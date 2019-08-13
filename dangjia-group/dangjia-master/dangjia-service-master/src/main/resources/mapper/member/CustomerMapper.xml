@@ -55,6 +55,7 @@
         mc.user_id as userId,
         c.owername as name,
         c.phone,
+        c.wechat,
         mc.modify_date AS modifyDate,
         mc.create_date AS createDate,
         mc.label_id_arr AS labelIdArr,

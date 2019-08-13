@@ -259,6 +259,7 @@
     <select id="ordersCustomer" resultType="com.dangjia.acg.dto.sale.client.OrdersCustomerDTO">
         SELECT
         c.id as clueId,
+        c.wechat,
         mc.id as mcId,
         mc.member_id as memberId,
         h.id as houseId,
@@ -320,6 +321,7 @@
             c.cus_service as userId,
             c.owername as name,
             c.phone,
+            c.wechat,
             c.modify_date AS modifyDate,
             c.create_date AS createDate,
             c.label_id AS labelIdArr,
