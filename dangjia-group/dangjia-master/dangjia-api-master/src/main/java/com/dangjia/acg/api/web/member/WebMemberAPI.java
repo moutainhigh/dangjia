@@ -92,7 +92,7 @@ public interface WebMemberAPI {
     @ApiOperation(value = "中台查看保险记录", notes = "中台查看保险记录")
     ServerResponse  queryInsurances(@RequestParam("request") HttpServletRequest request,
                                     @RequestParam("type") String type,
-                                    @RequestParam("valueKey") String valueKey,
+                                    @RequestParam("searchKey") String searchKey,
                                     @RequestParam("pageDTO") PageDTO pageDTO);
 
 

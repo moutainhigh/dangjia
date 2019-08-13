@@ -1146,7 +1146,7 @@ public class MemberService {
      * @param valueKey 工人名称或电话
      * @return
      */
-    public ServerResponse  queryInsurances(String type, String valueKey,PageDTO pageDTO) {
+    public ServerResponse  queryInsurances(String type, String searchKey,PageDTO pageDTO) {
 
         List<Map<String, Object>> datas = new ArrayList<>();
         Example example = new Example(Insurance.class);
@@ -1154,8 +1154,8 @@ public class MemberService {
         if(!CommonUtil.isEmpty(type)){
             criteria.andEqualTo(Insurance.TYPE,type);
         }
-        if(!CommonUtil.isEmpty(valueKey)){
-            criteria.andCondition(" CONCAT(worker_mobile,worker_name) like CONCAT('%','" + valueKey + "','%')");
+        if(!CommonUtil.isEmpty(searchKey)){
+            criteria.andCondition(" CONCAT(worker_mobile,worker_name) like CONCAT('%','" + searchKey + "','%')");
         }
         example.orderBy(Insurance.CREATE_DATE).desc();
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
