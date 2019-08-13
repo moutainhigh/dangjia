@@ -141,6 +141,7 @@ public class TaskService {
             }
         }
 
+        buttonDTO.setInsuranceDay(-1);
         if(member.getWorkerType()!=null&&member.getWorkerType()>2){
             Example example = new Example(Insurance.class);
             example.createCriteria().andEqualTo(Insurance.WORKER_ID, member.getId());
