@@ -778,7 +778,7 @@ public class ClientService {
         example.createCriteria().andEqualTo(Customer.MEMBER_ID,customer.getMemberId());
         Customer customer1=new Customer();
         customer1.setId(null);
-        customer1.setStage(5);
+        customer1.setStage(1);
         Clue clue=new Clue();
         clue.setId(null);
         clue.setStage(1);

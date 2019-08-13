@@ -520,26 +520,19 @@ public class RobService {
      */
     public ServerResponse upDateCustomerInfo(Clue clue,Integer phaseStatus,String memberId) {
         try {
-//            if(phaseStatus == 1){
                 Member member = new Member();
                 if (!CommonUtil.isEmpty(clue)) {
-                    member.setNickName(clue.getOwername());
-                    member.setRemarks(clue.getRemark());
-                    member.setMobile(clue.getPhone());
-                    member.setId(memberId);
-                    iMemberMapper.updateByPrimaryKeySelective(member);
+                    if(phaseStatus == 1){
+                        member.setNickName(clue.getOwername());
+                        member.setRemarks(clue.getRemark());
+                        member.setMobile(clue.getPhone());
+                        member.setId(memberId);
+                        iMemberMapper.updateByPrimaryKeySelective(member);
+                    }
                     clue.setCreateDate(null);
                     clueMapper.updateByPrimaryKeySelective(clue);
                     return ServerResponse.createBySuccessMessage("修改成功");
                 }
-
-//            }else{
-//                if (!CommonUtil.isEmpty(clue)) {
-//                    clue.setCreateDate(null);
-//                    clueMapper.updateByPrimaryKeySelective(clue);
-//                    return ServerResponse.createBySuccessMessage("修改成功");
-//                }
-//            }
 
             return ServerResponse.createByErrorMessage("修改失败");
         } catch (Exception e) {
