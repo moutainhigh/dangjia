@@ -78,6 +78,7 @@ public class TaskService {
     private IInsuranceMapper insuranceMapper;
     @Autowired
     private IHouseWorkerMapper houseWorkerMapper;
+
     /**
      * 任务列表
      */
@@ -141,18 +142,19 @@ public class TaskService {
             }
         }
 
-        if(member.getWorkerType()>2){
+        buttonDTO.setInsuranceDay(-1);
+        if (member.getWorkerType() > 2) {
             Example example = new Example(Insurance.class);
             example.createCriteria().andEqualTo(Insurance.WORKER_ID, member.getId());
             example.orderBy(Insurance.END_DATE).desc();
             List<Insurance> insurances = insuranceMapper.selectByExample(example);
 
-            if(insurances.size()==0){
+            if (insurances.size() == 0) {
                 buttonDTO.setInsuranceDay(0);
             }
-            if(insurances.size()>0){
+            if (insurances.size() > 0) {
                 //保险服务剩余天数小于等于60天
-                Integer daynum=DateUtil.daysofTwo(new Date(),insurances.get(0).getEndDate());
+                Integer daynum = DateUtil.daysofTwo(new Date(), insurances.get(0).getEndDate());
                 buttonDTO.setInsuranceDay(daynum);
             }
 
@@ -317,25 +319,25 @@ public class TaskService {
         List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
         for (HouseFlow houseFlow : houseFlowList) {
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
-            HouseWorker hw = houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(),1);
+            HouseWorker hw = houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), 1);
             example = new Example(Insurance.class);
             example.createCriteria().andEqualTo(Insurance.WORKER_ID, hw.getWorkerId());
             example.orderBy(Insurance.END_DATE).desc();
             List<Insurance> insurances = insuranceMapper.selectByExample(example);
 
             //保险服务剩余天数小于等于60天
-            Integer daynum=0;
-            if(insurances.size()>0){
-                daynum =DateUtil.daysofTwo(new Date(),insurances.get(0).getEndDate());
+            Integer daynum = 0;
+            if (insurances.size() > 0) {
+                daynum = DateUtil.daysofTwo(new Date(), insurances.get(0).getEndDate());
             }
             //工人未购买保险
-            if (workerType.getType()>2||(insurances.size()==0) || (insurances.size()>0&daynum<=60)) {
+            if (workerType.getType() > 2 || (insurances.size() == 0) || (insurances.size() > 0 & daynum <= 60)) {
                 //系统检查该工匠是否剩余保险天数超过60天，
                 // 是则正常流程走，
                 // 否则提示剩余保险天数为XX天，请购买保险再继续工作；
                 //
                 // 工匠有30分钟时间购买保险，30分钟内购买成功按正常流程走，未购买成功则自动放弃。30分钟内业主看不到工序支付任务
-            }else {
+            } else {
                 Task task = new Task();
                 task.setDate(DateUtil.dateToString(hw.getModifyDate(), DateUtil.FORMAT11));
                 task.setName(workerType.getName() + "待支付");
