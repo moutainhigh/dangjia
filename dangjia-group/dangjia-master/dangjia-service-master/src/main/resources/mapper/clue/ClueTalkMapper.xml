@@ -43,7 +43,7 @@
         INNER JOIN dj_clue c ON ct.clue_id = c.id
         INNER JOIN dj_user u ON ct.user_id = u.id
         WHERE
-            DATE_FORMAT(remind_time, '%y-%m-%d') = DATE_FORMAT(now(), '%y-%m-%d')
+            DATE_FORMAT(remind_time, '%y-%m-%d %h:%i') = DATE_FORMAT(#{nowDate}, '%y-%m-%d %h:%i')
     </select>
 </mapper>
 

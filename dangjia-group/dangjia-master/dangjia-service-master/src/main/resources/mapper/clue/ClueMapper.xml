@@ -73,7 +73,7 @@
         </if>
     </select>
 
-    <select id="followList" resultType="com.dangjia.acg.dto.other.ClueDTO">
+        <select id="followList" resultType="com.dangjia.acg.dto.other.ClueDTO">
             select
             <if test="stage==''">
                 c.id as clueId,c.owername,c.phone,c.wechat,c.address,c.stage,
@@ -205,7 +205,7 @@
                     #{item.userId}
                 </foreach>
             </if>
-            ORDER BY mc.modify_date desc
+            ORDER BY c.create_date desc
         </if>
         <if test="type==1 or type==2">
             INNER JOIN dj_member_customer mc
@@ -259,6 +259,7 @@
     <select id="ordersCustomer" resultType="com.dangjia.acg.dto.sale.client.OrdersCustomerDTO">
         SELECT
         c.id as clueId,
+        c.wechat,
         mc.id as mcId,
         mc.member_id as memberId,
         h.id as houseId,
@@ -320,6 +321,7 @@
             c.cus_service as userId,
             c.owername as name,
             c.phone,
+            c.wechat,
             c.modify_date AS modifyDate,
             c.create_date AS createDate,
             c.label_id AS labelIdArr,
@@ -403,6 +405,7 @@
             h.unit as unit,
             h.building as HouseBuilding,
             h.drawings,
+            h.house_type as houseType,
         </if>
         c.create_date as createDate,
         c.owername as owerName,

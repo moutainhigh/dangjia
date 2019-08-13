@@ -29,4 +29,5 @@ public class OrdersCustomerDTO {
     private List<SaleMemberLabelDTO> list=new ArrayList<>();//标签
     private Integer phaseStatus;//阶段
     private String userId;
+    private String wechat;
 }

@@ -493,14 +493,14 @@ public class RobService {
      * @return
      */
     public List<ClueTalkDTO> getTodayDescribes(){
-        return clueTalkMapper.getTodayDescribes();
+        return clueTalkMapper.getTodayDescribes(DateUtil.dateToString(new Date(), DateUtil.FORMAT11));
     }
 
     public void remindTime() {
         String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
         Example example = new Example(CustomerRecord.class);
-        example.createCriteria().andCondition(" DATE_FORMAT(remind_time, '%Y-%m-%d %I:%i')= '"
-                + DateUtil.dateToString(new Date(), DateUtil.FORMAT11) + "' ");
+        example.createCriteria().andCondition(" DATE_FORMAT(remind_time, '%Y-%m-%d %I:%i') = " +
+                "DATE_FORMAT('"+DateUtil.dateToString(new Date(), DateUtil.FORMAT11)+"', '%Y-%m-%d %I:%i')");
         List<CustomerRecord> customerRecords = iCustomerRecordMapper.selectByExample(example);
         for (CustomerRecord customerRecord : customerRecords) {
             MainUser u = userMapper.selectByPrimaryKey(customerRecord.getUserId());

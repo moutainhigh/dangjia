@@ -26,4 +26,5 @@ public class CustomerIndexDTO {
     private Integer tips;//消息提示 0:无提示 1：提示
     private Integer phaseStatus;
     private String stage;
+    private String wechat;
 }

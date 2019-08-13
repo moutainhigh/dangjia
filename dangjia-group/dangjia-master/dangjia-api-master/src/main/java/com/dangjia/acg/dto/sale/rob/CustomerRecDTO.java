@@ -1,12 +1,10 @@
 package com.dangjia.acg.dto.sale.rob;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.persistence.Entity;
-import java.util.Date;
 
 /**
  * 新增沟通记录信息
@@ -25,9 +23,10 @@ public class CustomerRecDTO {
 	@ApiModelProperty("沟通描述")
 	private String describes;
 
-	@ApiModelProperty("提醒时间")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm",timezone="GMT+8")
-	protected Date remindTime;
+
+//    @JsonFormat(pattern = "yyyy-MM-dd HH:mm",timezone="GMT+8")
+    @ApiModelProperty("提醒时间")
+    private String remindTime;
 
 	@ApiModelProperty("线索ID")
 	private String clueId;
