@@ -36,7 +36,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 /**
@@ -471,9 +470,9 @@ public class RobService {
                     if(accessToken != null){
                         clueTalk.setUserId(accessToken.getUserId());
                     }
-                    String remindTime = customerRecDTO.getRemindTime();
-                    Date date = DateUtil.toDate(remindTime);
-                    clueTalk.setRemindTime(date);
+//                    String remindTime = customerRecDTO.getRemindTime();
+//                    Date date = DateUtil.toDate(remindTime);
+                    clueTalk.setRemindTime(customerRecDTO.getRemindTime());
                     clueTalk.setClueId(customerRecDTO.getClueId());
                     clueTalk.setTalkContent(customerRecDTO.getDescribes());
                     clueTalk.setDataStatus(0);
