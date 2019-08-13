@@ -10,7 +10,6 @@ import lombok.experimental.FieldNameConstants;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import java.util.Date;
 
 @Data
 @Entity
@@ -34,9 +33,10 @@ public class ClueTalk extends BaseEntity {
     @ApiModelProperty("谈话内容")
     private String talkContent;
 
+    //    @JsonFormat(pattern = "yyyy-MM-dd HH:mm",timezone="GMT+8")
     @Column(name = "remind_time")
     @Desc(value = "提醒时间")
     @ApiModelProperty("提醒时间")
-    private Date remindTime;
+    private String remindTime;
 
 }
