@@ -212,8 +212,10 @@ public class StewardService {
             for (int i = 0; i < jsonArray.size(); i++) {
                 JSONObject object = jsonArray.getJSONObject(i);
                 String technologyName = object.getString("technologyName");
+                String technologyId = object.getString("technologyId");
                 String content = object.getString("content");
                 WorkerDisclosure workerDisclosure = new WorkerDisclosure();
+                workerDisclosure.setTechnologyId(technologyId);
                 workerDisclosure.setName(technologyName);
                 workerDisclosure.setDetails(content);
                 wdList.add(workerDisclosure);

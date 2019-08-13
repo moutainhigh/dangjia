@@ -751,6 +751,7 @@ public class BudgetWorkerService {
                     for (Technology t : tList) {
                         JSONObject map = new JSONObject();
                         map.put("technologyName", t.getName());
+                        map.put("technologyId", t.getId());
                         map.put("content", t.getContent());
                         jsonArray.add(map);
                     }
