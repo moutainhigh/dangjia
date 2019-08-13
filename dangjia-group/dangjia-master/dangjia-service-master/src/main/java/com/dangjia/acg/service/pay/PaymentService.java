@@ -218,7 +218,7 @@ public class PaymentService {
                 insurance.setNumber(businessOrder.getNumber());
                 insurance.setEndDate(DateUtil.addDateYear(insurance.getEndDate(), 1));
                 insuranceMapper.updateByPrimaryKeySelective(insurance);
-
+                return ServerResponse.createBySuccessMessage("支付成功");
             } else if (businessOrder.getType() == 5) {//验房分销
                 HouseDistribution houseDistribution = iHouseDistributionMapper.selectByPrimaryKey(businessOrder.getTaskId());
                 houseDistribution.setNumber(businessOrder.getNumber());//业务订单号
