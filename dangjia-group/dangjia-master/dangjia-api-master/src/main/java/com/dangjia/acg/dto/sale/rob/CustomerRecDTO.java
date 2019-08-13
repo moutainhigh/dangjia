@@ -1,5 +1,6 @@
 package com.dangjia.acg.dto.sale.rob;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -25,7 +26,8 @@ public class CustomerRecDTO {
 	private String describes;
 
 	@ApiModelProperty("提醒时间")
-	protected String remindTime;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm",timezone="GMT+8")
+	protected Date remindTime;
 
 	@ApiModelProperty("线索ID")
 	private String clueId;
