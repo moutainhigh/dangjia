@@ -521,11 +521,11 @@ public class CraftsmanConstructionService {
             bean.setIfDisclose(2);
         }
         if (hf.getWorkType() == 3) {//如果是已抢单待支付。则提醒业主支付
-            if(isBX) {
+//            if(isBX) {
                 promptList.add("请联系业主支付您的工匠费用");
-            }else {
-                buttonList.add(Utils.getButton("购买保险", 9));
-            }
+//            }else {
+//                buttonList.add(Utils.getButton("购买保险", 9));
+//            }
             bean.setIfBackOut(0);//0可放弃；1：申请停工；2：已停工 3 审核中
         } else if (hf.getPause() == 1) {
             promptList.add("您已停工");
