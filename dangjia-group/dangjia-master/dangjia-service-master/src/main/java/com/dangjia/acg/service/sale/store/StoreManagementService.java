@@ -36,6 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 /**
@@ -369,4 +370,14 @@ public class StoreManagementService {
         }
 
     }
+
+    /**
+     * 小区所有楼栋
+     * @param villageId
+     * @return
+     */
+    public ServerResponse getBuildingByVillageId(String villageId){
+        return ServerResponse.createBySuccess("查询成功",residentialBuildingMapper.getBuildingByVillageId(villageId));
+    }
+
 }

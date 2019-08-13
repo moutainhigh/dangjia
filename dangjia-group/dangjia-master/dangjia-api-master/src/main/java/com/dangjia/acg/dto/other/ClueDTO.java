@@ -5,8 +5,6 @@ import lombok.Data;
 import java.util.Date;
 @Data
 public class ClueDTO {
-
-    protected String id;
     protected Date createDate;// 创建日期
     protected Date modifyDate;// 修改日期
     protected int dataStatus;

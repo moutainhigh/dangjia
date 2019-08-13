@@ -16,8 +16,6 @@ import java.util.List;
 @Data
 public class SaleClueDTO{
 
-    private String id;
-
     private String owername;//业主名
 
     private String phone;//手机号码

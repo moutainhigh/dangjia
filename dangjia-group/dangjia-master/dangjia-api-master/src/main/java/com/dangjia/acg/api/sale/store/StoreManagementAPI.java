@@ -71,4 +71,10 @@ public interface StoreManagementAPI {
                                   @RequestParam("mcId")String mcId,
                                   @RequestParam("cityId")String cityId,
                                   @RequestParam("phaseStatus")Integer phaseStatus);
+
+    @PostMapping(value = "sale/store/getBuildingByVillageId")
+    @ApiOperation(value = "小区所有楼栋", notes = "小区所有楼栋")
+    ServerResponse getBuildingByVillageId(@RequestParam("request") HttpServletRequest request,
+                                          @RequestParam("villageId") String villageId);
+
 }

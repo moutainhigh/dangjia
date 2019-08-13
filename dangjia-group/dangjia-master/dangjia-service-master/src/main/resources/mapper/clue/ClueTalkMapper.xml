@@ -20,7 +20,7 @@
         from dj_clue_talk where data_status='0' and clue_id=#{clue_id} ORDER BY modify_date DESC
     </select>
 
-    <select id="getMaxDate" parameterType="String" resultType="date">
+    <select id="getMaxDate" parameterType="String" resultType="java.util.Date">
         SELECT max(modify_date) from dj_clue_talk where data_status='0' and clue_id=#{clue_id}
     </select>
 

@@ -82,4 +82,11 @@ public class StoreManagementController implements StoreManagementAPI {
         return storeManagementService.upDateCustomer(clueId, mcId, cityId, phaseStatus);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse getBuildingByVillageId(HttpServletRequest request, String villageId) {
+        return storeManagementService.getBuildingByVillageId(villageId);
+    }
+
+
 }

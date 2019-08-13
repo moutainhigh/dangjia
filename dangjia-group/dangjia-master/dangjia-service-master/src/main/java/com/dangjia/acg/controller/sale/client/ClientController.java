@@ -30,8 +30,8 @@ public class ClientController implements ClientAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse crossDomainOrder(HttpServletRequest request, Clue clue, String userToken , String villageId) {
-        return customerService.crossDomainOrder(clue,userToken,villageId);
+    public ServerResponse crossDomainOrder(HttpServletRequest request, Clue clue, String userToken , String villageId ,String buildingId,String cityId) {
+        return customerService.crossDomainOrder(clue,userToken,villageId,buildingId,cityId);
     }
 
     @Override
