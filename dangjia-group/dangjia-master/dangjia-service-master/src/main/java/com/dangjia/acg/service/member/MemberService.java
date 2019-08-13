@@ -1114,54 +1114,60 @@ public class MemberService {
      * @param userToken
      * @return
      */
-    public ServerResponse  addInsurances(String userToken) {
+    public ServerResponse addInsurances(String userToken) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
         }
-        String insuranceMoney=configUtil.getValue(SysConfig.INSURANCE_MONEY, String.class);
-        insuranceMoney= CommonUtil.isEmpty(insuranceMoney)?"100":insuranceMoney;
+        String insuranceMoney = configUtil.getValue(SysConfig.INSURANCE_MONEY, String.class);
+        insuranceMoney = CommonUtil.isEmpty(insuranceMoney) ? "100" : insuranceMoney;
         Member operator = (Member) object;
         Example example = new Example(Insurance.class);
         example.createCriteria().andEqualTo(Insurance.WORKER_ID, operator.getId());
         example.orderBy(Insurance.END_DATE).desc();
         List<Insurance> insurances = insuranceMapper.selectByExample(example);
-
         example = new Example(Insurance.class);
         example.createCriteria().andEqualTo(Insurance.WORKER_ID, operator.getId()).andIsNull(Insurance.END_DATE);
         List<Insurance> insurances2 = insuranceMapper.selectByExample(example);
-        Insurance insurance=new Insurance();
-        if(insurances2.size()>0){
-            insurance=insurances2.get(0);
+        Insurance insurance;
+        if (insurances2.size() > 0) {
+            insurance = insurances2.get(0);
+        } else {
+            insurance = new Insurance();
         }
         insurance.setWorkerId(operator.getId());
         insurance.setWorkerMobile(operator.getMobile());
         insurance.setWorkerName(operator.getName());
         insurance.setMoney(new BigDecimal(insuranceMoney));
-        if (insurances.size()==0) {
+        if (insurances.size() == 0) {
             insurance.setType("0");
-        }else{
+        } else {
             insurance.setType("1");
         }
-        insuranceMapper.insert(insurance);
+        if (insurances2.size() > 0) {
+            insuranceMapper.updateByPrimaryKeySelective(insurance);
+        } else {
+            insuranceMapper.insert(insurance);
+        }
         return ServerResponse.createBySuccess("ok", insurance.getId());
     }
+
     /**
      * 获取工匠保险信息
      *
-     * @param type 保险类型 0=首保 1=续保
-     * @param valueKey 工人名称或电话
+     * @param type     保险类型 0=首保 1=续保
+     * @param searchKey 工人名称或电话
      * @return
      */
-    public ServerResponse  queryInsurances(String type, String searchKey,PageDTO pageDTO) {
+    public ServerResponse queryInsurances(String type, String searchKey, PageDTO pageDTO) {
 
         List<Map<String, Object>> datas = new ArrayList<>();
         Example example = new Example(Insurance.class);
-        Example.Criteria criteria=example.createCriteria();
-        if(!CommonUtil.isEmpty(type)){
-            criteria.andEqualTo(Insurance.TYPE,type);
+        Example.Criteria criteria = example.createCriteria();
+        if (!CommonUtil.isEmpty(type)) {
+            criteria.andEqualTo(Insurance.TYPE, type);
         }
-        if(!CommonUtil.isEmpty(searchKey)){
+        if (!CommonUtil.isEmpty(searchKey)) {
             criteria.andCondition(" CONCAT(worker_mobile,worker_name) like CONCAT('%','" + searchKey + "','%')");
         }
         example.orderBy(Insurance.CREATE_DATE).desc();
@@ -1172,7 +1178,7 @@ public class MemberService {
             for (Insurance info : infos) {
                 Map<String, Object> map = BeanUtils.beanToMap(info);
                 map.put("surDay", 0);
-                if(info.getEndDate()!=null) {
+                if (info.getEndDate() != null) {
                     Integer daynum = DateUtil.daysofTwo(new Date(), info.getEndDate());
                     if (daynum > 0) {
                         map.put("surDay", daynum);
@@ -1185,7 +1191,7 @@ public class MemberService {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无该用户");
         }
         pageResult.setList(datas);
-        return ServerResponse.createBySuccess("查询成功",pageResult);
+        return ServerResponse.createBySuccess("查询成功", pageResult);
     }
 
 
