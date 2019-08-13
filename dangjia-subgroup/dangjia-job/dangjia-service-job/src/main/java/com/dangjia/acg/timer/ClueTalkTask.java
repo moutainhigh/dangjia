@@ -42,7 +42,7 @@ public class ClueTalkTask {
 //    @Scheduled(cron = "0 0 0,10,18,21 * * ?") //每天的0点、10点、18点、21点都执行一次
 //    @Scheduled(cron = "0 0 10 * * ?") //每天上午10点整触发
     @Scheduled(cron = "0 0/1 * * * ?")//1分钟执行一次
-    public void couponActivityOverdue() {
+    public void messageTips() {
         log.info(format.format(new Date()) + "开始执行沟通记录提醒任务...");
         List<ClueTalkDTO> todayDescribes = robAPI.getTodayDescribes();
         for (ClueTalkDTO todayDescribe : todayDescribes) {
