@@ -504,7 +504,7 @@
                 </foreach>
             </if>
         </if>
-        and tips = 1
+        and c.tips = 1 or mc.tips=1
     </select>
 
 
