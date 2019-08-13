@@ -576,12 +576,17 @@ public class HouseService {
                     house.setDataStatus(1);
                     iHouseMapper.updateByPrimaryKeySelective(house);
                     Customer customer=new Customer();
+                    customer.setId(null);
                     customer.setStage(1);
-                    customer.setMemberId(house.getMemberId());
                     example=new Example(Customer.class);
-                    example.createCriteria().andEqualTo(Customer.MEMBER_ID,house.getMemberId())
-                            .andEqualTo(Customer.STAGE,1);
-                    iCustomerMapper.updateByExample(customer,example);
+                    example.createCriteria().andEqualTo(Customer.MEMBER_ID,house.getMemberId());
+                    iCustomerMapper.updateByExampleSelective(customer,example);
+                    Clue clue=new Clue();
+                    clue.setId(null);
+                    clue.setStage(1);
+                    example=new Example(Clue.class);
+                    example.createCriteria().andEqualTo(Clue.MEMBER_ID,house.getMemberId());
+                    clueMapper.updateByExampleSelective(clue,example);
                     return ServerResponse.createBySuccessMessage("操作成功");
                 }
             }
@@ -626,6 +631,7 @@ public class HouseService {
         example=new Example(Customer.class);
         example.createCriteria().andEqualTo(Customer.MEMBER_ID,member.getId());
         Customer customer=new Customer();
+        customer.setId(null);
         customer.setStage(5);
         iCustomerMapper.updateByExampleSelective(customer,example);
         Integer type = iCustomerMapper.queryType(member.getId());

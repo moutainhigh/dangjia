@@ -770,13 +770,21 @@ public class ClientService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse setWithdraw(String mcId, String houseId) {
+        Customer customer = iCustomerMapper.selectByPrimaryKey(mcId);
         House house = new House();
         house.setId(houseId);
         house.setDataStatus(1);
-        Customer customer = new Customer();
-        customer.setId(mcId);
-        customer.setStage(1);
-        if (iHouseMapper.updateByPrimaryKeySelective(house) > 0 && iCustomerMapper.updateByPrimaryKeySelective(customer) > 0) {
+        Example example=new Example(Customer.class);
+        example.createCriteria().andEqualTo(Customer.MEMBER_ID,customer.getMemberId());
+        Customer customer1=new Customer();
+        customer1.setId(null);
+        customer1.setStage(5);
+        Clue clue=new Clue();
+        clue.setId(null);
+        clue.setStage(1);
+        example=new Example(Clue.class);
+        example.createCriteria().andEqualTo(Clue.MEMBER_ID,customer.getMemberId());
+        if (iHouseMapper.updateByPrimaryKeySelective(house) > 0 && iCustomerMapper.updateByExampleSelective(customer1,example)>0 &&clueMapper.updateByExampleSelective(clue,example)>0) {
             return ServerResponse.createBySuccessMessage("撤回成功");
         } else {
             return ServerResponse.createByErrorMessage("撤回失败");
