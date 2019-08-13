@@ -471,8 +471,9 @@ public class RobService {
                     if(accessToken != null){
                         clueTalk.setUserId(accessToken.getUserId());
                     }
-
-                    clueTalk.setRemindTime(customerRecDTO.getRemindTime());
+                    String remindTime = customerRecDTO.getRemindTime();
+                    Date date = DateUtil.toDate(remindTime);
+                    clueTalk.setRemindTime(date);
                     clueTalk.setClueId(customerRecDTO.getClueId());
                     clueTalk.setTalkContent(customerRecDTO.getDescribes());
                     clueTalk.setDataStatus(0);

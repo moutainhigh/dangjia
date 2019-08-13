@@ -25,7 +25,7 @@ public class CustomerRecDTO {
 	private String describes;
 
 	@ApiModelProperty("提醒时间")
-	protected Date remindTime;
+	protected String remindTime;
 
 	@ApiModelProperty("线索ID")
 	private String clueId;

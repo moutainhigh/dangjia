@@ -195,7 +195,7 @@
             LEFT JOIN dj_member_customer mc
             on mc.member_id=c.member_id
             and mc.user_id=c.cus_service
-            WHERE c.data_status = 0 and c.stage NOT IN (2,3,4,5)
+            WHERE c.data_status = 0 and c.stage NOT IN (2,3,4)
             <if test="null!=userId and ''!=userId">
                 and c.cus_service=#{userId}
             </if>
@@ -205,7 +205,7 @@
                     #{item.userId}
                 </foreach>
             </if>
-            ORDER BY c.modify_date desc
+            ORDER BY mc.modify_date desc
         </if>
         <if test="type==1 or type==2">
             INNER JOIN dj_member_customer mc
@@ -266,7 +266,7 @@
         CONCAT(IFNULL(h.residential,'*'),IFNULL(CONCAT(h.building,'栋'),'*栋'),IFNULL(CONCAT(h.unit,'单元'),'*单元'),IFNULL(CONCAT(h.number,'号'),'*号')) as houseName,
         m.mobile as mobile,
         m.nick_name as name,
-        h.create_date as createDate,
+        h.construction_date as createDate,
         h.completed_date as completedDate,
         u.username,
         mc.phase_status as phaseStatus
@@ -300,7 +300,7 @@
             AND h.visit_state=3
         </if>
         <if test="null!=searchKey and ''!=searchKey">
-            AND CONCAT(c.owername,c.phone,h.residential,CONCAT(h.building,'栋'),CONCAT(h.unit,'单元'),CONCAT(h.number,'号')) like CONCAT('%',#{searchKey},'%')
+            AND CONCAT( m.nick_name,c.phone,h.residential,CONCAT(h.building,'栋'),CONCAT(h.unit,'单元'),CONCAT(h.number,'号')) like CONCAT('%',#{searchKey},'%')
         </if>
         <if test="visitState==1">
             ORDER BY h.create_date
@@ -371,7 +371,7 @@
         INNER JOIN dj_member_customer mc on h.member_id = mc.member_id
         INNER JOIN dj_clue c on mc.member_id = c.member_id and mc.user_id = c.cus_service
         INNER JOIN dj_member m on mc.member_id = m.id
-        where h.visit_state = 0 and h.is_rob_stats = 0
+        where h.visit_state = 0 and h.is_rob_stats = 0 and h.data_status=0
         <if test="null != userId">
             and c.cus_service = #{userId}
         </if>
@@ -467,6 +467,9 @@
         SELECT
         COUNT(0)
         FROM dj_clue c
+        INNER JOIN dj_member_customer mc
+        ON mc.member_id = c.member_id
+        AND mc.user_id = c.cus_service
         <if test="type==''">
             WHERE c.data_status = 0 and c.stage NOT IN (2,3,4)
         <if test="null!=userId and ''!=userId">
@@ -479,28 +482,16 @@
             </foreach>
         </if>
         </if>
-        <if test="type==1">
-            INNER JOIN dj_member m
-            ON m.id=c.member_id
+        <if test="type==1 or type==2">
             INNER JOIN dj_house h
-            ON h.member_id = m.id  and h.data_status =0 and h.visit_state =1
-            WHERE m.data_status = 0
-            and c.data_status = 0
-            <if test="null!=userId and ''!=userId">
-                and c.cus_service=#{userId}
+            ON h.member_id = mc.member_id
+            and h.data_status =0
+            <if test="type==1">
+                and h.visit_state =1
             </if>
-            <if test="null!=storeUsers and storeUsers.size>0">
-                and c.cus_service in
-                <foreach collection="storeUsers" index="index" item="item" open="(" separator="," close=")">
-                    #{item.userId}
-                </foreach>
+            <if test="type==2">
+                and h.visit_state =3
             </if>
-        </if>
-        <if test="type==2">
-            INNER JOIN dj_member m
-            ON m.id=c.member_id
-            INNER JOIN dj_house h
-            ON h.member_id = m.id  and h.data_status =0 and h.visit_state =3
             WHERE m.data_status = 0
             and c.data_status = 0
             <if test="null!=userId and ''!=userId">

@@ -575,6 +575,13 @@ public class HouseService {
                     //iHouseMapper.deleteByPrimaryKey(house);
                     house.setDataStatus(1);
                     iHouseMapper.updateByPrimaryKeySelective(house);
+                    Customer customer=new Customer();
+                    customer.setStage(1);
+                    customer.setMemberId(house.getMemberId());
+                    example=new Example(Customer.class);
+                    example.createCriteria().andEqualTo(Customer.MEMBER_ID,house.getMemberId())
+                            .andEqualTo(Customer.STAGE,1);
+                    iCustomerMapper.updateByExample(customer,example);
                     return ServerResponse.createBySuccessMessage("操作成功");
                 }
             }
