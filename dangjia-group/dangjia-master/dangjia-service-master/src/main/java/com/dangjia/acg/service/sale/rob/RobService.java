@@ -183,8 +183,8 @@ public class RobService {
 
         Example example = new Example(House.class);
         example.createCriteria()
-                .andEqualTo(House.MEMBER_ID, userId)
-                .andEqualTo(House.DATA_STATUS, 0);
+                .andEqualTo(DjAlreadyRobSingle.USER_ID, userId)
+                .andEqualTo(DjAlreadyRobSingle.DATA_STATUS, 0);
         List<DjAlreadyRobSingle> lists = djAlreadyRobSingleMapper.selectByExample(example);
 
         List<RobDTO> robDTOs = new ArrayList<>();

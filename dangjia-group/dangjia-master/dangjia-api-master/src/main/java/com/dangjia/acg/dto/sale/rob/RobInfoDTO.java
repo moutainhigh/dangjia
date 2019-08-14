@@ -131,7 +131,8 @@ public class RobInfoDTO {
     @ApiModelProperty("头像")
     private String head;
 
-
+    @ApiModelProperty("状态")
+    private Integer isRobStats;
 
     public String getDrawingsName(){
         if(null != getDrawings() && 0 == getDrawings()){
