@@ -144,21 +144,29 @@ public class TaskService {
 
         buttonDTO.setInsuranceDay(-1);
         if (member.getWorkerType() != null && member.getWorkerType() > 2) {
-            Example example = new Example(Insurance.class);
-            example.createCriteria().andEqualTo(Insurance.WORKER_ID, member.getId());
-            example.orderBy(Insurance.END_DATE).desc();
-            List<Insurance> insurances = insuranceMapper.selectByExample(example);
+            //找到所有抢单带支付的订单
+            Example example = new Example(HouseWorker.class);
+            example.createCriteria().andEqualTo(HouseWorker.WORK_TYPE, 1)
+                    .andEqualTo(HouseWorker.HOUSE_ID, houseId)
+                    .andEqualTo(HouseWorker.WORKER_ID, member.getId());
+            List<HouseWorker> hwList = houseWorkerMapper.selectByExample(example);
+            if(hwList.size()>0) {
+                example = new Example(Insurance.class);
+                example.createCriteria().andEqualTo(Insurance.WORKER_ID, member.getId());
+                example.orderBy(Insurance.END_DATE).desc();
+                List<Insurance> insurances = insuranceMapper.selectByExample(example);
 
-            if (insurances.size() == 0) {
-                buttonDTO.setInsuranceDay(0);
-            }
-            if (insurances.size() > 0) {
-                //保险服务剩余天数小于等于60天
-                int daynum = DateUtil.daysofTwo(new Date(), insurances.get(0).getEndDate());
-                if (daynum < 0) {
-                    daynum = 0;
+                if (insurances.size() == 0) {
+                    buttonDTO.setInsuranceDay(0);
                 }
-                buttonDTO.setInsuranceDay(daynum);
+                if (insurances.size() > 0) {
+                    //保险服务剩余天数小于等于60天
+                    int daynum = DateUtil.daysofTwo(new Date(), insurances.get(0).getEndDate());
+                    if (daynum < 0) {
+                        daynum = 0;
+                    }
+                    buttonDTO.setInsuranceDay(daynum);
+                }
             }
 
         }
