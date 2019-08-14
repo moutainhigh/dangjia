@@ -17,8 +17,11 @@ public class GrabSheetDTO {
     private String name;//业主名字
     private Date createDate;//开始时间
     private String visitState;//阶段
-    private String memberId;
+    private String memberId;//客户id
     private String userId;
     private Integer phaseStatus;
     private String clueId;
+    private String latitude;//经度
+    private String longitude;//纬度
+    private Date modifyDate;//抢单时间
 }

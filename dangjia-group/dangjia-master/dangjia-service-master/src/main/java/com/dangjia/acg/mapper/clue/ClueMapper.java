@@ -8,6 +8,7 @@ import com.dangjia.acg.dto.sale.client.OrdersCustomerDTO;
 import com.dangjia.acg.dto.sale.rob.RobDTO;
 import com.dangjia.acg.dto.sale.rob.RobInfoDTO;
 import com.dangjia.acg.dto.sale.rob.UserInfoDTO;
+import com.dangjia.acg.dto.sale.store.GrabSheetDTO;
 import com.dangjia.acg.dto.sale.store.StoreUserDTO;
 import com.dangjia.acg.modle.clue.Clue;
 import org.apache.ibatis.annotations.Param;
@@ -87,4 +88,8 @@ public interface ClueMapper extends Mapper<Clue> {
     int setTips(@Param("clueId") String clueId,@Param("mcId") String mcId);
 
     int setStage(Map<String,Object> map);
+
+    List<GrabSheetDTO> notEnteredGrabSheet();
+
+    int setDistribution(@Param("storeId") String storeId);
 }

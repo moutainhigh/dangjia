@@ -6,6 +6,7 @@ import com.dangjia.acg.dto.clue.ClueTalkDTO;
 import com.dangjia.acg.dto.sale.rob.CustomerRecDTO;
 import com.dangjia.acg.modle.clue.Clue;
 import com.dangjia.acg.modle.home.IntentionHouse;
+import com.dangjia.acg.modle.sale.royalty.DjAlreadyRobSingle;
 import com.dangjia.acg.modle.sale.royalty.DjRobSingle;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -30,18 +31,31 @@ public interface RobAPI {
 
 
     @PostMapping(value = "sale/rob/queryRobSingledata")
-    @ApiOperation(value = "抢单列表查询", notes = "抢单列表查询")
+    @ApiOperation(value = "查询待抢单列表", notes = "查询待抢单列表")
     ServerResponse queryRobSingledata(@RequestParam("request")HttpServletRequest request,
                                       @RequestParam("userToken")String userToken,
                                       @RequestParam("storeId")String storeId,
                                       @RequestParam("isRobStats")Integer isRobStats);
 
 
+    @PostMapping(value = "sale/rob/queryAlreadyRobSingledata")
+    @ApiOperation(value = "查询已抢单列表", notes = "查询已抢单列表")
+    ServerResponse queryAlreadyRobSingledata(@RequestParam("request")HttpServletRequest request,
+                                             @RequestParam("userToken")String userToken,
+                                             @RequestParam("request")String userId);
+
 
     @PostMapping(value = "sale/rob/upDateIsRobStats")
     @ApiOperation(value = "抢单", notes = "抢单")
     ServerResponse upDateIsRobStats(@RequestParam("request")HttpServletRequest request,
-                                    @RequestParam("id")String id);
+                                    @RequestBody DjAlreadyRobSingle djAlreadyRobSingle);
+
+
+    @PostMapping(value = "sale/rob/upDateAlready")
+    @ApiOperation(value = "放弃", notes = "放弃")
+    ServerResponse upDateAlready(@RequestParam("request")HttpServletRequest request,
+                                 @RequestParam("houseId")String houseId,
+                                 @RequestParam("alreadyId")String alreadyId);
 
 
     @PostMapping(value = "sale/rob/queryCustomerInfo")
@@ -123,11 +137,12 @@ public interface RobAPI {
 
     @PostMapping(value = "sale/rob/queryDjRobSingle")
     @ApiOperation(value = "查询抢单时间配置", notes = "查询抢单时间配置")
-    ServerResponse queryDjRobSingle(HttpServletRequest request, PageDTO pageDTO);
+    ServerResponse queryDjRobSingle(@RequestParam("request")HttpServletRequest request,
+                                    @RequestParam("pageDTO")PageDTO pageDTO);
 
 
     @PostMapping(value = "sale/rob/notEnteredGrabSheet")
     @ApiOperation(value = "未录入抢单", notes = "未录入抢单")
-    ServerResponse notEnteredGrabSheet();
+    void notEnteredGrabSheet();
 
 }

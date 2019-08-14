@@ -8,6 +8,7 @@ import com.dangjia.acg.dto.clue.ClueTalkDTO;
 import com.dangjia.acg.dto.sale.rob.CustomerRecDTO;
 import com.dangjia.acg.modle.clue.Clue;
 import com.dangjia.acg.modle.home.IntentionHouse;
+import com.dangjia.acg.modle.sale.royalty.DjAlreadyRobSingle;
 import com.dangjia.acg.modle.sale.royalty.DjRobSingle;
 import com.dangjia.acg.service.sale.rob.RobService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,7 @@ public class RobController implements RobAPI {
     private RobService robService;
 
     /**
-     * 查询抢单列表
+     * 查询待抢单列表
      *
      * @param request
      * @param userToken
@@ -44,14 +45,40 @@ public class RobController implements RobAPI {
     }
 
     /**
-     * 抢单
-     *
-     * @param id
+     * 查询已抢单列表
+     * @param request
+     * @param userToken
      * @return
      */
-    public ServerResponse upDateIsRobStats(HttpServletRequest request, String id) {
-        return robService.upDateIsRobStats(id);
+    @Override
+    @ApiMethod
+    public ServerResponse queryAlreadyRobSingledata(HttpServletRequest request, String userToken, String userId) {
+        return robService.queryAlreadyRobSingledata(userToken, userId);
     }
+
+
+    /**
+     * 抢单
+     * @param djAlreadyRobSingle
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse upDateIsRobStats(HttpServletRequest request, DjAlreadyRobSingle djAlreadyRobSingle) {
+        return robService.upDateIsRobStats(djAlreadyRobSingle);
+    }
+
+    /**
+     * 放弃
+     * @param
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse upDateAlready(HttpServletRequest request,String houseId,String alreadyId) {
+        return robService.upDateAlready(houseId,alreadyId);
+    }
+
 
     /**
      * 查询客户详情
@@ -201,7 +228,7 @@ public class RobController implements RobAPI {
     }
 
     /**
-     * 删除配置时间
+     * 查询配置时间
      * @param request
      * @param pageDTO
      * @return
@@ -211,10 +238,22 @@ public class RobController implements RobAPI {
     public ServerResponse queryDjRobSingle(HttpServletRequest request, PageDTO pageDTO) {
         return robService.queryDjRobSingle(pageDTO);
     }
+
+
+//     */
+//    @Override
+//    @ApiMethod
+//    public ServerResponse queryDjRobSingle(HttpServletRequest request, PageDTO pageDTO) {
+//        return robService.queryDjRobSingle(pageDTO);
+//    }
+
+
     @Override
     @ApiMethod
-    public ServerResponse notEnteredGrabSheet() {
-        return null;
+    public void notEnteredGrabSheet() {
+        robService.notEnteredGrabSheet();
     }
+
+
 
 }

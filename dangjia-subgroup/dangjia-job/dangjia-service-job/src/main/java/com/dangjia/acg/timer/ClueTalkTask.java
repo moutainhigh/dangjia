@@ -25,11 +25,11 @@ import java.util.List;
 @Component
 public class ClueTalkTask {
     @Autowired
+    private ConfigUtil configUtil;
+    @Autowired
     private RobAPI robAPI;
     @Autowired
     private ConfigMessageAPI configMessageAPI;
-    @Autowired
-    private ConfigUtil configUtil;
 
     private Logger log = LoggerFactory.getLogger(ClueTalkTask.class);
     private final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
