@@ -747,7 +747,7 @@ public class BudgetWorkerService {
             for (BudgetWorker abw : budgetWorkerList) {
                 if (abw.getShopCount() + abw.getRepairCount() - abw.getBackCount() > 0) {
                     WorkerGoods wg = iWorkerGoodsMapper.selectByPrimaryKey(abw.getWorkerGoodsId());
-                    List<Technology> tList = iTechnologyMapper.patrolList(wg.getTechnologyIds());
+                    List<Technology> tList = iTechnologyMapper.workerPatrolList(wg.getTechnologyIds());
                     for (Technology t : tList) {
                         JSONObject map = new JSONObject();
                         map.put("technologyName", t.getName());
