@@ -59,12 +59,15 @@ public class HouseDistributionService {
      */
     public ServerResponse getHouseDistribution(HttpServletRequest request, PageDTO pageDTO,
                                                HouseDistribution houseDistribution,
-                                               String startDate, String endDate) {
+                                               String startDate, String endDate,String searchKey) {
         String userToken = request.getParameter(Constants.USER_TOKEY);
         Example example = new Example(HouseDistribution.class);
         Example.Criteria criteria = example.createCriteria();
         if (!CommonUtil.isEmpty(houseDistribution.getNickname())) {
             criteria.andLike(HouseDistribution.NICKNAME, "%" + houseDistribution.getNickname() + "%");
+        }
+        if (!CommonUtil.isEmpty(searchKey)) {
+            criteria.andCondition(" CONCAT(phone,info) like CONCAT('%','" + searchKey + "','%')");
         }
         if (!CommonUtil.isEmpty(houseDistribution.getType())) {
             criteria.andEqualTo(HouseDistribution.TYPE, houseDistribution.getType());

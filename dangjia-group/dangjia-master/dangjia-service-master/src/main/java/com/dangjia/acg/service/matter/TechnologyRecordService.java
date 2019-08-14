@@ -86,6 +86,16 @@ public class TechnologyRecordService {
 
             List<Map<String, Object>> listMap = new ArrayList<>();
             Map<String, Object> map;
+            if (applyType == 4) {
+                map = new HashMap<>();
+                map.put("imageTypeId", "");
+                map.put("imageTypeName", "现场照片");
+                map.put("imageType", 2);
+                listMap.add(0, map);
+                returnMap.put("listMap", listMap);
+                return ServerResponse.createBySuccess("查询成功", returnMap);
+            }
+
             HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
             House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
             if (StringUtil.isNotEmpty(nodeArr)) {
