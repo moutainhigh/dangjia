@@ -253,6 +253,7 @@ public class GroupInfoService {
         //检查用户是否注册，不存在自动注册(业主端口)
         registerJGUsers(AppType.ZHUANGXIU.getDesc(), new String[]{group.getUserId()}, new String[]{"业主"});
         //创建群组
+        //TODO 创建群有问题
         CreateGroupResultDTO groupResult = groupAPI.createGroup(AppType.GONGJIANG.getDesc(), group.getAdminId(), group.getHouseName(), memberlist, "", "", 1);
         if (groupResult != null) {
             group.setGroupId(String.valueOf(groupResult.getGid()));
