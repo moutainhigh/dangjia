@@ -27,7 +27,6 @@ import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.house.*;
 import com.dangjia.acg.mapper.matter.IRenovationManualMapper;
 import com.dangjia.acg.mapper.matter.IRenovationManualMemberMapper;
-import com.dangjia.acg.mapper.matter.IRenovationStageMapper;
 import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.member.ICustomerMapper;
 import com.dangjia.acg.mapper.member.IMemberCityMapper;
@@ -101,7 +100,7 @@ public class HouseService {
     @Autowired
     private IRenovationManualMapper renovationManualMapper;
     @Autowired
-    private IRenovationStageMapper renovationStageMapper;
+    private IHouseAddressMapper iHouseAddressMapper;
     @Autowired
     private IRenovationManualMemberMapper renovationManualMemberMapper;
     @Autowired
@@ -543,11 +542,11 @@ public class HouseService {
             customer.setStage(4);//阶段: 0未跟进,1继续跟进,2放弃跟进,3黑名单,4已下单
             customer.setPhaseStatus(1);
             iCustomerMapper.updateByPrimaryKeySelective(customer);
-            Map<String,Object> map=new HashedMap();
-            map.put("memberId",customer.getMemberId());
-            map.put("userId",customer.getUserId());
-            map.put("stage",4);
-            map.put("tips",1);
+            Map<String, Object> map = new HashedMap();
+            map.put("memberId", customer.getMemberId());
+            map.put("userId", customer.getUserId());
+            map.put("stage", 4);
+            map.put("tips", 1);
             clueMapper.setStage(map);//修改线索的阶段
         } catch (Exception e) {
             System.out.println("建群失败，异常：" + e.getMessage());
@@ -572,18 +571,18 @@ public class HouseService {
                     //iHouseMapper.deleteByPrimaryKey(house);
                     house.setDataStatus(1);
                     iHouseMapper.updateByPrimaryKeySelective(house);
-                    Customer customer=new Customer();
+                    Customer customer = new Customer();
                     customer.setId(null);
                     customer.setStage(1);
-                    example=new Example(Customer.class);
-                    example.createCriteria().andEqualTo(Customer.MEMBER_ID,house.getMemberId());
-                    iCustomerMapper.updateByExampleSelective(customer,example);
-                    Clue clue=new Clue();
+                    example = new Example(Customer.class);
+                    example.createCriteria().andEqualTo(Customer.MEMBER_ID, house.getMemberId());
+                    iCustomerMapper.updateByExampleSelective(customer, example);
+                    Clue clue = new Clue();
                     clue.setId(null);
                     clue.setStage(1);
-                    example=new Example(Clue.class);
-                    example.createCriteria().andEqualTo(Clue.MEMBER_ID,house.getMemberId());
-                    clueMapper.updateByExampleSelective(clue,example);
+                    example = new Example(Clue.class);
+                    example.createCriteria().andEqualTo(Clue.MEMBER_ID, house.getMemberId());
+                    clueMapper.updateByExampleSelective(clue, example);
                     return ServerResponse.createBySuccessMessage("操作成功");
                 }
             }
@@ -594,7 +593,8 @@ public class HouseService {
     /**
      * APP开始装修
      */
-    public ServerResponse setStartHouse(String userToken, String cityId, int houseType, int drawings) {
+    public ServerResponse setStartHouse(String userToken, String cityId, Integer houseType, Integer drawings,
+                                        String latitude, String longitude, String address, String name) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -620,17 +620,17 @@ public class HouseService {
                 }
             }
         }
-        Map<String,Object> map=new HashedMap();
-        map.put("memberId",member.getId());
-        map.put("stage",5);
-        map.put("tips",1);
+        Map<String, Object> map = new HashedMap();
+        map.put("memberId", member.getId());
+        map.put("stage", 5);
+        map.put("tips", 1);
         clueMapper.setStage(map);//修改线索的阶段
-        example=new Example(Customer.class);
-        example.createCriteria().andEqualTo(Customer.MEMBER_ID,member.getId());
-        Customer customer=new Customer();
+        example = new Example(Customer.class);
+        example.createCriteria().andEqualTo(Customer.MEMBER_ID, member.getId());
+        Customer customer = new Customer();
         customer.setId(null);
         customer.setStage(5);
-        iCustomerMapper.updateByExampleSelective(customer,example);
+        iCustomerMapper.updateByExampleSelective(customer, example);
         Integer type = iCustomerMapper.queryType(member.getId());
         Integer result = clueMapper.queryTClue(member.getMobile());
         City city = iCityMapper.selectByPrimaryKey(cityId);
@@ -673,7 +673,14 @@ public class HouseService {
         house.setDrawings(drawings);//有无图纸0：无图纸；1：有图纸
         house.setWorkDepositId(workDeposits.get(0).getId());
         iHouseMapper.insert(house);
-
+        //保存业主选择的地理位置
+        HouseAddress houseAddress = new HouseAddress();
+        houseAddress.setHouseId(house.getId());
+        houseAddress.setLatitude(latitude);
+        houseAddress.setLongitude(longitude);
+        houseAddress.setAddress(address);
+        houseAddress.setName(name);
+        iHouseAddressMapper.insert(houseAddress);
         example = new Example(MemberCity.class);
         example.createCriteria()
                 .andEqualTo(MemberCity.MEMBER_ID, member.getId())
@@ -695,6 +702,19 @@ public class HouseService {
         //默认切换至未确认开工的房子
         setSelectHouse(userToken, house.getId());
         return ServerResponse.createBySuccessMessage("操作成功");
+    }
+
+    public ServerResponse getHouseAddress(String houseId) {
+        Example example = new Example(HouseAddress.class);
+        example.createCriteria()
+                .andEqualTo(HouseAddress.HOUSE_ID, houseId)
+                .andEqualTo(HouseAddress.DATA_STATUS, 0);
+        example.orderBy(HouseAddress.CREATE_DATE).desc();
+        List<HouseAddress> houseAddresses = iHouseAddressMapper.selectByExample(example);
+        if (houseAddresses.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+        return ServerResponse.createBySuccess("查询成功", houseAddresses.get(0));
     }
 
     /**
@@ -1065,9 +1085,9 @@ public class HouseService {
                     name.append(house.getNoNumberHouseName());
                 }
                 Member member = memberMapper.selectByPrimaryKey(hfa.getWorkerId());
-                if(null!=member) {
+                if (null != member) {
                     WorkerType workerType = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
-                    if(null != workerType){
+                    if (null != workerType) {
                         name.append(" " + workerType.getName());
                     }
                     name.append(applyTypeMap.get(hfa.getApplyType()));
