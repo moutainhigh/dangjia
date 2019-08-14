@@ -39,8 +39,8 @@ public class RobController implements RobAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse queryRobSingledata(HttpServletRequest request, String userToken, String storeId) {
-        return robService.queryRobSingledata(userToken, storeId);
+    public ServerResponse queryRobSingledata(HttpServletRequest request, String userToken, String storeId,Integer isRobStats) {
+        return robService.queryRobSingledata(userToken, storeId,isRobStats);
     }
 
     /**
