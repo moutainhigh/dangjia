@@ -50,6 +50,9 @@ public class RobArrInFoDTO {
     @ApiModelProperty("销售id")
     private String userId;
 
+    @ApiModelProperty("订单id")
+    private String alreadyId;
+
     @ApiModelProperty("创建时间")
     private Date createDate;// 创建日期
 
@@ -58,6 +61,9 @@ public class RobArrInFoDTO {
 
     @ApiModelProperty("阶段 0:新线索 1：继续跟进 2：已放弃 3：黑名单 4:转客服")
     private Integer stage;
+
+    @ApiModelProperty("")
+    private Integer isRobStats;
 
     @ApiModelProperty("标签名称")
     private List<SaleMemberLabelDTO> list;

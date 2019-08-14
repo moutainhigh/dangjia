@@ -307,6 +307,7 @@ public class RobService {
         Clue clue = clueMapper.selectByPrimaryKey(clueId);
 
 
+
         Object object = constructionService.getAccessToken(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -315,6 +316,13 @@ public class RobService {
         if (CommonUtil.isEmpty(accessToken.getUserId())) {
             return ServerResponse.createbyUserTokenError();
         }
+
+        Example example = new Example(DjAlreadyRobSingle.class);
+        example.createCriteria()
+                .andEqualTo(DjAlreadyRobSingle.USER_ID, accessToken.getUserId())
+                .andEqualTo(DjAlreadyRobSingle.DATA_STATUS, 0)
+                .andEqualTo(DjAlreadyRobSingle.CLUE_ID, clueId);
+        List<DjAlreadyRobSingle> djAlreadyRobSingle = djAlreadyRobSingleMapper.selectByExample(example);
 
         //客户阶段查询客户详情
         if (phaseStatus == 1) {
@@ -332,6 +340,8 @@ public class RobService {
             List<RobInfoDTO> robInfoDTO = clueMapper.queryCustomerInfo(map);
 
             if (!CommonUtil.isEmpty(robInfoDTO)) {
+                robArrInFoDTO.setAlreadyId(
+                        djAlreadyRobSingle.size()> 0 ?djAlreadyRobSingle.get(0).getId():null);
                 robArrInFoDTO.setOwerName(robInfoDTO.get(0).getOwerName());
                 robArrInFoDTO.setPhone(robInfoDTO.get(0).getPhone());
                 robArrInFoDTO.setWechat(robInfoDTO.get(0).getWechat());
@@ -340,6 +350,7 @@ public class RobService {
                 robArrInFoDTO.setClueId(robInfoDTO.get(0).getClueId());
                 robArrInFoDTO.setMcId(robInfoDTO.get(0).getMcId());
                 robArrInFoDTO.setPhaseStatus(robInfoDTO.get(0).getPhaseStatus());
+                robArrInFoDTO.setIsRobStats(robInfoDTO.get(0).getIsRobStats());
                 if(robInfoDTO.get(0).getHouseCreateDate() != null){
                     robArrInFoDTO.setHouseCreateDate(robInfoDTO.get(0).getHouseCreateDate());
                 }else{
