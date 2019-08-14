@@ -34,7 +34,8 @@
             ct.modify_date AS modifyDate,
             ct.data_status AS dataStatus,
             ct.remind_time AS remindTime,
-            u.member_id AS memberId,
+            u.member_id AS targetUid,
+            c.member_id AS memberId,
             c.stage as stage,
             c.phase_status as phaseStatus,
             c.phone as phone

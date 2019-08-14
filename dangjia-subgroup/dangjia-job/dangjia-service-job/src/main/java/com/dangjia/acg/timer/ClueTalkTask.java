@@ -44,7 +44,7 @@ public class ClueTalkTask {
         log.info(format.format(new Date()) + "开始执行沟通记录提醒任务...");
         List<ClueTalkDTO> todayDescribes = robAPI.getTodayDescribes();
         for (ClueTalkDTO todayDescribe : todayDescribes) {
-            configMessageAPI.addConfigMessage(todayDescribe.getMemberId(),"沟通提醒",
+            configMessageAPI.addConfigMessage(todayDescribe.getTargetUid(),"沟通提醒",
                     "您有待沟通的客户【" + todayDescribe.getPhone() + "】",0, configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class)
                             + Utils.getCustomerDetails(todayDescribe.getMemberId(), todayDescribe.getClueId(), todayDescribe.getPhaseStatus(), todayDescribe.getStage().toString()));
         }

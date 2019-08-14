@@ -415,6 +415,7 @@
             h.unit as unit,
             h.building as HouseBuilding,
             h.drawings,
+            h.is_rob_stats as isRobStats,
         </if>
         c.create_date as createDate,
         c.owername as owerName,
