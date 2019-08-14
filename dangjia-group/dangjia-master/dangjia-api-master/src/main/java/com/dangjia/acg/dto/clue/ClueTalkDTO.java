@@ -53,4 +53,7 @@ public class ClueTalkDTO {
     @ApiModelProperty("电话号码")
     private String phone;
 
+    @ApiModelProperty("目标Id")
+    private String targetUid;
+
 }
