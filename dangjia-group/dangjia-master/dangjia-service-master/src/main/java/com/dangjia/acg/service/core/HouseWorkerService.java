@@ -427,6 +427,26 @@ public class HouseWorkerService {
         }
         switch (applyType) {
             case 0:
+                if(active!=null&&(active.equals("pre"))) {
+                    ModelingVillage village = modelingVillageMapper.selectByPrimaryKey(house.getVillageId());//小区
+                    if (village != null && village.getLocationx() != null && village.getLocationy() != null
+                            && latitude != null && longitude != null) {
+                        try {
+                            double longitude1 = Double.valueOf(longitude);
+                            double latitude1 = Double.valueOf(latitude);
+                            double longitude2 = Double.valueOf(village.getLocationx());
+                            double latitude2 = Double.valueOf(village.getLocationy());
+                            double distance = LocationUtils.getDistance(latitude1, longitude1, latitude2, longitude2);//计算距离
+                            if (distance > 1500) {
+                                return ServerResponse.createByErrorMessage("请确认您是否在小区范围内");
+                            }
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
+        }
+        switch (applyType) {
+            case 0:
                 return setCompletedToday(worker, hf, house,  applyDec,imageList);
             case 1:
                 return setPhaseCompletion(worker, hf, house, imageList);
@@ -644,23 +664,6 @@ public class HouseWorkerService {
      * 每日开工
      */
     private ServerResponse setStartDaily(Member worker, HouseFlow hf, House house, String latitude, String longitude, String imageList) {
-        if(active!=null&&(active.equals("pre"))) {
-            ModelingVillage village = modelingVillageMapper.selectByPrimaryKey(house.getVillageId());//小区
-            if (village != null && village.getLocationx() != null && village.getLocationy() != null
-                    && latitude != null && longitude != null) {
-                try {
-                    double longitude1 = Double.valueOf(longitude);
-                    double latitude1 = Double.valueOf(latitude);
-                    double longitude2 = Double.valueOf(village.getLocationx());
-                    double latitude2 = Double.valueOf(village.getLocationy());
-                    double distance = LocationUtils.getDistance(latitude1, longitude1, latitude2, longitude2);//计算距离
-                    if (distance > 1500) {
-                        return ServerResponse.createByErrorMessage("请确认您是否在小区范围内");
-                    }
-                } catch (Exception ignored) {
-                }
-            }
-        }
         WorkerType workerType = workerTypeMapper.selectByPrimaryKey(worker.getWorkerTypeId());
         if (hf.getWorkSteta() == 2) {
             return ServerResponse.createByErrorMessage("该工序（" + workerType.getName() + "）已经整体完工，无法开工");
@@ -763,6 +766,7 @@ public class HouseWorkerService {
         if (house.getPause() != null && house.getPause() == 1) {
             return ServerResponse.createByErrorMessage("该房子已暂停施工,请勿提交申请！");
         }
+
         HouseFlowApply hfa;
         if (applyType == 5) {//有人巡
             HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowId2);

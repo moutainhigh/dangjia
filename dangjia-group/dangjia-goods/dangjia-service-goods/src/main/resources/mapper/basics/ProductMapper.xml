@@ -581,8 +581,8 @@
         INNER JOIN dj_basics_goods_category ca ON ca.id = p.category_id
         <if test="name!=null and name!=''">
             INNER JOIN dj_basics_goods_category tca ON tca.id = ca.parent_top
-            INNER JOIN dj_basics_brand b ON b.id = p.brand_id
-            INNER JOIN dj_basics_brand_series bs ON bs.id = p.brand_series_id
+            left JOIN dj_basics_brand b ON b.id = p.brand_id
+            left JOIN dj_basics_brand_series bs ON bs.id = p.brand_series_id
         </if>
         WHERE   p.data_status = 0
 
@@ -601,8 +601,8 @@
             IFNULL(tca.`name`,''),
             p.`name`,
             IFNULL(p.value_name_arr,''),
-            b.`name`,
-            bs.`name`
+            IFNULL(b.`name`,''),
+            IFNULL(bs.`name`,'')
             )
             LIKE CONCAT('%',#{name},'%')
             )
@@ -647,14 +647,17 @@
         FROM
         dj_basics_goods bg
         INNER JOIN dj_basics_product bp ON bp.goods_id = bg.id
-        INNER JOIN dj_basics_brand bb ON bb.id = bp.brand_id
-        INNER JOIN dj_basics_brand_series bbs ON bbs.id = bp.brand_series_id
+        <if test="name!=null and name!=''">
+            LEFT JOIN dj_basics_brand bb ON bb.id = bp.brand_id
+            LEFT JOIN dj_basics_brand_series bbs ON bbs.id = bp.brand_series_id
+        </if>
+
         WHERE
         bp.maket = 1
         AND bp.type = 1
         AND bg.data_status = 0
         <if test="name!=null and name!=''">
-            AND CONCAT(bg. NAME,bp. NAME, bb. NAME, bbs. NAME) LIKE CONCAT('%', #{name}, '%')
+            AND CONCAT(bg.name,bp.name, IFNULL(bb.`name`,''),IFNULL(bbs.`name`,'')) LIKE CONCAT('%', #{name}, '%')
         </if>
         GROUP BY
         bp.goods_id
