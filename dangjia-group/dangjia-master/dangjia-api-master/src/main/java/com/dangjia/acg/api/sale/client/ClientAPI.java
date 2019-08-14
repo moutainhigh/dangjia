@@ -5,7 +5,6 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.clue.Clue;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.models.auth.In;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -157,7 +156,8 @@ public interface ClientAPI {
     @ApiOperation(value = "撤回", notes = "撤回")
     ServerResponse setWithdraw(@RequestParam("request") HttpServletRequest request,
                                @RequestParam("mcId") String mcId,
-                               @RequestParam("houseId") String houseId);
+                               @RequestParam("houseId") String houseId,
+                               @RequestParam("alreadyId")String alreadyId);
 
 
     /**

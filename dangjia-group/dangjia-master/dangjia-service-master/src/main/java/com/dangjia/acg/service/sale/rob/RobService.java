@@ -262,7 +262,7 @@ public class RobService {
     }
 
     /**
-     * 撤回
+     * 放弃
      * @param
      * @return
      */
