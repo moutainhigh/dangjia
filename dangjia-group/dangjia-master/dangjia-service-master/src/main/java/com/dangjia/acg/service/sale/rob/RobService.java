@@ -124,9 +124,9 @@ public class RobService {
         if (!CommonUtil.isEmpty(storeId)) {
             map.put("storeId", storeId);
         }
-        if (!CommonUtil.isEmpty(isRobStats)) {
-            map.put("isRobStats", 0);
-        }
+
+        map.put("isRobStats", 0);
+
         List<RobDTO> list = clueMapper.queryRobSingledata(map);
 
         //查询标签
