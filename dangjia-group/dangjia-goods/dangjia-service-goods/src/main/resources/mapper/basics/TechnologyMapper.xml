@@ -29,7 +29,7 @@
         where
         (goods_id = #{goodsId} or FIND_IN_SET(id,#{goodsId}))
         and
-            type in (1,2,3)
+            type in (1,3)
         ORDER BY create_date desc
     </select>
 
@@ -42,7 +42,7 @@
         where
         (goods_id = #{goodsId} or FIND_IN_SET(id,#{goodsId}))
         and
-        type in (1,2,3)
+        type in (2,3)
         ORDER BY create_date desc
     </select>
 

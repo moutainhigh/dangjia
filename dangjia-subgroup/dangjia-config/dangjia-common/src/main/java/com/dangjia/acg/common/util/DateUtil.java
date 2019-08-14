@@ -1331,9 +1331,8 @@ public class DateUtil implements AutoCloseable, Serializable {
 
     public static void main(String[] args) {
 
-        Integer daynum=DateUtil.daysofTwo(new Date(),toDate("2019-10-09 16:26:27"));
 
-        System.out.println(daynum);
+        System.out.println(addDateMinutes(new Date(),30).getTime());
     }
 
 }
