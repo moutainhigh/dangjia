@@ -55,7 +55,7 @@ public class HouseController implements HouseAPI {
     @ApiMethod
     public ServerResponse setStartHouse(String userToken, String cityId, Integer houseType, Integer drawings,
                                         String latitude,String longitude,String address,String name) {
-        return houseService.setStartHouse(userToken, cityId, houseType, drawings);
+        return houseService.setStartHouse(userToken, cityId, houseType, drawings,latitude,longitude,address,name);
     }
 
     /**

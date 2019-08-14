@@ -301,14 +301,7 @@
             AND h.visit_state=3
         </if>
         <if test="null!=searchKey and ''!=searchKey">
-            AND (
-            m.nick_name like CONCAT('%',#{searchKey},'%') or
-            c.phone like CONCAT('%',#{searchKey},'%') or
-            h.residential like CONCAT('%',#{searchKey},'%') or
-            CONCAT(h.building,'栋') like CONCAT('%',#{searchKey},'%') or
-            CONCAT(h.unit,'单元') like CONCAT('%',#{searchKey},'%') or
-            CONCAT(h.number,'号') like CONCAT('%',#{searchKey},'%')
-            )
+            AND CONCAT( m.nick_name,c.phone,h.residential,CONCAT(h.building,'栋'),CONCAT(h.unit,'单元'),CONCAT(h.number,'号')) like CONCAT('%',#{searchKey},'%')
         </if>
         <if test="visitState==1">
             ORDER BY h.create_date
@@ -417,7 +410,6 @@
             h.unit as unit,
             h.building as HouseBuilding,
             h.drawings,
-            h.house_type as houseType,
         </if>
         c.create_date as createDate,
         c.owername as owerName,

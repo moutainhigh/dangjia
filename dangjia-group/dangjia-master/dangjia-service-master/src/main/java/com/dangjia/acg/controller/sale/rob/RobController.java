@@ -39,8 +39,8 @@ public class RobController implements RobAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse queryRobSingledata(HttpServletRequest request, String userToken, String storeId,Integer isRobStats) {
-        return robService.queryRobSingledata(userToken, storeId,isRobStats);
+    public ServerResponse queryRobSingledata(HttpServletRequest request, String userToken, String storeId) {
+        return robService.queryRobSingledata(userToken, storeId);
     }
 
     /**
@@ -211,4 +211,10 @@ public class RobController implements RobAPI {
     public ServerResponse queryDjRobSingle(HttpServletRequest request, PageDTO pageDTO) {
         return robService.queryDjRobSingle(pageDTO);
     }
+    @Override
+    @ApiMethod
+    public ServerResponse notEnteredGrabSheet() {
+        return null;
+    }
+
 }

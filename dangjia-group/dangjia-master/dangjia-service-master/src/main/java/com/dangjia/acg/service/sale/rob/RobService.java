@@ -603,8 +603,18 @@ public class RobService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("删除失败");
         }
-
     }
+
+
+    /**
+     * 未录入抢单
+     * @return
+     */
+    public ServerResponse notEnteredGrabSheet() {
+
+        return null;
+    }
+
 
 
     /**
