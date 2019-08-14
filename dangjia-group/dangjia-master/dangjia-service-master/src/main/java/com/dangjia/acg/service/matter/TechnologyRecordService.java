@@ -89,9 +89,9 @@ public class TechnologyRecordService {
             if (applyType == 4) {
                 map = new HashMap<>();
                 map.put("imageTypeId", "");
-                map.put("imageTypeName", "材料照片");
-                map.put("imageType", 0);
-                listMap.add(listMap.size(), map);
+                map.put("imageTypeName", "现场照片");
+                map.put("imageType", 2);
+                listMap.add(0, map);
                 returnMap.put("listMap", listMap);
                 return ServerResponse.createBySuccess("查询成功", returnMap);
             }
