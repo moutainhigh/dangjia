@@ -20,6 +20,7 @@ import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IMaterialRecordMapper;
+import com.dangjia.acg.mapper.house.IModelingVillageMapper;
 import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.worker.IEvaluateMapper;
@@ -32,6 +33,7 @@ import com.dangjia.acg.modle.core.HouseFlowApplyImage;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.MaterialRecord;
+import com.dangjia.acg.modle.house.ModelingVillage;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.worker.Evaluate;
 import com.dangjia.acg.modle.worker.WorkIntegral;
@@ -39,11 +41,14 @@ import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseFlowApplyService;
+import com.dangjia.acg.service.core.HouseWorkerService;
 import com.dangjia.acg.service.house.HouseService;
 import com.dangjia.acg.service.repair.MendOrderService;
+import com.dangjia.acg.util.LocationUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
@@ -64,7 +69,7 @@ public class EvaluateService {
 
 
     @Autowired
-    private IHouseFlowApplyImageMapper houseFlowApplyImageMapper;
+    private HouseWorkerService houseWorkerService;
     @Autowired
     private IHouseFlowApplyMapper houseFlowApplyMapper;
     @Autowired
@@ -80,6 +85,10 @@ public class EvaluateService {
     @Autowired
     private IHouseMapper houseMapper;
 
+    @Autowired
+    private IModelingVillageMapper modelingVillageMapper;
+    @Value("${spring.profiles.active}")
+    private String active;
     @Autowired
     private MendOrderService mendOrderService;
     @Autowired
@@ -273,7 +282,7 @@ public class EvaluateService {
      * 1.31 增加 剩余材料登记
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse materialRecord(String houseFlowApplyId, String content, int star, String productArr) {
+    public ServerResponse materialRecord(String houseFlowApplyId, String content, int star, String productArr,String imageList,String latitude,String longitude) {
         try {
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
             House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
@@ -300,7 +309,7 @@ public class EvaluateService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("操作失败");
         }
-        return checkOk(houseFlowApplyId, content, star);
+        return checkOk(houseFlowApplyId, content, star, imageList, latitude, longitude);
     }
 
     /**
@@ -308,13 +317,30 @@ public class EvaluateService {
      * 1.30
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse checkOk(String houseFlowApplyId, String content, int star) {
+    public ServerResponse checkOk(String houseFlowApplyId, String content, int star, String imageList,String latitude,String longitude) {
         try {
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
             Member worker = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
             House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
             if (houseFlowApply.getSupervisorCheck() == 1) {//大管家已审核通过过 不要重复
                 return ServerResponse.createByErrorMessage("重复审核");
+            }
+            if(active!=null&&(active.equals("pre"))) {
+                ModelingVillage village = modelingVillageMapper.selectByPrimaryKey(house.getVillageId());//小区
+                if (village != null && village.getLocationx() != null && village.getLocationy() != null
+                        && latitude != null && longitude != null) {
+                    try {
+                        double longitude1 = Double.valueOf(longitude);
+                        double latitude1 = Double.valueOf(latitude);
+                        double longitude2 = Double.valueOf(village.getLocationx());
+                        double latitude2 = Double.valueOf(village.getLocationy());
+                        double distance = LocationUtils.getDistance(latitude1, longitude1, latitude2, longitude2);//计算距离
+                        if (distance > 1500) {
+                            return ServerResponse.createByErrorMessage("请确认您是否在小区范围内");
+                        }
+                    } catch (Exception ignored) {
+                    }
+                }
             }
             Member supervisor = memberMapper.getSupervisor(houseFlowApply.getHouseId());//houseId获得大管家
             Evaluate evaluate = new Evaluate();
@@ -373,6 +399,7 @@ public class EvaluateService {
 //                hfa.setApplyDec("业主您好，我是大管家，我已验收了" + worker.getName() + (houseFlowApply.getApplyType() == 1 ? "的阶段完工" : "的整体完工"));//描述
                 houseFlowApplyMapper.insert(hfa);
                 houseService.insertConstructionRecord(hfa);
+                houseWorkerService.setHouseFlowApplyImage(hfa,house,imageList);
             }
             if (houseFlowApply.getApplyType() == 1) {
                 //阶段审核
