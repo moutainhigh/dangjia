@@ -1,11 +1,12 @@
 package com.dangjia.acg.api.sale.rob;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.clue.ClueTalkDTO;
 import com.dangjia.acg.dto.sale.rob.CustomerRecDTO;
 import com.dangjia.acg.modle.clue.Clue;
-import com.dangjia.acg.modle.clue.ClueTalk;
 import com.dangjia.acg.modle.home.IntentionHouse;
+import com.dangjia.acg.modle.sale.royalty.DjRobSingle;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -32,7 +33,8 @@ public interface RobAPI {
     @ApiOperation(value = "抢单列表查询", notes = "抢单列表查询")
     ServerResponse queryRobSingledata(@RequestParam("request")HttpServletRequest request,
                                       @RequestParam("userToken")String userToken,
-                                      @RequestParam("storeId")String storeId);
+                                      @RequestParam("storeId")String storeId,
+                                      @RequestParam("isRobStats")Integer isRobStats);
 
 
 
@@ -102,4 +104,24 @@ public interface RobAPI {
     @ApiOperation(value = "删除意向房子", notes = "删除意向房子")
     ServerResponse deleteIntentionHouse(@RequestParam("request")HttpServletRequest request,
                                         @RequestParam("id")String id);
+
+
+    @PostMapping(value = "sale/rob/addDjRobSingle")
+    @ApiOperation(value = "新增抢单时间配置", notes = "新增抢单时间配置")
+    ServerResponse addDjRobSingle(@RequestParam("request")HttpServletRequest request,
+                                  @RequestParam("djRobSingle")DjRobSingle djRobSingle);
+
+    @PostMapping(value = "sale/rob/upDateDjRobSingle")
+    @ApiOperation(value = "修改抢单时间配置", notes = "修改抢单时间配置")
+    ServerResponse upDateDjRobSingle(@RequestParam("request")HttpServletRequest request,
+                                     @RequestParam("djRobSingle")DjRobSingle djRobSingle);
+
+    @PostMapping(value = "sale/rob/deleteDjRobSingle")
+    @ApiOperation(value = "删除抢单时间配置", notes = "删除抢单时间配置")
+    ServerResponse deleteDjRobSingle(@RequestParam("request")HttpServletRequest request,
+                                     @RequestParam("djRobSingle")DjRobSingle djRobSingle);
+
+    @PostMapping(value = "sale/rob/queryDjRobSingle")
+    @ApiOperation(value = "查询抢单时间配置", notes = "查询抢单时间配置")
+    ServerResponse queryDjRobSingle(HttpServletRequest request, PageDTO pageDTO);
 }
