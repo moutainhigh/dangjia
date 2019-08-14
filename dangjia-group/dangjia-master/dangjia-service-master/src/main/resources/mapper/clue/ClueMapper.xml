@@ -140,7 +140,7 @@
             </if>
             <if test="stage==4">
                 mc.data_status=0
-                and mc.stage in (0,1,5)
+                and mc.stage in (0,1)
                 and mc.phase_status=1
                 and c.phase_status=1
                 <if test="null!=userId and ''!=userId">
@@ -195,7 +195,7 @@
             LEFT JOIN dj_member_customer mc
             on mc.member_id=c.member_id
             and mc.user_id=c.cus_service
-            WHERE c.data_status = 0 and c.stage NOT IN (2,3,4)
+            WHERE c.data_status = 0 and c.stage NOT IN (2,3,4,5)
             <if test="null!=userId and ''!=userId">
                 and c.cus_service=#{userId}
             </if>
@@ -301,7 +301,13 @@
             AND h.visit_state=3
         </if>
         <if test="null!=searchKey and ''!=searchKey">
-            AND CONCAT( m.nick_name,c.phone,h.residential,CONCAT(h.building,'栋'),CONCAT(h.unit,'单元'),CONCAT(h.number,'号')) like CONCAT('%',#{searchKey},'%')
+            AND(
+            m.nick_name like CONCAT('%',#{searchKey},'%') OR
+            c.phone like CONCAT('%',#{searchKey},'%') OR
+            h.residential like CONCAT('%',#{searchKey},'%') OR
+            CONCAT_WS(IFNULL(h.residential, '*'),IFNULL(CONCAT(h.building, '栋'),'*栋'),IFNULL(CONCAT(h.unit,
+            '单元'),'*单元'),IFNULL(CONCAT(h.number, '号'),'*号')) like CONCAT('%',#{searchKey},'%')
+            )
         </if>
         <if test="visitState==1">
             ORDER BY h.create_date
@@ -642,6 +648,31 @@
     </update>
 
 
+    <select id="notEnteredGrabSheet" resultType="com.dangjia.acg.dto.sale.store.GrabSheetDTO">
+        select
+            mc.member_id as memberId,
+            hd.latitude,
+            hd.longitude,
+            mc.modify_date as modifyDate
+        from dj_clue c
+        INNER JOIN dj_house h
+        on c.member_id=h.member_id
+        INNER JOIN dj_member_customer mc
+        on mc.member_id=c.member_id
+        INNER JOIN dj_house_address hd
+        on h.id=hd.house_id
+        where c.cus_service IS NULL
+        AND c.store_id IS NULL
+    </select>
+
+    <update id="setDistribution">
+        update dj_clue c
+        INNER JOIN dj_member_customer mc
+        on c.member_id=mc.member_id
+        set c.store_id=#{storeId},
+        mc.store_id=#{storeId},
+        where c.member_id=#{memberId}
+    </update>
 
 
 </mapper>

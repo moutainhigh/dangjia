@@ -1,5 +1,6 @@
 package com.dangjia.acg.mapper.store;
 
+import com.dangjia.acg.dto.sale.store.OrderStoreDTO;
 import com.dangjia.acg.modle.store.Store;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -43,4 +44,5 @@ public interface IStoreMapper extends Mapper<Store>{
     List<Store> IndexqueryStore(@Param("cityId") String cityId,@Param("latitude") String latitude, @Param("longitude") String longitude);
 
 
+    List<OrderStoreDTO> getOrderStore(@Param("latitude") String latitude, @Param("longitude") String longitude);
 }

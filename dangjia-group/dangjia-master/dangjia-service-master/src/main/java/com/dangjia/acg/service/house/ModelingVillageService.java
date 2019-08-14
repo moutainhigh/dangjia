@@ -10,6 +10,7 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.house.VillageClassifyDTO;
 import com.dangjia.acg.dto.house.VillageDTO;
@@ -133,6 +134,7 @@ public class ModelingVillageService {
             JSONObject villageObj = JSONObject.parseObject(jsonStr);
             String villageId = villageObj.getString("id");//小区id
             String villageName = villageObj.getString("name");//小区name
+            Date modifyDate = DateUtil.toDate(villageObj.getString("modifyDate"));
             if (!StringUtils.isNotBlank(villageName))
                 return ServerResponse.createByErrorMessage("小区名称不能为空");
             ModelingVillage modelingVillage; //新增的 小区id
@@ -176,6 +178,8 @@ public class ModelingVillageService {
                     residentialBuilding = new ResidentialBuilding();
                     residentialBuilding.setVillageId(modelingVillage.getId());//设置 关联小区id
                     residentialBuilding.setBuilding(building);//楼栋名称
+                    residentialBuilding.setModifyDate(modifyDate);
+                    residentialBuilding.setCreateDate(modifyDate);
                     residentialBuildingMapper.insert(residentialBuilding);
                     modelingVillage.setLayoutSum(modelingVillage.getLayoutSum() + 1);//累计小区户型总数
                     modelingVillage.setModifyDate(new Date());
@@ -186,6 +190,7 @@ public class ModelingVillageService {
                         return ServerResponse.createByErrorMessage("楼栋名称已存在");
                     }
                     residentialBuilding.setBuilding(building);//楼栋名称
+                    residentialBuilding.setModifyDate(modifyDate);
                     residentialBuildingMapper.updateByPrimaryKeySelective(residentialBuilding);
                 }
             }

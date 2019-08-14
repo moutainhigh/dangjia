@@ -15,6 +15,8 @@ import com.dangjia.acg.dto.member.SaleMemberLabelDTO;
 import com.dangjia.acg.dto.member.WorkerTypeDTO;
 import com.dangjia.acg.dto.sale.achievement.UserAchievementDTO;
 import com.dangjia.acg.dto.sale.rob.*;
+import com.dangjia.acg.dto.sale.store.GrabSheetDTO;
+import com.dangjia.acg.dto.sale.store.OrderStoreDTO;
 import com.dangjia.acg.mapper.clue.ClueMapper;
 import com.dangjia.acg.mapper.clue.ClueTalkMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
@@ -25,6 +27,7 @@ import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.sale.DjAlreadyRobSingleMapper;
 import com.dangjia.acg.mapper.sale.DjRobSingleMapper;
 import com.dangjia.acg.mapper.sale.IntentionHouseMapper;
+import com.dangjia.acg.mapper.store.IStoreMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.modle.clue.Clue;
 import com.dangjia.acg.modle.clue.ClueTalk;
@@ -84,9 +87,11 @@ public class RobService {
     private IMemberMapper iMemberMapper;
     @Autowired
     private DjRobSingleMapper djRobSingleMapper;
-
     @Autowired
     private HouseService houseService;
+    @Autowired
+    private IStoreMapper iStoreMapper;
+
     @Autowired
     private DjAlreadyRobSingleMapper djAlreadyRobSingleMapper;
     @Autowired
@@ -348,7 +353,7 @@ public class RobService {
                     robArrInFoDTO.setPhone(member.getMobile());
                     robArrInFoDTO.setRemark(member.getRemarks());
                 }
-                
+
                 //查询意向房子
                 List<IntentionHouseDTO> intentionHouseList = intentionHouseMapper.queryIntentionHouse(robInfoDTO.get(0).getClueId());
                 robArrInFoDTO.setIntentionHouseList(intentionHouseList);
@@ -734,8 +739,23 @@ public class RobService {
      * @return
      */
     public ServerResponse notEnteredGrabSheet() {
-
-        return null;
+        List<GrabSheetDTO> grabSheetDTOS = clueMapper.notEnteredGrabSheet();
+        if(grabSheetDTOS.size()>0) {
+            Example example = new Example(DjRobSingle.class);
+            example.createCriteria().andEqualTo(DjRobSingle.DATA_STATUS, 0);
+            example.orderBy(DjRobSingle.ROB_DATE).asc();
+            List<DjRobSingle> djRobSingles = djRobSingleMapper.selectByExample(example);
+            for (GrabSheetDTO grabSheetDTO : grabSheetDTOS) {
+                List<OrderStoreDTO> orderStore = iStoreMapper.getOrderStore(grabSheetDTO.getLatitude(), grabSheetDTO.getLongitude());
+                for (int i=0;i<orderStore.size();i++){
+                    if(((System.currentTimeMillis()-grabSheetDTO.getModifyDate().getTime())/60/1000)
+                            >Integer.parseInt(djRobSingles.get(i).getRobDate())){
+                            clueMapper.setDistribution(orderStore.get(i).getStoreId());
+                    }
+                }
+            }
+        }
+        return ServerResponse.createBySuccessMessage("分配成功");
     }
 
 

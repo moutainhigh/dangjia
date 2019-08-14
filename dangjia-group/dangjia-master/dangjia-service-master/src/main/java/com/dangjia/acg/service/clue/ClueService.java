@@ -362,6 +362,7 @@ public class ClueService {
             clue.setClueType(0);
             clue.setTurnStatus(0);
             clue.setPhaseStatus(1);
+            clue.setPhone(phone);
             clue.setMemberId(member.getId());
             clueMapper.insert(clue);
             Customer customer = new Customer();

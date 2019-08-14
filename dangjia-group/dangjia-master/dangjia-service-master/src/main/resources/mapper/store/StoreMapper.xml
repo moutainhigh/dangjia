@@ -19,7 +19,7 @@
           reservation_number AS reservationNumber,
           latitude,
           longitude,
-          scope_itude scopeItude,
+          scope_itude AS scopeItude,
           villages
 	</sql>
 
@@ -107,5 +107,53 @@
         AND city_id=#{cityId}
         ORDER BY
         juli limit 1
+    </select>
+
+
+
+    <select id="getOrderStore" resultType="com.dangjia.acg.dto.sale.store.OrderStoreDTO">
+        SELECT
+          id AS storeId,
+          create_date AS createDate,
+          user_id AS userId,
+          modify_date AS modifyDate,
+          data_status AS dataStatus,
+          store_name AS storeName,
+          city_id AS cityId,
+          city_name AS cityName,
+          department_id AS departmentId,
+          department_name AS departmentName,
+          store_address AS storeAddress,
+          reservation_number AS reservationNumber,
+          latitude,
+          longitude,
+          scope_itude AS scopeItude,
+          villages,
+        ROUND(
+        6378.138 * 2 * ASIN(
+        SQRT(
+        POW(
+        SIN(
+        (
+        #{latitude} * PI() / 180 - latitude * PI() / 180
+        ) / 2
+        ),
+        2
+        ) + COS(
+        #{latitude} * PI() / 180) * COS(latitude * PI() / 180) * POW(
+        SIN(
+        (
+        #{longitude} * PI() / 180 - longitude * PI() / 180
+        ) / 2
+        ),
+        2
+        )
+        )
+        ) * 1000
+        ) AS juli
+        FROM dj_store
+        where data_status =0
+        ORDER BY
+        juli
     </select>
 </mapper>

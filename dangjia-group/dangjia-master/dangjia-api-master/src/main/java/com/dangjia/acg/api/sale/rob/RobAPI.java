@@ -143,6 +143,6 @@ public interface RobAPI {
 
     @PostMapping(value = "sale/rob/notEnteredGrabSheet")
     @ApiOperation(value = "未录入抢单", notes = "未录入抢单")
-    ServerResponse notEnteredGrabSheet();
+    void notEnteredGrabSheet();
 
 }

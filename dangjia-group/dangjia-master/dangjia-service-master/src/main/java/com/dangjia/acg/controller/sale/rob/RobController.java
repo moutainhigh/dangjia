@@ -240,10 +240,18 @@ public class RobController implements RobAPI {
     }
 
 
+//     */
+//    @Override
+//    @ApiMethod
+//    public ServerResponse queryDjRobSingle(HttpServletRequest request, PageDTO pageDTO) {
+//        return robService.queryDjRobSingle(pageDTO);
+//    }
+
+
     @Override
     @ApiMethod
-    public ServerResponse notEnteredGrabSheet() {
-        return null;
+    public void notEnteredGrabSheet() {
+        robService.notEnteredGrabSheet();
     }
 
 
