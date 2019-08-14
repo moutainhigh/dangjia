@@ -125,7 +125,7 @@ public class RobService {
             map.put("storeId", storeId);
         }
         if (!CommonUtil.isEmpty(isRobStats)) {
-            map.put("isRobStats", isRobStats);
+            map.put("isRobStats", 0);
         }
         List<RobDTO> list = clueMapper.queryRobSingledata(map);
 
@@ -139,6 +139,7 @@ public class RobService {
                     List<SaleMemberLabelDTO> labelByIds = iMemberLabelMapper.getLabelByIds(labelIds);
                     robDTO.setList(labelByIds);
                 }
+                robDTO.setCusService(li.getCusService());
                 robDTO.setPhone(li.getPhone());
                 robDTO.setOwerName(li.getOwerName());
                 robDTO.setVisitState(li.getVisitState());
@@ -205,6 +206,7 @@ public class RobService {
                 robDTO.setClueId(clue.getId());
                 robDTO.setStage(clue.getStage());
                 robDTO.setPhaseStatus(clue.getPhaseStatus());
+                robDTO.setCusService(clue.getCusService());
             }
 
             House house = iHouseMapper.selectByPrimaryKey(da.getHouseId());
