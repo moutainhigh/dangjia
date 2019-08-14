@@ -320,10 +320,10 @@ public class StewardService {
             courseDTO.setRewardUrl(configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
                     String.format(DjConstants.GJPageAddress.JFREGULATIONS, userToken, houseFlow.getCityId(), "选择奖罚条例"));//奖罚页面
             if (houseFlow.getWorkType() == 4 && houseFlow.getWorkSteta() == 3) {//待交底
-                Example example = new Example(WorkerDisclosure.class);
-                example.createCriteria().andEqualTo("state", 1).andEqualTo("type", 0);
-                List<WorkerDisclosure> wdList = workerDisclosureMapper.selectByExample(example);
-                courseDTO.setWorkerDisclosureList(wdList);
+//                Example example = new Example(WorkerDisclosure.class);
+//                example.createCriteria().andEqualTo("state", 1).andEqualTo("type", 0);
+//                List<WorkerDisclosure> wdList = workerDisclosureMapper.selectByExample(example);
+//                courseDTO.setWorkerDisclosureList(wdList);
                 courseDTO.setApplyType(0);//没有申请
             } else {//施工中
                 HouseFlowApply hfa = houseFlowApplyMapper.getSupervisorCheck(houseFlow.getId(), houseFlow.getWorkerId());
