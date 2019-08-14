@@ -181,7 +181,7 @@ public class RobService {
             userId = accessToken.getUserId();
         }
 
-        Example example = new Example(House.class);
+        Example example = new Example(DjAlreadyRobSingle.class);
         example.createCriteria()
                 .andEqualTo(DjAlreadyRobSingle.USER_ID, userId)
                 .andEqualTo(DjAlreadyRobSingle.DATA_STATUS, 0);
