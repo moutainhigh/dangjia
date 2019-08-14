@@ -3,6 +3,7 @@ package com.dangjia.acg.service.sale.rob;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.ServerCode;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
@@ -20,6 +21,7 @@ import com.dangjia.acg.mapper.member.ICustomerMapper;
 import com.dangjia.acg.mapper.member.ICustomerRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberLabelMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.mapper.sale.DjRobSingleMapper;
 import com.dangjia.acg.mapper.sale.IntentionHouseMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.modle.clue.Clue;
@@ -28,10 +30,13 @@ import com.dangjia.acg.modle.home.IntentionHouse;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.CustomerRecord;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.sale.royalty.DjRobSingle;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.util.Utils;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -69,6 +74,8 @@ public class RobService {
     private UserMapper userMapper;
     @Autowired
     private IMemberMapper iMemberMapper;
+    @Autowired
+    private DjRobSingleMapper djRobSingleMapper;
 
     /**
      * 查询抢单列表
@@ -77,7 +84,7 @@ public class RobService {
      * @param storeId
      * @return
      */
-    public ServerResponse queryRobSingledata(String userToken, String storeId) {
+    public ServerResponse queryRobSingledata(String userToken, String storeId,Integer isRobStats) {
 
         Object object = constructionService.getAccessToken(userToken);
         if (object instanceof ServerResponse) {
@@ -97,6 +104,9 @@ public class RobService {
         }
         if (!CommonUtil.isEmpty(storeId)) {
             map.put("storeId", storeId);
+        }
+        if (!CommonUtil.isEmpty(isRobStats)) {
+            map.put("isRobStats", isRobStats);
         }
         List<RobDTO> list = clueMapper.queryRobSingledata(map);
 
@@ -130,6 +140,11 @@ public class RobService {
     }
 
 
+    /**
+     * 修改抢单状态
+     * @param id
+     * @return
+     */
     public ServerResponse upDateIsRobStats(String id) {
         try {
             if (!CommonUtil.isEmpty(id)) {
@@ -138,10 +153,10 @@ public class RobService {
                 clueMapper.upDateIsRobStats(map);
                 return ServerResponse.createBySuccessMessage("修改成功");
             }
-            return ServerResponse.createByErrorMessage("修改成功");
+            return ServerResponse.createByErrorMessage("修改失败");
         } catch (Exception e) {
             e.printStackTrace();
-            return ServerResponse.createByErrorMessage("修改成功");
+            return ServerResponse.createByErrorMessage("修改失败");
         }
 
     }
@@ -588,6 +603,80 @@ public class RobService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("删除失败");
         }
+
+    }
+
+
+    /**
+     * 新增配置时间
+     * @param djRobSingle
+     * @return
+     */
+    public ServerResponse addDjRobSingle(DjRobSingle djRobSingle) {
+        try {
+            if (!CommonUtil.isEmpty(djRobSingle)) {
+                djRobSingleMapper.insert(djRobSingle);
+                return ServerResponse.createBySuccessMessage("新增成功");
+            }
+            return ServerResponse.createByErrorMessage("新增失败");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("新增失败");
+        }
+
+    }
+
+    /**
+     * 修改配置时间
+     * @param djRobSingle
+     * @return
+     */
+    public ServerResponse upDateDjRobSingle(DjRobSingle djRobSingle) {
+        try {
+            if (!CommonUtil.isEmpty(djRobSingle)) {
+                djRobSingle.setCreateDate(null);
+                djRobSingleMapper.updateByPrimaryKeySelective(djRobSingle);
+                return ServerResponse.createBySuccessMessage("修改成功");
+            }
+            return ServerResponse.createByErrorMessage("修改失败");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("修改失败");
+        }
+
+    }
+
+    /**
+     * 删除配置时间
+     * @param djRobSingle
+     * @return
+     */
+    public ServerResponse deleteDjRobSingle(DjRobSingle djRobSingle) {
+        try {
+            if (!CommonUtil.isEmpty(djRobSingle)) {
+                djRobSingleMapper.deleteByPrimaryKey(djRobSingle);
+                return ServerResponse.createBySuccessMessage("删除成功");
+            }
+            return ServerResponse.createByErrorMessage("删除失败");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("删除失败");
+        }
+
+    }
+
+    /**
+     * 查询配置时间
+     * @param pageDTO
+     * @return
+     */
+    public ServerResponse queryDjRobSingle(PageDTO pageDTO){
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        List<DjRobSingle> djRobSingles = djRobSingleMapper.selectAll();
+        if (djRobSingles.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+        return ServerResponse.createBySuccess("查询提成列表", new PageInfo(djRobSingles));
 
     }
 

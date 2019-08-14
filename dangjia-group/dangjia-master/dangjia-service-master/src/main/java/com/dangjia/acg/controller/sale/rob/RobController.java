@@ -2,12 +2,13 @@ package com.dangjia.acg.controller.sale.rob;
 
 import com.dangjia.acg.api.sale.rob.RobAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.clue.ClueTalkDTO;
 import com.dangjia.acg.dto.sale.rob.CustomerRecDTO;
 import com.dangjia.acg.modle.clue.Clue;
-import com.dangjia.acg.modle.clue.ClueTalk;
 import com.dangjia.acg.modle.home.IntentionHouse;
+import com.dangjia.acg.modle.sale.royalty.DjRobSingle;
 import com.dangjia.acg.service.sale.rob.RobService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,8 +39,8 @@ public class RobController implements RobAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse queryRobSingledata(HttpServletRequest request, String userToken, String storeId) {
-        return robService.queryRobSingledata(userToken, storeId);
+    public ServerResponse queryRobSingledata(HttpServletRequest request, String userToken, String storeId,Integer isRobStats) {
+        return robService.queryRobSingledata(userToken, storeId,isRobStats);
     }
 
     /**
@@ -162,4 +163,52 @@ public class RobController implements RobAPI {
         return robService.deleteIntentionHouse(id);
     }
 
+    /**
+     * 新增配置时间
+     * @param request
+     * @param djRobSingle
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse addDjRobSingle(HttpServletRequest request, DjRobSingle djRobSingle) {
+        return robService.addDjRobSingle(djRobSingle);
+    }
+
+    /**
+     * 修改配置时间
+     * @param request
+     * @param djRobSingle
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse upDateDjRobSingle(HttpServletRequest request, DjRobSingle djRobSingle) {
+        return robService.upDateDjRobSingle(djRobSingle);
+    }
+
+
+    /**
+     * 删除配置时间
+     * @param request
+     * @param djRobSingle
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse deleteDjRobSingle(HttpServletRequest request, DjRobSingle djRobSingle) {
+        return robService.deleteDjRobSingle(djRobSingle);
+    }
+
+    /**
+     * 删除配置时间
+     * @param request
+     * @param pageDTO
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryDjRobSingle(HttpServletRequest request, PageDTO pageDTO) {
+        return robService.queryDjRobSingle(pageDTO);
+    }
 }
