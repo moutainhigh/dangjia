@@ -27,6 +27,7 @@ import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.modle.clue.Clue;
 import com.dangjia.acg.modle.clue.ClueTalk;
 import com.dangjia.acg.modle.home.IntentionHouse;
+import com.dangjia.acg.modle.house.HouseAddress;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.CustomerRecord;
 import com.dangjia.acg.modle.member.Member;
@@ -34,6 +35,7 @@ import com.dangjia.acg.modle.sale.royalty.DjRobSingle;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.dangjia.acg.service.house.HouseService;
 import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -77,6 +79,8 @@ public class RobService {
     @Autowired
     private DjRobSingleMapper djRobSingleMapper;
 
+    @Autowired
+    private HouseService houseService;
     /**
      * 查询抢单列表
      *
@@ -247,6 +251,16 @@ public class RobService {
                             workerTypeDTO.setHead(imageAddress + workerTypeDTO.getHead());
                         }
                         to.setWorkerTypeDTO(workerTypeDTO);
+                    }
+                    //改小区名称
+                    if(CommonUtil.isEmpty(to.getResidential())){
+                        ServerResponse serverResponse = houseService.getHouseAddress("houseId");
+                        if (serverResponse.isSuccess()) {
+                            HouseAddress address = (HouseAddress) serverResponse.getResultObj();
+                            if(!CommonUtil.isEmpty(address.getName())){
+                                to.setResidential(address.getName());
+                            }
+                        }
                     }
                 }
             }
@@ -487,7 +501,12 @@ public class RobService {
                     }
 //                    String remindTime = customerRecDTO.getRemindTime();
 //                    Date date = DateUtil.toDate(remindTime);
-                    clueTalk.setRemindTime(customerRecDTO.getRemindTime());
+                    if(CommonUtil.isEmpty(customerRecDTO.getRemindTime())){
+                        clueTalk.setRemindTime(null);
+                    }else{
+                        clueTalk.setRemindTime(customerRecDTO.getRemindTime());
+                    }
+
                     clueTalk.setClueId(customerRecDTO.getClueId());
                     clueTalk.setTalkContent(customerRecDTO.getDescribes());
                     clueTalk.setDataStatus(0);
