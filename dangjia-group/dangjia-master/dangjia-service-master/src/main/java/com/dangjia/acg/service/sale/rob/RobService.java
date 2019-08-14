@@ -17,20 +17,25 @@ import com.dangjia.acg.dto.sale.achievement.UserAchievementDTO;
 import com.dangjia.acg.dto.sale.rob.*;
 import com.dangjia.acg.mapper.clue.ClueMapper;
 import com.dangjia.acg.mapper.clue.ClueTalkMapper;
+import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.ICustomerMapper;
 import com.dangjia.acg.mapper.member.ICustomerRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberLabelMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.mapper.sale.DjAlreadyRobSingleMapper;
 import com.dangjia.acg.mapper.sale.DjRobSingleMapper;
 import com.dangjia.acg.mapper.sale.IntentionHouseMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.modle.clue.Clue;
 import com.dangjia.acg.modle.clue.ClueTalk;
 import com.dangjia.acg.modle.home.IntentionHouse;
+import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.HouseAddress;
 import com.dangjia.acg.modle.member.AccessToken;
+import com.dangjia.acg.modle.member.Customer;
 import com.dangjia.acg.modle.member.CustomerRecord;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.sale.royalty.DjAlreadyRobSingle;
 import com.dangjia.acg.modle.sale.royalty.DjRobSingle;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.service.config.ConfigMessageService;
@@ -41,6 +46,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.*;
@@ -81,9 +87,13 @@ public class RobService {
 
     @Autowired
     private HouseService houseService;
+    @Autowired
+    private DjAlreadyRobSingleMapper djAlreadyRobSingleMapper;
+    @Autowired
+    private IHouseMapper iHouseMapper;
+
     /**
-     * 查询抢单列表
-     *
+     * 查询待抢单列表
      * @param userToken
      * @param storeId
      * @return
@@ -140,27 +150,130 @@ public class RobService {
         if (robDTOs.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
-        return ServerResponse.createBySuccess("查询提成列表", robDTOs);
+        return ServerResponse.createBySuccess("查询待抢单列表", robDTOs);
     }
 
 
+
     /**
-     * 修改抢单状态
-     * @param id
+     * 查询已抢单列表
+     * @param userToken
+     * @param userId
      * @return
      */
-    public ServerResponse upDateIsRobStats(String id) {
-        try {
-            if (!CommonUtil.isEmpty(id)) {
-                Map<String, Object> map = new HashMap<>();
-                map.put("id", id);
-                clueMapper.upDateIsRobStats(map);
-                return ServerResponse.createBySuccessMessage("修改成功");
+    public ServerResponse queryAlreadyRobSingledata(String userToken,String userId) {
+
+        Object object = constructionService.getAccessToken(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        AccessToken accessToken = (AccessToken) object;
+        if (CommonUtil.isEmpty(accessToken.getUserId())) {
+            return ServerResponse.createbyUserTokenError();
+        }
+
+        if(CommonUtil.isEmpty(userId)){
+            userId = accessToken.getUserId();
+        }
+
+        Example example = new Example(House.class);
+        example.createCriteria()
+                .andEqualTo(House.MEMBER_ID, userId)
+                .andEqualTo(House.DATA_STATUS, 0);
+        List<DjAlreadyRobSingle> lists = djAlreadyRobSingleMapper.selectByExample(example);
+
+        List<RobDTO> robDTOs = new ArrayList<>();
+
+        for (DjAlreadyRobSingle da: lists) {
+            RobDTO robDTO = new RobDTO();
+            robDTO.setAlreadyId(da.getId());
+
+            Member member = iMemberMapper.selectByPrimaryKey(da.getMemberId());
+            if(!CommonUtil.isEmpty(member)){
+                robDTO.setOwerName(member.getNickName());
+                robDTO.setMemberId(member.getId());
             }
-            return ServerResponse.createByErrorMessage("修改失败");
+
+            Clue clue = clueMapper.selectByPrimaryKey(da.getClueId());
+            if(!CommonUtil.isEmpty(clue)){
+                robDTO.setPhone(clue.getPhone());
+                robDTO.setClueId(clue.getId());
+                robDTO.setStage(clue.getStage());
+                robDTO.setPhaseStatus(clue.getPhaseStatus());
+            }
+
+            House house = iHouseMapper.selectByPrimaryKey(da.getHouseId());
+            if(!CommonUtil.isEmpty(house)){
+                robDTO.setCreateDate(house.getCreateDate());
+                robDTO.setIsRobStats(house.getIsRobStats());
+                robDTO.setVisitState(house.getVisitState());
+                robDTO.setHouseId(house.getId());
+            }
+
+            Customer customer = iCustomerMapper.selectByPrimaryKey(da.getMcId());
+            if(!CommonUtil.isEmpty(customer)){
+                //查询标签
+                if (!CommonUtil.isEmpty(customer.getLabelIdArr())) {
+                    String[] labelIds = customer.getLabelIdArr().split(",");
+                    List<SaleMemberLabelDTO> labelByIds = iMemberLabelMapper.getLabelByIds(labelIds);
+                    robDTO.setList(labelByIds);
+                }
+            }
+            robDTOs.add(robDTO);
+        }
+
+        if (robDTOs.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+        return ServerResponse.createBySuccess("查询已抢单列表", robDTOs);
+    }
+
+    /**
+     * 抢单
+     * @param djAlreadyRobSingle
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse upDateIsRobStats(DjAlreadyRobSingle djAlreadyRobSingle) {
+        try {
+            if (!CommonUtil.isEmpty(djAlreadyRobSingle)) {
+                //新增抢单表数据
+                djAlreadyRobSingleMapper.insert(djAlreadyRobSingle);
+
+                Map<String, Object> map = new HashMap<>();
+                map.put("id", djAlreadyRobSingle.getHouseId());
+                map.put("isRobStats", 1);
+                clueMapper.upDateIsRobStats(map);
+                return ServerResponse.createBySuccessMessage("抢单成功");
+            }
+            return ServerResponse.createByErrorMessage("抢单失败");
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("修改失败");
+        }
+
+    }
+
+    /**
+     * 撤回
+     * @param
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse upDateAlready(String houseId,String alreadyId) {
+        try {
+            Map<String, Object> map = new HashMap<>();
+            if (!CommonUtil.isEmpty(houseId)) {
+                map.put("houseId", houseId);
+            }
+            map.put("id", 0);
+            clueMapper.upDateIsRobStats(map);
+            djAlreadyRobSingleMapper.deleteByPrimaryKey(alreadyId);
+            return ServerResponse.createBySuccessMessage("放弃成功");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("放弃失败");
         }
 
     }
@@ -283,15 +396,6 @@ public class RobService {
                 }
                 robArrInFoDTO.setData(data);
             }
-
-//            //查询客户沟通记录
-//            if (!CommonUtil.isEmpty(memberId)) {
-//                List<CustomerRecordInFoDTO> data = iMemberLabelMapper.queryDescribes(memberId);
-//                for (CustomerRecordInFoDTO datum : data) {
-//                    datum.setHead(imageAddress + datum.getHead());
-//                }
-//                robArrInFoDTO.setData(data);
-//            }
 
             //销售人员订单数量
             List<UserAchievementDTO> uadto = clueMapper.queryUserAchievementInFo(map);

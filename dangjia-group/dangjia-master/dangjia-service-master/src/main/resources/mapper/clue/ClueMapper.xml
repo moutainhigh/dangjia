@@ -360,7 +360,6 @@
         c.stage as stage,
         c.phase_status as phaseStatus,
         h.id as houseId,
-        h.member_id as memberId,
         h.city_id as cityId,
         h.village_id as villageId,
         h.visit_state as visitState,
@@ -556,7 +555,7 @@
     <!--修改抢单状态-->
     <update id="upDateIsRobStats" parameterType="java.util.Map">
         update dj_house h
-        set h.is_rob_stats = 1
+        set h.is_rob_stats = #{isRobStats}
         where h.id = #{id}
     </update>
 
