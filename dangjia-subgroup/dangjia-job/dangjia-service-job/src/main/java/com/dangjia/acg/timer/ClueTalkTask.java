@@ -3,10 +3,8 @@ package com.dangjia.acg.timer;
 import com.dangjia.acg.api.config.ConfigMessageAPI;
 import com.dangjia.acg.api.sale.rob.RobAPI;
 import com.dangjia.acg.common.constants.SysConfig;
-import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.clue.ClueTalkDTO;
-import com.dangjia.acg.modle.config.ConfigMessage;
 import com.dangjia.acg.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +50,9 @@ public class ClueTalkTask {
         }
         log.info(format.format(new Date()) + "结束执行沟通记录提醒任务...");
     }
+
+
+
 
 
 

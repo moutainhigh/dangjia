@@ -17,10 +17,12 @@ import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IModelingLayoutMapper;
 import com.dangjia.acg.mapper.house.IModelingVillageMapper;
 import com.dangjia.acg.mapper.other.ICityMapper;
+import com.dangjia.acg.mapper.sale.ResidentialBuildingMapper;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.ModelingLayout;
 import com.dangjia.acg.modle.house.ModelingVillage;
 import com.dangjia.acg.modle.other.City;
+import com.dangjia.acg.modle.sale.residential.ResidentialBuilding;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -54,6 +56,8 @@ public class ModelingVillageService {
     private IHouseMapper houseMapper;
     @Autowired
     private ConfigUtil configUtil;
+    @Autowired
+    private ResidentialBuildingMapper residentialBuildingMapper;
 
 
     private static Logger LOG = LoggerFactory.getLogger(ModelingVillageService.class);
@@ -99,14 +103,24 @@ public class ModelingVillageService {
         List<Map<String, Object>> mapList = new ArrayList<>();
         for (ModelingVillage modelingVillage : allVillageList) {
             Map<String, Object> modelingVillageMap = BeanUtils.beanToMap(modelingVillage);
-            List<ModelingLayout> modelingLayoutList = modelingLayoutMapper.queryModelingLayoutByVillageId(modelingVillage.getId());
-            List<Map<String, Object>> modelingLayoutMapList = new ArrayList<>();
-            for (ModelingLayout modelingLayout : modelingLayoutList) {
-                Map<String, Object> modelingLayoutMap = BeanUtils.beanToMap(modelingLayout);
-                modelingLayoutMap.put("imageUrl", address + modelingLayout.getImage());
-                modelingLayoutMapList.add(modelingLayoutMap);
-                modelingVillageMap.put("modelingLayoutList", modelingLayoutMapList);
+            Example example=new Example(ResidentialBuilding.class);
+            example.createCriteria().andEqualTo(ResidentialBuilding.DATA_STATUS,0)
+                    .andEqualTo(ResidentialBuilding.VILLAGE_ID,modelingVillage.getId());
+            List<ResidentialBuilding> residentialBuildings = residentialBuildingMapper.selectByExample(example);
+            List<Map<String, Object>> residentialBuildingMapList = new ArrayList<>();
+            for (ResidentialBuilding residentialBuilding : residentialBuildings) {
+                Map<String, Object> residentialBuildingMap = BeanUtils.beanToMap(residentialBuilding);
+                residentialBuildingMapList.add(residentialBuildingMap);
+                modelingVillageMap.put("residentialBuildingList",residentialBuildingMapList);
             }
+//            List<ModelingLayout> modelingLayoutList = modelingLayoutMapper.queryModelingLayoutByVillageId(modelingVillage.getId());
+//            List<Map<String, Object>> modelingLayoutMapList = new ArrayList<>();
+//            for (ModelingLayout modelingLayout : modelingLayoutList) {
+//                Map<String, Object> modelingLayoutMap = BeanUtils.beanToMap(modelingLayout);
+//                modelingLayoutMap.put("imageUrl", address + modelingLayout.getImage());
+//                modelingLayoutMapList.add(modelingLayoutMap);
+//                modelingVillageMap.put("modelingLayoutList", modelingLayoutMapList);
+//            }
             mapList.add(modelingVillageMap);
         }
         pageResult.setList(mapList);
@@ -147,45 +161,39 @@ public class ModelingVillageService {
                 modelingVillageMapper.updateByPrimaryKeySelective(modelingVillage);
             }
 //            遍历户型对象 数组  ， 一个小区 对应 多个户型
-            String modelingLayoutList = villageObj.getString("modelingLayoutList");
-            JSONArray modelingLayoutArr = JSONArray.parseArray(modelingLayoutList);
-            for (int i = 0; i < modelingLayoutArr.size(); i++) {//遍历户型
-                JSONObject obj = modelingLayoutArr.getJSONObject(i);
-                String layoutId = obj.getString("id");//户型id
-                String name = obj.getString("name");//户型名称
-                if (CommonUtil.isEmpty(name))
-                    return ServerResponse.createByErrorMessage("户型名称不能为空");
-                ModelingLayout modelingLayout;
-                if (CommonUtil.isEmpty(layoutId)) {//没有id则新增
+            String residentialBuildingList = villageObj.getString("residentialBuildingList");
+            JSONArray residentialBuildingArr = JSONArray.parseArray(residentialBuildingList);
+            for (int i = 0; i < residentialBuildingArr.size(); i++) {//遍历户型
+                JSONObject obj = residentialBuildingArr.getJSONObject(i);
+                String residentialBuildingId = obj.getString("id");//楼栋id
+                String building = obj.getString("building");//楼栋名称
+                if (CommonUtil.isEmpty(building))
+                    return ServerResponse.createByErrorMessage("楼栋名称不能为空");
+                ResidentialBuilding residentialBuilding;
+                if (CommonUtil.isEmpty(residentialBuildingId)) {//没有id则新增
                     if (CommonUtil.isEmpty(modelingVillage.getId()))//没有id则新增
                         return ServerResponse.createByErrorMessage("小区id不能为null");
-                    modelingLayout = new ModelingLayout();
-                    modelingLayout.setVillageId(modelingVillage.getId());//设置 关联小区id
-                    modelingLayout.setName(name);//户型name
-                    modelingLayout.setImage(obj.getString("image"));//户型图片
-                    modelingLayout.setBuildSquare(obj.getString("buildSquare"));//建筑面积
-                    modelingLayoutMapper.insert(modelingLayout);
+                    residentialBuilding = new ResidentialBuilding();
+                    residentialBuilding.setVillageId(modelingVillage.getId());//设置 关联小区id
+                    residentialBuilding.setBuilding(building);//楼栋名称
+                    residentialBuildingMapper.insert(residentialBuilding);
                     modelingVillage.setLayoutSum(modelingVillage.getLayoutSum() + 1);//累计小区户型总数
                     modelingVillage.setModifyDate(new Date());
                     modelingVillageMapper.updateByPrimaryKeySelective(modelingVillage);
                 } else {
-                    modelingLayout = modelingLayoutMapper.selectByPrimaryKey(layoutId);
-                    if (!modelingLayout.getName().equals(name)) {
-                        if (modelingLayoutMapper.queryModelingLayoutByName(layoutId, name).size() > 0)
-                            return ServerResponse.createByErrorMessage("户型名称已存在");
+                    residentialBuilding = residentialBuildingMapper.selectByPrimaryKey(residentialBuildingId);
+                    if (!residentialBuilding.getBuilding().equals(building)) {
+                        return ServerResponse.createByErrorMessage("楼栋名称已存在");
                     }
-                    modelingLayout.setName(name);//户型名称
-                    modelingLayout.setImage(obj.getString("image"));//户型图片
-                    modelingLayout.setBuildSquare(obj.getString("buildSquare"));//建筑面积
-                    modelingLayout.setModifyDate(new Date());
-                    modelingLayoutMapper.updateByPrimaryKeySelective(modelingLayout);
+                    residentialBuilding.setBuilding(building);//楼栋名称
+                    residentialBuildingMapper.updateByPrimaryKeySelective(residentialBuilding);
                 }
             }
-            String[] deleteLayoutIds = villageObj.getString("deleteLayoutIds").split(",");//要删除的户型id数组，逗号分隔
-            for (String deleteLayoutId : deleteLayoutIds) {
-                if (modelingLayoutMapper.selectByPrimaryKey(deleteLayoutId) != null) {
-                    if (modelingLayoutMapper.deleteByPrimaryKey(deleteLayoutId) < 0)
-                        return ServerResponse.createByErrorMessage("删除id：" + deleteLayoutId + "失败");
+            String[] deleteResidentialBuildingIds = villageObj.getString("deleteResidentialBuildingIds").split(",");//要删除的楼栋id数组，逗号分隔
+            for (String deleteResidentialBuildingId : deleteResidentialBuildingIds) {
+                if (residentialBuildingMapper.selectByPrimaryKey(deleteResidentialBuildingId) != null) {
+                    if (residentialBuildingMapper.deleteByPrimaryKey(deleteResidentialBuildingId) < 0)
+                        return ServerResponse.createByErrorMessage("删除id：" + deleteResidentialBuildingId + "失败");
                 }
             }
         } catch (Exception e) {

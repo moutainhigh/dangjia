@@ -124,4 +124,10 @@ public interface RobAPI {
     @PostMapping(value = "sale/rob/queryDjRobSingle")
     @ApiOperation(value = "查询抢单时间配置", notes = "查询抢单时间配置")
     ServerResponse queryDjRobSingle(HttpServletRequest request, PageDTO pageDTO);
+
+
+    @PostMapping(value = "sale/rob/notEnteredGrabSheet")
+    @ApiOperation(value = "未录入抢单", notes = "未录入抢单")
+    ServerResponse notEnteredGrabSheet();
+
 }
