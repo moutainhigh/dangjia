@@ -481,7 +481,7 @@ public class HouseFlowService {
                 Example exampleFlow = new Example(HouseFlow.class);
                 exampleFlow.createCriteria()
                         .andEqualTo(HouseFlow.WORKER_ID, houseWorker.getWorkerId())
-                        .andEqualTo(HouseFlow.WORK_TYPE, 3)
+                        .andEqualTo(HouseFlow.WORK_TYPE, 4)
                         .andEqualTo(HouseFlow.WORKER_TYPE_ID, houseWorker.getWorkerTypeId())
                         .andEqualTo(HouseFlow.HOUSE_ID, houseWorker.getHouseId());
                 exampleFlow.orderBy(HouseFlow.CREATE_DATE).desc();
