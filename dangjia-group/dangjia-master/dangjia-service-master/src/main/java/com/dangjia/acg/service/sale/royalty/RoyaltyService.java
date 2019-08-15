@@ -110,6 +110,7 @@ public class RoyaltyService {
         for (DjRoyaltyMatch djRoyaltyMatch : djRoyaltyMatches) {
             DjRoyaltyMatch djRoyaltyMatch1=new DjRoyaltyMatch();
             djRoyaltyMatch1.setDataStatus(0);
+            djRoyaltyMatch1.setOrderStatus(1);
             djRoyaltyMatch1.setUserId(djRoyaltyMatch.getUserId());
             djRoyaltyMatch1.setHouseId(djRoyaltyMatch.getHouseId());
             djRoyaltyMatch1.setMonthRoyalty((int) (djRoyaltyMatch.getArrRoyalty()*0.25));
