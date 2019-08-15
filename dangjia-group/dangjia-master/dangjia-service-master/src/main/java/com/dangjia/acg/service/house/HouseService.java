@@ -418,6 +418,7 @@ public class HouseService {
      * WEB确认开工
      */
     public ServerResponse startWork(HttpServletRequest request, HouseDTO houseDTO) {
+
         if (houseDTO.getDecorationType() >= 3 || houseDTO.getDecorationType() == 0) {
             return ServerResponse.createByErrorMessage("装修类型参数错误");
         }
@@ -548,11 +549,38 @@ public class HouseService {
             map.put("stage", 4);
             map.put("tips", 1);
             clueMapper.setStage(map);//修改线索的阶段
+            //结算提成
+            endRoyalty(houseDTO);
+
         } catch (Exception e) {
             System.out.println("建群失败，异常：" + e.getMessage());
         }
         return ServerResponse.createBySuccessMessage("操作成功");
     }
+
+
+    /**
+     * 结算下单提成
+     */
+    public void endRoyalty(HouseDTO houseDTO){
+        House house = iHouseMapper.selectByPrimaryKey(houseDTO.getHouseId());
+
+        Example example = new Example(Clue.class);
+        example.createCriteria().andEqualTo(Clue.MEMBER_ID, house.getMemberId())
+                .andEqualTo(Clue.DATA_STATUS, 0);
+        List<Clue> clueList = clueMapper.selectByExample(example);
+        if(clueList.size() == 1){
+            //一个销售人员录入
+
+
+        }else{
+            //多个销售人员录入
+
+        }
+
+    }
+
+
 
     public ServerResponse revokeHouse(String userToken) {
         Object object = constructionService.getMember(userToken);
