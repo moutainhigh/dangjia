@@ -34,8 +34,7 @@ import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.other.ICityMapper;
 import com.dangjia.acg.mapper.other.IWorkDepositMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
-import com.dangjia.acg.mapper.sale.ResidentialBuildingMapper;
-import com.dangjia.acg.mapper.sale.ResidentialRangeMapper;
+import com.dangjia.acg.mapper.sale.*;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.clue.Clue;
 import com.dangjia.acg.modle.core.*;
@@ -44,6 +43,7 @@ import com.dangjia.acg.modle.house.*;
 import com.dangjia.acg.modle.matter.RenovationManual;
 import com.dangjia.acg.modle.matter.RenovationManualMember;
 import com.dangjia.acg.modle.matter.TechnologyRecord;
+import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Customer;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberCity;
@@ -53,6 +53,9 @@ import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.sale.residential.ResidentialBuilding;
 import com.dangjia.acg.modle.sale.residential.ResidentialRange;
+import com.dangjia.acg.modle.sale.royalty.DjAlreadyRobSingle;
+import com.dangjia.acg.modle.sale.royalty.DjRoyaltyDetailsSurface;
+import com.dangjia.acg.modle.sale.royalty.DjRoyaltyMatch;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
@@ -425,7 +428,7 @@ public class HouseService {
     /**
      * WEB确认开工
      */
-    public ServerResponse startWork(HttpServletRequest request, HouseDTO houseDTO) {
+    public ServerResponse startWork(HttpServletRequest request, HouseDTO houseDTO,String userToken) {
 
         if (houseDTO.getDecorationType() >= 3 || houseDTO.getDecorationType() == 0) {
             return ServerResponse.createByErrorMessage("装修类型参数错误");
@@ -557,9 +560,17 @@ public class HouseService {
             map.put("stage", 4);
             map.put("tips", 1);
             clueMapper.setStage(map);//修改线索的阶段
+
             //结算提成
-            String userId = "0";
-            endRoyalty(houseDTO,userId);
+            Object object = constructionService.getAccessToken(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            AccessToken accessToken = (AccessToken) object;
+            if (CommonUtil.isEmpty(accessToken.getUserId())) {
+                return ServerResponse.createbyUserTokenError();
+            }
+            endRoyalty(houseDTO,accessToken.getUserId());
 
         } catch (Exception e) {
             System.out.println("建群失败，异常：" + e.getMessage());
@@ -567,6 +578,12 @@ public class HouseService {
         return ServerResponse.createBySuccessMessage("操作成功");
     }
 
+    @Autowired
+    private DjAlreadyRobSingleMapper djAlreadyRobSingleMapper;
+    @Autowired
+    private RoyaltyMapper royaltyMapper;
+    @Autowired
+    private DjRoyaltyMatchMapper djRoyaltyMatchMapper;
 
     /**
      * 结算下单提成
@@ -577,10 +594,13 @@ public class HouseService {
         Example example = new Example(Clue.class);
         example.createCriteria().andEqualTo(Clue.MEMBER_ID, house.getMemberId())
                 .andEqualTo(Clue.DATA_STATUS, 0);
+
         List<Clue> clueList = clueMapper.selectByExample(example);
+        //查询提成配置表
+        List<DjRoyaltyDetailsSurface> list = royaltyMapper.selectAll();
         if(clueList.size() == 1){
             //一个销售人员录入
-
+            djrHouse(userId,houseDTO.getHouseId(),list);
 
         }else{
             //多个销售人员录入获取未抢到单的销售人员id
@@ -601,9 +621,35 @@ public class HouseService {
                         if(residentialRange.getUserId().equals(userId2)){
                             //两销售一起分配提成
 
+                            Map<String,Object> map = new HashMap<>();
+                            map.put("userId",userId);
+                            map.put("createDate",DateUtil.dateToString(new Date(), DateUtil.FORMAT));
+                            List<DjAlreadyRobSingle> darList = djAlreadyRobSingleMapper.selectArr(map);
+                            for (DjRoyaltyDetailsSurface ss : list) {
+                                //判断当月
+                                if (ss.getStartSingle() <= darList.size() && darList.size() <= ss.getOverSingle()) {
+                                    DjRoyaltyMatch djRoyaltyMatch1 = new DjRoyaltyMatch();
+                                    djRoyaltyMatch1.setDataStatus(0);
+                                    djRoyaltyMatch1.setUserId(userId);
+                                    djRoyaltyMatch1.setHouseId(houseDTO.getHouseId());
+                                    djRoyaltyMatch1.setMonthRoyalty((int) (ss.getRoyalty() * 0.4));
+                                    djRoyaltyMatch1.setMeterRoyalty((int) (ss.getRoyalty() * 0.4));
+                                    djRoyaltyMatch1.setArrRoyalty(ss.getRoyalty());
+                                    djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
+
+                                    djRoyaltyMatch1 = new DjRoyaltyMatch();
+                                    djRoyaltyMatch1.setDataStatus(0);
+                                    djRoyaltyMatch1.setUserId(userId2);
+                                    djRoyaltyMatch1.setHouseId(houseDTO.getHouseId());
+                                    djRoyaltyMatch1.setMonthRoyalty((int) (ss.getRoyalty() * 0.4));
+                                    djRoyaltyMatch1.setMeterRoyalty((int) (ss.getRoyalty() * 0.4));
+                                    djRoyaltyMatch1.setArrRoyalty(ss.getRoyalty());
+                                    djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
+                                }
+                            }
                         }else{
                             //抢单的销售单独分配提成
-
+                            djrHouse(userId,houseDTO.getHouseId(),list);
                         }
                     }
                 }
@@ -612,6 +658,25 @@ public class HouseService {
     }
 
 
+    public void djrHouse(String userId,String houseId,List<DjRoyaltyDetailsSurface> list){
+        Map<String,Object> map = new HashMap<>();
+        map.put("userId",userId);
+        map.put("createDate",DateUtil.dateToString(new Date(), DateUtil.FORMAT));
+        List<DjAlreadyRobSingle> darList = djAlreadyRobSingleMapper.selectArr(map);
+        for (DjRoyaltyDetailsSurface ss : list) {
+            //判断当月
+            if(ss.getStartSingle() <= darList.size() && darList.size() <=ss.getOverSingle()){
+                DjRoyaltyMatch djRoyaltyMatch1 = new DjRoyaltyMatch();
+                djRoyaltyMatch1.setDataStatus(0);
+                djRoyaltyMatch1.setUserId(userId);
+                djRoyaltyMatch1.setHouseId(houseId);
+                djRoyaltyMatch1.setMonthRoyalty((int) (ss.getRoyalty()*0.75));
+                djRoyaltyMatch1.setMeterRoyalty((int) (ss.getRoyalty()*0.75));
+                djRoyaltyMatch1.setArrRoyalty(ss.getRoyalty());
+                djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
+            }
+        }
+    }
 
     public ServerResponse revokeHouse(String userToken) {
         Object object = constructionService.getMember(userToken);
