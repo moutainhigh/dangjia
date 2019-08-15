@@ -7,7 +7,6 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
-import com.dangjia.acg.common.util.GaoDeUtils;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.member.SaleMemberLabelDTO;
 import com.dangjia.acg.dto.other.ClueDTO;
@@ -24,10 +23,7 @@ import com.dangjia.acg.mapper.house.IModelingVillageMapper;
 import com.dangjia.acg.mapper.member.ICustomerMapper;
 import com.dangjia.acg.mapper.member.IMemberLabelMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
-import com.dangjia.acg.mapper.sale.IntentionHouseMapper;
-import com.dangjia.acg.mapper.sale.MonthlyTargetMappper;
-import com.dangjia.acg.mapper.sale.ResidentialBuildingMapper;
-import com.dangjia.acg.mapper.sale.ResidentialRangeMapper;
+import com.dangjia.acg.mapper.sale.*;
 import com.dangjia.acg.mapper.store.IStoreMapper;
 import com.dangjia.acg.mapper.store.IStoreUserMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
@@ -103,6 +99,8 @@ public class ClientService {
     private ConfigUtil configUtil;
     @Autowired
     private IntentionHouseMapper intentionHouseMapper;
+    @Autowired
+    private DjAlreadyRobSingleMapper djAlreadyRobSingleMapper;
 
     /**
      * 录入客户
@@ -769,7 +767,7 @@ public class ClientService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse setWithdraw(String mcId, String houseId) {
+    public ServerResponse setWithdraw(String mcId, String houseId,String alreadyId) {
         Customer customer = iCustomerMapper.selectByPrimaryKey(mcId);
         House house = new House();
         house.setId(houseId);
@@ -784,6 +782,8 @@ public class ClientService {
         clue.setStage(1);
         example=new Example(Clue.class);
         example.createCriteria().andEqualTo(Clue.MEMBER_ID,customer.getMemberId());
+
+        djAlreadyRobSingleMapper.deleteByPrimaryKey(alreadyId);
         if (iHouseMapper.updateByPrimaryKeySelective(house) > 0 && iCustomerMapper.updateByExampleSelective(customer1,example)>0 &&clueMapper.updateByExampleSelective(clue,example)>0) {
             return ServerResponse.createBySuccessMessage("撤回成功");
         } else {

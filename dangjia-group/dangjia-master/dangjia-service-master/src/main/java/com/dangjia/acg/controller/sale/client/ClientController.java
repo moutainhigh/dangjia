@@ -62,8 +62,8 @@ public class ClientController implements ClientAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse setWithdraw(HttpServletRequest request, String mcId,String houseId) {
-        return customerService.setWithdraw(mcId,houseId);
+    public ServerResponse setWithdraw(HttpServletRequest request, String mcId,String houseId,String alreadyId) {
+        return customerService.setWithdraw(mcId,houseId,alreadyId);
     }
 
     @Override
