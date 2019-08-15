@@ -3,6 +3,7 @@ package com.dangjia.acg.service.sale.achievement;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
+import com.dangjia.acg.dto.sale.achievement.AchievementDataDTO;
 import com.dangjia.acg.dto.sale.achievement.AchievementInfoDTO;
 import com.dangjia.acg.dto.sale.achievement.UserAchievementDataDTO;
 import com.dangjia.acg.dto.sale.achievement.UserAchievementInfoDTO;
@@ -66,9 +67,23 @@ public class AchievementService {
             map.put("store",store.getId());
         }
 
+        AchievementDataDTO achievementDataDTO = new AchievementDataDTO();
+
         List<AchievementInfoDTO> achievementInfoDTOS = achievementMapper.queryRoyaltyMatch(map);
 
-        return ServerResponse.createBySuccess("查询成功", achievementInfoDTOS);
+        Integer taskOrderNum = achievementInfoDTOS.stream().filter
+                (a -> a.getMonthRoyalty()!=null).mapToInt
+                (AchievementInfoDTO::getMonthRoyalty).sum();
+
+        Integer s = achievementInfoDTOS.stream().filter
+                (a -> a.getSingleNumber()!=null).mapToInt
+                (AchievementInfoDTO::getSingleNumber).sum();
+
+        achievementDataDTO.setDealNumber(s);
+        achievementDataDTO.setStoreRoyalty(taskOrderNum);
+        achievementDataDTO.setAchievementDataDTOS(achievementInfoDTOS);
+
+        return ServerResponse.createBySuccess("查询成功", achievementDataDTO);
 
     }
 
