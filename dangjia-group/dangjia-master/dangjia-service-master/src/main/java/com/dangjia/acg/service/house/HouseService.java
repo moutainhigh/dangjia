@@ -592,6 +592,7 @@ public class HouseService {
                 }
             }
             //多个销售人员录入
+            //判断是否在未抢单的销售楼栋范围内
             ResidentialBuilding residentialBuilding = residentialBuildingMapper.selectSingleResidentialBuilding(null, house.getBuilding(), house.getVillageId());
                 if (null != residentialBuilding) {
                     ResidentialRange residentialRange = residentialRangeMapper.selectSingleResidentialRange(residentialBuilding.getId());
