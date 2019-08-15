@@ -391,15 +391,13 @@ public class MemberService {
             user.setInviteNum(0);
             user.setIsCrowned(0);
             user.setHead(Utils.getHead());
+            user.setPassword(DigestUtils.md5Hex(password));//验证码正确设置密码
+            memberMapper.insertSelective(user);
             updateOrInsertInfo(user.getId(), String.valueOf(userRole), user.getPassword());
-            user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
             ServerResponse serverResponse = setAccessToken(user, userRole);
             if (!serverResponse.isSuccess()) {
                 return serverResponse;
             }
-            user.setPassword(DigestUtils.md5Hex(password));//验证码正确设置密码
-            memberMapper.insertSelective(user);
-
             MemberCity userCity = new MemberCity();
             userCity.setMemberId(user.getId());
             userCity.setCityId(request.getParameter(Constants.CITY_ID));

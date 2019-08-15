@@ -147,7 +147,7 @@ public class ClientService {
             List<IntentionHouse> intentionHouses = intentionHouseMapper.selectByExample(example);
             if (intentionHouses.size() > 0) {
                 return ServerResponse.createByErrorMessage("该线索已存在");
-            } else {
+            } else if(!CommonUtil.isEmpty(clue.getBuilding())){
                 IntentionHouse intentionHouse = new IntentionHouse();
                 intentionHouse.setClueId(clue1.getId());
                 intentionHouse.setBuildingName(clue.getBuilding());
@@ -180,12 +180,14 @@ public class ClientService {
             clue.setTips("1");
             clue.setPhaseStatus(1);
             clue.setCityId(store.getCityId());
-            IntentionHouse intentionHouse = new IntentionHouse();
-            intentionHouse.setClueId(clue.getId());
-            intentionHouse.setBuildingName(clue.getBuilding());
-            intentionHouse.setNumberName(clue.getNumber());
-            intentionHouse.setResidentialName(clue.getAddress());
-            intentionHouseMapper.insert(intentionHouse);
+            if(!CommonUtil.isEmpty(clue.getBuilding())) {
+                IntentionHouse intentionHouse = new IntentionHouse();
+                intentionHouse.setClueId(clue.getId());
+                intentionHouse.setBuildingName(clue.getBuilding());
+                intentionHouse.setNumberName(clue.getNumber());
+                intentionHouse.setResidentialName(clue.getAddress());
+                intentionHouseMapper.insert(intentionHouse);
+            }
             customer.setUserId(user.getId());
             customer.setMemberId(members.get(0).getId());
             customer.setStage(1);
