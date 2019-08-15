@@ -3,7 +3,6 @@ package com.dangjia.acg.api.web.clue;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.clue.Clue;
-import com.dangjia.acg.modle.member.Member;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -85,7 +84,7 @@ public interface WebClueAPI {
      */
     @PostMapping("web/clue/sendUser")
     @ApiOperation(value = "转客户", notes = "转客户")
-    ServerResponse sendUser(@RequestParam("member") Member member,
+    ServerResponse sendUser(@RequestParam("id") String id,
                             @RequestParam("phone") String phone,
                             @RequestParam("longitude") String longitude,
                             @RequestParam("latitude") String latitude);

@@ -5,7 +5,6 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.clue.Clue;
-import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.service.clue.ClueService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -73,8 +72,8 @@ public class WebClueController implements WebClueAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse sendUser(Member member, String phone, String longitude, String latitude) {
-        return clueService.sendUser(member, phone, longitude, latitude);
+    public ServerResponse sendUser(String id, String phone, String longitude, String latitude) {
+        return clueService.sendUser(id, phone, longitude, latitude);
     }
 
     @Override

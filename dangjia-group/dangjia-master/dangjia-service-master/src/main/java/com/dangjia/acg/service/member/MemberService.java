@@ -215,7 +215,7 @@ public class MemberService {
             example.createCriteria().andEqualTo(Customer.MEMBER_ID, user.getId());
             List<Customer> customers = iCustomerMapper.selectByExample(example);
             if (customers.size() <= 0) {
-                clueService.sendUser(user, user.getMobile(), null, null);
+                clueService.sendUser(user.getId(), user.getMobile(), null, null);
             }
         }
         ServerResponse serverResponse = setAccessToken(user, userRole);
@@ -408,7 +408,7 @@ public class MemberService {
             }
 //            userRole", value = "app应用角色  1为业主角色，2为工匠角色，0为业主和工匠双重身份角色
             if (userRole == 1) {
-                clueService.sendUser(user, user.getMobile(), longitude, latitude);
+                clueService.sendUser(user.getId(), user.getMobile(), longitude, latitude);
             }
             redisClient.deleteCache(Constants.SMS_CODE + phone);
             if (userRole == 1) {
@@ -517,10 +517,9 @@ public class MemberService {
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
         }
-        Member user = (Member) object;
-        user = memberMapper.selectByPrimaryKey(user.getId());
-        if (user == null) {
-            return ServerResponse.createByErrorMessage("用户不存在");
+        Member user = memberMapper.selectByPrimaryKey(((Member) object).getId());
+        if(user==null){
+            return ServerResponse.createbyUserTokenError();
         }
         if (user.getCheckType() == 4) {
             //冻结的帐户不能修改资料信息
@@ -573,10 +572,9 @@ public class MemberService {
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
         }
-        Member user = (Member) object;
-        user = memberMapper.selectByPrimaryKey(user.getId());
-        if (user == null) {
-            return ServerResponse.createByErrorMessage("用户不存在");
+        Member user = memberMapper.selectByPrimaryKey(((Member) object).getId());
+        if(user==null){
+            return ServerResponse.createbyUserTokenError();
         }
         if (user.getCheckType() == 4) {
             //冻结的帐户不能修改资料信息

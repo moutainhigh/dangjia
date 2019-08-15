@@ -116,7 +116,10 @@ public class HouseFlowService {
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
-            Member member = (Member) object;
+            Member member = memberMapper.selectByPrimaryKey(((Member) object).getId());
+            if(member==null){
+                return ServerResponse.createbyUserTokenError();
+            }
             //工匠没有实名认证不应该展示数据
             if (CommonUtil.isEmpty(member.getWorkerTypeId()) || member.getCheckType() != 2 || member.getRealNameState() != 3) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
@@ -411,7 +414,10 @@ public class HouseFlowService {
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
-            Member member = (Member) object;
+            Member member = memberMapper.selectByPrimaryKey(((Member) object).getId());
+            if(member==null){
+                return ServerResponse.createbyUserTokenError();
+            }
             HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowId);
             Example example = new Example(HouseWorker.class);
             example.createCriteria().andEqualTo(HouseWorker.WORKER_ID, member.getId()).andEqualTo(HouseWorker.HOUSE_ID, hf.getHouseId());
@@ -504,10 +510,9 @@ public class HouseFlowService {
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
-            Member member = (Member) object;
-            member = memberMapper.selectByPrimaryKey(member.getId());
-            if (member == null) {
-                return ServerResponse.createByErrorMessage("用户不存在");
+            Member member = memberMapper.selectByPrimaryKey(((Member) object).getId());
+            if(member==null){
+                return ServerResponse.createbyUserTokenError();
             }
             HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowId);
             //查询排队时间,并修改重排

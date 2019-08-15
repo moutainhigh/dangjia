@@ -1,13 +1,10 @@
 package com.dangjia.acg.service.clue;
 
-import com.dangjia.acg.common.constants.SysConfig;
-import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
-import com.dangjia.acg.common.util.GaoDeUtils;
 import com.dangjia.acg.common.util.Validator;
 import com.dangjia.acg.common.util.excel.ImportExcel;
 import com.dangjia.acg.dao.ConfigUtil;
@@ -30,10 +27,8 @@ import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberLabel;
 import com.dangjia.acg.modle.store.Store;
 import com.dangjia.acg.modle.store.StoreUser;
-import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.modle.user.UserRoleKey;
 import com.dangjia.acg.service.config.ConfigMessageService;
-import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -292,7 +287,7 @@ public class ClueService {
      * 转客户
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse sendUser(Member member, String phone, String longitude, String latitude) {
+    public ServerResponse sendUser(String id, String phone, String longitude, String latitude) {
         try {
             //线索阶段手机号码会给多个销售人员录入   2019/8/9 销售端线索可为多个销售人员录入 所以应用list
             List<Clue> clues = clueMapper.getByPhone(phone);
@@ -308,7 +303,7 @@ public class ClueService {
                                 //操作dj_member_customer_record表
                                 CustomerRecord customerRecord = new CustomerRecord();
                                 customerRecord.setUserId(clue.getCusService());
-                                customerRecord.setMemberId(member.getId());
+                                customerRecord.setMemberId(id);
                                 customerRecord.setDescribes(clueTalk.getTalkContent());
                                 //customerRecord.setModifyDate(clueTalk.getModifyDate());
                                 customerRecord.setCreateDate(clueTalk.getCreateDate());
@@ -317,7 +312,7 @@ public class ClueService {
                                 if (date.compareTo(clueTalk.getModifyDate()) == 0) {
                                     Customer customer = new Customer();
                                     customer.setUserId(clue.getCusService());
-                                    customer.setMemberId(member.getId());
+                                    customer.setMemberId(id);
                                     customer.setCurrRecordId(customerRecord.getId());
                                     //customer.setModifyDate(clueTalk.getModifyDate());
                                     customer.setCreateDate(clueTalk.getCreateDate());
@@ -334,7 +329,7 @@ public class ClueService {
                         } else {
                             Customer customer = new Customer();
                             customer.setUserId(clue.getCusService());
-                            customer.setMemberId(member.getId());
+                            customer.setMemberId(id);
                             //customer.setModifyDate(clueTalk.getModifyDate());
                             customer.setCreateDate(clue.getCreateDate());
                             customer.setStage(1);
@@ -346,12 +341,9 @@ public class ClueService {
                         //改变线索表的数据状态
 //                clue.setDataStatus(1);
                         clue.setStage(1);
-                        clue.setMemberId(member.getId());
+                        clue.setMemberId(id);
                         clue.setPhaseStatus(1);
                         clueMapper.updateByPrimaryKeySelective(clue);
-                        //操作dj_member表
-                        member.setCreateDate(clue.getCreateDate());
-                        iMemberMapper.updateByPrimaryKeySelective(member);
                     }
                 }
                 return ServerResponse.createBySuccessMessage("操作成功");
@@ -363,10 +355,10 @@ public class ClueService {
             clue.setTurnStatus(0);
             clue.setPhaseStatus(1);
             clue.setPhone(phone);
-            clue.setMemberId(member.getId());
+            clue.setMemberId(id);
             clueMapper.insert(clue);
             Customer customer = new Customer();
-            customer.setMemberId(member.getId());
+            customer.setMemberId(id);
             customer.setDataStatus(0);
             customer.setStage(0);
             customer.setPhaseStatus(1);
