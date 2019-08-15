@@ -3,6 +3,7 @@ package com.dangjia.acg.service.core;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.ButtonDTO;
@@ -331,11 +332,13 @@ public class TaskService {
         for (HouseFlow houseFlow : houseFlowList) {
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
             HouseWorker hw = houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), 1);
-            example = new Example(Insurance.class);
-            example.createCriteria().andEqualTo(Insurance.WORKER_ID, hw.getWorkerId());
-            example.orderBy(Insurance.END_DATE).desc();
-            List<Insurance> insurances = insuranceMapper.selectByExample(example);
-
+            List<Insurance> insurances =null;
+            if(!CommonUtil.isEmpty(hw.getWorkerId())) {
+                example = new Example(Insurance.class);
+                example.createCriteria().andEqualTo(Insurance.WORKER_ID, hw.getWorkerId());
+                example.orderBy(Insurance.END_DATE).desc();
+                insurances = insuranceMapper.selectByExample(example);
+            }
             //保险服务剩余天数小于等于60天
             Integer daynum = 0;
             if (insurances.size() > 0) {
