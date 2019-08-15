@@ -520,7 +520,7 @@ public class HouseWorkerService {
         }
         hfa.setOtherMoney((workPrice).subtract(haveMoney).subtract(hfa.getApplyMoney()));
 //        hfa.setApplyDec("我是" + workerType.getName() + ",我今天已经完工了");//描述
-//        applyDec=setHouseFlowApplyImage(hfa, house, imageList);
+        setHouseFlowApplyImage(hfa, house, imageList);
 
         hfa.setApplyDec("尊敬的业主，您好！当家工匠【"+worker.getName()+"】为您新家施工，今日实际施工为:<br/>" +
                 applyDec +
