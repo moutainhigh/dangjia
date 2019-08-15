@@ -87,8 +87,10 @@ public class WalletService {
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
-            Member worker = (Member) object;
-            worker = memberMapper.selectByPrimaryKey(worker.getId());
+            Member worker = memberMapper.selectByPrimaryKey(((Member) object).getId());
+            if (worker == null) {
+                return ServerResponse.createbyUserTokenError();
+            }
             if (worker.getCheckType() == 4) {
                 //冻结的帐户不能提现
                 return ServerResponse.createByErrorMessage("账户冻结，无法提现");
@@ -113,7 +115,7 @@ public class WalletService {
             //生成提现订单
             BankCard bankCard = bankCardMapper.selectByPrimaryKey(workerBankCard.getBankCardId());
             WithdrawDeposit wd = new WithdrawDeposit();
-            wd.setRoleType(roleType==1 ? 1:worker.getWorkerType()==3 ? 2:3);
+            wd.setRoleType(roleType == 1 ? 1 : worker.getWorkerType() == 3 ? 2 : 3);
             wd.setName(worker.getName());
             wd.setWorkerId(worker.getId());
             wd.setMoney(new BigDecimal(money));
@@ -156,10 +158,9 @@ public class WalletService {
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
-            Member member = (Member) object;
-            member = memberMapper.selectByPrimaryKey(member.getId());
+            Member member = memberMapper.selectByPrimaryKey(((Member) object).getId());
             if (member == null) {
-                return ServerResponse.createByErrorMessage("用户不存在");
+                return ServerResponse.createbyUserTokenError();
             }
             if (member.getCheckType() == 4) {
                 //冻结的帐户不能修改资料信息
