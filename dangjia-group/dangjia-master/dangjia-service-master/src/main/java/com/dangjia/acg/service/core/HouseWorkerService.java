@@ -520,8 +520,10 @@ public class HouseWorkerService {
         }
         hfa.setOtherMoney((workPrice).subtract(haveMoney).subtract(hfa.getApplyMoney()));
 //        hfa.setApplyDec("我是" + workerType.getName() + ",我今天已经完工了");//描述
-        setHouseFlowApplyImage(hfa, house, imageList);
-
+        String dec= setHouseFlowApplyImage(hfa, house, imageList);
+        if(!CommonUtil.isEmpty(dec)){
+            applyDec=dec;
+        }
         hfa.setApplyDec("尊敬的业主，您好！当家工匠【"+worker.getName()+"】为您新家施工，今日实际施工为:<br/>" +
                 applyDec +
                 "<br/>现向您发送完成情况，请您查收。");//描述
@@ -909,8 +911,6 @@ public class HouseWorkerService {
                 JSONObject imageObj = imageObjArr.getJSONObject(i);
                 int imageType = Integer.parseInt(imageObj.getString("imageType"));
                 String imageTypeName = imageObj.getString("imageTypeName");
-                strbfr.append(imageTypeName);
-                strbfr.append("<br/>");
                 String imageUrl = imageObj.getString("imageUrl"); //图片,拼接
                 if (imageType == 3) {//节点图
                     String imageTypeId = imageObj.getString("imageTypeId");
@@ -930,6 +930,8 @@ public class HouseWorkerService {
                     technologyRecord.setState(0);//未验收
                     technologyRecord.setModifyDate(new Date());
                     technologyRecordMapper.insert(technologyRecord);
+                    strbfr.append(technology.getName());
+                    strbfr.append("<br/>");
                 } else {
                     String[] imageArr = imageUrl.split(",");
                     for (String anImageArr : imageArr) {
