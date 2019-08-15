@@ -524,6 +524,9 @@ public class CraftsmanConstructionService {
             if(isBX) {
                 promptList.add("请联系业主支付您的工匠费用");
             }else {
+                Date d = DateUtil.addDateMinutes(hw.getCreateDate(),30);
+                Date d2 = new Date();
+                promptList.add("剩余支付保险时间："+DateUtil.getDiffTime2(d.getTime() , d2.getTime())+",超过时间则自动放弃");
                 buttonList.add(Utils.getButton("购买保险", 9));
             }
             bean.setIfBackOut(0);//0可放弃；1：申请停工；2：已停工 3 审核中
