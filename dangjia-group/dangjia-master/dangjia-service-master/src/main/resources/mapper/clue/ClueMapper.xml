@@ -336,6 +336,8 @@
             FROM dj_clue c
             inner join dj_user u
             on c.cus_service=u.id
+            inner join dj_member_customer mc
+            on mc.member_id = c.member_id and mc.user_id = c.cus_service
             WHERE
             c.stage=2
             and c.store_id=#{storeId}
@@ -484,7 +486,7 @@
         ON mc.member_id = c.member_id
         AND mc.user_id = c.cus_service
         <if test="type==''">
-            WHERE c.data_status = 0 and c.stage NOT IN (2,3,4)
+            WHERE c.data_status = 0 and c.stage NOT IN (2,3,4,5)
         <if test="null!=userId and ''!=userId">
             and c.cus_service=#{userId}
         </if>
@@ -517,7 +519,7 @@
                 </foreach>
             </if>
         </if>
-        and c.tips = 1 or mc.tips=1
+        and (c.tips = 1 or mc.tips=1)
     </select>
 
 

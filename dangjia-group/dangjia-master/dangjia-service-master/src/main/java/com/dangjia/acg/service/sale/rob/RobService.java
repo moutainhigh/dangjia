@@ -271,9 +271,9 @@ public class RobService {
         try {
             Map<String, Object> map = new HashMap<>();
             if (!CommonUtil.isEmpty(houseId)) {
-                map.put("houseId", houseId);
+                map.put("id", houseId);
             }
-            map.put("id", 0);
+            map.put("isRobStats", 0);
             clueMapper.upDateIsRobStats(map);
             djAlreadyRobSingleMapper.deleteByPrimaryKey(alreadyId);
             return ServerResponse.createBySuccessMessage("放弃成功");
