@@ -57,10 +57,12 @@ public class AchievementInfoDTO implements Serializable {
     private Integer arrRoyalty;
 
     @ApiModelProperty("销售人员订单条数")
-    private Integer count;
+    private Integer getSingleNumber;
 
     @ApiModelProperty("当条数据提成")
     private Integer ziduan;
+
+
 
 
     public String getVisitStateName() {

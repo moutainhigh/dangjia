@@ -90,37 +90,92 @@
 
 
     <!--查询店长下面员工-->
+    <!--<select id="queryUserAchievementData" resultType="com.dangjia.acg.dto.sale.achievement.UserAchievementInfoDTO" parameterType="java.util.HashMap">-->
+        <!--select-->
+            <!--h.id as id,-->
+            <!--h.residential as residential,-->
+            <!--h.building as building,-->
+            <!--h.unit as unit,-->
+            <!--h.number as number,-->
+            <!--h.visit_state as visitState,-->
+            <!--mc.user_id as userId-->
+        <!--from-->
+        <!--dj_member_customer mc inner join dj_house h-->
+        <!--on mc.member_id = h.member_id-->
+        <!--where 1=1-->
+        <!--<if test="null != userId and '' != userId">-->
+            <!--and mc.user_id = #{userId}-->
+        <!--</if>-->
+        <!--<if test="null != memberId and '' != memberId">-->
+            <!--and h.member_id = #{memberId}-->
+        <!--</if>-->
+        <!--<if test="null != time">-->
+            <!--and date_format(mc.modify_date,'%Y-%m') = #{time}-->
+        <!--</if>-->
+        <!--<choose>-->
+            <!--<when test="visitState != null">-->
+                <!--and h.visit_state = #{visitState}-->
+            <!--</when>-->
+            <!--<otherwise>-->
+                <!--and (h.visit_state = 1 or h.visit_state = 3)-->
+            <!--</otherwise>-->
+        <!--</choose>-->
+    <!--</select>-->
+
+
     <select id="queryUserAchievementData" resultType="com.dangjia.acg.dto.sale.achievement.UserAchievementInfoDTO" parameterType="java.util.HashMap">
         select
-            h.id as id,
-            h.residential as residential,
-            h.building as building,
-            h.unit as unit,
-            h.number as number,
-            h.visit_state as visitState,
-            mc.user_id as userId
-        from
-        dj_member_customer mc inner join dj_house h
-        on mc.member_id = h.member_id
+        h.id as id,
+        h.residential as residential,
+        h.building as building,
+        h.unit as unit,
+        h.number as number,
+        h.visit_state as visitState,
+        rm.user_id as userId,
+        rm.order_status as orderStatus,
+        rm.month_royalty as monthRoyalty,
+        rm.meter_royalty as meterRoyalty,
+        rm.arr_royalty as arrRoyalty
+        from dj_royalty_match rm
+        inner join dj_house h
+        on rm.house_id=h.id
         where 1=1
         <if test="null != userId and '' != userId">
-            and mc.user_id = #{userId}
-        </if>
-        <if test="null != memberId and '' != memberId">
-            and h.member_id = #{memberId}
+            and rm.user_id = #{userId}
         </if>
         <if test="null != time">
-            and date_format(mc.modify_date,'%Y-%m') = #{time}
+            and date_format(rm.create_date,'%Y-%m') = #{time}
         </if>
-        <choose>
-            <when test="visitState != null">
-                and h.visit_state = #{visitState}
-            </when>
-            <otherwise>
-                and (h.visit_state = 1 or h.visit_state = 3)
-            </otherwise>
-        </choose>
+        <if test="visitState != null">
+            and rm.order_status = #{visitState}
+        </if>
     </select>
 
+
+
+    <!--查询店长下面所有员工提成-->
+    <select id="queryRoyaltyMatch" resultType="com.dangjia.acg.dto.sale.achievement.AchievementInfoDTO" parameterType="java.util.HashMap">
+        select
+        drm.user_id AS userId,
+        drm.house_id AS houseId,
+        SUM(drm.month_royalty )AS monthRoyalty,
+        SUM(drm.meter_royalty )AS meterRoyalty,
+        SUM(drm.arr_royalty )AS arrRoyalty,
+        count(drm.id) as singleNumber,
+        u.username as username,
+        smt.target_number as targetNumber
+        from
+        dj_royalty_match drm
+        INNER JOIN dj_user u on drm.user_id = u.id
+        LEFT JOIN dj_sale_monthly_target smt on drm.user_id = smt.user_Id
+        and date_format(smt.target_date,'%Y-%m') =  date_format(drm.modify_date,'%Y-%m')
+        where drm.user_id in
+        (SELECT su.user_id from dj_store_users su
+        where 1=1
+            and su.store_id = #{storeId}
+        )
+        and date_format(drm.modify_date,'%Y-%m') = #{time}
+        GROUP BY drm.user_id
+    </select>
 
 </mapper>

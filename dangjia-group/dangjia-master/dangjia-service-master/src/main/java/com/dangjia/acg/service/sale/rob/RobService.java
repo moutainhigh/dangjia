@@ -655,14 +655,14 @@ public class RobService {
     public void remindTime() {
         String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
         Example example = new Example(CustomerRecord.class);
-        example.createCriteria().andCondition(" DATE_FORMAT(remind_time, '%Y-%m-%d %I:%i') = " +
-                "DATE_FORMAT('"+DateUtil.dateToString(new Date(), DateUtil.FORMAT11)+"', '%Y-%m-%d %I:%i')");
+        example.createCriteria().andCondition(" DATE_FORMAT(remind_time, '%Y-%m-%d %I:%i')= '"
+                + DateUtil.dateToString(new Date(), DateUtil.FORMAT11) + "' ");
         List<CustomerRecord> customerRecords = iCustomerRecordMapper.selectByExample(example);
         for (CustomerRecord customerRecord : customerRecords) {
             MainUser u = userMapper.selectByPrimaryKey(customerRecord.getUserId());
             if (u != null && !CommonUtil.isEmpty(u.getMemberId()))
                 configMessageService.addConfigMessage(AppType.SALE, u.getMemberId(), "待分配客户提醒",
-                        "有一个门店范围内的注册客户待分配，快去分配给员工吧。", 0, url
+                        "有一个待分配客户，快去分配给员工吧。", 0, url
                                 + Utils.getCustomerDetails(customerRecord.getMemberId(), "", 1, "1"));
         }
     }

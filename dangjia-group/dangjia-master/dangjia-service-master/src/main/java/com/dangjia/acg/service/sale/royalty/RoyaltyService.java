@@ -7,9 +7,11 @@ import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.BaseEntity;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.mapper.sale.DjRoyaltyMatchMapper;
 import com.dangjia.acg.mapper.sale.RoyaltyMapper;
 import com.dangjia.acg.mapper.sale.SurfaceMapper;
 import com.dangjia.acg.modle.sale.royalty.DjRoyaltyDetailsSurface;
+import com.dangjia.acg.modle.sale.royalty.DjRoyaltyMatch;
 import com.dangjia.acg.modle.sale.royalty.DjRoyaltySurface;
 import com.dangjia.acg.modle.store.Store;
 import com.github.pagehelper.PageHelper;
@@ -34,6 +36,8 @@ public class RoyaltyService {
 
     @Autowired
     private SurfaceMapper surfaceMapper;
+    @Autowired
+    private DjRoyaltyMatchMapper djRoyaltyMatchMapper;
 
     /**
      * 查询提成列表
@@ -93,5 +97,28 @@ public class RoyaltyService {
         }
         return ServerResponse.createBySuccess("查询提成列表", djRoyaltyDetailsSurfaces);
     }
+
+
+    /**
+     * 房子竣工拿提成
+     * @param houseId
+     */
+    public void endRoyalty(String houseId){
+        Example example=new Example(DjRoyaltyMatch.class);
+        example.createCriteria().andEqualTo(DjRoyaltyMatch.HOUSE_ID,houseId);
+        List<DjRoyaltyMatch> djRoyaltyMatches = djRoyaltyMatchMapper.selectByExample(example);
+        for (DjRoyaltyMatch djRoyaltyMatch : djRoyaltyMatches) {
+            DjRoyaltyMatch djRoyaltyMatch1=new DjRoyaltyMatch();
+            djRoyaltyMatch1.setDataStatus(0);
+            djRoyaltyMatch1.setOrderStatus(1);
+            djRoyaltyMatch1.setUserId(djRoyaltyMatch.getUserId());
+            djRoyaltyMatch1.setHouseId(djRoyaltyMatch.getHouseId());
+            djRoyaltyMatch1.setMonthRoyalty((int) (djRoyaltyMatch.getArrRoyalty()*0.25));
+            djRoyaltyMatch1.setMeterRoyalty((int) (djRoyaltyMatch.getArrRoyalty()*0.25)+djRoyaltyMatch.getMeterRoyalty());
+            djRoyaltyMatch1.setArrRoyalty(djRoyaltyMatch1.getArrRoyalty());
+            djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
+        }
+    }
+
 
 }

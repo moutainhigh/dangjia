@@ -61,6 +61,9 @@ public class UserAchievementInfoDTO implements Serializable {
     @ApiModelProperty("全部提成")
     private Integer arrRoyalty;
 
+    @ApiModelProperty("订单状态 0：新开工 1：已竣工")
+    private Integer orderStatus;
+
     public String getHouseName() {
         return (CommonUtil.isEmpty(getResidential()) ? "*" : getResidential())
                 + (CommonUtil.isEmpty(getBuilding()) ? "*" : getBuilding()) + "栋"
