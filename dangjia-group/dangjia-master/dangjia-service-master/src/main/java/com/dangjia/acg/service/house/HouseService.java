@@ -34,6 +34,8 @@ import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.other.ICityMapper;
 import com.dangjia.acg.mapper.other.IWorkDepositMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
+import com.dangjia.acg.mapper.sale.ResidentialBuildingMapper;
+import com.dangjia.acg.mapper.sale.ResidentialRangeMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.clue.Clue;
 import com.dangjia.acg.modle.core.*;
@@ -49,6 +51,8 @@ import com.dangjia.acg.modle.other.City;
 import com.dangjia.acg.modle.other.WorkDeposit;
 import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.repair.MendOrder;
+import com.dangjia.acg.modle.sale.residential.ResidentialBuilding;
+import com.dangjia.acg.modle.sale.residential.ResidentialRange;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
@@ -149,6 +153,10 @@ public class HouseService {
     private ClueMapper clueMapper;
     @Autowired
     private IModelingVillageMapper iModelingVillageMapper;
+    @Autowired
+    private ResidentialRangeMapper residentialRangeMapper;
+    @Autowired
+    private ResidentialBuildingMapper residentialBuildingMapper;
 
 
     protected static final Logger LOG = LoggerFactory.getLogger(HouseService.class);
@@ -550,7 +558,8 @@ public class HouseService {
             map.put("tips", 1);
             clueMapper.setStage(map);//修改线索的阶段
             //结算提成
-            endRoyalty(houseDTO);
+            String userId = "0";
+            endRoyalty(houseDTO,userId);
 
         } catch (Exception e) {
             System.out.println("建群失败，异常：" + e.getMessage());
@@ -562,7 +571,7 @@ public class HouseService {
     /**
      * 结算下单提成
      */
-    public void endRoyalty(HouseDTO houseDTO){
+    public void endRoyalty(HouseDTO houseDTO,String userId){
         House house = iHouseMapper.selectByPrimaryKey(houseDTO.getHouseId());
 
         Example example = new Example(Clue.class);
@@ -574,8 +583,29 @@ public class HouseService {
 
 
         }else{
+            //多个销售人员录入获取未抢到单的销售人员id
+            String userId2=null;
+            for (Clue clue : clueList) {
+                if(!clue.getCusService().equals(userId)){
+                    userId2=clue.getCusService();
+                    break;
+                }
+            }
             //多个销售人员录入
+            ResidentialBuilding residentialBuilding = residentialBuildingMapper.selectSingleResidentialBuilding(null, house.getBuilding(), house.getVillageId());
+                if (null != residentialBuilding) {
+                    ResidentialRange residentialRange = residentialRangeMapper.selectSingleResidentialRange(residentialBuilding.getId());
+                    if (null != residentialRange) {
+                        //该单在未抢到单的销售的楼栋范围内
+                        if(residentialRange.getUserId().equals(userId2)){
+                            //两销售一起分配提成
 
+                        }else{
+                            //抢单的销售单独分配提成
+
+                        }
+                    }
+                }
         }
 
     }

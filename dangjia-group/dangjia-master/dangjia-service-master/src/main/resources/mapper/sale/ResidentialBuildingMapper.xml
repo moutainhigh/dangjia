@@ -12,7 +12,10 @@
             building,
             store_id as storeId
         from dj_sale_residential_building
-        WHERE store_id=#{storeId}
+        WHERE 1=1
+        <if test="null!=storeId and ''!=storeId">
+            and store_id=#{storeId}
+        </if>
         and building LIKE CONCAT('%',#{building},'%')
         and village_id=#{villageId}
     </select>

@@ -280,6 +280,7 @@ public class ClientService {
 //                    clue.setCityId(store.getCityId());
 //                    clue.setClueType(1);
 //                    clue.setPhaseStatus(0);
+
 //                    clueMapper.insert(clue);
 //                    MainUser u = userMapper.selectByPrimaryKey(store.getUserId());
 //                    if (u != null && !CommonUtil.isEmpty(u.getMemberId()))
