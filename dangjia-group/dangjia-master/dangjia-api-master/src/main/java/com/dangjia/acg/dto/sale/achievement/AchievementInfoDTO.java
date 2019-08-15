@@ -63,6 +63,8 @@ public class AchievementInfoDTO implements Serializable {
     private Integer ziduan;
 
 
+
+
     public String getVisitStateName() {
         if(null != getVisitState() && 1 == getVisitState()){
             return "装修中";
