@@ -283,17 +283,17 @@ public class StewardService {
     public ServerResponse stewardQrcode(String houseFlowId, String disclosureIds) {
         try {
             //删除之前选中的
-            Example example = new Example(WorkerDisclosureHouseFlow.class);
-            example.createCriteria().andEqualTo(WorkerDisclosureHouseFlow.HOUSE_FLOW_ID, houseFlowId);
-            workerDisclosureHouseFlowMapper.deleteByExample(example);
-            String[] tellList = disclosureIds.split(",");
-            for (String tell : tellList) {
-                WorkerDisclosureHouseFlow wdh = new WorkerDisclosureHouseFlow();
-                wdh.setWorkerDiscloId(tell);
-                wdh.setHouseFlowId(houseFlowId);
-                wdh.setState(1);
-                workerDisclosureHouseFlowMapper.insert(wdh);
-            }
+//            Example example = new Example(WorkerDisclosureHouseFlow.class);
+//            example.createCriteria().andEqualTo(WorkerDisclosureHouseFlow.HOUSE_FLOW_ID, houseFlowId);
+//            workerDisclosureHouseFlowMapper.deleteByExample(example);
+//            String[] tellList = disclosureIds.split(",");
+//            for (String tell : tellList) {
+//                WorkerDisclosureHouseFlow wdh = new WorkerDisclosureHouseFlow();
+//                wdh.setWorkerDiscloId(tell);
+//                wdh.setHouseFlowId(houseFlowId);
+//                wdh.setState(1);
+//                workerDisclosureHouseFlowMapper.insert(wdh);
+//            }
             return ServerResponse.createBySuccess("操作成功", "http://weixin.fengjiangit.com/g.html?a=" + houseFlowId);
         } catch (Exception e) {
             e.printStackTrace();

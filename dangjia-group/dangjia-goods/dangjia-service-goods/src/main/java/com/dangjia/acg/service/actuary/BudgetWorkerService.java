@@ -743,27 +743,14 @@ public class BudgetWorkerService {
     public JSONArray getTecByHouseFlowId(String houseId, String houseFlowId) {
         try {
             JSONArray jsonArray = new JSONArray();
-            List<BudgetWorker> budgetWorkerList = iBudgetWorkerMapper.getByHouseFlowId(houseId, houseFlowId);
-            for (BudgetWorker abw : budgetWorkerList) {
-                if (abw.getShopCount() + abw.getRepairCount() - abw.getBackCount() > 0) {
-                    WorkerGoods wg = iWorkerGoodsMapper.selectByPrimaryKey(abw.getWorkerGoodsId());
-                    List<Technology> tList = iTechnologyMapper.workerPatrolList(wg.getTechnologyIds());
-                    for (Technology t : tList) {
-                        JSONObject map = new JSONObject();
-                        map.put("technologyName", t.getName());
-                        map.put("technologyId", t.getId());
-                        map.put("content", t.getContent());
-                        jsonArray.add(map);
-                    }
-                }
+            List<Technology> tList = iBudgetWorkerMapper.getByHouseFlowTechnologyId(houseId, houseFlowId);
+            for (Technology t : tList) {
+                JSONObject map = new JSONObject();
+                map.put("technologyName", t.getName());
+                map.put("technologyId", t.getId());
+                map.put("content", t.getContent());
+                jsonArray.add(map);
             }
-//            List<Technology> tList = iBudgetWorkerMapper.getByHouseFlowTechnologyId(houseId, houseFlowId);
-//            for (Technology t : tList) {
-//                JSONObject map = new JSONObject();
-//                map.put("technologyName", t.getName());
-//                map.put("content", t.getContent());
-//                jsonArray.add(map);
-//            }
             return jsonArray;
         } catch (Exception e) {
             e.printStackTrace();
