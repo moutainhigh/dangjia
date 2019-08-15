@@ -1329,10 +1329,20 @@ public class DateUtil implements AutoCloseable, Serializable {
         return day + "," + hour + "," + min + "," + sec;
     }
 
+    public static String getDiffTime2(Long time1, Long time2) {
+        long l = time1 - time2;
+        long day = l / (24 * 60 * 60 * 1000);
+        long hour = (l / (60 * 60 * 1000) - day * 24);
+        long min = ((l / (60 * 1000)) - day * 24 * 60 - hour * 60);
+        long sec = (l / 1000 - day * 24 * 60 * 60 - hour * 60 * 60 - min * 60);
+        return min + "分" + sec+"秒";
+    }
+
     public static void main(String[] args) {
+        Date d = toDate("2019-08-15 17:00:00");
+        Date d2 = new Date();
 
-
-        System.out.println(addDateMinutes(new Date(),30).getTime());
+        System.out.println(getDiffTime2(d.getTime() , d2.getTime()));
     }
 
 }
