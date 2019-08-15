@@ -558,6 +558,7 @@ public class HouseFlowService {
                 if (hf.getWorkType() == 3 && hf.getSupervisorStart() == 0) {//已抢单待支付，并且未开工(无责取消)
                     hf.setWorkType(2);//抢s单状态更改为待抢单
                     hf.setReleaseTime(new Date());//set发布时间
+                    hf.setWorkerId("");
                     houseFlowMapper.updateByPrimaryKeySelective(hf);
                     houseWorker.setWorkType(7);//抢单状态改为（7抢单后放弃）
                     houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
@@ -568,6 +569,7 @@ public class HouseFlowService {
                         if (hf.getWorkType() == 4) {//已支付（有责取消）
                             hf.setWorkType(2);//抢单状态更改为待抢单
                             hf.setReleaseTime(new Date());//set发布时间
+                            hf.setWorkerId("");
                             houseFlowMapper.updateByPrimaryKeySelective(hf);
                             BigDecimal evaluation = member.getEvaluationScore();
                             if (evaluation == null) {//如果积分为空，默认60分
@@ -588,6 +590,7 @@ public class HouseFlowService {
                 if (hf.getWorkType() == 3) {//已抢单待支付(无责取消)
                     hf.setWorkType(2);//抢单状态更改为待抢单
                     hf.setReleaseTime(new Date());//set发布时间
+                    hf.setWorkerId("");
                     houseFlowMapper.updateByPrimaryKeySelective(hf);
                 } else {
                     if (hf.getWorkSteta() != 3 || hf.getWorkSteta() != 0) {//已开工的状态不可放弃
@@ -596,6 +599,7 @@ public class HouseFlowService {
                         if (hf.getWorkType() == 4) {//已支付（有责取消）
                             hf.setWorkType(2);//抢单状态更改为待抢单
                             hf.setReleaseTime(new Date());//set发布时间
+                            hf.setWorkerId("");
                             houseFlowMapper.updateByPrimaryKeySelective(hf);
                             BigDecimal evaluation = member.getEvaluationScore();
                             if (evaluation == null) {//如果积分为空，默认60分
