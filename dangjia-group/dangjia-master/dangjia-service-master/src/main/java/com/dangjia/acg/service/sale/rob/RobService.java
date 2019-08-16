@@ -763,7 +763,7 @@ public class RobService {
                 for (int i=0;i<orderStore.size();i++){
                     if(((System.currentTimeMillis()-grabSheetDTO.getModifyDate().getTime())/60/1000)
                             >Integer.parseInt(djRobSingles.get(i).getRobDate())){
-                            clueMapper.setDistribution(orderStore.get(i).getStoreId());
+                            clueMapper.setDistribution(orderStore.get(i).getStoreId(),grabSheetDTO.getMemberId());
                     }
                 }
             }

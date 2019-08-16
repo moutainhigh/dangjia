@@ -57,10 +57,6 @@ public class HouseTask {
         houseFlowApplyAPI.couponApply();
         log.info(format.format(new Date()) + "结束执行完工申请业主检测任务...");
         robAPI.remindTime();
-
-        log.info(format.format(new Date()) + "开始执行销售抢单计时任务...");
-        robAPI.notEnteredGrabSheet();
-        log.info(format.format(new Date()) + "结束执行销售抢单计时任务...");
     }
 
 
