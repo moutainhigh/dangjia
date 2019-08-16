@@ -96,7 +96,8 @@
         on m.id=h.member_id
         where h.visit_state=0
         and c.store_id=#{storeId}
-        order By h.create_date
+        and h.is_rob_stats=#{robStats}
+        order By h.create_date desc
     </select>
 
 

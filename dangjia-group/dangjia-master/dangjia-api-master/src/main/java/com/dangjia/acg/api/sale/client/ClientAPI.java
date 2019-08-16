@@ -25,7 +25,8 @@ public interface ClientAPI {
     @PostMapping(value = "sale/client/clientPage")
     @ApiOperation(value = "客户页", notes = "客户页")
     ServerResponse clientPage(@RequestParam("request") HttpServletRequest request,
-                              @RequestParam("userToken") String userToken);
+                              @RequestParam("userToken") String userToken,
+                              @RequestParam("robStats") Integer robStats);
 
     @PostMapping(value = "sale/client/enterCustomer")
     @ApiOperation(value = "录入客户", notes = "录入客户")

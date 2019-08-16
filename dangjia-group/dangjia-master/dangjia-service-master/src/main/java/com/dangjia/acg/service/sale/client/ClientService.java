@@ -443,7 +443,7 @@ public class ClientService {
      * @param userToken
      * @return
      */
-    public ServerResponse clientPage(String userToken) {
+    public ServerResponse clientPage(String userToken,Integer robStats) {
         Object object = constructionService.getAccessToken(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -527,7 +527,7 @@ public class ClientService {
                 map.put("waitDistribution", customerIndexDTOS1.get(0));
             }
             map.put("storeId", store.getId());
-            map.put("grabSheet", iCustomerMapper.grabSheet(store.getId()));
+            map.put("grabSheet", iCustomerMapper.grabSheet(store.getId(),robStats));
         }
         return ServerResponse.createBySuccess("查询成功", map);
     }
