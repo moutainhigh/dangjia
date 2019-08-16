@@ -247,6 +247,8 @@ public class ClientService {
             clue.setTurnStatus(0);
             clue.setPhaseStatus(0);
             clue.setCityId(cityId);
+            clue.setStage(0);
+            clue.setDataStatus(0);
             clueMapper.insert(clue);//记录为中台的线索
             return ServerResponse.createBySuccessMessage("记录为中台的线索");
         }
@@ -742,21 +744,27 @@ public class ClientService {
     public ServerResponse setTurnOut(String cityId, String storeId, String id, Integer phaseStatus) {
         Store store = iStoreMapper.selectByPrimaryKey(storeId);
         if (phaseStatus == 0) {
+            Example example=new Example(Clue.class);
+            example.createCriteria().andEqualTo(Clue.ID,id);
             Clue clue = new Clue();
             clue.setId(id);
             clue.setStoreId(storeId);
             clue.setCusService(store.getUserId());
             clue.setCityId(cityId);
             clue.setTurnStatus(1);
-            clueMapper.updateByPrimaryKeySelective(clue);
+            clue.setCusService(null);
+            clueMapper.updateByExample(clue,example);
         } else if (phaseStatus == 1) {
+            Example example=new Example(Customer.class);
+            example.createCriteria().andEqualTo(Customer.ID,id);
             Customer customer = new Customer();
             customer.setId(id);
             customer.setStoreId(storeId);
             customer.setUserId(store.getUserId());
             customer.setCityId(cityId);
             customer.setTurnStatus(1);
-            iCustomerMapper.updateByPrimaryKeySelective(customer);
+            customer.setUserId(null);
+            iCustomerMapper.updateByExample(customer,example);
         }
         return ServerResponse.createBySuccessMessage("操作成功");
     }
