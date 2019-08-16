@@ -75,16 +75,16 @@ public class SaleService {
      */
     public Object getStore(String userId) {
         String storeId = redisClient.getCache("storeId" + userId, String.class);
-        logger.info("第0次返回===================", storeId);
+        logger.info("第0次返回==================="+storeId);
         if (!CommonUtil.isEmpty(storeId)) {
             Store store = iStoreMapper.selectByPrimaryKey(storeId);
-            logger.info("第00次返回===================", store.getId());
+            logger.info("第00次返回==================="+ store.getId());
             if (store != null) {
                 if (store.getUserId().equals(userId)) {
-                    logger.info("第1次返回===================", store.getId()+" + "+store.getCityName()+" + "+ store.getStoreName());
+                    logger.info("第1次返回==================="+ store.getId()+" + "+store.getCityName()+" + "+ store.getStoreName());
                     return store;
                 } else {
-                    logger.info("第2次返回===================", store);
+                    logger.info("第2次返回==================="+store);
                     redisClient.deleteCache("storeId" + userId);
                 }
             }
@@ -97,7 +97,7 @@ public class SaleService {
         if (storeList.size() <= 0) {
             return ServerResponse.createbyUserTokenError();
         }
-        logger.info("第3次返回===================", storeList.get(0));
+        logger.info("第3次返回==================="+storeList.get(0));
         Store store = storeList.get(0);
         redisClient.put("storeId" + userId, store.getId());
         return store;
