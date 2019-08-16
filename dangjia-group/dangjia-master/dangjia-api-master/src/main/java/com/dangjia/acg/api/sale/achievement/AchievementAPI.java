@@ -33,6 +33,7 @@ public interface AchievementAPI {
     @PostMapping(value = "sale/achievement/queryUserAchievementData")
     @ApiOperation(value = "查询员工业绩", notes = "查询员工业绩")
     ServerResponse queryUserAchievementData(@RequestParam("request") HttpServletRequest request,
+                                            @RequestParam("userToken")String userToken,
                                             @RequestParam("visitState") Integer visitState,
                                             @RequestParam("userId") String userId,
                                             @RequestParam("time") Date time);

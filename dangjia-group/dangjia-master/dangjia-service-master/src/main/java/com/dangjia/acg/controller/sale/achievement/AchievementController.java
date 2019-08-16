@@ -5,6 +5,7 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.sale.achievement.AchievementService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -41,8 +42,8 @@ public class AchievementController implements AchievementAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryUserAchievementData(HttpServletRequest request, Integer visitState, String userId, Date time) {
-        return achievementService.queryUserAchievementData(visitState, userId, time);
+    public ServerResponse queryUserAchievementData(HttpServletRequest request,String userToken, Integer visitState, String userId, Date time) {
+        return achievementService.queryUserAchievementData(userToken,visitState, userId, time);
     }
 
 }
