@@ -22,6 +22,7 @@ import com.dangjia.acg.mapper.member.ICustomerMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.menu.IMenuConfigurationMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
+import com.dangjia.acg.mapper.sale.DjAlreadyRobSingleMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
@@ -29,10 +30,10 @@ import com.dangjia.acg.modle.core.HouseFlowApplyImage;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.group.GroupUserConfig;
 import com.dangjia.acg.modle.house.House;
-import com.dangjia.acg.modle.member.Customer;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.menu.MenuConfiguration;
 import com.dangjia.acg.modle.repair.MendOrder;
+import com.dangjia.acg.modle.sale.royalty.DjAlreadyRobSingle;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.util.HouseUtil;
@@ -79,6 +80,8 @@ public class MyHouseService {
     private MessageAPI messageAPI;
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private DjAlreadyRobSingleMapper djAlreadyRobSingleMapper;
 
     /**
      * 获取我的房产的查询条件
@@ -241,40 +244,40 @@ public class MyHouseService {
             }
         }
         //获取客服明细
-        Customer srcCustomer = iCustomerMapper.getCustomerByMemberId(member.getId());
-        String userid = "773075761552045112068";
-        if (house.getCityId().equals("961188961562724011757")) {
-            userid = "682958011563430082579";
-        }
-        if (srcCustomer != null && !CommonUtil.isEmpty(srcCustomer.getUserId())) {
-            userid = srcCustomer.getUserId();
-        }
-        Example example = new Example(MainUser.class);
-        example.createCriteria().andEqualTo(MainUser.ID, userid);//默认李优
-        example.orderBy(GroupUserConfig.CREATE_DATE).desc();
-        List<MainUser> list = userMapper.selectByExample(example);
-        if (list != null && list.size() > 0) {
-            MainUser user = list.get(0);
-            Map<String, Object> map = new HashMap<>();
-            map.put("id", user.getId());
-            map.put("targetId", user.getId());
-            map.put("targetAppKey", messageAPI.getAppKey(AppType.SALE.getDesc()));
-            UserInfoResultDTO userInfoResult = userAPI.getUserInfo(AppType.SALE.getDesc(), userid);
-            if (userInfoResult != null && !CommonUtil.isEmpty(userInfoResult.getNickname())) {
-                map.put("nickName", "装修顾问 " + userInfoResult.getNickname());
-            } else {
-                map.put("nickName", "装修顾问 小" + user.getUsername().substring(0, 1));
+        Example example1 = new Example(DjAlreadyRobSingle.class);
+        example1.createCriteria()
+                .andEqualTo(DjAlreadyRobSingle.HOUSE_ID, house.getId())
+                .andEqualTo(DjAlreadyRobSingle.DATA_STATUS, 0);
+        List<DjAlreadyRobSingle> lists = djAlreadyRobSingleMapper.selectByExample(example1);
+        if (!lists.isEmpty()) {
+            String userid = lists.get(0).getUserId();
+            Example example = new Example(MainUser.class);
+            example.createCriteria().andEqualTo(MainUser.ID, userid);
+            example.orderBy(GroupUserConfig.CREATE_DATE).desc();
+            List<MainUser> list = userMapper.selectByExample(example);
+            if (list != null && list.size() > 0) {
+                MainUser user = list.get(0);
+                Map<String, Object> map = new HashMap<>();
+                map.put("id", user.getId());
+                map.put("targetId", user.getId());
+                map.put("targetAppKey", messageAPI.getAppKey(AppType.SALE.getDesc()));
+                UserInfoResultDTO userInfoResult = userAPI.getUserInfo(AppType.SALE.getDesc(), userid);
+                if (userInfoResult != null && !CommonUtil.isEmpty(userInfoResult.getNickname())) {
+                    map.put("nickName", "装修顾问 " + userInfoResult.getNickname());
+                } else {
+                    map.put("nickName", "装修顾问 小" + user.getUsername().substring(0, 1));
+                }
+                map.put("name", user.getUsername());
+                map.put("mobile", user.getMobile());
+                Member member1 = memberMapper.selectByPrimaryKey(user.getMemberId());
+                if (member1 != null) {
+                    member1.initPath(address);
+                    map.put("head", member1.getHead());
+                } else {
+                    map.put("head", address + Utils.getHead());
+                }
+                houseResult.setMember(map);
             }
-            map.put("name", user.getUsername());
-            map.put("mobile", user.getMobile());
-            Member member1 = memberMapper.selectByPrimaryKey(user.getMemberId());
-            if (member1 != null) {
-                member1.initPath(address);
-                map.put("head", member1.getHead());
-            } else {
-                map.put("head", address + Utils.getHead());
-            }
-            houseResult.setMember(map);
         }
         houseResult.setDecorationType(house.getDecorationType());
         houseResult.setDrawings(house.getDrawings());

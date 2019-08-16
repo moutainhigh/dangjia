@@ -126,6 +126,8 @@ public class RobInfoDTO {
     @ApiModelProperty("大管家信息")
     WorkerTypeDTO workerTypeDTO;
 
+    @ApiModelProperty("")
+    private String addressName;
 
     @ApiModelProperty("标签id")
     private String labelId;

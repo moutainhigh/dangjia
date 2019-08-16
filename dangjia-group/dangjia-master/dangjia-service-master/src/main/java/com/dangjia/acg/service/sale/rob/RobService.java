@@ -383,6 +383,13 @@ public class RobService {
                         }
                         to.setWorkerTypeDTO(workerTypeDTO);
                     }
+
+                    //查询小区名称
+                    if (!CommonUtil.isEmpty(to.getHouseId())) {
+                        String addressName = iMemberLabelMapper.queryAddressName(to.getHouseId());
+                        to.setAddressName(addressName);
+                    }
+
                     //改小区名称
                     if(CommonUtil.isEmpty(to.getResidential())){
                         ServerResponse serverResponse = houseService.getHouseAddress("houseId");
