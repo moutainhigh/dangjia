@@ -69,9 +69,9 @@ public class AchievementService {
         }
 
 
-        logger.info("===================", store);
+        logger.info("店长id   storeId===================", storeId);
 
-        logger.info("店长id===============", store.getId());
+        logger.info("店长id   store.getId()===============", store.getId());
 
         map.put("store",store.getId());
 
