@@ -51,7 +51,8 @@ public class ClueTalkTask {
         log.info(format.format(new Date()) + "结束执行沟通记录提醒任务...");
     }
 
-    @Scheduled(cron = "0/1 * * * * ?")//1s执行一次
+//    @Scheduled(cron = "0/1 * * * * ?")//1s执行一次
+    @Scheduled(cron = "0 0/1 * * * ?")//1分钟执行一次
     public void notEnteredGrabSheet() {
         log.info(format.format(new Date()) + "开始执行销售抢单计时任务...");
         robAPI.notEnteredGrabSheet();
