@@ -383,6 +383,13 @@ public class RobService {
                         }
                         to.setWorkerTypeDTO(workerTypeDTO);
                     }
+
+                    //查询小区名称
+                    if (!CommonUtil.isEmpty(to.getHouseId())) {
+                        String addressName = iMemberLabelMapper.queryAddressName(to.getHouseId());
+                        to.setAddressName(addressName);
+                    }
+
                     //改小区名称
                     if(CommonUtil.isEmpty(to.getResidential())){
                         ServerResponse serverResponse = houseService.getHouseAddress("houseId");
@@ -763,7 +770,7 @@ public class RobService {
                 for (int i=0;i<orderStore.size();i++){
                     if(((System.currentTimeMillis()-grabSheetDTO.getModifyDate().getTime())/60/1000)
                             >Integer.parseInt(djRobSingles.get(i).getRobDate())){
-                            clueMapper.setDistribution(orderStore.get(i).getStoreId());
+                            clueMapper.setDistribution(orderStore.get(i).getStoreId(),grabSheetDTO.getMemberId());
                     }
                 }
             }

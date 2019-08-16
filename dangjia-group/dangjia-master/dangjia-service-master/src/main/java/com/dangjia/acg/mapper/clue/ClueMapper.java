@@ -91,5 +91,5 @@ public interface ClueMapper extends Mapper<Clue> {
 
     List<GrabSheetDTO> notEnteredGrabSheet();
 
-    int setDistribution(@Param("storeId") String storeId);
+    int setDistribution(@Param("storeId") String storeId,@Param("memberId") String memberId);
 }
