@@ -209,13 +209,15 @@ public class ClientService {
             clue.setStage(0);
             clue.setTips("1");
             clue.setPhaseStatus(0);
-            if (clueMapper.insert(clue) > 0 && !CommonUtil.isEmpty(clue.getBuilding())) {
+            if( !CommonUtil.isEmpty(clue.getBuilding())){
                 IntentionHouse intentionHouse = new IntentionHouse();
                 intentionHouse.setClueId(clue.getId());
                 intentionHouse.setBuildingName(clue.getBuilding());
                 intentionHouse.setNumberName(clue.getNumber());
                 intentionHouse.setResidentialName(clue.getAddress());
                 intentionHouseMapper.insert(intentionHouse);
+            }
+            if (clueMapper.insert(clue) > 0) {
                 return ServerResponse.createBySuccessMessage("提交成功");
             } else {
                 return ServerResponse.createByErrorMessage("提交失败");
