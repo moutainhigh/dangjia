@@ -75,7 +75,7 @@ public class AchievementService {
 
         logger.info("店长id   store.getId()==============="+ store.getId());
 
-        map.put("store",storeId);
+        map.put("storeId",store.getId());
 
 
         AchievementDataDTO achievementDataDTO = new AchievementDataDTO();
