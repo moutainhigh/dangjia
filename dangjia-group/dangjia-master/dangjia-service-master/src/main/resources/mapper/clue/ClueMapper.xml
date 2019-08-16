@@ -186,6 +186,7 @@
               m.nick_name as name,
               h.create_date as createDate,
               mc.modify_date as modifyDate,
+              h.completed_date as completedDate,
               CONCAT(IFNULL(h.residential,'*'),IFNULL(h.building,'*栋'),IFNULL(h.unit,'*单元'),IFNULL(h.number,'*号')) as houseName,
               c.cus_service as userId,
               c.phase_status as phaseStatus

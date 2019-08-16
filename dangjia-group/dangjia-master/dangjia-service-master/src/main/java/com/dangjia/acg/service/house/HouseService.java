@@ -160,7 +160,12 @@ public class HouseService {
     private ResidentialRangeMapper residentialRangeMapper;
     @Autowired
     private ResidentialBuildingMapper residentialBuildingMapper;
-
+    @Autowired
+    private DjAlreadyRobSingleMapper djAlreadyRobSingleMapper;
+    @Autowired
+    private RoyaltyMapper royaltyMapper;
+    @Autowired
+    private DjRoyaltyMatchMapper djRoyaltyMatchMapper;
 
     protected static final Logger LOG = LoggerFactory.getLogger(HouseService.class);
 
@@ -525,6 +530,46 @@ public class HouseService {
         house.setIsRobStats(1);
         house.setConstructionDate(new Date());
         iHouseMapper.updateByPrimaryKeySelective(house);
+
+        //确认开工后，要修改 业主客服阶段 为已下单
+        Customer customer = iCustomerMapper.getCustomerByMemberId(house.getMemberId());
+        customer.setStage(4);//阶段: 0未跟进,1继续跟进,2放弃跟进,3黑名单,4已下单
+        customer.setPhaseStatus(1);
+        iCustomerMapper.updateByPrimaryKeySelective(customer);
+        Map<String, Object> map = new HashedMap();
+        map.put("memberId", customer.getMemberId());
+        map.put("userId", customer.getUserId());
+        map.put("stage", 4);
+        map.put("tips", 1);
+        clueMapper.setStage(map);//修改线索的阶段
+
+
+
+        //结算提成
+        Object object = constructionService.getAccessToken(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        AccessToken accessToken = (AccessToken) object;
+        if (CommonUtil.isEmpty(accessToken.getUserId())) {
+            return ServerResponse.createbyUserTokenError();
+        }
+
+        //修改以抢单列表信息
+        DjAlreadyRobSingle djAlreadyRobSingle = new DjAlreadyRobSingle();
+        djAlreadyRobSingle.setId(null);
+        djAlreadyRobSingle.setModifyDate(new Date());
+        djAlreadyRobSingle.setDataStatus(1);
+        Example example = new Example(DjAlreadyRobSingle.class);
+        example.createCriteria()
+                .andEqualTo(DjAlreadyRobSingle.HOUSE_ID, houseDTO.getHouseId())
+                .andEqualTo(DjAlreadyRobSingle.USER_ID, accessToken.getUserId());
+        djAlreadyRobSingleMapper.updateByExampleSelective(djAlreadyRobSingle,example);
+        /**
+         * 结算下单提成
+         */
+        endRoyalty(houseDTO,accessToken.getUserId());
+
         try {
             List<Customer> ms = iCustomerMapper.getCustomerMemberIdList(house.getMemberId());
             if (ms != null) {
@@ -539,7 +584,7 @@ public class HouseService {
             configMessageService.addConfigMessage(request, AppType.ZHUANGXIU, house.getMemberId(), "0", "装修提醒",
                     String.format(DjConstants.PushMessage.START_FITTING_UP, house.getHouseName()), "");
             //通知设计师/精算师/大管家 抢单
-            Example example = new Example(WorkerType.class);
+            example = new Example(WorkerType.class);
             example.createCriteria().andCondition(WorkerType.TYPE + " in(1,2) ");
             List<WorkerType> workerTypeList = workerTypeMapper.selectByExample(example);
             for (WorkerType workerType : workerTypeList) {
@@ -549,28 +594,6 @@ public class HouseService {
                 configMessageService.addConfigMessage(request, AppType.GONGJIANG, StringUtils.join(workerTypes, ","), "0",
                         "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, "4");
             }
-            //确认开工后，要修改 业主客服阶段 为已下单
-            Customer customer = iCustomerMapper.getCustomerByMemberId(house.getMemberId());
-            customer.setStage(4);//阶段: 0未跟进,1继续跟进,2放弃跟进,3黑名单,4已下单
-            customer.setPhaseStatus(1);
-            iCustomerMapper.updateByPrimaryKeySelective(customer);
-            Map<String, Object> map = new HashedMap();
-            map.put("memberId", customer.getMemberId());
-            map.put("userId", customer.getUserId());
-            map.put("stage", 4);
-            map.put("tips", 1);
-            clueMapper.setStage(map);//修改线索的阶段
-
-            //结算提成
-            Object object = constructionService.getAccessToken(userToken);
-            if (object instanceof ServerResponse) {
-                return (ServerResponse) object;
-            }
-            AccessToken accessToken = (AccessToken) object;
-            if (CommonUtil.isEmpty(accessToken.getUserId())) {
-                return ServerResponse.createbyUserTokenError();
-            }
-            endRoyalty(houseDTO,accessToken.getUserId());
 
         } catch (Exception e) {
             System.out.println("建群失败，异常：" + e.getMessage());
@@ -578,12 +601,7 @@ public class HouseService {
         return ServerResponse.createBySuccessMessage("操作成功");
     }
 
-    @Autowired
-    private DjAlreadyRobSingleMapper djAlreadyRobSingleMapper;
-    @Autowired
-    private RoyaltyMapper royaltyMapper;
-    @Autowired
-    private DjRoyaltyMatchMapper djRoyaltyMatchMapper;
+
 
     /**
      * 结算下单提成

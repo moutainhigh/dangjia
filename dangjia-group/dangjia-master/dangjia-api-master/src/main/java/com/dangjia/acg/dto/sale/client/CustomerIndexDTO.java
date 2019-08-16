@@ -27,4 +27,5 @@ public class CustomerIndexDTO {
     private Integer phaseStatus;
     private String stage;
     private String wechat;
+    private Date completedDate;//竣工时间
 }
