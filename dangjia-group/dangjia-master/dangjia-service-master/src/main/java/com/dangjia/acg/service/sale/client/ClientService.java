@@ -786,7 +786,9 @@ public class ClientService {
         example=new Example(Clue.class);
         example.createCriteria().andEqualTo(Clue.MEMBER_ID,customer.getMemberId());
 
-        djAlreadyRobSingleMapper.deleteByPrimaryKey(alreadyId);
+        if(!CommonUtil.isEmpty(alreadyId)){
+            djAlreadyRobSingleMapper.deleteByPrimaryKey(alreadyId);
+        }
         if (iHouseMapper.updateByPrimaryKeySelective(house) > 0 && iCustomerMapper.updateByExampleSelective(customer1,example)>0 &&clueMapper.updateByExampleSelective(clue,example)>0) {
             return ServerResponse.createBySuccessMessage("撤回成功");
         } else {
