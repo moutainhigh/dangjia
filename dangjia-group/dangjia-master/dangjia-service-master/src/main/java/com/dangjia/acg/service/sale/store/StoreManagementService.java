@@ -96,8 +96,6 @@ public class StoreManagementService {
             return (ServerResponse) object;
         }
         Store store = (Store) object;
-        logger.info("第0次返回===================", store.getId());
-        logger.info("第0次返回===================", store.getStoreName());
         List<StoreUserDTO> storeUserDTOS = iStoreUserMapper.getStoreUsers(store.getId(), null, 4);
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
         for (StoreUserDTO storeUserDTO : storeUserDTOS) {
