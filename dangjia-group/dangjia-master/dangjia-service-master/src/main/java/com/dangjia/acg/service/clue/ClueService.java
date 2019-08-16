@@ -143,12 +143,10 @@ public class ClueService {
                     String ids[][] = new String[split.length][2];
                     for (int i = 0; i < split.length; i++) {
                         MemberLabel memberLabel = iMemberLabelMapper.selectByPrimaryKey(split[i]);
-                        if(null != memberLabel){
-                            sb.append(memberLabel.getParentName()).append("-").
-                                    append(memberLabel.getName()).append(",");
-                            ids[i][0] = memberLabel.getParentId();
-                            ids[i][1] = memberLabel.getId();
-                        }
+                        sb.append(memberLabel.getParentName()).append("-").
+                                append(memberLabel.getName()).append(",");
+                        ids[i][0] = memberLabel.getParentId();
+                        ids[i][1] = memberLabel.getId();
                     }
                     sb.delete(sb.lastIndexOf(","), sb.length());
                     clueDTO.setLabelName(sb.toString());
