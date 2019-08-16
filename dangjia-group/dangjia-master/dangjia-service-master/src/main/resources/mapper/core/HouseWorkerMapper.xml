@@ -45,6 +45,24 @@
         GROUP BY hw.house_id
     </select>
 
+    <!-- 查询所有施工中的工匠订单-->
+    <select id="getWorkerHouse" resultType="com.dangjia.acg.modle.core.HouseWorker">
+        SELECT
+        hw.id,
+        hw.house_id as houseId,
+        hw.worker_id as workerId,
+        hw.worker_type_id as workerTypeId,
+        hw.worker_type as workerType,
+        hw.work_type as workType,
+        hw.is_select as isSelect,
+        hw.data_status as dataStatus,
+        hw.create_date as createDate,
+        hw.modify_date as modifyDate
+        from `dj_core_house_worker` hw
+        INNER JOIN dj_house h ON hw.house_id=h.id
+        WHERE
+        h.visit_state =  1 AND hw.work_type =6 AND hw.worker_type >2
+    </select>
     <!--根据workerTypeId和workType-->
     <select id="getByWorkerTypeId" resultType="com.dangjia.acg.modle.core.HouseWorker">
         SELECT
