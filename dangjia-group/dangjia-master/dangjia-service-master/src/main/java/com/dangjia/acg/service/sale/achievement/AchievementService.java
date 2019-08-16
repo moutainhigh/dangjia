@@ -63,9 +63,8 @@ public class AchievementService {
         if (!CommonUtil.isEmpty(time)) {
             map.put("time",DateUtil.dateToString(time, DateUtil.FORMAT));
         }
-        if (!CommonUtil.isEmpty(store.getId())) {
-            map.put("store",store.getId());
-        }
+        map.put("store",store.getId());
+
 
         AchievementDataDTO achievementDataDTO = new AchievementDataDTO();
 
