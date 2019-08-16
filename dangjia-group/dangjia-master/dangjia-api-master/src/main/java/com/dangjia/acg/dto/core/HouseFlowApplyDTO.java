@@ -14,6 +14,7 @@ import java.util.Map;
 public class HouseFlowApplyDTO {
 
     private String houseId;
+    private String houseName;
     private String workerId;
     private String managerId;
     private String houseFlowApplyId;
