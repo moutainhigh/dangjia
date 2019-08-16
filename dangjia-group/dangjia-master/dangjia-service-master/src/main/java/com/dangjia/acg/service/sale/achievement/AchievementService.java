@@ -47,6 +47,7 @@ public class AchievementService {
      * @return
      */
     public ServerResponse queryLeaderAchievementData(String userToken,String storeId ,Date time){
+        logger.info("userToken===================", userToken);
         Object object = constructionService.getAccessToken(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -60,6 +61,7 @@ public class AchievementService {
             return (ServerResponse) object;
         }
         Store store = (Store) object;
+
         Map<String,Object> map = new HashMap();
         if (!CommonUtil.isEmpty(time)) {
             map.put("time",DateUtil.dateToString(time, DateUtil.FORMAT));
