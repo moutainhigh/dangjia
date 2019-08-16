@@ -8,7 +8,7 @@
     <select id="selectArr" resultType="com.dangjia.acg.modle.sale.royalty.DjAlreadyRobSingle" parameterType="java.util.Map">
         select
         dj.id as id,
-        dj.user_id as userId,
+        dj.user_id as userId
 		from dj_already_rob_single dj
 		where dj.user_id = #{userId}
 		and DATE_FORMAT(create_date, '%y-%m') = DATE_FORMAT(#{createDate},'%y-%m')
