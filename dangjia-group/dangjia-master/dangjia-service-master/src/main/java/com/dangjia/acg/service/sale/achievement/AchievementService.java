@@ -55,14 +55,11 @@ public class AchievementService {
         if (CommonUtil.isEmpty(accessToken.getUserId())) {
             return ServerResponse.createbyUserTokenError();
         }
-
         object = saleService.getStore(accessToken.getUserId());
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
         }
         Store store = (Store) object;
-
-
         Map<String,Object> map = new HashMap();
         if (!CommonUtil.isEmpty(time)) {
             map.put("time",DateUtil.dateToString(time, DateUtil.FORMAT));

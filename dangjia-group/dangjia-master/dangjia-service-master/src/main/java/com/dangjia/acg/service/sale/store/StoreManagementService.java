@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.sale.store;
 
+import com.dangjia.acg.auth.config.RedisSessionDAO;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.ServerCode;
@@ -32,6 +33,8 @@ import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.collections.map.HashedMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -71,7 +74,7 @@ public class StoreManagementService {
     private ConfigMessageService configMessageService;
     @Autowired
     private UserMapper userMapper;
-
+    private static Logger logger = LoggerFactory.getLogger(RedisSessionDAO.class);
     /**
      * 门店管理页
      *
@@ -93,6 +96,8 @@ public class StoreManagementService {
             return (ServerResponse) object;
         }
         Store store = (Store) object;
+        logger.info("第0次返回===================", store.getId());
+        logger.info("第0次返回===================", store.getStoreName());
         List<StoreUserDTO> storeUserDTOS = iStoreUserMapper.getStoreUsers(store.getId(), null, 4);
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
         for (StoreUserDTO storeUserDTO : storeUserDTOS) {
