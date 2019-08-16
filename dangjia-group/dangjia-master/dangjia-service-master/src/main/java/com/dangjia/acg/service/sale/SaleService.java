@@ -75,11 +75,13 @@ public class SaleService {
      */
     public Object getStore(String userId) {
         String storeId = redisClient.getCache("storeId" + userId, String.class);
+        logger.info("第0次返回===================", storeId);
         if (!CommonUtil.isEmpty(storeId)) {
             Store store = iStoreMapper.selectByPrimaryKey(storeId);
+            logger.info("第00次返回===================", store.getId());
             if (store != null) {
                 if (store.getUserId().equals(userId)) {
-                    logger.info("第1次返回===================", store);
+                    logger.info("第1次返回===================", store.getId()+" + "+store.getCityName()+" + "+ store.getStoreName());
                     return store;
                 } else {
                     logger.info("第2次返回===================", store);
