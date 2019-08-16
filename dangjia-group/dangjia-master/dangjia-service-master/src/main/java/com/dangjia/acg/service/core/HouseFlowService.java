@@ -455,17 +455,15 @@ public class HouseFlowService {
     }
 
     /**
-     * 工人30分钟自动放弃抢单任务，工人未购买保险或者保险服务剩余天数小于等于60天则自动放弃订单
+     * 工匠自动保险单续费
      *
      * @return
      */
     public ServerResponse autoRenewOrder() {
         //找到所有抢单带支付的订单
-        Example example = new Example(HouseWorker.class);
-        example.createCriteria().andEqualTo(HouseWorker.WORK_TYPE, 6);
-        List<HouseWorker> hwList = houseWorkerMapper.selectByExample(example);
+        List<HouseWorker> hwList = houseWorkerMapper.getWorkerHouse();
         for (HouseWorker houseWorker : hwList) {
-            example = new Example(Insurance.class);
+            Example example = new Example(Insurance.class);
             example.createCriteria().andEqualTo(Insurance.WORKER_ID, houseWorker.getWorkerId());
             example.orderBy(Insurance.END_DATE).desc();
             List<Insurance> insurances = insuranceMapper.selectByExample(example);
