@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.sale.achievement;
 
+import com.dangjia.acg.auth.config.RedisSessionDAO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
@@ -12,6 +13,8 @@ import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.store.Store;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.sale.SaleService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,6 +39,7 @@ public class AchievementService {
     private CraftsmanConstructionService constructionService;
     @Autowired
     private SaleService saleService;
+    private static Logger logger = LoggerFactory.getLogger(RedisSessionDAO.class);
     /**
      * 根据月份 查询店长业绩
      * @param storeId
@@ -63,9 +67,14 @@ public class AchievementService {
         if (!CommonUtil.isEmpty(time)) {
             map.put("time",DateUtil.dateToString(time, DateUtil.FORMAT));
         }
-        if (!CommonUtil.isEmpty(store.getId())) {
-            map.put("store",store.getId());
-        }
+
+
+        logger.info("===================", store);
+
+        logger.info("店长id===============", store.getId());
+
+        map.put("store",store.getId());
+
 
         AchievementDataDTO achievementDataDTO = new AchievementDataDTO();
 
