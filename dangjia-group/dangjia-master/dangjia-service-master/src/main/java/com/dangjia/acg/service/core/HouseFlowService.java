@@ -32,7 +32,6 @@ import com.dangjia.acg.modle.design.HouseStyleType;
 import com.dangjia.acg.modle.group.Group;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
-import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.worker.Insurance;
 import com.dangjia.acg.modle.worker.RewardPunishCondition;
 import com.dangjia.acg.modle.worker.RewardPunishRecord;
@@ -463,7 +462,7 @@ public class HouseFlowService {
     public ServerResponse autoRenewOrder() {
         //找到所有抢单带支付的订单
         Example example = new Example(HouseWorker.class);
-        example.createCriteria().andEqualTo(HouseWorker.WORK_TYPE, 4);
+        example.createCriteria().andEqualTo(HouseWorker.WORK_TYPE, 6);
         List<HouseWorker> hwList = houseWorkerMapper.selectByExample(example);
         for (HouseWorker houseWorker : hwList) {
             example = new Example(Insurance.class);

@@ -152,6 +152,7 @@ public class TaskService {
                     .andEqualTo(HouseWorker.WORKER_ID, member.getId());
             List<HouseWorker> hwList = houseWorkerMapper.selectByExample(example);
             if(hwList.size()>0) {
+                HouseWorker houseWorker =hwList.get(0);
                 example = new Example(Insurance.class);
                 example.createCriteria().andEqualTo(Insurance.WORKER_ID, member.getId());
                 example.orderBy(Insurance.END_DATE).desc();
@@ -167,6 +168,8 @@ public class TaskService {
                         daynum = 0;
                     }
                     buttonDTO.setInsuranceDay(daynum);
+                    buttonDTO.setInsuranceMsg("您当前剩余保险天数为"+daynum+"天，为给施工提供保障，请在"+DateUtil.getDateString(DateUtil.addDateMinutes(houseWorker.getCreateDate(),30).getTime())+"前购买保险再继续工作，未购买将自动放弃。");
+//
                 }
             }
 
