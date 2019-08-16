@@ -75,8 +75,8 @@ public class ClientController implements ClientAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse clientPage(HttpServletRequest request, String userToken) {
-        return customerService.clientPage(userToken);
+    public ServerResponse clientPage(HttpServletRequest request, String userToken,Integer robStats) {
+        return customerService.clientPage(userToken,robStats);
     }
 
     @Override

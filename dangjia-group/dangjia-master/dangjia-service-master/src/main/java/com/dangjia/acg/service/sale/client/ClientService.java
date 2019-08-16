@@ -443,7 +443,7 @@ public class ClientService {
      * @param userToken
      * @return
      */
-    public ServerResponse clientPage(String userToken) {
+    public ServerResponse clientPage(String userToken,Integer robStats) {
         Object object = constructionService.getAccessToken(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -527,7 +527,7 @@ public class ClientService {
                 map.put("waitDistribution", customerIndexDTOS1.get(0));
             }
             map.put("storeId", store.getId());
-            map.put("grabSheet", iCustomerMapper.grabSheet(store.getId()));
+            map.put("grabSheet", iCustomerMapper.grabSheet(store.getId(),robStats));
         }
         return ServerResponse.createBySuccess("查询成功", map);
     }
@@ -786,7 +786,9 @@ public class ClientService {
         example=new Example(Clue.class);
         example.createCriteria().andEqualTo(Clue.MEMBER_ID,customer.getMemberId());
 
-        djAlreadyRobSingleMapper.deleteByPrimaryKey(alreadyId);
+        if(!CommonUtil.isEmpty(alreadyId)){
+            djAlreadyRobSingleMapper.deleteByPrimaryKey(alreadyId);
+        }
         if (iHouseMapper.updateByPrimaryKeySelective(house) > 0 && iCustomerMapper.updateByExampleSelective(customer1,example)>0 &&clueMapper.updateByExampleSelective(clue,example)>0) {
             return ServerResponse.createBySuccessMessage("撤回成功");
         } else {

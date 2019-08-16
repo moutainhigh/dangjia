@@ -336,7 +336,7 @@
             FROM dj_clue c
             inner join dj_user u
             on c.cus_service=u.id
-            inner join dj_member_customer mc
+            LEFT JOIN dj_member_customer mc
             on mc.member_id = c.member_id and mc.user_id = c.cus_service
             WHERE
             c.stage=2
@@ -482,7 +482,7 @@
         SELECT
         COUNT(0)
         FROM dj_clue c
-        INNER JOIN dj_member_customer mc
+        LEFT JOIN dj_member_customer mc
         ON mc.member_id = c.member_id
         AND mc.user_id = c.cus_service
         <if test="type==''">
