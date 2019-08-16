@@ -154,7 +154,7 @@
                     and label_id like CONCAT('%',#{label},'%')
                 </if>
                 <if test="null!=searchKey and ''!=searchKey">
-                    and CONCAT(c.owername,c.phone) like CONCAT('%',#{searchKey},'%')
+                    and CONCAT(m.nick_name,c.owername,c.phone) like CONCAT('%',#{searchKey},'%')
                 </if>
                 ORDER BY mc.create_date
                 <if test="null!=time and ''!=time">

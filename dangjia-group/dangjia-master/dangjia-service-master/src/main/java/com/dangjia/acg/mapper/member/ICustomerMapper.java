@@ -3,7 +3,6 @@ package com.dangjia.acg.mapper.member;
 import com.dangjia.acg.dto.sale.client.CustomerIndexDTO;
 import com.dangjia.acg.dto.sale.store.GrabSheetDTO;
 import com.dangjia.acg.modle.member.Customer;
-import io.swagger.models.auth.In;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
@@ -24,6 +23,8 @@ public interface ICustomerMapper extends Mapper<Customer> {
 
     Customer getCustomerByMemberId(@Param("memberId") String memberId);
 
+
+    Customer getCustomerBy(@Param("memberId") String memberId);
     /**
      * 根据业主id查询
      * @param memberId
