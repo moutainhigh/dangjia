@@ -20,4 +20,7 @@ public interface DjAlreadyRobSingleMapper extends Mapper<DjAlreadyRobSingle> {
 
     List<DjAlreadyRobSingle> selectArr(Map<String,Object> map);
 
+
+    void upDateDataStatus(Map<String,Object> map);
+
 }
