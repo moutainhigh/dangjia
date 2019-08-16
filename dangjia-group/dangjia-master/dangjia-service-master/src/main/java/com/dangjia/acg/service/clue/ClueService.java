@@ -123,6 +123,10 @@ public class ClueService {
             if (!CommonUtil.isEmpty(childId)) {
                 criteria.andEqualTo(Clue.LABEL_ID, childId);
             }
+
+            criteria.andEqualTo(Clue.TURN_STATUS, 1);
+            criteria.andEqualTo(Clue.STAGE, 1);
+
             example.orderBy(Clue.MODIFY_DATE).desc();
             List<Clue> clues = clueMapper.selectByExample(example);
             if (clues == null || clues.size() <= 0) {

@@ -30,6 +30,19 @@
         limit 1
     </select>
 
+    <!-- 根据业主id 查询 -->
+    <select id="getCustomerBy" parameterType="String" resultType="com.dangjia.acg.modle.member.Customer">
+        SELECT
+        <include refid="all_columns"/>
+        FROM dj_member_customer
+        WHERE 1=1 and stage = 1 and turnStatus = 1
+        <if test="memberId!=null and memberId!=''">
+            and member_id = #{memberId}
+        </if>
+        ORDER by create_date desc
+        limit 1
+    </select>
+
     <!-- 根据业主id 和 stage 查询 -->
     <select id="getCustomerByMemberIdAndStage" parameterType="String"
             resultType="com.dangjia.acg.modle.member.Customer">
