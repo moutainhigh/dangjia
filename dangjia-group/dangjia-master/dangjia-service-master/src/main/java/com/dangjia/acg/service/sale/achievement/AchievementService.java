@@ -47,10 +47,9 @@ public class AchievementService {
      * @return
      */
     public ServerResponse queryLeaderAchievementData(String userToken,String storeId ,Date time){
-        logger.info("userToken===================", userToken);
+        logger.info("userToken==================="+ userToken);
 
-        String sss = "11111111111111";
-        logger.info("userToken===================", sss);
+
 
         Object object = constructionService.getAccessToken(userToken);
         if (object instanceof ServerResponse) {
@@ -72,9 +71,9 @@ public class AchievementService {
         }
 
 
-        logger.info("店长id   storeId===================", storeId);
+        logger.info("店长id   storeId==================="+storeId);
 
-        logger.info("店长id   store.getId()===============", store.getId());
+        logger.info("店长id   store.getId()==============="+ store.getId());
 
         map.put("store",storeId);
 
