@@ -752,8 +752,7 @@ public class ClientService {
             clue.setCusService(store.getUserId());
             clue.setCityId(cityId);
             clue.setTurnStatus(1);
-            clue.setCusService(null);
-            clueMapper.updateByExample(clue,example);
+            clueMapper.updateByExampleSelective(clue,example);
         } else if (phaseStatus == 1) {
             Example example=new Example(Customer.class);
             example.createCriteria().andEqualTo(Customer.ID,id);
@@ -763,8 +762,7 @@ public class ClientService {
             customer.setUserId(store.getUserId());
             customer.setCityId(cityId);
             customer.setTurnStatus(1);
-            customer.setUserId(null);
-            iCustomerMapper.updateByExample(customer,example);
+            iCustomerMapper.updateByExampleSelective(customer,example);
         }
         return ServerResponse.createBySuccessMessage("操作成功");
     }
