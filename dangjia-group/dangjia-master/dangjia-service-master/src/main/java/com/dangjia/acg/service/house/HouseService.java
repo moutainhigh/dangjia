@@ -556,15 +556,11 @@ public class HouseService {
         }
 
         //修改以抢单列表信息
-        DjAlreadyRobSingle djAlreadyRobSingle = new DjAlreadyRobSingle();
-        djAlreadyRobSingle.setId(null);
-        djAlreadyRobSingle.setModifyDate(new Date());
-        djAlreadyRobSingle.setDataStatus(1);
-        Example example = new Example(DjAlreadyRobSingle.class);
-        example.createCriteria()
-                .andEqualTo(DjAlreadyRobSingle.HOUSE_ID, houseDTO.getHouseId())
-                .andEqualTo(DjAlreadyRobSingle.USER_ID, accessToken.getUserId());
-        djAlreadyRobSingleMapper.updateByExampleSelective(djAlreadyRobSingle,example);
+        Map<String,Object> mm = new HashMap<>();
+        mm.put("dataStatus",1);
+        mm.put("houseId",houseDTO.getHouseId());
+        djAlreadyRobSingleMapper.upDateDataStatus(mm);
+
         /**
          * 结算下单提成
          */
@@ -584,7 +580,7 @@ public class HouseService {
             configMessageService.addConfigMessage(request, AppType.ZHUANGXIU, house.getMemberId(), "0", "装修提醒",
                     String.format(DjConstants.PushMessage.START_FITTING_UP, house.getHouseName()), "");
             //通知设计师/精算师/大管家 抢单
-            example = new Example(WorkerType.class);
+            Example example = new Example(WorkerType.class);
             example.createCriteria().andCondition(WorkerType.TYPE + " in(1,2) ");
             List<WorkerType> workerTypeList = workerTypeMapper.selectByExample(example);
             for (WorkerType workerType : workerTypeList) {
@@ -649,6 +645,7 @@ public class HouseService {
                                     DjRoyaltyMatch djRoyaltyMatch1 = new DjRoyaltyMatch();
                                     djRoyaltyMatch1.setDataStatus(0);
                                     djRoyaltyMatch1.setUserId(userId);
+                                    djRoyaltyMatch1.setOrderStatus(0);
                                     djRoyaltyMatch1.setHouseId(houseDTO.getHouseId());
                                     djRoyaltyMatch1.setMonthRoyalty((int) (ss.getRoyalty() * 0.4));
                                     djRoyaltyMatch1.setMeterRoyalty((int) (ss.getRoyalty() * 0.4));
@@ -658,6 +655,7 @@ public class HouseService {
                                     djRoyaltyMatch1 = new DjRoyaltyMatch();
                                     djRoyaltyMatch1.setDataStatus(0);
                                     djRoyaltyMatch1.setUserId(userId2);
+                                    djRoyaltyMatch1.setOrderStatus(0);
                                     djRoyaltyMatch1.setHouseId(houseDTO.getHouseId());
                                     djRoyaltyMatch1.setMonthRoyalty((int) (ss.getRoyalty() * 0.4));
                                     djRoyaltyMatch1.setMeterRoyalty((int) (ss.getRoyalty() * 0.4));
@@ -672,9 +670,7 @@ public class HouseService {
                     }
                 }
         }
-
     }
-
 
     public void djrHouse(String userId,String houseId,List<DjRoyaltyDetailsSurface> list){
         Map<String,Object> map = new HashMap<>();
@@ -683,11 +679,12 @@ public class HouseService {
         List<DjAlreadyRobSingle> darList = djAlreadyRobSingleMapper.selectArr(map);
         for (DjRoyaltyDetailsSurface ss : list) {
             //判断当月
-            if(ss.getStartSingle() <= darList.size() && darList.size() <=ss.getOverSingle()){
+            if(ss.getStartSingle() <= darList.size() && darList.size() <= ss.getOverSingle()){
                 DjRoyaltyMatch djRoyaltyMatch1 = new DjRoyaltyMatch();
                 djRoyaltyMatch1.setDataStatus(0);
                 djRoyaltyMatch1.setUserId(userId);
                 djRoyaltyMatch1.setHouseId(houseId);
+                djRoyaltyMatch1.setOrderStatus(0);
                 djRoyaltyMatch1.setMonthRoyalty((int) (ss.getRoyalty()*0.75));
                 djRoyaltyMatch1.setMeterRoyalty((int) (ss.getRoyalty()*0.75));
                 djRoyaltyMatch1.setArrRoyalty(ss.getRoyalty());

@@ -14,4 +14,12 @@
 		and DATE_FORMAT(create_date, '%y-%m') = DATE_FORMAT(#{createDate},'%y-%m')
     </select>
 
+    <update id="upDateDataStatus" parameterType="java.util.Map">
+        UPDATE dj_already_rob_single
+        SET
+            data_status = #{dataStatus}
+        WHERE
+        house_id = #{houseId}
+    </update>
+
 </mapper>

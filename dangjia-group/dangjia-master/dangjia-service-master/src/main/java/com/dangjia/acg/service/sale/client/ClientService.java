@@ -209,13 +209,15 @@ public class ClientService {
             clue.setStage(0);
             clue.setTips("1");
             clue.setPhaseStatus(0);
-            if (clueMapper.insert(clue) > 0 && !CommonUtil.isEmpty(clue.getBuilding())) {
+            if( !CommonUtil.isEmpty(clue.getBuilding())){
                 IntentionHouse intentionHouse = new IntentionHouse();
                 intentionHouse.setClueId(clue.getId());
                 intentionHouse.setBuildingName(clue.getBuilding());
                 intentionHouse.setNumberName(clue.getNumber());
                 intentionHouse.setResidentialName(clue.getAddress());
                 intentionHouseMapper.insert(intentionHouse);
+            }
+            if (clueMapper.insert(clue) > 0) {
                 return ServerResponse.createBySuccessMessage("提交成功");
             } else {
                 return ServerResponse.createByErrorMessage("提交失败");
@@ -744,25 +746,15 @@ public class ClientService {
     public ServerResponse setTurnOut(String cityId, String storeId, String id, Integer phaseStatus) {
         Store store = iStoreMapper.selectByPrimaryKey(storeId);
         if (phaseStatus == 0) {
-            Example example=new Example(Clue.class);
-            example.createCriteria().andEqualTo(Clue.ID,id);
-            Clue clue = new Clue();
+            Clue clue = clueMapper.selectByPrimaryKey(id);
             clue.setId(id);
             clue.setStoreId(storeId);
             clue.setCusService(store.getUserId());
             clue.setCityId(cityId);
             clue.setTurnStatus(1);
-            clueMapper.updateByExampleSelective(clue,example);
+            clueMapper.updateByPrimaryKeySelective(clue);
         } else if (phaseStatus == 1) {
-            Example example=new Example(Customer.class);
-            example.createCriteria().andEqualTo(Customer.ID,id);
-            Customer customer = new Customer();
-            customer.setId(id);
-            customer.setStoreId(storeId);
-            customer.setUserId(store.getUserId());
-            customer.setCityId(cityId);
-            customer.setTurnStatus(1);
-            iCustomerMapper.updateByExampleSelective(customer,example);
+            iCustomerMapper.turnOut(store.getUserId(),storeId,id,cityId);
         }
         return ServerResponse.createBySuccessMessage("操作成功");
     }

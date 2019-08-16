@@ -179,5 +179,21 @@
         AND tips = 1
     </select>
 
+    <update id="turnOut">
+        update dj_member_customer mc
+        inner join dj_clue c
+        on mc.member_id=c.member_id
+        and c.cus_service=mc.user_id
+        set c.cus_service=#{userId},
+        c.store_id=#{storeId},
+        c.turn_status=1,
+        c.city_id=#{cityId},
+        mc.user_id=#{userId},
+        mc.store_id=#{storeId},
+        mc.turn_status=1,
+        mc.city_id=#{cityId}
+        where mc.id=#{id}
+    </update>
+
 </mapper>
 
