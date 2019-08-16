@@ -525,6 +525,30 @@ public class HouseService {
         house.setIsRobStats(1);
         house.setConstructionDate(new Date());
         iHouseMapper.updateByPrimaryKeySelective(house);
+
+        //确认开工后，要修改 业主客服阶段 为已下单
+        Customer customer = iCustomerMapper.getCustomerByMemberId(house.getMemberId());
+        customer.setStage(4);//阶段: 0未跟进,1继续跟进,2放弃跟进,3黑名单,4已下单
+        customer.setPhaseStatus(1);
+        iCustomerMapper.updateByPrimaryKeySelective(customer);
+        Map<String, Object> map = new HashedMap();
+        map.put("memberId", customer.getMemberId());
+        map.put("userId", customer.getUserId());
+        map.put("stage", 4);
+        map.put("tips", 1);
+        clueMapper.setStage(map);//修改线索的阶段
+
+        //结算提成
+        Object object = constructionService.getAccessToken(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        AccessToken accessToken = (AccessToken) object;
+        if (CommonUtil.isEmpty(accessToken.getUserId())) {
+            return ServerResponse.createbyUserTokenError();
+        }
+        endRoyalty(houseDTO,accessToken.getUserId());
+
         try {
             List<Customer> ms = iCustomerMapper.getCustomerMemberIdList(house.getMemberId());
             if (ms != null) {
@@ -549,28 +573,6 @@ public class HouseService {
                 configMessageService.addConfigMessage(request, AppType.GONGJIANG, StringUtils.join(workerTypes, ","), "0",
                         "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, "4");
             }
-            //确认开工后，要修改 业主客服阶段 为已下单
-            Customer customer = iCustomerMapper.getCustomerByMemberId(house.getMemberId());
-            customer.setStage(4);//阶段: 0未跟进,1继续跟进,2放弃跟进,3黑名单,4已下单
-            customer.setPhaseStatus(1);
-            iCustomerMapper.updateByPrimaryKeySelective(customer);
-            Map<String, Object> map = new HashedMap();
-            map.put("memberId", customer.getMemberId());
-            map.put("userId", customer.getUserId());
-            map.put("stage", 4);
-            map.put("tips", 1);
-            clueMapper.setStage(map);//修改线索的阶段
-
-            //结算提成
-            Object object = constructionService.getAccessToken(userToken);
-            if (object instanceof ServerResponse) {
-                return (ServerResponse) object;
-            }
-            AccessToken accessToken = (AccessToken) object;
-            if (CommonUtil.isEmpty(accessToken.getUserId())) {
-                return ServerResponse.createbyUserTokenError();
-            }
-            endRoyalty(houseDTO,accessToken.getUserId());
 
         } catch (Exception e) {
             System.out.println("建群失败，异常：" + e.getMessage());
