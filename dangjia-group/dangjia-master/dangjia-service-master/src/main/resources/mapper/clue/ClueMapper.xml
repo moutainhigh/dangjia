@@ -415,9 +415,11 @@
             h.decoration_type as decorationType,
             h.residential as residential,
             h.unit as unit,
-            h.building as HouseBuilding,
+            h.building as houseBuilding,
             h.drawings,
             h.is_rob_stats as isRobStats,
+            h.number as houseNumber,
+            h.house_type as houseType,
         </if>
         c.create_date as createDate,
         c.owername as owerName,

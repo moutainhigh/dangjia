@@ -124,6 +124,8 @@ public class ClueService {
                 criteria.andEqualTo(Clue.LABEL_ID, childId);
             }
 
+            criteria.andEqualTo(Clue.PHASE_STATUS, 0);
+
             example.orderBy(Clue.MODIFY_DATE).desc();
             List<Clue> clues = clueMapper.selectByExample(example);
             if (clues == null || clues.size() <= 0) {

@@ -767,7 +767,7 @@ public class HouseService {
                 house.setIsType(1);
             }
         } else {
-            house.setIsType(0);
+            house.setIsType(1);
         }
         if (null != result) {
             if (result == 1) {
