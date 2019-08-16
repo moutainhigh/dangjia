@@ -15,6 +15,7 @@ public class ButtonDTO {
     private int houseType;//装修的房子类型0：新房；1：老房
     private int drawings;//有无图纸0：无图纸；1：有图纸
     private Integer insuranceDay;//工人保险剩余天数
+    private String insuranceMsg;//描述
     private String houseId;
     private List<Task> taskList;
 }
