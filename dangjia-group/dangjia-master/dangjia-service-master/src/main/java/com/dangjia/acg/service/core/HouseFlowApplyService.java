@@ -871,7 +871,9 @@ public class HouseFlowApplyService {
         try {
             String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
+            House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
             HouseFlowApplyDTO houseFlowApplyDTO = new HouseFlowApplyDTO();
+            houseFlowApplyDTO.setHouseName(house.getHouseName());
             Member worker = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
             houseFlowApplyDTO.setHouseFlowApplyId(houseFlowApplyId);
             houseFlowApplyDTO.setApplyType(houseFlowApply.getApplyType());
