@@ -325,6 +325,7 @@ public class ClueService {
                                     customer.setPhaseStatus(1);
                                     customer.setStoreId(clue.getStoreId());
                                     customer.setTips("1");
+                                    customer.setLabelIdArr(clue.getLabelId());
                                     iCustomerMapper.insert(customer);
                                 }
                                 //改变线索沟通表的数据状态
@@ -341,6 +342,7 @@ public class ClueService {
                             customer.setPhaseStatus(1);
                             customer.setStoreId(clue.getStoreId());
                             customer.setTips("1");
+                            customer.setLabelIdArr(clue.getLabelId());
                             iCustomerMapper.insert(customer);
                         }
                         //改变线索表的数据状态
