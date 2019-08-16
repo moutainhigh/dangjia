@@ -160,7 +160,12 @@ public class HouseService {
     private ResidentialRangeMapper residentialRangeMapper;
     @Autowired
     private ResidentialBuildingMapper residentialBuildingMapper;
-
+    @Autowired
+    private DjAlreadyRobSingleMapper djAlreadyRobSingleMapper;
+    @Autowired
+    private RoyaltyMapper royaltyMapper;
+    @Autowired
+    private DjRoyaltyMatchMapper djRoyaltyMatchMapper;
 
     protected static final Logger LOG = LoggerFactory.getLogger(HouseService.class);
 
@@ -538,6 +543,8 @@ public class HouseService {
         map.put("tips", 1);
         clueMapper.setStage(map);//修改线索的阶段
 
+
+
         //结算提成
         Object object = constructionService.getAccessToken(userToken);
         if (object instanceof ServerResponse) {
@@ -547,6 +554,20 @@ public class HouseService {
         if (CommonUtil.isEmpty(accessToken.getUserId())) {
             return ServerResponse.createbyUserTokenError();
         }
+
+        //修改以抢单列表信息
+        DjAlreadyRobSingle djAlreadyRobSingle = new DjAlreadyRobSingle();
+        djAlreadyRobSingle.setId(null);
+        djAlreadyRobSingle.setModifyDate(new Date());
+        djAlreadyRobSingle.setDataStatus(1);
+        Example example = new Example(DjAlreadyRobSingle.class);
+        example.createCriteria()
+                .andEqualTo(DjAlreadyRobSingle.HOUSE_ID, houseDTO.getHouseId())
+                .andEqualTo(DjAlreadyRobSingle.USER_ID, accessToken.getUserId());
+        djAlreadyRobSingleMapper.updateByExampleSelective(djAlreadyRobSingle,example);
+        /**
+         * 结算下单提成
+         */
         endRoyalty(houseDTO,accessToken.getUserId());
 
         try {
@@ -563,7 +584,7 @@ public class HouseService {
             configMessageService.addConfigMessage(request, AppType.ZHUANGXIU, house.getMemberId(), "0", "装修提醒",
                     String.format(DjConstants.PushMessage.START_FITTING_UP, house.getHouseName()), "");
             //通知设计师/精算师/大管家 抢单
-            Example example = new Example(WorkerType.class);
+            example = new Example(WorkerType.class);
             example.createCriteria().andCondition(WorkerType.TYPE + " in(1,2) ");
             List<WorkerType> workerTypeList = workerTypeMapper.selectByExample(example);
             for (WorkerType workerType : workerTypeList) {
@@ -580,12 +601,7 @@ public class HouseService {
         return ServerResponse.createBySuccessMessage("操作成功");
     }
 
-    @Autowired
-    private DjAlreadyRobSingleMapper djAlreadyRobSingleMapper;
-    @Autowired
-    private RoyaltyMapper royaltyMapper;
-    @Autowired
-    private DjRoyaltyMatchMapper djRoyaltyMatchMapper;
+
 
     /**
      * 结算下单提成
