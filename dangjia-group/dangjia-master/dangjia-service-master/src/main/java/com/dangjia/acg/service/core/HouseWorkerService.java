@@ -886,7 +886,7 @@ public class HouseWorkerService {
      * 保存巡查图片,验收节点图片等信息
      */
     private String setHouseFlowApplyImage(HouseFlowApply hfa, House house, String imageList) {
-        StringBuffer strbfr=new StringBuffer();
+        StringBuilder strbfr=new StringBuilder();
         if (StringUtil.isNotEmpty(imageList)) {
             JSONArray imageObjArr = JSON.parseArray(imageList);
             for (int i = 0; i < imageObjArr.size(); i++) {//上传材料照片

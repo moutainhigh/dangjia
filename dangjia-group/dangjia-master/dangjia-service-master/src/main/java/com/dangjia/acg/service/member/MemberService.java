@@ -701,7 +701,7 @@ public class MemberService {
             List<MemberCustomerDTO> mcDTOList = new ArrayList<>();
             for (Member member : list) {
                 logger.info("getMemberListByName id:" + member.getId());
-                Customer customer = iCustomerMapper.getCustomerByMemberId(member.getId());
+                Customer customer = iCustomerMapper.getCustomerBy(member.getId());
                 //每个业主增加关联 客服跟进
                 if (customer == null) {
                     customer = new Customer();
