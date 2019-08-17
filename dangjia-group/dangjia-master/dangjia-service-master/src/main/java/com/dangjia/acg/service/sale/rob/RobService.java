@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.sale.rob;
 
+import com.dangjia.acg.auth.config.RedisSessionDAO;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.ServerCode;
@@ -47,6 +48,8 @@ import com.dangjia.acg.service.house.HouseService;
 import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -379,7 +382,11 @@ public class RobService {
                     if (!CommonUtil.isEmpty(to.getHouseId())) {
                         WorkerTypeDTO workerTypeDTO = iMemberLabelMapper.queryWorkerType(to.getHouseId());
                         Integer wtd = iMemberLabelMapper.queryType(to.getHouseId());
+
+                        logger.info("workerTypeDTO==================="+ workerTypeDTO.getType());
+                        logger.info("wtd==================="+ wtd);
                         if(null != wtd){
+                            workerTypeDTO.setType(null);
                             workerTypeDTO.setType(wtd);
                         }
 
@@ -495,13 +502,8 @@ public class RobService {
         }
 
     }
+    private static Logger logger = LoggerFactory.getLogger(RedisSessionDAO.class);
 
-
-    public static void main(String[] args) {
-        List<Integer> list = new ArrayList<>();
-        list.add(1);
-        System.out.println(list.get(0));
-    }
 
     /**
      * 新增标签
