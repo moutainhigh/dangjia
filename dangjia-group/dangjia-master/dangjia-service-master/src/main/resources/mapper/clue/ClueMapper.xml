@@ -104,7 +104,8 @@
                 u.username as userName,
                 mc.phase_status as phaseStatus,
                 mc.user_id as userId,
-                mc.stage
+                mc.stage,
+                c.remark
             </if>
             from dj_clue c
             INNER JOIN dj_user u
