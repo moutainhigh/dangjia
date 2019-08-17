@@ -282,8 +282,7 @@
         ON mc.member_id=h.member_id
         INNER JOIN dj_member m
         on m.id=mc.member_id
-        WHERE mc.stage=4
-        and c.stage=4
+        WHERE h.visit_state=1
         and mc.phase_status=1
         and c.phase_status=1
         <if test="null!=userId and ''!=userId">
@@ -347,7 +346,7 @@
                 AND c.cus_service=#{staff}
             </if>
             <if test="null!=searchKey and ''!=searchKey">
-                AND CONCAT(name,phone,address) like CONCAT('%',#{searchKey},'%')
+                AND CONCAT(c.owername,c.phone) like CONCAT('%',#{searchKey},'%')
             </if>
             order by c.modify_date
             <if test="null!=time and ''!=time">
