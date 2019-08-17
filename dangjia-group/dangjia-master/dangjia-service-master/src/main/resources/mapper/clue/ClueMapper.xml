@@ -99,7 +99,7 @@
                 m.mobile as phone,
                 m.nick_name as owername,
                 mc.modify_date as modifyDate,
-                mc.create_date as createDate,
+                m.create_date as createDate,
                 mc.label_id_arr as labelId,
                 u.username as userName,
                 mc.phase_status as phaseStatus,
