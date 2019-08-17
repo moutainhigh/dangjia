@@ -250,10 +250,13 @@
         INNER JOIN dj_member_customer mc
         ON mc.member_id=c.member_id
         and mc.user_id=c.cus_service
-        WHERE c.data_status = 0
+        INNER JOIN dj_house h
+        ON h.member_id = mc.member_id
+        WHERE
+        h.visit_state=1
+        and mc.phase_status=1
+        and c.phase_status=1c.data_status = 0
         and mc.data_status = 0
-        and mc.stage=4
-        and c.stage=4
         and c.cus_service=#{userId}
         and date_format(mc.modify_date,'%Y-%m')=#{time}
     </select>

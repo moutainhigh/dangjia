@@ -185,7 +185,7 @@
 
     <update id="turnOut">
         update dj_member_customer mc
-        inner join dj_clue c
+        left join dj_clue c
         on mc.member_id=c.member_id
         and c.cus_service=mc.user_id
         set c.cus_service=#{userId},
