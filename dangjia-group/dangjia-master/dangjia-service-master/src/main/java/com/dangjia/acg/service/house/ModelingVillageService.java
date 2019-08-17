@@ -134,7 +134,6 @@ public class ModelingVillageService {
             JSONObject villageObj = JSONObject.parseObject(jsonStr);
             String villageId = villageObj.getString("id");//小区id
             String villageName = villageObj.getString("name");//小区name
-            Date modifyDate = DateUtil.toDate(villageObj.getString("modifyDate"));
             if (!StringUtils.isNotBlank(villageName))
                 return ServerResponse.createByErrorMessage("小区名称不能为空");
             ModelingVillage modelingVillage; //新增的 小区id
@@ -169,6 +168,7 @@ public class ModelingVillageService {
                 JSONObject obj = residentialBuildingArr.getJSONObject(i);
                 String residentialBuildingId = obj.getString("id");//楼栋id
                 String building = obj.getString("building");//楼栋名称
+                Date modifyDate = DateUtil.toDate(obj.getString("modifyDate"));
                 if (CommonUtil.isEmpty(building))
                     return ServerResponse.createByErrorMessage("楼栋名称不能为空");
                 ResidentialBuilding residentialBuilding;

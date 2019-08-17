@@ -48,6 +48,7 @@ import com.dangjia.acg.service.house.HouseService;
 import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.collections.map.HashedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -248,6 +249,11 @@ public class RobService {
         try {
             if (!CommonUtil.isEmpty(djAlreadyRobSingle)) {
 
+                Example example=new Example(DjAlreadyRobSingle.class);
+                example.createCriteria().andEqualTo(DjAlreadyRobSingle.CLUE_ID,djAlreadyRobSingle.getClueId());
+                if(djAlreadyRobSingleMapper.selectByExample(example).size()>0){
+                    return ServerResponse.createByErrorMessage("该订单已被抢");
+                }
                 Object object = constructionService.getAccessToken(userToken);
                 if (object instanceof ServerResponse) {
                     return (ServerResponse) object;
@@ -388,7 +394,7 @@ public class RobService {
                 robArrInFoDTO.setIntentionHouseList(intentionHouseList);
             }
 
-
+            List<UserAchievementDTO> uadto=new ArrayList<>();
             if (!CommonUtil.isEmpty(robInfoDTO)) {
                 for (RobInfoDTO to : robInfoDTO) {
                     //查询大管家信息
@@ -429,8 +435,15 @@ public class RobService {
                             }
                         }
                     }
+                    Map<String,Object> parmMap=new HashedMap();
+                    parmMap.put("userId",to.getCusService());
+                    parmMap.put("houseId",to.getHouseId());
+                    //查询业绩
+                    uadto.addAll(clueMapper.queryUserAchievementInFo(parmMap));
                 }
             }
+
+            robArrInFoDTO.setUserInFo(uadto);
 
             //查询客户标签
             if (!CommonUtil.isEmpty(robInfoDTO)) {
@@ -450,32 +463,6 @@ public class RobService {
                 }
                 robArrInFoDTO.setData(data);
             }
-
-            //销售人员订单数量
-            List<UserAchievementDTO> uadto = clueMapper.queryUserAchievementInFo(map);
-
-            //全部提成数量
-            int arrRoyalty = 1000;
-            int s = 0;
-            //每条数据当月提成
-            if (!uadto.isEmpty()) {
-                for (UserAchievementDTO to : uadto) {
-                    if (to.getVisitState() == 1) {
-                        s = (int) (arrRoyalty * 0.75);
-                        to.setMonthRoyaltys(s);
-                        to.setMeterRoyaltys(s);
-                    }
-                    if (to.getVisitState() == 3) {
-                        s = (int) (arrRoyalty * 0.25);
-                        to.setMonthRoyaltys(s);
-                        to.setMeterRoyaltys(arrRoyalty);
-                    }
-                    to.setHead(imageAddress + to.getHead());
-                    to.setArrRoyalty(arrRoyalty);
-                }
-                robArrInFoDTO.setUserInFo(uadto.get(0));
-            }
-
 
             robArrInFoDTO.setCustomerList(robInfoDTO);
             if (CommonUtil.isEmpty(robArrInFoDTO)) {

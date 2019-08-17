@@ -470,23 +470,18 @@
 
     <select id="queryUserAchievementInFo" resultType="com.dangjia.acg.dto.sale.achievement.UserAchievementDTO" parameterType="java.util.HashMap">
         select
-        m.name as name,
-        m.nick_name as nickName,
-        m.head as head,
-        h.visit_state as visitState,
-        mc.user_id as userId
-        from
-        dj_member_customer mc inner join dj_house h
-        on mc.member_id = h.member_id
-        inner join dj_member m on m.id = mc.member_id
-        where 1=1
-        <if test="null != userId and '' != userId">
-            and mc.user_id = #{userId}
-        </if>
-        <if test="null != memberId and '' != memberId">
-            and h.member_id = #{memberId}
-        </if>
-            and (h.visit_state = 1 or h.visit_state = 3)
+            u.username as name,
+            m.head,
+            rm.month_royalty as monthRoyaltys,
+            meter_royalty as meterRoyaltys,
+            arr_royalty as arrRoyalty
+            FROM dj_user u
+            INNER JOIN dj_royalty_match rm
+            on u.id=rm.user_id
+            INNER JOIN dj_member m
+            on u.member_id=m.id
+        where rm.house_id=#{houseId}
+        and rm.user_id=#{userId}
     </select>
 
 

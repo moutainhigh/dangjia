@@ -78,7 +78,7 @@ public class RobArrInFoDTO {
     private List<RobInfoDTO> customerList;
 
     @ApiModelProperty("销售业绩")
-    UserAchievementDTO userInFo;
+    List<UserAchievementDTO> userInFo;
 
     @ApiModelProperty("意向房屋信息")
     private List<IntentionHouseDTO> intentionHouseList;
