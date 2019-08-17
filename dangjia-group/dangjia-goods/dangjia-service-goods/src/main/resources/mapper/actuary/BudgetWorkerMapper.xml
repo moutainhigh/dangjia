@@ -174,6 +174,7 @@
 		FROM dj_actuary_budget_worker
 		WHERE house_id=#{houseId}
 		and worker_type_id =#{workerTypeId}
+		and delete_state!=1
 		ORDER BY worker_goods_sn and create_date desc
 	</select>
 
