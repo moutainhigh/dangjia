@@ -379,7 +379,10 @@ public class RobService {
                     if (!CommonUtil.isEmpty(to.getHouseId())) {
                         WorkerTypeDTO workerTypeDTO = iMemberLabelMapper.queryWorkerType(to.getHouseId());
                         List<WorkerTypeDTO> wtd = iMemberLabelMapper.queryType(to.getHouseId());
-                        workerTypeDTO.setType(wtd.get(0).getType());
+                        if(!wtd.isEmpty()){
+                            workerTypeDTO.setType(wtd.get(0).getType());
+                        }
+
                         if (null != workerTypeDTO) {
                             workerTypeDTO.setHead(imageAddress + workerTypeDTO.getHead());
                         }
