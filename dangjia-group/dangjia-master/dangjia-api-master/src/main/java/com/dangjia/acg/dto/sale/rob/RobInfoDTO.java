@@ -34,6 +34,9 @@ public class RobInfoDTO {
     @ApiModelProperty("数据状态 0=正常，1=删除")
     private Integer dataStatus;
 
+    @ApiModelProperty("下单时间")
+    private Date constructionDate;// 创建日期
+
     @ApiModelProperty("销售id")
     private String userId;
 
