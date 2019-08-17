@@ -438,6 +438,7 @@
         mc.user_id as userId,
         mc.member_id as memberId,
         mc.label_id_arr as labelIdArr,
+        mc.create_date as mcCreateDate,
         mc.stage as stage
         from dj_clue c
         <if test="stage == 4 or stage == 5">

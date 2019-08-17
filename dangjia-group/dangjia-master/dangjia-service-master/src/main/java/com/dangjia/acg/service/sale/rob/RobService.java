@@ -347,6 +347,7 @@ public class RobService {
                         djAlreadyRobSingle.size()> 0 ?djAlreadyRobSingle.get(0).getId():null);
                 robArrInFoDTO.setOwerName(robInfoDTO.get(0).getOwerName());
                 robArrInFoDTO.setPhone(robInfoDTO.get(0).getPhone());
+                robArrInFoDTO.setMcCreateDate(robInfoDTO.get(0).getMcCreateDate());
                 robArrInFoDTO.setWechat(robInfoDTO.get(0).getWechat());
                 robArrInFoDTO.setRemark(robInfoDTO.get(0).getRemark());
                 robArrInFoDTO.setMemberId(robInfoDTO.get(0).getMemberId());

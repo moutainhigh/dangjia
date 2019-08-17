@@ -29,7 +29,6 @@ import com.dangjia.acg.mapper.store.IStoreUserMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.modle.clue.Clue;
 import com.dangjia.acg.modle.home.IntentionHouse;
-import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.ModelingVillage;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Customer;
@@ -769,9 +768,6 @@ public class ClientService {
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse setWithdraw(String mcId, String houseId,String alreadyId) {
         Customer customer = iCustomerMapper.selectByPrimaryKey(mcId);
-        House house = new House();
-        house.setId(houseId);
-        house.setDataStatus(1);
         Example example=new Example(Customer.class);
         example.createCriteria().andEqualTo(Customer.MEMBER_ID,customer.getMemberId());
         Customer customer1=new Customer();
@@ -786,7 +782,7 @@ public class ClientService {
         if(!CommonUtil.isEmpty(alreadyId)){
             djAlreadyRobSingleMapper.deleteByPrimaryKey(alreadyId);
         }
-        if (iHouseMapper.updateByPrimaryKeySelective(house) > 0 && iCustomerMapper.updateByExampleSelective(customer1,example)>0 &&clueMapper.updateByExampleSelective(clue,example)>0) {
+        if (iHouseMapper.deleteByPrimaryKey(houseId) > 0 && iCustomerMapper.updateByExampleSelective(customer1,example)>0 &&clueMapper.updateByExampleSelective(clue,example)>0) {
             return ServerResponse.createBySuccessMessage("撤回成功");
         } else {
             return ServerResponse.createByErrorMessage("撤回失败");
