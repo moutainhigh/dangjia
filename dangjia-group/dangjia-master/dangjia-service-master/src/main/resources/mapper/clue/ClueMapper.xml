@@ -255,7 +255,8 @@
         WHERE
         h.visit_state=1
         and mc.phase_status=1
-        and c.phase_status=1c.data_status = 0
+        and c.phase_status=1
+        and c.data_status = 0
         and mc.data_status = 0
         and c.cus_service=#{userId}
         and date_format(mc.modify_date,'%Y-%m')=#{time}
