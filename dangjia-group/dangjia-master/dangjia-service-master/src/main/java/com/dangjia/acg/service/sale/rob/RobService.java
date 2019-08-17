@@ -244,9 +244,21 @@ public class RobService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse upDateIsRobStats(DjAlreadyRobSingle djAlreadyRobSingle) {
+    public ServerResponse upDateIsRobStats(DjAlreadyRobSingle djAlreadyRobSingle,String userToken) {
         try {
             if (!CommonUtil.isEmpty(djAlreadyRobSingle)) {
+
+                Object object = constructionService.getAccessToken(userToken);
+                if (object instanceof ServerResponse) {
+                    return (ServerResponse) object;
+                }
+                AccessToken accessToken = (AccessToken) object;
+                if (CommonUtil.isEmpty(accessToken.getUserId())) {
+                    return ServerResponse.createbyUserTokenError();
+                }
+
+                djAlreadyRobSingle.setUserId(accessToken.getUserId());
+
                 //新增抢单表数据
                 djAlreadyRobSingleMapper.insert(djAlreadyRobSingle);
 

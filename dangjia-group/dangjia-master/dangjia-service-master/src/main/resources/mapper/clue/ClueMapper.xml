@@ -250,10 +250,13 @@
         INNER JOIN dj_member_customer mc
         ON mc.member_id=c.member_id
         and mc.user_id=c.cus_service
-        WHERE c.data_status = 0
+        INNER JOIN dj_house h
+        ON h.member_id = mc.member_id
+        WHERE
+        h.visit_state=1
+        and mc.phase_status=1
+        and c.phase_status=1c.data_status = 0
         and mc.data_status = 0
-        and mc.stage=4
-        and c.stage=4
         and c.cus_service=#{userId}
         and date_format(mc.modify_date,'%Y-%m')=#{time}
     </select>
@@ -421,6 +424,7 @@
             h.is_rob_stats as isRobStats,
             h.number as houseNumber,
             h.house_type as houseType,
+            h.construction_date as constructionDate,
         </if>
         c.create_date as createDate,
         c.owername as owerName,
@@ -444,6 +448,10 @@
         <if test="stage == 4 or stage == 5">
             INNER JOIN dj_house h
             on h.member_id = c.member_id
+        </if>
+        <if test="visitState == 1">
+            INNER JOIN dj_already_rob_single ars
+            ON ars.user_id = c.cus_service AND ars.house_id = h.id
         </if>
         INNER JOIN
         dj_member_customer mc on c.member_id = mc.member_id

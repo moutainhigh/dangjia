@@ -48,7 +48,8 @@ public interface RobAPI {
     @PostMapping(value = "sale/rob/upDateIsRobStats")
     @ApiOperation(value = "抢单", notes = "抢单")
     ServerResponse upDateIsRobStats(@RequestParam("request")HttpServletRequest request,
-                                    @RequestBody DjAlreadyRobSingle djAlreadyRobSingle);
+                                    @RequestBody DjAlreadyRobSingle djAlreadyRobSingle,
+                                    @RequestParam("userToken")String userToken);
 
 
     @PostMapping(value = "sale/rob/upDateAlready")

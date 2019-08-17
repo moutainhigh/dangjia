@@ -154,6 +154,8 @@ public class ClientService {
                 intentionHouse.setResidentialName(clue.getAddress());
                 intentionHouseMapper.insert(intentionHouse);
                 return ServerResponse.createByErrorMessage("该线索已存在录入为该线索的意向房子");
+            }else{
+                return ServerResponse.createByErrorMessage("该线索已存在");
             }
         }
         Example example = new Example(Member.class);

@@ -64,8 +64,9 @@ public class RobController implements RobAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse upDateIsRobStats(HttpServletRequest request, DjAlreadyRobSingle djAlreadyRobSingle) {
-        return robService.upDateIsRobStats(djAlreadyRobSingle);
+    public ServerResponse upDateIsRobStats(HttpServletRequest request,
+                                           DjAlreadyRobSingle djAlreadyRobSingle,String userToken) {
+        return robService.upDateIsRobStats(djAlreadyRobSingle,userToken);
     }
 
     /**
