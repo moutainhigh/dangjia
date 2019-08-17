@@ -110,7 +110,7 @@
         ORDER BY cwt.create_date DESC
     </select>
 
-    <select id="queryType" resultType="com.dangjia.acg.dto.member.WorkerTypeDTO">
+    <select id="queryType" resultType="java.lang.Integer" parameterType="java.lang.String">
         select
             cwt.type as type
         from
