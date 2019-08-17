@@ -381,16 +381,20 @@ public class RobService {
                     //查询大管家信息
                     if (!CommonUtil.isEmpty(to.getHouseId())) {
                         WorkerTypeDTO workerTypeDTO = iMemberLabelMapper.queryWorkerType(to.getHouseId());
+
                         if (null != workerTypeDTO) {
                             workerTypeDTO.setHead(imageAddress + workerTypeDTO.getHead());
 
-                            Integer wtd = iMemberLabelMapper.queryType(to.getHouseId());
-
-                            logger.info("workerTypeDTO==================="+ workerTypeDTO.getType());
-                            logger.info("wtd==================="+ wtd);
+                            WorkerTypeDTO wtd = iMemberLabelMapper.queryType(to.getHouseId());
                             if(null != wtd){
-                                workerTypeDTO.setType(null);
-                                workerTypeDTO.setType(wtd);
+                                workerTypeDTO.setType(wtd.getType());
+
+                                Map<String,Object> map1 = new HashMap<>();
+                                map1.put("houseId",to.getHouseId());
+                                map1.put("workerTypeId",wtd.getWorkerTypeId());
+                                map1.put("workerType",wtd.getType());
+                                String wtd2 = iMemberLabelMapper.queryWorkSteta(map1);
+                                workerTypeDTO.setWorkSteta(wtd2);
                             }
                         }
                         to.setWorkerTypeDTO(workerTypeDTO);

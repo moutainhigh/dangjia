@@ -110,14 +110,26 @@
         ORDER BY cwt.create_date DESC
     </select>
 
-    <select id="queryType" resultType="java.lang.Integer" parameterType="java.lang.String">
+    <select id="queryType" resultType="com.dangjia.acg.dto.member.WorkerTypeDTO" parameterType="java.lang.String">
         select
-            cwt.type as type
+            cwt.type as type,
+            chf.worker_type_id as workerTypeId
         from
         dj_core_house_flow chf INNER JOIN
         dj_core_worker_type cwt on chf.worker_type_id = cwt.id
         where chf.house_id = #{houseId}
         order by chf.sort DESC limit 1
+    </select>
+
+    <select id="queryWorkSteta" resultType="java.lang.String" parameterType="java.util.Map">
+        select
+            work_steta as workSteta
+        from
+        dj_core_house_flow chf
+        where chf.house_id = #{houseId}
+        and chf.worker_type_id = {workerTypeId}
+        and chf.worker_type = {workerType}
+
     </select>
 
     <select id="queryAddressName" resultType="java.lang.String" parameterType="java.lang.String">
