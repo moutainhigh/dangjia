@@ -378,9 +378,9 @@ public class RobService {
                     //查询大管家信息
                     if (!CommonUtil.isEmpty(to.getHouseId())) {
                         WorkerTypeDTO workerTypeDTO = iMemberLabelMapper.queryWorkerType(to.getHouseId());
-                        List<Integer> wtd = iMemberLabelMapper.queryType(to.getHouseId());
-                        if(wtd.size() > 0){
-                            workerTypeDTO.setType(wtd.get(0));
+                        Integer wtd = iMemberLabelMapper.queryType(to.getHouseId());
+                        if(null != wtd){
+                            workerTypeDTO.setType(wtd);
                         }
 
                         if (null != workerTypeDTO) {
@@ -496,6 +496,12 @@ public class RobService {
 
     }
 
+
+    public static void main(String[] args) {
+        List<Integer> list = new ArrayList<>();
+        list.add(1);
+        System.out.println(list.get(0));
+    }
 
     /**
      * 新增标签
