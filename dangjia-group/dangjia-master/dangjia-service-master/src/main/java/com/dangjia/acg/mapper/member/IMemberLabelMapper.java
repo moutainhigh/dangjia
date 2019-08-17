@@ -77,6 +77,13 @@ public interface IMemberLabelMapper extends Mapper<MemberLabel> {
     WorkerTypeDTO queryWorkerType(@Param("houseId") String houseId);
 
 
+    /**
+     * 查询装修状态
+     * @param houseId
+     * @return
+     */
+    List<WorkerTypeDTO> queryType(@Param("houseId") String houseId);
+
     String queryAddressName(@Param("houseId") String houseId);
 
 }

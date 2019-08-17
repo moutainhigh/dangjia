@@ -378,6 +378,8 @@ public class RobService {
                     //查询大管家信息
                     if (!CommonUtil.isEmpty(to.getHouseId())) {
                         WorkerTypeDTO workerTypeDTO = iMemberLabelMapper.queryWorkerType(to.getHouseId());
+                        List<WorkerTypeDTO> wtd = iMemberLabelMapper.queryType(to.getHouseId());
+                        workerTypeDTO.setType(wtd.get(0).getType());
                         if (null != workerTypeDTO) {
                             workerTypeDTO.setHead(imageAddress + workerTypeDTO.getHead());
                         }
