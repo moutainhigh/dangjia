@@ -248,6 +248,11 @@ public class RobService {
         try {
             if (!CommonUtil.isEmpty(djAlreadyRobSingle)) {
 
+                Example example=new Example(DjAlreadyRobSingle.class);
+                example.createCriteria().andEqualTo(DjAlreadyRobSingle.CLUE_ID,djAlreadyRobSingle.getClueId());
+                if(djAlreadyRobSingleMapper.selectByExample(example).size()>0){
+                    return ServerResponse.createByErrorMessage("该订单已被抢");
+                }
                 Object object = constructionService.getAccessToken(userToken);
                 if (object instanceof ServerResponse) {
                     return (ServerResponse) object;
@@ -451,7 +456,7 @@ public class RobService {
                 robArrInFoDTO.setData(data);
             }
 
-            //销售人员订单数量
+            //查询业绩
             List<UserAchievementDTO> uadto = clueMapper.queryUserAchievementInFo(map);
 
             //全部提成数量
