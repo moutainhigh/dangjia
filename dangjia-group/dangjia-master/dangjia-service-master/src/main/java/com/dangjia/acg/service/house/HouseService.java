@@ -475,7 +475,7 @@ public class HouseService {
                 example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, house.getId()).andEqualTo(HouseFlow.WORKER_TYPE_ID, workerType.getId());
                 List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
                 if (houseFlowList.size() > 0) {
-                    return ServerResponse.createByErrorMessage("生成精算houseFlow异常");
+//                    return ServerResponse.createByErrorMessage("生成精算houseFlow异常");
                 } else {
                     houseFlow = new HouseFlow(true);
                     houseFlow.setCityId(house.getCityId());
