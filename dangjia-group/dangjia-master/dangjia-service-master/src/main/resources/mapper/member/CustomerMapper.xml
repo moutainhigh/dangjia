@@ -82,6 +82,7 @@
         on c.member_id=m.id
         WHERE c.cus_service=#{userId}
         AND c.data_status=0
+        AND c.turn_status=1
         <if test="null!=searchKey and ''!=searchKey">
             AND CONCAT(c.owername,c.phone,m.nick_name) like CONCAT('%',#{searchKey},'%')
         </if>
