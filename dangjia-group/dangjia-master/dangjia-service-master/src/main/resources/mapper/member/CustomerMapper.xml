@@ -72,7 +72,7 @@
         c.wechat,
         c.modify_date AS modifyDate,
         c.create_date AS createDate,
-        if(c.label_id_arr is not null,mc.label_id_arr,c.label_id_arr) AS labelIdArr,
+        if(c.label_id is not null,mc.label_id_arr,c.label_id) AS labelIdArr,
         c.phase_status as phaseStatus,
         c.stage
         FROM dj_clue c
