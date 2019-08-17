@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 标签表dao层
@@ -82,7 +83,16 @@ public interface IMemberLabelMapper extends Mapper<MemberLabel> {
      * @param houseId
      * @return
      */
-    Integer queryType(@Param("houseId") String houseId);
+    WorkerTypeDTO queryType(@Param("houseId") String houseId);
+
+
+    /**
+     * 查询装修状态
+     * @param map
+     * @return
+     */
+    String queryWorkSteta(Map<String,Object> map);
+
 
     String queryAddressName(@Param("houseId") String houseId);
 

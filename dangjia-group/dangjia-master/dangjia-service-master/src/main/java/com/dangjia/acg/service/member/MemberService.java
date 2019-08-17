@@ -707,7 +707,18 @@ public class MemberService {
                 if (customer == null) {
                     customer = new Customer();
                     customer.setMemberId(member.getId());
-                    customer.setStage(0);
+                    customer.setStage(1);
+                    customer.setTurnStatus(0);
+                    customer.setPhaseStatus(1);
+                    customer.setClueType(0);
+                    customer.setDataStatus(0);
+                    customer.setTips("0");
+                    Example example=new Example(MemberCity.class);
+                    example.createCriteria().andEqualTo(MemberCity.MEMBER_ID,member.getId());
+                    List<MemberCity> memberCities = memberCityMapper.selectByExample(example);
+                    customer.setCityId(memberCities.size()>0?memberCities.get(0).getCityId():null);
+                    customer.setPhaseStatus(1);
+                    iCustomerMapper.insert(customer);
                 } else {
                     if (customer.getRemindRecordId() != null)//有提醒记录的 更新 为最新的更新沟通记录
                     {

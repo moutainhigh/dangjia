@@ -347,6 +347,7 @@ public class RobService {
                         djAlreadyRobSingle.size()> 0 ?djAlreadyRobSingle.get(0).getId():null);
                 robArrInFoDTO.setOwerName(robInfoDTO.get(0).getOwerName());
                 robArrInFoDTO.setPhone(robInfoDTO.get(0).getPhone());
+                robArrInFoDTO.setMcCreateDate(robInfoDTO.get(0).getMcCreateDate());
                 robArrInFoDTO.setWechat(robInfoDTO.get(0).getWechat());
                 robArrInFoDTO.setRemark(robInfoDTO.get(0).getRemark());
                 robArrInFoDTO.setMemberId(robInfoDTO.get(0).getMemberId());
@@ -381,16 +382,20 @@ public class RobService {
                     //查询大管家信息
                     if (!CommonUtil.isEmpty(to.getHouseId())) {
                         WorkerTypeDTO workerTypeDTO = iMemberLabelMapper.queryWorkerType(to.getHouseId());
+
                         if (null != workerTypeDTO) {
                             workerTypeDTO.setHead(imageAddress + workerTypeDTO.getHead());
 
-                            Integer wtd = iMemberLabelMapper.queryType(to.getHouseId());
-
-                            logger.info("workerTypeDTO==================="+ workerTypeDTO.getType());
-                            logger.info("wtd==================="+ wtd);
+                            WorkerTypeDTO wtd = iMemberLabelMapper.queryType(to.getHouseId());
                             if(null != wtd){
-                                workerTypeDTO.setType(null);
-                                workerTypeDTO.setType(wtd);
+                                workerTypeDTO.setType(wtd.getType());
+
+                                Map<String,Object> map1 = new HashMap<>();
+                                map1.put("houseId",to.getHouseId());
+                                map1.put("workerTypeId",wtd.getWorkerTypeId());
+                                map1.put("workerType",wtd.getType());
+                                String wtd2 = iMemberLabelMapper.queryWorkSteta(map1);
+                                workerTypeDTO.setWorkSteta(wtd2);
                             }
                         }
                         to.setWorkerTypeDTO(workerTypeDTO);

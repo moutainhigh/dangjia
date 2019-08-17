@@ -99,12 +99,13 @@
                 m.mobile as phone,
                 m.nick_name as owername,
                 mc.modify_date as modifyDate,
-                mc.create_date as createDate,
+                m.create_date as createDate,
                 mc.label_id_arr as labelId,
                 u.username as userName,
                 mc.phase_status as phaseStatus,
                 mc.user_id as userId,
-                mc.stage
+                mc.stage,
+                c.remark
             </if>
             from dj_clue c
             INNER JOIN dj_user u
@@ -282,8 +283,7 @@
         ON mc.member_id=h.member_id
         INNER JOIN dj_member m
         on m.id=mc.member_id
-        WHERE mc.stage=4
-        and c.stage=4
+        WHERE h.visit_state=1
         and mc.phase_status=1
         and c.phase_status=1
         <if test="null!=userId and ''!=userId">
@@ -347,7 +347,7 @@
                 AND c.cus_service=#{staff}
             </if>
             <if test="null!=searchKey and ''!=searchKey">
-                AND CONCAT(name,phone,address) like CONCAT('%',#{searchKey},'%')
+                AND CONCAT(c.owername,c.phone) like CONCAT('%',#{searchKey},'%')
             </if>
             order by c.modify_date
             <if test="null!=time and ''!=time">
@@ -438,6 +438,7 @@
         mc.user_id as userId,
         mc.member_id as memberId,
         mc.label_id_arr as labelIdArr,
+        mc.create_date as mcCreateDate,
         mc.stage as stage
         from dj_clue c
         <if test="stage == 4 or stage == 5">

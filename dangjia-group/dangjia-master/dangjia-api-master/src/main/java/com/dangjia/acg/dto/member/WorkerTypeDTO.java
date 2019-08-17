@@ -27,6 +27,13 @@ public class WorkerTypeDTO {
     @ApiModelProperty("1设计师，2精算师，3大管家,4拆除，6水电工，7防水，8泥工,9木工，10油漆工")
     private Integer type;
 
+    @ApiModelProperty("工种ID")
+    private String workerTypeId;
+
+    @ApiModelProperty("施工状态，0未开始 ，1阶段完工通过，2整体完工通过，3待交底，4施工中，5收尾施工")
+    private String workSteta;
+
+
 
     public String getTypeName(){
         if(null != getType() &&getType() == 1){
