@@ -67,23 +67,25 @@
         mc.id as mcId,
         mc.member_id as memberId,
         mc.user_id as userId,
-        c.owername as name,
+        if(c.owername is not null,m.nick_name,c.owername) as name,
         c.phone,
         c.wechat,
-        mc.modify_date AS modifyDate,
-        mc.create_date AS createDate,
-        mc.label_id_arr AS labelIdArr,
-        mc.phase_status as phaseStatus
-        FROM dj_member_customer mc
-        INNER join dj_clue c
-        ON mc.member_id=c.member_id
-        and mc.user_id=c.cus_service
-        WHERE mc.user_id=#{userId}
-        AND mc.data_status=0
+        c.modify_date AS modifyDate,
+        c.create_date AS createDate,
+        if(c.label_id_arr is not null,mc.label_id_arr,c.label_id_arr) AS labelIdArr,
+        c.phase_status as phaseStatus,
+        c.stage
+        FROM dj_clue c
+        LEFT JOIN dj_member_customer mc ON mc.user_id = c.cus_service
+        AND mc.member_id = c.member_id
+        LEFT JOIN dj_member m
+        on c.member_id=m.id
+        WHERE c.cus_service=#{userId}
+        AND c.data_status=0
         <if test="null!=searchKey and ''!=searchKey">
-            AND CONCAT(c.owername,c.phone) like CONCAT('%',#{searchKey},'%')
+            AND CONCAT(c.owername,c.phone,m.nick_name) like CONCAT('%',#{searchKey},'%')
         </if>
-        ORDER by mc.create_date
+        ORDER by c.create_date
         <if test="null!=time and ''!=time">
             desc
         </if>

@@ -747,7 +747,6 @@ public class ClientService {
         Store store = iStoreMapper.selectByPrimaryKey(storeId);
         if (phaseStatus == 0) {
             Clue clue = clueMapper.selectByPrimaryKey(id);
-            clue.setId(id);
             clue.setStoreId(storeId);
             clue.setCusService(store.getUserId());
             clue.setCityId(cityId);
