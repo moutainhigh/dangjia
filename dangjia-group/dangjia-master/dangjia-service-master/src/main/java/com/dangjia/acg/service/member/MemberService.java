@@ -3,6 +3,7 @@ package com.dangjia.acg.service.member;
 import com.dangjia.acg.api.MessageAPI;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.sup.SupplierProductAPI;
+import com.dangjia.acg.auth.config.RedisSessionDAO;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
@@ -709,10 +710,14 @@ public class MemberService {
                     customer.setStage(0);
                 } else {
                     if (customer.getRemindRecordId() != null)//有提醒记录的 更新 为最新的更新沟通记录
+                    {
                         customerRecordService.updateMaxNearRemind(customer);
+                    }
                 }
                 MemberCustomerDTO mcDTO = new MemberCustomerDTO();
                 mcDTO.setMcId(customer.getId());
+                logger.info("customer.getId()==================="+ customer.getId());
+                logger.info("customer.getPhaseStatus()==================="+ customer.getPhaseStatus());
                 mcDTO.setPhaseStatus(customer.getPhaseStatus());
                 mcDTO.setOrderDate(member.getModifyDate());
                 mcDTO.setMemberId(member.getId());
