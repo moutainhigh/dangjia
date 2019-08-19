@@ -503,24 +503,25 @@ public class ClientService {
             }
             Store store = (Store) object;
             List<StoreUserDTO> storeUsers = iStoreUserMapper.getStoreUsers(store.getId(), null, null);
-            CustomerIndexDTO customerIndexDTO = clueMapper.clientPage(0, null, storeUsers);
-            if (null != customerIndexDTO) {
-                customerIndexDTO.setTips(clueMapper.getTips(0, user.getId(), null) > 0 ? 1 : 0);
-            }
-            map.put("followList", customerIndexDTO);
+            if(storeUsers.size()>0) {
+                CustomerIndexDTO customerIndexDTO = clueMapper.clientPage(0, null, storeUsers);
+                if (null != customerIndexDTO) {
+                    customerIndexDTO.setTips(clueMapper.getTips(0, user.getId(), null) > 0 ? 1 : 0);
+                }
+                map.put("followList", customerIndexDTO);
 
-            customerIndexDTO = clueMapper.clientPage(1, null, storeUsers);
-            if (null != customerIndexDTO) {
-                customerIndexDTO.setTips(clueMapper.getTips(1, user.getId(), null) > 0 ? 1 : 0);
-            }
-            map.put("placeOrder", customerIndexDTO);
+                customerIndexDTO = clueMapper.clientPage(1, null, storeUsers);
+                if (null != customerIndexDTO) {
+                    customerIndexDTO.setTips(clueMapper.getTips(1, user.getId(), null) > 0 ? 1 : 0);
+                }
+                map.put("placeOrder", customerIndexDTO);
 
-            customerIndexDTO = clueMapper.clientPage(2, null, storeUsers);
-            if (null != customerIndexDTO) {
-                customerIndexDTO.setTips(clueMapper.getTips(2, user.getId(), null) > 0 ? 1 : 0);
+                customerIndexDTO = clueMapper.clientPage(2, null, storeUsers);
+                if (null != customerIndexDTO) {
+                    customerIndexDTO.setTips(clueMapper.getTips(2, user.getId(), null) > 0 ? 1 : 0);
+                }
+                map.put("completion", customerIndexDTO);
             }
-            map.put("completion", customerIndexDTO);
-
             List<CustomerIndexDTO> customerIndexDTOS = clueMapper.sleepingCustomer(store.getId(), null, "desc", null);
             if (customerIndexDTOS.size() > 0) {
                 customerIndexDTOS.get(0).setTips(clueMapper.getSleepingCustomerTips() > 0 ? 1 : 0);
