@@ -287,8 +287,7 @@
         ON mc.member_id=h.member_id
         INNER JOIN dj_member m
         on m.id=mc.member_id
-        WHERE h.visit_state=1
-        and mc.phase_status=1
+        WHERE mc.phase_status=1
         and c.phase_status=1
         <if test="null!=userId and ''!=userId">
             and mc.user_id=#{userId}
