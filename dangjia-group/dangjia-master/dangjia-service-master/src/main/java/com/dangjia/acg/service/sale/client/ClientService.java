@@ -757,7 +757,7 @@ public class ClientService {
             clue.setCusService(store.getUserId());
             clue.setCityId(cityId);
             clue.setTurnStatus(1);
-            clueMapper.updateByPrimaryKeySelective(clue);
+            clueMapper.updateByPrimaryKey(clue);
         } else if (phaseStatus == 1) {
             Customer customer = iCustomerMapper.selectByPrimaryKey(id);
             Clue clue=new Clue();
@@ -773,7 +773,7 @@ public class ClientService {
             customer.setUserId(store.getUserId());
             customer.setStoreId(storeId);
             customer.setTurnStatus(1);
-            iCustomerMapper.updateByPrimaryKeySelective(customer);
+            iCustomerMapper.updateByPrimaryKey(customer);
         }
         return ServerResponse.createBySuccessMessage("操作成功");
     }
