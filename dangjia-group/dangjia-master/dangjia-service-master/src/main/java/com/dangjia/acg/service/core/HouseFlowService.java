@@ -520,7 +520,7 @@ public class HouseFlowService {
                         operator.setSurplusMoney(surplusMoney);
                         operator.setHaveMoney(haveMoney);
                         memberMapper.updateByPrimaryKeySelective(operator);
-                        configMessageService.addConfigMessage(null, "gj", operator.getId(), "0",
+                        configMessageService.addConfigMessage(null, AppType.GONGJIANG, operator.getId(), "0",
                                 "保险自动续保", "您的保险已到期,为确保您在施工期间的保障,系统已自动续保", "0");
                     }
                 }
