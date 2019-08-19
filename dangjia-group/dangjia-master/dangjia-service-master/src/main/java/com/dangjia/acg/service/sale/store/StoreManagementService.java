@@ -337,27 +337,26 @@ public class StoreManagementService {
      */
     public ServerResponse upDateCustomer(String clueId, String mcId, String cityId, Integer phaseStatus) {
         try {
-            Clue clue = new Clue();
-            Customer customer = new Customer();
+            Clue clue = clueMapper.selectByPrimaryKey(clueId);
+
             clue.setCusService(null);
             clue.setStoreId(null);
-            if (!CommonUtil.isEmpty(clueId)) {
-                clue.setId(clueId);
-            }
+
             if (!CommonUtil.isEmpty(cityId)) {
                 clue.setCityId(cityId);
-                customer.setCityId(cityId);
             }
             clue.setModifyDate(new Date());
             clue.setStage(1);
             //转出
             clue.setTurnStatus(1);
             //转出修改线索表
-            clueMapper.updateByPrimaryKeySelective(clue);
+            clueMapper.updateByPrimaryKey(clue);
             if (phaseStatus == 1) {
-                if (!CommonUtil.isEmpty(mcId)) {
-                    customer.setId(mcId);
+                Customer customer = iCustomerMapper.selectByPrimaryKey(mcId);
+                if (!CommonUtil.isEmpty(cityId)) {
+                    customer.setCityId(cityId);
                 }
+
                 customer.setModifyDate(new Date());
                 customer.setUserId(null);
                 customer.setStoreId(null);
