@@ -1284,7 +1284,6 @@ public class HouseService {
         pageResult.setList(listMap);
         return ServerResponse.createBySuccess("查询施工记录成功", pageResult);
     }
-
     /**
      * 施工记录（分类型）
      */
@@ -1292,7 +1291,6 @@ public class HouseService {
         List<HouseConstructionRecordTypeDTO> hfaList = houseConstructionRecordMapper.getHouseConstructionRecordTypeDTO(houseId);
         return ServerResponse.createBySuccess("查询施工记录成功", hfaList);
     }
-
     /**
      * 施工记录
      */
@@ -1307,7 +1305,7 @@ public class HouseService {
         }
         if (!CommonUtil.isEmpty(ids)) {
             String[] id = ids.split(",");
-            criteria.andIn(HouseConstructionRecord.ID, Arrays.asList(id));
+            criteria.andIn(HouseConstructionRecord.ID,  Arrays.asList(id));
         }
         if (!CommonUtil.isEmpty(workerType)) {
             criteria.andEqualTo(HouseConstructionRecord.WORKER_TYPE, workerType);
@@ -1653,6 +1651,7 @@ public class HouseService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("更新失败");
         }
+
     }
 
     public ServerResponse getHistoryWorker(String houseId, String workerTypeId, String workId, PageDTO pageDTO) {

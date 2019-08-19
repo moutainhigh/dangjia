@@ -748,6 +748,23 @@ public class DateUtil implements AutoCloseable, Serializable {
         return ca.getTime();
     }
 
+    /***
+     * 在当前日期上加多少年
+     *
+     * @param date 日期
+     * @param days 天数
+     * @return date
+     */
+    public static Date addDateYear(Date date, int days) {
+        if (date == null) {
+            return null;
+        }
+        Calendar ca = Calendar.getInstance();
+        ca.setTime(date);
+        ca.add(Calendar.YEAR, days);
+        return ca.getTime();
+    }
+
 
     /***
      * <p>在当前日期上减多少天 <p/>
@@ -1348,12 +1365,20 @@ public class DateUtil implements AutoCloseable, Serializable {
         return day + "," + hour + "," + min + "," + sec;
     }
 
-    public static void main(String[] args) {
-        List list=dayReportAll(2019,5);
-        for (Object o : list) {
-            System.out.println(o);
-        }
+    public static String getDiffTime2(Long time1, Long time2) {
+        long l = time1 - time2;
+        long day = l / (24 * 60 * 60 * 1000);
+        long hour = (l / (60 * 60 * 1000) - day * 24);
+        long min = ((l / (60 * 1000)) - day * 24 * 60 - hour * 60);
+        long sec = (l / 1000 - day * 24 * 60 * 60 - hour * 60 * 60 - min * 60);
+        return min + "分" + sec+"秒";
+    }
 
+    public static void main(String[] args) {
+        Date d = toDate("2019-08-15 17:00:00");
+        Date d2 = new Date();
+
+        System.out.println(getDiffTime2(d.getTime() , d2.getTime()));
     }
 
 }

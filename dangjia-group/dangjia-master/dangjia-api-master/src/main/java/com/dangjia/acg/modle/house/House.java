@@ -296,6 +296,7 @@ public class House extends BaseEntity {
         if (isIni) {
             this.type = 1;//0默认，1用户点击了开始装修，2代表老用户,默认生成 为0
             this.visitState = 0;//默认
+            this.siteDisplay = 0;//默认
             this.schedule = "0";//默认
             this.showHouse = 0;// 是否展示 0展示，1不展示,默认生成 为0
             this.taskNumber = 0;// 未处理任务数,默认生成为0

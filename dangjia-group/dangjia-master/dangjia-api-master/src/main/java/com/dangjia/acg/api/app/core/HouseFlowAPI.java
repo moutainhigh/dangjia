@@ -1,5 +1,6 @@
 package com.dangjia.acg.api.app.core;
 
+import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.core.HouseFlow;
 import io.swagger.annotations.Api;
@@ -35,6 +36,16 @@ public interface HouseFlowAPI {
     @ApiOperation(value = "放弃此单", notes = "放弃此单")
     ServerResponse setGiveUpOrder(@RequestParam("userToken") String userToken,
                                   @RequestParam("houseFlowId") String houseFlowId);
+
+    @PostMapping("app/core/houseFlow/autoGiveUpOrder")
+    @ApiOperation(value = "未购买保险自动放弃此单", notes = "未购买保险自动放弃此单")
+    ServerResponse autoGiveUpOrder();
+
+
+    @PostMapping("app/core/houseFlow/autoRenewOrder")
+    @ApiOperation(value = "施工中的工匠自动续保", notes = "施工中的工匠自动续保")
+    ServerResponse autoRenewOrder();
+
 
     @PostMapping("app/core/houseFlow/setRefuse")
     @ApiOperation(value = "拒单", notes = "拒单")

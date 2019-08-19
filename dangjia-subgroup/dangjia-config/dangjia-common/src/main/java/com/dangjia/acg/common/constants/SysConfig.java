@@ -66,5 +66,8 @@ public abstract class SysConfig {
     public static final ConfigBean<String> PUBLIC_QRCODE_PATH = new ConfigBean<>("PUBLIC_QRCODE_PATH",
             "qrcode/", "二维码保存目录", APP_TYPE);
 
+    public static final ConfigBean<String> INSURANCE_MONEY = new ConfigBean<String>("INSURANCE_MONEY",
+            "100", "工人购买保险金额", APP_TYPE);
+
 
 }

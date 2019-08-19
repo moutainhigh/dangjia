@@ -43,16 +43,23 @@ public interface EvaluateAPI {
     @PostMapping("app/worker/evaluate/materialRecord")
     @ApiOperation(value = "剩余材料登记", notes = "剩余材料登记")
     ServerResponse materialRecord(@RequestParam("userToken") String userToken,
-                           @RequestParam("houseFlowApplyId") String houseFlowApplyId,
-                           @RequestParam("content") String content, @RequestParam("star") int star
-                            ,@RequestParam("productArr") String productArr);
+                                  @RequestParam("houseFlowApplyId") String houseFlowApplyId,
+                                  @RequestParam("content") String content,
+                                  @RequestParam("star") int star,
+                                  @RequestParam("productArr") String productArr,
+                                  @RequestParam("imageList") String imageList,
+                                  @RequestParam("latitude") String latitude,
+                                  @RequestParam("longitude") String longitude);
 
     @PostMapping("app/worker/evaluate/checkOk")
     @ApiOperation(value = "管家审核通过工匠完工申请", notes = "管家审核通过工匠完工申请")
     ServerResponse checkOk(@RequestParam("userToken") String userToken,
                            @RequestParam("houseFlowApplyId") String houseFlowApplyId,
                            @RequestParam("content") String content,
-                           @RequestParam("star") int star);
+                           @RequestParam("star") int star,
+                           @RequestParam("imageList") String imageList,
+                           @RequestParam("latitude") String latitude,
+                           @RequestParam("longitude") String longitude);
 
     @PostMapping("app/worker/evaluate/saveEvaluateSupervisor")
     @ApiOperation(value = "业主评价管家完工", notes = "业主评价管家完工")

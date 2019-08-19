@@ -33,7 +33,8 @@ public interface HouseDistributionAPI {
                                         @RequestParam("pageDTO") PageDTO pageDTO,
                                         @RequestParam("houseDistribution") HouseDistribution houseDistribution,
                                         @RequestParam("startDate") String startDate,
-                                        @RequestParam("endDate") String endDate);
+                                        @RequestParam("endDate") String endDate,
+                                        @RequestParam("searchKey") String searchKey);
 
     /**
      * 新增

@@ -36,6 +36,15 @@ public class IndexPageController implements IndexPageAPI {
     public ServerResponse houseDetails(HttpServletRequest request, String houseId){
         return indexPageService.houseDetails(request,houseId);
     }
+    /**
+     * 施工现场详情
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse houseOtherDetails(HttpServletRequest request, String houseId){
+        return indexPageService.houseOtherDetails(request,houseId);
+    }
+
 
     /**
      * 工地标签详情

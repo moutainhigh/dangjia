@@ -290,6 +290,7 @@
 		FROM dj_actuary_budget_material
 		where house_id=#{houseId}
 		and worker_type_id =#{workerTypeId}
+		and delete_state!=1
 		ORDER BY category_id,create_date DESC
 	</select>
 
@@ -300,6 +301,7 @@
 		FROM dj_actuary_budget_material
 		where house_id=#{houseId}
 		and worker_type_id =#{workerTypeId}
+		and delete_state!=1
 		ORDER BY create_date desc
 	</select>
 

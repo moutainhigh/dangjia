@@ -21,7 +21,7 @@ public interface IWorkerGoodsMapper extends Mapper<WorkerGoods> {
 
     List<WorkerGoods> selectLists();
 
-    List<WorkerGoods> selectList(@Param("workerTypeId") String workerTypeId, @Param("searchKey") String searchKey, @Param("showGoods") String showGoods);
+    List<WorkerGoods> selectList(@Param("workerTypeId") String workerTypeId, @Param("searchKey") String searchKey, @Param("showGoods") String showGoods, @Param("istops") String istops);
 
     List<WorkerGoods> queryByName(@Param("name") String name, @Param("workerTypeId") String workerTypeId);//模糊查询
 

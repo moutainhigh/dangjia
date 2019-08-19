@@ -61,6 +61,25 @@ public class HouseFlowController implements HouseFlowAPI {
     }
 
     /**
+     * 工人30分钟自动放弃抢单任务，工人未购买保险或者保险服务剩余天数小于等于60天则自动放弃订单
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse autoGiveUpOrder() {
+        return houseFlowService.autoGiveUpOrder();
+    }
+
+    /**
+     * 工匠自动续保
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse autoRenewOrder() {
+        return houseFlowService.autoRenewOrder();
+    }
+    /**
      * 拒单
      *
      * @param userToken

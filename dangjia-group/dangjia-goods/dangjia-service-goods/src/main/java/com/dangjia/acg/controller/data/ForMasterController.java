@@ -2,6 +2,7 @@ package com.dangjia.acg.controller.data;
 
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.modle.basics.Goods;
@@ -82,6 +83,13 @@ public class ForMasterController implements ForMasterAPI {
     @ApiMethod
     public WorkerGoods getWorkerGoods(String cityId,String workerGoodsId){
         return forMasterService.getWorkerGoods(workerGoodsId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setProductOrWorkerGoodsIsTop(String gid, Integer type,String istop){
+        forMasterService.setProductOrWorkerGoodsIsTop(gid,type,istop);
+        return ServerResponse.createBySuccessMessage("置顶设置更新成功");
     }
     @Override
     @ApiMethod
