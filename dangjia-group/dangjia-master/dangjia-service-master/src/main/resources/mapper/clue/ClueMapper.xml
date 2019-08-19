@@ -458,6 +458,9 @@
         and mc.user_id = c.cus_service
         <where>
             1=1
+            <if test="stage == 4 or stage == 5">
+                and h.data_status = 0
+            </if>
             <if test="null != memberId and memberId !=''">
                and  c.member_id = #{memberId}
             </if>
