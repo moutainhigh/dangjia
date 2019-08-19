@@ -97,7 +97,7 @@
           c.id as clueId,
           mc.id as customerId,
           h.id as houseId,
-          if(m.name is not null,m.nick_name,m.name) as name,
+          if(m.nick_name is not null,m.nick_name,c.owername) as name,
           h.create_date AS createDate,
           h.visit_state as visitState,
           mc.user_id as userId,
