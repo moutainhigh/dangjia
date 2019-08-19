@@ -144,6 +144,7 @@ public class RobService {
                     robDTO.setList(labelByIds);
                 }
                 robDTO.setCusService(li.getCusService());
+                robDTO.setCreateDate(li.getCreateDate());
                 robDTO.setPhone(li.getPhone());
                 robDTO.setOwerName(li.getOwerName());
                 robDTO.setVisitState(li.getVisitState());
