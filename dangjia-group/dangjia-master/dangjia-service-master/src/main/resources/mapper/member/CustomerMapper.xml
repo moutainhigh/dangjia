@@ -67,12 +67,12 @@
         mc.id as mcId,
         mc.member_id as memberId,
         mc.user_id as userId,
-        if(c.owername is not null,m.nick_name,c.owername) as name,
+        if(c.owername is not null,c.owername,m.nick_name) as name,
         c.phone,
         c.wechat,
         c.modify_date AS modifyDate,
         c.create_date AS createDate,
-        if(c.label_id is not null,mc.label_id_arr,c.label_id) AS labelIdArr,
+        if(c.label_id is not null,c.label_id,mc.label_id_arr) AS labelIdArr,
         c.phase_status as phaseStatus,
         c.stage
         FROM dj_clue c
