@@ -147,7 +147,7 @@
             and date_format(rm.create_date,'%Y-%m') = #{time}
         </if>
         <if test="visitState != null">
-            and rm.order_status = #{visitState}
+            and h.visit_state = #{visitState}
         </if>
     </select>
 
