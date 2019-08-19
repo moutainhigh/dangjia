@@ -62,7 +62,6 @@
         INNER JOIN dj_house h ON hw.house_id=h.id
         WHERE
         h.visit_state =  1 AND hw.work_type =6 AND hw.worker_type >2
-        GROUP BY hw.worker_id
     </select>
     <!--根据workerTypeId和workType-->
     <select id="getByWorkerTypeId" resultType="com.dangjia.acg.modle.core.HouseWorker">

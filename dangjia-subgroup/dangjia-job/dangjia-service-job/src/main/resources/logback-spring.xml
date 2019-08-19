@@ -14,9 +14,35 @@
         <appender-ref ref="FILE"/>
     </appender>
 
-    <logger name="com.dangjia.acg" level="DEBUG"/>
-    <logger name="java.sql" level="debug" />
-    <logger name="org.mybatis" level="debug" />
-    <logger name="tk.mybatis" level="debug"></logger>
-    <logger name="org.apache.http" level="info"></logger>
+    <springProfile name="default">
+        <logger name="com.dangjia.acg" level="DEBUG"/>
+    </springProfile>
+    <springProfile name="dev">
+        <logger name="com.dangjia.acg" level="DEBUG"/>
+        <logger name="java.sql" level="debug" />
+        <logger name="org.mybatis" level="debug" />
+        <logger name="tk.mybatis" level="debug"></logger>
+        <logger name="org.apache.http" level="info"></logger>
+    </springProfile>
+    <springProfile name="test">
+        <logger name="com.dangjia.acg" level="DEBUG"/>
+        <logger name="java.sql" level="debug" />
+        <logger name="org.mybatis" level="debug" />
+        <logger name="tk.mybatis" level="debug"></logger>
+        <logger name="org.apache.http" level="info"></logger>
+    </springProfile>
+
+    <springProfile name="int">
+        <logger name="com.dangjia.acg" level="DEBUG"/>
+        <logger name="java.sql" level="debug" />
+        <logger name="org.mybatis" level="debug" />
+        <logger name="tk.mybatis" level="debug"></logger>
+        <logger name="org.apache.http" level="info"></logger>
+    </springProfile>
+
+    <root level="INFO">
+        <!--<appender-ref ref="ASYNC"/>-->
+        <!--<appender-ref ref="FILE"/>-->
+        <appender-ref ref="CONSOLE"/>
+    </root>
 </configuration>

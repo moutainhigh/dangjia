@@ -49,7 +49,6 @@ public class UserToKenAspect {
             } catch (Exception e) {
                 return ServerResponse.createbyUserTokenError();
             }
-
         }
         Object result;
         try {
