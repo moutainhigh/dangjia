@@ -653,7 +653,7 @@ public class ClientService {
                 list.add(saleClueDTO);
             }
             if(list.size()<=0){
-                return ServerResponse.createByErrorCodeMessage(ServerCode.WRONG_PARAM.getCode(),ServerCode.WRONG_PARAM.getDesc());
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
             }
             PageInfo pageResult = new PageInfo(list);
             return ServerResponse.createBySuccess("查询成功", pageResult);
