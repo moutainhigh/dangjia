@@ -229,8 +229,6 @@ public class WarehouseService {
                         warehouse.setOwnerBack((warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()));
                         warehouse.setWorkBack((warehouse.getWorkBack() == null ? 0D : warehouse.getWorkBack()));
                         BeanUtils.beanToBean(warehouse, warehouseDTO);
-                        warehouse.setOwnerBack((warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()));
-                        warehouse.setWorkBack((warehouse.getWorkBack() == null ? 0D : warehouse.getWorkBack()));
                         warehouseDTO.setImage(address + warehouse.getImage());
                         warehouseDTO.setShopCount(warehouse.getShopCount());
                         warehouseDTO.setRealCount(warehouse.getShopCount() - warehouse.getBackCount());

@@ -512,7 +512,7 @@ public class EngineerService {
         House house = houseMapper.selectByPrimaryKey(houseId);
         Example example = new Example(HouseFlow.class);
         example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, houseId);
-        example.orderBy(HouseFlow.SORT).asc();
+        example.orderBy(HouseFlow.SORT).desc();
         List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
         List<Map<String, Object>> mapList = new ArrayList<>();
         for (HouseFlow houseFlow : houseFlowList) {
