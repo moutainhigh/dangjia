@@ -687,6 +687,12 @@
         where c.member_id=#{memberId}
     </update>
 
+    <update id="updateStoreUser">
+        update dj_clue c
+        set c.store_id=#{storeId}
+        where c.cus_service=#{userId}
+    </update>
+
 
 </mapper>
 

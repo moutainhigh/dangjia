@@ -92,4 +92,6 @@ public interface ClueMapper extends Mapper<Clue> {
     List<GrabSheetDTO> notEnteredGrabSheet();
 
     int setDistribution(@Param("storeId") String storeId,@Param("memberId") String memberId);
+
+    int updateStoreUser(@Param("userId") String userId,@Param("storeId") String storeId);
 }

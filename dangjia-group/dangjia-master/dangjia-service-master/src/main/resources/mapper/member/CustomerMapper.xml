@@ -199,5 +199,11 @@
         where mc.id=#{id}
     </update>
 
+    <update id="updateStoreUser">
+        update dj_member_customer mc
+        set mc.store_id=#{storeId}
+        where mc.user_id=#{userId}
+    </update>
+
 </mapper>
 
