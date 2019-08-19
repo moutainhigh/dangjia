@@ -187,6 +187,7 @@ public class MyHouseService {
         houseResult.setHouseId(house.getId());
         Map<Integer, String> applyTypeMap = DjConstants.VisitState.getVisitStateMap();
         houseResult.setBuildStage(applyTypeMap.get(house.getVisitState()));
+        houseResult.setCreateDate(house.getCreateDate());
 
         HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart1(house.getId(), new Date());//查询今日开工记录
         if (todayStart == null) {//没有今日开工记录

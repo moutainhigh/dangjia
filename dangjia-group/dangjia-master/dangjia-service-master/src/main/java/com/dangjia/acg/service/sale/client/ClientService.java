@@ -652,6 +652,9 @@ public class ClientService {
                 saleClueDTO.setCommunicationDate(clueTalkMapper.getMaxDate(clueDTO.getClueId()));//沟通时间
                 list.add(saleClueDTO);
             }
+            if(list.size()<=0){
+                return ServerResponse.createByErrorCodeMessage(ServerCode.WRONG_PARAM.getCode(),ServerCode.WRONG_PARAM.getDesc());
+            }
             PageInfo pageResult = new PageInfo(list);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
