@@ -17,7 +17,7 @@
             and store_id=#{storeId}
         </if>
         and building LIKE CONCAT('%',#{building},'%')
-        and village_id=#{villageId}
+        and village_id=#{villageId} LIMIT 1
     </select>
 
     <select id="getvillageIdGroupBy" resultType="com.dangjia.acg.modle.sale.residential.ResidentialBuilding">
