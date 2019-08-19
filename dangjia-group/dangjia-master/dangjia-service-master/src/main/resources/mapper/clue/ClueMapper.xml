@@ -285,6 +285,9 @@
         on mc.user_id=u.id
         INNER JOIN dj_house h
         ON mc.member_id=h.member_id
+        INNER JOIN dj_already_rob_single ars
+        ON ars.user_id = c.cus_service
+        AND ars.house_id = h.id
         INNER JOIN dj_member m
         on m.id=mc.member_id
         WHERE mc.phase_status=1
