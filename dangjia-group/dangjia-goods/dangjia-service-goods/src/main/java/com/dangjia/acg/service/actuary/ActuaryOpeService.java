@@ -298,7 +298,7 @@ public class ActuaryOpeService {
                 }
                 budgetDTO.setBudgetItemDTOList(budgetItemDTOList);
             }
-            redisClient.put("HOUSEID-ACTUARY-"+houseId+type, SerializeUtils.serialize(budgetDTO));
+            redisClient.put("HOUSEID-ACTUARY-"+houseId+type, budgetDTO);
             return ServerResponse.createBySuccess("查询成功", budgetDTO);
         } catch (Exception e) {
             e.printStackTrace();
