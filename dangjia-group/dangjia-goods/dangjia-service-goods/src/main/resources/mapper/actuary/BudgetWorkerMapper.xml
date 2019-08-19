@@ -134,7 +134,7 @@
 			AND w.house_flow_id = #{houseFlowId}
 			AND w.delete_state = 3
 			AND ( w.shop_count + w.repair_count ) > 0
-			AND y.type IN ( 1, 3 )
+			AND y.type IN ( 2, 3 )
 		GROUP BY
 			y.id
 	</select>
@@ -174,6 +174,7 @@
 		FROM dj_actuary_budget_worker
 		WHERE house_id=#{houseId}
 		and worker_type_id =#{workerTypeId}
+		and delete_state!=1
 		ORDER BY worker_goods_sn and create_date desc
 	</select>
 

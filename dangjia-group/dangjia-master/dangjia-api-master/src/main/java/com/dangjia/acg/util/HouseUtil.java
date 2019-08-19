@@ -31,14 +31,14 @@ public class HouseUtil {
                 nodeDTO.setTotal(nameBs.length);
             } else {
                 nameBs = new String[]{"设计抢单", "支付设计费", "量房阶段", "设计平面图", "设计施工图", "设计完成"};
-                nameD = new String[]{"", "", "", "5天内提交,需业主确认", "2天内提交,需业主确认", ""};
+                nameD = new String[]{"", "", "", "2个工作日内提交,需业主确认", "7个工作日内提交,需业主确认", ""};
                 iconsY = new String[]{"zx_icon_1_2.png", "zx_icon_2_2.png", "zx_icon_3_2.png", "zx_icon_5_2.png", "zx_icon_6_2.png", "zx_icon_7_2.png"};
                 nodeDTO.setTotal(nameBs.length);
             }
             nodeDTO = getDesignDatas(house, nodeDTO);
         } else if (workerType.getType() == 2) {//精算
             nameBs = new String[]{"精算抢单", "支付精算费", "制作精算", "精算完成"};
-            nameD = new String[]{"", "", "3天内提交,需业主确认", ""};
+            nameD = new String[]{"", "", "3个工作日内提交,需业主确认", ""};
             iconsY = new String[]{"zx_icon_1_2.png", "zx_icon_2_2.png", "zx_icon_4_2.png", "zx_icon_7_2.png"};
             nodeDTO = getBudgetDatas(house, nodeDTO);
         } else if (workerType.getType() == 3) {//大管家

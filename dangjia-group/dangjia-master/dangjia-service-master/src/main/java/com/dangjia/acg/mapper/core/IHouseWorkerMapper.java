@@ -37,6 +37,7 @@ public interface IHouseWorkerMapper extends Mapper<HouseWorker> {
     Long getCountOrderByWorkerId(@Param("workerId") String workerId);
 
     List<HouseWorker> paidListByHouseId(@Param("houseId") String houseId);
+    List<HouseWorker> getWorkerHouse();
 
     List<HouseWorkerDTO> queryWorkerHouse(@Param("workerId") String workerId);
 

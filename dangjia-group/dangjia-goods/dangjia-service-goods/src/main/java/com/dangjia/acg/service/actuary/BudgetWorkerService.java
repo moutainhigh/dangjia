@@ -2,6 +2,7 @@ package com.dangjia.acg.service.actuary;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.app.core.HouseFlowAPI;
 import com.dangjia.acg.api.app.house.HouseAPI;
 import com.dangjia.acg.api.data.GetForBudgetAPI;
@@ -74,7 +75,8 @@ public class BudgetWorkerService {
     private WorkerGoodsService workerGoodsService;
     @Autowired
     private ProductService productService;
-
+    @Autowired
+    private RedisClient redisClient;
     @Autowired
     private IWorkerGoodsMapper workerGoodsMapper;
 
@@ -375,6 +377,8 @@ public class BudgetWorkerService {
 
             iBudgetMaterialMapper.deleteByhouseId(houseId, workerTypeId);
             iBudgetWorkerMapper.deleteByhouseId(houseId, workerTypeId);
+            redisClient.deleteCache("HOUSEID-ACTUARY-"+houseId+"1");
+            redisClient.deleteCache("HOUSEID-ACTUARY-"+houseId+"2");
             JSONArray goodsList = JSONArray.parseArray(listOfGoods);
             for (int i = 0; i < goodsList.size(); i++) {
                 JSONObject job = goodsList.getJSONObject(i);
@@ -743,26 +747,14 @@ public class BudgetWorkerService {
     public JSONArray getTecByHouseFlowId(String houseId, String houseFlowId) {
         try {
             JSONArray jsonArray = new JSONArray();
-            List<BudgetWorker> budgetWorkerList = iBudgetWorkerMapper.getByHouseFlowId(houseId, houseFlowId);
-            for (BudgetWorker abw : budgetWorkerList) {
-                if (abw.getShopCount() + abw.getRepairCount() - abw.getBackCount() > 0) {
-                    WorkerGoods wg = iWorkerGoodsMapper.selectByPrimaryKey(abw.getWorkerGoodsId());
-                    List<Technology> tList = iTechnologyMapper.patrolList(wg.getTechnologyIds());
-                    for (Technology t : tList) {
-                        JSONObject map = new JSONObject();
-                        map.put("technologyName", t.getName());
-                        map.put("content", t.getContent());
-                        jsonArray.add(map);
-                    }
-                }
+            List<Technology> tList = iBudgetWorkerMapper.getByHouseFlowTechnologyId(houseId, houseFlowId);
+            for (Technology t : tList) {
+                JSONObject map = new JSONObject();
+                map.put("technologyName", t.getName());
+                map.put("technologyId", t.getId());
+                map.put("content", t.getContent());
+                jsonArray.add(map);
             }
-//            List<Technology> tList = iBudgetWorkerMapper.getByHouseFlowTechnologyId(houseId, houseFlowId);
-//            for (Technology t : tList) {
-//                JSONObject map = new JSONObject();
-//                map.put("technologyName", t.getName());
-//                map.put("content", t.getContent());
-//                jsonArray.add(map);
-//            }
             return jsonArray;
         } catch (Exception e) {
             e.printStackTrace();

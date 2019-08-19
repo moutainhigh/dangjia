@@ -95,4 +95,10 @@ public class WebMemberController implements WebMemberAPI {
     public ServerResponse certificationAuditing(HttpServletRequest request, String userId, Integer realNameState, String realNameDescribe) {
         return memberService.certificationAuditing(userId, realNameState, realNameDescribe);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse  queryInsurances(HttpServletRequest request,String type, String searchKey,PageDTO pageDTO){
+        return memberService.queryInsurances(type, searchKey, pageDTO);
+    }
 }

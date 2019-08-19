@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.member.IMemberCollectMapper">
+    <sql id="basic_h_columns">
+        h.id,
+        h.building,
+        h.city_name as cityName,
+        h.residential,
+        h.type,
+        h.unit,
+        h.member_id as memberId,
+        h.task_number as taskNumber,
+        h.square,
+        h.number,
+        h.style,
+        h.designer_ok as designerOk,
+        h.budget_ok as budgetOk,
+        h.image,
+        h.decoration_type as decorationType,
+        h.city_id as cityId,
+        h.modeling_layout_id as modelingLayoutId,
+        h.money,
+        h.pause,
+        h.show_house as showHouse,
+        h.village_id as villageId,
+        h.refer_house_id as referHouseId,
+        h.have_complete as haveComplete,
+        h.record_type as recordType,
+        h.build_square as buildSquare,
+        h.again,
+        h.house_type as houseType,
+        h.drawings,
+        h.work_deposit_id as workDepositId,
+        h.custom_sort as customSort,
+        h.is_select as isSelect,
+        h.visit_state as visitState,
+        h.data_status as dataStatus,
+        h.create_date as createDate,
+        h.construction_date as constructionDate,
+        h.modify_date as modifyDate,
+        h.optional_label as optionalLabel
+    </sql>
+
+    <select id="queryCollectHouse" resultType="com.dangjia.acg.modle.house.House">
+        SELECT
+        <include refid="basic_h_columns"/>
+        FROM
+            `dj_member_collect` c
+        INNER JOIN dj_house h ON h.id = c.house_id
+        where 	c.data_status = 0
+        <if test="memberId!=null and memberId!=''">
+            AND c.member_id = #{memberId}
+        </if>
+        ORDER BY c.create_date DESC
+    </select>
+
+</mapper>
+

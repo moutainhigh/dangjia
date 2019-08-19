@@ -10,6 +10,7 @@ import lombok.experimental.FieldNameConstants;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 /**
  * 交底事项
@@ -46,7 +47,10 @@ public class WorkerDisclosure extends BaseEntity {
 	@Desc(value = "0:交底 1帮助")
 	@ApiModelProperty("0:交底 1帮助")
 	private Integer type; //
-	
+
+
+	@Transient
+	private String technologyId;
 }
 
 

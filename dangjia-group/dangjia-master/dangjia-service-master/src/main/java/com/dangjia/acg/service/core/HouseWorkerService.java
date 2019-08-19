@@ -27,6 +27,7 @@ import com.dangjia.acg.mapper.member.IMemberCityMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.other.IWorkDepositMapper;
 import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
+import com.dangjia.acg.mapper.worker.IInsuranceMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.complain.Complain;
@@ -38,6 +39,7 @@ import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberCity;
 import com.dangjia.acg.modle.other.WorkDeposit;
 import com.dangjia.acg.modle.repair.ChangeOrder;
+import com.dangjia.acg.modle.worker.Insurance;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.house.HouseService;
@@ -115,6 +117,8 @@ public class HouseWorkerService {
     @Autowired
     private IModelingVillageMapper modelingVillageMapper;
 
+    @Autowired
+    private IInsuranceMapper insuranceMapper;
     @Autowired
     private IMemberCityMapper memberCityMapper;
     /**
@@ -294,7 +298,7 @@ public class HouseWorkerService {
             houseWorker.setWorkType(1);//已抢单
             houseWorker.setIsSelect(1);
             houseWorkerMapper.insert(houseWorker);
-            
+
             Example example = new Example(MemberCity.class);
             example.createCriteria()
                     .andEqualTo(MemberCity.MEMBER_ID, worker.getId())
@@ -307,6 +311,20 @@ public class HouseWorkerService {
                 userCity.setCityName(house.getCityName());
                 memberCityMapper.insert(userCity);
             }
+            example = new Example(Insurance.class);
+            example.createCriteria().andEqualTo(Insurance.WORKER_ID, houseWorker.getWorkerId());
+            example.orderBy(Insurance.END_DATE).desc();
+            List<Insurance> insurances = insuranceMapper.selectByExample(example);
+
+            //保险服务剩余天数小于等于60天
+            Integer daynum=0;
+            if(insurances.size()>0){
+                daynum =DateUtil.daysofTwo(new Date(),insurances.get(0).getEndDate());
+            }
+            //工人未购买保险
+            if (houseFlow.getWorkerType()>2&&((insurances.size()==0) || (insurances.size()>0&daynum<=60))) {
+                //满足则不提醒业主
+            }else {
 //            3大管家,4拆除，6水电工，7防水，8泥工,9木工，10油漆工
             //通知业主设计师抢单成功
             if (worker.getWorkerType() == 1) {//设计师
@@ -332,7 +350,7 @@ public class HouseWorkerService {
                 HouseFlow houseFlowDgj = houseFlowMapper.getHouseFlowByHidAndWty(houseFlow.getHouseId(), 3);
                 configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlowDgj.getWorkerId(), "0", "工匠抢单提醒",
                         String.format(DjConstants.PushMessage.STEWARD_TWO_RUSH_TO_PURCHASE, house.getHouseName()), "4");
-            }
+            }}
             example = new Example(WorkerType.class);
             example.createCriteria().andEqualTo(WorkerType.TYPE, worker.getWorkerType());
             List<WorkerType> workerType = workerTypeMapper.selectByExample(example);
@@ -400,6 +418,26 @@ public class HouseWorkerService {
         House house = houseMapper.selectByPrimaryKey(hf.getHouseId());
         if (house == null) {
             return ServerResponse.createByErrorMessage("未找到该房产");
+        }
+        switch (applyType) {
+            case 0:
+                if(active!=null&&(active.equals("pre"))) {
+                    ModelingVillage village = modelingVillageMapper.selectByPrimaryKey(house.getVillageId());//小区
+                    if (village != null && village.getLocationx() != null && village.getLocationy() != null
+                            && latitude != null && longitude != null) {
+                        try {
+                            double longitude1 = Double.valueOf(longitude);
+                            double latitude1 = Double.valueOf(latitude);
+                            double longitude2 = Double.valueOf(village.getLocationx());
+                            double latitude2 = Double.valueOf(village.getLocationy());
+                            double distance = LocationUtils.getDistance(latitude1, longitude1, latitude2, longitude2);//计算距离
+                            if (distance > 1500) {
+                                return ServerResponse.createByErrorMessage("请确认您是否在小区范围内");
+                            }
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
         }
         switch (applyType) {
             case 0:
@@ -476,8 +514,10 @@ public class HouseWorkerService {
         }
         hfa.setOtherMoney((workPrice).subtract(haveMoney).subtract(hfa.getApplyMoney()));
 //        hfa.setApplyDec("我是" + workerType.getName() + ",我今天已经完工了");//描述
-        applyDec=setHouseFlowApplyImage(hfa, house, imageList);
-
+        String dec= setHouseFlowApplyImage(hfa, house, imageList);
+        if(!CommonUtil.isEmpty(dec)){
+            applyDec=dec;
+        }
         hfa.setApplyDec("尊敬的业主，您好！当家工匠【"+worker.getName()+"】为您新家施工，今日实际施工为:<br/>" +
                 applyDec +
                 "<br/>现向您发送完成情况，请您查收。");//描述
@@ -534,14 +574,8 @@ public class HouseWorkerService {
         }
         hfa.setOtherMoney(workPrice.subtract(haveMoney).subtract(hfa.getApplyMoney()));
 //        hfa.setApplyDec("我是" + workerType.getName() + ",我已申请了阶段完工");//描述
-        int nums=0;
-        if(!CommonUtil.isEmpty(imageList)){
-            JSONArray imageObjArr = JSON.parseArray(imageList);
-            nums=imageObjArr.size();
-        }
         hfa.setApplyDec("尊敬的业主，您好！<br/>" +
-                "当家工匠【"+worker.getName()+"】为您新家施工，工地【" + workerType.getName() + "】已阶段完工，剩余部分待其他工种完成后继续进行，严格按照平台施工验收标准进行施工，请您查收。<br/>" +
-                "【配图"+nums+"张以上】");//描述
+                "当家工匠【"+worker.getName()+"】为您新家施工，工地【" + workerType.getName() + "】已阶段完工，剩余部分待其他工种完成后继续进行，严格按照平台施工验收标准进行施工，请您查收。<br/>");//描述
         hfa.setSupervisorMoney(supervisorHF.getCheckMoney());//管家得相应验收收入
         //增加倒计时系统自动审核时间
         Calendar calendar = Calendar.getInstance();
@@ -607,14 +641,8 @@ public class HouseWorkerService {
         BigDecimal alsoMoney = new BigDecimal(workPrice.doubleValue() - haveMoney.doubleValue() - retentionMoney.doubleValue() - deductPrice.doubleValue());
         hfa.setApplyMoney(alsoMoney);
 //        hfa.setApplyDec("我是" + workerType.getName() + ",我已申请了整体完工");//描述
-        int nums=0;
-        if(!CommonUtil.isEmpty(imageList)){
-            JSONArray imageObjArr = JSON.parseArray(imageList);
-            nums=imageObjArr.size();
-        }
-        hfa.setApplyDec("尊敬的业主，您好！<br/>" +
-                "当家工匠【"+worker.getName()+"】为您新家施工，工地【" + workerType.getName() + "】已全部完工，严格按照平台施工验收标准进行施工，请您查收。<br/>" +
-                "【配图"+nums+"张以上】");//描述
+        hfa.setApplyDec("业主您好，我是大管家，我已验收了！<br/>" +
+                "当家工匠【"+worker.getName()+"】为您新家施工，工地【" + workerType.getName() + "】已全部完工，严格按照平台施工验收标准进行施工，请您查收。<br/>");//描述
         hfa.setSupervisorMoney(supervisorHF.getCheckMoney());//管家得相应验收收入
         //增加倒计时系统自动审核时间
         Calendar calendar = Calendar.getInstance();
@@ -632,23 +660,6 @@ public class HouseWorkerService {
      * 每日开工
      */
     private ServerResponse setStartDaily(Member worker, HouseFlow hf, House house, String latitude, String longitude, String imageList) {
-        if(active!=null&&(active.equals("pre"))) {
-            ModelingVillage village = modelingVillageMapper.selectByPrimaryKey(house.getVillageId());//小区
-            if (village != null && village.getLocationx() != null && village.getLocationy() != null
-                    && latitude != null && longitude != null) {
-                try {
-                    double longitude1 = Double.valueOf(longitude);
-                    double latitude1 = Double.valueOf(latitude);
-                    double longitude2 = Double.valueOf(village.getLocationx());
-                    double latitude2 = Double.valueOf(village.getLocationy());
-                    double distance = LocationUtils.getDistance(latitude1, longitude1, latitude2, longitude2);//计算距离
-                    if (distance > 1500) {
-                        return ServerResponse.createByErrorMessage("请确认您是否在小区范围内");
-                    }
-                } catch (Exception ignored) {
-                }
-            }
-        }
         WorkerType workerType = workerTypeMapper.selectByPrimaryKey(worker.getWorkerTypeId());
         if (hf.getWorkSteta() == 2) {
             return ServerResponse.createByErrorMessage("该工序（" + workerType.getName() + "）已经整体完工，无法开工");
@@ -751,6 +762,7 @@ public class HouseWorkerService {
         if (house.getPause() != null && house.getPause() == 1) {
             return ServerResponse.createByErrorMessage("该房子已暂停施工,请勿提交申请！");
         }
+
         HouseFlowApply hfa;
         if (applyType == 5) {//有人巡
             HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowId2);
@@ -885,16 +897,14 @@ public class HouseWorkerService {
     /**
      * 保存巡查图片,验收节点图片等信息
      */
-    private String setHouseFlowApplyImage(HouseFlowApply hfa, House house, String imageList) {
-        StringBuilder strbfr=new StringBuilder();
+    public String setHouseFlowApplyImage(HouseFlowApply hfa, House house, String imageList) {
+        StringBuffer strbfr=new StringBuffer();
         if (StringUtil.isNotEmpty(imageList)) {
             JSONArray imageObjArr = JSON.parseArray(imageList);
             for (int i = 0; i < imageObjArr.size(); i++) {//上传材料照片
                 JSONObject imageObj = imageObjArr.getJSONObject(i);
                 int imageType = Integer.parseInt(imageObj.getString("imageType"));
                 String imageTypeName = imageObj.getString("imageTypeName");
-                strbfr.append(imageTypeName);
-                strbfr.append("<br/>");
                 String imageUrl = imageObj.getString("imageUrl"); //图片,拼接
                 if (imageType == 3) {//节点图
                     String imageTypeId = imageObj.getString("imageTypeId");
@@ -914,6 +924,8 @@ public class HouseWorkerService {
                     technologyRecord.setState(0);//未验收
                     technologyRecord.setModifyDate(new Date());
                     technologyRecordMapper.insert(technologyRecord);
+                    strbfr.append(technology.getName());
+                    strbfr.append("<br/>");
                 } else {
                     String[] imageArr = imageUrl.split(",");
                     for (String anImageArr : imageArr) {

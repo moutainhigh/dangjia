@@ -66,7 +66,6 @@ public class HouseWorkerController implements HouseWorkerAPI {
         return constructionService.getConstructionView(request, userToken);
     }
 
-
     /**
      * 获取申请单明细
      */

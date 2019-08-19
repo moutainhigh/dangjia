@@ -1,6 +1,7 @@
 package com.dangjia.acg.dto.house;
 
 import com.dangjia.acg.common.util.CommonUtil;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.math.BigDecimal;

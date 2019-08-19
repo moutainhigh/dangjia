@@ -213,8 +213,10 @@ public class StewardService {
             for (int i = 0; i < jsonArray.size(); i++) {
                 JSONObject object = jsonArray.getJSONObject(i);
                 String technologyName = object.getString("technologyName");
+                String technologyId = object.getString("technologyId");
                 String content = object.getString("content");
                 WorkerDisclosure workerDisclosure = new WorkerDisclosure();
+                workerDisclosure.setTechnologyId(technologyId);
                 workerDisclosure.setName(technologyName);
                 workerDisclosure.setDetails(content);
                 wdList.add(workerDisclosure);
@@ -282,17 +284,17 @@ public class StewardService {
     public ServerResponse stewardQrcode(String houseFlowId, String disclosureIds) {
         try {
             //删除之前选中的
-            Example example = new Example(WorkerDisclosureHouseFlow.class);
-            example.createCriteria().andEqualTo(WorkerDisclosureHouseFlow.HOUSE_FLOW_ID, houseFlowId);
-            workerDisclosureHouseFlowMapper.deleteByExample(example);
-            String[] tellList = disclosureIds.split(",");
-            for (String tell : tellList) {
-                WorkerDisclosureHouseFlow wdh = new WorkerDisclosureHouseFlow();
-                wdh.setWorkerDiscloId(tell);
-                wdh.setHouseFlowId(houseFlowId);
-                wdh.setState(1);
-                workerDisclosureHouseFlowMapper.insert(wdh);
-            }
+//            Example example = new Example(WorkerDisclosureHouseFlow.class);
+//            example.createCriteria().andEqualTo(WorkerDisclosureHouseFlow.HOUSE_FLOW_ID, houseFlowId);
+//            workerDisclosureHouseFlowMapper.deleteByExample(example);
+//            String[] tellList = disclosureIds.split(",");
+//            for (String tell : tellList) {
+//                WorkerDisclosureHouseFlow wdh = new WorkerDisclosureHouseFlow();
+//                wdh.setWorkerDiscloId(tell);
+//                wdh.setHouseFlowId(houseFlowId);
+//                wdh.setState(1);
+//                workerDisclosureHouseFlowMapper.insert(wdh);
+//            }
             return ServerResponse.createBySuccess("操作成功", "http://weixin.fengjiangit.com/g.html?a=" + houseFlowId);
         } catch (Exception e) {
             e.printStackTrace();
@@ -319,10 +321,10 @@ public class StewardService {
             courseDTO.setRewardUrl(configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
                     String.format(DjConstants.GJPageAddress.JFREGULATIONS, userToken, houseFlow.getCityId(), "选择奖罚条例"));//奖罚页面
             if (houseFlow.getWorkType() == 4 && houseFlow.getWorkSteta() == 3) {//待交底
-                Example example = new Example(WorkerDisclosure.class);
-                example.createCriteria().andEqualTo("state", 1).andEqualTo("type", 0);
-                List<WorkerDisclosure> wdList = workerDisclosureMapper.selectByExample(example);
-                courseDTO.setWorkerDisclosureList(wdList);
+//                Example example = new Example(WorkerDisclosure.class);
+//                example.createCriteria().andEqualTo("state", 1).andEqualTo("type", 0);
+//                List<WorkerDisclosure> wdList = workerDisclosureMapper.selectByExample(example);
+//                courseDTO.setWorkerDisclosureList(wdList);
                 courseDTO.setApplyType(0);//没有申请
             } else {//施工中
                 HouseFlowApply hfa = houseFlowApplyMapper.getSupervisorCheck(houseFlow.getId(), houseFlow.getWorkerId());

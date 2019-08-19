@@ -23,49 +23,56 @@ public class PaymentController implements PaymentAPI {
 
     @Override
     @ApiMethod
-    public void budgetCorrect(String businessOrderNumber,  String payState, String houseFlowId){
-         paymentService.budgetCorrect(businessOrderNumber,payState,houseFlowId);
+    public void budgetCorrect(String businessOrderNumber, String payState, String houseFlowId) {
+        paymentService.budgetCorrect(businessOrderNumber, payState, houseFlowId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse setPaying(String userToken,String houseId){
+    public ServerResponse setPaying(String userToken, String houseId) {
         return paymentService.setPaying(houseId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse setPaySuccess(String userToken,String businessOrderNumber){
-        return paymentService.setPaySuccess(userToken,businessOrderNumber);
+    public ServerResponse setPaySuccess(String userToken, String businessOrderNumber) {
+        return paymentService.setPaySuccess(userToken, businessOrderNumber);
     }
+
     @Override
     @ApiMethod
-    public ServerResponse getWeiXinSign(String userToken, String businessOrderNumber){
-        return payService.getWeiXinSign(businessOrderNumber);
+    public ServerResponse getWeiXinSign(String userToken, String businessOrderNumber, Integer userRole) {
+        return payService.getWeiXinSign(businessOrderNumber, userRole);
     }
+
     @Override
     @ApiMethod
-    public ServerResponse getAliSign(String userToken, String businessOrderNumber){
+    public ServerResponse getAliSign(String userToken, String businessOrderNumber) {
         return payService.getAliSign(businessOrderNumber);
     }
+
     @Override
     @ApiMethod
-    public ServerResponse getPaymentOrder(String userToken, String houseId, String taskId,int type){
-        return paymentService.getPaymentOrder(userToken,houseId,taskId,type);
+    public ServerResponse getPaymentOrder(String userToken, String houseId, String taskId, int type) {
+        return paymentService.getPaymentOrder(userToken, houseId, taskId, type);
     }
+
     /**
      * 支付页面(通用)
      */
 
     @Override
     @ApiMethod
-    public ServerResponse getPaymentAllOrder(String userToken, String businessOrderNumber,Integer type){
-        if(type==null){ type=0;}
-        return paymentService.getPaymentAllOrder(userToken,businessOrderNumber,type);
+    public ServerResponse getPaymentAllOrder(String userToken, String businessOrderNumber, Integer type) {
+        if (type == null) {
+            type = 0;
+        }
+        return paymentService.getPaymentAllOrder(userToken, businessOrderNumber, type);
     }
+
     @Override
     @ApiMethod
-    public ServerResponse getPaymentPage(String userToken, String houseId, String taskId,int type){
-        return paymentService.getPaymentPage(userToken,houseId,taskId,type);
+    public ServerResponse getPaymentPage(String userToken, String houseId, String taskId, int type) {
+        return paymentService.getPaymentPage(userToken, houseId, taskId, type);
     }
 }

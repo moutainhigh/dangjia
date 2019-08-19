@@ -31,8 +31,8 @@ public interface GroupInfoAPI {
     @RequestMapping(value = "/group/list", method = RequestMethod.POST)
     @ApiOperation(value = "获取群组列表", notes = "获取群组列表")
     ServerResponse getGroups(@RequestParam("request") HttpServletRequest request,
-                             @RequestParam("request") PageDTO pageDTO,
-                             @RequestParam("request") Group group);
+                             @RequestParam("pageDTO") PageDTO pageDTO,
+                             @RequestParam("group") Group group);
 
     /**
      * 群组通知

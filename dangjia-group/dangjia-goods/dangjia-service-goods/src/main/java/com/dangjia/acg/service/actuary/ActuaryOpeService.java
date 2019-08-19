@@ -1,5 +1,8 @@
 package com.dangjia.acg.service.actuary;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.app.house.HouseAPI;
 import com.dangjia.acg.api.data.WorkerTypeAPI;
 import com.dangjia.acg.common.constants.SysConfig;
@@ -18,6 +21,7 @@ import com.dangjia.acg.modle.attribute.GoodsCategory;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.util.JdbcContextHolder;
+import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -47,7 +51,8 @@ public class ActuaryOpeService {
 
     @Autowired
     private HouseAPI houseAPI;
-
+    @Autowired
+    private RedisClient redisClient;
     /**
      * 根据分类list查询商品
      * 自定义查看

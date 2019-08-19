@@ -88,5 +88,12 @@ public interface WebMemberAPI {
                                          @RequestParam("realNameState") Integer realNameState,
                                          @RequestParam("realNameDescribe") String realNameDescribe);
 
+    @PostMapping("web/member/queryInsurances")
+    @ApiOperation(value = "中台查看保险记录", notes = "中台查看保险记录")
+    ServerResponse  queryInsurances(@RequestParam("request") HttpServletRequest request,
+                                    @RequestParam("type") String type,
+                                    @RequestParam("searchKey") String searchKey,
+                                    @RequestParam("pageDTO") PageDTO pageDTO);
+
 
 }

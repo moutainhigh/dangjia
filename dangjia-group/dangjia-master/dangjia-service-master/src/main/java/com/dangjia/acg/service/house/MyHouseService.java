@@ -151,19 +151,18 @@ public class MyHouseService {
         List<HouseFlowApplyImage> houseFlowApplyImageList = houseFlowApplyImageMapper.selectByExample(example);
         Member supervisor = memberMapper.getSupervisor(houseId);
         List<Map> imageList = new ArrayList<>();
-        Map mapObj = new HashMap();
+        Map mapObj =new HashMap();
         for (HouseFlowApplyImage houseFlowApplyImage : houseFlowApplyImageList) {
-            Map map = new HashMap();
-            map.put("image", address + houseFlowApplyImage.getImageUrl());
-            map.put("imageUrl", houseFlowApplyImage.getImageUrl());
-            mapObj.put("createDate", houseFlowApplyImage.getCreateDate());
+            Map map =new HashMap();
+            map.put("image",address + houseFlowApplyImage.getImageUrl());
+            map.put("imageUrl",houseFlowApplyImage.getImageUrl());
+            mapObj.put("createDate",houseFlowApplyImage.getCreateDate());
             imageList.add(map);
         }
-        mapObj.put("name", supervisor.getName());
-        mapObj.put("list", imageList);
+        mapObj.put("name",supervisor.getName());
+        mapObj.put("list",imageList);
         return ServerResponse.createBySuccess("查询成功", imageList);
     }
-
     /**
      * APP我的房产
      */

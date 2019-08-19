@@ -15,5 +15,5 @@ public class ActuaryDTO {
     private String price;//价格
     private String button;//按钮名
     private String url;//明细url
-    private int type; //1人工商品,2材料商品,3服务商品,4补人工,5补材料,6验房定金
+    private int type; //1人工商品,2材料商品,3服务商品,4补人工,5补材料,6验房定金,7工人购买保险
 }
