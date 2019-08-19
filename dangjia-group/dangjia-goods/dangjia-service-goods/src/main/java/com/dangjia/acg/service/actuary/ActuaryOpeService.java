@@ -1,5 +1,7 @@
 package com.dangjia.acg.service.actuary;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.app.house.HouseAPI;
 import com.dangjia.acg.api.data.WorkerTypeAPI;
@@ -221,15 +223,16 @@ public class ActuaryOpeService {
      */
     public ServerResponse actuary(String houseId, Integer type) {
         try {
-            BudgetDTO budgetDTO = redisClient.getCache("HOUSEID-ACTUARY-"+houseId+type,BudgetDTO.class);
-            if(budgetDTO!=null){
+            String budgetstr = redisClient.getCache("HOUSEID-ACTUARY-"+houseId+type,String .class);
+            if(!CommonUtil.isEmpty(budgetstr)){
+                BudgetDTO budgetDTO = JSON.toJavaObject(JSON.parseObject(budgetstr),BudgetDTO.class);
                 return ServerResponse.createBySuccess("查询成功", budgetDTO);
             }
             //切换数据源
             House house = houseAPI.getHouseById(houseId);
             JdbcContextHolder.putDataSource(house.getCityId());
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            budgetDTO = new BudgetDTO();
+            BudgetDTO budgetDTO = new BudgetDTO();
             budgetDTO.setCustomEdit(house.getCustomEdit());
             budgetDTO.setWorkerPrice(budgetWorkerMapper.getHouseWorkerPrice(houseId, null));
             budgetDTO.setCaiPrice(budgetMaterialMapper.getHouseCaiPrice(houseId));
@@ -296,7 +299,7 @@ public class ActuaryOpeService {
                 }
                 budgetDTO.setBudgetItemDTOList(budgetItemDTOList);
             }
-            redisClient.put("HOUSEID-ACTUARY-"+houseId+type,budgetDTO);
+            redisClient.put("HOUSEID-ACTUARY-"+houseId+type, JSON.toJSONString(budgetDTO));
             return ServerResponse.createBySuccess("查询成功", budgetDTO);
         } catch (Exception e) {
             e.printStackTrace();
