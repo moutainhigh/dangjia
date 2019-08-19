@@ -3,10 +3,12 @@ package com.dangjia.acg.service.actuary;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.app.house.HouseAPI;
 import com.dangjia.acg.api.data.WorkerTypeAPI;
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.AES;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
-import com.dangjia.acg.common.util.SerializeUtils;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.budget.BudgetDTO;
 import com.dangjia.acg.dto.budget.BudgetItemDTO;
@@ -20,7 +22,9 @@ import com.dangjia.acg.modle.attribute.GoodsCategory;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.util.JdbcContextHolder;
+import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.codec.Hex;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -223,8 +227,8 @@ public class ActuaryOpeService {
      */
     public ServerResponse actuary(String houseId, Integer type) {
         try {
-            BudgetDTO budgetstr = redisClient.getCache("HOUSEID-ACTUARY-"+houseId+type,BudgetDTO .class);
-            if(budgetstr!=null){
+            String budgetstr = redisClient.getCache("HOUSEID-ACTUARY-"+houseId+type,String .class);
+            if(!CommonUtil.isEmpty(budgetstr)){
                 return ServerResponse.createBySuccess("查询成功", budgetstr);
             }
             //切换数据源
@@ -298,7 +302,9 @@ public class ActuaryOpeService {
                 }
                 budgetDTO.setBudgetItemDTOList(budgetItemDTOList);
             }
-            redisClient.put("HOUSEID-ACTUARY-"+houseId+type, budgetDTO);
+            Gson gson = new Gson();
+            String toString = gson.toJson(BeanUtils.beanToMap(budgetDTO));
+            redisClient.put("HOUSEID-ACTUARY-"+houseId+type, toString.getBytes());
             return ServerResponse.createBySuccess("查询成功", budgetDTO);
         } catch (Exception e) {
             e.printStackTrace();
