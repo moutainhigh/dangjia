@@ -227,10 +227,6 @@ public class ActuaryOpeService {
      */
     public ServerResponse actuary(String houseId, Integer type) {
         try {
-            String budgetstr = redisClient.getCache("HOUSEID-ACTUARY-"+houseId+type,String .class);
-            if(!CommonUtil.isEmpty(budgetstr)){
-                return ServerResponse.createBySuccess("查询成功", budgetstr);
-            }
             //切换数据源
             House house = houseAPI.getHouseById(houseId);
             JdbcContextHolder.putDataSource(house.getCityId());
@@ -302,9 +298,6 @@ public class ActuaryOpeService {
                 }
                 budgetDTO.setBudgetItemDTOList(budgetItemDTOList);
             }
-            Gson gson = new Gson();
-            String toString = gson.toJson(BeanUtils.beanToMap(budgetDTO));
-            redisClient.put("HOUSEID-ACTUARY-"+houseId+type, toString.getBytes());
             return ServerResponse.createBySuccess("查询成功", budgetDTO);
         } catch (Exception e) {
             e.printStackTrace();
