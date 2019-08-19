@@ -261,7 +261,7 @@ public class RobService {
                 }
 
                 Example example=new Example(DjAlreadyRobSingle.class);
-                example.createCriteria().andEqualTo(DjAlreadyRobSingle.CLUE_ID,djAlreadyRobSingle.getClueId());
+                example.createCriteria().andEqualTo(DjAlreadyRobSingle.HOUSE_ID,djAlreadyRobSingle.getHouseId());
                 if(djAlreadyRobSingleMapper.selectByExample(example).size()>0){
                     return ServerResponse.createByErrorMessage("该订单已被抢");
                 }
