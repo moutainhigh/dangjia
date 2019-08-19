@@ -35,7 +35,7 @@
         SELECT
         <include refid="all_columns"/>
         FROM dj_member_customer
-        WHERE 1=1 and turn_status = 0
+        WHERE 1=1
         <if test="memberId!=null and memberId!=''">
             and member_id=#{memberId}
         </if>
