@@ -127,8 +127,8 @@
         from
         dj_core_house_flow chf
         where chf.house_id = #{houseId}
-        and chf.worker_type_id = {workerTypeId}
-        and chf.worker_type = {workerType}
+        and chf.worker_type_id = #{workerTypeId}
+        and chf.worker_type = #{workerType}
 
     </select>
 
