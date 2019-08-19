@@ -550,59 +550,60 @@ public class CraftsmanConstructionService {
                     "&houseName=" + house.getHouseName();
             buttonList.add(Utils.getButton("查看拿钱明细", url, 0));
         } else if (hf.getWorkType() == 4) {
-//            if(!isBX) {
-//                buttonList.add(Utils.getButton("购买保险", 9));
-//            }else
-            if (hf.getWorkSteta() == 3) {//待交底
-                buttonList.add(Utils.getButton("找大管家交底", 1));
+            if(!isBX) {
+                buttonList.add(Utils.getButton("购买保险", 9));
+            }else {
+                if (hf.getWorkSteta() == 3) {//待交底
+                    buttonList.add(Utils.getButton("找大管家交底", 1));
 //            } else if (worker.getWorkerType() == 4) {//如果是拆除，只有整体完工
 //                setDisplayState(hf, promptList, buttonList, checkFlowApp, true);
-            } else {//已交底
-                bean.setFootMessageTitle("");//每日开工事项
-                bean.setFootMessageDescribe("");//每日开工事项
-                HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart(house.getId(), worker.getId(), new Date());//查询今日开工记录
-                List<ConstructionByWorkerIdBean.BigListBean.ListMapBean> workerEverydayList = new ArrayList<>();
-                if (todayStart == null) {//没有今日开工记录
-                    buttonList.add(Utils.getButton("今日开工", 2));
-                    List<WorkerEveryday> listWorDay = workerEverydayMapper.getWorkerEverydayList(1);//事项类型  1 开工事项 2 完工事项
-                    for (WorkerEveryday day : listWorDay) {
-                        ConstructionByWorkerIdBean.BigListBean.ListMapBean listMapBean = new ConstructionByWorkerIdBean.BigListBean.ListMapBean();
-                        listMapBean.setName(day.getName());
-                        workerEverydayList.add(listMapBean);
-                    }
-                    bean.setFootMessageTitle("今日开工任务");//每日开工事项
-                    bean.setFootMessageDescribe("（每日十二点前今日开工）");//每日开工事项
-                } else {
-                    List<HouseFlowApply> allAppList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 2, worker.getId(), new Date());//查询今天是否已提交整体完工
-                    List<HouseFlowApply> stageAppList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 1, worker.getId(), new Date());//查询今天是否已提交阶段完工
-                    List<HouseFlowApply> flowAppList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 0, worker.getId(), new Date());//查询是否已提交今日完工
-                    if (allAppList.size() > 0) {
-                        promptList.add("今日已申请整体完工");
-                        bean.setIfBackOut(2);
-                    } else if (stageAppList.size() > 0) {
-                        promptList.add("今日已申请阶段完工");
-                        bean.setIfBackOut(2);
-                    } else if (flowAppList != null && flowAppList.size() > 0) {//已提交今日完工
-                        promptList.add("今日已完工");
-//                        bean.setIfBackOut(2);
-                    } else {
-                        buttonList.add(Utils.getButton("今日完工", 3));
-                        List<WorkerEveryday> listWorDay = workerEverydayMapper.getWorkerEverydayList(2);//事项类型  1 开工事项 2 完工事项
+                } else {//已交底
+                    bean.setFootMessageTitle("");//每日开工事项
+                    bean.setFootMessageDescribe("");//每日开工事项
+                    HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart(house.getId(), worker.getId(), new Date());//查询今日开工记录
+                    List<ConstructionByWorkerIdBean.BigListBean.ListMapBean> workerEverydayList = new ArrayList<>();
+                    if (todayStart == null) {//没有今日开工记录
+                        buttonList.add(Utils.getButton("今日开工", 2));
+                        List<WorkerEveryday> listWorDay = workerEverydayMapper.getWorkerEverydayList(1);//事项类型  1 开工事项 2 完工事项
                         for (WorkerEveryday day : listWorDay) {
                             ConstructionByWorkerIdBean.BigListBean.ListMapBean listMapBean = new ConstructionByWorkerIdBean.BigListBean.ListMapBean();
                             listMapBean.setName(day.getName());
                             workerEverydayList.add(listMapBean);
                         }
-                        bean.setFootMessageTitle("今日完工任务");//每日开工事项
-                        bean.setFootMessageDescribe("");//每日开工事项
-                        if (hf.getWorkSteta() == 1 || worker.getWorkerType() == 4) {
-                            setDisplayState(hf, promptList, buttonList, checkFlowApp, true);
+                        bean.setFootMessageTitle("今日开工任务");//每日开工事项
+                        bean.setFootMessageDescribe("（每日十二点前今日开工）");//每日开工事项
+                    } else {
+                        List<HouseFlowApply> allAppList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 2, worker.getId(), new Date());//查询今天是否已提交整体完工
+                        List<HouseFlowApply> stageAppList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 1, worker.getId(), new Date());//查询今天是否已提交阶段完工
+                        List<HouseFlowApply> flowAppList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 0, worker.getId(), new Date());//查询是否已提交今日完工
+                        if (allAppList.size() > 0) {
+                            promptList.add("今日已申请整体完工");
+                            bean.setIfBackOut(2);
+                        } else if (stageAppList.size() > 0) {
+                            promptList.add("今日已申请阶段完工");
+                            bean.setIfBackOut(2);
+                        } else if (flowAppList != null && flowAppList.size() > 0) {//已提交今日完工
+                            promptList.add("今日已完工");
+//                        bean.setIfBackOut(2);
                         } else {
-                            setDisplayState(hf, promptList, buttonList, checkFlowApp, false);
+                            buttonList.add(Utils.getButton("今日完工", 3));
+                            List<WorkerEveryday> listWorDay = workerEverydayMapper.getWorkerEverydayList(2);//事项类型  1 开工事项 2 完工事项
+                            for (WorkerEveryday day : listWorDay) {
+                                ConstructionByWorkerIdBean.BigListBean.ListMapBean listMapBean = new ConstructionByWorkerIdBean.BigListBean.ListMapBean();
+                                listMapBean.setName(day.getName());
+                                workerEverydayList.add(listMapBean);
+                            }
+                            bean.setFootMessageTitle("今日完工任务");//每日开工事项
+                            bean.setFootMessageDescribe("");//每日开工事项
+                            if (hf.getWorkSteta() == 1 || worker.getWorkerType() == 4) {
+                                setDisplayState(hf, promptList, buttonList, checkFlowApp, true);
+                            } else {
+                                setDisplayState(hf, promptList, buttonList, checkFlowApp, false);
+                            }
                         }
                     }
+                    bean.setWorkerEverydayList(workerEverydayList);//每日完工事项
                 }
-                bean.setWorkerEverydayList(workerEverydayList);//每日完工事项
             }
         }
         bean.setPromptList(promptList);
