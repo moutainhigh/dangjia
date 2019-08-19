@@ -64,9 +64,7 @@ public class HouseTask {
     houseFlowAPI.autoGiveUpOrder();
     log.info(format.format(new Date()) + "结束执行工匠保险检测任务...");
 
-    log.info(format.format(new Date()) + "开始执行工匠自动续保任务...");
-    houseFlowAPI.autoRenewOrder();
-    log.info(format.format(new Date()) + "结束执行工匠自动续保任务...");
+
 
   }
 
@@ -113,5 +111,9 @@ public class HouseTask {
     log.info(format.format(new Date()) + "开始执行旷工检测任务...");
     houseFlowApplyAPI.absenteeism();
     log.info(format.format(new Date()) + "结束执行旷工检测任务...");
+
+    log.info(format.format(new Date()) + "开始执行工匠自动续保任务...");
+    houseFlowAPI.autoRenewOrder();
+    log.info(format.format(new Date()) + "结束执行工匠自动续保任务...");
   }
 }
