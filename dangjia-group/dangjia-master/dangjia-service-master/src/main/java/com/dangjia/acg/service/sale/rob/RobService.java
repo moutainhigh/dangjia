@@ -379,9 +379,8 @@ public class RobService {
                 robArrInFoDTO.setIsRobStats(robInfoDTO.get(0).getIsRobStats());
                 if(robInfoDTO.get(0).getHouseCreateDate() != null){
                     robArrInFoDTO.setHouseCreateDate(robInfoDTO.get(0).getHouseCreateDate());
-                }else{
-                    robArrInFoDTO.setCreateDate(robInfoDTO.get(0).getCreateDate());
                 }
+                robArrInFoDTO.setCreateDate(robInfoDTO.get(0).getCreateDate());
                 robArrInFoDTO.setUserId(robInfoDTO.get(0).getUserId());
                 robArrInFoDTO.setStage(robInfoDTO.get(0).getStage());
                 robArrInFoDTO.setDrawings(robInfoDTO.get(0).getDrawings());
