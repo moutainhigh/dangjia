@@ -226,7 +226,6 @@ public class StoreManagementService {
                     slist.addAll(Arrays.asList(residentialRange.getBuildingId().split(",")));
                 }
             }
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<ModelingVillage> modelingVillages=new ArrayList<>();
             if (!CommonUtil.isEmpty(store.getVillages())) {
                 example = new Example(ModelingVillage.class);
@@ -243,7 +242,7 @@ public class StoreManagementService {
                     slist1.addAll(Arrays.asList(residentialRange.getBuildingId().split(",")));
                 }
             }
-            PageInfo pageResult = new PageInfo(modelingVillages);
+            PageInfo pageResult=null;
             for (ModelingVillage modelingVillage : modelingVillages) {
                 example = new Example(ResidentialBuilding.class);
                 Example.Criteria criteria = example.createCriteria();
@@ -252,7 +251,9 @@ public class StoreManagementService {
                 if (slist.size() > 0) {
                     criteria.andNotIn(ResidentialBuilding.ID, slist);
                 }
+                PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
                 List<ResidentialBuilding> residentialBuildings = residentialBuildingMapper.selectByExample(example);
+                pageResult = new PageInfo(residentialBuildings);
                 if (residentialBuildings.size() > 0) {
                     ResidentialRangeDTO residentialRangeDTO = new ResidentialRangeDTO();
                     residentialRangeDTO.setVillageId(modelingVillage.getId());
