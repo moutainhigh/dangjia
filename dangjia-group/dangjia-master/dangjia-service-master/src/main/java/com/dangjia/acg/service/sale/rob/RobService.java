@@ -249,11 +249,8 @@ public class RobService {
         try {
             if (!CommonUtil.isEmpty(djAlreadyRobSingle)) {
 
-                Example example=new Example(DjAlreadyRobSingle.class);
-                example.createCriteria().andEqualTo(DjAlreadyRobSingle.CLUE_ID,djAlreadyRobSingle.getClueId());
-                if(djAlreadyRobSingleMapper.selectByExample(example).size()>0){
-                    return ServerResponse.createByErrorMessage("该订单已被抢");
-                }
+                logger.info("userToken==================="+ userToken);
+
                 Object object = constructionService.getAccessToken(userToken);
                 if (object instanceof ServerResponse) {
                     return (ServerResponse) object;
@@ -261,6 +258,12 @@ public class RobService {
                 AccessToken accessToken = (AccessToken) object;
                 if (CommonUtil.isEmpty(accessToken.getUserId())) {
                     return ServerResponse.createbyUserTokenError();
+                }
+
+                Example example=new Example(DjAlreadyRobSingle.class);
+                example.createCriteria().andEqualTo(DjAlreadyRobSingle.CLUE_ID,djAlreadyRobSingle.getClueId());
+                if(djAlreadyRobSingleMapper.selectByExample(example).size()>0){
+                    return ServerResponse.createByErrorMessage("该订单已被抢");
                 }
 
                 djAlreadyRobSingle.setUserId(accessToken.getUserId());
