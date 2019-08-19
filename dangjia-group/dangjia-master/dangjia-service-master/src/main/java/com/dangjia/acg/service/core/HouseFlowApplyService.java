@@ -161,10 +161,11 @@ public class HouseFlowApplyService {
             /*
             节点审核通过
              */
-            if(null != hwo){
-                technologyRecordMapper.passTecRecord(hwo.getHouseId(), hwo.getWorkerTypeId());
+            if(null == hwo){
+                return ServerResponse.createByErrorMessage("该订单异常");
             }
 
+            technologyRecordMapper.passTecRecord(hwo.getHouseId(), hwo.getWorkerTypeId());
             if (hfa.getApplyType() == 2) {//整体完工
                 //修改进程
                 HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(hwo.getHouseId(), hwo.getWorkerTypeId());
