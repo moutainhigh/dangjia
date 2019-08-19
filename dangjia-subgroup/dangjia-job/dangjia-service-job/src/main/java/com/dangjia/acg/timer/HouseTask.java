@@ -112,8 +112,8 @@ public class HouseTask {
     log.info(format.format(new Date()) + "结束执行旷工检测任务...");
 
 
-      log.info(format.format(new Date()) + "开始执行工匠自动续保任务...");
-      houseFlowAPI.autoRenewOrder();
-      log.info(format.format(new Date()) + "结束执行工匠自动续保任务...");
+    log.info(format.format(new Date()) + "开始执行工匠自动续保任务...");
+    houseFlowAPI.autoRenewOrder();
+    log.info(format.format(new Date()) + "结束执行工匠自动续保任务...");
   }
 }
