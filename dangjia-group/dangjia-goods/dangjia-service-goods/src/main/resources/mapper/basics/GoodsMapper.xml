@@ -195,7 +195,6 @@
 			)
 		</if>
 		GROUP BY bg.id
-		ORDER BY bg.create_date desc
 	</select>
 
 	<!-- 查询某个分类的商品 模糊name -->
