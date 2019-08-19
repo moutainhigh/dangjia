@@ -1164,6 +1164,7 @@ public class MemberService {
         List<Map<String, Object>> datas = new ArrayList<>();
         Example example = new Example(Insurance.class);
         Example.Criteria criteria = example.createCriteria();
+        criteria.andIsNotNull(Insurance.END_DATE);
         if (!CommonUtil.isEmpty(type)) {
             criteria.andEqualTo(Insurance.TYPE, type);
         }
