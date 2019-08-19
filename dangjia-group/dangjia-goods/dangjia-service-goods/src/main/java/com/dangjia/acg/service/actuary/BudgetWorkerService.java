@@ -2,6 +2,7 @@ package com.dangjia.acg.service.actuary;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.app.core.HouseFlowAPI;
 import com.dangjia.acg.api.app.house.HouseAPI;
 import com.dangjia.acg.api.data.GetForBudgetAPI;
@@ -74,7 +75,8 @@ public class BudgetWorkerService {
     private WorkerGoodsService workerGoodsService;
     @Autowired
     private ProductService productService;
-
+    @Autowired
+    private RedisClient redisClient;
     @Autowired
     private IWorkerGoodsMapper workerGoodsMapper;
 
@@ -375,6 +377,8 @@ public class BudgetWorkerService {
 
             iBudgetMaterialMapper.deleteByhouseId(houseId, workerTypeId);
             iBudgetWorkerMapper.deleteByhouseId(houseId, workerTypeId);
+            redisClient.deleteCache("HOUSEID-ACTUARY-"+houseId+"1");
+            redisClient.deleteCache("HOUSEID-ACTUARY-"+houseId+"2");
             JSONArray goodsList = JSONArray.parseArray(listOfGoods);
             for (int i = 0; i < goodsList.size(); i++) {
                 JSONObject job = goodsList.getJSONObject(i);
