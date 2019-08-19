@@ -35,7 +35,7 @@ public class SesameServiceMasterApplication implements CommandLineRunner {
 //  @Bean
 //  MultipartConfigElement multipartConfigElement() {
 //    MultipartConfigFactory factory = new MultipartConfigFactory();
-//    factory.setLocation("d:/dangjia/temporary/");
+//    factory.setLocation("/data/temporary/");
 //    return factory.createMultipartConfig();
 //  }
   @Override

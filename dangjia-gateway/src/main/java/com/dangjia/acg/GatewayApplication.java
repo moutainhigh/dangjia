@@ -7,15 +7,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.embedded.ConfigurableEmbeddedServletContainer;
 import org.springframework.boot.context.embedded.EmbeddedServletContainerCustomizer;
 import org.springframework.boot.web.servlet.ErrorPage;
-import org.springframework.boot.web.servlet.MultipartConfigFactory;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.cloud.netflix.zuul.EnableZuulProxy;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.http.HttpStatus;
-
-import javax.servlet.MultipartConfigElement;
 
 @SpringBootApplication
 @ComponentScan(basePackages = "com.dangjia.acg", excludeFilters={
@@ -44,10 +41,10 @@ public class GatewayApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(GatewayApplication.class, args);
 	}
-	@Bean
-	MultipartConfigElement multipartConfigElement() {
-		MultipartConfigFactory factory = new MultipartConfigFactory();
-		factory.setLocation("d:/dangjia/temporary/");
-		return factory.createMultipartConfig();
-	}
+//	@Bean
+//	MultipartConfigElement multipartConfigElement() {
+//		MultipartConfigFactory factory = new MultipartConfigFactory();
+//		factory.setLocation("/data/temporary/");
+//		return factory.createMultipartConfig();
+//	}
 }

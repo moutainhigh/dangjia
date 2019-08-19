@@ -335,7 +335,7 @@ public class TaskService {
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
             HouseWorker hw = houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), 1);
             List<Insurance> insurances =null;
-            if(!CommonUtil.isEmpty(hw.getWorkerId())) {
+            if(hw!=null&&!CommonUtil.isEmpty(hw.getWorkerId())) {
                 example = new Example(Insurance.class);
                 example.createCriteria().andEqualTo(Insurance.WORKER_ID, hw.getWorkerId());
                 example.orderBy(Insurance.END_DATE).desc();
