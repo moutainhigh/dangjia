@@ -58,5 +58,7 @@ public interface ICustomerMapper extends Mapper<Customer> {
     List<Customer> getCustomerMemberIdList(@Param("memberId") String memberId);
 
     int turnOut(@Param("userId") String userId,@Param("storeId") String storeId,@Param("id") String id,@Param("cityId") String cityId);
+
+    int updateStoreUser(@Param("userId") String userId,@Param("storeId") String storeId);
 }
 

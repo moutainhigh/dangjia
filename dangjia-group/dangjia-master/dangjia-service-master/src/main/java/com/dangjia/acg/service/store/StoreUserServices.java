@@ -11,12 +11,20 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.sale.store.StoreUserDTO;
+import com.dangjia.acg.mapper.clue.ClueMapper;
+import com.dangjia.acg.mapper.member.ICustomerMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.mapper.sale.MonthlyTargetMappper;
+import com.dangjia.acg.mapper.sale.ResidentialRangeMapper;
 import com.dangjia.acg.mapper.store.IStoreMapper;
 import com.dangjia.acg.mapper.store.IStoreUserMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
+import com.dangjia.acg.modle.clue.Clue;
 import com.dangjia.acg.modle.member.AccessToken;
+import com.dangjia.acg.modle.member.Customer;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.sale.residential.ResidentialRange;
+import com.dangjia.acg.modle.sale.store.MonthlyTarget;
 import com.dangjia.acg.modle.store.Store;
 import com.dangjia.acg.modle.store.StoreUser;
 import com.dangjia.acg.modle.user.MainUser;
@@ -27,6 +35,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.Date;
@@ -55,6 +64,14 @@ public class StoreUserServices {
     private IMemberMapper memberMapper;
     @Autowired
     private RedisClient redisClient;
+    @Autowired
+    private ClueMapper clueMapper;
+    @Autowired
+    private ResidentialRangeMapper residentialRangeMapper;
+    @Autowired
+    private MonthlyTargetMappper monthlyTargetMappper;
+    @Autowired
+    private ICustomerMapper iCustomerMapper;
 
     public ServerResponse addStoreUser(String userId, String storeId, Integer type) {
         if (CommonUtil.isEmpty(userId)) {
@@ -94,6 +111,8 @@ public class StoreUserServices {
         storeUser.setUserId(userId);
         storeUser.setType(type);
         if (iStoreUserMapper.insertSelective(storeUser) > 0) {
+            clueMapper.updateStoreUser(storeUser.getUserId(),storeUser.getStoreId());//该门店删除销售 对应数据也改变
+            iCustomerMapper.updateStoreUser(storeUser.getUserId(),storeUser.getStoreId());
             return ServerResponse.createBySuccessMessage("添加成功");
         } else {
             return ServerResponse.createByErrorMessage("添加失败");
@@ -133,6 +152,7 @@ public class StoreUserServices {
         }
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse delStoreUser(String storeUserId) {
         StoreUser storeUser = iStoreUserMapper.selectByPrimaryKey(storeUserId);
         if (storeUser == null) {
@@ -152,6 +172,16 @@ public class StoreUserServices {
                     }
                 }
             }
+            clueMapper.updateStoreUser(storeUser.getUserId(),null);//该门店删除销售 对应数据也改变
+            iCustomerMapper.updateStoreUser(storeUser.getUserId(),null);
+            //楼栋范围也清空
+            Example example=new Example(ResidentialRange.class);
+            example.createCriteria().andEqualTo(ResidentialRange.USER_ID,storeUser.getUserId());
+            residentialRangeMapper.deleteByExample(example);
+            //月目标也清空
+            example=new Example(MonthlyTarget.class);
+            example.createCriteria().andEqualTo(MonthlyTarget.USER_ID,storeUser.getUserId());
+            monthlyTargetMappper.deleteByExample(example);
             return ServerResponse.createBySuccessMessage("删除成功");
         } else {
             return ServerResponse.createByErrorMessage("删除失败");
