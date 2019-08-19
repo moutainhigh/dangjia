@@ -12,6 +12,7 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
+import com.dangjia.acg.common.model.BaseEntity;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
@@ -612,7 +613,16 @@ public class HouseService {
 
         List<Clue> clueList = clueMapper.selectByExample(example);
         //查询提成配置表
-        List<DjRoyaltyDetailsSurface> list = royaltyMapper.selectAll();
+        List<DjRoyaltyDetailsSurface> list = null;
+        List<BaseEntity> baseEntityList = royaltyMapper.queryRoyaltySurface();
+        if(!baseEntityList.isEmpty()){
+            Example example1 = new Example(DjRoyaltyDetailsSurface.class);
+            example1.createCriteria().andEqualTo(
+                    DjRoyaltyDetailsSurface.VILLAGE_ID, baseEntityList.get(0).getId())
+                    .andEqualTo(Clue.DATA_STATUS, 0);
+             list = royaltyMapper.selectByExample(example1);
+        }
+
         if(clueList.size() == 1){
 
             logger.info("一个销售人员录入==================="+userId);
