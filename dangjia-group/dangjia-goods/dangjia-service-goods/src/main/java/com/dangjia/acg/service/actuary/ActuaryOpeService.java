@@ -21,6 +21,7 @@ import com.dangjia.acg.modle.attribute.GoodsCategory;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.util.JdbcContextHolder;
+import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -299,7 +300,9 @@ public class ActuaryOpeService {
                 }
                 budgetDTO.setBudgetItemDTOList(budgetItemDTOList);
             }
-            redisClient.put("HOUSEID-ACTUARY-"+houseId+type, JSON.toJSONString(budgetDTO));
+            Gson gson = new Gson();
+            String toString = gson.toJson(budgetDTO);
+            redisClient.put("HOUSEID-ACTUARY-"+houseId+type, toString);
             return ServerResponse.createBySuccess("查询成功", budgetDTO);
         } catch (Exception e) {
             e.printStackTrace();
