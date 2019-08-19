@@ -871,7 +871,15 @@ public class HouseFlowApplyService {
         try {
             String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
+            House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
+            HouseFlow supervisorHF = houseFlowMapper.getHouseFlowByHidAndWty(houseFlowApply.getHouseId(), 3);//大管家的hf
             HouseFlowApplyDTO houseFlowApplyDTO = new HouseFlowApplyDTO();
+            if (supervisorHF != null) {
+                houseFlowApplyDTO.setSupervisorHouseFlowId(supervisorHF.getId());
+            }
+            if (house != null) {
+                houseFlowApplyDTO.setHouseName(house.getHouseName());
+            }
             Member worker = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
             houseFlowApplyDTO.setHouseFlowApplyId(houseFlowApplyId);
             houseFlowApplyDTO.setApplyType(houseFlowApply.getApplyType());

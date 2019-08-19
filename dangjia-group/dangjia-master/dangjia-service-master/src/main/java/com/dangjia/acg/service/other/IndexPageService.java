@@ -90,23 +90,7 @@ public class IndexPageService {
             PageInfo pageResult = new PageInfo(houseList);
             List<Map> houseMap = new ArrayList<>();
             for (House house : houseList) {
-                request.setAttribute(Constants.CITY_ID, house.getCityId());
-                BigDecimal totalPrice = new BigDecimal(0);//总计
-                if (house.getDecorationType() != 2) {//自带设计
-                    Order order = orderMapper.getWorkerOrder(house.getId(), "1");
-                    if (order != null) {
-                        totalPrice = totalPrice.add(order.getTotalAmount());
-                    }
-                }
-                Order order = orderMapper.getWorkerOrder(house.getId(), "2");
-                if (order != null) {
-                    totalPrice = totalPrice.add(order.getTotalAmount());
-                }
-                BigDecimal totalAmount = budgetMaterialAPI.getHouseBudgetTotalAmount(request, house.getCityId(),house.getId());
-                if(totalAmount!=null) {
-                    totalPrice = totalPrice.add(totalAmount);
-                }
-                house.setMoney(totalPrice);
+                house = setHouseTotalPrice(request,house);
                 Map map = BeanUtils.beanToMap(house);
                 map.put("houseName", house.getHouseName());
                 map.put("imageUrl", configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class)+houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(),null));
@@ -120,6 +104,51 @@ public class IndexPageService {
         }
     }
 
+
+
+    /**
+     * 施工现场详情
+     */
+    public ServerResponse houseOtherDetails(HttpServletRequest request, String houseId) {
+        try {
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            House house = houseMapper.selectByPrimaryKey(houseId);
+            //获得装修总花费
+            house = setHouseTotalPrice(request,house);
+            HouseDetailsDTO houseDetailsDTO = new HouseDetailsDTO();
+            houseDetailsDTO.setCityId(house.getCityId());
+            houseDetailsDTO.setCityName(house.getCityName());
+            houseDetailsDTO.setSquare(house.getSquare());
+            houseDetailsDTO.setHouseId(house.getId());
+            houseDetailsDTO.setResidential(house.getResidential());
+            houseDetailsDTO.setImage(address+house.getImage());
+            houseDetailsDTO.setHouseName(house.getHouseName());
+            houseDetailsDTO.setOptionalLabel(house.getOptionalLabel());
+            houseDetailsDTO.setVisitState(house.getVisitState());
+            houseDetailsDTO.setNoNumberHouseName(house.getNoNumberHouseName());
+            String[] liangArr = {};
+            if (house.getLiangDian() != null) {
+                liangArr = house.getLiangDian().split(",");
+            }
+            List<String> dianList = new ArrayList<>();
+            if (!CommonUtil.isEmpty(house.getStyle())) {
+                dianList.add(house.getStyle());
+
+            }
+            if (!CommonUtil.isEmpty(house.getLiangDian())) {
+                Collections.addAll(dianList, liangArr);
+            }
+            if (!CommonUtil.isEmpty(house.getBuildSquare())) {
+                dianList.add(house.getBuildSquare() + "㎡");
+            }
+            houseDetailsDTO.setDianList(dianList);
+            houseDetailsDTO.setTotalPrice(house.getMoney());
+            return ServerResponse.createBySuccess("查询成功", houseDetailsDTO);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("系统出错,获取数据失败");
+        }
+    }
     /**
      * 施工现场详情
      */
@@ -353,41 +382,45 @@ public class IndexPageService {
     public ServerResponse getRecommended(HttpServletRequest request,String latitude, String longitude,Integer limit){
 
         try {
-
-
-        if (CommonUtil.isEmpty(latitude)) {
-            latitude = "28.228259";
-        }
-        if (CommonUtil.isEmpty(longitude)) {
-            longitude = "112.938904";
-        }
-        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-        List<House> houses = houseMapper.getRecommended(latitude, longitude, limit);
-        for (House house : houses) {
-            request.setAttribute(Constants.CITY_ID, house.getCityId());
-            BigDecimal totalPrice = new BigDecimal(0);//总计
-            if (house.getDecorationType() != 2) {//自带设计
-                Order order = orderMapper.getWorkerOrder(house.getId(), "1");
-                if (order != null) {
-                    totalPrice = totalPrice.add(order.getTotalAmount());
-                }
+            if (CommonUtil.isEmpty(latitude)) {
+                latitude = "28.228259";
             }
-            Order order = orderMapper.getWorkerOrder(house.getId(), "2");
-            if (order != null) {
-                totalPrice = totalPrice.add(order.getTotalAmount());
+            if (CommonUtil.isEmpty(longitude)) {
+                longitude = "112.938904";
             }
-
-            BigDecimal totalAmount = budgetMaterialAPI.getHouseBudgetTotalAmount(request,house.getCityId(), house.getId());
-            if(totalAmount!=null) {
-                totalPrice = totalPrice.add(totalAmount);
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            List<House> houses = houseMapper.getRecommended(latitude, longitude, limit);
+            for (int i = 0; i < houses.size(); i++) {
+                House house = houses.get(i);
+                house = setHouseTotalPrice(request,house);
+                house = this.getHouseImage(address,house);
+                houses.remove(i);
+                houses.add(i,house);
             }
-            house = this.getHouseImage(address,house);
-            house.setMoney(totalPrice);
-        }
-        return ServerResponse.createBySuccess("查询成功", houses);
+            return ServerResponse.createBySuccess("查询成功", houses);
         }catch (Exception e){
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询出错,获取数据失败");
         }
+    }
+    public House setHouseTotalPrice(HttpServletRequest request,House house){
+        BigDecimal totalPrice = new BigDecimal(0);//总计
+        if (house.getDecorationType() != 2) {//自带设计
+            Order order = orderMapper.getWorkerOrder(house.getId(), "1");
+            if (order != null) {
+                totalPrice = totalPrice.add(order.getTotalAmount());
+            }
+        }
+        Order order = orderMapper.getWorkerOrder(house.getId(), "2");
+        if (order != null) {
+            totalPrice = totalPrice.add(order.getTotalAmount());
+        }
+        request.setAttribute(Constants.CITY_ID, house.getCityId());
+        BigDecimal totalAmount = budgetMaterialAPI.getHouseBudgetTotalAmount(request, house.getCityId(),house.getId());
+        if(totalAmount!=null) {
+            totalPrice = totalPrice.add(totalAmount);
+        }
+        house.setMoney(totalPrice);
+        return house;
     }
 }

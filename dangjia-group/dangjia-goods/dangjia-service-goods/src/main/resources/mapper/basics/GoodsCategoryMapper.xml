@@ -78,7 +78,7 @@
         <if test="categoryId!=null and categoryId!=''">
             AND c.parent_top = #{categoryId}
         </if>
-        ORDER BY
+        ORDER BY p.istop DESC,
         p.create_date DESC
     </select>
 

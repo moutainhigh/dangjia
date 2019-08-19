@@ -76,6 +76,7 @@ public class ClassificationService {
                 .andEqualTo(WorkerGoods.WORKER_TYPE_ID, workerTypeId)
                 .andEqualTo(WorkerGoods.SHOW_GOODS, 1)
                 .andEqualTo(WorkerGoods.DATA_STATUS, 0);
+        example.orderBy(WorkerGoods.ISTOP).desc();
         example.orderBy(WorkerGoods.CREATE_DATE).desc();
         List<WorkerGoods> workerGoodsList = iWorkerGoodsMapper.selectByExample(example);
         if (workerGoodsList.size() <= 0) {

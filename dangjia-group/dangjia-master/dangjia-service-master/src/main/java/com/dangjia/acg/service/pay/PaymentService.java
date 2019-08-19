@@ -10,6 +10,7 @@ import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.dao.ConfigUtil;
@@ -36,6 +37,7 @@ import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.mapper.repair.IMendWorkerMapper;
 import com.dangjia.acg.mapper.safe.IWorkerTypeSafeMapper;
 import com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper;
+import com.dangjia.acg.mapper.worker.IInsuranceMapper;
 import com.dangjia.acg.modle.activity.ActivityRedPackRecord;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
@@ -60,6 +62,7 @@ import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.repair.MendWorker;
 import com.dangjia.acg.modle.safe.WorkerTypeSafe;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
+import com.dangjia.acg.modle.worker.Insurance;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.deliver.ProductChangeService;
@@ -90,6 +93,8 @@ public class PaymentService {
     private IActivityRedPackRecordMapper activityRedPackRecordMapper;
     @Autowired
     private RedisClient redisClient;
+    @Autowired
+    private IInsuranceMapper insuranceMapper;
     @Autowired
     private IHouseFlowMapper houseFlowMapper;
     @Autowired
@@ -202,6 +207,18 @@ public class PaymentService {
                 this.awaitPay(businessOrder, payState);
             } else if (businessOrder.getType() == 8) {//待付款 支付时业主包括取消的
                 this.awaitPayPurchaseOrder(businessOrder, payState);
+            } else if (businessOrder.getType() == 9) {//工人保险
+                Insurance insurance = insuranceMapper.selectByPrimaryKey(businessOrder.getTaskId());
+                if(insurance.getStartDate()==null){
+                    insurance.setStartDate(new Date());
+                }
+                if(insurance.getEndDate()==null){
+                    insurance.setEndDate(new Date());
+                }
+                insurance.setNumber(businessOrder.getNumber());
+                insurance.setEndDate(DateUtil.addDateYear(insurance.getEndDate(), 1));
+                insuranceMapper.updateByPrimaryKeySelective(insurance);
+                return ServerResponse.createBySuccessMessage("支付成功");
             } else if (businessOrder.getType() == 5) {//验房分销
                 HouseDistribution houseDistribution = iHouseDistributionMapper.selectByPrimaryKey(businessOrder.getTaskId());
                 houseDistribution.setNumber(businessOrder.getNumber());//业务订单号
@@ -952,7 +969,42 @@ public class PaymentService {
         List<ActuaryDTO> actuaryDTOList = new ArrayList<>();//商品
         try {
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-            if (type == 1) {
+            if (type == 9) {
+                Insurance insurance = insuranceMapper.selectByPrimaryKey(houseDistributionId);
+                if (insurance == null) {
+                    return ServerResponse.createByErrorMessage("保险记录不存在");
+                }
+
+                Example example = new Example(BusinessOrder.class);
+                example.createCriteria().andEqualTo(BusinessOrder.TASK_ID, houseDistributionId).andEqualTo(BusinessOrder.STATE, 1).andEqualTo(BusinessOrder.TYPE, 9);
+                List<BusinessOrder> businessOrderList = businessOrderMapper.selectByExample(example);
+                BusinessOrder businessOrder;
+                if (businessOrderList.size() == 0) {
+                    businessOrder = new BusinessOrder();
+                    businessOrder.setMemberId(insurance.getWorkerId()); //公众号唯一标识
+                    businessOrder.setHouseId(null);
+                    businessOrder.setNumber(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
+                    businessOrder.setState(1);//刚生成
+                    businessOrder.setTotalPrice(insurance.getMoney());
+                    businessOrder.setDiscountsPrice(new BigDecimal(0));
+                    businessOrder.setPayPrice(insurance.getMoney());
+                    businessOrder.setType(9);//记录支付类型任务类型
+                    businessOrder.setTaskId(houseDistributionId);//保存任务ID
+                    businessOrderMapper.insert(businessOrder);
+                } else {
+                    businessOrder = businessOrderList.get(0);
+                }
+                paymentDTO.setTotalPrice(insurance.getMoney());
+                paymentDTO.setBusinessOrderNumber(businessOrder.getNumber());
+                paymentDTO.setPayPrice(insurance.getMoney());//实付
+                ActuaryDTO actuaryDTO = new ActuaryDTO();
+                actuaryDTO.setImage(imageAddress + "icon/rmb.png");
+                actuaryDTO.setKind("保险费");
+                actuaryDTO.setName("保险服务（一年意外保险）");
+                actuaryDTO.setPrice("¥" + String.format("%.2f", insurance.getMoney().doubleValue()));
+                actuaryDTO.setType(7);
+                actuaryDTOList.add(actuaryDTO);
+            }else if (type == 1) {
                 HouseDistribution houseDistribution = iHouseDistributionMapper.selectByPrimaryKey(houseDistributionId);
                 if (houseDistribution == null) {
                     return ServerResponse.createByErrorMessage("验房分销记录不存在");

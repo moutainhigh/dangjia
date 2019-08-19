@@ -35,9 +35,9 @@ public class WorkerGoodsController implements WorkerGoodsAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse<PageInfo> getWorkerGoodses(HttpServletRequest request, PageDTO pageDTO, String workerTypeId, String searchKey, String showGoods) {
+    public ServerResponse<PageInfo> getWorkerGoodses(HttpServletRequest request, PageDTO pageDTO,String istops ,String workerTypeId, String searchKey, String showGoods) {
         try {
-            return workerGoodsService.getWorkerGoodses(pageDTO, workerTypeId, searchKey, showGoods);
+            return workerGoodsService.getWorkerGoodses(pageDTO, istops,workerTypeId, searchKey, showGoods);
         } catch (Exception e) {
             return ServerResponse.createByErrorMessage("查询工价商品失败");
         }

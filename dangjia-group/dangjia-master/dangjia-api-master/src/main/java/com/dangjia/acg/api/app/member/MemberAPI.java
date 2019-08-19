@@ -1,5 +1,6 @@
 package com.dangjia.acg.api.app.member;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.member.Member;
 import io.swagger.annotations.Api;
@@ -529,5 +530,14 @@ public interface MemberAPI {
     @ApiOperation(value = "其他项目获取登录信息", notes = "其他项目获取登录信息")
     Object getMember(@RequestParam("userToken") String userToken);
 
+    @RequestMapping(value = "member/insurances/add", method = RequestMethod.POST)
+    @ApiOperation(value = "添加用户保险单信息", notes = "添加用户保险单信息")
+    ServerResponse  addInsurances(String userToken);
+
+    @RequestMapping(value = "member/insurances/my", method = RequestMethod.POST)
+    @ApiOperation(value = "我的保险单信息", notes = "我的保险单信息")
+    ServerResponse  myInsurances(@RequestParam("request") HttpServletRequest request,
+                                 @RequestParam("userToken") String userToken,
+                                 @RequestParam("pageDTO") PageDTO pageDTO);
 }
 

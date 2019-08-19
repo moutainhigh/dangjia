@@ -4,7 +4,9 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
+import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.matter.TechnologyRecordDTO;
 import com.dangjia.acg.dto.matter.WorkNodeDTO;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
@@ -55,6 +57,8 @@ public class TechnologyRecordService {
     private IHouseFlowApplyMapper houseFlowApplyMapper;
     @Autowired
     private IMendWorkerMapper mendWorkerMapper;
+    @Autowired
+    private ConfigUtil configUtil;
 
 
     /**
@@ -62,54 +66,66 @@ public class TechnologyRecordService {
      * 获取上传图片列表
      * applyType 0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4：每日开工,5有效巡查,6无人巡查,7追加巡查
      */
-    public ServerResponse nodeImageList(String nodeArr,Integer applyType,String houseFlowId){
-        try{
-            if(StringUtil.isEmpty(houseFlowId))
+    public ServerResponse nodeImageList(String nodeArr, Integer applyType, String houseFlowId) {
+        try {
+            if (StringUtil.isEmpty(houseFlowId))
                 return ServerResponse.createByErrorMessage("houseFlowId不能为空");
-            Map<String,Object> returnMap = new HashMap<>();
-            if(applyType == 1 || applyType == 2){
+            Map<String, Object> returnMap = new HashMap<>();
+            if (applyType == 1 || applyType == 2) {
                 returnMap.put("hint", "温馨提示:您在提交验收后被驳回次数<font color=red>超过2次后将产生罚款</font>,金额为100元/1次的费用.");
                 List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.noPassList(houseFlowId);
-                if (houseFlowApplyList.size() >= 2){
+                if (houseFlowApplyList.size() >= 2) {
                     returnMap.put("pop", "您的整改次数已经超过2次，从第3次起，每次整改将按照100元/次自动罚款，请知晓");
-                }else {
+                } else {
                     returnMap.put("pop", "");
                 }
-            }else {
+            } else {
                 returnMap.put("hint", "");
                 returnMap.put("pop", "");
             }
 
-            List<Map<String,Object>> listMap = new ArrayList<>();
-            Map<String,Object> map;
+            List<Map<String, Object>> listMap = new ArrayList<>();
+            Map<String, Object> map;
+            if (applyType == 4) {
+                map = new HashMap<>();
+                map.put("imageTypeId", "");
+                map.put("imageTypeName", "现场照片");
+                map.put("imageType", 2);
+                listMap.add(0, map);
+                returnMap.put("listMap", listMap);
+                return ServerResponse.createBySuccess("查询成功", returnMap);
+            }
+
             HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
             House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
-            if (StringUtil.isNotEmpty(nodeArr)){
+            if (StringUtil.isNotEmpty(nodeArr)) {
                 String[] idArr = nodeArr.split(",");
+                String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
                 for (String id : idArr) {
                     Technology technology = forMasterAPI.byTechnologyId(house.getCityId(), id);
                     map = new HashMap<>();
                     map.put("imageTypeId", id);
                     map.put("imageTypeName", technology.getName());
                     map.put("imageType", 3);  //节点照片
+                    map.put("url", webAddress + "gyDetail?title=工艺详情&technologyId=" + id);  //节点照片
                     listMap.add(map);
                 }
-            }else {
+            } else {
                 map = new HashMap<>();
-                map.put("imageTypeId","");
-                map.put("imageTypeName","现场照片");
-                map.put("imageType",2);
-                listMap.add(0,map);
+                map.put("imageTypeId", "");
+                map.put("imageTypeName", "现场照片");
+                map.put("imageType", 2);
+                listMap.add(0, map);
             }
             map = new HashMap<>();
-            map.put("imageTypeId","");
-            map.put("imageTypeName","材料照片");
-            map.put("imageType",0);
+            map.put("imageTypeId", "");
+            map.put("imageTypeName", "材料照片");
+            map.put("imageType", 0);
             listMap.add(listMap.size(), map);
 
             returnMap.put("listMap", listMap);
-            return ServerResponse.createBySuccess("查询成功",returnMap);
-        }catch (Exception e){
+            return ServerResponse.createBySuccess("查询成功", returnMap);
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
@@ -120,7 +136,7 @@ public class TechnologyRecordService {
      * 管家工匠合并 节点列表
      * applyType 0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4：每日开工,5有效巡查,6无人巡查,7追加巡查
      */
-    public ServerResponse workNodeList(String userToken, String houseFlowId){
+    public ServerResponse workNodeList(String userToken, String houseFlowId) {
         Object object1 = constructionService.getMember(userToken);
         if (object1 instanceof ServerResponse) {
             return (ServerResponse) object1;
@@ -136,25 +152,25 @@ public class TechnologyRecordService {
 
         List<WorkNodeDTO> workNodeDTOList = new ArrayList<>();
         JSONArray jsonArray;
-        if(worker.getWorkerType() == 3){ //管家查询管家应验收节点
-            jsonArray = budgetWorkerAPI.getAllTechnologyByHouseId(house.getCityId(),house.getId());
+        if (worker.getWorkerType() == 3) { //管家查询管家应验收节点
+            jsonArray = budgetWorkerAPI.getAllTechnologyByHouseId(house.getCityId(), house.getId());
             /* 补人工的节点也加入进来 */
             List<MendWorker> mendWorkerList = mendWorkerMapper.houseMendWorkerList(house.getId());
-            for (MendWorker mendWorker : mendWorkerList){
-                if (budgetWorkerAPI.patrolList(house.getCityId(),mendWorker.getWorkerGoodsId())){
+            for (MendWorker mendWorker : mendWorkerList) {
+                if (budgetWorkerAPI.patrolList(house.getCityId(), mendWorker.getWorkerGoodsId())) {
                     JSONObject jsonObject = new JSONObject();
                     jsonObject.put("workerGoodsId", mendWorker.getWorkerGoodsId());
                     jsonObject.put("workerGoodsName", mendWorker.getWorkerGoodsName());
                     jsonArray.add(jsonObject);
                 }
             }
-        }else {//工匠提交的验收节点
+        } else {//工匠提交的验收节点
             //含工艺人工商品
-            jsonArray = budgetWorkerAPI.getWorkerGoodsList(house.getCityId(),houseFlow.getHouseId(),houseFlowId);
+            jsonArray = budgetWorkerAPI.getWorkerGoodsList(house.getCityId(), houseFlow.getHouseId(), houseFlowId);
             /* 补人工的节点也加入进来 */
-            List<MendWorker> mendWorkerList = mendWorkerMapper.mendWorkerList(house.getId(),worker.getWorkerTypeId());
-            for (MendWorker mendWorker : mendWorkerList){
-                if (budgetWorkerAPI.workerPatrolList(house.getCityId(),mendWorker.getWorkerGoodsId())){
+            List<MendWorker> mendWorkerList = mendWorkerMapper.mendWorkerList(house.getId(), worker.getWorkerTypeId());
+            for (MendWorker mendWorker : mendWorkerList) {
+                if (budgetWorkerAPI.workerPatrolList(house.getCityId(), mendWorker.getWorkerGoodsId())) {
                     JSONObject jsonObject = new JSONObject();
                     jsonObject.put("workerGoodsId", mendWorker.getWorkerGoodsId());
                     jsonObject.put("workerGoodsName", mendWorker.getWorkerGoodsName());
@@ -163,32 +179,32 @@ public class TechnologyRecordService {
             }
         }
 
-        for(int i=0; i<jsonArray.size(); i++){
+        for (int i = 0; i < jsonArray.size(); i++) {
             JSONObject object = jsonArray.getJSONObject(i);
             String workerGoodsId = object.getString("workerGoodsId");
             String workerGoodsName = object.getString("workerGoodsName");
 
             WorkNodeDTO workNodeDTOA = new WorkNodeDTO();
             workNodeDTOA.setTecName(workerGoodsName);//商品名
-            JSONArray tecArray = budgetWorkerAPI.getTecList(house.getCityId(),worker.getWorkerType(),workerGoodsId);
+            JSONArray tecArray = budgetWorkerAPI.getTecList(house.getCityId(), worker.getWorkerType(), workerGoodsId);
             List<TechnologyRecordDTO> trList = new ArrayList<>();
-            for(int j=0; j<tecArray.size(); j++){
+            for (int j = 0; j < tecArray.size(); j++) {
                 JSONObject tecObject = tecArray.getJSONObject(j);
                 String technologyId = tecObject.getString("technologyId");
                 String technologyName = tecObject.getString("technologyName");
                 TechnologyRecordDTO trd = new TechnologyRecordDTO();
                 trd.setId(technologyId);
                 trd.setName(technologyName);
-                List<TechnologyRecord> technologyRecordList = technologyRecordMapper.checkByTechnologyId(houseFlow.getHouseId(),technologyId,worker.getWorkerTypeId());
-                if (technologyRecordList.size() == 0){ //没有验收
+                List<TechnologyRecord> technologyRecordList = technologyRecordMapper.checkByTechnologyId(houseFlow.getHouseId(), technologyId, worker.getWorkerTypeId());
+                if (technologyRecordList.size() == 0) { //没有验收
                     trd.setState(0);
-                }else {
+                } else {
                     TechnologyRecord technologyRecord = technologyRecordList.get(0);
-                    if(technologyRecord.getState() == 2){//不通过
+                    if (technologyRecord.getState() == 2) {//不通过
                         trd.setState(0);
-                    }else if (technologyRecord.getState() == 0){
+                    } else if (technologyRecord.getState() == 0) {
                         trd.setState(0);//未验收
-                    }else {
+                    } else {
                         trd.setState(1);//已验收
                     }
                 }
@@ -205,11 +221,11 @@ public class TechnologyRecordService {
      * applyType 0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4：每日开工,5有效巡查,6无人巡查,7追加巡查
      */
     @Deprecated
-    public ServerResponse uploadingImageList(String nodeArr){
-        try{
-            List<Map<String,Object>> listMap = new ArrayList<>();
-            Map<String,Object> map;
-            if (StringUtil.isNotEmpty(nodeArr)){
+    public ServerResponse uploadingImageList(String nodeArr) {
+        try {
+            List<Map<String, Object>> listMap = new ArrayList<>();
+            Map<String, Object> map;
+            if (StringUtil.isNotEmpty(nodeArr)) {
                 String[] idArr = nodeArr.split(",");
                 for (String id : idArr) {
                     Technology technology = forMasterAPI.byTechnologyId("", id);
@@ -219,20 +235,20 @@ public class TechnologyRecordService {
                     map.put("imageType", 3);  //节点照片
                     listMap.add(map);
                 }
-            }else {
+            } else {
                 map = new HashMap<>();
-                map.put("imageTypeId","");
-                map.put("imageTypeName","现场照片");
-                map.put("imageType",2);
-                listMap.add(0,map);
+                map.put("imageTypeId", "");
+                map.put("imageTypeName", "现场照片");
+                map.put("imageType", 2);
+                listMap.add(0, map);
             }
             map = new HashMap<>();
-            map.put("imageTypeId","");
-            map.put("imageTypeName","材料照片");
-            map.put("imageType",0);
+            map.put("imageTypeId", "");
+            map.put("imageTypeName", "材料照片");
+            map.put("imageType", 0);
             listMap.add(listMap.size(), map);
-            return ServerResponse.createBySuccess("查询成功",listMap);
-        }catch (Exception e){
+            return ServerResponse.createBySuccess("查询成功", listMap);
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
@@ -241,12 +257,13 @@ public class TechnologyRecordService {
     /**
      * 查询验收节点
      * 供管家选择验收
+     *
+     * @see workNodeList(String userToken, String houseFlowId, Integer applyType)} constraint instead
      * @deprecated use the standard {@link com.dangjia.acg.service.matter.TechnologyRecordService
-     * @see  workNodeList(String userToken, String houseFlowId, Integer applyType)} constraint instead
      */
     @Deprecated
-    public ServerResponse technologyRecordList(String houseFlowId){
-        try{
+    public ServerResponse technologyRecordList(String houseFlowId) {
+        try {
             HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
             House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
             if (house.getPause() != null) {
@@ -257,13 +274,13 @@ public class TechnologyRecordService {
 
             //所有已进场未完工工序的节点
             List<TechnologyRecordDTO> technologyRecordDTOS = new ArrayList<>();
-            JSONArray jsonArray = budgetWorkerAPI.getAllTechnologyByHouseId(house.getCityId(),house.getId());
-            for(int i=0;i<jsonArray.size();i++){
+            JSONArray jsonArray = budgetWorkerAPI.getAllTechnologyByHouseId(house.getCityId(), house.getId());
+            for (int i = 0; i < jsonArray.size(); i++) {
                 JSONObject object = jsonArray.getJSONObject(i);
                 String technologyId = object.getString("technologyId");
                 String technologyName = object.getString("technologyName");
-                List<TechnologyRecord> technologyRecordList = technologyRecordMapper.checkByTechnologyId(house.getId(),technologyId,"3");
-                if (technologyRecordList.size() == 0){
+                List<TechnologyRecord> technologyRecordList = technologyRecordMapper.checkByTechnologyId(house.getId(), technologyId, "3");
+                if (technologyRecordList.size() == 0) {
                     TechnologyRecordDTO dto = new TechnologyRecordDTO();
                     dto.setId(technologyId);
                     dto.setName(technologyName);
@@ -272,8 +289,8 @@ public class TechnologyRecordService {
                 }
             }
 
-            return ServerResponse.createBySuccess("查询成功",technologyRecordDTOS);
-        }catch (Exception e){
+            return ServerResponse.createBySuccess("查询成功", technologyRecordDTOS);
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
@@ -282,19 +299,19 @@ public class TechnologyRecordService {
     /**
      * 已进场未完工
      */
-    public List<HouseFlow> unfinishedFlow(String houseId){
+    public List<HouseFlow> unfinishedFlow(String houseId) {
         return houseFlowMapper.unfinishedFlow(houseId);
     }
 
     /**
      * 所有购买材料
      */
-    public List<Warehouse> warehouseList(String houseId){
-        return warehouseMapper.warehouseList(houseId,null,null);
+    public List<Warehouse> warehouseList(String houseId) {
+        return warehouseMapper.warehouseList(houseId, null, null);
     }
 
-    public ServerResponse getByProductId(String productId,String houseId){
-        Warehouse warehouse = warehouseMapper.getByProductId(productId,houseId);
+    public ServerResponse getByProductId(String productId, String houseId) {
+        Warehouse warehouse = warehouseMapper.getByProductId(productId, houseId);
         return ServerResponse.createBySuccess("查询成功", warehouse);
     }
 
