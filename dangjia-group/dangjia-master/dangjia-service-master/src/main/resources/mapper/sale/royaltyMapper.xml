@@ -7,7 +7,8 @@
 
     <!--查询成交量-->
     <select id="queryRoyaltySurface" resultType="com.dangjia.acg.common.model.BaseEntity">
-        select id,create_date as createDate from dj_royalty_surface
+        select id,create_date as createDate
+        from dj_royalty_surface order by create_date desc
     </select>
 
 
