@@ -755,13 +755,6 @@ public class BudgetWorkerService {
                 map.put("content", t.getContent());
                 jsonArray.add(map);
             }
-//            List<Technology> tList = iBudgetWorkerMapper.getByHouseFlowTechnologyId(houseId, houseFlowId);
-//            for (Technology t : tList) {
-//                JSONObject map = new JSONObject();
-//                map.put("technologyName", t.getName());
-//                map.put("content", t.getContent());
-//                jsonArray.add(map);
-//            }
             return jsonArray;
         } catch (Exception e) {
             e.printStackTrace();
