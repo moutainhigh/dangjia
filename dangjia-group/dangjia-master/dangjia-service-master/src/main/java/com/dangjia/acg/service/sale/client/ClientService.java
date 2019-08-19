@@ -744,6 +744,7 @@ public class ClientService {
      * @param phaseStatus
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse setTurnOut(String cityId, String storeId, String id, Integer phaseStatus) {
         Store store = iStoreMapper.selectByPrimaryKey(storeId);
         if (phaseStatus == 0) {
@@ -754,7 +755,21 @@ public class ClientService {
             clue.setTurnStatus(1);
             clueMapper.updateByPrimaryKeySelective(clue);
         } else if (phaseStatus == 1) {
-            iCustomerMapper.turnOut(store.getUserId(),storeId,id,cityId);
+            Customer customer = iCustomerMapper.selectByPrimaryKey(id);
+            Clue clue=new Clue();
+            clue.setCusService(store.getUserId());
+            clue.setCityId(cityId);
+            clue.setTurnStatus(1);
+            clue.setStoreId(storeId);
+            Example example=new Example(Clue.class);
+            example.createCriteria().andEqualTo(Clue.CUS_SERVICE,customer.getUserId())
+                    .andEqualTo(Clue.MEMBER_ID,customer.getMemberId());
+            clueMapper.updateByExampleSelective(clue,example);
+            customer.setCityId(cityId);
+            customer.setUserId(store.getUserId());
+            customer.setStoreId(storeId);
+            customer.setTurnStatus(1);
+            iCustomerMapper.updateByPrimaryKeySelective(customer);
         }
         return ServerResponse.createBySuccessMessage("操作成功");
     }

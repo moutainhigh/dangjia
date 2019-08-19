@@ -386,7 +386,7 @@ public class RobService {
                 if(null != member.getNickName()){
                     robArrInFoDTO.setNickName(member.getNickName());
                     robArrInFoDTO.setPhone(member.getMobile());
-                    robArrInFoDTO.setRemark(member.getRemarks());
+//                    robArrInFoDTO.setRemark(member.getRemarks());
                 }
 
                 //查询意向房子
