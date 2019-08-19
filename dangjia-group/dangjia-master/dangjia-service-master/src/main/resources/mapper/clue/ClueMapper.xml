@@ -197,7 +197,8 @@
             LEFT JOIN dj_member_customer mc
             on mc.member_id=c.member_id
             and mc.user_id=c.cus_service
-            WHERE c.data_status = 0 and c.stage NOT IN (2,3,4,5)
+            WHERE c.data_status = 0
+            and c.stage NOT IN (2,3,4,5)
             <if test="null!=userId and ''!=userId">
                 and c.cus_service=#{userId}
             </if>
@@ -217,14 +218,11 @@
             ON h.member_id = mc.member_id
             INNER JOIN dj_member m
             on m.id=mc.member_id
-            WHERE mc.stage=4
-            and mc.data_status = 0
+            WHERE mc.data_status = 0
             and c.data_status = 0
             and c.phase_status=1
             and mc.phase_status=1
             and h.data_status =0
-            and c.stage=4
-            and mc.stage=4
             <if test="type==1">
                 and h.visit_state =1
             </if>
