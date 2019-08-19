@@ -788,9 +788,11 @@ public class RobService {
             for (GrabSheetDTO grabSheetDTO : grabSheetDTOS) {
                 List<OrderStoreDTO> orderStore = iStoreMapper.getOrderStore(grabSheetDTO.getLatitude(), grabSheetDTO.getLongitude());
                 for (int i=0;i<orderStore.size();i++){
-                    if(((System.currentTimeMillis()-grabSheetDTO.getModifyDate().getTime())/60/1000)
-                            >Integer.parseInt(djRobSingles.get(i).getRobDate())){
+                    for (DjRobSingle djRobSingle : djRobSingles) {
+                        if(((System.currentTimeMillis()-grabSheetDTO.getModifyDate().getTime())/60/1000)
+                                >Integer.parseInt(djRobSingle.getRobDate())){
                             clueMapper.setDistribution(orderStore.get(i).getStoreId(),grabSheetDTO.getMemberId());
+                        }
                     }
                 }
             }
