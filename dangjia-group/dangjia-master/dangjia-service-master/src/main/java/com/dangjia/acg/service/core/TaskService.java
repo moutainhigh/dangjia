@@ -168,9 +168,9 @@ public class TaskService {
                         daynum = 0;
                     }
                     buttonDTO.setInsuranceDay(daynum);
-                    buttonDTO.setInsuranceMsg("您当前剩余保险天数为"+daynum+"天，为给施工提供保障，请在"+DateUtil.getDateString(DateUtil.addDateMinutes(houseWorker.getCreateDate(),30).getTime())+"前购买保险再继续工作，未购买将自动放弃。");
-//
                 }
+                buttonDTO.setInsuranceMsg("您当前剩余保险天数为"+buttonDTO.getInsuranceDay()+"天，为给施工提供保障，请在"+DateUtil.getDateString(DateUtil.addDateMinutes(houseWorker.getCreateDate(),30).getTime())+"前购买保险再继续工作，未购买将自动放弃。");
+
             }
 
         }
