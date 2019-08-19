@@ -2,6 +2,7 @@ package com.dangjia.acg.dto.core;
 
 import lombok.Data;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -27,6 +28,7 @@ public class HouseResult {
     private Integer drawings;//有无图纸0：无图纸；1：有图纸
     private Map progress;//菜单
     private Integer isStart;//今日是否开工0:否；1：是；
+    protected Date createDate;// 创建日期
 
     @Data
     public static class ListMapBean {
