@@ -33,7 +33,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.dangjia.acg.common.util.AES.encrypt;
 
 /**
  * author: Ronalcheng
@@ -307,6 +306,7 @@ public class ActuaryOpeService {
             Gson gson = new Gson();
             String toString = gson.toJson(BeanUtils.beanToMap(budgetDTO));
             toString=AES.encrypt(toString, Constants.DANGJIA_SESSION_KEY, Constants.DANGJIA_IV);
+            System.out.println("HOUSEID-ACTUARY-"+houseId+type+"::::"+toString);
             redisClient.put("HOUSEID-ACTUARY-"+houseId+type, toString);
             return ServerResponse.createBySuccess("查询成功", budgetDTO);
         } catch (Exception e) {
