@@ -198,7 +198,7 @@ public class RobService {
         for (DjAlreadyRobSingle da: lists) {
             RobDTO robDTO = new RobDTO();
             robDTO.setAlreadyId(da.getId());
-
+            robDTO.setCreateDate(da.getCreateDate());
             Member member = iMemberMapper.selectByPrimaryKey(da.getMemberId());
             if(!CommonUtil.isEmpty(member)){
                 robDTO.setOwerName(member.getNickName());
