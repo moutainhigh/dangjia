@@ -226,8 +226,7 @@ public class ActuaryOpeService {
         try {
             String budgetstr = redisClient.getCache("HOUSEID-ACTUARY-"+houseId+type,String .class);
             if(!CommonUtil.isEmpty(budgetstr)){
-                BudgetDTO budgetDTO = JSON.toJavaObject(JSON.parseObject(budgetstr),BudgetDTO.class);
-                return ServerResponse.createBySuccess("查询成功", budgetDTO);
+                return ServerResponse.createBySuccess("查询成功", budgetstr);
             }
             //切换数据源
             House house = houseAPI.getHouseById(houseId);
