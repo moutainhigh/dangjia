@@ -243,10 +243,11 @@ public class StoreManagementService {
                     slist1.addAll(Arrays.asList(residentialRange.getBuildingId().split(",")));
                 }
             }
+            PageInfo pageResult = new PageInfo(modelingVillages);
             for (ModelingVillage modelingVillage : modelingVillages) {
                 example = new Example(ResidentialBuilding.class);
                 Example.Criteria criteria = example.createCriteria();
-                criteria.andEqualTo(ResidentialBuilding.STORE_ID, store.getId());
+//                criteria.andEqualTo(ResidentialBuilding.STORE_ID, store.getId());
                 criteria.andEqualTo(ResidentialBuilding.VILLAGE_ID, modelingVillage.getId());
                 if (slist.size() > 0) {
                     criteria.andNotIn(ResidentialBuilding.ID, slist);
@@ -267,8 +268,9 @@ public class StoreManagementService {
                     residentialRangeDTOList.add(residentialRangeDTO);
                 }
             }
+            pageResult.setList(residentialRangeDTOList);
             if (residentialRangeDTOList.size() > 0) {
-                return ServerResponse.createBySuccess("查询成功", residentialRangeDTOList);
+                return ServerResponse.createBySuccess("查询成功", pageResult);
             }
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
