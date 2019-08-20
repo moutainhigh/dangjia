@@ -377,7 +377,7 @@ public class ClientService {
     public ServerResponse setReported(String clueId, Integer phaseStatus, String mcId) {
         if (phaseStatus == 0) {
             Clue clue1 = clueMapper.selectByPrimaryKey(clueId);
-            if(new Date().getTime()>clue1.getReportDate().getTime()){
+            if(null!=clue1.getReportDate() && new Date().getTime()>clue1.getReportDate().getTime()){
                 return ServerResponse.createByErrorMessage("已报备不能再次报备");
             }
             Clue clue = new Clue();
@@ -386,7 +386,7 @@ public class ClientService {
             clueMapper.updateByPrimaryKeySelective(clue);
         } else if (phaseStatus == 1) {
             Customer customer1 = iCustomerMapper.selectByPrimaryKey(mcId);
-            if(new Date().getTime()>customer1.getReportDate().getTime()){
+            if(null!=customer1.getReportDate() && new Date().getTime()>customer1.getReportDate().getTime()){
                 return ServerResponse.createByErrorMessage("已报备不能再次报备");
             }
             Customer customer = new Customer();
