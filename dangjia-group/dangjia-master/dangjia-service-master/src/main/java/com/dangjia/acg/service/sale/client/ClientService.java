@@ -757,6 +757,7 @@ public class ClientService {
                 ordersCustomerDTO.setModifyDate(customerIndexDTO.getModifyDate());
                 ordersCustomerDTO.setUserName(customerIndexDTO.getUserName());
                 ordersCustomerDTO.setWechat(customerIndexDTO.getWechat());
+                ordersCustomerDTO.setClueType(customerIndexDTO.getClueType());
                 ordersCustomerDTOS.add(ordersCustomerDTO);
             }
         }
