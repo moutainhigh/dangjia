@@ -325,7 +325,7 @@ public class ClueService {
                                     customer.setStoreId(clue.getStoreId());
                                     customer.setTips("1");
                                     customer.setLabelIdArr(clue.getLabelId());
-                                    if(new Date().getTime()>clue.getReportDate().getTime()){
+                                    if(null!=clue.getReportDate() && new Date().getTime()>clue.getReportDate().getTime()){
                                         customer.setReportDate(clue.getReportDate());
                                     }
                                     iCustomerMapper.insert(customer);
@@ -345,7 +345,7 @@ public class ClueService {
                             customer.setStoreId(clue.getStoreId());
                             customer.setTips("1");
                             customer.setLabelIdArr(clue.getLabelId());
-                            if(new Date().getTime()>clue.getReportDate().getTime()){
+                            if(null!=clue.getReportDate() && new Date().getTime()>clue.getReportDate().getTime()){
                                 customer.setReportDate(clue.getReportDate());
                             }
                             iCustomerMapper.insert(customer);
