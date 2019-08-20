@@ -11,6 +11,6 @@ import java.util.List;
 @Repository
 public interface LoanMapper extends Mapper<Loan> {
 
-    List<LoanDTO> getLoanList(@Param("state") Integer state, @Param("searchKey") String searchKey);
+    List<LoanDTO> getLoanList(@Param("cityId") String cityId,@Param("state") Integer state, @Param("searchKey") String searchKey);
 
 }
