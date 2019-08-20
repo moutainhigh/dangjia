@@ -265,7 +265,7 @@ public class ClientService {
         clue.setTurnStatus(0);
         clue.setCityId(modelingVillage.getCityId());
         clue.setClueType(1);
-        clue.setPhaseStatus(0);
+        clue.setPhaseStatus(new Integer(0));
         clue.setCusService(residentialRange.getUserId());
         clueMapper.insert(clue);
         return ServerResponse.createBySuccessMessage("提交成功");
