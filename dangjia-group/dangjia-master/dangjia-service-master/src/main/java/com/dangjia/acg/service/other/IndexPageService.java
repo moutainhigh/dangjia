@@ -311,10 +311,10 @@ public class IndexPageService {
      * @return
      */
     public ServerResponse jobLocation(HttpServletRequest request, String latitude, String longitude,Integer limit) {
-        if (CommonUtil.isEmpty(latitude)) {
+        if (CommonUtil.isEmpty(latitude)||"0".equals(latitude)) {
             latitude = "28.228259";
         }
-        if (CommonUtil.isEmpty(longitude)) {
+        if (CommonUtil.isEmpty(longitude)||"0".equals(longitude)) {
             longitude = "112.938904";
         }
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
