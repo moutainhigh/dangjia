@@ -469,19 +469,19 @@ public class ClientService {
             if (null != customerIndexDTO) {
                 customerIndexDTO.setTips(clueMapper.getTips(0, user.getId(), null) > 0 ? 1 : 0);
             }
-            map.put("followList", customerIndexDTO);
+            map.put("followList", customerIndexDTO);//跟进列表
 
             customerIndexDTO = clueMapper.clientPage(1, user.getId(), null);
             if (null != customerIndexDTO) {
                 customerIndexDTO.setTips(clueMapper.getTips(1, user.getId(), null) > 0 ? 1 : 0);
             }
-            map.put("placeOrder", customerIndexDTO);
+            map.put("placeOrder", customerIndexDTO);//已下单客户
 
             customerIndexDTO = clueMapper.clientPage(2, user.getId(), null);
             if (null != customerIndexDTO) {
                 customerIndexDTO.setTips(clueMapper.getTips(2, user.getId(), null) > 0 ? 1 : 0);
             }
-            map.put("completion", customerIndexDTO);
+            map.put("completion", customerIndexDTO);//已竣工客户
             MonthlyTargetDTO monthlyTargetDTO = new MonthlyTargetDTO();
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM");
             String date = dateFormat.format(new Date());
@@ -489,8 +489,8 @@ public class ClientService {
             monthlyTargetDTO.setComplete(clueMapper.Complete(user.getId(), date));
             List<MonthlyTarget> monthlyTargets = getMonthlyTargetList(user.getId());
             monthlyTargetDTO.setTargetNumber(monthlyTargets.size() > 0 ? monthlyTargets.get(0).getTargetNumber() : 0);
-            map.put("monthlyTarget", monthlyTargetDTO);
-            map.put("outField", getResidentialRangeDTOList(user.getId()));
+            map.put("monthlyTarget", monthlyTargetDTO);//月目标
+            map.put("outField", getResidentialRangeDTOList(user.getId()));//销售范围
             example.createCriteria().andEqualTo(StoreUser.USER_ID, accessToken.getUserId())
                     .andEqualTo(Store.DATA_STATUS, 0);
             List<StoreUser> storeUsers = iStoreUserMapper.selectByExample(example);
@@ -498,7 +498,7 @@ public class ClientService {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
             StoreUser storeUser = storeUsers.get(0);
-            map.put("storeId", storeUser.getStoreId());
+            map.put("storeId", storeUser.getStoreId());//门店id
         } else {
             object = saleService.getStore(accessToken.getUserId());
             if (object instanceof ServerResponse) {
@@ -511,32 +511,32 @@ public class ClientService {
                 if (null != customerIndexDTO) {
                     customerIndexDTO.setTips(clueMapper.getTips(0, user.getId(), null) > 0 ? 1 : 0);
                 }
-                map.put("followList", customerIndexDTO);
+                map.put("followList", customerIndexDTO);//跟进列表
 
                 customerIndexDTO = clueMapper.clientPage(1, null, storeUsers);
                 if (null != customerIndexDTO) {
                     customerIndexDTO.setTips(clueMapper.getTips(1, user.getId(), null) > 0 ? 1 : 0);
                 }
-                map.put("placeOrder", customerIndexDTO);
+                map.put("placeOrder", customerIndexDTO);//已下单客户
 
                 customerIndexDTO = clueMapper.clientPage(2, null, storeUsers);
                 if (null != customerIndexDTO) {
                     customerIndexDTO.setTips(clueMapper.getTips(2, user.getId(), null) > 0 ? 1 : 0);
                 }
-                map.put("completion", customerIndexDTO);
+                map.put("completion", customerIndexDTO);//已竣工客户
             }
             List<CustomerIndexDTO> customerIndexDTOS = clueMapper.sleepingCustomer(store.getId(), null, "desc", null);
             if (customerIndexDTOS.size() > 0) {
                 customerIndexDTOS.get(0).setTips(clueMapper.getSleepingCustomerTips() > 0 ? 1 : 0);
-                map.put("sleepingCustomer", customerIndexDTOS.get(0));
+                map.put("sleepingCustomer", customerIndexDTOS.get(0));//沉睡客户
             }
             List<CustomerIndexDTO> customerIndexDTOS1 = iCustomerMapper.waitDistribution(user.getId(), null, "desc");
             if (customerIndexDTOS1.size() > 0) {
                 customerIndexDTOS1.get(0).setTips(iCustomerMapper.getwaitDistributionTips() > 0 ? 1 : 0);
-                map.put("waitDistribution", customerIndexDTOS1.get(0));
+                map.put("waitDistribution", customerIndexDTOS1.get(0));//待分配客户
             }
-            map.put("storeId", store.getId());
-            map.put("grabSheet", iCustomerMapper.grabSheet(store.getId(),robStats));
+            map.put("storeId", store.getId());//门店id
+            map.put("grabSheet", iCustomerMapper.grabSheet(store.getId(),robStats));//抢单池
         }
         return ServerResponse.createBySuccess("查询成功", map);
     }
@@ -693,7 +693,8 @@ public class ClientService {
         if (!CommonUtil.isEmpty(visitState)) {
             Example example = new Example(Store.class);
             example.createCriteria().andEqualTo(Store.USER_ID, user.getId());
-            if (iStoreMapper.selectByExample(example).size() <= 0) {
+            //已下单客户/已竣工客户
+            if (iStoreMapper.selectByExample(example).size() <= 0) {//判断是否为店长
                 ordersCustomerDTOS = clueMapper.ordersCustomer(user.getId(), visitState, searchKey, time, null, null);
             } else {
                 object = saleService.getStore(accessToken.getUserId());
