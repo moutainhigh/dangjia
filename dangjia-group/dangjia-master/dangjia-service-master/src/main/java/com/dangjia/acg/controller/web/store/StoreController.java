@@ -56,8 +56,8 @@ public class StoreController implements StoreAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryStoreSubscribe(String searchKey, PageDTO pageDTO, String state) {
-        return storeServices.queryStoreSubscribe(searchKey, pageDTO, state);
+    public ServerResponse queryStoreSubscribe(String cityId,String searchKey, PageDTO pageDTO, String state) {
+        return storeServices.queryStoreSubscribe( cityId,searchKey, pageDTO, state);
     }
 
     /**
