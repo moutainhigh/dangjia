@@ -848,6 +848,7 @@ public class HouseService {
         houseAddress.setLongitude(longitude);
         houseAddress.setAddress(address);
         houseAddress.setName(name);
+        houseAddress.setHouseType(houseType);//装修的房子类型0：新房；1：老房
         iHouseAddressMapper.insert(houseAddress);
         example = new Example(MemberCity.class);
         example.createCriteria()

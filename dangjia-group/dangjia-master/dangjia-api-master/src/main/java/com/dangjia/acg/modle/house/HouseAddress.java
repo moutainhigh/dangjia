@@ -46,4 +46,9 @@ public class HouseAddress extends BaseEntity {
     @ApiModelProperty("地址名称")
     private String name;
 
+    @Column(name = "house_type")
+    @Desc(value = "装修的房子类型0：新房；1：老房")
+    @ApiModelProperty("装修的房子类型0：新房；1：老房")
+    private Integer houseType;
+
 }
