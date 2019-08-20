@@ -2,6 +2,7 @@ package com.dangjia.acg.service.core;
 
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
@@ -12,6 +13,7 @@ import com.dangjia.acg.dto.core.HouseFlowApplyDTO;
 import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
+import com.dangjia.acg.mapper.member.ICustomerMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.safe.IWorkerTypeSafeMapper;
 import com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper;
@@ -21,12 +23,14 @@ import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.core.*;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.matter.TechnologyRecord;
+import com.dangjia.acg.modle.member.Customer;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.safe.WorkerTypeSafe;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
 import com.dangjia.acg.modle.worker.Evaluate;
 import com.dangjia.acg.modle.worker.WorkIntegral;
 import com.dangjia.acg.modle.worker.WorkerDetail;
+import com.dangjia.acg.service.config.ConfigMessageService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,6 +81,10 @@ public class HouseFlowApplyService {
     private ConfigUtil configUtil;
     @Autowired
     private ITechnologyRecordMapper technologyRecordMapper;
+    @Autowired
+    private ConfigMessageService configMessageService;
+    @Autowired
+    private ICustomerMapper iCustomerMapper;
 
 
     /**
@@ -153,6 +161,10 @@ public class HouseFlowApplyService {
             /*
             节点审核通过
              */
+            if(null == hwo){
+                return ServerResponse.createByErrorMessage("该订单异常");
+            }
+
             technologyRecordMapper.passTecRecord(hwo.getHouseId(), hwo.getWorkerTypeId());
             if (hfa.getApplyType() == 2) {//整体完工
                 //修改进程
@@ -716,7 +728,13 @@ public class HouseFlowApplyService {
             house.setVisitState(3);//新状态 已完工
             house.setCompletedDate(new Date());
             houseMapper.updateByPrimaryKeySelective(house);
-
+            List<Customer> ms = iCustomerMapper.getCustomerMemberIdList(house.getMemberId());
+            if (ms != null) {
+                for (Customer m : ms) {
+                    configMessageService.addConfigMessage(AppType.SALE, m.getMemberId(), "竣工提醒",
+                            "您的客户【" + house.getHouseName() + "】已竣工，请及时查看提成。", 6);
+                }
+            }
             //处理工钱
             if (worker.getHaveMoney() == null) {//工人已获取
                 worker.setHaveMoney(new BigDecimal(0.0));

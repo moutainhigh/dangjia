@@ -24,13 +24,13 @@ public class FeedbackController implements FeedbackAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse addFeedback(HttpServletRequest request, Feedback feedback){
-        return feedbackService.addFeedback(request,feedback);
+    public ServerResponse addFeedback(HttpServletRequest request, Feedback feedback, Integer userRole) {
+        return feedbackService.addFeedback(request, feedback, userRole);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse getFeedbacks(HttpServletRequest request, PageDTO pageDTO, Feedback feedback){
-        return feedbackService.getFeedbacks(request,pageDTO,feedback);
+    public ServerResponse getFeedbacks(HttpServletRequest request, PageDTO pageDTO, Feedback feedback) {
+        return feedbackService.getFeedbacks(request, pageDTO, feedback);
     }
 }

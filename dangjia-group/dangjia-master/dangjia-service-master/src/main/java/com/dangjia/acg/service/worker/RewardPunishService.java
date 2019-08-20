@@ -3,6 +3,7 @@ package com.dangjia.acg.service.worker;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.constants.DjConstants;
+import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -240,14 +241,11 @@ public class RewardPunishService {
             }
             rewardPunishRecord.setState(0);//0:启用;1:不启用
             rewardPunishRecordMapper.insert(rewardPunishRecord);
-
             //工人ID账户奖罚积分和金额变更
             updateWorkerInfo(rewardPunishRecord.getId());
-
-
             if (!CommonUtil.isEmpty(rewardPunishRecord.getHouseId()) && rewardPunishRecord.getHouseId() != null && rewardPunishRecord.getMemberId() != null) {
                 House house = houseMapper.selectByPrimaryKey(rewardPunishRecord.getHouseId());
-                configMessageService.addConfigMessage(null, "gj", rewardPunishRecord.getMemberId(),
+                configMessageService.addConfigMessage(null, AppType.GONGJIANG, rewardPunishRecord.getMemberId(),
                         "0", "奖罚提醒", String.format(DjConstants.PushMessage.RECORD_OF_REWARDS_AND_PENALTIES, house.getHouseName()), "7");
             }
             return ServerResponse.createBySuccessMessage("新增奖罚记录成功");

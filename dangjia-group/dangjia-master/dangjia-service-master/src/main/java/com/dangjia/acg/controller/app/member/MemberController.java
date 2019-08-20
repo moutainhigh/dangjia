@@ -33,13 +33,13 @@ public class MemberController implements MemberAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getMemberInfo(String userToken) {
-        return memberService.getMemberInfo(userToken);
+    public ServerResponse getMemberInfo(String userToken, Integer userRole) {
+        return memberService.getMemberInfo(userToken, userRole);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse login(String phone, String password, String userRole) {
+    public ServerResponse login(String phone, String password, Integer userRole) {
         return memberService.login(phone, password, userRole);
     }
 
@@ -51,14 +51,14 @@ public class MemberController implements MemberAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse checkRegister(HttpServletRequest request, String phone, String password, int smscode, String invitationCode, Integer userRole) {
-        return memberService.checkRegister(request, phone, smscode, password, invitationCode, userRole);
+    public ServerResponse checkRegister(HttpServletRequest request, String phone, String password, int smscode, String invitationCode, Integer userRole, String longitude, String latitude) {
+        return memberService.checkRegister(request, phone, smscode, password, invitationCode, userRole, longitude, latitude);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse updateWokerRegister(Member user, String userToken, String userRole) {
-        return memberService.updateWokerRegister(user, userToken, userRole);
+    public ServerResponse updateWokerRegister(Member user, String userToken) {
+        return memberService.updateWokerRegister(user, userToken);
     }
 
     @Override
@@ -93,8 +93,8 @@ public class MemberController implements MemberAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getMyInvitation(String userToken) {
-        return memberService.getMyInvitation(userToken);
+    public ServerResponse getMyInvitation(String userToken, Integer userRole) {
+        return memberService.getMyInvitation(userToken, userRole);
     }
 
     @Override

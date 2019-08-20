@@ -81,7 +81,7 @@ public class FeedbackService {
         return ServerResponse.createBySuccess("ok", pageResult);
     }
 
-    public ServerResponse addFeedback(HttpServletRequest request, Feedback customer) {
+    public ServerResponse addFeedback(HttpServletRequest request, Feedback customer, Integer userRole) {
         String userToken = request.getParameter(Constants.USER_TOKEY);
         if (userToken != null) {
             Object object = constructionService.getMember(userToken);
@@ -92,6 +92,23 @@ public class FeedbackService {
             }
         }
         customer.setState(0);
+        String userRoleText = "";
+        if (!CommonUtil.isEmpty(userRole)) {
+            switch (userRole) {
+                case 1:
+                    userRoleText = "（业主端）";
+                    break;
+                case 2:
+                    userRoleText = "（工匠端）";
+                    break;
+                case 3:
+                    userRoleText = "（销售端）";
+                    break;
+            }
+        }
+        if (!CommonUtil.isEmpty(customer.getCustomerdes())) {
+            customer.setCustomerdes(userRoleText + customer.getCustomerdes());
+        }
         if (!CommonUtil.isEmpty(customer.getWorkerTypeId())) {
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(customer.getWorkerTypeId());
             customer.setWorkerTypeName(workerType == null ? "" : workerType.getName());

@@ -157,6 +157,7 @@ public class IndexPageService {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             BigDecimal totalPrice = new BigDecimal(0);//总计
             House house = houseMapper.selectByPrimaryKey(houseId);
+            request.setAttribute(Constants.CITY_ID, house.getCityId());
             HouseDetailsDTO houseDetailsDTO = new HouseDetailsDTO();
             houseDetailsDTO.setCityId(house.getCityId());
             houseDetailsDTO.setCityName(house.getCityName());

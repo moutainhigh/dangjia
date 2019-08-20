@@ -61,7 +61,7 @@ public class MemberAuthService {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode()
                     , "没有绑定账号");
         } else {
-            return memberService.getUser(user, userRole + "");
+            return memberService.getUser(user, userRole);
         }
     }
 
@@ -98,7 +98,7 @@ public class MemberAuthService {
             }
             memberAuth.setMemberId(user.getId());
             memberAuthMapper.insertSelective(memberAuth);
-            return memberService.getUser(user, memberAuth.getUserRole() + "");
+            return memberService.getUser(user, memberAuth.getUserRole());
         }
     }
 
@@ -114,13 +114,13 @@ public class MemberAuthService {
      */
     public ServerResponse newUserBinding(HttpServletRequest request, String phone, String password,
                                          int smscode, String invitationCode,
-                                         MemberAuth memberAuth) {
+                                         MemberAuth memberAuth ,String longitude, String latitude) {
         if (memberAuth.getUserRole() == null || memberAuth.getUserRole() == 0
                 || memberAuth.getOpenType() == null || memberAuth.getOpenType() == 0
                 || memberAuth.getUnionid() == null) {
             return ServerResponse.createByErrorMessage("传入参数有误");
         }
-        ServerResponse response = memberService.checkRegister(request, phone, smscode, password, invitationCode, memberAuth.getUserRole());
+        ServerResponse response = memberService.checkRegister(request, phone, smscode, password, invitationCode, memberAuth.getUserRole(),longitude,latitude);
         if (!response.isSuccess()) {
             return response;
         }

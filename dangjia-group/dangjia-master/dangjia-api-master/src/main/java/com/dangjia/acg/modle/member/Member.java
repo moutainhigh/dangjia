@@ -208,6 +208,20 @@ public class Member extends BaseEntity {
     @ApiModelProperty("工匠审核描述")
     private String checkDescribe;
 
+    @Column(name = "city_id")
+    @Desc(value = "注册城市id")
+    @ApiModelProperty("注册城市id")
+    private String cityId;
+
+    @Column(name = "city_name")
+    @Desc(value = "注册城市名")
+    @ApiModelProperty("注册城市名")
+    private String cityName;
+
+    @Column(name = "policy_id")
+    @Desc(value = "注册时会员策略 1=业主  2=工匠  3=供应商  4=其他")
+    @ApiModelProperty("注册时会员策略 1=业主  2=工匠  3=供应商  4=其他")
+    private String policyId;//会员策略
 
     //所有图片字段加入域名和端口，形成全路径
     public void initPath(String address) {

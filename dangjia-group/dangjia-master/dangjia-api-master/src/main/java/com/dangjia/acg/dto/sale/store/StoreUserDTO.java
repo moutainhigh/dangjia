@@ -1,8 +1,11 @@
 package com.dangjia.acg.dto.sale.store;
 
+import com.dangjia.acg.dto.sale.residential.ResidentialRangeDTO;
+import com.dangjia.acg.modle.sale.store.MonthlyTarget;
 import lombok.Data;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author Ruking.Cheng
@@ -16,7 +19,7 @@ public class StoreUserDTO {
     private String storeUserId;//门店成员ID
     private String userId;//成员用户ID
     private String storeId;//门店ID
-    private Integer type;//类别：0:场内销售，1:场外销售
+    private Integer type;//类别：0:内场销售，1:外场销售
     private String userName;//用户名
     private String userMobile;//手机
     private String userHead;//头像
@@ -25,4 +28,6 @@ public class StoreUserDTO {
     private Date modifyDate;// 修改日期
     private String storeName;//门店——岗位名称
     private String appKey;//极光聊天的Key
+    private List<MonthlyTarget> monthlyTarget;//当前月份的目标
+    private List<ResidentialRangeDTO> outField;//销售范围
 }

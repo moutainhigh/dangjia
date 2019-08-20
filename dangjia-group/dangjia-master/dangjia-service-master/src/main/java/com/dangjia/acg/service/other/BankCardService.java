@@ -5,7 +5,6 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.other.IBankCardMapper;
-import com.dangjia.acg.mapper.worker.IWorkerBankCardMapper;
 import com.dangjia.acg.modle.other.BankCard;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,8 +23,6 @@ public class BankCardService {
 
     @Autowired
     private IBankCardMapper bankCardMapper;
-    @Autowired
-    private IWorkerBankCardMapper workerBankCardMapper;
     @Autowired
     private ConfigUtil configUtil;
 

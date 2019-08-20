@@ -8,6 +8,7 @@ import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
@@ -533,10 +534,10 @@ public class PaymentService {
 
                 House house = houseMapper.selectByPrimaryKey(houseId);
                 if (workerType == 3) {
-                    configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "大管家要包工包料",
+                    configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "大管家要包工包料",
                             String.format(DjConstants.PushMessage.STEWARD_Y_SERVER, house.getHouseName()), "");
                 } else {
-                    configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "工匠要材料", String.format
+                    configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "工匠要材料", String.format
                             (DjConstants.PushMessage.CRAFTSMAN_Y_MATERIAL, house.getHouseName()), "");
                 }
             }
@@ -604,7 +605,7 @@ public class PaymentService {
                 house.setBudgetOk(1);//房间工种表里标记开始精算
                 houseMapper.updateByPrimaryKeySelective(house);
                 //推送消息给精算师业主已付款
-                configMessageService.addConfigMessage(null, "gj", house.getMemberId(),
+                configMessageService.addConfigMessage(null, AppType.GONGJIANG, house.getMemberId(),
                         "0", "业主支付精算费", String.format(DjConstants.PushMessage.JINGSUANFEIZHIFUWANC,
                                 house.getHouseName()), "");
             } else {//其它工种
@@ -629,22 +630,22 @@ public class PaymentService {
             //app推送和发送短信给工匠
             if (houseWorker.getWorkerType() == 1) {//设计师
 
-                configMessageService.addConfigMessage(null, "gj", houseWorker.getWorkerId(), "0", "业主支付提醒",
+                configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseWorker.getWorkerId(), "0", "业主支付提醒",
                         String.format(DjConstants.PushMessage.PAYMENT_OF_DESIGN_FEE, member.getMobile(), house.getHouseName()), "5");
                 //短信通知
                 JsmsUtil.sendDesigner(memberGr.getMobile(), member.getMobile(), house.getHouseName());
 
             }
             if (houseWorker.getWorkerType() == 3) {//大管家
-                configMessageService.addConfigMessage(null, "gj", houseWorker.getWorkerId(), "0", "业主支付提醒",
+                configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseWorker.getWorkerId(), "0", "业主支付提醒",
                         String.format(DjConstants.PushMessage.STEWARD_PAYMENT, house.getHouseName()), "5");
             }
             if (houseWorker.getWorkerType() > 3) {//其它工种
-                configMessageService.addConfigMessage(null, "gj", houseWorker.getWorkerId(), "0", "业主支付提醒",
+                configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseWorker.getWorkerId(), "0", "业主支付提醒",
                         String.format(DjConstants.PushMessage.CRAFTSMAN_PAYMENT, house.getHouseName()), "5");
 
                 HouseFlow houseFlowDgj = houseFlowMapper.getHouseFlowByHidAndWty(houseFlow.getHouseId(), 3);
-                configMessageService.addConfigMessage(null, "gj", houseFlowDgj.getWorkerId(), "0", "业主支付提醒",
+                configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlowDgj.getWorkerId(), "0", "业主支付提醒",
                         String.format(DjConstants.PushMessage.STEWARD_CRAFTSMAN_TWO_PAYMENT, house.getHouseName()), "5");
 
             }

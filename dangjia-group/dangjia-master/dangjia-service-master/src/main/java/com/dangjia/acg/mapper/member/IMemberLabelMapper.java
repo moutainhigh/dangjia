@@ -1,11 +1,15 @@
 package com.dangjia.acg.mapper.member;
 
+import com.dangjia.acg.dto.member.CustomerRecordInFoDTO;
+import com.dangjia.acg.dto.member.SaleMemberLabelDTO;
+import com.dangjia.acg.dto.member.WorkerTypeDTO;
 import com.dangjia.acg.modle.member.MemberLabel;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 标签表dao层
@@ -41,5 +45,56 @@ public interface IMemberLabelMapper extends Mapper<MemberLabel> {
      * 根据拿到的父name拿到标签对象
      */
     List<MemberLabel> getLabelByParentName(@Param("parentName") String parentName);
+
+    /**
+     * 根据id查询标签
+     * @param labelIds
+     * @return
+     */
+    List<SaleMemberLabelDTO> getLabelByIds(@Param("labelIds") String[] labelIds );
+
+
+    /**
+     * 查询客户沟通记录
+     * @param memberId
+     * @return
+     */
+    List<CustomerRecordInFoDTO> queryDescribes(@Param("memberId") String memberId);
+
+
+    /**
+     * 查询线索阶段沟通记录
+     * @param clueId
+     * @return
+     */
+    List<CustomerRecordInFoDTO> queryTalkContent(@Param("clueId") String clueId);
+
+
+    /**
+     * 查询大管家信息
+     * @param houseId
+     * @return
+     */
+    WorkerTypeDTO queryWorkerType(@Param("houseId") String houseId);
+
+
+    /**
+     * 查询装修状态
+     * @param houseId
+     * @return
+     */
+    WorkerTypeDTO queryType(@Param("houseId") String houseId);
+
+
+    /**
+     * 查询装修状态
+     * @param map
+     * @return
+     */
+    String queryWorkSteta(Map<String,Object> map);
+
+
+    String queryAddressName(@Param("houseId") String houseId);
+
 }
 

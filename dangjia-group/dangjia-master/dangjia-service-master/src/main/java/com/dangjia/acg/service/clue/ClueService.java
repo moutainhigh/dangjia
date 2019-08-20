@@ -7,6 +7,7 @@ import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.Validator;
 import com.dangjia.acg.common.util.excel.ImportExcel;
+import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.other.ClueDTO;
 import com.dangjia.acg.mapper.clue.ClueMapper;
 import com.dangjia.acg.mapper.clue.ClueTalkMapper;
@@ -14,6 +15,9 @@ import com.dangjia.acg.mapper.member.ICustomerMapper;
 import com.dangjia.acg.mapper.member.ICustomerRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberLabelMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.mapper.store.IStoreMapper;
+import com.dangjia.acg.mapper.store.IStoreUserMapper;
+import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.mapper.user.UserRoleMapper;
 import com.dangjia.acg.modle.clue.Clue;
 import com.dangjia.acg.modle.clue.ClueTalk;
@@ -21,7 +25,10 @@ import com.dangjia.acg.modle.member.Customer;
 import com.dangjia.acg.modle.member.CustomerRecord;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberLabel;
+import com.dangjia.acg.modle.store.Store;
+import com.dangjia.acg.modle.store.StoreUser;
 import com.dangjia.acg.modle.user.UserRoleKey;
+import com.dangjia.acg.service.config.ConfigMessageService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +60,16 @@ public class ClueService {
     private IMemberLabelMapper iMemberLabelMapper;
     @Autowired
     private UserRoleMapper userRoleMapper;
+    @Autowired
+    private IStoreMapper iStoreMapper;
+    @Autowired
+    private ConfigUtil configUtil;
+    @Autowired
+    private ConfigMessageService configMessageService;
+    @Autowired
+    private UserMapper userMapper;
+    @Autowired
+    private IStoreUserMapper iStoreUserMapper;
 
     /**
      * 获取所有线索
@@ -88,7 +105,7 @@ public class ClueService {
             if (stage != null) {
                 criteria.andEqualTo(Clue.STAGE, stage);
             } else {
-                criteria.andCondition(" stage IN (0,1) ");
+                criteria.andCondition(" stage IN (0,1,2,3) ");
             }
             if (!CommonUtil.isEmpty(values)) {
                 criteria.andCondition(" CONCAT(owername,phone,wechat,address) like CONCAT('%','" + values + "','%')");
@@ -106,6 +123,8 @@ public class ClueService {
             if (!CommonUtil.isEmpty(childId)) {
                 criteria.andEqualTo(Clue.LABEL_ID, childId);
             }
+            
+            criteria.andEqualTo(Clue.PHASE_STATUS, 0);
             example.orderBy(Clue.MODIFY_DATE).desc();
             List<Clue> clues = clueMapper.selectByExample(example);
             if (clues == null || clues.size() <= 0) {
@@ -116,6 +135,8 @@ public class ClueService {
             List<ClueDTO> clueDTOList = new ArrayList<>();
             for (Clue c : clues) {
                 ClueDTO clueDTO = new ClueDTO();
+                clueDTO.setClueId(c.getId());
+                clueDTO.setPhaseStatus(c.getPhaseStatus());
                 BeanUtils.beanToBean(c, clueDTO);
                 if (c.getLabelId() != null) {
                     String[] split = c.getLabelId().split(",");
@@ -123,9 +144,11 @@ public class ClueService {
                     String ids[][] = new String[split.length][2];
                     for (int i = 0; i < split.length; i++) {
                         MemberLabel memberLabel = iMemberLabelMapper.selectByPrimaryKey(split[i]);
-                        sb.append(memberLabel.getParentName()).append("-").append(memberLabel.getName()).append(",");
-                        ids[i][0] = memberLabel.getParentId();
-                        ids[i][1] = memberLabel.getId();
+                        if(null != memberLabel){
+                            sb.append(memberLabel.getParentName()).append("-").append(memberLabel.getName()).append(",");
+                            ids[i][0] = memberLabel.getParentId();
+                            ids[i][1] = memberLabel.getId();
+                        }
                     }
                     sb.delete(sb.lastIndexOf(","), sb.length());
                     clueDTO.setLabelName(sb.toString());
@@ -221,12 +244,14 @@ public class ClueService {
                 if (Validator.isMobileNo(c.getPhone())) {
                     c.setCusService(userId);
                     c.setStage(0);
-                    Clue clue1 = clueMapper.getByPhone(c.getPhone());
-                    Member member = iMemberMapper.getByPhone(c.getPhone());
-                    //表示从来没有过线索和注册过
-                    if (clue1 == null && member == null) {
-                        clueMapper.insert(c);
-                        num++;
+                    List<Clue> clues = clueMapper.getByPhone(c.getPhone());
+                    for (Clue clue1 : clues) {
+                        Member member = iMemberMapper.getByPhone(c.getPhone());
+                        //表示从来没有过线索和注册过
+                        if (clue1 == null && member == null) {
+                            clueMapper.insert(c);
+                            num++;
+                        }
                     }
                 }
             }
@@ -266,62 +291,122 @@ public class ClueService {
      * 转客户
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse sendUser(Member member, String phone) {
+    public ServerResponse sendUser(String id, String phone, String longitude, String latitude) {
         try {
-            Clue clue = clueMapper.getByPhone(phone);
+            //线索阶段手机号码会给多个销售人员录入   2019/8/9 销售端线索可为多个销售人员录入 所以应用list
+            List<Clue> clues = clueMapper.getByPhone(phone);
             //表示线索表存在线索
-            if (clue != null && clue.getStage() != 4) {
-                //有沟通记录
-                List<ClueTalk> clueTalkList = clueTalkMapper.getTalkByClueId(clue.getId());
-                if (clueTalkList.size() != 0) {
-                    Date date = clueTalkMapper.getMaxDate(clue.getId());
-                    for (ClueTalk clueTalk : clueTalkList) {
-                        //操作dj_member_customer_record表
-                        CustomerRecord customerRecord = new CustomerRecord();
-                        customerRecord.setUserId(clue.getCusService());
-                        customerRecord.setMemberId(member.getId());
-                        customerRecord.setDescribes(clueTalk.getTalkContent());
-                        //customerRecord.setModifyDate(clueTalk.getModifyDate());
-                        customerRecord.setCreateDate(clueTalk.getCreateDate());
-                        iCustomerRecordMapper.insert(customerRecord);
-                        //操作dj_member_customer表
-                        if (date.compareTo(clueTalk.getModifyDate()) == 0) {
+            if(clues.size()>0) {
+                for (Clue clue : clues) {
+                    if (clue.getStage() == 0 || clue.getStage() == 1) {
+                        //有沟通记录
+                        List<ClueTalk> clueTalkList = clueTalkMapper.getTalkByClueId(clue.getId());
+                        if (clueTalkList.size() != 0) {
+                            Date date = clueTalkMapper.getMaxDate(clue.getId());
+                            for (ClueTalk clueTalk : clueTalkList) {
+                                //操作dj_member_customer_record表
+                                CustomerRecord customerRecord = new CustomerRecord();
+                                customerRecord.setUserId(clue.getCusService());
+                                customerRecord.setMemberId(id);
+                                customerRecord.setDescribes(clueTalk.getTalkContent());
+                                //customerRecord.setModifyDate(clueTalk.getModifyDate());
+                                customerRecord.setCreateDate(clueTalk.getCreateDate());
+                                iCustomerRecordMapper.insert(customerRecord);
+                                //操作dj_member_customer表
+                                if (date.compareTo(clueTalk.getModifyDate()) == 0) {
+                                    Customer customer = new Customer();
+                                    customer.setUserId(clue.getCusService());
+                                    customer.setMemberId(id);
+                                    customer.setCurrRecordId(customerRecord.getId());
+                                    //customer.setModifyDate(clueTalk.getModifyDate());
+                                    customer.setCreateDate(clueTalk.getCreateDate());
+                                    customer.setStage(1);
+                                    customer.setPhaseStatus(1);
+                                    customer.setStoreId(clue.getStoreId());
+                                    customer.setTips("1");
+                                    customer.setLabelIdArr(clue.getLabelId());
+                                    iCustomerMapper.insert(customer);
+                                }
+                                //改变线索沟通表的数据状态
+                                clueTalk.setDataStatus(1);
+                                clueTalkMapper.updateByPrimaryKeySelective(clueTalk);
+                            }
+                        } else {
                             Customer customer = new Customer();
                             customer.setUserId(clue.getCusService());
-                            customer.setMemberId(member.getId());
-                            customer.setCurrRecordId(customerRecord.getId());
+                            customer.setMemberId(id);
                             //customer.setModifyDate(clueTalk.getModifyDate());
-                            customer.setCreateDate(clueTalk.getCreateDate());
+                            customer.setCreateDate(clue.getCreateDate());
                             customer.setStage(1);
+                            customer.setPhaseStatus(1);
+                            customer.setStoreId(clue.getStoreId());
+                            customer.setTips("1");
+                            customer.setLabelIdArr(clue.getLabelId());
                             iCustomerMapper.insert(customer);
                         }
-                        //改变线索沟通表的数据状态
-                        clueTalk.setDataStatus(1);
-                        clueTalkMapper.updateByPrimaryKeySelective(clueTalk);
-                    }
-                } else {
-                    Customer customer = new Customer();
-                    customer.setUserId(clue.getCusService());
-                    customer.setMemberId(member.getId());
-                    //customer.setModifyDate(clueTalk.getModifyDate());
-                    customer.setCreateDate(clue.getCreateDate());
-                    customer.setStage(1);
-                    iCustomerMapper.insert(customer);
-                }
-                //改变线索表的数据状态
+                        //改变线索表的数据状态
 //                clue.setDataStatus(1);
-                clue.setStage(4);
-                clueMapper.updateByPrimaryKeySelective(clue);
-                //操作dj_member表
-                member.setCreateDate(clue.getCreateDate());
-                iMemberMapper.updateByPrimaryKeySelective(member);
+                        clue.setStage(1);
+                        clue.setMemberId(id);
+                        clue.setPhaseStatus(1);
+                        clueMapper.updateByPrimaryKeySelective(clue);
+                    }
+                }
+                return ServerResponse.createBySuccessMessage("操作成功");
             }
+            Clue clue=new Clue();
+            clue.setStage(0);
+            clue.setDataStatus(0);
+            clue.setClueType(0);
+            clue.setTurnStatus(0);
+            clue.setPhaseStatus(1);
+            clue.setPhone(phone);
+            clue.setMemberId(id);
+            clueMapper.insert(clue);
+            Customer customer = new Customer();
+            customer.setMemberId(id);
+            customer.setDataStatus(0);
+            customer.setStage(0);
+            customer.setPhaseStatus(1);
+            iCustomerMapper.insert(customer);
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             e.printStackTrace();
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return ServerResponse.createByErrorMessage("操作失败");
         }
+    }
+
+    public ServerResponse addH5Clue(String userId, String phone) {
+        Example example = new Example(Clue.class);
+        example.createCriteria().andEqualTo(Clue.CUS_SERVICE, userId).andEqualTo(Clue.PHONE, phone);
+        List<Clue> clueList = clueMapper.selectByExample(example);
+        if (clueList.size() > 0) {
+            return ServerResponse.createByErrorMessage("线索已存在");
+        }
+        example=new Example(StoreUser.class);
+        example.createCriteria().andEqualTo(StoreUser.USER_ID,userId)
+                .andEqualTo(StoreUser.DATA_STATUS,0);
+        List<StoreUser> storeUsers = iStoreUserMapper.selectByExample(example);
+        if(!storeUsers.isEmpty()){
+            Clue clue = new Clue();
+            clue.setCusService(userId);
+            clue.setPhone(phone);
+            clue.setPhaseStatus(0);
+            clue.setStoreId(storeUsers.get(0).getStoreId());
+            clue.setStage(0);
+            clue.setDataStatus(0);
+            clue.setClueType(0);
+            clue.setTurnStatus(0);
+            Store store = iStoreMapper.selectByPrimaryKey(storeUsers.get(0).getStoreId());
+            if(null==store){
+                return ServerResponse.createByErrorMessage("该门店不存在");
+            }
+            clue.setCityId(store.getCityId());
+            clueMapper.insert(clue);
+            return ServerResponse.createBySuccessMessage("操作成功");
+        }
+        return ServerResponse.createByErrorMessage("操作失败");
     }
 }
 

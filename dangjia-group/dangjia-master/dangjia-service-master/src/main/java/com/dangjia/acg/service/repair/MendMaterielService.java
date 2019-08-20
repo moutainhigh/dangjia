@@ -48,7 +48,6 @@ public class MendMaterielService {
     private IMemberMapper memberMapper;
     @Autowired
     private IWarehouseMapper warehouseMapper;
-
     @Autowired
     private ForMasterAPI forMasterAPI;
     @Autowired

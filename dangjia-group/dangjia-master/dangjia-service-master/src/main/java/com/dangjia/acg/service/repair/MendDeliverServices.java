@@ -2,7 +2,6 @@ package com.dangjia.acg.service.repair;
 
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.repair.MendDeliverDTO;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
@@ -33,8 +32,6 @@ public class MendDeliverServices {
     private IMendMaterialMapper iMendMaterialMapper;
     @Autowired
     private IMemberMapper iMemberMapper;
-    @Autowired
-    private ConfigUtil configUtil;
     @Autowired
     private ForMasterAPI forMasterAPI;
     @Autowired

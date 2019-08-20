@@ -165,7 +165,8 @@
         h.construction_date AS modifyDate
         FROM dj_member w
         INNER JOIN dj_member_info mi on mi.member_id = w.id and mi.policy_id=#{userRole}
-        INNER JOIN ( SELECT c.member_id, GROUP_CONCAT( c.city_id ) city_id FROM dj_member_city c GROUP BY c.member_id ) mt ON mt.member_id = w.id
+        INNER JOIN ( SELECT c.member_id, GROUP_CONCAT( c.city_id ) city_id FROM dj_member_city c GROUP BY c.member_id )
+        mt ON mt.member_id = w.id
         AND FIND_IN_SET(#{cityId}, mt.city_id )
 
         <choose>
@@ -176,7 +177,7 @@
             <otherwise>
                 INNER JOIN dj_member_customer mc on mc.member_id = w.id
                 <if test="userId!=null and userId!=''">
-                    and  mc.user_id=#{userId}
+                    and mc.user_id=#{userId}
                 </if>
                 <if test="userKey!=null and userKey!=''">
                     AND FIND_IN_SET(mc.user_id,#{userKey})
@@ -187,13 +188,13 @@
 
         <if test="type=='bb'">
             INNER
-            JOIN dj_house	h ON h.member_id = w.id  and h.data_status =0 and h.visit_state =1
+            JOIN dj_house h ON h.member_id = w.id and h.data_status =0 and h.visit_state =1
             WHERE w.data_status = 0
         </if>
 
         <if test="type!='bb'">
             LEFT
-            JOIN dj_house	h ON h.member_id = w.id  and h.data_status =0 and h.visit_state =1
+            JOIN dj_house h ON h.member_id = w.id and h.data_status =0 and h.visit_state =1
             WHERE w.data_status = 0
         </if>
 

@@ -18,16 +18,16 @@ public class WebCityServices {
     @Autowired
     private ICityMapper cityMapper;
 
-    public ServerResponse getCityList(String cityId){
-        Example example=new Example(City.class);
-        example.createCriteria().andEqualTo(City.DATA_STATUS,0).andEqualTo(City.ID,cityId);
-        return ServerResponse.createBySuccess("查询成功",cityMapper.selectByExample(example));
+    public ServerResponse getCityList(String cityId) {
+        Example example = new Example(City.class);
+        example.createCriteria().andEqualTo(City.DATA_STATUS, 0).andEqualTo(City.ID, cityId);
+        return ServerResponse.createBySuccess("查询成功", cityMapper.selectByExample(example));
     }
 
-    public ServerResponse addCity(City city){
+    public ServerResponse addCity(City city) {
         Example example = new Example(City.class);
         example.createCriteria().andEqualTo(City.NAME, city.getName())
-                .andEqualTo(City.DATA_STATUS,0);
+                .andEqualTo(City.DATA_STATUS, 0);
         if (cityMapper.selectByExample(example).size() > 0) {
             return ServerResponse.createByErrorMessage("城市已存在");
         }
@@ -36,7 +36,7 @@ public class WebCityServices {
         return ServerResponse.createBySuccessMessage("创建成功");
     }
 
-    public ServerResponse delCity(String cityId){
+    public ServerResponse delCity(String cityId) {
 //        City city=new City();
 //        city.setId(cityId);
 //        city.setDataStatus(1);
@@ -44,12 +44,12 @@ public class WebCityServices {
         return ServerResponse.createBySuccessMessage("删除成功");
     }
 
-    public ServerResponse updateCity(City city){
+    public ServerResponse updateCity(City city) {
         City oldCity = cityMapper.selectByPrimaryKey(city.getId());
-        if(!oldCity.getName().equals(city.getName())){
+        if (!oldCity.getName().equals(city.getName())) {
             Example example = new Example(City.class);
             example.createCriteria().andEqualTo(City.NAME, city.getName())
-                    .andEqualTo(City.DATA_STATUS,0);
+                    .andEqualTo(City.DATA_STATUS, 0);
             if (cityMapper.selectByExample(example).size() > 0) {
                 return ServerResponse.createByErrorMessage("城市已存在");
             }
@@ -58,8 +58,5 @@ public class WebCityServices {
         cityMapper.updateByPrimaryKeySelective(city);
         return ServerResponse.createBySuccessMessage("修改成功");
     }
-
-
-
 
 }

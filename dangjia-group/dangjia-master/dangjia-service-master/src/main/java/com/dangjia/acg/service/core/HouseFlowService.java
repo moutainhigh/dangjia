@@ -6,6 +6,7 @@ import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
@@ -130,7 +131,10 @@ public class HouseFlowService {
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
-            Member member = (Member) object;
+            Member member = memberMapper.selectByPrimaryKey(((Member) object).getId());
+            if(member==null){
+                return ServerResponse.createbyUserTokenError();
+            }
             //工匠没有实名认证不应该展示数据
             if (CommonUtil.isEmpty(member.getWorkerTypeId()) || member.getCheckType() != 2 || member.getRealNameState() != 3) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
@@ -516,7 +520,7 @@ public class HouseFlowService {
                         operator.setSurplusMoney(surplusMoney);
                         operator.setHaveMoney(haveMoney);
                         memberMapper.updateByPrimaryKeySelective(operator);
-                        configMessageService.addConfigMessage(null, "gj", operator.getId(), "0",
+                        configMessageService.addConfigMessage(null, AppType.GONGJIANG, operator.getId(), "0",
                                 "保险自动续保", "您的保险已到期,为确保您在施工期间的保障,系统已自动续保", "0");
                     }
                 }
@@ -537,7 +541,10 @@ public class HouseFlowService {
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
-            Member member = (Member) object;
+            Member member = memberMapper.selectByPrimaryKey(((Member) object).getId());
+            if(member==null){
+                return ServerResponse.createbyUserTokenError();
+            }
             HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowId);
             Example example = new Example(HouseWorker.class);
             example.createCriteria().andEqualTo(HouseWorker.WORKER_ID, member.getId()).andEqualTo(HouseWorker.HOUSE_ID, hf.getHouseId());
@@ -574,7 +581,7 @@ public class HouseFlowService {
                     }
                 }
                 House house = houseMapper.selectByPrimaryKey(hf.getHouseId());
-                configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "大管家放弃", String.format(DjConstants.PushMessage.STEWARD_ABANDON, house.getHouseName()), "");
+                configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "大管家放弃", String.format(DjConstants.PushMessage.STEWARD_ABANDON, house.getHouseName()), "");
             } else {//普通工匠
                 if (hf.getWorkType() == 3) {//已抢单待支付(无责取消)
                     hf.setWorkType(2);//抢单状态更改为待抢单
@@ -605,11 +612,9 @@ public class HouseFlowService {
                 houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
                 House house = houseMapper.selectByPrimaryKey(hf.getHouseId());
                 WorkerType workerType = workerTypeMapper.selectByPrimaryKey(hf.getWorkerTypeId());
-                configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "工匠放弃", String.format(DjConstants.PushMessage.CRAFTSMAN_ABANDON, house.getHouseName(), workerType.getName()), "");
-
-
+                configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "工匠放弃", String.format(DjConstants.PushMessage.CRAFTSMAN_ABANDON, house.getHouseName(), workerType.getName()), "");
                 HouseFlow houseFlowDgj = houseFlowMapper.getHouseFlowByHidAndWty(hf.getHouseId(), 3);
-                configMessageService.addConfigMessage(null, "gj", houseFlowDgj.getWorkerId(), "0", "工匠放弃",
+                configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlowDgj.getWorkerId(), "0", "工匠放弃",
                         String.format(DjConstants.PushMessage.STEWARD_CRAFTSMAN_TWO_ABANDON, house.getHouseName()), "5");
 
             }
@@ -636,10 +641,9 @@ public class HouseFlowService {
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
-            Member member = (Member) object;
-            member = memberMapper.selectByPrimaryKey(member.getId());
-            if (member == null) {
-                return ServerResponse.createByErrorMessage("用户不存在");
+            Member member = memberMapper.selectByPrimaryKey(((Member) object).getId());
+            if(member==null){
+                return ServerResponse.createbyUserTokenError();
             }
             HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowId);
             //查询排队时间,并修改重排
@@ -709,15 +713,7 @@ public class HouseFlowService {
             houseFlow.setSupervisorStart(1);//大管家进度改为已开工
             houseFlow.setModifyDate(new Date());
             houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
-//            HouseFlow nextHF = houseFlowMapper.getNextHouseFlow(houseFlow.getHouseId());//根据当前工序查下一工序
-//            if (nextHF != null) {
-//                nextHF.setWorkType(2);//把下一个工种弄成待抢单
-//                nextHF.setReleaseTime(new Date());//发布时间
-//                houseFlowMapper.updateByPrimaryKeySelective(nextHF);
-//                //通知下一个工种 抢单
-//                configMessageService.addConfigMessage(null, "gj", "wtId" + nextHF.getWorkerTypeId() + nextHF.getCityId(), "0", "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, "4");
-//            }
-            configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "大管家开工", DjConstants.PushMessage.STEWARD_CONSTRUCTION, "");
+            configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "大管家开工", DjConstants.PushMessage.STEWARD_CONSTRUCTION, "");
 
             //开始建群
             Group group = new Group();

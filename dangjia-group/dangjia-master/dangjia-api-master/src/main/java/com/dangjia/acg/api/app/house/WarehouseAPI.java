@@ -22,7 +22,7 @@ public interface WarehouseAPI {
     @PostMapping("app/house/warehouse/checkWarehouseSurplus")
     @ApiOperation(value = "查询仓库剩余总金额", notes = "查询仓库剩余总金额")
     ServerResponse checkWarehouseSurplus(@RequestParam("userToken") String userToken,
-                                 @RequestParam("houseId") String houseId);
+                                         @RequestParam("houseId") String houseId);
 
 
     @PostMapping("app/house/warehouse/warehouseList")

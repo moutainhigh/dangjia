@@ -82,25 +82,25 @@ public class StoreServices {
      * @return
      */
     public ServerResponse queryStore(String cityId, String storeName,PageDTO pageDTO) {
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<Store> stores = iStoreMapper.queryStore(cityId, storeName);
-            if(stores.size()<=0){
-                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        List<Store> stores = iStoreMapper.queryStore(cityId, storeName);
+        if(stores.size()<=0){
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+        PageInfo pageResult = new PageInfo(stores);
+        List<Map> storesMap = new ArrayList<>();
+        for (Store store : stores) {
+            Map map = BeanUtils.beanToMap(store);
+            MainUser mainUser = userMapper.selectByPrimaryKey(store.getUserId());
+            if (mainUser != null) {
+                map.put("userName", mainUser.getUsername());//用户名
+                map.put("userMobile", mainUser.getMobile());//手机
+                map.put("isJob", mainUser.getIsJob());//是否在职（0：正常；1，离职）
             }
-            PageInfo pageResult = new PageInfo(stores);
-            List<Map> storesMap = new ArrayList<>();
-            for (Store store : stores) {
-                Map map = BeanUtils.beanToMap(store);
-                MainUser mainUser = userMapper.selectByPrimaryKey(store.getUserId());
-                if (mainUser != null) {
-                    map.put("userName", mainUser.getUsername());//用户名
-                    map.put("userMobile", mainUser.getMobile());//手机
-                    map.put("isJob", mainUser.getIsJob());//是否在职（0：正常；1，离职）
-                }
-                storesMap.add(map);
-            }
-            pageResult.setList(storesMap);
-            return ServerResponse.createBySuccess("查询成功",pageResult);
+            storesMap.add(map);
+        }
+        pageResult.setList(storesMap);
+        return ServerResponse.createBySuccess("查询成功",pageResult);
     }
 
     /**
@@ -200,13 +200,14 @@ public class StoreServices {
      * @return
      */
     public ServerResponse delStore(String id) {
-        try {
-            iStoreMapper.deleteByPrimaryKey(id);
-            return ServerResponse.createBySuccessMessage("删除成功");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("删除失败");
+        Store store = iStoreMapper.selectByPrimaryKey(id);
+        if (store == null) {
+            return ServerResponse.createByErrorMessage("该门店不存在");
         }
+        store.setModifyDate(new Date());
+        store.setDataStatus(1);
+        iStoreMapper.updateByPrimaryKeySelective(store);
+        return ServerResponse.createBySuccessMessage("删除成功");
     }
 
     /**
@@ -215,13 +216,13 @@ public class StoreServices {
      * @return
      */
     public ServerResponse queryStoreSubscribe(String searchKey, PageDTO pageDTO, String state) {
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<StoreSubscribe> storeSubscribes = iStoreSubscribeMapper.queryStoreSubscribe(searchKey,state);
-            if(storeSubscribes.size()<=0){
-                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
-            }
-            PageInfo pageResult=new PageInfo(storeSubscribes);
-            return ServerResponse.createBySuccess("查询成功",pageResult);
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        List<StoreSubscribe> storeSubscribes = iStoreSubscribeMapper.queryStoreSubscribe(searchKey,state);
+        if(storeSubscribes.size()<=0){
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+        PageInfo pageResult=new PageInfo(storeSubscribes);
+        return ServerResponse.createBySuccess("查询成功",pageResult);
     }
 
     /**
@@ -266,13 +267,13 @@ public class StoreServices {
      * @return
      */
     public ServerResponse queryStoreDistance(PageDTO pageDTO,String cityId, String storeName) {
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<Store> stores = iStoreMapper.queryStoreDistance(cityId, storeName);
-            if(stores.size()<=0){
-                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
-            }
-            PageInfo pageResult = new PageInfo(stores);
-            return ServerResponse.createBySuccess("查询成功",pageResult);
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        List<Store> stores = iStoreMapper.queryStoreDistance(cityId, storeName);
+        if(stores.size()<=0){
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+        PageInfo pageResult = new PageInfo(stores);
+        return ServerResponse.createBySuccess("查询成功",pageResult);
     }
 
 
@@ -283,17 +284,17 @@ public class StoreServices {
      * @return
      */
     public ServerResponse IndexqueryStore(String cityId,String latitude, String longitude) {
-            if (CommonUtil.isEmpty(latitude)) {
-                latitude = "28.228259";
-            }
-            if (CommonUtil.isEmpty(longitude)) {
-                longitude = "112.938904";
-            }
-            List<Store> stores = iStoreMapper.IndexqueryStore(cityId,latitude, longitude);
-            if(stores.size()<=0){
-                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
-            }
-            return ServerResponse.createBySuccess("查询成功",stores);
+        if (CommonUtil.isEmpty(latitude)) {
+            latitude = "28.228259";
+        }
+        if (CommonUtil.isEmpty(longitude)) {
+            longitude = "112.938904";
+        }
+        List<Store> stores = iStoreMapper.IndexqueryStore(cityId,latitude, longitude);
+        if(stores.size()<=0){
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+        return ServerResponse.createBySuccess("查询成功",stores);
     }
 
     /**

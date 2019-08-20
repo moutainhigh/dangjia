@@ -1,6 +1,8 @@
 package com.dangjia.acg.mapper.clue;
 
+import com.dangjia.acg.dto.clue.ClueTalkDTO;
 import com.dangjia.acg.modle.clue.ClueTalk;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
@@ -19,4 +21,7 @@ public interface ClueTalkMapper extends Mapper<ClueTalk> {
     List<ClueTalk> getTalkByClueId(String clueId);
 
     Date getMaxDate(String clueID);
+
+    List<ClueTalkDTO> getTodayDescribes(@Param("nowDate") String nowDate);
+
 }

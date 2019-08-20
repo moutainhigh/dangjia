@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper
-PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.member.ICustomerMapper">
     <sql id="all_columns">
 		id,
@@ -12,25 +12,43 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         curr_record_id AS currRecordId,
         remind_record_id AS remindRecordId,
         create_date AS createDate,
-        modify_date AS modifyDate
+        modify_date AS modifyDate,
+        phase_status AS phaseStatus,
+        tips
 	</sql>
 
     <!-- 根据业主id 查询 -->
     <select id="getCustomerByMemberId" parameterType="String" resultType="com.dangjia.acg.modle.member.Customer">
         SELECT
-        <include refid="all_columns" />
+        <include refid="all_columns"/>
         FROM dj_member_customer
         WHERE 1=1
         <if test="memberId!=null and memberId!=''">
             and member_id=#{memberId}
         </if>
         ORDER by create_date desc
+        limit 1
     </select>
 
-    <!-- 根据业主id 和 stage 查询 -->
-    <select id="getCustomerByMemberIdAndStage" parameterType="String" resultType="com.dangjia.acg.modle.member.Customer">
+    <!-- 根据业主id 查询 -->
+    <select id="getCustomerBy" parameterType="String" resultType="com.dangjia.acg.modle.member.Customer">
         SELECT
-        <include refid="all_columns" />
+        <include refid="all_columns"/>
+        FROM dj_member_customer
+        WHERE 1=1
+        <if test="memberId!=null and memberId!=''">
+            and member_id=#{memberId}
+        </if>
+        ORDER by create_date desc
+        limit 1
+    </select>
+
+
+    <!-- 根据业主id 和 stage 查询 -->
+    <select id="getCustomerByMemberIdAndStage" parameterType="String"
+            resultType="com.dangjia.acg.modle.member.Customer">
+        SELECT
+        <include refid="all_columns"/>
         FROM dj_member_customer
         WHERE 1=1
         <if test="memberId!=null and memberId!=''">
@@ -41,5 +59,151 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </if>
         ORDER by create_date desc
     </select>
+
+    <!--待分配客户-->
+    <select id="waitDistribution" parameterType="String" resultType="com.dangjia.acg.dto.sale.client.CustomerIndexDTO">
+        SELECT
+        c.id as clueId,
+        mc.id as mcId,
+        mc.member_id as memberId,
+        mc.user_id as userId,
+        if(c.owername is not null,c.owername,m.nick_name) as name,
+        c.phone,
+        c.wechat,
+        c.modify_date AS modifyDate,
+        c.create_date AS createDate,
+        if(c.label_id is not null,c.label_id,mc.label_id_arr) AS labelIdArr,
+        c.phase_status as phaseStatus,
+        c.stage
+        FROM dj_clue c
+        LEFT JOIN dj_member_customer mc ON mc.user_id = c.cus_service
+        AND mc.member_id = c.member_id
+        LEFT JOIN dj_member m
+        on c.member_id=m.id
+        WHERE c.cus_service=#{userId}
+        AND c.data_status=0
+        AND c.turn_status=1
+        <if test="null!=searchKey and ''!=searchKey">
+            AND CONCAT(c.owername,c.phone,m.nick_name) like CONCAT('%',#{searchKey},'%')
+        </if>
+        ORDER by c.create_date
+        <if test="null!=time and ''!=time">
+            desc
+        </if>
+    </select>
+
+    <select id="grabSheet" resultType="com.dangjia.acg.dto.sale.store.GrabSheetDTO">
+        SELECT
+          c.id as clueId,
+          mc.id as customerId,
+          h.id as houseId,
+          if(m.nick_name is not null,m.nick_name,c.owername) as name,
+          h.create_date AS createDate,
+          h.visit_state as visitState,
+          mc.user_id as userId,
+          mc.member_id as memberId,
+          mc.phase_status as phaseStatus
+        FROM dj_member_customer mc
+        INNER JOIN dj_clue c
+        on mc.member_id=c.member_id
+        and mc.user_id=c.cus_service
+        INNER JOIN dj_member m
+        on mc.member_id=m.id
+        INNER JOIN dj_house h
+        on m.id=h.member_id
+        where h.visit_state=0
+        and h.data_status=0
+        and c.store_id=#{storeId}
+        and h.is_rob_stats=#{robStats}
+        order By h.create_date desc
+    </select>
+
+
+    <select id="queryType" resultType="java.lang.Integer" parameterType="java.lang.String">
+        select type from dj_store_users where user_id in
+        (select user_id from dj_member_customer mc
+        where mc.member_id = #{memberId})
+        limit 1
+    </select>
+
+    <select id="queryLabelIdArr" resultType="java.lang.String" parameterType="java.lang.String">
+        select label_id_arr as labelIdArr from dj_member_customer mc where mc.id = #{mcId}
+    </select>
+
+    <select id="queryLabelId" resultType="java.lang.String" parameterType="java.lang.String">
+        select label_id as labelId from dj_clue c where c.id = #{clueId}
+    </select>
+
+    <select id="queryTypeId" resultType="java.lang.Integer" parameterType="java.lang.String">
+        select type from dj_store_users where user_id = #{userId} and data_status=0
+    </select>
+
+
+    <update id="upDateLabelIdArr" parameterType="java.util.Map">
+        update dj_member_customer
+        set label_id_arr = #{labelIdArr}
+        where id = #{mcId}
+    </update>
+
+    <update id="upDateLabelId" parameterType="java.util.Map">
+        update dj_clue
+        set label_id = #{labelId}
+        where id = #{clueId}
+    </update>
+
+
+    <select id="getCustomerGroupBy" resultType="com.dangjia.acg.modle.member.Customer">
+        select * from dj_member_customer mc
+        inner join dj_clue c
+        on mc.member_id=c.member_id
+        and c.cus_service=mc.user_id
+        where c.phone=#{mobile}
+    </select>
+    <select id="getCustomerMemberIdList" resultType="com.dangjia.acg.modle.member.Customer">
+        SELECT
+            u.member_id as memberId,u.id as userId
+        FROM
+            dj_member_customer mc
+            INNER JOIN dj_user u ON u.id = mc.user_id
+        WHERE
+            mc.member_id =#{memberId}
+		GROUP BY u.member_id
+    </select>
+
+
+    <select id="getwaitDistributionTips"  resultType="java.lang.Integer">
+        SELECT
+        count(0)
+        FROM dj_member_customer mc
+        INNER join dj_member m
+        ON mc.member_id=m.id
+        WHERE user_id=#{userId}
+        AND mc.data_status=0
+        AND stage IN(0,1)
+        AND tips = 1
+    </select>
+
+    <update id="turnOut">
+        update dj_member_customer mc
+        left join dj_clue c
+        on mc.member_id=c.member_id
+        and c.cus_service=mc.user_id
+        set c.cus_service=#{userId},
+        c.store_id=#{storeId},
+        c.turn_status=1,
+        c.city_id=#{cityId},
+        mc.user_id=#{userId},
+        mc.store_id=#{storeId},
+        mc.turn_status=1,
+        mc.city_id=#{cityId}
+        where mc.id=#{id}
+    </update>
+
+    <update id="updateStoreUser">
+        update dj_member_customer mc
+        set mc.store_id=#{storeId}
+        where mc.user_id=#{userId}
+    </update>
+
 </mapper>
 

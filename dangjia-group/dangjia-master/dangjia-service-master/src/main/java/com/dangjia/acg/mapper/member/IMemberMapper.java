@@ -45,5 +45,8 @@ public interface IMemberMapper extends Mapper<Member> {
 //    List<Map<String,Object>> getMemberAndCustomerList();
 
     Member getByPhone(@Param("mobile") String mobile);
+
+
+
 }
 

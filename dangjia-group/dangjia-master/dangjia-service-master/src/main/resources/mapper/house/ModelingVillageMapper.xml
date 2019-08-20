@@ -266,5 +266,12 @@
         )tab
         order by rand() limit #{limit}
     </select>
+
+
+    <select id="queryVillageName" resultType="java.lang.String" parameterType="java.util.Map">
+        SELECT name
+        FROM dj_house_modeling_village where id={id}
+    </select>
+
 </mapper>
 

@@ -24,7 +24,8 @@ public interface FeedbackAPI {
     @PostMapping("/member/feedback/add")
     @ApiOperation(value = "添加客服反馈信息", notes = "添加客服反馈信息")
     ServerResponse addFeedback(@RequestParam("request") HttpServletRequest request,
-                               @RequestParam("feedback") Feedback feedback);
+                               @RequestParam("feedback") Feedback feedback,
+                               @RequestParam("userRole") Integer userRole);
 
 
     @PostMapping("/member/feedback/list")

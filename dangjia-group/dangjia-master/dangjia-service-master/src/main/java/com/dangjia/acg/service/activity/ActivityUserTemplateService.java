@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.activity;
 
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
@@ -46,15 +47,17 @@ public class ActivityUserTemplateService {
     /**
      * 获取所有推送模板
      *
-     * @param activityUserTemplate
      * @return
      */
-    public ServerResponse queryActivityUserTemplate(HttpServletRequest request, PageDTO pageDTO, ActivityUserTemplate activityUserTemplate) {
+    public ServerResponse queryActivityUserTemplate(PageDTO pageDTO) {
         Example example = new Example(ActivityUserTemplate.class);
         example.createCriteria().andEqualTo(ActivityUserTemplate.DATA_STATUS, 0);
         example.orderBy(Activity.MODIFY_DATE).desc();
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<ActivityUserTemplate> list = activityUserTemplateMapper.selectByExample(example);
+        if (list.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
         List<Map> mapList = new ArrayList<>();
         PageInfo pageResult = new PageInfo(list);
         for (ActivityUserTemplate activityUserTemplate1 : list) {

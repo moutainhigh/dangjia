@@ -2,11 +2,11 @@ package com.dangjia.acg.modle.house;
 
 import com.dangjia.acg.common.annotation.Desc;
 import com.dangjia.acg.common.model.BaseEntity;
+import com.dangjia.acg.common.util.CommonUtil;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
-import org.apache.http.util.TextUtils;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -251,6 +251,22 @@ public class House extends BaseEntity {
     @ApiModelProperty("选配标签")
     private String optionalLabel;
 
+    @Column(name = "abroad_stats")
+    @Desc(value = "0-一个销售人员下单 1-两个销售人员同时下单")
+    @ApiModelProperty("0-一个销售人员下单 1-两个销售人员同时下单")
+    private Integer abroadStats;
+
+    @Column(name = "is_rob_stats")
+    @Desc(value = " 0-未抢单 1-已抢单")
+    @ApiModelProperty("0-未抢单 1-已抢单")
+    private Integer isRobStats;
+
+    @Column(name = "is_type")
+    @Desc(value = " 类别：0:内场录入，1:外场录入")
+    @ApiModelProperty("类别：0:内场录入，1:外场录入")
+    private Integer isType;
+
+
     @Transient
     private String houseId;
     @Transient
@@ -295,15 +311,15 @@ public class House extends BaseEntity {
     }
 
     public String getHouseName() {
-        return (TextUtils.isEmpty(getResidential()) ? "*" : getResidential())
-                + (TextUtils.isEmpty(getBuilding()) ? "*" : getBuilding()) + "栋"
-                + (TextUtils.isEmpty(getUnit()) ? "*" : getUnit()) + "单元"
-                + (TextUtils.isEmpty(getNumber()) ? "*" : getNumber()) + "号";
+        return (CommonUtil.isEmpty(getResidential()) ? "*" : getResidential())
+                + (CommonUtil.isEmpty(getBuilding()) ? "*" : getBuilding()) + "栋"
+                + (CommonUtil.isEmpty(getUnit()) ? "*" : getUnit()) + "单元"
+                + (CommonUtil.isEmpty(getNumber()) ? "*" : getNumber()) + "号";
     }
 
     public String getNoNumberHouseName() {
-        return (TextUtils.isEmpty(getResidential()) ? "*" : getResidential()) + "**栋**单元"
-                + (TextUtils.isEmpty(getNumber()) ? "*" : getNumber()) + "号";
+        return (CommonUtil.isEmpty(getResidential()) ? "*" : getResidential()) + "**栋**单元"
+                + (CommonUtil.isEmpty(getNumber()) ? "*" : getNumber()) + "号";
     }
 
     public boolean equals(Object obj){

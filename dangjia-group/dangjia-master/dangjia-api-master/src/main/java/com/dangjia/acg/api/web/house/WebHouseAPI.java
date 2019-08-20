@@ -42,8 +42,7 @@ public interface WebHouseAPI {
     @ApiOperation(value = "确认开工", notes = "确认开工")
     ServerResponse startWork(@RequestParam("request") HttpServletRequest request,
                              @RequestParam("house") HouseDTO houseDTO,
-                             @RequestParam("members") String members,
-                             @RequestParam("prefixs") String prefixs);
+                             @RequestParam("userToken")String userToken);
 
     @PostMapping("web/house/setHouseInfo")
     @ApiOperation(value = "修改房子工序顺序以及选配标签", notes = "修改房子工序顺序以及选配标签")

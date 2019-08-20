@@ -33,6 +33,7 @@ import com.dangjia.acg.modle.worker.Insurance;
 import com.dangjia.acg.modle.worker.RewardPunishCondition;
 import com.dangjia.acg.modle.worker.RewardPunishRecord;
 import com.dangjia.acg.service.core.HouseWorkerService;
+import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -90,6 +91,7 @@ public class EngineerService {
 
     @Autowired
     private RedisClient redisClient;//缓存
+
     /**
      * 已支付换工匠
      */
@@ -371,9 +373,9 @@ public class EngineerService {
             map.put("mobile", worker.getMobile());
             map.put("createDate", houseFlow.getCreateDate());
             map.put("workSteta", houseFlow.getWorkSteta());
-            map.put("EndTime",null);
-            if(houseFlow.getWorkSteta()==2){
-                map.put("EndTime",houseFlow.getModifyDate());
+            map.put("EndTime", null);
+            if (houseFlow.getWorkSteta() == 2) {
+                map.put("EndTime", houseFlow.getModifyDate());
             }
             map.put("payState", hwo.getPayState());//0未支付，1已经支付
             map.put("retentionMoney", hwo.getRetentionMoney());//此单滞留金
@@ -384,12 +386,12 @@ public class EngineerService {
             map.put("repairPrice", hwo.getRepairTotalPrice());//补人工钱
             map.put("haveMoney", hwo.getHaveMoney());//已拿钱
             map.put("everyMoney", hwo.getEveryMoney());//每日申请累计钱
-            example =new Example(HouseFlowApply.class);
-            example.createCriteria().andEqualTo(HouseFlowApply.WORKER_ID,hwo.getWorkerId())
-                    .andEqualTo(HouseFlowApply.APPLY_TYPE,5)
-                    .andEqualTo(HouseFlowApply.HOUSE_ID,hwo.getHouseId());
+            example = new Example(HouseFlowApply.class);
+            example.createCriteria().andEqualTo(HouseFlowApply.WORKER_ID, hwo.getWorkerId())
+                    .andEqualTo(HouseFlowApply.APPLY_TYPE, 5)
+                    .andEqualTo(HouseFlowApply.HOUSE_ID, hwo.getHouseId());
             map.put("checkMoney", houseFlowApplyMapper.selectCountByExample(example));//巡查次数
-            map.put("patrol",houseFlow.getPatrol());//巡查标准
+            map.put("patrol", houseFlow.getPatrol());//巡查标准
             mapList.add(map);
         }
         return ServerResponse.createBySuccess("查询成功", mapList);
@@ -522,12 +524,12 @@ public class EngineerService {
             map.put("houseId", houseFlow.getHouseId());
             map.put("workerTypeId", houseFlow.getWorkerTypeId());
             map.put("workerTypeName", workerType.getName());
-            map.put("state", houseFlow.getWorkType()==1?0:1);
-            map.put("disable", houseFlow.getWorkType()==1?false:true);
-            if(!CommonUtil.isEmpty(house.getCustomEdit())){
+            map.put("state", houseFlow.getWorkType() == 1 ? 0 : 1);
+            map.put("disable", houseFlow.getWorkType() != 1);
+            if (!CommonUtil.isEmpty(house.getCustomEdit())) {
                 String[] workerTypeArr = house.getCustomSort().split(",");
                 for (String s : workerTypeArr) {
-                    if(houseFlow.getWorkerTypeId().equals(s)){
+                    if (houseFlow.getWorkerTypeId().equals(s)) {
                         map.put("disable", true);
                         break;
                     }
@@ -548,9 +550,8 @@ public class EngineerService {
         map.put("haveMoney", worker.getHaveMoney());
         map.put("surplusMoney", worker.getSurplusMoney());
         map.put("retentionMoney", worker.getRetentionMoney());
-
         if (CommonUtil.isEmpty(worker.getHead())) {
-            worker.setHead("qrcode/logo.png");
+            worker.setHead(Utils.getHead());
         }
         map.put("userName", worker.getUserName());
         map.put("name", worker.getName());
@@ -618,7 +619,7 @@ public class EngineerService {
     /**
      * 工地列表
      */
-    public ServerResponse getHouseList(HttpServletRequest request, PageDTO pageDTO, Integer visitState, String searchKey,String startDate, String endDate, String supKey) {
+    public ServerResponse getHouseList(HttpServletRequest request, PageDTO pageDTO, Integer visitState, String searchKey, String startDate, String endDate, String supKey) {
         String userID = request.getParameter(Constants.USERID);
 
         String cityKey = request.getParameter(Constants.CITY_ID);
@@ -627,7 +628,7 @@ public class EngineerService {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        List<House> houseList = houseMapper.getHouseListLikeSearchKey(cityKey,visitState, searchKey, startDate,  endDate,  supKey);
+        List<House> houseList = houseMapper.getHouseListLikeSearchKey(cityKey, visitState, searchKey, startDate, endDate, supKey);
         PageInfo pageResult = new PageInfo(houseList);
         List<Map<String, Object>> mapList = new ArrayList<>();
         for (House house : houseList) {
@@ -653,9 +654,9 @@ public class EngineerService {
                     suspendDay += flowss.getSuspendDay();
                 }
                 int startDay;
-                if (house.getCompletedDate()!=null) {
+                if (house.getCompletedDate() != null) {
                     startDay = DateUtil.daysofTwo(house.getConstructionDate(), house.getCompletedDate());
-                }else{
+                } else {
                     startDay = DateUtil.daysofTwo(house.getConstructionDate(), new Date());
                 }
                 map.put("startDay", 0);
@@ -674,10 +675,10 @@ public class EngineerService {
     /**
      * 工匠列表
      */
-    public ServerResponse artisanList(String cityId,String name, String workerTypeId, String type, String checkType, PageDTO pageDTO) {
+    public ServerResponse artisanList(String cityId, String name, String workerTypeId, String type, String checkType, PageDTO pageDTO) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<Member> memberList = memberMapper.artisanList(cityId,name, workerTypeId, type, checkType);
+            List<Member> memberList = memberMapper.artisanList(cityId, name, workerTypeId, type, checkType);
             PageInfo pageResult = new PageInfo(memberList);
             List<ArtisanDTO> artisanDTOS = new ArrayList<>();
             for (Member member : memberList) {

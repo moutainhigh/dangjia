@@ -97,16 +97,6 @@ public class HouseWorkerController implements HouseWorkerAPI {
         return houseWorkerService.getAdvanceInAdvance(houseFlowId);
     }
 
-    /**
-     * 查询工地列表
-     * TODO 1.4.0后删除此接口
-     */
-    @Override
-    @ApiMethod
-    public ServerResponse getHouseFlowList(String userToken) {
-        return houseWorkerService.getHouseFlowList(userToken);
-    }
-
     @Override
     @ApiMethod
     public ServerResponse getMyHouseFlowList(PageDTO pageDTO, String userToken) {
