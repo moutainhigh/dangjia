@@ -23,6 +23,7 @@ import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.repair.MendOrderCheck;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.dangjia.acg.service.sale.royalty.RoyaltyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -60,6 +61,8 @@ public class ChangeOrderService {
     private IHouseFlowMapper houseFlowMapper;
     @Autowired
     private IHouseWorkerOrderMapper houseWorkerOrderMapper;
+    @Autowired
+    private RoyaltyService royaltyService;
 
     /**
      * 管家审核变更单
@@ -227,6 +230,7 @@ public class ChangeOrderService {
             if (type == 1) {
                 List<ChangeOrder> changeOrderList = changeOrderMapper.unCheckOrder(houseId, workerTypeId);
                 List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.unCheckByWorkerTypeId(houseId, workerTypeId);
+                royaltyService.endRoyalty(houseId);//业主验收销售拿剩下的提成
                 if (changeOrderList.size() > 0 && houseFlowApplyList.size() > 0) {
                     HouseFlowApply houseFlowApply = houseFlowApplyList.get(0);
                     BigDecimal remain = houseFlowApply.getOtherMoney();//剩下的钱
