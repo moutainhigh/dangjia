@@ -102,6 +102,7 @@
                 m.create_date as createDate,
                 mc.label_id_arr as labelId,
                 u.username as userName,
+                mc.report_date as reportDate,
                 mc.phase_status as phaseStatus,
                 mc.user_id as userId,
                 mc.stage,

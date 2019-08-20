@@ -210,6 +210,7 @@ public class ClientService {
             clue.setStage(0);
             clue.setTips("1");
             clue.setPhaseStatus(0);
+            clue.setCityId(store.getCityId());
             if( !CommonUtil.isEmpty(clue.getBuilding())){
                 IntentionHouse intentionHouse = new IntentionHouse();
                 intentionHouse.setClueId(clue.getId());
