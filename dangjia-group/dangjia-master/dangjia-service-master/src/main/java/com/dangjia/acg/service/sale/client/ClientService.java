@@ -29,12 +29,14 @@ import com.dangjia.acg.mapper.store.IStoreUserMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.modle.clue.Clue;
 import com.dangjia.acg.modle.home.IntentionHouse;
+import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.ModelingVillage;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Customer;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.sale.residential.ResidentialBuilding;
 import com.dangjia.acg.modle.sale.residential.ResidentialRange;
+import com.dangjia.acg.modle.sale.royalty.DjAlreadyRobSingle;
 import com.dangjia.acg.modle.sale.store.MonthlyTarget;
 import com.dangjia.acg.modle.store.Store;
 import com.dangjia.acg.modle.store.StoreUser;
@@ -790,21 +792,28 @@ public class ClientService {
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse setWithdraw(String mcId, String houseId,String alreadyId) {
         Customer customer = iCustomerMapper.selectByPrimaryKey(mcId);
-        Example example=new Example(Customer.class);
-        example.createCriteria().andEqualTo(Customer.MEMBER_ID,customer.getMemberId());
-        Customer customer1=new Customer();
-        customer1.setId(null);
-        customer1.setStage(1);
-        Clue clue=new Clue();
-        clue.setId(null);
-        clue.setStage(1);
-        example=new Example(Clue.class);
-        example.createCriteria().andEqualTo(Clue.MEMBER_ID,customer.getMemberId());
-
+        Example example=new Example(DjAlreadyRobSingle.class);
+        example.createCriteria().andEqualTo(DjAlreadyRobSingle.USER_ID,customer.getUserId())
+                .andEqualTo(House.DATA_STATUS,0)
+                .andEqualTo(DjAlreadyRobSingle.MC_ID,mcId);
+        if(djAlreadyRobSingleMapper.selectByExample(example).size()<=0){//判断撤回的客户否在自己这里已下单 如果已下单就不撤回到客户列表
+            example=new Example(Customer.class);
+            example.createCriteria().andEqualTo(Customer.MEMBER_ID,customer.getMemberId());
+            Customer customer1=new Customer();
+            customer1.setId(null);
+            customer1.setStage(1);
+            Clue clue=new Clue();
+            clue.setId(null);
+            clue.setStage(1);
+            example=new Example(Clue.class);
+            example.createCriteria().andEqualTo(Clue.MEMBER_ID,customer.getMemberId());
+            iCustomerMapper.updateByExampleSelective(customer1,example);
+            clueMapper.updateByExampleSelective(clue,example);
+        }
         if(!CommonUtil.isEmpty(alreadyId)){
             djAlreadyRobSingleMapper.deleteByPrimaryKey(alreadyId);
         }
-        if (iHouseMapper.deleteByPrimaryKey(houseId) > 0 && iCustomerMapper.updateByExampleSelective(customer1,example)>0 &&clueMapper.updateByExampleSelective(clue,example)>0) {
+        if (iHouseMapper.deleteByPrimaryKey(houseId) > 0) {
             return ServerResponse.createBySuccessMessage("撤回成功");
         } else {
             return ServerResponse.createByErrorMessage("撤回失败");

@@ -325,6 +325,9 @@ public class ClueService {
                                     customer.setStoreId(clue.getStoreId());
                                     customer.setTips("1");
                                     customer.setLabelIdArr(clue.getLabelId());
+                                    if(new Date().getTime()>clue.getReportDate().getTime()){
+                                        customer.setReportDate(clue.getReportDate());
+                                    }
                                     iCustomerMapper.insert(customer);
                                 }
                                 //改变线索沟通表的数据状态
@@ -342,6 +345,9 @@ public class ClueService {
                             customer.setStoreId(clue.getStoreId());
                             customer.setTips("1");
                             customer.setLabelIdArr(clue.getLabelId());
+                            if(new Date().getTime()>clue.getReportDate().getTime()){
+                                customer.setReportDate(clue.getReportDate());
+                            }
                             iCustomerMapper.insert(customer);
                         }
                         //改变线索表的数据状态
