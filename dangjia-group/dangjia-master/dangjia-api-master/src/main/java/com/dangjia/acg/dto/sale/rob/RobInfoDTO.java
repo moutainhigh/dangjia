@@ -28,6 +28,9 @@ public class RobInfoDTO {
     @ApiModelProperty("创建时间")
     private Date houseCreateDate;// 创建日期
 
+    @ApiModelProperty("竣工时间")
+    private Date completedDate;// 日期
+
     @ApiModelProperty("修改时间")
     private Date modifyDate;// 修改日期
 

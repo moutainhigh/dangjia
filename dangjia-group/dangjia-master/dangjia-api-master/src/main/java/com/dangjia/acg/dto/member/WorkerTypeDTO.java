@@ -36,6 +36,9 @@ public class WorkerTypeDTO {
     @ApiModelProperty("施工状态，0未开始 ，1阶段完工通过，2整体完工通过，3待交底，4施工中，5收尾施工")
     private String workSteta;
 
+    @ApiModelProperty("施工状态，0未开始 ，1阶段完工通过，2整体完工通过，3待交底，4施工中，5收尾施工")
+    private String upWorkSteta;
+
 
 
     public String getTypeName(){

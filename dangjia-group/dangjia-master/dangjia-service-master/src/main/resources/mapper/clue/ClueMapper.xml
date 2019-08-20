@@ -432,6 +432,7 @@
             h.number as houseNumber,
             h.house_type as houseType,
             h.construction_date as constructionDate,
+            h.completed_date as completedDate,
         </if>
         c.create_date as createDate,
         c.owername as owerName,
