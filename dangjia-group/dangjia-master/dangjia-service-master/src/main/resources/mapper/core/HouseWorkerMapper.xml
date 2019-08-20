@@ -166,7 +166,7 @@
         <include refid="all_columns"/>
         from dj_core_house_worker
         where house_id = #{houseId}
-        and worker_type not in(1,2,3)
+        and worker_type not in(3)
         and work_type= 6
     </select>
     <select id="getMyHouseFlowList" resultType="com.dangjia.acg.dto.house.MyHouseFlowDTO">
