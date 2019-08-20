@@ -260,14 +260,36 @@ public class ClientService {
         }
         ResidentialBuilding residentialBuilding = residentialBuildingMapper.selectByPrimaryKey(buildingId);
         ResidentialRange residentialRange = residentialRangeMapper.selectSingleResidentialRange(residentialBuilding.getId());
+        Example example = new Example(StoreUser.class);
+        example.createCriteria().andEqualTo(StoreUser.USER_ID, residentialRange.getUserId())
+                .andEqualTo(Store.DATA_STATUS, 0);
+        List<StoreUser> storeUsers = iStoreUserMapper.selectByExample(example);
+        if (storeUsers.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+        StoreUser storeUser = storeUsers.get(0);
+        Store store = iStoreMapper.selectByPrimaryKey(storeUser.getStoreId());
+        if(null==residentialRange){//楼栋未分配销售转入店长待分配
+            clue.setStage(0);
+            clue.setDataStatus(0);
+            clue.setStoreId(store.getId());
+            clue.setClueType(0);
+            clue.setTurnStatus(0);
+            clue.setCityId(modelingVillage.getCityId());
+            clue.setClueType(1);
+            clue.setPhaseStatus(0);
+            clue.setCusService(store.getUserId());
+            clueMapper.insert(clue);
+            return ServerResponse.createBySuccessMessage("提交成功");
+        }//转入给对应的销售
         clue.setStage(0);
         clue.setDataStatus(0);
-        clue.setStoreId(residentialBuilding.getStoreId());
+        clue.setStoreId(store.getId());
         clue.setClueType(0);
         clue.setTurnStatus(0);
         clue.setCityId(modelingVillage.getCityId());
         clue.setClueType(1);
-        clue.setPhaseStatus(new Integer(0));
+        clue.setPhaseStatus(0);
         clue.setCusService(residentialRange.getUserId());
         clueMapper.insert(clue);
         return ServerResponse.createBySuccessMessage("提交成功");
