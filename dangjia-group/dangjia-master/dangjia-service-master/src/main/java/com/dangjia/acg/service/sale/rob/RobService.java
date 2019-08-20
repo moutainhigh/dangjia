@@ -464,7 +464,11 @@ public class RobService {
                     parmMap.put("userId",to.getCusService());
                     parmMap.put("houseId",to.getHouseId());
                     //查询业绩
-                    uadto.addAll(clueMapper.queryUserAchievementInFo(parmMap));
+                    List<UserAchievementDTO> userAchievementDTOS = clueMapper.queryUserAchievementInFo(parmMap);
+                    for (UserAchievementDTO userAchievementDTO : userAchievementDTOS) {
+                        userAchievementDTO.setHead(imageAddress+userAchievementDTO.getHead());
+                    }
+                    uadto.addAll(userAchievementDTOS);
                 }
             }
 
