@@ -118,7 +118,7 @@
         dj_core_house_flow chf INNER JOIN
         dj_core_worker_type cwt on chf.worker_type_id = cwt.id
         where chf.house_id = #{houseId}
-        order by chf.sort DESC limit 1
+        order by chf.sort DESC
     </select>
 
     <select id="queryWorkSteta" resultType="java.lang.String" parameterType="java.util.Map">

@@ -20,6 +20,7 @@ import com.dangjia.acg.dto.sale.store.GrabSheetDTO;
 import com.dangjia.acg.dto.sale.store.OrderStoreDTO;
 import com.dangjia.acg.mapper.clue.ClueMapper;
 import com.dangjia.acg.mapper.clue.ClueTalkMapper;
+import com.dangjia.acg.mapper.house.IHouseAddressMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.ICustomerMapper;
 import com.dangjia.acg.mapper.member.ICustomerRecordMapper;
@@ -100,6 +101,8 @@ public class RobService {
     private DjAlreadyRobSingleMapper djAlreadyRobSingleMapper;
     @Autowired
     private IHouseMapper iHouseMapper;
+    @Autowired
+    private IHouseAddressMapper iHouseAddressMapper;
 
     /**
      * 查询待抢单列表
@@ -403,23 +406,34 @@ public class RobService {
                     //查询大管家信息
                     if (!CommonUtil.isEmpty(to.getHouseId())) {
                         WorkerTypeDTO workerTypeDTO = iMemberLabelMapper.queryWorkerType(to.getHouseId());
-
                         if (null != workerTypeDTO) {
                             workerTypeDTO.setHead(imageAddress + workerTypeDTO.getHead());
-
-                            WorkerTypeDTO wtd = iMemberLabelMapper.queryType(to.getHouseId());
+                            List<WorkerTypeDTO> wtd = iMemberLabelMapper.queryType(to.getHouseId());
                             if(null != wtd){
-                                workerTypeDTO.setType(wtd.getType());
-
+                                workerTypeDTO.setType(wtd.get(0).getType());
+                                workerTypeDTO.setUpType(wtd.get(1).getType());
                                 Map<String,Object> map1 = new HashMap<>();
                                 map1.put("houseId",to.getHouseId());
-                                map1.put("workerTypeId",wtd.getWorkerTypeId());
-                                map1.put("workerType",wtd.getType());
+                                map1.put("workerTypeId",wtd.get(0).getWorkerTypeId());
+                                map1.put("workerType",wtd.get(0).getType());
                                 String wtd2 = iMemberLabelMapper.queryWorkSteta(map1);
                                 workerTypeDTO.setWorkSteta(wtd2);
                             }
                         }
                         to.setWorkerTypeDTO(workerTypeDTO);
+                    }
+
+                    //查询销售人员输入的房子类型
+                    Example example1 = new Example(HouseAddress.class);
+                    example.createCriteria()
+                            .andEqualTo(HouseAddress.HOUSE_ID, to.getHouseId())
+                            .andEqualTo(HouseAddress.DATA_STATUS, 0);
+
+                    //查询  意向房子
+                    List<HouseAddress> houseAddress = iHouseAddressMapper.selectByExample(example1);
+
+                    if(!houseAddress.isEmpty()){
+                        to.setMcHouseType(houseAddress.get(0).getHouseType());
                     }
 
                     //查询小区名称

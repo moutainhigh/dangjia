@@ -27,6 +27,9 @@ public class WorkerTypeDTO {
     @ApiModelProperty("1设计师，2精算师，3大管家,4拆除，6水电工，7防水，8泥工,9木工，10油漆工")
     private Integer type;
 
+    @ApiModelProperty("1设计师，2精算师，3大管家,4拆除，6水电工，7防水，8泥工,9木工，10油漆工")
+    private Integer upType;
+
     @ApiModelProperty("工种ID")
     private String workerTypeId;
 
