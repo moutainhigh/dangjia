@@ -16,6 +16,7 @@ import com.dangjia.acg.modle.house.HouseDistribution;
 import com.dangjia.acg.modle.house.WebsiteVisit;
 import com.dangjia.acg.modle.member.CustomerRecord;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.other.City;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.member.CustomerRecordService;
 import com.github.pagehelper.PageHelper;
@@ -72,6 +73,9 @@ public class HouseDistributionService {
         if (!CommonUtil.isEmpty(houseDistribution.getType())) {
             criteria.andEqualTo(HouseDistribution.TYPE, houseDistribution.getType());
         }
+        if (!CommonUtil.isEmpty(houseDistribution.getCityId())) {
+            criteria.andEqualTo(HouseDistribution.CITY_ID, houseDistribution.getCityId());
+        }
         if (!CommonUtil.isEmpty(houseDistribution.getState())) {
             criteria.andEqualTo(HouseDistribution.STATE, houseDistribution.getState());
         }
@@ -124,11 +128,14 @@ public class HouseDistributionService {
         }else {
             Member user = (Member) object;
             user = memberMapper.selectByPrimaryKey(user.getId());
+            City city=iCityMapper.selectByPrimaryKey(cityId);
             houseDistribution.setId(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
             houseDistribution.setHead(user.getHead());
             houseDistribution.setNickname(user.getNickName());
             houseDistribution.setPhone(user.getMobile());
-            houseDistribution.setCity(iCityMapper.selectByPrimaryKey(cityId).getName());
+            houseDistribution.setCity(city.getName());
+            houseDistribution.setCityId(cityId);
+            houseDistribution.setCityName(city.getName());
             houseDistribution.setPrice(DjConstants.distribution.PRICE.doubleValue());
             houseDistribution.setOpenid(user.getId());
             houseDistribution.setSex("0");
