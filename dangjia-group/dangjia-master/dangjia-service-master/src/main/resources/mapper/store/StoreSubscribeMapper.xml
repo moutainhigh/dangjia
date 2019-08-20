@@ -29,15 +29,15 @@
         </if>
         <if test="null!=searchKey and ''!=searchKey">
             AND (
-              customer_name LIKE CONCAT('%',#{searchKey},'%')
+            sb.customer_name LIKE CONCAT('%',#{searchKey},'%')
               OR
-              customer_phone LIKE CONCAT('%',#{searchKey},'%')
+            sb.customer_phone LIKE CONCAT('%',#{searchKey},'%')
             )
         </if>
         <if test="null!=state and ''!=state">
-            AND  state = #{state}
+            AND  sb.state = #{state}
         </if>
-        ORDER BY modify_date DESC
+        ORDER BY sb.modify_date DESC
     </select>
 
 
