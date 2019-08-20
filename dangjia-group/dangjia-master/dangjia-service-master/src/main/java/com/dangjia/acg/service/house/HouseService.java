@@ -705,10 +705,12 @@ public class HouseService {
         List<DjAlreadyRobSingle> darList = djAlreadyRobSingleMapper.selectArr(map);
         for (DjRoyaltyDetailsSurface ss : list) {
             //判断当月
-            if(ss.getStartSingle() <= darList.size() && darList.size() <= ss.getOverSingle()){
+            if(ss.getStartSingle() <= darList.size()
+                    && darList.size() <= ss.getOverSingle()){
                 logger.info("222222222222222222222==================="+ss.getStartSingle());
                 logger.info("333333333333333333333==================="+darList.size());
                 logger.info("444444444444444444444==================="+ss.getOverSingle());
+                logger.info("555555555555555555555==================="+ss.getRoyalty());
                 DjRoyaltyMatch djRoyaltyMatch1 = new DjRoyaltyMatch();
                 djRoyaltyMatch1.setDataStatus(0);
                 djRoyaltyMatch1.setUserId(userId);
@@ -848,6 +850,7 @@ public class HouseService {
         houseAddress.setLongitude(longitude);
         houseAddress.setAddress(address);
         houseAddress.setName(name);
+        houseAddress.setHouseType(houseType);//装修的房子类型0：新房；1：老房
         iHouseAddressMapper.insert(houseAddress);
         example = new Example(MemberCity.class);
         example.createCriteria()
