@@ -162,8 +162,8 @@ public class RedPackPayService {
             String houseFlowId = businessOrder.getTaskId();
             request.setAttribute(Constants.CITY_ID, house.getCityId());
 
-            ServerResponse retMaterial = budgetMaterialAPI.queryBudgetMaterialByHouseFlowId(request, houseFlowId);
-            ServerResponse retWorker = budgetWorkerAPI.queryBudgetWorkerByHouseFlowId(request, houseFlowId);
+            ServerResponse retMaterial = budgetMaterialAPI.queryBudgetMaterialByHouseFlowId(house.getCityId(), houseFlowId);
+            ServerResponse retWorker = budgetWorkerAPI.queryBudgetWorkerByHouseFlowId(house.getCityId(), houseFlowId);
 
             if (retMaterial.getResultObj() != null || retWorker.getResultObj() != null) {
                 List<BudgetMaterial> budgetMaterialList = JSONObject.parseArray(retMaterial.getResultObj().toString(), BudgetMaterial.class);
@@ -295,8 +295,8 @@ public class RedPackPayService {
                     ActivityRedPackRule redPackRule = activityRedPackRuleMapper.selectByPrimaryKey(redPacketRecord.getRedPackRuleId());
                     String houseFlowId = businessOrder.getTaskId();
                     request.setAttribute(Constants.CITY_ID, house.getCityId());
-                    ServerResponse retMaterial = budgetMaterialAPI.queryBudgetMaterialByHouseFlowId(request, houseFlowId);
-                    ServerResponse retWorker = budgetWorkerAPI.queryBudgetWorkerByHouseFlowId(request, houseFlowId);
+                    ServerResponse retMaterial = budgetMaterialAPI.queryBudgetMaterialByHouseFlowId(house.getCityId(), houseFlowId);
+                    ServerResponse retWorker = budgetWorkerAPI.queryBudgetWorkerByHouseFlowId(house.getCityId(), houseFlowId);
                     BigDecimal workerTotal = new BigDecimal(0);
                     BigDecimal goodsTotal = new BigDecimal(0);
                     BigDecimal productTotal = new BigDecimal(0);

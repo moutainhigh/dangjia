@@ -98,7 +98,7 @@ public class CartService {
             cartMapper.updateByPrimaryKeySelective(cart1);
         } else {
             if (cart.getShopCount() > 0) {
-                ServerResponse serverResponse = productAPI.getProductById(request, cart.getProductId());
+                ServerResponse serverResponse = productAPI.getProductById(request.getParameter(Constants.CITY_ID), cart.getProductId());
                 if (serverResponse != null && serverResponse.getResultObj() != null) {
                     Product product = JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), Product.class);
                     Goods goods = forMasterAPI.getGoods(request.getParameter(Constants.CITY_ID), product.getGoodsId());
@@ -169,7 +169,7 @@ public class CartService {
         List<Map> listMap = new ArrayList<>();
         for (Cart cart1 : list) {
             Map map = BeanUtils.beanToMap(cart1);
-            ServerResponse serverResponse = productAPI.getProductById(request, cart.getProductId());
+            ServerResponse serverResponse = productAPI.getProductById(house.getCityId(), cart.getProductId());
             if (serverResponse != null && serverResponse.getResultObj() != null) {
                 Product product = JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), Product.class);
                 if (product.getType() == 0 || product.getMaket() == 0) {
@@ -220,7 +220,7 @@ public class CartService {
                 warehouseMap.put(warehouseList.get(i).getProductId(), warehouseList.get(i));
             }
             request.setAttribute(Constants.CITY_ID, cityId);
-            PageInfo pageResult = productAPI.queryProductData(request, pageDTO.getPageNum(), pageDTO.getPageSize(), name, categoryId, productType, productIdArr);
+            PageInfo pageResult = productAPI.queryProductData(cityId, pageDTO.getPageNum(), pageDTO.getPageSize(), name, categoryId, productType, productIdArr);
             List<JSONObject> products = pageResult.getList();
             for (JSONObject product : products) {
                 WarehouseDTO warehouseDTO = new WarehouseDTO();
@@ -298,9 +298,9 @@ public class CartService {
         List<Map<String, Object>> mapList = new ArrayList<>();
         Map<String, Object> mapTop = new HashMap<>();//记录以及添加的顶级分类
         for (String categoryId : orderCategory) {
-            GoodsCategory goodsCategory = goodsCategoryAPI.getGoodsCategory(request, categoryId);
+            GoodsCategory goodsCategory = goodsCategoryAPI.getGoodsCategory(cityId, categoryId);
             if (goodsCategory != null) {
-                GoodsCategory goodsCategorytop = goodsCategoryAPI.getGoodsCategory(request, goodsCategory.getParentTop());
+                GoodsCategory goodsCategorytop = goodsCategoryAPI.getGoodsCategory(cityId, goodsCategory.getParentTop());
                 if (goodsCategorytop != null) {
                     goodsCategory = goodsCategorytop;
                 }

@@ -135,7 +135,7 @@ public class ProductController implements ProductAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getGoodsByGid(HttpServletRequest request, String goodsId) {
+    public ServerResponse getGoodsByGid(String cityId, String goodsId) {
         return goodsService.getGoodsByGid(goodsId);
 
     }
@@ -159,7 +159,7 @@ public class ProductController implements ProductAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getProductById(HttpServletRequest request, String id) {
+    public ServerResponse getProductById(String cityId, String id) {
         return productService.getProductById(id);
     }
 
@@ -237,7 +237,7 @@ public class ProductController implements ProductAPI {
     }
 
     @Override
-    public PageInfo queryProductData(HttpServletRequest request, Integer pageNum,Integer pageSize, String name, String categoryId, String productType, String[] productId) {
+    public PageInfo queryProductData(String cityId, Integer pageNum,Integer pageSize, String name, String categoryId, String productType, String[] productId) {
         PageInfo productList = productService.queryProductData(pageNum,pageSize, name, categoryId, productType, productId);
         return productList;
     }

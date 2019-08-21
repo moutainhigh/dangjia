@@ -106,14 +106,15 @@ public class ProductChangeService {
                 return (ServerResponse) object;
             }
             Member operator = (Member) object;
+            House house = houseMapper.selectByPrimaryKey(houseId);
             // 原商品仓库
             Warehouse oldWareHouse = warehouseMapper.getByProductId(srcProductId, houseId);
             // 新商品仓库
             Warehouse wareHouse = warehouseMapper.getByProductId(destProductId, houseId);
             // 原商品
-            ServerResponse srcResponse = productAPI.getProductById(request, srcProductId);
+            ServerResponse srcResponse = productAPI.getProductById(house.getCityId(), srcProductId);
             // 更换后的商品
-            ServerResponse destResponse = productAPI.getProductById(request, destProductId);
+            ServerResponse destResponse = productAPI.getProductById(house.getCityId(), destProductId);
             boolean flag = (srcResponse != null && srcResponse.getResultObj() != null && destResponse != null && destResponse.getResultObj() != null);
             Product srcProduct = null;
             Product destProduct = null;
@@ -122,7 +123,7 @@ public class ProductChangeService {
             if (flag) {
                 srcProduct = JSON.parseObject(JSON.toJSONString(srcResponse.getResultObj()), Product.class);
                 destProduct = JSON.parseObject(JSON.toJSONString(destResponse.getResultObj()), Product.class);
-                Goods goods = forMasterAPI.getGoods(request.getParameter(Constants.CITY_ID), destProduct.getGoodsId());
+                Goods goods = forMasterAPI.getGoods(house.getCityId(), destProduct.getGoodsId());
                 if (goods != null) {
                     productType = goods.getType();
                 }
@@ -554,6 +555,8 @@ public class ProductChangeService {
     private boolean changeGmProduct(HttpServletRequest request, String houseId, String orderId) {
         // 查询
         List<ProductChange> list = productChangeMapper.queryByHouseId(houseId, "0");
+
+        House house = houseMapper.selectByPrimaryKey(houseId);
         Product destProduct = null;
         Unit destUnit = null;
         if (null != list && list.size() > 0) {
@@ -566,7 +569,7 @@ public class ProductChangeService {
                     // 新商品仓库
                     Warehouse wareHouse = warehouseMapper.getByProductId(change.getDestProductId(), houseId);
                     // 更换后的商品
-                    ServerResponse destResponse = productAPI.getProductById(request, change.getDestProductId());
+                    ServerResponse destResponse = productAPI.getProductById(house.getCityId(), change.getDestProductId());
                     if (destResponse != null && destResponse.getResultObj() != null) {
                         destProduct = JSON.parseObject(JSON.toJSONString(destResponse.getResultObj()), Product.class);
                         ServerResponse destUnitResponse = unitAPI.getUnitById(request,request.getParameter(Constants.CITY_ID), destProduct.getConvertUnit());

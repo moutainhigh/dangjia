@@ -45,7 +45,7 @@ public interface WorkerGoodsAPI {
 
     @PostMapping("/basics/workerGoods/getWorkertoCheck")
     @ApiOperation(value = "每工种未删除或已支付工钱", notes = "每工种未删除或已支付工钱")
-    ServerResponse getWorkertoCheck(@RequestParam("request") HttpServletRequest request,
+    ServerResponse getWorkertoCheck(@RequestParam("cityId") String cityId,
                                     @RequestParam("houseId") String houseId,
                                     @RequestParam("houseFlowId") String houseFlowId);
 

@@ -1490,8 +1490,8 @@ public class PaymentService {
             }
             String houseFlowId = businessOrder.getTaskId();
             request.setAttribute(Constants.CITY_ID, house.getCityId());
-            ServerResponse retMaterial = budgetMaterialAPI.queryBudgetMaterialByHouseFlowId(request, houseFlowId);
-            ServerResponse retWorker = budgetWorkerAPI.queryBudgetWorkerByHouseFlowId(request, houseFlowId);
+            ServerResponse retMaterial = budgetMaterialAPI.queryBudgetMaterialByHouseFlowId(house.getCityId(), houseFlowId);
+            ServerResponse retWorker = budgetWorkerAPI.queryBudgetWorkerByHouseFlowId(house.getCityId(), houseFlowId);
 
             if (retMaterial.getResultObj() != null || retWorker.getResultObj() != null) {
                 List<BudgetMaterial> budgetMaterialList = JSONObject.parseArray(retMaterial.getResultObj().toString(), BudgetMaterial.class);
