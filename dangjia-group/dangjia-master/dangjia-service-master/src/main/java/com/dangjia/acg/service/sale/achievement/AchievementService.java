@@ -169,7 +169,7 @@ public class AchievementService {
 
         userAchievementDataDTO.setUserAchievementInfoDTOS(list);
         userAchievementDataDTO.setArrMonthRoyalty(taskOrderNum);
-        userAchievementDataDTO.setDealNumber(list.size());
+        userAchievementDataDTO.setDealNumber(achievementMapper.Complete(accessToken.getUserId(), DateUtil.dateToString(time, DateUtil.FORMAT)));
 
         return ServerResponse.createBySuccess("查询提成列表", userAchievementDataDTO);
     }
