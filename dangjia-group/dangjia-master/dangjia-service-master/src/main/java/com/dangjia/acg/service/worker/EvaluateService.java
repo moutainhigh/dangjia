@@ -44,6 +44,7 @@ import com.dangjia.acg.service.core.HouseFlowApplyService;
 import com.dangjia.acg.service.core.HouseWorkerService;
 import com.dangjia.acg.service.house.HouseService;
 import com.dangjia.acg.service.repair.MendOrderService;
+import com.dangjia.acg.service.sale.royalty.RoyaltyService;
 import com.dangjia.acg.util.LocationUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -112,6 +113,8 @@ public class EvaluateService {
     private HouseService houseService;
     @Autowired
     private CraftsmanConstructionService constructionService;
+    @Autowired
+    private RoyaltyService royaltyService;
 
 
     /**
@@ -439,6 +442,7 @@ public class EvaluateService {
                     return response;
                 }
             }
+            royaltyService.endRoyalty(house.getId());//业主验收销售拿剩下的提成
             Member worker = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
             Evaluate evaluate = new Evaluate();
             evaluate.setContent(content);
