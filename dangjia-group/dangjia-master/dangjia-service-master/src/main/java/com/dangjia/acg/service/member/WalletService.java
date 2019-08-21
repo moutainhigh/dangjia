@@ -5,6 +5,7 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.member.BrandCardDTO;
@@ -206,10 +207,9 @@ public class WalletService {
                 for (RewardPunishCondition rewardPunishCondition : conditionList) {
                     if (rewardPunishCondition.getType() == 4) {
                         Date endTime = rewardPunishCondition.getEndTime();
-                        DateFormat longDateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG);
                         Date date = new Date();
                         if (date.getTime() < endTime.getTime()) {
-                            return ServerResponse.createByErrorMessage("您处于平台处罚期内，" + longDateFormat.format(endTime) + "以后才能提现,如有疑问请致电400-168-1231");
+                            return ServerResponse.createByErrorMessage("您处于平台处罚期内，" + DateUtil.getDateString(endTime.getTime()) + "以后才能提现,如有疑问请致电400-168-1231");
                         }
                     }
                 }
