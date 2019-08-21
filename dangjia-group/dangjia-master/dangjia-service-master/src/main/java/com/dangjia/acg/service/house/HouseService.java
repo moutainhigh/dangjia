@@ -465,6 +465,7 @@ public class HouseService {
         house.setSquare(new BigDecimal(houseDTO.getSquare()));
         house.setReferHouseId(houseDTO.getReferHouseId());
         house.setStyle(houseDTO.getStyle());
+        house.setStyleId(houseDTO.getStyleId());
         house.setHouseType(houseDTO.getHouseType());
         house.setDrawings(houseDTO.getDrawings());
         house.setDecorationType(houseDTO.getDecorationType());
