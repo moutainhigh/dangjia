@@ -74,7 +74,8 @@
         c.create_date AS createDate,
         if(c.label_id is not null,c.label_id,mc.label_id_arr) AS labelIdArr,
         c.phase_status as phaseStatus,
-        c.stage
+        c.stage,
+        c.clue_type AS clueType
         FROM dj_clue c
         LEFT JOIN dj_member_customer mc ON mc.user_id = c.cus_service
         AND mc.member_id = c.member_id

@@ -30,4 +30,5 @@ public class OrdersCustomerDTO {
     private Integer phaseStatus;//阶段
     private String userId;
     private String wechat;
+    private Integer clueType;//线索类型 1：跨域下单  0：正常'
 }

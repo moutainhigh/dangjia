@@ -60,6 +60,9 @@ public class RobArrInFoDTO {
     private Date mcCreateDate;// 创建日期
 
     @ApiModelProperty("创建时间")
+    private Date mCreateDate;// 创建日期
+
+    @ApiModelProperty("创建时间")
     private Date houseCreateDate;// 创建日期
 
     @ApiModelProperty("竣工时间")

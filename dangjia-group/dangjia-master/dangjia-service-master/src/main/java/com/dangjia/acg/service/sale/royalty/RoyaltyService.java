@@ -13,7 +13,6 @@ import com.dangjia.acg.mapper.sale.SurfaceMapper;
 import com.dangjia.acg.modle.sale.royalty.DjRoyaltyDetailsSurface;
 import com.dangjia.acg.modle.sale.royalty.DjRoyaltyMatch;
 import com.dangjia.acg.modle.sale.royalty.DjRoyaltySurface;
-import com.dangjia.acg.modle.store.Store;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,7 +89,8 @@ public class RoyaltyService {
     public ServerResponse queryRoyaltyData(String id) {
         Example example = new Example(DjRoyaltyDetailsSurface.class);
         example.createCriteria().andEqualTo(DjRoyaltyDetailsSurface.VILLAGE_ID, id)
-                .andEqualTo(Store.DATA_STATUS, 0);
+                .andEqualTo(DjRoyaltyDetailsSurface.DATA_STATUS, 0);
+        example.orderBy(DjRoyaltyDetailsSurface.CREATE_DATE).desc();
         List<DjRoyaltyDetailsSurface> djRoyaltyDetailsSurfaces = royaltyMapper.selectByExample(example);
         if (djRoyaltyDetailsSurfaces.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
