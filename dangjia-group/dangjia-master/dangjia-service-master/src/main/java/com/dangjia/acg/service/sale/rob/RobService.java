@@ -121,13 +121,13 @@ public class RobService {
             return ServerResponse.createbyUserTokenError();
         }
 
-        Integer type = iCustomerMapper.queryTypeId(accessToken.getUserId());
+//        Integer type = iCustomerMapper.queryTypeId(accessToken.getUserId());
 
         Map<String, Object> map = new HashMap<>();
         map.put("userId", accessToken.getUserId());
-        if (!CommonUtil.isEmpty(type)) {
-            map.put("type", type);
-        }
+//        if (!CommonUtil.isEmpty(type)) {
+//            map.put("type", type);
+//        }
         if (!CommonUtil.isEmpty(storeId)) {
             map.put("storeId", storeId);
         }

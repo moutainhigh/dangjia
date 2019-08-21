@@ -395,9 +395,6 @@
         <if test="null != isRobStats">
             and h.is_rob_stats = #{isRobStats}
         </if>
-        <if test="null != type">
-            and h.is_type = #{type}
-        </if>
         <choose>
             <when test="userId != null">
                 and (c.cus_service = #{userId} or c.store_id = #{storeId})
