@@ -30,8 +30,8 @@ public class HouseFlowController implements HouseFlowAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getGrabList(String userToken, String cityId) {
-        return houseFlowService.getGrabList(userToken, cityId);
+    public ServerResponse getGrabList( HttpServletRequest request,String userToken, String cityId) {
+        return houseFlowService.getGrabList(  request,userToken, cityId);
     }
 
     /**
