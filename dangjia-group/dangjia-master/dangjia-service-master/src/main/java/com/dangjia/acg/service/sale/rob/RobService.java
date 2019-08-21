@@ -418,6 +418,9 @@ public class RobService {
                                 map1.put("workerTypeId",wtd.get(0).getWorkerTypeId());
                                 map1.put("workerType",wtd.get(0).getType());
                                 String wtd2 = iMemberLabelMapper.queryWorkSteta(map1);
+                                if(wtd2.equals("0")){
+                                    workerTypeDTO.setType(3);
+                                }
                                 workerTypeDTO.setWorkSteta(wtd2);
                                 if(wtd.size() > 1){
                                     workerTypeDTO.setUpType(wtd.get(1).getType());
@@ -427,6 +430,9 @@ public class RobService {
                                     map2.put("workerType",wtd.get(1).getType());
                                     String wtd3 = iMemberLabelMapper.queryWorkSteta(map1);
                                     workerTypeDTO.setUpWorkSteta(wtd3);
+                                    if(wtd3.equals("0")  && wtd2.equals("0")){
+                                        workerTypeDTO.setType(3);
+                                    }
                                 }
                             }
                         }
