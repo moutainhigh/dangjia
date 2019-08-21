@@ -115,7 +115,9 @@ public class RoyaltyService {
                 .andNotEqualTo(DjRoyaltyMatch.ORDER_STATUS,1);
         logger.info("houseId========================================"+houseId);
         List<DjRoyaltyMatch> djRoyaltyMatches = djRoyaltyMatchMapper.selectByExample(example);
+        logger.info("djRoyaltyMatches========================================"+djRoyaltyMatches);
         for (DjRoyaltyMatch djRoyaltyMatch : djRoyaltyMatches) {
+            logger.info("djRoyaltyMatch.getHouseId()========================================"+djRoyaltyMatch.getHouseId());
             DjRoyaltyMatch djRoyaltyMatch1=new DjRoyaltyMatch();
             djRoyaltyMatch1.setDataStatus(0);
             djRoyaltyMatch1.setOrderStatus(1);
