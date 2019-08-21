@@ -7,6 +7,7 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.service.actuary.BudgetWorkerService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
@@ -23,7 +24,7 @@ public class BudgetWorkerController implements BudgetWorkerAPI {
     //根据HouseFlowId查询房子材料精算
     @Override
     @ApiMethod
-    public ServerResponse queryBudgetWorkerByHouseFlowId(HttpServletRequest request,String houseFlowId){
+    public ServerResponse queryBudgetWorkerByHouseFlowId(String cityId,String houseFlowId){
         return budgetWorkerService.queryBudgetWorkerByHouseFlowId(houseFlowId);
     }
     /**
@@ -175,7 +176,7 @@ public class BudgetWorkerController implements BudgetWorkerAPI {
     @SuppressWarnings("static-access")
     @Override
     @ApiMethod
-    public ServerResponse getWorkerTotalPrice(HttpServletRequest request, String houseId, String workerTypeId) {
+    public ServerResponse getWorkerTotalPrice(String cityId, String houseId, String workerTypeId) {
         return budgetWorkerService.getWorkerTotalPrice(houseId, workerTypeId);
     }
 
@@ -187,7 +188,7 @@ public class BudgetWorkerController implements BudgetWorkerAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse gatEstimateBudgetByHId(HttpServletRequest request, String houseId) {
+    public ServerResponse gatEstimateBudgetByHId(String  cityId, String houseId) {
         return budgetWorkerService.gatEstimateBudgetByHId(houseId);
     }
 

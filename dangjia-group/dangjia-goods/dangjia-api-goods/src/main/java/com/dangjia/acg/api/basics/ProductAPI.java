@@ -76,7 +76,7 @@ public interface ProductAPI {
 
     @PostMapping("/basics/product/getGoodsByGid")
     @ApiOperation(value = "根据商品id查询对应商品", notes = "根据商品id查询对应商品")
-    ServerResponse getGoodsByGid(@RequestParam("request") HttpServletRequest request,
+    ServerResponse getGoodsByGid(@RequestParam("cityId") String cityId,
                                  @RequestParam("goodsId") String goodsId);
 
     @PostMapping("/basics/product/updateGoods")
@@ -94,7 +94,7 @@ public interface ProductAPI {
 
     @PostMapping("/basics/product/getProductById")
     @ApiOperation(value = "根据货品id查询货品对象", notes = "根据货品id查询货品对象")
-    ServerResponse getProductById(@RequestParam("request") HttpServletRequest request,
+    ServerResponse getProductById(@RequestParam("cityId") String cityId,
                                   @RequestParam("id") String id);
 
     @PostMapping("/basics/product/deleteProductById")
@@ -129,7 +129,7 @@ public interface ProductAPI {
 
     @PostMapping("/basics/product/data")
     @ApiOperation(value = "商品库检索查询", notes = "商品库检索查询")
-    PageInfo queryProductData(@RequestParam("request") HttpServletRequest request,
+    PageInfo queryProductData(@RequestParam("cityId") String cityId,
                               @RequestParam("pageNum") Integer pageNum,
                               @RequestParam("pageSize") Integer pageSize,
                               @RequestParam("name") String name,
