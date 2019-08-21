@@ -125,7 +125,7 @@ public class HouseFlowService {
     /**
      * 抢单列表
      */
-    public ServerResponse getGrabList(String userToken, String cityId) {
+    public ServerResponse getGrabList( HttpServletRequest request,String userToken, String cityId) {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
@@ -139,8 +139,6 @@ public class HouseFlowService {
             if (CommonUtil.isEmpty(member.getWorkerTypeId()) || member.getCheckType() != 2 || member.getRealNameState() != 3) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
-            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-            request.setAttribute(Constants.CITY_ID, cityId);
             List<AllgrabBean> grabList = new ArrayList<>();//返回的任务list
             String workerTypeId = member.getWorkerTypeId();
             /*待抢单*/
@@ -207,7 +205,7 @@ public class HouseFlowService {
                     } else if (houseFlow.getWorkerType() == 2) {
                         allgrabBean.setWorkertotal("¥" + String.format("%.2f", houseFlow.getWorkPrice().doubleValue()));
                     } else {
-                        request.setAttribute(Constants.CITY_ID, cityId);
+                        request.setAttribute(Constants.CITY_ID, house.getCityId());
                         ServerResponse serverResponse = budgetWorkerAPI.getWorkerTotalPrice(request, houseFlow.getHouseId(), houseFlow.getWorkerTypeId());
                         if (serverResponse.isSuccess()) {
                             if (serverResponse.getResultObj() != null) {
