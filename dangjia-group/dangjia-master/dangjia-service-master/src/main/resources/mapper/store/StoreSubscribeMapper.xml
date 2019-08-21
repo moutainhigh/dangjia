@@ -5,35 +5,39 @@
 <mapper namespace="com.dangjia.acg.mapper.store.IStoreSubscribeMapper">
 
     <sql id="all_columns">
-	      id,
-          create_date AS createDate,
-          modify_date AS modifyDate,
-          data_status AS dataStatus,
-          store_id AS storeId,
-          store_name AS storeName,
-          customer_name AS customerName,
-          customer_phone AS customerPhone,
-          state,
-          info
+	      sb.id,
+          sb.create_date AS createDate,
+          sb.modify_date AS modifyDate,
+          sb.data_status AS dataStatus,
+          sb.store_id AS storeId,
+          sb.store_name AS storeName,
+          sb.customer_name AS customerName,
+          sb.customer_phone AS customerPhone,
+          sb.state,
+          sb.info
 	</sql>
 
     <!--门店预约查询-->
     <select id="queryStoreSubscribe" resultType="com.dangjia.acg.modle.store.StoreSubscribe">
         SELECT
           <include refid="all_columns"/>
-        FROM dj_store_subscribe
+        FROM dj_store_subscribe sb
+        INNER JOIN dj_store s on sb.store_id=s.id
         WHERE 1=1
+        <if test="cityId!=null and cityId!=''">
+            and s.city_id=#{cityId}
+        </if>
         <if test="null!=searchKey and ''!=searchKey">
             AND (
-              customer_name LIKE CONCAT('%',#{searchKey},'%')
+            sb.customer_name LIKE CONCAT('%',#{searchKey},'%')
               OR
-              customer_phone LIKE CONCAT('%',#{searchKey},'%')
+            sb.customer_phone LIKE CONCAT('%',#{searchKey},'%')
             )
         </if>
         <if test="null!=state and ''!=state">
-            AND  state = #{state}
+            AND  sb.state = #{state}
         </if>
-        ORDER BY modify_date DESC
+        ORDER BY sb.modify_date DESC
     </select>
 
 

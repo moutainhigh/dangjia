@@ -98,8 +98,6 @@ public class HouseFlowService {
     private CraftsmanConstructionService constructionService;
 
     @Autowired
-    private IBusinessOrderMapper businessOrderMapper;
-    @Autowired
     private IInsuranceMapper insuranceMapper;
     @Autowired
     private GroupInfoService groupInfoService;
@@ -125,7 +123,7 @@ public class HouseFlowService {
     /**
      * 抢单列表
      */
-    public ServerResponse getGrabList(String userToken, String cityId) {
+    public ServerResponse getGrabList( HttpServletRequest request,String userToken, String cityId) {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
@@ -139,8 +137,6 @@ public class HouseFlowService {
             if (CommonUtil.isEmpty(member.getWorkerTypeId()) || member.getCheckType() != 2 || member.getRealNameState() != 3) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
-            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-            request.setAttribute(Constants.CITY_ID, cityId);
             List<AllgrabBean> grabList = new ArrayList<>();//返回的任务list
             String workerTypeId = member.getWorkerTypeId();
             /*待抢单*/
@@ -200,14 +196,14 @@ public class HouseFlowService {
                     allgrabBean.setHouseMember("业主 " + (mem.getNickName() == null ? mem.getName() : mem.getNickName()));//业主名称
                     allgrabBean.setWorkertotal("¥0");//工钱
                     double totalPrice = 0;
-                    if (houseFlow.getWorkerType() == 1 && !CommonUtil.isEmpty(house.getStyle())) {//设计师
-                        HouseStyleType houseStyleType = houseStyleTypeMapper.getStyleByName(house.getStyle());
+                    if (houseFlow.getWorkerType() == 1 && !CommonUtil.isEmpty(house.getStyleId())) {//设计师
+                        HouseStyleType houseStyleType = houseStyleTypeMapper.selectByPrimaryKey(house.getStyleId());
                         BigDecimal workPrice = house.getSquare().multiply(houseStyleType.getPrice());//设计工钱
                         allgrabBean.setWorkertotal("¥" + String.format("%.2f", workPrice.doubleValue()));//工钱
                     } else if (houseFlow.getWorkerType() == 2) {
                         allgrabBean.setWorkertotal("¥" + String.format("%.2f", houseFlow.getWorkPrice().doubleValue()));
                     } else {
-                        ServerResponse serverResponse = budgetWorkerAPI.getWorkerTotalPrice(request, houseFlow.getHouseId(), houseFlow.getWorkerTypeId());
+                        ServerResponse serverResponse = budgetWorkerAPI.getWorkerTotalPrice(house.getCityId(), houseFlow.getHouseId(), houseFlow.getWorkerTypeId());
                         if (serverResponse.isSuccess()) {
                             if (serverResponse.getResultObj() != null) {
                                 JSONObject obj = JSONObject.parseObject(serverResponse.getResultObj().toString());
@@ -708,6 +704,8 @@ public class HouseFlowService {
             if ("0".equals(house.getSchedule())) {
                 return ServerResponse.createByErrorMessage("您还没有制作工程日历！");
             }
+
+            house.setConstructionDate(new Date());
             house.setModifyDate(new Date());
             houseMapper.updateByPrimaryKeySelective(house);
             houseFlow.setSupervisorStart(1);//大管家进度改为已开工

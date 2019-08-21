@@ -397,6 +397,12 @@ public class MemberService {
             user.setIsCrowned(0);
             user.setHead(Utils.getHead());
             user.setPassword(DigestUtils.md5Hex(password));//验证码正确设置密码
+            user.setCityId(request.getParameter(Constants.CITY_ID));
+            user.setPolicyId(String.valueOf(userRole));
+            if (!CommonUtil.isEmpty(user.getCityId())) {
+                City city = iCityMapper.selectByPrimaryKey(user.getCityId());
+                user.setCityName(city.getName());
+            }
             memberMapper.insertSelective(user);
             updateOrInsertInfo(user.getId(), String.valueOf(userRole), user.getPassword());
             ServerResponse serverResponse = setAccessToken(user, userRole);
@@ -405,10 +411,9 @@ public class MemberService {
             }
             MemberCity userCity = new MemberCity();
             userCity.setMemberId(user.getId());
-            userCity.setCityId(request.getParameter(Constants.CITY_ID));
-            if (!CommonUtil.isEmpty(userCity.getCityId())) {
-                City city = iCityMapper.selectByPrimaryKey(userCity.getCityId());
-                userCity.setCityName(city.getName());
+            if (!CommonUtil.isEmpty(user.getCityId())) {
+                userCity.setCityId(user.getCityId());
+                userCity.setCityName(user.getName());
                 memberCityMapper.insert(userCity);
             }
 //            userRole", value = "app应用角色  1为业主角色，2为工匠角色，0为业主和工匠双重身份角色
@@ -870,7 +875,7 @@ public class MemberService {
      * @param searchKey     申请人或申请人手机好关键字
      * @param realNameState -1:全部，1:认证中，2:认证被驳回，3:认证通过 （默认-1）
      */
-    public ServerResponse certificationList(PageDTO pageDTO, String searchKey, Integer realNameState) {
+    public ServerResponse certificationList(PageDTO pageDTO, String searchKey, String cityId, String policyId, Integer realNameState) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             Example example = new Example(Member.class);
@@ -879,6 +884,12 @@ public class MemberService {
                 criteria.andCondition("(name like '%" + searchKey
                         + "%' or nick_name like '%" + searchKey
                         + "%' or mobile like '%" + searchKey + "%')");
+            }
+            if (!CommonUtil.isEmpty(cityId)) {
+                criteria.andEqualTo(Member.CITY_ID,cityId);
+            }
+            if (!CommonUtil.isEmpty(policyId)) {
+                criteria.andEqualTo(Member.POLICY_ID,policyId);
             }
             if (realNameState == null) realNameState = -1;
             switch (realNameState) {

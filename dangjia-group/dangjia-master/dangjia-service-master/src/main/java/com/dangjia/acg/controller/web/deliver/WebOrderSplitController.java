@@ -92,8 +92,8 @@ public class WebOrderSplitController implements WebOrderSplitAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getHouseList(PageDTO pageDTO, String likeAddress,String startDate, String endDate) {
-        return orderSplitService.getHouseList(pageDTO, likeAddress, startDate,  endDate);
+    public ServerResponse getHouseList( String cityId,PageDTO pageDTO, String likeAddress,String startDate, String endDate) {
+        return orderSplitService.getHouseList(cityId,pageDTO, likeAddress, startDate,  endDate);
     }
 
     @Override
