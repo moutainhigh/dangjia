@@ -1583,7 +1583,7 @@ public class HouseService {
             }
             if (house != null) {
                 request.setAttribute(Constants.CITY_ID, house.getCityId());
-                return budgetWorkerAPI.gatEstimateBudgetByHId(request, house.getId());
+                return budgetWorkerAPI.gatEstimateBudgetByHId(house.getCityId(), house.getId());
             }
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "暂无所需报价");
         } catch (Exception e) {

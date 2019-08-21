@@ -24,7 +24,7 @@ public class BudgetWorkerController implements BudgetWorkerAPI {
     //根据HouseFlowId查询房子材料精算
     @Override
     @ApiMethod
-    public ServerResponse queryBudgetWorkerByHouseFlowId(HttpServletRequest request,String houseFlowId){
+    public ServerResponse queryBudgetWorkerByHouseFlowId(String cityId,String houseFlowId){
         return budgetWorkerService.queryBudgetWorkerByHouseFlowId(houseFlowId);
     }
     /**
@@ -188,7 +188,7 @@ public class BudgetWorkerController implements BudgetWorkerAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse gatEstimateBudgetByHId(HttpServletRequest request, String houseId) {
+    public ServerResponse gatEstimateBudgetByHId(String  cityId, String houseId) {
         return budgetWorkerService.gatEstimateBudgetByHId(houseId);
     }
 

@@ -49,7 +49,7 @@ public class BudgetMaterialController implements BudgetMaterialAPI {
 	//根据HouseFlowId查询房子材料精算
 	@Override
 	@ApiMethod
-	public ServerResponse queryBudgetMaterialByHouseFlowId(HttpServletRequest request,String houseFlowId){
+	public ServerResponse queryBudgetMaterialByHouseFlowId(String cityId,String houseFlowId){
 		return budgetMaterialService.queryBudgetMaterialByHouseFlowId(houseFlowId);
 	}
 	/**

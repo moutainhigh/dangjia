@@ -208,7 +208,7 @@ public class RedPackService {
         }
         if (activityRedPackDTO.getFromObjectType() == 1) {
 
-            ServerResponse serverResponse = productAPI.getGoodsByGid(request, activityRedPackDTO.getFromObject());
+            ServerResponse serverResponse = productAPI.getGoodsByGid(activityRedPack.getCityId(), activityRedPackDTO.getFromObject());
             if (serverResponse != null && serverResponse.getResultObj() != null) {
                 if (serverResponse.getResultObj() instanceof JSONObject) {
                     JSONObject goods = (JSONObject) serverResponse.getResultObj();
@@ -217,7 +217,7 @@ public class RedPackService {
             }
         }
         if (activityRedPackDTO.getFromObjectType() == 2) {
-            ServerResponse serverResponse = productAPI.getProductById(request, activityRedPackDTO.getFromObject());
+            ServerResponse serverResponse = productAPI.getProductById(activityRedPack.getCityId(), activityRedPackDTO.getFromObject());
             if (serverResponse != null && serverResponse.getResultObj() != null) {
                 if (serverResponse.getResultObj() instanceof JSONObject) {
                     JSONObject goods = (JSONObject) serverResponse.getResultObj();
