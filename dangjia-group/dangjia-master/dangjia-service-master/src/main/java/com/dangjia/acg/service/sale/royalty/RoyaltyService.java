@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -69,6 +70,7 @@ public class RoyaltyService {
             for (int i = 0; i < list.size(); i++) {
                 djr = new DjRoyaltyDetailsSurface();
                 djr.setVillageId(djRoyaltySurface.getId());
+                djr.setCreateDate(new Date());
                 JSONObject JS = list.getJSONObject(i);
                 djr.setStartSingle(JS.getInteger("startSingle"));
                 djr.setOverSingle(JS.getInteger("overSingle"));
