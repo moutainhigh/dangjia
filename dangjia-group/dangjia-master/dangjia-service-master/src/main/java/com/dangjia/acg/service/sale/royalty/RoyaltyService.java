@@ -3,6 +3,7 @@ package com.dangjia.acg.service.sale.royalty;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.auth.config.RedisSessionDAO;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.BaseEntity;
 import com.dangjia.acg.common.model.PageDTO;
@@ -15,6 +16,8 @@ import com.dangjia.acg.modle.sale.royalty.DjRoyaltyMatch;
 import com.dangjia.acg.modle.sale.royalty.DjRoyaltySurface;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -38,6 +41,7 @@ public class RoyaltyService {
     private SurfaceMapper surfaceMapper;
     @Autowired
     private DjRoyaltyMatchMapper djRoyaltyMatchMapper;
+    private static Logger logger = LoggerFactory.getLogger(RedisSessionDAO.class);
 
     /**
      * 查询提成列表
@@ -108,9 +112,12 @@ public class RoyaltyService {
     public void endRoyalty(String houseId){
         Example example=new Example(DjRoyaltyMatch.class);
         example.createCriteria().andEqualTo(DjRoyaltyMatch.HOUSE_ID,houseId)
-                .andNotEqualTo(DjRoyaltyMatch.ORDER_STATUS,0);
+                .andNotEqualTo(DjRoyaltyMatch.ORDER_STATUS,1);
+        logger.info("houseId========================================"+houseId);
         List<DjRoyaltyMatch> djRoyaltyMatches = djRoyaltyMatchMapper.selectByExample(example);
+        logger.info("djRoyaltyMatches========================================"+djRoyaltyMatches);
         for (DjRoyaltyMatch djRoyaltyMatch : djRoyaltyMatches) {
+            logger.info("djRoyaltyMatch.getHouseId()========================================"+djRoyaltyMatch.getHouseId());
             DjRoyaltyMatch djRoyaltyMatch1=new DjRoyaltyMatch();
             djRoyaltyMatch1.setDataStatus(0);
             djRoyaltyMatch1.setOrderStatus(1);
