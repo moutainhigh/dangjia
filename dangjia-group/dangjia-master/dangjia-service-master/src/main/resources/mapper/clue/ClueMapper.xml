@@ -343,7 +343,8 @@
             c.create_date AS createDate,
             c.label_id AS labelIdArr,
             u.username as userName,
-            c.phase_status as phaseStatus
+            c.phase_status as phaseStatus,
+            mc.member_id as memberId
             FROM dj_clue c
             inner join dj_user u
             on c.cus_service=u.id
