@@ -209,7 +209,7 @@ public class WalletService {
                         Date endTime = rewardPunishCondition.getEndTime();
                         Date date = new Date();
                         if (date.getTime() < endTime.getTime()) {
-                            return ServerResponse.createByErrorMessage("您处于平台处罚期内，" + DateUtil.getDateString(endTime.getTime()) + "以后才能提现,如有疑问请致电400-168-1231");
+                            return ServerResponse.createByErrorMessage("您处于平台处罚期内，" + DateUtil.getDateString2(endTime.getTime()) + "以后才能提现,如有疑问请致电400-168-1231");
                         }
                     }
                 }
