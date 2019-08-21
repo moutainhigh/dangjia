@@ -82,6 +82,12 @@ public class AchievementService {
 
         List<AchievementInfoDTO> achievementInfoDTOS = achievementMapper.queryRoyaltyMatch(map);
 
+
+        for (AchievementInfoDTO aa:achievementInfoDTOS) {
+            int i = achievementMapper.Complete(aa.getUserId(), DateUtil.dateToString(time, DateUtil.FORMAT));
+            aa.setSingleNumber(i);
+        }
+
         Integer taskOrderNum = achievementInfoDTOS.stream().filter
                 (a -> a.getMonthRoyalty()!=null).mapToInt
                 (AchievementInfoDTO::getMonthRoyalty).sum();

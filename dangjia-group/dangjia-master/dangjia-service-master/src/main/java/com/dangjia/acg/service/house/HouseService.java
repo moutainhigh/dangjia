@@ -624,13 +624,48 @@ public class HouseService {
         }
 
         if(clueList.size() == 1){
+            if(!CommonUtil.isEmpty(clueList.get(0).getCrossDomainUserId())){
+                //跨域下单分提成
+                logger.info("跨域下单分提成==================="+userId);
+                logger.info("跨域下单分提成==================="+houseDTO.getHouseId());
+                logger.info("跨域下单分提成==================="+list);
+                Map<String,Object> map = new HashMap<>();
+                map.put("userId",userId);
+                map.put("createDate",DateUtil.dateToString(new Date(), DateUtil.FORMAT));
+                List<DjAlreadyRobSingle> darList = djAlreadyRobSingleMapper.selectArr(map);
 
-            logger.info("一个销售人员录入==================="+userId);
-            logger.info("一个销售人员录入==================="+houseDTO.getHouseId());
-            logger.info("一个销售人员录入==================="+list);
-            //一个销售人员录入
-            djrHouse(userId,houseDTO.getHouseId(),list);
+                for (DjRoyaltyDetailsSurface ss : list) {
+                    if (ss.getStartSingle() <= darList.size() && darList.size() <= ss.getOverSingle()) {
+                        DjRoyaltyMatch djRoyaltyMatch1 = new DjRoyaltyMatch();
+                        djRoyaltyMatch1.setDataStatus(0);
+                        djRoyaltyMatch1.setUserId(userId);
+                        djRoyaltyMatch1.setOrderStatus(0);
+                        djRoyaltyMatch1.setHouseId(houseDTO.getHouseId());
+                        djRoyaltyMatch1.setMonthRoyalty((int) (ss.getRoyalty() * 0.4*0.75));
+                        djRoyaltyMatch1.setMeterRoyalty((int) (ss.getRoyalty() * 0.4*0.75));
+                        djRoyaltyMatch1.setBranchRoyalty((int) (ss.getRoyalty() * 0.4));
+                        djRoyaltyMatch1.setArrRoyalty(ss.getRoyalty());
+                        djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
 
+                        djRoyaltyMatch1 = new DjRoyaltyMatch();
+                        djRoyaltyMatch1.setDataStatus(0);
+                        djRoyaltyMatch1.setUserId(clueList.get(0).getCrossDomainUserId());
+                        djRoyaltyMatch1.setOrderStatus(2);
+                        djRoyaltyMatch1.setHouseId(houseDTO.getHouseId());
+                        djRoyaltyMatch1.setMonthRoyalty((int) (ss.getRoyalty() * 0.4*0.75));
+                        djRoyaltyMatch1.setMeterRoyalty((int) (ss.getRoyalty() * 0.4*0.75));
+                        djRoyaltyMatch1.setBranchRoyalty((int) (ss.getRoyalty() * 0.4));
+                        djRoyaltyMatch1.setArrRoyalty(ss.getRoyalty());
+                        djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
+                    }
+                }
+            }else{
+                logger.info("一个销售人员录入==================="+userId);
+                logger.info("一个销售人员录入==================="+houseDTO.getHouseId());
+                logger.info("一个销售人员录入==================="+list);
+                //一个销售人员录入正常分提成
+                djrHouse(userId,houseDTO.getHouseId(),list);
+            }
         }else{
             logger.info("//多个销售人员录入获取未抢到单的销售人员id==================="+userId);
             //多个销售人员录入获取未抢到单的销售人员id
@@ -669,18 +704,20 @@ public class HouseService {
                                     djRoyaltyMatch1.setUserId(userId);
                                     djRoyaltyMatch1.setOrderStatus(0);
                                     djRoyaltyMatch1.setHouseId(houseDTO.getHouseId());
-                                    djRoyaltyMatch1.setMonthRoyalty((int) (ss.getRoyalty() * 0.4));
-                                    djRoyaltyMatch1.setMeterRoyalty((int) (ss.getRoyalty() * 0.4));
+                                    djRoyaltyMatch1.setMonthRoyalty((int) (ss.getRoyalty() * 0.4*0.75));
+                                    djRoyaltyMatch1.setMeterRoyalty((int) (ss.getRoyalty() * 0.4*0.75));
+                                    djRoyaltyMatch1.setBranchRoyalty((int) (ss.getRoyalty() * 0.4));
                                     djRoyaltyMatch1.setArrRoyalty(ss.getRoyalty());
                                     djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
 
                                     djRoyaltyMatch1 = new DjRoyaltyMatch();
                                     djRoyaltyMatch1.setDataStatus(0);
                                     djRoyaltyMatch1.setUserId(userId2);
-                                    djRoyaltyMatch1.setOrderStatus(0);
+                                    djRoyaltyMatch1.setOrderStatus(2);
                                     djRoyaltyMatch1.setHouseId(houseDTO.getHouseId());
-                                    djRoyaltyMatch1.setMonthRoyalty((int) (ss.getRoyalty() * 0.4));
-                                    djRoyaltyMatch1.setMeterRoyalty((int) (ss.getRoyalty() * 0.4));
+                                    djRoyaltyMatch1.setMonthRoyalty((int) (ss.getRoyalty() * 0.4*0.75));
+                                    djRoyaltyMatch1.setMeterRoyalty((int) (ss.getRoyalty() * 0.4*0.75));
+                                    djRoyaltyMatch1.setBranchRoyalty((int) (ss.getRoyalty() * 0.4));
                                     djRoyaltyMatch1.setArrRoyalty(ss.getRoyalty());
                                     djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
                                 }
@@ -718,6 +755,7 @@ public class HouseService {
                 djRoyaltyMatch1.setOrderStatus(0);
                 djRoyaltyMatch1.setMonthRoyalty((int) (ss.getRoyalty()*0.75));
                 djRoyaltyMatch1.setMeterRoyalty((int) (ss.getRoyalty()*0.75));
+                djRoyaltyMatch1.setBranchRoyalty((int) (ss.getRoyalty() * 0.75));
                 djRoyaltyMatch1.setArrRoyalty(ss.getRoyalty());
                 djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
             }

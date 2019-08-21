@@ -118,4 +118,9 @@ public class Clue extends BaseEntity {
     @ApiModelProperty("提示 0：无提示 1：提示")
     private String tips;
 
+    @Column(name = "cross_domain_user_id")
+    @Desc(value = "跨域下单的销售id ：不是跨域为空")
+    @ApiModelProperty("跨域下单的销售id ：不是跨域为空")
+    private String crossDomainUserId;
+
 }

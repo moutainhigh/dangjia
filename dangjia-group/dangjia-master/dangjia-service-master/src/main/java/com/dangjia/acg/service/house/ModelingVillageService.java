@@ -19,11 +19,13 @@ import com.dangjia.acg.mapper.house.IModelingLayoutMapper;
 import com.dangjia.acg.mapper.house.IModelingVillageMapper;
 import com.dangjia.acg.mapper.other.ICityMapper;
 import com.dangjia.acg.mapper.sale.ResidentialBuildingMapper;
+import com.dangjia.acg.mapper.store.IStoreMapper;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.ModelingLayout;
 import com.dangjia.acg.modle.house.ModelingVillage;
 import com.dangjia.acg.modle.other.City;
 import com.dangjia.acg.modle.sale.residential.ResidentialBuilding;
+import com.dangjia.acg.modle.store.Store;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -59,6 +61,8 @@ public class ModelingVillageService {
     private ConfigUtil configUtil;
     @Autowired
     private ResidentialBuildingMapper residentialBuildingMapper;
+    @Autowired
+    private IStoreMapper iStoreMapper;
 
 
     private static Logger LOG = LoggerFactory.getLogger(ModelingVillageService.class);
@@ -180,6 +184,10 @@ public class ModelingVillageService {
                     residentialBuilding.setBuilding(building);//楼栋名称
                     residentialBuilding.setModifyDate(modifyDate);
                     residentialBuilding.setCreateDate(modifyDate);
+                    Example example=new Example(Store.class);
+                    example.createCriteria().andLike(Store.VILLAGES,modelingVillage.getId());
+                    List<Store> stores = iStoreMapper.selectByExample(example);
+                    residentialBuilding.setStoreId(stores.size()>0?stores.get(0).getId():null);
                     residentialBuildingMapper.insert(residentialBuilding);
                     modelingVillage.setLayoutSum(modelingVillage.getLayoutSum() + 1);//累计小区户型总数
                     modelingVillage.setModifyDate(new Date());

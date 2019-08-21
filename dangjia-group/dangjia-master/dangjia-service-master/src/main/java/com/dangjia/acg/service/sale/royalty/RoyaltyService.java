@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -69,6 +70,7 @@ public class RoyaltyService {
             for (int i = 0; i < list.size(); i++) {
                 djr = new DjRoyaltyDetailsSurface();
                 djr.setVillageId(djRoyaltySurface.getId());
+                djr.setCreateDate(new Date());
                 JSONObject JS = list.getJSONObject(i);
                 djr.setStartSingle(JS.getInteger("startSingle"));
                 djr.setOverSingle(JS.getInteger("overSingle"));
@@ -105,7 +107,8 @@ public class RoyaltyService {
      */
     public void endRoyalty(String houseId){
         Example example=new Example(DjRoyaltyMatch.class);
-        example.createCriteria().andEqualTo(DjRoyaltyMatch.HOUSE_ID,houseId);
+        example.createCriteria().andEqualTo(DjRoyaltyMatch.HOUSE_ID,houseId)
+                .andNotEqualTo(DjRoyaltyMatch.ORDER_STATUS,1);
         List<DjRoyaltyMatch> djRoyaltyMatches = djRoyaltyMatchMapper.selectByExample(example);
         for (DjRoyaltyMatch djRoyaltyMatch : djRoyaltyMatches) {
             DjRoyaltyMatch djRoyaltyMatch1=new DjRoyaltyMatch();
@@ -113,8 +116,8 @@ public class RoyaltyService {
             djRoyaltyMatch1.setOrderStatus(1);
             djRoyaltyMatch1.setUserId(djRoyaltyMatch.getUserId());
             djRoyaltyMatch1.setHouseId(djRoyaltyMatch.getHouseId());
-            djRoyaltyMatch1.setMonthRoyalty((int) (djRoyaltyMatch.getArrRoyalty()*0.25));
-            djRoyaltyMatch1.setMeterRoyalty((int) (djRoyaltyMatch.getArrRoyalty()*0.25)+djRoyaltyMatch.getMeterRoyalty());
+            djRoyaltyMatch1.setMonthRoyalty((int) (djRoyaltyMatch.getBranchRoyalty()*0.25));
+            djRoyaltyMatch1.setMeterRoyalty((int) (djRoyaltyMatch.getBranchRoyalty()*0.25)+djRoyaltyMatch.getMeterRoyalty());
             djRoyaltyMatch1.setArrRoyalty(djRoyaltyMatch1.getArrRoyalty());
             djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
         }

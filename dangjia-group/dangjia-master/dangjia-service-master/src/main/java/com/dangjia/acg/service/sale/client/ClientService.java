@@ -102,6 +102,8 @@ public class ClientService {
     private IntentionHouseMapper intentionHouseMapper;
     @Autowired
     private DjAlreadyRobSingleMapper djAlreadyRobSingleMapper;
+    @Autowired
+    private AchievementMapper achievementMapper;
 
     /**
      * 录入客户
@@ -260,6 +262,22 @@ public class ClientService {
         }
         ResidentialBuilding residentialBuilding = residentialBuildingMapper.selectByPrimaryKey(buildingId);
         ResidentialRange residentialRange = residentialRangeMapper.selectSingleResidentialRange(residentialBuilding.getId());
+        if(null==residentialRange){//楼栋未分配销售转入店长待分配
+            Store store = iStoreMapper.selectByPrimaryKey(residentialBuilding.getStoreId());
+            clue.setStage(0);
+            clue.setDataStatus(0);
+            clue.setStoreId(residentialBuilding.getStoreId());
+            clue.setClueType(0);
+            clue.setTurnStatus(0);
+            clue.setCityId(modelingVillage.getCityId());
+            clue.setClueType(1);
+            clue.setPhaseStatus(0);
+            clue.setCusService(store.getUserId());
+            clue.setCrossDomainUserId(accessToken.getUserId());//跨域销售id
+            clueMapper.insert(clue);
+            return ServerResponse.createBySuccessMessage("提交成功");
+        }
+        //转入给对应的销售
         Example example = new Example(StoreUser.class);
         example.createCriteria().andEqualTo(StoreUser.USER_ID, residentialRange.getUserId())
                 .andEqualTo(Store.DATA_STATUS, 0);
@@ -269,19 +287,6 @@ public class ClientService {
         }
         StoreUser storeUser = storeUsers.get(0);
         Store store = iStoreMapper.selectByPrimaryKey(storeUser.getStoreId());
-        if(null==residentialRange){//楼栋未分配销售转入店长待分配
-            clue.setStage(0);
-            clue.setDataStatus(0);
-            clue.setStoreId(store.getId());
-            clue.setClueType(0);
-            clue.setTurnStatus(0);
-            clue.setCityId(modelingVillage.getCityId());
-            clue.setClueType(1);
-            clue.setPhaseStatus(0);
-            clue.setCusService(store.getUserId());
-            clueMapper.insert(clue);
-            return ServerResponse.createBySuccessMessage("提交成功");
-        }//转入给对应的销售
         clue.setStage(0);
         clue.setDataStatus(0);
         clue.setStoreId(store.getId());
@@ -291,6 +296,7 @@ public class ClientService {
         clue.setClueType(1);
         clue.setPhaseStatus(0);
         clue.setCusService(residentialRange.getUserId());
+        clue.setCrossDomainUserId(accessToken.getUserId());//跨域销售id
         clueMapper.insert(clue);
         return ServerResponse.createBySuccessMessage("提交成功");
 //        Example example = new Example(Store.class);
@@ -508,7 +514,7 @@ public class ClientService {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM");
             String date = dateFormat.format(new Date());
             monthlyTargetDTO.setModifyDate(date);
-            monthlyTargetDTO.setComplete(clueMapper.Complete(user.getId(), date));
+            monthlyTargetDTO.setComplete(achievementMapper.Complete(user.getId(), date));
             List<MonthlyTarget> monthlyTargets = getMonthlyTargetList(user.getId());
             monthlyTargetDTO.setTargetNumber(monthlyTargets.size() > 0 ? monthlyTargets.get(0).getTargetNumber() : 0);
             map.put("monthlyTarget", monthlyTargetDTO);//月目标
