@@ -279,6 +279,7 @@ public class ClientService {
             clue.setClueType(1);
             clue.setPhaseStatus(0);
             clue.setCusService(store.getUserId());
+            clue.setCrossDomainUserId(accessToken.getUserId());//跨域销售id
             clueMapper.insert(clue);
             return ServerResponse.createBySuccessMessage("提交成功");
         }//转入给对应的销售
@@ -291,6 +292,8 @@ public class ClientService {
         clue.setClueType(1);
         clue.setPhaseStatus(0);
         clue.setCusService(residentialRange.getUserId());
+        clue.setCrossDomainUserId(accessToken.getUserId());//跨域销售id
+
         clueMapper.insert(clue);
         return ServerResponse.createBySuccessMessage("提交成功");
 //        Example example = new Example(Store.class);
