@@ -37,8 +37,8 @@ public class GetForBudgetController implements GetForBudgetAPI {
 
     @Override
     @ApiMethod
-    public HouseStyleType getStyleByName(String style) {
-        return houseStyleTypeService.getStyleByName(style);
+    public HouseStyleType getStyleById(String style) {
+        return houseStyleTypeService.getStyleById(style);
     }
 
     @Override

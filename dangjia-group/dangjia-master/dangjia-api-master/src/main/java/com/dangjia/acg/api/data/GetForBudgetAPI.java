@@ -29,7 +29,7 @@ public interface GetForBudgetAPI {
 
     @PostMapping("/data/getForBudget/getStyleByName")
     @ApiOperation(value = "获取风格", notes = "获取风格")
-    HouseStyleType getStyleByName(@RequestParam("style") String style);
+    HouseStyleType getStyleById(@RequestParam("styleId") String styleId);
 
     @PostMapping("/data/getForBudget/getFlowList")
     @ApiOperation(value = "根据houseId查出所有工序", notes = "根据houseId查出所有工序")

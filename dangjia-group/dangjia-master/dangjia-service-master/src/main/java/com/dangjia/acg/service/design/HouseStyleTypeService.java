@@ -33,8 +33,8 @@ public class HouseStyleTypeService {
     /**
      * 获取风格
      */
-    public HouseStyleType getStyleByName(String style) {
-        return houseStyleTypeMapper.getStyleByName(style);
+    public HouseStyleType getStyleById(String styleId) {
+        return houseStyleTypeMapper.selectByPrimaryKey(styleId);
     }
 
     /**

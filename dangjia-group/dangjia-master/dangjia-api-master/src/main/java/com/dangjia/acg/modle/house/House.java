@@ -90,6 +90,10 @@ public class House extends BaseEntity {
     @ApiModelProperty("装修风格,存字符")
     private String style;
 
+    @Column(name = "style_id")
+    @Desc(value = "装修风格ID")
+    @ApiModelProperty("装修风格ID")
+    private String styleId;
 
     @Column(name = "schedule")
     @Desc(value = "大管家排期")

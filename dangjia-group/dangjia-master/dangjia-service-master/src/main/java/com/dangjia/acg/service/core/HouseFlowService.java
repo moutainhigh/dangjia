@@ -98,8 +98,6 @@ public class HouseFlowService {
     private CraftsmanConstructionService constructionService;
 
     @Autowired
-    private IBusinessOrderMapper businessOrderMapper;
-    @Autowired
     private IInsuranceMapper insuranceMapper;
     @Autowired
     private GroupInfoService groupInfoService;
@@ -198,8 +196,8 @@ public class HouseFlowService {
                     allgrabBean.setHouseMember("业主 " + (mem.getNickName() == null ? mem.getName() : mem.getNickName()));//业主名称
                     allgrabBean.setWorkertotal("¥0");//工钱
                     double totalPrice = 0;
-                    if (houseFlow.getWorkerType() == 1 && !CommonUtil.isEmpty(house.getStyle())) {//设计师
-                        HouseStyleType houseStyleType = houseStyleTypeMapper.getStyleByName(house.getStyle());
+                    if (houseFlow.getWorkerType() == 1 && !CommonUtil.isEmpty(house.getStyleId())) {//设计师
+                        HouseStyleType houseStyleType = houseStyleTypeMapper.selectByPrimaryKey(house.getStyleId());
                         BigDecimal workPrice = house.getSquare().multiply(houseStyleType.getPrice());//设计工钱
                         allgrabBean.setWorkertotal("¥" + String.format("%.2f", workPrice.doubleValue()));//工钱
                     } else if (houseFlow.getWorkerType() == 2) {
