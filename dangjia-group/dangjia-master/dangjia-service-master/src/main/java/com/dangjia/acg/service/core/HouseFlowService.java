@@ -704,6 +704,8 @@ public class HouseFlowService {
             if ("0".equals(house.getSchedule())) {
                 return ServerResponse.createByErrorMessage("您还没有制作工程日历！");
             }
+
+            house.setConstructionDate(new Date());
             house.setModifyDate(new Date());
             houseMapper.updateByPrimaryKeySelective(house);
             houseFlow.setSupervisorStart(1);//大管家进度改为已开工
