@@ -118,7 +118,7 @@ public class RoyaltyService {
             djRoyaltyMatch1.setHouseId(djRoyaltyMatch.getHouseId());
             djRoyaltyMatch1.setMonthRoyalty((int) (djRoyaltyMatch.getBranchRoyalty()*0.25));
             djRoyaltyMatch1.setMeterRoyalty((int) (djRoyaltyMatch.getBranchRoyalty()*0.25)+djRoyaltyMatch.getMeterRoyalty());
-            djRoyaltyMatch1.setArrRoyalty(djRoyaltyMatch1.getArrRoyalty());
+            djRoyaltyMatch1.setArrRoyalty(djRoyaltyMatch.getArrRoyalty());
             djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
         }
     }
