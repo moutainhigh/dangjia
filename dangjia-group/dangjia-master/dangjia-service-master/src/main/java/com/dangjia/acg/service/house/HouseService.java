@@ -641,18 +641,18 @@ public class HouseService {
                         djRoyaltyMatch1.setUserId(userId);
                         djRoyaltyMatch1.setOrderStatus(0);
                         djRoyaltyMatch1.setHouseId(houseDTO.getHouseId());
-                        djRoyaltyMatch1.setMonthRoyalty((int) (ss.getRoyalty() * 0.4));
-                        djRoyaltyMatch1.setMeterRoyalty((int) (ss.getRoyalty() * 0.4));
+                        djRoyaltyMatch1.setMonthRoyalty((int) (ss.getRoyalty() * 0.4*0.75));
+                        djRoyaltyMatch1.setMeterRoyalty((int) (ss.getRoyalty() * 0.4*0.75));
                         djRoyaltyMatch1.setArrRoyalty(ss.getRoyalty());
                         djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
 
                         djRoyaltyMatch1 = new DjRoyaltyMatch();
                         djRoyaltyMatch1.setDataStatus(0);
                         djRoyaltyMatch1.setUserId(clueList.get(0).getCrossDomainUserId());
-                        djRoyaltyMatch1.setOrderStatus(0);
+                        djRoyaltyMatch1.setOrderStatus(2);
                         djRoyaltyMatch1.setHouseId(houseDTO.getHouseId());
-                        djRoyaltyMatch1.setMonthRoyalty((int) (ss.getRoyalty() * 0.4));
-                        djRoyaltyMatch1.setMeterRoyalty((int) (ss.getRoyalty() * 0.4));
+                        djRoyaltyMatch1.setMonthRoyalty((int) (ss.getRoyalty() * 0.4*0.75));
+                        djRoyaltyMatch1.setMeterRoyalty((int) (ss.getRoyalty() * 0.4*0.75));
                         djRoyaltyMatch1.setArrRoyalty(ss.getRoyalty());
                         djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
                     }
@@ -702,18 +702,18 @@ public class HouseService {
                                     djRoyaltyMatch1.setUserId(userId);
                                     djRoyaltyMatch1.setOrderStatus(0);
                                     djRoyaltyMatch1.setHouseId(houseDTO.getHouseId());
-                                    djRoyaltyMatch1.setMonthRoyalty((int) (ss.getRoyalty() * 0.4));
-                                    djRoyaltyMatch1.setMeterRoyalty((int) (ss.getRoyalty() * 0.4));
+                                    djRoyaltyMatch1.setMonthRoyalty((int) (ss.getRoyalty() * 0.4*0.75));
+                                    djRoyaltyMatch1.setMeterRoyalty((int) (ss.getRoyalty() * 0.4*0.75));
                                     djRoyaltyMatch1.setArrRoyalty(ss.getRoyalty());
                                     djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
 
                                     djRoyaltyMatch1 = new DjRoyaltyMatch();
                                     djRoyaltyMatch1.setDataStatus(0);
                                     djRoyaltyMatch1.setUserId(userId2);
-                                    djRoyaltyMatch1.setOrderStatus(0);
+                                    djRoyaltyMatch1.setOrderStatus(2);
                                     djRoyaltyMatch1.setHouseId(houseDTO.getHouseId());
-                                    djRoyaltyMatch1.setMonthRoyalty((int) (ss.getRoyalty() * 0.4));
-                                    djRoyaltyMatch1.setMeterRoyalty((int) (ss.getRoyalty() * 0.4));
+                                    djRoyaltyMatch1.setMonthRoyalty((int) (ss.getRoyalty() * 0.4*0.75));
+                                    djRoyaltyMatch1.setMeterRoyalty((int) (ss.getRoyalty() * 0.4*0.75));
                                     djRoyaltyMatch1.setArrRoyalty(ss.getRoyalty());
                                     djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
                                 }
