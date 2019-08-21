@@ -108,7 +108,7 @@ public class RoyaltyService {
     public void endRoyalty(String houseId){
         Example example=new Example(DjRoyaltyMatch.class);
         example.createCriteria().andEqualTo(DjRoyaltyMatch.HOUSE_ID,houseId)
-                .andNotEqualTo(DjRoyaltyMatch.ORDER_STATUS,0);
+                .andNotEqualTo(DjRoyaltyMatch.ORDER_STATUS,1);
         List<DjRoyaltyMatch> djRoyaltyMatches = djRoyaltyMatchMapper.selectByExample(example);
         for (DjRoyaltyMatch djRoyaltyMatch : djRoyaltyMatches) {
             DjRoyaltyMatch djRoyaltyMatch1=new DjRoyaltyMatch();
