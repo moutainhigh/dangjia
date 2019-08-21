@@ -393,7 +393,7 @@ public class RobService {
                     robArrInFoDTO.setNickName(member.getNickName());
                     robArrInFoDTO.setPhone(member.getMobile());
                     robArrInFoDTO.setPhone(member.getMobile());
-                    robArrInFoDTO.setMcCreateDate(member.getCreateDate());
+                    robArrInFoDTO.setMCreateDate(member.getCreateDate());
 //                    robArrInFoDTO.setRemark(member.getRemarks());
                 }
 
