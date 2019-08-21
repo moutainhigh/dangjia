@@ -7,6 +7,7 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.service.actuary.BudgetWorkerService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
@@ -175,7 +176,7 @@ public class BudgetWorkerController implements BudgetWorkerAPI {
     @SuppressWarnings("static-access")
     @Override
     @ApiMethod
-    public ServerResponse getWorkerTotalPrice(HttpServletRequest request, String houseId, String workerTypeId) {
+    public ServerResponse getWorkerTotalPrice(String cityId, String houseId, String workerTypeId) {
         return budgetWorkerService.getWorkerTotalPrice(houseId, workerTypeId);
     }
 

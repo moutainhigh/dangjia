@@ -205,8 +205,7 @@ public class HouseFlowService {
                     } else if (houseFlow.getWorkerType() == 2) {
                         allgrabBean.setWorkertotal("¥" + String.format("%.2f", houseFlow.getWorkPrice().doubleValue()));
                     } else {
-                        request.setAttribute(Constants.CITY_ID, house.getCityId());
-                        ServerResponse serverResponse = budgetWorkerAPI.getWorkerTotalPrice(request, houseFlow.getHouseId(), houseFlow.getWorkerTypeId());
+                        ServerResponse serverResponse = budgetWorkerAPI.getWorkerTotalPrice(house.getCityId(), houseFlow.getHouseId(), houseFlow.getWorkerTypeId());
                         if (serverResponse.isSuccess()) {
                             if (serverResponse.getResultObj() != null) {
                                 JSONObject obj = JSONObject.parseObject(serverResponse.getResultObj().toString());
