@@ -139,29 +139,6 @@ public class AchievementService {
         UserAchievementDataDTO userAchievementDataDTO = new UserAchievementDataDTO();
         //查询员工业绩
         List<UserAchievementInfoDTO> list = achievementMapper.queryUserAchievementData(map);
-
-//        //全部提成数量
-//        int arrRoyalty = 1000;
-//        int s = 0;
-//
-//        //每条数据当月提成
-//        if(!list.isEmpty()){
-//            for (UserAchievementInfoDTO to:list) {
-//                if(to.getVisitState() == 1){
-//                    s = (int) (arrRoyalty*0.75);
-//                    to.setMonthRoyalty(s);
-//                    to.setMeterRoyalty(s);
-//                }
-//                if(to.getVisitState() == 3){
-//                    s = (int) (arrRoyalty*0.25);
-//                    to.setMonthRoyalty(s);
-//                    to.setMeterRoyalty(arrRoyalty);
-//                }
-//                to.setArrRoyalty(arrRoyalty);
-//            }
-//        }
-
-
         //求销售人员总提成
         Integer taskOrderNum = list.stream().filter
                 (a -> a.getMonthRoyalty()!=null).mapToInt
@@ -169,7 +146,7 @@ public class AchievementService {
 
         userAchievementDataDTO.setUserAchievementInfoDTOS(list);
         userAchievementDataDTO.setArrMonthRoyalty(taskOrderNum);
-        userAchievementDataDTO.setDealNumber(list.size());
+        userAchievementDataDTO.setDealNumber(achievementMapper.Complete(accessToken.getUserId(), DateUtil.dateToString(time, DateUtil.FORMAT)));
 
         return ServerResponse.createBySuccess("查询提成列表", userAchievementDataDTO);
     }

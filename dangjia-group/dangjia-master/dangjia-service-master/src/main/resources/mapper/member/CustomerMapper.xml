@@ -72,6 +72,7 @@
         c.wechat,
         c.modify_date AS modifyDate,
         c.create_date AS createDate,
+        m.create_date AS mcreateDate,
         if(c.label_id is not null,c.label_id,mc.label_id_arr) AS labelIdArr,
         c.phase_status as phaseStatus,
         c.stage,
@@ -85,7 +86,11 @@
         AND c.data_status=0
         AND c.turn_status=1
         <if test="null!=searchKey and ''!=searchKey">
-            AND CONCAT(c.owername,c.phone,m.nick_name) like CONCAT('%',#{searchKey},'%')
+            AND (
+                c.owername LIKE CONCAT('%' ,#{searchKey}, '%') or
+                c.phone LIKE CONCAT('%' ,#{searchKey}, '%') or
+                m.nick_name LIKE CONCAT('%' ,#{searchKey}, '%')
+            )
         </if>
         ORDER by c.create_date
         <if test="null!=time and ''!=time">
