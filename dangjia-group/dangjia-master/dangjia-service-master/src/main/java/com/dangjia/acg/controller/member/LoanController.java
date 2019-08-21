@@ -2,6 +2,7 @@ package com.dangjia.acg.controller.member;
 
 import com.dangjia.acg.api.member.LoanAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.member.LoanService;
@@ -25,7 +26,8 @@ public class LoanController implements LoanAPI {
     @Override
     @ApiMethod
     public ServerResponse addLoan(HttpServletRequest request, String userToken, String name, String bankName) {
-        return loanService.addLoan(userToken, name, bankName);
+        String cityId = request.getParameter(Constants.CITY_ID);
+        return loanService.addLoan(cityId,userToken, name, bankName);
     }
 
     @Override

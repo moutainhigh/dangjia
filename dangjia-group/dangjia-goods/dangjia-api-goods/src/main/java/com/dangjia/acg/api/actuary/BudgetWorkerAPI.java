@@ -35,7 +35,7 @@ public interface BudgetWorkerAPI {
 
     @PostMapping("/actuary/budgetWorker/queryBudgetWorkerByHouseFlowId")
     @ApiOperation(value = "根据HouseFlowId查询房子人工精算", notes = "根据HouseFlowId查询房子人工精算")
-    ServerResponse queryBudgetWorkerByHouseFlowId(@RequestParam("request") HttpServletRequest request,
+    ServerResponse queryBudgetWorkerByHouseFlowId(@RequestParam("cityId") String cityId,
                                                   @RequestParam("houseFlowId") String houseFlowId);
 
     /**
@@ -157,7 +157,7 @@ public interface BudgetWorkerAPI {
      */
     @PostMapping("/actuary/budgetWorker/getWorkerTotalPrice")
     @ApiOperation(value = "根据houseId和workerTypeId查询房子人工精算总价", notes = "根据houseId和workerTypeId查询房子人工精算总价")
-    ServerResponse getWorkerTotalPrice(@RequestParam("request") HttpServletRequest request,
+    ServerResponse getWorkerTotalPrice(@RequestParam("cityId") String cityId,
                                        @RequestParam("houseId") String houseId,
                                        @RequestParam("workerTypeId") String workerTypeId);
 
@@ -169,7 +169,7 @@ public interface BudgetWorkerAPI {
      */
     @PostMapping("/actuary/budgetWorker/gatEstimateBudgetByHId")
     @ApiOperation(value = "估价", notes = "估价")
-    ServerResponse gatEstimateBudgetByHId(@RequestParam("request") HttpServletRequest request,
+    ServerResponse gatEstimateBudgetByHId(@RequestParam("cityId") String cityId,
                                           @RequestParam("houseId") String houseId);
 
 

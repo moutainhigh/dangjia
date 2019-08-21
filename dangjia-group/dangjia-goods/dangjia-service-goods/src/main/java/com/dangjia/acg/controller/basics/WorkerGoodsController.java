@@ -71,7 +71,7 @@ public class WorkerGoodsController implements WorkerGoodsAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getWorkertoCheck(HttpServletRequest request, String houseId, String houseFlowId) {
+    public ServerResponse getWorkertoCheck(String cityId, String houseId, String houseFlowId) {
         return workerGoodsService.getWorkertoCheck(houseId, houseFlowId);
     }
 

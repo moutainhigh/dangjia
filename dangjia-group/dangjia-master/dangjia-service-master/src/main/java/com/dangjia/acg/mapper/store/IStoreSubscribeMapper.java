@@ -20,5 +20,5 @@ public interface IStoreSubscribeMapper extends Mapper<StoreSubscribe> {
      * 门店预约查询
      * @return
      */
-    List<StoreSubscribe> queryStoreSubscribe(@Param("searchKey") String searchKey, @Param("state") String state);
+    List<StoreSubscribe> queryStoreSubscribe(@Param("cityId") String cityId,@Param("searchKey") String searchKey, @Param("state") String state);
 }

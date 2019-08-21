@@ -23,6 +23,7 @@ public class HouseDTO {
     private String referHouseId;//参考房子id;
     private String referHouseName;//参考房子信息;
     private String style;//风格
+    private String styleId;//风格Id
     private String workDepositId;//结算比例ID
     private int houseType;//房子类型 0：新房；1：老房
     private int drawings;//有无图纸

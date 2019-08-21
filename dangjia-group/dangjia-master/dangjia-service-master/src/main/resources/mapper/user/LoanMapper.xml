@@ -21,6 +21,9 @@
         LEFT JOIN dj_user u ON l.follow_up_id = u.id
         WHERE
         l.data_status =0
+        <if test="cityId!=null and cityId!=''">
+            and l.city_id = #{cityId}
+        </if>
         <if test="state!=null">
             and l.state = #{state}
         </if>

@@ -56,8 +56,17 @@ public class HouseDistribution extends BaseEntity {
 	@Column(name = "city")
 	@Desc(value = "用户所在的城市")
 	@ApiModelProperty("用户所在的城市")
-	private String city;//
 
+	private String city;//
+    @Column(name = "city_id")
+    @Desc(value = "城市id")
+    @ApiModelProperty("城市id")
+    private String cityId;
+
+    @Column(name = "city_name")
+    @Desc(value = "城市名")
+    @ApiModelProperty("城市名")
+    private String cityName;
 
 	@Column(name = "info")
 	@Desc(value = "详细信息")

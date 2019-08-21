@@ -55,7 +55,7 @@ public interface BudgetMaterialAPI {
 
     @PostMapping("/actuary/budgetMaterial/queryBudgetMaterialByHouseFlowId")
     @ApiOperation(value = "根据HouseFlowId查询房子材料精算", notes = "根据HouseFlowId查询房子材料精算")
-    ServerResponse queryBudgetMaterialByHouseFlowId(@RequestParam("request") HttpServletRequest request,
+    ServerResponse queryBudgetMaterialByHouseFlowId(@RequestParam("cityId") String cityId,
                                                     @RequestParam("houseFlowId") String houseFlowId);
 
     /**

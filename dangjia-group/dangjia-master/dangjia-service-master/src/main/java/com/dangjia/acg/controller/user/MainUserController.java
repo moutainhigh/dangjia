@@ -78,7 +78,7 @@ public class MainUserController implements MainUserAPI {
         if(department.getCityId().indexOf(cityId)<0){
             return ServerResponse.createByErrorMessage("登录用户暂未分配该城市，请选择("+department.getCityName()+")");
         }
-        redisClient.put("sysSource:" + userID, source);
+//        redisClient.put("sysSource:" + userID, source);
         return ServerResponse.createBySuccessMessage("ok");
     }
 

@@ -701,7 +701,7 @@ public class BudgetWorkerService {
             BudgetListResult blr2 = new BudgetListResult();
             BudgetListResult blr3 = new BudgetListResult();
 
-            HouseStyleType houseStyleType = getForBudgetAPI.getStyleByName(house.getStyle());
+            HouseStyleType houseStyleType = getForBudgetAPI.getStyleById(house.getStyleId());
             if (houseStyleType != null && houseStyleType.getPrice() != null) {
                 blr1.setListCost(house.getSquare().multiply(houseStyleType.getPrice()));
             } else {
