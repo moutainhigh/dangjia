@@ -3,9 +3,11 @@ package com.dangjia.acg.service.finance;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.deliver.SupplierDeliverDTO;
 import com.dangjia.acg.dto.finance.WebSplitDeliverItemDTO;
 import com.dangjia.acg.dto.receipt.ReceiptDTO;
@@ -47,6 +49,8 @@ public class WebSplitDeliverService {
     @Autowired
     private IOrderSplitItemMapper iOrderSplitItemMapper;
 
+    @Autowired
+    private ConfigUtil configUtil;
     /**
      * 所有供应商
      *
@@ -369,7 +373,11 @@ public class WebSplitDeliverService {
      */
     public ServerResponse mendDeliverDetail(String id) {
         try {
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             List<MendMateriel> mendMateriels = iMendDeliverMapper.mendDeliverDetail(id);
+            for (MendMateriel mendMateriel : mendMateriels) {
+                mendMateriel.setImage(address+mendMateriel.getImage());
+            }
             return ServerResponse.createBySuccess("查询成功", mendMateriels);
         } catch (Exception e) {
             return ServerResponse.createByErrorMessage("查询失败");

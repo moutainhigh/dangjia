@@ -66,6 +66,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                 b.product_sn AS productSn,
                 b.cost AS cost,
                 b.price AS price,
+                b.unit_name AS unitName,
                 b.shop_count AS shopCount,
                 b.actual_count AS actualCount,
                 b.actual_price AS actualPrice
