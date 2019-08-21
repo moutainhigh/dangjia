@@ -309,7 +309,7 @@
             AND h.visit_state=1
         </if>
         <if test="visitState==2">
-            AND h.visit_state=3
+            AND (h.visit_state = 3 or h.visit_state=4)
         </if>
         <if test="null!=searchKey and ''!=searchKey">
             AND(
