@@ -23,7 +23,8 @@ public interface HouseFlowAPI {
 
     @PostMapping("app/core/houseFlow/getGrabList")
     @ApiOperation(value = "抢单列表", notes = "抢单列表")
-    ServerResponse getGrabList(@RequestParam("userToken") String userToken,
+    ServerResponse getGrabList(@RequestParam("request")  HttpServletRequest request,
+                                @RequestParam("userToken") String userToken,
                                @RequestParam("cityId") String cityId);
 
     @PostMapping("app/core/houseFlow/setGrabVerification")

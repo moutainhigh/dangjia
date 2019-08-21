@@ -197,12 +197,12 @@ public class WarehouseService {
                 List<String> categoryIdList = warehouseMapper.categoryIdList(houseId);
                 for (String categoryId : categoryIdList) {
                     //获取低级类别
-                    GoodsCategory goodsCategoryNext = goodsCategoryAPI.getGoodsCategory(request, categoryId);
+                    GoodsCategory goodsCategoryNext = goodsCategoryAPI.getGoodsCategory(house.getCityId(), categoryId);
                     if (goodsCategoryNext == null) {
                         continue;
                     }
                     //获取顶级类别
-                    GoodsCategory goodsCategoryParentTop = goodsCategoryAPI.getGoodsCategory(request, goodsCategoryNext.getParentTop());
+                    GoodsCategory goodsCategoryParentTop = goodsCategoryAPI.getGoodsCategory(house.getCityId(), goodsCategoryNext.getParentTop());
                     GoodsCategory goodsCategory;
                     if (goodsCategoryParentTop == null) {
                         goodsCategory = goodsCategoryNext;

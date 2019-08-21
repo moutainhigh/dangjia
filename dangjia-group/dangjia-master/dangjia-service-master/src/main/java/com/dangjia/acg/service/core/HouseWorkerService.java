@@ -958,7 +958,7 @@ public class HouseWorkerService {
                 //查出该工种工钱
                 Double workerTotal = 0.0;
                 request.setAttribute(Constants.CITY_ID, house.getCityId());
-                ServerResponse serverResponse = workerGoodsAPI.getWorkertoCheck(request, supervisorHF.getHouseId(), houseflow.getId());
+                ServerResponse serverResponse = workerGoodsAPI.getWorkertoCheck(house.getCityId(), supervisorHF.getHouseId(), houseflow.getId());
                 if (serverResponse.isSuccess()) {
                     JSONObject obj = JSONObject.parseObject(serverResponse.getResultObj().toString());
                     workerTotal = obj.getDouble("totalPrice");
@@ -983,7 +983,7 @@ public class HouseWorkerService {
             BigDecimal moneySup = new BigDecimal(0);
             if (supervisorHF.getWorkPrice().compareTo(new BigDecimal(0)) == 0) {
                 request.setAttribute(Constants.CITY_ID, house.getCityId());
-                ServerResponse serverResponse = workerGoodsAPI.getWorkertoCheck(request, supervisorHF.getHouseId(), supervisorHF.getId());
+                ServerResponse serverResponse = workerGoodsAPI.getWorkertoCheck( house.getCityId(), supervisorHF.getHouseId(), supervisorHF.getId());
                 if (serverResponse.isSuccess()) {
                     JSONObject obj = JSONObject.parseObject(serverResponse.getResultObj().toString());
                     moneySup = BigDecimal.valueOf(obj.getDouble("totalPrice"));

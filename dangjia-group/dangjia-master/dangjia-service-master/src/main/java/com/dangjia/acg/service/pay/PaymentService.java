@@ -582,7 +582,7 @@ public class PaymentService {
                 order.setTotalAmount(hwo.getWorkPrice());//设计费
                 order.setWorkerTypeName("设计订单");
                 order.setWorkerTypeId(hwo.getWorkerTypeId());
-                HouseStyleType houseStyleType = houseStyleTypeMapper.getStyleByName(house.getStyle());
+                HouseStyleType houseStyleType = houseStyleTypeMapper.selectByPrimaryKey(house.getStyleId());
                 order.setStyleName(house.getStyle());
                 order.setStylePrice(houseStyleType.getPrice());//风格价格
                 order.setType(1);//人工订单
@@ -1268,7 +1268,7 @@ public class PaymentService {
                 }
 
                 if (houseFlow.getWorkerType() == 1) {//设计师
-                    HouseStyleType houseStyleType = houseStyleTypeMapper.getStyleByName(house.getStyle());
+                    HouseStyleType houseStyleType = houseStyleTypeMapper.selectByPrimaryKey(house.getStyleId());
                     BigDecimal workPrice = house.getSquare().multiply(houseStyleType.getPrice());//设计工钱
                     hwo.setWorkPrice(workPrice);
                     hwo.setTotalPrice(workPrice);
@@ -1490,9 +1490,8 @@ public class PaymentService {
                 return null;
             }
             String houseFlowId = businessOrder.getTaskId();
-            request.setAttribute(Constants.CITY_ID, house.getCityId());
-            ServerResponse retMaterial = budgetMaterialAPI.queryBudgetMaterialByHouseFlowId(request, houseFlowId);
-            ServerResponse retWorker = budgetWorkerAPI.queryBudgetWorkerByHouseFlowId(request, houseFlowId);
+            ServerResponse retMaterial = budgetMaterialAPI.queryBudgetMaterialByHouseFlowId(house.getCityId(), houseFlowId);
+            ServerResponse retWorker = budgetWorkerAPI.queryBudgetWorkerByHouseFlowId(house.getCityId(), houseFlowId);
 
             if (retMaterial.getResultObj() != null || retWorker.getResultObj() != null) {
                 List<BudgetMaterial> budgetMaterialList = JSONObject.parseArray(retMaterial.getResultObj().toString(), BudgetMaterial.class);
@@ -1613,7 +1612,7 @@ public class PaymentService {
                 }
                 paymentDTO.setWorkerDTO(workerDTO);//工匠信息
                 if (houseFlow.getWorkerType() == 1) {//设计师
-                    HouseStyleType houseStyleType = houseStyleTypeMapper.getStyleByName(house.getStyle());
+                    HouseStyleType houseStyleType = houseStyleTypeMapper.selectByPrimaryKey(house.getStyleId());
                     workPrice = house.getSquare().multiply(houseStyleType.getPrice());//设计工钱
                     totalPrice = totalPrice.add(workPrice);
                 } else if (houseFlow.getWorkerType() == 2) {//精算

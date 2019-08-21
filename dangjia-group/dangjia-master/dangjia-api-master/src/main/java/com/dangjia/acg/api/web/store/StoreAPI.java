@@ -47,7 +47,8 @@ public interface StoreAPI {
 
     @PostMapping("/web/store/queryStoreSubscribe")
     @ApiOperation(value = "查询门店预约记录", notes = "查询门店预约记录")
-    ServerResponse queryStoreSubscribe(@RequestParam("searchKey") String searchKey,
+    ServerResponse queryStoreSubscribe(@RequestParam("cityId") String cityId,
+                                       @RequestParam("searchKey") String searchKey,
                                        @RequestParam("houseChoiceCase") PageDTO pageDTO,
                                        @RequestParam("state") String state);
 

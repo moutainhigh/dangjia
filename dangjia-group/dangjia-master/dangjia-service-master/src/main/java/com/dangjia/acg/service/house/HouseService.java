@@ -465,6 +465,7 @@ public class HouseService {
         house.setSquare(new BigDecimal(houseDTO.getSquare()));
         house.setReferHouseId(houseDTO.getReferHouseId());
         house.setStyle(houseDTO.getStyle());
+        house.setStyleId(houseDTO.getStyleId());
         house.setHouseType(houseDTO.getHouseType());
         house.setDrawings(houseDTO.getDrawings());
         house.setDecorationType(houseDTO.getDecorationType());
@@ -530,7 +531,6 @@ public class HouseService {
         }
         house.setVisitState(1);//开工成单
         house.setIsRobStats(1);
-        house.setConstructionDate(new Date());
         iHouseMapper.updateByPrimaryKeySelective(house);
 
         //确认开工后，要修改 业主客服阶段 为已下单
@@ -1624,7 +1624,7 @@ public class HouseService {
             }
             if (house != null) {
                 request.setAttribute(Constants.CITY_ID, house.getCityId());
-                return budgetWorkerAPI.gatEstimateBudgetByHId(request, house.getId());
+                return budgetWorkerAPI.gatEstimateBudgetByHId(house.getCityId(), house.getId());
             }
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "暂无所需报价");
         } catch (Exception e) {
