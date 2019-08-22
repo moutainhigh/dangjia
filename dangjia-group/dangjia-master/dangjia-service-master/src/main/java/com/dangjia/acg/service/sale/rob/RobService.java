@@ -392,7 +392,6 @@ public class RobService {
                 if(null != member.getNickName()){
                     robArrInFoDTO.setNickName(member.getNickName());
                     robArrInFoDTO.setPhone(member.getMobile());
-                    robArrInFoDTO.setPhone(member.getMobile());
                     robArrInFoDTO.setMCreateDate(member.getCreateDate());
 //                    robArrInFoDTO.setRemark(member.getRemarks());
                 }
@@ -445,10 +444,11 @@ public class RobService {
                             .andEqualTo(HouseAddress.HOUSE_ID, to.getHouseId())
                             .andEqualTo(HouseAddress.DATA_STATUS, 0);
 
-                    //查询  意向房子
+                    //查询房子类型
                     List<HouseAddress> houseAddress = iHouseAddressMapper.selectByExample(example1);
-
-                    if(!houseAddress.isEmpty()){
+                    logger.info("查询房子类型===================************"+houseAddress.size());
+                    if(houseAddress.size() > 0){
+                        logger.info("查询房子类型==================="+houseAddress.get(0).getHouseType());
                         to.setMcHouseType(houseAddress.get(0).getHouseType());
                     }
 
