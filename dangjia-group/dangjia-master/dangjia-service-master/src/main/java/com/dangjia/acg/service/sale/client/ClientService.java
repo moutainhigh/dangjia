@@ -742,6 +742,9 @@ public class ClientService {
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse setWithdraw(String mcId, String houseId,String alreadyId) {
         Customer customer = iCustomerMapper.selectByPrimaryKey(mcId);
+        if(!CommonUtil.isEmpty(alreadyId)){
+            djAlreadyRobSingleMapper.deleteByPrimaryKey(alreadyId);
+        }
         Example example=new Example(DjAlreadyRobSingle.class);
         example.createCriteria().andEqualTo(DjAlreadyRobSingle.USER_ID,customer.getUserId())
                 .andEqualTo(House.DATA_STATUS,0)
@@ -759,9 +762,6 @@ public class ClientService {
             example.createCriteria().andEqualTo(Clue.MEMBER_ID,customer.getMemberId());
             iCustomerMapper.updateByExampleSelective(customer1,example);
             clueMapper.updateByExampleSelective(clue,example);
-        }
-        if(!CommonUtil.isEmpty(alreadyId)){
-            djAlreadyRobSingleMapper.deleteByPrimaryKey(alreadyId);
         }
         if (iHouseMapper.deleteByPrimaryKey(houseId) > 0) {
             return ServerResponse.createBySuccessMessage("撤回成功");
