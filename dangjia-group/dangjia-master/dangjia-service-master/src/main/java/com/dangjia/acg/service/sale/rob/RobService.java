@@ -440,7 +440,7 @@ public class RobService {
 
                     //查询销售人员输入的房子类型
                     Example example1 = new Example(HouseAddress.class);
-                    example.createCriteria()
+                    example1.createCriteria()
                             .andEqualTo(HouseAddress.HOUSE_ID, to.getHouseId())
                             .andEqualTo(HouseAddress.DATA_STATUS, 0);
 
@@ -742,6 +742,7 @@ public class RobService {
                     if(phaseStatus == 1){
                         member.setNickName(clue.getOwername());
                         member.setRemarks(clue.getRemark());
+                        member.setCreateDate(null);
                         member.setMobile(clue.getPhone());
                         member.setId(memberId);
                         iMemberMapper.updateByPrimaryKeySelective(member);
