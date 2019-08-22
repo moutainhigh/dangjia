@@ -325,6 +325,8 @@ public class ClueService {
                                     customer.setStoreId(clue.getStoreId());
                                     customer.setTips("1");
                                     customer.setLabelIdArr(clue.getLabelId());
+                                    customer.setClueType(clue.getClueType());
+                                    customer.setTurnStatus(clue.getTurnStatus());
                                     if(null!=clue.getReportDate() && new Date().getTime()>clue.getReportDate().getTime()){
                                         customer.setReportDate(clue.getReportDate());
                                     }
@@ -345,6 +347,8 @@ public class ClueService {
                             customer.setStoreId(clue.getStoreId());
                             customer.setTips("1");
                             customer.setLabelIdArr(clue.getLabelId());
+                            customer.setClueType(clue.getClueType());
+                            customer.setTurnStatus(clue.getTurnStatus());
                             if(null!=clue.getReportDate() && new Date().getTime()>clue.getReportDate().getTime()){
                                 customer.setReportDate(clue.getReportDate());
                             }
@@ -374,6 +378,8 @@ public class ClueService {
             customer.setDataStatus(0);
             customer.setStage(0);
             customer.setPhaseStatus(1);
+            customer.setClueType(0);
+            customer.setTurnStatus(0);
             iCustomerMapper.insert(customer);
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
