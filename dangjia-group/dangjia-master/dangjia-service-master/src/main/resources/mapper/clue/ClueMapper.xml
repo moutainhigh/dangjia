@@ -76,7 +76,12 @@
         <select id="followList" resultType="com.dangjia.acg.dto.other.ClueDTO">
             select
             <if test="stage==''">
-                c.id as clueId,c.owername,c.phone,c.wechat,c.address,c.stage,
+                c.id as clueId,
+                c.owername,
+                c.phone,
+                c.wechat,
+                c.address,
+                c.stage,
                 c.building,c.number,
                 c.label_id as labelId,
                 c.cus_service as cusService,
@@ -89,8 +94,7 @@
                 c.store_id as storeId,
                 u.username as userName,
                 c.phase_status as phaseStatus,
-                c.clue_type as clueType,
-                c.stage
+                c.clue_type as clueType
             </if>
             <if test="stage==4">
                 mc.id as mcId,
