@@ -764,7 +764,7 @@ public class HouseService {
                 djRoyaltyMatch1.setOrderStatus(0);
                 djRoyaltyMatch1.setMonthRoyalty((int) (ss.getRoyalty()*0.75));
                 djRoyaltyMatch1.setMeterRoyalty((int) (ss.getRoyalty()*0.75));
-                djRoyaltyMatch1.setBranchRoyalty((int) (ss.getRoyalty() * 0.75));
+//                djRoyaltyMatch1.setBranchRoyalty((int) (ss.getRoyalty() * 0.75));
                 djRoyaltyMatch1.setArrRoyalty(ss.getRoyalty());
                 djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
             }
