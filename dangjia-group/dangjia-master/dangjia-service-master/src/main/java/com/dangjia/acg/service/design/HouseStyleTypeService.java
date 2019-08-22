@@ -33,8 +33,8 @@ public class HouseStyleTypeService {
     /**
      * 获取风格
      */
-    public HouseStyleType getStyleByName(String style) {
-        return houseStyleTypeMapper.getStyleByName(style);
+    public HouseStyleType getStyleById(String styleId) {
+        return houseStyleTypeMapper.selectByPrimaryKey(styleId);
     }
 
     /**
@@ -44,12 +44,6 @@ public class HouseStyleTypeService {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<HouseStyleType> houseStyleTypeList = houseStyleTypeMapper.selectAll();
         PageInfo pageResult = new PageInfo(houseStyleTypeList);
-        List<Map<String, Object>> mapList = new ArrayList<>();
-        for (HouseStyleType houseStyleType : houseStyleTypeList) {
-            Map<String, Object> map = BeanUtils.beanToMap(houseStyleType);
-            mapList.add(map);
-        }
-        pageResult.setList(mapList);
         return ServerResponse.createBySuccess("查询列表成功", pageResult);
     }
 

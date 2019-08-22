@@ -98,8 +98,6 @@ public class HouseFlowService {
     private CraftsmanConstructionService constructionService;
 
     @Autowired
-    private IBusinessOrderMapper businessOrderMapper;
-    @Autowired
     private IInsuranceMapper insuranceMapper;
     @Autowired
     private GroupInfoService groupInfoService;
@@ -143,8 +141,9 @@ public class HouseFlowService {
             String workerTypeId = member.getWorkerTypeId();
             /*待抢单*/
             Example example = new Example(HouseFlow.class);
-            example.createCriteria().andEqualTo(HouseFlow.WORK_TYPE, 2).andEqualTo(HouseFlow.WORKER_TYPE_ID, workerTypeId)
+            example.createCriteria().andCondition(" work_type in (2,3) ").andEqualTo(HouseFlow.WORKER_TYPE_ID, workerTypeId)
                     .andEqualTo(HouseFlow.CITY_ID, cityId).andNotEqualTo(HouseFlow.STATE, 2);
+            example.orderBy(HouseFlow.WORK_TYPE);
             List<HouseFlow> hfList = houseFlowMapper.selectByExample(example);
             if (hfList != null)
                 for (HouseFlow houseFlow : hfList) {
@@ -191,6 +190,10 @@ public class HouseFlowService {
                     if (mem == null) {
                         continue;
                     }
+                    allgrabBean.setButType("0");
+                    if (houseFlow.getWorkType() == 3) {
+                        allgrabBean.setButType("1");
+                    }
                     allgrabBean.setWorkerTypeId(workerTypeId);
                     allgrabBean.setHouseFlowId(houseFlow.getId());
                     allgrabBean.setHouseName(house.getHouseName());
@@ -198,8 +201,8 @@ public class HouseFlowService {
                     allgrabBean.setHouseMember("业主 " + (mem.getNickName() == null ? mem.getName() : mem.getNickName()));//业主名称
                     allgrabBean.setWorkertotal("¥0");//工钱
                     double totalPrice = 0;
-                    if (houseFlow.getWorkerType() == 1 && !CommonUtil.isEmpty(house.getStyle())) {//设计师
-                        HouseStyleType houseStyleType = houseStyleTypeMapper.getStyleByName(house.getStyle());
+                    if (houseFlow.getWorkerType() == 1 && !CommonUtil.isEmpty(house.getStyleId())) {//设计师
+                        HouseStyleType houseStyleType = houseStyleTypeMapper.selectByPrimaryKey(house.getStyleId());
                         BigDecimal workPrice = house.getSquare().multiply(houseStyleType.getPrice());//设计工钱
                         allgrabBean.setWorkertotal("¥" + String.format("%.2f", workPrice.doubleValue()));//工钱
                     } else if (houseFlow.getWorkerType() == 2) {
@@ -365,10 +368,9 @@ public class HouseFlowService {
                 for (RewardPunishCondition rewardPunishCondition : conditionList) {
                     if (rewardPunishCondition.getType() == 3) {
                         Date wraprDate = rewardPunishCondition.getEndTime();
-                        DateFormat longDateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG);
                         Date date = new Date();
                         if (date.getTime() < wraprDate.getTime()) {
-                            return ServerResponse.createByErrorMessage("您处于平台处罚期内，" + longDateFormat.format(wraprDate) + "以后才能抢单,如有疑问请致电400-168-1231！");
+                            return ServerResponse.createByErrorMessage("您处于平台处罚期内，" + DateUtil.getDateString2(wraprDate.getTime()) + "以后才能抢单,如有疑问请致电400-168-1231！");
                         }
                     }
                 }

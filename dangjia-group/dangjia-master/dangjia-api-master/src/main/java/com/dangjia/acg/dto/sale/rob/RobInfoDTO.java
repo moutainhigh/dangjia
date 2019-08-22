@@ -28,6 +28,9 @@ public class RobInfoDTO {
     @ApiModelProperty("创建时间")
     private Date houseCreateDate;// 创建日期
 
+    @ApiModelProperty("竣工时间")
+    private Date completedDate;// 日期
+
     @ApiModelProperty("修改时间")
     private Date modifyDate;// 修改日期
 
@@ -76,8 +79,11 @@ public class RobInfoDTO {
     @ApiModelProperty("意向房子")
     private String address;
 
-    @ApiModelProperty("装修的房子类型0：新房；1：老房")
+    @ApiModelProperty("销售录入装修的房子类型0：新房；1：老房")
     private Integer houseType;
+
+    @ApiModelProperty("业主录入装修的房子类型0：新房；1：老房")
+    private Integer mcHouseType;
 
     @ApiModelProperty("有无图纸0：无图纸；1：有图纸")
     private Integer drawings;

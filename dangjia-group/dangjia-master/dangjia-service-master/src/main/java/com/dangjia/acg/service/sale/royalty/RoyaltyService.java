@@ -3,6 +3,7 @@ package com.dangjia.acg.service.sale.royalty;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.auth.config.RedisSessionDAO;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.BaseEntity;
 import com.dangjia.acg.common.model.PageDTO;
@@ -13,13 +14,15 @@ import com.dangjia.acg.mapper.sale.SurfaceMapper;
 import com.dangjia.acg.modle.sale.royalty.DjRoyaltyDetailsSurface;
 import com.dangjia.acg.modle.sale.royalty.DjRoyaltyMatch;
 import com.dangjia.acg.modle.sale.royalty.DjRoyaltySurface;
-import com.dangjia.acg.modle.store.Store;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -38,6 +41,7 @@ public class RoyaltyService {
     private SurfaceMapper surfaceMapper;
     @Autowired
     private DjRoyaltyMatchMapper djRoyaltyMatchMapper;
+    private static Logger logger = LoggerFactory.getLogger(RedisSessionDAO.class);
 
     /**
      * 查询提成列表
@@ -70,6 +74,7 @@ public class RoyaltyService {
             for (int i = 0; i < list.size(); i++) {
                 djr = new DjRoyaltyDetailsSurface();
                 djr.setVillageId(djRoyaltySurface.getId());
+                djr.setCreateDate(new Date());
                 JSONObject JS = list.getJSONObject(i);
                 djr.setStartSingle(JS.getInteger("startSingle"));
                 djr.setOverSingle(JS.getInteger("overSingle"));
@@ -90,7 +95,8 @@ public class RoyaltyService {
     public ServerResponse queryRoyaltyData(String id) {
         Example example = new Example(DjRoyaltyDetailsSurface.class);
         example.createCriteria().andEqualTo(DjRoyaltyDetailsSurface.VILLAGE_ID, id)
-                .andEqualTo(Store.DATA_STATUS, 0);
+                .andEqualTo(DjRoyaltyDetailsSurface.DATA_STATUS, 0);
+        example.orderBy(DjRoyaltyDetailsSurface.CREATE_DATE).desc();
         List<DjRoyaltyDetailsSurface> djRoyaltyDetailsSurfaces = royaltyMapper.selectByExample(example);
         if (djRoyaltyDetailsSurfaces.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
@@ -105,17 +111,26 @@ public class RoyaltyService {
      */
     public void endRoyalty(String houseId){
         Example example=new Example(DjRoyaltyMatch.class);
-        example.createCriteria().andEqualTo(DjRoyaltyMatch.HOUSE_ID,houseId);
+        example.createCriteria().andEqualTo(DjRoyaltyMatch.HOUSE_ID,houseId)
+                .andNotEqualTo(DjRoyaltyMatch.ORDER_STATUS,1);
+        logger.info("houseId========================================"+houseId);
         List<DjRoyaltyMatch> djRoyaltyMatches = djRoyaltyMatchMapper.selectByExample(example);
+        logger.info("djRoyaltyMatches========================================"+djRoyaltyMatches);
         for (DjRoyaltyMatch djRoyaltyMatch : djRoyaltyMatches) {
+            logger.info("djRoyaltyMatch.getHouseId()========================================"+djRoyaltyMatch.getHouseId());
             DjRoyaltyMatch djRoyaltyMatch1=new DjRoyaltyMatch();
             djRoyaltyMatch1.setDataStatus(0);
             djRoyaltyMatch1.setOrderStatus(1);
             djRoyaltyMatch1.setUserId(djRoyaltyMatch.getUserId());
             djRoyaltyMatch1.setHouseId(djRoyaltyMatch.getHouseId());
-            djRoyaltyMatch1.setMonthRoyalty((int) (djRoyaltyMatch.getArrRoyalty()*0.25));
-            djRoyaltyMatch1.setMeterRoyalty((int) (djRoyaltyMatch.getArrRoyalty()*0.25)+djRoyaltyMatch.getMeterRoyalty());
-            djRoyaltyMatch1.setArrRoyalty(djRoyaltyMatch1.getArrRoyalty());
+            if(djRoyaltyMatch.getBranchRoyalty() != null){
+                djRoyaltyMatch1.setMonthRoyalty((int) (djRoyaltyMatch.getBranchRoyalty()*0.25));
+                djRoyaltyMatch1.setMeterRoyalty((int) (djRoyaltyMatch.getBranchRoyalty()*0.25)+djRoyaltyMatch.getMeterRoyalty());
+            }else{
+                djRoyaltyMatch1.setMonthRoyalty((int) (djRoyaltyMatch.getArrRoyalty()*0.25));
+                djRoyaltyMatch1.setMeterRoyalty((int) (djRoyaltyMatch.getArrRoyalty()*0.25)+djRoyaltyMatch.getMeterRoyalty());
+            }
+            djRoyaltyMatch1.setArrRoyalty(djRoyaltyMatch.getArrRoyalty());
             djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
         }
     }

@@ -60,7 +60,13 @@ public class RobArrInFoDTO {
     private Date mcCreateDate;// 创建日期
 
     @ApiModelProperty("创建时间")
+    private Date mCreateDate;// 创建日期
+
+    @ApiModelProperty("创建时间")
     private Date houseCreateDate;// 创建日期
+
+    @ApiModelProperty("竣工时间")
+    private Date completedDate;// 日期
 
     @ApiModelProperty("阶段 0:新线索 1：继续跟进 2：已放弃 3：黑名单 4:转客服")
     private Integer stage;

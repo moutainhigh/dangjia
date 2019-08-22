@@ -111,6 +111,8 @@
             from dj_clue c
             INNER JOIN dj_user u
             on c.cus_service=u.id
+            LEFT JOIN dj_clue_talk ct
+            ON c.id=ct.clue_id
             <if test="stage==4">
                 INNER JOIN dj_member_customer mc
                 on c.member_id=mc.member_id
@@ -135,7 +137,12 @@
                 <if test="null!=storeId and ''!=storeId">
                     and c.store_id=#{storeId}
                 </if>
-                ORDER BY c.create_date
+                GROUP BY ct.clue_id
+                ORDER BY ct.create_date
+                <if test="null!=time and ''!=time">
+                    desc
+                </if>
+                ,c.create_date
                 <if test="null!=time and ''!=time">
                     desc
                 </if>
@@ -158,7 +165,12 @@
                 <if test="null!=searchKey and ''!=searchKey">
                     and CONCAT(m.nick_name,c.owername,c.phone) like CONCAT('%',#{searchKey},'%')
                 </if>
-                ORDER BY mc.create_date
+                GROUP BY ct.clue_id
+                ORDER BY ct.create_date
+                <if test="null!=time and ''!=time">
+                    desc
+                </if>
+                ,mc.create_date
                 <if test="null!=time and ''!=time">
                     desc
                 </if>
@@ -257,7 +269,7 @@
         INNER JOIN dj_house h
         ON h.member_id = mc.member_id
         WHERE
-        h.visit_state=1
+        (h.visit_state = 1 or h.visit_state = 3)
         and mc.phase_status=1
         and c.phase_status=1
         and c.data_status = 0
@@ -309,7 +321,7 @@
             AND h.visit_state=1
         </if>
         <if test="visitState==2">
-            AND h.visit_state=3
+            AND (h.visit_state = 3 or h.visit_state=4)
         </if>
         <if test="null!=searchKey and ''!=searchKey">
             AND(
@@ -343,7 +355,8 @@
             c.create_date AS createDate,
             c.label_id AS labelIdArr,
             u.username as userName,
-            c.phase_status as phaseStatus
+            c.phase_status as phaseStatus,
+            mc.member_id as memberId
             FROM dj_clue c
             inner join dj_user u
             on c.cus_service=u.id
@@ -395,9 +408,6 @@
         <if test="null != isRobStats">
             and h.is_rob_stats = #{isRobStats}
         </if>
-        <if test="null != type">
-            and h.is_type = #{type}
-        </if>
         <choose>
             <when test="userId != null">
                 and (c.cus_service = #{userId} or c.store_id = #{storeId})
@@ -432,6 +442,7 @@
             h.number as houseNumber,
             h.house_type as houseType,
             h.construction_date as constructionDate,
+            h.completed_date as completedDate,
         </if>
         c.create_date as createDate,
         c.owername as owerName,

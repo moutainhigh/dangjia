@@ -49,5 +49,11 @@ public class DjRoyaltyMatch extends BaseEntity {
     @ApiModelProperty("订单状态 0：新开工 1：已竣工")
     private Integer orderStatus;
 
+    @Column(name = "branch_royalty")
+    @Desc(value = "全部提成")
+    @ApiModelProperty("全部提成")
+    private Integer branchRoyalty;
+
+
 
 }

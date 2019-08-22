@@ -256,8 +256,8 @@ public interface HomeAPI {
      * @param pageSize 必选 int 记录数
      * @return {"res": 1000,"msg": {"resultCode": 1000, "resultMsg": "ok", "resultObj": { "pageNum": 0,"pageSize": 10,"size": 1,"startRow": 1,"endRow": 1,"total": 1, "pages": 1,"list": [{返回参数说明}],"prePage": 0, "nextPage": 1,"isFirstPage": false,"isLastPage": false,"hasPreviousPage": false,"hasNextPage": true,"navigatePages": 8,"navigatepageNums": [1],"navigateFirstPage": 1,"navigateLastPage": 1}}}
      * @catalog 当家接口文档/首页模块
-     * @title 获取所以首页模块
-     * @description 获取所以首页模块
+     * @title 获取所有首页模块
+     * @description 获取所有首页模块
      * @method POST
      * @url master/home/getHomeMasterplateList
      * @return_param id string id
@@ -277,7 +277,7 @@ public interface HomeAPI {
      * @Date: 2019/6/13 3:11 PM
      */
     @PostMapping("home/getHomeMasterplateList")
-    @ApiOperation(value = "获取所以首页模块", notes = "获取所以首页模块")
+    @ApiOperation(value = "获取所有首页模块", notes = "获取所有首页模块")
     ServerResponse getHomeMasterplateList(
             @RequestParam("request") HttpServletRequest request,
             @RequestParam("pageDTO") PageDTO pageDTO);

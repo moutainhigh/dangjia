@@ -246,7 +246,7 @@ public class StoreManagementService {
             for (ModelingVillage modelingVillage : modelingVillages) {
                 example = new Example(ResidentialBuilding.class);
                 Example.Criteria criteria = example.createCriteria();
-//                criteria.andEqualTo(ResidentialBuilding.STORE_ID, store.getId());
+                criteria.andEqualTo(ResidentialBuilding.STORE_ID, store.getId());
                 criteria.andEqualTo(ResidentialBuilding.VILLAGE_ID, modelingVillage.getId());
                 if (slist.size() > 0) {
                     criteria.andNotIn(ResidentialBuilding.ID, slist);

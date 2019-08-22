@@ -18,7 +18,7 @@ public class CustomerIndexDTO {
     private String phone;//号码
     private Date modifyDate;//时间
     private String houseName;//房子名称
-    private Date createDate;
+    private Date createDate;//录入时间
     private String labelIdArr;//标签id
     private String userName;//跟进人
     private String userId;
@@ -28,4 +28,6 @@ public class CustomerIndexDTO {
     private String stage;
     private String wechat;
     private Date completedDate;//竣工时间
+    private Integer clueType;//线索类型 1：跨域下单  0：正常'
+    private Date mcreateDate;//注册时间
 }

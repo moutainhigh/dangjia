@@ -20,6 +20,7 @@ import com.dangjia.acg.dto.sale.store.GrabSheetDTO;
 import com.dangjia.acg.dto.sale.store.OrderStoreDTO;
 import com.dangjia.acg.mapper.clue.ClueMapper;
 import com.dangjia.acg.mapper.clue.ClueTalkMapper;
+import com.dangjia.acg.mapper.house.IHouseAddressMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.ICustomerMapper;
 import com.dangjia.acg.mapper.member.ICustomerRecordMapper;
@@ -100,6 +101,8 @@ public class RobService {
     private DjAlreadyRobSingleMapper djAlreadyRobSingleMapper;
     @Autowired
     private IHouseMapper iHouseMapper;
+    @Autowired
+    private IHouseAddressMapper iHouseAddressMapper;
 
     /**
      * 查询待抢单列表
@@ -118,13 +121,13 @@ public class RobService {
             return ServerResponse.createbyUserTokenError();
         }
 
-        Integer type = iCustomerMapper.queryTypeId(accessToken.getUserId());
+//        Integer type = iCustomerMapper.queryTypeId(accessToken.getUserId());
 
         Map<String, Object> map = new HashMap<>();
         map.put("userId", accessToken.getUserId());
-        if (!CommonUtil.isEmpty(type)) {
-            map.put("type", type);
-        }
+//        if (!CommonUtil.isEmpty(type)) {
+//            map.put("type", type);
+//        }
         if (!CommonUtil.isEmpty(storeId)) {
             map.put("storeId", storeId);
         }
@@ -332,7 +335,6 @@ public class RobService {
         Clue clue = clueMapper.selectByPrimaryKey(clueId);
 
 
-
         Object object = constructionService.getAccessToken(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -369,6 +371,7 @@ public class RobService {
                         djAlreadyRobSingle.size()> 0 ?djAlreadyRobSingle.get(0).getId():null);
                 robArrInFoDTO.setOwerName(robInfoDTO.get(0).getOwerName());
                 robArrInFoDTO.setPhone(robInfoDTO.get(0).getPhone());
+                robArrInFoDTO.setCompletedDate(robInfoDTO.get(0).getCompletedDate());
                 robArrInFoDTO.setMcCreateDate(robInfoDTO.get(0).getMcCreateDate());
                 robArrInFoDTO.setWechat(robInfoDTO.get(0).getWechat());
                 robArrInFoDTO.setRemark(robInfoDTO.get(0).getRemark());
@@ -389,6 +392,7 @@ public class RobService {
                 if(null != member.getNickName()){
                     robArrInFoDTO.setNickName(member.getNickName());
                     robArrInFoDTO.setPhone(member.getMobile());
+                    robArrInFoDTO.setMCreateDate(member.getCreateDate());
 //                    robArrInFoDTO.setRemark(member.getRemarks());
                 }
 
@@ -403,23 +407,49 @@ public class RobService {
                     //查询大管家信息
                     if (!CommonUtil.isEmpty(to.getHouseId())) {
                         WorkerTypeDTO workerTypeDTO = iMemberLabelMapper.queryWorkerType(to.getHouseId());
-
                         if (null != workerTypeDTO) {
                             workerTypeDTO.setHead(imageAddress + workerTypeDTO.getHead());
-
-                            WorkerTypeDTO wtd = iMemberLabelMapper.queryType(to.getHouseId());
-                            if(null != wtd){
-                                workerTypeDTO.setType(wtd.getType());
-
+                            List<WorkerTypeDTO> wtd = iMemberLabelMapper.queryType(to.getHouseId());
+                            if(wtd.size() > 0){
+                                workerTypeDTO.setType(wtd.get(0).getType());
                                 Map<String,Object> map1 = new HashMap<>();
                                 map1.put("houseId",to.getHouseId());
-                                map1.put("workerTypeId",wtd.getWorkerTypeId());
-                                map1.put("workerType",wtd.getType());
+                                map1.put("workerTypeId",wtd.get(0).getWorkerTypeId());
+                                map1.put("workerType",wtd.get(0).getType());
                                 String wtd2 = iMemberLabelMapper.queryWorkSteta(map1);
+                                if(wtd2.equals("0")){
+                                    workerTypeDTO.setType(3);
+                                }
                                 workerTypeDTO.setWorkSteta(wtd2);
+                                if(wtd.size() > 1){
+                                    workerTypeDTO.setUpType(wtd.get(1).getType());
+                                    Map<String,Object> map2 = new HashMap<>();
+                                    map2.put("houseId",to.getHouseId());
+                                    map2.put("workerTypeId",wtd.get(1).getWorkerTypeId());
+                                    map2.put("workerType",wtd.get(1).getType());
+                                    String wtd3 = iMemberLabelMapper.queryWorkSteta(map1);
+                                    workerTypeDTO.setUpWorkSteta(wtd3);
+                                    if(wtd3.equals("0")  && wtd2.equals("0")){
+                                        workerTypeDTO.setType(3);
+                                    }
+                                }
                             }
                         }
                         to.setWorkerTypeDTO(workerTypeDTO);
+                    }
+
+                    //查询销售人员输入的房子类型
+                    Example example1 = new Example(HouseAddress.class);
+                    example1.createCriteria()
+                            .andEqualTo(HouseAddress.HOUSE_ID, to.getHouseId())
+                            .andEqualTo(HouseAddress.DATA_STATUS, 0);
+
+                    //查询房子类型
+                    List<HouseAddress> houseAddress = iHouseAddressMapper.selectByExample(example1);
+                    logger.info("查询房子类型===================************"+houseAddress.size());
+                    if(houseAddress.size() > 0){
+                        logger.info("查询房子类型==================="+houseAddress.get(0).getHouseType());
+                        to.setMcHouseType(houseAddress.get(0).getHouseType());
                     }
 
                     //查询小区名称
@@ -442,7 +472,11 @@ public class RobService {
                     parmMap.put("userId",to.getCusService());
                     parmMap.put("houseId",to.getHouseId());
                     //查询业绩
-                    uadto.addAll(clueMapper.queryUserAchievementInFo(parmMap));
+                    List<UserAchievementDTO> userAchievementDTOS = clueMapper.queryUserAchievementInFo(parmMap);
+                    for (UserAchievementDTO userAchievementDTO : userAchievementDTOS) {
+                        userAchievementDTO.setHead(imageAddress+userAchievementDTO.getHead());
+                    }
+                    uadto.addAll(userAchievementDTOS);
                 }
             }
 
@@ -708,6 +742,7 @@ public class RobService {
                     if(phaseStatus == 1){
                         member.setNickName(clue.getOwername());
                         member.setRemarks(clue.getRemark());
+                        member.setCreateDate(null);
                         member.setMobile(clue.getPhone());
                         member.setId(memberId);
                         iMemberMapper.updateByPrimaryKeySelective(member);
