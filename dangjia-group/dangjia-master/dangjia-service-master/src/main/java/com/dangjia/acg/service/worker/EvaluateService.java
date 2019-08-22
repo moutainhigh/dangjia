@@ -534,9 +534,15 @@ public class EvaluateService {
             , String sContent, int sStar, boolean isAuto) {
         try {
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
+            if(houseFlowApply==null){
+                return ServerResponse.createByErrorMessage("该工单不存在");
+            }
             logger.info("houseFlowApply==================="+houseFlowApply);
             logger.info("houseFlowApply.getHouseId()==================="+houseFlowApply.getHouseId());
             House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
+            if(house==null){
+                return ServerResponse.createByErrorMessage("该房产不存在");
+            }
             logger.info("house==================="+house);
             if (houseFlowApply.getMemberCheck() == 1 || houseFlowApply.getMemberCheck() == 3) {
                 return ServerResponse.createByErrorMessage("重复审核");
