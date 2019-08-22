@@ -37,6 +37,7 @@ import com.dangjia.acg.mapper.other.ICityMapper;
 import com.dangjia.acg.mapper.other.IWorkDepositMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.mapper.sale.*;
+import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.clue.Clue;
 import com.dangjia.acg.modle.core.*;
@@ -58,6 +59,7 @@ import com.dangjia.acg.modle.sale.residential.ResidentialRange;
 import com.dangjia.acg.modle.sale.royalty.DjAlreadyRobSingle;
 import com.dangjia.acg.modle.sale.royalty.DjRoyaltyDetailsSurface;
 import com.dangjia.acg.modle.sale.royalty.DjRoyaltyMatch;
+import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
@@ -170,6 +172,8 @@ public class HouseService {
     private DjRoyaltyMatchMapper djRoyaltyMatchMapper;
 
     protected static final Logger LOG = LoggerFactory.getLogger(HouseService.class);
+    @Autowired
+    private UserMapper userMapper;
 
     /**
      * 切换房产
@@ -435,6 +439,7 @@ public class HouseService {
     /**
      * WEB确认开工
      */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse startWork(HttpServletRequest request, HouseDTO houseDTO,String userToken) {
 
         if (houseDTO.getDecorationType() >= 3 || houseDTO.getDecorationType() == 0) {
@@ -548,6 +553,7 @@ public class HouseService {
 
 
 
+
         //结算提成
         Object object = constructionService.getAccessToken(userToken);
         if (object instanceof ServerResponse) {
@@ -567,18 +573,11 @@ public class HouseService {
         /**
          * 结算下单提成
          */
-        endRoyalty(houseDTO,accessToken.getUserId());
+        endRoyalty(houseDTO,accessToken.getUserId(),customer);
+
 
         try {
-            List<Customer> ms = iCustomerMapper.getCustomerMemberIdList(house.getMemberId());
-            if (ms != null) {
-                String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
-                for (Customer m : ms) {
-                    configMessageService.addConfigMessage(AppType.SALE, m.getMemberId(), "开工提醒",
-                            "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url
-                                    + Utils.getCustomerDetails(house.getMemberId(), "", 1, "4"));
-                }
-            }
+
             //通知业主确认开工
             configMessageService.addConfigMessage(request, AppType.ZHUANGXIU, house.getMemberId(), "0", "装修提醒",
                     String.format(DjConstants.PushMessage.START_FITTING_UP, house.getHouseName()), "");
@@ -605,7 +604,7 @@ public class HouseService {
     /**
      * 结算下单提成
      */
-    public void endRoyalty(HouseDTO houseDTO,String userId){
+    public void endRoyalty(HouseDTO houseDTO,String userId,Customer customer){
         House house = iHouseMapper.selectByPrimaryKey(houseDTO.getHouseId());
 
         Example example = new Example(Clue.class);
@@ -658,6 +657,43 @@ public class HouseService {
                         djRoyaltyMatch1.setBranchRoyalty((int) (ss.getRoyalty() * 0.4));
                         djRoyaltyMatch1.setArrRoyalty(ss.getRoyalty());
                         djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
+
+
+                        //第一个销售推送消息  获取线索ID
+                        Example example2 = new Example(Clue.class);
+                        example2.createCriteria()
+                                .andEqualTo(Clue.CUS_SERVICE, userId)
+                                .andEqualTo(Clue.DATA_STATUS, 0)
+                                .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
+                        List<Clue> djAlreadyRobSingle1 = clueMapper.selectByExample(example2);
+                        if(djAlreadyRobSingle1.isEmpty()){
+                            logger.info("线索id为空==================="+ djAlreadyRobSingle1.get(0).getId());
+                        }
+                        //消息推送
+                        MainUser user = userMapper.selectByPrimaryKey(userId);
+                        String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+                        configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "开工提醒",
+                                "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url
+                                        + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle1.get(0).getId(), 1, "4"));
+
+
+                        //第二个销售推送消息  获取线索ID
+                        Example example3 = new Example(Clue.class);
+                        example3.createCriteria()
+                                .andEqualTo(Clue.CUS_SERVICE, clueList.get(0).getCrossDomainUserId())
+                                .andEqualTo(Clue.DATA_STATUS, 0)
+                                .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
+                        List<Clue> djAlreadyRobSingle2 = clueMapper.selectByExample(example3);
+                        if(djAlreadyRobSingle2.isEmpty()){
+                            logger.info("线索id为空==================="+ djAlreadyRobSingle2.get(0).getId());
+                        }
+                        //消息推送
+                        MainUser user1 = userMapper.selectByPrimaryKey(clueList.get(0).getCrossDomainUserId());
+                        String url1 = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+                        configMessageService.addConfigMessage(AppType.SALE, user1.getMemberId(), "开工提醒",
+                                "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url1
+                                        + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle2.get(0).getId(), 1, "4"));
+
                     }
                 }
             }else{
@@ -723,6 +759,42 @@ public class HouseService {
                                     djRoyaltyMatch1.setBranchRoyalty((int) (ss.getRoyalty() * 0.4));
                                     djRoyaltyMatch1.setArrRoyalty(ss.getRoyalty());
                                     djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
+
+                                    //第一个销售推送消息  获取线索ID
+                                    Example example2 = new Example(Clue.class);
+                                    example2.createCriteria()
+                                            .andEqualTo(Clue.CUS_SERVICE, userId)
+                                            .andEqualTo(Clue.DATA_STATUS, 0)
+                                            .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
+                                    List<Clue> djAlreadyRobSingle1 = clueMapper.selectByExample(example2);
+                                    if(djAlreadyRobSingle1.isEmpty()){
+                                        logger.info("线索id为空==================="+ djAlreadyRobSingle1.get(0).getId());
+                                    }
+                                    //消息推送
+                                    MainUser user = userMapper.selectByPrimaryKey(userId);
+                                    String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+                                    configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "开工提醒",
+                                            "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url
+                                                    + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle1.get(0).getId(), 1, "4"));
+
+
+                                    //第二个销售推送消息  获取线索ID
+                                    Example example3 = new Example(Clue.class);
+                                    example3.createCriteria()
+                                            .andEqualTo(Clue.CUS_SERVICE, userId2)
+                                            .andEqualTo(Clue.DATA_STATUS, 0)
+                                            .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
+                                    List<Clue> djAlreadyRobSingle2 = clueMapper.selectByExample(example3);
+                                    if(djAlreadyRobSingle2.isEmpty()){
+                                        logger.info("线索id为空==================="+ djAlreadyRobSingle2.get(0).getId());
+                                    }
+                                    //消息推送
+                                    MainUser user1 = userMapper.selectByPrimaryKey(userId2);
+                                    String url1 = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+                                    configMessageService.addConfigMessage(AppType.SALE, user1.getMemberId(), "开工提醒",
+                                            "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url1
+                                                    + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle2.get(0).getId(), 1, "4"));
+
                                 }
                             }
                         }else{
@@ -743,6 +815,7 @@ public class HouseService {
         }
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void djrHouse(String userId,String houseId,List<DjRoyaltyDetailsSurface> list){
         logger.info("111111111111111111111==================="+userId);
         Map<String,Object> map = new HashMap<>();
