@@ -680,8 +680,10 @@ public class HouseService {
             //多个销售人员录入
             //判断是否在未抢单的销售楼栋范围内
             ResidentialBuilding residentialBuilding = residentialBuildingMapper.selectSingleResidentialBuilding(null, house.getBuilding(), house.getVillageId());
+            logger.info("00000000000000000000==================="+residentialBuilding);
                 if (null != residentialBuilding) {
                     ResidentialRange residentialRange = residentialRangeMapper.selectSingleResidentialRange(residentialBuilding.getId());
+                    logger.info("99999999999999999==================="+residentialRange);
                     if (null != residentialRange) {
                         //该单在未抢到单的销售的楼栋范围内
                         if(residentialRange.getUserId().equals(userId2)){
@@ -730,6 +732,12 @@ public class HouseService {
                             logger.info("抢单的销售单独分配提成==================="+list);
                             djrHouse(userId,houseDTO.getHouseId(),list);
                         }
+                    }else{
+                        //抢单的销售单独分配提成
+                        logger.info("抢单的销售单独分配提成1==================="+userId);
+                        logger.info("抢单的销售单独分配提成1==================="+houseDTO);
+                        logger.info("抢单的销售单独分配提成1==================="+list);
+                        djrHouse(userId,houseDTO.getHouseId(),list);
                     }
                 }
         }
