@@ -469,6 +469,8 @@ public class HouseService {
         house.setNumber(houseDTO.getNumber());
         house.setSquare(new BigDecimal(houseDTO.getSquare()));
         house.setReferHouseId(houseDTO.getReferHouseId());
+        logger.info("houseDTO.getStyle()==================="+houseDTO.getStyle());
+        logger.info("houseDTO==================="+houseDTO);
         house.setStyle(houseDTO.getStyle());
         house.setStyleId(houseDTO.getStyleId());
         house.setHouseType(houseDTO.getHouseType());
@@ -620,7 +622,7 @@ public class HouseService {
             example1.createCriteria().andEqualTo(
                     DjRoyaltyDetailsSurface.VILLAGE_ID, baseEntityList.get(0).getId())
                     .andEqualTo(Clue.DATA_STATUS, 0);
-             list = royaltyMapper.selectByExample(example1);
+            list = royaltyMapper.selectByExample(example1);
         }
 
         if(clueList.size() == 1){
@@ -717,101 +719,101 @@ public class HouseService {
             //判断是否在未抢单的销售楼栋范围内
             ResidentialBuilding residentialBuilding = residentialBuildingMapper.selectSingleResidentialBuilding(null, house.getBuilding(), house.getVillageId());
             logger.info("00000000000000000000==================="+residentialBuilding);
-                if (null != residentialBuilding) {
-                    ResidentialRange residentialRange = residentialRangeMapper.selectSingleResidentialRange(residentialBuilding.getId());
-                    logger.info("99999999999999999==================="+residentialRange);
-                    if (null != residentialRange) {
-                        //该单在未抢到单的销售的楼栋范围内
-                        if(residentialRange.getUserId().equals(userId2)){
-                            //两销售一起分配提成
-                            logger.info("两销售一起分配提成==================="+userId2);
-                            logger.info("两销售一起分配提成==================="+userId);
-                            Map<String,Object> map = new HashMap<>();
-                            map.put("userId",userId);
-                            map.put("createDate",DateUtil.dateToString(new Date(), DateUtil.FORMAT));
-                            List<DjAlreadyRobSingle> darList = djAlreadyRobSingleMapper.selectArr(map);
-                            for (DjRoyaltyDetailsSurface ss : list) {
-                                //判断当月
-                                logger.info("判断当月==================="+ss.getStartSingle());
-                                logger.info("判断当月==================="+darList.size());
-                                logger.info("判断当月==================="+ss.getOverSingle());
+            if (null != residentialBuilding) {
+                ResidentialRange residentialRange = residentialRangeMapper.selectSingleResidentialRange(residentialBuilding.getId());
+                logger.info("99999999999999999==================="+residentialRange);
+                if (null != residentialRange) {
+                    //该单在未抢到单的销售的楼栋范围内
+                    if(residentialRange.getUserId().equals(userId2)){
+                        //两销售一起分配提成
+                        logger.info("两销售一起分配提成==================="+userId2);
+                        logger.info("两销售一起分配提成==================="+userId);
+                        Map<String,Object> map = new HashMap<>();
+                        map.put("userId",userId);
+                        map.put("createDate",DateUtil.dateToString(new Date(), DateUtil.FORMAT));
+                        List<DjAlreadyRobSingle> darList = djAlreadyRobSingleMapper.selectArr(map);
+                        for (DjRoyaltyDetailsSurface ss : list) {
+                            //判断当月
+                            logger.info("判断当月==================="+ss.getStartSingle());
+                            logger.info("判断当月==================="+darList.size());
+                            logger.info("判断当月==================="+ss.getOverSingle());
 
-                                if (ss.getStartSingle() <= darList.size() && darList.size() <= ss.getOverSingle()) {
-                                    logger.info("两销售一起分配提成---------------------");
-                                    DjRoyaltyMatch djRoyaltyMatch1 = new DjRoyaltyMatch();
-                                    djRoyaltyMatch1.setDataStatus(0);
-                                    djRoyaltyMatch1.setUserId(userId);
-                                    djRoyaltyMatch1.setOrderStatus(0);
-                                    djRoyaltyMatch1.setHouseId(houseDTO.getHouseId());
-                                    djRoyaltyMatch1.setMonthRoyalty((int) (ss.getRoyalty() * 0.4*0.75));
-                                    djRoyaltyMatch1.setMeterRoyalty((int) (ss.getRoyalty() * 0.4*0.75));
-                                    djRoyaltyMatch1.setBranchRoyalty((int) (ss.getRoyalty() * 0.4));
-                                    djRoyaltyMatch1.setArrRoyalty(ss.getRoyalty());
-                                    djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
+                            if (ss.getStartSingle() <= darList.size() && darList.size() <= ss.getOverSingle()) {
+                                logger.info("两销售一起分配提成---------------------");
+                                DjRoyaltyMatch djRoyaltyMatch1 = new DjRoyaltyMatch();
+                                djRoyaltyMatch1.setDataStatus(0);
+                                djRoyaltyMatch1.setUserId(userId);
+                                djRoyaltyMatch1.setOrderStatus(0);
+                                djRoyaltyMatch1.setHouseId(houseDTO.getHouseId());
+                                djRoyaltyMatch1.setMonthRoyalty((int) (ss.getRoyalty() * 0.4*0.75));
+                                djRoyaltyMatch1.setMeterRoyalty((int) (ss.getRoyalty() * 0.4*0.75));
+                                djRoyaltyMatch1.setBranchRoyalty((int) (ss.getRoyalty() * 0.4));
+                                djRoyaltyMatch1.setArrRoyalty(ss.getRoyalty());
+                                djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
 
-                                    djRoyaltyMatch1 = new DjRoyaltyMatch();
-                                    djRoyaltyMatch1.setDataStatus(0);
-                                    djRoyaltyMatch1.setUserId(userId2);
-                                    djRoyaltyMatch1.setOrderStatus(2);
-                                    djRoyaltyMatch1.setHouseId(houseDTO.getHouseId());
-                                    djRoyaltyMatch1.setMonthRoyalty((int) (ss.getRoyalty() * 0.4*0.75));
-                                    djRoyaltyMatch1.setMeterRoyalty((int) (ss.getRoyalty() * 0.4*0.75));
-                                    djRoyaltyMatch1.setBranchRoyalty((int) (ss.getRoyalty() * 0.4));
-                                    djRoyaltyMatch1.setArrRoyalty(ss.getRoyalty());
-                                    djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
+                                djRoyaltyMatch1 = new DjRoyaltyMatch();
+                                djRoyaltyMatch1.setDataStatus(0);
+                                djRoyaltyMatch1.setUserId(userId2);
+                                djRoyaltyMatch1.setOrderStatus(2);
+                                djRoyaltyMatch1.setHouseId(houseDTO.getHouseId());
+                                djRoyaltyMatch1.setMonthRoyalty((int) (ss.getRoyalty() * 0.4*0.75));
+                                djRoyaltyMatch1.setMeterRoyalty((int) (ss.getRoyalty() * 0.4*0.75));
+                                djRoyaltyMatch1.setBranchRoyalty((int) (ss.getRoyalty() * 0.4));
+                                djRoyaltyMatch1.setArrRoyalty(ss.getRoyalty());
+                                djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
 
-                                    //第一个销售推送消息  获取线索ID
-                                    Example example2 = new Example(Clue.class);
-                                    example2.createCriteria()
-                                            .andEqualTo(Clue.CUS_SERVICE, userId)
-                                            .andEqualTo(Clue.DATA_STATUS, 0)
-                                            .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
-                                    List<Clue> djAlreadyRobSingle1 = clueMapper.selectByExample(example2);
-                                    if(djAlreadyRobSingle1.isEmpty()){
-                                        logger.info("线索id为空==================="+ djAlreadyRobSingle1.get(0).getId());
-                                    }
-                                    //消息推送
-                                    MainUser user = userMapper.selectByPrimaryKey(userId);
-                                    String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
-                                    configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "开工提醒",
-                                            "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url
-                                                    + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle1.get(0).getId(), 1, "4"));
-
-
-                                    //第二个销售推送消息  获取线索ID
-                                    Example example3 = new Example(Clue.class);
-                                    example3.createCriteria()
-                                            .andEqualTo(Clue.CUS_SERVICE, userId2)
-                                            .andEqualTo(Clue.DATA_STATUS, 0)
-                                            .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
-                                    List<Clue> djAlreadyRobSingle2 = clueMapper.selectByExample(example3);
-                                    if(djAlreadyRobSingle2.isEmpty()){
-                                        logger.info("线索id为空==================="+ djAlreadyRobSingle2.get(0).getId());
-                                    }
-                                    //消息推送
-                                    MainUser user1 = userMapper.selectByPrimaryKey(userId2);
-                                    String url1 = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
-                                    configMessageService.addConfigMessage(AppType.SALE, user1.getMemberId(), "开工提醒",
-                                            "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url1
-                                                    + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle2.get(0).getId(), 1, "4"));
-
+                                //第一个销售推送消息  获取线索ID
+                                Example example2 = new Example(Clue.class);
+                                example2.createCriteria()
+                                        .andEqualTo(Clue.CUS_SERVICE, userId)
+                                        .andEqualTo(Clue.DATA_STATUS, 0)
+                                        .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
+                                List<Clue> djAlreadyRobSingle1 = clueMapper.selectByExample(example2);
+                                if(djAlreadyRobSingle1.isEmpty()){
+                                    logger.info("线索id为空==================="+ djAlreadyRobSingle1.get(0).getId());
                                 }
+                                //消息推送
+                                MainUser user = userMapper.selectByPrimaryKey(userId);
+                                String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+                                configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "开工提醒",
+                                        "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url
+                                                + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle1.get(0).getId(), 1, "4"));
+
+
+                                //第二个销售推送消息  获取线索ID
+                                Example example3 = new Example(Clue.class);
+                                example3.createCriteria()
+                                        .andEqualTo(Clue.CUS_SERVICE, userId2)
+                                        .andEqualTo(Clue.DATA_STATUS, 0)
+                                        .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
+                                List<Clue> djAlreadyRobSingle2 = clueMapper.selectByExample(example3);
+                                if(djAlreadyRobSingle2.isEmpty()){
+                                    logger.info("线索id为空==================="+ djAlreadyRobSingle2.get(0).getId());
+                                }
+                                //消息推送
+                                MainUser user1 = userMapper.selectByPrimaryKey(userId2);
+                                String url1 = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+                                configMessageService.addConfigMessage(AppType.SALE, user1.getMemberId(), "开工提醒",
+                                        "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url1
+                                                + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle2.get(0).getId(), 1, "4"));
+
                             }
-                        }else{
-                            //抢单的销售单独分配提成
-                            logger.info("抢单的销售单独分配提成==================="+userId);
-                            logger.info("抢单的销售单独分配提成==================="+houseDTO);
-                            logger.info("抢单的销售单独分配提成==================="+list);
-                            djrHouse(userId,houseDTO.getHouseId(),list);
                         }
                     }else{
                         //抢单的销售单独分配提成
-                        logger.info("抢单的销售单独分配提成1==================="+userId);
-                        logger.info("抢单的销售单独分配提成1==================="+houseDTO);
-                        logger.info("抢单的销售单独分配提成1==================="+list);
+                        logger.info("抢单的销售单独分配提成==================="+userId);
+                        logger.info("抢单的销售单独分配提成==================="+houseDTO);
+                        logger.info("抢单的销售单独分配提成==================="+list);
                         djrHouse(userId,houseDTO.getHouseId(),list);
                     }
+                }else{
+                    //抢单的销售单独分配提成
+                    logger.info("抢单的销售单独分配提成1==================="+userId);
+                    logger.info("抢单的销售单独分配提成1==================="+houseDTO);
+                    logger.info("抢单的销售单独分配提成1==================="+list);
+                    djrHouse(userId,houseDTO.getHouseId(),list);
                 }
+            }
         }
     }
 
