@@ -742,6 +742,7 @@ public class RobService {
                     if(phaseStatus == 1){
                         member.setNickName(clue.getOwername());
                         member.setRemarks(clue.getRemark());
+                        member.setCreateDate(null);
                         member.setMobile(clue.getPhone());
                         member.setId(memberId);
                         iMemberMapper.updateByPrimaryKeySelective(member);
