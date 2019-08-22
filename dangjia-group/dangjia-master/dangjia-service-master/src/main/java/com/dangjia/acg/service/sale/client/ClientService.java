@@ -713,12 +713,27 @@ public class ClientService {
             clueMapper.updateByPrimaryKey(clue);
         } else if (phaseStatus == 1) {
             Customer customer = iCustomerMapper.selectByPrimaryKey(id);
+            Example example=new Example(Clue.class);
+            example.createCriteria().andEqualTo(Clue.MEMBER_ID,customer.getMemberId());
             Clue clue=new Clue();
+            if(clueMapper.selectByExample(example).size()<=0){
+                clue.setStage(customer.getStage());
+                clue.setDataStatus(0);
+                clue.setStoreId(customer.getStoreId());
+                clue.setCusService(customer.getUserId());
+                clue.setClueType(customer.getClueType());
+                clue.setTurnStatus(customer.getTurnStatus());
+                clue.setTips(customer.getTips());
+                clue.setPhaseStatus(1);
+                clue.setCityId(customer.getCityId());
+                clue.setLabelId(customer.getLabelIdArr());
+                clueMapper.insert(clue);
+            }
             clue.setCusService(store.getUserId());
             clue.setCityId(cityId);
             clue.setTurnStatus(1);
             clue.setStoreId(storeId);
-            Example example=new Example(Clue.class);
+            example=new Example(Clue.class);
             example.createCriteria().andEqualTo(Clue.CUS_SERVICE,customer.getUserId())
                     .andEqualTo(Clue.MEMBER_ID,customer.getMemberId());
             clueMapper.updateByExampleSelective(clue,example);

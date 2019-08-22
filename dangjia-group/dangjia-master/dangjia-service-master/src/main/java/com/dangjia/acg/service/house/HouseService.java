@@ -435,6 +435,7 @@ public class HouseService {
     /**
      * WEB确认开工
      */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse startWork(HttpServletRequest request, HouseDTO houseDTO,String userToken) {
 
         if (houseDTO.getDecorationType() >= 3 || houseDTO.getDecorationType() == 0) {
@@ -605,6 +606,7 @@ public class HouseService {
     /**
      * 结算下单提成
      */
+    @Transactional(rollbackFor = Exception.class)
     public void endRoyalty(HouseDTO houseDTO,String userId){
         House house = iHouseMapper.selectByPrimaryKey(houseDTO.getHouseId());
 
@@ -743,6 +745,7 @@ public class HouseService {
         }
     }
 
+    @Transactional(rollbackFor = Exception.class)
     public void djrHouse(String userId,String houseId,List<DjRoyaltyDetailsSurface> list){
         logger.info("111111111111111111111==================="+userId);
         Map<String,Object> map = new HashMap<>();
