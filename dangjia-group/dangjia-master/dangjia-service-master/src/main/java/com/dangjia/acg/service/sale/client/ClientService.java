@@ -215,6 +215,7 @@ public class ClientService {
             clue.setTips("1");
             clue.setPhaseStatus(0);
             clue.setCityId(store.getCityId());
+            clue.setClueType(0);
             if( !CommonUtil.isEmpty(clue.getBuilding())){
                 IntentionHouse intentionHouse = new IntentionHouse();
                 intentionHouse.setClueId(clue.getId());
@@ -252,7 +253,7 @@ public class ClientService {
         ModelingVillage modelingVillage = iModelingVillageMapper.selectByPrimaryKey(villageId);
         if (modelingVillage == null) {
             clue.setClueType(1);
-            clue.setTurnStatus(0);
+            clue.setTurnStatus(1);
             clue.setPhaseStatus(0);
             clue.setCityId(cityId);
             clue.setStage(0);
@@ -267,8 +268,7 @@ public class ClientService {
             clue.setStage(0);
             clue.setDataStatus(0);
             clue.setStoreId(residentialBuilding.getStoreId());
-            clue.setClueType(0);
-            clue.setTurnStatus(0);
+            clue.setTurnStatus(1);
             clue.setCityId(modelingVillage.getCityId());
             clue.setClueType(1);
             clue.setPhaseStatus(0);
@@ -290,8 +290,7 @@ public class ClientService {
         clue.setStage(0);
         clue.setDataStatus(0);
         clue.setStoreId(store.getId());
-        clue.setClueType(0);
-        clue.setTurnStatus(0);
+        clue.setTurnStatus(1);
         clue.setCityId(modelingVillage.getCityId());
         clue.setClueType(1);
         clue.setPhaseStatus(0);

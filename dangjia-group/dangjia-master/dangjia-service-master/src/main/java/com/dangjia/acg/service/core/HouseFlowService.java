@@ -365,7 +365,7 @@ public class HouseFlowService {
                         Date wraprDate = rewardPunishCondition.getEndTime();
                         Date date = new Date();
                         if (date.getTime() < wraprDate.getTime()) {
-                            return ServerResponse.createByErrorMessage("您处于平台处罚期内，" + DateUtil.getDateString(wraprDate.getTime()) + "以后才能抢单,如有疑问请致电400-168-1231！");
+                            return ServerResponse.createByErrorMessage("您处于平台处罚期内，" + DateUtil.getDateString2(wraprDate.getTime()) + "以后才能抢单,如有疑问请致电400-168-1231！");
                         }
                     }
                 }
