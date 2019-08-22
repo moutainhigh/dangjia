@@ -15,6 +15,7 @@ import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.worker.WorkIntegralDTO;
+import com.dangjia.acg.mapper.clue.ClueMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyImageMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
@@ -24,10 +25,12 @@ import com.dangjia.acg.mapper.house.IMaterialRecordMapper;
 import com.dangjia.acg.mapper.house.IModelingVillageMapper;
 import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.mapper.worker.IEvaluateMapper;
 import com.dangjia.acg.mapper.worker.IWorkIntegralMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.basics.Product;
+import com.dangjia.acg.modle.clue.Clue;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.HouseFlowApplyImage;
@@ -35,7 +38,9 @@ import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.MaterialRecord;
 import com.dangjia.acg.modle.house.ModelingVillage;
+import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.modle.worker.Evaluate;
 import com.dangjia.acg.modle.worker.WorkIntegral;
 import com.dangjia.acg.modle.worker.WorkerDetail;
@@ -47,6 +52,7 @@ import com.dangjia.acg.service.house.HouseService;
 import com.dangjia.acg.service.repair.MendOrderService;
 import com.dangjia.acg.service.sale.royalty.RoyaltyService;
 import com.dangjia.acg.util.LocationUtils;
+import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -118,8 +124,10 @@ public class EvaluateService {
     private CraftsmanConstructionService constructionService;
     @Autowired
     private RoyaltyService royaltyService;
-
-
+    @Autowired
+    private ClueMapper clueMapper;
+    @Autowired
+    private UserMapper userMapper;
     /**
      * 获取积分记录
      * @param userToken
@@ -433,6 +441,8 @@ public class EvaluateService {
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse saveEvaluateSupervisor(String userToken,String houseFlowApplyId, String content, int star, boolean isAuto,String onekey) {
         try {
+
+
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
             House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
             if (houseFlowApply.getMemberCheck() == 1 || houseFlowApply.getMemberCheck() == 3) {
@@ -483,6 +493,30 @@ public class EvaluateService {
             temp_para.put("house_name", house.getHouseName());
             temp_para.put("worker_name", workerType.getName());
             JsmsUtil.sendSMS("15675101794", "164425", temp_para);
+
+            Object object = constructionService.getAccessToken(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            AccessToken accessToken = (AccessToken) object;
+            if (CommonUtil.isEmpty(accessToken.getUserId())) {
+                return ServerResponse.createbyUserTokenError();
+            }
+
+            //竣工消息推送
+            //获取线索ID
+            Example example1 = new Example(Clue.class);
+            example1.createCriteria()
+                    .andEqualTo(Clue.CUS_SERVICE, accessToken.getUserId())
+                    .andEqualTo(Clue.DATA_STATUS, 0)
+                    .andEqualTo(Clue.MEMBER_ID, house.getMemberId());
+            List<Clue> djAlreadyRobSingle = clueMapper.selectByExample(example1);
+            MainUser user = userMapper.selectByPrimaryKey(accessToken.getUserId());
+            String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+                configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "竣工提醒",
+                        "您有已竣工的房子【" + house.getHouseName() + "】", 0, url
+                                + Utils.getCustomerDetails(house.getMemberId(), djAlreadyRobSingle.get(0).getId(), 1, "4"));
+
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();

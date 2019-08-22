@@ -28,6 +28,12 @@ public class ClueTalk extends BaseEntity {
     @ApiModelProperty("操作人ID（客服）")
     private String userId;
 
+    @Column(name = "member_id")
+    @Desc(value = "ID（客服）")
+    @ApiModelProperty("ID（客服）")
+    private String memberId;
+
+
     @Column(name = "talk_content")
     @Desc(value = "谈话内容")
     @ApiModelProperty("谈话内容")

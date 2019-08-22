@@ -275,7 +275,17 @@ public class ClientService {
             clue.setCusService(store.getUserId());
             clue.setCrossDomainUserId(accessToken.getUserId());//跨域销售id
             clueMapper.insert(clue);
+
+            //店长推送消息
+            String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+            MainUser user = userMapper.selectByPrimaryKey(store.getUserId());
+            if (user != null && !CommonUtil.isEmpty(user.getMemberId()))
+                configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "分配提醒",
+                        "您收到一个店长分配的客户，请及时跟进。", 0, url
+                                + Utils.getCustomerDetails("", clue.getId(), clue.getPhaseStatus(), "0"));
+
             return ServerResponse.createBySuccessMessage("提交成功");
+
         }
         //转入给对应的销售
         Example example = new Example(StoreUser.class);
@@ -704,6 +714,7 @@ public class ClientService {
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse setTurnOut(String cityId, String storeId, String id, Integer phaseStatus) {
         Store store = iStoreMapper.selectByPrimaryKey(storeId);
+
         if (phaseStatus == 0) {
             Clue clue = clueMapper.selectByPrimaryKey(id);
             clue.setStoreId(storeId);
@@ -711,6 +722,14 @@ public class ClientService {
             clue.setCityId(cityId);
             clue.setTurnStatus(1);
             clueMapper.updateByPrimaryKey(clue);
+
+            //消息推送
+            MainUser user = userMapper.selectByPrimaryKey(store.getUserId());
+            String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+            configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "待分配客户提醒",
+                    "有一个待分配客户["+ clue.getOwername() +"]快去分配给员工吧", 0, url
+                            + Utils.getCustomerDetails("", id, 1, "4"));
+
         } else if (phaseStatus == 1) {
             Customer customer = iCustomerMapper.selectByPrimaryKey(id);
             Example example=new Example(Clue.class);
@@ -742,7 +761,15 @@ public class ClientService {
             customer.setStoreId(storeId);
             customer.setTurnStatus(1);
             iCustomerMapper.updateByPrimaryKey(customer);
+
+            //消息推送
+            MainUser user = userMapper.selectByPrimaryKey(store.getUserId());
+            String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+            configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "待分配客户提醒",
+                    "有一个待分配客户 ["+ clue.getOwername() +"]快去分配给员工吧", 0, url
+                            + Utils.getCustomerDetails(customer.getMemberId(), id, 1, "4"));
         }
+
         return ServerResponse.createBySuccessMessage("操作成功");
     }
 
