@@ -3,6 +3,7 @@ package com.dangjia.acg.service.worker;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.data.ForMasterAPI;
+import com.dangjia.acg.auth.config.RedisSessionDAO;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
@@ -48,6 +49,8 @@ import com.dangjia.acg.service.sale.royalty.RoyaltyService;
 import com.dangjia.acg.util.LocationUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -491,12 +494,16 @@ public class EvaluateService {
     /**
      * 保存业主端对管家对工人评价
      */
+    private static Logger logger = LoggerFactory.getLogger(RedisSessionDAO.class);
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse saveEvaluate(String houseFlowApplyId, String wContent, int wStar
             , String sContent, int sStar, boolean isAuto) {
         try {
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
+            logger.info("houseFlowApply==================="+houseFlowApply);
+            logger.info("houseFlowApply.getHouseId()==================="+houseFlowApply.getHouseId());
             House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
+            logger.info("house==================="+house);
             if (houseFlowApply.getMemberCheck() == 1 || houseFlowApply.getMemberCheck() == 3) {
                 return ServerResponse.createByErrorMessage("重复审核");
             }
