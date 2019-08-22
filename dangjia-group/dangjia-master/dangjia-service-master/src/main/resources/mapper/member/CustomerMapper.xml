@@ -159,7 +159,20 @@
 
 
     <select id="getCustomerGroupBy" resultType="com.dangjia.acg.modle.member.Customer">
-        select * from dj_member_customer mc
+        select
+            mc.id,
+            mc.stage,
+            mc.member_id AS memberId,
+            mc.user_id AS userId,
+            mc.label_id_arr AS labelIdArr,
+            mc.curr_record_id AS currRecordId,
+            mc.remind_record_id AS remindRecordId,
+            mc.create_date AS createDate,
+            mc.modify_date AS modifyDate,
+            mc.phase_status AS phaseStatus,
+            mc.tips,
+            mc.report_date as reportDate
+        from dj_member_customer mc
         inner join dj_clue c
         on mc.member_id=c.member_id
         and c.cus_service=mc.user_id

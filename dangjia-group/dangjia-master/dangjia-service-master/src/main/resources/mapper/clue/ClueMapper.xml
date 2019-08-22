@@ -141,7 +141,7 @@
             <if test="null!=storeId and ''!=storeId">
                 and c.store_id=#{storeId}
             </if>
-            GROUP BY ct.clue_id
+            GROUP BY c.id
             ORDER BY ct.create_date
             <if test="null!=time and ''!=time">
                 desc
@@ -164,12 +164,12 @@
                 and mc.store_id=#{storeId}
             </if>
             <if test="null!=label and ''!=label">
-                and label_id like CONCAT('%',#{label},'%')
+                and mc.label_id like CONCAT('%',#{label},'%')
             </if>
             <if test="null!=searchKey and ''!=searchKey">
                 and CONCAT(m.nick_name,c.owername,c.phone) like CONCAT('%',#{searchKey},'%')
             </if>
-            GROUP BY ct.clue_id
+            GROUP BY c.id
             ORDER BY ct.create_date
             <if test="null!=time and ''!=time">
                 desc
