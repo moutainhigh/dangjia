@@ -164,7 +164,7 @@
                 and mc.store_id=#{storeId}
             </if>
             <if test="null!=label and ''!=label">
-                and label_id like CONCAT('%',#{label},'%')
+                and mc.label_id like CONCAT('%',#{label},'%')
             </if>
             <if test="null!=searchKey and ''!=searchKey">
                 and CONCAT(m.nick_name,c.owername,c.phone) like CONCAT('%',#{searchKey},'%')

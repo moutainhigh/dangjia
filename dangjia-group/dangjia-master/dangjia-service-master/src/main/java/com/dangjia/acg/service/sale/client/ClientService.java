@@ -744,6 +744,7 @@ public class ClientService {
                 clue.setTurnStatus(customer.getTurnStatus());
                 clue.setTips(customer.getTips());
                 clue.setPhaseStatus(1);
+                clue.setPhone(iMemberMapper.selectByPrimaryKey(customer.getMemberId()).getMobile());
                 clue.setCityId(customer.getCityId());
                 clue.setLabelId(customer.getLabelIdArr());
                 clueMapper.insert(clue);
@@ -752,10 +753,7 @@ public class ClientService {
             clue.setCityId(cityId);
             clue.setTurnStatus(1);
             clue.setStoreId(storeId);
-            example=new Example(Clue.class);
-            example.createCriteria().andEqualTo(Clue.CUS_SERVICE,customer.getUserId())
-                    .andEqualTo(Clue.MEMBER_ID,customer.getMemberId());
-            clueMapper.updateByExampleSelective(clue,example);
+            clueMapper.updateByPrimaryKeySelective(clue);
             customer.setCityId(cityId);
             customer.setUserId(store.getUserId());
             customer.setStoreId(storeId);
