@@ -123,8 +123,13 @@ public class RoyaltyService {
             djRoyaltyMatch1.setOrderStatus(1);
             djRoyaltyMatch1.setUserId(djRoyaltyMatch.getUserId());
             djRoyaltyMatch1.setHouseId(djRoyaltyMatch.getHouseId());
-            djRoyaltyMatch1.setMonthRoyalty((int) (djRoyaltyMatch.getBranchRoyalty()*0.25));
-            djRoyaltyMatch1.setMeterRoyalty((int) (djRoyaltyMatch.getBranchRoyalty()*0.25)+djRoyaltyMatch.getMeterRoyalty());
+            if(djRoyaltyMatch.getBranchRoyalty() != null){
+                djRoyaltyMatch1.setMonthRoyalty((int) (djRoyaltyMatch.getBranchRoyalty()*0.25));
+                djRoyaltyMatch1.setMeterRoyalty((int) (djRoyaltyMatch.getBranchRoyalty()*0.25)+djRoyaltyMatch.getMeterRoyalty());
+            }else{
+                djRoyaltyMatch1.setMonthRoyalty((int) (djRoyaltyMatch.getArrRoyalty()*0.25));
+                djRoyaltyMatch1.setMeterRoyalty((int) (djRoyaltyMatch.getArrRoyalty()*0.25)+djRoyaltyMatch.getMeterRoyalty());
+            }
             djRoyaltyMatch1.setArrRoyalty(djRoyaltyMatch.getArrRoyalty());
             djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
         }

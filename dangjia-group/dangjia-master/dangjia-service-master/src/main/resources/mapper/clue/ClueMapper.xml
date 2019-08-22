@@ -137,6 +137,7 @@
                 <if test="null!=storeId and ''!=storeId">
                     and c.store_id=#{storeId}
                 </if>
+                GROUP BY ct.clue_id
                 ORDER BY ct.create_date
                 <if test="null!=time and ''!=time">
                     desc
@@ -164,6 +165,7 @@
                 <if test="null!=searchKey and ''!=searchKey">
                     and CONCAT(m.nick_name,c.owername,c.phone) like CONCAT('%',#{searchKey},'%')
                 </if>
+                GROUP BY ct.clue_id
                 ORDER BY ct.create_date
                 <if test="null!=time and ''!=time">
                     desc
