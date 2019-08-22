@@ -141,8 +141,9 @@ public class HouseFlowService {
             String workerTypeId = member.getWorkerTypeId();
             /*待抢单*/
             Example example = new Example(HouseFlow.class);
-            example.createCriteria().andEqualTo(HouseFlow.WORK_TYPE, 2).andEqualTo(HouseFlow.WORKER_TYPE_ID, workerTypeId)
+            example.createCriteria().andCondition(" work_type in (2,3) ").andEqualTo(HouseFlow.WORKER_TYPE_ID, workerTypeId)
                     .andEqualTo(HouseFlow.CITY_ID, cityId).andNotEqualTo(HouseFlow.STATE, 2);
+            example.orderBy(HouseFlow.WORK_TYPE);
             List<HouseFlow> hfList = houseFlowMapper.selectByExample(example);
             if (hfList != null)
                 for (HouseFlow houseFlow : hfList) {
@@ -188,6 +189,10 @@ public class HouseFlowService {
                     Member mem = memberMapper.selectByPrimaryKey(house.getMemberId());
                     if (mem == null) {
                         continue;
+                    }
+                    allgrabBean.setButType("0");
+                    if (houseFlow.getWorkType() == 3) {
+                        allgrabBean.setButType("1");
                     }
                     allgrabBean.setWorkerTypeId(workerTypeId);
                     allgrabBean.setHouseFlowId(houseFlow.getId());
