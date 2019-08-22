@@ -440,7 +440,7 @@ public class RobService {
 
                     //查询销售人员输入的房子类型
                     Example example1 = new Example(HouseAddress.class);
-                    example.createCriteria()
+                    example1.createCriteria()
                             .andEqualTo(HouseAddress.HOUSE_ID, to.getHouseId())
                             .andEqualTo(HouseAddress.DATA_STATUS, 0);
 
