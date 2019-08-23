@@ -727,8 +727,8 @@ public class ClientService {
             MainUser user = userMapper.selectByPrimaryKey(store.getUserId());
             String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
             configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "待分配客户提醒",
-                    "有一个待分配客户["+ clue.getOwername() +"]快去分配给员工吧", 0, url
-                            + Utils.getCustomerDetails("", id, 1, "4"));
+                    "有一个待分配客户【"+ clue.getOwername()!=null?clue.getOwername():clue.getPhone() +"】快去分配给员工吧", 0, url
+                            + Utils.getCustomerDetails("", id, 0, "0"));
 
         } else if (phaseStatus == 1) {
             Customer customer = iCustomerMapper.selectByPrimaryKey(id);
