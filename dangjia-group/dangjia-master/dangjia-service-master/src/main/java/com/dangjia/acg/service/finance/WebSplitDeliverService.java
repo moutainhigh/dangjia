@@ -406,6 +406,7 @@ public class WebSplitDeliverService {
             }
             return ServerResponse.createBySuccess("查询成功", mendMaterielsMap);
         } catch (Exception e) {
+            e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }

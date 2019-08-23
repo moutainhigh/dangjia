@@ -642,9 +642,9 @@
             on c.member_id=mc.member_id
             and c.cus_service=mc.user_id
         </if>
-        set c.stage=2,c.cus_service=null
+        set c.stage=2
         <if test="phaseStatus==1">
-            ,mc.stage=2,mc.user_id=null
+            ,mc.stage=2
         </if>
         where 1=1
         <if test="null!=mcId and ''!=mcId">
