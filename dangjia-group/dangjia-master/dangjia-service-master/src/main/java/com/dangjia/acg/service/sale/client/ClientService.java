@@ -749,6 +749,7 @@ public class ClientService {
                 clue.setPhone(iMemberMapper.selectByPrimaryKey(customer.getMemberId()).getMobile());
                 clue.setCityId(customer.getCityId());
                 clue.setLabelId(customer.getLabelIdArr());
+                clue.setMemberId(customer.getMemberId());
                 clueMapper.insert(clue);
             }else {
                 clue=clues.get(0);

@@ -496,8 +496,8 @@
             u.username as name,
             m.head,
             sum(rm.month_royalty) as monthRoyaltys,
-            sum(meter_royalty) as meterRoyaltys,
-            sum(count_arr_royalty) as arrRoyalty
+            sum(rm.month_royalty) as meterRoyaltys,
+            sum(rm.count_arr_royalty) as arrRoyalty
             FROM dj_user u
             INNER JOIN dj_royalty_match rm
             on u.id=rm.user_id
