@@ -651,6 +651,7 @@ public class HouseService {
                         djRoyaltyMatch1.setMeterRoyalty((int) (rds.getRoyalty() * 0.4*0.75));
                         djRoyaltyMatch1.setBranchRoyalty((int) (rds.getRoyalty() * 0.4));
                         djRoyaltyMatch1.setArrRoyalty(rds.getRoyalty());
+                        djRoyaltyMatch1.setCountArrRoyalty(rds.getRoyalty());
                         djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
                         logger.info("订单数量 大于 配置订单数量时处理==================="+ clueList.get(0).getCrossDomainUserId());
                         djRoyaltyMatch1 = new DjRoyaltyMatch();
@@ -662,6 +663,7 @@ public class HouseService {
                         djRoyaltyMatch1.setMeterRoyalty((int) (rds.getRoyalty() * 0.4*0.75));
                         djRoyaltyMatch1.setBranchRoyalty((int) (rds.getRoyalty() * 0.4));
                         djRoyaltyMatch1.setArrRoyalty(rds.getRoyalty());
+                        djRoyaltyMatch1.setCountArrRoyalty(rds.getRoyalty());
                         djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
 
                         //第一个销售推送消息  获取线索ID
@@ -712,6 +714,7 @@ public class HouseService {
                             djRoyaltyMatch1.setMeterRoyalty((int) (ss.getRoyalty() * 0.4*0.75));
                             djRoyaltyMatch1.setBranchRoyalty((int) (ss.getRoyalty() * 0.4));
                             djRoyaltyMatch1.setArrRoyalty(ss.getRoyalty());
+                            djRoyaltyMatch1.setCountArrRoyalty(ss.getRoyalty());
                             djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
                             logger.info("订单数量 在配置范围内时 处理==================="+ clueList.get(0).getCrossDomainUserId());
                             djRoyaltyMatch1 = new DjRoyaltyMatch();
@@ -723,6 +726,7 @@ public class HouseService {
                             djRoyaltyMatch1.setMeterRoyalty((int) (ss.getRoyalty() * 0.4*0.75));
                             djRoyaltyMatch1.setBranchRoyalty((int) (ss.getRoyalty() * 0.4));
                             djRoyaltyMatch1.setArrRoyalty(ss.getRoyalty());
+                            djRoyaltyMatch1.setCountArrRoyalty(ss.getRoyalty());
                             djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
 
                             //第一个销售推送消息  获取线索ID
@@ -813,6 +817,7 @@ public class HouseService {
                             djRoyaltyMatch1.setMeterRoyalty((int) (rds.getRoyalty() * 0.4*0.75));
                             djRoyaltyMatch1.setBranchRoyalty((int) (rds.getRoyalty() * 0.4));
                             djRoyaltyMatch1.setArrRoyalty(rds.getRoyalty());
+                            djRoyaltyMatch1.setCountArrRoyalty(rds.getRoyalty());
                             djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
 
                             djRoyaltyMatch1 = new DjRoyaltyMatch();
@@ -824,6 +829,7 @@ public class HouseService {
                             djRoyaltyMatch1.setMeterRoyalty((int) (rds.getRoyalty() * 0.4*0.75));
                             djRoyaltyMatch1.setBranchRoyalty((int) (rds.getRoyalty() * 0.4));
                             djRoyaltyMatch1.setArrRoyalty(rds.getRoyalty());
+                            djRoyaltyMatch1.setCountArrRoyalty(rds.getRoyalty());
                             djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
 
                             //第一个销售推送消息  获取线索ID
@@ -881,6 +887,7 @@ public class HouseService {
                                     djRoyaltyMatch1.setMeterRoyalty((int) (ss.getRoyalty() * 0.4*0.75));
                                     djRoyaltyMatch1.setBranchRoyalty((int) (ss.getRoyalty() * 0.4));
                                     djRoyaltyMatch1.setArrRoyalty(ss.getRoyalty());
+                                    djRoyaltyMatch1.setCountArrRoyalty(ss.getRoyalty());
                                     djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
 
                                     djRoyaltyMatch1 = new DjRoyaltyMatch();
@@ -892,6 +899,7 @@ public class HouseService {
                                     djRoyaltyMatch1.setMeterRoyalty((int) (ss.getRoyalty() * 0.4*0.75));
                                     djRoyaltyMatch1.setBranchRoyalty((int) (ss.getRoyalty() * 0.4));
                                     djRoyaltyMatch1.setArrRoyalty(ss.getRoyalty());
+                                    djRoyaltyMatch1.setCountArrRoyalty(ss.getRoyalty());
                                     djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
 
                                     //第一个销售推送消息  获取线索ID
@@ -973,6 +981,7 @@ public class HouseService {
             djRoyaltyMatch1.setMonthRoyalty((int) (rds.getRoyalty()*0.75));
             djRoyaltyMatch1.setMeterRoyalty((int) (rds.getRoyalty()*0.75));
             djRoyaltyMatch1.setArrRoyalty(rds.getRoyalty());
+            djRoyaltyMatch1.setCountArrRoyalty(rds.getRoyalty());
             djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
         }else{
             //订单数量 在配置范围内时 处理
@@ -993,6 +1002,7 @@ public class HouseService {
                     djRoyaltyMatch1.setMonthRoyalty((int) (ss.getRoyalty()*0.75));
                     djRoyaltyMatch1.setMeterRoyalty((int) (ss.getRoyalty()*0.75));
                     djRoyaltyMatch1.setArrRoyalty(ss.getRoyalty());
+                    djRoyaltyMatch1.setCountArrRoyalty(ss.getRoyalty());
                     djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
                 }
             }

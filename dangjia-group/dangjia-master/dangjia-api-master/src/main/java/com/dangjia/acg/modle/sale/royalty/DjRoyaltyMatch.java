@@ -50,10 +50,13 @@ public class DjRoyaltyMatch extends BaseEntity {
     private Integer orderStatus;
 
     @Column(name = "branch_royalty")
-    @Desc(value = "全部提成")
-    @ApiModelProperty("全部提成")
+    @Desc(value = "部分提成")
+    @ApiModelProperty("部分提成")
     private Integer branchRoyalty;
 
-
+    @Column(name = "count_arr_royalty")
+    @Desc(value = "结算总提成")
+    @ApiModelProperty("结算总提成")
+    private Integer countArrRoyalty;
 
 }
