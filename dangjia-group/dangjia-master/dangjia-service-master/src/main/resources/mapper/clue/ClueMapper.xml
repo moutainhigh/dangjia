@@ -639,7 +639,7 @@
             and c.cus_service=mc.user_id
         </if>
         set c.stage=2,
-        set c.cus_service=null
+        ,c.cus_service=null
         <if test="phaseStatus==1">
             ,mc.stage=2
             ,mc.user_id=null
