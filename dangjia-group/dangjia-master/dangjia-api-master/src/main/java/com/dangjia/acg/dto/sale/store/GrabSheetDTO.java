@@ -24,4 +24,5 @@ public class GrabSheetDTO {
     private String latitude;//经度
     private String longitude;//纬度
     private Date modifyDate;//抢单时间
+    private Integer isRobStats;
 }

@@ -2,7 +2,6 @@ package com.dangjia.acg.service.sale.rob;
 
 import com.dangjia.acg.auth.config.RedisSessionDAO;
 import com.dangjia.acg.common.constants.SysConfig;
-import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -38,15 +37,12 @@ import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.HouseAddress;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Customer;
-import com.dangjia.acg.modle.member.CustomerRecord;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.sale.royalty.DjAlreadyRobSingle;
 import com.dangjia.acg.modle.sale.royalty.DjRobSingle;
-import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.house.HouseService;
-import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.collections.map.HashedMap;
@@ -682,14 +678,15 @@ public class RobService {
                     if(accessToken != null){
                         clueTalk.setUserId(accessToken.getUserId());
                     }
-//                    String remindTime = customerRecDTO.getRemindTime();
-//                    Date date = DateUtil.toDate(remindTime);
                     if(CommonUtil.isEmpty(customerRecDTO.getRemindTime())){
                         clueTalk.setRemindTime(null);
                     }else{
                         clueTalk.setRemindTime(customerRecDTO.getRemindTime());
                     }
 
+                    if(null != customerRecDTO.getMemberId()){
+                        clueTalk.setMemberId(customerRecDTO.getMemberId());
+                    }
                     clueTalk.setClueId(customerRecDTO.getClueId());
                     clueTalk.setTalkContent(customerRecDTO.getDescribes());
                     clueTalk.setDataStatus(0);
@@ -714,18 +711,19 @@ public class RobService {
     }
 
     public void remindTime() {
-        String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
-        Example example = new Example(CustomerRecord.class);
-        example.createCriteria().andCondition(" DATE_FORMAT(remind_time, '%Y-%m-%d %I:%i')= '"
-                + DateUtil.dateToString(new Date(), DateUtil.FORMAT11) + "' ");
-        List<CustomerRecord> customerRecords = iCustomerRecordMapper.selectByExample(example);
-        for (CustomerRecord customerRecord : customerRecords) {
-            MainUser u = userMapper.selectByPrimaryKey(customerRecord.getUserId());
-            if (u != null && !CommonUtil.isEmpty(u.getMemberId()))
-                configMessageService.addConfigMessage(AppType.SALE, u.getMemberId(), "待分配客户提醒",
-                        "有一个待分配客户，快去分配给员工吧。", 0, url
-                                + Utils.getCustomerDetails(customerRecord.getMemberId(), "", 1, "1"));
-        }
+//        String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+//        Example example = new Example(ClueTalk.class);
+//        example.createCriteria().andCondition(" DATE_FORMAT(remind_time, '%Y-%m-%d %I:%i')= '"
+//                + DateUtil.dateToString(new Date(), DateUtil.FORMAT11) + "' ");
+//        List<ClueTalk> customerRecords = clueTalkMapper.selectByExample(example);
+//
+//        for (ClueTalk customerRecord : customerRecords) {
+//            MainUser u = userMapper.selectByPrimaryKey(customerRecord.getUserId());
+//            if (u != null && !CommonUtil.isEmpty(u.getMemberId()))
+//                configMessageService.addConfigMessage(AppType.SALE, u.getMemberId(), "沟通记录提示",
+//                        "沟通记录的提醒时间到了，请及时跟进。", 0, url
+//                                + Utils.getCustomerDetails(customerRecord.getMemberId(), customerRecord.getClueId(), 1, "1"));
+//        }
     }
 
 

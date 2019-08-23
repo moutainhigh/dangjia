@@ -264,7 +264,7 @@ public class MemberService {
     private ServerResponse setAccessToken(Member member, Integer userRole) {
         int memberType = -1;
         MainUser mainUser = userMapper.findUserByMobile(member.getMobile());
-        if (mainUser != null && CommonUtil.isEmpty(mainUser.getMemberId())) {
+        if (mainUser != null) {
             //插入MemberId
             userMapper.insertMemberId(member.getMobile());
         }
