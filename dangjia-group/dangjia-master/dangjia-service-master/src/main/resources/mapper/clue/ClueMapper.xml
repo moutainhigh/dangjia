@@ -312,6 +312,7 @@
         on m.id=mc.member_id
         WHERE mc.phase_status=1
         and c.phase_status=1
+        and h.data_status = 0
         <if test="null!=userId and ''!=userId">
             and mc.user_id=#{userId}
         </if>
@@ -637,9 +638,11 @@
             on c.member_id=mc.member_id
             and c.cus_service=mc.user_id
         </if>
-        set c.stage=2
+        set c.stage=2,
+        set c.cus_service=null
         <if test="phaseStatus==1">
             ,mc.stage=2
+            ,mc.user_id=null
         </if>
         where 1=1
         <if test="null!=mcId and ''!=mcId">
