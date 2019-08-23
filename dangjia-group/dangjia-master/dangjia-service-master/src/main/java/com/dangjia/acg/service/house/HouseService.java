@@ -707,6 +707,22 @@ public class HouseService {
                                     + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle1.get(0).getId(), 1, "4"));
 
 
+                        //第二个销售推送消息  获取线索ID
+                        Example example3 = new Example(Clue.class);
+                        example3.createCriteria()
+                                .andEqualTo(Clue.CUS_SERVICE, clueList.get(0).getCrossDomainUserId())
+                                .andEqualTo(Clue.DATA_STATUS, 0)
+                                .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
+                        List<Clue> djAlreadyRobSingle2 = clueMapper.selectByExample(example3);
+                        if(djAlreadyRobSingle2.isEmpty()){
+                            logger.info("线索id为空==================="+ djAlreadyRobSingle2.get(0).getId());
+                        }
+                        //消息推送
+                        MainUser user1 = userMapper.selectByPrimaryKey(clueList.get(0).getCrossDomainUserId());
+                        String url1 = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+                        configMessageService.addConfigMessage(AppType.SALE, user1.getMemberId(), "开工提醒",
+                                "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url1
+                                        + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle2.get(0).getId(), 1, "4"));
                     //第二个销售推送消息  获取线索ID
                     Example example3 = new Example(Clue.class);
                     example3.createCriteria()
