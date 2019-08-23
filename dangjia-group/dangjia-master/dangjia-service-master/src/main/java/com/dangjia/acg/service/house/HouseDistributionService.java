@@ -131,8 +131,10 @@ public class HouseDistributionService {
             City city=iCityMapper.selectByPrimaryKey(cityId);
             houseDistribution.setId(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
             houseDistribution.setHead(user.getHead());
-            houseDistribution.setNickname(user.getNickName());
-            houseDistribution.setPhone(user.getMobile());
+            if(CommonUtil.isEmpty(houseDistribution.getNickname())){
+                houseDistribution.setNickname(user.getNickName());
+                houseDistribution.setPhone(user.getMobile());
+            }
             houseDistribution.setCity(city.getName());
             houseDistribution.setCityId(cityId);
             houseDistribution.setCityName(city.getName());
