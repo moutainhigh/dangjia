@@ -22,4 +22,7 @@
         house_id = #{houseId}
     </update>
 
+
+
+
 </mapper>

@@ -13,5 +13,12 @@
 
 
 
+    <!--查询提出配置最大单数-->
+    <select id="selectOverSingle" resultType="com.dangjia.acg.modle.sale.royalty.DjRoyaltyDetailsSurface">
+        select
+        max(over_single) as overSingle,
+        royalty
+        from dj_royalty_details_surface
+    </select>
 
 </mapper>
