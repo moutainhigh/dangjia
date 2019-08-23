@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.house.IHouseDistributionConfigMapper">
+
+    <select id="getHouseDistributionConfigs" resultType="com.dangjia.acg.modle.house.HouseDistributionConfig" >
+       SELECT
+            dc.id,
+            dc.villages AS villages,
+            GROUP_CONCAT(v.`name`) AS villagesName,
+            dc.price AS price,
+            dc.create_date AS createDate,
+            dc.modify_date AS modifyDate
+        FROM
+            dj_house_distribution_config dc
+        INNER JOIN dj_house_modeling_village v ON FIND_IN_SET(v.id, dc.villages)
+        GROUP BY
+            dc.id
+
+    </select>
+</mapper>
+
