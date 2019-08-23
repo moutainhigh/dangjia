@@ -495,15 +495,19 @@
         select
             u.username as name,
             m.head,
-            rm.month_royalty as monthRoyaltys,
-            meter_royalty as meterRoyaltys,
-            arr_royalty as arrRoyalty
+            sum(rm.month_royalty) as monthRoyaltys,
+            sum(meter_royalty) as meterRoyaltys,
+            sum(count_arr_royalty) as arrRoyalty
             FROM dj_user u
             INNER JOIN dj_royalty_match rm
             on u.id=rm.user_id
             INNER JOIN dj_member m
             on u.member_id=m.id
-        where rm.house_id=#{houseId}
+        where rm.house_id in
+        <foreach collection="houseIds" index="index" item="item"
+                 separator="," open="(" close=")">
+            #{item}
+        </foreach>
         and rm.user_id=#{userId}
     </select>
 
@@ -638,11 +642,9 @@
             on c.member_id=mc.member_id
             and c.cus_service=mc.user_id
         </if>
-        set c.stage=2,
-        ,c.cus_service=null
+        set c.stage=2
         <if test="phaseStatus==1">
             ,mc.stage=2
-            ,mc.user_id=null
         </if>
         where 1=1
         <if test="null!=mcId and ''!=mcId">
