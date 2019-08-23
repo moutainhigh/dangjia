@@ -1016,6 +1016,9 @@ public class HouseService {
                     //iHouseMapper.deleteByPrimaryKey(house);
                     house.setDataStatus(1);
                     iHouseMapper.updateByPrimaryKeySelective(house);
+                    DjAlreadyRobSingle djAlreadyRobSingle=new DjAlreadyRobSingle();
+                    djAlreadyRobSingle.setHouseId(house.getHouseId());
+                    djAlreadyRobSingleMapper.delete(djAlreadyRobSingle);
                     Customer customer = new Customer();
                     customer.setId(null);
                     customer.setStage(1);

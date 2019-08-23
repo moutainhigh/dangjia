@@ -159,8 +159,8 @@
         drm.user_id AS userId,
         drm.house_id AS houseId,
         SUM(drm.month_royalty )AS monthRoyalty,
-        SUM(drm.meter_royalty )AS meterRoyalty,
-        SUM(drm.arr_royalty )AS arrRoyalty,
+        SUM(drm.month_royalty )AS meterRoyalty,
+        SUM(drm.month_royalty )AS arrRoyalty,
         count(drm.id) as singleNumber,
         u.username as username,
         smt.target_number as targetNumber
