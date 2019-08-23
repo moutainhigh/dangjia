@@ -3,9 +3,11 @@ package com.dangjia.acg.service.finance;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.deliver.SupplierDeliverDTO;
@@ -13,13 +15,18 @@ import com.dangjia.acg.dto.finance.WebSplitDeliverItemDTO;
 import com.dangjia.acg.dto.receipt.ReceiptDTO;
 import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
 import com.dangjia.acg.mapper.deliver.ISplitDeliverMapper;
+import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.receipt.IReceiptMapper;
 import com.dangjia.acg.mapper.repair.IMendDeliverMapper;
+import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
+import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.receipt.Receipt;
 import com.dangjia.acg.modle.repair.MendDeliver;
 import com.dangjia.acg.modle.repair.MendMateriel;
+import com.dangjia.acg.modle.repair.MendOrder;
+import com.dangjia.acg.modle.sup.SupplierProduct;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -28,10 +35,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * ysl
@@ -45,10 +49,15 @@ public class WebSplitDeliverService {
     @Autowired
     private IMendDeliverMapper iMendDeliverMapper;
     @Autowired
+    private IMendOrderMapper mendOrderMapper;
+    @Autowired
     private IReceiptMapper iReceiptMapper;
+    @Autowired
+    private IHouseMapper houseMapper;
     @Autowired
     private IOrderSplitItemMapper iOrderSplitItemMapper;
 
+    private ForMasterAPI forMasterAPI;
     @Autowired
     private ConfigUtil configUtil;
     /**
@@ -374,11 +383,28 @@ public class WebSplitDeliverService {
     public ServerResponse mendDeliverDetail(String id) {
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            MendDeliver mendDeliver=iMendDeliverMapper.selectByPrimaryKey(id);
+            MendOrder mendOrder=mendOrderMapper.selectByPrimaryKey(mendDeliver.getMendOrderId());
+
+            House house = houseMapper.selectByPrimaryKey(mendDeliver.getHouseId());
             List<MendMateriel> mendMateriels = iMendDeliverMapper.mendDeliverDetail(id);
+            List<Map> mendMaterielsMap = new ArrayList<>();
             for (MendMateriel mendMateriel : mendMateriels) {
                 mendMateriel.setImage(address+mendMateriel.getImage());
+                //如果是工匠退 ，保证实际字段不为空
+                if(mendOrder.getType()==2){
+                    mendMateriel.setActualCount(mendMateriel.getActualCount()==null?0d:mendMateriel.getActualCount());
+                    mendMateriel.setActualPrice(mendMateriel.getActualPrice()==null?0d:mendMateriel.getActualPrice());
+                }else{
+                    mendMateriel.setActualCount(null);
+                    mendMateriel.setActualPrice(null);
+                }
+                Map map= BeanUtils.beanToMap(mendMateriel);
+                SupplierProduct supplierProduct = forMasterAPI.getSupplierProduct(house.getCityId(), mendDeliver.getSupplierId(), mendMateriel.getProductId());
+                map.put("supCost",supplierProduct.getPrice());
+                mendMaterielsMap.add(map);
             }
-            return ServerResponse.createBySuccess("查询成功", mendMateriels);
+            return ServerResponse.createBySuccess("查询成功", mendMaterielsMap);
         } catch (Exception e) {
             return ServerResponse.createByErrorMessage("查询失败");
         }
