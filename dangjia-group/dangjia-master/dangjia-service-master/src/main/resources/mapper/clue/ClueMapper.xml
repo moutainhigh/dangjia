@@ -187,7 +187,7 @@
           <if test="type==''">
               c.id as clueId,
               mc.id as mcId,
-              if(m.nick_name is not null,m.nick_name,c.owername) as name,
+              if(m.nick_name is not null and m.nick_name!="",m.nick_name,c.owername) as name,
               c.phone,
               c.modify_date as modifyDate,
               c.cus_service as userId,
@@ -205,7 +205,7 @@
               h.create_date as createDate,
               mc.modify_date as modifyDate,
               h.completed_date as completedDate,
-              CONCAT(IFNULL(h.residential,'*'),IFNULL(h.building,'*栋'),IFNULL(h.unit,'*单元'),IFNULL(h.number,'*号')) as houseName,
+              CONCAT(IFNULL(h.residential,'*'),IFNULL(CONCAT(h.building,'栋'),'*栋'),IFNULL(CONCAT(h.unit,'单元'),'*单元'),IFNULL(CONCAT(h.number,'号'),'*号')) as houseName,
               c.cus_service as userId,
               c.phase_status as phaseStatus
           </if>
@@ -572,7 +572,7 @@
         and c.tips = 1
         UNION
         SELECT
-        if(m.name is not null,m.nick_name,m.name) as name,
+        if(m.name is not null and m.name!="",m.name,m.nick_name) as name,
         m.mobile AS phone,
         mc.modify_date AS modifyDate,
         mc.create_date AS createDate,
