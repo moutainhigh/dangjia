@@ -398,6 +398,8 @@ public class RobService {
             }
 
             List<UserAchievementDTO> uadto=new ArrayList<>();
+            Map<String,Object> parmMap=new HashedMap();
+            List<String> houseIds=new ArrayList<>();
             if (!CommonUtil.isEmpty(robInfoDTO)) {
                 for (RobInfoDTO to : robInfoDTO) {
                     //查询大管家信息
@@ -464,16 +466,20 @@ public class RobService {
                             }
                         }
                     }
-                    Map<String,Object> parmMap=new HashedMap();
+
                     parmMap.put("userId",to.getCusService());
-                    parmMap.put("houseId",to.getHouseId());
-                    //查询业绩
-                    List<UserAchievementDTO> userAchievementDTOS = clueMapper.queryUserAchievementInFo(parmMap);
-                    for (UserAchievementDTO userAchievementDTO : userAchievementDTOS) {
-                        userAchievementDTO.setHead(imageAddress+userAchievementDTO.getHead());
-                    }
-                    uadto.addAll(userAchievementDTOS);
+                    houseIds.add(to.getHouseId());
+                    logger.info("userId================="+to.getCusService());
                 }
+                logger.info("houseIds================="+houseIds);
+                parmMap.put("houseIds",houseIds);
+                logger.info("parmMap================="+parmMap);
+                //查询业绩
+                List<UserAchievementDTO> userAchievementDTOS = clueMapper.queryUserAchievementInFo(parmMap);
+                for (UserAchievementDTO userAchievementDTO : userAchievementDTOS) {
+                    userAchievementDTO.setHead(imageAddress+userAchievementDTO.getHead());
+                }
+                uadto.addAll(userAchievementDTOS);
             }
 
             robArrInFoDTO.setUserInFo(uadto);

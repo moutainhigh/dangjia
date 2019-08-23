@@ -733,9 +733,11 @@ public class ClientService {
         } else if (phaseStatus == 1) {
             Customer customer = iCustomerMapper.selectByPrimaryKey(id);
             Example example=new Example(Clue.class);
-            example.createCriteria().andEqualTo(Clue.MEMBER_ID,customer.getMemberId());
+            example.createCriteria().andEqualTo(Clue.MEMBER_ID,customer.getMemberId())
+                    .andEqualTo(Clue.CUS_SERVICE,customer.getUserId());
             Clue clue=new Clue();
-            if(clueMapper.selectByExample(example).size()<=0){
+            List<Clue> clues = clueMapper.selectByExample(example);
+            if(clues.size()<=0){
                 clue.setStage(customer.getStage());
                 clue.setDataStatus(0);
                 clue.setStoreId(customer.getStoreId());
@@ -748,6 +750,8 @@ public class ClientService {
                 clue.setCityId(customer.getCityId());
                 clue.setLabelId(customer.getLabelIdArr());
                 clueMapper.insert(clue);
+            }else {
+                clue=clues.get(0);
             }
             clue.setCusService(store.getUserId());
             clue.setCityId(cityId);
@@ -759,12 +763,11 @@ public class ClientService {
             customer.setStoreId(storeId);
             customer.setTurnStatus(1);
             iCustomerMapper.updateByPrimaryKey(customer);
-
             //消息推送
             MainUser user = userMapper.selectByPrimaryKey(store.getUserId());
             String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
             configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "待分配客户提醒",
-                    "有一个待分配客户 ["+ clue.getOwername() +"]快去分配给员工吧", 0, url
+                    "有一个待分配客户 【"+ clue.getOwername()!=null?clue.getOwername():iMemberMapper.selectByPrimaryKey(customer.getMemberId()).getNickName() +"】快去分配给员工吧", 0, url
                             + Utils.getCustomerDetails(customer.getMemberId(), id, 1, "4"));
         }
 
