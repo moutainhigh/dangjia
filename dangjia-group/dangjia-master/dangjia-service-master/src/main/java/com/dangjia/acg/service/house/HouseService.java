@@ -651,6 +651,7 @@ public class HouseService {
                     djRoyaltyMatch1.setMeterRoyalty((int) (rds.getRoyalty() * 0.4*0.75));
                     djRoyaltyMatch1.setBranchRoyalty((int) (rds.getRoyalty() * 0.4));
                     djRoyaltyMatch1.setArrRoyalty(rds.getRoyalty());
+                    djRoyaltyMatch1.setCountArrRoyalty(rds.getRoyalty());
                     djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
                     logger.info("订单数量 大于 配置订单数量时处理==================="+ clueList.get(0).getCrossDomainUserId());
                     djRoyaltyMatch1 = new DjRoyaltyMatch();
@@ -662,32 +663,8 @@ public class HouseService {
                     djRoyaltyMatch1.setMeterRoyalty((int) (rds.getRoyalty() * 0.4*0.75));
                     djRoyaltyMatch1.setBranchRoyalty((int) (rds.getRoyalty() * 0.4));
                     djRoyaltyMatch1.setArrRoyalty(rds.getRoyalty());
+                    djRoyaltyMatch1.setCountArrRoyalty(rds.getRoyalty());
                     djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
-                        //订单数量 大于 配置订单数量时处理
-                        logger.info("订单数量 大于 配置订单数量时处理==================="+ userId);
-                        DjRoyaltyMatch djRoyaltyMatch1 = new DjRoyaltyMatch();
-                        djRoyaltyMatch1.setDataStatus(0);
-                        djRoyaltyMatch1.setUserId(userId);
-                        djRoyaltyMatch1.setOrderStatus(0);
-                        djRoyaltyMatch1.setHouseId(houseDTO.getHouseId());
-                        djRoyaltyMatch1.setMonthRoyalty((int) (rds.getRoyalty() * 0.4*0.75));
-                        djRoyaltyMatch1.setMeterRoyalty((int) (rds.getRoyalty() * 0.4*0.75));
-                        djRoyaltyMatch1.setBranchRoyalty((int) (rds.getRoyalty() * 0.4));
-                        djRoyaltyMatch1.setArrRoyalty(rds.getRoyalty());
-                        djRoyaltyMatch1.setCountArrRoyalty(rds.getRoyalty());
-                        djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
-                        logger.info("订单数量 大于 配置订单数量时处理==================="+ clueList.get(0).getCrossDomainUserId());
-                        djRoyaltyMatch1 = new DjRoyaltyMatch();
-                        djRoyaltyMatch1.setDataStatus(0);
-                        djRoyaltyMatch1.setUserId(clueList.get(0).getCrossDomainUserId());
-                        djRoyaltyMatch1.setOrderStatus(2);
-                        djRoyaltyMatch1.setHouseId(houseDTO.getHouseId());
-                        djRoyaltyMatch1.setMonthRoyalty((int) (rds.getRoyalty() * 0.4*0.75));
-                        djRoyaltyMatch1.setMeterRoyalty((int) (rds.getRoyalty() * 0.4*0.75));
-                        djRoyaltyMatch1.setBranchRoyalty((int) (rds.getRoyalty() * 0.4));
-                        djRoyaltyMatch1.setArrRoyalty(rds.getRoyalty());
-                        djRoyaltyMatch1.setCountArrRoyalty(rds.getRoyalty());
-                        djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
 
                     //第一个销售推送消息  获取线索ID
                     Example example2 = new Example(Clue.class);
@@ -706,23 +683,6 @@ public class HouseService {
                             "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url
                                     + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle1.get(0).getId(), 1, "4"));
 
-
-                        //第二个销售推送消息  获取线索ID
-                        Example example3 = new Example(Clue.class);
-                        example3.createCriteria()
-                                .andEqualTo(Clue.CUS_SERVICE, clueList.get(0).getCrossDomainUserId())
-                                .andEqualTo(Clue.DATA_STATUS, 0)
-                                .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
-                        List<Clue> djAlreadyRobSingle2 = clueMapper.selectByExample(example3);
-                        if(djAlreadyRobSingle2.isEmpty()){
-                            logger.info("线索id为空==================="+ djAlreadyRobSingle2.get(0).getId());
-                        }
-                        //消息推送
-                        MainUser user1 = userMapper.selectByPrimaryKey(clueList.get(0).getCrossDomainUserId());
-                        String url1 = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
-                        configMessageService.addConfigMessage(AppType.SALE, user1.getMemberId(), "开工提醒",
-                                "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url1
-                                        + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle2.get(0).getId(), 1, "4"));
                     //第二个销售推送消息  获取线索ID
                     Example example3 = new Example(Clue.class);
                     example3.createCriteria()
