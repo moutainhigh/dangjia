@@ -223,6 +223,11 @@ public class Member extends BaseEntity {
     @ApiModelProperty("注册时会员策略 1=业主  2=工匠  3=供应商  4=其他")
     private String policyId;//会员策略
 
+    @Column(name = "styles")
+    @Desc(value = "设计师装修风格,ID")
+    @ApiModelProperty("设计师装修风格,ID")
+    private String styles;// 手机
+
     //所有图片字段加入域名和端口，形成全路径
     public void initPath(String address) {
         this.qrcode = StringUtils.isEmpty(this.qrcode) ? null : address + this.qrcode;//二维码

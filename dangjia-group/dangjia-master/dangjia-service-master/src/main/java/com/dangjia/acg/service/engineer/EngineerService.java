@@ -13,8 +13,10 @@ import com.dangjia.acg.common.util.excel.ExportExcel;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.engineer.ArtisanDTO;
 import com.dangjia.acg.dto.house.WareDTO;
+import com.dangjia.acg.dto.label.OptionalLabelDTO;
 import com.dangjia.acg.dto.repair.RepairMendDTO;
 import com.dangjia.acg.mapper.core.*;
+import com.dangjia.acg.mapper.design.IHouseStyleTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.matter.IWorkerDisclosureMapper;
@@ -24,8 +26,10 @@ import com.dangjia.acg.mapper.worker.IInsuranceMapper;
 import com.dangjia.acg.mapper.worker.IRewardPunishConditionMapper;
 import com.dangjia.acg.mapper.worker.IRewardPunishRecordMapper;
 import com.dangjia.acg.modle.core.*;
+import com.dangjia.acg.modle.design.HouseStyleType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
+import com.dangjia.acg.modle.label.OptionalLabel;
 import com.dangjia.acg.modle.matter.WorkerDisclosure;
 import com.dangjia.acg.modle.matter.WorkerEveryday;
 import com.dangjia.acg.modle.member.Member;
@@ -90,7 +94,7 @@ public class EngineerService {
     private IWorkerDisclosureMapper iWorkerDisclosureMapper;
 
     @Autowired
-    private RedisClient redisClient;//缓存
+    private IHouseStyleTypeMapper houseStyleTypeMapper;
 
     /**
      * 已支付换工匠
@@ -672,6 +676,50 @@ public class EngineerService {
     }
 
     /**
+     * 修改设计师绑定风格
+     */
+    public ServerResponse setMemberStyle(Member member) {
+        try {
+            Member srcMember = memberMapper.selectByPrimaryKey(member.getId());
+            srcMember.setStyles(member.getStyles());
+            memberMapper.updateByPrimaryKeySelective(srcMember);
+            return ServerResponse.createBySuccessMessage("保存成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("操作失败");
+        }
+    }
+    /**
+     * 设计师风格详情
+     */
+    public ServerResponse getMemberStyles(HttpServletRequest request, String mamberId) {
+        try {
+            Member member = memberMapper.selectByPrimaryKey(mamberId);
+            List<HouseStyleType> fieldValues = new ArrayList<>();
+            List<HouseStyleType> optionalLabels = houseStyleTypeMapper.selectAll();
+            for (HouseStyleType label : optionalLabels) {
+                HouseStyleType optionalLabelDTO=new HouseStyleType();
+                optionalLabelDTO.setId(label.getId());
+                optionalLabelDTO.setName(label.getName());
+                optionalLabelDTO.setDataStatus(1);
+                if(!CommonUtil.isEmpty(member.getStyles())){
+                    String[] optionalStyles=member.getStyles().split(",");
+                    for (String s : optionalStyles) {
+                        if(s.equals(label.getId())) {
+                            optionalLabelDTO.setDataStatus(0);
+                            break;
+                        }
+                    }
+                }
+                fieldValues.add(optionalLabelDTO);
+            }
+            return ServerResponse.createBySuccess("查询成功", fieldValues);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("系统出错,获取数据失败");
+        }
+    }
+    /**
      * 工匠列表
      */
     public ServerResponse artisanList(String cityId, String name, String workerTypeId, String type, String checkType, PageDTO pageDTO) {
@@ -688,9 +736,11 @@ public class EngineerService {
                 artisanDTO.setId(member.getId());
                 artisanDTO.setName(member.getName());
                 artisanDTO.setMobile(member.getMobile());
+                artisanDTO.setStyles(member.getStyles());
                 WorkerType workerType = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
                 if (workerType != null) {
                     artisanDTO.setWorkerTypeName(workerType.getName());
+                    artisanDTO.setWorkerType(workerType.getType());
                 }
                 artisanDTO.setCreateDate(member.getCreateDate());
                 artisanDTO.setInviteNum(member.getInviteNum());

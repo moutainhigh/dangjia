@@ -416,8 +416,8 @@ public class RobService {
                             logger.info("wtd=============================="+ wtd);
                             logger.info("wtd.get(0).getType()=============================="+ wtd.get(0).getType());
                             logger.info("wtd.get(0).getWorkerTypeId()=============================="+ wtd.get(0).getWorkSteta());
-                            logger.info("wtd.get(0).getType()=============================="+ wtd.get(1).getType());
-                            logger.info("wtd.get(0).getWorkerTypeId()=============================="+ wtd.get(1).getWorkSteta());
+                            logger.info("wtd.get(1).getType()=============================="+ wtd.get(1).getType());
+                            logger.info("wtd.get(1).getWorkerTypeId()=============================="+ wtd.get(1).getWorkSteta());
                             if(wtd.size() > 0){
                                 workerTypeDTO.setType(wtd.get(0).getType());
                                 workerTypeDTO.setWorkSteta(wtd.get(0).getWorkSteta());
@@ -428,8 +428,10 @@ public class RobService {
                                 if(wtd.size() > 1){
                                     workerTypeDTO.setUpType(wtd.get(1).getType());
                                     workerTypeDTO.setUpWorkSteta(wtd.get(1).getWorkSteta());
-                                    workerTypeDTO.setType(wtd.get(1).getType());
-                                    workerTypeDTO.setWorkSteta(wtd.get(1).getWorkSteta());
+
+//                                    workerTypeDTO.setType(wtd.get(1).getType());
+//                                    workerTypeDTO.setWorkSteta(wtd.get(1).getWorkSteta());
+
                                     if(wtd.get(1).getWorkSteta().equals("0")){
                                         workerTypeDTO.setType(3);
                                         workerTypeDTO.setWorkSteta("0");

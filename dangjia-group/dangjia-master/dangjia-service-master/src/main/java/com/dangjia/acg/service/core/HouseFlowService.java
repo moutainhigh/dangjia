@@ -395,7 +395,7 @@ public class HouseFlowService {
                 //持单数
                 long num = houseWorkerMapper.grabControl(member.getId());//查询未完工工地
                 WorkerType wt = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
-                if (member.getWorkerType() != 7 && num >= wt.getMethods()) {
+                if (wt.getMethods()>0 && member.getWorkerType() != 7 && num >= wt.getMethods()) {
                     return ServerResponse.createByErrorMessage("您有工地还未完工,暂不能抢单！");
                 }
 
