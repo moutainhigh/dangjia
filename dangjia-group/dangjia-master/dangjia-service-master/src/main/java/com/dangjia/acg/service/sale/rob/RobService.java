@@ -413,26 +413,22 @@ public class RobService {
                         if (null != workerTypeDTO) {
                             workerTypeDTO.setHead(imageAddress + workerTypeDTO.getHead());
                             List<WorkerTypeDTO> wtd = iMemberLabelMapper.queryType(to.getHouseId());
+                            logger.info("wtd=============================="+ wtd);
+                            logger.info("wtd.get(0).getType()=============================="+ wtd.get(0).getType());
+                            logger.info("wtd.get(0).getWorkerTypeId()=============================="+ wtd.get(0).getWorkSteta());
+                            logger.info("wtd.get(0).getType()=============================="+ wtd.get(1).getType());
+                            logger.info("wtd.get(0).getWorkerTypeId()=============================="+ wtd.get(1).getWorkSteta());
                             if(wtd.size() > 0){
                                 workerTypeDTO.setType(wtd.get(0).getType());
-                                Map<String,Object> map1 = new HashMap<>();
-                                map1.put("houseId",to.getHouseId());
-                                map1.put("workerTypeId",wtd.get(0).getWorkerTypeId());
-                                map1.put("workerType",wtd.get(0).getType());
-                                String wtd2 = iMemberLabelMapper.queryWorkSteta(map1);
-                                if(wtd2.equals("0")){
+                                workerTypeDTO.setWorkSteta(wtd.get(0).getWorkSteta());
+                                if(wtd.get(0).getWorkSteta().equals("0")){
                                     workerTypeDTO.setType(3);
                                 }
-                                workerTypeDTO.setWorkSteta(wtd2);
+
                                 if(wtd.size() > 1){
                                     workerTypeDTO.setUpType(wtd.get(1).getType());
-                                    Map<String,Object> map2 = new HashMap<>();
-                                    map2.put("houseId",to.getHouseId());
-                                    map2.put("workerTypeId",wtd.get(1).getWorkerTypeId());
-                                    map2.put("workerType",wtd.get(1).getType());
-                                    String wtd3 = iMemberLabelMapper.queryWorkSteta(map1);
-                                    workerTypeDTO.setUpWorkSteta(wtd3);
-                                    if(wtd3.equals("0")  && wtd2.equals("0")){
+                                    workerTypeDTO.setUpWorkSteta(wtd.get(1).getWorkSteta());
+                                    if(wtd.get(1).getWorkSteta().equals("0")){
                                         workerTypeDTO.setType(3);
                                     }
                                 }

@@ -113,7 +113,8 @@
     <select id="queryType" resultType="com.dangjia.acg.dto.member.WorkerTypeDTO" parameterType="java.lang.String">
         select
             cwt.type as type,
-            chf.worker_type_id as workerTypeId
+            chf.worker_type_id as workerTypeId,
+            chf.work_steta as workSteta
         from
         dj_core_house_flow chf INNER JOIN
         dj_core_worker_type cwt on chf.worker_type_id = cwt.id
