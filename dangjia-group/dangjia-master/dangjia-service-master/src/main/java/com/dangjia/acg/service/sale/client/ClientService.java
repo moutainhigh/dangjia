@@ -185,6 +185,9 @@ public class ClientService {
             clue.setTips("1");
             clue.setPhaseStatus(1);
             clue.setCityId(store.getCityId());
+            clue.setMemberId(members.get(0).getId());
+            clue.setTimeSequencing(clue.getCreateDate());
+            clueMapper.insert(clue);//记录进入线索线索状态为转客户客户阶段
             if(!CommonUtil.isEmpty(clue.getBuilding())) {
                 IntentionHouse intentionHouse = new IntentionHouse();
                 intentionHouse.setClueId(clue.getId());
@@ -204,8 +207,6 @@ public class ClientService {
             customer.setDataStatus(0);
             customer.setTips("1");
             customer.setPhaseStatus(1);
-            clue.setMemberId(members.get(0).getId());
-            clueMapper.insert(clue);//记录进入线索线索状态为转客户客户阶段
             iCustomerMapper.insert(customer);
             return ServerResponse.createBySuccessMessage("提交成功");
         } else {
@@ -216,6 +217,7 @@ public class ClientService {
             clue.setPhaseStatus(0);
             clue.setCityId(store.getCityId());
             clue.setClueType(0);
+            clue.setTimeSequencing(clue.getCreateDate());
             if( !CommonUtil.isEmpty(clue.getBuilding())){
                 IntentionHouse intentionHouse = new IntentionHouse();
                 intentionHouse.setClueId(clue.getId());
@@ -258,6 +260,7 @@ public class ClientService {
             clue.setCityId(cityId);
             clue.setStage(0);
             clue.setDataStatus(0);
+            clue.setTimeSequencing(clue.getCreateDate());
             clueMapper.insert(clue);//记录为中台的线索
             return ServerResponse.createBySuccessMessage("记录为中台的线索");
         }
@@ -274,6 +277,7 @@ public class ClientService {
             clue.setPhaseStatus(0);
             clue.setCusService(store.getUserId());
             clue.setCrossDomainUserId(accessToken.getUserId());//跨域销售id
+            clue.setTimeSequencing(clue.getCreateDate());
             clueMapper.insert(clue);
 
             //店长推送消息
@@ -306,6 +310,7 @@ public class ClientService {
         clue.setPhaseStatus(0);
         clue.setCusService(residentialRange.getUserId());
         clue.setCrossDomainUserId(accessToken.getUserId());//跨域销售id
+        clue.setTimeSequencing(clue.getCreateDate());
         clueMapper.insert(clue);
         return ServerResponse.createBySuccessMessage("提交成功");
     }
