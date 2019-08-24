@@ -776,7 +776,7 @@ public class ClientService {
             String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
             configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "待分配客户提醒",
                     "有一个待分配客户 【"+ name +"】快去分配给员工吧", 0, url
-                            + Utils.getCustomerDetails(customer.getMemberId(), id, 1, customer.getStage().toString()));
+                            + Utils.getCustomerDetails(customer.getMemberId(),clue.getId(), 1, customer.getStage().toString()));
         }
 
         return ServerResponse.createBySuccessMessage("操作成功");
