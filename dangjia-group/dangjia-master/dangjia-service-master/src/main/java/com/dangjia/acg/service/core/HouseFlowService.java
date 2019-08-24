@@ -388,7 +388,7 @@ public class HouseFlowService {
                     }
                 }
             }
-            if (member.getWorkerType() > 3) {//其他工人
+            if (member.getWorkerType() > 2) {//其他工人
 //                if (hf.getPause() == 1) {
 //                    return ServerResponse.createByErrorMessage("该房子已暂停施工！");
 //                }
