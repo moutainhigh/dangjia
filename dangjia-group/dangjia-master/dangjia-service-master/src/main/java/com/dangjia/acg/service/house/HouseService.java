@@ -1113,7 +1113,7 @@ public class HouseService {
         } else {
             house.setAbroadStats(0);
         }
-        List<Customer> ms = iCustomerMapper.getCustomerMemberIdList(house.getMemberId());
+        List<Customer> ms = iCustomerMapper.getCustomerMemberIdList(member.getId());
         if (ms != null) {
             for (Customer m : ms) {
                 configMessageService.addConfigMessage(AppType.SALE, m.getMemberId(), "待抢单客户提醒",
