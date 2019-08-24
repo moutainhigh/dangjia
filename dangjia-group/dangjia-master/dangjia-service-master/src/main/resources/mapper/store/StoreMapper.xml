@@ -77,7 +77,7 @@
     </select>
 
     <!--首页门店-->
-    <select id="IndexqueryStore" resultType="com.dangjia.acg.modle.store.Store">
+    <select id="indexqueryStore" resultType="com.dangjia.acg.modle.store.Store">
         SELECT
         <include refid="all_columns"/>,
         ROUND(

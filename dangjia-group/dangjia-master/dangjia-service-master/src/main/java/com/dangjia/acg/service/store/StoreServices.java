@@ -283,14 +283,14 @@ public class StoreServices {
      * @param longitude
      * @return
      */
-    public ServerResponse IndexqueryStore(String cityId,String latitude, String longitude) {
+    public ServerResponse indexqueryStore(String cityId,String latitude, String longitude) {
         if (CommonUtil.isEmpty(latitude)) {
             latitude = "28.228259";
         }
         if (CommonUtil.isEmpty(longitude)) {
             longitude = "112.938904";
         }
-        List<Store> stores = iStoreMapper.IndexqueryStore(cityId,latitude, longitude);
+        List<Store> stores = iStoreMapper.indexqueryStore(cityId,latitude, longitude);
         if(stores.size()<=0){
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
