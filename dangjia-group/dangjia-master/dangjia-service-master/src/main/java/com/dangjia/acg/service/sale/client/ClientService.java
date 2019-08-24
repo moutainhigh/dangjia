@@ -252,6 +252,7 @@ public class ClientService {
         if (CommonUtil.isEmpty(accessToken.getUserId())) {
             return ServerResponse.createbyUserTokenError();
         }
+        String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
         ModelingVillage modelingVillage = iModelingVillageMapper.selectByPrimaryKey(villageId);
         if (modelingVillage == null) {
             clue.setClueType(1);
@@ -279,15 +280,13 @@ public class ClientService {
             clue.setCrossDomainUserId(accessToken.getUserId());//跨域销售id
             clue.setTimeSequencing(clue.getCreateDate());
             clueMapper.insert(clue);
-
             //店长推送消息
-            String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
             MainUser user = userMapper.selectByPrimaryKey(store.getUserId());
+            String name=clue.getOwername()!=null?clue.getOwername():clue.getPhone();
             if (user != null && !CommonUtil.isEmpty(user.getMemberId()))
                 configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "分配提醒",
-                        "您收到一个店长分配的客户，请及时跟进。", 0, url
+                        "您收到了一个跨域客户【"+ name +"】，快去分配给销售吧。", 0, url
                                 + Utils.getCustomerDetails("", clue.getId(), clue.getPhaseStatus(), "0"));
-
             return ServerResponse.createBySuccessMessage("提交成功");
 
         }
@@ -312,6 +311,13 @@ public class ClientService {
         clue.setCrossDomainUserId(accessToken.getUserId());//跨域销售id
         clue.setTimeSequencing(clue.getCreateDate());
         clueMapper.insert(clue);
+        //销售推送消息
+        MainUser user = userMapper.selectByPrimaryKey(residentialRange.getUserId());
+        String name=clue.getOwername()!=null?clue.getOwername():clue.getPhone();
+        if (user != null && !CommonUtil.isEmpty(user.getMemberId()))
+            configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "分配提醒",
+                    "您收到了一个跨域客户【"+ name +"】，请及时跟进。", 0, url
+                            + Utils.getCustomerDetails("", clue.getId(), clue.getPhaseStatus(), "0"));
         return ServerResponse.createBySuccessMessage("提交成功");
     }
 
@@ -719,7 +725,6 @@ public class ClientService {
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse setTurnOut(String cityId, String storeId, String id, Integer phaseStatus) {
         Store store = iStoreMapper.selectByPrimaryKey(storeId);
-
         if (phaseStatus == 0) {
             Clue clue = clueMapper.selectByPrimaryKey(id);
             clue.setStoreId(storeId);
@@ -778,7 +783,6 @@ public class ClientService {
                     "有一个待分配客户 【"+ name +"】快去分配给员工吧", 0, url
                             + Utils.getCustomerDetails(customer.getMemberId(),clue.getId(), 1, customer.getStage().toString()));
         }
-
         return ServerResponse.createBySuccessMessage("操作成功");
     }
 
