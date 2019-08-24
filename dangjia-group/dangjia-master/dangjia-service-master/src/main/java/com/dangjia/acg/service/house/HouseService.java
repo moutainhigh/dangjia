@@ -1116,8 +1116,7 @@ public class HouseService {
         List<Customer> ms = iCustomerMapper.getCustomerMemberIdList(house.getMemberId());
         if (ms != null) {
             for (Customer m : ms) {
-                MainUser mainUser = userMapper.selectByPrimaryKey(m.getUserId());
-                configMessageService.addConfigMessage(AppType.SALE, mainUser.getMemberId(), "待抢单客户提醒",
+                configMessageService.addConfigMessage(AppType.SALE, m.getMemberId(), "待抢单客户提醒",
                         "您有一个新的待抢单客户，请及时查看。", 4, null, "您新的待有抢单客户快去查看吧！");
             }
         }
