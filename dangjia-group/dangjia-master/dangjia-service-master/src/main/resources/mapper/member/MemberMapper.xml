@@ -38,6 +38,7 @@
         w.paycode,
         w.referrals,
         w.remarks,
+        w.styles,
         w.real_name_state as realNameState,
         w.real_name_describe as realNameDescribe,
         w.check_describe as checkDescribe,
