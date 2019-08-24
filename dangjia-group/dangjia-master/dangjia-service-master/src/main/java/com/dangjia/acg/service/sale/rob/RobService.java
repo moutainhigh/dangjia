@@ -259,8 +259,13 @@ public class RobService {
                 if (CommonUtil.isEmpty(accessToken.getUserId())) {
                     return ServerResponse.createbyUserTokenError();
                 }
-
-                Example example=new Example(DjAlreadyRobSingle.class);
+                Example example=new Example(House.class);
+                example.createCriteria().andEqualTo(House.ID,djAlreadyRobSingle.getHouseId())
+                        .andEqualTo(House.DATA_STATUS,0);
+                if(iHouseMapper.selectByExample(example).size()<=0){
+                    return ServerResponse.createByErrorMessage("业主已撤回");
+                }
+                example=new Example(DjAlreadyRobSingle.class);
                 example.createCriteria().andEqualTo(DjAlreadyRobSingle.HOUSE_ID,djAlreadyRobSingle.getHouseId());
                 if(djAlreadyRobSingleMapper.selectByExample(example).size()>0){
                     return ServerResponse.createByErrorMessage("该订单已被抢");

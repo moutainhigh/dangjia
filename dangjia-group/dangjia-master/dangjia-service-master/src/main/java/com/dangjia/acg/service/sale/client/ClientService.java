@@ -128,7 +128,7 @@ public class ClientService {
         for (Clue groupBy : groupBys) {
             if (null!=groupBy.getReportDate() && new Date().getTime()>groupBy.getReportDate().getTime()) {
                 long time = groupBy.getReportDate().getTime()-new Date().getTime();
-                return ServerResponse.createByErrorMessage(String.valueOf(time));
+                return ServerResponse.createByErrorCodeMessage(ServerCode.USER_NOT_AUTHORIZE.getCode(),String.valueOf(time));
             }
         }
         //客户阶段是否报备
@@ -136,7 +136,7 @@ public class ClientService {
         for (Customer customer : customerGroupBy) {
             if (null!=customer.getReportDate() && new Date().getTime()>customer.getReportDate().getTime()) {
                 long time = customer.getReportDate().getTime()-new Date().getTime();
-                return ServerResponse.createByErrorMessage(String.valueOf(time));
+                return ServerResponse.createByErrorCodeMessage(ServerCode.USER_NOT_AUTHORIZE.getCode(),String.valueOf(time));
             }
         }
         //如果客户已录入过则把录入的房子变为意向房子
@@ -727,12 +727,12 @@ public class ClientService {
             clue.setCityId(cityId);
             clue.setTurnStatus(1);
             clueMapper.updateByPrimaryKey(clue);
-
             //消息推送
             MainUser user = userMapper.selectByPrimaryKey(store.getUserId());
+            String name=clue.getOwername()!=null?clue.getOwername():clue.getPhone();
             String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
             configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "待分配客户提醒",
-                    "有一个待分配客户【"+ clue.getOwername()!=null?clue.getOwername():clue.getPhone() +"】快去分配给员工吧", 0, url
+                    "有一个待分配客户【"+ name +"】快去分配给员工吧", 0, url
                             + Utils.getCustomerDetails("", id, 0, "0"));
 
         } else if (phaseStatus == 1) {
@@ -771,10 +771,12 @@ public class ClientService {
             iCustomerMapper.updateByPrimaryKey(customer);
             //消息推送
             MainUser user = userMapper.selectByPrimaryKey(store.getUserId());
+            Member member = iMemberMapper.selectByPrimaryKey(customer.getMemberId());
+            String name= clue.getOwername()!=null?clue.getOwername():member.getNickName();
             String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
             configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "待分配客户提醒",
-                    "有一个待分配客户 【"+ clue.getOwername()!=null?clue.getOwername():iMemberMapper.selectByPrimaryKey(customer.getMemberId()).getNickName() +"】快去分配给员工吧", 0, url
-                            + Utils.getCustomerDetails(customer.getMemberId(), id, 1, "4"));
+                    "有一个待分配客户 【"+ name +"】快去分配给员工吧", 0, url
+                            + Utils.getCustomerDetails(customer.getMemberId(), id, 1, customer.getStage().toString()));
         }
 
         return ServerResponse.createBySuccessMessage("操作成功");
