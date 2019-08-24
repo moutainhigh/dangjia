@@ -428,8 +428,11 @@ public class RobService {
                                 if(wtd.size() > 1){
                                     workerTypeDTO.setUpType(wtd.get(1).getType());
                                     workerTypeDTO.setUpWorkSteta(wtd.get(1).getWorkSteta());
+                                    workerTypeDTO.setType(wtd.get(1).getType());
+                                    workerTypeDTO.setWorkSteta(wtd.get(1).getWorkSteta());
                                     if(wtd.get(1).getWorkSteta().equals("0")){
                                         workerTypeDTO.setType(3);
+                                        workerTypeDTO.setWorkSteta("0");
                                     }
                                 }
                             }
