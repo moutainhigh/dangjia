@@ -162,6 +162,23 @@ public class HouseFlowService {
                     if (house.getVisitState() == 2 || house.getVisitState() == 3 || house.getVisitState() == 4) {
                         continue;
                     }
+                   if(member.getWorkerType()!=null&&member.getWorkerType()==1){
+                       boolean isContinue=true;
+                       if(!CommonUtil.isEmpty(member.getStyles())){
+                           String[] optionalStyles=member.getStyles().split(",");
+                           for (String s : optionalStyles) {
+                               if(s.equals(house.getStyleId())) {
+                                   isContinue=false;
+                                   break;
+                               }
+                           }
+                       }else{
+                           isContinue=false;
+                       }
+                       if (isContinue) {
+                           continue;
+                       }
+                   }
                     AllgrabBean allgrabBean = new AllgrabBean();
                     example = new Example(HouseFlowCountDownTime.class);
                     example.createCriteria().andEqualTo(HouseFlowCountDownTime.WORKER_ID, member.getId()).andEqualTo(HouseFlowCountDownTime.HOUSE_FLOW_ID, houseFlow.getId());

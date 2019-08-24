@@ -380,7 +380,7 @@ public class WebSplitDeliverService {
      * @param id
      * @return
      */
-    public ServerResponse mendDeliverDetail(String id) {
+    public ServerResponse mendDeliverDetail(String id,String cityId) {
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             MendDeliver mendDeliver=iMendDeliverMapper.selectByPrimaryKey(id);
@@ -400,8 +400,11 @@ public class WebSplitDeliverService {
                     mendMateriel.setActualPrice(null);
                 }
                 Map map= BeanUtils.beanToMap(mendMateriel);
-                SupplierProduct supplierProduct = forMasterAPI.getSupplierProduct(house.getCityId(), mendDeliver.getSupplierId(), mendMateriel.getProductId());
-                map.put("supCost",supplierProduct.getPrice());
+                if(house!=null) {
+                    cityId=house.getCityId();
+                }
+                SupplierProduct supplierProduct = forMasterAPI.getSupplierProduct(cityId, mendDeliver.getSupplierId(), mendMateriel.getProductId());
+                map.put("supCost", supplierProduct.getPrice());
                 mendMaterielsMap.add(map);
             }
             return ServerResponse.createBySuccess("查询成功", mendMaterielsMap);

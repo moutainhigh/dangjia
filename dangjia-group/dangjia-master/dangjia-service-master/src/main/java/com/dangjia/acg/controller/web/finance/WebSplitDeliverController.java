@@ -75,8 +75,8 @@ public class WebSplitDeliverController implements WebSplitDeliverAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse mendDeliverDetail(String id) {
-        return webSplitDeliverService.mendDeliverDetail(id);
+    public ServerResponse mendDeliverDetail(String id, String cityId) {
+        return webSplitDeliverService.mendDeliverDetail(id,cityId);
     }
 
 }

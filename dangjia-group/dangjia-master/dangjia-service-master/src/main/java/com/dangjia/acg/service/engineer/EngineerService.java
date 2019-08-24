@@ -726,9 +726,11 @@ public class EngineerService {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<Member> memberList = memberMapper.artisanList(cityId, name, workerTypeId, type, checkType);
+            List<HouseStyleType> optionalLabels = houseStyleTypeMapper.selectAll();
             PageInfo pageResult = new PageInfo(memberList);
             List<ArtisanDTO> artisanDTOS = new ArrayList<>();
             for (Member member : memberList) {
+                List<String> stylesValues = new ArrayList<>();
                 if (StringUtil.isEmpty(member.getWorkerTypeId())) {
                     continue;
                 }
@@ -737,6 +739,21 @@ public class EngineerService {
                 artisanDTO.setName(member.getName());
                 artisanDTO.setMobile(member.getMobile());
                 artisanDTO.setStyles(member.getStyles());
+                for (HouseStyleType label : optionalLabels) {
+                    if(!CommonUtil.isEmpty(member.getStyles())){
+                        String[] optionalStyles=member.getStyles().split(",");
+                        for (String s : optionalStyles) {
+                            if(s.equals(label.getId())) {
+                                stylesValues.add(label.getName());
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if(stylesValues.size()>0) {
+                    artisanDTO.setStyleNames(StringUtils.join(stylesValues, ","));
+                }
                 WorkerType workerType = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
                 if (workerType != null) {
                     artisanDTO.setWorkerTypeName(workerType.getName());
