@@ -651,6 +651,7 @@ public class RobService {
      * @param customerRecDTO
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse addDescribes(CustomerRecDTO customerRecDTO,String userToken) {
         try {
 
@@ -697,6 +698,11 @@ public class RobService {
                     clueTalk.setTalkContent(customerRecDTO.getDescribes());
                     clueTalk.setDataStatus(0);
                     clueTalkMapper.insert(clueTalk);
+                    Clue clue=new Clue();
+                    clue.setId(customerRecDTO.getClueId());
+                    clue.setCreateDate(null);
+                    clue.setTimeSequencing(clueTalk.getCreateDate());
+                    clueMapper.updateByPrimaryKeySelective(clue);//沟通记录更新线索排序时间
                     return ServerResponse.createBySuccessMessage("新增成功");
 //                }
             }

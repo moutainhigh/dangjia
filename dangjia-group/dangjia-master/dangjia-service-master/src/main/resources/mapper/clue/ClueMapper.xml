@@ -142,11 +142,7 @@
                 and c.store_id=#{storeId}
             </if>
             GROUP BY c.id
-            ORDER BY ct.create_date
-            <if test="null!=time and ''!=time">
-                desc
-            </if>
-            ,c.create_date
+            ORDER BY c.time_sequencing
             <if test="null!=time and ''!=time">
                 desc
             </if>
@@ -170,11 +166,7 @@
                 and CONCAT(m.nick_name,c.owername,c.phone) like CONCAT('%',#{searchKey},'%')
             </if>
             GROUP BY c.id
-            ORDER BY ct.create_date
-            <if test="null!=time and ''!=time">
-                desc
-            </if>
-            ,mc.create_date
+            ORDER BY c.time_sequencing
             <if test="null!=time and ''!=time">
                 desc
             </if>

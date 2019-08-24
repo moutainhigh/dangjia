@@ -123,4 +123,9 @@ public class Clue extends BaseEntity {
     @ApiModelProperty("跨域下单的销售id ：不是跨域为空")
     private String crossDomainUserId;
 
+    @Column(name = "time_sequencing")
+    @Desc(value = "列表时间排序字段")
+    @ApiModelProperty("列表时间排序字段")
+    private Date timeSequencing;
+
 }
