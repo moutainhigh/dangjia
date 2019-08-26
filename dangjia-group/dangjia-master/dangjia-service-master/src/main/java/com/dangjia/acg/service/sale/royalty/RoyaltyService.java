@@ -8,12 +8,8 @@ import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.BaseEntity;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.mapper.sale.DjRoyaltyMatchMapper;
-import com.dangjia.acg.mapper.sale.RoyaltyMapper;
-import com.dangjia.acg.mapper.sale.SurfaceMapper;
-import com.dangjia.acg.modle.sale.royalty.DjRoyaltyDetailsSurface;
-import com.dangjia.acg.modle.sale.royalty.DjRoyaltyMatch;
-import com.dangjia.acg.modle.sale.royalty.DjRoyaltySurface;
+import com.dangjia.acg.mapper.sale.*;
+import com.dangjia.acg.modle.sale.royalty.*;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -42,6 +38,11 @@ public class RoyaltyService {
     @Autowired
     private DjRoyaltyMatchMapper djRoyaltyMatchMapper;
     private static Logger logger = LoggerFactory.getLogger(RedisSessionDAO.class);
+
+    @Autowired
+    private DjAreaMatchMapper djAreaMatchMapper;
+    @Autowired
+    private DjAreaMatchSetupMapper djAreaMatchSetupMapper;
 
     /**
      * 查询提成列表
@@ -133,6 +134,49 @@ public class RoyaltyService {
             djRoyaltyMatch1.setArrRoyalty(djRoyaltyMatch.getArrRoyalty());
             djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
         }
+    }
+
+
+
+    /**
+     * 新增提成信息
+     *
+     * @param lists
+     * @return
+     */
+    public ServerResponse addAreaMatch(String lists,
+                                       String villageId,
+                                       String villageName,
+                                       String buildingName,
+                                       String buildingId) {
+
+        DjAreaMatch djAreaMatch = new DjAreaMatch();
+        djAreaMatch.setVillageId(villageId);
+        djAreaMatch.setVillageName(villageName);
+        djAreaMatch.setBuildingId(buildingId);
+        djAreaMatch.setBuildingName(buildingName);
+        djAreaMatch.setVbName(villageName + buildingName);
+        JSONArray list = JSON.parseArray(lists);
+        //插入提成配置总表
+        if (djAreaMatchMapper.insert(djAreaMatch) > 0) {
+            //循环插入提成配置详情表
+            DjAreaMatchSetup djr = new DjAreaMatchSetup();
+            for (int i = 0; i < list.size(); i++) {
+                djr = new DjAreaMatchSetup();
+                djr.setResourceId(djAreaMatch.getId());
+                djr.setCreateDate(new Date());
+                djr.setModifyDate(new Date());
+                JSONObject JS = list.getJSONObject(i);
+                djr.setStartSingle(JS.getInteger("startSingle"));
+                djr.setOverSingle(JS.getInteger("overSingle"));
+                djr.setRoyalty(JS.getInteger("royalty"));
+                djr.setVillageId(villageId);
+                djr.setBuildingId(buildingId);
+                djAreaMatchSetupMapper.insert(djr);
+            }
+            return ServerResponse.createBySuccessMessage("提交成功");
+        }
+        return ServerResponse.createBySuccessMessage("提交失败");
     }
 
 

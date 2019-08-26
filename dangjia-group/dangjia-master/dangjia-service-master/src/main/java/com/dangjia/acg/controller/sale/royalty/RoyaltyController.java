@@ -59,4 +59,24 @@ public class RoyaltyController implements RoyaltyAPI {
     public ServerResponse queryRoyaltyData(HttpServletRequest request,String id){
         return service.queryRoyaltyData(id);
     }
+
+
+
+    /**
+     * 新增房屋提成信息
+     * @param request
+     * @param lists
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse addAreaMatch(HttpServletRequest request,
+                                         String lists,
+                                       String villageId,
+                                       String villageName,
+                                       String buildingName,
+                                       String buildingId){
+        return service.addAreaMatch(lists,villageId,villageName,buildingName,buildingId);
+    }
+
 }

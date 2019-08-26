@@ -639,6 +639,7 @@ public class EngineerService {
                 Map<String, Object> map = new HashMap<>();
                 map.put("houseId", house.getId());
                 map.put("address", house.getHouseName());
+                map.put("completedDate", house.getCompletedDate());
                 map.put("memberName", house.getOwnerNickName() == null ? house.getOwnerName() : house.getOwnerNickName());
                 map.put("mobile", house.getOwnerMobile());
                 map.put("pause", house.getPause());
@@ -647,7 +648,7 @@ public class EngineerService {
                 map.put("supMobile", house.getSupMobile());
                 HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart1(house.getId(), new Date());//查询今日开工记录
                 map.put("todayStartPause", todayStart == null ? "0" : "1"); //0否,1是
-                map.put("createDate", house.getConstructionDate());
+                map.put("createDate", todayStart.getCreateDate());
 
                 Example example1 = new Example(HouseFlowApply.class);
                 example1.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, house.getId()).andEqualTo(HouseFlowApply.MEMBER_CHECK, 1).andEqualTo(HouseFlowApply.APPLY_TYPE, 3);
