@@ -641,6 +641,7 @@ public class HouseService {
                         //判断销售所选楼栋是否在自己楼栋范围内 不在则跟选择的楼栋范围销售分提成
                         logger.info("判断销售所选楼栋是否在自己楼栋范围内 分提成==================="+residentialRange.getUserId());
                         djHouse(userId,residentialRange.getUserId(),rds,list,houseDTO,customer,house);
+                        return;
                     }
                 }
             }

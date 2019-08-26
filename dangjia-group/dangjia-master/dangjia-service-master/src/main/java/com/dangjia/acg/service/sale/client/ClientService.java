@@ -286,7 +286,7 @@ public class ClientService {
             if (user != null && !CommonUtil.isEmpty(user.getMemberId()))
                 configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "分配提醒",
                         "您收到了一个跨域客户【"+ name +"】，快去分配给销售吧。", 0, url
-                                + Utils.getCustomerDetails("", clue.getId(), clue.getPhaseStatus(), "0"));
+                                + Utils.getCustomerDetails("", clue.getId(), clue.getPhaseStatus(), "0" ,"待分配"));
             return ServerResponse.createBySuccessMessage("提交成功");
 
         }
@@ -317,7 +317,7 @@ public class ClientService {
         if (user != null && !CommonUtil.isEmpty(user.getMemberId()))
             configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "分配提醒",
                     "您收到了一个跨域客户【"+ name +"】，请及时跟进。", 0, url
-                            + Utils.getCustomerDetails("", clue.getId(), clue.getPhaseStatus(), "0"));
+                            + Utils.getCustomerDetails("", clue.getId(), clue.getPhaseStatus(), "0","待分配"));
         return ServerResponse.createBySuccessMessage("提交成功");
     }
 
@@ -406,7 +406,7 @@ public class ClientService {
                     if (userStore != null && !CommonUtil.isEmpty(userStore.getMemberId()))
                         configMessageService.addConfigMessage(AppType.SALE, userStore.getMemberId(), "沉睡客户",
                                 "收到了【" + user.getUsername() + "】放弃跟进的客户，快去分配给员工吧。", 0, url
-                                        + Utils.getCustomerDetails(memberId, clueId, phaseStatus, "2"));
+                                        + Utils.getCustomerDetails(memberId, clueId, phaseStatus, "2","待分配"));
                 }
             }
         }
@@ -738,7 +738,7 @@ public class ClientService {
             String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
             configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "待分配客户提醒",
                     "有一个待分配客户【"+ name +"】快去分配给员工吧", 0, url
-                            + Utils.getCustomerDetails("", id, 0, "0"));
+                            + Utils.getCustomerDetails("", id, 0, "0","待分配"));
 
         } else if (phaseStatus == 1) {
             Customer customer = iCustomerMapper.selectByPrimaryKey(id);
@@ -781,7 +781,7 @@ public class ClientService {
             String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
             configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "待分配客户提醒",
                     "有一个待分配客户 【"+ name +"】快去分配给员工吧", 0, url
-                            + Utils.getCustomerDetails(customer.getMemberId(),clue.getId(), 1, customer.getStage().toString()));
+                            + Utils.getCustomerDetails(customer.getMemberId(),clue.getId(), 1, customer.getStage().toString(),"待分配"));
         }
         return ServerResponse.createBySuccessMessage("操作成功");
     }
