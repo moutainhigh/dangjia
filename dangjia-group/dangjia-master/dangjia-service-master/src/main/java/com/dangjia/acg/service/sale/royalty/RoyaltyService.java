@@ -8,6 +8,7 @@ import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.BaseEntity;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.mapper.sale.*;
 import com.dangjia.acg.modle.sale.royalty.*;
 import com.github.pagehelper.PageHelper;
@@ -177,6 +178,25 @@ public class RoyaltyService {
             return ServerResponse.createBySuccessMessage("提交成功");
         }
         return ServerResponse.createBySuccessMessage("提交失败");
+    }
+
+
+    public ServerResponse queryAreaMatch(String villageId){
+        Example example=new Example(DjAreaMatch.class);
+        Example.Criteria criteria = example.createCriteria().andEqualTo(DjAreaMatch.DATA_STATUS, 0);
+        if(!CommonUtil.isEmpty(villageId)){
+            criteria.andEqualTo(DjAreaMatch.VILLAGE_ID,villageId);
+        }
+        return ServerResponse.createBySuccess("查询成功",djAreaMatchMapper.selectByExample(example));
+    }
+
+
+    public ServerResponse delAreaMatch(String id){
+        DjAreaMatch djAreaMatch=new DjAreaMatch();
+        djAreaMatch.setId(id);
+        djAreaMatch.setDataStatus(1);
+        djAreaMatchMapper.updateByPrimaryKeySelective(djAreaMatch);
+        return ServerResponse.createBySuccessMessage("删除成功");
     }
 
 

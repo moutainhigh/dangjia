@@ -27,6 +27,7 @@ import com.dangjia.acg.mapper.member.IMemberCityMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.other.IWorkDepositMapper;
 import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
+import com.dangjia.acg.mapper.sale.DjRoyaltyMatchMapper;
 import com.dangjia.acg.mapper.worker.IInsuranceMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.basics.Technology;
@@ -39,6 +40,7 @@ import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberCity;
 import com.dangjia.acg.modle.other.WorkDeposit;
 import com.dangjia.acg.modle.repair.ChangeOrder;
+import com.dangjia.acg.modle.sale.royalty.DjRoyaltyMatch;
 import com.dangjia.acg.modle.worker.Insurance;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
@@ -121,6 +123,8 @@ public class HouseWorkerService {
     private IInsuranceMapper insuranceMapper;
     @Autowired
     private IMemberCityMapper memberCityMapper;
+    @Autowired
+    private DjRoyaltyMatchMapper djRoyaltyMatchMapper;
     /**
      * 根据工人id查询所有房子任务
      */
@@ -664,9 +668,20 @@ public class HouseWorkerService {
         if (hf.getWorkSteta() == 2) {
             return ServerResponse.createByErrorMessage("该工序（" + workerType.getName() + "）已经整体完工，无法开工");
         }
+        Example example=new Example(DjRoyaltyMatch.class);
+        example.createCriteria().andEqualTo(DjRoyaltyMatch.HOUSE_ID,house.getId())
+                .andEqualTo(DjRoyaltyMatch.DATA_STATUS,1);
+        if(djRoyaltyMatchMapper.selectByExample(example).size()>0){//第一个工匠开工销售拿提成
+            example=new Example(DjRoyaltyMatch.class);
+            example.createCriteria().andEqualTo(DjRoyaltyMatch.HOUSE_ID,house.getId());
+            DjRoyaltyMatch djRoyaltyMatch=new DjRoyaltyMatch();
+            djRoyaltyMatch.setId(null);
+            djRoyaltyMatch.setDataStatus(0);
+            djRoyaltyMatchMapper.updateByExampleSelective(djRoyaltyMatch,example);
+        }
         List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApply(null, 4, worker.getId(), new Date());
         for (HouseFlowApply houseFlowApply : houseFlowApplyList) {
-            Example example = new Example(HouseFlowApply.class);
+            example = new Example(HouseFlowApply.class);
             example.createCriteria().andCondition("   apply_type in (0,1,2)  and   to_days(create_date) = to_days('"
                     + DateUtil.getDateString(new Date().getTime()) + "') ")
                     .andNotEqualTo(HouseFlowApply.SUPERVISOR_CHECK, 2)
@@ -716,7 +731,7 @@ public class HouseWorkerService {
         Date start = DateUtil.toDate(DateUtil.dateToString(new Date(), null));
         Date end = start;
 
-        Example example = new Example(HouseFlowApply.class);
+        example = new Example(HouseFlowApply.class);
         example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, hf.getId())
                 .andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
                 .andEqualTo(HouseFlowApply.MEMBER_CHECK, 1)

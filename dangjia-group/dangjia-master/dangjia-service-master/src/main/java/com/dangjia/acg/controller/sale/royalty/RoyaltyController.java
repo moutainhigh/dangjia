@@ -79,4 +79,27 @@ public class RoyaltyController implements RoyaltyAPI {
         return service.addAreaMatch(lists,villageId,villageName,buildingName,buildingId);
     }
 
+
+    /**
+     *查询提成配置表
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryAreaMatch(String villageId) {
+        return service.queryAreaMatch(villageId);
+    }
+
+
+    /**
+     * 删除提成配置表
+     * @param id
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse delAreaMatch(String id) {
+        return service.delAreaMatch(id);
+    }
+
 }
