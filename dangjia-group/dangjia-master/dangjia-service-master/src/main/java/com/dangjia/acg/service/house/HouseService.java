@@ -608,7 +608,7 @@ public class HouseService {
      */
     public void endRoyalty(HouseDTO houseDTO,String userId,Customer customer){
         House house = iHouseMapper.selectByPrimaryKey(houseDTO.getHouseId());
-
+        logger.info("house==================="+house);
         Example example = new Example(Clue.class);
         example.createCriteria().andEqualTo(Clue.MEMBER_ID, house.getMemberId())
                 .andEqualTo(Clue.DATA_STATUS, 0);
@@ -626,11 +626,13 @@ public class HouseService {
         }
         //查询最大订单配置数量
         DjRoyaltyDetailsSurface rds = royaltyMapper.selectOverSingle();
-
+        logger.info("clueList.size()==================="+clueList.size());
         if(clueList.size() == 1){
 
             ResidentialBuilding residentialBuilding = residentialBuildingMapper.selectSingleResidentialBuilding(null, house.getBuilding(), house.getVillageId());
             logger.info("00000000000000000000==================="+residentialBuilding);
+            logger.info("house.getBuilding()==================="+house.getBuilding());
+            logger.info("house.getVillageId()==================="+house.getVillageId());
             if (null != residentialBuilding) { //判断楼栋是否存在
                 ResidentialRange residentialRange = residentialRangeMapper.selectSingleResidentialRange(residentialBuilding.getId());
                 logger.info("99999999999999999==================="+residentialRange);
