@@ -225,7 +225,7 @@ public class DjConstants {
      * Type 验房分销定金
      */
     public static class distribution {
-        public final static BigDecimal PRICE = new BigDecimal(50.00);
+        public final static BigDecimal PRICE = new BigDecimal(158.8);
     }
     public static class PushMessage {
         public final static String START_FITTING_UP = "业主您好！您的美宅【%s】开始装修啦！";
