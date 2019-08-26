@@ -11,20 +11,25 @@ import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.HouseFlowApplyDTO;
 import com.dangjia.acg.mapper.core.*;
+import com.dangjia.acg.mapper.deliver.IOrderSplitMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.member.ICustomerMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.mapper.safe.IWorkerTypeSafeMapper;
 import com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper;
 import com.dangjia.acg.mapper.worker.IEvaluateMapper;
 import com.dangjia.acg.mapper.worker.IWorkIntegralMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.core.*;
+import com.dangjia.acg.modle.deliver.OrderSplit;
+import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.matter.TechnologyRecord;
 import com.dangjia.acg.modle.member.Customer;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.safe.WorkerTypeSafe;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
 import com.dangjia.acg.modle.worker.Evaluate;
@@ -50,6 +55,12 @@ import java.util.*;
 @Service
 public class HouseFlowApplyService {
 
+
+
+    @Autowired
+    private IMendOrderMapper mendOrderMapper;
+    @Autowired
+    private IOrderSplitMapper orderSplitMapper;
     @Autowired
     private IHouseFlowApplyMapper houseFlowApplyMapper;
     @Autowired
@@ -181,6 +192,10 @@ public class HouseFlowApplyService {
                 //设置保险时间
                 WorkerTypeSafeOrder wtso = workerTypeSafeOrderMapper.getByWorkerTypeId(hwo.getWorkerTypeId(), hwo.getHouseId());
 
+                //超过免费要货次数,收取工匠运费
+                extraOrderSplitFare(hwo);
+                //收取工匠退货运费
+                extraMendOrderFare(hwo);
                 //临时代码-补充未生成的质保卡
                 if (wtso == null) {//默认生成一条
                     //该工钟所有保险
@@ -288,6 +303,76 @@ public class HouseFlowApplyService {
         }
     }
 
+    /*
+     * 计算是否超过免费要货次数,收取工匠运费
+     */
+    public void extraOrderSplitFare(HouseWorkerOrder hwo){
+        Example example = new Example(OrderSplit.class);
+        example.createCriteria()
+                .andEqualTo(OrderSplit.HOUSE_ID, hwo.getHouseId())
+                .andEqualTo(OrderSplit.APPLY_STATUS, 2)
+                .andEqualTo(OrderSplit.WORKER_TYPE_ID, hwo.getWorkerTypeId());
+        List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
+        WorkerType workerType = workerTypeMapper.selectByPrimaryKey( hwo.getWorkerTypeId());
+        if (orderSplitList.size() > workerType.getSafeState()) {//超过免费次数收工匠运费
+            //每次固定收取100元
+            BigDecimal yunFei = new BigDecimal(100);
+            Member worker = memberMapper.selectByPrimaryKey(hwo.getWorkerId());//要货人
+            for (int i = workerType.getSafeState(); i < orderSplitList.size(); i++) {
+                BigDecimal haveMoney = worker.getHaveMoney().subtract(yunFei);
+                BigDecimal surplusMoneys = worker.getSurplusMoney().subtract(yunFei);
+                WorkerDetail workerDetail = new WorkerDetail();
+                workerDetail.setName(workerType.getName()+"第"+(i+1)+"次要货运费");
+                workerDetail.setWorkerId(worker.getId());
+                workerDetail.setWorkerName(worker.getName());
+                workerDetail.setHouseId(hwo.getHouseId());
+                workerDetail.setMoney(yunFei);
+                workerDetail.setState(7);//收取运费
+                workerDetail.setWalletMoney(haveMoney);
+                workerDetail.setApplyMoney(yunFei);
+                workerDetailMapper.insert(workerDetail);
+                worker.setHaveMoney(haveMoney);
+                worker.setSurplusMoney(surplusMoneys);
+                memberMapper.updateByPrimaryKeySelective(worker);
+            }
+        }
+    }
+
+    /*
+     * 收取工匠退货运费
+     */
+    public void extraMendOrderFare(HouseWorkerOrder hwo){
+        Example example = new Example(MendOrder.class);
+        example.createCriteria()
+                .andEqualTo(MendOrder.HOUSE_ID, hwo.getHouseId())
+                .andEqualTo(MendOrder.TYPE, 2)
+                .andEqualTo(MendOrder.STATE, 4)
+                .andEqualTo(MendOrder.WORKER_TYPE_ID, hwo.getWorkerTypeId());
+        List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
+        WorkerType workerType = workerTypeMapper.selectByPrimaryKey( hwo.getWorkerTypeId());
+        if (workerType.getType()>3) {
+            //每次固定收取100元
+            BigDecimal yunFei = new BigDecimal(100);
+            Member worker = memberMapper.selectByPrimaryKey(hwo.getWorkerId());//要货人
+            for (int i = 0; i < mendOrderList.size(); i++) {
+                BigDecimal haveMoney = worker.getHaveMoney().subtract(yunFei);
+                BigDecimal surplusMoneys = worker.getSurplusMoney().subtract(yunFei);
+                WorkerDetail workerDetail = new WorkerDetail();
+                workerDetail.setName(workerType.getName()+"第"+(i+1)+"次退货运费");
+                workerDetail.setWorkerId(worker.getId());
+                workerDetail.setWorkerName(worker.getName());
+                workerDetail.setHouseId(hwo.getHouseId());
+                workerDetail.setMoney(yunFei);
+                workerDetail.setState(7);//收取运费
+                workerDetail.setWalletMoney(haveMoney);
+                workerDetail.setApplyMoney(yunFei);
+                workerDetailMapper.insert(workerDetail);
+                worker.setHaveMoney(haveMoney);
+                worker.setSurplusMoney(surplusMoneys);
+                memberMapper.updateByPrimaryKeySelective(worker);
+            }
+        }
+    }
     /**
      * 每日完工计分
      */
@@ -786,6 +871,8 @@ public class HouseFlowApplyService {
             worker.setVolume(worker.getVolume().add(new BigDecimal(1)));
             memberMapper.updateByPrimaryKeySelective(worker);
 
+            //超过免费要货次数,收取管家运费
+            extraOrderSplitFare(hwo);
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             e.printStackTrace();
