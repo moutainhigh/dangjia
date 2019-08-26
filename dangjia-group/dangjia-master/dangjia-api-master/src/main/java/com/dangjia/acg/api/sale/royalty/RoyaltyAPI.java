@@ -48,7 +48,15 @@ public interface RoyaltyAPI {
                                 @RequestParam("villageId")String villageId,
                                 @RequestParam("villageName")String villageName,
                                 @RequestParam("buildingName")String buildingName,
-                                @RequestParam("buildingId")String buildingId);
+                                @RequestParam("buildingId")String buildingId,
+                                @RequestParam("resourceId")String resourceId);
+
+
+    @PostMapping(value = "sale/royalty/queryAreaMatchInFo")
+    @ApiOperation(value = "查询楼栋配置详情", notes = "查询楼栋配置详情")
+    ServerResponse queryAreaMatchInFo(@RequestParam("request")HttpServletRequest request,
+                                      @RequestParam("resourceId")String resourceId);
+
 
 
     @PostMapping(value = "sale/royalty/queryAreaMatch")
