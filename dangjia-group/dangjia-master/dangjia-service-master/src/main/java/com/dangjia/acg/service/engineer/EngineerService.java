@@ -648,7 +648,7 @@ public class EngineerService {
                 map.put("supMobile", house.getSupMobile());
                 HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart1(house.getId(), new Date());//查询今日开工记录
                 map.put("todayStartPause", todayStart == null ? "0" : "1"); //0否,1是
-                map.put("createDate", todayStart.getCreateDate());
+                map.put("createDate", todayStart == null ? "" : todayStart.getCreateDate());
 
                 Example example1 = new Example(HouseFlowApply.class);
                 example1.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, house.getId()).andEqualTo(HouseFlowApply.MEMBER_CHECK, 1).andEqualTo(HouseFlowApply.APPLY_TYPE, 3);
