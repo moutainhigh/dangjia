@@ -156,6 +156,7 @@
         and house_id = #{houseId}
         and apply_type = 4
         and to_days(create_date) = to_days(#{time})
+        order by create_date
         LIMIT 1
     </select>
 
