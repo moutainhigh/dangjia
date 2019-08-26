@@ -7,12 +7,14 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
+import com.dangjia.acg.mapper.house.IHouseDistributionConfigMapper;
 import com.dangjia.acg.mapper.house.IHouseDistributionMapper;
 import com.dangjia.acg.mapper.house.IWebsiteVisitMapper;
 import com.dangjia.acg.mapper.member.ICustomerRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.other.ICityMapper;
 import com.dangjia.acg.modle.house.HouseDistribution;
+import com.dangjia.acg.modle.house.HouseDistributionConfig;
 import com.dangjia.acg.modle.house.WebsiteVisit;
 import com.dangjia.acg.modle.member.CustomerRecord;
 import com.dangjia.acg.modle.member.Member;
@@ -52,6 +54,8 @@ public class HouseDistributionService {
     @Autowired
     private ICustomerRecordMapper customerRecordMapper;
 
+    @Autowired
+    private IHouseDistributionConfigMapper houseDistributionConfigMapper;
     /**
      * 获取所有验房分销
      *
@@ -129,14 +133,29 @@ public class HouseDistributionService {
             Member user = (Member) object;
             user = memberMapper.selectByPrimaryKey(user.getId());
             City city=iCityMapper.selectByPrimaryKey(cityId);
+            houseDistribution.setPrice(DjConstants.distribution.PRICE.doubleValue());
+
+            Example example = new Example(HouseDistributionConfig.class);
+            Example.Criteria criteria = example.createCriteria();
+            if(!CommonUtil.isEmpty(houseDistribution.getVillageId())) {
+                criteria.andEqualTo(HouseDistributionConfig.CITY_ID, cityId);
+                criteria.andCondition(" FIND_IN_SET( '" + houseDistribution.getVillageId() + "', villages)");
+                example.orderBy(HouseDistributionConfig.PRICE);
+                List<HouseDistributionConfig> houseDistributionConfigs = houseDistributionConfigMapper.selectByExample(example);
+                if(houseDistributionConfigs.size()>0){
+                    houseDistribution.setPrice(houseDistributionConfigs.get(0).getPrice());
+                }
+            }
             houseDistribution.setId(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
             houseDistribution.setHead(user.getHead());
-            houseDistribution.setNickname(user.getNickName());
-            houseDistribution.setPhone(user.getMobile());
+            if(CommonUtil.isEmpty(houseDistribution.getNickname())){
+                houseDistribution.setNickname(user.getNickName());
+                houseDistribution.setPhone(user.getMobile());
+            }
             houseDistribution.setCity(city.getName());
             houseDistribution.setCityId(cityId);
             houseDistribution.setCityName(city.getName());
-            houseDistribution.setPrice(DjConstants.distribution.PRICE.doubleValue());
+
             houseDistribution.setOpenid(user.getId());
             houseDistribution.setSex("0");
             houseDistribution.setState(0);

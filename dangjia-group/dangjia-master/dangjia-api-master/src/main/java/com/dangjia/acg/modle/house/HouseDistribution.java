@@ -10,6 +10,7 @@ import lombok.experimental.FieldNameConstants;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import java.math.BigDecimal;
 
 /**
  * 微信用户  相当于订单
@@ -67,6 +68,22 @@ public class HouseDistribution extends BaseEntity {
     @Desc(value = "城市名")
     @ApiModelProperty("城市名")
     private String cityName;
+
+	@Column(name = "village_id")
+	@Desc(value = "小区ID")
+	@ApiModelProperty("小区ID")
+	private String villageId;
+
+	@Column(name = "building")
+	@Desc(value = "楼栋房号")
+	@ApiModelProperty("楼栋房号")
+	private String building;
+
+	@Column(name = "square")
+	@Desc(value = "面积")
+	@ApiModelProperty("面积")
+	private BigDecimal square;
+
 
 	@Column(name = "info")
 	@Desc(value = "详细信息")
