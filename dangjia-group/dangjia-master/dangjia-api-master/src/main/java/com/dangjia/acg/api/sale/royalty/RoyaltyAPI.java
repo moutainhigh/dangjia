@@ -40,4 +40,14 @@ public interface RoyaltyAPI {
     ServerResponse queryRoyaltyData(@RequestParam("request") HttpServletRequest request,
                                     @RequestParam("id") String id);
 
+
+    @PostMapping(value = "sale/royalty/addAreaMatch")
+    @ApiOperation(value = "新增楼栋提成配置", notes = "新增楼栋提成配置")
+    ServerResponse addAreaMatch(@RequestParam("request")HttpServletRequest request,
+                                @RequestParam("lists")String lists,
+                                @RequestParam("villageId")String villageId,
+                                @RequestParam("villageName")String villageName,
+                                @RequestParam("buildingName")String buildingName,
+                                @RequestParam("buildingId")String buildingId);
+
 }
