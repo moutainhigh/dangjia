@@ -547,7 +547,7 @@
             and ((f.supervisor_start = #{visitState} and h.visit_state !=2 and h.visit_state !=3 and h.visit_state !=4 and h.visit_state !=5 and h.pause=0) or (h.visit_state = 2))
         </if>
         <if test="visitState==3 || visitState==4 || visitState==5">
-            and h.visit_state = in(3,4,5)
+            and h.visit_state  in(3,4,5)
         </if>
         <if test="startDate!=null and endDate!=null and startDate!='' and endDate!=''">
             and h.construction_date BETWEEN #{startDate} and #{endDate}
