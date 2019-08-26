@@ -149,6 +149,7 @@
         <if test="visitState != null">
             and h.visit_state = #{visitState}
         </if>
+        ORDER BY rm.create_date desc
     </select>
 
 

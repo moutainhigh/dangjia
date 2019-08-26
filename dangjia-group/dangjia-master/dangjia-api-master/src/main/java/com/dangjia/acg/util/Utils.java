@@ -74,6 +74,12 @@ public class Utils {
                 memberId, clueId, phaseStatus + "", stage);
     }
 
+
+    public static String getCustomerDetails(String memberId, String clueId, Integer phaseStatus, String stage , String listType ,String storeId) {
+        return String.format("customerDetails?title=客户详情&memberId=%s&clueId=%s&phaseStatus=%s&stage=%s&listType=%s&storeId=%s",
+                memberId, clueId, phaseStatus + "", stage , listType ,storeId);
+    }
+
     /**
      * 随机获取图片
      *
