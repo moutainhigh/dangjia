@@ -9,7 +9,10 @@ import com.dangjia.acg.common.model.BaseEntity;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.dto.sale.royalty.DjAreaMatchSetupDTO;
+import com.dangjia.acg.mapper.house.IModelingVillageMapper;
 import com.dangjia.acg.mapper.sale.*;
+import com.dangjia.acg.modle.house.ModelingVillage;
 import com.dangjia.acg.modle.sale.residential.ResidentialBuilding;
 import com.dangjia.acg.modle.sale.royalty.*;
 import com.github.pagehelper.PageHelper;
@@ -21,10 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 提成配置模块
@@ -51,6 +51,9 @@ public class RoyaltyService {
 
     @Autowired
     private ResidentialBuildingMapper residentialBuildingMapper;
+
+    @Autowired
+    private IModelingVillageMapper iModelingVillageMapper;
 
     /**
      * 查询提成列表
@@ -213,15 +216,47 @@ public class RoyaltyService {
      * @return
      */
     public ServerResponse queryAreaMatchInFo(String resourceId){
+
         Example example = new Example(DjAreaMatchSetup.class);
         example.createCriteria().andEqualTo(DjAreaMatchSetup.RESOURCE_ID, resourceId)
                 .andEqualTo(DjAreaMatchSetup.DATA_STATUS, 0);
         example.orderBy(DjAreaMatchSetup.CREATE_DATE).desc();
         List<DjAreaMatchSetup> djRoyaltyDetailsSurfaces = djAreaMatchSetupMapper.selectByExample(example);
-        if (djRoyaltyDetailsSurfaces.size() <= 0) {
+
+        DjAreaMatchSetupDTO djAreaMatchSetupDTO = new DjAreaMatchSetupDTO();
+
+        if(!djRoyaltyDetailsSurfaces.isEmpty()){
+            //封装楼栋list
+            List<Map<Object,Object>> buildingList = new ArrayList<>();
+            Map<Object,Object> BuildingMap  = new HashMap<>();
+            String s = djRoyaltyDetailsSurfaces.get(0).getBuildingId();
+            String[] arr = s.split(",");
+            for (String ss:arr) {
+                ResidentialBuilding str = residentialBuildingMapper.selectByPrimaryKey(ss);
+                BuildingMap.put("buildingId",ss);
+                BuildingMap.put("buildingName",str.getBuilding());
+                buildingList.add(BuildingMap);
+            }
+
+            //封装小区list
+            List<Map<Object,Object>> VillageList = new ArrayList<>();
+            Map<Object,Object> villageMap  = new HashMap<>();
+            String villageId = djRoyaltyDetailsSurfaces.get(0).getVillageId();
+            ModelingVillage modelingVillage = iModelingVillageMapper.selectByPrimaryKey(villageId);
+            villageMap.put("villageId",villageId);
+            villageMap.put("villageName",modelingVillage.getName());
+            VillageList.add(villageMap);
+
+            djAreaMatchSetupDTO.setDjAreaMatchSetups(djRoyaltyDetailsSurfaces);
+            djAreaMatchSetupDTO.setBuildingList(buildingList);
+            djAreaMatchSetupDTO.setVillageList(VillageList);
+        }
+
+
+        if (djAreaMatchSetupDTO == null) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
-        return ServerResponse.createBySuccess("查询提成列表", djRoyaltyDetailsSurfaces);
+        return ServerResponse.createBySuccess("查询提成列表", djAreaMatchSetupDTO);
     }
 
 
