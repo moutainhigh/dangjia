@@ -692,7 +692,7 @@ public class HouseService {
                             logger.info("判断当月==================="+rds.getOverSingle());
                             logger.info("两销售一起分配提成---------------------");
                             DjRoyaltyMatch djRoyaltyMatch1 = new DjRoyaltyMatch();
-                            djRoyaltyMatch1.setDataStatus(0);
+                            djRoyaltyMatch1.setDataStatus(1);
                             djRoyaltyMatch1.setUserId(userId);
                             djRoyaltyMatch1.setOrderStatus(0);
                             djRoyaltyMatch1.setHouseId(houseDTO.getHouseId());
@@ -704,7 +704,7 @@ public class HouseService {
                             djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
 
                             djRoyaltyMatch1 = new DjRoyaltyMatch();
-                            djRoyaltyMatch1.setDataStatus(0);
+                            djRoyaltyMatch1.setDataStatus(1);
                             djRoyaltyMatch1.setUserId(userId2);
                             djRoyaltyMatch1.setOrderStatus(2);
                             djRoyaltyMatch1.setHouseId(houseDTO.getHouseId());
@@ -762,7 +762,7 @@ public class HouseService {
                                 if (ss.getStartSingle() <= darList.size() && darList.size() <= ss.getOverSingle()) {
                                     logger.info("两销售一起分配提成---------------------");
                                     DjRoyaltyMatch djRoyaltyMatch1 = new DjRoyaltyMatch();
-                                    djRoyaltyMatch1.setDataStatus(0);
+                                    djRoyaltyMatch1.setDataStatus(1);
                                     djRoyaltyMatch1.setUserId(userId);
                                     djRoyaltyMatch1.setOrderStatus(0);
                                     djRoyaltyMatch1.setHouseId(houseDTO.getHouseId());
@@ -774,7 +774,7 @@ public class HouseService {
                                     djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
 
                                     djRoyaltyMatch1 = new DjRoyaltyMatch();
-                                    djRoyaltyMatch1.setDataStatus(0);
+                                    djRoyaltyMatch1.setDataStatus(1);
                                     djRoyaltyMatch1.setUserId(userId2);
                                     djRoyaltyMatch1.setOrderStatus(2);
                                     djRoyaltyMatch1.setHouseId(houseDTO.getHouseId());
@@ -872,7 +872,7 @@ public class HouseService {
             //订单数量 大于 配置订单数量时处理
             logger.info("订单数量 大于 配置订单数量时处理==================="+ userId);
             DjRoyaltyMatch djRoyaltyMatch1 = new DjRoyaltyMatch();
-            djRoyaltyMatch1.setDataStatus(0);
+            djRoyaltyMatch1.setDataStatus(1);
             djRoyaltyMatch1.setUserId(userId);
             djRoyaltyMatch1.setOrderStatus(0);
             djRoyaltyMatch1.setHouseId(houseDTO.getHouseId());
@@ -884,7 +884,7 @@ public class HouseService {
             djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
             logger.info("订单数量 大于 配置订单数量时处理==================="+ userId2);
             djRoyaltyMatch1 = new DjRoyaltyMatch();
-            djRoyaltyMatch1.setDataStatus(0);
+            djRoyaltyMatch1.setDataStatus(1);
             djRoyaltyMatch1.setUserId(userId2);
             djRoyaltyMatch1.setOrderStatus(2);
             djRoyaltyMatch1.setHouseId(houseDTO.getHouseId());
@@ -935,7 +935,7 @@ public class HouseService {
             for (DjRoyaltyDetailsSurface ss : list) {
                 if (ss.getStartSingle() <= darList.size() && darList.size() <= ss.getOverSingle()) {
                     DjRoyaltyMatch djRoyaltyMatch1 = new DjRoyaltyMatch();
-                    djRoyaltyMatch1.setDataStatus(0);
+                    djRoyaltyMatch1.setDataStatus(1);
                     djRoyaltyMatch1.setUserId(userId);
                     djRoyaltyMatch1.setOrderStatus(0);
                     djRoyaltyMatch1.setHouseId(houseDTO.getHouseId());
@@ -947,7 +947,7 @@ public class HouseService {
                     djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
                     logger.info("订单数量 在配置范围内时 处理==================="+ userId2);
                     djRoyaltyMatch1 = new DjRoyaltyMatch();
-                    djRoyaltyMatch1.setDataStatus(0);
+                    djRoyaltyMatch1.setDataStatus(1);
                     djRoyaltyMatch1.setUserId(userId2);
                     djRoyaltyMatch1.setOrderStatus(2);
                     djRoyaltyMatch1.setHouseId(houseDTO.getHouseId());
@@ -1016,7 +1016,7 @@ public class HouseService {
             logger.info("444444444444444444444==================="+rds.getOverSingle());
             logger.info("555555555555555555555==================="+rds.getRoyalty());
             DjRoyaltyMatch djRoyaltyMatch1 = new DjRoyaltyMatch();
-            djRoyaltyMatch1.setDataStatus(0);
+            djRoyaltyMatch1.setDataStatus(1);
             djRoyaltyMatch1.setUserId(userId);
             djRoyaltyMatch1.setHouseId(houseId);
             djRoyaltyMatch1.setOrderStatus(0);
@@ -1037,7 +1037,7 @@ public class HouseService {
                     logger.info("444444444444444444444==================="+ss.getOverSingle());
                     logger.info("555555555555555555555==================="+ss.getRoyalty());
                     DjRoyaltyMatch djRoyaltyMatch1 = new DjRoyaltyMatch();
-                    djRoyaltyMatch1.setDataStatus(0);
+                    djRoyaltyMatch1.setDataStatus(1);
                     djRoyaltyMatch1.setUserId(userId);
                     djRoyaltyMatch1.setHouseId(houseId);
                     djRoyaltyMatch1.setOrderStatus(0);

@@ -149,6 +149,9 @@
         <if test="visitState != null">
             and h.visit_state = #{visitState}
         </if>
+        <if test="villageId != null and ''!=villageId">
+            and h.village_id=#{villageId}
+        </if>
         ORDER BY rm.create_date desc
     </select>
 
@@ -183,11 +186,53 @@
         SELECT
             count(0)
         FROM
-            dj_royalty_match
+            dj_royalty_match rm
+        INNER JOIN dj_house h
+        ON rm.house_id = h.id
         WHERE
             user_id =#{userId}
         AND order_status = 0
         AND date_format(create_date,'%Y-%m')=#{time}
+        <if test="building != null and ''!=building">
+            and h.building=#{building}
+        </if>
+        <if test="villageId != null and ''!=villageId">
+            and h.village_id=#{villageId}
+        </if>
+    </select>
+
+
+    <select id="queryVolumeDTO" resultType="com.dangjia.acg.dto.sale.achievement.UserAchievementInfoDTO">
+        SELECT
+            h.id,
+            CONCAT(
+                IFNULL(h.residential, '*'),
+                IFNULL(CONCAT(h.building, '栋'),'*栋'),
+                IFNULL(CONCAT(h.unit, '单元'),'*单元'),
+                IFNULL(CONCAT(h.number, '号'),'*号')
+            ) AS houseName,
+            h.visit_state as visitState
+        FROM
+            dj_royalty_match rm
+        INNER JOIN dj_house h ON rm.house_id = h.id
+        where 1=1
+        <if test="null != userId and '' != userId">
+            and rm.user_id = #{userId}
+        </if>
+        <if test="null != time">
+            and date_format(rm.create_date,'%Y-%m') = #{time}
+        </if>
+        <if test="visitState != null">
+            and h.visit_state = #{visitState}
+        </if>
+        <if test="building != null and ''!=building">
+            and h.building=#{building}
+        </if>
+        <if test="villageId != null and ''!=villageId">
+            and h.village_id=#{villageId}
+        </if>
+        GROUP BY h.id
+        ORDER BY h.modify_date desc
     </select>
 
 </mapper>

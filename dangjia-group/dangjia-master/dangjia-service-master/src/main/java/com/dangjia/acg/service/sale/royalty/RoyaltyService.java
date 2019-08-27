@@ -8,6 +8,7 @@ import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.BaseEntity;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.mapper.sale.*;
 import com.dangjia.acg.modle.sale.royalty.*;
 import com.github.pagehelper.PageHelper;
@@ -16,10 +17,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 提成配置模块
@@ -64,6 +68,7 @@ public class RoyaltyService {
      * @param lists
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse addRoyaltyData(String lists) {
         DjRoyaltySurface djRoyaltySurface = new DjRoyaltySurface();
         JSONArray list = JSON.parseArray(lists);
@@ -139,44 +144,129 @@ public class RoyaltyService {
 
 
     /**
-     * 新增提成信息
+     * 新增楼栋提成信息
      *
      * @param lists
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse addAreaMatch(String lists,
                                        String villageId,
                                        String villageName,
                                        String buildingName,
-                                       String buildingId) {
+                                       String buildingId,
+                                       String resourceId) {
+        if(resourceId != null ){
+            Example example = new Example(DjAreaMatch.class);
+            example.createCriteria().andEqualTo(DjAreaMatch.RESOURCE_ID, resourceId);
+            djAreaMatchMapper.deleteByExample(example);
+
+            Example example1 = new Example(DjAreaMatchSetup.class);
+            example.createCriteria().andEqualTo(DjAreaMatchSetup.RESOURCE_ID, resourceId);
+            djAreaMatchSetupMapper.deleteByExample(example1);
+        }
 
         DjAreaMatch djAreaMatch = new DjAreaMatch();
+        djAreaMatch.setResourceId((int)(Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis());
         djAreaMatch.setVillageId(villageId);
         djAreaMatch.setVillageName(villageName);
-        djAreaMatch.setBuildingId(buildingId);
-        djAreaMatch.setBuildingName(buildingName);
-        djAreaMatch.setVbName(villageName + buildingName);
-        JSONArray list = JSON.parseArray(lists);
-        //插入提成配置总表
-        if (djAreaMatchMapper.insert(djAreaMatch) > 0) {
-            //循环插入提成配置详情表
-            DjAreaMatchSetup djr = new DjAreaMatchSetup();
-            for (int i = 0; i < list.size(); i++) {
-                djr = new DjAreaMatchSetup();
-                djr.setResourceId(djAreaMatch.getId());
-                djr.setCreateDate(new Date());
-                djr.setModifyDate(new Date());
-                JSONObject JS = list.getJSONObject(i);
-                djr.setStartSingle(JS.getInteger("startSingle"));
-                djr.setOverSingle(JS.getInteger("overSingle"));
-                djr.setRoyalty(JS.getInteger("royalty"));
-                djr.setVillageId(villageId);
-                djr.setBuildingId(buildingId);
-                djAreaMatchSetupMapper.insert(djr);
-            }
-            return ServerResponse.createBySuccessMessage("提交成功");
+        JSONArray buildingIds = JSON.parseArray(buildingId);
+        JSONArray buildingNames = JSON.parseArray(buildingName);
+        for (int i = 0; i < buildingIds.size(); i++) {
+            djAreaMatch = new DjAreaMatch();
+            JSONObject bId = buildingIds.getJSONObject(i);
+            JSONObject bName = buildingNames.getJSONObject(i);
+            djAreaMatch.setBuildingId(bId.getString("buildingId"));
+            djAreaMatch.setBuildingName(bName.getString("buildingName"));
+            djAreaMatch.setVbName(villageName + djAreaMatch.getBuildingName());
+            //插入提成配置总表
+            djAreaMatchMapper.insert(djAreaMatch);
         }
-        return ServerResponse.createBySuccessMessage("提交失败");
+
+        JSONArray list = JSON.parseArray(lists);
+        DjAreaMatchSetup djr = new DjAreaMatchSetup();
+        for (int i = 0; i < list.size(); i++) {
+            djr = new DjAreaMatchSetup();
+            djr.setResourceId(djAreaMatch.getResourceId());
+            djr.setCreateDate(new Date());
+            djr.setModifyDate(new Date());
+            JSONObject JS = list.getJSONObject(i);
+            djr.setStartSingle(JS.getInteger("startSingle"));
+            djr.setOverSingle(JS.getInteger("overSingle"));
+            djr.setRoyalty(JS.getInteger("royalty"));
+            djr.setVillageId(villageId);
+            djr.setBuildingId(buildingId);
+            djAreaMatchSetupMapper.insert(djr);
+        }
+        return ServerResponse.createBySuccessMessage("提交成功");
+    }
+
+
+    /**
+     * 查询楼栋配置详情
+     * @param resourceId
+     * @return
+     */
+    public ServerResponse queryAreaMatchInFo(String resourceId){
+        Example example = new Example(DjAreaMatchSetup.class);
+        example.createCriteria().andEqualTo(DjAreaMatchSetup.RESOURCE_ID, resourceId)
+                .andEqualTo(DjAreaMatchSetup.DATA_STATUS, 0);
+        example.orderBy(DjAreaMatchSetup.CREATE_DATE).desc();
+        List<DjAreaMatchSetup> djRoyaltyDetailsSurfaces = djAreaMatchSetupMapper.selectByExample(example);
+        if (djRoyaltyDetailsSurfaces.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+        return ServerResponse.createBySuccess("查询提成列表", djRoyaltyDetailsSurfaces);
+    }
+
+
+    /**
+     * 查询楼栋配置列表
+     * @param villageId
+     * @return
+     */
+    public ServerResponse queryAreaMatch(String villageId){
+        Example example=new Example(DjAreaMatch.class);
+        Example.Criteria criteria = example.createCriteria().andEqualTo(DjAreaMatch.DATA_STATUS, 0);
+        if(!CommonUtil.isEmpty(villageId)){
+            criteria.andEqualTo(DjAreaMatch.VILLAGE_ID,villageId);
+        }
+        return ServerResponse.createBySuccess("查询成功",djAreaMatchMapper.selectByExample(example));
+    }
+
+
+    /**
+     * 删除楼栋配置
+     * @param id
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse delAreaMatch(String id){
+
+        DjAreaMatch djAreaMatch=new DjAreaMatch();
+        djAreaMatch.setId(id);
+        djAreaMatch.setDataStatus(1);
+        djAreaMatchMapper.updateByPrimaryKeySelective(djAreaMatch);
+
+        //查询提成所有信息
+        DjAreaMatch dd = djAreaMatchMapper.selectByPrimaryKey(id);
+        //查询楼栋id
+        Example example = new Example(DjAreaMatch.class);
+        example.createCriteria().andEqualTo(DjAreaMatch.RESOURCE_ID,dd.getResourceId()).
+                andEqualTo(DjAreaMatch.DATA_STATUS, 0);
+        List<DjAreaMatch> list = djAreaMatchMapper.selectByExample(example);
+        String s=null;
+        for (DjAreaMatch ds : list) {
+            s += ds.getResourceId()+",";
+        }
+        String str = s.substring(0, s.length()-1);
+
+        Map<String,Object> map = new HashMap<>();
+        map.put("resourceId",dd.getResourceId());
+        map.put("buildingId",str);
+        djAreaMatchSetupMapper.upDateBuildingId(map);
+
+        return ServerResponse.createBySuccessMessage("删除成功");
     }
 
 
