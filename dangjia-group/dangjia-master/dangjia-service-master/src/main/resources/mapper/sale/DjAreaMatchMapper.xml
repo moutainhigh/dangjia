@@ -6,6 +6,32 @@
 
 
 
+    <select id="commissionAllocation" resultType="com.dangjia.acg.dto.sale.royalty.DjAreaMatchDTO">
+        select
+            start_single as startSingle,
+            over_single as overSingle,
+            royalty,
+            am.building_id as buildingId,
+            am.building_name as buildingName,
+            am.village_id as villageId,
+            am.village_name as villageName
+        from dj_area_match am
+        INNER JOIN dj_area_match_setup ams
+        on am.resource_id=ams.resource_id
+        where am.building_name=#{buildingName}
+        and am.village_id=#{villageId}
+    </select>
+
+    <select id="maxCommissionAllocation" resultType="com.dangjia.acg.dto.sale.royalty.DjAreaMatchDTO">
+        select
+            max(over_single) as overSingle,
+            royalty
+        from dj_area_match am
+        INNER JOIN dj_area_match_setup ams
+        on am.resource_id=ams.resource_id
+        where am.building_name=#{buildingName}
+        and am.village_id=#{villageId}
+    </select>
 
 
 </mapper>
