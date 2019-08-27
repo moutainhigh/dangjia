@@ -10,6 +10,7 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.mapper.sale.*;
+import com.dangjia.acg.modle.sale.residential.ResidentialBuilding;
 import com.dangjia.acg.modle.sale.royalty.*;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -47,6 +48,9 @@ public class RoyaltyService {
     private DjAreaMatchMapper djAreaMatchMapper;
     @Autowired
     private DjAreaMatchSetupMapper djAreaMatchSetupMapper;
+
+    @Autowired
+    private ResidentialBuildingMapper residentialBuildingMapper;
 
     /**
      * 查询提成列表
@@ -170,18 +174,21 @@ public class RoyaltyService {
         djAreaMatch.setResourceId((int)(Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis());
         djAreaMatch.setVillageId(villageId);
         djAreaMatch.setVillageName(villageName);
-        JSONArray buildingIds = JSON.parseArray(buildingId);
-        JSONArray buildingNames = JSON.parseArray(buildingName);
-        for (int i = 0; i < buildingIds.size(); i++) {
+
+        String[] arr = buildingId.split(",");
+
+        for (String s : arr) {
             djAreaMatch = new DjAreaMatch();
-            JSONObject bId = buildingIds.getJSONObject(i);
-            JSONObject bName = buildingNames.getJSONObject(i);
-            djAreaMatch.setBuildingId(bId.getString("buildingId"));
-            djAreaMatch.setBuildingName(bName.getString("buildingName"));
-            djAreaMatch.setVbName(villageName + djAreaMatch.getBuildingName());
+            djAreaMatch.setBuildingId(s);
+            ResidentialBuilding str = residentialBuildingMapper.selectByPrimaryKey(s);
+            if(str != null){
+                djAreaMatch.setBuildingName(str.getBuilding());
+            }
+            djAreaMatch.setVbName(villageName + str.getBuilding());
             //插入提成配置总表
             djAreaMatchMapper.insert(djAreaMatch);
         }
+
 
         JSONArray list = JSON.parseArray(lists);
         DjAreaMatchSetup djr = new DjAreaMatchSetup();
