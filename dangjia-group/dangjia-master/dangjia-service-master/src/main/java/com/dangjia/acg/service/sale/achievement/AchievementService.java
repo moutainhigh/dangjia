@@ -114,7 +114,7 @@ public class AchievementService {
      * @param time
      * @return
      */
-    public ServerResponse queryUserAchievementData(String userToken, Integer visitState, String userId, Date time, String villageId){
+    public ServerResponse queryUserAchievementData(String userToken, Integer visitState, String userId, Date time, String villageId,String building){
 
         Object object = constructionService.getAccessToken(userToken);
         if (object instanceof ServerResponse) {
@@ -140,6 +140,9 @@ public class AchievementService {
         }
         if (!CommonUtil.isEmpty(villageId)) {
             map.put("villageId",villageId);
+        }
+        if (!CommonUtil.isEmpty(building)) {
+            map.put("building",building);
         }
 
         UserAchievementDataDTO userAchievementDataDTO = new UserAchievementDataDTO();
