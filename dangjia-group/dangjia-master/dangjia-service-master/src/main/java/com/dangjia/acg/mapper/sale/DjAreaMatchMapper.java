@@ -23,6 +23,6 @@ public interface DjAreaMatchMapper extends Mapper<DjAreaMatch> {
     List<DjAreaMatchDTO> commissionAllocation(Map<String,Object> map);
 
 
-    DjAreaMatchDTO maxCommissionAllocation();
+    DjAreaMatchDTO maxCommissionAllocation(Map<String,Object> map);
 
 }

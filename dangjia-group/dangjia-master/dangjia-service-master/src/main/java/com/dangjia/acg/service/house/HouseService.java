@@ -635,7 +635,7 @@ public class HouseService {
         djAreaMatchDTOS = djAreaMatchMapper.commissionAllocation(map);
 
         //查询最大订单配置数量
-        DjAreaMatchDTO djAreaMatchDTO = djAreaMatchMapper.maxCommissionAllocation();
+        DjAreaMatchDTO djAreaMatchDTO = djAreaMatchMapper.maxCommissionAllocation(map);
         logger.info("clueList.size()==================="+clueList.size());
         if(clueList.size() == 1){
 
