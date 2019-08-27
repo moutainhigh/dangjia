@@ -192,7 +192,7 @@
         WHERE
             user_id =#{userId}
         AND order_status = 0
-        AND date_format(create_date,'%Y-%m')=#{time}
+        AND date_format(rm.create_date,'%Y-%m')=#{time}
         <if test="building != null and ''!=building">
             and h.building=#{building}
         </if>
