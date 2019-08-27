@@ -109,7 +109,7 @@ public class RoyaltyService {
         Example example = new Example(DjRoyaltyDetailsSurface.class);
         example.createCriteria().andEqualTo(DjRoyaltyDetailsSurface.VILLAGE_ID, id)
                 .andEqualTo(DjRoyaltyDetailsSurface.DATA_STATUS, 0);
-        example.orderBy(DjRoyaltyDetailsSurface.CREATE_DATE).desc();
+        example.orderBy(DjRoyaltyDetailsSurface.START_SINGLE).asc();
         List<DjRoyaltyDetailsSurface> djRoyaltyDetailsSurfaces = royaltyMapper.selectByExample(example);
         if (djRoyaltyDetailsSurfaces.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
@@ -220,7 +220,7 @@ public class RoyaltyService {
         Example example = new Example(DjAreaMatchSetup.class);
         example.createCriteria().andEqualTo(DjAreaMatchSetup.RESOURCE_ID, resourceId)
                 .andEqualTo(DjAreaMatchSetup.DATA_STATUS, 0);
-        example.orderBy(DjAreaMatchSetup.CREATE_DATE).desc();
+        example.orderBy(DjAreaMatchSetup.START_SINGLE).asc();
         List<DjAreaMatchSetup> djRoyaltyDetailsSurfaces = djAreaMatchSetupMapper.selectByExample(example);
 
         DjAreaMatchSetupDTO djAreaMatchSetupDTO = new DjAreaMatchSetupDTO();
@@ -309,7 +309,12 @@ public class RoyaltyService {
         Map<String,Object> map = new HashMap<>();
         map.put("resourceId",dd.getResourceId());
         map.put("buildingId",str);
-        djAreaMatchSetupMapper.upDateBuildingId(map);
+
+        if("".equals(str)){
+            djAreaMatchSetupMapper.deleteBuildingId(map);
+        }else{
+            djAreaMatchSetupMapper.upDateBuildingId(map);
+        }
 
         return ServerResponse.createBySuccessMessage("删除成功");
     }

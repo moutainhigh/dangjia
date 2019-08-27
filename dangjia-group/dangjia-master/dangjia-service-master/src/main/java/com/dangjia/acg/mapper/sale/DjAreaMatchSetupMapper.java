@@ -22,4 +22,11 @@ public interface DjAreaMatchSetupMapper extends Mapper<DjAreaMatchSetup> {
      */
     void upDateBuildingId(Map<String,Object> map);
 
+
+    /**
+     * 删除 楼栋id
+     * @param map
+     */
+    void deleteBuildingId(Map<String,Object> map);
+
 }
