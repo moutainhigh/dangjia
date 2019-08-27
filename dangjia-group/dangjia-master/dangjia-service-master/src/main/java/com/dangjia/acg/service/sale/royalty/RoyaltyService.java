@@ -170,14 +170,10 @@ public class RoyaltyService {
             djAreaMatchSetupMapper.deleteByExample(example1);
         }
 
-        DjAreaMatch djAreaMatch = new DjAreaMatch();
         String resource = ((int)(Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis());
-
-
         String[] arr = buildingId.split(",");
-
         for (String s : arr) {
-            djAreaMatch = new DjAreaMatch();
+            DjAreaMatch djAreaMatch = new DjAreaMatch();
             djAreaMatch.setResourceId(resource);
             djAreaMatch.setVillageId(villageId);
             djAreaMatch.setVillageName(villageName);
