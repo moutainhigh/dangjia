@@ -21,7 +21,9 @@ import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 提成配置模块
@@ -238,29 +240,31 @@ public class RoyaltyService {
      * @param id
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse delAreaMatch(String id){
-
-        DjAreaMatch dd = djAreaMatchMapper.selectByPrimaryKey(id);
 
         DjAreaMatch djAreaMatch=new DjAreaMatch();
         djAreaMatch.setId(id);
         djAreaMatch.setDataStatus(1);
         djAreaMatchMapper.updateByPrimaryKeySelective(djAreaMatch);
 
+        //查询提成所有信息
+        DjAreaMatch dd = djAreaMatchMapper.selectByPrimaryKey(id);
+        //查询楼栋id
         Example example = new Example(DjAreaMatch.class);
-        example.createCriteria().andEqualTo(DjAreaMatch.RESOURCE_ID,dd.getResourceId());
+        example.createCriteria().andEqualTo(DjAreaMatch.RESOURCE_ID,dd.getResourceId()).
+                andEqualTo(DjAreaMatch.DATA_STATUS, 0);
         List<DjAreaMatch> list = djAreaMatchMapper.selectByExample(example);
         String s=null;
         for (DjAreaMatch ds : list) {
             s += ds.getResourceId()+",";
         }
-        s = s.substring(s.lastIndexOf(","));
+        String str = s.substring(0, s.length()-1);
 
-
-        Example ee = new Example(DjAreaMatchSetup.class);
-        ee.createCriteria().andEqualTo(DjAreaMatchSetup.RESOURCE_ID,dd.getResourceId());
-
-
+        Map<String,Object> map = new HashMap<>();
+        map.put("resourceId",dd.getResourceId());
+        map.put("buildingId",str);
+        djAreaMatchSetupMapper.upDateBuildingId(map);
 
         return ServerResponse.createBySuccessMessage("删除成功");
     }
