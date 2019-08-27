@@ -95,7 +95,7 @@ public class RoyaltyController implements RoyaltyAPI {
 
 
     /**
-     *查询提成配置表
+     *查询提成配置列表
      * @return
      */
     @Override
