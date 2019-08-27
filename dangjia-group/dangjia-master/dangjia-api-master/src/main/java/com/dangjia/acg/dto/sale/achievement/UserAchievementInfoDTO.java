@@ -67,12 +67,15 @@ public class UserAchievementInfoDTO implements Serializable {
     @ApiModelProperty("房子名称")
     private String houseName;
 
-//    public String getHouseName() {
-//        return (CommonUtil.isEmpty(getResidential()) ? "*" : getResidential())
-//                + (CommonUtil.isEmpty(getBuilding()) ? "*" : getBuilding()) + "栋"
-//                + (CommonUtil.isEmpty(getUnit()) ? "*" : getUnit()) + "单元"
-//                + (CommonUtil.isEmpty(getNumber()) ? "*" : getNumber()) + "号";
-//    }
+    @ApiModelProperty("房子名称")
+    private String wholeHouse;
+
+    public String getHouseName() {
+        return (CommonUtil.isEmpty(getResidential()) ? "*" : getResidential())
+                + (CommonUtil.isEmpty(getBuilding()) ? "*" : getBuilding()) + "栋"
+                + (CommonUtil.isEmpty(getUnit()) ? "*" : getUnit()) + "单元"
+                + (CommonUtil.isEmpty(getNumber()) ? "*" : getNumber()) + "号";
+    }
 
     public String getVisitStateName() {
         if(null != getVisitState() && 1 == getVisitState()){
