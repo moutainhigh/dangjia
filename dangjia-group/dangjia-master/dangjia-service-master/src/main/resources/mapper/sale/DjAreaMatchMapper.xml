@@ -33,5 +33,13 @@
         and am.village_id=#{villageId}
     </select>
 
+    <select id="queryArr" resultType="com.dangjia.acg.modle.sale.royalty.DjAreaMatch" parameterType="java.util.HashMap">
+    select
+       *
+    from dj_area_match am
+    where data_status = 0
+    and am.resource_id = #{resourceId}
+</select>
+
 
 </mapper>

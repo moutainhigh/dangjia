@@ -2,7 +2,6 @@ package com.dangjia.acg.mapper.sale;
 
 import com.dangjia.acg.dto.sale.royalty.DjAreaMatchDTO;
 import com.dangjia.acg.modle.sale.royalty.DjAreaMatch;
-import com.dangjia.acg.modle.sale.royalty.DjAreaMatchSetup;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
@@ -24,5 +23,8 @@ public interface DjAreaMatchMapper extends Mapper<DjAreaMatch> {
 
 
     DjAreaMatchDTO maxCommissionAllocation(Map<String,Object> map);
+
+    List<DjAreaMatch> queryArr(Map<String,Object> map);
+
 
 }

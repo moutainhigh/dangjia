@@ -291,10 +291,16 @@ public class RoyaltyService {
         //查询提成所有信息
         DjAreaMatch dd = djAreaMatchMapper.selectByPrimaryKey(id);
         //查询楼栋id
-        Example example = new Example(DjAreaMatch.class);
-        example.createCriteria().andEqualTo(DjAreaMatch.RESOURCE_ID,dd.getResourceId()).
-                andEqualTo(DjAreaMatch.DATA_STATUS, 0);
-        List<DjAreaMatch> list = djAreaMatchMapper.selectByExample(example);
+//        Example example = new Example(DjAreaMatch.class);
+//        example.createCriteria().andEqualTo(DjAreaMatch.RESOURCE_ID,dd.getResourceId()).
+//                andEqualTo(DjAreaMatch.DATA_STATUS, 0);
+//        List<DjAreaMatch> list = djAreaMatchMapper.selectByExample(example);
+
+        Map<String,Object> map1 = new HashMap<>();
+        map1.put("resourceId",dd.getResourceId());
+        List<DjAreaMatch> list = djAreaMatchMapper.queryArr(map1);
+        logger.info("list========================================"+list);
+
         String str="";
         if(list.size() > 1){
             String s=null;
