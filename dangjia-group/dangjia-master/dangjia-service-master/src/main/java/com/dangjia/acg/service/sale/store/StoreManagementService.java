@@ -9,10 +9,12 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.sale.residential.ResidentialRangeDTO;
+import com.dangjia.acg.dto.sale.royalty.ResidentialBuildingDTO;
 import com.dangjia.acg.dto.sale.store.StoreUserDTO;
 import com.dangjia.acg.mapper.clue.ClueMapper;
 import com.dangjia.acg.mapper.house.IModelingVillageMapper;
 import com.dangjia.acg.mapper.member.ICustomerMapper;
+import com.dangjia.acg.mapper.sale.DjAreaMatchMapper;
 import com.dangjia.acg.mapper.sale.ResidentialBuildingMapper;
 import com.dangjia.acg.mapper.sale.ResidentialRangeMapper;
 import com.dangjia.acg.mapper.store.IStoreMapper;
@@ -24,6 +26,7 @@ import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Customer;
 import com.dangjia.acg.modle.sale.residential.ResidentialBuilding;
 import com.dangjia.acg.modle.sale.residential.ResidentialRange;
+import com.dangjia.acg.modle.sale.royalty.DjAreaMatch;
 import com.dangjia.acg.modle.store.Store;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.service.config.ConfigMessageService;
@@ -75,6 +78,9 @@ public class StoreManagementService {
     @Autowired
     private UserMapper userMapper;
     private static Logger logger = LoggerFactory.getLogger(RedisSessionDAO.class);
+
+    @Autowired
+    private DjAreaMatchMapper djAreaMatchMapper;
     /**
      * 门店管理页
      *
@@ -381,6 +387,33 @@ public class StoreManagementService {
      */
     public ServerResponse getBuildingByVillageId(String villageId){
         return ServerResponse.createBySuccess("查询成功",residentialBuildingMapper.getBuildingByVillageId(villageId));
+    }
+
+
+    /**
+     * 小区所有楼栋
+     * @param villageId
+     * @return
+     */
+    public ServerResponse getBuildingByVillageIdArr(String villageId){
+
+        ResidentialBuildingDTO dto = new ResidentialBuildingDTO();
+        //根据小区id查询所有楼栋
+        List<ResidentialBuilding> rb = residentialBuildingMapper.getBuildingByVillageId(villageId);
+
+        Example example = new Example(DjAreaMatch.class);
+        example.createCriteria().andEqualTo(DjAreaMatch.VILLAGE_ID, villageId)
+                .andEqualTo(DjAreaMatch.DATA_STATUS, 0);
+        //根据小区id查询已选择楼栋
+        List<DjAreaMatch> list = djAreaMatchMapper.selectByExample(example);
+
+        dto.setRb(rb);
+        dto.setList(list);
+
+        if (dto == null) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+        return ServerResponse.createBySuccess("查询提成列表", dto);
     }
 
 }
