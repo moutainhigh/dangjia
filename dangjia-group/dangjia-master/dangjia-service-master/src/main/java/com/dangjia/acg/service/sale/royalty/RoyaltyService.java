@@ -171,14 +171,16 @@ public class RoyaltyService {
         }
 
         DjAreaMatch djAreaMatch = new DjAreaMatch();
-        djAreaMatch.setResourceId((int)(Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis());
-        djAreaMatch.setVillageId(villageId);
-        djAreaMatch.setVillageName(villageName);
+        String resource = ((int)(Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis());
+
 
         String[] arr = buildingId.split(",");
 
         for (String s : arr) {
             djAreaMatch = new DjAreaMatch();
+            djAreaMatch.setResourceId(resource);
+            djAreaMatch.setVillageId(villageId);
+            djAreaMatch.setVillageName(villageName);
             djAreaMatch.setBuildingId(s);
             ResidentialBuilding str = residentialBuildingMapper.selectByPrimaryKey(s);
             if(str != null){
@@ -194,7 +196,7 @@ public class RoyaltyService {
         DjAreaMatchSetup djr = new DjAreaMatchSetup();
         for (int i = 0; i < list.size(); i++) {
             djr = new DjAreaMatchSetup();
-            djr.setResourceId(djAreaMatch.getResourceId());
+            djr.setResourceId(resource);
             djr.setCreateDate(new Date());
             djr.setModifyDate(new Date());
             JSONObject JS = list.getJSONObject(i);
