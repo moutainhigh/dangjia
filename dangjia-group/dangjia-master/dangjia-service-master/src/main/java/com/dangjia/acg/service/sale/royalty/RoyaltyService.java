@@ -228,10 +228,10 @@ public class RoyaltyService {
         if(!djRoyaltyDetailsSurfaces.isEmpty()){
             //封装楼栋list
             List<Map<Object,Object>> buildingList = new ArrayList<>();
-            Map<Object,Object> BuildingMap  = new HashMap<>();
             String s = djRoyaltyDetailsSurfaces.get(0).getBuildingId();
             String[] arr = s.split(",");
             for (String ss:arr) {
+                Map<Object,Object> BuildingMap  = new HashMap<>();
                 ResidentialBuilding str = residentialBuildingMapper.selectByPrimaryKey(ss);
                 BuildingMap.put("buildingId",ss);
                 BuildingMap.put("buildingName",str.getBuilding());
