@@ -39,7 +39,7 @@ public class DjAreaMatch extends BaseEntity {
     @ApiModelProperty("楼栋id")
     private String buildingId;
 
-    @Column(name = "vbName")
+    @Column(name = "vb_name")
     @Desc(value = "小区楼栋名称")
     @ApiModelProperty("小区楼栋名称")
     private String vbName;
