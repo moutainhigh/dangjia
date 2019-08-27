@@ -152,6 +152,9 @@
         <if test="villageId != null and ''!=villageId">
             and h.village_id=#{villageId}
         </if>
+        <if test="building != null and ''!=building">
+            and h.building=#{building}
+        </if>
         ORDER BY rm.create_date desc
     </select>
 

@@ -36,8 +36,9 @@ public interface AchievementAPI {
                                             @RequestParam("userToken")String userToken,
                                             @RequestParam("visitState") Integer visitState,
                                             @RequestParam("userId") String userId,
-                                            @RequestParam("time") Date time,
-                                            @RequestParam("villageId") String villageId);
+                                            @RequestParam("time") Date time,//时间
+                                            @RequestParam("villageId") String villageId,//小区id
+                                            @RequestParam("building") String building);//楼栋
 
 
     @PostMapping(value = "sale/achievement/volume")
