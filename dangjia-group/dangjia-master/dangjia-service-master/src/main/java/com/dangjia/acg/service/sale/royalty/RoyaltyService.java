@@ -295,11 +295,17 @@ public class RoyaltyService {
         example.createCriteria().andEqualTo(DjAreaMatch.RESOURCE_ID,dd.getResourceId()).
                 andEqualTo(DjAreaMatch.DATA_STATUS, 0);
         List<DjAreaMatch> list = djAreaMatchMapper.selectByExample(example);
-        String s=null;
-        for (DjAreaMatch ds : list) {
-            s += ds.getResourceId()+",";
+        String str="";
+        if(list.size() > 1){
+            String s=null;
+            for (DjAreaMatch ds : list) {
+                s += ds.getBuildingId()+",";
+            }
+            str = s.substring(0, s.length()-1);
+        }else{
+            str = list.get(0).getBuildingId();
         }
-        String str = s.substring(0, s.length()-1);
+
 
         Map<String,Object> map = new HashMap<>();
         map.put("resourceId",dd.getResourceId());
