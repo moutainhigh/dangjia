@@ -88,5 +88,10 @@ public class StoreManagementController implements StoreManagementAPI {
         return storeManagementService.getBuildingByVillageId(villageId);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse getBuildingByVillageIdArr(HttpServletRequest request, String villageId) {
+        return storeManagementService.getBuildingByVillageIdArr(villageId);
+    }
 
 }
