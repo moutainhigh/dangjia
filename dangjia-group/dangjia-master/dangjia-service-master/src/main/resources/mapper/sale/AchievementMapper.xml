@@ -213,7 +213,7 @@
                 IFNULL(CONCAT(h.building, '栋'),'*栋'),
                 IFNULL(CONCAT(h.unit, '单元'),'*单元'),
                 IFNULL(CONCAT(h.number, '号'),'*号')
-            ) AS houseName,
+            ) AS wholeHouse,
             h.visit_state as visitState
         FROM
             dj_royalty_match rm
