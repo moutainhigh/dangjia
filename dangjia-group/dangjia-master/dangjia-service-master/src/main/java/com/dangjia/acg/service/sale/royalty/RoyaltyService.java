@@ -301,7 +301,9 @@ public class RoyaltyService {
         if(list.size() > 1){
             String s=null;
             for (DjAreaMatch ds : list) {
-                s += ds.getBuildingId()+",";
+                if(ds != null){
+                    s += ds.getBuildingId()+",";
+                }
             }
             str = s.substring(0, s.length()-1);
         }
