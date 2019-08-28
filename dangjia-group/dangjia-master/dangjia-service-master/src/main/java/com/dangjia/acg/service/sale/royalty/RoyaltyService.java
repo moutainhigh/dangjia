@@ -163,7 +163,9 @@ public class RoyaltyService {
                                        String buildingName,
                                        String buildingId,
                                        String resourceId) {
-        if(resourceId != null ){
+        logger.info("编辑是删除原来的信息========================================"+!CommonUtil.isEmpty(resourceId));
+        if(!CommonUtil.isEmpty(resourceId)){
+            logger.info("编辑是删除原来的信息1========================================"+resourceId);
             Example example = new Example(DjAreaMatch.class);
             example.createCriteria().andEqualTo(DjAreaMatch.RESOURCE_ID, resourceId);
             djAreaMatchMapper.deleteByExample(example);
