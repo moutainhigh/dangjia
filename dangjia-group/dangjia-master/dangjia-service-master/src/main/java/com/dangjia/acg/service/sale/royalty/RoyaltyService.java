@@ -163,16 +163,18 @@ public class RoyaltyService {
                                        String buildingName,
                                        String buildingId,
                                        String resourceId) {
-        logger.info("编辑是删除原来的信息========================================"+!CommonUtil.isEmpty(resourceId));
+        logger.info("编辑删除原来的信息========================================"+!CommonUtil.isEmpty(resourceId));
         if(!CommonUtil.isEmpty(resourceId)){
-            logger.info("编辑是删除原来的信息1========================================"+resourceId);
+            logger.info("编辑删除原来的信息1========================================"+resourceId);
             Example example = new Example(DjAreaMatch.class);
             example.createCriteria().andEqualTo(DjAreaMatch.RESOURCE_ID, resourceId);
             djAreaMatchMapper.deleteByExample(example);
 
-            Example example1 = new Example(DjAreaMatchSetup.class);
-            example.createCriteria().andEqualTo(DjAreaMatchSetup.RESOURCE_ID, resourceId);
-            djAreaMatchSetupMapper.deleteByExample(example1);
+//            Example example1 = new Example(DjAreaMatchSetup.class);
+//            example.createCriteria().andEqualTo(DjAreaMatchSetup.RESOURCE_ID, resourceId);
+            Map<String,Object> map = new HashMap<>();
+            map.put("resourceId",resourceId);
+            djAreaMatchSetupMapper.deleteBuildingId(map);
         }
 
         String resource = ((int)(Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis());
