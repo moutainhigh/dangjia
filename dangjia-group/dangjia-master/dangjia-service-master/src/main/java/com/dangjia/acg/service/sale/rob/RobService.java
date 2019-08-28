@@ -419,7 +419,8 @@ public class RobService {
                             logger.info("wtd.get(1).getType()=============================="+ wtd.get(1).getType());
                             logger.info("wtd.get(1).getWorkerTypeId()=============================="+ wtd.get(1).getWorkSteta());
                             if(wtd.size() > 0){
-                                workerTypeDTO.setType(Integer.parseInt(wtd.get(0).getWorkerTypeId()));
+                                workerTypeDTO.setWorkerTypeId(wtd.get(0).getWorkerTypeId());
+                                workerTypeDTO.setType(wtd.get(0).getType());
                                 workerTypeDTO.setWorkSteta(wtd.get(0).getWorkSteta());
                                 if(wtd.get(0).getWorkSteta().equals("0")){
                                     workerTypeDTO.setType(3);
