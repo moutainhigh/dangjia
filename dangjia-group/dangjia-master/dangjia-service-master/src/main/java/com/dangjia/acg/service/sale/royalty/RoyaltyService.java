@@ -306,6 +306,8 @@ public class RoyaltyService {
                 }
             }
             str = s.substring(0, s.length()-1);
+        }else if(list.size() ==1){
+            str = list.get(0).getBuildingId();
         }
 
         Map<String,Object> map = new HashMap<>();
