@@ -664,7 +664,7 @@ public class HouseService {
                 logger.info("一个销售人员录入==================="+houseDTO.getHouseId());
                 logger.info("一个销售人员录入==================="+djAreaMatchDTOS);
                 //一个销售人员录入正常分提成
-                djrHouseBuilding(userId,houseDTO.getHouseId(),djAreaMatchDTOS,djAreaMatchDTO);
+                djrHouseBuilding(userId,houseDTO.getHouseId(),djAreaMatchDTOS,djAreaMatchDTO,houseDTO,customer,house);
             }
         }else{
             logger.info("//多个销售人员录入获取未抢到单的销售人员id==================="+userId);
@@ -849,7 +849,7 @@ public class HouseService {
                                 logger.info("抢单的销售单独分配提成==================="+userId);
                                 logger.info("抢单的销售单独分配提成==================="+houseDTO);
                                 logger.info("抢单的销售单独分配提成==================="+djAreaMatchDTOS);
-                                djrHouseBuilding(userId,houseDTO.getHouseId(),djAreaMatchDTOS,djAreaMatchDTO);
+                                djrHouseBuilding(userId,houseDTO.getHouseId(),djAreaMatchDTOS,djAreaMatchDTO,houseDTO,customer,house);
                             }
                         }
                     }
@@ -858,7 +858,7 @@ public class HouseService {
                     logger.info("抢单的销售单独分配提成1==================="+userId);
                     logger.info("抢单的销售单独分配提成1==================="+houseDTO);
                     logger.info("抢单的销售单独分配提成1==================="+djAreaMatchDTOS);
-                    djrHouseBuilding(userId,houseDTO.getHouseId(),djAreaMatchDTOS,djAreaMatchDTO);
+                    djrHouseBuilding(userId,houseDTO.getHouseId(),djAreaMatchDTOS,djAreaMatchDTO,houseDTO,customer,house);
                 }
             }
         }
@@ -1026,7 +1026,8 @@ public class HouseService {
      * @param djAreaMatchDTO
      */
     @Transactional(rollbackFor = Exception.class)
-    public void djrHouseBuilding(String userId,String houseId,List<DjAreaMatchDTO> djAreaMatchDTOS ,DjAreaMatchDTO djAreaMatchDTO){
+    public void djrHouseBuilding(String userId,String houseId,List<DjAreaMatchDTO> djAreaMatchDTOS ,
+                                 DjAreaMatchDTO djAreaMatchDTO,HouseDTO houseDTO,Customer customer,House house){
         logger.info("111111111111111111111==================="+userId);
         Map<String,Object> map = new HashMap<>();
         map.put("userId",userId);
@@ -1075,6 +1076,25 @@ public class HouseService {
                 }
             }
         }
+
+        //第一个销售推送消息  获取线索ID
+        Example example2 = new Example(Clue.class);
+        example2.createCriteria()
+                .andEqualTo(Clue.CUS_SERVICE, userId)
+                .andEqualTo(Clue.DATA_STATUS, 0)
+                .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
+        List<Clue> djAlreadyRobSingle1 = clueMapper.selectByExample(example2);
+        if(djAlreadyRobSingle1.isEmpty()){
+            logger.info("线索id为空==================="+ djAlreadyRobSingle1.get(0).getId());
+        }
+        //消息推送
+        MainUser user = userMapper.selectByPrimaryKey(userId);
+        String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+        configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "开工提醒",
+                "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url
+                        + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle1.get(0).getId(), 1, "4"));
+
+
     }
 
 
@@ -1130,7 +1150,7 @@ public class HouseService {
                 logger.info("一个销售人员录入==================="+houseDTO.getHouseId());
                 logger.info("一个销售人员录入==================="+list);
                 //一个销售人员录入正常分提成
-                djrHouse(userId,houseDTO.getHouseId(),list,rds);
+                djrHouse(userId,houseDTO.getHouseId(),list,rds,houseDTO,customer,house);
             }
         }else{
             logger.info("//多个销售人员录入获取未抢到单的销售人员id==================="+userId);
@@ -1315,7 +1335,7 @@ public class HouseService {
                                 logger.info("抢单的销售单独分配提成==================="+userId);
                                 logger.info("抢单的销售单独分配提成==================="+houseDTO);
                                 logger.info("抢单的销售单独分配提成==================="+list);
-                                djrHouse(userId,houseDTO.getHouseId(),list,rds);
+                                djrHouse(userId,houseDTO.getHouseId(),list,rds,houseDTO,customer,house);
                             }
                         }
                     }
@@ -1324,7 +1344,7 @@ public class HouseService {
                     logger.info("抢单的销售单独分配提成1==================="+userId);
                     logger.info("抢单的销售单独分配提成1==================="+houseDTO);
                     logger.info("抢单的销售单独分配提成1==================="+list);
-                    djrHouse(userId,houseDTO.getHouseId(),list,rds);
+                    djrHouse(userId,houseDTO.getHouseId(),list,rds,houseDTO,customer,house);
                 }
             }
         }
@@ -1491,7 +1511,8 @@ public class HouseService {
      * @param rds
      */
     @Transactional(rollbackFor = Exception.class)
-    public void djrHouse(String userId,String houseId,List<DjRoyaltyDetailsSurface> list,DjRoyaltyDetailsSurface rds){
+    public void djrHouse(String userId,String houseId,List<DjRoyaltyDetailsSurface> list,
+                         DjRoyaltyDetailsSurface rds,HouseDTO houseDTO,Customer customer,House house){
         logger.info("111111111111111111111==================="+userId);
         Map<String,Object> map = new HashMap<>();
         map.put("userId",userId);
@@ -1540,6 +1561,26 @@ public class HouseService {
                 }
             }
         }
+
+
+        //第一个销售推送消息  获取线索ID
+        Example example2 = new Example(Clue.class);
+        example2.createCriteria()
+                .andEqualTo(Clue.CUS_SERVICE, userId)
+                .andEqualTo(Clue.DATA_STATUS, 0)
+                .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
+        List<Clue> djAlreadyRobSingle1 = clueMapper.selectByExample(example2);
+        if(djAlreadyRobSingle1.isEmpty()){
+            logger.info("线索id为空==================="+ djAlreadyRobSingle1.get(0).getId());
+        }
+        //消息推送
+        MainUser user = userMapper.selectByPrimaryKey(userId);
+        String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+        configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "开工提醒",
+                "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url
+                        + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle1.get(0).getId(), 1, "4"));
+
+
     }
 
     public ServerResponse revokeHouse(String userToken) {
