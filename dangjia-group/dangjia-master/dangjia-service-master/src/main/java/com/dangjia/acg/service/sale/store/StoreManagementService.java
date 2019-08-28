@@ -305,7 +305,7 @@ public class StoreManagementService {
             MainUser user = userMapper.selectByPrimaryKey(cusSerice);
             if (user != null && !CommonUtil.isEmpty(user.getMemberId()))
                 configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "分配提醒",
-                        "您收到一个店长分配的客户，请及时跟进。", 0, url
+                        "您收到一个店长分配的客户【 "+ user.getUsername() + "】，请及时跟进。", 0, url
                                 + Utils.getCustomerDetails(clue.getMemberId(), clueId, phaseStatus, "0"));
             return ServerResponse.createBySuccessMessage("分配成功");
         } else {
@@ -327,7 +327,7 @@ public class StoreManagementService {
             MainUser user = userMapper.selectByPrimaryKey(cusSerice);
             if (user != null && !CommonUtil.isEmpty(user.getMemberId()))
                 configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "分配提醒",
-                        "您收到一个店长分配的客户，请及时跟进。", 0, url
+                        "您收到一个店长分配的客户【 "+ user.getUsername() + "】，请及时跟进。", 0, url
                                 + Utils.getCustomerDetails(customer.getMemberId(), clueId, phaseStatus, "1"));
             return ServerResponse.createBySuccessMessage("分配成功");
         }
