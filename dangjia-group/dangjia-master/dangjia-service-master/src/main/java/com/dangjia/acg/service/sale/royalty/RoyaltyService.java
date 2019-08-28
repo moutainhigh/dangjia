@@ -299,7 +299,7 @@ public class RoyaltyService {
 
         String str="";
         if(list.size() > 1){
-            String s=null;
+            String s="";
             for (DjAreaMatch ds : list) {
                 if(ds != null){
                     s += ds.getBuildingId()+",";
