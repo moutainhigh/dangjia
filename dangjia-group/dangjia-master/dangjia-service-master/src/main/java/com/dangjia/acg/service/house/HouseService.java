@@ -650,7 +650,8 @@ public class HouseService {
                     if(!residentialRange.getUserId().equals(userId)){
                         //判断销售所选楼栋是否在自己楼栋范围内 不在则跟选择的楼栋范围销售分提成
                         logger.info("判断销售所选楼栋是否在自己楼栋范围内 分提成==================="+residentialRange.getUserId());
-                        djHouseBuilding(userId,residentialRange.getUserId(),djAreaMatchDTO,djAreaMatchDTOS,houseDTO,customer,house);
+                        int flag =0;//判断销售所选楼栋是否在自己楼栋范围内
+                        djHouseBuilding(userId,residentialRange.getUserId(),djAreaMatchDTO,djAreaMatchDTOS,houseDTO,customer,house,flag);
                         return;
                     }
                 }
@@ -658,7 +659,8 @@ public class HouseService {
             if(!CommonUtil.isEmpty(clueList.get(0).getCrossDomainUserId())){
                 logger.info("跨域下单分提成==================="+clueList.get(0).getCrossDomainUserId());
                 //跨域下单分提成
-                djHouseBuilding(userId,clueList.get(0).getCrossDomainUserId(),djAreaMatchDTO,djAreaMatchDTOS,houseDTO,customer,house);
+                int flag =1; //跨域下单分提成
+                djHouseBuilding(userId,clueList.get(0).getCrossDomainUserId(),djAreaMatchDTO,djAreaMatchDTOS,houseDTO,customer,house,flag);
             }else{
                 logger.info("一个销售人员录入==================="+userId);
                 logger.info("一个销售人员录入==================="+houseDTO.getHouseId());
@@ -842,7 +844,8 @@ public class HouseService {
                                 if(!residentialRange1.getUserId().equals(userId)){
                                     //判断销售所选楼栋是否在自己楼栋范围内 不在则跟选择的楼栋范围销售分提成
                                     logger.info("判断销售所选楼栋是否在自己楼栋范围内 分提成==================="+residentialRange.getUserId());
-                                    djHouseBuilding(userId,residentialRange1.getUserId(),djAreaMatchDTO,djAreaMatchDTOS,houseDTO,customer,house);
+                                    int flag =0 ;//0 :判断销售所选楼栋是否在自己楼栋范围内
+                                    djHouseBuilding(userId,residentialRange1.getUserId(),djAreaMatchDTO,djAreaMatchDTOS,houseDTO,customer,house,flag);
                                 }
                             }else{
                                 //抢单的销售单独分配提成
@@ -876,7 +879,7 @@ public class HouseService {
      * @param house
      */
     public void djHouseBuilding(String userId,String userId2, DjAreaMatchDTO djAreaMatchDTO,List<DjAreaMatchDTO>djAreaMatchDTOS,
-                        HouseDTO houseDTO,Customer customer,House house){
+                        HouseDTO houseDTO,Customer customer,House house,int flag){
         //跨域下单分提成
         logger.info("跨域下单分提成==================="+userId);
         logger.info("跨域下单分提成==================="+houseDTO.getHouseId());
@@ -933,21 +936,44 @@ public class HouseService {
 
 
             //第二个销售推送消息  获取线索ID
-            Example example3 = new Example(Clue.class);
-            example3.createCriteria()
-                    .andEqualTo(Clue.CUS_SERVICE, userId2)
-                    .andEqualTo(Clue.DATA_STATUS, 0)
-                    .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
-            List<Clue> djAlreadyRobSingle2 = clueMapper.selectByExample(example3);
-            if(!djAlreadyRobSingle2.isEmpty()){
-                logger.info("线索id为空==================="+ djAlreadyRobSingle2.get(0).getId());
-                //消息推送
-                MainUser user1 = userMapper.selectByPrimaryKey(userId2);
-                String url1 = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
-                configMessageService.addConfigMessage(AppType.SALE, user1.getMemberId(), "开工提醒",
-                        "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url1
-                                + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle2.get(0).getId(), 1, "4"));
+            if(flag == 1){
+                //跨域下单推送消息
+                MainUser us = userMapper.selectByPrimaryKey(userId2);
+                List<Customer> ms = iCustomerMapper.getCustomerMemberIdList(house.getMemberId());
+                if (ms != null) {
+                    for (Customer m : ms) {
+                        configMessageService.addConfigMessage(AppType.SALE, m.getMemberId(), "开工提醒",
+                                "您的跨域客户【" + us.getUsername() + "】已确认开工，请及时查看提成。", 6);
+                    }
+                }
+
+            }else{
+                //销售所选楼栋是否在自己楼栋范围内推送消息
+                List<Customer> ms = iCustomerMapper.getCustomerMemberIdList(house.getMemberId());
+                if (ms != null) {
+                    for (Customer m : ms) {
+                        configMessageService.addConfigMessage(AppType.SALE, m.getMemberId(), "开工提醒",
+                                "您有一个归于您的客户【" + house.getHouseName() + "】已确认开工，请及时查看提成。", 6);
+                    }
+                }
             }
+
+
+//            Example example3 = new Example(Clue.class);
+//            example3.createCriteria()
+//                    .andEqualTo(Clue.CUS_SERVICE, userId2)
+//                    .andEqualTo(Clue.DATA_STATUS, 0)
+//                    .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
+//            List<Clue> djAlreadyRobSingle2 = clueMapper.selectByExample(example3);
+//            if(!djAlreadyRobSingle2.isEmpty()){
+//                logger.info("线索id为空==================="+ djAlreadyRobSingle2.get(0).getId());
+//                //消息推送
+//                MainUser user1 = userMapper.selectByPrimaryKey(userId2);
+//                String url1 = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+//                configMessageService.addConfigMessage(AppType.SALE, user1.getMemberId(), "开工提醒",
+//                        "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url1
+//                                + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle2.get(0).getId(), 1, "4"));
+//            }
         }else{
             //订单数量 在配置范围内时 处理
             logger.info("订单数量 在配置范围内时 处理==================="+ userId);
@@ -995,21 +1021,45 @@ public class HouseService {
                                     + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle1.get(0).getId(), 1, "4"));
 
                     //第二个销售推送消息  获取线索ID
-                    Example example3 = new Example(Clue.class);
-                    example3.createCriteria()
-                            .andEqualTo(Clue.CUS_SERVICE, userId2)
-                            .andEqualTo(Clue.DATA_STATUS, 0)
-                            .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
-                    List<Clue> djAlreadyRobSingle2 = clueMapper.selectByExample(example3);
-                    if(!djAlreadyRobSingle2.isEmpty()){
-                        logger.info("线索id为空==================="+ djAlreadyRobSingle2.get(0).getId());
-                        //消息推送
-                        MainUser user1 = userMapper.selectByPrimaryKey(userId2);
-                        String url1 = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
-                        configMessageService.addConfigMessage(AppType.SALE, user1.getMemberId(), "开工提醒",
-                                "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url1
-                                        + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle2.get(0).getId(), 1, "4"));
+                    if(flag == 1){
+                        //跨域下单推送消息
+                        MainUser us = userMapper.selectByPrimaryKey(userId2);
+                        List<Customer> ms = iCustomerMapper.getCustomerMemberIdList(house.getMemberId());
+                        if (ms != null) {
+                            for (Customer m : ms) {
+                                configMessageService.addConfigMessage(AppType.SALE, m.getMemberId(), "开工提醒",
+                                        "您的跨域客户【" + us.getUsername() + "】已确认开工，请及时查看提成。", 6);
+                            }
+                        }
+
+                    }else{
+                        //销售所选楼栋是否在自己楼栋范围内推送消息
+                        List<Customer> ms = iCustomerMapper.getCustomerMemberIdList(house.getMemberId());
+                        if (ms != null) {
+                            for (Customer m : ms) {
+                                configMessageService.addConfigMessage(AppType.SALE, m.getMemberId(), "开工提醒",
+                                        "您有一个归于您的客户【" + house.getHouseName() + "】已确认开工，请及时查看提成。", 6);
+                            }
+                        }
                     }
+
+
+
+//                    Example example3 = new Example(Clue.class);
+//                    example3.createCriteria()
+//                            .andEqualTo(Clue.CUS_SERVICE, userId2)
+//                            .andEqualTo(Clue.DATA_STATUS, 0)
+//                            .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
+//                    List<Clue> djAlreadyRobSingle2 = clueMapper.selectByExample(example3);
+//                    if(!djAlreadyRobSingle2.isEmpty()){
+//                        logger.info("线索id为空==================="+ djAlreadyRobSingle2.get(0).getId());
+//                        //消息推送
+//                        MainUser user1 = userMapper.selectByPrimaryKey(userId2);
+//                        String url1 = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+//                        configMessageService.addConfigMessage(AppType.SALE, user1.getMemberId(), "开工提醒",
+//                                "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url1
+//                                        + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle2.get(0).getId(), 1, "4"));
+//                    }
 
                 }
             }
@@ -1136,7 +1186,8 @@ public class HouseService {
                     if(!residentialRange.getUserId().equals(userId)){
                         //判断销售所选楼栋是否在自己楼栋范围内 不在则跟选择的楼栋范围销售分提成
                         logger.info("判断销售所选楼栋是否在自己楼栋范围内 分提成==================="+residentialRange.getUserId());
-                        djHouse(userId,residentialRange.getUserId(),rds,list,houseDTO,customer,house);
+                        int flag =0 ;//0 :判断销售所选楼栋是否在自己楼栋范围内 分提成
+                        djHouse(userId,residentialRange.getUserId(),rds,list,houseDTO,customer,house,flag);
                         return;
                     }
                 }
@@ -1144,7 +1195,8 @@ public class HouseService {
             if(!CommonUtil.isEmpty(clueList.get(0).getCrossDomainUserId())){
                 logger.info("跨域下单分提成==================="+clueList.get(0).getCrossDomainUserId());
                 //跨域下单分提成
-                djHouse(userId,clueList.get(0).getCrossDomainUserId(),rds,list,houseDTO,customer,house);
+                int flag =1 ;//1 :判断跨域下单分提成
+                djHouse(userId,clueList.get(0).getCrossDomainUserId(),rds,list,houseDTO,customer,house,flag);
             }else{
                 logger.info("一个销售人员录入==================="+userId);
                 logger.info("一个销售人员录入==================="+houseDTO.getHouseId());
@@ -1328,7 +1380,8 @@ public class HouseService {
                                 if(!residentialRange1.getUserId().equals(userId)){
                                     //判断销售所选楼栋是否在自己楼栋范围内 不在则跟选择的楼栋范围销售分提成
                                     logger.info("判断销售所选楼栋是否在自己楼栋范围内 分提成==================="+residentialRange.getUserId());
-                                    djHouse(userId,residentialRange1.getUserId(),rds,list,houseDTO,customer,house);
+                                    int flag =0 ;//0 :判断销售所选楼栋是否在自己楼栋范围内 分提成
+                                    djHouse(userId,residentialRange1.getUserId(),rds,list,houseDTO,customer,house,flag);
                                 }
                             }else{
                                 //抢单的销售单独分配提成
@@ -1362,7 +1415,7 @@ public class HouseService {
      * @param house
      */
     public void djHouse(String userId,String userId2,DjRoyaltyDetailsSurface rds,List<DjRoyaltyDetailsSurface> list,
-                        HouseDTO houseDTO,Customer customer,House house){
+                        HouseDTO houseDTO,Customer customer,House house,int flag){
 
         //跨域下单分提成
         logger.info("跨域下单分提成==================="+userId);
@@ -1418,23 +1471,46 @@ public class HouseService {
                     "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url
                             + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle1.get(0).getId(), 1, "4"));
 
+            if(flag == 1){
+                //跨域下单推送消息
+                MainUser us = userMapper.selectByPrimaryKey(userId2);
+                List<Customer> ms = iCustomerMapper.getCustomerMemberIdList(house.getMemberId());
+                if (ms != null) {
+                    for (Customer m : ms) {
+                        configMessageService.addConfigMessage(AppType.SALE, m.getMemberId(), "开工提醒",
+                                "您的跨域客户【" + us.getUsername() + "】已确认开工，请及时查看提成。", 6);
+                    }
+                }
 
-            //第二个销售推送消息  获取线索ID
-            Example example3 = new Example(Clue.class);
-            example3.createCriteria()
-                    .andEqualTo(Clue.CUS_SERVICE, userId2)
-                    .andEqualTo(Clue.DATA_STATUS, 0)
-                    .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
-            List<Clue> djAlreadyRobSingle2 = clueMapper.selectByExample(example3);
-            if(!djAlreadyRobSingle2.isEmpty()){
-                logger.info("线索id为空==================="+ djAlreadyRobSingle2.get(0).getId());
-                //消息推送
-                MainUser user1 = userMapper.selectByPrimaryKey(userId2);
-                String url1 = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
-                configMessageService.addConfigMessage(AppType.SALE, user1.getMemberId(), "开工提醒",
-                        "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url1
-                                + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle2.get(0).getId(), 1, "4"));
+            }else{
+                //销售所选楼栋是否在自己楼栋范围内推送消息
+                List<Customer> ms = iCustomerMapper.getCustomerMemberIdList(house.getMemberId());
+                if (ms != null) {
+                    for (Customer m : ms) {
+                        configMessageService.addConfigMessage(AppType.SALE, m.getMemberId(), "开工提醒",
+                                "您有一个归于您的客户【" + house.getHouseName() + "】已确认开工，请及时查看提成。", 6);
+                    }
+                }
             }
+
+
+
+
+//            Example example3 = new Example(Clue.class);
+//            example3.createCriteria()
+//                    .andEqualTo(Clue.CUS_SERVICE, userId2)
+//                    .andEqualTo(Clue.DATA_STATUS, 0)
+//                    .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
+//            List<Clue> djAlreadyRobSingle2 = clueMapper.selectByExample(example3);
+//            if(!djAlreadyRobSingle2.isEmpty()){
+//                logger.info("线索id为空==================="+ djAlreadyRobSingle2.get(0).getId());
+//                //消息推送
+//                MainUser user1 = userMapper.selectByPrimaryKey(userId2);
+//                String url1 = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+//                configMessageService.addConfigMessage(AppType.SALE, user1.getMemberId(), "开工提醒",
+//                        "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url1
+//                                + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle2.get(0).getId(), 1, "4"));
+//            }
         }else{
             //订单数量 在配置范围内时 处理
             logger.info("订单数量 在配置范围内时 处理==================="+ userId);
@@ -1481,22 +1557,46 @@ public class HouseService {
                             "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url
                                     + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle1.get(0).getId(), 1, "4"));
 
+
                     //第二个销售推送消息  获取线索ID
-                    Example example3 = new Example(Clue.class);
-                    example3.createCriteria()
-                            .andEqualTo(Clue.CUS_SERVICE, userId2)
-                            .andEqualTo(Clue.DATA_STATUS, 0)
-                            .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
-                    List<Clue> djAlreadyRobSingle2 = clueMapper.selectByExample(example3);
-                    if(!djAlreadyRobSingle2.isEmpty()){
-                        logger.info("线索id为空==================="+ djAlreadyRobSingle2.get(0).getId());
-                        //消息推送
-                        MainUser user1 = userMapper.selectByPrimaryKey(userId2);
-                        String url1 = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
-                        configMessageService.addConfigMessage(AppType.SALE, user1.getMemberId(), "开工提醒",
-                                "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url1
-                                        + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle2.get(0).getId(), 1, "4"));
+                    if(flag == 1){
+                        //跨域下单推送消息
+                        MainUser us = userMapper.selectByPrimaryKey(userId2);
+                        List<Customer> ms = iCustomerMapper.getCustomerMemberIdList(house.getMemberId());
+                        if (ms != null) {
+                            for (Customer m : ms) {
+                                configMessageService.addConfigMessage(AppType.SALE, m.getMemberId(), "开工提醒",
+                                        "您的跨域客户【" + us.getUsername() + "】已确认开工，请及时查看提成。", 6);
+                            }
+                        }
+
+                    }else{
+                        //销售所选楼栋是否在自己楼栋范围内推送消息
+                        List<Customer> ms = iCustomerMapper.getCustomerMemberIdList(house.getMemberId());
+                        if (ms != null) {
+                            for (Customer m : ms) {
+                                configMessageService.addConfigMessage(AppType.SALE, m.getMemberId(), "开工提醒",
+                                        "您有一个归于您的客户【" + house.getHouseName() + "】已确认开工，请及时查看提成。", 6);
+                            }
+                        }
                     }
+
+
+//                    Example example3 = new Example(Clue.class);
+//                    example3.createCriteria()
+//                            .andEqualTo(Clue.CUS_SERVICE, userId2)
+//                            .andEqualTo(Clue.DATA_STATUS, 0)
+//                            .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
+//                    List<Clue> djAlreadyRobSingle2 = clueMapper.selectByExample(example3);
+//                    if(!djAlreadyRobSingle2.isEmpty()){
+//                        logger.info("线索id为空==================="+ djAlreadyRobSingle2.get(0).getId());
+//                        //消息推送
+//                        MainUser user1 = userMapper.selectByPrimaryKey(userId2);
+//                        String url1 = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+//                        configMessageService.addConfigMessage(AppType.SALE, user1.getMemberId(), "开工提醒",
+//                                "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url1
+//                                        + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle1.get(0).getId(), 1, "4"));
+//                    }
 
                 }
             }
