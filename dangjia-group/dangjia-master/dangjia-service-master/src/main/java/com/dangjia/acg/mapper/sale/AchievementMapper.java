@@ -3,6 +3,7 @@ package com.dangjia.acg.mapper.sale;
 import com.dangjia.acg.dto.sale.achievement.AchievementInfoDTO;
 import com.dangjia.acg.dto.sale.achievement.UserAchievementInfoDTO;
 import com.dangjia.acg.dto.sale.achievement.VolumeDTO;
+import com.dangjia.acg.modle.sale.royalty.DjAreaMatch;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
@@ -74,7 +75,8 @@ public interface AchievementMapper {
                  @Param("time") String time ,
                  @Param("building") String building,
                  @Param("villageId") String villageId,
-                 @Param("visitState") Integer visitState);
+                 @Param("visitState") Integer visitState,
+                 @Param("buildings") List<DjAreaMatch> buildings);
 
 
     /**
