@@ -242,7 +242,6 @@
         FROM
         `dj_house_modeling_village` mv ,dj_house h
         inner join
-        inner join
         (
         SELECT
         a.house_id,
