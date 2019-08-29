@@ -234,6 +234,12 @@
         <if test="villageId != null and ''!=villageId">
             and h.village_id=#{villageId}
         </if>
+        <if test="visitState == '1'">
+            and h.building not in
+            <foreach collection="buildings" index="index" item="item" open="(" separator="," close=")">
+                #{item.buildingName}
+            </foreach>
+        </if>
         GROUP BY h.id
         ORDER BY h.modify_date desc
     </select>

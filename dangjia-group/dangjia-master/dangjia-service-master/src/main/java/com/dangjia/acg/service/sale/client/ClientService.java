@@ -253,6 +253,12 @@ public class ClientService {
             return ServerResponse.createbyUserTokenError();
         }
         String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+        Example example=new Example(Clue.class);
+        example.createCriteria().andEqualTo(Clue.PHONE,clue.getPhone())
+                .andEqualTo(Clue.CLUE_TYPE,1);
+        if(clueMapper.selectByExample(example).size()>0){
+            return ServerResponse.createByErrorMessage("手机号已存在");
+        }
         ModelingVillage modelingVillage = iModelingVillageMapper.selectByPrimaryKey(villageId);
         if (modelingVillage == null) {
             clue.setClueType(1);
@@ -291,7 +297,7 @@ public class ClientService {
 
         }
         //转入给对应的销售
-        Example example = new Example(StoreUser.class);
+        example = new Example(StoreUser.class);
         example.createCriteria().andEqualTo(StoreUser.USER_ID, residentialRange.getUserId())
                 .andEqualTo(Store.DATA_STATUS, 0);
         List<StoreUser> storeUsers = iStoreUserMapper.selectByExample(example);
