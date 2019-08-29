@@ -255,7 +255,7 @@
         a.house_id
         ORDER BY
         create_date DESC
-        ) b ON  b.house_id=h.id/*筛选调无施工记录的房子*/
+        ) b ON  b.house_id=h.id
         WHERE
         mv.id=h.village_id
         AND mv.locationx IS NOT NULL
