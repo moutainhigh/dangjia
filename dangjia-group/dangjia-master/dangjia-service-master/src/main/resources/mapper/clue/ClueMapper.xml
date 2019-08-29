@@ -700,7 +700,7 @@
         on c.member_id=mc.member_id
         set c.store_id=#{storeId},
         mc.store_id=#{storeId},
-        mc.modify_date = #{date}
+        mc.modify_date = now()
         where c.member_id=#{memberId}
     </update>
 

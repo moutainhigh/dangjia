@@ -15,7 +15,6 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -92,7 +91,7 @@ public interface ClueMapper extends Mapper<Clue> {
 
     List<GrabSheetDTO> notEnteredGrabSheet();
 
-    int setDistribution(@Param("storeId") String storeId, @Param("memberId") String memberId,@Param("date") Date date);
+    int setDistribution(@Param("storeId") String storeId, @Param("memberId") String memberId);
 
     int updateStoreUser(@Param("userId") String userId,@Param("storeId") String storeId);
 }
