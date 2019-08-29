@@ -25,6 +25,7 @@ import com.dangjia.acg.dto.design.QuantityRoomDTO;
 import com.dangjia.acg.dto.house.*;
 import com.dangjia.acg.dto.repair.HouseProfitSummaryDTO;
 import com.dangjia.acg.dto.sale.royalty.DjAreaMatchDTO;
+import com.dangjia.acg.dto.sale.store.OrderStoreDTO;
 import com.dangjia.acg.mapper.clue.ClueMapper;
 import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.house.*;
@@ -38,6 +39,7 @@ import com.dangjia.acg.mapper.other.ICityMapper;
 import com.dangjia.acg.mapper.other.IWorkDepositMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.mapper.sale.*;
+import com.dangjia.acg.mapper.store.IStoreMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.clue.Clue;
@@ -179,6 +181,8 @@ public class HouseService {
     protected static final Logger LOG = LoggerFactory.getLogger(HouseService.class);
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private IStoreMapper iStoreMapper;
 
     @Autowired
     private RobService robService;
@@ -1832,6 +1836,8 @@ public class HouseService {
         example.createCriteria().andEqualTo(Customer.MEMBER_ID,member.getId())
                 .andIsNull(Customer.USER_ID);
         if(iCustomerMapper.selectByExample(example).size()>0) {
+            List<OrderStoreDTO> orderStore = iStoreMapper.getOrderStore(latitude, longitude);
+            clueMapper.setDistribution(orderStore.get(0).getStoreId(), member.getId());
             robService.notEnteredGrabSheet();
         }
 
