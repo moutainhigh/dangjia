@@ -835,7 +835,7 @@ public class RobService {
 //                for (int i = 0; i < orderStore.size(); i++) {
 //                    orderStore.get(i).setRobDate(djRobSingles.get(i).getRobDate());
 //                }
-                for (int i = 0; i < djRobSingles.size(); i++) {
+                for (int i = 1; i < djRobSingles.size(); i++) {
                     orderStore.get(i).setRobDate(djRobSingles.get(i).getRobDate());
                 }
                 logger.info("orderStore==================================="+orderStore);
