@@ -140,6 +140,7 @@
         inner join dj_house h
         on rm.house_id=h.id
         where 1=1
+        and rm.data_status=0
         <if test="null != userId and '' != userId">
             and rm.user_id = #{userId}
         </if>
