@@ -753,6 +753,7 @@ public class RobService {
                         iMemberMapper.updateByPrimaryKeySelective(member);
                     }
                     clue.setCreateDate(null);
+                    clue.setMemberId(null);
                     clueMapper.updateByPrimaryKeySelective(clue);
                     return ServerResponse.createBySuccessMessage("修改成功");
                 }
