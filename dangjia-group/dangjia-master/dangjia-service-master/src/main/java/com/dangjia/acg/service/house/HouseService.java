@@ -1488,8 +1488,6 @@ public class HouseService {
             }
 
 
-
-
 //            Example example3 = new Example(Clue.class);
 //            example3.createCriteria()
 //                    .andEqualTo(Clue.CUS_SERVICE, userId2)

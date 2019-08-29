@@ -219,6 +219,7 @@
             dj_royalty_match rm
         INNER JOIN dj_house h ON rm.house_id = h.id
         where 1=1
+        and rm.order_status=0
         <if test="null != userId and '' != userId">
             and rm.user_id = #{userId}
         </if>
@@ -240,7 +241,6 @@
                 #{item.buildingName}
             </foreach>
         </if>
-        GROUP BY h.id
         ORDER BY h.modify_date desc
     </select>
 
