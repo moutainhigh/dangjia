@@ -298,14 +298,22 @@ public class StoreManagementService {
             if (clue == null) {
                 return ServerResponse.createByErrorMessage("找不到此线索");
             }
+
             clue.setCusService(cusSerice);
             clue.setStage(1);
             clue.setModifyDate(new Date());
             clueMapper.updateByPrimaryKeySelective(clue);
             MainUser user = userMapper.selectByPrimaryKey(cusSerice);
+
+            String owername = "";
+            if(!CommonUtil.isEmpty(clue.getOwername()) ){
+                owername = clue.getOwername();
+            }else{
+                owername = "线索客户";
+            }
             if (user != null && !CommonUtil.isEmpty(user.getMemberId()))
                 configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "分配提醒",
-                        "您收到一个店长分配的客户【 "+ user.getUsername() + "】，请及时跟进。", 0, url
+                        "您收到一个店长分配的客户【 "+ owername + "】，请及时跟进。", 0, url
                                 + Utils.getCustomerDetails(clue.getMemberId(), clueId, phaseStatus, "0"));
             return ServerResponse.createBySuccessMessage("分配成功");
         } else {

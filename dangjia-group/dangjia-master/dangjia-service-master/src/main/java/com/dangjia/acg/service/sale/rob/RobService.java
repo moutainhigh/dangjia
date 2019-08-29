@@ -415,9 +415,10 @@ public class RobService {
                             List<WorkerTypeDTO> wtd = iMemberLabelMapper.queryType(to.getHouseId());
                             logger.info("wtd=============================="+ wtd);
                             logger.info("wtd.get(0).getType()=============================="+ wtd.get(0).getType());
-                            logger.info("wtd.get(0).getWorkerTypeId()=============================="+ wtd.get(0).getWorkSteta());
+                            logger.info("wtd.get(0).getWorkerTypeId()=============================="+ wtd.get(0).getWorkerTypeId());
+                            logger.info("wtd.get(0).getWorkSteta()=============================="+ wtd.get(0).getWorkSteta());
                             logger.info("wtd.get(1).getType()=============================="+ wtd.get(1).getType());
-                            logger.info("wtd.get(1).getWorkerTypeId()=============================="+ wtd.get(1).getWorkSteta());
+                            logger.info("wtd.get(1).getWorkSteta()=============================="+ wtd.get(1).getWorkSteta());
                             if(wtd.size() > 0){
                                 workerTypeDTO.setWorkerTypeId(wtd.get(0).getWorkerTypeId());
                                 workerTypeDTO.setType(wtd.get(0).getType());

@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.core;
 
+import com.dangjia.acg.auth.config.RedisSessionDAO;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
@@ -10,6 +11,7 @@ import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.HouseFlowApplyDTO;
+import com.dangjia.acg.mapper.clue.ClueMapper;
 import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.deliver.IOrderSplitMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
@@ -19,12 +21,15 @@ import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.mapper.safe.IWorkerTypeSafeMapper;
 import com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper;
+import com.dangjia.acg.mapper.sale.ResidentialBuildingMapper;
+import com.dangjia.acg.mapper.sale.ResidentialRangeMapper;
+import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.mapper.worker.IEvaluateMapper;
 import com.dangjia.acg.mapper.worker.IWorkIntegralMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
+import com.dangjia.acg.modle.clue.Clue;
 import com.dangjia.acg.modle.core.*;
 import com.dangjia.acg.modle.deliver.OrderSplit;
-import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.matter.TechnologyRecord;
 import com.dangjia.acg.modle.member.Customer;
@@ -32,12 +37,17 @@ import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.safe.WorkerTypeSafe;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
+import com.dangjia.acg.modle.sale.residential.ResidentialBuilding;
+import com.dangjia.acg.modle.sale.residential.ResidentialRange;
+import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.modle.worker.Evaluate;
 import com.dangjia.acg.modle.worker.WorkIntegral;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -96,8 +106,17 @@ public class HouseFlowApplyService {
     private ConfigMessageService configMessageService;
     @Autowired
     private ICustomerMapper iCustomerMapper;
+    @Autowired
+    private ClueMapper clueMapper;
+    @Autowired
+    private ResidentialRangeMapper residentialRangeMapper;
+    @Autowired
+    private ResidentialBuildingMapper residentialBuildingMapper;
 
+    @Autowired
+    private UserMapper userMapper;
 
+    private static Logger logger = LoggerFactory.getLogger(RedisSessionDAO.class);
     /**
      * 工匠端工地记录
      */
@@ -820,6 +839,46 @@ public class HouseFlowApplyService {
                             "您的客户【" + house.getHouseName() + "】已竣工，请及时查看提成。", 6);
                 }
             }
+
+
+            Example ex = new Example(Clue.class);
+            ex.createCriteria().andEqualTo(Clue.MEMBER_ID, house.getMemberId())
+                    .andEqualTo(Clue.DATA_STATUS, 0);
+            List<Clue> clueList = clueMapper.selectByExample(ex);
+            ResidentialBuilding residentialBuilding = residentialBuildingMapper.selectSingleResidentialBuilding(null, house.getBuilding(), house.getVillageId());
+            if (null != residentialBuilding) {   //判断楼栋是否存在
+                ResidentialRange residentialRange = residentialRangeMapper.selectSingleResidentialRange(residentialBuilding.getId());
+                if (null != residentialRange) {    //楼栋是否分配销售
+                    if(!residentialRange.getUserId().equals(clueList.get(0).getCusService())){
+                        //判断销售所选楼栋是否在自己楼栋范围内 不在则跟选择的楼栋范围销售分提成  推送消息
+                        logger.info("有一个归于您的客户【房子地址】已竣工==================="+residentialRange.getUserId());
+                        List<Customer> mss = iCustomerMapper.getCustomerMemberIdList(house.getMemberId());
+                        if (mss != null) {
+                            for (Customer m : mss) {
+                                configMessageService.addConfigMessage(AppType.SALE, m.getMemberId(), "开工提醒",
+                                        "您有一个归于您的客户【" + house.getHouseName() + "】已确认开工，请及时查看提成。", 6);
+                            }
+                        }
+                    }
+                }
+            }
+
+            if(clueList.size() == 1){
+                if(!CommonUtil.isEmpty(clueList.get(0).getCrossDomainUserId())){
+                    logger.info("您的跨域客户【客户名称】已竣工==================="+clueList.get(0).getCrossDomainUserId());
+                    //跨域下单推送消息
+                    MainUser us = userMapper.selectByPrimaryKey(clueList.get(0).getCusService());
+                    List<Customer> msa = iCustomerMapper.getCustomerMemberIdList(house.getMemberId());
+                    if (msa != null) {
+                        for (Customer m : msa) {
+                            configMessageService.addConfigMessage(AppType.SALE, m.getMemberId(), "开工提醒",
+                                    "您的跨域客户【" + us.getUsername() + "】已确认开工，请及时查看提成。", 6);
+                        }
+                    }
+                }
+            }
+
+
             //处理工钱
             if (worker.getHaveMoney() == null) {//工人已获取
                 worker.setHaveMoney(new BigDecimal(0.0));
