@@ -465,6 +465,16 @@ public class HouseService {
         } else {
             house.setCityId(houseDTO.getCityId());
         }
+
+        Example exa = new Example(House.class);
+        exa.createCriteria().andEqualTo(House.BUILDING, houseDTO.getBuilding()).
+                        andEqualTo(House.RESIDENTIAL, houseDTO.getResidential()).
+                        andEqualTo(House.NUMBER, houseDTO.getNumber());
+        List<House> hList = iHouseMapper.selectByExample(exa);
+        if(!hList.isEmpty()){
+            return ServerResponse.createByErrorMessage("该房子已存在");
+        }
+
         house.setCityName(houseDTO.getCityName());
         house.setVillageId(houseDTO.getVillageId());
         house.setResidential(houseDTO.getResidential());
