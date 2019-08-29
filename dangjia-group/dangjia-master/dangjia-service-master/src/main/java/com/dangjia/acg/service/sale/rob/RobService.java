@@ -856,11 +856,11 @@ public class RobService {
                                 > Integer.parseInt(orderStoreDTO.getRobDate())) {
                             logger.info("11111111111111111111===================================" + orderStoreDTO.getStoreId());
                             logger.info("11111111111111111111===================================" + grabSheetDTO.getMemberId());
-                            DjOrderSurface djOrderSurface = new DjOrderSurface();
-                            djOrderSurface.setDataStatus(0);
-                            djOrderSurface.setStoreId(orderStoreDTO.getStoreId());
-                            djOrderSurface.setClueId(grabSheetDTO.getClueId());
-                            djOrderSurfaceMapper.insert(djOrderSurface);
+//                            DjOrderSurface djOrderSurface = new DjOrderSurface();
+//                            djOrderSurface.setDataStatus(0);
+//                            djOrderSurface.setStoreId(orderStoreDTO.getStoreId());
+//                            djOrderSurface.setClueId(grabSheetDTO.getClueId());
+//                            djOrderSurfaceMapper.insert(djOrderSurface);
                             clueMapper.setDistribution(orderStoreDTO.getStoreId(), grabSheetDTO.getMemberId());
                         }
                     }
