@@ -185,10 +185,12 @@ public class ModelingVillageService {
                     residentialBuilding.setModifyDate(modifyDate);
                     residentialBuilding.setCreateDate(modifyDate);
                     Example example=new Example(Store.class);
-                    example.createCriteria().andLike(Store.VILLAGES,modelingVillage.getId());
+                    example.createCriteria().andLike(Store.VILLAGES,"%" + modelingVillage.getId() + "%");
                     List<Store> stores = iStoreMapper.selectByExample(example);
-                    residentialBuilding.setStoreId(stores.size()>0?stores.get(0).getId():null);
-                    residentialBuildingMapper.insert(residentialBuilding);
+                    for (Store store : stores) {
+                        residentialBuilding.setStoreId(store.getId());
+                        residentialBuildingMapper.insert(residentialBuilding);
+                    }
                     modelingVillage.setLayoutSum(modelingVillage.getLayoutSum() + 1);//累计小区户型总数
                     modelingVillage.setModifyDate(new Date());
                     modelingVillageMapper.updateByPrimaryKeySelective(modelingVillage);

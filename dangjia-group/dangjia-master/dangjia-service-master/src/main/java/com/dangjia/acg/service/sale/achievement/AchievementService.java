@@ -189,11 +189,28 @@ public class AchievementService {
         if (!CommonUtil.isEmpty(userId)) {
             map.put("userId",userId);
         }
-        if (!CommonUtil.isEmpty(building)) {
+        if (!CommonUtil.isEmpty(building)&&!building.equals("全部")) {
             map.put("building",building);
         }
-        if (!CommonUtil.isEmpty(villageId)) {
+        if (!CommonUtil.isEmpty(villageId)&&!villageId.equals("0")) {
             map.put("villageId",villageId);
+        }
+        if (villageId.equals("1")||!building.equals("其他")) {
+            Example example=new Example(ResidentialRange.class);
+            example.createCriteria().andEqualTo(ResidentialRange.USER_ID,userId);
+            List<ResidentialRange> list = residentialRangeMapper.selectByExample(example);
+            List<String> listIds=new ArrayList<>();
+            for (ResidentialRange residentialRange : list) {
+                String[] split = residentialRange.getBuildingId().split(",");
+                listIds.addAll(Arrays.asList(split));
+            }
+            List<DjAreaMatch> djAreaMatches=new ArrayList<>();
+            if(!listIds.isEmpty()) {
+                example=new Example(DjAreaMatch.class);
+                example.createCriteria().andIn(DjAreaMatch.BUILDING_ID,listIds);
+                djAreaMatches = djAreaMatchMapper.selectByExample(example);
+            }
+            map.put("buildings",djAreaMatches);
         }
         VolumeDTO volumeDTO=new VolumeDTO();
         //查询员工业绩

@@ -152,22 +152,28 @@
         select
         <include refid="all_columns"/>
         from dj_core_house_flow_apply
-        where 1=1
-        and house_id = #{houseId}
+        where  house_id = #{houseId}
         and apply_type = 4
         and to_days(create_date) = to_days(#{time})
         order by create_date
         LIMIT 1
     </select>
-
+    <select id="getHouseStart" resultType="com.dangjia.acg.modle.core.HouseFlowApply">
+        select
+        <include refid="all_columns"/>
+        from dj_core_house_flow_apply
+        where  house_id = #{houseId}
+        and apply_type = 4
+        order by create_date
+        LIMIT 1
+    </select>
     <!--查询待审核的申请(不算每日完工) -->
     <select id="checkHouseFlowApply" parameterType="java.lang.String"
             resultType="com.dangjia.acg.modle.core.HouseFlowApply">
         select
         <include refid="all_columns"/>
         from dj_core_house_flow_apply
-        where 1=1
-        and house_flow_id = #{houseFlowId}
+        where  house_flow_id = #{houseFlowId}
         and (supervisor_check = 0 or (supervisor_check = 1 and member_check = 0))
         and apply_type !=0
         and worker_id = #{workerId}
