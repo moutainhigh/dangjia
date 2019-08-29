@@ -209,7 +209,7 @@
     </select>
 
 
-    <select id="queryVolumeDTO" resultType="com.dangjia.acg.dto.sale.achievement.UserAchievementInfoDTO">
+    <select id="queryVolumeDTO" resultType="com.dangjia.acg.dto.sale.achievement.UserAchievementInfoDTO" parameterType="java.util.HashMap">
         SELECT
             h.id,
             CONCAT(
@@ -236,14 +236,16 @@
         <if test="building != null and ''!=building">
             and h.building=#{building}
         </if>
-        <if test="villageId != null and ''!=villageId">
+        <if test="villageId != null and ''!=villageId and villageId != 1">
             and h.village_id=#{villageId}
         </if>
-        <if test="villageId == '1'">
-            and h.building not in
-            <foreach collection="buildings" index="index" item="item" open="(" separator="," close=")">
-                #{item.buildingName}
-            </foreach>
+        <if test="villageId == 1">
+            <if test="null!=buildings and buildings.size>0">
+                and h.building not in
+                <foreach collection="buildings" index="index" item="item" open="(" separator="," close=")">
+                    #{item.buildingName}
+                </foreach>
+            </if>
         </if>
         ORDER BY h.modify_date desc
     </select>
