@@ -177,7 +177,7 @@ public class AchievementService {
 
         userAchievementDataDTO.setUserAchievementInfoDTOS(list);
         userAchievementDataDTO.setArrMonthRoyalty(taskOrderNum);
-        userAchievementDataDTO.setDealNumber(achievementMapper.Complete(userId, DateUtil.dateToString(time, DateUtil.FORMAT),null,villageId,visitState));
+        userAchievementDataDTO.setDealNumber(achievementMapper.Complete(userId, DateUtil.dateToString(time, DateUtil.FORMAT),building,villageId,visitState));
 
         return ServerResponse.createBySuccess("查询提成列表", userAchievementDataDTO);
     }
