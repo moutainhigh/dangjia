@@ -171,7 +171,7 @@ public class AchievementService {
                 djAreaMatches = djAreaMatchMapper.selectByExample(example);
             }
             map.put("building",null);
-            map.put("villageId",1);
+            map.put("villageId","1");
             map.put("buildings",djAreaMatches);
         }
         UserAchievementDataDTO userAchievementDataDTO = new UserAchievementDataDTO();
@@ -247,7 +247,7 @@ public class AchievementService {
                 djAreaMatches = djAreaMatchMapper.selectByExample(example);
             }
             map.put("building",null);
-            map.put("villageId",1);
+            map.put("villageId","1");
             map.put("buildings",djAreaMatches);
         }
         VolumeDTO volumeDTO=new VolumeDTO();
