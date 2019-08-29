@@ -260,11 +260,12 @@ public class ClientService {
         }
         example=new Example(Clue.class);
         example.createCriteria().andEqualTo(Clue.PHONE,clue.getPhone()).andIsNotNull(Clue.CUS_SERVICE)
-                .andEqualTo(Clue.CLUE_TYPE,1);
+                .andEqualTo(Clue.CLUE_TYPE,1);//跨域状态该客户是否已被录入
         List<Clue> clues = clueMapper.selectByExample(example);
         if(clues.size()>0){//该用户已被录入
             return ServerResponse.createByErrorMessage("该客户已被录入");
         }
+        //该客户在本城市/门店已注册 可跨域到其他地方
         example=new Example(Clue.class);
         example.createCriteria().andEqualTo(Clue.PHONE,clue.getPhone()).andEqualTo(Clue.PHASE_STATUS,1);
         List<Clue> clues1 = clueMapper.selectByExample(example);
