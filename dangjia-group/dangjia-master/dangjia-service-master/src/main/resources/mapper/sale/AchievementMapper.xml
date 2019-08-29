@@ -203,6 +203,9 @@
         <if test="villageId != null and ''!=villageId">
             and h.village_id=#{villageId}
         </if>
+        <if test="visitState != null">
+            and h.visit_state = #{visitState}
+        </if>
     </select>
 
 
@@ -236,7 +239,7 @@
         <if test="villageId != null and ''!=villageId">
             and h.village_id=#{villageId}
         </if>
-        <if test="visitState == '1'">
+        <if test="villageId == '1'">
             and h.building not in
             <foreach collection="buildings" index="index" item="item" open="(" separator="," close=")">
                 #{item.buildingName}
