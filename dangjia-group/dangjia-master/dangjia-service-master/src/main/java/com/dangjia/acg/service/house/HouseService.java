@@ -950,11 +950,13 @@ public class HouseService {
                 //跨域下单推送消息
                 MainUser us = userMapper.selectByPrimaryKey(userId2);
                 Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
+                logger.info("跨域下单推送消息==================="+ us.getMemberId());
                 configMessageService.addConfigMessage(AppType.SALE, us.getMemberId(), "开工提醒",
                         "您的跨域客户【" + member.getNickName() + "】已确认开工，请及时查看提成。", 6);
             }else{
                 //销售所选楼栋是否在自己楼栋范围内推送消息
                 MainUser us = userMapper.selectByPrimaryKey(userId2);
+                logger.info("销售所选楼栋是否在自己楼栋范围内推送消息==================="+ us.getMemberId());
                 configMessageService.addConfigMessage(AppType.SALE, us.getMemberId(), "开工提醒",
                         "您有一个归于您的客户【" + house.getHouseName() + "】已确认开工，请及时查看提成。", 6);
 
@@ -1026,12 +1028,14 @@ public class HouseService {
                         //跨域下单推送消息
                         MainUser us = userMapper.selectByPrimaryKey(userId2);
                         Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
+                        logger.info("跨域下单推送消息==================="+ us.getMemberId());
                         configMessageService.addConfigMessage(AppType.SALE, us.getMemberId(), "开工提醒",
                                 "您的跨域客户【" + member.getNickName() + "】已确认开工，请及时查看提成。", 6);
 
                     }else{
                         //销售所选楼栋是否在自己楼栋范围内推送消息
                         MainUser us = userMapper.selectByPrimaryKey(userId2);
+                        logger.info("销售所选楼栋是否在自己楼栋范围内推送消息==================="+ us.getMemberId());
                         configMessageService.addConfigMessage(AppType.SALE, us.getMemberId(), "开工提醒",
                                 "您有一个归于您的客户【" + house.getHouseName() + "】已确认开工，请及时查看提成。", 6);
 
@@ -1469,12 +1473,15 @@ public class HouseService {
                 //跨域下单推送消息
                 MainUser us = userMapper.selectByPrimaryKey(userId2);
                 Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
+                logger.info("跨域下单推送消息==================="+ us.getMemberId());
                 configMessageService.addConfigMessage(AppType.SALE, us.getMemberId(), "开工提醒",
                         "您的跨域客户【" + member.getNickName() + "】已确认开工，请及时查看提成。", 6);
+
 
             }else{
                 //销售所选楼栋是否在自己楼栋范围内推送消息
                 MainUser us = userMapper.selectByPrimaryKey(userId2);
+                logger.info("销售所选楼栋是否在自己楼栋范围内推送消息==================="+ us.getMemberId());
                 configMessageService.addConfigMessage(AppType.SALE, us.getMemberId(), "开工提醒",
                         "您有一个归于您的客户【" + house.getHouseName() + "】已确认开工，请及时查看提成。", 6);
 
@@ -1548,13 +1555,16 @@ public class HouseService {
                     //第二个销售推送消息  获取线索ID
                     if(flag == 1){
                         //跨域下单推送消息
+
                         MainUser us = userMapper.selectByPrimaryKey(userId2);
                         Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
+                        logger.info("跨域下单推送消息==================="+ us.getMemberId());
                         configMessageService.addConfigMessage(AppType.SALE, us.getMemberId(), "开工提醒",
                                 "您的跨域客户【" + member.getNickName() + "】已确认开工，请及时查看提成。", 6);
                     }else{
                         //销售所选楼栋是否在自己楼栋范围内推送消息
                         MainUser us = userMapper.selectByPrimaryKey(userId2);
+                        logger.info("销售所选楼栋是否在自己楼栋范围内推送消息==================="+ us.getMemberId());
                         configMessageService.addConfigMessage(AppType.SALE, us.getMemberId(), "开工提醒",
                                 "您有一个归于您的客户【" + house.getHouseName() + "】已确认开工，请及时查看提成。", 6);
 
