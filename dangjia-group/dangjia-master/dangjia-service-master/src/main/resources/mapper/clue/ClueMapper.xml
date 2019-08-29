@@ -691,8 +691,8 @@
         on mc.member_id=c.member_id
         INNER JOIN dj_house_address hd
         on h.id=hd.house_id
-        where c.cus_service IS NULL
-        AND c.store_id IS NULL
+        where (c.cus_service IS NULL or c.cus_service="")
+        AND (c.store_id IS NULL or c.store_id="")
     </select>
 
     <update id="setDistribution">
