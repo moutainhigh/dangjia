@@ -150,13 +150,13 @@
         <if test="visitState != null">
             and h.visit_state = #{visitState}
         </if>
-        <if test="villageId != null and ''!=villageId and villageId != 1">
+        <if test="villageId != null and ''!=villageId and villageId != '1'">
             and h.village_id=#{villageId}
         </if>
         <if test="building != null and ''!=building">
             and h.building=#{building}
         </if>
-        <if test="villageId == 1">
+        <if test="villageId == '1'">
             <if test="null!=buildings and buildings.size>0">
                 and h.building not in
                 <foreach collection="buildings" index="index" item="item" open="(" separator="," close=")">
@@ -208,13 +208,13 @@
         <if test="building != null and ''!=building">
             and h.building=#{building}
         </if>
-        <if test="villageId != null and ''!=villageId and villageId != 1">
+        <if test="villageId != null and ''!=villageId and villageId != '1'">
             and h.village_id=#{villageId}
         </if>
         <if test="visitState != null and ''!=visitState">
             and h.visit_state = #{visitState}
         </if>
-        <if test="villageId == 1">
+        <if test="villageId == '1'">
             <if test="null!=buildings and buildings.size>0">
                 and h.building not in
                 <foreach collection="buildings" index="index" item="item" open="(" separator="," close=")">
@@ -252,10 +252,10 @@
         <if test="building != null and ''!=building">
             and h.building=#{building}
         </if>
-        <if test="villageId != null and ''!=villageId and villageId != 1">
+        <if test="villageId != null and ''!=villageId and villageId != '1'">
             and h.village_id=#{villageId}
         </if>
-        <if test="villageId == 1">
+        <if test="villageId == '1'">
             <if test="null!=buildings and buildings.size>0">
                 and h.building not in
                 <foreach collection="buildings" index="index" item="item" open="(" separator="," close=")">
