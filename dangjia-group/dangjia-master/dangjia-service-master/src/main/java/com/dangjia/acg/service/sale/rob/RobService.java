@@ -55,7 +55,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 /**
@@ -824,7 +823,7 @@ public class RobService {
      * 未录入抢单
      * @return
      */
-    public ServerResponse notEnteredGrabSheet(HttpServletRequest request) {
+    public ServerResponse notEnteredGrabSheet() {
         List<GrabSheetDTO> grabSheetDTOS = clueMapper.notEnteredGrabSheet();
         logger.info("grabSheetDTOS==================================="+grabSheetDTOS);
         logger.info("grabSheetDTOS.size()==================================="+grabSheetDTOS.size());
@@ -856,11 +855,11 @@ public class RobService {
                                 > Integer.parseInt(orderStoreDTO.getRobDate())) {
                             logger.info("11111111111111111111===================================" + orderStoreDTO.getStoreId());
                             logger.info("11111111111111111111===================================" + grabSheetDTO.getMemberId());
-//                            DjOrderSurface djOrderSurface = new DjOrderSurface();
-//                            djOrderSurface.setDataStatus(0);
-//                            djOrderSurface.setStoreId(orderStoreDTO.getStoreId());
-//                            djOrderSurface.setClueId(grabSheetDTO.getClueId());
-//                            djOrderSurfaceMapper.insert(djOrderSurface);
+                            DjOrderSurface djOrderSurface = new DjOrderSurface();
+                            djOrderSurface.setDataStatus(0);
+                            djOrderSurface.setStoreId(orderStoreDTO.getStoreId());
+                            djOrderSurface.setClueId(grabSheetDTO.getClueId());
+                            djOrderSurfaceMapper.insert(djOrderSurface);
                             clueMapper.setDistribution(orderStoreDTO.getStoreId(), grabSheetDTO.getMemberId());
                         }
                     }
