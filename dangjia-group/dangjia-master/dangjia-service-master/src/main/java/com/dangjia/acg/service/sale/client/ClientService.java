@@ -433,6 +433,14 @@ public class ClientService {
             configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "分配提醒",
                     "您收到了一个跨域客户【"+ name +"】，请及时跟进。", 0, url
                             + Utils.getCustomerDetails("", clue.getId(), clue.getPhaseStatus(), "0"));
+
+        //店长推送消息
+        MainUser us = userMapper.selectByPrimaryKey(store.getUserId());
+        if (user != null && !CommonUtil.isEmpty(user.getMemberId()))
+            configMessageService.addConfigMessage(AppType.SALE, us.getMemberId(), "分配提醒",
+                    "您的销售【"+ user.getUsername() +"】，收到了一个跨域客户。", 0, url
+                            + Utils.getCustomerDetails("", clue.getId(), clue.getPhaseStatus(), "0" ,"待分配",store.getId()));
+
         return ServerResponse.createBySuccessMessage("提交成功");
     }
 
