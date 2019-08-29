@@ -71,12 +71,7 @@ public interface AchievementMapper {
     List<AchievementInfoDTO>queryRoyaltyMatch(Map<String, Object> map);
 
 
-    int Complete(@Param("userId") String userId,
-                 @Param("time") String time ,
-                 @Param("building") String building,
-                 @Param("villageId") String villageId,
-                 @Param("visitState") Integer visitState,
-                 @Param("buildings") List<DjAreaMatch> buildings);
+    int Complete(Map<String, Object> map1);
 
 
     /**

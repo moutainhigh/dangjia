@@ -86,7 +86,14 @@ public class AchievementService {
         List<AchievementInfoDTO> achievementInfoDTOS = achievementMapper.queryRoyaltyMatch(map);
 
         for (AchievementInfoDTO aa:achievementInfoDTOS) {
-            int i = achievementMapper.Complete(aa.getUserId(), DateUtil.dateToString(time, DateUtil.FORMAT),null,null,null,null);
+            Map<String,Object> map1 = new HashMap();
+            map1.put("userId",aa.getUserId());
+            map1.put("time",DateUtil.dateToString(time, DateUtil.FORMAT));
+            map1.put("building",null);
+            map1.put("villageId",null);
+            map1.put("visitState",null);
+            map1.put("buildings",null);
+            int i = achievementMapper.Complete(map1);
             aa.setSingleNumber(i);
         }
 
@@ -177,7 +184,7 @@ public class AchievementService {
 
         userAchievementDataDTO.setUserAchievementInfoDTOS(list);
         userAchievementDataDTO.setArrMonthRoyalty(taskOrderNum);
-        userAchievementDataDTO.setDealNumber(achievementMapper.Complete(userId, DateUtil.dateToString(time, DateUtil.FORMAT),building,villageId,visitState,djAreaMatches));
+        userAchievementDataDTO.setDealNumber(achievementMapper.Complete(map));
 
         return ServerResponse.createBySuccess("查询提成列表", userAchievementDataDTO);
     }
@@ -247,7 +254,7 @@ public class AchievementService {
         //查询员工业绩
         List<UserAchievementInfoDTO> volumeDTOS = achievementMapper.queryVolumeDTO(map);
         volumeDTO.setUserAchievementInfoDTOS(volumeDTOS);
-        volumeDTO.setDealNumber(achievementMapper.Complete(userId, DateUtil.dateToString(time, DateUtil.FORMAT),building,villageId,visitState,djAreaMatches));
+        volumeDTO.setDealNumber(achievementMapper.Complete(map));
         return ServerResponse.createBySuccess("查询成功", volumeDTO);
     }
 

@@ -439,7 +439,7 @@ public class ClientService {
         if (user != null && !CommonUtil.isEmpty(user.getMemberId()))
             configMessageService.addConfigMessage(AppType.SALE, us.getMemberId(), "分配提醒",
                     "您的销售【"+ user.getUsername() +"】，收到了一个跨域客户。", 0, url
-                            + Utils.getCustomerDetails("", clue.getId(), clue.getPhaseStatus(), "0" ,"待分配",store.getId()));
+                            + Utils.getCustomerDetails("", clue.getId(), clue.getPhaseStatus(), "0" ," ",store.getId()));
 
         return ServerResponse.createBySuccessMessage("提交成功");
     }
@@ -578,7 +578,14 @@ public class ClientService {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM");
             String date = dateFormat.format(new Date());
             monthlyTargetDTO.setModifyDate(date);
-            monthlyTargetDTO.setComplete(achievementMapper.Complete(user.getId(), date,null,null,null,null));
+            Map<String,Object> map1 = new HashMap();
+            map1.put("userId",user.getId());
+            map1.put("time",date);
+            map1.put("building",null);
+            map1.put("villageId",null);
+            map1.put("visitState",null);
+            map1.put("buildings",null);
+            monthlyTargetDTO.setComplete(achievementMapper.Complete(map1));
             List<MonthlyTarget> monthlyTargets = getMonthlyTargetList(user.getId());
             monthlyTargetDTO.setTargetNumber(monthlyTargets.size() > 0 ? monthlyTargets.get(0).getTargetNumber() : 0);
             map.put("monthlyTarget", monthlyTargetDTO);//月目标
