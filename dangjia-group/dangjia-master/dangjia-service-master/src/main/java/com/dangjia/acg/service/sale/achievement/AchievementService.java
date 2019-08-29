@@ -188,6 +188,9 @@ public class AchievementService {
         }
         if (!CommonUtil.isEmpty(userId)) {
             map.put("userId",userId);
+        }else{
+            map.put("userId",accessToken.getUserId());
+            userId =accessToken.getUserId();
         }
         if (!CommonUtil.isEmpty(building)&&!building.equals("全部")) {
             map.put("building",building);
