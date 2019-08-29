@@ -259,6 +259,7 @@ public class ClientService {
         if(clueMapper.selectByExample(example).size()>0){
             return ServerResponse.createByErrorMessage("手机号已存在");
         }
+
         ModelingVillage modelingVillage = iModelingVillageMapper.selectByPrimaryKey(villageId);
         if (modelingVillage == null) {
             clue.setClueType(1);
