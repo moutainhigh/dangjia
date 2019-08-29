@@ -846,7 +846,7 @@ public class RobService {
                                 > Integer.parseInt(orderStoreDTO.getRobDate())) {
                             logger.info("11111111111111111111===================================" + orderStoreDTO.getStoreId());
                             logger.info("11111111111111111111===================================" + grabSheetDTO.getMemberId());
-                            clueMapper.setDistribution(orderStoreDTO.getStoreId(), grabSheetDTO.getMemberId());
+                            clueMapper.setDistribution(orderStoreDTO.getStoreId(), grabSheetDTO.getMemberId(),new Date());
                         }
                     }
                 }
