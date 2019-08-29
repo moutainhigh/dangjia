@@ -1031,7 +1031,7 @@ public class PaymentService {
                 paymentDTO.setTotalPrice(new BigDecimal(houseDistribution.getPrice()));
                 paymentDTO.setBusinessOrderNumber(businessOrder.getNumber());
                 paymentDTO.setPayPrice(new BigDecimal(houseDistribution.getPrice()));//实付
-                paymentDTO.setInfo("温馨提示: 您将支付" + houseDistribution.getPrice() + "元验房定金，实际费用将根据表格为准!");
+//                paymentDTO.setInfo("温馨提示: 您将支付" + houseDistribution.getPrice() + "元验房定金，实际费用将根据表格为准!");
                 ActuaryDTO actuaryDTO = new ActuaryDTO();
                 actuaryDTO.setImage(imageAddress + "icon/rmb.png");
                 actuaryDTO.setKind("验房定金");
