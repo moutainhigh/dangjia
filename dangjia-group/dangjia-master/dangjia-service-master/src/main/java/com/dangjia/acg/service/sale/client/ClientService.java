@@ -345,7 +345,18 @@ public class ClientService {
             }
             //店长推送消息
             MainUser user = userMapper.selectByPrimaryKey(store.getUserId());
-            String name=member.getNickName()!=null?member.getNickName():clue.getOwername()!=null?clue.getOwername():"线索客户";
+            String name = "";
+            if(!CommonUtil.isEmpty(member.getNickName())){
+                name = member.getNickName();
+            }else{
+                if(!CommonUtil.isEmpty(clue.getOwername())){
+                    name = clue.getOwername();
+                }else{
+                    name = "线索客户";
+                }
+            }
+
+
             if (user != null && !CommonUtil.isEmpty(user.getMemberId()))
                 configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "分配提醒",
                         "您收到了一个跨域客户【"+ name +"】，快去分配给销售吧。", 0, url
@@ -405,7 +416,19 @@ public class ClientService {
         }
         //销售推送消息
         MainUser user = userMapper.selectByPrimaryKey(residentialRange.getUserId());
-        String name=member.getNickName()!=null?member.getNickName():clue.getOwername()!=null?clue.getOwername():"线索客户";
+
+        String name = " ";
+        if(!CommonUtil.isEmpty(member.getNickName())){
+            name = member.getNickName();
+        }else{
+            if(!CommonUtil.isEmpty(clue.getOwername())){
+                name = clue.getOwername();
+            }else{
+                name = "线索客户";
+            }
+        }
+
+//        String name=member.getNickName()!=null?member.getNickName():clue.getOwername()!=null?clue.getOwername():"线索客户";
         if (user != null && !CommonUtil.isEmpty(user.getMemberId()))
             configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "分配提醒",
                     "您收到了一个跨域客户【"+ name +"】，请及时跟进。", 0, url
