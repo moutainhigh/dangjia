@@ -144,11 +144,11 @@ public class AchievementService {
         if (!CommonUtil.isEmpty(building)) {
             map.put("building",building);
         }
-        if(villageId.equals("0")||building.equals("全部")){
+        if(villageId.equals("0")){
             map.put("building",null);
             map.put("villageId",null);
         }
-        if (villageId.equals("1")||building.equals("其他")) {
+        if (villageId.equals("1")) {
             Example example=new Example(ResidentialRange.class);
             example.createCriteria().andEqualTo(ResidentialRange.USER_ID,userId);
             List<ResidentialRange> list = residentialRangeMapper.selectByExample(example);
@@ -177,7 +177,7 @@ public class AchievementService {
 
         userAchievementDataDTO.setUserAchievementInfoDTOS(list);
         userAchievementDataDTO.setArrMonthRoyalty(taskOrderNum);
-        userAchievementDataDTO.setDealNumber(achievementMapper.Complete(userId, DateUtil.dateToString(time, DateUtil.FORMAT),null,villageId,visitState));
+        userAchievementDataDTO.setDealNumber(achievementMapper.Complete(userId, DateUtil.dateToString(time, DateUtil.FORMAT),building,villageId,visitState));
 
         return ServerResponse.createBySuccess("查询提成列表", userAchievementDataDTO);
     }
@@ -220,11 +220,11 @@ public class AchievementService {
         if (!CommonUtil.isEmpty(villageId)) {
             map.put("villageId",villageId);
         }
-        if(villageId.equals("0")||building.equals("全部")){
+        if(villageId.equals("0")){
             map.put("building",null);
             map.put("villageId",null);
         }
-        if (villageId.equals("1")||building.equals("其他")) {
+        if (villageId.equals("1")) {
             Example example=new Example(ResidentialRange.class);
             example.createCriteria().andEqualTo(ResidentialRange.USER_ID,userId);
             List<ResidentialRange> list = residentialRangeMapper.selectByExample(example);
