@@ -26,6 +26,7 @@ import com.dangjia.acg.mapper.member.ICustomerRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberLabelMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.sale.DjAlreadyRobSingleMapper;
+import com.dangjia.acg.mapper.sale.DjOrderSurfaceMapper;
 import com.dangjia.acg.mapper.sale.DjRobSingleMapper;
 import com.dangjia.acg.mapper.sale.IntentionHouseMapper;
 import com.dangjia.acg.mapper.store.IStoreMapper;
@@ -39,6 +40,7 @@ import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Customer;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.sale.royalty.DjAlreadyRobSingle;
+import com.dangjia.acg.modle.sale.royalty.DjOrderSurface;
 import com.dangjia.acg.modle.sale.royalty.DjRobSingle;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
@@ -53,6 +55,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 /**
@@ -815,11 +818,13 @@ public class RobService {
     }
 
 
+    @Autowired
+    private DjOrderSurfaceMapper djOrderSurfaceMapper;
     /**
      * 未录入抢单
      * @return
      */
-    public ServerResponse notEnteredGrabSheet() {
+    public ServerResponse notEnteredGrabSheet(HttpServletRequest request) {
         List<GrabSheetDTO> grabSheetDTOS = clueMapper.notEnteredGrabSheet();
         logger.info("grabSheetDTOS==================================="+grabSheetDTOS);
         logger.info("grabSheetDTOS.size()==================================="+grabSheetDTOS.size());
@@ -831,7 +836,12 @@ public class RobService {
             logger.info("djRobSingles==================================="+djRobSingles);
             logger.info("djRobSingles.size()==================================="+djRobSingles.size());
             for (GrabSheetDTO grabSheetDTO : grabSheetDTOS) {
-                List<OrderStoreDTO> orderStore = iStoreMapper.getOrderStore(grabSheetDTO.getLatitude(), grabSheetDTO.getLongitude());
+                example=new Example(DjOrderSurface.class);
+                example.createCriteria().andEqualTo(DjOrderSurface.CLUE_ID,grabSheetDTO.getClueId())
+                        .andEqualTo(DjOrderSurface.DATA_STATUS,0);
+                List<DjOrderSurface> djOrderSurfaces = djOrderSurfaceMapper.selectByExample(example);
+                List<OrderStoreDTO> orderStore = iStoreMapper.getOrderStore(grabSheetDTO.getLatitude(), grabSheetDTO.getLongitude(),djOrderSurfaces);
+
 //                for (int i = 0; i < orderStore.size(); i++) {
 //                    orderStore.get(i).setRobDate(djRobSingles.get(i).getRobDate());
 //                }
@@ -846,6 +856,11 @@ public class RobService {
                                 > Integer.parseInt(orderStoreDTO.getRobDate())) {
                             logger.info("11111111111111111111===================================" + orderStoreDTO.getStoreId());
                             logger.info("11111111111111111111===================================" + grabSheetDTO.getMemberId());
+                            DjOrderSurface djOrderSurface = new DjOrderSurface();
+                            djOrderSurface.setDataStatus(0);
+                            djOrderSurface.setStoreId(orderStoreDTO.getStoreId());
+                            djOrderSurface.setClueId(grabSheetDTO.getClueId());
+                            djOrderSurfaceMapper.insert(djOrderSurface);
                             clueMapper.setDistribution(orderStoreDTO.getStoreId(), grabSheetDTO.getMemberId());
                         }
                     }

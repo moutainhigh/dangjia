@@ -683,7 +683,8 @@
             mc.member_id as memberId,
             hd.latitude,
             hd.longitude,
-            mc.modify_date as modifyDate
+            mc.modify_date as modifyDate,
+            c.store_id as storeId
         from dj_clue c
         INNER JOIN dj_house h
         on c.member_id=h.member_id
