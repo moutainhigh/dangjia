@@ -646,7 +646,7 @@ public class EngineerService {
                 map.put("visitState", house.getVisitState()); //0待确认开工,1装修中,2休眠中,3已完工 4提前结束装修 5提前结束装修申请中
                 map.put("supName", house.getSupName());
                 map.put("supMobile", house.getSupMobile());
-                HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart1(house.getId(), new Date());//查询今日开工记录
+                HouseFlowApply todayStart = houseFlowApplyMapper.getHouseStart(house.getId());//查询今日开工记录
                 map.put("todayStartPause", todayStart == null ? "0" : "1"); //0否,1是
                 map.put("createDate", todayStart == null ? "" : todayStart.getCreateDate());
 
