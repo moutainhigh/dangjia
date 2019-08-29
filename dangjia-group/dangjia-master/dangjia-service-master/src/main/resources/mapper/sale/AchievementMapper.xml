@@ -150,11 +150,19 @@
         <if test="visitState != null">
             and h.visit_state = #{visitState}
         </if>
-        <if test="villageId != null and ''!=villageId">
+        <if test="villageId != null and ''!=villageId and villageId != 1">
             and h.village_id=#{villageId}
         </if>
         <if test="building != null and ''!=building">
             and h.building=#{building}
+        </if>
+        <if test="villageId == 1">
+            <if test="null!=buildings and buildings.size>0">
+                and h.building not in
+                <foreach collection="buildings" index="index" item="item" open="(" separator="," close=")">
+                    #{item.buildingName}
+                </foreach>
+            </if>
         </if>
         ORDER BY rm.create_date desc
     </select>
@@ -203,8 +211,16 @@
         <if test="villageId != null and ''!=villageId">
             and h.village_id=#{villageId}
         </if>
-        <if test="visitState != null">
+        <if test="visitState != null and ''!=villageId and villageId != 1">
             and h.visit_state = #{visitState}
+        </if>
+        <if test="villageId == 1">
+            <if test="null!=buildings and buildings.size>0">
+                and h.building not in
+                <foreach collection="buildings" index="index" item="item" open="(" separator="," close=")">
+                    #{item.buildingName}
+                </foreach>
+            </if>
         </if>
     </select>
 

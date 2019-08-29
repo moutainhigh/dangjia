@@ -144,7 +144,29 @@ public class AchievementService {
         if (!CommonUtil.isEmpty(building)) {
             map.put("building",building);
         }
-
+        if(villageId.equals("0")||building.equals("全部")){
+            map.put("building",null);
+            map.put("villageId",null);
+        }
+        if (villageId.equals("1")||building.equals("其他")) {
+            Example example=new Example(ResidentialRange.class);
+            example.createCriteria().andEqualTo(ResidentialRange.USER_ID,userId);
+            List<ResidentialRange> list = residentialRangeMapper.selectByExample(example);
+            List<String> listIds=new ArrayList<>();
+            for (ResidentialRange residentialRange : list) {
+                String[] split = residentialRange.getBuildingId().split(",");
+                listIds.addAll(Arrays.asList(split));
+            }
+            List<DjAreaMatch> djAreaMatches=new ArrayList<>();
+            if(!listIds.isEmpty()) {
+                example=new Example(DjAreaMatch.class);
+                example.createCriteria().andIn(DjAreaMatch.BUILDING_ID,listIds);
+                djAreaMatches = djAreaMatchMapper.selectByExample(example);
+            }
+            map.put("building",null);
+            map.put("villageId",1);
+            map.put("buildings",djAreaMatches);
+        }
         UserAchievementDataDTO userAchievementDataDTO = new UserAchievementDataDTO();
         //查询员工业绩
         List<UserAchievementInfoDTO> list = achievementMapper.queryUserAchievementData(map);
