@@ -821,17 +821,27 @@ public class RobService {
      */
     public ServerResponse notEnteredGrabSheet() {
         List<GrabSheetDTO> grabSheetDTOS = clueMapper.notEnteredGrabSheet();
+        logger.info("grabSheetDTOS==================================="+grabSheetDTOS);
+        logger.info("grabSheetDTOS.size()==================================="+grabSheetDTOS.size());
         if(grabSheetDTOS.size()>0) {
             Example example = new Example(DjRobSingle.class);
             example.createCriteria().andEqualTo(DjRobSingle.DATA_STATUS, 0);
             example.orderBy(DjRobSingle.ROB_DATE).asc();
             List<DjRobSingle> djRobSingles = djRobSingleMapper.selectByExample(example);
+            logger.info("djRobSingles==================================="+djRobSingles);
+            logger.info("djRobSingles.size()==================================="+djRobSingles.size());
             for (GrabSheetDTO grabSheetDTO : grabSheetDTOS) {
                 List<OrderStoreDTO> orderStore = iStoreMapper.getOrderStore(grabSheetDTO.getLatitude(), grabSheetDTO.getLongitude());
+                logger.info("orderStore==================================="+orderStore);
+                logger.info("orderStore.size()==================================="+orderStore.size());
                 for (int i=0;i<orderStore.size();i++){
                     for (DjRobSingle djRobSingle : djRobSingles) {
+                        logger.info("System.currentTimeMillis()-grabSheetDTO.getModifyDate().getTime())/60/1000==================================="+((System.currentTimeMillis()-grabSheetDTO.getModifyDate().getTime())/60/1000));
+                        logger.info("Integer.parseInt(djRobSingle.getRobDate())==================================="+Integer.parseInt(djRobSingle.getRobDate()));
                         if(((System.currentTimeMillis()-grabSheetDTO.getModifyDate().getTime())/60/1000)
                                 >Integer.parseInt(djRobSingle.getRobDate())){
+                            logger.info("11111111111111111111==================================="+orderStore.get(i).getStoreId());
+                            logger.info("11111111111111111111==================================="+grabSheetDTO.getMemberId());
                             clueMapper.setDistribution(orderStore.get(i).getStoreId(),grabSheetDTO.getMemberId());
                         }
                     }
