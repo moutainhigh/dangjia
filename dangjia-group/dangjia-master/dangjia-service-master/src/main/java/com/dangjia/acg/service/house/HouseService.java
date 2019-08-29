@@ -949,25 +949,16 @@ public class HouseService {
             if(flag == 1){
                 //跨域下单推送消息
                 MainUser us = userMapper.selectByPrimaryKey(userId2);
-                List<Customer> ms = iCustomerMapper.getCustomerMemberIdList(house.getMemberId());
-                if (ms != null) {
-                    for (Customer m : ms) {
-                        configMessageService.addConfigMessage(AppType.SALE, m.getMemberId(), "开工提醒",
-                                "您的跨域客户【" + us.getUsername() + "】已确认开工，请及时查看提成。", 6);
-                    }
-                }
-
+                Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
+                configMessageService.addConfigMessage(AppType.SALE, us.getMemberId(), "开工提醒",
+                        "您的跨域客户【" + member.getNickName() + "】已确认开工，请及时查看提成。", 6);
             }else{
                 //销售所选楼栋是否在自己楼栋范围内推送消息
-                List<Customer> ms = iCustomerMapper.getCustomerMemberIdList(house.getMemberId());
-                if (ms != null) {
-                    for (Customer m : ms) {
-                        configMessageService.addConfigMessage(AppType.SALE, m.getMemberId(), "开工提醒",
-                                "您有一个归于您的客户【" + house.getHouseName() + "】已确认开工，请及时查看提成。", 6);
-                    }
-                }
-            }
+                MainUser us = userMapper.selectByPrimaryKey(userId2);
+                configMessageService.addConfigMessage(AppType.SALE, us.getMemberId(), "开工提醒",
+                        "您有一个归于您的客户【" + house.getHouseName() + "】已确认开工，请及时查看提成。", 6);
 
+            }
 
 //            Example example3 = new Example(Clue.class);
 //            example3.createCriteria()
@@ -1034,23 +1025,16 @@ public class HouseService {
                     if(flag == 1){
                         //跨域下单推送消息
                         MainUser us = userMapper.selectByPrimaryKey(userId2);
-                        List<Customer> ms = iCustomerMapper.getCustomerMemberIdList(house.getMemberId());
-                        if (ms != null) {
-                            for (Customer m : ms) {
-                                configMessageService.addConfigMessage(AppType.SALE, m.getMemberId(), "开工提醒",
-                                        "您的跨域客户【" + us.getUsername() + "】已确认开工，请及时查看提成。", 6);
-                            }
-                        }
+                        Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
+                        configMessageService.addConfigMessage(AppType.SALE, us.getMemberId(), "开工提醒",
+                                "您的跨域客户【" + member.getNickName() + "】已确认开工，请及时查看提成。", 6);
 
                     }else{
                         //销售所选楼栋是否在自己楼栋范围内推送消息
-                        List<Customer> ms = iCustomerMapper.getCustomerMemberIdList(house.getMemberId());
-                        if (ms != null) {
-                            for (Customer m : ms) {
-                                configMessageService.addConfigMessage(AppType.SALE, m.getMemberId(), "开工提醒",
-                                        "您有一个归于您的客户【" + house.getHouseName() + "】已确认开工，请及时查看提成。", 6);
-                            }
-                        }
+                        MainUser us = userMapper.selectByPrimaryKey(userId2);
+                        configMessageService.addConfigMessage(AppType.SALE, us.getMemberId(), "开工提醒",
+                                "您有一个归于您的客户【" + house.getHouseName() + "】已确认开工，请及时查看提成。", 6);
+
                     }
 
 
@@ -1484,23 +1468,16 @@ public class HouseService {
             if(flag == 1){
                 //跨域下单推送消息
                 MainUser us = userMapper.selectByPrimaryKey(userId2);
-                List<Customer> ms = iCustomerMapper.getCustomerMemberIdList(house.getMemberId());
-                if (ms != null) {
-                    for (Customer m : ms) {
-                        configMessageService.addConfigMessage(AppType.SALE, m.getMemberId(), "开工提醒",
-                                "您的跨域客户【" + us.getUsername() + "】已确认开工，请及时查看提成。", 6);
-                    }
-                }
+                Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
+                configMessageService.addConfigMessage(AppType.SALE, us.getMemberId(), "开工提醒",
+                        "您的跨域客户【" + member.getNickName() + "】已确认开工，请及时查看提成。", 6);
 
             }else{
                 //销售所选楼栋是否在自己楼栋范围内推送消息
-                List<Customer> ms = iCustomerMapper.getCustomerMemberIdList(house.getMemberId());
-                if (ms != null) {
-                    for (Customer m : ms) {
-                        configMessageService.addConfigMessage(AppType.SALE, m.getMemberId(), "开工提醒",
-                                "您有一个归于您的客户【" + house.getHouseName() + "】已确认开工，请及时查看提成。", 6);
-                    }
-                }
+                MainUser us = userMapper.selectByPrimaryKey(userId2);
+                configMessageService.addConfigMessage(AppType.SALE, us.getMemberId(), "开工提醒",
+                        "您有一个归于您的客户【" + house.getHouseName() + "】已确认开工，请及时查看提成。", 6);
+
             }
 
 
@@ -1572,23 +1549,15 @@ public class HouseService {
                     if(flag == 1){
                         //跨域下单推送消息
                         MainUser us = userMapper.selectByPrimaryKey(userId2);
-                        List<Customer> ms = iCustomerMapper.getCustomerMemberIdList(house.getMemberId());
-                        if (ms != null) {
-                            for (Customer m : ms) {
-                                configMessageService.addConfigMessage(AppType.SALE, m.getMemberId(), "开工提醒",
-                                        "您的跨域客户【" + us.getUsername() + "】已确认开工，请及时查看提成。", 6);
-                            }
-                        }
-
+                        Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
+                        configMessageService.addConfigMessage(AppType.SALE, us.getMemberId(), "开工提醒",
+                                "您的跨域客户【" + member.getNickName() + "】已确认开工，请及时查看提成。", 6);
                     }else{
                         //销售所选楼栋是否在自己楼栋范围内推送消息
-                        List<Customer> ms = iCustomerMapper.getCustomerMemberIdList(house.getMemberId());
-                        if (ms != null) {
-                            for (Customer m : ms) {
-                                configMessageService.addConfigMessage(AppType.SALE, m.getMemberId(), "开工提醒",
-                                        "您有一个归于您的客户【" + house.getHouseName() + "】已确认开工，请及时查看提成。", 6);
-                            }
-                        }
+                        MainUser us = userMapper.selectByPrimaryKey(userId2);
+                        configMessageService.addConfigMessage(AppType.SALE, us.getMemberId(), "开工提醒",
+                                "您有一个归于您的客户【" + house.getHouseName() + "】已确认开工，请及时查看提成。", 6);
+
                     }
 
 
