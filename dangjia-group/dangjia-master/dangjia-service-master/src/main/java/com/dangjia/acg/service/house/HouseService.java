@@ -1838,7 +1838,7 @@ public class HouseService {
         if(iCustomerMapper.selectByExample(example).size()>0) {
             List<OrderStoreDTO> orderStore = iStoreMapper.getOrderStore(latitude, longitude);
             clueMapper.setDistribution(orderStore.get(0).getStoreId(), member.getId());
-            robService.notEnteredGrabSheet();
+//            robService.notEnteredGrabSheet();
         }
 
         return ServerResponse.createBySuccessMessage("操作成功");
