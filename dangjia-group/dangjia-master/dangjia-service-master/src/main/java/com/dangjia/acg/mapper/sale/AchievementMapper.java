@@ -73,7 +73,8 @@ public interface AchievementMapper {
     int Complete(@Param("userId") String userId,
                  @Param("time") String time ,
                  @Param("building") String building,
-                 @Param("villageId") String villageId);
+                 @Param("villageId") String villageId,
+                 @Param("visitState") Integer visitState);
 
 
     /**

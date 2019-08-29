@@ -86,7 +86,7 @@ public class AchievementService {
         List<AchievementInfoDTO> achievementInfoDTOS = achievementMapper.queryRoyaltyMatch(map);
 
         for (AchievementInfoDTO aa:achievementInfoDTOS) {
-            int i = achievementMapper.Complete(aa.getUserId(), DateUtil.dateToString(time, DateUtil.FORMAT),null,null);
+            int i = achievementMapper.Complete(aa.getUserId(), DateUtil.dateToString(time, DateUtil.FORMAT),null,null,null);
             aa.setSingleNumber(i);
         }
 
@@ -155,7 +155,7 @@ public class AchievementService {
 
         userAchievementDataDTO.setUserAchievementInfoDTOS(list);
         userAchievementDataDTO.setArrMonthRoyalty(taskOrderNum);
-        userAchievementDataDTO.setDealNumber(achievementMapper.Complete(userId, DateUtil.dateToString(time, DateUtil.FORMAT),null,villageId));
+        userAchievementDataDTO.setDealNumber(achievementMapper.Complete(userId, DateUtil.dateToString(time, DateUtil.FORMAT),null,villageId,visitState));
 
         return ServerResponse.createBySuccess("查询提成列表", userAchievementDataDTO);
     }
@@ -192,13 +192,17 @@ public class AchievementService {
             map.put("userId",accessToken.getUserId());
             userId =accessToken.getUserId();
         }
-        if (!CommonUtil.isEmpty(building)&&!building.equals("全部")) {
+        if (!CommonUtil.isEmpty(building)) {
             map.put("building",building);
         }
-        if (!CommonUtil.isEmpty(villageId)&&!villageId.equals("0")) {
+        if (!CommonUtil.isEmpty(villageId)) {
             map.put("villageId",villageId);
         }
-        if (villageId.equals("1")||!building.equals("其他")) {
+        if(villageId.equals("0")||building.equals("全部")){
+            map.put("building",null);
+            map.put("villageId",null);
+        }
+        if (villageId.equals("1")||building.equals("其他")) {
             Example example=new Example(ResidentialRange.class);
             example.createCriteria().andEqualTo(ResidentialRange.USER_ID,userId);
             List<ResidentialRange> list = residentialRangeMapper.selectByExample(example);
@@ -213,13 +217,15 @@ public class AchievementService {
                 example.createCriteria().andIn(DjAreaMatch.BUILDING_ID,listIds);
                 djAreaMatches = djAreaMatchMapper.selectByExample(example);
             }
+            map.put("building",null);
+            map.put("villageId",1);
             map.put("buildings",djAreaMatches);
         }
         VolumeDTO volumeDTO=new VolumeDTO();
         //查询员工业绩
         List<UserAchievementInfoDTO> volumeDTOS = achievementMapper.queryVolumeDTO(map);
         volumeDTO.setUserAchievementInfoDTOS(volumeDTOS);
-        volumeDTO.setDealNumber(achievementMapper.Complete(userId, DateUtil.dateToString(time, DateUtil.FORMAT),building,villageId));
+        volumeDTO.setDealNumber(achievementMapper.Complete(userId, DateUtil.dateToString(time, DateUtil.FORMAT),building,villageId,visitState));
         return ServerResponse.createBySuccess("查询成功", volumeDTO);
     }
 
