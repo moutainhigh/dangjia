@@ -439,7 +439,7 @@ public class ClientService {
         if (user != null && !CommonUtil.isEmpty(user.getMemberId()))
             configMessageService.addConfigMessage(AppType.SALE, us.getMemberId(), "分配提醒",
                     "您的销售【"+ user.getUsername() +"】，收到了一个跨域客户。", 0, url
-                            + Utils.getCustomerDetails("", clue.getId(), clue.getPhaseStatus(), "0" ,"待分配",store.getId()));
+                            + Utils.getCustomerDetails("", clue.getId(), clue.getPhaseStatus(), "0" ," ",store.getId()));
 
         return ServerResponse.createBySuccessMessage("提交成功");
     }
