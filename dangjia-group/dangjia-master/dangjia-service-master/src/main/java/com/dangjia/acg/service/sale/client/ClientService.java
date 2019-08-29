@@ -578,7 +578,7 @@ public class ClientService {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM");
             String date = dateFormat.format(new Date());
             monthlyTargetDTO.setModifyDate(date);
-            monthlyTargetDTO.setComplete(achievementMapper.Complete(user.getId(), date,null,null,null));
+            monthlyTargetDTO.setComplete(achievementMapper.Complete(user.getId(), date,null,null,null,null));
             List<MonthlyTarget> monthlyTargets = getMonthlyTargetList(user.getId());
             monthlyTargetDTO.setTargetNumber(monthlyTargets.size() > 0 ? monthlyTargets.get(0).getTargetNumber() : 0);
             map.put("monthlyTarget", monthlyTargetDTO);//月目标
