@@ -67,6 +67,7 @@ import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseFlowService;
 import com.dangjia.acg.service.design.DesignDataService;
+import com.dangjia.acg.service.sale.rob.RobService;
 import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -178,6 +179,9 @@ public class HouseService {
     protected static final Logger LOG = LoggerFactory.getLogger(HouseService.class);
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private RobService robService;
 
     /**
      * 切换房产
@@ -468,8 +472,8 @@ public class HouseService {
 
         Example exa = new Example(House.class);
         exa.createCriteria().andEqualTo(House.BUILDING, houseDTO.getBuilding()).
-                        andEqualTo(House.RESIDENTIAL, houseDTO.getResidential()).
-                        andEqualTo(House.NUMBER, houseDTO.getNumber());
+                andEqualTo(House.RESIDENTIAL, houseDTO.getResidential()).
+                andEqualTo(House.NUMBER, houseDTO.getNumber());
         List<House> hList = iHouseMapper.selectByExample(exa);
         if(!hList.isEmpty()){
             return ServerResponse.createByErrorMessage("该房子已存在");
@@ -889,7 +893,7 @@ public class HouseService {
      * @param house
      */
     public void djHouseBuilding(String userId,String userId2, DjAreaMatchDTO djAreaMatchDTO,List<DjAreaMatchDTO>djAreaMatchDTOS,
-                        HouseDTO houseDTO,Customer customer,House house,int flag){
+                                HouseDTO houseDTO,Customer customer,House house,int flag){
         //跨域下单分提成
         logger.info("跨域下单分提成==================="+userId);
         logger.info("跨域下单分提成==================="+houseDTO.getHouseId());
@@ -1821,6 +1825,16 @@ public class HouseService {
         houseExpendMapper.insert(houseExpend);
         //默认切换至未确认开工的房子
         setSelectHouse(userToken, house.getId());
+
+
+        //野生客戶点击我要装修
+        example=new Example(Customer.class);
+        example.createCriteria().andEqualTo(Customer.MEMBER_ID,member.getId())
+                .andIsNull(Customer.USER_ID);
+        if(iCustomerMapper.selectByExample(example).size()>0) {
+            robService.notEnteredGrabSheet();
+        }
+
         return ServerResponse.createBySuccessMessage("操作成功");
     }
 
