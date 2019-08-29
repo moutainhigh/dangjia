@@ -179,15 +179,15 @@ public class ModelingVillageService {
                 if (CommonUtil.isEmpty(residentialBuildingId)) {//没有id则新增
                     if (CommonUtil.isEmpty(modelingVillage.getId()))//没有id则新增
                         return ServerResponse.createByErrorMessage("小区id不能为null");
-                    residentialBuilding = new ResidentialBuilding();
-                    residentialBuilding.setVillageId(modelingVillage.getId());//设置 关联小区id
-                    residentialBuilding.setBuilding(building);//楼栋名称
-                    residentialBuilding.setModifyDate(modifyDate);
-                    residentialBuilding.setCreateDate(modifyDate);
                     Example example=new Example(Store.class);
                     example.createCriteria().andLike(Store.VILLAGES,"%" + modelingVillage.getId() + "%");
                     List<Store> stores = iStoreMapper.selectByExample(example);
                     for (Store store : stores) {
+                        residentialBuilding = new ResidentialBuilding();
+                        residentialBuilding.setVillageId(modelingVillage.getId());//设置 关联小区id
+                        residentialBuilding.setBuilding(building);//楼栋名称
+                        residentialBuilding.setModifyDate(modifyDate);
+                        residentialBuilding.setCreateDate(modifyDate);
                         residentialBuilding.setStoreId(store.getId());
                         residentialBuildingMapper.insert(residentialBuilding);
                     }
