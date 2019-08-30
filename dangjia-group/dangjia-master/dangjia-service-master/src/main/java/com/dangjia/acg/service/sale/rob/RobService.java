@@ -839,14 +839,8 @@ public class RobService {
         logger.info("grabSheetDTOS==================================="+grabSheetDTOS);
         logger.info("grabSheetDTOS.size()==================================="+grabSheetDTOS.size());
         if(grabSheetDTOS.size()>0) {
-            Example example = new Example(DjRobSingle.class);
-            example.createCriteria().andEqualTo(DjRobSingle.DATA_STATUS, 0);
-            example.orderBy(DjRobSingle.ROB_DATE).asc();
-            List<DjRobSingle> djRobSingles = djRobSingleMapper.selectByExample(example);
-            logger.info("djRobSingles==================================="+djRobSingles);
-            logger.info("djRobSingles.size()==================================="+djRobSingles.size());
             for (GrabSheetDTO grabSheetDTO : grabSheetDTOS) {
-                example=new Example(DjOrderSurface.class);
+                Example example=new Example(DjOrderSurface.class);
                 example.createCriteria().andEqualTo(DjOrderSurface.CLUE_ID,grabSheetDTO.getClueId())
                         .andEqualTo(DjOrderSurface.DATA_STATUS,0);
                 List<DjOrderSurface> djOrderSurfaces = djOrderSurfaceMapper.selectByExample(example);
@@ -855,7 +849,7 @@ public class RobService {
 //                for (int i = 0; i < orderStore.size(); i++) {
 //                    orderStore.get(i).setRobDate(djRobSingles.get(i).getRobDate());
 //                }
-
+                List<DjRobSingle> djRobSingles = djRobSingleMapper.getRobDate(djOrderSurfaces);
                 if(djRobSingles.size() > orderStore.size()){
                     logger.info("11111==================================="+orderStore);
                     for (int i = 0; i < orderStore.size(); i++) {
