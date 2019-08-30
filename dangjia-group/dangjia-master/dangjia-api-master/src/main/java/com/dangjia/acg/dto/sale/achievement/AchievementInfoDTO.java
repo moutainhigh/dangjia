@@ -65,6 +65,8 @@ public class AchievementInfoDTO implements Serializable {
     @ApiModelProperty("订单状态 0：新开工 1：已竣工")
     private Integer orderStatus;
 
+    @ApiModelProperty("状态 0：展示业绩 1：不展示")
+    private Integer dataStatus;
 
 
     public String getVisitStateName() {

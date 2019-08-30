@@ -85,6 +85,8 @@ public class AchievementService {
 
         List<AchievementInfoDTO> achievementInfoDTOS = achievementMapper.queryRoyaltyMatch(map);
 
+
+
         for (AchievementInfoDTO aa:achievementInfoDTOS) {
             Map<String,Object> map1 = new HashMap();
             map1.put("userId",aa.getUserId());

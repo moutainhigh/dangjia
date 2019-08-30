@@ -179,7 +179,8 @@
         SUM(drm.count_arr_royalty )AS arrRoyalty,
         count(drm.id) as singleNumber,
         u.username as username,
-        smt.target_number as targetNumber
+        smt.target_number as targetNumber,
+        drm.data_status as dataStatus
         from
         dj_royalty_match drm
         INNER JOIN dj_user u on drm.user_id = u.id
@@ -191,9 +192,11 @@
             and su.store_id = #{storeId}
         )
         and date_format(drm.modify_date,'%Y-%m') = #{time}
-        and drm.data_status=0
         GROUP BY drm.user_id
     </select>
+
+
+
     
     <select id="Complete" resultType="java.lang.Integer">
         SELECT
