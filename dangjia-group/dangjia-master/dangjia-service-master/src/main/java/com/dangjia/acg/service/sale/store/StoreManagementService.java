@@ -122,8 +122,9 @@ public class StoreManagementService {
                 residentialRangeDTO.setVillageId(modelingVillage.getId());
                 residentialRangeDTO.setVillagename(modelingVillage.getName());
                 example = new Example(ResidentialBuilding.class);
-                example.createCriteria().andEqualTo(ResidentialBuilding.STORE_ID, store.getId())
-                        .andEqualTo(ResidentialBuilding.VILLAGE_ID, modelingVillage.getId());
+//                example.createCriteria().andEqualTo(ResidentialBuilding.STORE_ID, store.getId())
+//                        .andEqualTo(ResidentialBuilding.VILLAGE_ID, modelingVillage.getId());
+                example.createCriteria().andEqualTo(ResidentialBuilding.VILLAGE_ID, modelingVillage.getId());
                 residentialRangeDTO.setList(residentialBuildingMapper.selectByExample(example));
                 residentialRangeDTOList.add(residentialRangeDTO);
             }
@@ -252,7 +253,7 @@ public class StoreManagementService {
             for (ModelingVillage modelingVillage : modelingVillages) {
                 example = new Example(ResidentialBuilding.class);
                 Example.Criteria criteria = example.createCriteria();
-                criteria.andEqualTo(ResidentialBuilding.STORE_ID, store.getId());
+//                criteria.andEqualTo(ResidentialBuilding.STORE_ID, store.getId());
                 criteria.andEqualTo(ResidentialBuilding.VILLAGE_ID, modelingVillage.getId());
                 if (slist.size() > 0) {
                     criteria.andNotIn(ResidentialBuilding.ID, slist);
