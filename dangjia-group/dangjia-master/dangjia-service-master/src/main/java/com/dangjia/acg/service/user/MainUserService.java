@@ -59,7 +59,7 @@ public class MainUserService {
     @Autowired
     private RedisClient redisClient;
 
-    public ServerResponse getUsers(String userID,UserSearchDTO userSearch, PageDTO pageDTO,Integer isJob) {
+    public ServerResponse getUsers(String cityId,String userID,UserSearchDTO userSearch, PageDTO pageDTO,Integer isJob) {
         // 时间处理
 
         userID=iStoreUserMapper.getVisitUser(userID);
@@ -83,7 +83,7 @@ public class MainUserService {
             }
         }
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        List<UserRoleDTO> urList = userMapper.getUsers(userID,userSearch,isJob);
+        List<UserRoleDTO> urList = userMapper.getUsers(cityId,userID,userSearch,isJob);
         // 获取分页查询后的数据
         PageInfo pageInfo = new PageInfo(urList);
         // 将角色名称提取到对应的字段中
@@ -250,9 +250,9 @@ public class MainUserService {
      * @param id
      * @return
      */
-    public ServerResponse setReceiveUser(String id, Integer type) {
+    public ServerResponse setReceiveUser(String cityId,String id, Integer type) {
         try {
-            MainUser oldMainUser = userMapper.getUserByReceive(type);
+            MainUser oldMainUser = userMapper.getUserByReceive(cityId,type);
             if (oldMainUser != null) { //把之前的 坐席用户 改为 非坐席
                 oldMainUser.setIsReceive(0);
                 userMapper.updateByPrimaryKeySelective(oldMainUser);

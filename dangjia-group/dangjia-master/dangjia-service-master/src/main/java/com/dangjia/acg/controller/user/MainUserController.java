@@ -91,7 +91,8 @@ public class MainUserController implements MainUserAPI {
     @ApiMethod
     public ServerResponse getUsers(HttpServletRequest request, PageDTO pageDTO, UserSearchDTO userSearch,Integer isJob) {
         String userID = request.getParameter(Constants.USERID);
-        return userService.getUsers(userID,userSearch, pageDTO,isJob);
+        String cityId = request.getParameter(Constants.CITY_ID);
+        return userService.getUsers( cityId,userID,userSearch, pageDTO,isJob);
     }
 
     /**
@@ -108,7 +109,8 @@ public class MainUserController implements MainUserAPI {
     @Override
     @ApiMethod
     public ServerResponse setReceiveUser(HttpServletRequest request, String id, Integer type) {
-        return userService.setReceiveUser(id, type);
+        String cityId = request.getParameter(Constants.CITY_ID);
+        return userService.setReceiveUser(cityId,id, type);
     }
 
     /**
