@@ -680,6 +680,7 @@
 
     <select id="notEnteredGrabSheet" resultType="com.dangjia.acg.dto.sale.store.GrabSheetDTO">
         select
+            c.id as clueId,
             mc.member_id as memberId,
             hd.latitude,
             hd.longitude,
