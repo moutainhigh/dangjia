@@ -191,6 +191,7 @@
             and su.store_id = #{storeId}
         )
         and date_format(drm.modify_date,'%Y-%m') = #{time}
+        and drm.order_status=0
         GROUP BY drm.user_id
     </select>
     
