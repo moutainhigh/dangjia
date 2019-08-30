@@ -185,7 +185,7 @@ public class MemberService {
             if (user == null) {
                 return ServerResponse.createByErrorMessage("用户不存在");
             }
-            if (userRole == 3) {//销售端放开登录权限
+            if (!CommonUtil.isEmpty(userRole)&&userRole == 3) {//销售端放开登录权限
                 if (!CommonUtil.isEmpty(accessToken.getUserId())) {
                     ServerResponse serverResponse = setSale(accessToken, accessToken.getUserId());
                     if (!serverResponse.isSuccess()) {
