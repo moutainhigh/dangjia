@@ -42,9 +42,11 @@ import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.sale.royalty.DjAlreadyRobSingle;
 import com.dangjia.acg.modle.sale.royalty.DjOrderSurface;
 import com.dangjia.acg.modle.sale.royalty.DjRobSingle;
+import com.dangjia.acg.modle.store.Store;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.house.HouseService;
+import com.dangjia.acg.service.sale.SaleService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.collections.map.HashedMap;
@@ -101,7 +103,8 @@ public class RobService {
     private IHouseMapper iHouseMapper;
     @Autowired
     private IHouseAddressMapper iHouseAddressMapper;
-
+    @Autowired
+    private SaleService saleService;
     /**
      * 查询待抢单列表
      * @param userToken
@@ -119,20 +122,28 @@ public class RobService {
             return ServerResponse.createbyUserTokenError();
         }
 
-//        Integer type = iCustomerMapper.queryTypeId(accessToken.getUserId());
+        object = saleService.getStore(accessToken.getUserId());
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Store store = (Store) object;
 
         Map<String, Object> map = new HashMap<>();
         map.put("userId", accessToken.getUserId());
-//        if (!CommonUtil.isEmpty(type)) {
-//            map.put("type", type);
-//        }
+
         if (!CommonUtil.isEmpty(storeId)) {
             map.put("storeId", storeId);
+        }else{
+            map.put("storeId", store);
         }
 
         map.put("isRobStats", 0);
 
         List<RobDTO> list = clueMapper.queryRobSingledata(map);
+
+
+        List<RobDTO> NotList = clueMapper.queryNotRobSingleData(map);
+
 
         //查询标签
         List<RobDTO> robDTOs = new ArrayList<>();
@@ -158,6 +169,8 @@ public class RobService {
                 robDTOs.add(robDTO);
             }
         }
+
+
 
         if (robDTOs.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
