@@ -22,7 +22,6 @@ import com.dangjia.acg.mapper.clue.ClueTalkMapper;
 import com.dangjia.acg.mapper.house.IHouseAddressMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.ICustomerMapper;
-import com.dangjia.acg.mapper.member.ICustomerRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberLabelMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.sale.DjAlreadyRobSingleMapper;
@@ -31,7 +30,6 @@ import com.dangjia.acg.mapper.sale.DjRobSingleMapper;
 import com.dangjia.acg.mapper.sale.IntentionHouseMapper;
 import com.dangjia.acg.mapper.store.IStoreMapper;
 import com.dangjia.acg.mapper.store.IStoreUserMapper;
-import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.modle.clue.Clue;
 import com.dangjia.acg.modle.clue.ClueTalk;
 import com.dangjia.acg.modle.home.IntentionHouse;
@@ -44,7 +42,6 @@ import com.dangjia.acg.modle.sale.royalty.DjAlreadyRobSingle;
 import com.dangjia.acg.modle.sale.royalty.DjOrderSurface;
 import com.dangjia.acg.modle.sale.royalty.DjRobSingle;
 import com.dangjia.acg.modle.store.StoreUser;
-import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.house.HouseService;
 import com.github.pagehelper.PageHelper;
@@ -132,7 +129,7 @@ public class RobService {
         if (!CommonUtil.isEmpty(storeId)) {
             map.put("storeId", storeId);
         }else{
-            map.put("storeId", storeList.get(0).getId());
+            map.put("storeId", storeList.get(0).getStoreId());
         }
 
         map.put("isRobStats", 0);
