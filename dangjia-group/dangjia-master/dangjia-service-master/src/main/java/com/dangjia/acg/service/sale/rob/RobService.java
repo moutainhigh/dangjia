@@ -350,6 +350,7 @@ public class RobService {
         Clue clue = clueMapper.selectByPrimaryKey(clueId);
 
 
+
         Object object = constructionService.getAccessToken(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -378,7 +379,7 @@ public class RobService {
             }
             map.put("phaseStatus", phaseStatus);
             RobArrInFoDTO robArrInFoDTO = new RobArrInFoDTO();
-
+            robArrInFoDTO.setBranchUser(clue.getBranchUser());
             List<RobInfoDTO> robInfoDTO = clueMapper.queryCustomerInfo(map);
 
             if (!CommonUtil.isEmpty(robInfoDTO)) {

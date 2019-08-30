@@ -12,6 +12,7 @@ import com.dangjia.acg.dto.repair.HouseProfitSummaryDTO;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IModelingVillageMapper;
 import com.dangjia.acg.mapper.other.ICityMapper;
+import com.dangjia.acg.mapper.sale.ResidentialBuildingMapper;
 import com.dangjia.acg.mapper.store.IStoreMapper;
 import com.dangjia.acg.mapper.store.IStoreSubscribeMapper;
 import com.dangjia.acg.mapper.system.IDepartmentMapper;
@@ -57,6 +58,8 @@ public class StoreServices {
     private IModelingVillageMapper modelingVillageMapper;//小区
     @Autowired
     private IDepartmentMapper departmentMapper;
+    @Autowired
+    private ResidentialBuildingMapper residentialBuildingMapper;
     /**
      * 根据门店ID,得到设置的管辖范围，得到所有范围内的小区
      * @param request
@@ -188,6 +191,10 @@ public class StoreServices {
             }
             if(villageIds.size()>0){
                 store.setVillages(StringUtils.join(villageIds,","));
+                Map<String,Object> map=new HashMap<>();
+                map.put("storeId",store.getId());
+                map.put("villageIds",villageIds);
+                residentialBuildingMapper.setBuildingInformation(map);
             }else{
                 store.setVillages("");
             }

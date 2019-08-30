@@ -151,6 +151,9 @@ public class RobInfoDTO {
     @ApiModelProperty("状态")
     private Integer isRobStats;
 
+    @ApiModelProperty("分配销售 1：已分配  0：未分配")
+    private Integer branchUser;
+
     public String getDrawingsName(){
         if(null != getDrawings() && 0 == getDrawings()){
             return "无图纸";
