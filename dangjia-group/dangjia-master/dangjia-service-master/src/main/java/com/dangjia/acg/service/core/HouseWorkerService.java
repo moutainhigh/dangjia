@@ -161,6 +161,21 @@ public class HouseWorkerService {
         if (houseFlow == null) {
             return ServerResponse.createByErrorMessage("该工序不存在");
         }
+        List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApply(null, 4, houseWorker.getWorkerId(), new Date());
+        for (HouseFlowApply houseFlowApply : houseFlowApplyList) {
+            Example example = new Example(HouseFlowApply.class);
+            example.createCriteria().andCondition("   apply_type in (0,1,2)  and   to_days(create_date) = to_days('"
+                    + DateUtil.getDateString(new Date().getTime()) + "') ")
+                    .andNotEqualTo(HouseFlowApply.SUPERVISOR_CHECK, 2)
+                    .andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, houseFlowApply.getHouseFlowId());
+            List<HouseFlowApply> houseFlowApplyList1 = houseFlowApplyMapper.selectByExample(example);
+            if (houseFlowApplyList1.size() == 0) {
+                House house1 = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());//工序
+                if (house1 != null && house1.getVisitState() == 1) {
+                    return ServerResponse.createByErrorMessage("工地[" + house1.getHouseName() + "]今日以开工，还未完工，不能换人");
+                }
+            }
+        }
         String workerId = houseWorker.getWorkerId();
         houseFlow.setWorkerId("");
         houseFlow.setWorkType(2);
