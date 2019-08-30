@@ -1,8 +1,11 @@
 package com.dangjia.acg.mapper.sale;
 
+import com.dangjia.acg.modle.sale.royalty.DjOrderSurface;
 import com.dangjia.acg.modle.sale.royalty.DjRobSingle;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
+
+import java.util.List;
 
 /**
  * 抢单配置 DAO
@@ -14,6 +17,6 @@ import tk.mybatis.mapper.common.Mapper;
 @Repository
 public interface DjRobSingleMapper extends Mapper<DjRobSingle> {
 
-
+    List<DjRobSingle> getRobDate(List<DjOrderSurface> djOrderSurfaces);
 
 }
