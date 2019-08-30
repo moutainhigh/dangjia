@@ -177,6 +177,7 @@ public class ModelingVillageService {
                     return ServerResponse.createByErrorMessage("楼栋名称不能为空");
                 ResidentialBuilding residentialBuilding;
                 if (CommonUtil.isEmpty(residentialBuildingId)) {//没有id则新增
+                    LOG.info("111111111111=======================");
                     if (CommonUtil.isEmpty(modelingVillage.getId()))//没有id则新增
                         return ServerResponse.createByErrorMessage("小区id不能为null");
                     Example example=new Example(Store.class);
