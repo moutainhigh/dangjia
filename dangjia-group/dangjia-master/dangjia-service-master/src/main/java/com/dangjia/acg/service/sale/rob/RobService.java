@@ -30,6 +30,7 @@ import com.dangjia.acg.mapper.sale.DjOrderSurfaceMapper;
 import com.dangjia.acg.mapper.sale.DjRobSingleMapper;
 import com.dangjia.acg.mapper.sale.IntentionHouseMapper;
 import com.dangjia.acg.mapper.store.IStoreMapper;
+import com.dangjia.acg.mapper.store.IStoreUserMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.modle.clue.Clue;
 import com.dangjia.acg.modle.clue.ClueTalk;
@@ -42,7 +43,7 @@ import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.sale.royalty.DjAlreadyRobSingle;
 import com.dangjia.acg.modle.sale.royalty.DjOrderSurface;
 import com.dangjia.acg.modle.sale.royalty.DjRobSingle;
-import com.dangjia.acg.modle.store.Store;
+import com.dangjia.acg.modle.store.StoreUser;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.house.HouseService;
@@ -105,6 +106,9 @@ public class RobService {
     private IHouseAddressMapper iHouseAddressMapper;
     @Autowired
     private SaleService saleService;
+
+    @Autowired
+    private IStoreUserMapper iStoreUserMapper;
     /**
      * 查询待抢单列表
      * @param userToken
@@ -123,10 +127,10 @@ public class RobService {
         }
 
 
-        Example example = new Example(Store.class);
-        example.createCriteria().andEqualTo(Store.USER_ID, accessToken.getUserId())
-                .andEqualTo(Store.DATA_STATUS, 0);
-        List<Store> storeList = iStoreMapper.selectByExample(example);
+        Example example = new Example(StoreUser.class);
+        example.createCriteria().andEqualTo(StoreUser.USER_ID, accessToken.getUserId())
+                .andEqualTo(StoreUser.DATA_STATUS, 0);
+        List<StoreUser> storeList = iStoreUserMapper.selectByExample(example);
         if (storeList.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
