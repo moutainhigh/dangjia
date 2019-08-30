@@ -677,30 +677,30 @@ public class RobService {
 //                    iCustomerRecordMapper.insert(customerRecord);
 //                    return ServerResponse.createBySuccessMessage("新增成功");
 //                } else {
-                    // 线索阶段新增沟通记录
-                    ClueTalk clueTalk = new ClueTalk();
-                    if(accessToken != null){
-                        clueTalk.setUserId(accessToken.getUserId());
-                    }
-                    if(CommonUtil.isEmpty(customerRecDTO.getRemindTime())){
-                        clueTalk.setRemindTime(null);
-                    }else{
-                        clueTalk.setRemindTime(customerRecDTO.getRemindTime());
-                    }
+                // 线索阶段新增沟通记录
+                ClueTalk clueTalk = new ClueTalk();
+                if(accessToken != null){
+                    clueTalk.setUserId(accessToken.getUserId());
+                }
+                if(CommonUtil.isEmpty(customerRecDTO.getRemindTime())){
+                    clueTalk.setRemindTime(null);
+                }else{
+                    clueTalk.setRemindTime(customerRecDTO.getRemindTime());
+                }
 
-                    if(null != customerRecDTO.getMemberId()){
-                        clueTalk.setMemberId(customerRecDTO.getMemberId());
-                    }
-                    clueTalk.setClueId(customerRecDTO.getClueId());
-                    clueTalk.setTalkContent(customerRecDTO.getDescribes());
-                    clueTalk.setDataStatus(0);
-                    clueTalkMapper.insert(clueTalk);
-                    Clue clue=new Clue();
-                    clue.setId(customerRecDTO.getClueId());
-                    clue.setCreateDate(null);
-                    clue.setTimeSequencing(clueTalk.getCreateDate());
-                    clueMapper.updateByPrimaryKeySelective(clue);//沟通记录更新线索排序时间
-                    return ServerResponse.createBySuccessMessage("新增成功");
+                if(null != customerRecDTO.getMemberId()){
+                    clueTalk.setMemberId(customerRecDTO.getMemberId());
+                }
+                clueTalk.setClueId(customerRecDTO.getClueId());
+                clueTalk.setTalkContent(customerRecDTO.getDescribes());
+                clueTalk.setDataStatus(0);
+                clueTalkMapper.insert(clueTalk);
+                Clue clue=new Clue();
+                clue.setId(customerRecDTO.getClueId());
+                clue.setCreateDate(null);
+                clue.setTimeSequencing(clueTalk.getCreateDate());
+                clueMapper.updateByPrimaryKeySelective(clue);//沟通记录更新线索排序时间
+                return ServerResponse.createBySuccessMessage("新增成功");
 //                }
             }
             return ServerResponse.createByErrorMessage("新增失败");
@@ -744,21 +744,21 @@ public class RobService {
      */
     public ServerResponse upDateCustomerInfo(Clue clue,Integer phaseStatus,String memberId) {
         try {
-                Member member = new Member();
-                if (!CommonUtil.isEmpty(clue)) {
-                    if(phaseStatus == 1){
-                        member.setNickName(clue.getOwername());
-                        member.setRemarks(clue.getRemark());
-                        member.setCreateDate(null);
-                        member.setMobile(clue.getPhone());
-                        member.setId(memberId);
-                        iMemberMapper.updateByPrimaryKeySelective(member);
-                    }
-                    clue.setCreateDate(null);
-                    clue.setMemberId(null);
-                    clueMapper.updateByPrimaryKeySelective(clue);
-                    return ServerResponse.createBySuccessMessage("修改成功");
+            Member member = new Member();
+            if (!CommonUtil.isEmpty(clue)) {
+                if(phaseStatus == 1){
+                    member.setNickName(clue.getOwername());
+                    member.setRemarks(clue.getRemark());
+                    member.setCreateDate(null);
+                    member.setMobile(clue.getPhone());
+                    member.setId(memberId);
+                    iMemberMapper.updateByPrimaryKeySelective(member);
                 }
+                clue.setCreateDate(null);
+                clue.setMemberId(null);
+                clueMapper.updateByPrimaryKeySelective(clue);
+                return ServerResponse.createBySuccessMessage("修改成功");
+            }
 
             return ServerResponse.createByErrorMessage("修改失败");
         } catch (Exception e) {

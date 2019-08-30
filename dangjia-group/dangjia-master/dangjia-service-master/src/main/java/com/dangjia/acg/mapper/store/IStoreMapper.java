@@ -45,5 +45,5 @@ public interface IStoreMapper extends Mapper<Store>{
     List<Store> indexqueryStore(@Param("cityId") String cityId,@Param("latitude") String latitude, @Param("longitude") String longitude);
 
 
-    List<OrderStoreDTO> getOrderStore(@Param("latitude") String latitude, @Param("longitude") String longitude ,@Param("djOrderSurfaces") List<DjOrderSurface> djOrderSurfaces);
+    List<OrderStoreDTO> getOrderStore(@Param("latitude") String latitude, @Param("longitude") String longitude, @Param("djOrderSurfaces")List<DjOrderSurface> djOrderSurfaces );
 }
