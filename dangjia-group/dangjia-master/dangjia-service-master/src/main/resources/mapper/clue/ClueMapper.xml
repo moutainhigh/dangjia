@@ -445,14 +445,6 @@
     </select>
 
 
-    <select id="queryNotRobSingleData" resultType="com.dangjia.acg.dto.sale.rob.RobDTO" parameterType="java.util.Map">
-
-    </select>
-
-
-
-
-
     <select id="queryCustomerInfo" resultType="com.dangjia.acg.dto.sale.rob.RobInfoDTO" parameterType="java.util.Map">
         select
         <if test="stage == 4 or stage == 5">

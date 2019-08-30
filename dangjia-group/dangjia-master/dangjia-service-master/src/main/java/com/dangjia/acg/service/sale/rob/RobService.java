@@ -142,7 +142,6 @@ public class RobService {
         List<RobDTO> list = clueMapper.queryRobSingledata(map);
 
 
-        List<RobDTO> NotList = clueMapper.queryNotRobSingleData(map);
 
 
         //查询标签
