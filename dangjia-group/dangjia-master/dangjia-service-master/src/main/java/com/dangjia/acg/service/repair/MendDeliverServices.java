@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -98,7 +99,8 @@ public class MendDeliverServices {
                 mendDeliverDTO.setMemberName(member.getName());
                 mendDeliverDTO.setList(mendMateriels);
                 mendDeliverDTO.setCount(mendMateriels.size());
-                mendDeliverDTO.setSumprice(sumprice);
+                BigDecimal value =new BigDecimal(sumprice).setScale(2,BigDecimal.ROUND_HALF_UP);
+                mendDeliverDTO.setSumprice(value.doubleValue());
                 return ServerResponse.createBySuccess("查询成功",mendDeliverDTO);
             }else{
                 return ServerResponse.createBySuccess("无此数据");
