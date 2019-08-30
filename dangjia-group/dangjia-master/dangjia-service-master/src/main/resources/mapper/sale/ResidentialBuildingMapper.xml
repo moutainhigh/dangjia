@@ -56,8 +56,8 @@
         update dj_sale_residential_building
         set store_id=#{storeId}
         where village_id in
-        <foreach item="villageIds" collection="array" open="(" separator="," close=")">
-            #{villageIds}
+        <foreach collection="villageIds" index="index" item="item" open="(" separator="," close=")">
+            #{item}
         </foreach>
     </update>
 
