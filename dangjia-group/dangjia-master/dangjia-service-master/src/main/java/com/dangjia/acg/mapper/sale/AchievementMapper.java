@@ -67,6 +67,12 @@ public interface AchievementMapper {
      */
     List<AchievementInfoDTO>queryRoyaltyMatch(Map<String, Object> map);
 
+    /**
+     *  查询门店下面员工业绩
+     * @param map
+     * @return
+     */
+    List<AchievementInfoDTO>queryMonthRoyalty(Map<String, Object> map);
 
 
 

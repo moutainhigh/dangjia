@@ -85,6 +85,13 @@ public class AchievementService {
 
         List<AchievementInfoDTO> achievementInfoDTOS = achievementMapper.queryRoyaltyMatch(map);
 
+        List<AchievementInfoDTO> list = achievementMapper.queryMonthRoyalty(map);
+
+        for (int i = 0; i < achievementInfoDTOS.size(); i++) {
+            achievementInfoDTOS.get(i).setMonthRoyalty(list.get(i).getMonthRoyalty());
+            achievementInfoDTOS.get(i).setMeterRoyalty(list.get(i).getMeterRoyalty());
+            achievementInfoDTOS.get(i).setArrRoyalty(list.get(i).getArrRoyalty());
+        }
 
 
         for (AchievementInfoDTO aa:achievementInfoDTOS) {
