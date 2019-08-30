@@ -26,6 +26,7 @@ import com.dangjia.acg.mapper.member.ICustomerRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberLabelMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.sale.DjAlreadyRobSingleMapper;
+import com.dangjia.acg.mapper.sale.DjOrderSurfaceMapper;
 import com.dangjia.acg.mapper.sale.DjRobSingleMapper;
 import com.dangjia.acg.mapper.sale.IntentionHouseMapper;
 import com.dangjia.acg.mapper.store.IStoreMapper;
@@ -39,6 +40,7 @@ import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Customer;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.sale.royalty.DjAlreadyRobSingle;
+import com.dangjia.acg.modle.sale.royalty.DjOrderSurface;
 import com.dangjia.acg.modle.sale.royalty.DjRobSingle;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
@@ -588,7 +590,7 @@ public class RobService {
                         }
                     }
                     String labelIdrr = str + "," + labelId;
-                    Map.put("labelIdArr", labelIdrr);
+                    Map.put("labelId", labelIdrr);
                     Map.put("clueId", clueId);
                     iCustomerMapper.upDateLabelId(Map);
                     return ServerResponse.createBySuccessMessage("新增成功");
@@ -675,30 +677,30 @@ public class RobService {
 //                    iCustomerRecordMapper.insert(customerRecord);
 //                    return ServerResponse.createBySuccessMessage("新增成功");
 //                } else {
-                    // 线索阶段新增沟通记录
-                    ClueTalk clueTalk = new ClueTalk();
-                    if(accessToken != null){
-                        clueTalk.setUserId(accessToken.getUserId());
-                    }
-                    if(CommonUtil.isEmpty(customerRecDTO.getRemindTime())){
-                        clueTalk.setRemindTime(null);
-                    }else{
-                        clueTalk.setRemindTime(customerRecDTO.getRemindTime());
-                    }
+                // 线索阶段新增沟通记录
+                ClueTalk clueTalk = new ClueTalk();
+                if(accessToken != null){
+                    clueTalk.setUserId(accessToken.getUserId());
+                }
+                if(CommonUtil.isEmpty(customerRecDTO.getRemindTime())){
+                    clueTalk.setRemindTime(null);
+                }else{
+                    clueTalk.setRemindTime(customerRecDTO.getRemindTime());
+                }
 
-                    if(null != customerRecDTO.getMemberId()){
-                        clueTalk.setMemberId(customerRecDTO.getMemberId());
-                    }
-                    clueTalk.setClueId(customerRecDTO.getClueId());
-                    clueTalk.setTalkContent(customerRecDTO.getDescribes());
-                    clueTalk.setDataStatus(0);
-                    clueTalkMapper.insert(clueTalk);
-                    Clue clue=new Clue();
-                    clue.setId(customerRecDTO.getClueId());
-                    clue.setCreateDate(null);
-                    clue.setTimeSequencing(clueTalk.getCreateDate());
-                    clueMapper.updateByPrimaryKeySelective(clue);//沟通记录更新线索排序时间
-                    return ServerResponse.createBySuccessMessage("新增成功");
+                if(null != customerRecDTO.getMemberId()){
+                    clueTalk.setMemberId(customerRecDTO.getMemberId());
+                }
+                clueTalk.setClueId(customerRecDTO.getClueId());
+                clueTalk.setTalkContent(customerRecDTO.getDescribes());
+                clueTalk.setDataStatus(0);
+                clueTalkMapper.insert(clueTalk);
+                Clue clue=new Clue();
+                clue.setId(customerRecDTO.getClueId());
+                clue.setCreateDate(null);
+                clue.setTimeSequencing(clueTalk.getCreateDate());
+                clueMapper.updateByPrimaryKeySelective(clue);//沟通记录更新线索排序时间
+                return ServerResponse.createBySuccessMessage("新增成功");
 //                }
             }
             return ServerResponse.createByErrorMessage("新增失败");
@@ -742,21 +744,21 @@ public class RobService {
      */
     public ServerResponse upDateCustomerInfo(Clue clue,Integer phaseStatus,String memberId) {
         try {
-                Member member = new Member();
-                if (!CommonUtil.isEmpty(clue)) {
-                    if(phaseStatus == 1){
-                        member.setNickName(clue.getOwername());
-                        member.setRemarks(clue.getRemark());
-                        member.setCreateDate(null);
-                        member.setMobile(clue.getPhone());
-                        member.setId(memberId);
-                        iMemberMapper.updateByPrimaryKeySelective(member);
-                    }
-                    clue.setCreateDate(null);
-                    clue.setMemberId(null);
-                    clueMapper.updateByPrimaryKeySelective(clue);
-                    return ServerResponse.createBySuccessMessage("修改成功");
+            Member member = new Member();
+            if (!CommonUtil.isEmpty(clue)) {
+                if(phaseStatus == 1){
+                    member.setNickName(clue.getOwername());
+                    member.setRemarks(clue.getRemark());
+                    member.setCreateDate(null);
+                    member.setMobile(clue.getPhone());
+                    member.setId(memberId);
+                    iMemberMapper.updateByPrimaryKeySelective(member);
                 }
+                clue.setCreateDate(null);
+                clue.setMemberId(null);
+                clueMapper.updateByPrimaryKeySelective(clue);
+                return ServerResponse.createBySuccessMessage("修改成功");
+            }
 
             return ServerResponse.createByErrorMessage("修改失败");
         } catch (Exception e) {
@@ -815,6 +817,8 @@ public class RobService {
     }
 
 
+    @Autowired
+    private DjOrderSurfaceMapper djOrderSurfaceMapper;
     /**
      * 未录入抢单
      * @return
@@ -831,13 +835,30 @@ public class RobService {
             logger.info("djRobSingles==================================="+djRobSingles);
             logger.info("djRobSingles.size()==================================="+djRobSingles.size());
             for (GrabSheetDTO grabSheetDTO : grabSheetDTOS) {
-                List<OrderStoreDTO> orderStore = iStoreMapper.getOrderStore(grabSheetDTO.getLatitude(), grabSheetDTO.getLongitude());
+                example=new Example(DjOrderSurface.class);
+                example.createCriteria().andEqualTo(DjOrderSurface.CLUE_ID,grabSheetDTO.getClueId())
+                        .andEqualTo(DjOrderSurface.DATA_STATUS,0);
+                List<DjOrderSurface> djOrderSurfaces = djOrderSurfaceMapper.selectByExample(example);
+                List<OrderStoreDTO> orderStore = iStoreMapper.getOrderStore(grabSheetDTO.getLatitude(), grabSheetDTO.getLongitude(),djOrderSurfaces);
+
 //                for (int i = 0; i < orderStore.size(); i++) {
 //                    orderStore.get(i).setRobDate(djRobSingles.get(i).getRobDate());
 //                }
-                for (int i = 0; i < djRobSingles.size(); i++) {
-                    orderStore.get(i).setRobDate(djRobSingles.get(i).getRobDate());
+
+                if(djRobSingles.size() > orderStore.size()){
+                    logger.info("11111==================================="+orderStore);
+                    for (int i = 0; i < orderStore.size(); i++) {
+                        orderStore.get(i).setRobDate(djRobSingles.get(i).getRobDate());
+                        orderStore.get(i).setRobDateId(djRobSingles.get(i).getId());
+                    }
+                }else{
+                    logger.info("22222==================================="+orderStore);
+                    for (int i = 0; i < djRobSingles.size(); i++) {
+                        orderStore.get(i).setRobDate(djRobSingles.get(i).getRobDate());
+                        orderStore.get(i).setRobDateId(djRobSingles.get(i).getId());
+                    }
                 }
+
                 logger.info("orderStore==================================="+orderStore);
                 logger.info("orderStore.size()==================================="+orderStore.size());
                 for (OrderStoreDTO orderStoreDTO : orderStore) {
@@ -846,6 +867,12 @@ public class RobService {
                                 > Integer.parseInt(orderStoreDTO.getRobDate())) {
                             logger.info("11111111111111111111===================================" + orderStoreDTO.getStoreId());
                             logger.info("11111111111111111111===================================" + grabSheetDTO.getMemberId());
+                            DjOrderSurface djOrderSurface = new DjOrderSurface();
+                            djOrderSurface.setDataStatus(0);
+                            djOrderSurface.setStoreId(orderStoreDTO.getStoreId());
+                            djOrderSurface.setClueId(grabSheetDTO.getClueId());
+                            djOrderSurface.setRobDateId(orderStoreDTO.getRobDateId());
+                            djOrderSurfaceMapper.insert(djOrderSurface);
                             clueMapper.setDistribution(orderStoreDTO.getStoreId(), grabSheetDTO.getMemberId());
                         }
                     }

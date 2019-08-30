@@ -59,10 +59,7 @@ import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.sale.residential.ResidentialBuilding;
 import com.dangjia.acg.modle.sale.residential.ResidentialRange;
-import com.dangjia.acg.modle.sale.royalty.DjAlreadyRobSingle;
-import com.dangjia.acg.modle.sale.royalty.DjAreaMatch;
-import com.dangjia.acg.modle.sale.royalty.DjRoyaltyDetailsSurface;
-import com.dangjia.acg.modle.sale.royalty.DjRoyaltyMatch;
+import com.dangjia.acg.modle.sale.royalty.*;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
@@ -183,7 +180,8 @@ public class HouseService {
     private UserMapper userMapper;
     @Autowired
     private IStoreMapper iStoreMapper;
-
+    @Autowired
+    private DjOrderSurfaceMapper djOrderSurfaceMapper;
     @Autowired
     private RobService robService;
 
@@ -1836,8 +1834,17 @@ public class HouseService {
         example.createCriteria().andEqualTo(Customer.MEMBER_ID,member.getId())
                 .andIsNull(Customer.USER_ID);
         if(iCustomerMapper.selectByExample(example).size()>0) {
-            List<OrderStoreDTO> orderStore = iStoreMapper.getOrderStore(latitude, longitude);
+            List<OrderStoreDTO> orderStore = iStoreMapper.getOrderStore(latitude, longitude,null);
             clueMapper.setDistribution(orderStore.get(0).getStoreId(), member.getId());
+            DjOrderSurface djOrderSurface = new DjOrderSurface();
+            djOrderSurface.setDataStatus(0);
+            djOrderSurface.setStoreId(orderStore.get(0).getStoreId());
+            example=new Example(Clue.class);
+            example.createCriteria().andEqualTo(Clue.MEMBER_ID,member.getId())
+                    .andIsNull(Clue.CUS_SERVICE);
+            List<Clue> clues = clueMapper.selectByExample(example);
+            djOrderSurface.setClueId(clues.get(0).getId());
+            djOrderSurfaceMapper.insert(djOrderSurface);
 //            robService.notEnteredGrabSheet();
         }
 

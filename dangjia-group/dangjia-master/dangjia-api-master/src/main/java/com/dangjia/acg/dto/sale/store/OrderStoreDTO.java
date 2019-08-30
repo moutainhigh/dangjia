@@ -25,4 +25,5 @@ public class OrderStoreDTO {
     private String userId;
     private Integer juli;//门店距离
     private String robDate;//抢单时间
+    private String robDateId;
 }
