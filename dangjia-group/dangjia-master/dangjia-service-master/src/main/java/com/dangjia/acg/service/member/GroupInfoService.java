@@ -4,6 +4,7 @@ import com.dangjia.acg.api.CrossAppAPI;
 import com.dangjia.acg.api.GroupAPI;
 import com.dangjia.acg.api.MessageAPI;
 import com.dangjia.acg.api.UserAPI;
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.model.PageDTO;
@@ -350,12 +351,9 @@ public class GroupInfoService {
      * @return
      */
     public ServerResponse getOnlineService(HttpServletRequest request, Integer type) {
-        Example example = new Example(MainUser.class);
-        example.createCriteria().andEqualTo(MainUser.IS_RECEIVE, type);
-        example.orderBy(GroupUserConfig.CREATE_DATE).desc();
-        List<MainUser> list = userMapper.selectByExample(example);
-        if (list != null && list.size() > 0) {
-            MainUser user = list.get(0);
+        String cityId = request.getParameter(Constants.CITY_ID);
+        MainUser user = userMapper.getUserByReceive(cityId,type);
+        if (user!=null) {
             Map map = new HashMap();
             map.put("targetId", user.getId());
             map.put("targetAppKey", messageAPI.getAppKey(AppType.SALE.getDesc()));
