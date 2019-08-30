@@ -558,7 +558,7 @@ public class ClientService {
                     if (userStore != null && !CommonUtil.isEmpty(userStore.getMemberId()))
                         configMessageService.addConfigMessage(AppType.SALE, userStore.getMemberId(), "沉睡客户",
                                 "收到了【" + user.getUsername() + "】放弃跟进的客户，快去分配给员工吧。", 0, url
-                                        + Utils.getCustomerDetails(memberId, clueId, phaseStatus, "2"," ",store.getId()));
+                                        + Utils.getCustomerDetails(memberId, clueId, phaseStatus, "2","待分配",store.getId()));
                 }
             }
         }

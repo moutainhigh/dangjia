@@ -470,6 +470,7 @@
             h.construction_date as constructionDate,
             h.completed_date as completedDate,
         </if>
+        c.branch_user as branchUser,
         c.create_date as createDate,
         c.owername as owerName,
         c.phone as phone,
@@ -637,6 +638,7 @@
         c.phase_status as phaseStatus,
         c.stage as stage,
         c.create_date as createDate,
+        c.branch_user as branchUser,
         m.name as userName,
         m.head as head,
         m.id as memberId
