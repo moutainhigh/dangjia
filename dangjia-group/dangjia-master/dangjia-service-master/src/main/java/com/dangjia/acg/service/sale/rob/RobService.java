@@ -30,6 +30,7 @@ import com.dangjia.acg.mapper.sale.DjOrderSurfaceMapper;
 import com.dangjia.acg.mapper.sale.DjRobSingleMapper;
 import com.dangjia.acg.mapper.sale.IntentionHouseMapper;
 import com.dangjia.acg.mapper.store.IStoreMapper;
+import com.dangjia.acg.mapper.store.IStoreUserMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.modle.clue.Clue;
 import com.dangjia.acg.modle.clue.ClueTalk;
@@ -42,11 +43,10 @@ import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.sale.royalty.DjAlreadyRobSingle;
 import com.dangjia.acg.modle.sale.royalty.DjOrderSurface;
 import com.dangjia.acg.modle.sale.royalty.DjRobSingle;
-import com.dangjia.acg.modle.store.Store;
+import com.dangjia.acg.modle.store.StoreUser;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.house.HouseService;
-import com.dangjia.acg.service.sale.SaleService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.collections.map.HashedMap;
@@ -77,17 +77,11 @@ public class RobService {
     @Autowired
     private ConfigUtil configUtil;
     @Autowired
-    private ICustomerRecordMapper iCustomerRecordMapper;
-    @Autowired
     private CraftsmanConstructionService constructionService;
     @Autowired
     private ClueTalkMapper clueTalkMapper;
     @Autowired
     private IntentionHouseMapper intentionHouseMapper;
-    @Autowired
-    private ConfigMessageService configMessageService;
-    @Autowired
-    private UserMapper userMapper;
     @Autowired
     private IMemberMapper iMemberMapper;
     @Autowired
@@ -96,15 +90,16 @@ public class RobService {
     private HouseService houseService;
     @Autowired
     private IStoreMapper iStoreMapper;
-
     @Autowired
     private DjAlreadyRobSingleMapper djAlreadyRobSingleMapper;
     @Autowired
     private IHouseMapper iHouseMapper;
     @Autowired
     private IHouseAddressMapper iHouseAddressMapper;
+
+
     @Autowired
-    private SaleService saleService;
+    private IStoreUserMapper iStoreUserMapper;
     /**
      * 查询待抢单列表
      * @param userToken
@@ -123,10 +118,10 @@ public class RobService {
         }
 
 
-        Example example = new Example(Store.class);
-        example.createCriteria().andEqualTo(Store.USER_ID, accessToken.getUserId())
-                .andEqualTo(Store.DATA_STATUS, 0);
-        List<Store> storeList = iStoreMapper.selectByExample(example);
+        Example example = new Example(StoreUser.class);
+        example.createCriteria().andEqualTo(StoreUser.USER_ID, accessToken.getUserId())
+                .andEqualTo(StoreUser.DATA_STATUS, 0);
+        List<StoreUser> storeList = iStoreUserMapper.selectByExample(example);
         if (storeList.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
@@ -844,14 +839,8 @@ public class RobService {
         logger.info("grabSheetDTOS==================================="+grabSheetDTOS);
         logger.info("grabSheetDTOS.size()==================================="+grabSheetDTOS.size());
         if(grabSheetDTOS.size()>0) {
-            Example example = new Example(DjRobSingle.class);
-            example.createCriteria().andEqualTo(DjRobSingle.DATA_STATUS, 0);
-            example.orderBy(DjRobSingle.ROB_DATE).asc();
-            List<DjRobSingle> djRobSingles = djRobSingleMapper.selectByExample(example);
-            logger.info("djRobSingles==================================="+djRobSingles);
-            logger.info("djRobSingles.size()==================================="+djRobSingles.size());
             for (GrabSheetDTO grabSheetDTO : grabSheetDTOS) {
-                example=new Example(DjOrderSurface.class);
+                Example example=new Example(DjOrderSurface.class);
                 example.createCriteria().andEqualTo(DjOrderSurface.CLUE_ID,grabSheetDTO.getClueId())
                         .andEqualTo(DjOrderSurface.DATA_STATUS,0);
                 List<DjOrderSurface> djOrderSurfaces = djOrderSurfaceMapper.selectByExample(example);
@@ -860,7 +849,7 @@ public class RobService {
 //                for (int i = 0; i < orderStore.size(); i++) {
 //                    orderStore.get(i).setRobDate(djRobSingles.get(i).getRobDate());
 //                }
-
+                List<DjRobSingle> djRobSingles = djRobSingleMapper.getRobDate(djOrderSurfaces);
                 if(djRobSingles.size() > orderStore.size()){
                     logger.info("11111==================================="+orderStore);
                     for (int i = 0; i < orderStore.size(); i++) {
