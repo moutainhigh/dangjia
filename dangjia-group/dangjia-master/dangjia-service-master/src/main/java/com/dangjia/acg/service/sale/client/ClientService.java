@@ -187,6 +187,7 @@ public class ClientService {
             clue.setCityId(store.getCityId());
             clue.setMemberId(members.get(0).getId());
             clue.setTimeSequencing(clue.getCreateDate());
+            clue.setBranchUser(0);
             clueMapper.insert(clue);//记录进入线索线索状态为转客户客户阶段
             if(!CommonUtil.isEmpty(clue.getBuilding())) {
                 IntentionHouse intentionHouse = new IntentionHouse();
@@ -217,6 +218,7 @@ public class ClientService {
             clue.setCityId(store.getCityId());
             clue.setClueType(0);
             clue.setTimeSequencing(clue.getCreateDate());
+            clue.setBranchUser(0);
             if( !CommonUtil.isEmpty(clue.getBuilding())){
                 IntentionHouse intentionHouse = new IntentionHouse();
                 intentionHouse.setClueId(clue.getId());
@@ -346,6 +348,7 @@ public class ClientService {
                 clue.setCrossDomainUserId(accessToken.getUserId());//跨域销售id
                 clue.setTimeSequencing(clue.getCreateDate());
                 clue.setStoreId(store.getId());
+                clue.setBranchUser(0);
                 clueMapper.insert(clue);
                 Customer customer = new Customer();
                 customer.setUserId(store.getUserId());
@@ -371,6 +374,7 @@ public class ClientService {
                 clue.setCusService(store.getUserId());
                 clue.setCrossDomainUserId(accessToken.getUserId());//跨域销售id
                 clue.setTimeSequencing(clue.getCreateDate());
+                clue.setBranchUser(0);
                 clueMapper.insert(clue);
             }
             //店长推送消息
@@ -416,6 +420,7 @@ public class ClientService {
             clue.setCrossDomainUserId(accessToken.getUserId());//跨域销售id
             clue.setTimeSequencing(clue.getCreateDate());
             clue.setStoreId(store.getId());
+            clue.setBranchUser(0);
             clueMapper.insert(clue);
             Customer customer=new Customer();
             customer.setUserId(residentialRange.getUserId());
