@@ -286,7 +286,7 @@ public class ClientService {
                 customer.setPhaseStatus(1);
                 customer.setTurnStatus(1);
                 iCustomerMapper.updateByPrimaryKeySelective(customer);
-                return ServerResponse.createBySuccessMessage("记录为中台的线索");
+                return ServerResponse.createBySuccessMessage("记录为中台的客户列表");
             }else{//未注册
                 clue.setClueType(1);
                 clue.setTurnStatus(1);
@@ -296,6 +296,7 @@ public class ClientService {
                 clue.setPhaseStatus(0);
                 clue.setTimeSequencing(clue.getCreateDate());
                 clueMapper.insert(clue);//记录为中台的线索
+                return ServerResponse.createBySuccessMessage("记录为中台的线索");
             }
         }
         ResidentialBuilding residentialBuilding = residentialBuildingMapper.selectByPrimaryKey(buildingId);
