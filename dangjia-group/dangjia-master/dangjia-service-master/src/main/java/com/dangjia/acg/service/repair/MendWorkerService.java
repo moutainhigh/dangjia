@@ -73,10 +73,8 @@ public class MendWorkerService {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             if (!CommonUtil.isEmpty(beginDate) && !CommonUtil.isEmpty(endDate)) {
-                if (beginDate.equals(endDate)) {
                     beginDate = beginDate + " " + "00:00:00";
                     endDate = endDate + " " + "23:59:59";
-                }
             }
 //            List<MendOrder> mendOrderList = mendOrderMapper.workerOrderState(houseId);
             List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(houseId, 1, beginDate, endDate, likeAddress);
