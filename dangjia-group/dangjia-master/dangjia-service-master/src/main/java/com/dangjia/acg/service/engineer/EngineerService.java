@@ -1001,7 +1001,7 @@ public class EngineerService {
         if (type != null) {
             example.createCriteria().andEqualTo(WorkerEveryday.TYPE, type);
         }
-        if (CommonUtil.isEmpty(search)) {
+        if (!CommonUtil.isEmpty(search)) {
             example.createCriteria().andLike(WorkerEveryday.NAME, "%" + search + "%");
         }
         example.orderBy(WorkerEveryday.TYPE).orderBy(WorkerEveryday.MODIFY_DATE).desc();

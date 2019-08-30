@@ -286,9 +286,9 @@
         </if>
         <if test="villageId == '1'.toString()">
             <if test="null!=buildings and buildings.size>0">
-                and h.building not in
+                and CONCAT(h.residential,h.building) not in
                 <foreach collection="buildings" index="index" item="item" open="(" separator="," close=")">
-                    #{item.buildingName}
+                    #{item.vbName}
                 </foreach>
             </if>
         </if>
