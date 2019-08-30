@@ -303,6 +303,7 @@ public class StoreManagementService {
             clue.setCusService(cusSerice);
             clue.setStage(1);
             clue.setModifyDate(new Date());
+            clue.setBranchUser(1);
             clueMapper.updateByPrimaryKeySelective(clue);
             MainUser user = userMapper.selectByPrimaryKey(cusSerice);
 
@@ -322,6 +323,7 @@ public class StoreManagementService {
             if (clue != null) {
                 clue.setCusService(cusSerice);
                 clue.setStage(1);
+                clue.setBranchUser(1);
                 clue.setModifyDate(new Date());
                 clueMapper.updateByPrimaryKeySelective(clue);
             }

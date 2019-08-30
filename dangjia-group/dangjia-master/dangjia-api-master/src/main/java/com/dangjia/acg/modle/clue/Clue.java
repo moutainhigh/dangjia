@@ -128,4 +128,9 @@ public class Clue extends BaseEntity {
     @ApiModelProperty("列表时间排序字段")
     private Date timeSequencing;
 
+    @Column(name = "branch_user")
+    @Desc(value = "分配销售 1：已分配  0：未分配")
+    @ApiModelProperty("分配销售 1：已分配  0：未分配")
+    private Integer branchUser;
+
 }
