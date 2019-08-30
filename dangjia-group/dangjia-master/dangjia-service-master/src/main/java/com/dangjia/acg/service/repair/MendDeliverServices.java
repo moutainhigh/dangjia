@@ -12,6 +12,7 @@ import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.MendDeliver;
 import com.dangjia.acg.modle.repair.MendMateriel;
+import com.dangjia.acg.modle.sup.SupplierProduct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -77,6 +78,12 @@ public class MendDeliverServices {
                 double sumprice = 0D;
                 MendDeliverDTO mendDeliverDTO = new MendDeliverDTO();
                 for (MendMateriel mendMateriel : mendMateriels) {
+                    SupplierProduct supplierProduct = forMasterAPI.getSupplierProduct(house.getCityId(),mendDeliver.getSupplierId(),mendMateriel.getProductId());
+                    if(supplierProduct!=null){
+                        mendMateriel.setPrice(supplierProduct.getPrice());
+                        mendMateriel.setTotalPrice(supplierProduct.getPrice() * mendMateriel.getShopCount());
+                        mendMateriel.setActualPrice(supplierProduct.getPrice() * mendMateriel.getActualCount());
+                    }
                     sumprice += mendMateriel.getActualPrice();
                     mendMateriel.setBrandName(forMasterAPI.brandName(house.getCityId(), mendMateriel.getProductId()));
                 }
