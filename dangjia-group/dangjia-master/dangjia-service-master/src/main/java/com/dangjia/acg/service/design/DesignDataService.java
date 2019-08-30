@@ -463,7 +463,7 @@ public class DesignDataService {
             //精算统计字段
             if(CommonUtil.isEmpty(workerTypeId)&&"2".equals(workerTypeId)){
                 for (int i = 0; i < fieldBudgetNames.length; i++) {
-                    map.put(fieldDesignNames[i], memberMapper.getBudgetStatisticsNum(member.getId(),startDate,endDate,(i+1)));
+                    map.put(fieldBudgetNames[i], memberMapper.getBudgetStatisticsNum(member.getId(),startDate,endDate,(i+1)));
                 }
             }
             memberMapList.add(map);
