@@ -450,6 +450,8 @@ public class DesignDataService {
                 "grabOrders", "payment", "measuringRoom", "uploadPlan", "confirmPlan", "uploadConstruction", "confirmConstruction ", "sctuarialFigure", "end"};
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<Member> memberList = memberMapper.artisanList(cityId, null, workerTypeId, null, "2");
+        List<Map> memberMapList =new ArrayList<>();
+        PageInfo pageResult = new PageInfo(memberList);
         for (Member member : memberList) {
             Map map= BeanUtils.beanToMap(member);
             //设计统计字段
@@ -464,8 +466,9 @@ public class DesignDataService {
                     map.put(fieldDesignNames[i], memberMapper.getBudgetStatisticsNum(member.getId(),startDate,endDate,(i+1)));
                 }
             }
+            memberMapList.add(map);
         }
-        PageInfo pageResult = new PageInfo(memberList);
+        pageResult.setList(memberMapList);
         return ServerResponse.createBySuccess("获取成功", pageResult);
     }
 }
