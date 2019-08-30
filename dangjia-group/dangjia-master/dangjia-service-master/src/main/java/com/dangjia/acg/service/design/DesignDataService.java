@@ -455,13 +455,13 @@ public class DesignDataService {
         for (Member member : memberList) {
             Map map= BeanUtils.beanToMap(member);
             //设计统计字段
-            if(CommonUtil.isEmpty(workerTypeId)&&"1".equals(workerTypeId)){
+            if(!CommonUtil.isEmpty(workerTypeId)&&"1".equals(workerTypeId)){
                 for (int i = 0; i < fieldDesignNames.length; i++) {
                     map.put(fieldDesignNames[i], memberMapper.getDesignStatisticsNum(member.getId(),startDate,endDate,(i+1)));
                 }
             }
             //精算统计字段
-            if(CommonUtil.isEmpty(workerTypeId)&&"2".equals(workerTypeId)){
+            if(!CommonUtil.isEmpty(workerTypeId)&&"2".equals(workerTypeId)){
                 for (int i = 0; i < fieldBudgetNames.length; i++) {
                     map.put(fieldBudgetNames[i], memberMapper.getBudgetStatisticsNum(member.getId(),startDate,endDate,(i+1)));
                 }
