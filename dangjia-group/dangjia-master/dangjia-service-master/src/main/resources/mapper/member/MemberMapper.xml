@@ -245,7 +245,7 @@
 
     <select id="getBudgetStatisticsNum" resultType="int">
         SELECT  COUNT(o.id) FROM  `dj_core_house_worker` o
-        <if test="type=='1'">
+        <if test="type==1">
             INNER JOIN dj_house h ON h.id = o.house_id
             WHERE
             o.worker_id = #{workerId}
@@ -254,7 +254,7 @@
                 and o.create_date BETWEEN #{startDate} and #{endDate}
             </if>
         </if>
-        <if test="type=='2'">
+        <if test="type==2">
             INNER JOIN `dj_deliver_order` h ON h.house_id = o.house_id
             AND h.worker_type_id = o.worker_type_id
             WHERE
@@ -264,7 +264,7 @@
                 and h.create_date BETWEEN #{startDate} and #{endDate}
             </if>
         </if>
-        <if test="type=='3'">
+        <if test="type==3">
             INNER JOIN dj_house h ON h.id = o.house_id
             AND h.budget_ok = 2
             WHERE
@@ -274,7 +274,7 @@
                 and o.create_date BETWEEN #{startDate} and #{endDate}
             </if>
         </if>
-        <if test="type=='4'">
+        <if test="type==4">
             INNER JOIN dj_house h ON h.id = o.house_id
             AND h.budget_ok = 3
             WHERE
@@ -284,7 +284,7 @@
                 and o.create_date BETWEEN #{startDate} and #{endDate}
             </if>
         </if>
-        <if test="type=='5'">
+        <if test="type==5">
             INNER JOIN dj_house h ON h.id = o.house_id
             AND h.budget_ok = 3
             AND h.construction_date IS NOT NULL
@@ -295,7 +295,7 @@
                 and o.create_date BETWEEN #{startDate} and #{endDate}
             </if>
         </if>
-        <if test="type=='6'">
+        <if test="type==6">
             INNER JOIN dj_house h ON h.id = o.house_id
             AND h.budget_ok != 3
             AND h.visit_state = 4
@@ -309,7 +309,7 @@
     </select>
     <select id="getDesignStatisticsNum" resultType="int">
         SELECT  COUNT(o.id) FROM  `dj_core_house_worker` o
-        <if test="type=='1'">
+        <if test="type==1">
             INNER JOIN dj_house h ON h.id = o.house_id
             WHERE
             o.worker_id = #{workerId}
@@ -318,7 +318,7 @@
                 and o.create_date BETWEEN #{startDate} and #{endDate}
             </if>
         </if>
-        <if test="type=='2'">
+        <if test="type==2">
             INNER JOIN `dj_deliver_order` h ON h.house_id = o.house_id
             AND h.worker_type_id = o.worker_type_id
             WHERE
@@ -328,7 +328,7 @@
                 and h.create_date BETWEEN #{startDate} and #{endDate}
             </if>
         </if>
-        <if test="type=='3'">
+        <if test="type==3">
             INNER JOIN `dj_design_quantity_room` h ON h.house_id = o.house_id
             AND h.type = 0
             WHERE
@@ -337,7 +337,7 @@
                 and o.create_date BETWEEN #{startDate} and #{endDate}
             </if>
         </if>
-        <if test="type=='4'">
+        <if test="type==4">
             INNER JOIN `dj_design_quantity_room` h ON h.house_id = o.house_id
             AND h.type = 1
             WHERE
@@ -346,7 +346,7 @@
                 and h.create_date BETWEEN #{startDate} and #{endDate}
             </if>
         </if>
-        <if test="type=='5'">
+        <if test="type==5">
             INNER JOIN `dj_design_quantity_room` r ON r.house_id = o.house_id
             AND r.type = 1
             INNER JOIN dj_house h ON h.id = o.house_id
@@ -357,7 +357,7 @@
                 and r.create_date BETWEEN #{startDate} and #{endDate}
             </if>
         </if>
-        <if test="type=='6'">
+        <if test="type==6">
             INNER JOIN `dj_design_quantity_room` h ON h.house_id = o.house_id
             AND h.type = 2
             WHERE
@@ -366,7 +366,7 @@
                 and h.create_date BETWEEN #{startDate} and #{endDate}
             </if>
         </if>
-        <if test="type=='7'">
+        <if test="type==7">
             INNER JOIN `dj_design_quantity_room` r ON r.house_id = o.house_id
             AND r.type = 2
             INNER JOIN dj_house h ON h.id = o.house_id
@@ -377,7 +377,7 @@
                 and r.create_date BETWEEN #{startDate} and #{endDate}
             </if>
         </if>
-        <if test="type=='8'">
+        <if test="type==8">
             INNER JOIN dj_house h ON h.id = o.house_id
             AND h.budget_ok > 0
             WHERE
@@ -386,7 +386,7 @@
                 and o.create_date BETWEEN #{startDate} and #{endDate}
             </if>
         </if>
-        <if test="type=='9'">
+        <if test="type==9">
             INNER JOIN dj_house h ON h.id = o.house_id
             AND h.visit_state = 4
             WHERE
