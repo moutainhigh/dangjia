@@ -845,7 +845,9 @@ public class RobService {
 
 //                for (int i = 0; i < orderStore.size(); i++) {
 //                    orderStore.get(i).setRobDate(djRobSingles.get(i).getRobDate());
-//                }
+                if(djOrderSurfaces.size()<=0){
+                    djOrderSurfaces=null;
+                }
                 List<DjRobSingle> djRobSingles = djRobSingleMapper.getRobDate(djOrderSurfaces);
                 if(djRobSingles.size() > orderStore.size()){
                     logger.info("11111==================================="+orderStore);
@@ -895,7 +897,6 @@ public class RobService {
         }
         return ServerResponse.createBySuccessMessage("分配成功");
     }
-
 
 
     /**
