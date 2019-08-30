@@ -844,9 +844,21 @@ public class RobService {
 //                for (int i = 0; i < orderStore.size(); i++) {
 //                    orderStore.get(i).setRobDate(djRobSingles.get(i).getRobDate());
 //                }
-                for (int i = 0; i < djRobSingles.size(); i++) {
-                    orderStore.get(i).setRobDate(djRobSingles.get(i).getRobDate());
+
+                if(djRobSingles.size() > orderStore.size()){
+                    logger.info("11111==================================="+orderStore);
+                    for (int i = 0; i < orderStore.size(); i++) {
+                        orderStore.get(i).setRobDate(djRobSingles.get(i).getRobDate());
+                        orderStore.get(i).setRobDateId(djRobSingles.get(i).getId());
+                    }
+                }else{
+                    logger.info("22222==================================="+orderStore);
+                    for (int i = 0; i < djRobSingles.size(); i++) {
+                        orderStore.get(i).setRobDate(djRobSingles.get(i).getRobDate());
+                        orderStore.get(i).setRobDateId(djRobSingles.get(i).getId());
+                    }
                 }
+
                 logger.info("orderStore==================================="+orderStore);
                 logger.info("orderStore.size()==================================="+orderStore.size());
                 for (OrderStoreDTO orderStoreDTO : orderStore) {
@@ -859,6 +871,7 @@ public class RobService {
                             djOrderSurface.setDataStatus(0);
                             djOrderSurface.setStoreId(orderStoreDTO.getStoreId());
                             djOrderSurface.setClueId(grabSheetDTO.getClueId());
+                            djOrderSurface.setRobDateId(orderStoreDTO.getRobDateId());
                             djOrderSurfaceMapper.insert(djOrderSurface);
                             clueMapper.setDistribution(orderStoreDTO.getStoreId(), grabSheetDTO.getMemberId());
                         }

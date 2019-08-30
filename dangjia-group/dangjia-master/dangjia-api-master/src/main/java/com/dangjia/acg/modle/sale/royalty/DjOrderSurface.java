@@ -28,4 +28,10 @@ public class DjOrderSurface extends BaseEntity {
     @Desc(value = "门店Id")
     @ApiModelProperty("门店Id")
     private String storeId;
+
+    @Column(name = "rob_date_id")
+    @Desc(value = "时间id")
+    @ApiModelProperty("时间id")
+    private String robDateId;
+
 }
