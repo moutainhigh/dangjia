@@ -413,6 +413,35 @@
                 and c.store_id = #{storeId}
             </otherwise>
         </choose>
+        union
+        SELECT
+        c.phone as phone,
+        c.cus_service as cusService,
+        c.member_id as memberId,
+        c.id as clueId,
+        c.stage as stage,
+        c.phase_status as phaseStatus,
+        h.id as houseId,
+        h.city_id as cityId,
+        h.village_id as villageId,
+        h.visit_state as visitState,
+        h.create_date as createDate,
+        mc.label_id_arr as labelIdArr,
+        mc.id as mcId,
+        m.nick_name as owerName
+        FROM
+        dj_clue c
+        INNER JOIN dj_house h ON c.member_id = h.member_id
+        INNER JOIN dj_member_customer mc ON mc.member_id = c.member_id
+        INNER JOIN dj_member m on m.id=c.member_id
+        WHERE
+        (
+        c.cus_service IS NULL
+        OR c.cus_service = ""
+        )
+        and c.store_id = #{storeId}
+        and h.visit_state = 0 and h.data_status=0
+        and h.is_rob_stats = 0
     </select>
 
 
