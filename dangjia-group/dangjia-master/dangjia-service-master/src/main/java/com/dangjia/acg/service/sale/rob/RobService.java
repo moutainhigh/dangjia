@@ -122,11 +122,14 @@ public class RobService {
             return ServerResponse.createbyUserTokenError();
         }
 
-        object = saleService.getStore(accessToken.getUserId());
-        if (object instanceof ServerResponse) {
-            return (ServerResponse) object;
+
+        Example example = new Example(Store.class);
+        example.createCriteria().andEqualTo(Store.USER_ID, accessToken.getUserId())
+                .andEqualTo(Store.DATA_STATUS, 0);
+        List<Store> storeList = iStoreMapper.selectByExample(example);
+        if (storeList.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
-        Store store = (Store) object;
 
         Map<String, Object> map = new HashMap<>();
         map.put("userId", accessToken.getUserId());
@@ -134,7 +137,7 @@ public class RobService {
         if (!CommonUtil.isEmpty(storeId)) {
             map.put("storeId", storeId);
         }else{
-            map.put("storeId", store);
+            map.put("storeId", storeList.get(0).getId());
         }
 
         map.put("isRobStats", 0);
