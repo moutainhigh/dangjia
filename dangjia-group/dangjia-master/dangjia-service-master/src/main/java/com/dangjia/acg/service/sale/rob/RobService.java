@@ -47,7 +47,6 @@ import com.dangjia.acg.modle.store.StoreUser;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.house.HouseService;
-import com.dangjia.acg.service.sale.SaleService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.collections.map.HashedMap;
@@ -78,17 +77,11 @@ public class RobService {
     @Autowired
     private ConfigUtil configUtil;
     @Autowired
-    private ICustomerRecordMapper iCustomerRecordMapper;
-    @Autowired
     private CraftsmanConstructionService constructionService;
     @Autowired
     private ClueTalkMapper clueTalkMapper;
     @Autowired
     private IntentionHouseMapper intentionHouseMapper;
-    @Autowired
-    private ConfigMessageService configMessageService;
-    @Autowired
-    private UserMapper userMapper;
     @Autowired
     private IMemberMapper iMemberMapper;
     @Autowired
@@ -97,15 +90,13 @@ public class RobService {
     private HouseService houseService;
     @Autowired
     private IStoreMapper iStoreMapper;
-
     @Autowired
     private DjAlreadyRobSingleMapper djAlreadyRobSingleMapper;
     @Autowired
     private IHouseMapper iHouseMapper;
     @Autowired
     private IHouseAddressMapper iHouseAddressMapper;
-    @Autowired
-    private SaleService saleService;
+
 
     @Autowired
     private IStoreUserMapper iStoreUserMapper;
