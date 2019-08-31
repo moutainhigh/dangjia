@@ -46,7 +46,6 @@ import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.house.HouseService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.apache.commons.collections.map.HashedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -422,8 +421,8 @@ public class RobService {
                 robArrInFoDTO.setIntentionHouseList(intentionHouseList);
             }
 
-            List<UserAchievementDTO> uadto=new ArrayList<>();
-            Map<String,Object> parmMap=new HashedMap();
+            List<UserAchievementDTO> uadto= new ArrayList<>();
+            Map<String,Object> parmMap= new HashMap<>();
             List<String> houseIds=new ArrayList<>();
             if (!CommonUtil.isEmpty(robInfoDTO)) {
                 for (RobInfoDTO to : robInfoDTO) {
@@ -482,19 +481,29 @@ public class RobService {
                         }
                     }
 
-                    parmMap.put("userId",to.getCusService());
-                    houseIds.add(to.getHouseId());
                     logger.info("userId================="+to.getCusService());
+                    parmMap.put("userId",to.getCusService());
+
+                    logger.info("userId================="+to.getHouseId());
+                    if(!CommonUtil.isEmpty(to.getHouseId())){
+                        logger.info("111111111111111111111"+to.getHouseId());
+                        houseIds.add(to.getHouseId());
+                        logger.info("houseIds================="+houseIds);
+                        parmMap.put("houseIds",houseIds);
+                        logger.info("parmMap================="+parmMap);
+                        //查询业绩
+                        List<UserAchievementDTO> userAchievementDTOS = clueMapper.queryUserAchievementInFo(parmMap);
+                        logger.info("userAchievementDTOS================="+userAchievementDTOS);
+                        logger.info("userAchievementDTOS================="+userAchievementDTOS.size());
+                        if(null != userAchievementDTOS && !userAchievementDTOS.isEmpty()){
+                            logger.info("userAchievementDTOS================="+userAchievementDTOS.size());
+                            for (UserAchievementDTO userAchievementDTO : userAchievementDTOS) {
+                                userAchievementDTO.setHead(imageAddress+userAchievementDTO.getHead());
+                            }
+                            uadto.addAll(userAchievementDTOS);
+                        }
+                    }
                 }
-                logger.info("houseIds================="+houseIds);
-                parmMap.put("houseIds",houseIds);
-                logger.info("parmMap================="+parmMap);
-                //查询业绩
-                List<UserAchievementDTO> userAchievementDTOS = clueMapper.queryUserAchievementInFo(parmMap);
-                for (UserAchievementDTO userAchievementDTO : userAchievementDTOS) {
-                    userAchievementDTO.setHead(imageAddress+userAchievementDTO.getHead());
-                }
-                uadto.addAll(userAchievementDTOS);
             }
 
             robArrInFoDTO.setUserInFo(uadto);
@@ -878,7 +887,7 @@ public class RobService {
                 for (OrderStoreDTO orderStoreDTO : orderStore) {
                     if(!CommonUtil.isEmpty(orderStoreDTO.getRobDate())) {
                         if (((System.currentTimeMillis() - grabSheetDTO.getModifyDate().getTime()) / 60 / 1000)
-                                > Integer.parseInt(orderStoreDTO.getRobDate())) {
+                                > (Integer.parseInt(orderStoreDTO.getRobDate())-1)) {
                             logger.info("11111111111111111111===================================" + orderStoreDTO.getStoreId());
                             logger.info("11111111111111111111===================================" + grabSheetDTO.getMemberId());
                             DjOrderSurface djOrderSurface = new DjOrderSurface();
