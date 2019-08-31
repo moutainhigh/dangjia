@@ -162,6 +162,7 @@ public interface HouseAPI {
                                               @RequestParam("ids") String ids,
                                               @RequestParam("day") String day,
                                               @RequestParam("workerType") String workerType,
+                                              @RequestParam("type") Integer type,
                                               @RequestParam("pageDTO") PageDTO pageDTO);
 
     @PostMapping("app/house/queryConstructionRecordType")
