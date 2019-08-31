@@ -88,10 +88,12 @@ public class AchievementService {
         List<AchievementInfoDTO> list = achievementMapper.queryMonthRoyalty(map);
 
         if(!achievementInfoDTOS.isEmpty() && !list.isEmpty()){
-            for (int i = 0; i < achievementInfoDTOS.size(); i++) {
-                achievementInfoDTOS.get(i).setMonthRoyalty(list.get(i).getMonthRoyalty());
-                achievementInfoDTOS.get(i).setMeterRoyalty(list.get(i).getMeterRoyalty());
-                achievementInfoDTOS.get(i).setArrRoyalty(list.get(i).getArrRoyalty());
+            if(achievementInfoDTOS.size() == list.size()){
+                for (int i = 0; i < achievementInfoDTOS.size(); i++) {
+                    achievementInfoDTOS.get(i).setMonthRoyalty(list.get(i).getMonthRoyalty());
+                    achievementInfoDTOS.get(i).setMeterRoyalty(list.get(i).getMeterRoyalty());
+                    achievementInfoDTOS.get(i).setArrRoyalty(list.get(i).getArrRoyalty());
+                }
             }
         }else if(!achievementInfoDTOS.isEmpty()){
             if(list.isEmpty()){
