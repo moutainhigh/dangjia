@@ -2273,8 +2273,9 @@ public class HouseService {
     }
     /**
      * 施工记录
+     * type:0  查询全部，1 查询有图片的
      */
-    public ServerResponse queryConstructionRecordAll(String houseId, String ids, String day, String workerType, PageDTO pageDTO) {
+    public ServerResponse queryConstructionRecordAll(String houseId, String ids, String day, String workerType,Integer type, PageDTO pageDTO) {
         // 施工记录的内容需要更改
         String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
         Example example = new Example(HouseConstructionRecord.class);
