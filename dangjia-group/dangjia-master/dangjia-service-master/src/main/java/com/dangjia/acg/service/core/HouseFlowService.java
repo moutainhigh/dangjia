@@ -691,18 +691,23 @@ public class HouseFlowService {
      * @return 等待时间
      */
     private Date getCountDownTime(BigDecimal evaluationScore) {
-        Calendar now = Calendar.getInstance();
-        if (Double.parseDouble(evaluationScore.toString()) < 70) {//积分小于70分，加20分钟
-            now.add(Calendar.MINUTE, 20);//当前时间加20分钟
-        } else if (Double.parseDouble(evaluationScore.toString()) >= 70 && Double.parseDouble(evaluationScore.toString()) < 80) {
-            now.add(Calendar.MINUTE, 10);//当前时间加10分钟
-        } else if (Double.parseDouble(evaluationScore.toString()) >= 80 && Double.parseDouble(evaluationScore.toString()) < 90) {
-            now.add(Calendar.MINUTE, 5);//当前时间加5分钟
-        } else {
-            now.add(Calendar.MINUTE, 1);//当前时间加1分钟
+        if (active != null && active.equals("pre")) {
+            Calendar now = Calendar.getInstance();
+            if (Double.parseDouble(evaluationScore.toString()) < 70) {//积分小于70分，加20分钟
+                now.add(Calendar.MINUTE, 20);//当前时间加20分钟
+            } else if (Double.parseDouble(evaluationScore.toString()) >= 70 && Double.parseDouble(evaluationScore.toString()) < 80) {
+                now.add(Calendar.MINUTE, 10);//当前时间加10分钟
+            } else if (Double.parseDouble(evaluationScore.toString()) >= 80 && Double.parseDouble(evaluationScore.toString()) < 90) {
+                now.add(Calendar.MINUTE, 5);//当前时间加5分钟
+            } else {
+                now.add(Calendar.MINUTE, 1);//当前时间加1分钟
+            }
+            String dateStr = DateUtil.getDateString(now.getTimeInMillis());
+            return DateUtil.toDate(dateStr);
+        }else{
+            return new Date();
         }
-        String dateStr = DateUtil.getDateString(now.getTimeInMillis());
-        return DateUtil.toDate(dateStr);
+
     }
 
     /**
