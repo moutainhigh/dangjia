@@ -418,7 +418,7 @@
             </otherwise>
         </choose>
         <if test="null != userId">
-            c.cus_service = #{userId}
+            and c.cus_service = #{userId}
         </if>
         union
         SELECT
