@@ -488,25 +488,22 @@ public class RobService {
                     if(!CommonUtil.isEmpty(to.getHouseId())){
                         logger.info("111111111111111111111"+to.getHouseId());
                         houseIds.add(to.getHouseId());
+                        logger.info("houseIds================="+houseIds);
+                        parmMap.put("houseIds",houseIds);
+                        logger.info("parmMap================="+parmMap);
+                        //查询业绩
+                        List<UserAchievementDTO> userAchievementDTOS = clueMapper.queryUserAchievementInFo(parmMap);
+                        logger.info("userAchievementDTOS================="+userAchievementDTOS);
+                        logger.info("userAchievementDTOS================="+userAchievementDTOS.size());
+                        if(null != userAchievementDTOS && !userAchievementDTOS.isEmpty()){
+                            logger.info("userAchievementDTOS================="+userAchievementDTOS.size());
+                            for (UserAchievementDTO userAchievementDTO : userAchievementDTOS) {
+                                userAchievementDTO.setHead(imageAddress+userAchievementDTO.getHead());
+                            }
+                            uadto.addAll(userAchievementDTOS);
+                        }
                     }
-
-
                 }
-                logger.info("houseIds================="+houseIds);
-                parmMap.put("houseIds",houseIds);
-                logger.info("parmMap================="+parmMap);
-                //查询业绩
-                List<UserAchievementDTO> userAchievementDTOS = clueMapper.queryUserAchievementInFo(parmMap);
-                logger.info("userAchievementDTOS================="+userAchievementDTOS);
-                logger.info("userAchievementDTOS================="+userAchievementDTOS.size());
-                if(null != userAchievementDTOS && !userAchievementDTOS.isEmpty()){
-                    logger.info("userAchievementDTOS================="+userAchievementDTOS.size());
-                    for (UserAchievementDTO userAchievementDTO : userAchievementDTOS) {
-                        userAchievementDTO.setHead(imageAddress+userAchievementDTO.getHead());
-                    }
-                    uadto.addAll(userAchievementDTOS);
-                }
-
             }
 
             robArrInFoDTO.setUserInFo(uadto);
