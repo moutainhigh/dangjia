@@ -240,7 +240,7 @@ public class AchievementService {
             map.put("userId",accessToken.getUserId());
             userId =accessToken.getUserId();
         }
-        if (!building.equals("全部")||!building.equals("其他")) {
+        if (!building.equals("全部")&&!building.equals("其他")) {
             map.put("building",building);
         }
         if (!CommonUtil.isEmpty(villageId)) {
