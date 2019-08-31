@@ -421,8 +421,8 @@ public class RobService {
                 robArrInFoDTO.setIntentionHouseList(intentionHouseList);
             }
 
-            List<UserAchievementDTO> uadto=null;
-            Map<String,Object> parmMap= null;
+            List<UserAchievementDTO> uadto= new ArrayList<>();
+            Map<String,Object> parmMap= new HashMap<>();
             List<String> houseIds=new ArrayList<>();
             if (!CommonUtil.isEmpty(robInfoDTO)) {
                 for (RobInfoDTO to : robInfoDTO) {
@@ -481,9 +481,16 @@ public class RobService {
                         }
                     }
 
-                    parmMap.put("userId",to.getCusService());
-                    houseIds.add(to.getHouseId());
                     logger.info("userId================="+to.getCusService());
+                    parmMap.put("userId",to.getCusService());
+
+                    logger.info("userId================="+to.getHouseId());
+                    if(!CommonUtil.isEmpty(to.getHouseId())){
+                        logger.info("111111111111111111111"+to.getHouseId());
+                        houseIds.add(to.getHouseId());
+                    }
+
+
                 }
                 logger.info("houseIds================="+houseIds);
                 parmMap.put("houseIds",houseIds);
