@@ -184,8 +184,6 @@ public class HouseService {
     private DjOrderSurfaceMapper djOrderSurfaceMapper;
     @Autowired
     private RobService robService;
-    @Autowired
-    private DjRobSingleMapper djRobSingleMapper;
 
     /**
      * 切换房产
@@ -1841,13 +1839,12 @@ public class HouseService {
             DjOrderSurface djOrderSurface = new DjOrderSurface();
             djOrderSurface.setDataStatus(0);
             djOrderSurface.setStoreId(orderStore.get(0).getStoreId());
+            djOrderSurface.setRobDateId("0");
             example=new Example(Clue.class);
             example.createCriteria().andEqualTo(Clue.MEMBER_ID,member.getId())
                     .andIsNull(Clue.CUS_SERVICE);
             List<Clue> clues = clueMapper.selectByExample(example);
             djOrderSurface.setClueId(clues.get(0).getId());
-            List<DjRobSingle> djRobSingles = djRobSingleMapper.getRobDate(null);
-            djOrderSurface.setRobDateId(djRobSingles.get(0).getId());
             djOrderSurfaceMapper.insert(djOrderSurface);
 //            robService.notEnteredGrabSheet();
         }
