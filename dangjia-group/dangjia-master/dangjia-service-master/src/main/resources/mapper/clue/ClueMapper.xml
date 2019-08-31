@@ -412,10 +412,14 @@
             <when test="userId != null">
                 and (c.cus_service = #{userId} or c.store_id = #{storeId})
             </when>
+
             <otherwise>
                 and c.store_id = #{storeId}
             </otherwise>
         </choose>
+        <if test="null != userId">
+            c.cus_service = #{userId}
+        </if>
         union
         SELECT
         c.phone as phone,
