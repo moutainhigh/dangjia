@@ -629,6 +629,19 @@
     </update>
 
 
+    <update id="upDateClueCusService" parameterType="java.util.Map">
+        update dj_clue c
+        set c.cus_service = #{cusService}
+        where c.id = #{clueId}
+    </update>
+
+
+    <update id="upDateMcUserId" parameterType="java.util.Map">
+        update dj_member_customer mc
+        set mc.user_id = #{userId}
+        where mc.id = #{mcId}
+    </update>
+
     <select id="queryTips" resultType="com.dangjia.acg.dto.sale.rob.UserInfoDTO" parameterType="java.util.HashMap">
         SELECT
         c.id as clueId,
