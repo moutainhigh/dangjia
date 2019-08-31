@@ -533,10 +533,12 @@
             INNER JOIN dj_member m
             on u.member_id=m.id
         where rm.house_id in
-        <foreach collection="houseIds" index="index" item="item"
-                 separator="," open="(" close=")">
-            #{item}
-        </foreach>
+        <if test="null!=houseIds and houseIds.size>0">
+            <foreach collection="houseIds" index="index" item="item"
+                     separator="," open="(" close=")">
+                #{item}
+            </foreach>
+        </if>
         and rm.user_id=#{userId}
     </select>
 
