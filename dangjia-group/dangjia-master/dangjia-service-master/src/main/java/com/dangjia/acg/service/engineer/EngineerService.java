@@ -111,10 +111,10 @@ public class EngineerService {
                         .andNotEqualTo(HouseFlowApply.SUPERVISOR_CHECK, 2)
                         .andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, houseFlowApply.getHouseFlowId());
                 List<HouseFlowApply> houseFlowApplyList1 = houseFlowApplyMapper.selectByExample(example);
-                if (houseFlowApplyList1.size() == 0) {
+                if (houseFlowApplyList1.size() == 0 && houseFlowApply.getHouseId().equals(houseWorker.getHouseId())) {
                     House house1 = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());//工序
                     if (house1 != null && house1.getVisitState() == 1) {
-                        return ServerResponse.createByErrorMessage("工地[" + house1.getHouseName() + "]今日以开工，还未完工，无法换人");
+                        return ServerResponse.createByErrorMessage("该工地今日以开工，还未完工，无法换人");
                     }
                 }
             }
