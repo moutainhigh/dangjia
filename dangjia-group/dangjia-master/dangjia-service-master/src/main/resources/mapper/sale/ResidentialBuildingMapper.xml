@@ -51,4 +51,14 @@
         where village_id=#{villageId}
     </select>
 
+
+    <update id="setBuildingInformation">
+        update dj_sale_residential_building
+        set store_id=#{storeId}
+        where village_id in
+        <foreach collection="villageIds" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
 </mapper>

@@ -18,7 +18,7 @@ public interface UserMapper extends Mapper<MainUser> {
      *
      * @return
      */
-    List<UserRoleDTO> getUsers(@Param("userKey") String userKey,@Param("userSearch") UserSearchDTO userSearch, @Param("isJob") Integer isJob);
+    List<UserRoleDTO> getUsers(@Param("cityKey") String cityKey,@Param("userKey") String userKey,@Param("userSearch") UserSearchDTO userSearch, @Param("isJob") Integer isJob);
 
     /**
      * 删除用户
@@ -35,7 +35,7 @@ public interface UserMapper extends Mapper<MainUser> {
      *
      * @return
      */
-    MainUser getUserByReceive(@Param("type") Integer type);
+    MainUser getUserByReceive(@Param("cityKey") String cityKey,@Param("type") Integer type);
 
     /**
      * 查询用户及对应的角色

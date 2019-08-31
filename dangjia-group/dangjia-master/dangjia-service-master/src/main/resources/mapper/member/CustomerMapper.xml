@@ -67,13 +67,13 @@
         mc.id as mcId,
         mc.member_id as memberId,
         mc.user_id as userId,
-        if(c.owername is not null,c.owername,m.nick_name) as name,
+        if(c.phase_status=0,c.owername,m.nick_name) as name,
         c.phone,
         c.wechat,
         c.modify_date AS modifyDate,
         c.create_date AS createDate,
         m.create_date AS mcreateDate,
-        if(c.label_id is not null,c.label_id,mc.label_id_arr) AS labelIdArr,
+        if(c.phase_status=0,c.label_id,mc.label_id_arr) AS labelIdArr,
         c.phase_status as phaseStatus,
         c.stage,
         c.clue_type AS clueType
@@ -103,12 +103,13 @@
           c.id as clueId,
           mc.id as customerId,
           h.id as houseId,
-          if(m.nick_name is not null,m.nick_name,c.owername) as name,
+          if(m.nick_name is not null and m.nick_name!="",m.nick_name,c.owername) as name,
           h.create_date AS createDate,
           h.visit_state as visitState,
           mc.user_id as userId,
           mc.member_id as memberId,
-          mc.phase_status as phaseStatus
+          mc.phase_status as phaseStatus,
+          h.is_rob_stats as isRobStats
         FROM dj_member_customer mc
         INNER JOIN dj_clue c
         on mc.member_id=c.member_id
@@ -159,7 +160,20 @@
 
 
     <select id="getCustomerGroupBy" resultType="com.dangjia.acg.modle.member.Customer">
-        select * from dj_member_customer mc
+        select
+            mc.id,
+            mc.stage,
+            mc.member_id AS memberId,
+            mc.user_id AS userId,
+            mc.label_id_arr AS labelIdArr,
+            mc.curr_record_id AS currRecordId,
+            mc.remind_record_id AS remindRecordId,
+            mc.create_date AS createDate,
+            mc.modify_date AS modifyDate,
+            mc.phase_status AS phaseStatus,
+            mc.tips,
+            mc.report_date as reportDate
+        from dj_member_customer mc
         inner join dj_clue c
         on mc.member_id=c.member_id
         and c.cus_service=mc.user_id

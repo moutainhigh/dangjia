@@ -91,7 +91,8 @@ public class MainUserController implements MainUserAPI {
     @ApiMethod
     public ServerResponse getUsers(HttpServletRequest request, PageDTO pageDTO, UserSearchDTO userSearch,Integer isJob) {
         String userID = request.getParameter(Constants.USERID);
-        return userService.getUsers(userID,userSearch, pageDTO,isJob);
+        String cityId = request.getParameter(Constants.CITY_ID);
+        return userService.getUsers( cityId,userID,userSearch, pageDTO,isJob);
     }
 
     /**
@@ -108,7 +109,8 @@ public class MainUserController implements MainUserAPI {
     @Override
     @ApiMethod
     public ServerResponse setReceiveUser(HttpServletRequest request, String id, Integer type) {
-        return userService.setReceiveUser(id, type);
+        String cityId = request.getParameter(Constants.CITY_ID);
+        return userService.setReceiveUser(cityId,id, type);
     }
 
     /**
@@ -335,7 +337,7 @@ public class MainUserController implements MainUserAPI {
             logger.info("用户登录，用户验证通过！member=" + user.getMobile());
             msg = ServerResponse.createBySuccess("用户登录，用户验证通过！member=" + user.getMobile(), existUser.getId());
             MainUser mainUser = userMapper.selectByPrimaryKey(existUser.getId());
-            if (mainUser != null && CommonUtil.isEmpty(mainUser.getMemberId())) {
+            if (mainUser != null) {
                 //插入MemberId
                 userMapper.insertMemberId(user.getMobile());
             }

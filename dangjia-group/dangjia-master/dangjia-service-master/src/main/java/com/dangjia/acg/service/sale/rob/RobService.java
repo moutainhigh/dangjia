@@ -2,7 +2,6 @@ package com.dangjia.acg.service.sale.rob;
 
 import com.dangjia.acg.auth.config.RedisSessionDAO;
 import com.dangjia.acg.common.constants.SysConfig;
-import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -23,14 +22,14 @@ import com.dangjia.acg.mapper.clue.ClueTalkMapper;
 import com.dangjia.acg.mapper.house.IHouseAddressMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.ICustomerMapper;
-import com.dangjia.acg.mapper.member.ICustomerRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberLabelMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.sale.DjAlreadyRobSingleMapper;
+import com.dangjia.acg.mapper.sale.DjOrderSurfaceMapper;
 import com.dangjia.acg.mapper.sale.DjRobSingleMapper;
 import com.dangjia.acg.mapper.sale.IntentionHouseMapper;
 import com.dangjia.acg.mapper.store.IStoreMapper;
-import com.dangjia.acg.mapper.user.UserMapper;
+import com.dangjia.acg.mapper.store.IStoreUserMapper;
 import com.dangjia.acg.modle.clue.Clue;
 import com.dangjia.acg.modle.clue.ClueTalk;
 import com.dangjia.acg.modle.home.IntentionHouse;
@@ -38,18 +37,15 @@ import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.HouseAddress;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Customer;
-import com.dangjia.acg.modle.member.CustomerRecord;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.sale.royalty.DjAlreadyRobSingle;
+import com.dangjia.acg.modle.sale.royalty.DjOrderSurface;
 import com.dangjia.acg.modle.sale.royalty.DjRobSingle;
-import com.dangjia.acg.modle.user.MainUser;
-import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.modle.store.StoreUser;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.house.HouseService;
-import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.apache.commons.collections.map.HashedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,17 +73,11 @@ public class RobService {
     @Autowired
     private ConfigUtil configUtil;
     @Autowired
-    private ICustomerRecordMapper iCustomerRecordMapper;
-    @Autowired
     private CraftsmanConstructionService constructionService;
     @Autowired
     private ClueTalkMapper clueTalkMapper;
     @Autowired
     private IntentionHouseMapper intentionHouseMapper;
-    @Autowired
-    private ConfigMessageService configMessageService;
-    @Autowired
-    private UserMapper userMapper;
     @Autowired
     private IMemberMapper iMemberMapper;
     @Autowired
@@ -96,7 +86,6 @@ public class RobService {
     private HouseService houseService;
     @Autowired
     private IStoreMapper iStoreMapper;
-
     @Autowired
     private DjAlreadyRobSingleMapper djAlreadyRobSingleMapper;
     @Autowired
@@ -104,6 +93,9 @@ public class RobService {
     @Autowired
     private IHouseAddressMapper iHouseAddressMapper;
 
+
+    @Autowired
+    private IStoreUserMapper iStoreUserMapper;
     /**
      * 查询待抢单列表
      * @param userToken
@@ -121,20 +113,30 @@ public class RobService {
             return ServerResponse.createbyUserTokenError();
         }
 
-//        Integer type = iCustomerMapper.queryTypeId(accessToken.getUserId());
+
+        Example example = new Example(StoreUser.class);
+        example.createCriteria().andEqualTo(StoreUser.USER_ID, accessToken.getUserId())
+                .andEqualTo(StoreUser.DATA_STATUS, 0);
+        List<StoreUser> storeList = iStoreUserMapper.selectByExample(example);
+        if (storeList.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
 
         Map<String, Object> map = new HashMap<>();
         map.put("userId", accessToken.getUserId());
-//        if (!CommonUtil.isEmpty(type)) {
-//            map.put("type", type);
-//        }
+
         if (!CommonUtil.isEmpty(storeId)) {
             map.put("storeId", storeId);
+        }else{
+            map.put("storeId", storeList.get(0).getStoreId());
         }
 
         map.put("isRobStats", 0);
 
         List<RobDTO> list = clueMapper.queryRobSingledata(map);
+
+
+
 
         //查询标签
         List<RobDTO> robDTOs = new ArrayList<>();
@@ -160,6 +162,8 @@ public class RobService {
                 robDTOs.add(robDTO);
             }
         }
+
+
 
         if (robDTOs.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
@@ -263,8 +267,13 @@ public class RobService {
                 if (CommonUtil.isEmpty(accessToken.getUserId())) {
                     return ServerResponse.createbyUserTokenError();
                 }
-
-                Example example=new Example(DjAlreadyRobSingle.class);
+                Example example=new Example(House.class);
+                example.createCriteria().andEqualTo(House.ID,djAlreadyRobSingle.getHouseId())
+                        .andEqualTo(House.DATA_STATUS,0);
+                if(iHouseMapper.selectByExample(example).size()<=0){
+                    return ServerResponse.createByErrorMessage("业主已撤回");
+                }
+                example=new Example(DjAlreadyRobSingle.class);
                 example.createCriteria().andEqualTo(DjAlreadyRobSingle.HOUSE_ID,djAlreadyRobSingle.getHouseId());
                 if(djAlreadyRobSingleMapper.selectByExample(example).size()>0){
                     return ServerResponse.createByErrorMessage("该订单已被抢");
@@ -279,6 +288,16 @@ public class RobService {
                 map.put("id", djAlreadyRobSingle.getHouseId());
                 map.put("isRobStats", 1);
                 clueMapper.upDateIsRobStats(map);
+
+                map = new HashMap<>();
+                map.put("clueId",djAlreadyRobSingle.getClueId());
+                map.put("cusService",accessToken.getUserId());
+                clueMapper.upDateClueCusService(map);
+
+                map = new HashMap<>();
+                map.put("mcId",djAlreadyRobSingle.getMcId());
+                map.put("userId",accessToken.getUserId());
+                clueMapper.upDateMcUserId(map);
                 return ServerResponse.createBySuccessMessage("抢单成功");
             }
             return ServerResponse.createByErrorMessage("抢单失败");
@@ -335,6 +354,7 @@ public class RobService {
         Clue clue = clueMapper.selectByPrimaryKey(clueId);
 
 
+
         Object object = constructionService.getAccessToken(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -363,7 +383,7 @@ public class RobService {
             }
             map.put("phaseStatus", phaseStatus);
             RobArrInFoDTO robArrInFoDTO = new RobArrInFoDTO();
-
+            robArrInFoDTO.setBranchUser(clue.getBranchUser());
             List<RobInfoDTO> robInfoDTO = clueMapper.queryCustomerInfo(map);
 
             if (!CommonUtil.isEmpty(robInfoDTO)) {
@@ -401,7 +421,9 @@ public class RobService {
                 robArrInFoDTO.setIntentionHouseList(intentionHouseList);
             }
 
-            List<UserAchievementDTO> uadto=new ArrayList<>();
+            List<UserAchievementDTO> uadto= new ArrayList<>();
+            Map<String,Object> parmMap= new HashMap<>();
+            List<String> houseIds=new ArrayList<>();
             if (!CommonUtil.isEmpty(robInfoDTO)) {
                 for (RobInfoDTO to : robInfoDTO) {
                     //查询大管家信息
@@ -410,28 +432,18 @@ public class RobService {
                         if (null != workerTypeDTO) {
                             workerTypeDTO.setHead(imageAddress + workerTypeDTO.getHead());
                             List<WorkerTypeDTO> wtd = iMemberLabelMapper.queryType(to.getHouseId());
+                            logger.info("wtd=============================="+ wtd);
+                            logger.info("wtd.get(0).getType()=============================="+ wtd.get(0).getType());
+                            logger.info("wtd.get(0).getWorkerTypeId()=============================="+ wtd.get(0).getWorkerTypeId());
+                            logger.info("wtd.get(0).getWorkSteta()=============================="+ wtd.get(0).getWorkSteta());
+                            logger.info("wtd.get(1).getType()=============================="+ wtd.get(1).getType());
+                            logger.info("wtd.get(1).getWorkSteta()=============================="+ wtd.get(1).getWorkSteta());
                             if(wtd.size() > 0){
+                                workerTypeDTO.setWorkerTypeId(wtd.get(0).getWorkerTypeId());
                                 workerTypeDTO.setType(wtd.get(0).getType());
-                                Map<String,Object> map1 = new HashMap<>();
-                                map1.put("houseId",to.getHouseId());
-                                map1.put("workerTypeId",wtd.get(0).getWorkerTypeId());
-                                map1.put("workerType",wtd.get(0).getType());
-                                String wtd2 = iMemberLabelMapper.queryWorkSteta(map1);
-                                if(wtd2.equals("0")){
+                                workerTypeDTO.setWorkSteta(wtd.get(0).getWorkSteta());
+                                if(wtd.get(0).getWorkSteta().equals("0")){
                                     workerTypeDTO.setType(3);
-                                }
-                                workerTypeDTO.setWorkSteta(wtd2);
-                                if(wtd.size() > 1){
-                                    workerTypeDTO.setUpType(wtd.get(1).getType());
-                                    Map<String,Object> map2 = new HashMap<>();
-                                    map2.put("houseId",to.getHouseId());
-                                    map2.put("workerTypeId",wtd.get(1).getWorkerTypeId());
-                                    map2.put("workerType",wtd.get(1).getType());
-                                    String wtd3 = iMemberLabelMapper.queryWorkSteta(map1);
-                                    workerTypeDTO.setUpWorkSteta(wtd3);
-                                    if(wtd3.equals("0")  && wtd2.equals("0")){
-                                        workerTypeDTO.setType(3);
-                                    }
                                 }
                             }
                         }
@@ -468,15 +480,29 @@ public class RobService {
                             }
                         }
                     }
-                    Map<String,Object> parmMap=new HashedMap();
+
+                    logger.info("userId================="+to.getCusService());
                     parmMap.put("userId",to.getCusService());
-                    parmMap.put("houseId",to.getHouseId());
-                    //查询业绩
-                    List<UserAchievementDTO> userAchievementDTOS = clueMapper.queryUserAchievementInFo(parmMap);
-                    for (UserAchievementDTO userAchievementDTO : userAchievementDTOS) {
-                        userAchievementDTO.setHead(imageAddress+userAchievementDTO.getHead());
+
+                    logger.info("userId================="+to.getHouseId());
+                    if(!CommonUtil.isEmpty(to.getHouseId())){
+                        logger.info("111111111111111111111"+to.getHouseId());
+                        houseIds.add(to.getHouseId());
+                        logger.info("houseIds================="+houseIds);
+                        parmMap.put("houseIds",houseIds);
+                        logger.info("parmMap================="+parmMap);
+                        //查询业绩
+                        List<UserAchievementDTO> userAchievementDTOS = clueMapper.queryUserAchievementInFo(parmMap);
+                        logger.info("userAchievementDTOS================="+userAchievementDTOS);
+                        logger.info("userAchievementDTOS================="+userAchievementDTOS.size());
+                        if(null != userAchievementDTOS && !userAchievementDTOS.isEmpty()){
+                            logger.info("userAchievementDTOS================="+userAchievementDTOS.size());
+                            for (UserAchievementDTO userAchievementDTO : userAchievementDTOS) {
+                                userAchievementDTO.setHead(imageAddress+userAchievementDTO.getHead());
+                            }
+                            uadto.addAll(userAchievementDTOS);
+                        }
                     }
-                    uadto.addAll(userAchievementDTOS);
                 }
             }
 
@@ -591,7 +617,7 @@ public class RobService {
                         }
                     }
                     String labelIdrr = str + "," + labelId;
-                    Map.put("labelIdArr", labelIdrr);
+                    Map.put("labelId", labelIdrr);
                     Map.put("clueId", clueId);
                     iCustomerMapper.upDateLabelId(Map);
                     return ServerResponse.createBySuccessMessage("新增成功");
@@ -649,6 +675,7 @@ public class RobService {
      * @param customerRecDTO
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse addDescribes(CustomerRecDTO customerRecDTO,String userToken) {
         try {
 
@@ -677,24 +704,30 @@ public class RobService {
 //                    iCustomerRecordMapper.insert(customerRecord);
 //                    return ServerResponse.createBySuccessMessage("新增成功");
 //                } else {
-                    // 线索阶段新增沟通记录
-                    ClueTalk clueTalk = new ClueTalk();
-                    if(accessToken != null){
-                        clueTalk.setUserId(accessToken.getUserId());
-                    }
-//                    String remindTime = customerRecDTO.getRemindTime();
-//                    Date date = DateUtil.toDate(remindTime);
-                    if(CommonUtil.isEmpty(customerRecDTO.getRemindTime())){
-                        clueTalk.setRemindTime(null);
-                    }else{
-                        clueTalk.setRemindTime(customerRecDTO.getRemindTime());
-                    }
+                // 线索阶段新增沟通记录
+                ClueTalk clueTalk = new ClueTalk();
+                if(accessToken != null){
+                    clueTalk.setUserId(accessToken.getUserId());
+                }
+                if(CommonUtil.isEmpty(customerRecDTO.getRemindTime())){
+                    clueTalk.setRemindTime(null);
+                }else{
+                    clueTalk.setRemindTime(customerRecDTO.getRemindTime());
+                }
 
-                    clueTalk.setClueId(customerRecDTO.getClueId());
-                    clueTalk.setTalkContent(customerRecDTO.getDescribes());
-                    clueTalk.setDataStatus(0);
-                    clueTalkMapper.insert(clueTalk);
-                    return ServerResponse.createBySuccessMessage("新增成功");
+                if(null != customerRecDTO.getMemberId()){
+                    clueTalk.setMemberId(customerRecDTO.getMemberId());
+                }
+                clueTalk.setClueId(customerRecDTO.getClueId());
+                clueTalk.setTalkContent(customerRecDTO.getDescribes());
+                clueTalk.setDataStatus(0);
+                clueTalkMapper.insert(clueTalk);
+                Clue clue=new Clue();
+                clue.setId(customerRecDTO.getClueId());
+                clue.setCreateDate(null);
+                clue.setTimeSequencing(clueTalk.getCreateDate());
+                clueMapper.updateByPrimaryKeySelective(clue);//沟通记录更新线索排序时间
+                return ServerResponse.createBySuccessMessage("新增成功");
 //                }
             }
             return ServerResponse.createByErrorMessage("新增失败");
@@ -714,18 +747,19 @@ public class RobService {
     }
 
     public void remindTime() {
-        String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
-        Example example = new Example(CustomerRecord.class);
-        example.createCriteria().andCondition(" DATE_FORMAT(remind_time, '%Y-%m-%d %I:%i')= '"
-                + DateUtil.dateToString(new Date(), DateUtil.FORMAT11) + "' ");
-        List<CustomerRecord> customerRecords = iCustomerRecordMapper.selectByExample(example);
-        for (CustomerRecord customerRecord : customerRecords) {
-            MainUser u = userMapper.selectByPrimaryKey(customerRecord.getUserId());
-            if (u != null && !CommonUtil.isEmpty(u.getMemberId()))
-                configMessageService.addConfigMessage(AppType.SALE, u.getMemberId(), "待分配客户提醒",
-                        "有一个待分配客户，快去分配给员工吧。", 0, url
-                                + Utils.getCustomerDetails(customerRecord.getMemberId(), "", 1, "1"));
-        }
+//        String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+//        Example example = new Example(ClueTalk.class);
+//        example.createCriteria().andCondition(" DATE_FORMAT(remind_time, '%Y-%m-%d %I:%i')= '"
+//                + DateUtil.dateToString(new Date(), DateUtil.FORMAT11) + "' ");
+//        List<ClueTalk> customerRecords = clueTalkMapper.selectByExample(example);
+//
+//        for (ClueTalk customerRecord : customerRecords) {
+//            MainUser u = userMapper.selectByPrimaryKey(customerRecord.getUserId());
+//            if (u != null && !CommonUtil.isEmpty(u.getMemberId()))
+//                configMessageService.addConfigMessage(AppType.SALE, u.getMemberId(), "沟通记录提示",
+//                        "沟通记录的提醒时间到了，请及时跟进。", 0, url
+//                                + Utils.getCustomerDetails(customerRecord.getMemberId(), customerRecord.getClueId(), 1, "1"));
+//        }
     }
 
 
@@ -737,20 +771,21 @@ public class RobService {
      */
     public ServerResponse upDateCustomerInfo(Clue clue,Integer phaseStatus,String memberId) {
         try {
-                Member member = new Member();
-                if (!CommonUtil.isEmpty(clue)) {
-                    if(phaseStatus == 1){
-                        member.setNickName(clue.getOwername());
-                        member.setRemarks(clue.getRemark());
-                        member.setCreateDate(null);
-                        member.setMobile(clue.getPhone());
-                        member.setId(memberId);
-                        iMemberMapper.updateByPrimaryKeySelective(member);
-                    }
-                    clue.setCreateDate(null);
-                    clueMapper.updateByPrimaryKeySelective(clue);
-                    return ServerResponse.createBySuccessMessage("修改成功");
+            Member member = new Member();
+            if (!CommonUtil.isEmpty(clue)) {
+                if(phaseStatus == 1){
+                    member.setNickName(clue.getOwername());
+                    member.setRemarks(clue.getRemark());
+                    member.setCreateDate(null);
+                    member.setMobile(clue.getPhone());
+                    member.setId(memberId);
+                    iMemberMapper.updateByPrimaryKeySelective(member);
                 }
+                clue.setCreateDate(null);
+                clue.setMemberId(null);
+                clueMapper.updateByPrimaryKeySelective(clue);
+                return ServerResponse.createBySuccessMessage("修改成功");
+            }
 
             return ServerResponse.createByErrorMessage("修改失败");
         } catch (Exception e) {
@@ -809,32 +844,79 @@ public class RobService {
     }
 
 
+    @Autowired
+    private DjOrderSurfaceMapper djOrderSurfaceMapper;
     /**
      * 未录入抢单
      * @return
      */
     public ServerResponse notEnteredGrabSheet() {
         List<GrabSheetDTO> grabSheetDTOS = clueMapper.notEnteredGrabSheet();
+        logger.info("grabSheetDTOS==================================="+grabSheetDTOS);
+        logger.info("grabSheetDTOS.size()==================================="+grabSheetDTOS.size());
         if(grabSheetDTOS.size()>0) {
-            Example example = new Example(DjRobSingle.class);
-            example.createCriteria().andEqualTo(DjRobSingle.DATA_STATUS, 0);
-            example.orderBy(DjRobSingle.ROB_DATE).asc();
-            List<DjRobSingle> djRobSingles = djRobSingleMapper.selectByExample(example);
             for (GrabSheetDTO grabSheetDTO : grabSheetDTOS) {
-                List<OrderStoreDTO> orderStore = iStoreMapper.getOrderStore(grabSheetDTO.getLatitude(), grabSheetDTO.getLongitude());
-                for (int i=0;i<orderStore.size();i++){
-                    for (DjRobSingle djRobSingle : djRobSingles) {
-                        if(((System.currentTimeMillis()-grabSheetDTO.getModifyDate().getTime())/60/1000)
-                                >Integer.parseInt(djRobSingle.getRobDate())){
-                            clueMapper.setDistribution(orderStore.get(i).getStoreId(),grabSheetDTO.getMemberId());
+                Example example=new Example(DjOrderSurface.class);
+                example.createCriteria().andEqualTo(DjOrderSurface.CLUE_ID,grabSheetDTO.getClueId())
+                        .andEqualTo(DjOrderSurface.DATA_STATUS,0);
+                List<DjOrderSurface> djOrderSurfaces = djOrderSurfaceMapper.selectByExample(example);
+                List<OrderStoreDTO> orderStore = iStoreMapper.getOrderStore(grabSheetDTO.getLatitude(), grabSheetDTO.getLongitude(),djOrderSurfaces);
+
+//                for (int i = 0; i < orderStore.size(); i++) {
+//                    orderStore.get(i).setRobDate(djRobSingles.get(i).getRobDate());
+                if(djOrderSurfaces.size()<=1){
+                    djOrderSurfaces=null;
+                }
+                List<DjRobSingle> djRobSingles = djRobSingleMapper.getRobDate(djOrderSurfaces);
+                if(djRobSingles.size() > orderStore.size()){
+                    logger.info("11111==================================="+orderStore);
+                    for (int i = 0; i < orderStore.size(); i++) {
+                        orderStore.get(i).setRobDate(djRobSingles.get(i).getRobDate());
+                        orderStore.get(i).setRobDateId(djRobSingles.get(i).getId());
+                    }
+                }else{
+                    logger.info("22222==================================="+orderStore);
+                    for (int i = 0; i < djRobSingles.size(); i++) {
+                        orderStore.get(i).setRobDate(djRobSingles.get(i).getRobDate());
+                        orderStore.get(i).setRobDateId(djRobSingles.get(i).getId());
+                    }
+                }
+
+                logger.info("orderStore==================================="+orderStore);
+                logger.info("orderStore.size()==================================="+orderStore.size());
+                for (OrderStoreDTO orderStoreDTO : orderStore) {
+                    if(!CommonUtil.isEmpty(orderStoreDTO.getRobDate())) {
+                        if (((System.currentTimeMillis() - grabSheetDTO.getModifyDate().getTime()) / 60 / 1000)
+                                > (Integer.parseInt(orderStoreDTO.getRobDate())-1)) {
+                            logger.info("11111111111111111111===================================" + orderStoreDTO.getStoreId());
+                            logger.info("11111111111111111111===================================" + grabSheetDTO.getMemberId());
+                            DjOrderSurface djOrderSurface = new DjOrderSurface();
+                            djOrderSurface.setDataStatus(0);
+                            djOrderSurface.setStoreId(orderStoreDTO.getStoreId());
+                            djOrderSurface.setClueId(grabSheetDTO.getClueId());
+                            djOrderSurface.setRobDateId(orderStoreDTO.getRobDateId());
+                            djOrderSurfaceMapper.insert(djOrderSurface);
+                            clueMapper.setDistribution(orderStoreDTO.getStoreId(), grabSheetDTO.getMemberId(),new Date());
+                            break;
                         }
                     }
                 }
+//                for (int i=0;i<orderStore.size();i++){
+//                    for (DjRobSingle djRobSingle : djRobSingles) {
+//                        logger.info("System.currentTimeMillis()-grabSheetDTO.getModifyDate().getTime())/60/1000==================================="+((System.currentTimeMillis()-grabSheetDTO.getModifyDate().getTime())/60/1000));
+//                        logger.info("Integer.parseInt(djRobSingle.getRobDate())==================================="+Integer.parseInt(djRobSingle.getRobDate()));
+//                        if(((System.currentTimeMillis()-grabSheetDTO.getModifyDate().getTime())/60/1000)
+//                                >Integer.parseInt(djRobSingle.getRobDate())){
+//                            logger.info("11111111111111111111==================================="+orderStore.get(i).getStoreId());
+//                            logger.info("11111111111111111111==================================="+grabSheetDTO.getMemberId());
+//                            clueMapper.setDistribution(orderStore.get(i).getStoreId(),grabSheetDTO.getMemberId());
+//                        }
+//                    }
+//                }
             }
         }
         return ServerResponse.createBySuccessMessage("分配成功");
     }
-
 
 
     /**
@@ -903,7 +985,7 @@ public class RobService {
     public ServerResponse queryDjRobSingle(PageDTO pageDTO){
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         Example example=new Example(DjRobSingle.class);
-        example.orderBy(DjRobSingle.CREATE_DATE).desc();
+        example.orderBy(DjRobSingle.CREATE_DATE).asc();
         List<DjRobSingle> djRobSingles = djRobSingleMapper.selectByExample(example);
         if (djRobSingles.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());

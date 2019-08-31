@@ -13,8 +13,10 @@ import com.dangjia.acg.common.util.excel.ExportExcel;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.engineer.ArtisanDTO;
 import com.dangjia.acg.dto.house.WareDTO;
+import com.dangjia.acg.dto.label.OptionalLabelDTO;
 import com.dangjia.acg.dto.repair.RepairMendDTO;
 import com.dangjia.acg.mapper.core.*;
+import com.dangjia.acg.mapper.design.IHouseStyleTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.matter.IWorkerDisclosureMapper;
@@ -24,8 +26,10 @@ import com.dangjia.acg.mapper.worker.IInsuranceMapper;
 import com.dangjia.acg.mapper.worker.IRewardPunishConditionMapper;
 import com.dangjia.acg.mapper.worker.IRewardPunishRecordMapper;
 import com.dangjia.acg.modle.core.*;
+import com.dangjia.acg.modle.design.HouseStyleType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
+import com.dangjia.acg.modle.label.OptionalLabel;
 import com.dangjia.acg.modle.matter.WorkerDisclosure;
 import com.dangjia.acg.modle.matter.WorkerEveryday;
 import com.dangjia.acg.modle.member.Member;
@@ -90,7 +94,7 @@ public class EngineerService {
     private IWorkerDisclosureMapper iWorkerDisclosureMapper;
 
     @Autowired
-    private RedisClient redisClient;//缓存
+    private IHouseStyleTypeMapper houseStyleTypeMapper;
 
     /**
      * 已支付换工匠
@@ -99,6 +103,21 @@ public class EngineerService {
     public ServerResponse changePayed(String houseWorkerId, String workerId) {
         try {
             HouseWorker houseWorker = houseWorkerMapper.selectByPrimaryKey(houseWorkerId);
+            List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApply(null, 4, houseWorker.getWorkerId(), new Date());
+            for (HouseFlowApply houseFlowApply : houseFlowApplyList) {
+                Example example = new Example(HouseFlowApply.class);
+                example.createCriteria().andCondition("   apply_type in (0,1,2)  and   to_days(create_date) = to_days('"
+                        + DateUtil.getDateString(new Date().getTime()) + "') ")
+                        .andNotEqualTo(HouseFlowApply.SUPERVISOR_CHECK, 2)
+                        .andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, houseFlowApply.getHouseFlowId());
+                List<HouseFlowApply> houseFlowApplyList1 = houseFlowApplyMapper.selectByExample(example);
+                if (houseFlowApplyList1.size() == 0 && houseFlowApply.getHouseId().equals(houseWorker.getHouseId())) {
+                    House house1 = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());//工序
+                    if (house1 != null && house1.getVisitState() == 1) {
+                        return ServerResponse.createByErrorMessage("该工地今日以开工，还未完工，无法换人");
+                    }
+                }
+            }
 //            if (houseWorker.getWorkerType() != 3) {//不操作管家
             //记录被换的人
             HouseWorker hw = new HouseWorker();
@@ -312,6 +331,7 @@ public class EngineerService {
                 }
 
             }
+
             return ServerResponse.createBySuccessMessage("通过验证");
         } catch (Exception e) {
             e.printStackTrace();
@@ -589,7 +609,7 @@ public class EngineerService {
                 map.put("supMobile", supervisor.getMobile());
             }
             map.put("createDate", houseFlow.getCreateDate());
-            map.put("workSteta", house.getVisitState()); //0待确认开工,1装修中,2休眠中,3已完工,4提前结束装修 5提前结束装修申请中
+            map.put("workSteta", houseFlow.getWorkSteta()); //0待确认开工,1装修中,2休眠中,3已完工,4提前结束装修 5提前结束装修申请中
             mapList.add(map);
         }
         return ServerResponse.createBySuccess("查询成功", mapList);
@@ -635,15 +655,16 @@ public class EngineerService {
                 Map<String, Object> map = new HashMap<>();
                 map.put("houseId", house.getId());
                 map.put("address", house.getHouseName());
+                map.put("completedDate", house.getCompletedDate());
                 map.put("memberName", house.getOwnerNickName() == null ? house.getOwnerName() : house.getOwnerNickName());
                 map.put("mobile", house.getOwnerMobile());
                 map.put("pause", house.getPause());
                 map.put("visitState", house.getVisitState()); //0待确认开工,1装修中,2休眠中,3已完工 4提前结束装修 5提前结束装修申请中
                 map.put("supName", house.getSupName());
                 map.put("supMobile", house.getSupMobile());
-                HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart1(house.getId(), new Date());//查询今日开工记录
+                HouseFlowApply todayStart = houseFlowApplyMapper.getHouseStart(house.getId());//查询今日开工记录
                 map.put("todayStartPause", todayStart == null ? "0" : "1"); //0否,1是
-                map.put("createDate", house.getConstructionDate());
+                map.put("createDate", todayStart == null ? "" : todayStart.getCreateDate());
 
                 Example example1 = new Example(HouseFlowApply.class);
                 example1.createCriteria().andEqualTo(HouseFlowApply.HOUSE_ID, house.getId()).andEqualTo(HouseFlowApply.MEMBER_CHECK, 1).andEqualTo(HouseFlowApply.APPLY_TYPE, 3);
@@ -672,15 +693,61 @@ public class EngineerService {
     }
 
     /**
+     * 修改设计师绑定风格
+     */
+    public ServerResponse setMemberStyle(Member member) {
+        try {
+            Member srcMember = memberMapper.selectByPrimaryKey(member.getId());
+            srcMember.setStyles(member.getStyles());
+            memberMapper.updateByPrimaryKeySelective(srcMember);
+            return ServerResponse.createBySuccessMessage("保存成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("操作失败");
+        }
+    }
+    /**
+     * 设计师风格详情
+     */
+    public ServerResponse getMemberStyles(HttpServletRequest request, String mamberId) {
+        try {
+            Member member = memberMapper.selectByPrimaryKey(mamberId);
+            List<HouseStyleType> fieldValues = new ArrayList<>();
+            List<HouseStyleType> optionalLabels = houseStyleTypeMapper.selectAll();
+            for (HouseStyleType label : optionalLabels) {
+                HouseStyleType optionalLabelDTO=new HouseStyleType();
+                optionalLabelDTO.setId(label.getId());
+                optionalLabelDTO.setName(label.getName());
+                optionalLabelDTO.setDataStatus(1);
+                if(!CommonUtil.isEmpty(member.getStyles())){
+                    String[] optionalStyles=member.getStyles().split(",");
+                    for (String s : optionalStyles) {
+                        if(s.equals(label.getId())) {
+                            optionalLabelDTO.setDataStatus(0);
+                            break;
+                        }
+                    }
+                }
+                fieldValues.add(optionalLabelDTO);
+            }
+            return ServerResponse.createBySuccess("查询成功", fieldValues);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("系统出错,获取数据失败");
+        }
+    }
+    /**
      * 工匠列表
      */
     public ServerResponse artisanList(String cityId, String name, String workerTypeId, String type, String checkType, PageDTO pageDTO) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<Member> memberList = memberMapper.artisanList(cityId, name, workerTypeId, type, checkType);
+            List<HouseStyleType> optionalLabels = houseStyleTypeMapper.selectAll();
             PageInfo pageResult = new PageInfo(memberList);
             List<ArtisanDTO> artisanDTOS = new ArrayList<>();
             for (Member member : memberList) {
+                List<String> stylesValues = new ArrayList<>();
                 if (StringUtil.isEmpty(member.getWorkerTypeId())) {
                     continue;
                 }
@@ -688,9 +755,26 @@ public class EngineerService {
                 artisanDTO.setId(member.getId());
                 artisanDTO.setName(member.getName());
                 artisanDTO.setMobile(member.getMobile());
+                artisanDTO.setStyles(member.getStyles());
+                for (HouseStyleType label : optionalLabels) {
+                    if(!CommonUtil.isEmpty(member.getStyles())){
+                        String[] optionalStyles=member.getStyles().split(",");
+                        for (String s : optionalStyles) {
+                            if(s.equals(label.getId())) {
+                                stylesValues.add(label.getName());
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if(stylesValues.size()>0) {
+                    artisanDTO.setStyleNames(StringUtils.join(stylesValues, ","));
+                }
                 WorkerType workerType = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
                 if (workerType != null) {
                     artisanDTO.setWorkerTypeName(workerType.getName());
+                    artisanDTO.setWorkerType(workerType.getType());
                 }
                 artisanDTO.setCreateDate(member.getCreateDate());
                 artisanDTO.setInviteNum(member.getInviteNum());
@@ -933,7 +1017,7 @@ public class EngineerService {
         if (type != null) {
             example.createCriteria().andEqualTo(WorkerEveryday.TYPE, type);
         }
-        if (CommonUtil.isEmpty(search)) {
+        if (!CommonUtil.isEmpty(search)) {
             example.createCriteria().andLike(WorkerEveryday.NAME, "%" + search + "%");
         }
         example.orderBy(WorkerEveryday.TYPE).orderBy(WorkerEveryday.MODIFY_DATE).desc();

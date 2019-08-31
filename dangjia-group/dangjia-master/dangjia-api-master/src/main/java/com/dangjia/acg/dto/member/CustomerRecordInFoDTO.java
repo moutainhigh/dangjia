@@ -18,7 +18,7 @@ public class CustomerRecordInFoDTO {
     private String describes;
 
     @ApiModelProperty("提醒时间")
-    private String remindTime;
+    private Date remindTime;
 
     @ApiModelProperty("创建时间")
     private Date createDate;

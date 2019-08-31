@@ -59,4 +59,61 @@ public class RoyaltyController implements RoyaltyAPI {
     public ServerResponse queryRoyaltyData(HttpServletRequest request,String id){
         return service.queryRoyaltyData(id);
     }
+
+
+
+    /**
+     * 新增房屋提成信息
+     * @param request
+     * @param lists
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse addAreaMatch(HttpServletRequest request,
+                                         String lists,
+                                       String villageId,
+                                       String villageName,
+                                       String buildingName,
+                                       String buildingId,
+                                       String resourceId){
+        return service.addAreaMatch(lists,villageId,villageName,buildingName,buildingId,resourceId);
+    }
+
+
+
+    /**
+     * 查询楼栋配置详情
+     * @param request
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryAreaMatchInFo(HttpServletRequest request,String resourceId){
+        return service.queryAreaMatchInFo(resourceId);
+    }
+
+
+    /**
+     *查询提成配置列表
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryAreaMatch(String villageId) {
+        return service.queryAreaMatch(villageId);
+    }
+
+
+    /**
+     * 删除提成配置表
+     * @param id
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse delAreaMatch(String id) {
+        return service.delAreaMatch(id);
+    }
+
 }

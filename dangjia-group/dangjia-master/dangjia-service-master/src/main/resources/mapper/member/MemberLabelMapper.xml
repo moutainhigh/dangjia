@@ -107,18 +107,19 @@
         INNER JOIN dj_core_worker_type cwt on chf.worker_type_id = cwt.id
         where m.worker_type = 3
         and chf.house_id = #{houseId}
-        ORDER BY cwt.create_date DESC
+        ORDER BY chf.modify_date desc
     </select>
 
     <select id="queryType" resultType="com.dangjia.acg.dto.member.WorkerTypeDTO" parameterType="java.lang.String">
         select
             cwt.type as type,
-            chf.worker_type_id as workerTypeId
+            chf.worker_type_id as workerTypeId,
+            chf.work_steta as workSteta
         from
         dj_core_house_flow chf INNER JOIN
         dj_core_worker_type cwt on chf.worker_type_id = cwt.id
         where chf.house_id = #{houseId}
-        order by chf.sort DESC
+        ORDER BY chf.modify_date desc
     </select>
 
     <select id="queryWorkSteta" resultType="java.lang.String" parameterType="java.util.Map">

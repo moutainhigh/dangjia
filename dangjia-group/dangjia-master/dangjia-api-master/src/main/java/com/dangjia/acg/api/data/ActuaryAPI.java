@@ -25,14 +25,16 @@ public interface ActuaryAPI {
             @RequestParam("request") HttpServletRequest request,
             @RequestParam("pageDTO") PageDTO pageDTO,
             @RequestParam("name") String name,
-            @RequestParam("budgetOk") String budgetOk
+            @RequestParam("budgetOk") String budgetOk,
+            @RequestParam("workerKey") String workerKey
     );
     @PostMapping("/data/actuary/getActuaryWaitPay")
     @ApiOperation(value = "返回待业主支付精算列表", notes = "返回待业主支付精算列表")
     ServerResponse getActuaryWaitPay(
             @RequestParam("request") HttpServletRequest request,
             @RequestParam("pageDTO") PageDTO pageDTO,
-            @RequestParam("name") String name
+            @RequestParam("name") String name,
+            @RequestParam("workerKey") String workerKey
 
     );
 
@@ -41,7 +43,8 @@ public interface ActuaryAPI {
     ServerResponse getActuaryCommit(
             @RequestParam("request") HttpServletRequest request,
             @RequestParam("pageDTO") PageDTO pageDTO,
-            @RequestParam("name") String name
+            @RequestParam("name") String name,
+            @RequestParam("workerKey") String workerKey
     );
 
     @PostMapping("/data/actuary/getActuaryConfirm")
@@ -49,7 +52,8 @@ public interface ActuaryAPI {
     ServerResponse getActuaryConfirm(
             @RequestParam("request") HttpServletRequest request,
             @RequestParam("pageDTO") PageDTO pageDTO,
-            @RequestParam("name") String name
+            @RequestParam("name") String name,
+            @RequestParam("workerKey") String workerKey
     );
 
     @PostMapping("/data/actuary/getActuaryComplete")
@@ -57,7 +61,8 @@ public interface ActuaryAPI {
     ServerResponse getActuaryComplete(
             @RequestParam("request") HttpServletRequest request,
             @RequestParam("pageDTO") PageDTO pageDTO,
-            @RequestParam("name") String name
+            @RequestParam("name") String name,
+            @RequestParam("workerKey") String workerKey
     );
 
     @PostMapping("/data/actuary/getStatistics")

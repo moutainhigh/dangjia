@@ -179,24 +179,23 @@ public class MendMaterielService {
             House house = houseMapper.selectByPrimaryKey(mendOrder.getHouseId());
             if (house != null) {
                 if (house.getVisitState() != 0) {
-//                    mendOrderDTO.setAddress(house.getResidential() + house.getBuilding() + "栋" + house.getUnit() + "单元" + house.getNumber());
                     mendOrderDTO.setAddress(house.getHouseName());
                     Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
                     mendOrderDTO.setMemberName(member.getNickName() == null ? member.getName() : member.getNickName());
                     mendOrderDTO.setMemberId(member.getId());
                     mendOrderDTO.setMemberMobile(member.getMobile());
-
-                    Member worker = memberMapper.selectByPrimaryKey(mendOrder.getApplyMemberId());
-                    mendOrderDTO.setApplyMemberId(worker.getId());
-                    mendOrderDTO.setApplyName(CommonUtil.isEmpty(worker.getName()) ? worker.getNickName() : worker.getName());
-                    mendOrderDTO.setApplyMobile(worker.getMobile());
-                    mendOrderDTO.setType(mendOrder.getType());
-                    mendOrderDTO.setState(mendOrder.getState());
-                    mendOrderDTO.setTotalAmount(mendOrder.getTotalAmount());
-                    mendOrderDTOS.add(mendOrderDTO);
-
                 }
             }
+            Member worker = memberMapper.selectByPrimaryKey(mendOrder.getApplyMemberId());
+            if(worker!=null) {
+                mendOrderDTO.setApplyMemberId(worker.getId());
+                mendOrderDTO.setApplyName(CommonUtil.isEmpty(worker.getName()) ? worker.getNickName() : worker.getName());
+                mendOrderDTO.setApplyMobile(worker.getMobile());
+            }
+            mendOrderDTO.setType(mendOrder.getType());
+            mendOrderDTO.setState(mendOrder.getState());
+            mendOrderDTO.setTotalAmount(mendOrder.getTotalAmount());
+            mendOrderDTOS.add(mendOrderDTO);
         }
 
         return mendOrderDTOS;

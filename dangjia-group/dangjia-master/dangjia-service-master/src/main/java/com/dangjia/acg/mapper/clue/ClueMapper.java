@@ -15,6 +15,7 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -68,6 +69,7 @@ public interface ClueMapper extends Mapper<Clue> {
     List<RobDTO> queryRobSingledata(Map<String,Object> map);
 
 
+
     List<RobInfoDTO> queryCustomerInfo(Map<String,Object> map);
 
 
@@ -76,6 +78,10 @@ public interface ClueMapper extends Mapper<Clue> {
 
     void upDateIsRobStats(Map<String,Object> map);
 
+
+    void upDateClueCusService(Map<String,Object> map);
+
+    void upDateMcUserId(Map<String,Object> map);
 
     UserInfoDTO queryTips(Map<String,Object> map);
 
@@ -91,7 +97,7 @@ public interface ClueMapper extends Mapper<Clue> {
 
     List<GrabSheetDTO> notEnteredGrabSheet();
 
-    int setDistribution(@Param("storeId") String storeId,@Param("memberId") String memberId);
+    int setDistribution(@Param("storeId") String storeId, @Param("memberId") String memberId, @Param("date")Date date);
 
-    int updateStoreUser(@Param("userId") String userId,@Param("storeId") String storeId);
+    int updateStoreUser(@Param("userId") String userId, @Param("storeId") String storeId);
 }

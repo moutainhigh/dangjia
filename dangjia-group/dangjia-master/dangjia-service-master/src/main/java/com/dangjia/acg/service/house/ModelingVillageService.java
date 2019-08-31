@@ -177,16 +177,17 @@ public class ModelingVillageService {
                     return ServerResponse.createByErrorMessage("楼栋名称不能为空");
                 ResidentialBuilding residentialBuilding;
                 if (CommonUtil.isEmpty(residentialBuildingId)) {//没有id则新增
+                    LOG.info("111111111111=======================");
                     if (CommonUtil.isEmpty(modelingVillage.getId()))//没有id则新增
                         return ServerResponse.createByErrorMessage("小区id不能为null");
+                    Example example=new Example(Store.class);
+                    example.createCriteria().andLike(Store.VILLAGES,"%" + modelingVillage.getId() + "%");
+                    List<Store> stores = iStoreMapper.selectByExample(example);
                     residentialBuilding = new ResidentialBuilding();
                     residentialBuilding.setVillageId(modelingVillage.getId());//设置 关联小区id
                     residentialBuilding.setBuilding(building);//楼栋名称
                     residentialBuilding.setModifyDate(modifyDate);
                     residentialBuilding.setCreateDate(modifyDate);
-                    Example example=new Example(Store.class);
-                    example.createCriteria().andLike(Store.VILLAGES,modelingVillage.getId());
-                    List<Store> stores = iStoreMapper.selectByExample(example);
                     residentialBuilding.setStoreId(stores.size()>0?stores.get(0).getId():null);
                     residentialBuildingMapper.insert(residentialBuilding);
                     modelingVillage.setLayoutSum(modelingVillage.getLayoutSum() + 1);//累计小区户型总数

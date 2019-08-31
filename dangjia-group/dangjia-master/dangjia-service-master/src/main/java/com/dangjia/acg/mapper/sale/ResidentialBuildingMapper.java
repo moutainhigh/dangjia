@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -21,4 +22,6 @@ public interface ResidentialBuildingMapper extends Mapper<ResidentialBuilding> {
     List<ResidentialBuilding> getvillageIdGroupBy(@Param("buildingId") String[] buildingId);
 
     List<ResidentialBuilding> getBuildingByVillageId(@Param("villageId") String villageId);
+
+    int setBuildingInformation(Map<String,Object> map);
 }

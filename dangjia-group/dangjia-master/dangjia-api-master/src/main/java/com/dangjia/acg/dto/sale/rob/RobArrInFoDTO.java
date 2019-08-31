@@ -89,5 +89,7 @@ public class RobArrInFoDTO {
     @ApiModelProperty("意向房屋信息")
     private List<IntentionHouseDTO> intentionHouseList;
 
+    @ApiModelProperty("分配销售 1：已分配  0：未分配")
+    private Integer branchUser;
 
 }

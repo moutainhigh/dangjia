@@ -45,7 +45,7 @@ public class ActuaryService {
      *
      * @return
      */
-    public ServerResponse getActuaryAll(HttpServletRequest request, PageDTO pageDTO, String name, String budgetOk) {
+    public ServerResponse getActuaryAll(HttpServletRequest request, PageDTO pageDTO, String name, String budgetOk, String workerKey) {
         String cityId = request.getParameter(Constants.CITY_ID);
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         String dataStatus = "0";//正常数据
@@ -54,18 +54,9 @@ public class ActuaryService {
             dataStatus = "1";
             budgetOk = "";
         }
-        List<HouseListDTO> houseList = houseMapper.getActuaryAll(cityId, budgetOk, name, dataStatus);
+        List<HouseListDTO> houseList = houseMapper.getActuaryAll(cityId, budgetOk, name,workerKey, dataStatus);
         PageInfo pageResult = new PageInfo(houseList);
         for (HouseListDTO houseListDTO : houseList) {
-            HouseWorker houseWorker = houseWorkerMapper.getHwByHidAndWtype(houseListDTO.getHouseId(), 2);
-            if (houseWorker != null) {
-                Member workerSup = memberMapper.selectByPrimaryKey(houseWorker.getWorkerId());
-                if (workerSup != null) {
-                    houseListDTO.setOperatorId(workerSup.getId());
-                    houseListDTO.setOperatorName(workerSup.getName());//大管家名字
-                    houseListDTO.setOperatorMobile(workerSup.getMobile());
-                }
-            }
             houseListDTO.setShowUpdata(0);
             if (houseListDTO.getDecorationType() == 2) {
                 if (houseListDTO.getBudgetOk() == 1 && houseListDTO.getDesignerOk() != 3) {

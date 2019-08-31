@@ -84,8 +84,8 @@ public class StoreController implements StoreAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse IndexqueryStore(String cityId, String latitude, String longitude) {
-        return storeServices.IndexqueryStore(cityId, latitude, longitude);
+    public ServerResponse indexqueryStore(String cityId, String latitude, String longitude) {
+        return storeServices.indexqueryStore(cityId, latitude, longitude);
     }
 
     /**

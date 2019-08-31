@@ -185,7 +185,7 @@ public class MemberService {
             if (user == null) {
                 return ServerResponse.createByErrorMessage("用户不存在");
             }
-            if (userRole == 3) {//销售端放开登录权限
+            if (!CommonUtil.isEmpty(userRole)&&userRole == 3) {//销售端放开登录权限
                 if (!CommonUtil.isEmpty(accessToken.getUserId())) {
                     ServerResponse serverResponse = setSale(accessToken, accessToken.getUserId());
                     if (!serverResponse.isSuccess()) {
@@ -264,7 +264,7 @@ public class MemberService {
     private ServerResponse setAccessToken(Member member, Integer userRole) {
         int memberType = -1;
         MainUser mainUser = userMapper.findUserByMobile(member.getMobile());
-        if (mainUser != null && CommonUtil.isEmpty(mainUser.getMemberId())) {
+        if (mainUser != null) {
             //插入MemberId
             userMapper.insertMemberId(member.getMobile());
         }
@@ -305,18 +305,18 @@ public class MemberService {
             redisClient.deleteCache(token + Constants.SESSIONUSERID);
         }
         redisClient.put(userRoleText, accessToken.getUserToken());
-        switch (userRole) {
-            case 1:
-                groupInfoService.registerJGUsers(AppType.ZHUANGXIU.getDesc(), new String[]{member.getId()}, new String[1]);
-                break;
-            case 2:
-                groupInfoService.registerJGUsers(AppType.GONGJIANG.getDesc(), new String[]{member.getId()}, new String[1]);
-                break;
-            case 3:
-                if (!CommonUtil.isEmpty(accessToken.getUserId()))
-                    groupInfoService.registerJGUsers(AppType.SALE.getDesc(), new String[]{accessToken.getUserId()}, new String[1]);
-                break;
-        }
+//        switch (userRole) {
+//            case 1:
+//                groupInfoService.registerJGUsers(AppType.ZHUANGXIU.getDesc(), new String[]{member.getId()}, new String[1]);
+//                break;
+//            case 2:
+//                groupInfoService.registerJGUsers(AppType.GONGJIANG.getDesc(), new String[]{member.getId()}, new String[1]);
+//                break;
+//            case 3:
+//                if (!CommonUtil.isEmpty(accessToken.getUserId()))
+//                    groupInfoService.registerJGUsers(AppType.SALE.getDesc(), new String[]{accessToken.getUserId()}, new String[1]);
+//                break;
+//        }
         return ServerResponse.createBySuccess(accessToken);
     }
 
@@ -528,7 +528,7 @@ public class MemberService {
             return (ServerResponse) object;
         }
         Member user = memberMapper.selectByPrimaryKey(((Member) object).getId());
-        if(user==null){
+        if (user == null) {
             return ServerResponse.createbyUserTokenError();
         }
         if (user.getCheckType() == 4) {
@@ -583,7 +583,7 @@ public class MemberService {
             return (ServerResponse) object;
         }
         Member user = memberMapper.selectByPrimaryKey(((Member) object).getId());
-        if(user==null){
+        if (user == null) {
             return ServerResponse.createbyUserTokenError();
         }
         if (user.getCheckType() == 4) {
@@ -722,10 +722,10 @@ public class MemberService {
                     customer.setClueType(0);
                     customer.setDataStatus(0);
                     customer.setTips("0");
-                    Example example=new Example(MemberCity.class);
-                    example.createCriteria().andEqualTo(MemberCity.MEMBER_ID,member.getId());
+                    Example example = new Example(MemberCity.class);
+                    example.createCriteria().andEqualTo(MemberCity.MEMBER_ID, member.getId());
                     List<MemberCity> memberCities = memberCityMapper.selectByExample(example);
-                    customer.setCityId(memberCities.size()>0?memberCities.get(0).getCityId():null);
+                    customer.setCityId(memberCities.size() > 0 ? memberCities.get(0).getCityId() : null);
                     customer.setPhaseStatus(1);
                     iCustomerMapper.insert(customer);
                 } else {
@@ -736,8 +736,8 @@ public class MemberService {
                 }
                 MemberCustomerDTO mcDTO = new MemberCustomerDTO();
                 mcDTO.setMcId(customer.getId());
-                logger.info("customer.getId()==================="+ customer.getId());
-                logger.info("customer.getPhaseStatus()==================="+ customer.getPhaseStatus());
+                logger.info("customer.getId()===================" + customer.getId());
+                logger.info("customer.getPhaseStatus()===================" + customer.getPhaseStatus());
                 mcDTO.setPhaseStatus(customer.getPhaseStatus());
                 mcDTO.setOrderDate(member.getModifyDate());
                 mcDTO.setMemberId(member.getId());
@@ -860,7 +860,7 @@ public class MemberService {
         memberMap.put("invitationNum", memberMapper.selectCountByExample(example));
         memberMap.put("invitationCode", member.getInvitationCode());
         memberMap.put("id", member.getId());
-        if (userRole == 3) {
+        if (userRole != null && userRole == 3) {
             String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
             MainUser mainUser = userMapper.findUserByMobile(member.getMobile());
             memberMap.put("codeData", url + String.format("codeDetails?invitationCode=%s&memberId=%s&userId=%s&title=%s",
@@ -886,10 +886,10 @@ public class MemberService {
                         + "%' or mobile like '%" + searchKey + "%')");
             }
             if (!CommonUtil.isEmpty(cityId)) {
-                criteria.andEqualTo(Member.CITY_ID,cityId);
+                criteria.andEqualTo(Member.CITY_ID, cityId);
             }
             if (!CommonUtil.isEmpty(policyId)) {
-                criteria.andEqualTo(Member.POLICY_ID,policyId);
+                criteria.andEqualTo(Member.POLICY_ID, policyId);
             }
             if (realNameState == null) realNameState = -1;
             switch (realNameState) {
@@ -1279,7 +1279,7 @@ public class MemberService {
     /**
      * 获取工匠保险信息
      *
-     * @param type     保险类型 0=首保 1=续保
+     * @param type      保险类型 0=首保 1=续保
      * @param searchKey 工人名称或电话
      * @return
      */
@@ -1323,10 +1323,10 @@ public class MemberService {
      * 获取我的保险信息
      *
      * @param userToken
-     * @param pageDTO 页码
+     * @param pageDTO   页码
      * @return
      */
-    public ServerResponse myInsurances(String userToken,PageDTO pageDTO) {
+    public ServerResponse myInsurances(String userToken, PageDTO pageDTO) {
 
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
@@ -1336,7 +1336,7 @@ public class MemberService {
         List<Map<String, Object>> datas = new ArrayList<>();
         Example example = new Example(Insurance.class);
         Example.Criteria criteria = example.createCriteria();
-            criteria.andEqualTo(Insurance.WORKER_ID, operator);
+        criteria.andEqualTo(Insurance.WORKER_ID, operator);
         example.orderBy(Insurance.CREATE_DATE).desc();
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<Insurance> infos = insuranceMapper.selectByExample(example);

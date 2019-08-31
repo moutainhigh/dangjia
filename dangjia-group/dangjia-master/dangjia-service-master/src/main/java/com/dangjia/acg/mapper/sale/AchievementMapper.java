@@ -2,7 +2,6 @@ package com.dangjia.acg.mapper.sale;
 
 import com.dangjia.acg.dto.sale.achievement.AchievementInfoDTO;
 import com.dangjia.acg.dto.sale.achievement.UserAchievementInfoDTO;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -68,7 +67,25 @@ public interface AchievementMapper {
      */
     List<AchievementInfoDTO>queryRoyaltyMatch(Map<String, Object> map);
 
+    /**
+     *  查询门店下面员工业绩
+     * @param map
+     * @return
+     */
+    List<AchievementInfoDTO>queryMonthRoyalty(Map<String, Object> map);
 
-    int Complete(@Param("userId") String userId,@Param("time") String time);
+
+
+    int Complete(Map<String, Object> map1);
+
+
+    /**
+     *  查询成交量页面
+     * @param map
+     * @return
+     */
+    List<UserAchievementInfoDTO>queryVolumeDTO(Map<String, Object> map);
+
+
 
 }

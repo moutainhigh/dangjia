@@ -1,8 +1,10 @@
 package com.dangjia.acg.api.web.engineer;
 
+import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.matter.WorkerDisclosure;
+import com.dangjia.acg.modle.member.Member;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -98,6 +100,13 @@ public interface WebEngineerAPI {
                                @RequestParam("type") String type, @RequestParam("checkType") String checkType ,
                                @RequestParam("pageDTO") PageDTO pageDTO);
 
+    @PostMapping(value = "web/engineer/setMemberStyle")
+    @ApiOperation(value = "修改设计师绑定风格", notes = "修改设计师绑定风格")
+     ServerResponse setMemberStyle(@RequestParam("request") HttpServletRequest request, @RequestParam("member") Member member) ;
+
+    @PostMapping(value = "web/engineer/getMemberStyles")
+    @ApiOperation(value = "设计师风格详情", notes = "设计师风格详情")
+    ServerResponse getMemberStyles(@RequestParam("request") HttpServletRequest request,@RequestParam("mamberId")  String mamberId);
     @PostMapping(value = "web/engineer/getWareHouse")
     @ApiOperation(value = "仓库列表", notes = "仓库列表")
     ServerResponse getWareHouse(@RequestParam("houseId") String houseId,

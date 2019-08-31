@@ -9,10 +9,12 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.sale.residential.ResidentialRangeDTO;
+import com.dangjia.acg.dto.sale.royalty.ResidentialBuildingDTO;
 import com.dangjia.acg.dto.sale.store.StoreUserDTO;
 import com.dangjia.acg.mapper.clue.ClueMapper;
 import com.dangjia.acg.mapper.house.IModelingVillageMapper;
 import com.dangjia.acg.mapper.member.ICustomerMapper;
+import com.dangjia.acg.mapper.sale.DjAreaMatchMapper;
 import com.dangjia.acg.mapper.sale.ResidentialBuildingMapper;
 import com.dangjia.acg.mapper.sale.ResidentialRangeMapper;
 import com.dangjia.acg.mapper.store.IStoreMapper;
@@ -24,6 +26,7 @@ import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Customer;
 import com.dangjia.acg.modle.sale.residential.ResidentialBuilding;
 import com.dangjia.acg.modle.sale.residential.ResidentialRange;
+import com.dangjia.acg.modle.sale.royalty.DjAreaMatch;
 import com.dangjia.acg.modle.store.Store;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.service.config.ConfigMessageService;
@@ -75,6 +78,9 @@ public class StoreManagementService {
     @Autowired
     private UserMapper userMapper;
     private static Logger logger = LoggerFactory.getLogger(RedisSessionDAO.class);
+
+    @Autowired
+    private DjAreaMatchMapper djAreaMatchMapper;
     /**
      * 门店管理页
      *
@@ -116,8 +122,9 @@ public class StoreManagementService {
                 residentialRangeDTO.setVillageId(modelingVillage.getId());
                 residentialRangeDTO.setVillagename(modelingVillage.getName());
                 example = new Example(ResidentialBuilding.class);
-                example.createCriteria().andEqualTo(ResidentialBuilding.STORE_ID, store.getId())
-                        .andEqualTo(ResidentialBuilding.VILLAGE_ID, modelingVillage.getId());
+//                example.createCriteria().andEqualTo(ResidentialBuilding.STORE_ID, store.getId())
+//                        .andEqualTo(ResidentialBuilding.VILLAGE_ID, modelingVillage.getId());
+                example.createCriteria().andEqualTo(ResidentialBuilding.VILLAGE_ID, modelingVillage.getId());
                 residentialRangeDTO.setList(residentialBuildingMapper.selectByExample(example));
                 residentialRangeDTOList.add(residentialRangeDTO);
             }
@@ -246,7 +253,7 @@ public class StoreManagementService {
             for (ModelingVillage modelingVillage : modelingVillages) {
                 example = new Example(ResidentialBuilding.class);
                 Example.Criteria criteria = example.createCriteria();
-                criteria.andEqualTo(ResidentialBuilding.STORE_ID, store.getId());
+//                criteria.andEqualTo(ResidentialBuilding.STORE_ID, store.getId());
                 criteria.andEqualTo(ResidentialBuilding.VILLAGE_ID, modelingVillage.getId());
                 if (slist.size() > 0) {
                     criteria.andNotIn(ResidentialBuilding.ID, slist);
@@ -292,21 +299,31 @@ public class StoreManagementService {
             if (clue == null) {
                 return ServerResponse.createByErrorMessage("找不到此线索");
             }
+
             clue.setCusService(cusSerice);
             clue.setStage(1);
             clue.setModifyDate(new Date());
+            clue.setBranchUser(1);
             clueMapper.updateByPrimaryKeySelective(clue);
             MainUser user = userMapper.selectByPrimaryKey(cusSerice);
+
+            String owername = "";
+            if(!CommonUtil.isEmpty(clue.getOwername()) ){
+                owername = clue.getOwername();
+            }else{
+                owername = "线索客户";
+            }
             if (user != null && !CommonUtil.isEmpty(user.getMemberId()))
                 configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "分配提醒",
-                        "您收到一个店长分配的客户，请及时跟进。", 0, url
-                                + Utils.getCustomerDetails("", clueId, phaseStatus, "0"));
+                        "您收到一个店长分配的客户【 "+ owername + "】，请及时跟进。", 0, url
+                                + Utils.getCustomerDetails(clue.getMemberId(), clueId, phaseStatus, "0"));
             return ServerResponse.createBySuccessMessage("分配成功");
         } else {
             Clue clue = clueMapper.selectByPrimaryKey(clueId);
             if (clue != null) {
                 clue.setCusService(cusSerice);
                 clue.setStage(1);
+                clue.setBranchUser(1);
                 clue.setModifyDate(new Date());
                 clueMapper.updateByPrimaryKeySelective(clue);
             }
@@ -321,8 +338,8 @@ public class StoreManagementService {
             MainUser user = userMapper.selectByPrimaryKey(cusSerice);
             if (user != null && !CommonUtil.isEmpty(user.getMemberId()))
                 configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "分配提醒",
-                        "您收到一个店长分配的客户，请及时跟进。", 0, url
-                                + Utils.getCustomerDetails(customer.getMemberId(), "", phaseStatus, "1"));
+                        "您收到一个店长分配的客户【 "+ user.getUsername() + "】，请及时跟进。", 0, url
+                                + Utils.getCustomerDetails(customer.getMemberId(), clueId, phaseStatus, "1"));
             return ServerResponse.createBySuccessMessage("分配成功");
         }
     }
@@ -381,6 +398,33 @@ public class StoreManagementService {
      */
     public ServerResponse getBuildingByVillageId(String villageId){
         return ServerResponse.createBySuccess("查询成功",residentialBuildingMapper.getBuildingByVillageId(villageId));
+    }
+
+
+    /**
+     * 小区所有楼栋
+     * @param villageId
+     * @return
+     */
+    public ServerResponse getBuildingByVillageIdArr(String villageId){
+
+        ResidentialBuildingDTO dto = new ResidentialBuildingDTO();
+        //根据小区id查询所有楼栋
+        List<ResidentialBuilding> rb = residentialBuildingMapper.getBuildingByVillageId(villageId);
+
+        Example example = new Example(DjAreaMatch.class);
+        example.createCriteria().andEqualTo(DjAreaMatch.VILLAGE_ID, villageId)
+                .andEqualTo(DjAreaMatch.DATA_STATUS, 0);
+        //根据小区id查询已选择楼栋
+        List<DjAreaMatch> list = djAreaMatchMapper.selectByExample(example);
+
+        dto.setRb(rb);
+        dto.setList(list);
+
+        if (dto == null) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+        return ServerResponse.createBySuccess("查询提成列表", dto);
     }
 
 }

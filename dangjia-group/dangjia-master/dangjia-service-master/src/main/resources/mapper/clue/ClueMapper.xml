@@ -73,108 +73,105 @@
         </if>
     </select>
 
-        <select id="followList" resultType="com.dangjia.acg.dto.other.ClueDTO">
-            select
-            <if test="stage==''">
-                c.id as clueId,c.owername,c.phone,c.wechat,c.address,c.stage,
-                c.building,c.number,
-                c.label_id as labelId,
-                c.cus_service as cusService,
-                c.create_date as createDate,
-                c.modify_date as modifyDate,
-                c.data_status as dataStatus,
-                c.remark,
-                c.report_date as reportDate,
-                c.member_id as memberId,
-                c.store_id as storeId,
-                u.username as userName,
-                c.phase_status as phaseStatus,
-                c.clue_type as clueType,
-                c.stage
+    <select id="followList" resultType="com.dangjia.acg.dto.other.ClueDTO">
+        select
+        <if test="stage==''">
+            c.id as clueId,
+            c.owername,
+            c.phone,
+            c.wechat,
+            c.address,
+            c.stage,
+            c.building,c.number,
+            c.label_id as labelId,
+            c.cus_service as cusService,
+            c.create_date as createDate,
+            c.modify_date as modifyDate,
+            c.data_status as dataStatus,
+            c.remark,
+            c.report_date as reportDate,
+            c.member_id as memberId,
+            c.store_id as storeId,
+            u.username as userName,
+            c.phase_status as phaseStatus,
+            c.clue_type as clueType
+        </if>
+        <if test="stage==4">
+            mc.id as mcId,
+            c.id as clueId,
+            mc.member_id as memberId,
+            m.mobile as phone,
+            m.nick_name as owername,
+            mc.modify_date as modifyDate,
+            m.create_date as createDate,
+            mc.label_id_arr as labelId,
+            u.username as userName,
+            mc.report_date as reportDate,
+            mc.phase_status as phaseStatus,
+            mc.user_id as userId,
+            mc.stage,
+            c.remark,
+            c.clue_type as clueType
+        </if>
+        from dj_clue c
+        INNER JOIN dj_user u
+        on c.cus_service=u.id
+        LEFT JOIN dj_clue_talk ct
+        ON c.id=ct.clue_id
+        <if test="stage==4">
+            INNER JOIN dj_member_customer mc
+            on c.member_id=mc.member_id
+            and c.cus_service=mc.user_id
+            INNER JOIN dj_member m
+            on mc.member_id=m.id
+        </if>
+        WHERE
+        <if test="stage==''">
+            c.data_status=0
+            and c.stage in (0,1)
+            and c.phase_status=0
+            <if test="null!=label and ''!=label">
+                and c.label_id like CONCAT('%',#{label},'%')
             </if>
-            <if test="stage==4">
-                mc.id as mcId,
-                c.id as clueId,
-                mc.member_id as memberId,
-                m.mobile as phone,
-                m.nick_name as owername,
-                mc.modify_date as modifyDate,
-                m.create_date as createDate,
-                mc.label_id_arr as labelId,
-                u.username as userName,
-                mc.report_date as reportDate,
-                mc.phase_status as phaseStatus,
-                mc.user_id as userId,
-                mc.stage,
-                c.remark
+            <if test="null!=searchKey and ''!=searchKey">
+                and CONCAT(c.owername,c.phone) like CONCAT('%',#{searchKey},'%')
             </if>
-            from dj_clue c
-            INNER JOIN dj_user u
-            on c.cus_service=u.id
-            LEFT JOIN dj_clue_talk ct
-            ON c.id=ct.clue_id
-            <if test="stage==4">
-                INNER JOIN dj_member_customer mc
-                on c.member_id=mc.member_id
-                and c.cus_service=mc.user_id
-                INNER JOIN dj_member m
-                on mc.member_id=m.id
+            <if test="null!=userId and ''!=userId">
+                and c.cus_service=#{userId}
             </if>
-            WHERE
-            <if test="stage==''">
-                c.data_status=0
-                and c.stage in (0,1)
-                and c.phase_status=0
-                <if test="null!=label and ''!=label">
-                    and c.label_id like CONCAT('%',#{label},'%')
-                </if>
-                <if test="null!=searchKey and ''!=searchKey">
-                    and CONCAT(c.owername,c.phone) like CONCAT('%',#{searchKey},'%')
-                </if>
-                <if test="null!=userId and ''!=userId">
-                    and c.cus_service=#{userId}
-                </if>
-                <if test="null!=storeId and ''!=storeId">
-                    and c.store_id=#{storeId}
-                </if>
-                GROUP BY ct.clue_id
-                ORDER BY ct.create_date
-                <if test="null!=time and ''!=time">
-                    desc
-                </if>
-                ,c.create_date
-                <if test="null!=time and ''!=time">
-                    desc
-                </if>
+            <if test="null!=storeId and ''!=storeId">
+                and c.store_id=#{storeId}
             </if>
-            <if test="stage==4">
-                mc.data_status=0
-                and mc.stage in (0,1)
-                and mc.phase_status=1
-                and c.phase_status=1
-                <if test="null!=userId and ''!=userId">
-                    and mc.user_id=#{userId}
-                    and c.cus_service=#{userId}
-                </if>
-                <if test="null!=storeId and ''!=storeId">
-                    and mc.store_id=#{storeId}
-                </if>
-                <if test="null!=label and ''!=label">
-                    and label_id like CONCAT('%',#{label},'%')
-                </if>
-                <if test="null!=searchKey and ''!=searchKey">
-                    and CONCAT(m.nick_name,c.owername,c.phone) like CONCAT('%',#{searchKey},'%')
-                </if>
-                GROUP BY ct.clue_id
-                ORDER BY ct.create_date
-                <if test="null!=time and ''!=time">
-                    desc
-                </if>
-                ,mc.create_date
-                <if test="null!=time and ''!=time">
-                    desc
-                </if>
+            GROUP BY c.id
+            ORDER BY c.time_sequencing
+            <if test="null!=time and ''!=time">
+                desc
             </if>
+        </if>
+        <if test="stage==4">
+            mc.data_status=0
+            and mc.stage in (0,1)
+            and mc.phase_status=1
+            and c.phase_status=1
+            <if test="null!=userId and ''!=userId">
+                and mc.user_id=#{userId}
+                and c.cus_service=#{userId}
+            </if>
+            <if test="null!=storeId and ''!=storeId">
+                and mc.store_id=#{storeId}
+            </if>
+            <if test="null!=label and ''!=label">
+                and mc.label_id_arr like CONCAT('%',#{label},'%')
+            </if>
+            <if test="null!=searchKey and ''!=searchKey">
+                and CONCAT(m.nick_name,c.owername,c.phone) like CONCAT('%',#{searchKey},'%')
+            </if>
+            GROUP BY c.id
+            ORDER BY c.time_sequencing
+            <if test="null!=time and ''!=time">
+                desc
+            </if>
+        </if>
     </select>
 
     <!--客户页-->
@@ -183,7 +180,7 @@
           <if test="type==''">
               c.id as clueId,
               mc.id as mcId,
-              if(m.nick_name is not null,m.nick_name,c.owername) as name,
+              if(m.nick_name is not null and m.nick_name!="",m.nick_name,c.owername) as name,
               c.phone,
               c.modify_date as modifyDate,
               c.cus_service as userId,
@@ -201,7 +198,7 @@
               h.create_date as createDate,
               mc.modify_date as modifyDate,
               h.completed_date as completedDate,
-              CONCAT(IFNULL(h.residential,'*'),IFNULL(h.building,'*栋'),IFNULL(h.unit,'*单元'),IFNULL(h.number,'*号')) as houseName,
+              CONCAT(IFNULL(h.residential,'*'),IFNULL(CONCAT(h.building,'栋'),'*栋'),IFNULL(CONCAT(h.unit,'单元'),'*单元'),IFNULL(CONCAT(h.number,'号'),'*号')) as houseName,
               c.cus_service as userId,
               c.phase_status as phaseStatus
           </if>
@@ -282,6 +279,7 @@
         SELECT
         c.id as clueId,
         c.wechat,
+        c.clue_type as clueType,
         mc.id as mcId,
         mc.member_id as memberId,
         h.id as houseId,
@@ -308,6 +306,7 @@
         on m.id=mc.member_id
         WHERE mc.phase_status=1
         and c.phase_status=1
+        and h.data_status = 0
         <if test="null!=userId and ''!=userId">
             and mc.user_id=#{userId}
         </if>
@@ -356,7 +355,8 @@
             c.label_id AS labelIdArr,
             u.username as userName,
             c.phase_status as phaseStatus,
-            mc.member_id as memberId
+            mc.member_id as memberId,
+            c.clue_type as clueType
             FROM dj_clue c
             inner join dj_user u
             on c.cus_service=u.id
@@ -412,10 +412,43 @@
             <when test="userId != null">
                 and (c.cus_service = #{userId} or c.store_id = #{storeId})
             </when>
+
             <otherwise>
                 and c.store_id = #{storeId}
             </otherwise>
         </choose>
+        <if test="null != userId">
+            and c.cus_service = #{userId}
+        </if>
+        union
+        SELECT
+        c.phone as phone,
+        c.cus_service as cusService,
+        c.member_id as memberId,
+        c.id as clueId,
+        c.stage as stage,
+        c.phase_status as phaseStatus,
+        h.id as houseId,
+        h.city_id as cityId,
+        h.village_id as villageId,
+        h.visit_state as visitState,
+        h.create_date as createDate,
+        mc.label_id_arr as labelIdArr,
+        mc.id as mcId,
+        m.nick_name as owerName
+        FROM
+        dj_clue c
+        INNER JOIN dj_house h ON c.member_id = h.member_id
+        INNER JOIN dj_member_customer mc ON mc.member_id = c.member_id
+        INNER JOIN dj_member m on m.id=c.member_id
+        WHERE
+        (
+        c.cus_service IS NULL
+        OR c.cus_service = ""
+        )
+        and c.store_id = #{storeId}
+        and h.visit_state = 0 and h.data_status=0
+        and h.is_rob_stats = 0
     </select>
 
 
@@ -444,6 +477,7 @@
             h.construction_date as constructionDate,
             h.completed_date as completedDate,
         </if>
+        c.branch_user as branchUser,
         c.create_date as createDate,
         c.owername as owerName,
         c.phone as phone,
@@ -466,7 +500,7 @@
         <if test="stage == 4 or stage == 5">
             INNER JOIN dj_house h
             on h.member_id = c.member_id
-            INNER JOIN dj_already_rob_single ars
+            LEFT JOIN dj_already_rob_single ars
             ON ars.user_id = c.cus_service AND ars.house_id = h.id
         </if>
         INNER JOIN
@@ -490,15 +524,19 @@
         select
             u.username as name,
             m.head,
-            rm.month_royalty as monthRoyaltys,
-            meter_royalty as meterRoyaltys,
-            arr_royalty as arrRoyalty
+            sum(rm.month_royalty) as monthRoyaltys,
+            sum(rm.month_royalty) as meterRoyaltys,
+            sum(rm.count_arr_royalty) as arrRoyalty
             FROM dj_user u
             INNER JOIN dj_royalty_match rm
             on u.id=rm.user_id
             INNER JOIN dj_member m
             on u.member_id=m.id
-        where rm.house_id=#{houseId}
+        where rm.house_id in
+        <foreach collection="houseIds" index="index" item="item"
+                 separator="," open="(" close=")">
+            #{item}
+        </foreach>
         and rm.user_id=#{userId}
     </select>
 
@@ -568,7 +606,7 @@
         and c.tips = 1
         UNION
         SELECT
-        if(m.name is not null,m.nick_name,m.name) as name,
+        if(m.name is not null and m.name!="",m.name,m.nick_name) as name,
         m.mobile AS phone,
         mc.modify_date AS modifyDate,
         mc.create_date AS createDate,
@@ -595,6 +633,19 @@
     </update>
 
 
+    <update id="upDateClueCusService" parameterType="java.util.Map">
+        update dj_clue c
+        set c.cus_service = #{cusService}
+        where c.id = #{clueId}
+    </update>
+
+
+    <update id="upDateMcUserId" parameterType="java.util.Map">
+        update dj_member_customer mc
+        set mc.user_id = #{userId}
+        where mc.id = #{mcId}
+    </update>
+
     <select id="queryTips" resultType="com.dangjia.acg.dto.sale.rob.UserInfoDTO" parameterType="java.util.HashMap">
         SELECT
         c.id as clueId,
@@ -607,13 +658,14 @@
         c.phase_status as phaseStatus,
         c.stage as stage,
         c.create_date as createDate,
+        c.branch_user as branchUser,
         m.name as userName,
         m.head as head,
         m.id as memberId
         FROM
         dj_clue c
         INNER JOIN dj_user u ON c.cus_service = u.id
-        INNER JOIN dj_member m ON u.member_id = m.id
+        LEFT JOIN dj_member m ON u.member_id = m.id
         where 1=1
         <if test="null!=id and ''!=id">
             and c.id = #{id}
@@ -679,10 +731,12 @@
 
     <select id="notEnteredGrabSheet" resultType="com.dangjia.acg.dto.sale.store.GrabSheetDTO">
         select
+            c.id as clueId,
             mc.member_id as memberId,
             hd.latitude,
             hd.longitude,
-            mc.modify_date as modifyDate
+            mc.modify_date as modifyDate,
+            c.store_id as storeId
         from dj_clue c
         INNER JOIN dj_house h
         on c.member_id=h.member_id
@@ -690,8 +744,7 @@
         on mc.member_id=c.member_id
         INNER JOIN dj_house_address hd
         on h.id=hd.house_id
-        where c.cus_service IS NULL
-        AND c.store_id IS NULL
+        where (c.cus_service IS NULL or c.cus_service="")
     </select>
 
     <update id="setDistribution">
@@ -699,7 +752,8 @@
         INNER JOIN dj_member_customer mc
         on c.member_id=mc.member_id
         set c.store_id=#{storeId},
-        mc.store_id=#{storeId}
+        mc.store_id=#{storeId},
+        mc.modify_date = #{date}
         where c.member_id=#{memberId}
     </update>
 

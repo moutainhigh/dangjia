@@ -128,7 +128,7 @@ public class ClientService {
         for (Clue groupBy : groupBys) {
             if (null!=groupBy.getReportDate() && new Date().getTime()>groupBy.getReportDate().getTime()) {
                 long time = groupBy.getReportDate().getTime()-new Date().getTime();
-                return ServerResponse.createByErrorMessage(String.valueOf(time));
+                return ServerResponse.createByErrorCodeMessage(ServerCode.USER_NOT_AUTHORIZE.getCode(),String.valueOf(time));
             }
         }
         //客户阶段是否报备
@@ -136,7 +136,7 @@ public class ClientService {
         for (Customer customer : customerGroupBy) {
             if (null!=customer.getReportDate() && new Date().getTime()>customer.getReportDate().getTime()) {
                 long time = customer.getReportDate().getTime()-new Date().getTime();
-                return ServerResponse.createByErrorMessage(String.valueOf(time));
+                return ServerResponse.createByErrorCodeMessage(ServerCode.USER_NOT_AUTHORIZE.getCode(),String.valueOf(time));
             }
         }
         //如果客户已录入过则把录入的房子变为意向房子
@@ -185,6 +185,10 @@ public class ClientService {
             clue.setTips("1");
             clue.setPhaseStatus(1);
             clue.setCityId(store.getCityId());
+            clue.setMemberId(members.get(0).getId());
+            clue.setTimeSequencing(clue.getCreateDate());
+            clue.setBranchUser(0);
+            clueMapper.insert(clue);//记录进入线索线索状态为转客户客户阶段
             if(!CommonUtil.isEmpty(clue.getBuilding())) {
                 IntentionHouse intentionHouse = new IntentionHouse();
                 intentionHouse.setClueId(clue.getId());
@@ -203,9 +207,6 @@ public class ClientService {
             customer.setClueType(0);
             customer.setDataStatus(0);
             customer.setTips("1");
-            customer.setPhaseStatus(1);
-            clue.setMemberId(members.get(0).getId());
-            clueMapper.insert(clue);//记录进入线索线索状态为转客户客户阶段
             iCustomerMapper.insert(customer);
             return ServerResponse.createBySuccessMessage("提交成功");
         } else {
@@ -216,6 +217,8 @@ public class ClientService {
             clue.setPhaseStatus(0);
             clue.setCityId(store.getCityId());
             clue.setClueType(0);
+            clue.setTimeSequencing(clue.getCreateDate());
+            clue.setBranchUser(0);
             if( !CommonUtil.isEmpty(clue.getBuilding())){
                 IntentionHouse intentionHouse = new IntentionHouse();
                 intentionHouse.setClueId(clue.getId());
@@ -250,35 +253,152 @@ public class ClientService {
         if (CommonUtil.isEmpty(accessToken.getUserId())) {
             return ServerResponse.createbyUserTokenError();
         }
+        String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+        Example example=new Example(Clue.class);
+        example.createCriteria().andEqualTo(Clue.PHONE,clue.getPhone())
+                .andEqualTo(Clue.CLUE_TYPE,1);
+        if(clueMapper.selectByExample(example).size()>0){
+            return ServerResponse.createByErrorMessage("手机号已存在");
+        }
+        example=new Example(Clue.class);
+        example.createCriteria().andEqualTo(Clue.PHONE,clue.getPhone()).andIsNotNull(Clue.CUS_SERVICE)
+                .andEqualTo(Clue.CLUE_TYPE,1);//跨域状态该客户是否已被录入
+        List<Clue> clues = clueMapper.selectByExample(example);
+        if(clues.size()>0){//该用户已被录入
+            return ServerResponse.createByErrorMessage("该客户已被录入");
+        }
+        //该客户在本城市/门店已注册 可跨域到其他地方
+        example=new Example(Clue.class);
+        example.createCriteria().andEqualTo(Clue.PHONE,clue.getPhone()).andEqualTo(Clue.PHASE_STATUS,1);
+        List<Clue> clues1 = clueMapper.selectByExample(example);
         ModelingVillage modelingVillage = iModelingVillageMapper.selectByPrimaryKey(villageId);
         if (modelingVillage == null) {
-            clue.setClueType(1);
-            clue.setTurnStatus(1);
-            clue.setPhaseStatus(0);
-            clue.setCityId(cityId);
-            clue.setStage(0);
-            clue.setDataStatus(0);
-            clueMapper.insert(clue);//记录为中台的线索
-            return ServerResponse.createBySuccessMessage("记录为中台的线索");
+            if(clues1.size()>0){//该客户已注册未分配销售
+                Clue clue1 = clues1.get(0);
+                clue1.setClueType(1);
+                clue1.setTurnStatus(1);
+                clue1.setPhaseStatus(1);
+                clue1.setTimeSequencing(clue.getCreateDate());
+                clueMapper.updateByPrimaryKeySelective(clue1);//记录为中台的线索
+                example=new Example(Customer.class);
+                example.createCriteria().andEqualTo(Customer.MEMBER_ID,clue1.getMemberId());
+                List<Customer> customers = iCustomerMapper.selectByExample(example);
+                Customer customer = customers.get(0);
+                customer.setUserId(null);
+                customer.setPhaseStatus(1);
+                customer.setTurnStatus(1);
+                iCustomerMapper.updateByPrimaryKeySelective(customer);
+                return ServerResponse.createBySuccessMessage("记录为中台的客户列表");
+            }else{//未注册
+                clue.setClueType(1);
+                clue.setTurnStatus(1);
+                clue.setCityId(cityId);
+                clue.setStage(0);
+                clue.setDataStatus(0);
+                clue.setPhaseStatus(0);
+                clue.setTimeSequencing(clue.getCreateDate());
+                clueMapper.insert(clue);//记录为中台的线索
+                return ServerResponse.createBySuccessMessage("记录为中台的线索");
+            }
         }
         ResidentialBuilding residentialBuilding = residentialBuildingMapper.selectByPrimaryKey(buildingId);
+        if(CommonUtil.isEmpty(residentialBuilding.getStoreId())){
+            if(clues1.size()>0){//该客户已注册未分配销售
+                Clue clue1 = clues1.get(0);
+                clue1.setClueType(1);
+                clue1.setTurnStatus(1);
+                clue1.setPhaseStatus(1);
+                clue1.setTimeSequencing(clue.getCreateDate());
+                clueMapper.updateByPrimaryKeySelective(clue1);//记录为中台的线索
+                example=new Example(Customer.class);
+                example.createCriteria().andEqualTo(Customer.MEMBER_ID,clue1.getMemberId());
+                List<Customer> customers = iCustomerMapper.selectByExample(example);
+                Customer customer = customers.get(0);
+                customer.setUserId(null);
+                customer.setPhaseStatus(1);
+                customer.setTurnStatus(1);
+                iCustomerMapper.updateByPrimaryKeySelective(customer);
+                return ServerResponse.createBySuccessMessage("小区楼栋未分配记录为中台客户列表");
+            }else{//未注册
+                clue.setClueType(1);
+                clue.setTurnStatus(1);
+                clue.setCityId(cityId);
+                clue.setStage(0);
+                clue.setDataStatus(0);
+                clue.setPhaseStatus(0);
+                clue.setTimeSequencing(clue.getCreateDate());
+                clueMapper.insert(clue);//记录为中台的线索
+                return ServerResponse.createBySuccessMessage("小区楼栋未分配记录为中台线索列表");
+            }
+        }
         ResidentialRange residentialRange = residentialRangeMapper.selectSingleResidentialRange(residentialBuilding.getId());
+        Member member=new Member();
         if(null==residentialRange){//楼栋未分配销售转入店长待分配
             Store store = iStoreMapper.selectByPrimaryKey(residentialBuilding.getStoreId());
-            clue.setStage(0);
-            clue.setDataStatus(0);
-            clue.setStoreId(residentialBuilding.getStoreId());
-            clue.setTurnStatus(1);
-            clue.setCityId(modelingVillage.getCityId());
-            clue.setClueType(1);
-            clue.setPhaseStatus(0);
-            clue.setCusService(store.getUserId());
-            clue.setCrossDomainUserId(accessToken.getUserId());//跨域销售id
-            clueMapper.insert(clue);
+            if (clues1.size() > 0) {
+                clue.setStage(0);
+                clue.setDataStatus(0);
+                clue.setStoreId(store.getId());
+                clue.setTurnStatus(1);
+                clue.setCityId(store.getCityId());
+                clue.setClueType(1);
+                clue.setPhaseStatus(1);
+                clue.setMemberId(clues1.get(0).getMemberId());
+                clue.setCusService(store.getUserId());
+                clue.setCrossDomainUserId(accessToken.getUserId());//跨域销售id
+                clue.setTimeSequencing(clue.getCreateDate());
+                clue.setStoreId(store.getId());
+                clue.setBranchUser(0);
+                clueMapper.insert(clue);
+                Customer customer = new Customer();
+                customer.setUserId(store.getUserId());
+                customer.setMemberId(clues1.get(0).getMemberId());
+                customer.setStage(1);
+                customer.setStoreId(store.getId());
+                customer.setCityId(store.getCityId());
+                customer.setTurnStatus(1);
+                customer.setPhaseStatus(1);
+                customer.setClueType(1);
+                customer.setDataStatus(0);
+                customer.setTips("1");
+                iCustomerMapper.insert(customer);
+                member = iMemberMapper.selectByPrimaryKey(clues1.get(0).getMemberId());
+            } else {
+                clue.setStage(0);
+                clue.setDataStatus(0);
+                clue.setStoreId(store.getId());
+                clue.setTurnStatus(1);
+                clue.setCityId(modelingVillage.getCityId());
+                clue.setClueType(1);
+                clue.setPhaseStatus(0);
+                clue.setCusService(store.getUserId());
+                clue.setCrossDomainUserId(accessToken.getUserId());//跨域销售id
+                clue.setTimeSequencing(clue.getCreateDate());
+                clue.setBranchUser(0);
+                clueMapper.insert(clue);
+            }
+            //店长推送消息
+            MainUser user = userMapper.selectByPrimaryKey(store.getUserId());
+            String name = "";
+            if(!CommonUtil.isEmpty(member.getNickName())){
+                name = member.getNickName();
+            }else{
+                if(!CommonUtil.isEmpty(clue.getOwername())){
+                    name = clue.getOwername();
+                }else{
+                    name = "线索客户";
+                }
+            }
+
+
+            if (user != null && !CommonUtil.isEmpty(user.getMemberId()))
+                configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "分配提醒",
+                        "您收到了一个跨域客户【"+ name +"】，快去分配给销售吧。", 0, url
+                                + Utils.getCustomerDetails("", clue.getId(), clue.getPhaseStatus(), "0" ,"待分配",store.getId()));
             return ServerResponse.createBySuccessMessage("提交成功");
         }
         //转入给对应的销售
-        Example example = new Example(StoreUser.class);
+        example = new Example(StoreUser.class);
         example.createCriteria().andEqualTo(StoreUser.USER_ID, residentialRange.getUserId())
                 .andEqualTo(Store.DATA_STATUS, 0);
         List<StoreUser> storeUsers = iStoreUserMapper.selectByExample(example);
@@ -287,16 +407,74 @@ public class ClientService {
         }
         StoreUser storeUser = storeUsers.get(0);
         Store store = iStoreMapper.selectByPrimaryKey(storeUser.getStoreId());
-        clue.setStage(0);
-        clue.setDataStatus(0);
-        clue.setStoreId(store.getId());
-        clue.setTurnStatus(1);
-        clue.setCityId(modelingVillage.getCityId());
-        clue.setClueType(1);
-        clue.setPhaseStatus(0);
-        clue.setCusService(residentialRange.getUserId());
-        clue.setCrossDomainUserId(accessToken.getUserId());//跨域销售id
-        clueMapper.insert(clue);
+        if(clues1.size()>0){//已注册
+            clue.setStage(0);
+            clue.setDataStatus(0);
+            clue.setStoreId(residentialBuilding.getStoreId());
+            clue.setTurnStatus(1);
+            clue.setCityId(store.getCityId());
+            clue.setClueType(1);
+            clue.setPhaseStatus(1);
+            clue.setMemberId(clues1.get(0).getMemberId());
+            clue.setCusService(residentialRange.getUserId());
+            clue.setCrossDomainUserId(accessToken.getUserId());//跨域销售id
+            clue.setTimeSequencing(clue.getCreateDate());
+            clue.setStoreId(store.getId());
+            clue.setBranchUser(0);
+            clueMapper.insert(clue);
+            Customer customer=new Customer();
+            customer.setUserId(residentialRange.getUserId());
+            customer.setMemberId(clues1.get(0).getMemberId());
+            customer.setStage(1);
+            customer.setStoreId(store.getId());
+            customer.setCityId(store.getCityId());
+            customer.setTurnStatus(1);
+            customer.setPhaseStatus(1);
+            customer.setClueType(1);
+            customer.setDataStatus(0);
+            customer.setTips("1");
+            iCustomerMapper.insert(customer);
+            member = iMemberMapper.selectByPrimaryKey(clues1.get(0).getMemberId());
+        }else {
+            clue.setStage(0);
+            clue.setDataStatus(0);
+            clue.setStoreId(store.getId());
+            clue.setTurnStatus(1);
+            clue.setCityId(modelingVillage.getCityId());
+            clue.setClueType(1);
+            clue.setPhaseStatus(0);
+            clue.setCusService(residentialRange.getUserId());
+            clue.setCrossDomainUserId(accessToken.getUserId());//跨域销售id
+            clue.setTimeSequencing(clue.getCreateDate());
+            clueMapper.insert(clue);
+        }
+        //销售推送消息
+        MainUser user = userMapper.selectByPrimaryKey(residentialRange.getUserId());
+
+        String name = " ";
+        if(!CommonUtil.isEmpty(member.getNickName())){
+            name = member.getNickName();
+        }else{
+            if(!CommonUtil.isEmpty(clue.getOwername())){
+                name = clue.getOwername();
+            }else{
+                name = "线索客户";
+            }
+        }
+
+//        String name=member.getNickName()!=null?member.getNickName():clue.getOwername()!=null?clue.getOwername():"线索客户";
+        if (user != null && !CommonUtil.isEmpty(user.getMemberId()))
+            configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "分配提醒",
+                    "您收到了一个跨域客户【"+ name +"】，请及时跟进。", 0, url
+                            + Utils.getCustomerDetails("", clue.getId(), clue.getPhaseStatus(), "0"));
+
+        //店长推送消息
+        MainUser us = userMapper.selectByPrimaryKey(store.getUserId());
+        if (user != null && !CommonUtil.isEmpty(user.getMemberId()))
+            configMessageService.addConfigMessage(AppType.SALE, us.getMemberId(), "分配提醒",
+                    "您的销售【"+ user.getUsername() +"】，收到了一个跨域客户。", 0, url
+                            + Utils.getCustomerDetails("", clue.getId(), clue.getPhaseStatus(), "0" ," ",store.getId()));
+
         return ServerResponse.createBySuccessMessage("提交成功");
     }
 
@@ -385,7 +563,7 @@ public class ClientService {
                     if (userStore != null && !CommonUtil.isEmpty(userStore.getMemberId()))
                         configMessageService.addConfigMessage(AppType.SALE, userStore.getMemberId(), "沉睡客户",
                                 "收到了【" + user.getUsername() + "】放弃跟进的客户，快去分配给员工吧。", 0, url
-                                        + Utils.getCustomerDetails(memberId, clueId, phaseStatus, "2"));
+                                        + Utils.getCustomerDetails(memberId, clueId, phaseStatus, "2","待分配",store.getId()));
                 }
             }
         }
@@ -434,7 +612,14 @@ public class ClientService {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM");
             String date = dateFormat.format(new Date());
             monthlyTargetDTO.setModifyDate(date);
-            monthlyTargetDTO.setComplete(achievementMapper.Complete(user.getId(), date));
+            Map<String,Object> map1 = new HashMap();
+            map1.put("userId",user.getId());
+            map1.put("time",date);
+            map1.put("building",null);
+            map1.put("villageId",null);
+            map1.put("visitState",null);
+            map1.put("buildings",null);
+            monthlyTargetDTO.setComplete(achievementMapper.Complete(map1));
             List<MonthlyTarget> monthlyTargets = getMonthlyTargetList(user.getId());
             monthlyTargetDTO.setTargetNumber(monthlyTargets.size() > 0 ? monthlyTargets.get(0).getTargetNumber() : 0);
             map.put("monthlyTarget", monthlyTargetDTO);//月目标
@@ -711,22 +896,56 @@ public class ClientService {
             clue.setCityId(cityId);
             clue.setTurnStatus(1);
             clueMapper.updateByPrimaryKey(clue);
+            //消息推送
+            MainUser user = userMapper.selectByPrimaryKey(store.getUserId());
+            String name=clue.getOwername()!=null?clue.getOwername():clue.getPhone();
+            String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+            configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "待分配客户提醒",
+                    "有一个待分配客户【"+ name +"】快去分配给员工吧", 0, url
+                            + Utils.getCustomerDetails("", id, 0, "0","待分配",storeId));
+
         } else if (phaseStatus == 1) {
             Customer customer = iCustomerMapper.selectByPrimaryKey(id);
+            Example example=new Example(Clue.class);
+            example.createCriteria().andEqualTo(Clue.MEMBER_ID,customer.getMemberId())
+                    .andEqualTo(Clue.CUS_SERVICE,customer.getUserId());
             Clue clue=new Clue();
+            List<Clue> clues = clueMapper.selectByExample(example);
+            if(clues.size()<=0){
+                clue.setStage(customer.getStage());
+                clue.setDataStatus(0);
+                clue.setStoreId(customer.getStoreId());
+                clue.setCusService(customer.getUserId());
+                clue.setClueType(customer.getClueType());
+                clue.setTurnStatus(customer.getTurnStatus());
+                clue.setTips(customer.getTips());
+                clue.setPhaseStatus(1);
+                clue.setPhone(iMemberMapper.selectByPrimaryKey(customer.getMemberId()).getMobile());
+                clue.setCityId(customer.getCityId());
+                clue.setLabelId(customer.getLabelIdArr());
+                clue.setMemberId(customer.getMemberId());
+                clueMapper.insert(clue);
+            }else {
+                clue=clues.get(0);
+            }
             clue.setCusService(store.getUserId());
             clue.setCityId(cityId);
             clue.setTurnStatus(1);
             clue.setStoreId(storeId);
-            Example example=new Example(Clue.class);
-            example.createCriteria().andEqualTo(Clue.CUS_SERVICE,customer.getUserId())
-                    .andEqualTo(Clue.MEMBER_ID,customer.getMemberId());
-            clueMapper.updateByExampleSelective(clue,example);
+            clueMapper.updateByPrimaryKeySelective(clue);
             customer.setCityId(cityId);
             customer.setUserId(store.getUserId());
             customer.setStoreId(storeId);
             customer.setTurnStatus(1);
             iCustomerMapper.updateByPrimaryKey(customer);
+            //消息推送
+            MainUser user = userMapper.selectByPrimaryKey(store.getUserId());
+            Member member = iMemberMapper.selectByPrimaryKey(customer.getMemberId());
+            String name= clue.getOwername()!=null?clue.getOwername():member.getNickName();
+            String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+            configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "待分配客户提醒",
+                    "有一个待分配客户 【"+ name +"】快去分配给员工吧", 0, url
+                            + Utils.getCustomerDetails(customer.getMemberId(),clue.getId(), 1, customer.getStage().toString(),"待分配" , storeId));
         }
         return ServerResponse.createBySuccessMessage("操作成功");
     }

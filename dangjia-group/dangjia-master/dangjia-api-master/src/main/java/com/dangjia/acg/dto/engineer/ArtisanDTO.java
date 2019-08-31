@@ -16,6 +16,7 @@ public class ArtisanDTO {
     private String name;// 姓名
     private String mobile;// 手机
     private String workerTypeName;//工种
+    private Integer workerType;//工种
     private Date createDate;//创建时间
     private Integer inviteNum;//存放邀约人数
     private Integer checkType;//状态:0审核中，1审核未通过,2审核已通过, 3账户已禁用,  5未提交资料
@@ -27,6 +28,8 @@ public class ArtisanDTO {
     private Integer realNameState;
     private String realNameDescribe;
     private String checkDescribe;
+    private String styles;//'设计师装修风格,ID'
+    private String styleNames;//'设计师装修风格,ID'
 
     private Boolean isJob;
 

@@ -53,6 +53,8 @@ public class UserInfoDTO {
     @ApiModelProperty("头像")
     private String head;
 
+    @ApiModelProperty("分配销售 1：已分配  0：未分配")
+    private Integer branchUser;
 
     @ApiModelProperty("客户id")
     private String memberId;

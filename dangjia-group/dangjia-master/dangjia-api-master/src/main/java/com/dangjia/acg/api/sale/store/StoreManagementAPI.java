@@ -77,4 +77,8 @@ public interface StoreManagementAPI {
     ServerResponse getBuildingByVillageId(@RequestParam("request") HttpServletRequest request,
                                           @RequestParam("villageId") String villageId);
 
+    @PostMapping(value = "sale/store/getBuildingByVillageIdArr")
+    @ApiOperation(value = "小区所有楼栋", notes = "小区所有楼栋")
+    ServerResponse getBuildingByVillageIdArr(@RequestParam("request")HttpServletRequest request,
+                                             @RequestParam("villageId")String villageId);
 }

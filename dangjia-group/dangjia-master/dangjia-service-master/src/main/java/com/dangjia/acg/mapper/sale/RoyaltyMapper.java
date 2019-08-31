@@ -23,4 +23,10 @@ public interface RoyaltyMapper extends Mapper<DjRoyaltyDetailsSurface> {
      */
     List<BaseEntity> queryRoyaltySurface();
 
+    /**
+     * 查询提出配置最大单数
+     * @return
+     */
+    DjRoyaltyDetailsSurface selectOverSingle();
+
 }

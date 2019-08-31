@@ -108,5 +108,5 @@ public interface WebSplitDeliverAPI {
      */
     @PostMapping("web/finance/splitDeliver/mendDeliverDetail")
     @ApiOperation(value = "退货单查看详情", notes = "退货单查看详情")
-    ServerResponse mendDeliverDetail(@RequestParam("id") String id);
+    ServerResponse mendDeliverDetail(@RequestParam("id") String id,@RequestParam("cityId") String cityId);
 }

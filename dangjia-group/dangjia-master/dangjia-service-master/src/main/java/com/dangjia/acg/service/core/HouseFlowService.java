@@ -162,6 +162,23 @@ public class HouseFlowService {
                     if (house.getVisitState() == 2 || house.getVisitState() == 3 || house.getVisitState() == 4) {
                         continue;
                     }
+                   if(member.getWorkerType()!=null&&member.getWorkerType()==1){
+                       boolean isContinue=true;
+                       if(!CommonUtil.isEmpty(member.getStyles())){
+                           String[] optionalStyles=member.getStyles().split(",");
+                           for (String s : optionalStyles) {
+                               if(s.equals(house.getStyleId())) {
+                                   isContinue=false;
+                                   break;
+                               }
+                           }
+                       }else{
+                           isContinue=false;
+                       }
+                       if (isContinue) {
+                           continue;
+                       }
+                   }
                     AllgrabBean allgrabBean = new AllgrabBean();
                     example = new Example(HouseFlowCountDownTime.class);
                     example.createCriteria().andEqualTo(HouseFlowCountDownTime.WORKER_ID, member.getId()).andEqualTo(HouseFlowCountDownTime.HOUSE_FLOW_ID, houseFlow.getId());
@@ -388,14 +405,14 @@ public class HouseFlowService {
                     }
                 }
             }
-            if (member.getWorkerType() > 3) {//其他工人
+            if (member.getWorkerType() > 2) {//其他工人
 //                if (hf.getPause() == 1) {
 //                    return ServerResponse.createByErrorMessage("该房子已暂停施工！");
 //                }
                 //持单数
                 long num = houseWorkerMapper.grabControl(member.getId());//查询未完工工地
                 WorkerType wt = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
-                if (member.getWorkerType() != 7 && num >= wt.getMethods()) {
+                if (wt.getMethods()>0 && member.getWorkerType() != 7 && num >= wt.getMethods()) {
                     return ServerResponse.createByErrorMessage("您有工地还未完工,暂不能抢单！");
                 }
 

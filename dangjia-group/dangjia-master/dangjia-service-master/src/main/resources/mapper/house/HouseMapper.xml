@@ -94,14 +94,28 @@
         member.NAME AS NAME,
         member.mobile AS mobile,
         s.store_name storeName
+        <if test="designerType > 0 and workerKey!=null and workerKey!=''">
+           ,gr.name operatorName,
+            gr.mobile operatorMobile,
+            gr.id operatorId
+        </if>
         FROM
         dj_house house
         INNER JOIN dj_member member ON member.id = house.member_id
+        <if test="designerType > 0 and workerKey!=null and workerKey!=''">
+            INNER JOIN dj_core_house_worker wk ON wk.house_id = house.id
+            AND wk.worker_type = 1
+            AND wk.work_type = 6
+            INNER JOIN dj_member gr ON gr.id = wk.worker_id
+        </if>
         LEFT JOIN dj_store s ON FIND_IN_SET(
         house.village_id,
         s.villages
         )
         WHERE 1=1
+        <if test="designerType > 0 and workerKey!=null and workerKey!=''">
+            AND CONCAT(gr.name,gr.mobile) like CONCAT('%',#{workerKey},'%')
+        </if>
         <if test="dataStatus!=null and dataStatus!=''">
             AND house.data_status=#{dataStatus}
         </if>
@@ -432,15 +446,30 @@
         h.optional_label as optionalLabel,
         ( CASE WHEN (h.decoration_type = 2 AND h.designer_ok != 3) THEN 1 ELSE 0 END ) AS showUpdata,
         s.store_name storeName
+        <if test="budgetOk != 0 and workerKey!=null and workerKey!=''">
+            ,gr.name operatorName,
+            gr.mobile operatorMobile,
+            gr.id operatorId
+        </if>
         FROM
         dj_house h
         INNER JOIN dj_member m ON h.member_id = m.id
+        <if test="budgetOk != 0 and workerKey!=null and workerKey!=''">
+            INNER JOIN dj_core_house_worker wk ON wk.house_id = h.id
+            AND wk.worker_type = 2
+            AND wk.work_type = 6
+            INNER JOIN dj_member gr ON gr.id = wk.worker_id
+        </if>
         LEFT JOIN dj_store s ON FIND_IN_SET(
         h.village_id,
         s.villages
         )
         WHERE
         (h.decoration_type = 2 or (h.decoration_type != 2 and h.designer_ok =3))
+
+        <if test="budgetOk != 0 and workerKey!=null and workerKey!=''">
+            AND CONCAT(gr.name,gr.mobile) like CONCAT('%',#{workerKey},'%')
+        </if>
         <if test="dataStatus!=null and dataStatus!=''">
             AND h.data_status=#{dataStatus}
         </if>
@@ -543,11 +572,11 @@
         <if test="cityKey!=null and cityKey!=''">
             AND FIND_IN_SET(h.city_id,#{cityKey})
         </if>
-        <if test="visitState==0 || visitState==1">
-            and f.supervisor_start = #{visitState} and h.visit_state !=2 and h.visit_state !=3 and h.visit_state !=4 and h.visit_state !=5 and h.pause=0
+        <if test="visitState==0 || visitState==1 || visitState==2">
+            and ((f.supervisor_start = #{visitState} and h.visit_state !=2 and h.visit_state !=3 and h.visit_state !=4 and h.visit_state !=5 and h.pause=0) or (h.visit_state = 2))
         </if>
-        <if test="visitState>=2">
-            and h.visit_state = #{visitState}
+        <if test="visitState==3 || visitState==4 || visitState==5">
+            and h.visit_state  in(3,4,5)
         </if>
         <if test="startDate!=null and endDate!=null and startDate!='' and endDate!=''">
             and h.construction_date BETWEEN #{startDate} and #{endDate}
