@@ -313,7 +313,7 @@ public class DesignDataService {
      * @param designerType 0：未支付和设计师未抢单，1：带量房，2：平面图，3：施工图，4：完工
      * @param searchKey    业主手机号/房子名称
      */
-    public ServerResponse getDesignList(HttpServletRequest request, PageDTO pageDTO, int designerType, String searchKey) {
+    public ServerResponse getDesignList(HttpServletRequest request, PageDTO pageDTO, int designerType, String searchKey,String workerKey) {
         String userID = request.getParameter(Constants.USERID);
 
         String cityKey = request.getParameter(Constants.CITY_ID);
@@ -327,18 +327,9 @@ public class DesignDataService {
             //当类型小于0时，则查询移除的数据
             dataStatus = "1";
         }
-        List<DesignDTO> designDTOList = houseMapper.getDesignList(designerType, cityKey, searchKey, dataStatus);
+        List<DesignDTO> designDTOList = houseMapper.getDesignList(designerType, cityKey, searchKey,workerKey, dataStatus);
         PageInfo pageResult = new PageInfo(designDTOList);
         for (DesignDTO designDTO : designDTOList) {
-            HouseWorker houseWorker = houseWorkerMapper.getHwByHidAndWtype(designDTO.getHouseId(), 1);
-            if (houseWorker != null) {
-                Member workerSup = memberMapper.selectByPrimaryKey(houseWorker.getWorkerId());
-                if (workerSup != null) {
-                    designDTO.setOperatorName(workerSup.getName());//大管家名字
-                    designDTO.setOperatorMobile(workerSup.getMobile());
-                    designDTO.setOperatorId(workerSup.getId());
-                }
-            }
             ServerResponse serverResponse = getPlaneMap(designDTO.getHouseId());
             if (!serverResponse.isSuccess()) {
                 serverResponse = getConstructionPlans(designDTO.getHouseId());
