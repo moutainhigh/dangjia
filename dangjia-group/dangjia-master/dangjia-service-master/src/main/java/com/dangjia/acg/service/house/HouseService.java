@@ -1835,7 +1835,7 @@ public class HouseService {
                 .andIsNull(Customer.USER_ID);
         if(iCustomerMapper.selectByExample(example).size()>0) {
             List<OrderStoreDTO> orderStore = iStoreMapper.getOrderStore(latitude, longitude,null);
-            clueMapper.setDistribution(orderStore.get(0).getStoreId(), member.getId());
+            clueMapper.setDistribution(orderStore.get(0).getStoreId(), member.getId(),new Date());
             DjOrderSurface djOrderSurface = new DjOrderSurface();
             djOrderSurface.setDataStatus(0);
             djOrderSurface.setStoreId(orderStore.get(0).getStoreId());

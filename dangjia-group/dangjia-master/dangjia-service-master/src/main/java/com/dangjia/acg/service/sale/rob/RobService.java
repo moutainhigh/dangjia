@@ -887,7 +887,7 @@ public class RobService {
                             djOrderSurface.setClueId(grabSheetDTO.getClueId());
                             djOrderSurface.setRobDateId(orderStoreDTO.getRobDateId());
                             djOrderSurfaceMapper.insert(djOrderSurface);
-                            clueMapper.setDistribution(orderStoreDTO.getStoreId(), grabSheetDTO.getMemberId());
+                            clueMapper.setDistribution(orderStoreDTO.getStoreId(), grabSheetDTO.getMemberId(),new Date());
                             break;
                         }
                     }
