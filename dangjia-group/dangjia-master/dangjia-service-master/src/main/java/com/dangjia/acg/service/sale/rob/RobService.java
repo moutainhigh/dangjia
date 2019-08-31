@@ -889,7 +889,7 @@ public class RobService {
                 for (OrderStoreDTO orderStoreDTO : orderStore) {
                     if(!CommonUtil.isEmpty(orderStoreDTO.getRobDate())) {
                         if (((System.currentTimeMillis() - grabSheetDTO.getModifyDate().getTime()) / 60 / 1000)
-                                > (Integer.parseInt(orderStoreDTO.getRobDate())-1)) {
+                                >= (Integer.parseInt(orderStoreDTO.getRobDate())-1)) {
                             logger.info("11111111111111111111===================================" + orderStoreDTO.getStoreId());
                             logger.info("11111111111111111111===================================" + grabSheetDTO.getMemberId());
                             DjOrderSurface djOrderSurface = new DjOrderSurface();
