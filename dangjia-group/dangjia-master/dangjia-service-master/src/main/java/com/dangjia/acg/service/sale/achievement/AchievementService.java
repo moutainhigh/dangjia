@@ -89,7 +89,7 @@ public class AchievementService {
 
 
 
-        for (int i = 0; i < achievementInfoDTOS.size(); i++) {
+        for (int i = 0; i < list.size(); i++) {
             achievementInfoDTOS.get(i).setMonthRoyalty(list.get(i).getMonthRoyalty());
             achievementInfoDTOS.get(i).setMeterRoyalty(list.get(i).getMeterRoyalty());
             achievementInfoDTOS.get(i).setArrRoyalty(list.get(i).getArrRoyalty());
