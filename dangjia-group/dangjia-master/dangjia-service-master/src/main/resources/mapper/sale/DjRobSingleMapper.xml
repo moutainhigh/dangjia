@@ -18,5 +18,6 @@
                 #{item.robDateId}
             </foreach>
         </if>
+        order by rob_date
     </select>
 </mapper>
