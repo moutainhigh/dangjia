@@ -54,7 +54,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -977,7 +976,7 @@ public class RobService {
     public ServerResponse queryDjRobSingle(PageDTO pageDTO){
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         Example example=new Example(DjRobSingle.class);
-        example.orderBy(DjRobSingle.CREATE_DATE).desc();
+        example.orderBy(DjRobSingle.ROB_DATE).asc();
         List<DjRobSingle> djRobSingles = djRobSingleMapper.selectByExample(example);
         if (djRobSingles.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
