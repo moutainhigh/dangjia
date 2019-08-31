@@ -179,7 +179,8 @@
         SUM(drm.count_arr_royalty )AS arrRoyalty,
         count(drm.id) as singleNumber,
         u.username as username,
-        smt.target_number as targetNumber
+        smt.target_number as targetNumber,
+        drm.data_status as dataStatus
         from
         dj_royalty_match drm
         INNER JOIN dj_user u on drm.user_id = u.id
