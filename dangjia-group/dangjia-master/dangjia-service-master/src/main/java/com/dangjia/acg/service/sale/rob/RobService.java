@@ -46,7 +46,6 @@ import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.house.HouseService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.apache.commons.collections.map.HashedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -422,8 +421,8 @@ public class RobService {
                 robArrInFoDTO.setIntentionHouseList(intentionHouseList);
             }
 
-            List<UserAchievementDTO> uadto=new ArrayList<>();
-            Map<String,Object> parmMap=new HashedMap();
+            List<UserAchievementDTO> uadto=null;
+            Map<String,Object> parmMap= null;
             List<String> houseIds=new ArrayList<>();
             if (!CommonUtil.isEmpty(robInfoDTO)) {
                 for (RobInfoDTO to : robInfoDTO) {
@@ -493,7 +492,7 @@ public class RobService {
                 List<UserAchievementDTO> userAchievementDTOS = clueMapper.queryUserAchievementInFo(parmMap);
                 logger.info("userAchievementDTOS================="+userAchievementDTOS);
                 logger.info("userAchievementDTOS================="+userAchievementDTOS.size());
-                if(!userAchievementDTOS.isEmpty()){
+                if(null != userAchievementDTOS && !userAchievementDTOS.isEmpty()){
                     logger.info("userAchievementDTOS================="+userAchievementDTOS.size());
                     for (UserAchievementDTO userAchievementDTO : userAchievementDTOS) {
                         userAchievementDTO.setHead(imageAddress+userAchievementDTO.getHead());
