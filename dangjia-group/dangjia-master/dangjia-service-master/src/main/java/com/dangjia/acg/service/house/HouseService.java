@@ -1839,6 +1839,7 @@ public class HouseService {
             DjOrderSurface djOrderSurface = new DjOrderSurface();
             djOrderSurface.setDataStatus(0);
             djOrderSurface.setStoreId(orderStore.get(0).getStoreId());
+            djOrderSurface.setRobDateId("0");
             example=new Example(Clue.class);
             example.createCriteria().andEqualTo(Clue.MEMBER_ID,member.getId())
                     .andIsNull(Clue.CUS_SERVICE);
