@@ -80,7 +80,8 @@ public interface HouseDesignImageAPI {
     ServerResponse getDesignList(@RequestParam("request") HttpServletRequest request,
                                  @RequestParam("pageDTO") PageDTO pageDTO,
                                  @RequestParam("designerType") int designerType,
-                                 @RequestParam("searchKey") String searchKey);
+                                 @RequestParam("searchKey") String searchKey,
+                                 @RequestParam("workerKey") String workerKey);
 
 
     /**
