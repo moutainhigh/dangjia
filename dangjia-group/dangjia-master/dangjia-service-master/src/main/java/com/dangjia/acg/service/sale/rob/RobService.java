@@ -491,10 +491,16 @@ public class RobService {
                 logger.info("parmMap================="+parmMap);
                 //查询业绩
                 List<UserAchievementDTO> userAchievementDTOS = clueMapper.queryUserAchievementInFo(parmMap);
-                for (UserAchievementDTO userAchievementDTO : userAchievementDTOS) {
-                    userAchievementDTO.setHead(imageAddress+userAchievementDTO.getHead());
+                logger.info("userAchievementDTOS================="+userAchievementDTOS);
+                logger.info("userAchievementDTOS================="+userAchievementDTOS.size());
+                if(!userAchievementDTOS.isEmpty()){
+                    logger.info("userAchievementDTOS================="+userAchievementDTOS.size());
+                    for (UserAchievementDTO userAchievementDTO : userAchievementDTOS) {
+                        userAchievementDTO.setHead(imageAddress+userAchievementDTO.getHead());
+                    }
+                    uadto.addAll(userAchievementDTOS);
                 }
-                uadto.addAll(userAchievementDTOS);
+
             }
 
             robArrInFoDTO.setUserInFo(uadto);
