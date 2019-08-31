@@ -185,6 +185,7 @@ public class HouseService {
     @Autowired
     private RobService robService;
 
+
     /**
      * 切换房产
      */
@@ -1708,6 +1709,14 @@ public class HouseService {
                     example = new Example(Clue.class);
                     example.createCriteria().andEqualTo(Clue.MEMBER_ID, house.getMemberId());
                     clueMapper.updateByExampleSelective(clue, example);
+
+                    Clue c = clueMapper.getClueId(house.getMemberId());
+                    c.setStoreId(null);
+                    clueMapper.updateByPrimaryKey(c);
+                    example = new Example(DjOrderSurface.class);
+                    example.createCriteria().andEqualTo(DjOrderSurface.CLUE_ID, c.getId());
+                    djOrderSurfaceMapper.deleteByExample(example);
+
                     return ServerResponse.createBySuccessMessage("操作成功");
                 }
             }

@@ -100,4 +100,7 @@ public interface ClueMapper extends Mapper<Clue> {
     int setDistribution(@Param("storeId") String storeId, @Param("memberId") String memberId, @Param("date")Date date);
 
     int updateStoreUser(@Param("userId") String userId, @Param("storeId") String storeId);
+
+
+    Clue getClueId(@Param("memberId")String memberId);
 }

@@ -764,6 +764,14 @@
         where c.cus_service=#{userId}
     </update>
 
+    <select id="getClueId" resultType="com.dangjia.acg.modle.clue.Clue">
+        select
+            id
+        from dj_clue
+        WHERE
+            member_id = #{memberId}
+            and (c.cus_service IS NULL or c.cus_service="")
+    </select>
 
 </mapper>
 
