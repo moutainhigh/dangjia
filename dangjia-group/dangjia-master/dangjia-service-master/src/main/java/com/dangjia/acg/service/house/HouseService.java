@@ -185,6 +185,7 @@ public class HouseService {
     @Autowired
     private RobService robService;
 
+
     /**
      * 切换房产
      */
@@ -1708,6 +1709,14 @@ public class HouseService {
                     example = new Example(Clue.class);
                     example.createCriteria().andEqualTo(Clue.MEMBER_ID, house.getMemberId());
                     clueMapper.updateByExampleSelective(clue, example);
+
+                    Clue c = clueMapper.getClueId(house.getMemberId());
+                    c.setStoreId(null);
+                    clueMapper.updateByPrimaryKey(c);
+                    example = new Example(DjOrderSurface.class);
+                    example.createCriteria().andEqualTo(DjOrderSurface.CLUE_ID, c.getId());
+                    djOrderSurfaceMapper.deleteByExample(example);
+
                     return ServerResponse.createBySuccessMessage("操作成功");
                 }
             }
@@ -2273,8 +2282,9 @@ public class HouseService {
     }
     /**
      * 施工记录
+     * type:0  查询全部，1 查询有图片的
      */
-    public ServerResponse queryConstructionRecordAll(String houseId, String ids, String day, String workerType, PageDTO pageDTO) {
+    public ServerResponse queryConstructionRecordAll(String houseId, String ids, String day, String workerType,Integer type, PageDTO pageDTO) {
         // 施工记录的内容需要更改
         String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
         Example example = new Example(HouseConstructionRecord.class);

@@ -194,7 +194,35 @@
         and drm.data_status=0
         GROUP BY drm.user_id
     </select>
-    
+
+
+    <!--查询店长下面所有员工提成-->
+    <select id="queryMonthRoyalty" resultType="com.dangjia.acg.dto.sale.achievement.AchievementInfoDTO" parameterType="java.util.HashMap">
+        select
+        drm.user_id AS userId,
+        drm.house_id AS houseId,
+        SUM(drm.month_royalty )AS monthRoyalty,
+        SUM(drm.month_royalty )AS meterRoyalty,
+        SUM(drm.count_arr_royalty )AS arrRoyalty,
+        count(drm.id) as singleNumber,
+        u.username as username,
+        smt.target_number as targetNumber
+        from
+        dj_royalty_match drm
+        INNER JOIN dj_user u on drm.user_id = u.id
+        LEFT JOIN dj_sale_monthly_target smt on drm.user_id = smt.user_Id
+        and date_format(smt.target_date,'%Y-%m') =  date_format(drm.modify_date,'%Y-%m')
+        where drm.user_id in
+        (SELECT su.user_id from dj_store_users su
+        where 1=1
+            and su.store_id = #{storeId}
+        )
+        and date_format(drm.modify_date,'%Y-%m') = #{time}
+        and drm.data_status=1
+        GROUP BY drm.user_id
+    </select>
+
+
     <select id="Complete" resultType="java.lang.Integer">
         SELECT
             count(0)
