@@ -32,8 +32,8 @@ public class HouseDesignImageController implements HouseDesignImageAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getDesignList(HttpServletRequest request, PageDTO pageDTO, int designerType, String searchKey) {
-        return designDataService.getDesignList(request, pageDTO, designerType, searchKey);
+    public ServerResponse getDesignList(HttpServletRequest request, PageDTO pageDTO, int designerType, String searchKey,String workerKey) {
+        return designDataService.getDesignList(request, pageDTO, designerType, searchKey, workerKey);
     }
 
     @Override
