@@ -498,7 +498,9 @@ public class RobService {
                         if(null != userAchievementDTOS && !userAchievementDTOS.isEmpty()){
                             logger.info("userAchievementDTOS================="+userAchievementDTOS.size());
                             for (UserAchievementDTO userAchievementDTO : userAchievementDTOS) {
-                                userAchievementDTO.setHead(imageAddress+userAchievementDTO.getHead());
+                                if(!CommonUtil.isEmpty(userAchievementDTO.getHead())){
+                                    userAchievementDTO.setHead(imageAddress+userAchievementDTO.getHead());
+                                }
                             }
                             uadto.addAll(userAchievementDTOS);
                         }
