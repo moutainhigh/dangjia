@@ -54,6 +54,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -289,6 +290,16 @@ public class RobService {
                 map.put("id", djAlreadyRobSingle.getHouseId());
                 map.put("isRobStats", 1);
                 clueMapper.upDateIsRobStats(map);
+
+                map = new HashMap<>();
+                map.put("clueId",djAlreadyRobSingle.getClueId());
+                map.put("cusService",accessToken.getUserId());
+                clueMapper.upDateClueCusService(map);
+
+                map = new HashMap<>();
+                map.put("mcId",djAlreadyRobSingle.getMcId());
+                map.put("userId",accessToken.getUserId());
+                clueMapper.upDateMcUserId(map);
                 return ServerResponse.createBySuccessMessage("抢单成功");
             }
             return ServerResponse.createByErrorMessage("抢单失败");
@@ -878,6 +889,7 @@ public class RobService {
                             djOrderSurface.setRobDateId(orderStoreDTO.getRobDateId());
                             djOrderSurfaceMapper.insert(djOrderSurface);
                             clueMapper.setDistribution(orderStoreDTO.getStoreId(), grabSheetDTO.getMemberId());
+                            break;
                         }
                     }
                 }

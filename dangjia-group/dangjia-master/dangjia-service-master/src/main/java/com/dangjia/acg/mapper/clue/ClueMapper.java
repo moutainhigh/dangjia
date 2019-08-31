@@ -78,6 +78,10 @@ public interface ClueMapper extends Mapper<Clue> {
     void upDateIsRobStats(Map<String,Object> map);
 
 
+    void upDateClueCusService(Map<String,Object> map);
+
+    void upDateMcUserId(Map<String,Object> map);
+
     UserInfoDTO queryTips(Map<String,Object> map);
 
     Integer getTips(@Param("type") Integer type,@Param("userId") String userId,@Param("storeUsers") List<StoreUserDTO> storeUsers);
