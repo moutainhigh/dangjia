@@ -56,7 +56,7 @@ public class ActuaryService {
             dataStatus = "1";
             budgetOk = "";
         }
-        List<HouseListDTO> houseList = houseMapper.getActuaryAll( cityId ,budgetOk, name, dataStatus);
+        List<HouseListDTO> houseList = houseMapper.getActuaryAll(cityId, budgetOk, name, dataStatus);
         PageInfo pageResult = new PageInfo(houseList);
         for (HouseListDTO houseListDTO : houseList) {
             HouseWorker houseWorker = houseWorkerMapper.getHwByHidAndWtype(houseListDTO.getHouseId(), 2);
@@ -72,21 +72,22 @@ public class ActuaryService {
             if (houseListDTO.getDecorationType() == 2) {
                 if (houseListDTO.getBudgetOk() == 1 && houseListDTO.getDesignerOk() != 3) {
                     houseListDTO.setShowUpdata(1);
-                } else if (houseListDTO.getDesignerOk() == 3) {
-                    //3设计图完成后有需要改设计的
-                    Example example = new Example(DesignBusinessOrder.class);
-                    Example.Criteria criteria = example.createCriteria()
-                            .andEqualTo(DesignBusinessOrder.DATA_STATUS, 0)
-                            .andEqualTo(DesignBusinessOrder.HOUSE_ID, houseListDTO.getHouseId())
-                            .andEqualTo(DesignBusinessOrder.STATUS, 1)
-                            .andNotEqualTo(DesignBusinessOrder.OPERATION_STATE, 2);
-                    criteria.andEqualTo(DesignBusinessOrder.TYPE, 3);
-                    List<DesignBusinessOrder> designBusinessOrders = designBusinessOrderMapper.selectByExample(example);
-                    if (designBusinessOrders != null && designBusinessOrders.size() > 0) {
-                        DesignBusinessOrder order = designBusinessOrders.get(0);
-                        if (order.getOperationState() == 0) {
-                            houseListDTO.setShowUpdata(1);
-                        }
+                }
+            }
+            if (houseListDTO.getDesignerOk() == 3) {
+                //3设计图完成后有需要改设计的
+                Example example = new Example(DesignBusinessOrder.class);
+                Example.Criteria criteria = example.createCriteria()
+                        .andEqualTo(DesignBusinessOrder.DATA_STATUS, 0)
+                        .andEqualTo(DesignBusinessOrder.HOUSE_ID, houseListDTO.getHouseId())
+                        .andEqualTo(DesignBusinessOrder.STATUS, 1)
+                        .andNotEqualTo(DesignBusinessOrder.OPERATION_STATE, 2);
+                criteria.andEqualTo(DesignBusinessOrder.TYPE, 3);
+                List<DesignBusinessOrder> designBusinessOrders = designBusinessOrderMapper.selectByExample(example);
+                if (designBusinessOrders != null && designBusinessOrders.size() > 0) {
+                    DesignBusinessOrder order = designBusinessOrders.get(0);
+                    if (order.getOperationState() == 0) {
+                        houseListDTO.setShowUpdata(1);
                     }
                 }
             }
