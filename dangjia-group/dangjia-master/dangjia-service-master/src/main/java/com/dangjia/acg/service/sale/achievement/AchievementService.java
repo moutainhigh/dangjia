@@ -94,9 +94,11 @@ public class AchievementService {
             if(achievementInfoDTOS.get(i).getDataStatus() == 0){
                 for(int j = 0; j < list.size(); j++){
                     if(achievementInfoDTOS.get(i).getDataStatus() == list.get(j).getDataStatus()){
-                        achievementInfoDTOS.get(i).setMonthRoyalty(list.get(j).getMonthRoyalty());
-                        achievementInfoDTOS.get(i).setMeterRoyalty(list.get(j).getMeterRoyalty());
-                        achievementInfoDTOS.get(i).setArrRoyalty(list.get(j).getArrRoyalty());
+                        if(achievementInfoDTOS.get(i).getUserId().equals(list.get(j).getUserId())){
+                            achievementInfoDTOS.get(i).setMonthRoyalty(list.get(j).getMonthRoyalty());
+                            achievementInfoDTOS.get(i).setMeterRoyalty(list.get(j).getMeterRoyalty());
+                            achievementInfoDTOS.get(i).setArrRoyalty(list.get(j).getArrRoyalty());
+                        }
                     }
                 }
 
