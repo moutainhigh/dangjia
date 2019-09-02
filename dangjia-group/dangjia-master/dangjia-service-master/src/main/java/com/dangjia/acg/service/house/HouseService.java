@@ -1876,7 +1876,19 @@ public class HouseService {
         example.createCriteria().andEqualTo(Customer.MEMBER_ID,member.getId());
         List<Customer> customers = iCustomerMapper.selectByExample(example);
         if(clues.size()<=0){
-            Customer customer = customers.get(0);
+            Customer customer=null;
+            if(customers.size()>0) {
+                customer = customers.get(0);
+                customer.setPhaseStatus(1);
+                customer.setTurnStatus(0);
+                iCustomerMapper.updateByPrimaryKeySelective(customer);
+            }else{
+                customer=new Customer();
+                customer.setPhaseStatus(1);
+                customer.setTurnStatus(0);
+                customer.setStage(1);
+                iCustomerMapper.insert(customer);
+            }
             Clue clue=new Clue();
             if(!CommonUtil.isEmpty(customer.getUserId())){
                 clue.setCusService(customer.getUserId());
@@ -1889,9 +1901,6 @@ public class HouseService {
             clue.setPhone(member.getMobile());
             clue.setMemberId(member.getId());
             clueMapper.insert(clue);
-            customer.setPhaseStatus(1);
-            customer.setTurnStatus(0);
-            iCustomerMapper.updateByPrimaryKeySelective(customer);
         }
     }
 
