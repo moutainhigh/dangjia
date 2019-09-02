@@ -1714,12 +1714,13 @@ public class HouseService {
                     clueMapper.updateByExampleSelective(clue, example);
 
                     Clue c = clueMapper.getClueId(house.getMemberId());
-                    c.setStoreId(null);
-                    clueMapper.updateByPrimaryKey(c);
-                    example = new Example(DjOrderSurface.class);
-                    example.createCriteria().andEqualTo(DjOrderSurface.CLUE_ID, c.getId());
-                    djOrderSurfaceMapper.deleteByExample(example);
-
+                    if(c!=null) {
+                        c.setStoreId(null);
+                        clueMapper.updateByPrimaryKey(c);
+                        example = new Example(DjOrderSurface.class);
+                        example.createCriteria().andEqualTo(DjOrderSurface.CLUE_ID, c.getId());
+                        djOrderSurfaceMapper.deleteByExample(example);
+                    }
                     return ServerResponse.createBySuccessMessage("操作成功");
                 }
             }
@@ -1737,6 +1738,9 @@ public class HouseService {
             return (ServerResponse) object;
         }
         Member member = (Member) object;
+        //针对以前老数据操作
+        setClue(member);
+
         Example example = new Example(House.class);
         example.createCriteria()
                 .andEqualTo(House.MEMBER_ID, member.getId())
@@ -1863,6 +1867,32 @@ public class HouseService {
 
         return ServerResponse.createBySuccessMessage("操作成功");
     }
+
+    private void setClue(Member member){
+        Example example=new Example(Clue.class);
+        example.createCriteria().andEqualTo(Clue.PHONE,member.getMobile());
+        List<Clue> clues = clueMapper.selectByExample(example);
+        example=new Example(Customer.class);
+        example.createCriteria().andEqualTo(Customer.MEMBER_ID,member.getId());
+        List<Customer> customers = iCustomerMapper.selectByExample(example);
+        if(clues.size()<=0){
+            Customer customer = customers.get(0);
+            Clue clue=new Clue();
+            if(!CommonUtil.isEmpty(customer.getUserId())){
+                clue.setCusService(customer.getUserId());
+            }
+            clue.setStage(1);
+            clue.setDataStatus(0);
+            clue.setClueType(0);
+            clue.setTurnStatus(0);
+            clue.setPhaseStatus(1);
+            clue.setPhone(member.getMobile());
+            clue.setMemberId(member.getId());
+            clueMapper.insert(clue);
+            iCustomerMapper.updateByPrimaryKeySelective(customer);
+        }
+    }
+
 
     public ServerResponse getHouseAddress(String houseId) {
         Example example = new Example(HouseAddress.class);
