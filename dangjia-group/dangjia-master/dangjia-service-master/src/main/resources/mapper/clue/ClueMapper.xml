@@ -769,7 +769,7 @@
     <select id="getClueId" resultType="com.dangjia.acg.modle.clue.Clue">
         select
             id
-        from dj_clue
+        from dj_clue c
         WHERE
             member_id = #{memberId}
             and (c.cus_service IS NULL or c.cus_service="")

@@ -6,7 +6,6 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
-import org.apache.http.util.TextUtils;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -82,8 +81,8 @@ public class UserAchievementInfoDTO implements Serializable {
             return "装修中";
         }
         if(null != getVisitState() && 3 == getVisitState()){
-            return "已完工";
+            return "已竣工";
         }
         return null;
-    }
+ }
 }
