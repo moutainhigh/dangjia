@@ -129,35 +129,37 @@ public class DesignDataService {
             Example example = new Example(PayConfiguration.class);
             Example.Criteria criteria = example.createCriteria()
                     .andEqualTo(PayConfiguration.DATA_STATUS, 0);
-            designDTO.addButton(Utils.getButton("需要修改设计", 1));
-            String message;
-            if (house.getDesignerOk() == 5) {
-                ServerResponse serverResponse = getPlaneMap(houseId);
-                if (!serverResponse.isSuccess()) {
-                    return serverResponse;
+            String message="";
+            if(house.getVisitState() != 3) {
+                designDTO.addButton(Utils.getButton("需要修改设计", 1));
+                if (house.getDesignerOk() == 5) {
+                    ServerResponse serverResponse = getPlaneMap(houseId);
+                    if (!serverResponse.isSuccess()) {
+                        return serverResponse;
+                    }
+                    criteria.andEqualTo(PayConfiguration.TYPE, 1);
+                    message = "温馨提示:您需要修改平面图次数超过%s次后将需要支付改图费,金额为%s元/次的费用。";
+                    QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
+                    designDTO.setData(quantityRoomDTO.getImages());
+                    designDTO.addButton(Utils.getButton("确认平面图", 2));
+                } else {
+                    ServerResponse serverResponse = getConstructionPlans(houseId);
+                    if (!serverResponse.isSuccess()) {
+                        return serverResponse;
+                    }
+                    criteria.andEqualTo(PayConfiguration.TYPE, 2);
+                    message = "温馨提示:您需要修改施工图次数超过%s次后将需要支付改图费,金额为%s元/次的费用。";
+                    QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
+                    designDTO.setData(quantityRoomDTO.getImages());
+                    designDTO.addButton(Utils.getButton("确认施工图", 2));
                 }
-                criteria.andEqualTo(PayConfiguration.TYPE, 1);
-                message = "温馨提示:您需要修改平面图次数超过%s次后将需要支付改图费,金额为%s元/次的费用。";
-                QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
-                designDTO.setData(quantityRoomDTO.getImages());
-                designDTO.addButton(Utils.getButton("确认平面图", 2));
-            } else {
-                ServerResponse serverResponse = getConstructionPlans(houseId);
-                if (!serverResponse.isSuccess()) {
-                    return serverResponse;
+                List<PayConfiguration> payConfigurations = payConfigurationMapper.selectByExample(example);
+                if (payConfigurations != null && payConfigurations.size() > 0) {
+                    PayConfiguration payConfiguration = payConfigurations.get(0);
+                    designDTO.setMessage(String.format(message,
+                            payConfiguration.getFrequency() + "",
+                            payConfiguration.getSumMoney().setScale(2, BigDecimal.ROUND_HALF_UP) + ""));
                 }
-                criteria.andEqualTo(PayConfiguration.TYPE, 2);
-                message = "温馨提示:您需要修改施工图次数超过%s次后将需要支付改图费,金额为%s元/次的费用。";
-                QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
-                designDTO.setData(quantityRoomDTO.getImages());
-                designDTO.addButton(Utils.getButton("确认施工图", 2));
-            }
-            List<PayConfiguration> payConfigurations = payConfigurationMapper.selectByExample(example);
-            if (payConfigurations != null && payConfigurations.size() > 0) {
-                PayConfiguration payConfiguration = payConfigurations.get(0);
-                designDTO.setMessage(String.format(message,
-                        payConfiguration.getFrequency() + "",
-                        payConfiguration.getSumMoney().setScale(2, BigDecimal.ROUND_HALF_UP) + ""));
             }
             designDTO.setHistoryRecord(0);
         } else {
@@ -183,7 +185,7 @@ public class DesignDataService {
                     && ((house.getDecorationType() == 2 && worker.getWorkerType() == 2)
                     || (house.getDecorationType() != 2 && worker.getWorkerType() == 1))) ? 1 : 0;
             designDTO.setHistoryRecord(historyRecord);
-            if (worker != null && worker.getId().equals(house.getMemberId())) {
+            if (house.getVisitState() != 3 && worker != null && worker.getId().equals(house.getMemberId())) {
                 Example example = new Example(DesignBusinessOrder.class);
                 Example.Criteria criteria = example.createCriteria()
                         .andEqualTo(DesignBusinessOrder.DATA_STATUS, 0)
