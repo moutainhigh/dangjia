@@ -526,7 +526,8 @@
             m.head,
             sum(rm.month_royalty) as monthRoyaltys,
             sum(rm.month_royalty) as meterRoyaltys,
-            sum(rm.count_arr_royalty) as arrRoyalty
+            sum(rm.count_arr_royalty) as arrRoyalty,
+            rm.data_status as dataStatus
             FROM dj_user u
             INNER JOIN dj_royalty_match rm
             on u.id=rm.user_id

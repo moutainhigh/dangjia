@@ -41,7 +41,8 @@ public class UserAchievementDTO {
     @ApiModelProperty("全部提成")
     private Integer arrRoyalty;
 
-
+    @ApiModelProperty("状态")
+    private Integer dataStatus;
 
 
 }
