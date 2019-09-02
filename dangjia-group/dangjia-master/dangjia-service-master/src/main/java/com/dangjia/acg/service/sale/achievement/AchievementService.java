@@ -90,10 +90,10 @@ public class AchievementService {
 
 
         for (int i = 0; i < achievementInfoDTOS.size(); i++) {
-            if(achievementInfoDTOS.get(i).getDataStatus() == 1){
-                achievementInfoDTOS.get(i).setMonthRoyalty(0);
-                achievementInfoDTOS.get(i).setMeterRoyalty(0);
-                achievementInfoDTOS.get(i).setArrRoyalty(0);
+            if(achievementInfoDTOS.get(i).getDataStatus() == 0){
+                achievementInfoDTOS.get(i).setMonthRoyalty(list.get(i).getMonthRoyalty());
+                achievementInfoDTOS.get(i).setMeterRoyalty(list.get(i).getMeterRoyalty());
+                achievementInfoDTOS.get(i).setArrRoyalty(list.get(i).getArrRoyalty());
             }
         }
 //        if(!achievementInfoDTOS.isEmpty() && !list.isEmpty()){
