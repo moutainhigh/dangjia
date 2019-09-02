@@ -189,7 +189,7 @@ public class RobInfoDTO {
             return "装修中";
         }
         if(null != getVisitState() && 3 == getVisitState()){
-            return "已完工";
+            return "已竣工";
         }
         return null;
     }

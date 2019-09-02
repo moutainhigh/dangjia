@@ -86,33 +86,29 @@ public class AchievementService {
         List<AchievementInfoDTO> achievementInfoDTOS = achievementMapper.queryRoyaltyMatch(map);
 
         List<AchievementInfoDTO> list = achievementMapper.queryMonthRoyalty(map);
-
-
-
+        logger.info("achievementInfoDTOS==============="+ achievementInfoDTOS);
+        logger.info("list==============="+ list);
+        logger.info("achievementInfoDTOS==============="+ achievementInfoDTOS.size());
+        logger.info("list==============="+ list.size());
         for (int i = 0; i < achievementInfoDTOS.size(); i++) {
-            if(achievementInfoDTOS.get(i).getDataStatus() == 1){
+            if(achievementInfoDTOS.get(i).getDataStatus() == 0){
+                for(int j = 0; j < list.size(); j++){
+                    if(achievementInfoDTOS.get(i).getDataStatus() == list.get(j).getDataStatus()){
+                        if(achievementInfoDTOS.get(i).getUserId().equals(list.get(j).getUserId())){
+                            achievementInfoDTOS.get(i).setMonthRoyalty(list.get(j).getMonthRoyalty());
+                            achievementInfoDTOS.get(i).setMeterRoyalty(list.get(j).getMeterRoyalty());
+                            achievementInfoDTOS.get(i).setArrRoyalty(list.get(j).getArrRoyalty());
+                        }
+                    }
+                }
+
+            }else{
                 achievementInfoDTOS.get(i).setMonthRoyalty(0);
                 achievementInfoDTOS.get(i).setMeterRoyalty(0);
                 achievementInfoDTOS.get(i).setArrRoyalty(0);
             }
         }
-//        if(!achievementInfoDTOS.isEmpty() && !list.isEmpty()){
-//            if(achievementInfoDTOS.size() == list.size()){
-//                for (int i = 0; i < achievementInfoDTOS.size(); i++) {
-//                    achievementInfoDTOS.get(i).setMonthRoyalty(list.get(i).getMonthRoyalty());
-//                    achievementInfoDTOS.get(i).setMeterRoyalty(list.get(i).getMeterRoyalty());
-//                    achievementInfoDTOS.get(i).setArrRoyalty(list.get(i).getArrRoyalty());
-//                }
-//            }
-//        }else if(!achievementInfoDTOS.isEmpty()){
-//            if(list.isEmpty()){
-//                for (int i = 0; i < achievementInfoDTOS.size(); i++) {
-//                    achievementInfoDTOS.get(i).setMonthRoyalty(0);
-//                    achievementInfoDTOS.get(i).setMeterRoyalty(0);
-//                    achievementInfoDTOS.get(i).setArrRoyalty(0);
-//                }
-//            }
-//        }
+
 
 
         for (AchievementInfoDTO aa:achievementInfoDTOS) {
