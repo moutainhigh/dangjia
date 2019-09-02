@@ -24,6 +24,7 @@ import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IMaterialRecordMapper;
 import com.dangjia.acg.mapper.house.IModelingVillageMapper;
 import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
+import com.dangjia.acg.mapper.member.ICustomerMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.mapper.worker.IEvaluateMapper;
@@ -39,6 +40,7 @@ import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.MaterialRecord;
 import com.dangjia.acg.modle.house.ModelingVillage;
 import com.dangjia.acg.modle.member.AccessToken;
+import com.dangjia.acg.modle.member.Customer;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.modle.worker.Evaluate;
@@ -124,6 +126,8 @@ public class EvaluateService {
     private CraftsmanConstructionService constructionService;
     @Autowired
     private RoyaltyService royaltyService;
+    @Autowired
+    private ICustomerMapper customerMapper;
     @Autowired
     private ClueMapper clueMapper;
     @Autowired
@@ -494,29 +498,23 @@ public class EvaluateService {
             temp_para.put("worker_name", workerType.getName());
             JsmsUtil.sendSMS("15675101794", "164425", temp_para);
 
-            Object object = constructionService.getAccessToken(userToken);
-            if (object instanceof ServerResponse) {
-                return (ServerResponse) object;
-            }
-            AccessToken accessToken = (AccessToken) object;
-            if (CommonUtil.isEmpty(accessToken.getUserId())) {
-                return ServerResponse.createbyUserTokenError();
-            }
-
-            //竣工消息推送
-            //获取线索ID
-            Example example1 = new Example(Clue.class);
-            example1.createCriteria()
-                    .andEqualTo(Clue.CUS_SERVICE, accessToken.getUserId())
-                    .andEqualTo(Clue.DATA_STATUS, 0)
-                    .andEqualTo(Clue.MEMBER_ID, house.getMemberId());
-            List<Clue> djAlreadyRobSingle = clueMapper.selectByExample(example1);
-            MainUser user = userMapper.selectByPrimaryKey(accessToken.getUserId());
-            String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+            Customer customer = customerMapper.getCustomerByMemberId(house.getMemberId());
+            if(customer!=null&&!CommonUtil.isEmpty(customer.getUserId())) {
+                //竣工消息推送
+                //获取线索ID
+                Example example1 = new Example(Clue.class);
+                example1.createCriteria()
+                        .andEqualTo(Clue.CUS_SERVICE, customer.getUserId())
+                        .andEqualTo(Clue.DATA_STATUS, 0)
+                        .andEqualTo(Clue.MEMBER_ID, house.getMemberId());
+                List<Clue> djAlreadyRobSingle = clueMapper.selectByExample(example1);
+                MainUser user = userMapper.selectByPrimaryKey(customer.getUserId());
+                String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
                 configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "竣工提醒",
                         "您有已竣工的房子【" + house.getHouseName() + "】", 0, url
                                 + Utils.getCustomerDetails(house.getMemberId(), djAlreadyRobSingle.get(0).getId(), 1, "4"));
 
+            }
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
