@@ -500,7 +500,7 @@
         <if test="stage == 4 or stage == 5">
             INNER JOIN dj_house h
             on h.member_id = c.member_id
-            LEFT JOIN dj_already_rob_single ars
+            INNER JOIN dj_already_rob_single ars
             ON ars.user_id = c.cus_service AND ars.house_id = h.id
         </if>
         INNER JOIN
