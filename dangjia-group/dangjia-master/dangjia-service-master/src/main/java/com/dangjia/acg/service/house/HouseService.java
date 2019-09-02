@@ -451,7 +451,7 @@ public class HouseService {
      * WEB确认开工
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse startWork(HttpServletRequest request, HouseDTO houseDTO,String userToken) {
+    public ServerResponse startWork(HttpServletRequest request, HouseDTO houseDTO,String userToken,String userId) {
 
         if (houseDTO.getDecorationType() >= 3 || houseDTO.getDecorationType() == 0) {
             return ServerResponse.createByErrorMessage("装修类型参数错误");
@@ -578,13 +578,16 @@ public class HouseService {
 
 
         //结算提成
-        Object object = constructionService.getAccessToken(userToken);
-        if (object instanceof ServerResponse) {
-            return (ServerResponse) object;
-        }
-        AccessToken accessToken = (AccessToken) object;
-        if (CommonUtil.isEmpty(accessToken.getUserId())) {
-            return ServerResponse.createbyUserTokenError();
+        if(!CommonUtil.isEmpty(userToken)){
+            Object object = constructionService.getAccessToken(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            AccessToken accessToken = (AccessToken) object;
+            if (CommonUtil.isEmpty(accessToken.getUserId())) {
+                return ServerResponse.createbyUserTokenError();
+            }
+            userId=accessToken.getUserId();
         }
 
         //修改以抢单列表信息
@@ -600,9 +603,9 @@ public class HouseService {
         example.createCriteria().andEqualTo(DjAreaMatch.VILLAGE_ID,houseDTO.getVillageId())
                 .andEqualTo(DjAreaMatch.BUILDING_NAME,houseDTO.getBuilding());
         if(djAreaMatchMapper.selectByExample(example).size()>0){
-            endBuildingRoyalty(houseDTO, accessToken.getUserId(), customer);
+            endBuildingRoyalty(houseDTO, userId, customer);
         }else {
-            endRoyalty(houseDTO, accessToken.getUserId(), customer);
+            endRoyalty(houseDTO, userId, customer);
         }
 
 
