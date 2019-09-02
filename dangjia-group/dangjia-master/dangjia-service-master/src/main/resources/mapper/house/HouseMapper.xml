@@ -373,6 +373,18 @@
         FROM
         dj_house h
         INNER JOIN dj_member m ON h.member_id = m.id
+        <choose>
+            <when test="(userKey==null or userKey=='')">
+                LEFT JOIN dj_member_customer mc on mc.member_id = m.id
+            </when>
+            <otherwise>
+                INNER JOIN dj_member_customer mc on mc.member_id = m.id
+                <if test="userKey!=null and userKey!=''">
+                    AND FIND_IN_SET(mc.user_id,#{userKey})
+                </if>
+            </otherwise>
+        </choose>
+        LEFT JOIN dj_member_customer_record mcr on mc.remind_record_id = mcr.id
         WHERE
         h.data_status =0
         <if test="cityKey!=null and cityKey!=''">

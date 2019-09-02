@@ -40,6 +40,7 @@ import com.dangjia.acg.mapper.other.IWorkDepositMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.mapper.sale.*;
 import com.dangjia.acg.mapper.store.IStoreMapper;
+import com.dangjia.acg.mapper.store.IStoreUserMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.clue.Clue;
@@ -94,6 +95,9 @@ import java.util.*;
  */
 @Service
 public class HouseService {
+
+    @Autowired
+    private IStoreUserMapper iStoreUserMapper;
     @Autowired
     private IHouseMapper iHouseMapper;
     @Autowired
@@ -1921,8 +1925,9 @@ public class HouseService {
     /**
      * 房子装修列表
      */
-    public ServerResponse getList(PageDTO pageDTO, String cityKey, Integer visitState, String startDate, String endDate, String searchKey, String orderBy, String memberId) {
+    public ServerResponse getList(PageDTO pageDTO, String userId,String cityKey, Integer visitState, String startDate, String endDate, String searchKey, String orderBy, String memberId) {
         try {
+            userId=iStoreUserMapper.getVisitUser(userId);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             if (!CommonUtil.isEmpty(startDate) && !CommonUtil.isEmpty(endDate)) {
                 if (startDate.equals(endDate)) {
@@ -1930,7 +1935,7 @@ public class HouseService {
                     endDate = endDate + " " + "23:59:59";
                 }
             }
-            List<HouseListDTO> houseList = iHouseMapper.getHouseList(cityKey, memberId, visitState, startDate, endDate, orderBy, searchKey);
+            List<HouseListDTO> houseList = iHouseMapper.getHouseList(cityKey, userId,memberId, visitState, startDate, endDate, orderBy, searchKey);
             if (houseList.size() <= 0) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode()
                         , "查无数据");
