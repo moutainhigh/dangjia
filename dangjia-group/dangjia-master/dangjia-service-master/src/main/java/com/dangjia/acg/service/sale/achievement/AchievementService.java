@@ -90,7 +90,7 @@ public class AchievementService {
         logger.info("list==============="+ list);
         logger.info("achievementInfoDTOS==============="+ achievementInfoDTOS.size());
         logger.info("list==============="+ list.size());
-        for (int i = 0; i < list.size(); i++) {
+        for (int i = 0; i < achievementInfoDTOS.size(); i++) {
             if(achievementInfoDTOS.get(i).getDataStatus() == 0){
                 achievementInfoDTOS.get(i).setMonthRoyalty(list.get(i).getMonthRoyalty());
                 achievementInfoDTOS.get(i).setMeterRoyalty(list.get(i).getMeterRoyalty());
