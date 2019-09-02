@@ -174,7 +174,7 @@
         select
         drm.user_id AS userId,
         drm.house_id AS houseId,
-        <if test="dataStatus == 0">
+        <if test="data_status == 0">
         SUM(drm.month_royalty )AS monthRoyalty,
         SUM(drm.month_royalty )AS meterRoyalty,
         SUM(drm.count_arr_royalty )AS arrRoyalty,
