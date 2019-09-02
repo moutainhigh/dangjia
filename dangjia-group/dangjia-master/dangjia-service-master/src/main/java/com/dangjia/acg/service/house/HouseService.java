@@ -1889,6 +1889,8 @@ public class HouseService {
             clue.setPhone(member.getMobile());
             clue.setMemberId(member.getId());
             clueMapper.insert(clue);
+            customer.setPhaseStatus(1);
+            customer.setTurnStatus(0);
             iCustomerMapper.updateByPrimaryKeySelective(customer);
         }
     }
