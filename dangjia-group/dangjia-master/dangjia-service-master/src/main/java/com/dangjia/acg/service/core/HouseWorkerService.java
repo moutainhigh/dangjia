@@ -631,6 +631,11 @@ public class HouseWorkerService {
         HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(hf.getHouseId(), hf.getWorkerTypeId());
         HouseFlow supervisorHF = houseFlowMapper.getHouseFlowByHidAndWty(hf.getHouseId(), 3);//大管家的hf
         HouseFlowApply hfa = getHouseFlowApply(hf, 2, supervisorHF);
+        hfa.setWorkerId(hf.getWorkerId());//工人id
+        hfa.setOperator(hf.getWorkerId());//提交人ID
+        hfa.setWorkerTypeId(hf.getWorkerTypeId());//工种id
+        hfa.setWorkerType(hf.getWorkerType());//工种类型
+        hfa.setHouseId(hf.getHouseId());//房子id
         //********************发申请，计算可得钱和积分等*****************//
         BigDecimal workPrice = new BigDecimal(0);
         BigDecimal haveMoney = new BigDecimal(0);
