@@ -95,9 +95,10 @@ public class ClueService {
     /**
      * 查询线索list
      */
-    public ServerResponse getClueList(Integer stage, String values, String memberId, String childId, String beginDate,
+    public ServerResponse getClueList(String userId,Integer stage, String values, String memberId, String childId, String beginDate,
                                       String endDate, PageDTO pageDTO) {
         try {
+            userId=iStoreUserMapper.getVisitUser(userId);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             Example example = new Example(Clue.class);
             Example.Criteria criteria = example.createCriteria();
@@ -116,6 +117,9 @@ public class ClueService {
                     endDate = endDate + " " + "23:59:59";
                 }
                 criteria.andBetween(Clue.CREATE_DATE, beginDate, endDate);
+            }
+            if (!CommonUtil.isEmpty(userId)) {
+                criteria.andCondition(" FIND_IN_SET(cus_service,'"+userId+"')");
             }
             if (!CommonUtil.isEmpty(memberId)) {
                 criteria.andEqualTo(Clue.CUS_SERVICE, memberId);

@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
+
 @FeignClient("dangjia-service-master")
 @Api(value = "线索功能", description = "线索功能")
 public interface WebClueAPI {
@@ -33,7 +35,8 @@ public interface WebClueAPI {
      */
     @PostMapping("web/clue/getClueList")
     @ApiOperation(value = "查询线索", notes = "查询线索")
-    ServerResponse getClueList(@RequestParam("stage") Integer stage,
+    ServerResponse getClueList(@RequestParam("request") HttpServletRequest request,
+                               @RequestParam("stage") Integer stage,
                                @RequestParam("values") String values,
                                @RequestParam("memberId") String memberId,
                                @RequestParam("childId") String childId,

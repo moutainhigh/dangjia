@@ -645,8 +645,9 @@ public class HouseWorkerService {
         BigDecimal alsoMoney = new BigDecimal(workPrice.doubleValue() - haveMoney.doubleValue() - retentionMoney.doubleValue() - deductPrice.doubleValue());
         hfa.setApplyMoney(alsoMoney);
 //        hfa.setApplyDec("我是" + workerType.getName() + ",我已申请了整体完工");//描述
-        hfa.setApplyDec("业主您好，我是大管家，我已验收了！<br/>" +
+        hfa.setApplyDec("尊敬的业主，您好！<br/>" +
                 "当家工匠【"+worker.getName()+"】为您新家施工，工地【" + workerType.getName() + "】已全部完工，严格按照平台施工验收标准进行施工，请您查收。<br/>");//描述
+
         hfa.setSupervisorMoney(supervisorHF.getCheckMoney());//管家得相应验收收入
         //增加倒计时系统自动审核时间
         Calendar calendar = Calendar.getInstance();
