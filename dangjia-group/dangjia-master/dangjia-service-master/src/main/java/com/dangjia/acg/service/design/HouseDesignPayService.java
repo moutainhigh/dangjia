@@ -281,6 +281,7 @@ public class HouseDesignPayService {
                 List<DesignBusinessOrder> designBusinessOrders = designBusinessOrderMapper.selectByExample(example);
                 if (designBusinessOrders != null && designBusinessOrders.size() > 0) {
                     designBusinessOrder.setOperationState(2);
+                    house.setBudgetOk(1);
                     DesignBusinessOrder order = designBusinessOrders.get(0);
                     order.setOperationState(2);
                     if (hwo != null) {

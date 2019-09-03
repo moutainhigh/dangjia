@@ -413,7 +413,6 @@ public class RobService {
                     robArrInFoDTO.setNickName(member.getNickName());
                     robArrInFoDTO.setPhone(member.getMobile());
                     robArrInFoDTO.setMCreateDate(member.getCreateDate());
-//                    robArrInFoDTO.setRemark(member.getRemarks());
                 }
 
                 //查询意向房子
@@ -544,7 +543,6 @@ public class RobService {
             //线索阶段查询详情
             Map<String, Object> map = new HashMap<>();
             map.put("id", clueId);
-//            map.put("userId", accessToken.getUserId());
             UserInfoDTO userInfoDTO = clueMapper.queryTips(map);
 
             if (!CommonUtil.isEmpty(userInfoDTO)) {
@@ -700,18 +698,6 @@ public class RobService {
             }
 
             if (!CommonUtil.isEmpty(customerRecDTO)) {
-//                if (customerRecDTO.getPhaseStatus() == 1) {
-//                    //客户阶段新增沟通记录
-//                    CustomerRecord customerRecord = new CustomerRecord();
-//                    customerRecord.setDescribes(customerRecDTO.getDescribes());
-//                    customerRecord.setRemindTime(customerRecDTO.getRemindTime());
-//                    if(accessToken != null){
-//                        customerRecord.setUserId(accessToken.getUserId());
-//                    }
-//                    customerRecord.setMemberId(customerRecDTO.getMemberId());
-//                    iCustomerRecordMapper.insert(customerRecord);
-//                    return ServerResponse.createBySuccessMessage("新增成功");
-//                } else {
                 // 线索阶段新增沟通记录
                 ClueTalk clueTalk = new ClueTalk();
                 if(accessToken != null){
@@ -736,7 +722,6 @@ public class RobService {
                 clue.setTimeSequencing(clueTalk.getCreateDate());
                 clueMapper.updateByPrimaryKeySelective(clue);//沟通记录更新线索排序时间
                 return ServerResponse.createBySuccessMessage("新增成功");
-//                }
             }
             return ServerResponse.createByErrorMessage("新增失败");
         } catch (Exception e) {
@@ -870,8 +855,6 @@ public class RobService {
                 List<DjOrderSurface> djOrderSurfaces = djOrderSurfaceMapper.selectByExample(example);
                 List<OrderStoreDTO> orderStore = iStoreMapper.getOrderStore(grabSheetDTO.getLatitude(), grabSheetDTO.getLongitude(),djOrderSurfaces);
 
-//                for (int i = 0; i < orderStore.size(); i++) {
-//                    orderStore.get(i).setRobDate(djRobSingles.get(i).getRobDate());
                 if(djOrderSurfaces.size()<=1){
                     djOrderSurfaces=null;
                 }
@@ -909,18 +892,6 @@ public class RobService {
                         }
                     }
                 }
-//                for (int i=0;i<orderStore.size();i++){
-//                    for (DjRobSingle djRobSingle : djRobSingles) {
-//                        logger.info("System.currentTimeMillis()-grabSheetDTO.getModifyDate().getTime())/60/1000==================================="+((System.currentTimeMillis()-grabSheetDTO.getModifyDate().getTime())/60/1000));
-//                        logger.info("Integer.parseInt(djRobSingle.getRobDate())==================================="+Integer.parseInt(djRobSingle.getRobDate()));
-//                        if(((System.currentTimeMillis()-grabSheetDTO.getModifyDate().getTime())/60/1000)
-//                                >Integer.parseInt(djRobSingle.getRobDate())){
-//                            logger.info("11111111111111111111==================================="+orderStore.get(i).getStoreId());
-//                            logger.info("11111111111111111111==================================="+grabSheetDTO.getMemberId());
-//                            clueMapper.setDistribution(orderStore.get(i).getStoreId(),grabSheetDTO.getMemberId());
-//                        }
-//                    }
-//                }
             }
         }
         return ServerResponse.createBySuccessMessage("分配成功");
