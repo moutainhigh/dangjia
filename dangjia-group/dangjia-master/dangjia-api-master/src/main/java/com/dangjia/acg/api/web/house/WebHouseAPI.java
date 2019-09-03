@@ -43,7 +43,7 @@ public interface WebHouseAPI {
     ServerResponse startWork(@RequestParam("request") HttpServletRequest request,
                              @RequestParam("house") HouseDTO houseDTO,
                              @RequestParam("userToken")String userToken,
-                             @RequestParam("userId")String userId);
+                             @RequestParam("user_id")String user_id);
 
     @PostMapping("web/house/setHouseInfo")
     @ApiOperation(value = "修改房子工序顺序以及选配标签", notes = "修改房子工序顺序以及选配标签")
