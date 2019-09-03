@@ -498,8 +498,14 @@ public class RobService {
                         if(null != userAchievementDTOS && !userAchievementDTOS.isEmpty()){
                             logger.info("userAchievementDTOS================="+userAchievementDTOS.size());
                             for (UserAchievementDTO userAchievementDTO : userAchievementDTOS) {
-                                if(!CommonUtil.isEmpty(userAchievementDTO.getHead())){
+                                if(null !=userAchievementDTO){
                                     userAchievementDTO.setHead(imageAddress+userAchievementDTO.getHead());
+                                    if(userAchievementDTO.getDataStatus() == 1){
+                                        userAchievementDTO.setMonthRoyaltys(0);
+                                        userAchievementDTO.setMeterRoyaltys(0);
+                                        userAchievementDTO.setArrRoyalty(0);
+                                    }
+
                                 }
                             }
                             uadto.addAll(userAchievementDTOS);

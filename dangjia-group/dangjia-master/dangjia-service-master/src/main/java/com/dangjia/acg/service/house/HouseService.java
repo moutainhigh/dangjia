@@ -40,6 +40,7 @@ import com.dangjia.acg.mapper.other.IWorkDepositMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.mapper.sale.*;
 import com.dangjia.acg.mapper.store.IStoreMapper;
+import com.dangjia.acg.mapper.store.IStoreUserMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.clue.Clue;
@@ -94,6 +95,9 @@ import java.util.*;
  */
 @Service
 public class HouseService {
+
+    @Autowired
+    private IStoreUserMapper iStoreUserMapper;
     @Autowired
     private IHouseMapper iHouseMapper;
     @Autowired
@@ -184,6 +188,7 @@ public class HouseService {
     private DjOrderSurfaceMapper djOrderSurfaceMapper;
     @Autowired
     private RobService robService;
+
 
     /**
      * 切换房产
@@ -450,7 +455,7 @@ public class HouseService {
      * WEB确认开工
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse startWork(HttpServletRequest request, HouseDTO houseDTO,String userToken) {
+    public ServerResponse startWork(HttpServletRequest request, HouseDTO houseDTO,String userToken,String userId) {
 
         if (houseDTO.getDecorationType() >= 3 || houseDTO.getDecorationType() == 0) {
             return ServerResponse.createByErrorMessage("装修类型参数错误");
@@ -577,13 +582,16 @@ public class HouseService {
 
 
         //结算提成
-        Object object = constructionService.getAccessToken(userToken);
-        if (object instanceof ServerResponse) {
-            return (ServerResponse) object;
-        }
-        AccessToken accessToken = (AccessToken) object;
-        if (CommonUtil.isEmpty(accessToken.getUserId())) {
-            return ServerResponse.createbyUserTokenError();
+        if(!CommonUtil.isEmpty(userToken)){
+            Object object = constructionService.getAccessToken(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            AccessToken accessToken = (AccessToken) object;
+            if (CommonUtil.isEmpty(accessToken.getUserId())) {
+                return ServerResponse.createbyUserTokenError();
+            }
+            userId=accessToken.getUserId();
         }
 
         //修改以抢单列表信息
@@ -599,9 +607,9 @@ public class HouseService {
         example.createCriteria().andEqualTo(DjAreaMatch.VILLAGE_ID,houseDTO.getVillageId())
                 .andEqualTo(DjAreaMatch.BUILDING_NAME,houseDTO.getBuilding());
         if(djAreaMatchMapper.selectByExample(example).size()>0){
-            endBuildingRoyalty(houseDTO, accessToken.getUserId(), customer);
+            endBuildingRoyalty(houseDTO, userId, customer);
         }else {
-            endRoyalty(houseDTO, accessToken.getUserId(), customer);
+            endRoyalty(houseDTO, userId, customer);
         }
 
 
@@ -1708,6 +1716,15 @@ public class HouseService {
                     example = new Example(Clue.class);
                     example.createCriteria().andEqualTo(Clue.MEMBER_ID, house.getMemberId());
                     clueMapper.updateByExampleSelective(clue, example);
+
+                    Clue c = clueMapper.getClueId(house.getMemberId());
+                    if(c!=null) {
+                        c.setStoreId(null);
+                        clueMapper.updateByPrimaryKey(c);
+                        example = new Example(DjOrderSurface.class);
+                        example.createCriteria().andEqualTo(DjOrderSurface.CLUE_ID, c.getId());
+                        djOrderSurfaceMapper.deleteByExample(example);
+                    }
                     return ServerResponse.createBySuccessMessage("操作成功");
                 }
             }
@@ -1725,6 +1742,9 @@ public class HouseService {
             return (ServerResponse) object;
         }
         Member member = (Member) object;
+        //针对以前老数据操作
+        setClue(member);
+
         Example example = new Example(House.class);
         example.createCriteria()
                 .andEqualTo(House.MEMBER_ID, member.getId())
@@ -1852,6 +1872,43 @@ public class HouseService {
         return ServerResponse.createBySuccessMessage("操作成功");
     }
 
+    private void setClue(Member member){
+        Example example=new Example(Clue.class);
+        example.createCriteria().andEqualTo(Clue.PHONE,member.getMobile());
+        List<Clue> clues = clueMapper.selectByExample(example);
+        example=new Example(Customer.class);
+        example.createCriteria().andEqualTo(Customer.MEMBER_ID,member.getId());
+        List<Customer> customers = iCustomerMapper.selectByExample(example);
+        if(clues.size()<=0){
+            Customer customer=null;
+            if(customers.size()>0) {
+                customer = customers.get(0);
+                customer.setPhaseStatus(1);
+                customer.setTurnStatus(0);
+                iCustomerMapper.updateByPrimaryKeySelective(customer);
+            }else{
+                customer=new Customer();
+                customer.setPhaseStatus(1);
+                customer.setTurnStatus(0);
+                customer.setStage(1);
+                iCustomerMapper.insert(customer);
+            }
+            Clue clue=new Clue();
+            if(!CommonUtil.isEmpty(customer.getUserId())){
+                clue.setCusService(customer.getUserId());
+            }
+            clue.setStage(1);
+            clue.setDataStatus(0);
+            clue.setClueType(0);
+            clue.setTurnStatus(0);
+            clue.setPhaseStatus(1);
+            clue.setPhone(member.getMobile());
+            clue.setMemberId(member.getId());
+            clueMapper.insert(clue);
+        }
+    }
+
+
     public ServerResponse getHouseAddress(String houseId) {
         Example example = new Example(HouseAddress.class);
         example.createCriteria()
@@ -1868,8 +1925,9 @@ public class HouseService {
     /**
      * 房子装修列表
      */
-    public ServerResponse getList(PageDTO pageDTO, String cityKey, Integer visitState, String startDate, String endDate, String searchKey, String orderBy, String memberId) {
+    public ServerResponse getList(PageDTO pageDTO, String userId,String cityKey, Integer visitState, String startDate, String endDate, String searchKey, String orderBy, String memberId) {
         try {
+            userId=iStoreUserMapper.getVisitUser(userId);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             if (!CommonUtil.isEmpty(startDate) && !CommonUtil.isEmpty(endDate)) {
                 if (startDate.equals(endDate)) {
@@ -1877,7 +1935,7 @@ public class HouseService {
                     endDate = endDate + " " + "23:59:59";
                 }
             }
-            List<HouseListDTO> houseList = iHouseMapper.getHouseList(cityKey, memberId, visitState, startDate, endDate, orderBy, searchKey);
+            List<HouseListDTO> houseList = iHouseMapper.getHouseList(cityKey, userId,memberId, visitState, startDate, endDate, orderBy, searchKey);
             if (houseList.size() <= 0) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode()
                         , "查无数据");
@@ -2273,8 +2331,9 @@ public class HouseService {
     }
     /**
      * 施工记录
+     * type:0  查询全部，1 查询有图片的
      */
-    public ServerResponse queryConstructionRecordAll(String houseId, String ids, String day, String workerType, PageDTO pageDTO) {
+    public ServerResponse queryConstructionRecordAll(String houseId, String ids, String day, String workerType,Integer type, PageDTO pageDTO) {
         // 施工记录的内容需要更改
         String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
         Example example = new Example(HouseConstructionRecord.class);

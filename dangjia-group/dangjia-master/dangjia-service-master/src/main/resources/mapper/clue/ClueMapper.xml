@@ -500,7 +500,7 @@
         <if test="stage == 4 or stage == 5">
             INNER JOIN dj_house h
             on h.member_id = c.member_id
-            LEFT JOIN dj_already_rob_single ars
+            INNER JOIN dj_already_rob_single ars
             ON ars.user_id = c.cus_service AND ars.house_id = h.id
         </if>
         INNER JOIN
@@ -526,17 +526,20 @@
             m.head,
             sum(rm.month_royalty) as monthRoyaltys,
             sum(rm.month_royalty) as meterRoyaltys,
-            sum(rm.count_arr_royalty) as arrRoyalty
+            sum(rm.count_arr_royalty) as arrRoyalty,
+            rm.data_status as dataStatus
             FROM dj_user u
             INNER JOIN dj_royalty_match rm
             on u.id=rm.user_id
             INNER JOIN dj_member m
             on u.member_id=m.id
         where rm.house_id in
-        <foreach collection="houseIds" index="index" item="item"
-                 separator="," open="(" close=")">
-            #{item}
-        </foreach>
+        <if test="null!=houseIds and houseIds.size>0">
+            <foreach collection="houseIds" index="index" item="item"
+                     separator="," open="(" close=")">
+                #{item}
+            </foreach>
+        </if>
         and rm.user_id=#{userId}
     </select>
 
@@ -763,6 +766,14 @@
         where c.cus_service=#{userId}
     </update>
 
+    <select id="getClueId" resultType="com.dangjia.acg.modle.clue.Clue">
+        select
+            id
+        from dj_clue c
+        WHERE
+            member_id = #{memberId}
+            and (c.cus_service IS NULL or c.cus_service="")
+    </select>
 
 </mapper>
 
