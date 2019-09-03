@@ -5,10 +5,8 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dto.house.HouseListDTO;
-import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
 import com.dangjia.acg.mapper.design.IDesignBusinessOrderMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
-import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.modle.design.DesignBusinessOrder;
 import com.dangjia.acg.modle.house.House;
 import com.github.pagehelper.PageHelper;
@@ -33,10 +31,6 @@ public class ActuaryService {
 
     @Autowired
     private IHouseMapper houseMapper;
-    @Autowired
-    private IHouseWorkerMapper houseWorkerMapper;
-    @Autowired
-    private IMemberMapper memberMapper;
     @Autowired
     private IDesignBusinessOrderMapper designBusinessOrderMapper;
 
