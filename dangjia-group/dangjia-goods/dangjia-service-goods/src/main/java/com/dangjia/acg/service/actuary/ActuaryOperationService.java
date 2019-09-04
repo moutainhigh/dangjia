@@ -184,7 +184,7 @@ public class ActuaryOperationService {
                             }
                             //查到 老的关联组 的精算
                             BudgetMaterial srcBudgetMaterial = budgetMaterialMapper.getBudgetCaiListByGoodsId(houseId, workerTypeId, srcGroupLink.getGoodsId());
-                            BudgetMaterial newBudgetMaterial = srcBudgetMaterial;
+                            BudgetMaterial newBudgetMaterial = budgetMaterialMapper.getBudgetCaiListByGoodsId(houseId, workerTypeId, srcGroupLink.getGoodsId());
                             Product targetProduct = productMapper.selectByPrimaryKey(targetGroupLink.getProductId());//目标product 对象
                             newBudgetMaterial.setProductId(targetProduct.getId());
                             newBudgetMaterial.setProductSn(targetProduct.getProductSn());
@@ -223,7 +223,7 @@ public class ActuaryOperationService {
                 }
             } else {
 
-                BudgetMaterial newBudgetMaterial = budgetMaterial;
+                BudgetMaterial newBudgetMaterial = budgetMaterialMapper.selectByPrimaryKey(budgetMaterialId);
                 Product product = productMapper.selectByPrimaryKey(productId);
                 newBudgetMaterial.setProductId(productId);
                 newBudgetMaterial.setProductSn(product.getProductSn());
