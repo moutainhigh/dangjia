@@ -84,3 +84,4 @@ public class IndexPageController implements IndexPageAPI {
         return indexPageService.getRecommended(request, latitude, longitude, limit);
     }
 }
+

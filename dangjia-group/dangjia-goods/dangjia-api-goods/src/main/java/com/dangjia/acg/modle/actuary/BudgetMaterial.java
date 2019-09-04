@@ -34,7 +34,7 @@ public class BudgetMaterial extends BaseEntity{
 	private String templateId; // 模板信息Id
 
 	@Column(name = "delete_state")
-	private Integer deleteState;//用户删除状态·,0表示未支付，1表示已删除,2表示业主取消,3表示已经支付,4再次购买
+	private Integer deleteState;//用户删除状态·,0表示未支付，1表示已删除,2表示业主取消,3表示已经支付,4再次/更换购买,5 被更换
 
 	@Column(name = "product_id")
 	private String productId;//货号ID

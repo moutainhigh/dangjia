@@ -64,7 +64,7 @@ public class EmployeeDetailsService {
                 if (!CommonUtil.isEmpty(u.getMemberId()))
                     configMessageService.addConfigMessage(AppType.SALE, u.getMemberId(), "月目标提醒",
                             "您本月有新的下单目标，请及时查看", 5);
-                return ServerResponse.createBySuccess("制定成功");
+                return ServerResponse.createBySuccessMessage("制定成功");
             }
             return ServerResponse.createByErrorMessage("制定失败");
         }
@@ -77,7 +77,7 @@ public class EmployeeDetailsService {
             if (!CommonUtil.isEmpty(u.getMemberId()))
                 configMessageService.addConfigMessage(AppType.SALE, u.getMemberId(), "月目标提醒",
                         "您本月有新的下单目标，请及时查看", 5);
-            return ServerResponse.createBySuccess("制定成功");
+            return ServerResponse.createBySuccessMessage("制定成功");
         }
         return ServerResponse.createByErrorMessage("制定失败");
     }
@@ -95,7 +95,7 @@ public class EmployeeDetailsService {
         residentialRange.setUserId(userId);
         residentialRange.setDataStatus(0);
         if (residentialRangeMapper.insert(residentialRange) > 0) {
-            return ServerResponse.createBySuccess("配置成功");
+            return ServerResponse.createBySuccessMessage("配置成功");
         }
         return ServerResponse.createByErrorMessage("配置失败");
     }
@@ -103,7 +103,7 @@ public class EmployeeDetailsService {
 
     public ServerResponse delMonthlyTarget(String monthlyTargetId) {
         if (monthlyTargetMappper.deleteByPrimaryKey(monthlyTargetId) > 0) {
-            return ServerResponse.createBySuccess("删除成功");
+            return ServerResponse.createBySuccessMessage("删除成功");
         }
         return ServerResponse.createByErrorMessage("删除失败");
     }
