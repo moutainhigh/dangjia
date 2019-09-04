@@ -90,6 +90,12 @@ public class StoreUserServices {
         if (stores.size() > 0) {
             return ServerResponse.createByErrorMessage("该用户已被设置为店长，请勿添加");
         }
+        example=new Example(StoreUser.class);
+        example.createCriteria().andEqualTo(StoreUser.USER_ID,userId)
+                .andEqualTo(StoreUser.DATA_STATUS,0);
+        if(iStoreUserMapper.selectByExample(example).size()>0){
+            return ServerResponse.createByErrorMessage("该用户已被设置为店员，情勿添加");
+        }
         example = new Example(StoreUser.class);
         example.createCriteria().andEqualTo(StoreUser.USER_ID, userId)
                 .andEqualTo(StoreUser.DATA_STATUS, 0);
