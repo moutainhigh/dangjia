@@ -30,7 +30,7 @@ public class GoodsCategoryController implements GoodsCategoryAPI {
     private AttributeService goodsAttributeService;
 
     @Override
-    public GoodsCategory getGoodsCategory(String  cityId, String categoryId) {
+    public GoodsCategory getGoodsCategory(String cityId, String categoryId) {
         return goodsCategoryService.getGoodsCategory(categoryId);
     }
 

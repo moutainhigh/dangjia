@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.sale.DjAreaMatchMapper">
+
+
+
+    <select id="commissionAllocation" resultType="com.dangjia.acg.dto.sale.royalty.DjAreaMatchDTO">
+        select
+            start_single as startSingle,
+            over_single as overSingle,
+            royalty,
+            am.building_id as buildingId,
+            am.building_name as buildingName,
+            am.village_id as villageId,
+            am.village_name as villageName
+        from dj_area_match am
+        INNER JOIN dj_area_match_setup ams
+        on am.resource_id=ams.resource_id
+        where am.building_name=#{buildingName}
+        and am.village_id=#{villageId}
+    </select>
+
+    <select id="maxCommissionAllocation" resultType="com.dangjia.acg.dto.sale.royalty.DjAreaMatchDTO">
+        select
+            max(over_single) as overSingle,
+            royalty
+        from dj_area_match am
+        INNER JOIN dj_area_match_setup ams
+        on am.resource_id=ams.resource_id
+        where am.building_name=#{buildingName}
+        and am.village_id=#{villageId}
+    </select>
+
+    <select id="queryArr" resultType="com.dangjia.acg.modle.sale.royalty.DjAreaMatch" parameterType="java.util.HashMap">
+    select
+       *
+    from dj_area_match am
+    where data_status = 0
+    and am.resource_id = #{resourceId}
+</select>
+
+
+</mapper>

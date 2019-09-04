@@ -31,4 +31,9 @@ public interface IModelingVillageMapper extends Mapper<ModelingVillage> {
 
     /*查询指定距离的小区*/
     List<House> jobModelingVillage(@Param("latitude") String latitude, @Param("longitude") String longitude,@Param("limit") Integer limit);
+
+    /**
+     * 根据小区id查询小区名称
+     */
+    String queryVillageName(Map<String,Object> map);
 }

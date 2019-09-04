@@ -1,8 +1,10 @@
 package com.dangjia.acg.service.house;
 
+import com.dangjia.acg.api.MessageAPI;
 import com.dangjia.acg.api.UserAPI;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
@@ -20,6 +22,7 @@ import com.dangjia.acg.mapper.member.ICustomerMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.menu.IMenuConfigurationMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
+import com.dangjia.acg.mapper.sale.DjAlreadyRobSingleMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
@@ -27,15 +30,14 @@ import com.dangjia.acg.modle.core.HouseFlowApplyImage;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.group.GroupUserConfig;
 import com.dangjia.acg.modle.house.House;
-import com.dangjia.acg.modle.member.Customer;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.menu.MenuConfiguration;
 import com.dangjia.acg.modle.repair.MendOrder;
+import com.dangjia.acg.modle.sale.royalty.DjAlreadyRobSingle;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.util.HouseUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.dangjia.acg.util.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -75,8 +77,11 @@ public class MyHouseService {
     @Autowired
     private ICustomerMapper iCustomerMapper;
     @Autowired
+    private MessageAPI messageAPI;
+    @Autowired
     private UserMapper userMapper;
-    protected static final Logger LOG = LoggerFactory.getLogger(MyHouseService.class);
+    @Autowired
+    private DjAlreadyRobSingleMapper djAlreadyRobSingleMapper;
 
     /**
      * 获取我的房产的查询条件
@@ -181,6 +186,7 @@ public class MyHouseService {
         houseResult.setHouseId(house.getId());
         Map<Integer, String> applyTypeMap = DjConstants.VisitState.getVisitStateMap();
         houseResult.setBuildStage(applyTypeMap.get(house.getVisitState()));
+        houseResult.setCreateDate(house.getCreateDate());
 
         HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart1(house.getId(), new Date());//查询今日开工记录
         if (todayStart == null) {//没有今日开工记录
@@ -215,7 +221,7 @@ public class MyHouseService {
                 map.put("memberType", 1);
                 map.put("id", member1.getId());
                 map.put("targetId", member1.getId());
-                map.put("targetAppKey", "49957e786a91f9c55b223d58");
+                map.put("targetAppKey", messageAPI.getAppKey(AppType.GONGJIANG.getDesc()));
                 map.put("nickName", member1.getNickName());
                 map.put("name", member1.getName());
                 map.put("mobile", member1.getMobile());
@@ -238,34 +244,40 @@ public class MyHouseService {
             }
         }
         //获取客服明细
-        Customer srcCustomer = iCustomerMapper.getCustomerByMemberId(member.getId());
-        String userid="773075761552045112068";
-        if(house.getCityId().equals("961188961562724011757")){
-            userid="682958011563430082579";
-        }
-        if(srcCustomer!=null&&!CommonUtil.isEmpty(srcCustomer.getUserId())){
-            userid=srcCustomer.getUserId();
-        }
-        Example example = new Example(MainUser.class);
-        example.createCriteria().andEqualTo(MainUser.ID, userid);//默认李优
-        example.orderBy(GroupUserConfig.CREATE_DATE).desc();
-        List<MainUser> list = userMapper.selectByExample(example);
-        if (list != null && list.size() > 0) {
-            MainUser user = list.get(0);
-            Map<String, Object> map = new HashMap<>();
-            map.put("id", user.getId());
-            map.put("targetId", user.getId());
-            map.put("targetAppKey", "49957e786a91f9c55b223d58");
-            UserInfoResultDTO userInfoResult = userAPI.getUserInfo("gj", userid);
-            if(userInfoResult != null && !CommonUtil.isEmpty(userInfoResult.getNickname())) {
-                map.put("nickName", "装修顾问 " + userInfoResult.getNickname());
-            }else{
-                map.put("nickName", "装修顾问 小" + user.getUsername().substring(0,1));
+        Example example1 = new Example(DjAlreadyRobSingle.class);
+        example1.createCriteria()
+                .andEqualTo(DjAlreadyRobSingle.HOUSE_ID, house.getId())
+                .andEqualTo(DjAlreadyRobSingle.DATA_STATUS, 0);
+        List<DjAlreadyRobSingle> lists = djAlreadyRobSingleMapper.selectByExample(example1);
+        if (!lists.isEmpty()) {
+            String userid = lists.get(0).getUserId();
+            Example example = new Example(MainUser.class);
+            example.createCriteria().andEqualTo(MainUser.ID, userid);
+            example.orderBy(GroupUserConfig.CREATE_DATE).desc();
+            List<MainUser> list = userMapper.selectByExample(example);
+            if (list != null && list.size() > 0) {
+                MainUser user = list.get(0);
+                Map<String, Object> map = new HashMap<>();
+                map.put("id", user.getId());
+                map.put("targetId", user.getId());
+                map.put("targetAppKey", messageAPI.getAppKey(AppType.SALE.getDesc()));
+                UserInfoResultDTO userInfoResult = userAPI.getUserInfo(AppType.SALE.getDesc(), userid);
+                if (userInfoResult != null && !CommonUtil.isEmpty(userInfoResult.getNickname())) {
+                    map.put("nickName", "装修顾问 " + userInfoResult.getNickname());
+                } else {
+                    map.put("nickName", "装修顾问 小" + user.getUsername().substring(0, 1));
+                }
+                map.put("name", user.getUsername());
+                map.put("mobile", user.getMobile());
+                Member member1 = memberMapper.selectByPrimaryKey(user.getMemberId());
+                if (member1 != null) {
+                    member1.initPath(address);
+                    map.put("head", member1.getHead());
+                } else {
+                    map.put("head", address + Utils.getHead());
+                }
+                houseResult.setMember(map);
             }
-            map.put("name", user.getUsername());
-            map.put("mobile", user.getMobile());
-            map.put("head", address + "qrcode/logo.png");
-            houseResult.setMember(map);
         }
         houseResult.setDecorationType(house.getDecorationType());
         houseResult.setDrawings(house.getDrawings());

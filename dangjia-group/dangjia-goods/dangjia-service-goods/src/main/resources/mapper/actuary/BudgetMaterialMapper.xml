@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper
-        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper">
 	<sql id="all_columns">
 		id,
@@ -36,42 +36,42 @@
 	<!--精算阶段花费统计-->
 	<select id="getHouseBudgetStageCost" resultType="com.dangjia.acg.dto.actuary.BudgetStageCostDTO">
 		(
-			SELECT
-				house_id houseId,
-				worker_type_id workerTypeId,
-				'0' type,
-				SUM(total_price) totalAmount
-			FROM
-				`dj_actuary_budget_material`
-			WHERE
-				delete_state != 1
-			<if test = "workerTypeId!=null and workerTypeId!=''">
-				AND `worker_type_id` = #{workerTypeId}
-			</if>
-			AND `house_id` = #{houseId}
-			GROUP BY
-				houseId,
-				workerTypeId
+		SELECT
+		house_id houseId,
+		worker_type_id workerTypeId,
+		'0' type,
+		SUM(total_price) totalAmount
+		FROM
+		`dj_actuary_budget_material`
+		WHERE
+		delete_state != 1
+		<if test = "workerTypeId!=null and workerTypeId!=''">
+			AND `worker_type_id` = #{workerTypeId}
+		</if>
+		AND `house_id` = #{houseId}
+		GROUP BY
+		houseId,
+		workerTypeId
 		)
 		UNION ALL
-			(
-				SELECT
-					house_id houseId,
-					worker_type_id workerTypeId,
-					'2' type,
-					SUM(total_price) totalAmount
-				FROM
-					`dj_actuary_budget_worker`
-				WHERE
-					delete_state != 1
-				<if test = "workerTypeId!=null and workerTypeId!=''">
-					AND `worker_type_id` = #{workerTypeId}
-				</if>
-				AND `house_id` = #{houseId}
-				GROUP BY
-					houseId,
-					workerTypeId
-			);
+		(
+		SELECT
+		house_id houseId,
+		worker_type_id workerTypeId,
+		'2' type,
+		SUM(total_price) totalAmount
+		FROM
+		`dj_actuary_budget_worker`
+		WHERE
+		delete_state != 1
+		<if test = "workerTypeId!=null and workerTypeId!=''">
+			AND `worker_type_id` = #{workerTypeId}
+		</if>
+		AND `house_id` = #{houseId}
+		GROUP BY
+		houseId,
+		workerTypeId
+		);
 	</select>
 	<!--精算阶段总花费统计-->
 	<select id="getHouseBudgetTotalAmount" resultType="java.math.BigDecimal">
@@ -90,7 +90,7 @@
 		<include refid="all_columns"/>
 		FROM dj_actuary_budget_material
 		WHERE
-			house_id=#{houseId}
+		house_id=#{houseId}
 		<if test = "categoryId!=null and categoryId!=''">
 			and category_id = #{categoryId}
 		</if>
@@ -130,10 +130,10 @@
 	<!-- 模糊查询 -->
 	<select id="repairBudgetMaterial" resultType="com.dangjia.acg.modle.actuary.BudgetMaterial">
 		SELECT
-		    <include refid="all_columns"/>
+		<include refid="all_columns"/>
 		FROM dj_actuary_budget_material
 		where
-		 steta in (1,2)
+		steta in (1,2)
 		and delete_state != 1
 		and house_id = #{houseId}
 		<if test = "productName!=null and productName!=''">
@@ -246,10 +246,11 @@
 		<include refid="all_columns"/>
 		FROM dj_actuary_budget_material
 		WHERE
-		   house_id=#{houseId}
-		   and worker_type_id =#{workerTypeId}
-		   and product_type = 0
-		   and delete_state in (0,2);
+		house_id=#{houseId}
+		and worker_type_id =#{workerTypeId}
+		and product_type = 0
+		and delete_state in (0,2,4)
+		ORDER BY category_id,product_sn,goods_name desc
 	</select>
 
 	<select id="getBudgetCaiListByGoodsId" resultType="com.dangjia.acg.modle.actuary.BudgetMaterial">
@@ -261,7 +262,8 @@
 		and worker_type_id =#{workerTypeId}
 		and goods_id =#{goodsId}
 		and product_type = 0
-		and delete_state in (0,2);
+		and delete_state in (0,2,4)
+		ORDER BY category_id,product_sn,goods_name desc
 	</select>
 
 
@@ -270,16 +272,17 @@
 		<include refid="all_columns"/>
 		FROM dj_actuary_budget_material
 		WHERE
-		   house_id=#{houseId}
-		   and worker_type_id =#{workerTypeId}
-		   and product_type = 1
-		   and delete_state in (0,2);
+		house_id=#{houseId}
+		and worker_type_id =#{workerTypeId}
+		and product_type = 1
+		and delete_state in (0,2,4)
+		ORDER BY category_id,product_sn,goods_name desc
 	</select>
 
 	<!-- 查询所有 -->
 	<select id="getBudgetMaterial" resultType="java.util.Map">
 		SELECT
-		    <include refid="all_columns"/>
+		<include refid="all_columns"/>
 		FROM dj_actuary_budget_material ORDER BY create_date desc
 	</select>
 
@@ -291,7 +294,7 @@
 		where house_id=#{houseId}
 		and worker_type_id =#{workerTypeId}
 		and delete_state!=1
-		ORDER BY category_id,create_date DESC
+		ORDER BY category_id,product_sn,goods_name desc
 	</select>
 
 	<!-- 根据houseId和workerTypeId查询房子材料精算 -->
@@ -302,7 +305,7 @@
 		where house_id=#{houseId}
 		and worker_type_id =#{workerTypeId}
 		and delete_state!=1
-		ORDER BY create_date desc
+		ORDER BY category_id,product_sn,goods_name desc
 	</select>
 
 	<!-- 根据template_id查询所有 -->

@@ -1,11 +1,11 @@
 package com.dangjia.acg.service.design;
 
-import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.design.DesignListDTO;
@@ -38,6 +38,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Ruking.Cheng
@@ -128,35 +129,37 @@ public class DesignDataService {
             Example example = new Example(PayConfiguration.class);
             Example.Criteria criteria = example.createCriteria()
                     .andEqualTo(PayConfiguration.DATA_STATUS, 0);
-            designDTO.addButton(Utils.getButton("需要修改设计", 1));
-            String message;
-            if (house.getDesignerOk() == 5) {
-                ServerResponse serverResponse = getPlaneMap(houseId);
-                if (!serverResponse.isSuccess()) {
-                    return serverResponse;
+            String message="";
+            if(house.getVisitState() != 3) {
+                designDTO.addButton(Utils.getButton("需要修改设计", 1));
+                if (house.getDesignerOk() == 5) {
+                    ServerResponse serverResponse = getPlaneMap(houseId);
+                    if (!serverResponse.isSuccess()) {
+                        return serverResponse;
+                    }
+                    criteria.andEqualTo(PayConfiguration.TYPE, 1);
+                    message = "温馨提示:您需要修改平面图次数超过%s次后将需要支付改图费,金额为%s元/次的费用。";
+                    QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
+                    designDTO.setData(quantityRoomDTO.getImages());
+                    designDTO.addButton(Utils.getButton("确认平面图", 2));
+                } else {
+                    ServerResponse serverResponse = getConstructionPlans(houseId);
+                    if (!serverResponse.isSuccess()) {
+                        return serverResponse;
+                    }
+                    criteria.andEqualTo(PayConfiguration.TYPE, 2);
+                    message = "温馨提示:您需要修改施工图次数超过%s次后将需要支付改图费,金额为%s元/次的费用。";
+                    QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
+                    designDTO.setData(quantityRoomDTO.getImages());
+                    designDTO.addButton(Utils.getButton("确认施工图", 2));
                 }
-                criteria.andEqualTo(PayConfiguration.TYPE, 1);
-                message = "温馨提示:您需要修改平面图次数超过%s次后将需要支付改图费,金额为%s元/次的费用。";
-                QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
-                designDTO.setData(quantityRoomDTO.getImages());
-                designDTO.addButton(Utils.getButton("确认平面图", 2));
-            } else {
-                ServerResponse serverResponse = getConstructionPlans(houseId);
-                if (!serverResponse.isSuccess()) {
-                    return serverResponse;
+                List<PayConfiguration> payConfigurations = payConfigurationMapper.selectByExample(example);
+                if (payConfigurations != null && payConfigurations.size() > 0) {
+                    PayConfiguration payConfiguration = payConfigurations.get(0);
+                    designDTO.setMessage(String.format(message,
+                            payConfiguration.getFrequency() + "",
+                            payConfiguration.getSumMoney().setScale(2, BigDecimal.ROUND_HALF_UP) + ""));
                 }
-                criteria.andEqualTo(PayConfiguration.TYPE, 2);
-                message = "温馨提示:您需要修改施工图次数超过%s次后将需要支付改图费,金额为%s元/次的费用。";
-                QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
-                designDTO.setData(quantityRoomDTO.getImages());
-                designDTO.addButton(Utils.getButton("确认施工图", 2));
-            }
-            List<PayConfiguration> payConfigurations = payConfigurationMapper.selectByExample(example);
-            if (payConfigurations != null && payConfigurations.size() > 0) {
-                PayConfiguration payConfiguration = payConfigurations.get(0);
-                designDTO.setMessage(String.format(message,
-                        payConfiguration.getFrequency() + "",
-                        payConfiguration.getSumMoney().setScale(2, BigDecimal.ROUND_HALF_UP) + ""));
             }
             designDTO.setHistoryRecord(0);
         } else {
@@ -182,7 +185,7 @@ public class DesignDataService {
                     && ((house.getDecorationType() == 2 && worker.getWorkerType() == 2)
                     || (house.getDecorationType() != 2 && worker.getWorkerType() == 1))) ? 1 : 0;
             designDTO.setHistoryRecord(historyRecord);
-            if (worker != null && worker.getId().equals(house.getMemberId())) {
+            if (house.getVisitState() != 3 && worker != null && worker.getId().equals(house.getMemberId())) {
                 Example example = new Example(DesignBusinessOrder.class);
                 Example.Criteria criteria = example.createCriteria()
                         .andEqualTo(DesignBusinessOrder.DATA_STATUS, 0)
@@ -312,7 +315,7 @@ public class DesignDataService {
      * @param designerType 0：未支付和设计师未抢单，1：带量房，2：平面图，3：施工图，4：完工
      * @param searchKey    业主手机号/房子名称
      */
-    public ServerResponse getDesignList(HttpServletRequest request, PageDTO pageDTO, int designerType, String searchKey) {
+    public ServerResponse getDesignList(HttpServletRequest request, PageDTO pageDTO, int designerType, String searchKey,String workerKey) {
         String userID = request.getParameter(Constants.USERID);
 
         String cityKey = request.getParameter(Constants.CITY_ID);
@@ -326,18 +329,9 @@ public class DesignDataService {
             //当类型小于0时，则查询移除的数据
             dataStatus = "1";
         }
-        List<DesignDTO> designDTOList = houseMapper.getDesignList(designerType, cityKey, searchKey, dataStatus);
+        List<DesignDTO> designDTOList = houseMapper.getDesignList(designerType, cityKey, searchKey,workerKey, dataStatus);
         PageInfo pageResult = new PageInfo(designDTOList);
         for (DesignDTO designDTO : designDTOList) {
-            HouseWorker houseWorker = houseWorkerMapper.getHwByHidAndWtype(designDTO.getHouseId(), 1);
-            if (houseWorker != null) {
-                Member workerSup = memberMapper.selectByPrimaryKey(houseWorker.getWorkerId());
-                if (workerSup != null) {
-                    designDTO.setOperatorName(workerSup.getName());//大管家名字
-                    designDTO.setOperatorMobile(workerSup.getMobile());
-                    designDTO.setOperatorId(workerSup.getId());
-                }
-            }
             ServerResponse serverResponse = getPlaneMap(designDTO.getHouseId());
             if (!serverResponse.isSuccess()) {
                 serverResponse = getConstructionPlans(designDTO.getHouseId());
@@ -437,4 +431,37 @@ public class DesignDataService {
         return ServerResponse.createBySuccess("查询成功", pageResult);
     }
 
+    public ServerResponse getHouseStatistics(String cityId,String workerTypeId,PageDTO pageDTO,String startDate, String endDate) {
+        if (!CommonUtil.isEmpty(startDate) && !CommonUtil.isEmpty(endDate)) {
+            startDate = startDate + " " + "00:00:00";
+            endDate = endDate + " " + "23:59:59";
+        }
+        //"抢单数","业主支付数","已上传精算数","确认精算数","进入施工数","提前结束数"
+        String[] fieldBudgetNames=new String[]{"grabOrders", "payment", "uploadActuarial", "confirmActuarial", "construction", "end"};
+        //"抢单数","业主支付数","量房数","已上传平面图数","确认平面图数","已上传施工图数","确认施工图数","进入精算数","提前结束数"
+        String[] fieldDesignNames=new String[]{
+                "grabOrders", "payment", "measuringRoom", "uploadPlan", "confirmPlan", "uploadConstruction", "confirmConstruction", "sctuarialFigure", "end"};
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        List<Member> memberList = memberMapper.artisanList(cityId, null, workerTypeId, null, "2");
+        List<Map> memberMapList =new ArrayList<>();
+        PageInfo pageResult = new PageInfo(memberList);
+        for (Member member : memberList) {
+            Map map= BeanUtils.beanToMap(member);
+            //设计统计字段
+            if(!CommonUtil.isEmpty(workerTypeId)&&"1".equals(workerTypeId)){
+                for (int i = 0; i < fieldDesignNames.length; i++) {
+                    map.put(fieldDesignNames[i], memberMapper.getDesignStatisticsNum(member.getId(),startDate,endDate,(i+1)));
+                }
+            }
+            //精算统计字段
+            if(!CommonUtil.isEmpty(workerTypeId)&&"2".equals(workerTypeId)){
+                for (int i = 0; i < fieldBudgetNames.length; i++) {
+                    map.put(fieldBudgetNames[i], memberMapper.getBudgetStatisticsNum(member.getId(),startDate,endDate,(i+1)));
+                }
+            }
+            memberMapList.add(map);
+        }
+        pageResult.setList(memberMapList);
+        return ServerResponse.createBySuccess("获取成功", pageResult);
+    }
 }

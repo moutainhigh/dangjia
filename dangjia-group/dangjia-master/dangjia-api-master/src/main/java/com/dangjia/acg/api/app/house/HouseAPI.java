@@ -24,17 +24,8 @@ public interface HouseAPI {
     @PostMapping("app/house/house/setSelectHouse")
     @ApiOperation(value = "切换房产", notes = "切换房产")
     ServerResponse setSelectHouse(@RequestParam("userToken") String userToken,
-                                  @RequestParam("cityId") String cityId,
                                   @RequestParam("houseId") String houseId);
 
-    /**
-     * 房产列表
-     * TODO 1.4.0后删除此接口
-     */
-    @PostMapping("app/house/house/getHouseList")
-    @ApiOperation(value = "房产列表", notes = "房产列表")
-    ServerResponse getHouseList(@RequestParam("userToken") String userToken,
-                                @RequestParam("cityId") String cityId);
 
     /**
      * showdoc
@@ -63,14 +54,6 @@ public interface HouseAPI {
     ServerResponse getMyHouseList(@RequestParam("pageDTO") PageDTO pageDTO,
                                   @RequestParam("userToken") String userToken);
 
-    /**
-     * 我的房产
-     * TODO 1.4.0后删除此接口
-     */
-    @PostMapping("app/house/house/getMyHouse")
-    @ApiOperation(value = "我的房产", notes = "我的房产")
-    ServerResponse getMyHouse(@RequestParam("userToken") String userToken,
-                              @RequestParam("cityId") String cityId);
 
     /**
      * 我的房子
@@ -87,8 +70,12 @@ public interface HouseAPI {
     @ApiOperation(value = "app开始装修", notes = "app开始装修")
     ServerResponse setStartHouse(@RequestParam("userToken") String userToken,
                                  @RequestParam("cityId") String cityId,
-                                 @RequestParam("houseType") int houseType,
-                                 @RequestParam("drawings") int drawings);
+                                 @RequestParam("houseType") Integer houseType,
+                                 @RequestParam("drawings") Integer drawings,
+                                 @RequestParam("latitude") String latitude,
+                                 @RequestParam("longitude") String longitude,
+                                 @RequestParam("address") String address,
+                                 @RequestParam("name") String name);
 
     @PostMapping("app/house/house/revokeHouse")
     @ApiOperation(value = "撤销房子装修", notes = "撤销房子装修")
@@ -102,27 +89,6 @@ public interface HouseAPI {
     ServerResponse setHouseBudgetOk(@RequestParam("houseId") String houseId,
                                     @RequestParam("budgetOk") Integer budgetOk);
 
-    /**
-     * 根据城市，小区，最小最大面积查询房子
-     */
-    @PostMapping("app/house/house/queryHouseByCity")
-    @ApiOperation(value = "根据城市，小区，最小最大面积查询房子", notes = "根据城市，小区，最小最大面积查询房子")
-    ServerResponse queryHouseByCity(@RequestParam("userToken") String userToken,
-                                    @RequestParam("cityId") String cityId,
-                                    @RequestParam("villageId") String villageId,
-                                    @RequestParam("minSquare") Double minSquare,
-                                    @RequestParam("maxSquare") Double maxSquare,
-                                    @RequestParam("houseType") Integer houseType,
-                                    @RequestParam("pageDTO") PageDTO pageDTO);
-
-    /**
-     * TODO 1.4.0后删除此接口
-     * 装修指南
-     */
-    @PostMapping("app/house/house/getRenovationManual")
-    @ApiOperation(value = "装修指南", notes = "装修指南")
-    ServerResponse getRenovationManual(@RequestParam("userToken") String userToken,
-                                       @RequestParam("type") Integer type);
 
     @PostMapping("app/house/house/saveRenovationManual")
     @ApiOperation(value = "保存装修指南", notes = "保存装修指南")
@@ -183,6 +149,7 @@ public interface HouseAPI {
                                               @RequestParam("ids") String ids,
                                               @RequestParam("day") String day,
                                               @RequestParam("workerType") String workerType,
+                                              @RequestParam("type") Integer type,
                                               @RequestParam("pageDTO") PageDTO pageDTO);
 
     @PostMapping("app/house/queryConstructionRecordType")
@@ -254,8 +221,8 @@ public interface HouseAPI {
                                    @RequestParam("unit") String unit,                               //单元号
                                    @RequestParam("number") String number,                           //房间号
                                    @RequestParam("cityId") String cityId,                           //城市Id
-                                   @RequestParam("modelingLayoutId") String modelingLayoutId,       //户型Id
-                                   @RequestParam("villageId") String villageId);                    //小区Id
+                                   @RequestParam("villageId") String villageId,                     //小区Id
+                                   @RequestParam("buildSquare") Double buildSquare);
 
     @PostMapping("app/house/house/updateCustomEdit")
     @ApiOperation(value = "房子申请修改未进场的工序还原", notes = "房子申请修改未进场的工序还原")

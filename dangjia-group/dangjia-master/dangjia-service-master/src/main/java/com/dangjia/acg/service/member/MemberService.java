@@ -3,8 +3,10 @@ package com.dangjia.acg.service.member;
 import com.dangjia.acg.api.MessageAPI;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.sup.SupplierProductAPI;
+import com.dangjia.acg.auth.config.RedisSessionDAO;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -19,6 +21,7 @@ import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.*;
 import com.dangjia.acg.mapper.menu.IMenuConfigurationMapper;
 import com.dangjia.acg.mapper.other.ICityMapper;
+import com.dangjia.acg.mapper.store.IStoreMapper;
 import com.dangjia.acg.mapper.store.IStoreUserMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.mapper.worker.IInsuranceMapper;
@@ -29,6 +32,8 @@ import com.dangjia.acg.modle.house.HouseDistribution;
 import com.dangjia.acg.modle.member.*;
 import com.dangjia.acg.modle.menu.MenuConfiguration;
 import com.dangjia.acg.modle.other.City;
+import com.dangjia.acg.modle.store.Store;
+import com.dangjia.acg.modle.store.StoreUser;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.modle.worker.Insurance;
@@ -38,6 +43,7 @@ import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.util.RKIDCardUtil;
 import com.dangjia.acg.util.TokenUtil;
+import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -69,8 +75,6 @@ public class MemberService {
     private IInsuranceMapper insuranceMapper;
     @Autowired
     private IMemberMapper memberMapper;
-    @Autowired
-    private IStoreUserMapper iStoreUserMapper;
     @Autowired
     private ICityMapper iCityMapper;
     @Autowired
@@ -115,14 +119,16 @@ public class MemberService {
     private RedisClient redisClient;
     @Autowired
     private MessageAPI messageAPI;
+    @Autowired
+    private IStoreMapper iStoreMapper;
+    @Autowired
+    private IStoreUserMapper iStoreUserMapper;
 
     /**
      * 获取用户手机号
      *
-     * @param request
-     * @param id      来源ID
-     * @param idType  1=房屋ID, 2=用户ID, 3=供应商ID, 4=系统用户, 5=验房分销
-     * @return
+     * @param id     来源ID
+     * @param idType 1=房屋ID, 2=用户ID, 3=供应商ID, 4=系统用户, 5=验房分销
      */
     public ServerResponse getMemberMobile(HttpServletRequest request, String id, String idType) {
         String mobile = "";
@@ -142,12 +148,6 @@ public class MemberService {
                     mobile = supplier.getTelephone();
                 }
                 break;
-            case "4":
-                MainUser mainUser = userMapper.selectByPrimaryKey(id);
-                if (mainUser != null) {
-                    mobile = mainUser.getMobile();
-                }
-                break;
             case "5":
                 HouseDistribution distribution = iHouseDistributionMapper.selectByPrimaryKey(id);
                 if (distribution != null) {
@@ -156,7 +156,14 @@ public class MemberService {
                 break;
             default:
                 Member member = memberMapper.selectByPrimaryKey(id);
-                mobile = member == null ? "" : member.getMobile();
+                if (member != null) {
+                    mobile = member.getMobile();
+                } else {
+                    MainUser mainUser = userMapper.selectByPrimaryKey(id);
+                    if (mainUser != null) {
+                        mobile = mainUser.getMobile();
+                    }
+                }
                 break;
         }
         if (CommonUtil.isEmpty(mobile)) {
@@ -169,7 +176,7 @@ public class MemberService {
     /**
      * 获取用户详细资料
      */
-    public ServerResponse getMemberInfo(String userToken) {
+    public ServerResponse getMemberInfo(String userToken, Integer userRole) {
         AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
         if (accessToken == null) {//无效的token
             return ServerResponse.createbyUserTokenError();
@@ -178,13 +185,22 @@ public class MemberService {
             if (user == null) {
                 return ServerResponse.createByErrorMessage("用户不存在");
             }
+            if (!CommonUtil.isEmpty(userRole)&&userRole == 3) {//销售端放开登录权限
+                if (!CommonUtil.isEmpty(accessToken.getUserId())) {
+                    ServerResponse serverResponse = setSale(accessToken, accessToken.getUserId());
+                    if (!serverResponse.isSuccess()) {
+//                    return ServerResponse.createbyUserTokenError();
+                        accessToken.setMemberType(6);
+                    }
+                }
+            }
             updataMember(user, accessToken);
             return ServerResponse.createBySuccess("有效！", accessToken);
         }
     }
 
     // 登录 接口
-    public ServerResponse login(String phone, String password, String userRole) {
+    public ServerResponse login(String phone, String password, Integer userRole) {
         //指定角色查询用户
         Member user = new Member();
         user.setMobile(phone);
@@ -198,36 +214,110 @@ public class MemberService {
         }
     }
 
-    ServerResponse getUser(Member user, String userRole) {
-        if ("1".equals(userRole)) {
-            clueService.sendUser(user, user.getMobile());
+    ServerResponse getUser(Member user, Integer userRole) {
+        if (userRole == 1) {
+            Example example = new Example(Customer.class);
+            example.createCriteria().andEqualTo(Customer.MEMBER_ID, user.getId());
+            List<Customer> customers = iCustomerMapper.selectByExample(example);
+            if (customers.size() <= 0) {
+                clueService.sendUser(user.getId(), user.getMobile(), null, null);
+            }
+        }
+        ServerResponse serverResponse = setAccessToken(user, userRole);
+        if (!serverResponse.isSuccess()) {
+            return serverResponse;
         }
         updateOrInsertInfo(user.getId(), String.valueOf(userRole), user.getPassword());
-        userRole = "role" + userRole + ":" + user.getId();
-        String token = redisClient.getCache(userRole, String.class);
-        //如果用户存在usertoken则清除原来的token数据
-        if (!CommonUtil.isEmpty(token)) {
-            redisClient.deleteCache(token + Constants.SESSIONUSERID);
+        return ServerResponse.createBySuccess("登录成功，正在跳转", serverResponse.getResultObj());
+    }
+
+    private ServerResponse setSale(AccessToken accessToken, String userId) {
+        if (accessToken != null)
+            accessToken.setMemberType(-1);
+        Example example = new Example(Store.class);
+        example.createCriteria().andEqualTo(Store.USER_ID, userId)
+                .andEqualTo(Store.DATA_STATUS, 0);
+        int c = iStoreMapper.selectCountByExample(example);
+        if (c > 0) {
+            if (accessToken != null)
+                accessToken.setMemberType(3);
+        } else {
+            example = new Example(StoreUser.class);
+            example.createCriteria().andEqualTo(StoreUser.USER_ID, userId)
+                    .andEqualTo(StoreUser.DATA_STATUS, 0);
+            List<StoreUser> storeUsers = iStoreUserMapper.selectByExample(example);
+            if (storeUsers.size() > 0) {
+                StoreUser storeUser = storeUsers.get(0);
+                if (storeUser.getType() == 0 || storeUser.getType() == 1) {
+                    if (accessToken != null)
+                        accessToken.setMemberType(storeUser.getType() == 0 ? 4 : 5);
+                } else {
+                    return ServerResponse.createByErrorMessage("当前用户暂无权限使用该终端，请联系管理员");
+                }
+            } else {
+                return ServerResponse.createByErrorMessage("当前用户暂无权限使用该终端，请联系管理员");
+            }
         }
-        user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
-        AccessToken accessToken = TokenUtil.generateAccessToken(user);
-        if (!CommonUtil.isEmpty(user.getWorkerTypeId())) {
-            WorkerType wt = workerTypeMapper.selectByPrimaryKey(user.getWorkerTypeId());
+        return ServerResponse.createBySuccess();
+    }
+
+    private ServerResponse setAccessToken(Member member, Integer userRole) {
+        int memberType = -1;
+        MainUser mainUser = userMapper.findUserByMobile(member.getMobile());
+        if (mainUser != null) {
+            //插入MemberId
+            userMapper.insertMemberId(member.getMobile());
+        }
+        if (userRole == 3) {//销售端放开登录权限
+            if (mainUser == null) {
+//                return ServerResponse.createByErrorMessage("当前用户暂无权限使用该终端，请联系管理员");
+                memberType = 6;
+            } else if (mainUser.getIsJob()) {
+//                return ServerResponse.createByErrorMessage("当前用户已离职，请您联系管理员");
+                memberType = 6;
+            }
+        }
+        member.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
+        AccessToken accessToken = TokenUtil.generateAccessToken(member, mainUser);
+        if (userRole == 3) {//销售端放开登录权限
+            if (memberType == -1) {
+                ServerResponse serverResponse = setSale(accessToken, mainUser.getId());
+                if (!serverResponse.isSuccess()) {
+//                    return serverResponse;
+                    memberType = 6;
+                }
+            }
+            if (memberType != -1) {
+                accessToken.setMemberType(memberType);
+            }
+        }
+        if (!CommonUtil.isEmpty(member.getWorkerTypeId())) {
+            WorkerType wt = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
             if (wt != null) {
                 accessToken.setWorkerTypeName(wt.getName());
             }
         }
-
         redisClient.put(accessToken.getUserToken() + Constants.SESSIONUSERID, accessToken);
-        redisClient.put(userRole, accessToken.getUserToken());
-        groupInfoService.registerJGUsers("zx", new String[]{accessToken.getMemberId()}, new String[1]);
-        groupInfoService.registerJGUsers("gj", new String[]{accessToken.getMemberId()}, new String[1]);
-        MainUser mainUser = userMapper.findUserByMobile(user.getMobile());
-        if (mainUser != null && CommonUtil.isEmpty(mainUser.getMemberId())) {
-            //插入MemberId
-            userMapper.insertMemberId(user.getMobile());
+        String userRoleText = "role" + userRole + ":" + member.getId();
+        String token = redisClient.getCache(userRoleText, String.class);
+        //如果用户存在usertoken则清除原来的token数据
+        if (!CommonUtil.isEmpty(token)) {
+            redisClient.deleteCache(token + Constants.SESSIONUSERID);
         }
-        return ServerResponse.createBySuccess("登录成功，正在跳转", accessToken);
+        redisClient.put(userRoleText, accessToken.getUserToken());
+//        switch (userRole) {
+//            case 1:
+//                groupInfoService.registerJGUsers(AppType.ZHUANGXIU.getDesc(), new String[]{member.getId()}, new String[1]);
+//                break;
+//            case 2:
+//                groupInfoService.registerJGUsers(AppType.GONGJIANG.getDesc(), new String[]{member.getId()}, new String[1]);
+//                break;
+//            case 3:
+//                if (!CommonUtil.isEmpty(accessToken.getUserId()))
+//                    groupInfoService.registerJGUsers(AppType.SALE.getDesc(), new String[]{accessToken.getUserId()}, new String[1]);
+//                break;
+//        }
+        return ServerResponse.createBySuccess(accessToken);
     }
 
     /*
@@ -278,15 +368,17 @@ public class MemberService {
     /**
      * 校验验证码并保存密码
      */
-    public ServerResponse checkRegister(HttpServletRequest request, String phone, int smscode, String password, String invitationCode, Integer userRole) {
+    public ServerResponse checkRegister(HttpServletRequest request, String phone, int smscode, String
+            password, String invitationCode, Integer userRole, String longitude, String latitude) {
         Integer registerCode = redisClient.getCache(Constants.SMS_CODE + phone, Integer.class);
         if (registerCode == null || smscode != registerCode) {
-
             return ServerResponse.createByErrorMessage("验证码错误");
         } else {
+            if (CommonUtil.isEmpty(password) || password.length() < 6) {
+                return ServerResponse.createByErrorMessage("密码不得小于六位数");
+            }
             Member user = new Member();
             user.setMobile(phone);
-            user.setPassword(DigestUtils.md5Hex(password));//验证码正确设置密码
             user.setPraiseRate(new BigDecimal(1));//好评率
             user.setEvaluationScore(new BigDecimal(60));//积分
             user.setCheckType(5);//未提交资料
@@ -303,42 +395,42 @@ public class MemberService {
             user.setNickName("当家-" + CommonUtil.randomString(6));
             user.setInviteNum(0);
             user.setIsCrowned(0);
-            user.setHead("qrcode/logo.png");
+            user.setHead(Utils.getHead());
+            user.setPassword(DigestUtils.md5Hex(password));//验证码正确设置密码
+            user.setCityId(request.getParameter(Constants.CITY_ID));
+            user.setPolicyId(String.valueOf(userRole));
+            if (!CommonUtil.isEmpty(user.getCityId())) {
+                City city = iCityMapper.selectByPrimaryKey(user.getCityId());
+                user.setCityName(city.getName());
+            }
             memberMapper.insertSelective(user);
-
+            updateOrInsertInfo(user.getId(), String.valueOf(userRole), user.getPassword());
+            ServerResponse serverResponse = setAccessToken(user, userRole);
+            if (!serverResponse.isSuccess()) {
+                return serverResponse;
+            }
             MemberCity userCity = new MemberCity();
             userCity.setMemberId(user.getId());
-            userCity.setCityId(request.getParameter(Constants.CITY_ID));
-            if (!CommonUtil.isEmpty(userCity.getCityId())) {
-                City city = iCityMapper.selectByPrimaryKey(userCity.getCityId());
-                userCity.setCityName(city.getName());
+            if (!CommonUtil.isEmpty(user.getCityId())) {
+                userCity.setCityId(user.getCityId());
+                userCity.setCityName(user.getName());
                 memberCityMapper.insert(userCity);
             }
 //            userRole", value = "app应用角色  1为业主角色，2为工匠角色，0为业主和工匠双重身份角色
             if (userRole == 1) {
-                clueService.sendUser(user, user.getMobile());
+                clueService.sendUser(user.getId(), user.getMobile(), longitude, latitude);
             }
-            updateOrInsertInfo(user.getId(), String.valueOf(userRole), user.getPassword());
-            user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
-            AccessToken accessToken = TokenUtil.generateAccessToken(user);
-            if (!CommonUtil.isEmpty(user.getWorkerTypeId())) {
-                WorkerType wt = workerTypeMapper.selectByPrimaryKey(user.getWorkerTypeId());
-                if (wt != null) {
-                    accessToken.setWorkerTypeName(wt.getName());
-                }
-            }
-            redisClient.put(accessToken.getUserToken() + Constants.SESSIONUSERID, accessToken);
             redisClient.deleteCache(Constants.SMS_CODE + phone);
             if (userRole == 1) {
                 try {
                     //检查是否有注册送优惠券活动，并给新注册的用户发放优惠券
                     redPackPayService.checkUpActivity(request, user.getMobile(), "1");
-                    configMessageService.addConfigMessage(request, "zx", user.getId(), "0", "注册通知", "业主您好！等候多时啦，有任何装修问题，请联系我们，谢谢。", null);
+                    configMessageService.addConfigMessage(request, AppType.ZHUANGXIU, user.getId(), "0", "注册通知", "业主您好！等候多时啦，有任何装修问题，请联系我们，谢谢。", null);
                 } catch (Exception e) {
                     logger.error("注册送优惠券活动异常-zhuce：原因：" + e.getMessage(), e);
                 }
             }
-            return ServerResponse.createBySuccess("注册成功", accessToken);
+            return ServerResponse.createBySuccess("注册成功", serverResponse.getResultObj());
         }
     }
 
@@ -364,7 +456,7 @@ public class MemberService {
     /**
      * 工匠提交详细资料
      */
-    public ServerResponse updateWokerRegister(Member user, String userToken, String userRole) {
+    public ServerResponse updateWokerRegister(Member user, String userToken) {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
                 .getRequest();
         AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
@@ -396,9 +488,9 @@ public class MemberService {
             user.setCreateDate(null);
             memberMapper.updateByPrimaryKeySelective(user);
             user = memberMapper.selectByPrimaryKey(user.getId());
-
             user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
-            accessToken = TokenUtil.generateAccessToken(user);
+            MainUser mainUser = userMapper.findUserByMobile(user.getMobile());
+            accessToken = TokenUtil.generateAccessToken(user, mainUser);
             accessToken.setUserToken(userToken);
             accessToken.setTimestamp(accessToken.getTimestamp());
             if (wt != null) {
@@ -428,17 +520,16 @@ public class MemberService {
      * @param idcaodb   身份证反面
      * @param idcaodall 半身照
      * @param idnumber  身份证号
-     * @return
      */
-    public ServerResponse certification(String userToken, String name, String idcaoda, String idcaodb, String idcaodall, String idnumber) {
+    public ServerResponse certification(String userToken, String name, String idcaoda, String idcaodb, String
+            idcaodall, String idnumber) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
         }
-        Member user = (Member) object;
-        user = memberMapper.selectByPrimaryKey(user.getId());
+        Member user = memberMapper.selectByPrimaryKey(((Member) object).getId());
         if (user == null) {
-            return ServerResponse.createByErrorMessage("用户不存在");
+            return ServerResponse.createbyUserTokenError();
         }
         if (user.getCheckType() == 4) {
             //冻结的帐户不能修改资料信息
@@ -485,17 +576,15 @@ public class MemberService {
      *
      * @param userToken    token
      * @param workerTypeId 工种类型的id
-     * @return
      */
     public ServerResponse certificationWorkerType(String userToken, String workerTypeId) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
         }
-        Member user = (Member) object;
-        user = memberMapper.selectByPrimaryKey(user.getId());
+        Member user = memberMapper.selectByPrimaryKey(((Member) object).getId());
         if (user == null) {
-            return ServerResponse.createByErrorMessage("用户不存在");
+            return ServerResponse.createbyUserTokenError();
         }
         if (user.getCheckType() == 4) {
             //冻结的帐户不能修改资料信息
@@ -517,9 +606,6 @@ public class MemberService {
 
     /**
      * 找回密码 获取code
-     *
-     * @return
-     * @throws Exception
      */
     public ServerResponse forgotPasswordCode(String phone) {
         Member user = new Member();
@@ -543,9 +629,6 @@ public class MemberService {
 
     /**
      * 找回密码校验验证码
-     *
-     * @return
-     * @throws Exception
      */
     public ServerResponse checkForgotPasswordCode(String phone, int smscode) {
         Member user = new Member();
@@ -563,13 +646,13 @@ public class MemberService {
 
     /**
      * 找回密码更新密码
-     *
-     * @return
-     * @throws Exception
      */
     public ServerResponse updateForgotPassword(String phone, String password, String token) {
         if (CommonUtil.isEmpty(token)) {
             return ServerResponse.createByErrorMessage("身份认证错误,无认证参数！");
+        }
+        if (CommonUtil.isEmpty(password) || password.length() < 6) {
+            return ServerResponse.createByErrorMessage("密码不得小于六位数");
         }
         Member user = new Member();
         user.setMobile(phone);
@@ -591,7 +674,8 @@ public class MemberService {
             user.setSmscode(0);
             memberMapper.updateByPrimaryKeySelective(user);
             user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
-            AccessToken accessToken = TokenUtil.generateAccessToken(user);
+            MainUser mainUser = userMapper.findUserByMobile(user.getMobile());
+            AccessToken accessToken = TokenUtil.generateAccessToken(user, mainUser);
             redisClient.put(accessToken.getUserToken() + Constants.SESSIONUSERID, accessToken);
             return ServerResponse.createBySuccessMessage("设置密码成功");
         }
@@ -615,32 +699,46 @@ public class MemberService {
             }
             String[] childsLabelIdArr = new String[childsLabelIdList.size()];
             childsLabelIdList.toArray(childsLabelIdArr);
-
             if (!CommonUtil.isEmpty(beginDate) && !CommonUtil.isEmpty(endDate)) {
                 if (beginDate.equals(endDate)) {
                     beginDate = beginDate + " " + "00:00:00";
                     endDate = endDate + " " + "23:59:59";
                 }
             }
-            //数据权限控制（总部根据城市查看全部客户，城市管理者根据指定城市查看所有客户，店长可看门店所有销售的客户，销售只能看自己的客户）
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<Member> list = memberMapper.getMemberListByName(cityId, searchKey, stage, userRole, childsLabelIdArr, orderBy, type, userKey, userId, beginDate, endDate);
             PageInfo pageResult = new PageInfo(list);
             List<MemberCustomerDTO> mcDTOList = new ArrayList<>();
             for (Member member : list) {
                 logger.info("getMemberListByName id:" + member.getId());
-                Customer customer = iCustomerMapper.getCustomerByMemberId(member.getId());
+                Customer customer = iCustomerMapper.getCustomerBy(member.getId());
                 //每个业主增加关联 客服跟进
                 if (customer == null) {
                     customer = new Customer();
                     customer.setMemberId(member.getId());
-                    customer.setStage(0);
+                    customer.setStage(1);
+                    customer.setTurnStatus(0);
+                    customer.setPhaseStatus(1);
+                    customer.setClueType(0);
+                    customer.setDataStatus(0);
+                    customer.setTips("0");
+                    Example example = new Example(MemberCity.class);
+                    example.createCriteria().andEqualTo(MemberCity.MEMBER_ID, member.getId());
+                    List<MemberCity> memberCities = memberCityMapper.selectByExample(example);
+                    customer.setCityId(memberCities.size() > 0 ? memberCities.get(0).getCityId() : null);
+                    customer.setPhaseStatus(1);
+                    iCustomerMapper.insert(customer);
                 } else {
                     if (customer.getRemindRecordId() != null)//有提醒记录的 更新 为最新的更新沟通记录
+                    {
                         customerRecordService.updateMaxNearRemind(customer);
+                    }
                 }
-
                 MemberCustomerDTO mcDTO = new MemberCustomerDTO();
+                mcDTO.setMcId(customer.getId());
+                logger.info("customer.getId()===================" + customer.getId());
+                logger.info("customer.getPhaseStatus()===================" + customer.getPhaseStatus());
+                mcDTO.setPhaseStatus(customer.getPhaseStatus());
                 mcDTO.setOrderDate(member.getModifyDate());
                 mcDTO.setMemberId(member.getId());
                 mcDTO.setMemberName(member.getName());
@@ -749,10 +847,8 @@ public class MemberService {
 
     /**
      * 我的邀请码
-     *
-     * @return
      */
-    public ServerResponse getMyInvitation(String userToken) {
+    public ServerResponse getMyInvitation(String userToken, Integer userRole) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -760,20 +856,26 @@ public class MemberService {
         Member member = (Member) object;
         Example example = new Example(Member.class);
         example.createCriteria().andEqualTo(Member.OTHERS_INVITATION_CODE, member.getInvitationCode());
-        Map memberMap = BeanUtils.beanToMap(member);
+        Map<String, Object> memberMap = new HashMap<>();
         memberMap.put("invitationNum", memberMapper.selectCountByExample(example));
+        memberMap.put("invitationCode", member.getInvitationCode());
+        memberMap.put("id", member.getId());
+        if (userRole != null && userRole == 3) {
+            String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+            MainUser mainUser = userMapper.findUserByMobile(member.getMobile());
+            memberMap.put("codeData", url + String.format("codeDetails?invitationCode=%s&memberId=%s&userId=%s&title=%s",
+                    member.getInvitationCode(), member.getId(), mainUser == null ? "" : mainUser.getId(), "好工匠 在当家"));
+        }
         return ServerResponse.createBySuccess("ok", memberMap);
     }
 
     /**
      * 查询用户实名认证列表
      *
-     * @param pageDTO
      * @param searchKey     申请人或申请人手机好关键字
      * @param realNameState -1:全部，1:认证中，2:认证被驳回，3:认证通过 （默认-1）
-     * @return
      */
-    public ServerResponse certificationList(PageDTO pageDTO, String searchKey, Integer realNameState) {
+    public ServerResponse certificationList(PageDTO pageDTO, String searchKey, String cityId, String policyId, Integer realNameState) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             Example example = new Example(Member.class);
@@ -782,6 +884,12 @@ public class MemberService {
                 criteria.andCondition("(name like '%" + searchKey
                         + "%' or nick_name like '%" + searchKey
                         + "%' or mobile like '%" + searchKey + "%')");
+            }
+            if (!CommonUtil.isEmpty(cityId)) {
+                criteria.andEqualTo(Member.CITY_ID, cityId);
+            }
+            if (!CommonUtil.isEmpty(policyId)) {
+                criteria.andEqualTo(Member.POLICY_ID, policyId);
             }
             if (realNameState == null) realNameState = -1;
             switch (realNameState) {
@@ -919,6 +1027,9 @@ public class MemberService {
         userRole = "role" + 2 + ":" + user.getId();
         token = redisClient.getCache(userRole, String.class);
         updataMember(user, token);
+        userRole = "role" + 3 + ":" + user.getId();
+        token = redisClient.getCache(userRole, String.class);
+        updataMember(user, token);
     }
 
     private void updataMember(Member user, String token) {
@@ -929,7 +1040,7 @@ public class MemberService {
     }
 
     private void updataMember(Member user, AccessToken accessToken) {
-        if (accessToken != null) {//无效的token
+        if (accessToken != null) {
             user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
             user.setPassword(null);
             accessToken.setMember(user);
@@ -940,8 +1051,6 @@ public class MemberService {
                 }
             }
             redisClient.put(accessToken.getUserToken() + Constants.SESSIONUSERID, accessToken);
-            groupInfoService.registerJGUsers("zx", new String[]{accessToken.getMemberId()}, new String[1]);
-            groupInfoService.registerJGUsers("gj", new String[]{accessToken.getMemberId()}, new String[1]);
         }
     }
 
@@ -983,7 +1092,7 @@ public class MemberService {
             map.put("name", member.getNickName());
             map.put("mobile", member.getMobile());
             map.put("head", member.getHead());
-            map.put("appKey", messageAPI.getAppKey("zx"));
+            map.put("appKey", messageAPI.getAppKey(AppType.ZHUANGXIU.getDesc()));
             datas.add(map);
         }
         example = new Example(MemberInfo.class);
@@ -1004,8 +1113,23 @@ public class MemberService {
                     map.put("workerName", wt.getName());
                 }
             }
-            map.put("appKey", messageAPI.getAppKey("gj"));
+            map.put("appKey", messageAPI.getAppKey(AppType.GONGJIANG.getDesc()));
             datas.add(map);
+        }
+        MainUser mainUser = userMapper.findUserByMobile(member.getMobile());
+        if (mainUser != null) {
+            ServerResponse serverResponse = setSale(null, mainUser.getId());
+            if (serverResponse.isSuccess()) {//有销售
+                Map<String, Object> map = new HashMap<>();
+                map.put("memberType", 2);
+                map.put("id", mainUser.getId());
+                map.put("nickName", member.getNickName());
+                map.put("name", member.getNickName());
+                map.put("mobile", member.getMobile());
+                map.put("head", member.getHead());
+                map.put("appKey", messageAPI.getAppKey(AppType.SALE.getDesc()));
+                datas.add(map);
+            }
         }
         if (datas.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无该用户");
@@ -1155,7 +1279,7 @@ public class MemberService {
     /**
      * 获取工匠保险信息
      *
-     * @param type     保险类型 0=首保 1=续保
+     * @param type      保险类型 0=首保 1=续保
      * @param searchKey 工人名称或电话
      * @return
      */
@@ -1199,10 +1323,10 @@ public class MemberService {
      * 获取我的保险信息
      *
      * @param userToken
-     * @param pageDTO 页码
+     * @param pageDTO   页码
      * @return
      */
-    public ServerResponse myInsurances(String userToken,PageDTO pageDTO) {
+    public ServerResponse myInsurances(String userToken, PageDTO pageDTO) {
 
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
@@ -1212,7 +1336,7 @@ public class MemberService {
         List<Map<String, Object>> datas = new ArrayList<>();
         Example example = new Example(Insurance.class);
         Example.Criteria criteria = example.createCriteria();
-            criteria.andEqualTo(Insurance.WORKER_ID, operator);
+        criteria.andEqualTo(Insurance.WORKER_ID, operator);
         example.orderBy(Insurance.CREATE_DATE).desc();
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<Insurance> infos = insuranceMapper.selectByExample(example);

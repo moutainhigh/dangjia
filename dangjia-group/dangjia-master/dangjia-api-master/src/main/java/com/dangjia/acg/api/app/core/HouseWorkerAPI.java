@@ -112,14 +112,6 @@ public interface HouseWorkerAPI {
     ServerResponse getAdvanceInAdvance(@RequestParam("userToken") String userToken,
                                        @RequestParam("houseFlowId") String houseFlowId);
 
-    /**
-     * TODO 1.4.0后删除此接口
-     *
-     * @return
-     */
-    @PostMapping("app/core/houseWorker/getHouseFlowList")
-    @ApiOperation(value = "查询工地列表", notes = "查询工地列表")
-    ServerResponse getHouseFlowList(@RequestParam("userToken") String userToken);
 
     /**
      * showdoc

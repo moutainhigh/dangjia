@@ -4,6 +4,7 @@ import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.user.MainUserAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.Constants;
+import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
@@ -53,6 +54,7 @@ public class MainUserController implements MainUserAPI {
 
     @Autowired
     private IDepartmentMapper departmentMapper;
+
     /**
      * 系统来源切换
      *
@@ -76,7 +78,7 @@ public class MainUserController implements MainUserAPI {
         if(department.getCityId().indexOf(cityId)<0){
             return ServerResponse.createByErrorMessage("登录用户暂未分配该城市，请选择("+department.getCityName()+")");
         }
-        redisClient.put("sysSource:" + userID, source);
+//        redisClient.put("sysSource:" + userID, source);
         return ServerResponse.createBySuccessMessage("ok");
     }
 
@@ -89,7 +91,8 @@ public class MainUserController implements MainUserAPI {
     @ApiMethod
     public ServerResponse getUsers(HttpServletRequest request, PageDTO pageDTO, UserSearchDTO userSearch,Integer isJob) {
         String userID = request.getParameter(Constants.USERID);
-        return userService.getUsers(userID,userSearch, pageDTO,isJob);
+        String cityId = request.getParameter(Constants.CITY_ID);
+        return userService.getUsers( cityId,userID,userSearch, pageDTO,isJob);
     }
 
     /**
@@ -100,34 +103,14 @@ public class MainUserController implements MainUserAPI {
     @Override
     @ApiMethod
     public ServerResponse setJobUser(HttpServletRequest request, String id, boolean isJob) {
-        logger.debug("设置用户是否离职！id:" + id + ",isJob:" + isJob);
-        ServerResponse msg = null;
-        try {
-            if (null == id) {
-                logger.debug("设置用户是否离职，结果=请求参数有误，请您稍后再试");
-                ServerResponse.createByErrorMessage("请求参数有误，请您稍后再试");
-            }
-            String userID = request.getParameter(Constants.USERID);
-            MainUser existUser = redisClient.getCache(Constants.USER_KEY + userID, MainUser.class);
-            if (null == existUser) {
-                throw new BaseException(ServerCode.THE_LANDING_TIME_PLEASE_LAND_AGAIN, ServerCode.THE_LANDING_TIME_PLEASE_LAND_AGAIN.getDesc());
-            }
-            // 设置用户是否离职
-            msg = userService.setJobUser(id, isJob, existUser.getId());
-            logger.info("设置用户是否离职成功！userID=" + id + ",isJob:" + isJob
-                    + "，操作的用户ID=" + existUser.getId());
-        } catch (Exception e) {
-            e.printStackTrace();
-            logger.error("设置用户是否离职异常！", e);
-            msg = ServerResponse.createByErrorMessage("操作异常，请您稍后再试！");
-        }
-        return msg;
+        return userService.setJobUser(request, id, isJob);
     }
 
     @Override
     @ApiMethod
     public ServerResponse setReceiveUser(HttpServletRequest request, String id, Integer type) {
-        return userService.setReceiveUser(id, type);
+        String cityId = request.getParameter(Constants.CITY_ID);
+        return userService.setReceiveUser(cityId,id, type);
     }
 
     /**
@@ -350,11 +333,11 @@ public class MainUserController implements MainUserAPI {
             logger.debug("用户登录，用户验证开始！member=" + user.getMobile());
             redisClient.put(Constants.USER_KEY + existUser.getId(), existUser);
             redisClient.put(Constants.CITY_KEY + existUser.getId(), department.getCityId());
-            groupInfoService.registerJGUsers("gj", new String[]{existUser.getId()}, new String[1]);
+            groupInfoService.registerJGUsers(AppType.SALE.getDesc(), new String[]{existUser.getId()}, new String[1]);
             logger.info("用户登录，用户验证通过！member=" + user.getMobile());
             msg = ServerResponse.createBySuccess("用户登录，用户验证通过！member=" + user.getMobile(), existUser.getId());
             MainUser mainUser = userMapper.selectByPrimaryKey(existUser.getId());
-            if(mainUser!=null&&CommonUtil.isEmpty(mainUser.getMemberId())) {
+            if (mainUser != null) {
                 //插入MemberId
                 userMapper.insertMemberId(user.getMobile());
             }
@@ -383,7 +366,7 @@ public class MainUserController implements MainUserAPI {
             }
             List<PermissionVO> source = redisClient.getListCache("userPerms:" + existUser.getId(), PermissionVO.class);
             if (source == null || source.size() == 0) {
-                ServerResponse pvo = mainAuthService.getUserPerms(userID,existUser.getId());
+                ServerResponse pvo = mainAuthService.getUserPerms(userID, existUser.getId());
                 source = (List) pvo.getResultObj();
                 redisClient.putListCache("userPerms" + existUser.getId(), source);
             }

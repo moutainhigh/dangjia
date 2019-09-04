@@ -28,8 +28,8 @@ public class ConfigApp extends BaseEntity {
     private String name;
 
     @Column(name = "app_type")
-    @Desc(value = "来源应用（1:安卓-业主端，2:安卓-工匠端，3:iOS-业主端，4:iOS-工匠端）")
-    @ApiModelProperty("来源应用（1:安卓-业主端，2:安卓-工匠端，3:iOS-业主端，4:iOS-工匠端）")
+    @Desc(value = "来源应用（1:安卓-业主端，2:安卓-工匠端，3:iOS-业主端，4:iOS-工匠端，5:安卓-销售端，6:iOS-销售端）")
+    @ApiModelProperty("来源应用（1:安卓-业主端，2:安卓-工匠端，3:iOS-业主端，4:iOS-工匠端，5:安卓-销售端，6:iOS-销售端）")
     private String appType;
 
     @Column(name = "version")

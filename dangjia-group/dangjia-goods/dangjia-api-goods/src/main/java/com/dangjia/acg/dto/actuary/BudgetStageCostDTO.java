@@ -25,7 +25,7 @@ public class BudgetStageCostDTO extends BaseEntity {
     @ApiModelProperty("工种id")
     private String workerTypeId;
 
-    @ApiModelProperty("0：材料；1：服务 2：人工 ")
+    @ApiModelProperty("0：材料；1：包工包料 2：人工 ")
     private Integer type;
 
 

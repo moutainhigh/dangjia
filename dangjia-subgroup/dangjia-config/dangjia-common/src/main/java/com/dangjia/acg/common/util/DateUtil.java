@@ -23,6 +23,8 @@ public class DateUtil implements AutoCloseable, Serializable {
      */
     private static Logger log = Logger.getLogger(DateUtil.class);
     /***/
+    public static final String FORMAT = "yyyy-MM";
+    /***/
     public static final String FORMAT1 = "yyyy-MM-dd";
     /***/
     public static final String FORMAT2 = "yyyy-MM-dd HH:mm:ss";
@@ -274,7 +276,7 @@ public class DateUtil implements AutoCloseable, Serializable {
     }
 
     /**
-     * 取得某个月凌晨0:00时间
+     * 取得某个月第一天凌晨0:00时间
      *
      * @param date 日期
      * @return Date
@@ -282,8 +284,9 @@ public class DateUtil implements AutoCloseable, Serializable {
     public static Date getMonthFirst(Date date) {
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
-        cal.add(Calendar.MONTH, 0);
-        cal.set(Calendar.DAY_OF_MONTH, 1);
+        cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONDAY), cal.get(Calendar.DAY_OF_MONTH), 0, 0, 0);
+        cal.set(Calendar.DAY_OF_MONTH, cal.getActualMinimum(Calendar.DAY_OF_MONTH));
+        cal.set(Calendar.MILLISECOND, 0);
         return cal.getTime();
     }
 
@@ -296,8 +299,10 @@ public class DateUtil implements AutoCloseable, Serializable {
     public static Date getMonthLast(Date date) {
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
-        cal.add(Calendar.MONTH, 1);
-        //cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
+        cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONDAY), cal.get(Calendar.DAY_OF_MONTH), 23, 59, 59);
+        cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
+//        cal.set(Calendar.HOUR_OF_DAY, 24);
+        cal.set(Calendar.MILLISECOND, 0);
         return cal.getTime();
     }
 
@@ -610,6 +615,33 @@ public class DateUtil implements AutoCloseable, Serializable {
         }
     }
 
+    /**
+     * 两个时间相差多少天多少秒多少小时
+     * @param first
+     * @param second
+     * @return
+     * @throws ParseException
+     */
+    public static String daysBetween(Date first, Date second) throws ParseException {
+        SimpleDateFormat sformat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        first = sformat.parse(sformat.format(first));
+        second = sformat.parse(sformat.format(second));
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(first);
+        long firstMills = calendar.getTimeInMillis();
+        calendar.setTime(second);
+        long secondMills = calendar.getTimeInMillis();
+        long rateD = 1000 * 60 * 60 * 24;
+        long rateH = 1000 * 60 * 60;
+        long rateM = 1000 * 60;
+        long rateS = 1000;
+        long mills = secondMills - firstMills;
+        long days = mills / rateD;
+        long hours = (mills % rateD) / rateH;
+        long minutes = (mills % rateD % rateH) / rateM;
+        long seconds = (mills % rateD % rateH % rateM) / rateS;
+        return "" + days + "天" + hours + "时" + minutes + "分" + seconds + "秒";
+    }
 
     /***
      * 计算两个日期之间的天数
@@ -959,6 +991,7 @@ public class DateUtil implements AutoCloseable, Serializable {
         Calendar cal = Calendar.getInstance();
         cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONDAY), cal.get(Calendar.DAY_OF_MONTH), 0, 0, 0);
         cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+        cal.set(Calendar.MILLISECOND, 0);
         return cal.getTime();
     }
 
@@ -983,6 +1016,7 @@ public class DateUtil implements AutoCloseable, Serializable {
         Calendar cal = Calendar.getInstance();
         cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONDAY), cal.get(Calendar.DAY_OF_MONTH), 0, 0, 0);
         cal.set(Calendar.DAY_OF_MONTH, cal.getActualMinimum(Calendar.DAY_OF_MONTH));
+        cal.set(Calendar.MILLISECOND, 0);
         return cal.getTime();
     }
 
@@ -994,9 +1028,10 @@ public class DateUtil implements AutoCloseable, Serializable {
      */
     public static Date getTimesMonthnight() {
         Calendar cal = Calendar.getInstance();
-        cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONDAY), cal.get(Calendar.DAY_OF_MONTH), 0, 0, 0);
+        cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONDAY), cal.get(Calendar.DAY_OF_MONTH), 23, 59, 59);
         cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
-        cal.set(Calendar.HOUR_OF_DAY, 24);
+//        cal.set(Calendar.HOUR_OF_DAY, 24);
+        cal.set(Calendar.MILLISECOND, 0);
         return cal.getTime();
     }
 
@@ -1084,6 +1119,7 @@ public class DateUtil implements AutoCloseable, Serializable {
         cal.setTime(time);
         cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONDAY), cal.get(Calendar.DAY_OF_MONTH), 0, 0, 0);
         cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+        cal.set(Calendar.MILLISECOND, 0);
         return cal.getTime();
     }
 

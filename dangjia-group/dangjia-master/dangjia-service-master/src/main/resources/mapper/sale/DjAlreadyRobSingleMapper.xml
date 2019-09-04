@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.sale.DjAlreadyRobSingleMapper">
+
+    <!--查询成交量-->
+    <select id="selectArr" resultType="com.dangjia.acg.modle.sale.royalty.DjAlreadyRobSingle" parameterType="java.util.Map">
+        select
+        dj.id as id,
+        dj.user_id as userId
+		from dj_already_rob_single dj
+		where dj.user_id = #{userId}
+		and DATE_FORMAT(create_date, '%Y-%m') = #{createDate}
+    </select>
+
+    <update id="upDateDataStatus" parameterType="java.util.Map">
+        UPDATE dj_already_rob_single
+        SET
+            data_status = #{dataStatus}
+        WHERE
+        house_id = #{houseId}
+    </update>
+
+
+
+
+</mapper>

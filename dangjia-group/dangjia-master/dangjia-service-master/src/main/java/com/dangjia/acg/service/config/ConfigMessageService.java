@@ -4,6 +4,8 @@ import com.dangjia.acg.api.MessageAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.enums.AppType;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
@@ -46,12 +48,15 @@ public class ConfigMessageService {
      * @param configMessage
      * @return
      */
-    public ServerResponse queryConfigMessages(HttpServletRequest request, PageDTO pageDTO, ConfigMessage configMessage) {
+    public ServerResponse queryConfigMessages(HttpServletRequest request, PageDTO pageDTO) {
         Example example = new Example(ConfigMessage.class);
         example.createCriteria().andNotEqualTo(ConfigMessage.NAME, "");
         example.orderBy("createDate").desc();
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<ConfigMessage> list = configMessageMapper.selectByExample(example);
+        if (list.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
         PageInfo pageResult = new PageInfo(list);
         return ServerResponse.createBySuccess("ok", pageResult);
     }
@@ -88,6 +93,9 @@ public class ConfigMessageService {
         example.orderBy("createDate").desc();
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<ConfigMessage> list = configMessageMapper.selectByExample(example);
+        if (list.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
         for (ConfigMessage msg : list) {
             msg.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
         }
@@ -96,68 +104,147 @@ public class ConfigMessageService {
     }
 
     /**
+     * 推送至个人消息（即将废弃）
+     */
+    public ServerResponse addConfigMessage(HttpServletRequest request, AppType appType, String memberId,
+                                           String targetType, String title, String alert, String typeText) {
+        String data = null;
+        int type = 0;
+        typeText = (!CommonUtil.isEmpty(typeText)) ? typeText : "2";
+        if (!CommonUtil.isEmpty(typeText) && "6".equals(typeText)) {
+            data = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.GJPageAddress.JUGLELIST,
+                    "", "", "评价记录");
+        } else if (!CommonUtil.isEmpty(typeText) && "7".equals(typeText)) {
+            data = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.GJPageAddress.JIANGFALIST,
+                    "", "", "奖罚记录");
+        } else if (!StringUtils.isNumeric(typeText)) {
+            data = typeText;
+        } else {
+            type = Integer.parseInt(typeText);
+        }
+        return addConfigMessage(appType, memberId, targetType, title, alert, type, data);
+    }
+
+    /**
+     * 推送至个人消息(无语音，type！=0）
+     *
+     * @param appType  应用端类别
+     * @param memberId 接收人
+     * @param title    推送标题
+     * @param alert    推送内容
+     * @param type     动作类型（0:直接跳转URL，1:跳转支付，2:只显示，3:登录，4:工匠端抢单界面/销售抢单页，5:工匠端施工界面/销售首页，6：销售业绩页）
+     * @return
+     */
+    public ServerResponse addConfigMessage(AppType appType, String memberId, String title, String alert, int type) {
+        return addConfigMessage(appType, memberId, title, alert, type, null);
+    }
+
+    /**
+     * 推送至个人消息(无语音）
+     *
+     * @param appType  应用端类别
+     * @param memberId 接收人
+     * @param title    推送标题
+     * @param alert    推送内容
+     * @param type     动作类型（0:直接跳转URL，1:跳转支付，2:只显示，3:登录，4:工匠端抢单界面/销售抢单页，5:工匠端施工界面/销售首页，6：销售业绩页）
+     * @param data     跳转地址
+     * @return
+     */
+    public ServerResponse addConfigMessage(AppType appType, String memberId, String title, String alert, int type, String data) {
+        return addConfigMessage(appType, memberId, title, alert, type, data, null);
+    }
+
+    /**
      * 推送至个人消息
      *
-     * @param request
-     * @param appType
+     * @param appType  应用端类别
+     * @param memberId 接收人
+     * @param title    推送标题
+     * @param alert    推送内容
+     * @param type     动作类型（0:直接跳转URL，1:跳转支付，2:只显示，3:登录，4:工匠端抢单界面/销售抢单页，5:工匠端施工界面/销售首页，6：销售业绩页）
+     * @param data     跳转地址
+     * @param speak    语音提示内容
+     * @return
+     */
+    public ServerResponse addConfigMessage(AppType appType, String memberId, String title, String alert, int type, String data, String speak) {
+        return addConfigMessage(appType, memberId, "0", title, alert, type, data, speak);
+    }
+
+    /**
+     * 推送消息(无语音）
+     *
+     * @param appType    应用端类别
      * @param memberId   接收人
      * @param targetType 消息类型 0=个人推送  1=全推
      * @param title      推送标题
      * @param alert      推送内容
-     * @param type       动作类型 动作类型（0:直接跳转URL，1:跳转支付，2:只显示，3:登录，4:工匠端抢单界面，5:工匠端施工界面，6:评价记录，7:奖罚记录）
+     * @param type       动作类型（0:直接跳转URL，1:跳转支付，2:只显示，3:登录，4:工匠端抢单界面/销售抢单页，5:工匠端施工界面/销售首页，6：销售业绩页）
+     * @param data       跳转地址
      * @return
      */
-    public ServerResponse addConfigMessage(HttpServletRequest request, String appType, String memberId, String targetType, String title, String alert, String type) {
+    public ServerResponse addConfigMessage(AppType appType, String memberId, String targetType,
+                                           String title, String alert, int type, String data) {
+        return addConfigMessage(appType, memberId, targetType, title, alert, type, data, null);
+    }
+
+    /**
+     * 推送消息
+     *
+     * @param appType    应用端类别
+     * @param memberId   接收人
+     * @param targetType 消息类型 0=个人推送  1=全推
+     * @param title      推送标题
+     * @param alert      推送内容
+     * @param type       动作类型（0:直接跳转URL，1:跳转支付，2:只显示，3:登录，4:工匠端抢单界面/销售抢单页，5:工匠端施工界面/销售首页，6：销售业绩页）
+     * @param data       跳转地址
+     * @param speak      语音提示内容
+     * @return
+     */
+    public ServerResponse addConfigMessage(AppType appType, String memberId, String targetType,
+                                           String title, String alert, int type, String data, String speak) {
         ConfigMessage configMessage = new ConfigMessage();
-        appType = (!CommonUtil.isEmpty(appType) && appType.equals("zx")) ? "1" : "2";
-        type = (!CommonUtil.isEmpty(type)) ? type : "2";
-        configMessage.setAppType(appType);
+        if (appType == null) {
+            appType = AppType.ZHUANGXIU;
+        }
+        configMessage.setAppType(appType.getCode() + "");
         configMessage.setTargetUid(memberId);
         configMessage.setTargetType(targetType);
         configMessage.setName(title);
         configMessage.setText(alert);
-        if (!CommonUtil.isEmpty(type) && "6".equals(type)) {
-            String pingJia = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.GJPageAddress.JUGLELIST,
-                    "", "", "评价记录");
-            configMessage.setType(0);
-            configMessage.setData(pingJia);
-        } else if (!CommonUtil.isEmpty(type) && "7".equals(type)) {
-            String pingJia = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.GJPageAddress.JIANGFALIST,
-                    "", "", "奖罚记录");
-            configMessage.setType(0);
-            configMessage.setData(pingJia);
-        } else if (!StringUtils.isNumeric(type)) {
-            configMessage.setType(0);
-            configMessage.setData(type);
-        } else {
-            configMessage.setType(Integer.parseInt(type));
-        }
-        return addConfigMessage(request, configMessage);
+        configMessage.setType(type);
+        configMessage.setData(data);
+        configMessage.setSpeak(speak);
+        return addConfigMessage(configMessage);
     }
 
-    /**
-     * 新增
-     *
-     * @param configMessage
-     * @return
-     */
-    public ServerResponse addConfigMessage(HttpServletRequest request, ConfigMessage configMessage) {
 
+    public ServerResponse addConfigMessage(ConfigMessage configMessage) {
         try {
-
             if (this.configMessageMapper.insertSelective(configMessage) > 0) {
                 new Thread(() -> {
                     if (CommonUtil.isEmpty(configMessage.getIcon())) {
                         //设置默认图标
                         configMessage.setIcon("qrcode/push.png");
                     }
-                    //发送推送消息
-                    String appType = (!CommonUtil.isEmpty(configMessage.getAppType()) && configMessage.getAppType().equals("1")) ? "zx" : "gj";
+                    AppType appType = AppType.ZHUANGXIU;
+                    if (!CommonUtil.isEmpty(configMessage.getAppType())) {
+                        switch (configMessage.getAppType()) {
+                            case "1":
+                                appType = AppType.ZHUANGXIU;
+                                break;
+                            case "2":
+                                appType = AppType.GONGJIANG;
+                                break;
+                            case "3":
+                                appType = AppType.SALE;
+                                break;
+                        }
+                    }
                     if (!CommonUtil.isEmpty(configMessage.getTargetUid()) && configMessage.getTargetType().equals("0")) {
-                        messageAPI.sendMemberIdPush(appType, new String[]{configMessage.getTargetUid()}, configMessage.getName(), configMessage.getText(), configMessage.getSpeak());
+                        messageAPI.sendMemberIdPush(appType.getDesc(), new String[]{configMessage.getTargetUid()}, configMessage.getName(), configMessage.getText(), configMessage.getSpeak());
                     }
                     if (configMessage.getTargetType().equals("1")) {
-                        messageAPI.sendSysPush(appType, configMessage.getName(), configMessage.getText(), configMessage.getSpeak());
+                        messageAPI.sendSysPush(appType.getDesc(), configMessage.getName(), configMessage.getText(), configMessage.getSpeak());
                     }
                 }).start();
             }

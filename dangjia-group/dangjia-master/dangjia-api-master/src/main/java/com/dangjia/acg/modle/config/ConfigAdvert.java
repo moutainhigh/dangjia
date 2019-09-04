@@ -24,8 +24,8 @@ import java.util.Date;
 public class ConfigAdvert extends BaseEntity {
 
     @Column(name = "app_type")
-    @Desc(value = "来源应用（1:业主端，2:工匠端）")
-    @ApiModelProperty("来源应用（1:业主端，2:工匠端）")
+    @Desc(value = "来源应用（1:业主端，2:工匠端，3:销售端）")
+    @ApiModelProperty("来源应用（1:业主端，2:工匠端，3:销售端）")
     private String appType;
 
     @Column(name = "is_show")

@@ -8,6 +8,7 @@ import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
@@ -533,10 +534,10 @@ public class PaymentService {
 
                 House house = houseMapper.selectByPrimaryKey(houseId);
                 if (workerType == 3) {
-                    configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "大管家要包工包料",
+                    configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "大管家要包工包料",
                             String.format(DjConstants.PushMessage.STEWARD_Y_SERVER, house.getHouseName()), "");
                 } else {
-                    configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "工匠要材料", String.format
+                    configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "工匠要材料", String.format
                             (DjConstants.PushMessage.CRAFTSMAN_Y_MATERIAL, house.getHouseName()), "");
                 }
             }
@@ -581,7 +582,7 @@ public class PaymentService {
                 order.setTotalAmount(hwo.getWorkPrice());//设计费
                 order.setWorkerTypeName("设计订单");
                 order.setWorkerTypeId(hwo.getWorkerTypeId());
-                HouseStyleType houseStyleType = houseStyleTypeMapper.getStyleByName(house.getStyle());
+                HouseStyleType houseStyleType = houseStyleTypeMapper.selectByPrimaryKey(house.getStyleId());
                 order.setStyleName(house.getStyle());
                 order.setStylePrice(houseStyleType.getPrice());//风格价格
                 order.setType(1);//人工订单
@@ -604,7 +605,7 @@ public class PaymentService {
                 house.setBudgetOk(1);//房间工种表里标记开始精算
                 houseMapper.updateByPrimaryKeySelective(house);
                 //推送消息给精算师业主已付款
-                configMessageService.addConfigMessage(null, "gj", house.getMemberId(),
+                configMessageService.addConfigMessage(null, AppType.GONGJIANG, house.getMemberId(),
                         "0", "业主支付精算费", String.format(DjConstants.PushMessage.JINGSUANFEIZHIFUWANC,
                                 house.getHouseName()), "");
             } else {//其它工种
@@ -629,22 +630,22 @@ public class PaymentService {
             //app推送和发送短信给工匠
             if (houseWorker.getWorkerType() == 1) {//设计师
 
-                configMessageService.addConfigMessage(null, "gj", houseWorker.getWorkerId(), "0", "业主支付提醒",
+                configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseWorker.getWorkerId(), "0", "业主支付提醒",
                         String.format(DjConstants.PushMessage.PAYMENT_OF_DESIGN_FEE, member.getMobile(), house.getHouseName()), "5");
                 //短信通知
                 JsmsUtil.sendDesigner(memberGr.getMobile(), member.getMobile(), house.getHouseName());
 
             }
             if (houseWorker.getWorkerType() == 3) {//大管家
-                configMessageService.addConfigMessage(null, "gj", houseWorker.getWorkerId(), "0", "业主支付提醒",
+                configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseWorker.getWorkerId(), "0", "业主支付提醒",
                         String.format(DjConstants.PushMessage.STEWARD_PAYMENT, house.getHouseName()), "5");
             }
             if (houseWorker.getWorkerType() > 3) {//其它工种
-                configMessageService.addConfigMessage(null, "gj", houseWorker.getWorkerId(), "0", "业主支付提醒",
+                configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseWorker.getWorkerId(), "0", "业主支付提醒",
                         String.format(DjConstants.PushMessage.CRAFTSMAN_PAYMENT, house.getHouseName()), "5");
 
                 HouseFlow houseFlowDgj = houseFlowMapper.getHouseFlowByHidAndWty(houseFlow.getHouseId(), 3);
-                configMessageService.addConfigMessage(null, "gj", houseFlowDgj.getWorkerId(), "0", "业主支付提醒",
+                configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlowDgj.getWorkerId(), "0", "业主支付提醒",
                         String.format(DjConstants.PushMessage.STEWARD_CRAFTSMAN_TWO_PAYMENT, house.getHouseName()), "5");
 
             }
@@ -1031,7 +1032,7 @@ public class PaymentService {
                 paymentDTO.setTotalPrice(new BigDecimal(houseDistribution.getPrice()));
                 paymentDTO.setBusinessOrderNumber(businessOrder.getNumber());
                 paymentDTO.setPayPrice(new BigDecimal(houseDistribution.getPrice()));//实付
-//                paymentDTO.setInfo("温馨提示: 您将支付" + houseDistribution.getPrice() + "元验房定金，实际费用将根据表格为准!");
+//                paymentDTO.setInfo("温馨提示: 您将支付" + houseDistribution.getPrice() + "元验房定金，实际费用将根据表格为准，线下补齐差额即可！");
                 ActuaryDTO actuaryDTO = new ActuaryDTO();
                 actuaryDTO.setImage(imageAddress + "icon/rmb.png");
                 actuaryDTO.setKind("验房定金");
@@ -1267,7 +1268,7 @@ public class PaymentService {
                 }
 
                 if (houseFlow.getWorkerType() == 1) {//设计师
-                    HouseStyleType houseStyleType = houseStyleTypeMapper.getStyleByName(house.getStyle());
+                    HouseStyleType houseStyleType = houseStyleTypeMapper.selectByPrimaryKey(house.getStyleId());
                     BigDecimal workPrice = house.getSquare().multiply(houseStyleType.getPrice());//设计工钱
                     hwo.setWorkPrice(workPrice);
                     hwo.setTotalPrice(workPrice);
@@ -1489,7 +1490,6 @@ public class PaymentService {
                 return null;
             }
             String houseFlowId = businessOrder.getTaskId();
-            request.setAttribute(Constants.CITY_ID, house.getCityId());
             ServerResponse retMaterial = budgetMaterialAPI.queryBudgetMaterialByHouseFlowId(house.getCityId(), houseFlowId);
             ServerResponse retWorker = budgetWorkerAPI.queryBudgetWorkerByHouseFlowId(house.getCityId(), houseFlowId);
 
@@ -1612,7 +1612,7 @@ public class PaymentService {
                 }
                 paymentDTO.setWorkerDTO(workerDTO);//工匠信息
                 if (houseFlow.getWorkerType() == 1) {//设计师
-                    HouseStyleType houseStyleType = houseStyleTypeMapper.getStyleByName(house.getStyle());
+                    HouseStyleType houseStyleType = houseStyleTypeMapper.selectByPrimaryKey(house.getStyleId());
                     workPrice = house.getSquare().multiply(houseStyleType.getPrice());//设计工钱
                     totalPrice = totalPrice.add(workPrice);
                 } else if (houseFlow.getWorkerType() == 2) {//精算

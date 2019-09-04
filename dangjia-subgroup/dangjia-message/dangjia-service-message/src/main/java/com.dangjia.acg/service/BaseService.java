@@ -11,7 +11,6 @@ import java.util.Map;
 
 
 /**
- *
  * @author: QiYuXiang
  * @date: 2018/10/24
  */
@@ -29,45 +28,52 @@ public class BaseService {
     @Value("${spring.data.jmessage.gongjiang.masterSecret}")
     private String gj_masterSecret;
 
+    @Value("${spring.data.jmessage.sale.appkey}")
+    private String sale_appkey;
 
-    public Map<String, String>  map = new HashMap<String, String>();
+    @Value("${spring.data.jmessage.sale.masterSecret}")
+    private String sale_masterSecret;
+
+
+    public Map<String, String> map = new HashMap<String, String>();
     @Value("${spring.profiles.active}")
     private String active;
 
-    public String getUserTag(String userid){
-        if(!(active!=null&&"pre".equals(active))){
-            return "test_"+userid;
-        }else{
+    public String getUserTag(String userid) {
+        if (!("pre".equals(active))) {
+            return "test_" + userid;
+        } else {
             return userid;
         }
     }
-    public String[] getUserTags(String[] userids){
-        if(userids!=null&&userids.length>0){
+
+    public String[] getUserTags(String[] userids) {
+        if (userids != null && userids.length > 0) {
             for (int i = 0; i < userids.length; i++) {
-                userids[i]=getUserTag(userids[i]);
+                userids[i] = getUserTag(userids[i]);
             }
         }
         return userids;
     }
+
     @PostConstruct //加上该注解表明该方法会在bean初始化后调用
-    public void init(){
+    public void init() {
         map.put("zx_appkey", zx_appkey);
-        map.put("gj_appkey", gj_appkey);
         map.put("zx_masterSecret", zx_masterSecret);
+        map.put("gj_appkey", gj_appkey);
         map.put("gj_masterSecret", gj_masterSecret);
+        map.put("sale_appkey", sale_appkey);
+        map.put("sale_masterSecret", sale_masterSecret);
     }
-    private String appkey;
-    private String masterSecret;
 
     public String getAppkey(String appType) {
-        appkey=map.get(appType+"_appkey");
-        return appkey;
-    }
-    public String getMasterSecret(String appType) {
-        masterSecret=map.get(appType+"_masterSecret");
-        return masterSecret;
+        return map.get(appType + "_appkey");
     }
 
-    public  final Logger LOG = LoggerFactory.getLogger(BaseService.class);
+    public String getMasterSecret(String appType) {
+        return map.get(appType + "_masterSecret");
+    }
+
+    public final Logger LOG = LoggerFactory.getLogger(BaseService.class);
 }
 

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.sale.RoyaltyMapper">
+
+
+    <!--查询成交量-->
+    <select id="queryRoyaltySurface" resultType="com.dangjia.acg.common.model.BaseEntity">
+        select id,create_date as createDate
+        from dj_royalty_surface order by create_date desc
+    </select>
+
+
+
+    <!--查询提出配置最大单数-->
+    <select id="selectOverSingle" resultType="com.dangjia.acg.modle.sale.royalty.DjRoyaltyDetailsSurface">
+    select max(over_single) as overSingle, max(royalty) as royalty from
+     dj_royalty_details_surface t RIGHT JOIN
+    (select  MAX(create_date) as "createDate" from dj_royalty_details_surface ) tmp
+    on t.create_date = tmp.createDate
+    </select>
+
+</mapper>

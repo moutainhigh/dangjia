@@ -18,5 +18,6 @@ public class AllgrabBean {
     private String workerTypeId;//	工种类型的id
     private String workertotal;//价格
     private String releaseTime;//发布时间
+    private String butType;//按钮状态  0=抢单  1=已被抢单（灰色）
     private long countDownTime;//倒计时（可抢单时间）
 }

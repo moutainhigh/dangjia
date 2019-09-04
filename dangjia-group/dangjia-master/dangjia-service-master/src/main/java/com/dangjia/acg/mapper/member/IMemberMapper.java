@@ -45,5 +45,16 @@ public interface IMemberMapper extends Mapper<Member> {
 //    List<Map<String,Object>> getMemberAndCustomerList();
 
     Member getByPhone(@Param("mobile") String mobile);
+
+    Integer getDesignStatisticsNum(@Param("workerId") String workerId,
+                                   @Param("startDate") String startDate,
+                                   @Param("endDate") String endDate,
+                                   @Param("type") Integer type);
+
+    Integer getBudgetStatisticsNum(@Param("workerId") String workerId,
+                                   @Param("startDate") String startDate,
+                                   @Param("endDate") String endDate,
+                                   @Param("type") Integer type);
+
 }
 

@@ -31,6 +31,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
 
@@ -42,7 +43,7 @@ public class MainUserService {
     private UserMapper userMapper;
     @Autowired
     private RoleMapper roleMapper;
-//    @Autowired
+    //    @Autowired
 //    private UserRoleMapper userRoleMapper;
     @Autowired
     private IDepartmentMapper departmentMapper;
@@ -58,7 +59,7 @@ public class MainUserService {
     @Autowired
     private RedisClient redisClient;
 
-    public ServerResponse getUsers(String userID,UserSearchDTO userSearch, PageDTO pageDTO,Integer isJob) {
+    public ServerResponse getUsers(String cityId,String userID,UserSearchDTO userSearch, PageDTO pageDTO,Integer isJob) {
         // 时间处理
 
         userID=iStoreUserMapper.getVisitUser(userID);
@@ -82,7 +83,7 @@ public class MainUserService {
             }
         }
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        List<UserRoleDTO> urList = userMapper.getUsers(userID,userSearch,isJob);
+        List<UserRoleDTO> urList = userMapper.getUsers(cityId,userID,userSearch,isJob);
         // 获取分页查询后的数据
         PageInfo pageInfo = new PageInfo(urList);
         // 将角色名称提取到对应的字段中
@@ -162,7 +163,7 @@ public class MainUserService {
             logger.debug("清除所有用户权限缓存！！！");
         } else {
             // 新增用户
-            user.setId((int)(Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis());
+            user.setId((int) (Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis());
             user.setCreateDate(new Date());
             user.setIsDel(false);
             user.setIsJob(false);
@@ -199,7 +200,7 @@ public class MainUserService {
             return ServerResponse.createByErrorMessage("该用户名已经存在");
         }
         // 新增用户
-        user.setId((int)(Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis());
+        user.setId((int) (Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis());
         user.setCreateDate(new Date());
         user.setIsDel(false);
         user.setIsJob(false);
@@ -222,11 +223,25 @@ public class MainUserService {
         return ServerResponse.createBySuccessMessage("ok");
     }
 
-
-    public ServerResponse setJobUser(String id, boolean isJob, String insertUid) {
-        String msg = this.userMapper.setJobUser(id, isJob, insertUid) == 1 ? "ok"
-                : "操作失败，请您稍后再试";
-        return ServerResponse.createBySuccessMessage(msg);
+    public ServerResponse setJobUser(HttpServletRequest request, String id, boolean isJob) {
+        MainUser mainUser = userMapper.selectByPrimaryKey(id);
+        if (mainUser == null) {
+            return ServerResponse.createByErrorMessage("该用户不存在");
+        }
+        String userID = request.getParameter(Constants.USERID);
+        if (!CommonUtil.isEmpty(mainUser.getMemberId()) && isJob) {
+            String userRoleText = "role" + 3 + ":" + mainUser.getMemberId();
+            String token = redisClient.getCache(userRoleText, String.class);
+            redisClient.deleteCache(userRoleText);
+            if (!CommonUtil.isEmpty(token)) {
+                redisClient.deleteCache(token + Constants.SESSIONUSERID);
+            }
+        }
+        mainUser.setIsJob(isJob);
+        mainUser.setInsertUid(userID);
+        mainUser.setModifyDate(new Date());
+        userMapper.updateByPrimaryKeySelective(mainUser);
+        return ServerResponse.createBySuccessMessage("操作成功");
     }
 
     /**
@@ -235,14 +250,13 @@ public class MainUserService {
      * @param id
      * @return
      */
-    public ServerResponse setReceiveUser(String id, Integer type) {
+    public ServerResponse setReceiveUser(String cityId,String id, Integer type) {
         try {
-            MainUser oldMainUser = userMapper.getUserByReceive(type);
+            MainUser oldMainUser = userMapper.getUserByReceive(cityId,type);
             if (oldMainUser != null) { //把之前的 坐席用户 改为 非坐席
                 oldMainUser.setIsReceive(0);
                 userMapper.updateByPrimaryKeySelective(oldMainUser);
             }
-
             MainUser newMainUser = userMapper.selectByPrimaryKey(id);
             newMainUser.setIsReceive(type);
             userMapper.updateByPrimaryKeySelective(newMainUser);
@@ -271,7 +285,4 @@ public class MainUserService {
         return this.userMapper.updatePwd(id, password);
     }
 
-    public int setUserLockNum(String id, int isLock) {
-        return this.userMapper.setUserLockNum(id, isLock);
-    }
 }

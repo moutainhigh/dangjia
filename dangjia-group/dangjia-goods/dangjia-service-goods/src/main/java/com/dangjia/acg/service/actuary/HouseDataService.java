@@ -86,7 +86,7 @@ public class HouseDataService {
                     for (BudgetMaterial budgetMaterial : budgetMaterialList) {
                         FlowActuaryDTO flowActuaryDTO = new FlowActuaryDTO();
                         flowActuaryDTO.setImage(address + "icon/zigou.png");
-                        flowActuaryDTO.setBuy(budgetMaterial.getProductType());//0:材料；1：服务
+                        flowActuaryDTO.setBuy(budgetMaterial.getProductType());//0:材料；1：包工包料
                         flowActuaryDTO.setName(budgetMaterial.getGoodsName());
                         flowActuaryDTO.setShopCount(budgetMaterial.getShopCount());
                         flowActuaryDTO.setConvertCount(budgetMaterial.getConvertCount());
@@ -126,9 +126,9 @@ public class HouseDataService {
                 /**
                  *  // 工匠数据库对应id： 3: 大管家 ，4：拆除 ，5：防水（弃用）  ，6：水电 ，7：泥工 ，8：木工 ，9：油漆
                  *  // 一维： 0: 大管家 ，1：拆除 ，2：  ，3：水电 ，4：泥工 ，5：木工 ，6：油漆
-                 *  //二维： 0：材料 ，1，服务，2，人工
+                 *  //二维： 0：材料 ，1，包工包料，2，人工
                  *   例如： [0][0]: 表示 大管家->材料
-                 *   例如： [0][1]: 表示 大管家->服务
+                 *   例如： [0][1]: 表示 大管家->包工包料
                  */
                 for (Object aJsonArray : jsonArray) { //遍历每个工序
                     for (int j = 0; j < 3; ++j) {
@@ -142,7 +142,7 @@ public class HouseDataService {
                         if (j == 0)
                             tActuaryGoodsTotal.setGoodsType("材料");
                         if (j == 1)
-                            tActuaryGoodsTotal.setGoodsType("服务");
+                            tActuaryGoodsTotal.setGoodsType("包工包料");
                         if (j == 2)
                             tActuaryGoodsTotal.setGoodsType("人工");
                         mapsTotal.put(workerType.getString(WorkerType.ID) + "-" + j, tActuaryGoodsTotal);
@@ -189,10 +189,10 @@ public class HouseDataService {
                                 tActuaryGoods.setDeleteState("再次购买");
                                 break;
                         }
-                        if (0 == goods.getType())//0:材料；1：服务
-                            tActuaryGoods.setGoodsType("材料");//商品类型 : 材料，服务，人工，
+                        if (0 == goods.getType())//0:材料；1：包工包料
+                            tActuaryGoods.setGoodsType("材料");//商品类型 : 材料，包工包料，人工，
                         else if (1 == goods.getType())
-                            tActuaryGoods.setGoodsType("服务");//商品类型 : 材料，服务，人工，
+                            tActuaryGoods.setGoodsType("包工包料");//商品类型 : 材料，包工包料，人工，
                         TActuaryGoodsTotal total = mapsTotal.get(workerType.getString(WorkerType.ID) + "-" + goods.getType());
                         if (goods.getBuy() == 2) //自购
                         {
@@ -237,7 +237,7 @@ public class HouseDataService {
                                 break;
                         }
 
-                        tActuaryGoods.setGoodsType("人工");//商品类型 : 人工，材料，服务
+                        tActuaryGoods.setGoodsType("人工");//商品类型 : 人工，材料，包工包料
                         if (CommonUtil.isEmpty(worker.getName()))
                             continue;
                         tActuaryGoods.setProductName(worker.getName());

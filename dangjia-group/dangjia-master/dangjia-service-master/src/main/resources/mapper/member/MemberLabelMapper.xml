@@ -55,6 +55,87 @@
 		FROM dj_member_label WHERE name=#{name}
         ORDER by create_date
 	</select>
+    
+    <select id="getLabelByIds" resultType="com.dangjia.acg.dto.member.SaleMemberLabelDTO">
+        SELECT
+          id,
+          CONCAT_WS("-",parent_name,name) name
+        FROM dj_member_label
+        WHERE id in
+        <foreach collection="labelIds" index="index" item="item" open="(" separator="," close=")">
+             #{item}
+        </foreach>
+    </select>
+
+
+    <select id="queryDescribes" resultType="com.dangjia.acg.dto.member.CustomerRecordInFoDTO">
+        select m.head as head,
+        m.nick_name as nickName,
+        m.name as name,
+        mcr.remind_time as remindTime,
+        mcr.describes as describes,
+        mcr.create_date as createDate
+        from
+        dj_member_customer_record mcr
+        INNER JOIN dj_member m on m.id = mcr.member_id
+        where  mcr.member_id = #{memberId} ORDER BY mcr.create_date DESC
+    </select>
+
+
+    <select id="queryTalkContent" resultType="com.dangjia.acg.dto.member.CustomerRecordInFoDTO">
+        select
+            m.name as name,
+            m.head as head,
+            ct.talk_content as describes,
+            ct.create_date as createDate,
+            ct.remind_time as remindTime
+        from dj_user u
+        INNER JOIN dj_member m on u.member_id=m.id
+        INNER JOIN dj_clue_talk ct on ct.user_id=u.id
+        where ct.clue_id= #{clueId} ORDER BY ct.create_date DESC
+    </select>
+
+
+
+    <select id="queryWorkerType" resultType="com.dangjia.acg.dto.member.WorkerTypeDTO">
+        select m.name as name,
+        m.mobile as mobile,
+        m.head as head,
+        cwt.type as type
+        from
+        dj_core_house_flow chf INNER JOIN dj_member m on chf.worker_id = m.id
+        INNER JOIN dj_core_worker_type cwt on chf.worker_type_id = cwt.id
+        where m.worker_type = 3
+        and chf.house_id = #{houseId}
+        ORDER BY chf.modify_date desc
+    </select>
+
+    <select id="queryType" resultType="com.dangjia.acg.dto.member.WorkerTypeDTO" parameterType="java.lang.String">
+        select
+            cwt.type as type,
+            chf.worker_type_id as workerTypeId,
+            chf.work_steta as workSteta
+        from
+        dj_core_house_flow chf INNER JOIN
+        dj_core_worker_type cwt on chf.worker_type_id = cwt.id
+        where chf.house_id = #{houseId}
+        ORDER BY chf.modify_date desc
+    </select>
+
+    <select id="queryWorkSteta" resultType="java.lang.String" parameterType="java.util.Map">
+        select
+            work_steta as workSteta
+        from
+        dj_core_house_flow chf
+        where chf.house_id = #{houseId}
+        and chf.worker_type_id = #{workerTypeId}
+        and chf.worker_type = #{workerType}
+
+    </select>
+
+    <select id="queryAddressName" resultType="java.lang.String" parameterType="java.lang.String">
+        select name from dj_house_address where house_id = #{houseId}  limit 1
+    </select>
 
 </mapper>
 

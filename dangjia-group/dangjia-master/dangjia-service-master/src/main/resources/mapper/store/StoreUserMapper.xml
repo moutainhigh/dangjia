@@ -45,9 +45,7 @@
         FROM
             `dj_store` s
             INNER JOIN dj_store_users u ON u.store_id = s.id
-        WHERE
-            s.user_id = #{userId}
-            OR u.user_id = #{userId}
+        WHERE u.data_status = 0 AND  ( s.user_id = #{userId} OR u.user_id = #{userId})
     </select>
 
 </mapper>

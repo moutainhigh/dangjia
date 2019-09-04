@@ -242,7 +242,6 @@
         FROM
         `dj_house_modeling_village` mv ,dj_house h
         inner join
-        inner join
         (
         SELECT
         a.house_id,
@@ -255,7 +254,7 @@
         a.house_id
         ORDER BY
         create_date DESC
-        ) b ON  b.house_id=h.id/*筛选调无施工记录的房子*/
+        ) b ON  b.house_id=h.id
         WHERE
         mv.id=h.village_id
         AND mv.locationx IS NOT NULL
@@ -266,5 +265,12 @@
         )tab
         order by rand() limit #{limit}
     </select>
+
+
+    <select id="queryVillageName" resultType="java.lang.String" parameterType="java.util.Map">
+        SELECT name
+        FROM dj_house_modeling_village where id={id}
+    </select>
+
 </mapper>
 

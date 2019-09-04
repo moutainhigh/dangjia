@@ -5,14 +5,10 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dto.house.HouseListDTO;
-import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
 import com.dangjia.acg.mapper.design.IDesignBusinessOrderMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
-import com.dangjia.acg.mapper.member.IMemberMapper;
-import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.design.DesignBusinessOrder;
 import com.dangjia.acg.modle.house.House;
-import com.dangjia.acg.modle.member.Member;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +16,10 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * author: Ronalcheng
@@ -33,12 +32,6 @@ public class ActuaryService {
     @Autowired
     private IHouseMapper houseMapper;
     @Autowired
-    private IMemberMapper userMapper;
-    @Autowired
-    private IHouseWorkerMapper houseWorkerMapper;
-    @Autowired
-    private IMemberMapper memberMapper;
-    @Autowired
     private IDesignBusinessOrderMapper designBusinessOrderMapper;
 
 
@@ -47,7 +40,7 @@ public class ActuaryService {
      *
      * @return
      */
-    public ServerResponse getActuaryAll(HttpServletRequest request, PageDTO pageDTO, String name, String budgetOk) {
+    public ServerResponse getActuaryAll(HttpServletRequest request, PageDTO pageDTO, String name, String budgetOk, String workerKey) {
         String cityId = request.getParameter(Constants.CITY_ID);
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         String dataStatus = "0";//正常数据
@@ -56,38 +49,28 @@ public class ActuaryService {
             dataStatus = "1";
             budgetOk = "";
         }
-        List<HouseListDTO> houseList = houseMapper.getActuaryAll(cityId, budgetOk, name, dataStatus);
+        List<HouseListDTO> houseList = houseMapper.getActuaryAll(cityId, budgetOk, name, workerKey, dataStatus);
         PageInfo pageResult = new PageInfo(houseList);
         for (HouseListDTO houseListDTO : houseList) {
-            HouseWorker houseWorker = houseWorkerMapper.getHwByHidAndWtype(houseListDTO.getHouseId(), 2);
-            if (houseWorker != null) {
-                Member workerSup = memberMapper.selectByPrimaryKey(houseWorker.getWorkerId());
-                if (workerSup != null) {
-                    houseListDTO.setOperatorId(workerSup.getId());
-                    houseListDTO.setOperatorName(workerSup.getName());//大管家名字
-                    houseListDTO.setOperatorMobile(workerSup.getMobile());
-                }
-            }
             houseListDTO.setShowUpdata(0);
             if (houseListDTO.getDecorationType() == 2) {
                 if (houseListDTO.getBudgetOk() == 1 && houseListDTO.getDesignerOk() != 3) {
                     houseListDTO.setShowUpdata(1);
-                }
-            }
-            if (houseListDTO.getDesignerOk() == 3) {
-                //3设计图完成后有需要改设计的
-                Example example = new Example(DesignBusinessOrder.class);
-                Example.Criteria criteria = example.createCriteria()
-                        .andEqualTo(DesignBusinessOrder.DATA_STATUS, 0)
-                        .andEqualTo(DesignBusinessOrder.HOUSE_ID, houseListDTO.getHouseId())
-                        .andEqualTo(DesignBusinessOrder.STATUS, 1)
-                        .andNotEqualTo(DesignBusinessOrder.OPERATION_STATE, 2);
-                criteria.andEqualTo(DesignBusinessOrder.TYPE, 3);
-                List<DesignBusinessOrder> designBusinessOrders = designBusinessOrderMapper.selectByExample(example);
-                if (designBusinessOrders != null && designBusinessOrders.size() > 0) {
-                    DesignBusinessOrder order = designBusinessOrders.get(0);
-                    if (order.getOperationState() == 0) {
-                        houseListDTO.setShowUpdata(1);
+                } else if (houseListDTO.getDesignerOk() == 3) {
+                    //3设计图完成后有需要改设计的
+                    Example example = new Example(DesignBusinessOrder.class);
+                    Example.Criteria criteria = example.createCriteria()
+                            .andEqualTo(DesignBusinessOrder.DATA_STATUS, 0)
+                            .andEqualTo(DesignBusinessOrder.HOUSE_ID, houseListDTO.getHouseId())
+                            .andEqualTo(DesignBusinessOrder.STATUS, 1)
+                            .andNotEqualTo(DesignBusinessOrder.OPERATION_STATE, 2);
+                    criteria.andEqualTo(DesignBusinessOrder.TYPE, 3);
+                    List<DesignBusinessOrder> designBusinessOrders = designBusinessOrderMapper.selectByExample(example);
+                    if (designBusinessOrders != null && designBusinessOrders.size() > 0) {
+                        DesignBusinessOrder order = designBusinessOrders.get(0);
+                        if (order.getOperationState() == 0) {
+                            houseListDTO.setShowUpdata(1);
+                        }
                     }
                 }
             }
@@ -135,31 +118,12 @@ public class ActuaryService {
                 sum4++;
             }
         }
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         map.put("actuaryNumber", houseList.size());//获取精算接单数量
         map.put("actuaryPayNumber", sum1);//待业主支付数量
         map.put("actuaryUploadNumber", sum2);//待上传精算数量
         map.put("actuaryConfirmeNumber", sum3);//待确认精算数量
         map.put("actuarycompletedNumber", sum4);//已完成精算数量
         return map;
-    }
-
-    //提出重复代码
-    private List<Map<String, Object>> listResult(List<House> houseList) {
-        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
-        for (House house : houseList) {
-            Map<String, Object> map = new HashMap<String, Object>();
-            Member user = userMapper.selectByPrimaryKey(house.getMemberId());
-            if (user == null) continue;
-            map.put("houseName", house.getHouseName());
-            map.put("customSort", house.getCustomSort());
-            map.put("name", user.getNickName());
-            map.put("mobile", user.getMobile());
-            map.put("square", house.getSquare());
-            map.put("houseId", house.getId());
-            map.put("budgetOk", house.getBudgetOk());
-            list.add(map);
-        }
-        return list;
     }
 }

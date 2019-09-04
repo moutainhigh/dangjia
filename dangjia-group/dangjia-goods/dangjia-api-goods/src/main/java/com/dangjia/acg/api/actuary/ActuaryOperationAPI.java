@@ -39,7 +39,14 @@ public interface ActuaryOperationAPI {
                                  @RequestParam("targetGroupId") String targetGroupId,
                                  @RequestParam("houseId") String houseId,
                                  @RequestParam("workerTypeId") String workerTypeId);
-
+    /**
+     * 恢复精算货品
+     */
+    @PostMapping("/actuary/actuaryOperation/recoveryProduct")
+    @ApiOperation(value = "恢复精算货品", notes = "恢复精算货品")
+    ServerResponse recoveryProduct(@RequestParam("request") HttpServletRequest request,
+                                 @RequestParam("houseId") String houseId,
+                                 @RequestParam("workerTypeId") String workerTypeId);
     /**
      * 选择货品
      */

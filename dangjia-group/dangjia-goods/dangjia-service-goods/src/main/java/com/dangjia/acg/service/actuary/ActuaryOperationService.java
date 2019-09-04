@@ -112,7 +112,32 @@ public class ActuaryOperationService {
             return ServerResponse.createByErrorMessage("操作失败");
         }
     }
+    /**
+     * 恢复精算货品
+     */
+    public ServerResponse recoveryProduct(String houseId, String workerTypeId) {
 
+        Example example=new Example(BudgetMaterial.class);
+        example.createCriteria()
+                .andEqualTo(BudgetMaterial.HOUSE_ID,houseId)
+                .andEqualTo(BudgetMaterial.WORKER_TYPE_ID,workerTypeId)
+                .andEqualTo(BudgetMaterial.DELETE_STATE,4);
+        budgetMaterialMapper.deleteByExample(example);
+
+        example=new Example(BudgetMaterial.class);
+        example.createCriteria()
+                .andEqualTo(BudgetMaterial.HOUSE_ID,houseId)
+                .andEqualTo(BudgetMaterial.WORKER_TYPE_ID,workerTypeId)
+                .andEqualTo(BudgetMaterial.DELETE_STATE,5);
+
+        BudgetMaterial budgetMaterial=new BudgetMaterial();
+        budgetMaterial.setId(null);
+        budgetMaterial.setCreateDate(null);
+        budgetMaterial.setModifyDate(new Date());
+        budgetMaterial.setDeleteState(0);
+        budgetMaterialMapper.updateByExampleSelective(budgetMaterial,example);
+        return ServerResponse.createBySuccessMessage("操作成功" );
+    }
     /**
      * 更换货品
      */
@@ -123,6 +148,7 @@ public class ActuaryOperationService {
             int count = 0;
             String ret = productId + " " + budgetMaterialId + " " + srcGroupId + " " + targetGroupId + " " + houseId + " " + workerTypeId;
             BudgetMaterial budgetMaterial = budgetMaterialMapper.selectByPrimaryKey(budgetMaterialId);
+
             if (StringUtils.isNotBlank(targetGroupId) && StringUtils.isNoneBlank(srcGroupId))//不为空  可以切换
             {
                 //找到 原关联组的goods成员， 把 goods 下的product 更换 成 目标关联组的 goods下的product
@@ -158,58 +184,71 @@ public class ActuaryOperationService {
                             }
                             //查到 老的关联组 的精算
                             BudgetMaterial srcBudgetMaterial = budgetMaterialMapper.getBudgetCaiListByGoodsId(houseId, workerTypeId, srcGroupLink.getGoodsId());
+                            BudgetMaterial newBudgetMaterial = budgetMaterialMapper.getBudgetCaiListByGoodsId(houseId, workerTypeId, srcGroupLink.getGoodsId());
                             Product targetProduct = productMapper.selectByPrimaryKey(targetGroupLink.getProductId());//目标product 对象
-                            srcBudgetMaterial.setProductId(targetProduct.getId());
-                            srcBudgetMaterial.setProductSn(targetProduct.getProductSn());
-                            srcBudgetMaterial.setProductName(targetProduct.getName());
-                            srcBudgetMaterial.setImage(targetProduct.getImage());
-                            srcBudgetMaterial.setPrice(targetProduct.getPrice());
-                            srcBudgetMaterial.setGoodsGroupId(targetGroupId);
+                            newBudgetMaterial.setProductId(targetProduct.getId());
+                            newBudgetMaterial.setProductSn(targetProduct.getProductSn());
+                            newBudgetMaterial.setProductName(targetProduct.getName());
+                            newBudgetMaterial.setImage(targetProduct.getImage());
+                            newBudgetMaterial.setPrice(targetProduct.getPrice());
+                            newBudgetMaterial.setGoodsGroupId(targetGroupId);
+                            newBudgetMaterial.setDeleteState(4);
                             GoodsGroup goodsGroup = iGoodsGroupMapper.selectByPrimaryKey(targetGroupId);
-                            srcBudgetMaterial.setGroupType(goodsGroup.getName());
-                            srcBudgetMaterial.setCost(targetProduct.getCost());
+                            newBudgetMaterial.setGroupType(goodsGroup.getName());
+                            newBudgetMaterial.setCost(targetProduct.getCost());
                             //这里会更新 为 新product的 换算后的购买数量
-//                            srcBudgetMaterial.setConvertCount(Math.ceil(srcBudgetMaterial.getShopCount() / targetProduct.getConvertQuality()));
-                            double converCount = (srcBudgetMaterial.getShopCount() / targetProduct.getConvertQuality());
+//                            newBudgetMaterial.setConvertCount(Math.ceil(newBudgetMaterial.getShopCount() / targetProduct.getConvertQuality()));
+                            double converCount = (newBudgetMaterial.getShopCount() / targetProduct.getConvertQuality());
                             Unit convertUnit = iUnitMapper.selectByPrimaryKey(targetProduct.getConvertUnit());
                             if (convertUnit.getType() == 1) {
                                 converCount = Math.ceil(converCount);
                             }
-                            srcBudgetMaterial.setConvertCount(converCount);
-                            srcBudgetMaterial.setTotalPrice(targetProduct.getPrice() * srcBudgetMaterial.getConvertCount());
+                            newBudgetMaterial.setConvertCount(converCount);
+                            newBudgetMaterial.setTotalPrice(targetProduct.getPrice() * newBudgetMaterial.getConvertCount());
 
-                            srcBudgetMaterial.setCategoryId(targetProduct.getCategoryId());
-                            srcBudgetMaterial.setImage(targetProduct.getImage());
-                            srcBudgetMaterial.setUnitName(convertUnit.getName());
+                            newBudgetMaterial.setCategoryId(targetProduct.getCategoryId());
+                            newBudgetMaterial.setImage(targetProduct.getImage());
+                            newBudgetMaterial.setUnitName(convertUnit.getName());
                             Goods goods = goodsMapper.queryById( targetProduct.getGoodsId());
-                            srcBudgetMaterial.setProductType(goods.getType());//0：材料；1：服务
-                            budgetMaterialMapper.updateByPrimaryKey(srcBudgetMaterial);
+                            newBudgetMaterial.setProductType(goods.getType());//0：材料；1：包工包料
+                            newBudgetMaterial.setId((int)(Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis());
+                            budgetMaterialMapper.insertSelective(newBudgetMaterial);
+
+                            srcBudgetMaterial.setDeleteState(5);
+                            budgetMaterialMapper.updateByPrimaryKeySelective(srcBudgetMaterial);
                             count++;
                         }
 
                     }
                 }
             } else {
+
+                BudgetMaterial newBudgetMaterial = budgetMaterialMapper.selectByPrimaryKey(budgetMaterialId);
                 Product product = productMapper.selectByPrimaryKey(productId);
-                budgetMaterial.setProductId(productId);
-                budgetMaterial.setProductSn(product.getProductSn());
-                budgetMaterial.setProductName(product.getName());
-                budgetMaterial.setPrice(product.getPrice());
-                budgetMaterial.setCost(product.getCost());
+                newBudgetMaterial.setProductId(productId);
+                newBudgetMaterial.setProductSn(product.getProductSn());
+                newBudgetMaterial.setProductName(product.getName());
+                newBudgetMaterial.setPrice(product.getPrice());
+                newBudgetMaterial.setCost(product.getCost());
+                newBudgetMaterial.setDeleteState(4);
                 //这里会更新 为 新product的 换算后的购买数量
-                double converCount = (budgetMaterial.getShopCount() / product.getConvertQuality());
+                double converCount = (newBudgetMaterial.getShopCount() / product.getConvertQuality());
                 Unit convertUnit = iUnitMapper.selectByPrimaryKey(product.getConvertUnit());
                 if (convertUnit.getType() == 1) {
                     converCount = Math.ceil(converCount);
                 }
-                budgetMaterial.setConvertCount(converCount);
-                budgetMaterial.setTotalPrice(product.getPrice() * budgetMaterial.getConvertCount());
+                newBudgetMaterial.setConvertCount(converCount);
+                newBudgetMaterial.setTotalPrice(product.getPrice() * newBudgetMaterial.getConvertCount());
 
-                budgetMaterial.setCategoryId(product.getCategoryId());
-                budgetMaterial.setImage(product.getImage());
-                budgetMaterial.setUnitName(convertUnit.getName());
+                newBudgetMaterial.setCategoryId(product.getCategoryId());
+                newBudgetMaterial.setImage(product.getImage());
+                newBudgetMaterial.setUnitName(convertUnit.getName());
                 Goods goods = goodsMapper.queryById( product.getGoodsId());
-                budgetMaterial.setProductType(goods.getType());//0：材料；1：服务
+                newBudgetMaterial.setProductType(goods.getType());//0：材料；1：包工包料
+                newBudgetMaterial.setId((int)(Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis());
+                budgetMaterialMapper.insertSelective(newBudgetMaterial);
+
+                budgetMaterial.setDeleteState(5);
                 budgetMaterialMapper.updateByPrimaryKeySelective(budgetMaterial);
                 return ServerResponse.createBySuccessMessage("操作成功" + ret);
             }
@@ -261,7 +300,7 @@ public class ActuaryOperationService {
                 }
                 WorkerGoodsDTO wGoodsDTO = workerGoodsService.assembleWorkerGoodsResult(workerGoods);
                 return ServerResponse.createBySuccess("查询成功", wGoodsDTO);
-            } else if (type == 2 || type == 3 || type == 5) {//材料商品  服务商品
+            } else if (type == 2 || type == 3 || type == 5) {//材料商品  包工包料商品
                 Product product;
                 String budgetMaterialId = null;
                 if (type != 5) {
@@ -303,7 +342,7 @@ public class ActuaryOperationService {
                 WorkerGoods workerGoods = workerGoodsMapper.selectByPrimaryKey(gId);//人工商品
                 WorkerGoodsDTO wGoodsDTO = workerGoodsService.assembleWorkerGoodsResult(workerGoods);
                 return ServerResponse.createBySuccess("查询成功", wGoodsDTO);
-            } else if (type == 2 || type == 3 || type == 5) {//材料商品  服务商品
+            } else if (type == 2 || type == 3 || type == 5) {//材料商品  包工包料商品
                 Product product = productMapper.selectByPrimaryKey(gId);//当前 货品
                 if(product == null){
                     return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "该商品已禁用！");
@@ -425,7 +464,7 @@ public class ActuaryOperationService {
     }
 
     /**
-     * 查看工序 type 人工1 材料2 服务3
+     * 查看工序 type 人工1 材料2 包工包料3
      * 支付时精算goods详情 查最新价格 共用此方法
      */
     public ServerResponse confirmActuaryDetail(String userToken, String houseId, String workerTypeId,
@@ -444,7 +483,7 @@ public class ActuaryOperationService {
             Map<Integer, String> mapgx = new HashMap<>();
             mapgx.put(DjConstants.GXType.RENGGONG, "人工");
             mapgx.put(DjConstants.GXType.CAILIAO, "材料");
-            mapgx.put(DjConstants.GXType.FUWU, "服务");
+            mapgx.put(DjConstants.GXType.FUWU, "包工包料");
             mapgx.put(DjConstants.GXType.BU_RENGGONG, "补人工");
             mapgx.put(DjConstants.GXType.BU_CAILIAO, "补材料");
             FlowDTO flowDTO = new FlowDTO();
@@ -650,7 +689,7 @@ public class ActuaryOperationService {
     }
 
     /**
-     * 精算详情 productType  0：材料；1：服务
+     * 精算详情 productType  0：材料；1：包工包料
      */
     public ServerResponse confirmActuary(String userToken, String houseId, String cityId) {
         //从master获取工序详情
@@ -662,15 +701,15 @@ public class ActuaryOperationService {
             String workerTypeId = map.get("workerTypeId");
             FlowDetailsDTO flowDetailsDTO = new FlowDetailsDTO();
             flowDetailsDTO.setName(name);
-            List<DetailsDTO> detailsDTOList = new ArrayList<>();//人工材料服务
+            List<DetailsDTO> detailsDTOList = new ArrayList<>();//人工材料包工包料
             List<BudgetWorker> budgetWorkerList = budgetWorkerMapper.getBudgetWorkerList(houseId, workerTypeId);//人工明细
             List<BudgetMaterial> materialCaiList = budgetMaterialMapper.getBudgetCaiList(houseId, workerTypeId);//材料明细
-            List<BudgetMaterial> materialSerList = budgetMaterialMapper.getBudgetSerList(houseId, workerTypeId);//服务明细
+            List<BudgetMaterial> materialSerList = budgetMaterialMapper.getBudgetSerList(houseId, workerTypeId);//包工包料明细
             List<Map> mapworker = new ArrayList<>();
             Map<Integer, String> mapgx = new HashMap<>();
             mapgx.put(DjConstants.GXType.RENGGONG, "人工");
             mapgx.put(DjConstants.GXType.CAILIAO, "材料");
-            mapgx.put(DjConstants.GXType.FUWU, "服务");
+            mapgx.put(DjConstants.GXType.FUWU, "包工包料");
             for (Map.Entry<Integer, String> entry : mapgx.entrySet()) {
                 Map<String, Object> m = new HashMap<>();
                 m.put("key", String.valueOf(entry.getKey()));

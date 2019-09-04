@@ -2,6 +2,7 @@ package com.dangjia.acg.service.actuary;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.app.core.HouseFlowAPI;
 import com.dangjia.acg.api.app.house.HouseAPI;
 import com.dangjia.acg.api.data.GetForBudgetAPI;
@@ -74,7 +75,8 @@ public class BudgetWorkerService {
     private WorkerGoodsService workerGoodsService;
     @Autowired
     private ProductService productService;
-
+    @Autowired
+    private RedisClient redisClient;
     @Autowired
     private IWorkerGoodsMapper workerGoodsMapper;
 
@@ -183,7 +185,7 @@ public class BudgetWorkerService {
         for (int i = 0; i < goodsList.size(); i++) {
             JSONObject job = goodsList.getJSONObject(i);
             BudgetMaterial jobT = job.toJavaObject(BudgetMaterial.class);
-            if (jobT.getProductType() != 2) {//材料或者服务
+            if (jobT.getProductType() != 2) {//材料或者包工包料
                 try {
                     BudgetMaterial budgetMaterial = new BudgetMaterial();
                     budgetMaterial.setConvertCount(1d);
@@ -375,16 +377,18 @@ public class BudgetWorkerService {
 
             iBudgetMaterialMapper.deleteByhouseId(houseId, workerTypeId);
             iBudgetWorkerMapper.deleteByhouseId(houseId, workerTypeId);
+            redisClient.deleteCache("HOUSEID-ACTUARY-"+houseId+"1");
+            redisClient.deleteCache("HOUSEID-ACTUARY-"+houseId+"2");
             JSONArray goodsList = JSONArray.parseArray(listOfGoods);
             for (int i = 0; i < goodsList.size(); i++) {
                 JSONObject job = goodsList.getJSONObject(i);
                 String goodsId = job.getString("goodsId");//商品id
                 String productId = job.getString("productId");//货品id
-                Integer productType = Integer.parseInt(job.getString("productType"));//0:材料；1：服务；2:人工
+                Integer productType = Integer.parseInt(job.getString("productType"));//0:材料；1：包工包料；2:人工
                 String groupType = job.getString("groupType");//null：单品；有值：关联组合
                 String goodsGroupId = job.getString("goodsGroupId");//所属关联组
                 Double shopCount = Double.parseDouble(job.getString("shopCount"));//数量
-                if (0 == productType || 1 == productType) {//材料或者服务
+                if (0 == productType || 1 == productType) {//材料或者包工包料
                     Example example1 = new Example(BudgetMaterial.class);
                     example1.createCriteria().andEqualTo(BudgetMaterial.HOUSE_ID, houseId).andEqualTo(BudgetMaterial.PRODUCT_ID, productId).andEqualTo(BudgetMaterial.WORKER_TYPE_ID, workerTypeId);
                     int num = iBudgetMaterialMapper.selectCountByExample(example1);
@@ -544,7 +548,7 @@ public class BudgetWorkerService {
             map.put("caiLiaos", caiLiaos);
 
 
-            ImportExcel fuWu = new ImportExcel(file, 0, 2);//服务
+            ImportExcel fuWu = new ImportExcel(file, 0, 2);//包工包料
             List<ProductDTO> fuWuList = fuWu.getDataList(ProductDTO.class, 0);
             List<ProductDTO> fuWus = new ArrayList<>();
             for (int i = 0; i < fuWuList.size(); i++) {
@@ -697,7 +701,7 @@ public class BudgetWorkerService {
             BudgetListResult blr2 = new BudgetListResult();
             BudgetListResult blr3 = new BudgetListResult();
 
-            HouseStyleType houseStyleType = getForBudgetAPI.getStyleByName(house.getStyle());
+            HouseStyleType houseStyleType = getForBudgetAPI.getStyleById(house.getStyleId());
             if (houseStyleType != null && houseStyleType.getPrice() != null) {
                 blr1.setListCost(house.getSquare().multiply(houseStyleType.getPrice()));
             } else {

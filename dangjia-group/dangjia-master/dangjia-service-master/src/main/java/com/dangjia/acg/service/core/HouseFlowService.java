@@ -6,6 +6,7 @@ import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
@@ -97,8 +98,6 @@ public class HouseFlowService {
     private CraftsmanConstructionService constructionService;
 
     @Autowired
-    private IBusinessOrderMapper businessOrderMapper;
-    @Autowired
     private IInsuranceMapper insuranceMapper;
     @Autowired
     private GroupInfoService groupInfoService;
@@ -124,25 +123,27 @@ public class HouseFlowService {
     /**
      * 抢单列表
      */
-    public ServerResponse getGrabList(String userToken, String cityId) {
+    public ServerResponse getGrabList( HttpServletRequest request,String userToken, String cityId) {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
-            Member member = (Member) object;
+            Member member = memberMapper.selectByPrimaryKey(((Member) object).getId());
+            if(member==null){
+                return ServerResponse.createbyUserTokenError();
+            }
             //工匠没有实名认证不应该展示数据
             if (CommonUtil.isEmpty(member.getWorkerTypeId()) || member.getCheckType() != 2 || member.getRealNameState() != 3) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
-            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-            request.setAttribute(Constants.CITY_ID, cityId);
             List<AllgrabBean> grabList = new ArrayList<>();//返回的任务list
             String workerTypeId = member.getWorkerTypeId();
             /*待抢单*/
             Example example = new Example(HouseFlow.class);
-            example.createCriteria().andEqualTo(HouseFlow.WORK_TYPE, 2).andEqualTo(HouseFlow.WORKER_TYPE_ID, workerTypeId)
+            example.createCriteria().andCondition(" work_type in (2,3) ").andEqualTo(HouseFlow.WORKER_TYPE_ID, workerTypeId)
                     .andEqualTo(HouseFlow.CITY_ID, cityId).andNotEqualTo(HouseFlow.STATE, 2);
+            example.orderBy(HouseFlow.WORK_TYPE);
             List<HouseFlow> hfList = houseFlowMapper.selectByExample(example);
             if (hfList != null)
                 for (HouseFlow houseFlow : hfList) {
@@ -161,6 +162,23 @@ public class HouseFlowService {
                     if (house.getVisitState() == 2 || house.getVisitState() == 3 || house.getVisitState() == 4) {
                         continue;
                     }
+                   if(member.getWorkerType()!=null&&member.getWorkerType()==1){
+                       boolean isContinue=true;
+                       if(!CommonUtil.isEmpty(member.getStyles())){
+                           String[] optionalStyles=member.getStyles().split(",");
+                           for (String s : optionalStyles) {
+                               if(s.equals(house.getStyleId())) {
+                                   isContinue=false;
+                                   break;
+                               }
+                           }
+                       }else{
+                           isContinue=false;
+                       }
+                       if (isContinue) {
+                           continue;
+                       }
+                   }
                     AllgrabBean allgrabBean = new AllgrabBean();
                     example = new Example(HouseFlowCountDownTime.class);
                     example.createCriteria().andEqualTo(HouseFlowCountDownTime.WORKER_ID, member.getId()).andEqualTo(HouseFlowCountDownTime.HOUSE_FLOW_ID, houseFlow.getId());
@@ -189,6 +207,10 @@ public class HouseFlowService {
                     if (mem == null) {
                         continue;
                     }
+                    allgrabBean.setButType("0");
+                    if (houseFlow.getWorkType() == 3) {
+                        allgrabBean.setButType("1");
+                    }
                     allgrabBean.setWorkerTypeId(workerTypeId);
                     allgrabBean.setHouseFlowId(houseFlow.getId());
                     allgrabBean.setHouseName(house.getHouseName());
@@ -196,8 +218,8 @@ public class HouseFlowService {
                     allgrabBean.setHouseMember("业主 " + (mem.getNickName() == null ? mem.getName() : mem.getNickName()));//业主名称
                     allgrabBean.setWorkertotal("¥0");//工钱
                     double totalPrice = 0;
-                    if (houseFlow.getWorkerType() == 1 && !CommonUtil.isEmpty(house.getStyle())) {//设计师
-                        HouseStyleType houseStyleType = houseStyleTypeMapper.getStyleByName(house.getStyle());
+                    if (houseFlow.getWorkerType() == 1 && !CommonUtil.isEmpty(house.getStyleId())) {//设计师
+                        HouseStyleType houseStyleType = houseStyleTypeMapper.selectByPrimaryKey(house.getStyleId());
                         BigDecimal workPrice = house.getSquare().multiply(houseStyleType.getPrice());//设计工钱
                         allgrabBean.setWorkertotal("¥" + String.format("%.2f", workPrice.doubleValue()));//工钱
                     } else if (houseFlow.getWorkerType() == 2) {
@@ -363,10 +385,9 @@ public class HouseFlowService {
                 for (RewardPunishCondition rewardPunishCondition : conditionList) {
                     if (rewardPunishCondition.getType() == 3) {
                         Date wraprDate = rewardPunishCondition.getEndTime();
-                        DateFormat longDateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG);
                         Date date = new Date();
                         if (date.getTime() < wraprDate.getTime()) {
-                            return ServerResponse.createByErrorMessage("您处于平台处罚期内，" + longDateFormat.format(wraprDate) + "以后才能抢单,如有疑问请致电400-168-1231！");
+                            return ServerResponse.createByErrorMessage("您处于平台处罚期内，" + DateUtil.getDateString2(wraprDate.getTime()) + "以后才能抢单,如有疑问请致电400-168-1231！");
                         }
                     }
                 }
@@ -384,14 +405,14 @@ public class HouseFlowService {
                     }
                 }
             }
-            if (member.getWorkerType() > 3) {//其他工人
+            if (member.getWorkerType() > 2) {//其他工人
 //                if (hf.getPause() == 1) {
 //                    return ServerResponse.createByErrorMessage("该房子已暂停施工！");
 //                }
                 //持单数
                 long num = houseWorkerMapper.grabControl(member.getId());//查询未完工工地
                 WorkerType wt = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
-                if (member.getWorkerType() != 7 && num >= wt.getMethods()) {
+                if (wt.getMethods()>0 && member.getWorkerType() != 7 && num >= wt.getMethods()) {
                     return ServerResponse.createByErrorMessage("您有工地还未完工,暂不能抢单！");
                 }
 
@@ -516,7 +537,7 @@ public class HouseFlowService {
                         operator.setSurplusMoney(surplusMoney);
                         operator.setHaveMoney(haveMoney);
                         memberMapper.updateByPrimaryKeySelective(operator);
-                        configMessageService.addConfigMessage(null, "gj", operator.getId(), "0",
+                        configMessageService.addConfigMessage(null, AppType.GONGJIANG, operator.getId(), "0",
                                 "保险自动续保", "您的保险已到期,为确保您在施工期间的保障,系统已自动续保", "0");
                     }
                 }
@@ -537,7 +558,10 @@ public class HouseFlowService {
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
-            Member member = (Member) object;
+            Member member = memberMapper.selectByPrimaryKey(((Member) object).getId());
+            if(member==null){
+                return ServerResponse.createbyUserTokenError();
+            }
             HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowId);
             Example example = new Example(HouseWorker.class);
             example.createCriteria().andEqualTo(HouseWorker.WORKER_ID, member.getId()).andEqualTo(HouseWorker.HOUSE_ID, hf.getHouseId());
@@ -574,7 +598,7 @@ public class HouseFlowService {
                     }
                 }
                 House house = houseMapper.selectByPrimaryKey(hf.getHouseId());
-                configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "大管家放弃", String.format(DjConstants.PushMessage.STEWARD_ABANDON, house.getHouseName()), "");
+                configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "大管家放弃", String.format(DjConstants.PushMessage.STEWARD_ABANDON, house.getHouseName()), "");
             } else {//普通工匠
                 if (hf.getWorkType() == 3) {//已抢单待支付(无责取消)
                     hf.setWorkType(2);//抢单状态更改为待抢单
@@ -605,11 +629,9 @@ public class HouseFlowService {
                 houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
                 House house = houseMapper.selectByPrimaryKey(hf.getHouseId());
                 WorkerType workerType = workerTypeMapper.selectByPrimaryKey(hf.getWorkerTypeId());
-                configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "工匠放弃", String.format(DjConstants.PushMessage.CRAFTSMAN_ABANDON, house.getHouseName(), workerType.getName()), "");
-
-
+                configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "工匠放弃", String.format(DjConstants.PushMessage.CRAFTSMAN_ABANDON, house.getHouseName(), workerType.getName()), "");
                 HouseFlow houseFlowDgj = houseFlowMapper.getHouseFlowByHidAndWty(hf.getHouseId(), 3);
-                configMessageService.addConfigMessage(null, "gj", houseFlowDgj.getWorkerId(), "0", "工匠放弃",
+                configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlowDgj.getWorkerId(), "0", "工匠放弃",
                         String.format(DjConstants.PushMessage.STEWARD_CRAFTSMAN_TWO_ABANDON, house.getHouseName()), "5");
 
             }
@@ -636,10 +658,9 @@ public class HouseFlowService {
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
-            Member member = (Member) object;
-            member = memberMapper.selectByPrimaryKey(member.getId());
-            if (member == null) {
-                return ServerResponse.createByErrorMessage("用户不存在");
+            Member member = memberMapper.selectByPrimaryKey(((Member) object).getId());
+            if(member==null){
+                return ServerResponse.createbyUserTokenError();
             }
             HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowId);
             //查询排队时间,并修改重排
@@ -670,18 +691,23 @@ public class HouseFlowService {
      * @return 等待时间
      */
     private Date getCountDownTime(BigDecimal evaluationScore) {
-        Calendar now = Calendar.getInstance();
-        if (Double.parseDouble(evaluationScore.toString()) < 70) {//积分小于70分，加20分钟
-            now.add(Calendar.MINUTE, 20);//当前时间加20分钟
-        } else if (Double.parseDouble(evaluationScore.toString()) >= 70 && Double.parseDouble(evaluationScore.toString()) < 80) {
-            now.add(Calendar.MINUTE, 10);//当前时间加10分钟
-        } else if (Double.parseDouble(evaluationScore.toString()) >= 80 && Double.parseDouble(evaluationScore.toString()) < 90) {
-            now.add(Calendar.MINUTE, 5);//当前时间加5分钟
-        } else {
-            now.add(Calendar.MINUTE, 1);//当前时间加1分钟
+        if (active != null && active.equals("pre")) {
+            Calendar now = Calendar.getInstance();
+            if (Double.parseDouble(evaluationScore.toString()) < 70) {//积分小于70分，加20分钟
+                now.add(Calendar.MINUTE, 20);//当前时间加20分钟
+            } else if (Double.parseDouble(evaluationScore.toString()) >= 70 && Double.parseDouble(evaluationScore.toString()) < 80) {
+                now.add(Calendar.MINUTE, 10);//当前时间加10分钟
+            } else if (Double.parseDouble(evaluationScore.toString()) >= 80 && Double.parseDouble(evaluationScore.toString()) < 90) {
+                now.add(Calendar.MINUTE, 5);//当前时间加5分钟
+            } else {
+                now.add(Calendar.MINUTE, 1);//当前时间加1分钟
+            }
+            String dateStr = DateUtil.getDateString(now.getTimeInMillis());
+            return DateUtil.toDate(dateStr);
+        }else{
+            return new Date();
         }
-        String dateStr = DateUtil.getDateString(now.getTimeInMillis());
-        return DateUtil.toDate(dateStr);
+
     }
 
     /**
@@ -711,15 +737,7 @@ public class HouseFlowService {
             houseFlow.setSupervisorStart(1);//大管家进度改为已开工
             houseFlow.setModifyDate(new Date());
             houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
-//            HouseFlow nextHF = houseFlowMapper.getNextHouseFlow(houseFlow.getHouseId());//根据当前工序查下一工序
-//            if (nextHF != null) {
-//                nextHF.setWorkType(2);//把下一个工种弄成待抢单
-//                nextHF.setReleaseTime(new Date());//发布时间
-//                houseFlowMapper.updateByPrimaryKeySelective(nextHF);
-//                //通知下一个工种 抢单
-//                configMessageService.addConfigMessage(null, "gj", "wtId" + nextHF.getWorkerTypeId() + nextHF.getCityId(), "0", "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, "4");
-//            }
-            configMessageService.addConfigMessage(null, "zx", house.getMemberId(), "0", "大管家开工", DjConstants.PushMessage.STEWARD_CONSTRUCTION, "");
+            configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "大管家开工", DjConstants.PushMessage.STEWARD_CONSTRUCTION, "");
 
             //开始建群
             Group group = new Group();

@@ -6,6 +6,7 @@ import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.matter.WorkerDisclosure;
+import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.service.engineer.EngineerService;
 import com.dangjia.acg.service.member.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -164,6 +165,25 @@ public class WebEngineerController implements WebEngineerAPI {
         return engineerService.artisanList(cityId,name, workerTypeId, type, checkType ,pageDTO);
     }
 
+    /**
+     *  修改设计师绑定风格
+     * @param request
+     * @param member
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse setMemberStyle(HttpServletRequest request,Member member) {
+        return engineerService.setMemberStyle(member);
+    }
+    /**
+     * 设计师风格详情
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getMemberStyles(HttpServletRequest request, String mamberId) {
+        return engineerService.getMemberStyles(request,mamberId);
+    }
     @Override
     @ApiMethod
     public ServerResponse getWareHouse(String houseId, PageDTO pageDTO) {

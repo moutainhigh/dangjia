@@ -5,6 +5,7 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.member.BrandCardDTO;
@@ -87,8 +88,10 @@ public class WalletService {
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
-            Member worker = (Member) object;
-            worker = memberMapper.selectByPrimaryKey(worker.getId());
+            Member worker = memberMapper.selectByPrimaryKey(((Member) object).getId());
+            if (worker == null) {
+                return ServerResponse.createbyUserTokenError();
+            }
             if (worker.getCheckType() == 4) {
                 //冻结的帐户不能提现
                 return ServerResponse.createByErrorMessage("账户冻结，无法提现");
@@ -113,7 +116,7 @@ public class WalletService {
             //生成提现订单
             BankCard bankCard = bankCardMapper.selectByPrimaryKey(workerBankCard.getBankCardId());
             WithdrawDeposit wd = new WithdrawDeposit();
-            wd.setRoleType(roleType==1 ? 1:worker.getWorkerType()==3 ? 2:3);
+            wd.setRoleType(roleType == 1 ? 1 : worker.getWorkerType() == 3 ? 2 : 3);
             wd.setName(worker.getName());
             wd.setWorkerId(worker.getId());
             wd.setMoney(new BigDecimal(money));
@@ -156,10 +159,9 @@ public class WalletService {
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
-            Member member = (Member) object;
-            member = memberMapper.selectByPrimaryKey(member.getId());
+            Member member = memberMapper.selectByPrimaryKey(((Member) object).getId());
             if (member == null) {
-                return ServerResponse.createByErrorMessage("用户不存在");
+                return ServerResponse.createbyUserTokenError();
             }
             if (member.getCheckType() == 4) {
                 //冻结的帐户不能修改资料信息
@@ -205,10 +207,9 @@ public class WalletService {
                 for (RewardPunishCondition rewardPunishCondition : conditionList) {
                     if (rewardPunishCondition.getType() == 4) {
                         Date endTime = rewardPunishCondition.getEndTime();
-                        DateFormat longDateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG);
                         Date date = new Date();
                         if (date.getTime() < endTime.getTime()) {
-                            return ServerResponse.createByErrorMessage("您处于平台处罚期内，" + longDateFormat.format(endTime) + "以后才能提现,如有疑问请致电400-168-1231");
+                            return ServerResponse.createByErrorMessage("您处于平台处罚期内，" + DateUtil.getDateString2(endTime.getTime()) + "以后才能提现,如有疑问请致电400-168-1231");
                         }
                     }
                 }

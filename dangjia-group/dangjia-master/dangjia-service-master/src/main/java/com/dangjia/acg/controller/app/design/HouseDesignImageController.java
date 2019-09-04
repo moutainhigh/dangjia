@@ -32,8 +32,8 @@ public class HouseDesignImageController implements HouseDesignImageAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getDesignList(HttpServletRequest request, PageDTO pageDTO, int designerType, String searchKey) {
-        return designDataService.getDesignList(request, pageDTO, designerType, searchKey);
+    public ServerResponse getDesignList(HttpServletRequest request, PageDTO pageDTO, int designerType, String searchKey,String workerKey) {
+        return designDataService.getDesignList(request, pageDTO, designerType, searchKey, workerKey);
     }
 
     @Override
@@ -107,5 +107,9 @@ public class HouseDesignImageController implements HouseDesignImageAPI {
     public ServerResponse getIdQuantityRoom(HttpServletRequest request, String quantityRoomId) {
         return designDataService.getIdQuantityRoom(quantityRoomId);
     }
-
+    @Override
+    @ApiMethod
+    public ServerResponse getHouseStatistics(String cityId,String workerTypeId,PageDTO pageDTO,String startDate, String endDate){
+        return designDataService.getHouseStatistics(cityId,workerTypeId,pageDTO,startDate,endDate);
+    }
 }

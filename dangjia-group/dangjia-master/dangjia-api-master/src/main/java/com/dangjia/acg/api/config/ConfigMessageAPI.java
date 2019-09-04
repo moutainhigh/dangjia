@@ -34,14 +34,12 @@ public interface ConfigMessageAPI {
     /**
      * 获取所有公告消息
      *
-     * @param configMessage
      * @return
      */
     @PostMapping("/config/message/all")
     @ApiOperation(value = "获取所有公告消息(web端列表)", notes = "获取所有公告消息(web端列表)")
     ServerResponse queryConfigMessages(@RequestParam("request") HttpServletRequest request,
-                                       @RequestParam("pageDTO") PageDTO pageDTO,
-                                       @RequestParam("configMessage") ConfigMessage configMessage);
+                                       @RequestParam("pageDTO") PageDTO pageDTO);
 
     /**
      * 新增公告消息
@@ -53,5 +51,16 @@ public interface ConfigMessageAPI {
     @ApiOperation(value = "新增公告消息", notes = "新增公告消息")
     ServerResponse addConfigMessage(@RequestParam("request") HttpServletRequest request,
                                     @RequestParam("configMessage") ConfigMessage configMessage);
+
+
+
+    @PostMapping("/config/message/addConfigMessage")
+    @ApiOperation(value = "沟通提示消息", notes = "沟通提示消息")
+    ServerResponse addConfigMessage(@RequestParam("memberId") String memberId,
+                                    @RequestParam("title") String title,
+                                    @RequestParam("alert") String alert,
+                                    @RequestParam("type") int type,
+                                    @RequestParam("data")String data);
+
 
 }

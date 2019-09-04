@@ -74,6 +74,8 @@ public interface WebMemberAPI {
     ServerResponse certificationList(@RequestParam("request") HttpServletRequest request,
                                      @RequestParam("pageDTO") PageDTO pageDTO,
                                      @RequestParam("searchKey") String searchKey,
+                                     @RequestParam("cityId") String cityId,
+                                     @RequestParam("policyId") String policyId,
                                      @RequestParam("realNameState") Integer realNameState);
 
     @PostMapping("web/member/certificationDetails")

@@ -13,21 +13,21 @@ import javax.persistence.Entity;
 @ApiModel(description = "用户token信息")
 public class AccessToken extends BaseEntity {
 
-	@ApiModelProperty("用户名")
-	private String memberId;//用户id
+    @ApiModelProperty("用户名")
+    private String memberId;//用户id
+    private String userId;
+    @ApiModelProperty("用户电话")
+    private String phone;//用户电话
+    @ApiModelProperty("工匠类型(0:大管家；1：普通工匠;2:业主;3:店长;4:内场销售;5:外场销售;6:无权限销售)")
+    private Integer memberType;//工匠类型(0:大管家；1：普通工匠;2:业主;3:店长;4:内场销售;5:外场销售;6:无权限销售)
+    @ApiModelProperty("工匠类型名称")
+    private String workerTypeName;//工匠类型名称
+    @ApiModelProperty("时间戳")
+    private String timestamp;// 时间戳
+    @ApiModelProperty("系统userToken")
+    private String userToken;// 系统userToken
 
-	@ApiModelProperty("用户电话")
-	private String phone;//用户电话
-	@ApiModelProperty("工匠类型(0:大管家；1：普通工匠;2:业主)")
-	private Integer memberType;//工匠类型(0:大管家；1：普通工匠;2:业主)
-	@ApiModelProperty("工匠类型名称")
-	private String workerTypeName;//工匠类型名称
-	@ApiModelProperty("时间戳")
-	private String timestamp;// 时间戳
-	@ApiModelProperty("系统userToken")
-	private String userToken;// 系统userToken
-
-	@ApiModelProperty("用户信息")
-	private Member member;// 用户信息
+    @ApiModelProperty("用户信息")
+    private Member member;// 用户信息
 
 }

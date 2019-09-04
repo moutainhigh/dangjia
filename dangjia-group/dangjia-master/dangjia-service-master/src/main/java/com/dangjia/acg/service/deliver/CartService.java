@@ -169,7 +169,7 @@ public class CartService {
         List<Map> listMap = new ArrayList<>();
         for (Cart cart1 : list) {
             Map map = BeanUtils.beanToMap(cart1);
-            ServerResponse serverResponse = productAPI.getProductById(house.getCityId(), cart.getProductId());
+            ServerResponse serverResponse = productAPI.getProductById(request.getParameter(Constants.CITY_ID), cart.getProductId());
             if (serverResponse != null && serverResponse.getResultObj() != null) {
                 Product product = JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), Product.class);
                 if (product.getType() == 0 || product.getMaket() == 0) {
@@ -219,7 +219,6 @@ public class CartService {
                 productIdArr[i] = warehouseList.get(i).getProductId();
                 warehouseMap.put(warehouseList.get(i).getProductId(), warehouseList.get(i));
             }
-            request.setAttribute(Constants.CITY_ID, cityId);
             PageInfo pageResult = productAPI.queryProductData(cityId, pageDTO.getPageNum(), pageDTO.getPageSize(), name, categoryId, productType, productIdArr);
             List<JSONObject> products = pageResult.getList();
             for (JSONObject product : products) {

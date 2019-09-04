@@ -80,8 +80,8 @@ public class WebMemberController implements WebMemberAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse certificationList(HttpServletRequest request, PageDTO pageDTO, String searchKey, Integer realNameState) {
-        return memberService.certificationList(pageDTO, searchKey, realNameState);
+    public ServerResponse certificationList(HttpServletRequest request, PageDTO pageDTO, String searchKey,String cityId, String policyId,Integer realNameState) {
+        return memberService.certificationList(pageDTO, searchKey,  cityId,  policyId,realNameState);
     }
 
     @Override

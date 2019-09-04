@@ -21,5 +21,5 @@ public class GoodsItemDTO {
     private Double repairCount;//补退
     private Double backCount;//退货
     private Double surCount;//剩余数量
-    private double tolPrice; //实际花费
+    private Double tolPrice; //实际花费
 }

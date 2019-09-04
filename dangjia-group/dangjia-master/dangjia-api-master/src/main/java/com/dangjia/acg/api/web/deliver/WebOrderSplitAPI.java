@@ -55,7 +55,8 @@ public interface WebOrderSplitAPI {
 
     @PostMapping("web/deliver/orderSplit/getHouseList")
     @ApiOperation(value = "材料员看房子列表", notes = "材料员看房子列表")
-    ServerResponse getHouseList(@RequestParam("pageDTO") PageDTO pageDTO,
+    ServerResponse getHouseList(@RequestParam("cityId") String cityId,
+                                @RequestParam("pageDTO") PageDTO pageDTO,
                                 @RequestParam("likeAddress") String likeAddress,
                                 @RequestParam("startDate")String startDate,
                                 @RequestParam("endDate")String endDate

@@ -31,10 +31,11 @@ public interface MainUserAPI {
 
     /**
      * 分页查询用户列表
+     *
      * @param request
      * @param pageDTO
      * @param userSearch
-     * @param isJob 1：查询未离职的用户 2：查询未离职售前客服、工程部、工程部经理三个角色的用户  "" ：不传则展示所有
+     * @param isJob      1：查询未离职的用户 2：查询未离职售前客服、工程部、工程部经理三个角色的用户  "" ：不传则展示所有
      * @return
      */
     @RequestMapping(value = "/user/getUsers", method = RequestMethod.POST)
@@ -137,7 +138,8 @@ public interface MainUserAPI {
 
     @RequestMapping(value = "/user/checkAuth", method = RequestMethod.POST)
     @ApiOperation(value = "檢查指定权限code，当前登录用户是否有权限", notes = "檢查指定权限code，当前登录用户是否有权限\"")
-    ServerResponse checkAuth(@RequestParam("request") HttpServletRequest request, @RequestParam("rcode") String rcode);
+    ServerResponse checkAuth(@RequestParam("request") HttpServletRequest request,
+                             @RequestParam("rcode") String rcode);
 
     /**
      * 修改密码之确认手机号

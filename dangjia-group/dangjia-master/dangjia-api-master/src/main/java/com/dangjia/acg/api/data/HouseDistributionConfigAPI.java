@@ -29,7 +29,7 @@ public interface HouseDistributionConfigAPI {
     @PostMapping("/config/distribution/list")
     @ApiOperation(value = "获取所有验房配置", notes = "获取所有验房配置")
     ServerResponse getHouseDistributionConfigs(@RequestParam("request") HttpServletRequest request,
-                                               @RequestParam("houseDistributionConfig") HouseDistributionConfig houseDistributionConfig);
+                                     @RequestParam("houseDistributionConfig") HouseDistributionConfig houseDistributionConfig);
 
     /**
      * 删除验房配置
@@ -40,7 +40,7 @@ public interface HouseDistributionConfigAPI {
     @PostMapping("/config/distribution/del")
     @ApiOperation(value = "删除验房配置", notes = "删除验房配置")
     ServerResponse delHouseDistributionConfig(@RequestParam("request") HttpServletRequest request,
-                                              @RequestParam("id") String id);
+                                    @RequestParam("id") String id);
 
     /**
      * 修改验房配置
@@ -51,7 +51,7 @@ public interface HouseDistributionConfigAPI {
     @PostMapping("/config/distribution/edit")
     @ApiOperation(value = "修改验房配置", notes = "修改验房配置")
     ServerResponse editHouseDistributionConfig(@RequestParam("request") HttpServletRequest request,
-                                               @RequestParam("houseDistributionConfig") HouseDistributionConfig houseDistributionConfig);
+                                     @RequestParam("houseDistributionConfig") HouseDistributionConfig houseDistributionConfig);
 
     /**
      * 新增验房配置
@@ -62,5 +62,5 @@ public interface HouseDistributionConfigAPI {
     @PostMapping("/config/distribution/add")
     @ApiOperation(value = "新增验房配置", notes = "新增验房配置")
     ServerResponse addHouseDistributionConfig(@RequestParam("request") HttpServletRequest request,
-                                              @RequestParam("houseDistributionConfig") HouseDistributionConfig houseDistributionConfig);
+                                    @RequestParam("houseDistributionConfig") HouseDistributionConfig houseDistributionConfig);
 }

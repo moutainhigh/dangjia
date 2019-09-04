@@ -3,6 +3,7 @@ package com.dangjia.acg.service.worker;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.data.ForMasterAPI;
+import com.dangjia.acg.auth.config.RedisSessionDAO;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
@@ -14,6 +15,7 @@ import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.worker.WorkIntegralDTO;
+import com.dangjia.acg.mapper.clue.ClueMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyImageMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
@@ -22,11 +24,14 @@ import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IMaterialRecordMapper;
 import com.dangjia.acg.mapper.house.IModelingVillageMapper;
 import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
+import com.dangjia.acg.mapper.member.ICustomerMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.mapper.worker.IEvaluateMapper;
 import com.dangjia.acg.mapper.worker.IWorkIntegralMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.basics.Product;
+import com.dangjia.acg.modle.clue.Clue;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.HouseFlowApplyImage;
@@ -34,7 +39,10 @@ import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.MaterialRecord;
 import com.dangjia.acg.modle.house.ModelingVillage;
+import com.dangjia.acg.modle.member.AccessToken;
+import com.dangjia.acg.modle.member.Customer;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.modle.worker.Evaluate;
 import com.dangjia.acg.modle.worker.WorkIntegral;
 import com.dangjia.acg.modle.worker.WorkerDetail;
@@ -44,9 +52,13 @@ import com.dangjia.acg.service.core.HouseFlowApplyService;
 import com.dangjia.acg.service.core.HouseWorkerService;
 import com.dangjia.acg.service.house.HouseService;
 import com.dangjia.acg.service.repair.MendOrderService;
+import com.dangjia.acg.service.sale.royalty.RoyaltyService;
 import com.dangjia.acg.util.LocationUtils;
+import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -70,6 +82,9 @@ public class EvaluateService {
 
     @Autowired
     private HouseWorkerService houseWorkerService;
+
+    @Autowired
+    private IHouseFlowApplyImageMapper houseFlowApplyImageMapper;
     @Autowired
     private IHouseFlowApplyMapper houseFlowApplyMapper;
     @Autowired
@@ -109,8 +124,14 @@ public class EvaluateService {
     private HouseService houseService;
     @Autowired
     private CraftsmanConstructionService constructionService;
-
-
+    @Autowired
+    private RoyaltyService royaltyService;
+    @Autowired
+    private ICustomerMapper customerMapper;
+    @Autowired
+    private ClueMapper clueMapper;
+    @Autowired
+    private UserMapper userMapper;
     /**
      * 获取积分记录
      * @param userToken
@@ -205,7 +226,7 @@ public class EvaluateService {
                 memberMapper.updateByPrimaryKeySelective(member);
             }
             House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
-            configMessageService.addConfigMessage(null, "gj", houseFlowApply.getWorkerId(),
+            configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlowApply.getWorkerId(),
                     "0", "完工申请结果", String.format(DjConstants.PushMessage.STEWARD_APPLY_FINISHED_NOT_PASS,
                             house.getHouseName()), "5");
             return ServerResponse.createBySuccessMessage("操作成功");
@@ -243,7 +264,7 @@ public class EvaluateService {
             houseFlowApply.setStartDate(DateUtil.addDateDays(new Date(), 1));
             houseFlowApply.setModifyDate(new Date());
             houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
-            configMessageService.addConfigMessage(null, "gj", member.getId(), "0",
+            configMessageService.addConfigMessage(null, AppType.GONGJIANG, member.getId(), "0",
                     "阶段/整体审核超时扣钱提醒", String.format(DjConstants.PushMessage.STEWARD_SHENGHECHAOSHI, house.getHouseName(),
                             workerType.getName()), "0");
         }
@@ -271,7 +292,7 @@ public class EvaluateService {
             member.setSurplusMoney(surplusMoney);
             member.setHaveMoney(haveMoney);
             memberMapper.updateByPrimaryKeySelective(member);
-            configMessageService.addConfigMessage(null, "gj", member.getId(), "0",
+            configMessageService.addConfigMessage(null, AppType.GONGJIANG, member.getId(), "0",
                     workerType.getName() + "旷工扣钱",
                     String.format(DjConstants.PushMessage.CRAFTSMAN_ABSENTEEISM, house.getHouseName()), "0");
         }
@@ -373,6 +394,9 @@ public class EvaluateService {
              * 大管家每次审核拿钱 新算法 2018.08.03
              */
             if (houseFlowApply.getApplyType() == 1 || houseFlowApply.getApplyType() == 2) {
+                Example example = new Example(HouseFlowApplyImage.class);
+                example.createCriteria().andEqualTo(HouseFlowApplyImage.HOUSE_FLOW_APPLY_ID, houseFlowApplyId);
+                List<HouseFlowApplyImage> hfaiList = houseFlowApplyImageMapper.selectByExample(example);
                 //算管家每次审核该拿的钱数
                 //大管家的hf
                 HouseFlow supervisorHF = houseFlowMapper.getHouseFlowByHidAndWty(houseFlowApply.getHouseId(), 3);
@@ -421,6 +445,8 @@ public class EvaluateService {
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse saveEvaluateSupervisor(String userToken,String houseFlowApplyId, String content, int star, boolean isAuto,String onekey) {
         try {
+
+
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
             House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
             if (houseFlowApply.getMemberCheck() == 1 || houseFlowApply.getMemberCheck() == 3) {
@@ -433,6 +459,7 @@ public class EvaluateService {
                     return response;
                 }
             }
+            royaltyService.endRoyalty(house.getId());//业主验收销售拿剩下的提成
             Member worker = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
             Evaluate evaluate = new Evaluate();
             evaluate.setContent(content);
@@ -461,7 +488,7 @@ public class EvaluateService {
             houseFlowApplyService.checkSupervisor(houseFlowApplyId, isAuto);
 
 
-            configMessageService.addConfigMessage(null, "gj", houseFlowApply.getWorkerId(), "0", "业主评价", String.format(DjConstants.PushMessage.CRAFTSMAN_EVALUATE, house.getHouseName()), "6");
+            configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlowApply.getWorkerId(), "0", "业主评价", String.format(DjConstants.PushMessage.CRAFTSMAN_EVALUATE, house.getHouseName()), "6");
 
 
             //短信通知业务本门
@@ -470,6 +497,24 @@ public class EvaluateService {
             temp_para.put("house_name", house.getHouseName());
             temp_para.put("worker_name", workerType.getName());
             JsmsUtil.sendSMS("15675101794", "164425", temp_para);
+
+            Customer customer = customerMapper.getCustomerByMemberId(house.getMemberId());
+            if(customer!=null&&!CommonUtil.isEmpty(customer.getUserId())) {
+                //竣工消息推送
+                //获取线索ID
+                Example example1 = new Example(Clue.class);
+                example1.createCriteria()
+                        .andEqualTo(Clue.CUS_SERVICE, customer.getUserId())
+                        .andEqualTo(Clue.DATA_STATUS, 0)
+                        .andEqualTo(Clue.MEMBER_ID, house.getMemberId());
+                List<Clue> djAlreadyRobSingle = clueMapper.selectByExample(example1);
+                MainUser user = userMapper.selectByPrimaryKey(customer.getUserId());
+                String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+                configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "竣工提醒",
+                        "您有已竣工的房子【" + house.getHouseName() + "】", 0, url
+                                + Utils.getCustomerDetails(house.getMemberId(), djAlreadyRobSingle.get(0).getId(), 1, "4"));
+
+            }
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
@@ -481,12 +526,22 @@ public class EvaluateService {
     /**
      * 保存业主端对管家对工人评价
      */
+    private static Logger logger = LoggerFactory.getLogger(RedisSessionDAO.class);
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse saveEvaluate(String houseFlowApplyId, String wContent, int wStar
             , String sContent, int sStar, boolean isAuto) {
         try {
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
+            if(houseFlowApply==null){
+                return ServerResponse.createByErrorMessage("该工单不存在");
+            }
+            logger.info("houseFlowApply==================="+houseFlowApply);
+            logger.info("houseFlowApply.getHouseId()==================="+houseFlowApply.getHouseId());
             House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
+            if(house==null){
+                return ServerResponse.createByErrorMessage("该房产不存在");
+            }
+            logger.info("house==================="+house);
             if (houseFlowApply.getMemberCheck() == 1 || houseFlowApply.getMemberCheck() == 3) {
                 return ServerResponse.createByErrorMessage("重复审核");
             }
@@ -559,8 +614,8 @@ public class EvaluateService {
                 TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                 return serverResponse;
             }
-            configMessageService.addConfigMessage(null, "gj", worker.getId(), "0", "业主评价", String.format(DjConstants.PushMessage.CRAFTSMAN_EVALUATE, house.getHouseName()), "6");
-            configMessageService.addConfigMessage(null, "gj", supervisor.getId(), "0", "业主评价", String.format(DjConstants.PushMessage.STEWARD_EVALUATE, house.getHouseName()), "6");
+            configMessageService.addConfigMessage(null, AppType.GONGJIANG, worker.getId(), "0", "业主评价", String.format(DjConstants.PushMessage.CRAFTSMAN_EVALUATE, house.getHouseName()), "6");
+            configMessageService.addConfigMessage(null, AppType.GONGJIANG, supervisor.getId(), "0", "业主评价", String.format(DjConstants.PushMessage.STEWARD_EVALUATE, house.getHouseName()), "6");
 
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {

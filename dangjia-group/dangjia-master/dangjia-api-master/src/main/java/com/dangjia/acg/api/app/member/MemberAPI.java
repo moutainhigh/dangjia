@@ -24,8 +24,9 @@ public interface MemberAPI {
     /**
      * showdoc
      *
-     * @param id     必选 string 来源ID
-     * @param idType 必选 string 来源类型：1=房屋ID, 2=用户ID
+     * @param id       必选 string 来源ID
+     * @param idType   必选 string 来源类型：1=房屋ID, 2=用户ID
+     * @param userRole 必选 string 1为业主应用，2为工匠应用，3为销售应用
      * @return {"res":1000,"msg":{"resultObj":"13788885555","resultCode":1000,"resultMsg":"成功"} }
      * @catalog 当家接口文档/用户模块/用户信息
      * @title 获取用户手机资料
@@ -53,6 +54,7 @@ public interface MemberAPI {
      * showdoc
      *
      * @param userToken 必选 string userToken
+     * @param userRole  必选 string 1为业主应用，2为工匠应用，3为销售应用
      * @return {"res":1000,"msg":{"resultObj":{返回参数说明},"resultCode":1000,"resultMsg":"成功"} }
      * @catalog 当家接口文档/用户模块/用户信息
      * @title 获取用户详细资料
@@ -116,14 +118,15 @@ public interface MemberAPI {
      */
     @RequestMapping(value = "member/info", method = RequestMethod.POST)
     @ApiOperation(value = "获取用户详细资料", notes = "获取用户详细资料")
-    ServerResponse getMemberInfo(@RequestParam("userToken") String userToken);
+    ServerResponse getMemberInfo(@RequestParam("userToken") String userToken,
+                                 @RequestParam("userRole") Integer userRole);
 
     /**
      * showdoc
      *
-     * @param phone    必选/可选 string 用户名
-     * @param password 必选/可选 string 密码
-     * @param userRole 必选/可选 string app应用 1为业主应用，2为工匠应用
+     * @param phone    必选 string 用户名
+     * @param password 必选 string 密码
+     * @param userRole 必选 string 1为业主应用，2为工匠应用，3为销售应用
      * @return {"res":1000,"msg":{"resultObj":{返回参数说明},"resultCode":1000,"resultMsg":"成功"} }
      * @catalog 当家接口文档/用户模块/用户信息
      * @title 用户登录
@@ -189,7 +192,7 @@ public interface MemberAPI {
     @ApiOperation(value = "用户登录", notes = "用户登录")
     ServerResponse login(@RequestParam("phone") String phone,
                          @RequestParam("password") String password,
-                         @RequestParam("userRole") String userRole);
+                         @RequestParam("userRole") Integer userRole);
 
     /**
      * showdoc
@@ -213,11 +216,11 @@ public interface MemberAPI {
     /**
      * showdoc
      *
-     * @param phone          必选/可选 string 手机号
-     * @param password       必选/可选 string 密码
-     * @param smscode        必选/可选 string 验证码Code
-     * @param invitationCode 必选/可选 string 邀请码
-     * @param userRole       必选/可选 string app应用 1为业主应用，2为工匠应用
+     * @param phone          必选 string 手机号
+     * @param password       必选 string 密码
+     * @param smscode        必选 string 验证码Code
+     * @param invitationCode 必选 string 邀请码
+     * @param userRole       必选 string 1为业主应用，2为工匠应用，3为销售应用
      * @return {"res":1000,"msg":{"resultObj":{返回参数说明},"resultCode":1000,"resultMsg":"成功"} }
      * @catalog 当家接口文档/用户模块/用户信息
      * @title 用户注册
@@ -286,7 +289,9 @@ public interface MemberAPI {
                                  @RequestParam("password") String password,
                                  @RequestParam("smscode") int smscode,
                                  @RequestParam("invitationCode") String invitationCode,
-                                 @RequestParam("userRole") Integer userRole);
+                                 @RequestParam("userRole") Integer userRole,
+                                 @RequestParam("longitude") String longitude,
+                                 @RequestParam("latitude") String latitude);
 
     /**
      * showdoc
@@ -306,7 +311,7 @@ public interface MemberAPI {
      * @param address        可选 String 现居地址
      * @param selfAssessment 可选 String 自我评价
      * @param specialty      可选 String 擅长工作
-     * @param userRole       可选 string app应用 1为业主应用，2为工匠应用
+     * @param userRole       必选 string 1为业主应用，2为工匠应用，3为销售应用
      * @return {"res":1000,"msg":{"resultCode":1000,"resultMsg":"成功"} }
      * @catalog 当家接口文档/用户模块/用户信息
      * @title 工匠提交详细资料
@@ -321,8 +326,7 @@ public interface MemberAPI {
     @RequestMapping(value = "member/updateWokerRegister", method = RequestMethod.POST)
     @ApiOperation(value = "工匠提交详细资料", notes = "工匠提交详细资料")
     ServerResponse updateWokerRegister(@RequestParam("member") Member user,
-                                       @RequestParam("userToken") String userToken,
-                                       @RequestParam("userRole") String userRole);
+                                       @RequestParam("userToken") String userToken);
 
     /**
      * showdoc
@@ -444,14 +448,17 @@ public interface MemberAPI {
      * showdoc
      *
      * @param userToken 必选 string userToken
+     * @param userRole  必选 string 1为业主应用，2为工匠应用，3为销售应用
      * @return {"res":1000,"msg":{"resultObj":{返回参数说明},"resultCode":1000,"resultMsg":"成功"} }
      * @catalog 当家接口文档/用户模块/用户信息
      * @title 我的邀请码
      * @description 我的邀请码
      * @method POST
      * @url master/member/getMyInvitation
-     * @return_param invitationCode int 邀请码
-     * @return_param invitationNum string 已邀请数
+     * @return_param invitationCode string 邀请码
+     * @return_param invitationNum int 已邀请数
+     * @return_param id string 用户ID
+     * @return_param codeData string 二维码内容（目前只有销售端有）
      * @remark 更多返回错误代码请看首页的错误代码描述
      * @number 12
      * @Author: Ruking 18075121944
@@ -459,7 +466,8 @@ public interface MemberAPI {
      */
     @RequestMapping(value = "member/getMyInvitation", method = RequestMethod.POST)
     @ApiOperation(value = "我的邀请码", notes = "我的邀请码")
-    ServerResponse getMyInvitation(@RequestParam("userToken") String userToken);
+    ServerResponse getMyInvitation(@RequestParam("userToken") String userToken,
+                                   @RequestParam("userRole") Integer userRole);
 
     /**
      * showdoc
@@ -473,7 +481,7 @@ public interface MemberAPI {
      * @description 通过手机号/ID获取用户信息
      * @method POST
      * @url master/member/getMembers
-     * @return_param memberType int 0业主，1工匠
+     * @return_param memberType int 0业主，1工匠，2销售
      * @return_param id string ID
      * @return_param nickName string 昵称
      * @return_param name string 昵称

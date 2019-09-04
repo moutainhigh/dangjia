@@ -95,7 +95,7 @@ public class ProductChangeService {
      * @param srcProductId
      * @param destProductId
      * @param srcSurCount
-     * @param productType   0:材料 1：服务
+     * @param productType   0:材料 1：包工包料
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
@@ -153,7 +153,7 @@ public class ProductChangeService {
                 change.setDestPrice(destProduct.getPrice());
                 change.setDestImage(destProduct.getImage());
                 change.setDestSurCount(srcSurCount);
-                // 类型 0 材料 1 服务
+                // 类型 0 材料 1 包工包料
                 change.setProductType(productType);
                 // 差额单价
                 BigDecimal price = BigDecimal.valueOf(MathUtil.sub(change.getDestPrice(), change.getSrcPrice()));
@@ -188,7 +188,7 @@ public class ProductChangeService {
                 productChange.setDestSurCount(srcSurCount);
                 // 未处理
                 productChange.setType(0);
-                // 类型 0 材料 1 服务
+                // 类型 0 材料 1 包工包料
                 productChange.setProductType(productType);
                 // 差额单价
                 BigDecimal price = BigDecimal.valueOf(MathUtil.sub(productChange.getDestPrice(), productChange.getSrcPrice()));
@@ -580,7 +580,7 @@ public class ProductChangeService {
                     }
                     // 处理新商品------begin
                     if (null == wareHouse) {
-                        Goods goods = forMasterAPI.getGoods(request.getParameter(Constants.CITY_ID), destProduct.getGoodsId());
+                        Goods goods = forMasterAPI.getGoods(house.getCityId(), destProduct.getGoodsId());
                         // 新商品没有则添加
                         Warehouse newWareHouse = new Warehouse();
                         newWareHouse.setHouseId(houseId);

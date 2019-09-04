@@ -783,6 +783,14 @@ public class CraftsmanConstructionService {
         return worker;
     }
 
+    public Object getAccessToken(String userToken) {
+        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+        if (accessToken == null) {
+            return ServerResponse.createbyUserTokenError();
+        }
+        return accessToken;
+    }
+
     /**
      * 获取工匠当前的施工单
      *

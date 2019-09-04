@@ -70,7 +70,7 @@ public interface WorkerGoodsAPI {
      * @return_param price Double 销售价
      * @return_param unitName string 单位
      * @return_param type Integer 0:货品，1：人工商品
-     * @return_param goodsType Integer 0:材料；1：服务
+     * @return_param goodsType Integer 0:材料；1：包工包料
      * @return_param name string 名称
      * @remark 更多返回错误代码请看首页的错误代码描述
      * @number 15

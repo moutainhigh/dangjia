@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.member;
 
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -7,9 +8,11 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dto.member.LoanDTO;
 import com.dangjia.acg.mapper.member.LoanFlowMapper;
 import com.dangjia.acg.mapper.member.LoanMapper;
+import com.dangjia.acg.mapper.other.ICityMapper;
 import com.dangjia.acg.modle.member.Loan;
 import com.dangjia.acg.modle.member.LoanFlow;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.other.City;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -35,6 +38,8 @@ public class LoanService {
     @Autowired
     private CraftsmanConstructionService constructionService;
 
+    @Autowired
+    private ICityMapper iCityMapper;
     /**
      * 添加贷款需求
      *
@@ -43,7 +48,7 @@ public class LoanService {
      * @param bankName  银行名称
      * @return ServerResponse
      */
-    public ServerResponse addLoan(String userToken, String name, String bankName) {
+    public ServerResponse addLoan(String cityId,String userToken, String name, String bankName) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -52,8 +57,11 @@ public class LoanService {
         if (CommonUtil.isEmpty(name) || CommonUtil.isEmpty(bankName)) {
             return ServerResponse.createByErrorMessage("传入参数错误");
         }
+        City city = iCityMapper.selectByPrimaryKey(cityId);
         Loan loan = new Loan();
         loan.setName(name);
+        loan.setCityId(cityId);
+        loan.setCityName(city.getName());
         loan.setBankName(bankName);
         loan.setMemberId(user.getId());
         loanMapper.insertSelective(loan);
@@ -71,9 +79,10 @@ public class LoanService {
      */
     public ServerResponse getLoanList(HttpServletRequest request, PageDTO pageDTO, Integer state, String searchKey) {
         try {
+            String cityId = request.getParameter(Constants.CITY_ID);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             if (state == -1) state = null;
-            List<LoanDTO> loanDTOS = loanMapper.getLoanList(state, searchKey);
+            List<LoanDTO> loanDTOS = loanMapper.getLoanList(cityId,state, searchKey);
             if (loanDTOS.size() <= 0) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode()
                         , "查无数据");

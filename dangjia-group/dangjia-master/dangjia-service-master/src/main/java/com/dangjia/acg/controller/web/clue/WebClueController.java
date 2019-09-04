@@ -2,14 +2,16 @@ package com.dangjia.acg.controller.web.clue;
 
 import com.dangjia.acg.api.web.clue.WebClueAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.clue.Clue;
-import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.service.clue.ClueService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletRequest;
 
 
 @RestController
@@ -37,8 +39,9 @@ public class WebClueController implements WebClueAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getClueList(Integer stage, String values, String memberId, String childId, String beginDate, String endDate, PageDTO pageDTO) {
-        return clueService.getClueList(stage, values, memberId, childId, beginDate, endDate, pageDTO);
+    public ServerResponse getClueList(HttpServletRequest request, Integer stage, String values, String memberId, String childId, String beginDate, String endDate, PageDTO pageDTO) {
+        String userID = request.getParameter(Constants.USERID);
+        return clueService.getClueList( userID, stage, values, memberId, childId, beginDate, endDate, pageDTO);
     }
 
     @Override
@@ -73,8 +76,13 @@ public class WebClueController implements WebClueAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse sendUser(Member member, String phone) {
-        return clueService.sendUser(member, phone);
+    public ServerResponse sendUser(String id, String phone, String longitude, String latitude) {
+        return clueService.sendUser(id, phone, longitude, latitude);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse addH5Clue(String userId, String phone) {
+        return clueService.addH5Clue(userId, phone);
+    }
 }

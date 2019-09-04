@@ -55,6 +55,14 @@ public class Loan extends BaseEntity {
     @ApiModelProperty("银行名称")
     private String bankName;
 
+    @Column(name = "city_id")
+    @Desc(value = "城市id")
+    @ApiModelProperty("城市id")
+    private String cityId;
 
+    @Column(name = "city_name")
+    @Desc(value = "城市名")
+    @ApiModelProperty("城市名")
+    private String cityName;
 
 }

@@ -28,9 +28,21 @@ public class ClueTalk extends BaseEntity {
     @ApiModelProperty("操作人ID（客服）")
     private String userId;
 
+    @Column(name = "member_id")
+    @Desc(value = "ID（客服）")
+    @ApiModelProperty("ID（客服）")
+    private String memberId;
+
+
     @Column(name = "talk_content")
     @Desc(value = "谈话内容")
     @ApiModelProperty("谈话内容")
     private String talkContent;
+
+    //    @JsonFormat(pattern = "yyyy-MM-dd HH:mm",timezone="GMT+8")
+    @Column(name = "remind_time")
+    @Desc(value = "提醒时间")
+    @ApiModelProperty("提醒时间")
+    private String remindTime;
 
 }

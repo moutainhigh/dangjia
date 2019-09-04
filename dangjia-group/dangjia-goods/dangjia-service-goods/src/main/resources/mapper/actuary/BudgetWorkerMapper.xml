@@ -42,7 +42,7 @@
 			and delete_state = #{deleteState}
 		</if>
 		<if test = "deleteState==null or deleteState==''">
-			and delete_state in (0,2,3)
+			and delete_state in (0,2,3);
 		</if>
 
 	</select>

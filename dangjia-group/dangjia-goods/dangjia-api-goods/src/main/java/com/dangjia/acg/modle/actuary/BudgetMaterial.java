@@ -9,7 +9,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 /**
- * 材料/服务精算
+ * 材料/包工包料精算
  */
 @Data
 @Entity
@@ -34,7 +34,7 @@ public class BudgetMaterial extends BaseEntity{
 	private String templateId; // 模板信息Id
 
 	@Column(name = "delete_state")
-	private Integer deleteState;//用户删除状态·,0表示未支付，1表示已删除,2表示业主取消,3表示已经支付,4再次购买
+	private Integer deleteState;//用户删除状态·,0表示未支付，1表示已删除,2表示业主取消,3表示已经支付,4再次/更换购买,5 被更换
 
 	@Column(name = "product_id")
 	private String productId;//货号ID
@@ -84,7 +84,7 @@ public class BudgetMaterial extends BaseEntity{
 	private String groupType; //null：单品；有值：关联组合  （如果 null 并且 goods_group_id 不为null， 说明是关联组的单品则不参与关联组切换）
 
 	@Column(name = "product_type")
-	private Integer productType; //0：材料；1：服务
+	private Integer productType; //0：材料；1：包工包料
 
 	@Column(name = "goods_group_id")
 	private String goodsGroupId; //所属关联组

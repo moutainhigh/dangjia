@@ -87,6 +87,25 @@ public class WorkerService {
         map2.put("workerId", member.getId());
         listMap.add(map2);
         if (worker != null) {
+            //管家和工匠都能联系精算和设计
+            Example example = new Example(HouseWorker.class);
+            example.createCriteria()
+                    .andEqualTo(HouseWorker.HOUSE_ID, houseId)
+                    .andEqualTo(HouseWorker.WORK_TYPE, 6)
+                    .andCondition(" worker_type in(1,2) ");
+            List<HouseWorker> houseWorkerList = houseWorkerMapper.selectByExample(example);
+            for (HouseWorker houseWorker : houseWorkerList) {
+                Map<String, Object> map = new HashMap<>();
+                Member worker2 = memberMapper.selectByPrimaryKey(houseWorker.getWorkerId());
+                if (worker2 == null) {
+                    continue;
+                }
+                map.put("workerTypeName", workerTypeMapper.selectByPrimaryKey(worker2.getWorkerTypeId()).getName());
+                map.put("workerName", worker2.getName());
+                map.put("workerPhone", worker2.getMobile());
+                map.put("workerId", worker2.getId());
+                listMap.add(map);
+            }
             if (worker.getWorkerType() == 3) {//大管家
                 List<HouseWorker> listHouseWorker = houseWorkerMapper.paidListByHouseId(houseId);
                 for (HouseWorker houseWorker : listHouseWorker) {
@@ -111,6 +130,8 @@ public class WorkerService {
                 map.put("workerId", worker2.getId());
                 listMap.add(map);
             }
+
+
         }
         return ServerResponse.createBySuccess("获取成功", listMap);
     }

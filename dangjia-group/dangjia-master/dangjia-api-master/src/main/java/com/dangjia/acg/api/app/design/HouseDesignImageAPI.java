@@ -80,7 +80,8 @@ public interface HouseDesignImageAPI {
     ServerResponse getDesignList(@RequestParam("request") HttpServletRequest request,
                                  @RequestParam("pageDTO") PageDTO pageDTO,
                                  @RequestParam("designerType") int designerType,
-                                 @RequestParam("searchKey") String searchKey);
+                                 @RequestParam("searchKey") String searchKey,
+                                 @RequestParam("workerKey") String workerKey);
 
 
     /**
@@ -453,4 +454,12 @@ public interface HouseDesignImageAPI {
     ServerResponse getIdQuantityRoom(@RequestParam("request") HttpServletRequest request,
                                      @RequestParam("quantityRoomId") String quantityRoomId);
 
+
+    @PostMapping("web/house/statistics")
+    @ApiOperation(value = "精算统计或设计统计", notes = "精算统计或设计统计")
+    ServerResponse getHouseStatistics(@RequestParam("cityId") String cityId,
+                                      @RequestParam("workerTypeId") String workerTypeId,
+                                      @RequestParam("pageDTO") PageDTO pageDTO,
+                                      @RequestParam("startDate") String startDate,
+                                      @RequestParam("endDate") String endDate);
 }

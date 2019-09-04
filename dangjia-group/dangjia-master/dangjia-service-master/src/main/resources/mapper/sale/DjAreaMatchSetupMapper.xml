@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.sale.DjAreaMatchSetupMapper">
+
+
+
+    <update id="upDateBuildingId" parameterType="java.util.Map">
+        UPDATE dj_area_match_setup
+        SET
+            building_id = #{buildingId}
+        WHERE
+        resource_id = #{resourceId}
+    </update>
+
+
+    <!-- 删除对象 -->
+    <delete id="deleteBuildingId" parameterType="java.lang.String">
+		DELETE FROM dj_area_match_setup
+		WHERE resource_id = #{resourceId}
+	</delete>
+
+
+</mapper>
