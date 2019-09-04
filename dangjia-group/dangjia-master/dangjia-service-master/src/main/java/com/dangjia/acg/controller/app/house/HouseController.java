@@ -99,12 +99,6 @@ public class HouseController implements HouseAPI {
         return houseService.setHouseBudgetOk(houseId, budgetOk);
     }
 
-    //根据城市，小区，最小最大面积查询房子
-    @Override
-    @ApiMethod
-    public ServerResponse queryHouseByCity(String userToken, String cityId, String villageId, Double minSquare, Double maxSquare, Integer houseType, PageDTO pageDTO) {
-        return indexPageService.queryHouseByCity(userToken, cityId, villageId, minSquare, maxSquare, houseType, pageDTO);
-    }
 
     @Override
     @ApiMethod

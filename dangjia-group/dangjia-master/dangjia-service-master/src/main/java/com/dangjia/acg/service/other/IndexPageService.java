@@ -83,7 +83,7 @@ public class IndexPageService {
     /**
      * 根据城市，小区，最小最大面积查询房子
      */
-    public ServerResponse queryHouseDistance(HttpServletRequest request, String userToken, String cityId, String villageId, Double square, PageDTO pageDTO) {
+    public ServerResponse queryHouseDistance(HttpServletRequest request, String cityId, String villageId, Double square, PageDTO pageDTO) {
         try {
             String locationx = null;
             String Locationy = null;
@@ -223,6 +223,131 @@ public class IndexPageService {
             }
         }
         return shareDTO;
+    }
+
+
+    /**
+     * 施工现场
+     *
+     * @param request
+     * @param latitude
+     * @param longitude
+     * @return
+     */
+    public ServerResponse jobLocation(HttpServletRequest request, String latitude, String longitude, Integer limit) {
+        if (CommonUtil.isEmpty(latitude) || "0".equals(latitude)) {
+            latitude = "28.228259";
+        }
+        if (CommonUtil.isEmpty(longitude) || "0".equals(longitude)) {
+            longitude = "112.938904";
+        }
+        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+        List<House> houses = new ArrayList<>();
+        Integer endDistance = 3;
+        Integer beginDistance = 0;
+        List<House> houses1 = modelingVillageMapper.jobLocation(latitude, longitude, beginDistance, 3 * (limit / 2), limit);
+        for (int i = 1; i < limit / 2 + 1; i++) {
+            List<House> lsHouse = new ArrayList<>();
+            Map map = new HashMap();
+            for (House house : houses1) {
+                if (lsHouse.size() == 2) {
+                    break;
+                }
+                if (map.get(house.getVillageId()) == null) {
+                    if (house.getJuli() >= (beginDistance * 1000) && house.getJuli() <= (endDistance * 1000)) {
+                        lsHouse.add(house);
+                    }
+                }
+            }
+            if (lsHouse.size() > 0) {
+                for (House house : lsHouse) {
+                    house.setHouseId(house.getId());
+                    house = this.getHouseImage(address, house);
+                    houses.add(house);
+                    map.put(house.getVillageId(), "Y");
+                }
+            }
+            beginDistance = endDistance;
+            endDistance += 3;
+        }
+//        if (houses.size() <= 0) {
+//            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+//        }
+        if (houses.size() == 0) {
+            List<House> houseslist = modelingVillageMapper.jobModelingVillage(latitude, longitude, limit);
+            for (House house : houseslist) {
+                houses.add(getHouseImage(address, house));
+            }
+        }
+        return ServerResponse.createBySuccess("查询成功", houses);
+    }
+
+    private House getHouseImage(String address, House house) {
+        String image = houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(), null);
+        if (CommonUtil.isEmpty(image)) {
+            image = houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(), 0);
+        }
+        house.setImage(address + image);
+        house.setHouseId(house.getId());
+        if (CommonUtil.isEmpty(image)) {
+            house.setImage(address + house.getImage());
+        }
+        return house;
+    }
+
+
+    /**
+     * 参考花费返回1004时调
+     *
+     * @param request
+     * @param latitude
+     * @param longitude
+     * @param limit
+     * @return
+     */
+    public ServerResponse getRecommended(HttpServletRequest request, String latitude, String longitude, Integer limit) {
+        try {
+            if (CommonUtil.isEmpty(latitude)) {
+                latitude = "28.228259";
+            }
+            if (CommonUtil.isEmpty(longitude)) {
+                longitude = "112.938904";
+            }
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            List<House> houses = houseMapper.getRecommended(latitude, longitude, limit);
+            for (int i = 0; i < houses.size(); i++) {
+                House house = houses.get(i);
+                house = setHouseTotalPrice(request, house);
+                house = this.getHouseImage(address, house);
+                houses.remove(i);
+                houses.add(i, house);
+            }
+            return ServerResponse.createBySuccess("查询成功", houses);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询出错,获取数据失败");
+        }
+    }
+
+    public House setHouseTotalPrice(HttpServletRequest request, House house) {
+        BigDecimal totalPrice = new BigDecimal(0);//总计
+        if (house.getDecorationType() != 2) {//自带设计
+            Order order = orderMapper.getWorkerOrder(house.getId(), "1");
+            if (order != null) {
+                totalPrice = totalPrice.add(order.getTotalAmount());
+            }
+        }
+        Order order = orderMapper.getWorkerOrder(house.getId(), "2");
+        if (order != null) {
+            totalPrice = totalPrice.add(order.getTotalAmount());
+        }
+        request.setAttribute(Constants.CITY_ID, house.getCityId());
+        BigDecimal totalAmount = budgetMaterialAPI.getHouseBudgetTotalAmount(request, house.getCityId(), house.getId());
+        if (totalAmount != null) {
+            totalPrice = totalPrice.add(totalAmount);
+        }
+        house.setMoney(totalPrice);
+        return house;
     }
 
     /**
@@ -421,129 +546,5 @@ public class IndexPageService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("系统出错,获取数据失败");
         }
-    }
-
-    /**
-     * 施工现场
-     *
-     * @param request
-     * @param latitude
-     * @param longitude
-     * @return
-     */
-    public ServerResponse jobLocation(HttpServletRequest request, String latitude, String longitude, Integer limit) {
-        if (CommonUtil.isEmpty(latitude) || "0".equals(latitude)) {
-            latitude = "28.228259";
-        }
-        if (CommonUtil.isEmpty(longitude) || "0".equals(longitude)) {
-            longitude = "112.938904";
-        }
-        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-        List<House> houses = new ArrayList<>();
-        Integer endDistance = 3;
-        Integer beginDistance = 0;
-        List<House> houses1 = modelingVillageMapper.jobLocation(latitude, longitude, beginDistance, 3 * (limit / 2), limit);
-        for (int i = 1; i < limit / 2 + 1; i++) {
-            List<House> lsHouse = new ArrayList<>();
-            Map map = new HashMap();
-            for (House house : houses1) {
-                if (lsHouse.size() == 2) {
-                    break;
-                }
-                if (map.get(house.getVillageId()) == null) {
-                    if (house.getJuli() >= (beginDistance * 1000) && house.getJuli() <= (endDistance * 1000)) {
-                        lsHouse.add(house);
-                    }
-                }
-            }
-            if (lsHouse.size() > 0) {
-                for (House house : lsHouse) {
-                    house.setHouseId(house.getId());
-                    house = this.getHouseImage(address, house);
-                    houses.add(house);
-                    map.put(house.getVillageId(), "Y");
-                }
-            }
-            beginDistance = endDistance;
-            endDistance += 3;
-        }
-//        if (houses.size() <= 0) {
-//            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
-//        }
-        if (houses.size() == 0) {
-            List<House> houseslist = modelingVillageMapper.jobModelingVillage(latitude, longitude, limit);
-            for (House house : houseslist) {
-                houses.add(getHouseImage(address, house));
-            }
-        }
-        return ServerResponse.createBySuccess("查询成功", houses);
-    }
-
-    private House getHouseImage(String address, House house) {
-        String image = houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(), null);
-        if (CommonUtil.isEmpty(image)) {
-            image = houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(), 0);
-        }
-        house.setImage(address + image);
-        house.setHouseId(house.getId());
-        if (CommonUtil.isEmpty(image)) {
-            house.setImage(address + house.getImage());
-        }
-        return house;
-    }
-
-
-    /**
-     * 参考花费返回1004时调
-     *
-     * @param request
-     * @param latitude
-     * @param longitude
-     * @param limit
-     * @return
-     */
-    public ServerResponse getRecommended(HttpServletRequest request, String latitude, String longitude, Integer limit) {
-        try {
-            if (CommonUtil.isEmpty(latitude)) {
-                latitude = "28.228259";
-            }
-            if (CommonUtil.isEmpty(longitude)) {
-                longitude = "112.938904";
-            }
-            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            List<House> houses = houseMapper.getRecommended(latitude, longitude, limit);
-            for (int i = 0; i < houses.size(); i++) {
-                House house = houses.get(i);
-                house = setHouseTotalPrice(request, house);
-                house = this.getHouseImage(address, house);
-                houses.remove(i);
-                houses.add(i, house);
-            }
-            return ServerResponse.createBySuccess("查询成功", houses);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("查询出错,获取数据失败");
-        }
-    }
-
-    public House setHouseTotalPrice(HttpServletRequest request, House house) {
-        BigDecimal totalPrice = new BigDecimal(0);//总计
-        if (house.getDecorationType() != 2) {//自带设计
-            Order order = orderMapper.getWorkerOrder(house.getId(), "1");
-            if (order != null) {
-                totalPrice = totalPrice.add(order.getTotalAmount());
-            }
-        }
-        Order order = orderMapper.getWorkerOrder(house.getId(), "2");
-        if (order != null) {
-            totalPrice = totalPrice.add(order.getTotalAmount());
-        }
-        request.setAttribute(Constants.CITY_ID, house.getCityId());
-        BigDecimal totalAmount = budgetMaterialAPI.getHouseBudgetTotalAmount(request, house.getCityId(), house.getId());
-        if (totalAmount != null) {
-            totalPrice = totalPrice.add(totalAmount);
-        }
-        house.setMoney(totalPrice);
-        return house;
     }
 }
