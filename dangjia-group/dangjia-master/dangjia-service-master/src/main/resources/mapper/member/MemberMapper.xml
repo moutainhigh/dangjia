@@ -189,13 +189,13 @@
 
         <if test="type=='bb'">
             INNER
-            JOIN dj_house h ON h.member_id = w.id and h.data_status =0 and h.visit_state > 0
+            JOIN dj_house h ON h.member_id = w.id and h.data_status =0
             WHERE w.data_status = 0
         </if>
 
         <if test="type!='bb'">
             LEFT
-            JOIN dj_house h ON h.member_id = w.id and h.data_status =0 and h.visit_state > 0
+            JOIN dj_house h ON h.member_id = w.id and h.data_status =0
             WHERE w.data_status = 0
         </if>
 
