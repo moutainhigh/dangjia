@@ -15,12 +15,14 @@ import com.dangjia.acg.mapper.other.ICityMapper;
 import com.dangjia.acg.mapper.sale.ResidentialBuildingMapper;
 import com.dangjia.acg.mapper.store.IStoreMapper;
 import com.dangjia.acg.mapper.store.IStoreSubscribeMapper;
+import com.dangjia.acg.mapper.store.IStoreUserMapper;
 import com.dangjia.acg.mapper.system.IDepartmentMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.modle.house.ModelingVillage;
 import com.dangjia.acg.modle.other.City;
 import com.dangjia.acg.modle.store.Store;
 import com.dangjia.acg.modle.store.StoreSubscribe;
+import com.dangjia.acg.modle.store.StoreUser;
 import com.dangjia.acg.modle.system.Department;
 import com.dangjia.acg.modle.user.MainUser;
 import com.github.pagehelper.PageHelper;
@@ -60,6 +62,8 @@ public class StoreServices {
     private IDepartmentMapper departmentMapper;
     @Autowired
     private ResidentialBuildingMapper residentialBuildingMapper;
+    @Autowired
+    private IStoreUserMapper iStoreUserMapper;
     /**
      * 根据门店ID,得到设置的管辖范围，得到所有范围内的小区
      * @param request
@@ -153,6 +157,12 @@ public class StoreServices {
                 if (iStoreMapper.selectByExample(example).size() > 0) {
                     return ServerResponse.createByErrorMessage("门店已存在");
                 }
+            }
+            Example example=new Example(StoreUser.class);
+            example.createCriteria().andEqualTo(StoreUser.USER_ID,store.getUserId())
+                    .andEqualTo(StoreUser.DATA_STATUS,0);
+            if(iStoreUserMapper.selectByExample(example).size()>0){
+                return ServerResponse.createByErrorMessage("该用户已被设置为店员，情勿添加");
             }
             if(!CommonUtil.isEmpty(store.getCityId())) {
                 City city = cityMapper.selectByPrimaryKey(store.getCityId());
