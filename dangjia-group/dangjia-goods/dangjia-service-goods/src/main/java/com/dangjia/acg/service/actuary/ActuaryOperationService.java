@@ -112,7 +112,32 @@ public class ActuaryOperationService {
             return ServerResponse.createByErrorMessage("操作失败");
         }
     }
+    /**
+     * 恢复精算货品
+     */
+    public ServerResponse recoveryProduct(String houseId, String workerTypeId) {
 
+        Example example=new Example(BudgetMaterial.class);
+        example.createCriteria()
+                .andEqualTo(BudgetMaterial.HOUSE_ID,houseId)
+                .andEqualTo(BudgetMaterial.WORKER_TYPE_ID,workerTypeId)
+                .andEqualTo(BudgetMaterial.DELETE_STATE,4);
+        budgetMaterialMapper.deleteByExample(example);
+
+        example=new Example(BudgetMaterial.class);
+        example.createCriteria()
+                .andEqualTo(BudgetMaterial.HOUSE_ID,houseId)
+                .andEqualTo(BudgetMaterial.WORKER_TYPE_ID,workerTypeId)
+                .andEqualTo(BudgetMaterial.DELETE_STATE,5);
+
+        BudgetMaterial budgetMaterial=new BudgetMaterial();
+        budgetMaterial.setId(null);
+        budgetMaterial.setCreateDate(null);
+        budgetMaterial.setModifyDate(new Date());
+        budgetMaterial.setDeleteState(0);
+        budgetMaterialMapper.updateByExampleSelective(budgetMaterial,example);
+        return ServerResponse.createBySuccessMessage("操作成功" );
+    }
     /**
      * 更换货品
      */
@@ -123,6 +148,7 @@ public class ActuaryOperationService {
             int count = 0;
             String ret = productId + " " + budgetMaterialId + " " + srcGroupId + " " + targetGroupId + " " + houseId + " " + workerTypeId;
             BudgetMaterial budgetMaterial = budgetMaterialMapper.selectByPrimaryKey(budgetMaterialId);
+
             if (StringUtils.isNotBlank(targetGroupId) && StringUtils.isNoneBlank(srcGroupId))//不为空  可以切换
             {
                 //找到 原关联组的goods成员， 把 goods 下的product 更换 成 目标关联组的 goods下的product
@@ -158,58 +184,71 @@ public class ActuaryOperationService {
                             }
                             //查到 老的关联组 的精算
                             BudgetMaterial srcBudgetMaterial = budgetMaterialMapper.getBudgetCaiListByGoodsId(houseId, workerTypeId, srcGroupLink.getGoodsId());
+                            BudgetMaterial newBudgetMaterial = srcBudgetMaterial;
                             Product targetProduct = productMapper.selectByPrimaryKey(targetGroupLink.getProductId());//目标product 对象
-                            srcBudgetMaterial.setProductId(targetProduct.getId());
-                            srcBudgetMaterial.setProductSn(targetProduct.getProductSn());
-                            srcBudgetMaterial.setProductName(targetProduct.getName());
-                            srcBudgetMaterial.setImage(targetProduct.getImage());
-                            srcBudgetMaterial.setPrice(targetProduct.getPrice());
-                            srcBudgetMaterial.setGoodsGroupId(targetGroupId);
+                            newBudgetMaterial.setProductId(targetProduct.getId());
+                            newBudgetMaterial.setProductSn(targetProduct.getProductSn());
+                            newBudgetMaterial.setProductName(targetProduct.getName());
+                            newBudgetMaterial.setImage(targetProduct.getImage());
+                            newBudgetMaterial.setPrice(targetProduct.getPrice());
+                            newBudgetMaterial.setGoodsGroupId(targetGroupId);
+                            newBudgetMaterial.setDeleteState(4);
                             GoodsGroup goodsGroup = iGoodsGroupMapper.selectByPrimaryKey(targetGroupId);
-                            srcBudgetMaterial.setGroupType(goodsGroup.getName());
-                            srcBudgetMaterial.setCost(targetProduct.getCost());
+                            newBudgetMaterial.setGroupType(goodsGroup.getName());
+                            newBudgetMaterial.setCost(targetProduct.getCost());
                             //这里会更新 为 新product的 换算后的购买数量
-//                            srcBudgetMaterial.setConvertCount(Math.ceil(srcBudgetMaterial.getShopCount() / targetProduct.getConvertQuality()));
-                            double converCount = (srcBudgetMaterial.getShopCount() / targetProduct.getConvertQuality());
+//                            newBudgetMaterial.setConvertCount(Math.ceil(newBudgetMaterial.getShopCount() / targetProduct.getConvertQuality()));
+                            double converCount = (newBudgetMaterial.getShopCount() / targetProduct.getConvertQuality());
                             Unit convertUnit = iUnitMapper.selectByPrimaryKey(targetProduct.getConvertUnit());
                             if (convertUnit.getType() == 1) {
                                 converCount = Math.ceil(converCount);
                             }
-                            srcBudgetMaterial.setConvertCount(converCount);
-                            srcBudgetMaterial.setTotalPrice(targetProduct.getPrice() * srcBudgetMaterial.getConvertCount());
+                            newBudgetMaterial.setConvertCount(converCount);
+                            newBudgetMaterial.setTotalPrice(targetProduct.getPrice() * newBudgetMaterial.getConvertCount());
 
-                            srcBudgetMaterial.setCategoryId(targetProduct.getCategoryId());
-                            srcBudgetMaterial.setImage(targetProduct.getImage());
-                            srcBudgetMaterial.setUnitName(convertUnit.getName());
+                            newBudgetMaterial.setCategoryId(targetProduct.getCategoryId());
+                            newBudgetMaterial.setImage(targetProduct.getImage());
+                            newBudgetMaterial.setUnitName(convertUnit.getName());
                             Goods goods = goodsMapper.queryById( targetProduct.getGoodsId());
-                            srcBudgetMaterial.setProductType(goods.getType());//0：材料；1：包工包料
-                            budgetMaterialMapper.updateByPrimaryKey(srcBudgetMaterial);
+                            newBudgetMaterial.setProductType(goods.getType());//0：材料；1：包工包料
+                            newBudgetMaterial.setId((int)(Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis());
+                            budgetMaterialMapper.insertSelective(newBudgetMaterial);
+
+                            srcBudgetMaterial.setDeleteState(5);
+                            budgetMaterialMapper.updateByPrimaryKeySelective(srcBudgetMaterial);
                             count++;
                         }
 
                     }
                 }
             } else {
+
+                BudgetMaterial newBudgetMaterial = budgetMaterial;
                 Product product = productMapper.selectByPrimaryKey(productId);
-                budgetMaterial.setProductId(productId);
-                budgetMaterial.setProductSn(product.getProductSn());
-                budgetMaterial.setProductName(product.getName());
-                budgetMaterial.setPrice(product.getPrice());
-                budgetMaterial.setCost(product.getCost());
+                newBudgetMaterial.setProductId(productId);
+                newBudgetMaterial.setProductSn(product.getProductSn());
+                newBudgetMaterial.setProductName(product.getName());
+                newBudgetMaterial.setPrice(product.getPrice());
+                newBudgetMaterial.setCost(product.getCost());
+                newBudgetMaterial.setDeleteState(4);
                 //这里会更新 为 新product的 换算后的购买数量
-                double converCount = (budgetMaterial.getShopCount() / product.getConvertQuality());
+                double converCount = (newBudgetMaterial.getShopCount() / product.getConvertQuality());
                 Unit convertUnit = iUnitMapper.selectByPrimaryKey(product.getConvertUnit());
                 if (convertUnit.getType() == 1) {
                     converCount = Math.ceil(converCount);
                 }
-                budgetMaterial.setConvertCount(converCount);
-                budgetMaterial.setTotalPrice(product.getPrice() * budgetMaterial.getConvertCount());
+                newBudgetMaterial.setConvertCount(converCount);
+                newBudgetMaterial.setTotalPrice(product.getPrice() * newBudgetMaterial.getConvertCount());
 
-                budgetMaterial.setCategoryId(product.getCategoryId());
-                budgetMaterial.setImage(product.getImage());
-                budgetMaterial.setUnitName(convertUnit.getName());
+                newBudgetMaterial.setCategoryId(product.getCategoryId());
+                newBudgetMaterial.setImage(product.getImage());
+                newBudgetMaterial.setUnitName(convertUnit.getName());
                 Goods goods = goodsMapper.queryById( product.getGoodsId());
-                budgetMaterial.setProductType(goods.getType());//0：材料；1：包工包料
+                newBudgetMaterial.setProductType(goods.getType());//0：材料；1：包工包料
+                newBudgetMaterial.setId((int)(Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis());
+                budgetMaterialMapper.insertSelective(newBudgetMaterial);
+
+                budgetMaterial.setDeleteState(5);
                 budgetMaterialMapper.updateByPrimaryKeySelective(budgetMaterial);
                 return ServerResponse.createBySuccessMessage("操作成功" + ret);
             }
