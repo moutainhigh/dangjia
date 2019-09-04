@@ -249,7 +249,8 @@
 		   house_id=#{houseId}
 		   and worker_type_id =#{workerTypeId}
 		   and product_type = 0
-		   and delete_state in (0,2,4);
+		   and delete_state in (0,2,4)
+		ORDER BY create_date desc
 	</select>
 
 	<select id="getBudgetCaiListByGoodsId" resultType="com.dangjia.acg.modle.actuary.BudgetMaterial">
@@ -261,7 +262,8 @@
 		and worker_type_id =#{workerTypeId}
 		and goods_id =#{goodsId}
 		and product_type = 0
-		and delete_state in (0,2,4);
+		and delete_state in (0,2,4)
+		ORDER BY create_date desc
 	</select>
 
 
@@ -273,7 +275,8 @@
 		   house_id=#{houseId}
 		   and worker_type_id =#{workerTypeId}
 		   and product_type = 1
-		   and delete_state in (0,2,4);
+		   and delete_state in (0,2,4)
+		ORDER BY create_date desc
 	</select>
 
 	<!-- 查询所有 -->
