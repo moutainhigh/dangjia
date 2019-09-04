@@ -309,13 +309,7 @@ public class HouseService {
                 .andNotEqualTo(House.VISIT_STATE, 0).andNotEqualTo(House.VISIT_STATE, 2)
                 .andEqualTo(House.DATA_STATUS, 0);
         List<House> houseList = iHouseMapper.selectByExample(example);
-        List<Map> mapList = new ArrayList<>();
-        for (House house : houseList) {
-            Map map = BeanUtils.beanToMap(house);
-            map.put("houseName", house.getHouseName());
-            mapList.add(map);
-        }
-        return ServerResponse.createBySuccess("查询成功", mapList);
+        return ServerResponse.createBySuccess("查询成功", houseList);
     }
 
 
