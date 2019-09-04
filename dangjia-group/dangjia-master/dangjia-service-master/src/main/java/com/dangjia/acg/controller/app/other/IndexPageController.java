@@ -25,24 +25,33 @@ public class IndexPageController implements IndexPageAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse queryHouseDistance(HttpServletRequest request,String userToken, String cityId, String villageId, Double square, PageDTO pageDTO){
-        return indexPageService.queryHouseDistance( request, userToken,  cityId,  villageId,  square,  pageDTO);
+    public ServerResponse queryHouseDistance(HttpServletRequest request, String userToken, String cityId, String villageId, Double square, PageDTO pageDTO) {
+        return indexPageService.queryHouseDistance(request, cityId, villageId, square, pageDTO);
     }
+
+    //根据城市，小区，最小最大面积查询房子
+    @Override
+    @ApiMethod
+    public ServerResponse queryHouseByCity(String userToken, String cityId, String villageId, Double minSquare, Double maxSquare, Integer houseType, PageDTO pageDTO) {
+        return indexPageService.queryHouseByCity(userToken, cityId, villageId, minSquare, maxSquare, houseType, pageDTO);
+    }
+
     /**
      * 施工现场详情
      */
     @Override
     @ApiMethod
-    public ServerResponse houseDetails(HttpServletRequest request, String houseId){
-        return indexPageService.houseDetails(request,houseId);
+    public ServerResponse houseDetails(HttpServletRequest request, String houseId) {
+        return indexPageService.houseDetails(request, houseId);
     }
+
     /**
      * 施工现场详情
      */
     @Override
     @ApiMethod
-    public ServerResponse houseOtherDetails(HttpServletRequest request, String houseId){
-        return indexPageService.houseOtherDetails(request,houseId);
+    public ServerResponse houseOtherDetails(HttpServletRequest request, String houseId) {
+        return indexPageService.houseOtherDetails(request, houseId);
     }
 
 
@@ -51,11 +60,13 @@ public class IndexPageController implements IndexPageAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getHouseLabels(HttpServletRequest request, String houseId){
-        return indexPageService.getHouseLabels(request,houseId);
+    public ServerResponse getHouseLabels(HttpServletRequest request, String houseId) {
+        return indexPageService.getHouseLabels(request, houseId);
     }
+
     /**
      * 施工现场
+     *
      * @param request
      * @param latitude
      * @param longitude
@@ -63,13 +74,14 @@ public class IndexPageController implements IndexPageAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse jobLocation(HttpServletRequest request, String latitude, String longitude,Integer limit) {
-        return indexPageService.jobLocation(request,latitude,longitude,limit);
+    public ServerResponse jobLocation(HttpServletRequest request, String latitude, String longitude, Integer limit) {
+        return indexPageService.jobLocation(request, latitude, longitude, limit);
     }
 
     @Override
     @ApiMethod
     public ServerResponse getRecommended(HttpServletRequest request, String latitude, String longitude, Integer limit) {
-        return indexPageService.getRecommended(request,latitude,longitude,limit);
+        return indexPageService.getRecommended(request, latitude, longitude, limit);
     }
 }
+
