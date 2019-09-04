@@ -89,19 +89,6 @@ public interface HouseAPI {
     ServerResponse setHouseBudgetOk(@RequestParam("houseId") String houseId,
                                     @RequestParam("budgetOk") Integer budgetOk);
 
-    /**
-     * 根据城市，小区，最小最大面积查询房子
-     */
-    @PostMapping("app/house/house/queryHouseByCity")
-    @ApiOperation(value = "根据城市，小区，最小最大面积查询房子", notes = "根据城市，小区，最小最大面积查询房子")
-    ServerResponse queryHouseByCity(@RequestParam("userToken") String userToken,
-                                    @RequestParam("cityId") String cityId,
-                                    @RequestParam("villageId") String villageId,
-                                    @RequestParam("minSquare") Double minSquare,
-                                    @RequestParam("maxSquare") Double maxSquare,
-                                    @RequestParam("houseType") Integer houseType,
-                                    @RequestParam("pageDTO") PageDTO pageDTO);
-
 
     @PostMapping("app/house/house/saveRenovationManual")
     @ApiOperation(value = "保存装修指南", notes = "保存装修指南")
