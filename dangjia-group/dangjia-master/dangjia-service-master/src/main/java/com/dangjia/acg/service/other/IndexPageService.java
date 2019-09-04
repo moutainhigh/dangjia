@@ -3,6 +3,7 @@ package com.dangjia.acg.service.other;
 import com.alibaba.fastjson.JSONArray;
 import com.dangjia.acg.api.actuary.BudgetMaterialAPI;
 import com.dangjia.acg.common.constants.Constants;
+import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
@@ -11,6 +12,8 @@ import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.actuary.BudgetStageCostDTO;
+import com.dangjia.acg.dto.design.QuantityRoomDTO;
+import com.dangjia.acg.dto.house.ShareDTO;
 import com.dangjia.acg.dto.label.OptionalLabelDTO;
 import com.dangjia.acg.dto.other.HouseDetailsDTO;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyImageMapper;
@@ -18,14 +21,20 @@ import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.deliver.IOrderMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
+import com.dangjia.acg.mapper.house.IModelingLayoutMapper;
 import com.dangjia.acg.mapper.house.IModelingVillageMapper;
 import com.dangjia.acg.mapper.label.OptionalLabelMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.Order;
+import com.dangjia.acg.modle.design.QuantityRoomImages;
 import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.house.ModelingLayout;
 import com.dangjia.acg.modle.house.ModelingVillage;
 import com.dangjia.acg.modle.label.OptionalLabel;
+import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.dangjia.acg.service.design.DesignDataService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +71,14 @@ public class IndexPageService {
     private IModelingVillageMapper modelingVillageMapper;
     @Autowired
     private IHouseFlowApplyImageMapper houseFlowApplyImageMapper;
+    @Autowired
+    private CraftsmanConstructionService constructionService;
+    @Autowired
+    private IHouseMapper iHouseMapper;
+    @Autowired
+    private IModelingLayoutMapper modelingLayoutMapper;
+    @Autowired
+    private DesignDataService designDataService;
 
     /**
      * 根据城市，小区，最小最大面积查询房子
@@ -104,6 +121,109 @@ public class IndexPageService {
         }
     }
 
+    /**
+     * 根据城市，小区，最小最大面积查询房子
+     */
+    public ServerResponse queryHouseByCity(String userToken, String cityId, String villageId,
+                                           Double minSquare, Double maxSquare, Integer houseType, PageDTO pageDTO) {
+        try {
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            Object object = constructionService.getMember(userToken);
+            Member member = null;
+            if (object instanceof Member) {
+                member = (Member) object;
+            }
+            boolean isReferenceBudget = false;
+            if (villageId != null && villageId.contains("#")) {
+                isReferenceBudget = true;
+                villageId = villageId.replaceAll("#", "");
+            }
+
+            List<House> houseList = iHouseMapper.getSameLayout(cityId, villageId, minSquare, maxSquare, houseType);
+            PageInfo pageResult = new PageInfo(houseList);
+            List<ShareDTO> srlist = new ArrayList<>();
+            if (houseList.size() > 0) {//根据条件查询所选小区总价最少的房子
+                for (House house : houseList) {
+                    srlist.add(convertHouse(house, member));
+                }
+            } else {
+                if (isReferenceBudget) {
+                    houseList = iHouseMapper.getSameLayout(cityId, null, minSquare, maxSquare, houseType);
+                    pageResult = new PageInfo(houseList);
+                    if (houseList.size() > 0) {//根据条件查询所选小区总价最少的房子
+                        for (House house : houseList) {
+                            srlist.add(convertHouse(house, member));
+                        }
+                    } else {
+                        return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无数据");
+                    }
+                } else {
+                    return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无数据");
+                }
+            }
+            pageResult.setList(srlist);
+            return ServerResponse.createBySuccess(null, pageResult);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("系统出错,获取数据失败");
+        }
+    }
+
+
+    private ShareDTO convertHouse(House house, Member member) {
+        ModelingLayout ml = modelingLayoutMapper.selectByPrimaryKey(house.getModelingLayoutId());
+        ShareDTO shareDTO = new ShareDTO();
+        shareDTO.setType("1");
+        if (house.getShowHouse() == 0) {
+//            if (accessToken != null) {
+//                shareDTO.setName(house.getHouseName());
+//            } else {
+            shareDTO.setHouseName(house.getHouseName());
+            shareDTO.setNoNumberHouseName(house.getResidential() + "**" + "栋" + (CommonUtil.isEmpty(house.getUnit()) ? "" : house.getUnit() + "单元") + house.getNumber() + "房");
+//            }
+        } else {
+            shareDTO.setHouseName(house.getHouseName());
+            shareDTO.setNoNumberHouseName("*栋*单元*号");
+        }
+        shareDTO.setJianzhumianji("建筑面积:" + (house.getBuildSquare() == null ? "0" : house.getBuildSquare()) + "m²");//建筑面积
+        shareDTO.setJvillageacreage("计算面积:" + (house.getSquare() == null ? "0" : house.getSquare()) + "m²");//计算面积
+        String biaoqian = house.getLiangDian();//标签
+        List<String> biaoqians = new ArrayList<>();
+        if (!CommonUtil.isEmpty(biaoqian)) {
+            for (String s1 : biaoqian.split(",")) {
+                if (!CommonUtil.isEmpty(s1)) {
+                    biaoqians.add(s1);
+                }
+            }
+        }
+        biaoqians.add((house.getBuildSquare() == null ? "0" : house.getBuildSquare()) + "m²");
+        shareDTO.setBiaoqian(biaoqians);//亮点标签
+        BigDecimal money = house.getMoney();
+        shareDTO.setPrice("***" + (member != null && money != null && money.toString().length() > 2 ?
+                money.toString().substring(money.toString().length() - 2) : "00"));//精算总价
+        shareDTO.setShowHouse(house.getShowHouse());
+        shareDTO.setHouseId(house.getId());
+        shareDTO.setVisitState(house.getVisitState());
+        shareDTO.setVillageId(house.getVillageId());//小区id
+        shareDTO.setVillageName(house.getResidential());//小区名
+        shareDTO.setLayoutId(house.getModelingLayoutId());//户型id
+        shareDTO.setLayoutleft(ml == null ? "" : ml.getName());//户型名称
+        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+        String jobLocationDetail = address + String.format(DjConstants.YZPageAddress.JOBLOCATIONDETAIL, "", house.getCityId(), "施工现场") + "&houseId=" + house.getId();
+        shareDTO.setUrl(jobLocationDetail);
+        shareDTO.setImageNum(0 + "张图片");
+        shareDTO.setImage(address + houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(), null));//户型图片
+        ServerResponse serverResponse = designDataService.getConstructionPlans(house.getId());
+        if (serverResponse.isSuccess()) {
+            QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
+            List<QuantityRoomImages> images = quantityRoomDTO.getImages();
+            if (images != null && images.size() > 0) {
+//                shareDTO.setImage(images.get(0).getImage() + "?x-image-process=image/resize,w_500,h_500/quality,q_80");
+                shareDTO.setImageNum(quantityRoomDTO.getImages().size() + "张图片");
+            }
+        }
+        return shareDTO;
+    }
 
     /**
      * 施工现场详情
@@ -383,7 +503,6 @@ public class IndexPageService {
      * @return
      */
     public ServerResponse getRecommended(HttpServletRequest request, String latitude, String longitude, Integer limit) {
-
         try {
             if (CommonUtil.isEmpty(latitude)) {
                 latitude = "28.228259";
