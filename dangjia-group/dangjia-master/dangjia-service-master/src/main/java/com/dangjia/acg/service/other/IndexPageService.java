@@ -106,11 +106,12 @@ public class IndexPageService {
             }
             PageInfo pageResult = new PageInfo(houseList);
             List<Map> houseMap = new ArrayList<>();
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             for (House house : houseList) {
-                house = setHouseTotalPrice(request, house);
+                house = getHouseImage(request, address, house);
                 Map map = BeanUtils.beanToMap(house);
                 map.put("houseName", house.getHouseName());
-                map.put("imageUrl", configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(), null));
+                map.put("imageUrl", house.getImage());
                 houseMap.add(map);
             }
             pageResult.setList(houseMap);
@@ -262,7 +263,7 @@ public class IndexPageService {
             if (lsHouse.size() > 0) {
                 for (House house : lsHouse) {
                     house.setHouseId(house.getId());
-                    house = this.getHouseImage(address, house);
+                    house = this.getHouseImage(request, address, house);
                     houses.add(house);
                     map.put(house.getVillageId(), "Y");
                 }
@@ -276,13 +277,14 @@ public class IndexPageService {
         if (houses.size() == 0) {
             List<House> houseslist = modelingVillageMapper.jobModelingVillage(latitude, longitude, limit);
             for (House house : houseslist) {
-                houses.add(getHouseImage(address, house));
+                houses.add(getHouseImage(request, address, house));
             }
         }
         return ServerResponse.createBySuccess("查询成功", houses);
     }
 
-    private House getHouseImage(String address, House house) {
+    private House getHouseImage(HttpServletRequest request, String address, House house) {
+        house = setHouseTotalPrice(request, house);
         String image = houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(), null);
         if (CommonUtil.isEmpty(image)) {
             image = houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(), 0);
@@ -317,8 +319,7 @@ public class IndexPageService {
             List<House> houses = houseMapper.getRecommended(latitude, longitude, limit);
             for (int i = 0; i < houses.size(); i++) {
                 House house = houses.get(i);
-                house = setHouseTotalPrice(request, house);
-                house = this.getHouseImage(address, house);
+                house = getHouseImage(request, address, house);
                 houses.remove(i);
                 houses.add(i, house);
             }
