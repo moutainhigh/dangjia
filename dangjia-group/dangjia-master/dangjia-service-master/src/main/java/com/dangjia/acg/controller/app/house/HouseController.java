@@ -6,7 +6,6 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.service.house.HouseService;
-import com.dangjia.acg.service.other.IndexPageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,8 +20,6 @@ public class HouseController implements HouseAPI {
 
     @Autowired
     private HouseService houseService;
-    @Autowired
-    private IndexPageService indexPageService;
 
 
     /**
