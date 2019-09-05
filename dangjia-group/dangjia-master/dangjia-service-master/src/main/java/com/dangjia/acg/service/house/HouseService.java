@@ -584,13 +584,15 @@ public class HouseService {
         /**
          * 业绩结算下单提成
          */
-        Example example = new Example(DjAreaMatch.class);
-        example.createCriteria().andEqualTo(DjAreaMatch.VILLAGE_ID, houseDTO.getVillageId())
-                .andEqualTo(DjAreaMatch.BUILDING_NAME, houseDTO.getBuilding());
-        if (djAreaMatchMapper.selectByExample(example).size() > 0) {
-            endBuildingRoyalty(houseDTO, userId, customer);
-        } else {
-            endRoyalty(houseDTO, userId, customer);
+        if(!CommonUtil.isEmpty(userId)) {
+            Example example = new Example(DjAreaMatch.class);
+            example.createCriteria().andEqualTo(DjAreaMatch.VILLAGE_ID, houseDTO.getVillageId())
+                    .andEqualTo(DjAreaMatch.BUILDING_NAME, houseDTO.getBuilding());
+            if (djAreaMatchMapper.selectByExample(example).size() > 0) {
+                endBuildingRoyalty(houseDTO, userId, customer);
+            } else {
+                endRoyalty(houseDTO, userId, customer);
+            }
         }
 
 
@@ -1658,11 +1660,12 @@ public class HouseService {
         }
         //消息推送
         MainUser user = userMapper.selectByPrimaryKey(userId);
-        String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
-        configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "开工提醒",
-                "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url
-                        + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle1.get(0).getId(), 1, "4"));
-
+        if(user!=null&& CommonUtil.isEmpty(user.getMemberId())) {
+            String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+            configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "开工提醒",
+                    "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url
+                            + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle1.get(0).getId(), 1, "4"));
+        }
 
     }
 
