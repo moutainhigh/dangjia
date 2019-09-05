@@ -9,6 +9,8 @@ import com.dangjia.acg.service.worker.RewardPunishService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
+
 /**
  * 奖罚管理
  * author: zmj
@@ -33,8 +35,8 @@ public class RewardPunishController implements RewardPunishAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse addRewardPunishCorrelation(String id, String name, String content, Integer type, Integer state, String conditionArr) {
-        return rewardPunishService.addRewardPunishCorrelation(id, name, content, type, state, conditionArr);
+    public ServerResponse addRewardPunishCorrelation(String id, String name, String content, Integer type, Integer state, String conditionArr, BigDecimal quantity) {
+        return rewardPunishService.addRewardPunishCorrelation(id, name, content, type, state, conditionArr,quantity);
     }
 
     /**

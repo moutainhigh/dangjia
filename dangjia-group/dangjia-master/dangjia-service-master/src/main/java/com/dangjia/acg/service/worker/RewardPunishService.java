@@ -64,7 +64,7 @@ public class RewardPunishService {
      *
      * @return
      */
-    public ServerResponse addRewardPunishCorrelation(String id, String name, String content, Integer type, Integer state, String conditionArr) {
+    public ServerResponse addRewardPunishCorrelation(String id, String name, String content, Integer type, Integer state, String conditionArr,BigDecimal quantity) {
         try {
             RewardPunishCorrelation rewardPunishCorrelation = new RewardPunishCorrelation();
             rewardPunishCorrelation.setName(name);
@@ -107,6 +107,7 @@ public class RewardPunishService {
                     String endTime = object.getString("endTime");
                     rewardPunishCondition.setStartTime(DateUtil.toDate(startTime));
                     rewardPunishCondition.setEndTime(DateUtil.toDate(endTime));
+                    rewardPunishCondition.setQuantity(quantity);
                 }
                 rewardPunishConditionMapper.insertSelective(rewardPunishCondition);//保存奖罚条件明细
             }

@@ -9,6 +9,8 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.math.BigDecimal;
+
 /**
  * author: zmj
  * Date: 2018/11/5 0005
@@ -25,7 +27,8 @@ public interface RewardPunishAPI {
                                               @RequestParam("content") String content,
                                               @RequestParam("type") Integer type,
                                               @RequestParam("state") Integer state,
-                                              @RequestParam("conditionArr") String conditionArr);
+                                              @RequestParam("conditionArr") String conditionArr,
+                                              @RequestParam("quantity") BigDecimal quantity);
 
     @PostMapping("/web/rewardPunish/deleteRewardPunishCorrelation")
     @ApiOperation(value = "删除奖罚条件及条件明细", notes = "删除奖罚条件及条件明细")
