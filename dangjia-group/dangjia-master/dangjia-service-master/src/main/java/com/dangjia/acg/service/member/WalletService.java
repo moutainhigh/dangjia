@@ -36,7 +36,6 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
-import java.text.DateFormat;
 import java.util.*;
 
 /**
@@ -206,10 +205,11 @@ public class WalletService {
                 List<RewardPunishCondition> conditionList = rewardPunishConditionMapper.selectByExample(example);
                 for (RewardPunishCondition rewardPunishCondition : conditionList) {
                     if (rewardPunishCondition.getType() == 4) {
-                        Date endTime = rewardPunishCondition.getEndTime();
+                        Date tt = DateUtil.addDateDays(record.getCreateDate(),rewardPunishCondition.getQuantity().intValue());
+//                        Date endTime = rewardPunishCondition.getEndTime();
                         Date date = new Date();
-                        if (date.getTime() < endTime.getTime()) {
-                            return ServerResponse.createByErrorMessage("您处于平台处罚期内，" + DateUtil.getDateString2(endTime.getTime()) + "以后才能提现,如有疑问请致电400-168-1231");
+                        if (date.getTime() < tt.getTime()) {
+                            return ServerResponse.createByErrorMessage("您处于平台处罚期内，" + DateUtil.getDateString2(tt.getTime()) + "以后才能提现,如有疑问请致电400-168-1231");
                         }
                     }
                 }

@@ -3,7 +3,6 @@ package com.dangjia.acg.service.core;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
-import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
@@ -20,7 +19,6 @@ import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.design.IHouseStyleTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
-import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
 import com.dangjia.acg.mapper.worker.IInsuranceMapper;
 import com.dangjia.acg.mapper.worker.IRewardPunishConditionMapper;
 import com.dangjia.acg.mapper.worker.IRewardPunishRecordMapper;
@@ -45,13 +43,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
-import java.text.DateFormat;
 import java.util.*;
 
 /**
@@ -387,10 +382,11 @@ public class HouseFlowService {
                 List<RewardPunishCondition> conditionList = rewardPunishConditionMapper.selectByExample(example);
                 for (RewardPunishCondition rewardPunishCondition : conditionList) {
                     if (rewardPunishCondition.getType() == 3) {
-                        Date wraprDate = rewardPunishCondition.getEndTime();
+                        Date tt = DateUtil.addDateDays(record.getCreateDate(),rewardPunishCondition.getQuantity().intValue());
+//                        Date wraprDate = rewardPunishCondition.getEndTime();
                         Date date = new Date();
-                        if (date.getTime() < wraprDate.getTime()) {
-                            return ServerResponse.createByErrorMessage("您处于平台处罚期内，" + DateUtil.getDateString2(wraprDate.getTime()) + "以后才能抢单,如有疑问请致电400-168-1231！");
+                        if (date.getTime() < tt.getTime()) {
+                            return ServerResponse.createByErrorMessage("您处于平台处罚期内，" + DateUtil.getDateString2(tt.getTime()) + "以后才能抢单,如有疑问请致电400-168-1231！");
                         }
                     }
                 }
