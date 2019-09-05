@@ -54,6 +54,10 @@ public interface IBudgetMaterialMapper extends Mapper<BudgetMaterial> {
 	/**未支付材料精算*/
 	BudgetMaterial getBudgetCaiListByGoodsId(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId,@Param("goodsId")String goodsId);
 
+	/**未支付材料精算*/
+	BudgetMaterial getBudgetByGoodsId(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId,@Param("goodsId")String goodsId,@Param("productType")Integer productType);
+
+
 	/**未支付服务精算*/
 	List<BudgetMaterial> getBudgetSerList(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
 	/**查询所有商品精算*/
