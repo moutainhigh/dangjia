@@ -158,11 +158,13 @@ public class StoreServices {
                     return ServerResponse.createByErrorMessage("门店已存在");
                 }
             }
-            Example example=new Example(StoreUser.class);
-            example.createCriteria().andEqualTo(StoreUser.USER_ID,store.getUserId())
-                    .andEqualTo(StoreUser.DATA_STATUS,0);
-            if(iStoreUserMapper.selectByExample(example).size()>0){
-                return ServerResponse.createByErrorMessage("该用户已被设置为店员，情勿添加");
+            if(!oldStore.getUserId().equals(store.getUserId())) {
+                Example example = new Example(StoreUser.class);
+                example.createCriteria().andEqualTo(StoreUser.USER_ID, store.getUserId())
+                        .andEqualTo(StoreUser.DATA_STATUS, 0);
+                if (iStoreUserMapper.selectByExample(example).size() > 0) {
+                    return ServerResponse.createByErrorMessage("该用户已被设置为店员，情勿添加");
+                }
             }
             if(!CommonUtil.isEmpty(store.getCityId())) {
                 City city = cityMapper.selectByPrimaryKey(store.getCityId());
