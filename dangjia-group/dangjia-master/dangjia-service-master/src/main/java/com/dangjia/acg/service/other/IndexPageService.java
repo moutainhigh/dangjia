@@ -102,6 +102,7 @@ public class IndexPageService {
             List<Map> houseMap = new ArrayList<>();
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             for (House house : houseList) {
+                house = setHouseTotalPrice(request, house);
                 house = getHouseImage(request, address, house);
                 Map map = BeanUtils.beanToMap(house);
                 map.put("houseName", house.getHouseName());
@@ -255,7 +256,7 @@ public class IndexPageService {
     }
 
     private House getHouseImage(HttpServletRequest request, String address, House house) {
-        house = setHouseTotalPrice(request, house);
+//        house = setHouseTotalPrice(request, house);
         String image = houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(), null);
         if (CommonUtil.isEmpty(image)) {
             image = houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(), 0);
@@ -290,6 +291,7 @@ public class IndexPageService {
             List<House> houses = houseMapper.getRecommended(latitude, longitude, limit);
             for (int i = 0; i < houses.size(); i++) {
                 House house = houses.get(i);
+                house = setHouseTotalPrice(request, house);
                 house = getHouseImage(request, address, house);
                 houses.remove(i);
                 houses.add(i, house);
