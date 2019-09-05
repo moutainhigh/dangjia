@@ -32,8 +32,8 @@ public class IndexPageController implements IndexPageAPI {
     //根据城市，小区，最小最大面积查询房子
     @Override
     @ApiMethod
-    public ServerResponse queryHouseByCity(String userToken, String cityId, String villageId, Double minSquare, Double maxSquare, Integer houseType, PageDTO pageDTO) {
-        return indexPageService.queryHouseByCity(userToken, cityId, villageId, minSquare, maxSquare, houseType, pageDTO);
+    public ServerResponse queryHouseByCity(HttpServletRequest request,String userToken, String cityId, String villageId, Double minSquare, Double maxSquare, Integer houseType, PageDTO pageDTO) {
+        return indexPageService.queryHouseByCity( request,userToken, cityId, villageId, minSquare, maxSquare, houseType, pageDTO);
     }
 
     /**

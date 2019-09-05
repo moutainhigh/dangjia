@@ -966,7 +966,7 @@ public class ClientService {
         }
         Example example=new Example(DjAlreadyRobSingle.class);
         example.createCriteria().andEqualTo(DjAlreadyRobSingle.USER_ID,customer.getUserId())
-                .andEqualTo(House.DATA_STATUS,0)
+                .andEqualTo(House.DATA_STATUS,1)
                 .andEqualTo(DjAlreadyRobSingle.MC_ID,mcId);
         if(djAlreadyRobSingleMapper.selectByExample(example).size()<=0){//判断撤回的客户否在自己这里已下单 如果已下单就不撤回到客户列表
             example=new Example(Customer.class);

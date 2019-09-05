@@ -1,6 +1,5 @@
 package com.dangjia.acg.service.engineer;
 
-import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
@@ -13,7 +12,6 @@ import com.dangjia.acg.common.util.excel.ExportExcel;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.engineer.ArtisanDTO;
 import com.dangjia.acg.dto.house.WareDTO;
-import com.dangjia.acg.dto.label.OptionalLabelDTO;
 import com.dangjia.acg.dto.repair.RepairMendDTO;
 import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.design.IHouseStyleTypeMapper;
@@ -29,7 +27,6 @@ import com.dangjia.acg.modle.core.*;
 import com.dangjia.acg.modle.design.HouseStyleType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
-import com.dangjia.acg.modle.label.OptionalLabel;
 import com.dangjia.acg.modle.matter.WorkerDisclosure;
 import com.dangjia.acg.modle.matter.WorkerEveryday;
 import com.dangjia.acg.modle.member.Member;
@@ -51,7 +48,6 @@ import tk.mybatis.mapper.util.StringUtil;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
-import java.text.DateFormat;
 import java.util.*;
 
 /**
@@ -314,10 +310,11 @@ public class EngineerService {
                 List<RewardPunishCondition> conditionList = rewardPunishConditionMapper.selectByExample(example);
                 for (RewardPunishCondition rewardPunishCondition : conditionList) {
                     if (rewardPunishCondition.getType() == 3) {
-                        Date wraprDate = rewardPunishCondition.getEndTime();
+                        Date tt = DateUtil.addDateDays(record.getCreateDate(),rewardPunishCondition.getQuantity().intValue());
+//                        Date wraprDate = rewardPunishCondition.getEndTime();
                         Date date = new Date();
-                        if (date.getTime() < wraprDate.getTime()) {
-                            return ServerResponse.createByErrorMessage("该工匠处于平台处罚期内，" +  DateUtil.getDateString2(wraprDate.getTime()) + "以后才能抢单！");
+                        if (date.getTime() < tt.getTime()) {
+                            return ServerResponse.createByErrorMessage("该工匠处于平台处罚期内，" +  DateUtil.getDateString2(tt.getTime()) + "以后才能抢单！");
                         }
                     }
                 }
