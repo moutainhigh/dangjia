@@ -15,7 +15,6 @@ import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.BaseEntity;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.common.util.JsmsUtil;
@@ -581,16 +580,23 @@ public class HouseService {
         mm.put("houseId", houseDTO.getHouseId());
         djAlreadyRobSingleMapper.upDateDataStatus(mm);
 
+
+
         /**
          * 业绩结算下单提成
          */
-        Example example = new Example(DjAreaMatch.class);
-        example.createCriteria().andEqualTo(DjAreaMatch.VILLAGE_ID, houseDTO.getVillageId())
-                .andEqualTo(DjAreaMatch.BUILDING_NAME, houseDTO.getBuilding());
-        if (djAreaMatchMapper.selectByExample(example).size() > 0) {
-            endBuildingRoyalty(houseDTO, userId, customer);
-        } else {
-            endRoyalty(houseDTO, userId, customer);
+        MainUser user = userMapper.selectByPrimaryKey(userId);
+        if(user!=null&& !CommonUtil.isEmpty(user.getMemberId())) {
+            if(!CommonUtil.isEmpty(userId)) {
+                Example example = new Example(DjAreaMatch.class);
+                example.createCriteria().andEqualTo(DjAreaMatch.VILLAGE_ID, houseDTO.getVillageId())
+                        .andEqualTo(DjAreaMatch.BUILDING_NAME, houseDTO.getBuilding());
+                if (djAreaMatchMapper.selectByExample(example).size() > 0) {
+                    endBuildingRoyalty(houseDTO, userId, customer);
+                } else {
+                    endRoyalty(houseDTO, userId, customer);
+                }
+            }
         }
 
 
@@ -600,7 +606,7 @@ public class HouseService {
             configMessageService.addConfigMessage(request, AppType.ZHUANGXIU, house.getMemberId(), "0", "装修提醒",
                     String.format(DjConstants.PushMessage.START_FITTING_UP, house.getHouseName()), "");
             //通知设计师/精算师/大管家 抢单
-            example = new Example(WorkerType.class);
+            Example example = new Example(WorkerType.class);
             example.createCriteria().andCondition(WorkerType.TYPE + " in(1,2) ");
             List<WorkerType> workerTypeList = workerTypeMapper.selectByExample(example);
             for (WorkerType workerType : workerTypeList) {
@@ -1658,11 +1664,12 @@ public class HouseService {
         }
         //消息推送
         MainUser user = userMapper.selectByPrimaryKey(userId);
-        String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
-        configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "开工提醒",
-                "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url
-                        + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle1.get(0).getId(), 1, "4"));
-
+        if(user!=null&& CommonUtil.isEmpty(user.getMemberId())) {
+            String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+            configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "开工提醒",
+                    "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url
+                            + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle1.get(0).getId(), 1, "4"));
+        }
 
     }
 
