@@ -72,13 +72,7 @@ public class IndexPageService {
     @Autowired
     private IHouseFlowApplyImageMapper houseFlowApplyImageMapper;
     @Autowired
-    private CraftsmanConstructionService constructionService;
-    @Autowired
     private IHouseMapper iHouseMapper;
-    @Autowired
-    private IModelingLayoutMapper modelingLayoutMapper;
-    @Autowired
-    private DesignDataService designDataService;
 
     /**
      * 根据城市，小区，最小最大面积查询房子
@@ -125,44 +119,25 @@ public class IndexPageService {
     /**
      * 根据城市，小区，最小最大面积查询房子
      */
-    public ServerResponse queryHouseByCity(String userToken, String cityId, String villageId,
+    public ServerResponse queryHouseByCity(HttpServletRequest request,String userToken, String cityId, String villageId,
                                            Double minSquare, Double maxSquare, Integer houseType, PageDTO pageDTO) {
         try {
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            Object object = constructionService.getMember(userToken);
-            Member member = null;
-            if (object instanceof Member) {
-                member = (Member) object;
-            }
-            boolean isReferenceBudget = false;
             if (villageId != null && villageId.contains("#")) {
-                isReferenceBudget = true;
                 villageId = villageId.replaceAll("#", "");
+            }else{
+                villageId=null;
             }
-
             List<House> houseList = iHouseMapper.getSameLayout(cityId, villageId, minSquare, maxSquare, houseType);
-            PageInfo pageResult = new PageInfo(houseList);
-            List<ShareDTO> srlist = new ArrayList<>();
-            if (houseList.size() > 0) {//根据条件查询所选小区总价最少的房子
-                for (House house : houseList) {
-                    srlist.add(convertHouse(house, member));
-                }
-            } else {
-                if (isReferenceBudget) {
-                    houseList = iHouseMapper.getSameLayout(cityId, null, minSquare, maxSquare, houseType);
-                    pageResult = new PageInfo(houseList);
-                    if (houseList.size() > 0) {//根据条件查询所选小区总价最少的房子
-                        for (House house : houseList) {
-                            srlist.add(convertHouse(house, member));
-                        }
-                    } else {
-                        return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无数据");
-                    }
-                } else {
-                    return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无数据");
-                }
+            if (houseList.size() == 0) {//根据条件查询所选小区总价最少的房子
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无数据");
             }
-            pageResult.setList(srlist);
+            PageInfo pageResult = new PageInfo(houseList);
+            List<House> houses = new ArrayList<>();
+            for (House house : houseList) {
+                houses.add(getHouseImage(request, address, house));
+            }
             return ServerResponse.createBySuccess(null, pageResult);
         } catch (Exception e) {
             e.printStackTrace();
@@ -171,60 +146,56 @@ public class IndexPageService {
     }
 
 
-    private ShareDTO convertHouse(House house, Member member) {
-        ModelingLayout ml = modelingLayoutMapper.selectByPrimaryKey(house.getModelingLayoutId());
-        ShareDTO shareDTO = new ShareDTO();
-        shareDTO.setType("1");
-        if (house.getShowHouse() == 0) {
-//            if (accessToken != null) {
-//                shareDTO.setName(house.getHouseName());
-//            } else {
-            shareDTO.setHouseName(house.getHouseName());
-            shareDTO.setNoNumberHouseName(house.getResidential() + "**" + "栋" + (CommonUtil.isEmpty(house.getUnit()) ? "" : house.getUnit() + "单元") + house.getNumber() + "房");
+//    private ShareDTO convertHouse(House house, Member member) {
+//        ModelingLayout ml = modelingLayoutMapper.selectByPrimaryKey(house.getModelingLayoutId());
+//        ShareDTO shareDTO = new ShareDTO();
+//        shareDTO.setType("1");
+//        if (house.getShowHouse() == 0) {
+//            shareDTO.setHouseName(house.getHouseName());
+//            shareDTO.setNoNumberHouseName(house.getResidential() + "**" + "栋" + (CommonUtil.isEmpty(house.getUnit()) ? "" : house.getUnit() + "单元") + house.getNumber() + "房");
+//        } else {
+//            shareDTO.setHouseName(house.getHouseName());
+//            shareDTO.setNoNumberHouseName("*栋*单元*号");
+//        }
+//        shareDTO.setJianzhumianji("建筑面积:" + (house.getBuildSquare() == null ? "0" : house.getBuildSquare()) + "m²");//建筑面积
+//        shareDTO.setJvillageacreage("计算面积:" + (house.getSquare() == null ? "0" : house.getSquare()) + "m²");//计算面积
+//        String biaoqian = house.getLiangDian();//标签
+//        List<String> biaoqians = new ArrayList<>();
+//        if (!CommonUtil.isEmpty(biaoqian)) {
+//            for (String s1 : biaoqian.split(",")) {
+//                if (!CommonUtil.isEmpty(s1)) {
+//                    biaoqians.add(s1);
+//                }
 //            }
-        } else {
-            shareDTO.setHouseName(house.getHouseName());
-            shareDTO.setNoNumberHouseName("*栋*单元*号");
-        }
-        shareDTO.setJianzhumianji("建筑面积:" + (house.getBuildSquare() == null ? "0" : house.getBuildSquare()) + "m²");//建筑面积
-        shareDTO.setJvillageacreage("计算面积:" + (house.getSquare() == null ? "0" : house.getSquare()) + "m²");//计算面积
-        String biaoqian = house.getLiangDian();//标签
-        List<String> biaoqians = new ArrayList<>();
-        if (!CommonUtil.isEmpty(biaoqian)) {
-            for (String s1 : biaoqian.split(",")) {
-                if (!CommonUtil.isEmpty(s1)) {
-                    biaoqians.add(s1);
-                }
-            }
-        }
-        biaoqians.add((house.getBuildSquare() == null ? "0" : house.getBuildSquare()) + "m²");
-        shareDTO.setBiaoqian(biaoqians);//亮点标签
-        BigDecimal money = house.getMoney();
-        shareDTO.setPrice("***" + (member != null && money != null && money.toString().length() > 2 ?
-                money.toString().substring(money.toString().length() - 2) : "00"));//精算总价
-        shareDTO.setShowHouse(house.getShowHouse());
-        shareDTO.setHouseId(house.getId());
-        shareDTO.setVisitState(house.getVisitState());
-        shareDTO.setVillageId(house.getVillageId());//小区id
-        shareDTO.setVillageName(house.getResidential());//小区名
-        shareDTO.setLayoutId(house.getModelingLayoutId());//户型id
-        shareDTO.setLayoutleft(ml == null ? "" : ml.getName());//户型名称
-        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-        String jobLocationDetail = address + String.format(DjConstants.YZPageAddress.JOBLOCATIONDETAIL, "", house.getCityId(), "施工现场") + "&houseId=" + house.getId();
-        shareDTO.setUrl(jobLocationDetail);
-        shareDTO.setImageNum(0 + "张图片");
-        shareDTO.setImage(address + houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(), null));//户型图片
-        ServerResponse serverResponse = designDataService.getConstructionPlans(house.getId());
-        if (serverResponse.isSuccess()) {
-            QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
-            List<QuantityRoomImages> images = quantityRoomDTO.getImages();
-            if (images != null && images.size() > 0) {
-//                shareDTO.setImage(images.get(0).getImage() + "?x-image-process=image/resize,w_500,h_500/quality,q_80");
-                shareDTO.setImageNum(quantityRoomDTO.getImages().size() + "张图片");
-            }
-        }
-        return shareDTO;
-    }
+//        }
+//        biaoqians.add((house.getBuildSquare() == null ? "0" : house.getBuildSquare()) + "m²");
+//        shareDTO.setBiaoqian(biaoqians);//亮点标签
+//        BigDecimal money = house.getMoney();
+//        shareDTO.setPrice("***" + (member != null && money != null && money.toString().length() > 2 ?
+//                money.toString().substring(money.toString().length() - 2) : "00"));//精算总价
+//        shareDTO.setShowHouse(house.getShowHouse());
+//        shareDTO.setHouseId(house.getId());
+//        shareDTO.setVisitState(house.getVisitState());
+//        shareDTO.setVillageId(house.getVillageId());//小区id
+//        shareDTO.setVillageName(house.getResidential());//小区名
+//        shareDTO.setLayoutId(house.getModelingLayoutId());//户型id
+//        shareDTO.setLayoutleft(ml == null ? "" : ml.getName());//户型名称
+//        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+//        String jobLocationDetail = address + String.format(DjConstants.YZPageAddress.JOBLOCATIONDETAIL, "", house.getCityId(), "施工现场") + "&houseId=" + house.getId();
+//        shareDTO.setUrl(jobLocationDetail);
+//        shareDTO.setImageNum(0 + "张图片");
+//        shareDTO.setImage(address + houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(), null));//户型图片
+//        ServerResponse serverResponse = designDataService.getConstructionPlans(house.getId());
+//        if (serverResponse.isSuccess()) {
+//            QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
+//            List<QuantityRoomImages> images = quantityRoomDTO.getImages();
+//            if (images != null && images.size() > 0) {
+////                shareDTO.setImage(images.get(0).getImage() + "?x-image-process=image/resize,w_500,h_500/quality,q_80");
+//                shareDTO.setImageNum(quantityRoomDTO.getImages().size() + "张图片");
+//            }
+//        }
+//        return shareDTO;
+//    }
 
 
     /**
