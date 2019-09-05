@@ -137,6 +137,7 @@ public class IndexPageService {
             PageInfo pageResult = new PageInfo(houseList);
             List<House> houses = new ArrayList<>();
             for (House house : houseList) {
+                house = setHouseTotalPrice(request, house);
                 houses.add(getHouseImage(request, address, house));
             }
             return ServerResponse.createBySuccess(null, pageResult);
@@ -235,6 +236,7 @@ public class IndexPageService {
             if (lsHouse.size() > 0) {
                 for (House house : lsHouse) {
                     house.setHouseId(house.getId());
+                    house = setHouseTotalPrice(request, house);
                     house = this.getHouseImage(request, address, house);
                     houses.add(house);
                     map.put(house.getVillageId(), "Y");
@@ -249,6 +251,7 @@ public class IndexPageService {
         if (houses.size() == 0) {
             List<House> houseslist = modelingVillageMapper.jobModelingVillage(latitude, longitude, limit);
             for (House house : houseslist) {
+                house = setHouseTotalPrice(request, house);
                 houses.add(getHouseImage(request, address, house));
             }
         }
