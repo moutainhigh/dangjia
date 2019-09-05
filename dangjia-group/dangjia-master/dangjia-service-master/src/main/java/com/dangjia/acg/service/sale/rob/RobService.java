@@ -114,6 +114,8 @@ public class RobService {
         }
 
 
+
+
         Example example = new Example(StoreUser.class);
         example.createCriteria().andEqualTo(StoreUser.USER_ID, accessToken.getUserId())
                 .andEqualTo(StoreUser.DATA_STATUS, 0);

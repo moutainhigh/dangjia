@@ -222,7 +222,7 @@
 	        p.id = bm.product_id
 	    and bm.house_id = #{houseId}
 	    and bm.worker_type_id = #{workerTypeId}
-	    and bm.delete_state = 0
+	    and bm.delete_state in (0, 4)
 	    and bm.steta = 1
 	    and bm.product_type = 0
 	</select>
@@ -263,6 +263,19 @@
 		and goods_id =#{goodsId}
 		and product_type = 0
 		and delete_state in (0,2,4)
+		ORDER BY category_id,product_sn,goods_name desc
+	</select>
+
+	<select id="getBudgetByGoodsId" resultType="com.dangjia.acg.modle.actuary.BudgetMaterial">
+		SELECT
+		<include refid="all_columns"/>
+		FROM dj_actuary_budget_material
+		WHERE
+		house_id=#{houseId}
+		and worker_type_id =#{workerTypeId}
+		and goods_id =#{goodsId}
+		and product_type = #{productType}
+		and delete_state = 5
 		ORDER BY category_id,product_sn,goods_name desc
 	</select>
 
