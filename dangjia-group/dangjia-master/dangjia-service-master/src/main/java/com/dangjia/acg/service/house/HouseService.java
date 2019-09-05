@@ -602,7 +602,7 @@ public class HouseService {
             configMessageService.addConfigMessage(request, AppType.ZHUANGXIU, house.getMemberId(), "0", "装修提醒",
                     String.format(DjConstants.PushMessage.START_FITTING_UP, house.getHouseName()), "");
             //通知设计师/精算师/大管家 抢单
-            example = new Example(WorkerType.class);
+            Example example = new Example(WorkerType.class);
             example.createCriteria().andCondition(WorkerType.TYPE + " in(1,2) ");
             List<WorkerType> workerTypeList = workerTypeMapper.selectByExample(example);
             for (WorkerType workerType : workerTypeList) {
