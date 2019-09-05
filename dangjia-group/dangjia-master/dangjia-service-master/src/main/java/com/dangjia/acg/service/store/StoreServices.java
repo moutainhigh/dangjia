@@ -158,7 +158,7 @@ public class StoreServices {
                     return ServerResponse.createByErrorMessage("门店已存在");
                 }
             }
-            if(!oldStore.getUserId().equals(store.getUserId())) {
+            if(!CommonUtil.isEmpty(store.getUserId())) {
                 Example example = new Example(StoreUser.class);
                 example.createCriteria().andEqualTo(StoreUser.USER_ID, store.getUserId())
                         .andEqualTo(StoreUser.DATA_STATUS, 0);
