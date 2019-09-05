@@ -102,13 +102,13 @@ public class RewardPunishService {
                 rewardPunishCondition.setType(types);
                 rewardPunishCondition.setQuantity(object.getBigDecimal("quantity"));
                 rewardPunishCondition.setUnits(object.getString("units"));
-                if (types == 3 || types == 4) {
-                    String startTime = object.getString("startTime");
-                    String endTime = object.getString("endTime");
-                    rewardPunishCondition.setStartTime(DateUtil.toDate(startTime));
-                    rewardPunishCondition.setEndTime(DateUtil.toDate(endTime));
-                    rewardPunishCondition.setQuantity(quantity);
-                }
+//                if (types == 4) {
+//                    String startTime = object.getString("startTime");
+//                    String endTime = object.getString("endTime");
+//                    rewardPunishCondition.setStartTime(DateUtil.toDate(startTime));
+//                    rewardPunishCondition.setEndTime(DateUtil.toDate(endTime));
+//                    rewardPunishCondition.setQuantity(quantity);
+//                }
                 rewardPunishConditionMapper.insertSelective(rewardPunishCondition);//保存奖罚条件明细
             }
             return ServerResponse.createBySuccessMessage("保存奖罚条件成功");
