@@ -211,11 +211,18 @@ public class ActuaryOperationService {
                             newBudgetMaterial.setUnitName(convertUnit.getName());
                             Goods goods = goodsMapper.queryById( targetProduct.getGoodsId());
                             newBudgetMaterial.setProductType(goods.getType());//0：材料；1：包工包料
-                            newBudgetMaterial.setId((int)(Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis());
-                            budgetMaterialMapper.insertSelective(newBudgetMaterial);
 
-                            srcBudgetMaterial.setDeleteState(5);
-                            budgetMaterialMapper.updateByPrimaryKeySelective(srcBudgetMaterial);
+                            if(newBudgetMaterial.getDeleteState()==4){
+                                budgetMaterialMapper.updateByPrimaryKeySelective(newBudgetMaterial);
+                            }else{
+                                newBudgetMaterial.setDeleteState(4);
+                                newBudgetMaterial.setId((int)(Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis());
+                                budgetMaterialMapper.insertSelective(newBudgetMaterial);
+
+                                srcBudgetMaterial.setDeleteState(5);
+                                budgetMaterialMapper.updateByPrimaryKeySelective(srcBudgetMaterial);
+                            }
+
                             count++;
                         }
 
@@ -230,7 +237,6 @@ public class ActuaryOperationService {
                 newBudgetMaterial.setProductName(product.getName());
                 newBudgetMaterial.setPrice(product.getPrice());
                 newBudgetMaterial.setCost(product.getCost());
-                newBudgetMaterial.setDeleteState(4);
                 //这里会更新 为 新product的 换算后的购买数量
                 double converCount = (newBudgetMaterial.getShopCount() / product.getConvertQuality());
                 Unit convertUnit = iUnitMapper.selectByPrimaryKey(product.getConvertUnit());
@@ -245,11 +251,17 @@ public class ActuaryOperationService {
                 newBudgetMaterial.setUnitName(convertUnit.getName());
                 Goods goods = goodsMapper.queryById( product.getGoodsId());
                 newBudgetMaterial.setProductType(goods.getType());//0：材料；1：包工包料
-                newBudgetMaterial.setId((int)(Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis());
-                budgetMaterialMapper.insertSelective(newBudgetMaterial);
+                if(newBudgetMaterial.getDeleteState()==4){
+                    budgetMaterialMapper.updateByPrimaryKeySelective(newBudgetMaterial);
+                }else{
+                    newBudgetMaterial.setDeleteState(4);
+                    newBudgetMaterial.setId((int)(Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis());
+                    budgetMaterialMapper.insertSelective(newBudgetMaterial);
 
-                budgetMaterial.setDeleteState(5);
-                budgetMaterialMapper.updateByPrimaryKeySelective(budgetMaterial);
+                    budgetMaterial.setDeleteState(5);
+                    budgetMaterialMapper.updateByPrimaryKeySelective(budgetMaterial);
+                }
+
                 return ServerResponse.createBySuccessMessage("操作成功" + ret);
             }
             if (count == 0)
