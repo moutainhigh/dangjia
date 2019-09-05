@@ -117,25 +117,26 @@ public class ActuaryOperationService {
      */
     public ServerResponse recoveryProduct(String houseId, String workerTypeId) {
 
+
         Example example=new Example(BudgetMaterial.class);
         example.createCriteria()
                 .andEqualTo(BudgetMaterial.HOUSE_ID,houseId)
                 .andEqualTo(BudgetMaterial.WORKER_TYPE_ID,workerTypeId)
-                .andEqualTo(BudgetMaterial.DELETE_STATE,4);
-        budgetMaterialMapper.deleteByExample(example);
-
-        example=new Example(BudgetMaterial.class);
-        example.createCriteria()
-                .andEqualTo(BudgetMaterial.HOUSE_ID,houseId)
-                .andEqualTo(BudgetMaterial.WORKER_TYPE_ID,workerTypeId)
                 .andEqualTo(BudgetMaterial.DELETE_STATE,5);
+        List<BudgetMaterial> budgetMaterials = budgetMaterialMapper.selectByExample(example);
+        for (BudgetMaterial budgetMaterial : budgetMaterials) {
+            example=new Example(BudgetMaterial.class);
+            example.createCriteria()
+                    .andEqualTo(BudgetMaterial.HOUSE_ID,houseId)
+                    .andEqualTo(BudgetMaterial.WORKER_TYPE_ID,workerTypeId)
+                    .andEqualTo(BudgetMaterial.GOODS_ID,budgetMaterial.getGoodsId())
+                    .andEqualTo(BudgetMaterial.DELETE_STATE,0);
+            budgetMaterialMapper.deleteByExample(example);
 
-        BudgetMaterial budgetMaterial=new BudgetMaterial();
-        budgetMaterial.setId(null);
-        budgetMaterial.setCreateDate(null);
-        budgetMaterial.setModifyDate(new Date());
-        budgetMaterial.setDeleteState(0);
-        budgetMaterialMapper.updateByExampleSelective(budgetMaterial,example);
+            budgetMaterial.setDeleteState(0);
+            budgetMaterialMapper.updateByPrimaryKey(budgetMaterial);
+        }
+
         return ServerResponse.createBySuccessMessage("操作成功" );
     }
     /**
@@ -185,6 +186,7 @@ public class ActuaryOperationService {
                             //查到 老的关联组 的精算
                             BudgetMaterial srcBudgetMaterial = budgetMaterialMapper.getBudgetCaiListByGoodsId(houseId, workerTypeId, srcGroupLink.getGoodsId());
                             BudgetMaterial newBudgetMaterial = budgetMaterialMapper.getBudgetCaiListByGoodsId(houseId, workerTypeId, srcGroupLink.getGoodsId());
+                            BudgetMaterial originalBudgetMaterial = budgetMaterialMapper.getBudgetByGoodsId(houseId, workerTypeId, newBudgetMaterial.getGoodsId(), newBudgetMaterial.getProductType());
                             Product targetProduct = productMapper.selectByPrimaryKey(targetGroupLink.getProductId());//目标product 对象
                             newBudgetMaterial.setProductId(targetProduct.getId());
                             newBudgetMaterial.setProductSn(targetProduct.getProductSn());
@@ -192,7 +194,6 @@ public class ActuaryOperationService {
                             newBudgetMaterial.setImage(targetProduct.getImage());
                             newBudgetMaterial.setPrice(targetProduct.getPrice());
                             newBudgetMaterial.setGoodsGroupId(targetGroupId);
-                            newBudgetMaterial.setDeleteState(4);
                             GoodsGroup goodsGroup = iGoodsGroupMapper.selectByPrimaryKey(targetGroupId);
                             newBudgetMaterial.setGroupType(goodsGroup.getName());
                             newBudgetMaterial.setCost(targetProduct.getCost());
@@ -211,18 +212,14 @@ public class ActuaryOperationService {
                             newBudgetMaterial.setUnitName(convertUnit.getName());
                             Goods goods = goodsMapper.queryById( targetProduct.getGoodsId());
                             newBudgetMaterial.setProductType(goods.getType());//0：材料；1：包工包料
-
-                            if(newBudgetMaterial.getDeleteState()==4){
+                            if(originalBudgetMaterial!=null){
                                 budgetMaterialMapper.updateByPrimaryKeySelective(newBudgetMaterial);
                             }else{
-                                newBudgetMaterial.setDeleteState(4);
                                 newBudgetMaterial.setId((int)(Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis());
                                 budgetMaterialMapper.insertSelective(newBudgetMaterial);
-
                                 srcBudgetMaterial.setDeleteState(5);
                                 budgetMaterialMapper.updateByPrimaryKeySelective(srcBudgetMaterial);
                             }
-
                             count++;
                         }
 
@@ -231,6 +228,8 @@ public class ActuaryOperationService {
             } else {
 
                 BudgetMaterial newBudgetMaterial = budgetMaterialMapper.selectByPrimaryKey(budgetMaterialId);
+                BudgetMaterial originalBudgetMaterial = budgetMaterialMapper.getBudgetByGoodsId(houseId, workerTypeId, newBudgetMaterial.getGoodsId(), newBudgetMaterial.getProductType());
+
                 Product product = productMapper.selectByPrimaryKey(productId);
                 newBudgetMaterial.setProductId(productId);
                 newBudgetMaterial.setProductSn(product.getProductSn());
@@ -251,17 +250,14 @@ public class ActuaryOperationService {
                 newBudgetMaterial.setUnitName(convertUnit.getName());
                 Goods goods = goodsMapper.queryById( product.getGoodsId());
                 newBudgetMaterial.setProductType(goods.getType());//0：材料；1：包工包料
-                if(newBudgetMaterial.getDeleteState()==4){
+                if(originalBudgetMaterial!=null){
                     budgetMaterialMapper.updateByPrimaryKeySelective(newBudgetMaterial);
                 }else{
-                    newBudgetMaterial.setDeleteState(4);
                     newBudgetMaterial.setId((int)(Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis());
                     budgetMaterialMapper.insertSelective(newBudgetMaterial);
-
                     budgetMaterial.setDeleteState(5);
                     budgetMaterialMapper.updateByPrimaryKeySelective(budgetMaterial);
                 }
-
                 return ServerResponse.createBySuccessMessage("操作成功" + ret);
             }
             if (count == 0)
