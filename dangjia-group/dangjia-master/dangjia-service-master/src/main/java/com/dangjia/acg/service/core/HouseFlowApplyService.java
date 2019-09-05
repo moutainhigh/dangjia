@@ -841,6 +841,7 @@ public class HouseFlowApplyService {
             }
 
 
+
             Example ex = new Example(Clue.class);
             ex.createCriteria().andEqualTo(Clue.MEMBER_ID, house.getMemberId())
                     .andEqualTo(Clue.DATA_STATUS, 0);
@@ -854,8 +855,10 @@ public class HouseFlowApplyService {
                         logger.info("有一个归于您的客户【房子地址】已竣工==================="+residentialRange.getUserId());
                         //销售所选楼栋是否在自己楼栋范围内推送消息
                         MainUser us = userMapper.selectByPrimaryKey(residentialRange.getUserId());
-                        configMessageService.addConfigMessage(AppType.SALE, us.getMemberId(), "竣工提醒",
-                                "您有一个归于您的客户【" + house.getHouseName() + "】已竣工，请及时查看提成。", 6);
+                        if(null != us && !CommonUtil.isEmpty(us.getMemberId())){
+                            configMessageService.addConfigMessage(AppType.SALE, us.getMemberId(), "竣工提醒",
+                                    "您有一个归于您的客户【" + house.getHouseName() + "】已竣工，请及时查看提成。", 6);
+                        }
                     }
                 }
             }
@@ -865,9 +868,12 @@ public class HouseFlowApplyService {
                     logger.info("您的跨域客户【客户名称】已竣工==================="+clueList.get(0).getCrossDomainUserId());
                     //跨域下单推送消息
                     MainUser us = userMapper.selectByPrimaryKey(clueList.get(0).getCrossDomainUserId());
-                    Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
-                    configMessageService.addConfigMessage(AppType.SALE, us.getMemberId(), "竣工提醒",
-                            "您的跨域客户【" + member.getNickName() + "】已竣工，请及时查看提成。", 6);
+                    if(null != us && !CommonUtil.isEmpty(us.getMemberId())){
+                        Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
+                        configMessageService.addConfigMessage(AppType.SALE, us.getMemberId(), "竣工提醒",
+                                "您的跨域客户【" + member.getNickName() + "】已竣工，请及时查看提成。", 6);
+                    }
+
                 }
             }
 
