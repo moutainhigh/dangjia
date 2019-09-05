@@ -146,6 +146,7 @@ public class HouseFlowService {
 //            example.orderBy(HouseFlow.WORK_TYPE);
             example.createCriteria().andEqualTo(HouseFlow.WORK_TYPE, 2).andEqualTo(HouseFlow.WORKER_TYPE_ID, workerTypeId)
                     .andEqualTo(HouseFlow.CITY_ID, cityId).andNotEqualTo(HouseFlow.STATE, 2);
+
             List<HouseFlow> hfList = houseFlowMapper.selectByExample(example);
             if (hfList != null)
                 for (HouseFlow houseFlow : hfList) {
