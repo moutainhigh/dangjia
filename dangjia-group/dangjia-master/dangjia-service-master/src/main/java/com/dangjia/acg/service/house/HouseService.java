@@ -15,7 +15,6 @@ import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.BaseEntity;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.common.util.JsmsUtil;
@@ -581,17 +580,22 @@ public class HouseService {
         mm.put("houseId", houseDTO.getHouseId());
         djAlreadyRobSingleMapper.upDateDataStatus(mm);
 
+
+
         /**
          * 业绩结算下单提成
          */
-        if(!CommonUtil.isEmpty(userId)) {
-            Example example = new Example(DjAreaMatch.class);
-            example.createCriteria().andEqualTo(DjAreaMatch.VILLAGE_ID, houseDTO.getVillageId())
-                    .andEqualTo(DjAreaMatch.BUILDING_NAME, houseDTO.getBuilding());
-            if (djAreaMatchMapper.selectByExample(example).size() > 0) {
-                endBuildingRoyalty(houseDTO, userId, customer);
-            } else {
-                endRoyalty(houseDTO, userId, customer);
+        MainUser user = userMapper.selectByPrimaryKey(userId);
+        if(user!=null&& !CommonUtil.isEmpty(user.getMemberId())) {
+            if(!CommonUtil.isEmpty(userId)) {
+                Example example = new Example(DjAreaMatch.class);
+                example.createCriteria().andEqualTo(DjAreaMatch.VILLAGE_ID, houseDTO.getVillageId())
+                        .andEqualTo(DjAreaMatch.BUILDING_NAME, houseDTO.getBuilding());
+                if (djAreaMatchMapper.selectByExample(example).size() > 0) {
+                    endBuildingRoyalty(houseDTO, userId, customer);
+                } else {
+                    endRoyalty(houseDTO, userId, customer);
+                }
             }
         }
 
