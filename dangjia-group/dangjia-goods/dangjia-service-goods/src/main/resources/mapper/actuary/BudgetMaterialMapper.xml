@@ -222,7 +222,7 @@
 	        p.id = bm.product_id
 	    and bm.house_id = #{houseId}
 	    and bm.worker_type_id = #{workerTypeId}
-	    and bm.delete_state = 0
+	    and bm.delete_state in (0, 4)
 	    and bm.steta = 1
 	    and bm.product_type = 0
 	</select>
