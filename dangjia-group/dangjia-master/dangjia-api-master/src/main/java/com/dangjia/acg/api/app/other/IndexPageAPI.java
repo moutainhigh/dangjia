@@ -45,7 +45,8 @@ public interface IndexPageAPI {
      */
     @PostMapping("app/house/house/queryHouseByCity")
     @ApiOperation(value = "根据城市，小区，最小最大面积查询房子", notes = "根据城市，小区，最小最大面积查询房子")
-    ServerResponse queryHouseByCity(@RequestParam("userToken") String userToken,
+    ServerResponse queryHouseByCity(@RequestParam("request") HttpServletRequest request,
+                                    @RequestParam("userToken") String userToken,
                                     @RequestParam("cityId") String cityId,
                                     @RequestParam("villageId") String villageId,
                                     @RequestParam("minSquare") Double minSquare,
