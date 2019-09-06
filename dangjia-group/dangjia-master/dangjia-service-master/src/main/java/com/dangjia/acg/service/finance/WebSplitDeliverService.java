@@ -404,7 +404,11 @@ public class WebSplitDeliverService {
                     cityId=house.getCityId();
                 }
                 SupplierProduct supplierProduct = forMasterAPI.getSupplierProduct(cityId, mendDeliver.getSupplierId(), mendMateriel.getProductId());
-                map.put("supCost", supplierProduct.getPrice());
+                if(supplierProduct!=null){
+                    map.put("supCost", supplierProduct.getPrice());
+                }else {
+                    map.put("supCost", mendMateriel.getCost());
+                }
                 mendMaterielsMap.add(map);
             }
             return ServerResponse.createBySuccess("查询成功", mendMaterielsMap);
