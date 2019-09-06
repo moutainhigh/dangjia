@@ -138,7 +138,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <select id="getCountWorkerDetailByWid" resultType="java.lang.Double">
         select sum(wd.money)
         from dj_worker_worker_detail as wd
-        where wd.state=0
+        where (wd.state=0 or wd.state=2)
         and wd.worker_id=#{workerId}
     </select>
     <!--查询有记录的历史月 -->
