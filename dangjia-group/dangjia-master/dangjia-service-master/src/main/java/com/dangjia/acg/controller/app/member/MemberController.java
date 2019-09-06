@@ -129,5 +129,11 @@ public class MemberController implements MemberAPI {
     public ServerResponse  myInsurances(HttpServletRequest request, String userToken, PageDTO pageDTO){
         return memberService.myInsurances(userToken, pageDTO);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse promotionList(HttpServletRequest request, String userToken, PageDTO pageDTO) {
+        return memberService.promotionList(userToken,pageDTO);
+    }
 }
 
