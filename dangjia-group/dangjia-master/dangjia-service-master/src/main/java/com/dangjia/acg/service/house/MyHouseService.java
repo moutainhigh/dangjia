@@ -161,7 +161,7 @@ public class MyHouseService {
         }
         mapObj.put("name",supervisor.getName());
         mapObj.put("list",imageList);
-        return ServerResponse.createBySuccess("查询成功", imageList);
+        return ServerResponse.createBySuccess("查询成功", mapObj);
     }
     /**
      * APP我的房产
