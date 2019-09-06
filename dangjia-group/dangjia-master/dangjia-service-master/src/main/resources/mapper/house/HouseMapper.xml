@@ -94,7 +94,7 @@
         member.NAME AS NAME,
         member.mobile AS mobile,
         s.store_name storeName
-        <if test="designerType > 0 and workerKey!=null and workerKey!=''">
+        <if test="designerType > 0 ">
            ,gr.name operatorName,
             gr.mobile operatorMobile,
             gr.id operatorId
@@ -102,7 +102,7 @@
         FROM
         dj_house house
         INNER JOIN dj_member member ON member.id = house.member_id
-        <if test="designerType > 0 and workerKey!=null and workerKey!=''">
+        <if test="designerType > 0 ">
             INNER JOIN dj_core_house_worker wk ON wk.house_id = house.id
             AND wk.worker_type = 1
             AND wk.work_type = 6
