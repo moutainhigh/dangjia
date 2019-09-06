@@ -554,7 +554,7 @@
         h.drawings,
         h.work_deposit_id as workDepositId,
         h.custom_sort as customSort,
-        h.construction_date as constructionDate,
+        o.create_date as constructionDate,
         h.completed_date as completedDate,
         h.is_select as isSelect,
         (
@@ -579,6 +579,10 @@
         WHERE f.worker_type=3 and f.work_type > 1
         ) f ON h.id=f.house_id
         INNER JOIN dj_member m ON h.member_id = m.id
+        INNER JOIN (
+            SELECT po.house_id,MIN(po.create_date) create_date from dj_core_house_flow_apply po  where po.apply_type = 4
+            GROUP BY po.house_id
+        ) o on o.house_id=h.id
         WHERE
         h.data_status =0
         <if test="cityKey!=null and cityKey!=''">
@@ -591,7 +595,7 @@
             and h.visit_state  in(3,4,5)
         </if>
         <if test="startDate!=null and endDate!=null and startDate!='' and endDate!=''">
-            and h.construction_date BETWEEN #{startDate} and #{endDate}
+            and o.create_date BETWEEN #{startDate} and #{endDate}
         </if>
         <if test="supKey!=null and supKey!=''">
             and (
