@@ -57,6 +57,7 @@ public class WebSplitDeliverService {
     @Autowired
     private IOrderSplitItemMapper iOrderSplitItemMapper;
 
+    @Autowired
     private ForMasterAPI forMasterAPI;
     @Autowired
     private ConfigUtil configUtil;
