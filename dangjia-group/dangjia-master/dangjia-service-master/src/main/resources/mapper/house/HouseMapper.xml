@@ -861,5 +861,14 @@
         )tab
         order by rand() limit #{limit}
     </select>
+
+    <select id="queryPromotionListHouse" resultType="com.dangjia.acg.modle.house.House">
+        select
+          <include refid="basic_columns"/>
+        from dj_house
+        where member_id=#{memberId}
+        ORDER BY create_date desc
+        limit 1
+    </select>
 </mapper>
 

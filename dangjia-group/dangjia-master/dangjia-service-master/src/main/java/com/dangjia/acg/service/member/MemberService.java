@@ -1362,4 +1362,32 @@ public class MemberService {
     }
 
 
+    /**
+     * 推广列表
+     * @param userToken
+     * @param pageDTO
+     * @return
+     */
+    public ServerResponse promotionList(String userToken, PageDTO pageDTO) {
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member member = (Member) object;
+        Example example=new Example(Member.class);
+        example.createCriteria().andEqualTo(Member.OTHERS_INVITATION_CODE,member.getInvitationCode());
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        List<Member> members = memberMapper.selectByExample(example);
+        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+        for (Member member1 : members) {
+            member1.setVisitState(houseMapper.queryPromotionListHouse(member1.getId()).getVisitState());
+            member1.setHead(address+member1.getHead());
+        }
+        PageInfo pageResult = new PageInfo(members);
+        if(members.size()<=0){
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
+        }
+        return ServerResponse.createBySuccess("查询成功",pageResult);
+    }
+
 }

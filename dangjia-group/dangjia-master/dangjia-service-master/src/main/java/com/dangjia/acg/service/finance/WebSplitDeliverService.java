@@ -57,6 +57,7 @@ public class WebSplitDeliverService {
     @Autowired
     private IOrderSplitItemMapper iOrderSplitItemMapper;
 
+    @Autowired
     private ForMasterAPI forMasterAPI;
     @Autowired
     private ConfigUtil configUtil;
@@ -404,9 +405,9 @@ public class WebSplitDeliverService {
                     cityId=house.getCityId();
                 }
                 SupplierProduct supplierProduct = forMasterAPI.getSupplierProduct(cityId, mendDeliver.getSupplierId(), mendMateriel.getProductId());
-                if(supplierProduct!=null) {
+                if(supplierProduct!=null){
                     map.put("supCost", supplierProduct.getPrice());
-                }else{
+                }else {
                     map.put("supCost", mendMateriel.getCost());
                 }
                 mendMaterielsMap.add(map);
