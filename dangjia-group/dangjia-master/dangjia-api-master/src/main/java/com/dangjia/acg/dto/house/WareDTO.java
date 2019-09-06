@@ -101,7 +101,7 @@ public class WareDTO {
     @ApiModelProperty("成本价")
     private Double cost;
 
-    @ExcelField(titile = "单位", offset = 14)
+    @ExcelField(titile = "单位", offset = 15)
     @ApiModelProperty("单位")
     private String unitName;
 

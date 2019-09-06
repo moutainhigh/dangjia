@@ -547,5 +547,11 @@ public interface MemberAPI {
     ServerResponse  myInsurances(@RequestParam("request") HttpServletRequest request,
                                  @RequestParam("userToken") String userToken,
                                  @RequestParam("pageDTO") PageDTO pageDTO);
+
+    @RequestMapping(value = "member/insurances/promotionList")
+    @ApiOperation(value = "推广列表", notes = "推广列表")
+    ServerResponse  promotionList(@RequestParam("request") HttpServletRequest request,
+                                  @RequestParam("userToken") String userToken,
+                                  @RequestParam("pageDTO") PageDTO pageDTO);
 }
 
