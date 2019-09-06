@@ -62,6 +62,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <select id="mendDeliverDetail" resultType="com.dangjia.acg.modle.repair.MendMateriel">
                 select
                 b.image AS image,
+                b.product_id AS productId,
                 b.product_name AS productName,
                 b.product_sn AS productSn,
                 b.cost AS cost,
