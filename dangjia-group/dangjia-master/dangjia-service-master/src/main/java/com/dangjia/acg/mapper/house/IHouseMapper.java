@@ -66,4 +66,7 @@ public interface IHouseMapper extends Mapper<House> {
 
     List<House> getRecommended(@Param("latitude")  String latitude,@Param("longitude") String longitude, @Param("limit") Integer limit);
 
+
+    House queryPromotionListHouse(@Param("memberId") String memberId);
+
 }
