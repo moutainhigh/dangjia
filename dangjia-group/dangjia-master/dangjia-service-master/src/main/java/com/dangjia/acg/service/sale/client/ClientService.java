@@ -297,6 +297,7 @@ public class ClientService {
                 clue.setDataStatus(0);
                 clue.setPhaseStatus(0);
                 clue.setTimeSequencing(clue.getCreateDate());
+                clue.setBranchUser(0);
                 clueMapper.insert(clue);//记录为中台的线索
                 return ServerResponse.createBySuccessMessage("记录为中台的线索");
             }
@@ -327,6 +328,7 @@ public class ClientService {
                 clue.setDataStatus(0);
                 clue.setPhaseStatus(0);
                 clue.setTimeSequencing(clue.getCreateDate());
+                clue.setBranchUser(0);
                 clueMapper.insert(clue);//记录为中台的线索
                 return ServerResponse.createBySuccessMessage("小区楼栋未分配记录为中台线索列表");
             }
