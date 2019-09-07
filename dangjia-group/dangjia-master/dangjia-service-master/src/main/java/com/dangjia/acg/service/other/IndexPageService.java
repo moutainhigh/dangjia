@@ -125,11 +125,11 @@ public class IndexPageService {
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            if (villageId != null && villageId.contains("#")) {
-                villageId = villageId.replaceAll("#", "");
-            }else{
-                villageId=null;
-            }
+//            if (villageId != null && villageId.contains("#")) {
+//                villageId = villageId.replaceAll("#", "");
+//            }else{
+//                villageId=null;
+//            }
             List<House> houseList = iHouseMapper.getSameLayout(cityId, villageId, minSquare, maxSquare, houseType);
             if (houseList.size() == 0) {//根据条件查询所选小区总价最少的房子
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无数据");
