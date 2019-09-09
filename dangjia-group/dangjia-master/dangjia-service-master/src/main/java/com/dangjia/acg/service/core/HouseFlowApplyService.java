@@ -211,10 +211,10 @@ public class HouseFlowApplyService {
                 //设置保险时间
                 WorkerTypeSafeOrder wtso = workerTypeSafeOrderMapper.getByWorkerTypeId(hwo.getWorkerTypeId(), hwo.getHouseId());
 
-                //超过免费要货次数,收取工匠运费
-                extraOrderSplitFare(hwo);
-                //收取工匠退货运费
-                extraMendOrderFare(hwo);
+//                //超过免费要货次数,收取工匠运费
+//                extraOrderSplitFare(hwo);
+//                //收取工匠退货运费
+//                extraMendOrderFare(hwo);
                 //临时代码-补充未生成的质保卡
                 if (wtso == null) {//默认生成一条
                     //该工钟所有保险
@@ -963,7 +963,7 @@ public class HouseFlowApplyService {
             memberMapper.updateByPrimaryKeySelective(worker);
 
             //超过免费要货次数,收取管家运费
-            extraOrderSplitFare(hwo);
+//            extraOrderSplitFare(hwo);
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             e.printStackTrace();

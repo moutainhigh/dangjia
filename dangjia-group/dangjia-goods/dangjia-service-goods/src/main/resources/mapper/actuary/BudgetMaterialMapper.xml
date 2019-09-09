@@ -99,22 +99,19 @@
 	<!--精算分类材料总价(支付和未支付)-->
 	<select id="getCategoryAllPrice" resultType="java.lang.Double">
 	    select
-		    IFNULL(sum(p.price * bm.convert_count),0)
-		from dj_basics_product p,dj_actuary_budget_material bm
+		    IFNULL(sum(bm.price * bm.convert_count),0)
+		from dj_actuary_budget_material bm
 		where
-	        p.id = bm.product_id
-	    and bm.house_id = #{houseId}
+	        bm.house_id = #{houseId}
 	    and bm.category_id =#{categoryId}
 	    and bm.delete_state in (0,2,3,4)
 	</select>
 	<!--房子材料服务总价-->
 	<select id="getHouseCaiPrice" resultType="java.lang.Double">
 		select
-		    IFNULL(sum(p.price * bm.convert_count),0)
-		from dj_basics_product p,dj_actuary_budget_material bm
-		where
-	        p.id = bm.product_id
-	    and bm.house_id = #{houseId}
+		    IFNULL(sum(bm.price * bm.convert_count),0)
+		from dj_actuary_budget_material bm
+		where  bm.house_id = #{houseId}
 	    and bm.delete_state in (0,2,3,4)
 	</select>
 	<!--查询精算分类-->
@@ -160,11 +157,10 @@
 	<!--未付款工种服务总价-->
 	<select id="nonPaymentSer" resultType="java.lang.Double">
 		select
-		    IFNULL(sum(p.price * bm.convert_count),0)
-		from dj_basics_product p,dj_actuary_budget_material bm
+		    IFNULL(sum(bm.price * bm.convert_count),0)
+		from dj_actuary_budget_material bm
 		where
-	        p.id = bm.product_id
-	    and bm.house_id = #{houseId}
+	        bm.house_id = #{houseId}
 	    and bm.worker_type_id = #{workerTypeId}
 	    and bm.delete_state in (0,2)
 	    and bm.steta = 1
@@ -174,11 +170,10 @@
 	<!--支付时工种服务总价-->
 	<select id="getBudgetSerPrice" resultType="java.lang.Double">
 		select
-		    IFNULL(sum(p.price * bm.convert_count),0)
-		from dj_basics_product p,dj_actuary_budget_material bm
+		    IFNULL(sum(bm.price * bm.convert_count),0)
+		from dj_actuary_budget_material bm
 		where
-	        p.id = bm.product_id
-	    and bm.house_id = #{houseId}
+	         bm.house_id = #{houseId}
 	    and bm.worker_type_id = #{workerTypeId}
 	    and bm.delete_state = 0
 	    and bm.steta = 1
@@ -187,11 +182,10 @@
 	<!--支付时未选择服务总价-->
 	<select id="getNotSerPrice" resultType="java.lang.Double">
 		select
-		    IFNULL(sum(p.price * bm.convert_count),0)
-		from dj_basics_product p,dj_actuary_budget_material bm
+		    IFNULL(sum(bm.price * bm.convert_count),0)
+		from dj_actuary_budget_material bm
 		where
-	        p.id = bm.product_id
-	    and bm.house_id = #{houseId}
+	        bm.house_id = #{houseId}
 	    and bm.worker_type_id = #{workerTypeId}
 	    and bm.delete_state = 2
 	    and bm.steta = 1
@@ -202,11 +196,10 @@
 	<!--未付款材料总价-->
 	<select id="nonPaymentCai" resultType="java.lang.Double">
 		select
-		    IFNULL(sum(p.price * bm.convert_count),0)
-		from dj_basics_product p,dj_actuary_budget_material bm
+		    IFNULL(sum(bm.price * bm.convert_count),0)
+		from dj_actuary_budget_material bm
 		where
-	        p.id = bm.product_id
-	    and bm.house_id = #{houseId}
+	        bm.house_id = #{houseId}
 	    and bm.worker_type_id = #{workerTypeId}
 	    and bm.delete_state in (0, 2)
 	    and bm.steta = 1
@@ -216,11 +209,10 @@
 	<!--支付时工种材料总价-->
 	<select id="getBudgetCaiPrice" resultType="java.lang.Double">
 		select
-		    IFNULL(sum(p.price * bm.convert_count),0)
-		from dj_basics_product p,dj_actuary_budget_material bm
+		    IFNULL(sum(bm.price * bm.convert_count),0)
+		from dj_actuary_budget_material bm
 		where
-	        p.id = bm.product_id
-	    and bm.house_id = #{houseId}
+	        bm.house_id = #{houseId}
 	    and bm.worker_type_id = #{workerTypeId}
 	    and bm.delete_state in (0, 4)
 	    and bm.steta = 1
@@ -230,11 +222,10 @@
 	<!--支付时未选择工种材料总价-->
 	<select id="getNotCaiPrice" resultType="java.lang.Double">
 		select
-		    IFNULL(sum(p.price * bm.convert_count),0)
-		from dj_basics_product p,dj_actuary_budget_material bm
+		    IFNULL(sum(bm.price * bm.convert_count),0)
+		from dj_actuary_budget_material bm
 		where
-	        p.id = bm.product_id
-	    and bm.house_id = #{houseId}
+	        bm.house_id = #{houseId}
 	    and bm.worker_type_id = #{workerTypeId}
 	    and bm.delete_state = 2
 	    and bm.steta = 1
@@ -358,10 +349,9 @@
 
 	<!--根据houseFlow查询未支付实时精算价格-->
 	<select id="getAbmCasualByHfId" resultType="java.lang.Double">
-		select sum(p.price * abm.shop_count)
-		from dj_basics_product p,dj_actuary_budget_material abm
-		WHERE  p.id = abm.product_id
-		and abm.delete_state!=1
+		select sum(abm.price * abm.shop_count)
+		from dj_actuary_budget_material abm
+		WHERE  abm.delete_state!=1
 		and abm.steta=1
         and abm.house_flow_id=#{houseFlowId}
 	</select>

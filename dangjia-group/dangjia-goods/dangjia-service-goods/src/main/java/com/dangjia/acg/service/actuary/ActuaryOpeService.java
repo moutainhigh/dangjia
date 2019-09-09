@@ -1,6 +1,6 @@
 package com.dangjia.acg.service.actuary;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.app.house.HouseAPI;
@@ -21,7 +21,6 @@ import com.dangjia.acg.modle.attribute.GoodsCategory;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.util.JdbcContextHolder;
-import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -96,6 +95,7 @@ public class ActuaryOpeService {
             }
             budgetDTO.setBudgetItemDTOList(budgetItemDTOList);
         } else {
+            JSONArray jsonArray=queryWorkerType();
             budgetDTO.setWorkerPrice(budgetWorkerMapper.getHouseWorkerPrice(houseId, null));
             budgetDTO.setCaiPrice(0.0);
             String[] categoryIdArr = idArr.split(",");
@@ -114,7 +114,7 @@ public class ActuaryOpeService {
                 List<GoodsItemDTO> goodsItemDTOList = new ArrayList<>();
                 for (BudgetMaterial budgetMaterial : budgetMaterialList) {
                     GoodsItemDTO goodsItemDTO = new GoodsItemDTO();
-                    WorkerType workerType = workerTypeAPI.queryWorkerType(budgetMaterial.getWorkerTypeId());
+                    WorkerType workerType = getWorkerTypeId(jsonArray,budgetMaterial.getWorkerTypeId());
                     if (workerType == null) {
                         continue;
                     }
@@ -146,9 +146,10 @@ public class ActuaryOpeService {
         try {
             List<Map<String, Object>> mapList = new ArrayList<>();
             if (type == 1) {
+                JSONArray jsonArray=queryWorkerType();
                 List<String> workerTypeIdList = budgetWorkerMapper.workerTypeList(houseId);
                 for (String workerTypeId : workerTypeIdList) {
-                    WorkerType workerType = workerTypeAPI.queryWorkerType(workerTypeId);
+                    WorkerType workerType = getWorkerTypeId(jsonArray,workerTypeId);
                     Map<String, Object> map = new HashMap<>();
                     map.put("id", workerType.getId());
                     map.put("name", workerType.getName());
@@ -177,11 +178,12 @@ public class ActuaryOpeService {
      */
     public List<BudgetItemDTO> getHouseWorkerInfo(String houseId, String deleteState, String address) {
         List<String> workerTypeIdList = budgetWorkerMapper.workerTypeList(houseId);
+        JSONArray jsonArray=queryWorkerType();
         List<BudgetItemDTO> budgetItemDTOList = new ArrayList<>();
         List<BudgetWorker> budgetWorkerList = budgetWorkerMapper.getTypeAllList(houseId, deleteState, null);
         for (String workerTypeId : workerTypeIdList) {
             BudgetItemDTO budgetItemDTO = new BudgetItemDTO();
-            WorkerType workerType = workerTypeAPI.queryWorkerType(workerTypeId);
+            WorkerType workerType = getWorkerTypeId(jsonArray,workerTypeId);
             budgetItemDTO.setRowImage(address + workerType.getImage());
             budgetItemDTO.setRowName(workerType.getName());
             Double rowPrice = budgetWorkerMapper.getTypeAllPrice(houseId, deleteState, workerTypeId);
@@ -218,6 +220,26 @@ public class ActuaryOpeService {
         return budgetWorkerMapper.getHouseWorkerPrice(houseId, deleteState);
     }
 
+    private JSONArray queryWorkerType(){
+        ServerResponse serverResponse = workerTypeAPI.getWorkerTypeList(-1);
+        JSONArray jsonArray = null;
+        if (serverResponse.isSuccess()) {
+            jsonArray = (JSONArray) serverResponse.getResultObj();
+        }
+        return jsonArray;
+    }
+    private WorkerType getWorkerTypeId(JSONArray jsonArray ,String workerTypeId){
+        WorkerType workerType=null;
+        for (int i = 0; i < jsonArray.size(); i++) {
+            JSONObject job = jsonArray.getJSONObject(i);
+            WorkerType jobT = job.toJavaObject(WorkerType.class);
+            if(jobT.getId().equals(workerTypeId)){
+                workerType=jobT;
+                break;
+            }
+        }
+        return workerType;
+    }
     /**
      * 精算详情
      * type: 1人工 2材料包工包料
@@ -227,6 +249,7 @@ public class ActuaryOpeService {
             //切换数据源
             House house = houseAPI.getHouseById(houseId);
             JdbcContextHolder.putDataSource(house.getCityId());
+
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             BudgetDTO budgetDTO = new BudgetDTO();
             budgetDTO.setCustomEdit(house.getCustomEdit());
@@ -237,6 +260,7 @@ public class ActuaryOpeService {
                 List<BudgetItemDTO> budgetItemDTOList = getHouseWorkerInfo(houseId, null, address);
                 budgetDTO.setBudgetItemDTOList(budgetItemDTOList);
             } else if (type == 2) {//材料
+                JSONArray jsonArray=queryWorkerType();
                 List<String> categoryIdList = budgetMaterialMapper.categoryIdList(houseId);
                 Map<String, BudgetItemDTO> maps = new HashMap<>();
                 List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.getCategoryAllList(houseId, null);
@@ -272,7 +296,7 @@ public class ActuaryOpeService {
                     for (BudgetMaterial budgetMaterial : budgetMaterialList) {
                         if (!categoryId.equals(budgetMaterial.getCategoryId())) continue;
                         GoodsItemDTO goodsItemDTO = new GoodsItemDTO();
-                        WorkerType workerType = workerTypeAPI.queryWorkerType(budgetMaterial.getWorkerTypeId());
+                        WorkerType workerType = getWorkerTypeId(jsonArray,budgetMaterial.getWorkerTypeId());
                         goodsItemDTO.setWorkerTypeName(workerType.getName());
                         goodsItemDTO.setGoodsImage(address + budgetMaterial.getImage());
                         if (budgetMaterial.getSteta() == 2) {//自购
