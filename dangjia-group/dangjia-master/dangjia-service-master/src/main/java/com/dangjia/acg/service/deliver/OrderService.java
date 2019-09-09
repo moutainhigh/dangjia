@@ -385,7 +385,7 @@ public class OrderService {
             }
             map.put("times", workerType.getSafeState());//要货次数
             Example example = new Example(OrderSplit.class);
-            example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andEqualTo(OrderSplit.WORKER_TYPE_ID, worker.getWorkerTypeId());
+            example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andEqualTo(OrderSplit.APPLY_STATUS, 2).andEqualTo(OrderSplit.WORKER_TYPE_ID, worker.getWorkerTypeId());
             int surplus = orderSplitMapper.selectCountByExample(example);
             map.put("surplus", workerType.getSafeState() - surplus);
 
