@@ -25,10 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * author: Ronalcheng
@@ -261,23 +258,10 @@ public class ActuaryOpeService {
                 budgetDTO.setBudgetItemDTOList(budgetItemDTOList);
             } else if (type == 2) {//材料
                 JSONArray jsonArray=queryWorkerType();
-                List<String> categoryIdList = budgetMaterialMapper.categoryIdList(houseId);
+                List<GoodsCategory> categoryIdList = budgetMaterialMapper.queryActuaryCategoryPrice(houseId);
                 Map<String, BudgetItemDTO> maps = new HashMap<>();
                 List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.getCategoryAllList(houseId, null);
-                for (String categoryId : categoryIdList) {
-                    //获取低级类别
-                    GoodsCategory goodsCategoryNext = goodsCategoryMapper.selectByPrimaryKey(categoryId);
-                    if (goodsCategoryNext == null) {
-                        continue;
-                    }
-                    //获取顶级类别
-                    GoodsCategory goodsCategoryParentTop = goodsCategoryMapper.selectByPrimaryKey(goodsCategoryNext.getParentTop());
-                    GoodsCategory goodsCategory;
-                    if (goodsCategoryParentTop == null) {
-                        goodsCategory = goodsCategoryNext;
-                    } else {
-                        goodsCategory = goodsCategoryParentTop;
-                    }
+                for (GoodsCategory goodsCategory : categoryIdList) {
                     //重临时缓存maps中取出BudgetItemDTO
                     BudgetItemDTO budgetItemDTO = maps.get(goodsCategory.getId());
                     if (budgetItemDTO == null) {
@@ -287,14 +271,13 @@ public class ActuaryOpeService {
                         budgetItemDTO.setRowName(goodsCategory.getName());
                     }
                     //获取价格
-                    Double rowPrice = budgetMaterialMapper.getCategoryAllPrice(houseId, categoryId);
-                    Double rowPriceOld = budgetItemDTO.getRowPrice();
-                    if (rowPriceOld == null) rowPriceOld = 0.0;
-                    if (rowPrice == null) rowPrice = 0.0;
                     //将价格每次都相加
-                    budgetItemDTO.setRowPrice(rowPriceOld + rowPrice);
+                    budgetItemDTO.setRowPrice(goodsCategory.getRowPrice());
                     for (BudgetMaterial budgetMaterial : budgetMaterialList) {
-                        if (!categoryId.equals(budgetMaterial.getCategoryId())) continue;
+                        if (CommonUtil.isEmpty(goodsCategory.getCategoryIds()) ||
+                                !Arrays.asList(goodsCategory.getCategoryIds().split(",")).contains(budgetMaterial.getCategoryId())) {
+                            continue;
+                        }
                         GoodsItemDTO goodsItemDTO = new GoodsItemDTO();
                         WorkerType workerType = getWorkerTypeId(jsonArray,budgetMaterial.getWorkerTypeId());
                         goodsItemDTO.setWorkerTypeName(workerType.getName());

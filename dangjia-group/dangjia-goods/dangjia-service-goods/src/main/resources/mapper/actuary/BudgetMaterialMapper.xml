@@ -123,7 +123,30 @@
  		and bm.category_id !=''
  		and bm.category_id is not null;
 	</select>
-
+	<!--查询精算分类价格-->
+	<select id="queryActuaryCategoryPrice" resultType="com.dangjia.acg.modle.attribute.GoodsCategory">
+		SELECT
+			topc.id,
+			topc.name,
+			topc.parent_id as parentId,
+			topc.parent_top as parentTop,
+			topc.image,
+			topc.create_date as createDate,
+			topc.modify_date as modifyDate, GROUP_CONCAT(c.id) categoryIds,
+			IFNULL(
+				sum(bm.price * bm.convert_count),
+				0
+			) rowPrice
+		FROM
+			dj_basics_goods_category topc
+		INNER JOIN dj_basics_goods_category c ON c.parent_top = topc.id
+		INNER JOIN dj_actuary_budget_material bm ON c.id = bm.category_id
+		WHERE
+			 bm.house_id = #{houseId}
+		AND bm.delete_state IN (0, 2, 3, 4)
+		GROUP BY
+			topc.id
+	</select>
 	<!-- 模糊查询 -->
 	<select id="repairBudgetMaterial" resultType="com.dangjia.acg.modle.actuary.BudgetMaterial">
 		SELECT
