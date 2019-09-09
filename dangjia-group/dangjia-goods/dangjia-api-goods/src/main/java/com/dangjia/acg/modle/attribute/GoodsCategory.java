@@ -10,6 +10,9 @@ import lombok.experimental.FieldNameConstants;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+import java.math.BigDecimal;
+
 /**
    * @类 名： GoodsCategory
    * @功能描述： 商品/服务的类别
@@ -39,4 +42,10 @@ public class GoodsCategory extends BaseEntity {
     @Desc(value = "顺序")
     @ApiModelProperty("顺序")
     private Integer sort;
+
+    //业主
+    @Transient
+    private String categoryIds;
+    @Transient
+    private Double rowPrice;
 }

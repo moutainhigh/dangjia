@@ -2,6 +2,7 @@ package com.dangjia.acg.mapper.actuary;
 
 import com.dangjia.acg.dto.actuary.BudgetStageCostDTO;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
+import com.dangjia.acg.modle.attribute.GoodsCategory;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
@@ -32,6 +33,7 @@ public interface IBudgetMaterialMapper extends Mapper<BudgetMaterial> {
 	Double getHouseCaiPrice(@Param("houseId")String houseId);
 	List<String> categoryIdList(@Param("houseId")String houseId);
 
+	List<GoodsCategory> queryActuaryCategoryPrice(@Param("houseId")String houseId);
 	/**查询精算内商品*/
 	List<BudgetMaterial> repairBudgetMaterial(@Param("workerTypeId")String workerTypeId,@Param("houseId")String houseId,
 											  @Param("categoryId")String categoryId,@Param("productName")String productName,@Param("productType")String productType);

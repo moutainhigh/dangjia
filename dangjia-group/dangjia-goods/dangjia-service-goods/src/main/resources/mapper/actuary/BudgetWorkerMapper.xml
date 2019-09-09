@@ -50,10 +50,9 @@
 	<!--精算工种人工总价(支付和未支付)-->
 	<select id="getTypeAllPrice" resultType="java.lang.Double">
 		SELECT
-			IFNULL(sum(wg.price * bw.shop_count),0) workerPrice
+			IFNULL(sum(bw.price * bw.shop_count),0) workerPrice
 		FROM
-			dj_basics_worker_goods wg
-		INNER JOIN dj_actuary_budget_worker bw ON wg.id = bw.worker_goods_id
+		dj_actuary_budget_worker bw
 		WHERE  bw.house_id = #{houseId}
 		<if test = "deleteState!=null and deleteState!=''">
 			and bw.delete_state = #{deleteState}
@@ -67,10 +66,8 @@
 	<!--房子人工总价-->
 	<select id="getHouseWorkerPrice" resultType="java.lang.Double">
 		SELECT
-			IFNULL(sum(wg.price * bw.shop_count),0) workerPrice
-		FROM
-			dj_basics_worker_goods wg
-		INNER JOIN dj_actuary_budget_worker bw ON wg.id = bw.worker_goods_id
+			IFNULL(sum(bw.price * bw.shop_count),0) workerPrice
+		FROM dj_actuary_budget_worker bw
 		WHERE  bw.house_id = #{houseId}
 		<if test = "deleteState!=null and deleteState!=''">
 			and bw.delete_state = #{deleteState}
@@ -141,10 +138,9 @@
 	<!--支付时工种人工总价-->
 	<select id="getBudgetWorkerPrice" resultType="java.lang.Double">
 		SELECT
-			IFNULL(sum(wg.price * bw.shop_count),0) workerPrice
+			IFNULL(sum(bw.price * bw.shop_count),0) workerPrice
 		FROM
-			dj_basics_worker_goods wg
-		INNER JOIN dj_actuary_budget_worker bw ON wg.id = bw.worker_goods_id
+			dj_actuary_budget_worker bw
 		WHERE  bw.house_id = #{houseId}
 	    and bw.delete_state = 0
 	    and bw.worker_type_id = #{workerTypeId}
@@ -217,13 +213,11 @@
 	<!-- 根据房子id和工序id查询人工精算总价 -->
 	<select id="getWorkerTotalPrice" resultType="java.util.Map">
 		SELECT
-			 IFNULL(sum(wg.price * abw.shop_count),0) AS totalPrice
+			 IFNULL(sum(abw.price * abw.shop_count),0) AS totalPrice
 		FROM
-			dj_basics_worker_goods wg,
 			dj_actuary_budget_worker abw
 		WHERE
-			wg.id = abw.worker_goods_id
-		AND abw.house_id = #{houseId}
+			abw.house_id = #{houseId}
 		AND abw.delete_state != 1
 		AND abw.worker_type_id = #{workerTypeId}
     </select>
