@@ -28,7 +28,7 @@ public class TokenUtil {
             accessToken.setUserId(user.getId());
         accessToken.setMemberType(0);
         //设置系统token
-        accessToken.setUserToken(getRandom());
+        accessToken.setUserToken(getRandom()+member.getId());
         // 设置时间戳
         accessToken.setTimestamp(getTimeStamp());
         member.setPassword(null);
