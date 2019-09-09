@@ -537,9 +537,9 @@ public class HouseFlowApplyService {
         if(deductPrice.doubleValue()>0) {
             WorkerDetail workerDetail = new WorkerDetail();
             if (applyType == 2) {//整体完工申请
-                workerDetail.setName("评分扣钱，评分为:" + star + "");
+                workerDetail.setName("整体完工申请-评分扣钱");
             } else if (applyType == 1) {
-                workerDetail.setName("评分扣钱，评分为:" + star + "");
+                workerDetail.setName("阶段完工申请-评分扣钱");
             }
             workerDetail.setWorkerId(worker.getId());
             workerDetail.setWorkerName(worker.getName());
