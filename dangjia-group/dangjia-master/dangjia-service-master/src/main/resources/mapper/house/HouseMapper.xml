@@ -559,7 +559,7 @@
         h.is_select as isSelect,
         (
         case
-        when (f.supervisor_start = 1 or f.supervisor_start = 0) and h.visit_state !=2 and h.visit_state !=3 and h.visit_state !=4 and h.visit_state !=5 and
+        when (f.supervisor_start = 1 or f.supervisor_start = 0 ) and h.visit_state !=2 and h.visit_state !=3 and h.visit_state !=4 and h.visit_state !=5 and
         h.pause=0 then f.supervisor_start
         when h.visit_state = 3 then 3
         when h.visit_state = 4 then 4
@@ -573,26 +573,34 @@
         FROM
         dj_house h
         INNER JOIN (
-        SELECT f.house_id,f.supervisor_start ,m.`name` supName,m.mobile supMobile
-        FROM dj_core_house_flow f
-        INNER JOIN dj_member m ON f.worker_id = m.id
-        WHERE f.worker_type=3 and f.work_type > 1
+            SELECT f.house_id,f.supervisor_start ,m.`name` supName,m.mobile supMobile
+            FROM dj_core_house_flow f
+            INNER JOIN dj_member m ON f.worker_id = m.id
+            WHERE f.worker_type=3 and f.work_type > 1
         ) f ON h.id=f.house_id
         INNER JOIN dj_member m ON h.member_id = m.id
-        INNER JOIN (
+        <if test="(visitState &lt;= 0 ) and !(startDate!=null and endDate!=null and startDate!='' and endDate!='')">
+            LEFT JOIN (
+                SELECT po.house_id,MIN(po.create_date) create_date from dj_core_house_flow_apply po  where po.apply_type = 4
+                GROUP BY po.house_id
+            ) o on o.house_id=h.id
+        </if>
+        <if test="(visitState &gt; 0 ) or (startDate!=null and endDate!=null and startDate!='' and endDate!='')">
+            INNER JOIN (
             SELECT po.house_id,MIN(po.create_date) create_date from dj_core_house_flow_apply po  where po.apply_type = 4
             GROUP BY po.house_id
-        ) o on o.house_id=h.id
+            ) o on o.house_id=h.id
+        </if>
         WHERE
         h.data_status =0
         <if test="cityKey!=null and cityKey!=''">
             AND FIND_IN_SET(h.city_id,#{cityKey})
         </if>
-        <if test="visitState==0 || visitState==1 || visitState==2">
-            and ((f.supervisor_start = #{visitState} and h.visit_state !=2 and h.visit_state !=3 and h.visit_state !=4 and h.visit_state !=5 and h.pause=0) or (h.visit_state = 2))
+        <if test="visitState==0 || visitState==1">
+            and f.supervisor_start = #{visitState} and h.visit_state !=2 and h.visit_state !=3 and h.visit_state !=4 and h.visit_state !=5 and h.pause=0
         </if>
-        <if test="visitState==3 || visitState==4 || visitState==5">
-            and h.visit_state  in(3,4,5)
+        <if test="visitState>=2">
+            and h.visit_state = #{visitState}
         </if>
         <if test="startDate!=null and endDate!=null and startDate!='' and endDate!=''">
             and o.create_date BETWEEN #{startDate} and #{endDate}

@@ -690,19 +690,22 @@ public class ComplainService {
         criteria.andCondition(" work_steta not IN(0,2,6)");
         List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example);
         for (HouseFlow houseFlow : houseFlows) {
-            Example example1 = new Example(HouseWorkerOrder.class);
             WorkerType workerType = iWorkerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
-            example1.createCriteria()
-                    .andEqualTo(HouseWorkerOrder.WORKER_ID, houseFlow.getWorkerId())
-                    .andEqualTo(HouseWorkerOrder.HOUSE_ID, houseFlow.getHouseId());
-            List<HouseWorkerOrder> houseWorkerOrderList = houseWorkerOrderMapper.selectByExample(example1);
-            BigDecimal haveMoney = houseWorkerOrderList.get(0).getHaveMoney();
-            BigDecimal workPrice = houseWorkerOrderList.get(0).getWorkPrice();
-            BigDecimal subtract = workPrice.subtract(haveMoney);
-            String workerId = houseWorkerOrderList.get(0).getWorkerId();
+            HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId());
+            BigDecimal workPrice = new BigDecimal(0);
+            BigDecimal haveMoney = new BigDecimal(0);
+            BigDecimal retentionMoney = new BigDecimal(0);
+            BigDecimal deductPrice = new BigDecimal(0);
+            if (hwo!=null) {
+                workPrice = hwo.getWorkPrice();//工钱
+                haveMoney = hwo.getHaveMoney();
+                retentionMoney = hwo.getRetentionMoney() == null ? new BigDecimal(0) : hwo.getRetentionMoney();//滞留金
+                deductPrice = hwo.getDeductPrice() == null ? new BigDecimal(0) : hwo.getDeductPrice();//评价积分扣除的钱
+            }
+            BigDecimal alsoMoney = new BigDecimal(workPrice.doubleValue() - haveMoney.doubleValue() - retentionMoney.doubleValue() - deductPrice.doubleValue());
             ComPlainStopDTO comPlainStopDTO = new ComPlainStopDTO();
-            comPlainStopDTO.setHaveMoney(subtract);
-            comPlainStopDTO.setWorkerId(workerId);
+            comPlainStopDTO.setHaveMoney(alsoMoney);
+            comPlainStopDTO.setWorkerId(hwo.getWorkerId());
             comPlainStopDTO.setWorkerTypeId(houseFlow.getWorkerTypeId());
             comPlainStopDTO.setWorkerTypeName(workerType.getName());
             comPlainStopDTOList.add(comPlainStopDTO);

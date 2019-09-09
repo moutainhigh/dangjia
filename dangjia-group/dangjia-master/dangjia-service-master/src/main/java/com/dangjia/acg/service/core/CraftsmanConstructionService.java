@@ -6,6 +6,7 @@ import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.ButtonListBean;
@@ -74,6 +75,7 @@ public class CraftsmanConstructionService {
 
     @Autowired
     private IInsuranceMapper insuranceMapper;
+
     /**
      * 获取施工页面
      *
@@ -427,14 +429,14 @@ public class CraftsmanConstructionService {
         List<Insurance> insurances = insuranceMapper.selectByExample(example);
 
         //保险服务剩余天数小于等于60天
-        Integer daynum=0;
-        if(insurances.size()>0){
-            daynum =DateUtil.daysofTwo(new Date(),insurances.get(0).getEndDate());
+        Integer daynum = 0;
+        if (insurances.size() > 0) {
+            daynum = DateUtil.daysofTwo(new Date(), insurances.get(0).getEndDate());
         }
-        Boolean isBX=true;
+        Boolean isBX = true;
         //工人未购买保险
-        if (hw.getWorkerType()>2&&((insurances.size()==0) || (insurances.size()>0&daynum<=60))) {
-            isBX=false;
+        if (hw.getWorkerType() > 2 && ((insurances.size() == 0) || (insurances.size() > 0 & daynum <= 60))) {
+            isBX = false;
         }
         bean.setWorkerType(1);//0:大管家；1：工匠；2：设计师；3：精算师
         bean.setHouseFlowId(hf.getId());
@@ -521,12 +523,12 @@ public class CraftsmanConstructionService {
             bean.setIfDisclose(2);
         }
         if (hf.getWorkType() == 3) {//如果是已抢单待支付。则提醒业主支付
-            if(isBX) {
+            if (isBX) {
                 promptList.add("请联系业主支付您的工匠费用");
-            }else {
-                Date d = DateUtil.addDateMinutes(hw.getCreateDate(),30);
+            } else {
+                Date d = DateUtil.addDateMinutes(hw.getCreateDate(), 30);
                 Date d2 = new Date();
-                promptList.add("剩余支付保险时间："+DateUtil.getDiffTime2(d.getTime() , d2.getTime())+",超过时间则自动放弃");
+                promptList.add("剩余支付保险时间：" + DateUtil.getDiffTime2(d.getTime(), d2.getTime()) + ",超过时间则自动放弃");
                 buttonList.add(Utils.getButton("购买保险", 9));
             }
             bean.setIfBackOut(0);//0可放弃；1：申请停工；2：已停工 3 审核中
@@ -772,6 +774,9 @@ public class CraftsmanConstructionService {
      * @return Member/ServerResponse
      */
     public Object getMember(String userToken) {
+        if (CommonUtil.isEmpty(userToken)) {
+            return ServerResponse.createbyUserTokenError();
+        }
         AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
         if (accessToken == null) {
             return ServerResponse.createbyUserTokenError();
@@ -784,6 +789,9 @@ public class CraftsmanConstructionService {
     }
 
     public Object getAccessToken(String userToken) {
+        if (CommonUtil.isEmpty(userToken)) {
+            return ServerResponse.createbyUserTokenError();
+        }
         AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
         if (accessToken == null) {
             return ServerResponse.createbyUserTokenError();

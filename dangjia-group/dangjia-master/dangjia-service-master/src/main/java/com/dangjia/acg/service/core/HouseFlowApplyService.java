@@ -211,9 +211,9 @@ public class HouseFlowApplyService {
                 //设置保险时间
                 WorkerTypeSafeOrder wtso = workerTypeSafeOrderMapper.getByWorkerTypeId(hwo.getWorkerTypeId(), hwo.getHouseId());
 
-                //超过免费要货次数,收取工匠运费
+//                //超过免费要货次数,收取工匠运费
 //                extraOrderSplitFare(hwo);
-                //收取工匠退货运费
+//                //收取工匠退货运费
 //                extraMendOrderFare(hwo);
                 //临时代码-补充未生成的质保卡
                 if (wtso == null) {//默认生成一条
@@ -449,7 +449,7 @@ public class HouseFlowApplyService {
         //查大管家被业主的评价
         Evaluate evaluate = evaluateMapper.getForCountMoney(houseFlowId, hfa.getApplyType(), hwo.getWorkerId());
 
-        int star;
+        double star;
         if (evaluate == null) {
             star = 0;
         } else {
@@ -482,6 +482,9 @@ public class HouseFlowApplyService {
 
         //钱包处理大管家的工钱
         Member worker = memberMapper.selectByPrimaryKey(hwo.getWorkerId());
+        //评分扣钱流水
+        deductFlow(worker, hwo, star, hfa.getApplyType(), deductPrice);
+
         WorkerType workerType = workerTypeMapper.selectByPrimaryKey(hfa.getWorkerTypeId());
         //管家押金处理
         HouseFlowApply houseFlowApply = new HouseFlowApply();
@@ -527,6 +530,30 @@ public class HouseFlowApplyService {
         memberMapper.updateByPrimaryKeySelective(worker);
     }
 
+    /**
+     * 记录评分扣钱流水
+     */
+    public void deductFlow(Member worker , HouseWorkerOrder hwo,Double star,Integer applyType, BigDecimal deductPrice) {
+        if(deductPrice.doubleValue()>0) {
+            WorkerDetail workerDetail = new WorkerDetail();
+            if (applyType == 2) {//整体完工申请
+                workerDetail.setName("整体完工申请-评分扣钱");
+            } else if (applyType == 1) {
+                workerDetail.setName("阶段完工申请-评分扣钱");
+            }
+            workerDetail.setWorkerId(worker.getId());
+            workerDetail.setWorkerName(worker.getName());
+            workerDetail.setHouseId(hwo.getHouseId());
+            workerDetail.setMoney(deductPrice);//实际支出
+            workerDetail.setState(3);//扣钱
+            workerDetail.setHaveMoney(hwo.getDeductPrice());
+            workerDetail.setDefinedWorkerId(hwo.getId());
+            workerDetail.setHouseWorkerOrderId(hwo.getId());
+            workerDetail.setApplyMoney(hwo.getDeductPrice());
+            workerDetail.setWalletMoney(deductPrice);
+            workerDetailMapper.insert(workerDetail);
+        }
+    }
     /**
      * 处理工人押金
      */
@@ -696,6 +723,11 @@ public class HouseFlowApplyService {
             hwo.setDeductPrice(hwo.getDeductPrice().add(deductPrice));
             hwo.setHaveMoney(hwo.getHaveMoney().add(applymoney));
             houseWorkerOrderMapper.updateByPrimaryKeySelective(hwo);
+
+
+            //评分扣钱流水
+            deductFlow(worker, hwo, star, hfa.getApplyType(), deductPrice);
+
             BigDecimal haveMoney = worker.getHaveMoney().add(applymoney);
             BigDecimal surplusMoney = worker.getSurplusMoney().add(applymoney);
             //记录流水
@@ -772,7 +804,7 @@ public class HouseFlowApplyService {
             //查大管家被业主的评价
             //查工匠被业主的评价
             Evaluate evaluate = evaluateMapper.getForCountMoney(hfa.getHouseFlowId(), hfa.getApplyType(), hfa.getWorkerId());
-            int star;
+            double star;
             if (evaluate == null) {
                 star = 0;
             } else {
@@ -921,7 +953,8 @@ public class HouseFlowApplyService {
                 }
             }
             houseWorkerOrderMapper.updateByPrimaryKeySelective(hwo);
-
+            //评分扣钱流水
+            deductFlow(worker, hwo, star, hfa.getApplyType(), deductPrice);
             //成交量加1
             if (worker.getVolume() == null) {
                 worker.setVolume(new BigDecimal(0.0));

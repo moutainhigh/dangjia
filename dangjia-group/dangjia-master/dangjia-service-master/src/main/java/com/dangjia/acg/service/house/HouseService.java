@@ -1798,6 +1798,7 @@ public class HouseService {
             }
         }
         house.setIsRobStats(0);
+        house.setSiteDisplay(0);
         house.setMemberId(member.getId());//用户id
         if (city != null)
             house.setCityName(city.getName());//城市名

@@ -3,7 +3,6 @@ package com.dangjia.acg.service.member;
 import com.dangjia.acg.api.MessageAPI;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.sup.SupplierProductAPI;
-import com.dangjia.acg.auth.config.RedisSessionDAO;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
@@ -545,7 +544,7 @@ public class MemberService {
                 (CommonUtil.isEmpty(name)
                         || (CommonUtil.isEmpty(user.getIdcaoda()) && CommonUtil.isEmpty(idcaoda))
                         || (CommonUtil.isEmpty(user.getIdcaodb()) && CommonUtil.isEmpty(idcaodb))
-                        || (CommonUtil.isEmpty(user.getIdcaodall()) && CommonUtil.isEmpty(idcaodall))
+//                        || (CommonUtil.isEmpty(user.getIdcaodall()) && CommonUtil.isEmpty(idcaodall))
                         || CommonUtil.isEmpty(idnumber))) {
             return ServerResponse.createByErrorMessage("请确认您的资料是否全部填写？");
         }
