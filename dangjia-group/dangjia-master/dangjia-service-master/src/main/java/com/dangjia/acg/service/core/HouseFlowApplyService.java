@@ -879,7 +879,7 @@ public class HouseFlowApplyService {
                     .andEqualTo(Clue.DATA_STATUS, 0);
             List<Clue> clueList = clueMapper.selectByExample(ex);
             ResidentialBuilding residentialBuilding = residentialBuildingMapper.selectSingleResidentialBuilding(null, house.getBuilding(), house.getVillageId());
-            if (null != residentialBuilding) {   //判断楼栋是否存在
+            if (clueList.size()>0&&null != residentialBuilding) {   //判断楼栋是否存在
                 ResidentialRange residentialRange = residentialRangeMapper.selectSingleResidentialRange(residentialBuilding.getId());
                 if (null != residentialRange) {    //楼栋是否分配销售
                     if(!residentialRange.getUserId().equals(clueList.get(0).getCusService())){
