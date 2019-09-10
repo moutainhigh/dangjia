@@ -745,16 +745,14 @@ public class HouseService {
                                     .andEqualTo(Clue.DATA_STATUS, 0)
                                     .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
                             List<Clue> djAlreadyRobSingle1 = clueMapper.selectByExample(example2);
-                            if (djAlreadyRobSingle1.isEmpty()) {
-                                logger.info("线索id为空===================" + djAlreadyRobSingle1.get(0).getId());
+                            if (djAlreadyRobSingle1.size()>0) {
+                                //消息推送
+                                MainUser user = userMapper.selectByPrimaryKey(userId);
+                                String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+                                configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "开工提醒",
+                                        "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url
+                                                + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle1.get(0).getId(), 1, "4"));
                             }
-                            //消息推送
-                            MainUser user = userMapper.selectByPrimaryKey(userId);
-                            String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
-                            configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "开工提醒",
-                                    "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url
-                                            + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle1.get(0).getId(), 1, "4"));
-
                             //第二个销售推送消息  获取线索ID
                             Example example3 = new Example(Clue.class);
                             example3.createCriteria()
@@ -762,16 +760,15 @@ public class HouseService {
                                     .andEqualTo(Clue.DATA_STATUS, 0)
                                     .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
                             List<Clue> djAlreadyRobSingle2 = clueMapper.selectByExample(example3);
-                            if (djAlreadyRobSingle2.isEmpty()) {
-                                logger.info("线索id为空===================" + djAlreadyRobSingle2.get(0).getId());
+                            if (djAlreadyRobSingle2.size()>0) {
+                                //消息推送
+                                MainUser user1 = userMapper.selectByPrimaryKey(userId2);
+                                String url1 = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+                                configMessageService.addConfigMessage(AppType.SALE, user1.getMemberId(), "开工提醒",
+                                        "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url1
+                                                + Utils.getCustomerDetails(customer.getMemberId(),
+                                                djAlreadyRobSingle2.get(0).getId(), 1, "4"));
                             }
-                            //消息推送
-                            MainUser user1 = userMapper.selectByPrimaryKey(userId2);
-                            String url1 = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
-                            configMessageService.addConfigMessage(AppType.SALE, user1.getMemberId(), "开工提醒",
-                                    "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url1
-                                            + Utils.getCustomerDetails(customer.getMemberId(),
-                                            djAlreadyRobSingle2.get(0).getId(), 1, "4"));
                         } else {
 
                             //订单数量 在配置范围内时 处理
@@ -815,16 +812,14 @@ public class HouseService {
                                             .andEqualTo(Clue.DATA_STATUS, 0)
                                             .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
                                     List<Clue> djAlreadyRobSingle1 = clueMapper.selectByExample(example2);
-                                    if (djAlreadyRobSingle1.isEmpty()) {
-                                        logger.info("线索id为空===================" + djAlreadyRobSingle1.get(0).getId());
+                                    if (djAlreadyRobSingle1.size()>0) {
+                                        //消息推送
+                                        MainUser user = userMapper.selectByPrimaryKey(userId);
+                                        String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+                                        configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "开工提醒",
+                                                "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url
+                                                        + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle1.get(0).getId(), 1, "4"));
                                     }
-                                    //消息推送
-                                    MainUser user = userMapper.selectByPrimaryKey(userId);
-                                    String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
-                                    configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "开工提醒",
-                                            "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url
-                                                    + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle1.get(0).getId(), 1, "4"));
-
 
                                     //第二个销售推送消息  获取线索ID
                                     Example example3 = new Example(Clue.class);
@@ -833,15 +828,14 @@ public class HouseService {
                                             .andEqualTo(Clue.DATA_STATUS, 0)
                                             .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
                                     List<Clue> djAlreadyRobSingle2 = clueMapper.selectByExample(example3);
-                                    if (djAlreadyRobSingle2.isEmpty()) {
-                                        logger.info("线索id为空===================" + djAlreadyRobSingle2.get(0).getId());
+                                    if (djAlreadyRobSingle2.size()>0) {
+                                        //消息推送
+                                        MainUser user1 = userMapper.selectByPrimaryKey(userId2);
+                                        String url1 = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+                                        configMessageService.addConfigMessage(AppType.SALE, user1.getMemberId(), "开工提醒",
+                                                "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url1
+                                                        + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle2.get(0).getId(), 1, "4"));
                                     }
-                                    //消息推送
-                                    MainUser user1 = userMapper.selectByPrimaryKey(userId2);
-                                    String url1 = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
-                                    configMessageService.addConfigMessage(AppType.SALE, user1.getMemberId(), "开工提醒",
-                                            "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url1
-                                                    + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle2.get(0).getId(), 1, "4"));
                                 }
                             }
                         }
@@ -936,17 +930,14 @@ public class HouseService {
                     .andEqualTo(Clue.DATA_STATUS, 0)
                     .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
             List<Clue> djAlreadyRobSingle1 = clueMapper.selectByExample(example2);
-            if (djAlreadyRobSingle1.isEmpty()) {
-                logger.info("线索id为空===================" + djAlreadyRobSingle1.get(0).getId());
+            if (djAlreadyRobSingle1.size()>0) {
+                //消息推送
+                MainUser user = userMapper.selectByPrimaryKey(userId);
+                String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+                configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "开工提醒",
+                        "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url
+                                + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle1.get(0).getId(), 1, "4"));
             }
-            //消息推送
-            MainUser user = userMapper.selectByPrimaryKey(userId);
-            String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
-            configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "开工提醒",
-                    "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url
-                            + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle1.get(0).getId(), 1, "4"));
-
-
             //第二个销售推送消息  获取线索ID
             if (flag == 1) {
                 //跨域下单推送消息
@@ -964,21 +955,6 @@ public class HouseService {
 
             }
 
-//            Example example3 = new Example(Clue.class);
-//            example3.createCriteria()
-//                    .andEqualTo(Clue.CUS_SERVICE, userId2)
-//                    .andEqualTo(Clue.DATA_STATUS, 0)
-//                    .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
-//            List<Clue> djAlreadyRobSingle2 = clueMapper.selectByExample(example3);
-//            if(!djAlreadyRobSingle2.isEmpty()){
-//                logger.info("线索id为空==================="+ djAlreadyRobSingle2.get(0).getId());
-//                //消息推送
-//                MainUser user1 = userMapper.selectByPrimaryKey(userId2);
-//                String url1 = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
-//                configMessageService.addConfigMessage(AppType.SALE, user1.getMemberId(), "开工提醒",
-//                        "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url1
-//                                + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle2.get(0).getId(), 1, "4"));
-//            }
         } else {
             //订单数量 在配置范围内时 处理
             logger.info("订单数量 在配置范围内时 处理===================" + userId);
@@ -1015,15 +991,15 @@ public class HouseService {
                             .andEqualTo(Clue.DATA_STATUS, 0)
                             .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
                     List<Clue> djAlreadyRobSingle1 = clueMapper.selectByExample(example2);
-                    if (djAlreadyRobSingle1.isEmpty()) {
-                        logger.info("线索id为空===================" + djAlreadyRobSingle1.get(0).getId());
+                    if (djAlreadyRobSingle1.size()>0) {
+                        //消息推送
+                        MainUser user = userMapper.selectByPrimaryKey(userId);
+                        String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+                        configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "开工提醒",
+                                "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url
+                                        + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle1.get(0).getId(), 1, "4"));
                     }
-                    //消息推送
-                    MainUser user = userMapper.selectByPrimaryKey(userId);
-                    String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
-                    configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "开工提醒",
-                            "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url
-                                    + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle1.get(0).getId(), 1, "4"));
+
 
                     //第二个销售推送消息  获取线索ID
                     if (flag == 1) {
@@ -1040,26 +1016,7 @@ public class HouseService {
                         logger.info("销售所选楼栋是否在自己楼栋范围内推送消息===================" + us.getMemberId());
                         configMessageService.addConfigMessage(AppType.SALE, us.getMemberId(), "开工提醒",
                                 "您有一个归于您的客户【" + house.getHouseName() + "】已确认开工，请及时查看提成。", 6);
-
                     }
-
-
-//                    Example example3 = new Example(Clue.class);
-//                    example3.createCriteria()
-//                            .andEqualTo(Clue.CUS_SERVICE, userId2)
-//                            .andEqualTo(Clue.DATA_STATUS, 0)
-//                            .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
-//                    List<Clue> djAlreadyRobSingle2 = clueMapper.selectByExample(example3);
-//                    if(!djAlreadyRobSingle2.isEmpty()){
-//                        logger.info("线索id为空==================="+ djAlreadyRobSingle2.get(0).getId());
-//                        //消息推送
-//                        MainUser user1 = userMapper.selectByPrimaryKey(userId2);
-//                        String url1 = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
-//                        configMessageService.addConfigMessage(AppType.SALE, user1.getMemberId(), "开工提醒",
-//                                "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url1
-//                                        + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle2.get(0).getId(), 1, "4"));
-//                    }
-
                 }
             }
         }
@@ -1133,16 +1090,14 @@ public class HouseService {
                 .andEqualTo(Clue.DATA_STATUS, 0)
                 .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
         List<Clue> djAlreadyRobSingle1 = clueMapper.selectByExample(example2);
-        if (djAlreadyRobSingle1.isEmpty()) {
-            logger.info("线索id为空===================" + djAlreadyRobSingle1.get(0).getId());
+        if (djAlreadyRobSingle1.size()>0) {
+            //消息推送
+            MainUser user = userMapper.selectByPrimaryKey(userId);
+            String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+            configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "开工提醒",
+                    "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url
+                            + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle1.get(0).getId(), 1, "4"));
         }
-        //消息推送
-        MainUser user = userMapper.selectByPrimaryKey(userId);
-        String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
-        configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "开工提醒",
-                "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url
-                        + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle1.get(0).getId(), 1, "4"));
-
 
     }
 
@@ -1268,16 +1223,14 @@ public class HouseService {
                                     .andEqualTo(Clue.DATA_STATUS, 0)
                                     .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
                             List<Clue> djAlreadyRobSingle1 = clueMapper.selectByExample(example2);
-                            if (djAlreadyRobSingle1.isEmpty()) {
-                                logger.info("线索id为空===================" + djAlreadyRobSingle1.get(0).getId());
+                            if (djAlreadyRobSingle1.size() > 0) {
+                                //消息推送
+                                MainUser user = userMapper.selectByPrimaryKey(userId);
+                                String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+                                configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "开工提醒",
+                                        "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url
+                                                + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle1.get(0).getId(), 1, "4"));
                             }
-                            //消息推送
-                            MainUser user = userMapper.selectByPrimaryKey(userId);
-                            String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
-                            configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "开工提醒",
-                                    "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url
-                                            + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle1.get(0).getId(), 1, "4"));
-
                             //第二个销售推送消息  获取线索ID
                             Example example3 = new Example(Clue.class);
                             example3.createCriteria()
@@ -1285,16 +1238,15 @@ public class HouseService {
                                     .andEqualTo(Clue.DATA_STATUS, 0)
                                     .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
                             List<Clue> djAlreadyRobSingle2 = clueMapper.selectByExample(example3);
-                            if (djAlreadyRobSingle2.isEmpty()) {
-                                logger.info("线索id为空===================" + djAlreadyRobSingle2.get(0).getId());
+                            if (djAlreadyRobSingle2.size() > 0) {
+                                //消息推送
+                                MainUser user1 = userMapper.selectByPrimaryKey(userId2);
+                                String url1 = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+                                configMessageService.addConfigMessage(AppType.SALE, user1.getMemberId(), "开工提醒",
+                                        "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url1
+                                                + Utils.getCustomerDetails(customer.getMemberId(),
+                                                djAlreadyRobSingle2.get(0).getId(), 1, "4"));
                             }
-                            //消息推送
-                            MainUser user1 = userMapper.selectByPrimaryKey(userId2);
-                            String url1 = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
-                            configMessageService.addConfigMessage(AppType.SALE, user1.getMemberId(), "开工提醒",
-                                    "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url1
-                                            + Utils.getCustomerDetails(customer.getMemberId(),
-                                            djAlreadyRobSingle2.get(0).getId(), 1, "4"));
                         } else {
 
                             //订单数量 在配置范围内时 处理
@@ -1338,17 +1290,16 @@ public class HouseService {
                                             .andEqualTo(Clue.DATA_STATUS, 0)
                                             .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
                                     List<Clue> djAlreadyRobSingle1 = clueMapper.selectByExample(example2);
-                                    if (djAlreadyRobSingle1.isEmpty()) {
+                                    if (djAlreadyRobSingle1.size() > 0) {
                                         logger.info("线索id为空===================" + djAlreadyRobSingle1.get(0).getId());
+                                        //消息推送
+                                        MainUser user = userMapper.selectByPrimaryKey(userId);
+                                        String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+                                        configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "开工提醒",
+                                                "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url
+                                                        + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle1.get(0).getId(), 1, "4"));
+
                                     }
-                                    //消息推送
-                                    MainUser user = userMapper.selectByPrimaryKey(userId);
-                                    String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
-                                    configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "开工提醒",
-                                            "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url
-                                                    + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle1.get(0).getId(), 1, "4"));
-
-
                                     //第二个销售推送消息  获取线索ID
                                     Example example3 = new Example(Clue.class);
                                     example3.createCriteria()
@@ -1356,15 +1307,14 @@ public class HouseService {
                                             .andEqualTo(Clue.DATA_STATUS, 0)
                                             .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
                                     List<Clue> djAlreadyRobSingle2 = clueMapper.selectByExample(example3);
-                                    if (djAlreadyRobSingle2.isEmpty()) {
-                                        logger.info("线索id为空===================" + djAlreadyRobSingle2.get(0).getId());
+                                    if (djAlreadyRobSingle2.size() > 0) {
+                                        //消息推送
+                                        MainUser user1 = userMapper.selectByPrimaryKey(userId2);
+                                        String url1 = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+                                        configMessageService.addConfigMessage(AppType.SALE, user1.getMemberId(), "开工提醒",
+                                                "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url1
+                                                        + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle2.get(0).getId(), 1, "4"));
                                     }
-                                    //消息推送
-                                    MainUser user1 = userMapper.selectByPrimaryKey(userId2);
-                                    String url1 = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
-                                    configMessageService.addConfigMessage(AppType.SALE, user1.getMemberId(), "开工提醒",
-                                            "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url1
-                                                    + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle2.get(0).getId(), 1, "4"));
                                 }
                             }
                         }
@@ -1460,16 +1410,14 @@ public class HouseService {
                     .andEqualTo(Clue.DATA_STATUS, 0)
                     .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
             List<Clue> djAlreadyRobSingle1 = clueMapper.selectByExample(example2);
-            if (djAlreadyRobSingle1.isEmpty()) {
-                logger.info("线索id为空===================" + djAlreadyRobSingle1.get(0).getId());
+            if (djAlreadyRobSingle1.size() > 0) {
+                //消息推送
+                MainUser user = userMapper.selectByPrimaryKey(userId);
+                String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+                configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "开工提醒",
+                        "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url
+                                + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle1.get(0).getId(), 1, "4"));
             }
-            //消息推送
-            MainUser user = userMapper.selectByPrimaryKey(userId);
-            String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
-            configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "开工提醒",
-                    "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url
-                            + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle1.get(0).getId(), 1, "4"));
-
             if (flag == 1) {
                 //跨域下单推送消息
                 MainUser us = userMapper.selectByPrimaryKey(userId2);
@@ -1540,16 +1488,14 @@ public class HouseService {
                             .andEqualTo(Clue.DATA_STATUS, 0)
                             .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
                     List<Clue> djAlreadyRobSingle1 = clueMapper.selectByExample(example2);
-                    if (djAlreadyRobSingle1.isEmpty()) {
-                        logger.info("线索id为空===================" + djAlreadyRobSingle1.get(0).getId());
+                    if (djAlreadyRobSingle1.size()>0) {
+                        //消息推送
+                        MainUser user = userMapper.selectByPrimaryKey(userId);
+                        String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+                        configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "开工提醒",
+                                "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url
+                                        + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle1.get(0).getId(), 1, "4"));
                     }
-                    //消息推送
-                    MainUser user = userMapper.selectByPrimaryKey(userId);
-                    String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
-                    configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "开工提醒",
-                            "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url
-                                    + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle1.get(0).getId(), 1, "4"));
-
 
                     //第二个销售推送消息  获取线索ID
                     if (flag == 1) {
@@ -1659,18 +1605,16 @@ public class HouseService {
                 .andEqualTo(Clue.DATA_STATUS, 0)
                 .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
         List<Clue> djAlreadyRobSingle1 = clueMapper.selectByExample(example2);
-        if (djAlreadyRobSingle1.isEmpty()) {
-            logger.info("线索id为空===================" + djAlreadyRobSingle1.get(0).getId());
+        if (djAlreadyRobSingle1.size()>0) {
+            //消息推送
+            MainUser user = userMapper.selectByPrimaryKey(userId);
+            if(user!=null&& CommonUtil.isEmpty(user.getMemberId())) {
+                String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+                configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "开工提醒",
+                        "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url
+                                + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle1.get(0).getId(), 1, "4"));
+            }
         }
-        //消息推送
-        MainUser user = userMapper.selectByPrimaryKey(userId);
-        if(user!=null&& CommonUtil.isEmpty(user.getMemberId())) {
-            String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
-            configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "开工提醒",
-                    "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url
-                            + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle1.get(0).getId(), 1, "4"));
-        }
-
     }
 
     public ServerResponse revokeHouse(String userToken) {
@@ -1854,8 +1798,10 @@ public class HouseService {
             example.createCriteria().andEqualTo(Clue.MEMBER_ID, member.getId())
                     .andIsNull(Clue.CUS_SERVICE);
             List<Clue> clues = clueMapper.selectByExample(example);
-            djOrderSurface.setClueId(clues.get(0).getId());
-            djOrderSurfaceMapper.insert(djOrderSurface);
+            if(clues.size()>0) {
+                djOrderSurface.setClueId(clues.get(0).getId());
+                djOrderSurfaceMapper.insert(djOrderSurface);
+            }
 //            robService.notEnteredGrabSheet();
         }
 

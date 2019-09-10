@@ -508,12 +508,14 @@ public class EvaluateService {
                         .andEqualTo(Clue.DATA_STATUS, 0)
                         .andEqualTo(Clue.MEMBER_ID, house.getMemberId());
                 List<Clue> djAlreadyRobSingle = clueMapper.selectByExample(example1);
-                MainUser user = userMapper.selectByPrimaryKey(customer.getUserId());
-                String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
-                configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "竣工提醒",
-                        "您有已竣工的房子【" + house.getHouseName() + "】", 0, url
-                                + Utils.getCustomerDetails(house.getMemberId(), djAlreadyRobSingle.get(0).getId(), 1, "4"));
+                if(djAlreadyRobSingle.size()>0) {
+                    MainUser user = userMapper.selectByPrimaryKey(customer.getUserId());
+                    String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+                    configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "竣工提醒",
+                            "您有已竣工的房子【" + house.getHouseName() + "】", 0, url
+                                    + Utils.getCustomerDetails(house.getMemberId(), djAlreadyRobSingle.get(0).getId(), 1, "4"));
 
+                }
             }
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
