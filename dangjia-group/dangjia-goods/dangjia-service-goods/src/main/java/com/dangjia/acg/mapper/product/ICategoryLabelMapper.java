@@ -1,6 +1,6 @@
 package com.dangjia.acg.mapper.product;
 
-import com.dangjia.acg.modle.basics.Label;
+
 import com.dangjia.acg.modle.product.CategoryLabel;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
