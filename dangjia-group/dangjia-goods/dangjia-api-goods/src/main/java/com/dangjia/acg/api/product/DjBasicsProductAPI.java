@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 public interface DjBasicsProductAPI {
 
     @PostMapping("/product/djBasicsProduct/queryProductData")
-    @ApiOperation(value = "查询配置关键词名称", notes = "查询配置关键词名称")
+    @ApiOperation(value = "查询商品信息", notes = "查询商品信息")
     ServerResponse queryProductData(@RequestParam("request")HttpServletRequest request,
                                     @RequestParam("name")String name);
 }

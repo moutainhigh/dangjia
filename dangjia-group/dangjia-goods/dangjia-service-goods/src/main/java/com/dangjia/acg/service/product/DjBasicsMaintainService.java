@@ -43,7 +43,7 @@ public class DjBasicsMaintainService {
     }
 
 
-    /**
+    /**djBasicsMaintain/queryMatchWord
      * 添加关键词
      * @param keywordName
      * @param searchItem
