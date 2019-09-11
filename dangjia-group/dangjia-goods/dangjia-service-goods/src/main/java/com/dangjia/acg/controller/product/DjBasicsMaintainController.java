@@ -21,7 +21,7 @@ public class DjBasicsMaintainController implements DjBasicsMaintainAPI {
     @Autowired
     private DjBasicsMaintainService djBasicsMaintainService;
 
-//    @Override
+    @Override
     @ApiMethod
     public ServerResponse queryMatchWord(HttpServletRequest request,String name) {
         return djBasicsMaintainService.queryMatchWord(name);

@@ -25,7 +25,7 @@ public class DjBasicsMaintainService {
 
 
     /**
-     * 查询配置关键名称
+     * 查询配置关键词名称
      * @param name
      * @return
      */

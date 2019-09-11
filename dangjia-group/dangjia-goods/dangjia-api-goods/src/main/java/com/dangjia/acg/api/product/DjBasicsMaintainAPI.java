@@ -48,4 +48,8 @@ public interface DjBasicsMaintainAPI {
     @ApiOperation(value = "查询关键词", notes = "查询关键词")
     ServerResponse queryKeywords(@RequestParam("request") HttpServletRequest request,@RequestParam("id") String id);
 
+    @PostMapping("/product/djBasicsMaintain/queryMatchWord")
+    @ApiOperation(value = "查询配置关键词名称", notes = "查询配置关键词名称")
+    ServerResponse queryMatchWord(@RequestParam("request")HttpServletRequest request,
+                                  @RequestParam("name")String name);
 }
