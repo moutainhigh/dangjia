@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import springfox.documentation.spring.web.json.Json;
 
 import java.util.*;
 
@@ -80,7 +79,7 @@ public class CategoryLabelService {
                 }
                 mapList.add(map);
             }
-            return ServerResponse.createBySuccess("查询成功", mapList);
+            return null;//ServerResponse.createBySuccess("查询成功",mapList);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
