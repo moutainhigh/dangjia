@@ -262,9 +262,9 @@ public class EngineerService {
                 return ServerResponse.createByErrorMessage("找不到该工匠");
             }
             //0待确认开工,1装修中,2休眠中,3已完工
-            if (hf.getWorkerType() == 3 && hf.getSupervisorStart() == 0) {
-                return ServerResponse.createByErrorMessage("该房大管家未开工");
-            }
+//            if (hf.getWorkerType() == 3 && hf.getSupervisorStart() == 0) {
+//                return ServerResponse.createByErrorMessage("该房大管家未开工");
+//            }
             if (house.getVisitState() == 3) {
                 return ServerResponse.createByErrorMessage("该房已完工");
             }
