@@ -30,31 +30,31 @@ public class DjBasicsMaintainController implements DjBasicsMaintainAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse addKeywords(String keywordName, String searchItem) {
+    public ServerResponse addKeywords(HttpServletRequest request,String keywordName, String searchItem) {
         return djBasicsMaintainService.addKeywords(keywordName,searchItem);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse updateKeywords(String id, String keywordName, String searchItem) {
+    public ServerResponse updateKeywords(HttpServletRequest request,String id, String keywordName, String searchItem) {
         return djBasicsMaintainService.updateKeywords(id,keywordName,searchItem);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse addRelatedTags(String id, String labelIds) {
+    public ServerResponse addRelatedTags(HttpServletRequest request,String id, String labelIds) {
         return djBasicsMaintainService.addRelatedTags(id,labelIds);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse delKeywords(String id) {
+    public ServerResponse delKeywords(HttpServletRequest request,String id) {
         return djBasicsMaintainService.delKeywords(id);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse queryKeywords(String id) {
+    public ServerResponse queryKeywords(HttpServletRequest request,String id) {
         return djBasicsMaintainService.queryKeywords(id);
     }
 }
