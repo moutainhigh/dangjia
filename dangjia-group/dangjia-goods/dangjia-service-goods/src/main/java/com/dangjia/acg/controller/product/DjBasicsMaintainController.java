@@ -7,6 +7,8 @@ import com.dangjia.acg.service.product.DjBasicsMaintainService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * Created with IntelliJ IDEA.
  * author: wk
@@ -15,9 +17,16 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class DjBasicsMaintainController implements DjBasicsMaintainAPI {
+
     @Autowired
     private DjBasicsMaintainService djBasicsMaintainService;
 
+//    @Override
+    @ApiMethod
+    public ServerResponse queryMatchWord(HttpServletRequest request,String name) {
+        return djBasicsMaintainService.queryMatchWord(name);
+
+    }
 
     @Override
     @ApiMethod

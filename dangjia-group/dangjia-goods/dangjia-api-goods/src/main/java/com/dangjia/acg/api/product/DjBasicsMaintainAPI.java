@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient("dangjia-service-goods")
 public interface DjBasicsMaintainAPI {
 
+
+
     @PostMapping("/product/DjBasicsMaintain/addKeywords")
     @ApiOperation(value = "添加关键词", notes = "添加关键词")
     ServerResponse addKeywords(@RequestParam("keywordName") String keywordName,
