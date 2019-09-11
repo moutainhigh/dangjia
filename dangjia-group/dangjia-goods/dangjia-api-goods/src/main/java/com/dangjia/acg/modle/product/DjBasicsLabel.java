@@ -19,7 +19,7 @@ import javax.persistence.Table;
  */
 @Data
 @Entity
-@Table(name = "dj_basics_maintain")
+@Table(name = "dj_basics_label")
 @ApiModel(description = "商品标签表")
 @FieldNameConstants(prefix = "")
 public class DjBasicsLabel extends BaseEntity {
