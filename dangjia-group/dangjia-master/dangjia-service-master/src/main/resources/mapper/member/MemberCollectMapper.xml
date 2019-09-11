@@ -43,13 +43,47 @@
         h.optional_label as optionalLabel
     </sql>
 
+    <!--商品表实体-->
+    <sql id="basic_goods_columns">
+        p.name  as name ,
+        p.goods_id as goodsId  ,
+        p.product_sn as  productSn ,
+        p.image as  image ,
+        p.unit_name as  unitName ,
+        p.unit_id as unitId  ,
+        p.category_id as categoryId   ,
+        p.label_id as   labelId ,
+        p.type as type   ,
+        p.maket as maket   ,
+        p.price as price   ,
+        p.other_name as other_name ,
+        p.istop as istop ,
+        p.remark as remark
+    </sql>
+
+
+    <!--房子收藏列表-->
     <select id="queryCollectHouse" resultType="com.dangjia.acg.modle.house.House">
         SELECT
         <include refid="basic_h_columns"/>
         FROM
             `dj_member_collect` c
         INNER JOIN dj_house h ON h.id = c.house_id
-        where 	c.data_status = 0
+        where 	c.data_status = 0 and c.condition_type = 0
+        <if test="memberId!=null and memberId!=''">
+            AND c.member_id = #{memberId}
+        </if>
+        ORDER BY c.create_date DESC
+    </select>
+
+    <!--产品收藏列表-->
+    <select id="queryCollectGood" resultType="com.dangjia.acg.modle.house.House">
+        SELECT
+        <include refid="basic_goods_columns"/>
+        FROM
+        `dj_member_collect` c
+        INNER JOIN dj_changsha.dj_basics_product p ON p.id = c.house_id
+        where 	c.data_status = 0 and c.condition_type = 1
         <if test="memberId!=null and memberId!=''">
             AND c.member_id = #{memberId}
         </if>
