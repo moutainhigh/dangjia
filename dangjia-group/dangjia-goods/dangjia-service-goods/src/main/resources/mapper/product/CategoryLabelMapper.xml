@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.product.ICategoryLabelMapper">
+    <sql id="Base_Column_List">
+    id, name, create_date, modify_date
+    </sql>
+
+
+    <select id="getCategoryLabel" resultType="com.dangjia.acg.modle.product.CategoryLabel">
+        SELECT
+           id, name, create_date as createDate, modify_date as modifyDate
+        from dj_baiscs_category_label
+        ORDER BY createDate desc
+    </select>
+
+    <!-- 根据标签名称查询 -->
+    <select id="getCategoryLabelByName" parameterType="String" resultType="com.dangjia.acg.modle.product.CategoryLabel">
+		SELECT
+			id, name, create_date as createDate, modify_date as modifyDate
+		FROM dj_baiscs_category_label WHERE name=#{name}
+		ORDER BY create_date desc
+	</select>
+
+</mapper>
