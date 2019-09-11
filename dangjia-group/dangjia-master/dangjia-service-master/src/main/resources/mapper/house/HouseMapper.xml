@@ -575,7 +575,7 @@
         INNER JOIN (
             SELECT f.house_id,f.supervisor_start ,m.`name` supName,m.mobile supMobile
             FROM dj_core_house_flow f
-            INNER JOIN dj_member m ON f.worker_id = m.id
+            LEFT JOIN dj_member m ON f.worker_id = m.id
             WHERE f.worker_type=3 and f.work_type > 1
         ) f ON h.id=f.house_id
         INNER JOIN dj_member m ON h.member_id = m.id
