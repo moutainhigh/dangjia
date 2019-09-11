@@ -70,6 +70,9 @@ public class MemberCollectService {
             PageInfo pageResult = new PageInfo(goodsList);
             List<Map> goodsMap = new ArrayList<>();
 
+
+
+            
             for (DjBasicsProduct djBasicsProduct : goodsList) {
                 Map map = BeanUtils.beanToMap(djBasicsProduct);
                 List<String> goodList = new ArrayList<>();
@@ -85,6 +88,9 @@ public class MemberCollectService {
                 if (!CommonUtil.isEmpty(djBasicsProduct.getImage())) {
                     goodList.add(djBasicsProduct.getImage());
                 }
+
+
+
 
                 map.put("goodList",goodList);//封装好的产品集合
                 map.put("goodName", djBasicsProduct.getName());//产品名称
