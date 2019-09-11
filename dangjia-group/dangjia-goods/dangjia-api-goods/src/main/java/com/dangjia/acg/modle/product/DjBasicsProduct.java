@@ -75,8 +75,8 @@ public class DjBasicsProduct extends BaseEntity {
     private Integer maket;
 
     @Column(name = "price")
-    @Desc(value = "材料商品别名")
-    @ApiModelProperty("材料商品别名")
+    @Desc(value = "销售价")
+    @ApiModelProperty("销售价")
     private Double price;
 
     @Column(name = "other_name")
