@@ -970,16 +970,21 @@ public class PaymentService {
         List<ActuaryDTO> actuaryDTOList = new ArrayList<>();//商品
         try {
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            Example example = new Example(BusinessOrder.class);
+            example.createCriteria().andEqualTo(BusinessOrder.TASK_ID, houseDistributionId);
+            List<BusinessOrder> businessOrderList = businessOrderMapper.selectByExample(example);
+            BusinessOrder businessOrder = null;
+            if(businessOrderList.size()>0){
+                businessOrder = businessOrderList.get(0);
+                if(businessOrder.getState()==3){
+                    return ServerResponse.createByErrorMessage("该订单已支付，请勿重复支付！");
+                }
+            }
             if (type == 9) {
                 Insurance insurance = insuranceMapper.selectByPrimaryKey(houseDistributionId);
                 if (insurance == null) {
                     return ServerResponse.createByErrorMessage("保险记录不存在");
                 }
-
-                Example example = new Example(BusinessOrder.class);
-                example.createCriteria().andEqualTo(BusinessOrder.TASK_ID, houseDistributionId).andEqualTo(BusinessOrder.STATE, 1).andEqualTo(BusinessOrder.TYPE, 9);
-                List<BusinessOrder> businessOrderList = businessOrderMapper.selectByExample(example);
-                BusinessOrder businessOrder;
                 if (businessOrderList.size() == 0) {
                     businessOrder = new BusinessOrder();
                     businessOrder.setMemberId(insurance.getWorkerId()); //公众号唯一标识
@@ -992,8 +997,6 @@ public class PaymentService {
                     businessOrder.setType(9);//记录支付类型任务类型
                     businessOrder.setTaskId(houseDistributionId);//保存任务ID
                     businessOrderMapper.insert(businessOrder);
-                } else {
-                    businessOrder = businessOrderList.get(0);
                 }
                 paymentDTO.setTotalPrice(insurance.getMoney());
                 paymentDTO.setBusinessOrderNumber(businessOrder.getNumber());
@@ -1010,10 +1013,6 @@ public class PaymentService {
                 if (houseDistribution == null) {
                     return ServerResponse.createByErrorMessage("验房分销记录不存在");
                 }
-                Example example = new Example(BusinessOrder.class);
-                example.createCriteria().andEqualTo(BusinessOrder.TASK_ID, houseDistributionId).andEqualTo(BusinessOrder.STATE, 1);
-                List<BusinessOrder> businessOrderList = businessOrderMapper.selectByExample(example);
-                BusinessOrder businessOrder;
                 if (businessOrderList.size() == 0) {
                     businessOrder = new BusinessOrder();
                     businessOrder.setMemberId(houseDistribution.getOpenid()); //公众号唯一标识
@@ -1026,8 +1025,6 @@ public class PaymentService {
                     businessOrder.setType(5);//记录支付类型任务类型
                     businessOrder.setTaskId(houseDistributionId);//保存任务ID
                     businessOrderMapper.insert(businessOrder);
-                } else {
-                    businessOrder = businessOrderList.get(0);
                 }
                 paymentDTO.setTotalPrice(new BigDecimal(houseDistribution.getPrice()));
                 paymentDTO.setBusinessOrderNumber(businessOrder.getNumber());
@@ -1046,10 +1043,6 @@ public class PaymentService {
                     return ServerResponse.createByErrorMessage("订单记录不存在");
                 }
                 House house = houseMapper.selectByPrimaryKey(productChangeOrder.getHouseId());
-                Example example = new Example(BusinessOrder.class);
-                example.createCriteria().andEqualTo(BusinessOrder.TASK_ID, houseDistributionId).andEqualTo(BusinessOrder.STATE, 1);
-                List<BusinessOrder> businessOrderList = businessOrderMapper.selectByExample(example);
-                BusinessOrder businessOrder;
                 if (businessOrderList.size() == 0) {
                     businessOrder = new BusinessOrder();
                     businessOrder.setMemberId(house.getMemberId()); //公众号唯一标识
@@ -1062,8 +1055,6 @@ public class PaymentService {
                     businessOrder.setType(6);//记录支付类型任务类型
                     businessOrder.setTaskId(houseDistributionId);//保存任务ID
                     businessOrderMapper.insert(businessOrder);
-                } else {
-                    businessOrder = businessOrderList.get(0);
                 }
                 paymentDTO.setTotalPrice(productChangeOrder.getDifferencePrice());
                 paymentDTO.setBusinessOrderNumber(businessOrder.getNumber());
@@ -1083,11 +1074,6 @@ public class PaymentService {
                 PurchaseOrder purchaseOrder = (PurchaseOrder) datas.get("purchaseOrder");
                 List<FlowActuaryDTO> flowActuaryDTOList = (List<FlowActuaryDTO>) datas.get("list");
                 House house = houseMapper.selectByPrimaryKey(purchaseOrder.getHouseId());
-                Example example = new Example(BusinessOrder.class);
-                example.createCriteria().andEqualTo(BusinessOrder.TASK_ID, houseDistributionId)
-                        .andEqualTo(BusinessOrder.STATE, 1);
-                List<BusinessOrder> businessOrderList = businessOrderMapper.selectByExample(example);
-                BusinessOrder businessOrder;
                 if (businessOrderList.size() == 0) {
                     businessOrder = new BusinessOrder();
                     businessOrder.setMemberId(house.getMemberId()); //公众号唯一标识
@@ -1100,8 +1086,6 @@ public class PaymentService {
                     businessOrder.setType(8);//记录支付类型任务类型
                     businessOrder.setTaskId(houseDistributionId);//保存任务ID
                     businessOrderMapper.insert(businessOrder);
-                } else {
-                    businessOrder = businessOrderList.get(0);
                 }
                 paymentDTO.setTotalPrice(new BigDecimal(purchaseOrder.getPrice()));
                 paymentDTO.setBusinessOrderNumber(businessOrder.getNumber());
@@ -1114,10 +1098,6 @@ public class PaymentService {
                 }
                 House house = houseMapper.selectByPrimaryKey(mendOrder.getHouseId());
                 WorkerType workerType = workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId());
-                Example example = new Example(BusinessOrder.class);
-                example.createCriteria().andEqualTo(BusinessOrder.TASK_ID, houseDistributionId).andEqualTo(BusinessOrder.STATE, 1);
-                List<BusinessOrder> businessOrderList = businessOrderMapper.selectByExample(example);
-                BusinessOrder businessOrder;
                 if (businessOrderList.size() == 0) {
                     businessOrder = new BusinessOrder();
                     businessOrder.setMemberId(house.getMemberId()); //公众号唯一标识
@@ -1130,8 +1110,6 @@ public class PaymentService {
                     businessOrder.setType(2);//记录支付类型任务类型
                     businessOrder.setTaskId(houseDistributionId);//保存任务ID
                     businessOrderMapper.insert(businessOrder);
-                } else {
-                    businessOrder = businessOrderList.get(0);
                 }
                 paymentDTO.setTotalPrice(new BigDecimal(mendOrder.getTotalAmount()));
                 paymentDTO.setBusinessOrderNumber(businessOrder.getNumber());
@@ -1156,17 +1134,12 @@ public class PaymentService {
                 }
                 actuaryDTOList.add(actuaryDTO);
             } else {
-                Example example = new Example(BusinessOrder.class);
-                example.createCriteria().andEqualTo(BusinessOrder.TASK_ID, houseDistributionId).andEqualTo(BusinessOrder.STATE, 1);
-                List<BusinessOrder> businessOrderList = businessOrderMapper.selectByExample(example);
                 if (businessOrderList == null || businessOrderList.size() <= 0) {
                     return ServerResponse.createByErrorMessage("支付订单不存在");
                 }
-                BusinessOrder businessOrder = businessOrderList.get(0);
                 paymentDTO.setDiscountsPrice(businessOrder.getDiscountsPrice());
                 paymentDTO.setTotalPrice(businessOrder.getTotalPrice());
                 paymentDTO.setPayPrice(businessOrder.getPayPrice());//实付
-
                 ActuaryDTO actuaryDTO = new ActuaryDTO();
                 actuaryDTO.setImage(imageAddress + "icon/rmb.png");
                 actuaryDTO.setKind("订单付款");
@@ -1203,11 +1176,17 @@ public class PaymentService {
                     }
                 }
             }
-            House house = houseMapper.selectByPrimaryKey(houseId);
             Example example = new Example(BusinessOrder.class);
-            example.createCriteria().andEqualTo(BusinessOrder.HOUSE_ID, houseId).andEqualTo(BusinessOrder.STATE, 1);
+            example.createCriteria().andEqualTo(BusinessOrder.TASK_ID, taskId);
             List<BusinessOrder> businessOrderList = businessOrderMapper.selectByExample(example);
-            BusinessOrder businessOrder;
+            BusinessOrder businessOrder = null;
+            if(businessOrderList.size()>0){
+                businessOrder = businessOrderList.get(0);
+                if(businessOrder.getState()==3){
+                    return ServerResponse.createByErrorMessage("该订单已支付，请勿重复支付！");
+                }
+            }
+            House house = houseMapper.selectByPrimaryKey(houseId);
             if (businessOrderList.size() == 0) {
                 businessOrder = new BusinessOrder();
                 businessOrder.setMemberId(house.getMemberId());
@@ -1219,8 +1198,6 @@ public class PaymentService {
                 businessOrder.setPayPrice(new BigDecimal(0.0));
                 businessOrder.setType(type);
                 businessOrderMapper.insert(businessOrder);
-            } else {
-                businessOrder = businessOrderList.get(0);
             }
             businessOrder.setType(type);//记录支付类型任务类型
             businessOrder.setTaskId(taskId);//保存任务ID
