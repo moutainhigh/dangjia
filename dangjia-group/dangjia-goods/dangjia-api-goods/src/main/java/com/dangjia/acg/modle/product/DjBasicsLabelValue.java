@@ -18,8 +18,8 @@ import javax.persistence.Table;
  */
 @Data
 @Entity
-@Table(name = "dj_basics_maintain")
-@ApiModel(description = "商品标签表")
+@Table(name = "dj_basics_label_value")
+@ApiModel(description = "商品标签值表")
 @FieldNameConstants(prefix = "")
 public class DjBasicsLabelValue {
     @Column(name = "label_id")
