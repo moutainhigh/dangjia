@@ -40,4 +40,16 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
 
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse queryProductLabels(HttpServletRequest request, String productId) {
+        return djBasicsProductService.queryProductLabels(productId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse addLabelsValue(HttpServletRequest request, String jsonStr) {
+        return djBasicsProductService.addLabelsValue(jsonStr);
+    }
+
 }

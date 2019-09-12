@@ -24,6 +24,16 @@ public interface DjBasicsProductAPI {
     ServerResponse queryProductData(@RequestParam("request")HttpServletRequest request,
                                     @RequestParam("name")String name);
 
+    @PostMapping("/product/djBasicsProduct/queryProductLabels")
+    @ApiOperation(value = "查询商品标签", notes = "查询商品标签")
+    ServerResponse queryProductLabels(@RequestParam("request")HttpServletRequest request,
+                                      @RequestParam("productId")String productId);
+
+    @PostMapping("/product/djBasicsProduct/addLabelsValue")
+    @ApiOperation(value = "商品打标签", notes = "商品打标签")
+    ServerResponse addLabelsValue(@RequestParam("request")HttpServletRequest request,
+                                  @RequestParam("jsonStr")String jsonStr);
+
     @PostMapping("/product/djBasicsProduct/saveBasicsGoods")
     @ApiOperation(value = "新增货品", notes = "新增货品")
     ServerResponse saveBasicsGoods(@RequestParam("request") HttpServletRequest request,
