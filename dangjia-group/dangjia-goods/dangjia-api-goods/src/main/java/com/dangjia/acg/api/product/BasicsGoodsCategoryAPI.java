@@ -24,7 +24,7 @@ public interface BasicsGoodsCategoryAPI {
 
     @PostMapping("/product/basicsGoodsCategory/getBasicsGoodsCategory")
     @ApiOperation(value = "商品类别明细", notes = "商品类别明细")
-    BasicsGoodsCategory getBasicsGoodsCategory(@RequestParam("cityId") String cityId, @RequestParam("categoryId") String categoryId);
+    ServerResponse getBasicsGoodsCategory(@RequestParam("cityId") String cityId, @RequestParam("categoryId") String categoryId);
 
     /**
      * 新增商品类别

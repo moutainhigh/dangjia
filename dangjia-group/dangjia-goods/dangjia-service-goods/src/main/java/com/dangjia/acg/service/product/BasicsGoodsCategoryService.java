@@ -1,16 +1,23 @@
 package com.dangjia.acg.service.product;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.basics.IAttributeMapper;
 import com.dangjia.acg.mapper.basics.IGoodsMapper;
 import com.dangjia.acg.mapper.product.IBasicsGoodsCategoryMapper;
+import com.dangjia.acg.mapper.product.ICategorySeriesMapper;
 import com.dangjia.acg.modle.attribute.Attribute;
 import com.dangjia.acg.modle.basics.Goods;
+import com.dangjia.acg.modle.brand.Brand;
+import com.dangjia.acg.modle.brand.BrandSeries;
 import com.dangjia.acg.modle.product.BasicsGoodsCategory;
+import com.dangjia.acg.modle.product.CategorySeries;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,16 +40,31 @@ public class BasicsGoodsCategoryService {
     @Autowired
     private IGoodsMapper iGoodsMapper;
     @Autowired
+    private ICategorySeriesMapper iCategorySeriesMapper;
+    @Autowired
     private IAttributeMapper attributeMapper;
 
-    public BasicsGoodsCategory getBasicsGoodsCategory(String categoryId) {
-        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-       BasicsGoodsCategory basicsGoodsCategory = iBasicsGoodsCategoryMapper.selectByPrimaryKey(categoryId);
-       String coverImage=basicsGoodsCategory.getCoverImage();
-       if(coverImage!=null&&!"".equalsIgnoreCase(coverImage)){
-           basicsGoodsCategory.setCoverImage(address+coverImage);
-       }
-        return basicsGoodsCategory;
+    public ServerResponse getBasicsGoodsCategory(String categoryId) {
+        try{
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+           BasicsGoodsCategory basicsGoodsCategory = iBasicsGoodsCategoryMapper.selectByPrimaryKey(categoryId);
+           String image=basicsGoodsCategory.getImage();
+            if(image!=null&&!"".equalsIgnoreCase(image)){
+                basicsGoodsCategory.setImage(address+image);
+            }
+           String coverImage=basicsGoodsCategory.getCoverImage();
+           if(coverImage!=null&&!"".equalsIgnoreCase(coverImage)){
+               basicsGoodsCategory.setCoverImage(address+coverImage);
+           }
+            Map categoryMap= BeanUtils.beanToMap(basicsGoodsCategory);
+            List<Brand> bList = iBasicsGoodsCategoryMapper.queryBrandByCategoryid(categoryId);
+            categoryMap.put("brands",bList);
+            return ServerResponse.createBySuccess("查询成功", categoryMap);
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ServerResponse.createByErrorMessage("查询失败");
+
+    }
     }
 
     //新增商品类别
@@ -62,10 +84,22 @@ public class BasicsGoodsCategoryService {
             category.setModifyDate(new Date());
             category.setIsLastCategory(isLastCategory);
             category.setPurchaseRestrictions(purchaseRestrictions);
-            category.setBrandIds(brandIds);
             category.setCoverImage(coverImage);
             category.setCategoryLabelId(categoryLabelId);
             iBasicsGoodsCategoryMapper.insert(category);
+            //如果品牌不为空，则添加品牌信息
+            if (StringUtils.isNoneBlank(brandIds)){
+                String[] arr = brandIds.split(",");
+                for (int i = 0; i < arr.length; i++) {//新增goods关联品牌系列
+                    String brandId = arr[i];
+                    CategorySeries gs = new CategorySeries();
+                    gs.setGoodsId(category.getId());
+                    if (StringUtils.isNoneBlank(brandId)) {
+                        gs.setBrandId(brandId);
+                    }
+                    iCategorySeriesMapper.insert(gs);
+                }
+            }
             return ServerResponse.createBySuccess("新增成功", category.getId());
         } catch (Exception e) {
             e.printStackTrace();
@@ -94,10 +128,23 @@ public class BasicsGoodsCategoryService {
             category.setModifyDate(new Date());
             category.setIsLastCategory(isLastCategory);
             category.setPurchaseRestrictions(purchaseRestrictions);
-            category.setBrandIds(brandIds);
             category.setCoverImage(coverImage);
             category.setCategoryLabelId(categoryLabelId);
             iBasicsGoodsCategoryMapper.updateByPrimaryKeySelective(category);
+            if (StringUtils.isNoneBlank(brandIds)){
+                iBasicsGoodsCategoryMapper.deleteCategorysSeries(category.getId());
+                String[] arr = brandIds.split(",");
+                for (int i = 0; i < arr.length; i++) {//新增goods关联品牌系列
+                    String brandId = arr[i];
+                    CategorySeries gs = new CategorySeries();
+                    gs.setGoodsId(category.getId());
+                    if (StringUtils.isNoneBlank(brandId)) {
+                        gs.setBrandId(brandId);
+                    }
+                    iCategorySeriesMapper.insert(gs);
+                }
+            }
+
             return ServerResponse.createBySuccessMessage("修改成功");
         } catch (Exception e) {
             e.printStackTrace();

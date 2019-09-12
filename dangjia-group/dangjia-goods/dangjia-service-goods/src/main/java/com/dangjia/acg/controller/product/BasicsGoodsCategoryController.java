@@ -4,7 +4,6 @@ import com.dangjia.acg.api.product.BasicsGoodsCategoryAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.modle.product.BasicsGoodsCategory;
 import com.dangjia.acg.service.basics.AttributeService;
 import com.dangjia.acg.service.product.BasicsGoodsCategoryService;
 import com.github.pagehelper.PageInfo;
@@ -37,7 +36,7 @@ public class BasicsGoodsCategoryController implements BasicsGoodsCategoryAPI {
      */
     @Override
     @ApiMethod
-    public BasicsGoodsCategory getBasicsGoodsCategory(String cityId, String categoryId) {
+    public ServerResponse getBasicsGoodsCategory(String cityId, String categoryId) {
         return basicsGoodsCategoryService.getBasicsGoodsCategory(categoryId);
     }
 
