@@ -25,7 +25,6 @@ public interface DjBasicsProductAPI {
     ServerResponse queryProductData(@RequestParam("request")HttpServletRequest request,
                                     @RequestParam("name")String name);
 
-
     @PostMapping("/product/djBasicsProduct/queryProductDataByID")
     @ApiOperation(value = "根据主键查询商品信息", notes = "根据主键查询商品信息")
     DjBasicsProduct queryProductDataByID(@RequestParam("request")HttpServletRequest request,

@@ -21,6 +21,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -61,17 +64,6 @@ public class DjBasicsProductService {
             return ServerResponse.createBySuccess("查询成功", list);
         }
         return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
-    }
-
-    /**
-     * 查询单个商品
-     * @param request
-     * @param id
-     * @return
-     */
-    public DjBasicsProduct queryProductDataByID(HttpServletRequest request, String id)
-    {
-        return djBasicsProductMapper.selectByPrimaryKey(id);
     }
 
 
@@ -147,4 +139,16 @@ public class DjBasicsProductService {
         }
         return ServerResponse.createBySuccessMessage("操作成功");
     }
+
+    /**
+     * 查询单个商品
+     * @param request
+     * @param id
+     * @return
+     */
+    public DjBasicsProduct queryProductDataByID(HttpServletRequest request, String id)
+    {
+        return djBasicsProductMapper.selectByPrimaryKey(id);
+    }
+
 }
