@@ -46,6 +46,18 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
     @ApiMethod
     public ServerResponse insertProduct(HttpServletRequest request, String productArr) {
         return djBasicsProductService.insertProduct(productArr);
-
     }
+    @Override
+    @ApiMethod
+    public ServerResponse queryProductLabels(HttpServletRequest request, String productId) {
+        return djBasicsProductService.queryProductLabels(productId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse addLabelsValue(HttpServletRequest request, String jsonStr) {
+        return djBasicsProductService.addLabelsValue(jsonStr);
+    }
+
+
 }
