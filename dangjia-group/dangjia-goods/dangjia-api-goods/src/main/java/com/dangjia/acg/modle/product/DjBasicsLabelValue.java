@@ -36,5 +36,5 @@ public class DjBasicsLabelValue extends BaseEntity {
     @Column(name = "sort")
     @Desc(value = "排序")
     @ApiModelProperty("排序")
-    private String sort;
+    private Integer sort;
 }
