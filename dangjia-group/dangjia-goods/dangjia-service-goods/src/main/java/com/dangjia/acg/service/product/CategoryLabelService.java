@@ -64,7 +64,7 @@ public class CategoryLabelService {
     }
 
     //查询所有的标签(分类下拉选项,不需要分页）
-    public ServerResponse<PageInfo> getAllCategoryLabelList() {
+    public ServerResponse getAllCategoryLabelList() {
         try {
             List<Map<String, Object>> mapList = new ArrayList<>();
             List<CategoryLabel> labelList = iCategoryLabelMapper.getCategoryLabel();
@@ -79,7 +79,7 @@ public class CategoryLabelService {
                 }
                 mapList.add(map);
             }
-            return null;//ServerResponse.createBySuccess("查询成功",mapList);
+            return ServerResponse.createBySuccess("查询成功",mapList);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");

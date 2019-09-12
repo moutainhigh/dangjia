@@ -15,7 +15,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "dj_member_collect")
 @FieldNameConstants(prefix = "")
-@ApiModel(description = "当家用户工地收藏记录")
+@ApiModel(description = "当家用户收藏记录")
 public class MemberCollect extends BaseEntity {
 
     @Column(name = "member_id")
@@ -28,5 +28,11 @@ public class MemberCollect extends BaseEntity {
     @Desc(value = "房子ID")
     @ApiModelProperty("房子ID")
     private String houseId;
+
+
+    @Column(name = "condition_type")
+    @Desc(value = "收藏类型,0:代表收藏房子 1：代表收藏商品")
+    @ApiModelProperty("收藏类型")
+    private String conditionType;
 
 }
