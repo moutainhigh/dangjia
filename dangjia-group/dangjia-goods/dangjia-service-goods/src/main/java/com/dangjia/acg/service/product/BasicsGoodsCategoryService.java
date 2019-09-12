@@ -11,11 +11,13 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.basics.IAttributeMapper;
 import com.dangjia.acg.mapper.basics.IGoodsMapper;
 import com.dangjia.acg.mapper.product.IBasicsGoodsCategoryMapper;
+import com.dangjia.acg.mapper.product.IBasicsGoodsMapper;
 import com.dangjia.acg.mapper.product.ICategorySeriesMapper;
 import com.dangjia.acg.modle.attribute.Attribute;
 import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.brand.BrandSeries;
+import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.BasicsGoodsCategory;
 import com.dangjia.acg.modle.product.CategorySeries;
 import org.apache.commons.lang3.StringUtils;
@@ -38,7 +40,7 @@ public class BasicsGoodsCategoryService {
     @Autowired
     private ConfigUtil configUtil;
     @Autowired
-    private IGoodsMapper iGoodsMapper;
+    private IBasicsGoodsMapper iBasicsGoodsMapper;
     @Autowired
     private ICategorySeriesMapper iCategorySeriesMapper;
     @Autowired
@@ -165,7 +167,7 @@ public class BasicsGoodsCategoryService {
     public ServerResponse deleteGoodsCategory(String id) {
         try {
             List<BasicsGoodsCategory> goodsCategoryList = iBasicsGoodsCategoryMapper.queryCategoryByParentId(id);//根据id查询是否有下级类别
-            List<Goods> goodsList = iGoodsMapper.queryByCategoryId(id);//根据id查询是否有关联商品
+            List<BasicsGoods> goodsList = iBasicsGoodsMapper.queryByCategoryId(id);//根据id查询是否有关联商品
             List<Attribute> GoodsAList = attributeMapper.queryAttributeByCategoryId(id, null);//根据id查询是否有关联属性
             if (goodsCategoryList.size() > 0) {
                 return ServerResponse.createByErrorMessage("此类别有下级不能删除");

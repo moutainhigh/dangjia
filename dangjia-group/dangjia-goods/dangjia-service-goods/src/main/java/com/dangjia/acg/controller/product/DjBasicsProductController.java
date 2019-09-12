@@ -3,6 +3,7 @@ package com.dangjia.acg.controller.product;
 import com.dangjia.acg.api.product.DjBasicsProductAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dto.product.BasicsGoodsDTO;
 import com.dangjia.acg.service.product.DjBasicsProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,22 +35,17 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse saveBasicsGoods(HttpServletRequest request, String name, String categoryId, Integer buy,
-                                    Integer sales, String unitId, Integer type, String arrString, String otherName) {
-        return djBasicsProductService.saveBasicsGoods(name, categoryId, buy, sales, unitId, type, arrString, otherName);
+    public ServerResponse saveBasicsGoods(HttpServletRequest request, BasicsGoodsDTO basicsGoodsDTO) {
+        return djBasicsProductService.saveBasicsGoods(basicsGoodsDTO);
 
     }
-
+    /**
+     * 新增商品
+     */
     @Override
     @ApiMethod
-    public ServerResponse queryProductLabels(HttpServletRequest request, String productId) {
-        return djBasicsProductService.queryProductLabels(productId);
-    }
+    public ServerResponse insertProduct(HttpServletRequest request, String productArr) {
+        return djBasicsProductService.insertProduct(productArr);
 
-    @Override
-    @ApiMethod
-    public ServerResponse addLabelsValue(HttpServletRequest request, String jsonStr) {
-        return djBasicsProductService.addLabelsValue(jsonStr);
     }
-
 }
