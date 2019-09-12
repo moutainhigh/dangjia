@@ -29,5 +29,15 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
         return djBasicsProductService.queryProductData(name);
 
     }
+    /**
+     * 新增货品
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse saveBasicsGoods(HttpServletRequest request, String name, String categoryId, Integer buy,
+                                    Integer sales, String unitId, Integer type, String arrString, String otherName) {
+        return djBasicsProductService.saveBasicsGoods(name, categoryId, buy, sales, unitId, type, arrString, otherName);
+
+    }
 
 }
