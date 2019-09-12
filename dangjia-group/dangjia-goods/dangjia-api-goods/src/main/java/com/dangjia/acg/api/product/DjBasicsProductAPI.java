@@ -1,6 +1,7 @@
 package com.dangjia.acg.api.product;
 
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.product.DjBasicsProduct;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -23,4 +24,11 @@ public interface DjBasicsProductAPI {
     @ApiOperation(value = "查询商品信息", notes = "查询商品信息")
     ServerResponse queryProductData(@RequestParam("request")HttpServletRequest request,
                                     @RequestParam("name")String name);
+
+
+    @PostMapping("/product/djBasicsProduct/queryProductDataByID")
+    @ApiOperation(value = "根据主键查询商品信息", notes = "根据主键查询商品信息")
+    DjBasicsProduct queryProductDataByID(@RequestParam("request")HttpServletRequest request,
+                                         @RequestParam("id")String id);
+
 }

@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 @Api(value = "当家用户收藏接口", description = "当家用户收藏接口")
 public interface MemberCollectAPI {
 
+
     @RequestMapping(value = "member/collect/queryHouse", method = RequestMethod.POST)
     @ApiOperation(value = "查询收藏的工地记录", notes = "查询收藏的工地记录")
     ServerResponse queryCollectHouse(@RequestParam("request") HttpServletRequest request,
