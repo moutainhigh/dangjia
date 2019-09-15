@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.member;
 
+import com.dangjia.acg.api.product.DjBasicsProductAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
@@ -10,6 +11,7 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyImageMapper;
 import com.dangjia.acg.mapper.deliver.IOrderMapper;
+
 import com.dangjia.acg.mapper.member.IMemberCollectMapper;
 import com.dangjia.acg.modle.config.Sms;
 import com.dangjia.acg.modle.house.House;
@@ -46,8 +48,10 @@ public class MemberCollectService {
     @Autowired
     private IHouseFlowApplyImageMapper houseFlowApplyImageMapper;
 
+    @Autowired
+    private DjBasicsProductAPI djBasicsProductAPI;
     /**
-     *查询收藏的商品记录
+     *新增查询收藏的商品记录
      * @param request
      * @param userToken
      * @param pageDTO
@@ -63,17 +67,45 @@ public class MemberCollectService {
             Member member = (Member) object;//获取用户信息
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());//初始化分页插件
 
-            List<DjBasicsProduct> goodsList=iMemberCollectMapper.queryCollectGood(member.getId());//获取商品集合
-            if(goodsList.size()<=0){
+
+
+            List<DjBasicsProduct> productList=new ArrayList<DjBasicsProduct>();//获取商品集合
+            //dj_basics_product 基础产品表   dj_member_collect 收藏表
+            //改造获取商品集合方法
+            Example example = new Example(MemberCollect.class);
+            example.createCriteria().andEqualTo(MemberCollect.MEMBER_ID,member.getId());
+            List<MemberCollect> MemberCollectList=iMemberCollectMapper.selectByExample(example);
+
+            DjBasicsProduct djBasicsProductDTO=new DjBasicsProduct();
+            for(MemberCollect memberCollect :MemberCollectList )
+            {
+                String houseId=memberCollect.getHouseId();
+                DjBasicsProduct djBasicsProduct=djBasicsProductAPI.queryProductDataByID(request,houseId);
+
+                djBasicsProductDTO.setName(djBasicsProduct.getName());
+                djBasicsProductDTO.setGoodsId(djBasicsProduct.getGoodsId());
+                djBasicsProductDTO.setProductSn(djBasicsProduct.getProductSn());
+                djBasicsProductDTO .setImage(djBasicsProduct.getImage());
+                djBasicsProductDTO.setUnitName(djBasicsProduct.getUnitName());
+                djBasicsProductDTO.setUnitId(djBasicsProduct.getUnitId());
+                djBasicsProductDTO.setCategoryId(djBasicsProduct.getCategoryId());
+                djBasicsProductDTO.setLabelId(djBasicsProduct.getLabelId());
+                djBasicsProductDTO.setType(djBasicsProduct.getType());
+                djBasicsProductDTO.setMaket(djBasicsProduct.getMaket());
+                djBasicsProductDTO.setPrice(djBasicsProduct.getPrice());
+                djBasicsProductDTO.setOtherName(djBasicsProduct.getOtherName());
+                djBasicsProductDTO.setIstop(djBasicsProduct.getIstop());
+                djBasicsProductDTO.setRemark(djBasicsProduct.getRemark());
+                productList.add(djBasicsProductDTO);
+            }
+
+
+            if(productList.size()<=0){
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
-            PageInfo pageResult = new PageInfo(goodsList);
+            PageInfo pageResult = new PageInfo(productList);
             List<Map> goodsMap = new ArrayList<>();
-
-
-
-            
-            for (DjBasicsProduct djBasicsProduct : goodsList) {
+            for (DjBasicsProduct djBasicsProduct : productList) {
                 Map map = BeanUtils.beanToMap(djBasicsProduct);
                 List<String> goodList = new ArrayList<>();
                 //价格
@@ -88,10 +120,6 @@ public class MemberCollectService {
                 if (!CommonUtil.isEmpty(djBasicsProduct.getImage())) {
                     goodList.add(djBasicsProduct.getImage());
                 }
-
-
-
-
                 map.put("goodList",goodList);//封装好的产品集合
                 map.put("goodName", djBasicsProduct.getName());//产品名称
                 map.put("imageUrl", configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class)+djBasicsProduct.getImage());//商品图片
@@ -160,7 +188,7 @@ public class MemberCollectService {
 
 
     /**
-     *  检测该工地是否已收藏
+     *  优化优化检测该工地是否已收藏
      * @param request userToken
      * @param houseId 房子ID或者房子
      * @return
@@ -186,7 +214,7 @@ public class MemberCollectService {
     }
 
     /**
-     * 添加收藏
+     * 优化添加收藏
      * @param request userToken
      * @param houseId 房子ID或者房子
      * @return
@@ -208,7 +236,7 @@ public class MemberCollectService {
     }
 
     /**
-     * 取消收藏
+     * 优化取消收藏
      * @param request userToken
      * @param houseId 收藏的工地ID或者房子
      * @return

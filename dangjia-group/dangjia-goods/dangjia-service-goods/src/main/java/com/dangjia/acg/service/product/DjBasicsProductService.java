@@ -34,6 +34,10 @@ import java.util.Date;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -410,4 +414,16 @@ public class DjBasicsProductService {
 
 
     }
+
+    /**
+     * 查询单个商品
+     * @param request
+     * @param id
+     * @return
+     */
+    public DjBasicsProduct queryProductDataByID(HttpServletRequest request, String id)
+    {
+        return djBasicsProductMapper.selectByPrimaryKey(id);
+    }
+
 }

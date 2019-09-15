@@ -76,7 +76,7 @@
         ORDER BY c.create_date DESC
     </select>
 
-    <!--产品收藏列表-->
+    <!--产品收藏列表
     <select id="queryCollectGood" resultType="com.dangjia.acg.modle.house.House">
         SELECT
         <include refid="basic_goods_columns"/>
@@ -88,7 +88,7 @@
             AND c.member_id = #{memberId}
         </if>
         ORDER BY c.create_date DESC
-    </select>
+    </select>-->
 
 </mapper>
 
