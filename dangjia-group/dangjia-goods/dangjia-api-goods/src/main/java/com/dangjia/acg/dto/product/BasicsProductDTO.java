@@ -90,7 +90,7 @@ public class BasicsProductDTO extends BaseEntity {
 
     private String workerStandard;//工艺标准
 
-    private Integer showGoods;
+    private Integer showGoods;//是否展示
 
     private Double lastPrice; //调后单价
 

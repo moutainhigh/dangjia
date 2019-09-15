@@ -18,8 +18,6 @@
         istop,
         price as price,
         other_name as otherName
-       create_date      as createDate,
-       modify_date      as modifyDate
     </sql>
 
     <!-- 查询当前添加商品的属性值是否已被用(存在相关属性值的商品) -->

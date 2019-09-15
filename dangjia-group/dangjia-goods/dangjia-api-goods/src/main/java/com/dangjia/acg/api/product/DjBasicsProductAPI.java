@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletRequest;
  * Date: 2019/9/11
  * Time: 13:56
  */
-@Api(description = "商品接口")
+@Api(description = "商品3.0管理接口")
 @FeignClient("dangjia-service-goods")
 public interface DjBasicsProductAPI {
 

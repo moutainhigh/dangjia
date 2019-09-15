@@ -23,10 +23,6 @@ import javax.persistence.Table;
 @ApiModel(description = "商品表实体")
 @FieldNameConstants(prefix = "")
 public class DjBasicsProduct extends BaseEntity {
-    @Column(name = "id")
-    @Desc(value = "商品ID")
-    @ApiModelProperty("商品ID")
-    private String id;
 
     @Column(name = "name")
     @Desc(value = "名称")
