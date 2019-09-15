@@ -73,4 +73,36 @@
         ORDER BY istop DESC,create_date desc
     </select>
 
+    <!--  按照 属性id 和属性值查找商品 -->
+    <select id="getPListByValueIdArrOrAttrId" resultType="com.dangjia.acg.modle.product.DjBasicsProduct">
+        select
+        p.id as id,
+        p.name as name,
+        p.goods_id as goodsId,
+        p.category_id as categoryId,
+        p.product_sn as productSn,
+        p.image as image,
+        p.unit_id as unitId,
+        p.label_id as labelId,
+        p.unit_name as unitName,
+        p.type as type,
+        p.price as price,
+        p.istop,
+        pm.brand_id as brandId,
+        pm.brand_series_id as brandSeriesId,
+        pm.attribute_id_arr AS attributeIdArr,
+        pm.value_name_arr AS valueNameArr,
+        pm.value_id_arr AS valueIdArr
+        from dj_basics_product p
+        INNER JOIN dj_basics_product_material pm
+        on p.id=pm.product_id
+        where
+        p.type=1 and p.maket=1
+        <if test="attributeIdArr!=null and attributeIdArr!=''">
+            and FIND_IN_SET(#{attributeIdArr},pm.attribute_id_arr)
+        </if>
+        <if test="valueIdArr!=null and valueIdArr!=''">
+            and FIND_IN_SET(#{valueIdArr},pm.value_id_arr)
+        </if>
+    </select>
 </mapper>
