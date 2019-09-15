@@ -195,7 +195,7 @@ public class ModelingVillageService {
                     modelingVillageMapper.updateByPrimaryKeySelective(modelingVillage);
                 } else {
                     residentialBuilding = residentialBuildingMapper.selectByPrimaryKey(residentialBuildingId);
-                    if (!residentialBuilding.getBuilding().equals(building)) {
+                    if (residentialBuilding.getBuilding().equals(building)) {
                         return ServerResponse.createByErrorMessage("楼栋名称已存在");
                     }
                     residentialBuilding.setBuilding(building);//楼栋名称

@@ -32,6 +32,14 @@ public interface CatetgoryLabelAPI {
                                                  @RequestParam("pageDTO") PageDTO pageDTO);
 
     /**
+     * 查询所有的分类标签列表
+     * @param request
+     * @return
+     */
+    @PostMapping("/product/categoryLabel/getAllCategoryLabelList")
+    @ApiOperation(value = "查询所有类别标签列表", notes = "查询所有类别标签列表")
+    ServerResponse getAllCategoryLabelList(@RequestParam("request") HttpServletRequest request);
+    /**
      * 修改类别标签
      *
      * @param labelId   标签ID

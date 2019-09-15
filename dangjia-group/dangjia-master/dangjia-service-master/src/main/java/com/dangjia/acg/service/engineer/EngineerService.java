@@ -144,7 +144,8 @@ public class EngineerService {
             hw.setModifyDate(new Date());
             houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
 
-
+            houseWorker.setCreateDate(new Date());
+            houseWorker.setModifyDate(new Date());
             houseWorker.setWorkType(6);
             houseWorker.setIsSelect(1);
             houseWorker.setWorkerId(workerId);

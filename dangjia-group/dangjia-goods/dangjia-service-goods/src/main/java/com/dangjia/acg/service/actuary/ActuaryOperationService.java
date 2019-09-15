@@ -341,6 +341,36 @@ public class ActuaryOperationService {
     }
 
     /**
+     * 新版商品详情
+     * gId:  WorkerGoodsId   ProductId
+     */
+    public ServerResponse getGoodsDetailNew(String gId, int type) {
+        try {
+            if (type == 1 || type == 4) {//人工
+                WorkerGoods workerGoods = workerGoodsMapper.selectByPrimaryKey(gId);//人工商品
+                WorkerGoodsDTO wGoodsDTO = workerGoodsService.assembleWorkerGoodsResult(workerGoods);
+                return ServerResponse.createBySuccess("查询成功", wGoodsDTO);
+            } else if (type == 2 || type == 3 || type == 5) {//材料商品  包工包料商品
+                Product product = productMapper.selectByPrimaryKey(gId);//当前 货品
+                if(product == null){
+                    return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "该商品已禁用！");
+                }
+                GoodsDTO goodsDTO = goodsDetail(product, null);
+                if (goodsDTO != null) {
+                    return ServerResponse.createBySuccess("查询成功", goodsDTO);
+                } else {
+                    return ServerResponse.createByErrorMessage("查询失败,数据异常");
+                }
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败,数据异常");
+        }
+        return ServerResponse.createByErrorMessage("查询失败,type错误");
+    }
+
+    /**
      * 商品详情
      * gId:  WorkerGoodsId   ProductId
      */

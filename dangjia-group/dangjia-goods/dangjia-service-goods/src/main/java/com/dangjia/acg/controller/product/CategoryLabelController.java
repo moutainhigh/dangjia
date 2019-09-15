@@ -39,6 +39,16 @@ public class CategoryLabelController implements CatetgoryLabelAPI {
     }
 
     /**
+     * 查询所有类别标签,不分页
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getAllCategoryLabelList(HttpServletRequest request){
+        return categoryLabelService.getAllCategoryLabelList();
+    }
+
+    /**
      * 修改类别标签
      * @param labelId 标签ID
      * @param labelName	标签名称

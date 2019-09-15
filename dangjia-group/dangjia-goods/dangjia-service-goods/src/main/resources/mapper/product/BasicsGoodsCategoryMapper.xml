@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.product.IBasicsGoodsCategoryMapper">
+
+    <sql id="all_columns">
+        id,
+        NAME,
+        parent_id AS parentId,
+        parent_top AS parentTop,
+        image,
+        create_date AS createDate,
+        modify_date AS modifyDate,
+        is_last_category AS isLastCategory,
+        purchase_restrictions AS purchaseRestrictions,
+        brand_ids AS brandIds,
+        cover_image AS coverImage,
+        category_label_id categoryLabelId
+	</sql>
+    <!-- 删除对象 -->
+    <delete id="deleteById" parameterType="java.lang.String">
+		DELETE FROM dj_basics_goods_category 
+		WHERE id=#{id}
+	</delete>
+    <!-- 查询所有 -->
+    <select id="query" resultType="com.dangjia.acg.modle.product.BasicsGoodsCategory">
+		SELECT
+            id,
+            NAME,
+            parent_id AS parentId,
+            parent_top AS parentTop,
+            image,
+            create_date AS createDate,
+            modify_date AS modifyDate,
+            is_last_category AS isLastCategory,
+            purchase_restrictions AS purchaseRestrictions,
+            brand_ids AS brandIds,
+            cover_image AS coverImage,
+            category_label_id categoryLabelId
+		FROM dj_basics_goods_category
+	</select>
+    <!-- 批量插入数据 -->
+    <insert id="insertBatch" parameterType="java.util.List">
+        insert into dj_basics_goods_category
+        (<include refid="all_columns"/>)
+        values
+        <foreach collection="list" item="goods" index="index" separator=",">
+            (
+            #{goods.id}, #{goods.name},#{goods.parent_id}, #{goods.parent_top},
+            #{goods.image},SYSDATE(),SYSDATE(),#{goods.is_last_category},#{goods.purchase_restrictions},#{goods.brand_ids},
+            #{goods.cover_image},#{goods.category_label_id}
+            )
+        </foreach>
+    </insert>
+
+    <!-- 根据父id查询下属商品类别 -->
+    <select id="queryCategoryByParentId" resultType="com.dangjia.acg.modle.product.BasicsGoodsCategory">
+        SELECT
+        <include refid="all_columns"/>
+        FROM dj_basics_goods_category where parent_id =#{parentId}
+        ORDER BY create_date desc
+    </select>
+
+    <!-- 根据父id查询下属商品类别 -->
+    <select id="queryCategoryByName" resultType="com.dangjia.acg.modle.product.BasicsGoodsCategory">
+        SELECT
+        <include refid="all_columns"/>
+        FROM dj_basics_goods_category where name =#{name}
+        ORDER BY create_date desc
+    </select>
+    <select id="getProductList" resultType="com.dangjia.acg.modle.basics.HomeProductDTO">
+        SELECT
+        p.id AS id,
+        p.image AS image,
+        p.price AS price,
+        u.name AS unitName,
+        g.type AS goodsType,
+        0 AS type,
+        p.NAME AS NAME
+        FROM
+        dj_basics_product p
+        INNER JOIN dj_basics_goods_category c ON c.id = p.category_id
+        INNER JOIN dj_basics_goods g ON g.id = p.goods_id
+        INNER JOIN dj_basics_unit u ON u.id = p.convert_unit
+        WHERE
+        p.maket = 1
+        AND p.type = 1
+        <if test="categoryId!=null and categoryId!=''">
+            AND c.parent_top = #{categoryId}
+        </if>
+        ORDER BY p.istop DESC,
+        p.create_date DESC
+    </select>
+
+
+</mapper>
