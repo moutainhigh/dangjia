@@ -55,10 +55,7 @@
             and m.modify_date between #{beginDate} and #{endDate}
         </if>
         <if test="searchKey!=null and searchKey!=''">
-            and ( m.ship_address like CONCAT('%',#{searchKey},'%')
-            or m.ship_mobile like CONCAT('%',#{searchKey},'%')
-            or m.ship_name like CONCAT('%',#{searchKey},'%')
-            or m.supplier_name like CONCAT('%',#{searchKey},'%'))
+            and (m.supplier_name like CONCAT('%',#{searchKey},'%'))
         </if>
         GROUP BY
         m.supplier_id
@@ -101,10 +98,7 @@
             and s.modify_date between #{beginDate} and #{endDate}
         </if>
         <if test="searchKey!=null and searchKey!=''">
-            and ( s.ship_address like CONCAT('%',#{searchKey},'%')
-            or s.ship_mobile like CONCAT('%',#{searchKey},'%')
-            or s.ship_name like CONCAT('%',#{searchKey},'%')
-            or s.supplier_name like CONCAT('%',#{searchKey},'%'))
+            and (s.supplier_name like CONCAT('%',#{searchKey},'%'))
         </if>
         GROUP BY
         s.supplier_id
