@@ -8,8 +8,9 @@ import javax.servlet.http.HttpServletRequest;
 
 @RestController
 public class CartController  implements CartAPI {
+
     @Override
-    public ServerResponse add(HttpServletRequest request, String userToken) {
+    public ServerResponse add(HttpServletRequest request, String userToken, String productId, int num) {
         return null;
     }
 
@@ -19,17 +20,17 @@ public class CartController  implements CartAPI {
     }
 
     @Override
-    public ServerResponse updateCartNum(HttpServletRequest request, String userToken) {
+    public ServerResponse updateCartNum(HttpServletRequest request, String userToken, String productId, int num) {
         return null;
     }
 
     @Override
-    public ServerResponse checkAll(HttpServletRequest request, String userToken) {
+    public ServerResponse checkAll(HttpServletRequest request, String userToken, String checked) {
         return null;
     }
 
     @Override
-    public ServerResponse delCartProduct(HttpServletRequest request, String userToken) {
+    public ServerResponse delCartProduct(HttpServletRequest request, String userToken, String productId) {
         return null;
     }
 
