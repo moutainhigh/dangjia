@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.product.DjBasicsProductWorkerMapper">
+    <!-- 根据商品ID查询商品材料表信息 -->
+    <select id="queryProductWorkerByProductId" resultType="com.dangjia.acg.modle.product.DjBasicsProductWorker">
+
+        SELECT
+            id,
+            create_date,
+            modify_date,
+            product_id,
+            work_explain,
+            worker_dec,
+            worker_standard,
+            worker_type_id,
+            last_price,
+            last_time,
+            technology_ids,
+            considerations,
+            calculate_content,
+            build_content,
+            is_agency_purchase
+        FROM
+            dj_basics_product_worker
+        where data_status = 0
+        and product_id = #{productId}
+    </select>
+
+
+
+</mapper>

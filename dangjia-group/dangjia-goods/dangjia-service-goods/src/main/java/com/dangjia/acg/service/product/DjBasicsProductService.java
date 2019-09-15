@@ -1,43 +1,33 @@
 package com.dangjia.acg.service.product;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.api.app.repair.MasterMendWorkerAPI;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dto.product.BasicsGoodsDTO;
-import com.dangjia.acg.mapper.basics.IGoodsSeriesMapper;
-import com.dangjia.acg.common.util.DateUtil;
+import com.dangjia.acg.dto.product.BasicsProductDTO;
 import com.dangjia.acg.dto.product.DjBasicsLabelDTO;
-import com.dangjia.acg.mapper.product.DjBasicsLabelMapper;
-import com.dangjia.acg.mapper.product.DjBasicsLabelValueMapper;
-import com.dangjia.acg.mapper.product.DjBasicsProductLabelValMapper;
-import com.dangjia.acg.mapper.product.DjBasicsProductMapper;
-import com.dangjia.acg.mapper.product.IBasicsGoodsMapper;
-import com.dangjia.acg.modle.basics.Product;
-import com.dangjia.acg.modle.product.BasicsGoods;
-import com.dangjia.acg.modle.product.DjBasicsLabel;
-import com.dangjia.acg.modle.product.DjBasicsLabelValue;
-import com.dangjia.acg.modle.product.DjBasicsProduct;
-import com.dangjia.acg.service.basics.ProductService;
+import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
+import com.dangjia.acg.mapper.basics.ITechnologyMapper;
+import com.dangjia.acg.mapper.product.*;
+import com.dangjia.acg.modle.basics.WorkerGoods;
+import com.dangjia.acg.modle.product.*;
+import com.dangjia.acg.service.basics.TechnologyService;
 import org.apache.commons.lang3.StringUtils;
-import com.dangjia.acg.modle.product.DjBasicsProductLabelVal;
-import com.dangjia.acg.modle.sale.residential.ResidentialBuilding;
-import com.dangjia.acg.modle.store.Store;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.Date;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -61,8 +51,23 @@ public class DjBasicsProductService {
     @Autowired
     private IBasicsGoodsMapper iBasicsGoodsMapper;
     @Autowired
-    private IGoodsSeriesMapper iGoodsSeriesMapper;
+    private TechnologyService technologyService;
 
+    @Autowired
+    private ITechnologyMapper iTechnologyMapper;
+
+    @Autowired
+    private DjBasicsGoodsMapper djBasicsGoodsMapper;
+    @Autowired
+    private DjBasicsProductMaterialMapper djBasicsProductMaterialMapper;
+
+    @Autowired
+    private DjBasicsProductWorkerMapper djBasicsProductWorkerMapper;
+
+    @Autowired
+    private IBudgetWorkerMapper iBudgetWorkerMapper;
+    @Autowired
+    private MasterMendWorkerAPI masterMendWorkerAPI;
     /**
      * 查询商品信息
      *
@@ -115,7 +120,7 @@ public class DjBasicsProductService {
             iBasicsGoodsMapper.insert(goods);
             return ServerResponse.createBySuccess("新增成功", goods.getId());
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.error("新增货品失败：",e);
             return ServerResponse.createByErrorMessage("新增失败");
         }
     }
@@ -157,74 +162,49 @@ public class DjBasicsProductService {
      * @param productArr
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse insertProduct(String productArr) {
-        try {/*
             JSONArray jsonArr = JSONArray.parseArray(productArr);
             for (int i = 0; i < jsonArr.size(); i++) {
                 JSONObject obj = jsonArr.getJSONObject(i);
-
-                String unitId = obj.getString("unitId");//单位
-                if (!StringUtils.isNotBlank(unitId))
-                    return ServerResponse.createByErrorMessage("单位id不能为空");
-
-                String unitName = obj.getString("unitName");//单位
-                if (!StringUtils.isNotBlank(unitName))
-                    return ServerResponse.createByErrorMessage("单位名字不能为空");
-
-                String categoryId = obj.getString("categoryId");//分类id
-                if (!StringUtils.isNotBlank(categoryId))
-                    return ServerResponse.createByErrorMessage("商品分类不能为空");
-
-                String goodsId = obj.getString("goodsId");//goodsid
-                if (!StringUtils.isNotBlank(goodsId))
-                    return ServerResponse.createByErrorMessage("商品id不能为空");
-
-                String id = obj.getString("id");//id
-                String productSn = obj.getString("productSn");//商品编号
-                if (!StringUtils.isNotBlank(productSn))
-                    return ServerResponse.createByErrorMessage("商品编号不能为空");
-
-                String name = obj.getString("name");//商品名字
-                if (!StringUtils.isNotBlank(name))
-                    return ServerResponse.createByErrorMessage("商品名字不能为空");
-
-                Double convertQuality = obj.getDouble("convertQuality");//换算量
-                LOG.info("insertProduct convertQuality:" + convertQuality);
-                if (convertQuality <= 0)
-                    return ServerResponse.createByErrorMessage("换算量必须大于0");
-
-                String brandId = obj.getString("brandId");
-                String brandSeriesId = obj.getString("brandSeriesId");
-                String valueNameArr = obj.getString("valueNameArr");
-                String valueIdArr = obj.getString("valueIdArr");
-                String attributeIdArr = obj.getString("attributeIdArr");
-
-                if (!StringUtils.isNotBlank(id)) {//没有id则新增
-                    int brandSeriesIdCount = 0;
-                    //同品牌同系列无属性值
-
-
+                //JSON对象转换成Java对象
+                BasicsProductDTO basicsProductDTO = JSONObject.toJavaObject(obj, BasicsProductDTO.class);
+                //1.判断必填字段是否为空
+                String checkStr = checkFielsNull(basicsProductDTO);
+                if(StringUtils.isNotBlank(checkStr)){
+                    return ServerResponse.createByErrorMessage(checkStr);
                 }
-
+                String id = basicsProductDTO.getId();//商品ID
+                String name = basicsProductDTO.getName();//商品名称
+                String productSn = basicsProductDTO.getProductSn();//商品编码
+                //判断当前添加的属性值是否有相同的已存在的商品
+                checkStr = checkProductAttr(basicsProductDTO,jsonArr);
+                if(StringUtils.isNotBlank(checkStr)){
+                    return ServerResponse.createByErrorMessage(checkStr);
+                }
+                //校验商品是否存在
                 String ret = checkProduct(name, productSn, id, jsonArr);
                 if (!ret.equals("ok")) {
                     return ServerResponse.createByErrorMessage(ret);
                 }
             }
-
-
+            //添加商品
             for (int i = 0; i < jsonArr.size(); i++) {
                 JSONObject obj = jsonArr.getJSONObject(i);
-                Product product = new Product();
-                String productId = obj.getString("id");
-                product.setName(obj.getString("name"));//product品名称
-                product.setCategoryId(obj.getString("categoryId"));//分类id
-                product.setGoodsId(obj.getString("goodsId"));//goodsid
-                String productSn = obj.getString("productSn");
+                BasicsProductDTO basicsProductDTO = JSONObject.toJavaObject(obj, BasicsProductDTO.class);
+                String categoryId=basicsProductDTO.getCategoryId();//商品类别Id
+                DjBasicsGoods basicsGoods = djBasicsGoodsMapper.selectByPrimaryKey(categoryId);
+
+                DjBasicsProduct product = new DjBasicsProduct();
+                String productId = basicsProductDTO.getId();
+                product.setName(basicsProductDTO.getName());//product品名称
+                product.setCategoryId(categoryId);//分类id
+                product.setGoodsId(basicsProductDTO.getGoodsId());//goodsid
+                String productSn = basicsProductDTO.getProductSn();
                 if (!StringUtils.isNotBlank(productSn))
                     return ServerResponse.createByErrorMessage("商品编号不能为空");
                 product.setProductSn(productSn);//商品编号
-                String[] imgArr = obj.getString("image").split(",");
+                String[] imgArr = basicsProductDTO.getImage().split(",");
 //                String[] technologyIds = obj.getString("technologyIds").split(",");//工艺节点
                 StringBuilder imgStr = new StringBuilder();
                 for (int j = 0; j < imgArr.length; j++) {
@@ -238,55 +218,12 @@ public class DjBasicsProductService {
                 if (!StringUtils.isNotBlank(imgStr.toString()))
                     return ServerResponse.createByErrorMessage("商品图片不能为空");
                 product.setImage(imgStr.toString());//图片地址
-                product.setUnitId(obj.getString("unitId"));//单位
+                product.setUnitId(basicsProductDTO.getUnitId());//单位
 //                product.setLabelId(obj.getString("labelId"));//标签
-                product.setUnitName(obj.getString("unitName"));//单位
-                product.setWeight(obj.getDouble("weight"));//重量
-                product.setConvertQuality(obj.getDouble("convertQuality"));//换算量
-                product.setConvertUnit(obj.getString("convertUnit"));//换算单位
-                product.setType(obj.getInteger("type"));//是否禁用0：禁用；1不禁用
-                product.setMaket(obj.getInteger("maket"));//是否上架0：不上架；1：上架
-                product.setCost(0.00);//平均成本价
-                product.setPrice(obj.getDouble("price"));//销售价
-                product.setProfit(obj.getDouble("profit"));//利润率
-
-                if (!StringUtils.isNoneBlank(obj.getString("brandId"))) {
-                    product.setBrandId(null);
-                } else {
-                    product.setBrandId(obj.getString("brandId"));
-                }
-
-                if (!StringUtils.isNoneBlank(obj.getString("brandSeriesId"))) {
-                    product.setBrandSeriesId(null);
-                } else {
-                    product.setBrandSeriesId(obj.getString("brandSeriesId"));
-                }
-
-//                product.setBrandId(obj.getString("brandId"));//品牌id
-//                String brandSeriesId = obj.getString("brandSeriesId");
-//                if (!StringUtils.isNotBlank(brandSeriesId))
-//                    return ServerResponse.createByErrorMessage("品牌系列id不能为空");
-//                product.setBrandSeriesId(brandSeriesId);//品牌系列id
-
-
-                if (!StringUtils.isNoneBlank(obj.getString("valueNameArr"))) {
-                    product.setValueNameArr(null);
-                } else {
-                    product.setValueNameArr(obj.getString("valueNameArr"));
-                }
-
-                if (!StringUtils.isNoneBlank(obj.getString("valueIdArr"))) {
-                    product.setValueIdArr(null);
-                } else {
-                    product.setValueIdArr(obj.getString("valueIdArr"));
-                }
-
-                if (!StringUtils.isNoneBlank(obj.getString("attributeIdArr"))) {
-                    product.setAttributeIdArr(null);
-                } else {
-                    product.setAttributeIdArr(obj.getString("attributeIdArr"));
-                }
-
+                product.setUnitName(basicsProductDTO.getUnitName());//单位
+                product.setType(basicsProductDTO.getType());//是否禁用0：禁用；1不禁用
+                product.setMaket(basicsProductDTO.getMaket());//是否上架0：不上架；1：上架
+                product.setPrice(basicsProductDTO.getPrice());//销售价
                 if (productId == null || "".equals(productId)) {//没有id则新增
                     product.setCreateDate(new Date());
                     product.setModifyDate(new Date());
@@ -296,35 +233,195 @@ public class DjBasicsProductService {
                     product.setModifyDate(new Date());
                     djBasicsProductMapper.updateByPrimaryKey(product);
                 }
+                LOG.info("001----------insertProduct productId:" + product.getId());
+                if("2".equals(basicsGoods.getType())){
+                    //添加人工商品扩展信息
+                    LOG.info("002-----添加人工商品扩展信息:" + product.getId());
+                    DjBasicsProductWorker djBasicsProductWorker = new DjBasicsProductWorker();
+                    djBasicsProductWorker.setProductId(product.getId());
+                    djBasicsProductWorker.setWorkExplain(basicsProductDTO.getWorkExplain());
+                    djBasicsProductWorker.setWorkerDec(basicsProductDTO.getWorkerDec());
+                    djBasicsProductWorker.setWorkerStandard(basicsProductDTO.getWorkerStandard());
+                    djBasicsProductWorker.setWorkerTypeId(basicsProductDTO.getWorkerTypeId());
+                    djBasicsProductWorker.setLastPrice(basicsProductDTO.getLastPrice());
+                    djBasicsProductWorker.setLastTime(basicsProductDTO.getLastTime());
+                    djBasicsProductWorker.setTechnologyIds(basicsProductDTO.getTechnologyIds());
+                    djBasicsProductWorker.setConsiderations(basicsProductDTO.getConsiderations());
+                    djBasicsProductWorker.setCalculateContent(basicsProductDTO.getCalculateContent());
+                    djBasicsProductWorker.setBuildContent(basicsProductDTO.getBuildContent());
+                    djBasicsProductWorker.setIsAgencyPurchase(basicsProductDTO.getIsAgencyPurchase());
+                    //根据商品ID查询扩展表的ID
+                    DjBasicsProductWorker oldBasicsProductWorker = djBasicsProductWorkerMapper.queryProductWorkerByProductId(product.getId());
+                    if(oldBasicsProductWorker!=null&&StringUtils.isNotBlank(oldBasicsProductWorker.getId())){
+                        //更新
+                        djBasicsProductWorker.setId(oldBasicsProductWorker.getId());
+                        djBasicsProductWorker.setModifyDate(new Date());
+                        if (djBasicsProductWorkerMapper.updateByPrimaryKeySelective(djBasicsProductWorker) < 0) {
+                            return ServerResponse.createByErrorMessage("更新工价商品失败");
+                        } else {
+                            //相关联表也更新
+                            iBudgetWorkerMapper.updateBudgetMaterialById(product.getId());
+                            Example example = new Example(DjBasicsProduct.class);
+                            example.createCriteria().andEqualTo(DjBasicsProduct.ID, product.getId());
+                            List<DjBasicsProduct> list = djBasicsProductMapper.selectByExample(example);
+                            masterMendWorkerAPI.updateMendWorker(JSON.toJSONString(list));
+                        }
+                    }else{
+                        //添加
+                        djBasicsProductWorker.setCreateDate(new Date());
+                        djBasicsProductWorker.setModifyDate(new Date());
+                        if (djBasicsProductWorkerMapper.insert(djBasicsProductWorker) < 0)
+                            return ServerResponse.createByErrorMessage("新增工价商品失败");
+                    }
 
-                LOG.info("insertProduct productId:" + product.getId());
-                String ret = technologyService.insertTechnologyList(obj.getString("technologyList"), "0", 0, product.getId());
-                if (!ret.equals("1"))  //如果不成功 ，弹出是错误提示
-                    return ServerResponse.createByErrorMessage(ret);
+                }else if("0".equals(basicsGoods.getType())||"1".equals(basicsGoods.getType())){
+                    LOG.info("003------添加材料商品扩展信息:" + product.getId());
+                    //添加材料商品扩展信息(材料和包工包料）
+                    DjBasicsProductMaterial djBasicsProductMaterial = new DjBasicsProductMaterial();
+                    djBasicsProductMaterial.setProductId(product.getId());
+                    djBasicsProductMaterial.setWeight(basicsProductDTO.getWeight());
+                    djBasicsProductMaterial.setCost(basicsProductDTO.getCost());
+                    djBasicsProductMaterial.setProfit(basicsProductDTO.getProfit());
+                    djBasicsProductMaterial.setConvertQuality(basicsProductDTO.getConvertQuality());
+                    djBasicsProductMaterial.setConvertUnit(basicsProductDTO.getConvertUnit());
+                    djBasicsProductMaterial.setIsInflueWarrantyPeriod(basicsProductDTO.getIsInflueWarrantyPeriod());
+                    djBasicsProductMaterial.setWorkerTypeId(basicsProductDTO.getWorkerTypeId());
+                    djBasicsProductMaterial.setMaxWarrantyPeriodYear(basicsProductDTO.getMaxWarrantyPeriodYear());
+                    djBasicsProductMaterial.setMinWarrantyPeriodYear(basicsProductDTO.getMinWarrantyPeriodYear());
+                    djBasicsProductMaterial.setMarketingName(basicsProductDTO.getMarketingName());
+                    djBasicsProductMaterial.setCartagePrice(basicsProductDTO.getCartagePrice());
+                    djBasicsProductMaterial.setDetailImage(basicsProductDTO.getDetailImage());
+                    djBasicsProductMaterial.setGuaranteedPolicy(basicsProductDTO.getGuaranteedPolicy());
+                    djBasicsProductMaterial.setRefundPolicy(basicsProductDTO.getRefundPolicy());
+                    if (!StringUtils.isNoneBlank(basicsProductDTO.getValueNameArr())) {
+                        djBasicsProductMaterial.setValueNameArr(null);
+                    } else {
+                        djBasicsProductMaterial.setValueNameArr(basicsProductDTO.getValueNameArr());
+                    }
+                    if (!StringUtils.isNoneBlank(basicsProductDTO.getValueIdArr())) {
+                        djBasicsProductMaterial.setValueIdArr(null);
+                    } else {
+                        djBasicsProductMaterial.setValueIdArr(basicsProductDTO.getValueIdArr());
+                    }
+                    if (!StringUtils.isNoneBlank(basicsProductDTO.getAttributeIdArr())) {
+                        djBasicsProductMaterial.setAttributeIdArr(null);
+                    } else {
+                        djBasicsProductMaterial.setAttributeIdArr(basicsProductDTO.getAttributeIdArr());
+                    }
+                    //根据商品ID查询扩展表的ID
+                    DjBasicsProductMaterial oldBasicsProductMaterial = djBasicsProductMaterialMapper.queryProductMaterialByProductId(product.getId());
+                    if(oldBasicsProductMaterial!=null&&StringUtils.isNotBlank(oldBasicsProductMaterial.getId())){
+                        //更新
+                        djBasicsProductMaterial.setId(oldBasicsProductMaterial.getId());
+                        djBasicsProductMaterial.setModifyDate(new Date());
+                        djBasicsProductMaterialMapper.updateByPrimaryKey(djBasicsProductMaterial);
 
-                String[] deleteTechnologyIdArr = obj.getString("deleteTechnologyIds").split(",");//选中的属性id字符串
-                for (String aDeleteTechnologyIdArr : deleteTechnologyIdArr) {
-                    if (iTechnologyMapper.selectByPrimaryKey(aDeleteTechnologyIdArr) != null) {
-                        if (iTechnologyMapper.deleteByPrimaryKey(aDeleteTechnologyIdArr) < 0)
-                            return ServerResponse.createByErrorMessage("删除id：" + aDeleteTechnologyIdArr + "失败");
+                    }else{
+                        //添加
+                        djBasicsProductMaterial.setCreateDate(new Date());
+                        djBasicsProductMaterial.setModifyDate(new Date());
+                        djBasicsProductMaterialMapper.insert(djBasicsProductMaterial);
+                    }
+                    //添加材料商品的工艺信息
+                    LOG.info("003----1---添加材料商品工艺信息:" + product.getId());
+                    String ret = technologyService.insertTechnologyList(obj.getString("technologyList"), "0", 0, product.getId());
+                    if (!ret.equals("1"))  //如果不成功 ，弹出是错误提示
+                        return ServerResponse.createByErrorMessage(ret);
+                }
+                //删除对应需要删除的工艺信息
+                String deleteTechnologyIds=obj.getString("deleteTechnologyIds");
+                if (!CommonUtil.isEmpty(deleteTechnologyIds)) {
+                    String[] deleteTechnologyIdArr = deleteTechnologyIds.split(",");
+                    for (String aDeleteTechnologyIdArr : deleteTechnologyIdArr) {
+                        if (iTechnologyMapper.selectByPrimaryKey(aDeleteTechnologyIdArr) != null) {
+                            if (iTechnologyMapper.deleteByPrimaryKey(aDeleteTechnologyIdArr) < 0)
+                                return ServerResponse.createByErrorMessage("删除id：" + aDeleteTechnologyIdArr + "失败");
+                        }
                     }
                 }
-//                iTechnologyMapper.deleteWokerTechnologyByWgId(product.getId());
-//                for (String id : technologyIds) {
-//                    if (StringUtils.isNotBlank(id)) {
-//                        WorkerTechnology wt = new WorkerTechnology();
-//                        wt.setWorkerGoodsId(product.getId());
-//                        wt.setTechnologyId(id);
-//                        iTechnologyMapper.insertWokerTechnology(wt);// 需要将工艺替换
-//                    }
-//                }
-            }*/
+
+            }
             return ServerResponse.createBySuccessMessage("新增成功");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("新增失败");
-        }
     }
+
+    /**
+     * 判断校验字段是否可以为空
+     * @param basicsProductDTO
+     * @return  //
+     */
+    private String checkFielsNull(BasicsProductDTO basicsProductDTO){
+        //判断添加商品时，对应的字段不能为空
+        /*if (!StringUtils.isNotBlank(basicsProductDTO.getUnitId()))
+           return "单位id不能为空";
+
+        if (!StringUtils.isNotBlank(basicsProductDTO.getUnitName()))
+            return "单位名字不能为空";
+*/
+        if (!StringUtils.isNotBlank(basicsProductDTO.getCategoryId()))
+            return "商品分类不能为空";
+
+        if (!StringUtils.isNotBlank(basicsProductDTO.getGoodsId()))
+            return "货品id不能为空";
+
+        if (!StringUtils.isNotBlank(basicsProductDTO.getProductSn()))//商品编号
+            return "商品编号不能为空";
+
+        if (!StringUtils.isNotBlank(basicsProductDTO.getName()))//商品名字
+            return "商品名字不能为空";
+
+      /*  Double convertQuality = basicsProductDTO;//换算量
+        LOG.info("insertProduct convertQuality:" + convertQuality);
+        if (convertQuality <= 0)
+            return "换算量必须大于0";
+*/
+        return "";
+    }
+
+    /**
+     * 判断属性值添加是否重复
+     * @param basicsProductDTO
+     * @param jsonArr
+     * @return
+     */
+    public String checkProductAttr(BasicsProductDTO basicsProductDTO,JSONArray jsonArr){
+        if (!StringUtils.isNotBlank(basicsProductDTO.getId())) {//没有id则新增,判断是当前添加的属性值是否重复，是否已存在
+            int valueIdArrCount = 0;
+            String valueIdArr = basicsProductDTO.getValueIdArr();
+            String productSn = basicsProductDTO.getProductSn();
+            String id=basicsProductDTO.getId();
+            String name=basicsProductDTO.getName();
+            //属性值判断
+            if (StringUtils.isNoneBlank(valueIdArr)
+                    && StringUtils.isNoneBlank(basicsProductDTO.getAttributeIdArr())) {
+
+                List<DjBasicsProduct> pValueList = djBasicsProductMapper.getPListByValueIdArr(valueIdArr);
+                if (pValueList.size() > 0) {
+                    String ret = checkProduct(name, productSn, id, jsonArr);
+                    if (!ret.equals("ok")) {
+                        return "属性值已存在,请检查编号:" + productSn;
+                    }
+                }
+
+                //统计添加时是否存在同属性的
+                for (int j = 0; j < jsonArr.size(); j++) {
+                    JSONObject objJ = jsonArr.getJSONObject(j);
+                    if (valueIdArr.equals(objJ.getString("valueIdArr"))) {
+                        valueIdArrCount++;
+                        if (valueIdArrCount > 1) {
+                            String ret = checkProduct(name, productSn, id, jsonArr);
+                            if (!ret.equals("ok")) {
+                                return "属性值不能重复,请检查编号:" + productSn;
+//                                        return ServerResponse.createByErrorMessage("无品牌无系列属性值不能重复,商品编号“" + objJ.getString("productSn") + "”");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return "";
+    }
+
+
     /**
      * 检商商品是否添加重复
      * @param name
@@ -334,6 +431,39 @@ public class DjBasicsProductService {
      * @return
      */
     public String checkProduct(String name, String productSn, String id, JSONArray jsonArr) {
+        List<DjBasicsProduct> nameList = djBasicsProductMapper.queryByName(name);
+        List<DjBasicsProduct> productSnList = djBasicsProductMapper.queryByProductSn(productSn);
+        if (!StringUtils.isNotBlank(id)) {//没有id则新增
+            if (nameList.size() > 0)
+                return "名字“" + nameList.get(0).getName() + "”已存在";
+            if (productSnList.size() > 0)
+                return "编号“:" + productSnList.get(0).getProductSn() + "”已存在";
+            int snCount = 0;
+            int nameCount = 0;
+            for (int j = 0; j < jsonArr.size(); j++) {
+                JSONObject objJ = jsonArr.getJSONObject(j);
+                if (productSn.equals(objJ.getString("productSn"))) {
+                    snCount++;
+                    if (snCount > 1)
+                        return "编号“" + productSn + "”不能重复";
+                }
+                if (name.equals(objJ.getString("name"))) {
+                    nameCount++;
+                    if (nameCount > 1)
+                        return "名字“" + name + "”不能重复";
+                }
+            }
+        } else {//修改
+            DjBasicsProduct oldProduct = djBasicsProductMapper.selectByPrimaryKey(id);
+            if (!oldProduct.getName().equals(name)) {
+                if (nameList.size() > 0)
+                    return "名字“" + name + "”已存在";
+            }
+            if (!oldProduct.getProductSn().equals(productSn)) {
+                if (productSnList.size() > 0)
+                    return "编号“" + productSn + "”已存在";
+            }
+        }
 
         return "ok";
     }

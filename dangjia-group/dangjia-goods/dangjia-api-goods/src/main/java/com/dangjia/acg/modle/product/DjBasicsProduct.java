@@ -23,6 +23,10 @@ import javax.persistence.Table;
 @ApiModel(description = "商品表实体")
 @FieldNameConstants(prefix = "")
 public class DjBasicsProduct extends BaseEntity {
+    @Column(name = "id")
+    @Desc(value = "商品ID")
+    @ApiModelProperty("商品ID")
+    private String id;
 
     @Column(name = "name")
     @Desc(value = "名称")
@@ -30,9 +34,14 @@ public class DjBasicsProduct extends BaseEntity {
     private String name;
 
     @Column(name = "goods_id")
-    @Desc(value = "材料id")
-    @ApiModelProperty("材料id")
+    @Desc(value = "货品ID")
+    @ApiModelProperty("货品Id")
     private String goodsId;
+
+    @Column(name = "category_id")
+    @Desc(value = "类别ID")
+    @ApiModelProperty("类别ID")
+    private String categoryId;
 
     @Column(name = "product_sn")
     @Desc(value = "货号编号")
@@ -54,10 +63,6 @@ public class DjBasicsProduct extends BaseEntity {
     @ApiModelProperty("单位ID")
     private String unitId;
 
-    @Column(name = "category_id")
-    @Desc(value = "分类id")
-    @ApiModelProperty("分类id")
-    private String categoryId;
 
     @Column(name = "label_id")
     @Desc(value = "标签id")

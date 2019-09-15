@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.product.DjBasicsProductMaterialMapper">
+    <!-- 根据商品ID查询商品材料表信息 -->
+    <select id="queryProductMaterialByProductId" resultType="com.dangjia.acg.modle.product.DjBasicsProductMaterial">
+
+        SELECT
+            id,
+            create_date,
+            modify_date,
+            product_id,
+            weight,
+            cost,
+            profit,
+            value_name_arr,
+            convert_unit,
+            convert_quality,
+            value_id_arr,
+            attribute_id_arr,
+            is_influe_warranty_period,
+            max_warranty_period_year,
+            min_warranty_period_year,
+            marketing_name,
+            cartage_price,
+            detail_image,
+            guaranteed_policy,
+            refund_policy,
+            remark
+        FROM
+            dj_basics_product_material
+        where data_status = 0
+        and product_id = #{productId}
+    </select>
+
+
+
+</mapper>

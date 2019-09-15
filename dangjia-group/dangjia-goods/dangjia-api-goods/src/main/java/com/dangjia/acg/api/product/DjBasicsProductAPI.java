@@ -1,6 +1,7 @@
 package com.dangjia.acg.api.product;
 
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dto.product.BasicsGoodsDTO;
 import com.dangjia.acg.modle.product.DjBasicsProduct;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -45,4 +46,16 @@ public interface DjBasicsProductAPI {
     @ApiOperation(value = "根据货品编号查看商品详情", notes = "根据货品编号查看商品详情")
     ServerResponse queryDataByProductId(@RequestParam("request")HttpServletRequest request,
                                     @RequestParam("productId")String productId);
+
+
+    @PostMapping("/product/djBasicsProduct/saveBasicsGoods")
+    @ApiOperation(value = "新增货品", notes = "新增货品")
+    ServerResponse saveBasicsGoods(@RequestParam("request") HttpServletRequest request,
+                                   BasicsGoodsDTO basicsGoodsDTO);
+
+    @PostMapping("/product/djBasicsProduct/insertProduct")
+    @ApiOperation(value = "新增货品下的商品", notes = "新增货品下的商品")
+    ServerResponse insertProduct(@RequestParam("request") HttpServletRequest request,
+                                 @RequestParam("productArr") String productArr);
+
 }
