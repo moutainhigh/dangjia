@@ -183,6 +183,10 @@ public class HouseWorkerSupService {
                             hfa.setStartDate(start);
                             hfa.setEndDate(end);
                             hfa.setOperator(worker.getId());
+                            //考虑到工人还未进场提前申请延时停工，默认取提交的管家ID
+                            if(CommonUtil.isEmpty(houseFlow.getWorkerId())){
+                                hfa.setWorkerId(worker.getId());
+                            }
                             houseFlowApplyMapper.insert(hfa);
 
                             //重新获取
@@ -246,6 +250,10 @@ public class HouseWorkerSupService {
                 hfa.setStartDate(start);
                 hfa.setEndDate(end);
                 hfa.setOperator(worker.getId());
+                //考虑到工人还未进场提前申请延时停工，默认取提交的管家ID
+                if(CommonUtil.isEmpty(houseFlow.getWorkerId())){
+                    hfa.setWorkerId(worker.getId());
+                }
                 houseFlowApplyMapper.insert(hfa);
                 houseService.insertConstructionRecord(hfa);
                 if (houseFlow.getWorkSteta() != 1 && houseFlow.getWorkSteta() != 2 && houseFlow.getWorkSteta() != 6) {
