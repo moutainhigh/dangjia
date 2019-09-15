@@ -47,4 +47,7 @@ public interface DjBasicsProductMapper extends Mapper<DjBasicsProduct> {
      */
     List<DjBasicsProduct> queryByProductSn(@Param("productSn") String productSn);
 
+    /*更新单位*/
+    void updateProductValueId(@Param("valueId") String valueId);
+
 }

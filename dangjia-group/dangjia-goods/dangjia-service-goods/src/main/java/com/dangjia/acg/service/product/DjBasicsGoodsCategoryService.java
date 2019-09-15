@@ -5,7 +5,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.mapper.basics.IGoodsMapper;
 import com.dangjia.acg.mapper.product.*;
 import com.dangjia.acg.modle.product.*;
 import org.apache.commons.lang3.StringUtils;
@@ -243,7 +242,7 @@ public class DjBasicsGoodsCategoryService {
                     djBasicsAttributeValue.setName(obj.getString("name"));
                     djBasicsAttributeValueMapper.updateByPrimaryKeySelective(djBasicsAttributeValue);
 //                    //更新指定属性值关联的商品属性名称
-//                    iProductMapper.updateProductValueId(djBasicsAttributeValue.getId());
+                    djBasicsProductMapper.updateProductValueId(djBasicsAttributeValue.getId());
                 }
             }
             return ServerResponse.createBySuccessMessage("保存成功");

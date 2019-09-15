@@ -105,4 +105,13 @@
             and FIND_IN_SET(#{valueIdArr},pm.value_id_arr)
         </if>
     </select>
+
+    <!--更新货品属性-->
+    <update id="updateProductValueId" parameterType="java.lang.String">
+        UPDATE `dj_basics_product_material` pm
+        SET pm.value_name_arr =
+          ( SELECT GROUP_CONCAT( v.NAME ) FROM dj_basics_attribute_value v WHERE FIND_IN_SET( v.id, pm.value_id_arr ) )
+        WHERE
+        FIND_IN_SET(#{valueId}, pm.value_id_arr )
+    </update>
 </mapper>
