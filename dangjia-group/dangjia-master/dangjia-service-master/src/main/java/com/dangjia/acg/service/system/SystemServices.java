@@ -195,9 +195,9 @@ public class SystemServices {
             if(!CommonUtil.isEmpty(departmentId)){
                 criteria.andEqualTo(Job.DEPARTMENT_ID,departmentId);
             }
-            if(!CommonUtil.isEmpty(cityId)){
-                criteria.andCondition(" FIND_IN_SET( '"+cityId+"', city_id)");
-            }
+//            if(!CommonUtil.isEmpty(cityId)){
+//                criteria.andCondition(" FIND_IN_SET( '"+cityId+"', city_id)");
+//            }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<Job> jobs = jobMapper.selectByExample(example);
             PageInfo pageResult=new PageInfo(jobs);
