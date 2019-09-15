@@ -1,13 +1,13 @@
 package com.dangjia.acg.controller.app.product;
 
-import com.dangjia.acg.api.app.product.CartAPI;
+import com.dangjia.acg.api.app.product.ShopCartAPI;
 import com.dangjia.acg.common.response.ServerResponse;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 
 @RestController
-public class CartController  implements CartAPI {
+public class ShopCartController implements ShopCartAPI {
 
     @Override
     public ServerResponse add(HttpServletRequest request, String userToken, String productId, int num) {
