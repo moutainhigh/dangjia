@@ -132,7 +132,7 @@ public class DjBasicsProductService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse insertProduct(String productArr) {
+    public ServerResponse insertBatchProduct(String productArr) {
 
             JSONArray jsonArr = JSONArray.parseArray(productArr);
             //1.商品作校验，校验前端传过来的商品是否符合条件
@@ -386,7 +386,6 @@ public class DjBasicsProductService {
         }
         return "";
     }
-
     /**
      * 判断校验字段是否可以为空
      * @param basicsProductDTO
@@ -512,15 +511,47 @@ public class DjBasicsProductService {
     }
 
     /**
+     * 校验商品是否符合添加条件
+     * @param basicsProductDTO
+     * @param type 0材料，1包工包料，2人工
+     * @return
+     */
+    public String checkSingleProductCommon(BasicsProductDTO basicsProductDTO,int type,JSONArray jsonArr){
+        //1.判断必填字段是否为空
+        String checkStr = checkFielsNull(basicsProductDTO);
+        if(StringUtils.isNotBlank(checkStr)){
+            return checkStr;
+        }
+        String id = basicsProductDTO.getId();//商品ID
+        String name = basicsProductDTO.getName();//商品名称
+        String productSn = basicsProductDTO.getProductSn();//商品编码
+        String categoryId=basicsProductDTO.getCategoryId();//商品类别Id
+        DjBasicsGoods basicsGoods = djBasicsGoodsMapper.selectByPrimaryKey(categoryId);
+        if(type == 0 || type == 1){
+            //判断当前添加的属性值是否有相同的已存在的商品（材料商品才有）
+            checkStr = checkProductAttr(basicsProductDTO,jsonArr);
+            if(StringUtils.isNotBlank(checkStr)){
+                return checkStr;
+            }
+        }
+        //校验商品是否存在
+        String ret = checkProduct(name, productSn, id, jsonArr);
+        if (!ret.equals("ok")) {
+            return ret;
+        }
+        return "";
+    }
+    /**
      * 商品信息暂存
      *
      * @param basicsProductDTO
      * @param technologyList
      * @param deleteTechnologyIds
+     * @param dataStatus 数据状态，0正常，1暂存
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse saveProductTemporaryStorage(BasicsProductDTO basicsProductDTO,String technologyList, String  deleteTechnologyIds){
+    public ServerResponse saveProductTemporaryStorage(BasicsProductDTO basicsProductDTO,String technologyList, String  deleteTechnologyIds,int dataStatus){
         if (!StringUtils.isNotBlank(basicsProductDTO.getCategoryId()))
             return ServerResponse.createByErrorMessage("商品分类不能为空");
 
@@ -528,6 +559,13 @@ public class DjBasicsProductService {
             return ServerResponse.createByErrorMessage("货品id不能为空");
         String goodsId=basicsProductDTO.getGoodsId();//货品ID
         DjBasicsGoods basicsGoods = djBasicsGoodsMapper.selectByPrimaryKey(goodsId);//查询货品表信息，判断是人工还是材料商品新增
+        if(dataStatus == 0){
+            //添加正式商品前的校验，商品名称和编码不能为空，且不能重复
+           String restr = checkSingleProductCommon(basicsProductDTO,basicsGoods.getType(),new JSONArray());
+           if(StringUtils.isNotBlank(restr)){
+               return ServerResponse.createByErrorMessage(restr);
+           }
+       }
         //2.1添加商品主表信息
         StringBuilder imgStr = new StringBuilder();
         if(StringUtils.isNotBlank(basicsProductDTO.getImage())){
@@ -542,8 +580,8 @@ public class DjBasicsProductService {
                 }
             }
         }
-        LOG.info("001----------添加商品主表 start:" + basicsProductDTO.getName());
-        String productId = insertBasicsProductData(basicsProductDTO,imgStr,2);
+        LOG.info("001----------添加商品主表 start:" +basicsProductDTO.getId()+"-----"+ basicsProductDTO.getName());
+        String productId = insertBasicsProductData(basicsProductDTO,imgStr,dataStatus);
         LOG.info("001----------添加商品主表 end productId:" + productId);
 
         if(2 == basicsGoods.getType()){

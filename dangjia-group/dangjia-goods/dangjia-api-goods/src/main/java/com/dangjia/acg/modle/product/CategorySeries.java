@@ -16,7 +16,7 @@ import javax.persistence.Table;
  */
 @Data
 @Entity
-@Table(name = "dj_basics_category_series")
+@Table(name = "dj_basics_category_brand")
 @ApiModel(description = "商品关联品牌系列")
 public class CategorySeries extends BaseEntity {
 

@@ -1,10 +1,12 @@
 package com.dangjia.acg.dto.product;
 
+import com.dangjia.acg.common.annotation.ExcelField;
 import com.dangjia.acg.common.model.BaseEntity;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * 产品实体类
@@ -13,6 +15,8 @@ import java.util.Date;
 @Data
 @FieldNameConstants(prefix = "")
 public class BasicsProductDTO extends BaseEntity {
+
+    private String id;
 
     private String name;
 
