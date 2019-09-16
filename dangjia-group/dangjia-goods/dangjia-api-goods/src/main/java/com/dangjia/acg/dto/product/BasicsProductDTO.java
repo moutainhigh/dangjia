@@ -106,13 +106,6 @@ public class BasicsProductDTO extends BaseEntity {
 
     private String isAgencyPurchase;//是否为代买（1是，0否）
 
-    @ExcelField(titile = "精算数", offset = 6)
-    private String shopCount;//精算数
-    private String msg;//异常说明
-
-    @ApiModelProperty("technologies")
-    private List<TechnologyDTO> technologies;
-
 
 
 
