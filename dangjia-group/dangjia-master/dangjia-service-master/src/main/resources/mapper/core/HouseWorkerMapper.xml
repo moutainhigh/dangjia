@@ -82,17 +82,22 @@
     <!-- 根据工人id查询未完工任务-->
     <select id="grabControl" resultType="java.lang.Long">
         SELECT
-            count(*)
-        from
-            dj_core_house_flow
-        where
-            worker_id = #{workerId}
-        and
-            state = 0
-        and
-            worker_type > 2
-        and
-            work_steta not in(1,2)
+        count( * )
+        FROM
+        dj_core_house_worker hw
+        INNER JOIN dj_core_house_flow hf ON hw.house_id = hf.house_id
+        AND hw.worker_type_id = hf.worker_type_id
+        INNER JOIN dj_house h ON hw.house_id = h.id
+        WHERE
+        hw.worker_id = #{workerId}
+        <if test="workerType!=null and workerType!=3">
+            AND hw.work_type !=2
+        </if>
+        AND hw.work_type IN ( 1, 6 )
+        AND hf.work_steta != 2
+        AND hf.work_steta != 6
+        AND h.visit_state != 3
+        AND h.visit_state != 4
     </select>
 
     <!-- 查询当天是否抢单-->
