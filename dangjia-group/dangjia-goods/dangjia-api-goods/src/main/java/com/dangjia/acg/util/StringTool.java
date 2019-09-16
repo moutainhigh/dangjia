@@ -134,4 +134,14 @@ public class StringTool {
         return url;
     }
 
+    public static String getLikeV(String input) {
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < input.length(); i++) {
+            if (i > 0) {
+                result.append("%");
+            }
+            result.append(input.charAt(i));
+        }
+        return result.toString();
+    }
 }
