@@ -73,4 +73,31 @@
         ORDER BY istop DESC,create_date desc
     </select>
 
+    <!-- 根据材料商品编号查询  营销名称-->
+        <select  id ="queryProductMaterial"  parameterType="java.lang.String"    resultType="com.dangjia.acg.dto.product.AppBasicsProductDTO">
+            select
+            p.id,p.name,p.goods_id,p.category_id,p.product_sn,p.image,
+            p.unit_name,p.unit_id,p.label_id,p.type,p.maket,p.price,p.other_name,
+            p.istop,p.remark  ,m.marketing_name,b.name as attributeIdArr   from dj_basics_product  p left join  dj_basics_product_material m on  p.id=m.product_id
+            left join dj_basics_attribute b on b.id=m.value_id_arr
+
+            <if test="productSn!=null and productSn!=''">
+                and
+                p.product_sn=#{productSn}
+            </if>
+            ORDER BY istop DESC,create_date desc
+        </select>
+    <!-- 根据人工商品编号查询  没有规格、没有营销名称-->
+        <select  id ="queryProductWorker" parameterType="java.lang.String" resultType="com.dangjia.acg.dto.product.AppBasicsProductDTO">
+            select
+            p.id,p.name,p.goods_id,p.category_id,p.product_sn,p.image,
+            p.unit_name,p.unit_id,p.label_id,p.type,p.maket,p.price,p.other_name,
+            p.istop,p.remark,'' as marketing_name ,'' as attributeIdArr  from dj_basics_product  p left join dj_basics_product_worker w on p.id=w.product_id
+            <if test="productSn!=null and productSn!=''">
+             and
+             p.product_sn=#{productSn}
+            </if>
+            ORDER BY istop DESC,create_date desc
+        </select>
+
 </mapper>

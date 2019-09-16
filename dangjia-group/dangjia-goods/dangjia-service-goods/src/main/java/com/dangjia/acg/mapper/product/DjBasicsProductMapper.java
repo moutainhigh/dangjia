@@ -1,5 +1,6 @@
 package com.dangjia.acg.mapper.product;
 
+import com.dangjia.acg.dto.product.AppBasicsProductDTO;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.product.DjBasicsProduct;
 import org.apache.ibatis.annotations.Param;
@@ -37,5 +38,9 @@ public interface DjBasicsProductMapper extends Mapper<DjBasicsProduct> {
      * @return
      */
     List<DjBasicsProduct> queryByProductSn(@Param("productSn") String productSn);
+
+    List<AppBasicsProductDTO> queryProductMaterial(@Param("productSn") String productSn);
+
+    List<AppBasicsProductDTO> queryProductWorker(@Param("productSn") String productSn);
 
 }

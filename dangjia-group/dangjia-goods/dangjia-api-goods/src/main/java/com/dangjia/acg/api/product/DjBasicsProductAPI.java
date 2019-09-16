@@ -43,9 +43,9 @@ public interface DjBasicsProductAPI {
                                   @RequestParam("jsonStr")String jsonStr);
 
     @PostMapping("/product/djBasicsProduct/queryDataByProductId")
-    @ApiOperation(value = "根据货品编号查看商品详情", notes = "根据货品编号查看商品详情")
+    @ApiOperation(value = "根据商品编号查看商品详情", notes = "根据商品编号查看商品详情")
     ServerResponse queryDataByProductId(@RequestParam("request")HttpServletRequest request,
-                                    @RequestParam("productId")String productId);
+                                    @RequestParam("productSn")String productSn);
 
 
     @PostMapping("/product/djBasicsProduct/saveBasicsGoods")
@@ -57,5 +57,7 @@ public interface DjBasicsProductAPI {
     @ApiOperation(value = "新增货品下的商品", notes = "新增货品下的商品")
     ServerResponse insertProduct(@RequestParam("request") HttpServletRequest request,
                                  @RequestParam("productArr") String productArr);
+
+
 
 }

@@ -4,6 +4,10 @@ import com.dangjia.acg.api.product.DjBasicsProductAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.product.BasicsGoodsDTO;
+import com.dangjia.acg.mapper.product.DjBasicsProductMapper;
+import com.dangjia.acg.mapper.product.IBasicsGoodsMapper;
+import com.dangjia.acg.modle.basics.Goods;
+import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProduct;
 import com.dangjia.acg.service.product.DjBasicsProductService;
 import org.slf4j.Logger;
@@ -26,6 +30,11 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
     @Autowired
     private DjBasicsProductService djBasicsProductService;
 
+    @Autowired
+    private DjBasicsProductMapper djBasicsProductMapper ;
+
+    @Autowired
+    private IBasicsGoodsMapper iBasicsGoodsMapper ;
 
     @Override
     @ApiMethod
@@ -52,8 +61,8 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
     }
 
     @Override
-    public ServerResponse queryDataByProductId(HttpServletRequest request, String productId) {
-        return null;
+    public ServerResponse queryDataByProductId(HttpServletRequest request, String productSn) {
+        return djBasicsProductService.queryDataByProductId(request,productSn);
     }
 
     /**

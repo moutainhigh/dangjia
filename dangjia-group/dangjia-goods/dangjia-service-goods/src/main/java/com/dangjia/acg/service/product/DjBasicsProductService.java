@@ -7,6 +7,7 @@ import com.dangjia.acg.api.app.repair.MasterMendWorkerAPI;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.dto.product.AppBasicsProductDTO;
 import com.dangjia.acg.dto.product.BasicsGoodsDTO;
 import com.dangjia.acg.dto.product.BasicsProductDTO;
 import com.dangjia.acg.dto.product.DjBasicsLabelDTO;
@@ -85,6 +86,38 @@ public class DjBasicsProductService {
             return ServerResponse.createBySuccess("查询成功", list);
         }
         return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+    }
+
+    /**
+     * 查看商品详情
+     * @param request
+     * @param productSn
+     * @return
+     */
+    public ServerResponse queryDataByProductId(HttpServletRequest request, String productSn) {
+        try {
+            Example example = new Example(DjBasicsProduct.class);
+            example.createCriteria().andEqualTo(DjBasicsProduct.PRODUCT_SN,productSn);
+            List<DjBasicsProduct> djBasicsProduct = djBasicsProductMapper.selectByExample(example); //根据商品编号查询对象
+            //获取商品ID，然后关联商品表
+            String goodsId = djBasicsProduct.get(0).getGoodsId();
+            //判断是人工商品还是货品商品
+            BasicsGoods  basicsGoods = iBasicsGoodsMapper.selectByPrimaryKey(goodsId);
+            //组合实体对象DTO返回   类型0：材料；1：服务；2：人工；3：体验；4：增值
+            int type = basicsGoods.getType();
+            AppBasicsProductDTO appBasicsProductDTO=null;
+            if (type == 0 || type == 1) {//非人工
+                //dj_basics_product_material
+                appBasicsProductDTO= djBasicsProductMapper.queryProductMaterial(productSn).get(0);
+            } else if (type == 2) {//人工
+                //dj_basics_product_worker
+                appBasicsProductDTO= djBasicsProductMapper.queryProductWorker(productSn).get(0);
+            }
+            appBasicsProductDTO.setType(type);//初始化类型（人工和非人工）
+            return ServerResponse.createBySuccess("查询成功", appBasicsProductDTO);
+        } catch (Exception e) {
+            return ServerResponse.createByErrorMessage("操作失败");
+        }
     }
 
     /**
