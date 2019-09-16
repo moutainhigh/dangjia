@@ -5,15 +5,13 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.product.BasicsGoodsDTO;
 import com.dangjia.acg.dto.product.BasicsProductDTO;
-import com.dangjia.acg.mapper.product.DjBasicsProductMapper;
-import com.dangjia.acg.mapper.product.IBasicsGoodsMapper;
-import com.dangjia.acg.modle.basics.Goods;
-import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProduct;
+import com.dangjia.acg.service.product.DjBasicsGoodsService;
 import com.dangjia.acg.service.product.DjBasicsProductService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -31,6 +29,8 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
     @Autowired
     private DjBasicsProductService djBasicsProductService;
 
+    @Autowired
+    private DjBasicsGoodsService djBasicsGoodsService;
 
     @Override
     @ApiMethod
@@ -68,22 +68,55 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
     @Override
     @ApiMethod
     public ServerResponse saveBasicsGoods(HttpServletRequest request, BasicsGoodsDTO basicsGoodsDTO) {
-        return djBasicsProductService.saveBasicsGoods(basicsGoodsDTO);
+        return djBasicsGoodsService.saveBasicsGoods(basicsGoodsDTO);
 
+    }
+
+    /**
+     * 修改货品
+     * @param request
+     * @param basicsGoodsDTO
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse updateBasicsGoods(HttpServletRequest request,BasicsGoodsDTO basicsGoodsDTO){
+        return djBasicsGoodsService.updateBasicsGoods(basicsGoodsDTO);
     }
     /**
      * 新增商品
      */
     @Override
     @ApiMethod
-    public ServerResponse insertProduct(HttpServletRequest request, String productArr) {
+    public ServerResponse insertBatchProduct(HttpServletRequest request, String productArr) {
         try{
-            return djBasicsProductService.insertProduct(productArr);
+            return djBasicsProductService.insertBatchProduct(productArr);
         }catch (Exception e){
             logger.error("新增商品信息失败：",e);
             return ServerResponse.createBySuccessMessage("新增失败");
         }
 
+    }
+    /**
+     * 单个新增修改商品信息
+     * @param request
+     * @param basicsProductDTO
+     * @param technologyList  添加工艺列表
+     * @param deleteTechnologyIds 删除工艺列表的D
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse editSingleProduct(@RequestParam("request") HttpServletRequest request,
+                                     BasicsProductDTO basicsProductDTO,
+                                     @RequestParam("technologyList") String technologyList,
+                                     @RequestParam("deleteTechnologyIds") String  deleteTechnologyIds){
+        try{
+            return djBasicsProductService.saveProductTemporaryStorage(basicsProductDTO, technologyList, deleteTechnologyIds,0);
+        }catch (Exception e){
+            logger.error("保存单个商品信息失败：",e);
+            return ServerResponse.createBySuccessMessage("保存单个商品失败");
+        }
     }
 
     /**
@@ -99,7 +132,7 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
     public ServerResponse saveProductTemporaryStorage(HttpServletRequest request,
                                                       BasicsProductDTO basicsProductDTO, String technologyList, String  deleteTechnologyIds){
         try{
-            return djBasicsProductService.saveProductTemporaryStorage(basicsProductDTO, technologyList, deleteTechnologyIds);
+            return djBasicsProductService.saveProductTemporaryStorage(basicsProductDTO, technologyList, deleteTechnologyIds,2);
         }catch (Exception e){
             logger.error("保存商品信息失败：",e);
             return ServerResponse.createBySuccessMessage("保存商品失败");

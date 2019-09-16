@@ -3,6 +3,7 @@ package com.dangjia.acg.api.product;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.product.BasicsGoodsDTO;
 import com.dangjia.acg.dto.product.BasicsProductDTO;
+import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.product.DjBasicsProduct;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -54,14 +55,26 @@ public interface DjBasicsProductAPI {
     ServerResponse saveBasicsGoods(@RequestParam("request") HttpServletRequest request,
                                    BasicsGoodsDTO basicsGoodsDTO);
 
-    @PostMapping("/product/djBasicsProduct/insertProduct")
-    @ApiOperation(value = "新增货品下的商品", notes = "新增货品下的商品")
-    ServerResponse insertProduct(@RequestParam("request") HttpServletRequest request,
+    @PostMapping("/product/djBasicsProduct/updateBasicsGoods")
+    @ApiOperation(value = "修改货品", notes = "修改货品")
+    ServerResponse updateBasicsGoods(@RequestParam("request") HttpServletRequest request,
+                               BasicsGoodsDTO basicsGoodsDTO);
+
+    @PostMapping("/product/djBasicsProduct/insertBatchProduct")
+    @ApiOperation(value = "批量新增修改货品下的商品", notes = "批量新增修改货品下的商品")
+    ServerResponse insertBatchProduct(@RequestParam("request") HttpServletRequest request,
                                  @RequestParam("productArr") String productArr);
 
     @PostMapping("/product/djBasicsProduct/saveProductTemporaryStorage")
     @ApiOperation(value = "暂存商品信息", notes = "暂存商品信息")
     ServerResponse saveProductTemporaryStorage(@RequestParam("request") HttpServletRequest request,
+                                 BasicsProductDTO basicsProductDTO,
+                                 @RequestParam("technologyList") String technologyList,
+                                 @RequestParam("deleteTechnologyIds") String  deleteTechnologyIds);
+
+    @PostMapping("/product/djBasicsProduct/editSingleProduct")
+    @ApiOperation(value = "单个新增修改货品下的商品", notes = "单个新增修改货品下的商品")
+    ServerResponse editSingleProduct(@RequestParam("request") HttpServletRequest request,
                                  BasicsProductDTO basicsProductDTO,
                                  @RequestParam("technologyList") String technologyList,
                                  @RequestParam("deleteTechnologyIds") String  deleteTechnologyIds);

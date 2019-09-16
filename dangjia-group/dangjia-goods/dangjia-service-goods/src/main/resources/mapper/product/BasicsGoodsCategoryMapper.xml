@@ -96,7 +96,7 @@
 
     <!-- 删除商品和系列关系 -->
     <delete id="deleteCategorysSeries" parameterType="java.lang.String">
-		DELETE FROM dj_basics_category_series
+		DELETE FROM dj_basics_category_brand
 		WHERE category_id=#{categoryId}
 	</delete>
 
@@ -112,7 +112,7 @@
 		     id in(
 		        select
 		              brand_id
-		        from dj_basics_category_series
+		        from dj_basics_category_brand
 		        where
 		             category_id =#{categoryId}
 		        group by brand_id

@@ -1,7 +1,6 @@
 package com.dangjia.acg.service.sale;
 
 import com.dangjia.acg.api.RedisClient;
-import com.dangjia.acg.auth.config.RedisSessionDAO;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -12,8 +11,6 @@ import com.dangjia.acg.modle.store.Store;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -28,7 +25,6 @@ public class SaleService {
     private CraftsmanConstructionService constructionService;
     @Autowired
     private RedisClient redisClient;
-    private static Logger logger = LoggerFactory.getLogger(RedisSessionDAO.class);
 
     public ServerResponse getUserStoreList(String userToken, PageDTO pageDTO) {
         Object object = constructionService.getAccessToken(userToken);
