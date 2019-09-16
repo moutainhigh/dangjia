@@ -54,8 +54,13 @@ public interface DjBasicsProductAPI {
     ServerResponse saveBasicsGoods(@RequestParam("request") HttpServletRequest request,
                                    BasicsGoodsDTO basicsGoodsDTO);
 
+    @PostMapping("/product/djBasicsProduct/updateBasicsGoods")
+    @ApiOperation(value = "修改货品", notes = "修改货品")
+    ServerResponse updateBasicsGoods(@RequestParam("request") HttpServletRequest request,
+                               BasicsGoodsDTO basicsGoodsDTO);
+
     @PostMapping("/product/djBasicsProduct/insertProduct")
-    @ApiOperation(value = "新增货品下的商品", notes = "新增货品下的商品")
+    @ApiOperation(value = "新增修改货品下的商品", notes = "新增修改货品下的商品")
     ServerResponse insertProduct(@RequestParam("request") HttpServletRequest request,
                                  @RequestParam("productArr") String productArr);
 

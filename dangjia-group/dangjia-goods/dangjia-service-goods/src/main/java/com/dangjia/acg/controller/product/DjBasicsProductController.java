@@ -5,11 +5,8 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.product.BasicsGoodsDTO;
 import com.dangjia.acg.dto.product.BasicsProductDTO;
-import com.dangjia.acg.mapper.product.DjBasicsProductMapper;
-import com.dangjia.acg.mapper.product.IBasicsGoodsMapper;
-import com.dangjia.acg.modle.basics.Goods;
-import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProduct;
+import com.dangjia.acg.service.product.DjBasicsGoodsService;
 import com.dangjia.acg.service.product.DjBasicsProductService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +28,8 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
     @Autowired
     private DjBasicsProductService djBasicsProductService;
 
+    @Autowired
+    private DjBasicsGoodsService djBasicsGoodsService;
 
     @Override
     @ApiMethod
@@ -68,8 +67,20 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
     @Override
     @ApiMethod
     public ServerResponse saveBasicsGoods(HttpServletRequest request, BasicsGoodsDTO basicsGoodsDTO) {
-        return djBasicsProductService.saveBasicsGoods(basicsGoodsDTO);
+        return djBasicsGoodsService.saveBasicsGoods(basicsGoodsDTO);
 
+    }
+
+    /**
+     * 修改货品
+     * @param request
+     * @param basicsGoodsDTO
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse updateBasicsGoods(HttpServletRequest request,BasicsGoodsDTO basicsGoodsDTO){
+        return djBasicsGoodsService.updateBasicsGoods(basicsGoodsDTO);
     }
     /**
      * 新增商品
