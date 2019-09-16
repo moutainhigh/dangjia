@@ -27,7 +27,4 @@
         where data_status = 0
         and product_id = #{productId}
     </select>
-
-
-
 </mapper>

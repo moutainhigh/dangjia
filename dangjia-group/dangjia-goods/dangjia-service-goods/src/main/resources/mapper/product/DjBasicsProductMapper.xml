@@ -139,4 +139,14 @@
         WHERE
         FIND_IN_SET(#{valueId}, pm.value_id_arr )
     </update>
+
+    <!-- 删除材料商品扩展表信息-->
+    <delete id="deleteProductMaterial" parameterType="java.lang.String">
+       delete from dj_basics_product_material  where product_id in(select id from dj_basics_product where goods_id=#{goodsId})
+    </delete>
+    <!-- 删除人工商品扩展表信息-->
+    <delete id="deleteProductWorker">
+       delete from dj_basics_product_worker  where product_id in(select id from dj_basics_product where goods_id=#{goodsId})
+    </delete>
+
 </mapper>

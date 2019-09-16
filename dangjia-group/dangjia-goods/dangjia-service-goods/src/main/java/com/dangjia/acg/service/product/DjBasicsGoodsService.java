@@ -7,6 +7,7 @@ import com.dangjia.acg.dto.product.BasicsGoodsDTO;
 import com.dangjia.acg.mapper.product.DjBasicsGoodsMapper;
 import com.dangjia.acg.mapper.product.DjBasicsProductMapper;
 import com.dangjia.acg.mapper.product.IBasicsGoodsMapper;
+import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProduct;
@@ -15,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.Date;
@@ -136,5 +138,26 @@ public class DjBasicsGoodsService {
         goods.setLabelIds(basicsGoodsDTO.getLabelIds());
         return goods;
     }
+    /**
+     * 根据id删除goods和下面的商品信息
+     *
+     * @param id
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse deleteBasicsGoods(String id) {
+//            if (true)
+//                return ServerResponse.createByErrorMessage("不能执行删除操作");
+            iBasicsGoodsMapper.deleteByPrimaryKey(id);
 
+            //删除材料商品扩展表信息
+            djBasicsProductMapper.deleteProductMaterial(id);
+            //删除人工商品扩展表信息
+            djBasicsProductMapper.deleteProductWorker(id);
+            //删除货品下的商品信息
+            Example example = new Example(Product.class);
+            example.createCriteria().andEqualTo("goodsId", id);
+            djBasicsProductMapper.deleteByExample(example);
+            return ServerResponse.createBySuccessMessage("删除成功");
+    }
 }

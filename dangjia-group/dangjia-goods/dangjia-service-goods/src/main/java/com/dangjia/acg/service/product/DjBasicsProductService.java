@@ -699,4 +699,26 @@ public class DjBasicsProductService {
         return djBasicsProductMapper.selectByPrimaryKey(id);
     }
 
+    /**
+     * 根据productid删除product对象
+     *
+     * @param id
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse deleteBasicsProductById(String id) {
+            DjBasicsProduct djBasicsProduct = new DjBasicsProduct();
+            djBasicsProduct.setId(id);
+            djBasicsProductMapper.deleteByPrimaryKey(djBasicsProduct);
+            //删除材料商品扩展表
+            Example example = new Example(DjBasicsProductMaterial.class);
+            example.createCriteria().andEqualTo("productId", id);
+            djBasicsProductMaterialMapper.deleteByExample(example);
+            //删除人工商品扩展表
+            example = new Example(DjBasicsProductWorker.class);
+            example.createCriteria().andEqualTo("productId", id);
+            djBasicsProductWorkerMapper.deleteByExample(example);
+            return ServerResponse.createBySuccessMessage("删除成功");
+    }
+
 }

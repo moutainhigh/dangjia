@@ -79,6 +79,15 @@ public interface DjBasicsProductAPI {
                                  @RequestParam("technologyList") String technologyList,
                                  @RequestParam("deleteTechnologyIds") String  deleteTechnologyIds);
 
+    @PostMapping("/product/djBasicsProduct/deleteBasicsProductById")
+    @ApiOperation(value = "根据货品id删除商品对象", notes = "根据货品id删除商品对象")
+    ServerResponse deleteBasicsProductById(@RequestParam("request") HttpServletRequest request,
+                                     @RequestParam("id") String id);
+
+    @PostMapping("/product/djBasicsProduct/deleteBasicsGoods")
+    @ApiOperation(value = "根据id删除货品及其下面的商品", notes = "根据id删除货品及其下面的商品")
+    ServerResponse deleteBasicsGoods(@RequestParam("request") HttpServletRequest request,
+                               @RequestParam("id") String id);
 
 
 }

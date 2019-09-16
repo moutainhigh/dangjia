@@ -135,4 +135,39 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
             return ServerResponse.createBySuccessMessage("保存商品失败");
         }
     }
+    /**
+     * 根据货品id删除商品对象
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse deleteBasicsProductById(HttpServletRequest request, String id) {
+        try{
+            return djBasicsProductService.deleteBasicsProductById(id);
+        }catch (Exception e){
+            logger.error("删除商品失败："+id,e);
+            return ServerResponse.createByErrorMessage("删除商品失败");
+        }
+
+    }
+
+    /**
+     * 根据id删除货品及其下面的商品
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse deleteBasicsGoods(HttpServletRequest request, String id) {
+        try{
+            return djBasicsGoodsService.deleteBasicsGoods(id);
+        }catch (Exception e){
+            logger.error("删除货品失败："+id,e);
+            return ServerResponse.createByErrorMessage("删除货品失败");
+        }
+
+    }
 }

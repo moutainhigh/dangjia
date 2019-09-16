@@ -55,4 +55,15 @@ public interface DjBasicsProductMapper extends Mapper<DjBasicsProduct> {
     /*更新单位*/
     void updateProductValueId(@Param("valueId") String valueId);
 
+    /**
+     * 删除材料扩展表信息
+     * @param goodsId 货品ID
+     */
+    void deleteProductMaterial(@Param("goodsId") String goodsId);
+
+    /**
+     * 删除产品扩展表信息
+     * @param goodsId 货品ID
+     */
+    void deleteProductWorker(@Param("goodsId") String goodsId);
 }
