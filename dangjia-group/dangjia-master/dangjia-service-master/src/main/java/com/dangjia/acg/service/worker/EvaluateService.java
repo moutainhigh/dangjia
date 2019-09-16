@@ -435,7 +435,7 @@ public class EvaluateService {
      * @return
      */
     public ServerResponse getUserToHouseDistance(String latitude, String longitude, String villageId) {
-        if (active != null && (active.equals("pre"))) {
+        if (active != null && active.equals("pre")) {
             ModelingVillage village = modelingVillageMapper.selectByPrimaryKey(villageId);//小区
             if (village != null && village.getLocationx() != null && village.getLocationy() != null
                     && latitude != null && longitude != null) {
