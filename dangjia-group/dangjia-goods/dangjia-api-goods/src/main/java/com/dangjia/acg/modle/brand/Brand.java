@@ -20,4 +20,6 @@ public class Brand extends BaseEntity{
     @Column(name = "name")
     private String name;//名称
 
+    @Column(name = "image")
+    private String image;//图片
 }

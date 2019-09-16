@@ -9,6 +9,7 @@ import com.dangjia.acg.mapper.basics.IGoodsCategoryMapper;
 import com.dangjia.acg.mapper.basics.IGoodsMapper;
 import com.dangjia.acg.mapper.product.IBasicsGoodsCategoryMapper;
 import com.dangjia.acg.mapper.product.ICategoryLabelMapper;
+import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.product.BasicsGoodsCategory;
 import com.dangjia.acg.modle.product.CategoryLabel;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,15 +50,17 @@ public class AppCategoryGoodsService {
      * 第二部分：左侧分类集合
      * @return
      */
+
     public ServerResponse queryLeftCategoryByDatas(String categoryLabelId) {
         List<BasicsGoodsCategory> goodsCategoryList = iBasicsGoodsCategoryMapper.queryCategoryByParentId("1",categoryLabelId);
         return ServerResponse.createBySuccess("查询成功", goodsCategoryList);
     }
 
     /**
-     * 第二部分：右侧侧分类集合
+     * 第三部分：右侧侧分类集合
      * @return
      */
+
     public ServerResponse queryRightCategoryByDatas(String parentId) {
         //查询两级商品分类
         try {
@@ -67,7 +70,15 @@ public class AppCategoryGoodsService {
             mapBrand.put("name","推荐品牌");
             mapBrand.put("type",1);//type: 0=分类ID  1=品牌ID
             List<Map<String, Object>> mapTwoBrandList = new ArrayList<>();
-
+            List<Brand> brands = iBasicsGoodsCategoryMapper.queryBrandByTopCategoryid(parentId);
+            for (Brand brand : brands) {
+                Map<String, Object> mapTwo = new HashMap<>();
+                mapTwo.put("id", brand.getId());
+                mapTwo.put("name", brand.getName());
+                mapTwo.put("image", address+brand.getImage());
+                mapTwo.put("type",1);//type: 0=分类ID  1=品牌ID
+                mapTwoBrandList.add(mapTwo);
+            }
             mapBrand.put("nextList", mapTwoBrandList);
             mapList.add(mapBrand);
 

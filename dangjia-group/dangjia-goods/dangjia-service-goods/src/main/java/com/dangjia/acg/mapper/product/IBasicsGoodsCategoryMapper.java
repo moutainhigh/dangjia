@@ -1,6 +1,5 @@
 package com.dangjia.acg.mapper.product;
 
-import com.dangjia.acg.modle.attribute.GoodsCategory;
 import com.dangjia.acg.modle.basics.HomeProductDTO;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.product.BasicsGoodsCategory;
@@ -33,6 +32,10 @@ public interface IBasicsGoodsCategoryMapper extends Mapper<BasicsGoodsCategory> 
 
 	//删除类别关联品牌系列
 	void deleteCategorysSeries(@Param("categoryId")String categoryId);
-	//根据商品id查询关联品牌
-	List<Brand> queryBrandByCategoryid(@Param("categoryId")String categoryId);
+    //根据商品id查询关联品牌
+    List<Brand> queryBrandByCategoryid(@Param("categoryId")String categoryId);
+    //根据商分类顶级id查询关联品牌
+    List<Brand> queryBrandByTopCategoryid(@Param("categoryId")String categoryId);
+
+
 }
