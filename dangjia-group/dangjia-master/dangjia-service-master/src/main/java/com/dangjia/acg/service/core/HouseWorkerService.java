@@ -458,7 +458,7 @@ public class HouseWorkerService {
         if (houseFlowApplyList.size() > 0) {
             HouseFlowApply houseFlowApply = houseFlowApplyList.get(0);
             if (houseFlowApply.getStartDate().before(new Date()) && houseFlowApply.getEndDate().after(new Date())) {
-                return ServerResponse.createByErrorMessage("工序(" + workerType.getName() + ")处于停工期间!");
+                return ServerResponse.createByErrorMessage("工序(" + workerType.getName() + ")处于停工期间！");
             }
         }
         houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 4, worker.getId(), new Date());

@@ -118,14 +118,14 @@ public class HouseFlowService {
     /**
      * 抢单列表
      */
-    public ServerResponse getGrabList( HttpServletRequest request,String userToken, String cityId) {
+    public ServerResponse getGrabList(HttpServletRequest request, String userToken, String cityId) {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
             Member member = memberMapper.selectByPrimaryKey(((Member) object).getId());
-            if(member==null){
+            if (member == null) {
                 return ServerResponse.createbyUserTokenError();
             }
             //工匠没有实名认证不应该展示数据
@@ -160,23 +160,23 @@ public class HouseFlowService {
                     if (house.getVisitState() == 2 || house.getVisitState() == 3 || house.getVisitState() == 4) {
                         continue;
                     }
-                   if(member.getWorkerType()!=null&&member.getWorkerType()==1){
-                       boolean isContinue=true;
-                       if(!CommonUtil.isEmpty(member.getStyles())){
-                           String[] optionalStyles=member.getStyles().split(",");
-                           for (String s : optionalStyles) {
-                               if(s.equals(house.getStyleId())) {
-                                   isContinue=false;
-                                   break;
-                               }
-                           }
-                       }else{
-                           isContinue=false;
-                       }
-                       if (isContinue) {
-                           continue;
-                       }
-                   }
+                    if (member.getWorkerType() != null && member.getWorkerType() == 1) {
+                        boolean isContinue = true;
+                        if (!CommonUtil.isEmpty(member.getStyles())) {
+                            String[] optionalStyles = member.getStyles().split(",");
+                            for (String s : optionalStyles) {
+                                if (s.equals(house.getStyleId())) {
+                                    isContinue = false;
+                                    break;
+                                }
+                            }
+                        } else {
+                            isContinue = false;
+                        }
+                        if (isContinue) {
+                            continue;
+                        }
+                    }
                     AllgrabBean allgrabBean = new AllgrabBean();
                     example = new Example(HouseFlowCountDownTime.class);
                     example.createCriteria().andEqualTo(HouseFlowCountDownTime.WORKER_ID, member.getId()).andEqualTo(HouseFlowCountDownTime.HOUSE_FLOW_ID, houseFlow.getId());
@@ -382,7 +382,7 @@ public class HouseFlowService {
                 List<RewardPunishCondition> conditionList = rewardPunishConditionMapper.selectByExample(example);
                 for (RewardPunishCondition rewardPunishCondition : conditionList) {
                     if (rewardPunishCondition.getType() == 3) {
-                        Date tt = DateUtil.addDateDays(record.getCreateDate(),rewardPunishCondition.getQuantity().intValue());
+                        Date tt = DateUtil.addDateDays(record.getCreateDate(), rewardPunishCondition.getQuantity().intValue());
 //                        Date wraprDate = rewardPunishCondition.getEndTime();
                         Date date = new Date();
                         if (date.getTime() < tt.getTime()) {
@@ -409,9 +409,9 @@ public class HouseFlowService {
 //                    return ServerResponse.createByErrorMessage("该房子已暂停施工！");
 //                }
                 //持单数
-                long num = houseWorkerMapper.grabControl(member.getId());//查询未完工工地
+                long num = houseWorkerMapper.grabControl(member.getId(), member.getWorkerType());//查询未完工工地
                 WorkerType wt = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
-                if (wt.getMethods()>0 && member.getWorkerType() != 7 && num >= wt.getMethods()) {
+                if (wt.getMethods() > 0 && member.getWorkerType() != 7 && num >= wt.getMethods()) {
                     return ServerResponse.createByErrorMessage("您有工地还未完工,暂不能抢单！");
                 }
 
@@ -443,19 +443,19 @@ public class HouseFlowService {
         example.createCriteria().andEqualTo(HouseWorker.WORK_TYPE, 1);
         List<HouseWorker> hwList = houseWorkerMapper.selectByExample(example);
         for (HouseWorker houseWorker : hwList) {
-            if(DateUtil.addDateMinutes(houseWorker.getCreateDate(),30).getTime()<=(new Date()).getTime()) {
+            if (DateUtil.addDateMinutes(houseWorker.getCreateDate(), 30).getTime() <= (new Date()).getTime()) {
                 example = new Example(Insurance.class);
                 example.createCriteria().andEqualTo(Insurance.WORKER_ID, houseWorker.getWorkerId());
                 example.orderBy(Insurance.END_DATE).desc();
                 List<Insurance> insurances = insuranceMapper.selectByExample(example);
 
                 //保险服务剩余天数小于等于60天
-                Integer daynum=0;
-                if(insurances.size()>0){
-                    daynum =DateUtil.daysofTwo(new Date(),insurances.get(0).getEndDate());
+                Integer daynum = 0;
+                if (insurances.size() > 0) {
+                    daynum = DateUtil.daysofTwo(new Date(), insurances.get(0).getEndDate());
                 }
                 //工人未购买保险
-                if (houseWorker.getWorkerType()>2&&(insurances.size()==0 || (insurances.size()>0&daynum<=60))) {
+                if (houseWorker.getWorkerType() > 2 && (insurances.size() == 0 || (insurances.size() > 0 & daynum <= 60))) {
                     Example exampleFlow = new Example(HouseFlow.class);
                     exampleFlow.createCriteria()
                             .andEqualTo(HouseFlow.WORKER_ID, houseWorker.getWorkerId())
@@ -464,7 +464,7 @@ public class HouseFlowService {
                             .andEqualTo(HouseFlow.HOUSE_ID, houseWorker.getHouseId());
                     exampleFlow.orderBy(HouseFlow.CREATE_DATE).desc();
                     List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(exampleFlow);
-                    if(houseFlowList.size()>0) {
+                    if (houseFlowList.size() > 0) {
                         String userToken = redisClient.getCache("role2:" + houseWorker.getWorkerId(), String.class);
                         setGiveUpOrder(userToken, houseFlowList.get(0).getId());
                     }
@@ -489,14 +489,14 @@ public class HouseFlowService {
             List<Insurance> insurances = insuranceMapper.selectByExample(example);
 
             //保险服务剩余天数小于等于60天
-            Integer daynum=0;
-            if(insurances.size()>0){
-                daynum =DateUtil.daysofTwo(new Date(),insurances.get(0).getEndDate());
+            Integer daynum = 0;
+            if (insurances.size() > 0) {
+                daynum = DateUtil.daysofTwo(new Date(), insurances.get(0).getEndDate());
             }
             //工人未购买保险
-            if (houseWorker.getWorkerType()>2&&((insurances.size()==0) || (insurances.size()>0&daynum<=0))) {
+            if (houseWorker.getWorkerType() > 2 && ((insurances.size() == 0) || (insurances.size() > 0 & daynum <= 0))) {
                 Member operator = memberMapper.selectByPrimaryKey(houseWorker.getWorkerId());
-                if(operator!=null) {
+                if (operator != null) {
                     String insuranceMoney = configUtil.getValue(SysConfig.INSURANCE_MONEY, String.class);
                     insuranceMoney = CommonUtil.isEmpty(insuranceMoney) ? "100" : insuranceMoney;
                     Insurance insurance = new Insurance();
@@ -544,6 +544,7 @@ public class HouseFlowService {
         }
         return ServerResponse.createBySuccessMessage("ok");
     }
+
     /**
      * 放弃此单
      *
@@ -558,7 +559,7 @@ public class HouseFlowService {
                 return (ServerResponse) object;
             }
             Member member = memberMapper.selectByPrimaryKey(((Member) object).getId());
-            if(member==null){
+            if (member == null) {
                 return ServerResponse.createbyUserTokenError();
             }
             HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowId);
@@ -658,7 +659,7 @@ public class HouseFlowService {
                 return (ServerResponse) object;
             }
             Member member = memberMapper.selectByPrimaryKey(((Member) object).getId());
-            if(member==null){
+            if (member == null) {
                 return ServerResponse.createbyUserTokenError();
             }
             HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowId);
@@ -703,7 +704,7 @@ public class HouseFlowService {
             }
             String dateStr = DateUtil.getDateString(now.getTimeInMillis());
             return DateUtil.toDate(dateStr);
-        }else{
+        } else {
             return new Date();
         }
 
