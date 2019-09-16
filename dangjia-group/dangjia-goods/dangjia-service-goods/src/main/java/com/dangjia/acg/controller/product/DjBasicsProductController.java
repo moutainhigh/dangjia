@@ -9,6 +9,7 @@ import com.dangjia.acg.dto.product.BasicsProductDTO;
 import com.dangjia.acg.modle.product.DjBasicsProduct;
 import com.dangjia.acg.service.product.DjBasicsGoodsService;
 import com.dangjia.acg.service.product.DjBasicsProductService;
+import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -176,4 +177,42 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
         }
 
     }
+    /**
+     * 根据货品ID查询对应的货品信息
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getBasicsGoodsByGid( String cityId, String goodsId) {
+        return djBasicsGoodsService.getBasicsGoodsByGid(goodsId);
+
+    }
+    /**
+     * 查询所有商品
+     *
+     * @throws
+     * @Title: queryProduct
+     * @param: @param category_id
+     * @param: @return
+     * @return: JsonResult
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse<PageInfo> queryProduct(HttpServletRequest request, PageDTO pageDTO, String categoryId) {
+        return djBasicsProductService.queryProduct(pageDTO, categoryId);
+    }
+
+    /**
+     * 查询所有单位
+     *
+     * @throws
+     * @Title: queryUnit
+     * @param: @return
+     * @return: JsonResult
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryUnit(HttpServletRequest request) {
+        return djBasicsProductService.queryUnit();
+    }
+
 }

@@ -20,7 +20,6 @@
         other_name as otherName,
         create_date as createDate,
         modify_date as modifyDate
-        other_name as otherName
     </sql>
 
     <!-- 查询当前添加商品的属性值是否已被用(存在相关属性值的商品) -->
@@ -160,5 +159,17 @@
     <delete id="deleteProductWorker">
        delete from dj_basics_product_worker  where product_id in(select id from dj_basics_product where goods_id=#{goodsId})
     </delete>
+
+    <!-- 查询所有的货品信息 -->
+    <select id="queryProductByCategoryId" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.product.DjBasicsProduct">
+        SELECT
+        <include refid="new_columns"/>
+        FROM dj_basics_product
+        <if test="categoryId!=null and categoryId!=''">
+            where
+            category_id=#{categoryId}
+        </if>
+        ORDER BY istop DESC,create_date desc
+    </select>
 
 </mapper>

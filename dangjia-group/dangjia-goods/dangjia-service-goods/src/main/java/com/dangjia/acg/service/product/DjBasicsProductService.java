@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.app.repair.MasterMendWorkerAPI;
+import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -18,10 +19,12 @@ import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
 import com.dangjia.acg.mapper.basics.ITechnologyMapper;
 import com.dangjia.acg.mapper.basics.IUnitMapper;
 import com.dangjia.acg.mapper.product.*;
+import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.product.*;
 import com.dangjia.acg.service.basics.TechnologyService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.dangjia.acg.util.StringTool;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,9 +74,10 @@ public class DjBasicsProductService {
     private IBudgetWorkerMapper iBudgetWorkerMapper;
     @Autowired
     private MasterMendWorkerAPI masterMendWorkerAPI;
-
-
-
+    @Autowired
+    private IUnitMapper iUnitMapper;
+    @Autowired
+    private ConfigUtil configUtil;
     /**
      * 查询商品信息
      *
@@ -393,7 +397,6 @@ public class DjBasicsProductService {
         }
         return "";
     }
-
     /**
      * 判断校验字段是否可以为空
      * @param basicsProductDTO
@@ -776,5 +779,66 @@ public class DjBasicsProductService {
         }
     }
 
+
+
+
+
+    /**
+     * 查询所有的商品
+     * @param pageDTO
+     * @param categoryId
+     * @return
+     */
+    public ServerResponse<PageInfo> queryProduct(PageDTO pageDTO, String categoryId) {
+        try {
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            List<DjBasicsProduct> productList = djBasicsProductMapper.queryProductByCategoryId(categoryId);
+            PageInfo pageResult = new PageInfo(productList);
+            List<Map<String, Object>> mapList = new ArrayList<>();
+            for (DjBasicsProduct p : productList) {
+                if (p.getImage() == null) {
+                    continue;
+                }
+                String[] imgArr = p.getImage().split(",");
+                StringBuilder imgStr = new StringBuilder();
+                StringBuilder imgUrlStr = new StringBuilder();
+                StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
+                p.setImage(imgStr.toString());
+                Map<String, Object> map = BeanUtils.beanToMap(p);
+                map.put("imageUrl", imgUrlStr.toString());
+                //查询商品对应的标签及标签值列表
+                /*if (!StringUtils.isNotBlank(p.getLabelId())) {
+                    map.put("labelId", "");
+                    map.put("labelName", "");
+                } else {
+                    map.put("labelId", p.getLabelId());
+                    Label label = djBasicsLabel.selectByPrimaryKey(p.getLabelId());
+                    if (label.getName() != null)
+                        map.put("labelName", label.getName());
+                }*/
+                mapList.add(map);
+            }
+            pageResult.setList(mapList);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    /**
+     * 查询所有单位列表
+     * @return
+     */
+    public ServerResponse queryUnit() {
+        try {
+            List<Unit> unitList = iUnitMapper.getUnit();
+            return ServerResponse.createBySuccess("查询成功", unitList);
+        } catch (Exception e) {
+            LOG.error("查询失败：",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
 
 }

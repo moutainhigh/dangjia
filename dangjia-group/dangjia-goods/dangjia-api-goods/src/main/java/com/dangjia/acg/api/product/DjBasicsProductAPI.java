@@ -6,6 +6,7 @@ import com.dangjia.acg.dto.product.BasicsGoodsDTO;
 import com.dangjia.acg.dto.product.BasicsProductDTO;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.product.DjBasicsProduct;
+import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -99,6 +100,21 @@ public interface DjBasicsProductAPI {
     @ApiOperation(value = "根据id删除货品及其下面的商品", notes = "根据id删除货品及其下面的商品")
     ServerResponse deleteBasicsGoods(@RequestParam("request") HttpServletRequest request,
                                @RequestParam("id") String id);
+
+    @PostMapping("/product/djBasicsProduct/getGoodsByGid")
+    @ApiOperation(value = "根据货品id查询对应货品信息", notes = "根据货品id查询对应货品信息")
+    ServerResponse getBasicsGoodsByGid(@RequestParam("cityId") String cityId,
+                                 @RequestParam("goodsId") String goodsId);
+
+    @PostMapping("/product/djBasicsProduct/queryProduct")
+    @ApiOperation(value = "查询所有商品", notes = "查询所有商品")
+    ServerResponse<PageInfo> queryProduct(@RequestParam("request") HttpServletRequest request,
+                                          @RequestParam("pageDTO") PageDTO pageDTO,
+                                          @RequestParam("categoryId") String categoryId);
+
+    @PostMapping("/product/djBasicsProduct/queryUnit")
+    @ApiOperation(value = "查询所有单位", notes = "查询所有单位")
+    ServerResponse queryUnit(@RequestParam("request") HttpServletRequest request);
 
 
 }

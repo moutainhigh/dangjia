@@ -69,4 +69,7 @@ public interface DjBasicsProductMapper extends Mapper<DjBasicsProduct> {
      * @param goodsId 货品ID
      */
     void deleteProductWorker(@Param("goodsId") String goodsId);
+
+    List<DjBasicsProduct> queryProductByCategoryId(@Param("categoryId") String categoryId);
+
 }
