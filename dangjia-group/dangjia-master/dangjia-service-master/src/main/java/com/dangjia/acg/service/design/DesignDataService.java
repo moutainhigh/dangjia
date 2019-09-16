@@ -11,7 +11,6 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.design.DesignListDTO;
 import com.dangjia.acg.dto.design.QuantityRoomDTO;
 import com.dangjia.acg.dto.house.DesignDTO;
-import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
 import com.dangjia.acg.mapper.design.IDesignBusinessOrderMapper;
 import com.dangjia.acg.mapper.design.IPayConfigurationMapper;
 import com.dangjia.acg.mapper.design.IQuantityRoomImagesMapper;
@@ -19,7 +18,6 @@ import com.dangjia.acg.mapper.design.IQuantityRoomMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
-import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.design.DesignBusinessOrder;
 import com.dangjia.acg.modle.design.PayConfiguration;
 import com.dangjia.acg.modle.design.QuantityRoomImages;
@@ -63,8 +61,6 @@ public class DesignDataService {
     private IMemberMapper memberMapper;
     @Autowired
     private UserMapper userMapper;
-    @Autowired
-    private IHouseWorkerMapper houseWorkerMapper;
     @Autowired
     private IPayConfigurationMapper payConfigurationMapper;
     @Autowired
