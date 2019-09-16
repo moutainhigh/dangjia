@@ -107,10 +107,7 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse editSingleProduct(@RequestParam("request") HttpServletRequest request,
-                                     BasicsProductDTO basicsProductDTO,
-                                     @RequestParam("technologyList") String technologyList,
-                                     @RequestParam("deleteTechnologyIds") String  deleteTechnologyIds){
+    public ServerResponse editSingleProduct( HttpServletRequest request,BasicsProductDTO basicsProductDTO,String technologyList, String  deleteTechnologyIds){
         try{
             return djBasicsProductService.saveProductTemporaryStorage(basicsProductDTO, technologyList, deleteTechnologyIds,0);
         }catch (Exception e){
