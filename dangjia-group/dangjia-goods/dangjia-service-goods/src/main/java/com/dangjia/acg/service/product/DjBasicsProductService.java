@@ -197,46 +197,21 @@ public class DjBasicsProductService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse insertProduct(String productArr) {
-            JSONArray jsonArr = JSONArray.parseArray(productArr);
-            for (int i = 0; i < jsonArr.size(); i++) {
-                JSONObject obj = jsonArr.getJSONObject(i);
-                //JSON对象转换成Java对象
-                BasicsProductDTO basicsProductDTO = JSONObject.toJavaObject(obj, BasicsProductDTO.class);
-                //1.判断必填字段是否为空
-                String checkStr = checkFielsNull(basicsProductDTO);
-                if(StringUtils.isNotBlank(checkStr)){
-                    return ServerResponse.createByErrorMessage(checkStr);
-                }
-                String id = basicsProductDTO.getId();//商品ID
-                String name = basicsProductDTO.getName();//商品名称
-                String productSn = basicsProductDTO.getProductSn();//商品编码
-                //判断当前添加的属性值是否有相同的已存在的商品
-                checkStr = checkProductAttr(basicsProductDTO,jsonArr);
-                if(StringUtils.isNotBlank(checkStr)){
-                    return ServerResponse.createByErrorMessage(checkStr);
-                }
-                //校验商品是否存在
-                String ret = checkProduct(name, productSn, id, jsonArr);
-                if (!ret.equals("ok")) {
-                    return ServerResponse.createByErrorMessage(ret);
-                }
-            }
-            //添加商品
-            for (int i = 0; i < jsonArr.size(); i++) {
-                JSONObject obj = jsonArr.getJSONObject(i);
-                BasicsProductDTO basicsProductDTO = JSONObject.toJavaObject(obj, BasicsProductDTO.class);
-                String categoryId=basicsProductDTO.getCategoryId();//商品类别Id
-                DjBasicsGoods basicsGoods = djBasicsGoodsMapper.selectByPrimaryKey(categoryId);
 
-                DjBasicsProduct product = new DjBasicsProduct();
-                String productId = basicsProductDTO.getId();
-                product.setName(basicsProductDTO.getName());//product品名称
-                product.setCategoryId(categoryId);//分类id
-                product.setGoodsId(basicsProductDTO.getGoodsId());//goodsid
-                String productSn = basicsProductDTO.getProductSn();
-                if (!StringUtils.isNotBlank(productSn))
-                    return ServerResponse.createByErrorMessage("商品编号不能为空");
-                product.setProductSn(productSn);//商品编号
+            JSONArray jsonArr = JSONArray.parseArray(productArr);
+            //1.商品作校验，校验前端传过来的商品是否符合条件
+            String resCheckStr = checkProductData(jsonArr);
+            if(StringUtils.isNotBlank(resCheckStr)){
+                return ServerResponse.createByErrorMessage(resCheckStr);
+            }
+
+            //2.添加商品信息
+            for (int i = 0; i < jsonArr.size(); i++) {
+                JSONObject obj = jsonArr.getJSONObject(i);
+                BasicsProductDTO basicsProductDTO = JSONObject.toJavaObject(obj, BasicsProductDTO.class);
+                String goodsId=basicsProductDTO.getGoodsId();//货品ID
+                DjBasicsGoods basicsGoods = djBasicsGoodsMapper.selectByPrimaryKey(goodsId);//查询货品表信息，判断是人工还是材料商品新增
+                //2.1添加商品主表信息
                 String[] imgArr = basicsProductDTO.getImage().split(",");
 //                String[] technologyIds = obj.getString("technologyIds").split(",");//工艺节点
                 StringBuilder imgStr = new StringBuilder();
@@ -250,118 +225,31 @@ public class DjBasicsProductService {
                 }
                 if (!StringUtils.isNotBlank(imgStr.toString()))
                     return ServerResponse.createByErrorMessage("商品图片不能为空");
-                product.setImage(imgStr.toString());//图片地址
-                product.setUnitId(basicsProductDTO.getUnitId());//单位
-//                product.setLabelId(obj.getString("labelId"));//标签
-                product.setUnitName(basicsProductDTO.getUnitName());//单位
-                product.setType(basicsProductDTO.getType());//是否禁用0：禁用；1不禁用
-                product.setMaket(basicsProductDTO.getMaket());//是否上架0：不上架；1：上架
-                product.setPrice(basicsProductDTO.getPrice());//销售价
-                if (productId == null || "".equals(productId)) {//没有id则新增
-                    product.setCreateDate(new Date());
-                    product.setModifyDate(new Date());
-                    djBasicsProductMapper.insert(product);
-                } else {//修改
-                    product.setId(productId);
-                    product.setModifyDate(new Date());
-                    djBasicsProductMapper.updateByPrimaryKey(product);
-                }
-                LOG.info("001----------insertProduct productId:" + product.getId());
-                if("2".equals(basicsGoods.getType())){
-                    //添加人工商品扩展信息
-                    LOG.info("002-----添加人工商品扩展信息:" + product.getId());
-                    DjBasicsProductWorker djBasicsProductWorker = new DjBasicsProductWorker();
-                    djBasicsProductWorker.setProductId(product.getId());
-                    djBasicsProductWorker.setWorkExplain(basicsProductDTO.getWorkExplain());
-                    djBasicsProductWorker.setWorkerDec(basicsProductDTO.getWorkerDec());
-                    djBasicsProductWorker.setWorkerStandard(basicsProductDTO.getWorkerStandard());
-                    djBasicsProductWorker.setWorkerTypeId(basicsProductDTO.getWorkerTypeId());
-                    djBasicsProductWorker.setLastPrice(basicsProductDTO.getLastPrice());
-                    djBasicsProductWorker.setLastTime(basicsProductDTO.getLastTime());
-                    djBasicsProductWorker.setTechnologyIds(basicsProductDTO.getTechnologyIds());
-                    djBasicsProductWorker.setConsiderations(basicsProductDTO.getConsiderations());
-                    djBasicsProductWorker.setCalculateContent(basicsProductDTO.getCalculateContent());
-                    djBasicsProductWorker.setBuildContent(basicsProductDTO.getBuildContent());
-                    djBasicsProductWorker.setIsAgencyPurchase(basicsProductDTO.getIsAgencyPurchase());
-                    //根据商品ID查询扩展表的ID
-                    DjBasicsProductWorker oldBasicsProductWorker = djBasicsProductWorkerMapper.queryProductWorkerByProductId(product.getId());
-                    if(oldBasicsProductWorker!=null&&StringUtils.isNotBlank(oldBasicsProductWorker.getId())){
-                        //更新
-                        djBasicsProductWorker.setId(oldBasicsProductWorker.getId());
-                        djBasicsProductWorker.setModifyDate(new Date());
-                        if (djBasicsProductWorkerMapper.updateByPrimaryKeySelective(djBasicsProductWorker) < 0) {
-                            return ServerResponse.createByErrorMessage("更新工价商品失败");
-                        } else {
-                            //相关联表也更新
-                            iBudgetWorkerMapper.updateBudgetMaterialById(product.getId());
-                            Example example = new Example(DjBasicsProduct.class);
-                            example.createCriteria().andEqualTo(DjBasicsProduct.ID, product.getId());
-                            List<DjBasicsProduct> list = djBasicsProductMapper.selectByExample(example);
-                            masterMendWorkerAPI.updateMendWorker(JSON.toJSONString(list));
-                        }
-                    }else{
-                        //添加
-                        djBasicsProductWorker.setCreateDate(new Date());
-                        djBasicsProductWorker.setModifyDate(new Date());
-                        if (djBasicsProductWorkerMapper.insert(djBasicsProductWorker) < 0)
-                            return ServerResponse.createByErrorMessage("新增工价商品失败");
-                    }
+                LOG.info("001----------添加商品主表 start:" + basicsProductDTO.getName());
+                String productId = insertBasicsProductData(basicsProductDTO,imgStr);
+                LOG.info("001----------添加商品主表 end productId:" + productId);
 
-                }else if("0".equals(basicsGoods.getType())||"1".equals(basicsGoods.getType())){
-                    LOG.info("003------添加材料商品扩展信息:" + product.getId());
-                    //添加材料商品扩展信息(材料和包工包料）
-                    DjBasicsProductMaterial djBasicsProductMaterial = new DjBasicsProductMaterial();
-                    djBasicsProductMaterial.setProductId(product.getId());
-                    djBasicsProductMaterial.setWeight(basicsProductDTO.getWeight());
-                    djBasicsProductMaterial.setCost(basicsProductDTO.getCost());
-                    djBasicsProductMaterial.setProfit(basicsProductDTO.getProfit());
-                    djBasicsProductMaterial.setConvertQuality(basicsProductDTO.getConvertQuality());
-                    djBasicsProductMaterial.setConvertUnit(basicsProductDTO.getConvertUnit());
-                    djBasicsProductMaterial.setIsInflueWarrantyPeriod(basicsProductDTO.getIsInflueWarrantyPeriod());
-                    djBasicsProductMaterial.setWorkerTypeId(basicsProductDTO.getWorkerTypeId());
-                    djBasicsProductMaterial.setMaxWarrantyPeriodYear(basicsProductDTO.getMaxWarrantyPeriodYear());
-                    djBasicsProductMaterial.setMinWarrantyPeriodYear(basicsProductDTO.getMinWarrantyPeriodYear());
-                    djBasicsProductMaterial.setMarketingName(basicsProductDTO.getMarketingName());
-                    djBasicsProductMaterial.setCartagePrice(basicsProductDTO.getCartagePrice());
-                    djBasicsProductMaterial.setDetailImage(basicsProductDTO.getDetailImage());
-                    djBasicsProductMaterial.setGuaranteedPolicy(basicsProductDTO.getGuaranteedPolicy());
-                    djBasicsProductMaterial.setRefundPolicy(basicsProductDTO.getRefundPolicy());
-                    if (!StringUtils.isNoneBlank(basicsProductDTO.getValueNameArr())) {
-                        djBasicsProductMaterial.setValueNameArr(null);
-                    } else {
-                        djBasicsProductMaterial.setValueNameArr(basicsProductDTO.getValueNameArr());
-                    }
-                    if (!StringUtils.isNoneBlank(basicsProductDTO.getValueIdArr())) {
-                        djBasicsProductMaterial.setValueIdArr(null);
-                    } else {
-                        djBasicsProductMaterial.setValueIdArr(basicsProductDTO.getValueIdArr());
-                    }
-                    if (!StringUtils.isNoneBlank(basicsProductDTO.getAttributeIdArr())) {
-                        djBasicsProductMaterial.setAttributeIdArr(null);
-                    } else {
-                        djBasicsProductMaterial.setAttributeIdArr(basicsProductDTO.getAttributeIdArr());
-                    }
-                    //根据商品ID查询扩展表的ID
-                    DjBasicsProductMaterial oldBasicsProductMaterial = djBasicsProductMaterialMapper.queryProductMaterialByProductId(product.getId());
-                    if(oldBasicsProductMaterial!=null&&StringUtils.isNotBlank(oldBasicsProductMaterial.getId())){
-                        //更新
-                        djBasicsProductMaterial.setId(oldBasicsProductMaterial.getId());
-                        djBasicsProductMaterial.setModifyDate(new Date());
-                        djBasicsProductMaterialMapper.updateByPrimaryKey(djBasicsProductMaterial);
+                if(2 == basicsGoods.getType()){
+                    //2.2添加人工商品扩展信息
+                    LOG.info("002-----添加人工商品扩展信息 start :" + productId);
+                   String restr = insertBasicsProductDataWorker(basicsProductDTO,productId);
+                    if (StringUtils.isNotBlank(restr))
+                        return ServerResponse.createByErrorMessage(restr);
+                    LOG.info("002-----添加人工商品扩展信息 end :" + productId);
 
-                    }else{
-                        //添加
-                        djBasicsProductMaterial.setCreateDate(new Date());
-                        djBasicsProductMaterial.setModifyDate(new Date());
-                        djBasicsProductMaterialMapper.insert(djBasicsProductMaterial);
-                    }
+                }else if(0 == basicsGoods.getType()||1 == basicsGoods.getType()){
+                    LOG.info("003------添加材料商品扩展信息 start:" + productId);
+                    //2.3添加材料商品扩展信息(材料和包工包料）
+                    insertBasicsProductDataMaterial(basicsProductDTO,productId);
                     //添加材料商品的工艺信息
-                    LOG.info("003----1---添加材料商品工艺信息:" + product.getId());
-                    String ret = technologyService.insertTechnologyList(obj.getString("technologyList"), "0", 0, product.getId());
+                    LOG.info("003----1---添加材料商品工艺信息:" + productId);
+                    String ret = technologyService.insertTechnologyList(obj.getString("technologyList"), "0", 0, productId);
                     if (!ret.equals("1"))  //如果不成功 ，弹出是错误提示
                         return ServerResponse.createByErrorMessage(ret);
+
+                    LOG.info("003------添加材料商品扩展信息 end:" + productId);
                 }
-                //删除对应需要删除的工艺信息
+                //3.删除对应需要删除的工艺信息
                 String deleteTechnologyIds=obj.getString("deleteTechnologyIds");
                 if (!CommonUtil.isEmpty(deleteTechnologyIds)) {
                     String[] deleteTechnologyIdArr = deleteTechnologyIds.split(",");
@@ -372,9 +260,181 @@ public class DjBasicsProductService {
                         }
                     }
                 }
-
             }
             return ServerResponse.createBySuccessMessage("新增成功");
+    }
+
+    /**
+     * 添加商品主表信息
+     * @param basicsProductDTO
+     * @param imgStr
+     * @return
+     */
+    private String insertBasicsProductData(BasicsProductDTO basicsProductDTO,StringBuilder imgStr){
+        DjBasicsProduct product = new DjBasicsProduct();
+        String productId = basicsProductDTO.getId();
+        product.setName(basicsProductDTO.getName());//product品名称
+        product.setCategoryId(basicsProductDTO.getCategoryId());//分类id
+        product.setGoodsId(basicsProductDTO.getGoodsId());//goodsid
+        String productSn = basicsProductDTO.getProductSn();
+        product.setProductSn(productSn);//商品编号
+        product.setImage(imgStr.toString());//图片地址
+        product.setUnitId(basicsProductDTO.getUnitId());//单位
+//                product.setLabelId(obj.getString("labelId"));//标签
+        product.setUnitName(basicsProductDTO.getUnitName());//单位
+        product.setType(basicsProductDTO.getType()==null?1:basicsProductDTO.getType());//是否禁用0：禁用；1不禁用
+        product.setMaket(basicsProductDTO.getMaket()==null?1:basicsProductDTO.getMaket());//是否上架0：不上架；1：上架
+        product.setPrice(basicsProductDTO.getPrice());//销售价
+        if (productId == null || "".equals(productId)) {//没有id则新增
+            product.setCreateDate(new Date());
+            product.setModifyDate(new Date());
+            djBasicsProductMapper.insert(product);
+        } else {//修改
+            product.setId(productId);
+            product.setModifyDate(new Date());
+            djBasicsProductMapper.updateByPrimaryKey(product);
+        }
+        return product.getId();
+    }
+
+    /**
+     * 添加人工商品扩展信息
+     * @param basicsProductDTO
+     * @param productId
+     * @return
+     */
+    private String insertBasicsProductDataWorker(BasicsProductDTO basicsProductDTO,String productId){
+        DjBasicsProductWorker djBasicsProductWorker = new DjBasicsProductWorker();
+        djBasicsProductWorker.setProductId(productId);
+        djBasicsProductWorker.setWorkExplain(basicsProductDTO.getWorkExplain());
+        djBasicsProductWorker.setWorkerDec(basicsProductDTO.getWorkerDec());
+        djBasicsProductWorker.setWorkerStandard(basicsProductDTO.getWorkerStandard());
+        djBasicsProductWorker.setWorkerTypeId(basicsProductDTO.getWorkerTypeId());
+        djBasicsProductWorker.setLastPrice(basicsProductDTO.getLastPrice());
+        djBasicsProductWorker.setLastTime(basicsProductDTO.getLastTime());
+        djBasicsProductWorker.setTechnologyIds(basicsProductDTO.getTechnologyIds());
+        djBasicsProductWorker.setConsiderations(basicsProductDTO.getConsiderations());
+        djBasicsProductWorker.setCalculateContent(basicsProductDTO.getCalculateContent());
+        djBasicsProductWorker.setBuildContent(basicsProductDTO.getBuildContent());
+        djBasicsProductWorker.setIsAgencyPurchase(basicsProductDTO.getIsAgencyPurchase());
+        djBasicsProductWorker.setShowGoods(basicsProductDTO.getShowGoods());
+        //根据商品ID查询扩展表的ID
+        DjBasicsProductWorker oldBasicsProductWorker = djBasicsProductWorkerMapper.queryProductWorkerByProductId(productId);
+        if(oldBasicsProductWorker!=null&&StringUtils.isNotBlank(oldBasicsProductWorker.getId())){
+            //更新
+            djBasicsProductWorker.setId(oldBasicsProductWorker.getId());
+            djBasicsProductWorker.setModifyDate(new Date());
+            if (djBasicsProductWorkerMapper.updateByPrimaryKeySelective(djBasicsProductWorker) < 0) {
+                return "更新工价商品失败";
+            } else {
+                //相关联表也更新
+                iBudgetWorkerMapper.updateBudgetMaterialById(productId);
+                Example example = new Example(DjBasicsProduct.class);
+                example.createCriteria().andEqualTo(DjBasicsProduct.ID, productId);
+                List<DjBasicsProduct> list = djBasicsProductMapper.selectByExample(example);
+                masterMendWorkerAPI.updateMendWorker(JSON.toJSONString(list));
+            }
+        }else{
+            //添加
+            djBasicsProductWorker.setCreateDate(new Date());
+            djBasicsProductWorker.setModifyDate(new Date());
+            if (djBasicsProductWorkerMapper.insert(djBasicsProductWorker) < 0)
+                return "新增工价商品失败";
+        }
+        return "";
+    }
+
+    /**
+     * 添加材料商品扩展信息
+     * @param basicsProductDTO
+     * @param productId
+     * @return
+     */
+    private void insertBasicsProductDataMaterial(BasicsProductDTO basicsProductDTO,String productId){
+        DjBasicsProductMaterial djBasicsProductMaterial = new DjBasicsProductMaterial();
+        djBasicsProductMaterial.setProductId(productId);
+        djBasicsProductMaterial.setWeight(basicsProductDTO.getWeight());
+        djBasicsProductMaterial.setCost(basicsProductDTO.getCost());
+        djBasicsProductMaterial.setProfit(basicsProductDTO.getProfit());
+        djBasicsProductMaterial.setConvertQuality(basicsProductDTO.getConvertQuality());
+        djBasicsProductMaterial.setConvertUnit(basicsProductDTO.getConvertUnit());
+        djBasicsProductMaterial.setIsInflueWarrantyPeriod(basicsProductDTO.getIsInflueWarrantyPeriod());
+        djBasicsProductMaterial.setWorkerTypeId(basicsProductDTO.getWorkerTypeId());
+        djBasicsProductMaterial.setMaxWarrantyPeriodYear(basicsProductDTO.getMaxWarrantyPeriodYear());
+        djBasicsProductMaterial.setMinWarrantyPeriodYear(basicsProductDTO.getMinWarrantyPeriodYear());
+        djBasicsProductMaterial.setMarketingName(basicsProductDTO.getMarketingName());
+        djBasicsProductMaterial.setCartagePrice(basicsProductDTO.getCartagePrice());
+        djBasicsProductMaterial.setDetailImage(basicsProductDTO.getDetailImage());
+        djBasicsProductMaterial.setGuaranteedPolicy(basicsProductDTO.getGuaranteedPolicy());
+        djBasicsProductMaterial.setRefundPolicy(basicsProductDTO.getRefundPolicy());
+        if (!StringUtils.isNoneBlank(basicsProductDTO.getValueNameArr())) {
+            djBasicsProductMaterial.setValueNameArr(null);
+        } else {
+            djBasicsProductMaterial.setValueNameArr(basicsProductDTO.getValueNameArr());
+        }
+        if (!StringUtils.isNoneBlank(basicsProductDTO.getValueIdArr())) {
+            djBasicsProductMaterial.setValueIdArr(null);
+        } else {
+            djBasicsProductMaterial.setValueIdArr(basicsProductDTO.getValueIdArr());
+        }
+        if (!StringUtils.isNoneBlank(basicsProductDTO.getAttributeIdArr())) {
+            djBasicsProductMaterial.setAttributeIdArr(null);
+        } else {
+            djBasicsProductMaterial.setAttributeIdArr(basicsProductDTO.getAttributeIdArr());
+        }
+        //根据商品ID查询扩展表的ID
+        DjBasicsProductMaterial oldBasicsProductMaterial = djBasicsProductMaterialMapper.queryProductMaterialByProductId(productId);
+        if(oldBasicsProductMaterial!=null&&StringUtils.isNotBlank(oldBasicsProductMaterial.getId())){
+            //更新
+            djBasicsProductMaterial.setId(oldBasicsProductMaterial.getId());
+            djBasicsProductMaterial.setModifyDate(new Date());
+            djBasicsProductMaterialMapper.updateByPrimaryKey(djBasicsProductMaterial);
+
+        }else{
+            //添加
+            djBasicsProductMaterial.setCreateDate(new Date());
+            djBasicsProductMaterial.setModifyDate(new Date());
+            djBasicsProductMaterialMapper.insert(djBasicsProductMaterial);
+        }
+
+    }
+    /**
+     * 校验需添加商品数据是否正确
+     * 1.校验字段是否为空
+     * 2.校验材料商品的属性字段
+     * 3校验商品是否已存在
+     * @param jsonArr
+     * @return
+     */
+    private String checkProductData(JSONArray jsonArr){
+        for (int i = 0; i < jsonArr.size(); i++) {
+            JSONObject obj = jsonArr.getJSONObject(i);
+            //JSON对象转换成Java对象
+            BasicsProductDTO basicsProductDTO = JSONObject.toJavaObject(obj, BasicsProductDTO.class);
+            //1.判断必填字段是否为空
+            String checkStr = checkFielsNull(basicsProductDTO);
+            if(StringUtils.isNotBlank(checkStr)){
+                return checkStr;
+            }
+            String id = basicsProductDTO.getId();//商品ID
+            String name = basicsProductDTO.getName();//商品名称
+            String productSn = basicsProductDTO.getProductSn();//商品编码
+            String categoryId=basicsProductDTO.getCategoryId();//商品类别Id
+            DjBasicsGoods basicsGoods = djBasicsGoodsMapper.selectByPrimaryKey(categoryId);
+            if("0".equals(basicsGoods.getType())||"1".equals(basicsGoods.getType())){
+                //判断当前添加的属性值是否有相同的已存在的商品（材料商品才有）
+                checkStr = checkProductAttr(basicsProductDTO,jsonArr);
+                if(StringUtils.isNotBlank(checkStr)){
+                    return checkStr;
+                }
+            }
+            //校验商品是否存在
+            String ret = checkProduct(name, productSn, id, jsonArr);
+            if (!ret.equals("ok")) {
+                return ret;
+            }
+        }
+        return "";
     }
 
     /**

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.product.DjBasicsAttributeMapper">
+
+    <sql id="all_columns">
+        id,
+        category_id,
+        name,
+        type,
+        create_date as createDate,
+        modify_date as modifyDate,
+        data_status as dataStatus,
+        is_screen_conditions as isScreenConditions
+	</sql>
+
+    <!-- 根据商品类别Id 查询关联的属性 -->
+    <select id="queryAttributeByCategoryId" parameterType="java.lang.String"
+            resultType="com.dangjia.acg.modle.product.DjBasicsAttribute">
+        select
+        <include refid="all_columns"/>
+        from
+        dj_basics_attribute
+        where 1=1
+        <if test="categoryId!=null and categoryId!=''">
+            and  category_id =#{categoryId}
+        </if>
+
+        <if test="likeAttrName!=null and likeAttrName!=''">
+            and  name like CONCAT('%',#{likeAttrName},'%')
+        </if>
+        ORDER BY create_date desc
+    </select>
+
+    <!-- 根据商品类别Id 查询关联的属性 -->
+    <select id="queryAttributeByCategoryIdAndAttrName" parameterType="java.lang.String"
+            resultType="com.dangjia.acg.modle.product.DjBasicsAttribute">
+        select
+        <include refid="all_columns"/>
+        from dj_basics_attribute
+        where 1=1
+        <if test="categoryId!=null and categoryId!=''">
+            and  category_id =#{categoryId}
+        </if>
+
+        <if test="attrName!=null and attrName!=''">
+            and  name =#{attrName}
+        </if>
+        ORDER BY create_date desc
+    </select>
+
+</mapper>

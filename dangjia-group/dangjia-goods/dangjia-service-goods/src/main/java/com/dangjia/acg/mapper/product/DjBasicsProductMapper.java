@@ -19,6 +19,15 @@ import java.util.List;
 public interface DjBasicsProductMapper extends Mapper<DjBasicsProduct> {
 
     /**
+     * 按照 属性id 和属性值查找商品
+     *
+     * @param attributeIdArr
+     * @param valueIdArr
+     * @return
+     */
+    List<DjBasicsProduct> getPListByValueIdArrOrAttrId(@Param("attributeIdArr") String attributeIdArr, @Param("valueIdArr") String valueIdArr);
+
+    /**
      * 查询是否添加过同属性的商品
      * @param valueIdArr
      * @return
@@ -42,5 +51,8 @@ public interface DjBasicsProductMapper extends Mapper<DjBasicsProduct> {
     List<AppBasicsProductDTO> queryProductMaterial(@Param("productSn") String productSn);
 
     List<AppBasicsProductDTO> queryProductWorker(@Param("productSn") String productSn);
+
+    /*更新单位*/
+    void updateProductValueId(@Param("valueId") String valueId);
 
 }
