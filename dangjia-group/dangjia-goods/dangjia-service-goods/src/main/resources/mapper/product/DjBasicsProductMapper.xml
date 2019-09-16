@@ -83,7 +83,7 @@
                 and
                 p.product_sn=#{productSn}
             </if>
-            ORDER BY istop DESC,create_date desc
+            ORDER BY p.istop DESC,p.create_date desc
         </select>
     <!-- 根据人工商品编号查询  没有规格、没有营销名称-->
         <select  id ="queryProductWorker" parameterType="java.lang.String" resultType="com.dangjia.acg.dto.product.AppBasicsProductDTO">
@@ -95,7 +95,7 @@
              and
              p.product_sn=#{productSn}
             </if>
-            ORDER BY istop DESC,create_date desc
+            ORDER BY p.istop DESC,p.create_date desc
         </select>
 
     <!--  按照 属性id 和属性值查找商品 -->
