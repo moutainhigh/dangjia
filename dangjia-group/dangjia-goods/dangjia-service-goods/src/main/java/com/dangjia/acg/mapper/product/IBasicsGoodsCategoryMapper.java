@@ -23,7 +23,7 @@ public interface IBasicsGoodsCategoryMapper extends Mapper<BasicsGoodsCategory> 
 	List<BasicsGoodsCategory> query();
 
 	//根据父id查询下属商品类型
-	List<BasicsGoodsCategory> queryCategoryByParentId(@Param("parentId") String parentId);
+	List<BasicsGoodsCategory> queryCategoryByParentId(@Param("parentId") String parentId,@Param("categoryLabelId") String categoryLabelId);
 
 	//根据name查询商品对象
 	List<BasicsGoodsCategory> queryCategoryByName(@Param("name") String name);
