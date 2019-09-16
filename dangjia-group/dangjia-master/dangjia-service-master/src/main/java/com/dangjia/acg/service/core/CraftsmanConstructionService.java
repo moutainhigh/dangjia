@@ -29,6 +29,7 @@ import com.dangjia.acg.modle.worker.Insurance;
 import com.dangjia.acg.util.HouseUtil;
 import com.dangjia.acg.util.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
@@ -76,6 +77,8 @@ public class CraftsmanConstructionService {
     @Autowired
     private IInsuranceMapper insuranceMapper;
 
+    @Value("${spring.profiles.active}")
+    private String active;
     /**
      * 获取施工页面
      *
@@ -372,6 +375,11 @@ public class CraftsmanConstructionService {
         }
         //查询是否今天已经上传过巡查
         List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getTodayPatrol(hf.getHouseId(), new Date());
+        if(active!=null&&(active.equals("pre"))) {
+            if (!((houseFlowApplyList.size()&1)==1)) {
+                houseFlowApplyList=null;
+            }
+        }
         if (hf.getSupervisorStart() == 0) {//已开工之后都是巡查工地；1：巡查工地2：申请业主验收；3:确认开工
             List<HouseFlow> listStart = houseFlowMapper.getHouseIsStart(hf.getHouseId());
             if (listStart.size() > 0) {
@@ -564,6 +572,12 @@ public class CraftsmanConstructionService {
                 bean.setFootMessageDescribe("");//每日开工事项
                 HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart(house.getId(), worker.getId(), new Date());//查询今日开工记录
                 List<ConstructionByWorkerIdBean.BigListBean.ListMapBean> workerEverydayList = new ArrayList<>();
+                if(active!=null&&(active.equals("pre"))) {
+                    List<HouseFlowApply> flowAppList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 0, worker.getId(), new Date());//查询是否已提交今日完工
+                    if (flowAppList != null && flowAppList.size() > 0) {
+                        todayStart=null;
+                    }
+                }
                 if (todayStart == null) {//没有今日开工记录
                     buttonList.add(Utils.getButton("今日开工", 2));
                     List<WorkerEveryday> listWorDay = workerEverydayMapper.getWorkerEverydayList(1);//事项类型  1 开工事项 2 完工事项
