@@ -2,6 +2,7 @@ package com.dangjia.acg.api.product;
 
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.product.BasicsGoodsDTO;
+import com.dangjia.acg.dto.product.BasicsProductDTO;
 import com.dangjia.acg.modle.product.DjBasicsProduct;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -43,9 +44,9 @@ public interface DjBasicsProductAPI {
                                   @RequestParam("jsonStr")String jsonStr);
 
     @PostMapping("/product/djBasicsProduct/queryDataByProductId")
-    @ApiOperation(value = "根据商品编号查看商品详情", notes = "根据商品编号查看商品详情")
+    @ApiOperation(value = "根据货品编号查看商品详情", notes = "根据货品编号查看商品详情")
     ServerResponse queryDataByProductId(@RequestParam("request")HttpServletRequest request,
-                                    @RequestParam("productSn")String productSn);
+                                    @RequestParam("productId")String productId);
 
 
     @PostMapping("/product/djBasicsProduct/saveBasicsGoods")
@@ -57,6 +58,13 @@ public interface DjBasicsProductAPI {
     @ApiOperation(value = "新增货品下的商品", notes = "新增货品下的商品")
     ServerResponse insertProduct(@RequestParam("request") HttpServletRequest request,
                                  @RequestParam("productArr") String productArr);
+
+    @PostMapping("/product/djBasicsProduct/saveProductTemporaryStorage")
+    @ApiOperation(value = "暂存商品信息", notes = "暂存商品信息")
+    ServerResponse saveProductTemporaryStorage(@RequestParam("request") HttpServletRequest request,
+                                 BasicsProductDTO basicsProductDTO,
+                                 @RequestParam("technologyList") String technologyList,
+                                 @RequestParam("deleteTechnologyIds") String  deleteTechnologyIds);
 
 
 

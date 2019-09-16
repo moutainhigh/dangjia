@@ -4,6 +4,7 @@ import com.dangjia.acg.api.product.DjBasicsProductAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.product.BasicsGoodsDTO;
+import com.dangjia.acg.dto.product.BasicsProductDTO;
 import com.dangjia.acg.mapper.product.DjBasicsProductMapper;
 import com.dangjia.acg.mapper.product.IBasicsGoodsMapper;
 import com.dangjia.acg.modle.basics.Goods;
@@ -30,11 +31,6 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
     @Autowired
     private DjBasicsProductService djBasicsProductService;
 
-    @Autowired
-    private DjBasicsProductMapper djBasicsProductMapper ;
-
-    @Autowired
-    private IBasicsGoodsMapper iBasicsGoodsMapper ;
 
     @Override
     @ApiMethod
@@ -87,5 +83,25 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
             return ServerResponse.createBySuccessMessage("新增失败");
         }
 
+    }
+
+    /**
+     * 暂存商品
+     * @param request
+     * @param basicsProductDTO
+     * @param technologyList  添加工艺列表
+     * @param deleteTechnologyIds 删除工艺列表的D
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse saveProductTemporaryStorage(HttpServletRequest request,
+                                                      BasicsProductDTO basicsProductDTO, String technologyList, String  deleteTechnologyIds){
+        try{
+            return djBasicsProductService.saveProductTemporaryStorage(basicsProductDTO, technologyList, deleteTechnologyIds);
+        }catch (Exception e){
+            logger.error("保存商品信息失败：",e);
+            return ServerResponse.createBySuccessMessage("保存商品失败");
+        }
     }
 }
