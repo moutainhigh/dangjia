@@ -375,7 +375,7 @@ public class CraftsmanConstructionService {
         }
         //查询是否今天已经上传过巡查
         List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getTodayPatrol(hf.getHouseId(), new Date());
-        if(active!=null&&(active.equals("pre"))) {
+        if(active!=null&&!(active.equals("pre"))) {
             if (!((houseFlowApplyList.size()&1)==1)) {
                 houseFlowApplyList=null;
             }
@@ -572,7 +572,7 @@ public class CraftsmanConstructionService {
                 bean.setFootMessageDescribe("");//每日开工事项
                 HouseFlowApply todayStart = houseFlowApplyMapper.getTodayStart(house.getId(), worker.getId(), new Date());//查询今日开工记录
                 List<ConstructionByWorkerIdBean.BigListBean.ListMapBean> workerEverydayList = new ArrayList<>();
-                if(active!=null&&(active.equals("pre"))) {
+                if(active!=null&&!(active.equals("pre"))) {
                     List<HouseFlowApply> flowAppList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 0, worker.getId(), new Date());//查询是否已提交今日完工
                     if (flowAppList != null && flowAppList.size() > 0) {
                         todayStart=null;
