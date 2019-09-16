@@ -2,6 +2,7 @@ package com.dangjia.acg.controller.product;
 
 import com.dangjia.acg.api.product.DjBasicsProductAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.product.BasicsGoodsDTO;
 import com.dangjia.acg.dto.product.BasicsProductDTO;
@@ -11,7 +12,6 @@ import com.dangjia.acg.service.product.DjBasicsProductService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -96,6 +96,12 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
             return ServerResponse.createBySuccessMessage("新增失败");
         }
 
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryGoodsListByCategoryLikeName(HttpServletRequest request, PageDTO pageDTO, String categoryId, String name, String cityId, Integer type,String categoryName) {
+        return djBasicsProductService.queryGoodsListByCategoryLikeName(pageDTO, categoryId, name, type,categoryName);
     }
     /**
      * 单个新增修改商品信息

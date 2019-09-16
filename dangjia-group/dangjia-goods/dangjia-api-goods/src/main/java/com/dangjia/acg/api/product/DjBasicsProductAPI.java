@@ -1,5 +1,6 @@
 package com.dangjia.acg.api.product;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.product.BasicsGoodsDTO;
 import com.dangjia.acg.dto.product.BasicsProductDTO;
@@ -64,6 +65,16 @@ public interface DjBasicsProductAPI {
     @ApiOperation(value = "批量新增修改货品下的商品", notes = "批量新增修改货品下的商品")
     ServerResponse insertBatchProduct(@RequestParam("request") HttpServletRequest request,
                                  @RequestParam("productArr") String productArr);
+
+    @PostMapping("/product/djBasicsProduct/queryGoodsListByCategoryLikeName")
+    @ApiOperation(value = "按照name模糊查询商品及下属货品", notes = "按照name模糊查询商品及下属货品，type： 是否禁用  0：禁用；1不禁用 ;  -1全部默认")
+    ServerResponse queryGoodsListByCategoryLikeName(@RequestParam("request") HttpServletRequest request,
+                                                    @RequestParam("pageDTO") PageDTO pageDTO,
+                                                    @RequestParam("categoryId") String categoryId,
+                                                    @RequestParam("name") String name,
+                                                    @RequestParam("cityId") String cityId,
+                                                    @RequestParam("type") Integer type,
+                                                    @RequestParam("categoryName") String categoryName);
 
     @PostMapping("/product/djBasicsProduct/saveProductTemporaryStorage")
     @ApiOperation(value = "暂存商品信息", notes = "暂存商品信息")

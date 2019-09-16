@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.product.DjBasicsGoodsMapper">
+
+
+    <!-- 查询某个分类的商品 模糊name -->
+    <select id="queryGoodsListByCategoryLikeName" resultType="com.dangjia.acg.modle.product.DjBasicsGoods">
+        SELECT
+        bg.id as id,
+        bg.`NAME` as name,
+        bg.category_id AS categoryId,
+        bg.type as type,
+        bg.buy as buy,
+        bg.sales as sales,
+        bg.unit_id AS unitId,
+        bg.other_name AS otherName,
+        bg.create_date AS createDate,
+        bg.modify_date AS modifyDate
+        FROM dj_basics_goods bg
+        INNER JOIN dj_basics_product bp ON bp.goods_id = bg.id
+        where 1=1
+        <if test="categoryId!=null and categoryId!=''">
+            and bg.category_id=#{categoryId}
+        </if>
+        <if test="name!=null and name!=''">
+            AND (
+            bp.`name` LIKE CONCAT('%',#{name}, '%' )
+            OR bg.`other_name` LIKE CONCAT( '%', #{name}, '%' )
+            )
+        </if>
+        GROUP BY bg.id
+    </select>
+
+    <select id="queryGoodsListByCategoryId" resultType="com.dangjia.acg.modle.product.DjBasicsGoods">
+        SELECT
+             CONCAT(b.`name`, g.`name`) AS NAME,
+             g.id as id,
+             g.type as type,
+             g.buy as buy
+        FROM
+            dj_basics_goods g,
+            dj_basics_brand b
+        WHERE
+            g.brand_id = b.id
+        AND g.category_id = #{categoryId}
+    </select>
+
+</mapper>

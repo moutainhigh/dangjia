@@ -5,16 +5,23 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.app.repair.MasterMendWorkerAPI;
 import com.dangjia.acg.common.exception.ServerCode;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.product.ActuarialGoodsDTO;
 import com.dangjia.acg.dto.product.AppBasicsProductDTO;
 import com.dangjia.acg.dto.product.BasicsProductDTO;
 import com.dangjia.acg.dto.product.DjBasicsLabelDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
 import com.dangjia.acg.mapper.basics.ITechnologyMapper;
+import com.dangjia.acg.mapper.basics.IUnitMapper;
 import com.dangjia.acg.mapper.product.*;
 import com.dangjia.acg.modle.product.*;
 import com.dangjia.acg.service.basics.TechnologyService;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,11 +30,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.Date;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 
 /**
  * 产品逻辑处理层
@@ -67,6 +71,9 @@ public class DjBasicsProductService {
     private IBudgetWorkerMapper iBudgetWorkerMapper;
     @Autowired
     private MasterMendWorkerAPI masterMendWorkerAPI;
+
+
+
     /**
      * 查询商品信息
      *
@@ -386,6 +393,7 @@ public class DjBasicsProductService {
         }
         return "";
     }
+
     /**
      * 判断校验字段是否可以为空
      * @param basicsProductDTO
@@ -720,5 +728,53 @@ public class DjBasicsProductService {
             djBasicsProductWorkerMapper.deleteByExample(example);
             return ServerResponse.createBySuccessMessage("删除成功");
     }
+
+
+
+    /**
+     * 模糊查询goods及下属product
+     *
+     * @param pageDTO
+     * @param categoryId
+     * @param name 分类名称
+     * @param type 是否禁用  0：禁用；1不禁用 ;  -1全部默认
+     * @return
+     */
+    public ServerResponse queryGoodsListByCategoryLikeName(PageDTO pageDTO, String categoryId, String name, Integer type, String categoryName) {
+        try {
+            LOG.info("tqueryGoodsListByCategoryLikeName type :" + type);
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<DjBasicsGoods> djBasicsGoods = djBasicsGoodsMapper.queryGoodsListByCategoryLikeName(categoryId, name);
+            PageInfo pageResult = new PageInfo(djBasicsGoods);
+            List<ActuarialGoodsDTO> actuarialGoodsDTOS=new ArrayList<>();
+            List<Map<String, Object>> gMapList = new ArrayList<>();
+            ActuarialGoodsDTO actuarialGoodsDTO=new ActuarialGoodsDTO();
+            actuarialGoodsDTO.setCategoryName(categoryName);
+            djBasicsGoods.forEach(goods ->{
+                Map<String, Object> gMap = BeanUtils.beanToMap(goods);
+                List<Map<String, Object>> mapList = new ArrayList<>();
+                if (2 != goods.getBuy()) {
+                    List<DjBasicsProduct> djBasicsProducts = djBasicsProductMapper.queryByGoodsId(goods.getId());
+                    for (DjBasicsProduct p : djBasicsProducts) {
+                        //type表示： 是否禁用  0：禁用；1不禁用 ;  -1全部默认
+                        if (type!=null&& !type.equals(p.getType()) && -1 != type) //不等于 type 的不返回给前端
+                            continue;
+                        Map<String, Object> map = BeanUtils.beanToMap(p);
+                        mapList.add(map);
+                    }
+                    gMap.put("productList", mapList);
+                    gMapList.add(gMap);
+                }
+            });
+            actuarialGoodsDTO.setGMapList(gMapList);
+            actuarialGoodsDTOS.add(actuarialGoodsDTO);
+            pageResult.setList(actuarialGoodsDTOS);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
 
 }

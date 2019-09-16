@@ -5,7 +5,7 @@
 <mapper namespace="com.dangjia.acg.mapper.product.DjBasicsProductMapper">
 
     <sql id="new_columns">
-               id as id,
+        id as id,
         name as name,
         goods_id as goodsId,
         category_id as categoryId,
@@ -17,6 +17,9 @@
         type as type,
         istop,
         price as price,
+        other_name as otherName,
+        create_date as createDate,
+        modify_date as modifyDate
         other_name as otherName
     </sql>
 
@@ -139,6 +142,15 @@
         WHERE
         FIND_IN_SET(#{valueId}, pm.value_id_arr )
     </update>
+
+    <!-- 根据商品Id查询所有货品 -->
+    <select id="queryByGoodsId" resultType="com.dangjia.acg.modle.product.DjBasicsProduct">
+        SELECT
+        <include refid="new_columns"/>
+        FROM dj_basics_product
+        where goods_id=#{goodsId}
+        ORDER BY istop DESC,create_date desc
+    </select>
 
     <!-- 删除材料商品扩展表信息-->
     <delete id="deleteProductMaterial" parameterType="java.lang.String">
