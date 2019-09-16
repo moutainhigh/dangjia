@@ -9,6 +9,8 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * author: Ronalcheng
  * Date: 2018/11/2 0002
@@ -208,7 +210,8 @@ public interface HouseAPI {
 
     @PostMapping("app/house/house/getReferenceBudget")
     @ApiOperation(value = "参考报价", notes = "参考报价")
-    ServerResponse getReferenceBudget(@RequestParam("cityId") String cityId,
+    ServerResponse getReferenceBudget(@RequestParam("request") HttpServletRequest request,
+                                      @RequestParam("cityId") String cityId,
                                       @RequestParam("villageId") String villageId,
                                       @RequestParam("square") Double square,
                                       @RequestParam("houseType") Integer houseType);

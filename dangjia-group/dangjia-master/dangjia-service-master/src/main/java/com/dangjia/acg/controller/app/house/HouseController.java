@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * author: Ronalcheng
  * Date: 2018/11/2 0002
@@ -195,14 +197,13 @@ public class HouseController implements HouseAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getReferenceBudget(String cityId, String villageId, Double square, Integer houseType) {
-        if (square != null && !"".equals(square)) {
-            Double minSquare = square - 15;
-            Double maxSquare = square + 15;
-            return houseService.getReferenceBudget(cityId, villageId, minSquare, maxSquare, houseType);
-        } else {
-            return ServerResponse.createByErrorMessage("请输入正确的面积");
+    public ServerResponse getReferenceBudget(HttpServletRequest request, String cityId, String villageId, Double square, Integer houseType) {
+        if (square == null) {
+            square = 15d;
         }
+        Double minSquare = square - 15;
+        Double maxSquare = square + 15;
+        return houseService.getReferenceBudget(request, cityId, villageId, minSquare, maxSquare, houseType);
     }
 
     @Override
