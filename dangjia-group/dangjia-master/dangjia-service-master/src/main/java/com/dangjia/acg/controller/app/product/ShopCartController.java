@@ -3,6 +3,7 @@ package com.dangjia.acg.controller.app.product;
 import com.dangjia.acg.api.app.product.ShopCartAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dto.product.CartDTO;
 import com.dangjia.acg.service.product.ShopCartservice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,8 +18,8 @@ public class ShopCartController implements ShopCartAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse add(HttpServletRequest request, String userToken, String productId, int num) {
-        return shopCartservice.add(request,userToken,productId,num);
+    public ServerResponse add(HttpServletRequest request, String userToken, CartDTO cartDTO ) {
+        return shopCartservice.add(request,userToken,cartDTO);
     }
 
     @Override

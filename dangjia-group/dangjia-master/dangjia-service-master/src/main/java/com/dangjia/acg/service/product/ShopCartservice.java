@@ -1,7 +1,6 @@
 package com.dangjia.acg.service.product;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import cn.jiguang.common.utils.StringUtils;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -14,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -37,36 +36,57 @@ public class ShopCartservice {
      *
      * @param request
      * @param userToken
-     * @param productId
-     * @param num
+     * @param cartDTO
      * @return
      */
-    public ServerResponse add(HttpServletRequest request, String userToken, String productId, int num) {
-
-        try{
-            Boolean exists = redisClient.exists(productId);//首先判断redis数据库中是否存在当前键
-            if (exists) {
-                //此处要修改，用用户的的Userid进行区分
-                //获取现有的购物车中的数据
-                String jsonStr = redisClient.getCache(Constants.REDIS_DANGJIA_CACHE + productId.toString(), String.class);
-                if (jsonStr != null) {
-                    CartDTO cartDTO = JSON.toJavaObject(JSONObject.parseObject(jsonStr), CartDTO.class);
-                    cartDTO.setProductNum(cartDTO.getProductNum() + num);
-                    redisClient.put(Constants.REDIS_DANGJIA_CACHE + productId.toString(), JSON.toJSON(jsonStr).toString());
-                } else {
-                    return ServerResponse.createBySuccess("没有检索到数据", 0);
-                }
-                return ServerResponse.createBySuccess("检索到数据", 1);
+    public ServerResponse add(HttpServletRequest request, String userToken, CartDTO cartDTO) {
+        try {
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
             }
-            //根据商品ID获取商品
-            //设置购物车值
-            return null;
-        }
-        catch (Exception e) {
+            Member member = (Member) object;
+            List<House> houseList = iMemberCollectMapper.queryCollectHouse(member.getId());
+            if (houseList.size() <= 0) {
+                return ServerResponse.createBySuccess("您还没有房子,不能选购商品!");
+            }
+            //首先判断redis数据库中是否存在当前键
+            Boolean exists = redisClient.exists(Constants.REDIS_DANGJIA_CACHE + member.getId().toString());
+            if (exists) {
+                //获取现有的购物车中的数据
+                List<CartDTO> cartDTOlist = redisClient.getListCache(Constants.REDIS_DANGJIA_CACHE + member.getId().toString(), CartDTO.class);
+                if (cartDTOlist != null) {
+                    for (CartDTO clscartDto : cartDTOlist) {
+                        String productId = clscartDto.getProductId();
+                        //判断是同一商品
+                        if (cartDTO.getProductId().equals(productId)) {
+                            //数量相加
+                            clscartDto.setProductNum(clscartDto.getProductNum() + cartDTO.getProductNum());
+                        }
+                    }
+                    redisClient.putListCache(Constants.REDIS_DANGJIA_CACHE + member.getId().toString(), cartDTOlist);
+                    return ServerResponse.createBySuccess("商品加入购物车成功");
+                } else {
+                    return ServerResponse.createBySuccess("数据库中不存在当前购物车");
+                }
+            }
+            //redis数据库里面不存在当前存储的键,键生成方式:Constants.REDIS_DANGJIA_CACHE + member.getId().toString()，就往购物车里面增加商品
+            List<CartDTO> list = new ArrayList<CartDTO>();
+            CartDTO clsCartDTO = new CartDTO();
+            clsCartDTO.setProductId(cartDTO.getProductId());
+            clsCartDTO.setProductNum(cartDTO.getProductNum());
+            clsCartDTO.setCheck(cartDTO.getCheck());
+            clsCartDTO.setProductIcon(cartDTO.getProductIcon());
+            clsCartDTO.setProductPrice(cartDTO.getProductPrice());
+            clsCartDTO.setProductStatus(cartDTO.getProductStatus());
+            list.add(clsCartDTO);
+            //将商品集合存入redis
+            redisClient.putListCache(Constants.REDIS_DANGJIA_CACHE + member.getId().toString(), list);
+            return ServerResponse.createByErrorMessage("增加购物车成功!");
+        } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("检索到数据异常");
         }
-
     }
 
     /**
@@ -85,22 +105,15 @@ public class ShopCartservice {
             Member member = (Member) object;
             List<House> houseList = iMemberCollectMapper.queryCollectHouse(member.getId());
             if (houseList.size() <= 0) {
-                return ServerResponse.createBySuccess("您还没有房子,不能查看购物车列表!", 0);
+                return ServerResponse.createBySuccess("您还没有房子,不能查看购物车列表!");
             }
-
-            //此处要修改，用用户的的Userid进行区分
-            List<String> jsonList = redisClient.getListCache(Constants.REDIS_DANGJIA_CACHE + member.getId().toString(), String.class);
-            List<CartDTO> cartDtoList = new LinkedList<CartDTO>();
-            for (String json : jsonList) {
-                CartDTO cartDTO = JSON.toJavaObject(JSONObject.parseObject(json), CartDTO.class);
-                cartDtoList.add(cartDTO);
-            }
-            return ServerResponse.createBySuccess("查询购物车成功!", cartDtoList);
+            //获取缓存列表中的集合
+            List<CartDTO> cartDTOList = redisClient.getListCache(Constants.REDIS_DANGJIA_CACHE + member.getId().toString(), CartDTO.class);
+            return ServerResponse.createBySuccess("查询购物车列表成功!", cartDTOList);
         } catch (Exception e) {
             e.printStackTrace();
-            return ServerResponse.createByErrorMessage("查询购物车异常");
+            return ServerResponse.createByErrorMessage("查询购物车列表异常");
         }
-
     }
 
     /**
@@ -121,18 +134,23 @@ public class ShopCartservice {
             Member member = (Member) object;
             List<House> houseList = iMemberCollectMapper.queryCollectHouse(member.getId());
             if (houseList.size() <= 0) {
-                return ServerResponse.createBySuccess("您还没有房子,不能更新数量!", 0);
+                return ServerResponse.createBySuccess("您还没有房子,不能更新数量!");
             }
-
-//            String userId = "测试";
-            String json = redisClient.getCache(Constants.REDIS_DANGJIA_CACHE + member.getId(), String.class);
-            if (json == null) {
-                return ServerResponse.createBySuccess("更新数量失败!", 0);
+            if (StringUtils.isNotEmpty(productId)) {
+                //获取缓存中存储的列表集合
+                List<CartDTO> cartDTOList = redisClient.getListCache(Constants.REDIS_DANGJIA_CACHE + member.getId().toString(), CartDTO.class);
+                for (CartDTO cartDTO : cartDTOList) {
+                    String redisProductId = cartDTO.getProductId();
+                    if (redisProductId.equals(productId)) {
+                        cartDTO.setProductNum(cartDTO.getProductNum() + num);
+                    }
+                }
+                //重新封装list，存储到redis数据库
+                redisClient.putListCache(Constants.REDIS_DANGJIA_CACHE + member.getId().toString(), cartDTOList);
+                return ServerResponse.createBySuccess("更新数量成功!");
+            } else {
+                return ServerResponse.createByErrorMessage("商品编号不能为空!");
             }
-            CartDTO cartDTO = JSON.toJavaObject(JSONObject.parseObject(json), CartDTO.class);
-            cartDTO.setProductNum(num);
-            redisClient.put(Constants.REDIS_DANGJIA_CACHE + member.getId().toString(), JSON.toJSON(cartDTO).toString());
-            return ServerResponse.createBySuccess("更新数量成功!", 1);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("更新数量异常");
@@ -161,18 +179,18 @@ public class ShopCartservice {
                 return ServerResponse.createBySuccess("您还没有房子,不能全选商品!", 0);
             }
             //获取商品列表
-            List<String> jsonList = redisClient.getListCache(Constants.REDIS_DANGJIA_CACHE + member.getId().toString(), String.class);
-            for (String json : jsonList) {
-                CartDTO cartDTO = JSON.toJavaObject(JSONObject.parseObject(json), CartDTO.class);
+            List<CartDTO> cartDTOList = redisClient.getListCache(Constants.REDIS_DANGJIA_CACHE + member.getId().toString(), CartDTO.class);
+            for (CartDTO cartDTO : cartDTOList) {
                 if ("true".equals(checked)) {
                     cartDTO.setCheck("1");
                 } else if ("false".equals(checked)) {
                     cartDTO.setCheck("0");
                 } else {
-                    return ServerResponse.createBySuccess("全选失败!", 1);
+                    return ServerResponse.createBySuccess("全选失败!");
                 }
             }
-            return ServerResponse.createBySuccess("全选商品成功!", 1);
+            redisClient.putListCache(Constants.REDIS_DANGJIA_CACHE + member.getId().toString(), cartDTOList);
+            return ServerResponse.createBySuccess("全选商品成功!");
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("全选商品异常");
@@ -199,13 +217,20 @@ public class ShopCartservice {
             if (houseList.size() <= 0) {
                 return ServerResponse.createBySuccess("您还没有房子,不能删除勾选商品!", 0);
             }
-            redisClient.deleteCache(Constants.REDIS_DANGJIA_CACHE + member.getId().toString());
-            return ServerResponse.createBySuccess("删除勾选商品成功!", 1);
+
+            List<CartDTO> cartDTOList = redisClient.getListCache(Constants.REDIS_DANGJIA_CACHE + member.getId().toString(), CartDTO.class);
+            for (CartDTO cartDTO : cartDTOList) {
+                if (cartDTO.getProductId().equals(productId)) {
+                    cartDTOList.remove(cartDTO);//删除当前匹配的对象实体
+                }
+            }
+            //重新封装list，存储到redis数据库
+            redisClient.putListCache(Constants.REDIS_DANGJIA_CACHE + member.getId().toString(), cartDTOList);
+            return ServerResponse.createBySuccess("删除勾选商品成功!");
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("删除勾选商品异常");
         }
-
     }
 
     /**
@@ -224,11 +249,10 @@ public class ShopCartservice {
             Member member = (Member) object;
             List<House> houseList = iMemberCollectMapper.queryCollectHouse(member.getId());
             if (houseList.size() <= 0) {
-                return ServerResponse.createBySuccess("您还没有房子,不能清空!", 0);
+                return ServerResponse.createBySuccess("您还没有房子,不能清空!");
             }
-            //   String userId = null;
             redisClient.deleteCache(Constants.REDIS_DANGJIA_CACHE + member.getId().toString());
-            return ServerResponse.createBySuccess("清空购物车成功!", 1);
+            return ServerResponse.createBySuccess("清空购物车成功!");
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("清空购物车异常");

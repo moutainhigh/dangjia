@@ -1,6 +1,7 @@
 package com.dangjia.acg.api.app.product;
 
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dto.product.CartDTO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -22,7 +23,7 @@ public interface ShopCartAPI {
 
     @PostMapping("/shopcart/add")
     @ApiOperation(value = "加入购物车", notes = "加入购物车")
-    ServerResponse add(@RequestParam("request") HttpServletRequest request, @RequestParam("userToken") String userToken, String productId, int num);
+    ServerResponse add(@RequestParam("request") HttpServletRequest request, @RequestParam("userToken") String userToken, @RequestParam("cartDTO") CartDTO cartDTO);
 
 
     @PostMapping("/shopcart/getCartList")
