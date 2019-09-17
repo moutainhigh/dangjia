@@ -1,7 +1,10 @@
 package com.dangjia.acg.api.product.app;
 
+import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,5 +33,15 @@ public interface AppCategoryGoodsAPI {
     @ApiOperation(value = " 第三部分：右侧侧分类集合", notes = " 第三部分：右侧侧分类集合")
     ServerResponse queryRightCategoryByDatas(@RequestParam("cityId") String cityId,@RequestParam("parentId") String parentId);
 
+
+    @PostMapping("/app/category/goods/data")
+    @ApiOperation(value = " 第四部分：二级商品列表搜索页面", notes = " 第四部分：二级商品列表搜索页面")
+    ServerResponse serchCategoryProduct(@RequestParam("pageDTO") PageDTO pageDTO,
+                                        @RequestParam("cityId") String cityId,
+                                        @RequestParam("categoryId") String categoryId,
+                                        @RequestParam("name") String name,
+                                        @RequestParam("attributeVal") String attributeVal,
+                                        @RequestParam("brandVal") String brandVal,
+                                        @RequestParam("orderKey") String orderKey);
 
 }

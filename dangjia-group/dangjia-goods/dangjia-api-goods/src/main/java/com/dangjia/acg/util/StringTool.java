@@ -1,5 +1,6 @@
 package com.dangjia.acg.util;
 
+import com.dangjia.acg.common.util.CommonUtil;
 import com.github.pagehelper.util.StringUtil;
 import org.apache.commons.lang.StringUtils;
 
@@ -135,13 +136,16 @@ public class StringTool {
     }
 
     public static String getLikeV(String input) {
-        StringBuilder result = new StringBuilder();
-        for (int i = 0; i < input.length(); i++) {
-            if (i > 0) {
-                result.append("%");
+        if(!CommonUtil.isEmpty(input)) {
+            StringBuilder result = new StringBuilder();
+            for (int i = 0; i < input.length(); i++) {
+                if (i > 0) {
+                    result.append("%");
+                }
+                result.append(input.charAt(i));
             }
-            result.append(input.charAt(i));
+            return result.toString();
         }
-        return result.toString();
+        return null;
     }
 }

@@ -17,6 +17,7 @@ import com.dangjia.acg.modle.basics.WorkerGoods;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.product.BasicsGoodsCategory;
 import com.dangjia.acg.modle.product.CategoryLabel;
+import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -118,14 +119,17 @@ public class AppCategoryGoodsService {
         }
     }
 
-    //根据内容模糊搜索
-    public ServerResponse queryByName(PageDTO pageDTO, String cityId, String name,String attributeVal, String brandVal) {
+    /**
+     * 第四部分：二级商品列表搜索页面
+     * @return
+     */
+    public ServerResponse serchCategoryProduct(PageDTO pageDTO, String cityId, String categoryId,String name,String attributeVal, String brandVal,String orderKey) {
         JSONArray arr = new JSONArray();
         PageInfo pageResult = null;
         try {
             //根据内容模糊搜索商品
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<Product> pList = iProductMapper.serchBoxName(name);
+            List<Product> pList = iProductMapper.serchCategoryProduct(categoryId,StringTool.getLikeV(name),brandVal,attributeVal,orderKey);
             pageResult = new PageInfo<>(pList);
             for (Product product : pList) {
                 String convertUnitName = iUnitMapper.selectByPrimaryKey(product.getConvertUnit()).getName();

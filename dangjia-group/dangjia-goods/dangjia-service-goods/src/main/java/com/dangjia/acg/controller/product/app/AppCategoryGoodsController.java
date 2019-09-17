@@ -46,4 +46,14 @@ public class AppCategoryGoodsController implements AppCategoryGoodsAPI {
     public ServerResponse queryRightCategoryByDatas(String cityId,String parentId) {
         return appCategoryGoodsService.queryRightCategoryByDatas(parentId);
     }
+
+    /**
+     * 第四部分：二级商品列表搜索页面
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse serchCategoryProduct(PageDTO pageDTO, String cityId, String categoryId,String name,String attributeVal, String brandVal,String orderKey){
+        return appCategoryGoodsService.serchCategoryProduct( pageDTO,  cityId,  categoryId, name, attributeVal,  brandVal, orderKey);
+    }
 }
