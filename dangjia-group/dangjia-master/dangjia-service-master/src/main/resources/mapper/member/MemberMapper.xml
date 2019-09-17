@@ -267,44 +267,45 @@
         </if>
         <if test="type==3">
             INNER JOIN dj_house h ON h.id = o.house_id
-            AND h.budget_ok in (2,3,4)
             WHERE
             o.worker_id = #{workerId}
             AND o.work_type = 6
+            AND h.budget_ok in (2,3,4)
+            AND h.visit_state != 4
             <if test="startDate!=null and endDate!=null and startDate!='' and endDate!=''">
                 and o.create_date BETWEEN #{startDate} and #{endDate}
             </if>
         </if>
         <if test="type==4">
             INNER JOIN dj_house h ON h.id = o.house_id
-            AND h.budget_ok = 3
-            AND h.visit_state != 4
             WHERE
             o.worker_id = #{workerId}
             AND o.work_type = 6
+            AND h.budget_ok = 3
+            AND h.visit_state != 4
             <if test="startDate!=null and endDate!=null and startDate!='' and endDate!=''">
                 and o.create_date BETWEEN #{startDate} and #{endDate}
             </if>
         </if>
         <if test="type==5">
             INNER JOIN dj_house h ON h.id = o.house_id
-            AND h.budget_ok = 3
-            AND h.construction_date IS NOT NULL
-            AND h.visit_state != 4
             WHERE
             o.worker_id = #{workerId}
             AND o.work_type = 6
+            AND h.budget_ok = 3
+            AND h.construction_date IS NOT NULL
+            AND h.visit_state != 4
             <if test="startDate!=null and endDate!=null and startDate!='' and endDate!=''">
                 and o.create_date BETWEEN #{startDate} and #{endDate}
             </if>
         </if>
         <if test="type==6">
             INNER JOIN dj_house h ON h.id = o.house_id
-            AND h.budget_ok != 3
-            AND h.visit_state = 4
             WHERE
             o.worker_id = #{workerId}
             AND o.work_type = 6
+            AND h.budget_ok != 3
+            AND h.visit_state = 4
             <if test="startDate!=null and endDate!=null and startDate!='' and endDate!=''">
                 and o.create_date BETWEEN #{startDate} and #{endDate}
             </if>
