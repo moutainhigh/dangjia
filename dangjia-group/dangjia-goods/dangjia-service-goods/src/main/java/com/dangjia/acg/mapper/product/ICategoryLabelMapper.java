@@ -14,4 +14,7 @@ public interface ICategoryLabelMapper extends Mapper<CategoryLabel> {
     List<CategoryLabel> getCategoryLabel();
     /**根据拿到的name拿到标签对象*/
     List<CategoryLabel> getCategoryLabelByName(String name);
+
+    /**查询绑定过的标签*/
+    List<CategoryLabel> queryAPPCategoryLabel();
 }

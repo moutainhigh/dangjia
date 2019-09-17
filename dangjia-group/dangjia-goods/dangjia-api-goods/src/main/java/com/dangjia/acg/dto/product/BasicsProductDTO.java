@@ -2,8 +2,6 @@ package com.dangjia.acg.dto.product;
 
 import com.dangjia.acg.common.annotation.ExcelField;
 import com.dangjia.acg.common.model.BaseEntity;
-import com.dangjia.acg.dto.basics.TechnologyDTO;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
 
@@ -19,6 +17,7 @@ import java.util.List;
 public class BasicsProductDTO extends BaseEntity {
 
     private String id;
+
     private String name;
 
     private String goodsId;//货品id
@@ -27,7 +26,7 @@ public class BasicsProductDTO extends BaseEntity {
 
     private String image;//图片
 
-    private String unitName;//单位换算
+    private String unitName;//单位名称
 
     private String unitId;//单位ID
 
@@ -41,7 +40,7 @@ public class BasicsProductDTO extends BaseEntity {
 
     private Double price;//销售价
 
-    private String otherName;//标签id
+    private String otherName;//商品别名
 
     private Integer istop;//是否置顶 0=正常，1=置顶
 

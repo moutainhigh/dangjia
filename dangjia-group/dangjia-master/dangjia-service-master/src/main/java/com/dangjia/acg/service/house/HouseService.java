@@ -5,7 +5,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
-import com.dangjia.acg.auth.config.RedisSessionDAO;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
@@ -68,14 +67,10 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import tk.mybatis.mapper.entity.Example;
 import tk.mybatis.mapper.util.StringUtil;
 
@@ -169,7 +164,6 @@ public class HouseService {
     private DjRoyaltyMatchMapper djRoyaltyMatchMapper;
     @Autowired
     private DjAreaMatchMapper djAreaMatchMapper;
-    protected static final Logger LOG = LoggerFactory.getLogger(HouseService.class);
     @Autowired
     private UserMapper userMapper;
     @Autowired
@@ -335,12 +329,10 @@ public class HouseService {
                 srcHouse = iHouseMapper.selectByPrimaryKey(house.getHouseId());
             }
             if (!CommonUtil.isEmpty(house.getCustomSort()) && !house.getCustomSort().equals("ignore")) {
-                LOG.info("setHouseInfo getCustomSort:" + house.getCustomSort());
                 if (StringUtils.isNoneBlank(house.getCustomSort())
                         && StringUtils.isNoneBlank(srcHouse.getCustomSort())) {//如果不问null ，说明已经排序过，就是修改顺序
                     String[] oldWorkerTypeArr = srcHouse.getCustomSort().split(",");
                     String[] newWorkerTypeArr = house.getCustomSort().split(",");
-                    LOG.info("setHouseInfo old getCustomSort:" + srcHouse.getCustomSort());
                     Set<String> setNew = new HashSet<>(Arrays.asList(newWorkerTypeArr));//新修改的工序类型 的集合
                     Set<String> setDelete = new HashSet<>();//找出被删除的 工序类型 的集合
                     Set<String> setUpdate = new HashSet<>();//找出要修改的 工序类型 的集合
@@ -350,31 +342,20 @@ public class HouseService {
                         } else
                             setDelete.add(oldWorkerType);//找出被删除的 工序类型
                     }
-                    LOG.info("删除前:" + setDelete + "  " + setDelete.size());
                     for (String deleteWorkerType : setDelete) {//删除工序
                         HouseFlow oldHouseFlow = houseFlowMapper.getHouseFlowByHidAndWty(house.getId(), Integer.parseInt(deleteWorkerType));
-//                        LOG.info("oldHouseFlow 删除前:" + oldHouseFlow + "  " + deleteWorkerType);
                         if (oldHouseFlow != null) {
-                            int ret = houseFlowMapper.deleteByPrimaryKey(oldHouseFlow.getId());
-                            if (ret >= 1) {
-                                LOG.info("setDelete 删除成功:" + deleteWorkerType);
-                            }
+                            houseFlowMapper.deleteByPrimaryKey(oldHouseFlow.getId());
                         }
                     }
                     for (String updateWorkerType : setUpdate) {//删除工序
                         HouseFlow oldHouseFlow = houseFlowMapper.getHouseFlowByHidAndWty(house.getId(), Integer.parseInt(updateWorkerType));
-                        LOG.info("setHouseInfo updateWorkerType：：" + updateWorkerType + " " + oldHouseFlow);
                         if (oldHouseFlow != null) {
                             int sortIndex = houseFlowService.getCustomSortIndex(house.getCustomSort(), updateWorkerType);
-//                            LOG.info("新排序：" + house.getCustomSort() + " oldWorkerType：" + updateWorkerType + " sortIndex:" + sortIndex);
-//                            LOG.info("oldHouseFlow 修改前:" + oldHouseFlow);
                             if (sortIndex != -1 && oldHouseFlow.getSort() != sortIndex) {
                                 oldHouseFlow.setSort(sortIndex);
                                 oldHouseFlow.setModifyDate(new Date());
-                                int ret = houseFlowMapper.updateByPrimaryKeySelective(oldHouseFlow);
-                                if (ret >= 1) {
-                                    LOG.info("oldHouseFlow 修改成功:" + oldHouseFlow);
-                                }
+                                houseFlowMapper.updateByPrimaryKeySelective(oldHouseFlow);
                             }
                         }
 
@@ -476,8 +457,6 @@ public class HouseService {
         house.setNumber(houseDTO.getNumber());
         house.setSquare(new BigDecimal(houseDTO.getSquare()));
         house.setReferHouseId(houseDTO.getReferHouseId());
-        logger.info("houseDTO.getStyle()===================" + houseDTO.getStyle());
-        logger.info("houseDTO===================" + houseDTO);
         house.setStyle(houseDTO.getStyle());
         house.setStyleId(houseDTO.getStyleId());
         house.setHouseType(houseDTO.getHouseType());
@@ -581,13 +560,12 @@ public class HouseService {
         djAlreadyRobSingleMapper.upDateDataStatus(mm);
 
 
-
         /**
          * 业绩结算下单提成
          */
         MainUser user = userMapper.selectByPrimaryKey(userId);
-        if(user!=null&& !CommonUtil.isEmpty(user.getMemberId())) {
-            if(!CommonUtil.isEmpty(userId)) {
+        if (user != null && !CommonUtil.isEmpty(user.getMemberId())) {
+            if (!CommonUtil.isEmpty(userId)) {
                 Example example = new Example(DjAreaMatch.class);
                 example.createCriteria().andEqualTo(DjAreaMatch.VILLAGE_ID, houseDTO.getVillageId())
                         .andEqualTo(DjAreaMatch.BUILDING_NAME, houseDTO.getBuilding());
@@ -623,15 +601,12 @@ public class HouseService {
         return ServerResponse.createBySuccessMessage("操作成功");
     }
 
-    private static Logger logger = LoggerFactory.getLogger(RedisSessionDAO.class);
-
 
     /**
      * 楼栋结算 下单提成
      */
     public void endBuildingRoyalty(HouseDTO houseDTO, String userId, Customer customer) {
         House house = iHouseMapper.selectByPrimaryKey(houseDTO.getHouseId());
-        logger.info("楼栋结算 下单提成 house===================" + house);
         Example example = new Example(Clue.class);
         example.createCriteria().andEqualTo(Clue.MEMBER_ID, house.getMemberId())
                 .andEqualTo(Clue.DATA_STATUS, 0);
@@ -647,20 +622,13 @@ public class HouseService {
 
         //查询最大订单配置数量
         DjAreaMatchDTO djAreaMatchDTO = djAreaMatchMapper.maxCommissionAllocation(map);
-        logger.info("clueList.size()===================" + clueList.size());
         if (clueList.size() == 1) {
-
             ResidentialBuilding residentialBuilding = residentialBuildingMapper.selectSingleResidentialBuilding(null, house.getBuilding(), house.getVillageId());
-            logger.info("00000000000000000000===================" + residentialBuilding);
-            logger.info("house.getBuilding()===================" + house.getBuilding());
-            logger.info("house.getVillageId()===================" + house.getVillageId());
             if (null != residentialBuilding) { //判断楼栋是否存在
                 ResidentialRange residentialRange = residentialRangeMapper.selectSingleResidentialRange(residentialBuilding.getId());
-                logger.info("99999999999999999===================" + residentialRange);
                 if (null != residentialRange) {  //楼栋是否分配销售
                     if (!residentialRange.getUserId().equals(userId)) {
                         //判断销售所选楼栋是否在自己楼栋范围内 不在则跟选择的楼栋范围销售分提成
-                        logger.info("判断销售所选楼栋是否在自己楼栋范围内 分提成===================" + residentialRange.getUserId());
                         int flag = 0;//判断销售所选楼栋是否在自己楼栋范围内
                         djHouseBuilding(userId, residentialRange.getUserId(), djAreaMatchDTO, djAreaMatchDTOS, houseDTO, customer, house, flag);
                         return;
@@ -668,19 +636,14 @@ public class HouseService {
                 }
             }
             if (!CommonUtil.isEmpty(clueList.get(0).getCrossDomainUserId())) {
-                logger.info("跨域下单分提成===================" + clueList.get(0).getCrossDomainUserId());
                 //跨域下单分提成
                 int flag = 1; //跨域下单分提成
                 djHouseBuilding(userId, clueList.get(0).getCrossDomainUserId(), djAreaMatchDTO, djAreaMatchDTOS, houseDTO, customer, house, flag);
             } else {
-                logger.info("一个销售人员录入===================" + userId);
-                logger.info("一个销售人员录入===================" + houseDTO.getHouseId());
-                logger.info("一个销售人员录入===================" + djAreaMatchDTOS);
                 //一个销售人员录入正常分提成
                 djrHouseBuilding(userId, houseDTO.getHouseId(), djAreaMatchDTOS, djAreaMatchDTO, houseDTO, customer, house);
             }
         } else {
-            logger.info("//多个销售人员录入获取未抢到单的销售人员id===================" + userId);
             //多个销售人员录入获取未抢到单的销售人员id
             String userId2 = null;
             for (Clue clue : clueList) {
@@ -692,28 +655,18 @@ public class HouseService {
             //多个销售人员录入
             //判断是否在未抢单的销售楼栋范围内
             ResidentialBuilding residentialBuilding = residentialBuildingMapper.selectSingleResidentialBuilding(null, house.getBuilding(), house.getVillageId());
-            logger.info("00000000000000000000===================" + residentialBuilding);
             if (null != residentialBuilding) {
                 ResidentialRange residentialRange = residentialRangeMapper.selectSingleResidentialRange(residentialBuilding.getId());
-                logger.info("99999999999999999===================" + residentialRange);
                 if (null != residentialRange) { //该单不在任何一个销售范围内
                     if (residentialRange.getUserId().equals(userId2)) { //该单在未抢到单的销售的楼栋范围内
                         //两销售一起分配提成
-                        logger.info("两销售一起分配提成===================" + userId2);
-                        logger.info("两销售一起分配提成===================" + userId);
                         map = new HashMap<>();
                         map.put("userId", userId);
                         map.put("createDate", DateUtil.dateToString(new Date(), DateUtil.FORMAT));
                         List<DjAlreadyRobSingle> darList = djAlreadyRobSingleMapper.selectArr(map);
-
                         if (djAreaMatchDTO.getOverSingle() < darList.size()) {
                             //订单数量 大于 配置订单数量时处理
-                            logger.info("订单数量 大于 配置订单数量时处理1===================" + userId);
                             //判断当月
-                            logger.info("判断当月===================" + djAreaMatchDTO.getStartSingle());
-                            logger.info("判断当月===================" + darList.size());
-                            logger.info("判断当月===================" + djAreaMatchDTO.getOverSingle());
-                            logger.info("两销售一起分配提成---------------------");
                             DjRoyaltyMatch djRoyaltyMatch1 = new DjRoyaltyMatch();
                             djRoyaltyMatch1.setDataStatus(1);
                             djRoyaltyMatch1.setUserId(userId);
@@ -745,7 +698,7 @@ public class HouseService {
                                     .andEqualTo(Clue.DATA_STATUS, 0)
                                     .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
                             List<Clue> djAlreadyRobSingle1 = clueMapper.selectByExample(example2);
-                            if (djAlreadyRobSingle1.size()>0) {
+                            if (djAlreadyRobSingle1.size() > 0) {
                                 //消息推送
                                 MainUser user = userMapper.selectByPrimaryKey(userId);
                                 String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
@@ -760,7 +713,7 @@ public class HouseService {
                                     .andEqualTo(Clue.DATA_STATUS, 0)
                                     .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
                             List<Clue> djAlreadyRobSingle2 = clueMapper.selectByExample(example3);
-                            if (djAlreadyRobSingle2.size()>0) {
+                            if (djAlreadyRobSingle2.size() > 0) {
                                 //消息推送
                                 MainUser user1 = userMapper.selectByPrimaryKey(userId2);
                                 String url1 = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
@@ -770,17 +723,10 @@ public class HouseService {
                                                 djAlreadyRobSingle2.get(0).getId(), 1, "4"));
                             }
                         } else {
-
                             //订单数量 在配置范围内时 处理
-                            logger.info("订单数量 在配置范围内时 处理1===================" + userId);
                             for (DjAreaMatchDTO ss : djAreaMatchDTOS) {
                                 //判断当月
-                                logger.info("判断当月===================" + ss.getStartSingle());
-                                logger.info("判断当月===================" + darList.size());
-                                logger.info("判断当月===================" + ss.getOverSingle());
-
                                 if (ss.getStartSingle() <= darList.size() && darList.size() <= ss.getOverSingle()) {
-                                    logger.info("两销售一起分配提成---------------------");
                                     DjRoyaltyMatch djRoyaltyMatch1 = new DjRoyaltyMatch();
                                     djRoyaltyMatch1.setDataStatus(1);
                                     djRoyaltyMatch1.setUserId(userId);
@@ -812,7 +758,7 @@ public class HouseService {
                                             .andEqualTo(Clue.DATA_STATUS, 0)
                                             .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
                                     List<Clue> djAlreadyRobSingle1 = clueMapper.selectByExample(example2);
-                                    if (djAlreadyRobSingle1.size()>0) {
+                                    if (djAlreadyRobSingle1.size() > 0) {
                                         //消息推送
                                         MainUser user = userMapper.selectByPrimaryKey(userId);
                                         String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
@@ -828,7 +774,7 @@ public class HouseService {
                                             .andEqualTo(Clue.DATA_STATUS, 0)
                                             .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
                                     List<Clue> djAlreadyRobSingle2 = clueMapper.selectByExample(example3);
-                                    if (djAlreadyRobSingle2.size()>0) {
+                                    if (djAlreadyRobSingle2.size() > 0) {
                                         //消息推送
                                         MainUser user1 = userMapper.selectByPrimaryKey(userId2);
                                         String url1 = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
@@ -841,31 +787,22 @@ public class HouseService {
                         }
                     } else {
                         ResidentialBuilding residentialBuilding1 = residentialBuildingMapper.selectSingleResidentialBuilding(null, house.getBuilding(), house.getVillageId());
-                        logger.info("00000000000000000000===================" + residentialBuilding);
                         if (null != residentialBuilding1) { //判断楼栋是否存在
                             ResidentialRange residentialRange1 = residentialRangeMapper.selectSingleResidentialRange(residentialBuilding.getId());
-                            logger.info("99999999999999999===================" + residentialRange);
                             if (null != residentialRange1) { //楼栋是否分配销售
                                 if (!residentialRange1.getUserId().equals(userId)) {
                                     //判断销售所选楼栋是否在自己楼栋范围内 不在则跟选择的楼栋范围销售分提成
-                                    logger.info("判断销售所选楼栋是否在自己楼栋范围内 分提成===================" + residentialRange.getUserId());
                                     int flag = 0;//0 :判断销售所选楼栋是否在自己楼栋范围内
                                     djHouseBuilding(userId, residentialRange1.getUserId(), djAreaMatchDTO, djAreaMatchDTOS, houseDTO, customer, house, flag);
                                 }
                             } else {
                                 //抢单的销售单独分配提成
-                                logger.info("抢单的销售单独分配提成===================" + userId);
-                                logger.info("抢单的销售单独分配提成===================" + houseDTO);
-                                logger.info("抢单的销售单独分配提成===================" + djAreaMatchDTOS);
                                 djrHouseBuilding(userId, houseDTO.getHouseId(), djAreaMatchDTOS, djAreaMatchDTO, houseDTO, customer, house);
                             }
                         }
                     }
                 } else {
                     //抢单的销售单独分配提成
-                    logger.info("抢单的销售单独分配提成1===================" + userId);
-                    logger.info("抢单的销售单独分配提成1===================" + houseDTO);
-                    logger.info("抢单的销售单独分配提成1===================" + djAreaMatchDTOS);
                     djrHouseBuilding(userId, houseDTO.getHouseId(), djAreaMatchDTOS, djAreaMatchDTO, houseDTO, customer, house);
                 }
             }
@@ -887,18 +824,13 @@ public class HouseService {
     public void djHouseBuilding(String userId, String userId2, DjAreaMatchDTO djAreaMatchDTO, List<DjAreaMatchDTO> djAreaMatchDTOS,
                                 HouseDTO houseDTO, Customer customer, House house, int flag) {
         //跨域下单分提成
-        logger.info("跨域下单分提成===================" + userId);
-        logger.info("跨域下单分提成===================" + houseDTO.getHouseId());
-        logger.info("跨域下单分提成===================" + djAreaMatchDTOS);
         Map<String, Object> map = new HashMap<>();
         map.put("userId", userId);
         map.put("createDate", DateUtil.dateToString(new Date(), DateUtil.FORMAT));
         //查询销售人员订单数量
         List<DjAlreadyRobSingle> darList = djAlreadyRobSingleMapper.selectArr(map);
-
         if (djAreaMatchDTO.getOverSingle() < darList.size()) {
             //订单数量 大于 配置订单数量时处理
-            logger.info("订单数量 大于 配置订单数量时处理===================" + userId);
             DjRoyaltyMatch djRoyaltyMatch1 = new DjRoyaltyMatch();
             djRoyaltyMatch1.setDataStatus(1);
             djRoyaltyMatch1.setUserId(userId);
@@ -910,7 +842,6 @@ public class HouseService {
             djRoyaltyMatch1.setArrRoyalty(djAreaMatchDTO.getRoyalty());
             djRoyaltyMatch1.setCountArrRoyalty(djAreaMatchDTO.getRoyalty());
             djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
-            logger.info("订单数量 大于 配置订单数量时处理===================" + userId2);
             djRoyaltyMatch1 = new DjRoyaltyMatch();
             djRoyaltyMatch1.setDataStatus(1);
             djRoyaltyMatch1.setUserId(userId2);
@@ -930,7 +861,7 @@ public class HouseService {
                     .andEqualTo(Clue.DATA_STATUS, 0)
                     .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
             List<Clue> djAlreadyRobSingle1 = clueMapper.selectByExample(example2);
-            if (djAlreadyRobSingle1.size()>0) {
+            if (djAlreadyRobSingle1.size() > 0) {
                 //消息推送
                 MainUser user = userMapper.selectByPrimaryKey(userId);
                 String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
@@ -943,13 +874,11 @@ public class HouseService {
                 //跨域下单推送消息
                 MainUser us = userMapper.selectByPrimaryKey(userId2);
                 Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
-                logger.info("跨域下单推送消息===================" + us.getMemberId());
                 configMessageService.addConfigMessage(AppType.SALE, us.getMemberId(), "开工提醒",
                         "您的跨域客户【" + member.getNickName() + "】已确认开工，请及时查看提成。", 6);
             } else {
                 //销售所选楼栋是否在自己楼栋范围内推送消息
                 MainUser us = userMapper.selectByPrimaryKey(userId2);
-                logger.info("销售所选楼栋是否在自己楼栋范围内推送消息===================" + us.getMemberId());
                 configMessageService.addConfigMessage(AppType.SALE, us.getMemberId(), "开工提醒",
                         "您有一个归于您的客户【" + house.getHouseName() + "】已确认开工，请及时查看提成。", 6);
 
@@ -957,7 +886,6 @@ public class HouseService {
 
         } else {
             //订单数量 在配置范围内时 处理
-            logger.info("订单数量 在配置范围内时 处理===================" + userId);
             for (DjAreaMatchDTO ss : djAreaMatchDTOS) {
                 if (ss.getStartSingle() <= darList.size() && darList.size() <= ss.getOverSingle()) {
                     DjRoyaltyMatch djRoyaltyMatch1 = new DjRoyaltyMatch();
@@ -971,7 +899,6 @@ public class HouseService {
                     djRoyaltyMatch1.setArrRoyalty(ss.getRoyalty());
                     djRoyaltyMatch1.setCountArrRoyalty(ss.getRoyalty());
                     djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
-                    logger.info("订单数量 在配置范围内时 处理===================" + userId2);
                     djRoyaltyMatch1 = new DjRoyaltyMatch();
                     djRoyaltyMatch1.setDataStatus(1);
                     djRoyaltyMatch1.setUserId(userId2);
@@ -991,7 +918,7 @@ public class HouseService {
                             .andEqualTo(Clue.DATA_STATUS, 0)
                             .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
                     List<Clue> djAlreadyRobSingle1 = clueMapper.selectByExample(example2);
-                    if (djAlreadyRobSingle1.size()>0) {
+                    if (djAlreadyRobSingle1.size() > 0) {
                         //消息推送
                         MainUser user = userMapper.selectByPrimaryKey(userId);
                         String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
@@ -1006,14 +933,12 @@ public class HouseService {
                         //跨域下单推送消息
                         MainUser us = userMapper.selectByPrimaryKey(userId2);
                         Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
-                        logger.info("跨域下单推送消息===================" + us.getMemberId());
                         configMessageService.addConfigMessage(AppType.SALE, us.getMemberId(), "开工提醒",
                                 "您的跨域客户【" + member.getNickName() + "】已确认开工，请及时查看提成。", 6);
 
                     } else {
                         //销售所选楼栋是否在自己楼栋范围内推送消息
                         MainUser us = userMapper.selectByPrimaryKey(userId2);
-                        logger.info("销售所选楼栋是否在自己楼栋范围内推送消息===================" + us.getMemberId());
                         configMessageService.addConfigMessage(AppType.SALE, us.getMemberId(), "开工提醒",
                                 "您有一个归于您的客户【" + house.getHouseName() + "】已确认开工，请及时查看提成。", 6);
                     }
@@ -1034,20 +959,12 @@ public class HouseService {
     @Transactional(rollbackFor = Exception.class)
     public void djrHouseBuilding(String userId, String houseId, List<DjAreaMatchDTO> djAreaMatchDTOS,
                                  DjAreaMatchDTO djAreaMatchDTO, HouseDTO houseDTO, Customer customer, House house) {
-        logger.info("111111111111111111111===================" + userId);
         Map<String, Object> map = new HashMap<>();
         map.put("userId", userId);
         map.put("createDate", DateUtil.dateToString(new Date(), DateUtil.FORMAT));
         List<DjAlreadyRobSingle> darList = djAlreadyRobSingleMapper.selectArr(map);
-        logger.info("rds.getOverSingle()===================" + djAreaMatchDTO.getOverSingle());
-        logger.info("darList.size()===================" + darList.size());
         if (djAreaMatchDTO.getOverSingle() < darList.size()) {
             //订单数量 大于配置范围内时
-            logger.info("订单数量 大于配置范围内时 处理2===================" + userId);
-            logger.info("222222222222222222222===================" + djAreaMatchDTO.getStartSingle());
-            logger.info("333333333333333333333===================" + darList.size());
-            logger.info("444444444444444444444===================" + djAreaMatchDTO.getOverSingle());
-            logger.info("555555555555555555555===================" + djAreaMatchDTO.getRoyalty());
             DjRoyaltyMatch djRoyaltyMatch1 = new DjRoyaltyMatch();
             djRoyaltyMatch1.setDataStatus(1);
             djRoyaltyMatch1.setUserId(userId);
@@ -1060,15 +977,10 @@ public class HouseService {
             djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
         } else {
             //订单数量 在配置范围内时 处理
-            logger.info("订单数量 在配置范围内时 处理2===================" + userId);
             for (DjAreaMatchDTO ss : djAreaMatchDTOS) {
                 //判断当月
                 if (ss.getStartSingle() <= darList.size()
                         && darList.size() <= ss.getOverSingle()) {
-                    logger.info("222222222222222222222===================" + ss.getStartSingle());
-                    logger.info("333333333333333333333===================" + darList.size());
-                    logger.info("444444444444444444444===================" + ss.getOverSingle());
-                    logger.info("555555555555555555555===================" + ss.getRoyalty());
                     DjRoyaltyMatch djRoyaltyMatch1 = new DjRoyaltyMatch();
                     djRoyaltyMatch1.setDataStatus(1);
                     djRoyaltyMatch1.setUserId(userId);
@@ -1090,7 +1002,7 @@ public class HouseService {
                 .andEqualTo(Clue.DATA_STATUS, 0)
                 .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
         List<Clue> djAlreadyRobSingle1 = clueMapper.selectByExample(example2);
-        if (djAlreadyRobSingle1.size()>0) {
+        if (djAlreadyRobSingle1.size() > 0) {
             //消息推送
             MainUser user = userMapper.selectByPrimaryKey(userId);
             String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
@@ -1107,7 +1019,6 @@ public class HouseService {
      */
     public void endRoyalty(HouseDTO houseDTO, String userId, Customer customer) {
         House house = iHouseMapper.selectByPrimaryKey(houseDTO.getHouseId());
-        logger.info("结算正常下单提成 house===================" + house);
         Example example = new Example(Clue.class);
         example.createCriteria().andEqualTo(Clue.MEMBER_ID, house.getMemberId())
                 .andEqualTo(Clue.DATA_STATUS, 0);
@@ -1125,20 +1036,13 @@ public class HouseService {
         }
         //查询最大订单配置数量
         DjRoyaltyDetailsSurface rds = royaltyMapper.selectOverSingle();
-        logger.info("clueList.size()===================" + clueList.size());
         if (clueList.size() == 1) {
-
             ResidentialBuilding residentialBuilding = residentialBuildingMapper.selectSingleResidentialBuilding(null, house.getBuilding(), house.getVillageId());
-            logger.info("00000000000000000000===================" + residentialBuilding);
-            logger.info("house.getBuilding()===================" + house.getBuilding());
-            logger.info("house.getVillageId()===================" + house.getVillageId());
             if (null != residentialBuilding) { //判断楼栋是否存在
                 ResidentialRange residentialRange = residentialRangeMapper.selectSingleResidentialRange(residentialBuilding.getId());
-                logger.info("99999999999999999===================" + residentialRange);
                 if (null != residentialRange) {  //楼栋是否分配销售
                     if (!residentialRange.getUserId().equals(userId)) {
                         //判断销售所选楼栋是否在自己楼栋范围内 不在则跟选择的楼栋范围销售分提成
-                        logger.info("判断销售所选楼栋是否在自己楼栋范围内 分提成===================" + residentialRange.getUserId());
                         int flag = 0;//0 :判断销售所选楼栋是否在自己楼栋范围内 分提成
                         djHouse(userId, residentialRange.getUserId(), rds, list, houseDTO, customer, house, flag);
                         return;
@@ -1146,19 +1050,14 @@ public class HouseService {
                 }
             }
             if (!CommonUtil.isEmpty(clueList.get(0).getCrossDomainUserId())) {
-                logger.info("跨域下单分提成===================" + clueList.get(0).getCrossDomainUserId());
                 //跨域下单分提成
                 int flag = 1;//1 :判断跨域下单分提成
                 djHouse(userId, clueList.get(0).getCrossDomainUserId(), rds, list, houseDTO, customer, house, flag);
             } else {
-                logger.info("一个销售人员录入===================" + userId);
-                logger.info("一个销售人员录入===================" + houseDTO.getHouseId());
-                logger.info("一个销售人员录入===================" + list);
                 //一个销售人员录入正常分提成
                 djrHouse(userId, houseDTO.getHouseId(), list, rds, houseDTO, customer, house);
             }
         } else {
-            logger.info("//多个销售人员录入获取未抢到单的销售人员id===================" + userId);
             //多个销售人员录入获取未抢到单的销售人员id
             String userId2 = null;
             for (Clue clue : clueList) {
@@ -1170,28 +1069,16 @@ public class HouseService {
             //多个销售人员录入
             //判断是否在未抢单的销售楼栋范围内
             ResidentialBuilding residentialBuilding = residentialBuildingMapper.selectSingleResidentialBuilding(null, house.getBuilding(), house.getVillageId());
-            logger.info("00000000000000000000===================" + residentialBuilding);
             if (null != residentialBuilding) {
                 ResidentialRange residentialRange = residentialRangeMapper.selectSingleResidentialRange(residentialBuilding.getId());
-                logger.info("99999999999999999===================" + residentialRange);
                 if (null != residentialRange) { //该单不在任何一个销售范围内
                     if (residentialRange.getUserId().equals(userId2)) { //该单在未抢到单的销售的楼栋范围内
-                        //两销售一起分配提成
-                        logger.info("两销售一起分配提成===================" + userId2);
-                        logger.info("两销售一起分配提成===================" + userId);
                         Map<String, Object> map = new HashMap<>();
                         map.put("userId", userId);
                         map.put("createDate", DateUtil.dateToString(new Date(), DateUtil.FORMAT));
                         List<DjAlreadyRobSingle> darList = djAlreadyRobSingleMapper.selectArr(map);
 
                         if (rds.getOverSingle() < darList.size()) {
-                            //订单数量 大于 配置订单数量时处理
-                            logger.info("订单数量 大于 配置订单数量时处理1===================" + userId);
-                            //判断当月
-                            logger.info("判断当月===================" + rds.getStartSingle());
-                            logger.info("判断当月===================" + darList.size());
-                            logger.info("判断当月===================" + rds.getOverSingle());
-                            logger.info("两销售一起分配提成---------------------");
                             DjRoyaltyMatch djRoyaltyMatch1 = new DjRoyaltyMatch();
                             djRoyaltyMatch1.setDataStatus(1);
                             djRoyaltyMatch1.setUserId(userId);
@@ -1248,17 +1135,8 @@ public class HouseService {
                                                 djAlreadyRobSingle2.get(0).getId(), 1, "4"));
                             }
                         } else {
-
-                            //订单数量 在配置范围内时 处理
-                            logger.info("订单数量 在配置范围内时 处理1===================" + userId);
                             for (DjRoyaltyDetailsSurface ss : list) {
-                                //判断当月
-                                logger.info("判断当月===================" + ss.getStartSingle());
-                                logger.info("判断当月===================" + darList.size());
-                                logger.info("判断当月===================" + ss.getOverSingle());
-
                                 if (ss.getStartSingle() <= darList.size() && darList.size() <= ss.getOverSingle()) {
-                                    logger.info("两销售一起分配提成---------------------");
                                     DjRoyaltyMatch djRoyaltyMatch1 = new DjRoyaltyMatch();
                                     djRoyaltyMatch1.setDataStatus(1);
                                     djRoyaltyMatch1.setUserId(userId);
@@ -1291,7 +1169,6 @@ public class HouseService {
                                             .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
                                     List<Clue> djAlreadyRobSingle1 = clueMapper.selectByExample(example2);
                                     if (djAlreadyRobSingle1.size() > 0) {
-                                        logger.info("线索id为空===================" + djAlreadyRobSingle1.get(0).getId());
                                         //消息推送
                                         MainUser user = userMapper.selectByPrimaryKey(userId);
                                         String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
@@ -1320,31 +1197,22 @@ public class HouseService {
                         }
                     } else {
                         ResidentialBuilding residentialBuilding1 = residentialBuildingMapper.selectSingleResidentialBuilding(null, house.getBuilding(), house.getVillageId());
-                        logger.info("00000000000000000000===================" + residentialBuilding);
                         if (null != residentialBuilding1) { //判断楼栋是否存在
                             ResidentialRange residentialRange1 = residentialRangeMapper.selectSingleResidentialRange(residentialBuilding.getId());
-                            logger.info("99999999999999999===================" + residentialRange);
                             if (null != residentialRange1) { //楼栋是否分配销售
                                 if (!residentialRange1.getUserId().equals(userId)) {
                                     //判断销售所选楼栋是否在自己楼栋范围内 不在则跟选择的楼栋范围销售分提成
-                                    logger.info("判断销售所选楼栋是否在自己楼栋范围内 分提成===================" + residentialRange.getUserId());
                                     int flag = 0;//0 :判断销售所选楼栋是否在自己楼栋范围内 分提成
                                     djHouse(userId, residentialRange1.getUserId(), rds, list, houseDTO, customer, house, flag);
                                 }
                             } else {
                                 //抢单的销售单独分配提成
-                                logger.info("抢单的销售单独分配提成===================" + userId);
-                                logger.info("抢单的销售单独分配提成===================" + houseDTO);
-                                logger.info("抢单的销售单独分配提成===================" + list);
                                 djrHouse(userId, houseDTO.getHouseId(), list, rds, houseDTO, customer, house);
                             }
                         }
                     }
                 } else {
                     //抢单的销售单独分配提成
-                    logger.info("抢单的销售单独分配提成1===================" + userId);
-                    logger.info("抢单的销售单独分配提成1===================" + houseDTO);
-                    logger.info("抢单的销售单独分配提成1===================" + list);
                     djrHouse(userId, houseDTO.getHouseId(), list, rds, houseDTO, customer, house);
                 }
             }
@@ -1367,9 +1235,6 @@ public class HouseService {
                         HouseDTO houseDTO, Customer customer, House house, int flag) {
 
         //跨域下单分提成
-        logger.info("跨域下单分提成===================" + userId);
-        logger.info("跨域下单分提成===================" + houseDTO.getHouseId());
-        logger.info("跨域下单分提成===================" + list);
         Map<String, Object> map = new HashMap<>();
         map.put("userId", userId);
         map.put("createDate", DateUtil.dateToString(new Date(), DateUtil.FORMAT));
@@ -1378,7 +1243,6 @@ public class HouseService {
 
         if (rds.getOverSingle() < darList.size()) {
             //订单数量 大于 配置订单数量时处理
-            logger.info("订单数量 大于 配置订单数量时处理===================" + userId);
             DjRoyaltyMatch djRoyaltyMatch1 = new DjRoyaltyMatch();
             djRoyaltyMatch1.setDataStatus(1);
             djRoyaltyMatch1.setUserId(userId);
@@ -1390,7 +1254,6 @@ public class HouseService {
             djRoyaltyMatch1.setArrRoyalty(rds.getRoyalty());
             djRoyaltyMatch1.setCountArrRoyalty(rds.getRoyalty());
             djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
-            logger.info("订单数量 大于 配置订单数量时处理===================" + userId2);
             djRoyaltyMatch1 = new DjRoyaltyMatch();
             djRoyaltyMatch1.setDataStatus(1);
             djRoyaltyMatch1.setUserId(userId2);
@@ -1422,15 +1285,11 @@ public class HouseService {
                 //跨域下单推送消息
                 MainUser us = userMapper.selectByPrimaryKey(userId2);
                 Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
-                logger.info("跨域下单推送消息===================" + us.getMemberId());
                 configMessageService.addConfigMessage(AppType.SALE, us.getMemberId(), "开工提醒",
                         "您的跨域客户【" + member.getNickName() + "】已确认开工，请及时查看提成。", 6);
-
-
             } else {
                 //销售所选楼栋是否在自己楼栋范围内推送消息
                 MainUser us = userMapper.selectByPrimaryKey(userId2);
-                logger.info("销售所选楼栋是否在自己楼栋范围内推送消息===================" + us.getMemberId());
                 configMessageService.addConfigMessage(AppType.SALE, us.getMemberId(), "开工提醒",
                         "您有一个归于您的客户【" + house.getHouseName() + "】已确认开工，请及时查看提成。", 6);
 
@@ -1454,7 +1313,6 @@ public class HouseService {
 //            }
         } else {
             //订单数量 在配置范围内时 处理
-            logger.info("订单数量 在配置范围内时 处理===================" + userId);
             for (DjRoyaltyDetailsSurface ss : list) {
                 if (ss.getStartSingle() <= darList.size() && darList.size() <= ss.getOverSingle()) {
                     DjRoyaltyMatch djRoyaltyMatch1 = new DjRoyaltyMatch();
@@ -1468,7 +1326,6 @@ public class HouseService {
                     djRoyaltyMatch1.setArrRoyalty(ss.getRoyalty());
                     djRoyaltyMatch1.setCountArrRoyalty(ss.getRoyalty());
                     djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
-                    logger.info("订单数量 在配置范围内时 处理===================" + userId2);
                     djRoyaltyMatch1 = new DjRoyaltyMatch();
                     djRoyaltyMatch1.setDataStatus(1);
                     djRoyaltyMatch1.setUserId(userId2);
@@ -1488,7 +1345,7 @@ public class HouseService {
                             .andEqualTo(Clue.DATA_STATUS, 0)
                             .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
                     List<Clue> djAlreadyRobSingle1 = clueMapper.selectByExample(example2);
-                    if (djAlreadyRobSingle1.size()>0) {
+                    if (djAlreadyRobSingle1.size() > 0) {
                         //消息推送
                         MainUser user = userMapper.selectByPrimaryKey(userId);
                         String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
@@ -1503,13 +1360,11 @@ public class HouseService {
 
                         MainUser us = userMapper.selectByPrimaryKey(userId2);
                         Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
-                        logger.info("跨域下单推送消息===================" + us.getMemberId());
                         configMessageService.addConfigMessage(AppType.SALE, us.getMemberId(), "开工提醒",
                                 "您的跨域客户【" + member.getNickName() + "】已确认开工，请及时查看提成。", 6);
                     } else {
                         //销售所选楼栋是否在自己楼栋范围内推送消息
                         MainUser us = userMapper.selectByPrimaryKey(userId2);
-                        logger.info("销售所选楼栋是否在自己楼栋范围内推送消息===================" + us.getMemberId());
                         configMessageService.addConfigMessage(AppType.SALE, us.getMemberId(), "开工提醒",
                                 "您有一个归于您的客户【" + house.getHouseName() + "】已确认开工，请及时查看提成。", 6);
 
@@ -1548,20 +1403,12 @@ public class HouseService {
     @Transactional(rollbackFor = Exception.class)
     public void djrHouse(String userId, String houseId, List<DjRoyaltyDetailsSurface> list,
                          DjRoyaltyDetailsSurface rds, HouseDTO houseDTO, Customer customer, House house) {
-        logger.info("111111111111111111111===================" + userId);
         Map<String, Object> map = new HashMap<>();
         map.put("userId", userId);
         map.put("createDate", DateUtil.dateToString(new Date(), DateUtil.FORMAT));
         List<DjAlreadyRobSingle> darList = djAlreadyRobSingleMapper.selectArr(map);
-        logger.info("rds.getOverSingle()===================" + rds.getOverSingle());
-        logger.info("darList.size()===================" + darList.size());
         if (rds.getOverSingle() < darList.size()) {
             //订单数量 大于配置范围内时
-            logger.info("订单数量 大于配置范围内时 处理2===================" + userId);
-            logger.info("222222222222222222222===================" + rds.getStartSingle());
-            logger.info("333333333333333333333===================" + darList.size());
-            logger.info("444444444444444444444===================" + rds.getOverSingle());
-            logger.info("555555555555555555555===================" + rds.getRoyalty());
             DjRoyaltyMatch djRoyaltyMatch1 = new DjRoyaltyMatch();
             djRoyaltyMatch1.setDataStatus(1);
             djRoyaltyMatch1.setUserId(userId);
@@ -1574,15 +1421,10 @@ public class HouseService {
             djRoyaltyMatchMapper.insert(djRoyaltyMatch1);
         } else {
             //订单数量 在配置范围内时 处理
-            logger.info("订单数量 在配置范围内时 处理2===================" + userId);
             for (DjRoyaltyDetailsSurface ss : list) {
                 //判断当月
                 if (ss.getStartSingle() <= darList.size()
                         && darList.size() <= ss.getOverSingle()) {
-                    logger.info("222222222222222222222===================" + ss.getStartSingle());
-                    logger.info("333333333333333333333===================" + darList.size());
-                    logger.info("444444444444444444444===================" + ss.getOverSingle());
-                    logger.info("555555555555555555555===================" + ss.getRoyalty());
                     DjRoyaltyMatch djRoyaltyMatch1 = new DjRoyaltyMatch();
                     djRoyaltyMatch1.setDataStatus(1);
                     djRoyaltyMatch1.setUserId(userId);
@@ -1605,10 +1447,10 @@ public class HouseService {
                 .andEqualTo(Clue.DATA_STATUS, 0)
                 .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
         List<Clue> djAlreadyRobSingle1 = clueMapper.selectByExample(example2);
-        if (djAlreadyRobSingle1.size()>0) {
+        if (djAlreadyRobSingle1.size() > 0) {
             //消息推送
             MainUser user = userMapper.selectByPrimaryKey(userId);
-            if(user!=null&& CommonUtil.isEmpty(user.getMemberId())) {
+            if (user != null && CommonUtil.isEmpty(user.getMemberId())) {
                 String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
                 configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "开工提醒",
                         "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url
@@ -1798,7 +1640,7 @@ public class HouseService {
             example.createCriteria().andEqualTo(Clue.MEMBER_ID, member.getId())
                     .andIsNull(Clue.CUS_SERVICE);
             List<Clue> clues = clueMapper.selectByExample(example);
-            if(clues.size()>0) {
+            if (clues.size() > 0) {
                 djOrderSurface.setClueId(clues.get(0).getId());
                 djOrderSurfaceMapper.insert(djOrderSurface);
             }
@@ -2428,29 +2270,22 @@ public class HouseService {
      *
      * @return
      */
-    public ServerResponse getReferenceBudget(String cityId, String villageId, Double minSquare, Double maxSquare, Integer houseType) {
-        try {
-            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-            House house = null;
-            List<House> listHouse = iHouseMapper.getReferenceBudget(cityId, villageId, houseType, minSquare, maxSquare);
+    public ServerResponse getReferenceBudget(HttpServletRequest request, String cityId, String villageId, Double minSquare, Double maxSquare, Integer houseType) {
+        House house = null;
+        List<House> listHouse = iHouseMapper.getReferenceBudget(cityId, villageId, houseType, minSquare, maxSquare);
+        if (listHouse.size() > 0) {//根据条件查询所选小区总价最少的房子
+            house = listHouse.get(0);
+        } else {
+            listHouse = iHouseMapper.getReferenceBudget(cityId, null, houseType, minSquare, maxSquare);
             if (listHouse.size() > 0) {//根据条件查询所选小区总价最少的房子
                 house = listHouse.get(0);
-            } else {
-                listHouse = iHouseMapper.getReferenceBudget(cityId, null, houseType, minSquare, maxSquare);
-                if (listHouse.size() > 0) {//根据条件查询所选小区总价最少的房子
-                    house = listHouse.get(0);
-                }
             }
-            if (house != null) {
-                request.setAttribute(Constants.CITY_ID, house.getCityId());
-                return budgetWorkerAPI.gatEstimateBudgetByHId(house.getCityId(), house.getId());
-            }
-            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "暂无所需报价");
-        } catch (Exception e) {
-            e.printStackTrace();
-            LOG.error("系统出错，查询参考报价失败", e);
-            return ServerResponse.createByErrorMessage("系统出错,查询参考报价失败");
         }
+        if (house != null) {
+            request.setAttribute(Constants.CITY_ID, house.getCityId());
+            return budgetWorkerAPI.gatEstimateBudgetByHId(house.getCityId(), house.getId());
+        }
+        return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "暂无所需报价");
     }
 
     /**
@@ -2632,7 +2467,6 @@ public class HouseService {
                 houseConstructionRecordMapper.insert(houseConstructionRecord);
             }
         } catch (BaseException e) {
-            LOG.error("施工记录保存异常：" + e.getMessage(), e);
         }
     }
 

@@ -1,7 +1,6 @@
 package com.dangjia.acg.mapper.product;
 
 import com.dangjia.acg.dto.product.AppBasicsProductDTO;
-import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.product.DjBasicsProduct;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -54,5 +53,23 @@ public interface DjBasicsProductMapper extends Mapper<DjBasicsProduct> {
 
     /*更新单位*/
     void updateProductValueId(@Param("valueId") String valueId);
+
+
+    //根据商品Id查货品
+    List<DjBasicsProduct> queryByGoodsId(@Param("goodsId") String goodsId);
+
+    /**
+     * 删除材料扩展表信息
+     * @param goodsId 货品ID
+     */
+    void deleteProductMaterial(@Param("goodsId") String goodsId);
+
+    /**
+     * 删除产品扩展表信息
+     * @param goodsId 货品ID
+     */
+    void deleteProductWorker(@Param("goodsId") String goodsId);
+
+    List<DjBasicsProduct> queryProductByCategoryId(@Param("categoryId") String categoryId);
 
 }

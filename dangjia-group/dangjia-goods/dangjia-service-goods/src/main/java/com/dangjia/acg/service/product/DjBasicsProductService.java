@@ -4,33 +4,37 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.app.repair.MasterMendWorkerAPI;
+import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.product.ActuarialGoodsDTO;
 import com.dangjia.acg.dto.product.AppBasicsProductDTO;
-import com.dangjia.acg.dto.product.BasicsGoodsDTO;
 import com.dangjia.acg.dto.product.BasicsProductDTO;
 import com.dangjia.acg.dto.product.DjBasicsLabelDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
 import com.dangjia.acg.mapper.basics.ITechnologyMapper;
+import com.dangjia.acg.mapper.basics.IUnitMapper;
 import com.dangjia.acg.mapper.product.*;
-import com.dangjia.acg.modle.basics.WorkerGoods;
+import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.product.*;
 import com.dangjia.acg.service.basics.TechnologyService;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.dangjia.acg.util.StringTool;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestParam;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.Date;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 
 /**
  * 产品逻辑处理层
@@ -70,6 +74,10 @@ public class DjBasicsProductService {
     private IBudgetWorkerMapper iBudgetWorkerMapper;
     @Autowired
     private MasterMendWorkerAPI masterMendWorkerAPI;
+    @Autowired
+    private IUnitMapper iUnitMapper;
+    @Autowired
+    private ConfigUtil configUtil;
     /**
      * 查询商品信息
      *
@@ -121,69 +129,7 @@ public class DjBasicsProductService {
         }
     }
 
-    /**
-     * 保存货品信息
-     * <p>Title: saveBasicsGoods</p>
-     * <p>Description: </p>
-     *
-     * @return
-     */
-    public ServerResponse saveBasicsGoods(BasicsGoodsDTO basicsGoodsDTO) {
-        try {
-            String name = basicsGoodsDTO.getName();
-            String unitId = basicsGoodsDTO.getUnitId();
-            String categoryId = basicsGoodsDTO.getCategoryId();
-            int type = basicsGoodsDTO.getType();
-            if (!StringUtils.isNotBlank(name))
-                return ServerResponse.createByErrorMessage("名字不能为空");
 
-            List<BasicsGoods> goodsList = iBasicsGoodsMapper.queryByName(name);
-            if (goodsList.size() > 0)
-                return ServerResponse.createByErrorMessage("名字不能重复");
-
-            if (!StringUtils.isNotBlank(unitId))
-                return ServerResponse.createByErrorMessage("单位id不能为空");
-
-            if (!StringUtils.isNotBlank(categoryId))
-                return ServerResponse.createByErrorMessage("分类不能为空");
-
-            if (type < -1)
-                return ServerResponse.createByErrorMessage("性质不能为空");
-
-            BasicsGoods goods = getBasicsGoods(basicsGoodsDTO);
-            iBasicsGoodsMapper.insert(goods);
-            return ServerResponse.createBySuccess("新增成功", goods.getId());
-        } catch (Exception e) {
-            LOG.error("新增货品失败：",e);
-            return ServerResponse.createByErrorMessage("新增失败");
-        }
-    }
-
-    /**
-     * 对象转换
-     *
-     * @return
-     */
-    private BasicsGoods getBasicsGoods(BasicsGoodsDTO basicsGoodsDTO) {
-        BasicsGoods goods = new BasicsGoods();
-        goods.setName(basicsGoodsDTO.getName());
-        goods.setOtherName(basicsGoodsDTO.getOtherName());//别名
-        goods.setCategoryId(basicsGoodsDTO.getCategoryId());//分类
-        goods.setBuy(basicsGoodsDTO.getBuy());//购买性质
-        goods.setSales(basicsGoodsDTO.getSales());//退货性质
-        goods.setUnitId(basicsGoodsDTO.getUnitId());//单位
-        goods.setType(basicsGoodsDTO.getType());//goods性质
-        goods.setCreateDate(new Date());
-        goods.setModifyDate(new Date());
-        goods.setIsInflueDecorationProgress(basicsGoodsDTO.getIsInflueDecorationProgress());
-        goods.setIrreversibleReasons(basicsGoodsDTO.getIrreversibleReasons());
-        goods.setIstop(basicsGoodsDTO.getIstop());
-        goods.setBrandId(basicsGoodsDTO.getBrandId());
-        goods.setIsElevatorFee(basicsGoodsDTO.getIsElevatorFee());
-        goods.setIndicativePrice(basicsGoodsDTO.getIndicativePrice());
-        goods.setLabelIds(basicsGoodsDTO.getLabelIds());
-        return goods;
-    }
 
     /**
      * 保存product
@@ -197,7 +143,7 @@ public class DjBasicsProductService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse insertProduct(String productArr) {
+    public ServerResponse insertBatchProduct(String productArr) {
 
             JSONArray jsonArr = JSONArray.parseArray(productArr);
             //1.商品作校验，校验前端传过来的商品是否符合条件
@@ -257,7 +203,7 @@ public class DjBasicsProductService {
                     return ServerResponse.createByErrorMessage(restr);
                 }
             }
-            return ServerResponse.createBySuccessMessage("新增成功");
+            return ServerResponse.createBySuccessMessage("保存更新商品成功");
     }
 
     /**
@@ -451,7 +397,6 @@ public class DjBasicsProductService {
         }
         return "";
     }
-
     /**
      * 判断校验字段是否可以为空
      * @param basicsProductDTO
@@ -577,15 +522,47 @@ public class DjBasicsProductService {
     }
 
     /**
+     * 校验商品是否符合添加条件
+     * @param basicsProductDTO
+     * @param type 0材料，1包工包料，2人工
+     * @return
+     */
+    public String checkSingleProductCommon(BasicsProductDTO basicsProductDTO,int type,JSONArray jsonArr){
+        //1.判断必填字段是否为空
+        String checkStr = checkFielsNull(basicsProductDTO);
+        if(StringUtils.isNotBlank(checkStr)){
+            return checkStr;
+        }
+        String id = basicsProductDTO.getId();//商品ID
+        String name = basicsProductDTO.getName();//商品名称
+        String productSn = basicsProductDTO.getProductSn();//商品编码
+        String categoryId=basicsProductDTO.getCategoryId();//商品类别Id
+        DjBasicsGoods basicsGoods = djBasicsGoodsMapper.selectByPrimaryKey(categoryId);
+        if(type == 0 || type == 1){
+            //判断当前添加的属性值是否有相同的已存在的商品（材料商品才有）
+            checkStr = checkProductAttr(basicsProductDTO,jsonArr);
+            if(StringUtils.isNotBlank(checkStr)){
+                return checkStr;
+            }
+        }
+        //校验商品是否存在
+        String ret = checkProduct(name, productSn, id, jsonArr);
+        if (!ret.equals("ok")) {
+            return ret;
+        }
+        return "";
+    }
+    /**
      * 商品信息暂存
      *
      * @param basicsProductDTO
      * @param technologyList
      * @param deleteTechnologyIds
+     * @param dataStatus 数据状态，0正常，1暂存
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse saveProductTemporaryStorage(BasicsProductDTO basicsProductDTO,String technologyList, String  deleteTechnologyIds){
+    public ServerResponse saveProductTemporaryStorage(BasicsProductDTO basicsProductDTO,String technologyList, String  deleteTechnologyIds,int dataStatus){
         if (!StringUtils.isNotBlank(basicsProductDTO.getCategoryId()))
             return ServerResponse.createByErrorMessage("商品分类不能为空");
 
@@ -593,6 +570,13 @@ public class DjBasicsProductService {
             return ServerResponse.createByErrorMessage("货品id不能为空");
         String goodsId=basicsProductDTO.getGoodsId();//货品ID
         DjBasicsGoods basicsGoods = djBasicsGoodsMapper.selectByPrimaryKey(goodsId);//查询货品表信息，判断是人工还是材料商品新增
+        if(dataStatus == 0){
+            //添加正式商品前的校验，商品名称和编码不能为空，且不能重复
+           String restr = checkSingleProductCommon(basicsProductDTO,basicsGoods.getType(),new JSONArray());
+           if(StringUtils.isNotBlank(restr)){
+               return ServerResponse.createByErrorMessage(restr);
+           }
+       }
         //2.1添加商品主表信息
         StringBuilder imgStr = new StringBuilder();
         if(StringUtils.isNotBlank(basicsProductDTO.getImage())){
@@ -607,8 +591,8 @@ public class DjBasicsProductService {
                 }
             }
         }
-        LOG.info("001----------添加商品主表 start:" + basicsProductDTO.getName());
-        String productId = insertBasicsProductData(basicsProductDTO,imgStr,2);
+        LOG.info("001----------添加商品主表 start:" +basicsProductDTO.getId()+"-----"+ basicsProductDTO.getName());
+        String productId = insertBasicsProductData(basicsProductDTO,imgStr,dataStatus);
         LOG.info("001----------添加商品主表 end productId:" + productId);
 
         if(2 == basicsGoods.getType()){
@@ -636,7 +620,7 @@ public class DjBasicsProductService {
         if (StringUtils.isNotBlank(restr)) {
             return ServerResponse.createByErrorMessage(restr);
         }
-        return ServerResponse.createBySuccessMessage("保存成功");
+        return ServerResponse.createBySuccess("保存成功",productId);
     }
     /**
      * 查询商品标签
@@ -724,6 +708,137 @@ public class DjBasicsProductService {
     public DjBasicsProduct queryProductDataByID(HttpServletRequest request, String id)
     {
         return djBasicsProductMapper.selectByPrimaryKey(id);
+    }
+
+    /**
+     * 根据productid删除product对象
+     *
+     * @param id
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse deleteBasicsProductById(String id) {
+            DjBasicsProduct djBasicsProduct = new DjBasicsProduct();
+            djBasicsProduct.setId(id);
+            djBasicsProductMapper.deleteByPrimaryKey(djBasicsProduct);
+            //删除材料商品扩展表
+            Example example = new Example(DjBasicsProductMaterial.class);
+            example.createCriteria().andEqualTo("productId", id);
+            djBasicsProductMaterialMapper.deleteByExample(example);
+            //删除人工商品扩展表
+            example = new Example(DjBasicsProductWorker.class);
+            example.createCriteria().andEqualTo("productId", id);
+            djBasicsProductWorkerMapper.deleteByExample(example);
+            return ServerResponse.createBySuccessMessage("删除成功");
+    }
+
+
+
+    /**
+     * 模糊查询goods及下属product
+     *
+     * @param pageDTO
+     * @param categoryId
+     * @param name 分类名称
+     * @param type 是否禁用  0：禁用；1不禁用 ;  -1全部默认
+     * @return
+     */
+    public ServerResponse queryGoodsListByCategoryLikeName(PageDTO pageDTO, String categoryId, String name, Integer type, String categoryName) {
+        try {
+            LOG.info("tqueryGoodsListByCategoryLikeName type :" + type);
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<DjBasicsGoods> djBasicsGoods = djBasicsGoodsMapper.queryGoodsListByCategoryLikeName(categoryId, name);
+            PageInfo pageResult = new PageInfo(djBasicsGoods);
+            List<ActuarialGoodsDTO> actuarialGoodsDTOS=new ArrayList<>();
+            List<Map<String, Object>> gMapList = new ArrayList<>();
+            ActuarialGoodsDTO actuarialGoodsDTO=new ActuarialGoodsDTO();
+            actuarialGoodsDTO.setCategoryName(categoryName);
+            djBasicsGoods.forEach(goods ->{
+                Map<String, Object> gMap = BeanUtils.beanToMap(goods);
+                List<Map<String, Object>> mapList = new ArrayList<>();
+                if (2 != goods.getBuy()) {
+                    List<DjBasicsProduct> djBasicsProducts = djBasicsProductMapper.queryByGoodsId(goods.getId());
+                    for (DjBasicsProduct p : djBasicsProducts) {
+                        //type表示： 是否禁用  0：禁用；1不禁用 ;  -1全部默认
+                        if (type!=null&& !type.equals(p.getType()) && -1 != type) //不等于 type 的不返回给前端
+                            continue;
+                        Map<String, Object> map = BeanUtils.beanToMap(p);
+                        mapList.add(map);
+                    }
+                    gMap.put("productList", mapList);
+                    gMapList.add(gMap);
+                }
+            });
+            actuarialGoodsDTO.setGMapList(gMapList);
+            actuarialGoodsDTOS.add(actuarialGoodsDTO);
+            pageResult.setList(actuarialGoodsDTOS);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+
+
+
+
+    /**
+     * 查询所有的商品
+     * @param pageDTO
+     * @param categoryId
+     * @return
+     */
+    public ServerResponse<PageInfo> queryProduct(PageDTO pageDTO, String categoryId) {
+        try {
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            List<DjBasicsProduct> productList = djBasicsProductMapper.queryProductByCategoryId(categoryId);
+            PageInfo pageResult = new PageInfo(productList);
+            List<Map<String, Object>> mapList = new ArrayList<>();
+            for (DjBasicsProduct p : productList) {
+                if (p.getImage() == null) {
+                    continue;
+                }
+                String[] imgArr = p.getImage().split(",");
+                StringBuilder imgStr = new StringBuilder();
+                StringBuilder imgUrlStr = new StringBuilder();
+                StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
+                p.setImage(imgStr.toString());
+                Map<String, Object> map = BeanUtils.beanToMap(p);
+                map.put("imageUrl", imgUrlStr.toString());
+                //查询商品对应的标签及标签值列表
+                /*if (!StringUtils.isNotBlank(p.getLabelId())) {
+                    map.put("labelId", "");
+                    map.put("labelName", "");
+                } else {
+                    map.put("labelId", p.getLabelId());
+                    Label label = djBasicsLabel.selectByPrimaryKey(p.getLabelId());
+                    if (label.getName() != null)
+                        map.put("labelName", label.getName());
+                }*/
+                mapList.add(map);
+            }
+            pageResult.setList(mapList);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    /**
+     * 查询所有单位列表
+     * @return
+     */
+    public ServerResponse queryUnit() {
+        try {
+            List<Unit> unitList = iUnitMapper.getUnit();
+            return ServerResponse.createBySuccess("查询成功", unitList);
+        } catch (Exception e) {
+            LOG.error("查询失败：",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
     }
 
 }

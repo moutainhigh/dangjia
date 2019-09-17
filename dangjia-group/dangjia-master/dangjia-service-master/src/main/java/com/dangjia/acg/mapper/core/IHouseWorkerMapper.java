@@ -22,7 +22,7 @@ public interface IHouseWorkerMapper extends Mapper<HouseWorker> {
     HouseWorker getByWorkerTypeId(@Param("houseId") String houseId, @Param("workerTypeId") String workerTypeId,
                                   @Param("workType") Integer workType);
 
-    Long grabControl(@Param("workerId") String workerId);
+    Long grabControl(@Param("workerId") String workerId, @Param("workerType") Integer workerType);
 
     List<HouseWorker> grabOneDayOneTime(@Param("workerId") String workerId);
 
@@ -37,6 +37,7 @@ public interface IHouseWorkerMapper extends Mapper<HouseWorker> {
     Long getCountOrderByWorkerId(@Param("workerId") String workerId);
 
     List<HouseWorker> paidListByHouseId(@Param("houseId") String houseId);
+
     List<HouseWorker> getWorkerHouse();
 
     List<HouseWorkerDTO> queryWorkerHouse(@Param("workerId") String workerId);

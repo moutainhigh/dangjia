@@ -884,7 +884,6 @@ public class HouseFlowApplyService {
                 if (null != residentialRange) {    //楼栋是否分配销售
                     if(!residentialRange.getUserId().equals(clueList.get(0).getCusService())){
                         //判断销售所选楼栋是否在自己楼栋范围内 不在则跟选择的楼栋范围销售分提成  推送消息
-                        logger.info("有一个归于您的客户【房子地址】已竣工==================="+residentialRange.getUserId());
                         //销售所选楼栋是否在自己楼栋范围内推送消息
                         MainUser us = userMapper.selectByPrimaryKey(residentialRange.getUserId());
                         if(null != us && !CommonUtil.isEmpty(us.getMemberId())){
@@ -897,7 +896,6 @@ public class HouseFlowApplyService {
 
             if(clueList.size() == 1){
                 if(!CommonUtil.isEmpty(clueList.get(0).getCrossDomainUserId())){
-                    logger.info("您的跨域客户【客户名称】已竣工==================="+clueList.get(0).getCrossDomainUserId());
                     //跨域下单推送消息
                     MainUser us = userMapper.selectByPrimaryKey(clueList.get(0).getCrossDomainUserId());
                     if(null != us && !CommonUtil.isEmpty(us.getMemberId())){

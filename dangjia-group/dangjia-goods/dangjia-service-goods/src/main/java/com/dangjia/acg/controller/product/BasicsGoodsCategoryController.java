@@ -197,4 +197,31 @@ public class BasicsGoodsCategoryController implements BasicsGoodsCategoryAPI {
     public ServerResponse queryGoodsCategoryTwo(HttpServletRequest request) {
         return basicsGoodsCategoryService.queryGoodsCategoryTwo();
     }
+
+    /**
+     * 查询所有品牌
+     *
+     * @throws
+     * @Title: queryBrand
+     * @param: @return
+     * @return: JsonResult
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryBrand(HttpServletRequest request) {
+
+        return basicsGoodsCategoryService.queryBrand();
+    }
+
+    /**
+     * 查询分类下的所有品牌
+     * @param request
+     * @param categoryId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryBrandByCategoryId(HttpServletRequest request, String categoryId){
+        return basicsGoodsCategoryService.queryBrandByCategoryId(categoryId);
+    }
 }
