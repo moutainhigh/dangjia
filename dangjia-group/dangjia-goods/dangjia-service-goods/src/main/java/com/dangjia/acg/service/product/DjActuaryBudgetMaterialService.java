@@ -1,51 +1,51 @@
-//package com.dangjia.acg.service.product;
-//
-//import com.alibaba.fastjson.JSONArray;
-//import com.alibaba.fastjson.JSONObject;
-//import com.dangjia.acg.api.RedisClient;
-//import com.dangjia.acg.api.data.GetForBudgetAPI;
-//import com.dangjia.acg.common.response.ServerResponse;
-//import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
-//import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
-//import com.dangjia.acg.modle.actuary.ActuarialTemplate;
-//import com.dangjia.acg.modle.actuary.BudgetMaterial;
-//import com.dangjia.acg.modle.actuary.BudgetWorker;
-//import com.dangjia.acg.modle.basics.Goods;
-//import com.dangjia.acg.modle.basics.Product;
-//import com.dangjia.acg.modle.basics.WorkerGoods;
-//import com.dangjia.acg.modle.brand.Unit;
-//import com.dangjia.acg.service.actuary.BudgetWorkerService;
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.stereotype.Service;
-//import tk.mybatis.mapper.entity.Example;
-//
-//import java.math.BigDecimal;
-//import java.util.Date;
-//import java.util.List;
-//
-///**
-// * Created with IntelliJ IDEA.
-// * author: wk
-// * Date: 2019/9/17
-// * Time: 14:21
-// */
-//@Service
-//public class DjActuaryBudgetMaterialService {
-//    @Autowired
-//    private IBudgetMaterialMapper iBudgetMaterialMapper;
-//    private static Logger LOG = LoggerFactory.getLogger(BudgetWorkerService.class);
-//    @Autowired
-//    private GetForBudgetAPI getForBudgetAPI;
-//    @Autowired
-//    private IBudgetWorkerMapper iBudgetWorkerMapper;
-//    @Autowired
-//    private RedisClient redisClient;
+package com.dangjia.acg.service.product;
+
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.api.RedisClient;
+import com.dangjia.acg.api.data.GetForBudgetAPI;
+import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
+import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
+import com.dangjia.acg.modle.actuary.ActuarialTemplate;
+import com.dangjia.acg.modle.actuary.BudgetMaterial;
+import com.dangjia.acg.modle.actuary.BudgetWorker;
+import com.dangjia.acg.modle.basics.Goods;
+import com.dangjia.acg.modle.basics.Product;
+import com.dangjia.acg.modle.basics.WorkerGoods;
+import com.dangjia.acg.modle.brand.Unit;
+import com.dangjia.acg.service.actuary.BudgetWorkerService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
+
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.List;
+
+/**
+ * Created with IntelliJ IDEA.
+ * author: wk
+ * Date: 2019/9/17
+ * Time: 14:21
+ */
+@Service
+public class DjActuaryBudgetMaterialService {
+    @Autowired
+    private IBudgetMaterialMapper iBudgetMaterialMapper;
+    private static Logger LOG = LoggerFactory.getLogger(BudgetWorkerService.class);
+    @Autowired
+    private GetForBudgetAPI getForBudgetAPI;
+    @Autowired
+    private IBudgetWorkerMapper iBudgetWorkerMapper;
+    @Autowired
+    private RedisClient redisClient;
 //    @Autowired
 //    private
-//
-//
+
+
 //    /**
 //     * 生成精算
 //     */
@@ -208,7 +208,7 @@
 //            return ServerResponse.createByErrorMessage("生成失败");
 //        }
 //    }
-//
-//
-//
-//}
+
+
+
+}
