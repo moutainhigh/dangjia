@@ -855,7 +855,10 @@ public class DjBasicsProductService {
     public ServerResponse getProductById(String id) {
         try {
             DjBasicsProduct djBasicsProduct =djBasicsProductMapper.selectByPrimaryKey(id);
-            Map<String,Object> map = getProductDetailByProductId(djBasicsProduct);
+            Map<String,Object> map = null;
+            if(djBasicsProduct!=null&&StringUtils.isNotBlank(djBasicsProduct.getId())){
+                map = getProductDetailByProductId(djBasicsProduct);
+            }
             return ServerResponse.createBySuccess("查询成功", map);
         } catch (Exception e) {
             LOG.error("查询失败：",e);
@@ -872,7 +875,7 @@ public class DjBasicsProductService {
     public ServerResponse getTemporaryStorageProductByGoodsId(String goodsId) {
         try {
             DjBasicsProduct djBasicsProduct =djBasicsProductMapper.queryTemporaryStorage(goodsId,"2");
-            Map<String,Object> map = new HashMap<String,Object>();
+            Map<String,Object> map = null;
             if(djBasicsProduct!=null&&StringUtils.isNotBlank(djBasicsProduct.getId())){
                map = getProductDetailByProductId(djBasicsProduct);
             }
