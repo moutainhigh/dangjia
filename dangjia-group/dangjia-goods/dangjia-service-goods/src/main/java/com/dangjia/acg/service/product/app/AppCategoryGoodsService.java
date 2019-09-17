@@ -7,8 +7,11 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.actuary.AttributeDTO;
 import com.dangjia.acg.mapper.basics.*;
+import com.dangjia.acg.mapper.product.DjBasicsAttributeMapper;
 import com.dangjia.acg.mapper.product.IBasicsGoodsCategoryMapper;
 import com.dangjia.acg.mapper.product.ICategoryLabelMapper;
 import com.dangjia.acg.modle.actuary.SearchBox;
@@ -43,6 +46,11 @@ public class AppCategoryGoodsService {
     private ICategoryLabelMapper iCategoryLabelMapper;
     @Autowired
     private IBasicsGoodsCategoryMapper iBasicsGoodsCategoryMapper;
+
+    @Autowired
+    private DjBasicsAttributeMapper djBasicsAttributeMapper;
+
+
     @Autowired
     private ConfigUtil configUtil;
 
@@ -129,7 +137,11 @@ public class AppCategoryGoodsService {
         try {
             //根据内容模糊搜索商品
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<Product> pList = iProductMapper.serchCategoryProduct(categoryId,StringTool.getLikeV(name),brandVal,attributeVal,orderKey);
+            String[] attributeVals=null;
+            if(!CommonUtil.isEmpty(attributeVal)){
+                attributeVals=attributeVal.split(",");
+            }
+            List<Product> pList = iProductMapper.serchCategoryProduct(categoryId,StringTool.getLikeV(name),brandVal,attributeVals,orderKey);
             pageResult = new PageInfo<>(pList);
             for (Product product : pList) {
                 String convertUnitName = iUnitMapper.selectByPrimaryKey(product.getConvertUnit()).getName();
@@ -151,6 +163,23 @@ public class AppCategoryGoodsService {
             return ServerResponse.createByErrorMessage("查询失败");
         }
         return ServerResponse.createBySuccess("查询成功", pageResult);
+    }
+
+    /**
+     * 第四部分：二级商品品牌筛选数据
+     * @return
+     */
+    public ServerResponse queryBrandDatas(String categoryId) {
+        List<Brand> brands = iBasicsGoodsCategoryMapper.queryBrandByTopCategoryid(categoryId);
+        return ServerResponse.createBySuccess("查询成功", brands);
+    }
+    /**
+     * 第四部分：二级商品规格筛选数据
+     * @return
+     */
+    public ServerResponse queryAttributeDatas(String categoryId) {
+        List<AttributeDTO> attributeDTOS = djBasicsAttributeMapper.queryAttributeDatas(categoryId);
+        return ServerResponse.createBySuccess("查询成功", attributeDTOS);
     }
 
 
