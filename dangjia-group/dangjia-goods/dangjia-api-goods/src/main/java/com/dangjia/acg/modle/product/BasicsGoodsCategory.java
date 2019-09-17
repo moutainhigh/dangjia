@@ -52,12 +52,6 @@ public class BasicsGoodsCategory extends BaseEntity {
     @ApiModelProperty("购买限制")
     private String purchaseRestrictions;//购买限制（1自由购房；1有房无精算；2有房有精算）
 
-
-    @Column(name = "brand_ids")
-    @Desc(value = "品牌ID")
-    @ApiModelProperty("品牌ID")
-    private String brandIds;//关联的品牌ID，多个逗号分割
-
     @Column(name = "cover_image")
     @Desc(value = "上传封面图")
     @ApiModelProperty("上传封面图")

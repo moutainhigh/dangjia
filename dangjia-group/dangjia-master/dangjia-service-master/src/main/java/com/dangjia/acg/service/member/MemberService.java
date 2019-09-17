@@ -184,7 +184,7 @@ public class MemberService {
             if (user == null) {
                 return ServerResponse.createByErrorMessage("用户不存在");
             }
-            if (!CommonUtil.isEmpty(userRole)&&userRole == 3) {//销售端放开登录权限
+            if (!CommonUtil.isEmpty(userRole) && userRole == 3) {//销售端放开登录权限
                 if (!CommonUtil.isEmpty(accessToken.getUserId())) {
                     ServerResponse serverResponse = setSale(accessToken, accessToken.getUserId());
                     if (!serverResponse.isSuccess()) {
@@ -735,8 +735,6 @@ public class MemberService {
                 }
                 MemberCustomerDTO mcDTO = new MemberCustomerDTO();
                 mcDTO.setMcId(customer.getId());
-                logger.info("customer.getId()===================" + customer.getId());
-                logger.info("customer.getPhaseStatus()===================" + customer.getPhaseStatus());
                 mcDTO.setPhaseStatus(customer.getPhaseStatus());
                 mcDTO.setOrderDate(member.getModifyDate());
                 mcDTO.setMemberId(member.getId());
@@ -804,8 +802,6 @@ public class MemberService {
                 }
                 mcDTOList.add(mcDTO);
             }
-//            logger.info(" mcDTOList getMemberNickName:" + mcDTOList.get(0).getMemberNickName());
-//            logger.info("mcDTOList size:" + mcDTOList.size() +" mcDTOListOrderBy:"+ mcDTOListOrderBy.size() + " list:"+ list.size());
             pageResult.setList(mcDTOList);
             return ServerResponse.createBySuccess("查询用户列表成功", pageResult);
         } catch (Exception e) {
@@ -821,7 +817,6 @@ public class MemberService {
      */
     public ServerResponse setMember(Member member) {
         try {
-            logger.info("setMember member: " + member);
             Member srcMember = memberMapper.selectByPrimaryKey(member.getId());
             if (srcMember == null)
                 return ServerResponse.createByErrorMessage("该业主不存在");
@@ -1363,6 +1358,7 @@ public class MemberService {
 
     /**
      * 推广列表
+     *
      * @param userToken
      * @param pageDTO
      * @return
@@ -1373,20 +1369,20 @@ public class MemberService {
             return (ServerResponse) object;
         }
         Member member = (Member) object;
-        Example example=new Example(Member.class);
-        example.createCriteria().andEqualTo(Member.OTHERS_INVITATION_CODE,member.getInvitationCode());
+        Example example = new Example(Member.class);
+        example.createCriteria().andEqualTo(Member.OTHERS_INVITATION_CODE, member.getInvitationCode());
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<Member> members = memberMapper.selectByExample(example);
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         for (Member member1 : members) {
             member1.setVisitState(houseMapper.queryPromotionListHouse(member1.getId()).getVisitState());
-            member1.setHead(address+member1.getHead());
+            member1.setHead(address + member1.getHead());
         }
         PageInfo pageResult = new PageInfo(members);
-        if(members.size()<=0){
-            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
+        if (members.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
-        return ServerResponse.createBySuccess("查询成功",pageResult);
+        return ServerResponse.createBySuccess("查询成功", pageResult);
     }
 
 }

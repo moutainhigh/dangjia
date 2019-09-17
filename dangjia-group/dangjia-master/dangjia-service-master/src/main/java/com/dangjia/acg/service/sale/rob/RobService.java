@@ -96,13 +96,15 @@ public class RobService {
 
     @Autowired
     private IStoreUserMapper iStoreUserMapper;
+
     /**
      * 查询待抢单列表
+     *
      * @param userToken
      * @param storeId
      * @return
      */
-    public ServerResponse queryRobSingledata(String userToken, String storeId,Integer isRobStats) {
+    public ServerResponse queryRobSingledata(String userToken, String storeId, Integer isRobStats) {
 
         Object object = constructionService.getAccessToken(userToken);
         if (object instanceof ServerResponse) {
@@ -112,8 +114,6 @@ public class RobService {
         if (CommonUtil.isEmpty(accessToken.getUserId())) {
             return ServerResponse.createbyUserTokenError();
         }
-
-
 
 
         Example example = new Example(StoreUser.class);
@@ -129,7 +129,7 @@ public class RobService {
 
         if (!CommonUtil.isEmpty(storeId)) {
             map.put("storeId", storeId);
-        }else{
+        } else {
             map.put("storeId", storeList.get(0).getStoreId());
         }
 
@@ -138,11 +138,9 @@ public class RobService {
         List<RobDTO> list = clueMapper.queryRobSingledata(map);
 
 
-
-
         //查询标签
         List<RobDTO> robDTOs = new ArrayList<>();
-        if(!list.isEmpty()){
+        if (!list.isEmpty()) {
             for (RobDTO li : list) {
                 RobDTO robDTO = new RobDTO();
                 if (!CommonUtil.isEmpty(li.getLabelIdArr())) {
@@ -166,7 +164,6 @@ public class RobService {
         }
 
 
-
         if (robDTOs.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
@@ -174,14 +171,14 @@ public class RobService {
     }
 
 
-
     /**
      * 查询已抢单列表
+     *
      * @param userToken
      * @param userId
      * @return
      */
-    public ServerResponse queryAlreadyRobSingledata(String userToken,String userId) {
+    public ServerResponse queryAlreadyRobSingledata(String userToken, String userId) {
 
         Object object = constructionService.getAccessToken(userToken);
         if (object instanceof ServerResponse) {
@@ -192,7 +189,7 @@ public class RobService {
             return ServerResponse.createbyUserTokenError();
         }
 
-        if(CommonUtil.isEmpty(userId)){
+        if (CommonUtil.isEmpty(userId)) {
             userId = accessToken.getUserId();
         }
 
@@ -204,18 +201,18 @@ public class RobService {
 
         List<RobDTO> robDTOs = new ArrayList<>();
 
-        for (DjAlreadyRobSingle da: lists) {
+        for (DjAlreadyRobSingle da : lists) {
             RobDTO robDTO = new RobDTO();
             robDTO.setAlreadyId(da.getId());
             robDTO.setCreateDate(da.getCreateDate());
             Member member = iMemberMapper.selectByPrimaryKey(da.getMemberId());
-            if(!CommonUtil.isEmpty(member)){
+            if (!CommonUtil.isEmpty(member)) {
                 robDTO.setOwerName(member.getNickName());
                 robDTO.setMemberId(member.getId());
             }
 
             Clue clue = clueMapper.selectByPrimaryKey(da.getClueId());
-            if(!CommonUtil.isEmpty(clue)){
+            if (!CommonUtil.isEmpty(clue)) {
                 robDTO.setPhone(clue.getPhone());
                 robDTO.setClueId(clue.getId());
                 robDTO.setStage(clue.getStage());
@@ -224,7 +221,7 @@ public class RobService {
             }
 
             House house = iHouseMapper.selectByPrimaryKey(da.getHouseId());
-            if(!CommonUtil.isEmpty(house)){
+            if (!CommonUtil.isEmpty(house)) {
                 robDTO.setCreateDate(house.getCreateDate());
                 robDTO.setIsRobStats(house.getIsRobStats());
                 robDTO.setVisitState(house.getVisitState());
@@ -232,7 +229,7 @@ public class RobService {
             }
 
             Customer customer = iCustomerMapper.selectByPrimaryKey(da.getMcId());
-            if(!CommonUtil.isEmpty(customer)){
+            if (!CommonUtil.isEmpty(customer)) {
                 //查询标签
                 if (!CommonUtil.isEmpty(customer.getLabelIdArr())) {
                     String[] labelIds = customer.getLabelIdArr().split(",");
@@ -251,16 +248,14 @@ public class RobService {
 
     /**
      * 抢单
+     *
      * @param djAlreadyRobSingle
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse upDateIsRobStats(DjAlreadyRobSingle djAlreadyRobSingle,String userToken) {
+    public ServerResponse upDateIsRobStats(DjAlreadyRobSingle djAlreadyRobSingle, String userToken) {
         try {
             if (!CommonUtil.isEmpty(djAlreadyRobSingle)) {
-
-                logger.info("userToken==================="+ userToken);
-
                 Object object = constructionService.getAccessToken(userToken);
                 if (object instanceof ServerResponse) {
                     return (ServerResponse) object;
@@ -269,15 +264,15 @@ public class RobService {
                 if (CommonUtil.isEmpty(accessToken.getUserId())) {
                     return ServerResponse.createbyUserTokenError();
                 }
-                Example example=new Example(House.class);
-                example.createCriteria().andEqualTo(House.ID,djAlreadyRobSingle.getHouseId())
-                        .andEqualTo(House.DATA_STATUS,0);
-                if(iHouseMapper.selectByExample(example).size()<=0){
+                Example example = new Example(House.class);
+                example.createCriteria().andEqualTo(House.ID, djAlreadyRobSingle.getHouseId())
+                        .andEqualTo(House.DATA_STATUS, 0);
+                if (iHouseMapper.selectByExample(example).size() <= 0) {
                     return ServerResponse.createByErrorMessage("业主已撤回");
                 }
-                example=new Example(DjAlreadyRobSingle.class);
-                example.createCriteria().andEqualTo(DjAlreadyRobSingle.HOUSE_ID,djAlreadyRobSingle.getHouseId());
-                if(djAlreadyRobSingleMapper.selectByExample(example).size()>0){
+                example = new Example(DjAlreadyRobSingle.class);
+                example.createCriteria().andEqualTo(DjAlreadyRobSingle.HOUSE_ID, djAlreadyRobSingle.getHouseId());
+                if (djAlreadyRobSingleMapper.selectByExample(example).size() > 0) {
                     return ServerResponse.createByErrorMessage("该订单已被抢");
                 }
 
@@ -292,13 +287,13 @@ public class RobService {
                 clueMapper.upDateIsRobStats(map);
 
                 map = new HashMap<>();
-                map.put("clueId",djAlreadyRobSingle.getClueId());
-                map.put("cusService",accessToken.getUserId());
+                map.put("clueId", djAlreadyRobSingle.getClueId());
+                map.put("cusService", accessToken.getUserId());
                 clueMapper.upDateClueCusService(map);
 
                 map = new HashMap<>();
-                map.put("mcId",djAlreadyRobSingle.getMcId());
-                map.put("userId",accessToken.getUserId());
+                map.put("mcId", djAlreadyRobSingle.getMcId());
+                map.put("userId", accessToken.getUserId());
                 clueMapper.upDateMcUserId(map);
                 return ServerResponse.createBySuccessMessage("抢单成功");
             }
@@ -312,11 +307,12 @@ public class RobService {
 
     /**
      * 放弃
+     *
      * @param
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse upDateAlready(String houseId,String alreadyId) {
+    public ServerResponse upDateAlready(String houseId, String alreadyId) {
         try {
             Map<String, Object> map = new HashMap<>();
             if (!CommonUtil.isEmpty(houseId)) {
@@ -347,14 +343,13 @@ public class RobService {
                                             Integer phaseStatus,
                                             String stage) {
 
-        if(CommonUtil.isEmpty(clueId)){
+        if (CommonUtil.isEmpty(clueId)) {
             return ServerResponse.createByErrorMessage("线索不能为空");
         }
         //获取图片url
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
 
         Clue clue = clueMapper.selectByPrimaryKey(clueId);
-
 
 
         Object object = constructionService.getAccessToken(userToken);
@@ -379,8 +374,8 @@ public class RobService {
             if (!CommonUtil.isEmpty(memberId)) {
                 map.put("memberId", memberId);
             }
-            map.put("userId", clue.getCusService());
-            if(clue != null){
+            if (clue != null) {
+                map.put("userId", clue.getCusService());
                 map.put("stage", clue.getStage());
             }
             map.put("phaseStatus", phaseStatus);
@@ -390,7 +385,7 @@ public class RobService {
 
             if (!CommonUtil.isEmpty(robInfoDTO)) {
                 robArrInFoDTO.setAlreadyId(
-                        djAlreadyRobSingle.size()> 0 ?djAlreadyRobSingle.get(0).getId():null);
+                        djAlreadyRobSingle.size() > 0 ? djAlreadyRobSingle.get(0).getId() : null);
                 robArrInFoDTO.setOwerName(robInfoDTO.get(0).getOwerName());
                 robArrInFoDTO.setPhone(robInfoDTO.get(0).getPhone());
                 robArrInFoDTO.setCompletedDate(robInfoDTO.get(0).getCompletedDate());
@@ -402,7 +397,7 @@ public class RobService {
                 robArrInFoDTO.setMcId(robInfoDTO.get(0).getMcId());
                 robArrInFoDTO.setPhaseStatus(robInfoDTO.get(0).getPhaseStatus());
                 robArrInFoDTO.setIsRobStats(robInfoDTO.get(0).getIsRobStats());
-                if(robInfoDTO.get(0).getHouseCreateDate() != null){
+                if (robInfoDTO.get(0).getHouseCreateDate() != null) {
                     robArrInFoDTO.setHouseCreateDate(robInfoDTO.get(0).getHouseCreateDate());
                 }
                 robArrInFoDTO.setCreateDate(robInfoDTO.get(0).getCreateDate());
@@ -411,7 +406,7 @@ public class RobService {
                 robArrInFoDTO.setDrawings(robInfoDTO.get(0).getDrawings());
                 Member member = iMemberMapper.selectByPrimaryKey(robInfoDTO.get(0).getMemberId());
 
-                if(null != member.getNickName()){
+                if (null != member.getNickName()) {
                     robArrInFoDTO.setNickName(member.getNickName());
                     robArrInFoDTO.setPhone(member.getMobile());
                     robArrInFoDTO.setMCreateDate(member.getCreateDate());
@@ -422,9 +417,9 @@ public class RobService {
                 robArrInFoDTO.setIntentionHouseList(intentionHouseList);
             }
 
-            List<UserAchievementDTO> uadto= new ArrayList<>();
-            Map<String,Object> parmMap= new HashMap<>();
-            List<String> houseIds=new ArrayList<>();
+            List<UserAchievementDTO> uadto = new ArrayList<>();
+            Map<String, Object> parmMap = new HashMap<>();
+            List<String> houseIds = new ArrayList<>();
             if (!CommonUtil.isEmpty(robInfoDTO)) {
                 for (RobInfoDTO to : robInfoDTO) {
                     //查询大管家信息
@@ -433,17 +428,11 @@ public class RobService {
                         if (null != workerTypeDTO) {
                             workerTypeDTO.setHead(imageAddress + workerTypeDTO.getHead());
                             List<WorkerTypeDTO> wtd = iMemberLabelMapper.queryType(to.getHouseId());
-                            logger.info("wtd=============================="+ wtd);
-                            logger.info("wtd.get(0).getType()=============================="+ wtd.get(0).getType());
-                            logger.info("wtd.get(0).getWorkerTypeId()=============================="+ wtd.get(0).getWorkerTypeId());
-                            logger.info("wtd.get(0).getWorkSteta()=============================="+ wtd.get(0).getWorkSteta());
-                            logger.info("wtd.get(1).getType()=============================="+ wtd.get(1).getType());
-                            logger.info("wtd.get(1).getWorkSteta()=============================="+ wtd.get(1).getWorkSteta());
-                            if(wtd.size() > 0){
+                            if (wtd.size() > 0) {
                                 workerTypeDTO.setWorkerTypeId(wtd.get(0).getWorkerTypeId());
                                 workerTypeDTO.setType(wtd.get(0).getType());
                                 workerTypeDTO.setWorkSteta(wtd.get(0).getWorkSteta());
-                                if(wtd.get(0).getWorkSteta().equals("0")){
+                                if (wtd.get(0).getWorkSteta().equals("0")) {
                                     workerTypeDTO.setType(3);
                                 }
                             }
@@ -459,9 +448,7 @@ public class RobService {
 
                     //查询房子类型
                     List<HouseAddress> houseAddress = iHouseAddressMapper.selectByExample(example1);
-                    logger.info("查询房子类型===================************"+houseAddress.size());
-                    if(houseAddress.size() > 0){
-                        logger.info("查询房子类型==================="+houseAddress.get(0).getHouseType());
+                    if (houseAddress.size() > 0) {
                         to.setMcHouseType(houseAddress.get(0).getHouseType());
                     }
 
@@ -472,41 +459,30 @@ public class RobService {
                     }
 
                     //改小区名称
-                    if(CommonUtil.isEmpty(to.getResidential())){
+                    if (CommonUtil.isEmpty(to.getResidential())) {
                         ServerResponse serverResponse = houseService.getHouseAddress("houseId");
                         if (serverResponse.isSuccess()) {
                             HouseAddress address = (HouseAddress) serverResponse.getResultObj();
-                            if(!CommonUtil.isEmpty(address.getName())){
+                            if (!CommonUtil.isEmpty(address.getName())) {
                                 to.setResidential(address.getName());
                             }
                         }
                     }
-
-                    logger.info("userId================="+to.getCusService());
-                    parmMap.put("userId",to.getCusService());
-
-                    logger.info("userId================="+to.getHouseId());
-                    if(!CommonUtil.isEmpty(to.getHouseId())){
-                        logger.info("111111111111111111111"+to.getHouseId());
+                    parmMap.put("userId", to.getCusService());
+                    if (!CommonUtil.isEmpty(to.getHouseId())) {
                         houseIds.add(to.getHouseId());
-                        logger.info("houseIds================="+houseIds);
-                        parmMap.put("houseIds",houseIds);
-                        logger.info("parmMap================="+parmMap);
+                        parmMap.put("houseIds", houseIds);
                         //查询业绩
                         List<UserAchievementDTO> userAchievementDTOS = clueMapper.queryUserAchievementInFo(parmMap);
-                        logger.info("userAchievementDTOS================="+userAchievementDTOS);
-                        logger.info("userAchievementDTOS================="+userAchievementDTOS.size());
-                        if(null != userAchievementDTOS && !userAchievementDTOS.isEmpty()){
-                            logger.info("userAchievementDTOS================="+userAchievementDTOS.size());
+                        if (null != userAchievementDTOS && !userAchievementDTOS.isEmpty()) {
                             for (UserAchievementDTO userAchievementDTO : userAchievementDTOS) {
-                                if(null !=userAchievementDTO){
-                                    userAchievementDTO.setHead(imageAddress+userAchievementDTO.getHead());
-                                    if(userAchievementDTO.getDataStatus() == 1){
+                                if (null != userAchievementDTO) {
+                                    userAchievementDTO.setHead(imageAddress + userAchievementDTO.getHead());
+                                    if (userAchievementDTO.getDataStatus() == 1) {
                                         userAchievementDTO.setMonthRoyaltys(0);
                                         userAchievementDTO.setMeterRoyaltys(0);
                                         userAchievementDTO.setArrRoyalty(0);
                                     }
-
                                 }
                             }
                             uadto.addAll(userAchievementDTOS);
@@ -577,6 +553,7 @@ public class RobService {
         }
 
     }
+
     private static Logger logger = LoggerFactory.getLogger(RedisSessionDAO.class);
 
 
@@ -684,10 +661,10 @@ public class RobService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse addDescribes(CustomerRecDTO customerRecDTO,String userToken) {
+    public ServerResponse addDescribes(CustomerRecDTO customerRecDTO, String userToken) {
         try {
 
-            AccessToken accessToken =null;
+            AccessToken accessToken = null;
             if (!CommonUtil.isEmpty(userToken)) {
                 Object object = constructionService.getAccessToken(userToken);
                 if (object instanceof ServerResponse) {
@@ -702,23 +679,23 @@ public class RobService {
             if (!CommonUtil.isEmpty(customerRecDTO)) {
                 // 线索阶段新增沟通记录
                 ClueTalk clueTalk = new ClueTalk();
-                if(accessToken != null){
+                if (accessToken != null) {
                     clueTalk.setUserId(accessToken.getUserId());
                 }
-                if(CommonUtil.isEmpty(customerRecDTO.getRemindTime())){
+                if (CommonUtil.isEmpty(customerRecDTO.getRemindTime())) {
                     clueTalk.setRemindTime(null);
-                }else{
+                } else {
                     clueTalk.setRemindTime(customerRecDTO.getRemindTime());
                 }
 
-                if(null != customerRecDTO.getMemberId()){
+                if (null != customerRecDTO.getMemberId()) {
                     clueTalk.setMemberId(customerRecDTO.getMemberId());
                 }
                 clueTalk.setClueId(customerRecDTO.getClueId());
                 clueTalk.setTalkContent(customerRecDTO.getDescribes());
                 clueTalk.setDataStatus(0);
                 clueTalkMapper.insert(clueTalk);
-                Clue clue=new Clue();
+                Clue clue = new Clue();
                 clue.setId(customerRecDTO.getClueId());
                 clue.setCreateDate(null);
                 clue.setTimeSequencing(clueTalk.getCreateDate());
@@ -735,9 +712,10 @@ public class RobService {
 
     /**
      * 查询今天提醒的沟通记录
+     *
      * @return
      */
-    public List<ClueTalkDTO> getTodayDescribes(){
+    public List<ClueTalkDTO> getTodayDescribes() {
         return clueTalkMapper.getTodayDescribes(DateUtil.dateToString(new Date(), DateUtil.FORMAT11));
     }
 
@@ -764,11 +742,11 @@ public class RobService {
      * @param clue
      * @return
      */
-    public ServerResponse upDateCustomerInfo(Clue clue,Integer phaseStatus,String memberId) {
+    public ServerResponse upDateCustomerInfo(Clue clue, Integer phaseStatus, String memberId) {
         try {
             Member member = new Member();
             if (!CommonUtil.isEmpty(clue)) {
-                if(phaseStatus == 1){
+                if (phaseStatus == 1) {
                     member.setNickName(clue.getOwername());
                     member.setRemarks(clue.getRemark());
                     member.setCreateDate(null);
@@ -841,55 +819,48 @@ public class RobService {
 
     @Autowired
     private DjOrderSurfaceMapper djOrderSurfaceMapper;
+
     /**
      * 未录入抢单
+     *
      * @return
      */
     public ServerResponse notEnteredGrabSheet() {
         List<GrabSheetDTO> grabSheetDTOS = clueMapper.notEnteredGrabSheet();
-        logger.info("grabSheetDTOS==================================="+grabSheetDTOS);
-        logger.info("grabSheetDTOS.size()==================================="+grabSheetDTOS.size());
-        if(grabSheetDTOS.size()>0) {
+        if (grabSheetDTOS.size() > 0) {
             for (GrabSheetDTO grabSheetDTO : grabSheetDTOS) {
-                Example example=new Example(DjOrderSurface.class);
-                example.createCriteria().andEqualTo(DjOrderSurface.CLUE_ID,grabSheetDTO.getClueId())
-                        .andEqualTo(DjOrderSurface.DATA_STATUS,0);
+                Example example = new Example(DjOrderSurface.class);
+                example.createCriteria().andEqualTo(DjOrderSurface.CLUE_ID, grabSheetDTO.getClueId())
+                        .andEqualTo(DjOrderSurface.DATA_STATUS, 0);
                 List<DjOrderSurface> djOrderSurfaces = djOrderSurfaceMapper.selectByExample(example);
-                List<OrderStoreDTO> orderStore = iStoreMapper.getOrderStore(grabSheetDTO.getLatitude(), grabSheetDTO.getLongitude(),djOrderSurfaces);
+                List<OrderStoreDTO> orderStore = iStoreMapper.getOrderStore(grabSheetDTO.getLatitude(), grabSheetDTO.getLongitude(), djOrderSurfaces);
 
-                if(djOrderSurfaces.size()<=1){
-                    djOrderSurfaces=null;
+                if (djOrderSurfaces.size() <= 1) {
+                    djOrderSurfaces = null;
                 }
                 List<DjRobSingle> djRobSingles = djRobSingleMapper.getRobDate(djOrderSurfaces);
-                if(djRobSingles.size() > orderStore.size()){
-                    logger.info("11111==================================="+orderStore);
+                if (djRobSingles.size() > orderStore.size()) {
                     for (int i = 0; i < orderStore.size(); i++) {
                         orderStore.get(i).setRobDate(djRobSingles.get(i).getRobDate());
                         orderStore.get(i).setRobDateId(djRobSingles.get(i).getId());
                     }
-                }else{
-                    logger.info("22222==================================="+orderStore);
+                } else {
                     for (int i = 0; i < djRobSingles.size(); i++) {
                         orderStore.get(i).setRobDate(djRobSingles.get(i).getRobDate());
                         orderStore.get(i).setRobDateId(djRobSingles.get(i).getId());
                     }
                 }
-
-                logger.info("orderStore==================================="+orderStore);
-                logger.info("orderStore.size()==================================="+orderStore.size());
                 for (OrderStoreDTO orderStoreDTO : orderStore) {
-                    if(!CommonUtil.isEmpty(orderStoreDTO.getRobDate())) {
+                    if (!CommonUtil.isEmpty(orderStoreDTO.getRobDate())) {
                         if (((System.currentTimeMillis() - grabSheetDTO.getModifyDate().getTime()) / 60 / 1000)
-                                > (Integer.parseInt(orderStoreDTO.getRobDate())-1)) {
-                            logger.info("11111111111111111111===================================" + orderStoreDTO.getStoreId());
-                            logger.info("11111111111111111111===================================" + grabSheetDTO.getMemberId());
+                                > (Integer.parseInt(orderStoreDTO.getRobDate()) - 1)) {
                             DjOrderSurface djOrderSurface = new DjOrderSurface();
                             djOrderSurface.setDataStatus(0);
                             djOrderSurface.setStoreId(orderStoreDTO.getStoreId());
                             djOrderSurface.setClueId(grabSheetDTO.getClueId());
                             djOrderSurface.setRobDateId(orderStoreDTO.getRobDateId());
                             djOrderSurfaceMapper.insert(djOrderSurface);
-                            clueMapper.setDistribution(orderStoreDTO.getStoreId(), grabSheetDTO.getMemberId(),new Date());
+                            clueMapper.setDistribution(orderStoreDTO.getStoreId(), grabSheetDTO.getMemberId(), new Date());
                             break;
                         }
                     }
@@ -902,6 +873,7 @@ public class RobService {
 
     /**
      * 新增配置时间
+     *
      * @param djRobSingle
      * @return
      */
@@ -921,6 +893,7 @@ public class RobService {
 
     /**
      * 修改配置时间
+     *
      * @param djRobSingle
      * @return
      */
@@ -941,6 +914,7 @@ public class RobService {
 
     /**
      * 删除配置时间
+     *
      * @param djRobSingle
      * @return
      */
@@ -960,12 +934,13 @@ public class RobService {
 
     /**
      * 查询配置时间
+     *
      * @param pageDTO
      * @return
      */
-    public ServerResponse queryDjRobSingle(PageDTO pageDTO){
+    public ServerResponse queryDjRobSingle(PageDTO pageDTO) {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        Example example=new Example(DjRobSingle.class);
+        Example example = new Example(DjRobSingle.class);
         example.orderBy(DjRobSingle.CREATE_DATE).asc();
         List<DjRobSingle> djRobSingles = djRobSingleMapper.selectByExample(example);
         if (djRobSingles.size() <= 0) {

@@ -4,7 +4,6 @@ import com.dangjia.acg.api.product.BasicsGoodsCategoryAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.modle.product.BasicsGoodsCategory;
 import com.dangjia.acg.service.basics.AttributeService;
 import com.dangjia.acg.service.product.BasicsGoodsCategoryService;
 import com.github.pagehelper.PageInfo;
@@ -37,7 +36,7 @@ public class BasicsGoodsCategoryController implements BasicsGoodsCategoryAPI {
      */
     @Override
     @ApiMethod
-    public BasicsGoodsCategory getBasicsGoodsCategory(String cityId, String categoryId) {
+    public ServerResponse getBasicsGoodsCategory(String cityId, String categoryId) {
         return basicsGoodsCategoryService.getBasicsGoodsCategory(categoryId);
     }
 
@@ -197,5 +196,32 @@ public class BasicsGoodsCategoryController implements BasicsGoodsCategoryAPI {
     @ApiMethod
     public ServerResponse queryGoodsCategoryTwo(HttpServletRequest request) {
         return basicsGoodsCategoryService.queryGoodsCategoryTwo();
+    }
+
+    /**
+     * 查询所有品牌
+     *
+     * @throws
+     * @Title: queryBrand
+     * @param: @return
+     * @return: JsonResult
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryBrand(HttpServletRequest request) {
+
+        return basicsGoodsCategoryService.queryBrand();
+    }
+
+    /**
+     * 查询分类下的所有品牌
+     * @param request
+     * @param categoryId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryBrandByCategoryId(HttpServletRequest request, String categoryId){
+        return basicsGoodsCategoryService.queryBrandByCategoryId(categoryId);
     }
 }

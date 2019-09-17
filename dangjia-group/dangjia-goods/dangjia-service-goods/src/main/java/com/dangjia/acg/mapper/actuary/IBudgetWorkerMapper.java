@@ -57,4 +57,7 @@ public interface IBudgetWorkerMapper extends Mapper<BudgetWorker> {
 
 	/*更新人工商品名称及属性*/
 	void updateBudgetMaterialById(@Param("id") String id);
+
+	/*更新人工商品名称及属性(商品3.0改版后的关联)*/
+	void updateBudgetMaterialByProductId(@Param("id") String id);
 }

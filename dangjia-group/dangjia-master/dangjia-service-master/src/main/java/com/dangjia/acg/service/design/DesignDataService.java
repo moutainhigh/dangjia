@@ -11,7 +11,6 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.design.DesignListDTO;
 import com.dangjia.acg.dto.design.QuantityRoomDTO;
 import com.dangjia.acg.dto.house.DesignDTO;
-import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
 import com.dangjia.acg.mapper.design.IDesignBusinessOrderMapper;
 import com.dangjia.acg.mapper.design.IPayConfigurationMapper;
 import com.dangjia.acg.mapper.design.IQuantityRoomImagesMapper;
@@ -19,7 +18,6 @@ import com.dangjia.acg.mapper.design.IQuantityRoomMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
-import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.design.DesignBusinessOrder;
 import com.dangjia.acg.modle.design.PayConfiguration;
 import com.dangjia.acg.modle.design.QuantityRoomImages;
@@ -63,8 +61,6 @@ public class DesignDataService {
     private IMemberMapper memberMapper;
     @Autowired
     private UserMapper userMapper;
-    @Autowired
-    private IHouseWorkerMapper houseWorkerMapper;
     @Autowired
     private IPayConfigurationMapper payConfigurationMapper;
     @Autowired
@@ -440,7 +436,8 @@ public class DesignDataService {
         String[] fieldBudgetNames=new String[]{"grabOrders", "payment", "uploadActuarial", "confirmActuarial", "construction", "end"};
         //"抢单数","业主支付数","量房数","已上传平面图数","确认平面图数","已上传施工图数","确认施工图数","进入精算数","提前结束数"
         String[] fieldDesignNames=new String[]{
-                "grabOrders", "payment", "measuringRoom", "uploadPlan", "confirmPlan", "uploadConstruction", "confirmConstruction", "sctuarialFigure", "end"};
+                "grabOrders", "payment", "measuringRoom", "uploadPlan", "confirmPlan", "uploadConstruction",
+                "confirmConstruction", "sctuarialFigure", "end"};
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<Member> memberList = memberMapper.artisanList(cityId, null, workerTypeId, null, "2");
         List<Map> memberMapList =new ArrayList<>();

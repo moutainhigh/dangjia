@@ -1,6 +1,5 @@
 package com.dangjia.acg.service.sale.achievement;
 
-import com.dangjia.acg.auth.config.RedisSessionDAO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
@@ -14,8 +13,6 @@ import com.dangjia.acg.modle.sale.royalty.DjAreaMatch;
 import com.dangjia.acg.modle.store.Store;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.sale.SaleService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -42,7 +39,6 @@ public class AchievementService {
     private ResidentialRangeMapper residentialRangeMapper;
     @Autowired
     private DjAreaMatchMapper djAreaMatchMapper;
-    private static Logger logger = LoggerFactory.getLogger(RedisSessionDAO.class);
     /**
      * 根据月份 查询店长业绩
      * @param storeId
@@ -50,10 +46,6 @@ public class AchievementService {
      * @return
      */
     public ServerResponse queryLeaderAchievementData(String userToken,String storeId ,Date time){
-        logger.info("userToken==================="+ userToken);
-
-
-
         Object object = constructionService.getAccessToken(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -72,24 +64,10 @@ public class AchievementService {
         if (!CommonUtil.isEmpty(time)) {
             map.put("time",DateUtil.dateToString(time, DateUtil.FORMAT));
         }
-
-
-        logger.info("店长id   storeId==================="+storeId);
-
-        logger.info("店长id   store.getId()==============="+ store.getId());
-
         map.put("storeId",store.getId());
-
-
         AchievementDataDTO achievementDataDTO = new AchievementDataDTO();
-
         List<AchievementInfoDTO> achievementInfoDTOS = achievementMapper.queryRoyaltyMatch(map);
-
         List<AchievementInfoDTO> list = achievementMapper.queryMonthRoyalty(map);
-        logger.info("achievementInfoDTOS==============="+ achievementInfoDTOS);
-        logger.info("list==============="+ list);
-        logger.info("achievementInfoDTOS==============="+ achievementInfoDTOS.size());
-        logger.info("list==============="+ list.size());
         for (int i = 0; i < achievementInfoDTOS.size(); i++) {
             if(achievementInfoDTOS.get(i).getDataStatus() == 0){
                 for(int j = 0; j < list.size(); j++){
@@ -101,7 +79,6 @@ public class AchievementService {
                         }
                     }
                 }
-
             }else{
                 achievementInfoDTOS.get(i).setMonthRoyalty(0);
                 achievementInfoDTOS.get(i).setMeterRoyalty(0);

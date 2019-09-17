@@ -54,14 +54,15 @@
         <include refid="all_columns"/>
         FROM dj_member w
         INNER JOIN dj_member_info mi on mi.member_id = w.id and mi.policy_id='2'
-        INNER JOIN ( SELECT c.member_id, GROUP_CONCAT( c.city_id ) city_id FROM dj_member_city c GROUP BY c.member_id ) mt ON mt.member_id = w.id
+        INNER JOIN ( SELECT c.member_id, GROUP_CONCAT( c.city_id ) city_id FROM dj_member_city c GROUP BY c.member_id )
+        mt ON mt.member_id = w.id
         AND FIND_IN_SET(#{cityId}, mt.city_id )
         WHERE w.data_status = 0
         <if test="name!=null and name!=''">
             and(
-              w.name LIKE CONCAT('%',#{name},'%')
-              or
-              w.mobile LIKE CONCAT('%',#{name},'%')
+            w.name LIKE CONCAT('%',#{name},'%')
+            or
+            w.mobile LIKE CONCAT('%',#{name},'%')
             )
         </if>
         <if test="workerTypeId!=null and workerTypeId!=''">
@@ -244,7 +245,7 @@
     </select>
 
     <select id="getBudgetStatisticsNum" resultType="int">
-        SELECT  COUNT(o.id) FROM  `dj_core_house_worker` o
+        SELECT COUNT(o.id) FROM `dj_core_house_worker` o
         <if test="type==1">
             INNER JOIN dj_house h ON h.id = o.house_id
             WHERE
@@ -266,7 +267,7 @@
         </if>
         <if test="type==3">
             INNER JOIN dj_house h ON h.id = o.house_id
-            AND h.budget_ok = 2
+            AND h.budget_ok in (2,3,4)
             WHERE
             o.worker_id = #{workerId}
             AND o.work_type = 6
@@ -277,6 +278,7 @@
         <if test="type==4">
             INNER JOIN dj_house h ON h.id = o.house_id
             AND h.budget_ok = 3
+            AND h.visit_state != 4
             WHERE
             o.worker_id = #{workerId}
             AND o.work_type = 6
@@ -288,6 +290,7 @@
             INNER JOIN dj_house h ON h.id = o.house_id
             AND h.budget_ok = 3
             AND h.construction_date IS NOT NULL
+            AND h.visit_state != 4
             WHERE
             o.worker_id = #{workerId}
             AND o.work_type = 6
@@ -308,7 +311,7 @@
         </if>
     </select>
     <select id="getDesignStatisticsNum" resultType="int">
-        SELECT  COUNT(o.id) FROM  `dj_core_house_worker` o
+        SELECT COUNT(o.id) FROM `dj_core_house_worker` o
         <if test="type==1">
             INNER JOIN dj_house h ON h.id = o.house_id
             WHERE
@@ -329,17 +332,33 @@
             </if>
         </if>
         <if test="type==3">
-            INNER JOIN `dj_design_quantity_room` h ON h.house_id = o.house_id
-            AND h.type = 0
+            INNER JOIN ( SELECT
+            h.id, r.create_date
+            FROM
+            dj_house h
+            INNER JOIN dj_design_quantity_room r ON r.house_id = h.id
+            WHERE
+            r.type = 0
+            AND h.designer_ok IN ( 9, 5, 6, 7, 2, 8, 3 )
+            GROUP BY h.id
+            ) h ON h.id = o.house_id
             WHERE
             o.worker_id = #{workerId}
             <if test="startDate!=null and endDate!=null and startDate!='' and endDate!=''">
-                and o.create_date BETWEEN #{startDate} and #{endDate}
+                and h.create_date BETWEEN #{startDate} and #{endDate}
             </if>
         </if>
         <if test="type==4">
-            INNER JOIN `dj_design_quantity_room` h ON h.house_id = o.house_id
-            AND h.type = 1
+            INNER JOIN ( SELECT
+            h.id, r.create_date
+            FROM
+            dj_house h
+            INNER JOIN dj_design_quantity_room r ON r.house_id = h.id
+            WHERE
+            r.type = 1
+            AND h.designer_ok IN (5, 6, 7, 2, 8, 3 )
+            GROUP BY h.id
+            ) h ON h.id = o.house_id
             WHERE
             o.worker_id = #{workerId}
             <if test="startDate!=null and endDate!=null and startDate!='' and endDate!=''">
@@ -347,19 +366,33 @@
             </if>
         </if>
         <if test="type==5">
-            INNER JOIN `dj_design_quantity_room` r ON r.house_id = o.house_id
-            AND r.type = 1
-            INNER JOIN dj_house h ON h.id = o.house_id
-            AND h.designer_ok IN (2, 3, 7, 8)
+            INNER JOIN ( SELECT
+            h.id, r.create_date
+            FROM
+            dj_house h
+            INNER JOIN dj_design_quantity_room r ON r.house_id = h.id
+            WHERE
+            r.type = 1
+            AND h.designer_ok IN (7, 2, 8, 3 )
+            GROUP BY h.id
+            ) h ON h.id = o.house_id
             WHERE
             o.worker_id = #{workerId}
             <if test="startDate!=null and endDate!=null and startDate!='' and endDate!=''">
-                and r.create_date BETWEEN #{startDate} and #{endDate}
+                and h.create_date BETWEEN #{startDate} and #{endDate}
             </if>
         </if>
         <if test="type==6">
-            INNER JOIN `dj_design_quantity_room` h ON h.house_id = o.house_id
-            AND h.type = 2
+            INNER JOIN ( SELECT
+            h.id, r.create_date
+            FROM
+            dj_house h
+            INNER JOIN dj_design_quantity_room r ON r.house_id = h.id
+            WHERE
+            r.type = 2
+            AND h.designer_ok IN (2, 8, 3 )
+            GROUP BY h.id
+            ) h ON h.id = o.house_id
             WHERE
             o.worker_id = #{workerId}
             <if test="startDate!=null and endDate!=null and startDate!='' and endDate!=''">
@@ -367,19 +400,26 @@
             </if>
         </if>
         <if test="type==7">
-            INNER JOIN `dj_design_quantity_room` r ON r.house_id = o.house_id
-            AND r.type = 2
-            INNER JOIN dj_house h ON h.id = o.house_id
-            AND h.designer_ok = 3
+            INNER JOIN ( SELECT
+            h.id, r.create_date
+            FROM
+            dj_house h
+            INNER JOIN dj_design_quantity_room r ON r.house_id = h.id
+            WHERE
+            r.type = 2
+            AND h.designer_ok IN (3 )
+            GROUP BY h.id
+            ) h ON h.id = o.house_id
             WHERE
             o.worker_id = #{workerId}
             <if test="startDate!=null and endDate!=null and startDate!='' and endDate!=''">
-                and r.create_date BETWEEN #{startDate} and #{endDate}
+                and h.create_date BETWEEN #{startDate} and #{endDate}
             </if>
         </if>
         <if test="type==8">
             INNER JOIN dj_house h ON h.id = o.house_id
             AND h.budget_ok > 0
+            AND h.visit_state != 4
             WHERE
             o.worker_id = #{workerId}
             <if test="startDate!=null and endDate!=null and startDate!='' and endDate!=''">

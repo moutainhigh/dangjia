@@ -21,4 +21,19 @@
 		ORDER BY create_date desc
 	</select>
 
+    <!-- 查询绑定过的标签 -->
+    <select id="queryAPPCategoryLabel" resultType="com.dangjia.acg.modle.product.CategoryLabel">
+       SELECT
+            l.id,
+            l.name,
+            l.create_date AS createDate,
+            l.modify_date AS modifyDate
+        FROM
+            dj_baiscs_category_label l
+        INNER JOIN dj_basics_goods_category c on FIND_IN_SET(l.id,c.category_label_id)
+        GROUP BY l.id
+        ORDER BY
+            createDate DESC
+    </select>
+
 </mapper>
