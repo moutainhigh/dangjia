@@ -22,7 +22,7 @@ public interface ShopCartAPI {
 
     @PostMapping("/shopcart/add")
     @ApiOperation(value = "加入购物车", notes = "加入购物车")
-    ServerResponse add(@RequestParam("request") HttpServletRequest request, @RequestParam("userToken") String userToken,String productId,int num);
+    ServerResponse add(@RequestParam("request") HttpServletRequest request, @RequestParam("userToken") String userToken, String productId, int num);
 
 
     @PostMapping("/shopcart/getCartList")
@@ -32,16 +32,16 @@ public interface ShopCartAPI {
 
     @PostMapping("/shopcart/updateCartNum")
     @ApiOperation(value = "更新购物车数量", notes = "更新购物车数量")
-    ServerResponse updateCartNum(@RequestParam("request") HttpServletRequest request, @RequestParam("userToken") String userToken,String productId,int num);
+    ServerResponse updateCartNum(@RequestParam("request") HttpServletRequest request, @RequestParam("userToken") String userToken, String productId, int num);
 
     @PostMapping("/shopcart/checkAll")
     @ApiOperation(value = "全选购物车", notes = "全选购物车")
-    ServerResponse checkAll(@RequestParam("request") HttpServletRequest request, @RequestParam("userToken") String userToken,String checked);
+    ServerResponse checkAll(@RequestParam("request") HttpServletRequest request, @RequestParam("userToken") String userToken, String checked);
 
 
     @PostMapping("/shopcart/delCartProduct")
     @ApiOperation(value = "删除勾选商品", notes = "删除勾选商品")
-    ServerResponse delCartProduct(@RequestParam("request") HttpServletRequest request, @RequestParam("userToken") String userToken,String productId);
+    ServerResponse delCartProduct(@RequestParam("request") HttpServletRequest request, @RequestParam("userToken") String userToken, String productId);
 
     @PostMapping("/shopcart/delCart")
     @ApiOperation(value = "删除购物车", notes = "删除购物车")
