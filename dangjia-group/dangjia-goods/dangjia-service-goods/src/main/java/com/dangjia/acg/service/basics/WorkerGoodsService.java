@@ -76,7 +76,7 @@ public class WorkerGoodsService {
         return ServerResponse.createBySuccess("获取工价商品列表成功", pageResult);
     }*/
 
-    /*public WorkerGoodsDTO getWorkerGoodsDTO(String workerGoodsSn, String workerTypeId, String shopCount) {
+    public WorkerGoodsDTO getWorkerGoodsDTO(String workerGoodsSn, String workerTypeId, String shopCount) {
         Example example = new Example(WorkerGoods.class);
         example.createCriteria()
                 .andEqualTo(WorkerGoods.DATA_STATUS, '0')
@@ -95,7 +95,7 @@ public class WorkerGoodsService {
             workerGoodsDTO.setMsg("找不到该人工商品（" + workerGoodsSn + "）,请检查是否创建或者停用！");
         }
         return workerGoodsDTO;
-    }*/
+    }
 
     private String getImageAddress(String address, String image) {
         StringBuilder imgStr = new StringBuilder();

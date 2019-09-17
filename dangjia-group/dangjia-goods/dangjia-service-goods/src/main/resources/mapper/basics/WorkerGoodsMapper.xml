@@ -63,7 +63,7 @@
                 dj_basics_product p,dj_basics_product_worker p1
             WHERE p.id = p1.product_id
                 and p.data_status = 0
-                AND p1.show_goods = 1
+                AND p.maket = 1
                 AND image !='qrcode/moren.png'
                 AND p1.worker_dec !=''
                 AND p1.worker_dec is not null

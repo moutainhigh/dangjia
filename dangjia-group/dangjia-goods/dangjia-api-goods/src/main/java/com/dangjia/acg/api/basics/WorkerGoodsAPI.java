@@ -23,26 +23,26 @@ import javax.servlet.http.HttpServletRequest;
 @FeignClient("dangjia-service-goods")
 public interface WorkerGoodsAPI {
 
-    @PostMapping("/basics/workerGoods/getWorkerGoodses")
+    /*@PostMapping("/basics/workerGoods/getWorkerGoodses")
     @ApiOperation(value = "查询所有商品单位", notes = "查询所有商品单位")
     ServerResponse<PageInfo> getWorkerGoodses(@RequestParam("request") HttpServletRequest request,
                                               @RequestParam("pageDTO") PageDTO pageDTO,
                                               @RequestParam("istops") String istops,
                                               @RequestParam("workerTypeId") String workerTypeId,
                                               @RequestParam("searchKey") String searchKey,
-                                              @RequestParam("showGoods") String showGoods);
+                                              @RequestParam("showGoods") String showGoods);*/
 
 //    @PostMapping("/basics/workerGoods/setWorkerGoods")
 //    @ApiOperation(value = "新增或更新工价商品", notes = "新增或更新工价商品")
 //    ServerResponse setWorkerGoods(@RequestParam("request") HttpServletRequest request,@RequestParam("workerGoods")WorkerGoods workerGoods, @RequestParam("technologyIds")String technologyIds);
 
-    @PostMapping("/basics/workerGoods/setWorkerGoods")
+   /* @PostMapping("/basics/workerGoods/setWorkerGoods")
     @ApiOperation(value = "新增或更新工价商品", notes = "新增或更新工价商品")
     ServerResponse setWorkerGoods(@RequestParam("request") HttpServletRequest request,
                                   @RequestParam("workerGoods") WorkerGoods workerGoods,
                                   @RequestParam("technologyJsonList") String technologyJsonList,
                                   @RequestParam("deleteTechnologyIds") String deleteTechnologyIds);
-
+*/
     @PostMapping("/basics/workerGoods/getWorkertoCheck")
     @ApiOperation(value = "每工种未删除或已支付工钱", notes = "每工种未删除或已支付工钱")
     ServerResponse getWorkertoCheck(@RequestParam("cityId") String cityId,

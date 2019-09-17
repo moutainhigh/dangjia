@@ -9,6 +9,7 @@ import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.basics.WorkerGoods;
+import com.dangjia.acg.modle.product.DjBasicsProduct;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
 import com.dangjia.acg.service.data.ForMasterService;
@@ -79,9 +80,9 @@ public class ForMasterController implements ForMasterAPI {
     public String brandName(String cityId,String productId){
         return forMasterService.brandName(productId);
     }
-    @Override
+   @Override
     @ApiMethod
-    public WorkerGoods getWorkerGoods(String cityId,String workerGoodsId){
+    public DjBasicsProduct getWorkerGoods(String cityId, String workerGoodsId){
         return forMasterService.getWorkerGoods(workerGoodsId);
     }
 
