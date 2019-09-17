@@ -49,11 +49,6 @@ public class DjBasicsProductWorker extends BaseEntity {
     @ApiModelProperty("关联工种id")
     private String workerTypeId;//关联工种id
 
-    @Column(name = "show_goods")
-    @Desc(value = "是否展示")
-    @ApiModelProperty("是否展示")
-    private int showGoods;//是否展示
-
 
     @Column(name = "last_price")
     @Desc(value = "调后单价")

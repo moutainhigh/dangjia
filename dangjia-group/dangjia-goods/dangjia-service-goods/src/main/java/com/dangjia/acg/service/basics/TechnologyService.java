@@ -349,7 +349,7 @@ public class TechnologyService {
                 searchBoxMapper.insertSelective(serchBox);
             }
 
-            if (type == 2) {
+           /* if (type == 2) {
                 //根据内容模糊搜索人工
                 PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
                 List<WorkerGoods> wList = iWorkerGoodsMapper.queryByName(name, null);
@@ -363,7 +363,7 @@ public class TechnologyService {
                     object.put("url", url);//0:工艺；1：商品；2：人工
                     arr.add(object);
                 }
-            }else{
+            }else{*/
                 //根据内容模糊搜索商品
                 PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
                 List<Product> pList = iProductMapper.serchBoxName(name);
@@ -386,7 +386,7 @@ public class TechnologyService {
                     object.put("url", url);//0:工艺；1：商品；2：人工
                     arr.add(object);
                 }
-            }
+           // }
 
             pageResult.setList(arr);
         } catch (Exception e) {

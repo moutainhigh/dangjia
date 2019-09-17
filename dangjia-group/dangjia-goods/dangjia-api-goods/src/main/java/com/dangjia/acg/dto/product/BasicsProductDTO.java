@@ -36,7 +36,7 @@ public class BasicsProductDTO extends BaseEntity {
 
     private Integer type;//是否禁用0：禁用；1不禁用
 
-    private Integer maket;//是否上架0：不上架；1：上架
+    private Integer maket;//是否上架0：不上架（不展示）；1：上架（展示）
 
     private Double price;//销售价
 
@@ -89,7 +89,6 @@ public class BasicsProductDTO extends BaseEntity {
 
     private String workerStandard;//工艺标准
 
-    private Integer showGoods;//是否展示
 
     private Double lastPrice; //调后单价
 

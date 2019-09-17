@@ -1,89 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.dangjia.acg.mapper.basics.IWorkerGoodsMapper">
-    <sql id="Base_Column_List">
-        id,
-        name,
-        worker_goods_sn workerGoodsSn,
-        image,
-        unit_id unitId,
-        other_name otherName ,
-        unit_name unitName,
-        price,
-        sales,
-        istop,
-        work_explain workExplain,
-        worker_dec workerDec,
-        worker_standard workerStandard,
-        worker_type_id workerTypeId,
-        show_goods showGoods,
-        create_date createDate,
-        modify_date modifyDate,
-        last_price lastPrice,
-        last_time lastTime,
-        technology_ids technologyIds,
-        considerations,
-        calculate_content calculateContent,
-        build_content buildContent
-  </sql>
-
-
-
-    <select id="selectList" resultType="com.dangjia.acg.modle.basics.WorkerGoods" parameterType="java.lang.String">
-        SELECT
-        id,
-        name,
-        worker_goods_sn as workerGoodsSn,
-        image,
-        unit_id as unitId,
-        unit_name as unitName,
-        price,
-        istop,
-        other_name as otherName,
-        sales,
-        work_explain as workExplain,
-        worker_dec as workerDec,
-        worker_standard as workerStandard,
-        worker_type_id as workerTypeId,
-        show_goods as showGoods,
-        create_date as createDate,
-        modify_date as modifyDate,
-        last_price lastPrice,
-        last_time lastTime,
-        technology_ids technologyIds,
-        considerations,
-        calculate_content calculateContent,
-        build_content buildContent
-        from dj_basics_worker_goods
-        where data_status = 0
-        <if test="workerTypeId != null">
-            AND worker_type_id=#{workerTypeId}
-        </if>
-        <if test="searchKey != null">
-            AND (worker_goods_sn like CONCAT('%',#{searchKey},'%')
-            OR name like CONCAT('%',#{searchKey},'%')
-            OR other_name like CONCAT('%',#{searchKey},'%')
-            )
-        </if>
-
-        <if test="istops != null and istops !=''">
-            AND istop=#{istops}
-        </if>
-        <if test="showGoods != null">
-            AND show_goods=#{showGoods}
-        </if>
-        ORDER BY istop DESC,create_date desc
-    </select>
-    <select id="selectLists" resultType="com.dangjia.acg.modle.basics.WorkerGoods" parameterType="java.lang.String">
-        SELECT
-        <include refid="Base_Column_List"/>
-        from dj_basics_worker_goods
-        ORDER BY create_date desc
-    </select>
     <!--每工种未删除 或 已支付工钱-->
     <select id="getWorkertoCheck" resultType="java.lang.Double">
         select sum(wg.price*abw.shop_count)
-        from dj_basics_worker_goods wg,dj_actuary_budget_worker abw
+        from dj_basics_product wg,dj_actuary_budget_worker abw
         where wg.data_status = 0
         and wg.id = abw.worker_goods_id
         and abw.house_id=#{houseId}
@@ -94,174 +15,22 @@
     <!--从精算表查每工种已支付工钱-->
     <select id="getPayedWorker" resultType="java.lang.Double">
         select sum(wg.price*abw.shop_count)
-        from dj_basics_worker_goods wg,dj_actuary_budget_worker abw
+        from dj_basics_product wg,dj_actuary_budget_worker abw
         where wg.data_status = 0
         and wg.id = abw.worker_goods_id
         and abw.house_id=#{houseId}
         and abw.delete_state =3
         and abw.house_flow_id=#{houseFlowId}
     </select>
-    <!-- 根据名称模糊查询 -->
-    <select id="queryByName" resultType="com.dangjia.acg.modle.basics.WorkerGoods" parameterType="java.lang.String">
-        SELECT
-        id,
-        name,
-        worker_goods_sn as workerGoodsSn,
-        image,
-        unit_id as unitId,
-        unit_name as unitName,
-        price,
-        sales,
-        istop,
-        other_name as otherName,
-        work_explain as workExplain,
-        worker_dec as workerDec,
-        worker_standard as workerStandard,
-        worker_type_id as workerTypeId,
-        show_goods as showGoods,
-        create_date as createDate,
-        modify_date as modifyDate
-        from dj_basics_worker_goods
-        where data_status = 0 and show_goods=1
-        <if test="name!=null and workerTypeId!=''">
-            and
-            name LIKE CONCAT('%',#{name},'%')
-        </if>
-        <if test="workerTypeId!=null and workerTypeId!=''">
-            AND
-            w.worker_type_id =#{workerTypeId}
-        </if>
-        ORDER BY istop DESC,create_date desc
-    </select>
-
-    <!-- 根据商品编号查询 -->
-    <select id="selectByWorkerGoodsSn" resultType="com.dangjia.acg.modle.basics.WorkerGoods"
-            parameterType="java.lang.String">
-        SELECT
-        id,
-        name,
-        worker_goods_sn as workerGoodsSn,
-        image,
-        unit_id as unitId,
-        unit_name as unitName,
-        price,
-        istop,
-        other_name as otherName,
-        sales,
-        work_explain as workExplain,
-        worker_dec as workerDec,
-        worker_standard as workerStandard,
-        worker_type_id as workerTypeId,
-        show_goods as showGoods,
-        create_date as createDate,
-        modify_date as modifyDate
-        from dj_basics_worker_goods as w
-        where w.data_status = 0
-        <if test="workerGoodsSn!=null and workerGoodsSn!=''">
-            and
-            w.worker_goods_sn =#{workerGoodsSn}
-        </if>
-        <if test="workerTypeId!=null and workerTypeId!=''">
-            AND
-            w.worker_type_id =#{workerTypeId}
-        </if>
-        ORDER BY istop DESC,create_date desc
-    </select>
-
-    <!-- 根据名称查询 -->
-    <select id="selectByName" resultType="com.dangjia.acg.modle.basics.WorkerGoods" parameterType="java.lang.String">
-        SELECT
-        id,
-        name,
-        worker_goods_sn as workerGoodsSn,
-        image,
-        unit_id as unitId,
-        unit_name as unitName,
-        price,
-        istop,
-        other_name as otherName,
-        sales,
-        work_explain as workExplain,
-        worker_dec as workerDec,
-        worker_standard as workerStandard,
-        worker_type_id as workerTypeId,
-        show_goods as showGoods,
-        create_date as createDate,
-        modify_date as modifyDate
-        from dj_basics_worker_goods as w
-        where w.data_status = 0
-        <if test="name!=null and name!=''">
-            and
-            w.name =#{name}
-        </if>
-        <if test="workerTypeId!=null and workerTypeId!=''">
-            AND
-            w.worker_type_id =#{workerTypeId}
-        </if>
-        ORDER BY istop DESC,create_date desc
-    </select>
-
-    <!-- 根据id查询 -->
-    <select id="queryById" resultType="com.dangjia.acg.modle.basics.WorkerGoods" parameterType="java.lang.String">
-        SELECT
-        id,
-        name,
-        istop,
-        worker_goods_sn as workerGoodsSn,
-        image,
-        unit_id as unitId,
-        unit_name as unitName,
-        price,
-        other_name as otherName,
-        sales,
-        work_explain as workExplain,
-        worker_dec as workerDec,
-        worker_standard as workerStandard,
-        worker_type_id as workerTypeId,
-        show_goods as showGoods,
-        create_date as createDate,
-        modify_date as modifyDate
-        from dj_basics_worker_goods
-        where
-         id =#{id}
-        ORDER BY istop DESC,create_date desc
-    </select>
-
-    <!--补货查询精算内人工商品-->
-    <select id="queryRepairBudgetWorker" resultType="com.dangjia.acg.modle.basics.WorkerGoods">
-        select
-        w.id,
-        w.name,
-        w.worker_goods_sn as workerGoodsSn,
-        w.image,
-        w.unit_id as unitId,
-        w.unit_name as unitName,
-        w.price,
-        istop,
-        w.sales,
-        w.work_explain as workExplain,
-        w.worker_dec as workerDec,
-        w.worker_standard as workerStandard,
-        w.worker_type_id as workerTypeId,
-        w.show_goods as showGoods,
-        w.create_date as createDate,
-        w.modify_date as modifyDate
-        from dj_actuary_budget_worker abw ,dj_basics_worker_goods w
-        WHERE abw.worker_goods_id =w.id
-        and abw.delete_state!=1
-        and abw.steta=1
-        and abw.house_id =#{houseId}
-        <if test="name!=null and name!=''">
-            AND
-            abw.name LIKE CONCAT('%',#{name},'%')
-        </if>
-        <if test="workerTypeId!=null and workerTypeId!=''">
-            AND
-            w.worker_type_id =#{workerTypeId}
-        </if>
-    </select>
+    <!--更新单位-->
+    <update id="updateWorkerGoodsByUnitId" parameterType="java.lang.String">
+        update dj_basics_product
+        set unit_name=#{unitName}
+        where unit_id=#{unitId}
+    </update>
     <select id="getHomeProductList" resultType="com.dangjia.acg.modle.basics.HomeProductDTO">
-           ( SELECT
+
+( SELECT
             p.id AS id,
             p.image AS image,
             p.price AS price,
@@ -272,21 +41,18 @@
             FROM
                 dj_basics_product p
                 INNER JOIN dj_basics_goods g ON g.id = p.goods_id
-                INNER JOIN dj_basics_brand_series s ON s.id = p.brand_series_id
             WHERE
                 p.data_status = 0
                 AND p.type = 1
                 AND p.maket = 1
                 AND p.image !='qrcode/moren.png'
-                AND s.image !=''
-                AND s.image is not null
             ORDER BY
                 rand( )
                 LIMIT 6
                 ) UNION ALL
                 (
             SELECT
-                id AS id,
+                p.id AS id,
                 image AS image,
                 price AS price,
                 unit_name AS unitName,
@@ -294,24 +60,16 @@
                 1 AS type,
             NAME AS NAME
             FROM
-                dj_basics_worker_goods
-            WHERE
-                data_status = 0
-                AND show_goods = 1
+                dj_basics_product p,dj_basics_product_worker p1
+            WHERE p.id = p1.product_id
+                and p.data_status = 0
+                AND p.maket = 1
                 AND image !='qrcode/moren.png'
-                AND worker_dec !=''
-                AND worker_dec is not null
+                AND p1.worker_dec !=''
+                AND p1.worker_dec is not null
             ORDER BY
                 rand( )
                 LIMIT 6
                 )
     </select>
-
-
-    <!--更新单位-->
-    <update id="updateWorkerGoodsByUnitId" parameterType="java.lang.String">
-        update dj_basics_worker_goods
-        set unit_name=#{unitName}
-        where unit_id=#{unitId}
-    </update>
 </mapper>
