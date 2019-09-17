@@ -8,20 +8,20 @@
 
         SELECT
             id,
-            create_date,
-            modify_date,
-            product_id,
-            work_explain,
-            worker_dec,
-            worker_standard,
-            worker_type_id,
-            last_price,
-            last_time,
-            technology_ids,
+            create_date AS createDate,
+            modify_date as modifyDate,
+            product_id as productId,
+            work_explain as workExplain,
+            worker_dec as workerDec,
+            worker_standard as workerStandard,
+            worker_type_id as workerTypeId,
+            last_price as lastPrice,
+            last_time as lastTime,
+            technology_ids as technologyIds,
             considerations,
-            calculate_content,
-            build_content,
-            is_agency_purchase
+            calculate_content calculateContent,
+            build_content buildContent,
+            is_agency_purchase isAgencyPurchase
         FROM
             dj_basics_product_worker
         where data_status = 0

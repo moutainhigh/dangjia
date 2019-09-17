@@ -16,9 +16,12 @@ import com.dangjia.acg.dto.product.AppBasicsProductDTO;
 import com.dangjia.acg.dto.product.BasicsProductDTO;
 import com.dangjia.acg.dto.product.DjBasicsLabelDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
+import com.dangjia.acg.mapper.basics.IAttributeValueMapper;
 import com.dangjia.acg.mapper.basics.ITechnologyMapper;
 import com.dangjia.acg.mapper.basics.IUnitMapper;
 import com.dangjia.acg.mapper.product.*;
+import com.dangjia.acg.modle.attribute.AttributeValue;
+import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.product.*;
 import com.dangjia.acg.service.basics.TechnologyService;
@@ -78,6 +81,8 @@ public class DjBasicsProductService {
     private IUnitMapper iUnitMapper;
     @Autowired
     private ConfigUtil configUtil;
+    @Autowired
+    private IAttributeValueMapper iAttributeValueMapper;
     /**
      * 查询商品信息
      *
@@ -840,5 +845,210 @@ public class DjBasicsProductService {
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
+
+    /**
+     * 根据productid查询product对象
+     *
+     * @param id
+     * @return
+     */
+    public ServerResponse getProductById(String id) {
+        try {
+            DjBasicsProduct djBasicsProduct =djBasicsProductMapper.selectByPrimaryKey(id);
+            Map<String,Object> map = getProductDetailByProductId(djBasicsProduct);
+            return ServerResponse.createBySuccess("查询成功", map);
+        } catch (Exception e) {
+            LOG.error("查询失败：",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    /**
+     * 查询货品下暂存的商品信息
+     *
+     * @param goodsId
+     * @return
+     */
+    public ServerResponse getTemporaryStorageProductByGoodsId(String goodsId) {
+        try {
+            DjBasicsProduct djBasicsProduct =djBasicsProductMapper.queryTemporaryStorage(goodsId,"2");
+            Map<String,Object> map = new HashMap<String,Object>();
+            if(djBasicsProduct!=null&&StringUtils.isNotBlank(djBasicsProduct.getId())){
+               map = getProductDetailByProductId(djBasicsProduct);
+            }
+            return ServerResponse.createBySuccess("查询成功", map);
+        } catch (Exception e) {
+            LOG.error("查询失败：",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+
+    /**
+     * 根据商品ID查询对应的商品详情信息
+     * 1.材料或人工扩展信息
+     * 2.单位信息
+     * 3.工艺信息
+     * 4.属性信息
+     * @param djBasicsProduct
+     * @return
+     */
+    private Map<String, Object> getProductDetailByProductId(DjBasicsProduct djBasicsProduct){
+        String id=djBasicsProduct.getId();
+        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+        String[] imgArr = djBasicsProduct.getImage().split(",");
+        StringBuilder imgStr = new StringBuilder();
+        StringBuilder imgUrlStr = new StringBuilder();
+        StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
+        djBasicsProduct.setImage(imgStr.toString());
+        Map<String, Object> map = BeanUtils.beanToMap(djBasicsProduct);
+        map.put("imageUrl", imgUrlStr.toString());
+        //单位列表
+        List<Unit> linkUnitList = getlinkUnitListByGoodsUnitId(djBasicsProduct.getGoodsId());
+        //商品工艺信息
+        List<Map<String, Object>> tTechnologymMapList = getTechnologymMapList(id,address);
+        //根据商品查询材料商品扩展信息
+        DjBasicsProductMaterial djBasicsProductMaterial=djBasicsProductMaterialMapper.queryProductMaterialByProductId(id);
+        //根据商品查询人工商品扩展信息
+        DjBasicsProductWorker djBasicsProductWorker=djBasicsProductWorkerMapper.queryProductWorkerByProductId(id);
+        //材料商品信息
+        if(djBasicsProductMaterial!=null&&StringUtils.isNotBlank(djBasicsProductMaterial.getId())){//添加材料商品返加
+            if(StringUtils.isNotBlank(djBasicsProductMaterial.getDetailImage())){
+                imgArr = djBasicsProductMaterial.getDetailImage().split(",");
+                imgStr = new StringBuilder();
+                imgUrlStr = new StringBuilder();
+                StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
+                djBasicsProductMaterial.setDetailImage(imgStr.toString());
+            }
+            Map<String, Object> djBasicsProductMaterialMap = BeanUtils.beanToMap(djBasicsProductMaterial);
+            map.putAll(djBasicsProductMaterialMap);
+        }
+        //人工商品信息
+        if(djBasicsProductWorker!=null&&StringUtils.isNotBlank(djBasicsProductWorker.getId())){//添加人工商品返回
+            Map<String, Object> djBasicsProductWorkerMap = BeanUtils.beanToMap(djBasicsProductWorker);
+            map.putAll(djBasicsProductWorkerMap);
+        }
+        //商品属性值信息
+        String strNewValueNameArr = "";
+        if (djBasicsProductMaterial!=null&&StringUtils.isNotBlank(djBasicsProductMaterial.getValueIdArr())) {
+            strNewValueNameArr = getNewValueNameArr(djBasicsProductMaterial.getValueIdArr());
+        }
+        map.put("newValueNameArr", strNewValueNameArr);
+        map.put("tTechnologymMapList", tTechnologymMapList);
+        map.put("unitList",linkUnitList);
+        map.put("imageUrl",imgUrlStr.toString());
+        return map;
+    }
+
+    /**
+     * 获取对应的属性值信息
+     * @param valueIdArr
+     * @return
+     */
+    private String getNewValueNameArr(String valueIdArr){
+        String strNewValueNameArr = "";
+        String[] newValueNameArr = valueIdArr.split(",");
+        for (int i = 0; i < newValueNameArr.length; i++) {
+            String valueId = newValueNameArr[i];
+            if (StringUtils.isNotBlank(valueId)) {
+                AttributeValue attributeValue = iAttributeValueMapper.selectByPrimaryKey(valueId);
+                if(attributeValue!=null&&StringUtils.isNotBlank(attributeValue.getName())){
+                    if (i == 0) {
+                        strNewValueNameArr = attributeValue.getName();
+                    } else {
+                        strNewValueNameArr = strNewValueNameArr + "," + attributeValue.getName();
+                    }
+                }
+
+            }
+        }
+        return strNewValueNameArr;
+    }
+
+    /**
+     * 查询关联的换算单位
+     * @param goodsId
+     * @return
+     */
+    private List<Unit> getlinkUnitListByGoodsUnitId(String goodsId){
+        List<Unit> linkUnitList = new ArrayList<>();
+        BasicsGoods oldGoods = iBasicsGoodsMapper.selectByPrimaryKey(goodsId);
+        if(oldGoods!=null&&StringUtils.isNotBlank(oldGoods.getUnitId())){
+            Unit unit = iUnitMapper.selectByPrimaryKey(oldGoods.getUnitId());
+//            linkUnitList.add(unit);
+            if (unit!=null&&unit.getLinkUnitIdArr() != null) {
+                String[] linkUnitIdArr = unit.getLinkUnitIdArr().split(",");
+                for (String linkUnitId : linkUnitIdArr) {
+                    Unit linkUnit = iUnitMapper.selectByPrimaryKey(linkUnitId);
+                    linkUnitList.add(linkUnit);
+                }
+            }
+        }
+
+
+        return linkUnitList;
+    }
+
+    /**
+     * 查询对应工艺信息
+     * @param productId
+     * @return
+     */
+    private List<Map<String, Object>> getTechnologymMapList(String productId,String address){
+        List<Technology> pTechnologyList = iTechnologyMapper.queryTechnologyByWgId(productId);
+        List<Map<String, Object>> tTechnologymMapList = new ArrayList<>();
+        for (Technology t : pTechnologyList) {
+            if (t.getImage() == null) {
+                continue;
+            }
+            String[] imgArr = t.getImage().split(",");
+            StringBuilder imgStr = new StringBuilder();
+            StringBuilder imgUrlStr = new StringBuilder();
+            StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
+            t.setImage(imgUrlStr.toString());
+            Map<String, Object> techMap = BeanUtils.beanToMap(t);
+            techMap.put("imageUrl", imgStr.toString());
+            techMap.put("sampleImageUrl", address + t.getSampleImage());
+            tTechnologymMapList.add(techMap);
+        }
+        return tTechnologymMapList;
+    }
+
+
+    //根据类别Id查到所有所属货品goods
+    public ServerResponse getAllGoodsByCategoryId(String categoryId) {
+        try {
+            List<BasicsGoods> mapList = iBasicsGoodsMapper.queryByCategoryId(categoryId);
+            return ServerResponse.createBySuccess("查询成功", mapList);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    /**
+     * 根据货品ID查询商品
+     * @param goodsId
+     * @return
+     */
+    public ServerResponse getAllProductByGoodsId(String goodsId) {
+        try {
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            List<DjBasicsProduct> pList = djBasicsProductMapper.queryByGoodsId(goodsId);
+            List<Map<String, Object>> mapList = new ArrayList<>();
+            for (DjBasicsProduct p : pList) {
+                if (p.getImage() == null) {
+                    continue;
+                }
+                Map<String, Object> map = getProductDetailByProductId(p);
+                mapList.add(map);
+            }
+            return ServerResponse.createBySuccess("查询成功", mapList);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
 
 }

@@ -8,29 +8,30 @@
 
         SELECT
             id,
-            create_date,
-            modify_date,
-            product_id,
+            create_date AS createDate,
+            modify_date AS modifyDate,
+            product_id productId,
             weight,
             cost,
             profit,
-            value_name_arr,
-            convert_unit,
-            convert_quality,
-            value_id_arr,
-            attribute_id_arr,
-            is_influe_warranty_period,
-            max_warranty_period_year,
-            min_warranty_period_year,
-            marketing_name,
-            cartage_price,
-            detail_image,
-            guaranteed_policy,
-            refund_policy,
+            value_name_arr valueNameArr,
+            convert_unit convertUnit,
+            convert_quality convertQuality,
+            value_id_arr AS valueIdArr,
+            attribute_id_arr AS attributeIdArr,
+            is_influe_warranty_period AS isInflueWarrantyPeriod,
+            max_warranty_period_year AS maxWarrantyPeriodYear,
+            min_warranty_period_year AS minWarrantyPeriodYear,
+            marketing_name AS marketingName,
+            cartage_price cartagePrice,
+            detail_image detailImage,
+            guaranteed_policy guaranteedPolicy,
+            refund_policy refundPolicy,
             remark
         FROM
             dj_basics_product_material
-        where data_status = 0
+        WHERE
+            data_status = 0
         and product_id = #{productId}
     </select>
 

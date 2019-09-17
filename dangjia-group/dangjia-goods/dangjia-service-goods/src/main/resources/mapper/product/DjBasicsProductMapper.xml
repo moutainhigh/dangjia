@@ -151,6 +151,18 @@
         ORDER BY istop DESC,create_date desc
     </select>
 
+    <!-- 根据货品ID查询暂存的商品 -->
+    <select id="queryTemporaryStorage" resultType="com.dangjia.acg.modle.product.DjBasicsProduct">
+        SELECT
+        <include refid="new_columns"/>
+        FROM dj_basics_product
+        where goods_id=#{goodsId}
+        and  data_status=#{dataStatus}
+        ORDER BY istop DESC,create_date desc
+        limit 1
+    </select>
+
+
     <!-- 删除材料商品扩展表信息-->
     <delete id="deleteProductMaterial" parameterType="java.lang.String">
        delete from dj_basics_product_material  where product_id in(select id from dj_basics_product where goods_id=#{goodsId})

@@ -58,6 +58,9 @@ public interface DjBasicsProductMapper extends Mapper<DjBasicsProduct> {
     //根据商品Id查货品
     List<DjBasicsProduct> queryByGoodsId(@Param("goodsId") String goodsId);
 
+    //根据货品ID查询商品（暂存商品）
+    DjBasicsProduct queryTemporaryStorage(@Param("goodsId") String goodsId,@Param("dataStatus") String dataStatus);
+
     /**
      * 删除材料扩展表信息
      * @param goodsId 货品ID

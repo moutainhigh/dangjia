@@ -3,14 +3,11 @@ package com.dangjia.acg.service.product;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.dto.product.BasicsGoodsDTO;
 import com.dangjia.acg.mapper.product.DjBasicsGoodsMapper;
 import com.dangjia.acg.mapper.product.DjBasicsProductMapper;
 import com.dangjia.acg.mapper.product.IBasicsGoodsMapper;
 import com.dangjia.acg.modle.basics.Product;
-import com.dangjia.acg.modle.brand.Brand;
-import com.dangjia.acg.modle.brand.BrandSeries;
 import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProduct;
@@ -22,10 +19,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 
 /**
@@ -177,8 +172,8 @@ public class DjBasicsGoodsService {
     public ServerResponse getBasicsGoodsByGid(String goodsId) {
         try {
             BasicsGoods basicsGoods = iBasicsGoodsMapper.queryById(goodsId);
-            Map goodsMap= BeanUtils.beanToMap(basicsGoods);
-            return ServerResponse.createBySuccess("查询成功", goodsMap);
+           // Map goodsMap= BeanUtils.beanToMap(basicsGoods);
+            return ServerResponse.createBySuccess("查询成功", basicsGoods);
         } catch (Exception e) {
             LOG.error("getBasicsGoodsByGid查询失败：",e);
             return ServerResponse.createByErrorMessage("查询失败");
