@@ -38,19 +38,6 @@
             category_label_id categoryLabelId
 		FROM dj_basics_goods_category
 	</select>
-    <!-- 批量插入数据 -->
-    <insert id="insertBatch" parameterType="java.util.List">
-        insert into dj_basics_goods_category
-        (<include refid="all_columns"/>)
-        values
-        <foreach collection="list" item="goods" index="index" separator=",">
-            (
-            #{goods.id}, #{goods.name},#{goods.parent_id}, #{goods.parent_top},
-            #{goods.image},SYSDATE(),SYSDATE(),#{goods.is_last_category},#{goods.purchase_restrictions},#{goods.brand_ids},
-            #{goods.cover_image},#{goods.category_label_id}
-            )
-        </foreach>
-    </insert>
 
     <!-- 根据父id查询下属商品类别 -->
     <select id="queryCategoryByParentId" resultType="com.dangjia.acg.modle.product.BasicsGoodsCategory">
@@ -136,4 +123,6 @@
         ORDER BY
             c.sort DESC
 	</select>
+
+
 </mapper>

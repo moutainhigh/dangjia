@@ -44,4 +44,12 @@ public interface AppCategoryGoodsAPI {
                                         @RequestParam("brandVal") String brandVal,
                                         @RequestParam("orderKey") String orderKey);
 
+    @PostMapping("/app/category/brand/data")
+    @ApiOperation(value = " 第四部分：二级商品品牌筛选数据", notes = " 第四部分：二级商品品牌筛选数据")
+    ServerResponse queryBrandDatas(@RequestParam("cityId") String cityId,@RequestParam("categoryId") String categoryId);
+
+    @PostMapping("/app/category/attribute/data")
+    @ApiOperation(value = " 第四部分：二级商品规格筛选数据", notes = " 第四部分：二级商品规格筛选数据")
+    ServerResponse queryAttributeDatas(@RequestParam("cityId") String cityId,@RequestParam("categoryId") String categoryId);
+
 }

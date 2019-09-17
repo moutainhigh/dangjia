@@ -1,18 +1,12 @@
 package com.dangjia.acg.controller.product.app;
 
-import com.dangjia.acg.api.product.BasicsGoodsCategoryAPI;
 import com.dangjia.acg.api.product.app.AppCategoryGoodsAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.service.basics.AttributeService;
-import com.dangjia.acg.service.product.BasicsGoodsCategoryService;
 import com.dangjia.acg.service.product.app.AppCategoryGoodsService;
-import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * @类 名： AppCategoryGoodsController
@@ -55,5 +49,24 @@ public class AppCategoryGoodsController implements AppCategoryGoodsAPI {
     @ApiMethod
     public ServerResponse serchCategoryProduct(PageDTO pageDTO, String cityId, String categoryId,String name,String attributeVal, String brandVal,String orderKey){
         return appCategoryGoodsService.serchCategoryProduct( pageDTO,  cityId,  categoryId, name, attributeVal,  brandVal, orderKey);
+    }
+
+    /**
+     * 第四部分：二级商品品牌筛选数据
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryBrandDatas(String cityId,String categoryId) {
+        return appCategoryGoodsService.queryBrandDatas(categoryId);
+    }
+    /**
+     * 第四部分：二级商品规格筛选数据
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryAttributeDatas(String cityId,String categoryId) {
+        return appCategoryGoodsService.queryAttributeDatas(categoryId);
     }
 }
