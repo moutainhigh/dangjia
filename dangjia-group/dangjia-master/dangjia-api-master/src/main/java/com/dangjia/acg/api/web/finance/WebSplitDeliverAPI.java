@@ -78,7 +78,7 @@ public interface WebSplitDeliverAPI {
      */
     @PostMapping("web/finance/splitDeliver/Settlemen")
     @ApiOperation(value = "结算", notes = "结算")
-    ServerResponse Settlemen(@RequestParam("image") String image,
+    ServerResponse settlemen(@RequestParam("image") String image,
                              @RequestParam("merge") String merge,
                              @RequestParam("supplierId") String supplierId);
 
@@ -88,7 +88,7 @@ public interface WebSplitDeliverAPI {
      */
     @PostMapping("web/finance/splitDeliver/ClsdMendDeliverList")
     @ApiOperation(value = "已结算货单列表", notes = "已结算货单列表")
-    ServerResponse ClsdMendDeliverList(@RequestParam("shipAddress")String shipAddress,
+    ServerResponse clsdMendDeliverList(@RequestParam("shipAddress")String shipAddress,
                                        @RequestParam("beginDate") String beginDate,
                                        @RequestParam("endDate") String endDate,
                                        @RequestParam("supplierId") String supplierId);

@@ -57,14 +57,14 @@ public class WebSplitDeliverController implements WebSplitDeliverAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse Settlemen(String image, String merge, String supplierId) {
-        return webSplitDeliverService.Settlemen(image, merge, supplierId);
+    public ServerResponse settlemen(String image, String merge, String supplierId) {
+        return webSplitDeliverService.settlemen(image, merge, supplierId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse ClsdMendDeliverList(String shipAddress, String beginDate, String endDate, String supplierId) {
-        return webSplitDeliverService.ClsdMendDeliverList(shipAddress, beginDate, endDate, supplierId);
+    public ServerResponse clsdMendDeliverList(String shipAddress, String beginDate, String endDate, String supplierId) {
+        return webSplitDeliverService.clsdMendDeliverList(shipAddress, beginDate, endDate, supplierId);
     }
 
     @Override

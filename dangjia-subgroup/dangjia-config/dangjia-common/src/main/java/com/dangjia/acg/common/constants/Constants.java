@@ -36,6 +36,13 @@ public final class Constants {
    */
   public static final String REDIS_SHIRO_CACHE = "shiro-cache:";
 
+
+  /**
+   * 购物车前缀
+   */
+  public static final String REDIS_DANGJIA_CACHE = "dangjia-cart:";
+
+
   /**
    * 会话过期时间
    */

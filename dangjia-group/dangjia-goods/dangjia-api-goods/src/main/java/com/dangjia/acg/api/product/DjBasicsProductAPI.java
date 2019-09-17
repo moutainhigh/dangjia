@@ -1,10 +1,11 @@
 package com.dangjia.acg.api.product;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.product.BasicsGoodsDTO;
 import com.dangjia.acg.dto.product.BasicsProductDTO;
-import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.product.DjBasicsProduct;
+import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -65,6 +66,16 @@ public interface DjBasicsProductAPI {
     ServerResponse insertBatchProduct(@RequestParam("request") HttpServletRequest request,
                                  @RequestParam("productArr") String productArr);
 
+    @PostMapping("/product/djBasicsProduct/queryGoodsListByCategoryLikeName")
+    @ApiOperation(value = "按照name模糊查询商品及下属货品", notes = "按照name模糊查询商品及下属货品，type： 是否禁用  0：禁用；1不禁用 ;  -1全部默认")
+    ServerResponse queryGoodsListByCategoryLikeName(@RequestParam("request") HttpServletRequest request,
+                                                    @RequestParam("pageDTO") PageDTO pageDTO,
+                                                    @RequestParam("categoryId") String categoryId,
+                                                    @RequestParam("name") String name,
+                                                    @RequestParam("cityId") String cityId,
+                                                    @RequestParam("type") Integer type,
+                                                    @RequestParam("categoryName") String categoryName);
+
     @PostMapping("/product/djBasicsProduct/saveProductTemporaryStorage")
     @ApiOperation(value = "暂存商品信息", notes = "暂存商品信息")
     ServerResponse saveProductTemporaryStorage(@RequestParam("request") HttpServletRequest request,
@@ -89,5 +100,50 @@ public interface DjBasicsProductAPI {
     ServerResponse deleteBasicsGoods(@RequestParam("request") HttpServletRequest request,
                                @RequestParam("id") String id);
 
+    @PostMapping("/product/djBasicsProduct/getGoodsByGid")
+    @ApiOperation(value = "根据货品id查询对应货品信息", notes = "根据货品id查询对应货品信息")
+    ServerResponse getBasicsGoodsByGid(@RequestParam("cityId") String cityId,
+                                 @RequestParam("goodsId") String goodsId);
+
+    @PostMapping("/product/djBasicsProduct/queryProduct")
+    @ApiOperation(value = "查询所有商品根据类别ID", notes = "查询所有商品根据类别ID")
+    ServerResponse<PageInfo> queryProduct(@RequestParam("request") HttpServletRequest request,
+                                          @RequestParam("pageDTO") PageDTO pageDTO,
+                                          @RequestParam("categoryId") String categoryId);
+
+    @PostMapping("/product/djBasicsProduct/queryUnit")
+    @ApiOperation(value = "查询所有单位", notes = "查询所有单位")
+    ServerResponse queryUnit(@RequestParam("request") HttpServletRequest request);
+
+    @PostMapping("/product/djBasicsProduct/getProductById")
+    @ApiOperation(value = "根据商品ID查询商品对象", notes = "根据商品ID查询商品对象")
+    ServerResponse getProductById(@RequestParam("cityId") String cityId,
+                                  @RequestParam("id") String id);
+
+    @PostMapping("/product/djBasicsProduct/getTemporaryStorageProductByGoodsId")
+    @ApiOperation(value = "查询货品下暂存的商品信息", notes = "查询货品下暂存的商品信息")
+    ServerResponse getTemporaryStorageProductByGoodsId(@RequestParam("cityId") String cityId,
+                                  @RequestParam("goodsId") String goodsId);
+
+    /**
+     * 根据类别Id查询所属货品
+     *
+     * @return
+     */
+    @PostMapping("/product/djBasicsProduct/getAllGoodsByCategoryId")
+    @ApiOperation(value = "根据类别Id查询所属货品", notes = "根据类别Id查询所属商品")
+    ServerResponse getAllGoodsByCategoryId(@RequestParam("request") HttpServletRequest request,
+                                           @RequestParam("categoryId") String categoryId);
+
+    /**
+     * 根据货品ID查询商品
+     *
+     * @param goodsId
+     * @return
+     */
+    @PostMapping("/product/djBasicsProduct/getAllProductByGoodsId")
+    @ApiOperation(value = "根据货品ID查询所有商品", notes = "根据货品ID查询所有商品")
+    ServerResponse getAllProductByGoodsId(@RequestParam("request") HttpServletRequest request,
+                                          @RequestParam("goodsId") String goodsId);
 
 }

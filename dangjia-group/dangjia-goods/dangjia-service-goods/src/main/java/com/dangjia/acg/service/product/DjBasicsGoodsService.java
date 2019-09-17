@@ -160,4 +160,24 @@ public class DjBasicsGoodsService {
             djBasicsProductMapper.deleteByExample(example);
             return ServerResponse.createBySuccessMessage("删除成功");
     }
+
+    /**
+     * 根据goodsid查询对应goods
+     * <p>Title: getGoodsByGid</p>
+     * <p>Description: </p>
+     *
+     * @param goodsId
+     * @return
+     */
+    public ServerResponse getBasicsGoodsByGid(String goodsId) {
+        try {
+            BasicsGoods basicsGoods = iBasicsGoodsMapper.queryById(goodsId);
+           // Map goodsMap= BeanUtils.beanToMap(basicsGoods);
+            return ServerResponse.createBySuccess("查询成功", basicsGoods);
+        } catch (Exception e) {
+            LOG.error("getBasicsGoodsByGid查询失败：",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+
+        }
+    }
 }
