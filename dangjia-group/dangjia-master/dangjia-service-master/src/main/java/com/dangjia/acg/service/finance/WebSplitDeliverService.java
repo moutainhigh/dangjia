@@ -61,6 +61,7 @@ public class WebSplitDeliverService {
     private ForMasterAPI forMasterAPI;
     @Autowired
     private ConfigUtil configUtil;
+
     /**
      * 所有供应商
      *
@@ -229,7 +230,7 @@ public class WebSplitDeliverService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse Settlemen(String image, String merge, String supplierId) throws RuntimeException {
+    public ServerResponse settlemen(String image, String merge, String supplierId) throws RuntimeException {
         try {
             if (StringUtils.isNotEmpty(merge)) {
                 JSONArray itemObjArr = JSON.parseArray(merge);
@@ -281,7 +282,7 @@ public class WebSplitDeliverService {
      * @param endDate
      * @return
      */
-    public ServerResponse ClsdMendDeliverList(String shipAddress, String beginDate, String endDate, String supplierId) {
+    public ServerResponse clsdMendDeliverList(String shipAddress, String beginDate, String endDate, String supplierId) {
         try {
             if (!CommonUtil.isEmpty(beginDate) && !CommonUtil.isEmpty(endDate)) {
                 if (beginDate.equals(endDate)) {
@@ -301,14 +302,14 @@ public class WebSplitDeliverService {
                 JSONArray itemObjArr = JSON.parseArray(receipt.getMerge());
                 ReceiptDTO receiptDTO = new ReceiptDTO();
                 for (int i = 0; i < itemObjArr.size(); i++) {
-                    SupplierDeliverDTO supplierDeliverDTO =null;
+                    SupplierDeliverDTO supplierDeliverDTO = null;
                     JSONObject jsonObject = itemObjArr.getJSONObject(i);
                     String id = jsonObject.getString("id");
                     int deliverType = jsonObject.getInteger("deliverType");
                     if (deliverType == 1) {
                         SplitDeliver splitDeliver = iSplitDeliverMapper.selectClsd(id, shipAddress, beginDate, endDate);
                         if (null != splitDeliver) {
-                            supplierDeliverDTO=new SupplierDeliverDTO();
+                            supplierDeliverDTO = new SupplierDeliverDTO();
                             supplierDeliverDTO.setId(splitDeliver.getId());
                             supplierDeliverDTO.setNumber(splitDeliver.getNumber());
                             supplierDeliverDTO.setShipAddress(splitDeliver.getShipAddress());
@@ -319,7 +320,7 @@ public class WebSplitDeliverService {
                     } else if (deliverType == 2) {
                         MendDeliver mendDeliver = iMendDeliverMapper.selectClsd(id, shipAddress, beginDate, endDate);
                         if (null != mendDeliver) {
-                            supplierDeliverDTO=new SupplierDeliverDTO();
+                            supplierDeliverDTO = new SupplierDeliverDTO();
                             supplierDeliverDTO.setId(mendDeliver.getId());
                             supplierDeliverDTO.setNumber(mendDeliver.getNumber());
                             supplierDeliverDTO.setShipAddress(mendDeliver.getShipAddress());
@@ -328,7 +329,7 @@ public class WebSplitDeliverService {
                             md += mendDeliver.getTotalAmount();
                         }
                     }
-                    if(null!=supplierDeliverDTO) {
+                    if (null != supplierDeliverDTO) {
                         supplierDeliverDTOList.add(supplierDeliverDTO);
                     }
                 }
@@ -341,15 +342,7 @@ public class WebSplitDeliverService {
                     receiptDTO.setId(receipt.getId());
                     list.add(receiptDTO);
                     //对list进行排序 根据时间降序排序
-                    Collections.sort(list, (r1, r2) -> {
-                        int flag = r1.getCreateDate().compareTo(r2.getCreateDate());
-                        if (flag == -1) {
-                            flag = 1;
-                        } else if (flag == 1) {
-                            flag = -1;
-                        }
-                        return flag;
-                    });
+                    list.sort((r1, r2) -> r2.getCreateDate().compareTo(r1.getCreateDate()));
                 }
             }
             return ServerResponse.createBySuccess("查询成功", list);
@@ -381,33 +374,33 @@ public class WebSplitDeliverService {
      * @param id
      * @return
      */
-    public ServerResponse mendDeliverDetail(String id,String cityId) {
+    public ServerResponse mendDeliverDetail(String id, String cityId) {
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            MendDeliver mendDeliver=iMendDeliverMapper.selectByPrimaryKey(id);
-            MendOrder mendOrder=mendOrderMapper.selectByPrimaryKey(mendDeliver.getMendOrderId());
+            MendDeliver mendDeliver = iMendDeliverMapper.selectByPrimaryKey(id);
+            MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendDeliver.getMendOrderId());
 
             House house = houseMapper.selectByPrimaryKey(mendDeliver.getHouseId());
             List<MendMateriel> mendMateriels = iMendDeliverMapper.mendDeliverDetail(id);
             List<Map> mendMaterielsMap = new ArrayList<>();
             for (MendMateriel mendMateriel : mendMateriels) {
-                mendMateriel.setImage(address+mendMateriel.getImage());
+                mendMateriel.setImage(address + mendMateriel.getImage());
                 //如果是工匠退 ，保证实际字段不为空
-                if(mendOrder.getType()==2){
-                    mendMateriel.setActualCount(mendMateriel.getActualCount()==null?0d:mendMateriel.getActualCount());
-                    mendMateriel.setActualPrice(mendMateriel.getActualPrice()==null?0d:mendMateriel.getActualPrice());
-                }else{
+                if (mendOrder.getType() == 2) {
+                    mendMateriel.setActualCount(mendMateriel.getActualCount() == null ? 0d : mendMateriel.getActualCount());
+                    mendMateriel.setActualPrice(mendMateriel.getActualPrice() == null ? 0d : mendMateriel.getActualPrice());
+                } else {
                     mendMateriel.setActualCount(null);
                     mendMateriel.setActualPrice(null);
                 }
-                Map map= BeanUtils.beanToMap(mendMateriel);
-                if(house!=null) {
-                    cityId=house.getCityId();
+                Map map = BeanUtils.beanToMap(mendMateriel);
+                if (house != null) {
+                    cityId = house.getCityId();
                 }
                 SupplierProduct supplierProduct = forMasterAPI.getSupplierProduct(cityId, mendDeliver.getSupplierId(), mendMateriel.getProductId());
-                if(supplierProduct!=null){
+                if (supplierProduct != null) {
                     map.put("supCost", supplierProduct.getPrice());
-                }else {
+                } else {
                     map.put("supCost", mendMateriel.getCost());
                 }
                 mendMaterielsMap.add(map);
