@@ -3,6 +3,7 @@ package com.dangjia.acg.service.data;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
 import com.dangjia.acg.mapper.basics.*;
+import com.dangjia.acg.mapper.product.DjBasicsProductMapper;
 import com.dangjia.acg.mapper.sup.ISupplierMapper;
 import com.dangjia.acg.mapper.sup.ISupplierProductMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
@@ -12,6 +13,7 @@ import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.basics.WorkerGoods;
 import com.dangjia.acg.modle.brand.Unit;
+import com.dangjia.acg.modle.product.DjBasicsProduct;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,8 +37,8 @@ public class ForMasterService {
     private IBudgetWorkerMapper budgetWorkerMapper;
     @Autowired
     private IBudgetMaterialMapper budgetMaterialMapper;
-    @Autowired
-    private IWorkerGoodsMapper workerGoodsMapper;
+   // @Autowired
+   // private IWorkerGoodsMapper workerGoodsMapper;
     @Autowired
     private IProductMapper productMapper;
     @Autowired
@@ -52,6 +54,8 @@ public class ForMasterService {
     @Autowired
     private IUnitMapper unitMapper;
 
+    @Autowired
+    private DjBasicsProductMapper djBasicsProductMapper;
 
     public String getUnitName(String unitId){
         Unit unit = unitMapper.selectByPrimaryKey(unitId);
@@ -102,7 +106,12 @@ public class ForMasterService {
      * @param type 0=材料商品  1=人工商品
      */
     public void setProductOrWorkerGoodsIsTop(String gid,Integer type,String istop){
-        if(type==0){
+        DjBasicsProduct djBasicsProduct= djBasicsProductMapper.selectByPrimaryKey(gid);
+        if(djBasicsProduct!=null){
+            djBasicsProduct.setIstop(Integer.parseInt(istop));
+            djBasicsProductMapper.updateByPrimaryKeySelective(djBasicsProduct);
+        }
+        /*if(type==0){
             Product product= productMapper.selectByPrimaryKey(gid);
             if(product!=null){
                 product.setIstop(istop);
@@ -114,10 +123,10 @@ public class ForMasterService {
                 workerGoods.setIstop(istop);
                 workerGoodsMapper.updateByPrimaryKeySelective(workerGoods);
             }
-        }
+        }*/
     }
-    public WorkerGoods getWorkerGoods(String workerGoodsId){
-        return workerGoodsMapper.selectByPrimaryKey(workerGoodsId);
+    public DjBasicsProduct getWorkerGoods(String workerGoodsId){
+        return djBasicsProductMapper.selectByPrimaryKey(workerGoodsId);
     }
     public Goods getGoods(String goodsId){
         return goodsMapper.selectByPrimaryKey(goodsId);
@@ -172,15 +181,16 @@ public class ForMasterService {
             example.createCriteria().andEqualTo(BudgetWorker.HOUSE_FLOW_ID, houseFlowId).andEqualTo(BudgetWorker.DELETE_STATE, 0);
             List<BudgetWorker> budgetWorkerList = budgetWorkerMapper.selectByExample(example);
             for(BudgetWorker budgetWorker : budgetWorkerList){
-                WorkerGoods wg = workerGoodsMapper.selectByPrimaryKey(budgetWorker.getWorkerGoodsId());
-                if (wg == null){
+                //WorkerGoods wg = workerGoodsMapper.selectByPrimaryKey(budgetWorker.getWorkerGoodsId());
+                DjBasicsProduct djBasicsProduct=djBasicsProductMapper.selectByPrimaryKey(budgetWorker.getWorkerGoodsId());
+                if (djBasicsProduct == null){
                     budgetWorkerList.remove(budgetWorker);//移除
                     budgetWorker.setDeleteState(1);//找不到商品标记删除
                     budgetWorker.setModifyDate(new Date());
                     budgetWorkerMapper.updateByPrimaryKeySelective(budgetWorker);
                 }else {
-                    budgetWorker.setPrice(wg.getPrice());
-                    budgetWorker.setTotalPrice(budgetWorker.getShopCount() * wg.getPrice());
+                    budgetWorker.setPrice(djBasicsProduct.getPrice());
+                    budgetWorker.setTotalPrice(budgetWorker.getShopCount() * djBasicsProduct.getPrice());
                     budgetWorker.setDeleteState(3);//已支付
                     budgetWorker.setModifyDate(new Date());
                     budgetWorkerMapper.updateByPrimaryKeySelective(budgetWorker);

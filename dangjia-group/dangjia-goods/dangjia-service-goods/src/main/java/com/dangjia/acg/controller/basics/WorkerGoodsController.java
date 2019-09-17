@@ -25,14 +25,14 @@ public class WorkerGoodsController implements WorkerGoodsAPI {
     @Autowired
     private WorkerGoodsService workerGoodsService;
 
-    /**
+   /* *//**
      * 查询工价商品
      *
      * @param pageDTO
      * @param workerTypeId
      * @param searchKey
      * @return
-     */
+     *//*
     @Override
     @ApiMethod
     public ServerResponse<PageInfo> getWorkerGoodses(HttpServletRequest request, PageDTO pageDTO,String istops ,String workerTypeId, String searchKey, String showGoods) {
@@ -41,7 +41,7 @@ public class WorkerGoodsController implements WorkerGoodsAPI {
         } catch (Exception e) {
             return ServerResponse.createByErrorMessage("查询工价商品失败");
         }
-    }
+    }*/
 
     /**
      * 新增或更新工价商品
@@ -50,7 +50,7 @@ public class WorkerGoodsController implements WorkerGoodsAPI {
      * @param technologyJsonList
      * @return
      */
-    @Override
+  /*  @Override
     @ApiMethod
     public ServerResponse<String> setWorkerGoods(HttpServletRequest request, WorkerGoods workerGoods, String technologyJsonList, String deleteTechnologyIds) {
 //    public ServerResponse<String> setWorkerGoods(HttpServletRequest request,WorkerGoods workerGoods, String technologyListJson) {
@@ -60,7 +60,7 @@ public class WorkerGoodsController implements WorkerGoodsAPI {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("新增或更新工价商品失败");
         }
-    }
+    }*/
 
     /**
      * 每工种未删除 或 已支付工钱
