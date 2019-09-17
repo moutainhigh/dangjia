@@ -671,7 +671,7 @@
         SELECT
         bp.id,
         bp.goods_id,
-        bp.`name`,,
+        bp.`name`,
         bp.image,
         bp.price,
         bg.type,
