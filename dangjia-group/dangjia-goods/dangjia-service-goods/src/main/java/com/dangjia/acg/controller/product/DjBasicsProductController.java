@@ -214,5 +214,47 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
     public ServerResponse queryUnit(HttpServletRequest request) {
         return djBasicsProductService.queryUnit();
     }
+    /**
+     * 根据商品ID查询商品对象
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getProductById(String cityId, String id) {
+        return djBasicsProductService.getProductById(id);
+    }
 
+    /**
+     * 查询货品下暂存的商品信息
+     * @param cityId
+     * @param goodsId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getTemporaryStorageProductByGoodsId(String cityId, String goodsId) {
+        return djBasicsProductService.getTemporaryStorageProductByGoodsId(goodsId);
+    }
+
+    /**
+     * 根据类别Id查询所属货品
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getAllGoodsByCategoryId(HttpServletRequest request,String categoryId){
+        return djBasicsProductService.getAllGoodsByCategoryId(categoryId);
+    }
+    /**
+     * 根据货品ID查询商品
+     * @param goodsId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse  getAllProductByGoodsId(HttpServletRequest request,String goodsId){
+        return djBasicsProductService.getAllProductByGoodsId(goodsId);
+    }
 }

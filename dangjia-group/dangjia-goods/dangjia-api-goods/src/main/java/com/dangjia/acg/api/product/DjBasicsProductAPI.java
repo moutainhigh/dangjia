@@ -107,7 +107,7 @@ public interface DjBasicsProductAPI {
                                  @RequestParam("goodsId") String goodsId);
 
     @PostMapping("/product/djBasicsProduct/queryProduct")
-    @ApiOperation(value = "查询所有商品", notes = "查询所有商品")
+    @ApiOperation(value = "查询所有商品根据类别ID", notes = "查询所有商品根据类别ID")
     ServerResponse<PageInfo> queryProduct(@RequestParam("request") HttpServletRequest request,
                                           @RequestParam("pageDTO") PageDTO pageDTO,
                                           @RequestParam("categoryId") String categoryId);
@@ -116,5 +116,35 @@ public interface DjBasicsProductAPI {
     @ApiOperation(value = "查询所有单位", notes = "查询所有单位")
     ServerResponse queryUnit(@RequestParam("request") HttpServletRequest request);
 
+    @PostMapping("/product/djBasicsProduct/getProductById")
+    @ApiOperation(value = "根据商品ID查询商品对象", notes = "根据商品ID查询商品对象")
+    ServerResponse getProductById(@RequestParam("cityId") String cityId,
+                                  @RequestParam("id") String id);
+
+    @PostMapping("/product/djBasicsProduct/getTemporaryStorageProductByGoodsId")
+    @ApiOperation(value = "查询货品下暂存的商品信息", notes = "查询货品下暂存的商品信息")
+    ServerResponse getTemporaryStorageProductByGoodsId(@RequestParam("cityId") String cityId,
+                                  @RequestParam("goodsId") String goodsId);
+
+    /**
+     * 根据类别Id查询所属货品
+     *
+     * @return
+     */
+    @PostMapping("/product/djBasicsProduct/getAllGoodsByCategoryId")
+    @ApiOperation(value = "根据类别Id查询所属货品", notes = "根据类别Id查询所属商品")
+    ServerResponse getAllGoodsByCategoryId(@RequestParam("request") HttpServletRequest request,
+                                           @RequestParam("categoryId") String categoryId);
+
+    /**
+     * 根据货品ID查询商品
+     *
+     * @param goodsId
+     * @return
+     */
+    @PostMapping("/product/djBasicsProduct/getAllProductByGoodsId")
+    @ApiOperation(value = "根据货品ID查询所有商品", notes = "根据货品ID查询所有商品")
+    ServerResponse getAllProductByGoodsId(@RequestParam("request") HttpServletRequest request,
+                                          @RequestParam("goodsId") String goodsId);
 
 }

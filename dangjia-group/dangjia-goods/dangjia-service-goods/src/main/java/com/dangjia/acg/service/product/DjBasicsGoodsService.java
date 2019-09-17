@@ -177,8 +177,8 @@ public class DjBasicsGoodsService {
     public ServerResponse getBasicsGoodsByGid(String goodsId) {
         try {
             BasicsGoods basicsGoods = iBasicsGoodsMapper.queryById(goodsId);
-            Map goodsMap= BeanUtils.beanToMap(basicsGoods);
-            return ServerResponse.createBySuccess("查询成功", goodsMap);
+           // Map goodsMap= BeanUtils.beanToMap(basicsGoods);
+            return ServerResponse.createBySuccess("查询成功", basicsGoods);
         } catch (Exception e) {
             LOG.error("getBasicsGoodsByGid查询失败：",e);
             return ServerResponse.createByErrorMessage("查询失败");
