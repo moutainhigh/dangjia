@@ -4,7 +4,6 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.product.BasicsGoodsDTO;
 import com.dangjia.acg.dto.product.BasicsProductDTO;
-import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.product.DjBasicsProduct;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
