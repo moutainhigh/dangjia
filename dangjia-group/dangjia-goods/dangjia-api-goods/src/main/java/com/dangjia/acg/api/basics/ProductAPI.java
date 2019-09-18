@@ -47,16 +47,16 @@ public interface ProductAPI {
                              @RequestParam("arrString") String arrString,
                              @RequestParam("otherName") String otherName);
 
-    @PostMapping("/basics/product/queryBrandByGid")
+    /*@PostMapping("/basics/product/queryBrandByGid")
     @ApiOperation(value = "根据商品id查询关联品牌", notes = "根据商品id查询关联品牌")
     ServerResponse queryBrandByGid(@RequestParam("request") HttpServletRequest request,
-                                   @RequestParam("goodsId") String goodsId);
+                                   @RequestParam("goodsId") String goodsId);*/
 
-    @PostMapping("/basics/product/queryBrandByGidAndBid")
+    /*@PostMapping("/basics/product/queryBrandByGidAndBid")
     @ApiOperation(value = "根据商品id和品牌id查询关联品牌系列", notes = "根据商品id和品牌id查询关联品牌系列")
     ServerResponse queryBrandByGidAndBid(@RequestParam("request") HttpServletRequest request,
                                          @RequestParam("goodsId") String goodsId,
-                                         @RequestParam("brandId") String brandId);
+                                         @RequestParam("brandId") String brandId);*/
 
     @PostMapping("/basics/product/updateProduct")
     @ApiOperation(value = "更新货品名称", notes = "更新货品名称")
@@ -74,10 +74,10 @@ public interface ProductAPI {
     ServerResponse insertProduct(@RequestParam("request") HttpServletRequest request,
                                  @RequestParam("productArr") String productArr);
 
-    @PostMapping("/basics/product/getGoodsByGid")
+  /*  @PostMapping("/basics/product/getGoodsByGid")
     @ApiOperation(value = "根据商品id查询对应商品", notes = "根据商品id查询对应商品")
     ServerResponse getGoodsByGid(@RequestParam("cityId") String cityId,
-                                 @RequestParam("goodsId") String goodsId);
+                                 @RequestParam("goodsId") String goodsId);*/
 
     @PostMapping("/basics/product/updateGoods")
     @ApiOperation(value = "修改商品", notes = "修改商品")
