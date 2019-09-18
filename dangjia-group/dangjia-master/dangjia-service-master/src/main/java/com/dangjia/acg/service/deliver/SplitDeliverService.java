@@ -184,7 +184,7 @@ public class SplitDeliverService {
             splitDeliverDTO.setCreateDate(splitDeliver.getCreateDate());
             splitDeliverDTO.setSendTime(splitDeliver.getSendTime());
             splitDeliverDTO.setSubmitTime(splitDeliver.getSubmitTime());
-            splitDeliverDTO.setRecTime(splitDeliver.getRecTime() == null ? splitDeliver.getModifyDate() : splitDeliver.getRecTime());//收货时间
+            splitDeliverDTO.setRecTime(splitDeliver.getRecTime());//收货时间
             splitDeliverDTO.setTotalAmount(splitDeliver.getTotalAmount());
             splitDeliverDTO.setSupState(splitDeliver.getSupState());//大管家收货状态
             splitDeliverDTO.setSupName(splitDeliver.getSupplierName());
