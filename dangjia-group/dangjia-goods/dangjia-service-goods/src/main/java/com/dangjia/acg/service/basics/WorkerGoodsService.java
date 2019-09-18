@@ -1,12 +1,10 @@
 package com.dangjia.acg.service.basics;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.app.repair.MasterMendWorkerAPI;
 import com.dangjia.acg.api.data.WorkerTypeAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
-import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
@@ -20,17 +18,15 @@ import com.dangjia.acg.modle.basics.HomeProductDTO;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.basics.WorkerGoods;
 import com.dangjia.acg.modle.core.WorkerType;
+import com.dangjia.acg.service.product.DjBasicsProductService;
 import com.dangjia.acg.util.DateUtils;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
-import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -42,7 +38,7 @@ import java.util.List;
  */
 @Service
 public class WorkerGoodsService {
-
+    private static Logger logger = LoggerFactory.getLogger(WorkerGoodsService.class);
     @Autowired
     private IWorkerGoodsMapper iWorkerGoodsMapper;
     @Autowired
@@ -316,6 +312,26 @@ public class WorkerGoodsService {
 
         }
     }
+
+    /**
+     * 从精算表查代购商品支付工钱
+     * @param houseId
+     * @param houseFlowId
+     * @return
+     */
+    public ServerResponse getAgencyPurchaseMoney(String houseId, String houseFlowId){
+        try {
+            Double totalAgencyPurchasePrice = iWorkerGoodsMapper.getAgencyPurchaseMoney(houseId, houseFlowId);
+            JSONObject object = new JSONObject();
+            object.put("totalAgencyPurchasePrice", totalAgencyPurchasePrice);
+            return ServerResponse.createBySuccess("查询精算表查代购商品支付工钱成功", object);
+        } catch (Exception e) {
+           logger.error("查询精算表查代购商品支付工钱失败",e);
+            return ServerResponse.createByErrorMessage("查询精算表查代购商品支付工钱失败");
+
+        }
+    }
+
 
     public ServerResponse getHomeProductList() {
         List<HomeProductDTO> homeProductDTOS = iWorkerGoodsMapper.getHomeProductList();

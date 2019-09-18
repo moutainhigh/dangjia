@@ -22,6 +22,19 @@
         and abw.delete_state =3
         and abw.house_flow_id=#{houseFlowId}
     </select>
+    <!-- 从精算表查代购商品支付工钱 -->
+    <select id="getAgencyPurchaseMoney" resultType="java.lang.Double">
+        SELECT
+            sum(t.total_price)
+        FROM
+            dj_actuary_budget_worker t, dj_basics_product_worker t1
+        WHERE t.worker_goods_id = t1.product_id
+        and t.house_id = #{houseId}
+        AND t.house_flow_id = #{houseFlowId}
+        AND t1.is_agency_purchase = 1
+        AND t.delete_state = 3
+    </select>
+
     <!--更新单位-->
     <update id="updateWorkerGoodsByUnitId" parameterType="java.lang.String">
         update dj_basics_product

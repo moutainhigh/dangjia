@@ -40,4 +40,5 @@ public interface IWorkerGoodsMapper extends Mapper<WorkerGoods> {
 
     Double getPayedWorker(@Param("houseId") String houseId, @Param("houseFlowId") String houseFlowId);
     List<HomeProductDTO> getHomeProductList();
+    Double getAgencyPurchaseMoney(@Param("houseId") String houseId, @Param("houseFlowId") String houseFlowId);
 }
