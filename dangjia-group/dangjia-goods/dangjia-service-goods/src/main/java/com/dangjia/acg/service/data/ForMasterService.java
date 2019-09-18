@@ -1,9 +1,14 @@
 package com.dangjia.acg.service.data;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
+import com.dangjia.acg.dto.product.BasicsProductDTO;
+import com.dangjia.acg.dto.product.ProductWorkerDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
 import com.dangjia.acg.mapper.basics.*;
 import com.dangjia.acg.mapper.product.DjBasicsProductMapper;
+import com.dangjia.acg.mapper.product.DjBasicsProductWorkerMapper;
 import com.dangjia.acg.mapper.sup.ISupplierMapper;
 import com.dangjia.acg.mapper.sup.ISupplierProductMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
@@ -14,8 +19,10 @@ import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.basics.WorkerGoods;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.product.DjBasicsProduct;
+import com.dangjia.acg.modle.product.DjBasicsProductWorker;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
+import org.apache.commons.beanutils.PropertyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
@@ -23,6 +30,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * author: Ronalcheng
@@ -56,6 +64,8 @@ public class ForMasterService {
 
     @Autowired
     private DjBasicsProductMapper djBasicsProductMapper;
+    @Autowired
+    private DjBasicsProductWorkerMapper djBasicsProductWorkerMapper;
 
     public String getUnitName(String unitId){
         Unit unit = unitMapper.selectByPrimaryKey(unitId);
@@ -125,8 +135,14 @@ public class ForMasterService {
             }
         }*/
     }
-    public DjBasicsProduct getWorkerGoods(String workerGoodsId){
-        return djBasicsProductMapper.selectByPrimaryKey(workerGoodsId);
+    public ProductWorkerDTO getWorkerGoods(String workerGoodsId){
+        DjBasicsProduct djBasicsProduct = djBasicsProductMapper.selectByPrimaryKey(workerGoodsId);
+        ProductWorkerDTO productWorkerDTO = JSON.parseObject(JSON.toJSONString(djBasicsProduct),new TypeReference<ProductWorkerDTO>() {});
+        DjBasicsProductWorker djBasicsProductWorker= djBasicsProductWorkerMapper.queryProductWorkerByProductId(workerGoodsId);
+        productWorkerDTO.setWorkerDec(djBasicsProductWorker.getWorkerDec());
+        productWorkerDTO.setWorkerTypeId(djBasicsProductWorker.getWorkerTypeId());
+        productWorkerDTO.setShowGoods(djBasicsProduct.getMaket());
+        return productWorkerDTO;
     }
     public Goods getGoods(String goodsId){
         return goodsMapper.selectByPrimaryKey(goodsId);

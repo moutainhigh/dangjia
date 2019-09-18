@@ -124,5 +124,34 @@
             c.sort DESC
 	</select>
 
+    <!-- 查询当前顶级分类下的与有类别-->
+    <select id="getAllCategoryChildById" resultType="com.dangjia.acg.modle.product.BasicsGoodsCategory">
+        SELECT
+        *
+        FROM
+        (
+        SELECT
+        T1.*,
+        IF (
+        FIND_IN_SET(parentTop, @PIDS) > 0,
+        @PIDS := CONCAT(@PIDS, ',', T1.ID),
+        0
+        ) AS ISCHILD
+        FROM
+        (
+        SELECT
+        <include refid="all_columns"/>
+        FROM
+        dj_basics_goods_category A
+        ) AS T1,
+        (
+        SELECT
+        @PIDS := #{parentTop}
+        ) t2
+        ) t3
+        WHERE
+        ISCHILD != '0'
+    </select>
+
 
 </mapper>

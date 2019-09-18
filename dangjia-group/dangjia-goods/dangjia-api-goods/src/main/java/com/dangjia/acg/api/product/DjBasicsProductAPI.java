@@ -146,4 +146,6 @@ public interface DjBasicsProductAPI {
     ServerResponse getAllProductByGoodsId(@RequestParam("request") HttpServletRequest request,
                                           @RequestParam("goodsId") String goodsId);
 
+
+
 }

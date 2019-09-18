@@ -13,6 +13,7 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.product.ProductWorkerDTO;
 import com.dangjia.acg.dto.repair.MendOrderInfoDTO;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
@@ -37,6 +38,7 @@ import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.SurplusWareHouse;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.product.DjBasicsProduct;
 import com.dangjia.acg.modle.repair.*;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
@@ -694,7 +696,7 @@ public class MendOrderService {
                 MendWorker mendWorker = new MendWorker();//补退人工
                 String workerGoodsId = obj.getString("workerGoodsId");
                 double num = Double.parseDouble(obj.getString("num"));
-                WorkerGoods workerGoods = forMasterAPI.getWorkerGoods(house.getCityId(), workerGoodsId);
+                ProductWorkerDTO workerGoods = forMasterAPI.getWorkerGoods(house.getCityId(), workerGoodsId);
                 if (!workerGoods.getWorkerTypeId().equals(workerTypeId)) {
                     System.out.println("所选人工商品与所选工种不符");
                     TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
@@ -703,7 +705,7 @@ public class MendOrderService {
                 mendWorker.setMendOrderId(mendOrder.getId());
                 mendWorker.setWorkerGoodsId(workerGoodsId);
                 mendWorker.setWorkerGoodsName(workerGoods.getName());
-                mendWorker.setWorkerGoodsSn(workerGoods.getWorkerGoodsSn());
+                mendWorker.setWorkerGoodsSn(workerGoods.getProductSn());
                 mendWorker.setUnitName(workerGoods.getUnitName());
                 mendWorker.setPrice(workerGoods.getPrice());
                 mendWorker.setImage(workerGoods.getImage());
