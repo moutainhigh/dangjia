@@ -87,10 +87,10 @@ public class ShopCartservice {
 
                         //相同产品ID情况下修改产品的数量
                         if (cartDTOListIdentical.size() >= 0) {
-                            Iterator it = cartDTOlist.iterator();
+                            Iterator it = cartDTOListIdentical.iterator();
                             while (it.hasNext()) {
                                 CartDTO cartDTOIterator = (CartDTO) it.next();
-                                if (cartDTOIterator.getProductId().equals(cartDTO.getProductId())) ;
+                                if (cartDTOIterator.getProductId()==cartDTO.getProductId()) ;
                                 {
                                     cartDTOIterator.setProductNum(cartDTOIterator.getProductNum() + cartDTO.getProductNum());
                                     CartDTOlistInequality.add(cartDTOIterator);
@@ -175,8 +175,7 @@ public class ShopCartservice {
                 //获取缓存中存储的列表集合
                 List<CartDTO> cartDTOList = redisClient.getListCache(Constants.REDIS_DANGJIA_CACHE + member.getId().toString(), CartDTO.class);
                 for (CartDTO cartDTO : cartDTOList) {
-                    String redisProductId = cartDTO.getProductId();
-                    if (redisProductId.equals(productId)) {
+                    if (productId.equals(cartDTO.getProductId())) {
                         cartDTO.setProductNum(cartDTO.getProductNum() + num);
                     }
                 }
@@ -216,9 +215,9 @@ public class ShopCartservice {
             //获取商品列表
             List<CartDTO> cartDTOList = redisClient.getListCache(Constants.REDIS_DANGJIA_CACHE + member.getId().toString(), CartDTO.class);
             for (CartDTO cartDTO : cartDTOList) {
-                if ("true".equals(checked)) {
+                if (checked.equals("1")) {
                     cartDTO.setCheck("1");
-                } else if ("false".equals(checked)) {
+                } else if (checked.equals("0")) {
                     cartDTO.setCheck("0");
                 } else {
                     return ServerResponse.createBySuccess("全选失败!");
