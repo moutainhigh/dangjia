@@ -1,4 +1,4 @@
-package com.dangjia.acg.service.actuary;
+package com.dangjia.acg.service.actuary.app;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -13,22 +13,30 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.actuary.*;
+import com.dangjia.acg.dto.basics.TechnologyDTO;
 import com.dangjia.acg.dto.basics.WorkerGoodsDTO;
 import com.dangjia.acg.dto.repair.MendOrderInfoDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
 import com.dangjia.acg.mapper.basics.*;
+import com.dangjia.acg.mapper.product.DjBasicsGoodsMapper;
+import com.dangjia.acg.mapper.product.DjBasicsProductMapper;
+import com.dangjia.acg.mapper.product.DjBasicsProductMaterialMapper;
+import com.dangjia.acg.mapper.product.DjBasicsProductWorkerMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.modle.basics.*;
 import com.dangjia.acg.modle.brand.Brand;
-import com.dangjia.acg.modle.brand.BrandSeries;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.product.DjBasicsGoods;
+import com.dangjia.acg.modle.product.DjBasicsProduct;
+import com.dangjia.acg.modle.product.DjBasicsProductMaterial;
+import com.dangjia.acg.modle.product.DjBasicsProductWorker;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.modle.repair.MendWorker;
-import com.dangjia.acg.service.basics.WorkerGoodsService;
+import com.dangjia.acg.util.DateUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,12 +48,11 @@ import java.math.BigDecimal;
 import java.util.*;
 
 /**
- * author: Ronalcheng
- * Date: 2018/11/15 0015
- * Time: 19:27
+ * author: qiyuxiang
+ * Date: 2019/09/18
  */
 @Service
-public class ActuaryOperationService {
+public class AppActuaryOperationService {
 
     @Autowired
     private IBudgetWorkerMapper budgetWorkerMapper;
@@ -58,17 +65,15 @@ public class ActuaryOperationService {
     @Autowired
     private WorkerTypeAPI workerTypeAPI;
     @Autowired
-    private IGoodsMapper goodsMapper;
+    private DjBasicsGoodsMapper goodsMapper;
     @Autowired
-    private IProductMapper productMapper;
+    private DjBasicsProductMapper productMapper;
     @Autowired
     private IUnitMapper iUnitMapper;
     @Autowired
     private IGroupLinkMapper iGroupLinkMapper;
     @Autowired
     private IGoodsGroupMapper iGoodsGroupMapper;
-    @Autowired
-    private IWorkerGoodsMapper workerGoodsMapper;
     @Autowired
     private IBrandSeriesMapper iBrandSeriesMapper;
     @Autowired
@@ -78,10 +83,15 @@ public class ActuaryOperationService {
     @Autowired
     private MendOrderAPI mendOrderAPI;
 
+    @Autowired
+    private DjBasicsProductMaterialMapper djBasicsProductMaterialMapper;
+    @Autowired
+    private DjBasicsProductWorkerMapper djBasicsProductWorkerMapper;
 
     @Autowired
-    private WorkerGoodsService workerGoodsService;
-    protected static final Logger LOG = LoggerFactory.getLogger(ActuaryOperationService.class);
+    private ITechnologyMapper iTechnologyMapper;
+
+    protected static final Logger LOG = LoggerFactory.getLogger(AppActuaryOperationService.class);
 
     /**
      * 选择取消精算
@@ -187,7 +197,9 @@ public class ActuaryOperationService {
                             BudgetMaterial srcBudgetMaterial = budgetMaterialMapper.getBudgetCaiListByGoodsId(houseId, workerTypeId, srcGroupLink.getGoodsId());
                             BudgetMaterial newBudgetMaterial = budgetMaterialMapper.getBudgetCaiListByGoodsId(houseId, workerTypeId, srcGroupLink.getGoodsId());
                             BudgetMaterial originalBudgetMaterial = budgetMaterialMapper.getBudgetByGoodsId(houseId, workerTypeId, newBudgetMaterial.getGoodsId(), newBudgetMaterial.getProductType());
-                            Product targetProduct = productMapper.selectByPrimaryKey(targetGroupLink.getProductId());//目标product 对象
+                            DjBasicsProduct targetProduct = productMapper.selectByPrimaryKey(targetGroupLink.getProductId());//目标product 对象
+                            DjBasicsProductMaterial targetProductMaterial = djBasicsProductMaterialMapper.queryProductMaterialByProductId(targetGroupLink.getProductId());//目标product 对象
+
                             newBudgetMaterial.setProductId(targetProduct.getId());
                             newBudgetMaterial.setProductSn(targetProduct.getProductSn());
                             newBudgetMaterial.setProductName(targetProduct.getName());
@@ -196,11 +208,11 @@ public class ActuaryOperationService {
                             newBudgetMaterial.setGoodsGroupId(targetGroupId);
                             GoodsGroup goodsGroup = iGoodsGroupMapper.selectByPrimaryKey(targetGroupId);
                             newBudgetMaterial.setGroupType(goodsGroup.getName());
-                            newBudgetMaterial.setCost(targetProduct.getCost());
+                            newBudgetMaterial.setCost(targetProductMaterial.getCost());
                             //这里会更新 为 新product的 换算后的购买数量
 //                            newBudgetMaterial.setConvertCount(Math.ceil(newBudgetMaterial.getShopCount() / targetProduct.getConvertQuality()));
-                            double converCount = (newBudgetMaterial.getShopCount() / targetProduct.getConvertQuality());
-                            Unit convertUnit = iUnitMapper.selectByPrimaryKey(targetProduct.getConvertUnit());
+                            double converCount = (newBudgetMaterial.getShopCount() / targetProductMaterial.getConvertQuality());
+                            Unit convertUnit = iUnitMapper.selectByPrimaryKey(targetProductMaterial.getConvertUnit());
                             if (convertUnit.getType() == 1) {
                                 converCount = Math.ceil(converCount);
                             }
@@ -210,7 +222,7 @@ public class ActuaryOperationService {
                             newBudgetMaterial.setCategoryId(targetProduct.getCategoryId());
                             newBudgetMaterial.setImage(targetProduct.getImage());
                             newBudgetMaterial.setUnitName(convertUnit.getName());
-                            Goods goods = goodsMapper.queryById( targetProduct.getGoodsId());
+                            DjBasicsGoods goods = goodsMapper.selectByPrimaryKey( targetProduct.getGoodsId());
                             newBudgetMaterial.setProductType(goods.getType());//0：材料；1：包工包料
                             if(originalBudgetMaterial!=null){
                                 budgetMaterialMapper.updateByPrimaryKeySelective(newBudgetMaterial);
@@ -229,16 +241,17 @@ public class ActuaryOperationService {
 
                 BudgetMaterial newBudgetMaterial = budgetMaterialMapper.selectByPrimaryKey(budgetMaterialId);
                 BudgetMaterial originalBudgetMaterial = budgetMaterialMapper.getBudgetByGoodsId(houseId, workerTypeId, newBudgetMaterial.getGoodsId(), newBudgetMaterial.getProductType());
+                DjBasicsProduct product = productMapper.selectByPrimaryKey(productId);//目标product 对象
+                DjBasicsProductMaterial targetProductMaterial = djBasicsProductMaterialMapper.queryProductMaterialByProductId(productId);//目标product 对象
 
-                Product product = productMapper.selectByPrimaryKey(productId);
                 newBudgetMaterial.setProductId(productId);
                 newBudgetMaterial.setProductSn(product.getProductSn());
                 newBudgetMaterial.setProductName(product.getName());
                 newBudgetMaterial.setPrice(product.getPrice());
-                newBudgetMaterial.setCost(product.getCost());
+                newBudgetMaterial.setCost(targetProductMaterial.getCost());
                 //这里会更新 为 新product的 换算后的购买数量
-                double converCount = (newBudgetMaterial.getShopCount() / product.getConvertQuality());
-                Unit convertUnit = iUnitMapper.selectByPrimaryKey(product.getConvertUnit());
+                double converCount = (newBudgetMaterial.getShopCount() / targetProductMaterial.getConvertQuality());
+                Unit convertUnit = iUnitMapper.selectByPrimaryKey(targetProductMaterial.getConvertUnit());
                 if (convertUnit.getType() == 1) {
                     converCount = Math.ceil(converCount);
                 }
@@ -248,7 +261,7 @@ public class ActuaryOperationService {
                 newBudgetMaterial.setCategoryId(product.getCategoryId());
                 newBudgetMaterial.setImage(product.getImage());
                 newBudgetMaterial.setUnitName(convertUnit.getName());
-                Goods goods = goodsMapper.queryById( product.getGoodsId());
+                DjBasicsGoods goods = goodsMapper.selectByPrimaryKey(product.getGoodsId());
                 newBudgetMaterial.setProductType(goods.getType());//0：材料；1：包工包料
                 if(originalBudgetMaterial!=null){
                     budgetMaterialMapper.updateByPrimaryKeySelective(newBudgetMaterial);
@@ -272,15 +285,13 @@ public class ActuaryOperationService {
 
     /**
      * 选择货品刷新页面
-     *
-     * @param attributeIdArr 属性值id集合
      */
-    public ServerResponse selectProduct(String goodsId, String selectVal, String attributeIdArr, String budgetMaterialId) {
+    public ServerResponse selectProduct(String goodsId, String selectVal, String budgetMaterialId) {
         try {
             if (!StringUtils.isNoneBlank(goodsId))
                 return ServerResponse.createByErrorMessage("goodsId 不能为null");
-            Product product = productMapper.selectByPrimaryKey(selectVal);
-            GoodsDTO goodsDTO = goodsDetail(product, budgetMaterialId);
+            DjBasicsProduct product = productMapper.selectByPrimaryKey(selectVal);//目标product 对象
+            Object goodsDTO = goodsDetail(product, budgetMaterialId);
             if (goodsDTO != null) {
                 return ServerResponse.createBySuccess("查询成功", goodsDTO);
             } else {
@@ -296,198 +307,185 @@ public class ActuaryOperationService {
      * 商品详情
      * gId:  budgetWorkerId   budgetMaterialId
      */
-    public ServerResponse getCommo(String gId, int type) {
+    public ServerResponse getCommo(String gId,String budgetMaterialId) {
         try {
-            if (type == 1 || type == 4) {//人工
-                WorkerGoods workerGoods;
-                if (type == 1) {
-                    BudgetWorker budgetWorker = budgetWorkerMapper.selectByPrimaryKey(gId);
-                    workerGoods = workerGoodsMapper.selectByPrimaryKey(budgetWorker.getWorkerGoodsId());//人工商品
-                } else {
-                    workerGoods = workerGoodsMapper.selectByPrimaryKey(gId);//人工商品
-                }
-                WorkerGoodsDTO wGoodsDTO = workerGoodsService.assembleWorkerGoodsResult(workerGoods);
-                return ServerResponse.createBySuccess("查询成功", wGoodsDTO);
-            } else if (type == 2 || type == 3 || type == 5) {//材料商品  包工包料商品
-                Product product;
-                String budgetMaterialId = null;
-                if (type != 5) {
-                    BudgetMaterial budgetMaterial = budgetMaterialMapper.selectByPrimaryKey(gId);
-                    if (budgetMaterial != null) {
-                        product = productMapper.selectByPrimaryKey(budgetMaterial.getProductId());//当前 货品
-                        budgetMaterialId = budgetMaterial.getId();
-                    } else {
-                        product = productMapper.selectByPrimaryKey(gId);//当前 货品
-                    }
-                } else {
-                    product = productMapper.selectByPrimaryKey(gId);//当前 货品
-                }
+                DjBasicsProduct product = productMapper.selectByPrimaryKey(gId);//当前 货品
                 if(product == null){
                     return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "该商品已禁用！");
                 }
-                GoodsDTO goodsDTO = goodsDetail(product, budgetMaterialId);
+                Object goodsDTO = goodsDetail(product, budgetMaterialId);
                 if (goodsDTO != null) {
                     return ServerResponse.createBySuccess("查询成功", goodsDTO);
                 } else {
                     return ServerResponse.createByErrorMessage("查询失败,数据异常");
                 }
-
-            }
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败,数据异常");
         }
-        return ServerResponse.createByErrorMessage("查询失败,type错误");
     }
 
-    /**
-     * 新版商品详情
-     * gId:  WorkerGoodsId   ProductId
-     */
-    public ServerResponse getGoodsDetailNew(String gId, int type) {
-        try {
-            if (type == 1 || type == 4) {//人工
-                WorkerGoods workerGoods = workerGoodsMapper.selectByPrimaryKey(gId);//人工商品
-                WorkerGoodsDTO wGoodsDTO = workerGoodsService.assembleWorkerGoodsResult(workerGoods);
-                return ServerResponse.createBySuccess("查询成功", wGoodsDTO);
-            } else if (type == 2 || type == 3 || type == 5) {//材料商品  包工包料商品
-                Product product = productMapper.selectByPrimaryKey(gId);//当前 货品
-                if(product == null){
-                    return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "该商品已禁用！");
-                }
-                GoodsDTO goodsDTO = goodsDetail(product, null);
-                if (goodsDTO != null) {
-                    return ServerResponse.createBySuccess("查询成功", goodsDTO);
-                } else {
-                    return ServerResponse.createByErrorMessage("查询失败,数据异常");
-                }
-
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("查询失败,数据异常");
-        }
-        return ServerResponse.createByErrorMessage("查询失败,type错误");
-    }
-
-    /**
-     * 商品详情
-     * gId:  WorkerGoodsId   ProductId
-     */
-    public ServerResponse getGoodsDetail(String gId, int type) {
-        try {
-            if (type == 1 || type == 4) {//人工
-                WorkerGoods workerGoods = workerGoodsMapper.selectByPrimaryKey(gId);//人工商品
-                WorkerGoodsDTO wGoodsDTO = workerGoodsService.assembleWorkerGoodsResult(workerGoods);
-                return ServerResponse.createBySuccess("查询成功", wGoodsDTO);
-            } else if (type == 2 || type == 3 || type == 5) {//材料商品  包工包料商品
-                Product product = productMapper.selectByPrimaryKey(gId);//当前 货品
-                if(product == null){
-                    return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "该商品已禁用！");
-                }
-                GoodsDTO goodsDTO = goodsDetail(product, null);
-                if (goodsDTO != null) {
-                    return ServerResponse.createBySuccess("查询成功", goodsDTO);
-                } else {
-                    return ServerResponse.createByErrorMessage("查询失败,数据异常");
-                }
-
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("查询失败,数据异常");
-        }
-        return ServerResponse.createByErrorMessage("查询失败,type错误");
-    }
 
     /**
      * @param budgetMaterialId 传null ：表示不是精算里的商品。 如果是精算里的商品 ，可能有 关联组，关联组id 在 精算表里存的，所以，需要传精算id  ，
      * @return GoodsDTO
      */
-    public GoodsDTO goodsDetail(Product product, String budgetMaterialId) {
+    public Object goodsDetail(DjBasicsProduct product, String budgetMaterialId) {
         try {
-            GoodsDTO goodsDTO = new GoodsDTO();//长图  品牌系列图+属性图(多个)
-            Goods goods = goodsMapper.selectByPrimaryKey(product.getGoodsId());//当前 商品
-            goodsDTO.setProductId(product.getId());
-            goodsDTO.setGoodsId(goods.getId());
-            goodsDTO.setMaket(1);
-            if (product.getMaket() == 0 || product.getType() == 0) {
-                goodsDTO.setMaket(0);
-            }
-            goodsDTO.setImage(getImage(product.getImage()));//图一张
-            String convertUnitName = iUnitMapper.selectByPrimaryKey(product.getConvertUnit()).getName();
-            goodsDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + convertUnitName);
-            goodsDTO.setName(product.getName());
-            goodsDTO.setUnitName(convertUnitName);//单位
-            goodsDTO.setProductType(goods.getType());//材料类型
+            DjBasicsGoods goods = goodsMapper.selectByPrimaryKey(product.getGoodsId());
+            //如果商品为0：材料；1：服务
+            if(goods.getType()==1 || goods.getType()==2) {
+                GoodsDTO goodsDTO = new GoodsDTO();//长图  品牌系列图+属性图(多个)
+                DjBasicsProductMaterial targetProductMaterial = djBasicsProductMaterialMapper.queryProductMaterialByProductId(product.getId());//目标product 对象
+                goodsDTO.setProductId(product.getId());
+                goodsDTO.setGoodsId(goods.getId());
+                goodsDTO.setMaket(1);
+                if (product.getMaket() == 0 || product.getType() == 0) {
+                    goodsDTO.setMaket(0);
+                }
+                goodsDTO.setImage(getImage(product.getImage()));//图一张
+                String convertUnitName = iUnitMapper.selectByPrimaryKey(targetProductMaterial.getConvertUnit()).getName();
+                goodsDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + convertUnitName);
+                goodsDTO.setName(product.getName());
+                goodsDTO.setUnitName(convertUnitName);//单位
+                goodsDTO.setProductType(goods.getType());//材料类型
 
-            List<String> imageList = new ArrayList<>();//长图片 多图组合
-            GoodsGroup srcGoodsGroup = null;
-            //找到一个groupId 的可以切换的目标关联组
-            Set<String> pIdTargetGroupSet = new HashSet<>();//目标关联组下的所有productId
-            pIdTargetGroupSet.add(product.getId());
-            BudgetMaterial budgetMaterial = null;
-            if (budgetMaterialId != null) {
-                budgetMaterial = budgetMaterialMapper.selectByPrimaryKey(budgetMaterialId);
-            }
-            if (budgetMaterial != null) {
-                //有精算的时候，才有可能 有关联组的处理
-                if (StringUtils.isNoneBlank(budgetMaterial.getGoodsGroupId())) {
-                    srcGoodsGroup = iGoodsGroupMapper.selectByPrimaryKey(budgetMaterial.getGoodsGroupId());
-                    goodsDTO.setIsSwitch(1);
-                    String[] gGroupIds = srcGoodsGroup.getSwitchArr().split(",");
-                    if (StringUtils.isNoneBlank(gGroupIds)) {
-                        for (String gGroupId : gGroupIds) {
-                            //拼接 所有目标关联组 的所有 productId
-                            //找到所有可以切换的组 商品
-                            List<GroupLink> groupLinkList = iGroupLinkMapper.queryGroupLinkByGidAndGoodsId(gGroupId, product.getGoodsId());
-                            for (GroupLink groupLink : groupLinkList) {
-                                if (groupLink.getGoodsId().equals(product.getGoodsId())) { //可切换性0:可切换；1不可切换
-                                    if (groupLink.getProductId().equals(product.getId())) {// 找出当前product 所在关联组id 和 是否能切换
-                                        goodsDTO.setSrcGroupId(groupLink.getGroupId());
-                                        goodsDTO.setIsSwitch(groupLink.getIsSwitch());
-                                    }
-                                    if (groupLink.getIsSwitch() == 0) {//保存可以切换的 product
-                                        pIdTargetGroupSet.add(groupLink.getProductId());
+                List<String> imageList = new ArrayList<>();//长图片 多图组合
+                imageList.add(getImage(targetProductMaterial.getDetailImage()));//属性图
+                GoodsGroup srcGoodsGroup = null;
+                //找到一个groupId 的可以切换的目标关联组
+                Set<String> pIdTargetGroupSet = new HashSet<>();//目标关联组下的所有productId
+                pIdTargetGroupSet.add(product.getId());
+                BudgetMaterial budgetMaterial = null;
+                if (budgetMaterialId != null) {
+                    budgetMaterial = budgetMaterialMapper.selectByPrimaryKey(budgetMaterialId);
+                }
+                if (budgetMaterial != null) {
+                    //有精算的时候，才有可能 有关联组的处理
+                    if (StringUtils.isNoneBlank(budgetMaterial.getGoodsGroupId())) {
+                        srcGoodsGroup = iGoodsGroupMapper.selectByPrimaryKey(budgetMaterial.getGoodsGroupId());
+                        goodsDTO.setIsSwitch(1);
+                        String[] gGroupIds = srcGoodsGroup.getSwitchArr().split(",");
+                        if (StringUtils.isNoneBlank(gGroupIds)) {
+                            for (String gGroupId : gGroupIds) {
+                                //拼接 所有目标关联组 的所有 productId
+                                //找到所有可以切换的组 商品
+                                List<GroupLink> groupLinkList = iGroupLinkMapper.queryGroupLinkByGidAndGoodsId(gGroupId, product.getGoodsId());
+                                for (GroupLink groupLink : groupLinkList) {
+                                    if (groupLink.getGoodsId().equals(product.getGoodsId())) { //可切换性0:可切换；1不可切换
+                                        if (groupLink.getProductId().equals(product.getId())) {// 找出当前product 所在关联组id 和 是否能切换
+                                            goodsDTO.setSrcGroupId(groupLink.getGroupId());
+                                            goodsDTO.setIsSwitch(groupLink.getIsSwitch());
+                                        }
+                                        if (groupLink.getIsSwitch() == 0) {//保存可以切换的 product
+                                            pIdTargetGroupSet.add(groupLink.getProductId());
+                                        }
                                     }
                                 }
                             }
                         }
                     }
                 }
-            }
-            List<Product> productList = new ArrayList<>();
-            if (srcGoodsGroup != null) {//是关联组
-                for (String pId : pIdTargetGroupSet) {
-                    //如果没有品牌，就只遍历属性
-                    Product pt = productMapper.selectByPrimaryKey(pId);
-                    if (StringUtils.isNoneBlank(pt.getAttributeIdArr())
-                            && StringUtils.isNoneBlank(pt.getValueIdArr())) {
-                        productList.add(pt);
-                    }
-                }
-            } else {
-                Example example = new Example(Product.class);
-                example.createCriteria().andEqualTo(Product.GOODS_ID, goods.getId()).andEqualTo(Product.TYPE, "1");
-                example.orderBy(Product.VALUE_ID_ARR);
-                productList = productMapper.selectByExample(example);
-            }
-            List<AttributeDTO> attrList = getAllAttributes(product, productList, imageList);
-            goodsDTO.setAttrList(attrList);
-            if (imageList.size() > 0) {
-                String img = StringUtils.join(imageList, ",");
-                imageList.remove(0);
-                imageList.add(0, img);
-            }
-            goodsDTO.setImageList(imageList);
+                List<DjBasicsProduct> productList = new ArrayList<>();
+                if (srcGoodsGroup != null) {//是关联组
+                    for (String pId : pIdTargetGroupSet) {
+                        //如果没有品牌，就只遍历属性
+                        DjBasicsProductMaterial pt = djBasicsProductMaterialMapper.queryProductMaterialByProductId(pId);//目标product 对象
 
-            return goodsDTO;
+                        if (StringUtils.isNoneBlank(pt.getAttributeIdArr())
+                                && StringUtils.isNoneBlank(pt.getValueIdArr())) {
+                            DjBasicsProduct prot = productMapper.selectByPrimaryKey(pId);
+                            productList.add(prot);
+                        }
+                    }
+                } else {
+                    Example example = new Example(Product.class);
+                    example.createCriteria().andEqualTo(Product.GOODS_ID, goods.getId()).andEqualTo(Product.TYPE, "1");
+                    example.orderBy(Product.VALUE_ID_ARR);
+                    productList = productMapper.selectByExample(example);
+                }
+                List<AttributeDTO> attrList = getAllAttributes(product, productList);
+                goodsDTO.setAttrList(attrList);
+                if (imageList.size() > 0) {
+                    String img = StringUtils.join(imageList, ",");
+                    imageList.remove(0);
+                    imageList.add(0, img);
+                }
+                goodsDTO.setImageList(imageList);
+                return goodsDTO;
+            }else{
+                WorkerGoodsDTO  workerGoodsDTO=assembleWorkerGoodsResult(product);
+                return ServerResponse.createBySuccess("查询成功", workerGoodsDTO);
+            }
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
+    public WorkerGoodsDTO assembleWorkerGoodsResult(DjBasicsProduct workerGoods) {
+        try {
+            DjBasicsProductWorker pt = djBasicsProductWorkerMapper.queryProductWorkerByProductId(workerGoods.getId());//目标product 对象
+            DjBasicsGoods goods = goodsMapper.selectByPrimaryKey(workerGoods.getGoodsId());
+            WorkerGoodsDTO workerGoodsResult = new WorkerGoodsDTO();
+            workerGoodsResult.setId(workerGoods.getId());
+            workerGoodsResult.setName(workerGoods.getName());
+            workerGoodsResult.setWorkerGoodsSn(workerGoods.getProductSn());
+            workerGoodsResult.setImage(getImage(workerGoods.getImage()));
+            workerGoodsResult.setImageUrl(workerGoods.getImage());
+            workerGoodsResult.setWorkerDec(getImage(pt.getWorkerDec()));
+            workerGoodsResult.setWorkerDecUrl(pt.getWorkerDec());
+            workerGoodsResult.setUnitId(workerGoods.getUnitId());
+            workerGoodsResult.setUnitName(workerGoods.getUnitName());
+            workerGoodsResult.setOtherName(workerGoods.getOtherName());
+            String workerTypeName = "";
+            ServerResponse response = workerTypeAPI.getWorkerType(pt.getWorkerTypeId());
+            if (response.isSuccess()) {
+                workerTypeName = (((JSONObject) response.getResultObj()).getString(WorkerType.NAME));
+            }
+            workerGoodsResult.setWorkerTypeName(workerTypeName);
+            workerGoodsResult.setPrice(workerGoods.getPrice());
+            workerGoodsResult.setIstops(goods.getIstop());
+            workerGoodsResult.setSales(goods.getSales());
+            workerGoodsResult.setWorkExplain(pt.getWorkExplain());
+            workerGoodsResult.setWorkerStandard(pt.getWorkerStandard());
+            workerGoodsResult.setWorkerTypeId(pt.getWorkerTypeId());
+            workerGoodsResult.setWorkerTypeName(workerTypeName);
+            workerGoodsResult.setShowGoods(workerGoods.getMaket());
 
+            workerGoodsResult.setLastPrice(pt.getLastPrice());
+            workerGoodsResult.setLastTime(pt.getLastTime());
+            workerGoodsResult.setTechnologyIds(pt.getTechnologyIds());
+            workerGoodsResult.setConsiderations(pt.getConsiderations());
+            workerGoodsResult.setCalculateContent(pt.getCalculateContent());
+            workerGoodsResult.setBuildContent(pt.getBuildContent());
+
+            //将工艺列表返回
+            List<TechnologyDTO> technologies = new ArrayList<>();
+            List<Technology> technologyList = iTechnologyMapper.queryTechnologyList(pt.getTechnologyIds());
+            for (Technology technology : technologyList) {
+                TechnologyDTO technologyResult = new TechnologyDTO();
+                technologyResult.setId(technology.getId());
+                technologyResult.setName(technology.getName());
+                technologyResult.setWorkerTypeId(technology.getWorkerTypeId());
+                technologyResult.setContent(technology.getContent());
+                technologyResult.setImage(getImage(technology.getImage()));
+                technologyResult.setImageUrl(technology.getImage());
+                technologyResult.setSampleImage(technology.getSampleImage());
+                technologyResult.setSampleImageUrl(getImage(technology.getSampleImage()));
+                technologyResult.setType(technology.getType());
+                technologyResult.setCreateDate(DateUtils.timedate(String.valueOf(technology.getCreateDate().getTime())));
+                technologyResult.setModifyDate(DateUtils.timedate(String.valueOf(technology.getModifyDate().getTime())));
+                technologies.add(technologyResult);
+            }
+            workerGoodsResult.setTechnologies(technologies);
+            workerGoodsResult.setCreateDate(DateUtils.timedate(String.valueOf(workerGoods.getCreateDate().getTime())));
+            workerGoodsResult.setModifyDate(DateUtils.timedate(String.valueOf(workerGoods.getModifyDate().getTime())));
+            return workerGoodsResult;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
     //取第一张图
     private String getImage(String images) {
         if (!CommonUtil.isEmpty(images)) {
@@ -535,19 +533,23 @@ public class ActuaryOperationService {
             if (type == DjConstants.GXType.RENGGONG) {
                 List<BudgetWorker> budgetWorkerList = budgetWorkerMapper.getBudgetWorkerList(houseId, workerTypeId);
                 for (BudgetWorker bw : budgetWorkerList) {
-                    WorkerGoods workerGoods = workerGoodsMapper.selectByPrimaryKey(bw.getWorkerGoodsId());
                     FlowActuaryDTO flowActuaryDTO = new FlowActuaryDTO();
+                    DjBasicsProduct product = productMapper.selectByPrimaryKey(bw.getWorkerGoodsId());//当前 货品
+                    if(!CommonUtil.isEmpty(product.getGoodsId())){
+                        DjBasicsGoods goods = goodsMapper.selectByPrimaryKey(product.getGoodsId());
+                        flowActuaryDTO.setIsInfluence(goods.getIsInflueDecorationProgress());
+                    }
                     flowActuaryDTO.setBudgetMaterialId(bw.getId());
-                    flowActuaryDTO.setId(workerGoods.getId());
+                    flowActuaryDTO.setId(product.getId());
                     flowActuaryDTO.setName(bw.getName());
-                    flowActuaryDTO.setImage(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + workerGoods.getImage());
+                    flowActuaryDTO.setImage(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + product.getImage());
                     flowActuaryDTO.setTypeName(typsValue);
                     flowActuaryDTO.setType(type);
                     flowActuaryDTO.setShopCount(bw.getShopCount());
                     String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.COMMO, userToken, cityId, flowActuaryDTO.getTypeName() + "商品详情") + "&gId=" + bw.getId() + "&type=" + type;
                     flowActuaryDTO.setUrl(url);
-                    flowActuaryDTO.setPrice("¥" + String.format("%.2f", workerGoods.getPrice()) + "/" + workerGoods.getUnitName());
-                    flowActuaryDTO.setTotalPrice(workerGoods.getPrice() * bw.getShopCount());
+                    flowActuaryDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + bw.getUnitName());
+                    flowActuaryDTO.setTotalPrice(product.getPrice() * bw.getShopCount());
                     flowActuaryDTOList.add(flowActuaryDTO);
                 }
                 Double workerPrice = budgetWorkerMapper.getBudgetWorkerPrice(houseId, workerTypeId);//精算工钱
@@ -557,6 +559,7 @@ public class ActuaryOperationService {
                 List<MendWorker> budgetWorkerList = mendOrderInfoDTO.getMendWorkers();
                 for (MendWorker bw : budgetWorkerList) {
                     FlowActuaryDTO flowActuaryDTO = new FlowActuaryDTO();
+                    flowActuaryDTO.setIsInfluence("0");
                     flowActuaryDTO.setId(bw.getWorkerGoodsId());
                     flowActuaryDTO.setName(bw.getWorkerGoodsName());
                     flowActuaryDTO.setImage(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + bw.getImage());
@@ -573,23 +576,21 @@ public class ActuaryOperationService {
                 MendOrderInfoDTO mendOrderInfoDTO = mendOrderAPI.getMendDetail(workerTypeId, "0");
                 List<MendMateriel> budgetMaterielList = mendOrderInfoDTO.getMendMateriels();
                 for (MendMateriel mendMateriel : budgetMaterielList) {
-                    Product product = productMapper.selectByPrimaryKey(mendMateriel.getProductId());
                     FlowActuaryDTO flowActuaryDTO = new FlowActuaryDTO();
-                    flowActuaryDTO.setId(product.getId());
+                    flowActuaryDTO.setIsInfluence("0");
+                    flowActuaryDTO.setId(mendMateriel.getId());
                     flowActuaryDTO.setTypeName(typsValue);
                     flowActuaryDTO.setType(type);
                     flowActuaryDTO.setImage(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + mendMateriel.getImage());
                     flowActuaryDTO.setAttribute(getAttributes(mendMateriel.getProductId()));//拼接属性品牌
-
-                    Unit convertUnit = iUnitMapper.selectByPrimaryKey(product.getConvertUnit());
-                    flowActuaryDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + convertUnit.getName());
+                    flowActuaryDTO.setPrice("¥" + String.format("%.2f", mendMateriel.getPrice()) + "/" + mendMateriel.getUnitName());
                     flowActuaryDTO.setTotalPrice(mendMateriel.getTotalPrice());
                     flowActuaryDTO.setShopCount(mendMateriel.getShopCount());
                     flowActuaryDTO.setConvertCount(mendMateriel.getShopCount());
                     flowActuaryDTO.setBuy(0);
                     flowActuaryDTO.setBudgetMaterialId(mendMateriel.getProductId());
                     flowActuaryDTO.setName(mendMateriel.getProductName());
-                    flowActuaryDTO.setUnitName(convertUnit.getName());
+                    flowActuaryDTO.setUnitName(mendMateriel.getUnitName());
                     flowActuaryDTOList.add(flowActuaryDTO);
                 }
                 flowDTO.setSumTotal(new BigDecimal(mendOrderInfoDTO.getTotalAmount()));//合计
@@ -613,9 +614,12 @@ public class ActuaryOperationService {
                 }
                 if (budgetMaterialList != null)
                     for (BudgetMaterial bm : budgetMaterialList) {
-                        Goods goods = goodsMapper.selectByPrimaryKey(bm.getGoodsId());
-                        Product product = productMapper.selectByPrimaryKey(bm.getProductId());
+                        DjBasicsGoods goods = goodsMapper.selectByPrimaryKey(bm.getGoodsId());
+                        DjBasicsProduct product = productMapper.selectByPrimaryKey(bm.getProductId());//当前 货品
                         FlowActuaryDTO flowActuaryDTO = new FlowActuaryDTO();
+                        if(!CommonUtil.isEmpty(product.getGoodsId())){
+                            flowActuaryDTO.setIsInfluence(goods.getIsInflueDecorationProgress());
+                        }
                         flowActuaryDTO.setTypeName(typsValue);
                         flowActuaryDTO.setType(type);
                         String convertUnitName = bm.getUnitName();
@@ -627,9 +631,8 @@ public class ActuaryOperationService {
                                             cityId, flowActuaryDTO.getTypeName() + "商品详情") + "&gId=" + bm.getId() + "&type=" + type;
                             flowActuaryDTO.setUrl(url);
                             flowActuaryDTO.setAttribute(getAttributes(product.getId()));//拼接属性品牌
-                            convertUnitName = iUnitMapper.selectByPrimaryKey(product.getConvertUnit()).getName();
-                            flowActuaryDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + convertUnitName);
-                            flowActuaryDTO.setTotalPrice(product.getPrice() * bm.getConvertCount());
+                            flowActuaryDTO.setPrice("¥" + String.format("%.2f", bm.getPrice()) + "/" + convertUnitName);
+                            flowActuaryDTO.setTotalPrice(bm.getPrice() * bm.getConvertCount());
                         }
                         flowActuaryDTO.setShopCount(bm.getShopCount());
                         flowActuaryDTO.setConvertCount(bm.getConvertCount());
@@ -665,7 +668,7 @@ public class ActuaryOperationService {
     }
 
     //根据品牌系列找属性品牌
-    private List<AttributeDTO> getAllAttributes(Product product, List<Product> productList, List<String> imageList) {
+    private List<AttributeDTO> getAllAttributes(DjBasicsProduct product, List<DjBasicsProduct> productList) {
         List<AttributeDTO> attributeDTOList = new ArrayList<>();
         //品牌
         if (productList.size() > 0) {
@@ -673,32 +676,19 @@ public class ActuaryOperationService {
             attributeDTO.setId("0");
             attributeDTO.setName("规格");
             List<AttributeValueDTO> attributeValueDTOList = new ArrayList<>();
-            for (Product atId : productList) {
+            DjBasicsGoods goods = goodsMapper.selectByPrimaryKey(product.getGoodsId());
+            Brand brand =null;
+            if (!CommonUtil.isEmpty(goods.getBrandId())) {
+                 brand = iBrandMapper.selectByPrimaryKey(goods.getBrandId());
+            }
+            for (DjBasicsProduct atId : productList) {
+                DjBasicsProductMaterial pt = djBasicsProductMaterialMapper.queryProductMaterialByProductId(atId.getId());//目标product 对象
                 StringBuilder strbuf = new StringBuilder();
-                if (!CommonUtil.isEmpty(atId.getBrandId())) {
-                    Brand brand = iBrandMapper.selectByPrimaryKey(atId.getBrandId());
+                if (brand!=null) {
                     strbuf.append(brand.getName()).append(" ");
                 }
-                if (!CommonUtil.isEmpty(atId.getBrandSeriesId())) {
-                    BrandSeries brandSeries = iBrandSeriesMapper.selectByPrimaryKey(atId.getBrandSeriesId());
-                    strbuf.append(brandSeries.getName()).append(" ");
-                    if (atId.getId().equals(product.getId())) {//如果包含该属性
-                        if (!CommonUtil.isEmpty(brandSeries.getImage())) {
-                            imageList.add(getImage(brandSeries.getImage()));//属性图
-                        }
-                    }
-                }
-                if (!CommonUtil.isEmpty(atId.getValueIdArr())) {
-                    strbuf.append(atId.getValueNameArr().replaceAll(",", " "));
-//                    if (atId.getId().equals(product.getId())) {//如果包含该属性
-//                        String[] strAtIdArr = atId.getValueIdArr().split(",");
-//                        for (String atValId : strAtIdArr) {
-//                            AttributeValue strVIs = iAttributeValueMapper.selectByPrimaryKey(atValId);
-//                            if (strVIs != null && !CommonUtil.isEmpty(strVIs.getImage())) {
-//                                imageList.add(getImage(strVIs.getImage()));//属性图
-//                            }
-//                        }
-//                    }
+                if (!CommonUtil.isEmpty(pt.getValueIdArr())) {
+                    strbuf.append(pt.getValueNameArr().replaceAll(",", " "));
                 }
                 AttributeValueDTO avDTO = new AttributeValueDTO();
                 avDTO.setAttributeValueId(atId.getId());

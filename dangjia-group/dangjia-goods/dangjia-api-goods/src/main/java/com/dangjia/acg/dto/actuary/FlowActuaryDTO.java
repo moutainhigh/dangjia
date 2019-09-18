@@ -24,4 +24,5 @@ public class FlowActuaryDTO {
     private String unitName;//单位
     private Double totalPrice;//总价    最新价格
     private Integer selection;//是否选中：0：否，1：是
+    private String isInfluence;//是否影响装修进度 1：是   0：否
 }

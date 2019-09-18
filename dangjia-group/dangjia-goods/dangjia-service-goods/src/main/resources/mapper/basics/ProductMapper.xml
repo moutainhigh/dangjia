@@ -667,60 +667,7 @@
         bg.`name` DESC
     </select>
 
-    <select id="serchCategoryProduct" resultType="com.dangjia.acg.modle.basics.Product">
-        SELECT
-        bp.id,
-        bp.goods_id,
-        bp.`name`,
-        bp.image,
-        bp.price,
-        bg.type,
-        bp.istop,
-        IFNULL(m.convert_unit,bp.unit_id) AS convertUnit
-        FROM
-        dj_basics_goods bg
-        INNER JOIN dj_basics_product bp ON bp.goods_id = bg.id
-        <if test="(brandVal!=null and brandVal!='') or (attributeVal!=null and attributeVal!='')">
-            INNER JOIN dj_basics_product_material m ON m.product_id = bp.id
-        </if>
-        <if test="(brandVal==null and brandVal=='') and (attributeVal==null and attributeVal=='')">
-            LEFT JOIN dj_basics_product_material m ON m.product_id = bp.id
-        </if>
-        LEFT JOIN dj_basics_product_worker w ON w.product_id = bp.id
-        WHERE
-        bp.maket = 1
-        AND bp.type = 1
-        AND bg.data_status = 0
-        <if test="name!=null and name!=''">
-            AND CONCAT(bg.name,bp.name) LIKE CONCAT('%', #{name}, '%')
-        </if>
-        <if test="categoryId!=null and categoryId!=''">
-            AND bg.category_id = #{categoryId}
-        </if>
 
-        <if test="null!=attributeVal and attributeVal.size>0">
-            AND
-            <foreach collection="attributeVal" index="index" item="item" open="(" separator="OR" close=")">
-                 FIND_IN_SET( #{item},m.value_id_arr)
-            </foreach>
-        </if>
-        <if test="brandVal!=null and brandVal!=''">
-            AND  FIND_IN_SET(m.brand_id,#{brandVal})
-        </if>
-        <if test="orderKey!=null and orderKey!='' and orderKey==0 ">
-            ORDER BY bp.price
-        </if>
-        <if test="orderKey!=null and orderKey!='' and orderKey==1 ">
-            ORDER BY bp.price DESC
-        </if>
-        <if test="orderKey==null or orderKey==''">
-            ORDER BY
-            bp.istop DESC,
-            bg.category_id,
-            bg.`name` DESC
-        </if>
-
-    </select>
     <select id="selectProductByGoodsIdAndBrandIdAndBrandSeriesId"
             resultType="com.dangjia.acg.modle.basics.Product">
         SELECT

@@ -4,30 +4,30 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
-import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.actuary.AttributeDTO;
-import com.dangjia.acg.mapper.basics.*;
+import com.dangjia.acg.mapper.basics.IUnitMapper;
 import com.dangjia.acg.mapper.product.DjBasicsAttributeMapper;
+import com.dangjia.acg.mapper.product.DjBasicsProductMapper;
 import com.dangjia.acg.mapper.product.IBasicsGoodsCategoryMapper;
 import com.dangjia.acg.mapper.product.ICategoryLabelMapper;
-import com.dangjia.acg.modle.actuary.SearchBox;
-import com.dangjia.acg.modle.basics.Product;
-import com.dangjia.acg.modle.basics.WorkerGoods;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.product.BasicsGoodsCategory;
 import com.dangjia.acg.modle.product.CategoryLabel;
+import com.dangjia.acg.modle.product.DjBasicsProduct;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import tk.mybatis.mapper.entity.Example;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @类 名： AppCategoryGoodsService
@@ -39,7 +39,7 @@ import java.util.*;
 public class AppCategoryGoodsService {
 
     @Autowired
-    private IProductMapper iProductMapper;
+    private DjBasicsProductMapper djBasicsProductMapper;
     @Autowired
     private IUnitMapper iUnitMapper;
     @Autowired
@@ -141,10 +141,10 @@ public class AppCategoryGoodsService {
             if(!CommonUtil.isEmpty(attributeVal)){
                 attributeVals=attributeVal.split(",");
             }
-            List<Product> pList = iProductMapper.serchCategoryProduct(categoryId,StringTool.getLikeV(name),brandVal,attributeVals,orderKey);
+            List<DjBasicsProduct> pList = djBasicsProductMapper.serchCategoryProduct(categoryId,StringTool.getLikeV(name),brandVal,attributeVals,orderKey);
             pageResult = new PageInfo<>(pList);
-            for (Product product : pList) {
-                String convertUnitName = iUnitMapper.selectByPrimaryKey(product.getConvertUnit()).getName();
+            for (DjBasicsProduct product : pList) {
+                String convertUnitName = iUnitMapper.selectByPrimaryKey(product.getUnitId()).getName();
                 String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
                         String.format(DjConstants.YZPageAddress.GOODSDETAIL, "", cityId, "商品详情") +
                         "&gId=" + product.getId() ;
