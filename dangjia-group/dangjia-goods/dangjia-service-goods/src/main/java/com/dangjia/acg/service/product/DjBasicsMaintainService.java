@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Arrays;
 
@@ -109,10 +110,9 @@ public class DjBasicsMaintainService {
      * @return
      */
     public ServerResponse addRelatedTags(String id, String labelIds) {
-        DjBasicsMaintain djBasicsMaintain=new DjBasicsMaintain();
-        djBasicsMaintain.setId(id);
+        DjBasicsMaintain djBasicsMaintain=djBasicsMaintainMapper.selectByPrimaryKey(id);
         djBasicsMaintain.setLabelIds(labelIds);
-        djBasicsMaintain.setCreateDate(null);
+        djBasicsMaintain.setModifyDate(new Date());
         djBasicsMaintainMapper.updateByPrimaryKeySelective(djBasicsMaintain);
         return ServerResponse.createBySuccessMessage("关联标签成功");
     }
