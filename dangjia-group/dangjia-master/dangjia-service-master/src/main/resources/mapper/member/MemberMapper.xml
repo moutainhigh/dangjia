@@ -419,6 +419,7 @@
         <if test="type==8">
             INNER JOIN dj_house h ON h.id = o.house_id
             AND h.budget_ok in (1, 2, 3, 4)
+            AND h.designer_ok = 3
             WHERE
             o.worker_id = #{workerId}
             <if test="startDate!=null and endDate!=null and startDate!='' and endDate!=''">
