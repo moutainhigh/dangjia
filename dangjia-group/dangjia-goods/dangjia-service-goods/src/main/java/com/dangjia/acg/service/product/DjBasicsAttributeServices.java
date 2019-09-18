@@ -4,10 +4,13 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.mapper.product.*;
 import com.dangjia.acg.modle.product.*;
-import org.apache.commons.lang3.StringUtils;
+import com.dangjia.acg.pojo.product.DjBasicsAttributeValuePO;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,67 +18,59 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
  * author: wk
- * Date: 2019/9/15
- * Time: 10:04
+ * Date: 2019/9/18
+ * Time: 10:08
  */
 @Service
-public class DjBasicsGoodsCategoryService {
-    @Autowired
-    private DjBasicsGoodsCategoryMapper djBasicsGoodsCategoryMapper;
+public class DjBasicsAttributeServices {
     @Autowired
     private DjBasicsAttributeMapper djBasicsAttributeMapper;
     @Autowired
     private DjBasicsAttributeValueMapper djBasicsAttributeValueMapper;
-    private static Logger LOG = LoggerFactory.getLogger(DjBasicsGoodsCategoryService.class);
+    private static Logger LOG = LoggerFactory.getLogger(DjBasicsAttributeServices.class);
     @Autowired
     private DjBasicsProductMapper djBasicsProductMapper;
     @Autowired
     private DjBasicsGoodsMapper djBasicsGoodsMapper;
+    @Autowired
+    private DjBasicsProductMaterialMapper djBasicsProductMaterialMapper;
 
 
-    /**
-     * 新增商品类别
-     * @param name
-     * @param parentId
-     * @param parentTop
-     * @param sort
-     * @param isLastCategory
-     * @param categoryLabelId
-     * @param coverImage
-     * @param purchaseRestrictions
-     * @param brandId
-     * @return
-     */
-    public ServerResponse addGoodsCategory(String name, String parentId, String parentTop, Integer sort, Integer isLastCategory,
-                                           String categoryLabelId, String coverImage, Integer purchaseRestrictions, String brandId) {
+
+    //根据类别id查询关联属性
+    public ServerResponse<PageInfo> queryGoodsAttribute(PageDTO pageDTO, String goodsCategoryId, String likeAttrName) {
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         try {
-            Example example=new Example(DjBasicsGoodsCategory.class);
-            example.createCriteria().andEqualTo(DjBasicsGoodsCategory.NAME,name);
-            List<DjBasicsGoodsCategory> djBasicsGoodsCategories = djBasicsGoodsCategoryMapper.selectByExample(example);//根据name查询商品对象
-            if (djBasicsGoodsCategories.size() > 0)
-                return ServerResponse.createByErrorMessage("不能重复添加类别");
-            DjBasicsGoodsCategory djBasicsGoodsCategory = new DjBasicsGoodsCategory();
-            djBasicsGoodsCategory.setName(name);
-            djBasicsGoodsCategory.setParentId(parentId);
-            djBasicsGoodsCategory.setParentTop(parentTop);
-            djBasicsGoodsCategory.setIsLastCategory(isLastCategory);
-            djBasicsGoodsCategory.setCategoryLabelId(categoryLabelId);
-            djBasicsGoodsCategory.setImage(coverImage);
-            djBasicsGoodsCategory.setPurchaseRestrictions(purchaseRestrictions);
-            djBasicsGoodsCategory.setBrandId(brandId);
-            if (sort == null) sort = 99;
-            djBasicsGoodsCategory.setSort(sort);
-            djBasicsGoodsCategoryMapper.insert(djBasicsGoodsCategory);
-            return ServerResponse.createBySuccess("新增成功", djBasicsGoodsCategory.getId());
+            List<DjBasicsAttribute> caList  = djBasicsAttributeMapper.queryAttributeByCategoryId(goodsCategoryId, likeAttrName);
+            List<Map<String, Object>> rListMap = new ArrayList<>();
+            PageInfo pageResult = new PageInfo(caList);
+            caList.forEach(ca ->{
+                Map<String, Object> caMap = new HashMap<>();
+                caMap.put("id", ca.getId());
+                caMap.put("name", ca.getName());
+                caMap.put("type", ca.getType());
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                caMap.put("createDate", sdf.format(ca.getCreateDate()));
+                caMap.put("modifyDate", sdf.format(ca.getModifyDate()));
+                List<DjBasicsAttributeValuePO> avList = djBasicsAttributeValueMapper.queryPOByAttributeId(ca.getId());
+                List<Map<String, Object>> avListMap = new ArrayList<>();
+                avList.forEach(av ->{
+                    Map<String, Object> avMap = new HashMap<>();
+                    avMap.put("avId", av.getId());
+                    avMap.put("avName", av.getName());
+                    avListMap.add(avMap);
+                });
+                caMap.put("avListMap", avListMap);
+                rListMap.add(caMap);
+            });
+            pageResult.setList(rListMap);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();
             throw new BaseException(ServerCode.WRONG_PARAM, "查询失败");
@@ -83,56 +78,79 @@ public class DjBasicsGoodsCategoryService {
     }
 
 
-    /**
-     * 修改商品类别
-     * @param name
-     * @param parentId
-     * @param parentTop
-     * @param sort
-     * @param isLastCategory
-     * @param categoryLabelId
-     * @param coverImage
-     * @param purchaseRestrictions
-     * @param brandId
-     * @return
-     */
-    public ServerResponse updateGoodsCategory(String id,String name, String parentId, String parentTop, Integer sort, Integer isLastCategory,
-                                              String categoryLabelId, String coverImage, Integer purchaseRestrictions, String brandId) {
+    //根据属性名称模糊查询属性
+    public ServerResponse<PageInfo> queryGoodsAttributelikeName(PageDTO pageDTO, String name) {
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         try {
-            DjBasicsGoodsCategory djBasicsGoodsCategory = djBasicsGoodsCategoryMapper.selectByPrimaryKey(id);
-            if (!djBasicsGoodsCategory.getName().equals(name)) { //如果 是修改name
-                Example example=new Example(DjBasicsGoodsCategory.class);
-                example.createCriteria().andEqualTo(DjBasicsGoodsCategory.NAME,name);
-                List<DjBasicsGoodsCategory> djBasicsGoodsCategories = djBasicsGoodsCategoryMapper.selectByExample(example);//根据name查询商品对象
-                if (djBasicsGoodsCategories.size() > 0)
-                    return ServerResponse.createByErrorMessage("该类别已存在");
+            List<DjBasicsAttribute> caList;
+            List<Map<String, Object>> rListMap = new ArrayList<>();
+            if (name == null || "".equals(name)) {
+                caList = djBasicsAttributeMapper.selectAll();
+            } else {
+                Example example=new Example(DjBasicsAttribute.class);
+                example.createCriteria().andLike(DjBasicsAttribute.NAME,"%" + name + "%");
+                example.orderBy(DjBasicsAttribute.CREATE_DATE).desc();
+                caList = djBasicsAttributeMapper.selectByExample(example);
             }
-            djBasicsGoodsCategory.setName(name);
-            djBasicsGoodsCategory.setParentId(parentId);
-            djBasicsGoodsCategory.setParentTop(parentTop);
-            djBasicsGoodsCategory.setIsLastCategory(isLastCategory);
-            djBasicsGoodsCategory.setCategoryLabelId(categoryLabelId);
-            djBasicsGoodsCategory.setImage(coverImage);
-            djBasicsGoodsCategory.setPurchaseRestrictions(purchaseRestrictions);
-            djBasicsGoodsCategory.setBrandId(brandId);
-            if (sort != null) {
-                djBasicsGoodsCategory.setSort(sort);
+            PageInfo pageResult = new PageInfo(caList);
+            for (DjBasicsAttribute ca : caList) {
+                Map<String, Object> caMap = new HashMap<>();
+                caMap.put("id", ca.getId());
+                caMap.put("name", ca.getName());
+                caMap.put("type", ca.getType());
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                caMap.put("createDate", sdf.format(ca.getCreateDate()));
+                caMap.put("modifyDate", sdf.format(ca.getModifyDate()));
+                Example example=new Example(DjBasicsAttributeValue.class);
+                example.createCriteria().andEqualTo(DjBasicsAttributeValue.ATTRIBUTE_ID,ca.getId());
+                example.orderBy(DjBasicsAttributeValue.CREATE_DATE).desc();
+                List<DjBasicsAttributeValue> avList = djBasicsAttributeValueMapper.selectByExample(example);
+                List<Map<String, Object>> avListMap = new ArrayList<>();
+                for (DjBasicsAttributeValue av : avList) {
+                    Map<String, Object> avMap = new HashMap<>();
+                    avMap.put("avId", av.getId());
+                    avMap.put("avName", av.getName());
+                    avListMap.add(avMap);
+                }
+                caMap.put("avListMap", avListMap);
+                rListMap.add(caMap);
             }
-            djBasicsGoodsCategoryMapper.updateByPrimaryKeySelective(djBasicsGoodsCategory);
-            return ServerResponse.createBySuccessMessage("修改成功");
+            pageResult.setList(rListMap);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();
-            throw new BaseException(ServerCode.WRONG_PARAM, "修改失败");
+            throw new BaseException(ServerCode.WRONG_PARAM, "查询失败");
         }
     }
 
-    //查询商品属性列表 queryGoodsCategory
-    public ServerResponse queryGoodsCategory(String parentId) {
-        List<DjBasicsGoodsCategory> djBasicsGoodsCategories = djBasicsGoodsCategoryMapper.queryCategoryByParentId(parentId);
-        if (djBasicsGoodsCategories.size() <= 0) {
-            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+
+    //根据属性id查询属性及其所有关联属性选项
+    public ServerResponse queryAttributeValue(String id) {
+        try {
+            Map<String, Object> gaMap = new HashMap<>();
+            DjBasicsAttribute goodsAttribute = djBasicsAttributeMapper.selectByPrimaryKey(id);
+            if (goodsAttribute != null) {
+                gaMap.put("id", goodsAttribute.getId());
+                gaMap.put("name", goodsAttribute.getName());
+                gaMap.put("type", goodsAttribute.getType());
+                Example example=new Example(DjBasicsAttributeValue.class);
+                example.createCriteria().andEqualTo(DjBasicsAttributeValue.ATTRIBUTE_ID,goodsAttribute.getId());
+                example.orderBy(DjBasicsAttributeValue.CREATE_DATE).desc();
+                List<DjBasicsAttributeValue> avList = djBasicsAttributeValueMapper.selectByExample(example);
+                List<Map<String, Object>> avListMap = new ArrayList<>();
+                for (DjBasicsAttributeValue av : avList) {
+                    Map<String, Object> avMap = new HashMap<>();
+                    avMap.put("avId", av.getId());
+                    avMap.put("avName", av.getName());
+                    avListMap.add(avMap);
+                }
+                gaMap.put("avListMap", avListMap);
+            }
+            return ServerResponse.createBySuccess("查询成功", gaMap);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new BaseException(ServerCode.WRONG_PARAM, "查询失败");
         }
-        return ServerResponse.createBySuccess("查询成功", djBasicsGoodsCategories);
     }
 
 
@@ -252,6 +270,52 @@ public class DjBasicsGoodsCategoryService {
         }
     }
 
+    /**
+     * 删除商品属性
+     */
+    public ServerResponse deleteGoodsAttribute(String goodsAttributeId) {
+        try {
+            DjBasicsAttribute srcAttribute = djBasicsAttributeMapper.selectByPrimaryKey(goodsAttributeId);
+            List<DjBasicsGoods> goodsList = djBasicsGoodsMapper.queryByCategoryId(srcAttribute.getCategoryId());//根据分类id查询是否有关联商品
+            if (goodsList.size() > 0)
+                return ServerResponse.createByErrorMessage("该商品属性有关联商品不能删除");
+
+            List<DjBasicsProduct> productLists = djBasicsProductMapper.getPListByValueIdArrOrAttrId(srcAttribute.getId(), null);
+            if (productLists.size() > 0)
+                return ServerResponse.createByErrorMessage("该商品属性有关联商品不能删除");
+
+
+            //检查该分类中的所有商品，是否有商品使用 该属性名和属性选项名
+            for (DjBasicsGoods gs : goodsList) {
+//				LOG.info("gs name:"+ gs.getName());
+                //检查属性名已经存在   属性名是否有商品使用
+                List<DjBasicsProduct> productList = djBasicsProductMapper.queryByGoodsId(gs.getId());
+                Example example=new Example(DjBasicsProductMaterial.class);
+                for (DjBasicsProduct product : productList) {
+                    example.createCriteria().andEqualTo(DjBasicsProductMaterial.PRODUCT_ID,product.getId());
+                    List<DjBasicsProductMaterial> djBasicsProductMaterials = djBasicsProductMaterialMapper.selectByExample(example);
+                    for (DjBasicsProductMaterial djBasicsProductMaterial : djBasicsProductMaterials) {
+                        String[] attributeIdArr = djBasicsProductMaterial.getAttributeIdArr().split(",");
+                        for (String anAttributeIdArr : attributeIdArr) {
+                            DjBasicsAttribute ae = djBasicsAttributeMapper.selectByPrimaryKey(anAttributeIdArr);
+                            if (srcAttribute.getName().equals(ae.getName()))
+                                return ServerResponse.createByErrorMessage("删除失败，该属性选项名已被其他商品使用");
+                        }
+                    }
+                }
+            }
+
+            djBasicsAttributeMapper.deleteByPrimaryKey(goodsAttributeId);//删除商品属性
+            Example example=new Example(DjBasicsAttributeValue.class);
+            example.createCriteria().andEqualTo(DjBasicsAttributeValue.ATTRIBUTE_ID,goodsAttributeId);
+            djBasicsAttributeValueMapper.deleteByExample(example);//删除属性选项
+            return ServerResponse.createBySuccessMessage("删除成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new BaseException(ServerCode.WRONG_PARAM, "删除失败");
+        }
+    }
+
 
     public ServerResponse deleteByAttributeId(String attributeValueId) {
         try {
@@ -273,58 +337,5 @@ public class DjBasicsGoodsCategoryService {
             throw new BaseException(ServerCode.WRONG_PARAM, "删除失败");
         }
     }
-
-    //查询类别id查询所有父级以及父级属性
-    public ServerResponse queryAttributeListById(String goodsCategoryId) {
-        try {
-            if (!StringUtils.isNoneBlank(goodsCategoryId)) {
-                return ServerResponse.createByErrorMessage("goodsCategoryId不能为null");
-            }
-            DjBasicsGoodsCategory djBasicsGoodsCategory = djBasicsGoodsCategoryMapper.selectByPrimaryKey(goodsCategoryId);
-            if (djBasicsGoodsCategory == null) {
-                return ServerResponse.createByErrorMessage("查询失败");
-            }
-            List<DjBasicsAttribute> djBasicsAttributes = djBasicsAttributeMapper.queryAttributeByCategoryId(djBasicsGoodsCategory.getId(), null);
-            while (djBasicsGoodsCategory != null) {
-                djBasicsGoodsCategory = djBasicsGoodsCategoryMapper.selectByPrimaryKey(djBasicsGoodsCategory.getParentId());
-                if (djBasicsGoodsCategory != null) {
-                    djBasicsAttributes.addAll(djBasicsAttributeMapper.queryAttributeByCategoryId(djBasicsGoodsCategory.getId(), null));
-                }
-            }
-            return ServerResponse.createBySuccess("查询成功", djBasicsAttributes);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("查询失败");
-        }
-    }
-
-
-    //查询两级商品分类
-    public ServerResponse queryGoodsCategoryTwo() {
-        try {
-            List<Map<String, Object>> mapList = new ArrayList<>();
-            List<DjBasicsGoodsCategory> djBasicsGoodsCategories = djBasicsGoodsCategoryMapper.queryCategoryByParentId("1");
-            for (DjBasicsGoodsCategory djBasicsGoodsCategory : djBasicsGoodsCategories) {
-                Map<String, Object> map = new HashMap<>();
-                map.put("id", djBasicsGoodsCategory.getId());
-                map.put("name", djBasicsGoodsCategory.getName());
-                List<Map<String, Object>> mapTwoList = new ArrayList<>();
-                List<DjBasicsGoodsCategory> djBasicsGoodsCategories1 = djBasicsGoodsCategoryMapper.queryCategoryByParentId(djBasicsGoodsCategory.getId());
-                for (DjBasicsGoodsCategory djBasicsGoodsCategory1 : djBasicsGoodsCategories1) {
-                    Map<String, Object> mapTwo = new HashMap<>();
-                    mapTwo.put("id", djBasicsGoodsCategory1.getId());
-                    mapTwo.put("name", djBasicsGoodsCategory1.getName());
-                    mapTwoList.add(mapTwo);
-                }
-                map.put("nextList", mapTwoList);
-                mapList.add(map);
-            }
-            return ServerResponse.createBySuccess("查询成功", mapList);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("查询失败");
-        }
-    }
-
 
 }

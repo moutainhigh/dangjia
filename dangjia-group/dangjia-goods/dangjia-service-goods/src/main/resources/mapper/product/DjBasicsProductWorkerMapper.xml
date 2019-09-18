@@ -27,4 +27,39 @@
         where data_status = 0
         and product_id = #{productId}
     </select>
+
+    <select id="queryWorkerGoodsDTO" resultType="com.dangjia.acg.dto.basics.WorkerGoodsDTO">
+        SELECT
+            p.id,
+            p. NAME as name,
+            p.product_sn as workerGoodsSn,
+            p.image,
+            w.worker_dec as workerDec,
+            p.unit_id as unitId,
+            p.unit_name as unitName,
+            p.other_name as otherName,
+            w.worker_type_id as workerTypeId,
+            p.price,
+            p.istop,
+            g.sales,
+            w.work_explain as workExplain,
+            w.worker_standard as workerStandard,
+            p.maket,
+            w.last_price as lastPrice,
+            w.last_time as lastTime,
+            w.technology_ids as technologyIds,
+            w.considerations as considerations,
+            w.calculate_content as calculateContent,
+            w.build_content as buildContent,
+            p.create_date as createDate,
+	        p.modify_date as modifyDate
+        FROM
+            dj_basics_product p
+        INNER JOIN dj_basics_product_worker w ON p.id = w.product_id
+        INNER JOIN dj_basics_goods g ON p.goods_id = g.id
+        where p.data_status=0
+        and p.maket=1
+        and p.product_sn=#{productSn}
+        and w.worker_type_id=#{workerTypeId}
+    </select>
 </mapper>

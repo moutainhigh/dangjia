@@ -124,12 +124,13 @@ public class DjBasicsMaintainService {
      * @return
      */
     public ServerResponse delKeywords(String id) {
-        DjBasicsMaintain djBasicsMaintain=new DjBasicsMaintain();
-        djBasicsMaintain.setId(id);
-        djBasicsMaintain.setDataStatus(1);
-        djBasicsMaintain.setCreateDate(null);
-        djBasicsMaintainMapper.updateByPrimaryKeySelective(djBasicsMaintain);
-        return ServerResponse.createBySuccessMessage("删除关键词成功");
+        try {
+            djBasicsMaintainMapper.deleteByPrimaryKey(id);
+            return ServerResponse.createBySuccessMessage("删除关键词成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("删除关键词失败");
+        }
     }
 
     /**
@@ -140,7 +141,10 @@ public class DjBasicsMaintainService {
     public ServerResponse queryKeywords(String id) {
         if(!CommonUtil.isEmpty(id))
             return ServerResponse.createBySuccess("查询成功",djBasicsMaintainMapper.selectByPrimaryKey(id));
-        List<DjBasicsMaintain> djBasicsMaintains = djBasicsMaintainMapper.selectAll();
+        Example example=new Example(DjBasicsMaintain.class);
+        example.createCriteria().andEqualTo(DjBasicsMaintain.DATA_STATUS,0);
+        example.orderBy(DjBasicsMaintain.CREATE_DATE).desc();
+        List<DjBasicsMaintain> djBasicsMaintains = djBasicsMaintainMapper.selectByExample(example);
         if(djBasicsMaintains.size()<=0)
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
         return ServerResponse.createBySuccess("查询成功",djBasicsMaintains);

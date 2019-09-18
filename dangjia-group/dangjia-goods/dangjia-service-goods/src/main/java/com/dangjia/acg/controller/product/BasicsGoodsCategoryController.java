@@ -6,6 +6,7 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.basics.AttributeService;
 import com.dangjia.acg.service.product.BasicsGoodsCategoryService;
+import com.dangjia.acg.service.product.DjBasicsAttributeServices;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,7 +27,7 @@ public class BasicsGoodsCategoryController implements BasicsGoodsCategoryAPI {
     @Autowired
     private BasicsGoodsCategoryService basicsGoodsCategoryService;
     @Autowired
-    private AttributeService goodsAttributeService;
+    private DjBasicsAttributeServices djBasicsAttributeServices;
 
     /**
      * 商品分类类别查询
@@ -102,7 +103,7 @@ public class BasicsGoodsCategoryController implements BasicsGoodsCategoryAPI {
     @Override
     @ApiMethod
     public ServerResponse<PageInfo> queryBasicsGoodsAttribute(HttpServletRequest request, PageDTO pageDTO, String goodsCategoryId, String likeAttrName) {
-        return goodsAttributeService.queryGoodsAttribute(pageDTO, goodsCategoryId, likeAttrName);
+        return djBasicsAttributeServices.queryGoodsAttribute(pageDTO, goodsCategoryId, likeAttrName);
     }
 
     /**
@@ -113,7 +114,7 @@ public class BasicsGoodsCategoryController implements BasicsGoodsCategoryAPI {
     @Override
     @ApiMethod
     public ServerResponse<PageInfo> queryGoodsAttributelikeName(HttpServletRequest request, PageDTO pageDTO, String name) {
-        return goodsAttributeService.queryGoodsAttributelikeName(pageDTO, name);
+        return djBasicsAttributeServices.queryGoodsAttributelikeName(pageDTO, name);
     }
 
     /**
@@ -124,7 +125,7 @@ public class BasicsGoodsCategoryController implements BasicsGoodsCategoryAPI {
     @Override
     @ApiMethod
     public ServerResponse queryAttributeValue(HttpServletRequest request, String goodsAttributeId) {
-        return goodsAttributeService.queryAttributeValue(goodsAttributeId);
+        return djBasicsAttributeServices.queryAttributeValue(goodsAttributeId);
     }
 
     /**
@@ -134,8 +135,8 @@ public class BasicsGoodsCategoryController implements BasicsGoodsCategoryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse insertGoodsAttribute(HttpServletRequest request, String goodsCategoryId, String attributeName, Integer type, String jsonStr) {
-        return goodsAttributeService.insertGoodsAttribute(goodsCategoryId, attributeName, type, jsonStr);
+    public ServerResponse addGoodsAttribute(HttpServletRequest request, String goodsCategoryId, String attributeName, Integer type, String jsonStr, Integer isScreenConditions) {
+        return djBasicsAttributeServices.addGoodsAttribute(goodsCategoryId,attributeName,type,jsonStr,isScreenConditions);
     }
 
     /**
@@ -145,8 +146,8 @@ public class BasicsGoodsCategoryController implements BasicsGoodsCategoryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse doModifyGoodsAttribute(HttpServletRequest request, String attributeId, String attributeName, Integer type, String jsonStr) {
-        return goodsAttributeService.doModifyGoodsAttribute(attributeId, attributeName, type, jsonStr);
+    public ServerResponse updateGoodsAttribute(HttpServletRequest request, String attributeId, String attributeName, Integer type, String jsonStr, Integer isScreenConditions) {
+        return djBasicsAttributeServices.updateGoodsAttribute(attributeId,attributeName,type,jsonStr,isScreenConditions);
     }
 
     /**
@@ -155,7 +156,7 @@ public class BasicsGoodsCategoryController implements BasicsGoodsCategoryAPI {
     @Override
     @ApiMethod
     public ServerResponse deleteGoodsAttribute(HttpServletRequest request, String goodsAttributeId) {
-        return goodsAttributeService.deleteGoodsAttribute(goodsAttributeId);
+        return djBasicsAttributeServices.deleteGoodsAttribute(goodsAttributeId);
     }
 
     /**
@@ -164,7 +165,7 @@ public class BasicsGoodsCategoryController implements BasicsGoodsCategoryAPI {
     @Override
     @ApiMethod
     public ServerResponse deleteByAttributeId(HttpServletRequest request, String attributeValueId) {
-        return goodsAttributeService.deleteByAttributeId(attributeValueId);
+        return djBasicsAttributeServices.deleteByAttributeId(attributeValueId);
     }
     /**
      * 删除商品类别
