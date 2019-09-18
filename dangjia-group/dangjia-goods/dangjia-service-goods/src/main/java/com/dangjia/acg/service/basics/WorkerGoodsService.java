@@ -57,7 +57,7 @@ public class WorkerGoodsService {
     @Autowired
     private MasterMendWorkerAPI masterMendWorkerAPI;
 
-    public ServerResponse<PageInfo> getWorkerGoodses(PageDTO pageDTO, String istops,String workerTypeId, String searchKey, String showGoods) {
+    /*public ServerResponse<PageInfo> getWorkerGoodses(PageDTO pageDTO, String istops,String workerTypeId, String searchKey, String showGoods) {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<WorkerGoods> productList = iWorkerGoodsMapper.selectList(StringUtils.isBlank(workerTypeId) ? null : workerTypeId,
                 StringUtils.isBlank(searchKey) ? null : searchKey, StringUtils.isBlank(showGoods) ? null : showGoods,istops);
@@ -74,7 +74,7 @@ public class WorkerGoodsService {
         PageInfo pageResult = new PageInfo(productList);
         pageResult.setList(workerGoodsResults);
         return ServerResponse.createBySuccess("获取工价商品列表成功", pageResult);
-    }
+    }*/
 
     public WorkerGoodsDTO getWorkerGoodsDTO(String workerGoodsSn, String workerTypeId, String shopCount) {
         Example example = new Example(WorkerGoods.class);
@@ -177,7 +177,7 @@ public class WorkerGoodsService {
         }
     }
 
-    @Transactional(rollbackFor = Exception.class)
+   /* @Transactional(rollbackFor = Exception.class)
     public ServerResponse<String> setWorkerGoods(WorkerGoods workerGoods, String technologyJsonList, String deleteTechnologyIds) {
         if (workerGoods == null) {
             return ServerResponse.createByErrorMessage("请传入参数");
@@ -237,7 +237,7 @@ public class WorkerGoodsService {
         }
 
         return ServerResponse.createBySuccessMessage("操作工价商品成功");
-    }
+    }*/
 
     /**
      * 每工种未删除 或 已支付工钱

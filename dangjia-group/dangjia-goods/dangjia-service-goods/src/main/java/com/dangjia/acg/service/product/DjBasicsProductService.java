@@ -283,7 +283,6 @@ public class DjBasicsProductService {
         djBasicsProductWorker.setCalculateContent(basicsProductDTO.getCalculateContent());
         djBasicsProductWorker.setBuildContent(basicsProductDTO.getBuildContent());
         djBasicsProductWorker.setIsAgencyPurchase(basicsProductDTO.getIsAgencyPurchase());
-        djBasicsProductWorker.setShowGoods(basicsProductDTO.getShowGoods());
         //根据商品ID查询扩展表的ID
         DjBasicsProductWorker oldBasicsProductWorker = djBasicsProductWorkerMapper.queryProductWorkerByProductId(productId);
         if(oldBasicsProductWorker!=null&&StringUtils.isNotBlank(oldBasicsProductWorker.getId())){

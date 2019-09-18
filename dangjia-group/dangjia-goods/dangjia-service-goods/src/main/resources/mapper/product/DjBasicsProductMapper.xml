@@ -164,6 +164,9 @@
         limit 1
     </select>
 
+    <update id="updateProductCategoryByGoodsId">
+        update dj_basics_product set category_id=#{categoryId} where goods_id=#{goodsId}
+    </update>
 
     <!-- 删除材料商品扩展表信息-->
     <delete id="deleteProductMaterial" parameterType="java.lang.String">
@@ -186,4 +189,21 @@
         ORDER BY istop DESC,create_date desc
     </select>
 
+    <select id="queryProductByTechnologyIds" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.product.DjBasicsProduct">
+        SELECT
+        <include refid="new_columns"/>
+        FROM dj_basics_product t
+        where t.data_status = 0
+        AND t.maket = 1
+        AND EXISTS (
+        SELECT
+        1
+        FROM
+        dj_basics_product_worker t1
+        WHERE
+        t.id = t1.product_id
+        AND FIND_IN_SET(#{technologyId}, t1.technology_ids)
+        )
+        ORDER BY istop DESC,create_date desc
+    </select>
 </mapper>

@@ -1,5 +1,6 @@
 package com.dangjia.acg.mapper.product;
 
+import com.dangjia.acg.dto.actuary.AttributeDTO;
 import com.dangjia.acg.modle.product.DjBasicsAttribute;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -20,4 +21,8 @@ public interface DjBasicsAttributeMapper extends Mapper<DjBasicsAttribute> {
     List<DjBasicsAttribute> queryAttributeByCategoryId(@Param("categoryId") String categoryId, @Param("likeAttrName") String likeAttrName);
 
     List<DjBasicsAttribute> queryAttributeByCategoryIdAndAttrName(@Param("categoryId") String categoryId, @Param("attrName") String attrName);
+
+    List<AttributeDTO> queryAttributeDatas(@Param("categoryId") String categoryId);
+
+
 }

@@ -18,7 +18,7 @@ import java.util.List;
 @Repository
 public interface IWorkerGoodsMapper extends Mapper<WorkerGoods> {
 
-
+/*
     List<WorkerGoods> selectLists();
 
     List<WorkerGoods> selectList(@Param("workerTypeId") String workerTypeId, @Param("searchKey") String searchKey, @Param("showGoods") String showGoods, @Param("istops") String istops);
@@ -30,15 +30,14 @@ public interface IWorkerGoodsMapper extends Mapper<WorkerGoods> {
     List<WorkerGoods> selectByWorkerGoodsSn(@Param("workerGoodsSn") String name, @Param("workerTypeId") String workerTypeId);
 
     WorkerGoods queryById(@Param("id") String id);
+    List<WorkerGoods> queryRepairBudgetWorker(@Param("houseId") String houseId, @Param("workerTypeId") String workerTypeId, @Param("name") String name);
 
+    *//*更新单位*//*
+    void updateWorkerGoodsByUnitId(@Param("unitId") String unitId, @Param("unitName") String unitName);
+
+    List<HomeProductDTO> getHomeProductList();*/
     Double getWorkertoCheck(@Param("houseId") String houseId, @Param("houseFlowId") String houseFlowId);
 
     Double getPayedWorker(@Param("houseId") String houseId, @Param("houseFlowId") String houseFlowId);
-
-    List<WorkerGoods> queryRepairBudgetWorker(@Param("houseId") String houseId, @Param("workerTypeId") String workerTypeId, @Param("name") String name);
-
-    /*更新单位*/
-    void updateWorkerGoodsByUnitId(@Param("unitId") String unitId, @Param("unitName") String unitName);
-
     List<HomeProductDTO> getHomeProductList();
 }

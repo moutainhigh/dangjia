@@ -81,7 +81,7 @@ public interface IProductMapper extends Mapper<Product> {
      * @return 到的goods中的商品名称
      */
     List<Product> serchBoxName(@Param("name") String name);
-    List<Product> serchCategoryProduct(@Param("categoryId") String categoryId,@Param("name") String name,@Param("brandVal") String brandVal,@Param("attributeVal") String attributeVal,@Param("orderKey") String orderKey);
+    List<Product> serchCategoryProduct(@Param("categoryId") String categoryId,@Param("name") String name,@Param("brandVal") String brandVal,@Param("attributeVal") String[] attributeVal,@Param("orderKey") String orderKey);
 
 
     Product selectProductByGoodsIdAndBrandIdAndBrandSeriesId(String goodsId, String brandId, String brandSeriesId);

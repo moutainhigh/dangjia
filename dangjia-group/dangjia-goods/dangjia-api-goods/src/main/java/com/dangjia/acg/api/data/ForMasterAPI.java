@@ -1,12 +1,14 @@
 package com.dangjia.acg.api.data;
 
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dto.product.ProductWorkerDTO;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.basics.WorkerGoods;
+import com.dangjia.acg.modle.product.DjBasicsProduct;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
 import io.swagger.annotations.Api;
@@ -67,7 +69,8 @@ public interface ForMasterAPI {
 
     @PostMapping("/data/forMaster/getWorkerGoods")
     @ApiOperation(value = "工价商品信息", notes = "工价商品信息")
-    WorkerGoods getWorkerGoods(@RequestParam("cityId") String cityId,@RequestParam("workerGoodsId") String workerGoodsId);
+    ProductWorkerDTO getWorkerGoods(@RequestParam("cityId") String cityId, @RequestParam("workerGoodsId") String workerGoodsId);
+   // WorkerGoods getWorkerGoods(@RequestParam("cityId") String cityId,@RequestParam("workerGoodsId") String workerGoodsId);
 
     @PostMapping("/data/goods/settop")
     @ApiOperation(value = "设置材料或者人工商品置顶或取消置顶", notes = "设置材料或者人工商品置顶或取消置顶")

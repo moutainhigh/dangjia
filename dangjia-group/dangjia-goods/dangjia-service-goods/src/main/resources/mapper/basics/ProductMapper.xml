@@ -671,7 +671,7 @@
         SELECT
         bp.id,
         bp.goods_id,
-        bp.`name`,,
+        bp.`name`,
         bp.image,
         bp.price,
         bg.type,
@@ -698,11 +698,14 @@
             AND bg.category_id = #{categoryId}
         </if>
 
-        <if test="attributeVal!=null and attributeVal!=''">
-            AND FIND_IN_SET(#{attributeVal},m.attribute_id_arr)
+        <if test="null!=attributeVal and attributeVal.size>0">
+            AND
+            <foreach collection="attributeVal" index="index" item="item" open="(" separator="OR" close=")">
+                 FIND_IN_SET( #{item},m.value_id_arr)
+            </foreach>
         </if>
         <if test="brandVal!=null and brandVal!=''">
-            AND  m.brand_id = #{brandVal}
+            AND  FIND_IN_SET(m.brand_id,#{brandVal})
         </if>
         <if test="orderKey!=null and orderKey!='' and orderKey==0 ">
             ORDER BY bp.price

@@ -2,6 +2,7 @@ package com.dangjia.acg.service.activity;
 
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.basics.ProductAPI;
+import com.dangjia.acg.api.product.DjBasicsProductAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
@@ -54,8 +55,10 @@ public class RedPackService {
 
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
+  //  @Autowired
+   // private ProductAPI productAPI;
     @Autowired
-    private ProductAPI productAPI;
+    private DjBasicsProductAPI djBasicsProductAPI;
     @Autowired
     private IMemberMapper memberMapper;
     @Autowired
@@ -206,9 +209,9 @@ public class RedPackService {
                 activityRedPackDTO.setFromObjectName(workerType.getName());
             }
         }
-        if (activityRedPackDTO.getFromObjectType() == 1) {
-
-            ServerResponse serverResponse = productAPI.getGoodsByGid(activityRedPack.getCityId(), activityRedPackDTO.getFromObject());
+        if (activityRedPackDTO.getFromObjectType() == 1) {//货品名称
+            ServerResponse serverResponse = djBasicsProductAPI.getBasicsGoodsByGid(activityRedPack.getCityId(), activityRedPackDTO.getFromObject());
+           /* ServerResponse serverResponse = productAPI.getGoodsByGid(activityRedPack.getCityId(), activityRedPackDTO.getFromObject());*/
             if (serverResponse != null && serverResponse.getResultObj() != null) {
                 if (serverResponse.getResultObj() instanceof JSONObject) {
                     JSONObject goods = (JSONObject) serverResponse.getResultObj();
@@ -216,8 +219,8 @@ public class RedPackService {
                 }
             }
         }
-        if (activityRedPackDTO.getFromObjectType() == 2) {
-            ServerResponse serverResponse = productAPI.getProductById(activityRedPack.getCityId(), activityRedPackDTO.getFromObject());
+        if (activityRedPackDTO.getFromObjectType() == 2) {//商品名称
+            ServerResponse serverResponse = djBasicsProductAPI.getProductById(activityRedPack.getCityId(), activityRedPackDTO.getFromObject());
             if (serverResponse != null && serverResponse.getResultObj() != null) {
                 if (serverResponse.getResultObj() instanceof JSONObject) {
                     JSONObject goods = (JSONObject) serverResponse.getResultObj();

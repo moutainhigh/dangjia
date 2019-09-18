@@ -150,7 +150,7 @@ public class GoodsService {
      * @param goodsId
      * @return
      */
-    public ServerResponse queryBrandByGid(String goodsId) {
+    /*public ServerResponse queryBrandByGid(String goodsId) {
         try {
             List<Brand> bList = iGoodsMapper.queryBrandByGid(goodsId);
             return ServerResponse.createBySuccess("查询成功", bList);
@@ -158,7 +158,7 @@ public class GoodsService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
-    }
+    }*/
 
     /**
      * 根据goodsid和品牌id查询关联品牌系列
@@ -168,7 +168,7 @@ public class GoodsService {
      * @param goodsId
      * @return
      */
-    public ServerResponse queryBrandByGidAndBid(String goodsId, String brandId) {
+    /*public ServerResponse queryBrandByGidAndBid(String goodsId, String brandId) {
         try {
             List<BrandSeries> bList = iGoodsMapper.queryBrandByGidAndBid(goodsId, brandId);
             return ServerResponse.createBySuccess("查询成功", bList);
@@ -176,7 +176,7 @@ public class GoodsService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
-    }
+    }*/
 
     /**
      * 根据goodsid查询对应goods
@@ -186,7 +186,7 @@ public class GoodsService {
      * @param goodsId
      * @return
      */
-    public ServerResponse getGoodsByGid(String goodsId) {
+    /*public ServerResponse getGoodsByGid(String goodsId) {
         try {
             Goods goods = iGoodsMapper.queryById(goodsId);
             Map goodsMap=BeanUtils.beanToMap(goods);
@@ -206,7 +206,7 @@ public class GoodsService {
             return ServerResponse.createByErrorMessage("查询失败");
 
         }
-    }
+    }*/
 
     /**
      * 修改goods

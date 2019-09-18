@@ -3,12 +3,15 @@ package com.dangjia.acg.service.product;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.dto.product.BasicsGoodsDTO;
 import com.dangjia.acg.mapper.product.DjBasicsGoodsMapper;
 import com.dangjia.acg.mapper.product.DjBasicsProductMapper;
+import com.dangjia.acg.mapper.product.IBasicsGoodsCategoryMapper;
 import com.dangjia.acg.mapper.product.IBasicsGoodsMapper;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.product.BasicsGoods;
+import com.dangjia.acg.modle.product.BasicsGoodsCategory;
 import com.dangjia.acg.modle.product.DjBasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProduct;
 import org.apache.commons.lang3.StringUtils;
@@ -21,6 +24,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -38,6 +42,8 @@ public class DjBasicsGoodsService {
     private DjBasicsProductMapper djBasicsProductMapper;
     @Autowired
     private IBasicsGoodsMapper iBasicsGoodsMapper;
+    @Autowired
+    private IBasicsGoodsCategoryMapper iBasicsGoodsCategoryMapper;
 
     /**
      * 货品打标签
@@ -94,8 +100,8 @@ public class DjBasicsGoodsService {
             return ServerResponse.createByErrorMessage("新增失败");
         }
     }
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse updateBasicsGoods(BasicsGoodsDTO basicsGoodsDTO){
-        try {
             String id = basicsGoodsDTO.getId();
             String name = basicsGoodsDTO.getName();
             BasicsGoods oldBasicsGoods = iBasicsGoodsMapper.selectByPrimaryKey(id);
@@ -107,11 +113,9 @@ public class DjBasicsGoodsService {
             BasicsGoods goods = getBasicsGoods(basicsGoodsDTO);
             goods.setId(basicsGoodsDTO.getId());
             iBasicsGoodsMapper.updateByPrimaryKeySelective(goods);
+
+            djBasicsProductMapper.updateProductCategoryByGoodsId(id,oldBasicsGoods.getCategoryId());
             return ServerResponse.createBySuccessMessage("修改成功");
-        } catch (Exception e) {
-            LOG.error("修改货品失败：",e);
-            throw new BaseException(ServerCode.WRONG_PARAM, "修改失败");
-        }
     }
     /**
      * 对象转换
@@ -155,7 +159,7 @@ public class DjBasicsGoodsService {
             //删除人工商品扩展表信息
             djBasicsProductMapper.deleteProductWorker(id);
             //删除货品下的商品信息
-            Example example = new Example(Product.class);
+            Example example = new Example(DjBasicsProduct.class);
             example.createCriteria().andEqualTo("goodsId", id);
             djBasicsProductMapper.deleteByExample(example);
             return ServerResponse.createBySuccessMessage("删除成功");
@@ -172,12 +176,25 @@ public class DjBasicsGoodsService {
     public ServerResponse getBasicsGoodsByGid(String goodsId) {
         try {
             BasicsGoods basicsGoods = iBasicsGoodsMapper.queryById(goodsId);
-           // Map goodsMap= BeanUtils.beanToMap(basicsGoods);
-            return ServerResponse.createBySuccess("查询成功", basicsGoods);
+            Map goodsMap= BeanUtils.beanToMap(basicsGoods);
+            List<BasicsGoodsCategory> goodsCategoryList=getAllCategoryChildById(basicsGoods.getCategoryId());
+            goodsMap.put("goodsCategoryList",goodsCategoryList);
+            return ServerResponse.createBySuccess("查询成功", goodsMap);
         } catch (Exception e) {
             LOG.error("getBasicsGoodsByGid查询失败：",e);
             return ServerResponse.createByErrorMessage("查询失败");
 
         }
+    }
+
+    /**
+     * 根据类别I查询当前类别父类下面的甩有子类信息
+     * @param categoryId
+     * @return
+     */
+    private List<BasicsGoodsCategory> getAllCategoryChildById(String categoryId){
+        BasicsGoodsCategory basicsGoodsCategory=iBasicsGoodsCategoryMapper.selectByPrimaryKey(categoryId);
+        List<BasicsGoodsCategory> goodsCategoryList=iBasicsGoodsCategoryMapper.getAllCategoryChildById(basicsGoodsCategory.getParentTop());
+        return goodsCategoryList;
     }
 }

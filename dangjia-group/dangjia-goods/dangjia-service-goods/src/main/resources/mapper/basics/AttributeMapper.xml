@@ -78,17 +78,6 @@
 		FROM dj_basics_attribute
 		ORDER BY create_date desc
 	</select>
-    <!-- 批量插入数据 -->
-    <insert id="insertBatch" parameterType="java.util.List">
-        insert into dj_basics_attribute
-        (<include refid="all_columns"/>)
-        values
-        <foreach collection="list" item="goods" index="index" separator=",">
-            (
-            #{goods.id}, #{goods.name}, #{goods.type},SYSDATE(),SYSDATE()
-            )
-        </foreach>
-    </insert>
 
     <!-- 根据id查询属性对象 -->
     <select id="queryById" resultType="com.dangjia.acg.modle.attribute.Attribute">

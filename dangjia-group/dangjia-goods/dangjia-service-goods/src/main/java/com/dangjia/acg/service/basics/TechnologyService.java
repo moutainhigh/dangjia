@@ -12,12 +12,16 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.actuary.ISearchBoxMapper;
 import com.dangjia.acg.mapper.basics.*;
+import com.dangjia.acg.mapper.product.DjBasicsProductMapper;
+import com.dangjia.acg.mapper.product.DjBasicsProductWorkerMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.SearchBox;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.basics.WorkerGoods;
 import com.dangjia.acg.modle.core.WorkerType;
+import com.dangjia.acg.modle.product.DjBasicsProduct;
+import com.dangjia.acg.modle.product.DjBasicsProductWorker;
 import com.dangjia.acg.service.actuary.ActuaryOperationService;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
@@ -48,7 +52,11 @@ public class TechnologyService {
     @Autowired
     private ITechnologyMapper iTechnologyMapper;
     @Autowired
-    private IWorkerGoodsMapper iWorkerGoodsMapper;
+    private DjBasicsProductWorkerMapper djBasicsProductWorkerMapper;
+    //@Autowired
+    //private IWorkerGoodsMapper iWorkerGoodsMapper;
+    @Autowired
+    private DjBasicsProductMapper djBasicsProductMapper;
     @Autowired
     private IProductMapper iProductMapper;
     @Autowired
@@ -218,9 +226,12 @@ public class TechnologyService {
             List<Map<String, Object>> mapList = new ArrayList<>();
             for (Technology t : tList) {
                 Map<String, Object> map = BeanUtils.beanToMap(t);
-                Example example = new Example(WorkerGoods.class);
+                /*Example example = new Example(WorkerGoods.class);
                 example.createCriteria().andCondition(" FIND_IN_SET( '"+t.getId()+"', technology_ids)");
-                List<WorkerGoods> wList = iWorkerGoodsMapper.selectByExample(example);
+                List<WorkerGoods> wList = iWorkerGoodsMapper.selectByExample(example);*/
+                Example example = new Example(DjBasicsProductWorker.class);
+                example.createCriteria().andCondition(" FIND_IN_SET( '"+t.getId()+"', technology_ids)");
+                List<DjBasicsProductWorker> wList = djBasicsProductWorkerMapper.selectByExample(example);
                 String workerTypeName = "";
                 ServerResponse response = workerTypeAPI.getWorkerType(t.getWorkerTypeId());
                 if (response.isSuccess()) {
@@ -253,10 +264,11 @@ public class TechnologyService {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             Technology t = iTechnologyMapper.selectByPrimaryKey(technologyId);
             Map<String, Object> map = BeanUtils.beanToMap(t);
-            Example example = new Example(WorkerGoods.class);
+            /*Example example = new Example(WorkerGoods.class);
             example.createCriteria().andEqualTo(WorkerGoods.SHOW_GOODS,1)
-                    .andCondition(" FIND_IN_SET( '"+t.getId()+"', technology_ids)");
-            List<WorkerGoods> wList = iWorkerGoodsMapper.selectByExample(example);
+                    .andCondition(" FIND_IN_SET( '"+t.getId()+"', technology_ids)");*/
+          //  List<WorkerGoods> wList = iWorkerGoodsMapper.selectByExample(example);
+            List<DjBasicsProduct> wList=djBasicsProductMapper.queryProductByTechnologyIds(t.getId());
             List<Map<String, Object>> mapList = new ArrayList<>();
             String workerTypeName = "";
             ServerResponse response = workerTypeAPI.getWorkerType(t.getWorkerTypeId());
@@ -265,7 +277,7 @@ public class TechnologyService {
             }
             map.put("workerTypeName", workerTypeName);
             map.put("workerNum", wList.size());
-            for (WorkerGoods w : wList) {
+            for (DjBasicsProduct w : wList) {
                 Map<String, Object> wmap = BeanUtils.beanToMap(w);
                 StringBuilder imgStr = new StringBuilder();
                 StringBuilder imgUrlStr = new StringBuilder();
@@ -306,9 +318,10 @@ public class TechnologyService {
     public ServerResponse queryTechnologyByWgId(String workerGoodsId) {
         try {
 
-            WorkerGoods wg = iWorkerGoodsMapper.selectByPrimaryKey(workerGoodsId);
+            //WorkerGoods wg = iWorkerGoodsMapper.selectByPrimaryKey(workerGoodsId);
+            DjBasicsProductWorker dw=djBasicsProductWorkerMapper.queryProductWorkerByProductId(workerGoodsId);
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            List<Technology> tList = iTechnologyMapper.queryTechnologyByWgId(wg.getTechnologyIds());
+            List<Technology> tList = iTechnologyMapper.queryTechnologyByWgId(dw.getTechnologyIds());
             List<Map<String, Object>> mapList = new ArrayList<>();
             for (Technology t : tList) {
                 Map<String, Object> map =BeanUtils.beanToMap(t);
@@ -349,7 +362,7 @@ public class TechnologyService {
                 searchBoxMapper.insertSelective(serchBox);
             }
 
-            if (type == 2) {
+           /* if (type == 2) {
                 //根据内容模糊搜索人工
                 PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
                 List<WorkerGoods> wList = iWorkerGoodsMapper.queryByName(name, null);
@@ -363,7 +376,7 @@ public class TechnologyService {
                     object.put("url", url);//0:工艺；1：商品；2：人工
                     arr.add(object);
                 }
-            }else{
+            }else{*/
                 //根据内容模糊搜索商品
                 PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
                 List<Product> pList = iProductMapper.serchBoxName(name);
@@ -386,7 +399,7 @@ public class TechnologyService {
                     object.put("url", url);//0:工艺；1：商品；2：人工
                     arr.add(object);
                 }
-            }
+           // }
 
             pageResult.setList(arr);
         } catch (Exception e) {

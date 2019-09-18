@@ -161,7 +161,7 @@ public class BudgetWorkerService {
     }
 
     //获取所有人工商品
-    public ServerResponse getAllWorkerGoods() {
+   /* public ServerResponse getAllWorkerGoods() {
         try {
             List<WorkerGoods> workerList = iWorkerGoodsMapper.selectLists();
             return ServerResponse.createBySuccess("查询成功", workerList);
@@ -169,7 +169,7 @@ public class BudgetWorkerService {
             e.printStackTrace();
             throw new BaseException(ServerCode.WRONG_PARAM, "查询失败");
         }
-    }
+    }*/
 
     //修改精算模板
     public ServerResponse updateBudgetTemplate(String listOfGoods, String workerTypeId, String templateId) {

@@ -103,22 +103,22 @@ public class ProductController implements ProductAPI {
     /**
      * 根据商品id查询关联品牌
      */
-    @Override
+    /*@Override
     @ApiMethod
     public ServerResponse queryBrandByGid(HttpServletRequest request, String goodsId) {
         return goodsService.queryBrandByGid(goodsId);
 
-    }
+    }*/
 
     /**
      * 根据商品id和品牌id查询关联品牌系列
      */
-    @Override
+   /* @Override
     @ApiMethod
     public ServerResponse queryBrandByGidAndBid(HttpServletRequest request, String goodsId, String brandId) {
         return goodsService.queryBrandByGidAndBid(goodsId, brandId);
 
-    }
+    }*/
 
     /**
      * 新增货品
@@ -133,12 +133,12 @@ public class ProductController implements ProductAPI {
     /**
      * 根据商品id查询对应商品
      */
-    @Override
+    /*@Override
     @ApiMethod
     public ServerResponse getGoodsByGid( String cityId, String goodsId) {
         return goodsService.getGoodsByGid(goodsId);
 
-    }
+    }*/
 
     /**
      * 修改商品

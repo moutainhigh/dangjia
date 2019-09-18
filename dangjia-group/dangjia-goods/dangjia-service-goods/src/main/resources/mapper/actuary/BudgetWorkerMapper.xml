@@ -124,7 +124,7 @@
 			y.text_content AS textContent
 		FROM
 			dj_actuary_budget_worker w
-			INNER JOIN `dj_basics_worker_goods` g ON w.worker_goods_id = g.id
+			INNER JOIN `dj_basics_product_worker` g ON w.worker_goods_id = g.product_id
 			INNER JOIN dj_basics_technology y ON FIND_IN_SET( y.id, g.technology_ids )
 		WHERE
 		    w.house_id=#{houseId}
@@ -278,7 +278,7 @@
 	<!--更新人工商品名称-->
 	<update id="updateBudgetMaterialById" parameterType="java.lang.String">
 		UPDATE dj_actuary_budget_worker p1
-		INNER JOIN `dj_basics_worker_goods` p ON p.id = p1.worker_goods_id
+		INNER JOIN `dj_basics_product` p ON p.id = p1.worker_goods_id
 		SET p1.name = p.`name`,p1.image=p.image,p1.price=p.price,p1.unit_name=p.unit_name
 		WHERE p.id=#{id}
 	</update>
