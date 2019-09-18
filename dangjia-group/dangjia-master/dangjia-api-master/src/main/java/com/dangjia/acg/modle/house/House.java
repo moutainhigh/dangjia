@@ -303,10 +303,18 @@ public class House extends BaseEntity {
         return designerOk;
     }
 
+    public Integer getDesignerOk2() {
+        return designerOk;
+    }
+
     public Integer getBudgetOk() {
         if (visitState == 4) {
             budgetOk = 3;
         }
+        return budgetOk;
+    }
+
+    public Integer getBudgetOk2() {
         return budgetOk;
     }
 
