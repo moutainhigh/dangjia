@@ -1,7 +1,6 @@
 package com.dangjia.acg.mapper.product;
 
 import com.dangjia.acg.dto.product.AppBasicsProductDTO;
-import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.product.DjBasicsProduct;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -77,5 +76,9 @@ public interface DjBasicsProductMapper extends Mapper<DjBasicsProduct> {
     List<DjBasicsProduct> queryProductByCategoryId(@Param("categoryId") String categoryId);
 
     List<DjBasicsProduct> serchCategoryProduct(@Param("categoryId") String categoryId, @Param("name") String name, @Param("brandVal") String brandVal, @Param("attributeVal") String[] attributeVal, @Param("orderKey") String orderKey);
+
+    List<DjBasicsProduct> queryProductByTechnologyIds(@Param("technologyId") String technologyId);
+
+    int updateProductCategoryByGoodsId(@Param("goodsId") String goodsId,@Param("categoryId")String categoryId);
 
 }

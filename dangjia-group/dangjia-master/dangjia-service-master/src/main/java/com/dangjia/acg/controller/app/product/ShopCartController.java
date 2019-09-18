@@ -51,4 +51,16 @@ public class ShopCartController implements ShopCartAPI {
     public ServerResponse delCart(HttpServletRequest request, String userToken) {
         return shopCartservice.delCart(request,userToken);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse updateGood(HttpServletRequest request, String userToken) {
+        return null;
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse settleMent(HttpServletRequest request, String userToken) {
+        return null;
+    }
 }

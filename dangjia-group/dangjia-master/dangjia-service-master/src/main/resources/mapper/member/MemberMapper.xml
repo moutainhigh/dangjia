@@ -306,7 +306,7 @@
             AND o.work_type NOT IN (2, 3, 4, 5, 7)
             AND h.visit_state = 4
             <if test="startDate!=null and endDate!=null and startDate!='' and endDate!=''">
-                and o.create_date BETWEEN #{startDate} and #{endDate}
+                and h.completed_date BETWEEN #{startDate} and #{endDate}
             </if>
         </if>
     </select>
@@ -419,6 +419,7 @@
         <if test="type==8">
             INNER JOIN dj_house h ON h.id = o.house_id
             AND h.budget_ok in (1, 2, 3, 4)
+            AND h.designer_ok = 3
             WHERE
             o.worker_id = #{workerId}
             <if test="startDate!=null and endDate!=null and startDate!='' and endDate!=''">
@@ -432,7 +433,7 @@
             AND o.work_type NOT IN (2, 3, 4, 5, 7)
             AND h.visit_state = 4
             <if test="startDate!=null and endDate!=null and startDate!='' and endDate!=''">
-                and o.create_date BETWEEN #{startDate} and #{endDate}
+                and h.completed_date BETWEEN #{startDate} and #{endDate}
             </if>
         </if>
     </select>

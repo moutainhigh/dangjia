@@ -27,10 +27,10 @@ public interface IGoodsMapper extends Mapper<Goods> {
 	void insertGoodsSeries(GoodsSeries goodsSeries);
 	//删除商品关联品牌系列
 	void deleteGoodsSeries(@Param("goodsId")String goodsId);
-	//根据商品id查询关联品牌
-	List<Brand> queryBrandByGid(@Param("goodsId")String goodsId);
-	//根据商品id和品牌id查询关联品牌系列 
-	List<BrandSeries> queryBrandByGidAndBid(@Param("goodsId") String goodsId, @Param("brandId") String brandId);
+	/*//根据商品id查询关联品牌
+	List<Brand> queryBrandByGid(@Param("goodsId")String goodsId);*/
+	/*//根据商品id和品牌id查询关联品牌系列
+	List<BrandSeries> queryBrandByGidAndBid(@Param("goodsId") String goodsId, @Param("brandId") String brandId);*/
 	List<Goods> queryByCategoryId(@Param("categoryId")String categoryId);
 	List<Goods> queryRepairGoods(@Param("name")String name,@Param("categoryId")String categoryId);
 	List<Goods> queryGoodsList(@Param("categoryId")String categoryId,@Param("name")String name);

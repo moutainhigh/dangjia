@@ -18,6 +18,7 @@ import com.dangjia.acg.dto.repair.MendOrderInfoDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
 import com.dangjia.acg.mapper.basics.*;
+import com.dangjia.acg.mapper.product.DjBasicsProductMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.modle.basics.*;
@@ -26,6 +27,7 @@ import com.dangjia.acg.modle.brand.BrandSeries;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.product.DjBasicsProduct;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.modle.repair.MendWorker;
 import com.dangjia.acg.service.basics.WorkerGoodsService;
@@ -67,8 +69,10 @@ public class ActuaryOperationService {
     private IGroupLinkMapper iGroupLinkMapper;
     @Autowired
     private IGoodsGroupMapper iGoodsGroupMapper;
+   // @Autowired
+    //private IWorkerGoodsMapper workerGoodsMapper;
     @Autowired
-    private IWorkerGoodsMapper workerGoodsMapper;
+    private DjBasicsProductMapper djBasicsProductMapper;
     @Autowired
     private IBrandSeriesMapper iBrandSeriesMapper;
     @Autowired
@@ -296,7 +300,7 @@ public class ActuaryOperationService {
      * 商品详情
      * gId:  budgetWorkerId   budgetMaterialId
      */
-    public ServerResponse getCommo(String gId, int type) {
+    /*public ServerResponse getCommo(String gId, int type) {
         try {
             if (type == 1 || type == 4) {//人工
                 WorkerGoods workerGoods;
@@ -338,7 +342,7 @@ public class ActuaryOperationService {
             return ServerResponse.createByErrorMessage("查询失败,数据异常");
         }
         return ServerResponse.createByErrorMessage("查询失败,type错误");
-    }
+    }*/
 
     /**
      * 新版商品详情
@@ -346,7 +350,7 @@ public class ActuaryOperationService {
      */
     public ServerResponse getGoodsDetailNew(String gId, int type) {
         try {
-            if (type == 1 || type == 4) {//人工
+            /*if (type == 1 || type == 4) {//人工
                 WorkerGoods workerGoods = workerGoodsMapper.selectByPrimaryKey(gId);//人工商品
                 WorkerGoodsDTO wGoodsDTO = workerGoodsService.assembleWorkerGoodsResult(workerGoods);
                 return ServerResponse.createBySuccess("查询成功", wGoodsDTO);
@@ -362,12 +366,22 @@ public class ActuaryOperationService {
                     return ServerResponse.createByErrorMessage("查询失败,数据异常");
                 }
 
+            }*/
+            Product product = productMapper.selectByPrimaryKey(gId);//当前 货品
+            if(product == null){
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "该商品已禁用！");
+            }
+            GoodsDTO goodsDTO = goodsDetail(product, null);
+            if (goodsDTO != null) {
+                return ServerResponse.createBySuccess("查询成功", goodsDTO);
+            } else {
+                return ServerResponse.createByErrorMessage("查询失败,数据异常");
             }
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败,数据异常");
         }
-        return ServerResponse.createByErrorMessage("查询失败,type错误");
+        //return ServerResponse.createByErrorMessage("查询失败,type错误");
     }
 
     /**
@@ -376,7 +390,7 @@ public class ActuaryOperationService {
      */
     public ServerResponse getGoodsDetail(String gId, int type) {
         try {
-            if (type == 1 || type == 4) {//人工
+            /*if (type == 1 || type == 4) {//人工
                 WorkerGoods workerGoods = workerGoodsMapper.selectByPrimaryKey(gId);//人工商品
                 WorkerGoodsDTO wGoodsDTO = workerGoodsService.assembleWorkerGoodsResult(workerGoods);
                 return ServerResponse.createBySuccess("查询成功", wGoodsDTO);
@@ -392,12 +406,22 @@ public class ActuaryOperationService {
                     return ServerResponse.createByErrorMessage("查询失败,数据异常");
                 }
 
+            }*/
+            Product product = productMapper.selectByPrimaryKey(gId);//当前 货品
+            if(product == null){
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "该商品已禁用！");
+            }
+            GoodsDTO goodsDTO = goodsDetail(product, null);
+            if (goodsDTO != null) {
+                return ServerResponse.createBySuccess("查询成功", goodsDTO);
+            } else {
+                return ServerResponse.createByErrorMessage("查询失败,数据异常");
             }
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败,数据异常");
         }
-        return ServerResponse.createByErrorMessage("查询失败,type错误");
+     //   return ServerResponse.createByErrorMessage("查询失败,type错误");
     }
 
     /**
@@ -535,19 +559,20 @@ public class ActuaryOperationService {
             if (type == DjConstants.GXType.RENGGONG) {
                 List<BudgetWorker> budgetWorkerList = budgetWorkerMapper.getBudgetWorkerList(houseId, workerTypeId);
                 for (BudgetWorker bw : budgetWorkerList) {
-                    WorkerGoods workerGoods = workerGoodsMapper.selectByPrimaryKey(bw.getWorkerGoodsId());
+                   // WorkerGoods workerGoods = workerGoodsMapper.selectByPrimaryKey(bw.getWorkerGoodsId());
+                    DjBasicsProduct djBasicsProduct =djBasicsProductMapper.selectByPrimaryKey(bw.getWorkerGoodsId());
                     FlowActuaryDTO flowActuaryDTO = new FlowActuaryDTO();
                     flowActuaryDTO.setBudgetMaterialId(bw.getId());
-                    flowActuaryDTO.setId(workerGoods.getId());
+                    flowActuaryDTO.setId(djBasicsProduct.getId());
                     flowActuaryDTO.setName(bw.getName());
-                    flowActuaryDTO.setImage(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + workerGoods.getImage());
+                    flowActuaryDTO.setImage(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + djBasicsProduct.getImage());
                     flowActuaryDTO.setTypeName(typsValue);
                     flowActuaryDTO.setType(type);
                     flowActuaryDTO.setShopCount(bw.getShopCount());
                     String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.COMMO, userToken, cityId, flowActuaryDTO.getTypeName() + "商品详情") + "&gId=" + bw.getId() + "&type=" + type;
                     flowActuaryDTO.setUrl(url);
-                    flowActuaryDTO.setPrice("¥" + String.format("%.2f", workerGoods.getPrice()) + "/" + workerGoods.getUnitName());
-                    flowActuaryDTO.setTotalPrice(workerGoods.getPrice() * bw.getShopCount());
+                    flowActuaryDTO.setPrice("¥" + String.format("%.2f", djBasicsProduct.getPrice()) + "/" + djBasicsProduct.getUnitName());
+                    flowActuaryDTO.setTotalPrice(djBasicsProduct.getPrice() * bw.getShopCount());
                     flowActuaryDTOList.add(flowActuaryDTO);
                 }
                 Double workerPrice = budgetWorkerMapper.getBudgetWorkerPrice(houseId, workerTypeId);//精算工钱

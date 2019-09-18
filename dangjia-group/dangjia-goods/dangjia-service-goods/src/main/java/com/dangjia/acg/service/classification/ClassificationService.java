@@ -30,8 +30,8 @@ import java.util.List;
 public class ClassificationService {
     @Autowired
     private IGoodsCategoryMapper iGoodsCategoryMapper;
-    @Autowired
-    private IWorkerGoodsMapper iWorkerGoodsMapper;
+   // @Autowired
+    //private IWorkerGoodsMapper iWorkerGoodsMapper;
     @Autowired
     private ConfigUtil configUtil;
 
@@ -69,7 +69,7 @@ public class ClassificationService {
         return ServerResponse.createBySuccess("查询成功", pageResult);
     }
 
-    public ServerResponse getWorkerGoodsList(PageDTO pageDTO, String workerTypeId) {
+   /* public ServerResponse getWorkerGoodsList(PageDTO pageDTO, String workerTypeId) {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         Example example = new Example(WorkerGoods.class);
         example.createCriteria()
@@ -90,5 +90,5 @@ public class ClassificationService {
         }
         pageResult.setList(workerGoodsList);
         return ServerResponse.createBySuccess("查询成功", pageResult);
-    }
+    }*/
 }

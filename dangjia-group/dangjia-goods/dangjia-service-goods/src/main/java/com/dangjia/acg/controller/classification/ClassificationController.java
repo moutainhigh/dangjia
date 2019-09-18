@@ -37,9 +37,9 @@ public class ClassificationController implements ClassificationAPI {
         return classificationService.getProductList(pageDTO, categoryId);
     }
 
-    @Override
+    /*@Override
     @ApiMethod
     public ServerResponse getWorkerGoodsList(HttpServletRequest request, PageDTO pageDTO, String workerTypeId) {
         return classificationService.getWorkerGoodsList(pageDTO, workerTypeId);
-    }
+    }*/
 }

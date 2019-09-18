@@ -3,6 +3,7 @@ package com.dangjia.acg.controller.data;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dto.product.ProductWorkerDTO;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.modle.basics.Goods;
@@ -82,7 +83,7 @@ public class ForMasterController implements ForMasterAPI {
     }
    @Override
     @ApiMethod
-    public DjBasicsProduct getWorkerGoods(String cityId, String workerGoodsId){
+    public ProductWorkerDTO getWorkerGoods(String cityId, String workerGoodsId){
         return forMasterService.getWorkerGoods(workerGoodsId);
     }
 

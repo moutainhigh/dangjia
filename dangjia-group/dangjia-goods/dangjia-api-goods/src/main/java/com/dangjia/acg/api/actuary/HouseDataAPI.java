@@ -31,10 +31,10 @@ public interface HouseDataAPI {
     ServerResponse selfBuyingList(@RequestParam("cityId") String cityId,
                                   @RequestParam("houseId") String houseId);
 
-    @PostMapping("/actuary/houseData/workerGoodsDetail")
+    /*@PostMapping("/actuary/houseData/workerGoodsDetail")
     @ApiOperation(value = "人工详情", notes = "人工详情")
     ServerResponse workerGoodsDetail(@RequestParam("cityId") String cityId,
-                                     @RequestParam("workerGoodsId") String workerGoodsId);
+                                     @RequestParam("workerGoodsId") String workerGoodsId);*/
 
     @PostMapping("/actuary/houseData/getBudgetWorker")
     @ApiOperation(value = "查询工序人工", notes = "查询工序人工")
@@ -43,10 +43,10 @@ public interface HouseDataAPI {
                                    @RequestParam("workerTypeId") String workerTypeId,
                                    @RequestParam("pageDTO") PageDTO pageDTO);
 
-    @PostMapping("/actuary/houseData/goodsDetail")
+   /* @PostMapping("/actuary/houseData/goodsDetail")
     @ApiOperation(value = "材料详情", notes = "材料详情")
     ServerResponse goodsDetail(@RequestParam("cityId") String cityId,
-                               @RequestParam("productId") String productId);
+                               @RequestParam("productId") String productId);*/
 
     @PostMapping("/actuary/houseData/getBudgetMaterial")
     @ApiOperation(value = "查询工序材料", notes = "查询工序材料")

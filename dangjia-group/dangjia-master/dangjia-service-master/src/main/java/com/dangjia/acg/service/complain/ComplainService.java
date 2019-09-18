@@ -479,8 +479,8 @@ public class ComplainService {
                         house.setCompletedDate(new Date());
                         house.setVisitState(4);
                         house.setHaveComplete(1);
-                        house.setDesignerOk(3);
-                        house.setBudgetOk(3);
+//                        house.setDesignerOk(3);
+//                        house.setBudgetOk(3);
                         JSONArray brandSeriesLists = JSONArray.parseArray(operateName);
                         List<Map<String, Object>> maps = new ArrayList<>();
                         if (backMoneyJudge(brandSeriesLists, maps))
@@ -762,8 +762,8 @@ public class ComplainService {
         house.setCompletedDate(new Date());
         house.setVisitState(4);
         house.setHaveComplete(1);
-        house.setDesignerOk(3);
-        house.setBudgetOk(3);
+//        house.setDesignerOk(3);
+//        house.setBudgetOk(3);
         houseMapper.updateByPrimaryKeySelective(house);
         return ServerResponse.createBySuccessMessage("ok");
     }
@@ -822,8 +822,8 @@ public class ComplainService {
         house.setCompletedDate(new Date());
         house.setVisitState(4);
         house.setHaveComplete(1);
-        house.setDesignerOk(3);
-        house.setBudgetOk(3);
+//        house.setDesignerOk(3);
+//        house.setBudgetOk(3);
         houseMapper.updateByPrimaryKeySelective(house);
         return ServerResponse.createBySuccessMessage("操作成功");
     }

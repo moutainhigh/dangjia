@@ -48,4 +48,13 @@ public interface ShopCartAPI {
     @ApiOperation(value = "删除购物车", notes = "删除购物车")
     ServerResponse delCart(@RequestParam("request") HttpServletRequest request, @RequestParam("userToken") String userToken);
 
+
+    @PostMapping("/shopcart/updateGood")
+    @ApiOperation(value = "购物车-商品明细（更换商品）", notes = "购物车-商品明细（更换商品）")
+    ServerResponse updateGood(@RequestParam("request") HttpServletRequest request, @RequestParam("userToken") String userToken);
+
+    @PostMapping("/shopcart/settleMent")
+    @ApiOperation(value = "购物车-商品结算", notes = "购物车-商品结算")
+    ServerResponse settleMent(@RequestParam("request") HttpServletRequest request, @RequestParam("userToken") String userToken);
+
 }

@@ -1,6 +1,7 @@
 package com.dangjia.acg.api.data;
 
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dto.product.ProductWorkerDTO;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.modle.basics.Goods;
@@ -68,7 +69,7 @@ public interface ForMasterAPI {
 
     @PostMapping("/data/forMaster/getWorkerGoods")
     @ApiOperation(value = "工价商品信息", notes = "工价商品信息")
-    DjBasicsProduct getWorkerGoods(@RequestParam("cityId") String cityId, @RequestParam("workerGoodsId") String workerGoodsId);
+    ProductWorkerDTO getWorkerGoods(@RequestParam("cityId") String cityId, @RequestParam("workerGoodsId") String workerGoodsId);
    // WorkerGoods getWorkerGoods(@RequestParam("cityId") String cityId,@RequestParam("workerGoodsId") String workerGoodsId);
 
     @PostMapping("/data/goods/settop")

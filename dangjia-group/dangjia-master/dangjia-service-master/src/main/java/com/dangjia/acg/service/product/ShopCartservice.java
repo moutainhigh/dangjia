@@ -14,7 +14,9 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * author:Chenyufeng
@@ -55,17 +57,50 @@ public class ShopCartservice {
             if (exists) {
                 //获取现有的购物车中的数据
                 List<CartDTO> cartDTOlist = redisClient.getListCache(Constants.REDIS_DANGJIA_CACHE + member.getId().toString(), CartDTO.class);
+                List<CartDTO> newCartDTOlist=cartDTOlist;
+                List<CartDTO> CartDTOlistInequality=null;//过滤不相同之后的集合
+                List<CartDTO> cartDTOListIdentical = null;//过滤相同之后的集合
+                int temp=0;
                 if (cartDTOlist != null) {
-                    for (CartDTO clscartDto : cartDTOlist) {
-                        String productId = clscartDto.getProductId();
-                        //判断是同一商品
-                        if (cartDTO.getProductId().equals(productId)) {
-                            //数量相加
-                            clscartDto.setProductNum(clscartDto.getProductNum() + cartDTO.getProductNum());
-                        }
+
+                    //需要过滤条件集合
+                    List<String> productIdList = new ArrayList<String>();
+                    productIdList.add(cartDTO.getProductId());
+                    // JDK1.8提供了lambda表达式， 可以从stuList中过滤出符合条件的结果。
+                    cartDTOListIdentical = cartDTOlist.stream()
+                            .filter((CartDTO c) -> productIdList.contains(c.getProductId()))
+                            .collect(Collectors.toList());
+
+                    //如果过滤之后的list的大小为零，就在当前用户的list集合里面增加记录，也就是新增购买新的产品
+                    if (cartDTOListIdentical.size() == 0) {
+                        newCartDTOlist.add(cartDTO);
+                        redisClient.putListCache(Constants.REDIS_DANGJIA_CACHE + member.getId().toString(), newCartDTOlist);
+                        return ServerResponse.createBySuccess("商品加入购物车成功");
                     }
-                    redisClient.putListCache(Constants.REDIS_DANGJIA_CACHE + member.getId().toString(), cartDTOlist);
-                    return ServerResponse.createBySuccess("商品加入购物车成功");
+                    else {
+                        //非公共部分
+                        for(CartDTO cartDTOafter:cartDTOListIdentical)
+                        {
+                            cartDTOlist.remove(cartDTOafter);
+                            CartDTOlistInequality=cartDTOlist;
+                        }
+
+                        //相同产品ID情况下修改产品的数量
+                        if (cartDTOListIdentical.size() >= 0) {
+                            Iterator it = cartDTOlist.iterator();
+                            while (it.hasNext()) {
+                                CartDTO cartDTOIterator = (CartDTO) it.next();
+                                if (cartDTOIterator.getProductId().equals(cartDTO.getProductId())) ;
+                                {
+                                    cartDTOIterator.setProductNum(cartDTOIterator.getProductNum() + cartDTO.getProductNum());
+                                    CartDTOlistInequality.add(cartDTOIterator);
+                                }
+                            }
+                        }
+                        //重构list，放入redis数据库
+                        redisClient.putListCache(Constants.REDIS_DANGJIA_CACHE + member.getId().toString(), CartDTOlistInequality);
+                        return ServerResponse.createBySuccess("商品加入购物车成功");
+                    }
                 } else {
                     return ServerResponse.createBySuccess("数据库中不存在当前购物车");
                 }
@@ -219,13 +254,24 @@ public class ShopCartservice {
             }
 
             List<CartDTO> cartDTOList = redisClient.getListCache(Constants.REDIS_DANGJIA_CACHE + member.getId().toString(), CartDTO.class);
-            for (CartDTO cartDTO : cartDTOList) {
-                if (cartDTO.getProductId().equals(productId)) {
-                    cartDTOList.remove(cartDTO);//删除当前匹配的对象实体
+            for(int i=0;i<cartDTOList.size();i++)
+            {
+                if(cartDTOList.get(i).getProductId().equals(productId))
+                {
+                    cartDTOList.remove(i);
                 }
             }
+
             //重新封装list，存储到redis数据库
+            if(cartDTOList==null)
+            {
+                //集合为空，将键设置过期,相当于删除键
+                final long expireTime=1;
+                redisClient.putListCacheWithExpireTime(Constants.REDIS_DANGJIA_CACHE + member.getId().toString(),cartDTOList,expireTime);
+                return ServerResponse.createBySuccess("删除勾选商品成功!");
+            }
             redisClient.putListCache(Constants.REDIS_DANGJIA_CACHE + member.getId().toString(), cartDTOList);
+            //list等于null的时候，待处理
             return ServerResponse.createBySuccess("删除勾选商品成功!");
         } catch (Exception e) {
             e.printStackTrace();
@@ -260,4 +306,23 @@ public class ShopCartservice {
 
     }
 
+    /**
+     *更换商品
+     * @param request
+     * @param userToken
+     * @return
+     */
+    public ServerResponse updateGood(HttpServletRequest request, String userToken) {
+        return null;
+    }
+
+    /**
+     * 购物车结算
+     * @param request
+     * @param userToken
+     * @return
+     */
+    public ServerResponse settleMent(HttpServletRequest request, String userToken) {
+        return null;
+    }
 }
