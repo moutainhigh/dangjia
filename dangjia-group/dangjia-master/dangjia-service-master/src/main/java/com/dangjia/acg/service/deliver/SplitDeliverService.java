@@ -277,7 +277,7 @@ public class SplitDeliverService {
                 splitDeliverDTO.setShipState(splitDeliver.getShippingState());
                 splitDeliverDTO.setNumber(splitDeliver.getNumber());
                 splitDeliverDTO.setSendTime(splitDeliver.getSendTime());//发货时间
-                splitDeliverDTO.setRecTime(splitDeliver.getRecTime() == null ? splitDeliver.getModifyDate() : splitDeliver.getRecTime());//收货时间
+                splitDeliverDTO.setRecTime(splitDeliver.getRecTime());//收货时间
                 Supplier supplier = forMasterAPI.getSupplier(house.getCityId(), splitDeliver.getSupplierId());
                 if (supplier != null) {
                     splitDeliverDTO.setSupId(supplier.getId());//供应商id
