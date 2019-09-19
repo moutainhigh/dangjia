@@ -17,4 +17,6 @@ public interface ICategoryLabelMapper extends Mapper<CategoryLabel> {
 
     /**查询绑定过的标签*/
     List<CategoryLabel> queryAPPCategoryLabel();
+     //获取当前有多少条标签
+    int getCategoryCountLabel();
 }

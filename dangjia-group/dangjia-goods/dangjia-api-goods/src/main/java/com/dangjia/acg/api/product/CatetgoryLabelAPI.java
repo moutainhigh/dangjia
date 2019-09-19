@@ -50,7 +50,8 @@ public interface CatetgoryLabelAPI {
     @ApiOperation(value = "修改类别标签", notes = "修改类别标签")
     ServerResponse updateCategoryLabel(@RequestParam("request") HttpServletRequest request,
                                        @RequestParam("labelId") String labelId,
-                                       @RequestParam("labelName") String labelName);
+                                       @RequestParam("labelName") String labelName,
+                                       @RequestParam("sort") int sort);
 
     /**
      * 新增类别标签
