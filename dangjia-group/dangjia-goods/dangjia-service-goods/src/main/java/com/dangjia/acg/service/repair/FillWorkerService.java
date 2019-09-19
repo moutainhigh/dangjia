@@ -5,11 +5,12 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.product.ProductWorkerDTO;
 import com.dangjia.acg.dto.repair.BudgetWorkerDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
-import com.dangjia.acg.mapper.basics.IWorkerGoodsMapper;
+import com.dangjia.acg.mapper.basics.IProductWorkerMapper;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
-import com.dangjia.acg.modle.basics.WorkerGoods;
+import com.dangjia.acg.modle.product.DjBasicsProduct;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -33,7 +34,7 @@ public class FillWorkerService {
     @Autowired
     private IBudgetWorkerMapper budgetWorkerMapper;
     @Autowired
-    private IWorkerGoodsMapper workerGoodsMapper;
+    private IProductWorkerMapper workerGoodsMapper;
 
     @Autowired
     private ConfigUtil configUtil;
@@ -66,7 +67,7 @@ public class FillWorkerService {
                 List<BudgetWorker> budgetWorkerList = budgetWorkerMapper.selectByExample(example);
                 pageResult = new PageInfo(budgetWorkerList);
                 for (BudgetWorker budgetWorker : budgetWorkerList) {
-                    WorkerGoods workerGoods = workerGoodsMapper.selectByPrimaryKey(budgetWorker.getWorkerGoodsId());
+                    DjBasicsProduct workerGoods = workerGoodsMapper.selectByPrimaryKey(budgetWorker.getWorkerGoodsId());
                     BudgetWorkerDTO budgetWorkerDTO = new BudgetWorkerDTO();
                     budgetWorkerDTO.setWorkerGoodsId(budgetWorker.getWorkerGoodsId());
                     budgetWorkerDTO.setWorkerTypeId(budgetWorker.getWorkerTypeId());
@@ -79,21 +80,22 @@ public class FillWorkerService {
                     budgetWorkerDTOList.add(budgetWorkerDTO);
                 }
             } else {
-                Example example = new Example(WorkerGoods.class);
+               /* Example example = new Example(DjBasicsProductWorker.class);
                 Example.Criteria criteria = example.createCriteria();
-                criteria.andEqualTo(WorkerGoods.WORKER_TYPE_ID, workerTypeId);
+                criteria.andEqualTo(DjBasicsProductWorker.WORKER_TYPE_ID, workerTypeId);
                 criteria.andEqualTo(WorkerGoods.SHOW_GOODS, 1);
                 if (!CommonUtil.isEmpty(name)) {
                     criteria.andLike(WorkerGoods.NAME, "%" + name + "%");
-                }
+                }*/
+
                 PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-                List<WorkerGoods> workerGoodsList = workerGoodsMapper.selectByExample(example);
+                List<ProductWorkerDTO> workerGoodsList = workerGoodsMapper.getProductWorker(workerTypeId,name);
                 pageResult = new PageInfo(workerGoodsList);
-                for (WorkerGoods workerGoods : workerGoodsList) {
+                for (ProductWorkerDTO  workerGoods : workerGoodsList) {
                     BudgetWorkerDTO budgetWorkerDTO = new BudgetWorkerDTO();
                     budgetWorkerDTO.setWorkerGoodsId(workerGoods.getId());
                     budgetWorkerDTO.setWorkerTypeId(workerGoods.getWorkerTypeId());
-                    budgetWorkerDTO.setWorkerGoodsSn(workerGoods.getWorkerGoodsSn());
+                    budgetWorkerDTO.setWorkerGoodsSn(workerGoods.getProductSn());
                     budgetWorkerDTO.setName(workerGoods.getName());
                     budgetWorkerDTO.setPrice(workerGoods.getPrice());
                     budgetWorkerDTO.setUnitName(workerGoods.getUnitName());//单位

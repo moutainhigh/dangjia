@@ -25,9 +25,9 @@ import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.product.*;
 import com.dangjia.acg.service.basics.TechnologyService;
+import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.dangjia.acg.util.StringTool;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,8 +36,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.*;
 import javax.servlet.http.HttpServletRequest;
+import java.util.*;
 
 /**
  * 产品逻辑处理层
@@ -123,7 +123,7 @@ public class DjBasicsProductService {
             if (type == 0 || type == 1) {//非人工
                 //dj_basics_product_material
                 appBasicsProductDTO= djBasicsProductMapper.queryProductMaterial(productSn).get(0);
-            } else if (type == 2) {//人工
+            } else if (type == 2) {//人工v
                 //dj_basics_product_worker
                 appBasicsProductDTO= djBasicsProductMapper.queryProductWorker(productSn).get(0);
             }

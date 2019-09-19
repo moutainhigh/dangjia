@@ -1,7 +1,5 @@
 package com.dangjia.acg.service.basics;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
@@ -15,9 +13,6 @@ import com.dangjia.acg.modle.attribute.AttributeValue;
 import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Label;
 import com.dangjia.acg.modle.basics.Product;
-import com.dangjia.acg.modle.brand.Brand;
-import com.dangjia.acg.modle.brand.BrandSeries;
-import com.dangjia.acg.modle.brand.GoodsSeries;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -44,8 +39,6 @@ public class GoodsService {
     private static Logger LOG = LoggerFactory.getLogger(GoodsService.class);
     @Autowired
     private IGoodsMapper iGoodsMapper;
-    @Autowired
-    private IGoodsSeriesMapper iGoodsSeriesMapper;
     @Autowired
     private IUnitMapper iUnitMapper;
     @Autowired
@@ -104,36 +97,7 @@ public class GoodsService {
             goods.setCreateDate(new Date());
             goods.setModifyDate(new Date());
             iGoodsMapper.insert(goods);
-            if (buy != 2) //非自购
-            {
-                if (!StringUtils.isNoneBlank(arrString)) {
-                    GoodsSeries gs = new GoodsSeries();
-                    gs.setGoodsId(goods.getId());
-                    gs.setBrandId(null);
-                    gs.setSeriesId(null);
-                    iGoodsSeriesMapper.insert(gs);
-                } else {
-                    JSONArray arr = JSONArray.parseArray(arrString);
-                    for (int i = 0; i < arr.size(); i++) {//新增goods关联品牌系列
-                        JSONObject obj = arr.getJSONObject(i);
-                        GoodsSeries gs = new GoodsSeries();
-                        gs.setGoodsId(goods.getId());
-                        if (!StringUtils.isNoneBlank(obj.getString("brandId"))) {
-                            gs.setBrandId(null);
-                        } else {
-                            gs.setBrandId(obj.getString("brandId"));
-                        }
 
-                        if (!StringUtils.isNoneBlank(obj.getString("seriesId"))) {
-                            gs.setSeriesId(null);
-                        } else {
-                            gs.setSeriesId(obj.getString("seriesId"));
-                        }
-                        iGoodsSeriesMapper.insert(gs);
-                    }
-                }
-
-            }
 
             return ServerResponse.createBySuccess("新增成功", goods.getId());
         } catch (Exception e) {
@@ -245,39 +209,7 @@ public class GoodsService {
             goods.setOtherName(otherName);
             goods.setModifyDate(new Date());
             iGoodsMapper.updateByPrimaryKeySelective(goods);
-            if (buy != 2) //非自购goods ，有品牌
-            {
-                if (!StringUtils.isNoneBlank(arrString)) {
-                    GoodsSeries gs = new GoodsSeries();
-                    gs.setGoodsId(id);
-                    gs.setBrandId(null);
-                    gs.setSeriesId(null);
-                    gs.setCreateDate(new Date());
-                    gs.setModifyDate(new Date());
-                    iGoodsSeriesMapper.insert(gs);
-                } else {
-                    JSONArray arr = JSONArray.parseArray(arrString);
-                    iGoodsMapper.deleteGoodsSeries(id);//先删除goods所有跟品牌关联
-                    for (int i = 0; i < arr.size(); i++) {//新增goods关联品牌系列
-                        JSONObject obj = arr.getJSONObject(i);
-                        GoodsSeries gs = new GoodsSeries();
-                        gs.setGoodsId(id);
 
-                        if (!StringUtils.isNoneBlank(obj.getString("brandId"))) {
-                            gs.setBrandId(null);
-                        } else {
-                            gs.setBrandId(obj.getString("brandId"));
-                        }
-
-                        if (!StringUtils.isNoneBlank(obj.getString("seriesId"))) {
-                            gs.setSeriesId(null);
-                        } else {
-                            gs.setSeriesId(obj.getString("seriesId"));
-                        }
-                        iGoodsSeriesMapper.insert(gs);
-                    }
-                }
-            }
             return ServerResponse.createBySuccessMessage("修改成功");
         } catch (Exception e) {
             throw new BaseException(ServerCode.WRONG_PARAM, "修改失败");

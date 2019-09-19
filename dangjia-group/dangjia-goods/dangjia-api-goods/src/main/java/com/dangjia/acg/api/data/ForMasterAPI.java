@@ -7,8 +7,6 @@ import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.Technology;
-import com.dangjia.acg.modle.basics.WorkerGoods;
-import com.dangjia.acg.modle.product.DjBasicsProduct;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
 import io.swagger.annotations.Api;

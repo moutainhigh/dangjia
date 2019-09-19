@@ -18,7 +18,6 @@ import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.SearchBox;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.Technology;
-import com.dangjia.acg.modle.basics.WorkerGoods;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.product.DjBasicsProduct;
 import com.dangjia.acg.modle.product.DjBasicsProductWorker;

@@ -290,4 +290,45 @@
 		SET p1.name = p.`name`,p1.image=p.image,p1.price=p.price,p1.unit_name=p.unit_name
 		WHERE p.id=#{id}
 	</update>
+
+
+
+    <!-- 根据房子id和工序id查询人工精算总价 -->
+    <select id="queryMakeBudgetsList" resultType="com.dangjia.acg.dto.product.BasicsgDTO">
+        select
+            bgc.name as name,
+            abw.id as abwId,
+            abw.price as price,
+            abw.image as image,
+            abw.unit_name as unitName,
+            abw.total_price as totalPrice,
+            abw.house_id AS houseId,
+            abw.steta AS steta,
+            abw.worker_goods_id AS workerGoodsId,
+            abw.worker_goods_sn AS workerGoodsSn
+        from dj_basics_goods_category bgc
+        INNER JOIN dj_basics_product bp on bgc.id = bp.category_id
+        INNER JOIN dj_actuary_budget_worker abw on bp.id = abw.worker_goods_id
+        where abw.data_status = 0 and abw.house_id = #{houseId} and bgc.id = #{id}
+    </select>
+
+    <!-- 根据房子id和工序id查询人工精算总价 -->
+    <select id="queryMakeBudgetsBmList" resultType="com.dangjia.acg.dto.product.BasicsgDTO">
+        select
+            abm.id as abmId,
+            abm.goods_name as name,
+            abm.product_name as productName,
+            abm.price as price,
+            abm.cost as cost,
+            abm.shop_count AS shopCount,
+            abm.convert_count AS convertCount,
+            abm.unit_name AS unitName,
+            abm.image AS image,
+			abm.category_id AS categoryId,
+			abm.product_id AS productId
+        from dj_basics_goods_category bgc
+        INNER JOIN dj_actuary_budget_material abm on bgc.id = abm.category_id
+        where  abm.data_status = 0 AND abm.house_id = #{houseId} and bgc.id = #{id}
+    </select>
+
 </mapper>
