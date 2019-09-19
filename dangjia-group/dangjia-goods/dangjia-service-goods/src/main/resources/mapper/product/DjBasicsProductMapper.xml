@@ -160,6 +160,7 @@
         FROM dj_basics_product
         where goods_id=#{goodsId}
         and  data_status=#{dataStatus}
+        and data_status=0
         ORDER BY istop DESC,create_date desc
         limit 1
     </select>
@@ -187,6 +188,17 @@
         </if>
         ORDER BY istop DESC,create_date desc
     </select>
+
+    <!-- 根据货品id查询货品对象 -->
+    <select id="getById" resultType="com.dangjia.acg.modle.product.DjBasicsProduct">
+        SELECT
+        <include refid="new_columns"/>
+        FROM dj_basics_product
+        where id=#{id}
+        and data_status=0
+        ORDER BY istop DESC,create_date desc
+    </select>
+
 
     <select id="serchCategoryProduct" resultType="com.dangjia.acg.modle.product.DjBasicsProduct">
         SELECT

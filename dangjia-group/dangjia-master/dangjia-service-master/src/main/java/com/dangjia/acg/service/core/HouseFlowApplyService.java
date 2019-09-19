@@ -1,6 +1,9 @@
 package com.dangjia.acg.service.core;
 
+import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.api.basics.WorkerGoodsAPI;
 import com.dangjia.acg.auth.config.RedisSessionDAO;
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
@@ -46,14 +49,18 @@ import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.google.gson.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import tk.mybatis.mapper.entity.Example;
 
+import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -91,7 +98,8 @@ public class HouseFlowApplyService {
     private IWorkerDetailMapper workerDetailMapper;
     @Autowired
     private IHouseMapper houseMapper;
-
+    @Autowired
+    private WorkerGoodsAPI workerGoodsAPI;
     @Autowired
     private IWorkerTypeSafeOrderMapper workerTypeSafeOrderMapper;
     @Autowired
@@ -638,6 +646,25 @@ public class HouseFlowApplyService {
     }
 
     /**
+     * 获取当前工种的代买商吕的总价钱
+     * @return
+     */
+    private BigDecimal getTotalAgencyPurchasePrice(String houseFlowApplyId){
+        HouseFlowApply hfa = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
+        HouseFlow houseFlow =houseFlowMapper.selectByPrimaryKey(hfa.getHouseFlowId());
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+        //查出该工种代购商品的工钱
+        Double totalAgencyPurchasePrice = 0.0;
+        request.setAttribute(Constants.CITY_ID, houseFlow.getCityId());
+        ServerResponse serverResponse = workerGoodsAPI.getAgencyPurchaseMoney(houseFlow.getCityId(), houseFlow.getHouseId(), houseFlow.getId());
+        if (serverResponse.isSuccess()) {
+            JSONObject obj = JSONObject.parseObject(serverResponse.getResultObj().toString());
+            totalAgencyPurchasePrice = obj.getDouble("totalAgencyPurchasePrice");
+        }
+        return new BigDecimal(totalAgencyPurchasePrice.toString());
+    }
+
+    /**
      * 工人拿钱
      */
     private void workerMoney(HouseWorkerOrder hwo, HouseFlowApply hfa) {
@@ -702,20 +729,22 @@ public class HouseFlowApplyService {
                 star2 = e2.getStar();//几星？
             }
             Double star = (double) ((star1 + star2) / 2);
-            //工人钱
-            BigDecimal applymoney = new BigDecimal(0);
             //评分扣钱
             BigDecimal deductPrice = new BigDecimal(0);
-
+            BigDecimal totalAgencyMoney=hfa.getApplyMoney().subtract(getTotalAgencyPurchasePrice(hfa.getId()));
+            //评份扣钱对应的基数钱
+            BigDecimal applyDeductMoney;
             if (star >= 4) {
-                applymoney = hfa.getApplyMoney();
+                applyDeductMoney = totalAgencyMoney;
             } else if (star > 2) {
-                applymoney = hfa.getApplyMoney().multiply(new BigDecimal(0.97));
-                deductPrice = hfa.getApplyMoney().subtract(applymoney);
+                applyDeductMoney = totalAgencyMoney.multiply(new BigDecimal(0.97));
+                deductPrice = totalAgencyMoney.subtract(applyDeductMoney);
             } else {
-                applymoney = hfa.getApplyMoney().multiply(new BigDecimal(0.95));
-                deductPrice = hfa.getApplyMoney().subtract(applymoney);
+                applyDeductMoney = totalAgencyMoney.multiply(new BigDecimal(0.95));
+                deductPrice = totalAgencyMoney.subtract(applyDeductMoney);
             }
+            //工人钱
+            BigDecimal applymoney = hfa.getApplyMoney().subtract(deductPrice);
             //整体完工前均能发起，阶段完工发起的，阶段完工时拿钱（还可拿钱立即体现增加金额），
             // 阶段完工后整体完工前发起的，整体完工时拿钱（还可拿钱立即体现增加金额）
             //清空补人工钱，用于整体完工时记录新的补人工钱CraftsmanConstructionService
@@ -812,18 +841,21 @@ public class HouseFlowApplyService {
             }
             //评分扣钱
             BigDecimal deductPrice = new BigDecimal(0);
-            //管家钱
-            BigDecimal applyMoney;
-            if (star == 5) {
-                applyMoney = hfa.getApplyMoney();
-            } else if (star == 3 || star == 4) {
-                applyMoney = hfa.getApplyMoney().multiply(new BigDecimal(0.9));
-                deductPrice = hfa.getApplyMoney().subtract(applyMoney);
-            } else {
-                applyMoney = hfa.getApplyMoney().multiply(new BigDecimal(0.8));
-                deductPrice = hfa.getApplyMoney().subtract(applyMoney);
-            }
+            BigDecimal totalAgencyMoney=hfa.getApplyMoney().subtract(getTotalAgencyPurchasePrice(hfa.getId()));
 
+            //计算评分扣钱时用的总钱系数
+            BigDecimal applyDeductMoney;
+            if (star == 5) {
+                applyDeductMoney = totalAgencyMoney;
+            } else if (star == 3 || star == 4) {
+                applyDeductMoney = totalAgencyMoney.multiply(new BigDecimal(0.9));
+                deductPrice = totalAgencyMoney.subtract(applyDeductMoney);
+            } else {
+                applyDeductMoney = totalAgencyMoney.multiply(new BigDecimal(0.8));
+                deductPrice = totalAgencyMoney.subtract(applyDeductMoney);
+            }
+            //管家钱
+            BigDecimal applyMoney = hfa.getApplyMoney().subtract(deductPrice);
             //计算大管家整体完工金额
             HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(hfa.getHouseId(), hfa.getWorkerTypeId());  //处理工人评分扣钱
             if (hwo.getDeductPrice() == null) {

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.product.DjBasicsAttributeValueMapper">
+    <sql id="all_columns">
+		id,
+		name,
+		attribute_id as attributeId,
+		introduction,
+        create_date as createDate,
+        modify_date as modifyDate,
+        data_status as dataStatus
+	</sql>
+    <resultMap type="com.dangjia.acg.pojo.product.DjBasicsAttributeValuePO" id="attributeValueResultMap">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="attributeId" column="attributeId"/>
+        <result property="introduction" column="introduction"/>
+        <result property="createDate" column="createDate"/>
+        <result property="modifyDate" column="modifyDate"/>
+
+        <association property="djBasicsAttribute" javaType="com.dangjia.acg.modle.product.DjBasicsAttribute" >
+            <id property="id" column="id"/>
+            <result property="name" column="name"/>
+            <result property="type" column="type"/>
+            <result property="createDate" column="createDate"/>
+            <result property="modifyDate" column="modifyDate"/>
+        </association>
+    </resultMap>
+
+    <!-- 根据属性id查询所有属性选项 -->
+    <select id="queryPOByAttributeId" resultMap="attributeValueResultMap">
+		SELECT
+            *
+		FROM dj_basics_attribute_value
+		where attribute_id= #{attributeId}
+		ORDER BY create_date desc
+	</select>
+
+</mapper>

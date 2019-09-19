@@ -94,4 +94,17 @@ public class WorkerGoodsController implements WorkerGoodsAPI {
         return workerGoodsService.getHomeProductList();
     }
 
+    /**
+     * 从精算表查代购商品支付工钱
+     * @param cityId
+     * @param houseId
+     * @param houseFlowId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getAgencyPurchaseMoney(String cityId, String houseId, String houseFlowId){
+        return workerGoodsService.getAgencyPurchaseMoney(houseId, houseFlowId);
+    }
+
 }

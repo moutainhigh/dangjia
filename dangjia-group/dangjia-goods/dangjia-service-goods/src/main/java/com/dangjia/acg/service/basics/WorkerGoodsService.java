@@ -1,12 +1,10 @@
 package com.dangjia.acg.service.basics;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.app.repair.MasterMendWorkerAPI;
 import com.dangjia.acg.api.data.WorkerTypeAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
-import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
@@ -15,21 +13,20 @@ import com.dangjia.acg.dto.basics.WorkerGoodsDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
 import com.dangjia.acg.mapper.basics.ITechnologyMapper;
 import com.dangjia.acg.mapper.basics.IWorkerGoodsMapper;
+import com.dangjia.acg.mapper.product.DjBasicsProductWorkerMapper;
 import com.dangjia.acg.modle.basics.HomeProductDTO;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.basics.WorkerGoods;
 import com.dangjia.acg.modle.core.WorkerType;
+import com.dangjia.acg.service.product.DjBasicsProductService;
 import com.dangjia.acg.util.DateUtils;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
-import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -41,7 +38,7 @@ import java.util.List;
  */
 @Service
 public class WorkerGoodsService {
-
+    private static Logger logger = LoggerFactory.getLogger(WorkerGoodsService.class);
     @Autowired
     private IWorkerGoodsMapper iWorkerGoodsMapper;
     @Autowired
@@ -50,6 +47,8 @@ public class WorkerGoodsService {
     private ConfigUtil configUtil;
     @Autowired
     private WorkerTypeAPI workerTypeAPI;
+    @Autowired
+    private DjBasicsProductWorkerMapper djBasicsProductWorkerMapper;
     @Autowired
     private TechnologyService technologyService;
     @Autowired
@@ -77,17 +76,51 @@ public class WorkerGoodsService {
     }*/
 
     public WorkerGoodsDTO getWorkerGoodsDTO(String workerGoodsSn, String workerTypeId, String shopCount) {
-        Example example = new Example(WorkerGoods.class);
-        example.createCriteria()
-                .andEqualTo(WorkerGoods.DATA_STATUS, '0')
-                .andEqualTo(WorkerGoods.SHOW_GOODS, 1)
-                .andEqualTo(WorkerGoods.WORKER_GOODS_SN, workerGoodsSn)
-                .andEqualTo(WorkerGoods.WORKER_TYPE_ID, workerTypeId)
-        ;
-        List<WorkerGoods> workerGoods = iWorkerGoodsMapper.selectByExample(example);
+//        Example example = new Example(WorkerGoods.class);
+//        example.createCriteria()
+//                .andEqualTo(WorkerGoods.DATA_STATUS, '0')
+//                .andEqualTo(WorkerGoods.SHOW_GOODS, 1)
+//                .andEqualTo(WorkerGoods.WORKER_GOODS_SN, workerGoodsSn)
+//                .andEqualTo(WorkerGoods.WORKER_TYPE_ID, workerTypeId)
+//        ;
+//        List<WorkerGoods> workerGoods = iWorkerGoodsMapper.selectByExample(example);
+        List<WorkerGoodsDTO> workerGoodsDTOS = djBasicsProductWorkerMapper.queryWorkerGoodsDTO(workerGoodsSn, workerTypeId);
         WorkerGoodsDTO workerGoodsDTO = new WorkerGoodsDTO();
-        if (workerGoods != null && workerGoods.size() > 0) {
-            workerGoodsDTO = assembleWorkerGoodsResult(workerGoods.get(0));
+        if (workerGoodsDTOS != null && workerGoodsDTOS.size() > 0) {
+            workerGoodsDTO = workerGoodsDTOS.get(0);
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            workerGoodsDTO.setImage(getImageAddress(address, workerGoodsDTO.getImage()));
+            workerGoodsDTO.setImageUrl(workerGoodsDTO.getImage());
+            workerGoodsDTO.setWorkerDec(getImageAddress(address, workerGoodsDTO.getWorkerDec()));
+            workerGoodsDTO.setWorkerDecUrl(workerGoodsDTO.getWorkerDec());
+            String workerTypeName = "";
+            ServerResponse response = workerTypeAPI.getWorkerType(workerGoodsDTO.getWorkerTypeId());
+            if (response.isSuccess()) {
+                workerTypeName = (((JSONObject) response.getResultObj()).getString(WorkerType.NAME));
+            }
+            //将工艺列表返回
+            List<TechnologyDTO> technologies = new ArrayList<>();
+            List<Technology> technologyList = iTechnologyMapper.queryTechnologyList(workerGoodsDTO.getTechnologyIds());
+            for (Technology technology : technologyList) {
+                TechnologyDTO technologyResult = new TechnologyDTO();
+                technologyResult.setId(technology.getId());
+                technologyResult.setName(technology.getName());
+                technologyResult.setWorkerTypeId(technology.getWorkerTypeId());
+                technologyResult.setContent(technology.getContent());
+                technologyResult.setImage(getImageAddress(address, technology.getImage()));
+                technologyResult.setImageUrl(technology.getImage());
+                technologyResult.setSampleImage(technology.getSampleImage());
+                technologyResult.setSampleImageUrl(address + technology.getSampleImage());
+                technologyResult.setType(technology.getType());
+
+                technologyResult.setCreateDate(DateUtils.timedate(String.valueOf(technology.getCreateDate().getTime())));
+                technologyResult.setModifyDate(DateUtils.timedate(String.valueOf(technology.getModifyDate().getTime())));
+                technologies.add(technologyResult);
+            }
+            workerGoodsDTO.setTechnologies(technologies);
+            workerGoodsDTO.setCreateDate(DateUtils.timedate(String.valueOf(workerGoodsDTO.getCreateDate())));
+            workerGoodsDTO.setModifyDate(DateUtils.timedate(String.valueOf(workerGoodsDTO.getModifyDate())));
+            workerGoodsDTO.setWorkerTypeName(workerTypeName);
             workerGoodsDTO.setShopCount(shopCount);
         } else {
             workerGoodsDTO.setWorkerGoodsSn(workerGoodsSn);
@@ -112,70 +145,70 @@ public class WorkerGoodsService {
         return imgStr.toString();
     }
 
-    public WorkerGoodsDTO assembleWorkerGoodsResult(WorkerGoods workerGoods) {
-        try {
-            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            WorkerGoodsDTO workerGoodsResult = new WorkerGoodsDTO();
-            workerGoodsResult.setId(workerGoods.getId());
-            workerGoodsResult.setName(workerGoods.getName());
-            workerGoodsResult.setWorkerGoodsSn(workerGoods.getWorkerGoodsSn());
-            workerGoodsResult.setImage(getImageAddress(address, workerGoods.getImage()));
-            workerGoodsResult.setImageUrl(workerGoods.getImage());
-            workerGoodsResult.setWorkerDec(getImageAddress(address, workerGoods.getWorkerDec()));
-            workerGoodsResult.setWorkerDecUrl(workerGoods.getWorkerDec());
-            workerGoodsResult.setUnitId(workerGoods.getUnitId());
-            workerGoodsResult.setUnitName(workerGoods.getUnitName());
-            workerGoodsResult.setOtherName(workerGoods.getOtherName());
-            String workerTypeName = "";
-            ServerResponse response = workerTypeAPI.getWorkerType(workerGoods.getWorkerTypeId());
-            if (response.isSuccess()) {
-                workerTypeName = (((JSONObject) response.getResultObj()).getString(WorkerType.NAME));
-            }
-            workerGoodsResult.setWorkerTypeName(workerTypeName);
-            workerGoodsResult.setPrice(workerGoods.getPrice());
-            workerGoodsResult.setIstops(workerGoods.getIstop());
-            workerGoodsResult.setSales(workerGoods.getSales());
-            workerGoodsResult.setWorkExplain(workerGoods.getWorkExplain());
-            workerGoodsResult.setWorkerStandard(workerGoods.getWorkerStandard());
-            workerGoodsResult.setWorkerTypeId(workerGoods.getWorkerTypeId());
-            workerGoodsResult.setWorkerTypeName(workerTypeName);
-            workerGoodsResult.setShowGoods(workerGoods.getShowGoods());
-
-            workerGoodsResult.setLastPrice(workerGoods.getLastPrice());
-            workerGoodsResult.setLastTime(workerGoods.getLastTime());
-            workerGoodsResult.setTechnologyIds(workerGoods.getTechnologyIds());
-            workerGoodsResult.setConsiderations(workerGoods.getConsiderations());
-            workerGoodsResult.setCalculateContent(workerGoods.getCalculateContent());
-            workerGoodsResult.setBuildContent(workerGoods.getBuildContent());
-
-            //将工艺列表返回
-            List<TechnologyDTO> technologies = new ArrayList<>();
-            List<Technology> technologyList = iTechnologyMapper.queryTechnologyList(workerGoods.getTechnologyIds());
-            for (Technology technology : technologyList) {
-                TechnologyDTO technologyResult = new TechnologyDTO();
-                technologyResult.setId(technology.getId());
-                technologyResult.setName(technology.getName());
-                technologyResult.setWorkerTypeId(technology.getWorkerTypeId());
-                technologyResult.setContent(technology.getContent());
-                technologyResult.setImage(getImageAddress(address, technology.getImage()));
-                technologyResult.setImageUrl(technology.getImage());
-                technologyResult.setSampleImage(technology.getSampleImage());
-                technologyResult.setSampleImageUrl(address + technology.getSampleImage());
-                technologyResult.setType(technology.getType());
-
-                technologyResult.setCreateDate(DateUtils.timedate(String.valueOf(technology.getCreateDate().getTime())));
-                technologyResult.setModifyDate(DateUtils.timedate(String.valueOf(technology.getModifyDate().getTime())));
-                technologies.add(technologyResult);
-            }
-            workerGoodsResult.setTechnologies(technologies);
-            workerGoodsResult.setCreateDate(DateUtils.timedate(String.valueOf(workerGoods.getCreateDate().getTime())));
-            workerGoodsResult.setModifyDate(DateUtils.timedate(String.valueOf(workerGoods.getModifyDate().getTime())));
-            return workerGoodsResult;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
+//    public WorkerGoodsDTO assembleWorkerGoodsResult(WorkerGoods workerGoods) {
+//        try {
+//            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+//            WorkerGoodsDTO workerGoodsResult = new WorkerGoodsDTO();
+//            workerGoodsResult.setId(workerGoods.getId());
+//            workerGoodsResult.setName(workerGoods.getName());
+//            workerGoodsResult.setWorkerGoodsSn(workerGoods.getWorkerGoodsSn());
+//            workerGoodsResult.setImage(getImageAddress(address, workerGoods.getImage()));
+//            workerGoodsResult.setImageUrl(workerGoods.getImage());
+//            workerGoodsResult.setWorkerDec(getImageAddress(address, workerGoods.getWorkerDec()));
+//            workerGoodsResult.setWorkerDecUrl(workerGoods.getWorkerDec());
+//            workerGoodsResult.setUnitId(workerGoods.getUnitId());
+//            workerGoodsResult.setUnitName(workerGoods.getUnitName());
+//            workerGoodsResult.setOtherName(workerGoods.getOtherName());
+//            String workerTypeName = "";
+//            ServerResponse response = workerTypeAPI.getWorkerType(workerGoods.getWorkerTypeId());
+//            if (response.isSuccess()) {
+//                workerTypeName = (((JSONObject) response.getResultObj()).getString(WorkerType.NAME));
+//            }
+//            workerGoodsResult.setWorkerTypeName(workerTypeName);
+//            workerGoodsResult.setPrice(workerGoods.getPrice());
+//            workerGoodsResult.setIstops(workerGoods.getIstop());
+//            workerGoodsResult.setSales(workerGoods.getSales());
+//            workerGoodsResult.setWorkExplain(workerGoods.getWorkExplain());
+//            workerGoodsResult.setWorkerStandard(workerGoods.getWorkerStandard());
+//            workerGoodsResult.setWorkerTypeId(workerGoods.getWorkerTypeId());
+//            workerGoodsResult.setWorkerTypeName(workerTypeName);
+//            workerGoodsResult.setShowGoods(workerGoods.getShowGoods());
+//
+//            workerGoodsResult.setLastPrice(workerGoods.getLastPrice());
+//            workerGoodsResult.setLastTime(workerGoods.getLastTime());
+//            workerGoodsResult.setTechnologyIds(workerGoods.getTechnologyIds());
+//            workerGoodsResult.setConsiderations(workerGoods.getConsiderations());
+//            workerGoodsResult.setCalculateContent(workerGoods.getCalculateContent());
+//            workerGoodsResult.setBuildContent(workerGoods.getBuildContent());
+//
+//            //将工艺列表返回
+//            List<TechnologyDTO> technologies = new ArrayList<>();
+//            List<Technology> technologyList = iTechnologyMapper.queryTechnologyList(workerGoods.getTechnologyIds());
+//            for (Technology technology : technologyList) {
+//                TechnologyDTO technologyResult = new TechnologyDTO();
+//                technologyResult.setId(technology.getId());
+//                technologyResult.setName(technology.getName());
+//                technologyResult.setWorkerTypeId(technology.getWorkerTypeId());
+//                technologyResult.setContent(technology.getContent());
+//                technologyResult.setImage(getImageAddress(address, technology.getImage()));
+//                technologyResult.setImageUrl(technology.getImage());
+//                technologyResult.setSampleImage(technology.getSampleImage());
+//                technologyResult.setSampleImageUrl(address + technology.getSampleImage());
+//                technologyResult.setType(technology.getType());
+//
+//                technologyResult.setCreateDate(DateUtils.timedate(String.valueOf(technology.getCreateDate().getTime())));
+//                technologyResult.setModifyDate(DateUtils.timedate(String.valueOf(technology.getModifyDate().getTime())));
+//                technologies.add(technologyResult);
+//            }
+//            workerGoodsResult.setTechnologies(technologies);
+//            workerGoodsResult.setCreateDate(DateUtils.timedate(String.valueOf(workerGoods.getCreateDate().getTime())));
+//            workerGoodsResult.setModifyDate(DateUtils.timedate(String.valueOf(workerGoods.getModifyDate().getTime())));
+//            return workerGoodsResult;
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return null;
+//        }
+//    }
 
    /* @Transactional(rollbackFor = Exception.class)
     public ServerResponse<String> setWorkerGoods(WorkerGoods workerGoods, String technologyJsonList, String deleteTechnologyIds) {
@@ -279,6 +312,26 @@ public class WorkerGoodsService {
 
         }
     }
+
+    /**
+     * 从精算表查代购商品支付工钱
+     * @param houseId
+     * @param houseFlowId
+     * @return
+     */
+    public ServerResponse getAgencyPurchaseMoney(String houseId, String houseFlowId){
+        try {
+            Double totalAgencyPurchasePrice = iWorkerGoodsMapper.getAgencyPurchaseMoney(houseId, houseFlowId);
+            JSONObject object = new JSONObject();
+            object.put("totalAgencyPurchasePrice", totalAgencyPurchasePrice);
+            return ServerResponse.createBySuccess("查询精算表查代购商品支付工钱成功", object);
+        } catch (Exception e) {
+           logger.error("查询精算表查代购商品支付工钱失败",e);
+            return ServerResponse.createByErrorMessage("查询精算表查代购商品支付工钱失败");
+
+        }
+    }
+
 
     public ServerResponse getHomeProductList() {
         List<HomeProductDTO> homeProductDTOS = iWorkerGoodsMapper.getHomeProductList();

@@ -55,6 +55,13 @@ public interface WorkerGoodsAPI {
                                   @RequestParam("houseId") String houseId,
                                   @RequestParam("houseFlowId") String houseFlowId);
 
+
+ @PostMapping("/basics/workerGoods/getAgencyPurchaseMoney")
+ @ApiOperation(value = " 从精算表查代购商品支付工钱", notes = " 从精算表查代购商品支付工钱")
+ ServerResponse getAgencyPurchaseMoney(@RequestParam("cityId") String cityId,
+                               @RequestParam("houseId") String houseId,
+                               @RequestParam("houseFlowId") String houseFlowId);
+
     /**
      * showdoc
      *

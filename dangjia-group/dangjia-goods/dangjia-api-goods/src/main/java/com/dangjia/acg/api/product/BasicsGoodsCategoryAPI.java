@@ -110,27 +110,28 @@ public interface BasicsGoodsCategoryAPI {
      *
      * @Title: getProduct
      */
-    @PostMapping("/product/basicsGoodsCategory/insertGoodsAttribute")
+    @PostMapping("/product/basicsGoodsCategory/addGoodsAttribute")
     @ApiOperation(value = "新增属性及其属性选项", notes = "新增属性及其属性选项")
-    ServerResponse insertGoodsAttribute(@RequestParam("request") HttpServletRequest request,
-                                        @RequestParam("goodsCategoryId") String goodsCategoryId,
-                                        @RequestParam("attributeName") String attributeName,
-                                        @RequestParam("type") Integer type,
-                                        @RequestParam("jsonStr") String jsonStr);
+    ServerResponse addGoodsAttribute(@RequestParam("request") HttpServletRequest request,
+                                     @RequestParam("goodsCategoryId") String goodsCategoryId,
+                                     @RequestParam("attributeName") String attributeName,
+                                     @RequestParam("type") Integer type,
+                                     @RequestParam("jsonStr") String jsonStr,
+                                     @RequestParam("isScreenConditions") Integer isScreenConditions);
 
     /**
      * 修改属性及其属性选项
      *
      * @Title: getProduct
      */
-    @PostMapping("/product/basicsGoodsCategory/doModifyGoodsAttribute")
+    @PostMapping("/product/basicsGoodsCategory/updateGoodsAttribute")
     @ApiOperation(value = "修改属性及其属性选项", notes = "修改属性及其属性选项")
-    ServerResponse doModifyGoodsAttribute(@RequestParam("request") HttpServletRequest request,
-                                          @RequestParam("attributeId") String attributeId,
-                                          @RequestParam("attributeName") String attributeName,
-                                          @RequestParam("type") Integer type,
-                                          @RequestParam("jsonStr") String jsonStr);
-
+    ServerResponse updateGoodsAttribute(@RequestParam("request") HttpServletRequest request,
+                                        @RequestParam("attributeId") String attributeId,
+                                        @RequestParam("attributeName") String attributeName,
+                                        @RequestParam("type") Integer type,
+                                        @RequestParam("jsonStr") String jsonStr,
+                                        @RequestParam("isScreenConditions") Integer isScreenConditions);
     /**
      * 删除商品属性
      */

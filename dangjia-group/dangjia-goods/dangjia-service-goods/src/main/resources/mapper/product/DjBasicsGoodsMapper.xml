@@ -2,6 +2,27 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.dangjia.acg.mapper.product.DjBasicsGoodsMapper">
 
+    <sql id="all_columns">
+          `id`,
+          `name`,
+          `category_id` AS categoryId,
+          `type`,
+          `buy`,
+          `sales`,
+          `unit_id` AS unitId,
+          `create_date` AS createDate,
+          `modify_date` AS modifyDate,
+          `data_status` AS dataStatus,
+          `other_name` AS otherName,
+          `is_influe_decoration_progress` AS isInflueDecorationProgress,
+          `irreversible_reasons` AS irreversibleReasons,
+          `istop`,
+          `brand_id` AS brandId,
+          `is_elevator_fee` AS isElevatorFee,
+          `indicative_price` AS indicativePrice,
+          `label_ids` AS labelIds
+	</sql>
+
 
     <!-- 查询某个分类的商品 模糊name -->
     <select id="queryGoodsListByCategoryLikeName" resultType="com.dangjia.acg.modle.product.DjBasicsGoods">
@@ -45,4 +66,36 @@
         AND g.category_id = #{categoryId}
     </select>
 
+    <!-- 根据id查询属性对象 -->
+    <select id="queryById" resultType="com.dangjia.acg.modle.product.DjBasicsGoods">
+        SELECT
+        <include refid="all_columns"/>
+        FROM dj_basics_goods
+        where
+        id =#{id}
+        and data_status=0
+        ORDER BY create_date desc
+    </select>
+
+    <!-- 根据商品Id查询所有货品 -->
+    <select id="queryByGoodsId" resultType="com.dangjia.acg.modle.product.DjBasicsProduct">
+        SELECT
+        <include refid="all_columns"/>
+        FROM dj_basics_product
+        where goods_id=#{goodsId}
+        and data_status=0
+        ORDER BY istop DESC,create_date desc
+    </select>
+
+    <!-- 根据类别id查询商品对象 -->
+    <select id="queryByCategoryId" resultType="com.dangjia.acg.modle.product.DjBasicsGoods">
+        SELECT
+        <include refid="all_columns"/>
+        FROM dj_basics_goods
+        <if test="categoryId!=null">
+            where
+            category_id=#{categoryId}
+        </if>
+        ORDER BY create_date desc
+    </select>
 </mapper>
