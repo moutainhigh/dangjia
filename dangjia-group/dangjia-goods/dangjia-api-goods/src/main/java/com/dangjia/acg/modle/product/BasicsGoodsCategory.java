@@ -62,10 +62,7 @@ public class BasicsGoodsCategory extends BaseEntity {
     @ApiModelProperty("分类标签ID")
     private String categoryLabelId;//分类标签ID
 
-    @Column(name = "brand_id")
-    @Desc(value = "品牌Id")
-    @ApiModelProperty("品牌Id")
-    private String brandId;
+
 
     //业主
     @Transient
