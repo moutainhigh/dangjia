@@ -57,7 +57,7 @@ public class BasicsGoodsCategory extends BaseEntity {
     @ApiModelProperty("上传封面图")
     private String coverImage;//上传封面图
 
-    @Column(name = "category_label_id")
+    @Column(name = "category_label_ids")
     @Desc(value = "分类标签ID")
     @ApiModelProperty("分类标签ID")
     private String categoryLabelId;//分类标签ID

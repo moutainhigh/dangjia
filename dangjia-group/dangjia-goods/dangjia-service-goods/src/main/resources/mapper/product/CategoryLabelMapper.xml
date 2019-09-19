@@ -30,7 +30,7 @@
             l.modify_date AS modifyDate
         FROM
             dj_baiscs_category_label l
-        INNER JOIN dj_basics_goods_category c on FIND_IN_SET(l.id,c.category_label_id)
+        INNER JOIN dj_basics_goods_category c on FIND_IN_SET(l.id,c.category_label_ids)
         GROUP BY l.id
         ORDER BY
             createDate DESC

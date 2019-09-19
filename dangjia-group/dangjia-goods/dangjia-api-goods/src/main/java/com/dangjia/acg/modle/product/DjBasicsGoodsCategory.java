@@ -64,9 +64,9 @@ public class DjBasicsGoodsCategory extends BaseEntity {
     @ApiModelProperty("上传封面图")
     private String coverImage;
 
-    @Column(name = "category_label_id")
-    @Desc(value = "分类标签ID")
-    @ApiModelProperty("分类标签ID")
+    @Column(name = "category_label_ids")
+    @Desc(value = "分类标签ID,用逗号分隔")
+    @ApiModelProperty("分类标签ID,用逗号分隔")
     private String categoryLabelId;
 
     @Column(name = "brand_id")
