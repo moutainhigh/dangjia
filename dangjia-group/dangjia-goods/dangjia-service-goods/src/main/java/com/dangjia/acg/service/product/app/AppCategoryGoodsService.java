@@ -60,7 +60,13 @@ public class AppCategoryGoodsService {
      * @return
      */
     public ServerResponse queryTopCategoryLabel() {
+        List<CategoryLabel> list =new ArrayList<>();
+        CategoryLabel categoryLabel =new CategoryLabel();
+        categoryLabel.setName("全部");
+        categoryLabel.setId("");
+        list.add(categoryLabel);
         List<CategoryLabel> goodsCategoryList = iCategoryLabelMapper.queryAPPCategoryLabel();
+        list.addAll(goodsCategoryList);
         return ServerResponse.createBySuccess("查询成功", goodsCategoryList);
     }
 
