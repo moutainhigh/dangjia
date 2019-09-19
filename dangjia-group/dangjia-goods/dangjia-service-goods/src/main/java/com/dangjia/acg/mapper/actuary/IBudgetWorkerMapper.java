@@ -1,5 +1,6 @@
 package com.dangjia.acg.mapper.actuary;
 
+import com.dangjia.acg.dto.product.BasicsgDTO;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.modle.basics.Technology;
 import org.apache.ibatis.annotations.Param;
@@ -60,4 +61,17 @@ public interface IBudgetWorkerMapper extends Mapper<BudgetWorker> {
 
 	/*更新人工商品名称及属性(商品3.0改版后的关联)*/
 	void updateBudgetMaterialByProductId(@Param("id") String id);
+
+
+    /**
+     * 查询商品
+     * @param houseId
+     * @param id
+     * @return
+     */
+    List<BasicsgDTO> queryMakeBudgetsList(@Param("houseId")String houseId, @Param("id")String id);
+
+
+    List<BasicsgDTO> queryMakeBudgetsBmList(@Param("houseId")String houseId, @Param("id")String id);
+
 }
