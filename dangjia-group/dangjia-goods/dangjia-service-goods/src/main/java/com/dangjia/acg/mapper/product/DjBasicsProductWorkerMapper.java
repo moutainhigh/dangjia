@@ -24,6 +24,6 @@ public interface DjBasicsProductWorkerMapper extends Mapper<DjBasicsProductWorke
      */
     DjBasicsProductWorker queryProductWorkerByProductId(@Param("productId") String productId);
 
-    List<WorkerGoodsDTO> queryWorkerGoodsDTO(@Param("productSn") String productSn,@Param("workerTypeId") String workerTypeId);
+    List<WorkerGoodsDTO> queryWorkerGoodsDTO(@Param("productSn") String productSn, @Param("workerTypeId") String workerTypeId);
 
 }
