@@ -1,15 +1,11 @@
 package com.dangjia.acg.pojo.product;
 
-import com.dangjia.acg.modle.attribute.GoodsCategory;
-import com.dangjia.acg.modle.basics.Goods;
-import com.dangjia.acg.modle.basics.Label;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.brand.Unit;
+import com.dangjia.acg.modle.product.BasicsGoodsCategory;
 import com.dangjia.acg.modle.product.DjBasicsGoods;
-import com.dangjia.acg.modle.product.DjBasicsGoodsCategory;
 import com.dangjia.acg.modle.product.DjBasicsLabel;
-import com.dangjia.acg.pojo.attribute.AttributePO;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
@@ -30,7 +26,7 @@ public class DjBasicsProductPO extends Product {
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "category_id")
-    private DjBasicsGoodsCategory djBasicsGoodsCategory;//分类对象
+    private BasicsGoodsCategory basicsGoodsCategory;//分类对象
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "goods_id")

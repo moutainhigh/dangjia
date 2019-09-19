@@ -20,7 +20,6 @@ import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.product.DjBasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProduct;
 import com.dangjia.acg.modle.product.DjBasicsProductMaterial;
-import com.dangjia.acg.service.actuary.BudgetWorkerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +40,7 @@ import java.util.List;
 public class DjActuaryBudgetMaterialService {
     @Autowired
     private IBudgetMaterialMapper iBudgetMaterialMapper;
-    private static Logger LOG = LoggerFactory.getLogger(BudgetWorkerService.class);
+    private static Logger LOG = LoggerFactory.getLogger(DjActuaryBudgetMaterialService.class);
     @Autowired
     private GetForBudgetAPI getForBudgetAPI;
     @Autowired

@@ -62,6 +62,8 @@ public class BasicsGoodsCategory extends BaseEntity {
     @ApiModelProperty("分类标签ID")
     private String categoryLabelId;//分类标签ID
 
+
+
     //业主
     @Transient
     private String categoryIds;
