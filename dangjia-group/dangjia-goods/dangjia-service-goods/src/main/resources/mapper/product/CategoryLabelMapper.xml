@@ -27,7 +27,7 @@
             l.id,
             l.name,
             l.create_date AS createDate,
-            l.modify_date AS modifyDate
+            l.modify_date AS modifyDate,
             l.sort
         FROM
             dj_basics_category_label l
