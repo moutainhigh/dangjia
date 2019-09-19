@@ -146,6 +146,15 @@ public interface DjBasicsProductAPI {
     ServerResponse getAllProductByGoodsId(@RequestParam("request") HttpServletRequest request,
                                           @RequestParam("goodsId") String goodsId);
 
+    @PostMapping("/product/djBasicsProduct/queryGoodsList")
+    @ApiOperation(value = "按照name模糊查询商品及下属货品", notes = "按照name模糊查询商品及下属货品，type： 是否禁用  0：禁用；1不禁用 ;  -1全部默认")
+    ServerResponse queryGoodsList(@RequestParam("request") HttpServletRequest request,
+                                                    @RequestParam("pageDTO") PageDTO pageDTO,
+                                                    @RequestParam("categoryId") String categoryId,
+                                                    @RequestParam("name") String name,
+                                                    @RequestParam("cityId") String cityId,
+                                                    @RequestParam("type") Integer type);
+
 
 
 }
