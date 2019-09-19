@@ -334,7 +334,7 @@ public class AppActuaryOperationService {
         try {
             DjBasicsGoods goods = goodsMapper.selectByPrimaryKey(product.getGoodsId());
             //如果商品为0：材料；1：服务
-            if(goods.getType()==1 || goods.getType()==2) {
+            if(goods.getType()==1 || goods.getType()==0) {
                 GoodsDTO goodsDTO = new GoodsDTO();//长图  品牌系列图+属性图(多个)
                 DjBasicsProductMaterial targetProductMaterial = djBasicsProductMaterialMapper.queryProductMaterialByProductId(product.getId());//目标product 对象
                 goodsDTO.setProductId(product.getId());
@@ -400,8 +400,8 @@ public class AppActuaryOperationService {
                     }
                 } else {
                     Example example = new Example(Product.class);
-                    example.createCriteria().andEqualTo(Product.GOODS_ID, goods.getId()).andEqualTo(Product.TYPE, "1");
-                    example.orderBy(Product.VALUE_ID_ARR);
+                    example.createCriteria().andEqualTo(DjBasicsProduct.GOODS_ID, goods.getId()).andEqualTo(DjBasicsProduct.TYPE, "1");
+                    example.orderBy(DjBasicsProduct.CATEGORY_ID);
                     productList = productMapper.selectByExample(example);
                 }
                 List<AttributeDTO> attrList = getAllAttributes(product, productList);
@@ -415,7 +415,7 @@ public class AppActuaryOperationService {
                 return goodsDTO;
             }else{
                 WorkerGoodsDTO  workerGoodsDTO=assembleWorkerGoodsResult(product);
-                return ServerResponse.createBySuccess("查询成功", workerGoodsDTO);
+                return workerGoodsDTO;
             }
         } catch (Exception e) {
             e.printStackTrace();
