@@ -24,8 +24,8 @@ import javax.servlet.http.HttpServletRequest;
 @FeignClient("dangjia-service-goods")
 public interface DjBasicsProductAPI {
 
-    @PostMapping("/product/djBasicsProduct/queryProductData")
-    @ApiOperation(value = "查询商品信息", notes = "查询商品信息")
+    @PostMapping("/app/product/djBasicsProduct/queryProductData")
+    @ApiOperation(value = "app根据商品名称查询商品信息", notes = "app根据商品名称查询商品信息")
     ServerResponse queryProductData(@RequestParam("request")HttpServletRequest request,
                                     @RequestParam("name")String name);
 
