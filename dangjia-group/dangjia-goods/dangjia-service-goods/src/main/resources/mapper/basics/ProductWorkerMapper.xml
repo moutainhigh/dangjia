@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.dangjia.acg.mapper.basics.IWorkerGoodsMapper">
+<mapper namespace="com.dangjia.acg.mapper.basics.IProductWorkerMapper">
     <!--每工种未删除 或 已支付工钱-->
     <select id="getWorkertoCheck" resultType="java.lang.Double">
         select sum(wg.price*abw.shop_count)
@@ -33,6 +33,47 @@
         AND t.house_flow_id = #{houseFlowId}
         AND t1.is_agency_purchase = 1
         AND t.delete_state = 3
+    </select>
+
+    <select id="getProductWorker" resultType="com.dangjia.acg.dto.product.ProductWorkerDTO">
+        SELECT
+            t.id AS id,
+            t.NAME AS NAME,
+            t.goods_id AS goodsId,
+            t.category_id AS categoryId,
+            t.product_sn AS productSn,
+            t.image AS image,
+            t.unit_id AS unitId,
+            t.label_id AS labelId,
+            t.unit_name AS unitName,
+            t.type AS type,
+            t.istop,
+            t.price AS price,
+            t.other_name AS otherName,
+            t.create_date AS createDate,
+            t.modify_date AS modifyDate,
+            t1.work_explain AS workExplain,
+            t1.worker_dec AS workerDec,
+            t1.worker_standard AS workerStandard,
+            t1.worker_type_id AS workerTypeId,
+            t1.last_price AS lastPrice,
+            t1.last_time AS lastTime,
+            t1.technology_ids AS technologyIds,
+            t1.considerations,
+            t1.calculate_content calculateContent,
+            t1.build_content buildContent,
+            t1.is_agency_purchase isAgencyPurchase
+        FROM
+            dj_basics_product t,
+            dj_basics_product_worker t1
+        WHERE
+            t.id = t1.product_id
+        AND t.maket = 1
+        AND t1.worker_type_id = #{workerTypeId}
+        <if test="name!=null and name!=''">
+            AND t.`name` LIKE CONCAT('%', #{name}, '%')
+        </if>
+
     </select>
 
     <!--更新单位-->

@@ -18,18 +18,21 @@ import com.dangjia.acg.mapper.actuary.IActuarialTemplateMapper;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
 import com.dangjia.acg.mapper.basics.*;
+import com.dangjia.acg.mapper.product.DjBasicsProductMapper;
+import com.dangjia.acg.mapper.product.DjBasicsProductWorkerMapper;
 import com.dangjia.acg.modle.actuary.ActuarialTemplate;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.Technology;
-import com.dangjia.acg.modle.basics.WorkerGoods;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.design.HouseStyleType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
+import com.dangjia.acg.modle.product.DjBasicsProduct;
+import com.dangjia.acg.modle.product.DjBasicsProductWorker;
 import com.dangjia.acg.service.basics.ProductService;
 import com.dangjia.acg.service.basics.WorkerGoodsService;
 import org.apache.commons.lang3.StringUtils;
@@ -50,11 +53,15 @@ public class BudgetWorkerService {
     @Autowired
     private IBudgetMaterialMapper iBudgetMaterialMapper;
     @Autowired
-    private IWorkerGoodsMapper iWorkerGoodsMapper;
+    private IProductWorkerMapper iWorkerGoodsMapper;
     @Autowired
     private IGoodsMapper iGoodsMapper;
     @Autowired
     private IProductMapper iProductMapper;
+    @Autowired
+    private DjBasicsProductMapper djBasicsProductMapper;
+    @Autowired
+    private DjBasicsProductWorkerMapper djBasicsProductWorkerMapper;
     @Autowired
     private IUnitMapper iUnitMapper;
     @Autowired
@@ -78,7 +85,7 @@ public class BudgetWorkerService {
     @Autowired
     private RedisClient redisClient;
     @Autowired
-    private IWorkerGoodsMapper workerGoodsMapper;
+    private IProductWorkerMapper workerGoodsMapper;
 
     private static Logger LOG = LoggerFactory.getLogger(BudgetWorkerService.class);
 
@@ -259,7 +266,7 @@ public class BudgetWorkerService {
                 try {
                     Double shopCount = Double.parseDouble(job.getString("shopCount"));
                     BudgetWorker budgetWorker = new BudgetWorker();
-                    WorkerGoods workerGoods = iWorkerGoodsMapper.selectByPrimaryKey(jobT.getProductId());
+                    DjBasicsProduct workerGoods = djBasicsProductMapper.selectByPrimaryKey(jobT.getProductId());
                     budgetWorker.setWorkerTypeId(workerTypeId);
                     budgetWorker.setSteta(3);
                     budgetWorker.setRepairCount(0.0);
@@ -267,7 +274,7 @@ public class BudgetWorkerService {
                     budgetWorker.setTemplateId(templateId);
                     budgetWorker.setDeleteState(0);
                     budgetWorker.setWorkerGoodsId(workerGoods.getId());
-                    budgetWorker.setWorkerGoodsSn(workerGoods.getWorkerGoodsSn());
+                    budgetWorker.setWorkerGoodsSn(workerGoods.getProductSn());
                     budgetWorker.setName(workerGoods.getName());
                     budgetWorker.setPrice(workerGoods.getPrice());
                     budgetWorker.setShopCount(shopCount);
@@ -478,7 +485,7 @@ public class BudgetWorkerService {
                             continue;
                         }
                         BudgetWorker budgetWorker = new BudgetWorker();
-                        WorkerGoods workerGoods = iWorkerGoodsMapper.selectByPrimaryKey(productId);
+                        DjBasicsProduct workerGoods = djBasicsProductMapper.selectByPrimaryKey(productId);
                         if (workerGoods == null) {
                             continue;
                         }
@@ -490,7 +497,7 @@ public class BudgetWorkerService {
                         budgetWorker.setRepairCount(0.0);
                         budgetWorker.setBackCount(0.0);
                         budgetWorker.setWorkerGoodsId(workerGoods.getId());
-                        budgetWorker.setWorkerGoodsSn(workerGoods.getWorkerGoodsSn());
+                        budgetWorker.setWorkerGoodsSn(workerGoods.getProductSn());
                         budgetWorker.setName(workerGoods.getName());
                         budgetWorker.setPrice(workerGoods.getPrice());
                         budgetWorker.setImage(workerGoods.getImage());
@@ -632,7 +639,7 @@ public class BudgetWorkerService {
                         .andCondition("delete_state!=1");
                 List<BudgetWorker> bwList = iBudgetWorkerMapper.selectByExample(example);
                 for (BudgetWorker abw : bwList) {//增加一层循环遍历存储下级子项目
-                    WorkerGoods wg = iWorkerGoodsMapper.selectByPrimaryKey(abw.getWorkerGoodsId());
+                    DjBasicsProduct wg = djBasicsProductMapper.selectByPrimaryKey(abw.getWorkerGoodsId());
                     rlistResult = new RlistResult();
                     rlistResult.setRId(abw.getId());//id
                     //单价
@@ -775,8 +782,9 @@ public class BudgetWorkerService {
                 List<BudgetWorker> budgetWorkerList = iBudgetWorkerMapper.getByHouseFlowId(houseFlow.getHouseId(), houseFlow.getId());
                 for (BudgetWorker abw : budgetWorkerList) {
                     if (abw.getShopCount() + abw.getRepairCount() - abw.getBackCount() > 0) {
-                        WorkerGoods wg = iWorkerGoodsMapper.selectByPrimaryKey(abw.getWorkerGoodsId());
-                        List<Technology> tList = iTechnologyMapper.patrolList(wg.getTechnologyIds());
+                        DjBasicsProduct wg = djBasicsProductMapper.selectByPrimaryKey(abw.getWorkerGoodsId());
+                        DjBasicsProductWorker djBasicsProductWorker = djBasicsProductWorkerMapper.queryProductWorkerByProductId(wg.getId());
+                        List<Technology> tList = iTechnologyMapper.patrolList(djBasicsProductWorker.getTechnologyIds());
                         if (tList.size() > 0) {
                             JSONObject jsonObject = new JSONObject();
                             jsonObject.put("workerGoodsId", wg.getId());
@@ -818,7 +826,7 @@ public class BudgetWorkerService {
             List<BudgetWorker> budgetWorkerList = iBudgetWorkerMapper.getByHouseFlowId(houseId, houseFlowId);
             for (BudgetWorker abw : budgetWorkerList) {
                 if (abw.getShopCount() + abw.getRepairCount() - abw.getBackCount() > 0) {
-                    WorkerGoods  workerGoods = workerGoodsMapper.selectByPrimaryKey(abw.getWorkerGoodsId());//人工商品
+                    DjBasicsProduct  workerGoods = djBasicsProductMapper.selectByPrimaryKey(abw.getWorkerGoodsId());//人工商品
                     if (!CommonUtil.isEmpty(workerGoods)) {
                         JSONObject jsonObject = new JSONObject();
                         jsonObject.put("workerGoodsId", abw.getWorkerGoodsId());
@@ -840,7 +848,7 @@ public class BudgetWorkerService {
     public JSONArray getTecList(int workerType, String workerGoodsId) {
         try {
             JSONArray jsonArray = new JSONArray();
-            WorkerGoods wg = iWorkerGoodsMapper.selectByPrimaryKey(workerGoodsId);
+            DjBasicsProductWorker wg = djBasicsProductWorkerMapper.queryProductWorkerByProductId(workerGoodsId);
             List<Technology> tList;
             if (workerType == 3) {
                 tList = iTechnologyMapper.patrolList(wg.getTechnologyIds());
@@ -861,7 +869,7 @@ public class BudgetWorkerService {
     }
 
     public boolean workerPatrolList(String workerGoodsId) {
-        WorkerGoods wg = iWorkerGoodsMapper.selectByPrimaryKey(workerGoodsId);
+        DjBasicsProductWorker wg = djBasicsProductWorkerMapper.selectByPrimaryKey(workerGoodsId);
         List<Technology> tList = iTechnologyMapper.workerPatrolList(wg.getTechnologyIds());
         if (tList.size() > 0) {
             return true;
@@ -871,7 +879,7 @@ public class BudgetWorkerService {
     }
 
     public boolean patrolList(String workerGoodsId) {
-        WorkerGoods wg = iWorkerGoodsMapper.selectByPrimaryKey(workerGoodsId);
+        DjBasicsProductWorker wg = djBasicsProductWorkerMapper.selectByPrimaryKey(workerGoodsId);
         List<Technology> tList = iTechnologyMapper.patrolList(wg.getTechnologyIds());
         if (tList.size() > 0) {
             return true;

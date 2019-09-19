@@ -1,9 +1,6 @@
 package com.dangjia.acg.api.basics;
 
-import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.modle.basics.WorkerGoods;
-import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -19,7 +16,7 @@ import javax.servlet.http.HttpServletRequest;
  * @tel 18075121944
  * @date on 2018/9/12 上午11:09
  */
-@Api(description = "人工商品管理接口")
+@Api(description = "人工商品关联接口")
 @FeignClient("dangjia-service-goods")
 public interface WorkerGoodsAPI {
 
@@ -65,7 +62,7 @@ public interface WorkerGoodsAPI {
     /**
      * showdoc
      *
-     * @param cityId 必选 string 城市ID
+     * @param
      * @return {"res":1000,"msg":{"resultObj":[{返回参数说明},{返回参数说明}],"resultCode":1000,"resultMsg":"成功"} }
      * @catalog 当家接口文档/首页模块
      * @title 首页当家商品模块

@@ -72,24 +72,6 @@
 		WHERE id=#{id}
 	</delete>
 
-	<!-- 根据商品id查询关联品牌系列 -->
-	<select id="queryBrandByGid" resultType="com.dangjia.acg.modle.brand.BrandSeries">
-		SELECT
-		id,
-		name,
-		brand_id as brandId,
-		content,
-		image
-		FROM dj_basics_brand_series
-		where
-		id in(
-		select
-		series_id
-		from dj_basics_goods_series
-		where
-		goods_id=#{goodsId}
-		)
-		ORDER BY create_date desc
-	</select>
+
 </mapper>
 

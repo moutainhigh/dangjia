@@ -73,43 +73,13 @@
 		create_date,
 		modify_date
 	</sql>
-	<!-- 新增商品和系列关系 -->
-	<insert id="insertGoodsSeries" parameterType="com.dangjia.acg.modle.brand.GoodsSeries">
-		INSERT INTO dj_basics_goods_series(
-		    <include refid="all_GSColumns" />
-		) 
-		VALUES (#{id}, #{goodsId},#{brandId},#{seriesId},SYSDATE(),SYSDATE())
-	</insert>
-	<!-- 删除商品和系列关系 -->
-	<delete id="deleteGoodsSeries" parameterType="java.lang.String">
-		DELETE FROM dj_basics_goods_series
-		WHERE goods_id=#{goodsId}
-	</delete>
 	<sql id="all_Bcolumns">
 		id,
 		name,
 		create_date,
 		modify_date
 	</sql>
-	<!-- 根据商品id查询关联品牌 -->
-	<select id="queryBrandByGid" resultType="com.dangjia.acg.modle.brand.Brand">
-		SELECT
-			id,
-			name,
-			create_date as createDate,
-			modify_date as modifyDate
-		FROM dj_basics_brand
-		where 
-		     id in(
-		        select 
-		              brand_id
-		        from dj_basics_goods_series
-		        where 
-		             goods_id =#{goodsId}
-		        group by brand_id
-		     )
-		ORDER BY create_date desc
-	</select>
+
 	<sql id="all_BScolumns">
 		id,
 		name,
@@ -118,32 +88,7 @@
 		create_date,
 		modify_date
 	</sql>
-	<!-- 根据商品id和品牌id查询关联品牌系列 -->
-	<select id="queryBrandByGidAndBid" resultType="com.dangjia.acg.modle.brand.BrandSeries">
-		SELECT
-			id,
-			name,
-			brand_id as brandId,
-			content,
-			create_date as createDate,
-			modify_date as modifyDate
-		FROM dj_basics_brand_series
-		where 
-		     id in(
-		        select 
-		              series_id
-		        from dj_basics_goods_series
-		        where
-		        1=1
-				<if test="goodsId!=null">
-					and goods_id=#{goodsId}
-				</if>
-				<if test="brandId!=null">
-					and brand_id=#{brandId}
-				</if>
-		     )
-		ORDER BY create_date desc
-	</select>
+
 	 <!-- 根据类别id查询商品对象 -->
 	<select id="queryByCategoryId" resultType="com.dangjia.acg.modle.basics.Goods">
 		SELECT
