@@ -24,22 +24,20 @@ import javax.servlet.http.HttpServletRequest;
 public interface BrowseRecordAPI {
 
     @RequestMapping(value = "app/product/queryBrowseRecord", method = RequestMethod.POST)
-    @ApiOperation(value = "查询用户浏览商品记录表", notes = "查询用户浏览商品记录表")
+    @ApiOperation(value = "查询用户浏览商品记录表(固定取12条)", notes = "查询用户浏览商品记录表(固定取12条)")
     ServerResponse queryBrowseRecord(@RequestParam("request") HttpServletRequest request,
-                                     @RequestParam("userToken") String userToken,
-                                     @RequestParam("pageDTO") PageDTO pageDTO);
+                                     @RequestParam("userToken") String userToken);
 
     @RequestMapping(value = "app/product/addBrowseRecord", method = RequestMethod.POST)
     @ApiOperation(value = "新增用户浏览商品记录表", notes = "新增用户浏览商品记录表")
     ServerResponse addBrowseRecord(@RequestParam("request") HttpServletRequest request,
-                                     @RequestParam("userToken") String userToken,
-                                     @RequestParam("BrowseRecord") BrowseRecord browseRecord);
+                                   @RequestParam("userToken") String userToken,
+                                   @RequestParam("productId") String productId, @RequestParam("productId") String visitsNum);
 
     /**
      * 我的收藏：商品调用新版方案，工地用以前老的方法
      * 购物车猜你喜欢：调用新方案
      * 商品详情页调用同级别货品下面的商品的随机12个
-     *
      */
 
 }

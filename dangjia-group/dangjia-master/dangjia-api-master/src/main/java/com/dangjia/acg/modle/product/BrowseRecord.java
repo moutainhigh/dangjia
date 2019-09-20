@@ -31,6 +31,6 @@ public class BrowseRecord extends BaseEntity {
     @Column(name = "visits_num")
     @Desc(value = "访问次数")
     @ApiModelProperty("访问次数")
-    private String visits_num;
+    private String visitsNum;
 
 }

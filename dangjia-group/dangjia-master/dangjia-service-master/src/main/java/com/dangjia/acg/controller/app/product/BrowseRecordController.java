@@ -18,13 +18,13 @@ public class BrowseRecordController  implements BrowseRecordAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryBrowseRecord(HttpServletRequest request, String userToken, PageDTO pageDTO) {
-        return browseRecordService.queryBrowseRecord(request,userToken,pageDTO);
+    public ServerResponse queryBrowseRecord(HttpServletRequest request, String userToken) {
+        return browseRecordService.queryBrowseRecord(request,userToken);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse addBrowseRecord(HttpServletRequest request, String userToken, BrowseRecord browseRecord) {
-        return browseRecordService.addBrowseRecord(request,userToken,browseRecord);
+    public ServerResponse addBrowseRecord(HttpServletRequest request, String userToken,  String productId , String visitsNum) {
+        return browseRecordService.addBrowseRecord(request, userToken, productId, visitsNum);
     }
 }
