@@ -20,7 +20,8 @@
           `brand_id` AS brandId,
           `is_elevator_fee` AS isElevatorFee,
           `indicative_price` AS indicativePrice,
-          `label_ids` AS labelIds
+          `label_ids` AS labelIds,
+          is_reservation_deliver as isReservationDeliver
 	</sql>
 
 

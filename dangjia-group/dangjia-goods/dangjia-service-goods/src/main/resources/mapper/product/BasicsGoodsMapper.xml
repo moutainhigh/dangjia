@@ -21,7 +21,8 @@
 		brand_id as brandId,
 		is_elevator_fee as isElevatorFee,
 		indicative_price as indicativePrice,
-		label_ids as  labelIds
+		label_ids as  labelIds,
+		is_reservation_deliver as isReservationDeliver
 	</sql>
 
 	<sql id="new_columns">
@@ -41,7 +42,8 @@
 		brand_id as brandId,
 		is_elevator_fee as isElevatorFee,
 		indicative_price as indicativePrice,
-		label_ids as  labelIds
+		label_ids as  labelIds,
+		is_reservation_deliver as isReservationDeliver
 	</sql>
 	<!-- 删除对象 -->
 	<delete id="deleteById" parameterType="java.lang.String">
@@ -123,8 +125,6 @@
 			bg.modify_date AS modifyDate
 		FROM dj_basics_goods bg
 		INNER JOIN dj_basics_product bp ON bp.goods_id = bg.id
-		INNER JOIN dj_basics_brand bb ON bb.id = bp.brand_id
-		INNER JOIN dj_basics_brand_series bbs ON bbs.id = bp.brand_series_id
 		where 1=1
 		<if test="categoryId!=null and categoryId!=''">
 			and bg.category_id=#{categoryId}
@@ -132,8 +132,6 @@
 		<if test="name!=null and name!=''">
 			AND (
 			bp.`name` LIKE CONCAT('%',#{name}, '%' )
-			OR bb.`name` LIKE CONCAT('%',#{name}, '%' )
-			OR bbs.`name` LIKE CONCAT( '%', #{name}, '%' )
 			OR bg.`other_name` LIKE CONCAT( '%', #{name}, '%' )
 			)
 		</if>
@@ -155,8 +153,6 @@
 		bg.modify_date AS modifyDate
 		FROM dj_basics_goods bg
 		INNER JOIN dj_basics_product bp ON bp.goods_id = bg.id
-		INNER JOIN dj_basics_brand bb ON bb.id = bp.brand_id
-		INNER JOIN dj_basics_brand_series bbs ON bbs.id = bp.brand_series_id
 		where 1=1
 		<if test="categoryId!=null and categoryId!=''">
 			and bg.category_id=#{categoryId}
@@ -173,8 +169,6 @@
 		<if test="name!=null and name!=''">
 			AND (
 			bp.`name` LIKE CONCAT('%',#{name}, '%' )
-			OR bb.`name` LIKE CONCAT('%',#{name}, '%' )
-			OR bbs.`name` LIKE CONCAT( '%', #{name}, '%' )
 			OR bg.`other_name` LIKE CONCAT( '%', #{name}, '%' )
 			)
 		</if>
