@@ -257,4 +257,10 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
     public ServerResponse  getAllProductByGoodsId(HttpServletRequest request,String goodsId){
         return djBasicsProductService.getAllProductByGoodsId(goodsId);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse randQueryProduct(HttpServletRequest request, String goodsId) {
+        return djBasicsProductService.getAllProductByGoodsIdLimit12(goodsId);
+    }
 }

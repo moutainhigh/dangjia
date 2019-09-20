@@ -1053,4 +1053,28 @@ public class DjBasicsProductService {
     }
 
 
+    /**
+     * 根据货品ID查询商品
+     * @param goodsId
+     * @return
+     */
+    public ServerResponse getAllProductByGoodsIdLimit12(String goodsId) {
+        try {
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            List<DjBasicsProduct> pList = djBasicsProductMapper.queryByGoodsIdLimit12(goodsId);
+            List<Map<String, Object>> mapList = new ArrayList<>();
+            for (DjBasicsProduct p : pList) {
+                if (p.getImage() == null) {
+                    continue;
+                }
+                Map<String, Object> map = getProductDetailByProductId(p);
+                mapList.add(map);
+            }
+            return ServerResponse.createBySuccess("查询成功", mapList);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
 }

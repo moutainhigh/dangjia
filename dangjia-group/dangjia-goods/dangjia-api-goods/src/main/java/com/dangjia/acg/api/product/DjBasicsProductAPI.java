@@ -29,7 +29,7 @@ public interface DjBasicsProductAPI {
     ServerResponse queryProductData(@RequestParam("request")HttpServletRequest request,
                                     @RequestParam("name")String name);
 
-    @PostMapping("/product/djBasicsProduct/queryProductDataByID")
+    @PostMapping("app/product/queryProductDataByID")
     @ApiOperation(value = "根据主键查询商品信息", notes = "根据主键查询商品信息")
     DjBasicsProduct queryProductDataByID(@RequestParam("request")HttpServletRequest request,
                                          @RequestParam("id")String id);
@@ -45,7 +45,7 @@ public interface DjBasicsProductAPI {
     ServerResponse addLabelsValue(@RequestParam("request")HttpServletRequest request,
                                   @RequestParam("jsonStr")String jsonStr);
 
-    @PostMapping("/product/djBasicsProduct/queryDataByProductId")
+    @PostMapping("app/product/queryDataByProductId")
     @ApiOperation(value = "根据货品编号查看商品详情", notes = "根据货品编号查看商品详情")
     ServerResponse queryDataByProductId(@RequestParam("request")HttpServletRequest request,
                                     @RequestParam("productId")String productId);
@@ -147,5 +147,15 @@ public interface DjBasicsProductAPI {
                                           @RequestParam("goodsId") String goodsId);
 
 
+    /**
+     * 猜你喜欢(商品详情列表，随机返回同类别下的12个商品)
+     * @param request
+     * @param goodsId
+     * @return
+     * chenyufeng
+     */
+    @PostMapping("app/product/randQueryProduct")
+    @ApiOperation(value = "猜你喜欢(商品详情列表，随机返回同类别下的12个商品)", notes = "猜你喜欢(商品详情列表，随机返回同类别下的12个商品)")
+    ServerResponse randQueryProduct(@RequestParam("request") HttpServletRequest request,@RequestParam("goodsId") String goodsId);
 
 }
