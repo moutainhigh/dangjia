@@ -27,7 +27,7 @@ public class BrowseRecordService {
      * @param pageDTO
      * @return
      */
-    public ServerResponse queryBrowseRecord(HttpServletRequest request, String userToken, PageDTO pageDTO) {
+    public ServerResponse queryBrowseRecord(HttpServletRequest request, String userToken) {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
@@ -48,30 +48,33 @@ public class BrowseRecordService {
      * @param userToken
      * @return
      */
-    public ServerResponse addBrowseRecord(HttpServletRequest request, String userToken, BrowseRecord browseRecord) {
+    public ServerResponse addBrowseRecord(HttpServletRequest request, String userToken, String productId , String visitsNum ) {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
             Member member = (Member) object;
-            String productId = browseRecord.getProductId();
             Example example = new Example(BrowseRecord.class);
             example.createCriteria().andEqualTo(BrowseRecord.PRODUCT_ID, productId);
             List<BrowseRecord> list = iBrowseRecordMapper.selectByExample(example);
-            if (list!=null)
+            if (list.size()>0)
             {
                 BrowseRecord record= list.get(0);
-                if(record.getProductId()==browseRecord.getProductId())
+                if(record.getProductId().equals(productId))
                 {
-                    record.setVisits_num(record.getVisits_num()+1);
+                    record.setVisitsNum(String.valueOf(Integer.parseInt(record.getVisitsNum())+1));
+                    record.setMemberId(member.getId());
+                    iBrowseRecordMapper.updateByPrimaryKeySelective(record);
+                    return ServerResponse.createBySuccess("已经存在记录，修改成功!");
                 }
-                record.setMemberId(member.getId());
-                iBrowseRecordMapper.updateByPrimaryKeySelective(record);
-                return ServerResponse.createBySuccess("已经存在记录，修改成功!");
             }
+            BrowseRecord browseRecord=new BrowseRecord();
             browseRecord.setMemberId(member.getId());//用户编号
+            browseRecord.setProductId(productId);
+            browseRecord.setVisitsNum("1");
             iBrowseRecordMapper.insert(browseRecord);
+
             return ServerResponse.createBySuccess("添加用户浏览记录成功!");
         } catch (Exception e) {
             e.printStackTrace();
