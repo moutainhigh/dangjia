@@ -296,8 +296,12 @@
     <!-- 根据房子id和工序id查询人工精算总价 -->
     <select id="queryMakeBudgetsList" resultType="com.dangjia.acg.dto.product.BasicsgDTO">
         select
-            bgc.name as name,
+            bgc.id as bgcId,
+            bp.id as bpId,
+            bg.id as bgId,
+            bg.buy as buy,
             abw.id as abwId,
+            bgc.name as name,
             abw.price as price,
             abw.image as image,
             abw.unit_name as unitName,
@@ -309,12 +313,16 @@
         from dj_basics_goods_category bgc
         INNER JOIN dj_basics_product bp on bgc.id = bp.category_id
         INNER JOIN dj_actuary_budget_worker abw on bp.id = abw.worker_goods_id
+        INNER JOIN dj_basics_goods bg on bg.id = bp.goods_id
         where abw.data_status = 0 and abw.house_id = #{houseId} and bgc.id = #{id}
     </select>
 
     <!-- 根据房子id和工序id查询人工精算总价 -->
     <select id="queryMakeBudgetsBmList" resultType="com.dangjia.acg.dto.product.BasicsgDTO">
         select
+            bg.id as bgId,
+            bg.buy as buy,
+            bgc.id as bgcId,
             abm.id as abmId,
             abm.goods_name as name,
             abm.product_name as productName,
@@ -324,11 +332,13 @@
             abm.convert_count AS convertCount,
             abm.unit_name AS unitName,
             abm.image AS image,
-			abm.category_id AS categoryId,
-			abm.product_id AS productId
-        from dj_basics_goods_category bgc
+            abm.category_id AS categoryId,
+            abm.product_id AS bpId
+        from  dj_basics_goods_category bgc
+        INNER JOIN dj_basics_goods bg on bg.category_id = bgc.id
         INNER JOIN dj_actuary_budget_material abm on bgc.id = abm.category_id
-        where  abm.data_status = 0 AND abm.house_id = #{houseId} and bgc.id = #{id}
+        and abm.goods_id = bg.id
+		where abm.data_status = 0 AND abm.house_id = #{houseId} and bgc.id = #{id}
     </select>
 
 </mapper>

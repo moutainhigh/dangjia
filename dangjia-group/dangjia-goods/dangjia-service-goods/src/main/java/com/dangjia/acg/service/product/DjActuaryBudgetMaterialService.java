@@ -244,10 +244,15 @@ public class DjActuaryBudgetMaterialService {
     }
 
 
-
-
+    /**
+     * 查询精算列表
+     * @param bclId
+     * @param categoryId
+     * @param houseId
+     * @return
+     */
     public ServerResponse queryMakeBudgetsList(String bclId,String categoryId,String houseId){
-        //查询类型 0：材料；1：服务；2：人工；
+
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
 //        String imageAddress ="";
         Example example = new Example(DjBasicsGoods.class);
@@ -259,7 +264,7 @@ public class DjActuaryBudgetMaterialService {
         if(list.size() > 0){
             int i = list.get(0).getType();
             if(i == 2){
-                //人工
+                //2 人工
                 List<BasicsGoodDTO> bgdList = new ArrayList<>();
                 if(!CommonUtil.isEmpty(djBasicsGoodsCategory)){
                     example = new Example(DjBasicsGoodsCategory.class);

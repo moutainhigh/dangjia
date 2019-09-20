@@ -24,8 +24,8 @@ import javax.servlet.http.HttpServletRequest;
 @FeignClient("dangjia-service-goods")
 public interface DjBasicsProductAPI {
 
-    @PostMapping("/product/djBasicsProduct/queryProductData")
-    @ApiOperation(value = "查询商品信息", notes = "查询商品信息")
+    @PostMapping("/app/product/djBasicsProduct/queryProductData")
+    @ApiOperation(value = "app根据商品名称查询商品信息", notes = "app根据商品名称查询商品信息")
     ServerResponse queryProductData(@RequestParam("request")HttpServletRequest request,
                                     @RequestParam("name")String name);
 
@@ -145,6 +145,15 @@ public interface DjBasicsProductAPI {
     @ApiOperation(value = "根据货品ID查询所有商品", notes = "根据货品ID查询所有商品")
     ServerResponse getAllProductByGoodsId(@RequestParam("request") HttpServletRequest request,
                                           @RequestParam("goodsId") String goodsId);
+
+    @PostMapping("/product/djBasicsProduct/queryGoodsList")
+    @ApiOperation(value = "按照name模糊查询商品及下属货品", notes = "按照name模糊查询商品及下属货品，type： 是否禁用  0：禁用；1不禁用 ;  -1全部默认")
+    ServerResponse queryGoodsList(@RequestParam("request") HttpServletRequest request,
+                                                    @RequestParam("pageDTO") PageDTO pageDTO,
+                                                    @RequestParam("categoryId") String categoryId,
+                                                    @RequestParam("name") String name,
+                                                    @RequestParam("cityId") String cityId,
+                                                    @RequestParam("type") Integer type);
 
 
     /**

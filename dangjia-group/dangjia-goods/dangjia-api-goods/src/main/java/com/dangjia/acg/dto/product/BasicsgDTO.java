@@ -19,6 +19,12 @@ public class BasicsgDTO {
     private String workerGoodsId;
     private String workerGoodsSn;
 
+    private String bgId;
+    private String bgcId;
+    private String abmId;
+    private String bpId;
+
+    private Integer buy;//购买性质0：必买；1：可选；2：自购
 
     private String houseFlowId;
     private String workerTypeId;//工种ID   3: 大管家 ，4：拆除 ，5：  ，6：水电 ，7：泥工 ，8：木工 ，9：油漆

@@ -1,19 +1,22 @@
 package com.dangjia.acg.service.product;
 
-import com.dangjia.acg.common.exception.BaseException;
-import com.dangjia.acg.common.exception.ServerCode;
+import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
+import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.product.BasicsGoodsDTO;
-import com.dangjia.acg.mapper.product.DjBasicsGoodsMapper;
-import com.dangjia.acg.mapper.product.DjBasicsProductMapper;
-import com.dangjia.acg.mapper.product.IBasicsGoodsCategoryMapper;
-import com.dangjia.acg.mapper.product.IBasicsGoodsMapper;
-import com.dangjia.acg.modle.basics.Product;
-import com.dangjia.acg.modle.product.BasicsGoods;
-import com.dangjia.acg.modle.product.BasicsGoodsCategory;
-import com.dangjia.acg.modle.product.DjBasicsGoods;
-import com.dangjia.acg.modle.product.DjBasicsProduct;
+import com.dangjia.acg.mapper.basics.IAttributeValueMapper;
+import com.dangjia.acg.mapper.basics.ILabelMapper;
+import com.dangjia.acg.mapper.basics.IUnitMapper;
+import com.dangjia.acg.mapper.product.*;
+import com.dangjia.acg.modle.attribute.AttributeValue;
+import com.dangjia.acg.modle.basics.Label;
+import com.dangjia.acg.modle.product.*;
+import com.dangjia.acg.util.StringTool;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -41,9 +45,21 @@ public class DjBasicsGoodsService {
     @Autowired
     private DjBasicsProductMapper djBasicsProductMapper;
     @Autowired
+    private DjBasicsProductMaterialMapper djBasicsProductMaterialMapper;
+    @Autowired
+    DjBasicsProductWorkerMapper djBasicsProductWorkerMapper;
+    @Autowired
     private IBasicsGoodsMapper iBasicsGoodsMapper;
     @Autowired
     private IBasicsGoodsCategoryMapper iBasicsGoodsCategoryMapper;
+    @Autowired
+    private ConfigUtil configUtil;
+    @Autowired
+    private IUnitMapper iUnitMapper;
+    @Autowired
+    private IAttributeValueMapper iAttributeValueMapper;
+    @Autowired
+    private ILabelMapper iLabelMapper;
 
     /**
      * 货品打标签
@@ -197,4 +213,89 @@ public class DjBasicsGoodsService {
         List<BasicsGoodsCategory> goodsCategoryList=iBasicsGoodsCategoryMapper.getAllCategoryChildById(basicsGoodsCategory.getParentTop());
         return goodsCategoryList;
     }
+    /**
+     * 模糊查询goods及下属product
+     *
+     * @param pageDTO
+     * @param categoryId
+     * @param name
+     * @param type       是否禁用  0：禁用；1不禁用 ;  -1全部默认
+     * @return
+     */
+    public ServerResponse queryGoodsList(PageDTO pageDTO, String categoryId, String name, Integer type) {
+        try {
+            LOG.info("tqueryGoodsListByCategoryLikeName type :" + type);
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<DjBasicsGoods> goodsList = djBasicsGoodsMapper.queryGoodsListByCategoryLikeName(categoryId, name);
+            PageInfo pageResult = new PageInfo(goodsList);
+            List<Map<String, Object>> gMapList = new ArrayList<>();
+            for (DjBasicsGoods goods : goodsList) {
+                Map<String, Object> gMap = BeanUtils.beanToMap(goods);
+                List<Map<String, Object>> mapList = new ArrayList<>();
+                gMap.put("goodsUnitName", iUnitMapper.selectByPrimaryKey(goods.getUnitId()).getName());
+
+                List<DjBasicsProduct> productList = djBasicsProductMapper.queryByGoodsId(goods.getId());
+                for (DjBasicsProduct p : productList) {
+                    //type表示： 是否禁用  0：禁用；1不禁用 ;  -1全部默认
+                    if (type!=null&& !type.equals(p.getType()) && -1 != type) //不等于 type 的不返回给前端
+                        continue;
+                    StringBuilder imgUrlStr = new StringBuilder();
+                    StringBuilder imgStr = new StringBuilder();
+                    if (!CommonUtil.isEmpty(p.getImage())) {
+                        String[] imgArr = p.getImage().split(",");
+                        StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
+                    }
+                    p.setImage(imgStr.toString());
+                    DjBasicsProductMaterial djBasicsProductMaterial =djBasicsProductMaterialMapper.queryProductMaterialByProductId(p.getId());
+                    DjBasicsProductWorker djBasicsProductWorker = djBasicsProductWorkerMapper.queryProductWorkerByProductId(p.getId());
+                    Map<String, Object> map = BeanUtils.beanToMap(p);
+                    map.put("imageUrl", imgUrlStr.toString());
+                    StringBuilder strNewValueNameArr = new StringBuilder();
+                    if(djBasicsProductMaterial!=null&&StringUtils.isNotBlank(djBasicsProductMaterial.getId())){
+                        map.putAll(BeanUtils.beanToMap(djBasicsProductMaterial));
+                        map.put("convertUnitName", iUnitMapper.selectByPrimaryKey(djBasicsProductMaterial.getConvertUnit()).getName());
+                        if (StringUtils.isNotBlank(djBasicsProductMaterial.getValueIdArr())) {
+                            String[] newValueNameArr = djBasicsProductMaterial.getValueIdArr().split(",");
+                            for (int i = 0; i < newValueNameArr.length; i++) {
+                                String valueId = newValueNameArr[i];
+                                if (StringUtils.isNotBlank(valueId)) {
+                                    AttributeValue attributeValue = iAttributeValueMapper.selectByPrimaryKey(valueId);
+                                    if (i == 0) {
+                                        strNewValueNameArr = new StringBuilder(attributeValue.getName());
+                                    } else {
+                                        strNewValueNameArr.append(",").append(attributeValue.getName());
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    map.put("newValueNameArr", strNewValueNameArr.toString());
+                    if(djBasicsProductWorker!=null&&StringUtils.isNotBlank(djBasicsProductWorker.getId())){
+                        map.putAll(BeanUtils.beanToMap(djBasicsProductWorker));
+                    }
+
+
+                    if (!StringUtils.isNotBlank(p.getLabelId())) {
+                        map.put("labelId", "");
+                        map.put("labelName", "");
+                    } else {
+                        map.put("labelId", p.getLabelId());
+                        Label label = iLabelMapper.selectByPrimaryKey(p.getLabelId());
+                        if (label.getName() != null)
+                            map.put("labelName", label.getName());
+                    }
+                    mapList.add(map);
+                }
+                gMap.put("productList", mapList);
+                gMapList.add(gMap);
+            }
+            pageResult.setList(gMapList);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
 }
