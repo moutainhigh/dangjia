@@ -378,7 +378,7 @@ public class CraftsmanConstructionService {
         List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getTodayPatrol(hf.getHouseId(), new Date());
         if (active != null && !active.equals("pre")) {
             if (!((houseFlowApplyList.size() & 1) == 1)) {
-                houseFlowApplyList = null;
+                houseFlowApplyList = new ArrayList<>();
             }
         }
         if (hf.getSupervisorStart() == 0) {//已开工之后都是巡查工地；1：巡查工地2：申请业主验收；3:确认开工

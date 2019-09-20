@@ -464,7 +464,7 @@ public class HouseWorkerService {
         }
         houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 4, worker.getId(), new Date());
         if (houseFlowApplyList.size() > 0) {
-            if (active != null && !active.equals("pre")) {
+            if (active != null && active.equals("pre")) {
                 HouseFlowApply houseFlowApply = houseFlowApplyList.get(0);
                 if (new Date().getTime() < DateUtil.addDateHours(houseFlowApply.getCreateDate(), 3).getTime()) {
                     return ServerResponse.createByErrorMessage("该工序（" + workerType.getName() + "）开工后3小时才能申请完工！");
@@ -473,7 +473,7 @@ public class HouseWorkerService {
         } else {
             return ServerResponse.createByErrorMessage("该工序（" + workerType.getName() + "）未开工，无法申请完工！");
         }
-        if (active != null && !active.equals("pre")) {
+        if (active != null && active.equals("pre")) {
             //包括所有申请 和 巡查
             houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 0, worker.getId(), new Date());
             if (houseFlowApplyList.size() > 0) {
@@ -681,7 +681,7 @@ public class HouseWorkerService {
                 }
             }
         }
-        if (active != null && !active.equals("pre")) {
+        if (active != null && active.equals("pre")) {
             houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 4, worker.getId(), new Date());
             if (houseFlowApplyList.size() > 0) {
                 return ServerResponse.createByErrorMessage("您今日已提交过此申请,请勿重复提交！");
@@ -781,7 +781,7 @@ public class HouseWorkerService {
             if (hf.getPause() == 1) {
                 return ServerResponse.createByErrorMessage("该工序（" + workerType.getName() + "）已暂停施工,请勿提交申请！");
             }
-            if (active != null && !active.equals("pre")) {
+            if (active != null && active.equals("pre")) {
                 List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), applyType, worker.getId(), new Date());
                 if (houseFlowApplyList.size() > 0) {
                     return ServerResponse.createByErrorMessage("您今日已提交过此申请,请勿重复提交！");
