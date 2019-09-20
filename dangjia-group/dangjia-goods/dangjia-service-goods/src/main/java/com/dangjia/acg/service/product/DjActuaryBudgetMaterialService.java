@@ -244,8 +244,13 @@ public class DjActuaryBudgetMaterialService {
     }
 
 
-
-
+    /**
+     * 查询精算列表
+     * @param bclId
+     * @param categoryId
+     * @param houseId
+     * @return
+     */
     public ServerResponse queryMakeBudgetsList(String bclId,String categoryId,String houseId){
 
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
