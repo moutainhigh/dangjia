@@ -86,6 +86,7 @@
                 and
                 p.product_sn=#{productSn}
             </if>
+            where  1=1 and p.data_status = 0
             ORDER BY p.istop DESC,p.create_date desc
         </select>
     <!-- 根据人工商品编号查询  没有规格、没有营销名称-->
@@ -98,6 +99,8 @@
              and
              p.product_sn=#{productSn}
             </if>
+
+            where  1=1 and p.data_status = 0
             ORDER BY p.istop DESC,p.create_date desc
         </select>
 
@@ -148,9 +151,19 @@
         SELECT
         <include refid="new_columns"/>
         FROM dj_basics_product
-        where goods_id=#{goodsId}
+        where 1=1 and goods_id=#{goodsId}
         and data_status = 0
         ORDER BY istop DESC,create_date desc
+    </select>
+
+    <!-- 根据商品Id查询所有货品 -->
+    <select id="queryByGoodsIdLimit12" resultType="com.dangjia.acg.modle.product.DjBasicsProduct">
+        SELECT
+        <include refid="new_columns"/>
+        FROM dj_basics_product
+        where 1=1 and goods_id=#{goodsId}
+        and data_status = 0
+        ORDER BY  RAND() LIMIT 12
     </select>
 
     <!-- 根据货品ID查询暂存的商品 -->

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.product.IBrowseRecordMapper">
+    <sql id="all_columns">
+		id,
+        create_date AS createDate,
+        modify_date AS modifyDate,
+        data_status AS dataStatus,
+        member_id AS memberId,
+        product_id AS productId,
+        visits_num as visitsNum
+	</sql>
+    <!--查询用户随机浏览记录-->
+    <select id="queryBrowseRecord" resultType="com.dangjia.acg.modle.product.BrowseRecord">
+        SELECT
+        <include refid="all_columns"/>
+        FROM
+        dj_basics_browse_record  where 1=1
+        <if test="memberId != null">
+            AND member_id = #{memberId}
+        </if>
+        order by visits_num+0 desc limit 12
+    </select>
+
+</mapper>
+

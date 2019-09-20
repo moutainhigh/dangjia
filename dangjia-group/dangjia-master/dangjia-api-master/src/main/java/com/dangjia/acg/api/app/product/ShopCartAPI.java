@@ -21,39 +21,39 @@ import javax.servlet.http.HttpServletRequest;
 @Api(value = "新版商品购物车接口", description = "新版商品购物车接口")
 public interface ShopCartAPI {
 
-    @PostMapping("/shopcart/add")
+    @PostMapping("/product/shopcart/add")
     @ApiOperation(value = "加入购物车", notes = "加入购物车")
     ServerResponse add(@RequestParam("request") HttpServletRequest request, @RequestParam("userToken") String userToken, @RequestParam("cartDTO") CartDTO cartDTO);
 
 
-    @PostMapping("/shopcart/getCartList")
+    @PostMapping("/product/shopcart/getCartList")
     @ApiOperation(value = "获取购物车列表", notes = "获取购物车列表")
     ServerResponse getCartList(@RequestParam("request") HttpServletRequest request, @RequestParam("userToken") String userToken);
 
 
-    @PostMapping("/shopcart/updateCartNum")
+    @PostMapping("/product/shopcart/updateCartNum")
     @ApiOperation(value = "更新购物车数量", notes = "更新购物车数量")
     ServerResponse updateCartNum(@RequestParam("request") HttpServletRequest request, @RequestParam("userToken") String userToken, String productId, int num);
 
-    @PostMapping("/shopcart/checkAll")
+    @PostMapping("/product/shopcart/checkAll")
     @ApiOperation(value = "全选购物车", notes = "全选购物车")
     ServerResponse checkAll(@RequestParam("request") HttpServletRequest request, @RequestParam("userToken") String userToken, String checked);
 
 
-    @PostMapping("/shopcart/delCartProduct")
+    @PostMapping("/product/shopcart/delCartProduct")
     @ApiOperation(value = "删除勾选商品", notes = "删除勾选商品")
     ServerResponse delCartProduct(@RequestParam("request") HttpServletRequest request, @RequestParam("userToken") String userToken, String productId);
 
-    @PostMapping("/shopcart/delCart")
+    @PostMapping("/product/shopcart/delCart")
     @ApiOperation(value = "删除购物车", notes = "删除购物车")
     ServerResponse delCart(@RequestParam("request") HttpServletRequest request, @RequestParam("userToken") String userToken);
 
 
-    @PostMapping("/shopcart/updateGood")
+    @PostMapping("/product/shopcart/updateGood")
     @ApiOperation(value = "购物车-商品明细（更换商品）", notes = "购物车-商品明细（更换商品）")
-    ServerResponse updateGood(@RequestParam("request") HttpServletRequest request, @RequestParam("userToken") String userToken);
+    ServerResponse replaceGood(@RequestParam("request") HttpServletRequest request, @RequestParam("userToken") String userToken,@RequestParam("oldProductId") String oldProductId,@RequestParam("cartDTO") CartDTO cartDTO);
 
-    @PostMapping("/shopcart/settleMent")
+    @PostMapping("/product/shopcart/settleMent")
     @ApiOperation(value = "购物车-商品结算", notes = "购物车-商品结算")
     ServerResponse settleMent(@RequestParam("request") HttpServletRequest request, @RequestParam("userToken") String userToken);
 
