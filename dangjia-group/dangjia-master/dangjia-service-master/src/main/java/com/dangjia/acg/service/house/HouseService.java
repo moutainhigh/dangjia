@@ -481,7 +481,8 @@ public class HouseService {
                     houseFlow.setHouseId(house.getId());
                     houseFlow.setState(workerType.getState());
                     houseFlow.setSort(workerType.getSort());
-                    houseFlow.setWorkType(2);//设置可抢单
+                    houseFlow.setWorkType(5);//设置待业主支付
+                    houseFlow.setModifyDate(new Date());
                     //这里算出精算费
                     WorkDeposit workDeposit = workDepositMapper.selectByPrimaryKey(house.getWorkDepositId());//结算比例表
                     houseFlow.setWorkPrice(house.getSquare().multiply(workDeposit.getBudgetCost()));
@@ -499,22 +500,22 @@ public class HouseService {
                     return ServerResponse.createByErrorMessage("设计异常,请联系平台部");
                 } else if (houseFlowList.size() == 1) {
                     houseFlow = houseFlowList.get(0);
-                    houseFlow.setReleaseTime(new Date());//发布时间
                     houseFlow.setState(workerType.getState());
                     houseFlow.setSort(workerType.getSort());
-                    houseFlow.setWorkType(2);//开始设计等待被抢
+                    houseFlow.setWorkType(5);//开始设计等待业主支付
+                    houseFlow.setModifyDate(new Date());
                     houseFlow.setCityId(house.getCityId());
                     houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
                 } else {
                     houseFlow = new HouseFlow(true);
                     houseFlow.setCityId(house.getCityId());
-                    houseFlow.setReleaseTime(new Date());//发布时间
                     houseFlow.setWorkerTypeId(workerType.getId());
                     houseFlow.setWorkerType(workerType.getType());
                     houseFlow.setHouseId(house.getId());
                     houseFlow.setState(workerType.getState());
                     houseFlow.setSort(workerType.getSort());
-                    houseFlow.setWorkType(2);//开始设计等待被抢
+                    houseFlow.setWorkType(5);//开始设计等待业主支付
+                    houseFlow.setModifyDate(new Date());
                     houseFlow.setCityId(house.getCityId());
                     houseFlowMapper.insert(houseFlow);
                 }
@@ -1788,8 +1789,8 @@ public class HouseService {
                 }
                 //通知大管家抢单
                 HouseFlow houseFlow = houseFlowMapper.getHouseFlowByHidAndWty(houseId, 3);
-                houseFlow.setWorkType(2);//待抢单
-                houseFlow.setReleaseTime(new Date());//发布时间
+                houseFlow.setWorkType(5);//待业主支付
+                houseFlow.setModifyDate(new Date());
                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
                 configMessageService.addConfigMessage(null, AppType.GONGJIANG, "wtId3" + houseFlow.getCityId(),
                         "0", "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, "4");

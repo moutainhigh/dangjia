@@ -60,6 +60,11 @@ public class HouseFlowController implements HouseFlowAPI {
         return houseFlowService.setGiveUpOrder(userToken, houseFlowId);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse setConfirm(HttpServletRequest request,String userToken, String houseFlowId) {
+        return houseFlowService.setConfirm(request,userToken, houseFlowId);
+    }
     /**
      * 工人30分钟自动放弃抢单任务，工人未购买保险或者保险服务剩余天数小于等于60天则自动放弃订单
      * @return

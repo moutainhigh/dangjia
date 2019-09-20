@@ -160,7 +160,7 @@ public class EngineerService {
     }
 
     /**
-     * 抢单未支付
+     * 抢单未确认
      * 换工匠重新抢
      */
     public ServerResponse changeWorker(String houseWorkerId) {
