@@ -9,12 +9,14 @@ import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.AllgrabBean;
 import com.dangjia.acg.dto.group.GroupDTO;
+import com.dangjia.acg.dto.pay.WorkerDTO;
 import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.design.IHouseStyleTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
@@ -719,6 +721,38 @@ public class HouseFlowService {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return ServerResponse.createBySuccessMessage("确认异常！");
         }
+    }
+    /**
+     * 审核工序工匠信息界面
+     */
+    public ServerResponse setCraftsmanInfo(String userToken,  String houseFlowId) {
+        String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+        HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
+        if (houseFlow.getWorkType() != 3) {
+            return ServerResponse.createByErrorMessage("该工序订单异常");
+        }
+        HouseWorker houseWorker = houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), 1);
+        Member worker = memberMapper.selectByPrimaryKey(houseWorker.getWorkerId()); //查工匠
+        WorkerType workerType = workerTypeMapper.selectByPrimaryKey(worker.getWorkerTypeId());
+        WorkerDTO workerDTO = new WorkerDTO();
+        workerDTO.setHouseWorkerId(houseWorker.getId());//换人参数
+        workerDTO.setHead(imageAddress + worker.getHead());
+        workerDTO.setWorkerTypeName(workerType.getName());
+        workerDTO.setName(worker.getName());
+        workerDTO.setWorkerId(houseWorker.getWorkerId());
+        workerDTO.setMobile(worker.getMobile());
+        workerDTO.setChange(0);//不能换人
+        Map map = BeanUtils.beanToMap(houseFlow);
+        map.put("workerDTO",workerDTO);//工匠信息
+        Example example = new Example(Insurance.class);
+        example.createCriteria().andEqualTo(Insurance.WORKER_ID, houseWorker.getWorkerId());
+        example.orderBy(Insurance.END_DATE).desc();
+        List<Insurance> insurances = insuranceMapper.selectByExample(example);
+        if(insurances.size()>0){
+            map.put("insurances",insurances.get(0));//工匠保险信息
+        }
+
+        return ServerResponse.createBySuccess("通过验证", map);
     }
     /**
      * 拉工人进群
