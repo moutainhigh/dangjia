@@ -156,6 +156,7 @@ public class DjBasicsGoodsService {
         goods.setIsElevatorFee(basicsGoodsDTO.getIsElevatorFee());
         goods.setIndicativePrice(basicsGoodsDTO.getIndicativePrice());
         goods.setLabelIds(basicsGoodsDTO.getLabelIds());
+        goods.setIsReservationDeliver(basicsGoodsDTO.getIsReservationDeliver());
         return goods;
     }
     /**
