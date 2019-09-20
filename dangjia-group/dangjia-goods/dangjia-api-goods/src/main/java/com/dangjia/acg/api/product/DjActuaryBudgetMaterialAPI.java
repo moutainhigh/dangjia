@@ -29,7 +29,7 @@ public interface DjActuaryBudgetMaterialAPI {
                                @RequestParam("listOfGoods") String listOfGoods);
 
 
-    @PostMapping("/product/djActuaryBudgetMaterial/queryMakeBudgetsList")
+    @PostMapping("/app/product/djActuaryBudgetMaterial/queryMakeBudgetsList")
     @ApiOperation(value = "查询精算列表", notes = "查询精算列表")
     ServerResponse queryMakeBudgetsList(@RequestParam("request") HttpServletRequest request,
                                         @RequestParam("bclId") String bclId,
@@ -37,7 +37,7 @@ public interface DjActuaryBudgetMaterialAPI {
                                         @RequestParam("houseId") String houseId);
 
 
-    @PostMapping("/product/djActuaryBudgetMaterial/queryBasicsProduct")
+    @PostMapping("/app/product/djActuaryBudgetMaterial/queryBasicsProduct")
     @ApiOperation(value = "查询精算详情列表", notes = "查询精算详情列表")
     ServerResponse queryBasicsProduct(@RequestParam("request") HttpServletRequest request,
                                       @RequestParam("productId") String productId,
