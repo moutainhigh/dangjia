@@ -145,9 +145,9 @@ public interface ForMasterAPI {
 
     @PostMapping("/data/budget/label")
     @ApiOperation(value = "查询工种材料未支付所有商品的标签", notes = "查询工种材料未支付所有商品的标签")
-    List<BudgetLabelDTO> queryBudgetLabel(String houseId, String workerTypeId, String cityId);
+    List<BudgetLabelDTO> queryBudgetLabel(@RequestParam("houseId") String houseId, @RequestParam("workerTypeId") String workerTypeId, @RequestParam("cityId") String cityId);
 
     @PostMapping("/data/budget/label/goods")
     @ApiOperation(value = "查询工种材料未支付所有商品", notes = "查询工种材料未支付所有商品")
-    List<BudgetLabelGoodsDTO> queryBudgetLabelGoods(String houseId, String workerTypeId, String cityId);
+    List<BudgetLabelGoodsDTO> queryBudgetLabelGoods(@RequestParam("houseId") String houseId, @RequestParam("workerTypeId") String workerTypeId, @RequestParam("cityId") String cityId);
 }
