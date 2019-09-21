@@ -58,11 +58,7 @@ import java.util.*;
 public class AppActuaryOperationService {
 
     @Autowired
-    private IBudgetWorkerMapper budgetWorkerMapper;
-    @Autowired
     private IBudgetMaterialMapper budgetMaterialMapper;
-    @Autowired
-    private GetForBudgetAPI getForBudgetAPI;
     @Autowired
     private ConfigUtil configUtil;
     @Autowired
@@ -78,14 +74,7 @@ public class AppActuaryOperationService {
     @Autowired
     private IGoodsGroupMapper iGoodsGroupMapper;
     @Autowired
-    private IBrandSeriesMapper iBrandSeriesMapper;
-    @Autowired
     private IBrandMapper iBrandMapper;
-    @Autowired
-    private HouseAPI houseAPI;
-    @Autowired
-    private MendOrderAPI mendOrderAPI;
-
     @Autowired
     private DjBasicsProductMaterialMapper djBasicsProductMaterialMapper;
     @Autowired
@@ -98,27 +87,24 @@ public class AppActuaryOperationService {
     protected static final Logger LOG = LoggerFactory.getLogger(AppActuaryOperationService.class);
 
     /**
-     * 选择取消精算
+     * 取消精算
      * buy": 0必买；1可选选中；2自购; 3可选没选中(业主已取消)
      * <p>
      * 这里往精算表插入最新价格
      */
-    public ServerResponse choiceGoods(String budgetIdList) {
+    public ServerResponse choiceGoods(String houseId,String productId) {
         try {
-            JSONArray arr = JSONArray.parseArray(budgetIdList);
-            for (int i = 0; i < arr.size(); i++) {
-                JSONObject obj = arr.getJSONObject(i);
-                int buy = Integer.parseInt(obj.getString("buy"));
-                String budgetMaterialId = obj.getString("budgetMaterialId");
-                BudgetMaterial budgetMaterial = budgetMaterialMapper.selectByPrimaryKey(budgetMaterialId);
-                if (buy == 3) {
+            Example example=new Example(BudgetMaterial.class);
+            example.createCriteria()
+                    .andEqualTo(BudgetMaterial.HOUSE_ID,houseId)
+                    .andCondition("  FIND_IN_SET(product_id,'" + productId + "') ");
+            List<BudgetMaterial> budgetMaterials = budgetMaterialMapper.selectByExample(example);
+            for (BudgetMaterial budgetMaterial : budgetMaterials) {
+                DjBasicsGoods goods = goodsMapper.selectByPrimaryKey(budgetMaterial.getGoodsId());
+                if(goods.getBuy()==1) {//可选商品取消
                     budgetMaterial.setDeleteState(2);//取消
-                } else if (buy == 1) {
-                    budgetMaterial.setDeleteState(0);//选回来
-                } else {
-                    return ServerResponse.createByErrorMessage("操作失败,参数错误");
+                    budgetMaterialMapper.updateByPrimaryKeySelective(budgetMaterial);
                 }
-                budgetMaterialMapper.updateByPrimaryKeySelective(budgetMaterial);
             }
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
@@ -129,25 +115,17 @@ public class AppActuaryOperationService {
     /**
      * 恢复精算货品
      */
-    public ServerResponse recoveryProduct(String houseId, String workerTypeId) {
+    public ServerResponse recoveryProduct(String houseId,String productId) {
 
 
         Example example=new Example(BudgetMaterial.class);
         example.createCriteria()
                 .andEqualTo(BudgetMaterial.HOUSE_ID,houseId)
-                .andEqualTo(BudgetMaterial.WORKER_TYPE_ID,workerTypeId)
-                .andEqualTo(BudgetMaterial.DELETE_STATE,5);
+                .andCondition("  FIND_IN_SET(product_id,'" + productId + "') ");
         List<BudgetMaterial> budgetMaterials = budgetMaterialMapper.selectByExample(example);
         for (BudgetMaterial budgetMaterial : budgetMaterials) {
-            example=new Example(BudgetMaterial.class);
-            example.createCriteria()
-                    .andEqualTo(BudgetMaterial.HOUSE_ID,houseId)
-                    .andEqualTo(BudgetMaterial.WORKER_TYPE_ID,workerTypeId)
-                    .andEqualTo(BudgetMaterial.GOODS_ID,budgetMaterial.getGoodsId())
-                    .andEqualTo(BudgetMaterial.DELETE_STATE,0);
-            budgetMaterialMapper.deleteByExample(example);
+            DjBasicsProduct targetProduct = productMapper.selectByPrimaryKey(budgetMaterial.getOriginalProductId());//目标product 对象
 
-            budgetMaterial.setDeleteState(0);
             budgetMaterialMapper.updateByPrimaryKey(budgetMaterial);
         }
 
@@ -502,174 +480,6 @@ public class AppActuaryOperationService {
         return "";//暂无图片
     }
 
-    /**
-     * 查看工序 type 人工1 材料2 包工包料3
-     * 支付时精算goods详情 查最新价格 共用此方法
-     */
-    public ServerResponse confirmActuaryDetail(String userToken, String houseId, String workerTypeId,
-                                               int type, String cityId) {
-        try {
-            String workerTypeName = "";
-            if (type != 5 && type != 4) {
-                ServerResponse response = workerTypeAPI.getWorkerType(workerTypeId);
-                if (response.isSuccess()) {
-                    workerTypeName = (((JSONObject) response.getResultObj()).getString(WorkerType.NAME));
-                } else {
-                    return ServerResponse.createByErrorMessage("查询工序精算失败");
-                }
-            }
-
-            Map<Integer, String> mapgx = new HashMap<>();
-            mapgx.put(DjConstants.GXType.RENGGONG, "人工");
-            mapgx.put(DjConstants.GXType.CAILIAO, "材料");
-            mapgx.put(DjConstants.GXType.FUWU, "包工包料");
-            mapgx.put(DjConstants.GXType.BU_RENGGONG, "补人工");
-            mapgx.put(DjConstants.GXType.BU_CAILIAO, "补材料");
-            FlowDTO flowDTO = new FlowDTO();
-            flowDTO.setName(workerTypeName);
-            flowDTO.setType(type);
-            List<FlowActuaryDTO> flowActuaryDTOList = new ArrayList<>();
-            String typsValue = mapgx.get(type);
-            if (CommonUtil.isEmpty(typsValue)) {
-                return ServerResponse.createByErrorMessage("type参数错误");
-            }
-            if (type == DjConstants.GXType.RENGGONG) {
-                List<BudgetWorker> budgetWorkerList = budgetWorkerMapper.getBudgetWorkerList(houseId, workerTypeId);
-                for (BudgetWorker bw : budgetWorkerList) {
-                    FlowActuaryDTO flowActuaryDTO = new FlowActuaryDTO();
-                    DjBasicsProduct product = productMapper.selectByPrimaryKey(bw.getWorkerGoodsId());//当前 货品
-                    if(!CommonUtil.isEmpty(product.getGoodsId())){
-                        DjBasicsGoods goods = goodsMapper.selectByPrimaryKey(product.getGoodsId());
-                        flowActuaryDTO.setIsInfluence(goods.getIsInflueDecorationProgress());
-                    }
-                    flowActuaryDTO.setBudgetMaterialId(bw.getId());
-                    flowActuaryDTO.setId(product.getId());
-                    flowActuaryDTO.setName(bw.getName());
-                    flowActuaryDTO.setImage(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + product.getImage());
-                    flowActuaryDTO.setTypeName(typsValue);
-                    flowActuaryDTO.setType(type);
-                    flowActuaryDTO.setShopCount(bw.getShopCount());
-                    String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + String.format(DjConstants.YZPageAddress.COMMO, userToken, cityId, flowActuaryDTO.getTypeName() + "商品详情") + "&gId=" + bw.getId() + "&type=" + type;
-                    flowActuaryDTO.setUrl(url);
-                    flowActuaryDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + bw.getUnitName());
-                    flowActuaryDTO.setTotalPrice(product.getPrice() * bw.getShopCount());
-                    flowActuaryDTOList.add(flowActuaryDTO);
-                }
-                Double workerPrice = budgetWorkerMapper.getBudgetWorkerPrice(houseId, workerTypeId);//精算工钱
-                flowDTO.setSumTotal(new BigDecimal(workerPrice));//合计
-            } else if (type == DjConstants.GXType.BU_RENGGONG) {
-                MendOrderInfoDTO mendOrderInfoDTO = mendOrderAPI.getMendDetail(workerTypeId, "1");
-                List<MendWorker> budgetWorkerList = mendOrderInfoDTO.getMendWorkers();
-                for (MendWorker bw : budgetWorkerList) {
-                    FlowActuaryDTO flowActuaryDTO = new FlowActuaryDTO();
-                    flowActuaryDTO.setIsInfluence("0");
-                    flowActuaryDTO.setId(bw.getWorkerGoodsId());
-                    flowActuaryDTO.setName(bw.getWorkerGoodsName());
-                    flowActuaryDTO.setImage(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + bw.getImage());
-                    flowActuaryDTO.setTypeName(typsValue);
-                    flowActuaryDTO.setType(type);
-                    flowActuaryDTO.setShopCount(bw.getShopCount());
-                    flowActuaryDTO.setPrice("¥" + String.format("%.2f", bw.getPrice()) + "/" + bw.getUnitName());
-                    flowActuaryDTO.setTotalPrice(bw.getPrice() * bw.getShopCount());
-                    flowActuaryDTO.setBudgetMaterialId(bw.getWorkerGoodsId());
-                    flowActuaryDTOList.add(flowActuaryDTO);
-                }
-                flowDTO.setSumTotal(new BigDecimal(mendOrderInfoDTO.getTotalAmount()));//合计
-            } else if (type == DjConstants.GXType.BU_CAILIAO) {
-                MendOrderInfoDTO mendOrderInfoDTO = mendOrderAPI.getMendDetail(workerTypeId, "0");
-                List<MendMateriel> budgetMaterielList = mendOrderInfoDTO.getMendMateriels();
-                for (MendMateriel mendMateriel : budgetMaterielList) {
-                    FlowActuaryDTO flowActuaryDTO = new FlowActuaryDTO();
-                    flowActuaryDTO.setIsInfluence("0");
-                    flowActuaryDTO.setId(mendMateriel.getId());
-                    flowActuaryDTO.setTypeName(typsValue);
-                    flowActuaryDTO.setType(type);
-                    flowActuaryDTO.setImage(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + mendMateriel.getImage());
-                    flowActuaryDTO.setAttribute(getAttributes(mendMateriel.getProductId()));//拼接属性品牌
-                    flowActuaryDTO.setPrice("¥" + String.format("%.2f", mendMateriel.getPrice()) + "/" + mendMateriel.getUnitName());
-                    flowActuaryDTO.setTotalPrice(mendMateriel.getTotalPrice());
-                    flowActuaryDTO.setShopCount(mendMateriel.getShopCount());
-                    flowActuaryDTO.setConvertCount(mendMateriel.getShopCount());
-                    flowActuaryDTO.setBuy(0);
-                    flowActuaryDTO.setBudgetMaterialId(mendMateriel.getProductId());
-                    flowActuaryDTO.setName(mendMateriel.getProductName());
-                    flowActuaryDTO.setUnitName(mendMateriel.getUnitName());
-                    flowActuaryDTOList.add(flowActuaryDTO);
-                }
-                flowDTO.setSumTotal(new BigDecimal(mendOrderInfoDTO.getTotalAmount()));//合计
-            } else {
-                List<BudgetMaterial> budgetMaterialList = null;
-                if (type == DjConstants.GXType.CAILIAO) {
-                    budgetMaterialList = budgetMaterialMapper.getBudgetCaiList(houseId, workerTypeId);
-                    Double caiPrice = budgetMaterialMapper.getBudgetCaiPrice(houseId, workerTypeId);
-                    if (caiPrice == null) {
-                        caiPrice = 0.0;
-                    }
-                    flowDTO.setSumTotal(new BigDecimal(caiPrice));//合计
-                }
-                if (type == DjConstants.GXType.FUWU) {
-                    budgetMaterialList = budgetMaterialMapper.getBudgetSerList(houseId, workerTypeId);
-                    Double serPrice = budgetMaterialMapper.getBudgetSerPrice(houseId, workerTypeId);
-                    if (serPrice == null) {
-                        serPrice = 0.0;
-                    }
-                    flowDTO.setSumTotal(new BigDecimal(serPrice));//合计
-                }
-                if (budgetMaterialList != null)
-                    for (BudgetMaterial bm : budgetMaterialList) {
-                        DjBasicsGoods goods = goodsMapper.selectByPrimaryKey(bm.getGoodsId());
-                        DjBasicsProduct product = productMapper.selectByPrimaryKey(bm.getProductId());//当前 货品
-                        FlowActuaryDTO flowActuaryDTO = new FlowActuaryDTO();
-                        if(!CommonUtil.isEmpty(product.getGoodsId())){
-                            flowActuaryDTO.setIsInfluence(goods.getIsInflueDecorationProgress());
-                        }
-                        flowActuaryDTO.setTypeName(typsValue);
-                        flowActuaryDTO.setType(type);
-                        String convertUnitName = bm.getUnitName();
-                        if (product != null) {
-                            flowActuaryDTO.setId(product.getId());
-                            flowActuaryDTO.setImage(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + product.getImage());
-                            String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
-                                    String.format(DjConstants.YZPageAddress.COMMODITY, userToken,
-                                            cityId, flowActuaryDTO.getTypeName() + "商品详情") + "&gId=" + bm.getId() + "&type=" + type;
-                            flowActuaryDTO.setUrl(url);
-                            flowActuaryDTO.setAttribute(getAttributes(product.getId()));//拼接属性品牌
-                            flowActuaryDTO.setPrice("¥" + String.format("%.2f", bm.getPrice()) + "/" + convertUnitName);
-                            flowActuaryDTO.setTotalPrice(bm.getPrice() * bm.getConvertCount());
-                        }
-                        flowActuaryDTO.setShopCount(bm.getShopCount());
-                        flowActuaryDTO.setConvertCount(bm.getConvertCount());
-                        flowActuaryDTO.setBudgetMaterialId(bm.getId());
-                        flowActuaryDTO.setName(bm.getGoodsName());
-                        if (CommonUtil.isEmpty(flowActuaryDTO.getName())) {
-                            flowActuaryDTO.setName(bm.getProductName());
-                        }
-                        flowActuaryDTO.setUnitName(convertUnitName);
-                        if (bm.getDeleteState() == 2) {
-                            flowActuaryDTO.setBuy(3);//可选没选中(业主已取消)
-                        } else {
-                            flowActuaryDTO.setBuy(goods.getBuy());
-                        }
-                        flowActuaryDTOList.add(flowActuaryDTO);
-                    }
-            }
-            flowDTO.setFlowActuaryDTOList(flowActuaryDTOList);
-            return ServerResponse.createBySuccess("查询成功", flowDTO);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("查询失败");
-        }
-    }
-
-    //拼接属性品牌
-    public String getAttributes(String productId) {
-        String attributes = iBrandSeriesMapper.getAttributesName(productId);
-        if (CommonUtil.isEmpty(attributes)) {
-            return "";
-        }
-        return attributes.replaceAll(",", " ");
-    }
-
     //根据品牌系列找属性品牌
     private List<AttributeDTO> getAllAttributes(DjBasicsProduct product, List<DjBasicsProduct> productList) {
         List<AttributeDTO> attributeDTOList = new ArrayList<>();
@@ -708,69 +518,5 @@ public class AppActuaryOperationService {
         return attributeDTOList;
     }
 
-    /**
-     * 精算详情 productType  0：材料；1：包工包料
-     */
-    public ServerResponse confirmActuary(String userToken, String houseId, String cityId) {
-        //从master获取工序详情
-        List<Map<String, String>> mapList = getForBudgetAPI.getFlowList(houseId);
-        ActuaryDetailsDTO actuaryDetailsDTO = new ActuaryDetailsDTO();//最外层
-        List<FlowDetailsDTO> flowDetailsDTOList = new ArrayList<>();
-        for (Map<String, String> map : mapList) {
-            String name = map.get("name");
-            String workerTypeId = map.get("workerTypeId");
-            FlowDetailsDTO flowDetailsDTO = new FlowDetailsDTO();
-            flowDetailsDTO.setName(name);
-            List<DetailsDTO> detailsDTOList = new ArrayList<>();//人工材料包工包料
-            List<BudgetWorker> budgetWorkerList = budgetWorkerMapper.getBudgetWorkerList(houseId, workerTypeId);//人工明细
-            List<BudgetMaterial> materialCaiList = budgetMaterialMapper.getBudgetCaiList(houseId, workerTypeId);//材料明细
-            List<BudgetMaterial> materialSerList = budgetMaterialMapper.getBudgetSerList(houseId, workerTypeId);//包工包料明细
-            List<Map> mapworker = new ArrayList<>();
-            Map<Integer, String> mapgx = new HashMap<>();
-            mapgx.put(DjConstants.GXType.RENGGONG, "人工");
-            mapgx.put(DjConstants.GXType.CAILIAO, "材料");
-            mapgx.put(DjConstants.GXType.FUWU, "包工包料");
-            for (Map.Entry<Integer, String> entry : mapgx.entrySet()) {
-                Map<String, Object> m = new HashMap<>();
-                m.put("key", String.valueOf(entry.getKey()));
-                m.put("name", entry.getValue());
-                int size = 0;
-                if (DjConstants.GXType.RENGGONG.equals(entry.getKey())) {
-                    size = budgetWorkerList.size();
-                } else if (DjConstants.GXType.CAILIAO.equals(entry.getKey())) {
-                    size = materialCaiList.size();
-                } else if (DjConstants.GXType.FUWU.equals(entry.getKey())) {
-                    size = materialSerList.size();
-                }
-                m.put("size", size);
-                mapworker.add(m);
-            }
-            for (Map mp : mapworker) {
-                Integer size = (Integer) mp.get("size");
-                String names = (String) mp.get("name");
-                String key = (String) mp.get("key");
-                if (size > 0) {
-                    DetailsDTO detailsDTO = new DetailsDTO();
-                    detailsDTO.setImage("");
-                    detailsDTO.setNameA(names);
-                    detailsDTO.setNameB(name + "阶段" + names);
-                    detailsDTO.setNameC(names + "明细");
-                    detailsDTO.setType(key);
-                    String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
-                            String.format(DjConstants.YZPageAddress.CONFIRMACTUARYDETAIL, userToken, cityId, names + "明细") +
-                            "&houseId=" + houseId + "&workerTypeId=" + workerTypeId + "&type=" + key;
-                    detailsDTO.setUrl(url);
-                    detailsDTOList.add(detailsDTO);
-                }
-            }
-            flowDetailsDTO.setDetailsDTOList(detailsDTOList);
-            flowDetailsDTOList.add(flowDetailsDTO);
-        }
-        House house = houseAPI.getHouseById(houseId);
-        actuaryDetailsDTO.setHouseId(houseId);
-        actuaryDetailsDTO.setFlowDetailsDTOList(flowDetailsDTOList);
-        actuaryDetailsDTO.setBudgetOk(house.getBudgetOk());
-        return ServerResponse.createBySuccess("查询成功", actuaryDetailsDTO);
-    }
 
 }

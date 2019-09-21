@@ -22,8 +22,8 @@ public class AppActuaryOperationController implements AppActuaryOperationAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse choiceGoods(HttpServletRequest request, String budgetIdList) {
-        return actuaryOperationService.choiceGoods(budgetIdList);
+    public ServerResponse choiceGoods(HttpServletRequest request, String houseId,String productId) {
+        return actuaryOperationService.choiceGoods( houseId, productId);
     }
 
     @Override
@@ -50,15 +50,5 @@ public class AppActuaryOperationController implements AppActuaryOperationAPI {
     }
 
 
-    @Override
-    @ApiMethod
-    public ServerResponse confirmActuaryDetail(HttpServletRequest request, String userToken, String houseId, String workerTypeId, int type, String cityId) {
-        return actuaryOperationService.confirmActuaryDetail(userToken, houseId, workerTypeId, type, cityId);
-    }
 
-    @Override
-    @ApiMethod
-    public ServerResponse confirmActuary(HttpServletRequest request, String userToken, String houseId, String cityId) {
-        return actuaryOperationService.confirmActuary(userToken, houseId, cityId);
-    }
 }
