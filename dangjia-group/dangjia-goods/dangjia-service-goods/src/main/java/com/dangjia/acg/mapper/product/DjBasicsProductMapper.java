@@ -87,4 +87,6 @@ public interface DjBasicsProductMapper extends Mapper<DjBasicsProduct> {
 
     DjBasicsProduct getById(String id);
 
+    List<DjBasicsProduct> queryChooseGoods();
+
 }

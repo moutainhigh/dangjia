@@ -167,4 +167,14 @@ public interface DjBasicsProductAPI {
     @ApiOperation(value = "猜你喜欢(商品详情列表，随机返回同类别下的12个商品)", notes = "猜你喜欢(商品详情列表，随机返回同类别下的12个商品)")
     ServerResponse randQueryProduct(@RequestParam("request") HttpServletRequest request,@RequestParam("goodsId") String goodsId);
 
+
+    /**
+     * 确认开工页选择商铺列表
+     * @param request
+     * @return
+     */
+    @PostMapping("web/product/queryChooseGoods")
+    @ApiOperation(value = "确认开工页选择商品列表", notes = "确认开工页选择商品列表")
+    ServerResponse queryChooseGoods(@RequestParam("request") HttpServletRequest request);
+
 }

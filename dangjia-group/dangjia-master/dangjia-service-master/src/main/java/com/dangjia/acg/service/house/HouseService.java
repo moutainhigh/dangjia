@@ -463,6 +463,7 @@ public class HouseService {
         house.setDrawings(houseDTO.getDrawings());
         house.setDecorationType(houseDTO.getDecorationType());
         house.setConstructionDate(new Date());
+        house.setProductId(houseDTO.getProductId());
         HouseFlow houseFlow;
         try {
             //修改-自带设计和远程设计都需要进行抢单

@@ -289,4 +289,18 @@
         )
         ORDER BY istop DESC,create_date desc
     </select>
+
+    <select id="queryChooseGoods" resultType="com.dangjia.acg.modle.product.DjBasicsProduct">
+        SELECT
+            p.*
+        FROM
+            dj_basics_goods_category gc
+        INNER JOIN dj_basics_goods g ON gc.id = g.category_id
+        INNER JOIN dj_basics_product p ON g.id = p.goods_id
+        WHERE
+            (
+                gc. NAME = "设计师"
+                OR gc. NAME = "精算师"
+            )
+    </select>
 </mapper>
