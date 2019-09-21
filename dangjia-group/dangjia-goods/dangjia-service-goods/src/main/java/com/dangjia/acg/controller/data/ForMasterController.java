@@ -163,10 +163,12 @@ public class ForMasterController implements ForMasterAPI {
 
     /*********************商品3.0改造**************************/
     @Override
+    @ApiMethod
     public List<BudgetLabelDTO> queryBudgetLabel(String houseId, String workerTypeId, String cityId){
         return forMasterService.queryBudgetLabel(houseId,workerTypeId);
     }
     @Override
+    @ApiMethod
     public  List<BudgetLabelGoodsDTO> queryBudgetLabelGoods(String houseId, String workerTypeId, String cityId){
         return forMasterService.queryBudgetLabelGoods(houseId,workerTypeId);
     }
