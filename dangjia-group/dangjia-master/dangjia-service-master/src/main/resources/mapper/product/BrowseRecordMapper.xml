@@ -10,7 +10,8 @@
         data_status AS dataStatus,
         member_id AS memberId,
         product_id AS productId,
-        visits_num as visitsNum
+        visits_num as visitsNum,
+        vists_Type as vistsType
 	</sql>
     <!--查询用户随机浏览记录-->
     <select id="queryBrowseRecord" resultType="com.dangjia.acg.modle.product.BrowseRecord">
@@ -20,6 +21,9 @@
         dj_basics_browse_record  where 1=1
         <if test="memberId != null">
             AND member_id = #{memberId}
+        </if>
+        <if test="vistsType != null">
+            AND vists_Type = #{vistsType}
         </if>
         order by visits_num+0 desc limit 12
     </select>

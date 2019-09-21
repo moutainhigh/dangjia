@@ -24,10 +24,9 @@ public class BrowseRecordService {
     /**
      * @param request
      * @param userToken
-     * @param pageDTO
      * @return
      */
-    public ServerResponse queryBrowseRecord(HttpServletRequest request, String userToken) {
+    public ServerResponse queryBrowseRecord(HttpServletRequest request, String userToken,String vistsType) {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
@@ -35,7 +34,7 @@ public class BrowseRecordService {
             }
             Member member = (Member) object;
             String memberId=member.getId();
-            List<BrowseRecord> list=iBrowseRecordMapper.queryBrowseRecord(memberId);
+            List<BrowseRecord> list=iBrowseRecordMapper.queryBrowseRecord(memberId,vistsType);
             return ServerResponse.createBySuccess("查询浏览记录成功!",list);
         } catch (Exception e) {
             e.printStackTrace();
@@ -48,7 +47,7 @@ public class BrowseRecordService {
      * @param userToken
      * @return
      */
-    public ServerResponse addBrowseRecord(HttpServletRequest request, String userToken, String productId , String visitsNum ) {
+    public ServerResponse addBrowseRecord(HttpServletRequest request, String userToken, String productId ,String vistsType ) {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
@@ -65,6 +64,7 @@ public class BrowseRecordService {
                 {
                     record.setVisitsNum(String.valueOf(Integer.parseInt(record.getVisitsNum())+1));
                     record.setMemberId(member.getId());
+                    record.setVistsType(vistsType);
                     iBrowseRecordMapper.updateByPrimaryKeySelective(record);
                     return ServerResponse.createBySuccess("已经存在记录，修改成功!");
                 }
@@ -73,6 +73,7 @@ public class BrowseRecordService {
             browseRecord.setMemberId(member.getId());//用户编号
             browseRecord.setProductId(productId);
             browseRecord.setVisitsNum("1");
+            browseRecord.setVistsType(vistsType);
             iBrowseRecordMapper.insert(browseRecord);
 
             return ServerResponse.createBySuccess("添加用户浏览记录成功!");
