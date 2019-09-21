@@ -296,27 +296,20 @@ public class House extends BaseEntity {
 
     }
 
-    public Integer getDesignerOk() {
+    public Integer getDesignerState() {
         if (visitState == 4) {
             return 3;
         }
         return designerOk;
     }
 
-    public Integer getDesignerOk2() {
-        return designerOk;
-    }
-
-    public Integer getBudgetOk() {
+    public Integer getBudgetState() {
         if (visitState == 4) {
             return 3;
         }
         return budgetOk;
     }
 
-    public Integer getBudgetOk2() {
-        return budgetOk;
-    }
 
     public House(boolean isIni) {
         if (isIni) {
