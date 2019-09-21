@@ -75,6 +75,7 @@ public class AppActuaryOperationService {
     private IGoodsGroupMapper iGoodsGroupMapper;
     @Autowired
     private IBrandMapper iBrandMapper;
+
     @Autowired
     private DjBasicsProductMaterialMapper djBasicsProductMaterialMapper;
     @Autowired
@@ -124,9 +125,9 @@ public class AppActuaryOperationService {
                 .andCondition("  FIND_IN_SET(product_id,'" + productId + "') ");
         List<BudgetMaterial> budgetMaterials = budgetMaterialMapper.selectByExample(example);
         for (BudgetMaterial budgetMaterial : budgetMaterials) {
-            DjBasicsProduct targetProduct = productMapper.selectByPrimaryKey(budgetMaterial.getOriginalProductId());//目标product 对象
-
-            budgetMaterialMapper.updateByPrimaryKey(budgetMaterial);
+            if(!CommonUtil.isEmpty(budgetMaterial.getOriginalProductId())) {
+                changeProduct(budgetMaterial.getOriginalProductId(),budgetMaterial.getId(),houseId,budgetMaterial.getWorkerTypeId());
+            }
         }
 
         return ServerResponse.createBySuccessMessage("操作成功" );
@@ -135,24 +136,22 @@ public class AppActuaryOperationService {
      * 更换货品
      */
     public ServerResponse changeProduct(String productId, String budgetMaterialId,
-                                        String srcGroupId, String targetGroupId,
                                         String houseId, String workerTypeId) {
         try {
-            int count = 0;
-            String ret = productId + " " + budgetMaterialId + " " + srcGroupId + " " + targetGroupId + " " + houseId + " " + workerTypeId;
             BudgetMaterial budgetMaterial = budgetMaterialMapper.selectByPrimaryKey(budgetMaterialId);
-
-            if (StringUtils.isNotBlank(targetGroupId) && StringUtils.isNoneBlank(srcGroupId))//不为空  可以切换
+            List<GroupLink> srcGroup = iGroupLinkMapper.queryGroupLinkByPid(budgetMaterial.getProductId());
+            List<GroupLink> targetGroup = iGroupLinkMapper.queryGroupLinkByPid(productId);
+            if (srcGroup.size()>0 && targetGroup.size()>0)//不为空  可以切换
             {
                 //找到 原关联组的goods成员， 把 goods 下的product 更换 成 目标关联组的 goods下的product
-                List<GroupLink> srcGroupLinkLists = iGroupLinkMapper.queryGroupLinkByGid(srcGroupId);
-                List<GroupLink> targetGroupLinkLists = iGroupLinkMapper.queryGroupLinkByGid(targetGroupId);
+                List<GroupLink> srcGroupLinkLists = iGroupLinkMapper.queryGroupLinkByGid(srcGroup.get(0).getGroupId());
+                List<GroupLink> targetGroupLinkLists = iGroupLinkMapper.queryGroupLinkByGid(targetGroup.get(0).getGroupId());
                 Set<String> allNoPayProductIds = new HashSet<>();//所有未支付的product 是单品的
                 Set<String> danProductIds = new HashSet<>();//所有未支付的product 是单品的 或者是 其他关联组的商品，都不参与切换
                 //未支付的材料1
                 List<BudgetMaterial> budgetMaterials = budgetMaterialMapper.getBudgetCaiList(houseId, workerTypeId);
                 for (BudgetMaterial budgetMaterial1 : budgetMaterials) {
-                    if (budgetMaterial.getGoodsGroupId().equals(srcGroupId)) {
+                    if (budgetMaterial.getGoodsGroupId().equals(srcGroup.get(0).getGroupId())) {
                         allNoPayProductIds.add(budgetMaterial1.getProductId());
                     }
                     if (!StringUtils.isNoneBlank(budgetMaterial1.getGoodsGroupId())) {
@@ -176,9 +175,7 @@ public class AppActuaryOperationService {
                                 continue;
                             }
                             //查到 老的关联组 的精算
-                            BudgetMaterial srcBudgetMaterial = budgetMaterialMapper.getBudgetCaiListByGoodsId(houseId, workerTypeId, srcGroupLink.getGoodsId());
                             BudgetMaterial newBudgetMaterial = budgetMaterialMapper.getBudgetCaiListByGoodsId(houseId, workerTypeId, srcGroupLink.getGoodsId());
-                            BudgetMaterial originalBudgetMaterial = budgetMaterialMapper.getBudgetByGoodsId(houseId, workerTypeId, newBudgetMaterial.getGoodsId(), newBudgetMaterial.getProductType());
                             DjBasicsProduct targetProduct = productMapper.selectByPrimaryKey(targetGroupLink.getProductId());//目标product 对象
                             DjBasicsProductMaterial targetProductMaterial = djBasicsProductMaterialMapper.queryProductMaterialByProductId(targetGroupLink.getProductId());//目标product 对象
 
@@ -187,8 +184,8 @@ public class AppActuaryOperationService {
                             newBudgetMaterial.setProductName(targetProduct.getName());
                             newBudgetMaterial.setImage(targetProduct.getImage());
                             newBudgetMaterial.setPrice(targetProduct.getPrice());
-                            newBudgetMaterial.setGoodsGroupId(targetGroupId);
-                            GoodsGroup goodsGroup = iGoodsGroupMapper.selectByPrimaryKey(targetGroupId);
+                            newBudgetMaterial.setGoodsGroupId(targetGroup.get(0).getGroupId());
+                            GoodsGroup goodsGroup = iGoodsGroupMapper.selectByPrimaryKey(targetGroup.get(0).getGroupId());
                             newBudgetMaterial.setGroupType(goodsGroup.getName());
                             newBudgetMaterial.setCost(targetProductMaterial.getCost());
                             //这里会更新 为 新product的 换算后的购买数量
@@ -206,23 +203,15 @@ public class AppActuaryOperationService {
                             newBudgetMaterial.setUnitName(convertUnit.getName());
                             DjBasicsGoods goods = goodsMapper.selectByPrimaryKey( targetProduct.getGoodsId());
                             newBudgetMaterial.setProductType(goods.getType());//0：材料；1：包工包料
-                            if(originalBudgetMaterial!=null){
-                                budgetMaterialMapper.updateByPrimaryKeySelective(newBudgetMaterial);
-                            }else{
-                                newBudgetMaterial.setId((int)(Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis());
-                                budgetMaterialMapper.insertSelective(newBudgetMaterial);
-                                srcBudgetMaterial.setDeleteState(5);
-                                budgetMaterialMapper.updateByPrimaryKeySelective(srcBudgetMaterial);
-                            }
-                            count++;
+                            budgetMaterialMapper.updateByPrimaryKeySelective(newBudgetMaterial);
                         }
 
                     }
                 }
+                return ServerResponse.createBySuccessMessage("更换成功，相关商品连带更换" );
             } else {
 
                 BudgetMaterial newBudgetMaterial = budgetMaterialMapper.selectByPrimaryKey(budgetMaterialId);
-                BudgetMaterial originalBudgetMaterial = budgetMaterialMapper.getBudgetByGoodsId(houseId, workerTypeId, newBudgetMaterial.getGoodsId(), newBudgetMaterial.getProductType());
                 DjBasicsProduct product = productMapper.selectByPrimaryKey(productId);//目标product 对象
                 DjBasicsProductMaterial targetProductMaterial = djBasicsProductMaterialMapper.queryProductMaterialByProductId(productId);//目标product 对象
 
@@ -245,20 +234,9 @@ public class AppActuaryOperationService {
                 newBudgetMaterial.setUnitName(convertUnit.getName());
                 DjBasicsGoods goods = goodsMapper.selectByPrimaryKey(product.getGoodsId());
                 newBudgetMaterial.setProductType(goods.getType());//0：材料；1：包工包料
-                if(originalBudgetMaterial!=null){
-                    budgetMaterialMapper.updateByPrimaryKeySelective(newBudgetMaterial);
-                }else{
-                    newBudgetMaterial.setId((int)(Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis());
-                    budgetMaterialMapper.insertSelective(newBudgetMaterial);
-                    budgetMaterial.setDeleteState(5);
-                    budgetMaterialMapper.updateByPrimaryKeySelective(budgetMaterial);
-                }
-                return ServerResponse.createBySuccessMessage("操作成功" + ret);
+                budgetMaterialMapper.updateByPrimaryKeySelective(newBudgetMaterial);
+                return ServerResponse.createBySuccessMessage("更换成功" );
             }
-            if (count == 0)
-                return ServerResponse.createByErrorMessage(count + "操作失败" + ret);
-            else
-                return ServerResponse.createBySuccessMessage(count + "操作成功" + ret);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("操作失败");
