@@ -16,7 +16,6 @@
             profit,
             convert_unit convertUnit,
             convert_quality convertQuality,
-            attribute_id_arr AS attributeIdArr,
             is_influe_warranty_period AS isInflueWarrantyPeriod,
             max_warranty_period_year AS maxWarrantyPeriodYear,
             min_warranty_period_year AS minWarrantyPeriodYear,
