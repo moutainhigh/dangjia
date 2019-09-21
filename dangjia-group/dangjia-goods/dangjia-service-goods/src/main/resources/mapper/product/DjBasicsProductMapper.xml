@@ -14,6 +14,8 @@
         unit_id as unitId,
         label_id as labelId,
         unit_name as unitName,
+        value_name_arr valueNameArr,
+        value_id_arr AS valueIdArr,
         type as type,
         istop,
         price as price,
@@ -37,7 +39,9 @@
         p.type as type,
         p.istop,
         p.price as price,
-        p.other_name as otherName
+        p.other_name as otherName,
+        p.value_name_arr valueNameArr,
+        p.value_id_arr AS valueIdArr
         from dj_basics_product p,dj_basics_product_material p1
         where
         p.id = p1.product_id

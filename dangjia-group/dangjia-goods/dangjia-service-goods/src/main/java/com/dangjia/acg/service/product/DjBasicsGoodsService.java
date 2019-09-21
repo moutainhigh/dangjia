@@ -157,6 +157,11 @@ public class DjBasicsGoodsService {
         goods.setIndicativePrice(basicsGoodsDTO.getIndicativePrice());
         goods.setLabelIds(basicsGoodsDTO.getLabelIds());
         goods.setIsReservationDeliver(basicsGoodsDTO.getIsReservationDeliver());
+        if (!StringUtils.isNoneBlank(basicsGoodsDTO.getAttributeIdArr())) {
+            goods.setAttributeIdArr(null);
+        } else {
+            goods.setAttributeIdArr(basicsGoodsDTO.getAttributeIdArr());
+        }
         return goods;
     }
     /**
@@ -256,17 +261,17 @@ public class DjBasicsGoodsService {
                     if(djBasicsProductMaterial!=null&&StringUtils.isNotBlank(djBasicsProductMaterial.getId())){
                         map.putAll(BeanUtils.beanToMap(djBasicsProductMaterial));
                         map.put("convertUnitName", iUnitMapper.selectByPrimaryKey(djBasicsProductMaterial.getConvertUnit()).getName());
-                        if (StringUtils.isNotBlank(djBasicsProductMaterial.getValueIdArr())) {
-                            String[] newValueNameArr = djBasicsProductMaterial.getValueIdArr().split(",");
-                            for (int i = 0; i < newValueNameArr.length; i++) {
-                                String valueId = newValueNameArr[i];
-                                if (StringUtils.isNotBlank(valueId)) {
-                                    AttributeValue attributeValue = iAttributeValueMapper.selectByPrimaryKey(valueId);
-                                    if (i == 0) {
-                                        strNewValueNameArr = new StringBuilder(attributeValue.getName());
-                                    } else {
-                                        strNewValueNameArr.append(",").append(attributeValue.getName());
-                                    }
+                    }
+                    if (StringUtils.isNotBlank(p.getValueIdArr())) {
+                        String[] newValueNameArr = p.getValueIdArr().split(",");
+                        for (int i = 0; i < newValueNameArr.length; i++) {
+                            String valueId = newValueNameArr[i];
+                            if (StringUtils.isNotBlank(valueId)) {
+                                AttributeValue attributeValue = iAttributeValueMapper.selectByPrimaryKey(valueId);
+                                if (i == 0) {
+                                    strNewValueNameArr = new StringBuilder(attributeValue.getName());
+                                } else {
+                                    strNewValueNameArr.append(",").append(attributeValue.getName());
                                 }
                             }
                         }

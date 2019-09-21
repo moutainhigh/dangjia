@@ -44,20 +44,6 @@ public class DjBasicsProductMaterial extends BaseEntity {
     @ApiModelProperty("利润率")
     private Double profit;//利润率
 
-    @Column(name = "value_name_arr")
-    @Desc(value = "属性选项选中值name集合")
-    @ApiModelProperty("属性选项选中值name集合")
-    private String valueNameArr;//属性选项选中值name集合
-
-    @Column(name = "value_id_arr")
-    @Desc(value = "属性选项选中值id集合")
-    @ApiModelProperty("属性选项选中值id集合")
-    private String valueIdArr;//属性选项选中值id集合
-
-    @Column(name = "attribute_id_arr")
-    @Desc(value = "属性选中值Id集合")
-    @ApiModelProperty("属性选中值Id集合")
-    private String attributeIdArr;//属性选中值Id集合
 
     @Column(name = "convert_quality")
     @Desc(value = "换算量")

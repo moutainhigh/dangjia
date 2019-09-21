@@ -43,5 +43,7 @@ public class BasicsGoodsDTO extends BaseEntity {
 
     private String  isReservationDeliver;//是否业主预约发货（1是，0否）
 
+    private String attributeIdArr;//属性选中值Id集合
+
     
 }

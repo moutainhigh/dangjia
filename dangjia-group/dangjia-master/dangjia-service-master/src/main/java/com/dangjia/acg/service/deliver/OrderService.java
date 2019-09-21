@@ -7,6 +7,7 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.deliver.BusinessOrderDTO;
@@ -408,10 +409,25 @@ public class OrderService {
                 example = new Example(OrderSplitItem.class);
                 example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplit.getId());
                 List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
+                List<Map<String,Object>> resMapList=new ArrayList<>();
                 for (OrderSplitItem v : orderSplitItemList) {
                     v.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
+                    //增加当前仓库商品的购买量和剩余量字段的显示
+                    example = new Example(Warehouse.class);
+                    example.createCriteria().andEqualTo(Warehouse.HOUSE_ID, houseId).andEqualTo(Warehouse.PRODUCT_ID, v.getProductId());
+                    List<Warehouse> warehouseList = warehouseMapper.selectByExample(example);
+                    Map orderSplitMap= BeanUtils.beanToMap(v);
+                    if (warehouseList.size() > 0) {
+                        Warehouse warehouse = warehouseList.get(0);
+                        orderSplitMap.put("shopCount",warehouse.getShopCount());//购买量
+                        orderSplitMap.put("surCount",warehouse.getShopCount() - (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()) - warehouse.getAskCount());
+                    }else{
+                        orderSplitMap.put("shopCount",0D);//购买量
+                        orderSplitMap.put("surCount",0D);//剩余量
+                    }
+                    resMapList.add(orderSplitMap);
                 }
-                map.put("orderSplitItemList", orderSplitItemList);
+                map.put("orderSplitItemList", resMapList);
                 return ServerResponse.createBySuccess("查询成功", map);
             }
         } catch (Exception e) {

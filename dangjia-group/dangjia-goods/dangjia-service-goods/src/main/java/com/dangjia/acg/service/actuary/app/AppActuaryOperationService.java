@@ -19,10 +19,7 @@ import com.dangjia.acg.dto.repair.MendOrderInfoDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
 import com.dangjia.acg.mapper.basics.*;
-import com.dangjia.acg.mapper.product.DjBasicsGoodsMapper;
-import com.dangjia.acg.mapper.product.DjBasicsProductMapper;
-import com.dangjia.acg.mapper.product.DjBasicsProductMaterialMapper;
-import com.dangjia.acg.mapper.product.DjBasicsProductWorkerMapper;
+import com.dangjia.acg.mapper.product.*;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.modle.basics.*;
@@ -30,10 +27,7 @@ import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
-import com.dangjia.acg.modle.product.DjBasicsGoods;
-import com.dangjia.acg.modle.product.DjBasicsProduct;
-import com.dangjia.acg.modle.product.DjBasicsProductMaterial;
-import com.dangjia.acg.modle.product.DjBasicsProductWorker;
+import com.dangjia.acg.modle.product.*;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.modle.repair.MendWorker;
 import com.dangjia.acg.util.DateUtils;
@@ -87,7 +81,10 @@ public class AppActuaryOperationService {
     private DjBasicsProductMaterialMapper djBasicsProductMaterialMapper;
     @Autowired
     private DjBasicsProductWorkerMapper djBasicsProductWorkerMapper;
-
+    @Autowired
+    private DjBasicsProductMapper djBasicsProductMapper;
+    @Autowired
+    private IBasicsGoodsMapper iBasicsGoodsMapper;
     @Autowired
     private ITechnologyMapper iTechnologyMapper;
 
@@ -389,11 +386,10 @@ public class AppActuaryOperationService {
                 List<DjBasicsProduct> productList = new ArrayList<>();
                 if (srcGoodsGroup != null) {//是关联组
                     for (String pId : pIdTargetGroupSet) {
+                        DjBasicsProduct djBasicsProduct=djBasicsProductMapper.selectByPrimaryKey(pId);
                         //如果没有品牌，就只遍历属性
-                        DjBasicsProductMaterial pt = djBasicsProductMaterialMapper.queryProductMaterialByProductId(pId);//目标product 对象
-
-                        if (StringUtils.isNoneBlank(pt.getAttributeIdArr())
-                                && StringUtils.isNoneBlank(pt.getValueIdArr())) {
+                        if (StringUtils.isNoneBlank(goods.getAttributeIdArr())
+                                && StringUtils.isNoneBlank(djBasicsProduct.getValueIdArr())) {
                             DjBasicsProduct prot = productMapper.selectByPrimaryKey(pId);
                             productList.add(prot);
                         }
@@ -682,13 +678,12 @@ public class AppActuaryOperationService {
                  brand = iBrandMapper.selectByPrimaryKey(goods.getBrandId());
             }
             for (DjBasicsProduct atId : productList) {
-                DjBasicsProductMaterial pt = djBasicsProductMaterialMapper.queryProductMaterialByProductId(atId.getId());//目标product 对象
-                StringBuilder strbuf = new StringBuilder();
+                 StringBuilder strbuf = new StringBuilder();
                 if (brand!=null) {
                     strbuf.append(brand.getName()).append(" ");
                 }
-                if (!CommonUtil.isEmpty(pt.getValueIdArr())) {
-                    strbuf.append(pt.getValueNameArr().replaceAll(",", " "));
+                if (!CommonUtil.isEmpty(atId.getValueIdArr())) {
+                    strbuf.append(atId.getValueNameArr().replaceAll(",", " "));
                 }
                 AttributeValueDTO avDTO = new AttributeValueDTO();
                 avDTO.setAttributeValueId(atId.getId());
