@@ -8,16 +8,18 @@ import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
 import com.dangjia.acg.mapper.basics.*;
 import com.dangjia.acg.mapper.product.DjBasicsProductMapper;
+import com.dangjia.acg.mapper.product.DjBasicsProductMaterialMapper;
 import com.dangjia.acg.mapper.product.DjBasicsProductWorkerMapper;
+import com.dangjia.acg.mapper.product.IBasicsGoodsMapper;
 import com.dangjia.acg.mapper.sup.ISupplierMapper;
 import com.dangjia.acg.mapper.sup.ISupplierProductMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
-import com.dangjia.acg.modle.basics.Goods;
-import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.brand.Unit;
+import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProduct;
+import com.dangjia.acg.modle.product.DjBasicsProductMaterial;
 import com.dangjia.acg.modle.product.DjBasicsProductWorker;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
@@ -46,11 +48,7 @@ public class ForMasterService {
    // @Autowired
    // private IWorkerGoodsMapper workerGoodsMapper;
     @Autowired
-    private IProductMapper productMapper;
-    @Autowired
     private ITechnologyMapper technologyMapper;
-    @Autowired
-    private IGoodsMapper goodsMapper;
     @Autowired
     private IBrandSeriesMapper brandSeriesMapper;
     @Autowired
@@ -63,7 +61,11 @@ public class ForMasterService {
     @Autowired
     private DjBasicsProductMapper djBasicsProductMapper;
     @Autowired
+    private IBasicsGoodsMapper iBasicsGoodsMapper;
+    @Autowired
     private DjBasicsProductWorkerMapper djBasicsProductWorkerMapper;
+    @Autowired
+    private DjBasicsProductMaterialMapper djBasicsProductMaterialMapper;
 
     public String getUnitName(String unitId){
         Unit unit = unitMapper.selectByPrimaryKey(unitId);
@@ -142,12 +144,17 @@ public class ForMasterService {
         productWorkerDTO.setShowGoods(djBasicsProduct.getMaket());
         return productWorkerDTO;
     }
-    public Goods getGoods(String goodsId){
-        return goodsMapper.selectByPrimaryKey(goodsId);
+    public BasicsGoods getGoods(String goodsId){
+        return iBasicsGoodsMapper.selectByPrimaryKey(goodsId);
     }
-    public Product getProduct(String productId){
-        return productMapper.selectByPrimaryKey(productId);
+    public DjBasicsProduct getProduct(String productId){
+        return djBasicsProductMapper.selectByPrimaryKey(productId);
     }
+
+    public DjBasicsProductMaterial getProductMaterial(String productId){
+        return djBasicsProductMaterialMapper.queryProductMaterialByProductId(productId);
+    }
+
 
     /**
      * 支付回调获取材料精算
@@ -161,16 +168,17 @@ public class ForMasterService {
                     .andEqualTo(BudgetMaterial.STETA,1);
             List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.selectByExample(example);
             for (BudgetMaterial budgetMaterial : budgetMaterialList){
-                Product product = productMapper.selectByPrimaryKey(budgetMaterial.getProductId());
+                DjBasicsProduct product = djBasicsProductMapper.selectByPrimaryKey(budgetMaterial.getProductId());
                 if(product == null){
                     budgetMaterialList.remove(budgetMaterial);//移除
                     budgetMaterial.setDeleteState(1);//找不到商品标记删除
                     budgetMaterial.setModifyDate(new Date());
                     budgetMaterialMapper.updateByPrimaryKeySelective(budgetMaterial);
                 }else {
+                    DjBasicsProductMaterial djBasicsProductMaterial= djBasicsProductMaterialMapper.queryProductMaterialByProductId(product.getId());
                     //重新记录支付时精算价格
                     budgetMaterial.setPrice(product.getPrice());
-                    budgetMaterial.setCost(product.getCost());
+                    budgetMaterial.setCost(djBasicsProductMaterial.getCost());
                     budgetMaterial.setTotalPrice(budgetMaterial.getConvertCount() * product.getPrice());//已支付 记录总价
                     budgetMaterial.setDeleteState(3);//已支付
                     budgetMaterial.setModifyDate(new Date());

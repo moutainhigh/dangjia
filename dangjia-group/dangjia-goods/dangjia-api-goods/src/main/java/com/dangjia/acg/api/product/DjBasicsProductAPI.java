@@ -167,4 +167,14 @@ public interface DjBasicsProductAPI {
     @ApiOperation(value = "猜你喜欢(商品详情列表，随机返回同类别下的12个商品)", notes = "猜你喜欢(商品详情列表，随机返回同类别下的12个商品)")
     ServerResponse randQueryProduct(@RequestParam("request") HttpServletRequest request,@RequestParam("goodsId") String goodsId);
 
+    @PostMapping("app/product/djBasicsProduct/queryBasicsProductData")
+    @ApiOperation(value = "商品库检索查询", notes = "商品库检索查询")
+    PageInfo queryBasicsProductData(@RequestParam("cityId") String cityId,
+                              @RequestParam("pageNum") Integer pageNum,
+                              @RequestParam("pageSize") Integer pageSize,
+                              @RequestParam("name") String name,
+                              @RequestParam("categoryId") String categoryId,
+                              @RequestParam("productType") String productType,
+                              @RequestParam("productId") String[] productId);
+
 }

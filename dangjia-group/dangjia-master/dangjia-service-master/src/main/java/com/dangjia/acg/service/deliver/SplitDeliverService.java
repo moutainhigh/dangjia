@@ -24,6 +24,7 @@ import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.product.DjBasicsProduct;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
@@ -220,7 +221,7 @@ public class SplitDeliverService {
                 if (orderSplitItem.getReceive() == null) {
                     orderSplitItem.setReceive(0D);
                 }
-                Product product = forMasterAPI.getProduct(house.getCityId(), orderSplitItem.getProductId());
+                DjBasicsProduct product = forMasterAPI.getProduct(house.getCityId(), orderSplitItem.getProductId());
                 SplitDeliverItemDTO splitDeliverItemDTO = new SplitDeliverItemDTO();
                 splitDeliverItemDTO.setImage(address + product.getImage());
                 splitDeliverItemDTO.setProductName(product.getName());

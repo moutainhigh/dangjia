@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.basics.GoodsCategoryAPI;
 import com.dangjia.acg.api.basics.ProductAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
+import com.dangjia.acg.api.product.DjBasicsProductAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
@@ -24,6 +25,7 @@ import com.dangjia.acg.modle.deliver.Cart;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +52,7 @@ public class CartService {
     @Autowired
     private ICartMapper cartMapper;
     @Autowired
-    private ProductAPI productAPI;
+    private DjBasicsProductAPI djBasicsProductAPI;
     @Autowired
     private IOrderSplitMapper orderSplitMapper;
 
@@ -98,10 +100,10 @@ public class CartService {
             cartMapper.updateByPrimaryKeySelective(cart1);
         } else {
             if (cart.getShopCount() > 0) {
-                ServerResponse serverResponse = productAPI.getProductById(request.getParameter(Constants.CITY_ID), cart.getProductId());
+                ServerResponse serverResponse = djBasicsProductAPI.getProductById(request.getParameter(Constants.CITY_ID), cart.getProductId());
                 if (serverResponse != null && serverResponse.getResultObj() != null) {
                     Product product = JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), Product.class);
-                    Goods goods = forMasterAPI.getGoods(request.getParameter(Constants.CITY_ID), product.getGoodsId());
+                    BasicsGoods goods = forMasterAPI.getGoods(request.getParameter(Constants.CITY_ID), product.getGoodsId());
                     cart.setProductSn(product.getProductSn());
                     cart.setProductName(product.getName());
                     cart.setMemberId(operator.getId());
@@ -162,6 +164,7 @@ public class CartService {
                 .andEqualTo(Cart.HOUSE_ID, cart.getHouseId())
                 .andEqualTo(Cart.WORKER_TYPE_ID, operator.getWorkerTypeId())
                 .andEqualTo(Cart.MEMBER_ID, operator.getId());
+        example.setOrderByClause(Cart.CATEGORY_ID);
         List<Cart> list = cartMapper.selectByExample(example);
         if (list.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
@@ -169,7 +172,7 @@ public class CartService {
         List<Map> listMap = new ArrayList<>();
         for (Cart cart1 : list) {
             Map map = BeanUtils.beanToMap(cart1);
-            ServerResponse serverResponse = productAPI.getProductById(request.getParameter(Constants.CITY_ID), cart1.getProductId());
+            ServerResponse serverResponse = djBasicsProductAPI.getProductById(request.getParameter(Constants.CITY_ID), cart1.getProductId());
             if (serverResponse != null && serverResponse.getResultObj() != null) {
                 Product product = JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), Product.class);
                 if (product.getType() == 0 || product.getMaket() == 0) {
@@ -222,7 +225,7 @@ public class CartService {
         for (Cart cart1 : list) {
 
             Map map = BeanUtils.beanToMap(cart1);
-            ServerResponse serverResponse = productAPI.getProductById(request.getParameter(Constants.CITY_ID), cart1.getProductId());
+            ServerResponse serverResponse = djBasicsProductAPI.getProductById(request.getParameter(Constants.CITY_ID), cart1.getProductId());
             if (serverResponse != null && serverResponse.getResultObj() != null) {
                 Product product = JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), Product.class);
                 if (product.getType() == 0 || product.getMaket() == 0) {
@@ -301,7 +304,8 @@ public class CartService {
                 productIdArr[i] = warehouseList.get(i).getProductId();
                 warehouseMap.put(warehouseList.get(i).getProductId(), warehouseList.get(i));
             }
-            PageInfo pageResult = productAPI.queryProductData(cityId, pageDTO.getPageNum(), pageDTO.getPageSize(), name, categoryId, productType, productIdArr);
+           // PageInfo pageResult = productAPI.queryProductData(cityId, pageDTO.getPageNum(), pageDTO.getPageSize(), name, categoryId, productType, productIdArr);
+            PageInfo pageResult = djBasicsProductAPI.queryBasicsProductData(cityId, pageDTO.getPageNum(), pageDTO.getPageSize(), name, categoryId, productType, productIdArr);
             List<JSONObject> products = pageResult.getList();
             for (JSONObject product : products) {
                 WarehouseDTO warehouseDTO = new WarehouseDTO();
@@ -316,7 +320,7 @@ public class CartService {
                 warehouseDTO.setImage(address + product.get(Product.IMAGE));
                 Warehouse warehouse = warehouseMap.get(warehouseDTO.getProductId());
                 if (warehouse != null) {
-                    Goods goods = forMasterAPI.getGoods(cityId, String.valueOf(product.get(Product.GOODS_ID)));
+                    BasicsGoods goods = forMasterAPI.getGoods(cityId, String.valueOf(product.get(Product.GOODS_ID)));
                     if (goods != null) {
                         warehouseDTO.setSales(goods.getSales());
                     }
@@ -351,6 +355,7 @@ public class CartService {
                     warehouseDTOS.add(warehouseDTO);
                 }
             }
+
             pageResult.setList(warehouseDTOS);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {

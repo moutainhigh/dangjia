@@ -6,9 +6,10 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.product.ProductWorkerDTO;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
-import com.dangjia.acg.modle.basics.Goods;
-import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.Technology;
+import com.dangjia.acg.modle.product.BasicsGoods;
+import com.dangjia.acg.modle.product.DjBasicsProduct;
+import com.dangjia.acg.modle.product.DjBasicsProductMaterial;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
 import com.dangjia.acg.service.data.ForMasterService;
@@ -93,14 +94,21 @@ public class ForMasterController implements ForMasterAPI {
     }
     @Override
     @ApiMethod
-    public Goods getGoods(String cityId,String goodsId){
+    public BasicsGoods getGoods(String cityId, String goodsId){
         return forMasterService.getGoods(goodsId);
     }
     @Override
     @ApiMethod
-    public Product getProduct(String cityId, String productId){
+    public DjBasicsProduct getProduct(String cityId, String productId){
         return forMasterService.getProduct(productId);
     }
+    @Override
+    @ApiMethod
+    public DjBasicsProductMaterial getProductMaterial(String cityId, String productId){
+        return forMasterService.getProductMaterial(productId);
+    }
+
+
 
     @Override
     @ApiMethod

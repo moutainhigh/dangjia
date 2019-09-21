@@ -7,6 +7,9 @@ import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.Technology;
+import com.dangjia.acg.modle.product.BasicsGoods;
+import com.dangjia.acg.modle.product.DjBasicsProduct;
+import com.dangjia.acg.modle.product.DjBasicsProductMaterial;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
 import io.swagger.annotations.Api;
@@ -75,12 +78,16 @@ public interface ForMasterAPI {
     ServerResponse setProductOrWorkerGoodsIsTop(@RequestParam("gid") String gid, @RequestParam("type") Integer type,@RequestParam("istop") String istop);
 
     @PostMapping("/data/forMaster/getGoods")
-    @ApiOperation(value = "商品信息", notes = "商品信息")
-    Goods getGoods(@RequestParam("cityId") String cityId,@RequestParam("goodsId") String goodsId);
+    @ApiOperation(value = "货品信息", notes = "货品信息")
+    BasicsGoods getGoods(@RequestParam("cityId") String cityId, @RequestParam("goodsId") String goodsId);
 
     @PostMapping("/data/forMaster/getProduct")
-    @ApiOperation(value = "货品信息", notes = "货品信息")
-    Product getProduct(@RequestParam("cityId") String cityId,@RequestParam("productId") String productId);
+    @ApiOperation(value = "商品信息", notes = "商品信息")
+    DjBasicsProduct getProduct(@RequestParam("cityId") String cityId, @RequestParam("productId") String productId);
+
+    @PostMapping("/data/forMaster/getProductMaterial")
+    @ApiOperation(value = "商品信息扩展信息", notes = "商品信息扩展信息")
+    DjBasicsProductMaterial getProductMaterial(@RequestParam("cityId") String cityId, @RequestParam("productId") String productId);
 
     @PostMapping("/data/forMaster/caiLiao")
     @ApiOperation(value = "支付回调获取材料精算", notes = "支付回调获取材料精算")

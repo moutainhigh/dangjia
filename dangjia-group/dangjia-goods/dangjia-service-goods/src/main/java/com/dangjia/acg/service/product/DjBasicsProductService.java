@@ -21,6 +21,7 @@ import com.dangjia.acg.mapper.basics.ITechnologyMapper;
 import com.dangjia.acg.mapper.basics.IUnitMapper;
 import com.dangjia.acg.mapper.product.*;
 import com.dangjia.acg.modle.attribute.AttributeValue;
+import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.product.*;
@@ -1070,6 +1071,12 @@ public class DjBasicsProductService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
+    }
+    public PageInfo queryBasicsProductData( Integer pageNum,Integer pageSize,  String name, String categoryId, String productType, String[] productId) {
+        PageHelper.startPage(pageNum, pageSize);
+        List<DjBasicsProduct> productList = djBasicsProductMapper.queryProductData(name, categoryId, productType, productId);
+        PageInfo pageResult = new PageInfo(productList);
+        return pageResult;
     }
 
 }

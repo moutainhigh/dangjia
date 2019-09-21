@@ -57,6 +57,7 @@ import com.dangjia.acg.modle.other.WorkDeposit;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.pay.PayOrder;
 import com.dangjia.acg.modle.pay.PurchaseOrder;
+import com.dangjia.acg.modle.product.DjBasicsProduct;
 import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.modle.repair.MendOrder;
@@ -363,7 +364,7 @@ public class PaymentService {
 
                 //处理补材料
                 for (MendMateriel mendMateriel : mendMaterielList) {
-                    Product product=forMasterAPI.getProduct(house.getCityId(),mendMateriel.getProductId());
+                    DjBasicsProduct product=forMasterAPI.getProduct(house.getCityId(),mendMateriel.getProductId());
                     OrderItem orderItem = new OrderItem();
                     orderItem.setOrderId(order.getId());
                     orderItem.setHouseId(businessOrder.getHouseId());
@@ -855,7 +856,7 @@ public class PaymentService {
             House house = houseMapper.selectByPrimaryKey(houseId);
             for (BudgetMaterial budgetMaterial : budgetMaterialList) {
                 OrderItem orderItem = new OrderItem();
-                Product product=forMasterAPI.getProduct(house.getCityId(),budgetMaterial.getProductId());
+                DjBasicsProduct product=forMasterAPI.getProduct(house.getCityId(),budgetMaterial.getProductId());
                 orderItem.setOrderId(orderId);
                 orderItem.setHouseId(houseId);
                 orderItem.setProductId(budgetMaterial.getProductId());//货品id
