@@ -194,23 +194,29 @@ public class MemberCollectService {
      * @return
      */
     public ServerResponse isMemberCollect(HttpServletRequest request,String houseId,String conditionType) {
-        String userToken = request.getParameter(Constants.USER_TOKEY);
-        if (userToken != null) {
-            Object object = constructionService.getMember(userToken);
-            if (object instanceof Member) {
-                Member operator = (Member) object;
-                Example example = new Example(MemberCollect.class);
-                example.createCriteria()
-                        .andEqualTo(MemberCollect.MEMBER_ID, operator.getId())
-                        .andEqualTo(MemberCollect.HOUSE_ID,houseId)
-                        .andEqualTo(MemberCollect.CONDITION_TYPE,conditionType);
-                List<MemberCollect> list = iMemberCollectMapper.selectByExample(example);
-                if(list.size()>0){
-                    return ServerResponse.createBySuccess("ok","1");
+        try{
+            String userToken = request.getParameter(Constants.USER_TOKEY);
+            if (userToken != null) {
+                Object object = constructionService.getMember(userToken);
+                if (object instanceof Member) {
+                    Member operator = (Member) object;
+                    Example example = new Example(MemberCollect.class);
+                    example.createCriteria()
+                            .andEqualTo(MemberCollect.MEMBER_ID, operator.getId())
+                            .andEqualTo(MemberCollect.HOUSE_ID,houseId)
+                            .andEqualTo(MemberCollect.CONDITION_TYPE,conditionType);
+                    List<MemberCollect> list = iMemberCollectMapper.selectByExample(example);
+                    if(list.size()>0){
+                        return ServerResponse.createBySuccess("ok","1");
+                    }
                 }
             }
+            return ServerResponse.createBySuccess("ok","0");
         }
-        return ServerResponse.createBySuccess("ok","0");
+        catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("系统出错,检测该工地是否已收藏失败");
+        }
     }
 
     /**
@@ -220,42 +226,58 @@ public class MemberCollectService {
      * @return
      */
     public ServerResponse addMemberCollect(HttpServletRequest request,String houseId,String conditionType) {
-        String userToken = request.getParameter(Constants.USER_TOKEY);
-        MemberCollect memberCollect=new MemberCollect();
-        if (userToken != null) {
-            Object object = constructionService.getMember(userToken);
-            if (object instanceof Member) {
-                Member operator = (Member) object;
-                memberCollect.setMemberId(operator.getId());
-                memberCollect.setHouseId(houseId);
-                memberCollect.setConditionType(conditionType);
-                iMemberCollectMapper.insertSelective(memberCollect);
+        try {
+            String userToken = request.getParameter(Constants.USER_TOKEY);
+            MemberCollect memberCollect = new MemberCollect();
+            if (userToken != null) {
+                Object object = constructionService.getMember(userToken);
+                if (object instanceof Member) {
+                    Member operator = (Member) object;
+                    memberCollect.setMemberId(operator.getId());
+                    memberCollect.setHouseId(houseId);
+                    memberCollect.setConditionType(conditionType);
+                    iMemberCollectMapper.insertSelective(memberCollect);
+                    return ServerResponse.createBySuccess("ok", "1");
+                }
             }
+            return ServerResponse.createBySuccess("ok", "0");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("系统出错,添加收藏失败");
         }
-        return ServerResponse.createBySuccessMessage("ok");
+
     }
 
     /**
-     * 优化取消收藏
+     * 优化
      * @param request userToken
      * @param houseId 收藏的工地ID或者房子
      * @return
      */
     public ServerResponse delMemberCollect(HttpServletRequest request,String houseId,String conditionType) {
-        String userToken = request.getParameter(Constants.USER_TOKEY);
-        if (userToken != null) {
-            Object object = constructionService.getMember(userToken);
-            if (object instanceof Member) {
-                Member operator = (Member) object;
-                Example example = new Example(MemberCollect.class);
-                Example.Criteria criteria = example.createCriteria();
-                criteria.andEqualTo(MemberCollect.HOUSE_ID,houseId)
-                .andEqualTo(MemberCollect.MEMBER_ID,operator.getId())
-                .andEqualTo(MemberCollect.CONDITION_TYPE,conditionType);
-                iMemberCollectMapper.deleteByExample(example);
+        try
+        {
+            String userToken = request.getParameter(Constants.USER_TOKEY);
+            if (userToken != null) {
+                Object object = constructionService.getMember(userToken);
+                if (object instanceof Member) {
+                    Member operator = (Member) object;
+                    Example example = new Example(MemberCollect.class);
+                    Example.Criteria criteria = example.createCriteria();
+                    criteria.andEqualTo(MemberCollect.HOUSE_ID,houseId)
+                            .andEqualTo(MemberCollect.MEMBER_ID,operator.getId())
+                            .andEqualTo(MemberCollect.CONDITION_TYPE,conditionType);
+                    iMemberCollectMapper.deleteByExample(example);
+                    return ServerResponse.createBySuccess("ok","1");
+                }
             }
+            return ServerResponse.createBySuccess("ok","0");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("系统出错,取消收藏失败");
         }
-        return ServerResponse.createBySuccessMessage("ok");
+
+
     }
 
 
