@@ -35,6 +35,9 @@ import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.pay.BusinessOrder;
+import com.dangjia.acg.modle.product.BasicsGoods;
+import com.dangjia.acg.modle.product.DjBasicsProduct;
+import com.dangjia.acg.modle.product.DjBasicsProductMaterial;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.util.Utils;
@@ -123,7 +126,7 @@ public class ProductChangeService {
             if (flag) {
                 srcProduct = JSON.parseObject(JSON.toJSONString(srcResponse.getResultObj()), Product.class);
                 destProduct = JSON.parseObject(JSON.toJSONString(destResponse.getResultObj()), Product.class);
-                Goods goods = forMasterAPI.getGoods(request.getParameter(Constants.CITY_ID), destProduct.getGoodsId());
+                BasicsGoods goods = forMasterAPI.getGoods(request.getParameter(Constants.CITY_ID), destProduct.getGoodsId());
                 if (goods != null) {
                     productType = goods.getType();
                 }
@@ -314,8 +317,9 @@ public class ProductChangeService {
                     return ServerResponse.createByErrorMessage("不能大于商品剩余数");
                 }
                 Unit unit;
-                Product product = forMasterAPI.getProduct(house.getCityId(), productChange.getDestProductId());
-                ServerResponse serverResponse = unitAPI.getUnitById(request, house.getCityId(),product.getConvertUnit());
+                DjBasicsProduct product = forMasterAPI.getProduct(house.getCityId(), productChange.getDestProductId());
+                DjBasicsProductMaterial pm=forMasterAPI.getProductMaterial(house.getCityId(), productChange.getDestProductId());
+                ServerResponse serverResponse = unitAPI.getUnitById(request, house.getCityId(),pm.getConvertUnit());
                 if (serverResponse.getResultObj() instanceof JSONObject) {
                     unit = JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), Unit.class);
                 } else {
@@ -379,8 +383,9 @@ public class ProductChangeService {
                         return ServerResponse.createByErrorMessage("不能大于商品剩余数");
                     }
                     Unit unit;
-                    Product product = forMasterAPI.getProduct(house.getCityId(), productChange.getDestProductId());
-                    ServerResponse serverResponse = unitAPI.getUnitById(request,house.getCityId(), product.getConvertUnit());
+                    DjBasicsProduct product = forMasterAPI.getProduct(house.getCityId(), productChange.getDestProductId());
+                    DjBasicsProductMaterial pm = forMasterAPI.getProductMaterial(house.getCityId(), productChange.getDestProductId());
+                    ServerResponse serverResponse = unitAPI.getUnitById(request,house.getCityId(), pm.getConvertUnit());
                     if (serverResponse.getResultObj() instanceof JSONObject) {
                         unit = JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), Unit.class);
                     } else {
@@ -580,7 +585,7 @@ public class ProductChangeService {
                     }
                     // 处理新商品------begin
                     if (null == wareHouse) {
-                        Goods goods = forMasterAPI.getGoods(house.getCityId(), destProduct.getGoodsId());
+                        BasicsGoods goods = forMasterAPI.getGoods(house.getCityId(), destProduct.getGoodsId());
                         // 新商品没有则添加
                         Warehouse newWareHouse = new Warehouse();
                         newWareHouse.setHouseId(houseId);

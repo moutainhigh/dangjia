@@ -270,6 +270,11 @@ public class House extends BaseEntity {
     @ApiModelProperty("类别：0:内场录入，1:外场录入")
     private Integer isType;
 
+    @Column(name = "product_id")
+    @Desc(value = "选择货品")
+    @ApiModelProperty("选择货品")
+    private String productId;
+
 
     @Transient
     private String houseId;
@@ -296,27 +301,20 @@ public class House extends BaseEntity {
 
     }
 
-    public Integer getDesignerOk() {
+    public Integer getDesignerState() {
         if (visitState == 4) {
-            designerOk = 3;
+            return 3;
         }
         return designerOk;
     }
 
-    public Integer getDesignerOk2() {
-        return designerOk;
-    }
-
-    public Integer getBudgetOk() {
+    public Integer getBudgetState() {
         if (visitState == 4) {
-            budgetOk = 3;
+            return 3;
         }
         return budgetOk;
     }
 
-    public Integer getBudgetOk2() {
-        return budgetOk;
-    }
 
     public House(boolean isIni) {
         if (isIni) {

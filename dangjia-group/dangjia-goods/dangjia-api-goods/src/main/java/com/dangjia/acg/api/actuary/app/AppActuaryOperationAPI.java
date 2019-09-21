@@ -23,7 +23,7 @@ public interface AppActuaryOperationAPI {
     @PostMapping("/app/actuary/actuaryOperation/choiceGoods")
     @ApiOperation(value = "选择取消精算", notes = "选择取消精算")
     ServerResponse choiceGoods(@RequestParam("request") HttpServletRequest request,
-                               @RequestParam("budgetIdList") String budgetIdList);
+                               @RequestParam("houseId") String houseId, @RequestParam("productId") String productId);
 
     /**
      * 更换货品
@@ -62,27 +62,5 @@ public interface AppActuaryOperationAPI {
                             @RequestParam("cityId") String cityId);
 
 
-    /**
-     * 工序明细
-     * 支付时精算goods详情 waitingPayDetail 共用此方法
-     */
-    @PostMapping("/app/actuary/actuaryOperation/confirmActuaryDetail")
-    @ApiOperation(value = "工序明细", notes = "工序明细")
-    ServerResponse confirmActuaryDetail(@RequestParam("request") HttpServletRequest request,
-                                        @RequestParam("userToken") String userToken,
-                                        @RequestParam("houseId") String houseId,
-                                        @RequestParam("workerTypeId") String workerTypeId,
-                                        @RequestParam("type") int type,
-                                        @RequestParam("cityId") String cityId);
-
-    /**
-     * 精算详情
-     */
-    @PostMapping("/app/actuary/actuaryOperation/confirmActuary")
-    @ApiOperation(value = "精算详情", notes = "精算详情")
-    ServerResponse confirmActuary(@RequestParam("request") HttpServletRequest request,
-                                  @RequestParam("userToken") String userToken,
-                                  @RequestParam("houseId") String houseId,
-                                  @RequestParam("cityId") String cityId);
 
 }

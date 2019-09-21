@@ -1,5 +1,7 @@
 package com.dangjia.acg.mapper.actuary;
 
+import com.dangjia.acg.dto.actuary.BudgetLabelDTO;
+import com.dangjia.acg.dto.actuary.BudgetLabelGoodsDTO;
 import com.dangjia.acg.dto.actuary.BudgetStageCostDTO;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.attribute.GoodsCategory;
@@ -85,5 +87,13 @@ public interface IBudgetMaterialMapper extends Mapper<BudgetMaterial> {
 
 	void insertByBatch(@Param("list")List<BudgetMaterial> list);
 
+
+	/*****************商品3.0 精算结算新接口********开始*************/
+//	<!--查询工种材料未支付所有商品的标签-->
+	List<BudgetLabelDTO>  queryBudgetLabel(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
+
+//	<!--查询工种材料未支付所有商品-->
+	List<BudgetLabelGoodsDTO>  queryBudgetLabelGoods(@Param("houseId")String houseId, @Param("workerTypeId")String workerTypeId);
+	/*****************商品3.0 精算结算新接口*********结束************/
 
 }

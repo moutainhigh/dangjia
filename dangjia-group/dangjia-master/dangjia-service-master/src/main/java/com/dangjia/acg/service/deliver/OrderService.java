@@ -7,6 +7,7 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.deliver.BusinessOrderDTO;
@@ -32,6 +33,9 @@ import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.house.WarehouseDetail;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.pay.BusinessOrder;
+import com.dangjia.acg.modle.product.BasicsGoods;
+import com.dangjia.acg.modle.product.DjBasicsProduct;
+import com.dangjia.acg.modle.product.DjBasicsProductMaterial;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
@@ -408,10 +412,25 @@ public class OrderService {
                 example = new Example(OrderSplitItem.class);
                 example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplit.getId());
                 List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
+                List<Map<String,Object>> resMapList=new ArrayList<>();
                 for (OrderSplitItem v : orderSplitItemList) {
                     v.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
+                    //增加当前仓库商品的购买量和剩余量字段的显示
+                    example = new Example(Warehouse.class);
+                    example.createCriteria().andEqualTo(Warehouse.HOUSE_ID, houseId).andEqualTo(Warehouse.PRODUCT_ID, v.getProductId());
+                    List<Warehouse> warehouseList = warehouseMapper.selectByExample(example);
+                    Map orderSplitMap= BeanUtils.beanToMap(v);
+                    if (warehouseList.size() > 0) {
+                        Warehouse warehouse = warehouseList.get(0);
+                        orderSplitMap.put("shopCount",warehouse.getShopCount());//购买量
+                        orderSplitMap.put("surCount",warehouse.getShopCount() - (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()) - warehouse.getAskCount());
+                    }else{
+                        orderSplitMap.put("shopCount",0D);//购买量
+                        orderSplitMap.put("surCount",0D);//剩余量
+                    }
+                    resMapList.add(orderSplitMap);
                 }
-                map.put("orderSplitItemList", orderSplitItemList);
+                map.put("orderSplitItemList", resMapList);
                 return ServerResponse.createBySuccess("查询成功", map);
             }
         } catch (Exception e) {
@@ -498,8 +517,8 @@ public class OrderService {
                 Double num = aCartList.getShopCount();
                 String productId = aCartList.getProductId();
                 Warehouse warehouse = warehouseMapper.getByProductId(productId, houseId);//定位到仓库id
-                Product product = forMasterAPI.getProduct(house.getCityId(), productId);
-
+                DjBasicsProduct product = forMasterAPI.getProduct(house.getCityId(), productId);
+                DjBasicsProductMaterial pm = forMasterAPI.getProductMaterial(house.getCityId(), productId);
                 example = new Example(OrderSplitItem.class);
                 example.createCriteria()
                         .andEqualTo(OrderSplitItem.PRODUCT_ID, productId)
@@ -529,17 +548,17 @@ public class OrderService {
                     orderSplitItem.setHouseId(houseId);
                     orderSplitItemMapper.insert(orderSplitItem);
                 } else {
-                    Goods goods = forMasterAPI.getGoods(house.getCityId(), product.getGoodsId());
+                    BasicsGoods goods = forMasterAPI.getGoods(house.getCityId(), product.getGoodsId());
                     orderSplitItem.setOrderSplitId(orderSplit.getId());
                     orderSplitItem.setProductId(product.getId());
                     orderSplitItem.setProductSn(product.getProductSn());
                     orderSplitItem.setProductName(product.getName());
                     orderSplitItem.setPrice(product.getPrice());
                     orderSplitItem.setAskCount(0d);
-                    orderSplitItem.setCost(product.getCost());
+                    orderSplitItem.setCost(pm.getCost());
                     orderSplitItem.setShopCount(0d);
                     orderSplitItem.setNum(num);
-                    orderSplitItem.setUnitName(forMasterAPI.getUnitName(house.getCityId(), product.getConvertUnit()));
+                    orderSplitItem.setUnitName(forMasterAPI.getUnitName(house.getCityId(), pm.getConvertUnit()));
                     orderSplitItem.setTotalPrice(product.getPrice() * num);//单项总价 销售价
                     orderSplitItem.setProductType(goods.getType());
                     orderSplitItem.setCategoryId(product.getCategoryId());

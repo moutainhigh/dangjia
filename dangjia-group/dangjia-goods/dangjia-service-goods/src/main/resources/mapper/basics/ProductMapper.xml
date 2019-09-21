@@ -647,17 +647,14 @@
         FROM
         dj_basics_goods bg
         INNER JOIN dj_basics_product bp ON bp.goods_id = bg.id
-        <if test="name!=null and name!=''">
-            LEFT JOIN dj_basics_brand bb ON bb.id = bp.brand_id
-            LEFT JOIN dj_basics_brand_series bbs ON bbs.id = bp.brand_series_id
-        </if>
+
 
         WHERE
         bp.maket = 1
         AND bp.type = 1
         AND bg.data_status = 0
         <if test="name!=null and name!=''">
-            AND CONCAT(bg.name,bp.name, IFNULL(bb.`name`,''),IFNULL(bbs.`name`,'')) LIKE CONCAT('%', #{name}, '%')
+            AND CONCAT(bg.name,bp.name) LIKE CONCAT('%', #{name}, '%')
         </if>
         GROUP BY
         bp.goods_id

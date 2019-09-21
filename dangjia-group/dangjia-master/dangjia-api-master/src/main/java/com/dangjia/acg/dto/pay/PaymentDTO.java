@@ -1,5 +1,6 @@
 package com.dangjia.acg.dto.pay;
 
+import com.dangjia.acg.dto.actuary.BudgetLabelDTO;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -29,4 +30,5 @@ public class PaymentDTO<T> {
     private int type;
     private String agreementName;//协议名
     private String agreementUrl;//协议链接
+
 }

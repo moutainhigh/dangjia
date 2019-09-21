@@ -32,6 +32,8 @@ import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.MaterialRecord;
 import com.dangjia.acg.modle.house.Warehouse;
+import com.dangjia.acg.modle.product.BasicsGoods;
+import com.dangjia.acg.modle.product.DjBasicsProduct;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -41,6 +43,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import javax.persistence.Basic;
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.*;
@@ -149,9 +152,9 @@ public class WarehouseService {
                 warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * warehouse.getPrice());
                 warehouseDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(house.getCityId(), warehouse.getProductId()));
                 warehouseDTO.setRepairCount(warehouse.getRepairCount());
-                Product product = forMasterAPI.getProduct(house.getCityId(), warehouse.getProductId());
+                DjBasicsProduct product = forMasterAPI.getProduct(house.getCityId(), warehouse.getProductId());
                 if (product != null) {
-                    Goods goods = forMasterAPI.getGoods(house.getCityId(), product.getGoodsId());
+                    BasicsGoods goods = forMasterAPI.getGoods(house.getCityId(), product.getGoodsId());
                     if (goods != null) {
                         warehouseDTO.setSales(goods.getSales());
                     }

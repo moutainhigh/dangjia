@@ -291,17 +291,11 @@ public class DjBasicsAttributeServices {
                 //检查属性名已经存在   属性名是否有商品使用
                 List<DjBasicsProduct> productList = djBasicsProductMapper.queryByGoodsId(gs.getId());
                 Example example=new Example(DjBasicsProductMaterial.class);
-                for (DjBasicsProduct product : productList) {
-                    example.createCriteria().andEqualTo(DjBasicsProductMaterial.PRODUCT_ID,product.getId());
-                    List<DjBasicsProductMaterial> djBasicsProductMaterials = djBasicsProductMaterialMapper.selectByExample(example);
-                    for (DjBasicsProductMaterial djBasicsProductMaterial : djBasicsProductMaterials) {
-                        String[] attributeIdArr = djBasicsProductMaterial.getAttributeIdArr().split(",");
-                        for (String anAttributeIdArr : attributeIdArr) {
-                            DjBasicsAttribute ae = djBasicsAttributeMapper.selectByPrimaryKey(anAttributeIdArr);
-                            if (srcAttribute.getName().equals(ae.getName()))
-                                return ServerResponse.createByErrorMessage("删除失败，该属性选项名已被其他商品使用");
-                        }
-                    }
+                String[] attributeIdArr = gs.getAttributeIdArr().split(",");
+                for (String anAttributeIdArr : attributeIdArr) {
+                    DjBasicsAttribute ae = djBasicsAttributeMapper.selectByPrimaryKey(anAttributeIdArr);
+                    if (srcAttribute.getName().equals(ae.getName()))
+                        return ServerResponse.createByErrorMessage("删除失败，该属性选项名已被其他商品使用");
                 }
             }
 

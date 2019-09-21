@@ -59,8 +59,6 @@ public class BasicsProductDTO extends BaseEntity {
 
     private String valueIdArr;//属性选项选中值id集合
 
-    private String attributeIdArr;//属性选中值Id集合
-
     private Double convertQuality;//换算量
 
     private String convertUnit;//换算单位

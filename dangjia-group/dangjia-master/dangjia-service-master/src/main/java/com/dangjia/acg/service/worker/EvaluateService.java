@@ -40,6 +40,7 @@ import com.dangjia.acg.modle.house.MaterialRecord;
 import com.dangjia.acg.modle.house.ModelingVillage;
 import com.dangjia.acg.modle.member.Customer;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.product.DjBasicsProduct;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.modle.worker.Evaluate;
 import com.dangjia.acg.modle.worker.WorkIntegral;
@@ -311,7 +312,7 @@ public class EvaluateService {
                 JSONObject obj = jsonArray.getJSONObject(i);
                 String productId = obj.getString("productId");
                 double num = Double.parseDouble(obj.getString("num"));
-                Product product = forMasterAPI.getProduct(house.getCityId(), productId);
+                DjBasicsProduct product = forMasterAPI.getProduct(house.getCityId(), productId);
                 MaterialRecord materialRecord = new MaterialRecord();
                 materialRecord.setHouseId(houseFlowApply.getHouseId());
                 materialRecord.setWorkerTypeId(houseFlowApply.getWorkerTypeId());

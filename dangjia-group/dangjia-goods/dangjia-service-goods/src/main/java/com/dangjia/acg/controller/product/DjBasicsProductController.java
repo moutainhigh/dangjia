@@ -279,4 +279,15 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
     public ServerResponse randQueryProduct(HttpServletRequest request, String goodsId) {
         return djBasicsProductService.getAllProductByGoodsIdLimit12(goodsId);
     }
+    @Override
+    public PageInfo queryBasicsProductData(String  cityId, Integer pageNum,Integer pageSize, String name, String categoryId, String productType, String[] productId) {
+        PageInfo productList = djBasicsProductService.queryBasicsProductData(pageNum,pageSize, name, categoryId, productType, productId);
+        return productList;
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryChooseGoods(HttpServletRequest request) {
+        return djBasicsProductService.queryChooseGoods();
+    }
 }

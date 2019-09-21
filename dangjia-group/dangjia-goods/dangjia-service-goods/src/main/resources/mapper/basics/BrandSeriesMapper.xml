@@ -23,14 +23,24 @@
 		    p.id = #{productId}
 	</select>
 	<!--根据货品id查询品牌系列名-->
-	<select id="brandSeriesName" resultType="java.lang.String">
+	<!--<select id="brandSeriesName" resultType="java.lang.String">
         select bs.name
 		From dj_basics_brand_series bs, dj_basics_product p
 		where
 		    p.brand_series_id = bs.id
 		and
 		    p.id = #{productId}
+	</select>-->
+
+
+    <!--根据货品id查询品牌系列名-->
+    <select id="brandSeriesName" resultType="java.lang.String">
+     select bb.name from dj_basics_product bp
+     INNER JOIN dj_basics_goods bg on bp.goods_id = bg.id
+     INNER JOIN dj_basics_brand bb on bg.brand_id = bb.id
+     where p.id = #{productId}
 	</select>
+
 	<select id="brandName" resultType="java.lang.String">
         select bs.name
 		From dj_basics_brand bs, dj_basics_product p

@@ -139,16 +139,16 @@ public class CraftsmanConstructionService {
         Map<String, Object> dataMap = HouseUtil.getDesignDatas(house);
         bean.setDataList((List<Map<String, Object>>) dataMap.get("dataList"));
         List<ButtonListBean> buttonList = new ArrayList<>();
-//        if (house.getVisitState() == 1 && house.getDesignerOk() != 0 && house.getDesignerOk() != 4 && house.getDesignerOk() != 3) {
+//        if (house.getVisitState() == 1 && house.getDesignerState() != 0 && house.getDesignerState() != 4 && house.getDesignerState() != 3) {
 //            String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
 //            String data = "&houseId=" + house.getId() + "&houseFlowId=" + hf.getId();
 //            buttonList.add(Utils.getButton("提前结束", webAddress + "construction?title=填写原因" + data, 0));
 //        }
         if (house.getVisitState() == 1) {
-            if (house.getDecorationType() != 2 && house.getDesignerOk() == 1) {
+            if (house.getDecorationType() != 2 && house.getDesignerState() == 1) {
                 buttonList.add(Utils.getButton("去量房", 2));
             } else {
-                switch (house.getDesignerOk()) {
+                switch (house.getDesignerState()) {
                     case 1://1已支付-设计师待量房
                     case 9://9量房图发给业主
                         buttonList.add(Utils.getButton("上传平面图", 3));
@@ -213,9 +213,9 @@ public class CraftsmanConstructionService {
 //            buttonList.add(Utils.getButton("提前结束", webAddress + "construction?title=填写原因" + data, 0));
 //        }
         if (house.getVisitState() == 1 && house.getDecorationType() == 2) {
-            if (house.getBudgetOk() == 1 && house.getDesignerOk() != 3) {
+            if (house.getBudgetState() == 1 && house.getDesignerState() != 3) {
                 buttonList.add(Utils.getButton("上传设计图", 4));
-            } else if (house.getDesignerOk() == 3) {
+            } else if (house.getDesignerState() == 3) {
                 //3设计图完成后有需要改设计的
                 Example example = new Example(DesignBusinessOrder.class);
                 Example.Criteria criteria = example.createCriteria()

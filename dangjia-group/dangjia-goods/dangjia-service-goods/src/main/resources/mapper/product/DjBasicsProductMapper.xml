@@ -14,6 +14,8 @@
         unit_id as unitId,
         label_id as labelId,
         unit_name as unitName,
+        value_name_arr valueNameArr,
+        value_id_arr AS valueIdArr,
         type as type,
         istop,
         price as price,
@@ -37,7 +39,9 @@
         p.type as type,
         p.istop,
         p.price as price,
-        p.other_name as otherName
+        p.other_name as otherName,
+        p.value_name_arr valueNameArr,
+        p.value_id_arr AS valueIdArr
         from dj_basics_product p,dj_basics_product_material p1
         where
         p.id = p1.product_id
@@ -119,11 +123,8 @@
         p.type as type,
         p.price as price,
         p.istop,
-        pm.brand_id as brandId,
-        pm.brand_series_id as brandSeriesId,
-        pm.attribute_id_arr AS attributeIdArr,
-        pm.value_name_arr AS valueNameArr,
-        pm.value_id_arr AS valueIdArr
+        p.attribute_id_arr AS attributeIdArr,
+        p.value_name_arr AS valueNameArr
         from dj_basics_product p
         INNER JOIN dj_basics_product_material pm
         on p.id=pm.product_id
@@ -284,5 +285,79 @@
         AND FIND_IN_SET(#{technologyId}, t1.technology_ids)
         )
         ORDER BY istop DESC,create_date desc
+    </select>
+
+
+    <!--补货查询商品库服务-->
+    <select id="queryProductData" resultType="com.dangjia.acg.modle.product.DjBasicsProduct">
+    select
+        p.id as id,
+        p.name as name,
+        p.goods_id as goodsId,
+        p.category_id as categoryId,
+        p.product_sn as productSn,
+        p.image as image,
+        p.unit_id as unitId,
+        p.label_id as labelId,
+        p.unit_name as unitName,
+        p.type as type,
+        p.price as price,
+        p.istop,
+        p.value_id_arr AS valueIdArr,
+        p.value_name_arr AS valueNameArr
+    FROM
+    dj_basics_product p
+    INNER JOIN dj_basics_goods g ON p.goods_id = g.id
+    INNER JOIN dj_basics_goods_category ca ON ca.id = p.category_id
+    <if test="name!=null and name!=''">
+        INNER JOIN dj_basics_goods_category tca ON tca.id = ca.parent_top
+    </if>
+    WHERE   p.data_status = 0
+
+    <!--<if test="productId==null or productId==''">-->
+    <!--AND p.type = 1-->
+    <!--</if>-->
+
+    <if test="productType!=null and productType!=''">
+        AND g.type =#{productType}
+    </if>
+    <if test="name!=null and name!=''">
+        AND (
+        CONCAT(
+        IFNULL(g.other_name,''),
+        ca.`name`,
+        IFNULL(tca.`name`,''),
+        p.`name`,
+        IFNULL(p.value_name_arr,'')
+        )
+        LIKE CONCAT('%',#{name},'%')
+        )
+    </if>
+
+        <if test="productId!=null and productId!=''">
+            AND p.id in
+            <foreach collection="productId" item="id" index="index" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+        </if>
+        <if test="categoryId!=null and categoryId!=''">
+            AND (ca.parent_top=#{categoryId} OR p.category_id=#{categoryId})
+        </if>
+        ORDER BY p.istop DESC,p.`name` DESC
+    </select>
+
+
+    <select id="queryChooseGoods" resultType="com.dangjia.acg.modle.product.DjBasicsProduct">
+        SELECT
+            p.*
+        FROM
+            dj_basics_goods_category gc
+        INNER JOIN dj_basics_goods g ON gc.id = g.category_id
+        INNER JOIN dj_basics_product p ON g.id = p.goods_id
+        WHERE
+            (
+                gc. NAME = "设计师"
+                OR gc. NAME = "精算师"
+            )
     </select>
 </mapper>

@@ -17,6 +17,7 @@ import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.SurplusWareDivert;
 import com.dangjia.acg.modle.house.SurplusWareHouse;
 import com.dangjia.acg.modle.house.SurplusWareHouseItem;
+import com.dangjia.acg.modle.product.DjBasicsProduct;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -176,7 +177,7 @@ public class SurplusWareDivertService {
                 newSurplusWareHouseItem.setSurplusWareHouseId(toSurplusWareHouse.getId());
                 newSurplusWareHouseItem.setProductId(productId);
                 newSurplusWareHouseItem.setProductCount(divertCount);
-                Product product;
+                DjBasicsProduct product;
                 House house = iHouseMapper.selectByPrimaryKey(toSurplusWareHouse.getHouseId());
                 if (house != null) {
                     product = forMasterAPI.getProduct(house.getCityId(), productId);
@@ -222,7 +223,7 @@ public class SurplusWareDivertService {
             detailsDTO.setProductName(surplusWareHouseItem.getProductName());
             detailsDTO.setProductCount(surplusWareHouseItem.getProductCount());
             detailsDTO.setCreateDate(surplusWareHouseItem.getCreateDate());
-            Product product = forMasterAPI.getProduct("", surplusWareHouseItem.getProductId());
+            DjBasicsProduct product = forMasterAPI.getProduct("", surplusWareHouseItem.getProductId());
             if (product != null)
                 detailsDTO.setProductUnit(product.getUnitName());
             detailsDTO.setSurplusWareHouseId(surplusWareHouseItem.getSurplusWareHouseId());

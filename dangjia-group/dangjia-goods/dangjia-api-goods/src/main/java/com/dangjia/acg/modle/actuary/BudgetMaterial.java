@@ -39,6 +39,9 @@ public class BudgetMaterial extends BaseEntity{
 	@Column(name = "product_id")
 	private String productId;//货号ID
 
+	@Column(name = "original_product_id")
+	private String originalProductId;//最初始的商品ID,精算师设置的商品，用与更换商品用
+
 	@Column(name = "product_sn")
 	private String productSn;// 货号编号
 

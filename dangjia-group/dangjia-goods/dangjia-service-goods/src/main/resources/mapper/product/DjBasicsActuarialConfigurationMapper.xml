@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.product.DjBasicsActuarialConfigurationMapper">
+
+    <sql id="all_columns">
+        `id`,
+        `create_date` AS createDate,
+        `modify_date` AS modifyDate,
+        `data_status` as dataStatus,
+        p.`phase_id` as phaseId,
+        `goods_id` as goodsId,
+        `product_id` as productId,
+        `an_actuarial_table` as anActuarialTable,
+    </sql>
+
+    <select id="queryConfiguration" resultType="com.dangjia.acg.dto.product.DjBasicsActuarialConfigurationDTO">
+        SELECT
+            apc.id as id,
+            apc.phase as phase,
+            GROUP_CONCAT(g.`name`) as productNames
+        FROM
+            dj_basics_actuarial_configuration ac
+        INNER JOIN dj_basics_actuarial_phase_configuration apc ON ac.phase_id = apc.id
+        INNER JOIN dj_basics_goods g ON ac.goods_id = g.id
+        GROUP BY apc.id
+    </select>
+    <select id="querySingleConfiguration" resultType="com.dangjia.acg.modle.product.DjBasicsActuarialConfiguration">
+        SELECT
+            <include refid="all_columns"/>
+        FROM
+            dj_basics_actuarial_phase_configuration pc
+        INNER JOIN dj_basics_actuarial_configuration c ON pc.id = c.phase_id
+        WHERE
+            c.phase_id = #{phaseId}
+    </select>
+
+</mapper>

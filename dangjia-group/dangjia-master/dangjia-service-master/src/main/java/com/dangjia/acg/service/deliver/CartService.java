@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.basics.GoodsCategoryAPI;
 import com.dangjia.acg.api.basics.ProductAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
+import com.dangjia.acg.api.product.DjBasicsProductAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
@@ -24,6 +25,7 @@ import com.dangjia.acg.modle.deliver.Cart;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +52,7 @@ public class CartService {
     @Autowired
     private ICartMapper cartMapper;
     @Autowired
-    private ProductAPI productAPI;
+    private DjBasicsProductAPI djBasicsProductAPI;
     @Autowired
     private IOrderSplitMapper orderSplitMapper;
 
@@ -98,10 +100,10 @@ public class CartService {
             cartMapper.updateByPrimaryKeySelective(cart1);
         } else {
             if (cart.getShopCount() > 0) {
-                ServerResponse serverResponse = productAPI.getProductById(request.getParameter(Constants.CITY_ID), cart.getProductId());
+                ServerResponse serverResponse = djBasicsProductAPI.getProductById(request.getParameter(Constants.CITY_ID), cart.getProductId());
                 if (serverResponse != null && serverResponse.getResultObj() != null) {
                     Product product = JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), Product.class);
-                    Goods goods = forMasterAPI.getGoods(request.getParameter(Constants.CITY_ID), product.getGoodsId());
+                    BasicsGoods goods = forMasterAPI.getGoods(request.getParameter(Constants.CITY_ID), product.getGoodsId());
                     cart.setProductSn(product.getProductSn());
                     cart.setProductName(product.getName());
                     cart.setMemberId(operator.getId());
@@ -162,6 +164,7 @@ public class CartService {
                 .andEqualTo(Cart.HOUSE_ID, cart.getHouseId())
                 .andEqualTo(Cart.WORKER_TYPE_ID, operator.getWorkerTypeId())
                 .andEqualTo(Cart.MEMBER_ID, operator.getId());
+        example.setOrderByClause(Cart.CATEGORY_ID);
         List<Cart> list = cartMapper.selectByExample(example);
         if (list.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
@@ -169,7 +172,7 @@ public class CartService {
         List<Map> listMap = new ArrayList<>();
         for (Cart cart1 : list) {
             Map map = BeanUtils.beanToMap(cart1);
-            ServerResponse serverResponse = productAPI.getProductById(request.getParameter(Constants.CITY_ID), cart.getProductId());
+            ServerResponse serverResponse = djBasicsProductAPI.getProductById(request.getParameter(Constants.CITY_ID), cart1.getProductId());
             if (serverResponse != null && serverResponse.getResultObj() != null) {
                 Product product = JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), Product.class);
                 if (product.getType() == 0 || product.getMaket() == 0) {
@@ -187,6 +190,88 @@ public class CartService {
         return ServerResponse.createBySuccess("操作成功", listMap);
     }
 
+
+    /**
+     * 查询购物车商品(分类后的商品）
+     *
+     * @param userToken
+     * @param cart
+     * @return
+     */
+    public ServerResponse queryCategoryCart(String userToken, Cart cart) {
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
+                .getRequest();
+        House house = iHouseMapper.selectByPrimaryKey(cart.getHouseId());
+        request.setAttribute(Constants.CITY_ID, house.getCityId());
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+        Member operator = (Member) object;
+        Example example = new Example(Cart.class);
+        example.createCriteria()
+                .andEqualTo(Cart.HOUSE_ID, cart.getHouseId())
+                .andEqualTo(Cart.WORKER_TYPE_ID, operator.getWorkerTypeId())
+                .andEqualTo(Cart.MEMBER_ID, operator.getId());
+        List<Cart> list = cartMapper.selectByExample(example);
+        if (list.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+        //保存分类的大类
+        Map categoryMap = new HashMap();
+        Map<String,Object> containsKeyMap = new HashMap<String,Object>();
+        List<Map<String,Object>> cartCategroyList;
+        for (Cart cart1 : list) {
+
+            Map map = BeanUtils.beanToMap(cart1);
+            ServerResponse serverResponse = djBasicsProductAPI.getProductById(request.getParameter(Constants.CITY_ID), cart1.getProductId());
+            if (serverResponse != null && serverResponse.getResultObj() != null) {
+                Product product = JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), Product.class);
+                if (product.getType() == 0 || product.getMaket() == 0) {
+                    example = new Example(Warehouse.class);
+                    example.createCriteria().andEqualTo(Warehouse.HOUSE_ID, cart1.getHouseId()).andEqualTo(Warehouse.PRODUCT_ID, cart1.getProductId());
+                    List<Warehouse> warehouseList = warehouseMapper.selectByExample(example);
+                    if (warehouseList.size() > 0) {
+                        Warehouse warehouse = warehouseList.get(0);
+                        map.put("shopCount",warehouse.getShopCount());//购买量
+                        map.put("surCount",warehouse.getShopCount() - (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()) - warehouse.getAskCount());
+                        map.put("maxCount", warehouse.getShopCount() - (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()) - warehouse.getAskCount());
+                    }else{
+                        map.put("shopCount",0D);//购买量
+                        map.put("surCount",0D);//剩余量
+                    }
+                    map.put("image",address + product.getImage());
+                }
+            }
+            if(!containsKeyMap.containsKey(cart1.getCategoryId())){//判断是否有已有的大类
+                GoodsCategory goodsCategory = goodsCategoryAPI.getGoodsCategory(request.getParameter(Constants.CITY_ID), cart1.getCategoryId());
+                if (goodsCategory != null) {
+                    GoodsCategory goodsCategorytop = goodsCategoryAPI.getGoodsCategory(request.getParameter(Constants.CITY_ID), goodsCategory.getParentTop());
+                    if (goodsCategorytop != null) {
+                        goodsCategory = goodsCategorytop;
+                    }
+                    categoryMap=new HashMap();
+                    categoryMap.put("categoryId",cart1.getCategoryId());
+                    categoryMap.put("parentTopCategoryId",goodsCategory.getId());
+                    categoryMap.put("parentTopCategoryName",goodsCategory.getName());
+                    cartCategroyList = new ArrayList<>();
+                    cartCategroyList.add(map);
+                    categoryMap.put("cartList",cartCategroyList);
+                    containsKeyMap.put(cart1.getCategoryId(),categoryMap);
+                }
+
+            }else{
+                categoryMap= (Map) containsKeyMap.get(cart1.getCategoryId());
+                cartCategroyList = (List)categoryMap.get("cartList");
+                cartCategroyList.add(map);
+                categoryMap.put("cartList",cartCategroyList);
+            }
+
+        }
+        List<Object> resCartList = new ArrayList<>(categoryMap.values());//map转换成List
+        return ServerResponse.createBySuccess("操作成功", resCartList);
+    }
     /**
      * 要退查询仓库
      * 结合 精算记录+补记录
@@ -219,7 +304,8 @@ public class CartService {
                 productIdArr[i] = warehouseList.get(i).getProductId();
                 warehouseMap.put(warehouseList.get(i).getProductId(), warehouseList.get(i));
             }
-            PageInfo pageResult = productAPI.queryProductData(cityId, pageDTO.getPageNum(), pageDTO.getPageSize(), name, categoryId, productType, productIdArr);
+           // PageInfo pageResult = productAPI.queryProductData(cityId, pageDTO.getPageNum(), pageDTO.getPageSize(), name, categoryId, productType, productIdArr);
+            PageInfo pageResult = djBasicsProductAPI.queryBasicsProductData(cityId, pageDTO.getPageNum(), pageDTO.getPageSize(), name, categoryId, productType, productIdArr);
             List<JSONObject> products = pageResult.getList();
             for (JSONObject product : products) {
                 WarehouseDTO warehouseDTO = new WarehouseDTO();
@@ -234,7 +320,7 @@ public class CartService {
                 warehouseDTO.setImage(address + product.get(Product.IMAGE));
                 Warehouse warehouse = warehouseMap.get(warehouseDTO.getProductId());
                 if (warehouse != null) {
-                    Goods goods = forMasterAPI.getGoods(cityId, String.valueOf(product.get(Product.GOODS_ID)));
+                    BasicsGoods goods = forMasterAPI.getGoods(cityId, String.valueOf(product.get(Product.GOODS_ID)));
                     if (goods != null) {
                         warehouseDTO.setSales(goods.getSales());
                     }
@@ -269,6 +355,7 @@ public class CartService {
                     warehouseDTOS.add(warehouseDTO);
                 }
             }
+
             pageResult.setList(warehouseDTOS);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
