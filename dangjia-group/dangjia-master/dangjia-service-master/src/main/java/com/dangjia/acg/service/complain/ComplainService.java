@@ -669,14 +669,14 @@ public class ComplainService {
             return ServerResponse.createByErrorMessage("没有查询到相关房子");
         }
         List<ComPlainStopDTO> comPlainStopDTOList = new ArrayList<>();
-        if (house.getDecorationType() != 2 && house.getDesignerOk() != 3) {
+        if (house.getDecorationType() != 2 && house.getDesignerState() != 3) {
             Example examples = new Example(HouseFlow.class);
             examples.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, house.getId())
                     .andEqualTo(HouseFlow.WORKER_TYPE, "1");
             List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(examples);
             getComPlainStop(comPlainStopDTOList, houseFlows);
         }
-        if (house.getBudgetOk() != 3) {
+        if (house.getBudgetState() != 3) {
             Example examples = new Example(HouseFlow.class);
             examples.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, house.getId())
                     .andEqualTo(HouseFlow.WORKER_TYPE, "2");
@@ -786,7 +786,7 @@ public class ComplainService {
             return ServerResponse.createbyUserTokenError();
         }
         HouseWorkerOrder hwo2 = null;
-        if (house.getDecorationType() != 2 && house.getDesignerOk() != 3) {
+        if (house.getDecorationType() != 2 && house.getDesignerState() != 3) {
             Example examples = new Example(HouseFlow.class);
             examples.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, house.getId())
                     .andEqualTo(HouseFlow.WORKER_TYPE, "1");
@@ -797,7 +797,7 @@ public class ComplainService {
                     hwo2 = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId());
                 }
             }
-        } else if (house.getBudgetOk() != 3) {
+        } else if (house.getBudgetState() != 3) {
             Example examples = new Example(HouseFlow.class);
             examples.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, house.getId())
                     .andEqualTo(HouseFlow.WORKER_TYPE, "2");

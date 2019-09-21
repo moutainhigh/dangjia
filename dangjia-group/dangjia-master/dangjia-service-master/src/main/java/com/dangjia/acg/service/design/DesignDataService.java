@@ -19,7 +19,6 @@ import com.dangjia.acg.mapper.design.IQuantityRoomMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
-import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.design.DesignBusinessOrder;
 import com.dangjia.acg.modle.design.PayConfiguration;
 import com.dangjia.acg.modle.design.QuantityRoomImages;
@@ -112,11 +111,11 @@ public class DesignDataService {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "已经提前结束装修");
         }
         DesignListDTO designDTO = new DesignListDTO();
-        if (worker != null && house.getDesignerOk() != 3 && worker.getId().equals(house.getMemberId())) {//是业主而且没有设计完工将走审核逻辑
+        if (worker != null && house.getDesignerState() != 3 && worker.getId().equals(house.getMemberId())) {//是业主而且没有设计完工将走审核逻辑
             if (!CommonUtil.isEmpty(type) && type == 0) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "设计师还在设计中");
             }
-            if (house.getDesignerOk() != 5 && house.getDesignerOk() != 2) {
+            if (house.getDesignerState() != 5 && house.getDesignerState() != 2) {
 //                if (house.getDesignerOk() != 0 && house.getDesignerOk() != 4 && house.getVisitState() == 1) {
 //                    designDTO.setHistoryRecord(0);
 //                    String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
@@ -129,10 +128,10 @@ public class DesignDataService {
             Example example = new Example(PayConfiguration.class);
             Example.Criteria criteria = example.createCriteria()
                     .andEqualTo(PayConfiguration.DATA_STATUS, 0);
-            String message="";
+            String message;
             if(house.getVisitState() != 3) {
                 designDTO.addButton(Utils.getButton("需要修改设计", 1));
-                if (house.getDesignerOk() == 5) {
+                if (house.getDesignerState() == 5) {
                     ServerResponse serverResponse = getPlaneMap(houseId);
                     if (!serverResponse.isSuccess()) {
                         return serverResponse;
