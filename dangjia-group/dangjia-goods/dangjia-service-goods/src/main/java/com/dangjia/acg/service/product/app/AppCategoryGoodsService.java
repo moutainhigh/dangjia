@@ -67,7 +67,7 @@ public class AppCategoryGoodsService {
         list.add(categoryLabel);
         List<CategoryLabel> goodsCategoryList = iCategoryLabelMapper.queryAPPCategoryLabel();
         list.addAll(goodsCategoryList);
-        return ServerResponse.createBySuccess("查询成功", goodsCategoryList);
+        return ServerResponse.createBySuccess("查询成功", list);
     }
 
     /**
