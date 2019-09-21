@@ -9,5 +9,5 @@ import java.util.List;
 
 @Repository
 public interface IBrowseRecordMapper extends Mapper<BrowseRecord> {
-    List<BrowseRecord> queryBrowseRecord(@Param("memberId") String memberId);
+    List<BrowseRecord> queryBrowseRecord(@Param("memberId") String memberId,@Param("vistsType") String  vistsType);
 }

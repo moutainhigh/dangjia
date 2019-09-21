@@ -81,22 +81,26 @@ public class MemberCollectService {
             {
                 String houseId=memberCollect.getHouseId();
                 DjBasicsProduct djBasicsProduct=djBasicsProductAPI.queryProductDataByID(request,houseId);
+                if(djBasicsProduct!=null)
+                {
+                    djBasicsProductDTO.setName(djBasicsProduct.getName());
+                    djBasicsProductDTO.setGoodsId(djBasicsProduct.getGoodsId());
+                    djBasicsProductDTO.setProductSn(djBasicsProduct.getProductSn());
+                    djBasicsProductDTO .setImage(djBasicsProduct.getImage());
+                    djBasicsProductDTO.setUnitName(djBasicsProduct.getUnitName());
+                    djBasicsProductDTO.setUnitId(djBasicsProduct.getUnitId());
+                    djBasicsProductDTO.setCategoryId(djBasicsProduct.getCategoryId());
+                    djBasicsProductDTO.setLabelId(djBasicsProduct.getLabelId());
+                    djBasicsProductDTO.setType(djBasicsProduct.getType());
+                    djBasicsProductDTO.setMaket(djBasicsProduct.getMaket());
+                    djBasicsProductDTO.setPrice(djBasicsProduct.getPrice());
+                    djBasicsProductDTO.setOtherName(djBasicsProduct.getOtherName());
+                    djBasicsProductDTO.setIstop(djBasicsProduct.getIstop());
+                    djBasicsProductDTO.setRemark(djBasicsProduct.getRemark());
+                    productList.add(djBasicsProductDTO);
 
-                djBasicsProductDTO.setName(djBasicsProduct.getName());
-                djBasicsProductDTO.setGoodsId(djBasicsProduct.getGoodsId());
-                djBasicsProductDTO.setProductSn(djBasicsProduct.getProductSn());
-                djBasicsProductDTO .setImage(djBasicsProduct.getImage());
-                djBasicsProductDTO.setUnitName(djBasicsProduct.getUnitName());
-                djBasicsProductDTO.setUnitId(djBasicsProduct.getUnitId());
-                djBasicsProductDTO.setCategoryId(djBasicsProduct.getCategoryId());
-                djBasicsProductDTO.setLabelId(djBasicsProduct.getLabelId());
-                djBasicsProductDTO.setType(djBasicsProduct.getType());
-                djBasicsProductDTO.setMaket(djBasicsProduct.getMaket());
-                djBasicsProductDTO.setPrice(djBasicsProduct.getPrice());
-                djBasicsProductDTO.setOtherName(djBasicsProduct.getOtherName());
-                djBasicsProductDTO.setIstop(djBasicsProduct.getIstop());
-                djBasicsProductDTO.setRemark(djBasicsProduct.getRemark());
-                productList.add(djBasicsProductDTO);
+                }
+
             }
 
 
@@ -188,12 +192,12 @@ public class MemberCollectService {
 
 
     /**
-     *  优化优化检测该工地是否已收藏
+     *  优化检测该工地是否已收藏
      * @param request userToken
      * @param houseId 房子ID或者房子
      * @return
      */
-    public ServerResponse isMemberCollect(HttpServletRequest request,String houseId,String conditionType) {
+    public ServerResponse isMemberCollect(HttpServletRequest request,String houseId,String collectType) {
         try{
             String userToken = request.getParameter(Constants.USER_TOKEY);
             if (userToken != null) {
@@ -204,7 +208,7 @@ public class MemberCollectService {
                     example.createCriteria()
                             .andEqualTo(MemberCollect.MEMBER_ID, operator.getId())
                             .andEqualTo(MemberCollect.HOUSE_ID,houseId)
-                            .andEqualTo(MemberCollect.CONDITION_TYPE,conditionType);
+                            .andEqualTo(MemberCollect.CONDITION_TYPE,collectType);
                     List<MemberCollect> list = iMemberCollectMapper.selectByExample(example);
                     if(list.size()>0){
                         return ServerResponse.createBySuccess("ok","1");
@@ -225,7 +229,7 @@ public class MemberCollectService {
      * @param houseId 房子ID或者房子
      * @return
      */
-    public ServerResponse addMemberCollect(HttpServletRequest request,String houseId,String conditionType) {
+    public ServerResponse addMemberCollect(HttpServletRequest request,String houseId,String collectType) {
         try {
             String userToken = request.getParameter(Constants.USER_TOKEY);
             MemberCollect memberCollect = new MemberCollect();
@@ -235,7 +239,7 @@ public class MemberCollectService {
                     Member operator = (Member) object;
                     memberCollect.setMemberId(operator.getId());
                     memberCollect.setHouseId(houseId);
-                    memberCollect.setConditionType(conditionType);
+                    memberCollect.setConditionType(collectType);
                     iMemberCollectMapper.insertSelective(memberCollect);
                     return ServerResponse.createBySuccess("ok", "1");
                 }
@@ -254,7 +258,7 @@ public class MemberCollectService {
      * @param houseId 收藏的工地ID或者房子
      * @return
      */
-    public ServerResponse delMemberCollect(HttpServletRequest request,String houseId,String conditionType) {
+    public ServerResponse delMemberCollect(HttpServletRequest request,String houseId,String collectType) {
         try
         {
             String userToken = request.getParameter(Constants.USER_TOKEY);
@@ -266,7 +270,7 @@ public class MemberCollectService {
                     Example.Criteria criteria = example.createCriteria();
                     criteria.andEqualTo(MemberCollect.HOUSE_ID,houseId)
                             .andEqualTo(MemberCollect.MEMBER_ID,operator.getId())
-                            .andEqualTo(MemberCollect.CONDITION_TYPE,conditionType);
+                            .andEqualTo(MemberCollect.CONDITION_TYPE,collectType);
                     iMemberCollectMapper.deleteByExample(example);
                     return ServerResponse.createBySuccess("ok","1");
                 }
