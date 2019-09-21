@@ -39,7 +39,6 @@ import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.MaterialRecord;
 import com.dangjia.acg.modle.house.ModelingVillage;
-import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Customer;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.user.MainUser;
@@ -132,8 +131,10 @@ public class EvaluateService {
     private ClueMapper clueMapper;
     @Autowired
     private UserMapper userMapper;
+
     /**
      * 获取积分记录
+     *
      * @param userToken
      * @return
      */
@@ -303,7 +304,7 @@ public class EvaluateService {
      * 1.31 增加 剩余材料登记
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse materialRecord(String houseFlowApplyId, String content, int star, String productArr,String imageList,String latitude,String longitude) {
+    public ServerResponse materialRecord(String houseFlowApplyId, String content, int star, String productArr, String imageList, String latitude, String longitude) {
         try {
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
             House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
@@ -338,7 +339,7 @@ public class EvaluateService {
      * 1.30
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse checkOk(String houseFlowApplyId, String content, int star, String imageList,String latitude,String longitude) {
+    public ServerResponse checkOk(String houseFlowApplyId, String content, int star, String imageList, String latitude, String longitude) {
         try {
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
             Member worker = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
@@ -346,23 +347,9 @@ public class EvaluateService {
             if (houseFlowApply.getSupervisorCheck() == 1) {//大管家已审核通过过 不要重复
                 return ServerResponse.createByErrorMessage("重复审核");
             }
-            if(active!=null&&(active.equals("pre"))) {
-                ModelingVillage village = modelingVillageMapper.selectByPrimaryKey(house.getVillageId());//小区
-                if (village != null && village.getLocationx() != null && village.getLocationy() != null
-                        && latitude != null && longitude != null) {
-                    try {
-                        double longitude1 = Double.valueOf(longitude);
-                        double latitude1 = Double.valueOf(latitude);
-                        double longitude2 = Double.valueOf(village.getLocationx());
-                        double latitude2 = Double.valueOf(village.getLocationy());
-                        double distance = LocationUtils.getDistance(latitude1, longitude1, latitude2, longitude2);//计算距离
-                        if (distance > 1500) {
-                            return ServerResponse.createByErrorMessage("请确认您是否在小区范围内");
-                        }
-                    } catch (Exception ignored) {
-                    }
-                }
-            }
+            ServerResponse serverResponse = getUserToHouseDistance(latitude, longitude, house.getVillageId());
+            if (!serverResponse.isSuccess())
+                return serverResponse;
             Member supervisor = memberMapper.getSupervisor(houseFlowApply.getHouseId());//houseId获得大管家
             Evaluate evaluate = new Evaluate();
             evaluate.setContent(content);
@@ -419,11 +406,11 @@ public class EvaluateService {
                 hfa.setSupervisorCheck(1);//大管家审核状态0未审核，1审核通过，2审核不通过
                 hfa.setPayState(0);//是否付款
                 hfa.setApplyDec("尊敬的业主，您好！<br/>" +
-                        "当家大管家【"+supervisor.getName()+"】为您新家质量保驾护航，工地【"+workerType.getName()+"】已"+(houseFlowApply.getApplyType() == 1 ? "阶段完工" : "整体完工")+"，已经根据平台施工验收标准进行验收，未发现漏项及施工不合格情况，请您查收。<br/>" );//描述
+                        "当家大管家【" + supervisor.getName() + "】为您新家质量保驾护航，工地【" + workerType.getName() + "】已" + (houseFlowApply.getApplyType() == 1 ? "阶段完工" : "整体完工") + "，已经根据平台施工验收标准进行验收，未发现漏项及施工不合格情况，请您查收。<br/>");//描述
 //                hfa.setApplyDec("业主您好，我是大管家，我已验收了" + worker.getName() + (houseFlowApply.getApplyType() == 1 ? "的阶段完工" : "的整体完工"));//描述
                 houseFlowApplyMapper.insert(hfa);
                 houseService.insertConstructionRecord(hfa);
-                houseWorkerService.setHouseFlowApplyImage(hfa,house,imageList);
+                houseWorkerService.setHouseFlowApplyImage(hfa, house, imageList);
             }
             if (houseFlowApply.getApplyType() == 1) {
                 //阶段审核
@@ -440,10 +427,40 @@ public class EvaluateService {
     }
 
     /**
+     * 判断用户和小区的距离
+     *
+     * @param latitude
+     * @param longitude
+     * @param villageId
+     * @return
+     */
+    public ServerResponse getUserToHouseDistance(String latitude, String longitude, String villageId) {
+        if (active != null && active.equals("pre")) {
+            ModelingVillage village = modelingVillageMapper.selectByPrimaryKey(villageId);//小区
+            if (village != null && village.getLocationx() != null && village.getLocationy() != null
+                    && latitude != null && longitude != null) {
+                try {
+                    double longitude1 = Double.valueOf(longitude);
+                    double latitude1 = Double.valueOf(latitude);
+                    double longitude2 = Double.valueOf(village.getLocationx());
+                    double latitude2 = Double.valueOf(village.getLocationy());
+                    double distance = LocationUtils.getDistance(latitude1, longitude1, latitude2, longitude2);//计算距离
+                    if (distance > 1500) {
+                        return ServerResponse.createByErrorMessage("请确认您是否在小区范围内");
+                    }
+                } catch (Exception ignored) {
+                }
+            }
+        }
+        return ServerResponse.createBySuccess();
+    }
+
+
+    /**
      * 业主评价管家完工 最后完工
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse saveEvaluateSupervisor(String userToken,String houseFlowApplyId, String content, int star, boolean isAuto,String onekey) {
+    public ServerResponse saveEvaluateSupervisor(String userToken, String houseFlowApplyId, String content, int star, boolean isAuto, String onekey) {
         try {
 
 
@@ -453,8 +470,8 @@ public class EvaluateService {
                 return ServerResponse.createByErrorMessage("重复审核");
             }
             //业主同意一键退款
-            if(!CommonUtil.isEmpty(onekey)&&"1".equals(onekey)) {
-                ServerResponse response=mendOrderService.landlordOnekeyBack(userToken, house.getId());
+            if (!CommonUtil.isEmpty(onekey) && "1".equals(onekey)) {
+                ServerResponse response = mendOrderService.landlordOnekeyBack(userToken, house.getId());
                 if (!response.isSuccess()) {
                     return response;
                 }
@@ -499,7 +516,7 @@ public class EvaluateService {
             JsmsUtil.sendSMS("15675101794", "164425", temp_para);
 
             Customer customer = customerMapper.getCustomerByMemberId(house.getMemberId());
-            if(customer!=null&&!CommonUtil.isEmpty(customer.getUserId())) {
+            if (customer != null && !CommonUtil.isEmpty(customer.getUserId())) {
                 //竣工消息推送
                 //获取线索ID
                 Example example1 = new Example(Clue.class);
@@ -508,7 +525,7 @@ public class EvaluateService {
                         .andEqualTo(Clue.DATA_STATUS, 0)
                         .andEqualTo(Clue.MEMBER_ID, house.getMemberId());
                 List<Clue> djAlreadyRobSingle = clueMapper.selectByExample(example1);
-                if(djAlreadyRobSingle.size()>0) {
+                if (djAlreadyRobSingle.size() > 0) {
                     MainUser user = userMapper.selectByPrimaryKey(customer.getUserId());
                     String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
                     configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "竣工提醒",
@@ -529,21 +546,22 @@ public class EvaluateService {
      * 保存业主端对管家对工人评价
      */
     private static Logger logger = LoggerFactory.getLogger(RedisSessionDAO.class);
+
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse saveEvaluate(String houseFlowApplyId, String wContent, int wStar
             , String sContent, int sStar, boolean isAuto) {
         try {
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
-            if(houseFlowApply==null){
+            if (houseFlowApply == null) {
                 return ServerResponse.createByErrorMessage("该工单不存在");
             }
-            logger.info("houseFlowApply==================="+houseFlowApply);
-            logger.info("houseFlowApply.getHouseId()==================="+houseFlowApply.getHouseId());
+            logger.info("houseFlowApply===================" + houseFlowApply);
+            logger.info("houseFlowApply.getHouseId()===================" + houseFlowApply.getHouseId());
             House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
-            if(house==null){
+            if (house == null) {
                 return ServerResponse.createByErrorMessage("该房产不存在");
             }
-            logger.info("house==================="+house);
+            logger.info("house===================" + house);
             if (houseFlowApply.getMemberCheck() == 1 || houseFlowApply.getMemberCheck() == 3) {
                 return ServerResponse.createByErrorMessage("重复审核");
             }

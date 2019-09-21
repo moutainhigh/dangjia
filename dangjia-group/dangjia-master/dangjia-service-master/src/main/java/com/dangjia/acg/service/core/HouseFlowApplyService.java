@@ -487,12 +487,12 @@ public class HouseFlowApplyService {
 
         WorkerType workerType = workerTypeMapper.selectByPrimaryKey(hfa.getWorkerTypeId());
         //管家押金处理
-        HouseFlowApply houseFlowApply = new HouseFlowApply();
-        houseFlowApply.setWorkerType(3);
-        houseFlowApply.setWorkerId(worker.getId());
-        houseFlowApply.setWorkerTypeId(worker.getWorkerTypeId());
-        houseFlowApply.setHouseId(hwo.getHouseId());
-        deposit(hwo, houseFlowApply);
+//        HouseFlowApply houseFlowApply = new HouseFlowApply();
+//        houseFlowApply.setWorkerType(3);
+//        houseFlowApply.setWorkerId(worker.getId());
+//        houseFlowApply.setWorkerTypeId(worker.getWorkerTypeId());
+//        houseFlowApply.setHouseId(hwo.getHouseId());
+//        deposit(hwo, houseFlowApply);
 
         BigDecimal surplusMoney = worker.getSurplusMoney().add(supervisorMoney);
         //记录流水
@@ -829,6 +829,9 @@ public class HouseFlowApplyService {
             if (hwo.getDeductPrice() == null) {
                 hwo.setDeductPrice(new BigDecimal(0.0));
             }
+            //管家押金处理
+            deposit(hwo, hfa);
+            houseFlowApplyMapper.updateByPrimaryKeySelective(hfa);
             //处理worker表中大管家
             Member worker = memberMapper.selectByPrimaryKey(hfa.getWorkerId());
             BigDecimal surplusMoney = worker.getSurplusMoney().add(applyMoney);

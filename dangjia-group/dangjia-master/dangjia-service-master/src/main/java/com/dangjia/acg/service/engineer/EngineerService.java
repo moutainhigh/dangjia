@@ -322,7 +322,7 @@ public class EngineerService {
             }
             //抢单时间限制
             if (member.getWorkerType() > 3) {//其他工人
-                long num = houseWorkerMapper.grabControl(member.getId());//查询未完工工地
+                long num = houseWorkerMapper.grabControl(member.getId(),member.getWorkerType());//查询未完工工地
                 WorkerType wt = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
                 if (member.getWorkerType() != 7 && num >= wt.getMethods()) {
                     return ServerResponse.createByErrorMessage("该工匠达到持单上限，无法设置！");

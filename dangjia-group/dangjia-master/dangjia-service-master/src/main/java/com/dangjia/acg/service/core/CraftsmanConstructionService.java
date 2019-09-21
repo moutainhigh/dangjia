@@ -29,6 +29,7 @@ import com.dangjia.acg.modle.worker.Insurance;
 import com.dangjia.acg.util.HouseUtil;
 import com.dangjia.acg.util.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
@@ -75,6 +76,9 @@ public class CraftsmanConstructionService {
 
     @Autowired
     private IInsuranceMapper insuranceMapper;
+
+    @Value("${spring.profiles.active}")
+    private String active;
 
     /**
      * 获取施工页面
@@ -372,6 +376,11 @@ public class CraftsmanConstructionService {
         }
         //查询是否今天已经上传过巡查
         List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getTodayPatrol(hf.getHouseId(), new Date());
+        if (active != null && !active.equals("pre")) {
+            if (!((houseFlowApplyList.size() & 1) == 1)) {
+                houseFlowApplyList = new ArrayList<>();
+            }
+        }
         if (hf.getSupervisorStart() == 0) {//已开工之后都是巡查工地；1：巡查工地2：申请业主验收；3:确认开工
             List<HouseFlow> listStart = houseFlowMapper.getHouseIsStart(hf.getHouseId());
             if (listStart.size() > 0) {
@@ -427,15 +436,14 @@ public class CraftsmanConstructionService {
         example.createCriteria().andEqualTo(Insurance.WORKER_ID, hw.getWorkerId());
         example.orderBy(Insurance.END_DATE).desc();
         List<Insurance> insurances = insuranceMapper.selectByExample(example);
-
         //保险服务剩余天数小于等于60天
-        Integer daynum = 0;
+        int daynum = 0;
         if (insurances.size() > 0) {
             daynum = DateUtil.daysofTwo(new Date(), insurances.get(0).getEndDate());
         }
-        Boolean isBX = true;
+        boolean isBX = true;
         //工人未购买保险
-        if (hw.getWorkerType() > 2 && ((insurances.size() == 0) || (insurances.size() > 0 & daynum <= 60))) {
+        if (hw.getWorkerType() > 2 && (insurances.size() == 0 || daynum <= 60)) {
             isBX = false;
         }
         bean.setWorkerType(1);//0:大管家；1：工匠；2：设计师；3：精算师
@@ -461,36 +469,6 @@ public class CraftsmanConstructionService {
         } else {
             bean.setIfBackOut(1);
         }
-//            Example example = new Example(HouseFlowApply.class);
-//            example.createCriteria()
-//                    .andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, hf.getId())
-//                    .andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
-//                    .andEqualTo(HouseFlowApply.PAY_STATE, 1);
-//            List<HouseFlowApply> houseFlowApplies = houseFlowApplyMapper.selectByExample(example);
-//            if (houseFlowApplies != null && houseFlowApplies.size() > 0) {
-//                HouseFlowApply hfa = houseFlowApplies.get(0);
-//                switch (hfa.getMemberCheck()) {
-//                    case 0://0未审核
-//                        bean.setIfBackOut(4);//0可放弃；1：申请停工；2：已停工 3 审核中
-//                        break;
-//                    case 1://1审核通过
-//                        Date date = new Date();
-//                        if (hfa.getStartDate() != null && date.getTime() < hfa.getStartDate().getTime()) {
-//                            bean.setIfBackOut(4);//0可放弃；1：申请停工；2：已停工 3 审核中
-//                        } else if (hfa.getEndDate() != null && date.getTime() > hfa.getEndDate().getTime()) {
-//                            bean.setIfBackOut(1);//0可放弃；1：申请停工；2：已停工 3 审核中
-//                        } else {
-//                            bean.setIfBackOut(2);//0可放弃；1：申请停工；2：已停工 3 审核中
-//                        }
-//                        break;
-//                    default://2审核不通过
-//                        bean.setIfBackOut(1);//0可放弃；1：申请停工；2：已停工 3 审核中
-//                        break;
-//                }
-//            } else {
-//                bean.setIfBackOut(1);//0可放弃；1：申请停工；2：已停工 3 审核中
-//            }
-
         setMenus(bean, house, hf);
         List<String> promptList = new ArrayList<>();//消息提示list
         List<ButtonListBean> buttonList = new ArrayList<>();
@@ -601,6 +579,19 @@ public class CraftsmanConstructionService {
                             setDisplayState(hf, promptList, buttonList, checkFlowApp, true);
                         } else {
                             setDisplayState(hf, promptList, buttonList, checkFlowApp, false);
+                        }
+                    }
+                }
+                if (active != null && !active.equals("pre")) {//TODO 生产没有
+                    if (buttonList.size() <= 0) {
+                        buttonList.add(Utils.getButton("今日开工", 2));
+                        bean.setFootMessageTitle("今日开工任务");//每日开工事项
+                        bean.setFootMessageDescribe("（每日十二点前今日开工）");//每日开工事项
+                        List<WorkerEveryday> listWorDay = workerEverydayMapper.getWorkerEverydayList(1);//事项类型  1 开工事项 2 完工事项
+                        for (WorkerEveryday day : listWorDay) {
+                            ConstructionByWorkerIdBean.BigListBean.ListMapBean listMapBean = new ConstructionByWorkerIdBean.BigListBean.ListMapBean();
+                            listMapBean.setName(day.getName());
+                            workerEverydayList.add(listMapBean);
                         }
                     }
                 }

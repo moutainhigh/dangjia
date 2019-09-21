@@ -296,6 +296,28 @@ public class House extends BaseEntity {
 
     }
 
+    public Integer getDesignerOk() {
+        if (visitState == 4) {
+            designerOk = 3;
+        }
+        return designerOk;
+    }
+
+    public Integer getDesignerOk2() {
+        return designerOk;
+    }
+
+    public Integer getBudgetOk() {
+        if (visitState == 4) {
+            budgetOk = 3;
+        }
+        return budgetOk;
+    }
+
+    public Integer getBudgetOk2() {
+        return budgetOk;
+    }
+
     public House(boolean isIni) {
         if (isIni) {
             this.type = 1;//0默认，1用户点击了开始装修，2代表老用户,默认生成 为0
@@ -326,14 +348,15 @@ public class House extends BaseEntity {
                 + (CommonUtil.isEmpty(getNumber()) ? "*" : getNumber()) + "号";
     }
 
-    public boolean equals(Object obj){
-        if(obj instanceof House){
-            House house=(House) obj;
+    public boolean equals(Object obj) {
+        if (obj instanceof House) {
+            House house = (House) obj;
             return (house.getId().equals(house.getId()));
         }
         return super.equals(obj);
     }
-    public int hashCode(){
+
+    public int hashCode() {
         return id.hashCode();
     }
 }
