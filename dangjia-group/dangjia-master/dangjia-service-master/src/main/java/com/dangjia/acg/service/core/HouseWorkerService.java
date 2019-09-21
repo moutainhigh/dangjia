@@ -1021,8 +1021,8 @@ public class HouseWorkerService {
             } else if (houseFlow.getWorkType() == null) {
                 houseFlow.setWorkType(0);//
             }
-            houseFlow.setWorkType(2);
-            houseFlow.setReleaseTime(new Date());//发布时间
+            houseFlow.setWorkType(5);
+            houseFlow.setModifyDate(new Date());
             houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
             return ServerResponse.createBySuccessMessage("提前进场成功");
         } catch (Exception e) {

@@ -7,42 +7,48 @@ import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.ServerCode;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
+import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.AllgrabBean;
-import com.dangjia.acg.mapper.core.IHouseFlowCountDownTimeMapper;
-import com.dangjia.acg.mapper.core.IHouseFlowMapper;
-import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
-import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
+import com.dangjia.acg.dto.group.GroupDTO;
+import com.dangjia.acg.dto.pay.WorkerDTO;
+import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.design.IHouseStyleTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
 import com.dangjia.acg.mapper.worker.IInsuranceMapper;
 import com.dangjia.acg.mapper.worker.IRewardPunishConditionMapper;
 import com.dangjia.acg.mapper.worker.IRewardPunishRecordMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
-import com.dangjia.acg.modle.core.HouseFlow;
-import com.dangjia.acg.modle.core.HouseFlowCountDownTime;
-import com.dangjia.acg.modle.core.HouseWorker;
-import com.dangjia.acg.modle.core.WorkerType;
+import com.dangjia.acg.modle.core.*;
+import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.design.HouseStyleType;
 import com.dangjia.acg.modle.group.Group;
 import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.house.HouseExpend;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.other.WorkDeposit;
+import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.worker.Insurance;
 import com.dangjia.acg.modle.worker.RewardPunishCondition;
 import com.dangjia.acg.modle.worker.RewardPunishRecord;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.member.GroupInfoService;
+import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
@@ -66,6 +72,9 @@ public class HouseFlowService {
     private ConfigUtil configUtil;
     @Autowired
     private IHouseFlowMapper houseFlowMapper;
+
+    @Autowired
+    private IHouseWorkerOrderMapper houseWorkerOrderMapper;
     @Autowired
     private IHouseMapper houseMapper;
     @Autowired
@@ -92,6 +101,8 @@ public class HouseFlowService {
     @Autowired
     private CraftsmanConstructionService constructionService;
 
+    @Autowired
+    private IBusinessOrderMapper businessOrderMapper;
     @Autowired
     private IInsuranceMapper insuranceMapper;
     @Autowired
@@ -641,7 +652,131 @@ public class HouseFlowService {
             return ServerResponse.createByErrorMessage("系统出错，放弃失败！");
         }
     }
+    /**
+     * 业主确认此单
+     *
+     * @param userToken   用户登录信息
+     * @param houseFlowId 房子ID
+     * @return 是否成功
+     */
+    public ServerResponse setConfirm(HttpServletRequest request,String userToken,  String houseFlowId) {
+        try {
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;
+            if (member == null) {
+                return ServerResponse.createbyUserTokenError();
+            }
+            HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
+            House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
+            if(!house.getMemberId().equals(member.getId())){
+                return ServerResponse.createByErrorMessage("非业主本人操作，确认失败！");
+            }
+            if (house.getMoney() == null) {
+                house.setMoney(new BigDecimal(0));
+            }
+            Example example = new Example(BusinessOrder.class);
+            example.createCriteria().andEqualTo(BusinessOrder.TASK_ID, houseFlow.getId());
+            List<BusinessOrder> businessOrderList = businessOrderMapper.selectByExample(example);
+            BusinessOrder businessOrder = null;
+            if(businessOrderList.size()>0){
+                businessOrder = businessOrderList.get(0);
+                if(businessOrder.getState()!=3){
+                    return ServerResponse.createByErrorMessage("该工序未支付，请确保已经支付！");
+                }
+            }
+            if(businessOrder==null){
+                return ServerResponse.createByErrorMessage("该工序未支付，请确保已经支付！");
+            }
+            HouseWorker houseWorker = houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), 1);
+            houseWorker.setWorkType(6);
+            houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
+            /*
+             * 工匠订单
+             */
+            HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(house.getHouseId(), houseFlow.getWorkerTypeId());
+            if (hwo != null) {
+                hwo.setWorkerId(houseWorker.getWorkerId());
+                hwo.setPayState(1);
+                houseWorkerOrderMapper.updateByPrimaryKey(hwo);
+            }
 
+
+            houseFlow.setWorkerId(hwo.getWorkerId());
+            houseFlow.setWorkType(4);
+            houseFlow.setWorkSteta(3);//待交底
+            houseFlow.setModifyDate(new Date());
+            houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
+
+            /*支付完成后将工人拉入激光群组内，方便交流*/
+            //售中客服，设计师，精算师无需进群
+            if (!("1".equals(houseFlow.getWorkerTypeId()) || "2".equals(houseFlow.getWorkerTypeId()))) {
+                addGroupMember(request, houseFlow.getHouseId(), houseFlow.getWorkerId());
+            }
+            return ServerResponse.createBySuccessMessage("确认成功！");
+        } catch (Exception e) {
+            e.printStackTrace();
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return ServerResponse.createBySuccessMessage("确认异常！");
+        }
+    }
+    /**
+     * 审核工序工匠信息界面
+     */
+    public ServerResponse setCraftsmanInfo(String userToken,  String houseFlowId) {
+        String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+        HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
+        if (houseFlow.getWorkType() != 3) {
+            return ServerResponse.createByErrorMessage("该工序订单异常");
+        }
+        HouseWorker houseWorker = houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), 1);
+        Member worker = memberMapper.selectByPrimaryKey(houseWorker.getWorkerId()); //查工匠
+        WorkerType workerType = workerTypeMapper.selectByPrimaryKey(worker.getWorkerTypeId());
+        WorkerDTO workerDTO = new WorkerDTO();
+        workerDTO.setHouseWorkerId(houseWorker.getId());//换人参数
+        workerDTO.setHead(imageAddress + worker.getHead());
+        workerDTO.setWorkerTypeName(workerType.getName());
+        workerDTO.setName(worker.getName());
+        workerDTO.setWorkerId(houseWorker.getWorkerId());
+        workerDTO.setMobile(worker.getMobile());
+        workerDTO.setChange(0);//不能换人
+        Map map = BeanUtils.beanToMap(houseFlow);
+        map.put("workerDTO",workerDTO);//工匠信息
+        Example example = new Example(Insurance.class);
+        example.createCriteria().andEqualTo(Insurance.WORKER_ID, houseWorker.getWorkerId());
+        example.orderBy(Insurance.END_DATE).desc();
+        List<Insurance> insurances = insuranceMapper.selectByExample(example);
+        if(insurances.size()>0){
+            map.put("insurances",insurances.get(0));//工匠保险信息
+        }
+
+        return ServerResponse.createBySuccess("通过验证", map);
+    }
+    /**
+     * 拉工人进群
+     */
+    public void addGroupMember(HttpServletRequest request, String houseId, String memberid) {
+        try {
+            PageDTO pageDTO = new PageDTO();
+            pageDTO.setPageNum(1);
+            pageDTO.setPageSize(1);
+            Group group = new Group();
+            group.setHouseId(houseId);
+            //获取房子群组
+            ServerResponse groups = groupInfoService.getGroups(request, pageDTO, group);
+            if (groups.isSuccess()) {
+                PageInfo pageInfo = (PageInfo) groups.getResultObj();
+                List<GroupDTO> listdto = pageInfo.getList();
+                if (listdto != null && listdto.size() > 0) {
+                    groupInfoService.editManageGroup(Integer.parseInt(listdto.get(0).getGroupId()), memberid, "");
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("建群失败，异常：" + e.getMessage());
+        }
+    }
     /**
      * 拒绝此单
      *

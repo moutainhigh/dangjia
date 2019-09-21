@@ -38,6 +38,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -340,7 +341,8 @@ public class DesignerOperationService {
                         houseFlow.setHouseId(house.getId());
                         houseFlow.setState(workerType.getState());
                         houseFlow.setSort(workerType.getSort());
-                        houseFlow.setWorkType(2);//设置可抢单
+                        houseFlow.setWorkType(5);//设置可业主支付
+                        houseFlow.setModifyDate(new Date());
                         //这里算出精算费
                         WorkDeposit workDeposit = workDepositMapper.selectByPrimaryKey(house.getWorkDepositId());//结算比例表
                         houseFlow.setWorkPrice(house.getSquare().multiply(workDeposit.getBudgetCost()));

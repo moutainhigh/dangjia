@@ -549,8 +549,8 @@ public class PaymentService {
      */
     private void payWorkerType(String businessOrderNumber, String houseFlowId, String payState) {
         try {
-            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
-                    .getRequest();
+//            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
+//                    .getRequest();
             HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
             House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
             if (house.getMoney() == null) {
@@ -561,18 +561,14 @@ public class PaymentService {
             houseWorkerOrdernew.setId(hwo.getId());
             houseWorkerOrdernew.setPayState(1);
             houseWorkerOrderMapper.updateByPrimaryKeySelective(houseWorkerOrdernew);
-
-            HouseWorker houseWorker = houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), 1);
-            houseWorker.setWorkType(6);
-            hwo.setModifyDate(new Date());
-            houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
-
-            houseFlow.setWorkerId(hwo.getWorkerId());
-            houseFlow.setWorkType(4);
+            //为兼容老数据，工序到了已被抢单的，说明已经支付完成，无需在做下一步操作
+            if(houseFlow.getWorkType()!=3){
+                houseFlow.setWorkType(2);
+                houseFlow.setReleaseTime(new Date());//set发布时间
+            }
             houseFlow.setMaterialPrice(hwo.getMaterialPrice());
             houseFlow.setWorkPrice(hwo.getWorkPrice());
             houseFlow.setTotalPrice(hwo.getTotalPrice());
-            houseFlow.setWorkSteta(3);//待交底
             houseFlow.setModifyDate(new Date());
             houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
             if (hwo.getWorkerType() == 1) { //设计费用处理
@@ -604,10 +600,10 @@ public class PaymentService {
                 orderMapper.insert(order);
                 house.setBudgetOk(1);//房间工种表里标记开始精算
                 houseMapper.updateByPrimaryKeySelective(house);
-                //推送消息给精算师业主已付款
-                configMessageService.addConfigMessage(null, AppType.GONGJIANG, house.getMemberId(),
-                        "0", "业主支付精算费", String.format(DjConstants.PushMessage.JINGSUANFEIZHIFUWANC,
-                                house.getHouseName()), "");
+//                //推送消息给精算师业主已付款
+//                configMessageService.addConfigMessage(null, AppType.GONGJIANG, house.getMemberId(),
+//                        "0", "业主支付精算费", String.format(DjConstants.PushMessage.JINGSUANFEIZHIFUWANC,
+//                                house.getHouseName()), "");
             } else {//其它工种
                 /*不统计设计精算人工*/
                 HouseExpend houseExpend = houseExpendMapper.getByHouseId(hwo.getHouseId());
@@ -624,36 +620,36 @@ public class PaymentService {
             /*记录项目流水工钱+材料钱*/
             //liuShui(businessOrderNumber,house,hwo,paystate);
             //业主信息
-            Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
+//            Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
             //工人信息
-            Member memberGr = memberMapper.selectByPrimaryKey(houseWorker.getWorkerId());
+//            Member memberGr = memberMapper.selectByPrimaryKey(houseWorker.getWorkerId());
             //app推送和发送短信给工匠
-            if (houseWorker.getWorkerType() == 1) {//设计师
-
-                configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseWorker.getWorkerId(), "0", "业主支付提醒",
-                        String.format(DjConstants.PushMessage.PAYMENT_OF_DESIGN_FEE, member.getMobile(), house.getHouseName()), "5");
-                //短信通知
-                JsmsUtil.sendDesigner(memberGr.getMobile(), member.getMobile(), house.getHouseName());
-
-            }
-            if (houseWorker.getWorkerType() == 3) {//大管家
-                configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseWorker.getWorkerId(), "0", "业主支付提醒",
-                        String.format(DjConstants.PushMessage.STEWARD_PAYMENT, house.getHouseName()), "5");
-            }
-            if (houseWorker.getWorkerType() > 3) {//其它工种
-                configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseWorker.getWorkerId(), "0", "业主支付提醒",
-                        String.format(DjConstants.PushMessage.CRAFTSMAN_PAYMENT, house.getHouseName()), "5");
-
-                HouseFlow houseFlowDgj = houseFlowMapper.getHouseFlowByHidAndWty(houseFlow.getHouseId(), 3);
-                configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlowDgj.getWorkerId(), "0", "业主支付提醒",
-                        String.format(DjConstants.PushMessage.STEWARD_CRAFTSMAN_TWO_PAYMENT, house.getHouseName()), "5");
-
-            }
+//            if (houseWorker.getWorkerType() == 1) {//设计师
+//
+//                configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseWorker.getWorkerId(), "0", "业主支付提醒",
+//                        String.format(DjConstants.PushMessage.PAYMENT_OF_DESIGN_FEE, member.getMobile(), house.getHouseName()), "5");
+//                //短信通知
+//                JsmsUtil.sendDesigner(memberGr.getMobile(), member.getMobile(), house.getHouseName());
+//
+//            }
+//            if (houseWorker.getWorkerType() == 3) {//大管家
+//                configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseWorker.getWorkerId(), "0", "业主支付提醒",
+//                        String.format(DjConstants.PushMessage.STEWARD_PAYMENT, house.getHouseName()), "5");
+//            }
+//            if (houseWorker.getWorkerType() > 3) {//其它工种
+//                configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseWorker.getWorkerId(), "0", "业主支付提醒",
+//                        String.format(DjConstants.PushMessage.CRAFTSMAN_PAYMENT, house.getHouseName()), "5");
+//
+//                HouseFlow houseFlowDgj = houseFlowMapper.getHouseFlowByHidAndWty(houseFlow.getHouseId(), 3);
+//                configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlowDgj.getWorkerId(), "0", "业主支付提醒",
+//                        String.format(DjConstants.PushMessage.STEWARD_CRAFTSMAN_TWO_PAYMENT, house.getHouseName()), "5");
+//
+//            }
             /*支付完成后将工人拉入激光群组内，方便交流*/
             //售中客服，设计师，精算师无需进群
-            if (!("1".equals(houseFlow.getWorkerTypeId()) || "2".equals(houseFlow.getWorkerTypeId()))) {
-                addGroupMember(request, houseFlow.getHouseId(), houseFlow.getWorkerId());
-            }
+//            if (!("1".equals(houseFlow.getWorkerTypeId()) || "2".equals(houseFlow.getWorkerTypeId()))) {
+//                addGroupMember(request, houseFlow.getHouseId(), houseFlow.getWorkerId());
+//            }
         } catch (Exception e) {
             e.printStackTrace();
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
@@ -1211,18 +1207,7 @@ public class PaymentService {
                 if (houseFlow.getWorkType() != 3) {
                     return ServerResponse.createByErrorMessage("该工序订单异常");
                 }
-                HouseWorker houseWorker = houseWorkerMapper.getByWorkerTypeId(houseId, houseFlow.getWorkerTypeId(), 1);
-                Member worker = memberMapper.selectByPrimaryKey(houseWorker.getWorkerId()); //查工匠
-                WorkerType workerType = workerTypeMapper.selectByPrimaryKey(worker.getWorkerTypeId());
-                WorkerDTO workerDTO = new WorkerDTO();
-                workerDTO.setHouseWorkerId(houseWorker.getId());//换人参数
-                workerDTO.setHead(imageAddress + worker.getHead());
-                workerDTO.setWorkerTypeName(workerType.getName());
-                workerDTO.setName(worker.getName());
-                workerDTO.setWorkerId(houseWorker.getWorkerId());
-                workerDTO.setMobile(worker.getMobile());
-                workerDTO.setChange(0);//不能换人
-                paymentDTO.setWorkerDTO(workerDTO);//工匠信息
+                WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
                 /*
                  * 生成工匠订单
                  */
@@ -1230,16 +1215,14 @@ public class PaymentService {
                 if (hwo == null) {
                     hwo = new HouseWorkerOrder(true);
                     hwo.setHouseId(houseFlow.getHouseId());
-                    hwo.setWorkerId(worker.getId());
-                    hwo.setWorkerTypeId(worker.getWorkerTypeId());
-                    hwo.setWorkerType(worker.getWorkerType());
+                    hwo.setWorkerTypeId(houseFlow.getWorkerTypeId());
+                    hwo.setWorkerType(houseFlow.getWorkerType());
                     hwo.setBusinessOrderNumber(businessOrder.getNumber());//业务订单号
                     houseWorkerOrderMapper.insert(hwo);
                 } else {
                     hwo.setHouseId(houseFlow.getHouseId());
-                    hwo.setWorkerId(worker.getId());
-                    hwo.setWorkerTypeId(worker.getWorkerTypeId());
-                    hwo.setWorkerType(worker.getWorkerType());
+                    hwo.setWorkerTypeId(houseFlow.getWorkerTypeId());
+                    hwo.setWorkerType(houseFlow.getWorkerType());
                     hwo.setBusinessOrderNumber(businessOrder.getNumber());//业务订单号
                     houseWorkerOrderMapper.updateByPrimaryKey(hwo);
                 }

@@ -494,13 +494,14 @@ public class HouseFlowApplyService {
         deductFlow(worker, hwo, star, hfa.getApplyType(), deductPrice);
 
         WorkerType workerType = workerTypeMapper.selectByPrimaryKey(hfa.getWorkerTypeId());
-        //管家押金处理
-        HouseFlowApply houseFlowApply = new HouseFlowApply();
-        houseFlowApply.setWorkerType(3);
-        houseFlowApply.setWorkerId(worker.getId());
-        houseFlowApply.setWorkerTypeId(worker.getWorkerTypeId());
-        houseFlowApply.setHouseId(hwo.getHouseId());
-        deposit(hwo, houseFlowApply);
+//        //管家押金处理
+//        HouseFlowApply houseFlowApply = new HouseFlowApply();
+//        houseFlowApply.setWorkerType(3);
+//        houseFlowApply.setWorkerId(worker.getId());
+//        houseFlowApply.setWorkerTypeId(worker.getWorkerTypeId());
+//        houseFlowApply.setHouseId(hwo.getHouseId());
+//        houseFlowApply.setApplyMoney(supervisorMoney);
+//        deposit(hwo, houseFlowApply);
 
         BigDecimal surplusMoney = worker.getSurplusMoney().add(supervisorMoney);
         //记录流水
@@ -854,13 +855,17 @@ public class HouseFlowApplyService {
                 applyDeductMoney = totalAgencyMoney.multiply(new BigDecimal(0.8));
                 deductPrice = totalAgencyMoney.subtract(applyDeductMoney);
             }
-            //管家钱
-            BigDecimal applyMoney = hfa.getApplyMoney().subtract(deductPrice);
             //计算大管家整体完工金额
             HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(hfa.getHouseId(), hfa.getWorkerTypeId());  //处理工人评分扣钱
             if (hwo.getDeductPrice() == null) {
                 hwo.setDeductPrice(new BigDecimal(0.0));
             }
+            //管家押金处理
+            deposit(hwo, hfa);
+            houseFlowApplyMapper.updateByPrimaryKeySelective(hfa);
+            //管家钱
+            BigDecimal applyMoney = hfa.getApplyMoney().subtract(deductPrice);
+
             //处理worker表中大管家
             Member worker = memberMapper.selectByPrimaryKey(hfa.getWorkerId());
             BigDecimal surplusMoney = worker.getSurplusMoney().add(applyMoney);

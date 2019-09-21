@@ -38,6 +38,17 @@ public interface HouseFlowAPI {
     ServerResponse setGiveUpOrder(@RequestParam("userToken") String userToken,
                                   @RequestParam("houseFlowId") String houseFlowId);
 
+    @PostMapping("app/core/houseFlow/setConfirm")
+    @ApiOperation(value = "业主确认此单", notes = "业主确认此单")
+    ServerResponse setConfirm(@RequestParam("request") HttpServletRequest request,
+                              @RequestParam("userToken") String userToken,
+                              @RequestParam("houseFlowId") String houseFlowId);
+
+    @PostMapping("app/core/houseFlow/setCraftsmanInfo")
+    @ApiOperation(value = "审核工序工匠信息界面", notes = "审核工序工匠信息界面")
+    ServerResponse setCraftsmanInfo(@RequestParam("userToken") String userToken,
+                              @RequestParam("houseFlowId") String houseFlowId);
+
     @PostMapping("app/core/houseFlow/autoGiveUpOrder")
     @ApiOperation(value = "未购买保险自动放弃此单", notes = "未购买保险自动放弃此单")
     ServerResponse autoGiveUpOrder();
