@@ -298,7 +298,7 @@ public class House extends BaseEntity {
 
     public Integer getDesignerOk() {
         if (visitState == 4) {
-            designerOk = 3;
+            return 3;
         }
         return designerOk;
     }
@@ -309,7 +309,7 @@ public class House extends BaseEntity {
 
     public Integer getBudgetOk() {
         if (visitState == 4) {
-            budgetOk = 3;
+            return 3;
         }
         return budgetOk;
     }
