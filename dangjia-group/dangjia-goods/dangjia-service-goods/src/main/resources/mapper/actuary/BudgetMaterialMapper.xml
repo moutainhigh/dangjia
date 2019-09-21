@@ -379,6 +379,90 @@
         and abm.house_flow_id=#{houseFlowId}
 	</select>
 
+	<!--查询工种材料未支付所有商品的标签-->
+	<select id="queryBudgetLabel" resultType="com.dangjia.acg.dto.actuary.BudgetLabelDTO">
+		SELECT
+			IFNULL(l.id,'-1') labelId,
+			IFNULL(l.name,'其他') labelName,
+			GROUP_CONCAT(c.id) categoryId
+		FROM
+			dj_basics_goods_category c
+		LEFT JOIN dj_basics_category_label l ON FIND_IN_SET(l.id, c.category_label_ids)
+		WHERE
+			c.id IN (
+				SELECT
+					w.category_id
+				FROM
+					(
+						SELECT
+							p.category_id
+						FROM
+							dj_actuary_budget_material m
+						INNER JOIN dj_basics_product p ON m.product_id = p.id
+						WHERE m.house_id = #{houseId}
+						and m.worker_type_id = #{workerTypeId}
+						and m.delete_state in (0, 4)
+						UNION ALL
+							SELECT
+								p.category_id
+							FROM
+								dj_actuary_budget_worker w
+							INNER JOIN dj_basics_product p ON w.worker_goods_id = p.id
+							WHERE w.house_id = #{houseId}
+							and w.worker_type_id = #{workerTypeId}
+							and w.delete_state in (0, 4)
+					) w GROUP BY w.category_id
+			)
+		GROUP BY l.id
+		ORDER BY l.id desc
+	</select>
+	<!--查询工种材料未支付所有商品-->
+	<select id="queryBudgetLabelGoods" resultType="com.dangjia.acg.dto.actuary.BudgetLabelGoodsDTO">
+		SELECT
+		w.id,
+		w.house_flow_id houseFlowId,
+		w.house_id houseId,
+		w.worker_type_id workerTypeId,
+		w.steta,
+		w.delete_state deleteState,
+		w.product_id productId,
+		w.product_sn productSn,
+		w.product_name productName,
+		w.price,
+		w.shop_count shopCount,
+		w.unit_name unitName,
+		w.total_price totalPrice,
+		w.create_date createDate,
+		w.create_date createDate,
+		w.product_type productType,
+		w.data_status dataStatus,
+		w.category_id categoryId,
+		w.image
+		FROM
+		(
+			SELECT
+				m.id,m.house_flow_id,m.house_id,m.worker_type_id,m.steta,m.delete_state,m.product_id,
+				m.product_sn,m.product_name,m.price,m.convert_count shop_count,m.unit_name,m.total_price,
+				m.create_date,m.modify_date,m.product_type,m.data_status,p.category_id,m.image
+			FROM
+				dj_actuary_budget_material m
+			INNER JOIN dj_basics_product p ON m.product_id = p.id
+			WHERE m.house_id = #{houseId}
+			and m.worker_type_id = #{workerTypeId}
+			and m.delete_state in (0, 4)
+			UNION ALL
+				SELECT
+					w.id,w.house_flow_id ,w.house_id,w.worker_type_id,w.steta,w.delete_state,w.worker_goods_id product_id,
+					w.worker_goods_sn product_sn,w.name product_name,w.price,w.shop_count,
+					w.unit_name,w.total_price,w.create_date,w.modify_date,2 product_type,w.data_status,p.category_id,w.image
+				FROM
+					dj_actuary_budget_worker w
+				INNER JOIN dj_basics_product p ON w.worker_goods_id = p.id
+				WHERE w.house_id = #{houseId}
+			and w.worker_type_id = #{workerTypeId}
+			and w.delete_state in (0, 4)
+		) w
+	</select>
 
 	<insert id="insertByBatch" parameterType="java.util.List">
 		INSERT INTO dj_actuary_budget_material (

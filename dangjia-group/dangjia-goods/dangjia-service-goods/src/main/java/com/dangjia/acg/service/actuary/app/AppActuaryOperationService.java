@@ -19,15 +19,24 @@ import com.dangjia.acg.dto.repair.MendOrderInfoDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
 import com.dangjia.acg.mapper.basics.*;
-import com.dangjia.acg.mapper.product.*;
+import com.dangjia.acg.mapper.product.DjBasicsGoodsMapper;
+import com.dangjia.acg.mapper.product.DjBasicsProductMapper;
+import com.dangjia.acg.mapper.product.DjBasicsProductMaterialMapper;
+import com.dangjia.acg.mapper.product.DjBasicsProductWorkerMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
-import com.dangjia.acg.modle.basics.*;
+import com.dangjia.acg.modle.basics.GoodsGroup;
+import com.dangjia.acg.modle.basics.GroupLink;
+import com.dangjia.acg.modle.basics.Product;
+import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
-import com.dangjia.acg.modle.product.*;
+import com.dangjia.acg.modle.product.DjBasicsGoods;
+import com.dangjia.acg.modle.product.DjBasicsProduct;
+import com.dangjia.acg.modle.product.DjBasicsProductMaterial;
+import com.dangjia.acg.modle.product.DjBasicsProductWorker;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.modle.repair.MendWorker;
 import com.dangjia.acg.util.DateUtils;
@@ -83,8 +92,6 @@ public class AppActuaryOperationService {
     private DjBasicsProductWorkerMapper djBasicsProductWorkerMapper;
     @Autowired
     private DjBasicsProductMapper djBasicsProductMapper;
-    @Autowired
-    private IBasicsGoodsMapper iBasicsGoodsMapper;
     @Autowired
     private ITechnologyMapper iTechnologyMapper;
 

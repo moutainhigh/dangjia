@@ -2,6 +2,9 @@ package com.dangjia.acg.service.data;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
+import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.dto.actuary.BudgetLabelDTO;
+import com.dangjia.acg.dto.actuary.BudgetLabelGoodsDTO;
 import com.dangjia.acg.dto.product.BasicsProductDTO;
 import com.dangjia.acg.dto.product.ProductWorkerDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
@@ -252,5 +255,16 @@ public class ForMasterService {
      */
     public Double getNotCaiPrice(String houseId,String workerTypeId){
         return budgetMaterialMapper.getNotCaiPrice(houseId,workerTypeId);
+    }
+
+
+
+
+    /*********************商品3.0改造**************************/
+    public List<BudgetLabelDTO> queryBudgetLabel(String houseId, String workerTypeId){
+        return budgetMaterialMapper.queryBudgetLabel(houseId,workerTypeId);
+    }
+    public  List<BudgetLabelGoodsDTO> queryBudgetLabelGoods(String houseId, String workerTypeId){
+        return budgetMaterialMapper.queryBudgetLabelGoods(houseId,workerTypeId);
     }
 }
