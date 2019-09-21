@@ -341,10 +341,10 @@ public class MyHouseService {
                 .andEqualTo(MendOrder.STATE, 3);//补材料审核状态全通过
         mendOrderList = mendOrderMapper.selectByExample(example);
         task += mendOrderList.size();
-        if (house.getDesignerOk() == 5 || house.getDesignerOk() == 2) {
+        if (house.getDesignerState() == 5 || house.getDesignerState() == 2) {
             task++;
         }
-        if (house.getBudgetOk() == 2) {
+        if (house.getBudgetState() == 2) {
             task++;
         }
         //验收任务

@@ -99,7 +99,7 @@ public class DesignerOperationService {
         if (house.getVisitState() != 1) {
             return ServerResponse.createByErrorMessage("该房子不在装修中");
         }
-        if (house.getDesignerOk() == 3) {
+        if (house.getDesignerState() == 3) {
             Example example = new Example(DesignBusinessOrder.class);
             Example.Criteria criteria = example.createCriteria()
                     .andEqualTo(DesignBusinessOrder.DATA_STATUS, 0)
@@ -134,14 +134,14 @@ public class DesignerOperationService {
                 }
             }
         } else if (house.getDecorationType() == 2) {//自带设计流程
-            if (house.getDesignerOk() == 1 || house.getDesignerOk() == 6 ||
-                    house.getDesignerOk() == 7 || house.getDesignerOk() == 8) {
+            if (house.getDesignerState() == 1 || house.getDesignerState() == 6 ||
+                    house.getDesignerState() == 7 || house.getDesignerState() == 8) {
                 return constructionPlans(house);
             }
         } else {
-            if (house.getDesignerOk() == 9 || house.getDesignerOk() == 6) {
+            if (house.getDesignerState() == 9 || house.getDesignerState() == 6) {
                 return sendPlan(house);
-            } else if (house.getDesignerOk() == 7 || house.getDesignerOk() == 8) {
+            } else if (house.getDesignerState() == 7 || house.getDesignerState() == 8) {
                 return constructionPlans(house);
             }
         }
@@ -282,7 +282,7 @@ public class DesignerOperationService {
         if (houseFlows.size() > 0) {
             hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(houseFlows.get(0).getHouseId(), houseFlows.get(0).getWorkerTypeId());
         }
-        switch (house.getDesignerOk()) {
+        switch (house.getDesignerState()) {
             case 5://审核平面图
                 if (type == 1) {//通过
                     house.setDesignerOk(7);
@@ -435,7 +435,7 @@ public class DesignerOperationService {
                 if (house.getDecorationType() == 2) {
                     return ServerResponse.createByErrorMessage("自带设计无需量房");
                 }
-                if (house.getDesignerOk() != 1) {
+                if (house.getDesignerState() != 1) {
                     return ServerResponse.createByErrorMessage("该阶段无法上传量房信息");
                 }
                 if (CommonUtil.isEmpty(elevator)) {
@@ -447,11 +447,11 @@ public class DesignerOperationService {
                 break;
             case 1:
                 if (house.getDecorationType() == 2) {
-                    if (house.getDesignerOk() != 1 && house.getDesignerOk() != 6) {
+                    if (house.getDesignerState() != 1 && house.getDesignerState() != 6) {
                         return ServerResponse.createByErrorMessage("该阶段无法上传平面图");
                     }
                 } else {
-                    if (house.getDesignerOk() != 9 && house.getDesignerOk() != 6) {
+                    if (house.getDesignerState() != 9 && house.getDesignerState() != 6) {
                         return ServerResponse.createByErrorMessage("该阶段无法上传平面图");
                     }
                 }
@@ -476,7 +476,7 @@ public class DesignerOperationService {
                     }
                 }
                 if (house.getDecorationType() != 2) {//自带设计不需要判断
-                    if (house.getDesignerOk() != 7 && house.getDesignerOk() != 8) {
+                    if (house.getDesignerState() != 7 && house.getDesignerState() != 8) {
                         return ServerResponse.createByErrorMessage("该阶段无法上传施工图");
                     }
                 }

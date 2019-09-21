@@ -105,16 +105,16 @@ public class ActuaryService {
     private Map<String, Object> mapResult(List<House> houseList) {
         int sum1 = 0, sum2 = 0, sum3 = 0, sum4 = 0;
         for (House house : houseList) {
-            if (house.getBudgetOk() == 0) {
+            if (house.getBudgetState() == 0) {
                 sum1++;
             }
-            if (house.getBudgetOk() == 1) {
+            if (house.getBudgetState() == 1) {
                 sum2++;
             }
-            if (house.getBudgetOk() == 2) {
+            if (house.getBudgetState() == 2) {
                 sum3++;
             }
-            if (house.getBudgetOk() == 3) {
+            if (house.getBudgetState() == 3) {
                 sum4++;
             }
         }
