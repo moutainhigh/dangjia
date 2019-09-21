@@ -284,4 +284,10 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
         PageInfo productList = djBasicsProductService.queryBasicsProductData(pageNum,pageSize, name, categoryId, productType, productId);
         return productList;
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryChooseGoods(HttpServletRequest request) {
+        return djBasicsProductService.queryChooseGoods();
+    }
 }

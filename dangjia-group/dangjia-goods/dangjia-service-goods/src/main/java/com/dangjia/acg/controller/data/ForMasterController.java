@@ -3,6 +3,8 @@ package com.dangjia.acg.controller.data;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dto.actuary.BudgetLabelDTO;
+import com.dangjia.acg.dto.actuary.BudgetLabelGoodsDTO;
 import com.dangjia.acg.dto.product.ProductWorkerDTO;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
@@ -159,4 +161,13 @@ public class ForMasterController implements ForMasterAPI {
         return forMasterService.getNotCaiPrice(houseId,workerTypeId);
     }
 
+    /*********************商品3.0改造**************************/
+    @Override
+    public List<BudgetLabelDTO> queryBudgetLabel(String houseId, String workerTypeId, String cityId){
+        return forMasterService.queryBudgetLabel(houseId,workerTypeId);
+    }
+    @Override
+    public  List<BudgetLabelGoodsDTO> queryBudgetLabelGoods(String houseId, String workerTypeId, String cityId){
+        return forMasterService.queryBudgetLabelGoods(houseId,workerTypeId);
+    }
 }

@@ -270,6 +270,11 @@ public class House extends BaseEntity {
     @ApiModelProperty("类别：0:内场录入，1:外场录入")
     private Integer isType;
 
+    @Column(name = "product_id")
+    @Desc(value = "选择货品")
+    @ApiModelProperty("选择货品")
+    private String productId;
+
 
     @Transient
     private String houseId;

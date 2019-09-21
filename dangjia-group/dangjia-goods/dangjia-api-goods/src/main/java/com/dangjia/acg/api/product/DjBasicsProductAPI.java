@@ -177,4 +177,14 @@ public interface DjBasicsProductAPI {
                               @RequestParam("productType") String productType,
                               @RequestParam("productId") String[] productId);
 
+
+    /**
+     * 确认开工页选择商铺列表
+     * @param request
+     * @return
+     */
+    @PostMapping("web/product/queryChooseGoods")
+    @ApiOperation(value = "确认开工页选择商品列表", notes = "确认开工页选择商品列表")
+    ServerResponse queryChooseGoods(@RequestParam("request") HttpServletRequest request);
+
 }

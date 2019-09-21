@@ -90,4 +90,6 @@ public interface DjBasicsProductMapper extends Mapper<DjBasicsProduct> {
     List<DjBasicsProduct> queryProductData(@Param("name") String name, @Param("categoryId") String categoryId, @Param("productType") String productType,@Param("productId")String[] productId);
 
 
+    List<DjBasicsProduct> queryChooseGoods();
+
 }

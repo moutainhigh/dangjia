@@ -1079,4 +1079,21 @@ public class DjBasicsProductService {
         return pageResult;
     }
 
+
+    /**
+     * 确认开工选择商品列表
+     * @return
+     */
+    public ServerResponse queryChooseGoods() {
+        try {
+            List<DjBasicsProduct> djBasicsProducts = djBasicsProductMapper.queryChooseGoods();
+            if(djBasicsProducts.size()<=0)
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
+            return ServerResponse.createBySuccess("查询成功", djBasicsProducts);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
 }
