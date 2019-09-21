@@ -274,10 +274,10 @@ public class HouseService {
                 .andEqualTo(MendOrder.STATE, 3);//审核状态
         mendOrderList = mendOrderMapper.selectByExample(example);
         task += mendOrderList.size();
-        if (house.getDesignerOk() == 5 || house.getDesignerOk() == 2) {
+        if (house.getDesignerState() == 5 || house.getDesignerState() == 2) {
             task++;
         }
-        if (house.getBudgetOk() == 2) {
+        if (house.getBudgetState() == 2) {
             task++;
         }
         //验收任务
@@ -1741,7 +1741,7 @@ public class HouseService {
             if (house == null) {
                 return ServerResponse.createByErrorMessage("修改房子精算状态失败");
             }
-            if (house.getDecorationType() == 2 && house.getDesignerOk() != 3 && budgetOk == 2) {
+            if (house.getDecorationType() == 2 && house.getDesignerState() != 3 && budgetOk == 2) {
                 return ServerResponse.createByErrorMessage("请先上传设计图！");
             }
             WorkDeposit workDeposit = workDepositMapper.selectByPrimaryKey(house.getWorkDepositId());//结算比例表
@@ -1751,10 +1751,10 @@ public class HouseService {
                     return ServerResponse.createByErrorMessage("大管家没有精算人工费,请重新添加");
                 }
             }
-            if (house.getBudgetOk() == 2 && budgetOk == 2) {
+            if (house.getBudgetState() == 2 && budgetOk == 2) {
                 return ServerResponse.createByErrorMessage("该精算任务已发送给业主审核！");
             }
-            if (house.getBudgetOk() == 3) {
+            if (house.getBudgetState() == 3) {
                 return ServerResponse.createBySuccessMessage("精算已审核通过");
             }
             if (budgetOk == 3) {//精算审核通过，调用此方法查询所有验收节点并保存

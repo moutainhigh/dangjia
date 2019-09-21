@@ -436,7 +436,7 @@ public class TaskService {
         }
         //设计审核任务
         boolean isDesigner = false;
-        if (house.getDesignerOk() == 3) {
+        if (house.getDesignerState() == 3) {
             Example example1 = new Example(DesignBusinessOrder.class);
             example1.createCriteria()
                     .andEqualTo(DesignBusinessOrder.DATA_STATUS, 0)
@@ -452,10 +452,10 @@ public class TaskService {
                 }
             }
         }
-        if (isDesigner || house.getDesignerOk() == 5 || house.getDesignerOk() == 2) {
+        if (isDesigner || house.getDesignerState() == 5 || house.getDesignerState() == 2) {
             Task task = new Task();
             task.setDate(DateUtil.dateToString(house.getModifyDate(), DateUtil.FORMAT11));
-            task.setName(house.getDesignerOk() == 5 ? "平面图审核" : "施工图审核");
+            task.setName(house.getDesignerState() == 5 ? "平面图审核" : "施工图审核");
             task.setImage(imageAddress + "icon/sheji.png");
             String url = address + String.format(DjConstants.YZPageAddress.DESIGNLIST, userToken, house.getCityId(), task.getName()) + "&houseId=" + house.getId();
             task.setHtmlUrl(url);
@@ -464,7 +464,7 @@ public class TaskService {
             taskList.add(task);
         }
         //精算审核任务
-        if (house.getBudgetOk() == 2) {
+        if (house.getBudgetState() == 2) {
             Task task = new Task();
             task.setDate(DateUtil.dateToString(house.getModifyDate(), DateUtil.FORMAT11));
             task.setName("精算审核");

@@ -144,7 +144,7 @@ public class HouseUtil {
     }
 
     public static NodeDTO getBudgetDatas(House house, NodeDTO nodeDTO) {
-        switch (house.getBudgetOk2()) {
+        switch (house.getBudgetOk()) {
             case 0:
                 nodeDTO.setRank(1);
                 nodeDTO.setNameB("待抢单");
@@ -154,7 +154,7 @@ public class HouseUtil {
                 nodeDTO.setNameB("待业主支付");
                 break;
             case 1:
-                if (house.getDecorationType() == 2 && house.getDesignerOk2() != 3) {
+                if (house.getDecorationType() == 2 && house.getDesignerOk() != 3) {
                     nodeDTO.setRank(3);
                     nodeDTO.setNameB("待上传设计图");
                 } else {
@@ -188,7 +188,7 @@ public class HouseUtil {
 
     public static NodeDTO getDesignDatas(House house, NodeDTO nodeDTO) {
         if (house.getDecorationType() == 2) {//自带设计流程
-            switch (house.getDesignerOk2()) {
+            switch (house.getDesignerOk()) {
                 case 0://0未确定设计师
                     nodeDTO.setRank(1);
                     nodeDTO.setNameB("待抢单");
@@ -231,7 +231,7 @@ public class HouseUtil {
                     break;
             }
         } else {
-            switch (house.getDesignerOk2()) {
+            switch (house.getDesignerOk()) {
                 case 0://0未确定设计师
                     nodeDTO.setRank(1);
                     nodeDTO.setNameB("待抢单");
@@ -339,7 +339,7 @@ public class HouseUtil {
         List<Map<String, Object>> dataList = new ArrayList<>();
         dataMap.put("total", 4);
         String[] nameBs = {"开始精算", "业主支付", "精算阶段", "完成"};
-        switch (house.getBudgetOk2()) {
+        switch (house.getBudgetOk()) {
             case 0:
                 dataMap.put("rank", 1);
                 dataMap.put("nameB", "待抢单");
@@ -349,7 +349,7 @@ public class HouseUtil {
                 dataMap.put("nameB", "待业主支付");
                 break;
             case 1:
-                if (house.getDecorationType() == 2 && house.getDesignerOk2() != 3) {
+                if (house.getDecorationType() == 2 && house.getDesignerOk() != 3) {
                     dataMap.put("rank", 3);
                     dataMap.put("nameB", "待上传设计设计图");
                 } else {
@@ -425,7 +425,7 @@ public class HouseUtil {
         if (house.getDecorationType() == 2) {//自带设计流程
             dataMap.put("total", 4);
             nameBs = new String[]{"开始自带设计", "平面图阶段", "施工图阶段", "完成"};
-            switch (house.getDesignerOk2()) {
+            switch (house.getDesignerOk()) {
                 case 0://0未确定设计师
                     dataMap.put("rank", 1);
                     dataMap.put("nameB", "待抢单");
@@ -464,7 +464,7 @@ public class HouseUtil {
         } else {
             dataMap.put("total", 6);
             nameBs = new String[]{"开始远程设计", "业主支付", "量房阶段", "平面图阶段", "施工图阶段", "完成"};
-            switch (house.getDesignerOk2()) {
+            switch (house.getDesignerOk()) {
                 case 0://0未确定设计师
                     dataMap.put("rank", 1);
                     dataMap.put("nameB", "待抢单");

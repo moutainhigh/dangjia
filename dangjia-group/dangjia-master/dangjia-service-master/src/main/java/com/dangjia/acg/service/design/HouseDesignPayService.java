@@ -184,7 +184,7 @@ public class HouseDesignPayService {
                 designPayDTO.setMessage("您当前已确认设计图需支付修改精算费用" + payConfiguration.getSumMoney().setScale(2, BigDecimal.ROUND_HALF_UP) + "元。");
                 break;
             case 4:
-                if (house.getBudgetOk() == 3) {
+                if (house.getBudgetState() == 3) {
                     example = new Example(PayConfiguration.class);
                     Example.Criteria criteria = example.createCriteria()
                             .andEqualTo(PayConfiguration.DATA_STATUS, 0);
@@ -406,7 +406,7 @@ public class HouseDesignPayService {
             DesignBusinessOrder order = designBusinessOrders.get(0);
             if (order.getOperationState() == 1) {
                 if (type == 1) {
-                    if (house.getBudgetOk() == 3) {
+                    if (house.getBudgetState() == 3) {
                         example = new Example(PayConfiguration.class);
                         Example.Criteria criteria = example.createCriteria()
                                 .andEqualTo(PayConfiguration.DATA_STATUS, 0);
