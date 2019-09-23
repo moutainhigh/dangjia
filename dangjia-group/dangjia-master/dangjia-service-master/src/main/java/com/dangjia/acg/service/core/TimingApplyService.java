@@ -3,8 +3,10 @@ package com.dangjia.acg.service.core;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
+import com.dangjia.acg.mapper.worker.IWorkIntegralMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
+import com.dangjia.acg.modle.worker.WorkIntegral;
 import com.dangjia.acg.service.matter.TechnologyRecordService;
 import com.dangjia.acg.service.worker.EvaluateService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +33,7 @@ public class TimingApplyService {
     private EvaluateService evaluateService;
 
     @Autowired
-    private TechnologyRecordService technologyRecordService;
+    private IWorkIntegralMapper workIntegralMapper;
     /**
      * 管家自动审核
      */
@@ -71,11 +73,20 @@ public class TimingApplyService {
                 List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.selectByExample(example);
                 if (houseFlowApplyList.size() > 0) {
                     HouseFlowApply houseFlowApply = houseFlowApplyList.get(0);
-                    Date start = houseFlowApply.getStartDate();
-                    Date end = new Date();
-                    int suspendDay = DateUtil.daysofTwo(start, end);
-                    if (suspendDay > 1) {
-                        evaluateService.updateMemberIntegral(houseFlow.getWorkerId(), houseFlow.getHouseId(), new BigDecimal(1), "申请停工超过2天，积分扣除");
+
+                    example = new Example(WorkIntegral.class);
+                    example.createCriteria().andEqualTo(WorkIntegral.HOUSE_ID, houseFlow.getHouseId())
+                            .andEqualTo(WorkIntegral.WORKER_ID, houseFlow.getWorkerId())
+                            .andLike(WorkIntegral.BRIEFED, "%申请停工超过2天，积分扣除%")
+                            .andCondition("  to_days(create_date) = to_days('" + DateUtil.getDateString(new Date().getTime()) + "') ");
+                    List<WorkIntegral> workIntegrals = workIntegralMapper.selectByExample(example);
+                    if(workIntegrals.size()==0) {
+                        Date start = houseFlowApply.getStartDate();
+                        Date end = new Date();
+                        int suspendDay = DateUtil.daysofTwo(start, end);
+                        if (suspendDay > 1) {
+                            evaluateService.updateMemberIntegral(houseFlow.getWorkerId(), houseFlow.getHouseId(), new BigDecimal(1), "申请停工超过2天，积分扣除");
+                        }
                     }
                 }
             }
