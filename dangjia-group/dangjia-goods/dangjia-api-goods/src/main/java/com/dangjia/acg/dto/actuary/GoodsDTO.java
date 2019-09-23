@@ -1,5 +1,6 @@
 package com.dangjia.acg.dto.actuary;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.util.List;
@@ -16,8 +17,9 @@ public class GoodsDTO {
     private String budgetMaterialId;
     private String srcGroupId;//该product所在的原关联组id
     private int isSwitch;//可切换性0:可切换；1不可切换
-//    private String targetGroupId;//可切换的目标关联组id
     private String productId;
+    private Integer sales;//退货性质0：可退；1：不可退
+    private String irreversibleReasons;//不可退原因
     private String goodsId;
     private String image;//product图 1张
     private String price;//价格加单位

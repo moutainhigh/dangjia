@@ -23,7 +23,8 @@ public class WorkerGoodsDTO {
     private String id;
     @ApiModelProperty("name")
     private String name;
-
+    private Integer sales;//退货性质0：可退；1：不可退
+    private String irreversibleReasons;//不可退原因
     @ExcelField(titile = "商品编号", offset = 2)
     private String workerGoodsSn;
     @ApiModelProperty("image")
@@ -34,8 +35,6 @@ public class WorkerGoodsDTO {
     private String unitName;
     @ApiModelProperty("price")
     private Double price;
-    @ApiModelProperty("sales")
-    private Integer sales;
     @ApiModelProperty("workExplain")
     private String workExplain;
     @ApiModelProperty("workerDec")
