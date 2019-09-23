@@ -18,18 +18,18 @@ public abstract class SysConfig {
      * API路径
      */
     public static final ConfigBean<String> DANGJIA_API_LOCAL = new ConfigBean<>("DANGJIA_API_LOCAL",
-            "http://172.16.30.211/", "API路径", APP_TYPE);
+            "http://172.16.30.95/", "API路径", APP_TYPE);
 
     /**
      * 静态页面访问路径（APP）
      */
     public static final ConfigBean<String> PUBLIC_APP_ADDRESS = new ConfigBean<>("PUBLIC_DANGJIA_APP_ADDRESS",
-            "http://172.16.30.211:7001/#/", "静态页面访问路径（APP）", APP_TYPE);
+            "http://172.16.30.95:7001/#/", "静态页面访问路径（APP）", APP_TYPE);
     /**
      * 静态页面访问路径（SALE_APP）
      */
     public static final ConfigBean<String> PUBLIC_SALE_APP_ADDRESS = new ConfigBean<>("PUBLIC_SALE_APP_ADDRESS",
-            "http://172.16.30.211:7001/#/", "静态页面访问路径（SALE_APP）", APP_TYPE);
+            "http://172.16.30.95:7001/#/", "静态页面访问路径（SALE_APP）", APP_TYPE);
     /**
      * 静态页面访问路径（WEB）
      */
