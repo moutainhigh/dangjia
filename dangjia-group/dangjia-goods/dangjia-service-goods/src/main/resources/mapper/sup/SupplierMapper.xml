@@ -94,34 +94,32 @@
     </update>
     <!-- 根据供应商查询自己所供应的商品-->
     <select id="querySupplierProduct" resultType="com.dangjia.acg.modle.basics.Product">
-        select
-        p.id,
-        p.NAME,
-        p.goods_id AS goodsId,
-        p.category_id AS categoryId,
-        p.product_sn AS productSn,
-        p.image,
-        p.unit_name as unitName,
-        p.unit_id as unitId,
-        p.weight,
-        p.type,
-        p.maket,
-        p.cost,
-        p.price,
-        p.profit,
-        p.brand_id AS brandId,
-        p.brand_series_id AS brandSeriesId,
-        p.attribute_id_arr AS attributeIdArr,
-        p.value_name_arr AS valueNameArr,
-        p.value_id_arr AS valueIdArr,
-        p.convert_unit AS convertUnit,
-        p.convert_quality AS convertQuality,
-        p.create_date AS createDate,
-        p.modify_date AS modifyDate
-        from
-        dj_basics_product p
-        INNER JOIN dj_sup_supplier_product sp ON p.id = sp.product_id
-        where p.data_status=0
+		select
+			p.id,
+			p.`name`,
+			p.goods_id AS goodsId,
+			p.category_id AS categoryId,
+			p.product_sn AS productSn,
+			p.image,
+			p.unit_name as unitName,
+			p.unit_id as unitId,
+			p1.weight,
+			p.type,
+			p.maket,
+			p1.cost,
+			p.price,
+			p1.profit,
+			p.value_name_arr AS valueNameArr,
+			p.value_id_arr AS valueIdArr,
+			p1.convert_unit AS convertUnit,
+			p1.convert_quality AS convertQuality,
+			p.create_date AS createDate,
+			p.modify_date AS modifyDate
+		from
+		   dj_basics_product p
+		INNER JOIN dj_sup_supplier_product sp ON p.id = sp.product_id
+		INNER JOIN dj_basics_product_material p1 on p.id = p1.product_id
+		where  p.data_status=0
         <if test="supplierId!=null and supplierId!=''">
             and sp.supplier_id=#{supplierId}
         </if>
