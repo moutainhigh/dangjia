@@ -60,5 +60,12 @@ public interface AppActuaryOperationAPI {
                             @RequestParam("cityId") String cityId);
 
 
+    @PostMapping("/app/actuary/actuaryOperation/getNewCommo")
+    @ApiOperation(value = "商品详情", notes = "商品详情")
+    Object getNewCommo(@RequestParam("request") HttpServletRequest request,
+                            @RequestParam("gId") String gId,
+                            @RequestParam("cityId") String cityId);
+
+
 
 }

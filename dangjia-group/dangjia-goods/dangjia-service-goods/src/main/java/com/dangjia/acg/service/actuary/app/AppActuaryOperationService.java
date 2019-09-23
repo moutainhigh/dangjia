@@ -283,6 +283,27 @@ public class AppActuaryOperationService {
         }
     }
 
+    /**
+     * 商品详情
+     * gId:  budgetWorkerId   budgetMaterialId
+     */
+    public Object getNewCommo(String gId,String budgetMaterialId) {
+        try {
+            DjBasicsProduct product = productMapper.selectByPrimaryKey(gId);//当前 货品
+            if(product == null){
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "该商品已禁用！");
+            }
+            Object goodsDTO = goodsDetail(product, budgetMaterialId);
+            if (goodsDTO != null) {
+                return goodsDTO;
+            } else {
+                return ServerResponse.createByErrorMessage("查询失败,数据异常");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败,数据异常");
+        }
+    }
 
     /**
      * @param budgetMaterialId 传null ：表示不是精算里的商品。 如果是精算里的商品 ，可能有 关联组，关联组id 在 精算表里存的，所以，需要传精算id  ，
