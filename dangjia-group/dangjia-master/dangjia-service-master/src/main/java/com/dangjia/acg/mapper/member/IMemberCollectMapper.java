@@ -19,6 +19,5 @@ public interface IMemberCollectMapper extends Mapper<MemberCollect> {
 
     List<House> queryCollectHouse(@Param("memberId") String memberId);
 
-    List<DjBasicsProduct>  queryCollectGood(@Param("memberId") String memberId);
 }
 
