@@ -25,6 +25,7 @@ public class BasicsgDTO {
     private String bpId;
 
     private Integer buy;//购买性质0：必买；1：可选；2：自购
+    private String buyStr;//购买性质等于2时 自购商品需自行购买
 
     private String houseFlowId;
     private String workerTypeId;//工种ID   3: 大管家 ，4：拆除 ，5：  ，6：水电 ，7：泥工 ，8：木工 ，9：油漆
