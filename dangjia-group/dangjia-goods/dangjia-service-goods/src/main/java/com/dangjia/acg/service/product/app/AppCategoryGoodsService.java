@@ -176,7 +176,7 @@ public class AppCategoryGoodsService {
      * @return
      */
     public ServerResponse queryBrandDatas(String categoryId) {
-        List<Brand> brands = iBasicsGoodsCategoryMapper.queryBrandByTopCategoryid(categoryId);
+        List<Brand> brands = iBasicsGoodsCategoryMapper.queryBrandByTopCategoryid(StringTool.getLikeV(categoryId));
         return ServerResponse.createBySuccess("查询成功", brands);
     }
     /**
@@ -184,7 +184,7 @@ public class AppCategoryGoodsService {
      * @return
      */
     public ServerResponse queryAttributeDatas(String categoryId) {
-        List<AttributeDTO> attributeDTOS = djBasicsAttributeMapper.queryAttributeDatas(categoryId);
+        List<AttributeDTO> attributeDTOS = djBasicsAttributeMapper.queryAttributeDatas(StringTool.getLikeV(categoryId));
         return ServerResponse.createBySuccess("查询成功", attributeDTOS);
     }
 

@@ -111,15 +111,16 @@
     <select id="queryBrandByTopCategoryid" resultType="com.dangjia.acg.modle.brand.Brand">
 		SELECT
             b.id,
-            b. NAME,
+            b.NAME,
             b.create_date AS createDate,
             b.modify_date AS modifyDate
         FROM
             dj_basics_brand b
-        INNER JOIN dj_basics_category_brand cb ON cb.brand_id = b.id
-        INNER JOIN dj_basics_goods_category c ON c.id = cb.category_id
+        INNER JOIN dj_basics_product p ON (p.`name` LIKE CONCAT('%', b. NAME, '%'))
+        INNER JOIN dj_basics_goods_category c ON c.id = p.category_id
         WHERE
-            (c.id = #{categoryId} OR c.parent_top = #{categoryId})
+          p.`name` LIKE  CONCAT('%',#{categoryId},'%')
+        GROUP BY b.id
         ORDER BY
             c.sort DESC
 	</select>

@@ -64,9 +64,12 @@
         FROM
             dj_basics_attribute a
         INNER JOIN dj_basics_attribute_value vl on a.id=vl.attribute_id
+        INNER JOIN dj_basics_product p ON FIND_IN_SET(vl.id, p.value_id_arr)
         WHERE
             a.type = 1
-        AND category_id = #{categoryId}
+            AND  p.`name` LIKE  CONCAT('%',#{categoryId},'%')
+            GROUP BY
+	          vl.id
         ORDER BY
             a.create_date DESC
 	</select>
