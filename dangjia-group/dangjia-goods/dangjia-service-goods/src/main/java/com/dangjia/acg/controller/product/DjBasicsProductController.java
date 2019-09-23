@@ -40,11 +40,7 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
 
     }
 
-    @Override
-    @ApiMethod
-    public DjBasicsProduct queryProductDataByID(HttpServletRequest request, String id) {
-        return djBasicsProductService.queryProductDataByID(request,id);
-    }
+
     @Override
     @ApiMethod
     public ServerResponse queryProductLabels(HttpServletRequest request, String productId) {

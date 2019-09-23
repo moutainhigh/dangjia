@@ -5,6 +5,7 @@ import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.experimental.FieldNameConstants;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -18,6 +19,7 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "dj_worker_work_integral")
 @ApiModel(description = "工人积分明细")
+@FieldNameConstants(prefix = "")
 public class WorkIntegral extends BaseEntity {
 
 	@Column(name = "worker_id")

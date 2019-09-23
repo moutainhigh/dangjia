@@ -67,9 +67,14 @@
         INNER JOIN dj_basics_product p ON FIND_IN_SET(vl.id, p.value_id_arr)
         WHERE
             a.type = 1
-            AND  p.`name` LIKE  CONCAT('%',#{categoryId},'%')
-            GROUP BY
-	          vl.id
+        <if test="wordKey!=null and wordKey!=''">
+            AND  p.`name` LIKE  CONCAT('%',#{wordKey},'%')
+        </if>
+        <if test="categoryId!=null and categoryId!=''">
+            AND category_id = #{categoryId}
+        </if>
+        GROUP BY
+          vl.id
         ORDER BY
             a.create_date DESC
 	</select>

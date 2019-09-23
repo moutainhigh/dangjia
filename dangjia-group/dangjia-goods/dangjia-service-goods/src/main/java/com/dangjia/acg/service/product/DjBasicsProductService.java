@@ -699,16 +699,7 @@ public class DjBasicsProductService {
 
     }
 
-    /**
-     * 查询单个商品
-     * @param request
-     * @param id
-     * @return
-     */
-    public DjBasicsProduct queryProductDataByID(HttpServletRequest request, String id)
-    {
-        return djBasicsProductMapper.selectByPrimaryKey(id);
-    }
+
 
     /**
      * 根据productid删除product对象

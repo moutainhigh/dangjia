@@ -208,7 +208,7 @@ public class OrderSplitService {
                 orderSplitItemDTO.setShopCount(String.valueOf(orderSplitItem.getShopCount()));
                 orderSplitItemDTO.setImage(address + product.getImage());
                 orderSplitItemDTO.setReceive(orderSplitItem.getReceive());
-                orderSplitItemDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(house.getCityId(), orderSplitItem.getProductId()));
+                //orderSplitItemDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(house.getCityId(), orderSplitItem.getProductId()));
                 orderSplitItemDTO.setBrandName(forMasterAPI.brandName(house.getCityId(), orderSplitItem.getProductId()));
                 if (splitDeliver.getShippingState() == 2 || splitDeliver.getShippingState() == 4 || splitDeliver.getShippingState() == 5) {
                     orderSplitItemDTO.setTotalPrice(new BigDecimal(orderSplitItem.getSupCost() * orderSplitItem.getReceive()).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue());

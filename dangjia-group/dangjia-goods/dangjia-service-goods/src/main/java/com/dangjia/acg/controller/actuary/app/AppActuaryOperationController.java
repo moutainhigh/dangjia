@@ -34,8 +34,8 @@ public class AppActuaryOperationController implements AppActuaryOperationAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse recoveryProduct(HttpServletRequest request,String houseId, String workerTypeId) {
-        return actuaryOperationService.recoveryProduct( houseId, workerTypeId);
+    public ServerResponse recoveryProduct(HttpServletRequest request,String houseId, String productId) {
+        return actuaryOperationService.recoveryProduct( houseId, productId);
     }
     @Override
     @ApiMethod
@@ -50,5 +50,11 @@ public class AppActuaryOperationController implements AppActuaryOperationAPI {
     }
 
 
+
+    @Override
+    @ApiMethod
+    public Object getNewCommo(HttpServletRequest request, String gId, String cityId) {
+        return actuaryOperationService.getNewCommo(gId, null);
+    }
 
 }

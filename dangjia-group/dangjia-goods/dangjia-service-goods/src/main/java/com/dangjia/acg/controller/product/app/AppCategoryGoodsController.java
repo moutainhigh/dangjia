@@ -57,8 +57,8 @@ public class AppCategoryGoodsController implements AppCategoryGoodsAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse queryBrandDatas(String cityId,String categoryId) {
-        return appCategoryGoodsService.queryBrandDatas(categoryId);
+    public ServerResponse queryBrandDatas(String cityId,String categoryId,String wordKey) {
+        return appCategoryGoodsService.queryBrandDatas(categoryId, wordKey);
     }
     /**
      * 第四部分：二级商品规格筛选数据
@@ -66,7 +66,7 @@ public class AppCategoryGoodsController implements AppCategoryGoodsAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse queryAttributeDatas(String cityId,String categoryId) {
-        return appCategoryGoodsService.queryAttributeDatas(categoryId);
+    public ServerResponse queryAttributeDatas(String cityId,String categoryId,String wordKey) {
+        return appCategoryGoodsService.queryAttributeDatas(categoryId, wordKey);
     }
 }

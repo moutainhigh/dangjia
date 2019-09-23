@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.member;
 
+import com.dangjia.acg.api.actuary.app.AppActuaryOperationAPI;
 import com.dangjia.acg.api.product.DjBasicsProductAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
@@ -9,6 +10,7 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.product.MemberCollectDTO;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyImageMapper;
 import com.dangjia.acg.mapper.deliver.IOrderMapper;
 
@@ -50,8 +52,10 @@ public class MemberCollectService {
 
     @Autowired
     private DjBasicsProductAPI djBasicsProductAPI;
+    @Autowired
+    private AppActuaryOperationAPI appActuaryOperationAPI;
     /**
-     *新增查询收藏的商品记录
+     *新增查询收藏的(人工或者服务)商品记录
      * @param request
      * @param userToken
      * @param pageDTO
@@ -66,70 +70,28 @@ public class MemberCollectService {
             }
             Member member = (Member) object;//获取用户信息
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());//初始化分页插件
-
-
-
-            List<DjBasicsProduct> productList=new ArrayList<DjBasicsProduct>();//获取商品集合
-            //dj_basics_product 基础产品表   dj_member_collect 收藏表
-            //改造获取商品集合方法
+            //根据商品用户编号查询收藏记录
             Example example = new Example(MemberCollect.class);
             example.createCriteria().andEqualTo(MemberCollect.MEMBER_ID,member.getId());
             List<MemberCollect> MemberCollectList=iMemberCollectMapper.selectByExample(example);
-
-            DjBasicsProduct djBasicsProductDTO=new DjBasicsProduct();
-            for(MemberCollect memberCollect :MemberCollectList )
-            {
-                String houseId=memberCollect.getHouseId();
-                DjBasicsProduct djBasicsProduct=djBasicsProductAPI.queryProductDataByID(request,houseId);
-                if(djBasicsProduct!=null)
-                {
-                    djBasicsProductDTO.setName(djBasicsProduct.getName());
-                    djBasicsProductDTO.setGoodsId(djBasicsProduct.getGoodsId());
-                    djBasicsProductDTO.setProductSn(djBasicsProduct.getProductSn());
-                    djBasicsProductDTO .setImage(djBasicsProduct.getImage());
-                    djBasicsProductDTO.setUnitName(djBasicsProduct.getUnitName());
-                    djBasicsProductDTO.setUnitId(djBasicsProduct.getUnitId());
-                    djBasicsProductDTO.setCategoryId(djBasicsProduct.getCategoryId());
-                    djBasicsProductDTO.setLabelId(djBasicsProduct.getLabelId());
-                    djBasicsProductDTO.setType(djBasicsProduct.getType());
-                    djBasicsProductDTO.setMaket(djBasicsProduct.getMaket());
-                    djBasicsProductDTO.setPrice(djBasicsProduct.getPrice());
-                    djBasicsProductDTO.setOtherName(djBasicsProduct.getOtherName());
-                    djBasicsProductDTO.setIstop(djBasicsProduct.getIstop());
-                    djBasicsProductDTO.setRemark(djBasicsProduct.getRemark());
-                    productList.add(djBasicsProductDTO);
-
-                }
-
-            }
-
-
-            if(productList.size()<=0){
+            if(MemberCollectList.size()<=0){
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
-            PageInfo pageResult = new PageInfo(productList);
-            List<Map> goodsMap = new ArrayList<>();
-            for (DjBasicsProduct djBasicsProduct : productList) {
-                Map map = BeanUtils.beanToMap(djBasicsProduct);
-                List<String> goodList = new ArrayList<>();
-                //价格
-                if (!CommonUtil.isEmpty(djBasicsProduct.getPrice())) {
-                    goodList.add(djBasicsProduct.getPrice()!=null?String.format(djBasicsProduct.getPrice().toString()):"");
-                }
-                // 名称
-                if (!CommonUtil.isEmpty(djBasicsProduct.getName())) {
-                    goodList.add(djBasicsProduct.getName());
-                }
-                // 图片
-                if (!CommonUtil.isEmpty(djBasicsProduct.getImage())) {
-                    goodList.add(djBasicsProduct.getImage());
-                }
-                map.put("goodList",goodList);//封装好的产品集合
-                map.put("goodName", djBasicsProduct.getName());//产品名称
-                map.put("imageUrl", configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class)+djBasicsProduct.getImage());//商品图片
-                goodsMap.add(map);
+            //组装新list
+            List<MemberCollectDTO> memberCollectDTOList=new ArrayList<MemberCollectDTO>();
+            for(MemberCollect memberCollect :MemberCollectList )
+            {
+                MemberCollectDTO memberCollectDTO=new MemberCollectDTO();
+                String houseId=memberCollect.getHouseId();
+                Object objectProduct=appActuaryOperationAPI.getNewCommo(request,houseId,null);
+                memberCollectDTO.setObject(objectProduct);
+                memberCollectDTO.setConditionType(memberCollect.getConditionType());
+                memberCollectDTO.setHouseId(houseId);
+                memberCollectDTO.setMemberId(memberCollect.getMemberId());
+                memberCollectDTOList.add(memberCollectDTO);
             }
-            pageResult.setList(goodsMap);
+            PageInfo pageResult = new PageInfo(memberCollectDTOList);
+            pageResult.setList(memberCollectDTOList);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         }catch (Exception e)
         {

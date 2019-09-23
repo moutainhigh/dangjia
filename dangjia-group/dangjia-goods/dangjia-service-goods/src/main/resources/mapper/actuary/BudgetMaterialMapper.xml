@@ -437,27 +437,34 @@
 		w.product_type productType,
 		w.data_status dataStatus,
 		w.category_id categoryId,
-		w.image
+		w.image,
+		w.buy,
+		w.sales,
+        w.is_influe_decoration_progress isInflueDecorationProgress
 		FROM
 		(
 			SELECT
 				m.id,m.house_flow_id,m.house_id,m.worker_type_id,m.steta,m.delete_state,m.product_id,
 				m.product_sn,m.product_name,m.price,m.convert_count shop_count,m.unit_name,m.total_price,
-				m.create_date,m.modify_date,m.product_type,m.data_status,p.category_id,m.image
+				m.create_date,m.modify_date,m.product_type,m.data_status,p.category_id,m.image,g.buy,g.sales,
+		        g.is_influe_decoration_progress
 			FROM
 				dj_actuary_budget_material m
 			INNER JOIN dj_basics_product p ON m.product_id = p.id
+			INNER JOIN dj_basics_goods g ON p.goods_id = g.id
 			WHERE m.house_id = #{houseId}
 			and m.worker_type_id = #{workerTypeId}
 			and m.delete_state in (0, 4)
 			UNION ALL
 				SELECT
 					w.id,w.house_flow_id ,w.house_id,w.worker_type_id,w.steta,w.delete_state,w.worker_goods_id product_id,
-					w.worker_goods_sn product_sn,w.name product_name,w.price,w.shop_count,
-					w.unit_name,w.total_price,w.create_date,w.modify_date,2 product_type,w.data_status,p.category_id,w.image
+					w.worker_goods_sn product_sn,w.name product_name,w.price,w.shop_count,w.unit_name,w.total_price,
+					w.create_date,w.modify_date,2 product_type,w.data_status,p.category_id,w.image,g.buy,g.sales,
+		            g.is_influe_decoration_progress
 				FROM
 					dj_actuary_budget_worker w
 				INNER JOIN dj_basics_product p ON w.worker_goods_id = p.id
+				INNER JOIN dj_basics_goods g ON p.goods_id = g.id
 				WHERE w.house_id = #{houseId}
 			and w.worker_type_id = #{workerTypeId}
 			and w.delete_state in (0, 4)

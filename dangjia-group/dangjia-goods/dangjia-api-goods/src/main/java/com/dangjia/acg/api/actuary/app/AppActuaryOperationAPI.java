@@ -42,7 +42,7 @@ public interface AppActuaryOperationAPI {
     @ApiOperation(value = "恢复精算货品", notes = "恢复精算货品")
     ServerResponse recoveryProduct(@RequestParam("request") HttpServletRequest request,
                                    @RequestParam("houseId") String houseId,
-                                   @RequestParam("workerTypeId") String workerTypeId);
+                                   @RequestParam("productId") String productId);
     /**
      * 选择货品
      */
@@ -56,6 +56,13 @@ public interface AppActuaryOperationAPI {
     @PostMapping("/app/actuary/actuaryOperation/getCommo")
     @ApiOperation(value = "商品详情", notes = "商品详情")
     ServerResponse getCommo(@RequestParam("request") HttpServletRequest request,
+                            @RequestParam("gId") String gId,
+                            @RequestParam("cityId") String cityId);
+
+
+    @PostMapping("/app/actuary/actuaryOperation/getNewCommo")
+    @ApiOperation(value = "商品详情", notes = "商品详情")
+    Object getNewCommo(@RequestParam("request") HttpServletRequest request,
                             @RequestParam("gId") String gId,
                             @RequestParam("cityId") String cityId);
 

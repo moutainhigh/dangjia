@@ -248,8 +248,6 @@ public class AppActuaryOperationService {
      */
     public ServerResponse selectProduct(String goodsId, String selectVal, String budgetMaterialId) {
         try {
-            if (!StringUtils.isNoneBlank(goodsId))
-                return ServerResponse.createByErrorMessage("goodsId 不能为null");
             DjBasicsProduct product = productMapper.selectByPrimaryKey(selectVal);//目标product 对象
             Object goodsDTO = goodsDetail(product, budgetMaterialId);
             if (goodsDTO != null) {
@@ -285,6 +283,27 @@ public class AppActuaryOperationService {
         }
     }
 
+    /**
+     * 商品详情
+     * gId:  budgetWorkerId   budgetMaterialId
+     */
+    public Object getNewCommo(String gId,String budgetMaterialId) {
+        try {
+            DjBasicsProduct product = productMapper.selectByPrimaryKey(gId);//当前 货品
+            if(product == null){
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "该商品已禁用！");
+            }
+            Object goodsDTO = goodsDetail(product, budgetMaterialId);
+            if (goodsDTO != null) {
+                return goodsDTO;
+            } else {
+                return ServerResponse.createByErrorMessage("查询失败,数据异常");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败,数据异常");
+        }
+    }
 
     /**
      * @param budgetMaterialId 传null ：表示不是精算里的商品。 如果是精算里的商品 ，可能有 关联组，关联组id 在 精算表里存的，所以，需要传精算id  ，
@@ -296,6 +315,8 @@ public class AppActuaryOperationService {
             //如果商品为0：材料；1：服务
             if(goods.getType()==1 || goods.getType()==0) {
                 GoodsDTO goodsDTO = new GoodsDTO();//长图  品牌系列图+属性图(多个)
+                goodsDTO.setSales(goods.getSales());
+                goodsDTO.setIrreversibleReasons(goods.getIrreversibleReasons());
                 DjBasicsProductMaterial targetProductMaterial = djBasicsProductMaterialMapper.queryProductMaterialByProductId(product.getId());//目标product 对象
                 goodsDTO.setProductId(product.getId());
                 goodsDTO.setGoodsId(goods.getId());
@@ -373,7 +394,7 @@ public class AppActuaryOperationService {
                 goodsDTO.setImageList(imageList);
                 return goodsDTO;
             }else{
-                WorkerGoodsDTO  workerGoodsDTO=assembleWorkerGoodsResult(product);
+                WorkerGoodsDTO  workerGoodsDTO=assembleWorkerGoodsResult(product,goods);
                 return workerGoodsDTO;
             }
         } catch (Exception e) {
@@ -381,12 +402,12 @@ public class AppActuaryOperationService {
             return null;
         }
     }
-    public WorkerGoodsDTO assembleWorkerGoodsResult(DjBasicsProduct workerGoods) {
+    public WorkerGoodsDTO assembleWorkerGoodsResult(DjBasicsProduct workerGoods,DjBasicsGoods goods) {
         try {
             DjBasicsProductWorker pt = djBasicsProductWorkerMapper.queryProductWorkerByProductId(workerGoods.getId());//目标product 对象
-            DjBasicsGoods goods = goodsMapper.selectByPrimaryKey(workerGoods.getGoodsId());
             WorkerGoodsDTO workerGoodsResult = new WorkerGoodsDTO();
             workerGoodsResult.setId(workerGoods.getId());
+            workerGoodsResult.setIrreversibleReasons(goods.getIrreversibleReasons());
             workerGoodsResult.setName(workerGoods.getName());
             workerGoodsResult.setWorkerGoodsSn(workerGoods.getProductSn());
             workerGoodsResult.setImage(getImage(workerGoods.getImage()));
