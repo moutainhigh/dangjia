@@ -230,7 +230,7 @@
         <if test="(brandVal!=null and brandVal!='') or (attributeVal!=null and attributeVal!='')">
             INNER JOIN dj_basics_product_material m ON m.product_id = bp.id
         </if>
-        <if test="(brandVal==null and brandVal=='') and (attributeVal==null and attributeVal=='')">
+        <if test="(brandVal==null or brandVal=='') and (attributeVal==null or attributeVal=='')">
             LEFT JOIN dj_basics_product_material m ON m.product_id = bp.id
         </if>
         LEFT JOIN dj_basics_product_worker w ON w.product_id = bp.id
