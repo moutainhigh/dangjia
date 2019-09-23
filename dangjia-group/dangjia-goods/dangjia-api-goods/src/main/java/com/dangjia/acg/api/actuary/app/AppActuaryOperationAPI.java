@@ -33,8 +33,6 @@ public interface AppActuaryOperationAPI {
     ServerResponse changeProduct(@RequestParam("request") HttpServletRequest request,
                                  @RequestParam("productId") String productId,
                                  @RequestParam("budgetMaterialId") String budgetMaterialId,
-                                 @RequestParam("srcGroupId") String srcGroupId,
-                                 @RequestParam("targetGroupId") String targetGroupId,
                                  @RequestParam("houseId") String houseId,
                                  @RequestParam("workerTypeId") String workerTypeId);
     /**

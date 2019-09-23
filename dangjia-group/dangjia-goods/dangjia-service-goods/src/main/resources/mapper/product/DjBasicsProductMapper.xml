@@ -244,15 +244,14 @@
         <if test="categoryId!=null and categoryId!=''">
             AND bg.category_id = #{categoryId}
         </if>
-
         <if test="null!=attributeVal and attributeVal.size>0">
             AND
             <foreach collection="attributeVal" index="index" item="item" open="(" separator="OR" close=")">
-                FIND_IN_SET( #{item},m.value_id_arr)
+                FIND_IN_SET( #{item},bp.value_id_arr)
             </foreach>
         </if>
         <if test="brandVal!=null and brandVal!=''">
-            AND  FIND_IN_SET(m.brand_id,#{brandVal})
+            AND  FIND_IN_SET(bg.brand_id,#{brandVal})
         </if>
         <if test="orderKey!=null and orderKey!='' and orderKey==0 ">
             ORDER BY bp.price

@@ -18,6 +18,8 @@ public class BudgetLabelGoodsDTO {
     private String houseId;//房子ID
     private String workerTypeId;//工种ID
     private Integer steta;//1代表我们购,2代表自购,3代表模板
+    private Integer buy;//购买性质0：必买；1：可选；2：自购
+    private Integer sales;//退货性质0：可退；1：不可退
     private Integer deleteState;//用户删除状态·,0表示未支付，1表示已删除,2表示业主取消,3表示已经支付,4再次/更换购买,5 被更换
     private String productId;//商品ID
     private String productSn;//商品编号
@@ -28,7 +30,7 @@ public class BudgetLabelGoodsDTO {
     private BigDecimal totalPrice;//销售总价
     private Date createDate;//新建时间
     private Date modifyDate;//修改时间
-    private Integer productYype;// 0：材料；1：包工包料；2：人工
+    private Integer productType;// 0：材料；1：包工包料；2：人工
     private String categoryId;//分类ID
     private String image;//商品图片
 }

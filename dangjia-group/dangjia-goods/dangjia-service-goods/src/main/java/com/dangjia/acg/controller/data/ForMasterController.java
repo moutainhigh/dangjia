@@ -72,11 +72,11 @@ public class ForMasterController implements ForMasterAPI {
         return forMasterService.byTechnologyId(technologyId);
     }
 
-    @Override
+    /*@Override
     @ApiMethod
     public String brandSeriesName(String cityId,String productId){
         return forMasterService.brandSeriesName(productId);
-    }
+    }*/
     @Override
     @ApiMethod
     public String brandName(String cityId,String productId){

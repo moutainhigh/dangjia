@@ -235,7 +235,7 @@ public class SplitDeliverService {
                 splitDeliverItemDTO.setShopCount(orderSplitItem.getShopCount());
                 splitDeliverItemDTO.setNum(orderSplitItem.getNum());
                 splitDeliverItemDTO.setUnitName(orderSplitItem.getUnitName());
-                splitDeliverItemDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(house.getCityId(), orderSplitItem.getProductId()));
+                //splitDeliverItemDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(house.getCityId(), orderSplitItem.getProductId()));
                 splitDeliverItemDTO.setPrice(orderSplitItem.getPrice());
                 splitDeliverItemDTO.setCost(orderSplitItem.getCost());
                 splitDeliverItemDTO.setId(orderSplitItem.getId());
