@@ -343,8 +343,10 @@ public class DjActuaryBudgetMaterialService {
                         "&gId=" + product.getId() ;
                 JSONObject object = new JSONObject();
                 if(productId.equals(product.getId())){
+                    //勾选商品标识
                     object.put("flag", true);
                 }else{
+                    //未勾选商品标识
                     object.put("flag", false);
                 }
                 object.put("image", imageAddress + product.getImage());
