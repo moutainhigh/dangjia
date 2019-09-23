@@ -35,7 +35,7 @@ public interface IBasicsGoodsCategoryMapper extends Mapper<BasicsGoodsCategory> 
     //根据商品id查询关联品牌
     List<Brand> queryBrandByCategoryid(@Param("categoryId")String categoryId);
     //根据商分类顶级id查询关联品牌
-    List<Brand> queryBrandByTopCategoryid(@Param("categoryId")String categoryId);
+    List<Brand> queryBrandByTopCategoryid(@Param("categoryId")String categoryId,@Param("wordKey")String wordKey);
 
     List<BasicsGoodsCategory> getAllCategoryChildById(@Param("parentTop")String parentTop);
 

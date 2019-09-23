@@ -118,8 +118,13 @@
             dj_basics_brand b
         INNER JOIN dj_basics_product p ON (p.`name` LIKE CONCAT('%', b. NAME, '%'))
         INNER JOIN dj_basics_goods_category c ON c.id = p.category_id
-        WHERE
-          p.`name` LIKE  CONCAT('%',#{categoryId},'%')
+        WHERE p.maket = 1 AND p.type = 1
+        <if test="wordKey!=null and wordKey!=''">
+            AND   p.`name` LIKE  CONCAT('%',#{wordKey},'%')
+        </if>
+        <if test="categoryId!=null and categoryId!=''">
+            AND  (c.id = #{categoryId} OR c.parent_top = #{categoryId})
+        </if>
         GROUP BY b.id
         ORDER BY
             c.sort DESC

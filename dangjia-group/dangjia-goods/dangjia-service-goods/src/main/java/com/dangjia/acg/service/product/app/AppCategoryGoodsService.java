@@ -94,7 +94,7 @@ public class AppCategoryGoodsService {
             mapBrand.put("name","推荐品牌");
             mapBrand.put("type",1);//type: 0=分类ID  1=品牌ID
             List<Map<String, Object>> mapTwoBrandList = new ArrayList<>();
-            List<Brand> brands = iBasicsGoodsCategoryMapper.queryBrandByTopCategoryid(parentId);
+            List<Brand> brands = iBasicsGoodsCategoryMapper.queryBrandByTopCategoryid(parentId,null);
             for (Brand brand : brands) {
                 Map<String, Object> mapTwo = new HashMap<>();
                 mapTwo.put("id", brand.getId());
@@ -175,16 +175,16 @@ public class AppCategoryGoodsService {
      * 第四部分：二级商品品牌筛选数据
      * @return
      */
-    public ServerResponse queryBrandDatas(String categoryId) {
-        List<Brand> brands = iBasicsGoodsCategoryMapper.queryBrandByTopCategoryid(StringTool.getLikeV(categoryId));
+    public ServerResponse queryBrandDatas(String categoryId,String wordKey) {
+        List<Brand> brands = iBasicsGoodsCategoryMapper.queryBrandByTopCategoryid(categoryId,StringTool.getLikeV(wordKey));
         return ServerResponse.createBySuccess("查询成功", brands);
     }
     /**
      * 第四部分：二级商品规格筛选数据
      * @return
      */
-    public ServerResponse queryAttributeDatas(String categoryId) {
-        List<AttributeDTO> attributeDTOS = djBasicsAttributeMapper.queryAttributeDatas(StringTool.getLikeV(categoryId));
+    public ServerResponse queryAttributeDatas(String categoryId,String wordKey) {
+        List<AttributeDTO> attributeDTOS = djBasicsAttributeMapper.queryAttributeDatas(categoryId,StringTool.getLikeV(wordKey));
         return ServerResponse.createBySuccess("查询成功", attributeDTOS);
     }
 
