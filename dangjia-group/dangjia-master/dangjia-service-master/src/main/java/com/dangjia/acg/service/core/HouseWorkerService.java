@@ -1031,7 +1031,7 @@ public class HouseWorkerService {
             houseFlow.setWorkType(2);
             houseFlow.setReleaseTime(new Date());//发布时间
             houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
-            configMessageService.addConfigMessage(AppType.GONGJIANG, "wtId" + houseFlow.getWorkerTypeId() + houseFlow.getCityId(),
+            configMessageService.addConfigMessage(AppType.GONGJIANG, "wtId" + houseFlow.getWorkerType() + houseFlow.getCityId(),
                     "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, 4, null, "您有新的装修订单，快去抢吧！");
             return ServerResponse.createBySuccessMessage("提前进场成功");
         } catch (Exception e) {
