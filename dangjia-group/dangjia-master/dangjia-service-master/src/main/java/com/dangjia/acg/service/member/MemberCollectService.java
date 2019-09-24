@@ -202,11 +202,20 @@ public class MemberCollectService {
                     memberCollect.setMemberId(operator.getId());
                     memberCollect.setHouseId(houseId);
                     memberCollect.setConditionType(collectType);
+
+                    //判断是否重复收藏
+                    Example example=new Example(MemberCollect.class);
+                    example.createCriteria().andEqualTo(MemberCollect.HOUSE_ID,houseId).andEqualTo(MemberCollect.MEMBER_ID,operator.getId());
+                    List<MemberCollect> listMemberCollect=iMemberCollectMapper.selectByExample(example);
+                    if(listMemberCollect.size()>0)
+                    {
+                        return ServerResponse.createBySuccess("该商品已经被收藏!", "2");
+                    }
                     iMemberCollectMapper.insertSelective(memberCollect);
-                    return ServerResponse.createBySuccess("ok", "1");
+                    return ServerResponse.createBySuccess("商品收藏成功!", "1");
                 }
             }
-            return ServerResponse.createBySuccess("ok", "0");
+            return ServerResponse.createBySuccess("用户token失效,请重新登录!", "0");
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("系统出错,添加收藏失败");
@@ -217,7 +226,7 @@ public class MemberCollectService {
     /**
      * 优化
      * @param request userToken
-     * @param houseId 收藏的工地ID或者房子
+     * @param houseId 删除收藏的工地ID或者房子
      * @return
      */
     public ServerResponse delMemberCollect(HttpServletRequest request,String houseId,String collectType) {
@@ -234,10 +243,10 @@ public class MemberCollectService {
                             .andEqualTo(MemberCollect.MEMBER_ID,operator.getId())
                             .andEqualTo(MemberCollect.CONDITION_TYPE,collectType);
                     iMemberCollectMapper.deleteByExample(example);
-                    return ServerResponse.createBySuccess("ok","1");
+                    return ServerResponse.createBySuccess("删除成功!","1");
                 }
             }
-            return ServerResponse.createBySuccess("ok","0");
+            return ServerResponse.createBySuccess("删除失败!","0");
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("系统出错,取消收藏失败");

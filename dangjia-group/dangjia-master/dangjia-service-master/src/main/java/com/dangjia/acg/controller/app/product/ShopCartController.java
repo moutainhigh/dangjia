@@ -63,4 +63,10 @@ public class ShopCartController implements ShopCartAPI {
     public ServerResponse settleMent(HttpServletRequest request, String userToken) {
         return null;
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setPaying(String userToken, String productId) {
+        return null;
+    }
 }
