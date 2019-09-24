@@ -381,8 +381,8 @@ public class DjBasicsProductService {
             String id = basicsProductDTO.getId();//商品ID
             String name = basicsProductDTO.getName();//商品名称
             String productSn = basicsProductDTO.getProductSn();//商品编码
-            String categoryId=basicsProductDTO.getCategoryId();//商品类别Id
-            DjBasicsGoods basicsGoods = djBasicsGoodsMapper.selectByPrimaryKey(categoryId);
+            String goodsId=basicsProductDTO.getGoodsId();//货品ID
+            DjBasicsGoods basicsGoods = djBasicsGoodsMapper.selectByPrimaryKey(goodsId);
             if("0".equals(basicsGoods.getType())||"1".equals(basicsGoods.getType())){
                 //判断当前添加的属性值是否有相同的已存在的商品（材料商品才有）
                 checkStr = checkProductAttr(basicsProductDTO,jsonArr);
