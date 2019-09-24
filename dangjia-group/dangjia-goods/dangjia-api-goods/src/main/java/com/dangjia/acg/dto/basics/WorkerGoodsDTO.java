@@ -58,7 +58,7 @@ public class WorkerGoodsDTO {
     @ApiModelProperty("otherName")
     private String otherName;
 
-    private int productType;//0:材料；1：包工包料
+    private int productType;//2=人工商品
 
     private Double lastPrice;
     private Date lastTime;
