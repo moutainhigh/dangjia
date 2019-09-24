@@ -381,15 +381,16 @@ public class DjBasicsProductService {
             String id = basicsProductDTO.getId();//商品ID
             String name = basicsProductDTO.getName();//商品名称
             String productSn = basicsProductDTO.getProductSn();//商品编码
-            String goodsId=basicsProductDTO.getGoodsId();//货品ID
-            DjBasicsGoods basicsGoods = djBasicsGoodsMapper.selectByPrimaryKey(goodsId);
-            if("0".equals(basicsGoods.getType())||"1".equals(basicsGoods.getType())){
+            //改版后，人工和材料都需要添加属性字段，故去掉判断
+            //String goodsId=basicsProductDTO.getGoodsId();//货品ID
+            //DjBasicsGoods basicsGoods = djBasicsGoodsMapper.selectByPrimaryKey(goodsId);
+            //if("0".equals(basicsGoods.getType())||"1".equals(basicsGoods.getType())){
                 //判断当前添加的属性值是否有相同的已存在的商品（材料商品才有）
                 checkStr = checkProductAttr(basicsProductDTO,jsonArr);
                 if(StringUtils.isNotBlank(checkStr)){
                     return checkStr;
                 }
-            }
+          //  }
             //校验商品是否存在
             String ret = checkProduct(name, productSn, id, jsonArr);
             if (!ret.equals("ok")) {
