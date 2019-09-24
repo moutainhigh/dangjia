@@ -244,7 +244,7 @@
         <if test="categoryId!=null and categoryId!=''">
             AND bg.category_id = #{categoryId}
         </if>
-        <if test="null!=attributeVal and attributeVal.size>0">
+        <if test="null!=attributeVal">
             AND
             <foreach collection="attributeVal" index="index" item="item" open="(" separator="OR" close=")">
                 FIND_IN_SET( #{item},bp.value_id_arr)
