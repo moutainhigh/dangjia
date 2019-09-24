@@ -57,4 +57,24 @@ public interface ShopCartAPI {
     @ApiOperation(value = "购物车-商品结算", notes = "购物车-商品结算")
     ServerResponse settleMent(@RequestParam("request") HttpServletRequest request, @RequestParam("userToken") String userToken);
 
+    @PostMapping("/product/shopcart/setPaying")
+    @ApiOperation(value = "待付款提前付款", notes = "待付款提前付款")
+    ServerResponse setPaying(@RequestParam("userToken") String userToken, @RequestParam("productId") String productId);
+
+
+    /**
+     * 获取微信签名信息  复用
+     */
+
+    /**
+     * 获取支付宝签名信息  复用
+     */
+
+    /**
+     * 支付成功回调  复用
+     */
+
+    /**
+     * 支付页面接口(通用)
+     */
 }
