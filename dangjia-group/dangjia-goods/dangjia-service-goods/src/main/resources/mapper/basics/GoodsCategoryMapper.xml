@@ -60,20 +60,28 @@
     </select>
     <select id="getProductList" resultType="com.dangjia.acg.modle.basics.HomeProductDTO">
         SELECT
-        p.id AS id,
-        p.image AS image,
-        p.price AS price,
-        u.name AS unitName,
-        g.type AS goodsType,
-        0 AS type,
-        p.NAME AS NAME
-        FROM
-        dj_basics_product p
-        INNER JOIN dj_basics_product_material p1 on p.id=p1.product_id
-        INNER JOIN dj_basics_goods_category c ON c.id = p.category_id
-        INNER JOIN dj_basics_unit u ON u.id = p1.convert_unit
+            p.id AS id,
+            p.image AS image,
+            p.price AS price,
+            u. NAME AS unitName,
+            g.type AS goodsType,
+            0 AS type,
+            p. NAME AS NAME
+            FROM
+            dj_basics_product p,
+            dj_basics_product_material p1,
+            dj_basics_goods_category c,
+            dj_basics_goods g,
+            dj_basics_unit u
         WHERE
-        p.maket = 1
+        p.id = p1.product_id
+        AND c.id = p.category_id
+        AND p.goods_id=g.id
+        and g.category_id=c.id
+        AND u.id = p1.convert_unit
+        AND p.maket = 1
+        AND p.type = 1
+        and p.maket = 1
         AND p.type = 1
         <if test="categoryId!=null and categoryId!=''">
             AND c.parent_top = #{categoryId}
