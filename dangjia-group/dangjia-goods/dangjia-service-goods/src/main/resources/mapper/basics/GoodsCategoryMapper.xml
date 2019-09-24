@@ -69,9 +69,9 @@
         p.NAME AS NAME
         FROM
         dj_basics_product p
+        INNER JOIN dj_basics_product_material p1 on p.id=p1.product_id
         INNER JOIN dj_basics_goods_category c ON c.id = p.category_id
-        INNER JOIN dj_basics_goods g ON g.id = p.goods_id
-        INNER JOIN dj_basics_unit u ON u.id = p.convert_unit
+        INNER JOIN dj_basics_unit u ON u.id = p1.convert_unit
         WHERE
         p.maket = 1
         AND p.type = 1
