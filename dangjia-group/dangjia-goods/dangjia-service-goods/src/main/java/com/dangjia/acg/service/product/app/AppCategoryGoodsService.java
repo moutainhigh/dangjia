@@ -10,19 +10,18 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.actuary.AttributeDTO;
 import com.dangjia.acg.mapper.basics.IUnitMapper;
-import com.dangjia.acg.mapper.product.DjBasicsAttributeMapper;
-import com.dangjia.acg.mapper.product.DjBasicsProductMapper;
-import com.dangjia.acg.mapper.product.IBasicsGoodsCategoryMapper;
-import com.dangjia.acg.mapper.product.ICategoryLabelMapper;
+import com.dangjia.acg.mapper.product.*;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.product.BasicsGoodsCategory;
 import com.dangjia.acg.modle.product.CategoryLabel;
+import com.dangjia.acg.modle.product.DjBasicsMaintain;
 import com.dangjia.acg.modle.product.DjBasicsProduct;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -49,7 +48,8 @@ public class AppCategoryGoodsService {
 
     @Autowired
     private DjBasicsAttributeMapper djBasicsAttributeMapper;
-
+    @Autowired
+    private DjBasicsMaintainMapper djBasicsMaintainMapper;
 
     @Autowired
     private ConfigUtil configUtil;
@@ -141,6 +141,17 @@ public class AppCategoryGoodsService {
         JSONArray arr = new JSONArray();
         PageInfo pageResult = null;
         try {
+
+            if(!CommonUtil.isEmpty(name)){
+                Example example = new Example(DjBasicsMaintain.class);
+                example.createCriteria().andLike(DjBasicsMaintain.SEARCH_ITEM,name);
+                //根据搜索词,查询关键词名称
+                List<DjBasicsMaintain> list = djBasicsMaintainMapper.selectByExample(example);
+                if(list.size() > 0){
+                    name = list.get(0).getKeywordName();
+                }
+            }
+
             //根据内容模糊搜索商品
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             String[] attributeVals=null;
@@ -153,7 +164,7 @@ public class AppCategoryGoodsService {
                 String convertUnitName = iUnitMapper.selectByPrimaryKey(product.getUnitId()).getName();
                 String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
                         String.format(DjConstants.YZPageAddress.GOODSDETAIL, "", cityId, "商品详情") +
-                        "&gId=" + product.getId() ;
+                        "&gId=" + product.getId();
                 JSONObject object = new JSONObject();
                 object.put("image", configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + product.getImage());
                 object.put("price", product.getPrice());

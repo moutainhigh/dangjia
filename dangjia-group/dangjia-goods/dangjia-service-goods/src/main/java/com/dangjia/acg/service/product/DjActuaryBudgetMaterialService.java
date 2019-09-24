@@ -271,15 +271,22 @@ public class DjActuaryBudgetMaterialService {
                     example.createCriteria().andEqualTo(DjBasicsGoodsCategory.PARENT_ID,
                             djBasicsGoodsCategory.getParentId());
                     List<BasicsGoodsCategory> li = djBasicsGoodsCategoryMapper.selectByExample(example);
-                    for (BasicsGoodsCategory bgc:li) {
-                        BasicsGoodDTO basicsGoodDTO = new BasicsGoodDTO();
-                        List<BasicsgDTO> bList = iBudgetWorkerMapper.queryMakeBudgetsList(houseId,bgc.getId());
-                        for (BasicsgDTO basicsgDTO : bList) {
-                            basicsgDTO.setImage(imageAddress + basicsgDTO.getImage());
+                    if(!li.isEmpty()){
+                        for (BasicsGoodsCategory bgc:li) {
+                            BasicsGoodDTO basicsGoodDTO = new BasicsGoodDTO();
+                            List<BasicsgDTO> bList = iBudgetWorkerMapper.queryMakeBudgetsList(houseId,bgc.getId());
+                            for (BasicsgDTO basicsgDTO : bList) {
+                                basicsgDTO.setImage(imageAddress + basicsgDTO.getImage());
+                                if(basicsgDTO.getBuy() == 2){
+                                    basicsgDTO.setBuyStr("自购商品需自行购买 ");
+                                }else{
+                                    basicsgDTO.setBuyStr("");
+                                }
+                            }
+                            basicsGoodDTO.setList(bList);
+                            basicsGoodDTO.setName(bgc.getName());
+                            bgdList.add(basicsGoodDTO);
                         }
-                        basicsGoodDTO.setList(bList);
-                        basicsGoodDTO.setName(bgc.getName());
-                        bgdList.add(basicsGoodDTO);
                     }
                 }
                 return ServerResponse.createBySuccess("查询成功", bgdList);
@@ -291,15 +298,22 @@ public class DjActuaryBudgetMaterialService {
                     example.createCriteria().andEqualTo(DjBasicsGoodsCategory.PARENT_ID,
                             djBasicsGoodsCategory.getParentId());
                     List<BasicsGoodsCategory> li = djBasicsGoodsCategoryMapper.selectByExample(example);
-                    for (BasicsGoodsCategory bgc:li) {
-                        BasicsGoodDTO basicsGoodDTO = new BasicsGoodDTO();
-                        List<BasicsgDTO> bList = iBudgetWorkerMapper.queryMakeBudgetsBmList(houseId,bgc.getId());
-                        for (BasicsgDTO basicsgDTO : bList) {
-                            basicsgDTO.setImage(imageAddress + basicsgDTO.getImage());
+                    if(!li.isEmpty()){
+                        for (BasicsGoodsCategory bgc:li) {
+                            BasicsGoodDTO basicsGoodDTO = new BasicsGoodDTO();
+                            List<BasicsgDTO> bList = iBudgetWorkerMapper.queryMakeBudgetsBmList(houseId,bgc.getId());
+                            for (BasicsgDTO basicsgDTO : bList) {
+                                basicsgDTO.setImage(imageAddress + basicsgDTO.getImage());
+                                if(basicsgDTO.getBuy() == 2){
+                                    basicsgDTO.setBuyStr("自购商品需自行购买");
+                                }else{
+                                    basicsgDTO.setBuyStr("");
+                                }
+                            }
+                            basicsGoodDTO.setList(bList);
+                            basicsGoodDTO.setName(bgc.getName());
+                            bgdList.add(basicsGoodDTO);
                         }
-                        basicsGoodDTO.setList(bList);
-                        basicsGoodDTO.setName(bgc.getName());
-                        bgdList.add(basicsGoodDTO);
                     }
                 }
                 return ServerResponse.createBySuccess("查询成功", bgdList);
@@ -336,28 +350,29 @@ public class DjActuaryBudgetMaterialService {
             }
             List<DjBasicsProduct> pList = djBasicsProductMapper.serchCategoryProduct(categoryId, StringTool.getLikeV(name),brandVal,attributeVals,orderKey);
             pageResult = new PageInfo<>(pList);
-            for (DjBasicsProduct product : pList) {
-                String convertUnitName = iUnitMapper.selectByPrimaryKey(product.getUnitId()).getName();
-                String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
-                        String.format(DjConstants.YZPageAddress.GOODSDETAIL, " ", cityId, "商品详情") +
-                        "&gId=" + product.getId() ;
-                JSONObject object = new JSONObject();
-                if(productId.equals(product.getId())){
-                    //勾选商品标识
-                    object.put("flag", true);
-                }else{
-                    //未勾选商品标识
-                    object.put("flag", false);
+            if(!pList.isEmpty()){
+                for (DjBasicsProduct product : pList) {
+                    String convertUnitName = iUnitMapper.selectByPrimaryKey(product.getUnitId()).getName();
+                    String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
+                            String.format(DjConstants.YZPageAddress.GOODSDETAIL, " ", cityId, "商品详情") +
+                            "&gId=" + product.getId() ;
+                    JSONObject object = new JSONObject();
+                    if(productId.equals(product.getId())){
+                        //勾选商品标识
+                        object.put("flag", true);
+                    }else{
+                        //未勾选商品标识
+                        object.put("flag", false);
+                    }
+                    object.put("image", imageAddress + product.getImage());
+                    object.put("price", product.getPrice());
+                    object.put("unitName", convertUnitName);
+                    object.put("name", product.getName());
+                    object.put("id", product.getId());
+                    object.put("url", url);//0:工艺；1：商品；2：人工
+                    arr.add(object);
                 }
-                object.put("image", imageAddress + product.getImage());
-                object.put("price", product.getPrice());
-                object.put("unitName", convertUnitName);
-                object.put("name", product.getName());
-                object.put("id", product.getId());
-                object.put("url", url);//0:工艺；1：商品；2：人工
-                arr.add(object);
             }
-
             pageResult.setList(arr);
         } catch (Exception e) {
             e.printStackTrace();

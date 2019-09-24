@@ -28,6 +28,7 @@ public class BudgetLabelGoodsDTO {
     private Double shopCount;//精算数
     private String unitName;//单位名称
     private BigDecimal totalPrice;//销售总价
+    private String isInflueDecorationProgress;//是否影响装修进度(1是，0否)
     private Date createDate;//新建时间
     private Date modifyDate;//修改时间
     private Integer productType;// 0：材料；1：包工包料；2：人工

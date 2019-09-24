@@ -34,8 +34,8 @@ public class AppActuaryOperationController implements AppActuaryOperationAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse recoveryProduct(HttpServletRequest request,String houseId, String workerTypeId) {
-        return actuaryOperationService.recoveryProduct( houseId, workerTypeId);
+    public ServerResponse recoveryProduct(HttpServletRequest request,String houseId, String productId) {
+        return actuaryOperationService.recoveryProduct( houseId, productId);
     }
     @Override
     @ApiMethod
