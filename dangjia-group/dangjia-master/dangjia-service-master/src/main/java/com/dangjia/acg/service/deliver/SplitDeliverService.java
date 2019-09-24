@@ -94,10 +94,8 @@ public class SplitDeliverService {
                 warehouse.setReceive(warehouse.getReceive() + receive);
                 //部分收货则未收货的商品数量要退回到业主仓库中
                 //未收货的数量
-                Double noReceive =orderSplitItem.getNum()-receive;
-                if(noReceive>0) {
-                    warehouse.setAskCount(warehouse.getAskCount() - noReceive);
-                }
+                Double noReceive =warehouse.getAskCount()-(orderSplitItem.getNum()-receive);
+                warehouse.setAskCount(noReceive);
                 warehouseMapper.updateByPrimaryKeySelective(warehouse);
                 applyMoney+=orderSplitItem.getSupCost()*orderSplitItem.getReceive();
             }
