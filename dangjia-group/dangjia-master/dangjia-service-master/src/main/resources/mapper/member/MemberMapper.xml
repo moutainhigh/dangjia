@@ -171,7 +171,7 @@
         INNER JOIN ( SELECT c.member_id, GROUP_CONCAT( c.city_id ) city_id,c.city_name  FROM dj_member_city c GROUP BY c.member_id )
         mt ON mt.member_id = w.id
         AND FIND_IN_SET(#{cityId}, mt.city_id )
-        <if test="(stage &gt;= 0 and stage &lt;= 4) or ">
+        <if test="(stage &gt;= 0 and stage &lt;= 4) or stage == 7">
             INNER JOIN dj_member_customer mc on mc.member_id = w.id
             <if test="userId!=null and userId!=''">
                 and mc.user_id=#{userId}
