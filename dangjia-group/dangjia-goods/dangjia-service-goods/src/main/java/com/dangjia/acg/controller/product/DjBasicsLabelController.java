@@ -23,7 +23,7 @@ public class DjBasicsLabelController implements DjBasicsLabelAPI {
     @Override
     @ApiMethod
     public ServerResponse addCommodityLabels(HttpServletRequest request, String labelName, String labelValue) {
-        return djBasicsLabelService.addCommodityLabels(labelName,labelValue);
+        return djBasicsLabelService.addCommodityLabels(labelName, labelValue);
     }
 
     @Override

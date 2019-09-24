@@ -30,28 +30,29 @@ public class DjBasicsLabelService {
 
     /**
      * 添加商品标签
+     *
      * @param labelName
      * @param labelValue
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse addCommodityLabels(String labelName, String labelValue) {
-        Example example=new Example(DjBasicsLabel.class);
-        example.createCriteria().andEqualTo(DjBasicsLabel.NAME,labelName)
-                .andEqualTo(DjBasicsLabel.DATA_STATUS,0);
-        if(djBasicsLabelMapper.selectByExample(example).size()>0)
+        Example example = new Example(DjBasicsLabel.class);
+        example.createCriteria().andEqualTo(DjBasicsLabel.NAME, labelName)
+                .andEqualTo(DjBasicsLabel.DATA_STATUS, 0);
+        if (djBasicsLabelMapper.selectByExample(example).size() > 0)
             return ServerResponse.createByErrorMessage("该标签名称已存在");
         List<String> strings = Arrays.asList(labelValue.split(","));
         //判断集合是否有重复元素
         long count = strings.stream().distinct().count();
-        if(count<strings.size())
+        if (count < strings.size())
             return ServerResponse.createByErrorMessage("标签值重复");
-        DjBasicsLabel djBasicsLabel=new DjBasicsLabel();
+        DjBasicsLabel djBasicsLabel = new DjBasicsLabel();
         djBasicsLabel.setName(labelName);
         djBasicsLabel.setDataStatus(0);
         djBasicsLabelMapper.insert(djBasicsLabel);
-        strings.forEach(str ->{
-            DjBasicsLabelValue djBasicsLabelValue=new DjBasicsLabelValue();
+        strings.forEach(str -> {
+            DjBasicsLabelValue djBasicsLabelValue = new DjBasicsLabelValue();
             djBasicsLabelValue.setLabelId(djBasicsLabel.getId());
             djBasicsLabelValue.setName(str);
             djBasicsLabelValue.setDataStatus(0);
@@ -63,6 +64,7 @@ public class DjBasicsLabelService {
 
     /**
      * 编辑商品标签
+     *
      * @param id
      * @param labelName
      * @param labelValue
@@ -71,11 +73,11 @@ public class DjBasicsLabelService {
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse updateCommodityLabels(String id, String labelName, String labelValue) {
         DjBasicsLabel djBasicsLabel = djBasicsLabelMapper.selectByPrimaryKey(id);
-        if(!djBasicsLabel.getName().equals(labelName)){
-            Example example=new Example(DjBasicsLabel.class);
-            example.createCriteria().andEqualTo(DjBasicsLabel.NAME,labelName)
-                    .andEqualTo(DjBasicsLabel.DATA_STATUS,0);
-            if(djBasicsLabelMapper.selectByExample(example).size()>0)
+        if (!djBasicsLabel.getName().equals(labelName)) {
+            Example example = new Example(DjBasicsLabel.class);
+            example.createCriteria().andEqualTo(DjBasicsLabel.NAME, labelName)
+                    .andEqualTo(DjBasicsLabel.DATA_STATUS, 0);
+            if (djBasicsLabelMapper.selectByExample(example).size() > 0)
                 return ServerResponse.createByErrorMessage("该标签名称已存在");
             djBasicsLabel.setName(labelName);
             djBasicsLabelMapper.updateByPrimaryKeySelective(djBasicsLabel);
@@ -83,13 +85,13 @@ public class DjBasicsLabelService {
         List<String> strings = Arrays.asList(labelValue.split(","));
         //判断集合是否有重复元素
         long count = strings.stream().distinct().count();
-        if(count<strings.size())
+        if (count < strings.size())
             return ServerResponse.createByErrorMessage("标签值重复");
-        Example example=new Example(DjBasicsLabelValue.class);
-        example.createCriteria().andEqualTo(DjBasicsLabelValue.LABEL_ID,id);
+        Example example = new Example(DjBasicsLabelValue.class);
+        example.createCriteria().andEqualTo(DjBasicsLabelValue.LABEL_ID, id);
         djBasicsLabelValueMapper.deleteByExample(example);
-        strings.forEach(str ->{
-            DjBasicsLabelValue djBasicsLabelValue=new DjBasicsLabelValue();
+        strings.forEach(str -> {
+            DjBasicsLabelValue djBasicsLabelValue = new DjBasicsLabelValue();
             djBasicsLabelValue.setLabelId(djBasicsLabel.getId());
             djBasicsLabelValue.setName(str);
             djBasicsLabelValue.setDataStatus(0);
@@ -99,17 +101,17 @@ public class DjBasicsLabelService {
     }
 
 
-
     /**
      * 删除商品标签
+     *
      * @param id
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse delCommodityLabels(String id) {
         djBasicsLabelMapper.deleteByPrimaryKey(id);
-        Example example=new Example(DjBasicsLabelValue.class);
-        example.createCriteria().andEqualTo(DjBasicsLabelValue.LABEL_ID,id);
+        Example example = new Example(DjBasicsLabelValue.class);
+        example.createCriteria().andEqualTo(DjBasicsLabelValue.LABEL_ID, id);
         djBasicsLabelValueMapper.deleteByExample(example);
         return ServerResponse.createBySuccessMessage("删除成功");
     }
@@ -117,40 +119,42 @@ public class DjBasicsLabelService {
 
     /**
      * 根据id查询商品标签
+     *
      * @param id
      * @return
      */
     public ServerResponse queryCommodityLabelsById(String id) {
         DjBasicsLabel djBasicsLabel = djBasicsLabelMapper.selectByPrimaryKey(id);
-        DjBasicsLabelDTO djBasicsLabelDTO=new DjBasicsLabelDTO();
+        DjBasicsLabelDTO djBasicsLabelDTO = new DjBasicsLabelDTO();
         djBasicsLabelDTO.setId(djBasicsLabel.getId());
         djBasicsLabelDTO.setName(djBasicsLabel.getName());
-        Example example=new Example(DjBasicsLabelValue.class);
-        example.createCriteria().andEqualTo(DjBasicsLabelValue.LABEL_ID,id)
-                .andEqualTo(DjBasicsLabelValue.DATA_STATUS,0);
+        Example example = new Example(DjBasicsLabelValue.class);
+        example.createCriteria().andEqualTo(DjBasicsLabelValue.LABEL_ID, id)
+                .andEqualTo(DjBasicsLabelValue.DATA_STATUS, 0);
         djBasicsLabelDTO.setLabelValueList(djBasicsLabelValueMapper.selectByExample(example));
-        return ServerResponse.createBySuccess("查询成功",djBasicsLabelDTO);
+        return ServerResponse.createBySuccess("查询成功", djBasicsLabelDTO);
     }
 
 
     /**
      * 查询商品标签
+     *
      * @return
      */
     public ServerResponse queryCommodityLabels() {
         List<DjBasicsLabel> djBasicsLabels = djBasicsLabelMapper.selectAll();
-        List<DjBasicsLabelDTO> labelDTOS=new ArrayList<>();
+        List<DjBasicsLabelDTO> labelDTOS = new ArrayList<>();
         for (DjBasicsLabel djBasicsLabel : djBasicsLabels) {
-            DjBasicsLabelDTO djBasicsLabelDTO=new DjBasicsLabelDTO();
+            DjBasicsLabelDTO djBasicsLabelDTO = new DjBasicsLabelDTO();
             djBasicsLabelDTO.setId(djBasicsLabel.getId());
             djBasicsLabelDTO.setName(djBasicsLabel.getName());
-            Example example=new Example(DjBasicsLabelValue.class);
-            example.createCriteria().andEqualTo(DjBasicsLabelValue.LABEL_ID,djBasicsLabel.getId())
-                    .andEqualTo(DjBasicsLabelValue.DATA_STATUS,0);
+            Example example = new Example(DjBasicsLabelValue.class);
+            example.createCriteria().andEqualTo(DjBasicsLabelValue.LABEL_ID, djBasicsLabel.getId())
+                    .andEqualTo(DjBasicsLabelValue.DATA_STATUS, 0);
             djBasicsLabelDTO.setLabelValueList(djBasicsLabelValueMapper.selectByExample(example));
             labelDTOS.add(djBasicsLabelDTO);
         }
-        return ServerResponse.createBySuccess("查询成功",labelDTOS);
+        return ServerResponse.createBySuccess("查询成功", labelDTOS);
     }
 
 }

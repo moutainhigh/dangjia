@@ -19,5 +19,5 @@ public interface DjBasicsAttributeValueMapper extends Mapper<DjBasicsAttributeVa
 
 
     //根据属性id查询所有属性选项PO对象
-    List<DjBasicsAttributeValuePO> queryPOByAttributeId(@Param("attributeId")String attributeId);
+    List<DjBasicsAttributeValuePO> queryPOByAttributeId(@Param("attributeId") String attributeId);
 }

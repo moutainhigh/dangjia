@@ -80,7 +80,7 @@ public class CategoryLabelService {
                 }
                 mapList.add(map);
             }
-            return ServerResponse.createBySuccess("查询成功",mapList);
+            return ServerResponse.createBySuccess("查询成功", mapList);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
@@ -92,10 +92,10 @@ public class CategoryLabelService {
         try {
             if (iCategoryLabelMapper.getCategoryLabelByName(labelName).size() > 0)
                 return ServerResponse.createByErrorMessage("标签名称已存在");
-            int countLabel=iCategoryLabelMapper.getCategoryCountLabel();
+            int countLabel = iCategoryLabelMapper.getCategoryCountLabel();
             CategoryLabel categoryLabel = new CategoryLabel();
             categoryLabel.setName(labelName);
-            categoryLabel.setSort(countLabel+1);
+            categoryLabel.setSort(countLabel + 1);
             iCategoryLabelMapper.insert(categoryLabel);
             return ServerResponse.createBySuccessMessage("新增成功");
         } catch (Exception e) {
@@ -105,7 +105,7 @@ public class CategoryLabelService {
     }
 
     //修改类别标签
-    public ServerResponse update(String labelId, String labelName,int sort) {
+    public ServerResponse update(String labelId, String labelName, int sort) {
         try {
             CategoryLabel oldLabel = iCategoryLabelMapper.selectByPrimaryKey(labelId);
             if (oldLabel == null)
@@ -122,7 +122,7 @@ public class CategoryLabelService {
             iCategoryLabelMapper.updateByPrimaryKeySelective(oldLabel);
             return ServerResponse.createBySuccessMessage("修改成功");
         } catch (Exception e) {
-            logger.error("修改失败：",e);
+            logger.error("修改失败：", e);
             return ServerResponse.createByErrorMessage("修改失败");
         }
     }

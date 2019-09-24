@@ -29,6 +29,7 @@ public class DjActuaryBudgetMaterialController implements DjActuaryBudgetMateria
 
     /**
      * 查询精算首页列表
+     *
      * @param request
      * @param bclId
      * @param categoryId
@@ -37,13 +38,14 @@ public class DjActuaryBudgetMaterialController implements DjActuaryBudgetMateria
      */
     @Override
     @ApiMethod
-    public ServerResponse queryMakeBudgetsList(HttpServletRequest request,String bclId,String categoryId,String houseId){
-        return djActuaryBudgetMaterialService.queryMakeBudgetsList(bclId,categoryId,houseId);
+    public ServerResponse queryMakeBudgetsList(HttpServletRequest request, String bclId, String categoryId, String houseId) {
+        return djActuaryBudgetMaterialService.queryMakeBudgetsList(bclId, categoryId, houseId);
     }
 
 
     /**
      * 第四部分：二级商品列表搜索页面
+     *
      * @return
      */
     @Override
@@ -56,8 +58,8 @@ public class DjActuaryBudgetMaterialController implements DjActuaryBudgetMateria
                                              String name,
                                              String attributeVal,
                                              String brandVal,
-                                             String orderKey){
-        return djActuaryBudgetMaterialService.queryBasicsProduct(productId,pageDTO,cityId,categoryId,name,attributeVal,brandVal,orderKey);
+                                             String orderKey) {
+        return djActuaryBudgetMaterialService.queryBasicsProduct(productId, pageDTO, cityId, categoryId, name, attributeVal, brandVal, orderKey);
     }
 
 }

@@ -27,12 +27,13 @@ public class DjBasicsMaintainService {
 
     /**
      * 查询配置关键词名称
+     *
      * @param name
      * @return
      */
-    public ServerResponse queryMatchWord(String name){
+    public ServerResponse queryMatchWord(String name) {
         Example example = new Example(DjBasicsMaintain.class);
-        if(!CommonUtil.isEmpty(name)){
+        if (!CommonUtil.isEmpty(name)) {
             example.createCriteria().andLike(DjBasicsMaintain.SEARCH_ITEM, "%" + name + "%");
             List<DjBasicsMaintain> list = djBasicsMaintainMapper.selectByExample(example);
             if (list.size() <= 0) {
@@ -44,32 +45,34 @@ public class DjBasicsMaintainService {
     }
 
 
-    /**djBasicsMaintain/queryMatchWord
+    /**
+     * djBasicsMaintain/queryMatchWord
      * 添加关键词
+     *
      * @param keywordName
      * @param searchItem
      * @return
      */
-    public ServerResponse addKeywords(String keywordName, String searchItem){
-        Example example=new Example(DjBasicsMaintain.class);
-        example.createCriteria().andEqualTo(DjBasicsMaintain.KEYWORD_NAME,keywordName)
-                .andEqualTo(DjBasicsMaintain.DATA_STATUS,0);
+    public ServerResponse addKeywords(String keywordName, String searchItem) {
+        Example example = new Example(DjBasicsMaintain.class);
+        example.createCriteria().andEqualTo(DjBasicsMaintain.KEYWORD_NAME, keywordName)
+                .andEqualTo(DjBasicsMaintain.DATA_STATUS, 0);
         List<DjBasicsMaintain> djBasicsMaintains = djBasicsMaintainMapper.selectByExample(example);
-        if(djBasicsMaintains.size()>0)
+        if (djBasicsMaintains.size() > 0)
             return ServerResponse.createByErrorMessage("该关键词名称已存在");
         List<String> strings = Arrays.asList(searchItem.split(","));
         //判断集合是否有重复元素
         long count = strings.stream().distinct().count();
-        if(count<strings.size())
+        if (count < strings.size())
             return ServerResponse.createByErrorMessage("搜索词重复");
-        if(djBasicsMaintainMapper.duplicateRemoval(strings).size()>0){
+        if (djBasicsMaintainMapper.duplicateRemoval(strings).size() > 0) {
             return ServerResponse.createByErrorMessage("搜索词已存在");
         }
-        DjBasicsMaintain djBasicsMaintain=new DjBasicsMaintain();
+        DjBasicsMaintain djBasicsMaintain = new DjBasicsMaintain();
         djBasicsMaintain.setKeywordName(keywordName);
         djBasicsMaintain.setSearchItem(searchItem);
         djBasicsMaintain.setDataStatus(0);
-        if(djBasicsMaintainMapper.insert(djBasicsMaintain)>0)
+        if (djBasicsMaintainMapper.insert(djBasicsMaintain) > 0)
             return ServerResponse.createBySuccessMessage("添加成功");
         return ServerResponse.createByErrorMessage("添加失败");
     }
@@ -77,28 +80,29 @@ public class DjBasicsMaintainService {
 
     /**
      * 编辑关键词
+     *
      * @param id
      * @param keywordName
      * @param searchItem
      * @return
      */
-    public ServerResponse updateKeywords(String id, String keywordName, String searchItem){
+    public ServerResponse updateKeywords(String id, String keywordName, String searchItem) {
         DjBasicsMaintain djBasicsMaintain = djBasicsMaintainMapper.selectByPrimaryKey(id);
-        if(!djBasicsMaintain.getKeywordName().equals(keywordName)){
-            Example example=new Example(DjBasicsMaintain.class);
-            example.createCriteria().andEqualTo(DjBasicsMaintain.KEYWORD_NAME,keywordName)
-                    .andEqualTo(DjBasicsMaintain.DATA_STATUS,0);
-            if(djBasicsMaintainMapper.selectByExample(example).size()>0)
+        if (!djBasicsMaintain.getKeywordName().equals(keywordName)) {
+            Example example = new Example(DjBasicsMaintain.class);
+            example.createCriteria().andEqualTo(DjBasicsMaintain.KEYWORD_NAME, keywordName)
+                    .andEqualTo(DjBasicsMaintain.DATA_STATUS, 0);
+            if (djBasicsMaintainMapper.selectByExample(example).size() > 0)
                 return ServerResponse.createByErrorMessage("该关键词名称已存在");
         }
         String[] searchItems = searchItem.split(",");
         List<String> strings = Arrays.asList(searchItems);
         //判断集合是否有重复元素
         long count = strings.stream().distinct().count();
-        if(count<strings.size()){
+        if (count < strings.size()) {
             return ServerResponse.createByErrorMessage("搜索词重复");
         }
-        if(djBasicsMaintainMapper.duplicateRemoval(strings).size()>0){
+        if (djBasicsMaintainMapper.duplicateRemoval(strings).size() > 0) {
             return ServerResponse.createByErrorMessage("搜索词已存在");
         }
         djBasicsMaintain.setKeywordName(keywordName);
@@ -106,17 +110,18 @@ public class DjBasicsMaintainService {
         djBasicsMaintain.setDataStatus(0);
         djBasicsMaintainMapper.updateByPrimaryKeySelective(djBasicsMaintain);
         return ServerResponse.createBySuccessMessage("编辑成功");
-}
+    }
 
 
     /**
      * 关联标签
+     *
      * @param id
      * @param labelIds
      * @return
      */
     public ServerResponse addRelatedTags(String id, String labelIds) {
-        DjBasicsMaintain djBasicsMaintain=djBasicsMaintainMapper.selectByPrimaryKey(id);
+        DjBasicsMaintain djBasicsMaintain = djBasicsMaintainMapper.selectByPrimaryKey(id);
         djBasicsMaintain.setLabelIds(labelIds);
         djBasicsMaintain.setModifyDate(new Date());
         djBasicsMaintainMapper.updateByPrimaryKeySelective(djBasicsMaintain);
@@ -126,6 +131,7 @@ public class DjBasicsMaintainService {
 
     /**
      * 删除关键词
+     *
      * @param id
      * @return
      */
@@ -141,18 +147,19 @@ public class DjBasicsMaintainService {
 
     /**
      * 查询关键词
+     *
      * @param id
      * @return
      */
     public ServerResponse queryKeywords(String id) {
-        if(!CommonUtil.isEmpty(id))
-            return ServerResponse.createBySuccess("查询成功",djBasicsMaintainMapper.selectByPrimaryKey(id));
-        Example example=new Example(DjBasicsMaintain.class);
-        example.createCriteria().andEqualTo(DjBasicsMaintain.DATA_STATUS,0);
+        if (!CommonUtil.isEmpty(id))
+            return ServerResponse.createBySuccess("查询成功", djBasicsMaintainMapper.selectByPrimaryKey(id));
+        Example example = new Example(DjBasicsMaintain.class);
+        example.createCriteria().andEqualTo(DjBasicsMaintain.DATA_STATUS, 0);
         example.orderBy(DjBasicsMaintain.CREATE_DATE).desc();
         List<DjBasicsMaintain> djBasicsMaintains = djBasicsMaintainMapper.selectByExample(example);
-        if(djBasicsMaintains.size()<=0)
-            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
-        return ServerResponse.createBySuccess("查询成功",djBasicsMaintains);
+        if (djBasicsMaintains.size() <= 0)
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        return ServerResponse.createBySuccess("查询成功", djBasicsMaintains);
     }
 }

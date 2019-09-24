@@ -23,38 +23,38 @@ public class DjBasicsMaintainController implements DjBasicsMaintainAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryMatchWord(HttpServletRequest request,String name) {
+    public ServerResponse queryMatchWord(HttpServletRequest request, String name) {
         return djBasicsMaintainService.queryMatchWord(name);
 
     }
 
     @Override
     @ApiMethod
-    public ServerResponse addKeywords(HttpServletRequest request,String keywordName, String searchItem) {
-        return djBasicsMaintainService.addKeywords(keywordName,searchItem);
+    public ServerResponse addKeywords(HttpServletRequest request, String keywordName, String searchItem) {
+        return djBasicsMaintainService.addKeywords(keywordName, searchItem);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse updateKeywords(HttpServletRequest request,String id, String keywordName, String searchItem) {
-        return djBasicsMaintainService.updateKeywords(id,keywordName,searchItem);
+    public ServerResponse updateKeywords(HttpServletRequest request, String id, String keywordName, String searchItem) {
+        return djBasicsMaintainService.updateKeywords(id, keywordName, searchItem);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse addRelatedTags(HttpServletRequest request,String id, String labelIds) {
-        return djBasicsMaintainService.addRelatedTags(id,labelIds);
+    public ServerResponse addRelatedTags(HttpServletRequest request, String id, String labelIds) {
+        return djBasicsMaintainService.addRelatedTags(id, labelIds);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse delKeywords(HttpServletRequest request,String id) {
+    public ServerResponse delKeywords(HttpServletRequest request, String id) {
         return djBasicsMaintainService.delKeywords(id);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse queryKeywords(HttpServletRequest request,String id) {
+    public ServerResponse queryKeywords(HttpServletRequest request, String id) {
         return djBasicsMaintainService.queryKeywords(id);
     }
 }

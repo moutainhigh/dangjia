@@ -45,7 +45,7 @@
         <include refid="all_columns"/>
         FROM dj_basics_goods_category where parent_id =#{parentId}
         <if test="categoryLabelId!=null and categoryLabelId!=''">
-         and   FIND_IN_SET(#{categoryLabelId},category_label_ids)
+            and FIND_IN_SET(#{categoryLabelId},category_label_ids)
         </if>
         ORDER BY create_date desc
     </select>
@@ -117,26 +117,26 @@
 
     <!-- 根据商分类顶级id查询关联品牌 -->
     <select id="queryBrandByTopCategoryid" resultType="com.dangjia.acg.modle.brand.Brand">
-		SELECT
-            b.id,
-            b.NAME,
-            b.create_date AS createDate,
-            b.modify_date AS modifyDate
+        SELECT
+        b.id,
+        b.NAME,
+        b.create_date AS createDate,
+        b.modify_date AS modifyDate
         FROM
-            dj_basics_brand b
+        dj_basics_brand b
         INNER JOIN dj_basics_product p ON (p.`name` LIKE CONCAT('%', b. NAME, '%'))
         INNER JOIN dj_basics_goods_category c ON c.id = p.category_id
         WHERE p.maket = 1 AND p.type = 1
         <if test="wordKey!=null and wordKey!=''">
-            AND   p.`name` LIKE  CONCAT('%',#{wordKey},'%')
+            AND p.`name` LIKE CONCAT('%',#{wordKey},'%')
         </if>
         <if test="categoryId!=null and categoryId!=''">
-            AND  (c.id = #{categoryId} OR c.parent_top = #{categoryId})
+            AND (c.id = #{categoryId} OR c.parent_top = #{categoryId})
         </if>
         GROUP BY b.id
         ORDER BY
-            c.sort DESC
-	</select>
+        c.sort DESC
+    </select>
 
     <!-- 查询当前顶级分类下的与有类别-->
     <select id="getAllCategoryChildById" resultType="com.dangjia.acg.modle.product.BasicsGoodsCategory">
