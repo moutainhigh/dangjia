@@ -8,13 +8,14 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.actuary.BudgetStageCostDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.basics.*;
+import com.dangjia.acg.mapper.product.DjBasicsProductMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.attribute.AttributeValue;
 import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Label;
-import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.brand.Unit;
+import com.dangjia.acg.modle.product.DjBasicsProduct;
 import com.dangjia.acg.util.StringTool;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -44,8 +45,10 @@ public class BudgetMaterialService {
     private ILabelMapper iLabelMapper;
     @Autowired
     private IAttributeValueMapper iAttributeValueMapper;
+    //@Autowired
+    //private IProductMapper iProductMaper;
     @Autowired
-    private IProductMapper iProductMaper;
+    private DjBasicsProductMapper djBasicsProductMapper;
     @Autowired
     private ITechnologyMapper iTechnologyMapper;
     @Autowired
@@ -158,10 +161,10 @@ public class BudgetMaterialService {
     public ServerResponse getAllProductByGoodsId(String goodsId) {
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            List<Product> pList = iProductMaper.queryByGoodsId(goodsId);
+            List<DjBasicsProduct> pList = djBasicsProductMapper.queryByGoodsId(goodsId);
 
             List<Map<String, Object>> mapList = new ArrayList<>();
-            for (Product p : pList) {
+            for (DjBasicsProduct p : pList) {
                 if (p.getImage() == null) {
                     continue;
                 }

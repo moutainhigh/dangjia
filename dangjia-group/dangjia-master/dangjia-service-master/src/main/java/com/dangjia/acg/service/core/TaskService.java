@@ -370,7 +370,7 @@ public class TaskService {
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
             HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(house.getHouseId(), houseFlow.getWorkerTypeId());
             //检查是否该工序订单已经被业主支付，才能审核
-            if(hwo.getPayState()==1){
+            if(hwo!=null&&hwo.getPayState()==1){
                 Task task = new Task();
                 task.setDate(DateUtil.dateToString(houseFlow.getModifyDate(), DateUtil.FORMAT11));
                 task.setName("审核"+workerType.getName() + "工匠");
