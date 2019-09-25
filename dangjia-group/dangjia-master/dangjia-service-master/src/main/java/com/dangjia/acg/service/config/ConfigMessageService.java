@@ -16,6 +16,7 @@ import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -45,7 +46,6 @@ public class ConfigMessageService {
     /**
      * 获取所有公共消息(web端列表)
      *
-     * @param configMessage
      * @return
      */
     public ServerResponse queryConfigMessages(HttpServletRequest request, PageDTO pageDTO) {
@@ -82,9 +82,9 @@ public class ConfigMessageService {
             criteria.andCondition("(" +
                     "target_uid='" + member.getId() + "' or " +
                     "target_uid='" + cityId + "' or " +
-                    "target_uid='wtId" + member.getWorkerTypeId() + "' or " +
+                    "target_uid='" + DigestUtils.md5Hex("wtId" + member.getWorkerTypeId()) + "' or " +
                     "target_type=1  or " +
-                    "target_uid='wtId" + member.getWorkerTypeId() + cityId + "'" +
+                    "target_uid='" + DigestUtils.md5Hex("wtId" + member.getWorkerTypeId() + cityId) + "'" +
                     ")");
 //            criteria.andEqualTo("targetUid", accessToken.getMember().getId()).orEqualTo("targetType","1");
         } else {
