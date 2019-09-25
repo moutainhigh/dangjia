@@ -87,7 +87,7 @@ public class WebSplitDeliverService {
                 }
             }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<WebSplitDeliverItemDTO> webSplitDeliverItemDTOLists = iSplitDeliverMapper.getWebSplitDeliverList(applyState, searchKey, beginDate, endDate);
+            List<WebSplitDeliverItemDTO> webSplitDeliverItemDTOLists = iSplitDeliverMapper.getWebSplitDeliverList(cityId,applyState, searchKey, beginDate, endDate);
             PageInfo pageResult = new PageInfo(webSplitDeliverItemDTOLists);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
