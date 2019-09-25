@@ -22,7 +22,8 @@
 		is_elevator_fee as isElevatorFee,
 		indicative_price as indicativePrice,
 		label_ids as  labelIds,
-		is_reservation_deliver as isReservationDeliver
+		is_reservation_deliver as isReservationDeliver,
+		attribute_id_arr attributeIdArr
 	</sql>
 
     <sql id="new_columns">
@@ -43,7 +44,8 @@
 		is_elevator_fee as isElevatorFee,
 		indicative_price as indicativePrice,
 		label_ids as  labelIds,
-		is_reservation_deliver as isReservationDeliver
+		is_reservation_deliver as isReservationDeliver,
+		attribute_id_arr attributeIdArr
 	</sql>
     <!-- 删除对象 -->
     <delete id="deleteById" parameterType="java.lang.String">
