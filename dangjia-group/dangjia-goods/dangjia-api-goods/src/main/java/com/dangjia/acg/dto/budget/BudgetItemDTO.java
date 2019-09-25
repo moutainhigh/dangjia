@@ -12,9 +12,19 @@ import java.util.List;
  */
 @Data
 public class BudgetItemDTO {
-    private String rowImage;//图标
-    private String rowName;//列名字
+    /**
+     * 图标
+     */
+    private String rowImage;
+    /**
+     *列名字
+     */
+    private String rowName;
+    /**
+     *价格
+     */
     private Double rowPrice;
+
 
     private List<GoodsItemDTO> goodsItemDTOList;
 

@@ -42,12 +42,19 @@
 	</select>
 
 	<select id="brandName" resultType="java.lang.String">
-        select bs.name
+       <!-- select bs.name
 		From dj_basics_brand bs, dj_basics_product p
 		where
 		    p.brand_id = bs.id
+		update 2019-09-24
+		-->
+		select bs.name
+		From dj_basics_brand bs, dj_basics_product p,dj_basics_goods g
+		where
+		g.brand_id = bs.id
+		and p.goods_id=g.id
 		and
-		    p.id = #{productId}
+		p.id = #{productId}
 	</select>
 	<!--根据货品id查询品牌系列-->
 	<select id="brandSeriesByPid" resultType="com.dangjia.acg.modle.brand.BrandSeries">

@@ -14,12 +14,15 @@ import com.dangjia.acg.dto.budget.BudgetItemDTO;
 import com.dangjia.acg.dto.budget.GoodsItemDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
+import com.dangjia.acg.mapper.basics.IBrandSeriesMapper;
 import com.dangjia.acg.mapper.basics.IGoodsCategoryMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.modle.attribute.GoodsCategory;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.product.DjBasicsProduct;
+import com.dangjia.acg.service.product.DjBasicsProductService;
 import com.dangjia.acg.util.JdbcContextHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -49,6 +52,12 @@ public class ActuaryOpeService {
     private HouseAPI houseAPI;
     @Autowired
     private RedisClient redisClient;
+    @Autowired
+    private IBrandSeriesMapper iBrandSeriesMapper;
+
+    @Autowired
+    private DjBasicsProductService djBasicsProductService;
+
     /**
      * 根据分类list查询商品
      * 自定义查看
@@ -205,7 +214,14 @@ public class ActuaryOpeService {
                 goodsItemDTO.setRepairCount(budgetWorker.getRepairCount());
                 goodsItemDTO.setSurCount(budgetWorker.getShopCount() - budgetWorker.getBackCount() + budgetWorker.getRepairCount());
                 goodsItemDTO.setTolPrice(goodsItemDTO.getSurCount()*goodsItemDTO.getPrice());
+                //品牌+规格
+                String brandName=iBrandSeriesMapper.brandName(budgetWorker.getWorkerGoodsId());    //通过商品id去关联，然后组合商品名称
+                DjBasicsProduct djBasicsProduct=djBasicsProductService.queryDataByProductId(budgetWorker.getWorkerGoodsId());  //通过商品id去关联规格
+                String valueIdArr=djBasicsProduct.getValueIdArr();
+                String guige=djBasicsProductService.getNewValueNameArr(valueIdArr);
+                goodsItemDTO.setBrandName(brandName+" "+guige);
                 goodsItemDTOList.add(goodsItemDTO);
+
             }
             budgetItemDTO.setGoodsItemDTOList(goodsItemDTOList);
             budgetItemDTOList.add(budgetItemDTO);

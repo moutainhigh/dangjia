@@ -40,6 +40,12 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
 
     }
 
+    @Override
+    @ApiMethod
+    public String getNewValueNameArr(String valueIdArr) {
+        return djBasicsProductService.getNewValueNameArr(valueIdArr);
+    }
+
 
     @Override
     @ApiMethod
@@ -55,8 +61,8 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryDataByProductId(HttpServletRequest request, String productSn) {
-        return djBasicsProductService.queryDataByProductId(request,productSn);
+    public DjBasicsProduct queryDataByProductId(String productId) {
+        return djBasicsProductService.queryDataByProductId(productId);
     }
 
     /**
