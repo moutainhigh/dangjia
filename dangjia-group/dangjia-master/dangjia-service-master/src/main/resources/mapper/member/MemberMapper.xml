@@ -171,6 +171,8 @@
         INNER JOIN ( SELECT c.member_id, GROUP_CONCAT( c.city_id ) city_id,c.city_name  FROM dj_member_city c GROUP BY c.member_id )
         mt ON mt.member_id = w.id
         AND FIND_IN_SET(#{cityId}, mt.city_id )
+        LEFT JOIN (SELECT cr.member_id,cr.remind_time ,cr.describes  FROM dj_member_customer_record cr GROUP BY cr.member_id ORDER BY cr.remind_time DESC)
+        cr on cr.member_id = w.id
         <if test="(childsLabelIdArr!=null and childsLabelIdArr!='') or ((stage &gt;= 0 and stage &lt;= 4) or stage == 7)">
             INNER JOIN dj_member_customer mc on mc.member_id = w.id
             <if test="userId!=null and userId!=''">
@@ -216,7 +218,7 @@
         <if test="type=='cc' and beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
             and w.create_date between #{beginDate} and #{endDate}
         </if>
-        ORDER by w.create_date
+        ORDER by cr.remind_time desc,w.create_date
         <if test="orderBy!=null and orderBy!=''and orderBy=='desc'">
             desc
         </if>

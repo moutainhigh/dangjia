@@ -613,8 +613,8 @@ public class HouseService {
                 List<String> workerTypes = new ArrayList<>();
                 workerTypes.add("wtId" + workerType.getId());
 //                workerTypes.add(house.getId());
-                configMessageService.addConfigMessage(request, AppType.GONGJIANG, StringUtils.join(workerTypes, ","), "0",
-                        "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, "4");
+                configMessageService.addConfigMessage(AppType.GONGJIANG, StringUtils.join(workerTypes, ","),
+                        "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, 4, null, "您有新的装修订单，快去抢吧！");
             }
 
         } catch (Exception e) {
@@ -1949,8 +1949,8 @@ public class HouseService {
                 houseFlow.setWorkType(2);//待抢单
                 houseFlow.setReleaseTime(new Date());//发布时间
                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
-                configMessageService.addConfigMessage(null, AppType.GONGJIANG, "wtId3" + houseFlow.getCityId(),
-                        "0", "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, "4");
+                configMessageService.addConfigMessage(AppType.GONGJIANG, "wtId3" + houseFlow.getCityId(),
+                        "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, 4, null, "您有新的装修订单，快去抢吧！");
                 //推送消息给业主等待大管家抢单
                 configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(),
                         "0", "等待大管家抢单", String.format(DjConstants.PushMessage.ACTUARIAL_COMPLETION,
