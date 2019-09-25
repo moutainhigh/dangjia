@@ -47,6 +47,7 @@
         ) wait
         FROM
         dj_repair_mend_deliver m
+        inner join dj_house h on h.id = m.house_id and h.city_id = #{cityId}
         WHERE
         m.data_status = 0
         AND m.apply_state IS NOT NULL
@@ -90,6 +91,7 @@
         ) wait
         FROM
         dj_deliver_split_deliver s
+        inner join dj_house h on h.id = s.house_id and h.city_id = #{cityId}
         WHERE
         s.data_status = 0
         AND s.apply_state IS NOT NULL

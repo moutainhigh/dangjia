@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.store;
 
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -350,6 +351,8 @@ public class StoreServices {
      * 门店利润列表（利润统计）
      */
     public ServerResponse getStoreProfitList(HttpServletRequest request,PageDTO pageDTO, String searchKey) {
+
+        String cityId = request.getParameter(Constants.CITY_ID);
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<Store> stores = iStoreMapper.queryStore(null, searchKey);
         List<Map> storemaps =new ArrayList<>();
@@ -360,7 +363,7 @@ public class StoreServices {
         for (Store store : stores) {
             Double profit = 0d;
             if(!CommonUtil.isEmpty(store.getVillages())) {
-                List<DesignDTO> houseList = iHouseMapper.getHouseProfitList(store.getVillages(), null, null);
+                List<DesignDTO> houseList = iHouseMapper.getHouseProfitList(cityId,store.getVillages(), null, null);
                 if (houseList.size() <= 0) {
                     continue;
                 }

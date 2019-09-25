@@ -2477,8 +2477,10 @@ public class HouseService {
      */
     public ServerResponse getHouseProfitList(HttpServletRequest request, PageDTO pageDTO, String villageId, String visitState, String searchKey) {
         try {
+
+            String cityId = request.getParameter(Constants.CITY_ID);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<DesignDTO> houseList = iHouseMapper.getHouseProfitList(villageId, visitState, searchKey);
+            List<DesignDTO> houseList = iHouseMapper.getHouseProfitList(cityId,villageId, visitState, searchKey);
             if (houseList.size() <= 0) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode()
                         , "查无数据");
