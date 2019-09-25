@@ -234,6 +234,7 @@ public class DjBasicsProductService {
         product.setType(basicsProductDTO.getType()==null?1:basicsProductDTO.getType());//是否禁用0：禁用；1不禁用
         product.setMaket(basicsProductDTO.getMaket()==null?1:basicsProductDTO.getMaket());//是否上架0：不上架；1：上架
         product.setPrice(basicsProductDTO.getPrice());//销售价
+        product.setOtherName(basicsProductDTO.getOtherName());
         if (!StringUtils.isNoneBlank(basicsProductDTO.getValueNameArr())) {
             product.setValueNameArr(null);
         } else {
