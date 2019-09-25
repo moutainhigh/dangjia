@@ -2,6 +2,7 @@ package com.dangjia.acg.controller.web.finance;
 
 import com.dangjia.acg.api.web.finance.WebWalletAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.worker.WorkerDetail;
@@ -39,7 +40,8 @@ public class WebWalletController implements WebWalletAPI {
     @Override
     @ApiMethod
     public ServerResponse getAllWallet(HttpServletRequest request, PageDTO pageDTO, String workerId, String houseId, String likeMobile, String likeAddress) {
-        return webWalletService.getAllWallet(pageDTO, workerId, houseId, likeMobile, likeAddress);
+        String cityId = request.getParameter(Constants.CITY_ID);
+        return webWalletService.getAllWallet(pageDTO, cityId, workerId, houseId, likeMobile, likeAddress);
     }
 
     @Override

@@ -54,7 +54,7 @@ public class WebWithdrawDepositService {
      * @param endDate   结束时间
      * @return
      */
-    public ServerResponse getAllWithdraw(PageDTO pageDTO, String searchKey, Integer state, String beginDate, String endDate) {
+    public ServerResponse getAllWithdraw(PageDTO pageDTO,String cityId, String searchKey, Integer state, String beginDate, String endDate) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             if (!CommonUtil.isEmpty(beginDate) && !CommonUtil.isEmpty(endDate)) {
@@ -63,7 +63,7 @@ public class WebWithdrawDepositService {
                     endDate = endDate + " " + "23:59:59";
                 }
             }
-            List<WebWithdrawDTO> withdrawDTOList = iWithdrawDepositMapper.getWebWithdrawList(state, searchKey, beginDate, endDate);
+            List<WebWithdrawDTO> withdrawDTOList = iWithdrawDepositMapper.getWebWithdrawList(state,cityId, searchKey, beginDate, endDate);
             PageInfo pageResult = new PageInfo(withdrawDTOList);
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             for (WebWithdrawDTO webWithdrawDTO : withdrawDTOList) {

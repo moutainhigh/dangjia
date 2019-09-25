@@ -2,6 +2,7 @@ package com.dangjia.acg.controller.web.finance;
 
 import com.dangjia.acg.api.web.finance.WebSplitDeliverAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
@@ -28,7 +29,8 @@ public class WebSplitDeliverController implements WebSplitDeliverAPI {
     public ServerResponse getAllSplitDeliver(HttpServletRequest request, PageDTO pageDTO,
                                              Integer applyState, String searchKey,
                                              String beginDate, String endDate) {
-        return webSplitDeliverService.getAllSplitDeliver(pageDTO, applyState, searchKey, beginDate, endDate);
+        String cityId = request.getParameter(Constants.CITY_ID);
+        return webSplitDeliverService.getAllSplitDeliver(pageDTO, cityId, applyState, searchKey, beginDate, endDate);
     }
 
     @Override

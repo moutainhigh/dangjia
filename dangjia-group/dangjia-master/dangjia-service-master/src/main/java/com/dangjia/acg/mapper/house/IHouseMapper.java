@@ -60,7 +60,7 @@ public interface IHouseMapper extends Mapper<House> {
     int getBuildDay(@Param("houseId") String houseId);
 
 
-    List<DesignDTO> getHouseProfitList(@Param("villageId")  String villageId,@Param("visitState") String visitState, @Param("searchKey") String searchKey);
+    List<DesignDTO> getHouseProfitList(@Param("cityId")String cityId ,@Param("villageId")  String villageId,@Param("visitState") String visitState, @Param("searchKey") String searchKey);
 
     List<HouseProfitSummaryDTO> getHouseProfitSummary(@Param("houseId") String houseId);
 
