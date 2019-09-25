@@ -65,6 +65,7 @@ import com.dangjia.acg.service.core.HouseFlowService;
 import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -591,8 +592,7 @@ public class HouseService {
             List<WorkerType> workerTypeList = workerTypeMapper.selectByExample(example);
             for (WorkerType workerType : workerTypeList) {
                 List<String> workerTypes = new ArrayList<>();
-                workerTypes.add("wtId" + workerType.getId());
-//                workerTypes.add(house.getId());
+                workerTypes.add(DigestUtils.md5Hex("wtId" + workerType.getId()));
                 configMessageService.addConfigMessage(AppType.GONGJIANG, StringUtils.join(workerTypes, ","),
                         "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, 4, null, "您有新的装修订单，快去抢吧！");
             }
@@ -1793,7 +1793,7 @@ public class HouseService {
                 houseFlow.setWorkType(5);//待业主支付
                 houseFlow.setModifyDate(new Date());
                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
-                configMessageService.addConfigMessage(AppType.GONGJIANG, "wtId3" + houseFlow.getCityId(),
+                configMessageService.addConfigMessage(AppType.GONGJIANG, DigestUtils.md5Hex("wtId3" + houseFlow.getCityId()),
                         "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, 4, null, "您有新的装修订单，快去抢吧！");
                 //推送消息给业主等待大管家抢单
                 configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(),
@@ -2480,7 +2480,7 @@ public class HouseService {
 
             String cityId = request.getParameter(Constants.CITY_ID);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<DesignDTO> houseList = iHouseMapper.getHouseProfitList(cityId,villageId, visitState, searchKey);
+            List<DesignDTO> houseList = iHouseMapper.getHouseProfitList(cityId, villageId, visitState, searchKey);
             if (houseList.size() <= 0) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode()
                         , "查无数据");
