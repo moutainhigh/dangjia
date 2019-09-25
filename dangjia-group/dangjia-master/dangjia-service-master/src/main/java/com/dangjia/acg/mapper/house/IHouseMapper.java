@@ -33,25 +33,25 @@ public interface IHouseMapper extends Mapper<House> {
      */
     List<House> getAllHouseByVisitState(@Param("visitState") Integer visitState);
 
-    List<House> getByLikeAddress(@Param("cityId") String cityId,@Param("likeAddress") String likeAddress,@Param("startDate") String startDate, @Param("endDate") String endDate);
+    List<House> getByLikeAddress(@Param("cityId") String cityId, @Param("likeAddress") String likeAddress, @Param("startDate") String startDate, @Param("endDate") String endDate);
 
-    List<DesignDTO> getDesignList(@Param("designerType") int designerType, @Param("cityKey") String cityKey,@Param("searchKey") String searchKey,@Param("workerKey") String workerKey, @Param("dataStatus") String dataStatus);
+    List<DesignDTO> getDesignList(@Param("designerType") int designerType, @Param("cityKey") String cityKey, @Param("searchKey") String searchKey, @Param("workerKey") String workerKey, @Param("dataStatus") String dataStatus);
 
     List<House> getSameLayout(@Param("cityId") String cityId, @Param("villageId") String villageId,
                               @Param("minSquare") Double minSquare, @Param("maxSquare") Double maxSquare, @Param("houseType") Integer houseType);
 
     List<House> getSameLayoutDistance(@Param("cityId") String cityId, @Param("locationx") String locationx, @Param("locationy") String locationy,
-                              @Param("minSquare") Double minSquare, @Param("maxSquare") Double maxSquare, @Param("villageId") String villageId);
+                                      @Param("minSquare") Double minSquare, @Param("maxSquare") Double maxSquare, @Param("villageId") String villageId);
 
     List<House> getReferenceBudget(@Param("cityId") String cityId, @Param("villageId") String villageId, @Param("houseType") Integer houseType,
                                    @Param("minSquare") Double minSquare, @Param("maxSquare") Double maxSquare);
 
 
-    List<HouseListDTO> getActuaryAll(@Param("cityId")String cityId ,@Param("budgetOk") String budgetOk, @Param("searchKey") String searchKey,@Param("workerKey") String workerKey, @Param("dataStatus") String dataStatus);
+    List<HouseListDTO> getActuaryAll(@Param("cityId") String cityId, @Param("budgetOk") String budgetOk, @Param("searchKey") String searchKey, @Param("workerKey") String workerKey, @Param("dataStatus") String dataStatus);
 
-    List<HouseListDTO> getHouseList(@Param("cityKey")  String cityKey,@Param("userKey") String userKey,@Param("memberId") String memberId, @Param("visitState") Integer visitState, @Param("startDate") String startDate, @Param("endDate") String endDate, @Param("orderBy") String orderBy, @Param("searchKey") String searchKey);
+    List<HouseListDTO> getHouseList(@Param("cityKey") String cityKey, @Param("userKey") String userKey, @Param("memberId") String memberId, @Param("visitState") Integer visitState, @Param("startDate") String startDate, @Param("endDate") String endDate, @Param("orderBy") String orderBy, @Param("searchKey") String searchKey);
 
-    List<House> getHouseListLikeSearchKey(@Param("cityKey")  String cityKey,@Param("visitState") Integer visitState, @Param("searchKey") String searchKey,@Param("startDate") String startDate, @Param("endDate") String endDate, @Param("supKey") String supKey);
+    List<House> getHouseListLikeSearchKey(@Param("cityKey") String cityKey, @Param("visitState") Integer visitState, @Param("searchKey") String searchKey, @Param("startDate") String startDate, @Param("endDate") String endDate, @Param("supKey") String supKey);
 
     Date getHouseDateByMemberId(@Param("memberId") String memberId);
 
@@ -60,11 +60,11 @@ public interface IHouseMapper extends Mapper<House> {
     int getBuildDay(@Param("houseId") String houseId);
 
 
-    List<DesignDTO> getHouseProfitList(@Param("villageId")  String villageId,@Param("visitState") String visitState, @Param("searchKey") String searchKey);
+    List<DesignDTO> getHouseProfitList(@Param("cityId") String cityId, @Param("villageId") String villageId, @Param("visitState") String visitState, @Param("searchKey") String searchKey);
 
     List<HouseProfitSummaryDTO> getHouseProfitSummary(@Param("houseId") String houseId);
 
-    List<House> getRecommended(@Param("latitude")  String latitude,@Param("longitude") String longitude, @Param("limit") Integer limit);
+    List<House> getRecommended(@Param("latitude") String latitude, @Param("longitude") String longitude, @Param("limit") Integer limit);
 
 
     House queryPromotionListHouse(@Param("memberId") String memberId);

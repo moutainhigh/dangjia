@@ -87,9 +87,11 @@
         s.store_name storeName
         FROM
         dj_pay_business_order AS a
+        INNER JOIN dj_member AS d ON d.id = a.member_id
+        INNER JOIN ( SELECT c.member_id, GROUP_CONCAT( c.city_id ) city_id,c.city_name  FROM dj_member_city c GROUP BY c.member_id )
+        mt ON mt.member_id = d.id AND FIND_IN_SET(#{cityId}, mt.city_id )
         LEFT JOIN dj_pay_pay_order AS b ON b.number = a.pay_order_number
         LEFT JOIN dj_house AS c ON a.house_id = c.id
-        LEFT JOIN dj_member AS d ON d.id = c.member_id
         LEFT JOIN dj_store s ON FIND_IN_SET(
         c.village_id,
         s.villages
