@@ -2,6 +2,9 @@ package com.dangjia.acg.util;
 
 import com.dangjia.acg.dto.core.ButtonListBean;
 
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -91,4 +94,20 @@ public class Utils {
         return heads[r.nextInt(heads.length)];
     }
 
+    public static String md5(String string) {
+        byte[] hash;
+        try {
+            hash = MessageDigest.getInstance("MD5").digest(string.getBytes("UTF-8"));
+        } catch (NoSuchAlgorithmException e) {
+            return string;
+        } catch (UnsupportedEncodingException e) {
+            return string;
+        }
+        StringBuilder hex = new StringBuilder(hash.length * 2);
+        for (byte b : hash) {
+            if ((b & 0xFF) < 0x10) hex.append("0");
+            hex.append(Integer.toHexString(b & 0xFF));
+        }
+        return hex.toString();
+    }
 }
