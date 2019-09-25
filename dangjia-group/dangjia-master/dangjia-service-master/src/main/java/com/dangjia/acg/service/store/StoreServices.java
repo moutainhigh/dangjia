@@ -3,10 +3,7 @@ package com.dangjia.acg.service.store;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.common.util.BeanUtils;
-import com.dangjia.acg.common.util.CommonUtil;
-import com.dangjia.acg.common.util.GaoDeUtils;
-import com.dangjia.acg.common.util.JsmsUtil;
+import com.dangjia.acg.common.util.*;
 import com.dangjia.acg.dto.house.DesignDTO;
 import com.dangjia.acg.dto.repair.HouseProfitSummaryDTO;
 import com.dangjia.acg.mapper.house.IHouseMapper;
@@ -271,6 +268,20 @@ public class StoreServices {
                 temp_para.put("phone",store.getReservationNumber());
                 //给预约客户发送短信
                 JsmsUtil.sendSMS(customerPhone, "167166", temp_para);
+
+
+                if(!CommonUtil.isEmpty(store.getUserId())) {
+                    //店长推送消息
+                    MainUser user = userMapper.selectByPrimaryKey(store.getUserId());
+                    temp_para = new HashMap();
+                    temp_para.put("store_name", storeSubscribe.getStoreName());
+                    temp_para.put("modify_date", DateUtil.getDateString2(modifyDate == null ? storeSubscribe.getCreateDate().getTime() : modifyDate.getTime()));
+                    temp_para.put("customer_name", storeSubscribe.getCustomerName());
+                    temp_para.put("customer_phone", storeSubscribe.getCustomerPhone());
+                    //给预约客户发送短信
+                    JsmsUtil.sendSMS(user.getMobile(), "170458", temp_para);
+                }
+
             }
             return ServerResponse.createBySuccessMessage("预约成功");
         } catch (Exception e) {
