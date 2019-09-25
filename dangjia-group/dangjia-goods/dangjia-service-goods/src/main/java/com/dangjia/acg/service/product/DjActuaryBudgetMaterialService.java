@@ -254,8 +254,8 @@ public class DjActuaryBudgetMaterialService {
      */
     public ServerResponse queryMakeBudgetsList(String bclId, String categoryId, String houseId) {
 
-//        String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-        String imageAddress ="";
+        String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+//        String imageAddress ="";
         BasicsGoodArrDTO basicsGoodArrDTO = new BasicsGoodArrDTO();
         Example example = new Example(DjBasicsGoods.class);
         example.createCriteria().andEqualTo(DjBasicsGoods.CATEGORY_ID, categoryId);
