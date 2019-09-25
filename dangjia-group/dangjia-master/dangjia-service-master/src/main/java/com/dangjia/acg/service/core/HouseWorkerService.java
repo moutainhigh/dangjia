@@ -316,7 +316,7 @@ public class HouseWorkerService {
                 memberCityMapper.insert(userCity);
             }
             example = new Example(Insurance.class);
-            example.createCriteria().andEqualTo(Insurance.WORKER_ID, houseWorker.getWorkerId());
+            example.createCriteria().andEqualTo(Insurance.WORKER_ID, houseWorker.getWorkerId()).andIsNotNull(Insurance.END_DATE);
             example.orderBy(Insurance.END_DATE).desc();
             List<Insurance> insurances = insuranceMapper.selectByExample(example);
 

@@ -439,7 +439,7 @@ public class HouseFlowService {
         for (HouseWorker houseWorker : hwList) {
             if (DateUtil.addDateMinutes(houseWorker.getCreateDate(), 30).getTime() <= (new Date()).getTime()) {
                 example = new Example(Insurance.class);
-                example.createCriteria().andEqualTo(Insurance.WORKER_ID, houseWorker.getWorkerId());
+                example.createCriteria().andEqualTo(Insurance.WORKER_ID, houseWorker.getWorkerId()).andIsNotNull(Insurance.END_DATE);
                 example.orderBy(Insurance.END_DATE).desc();
                 List<Insurance> insurances = insuranceMapper.selectByExample(example);
 
@@ -478,7 +478,7 @@ public class HouseFlowService {
         List<HouseWorker> hwList = houseWorkerMapper.getWorkerHouse();
         for (HouseWorker houseWorker : hwList) {
             Example example = new Example(Insurance.class);
-            example.createCriteria().andEqualTo(Insurance.WORKER_ID, houseWorker.getWorkerId());
+            example.createCriteria().andEqualTo(Insurance.WORKER_ID, houseWorker.getWorkerId()).andIsNotNull(Insurance.END_DATE);
             example.orderBy(Insurance.END_DATE).desc();
             List<Insurance> insurances = insuranceMapper.selectByExample(example);
 
