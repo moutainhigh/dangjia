@@ -22,4 +22,8 @@ public class GoodsItemDTO {
     private Double backCount;//退货
     private Double surCount;//剩余数量
     private double tolPrice; //实际花费
+    /**
+     * 品牌名称
+     */
+    private String brandName;
 }

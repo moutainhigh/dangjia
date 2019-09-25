@@ -30,6 +30,9 @@ public interface DjBasicsProductAPI {
                                     @RequestParam("name")String name);
 
 
+    @PostMapping("/app/product/djBasicsProduct/getNewValueNameArr")
+    @ApiOperation(value = "根据货品id查询规格", notes = "根据货品id查询规格")
+    String getNewValueNameArr(@RequestParam("valueIdArr")String valueIdArr);
 
 
     @PostMapping("/product/djBasicsProduct/queryProductLabels")
@@ -44,8 +47,7 @@ public interface DjBasicsProductAPI {
 
     @PostMapping("app/product/queryDataByProductId")
     @ApiOperation(value = "根据货品编号查看商品详情", notes = "根据货品编号查看商品详情")
-    ServerResponse queryDataByProductId(@RequestParam("request")HttpServletRequest request,
-                                    @RequestParam("productId")String productId);
+    DjBasicsProduct queryDataByProductId(@RequestParam("productId")String productId);
 
 
     @PostMapping("/product/djBasicsProduct/saveBasicsGoods")

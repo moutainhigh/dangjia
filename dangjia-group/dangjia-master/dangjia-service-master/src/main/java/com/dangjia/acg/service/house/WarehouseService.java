@@ -5,6 +5,7 @@ import com.dangjia.acg.api.actuary.ActuaryOpeAPI;
 import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
 import com.dangjia.acg.api.basics.GoodsCategoryAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
+import com.dangjia.acg.api.product.DjBasicsProductAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
@@ -80,7 +81,8 @@ public class WarehouseService {
     @Autowired
     private IMendMaterialMapper mendMaterielMapper;
 
-
+    @Autowired
+    private DjBasicsProductAPI djBasicsProductAPI;
     private static Logger LOG = LoggerFactory.getLogger(WarehouseService.class);
 
 
@@ -246,6 +248,14 @@ public class WarehouseService {
                                 warehouseDTO.setChangeType(1);
                             }
                         }
+
+                        //品牌+规格
+                        String brandName=forMasterAPI.brandName("",warehouse.getProductId());  //通过商品id去关联，然后组合商品名称
+                        DjBasicsProduct djBasicsProduct=djBasicsProductAPI.queryDataByProductId(warehouse.getProductId());  //通过商品id去关联规格
+                        String valueIdArr=djBasicsProduct.getValueIdArr();
+                        String guige=djBasicsProductAPI.getNewValueNameArr(valueIdArr);
+                        warehouseDTO.setBrandName(brandName+" "+guige);
+
                         warehouseDTOS.add(warehouseDTO);
                         rowPrice = rowPrice.add(new BigDecimal(warehouseDTO.getTolPrice()));
                     }
