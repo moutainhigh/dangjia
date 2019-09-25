@@ -2,6 +2,9 @@ package com.dangjia.acg.util;
 
 import com.dangjia.acg.dto.core.ButtonListBean;
 
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -75,9 +78,9 @@ public class Utils {
     }
 
 
-    public static String getCustomerDetails(String memberId, String clueId, Integer phaseStatus, String stage , String listType ,String storeId) {
+    public static String getCustomerDetails(String memberId, String clueId, Integer phaseStatus, String stage, String listType, String storeId) {
         return String.format("customerDetails?title=客户详情&memberId=%s&clueId=%s&phaseStatus=%s&stage=%s&listType=%s&storeId=%s",
-                memberId, clueId, phaseStatus + "", stage , listType ,storeId);
+                memberId, clueId, phaseStatus + "", stage, listType, storeId);
     }
 
     /**
@@ -89,5 +92,22 @@ public class Utils {
         String[] heads = {"qrcode/img_tx01.png", "qrcode/img_tx02.png", "qrcode/img_tx03.png", "qrcode/img_tx04.png", "qrcode/img_tx05.png"};
         Random r = new Random();
         return heads[r.nextInt(heads.length)];
+    }
+
+    public static String md5(String string) {
+        byte[] hash;
+        try {
+            hash = MessageDigest.getInstance("MD5").digest(string.getBytes("UTF-8"));
+        } catch (NoSuchAlgorithmException e) {
+            return string;
+        } catch (UnsupportedEncodingException e) {
+            return string;
+        }
+        StringBuilder hex = new StringBuilder(hash.length * 2);
+        for (byte b : hash) {
+            if ((b & 0xFF) < 0x10) hex.append("0");
+            hex.append(Integer.toHexString(b & 0xFF));
+        }
+        return hex.toString();
     }
 }
