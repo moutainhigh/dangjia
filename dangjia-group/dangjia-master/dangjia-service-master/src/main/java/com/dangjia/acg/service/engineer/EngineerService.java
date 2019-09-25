@@ -794,7 +794,7 @@ public class EngineerService {
                     }
                 }
                 Example example = new Example(Insurance.class);
-                example.createCriteria().andEqualTo(Insurance.WORKER_ID, member.getId());
+                example.createCriteria().andEqualTo(Insurance.WORKER_ID, member.getId()).andIsNotNull(Insurance.END_DATE);
                 example.orderBy(Insurance.END_DATE).desc();
                 List<Insurance> insurances = insuranceMapper.selectByExample(example);
 

@@ -487,7 +487,7 @@ public class HouseFlowService {
             if (insurances.size() > 0) {
                 daynum = DateUtil.daysofTwo(new Date(), insurances.get(0).getEndDate());
             }
-            //工人未购买保险
+            //工人未购买保险-不首保，只续保
             if (houseWorker.getWorkerType() > 2 && (insurances.size() > 0 & daynum <= 0)) {
                 Member operator = memberMapper.selectByPrimaryKey(houseWorker.getWorkerId());
                 if (operator != null) {

@@ -66,6 +66,7 @@ import com.dangjia.acg.service.core.HouseFlowService;
 import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -581,13 +582,12 @@ public class HouseService {
         djAlreadyRobSingleMapper.upDateDataStatus(mm);
 
 
-
         /**
          * 业绩结算下单提成
          */
         MainUser user = userMapper.selectByPrimaryKey(userId);
-        if(user!=null&& !CommonUtil.isEmpty(user.getMemberId())) {
-            if(!CommonUtil.isEmpty(userId)) {
+        if (user != null && !CommonUtil.isEmpty(user.getMemberId())) {
+            if (!CommonUtil.isEmpty(userId)) {
                 Example example = new Example(DjAreaMatch.class);
                 example.createCriteria().andEqualTo(DjAreaMatch.VILLAGE_ID, houseDTO.getVillageId())
                         .andEqualTo(DjAreaMatch.BUILDING_NAME, houseDTO.getBuilding());
@@ -611,8 +611,7 @@ public class HouseService {
             List<WorkerType> workerTypeList = workerTypeMapper.selectByExample(example);
             for (WorkerType workerType : workerTypeList) {
                 List<String> workerTypes = new ArrayList<>();
-                workerTypes.add("wtId" + workerType.getId());
-//                workerTypes.add(house.getId());
+                workerTypes.add(Utils.md5("wtId" + workerType.getId()));
                 configMessageService.addConfigMessage(AppType.GONGJIANG, StringUtils.join(workerTypes, ","),
                         "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, 4, null, "您有新的装修订单，快去抢吧！");
             }
@@ -745,7 +744,7 @@ public class HouseService {
                                     .andEqualTo(Clue.DATA_STATUS, 0)
                                     .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
                             List<Clue> djAlreadyRobSingle1 = clueMapper.selectByExample(example2);
-                            if (djAlreadyRobSingle1.size()>0) {
+                            if (djAlreadyRobSingle1.size() > 0) {
                                 //消息推送
                                 MainUser user = userMapper.selectByPrimaryKey(userId);
                                 String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
@@ -760,7 +759,7 @@ public class HouseService {
                                     .andEqualTo(Clue.DATA_STATUS, 0)
                                     .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
                             List<Clue> djAlreadyRobSingle2 = clueMapper.selectByExample(example3);
-                            if (djAlreadyRobSingle2.size()>0) {
+                            if (djAlreadyRobSingle2.size() > 0) {
                                 //消息推送
                                 MainUser user1 = userMapper.selectByPrimaryKey(userId2);
                                 String url1 = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
@@ -812,7 +811,7 @@ public class HouseService {
                                             .andEqualTo(Clue.DATA_STATUS, 0)
                                             .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
                                     List<Clue> djAlreadyRobSingle1 = clueMapper.selectByExample(example2);
-                                    if (djAlreadyRobSingle1.size()>0) {
+                                    if (djAlreadyRobSingle1.size() > 0) {
                                         //消息推送
                                         MainUser user = userMapper.selectByPrimaryKey(userId);
                                         String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
@@ -828,7 +827,7 @@ public class HouseService {
                                             .andEqualTo(Clue.DATA_STATUS, 0)
                                             .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
                                     List<Clue> djAlreadyRobSingle2 = clueMapper.selectByExample(example3);
-                                    if (djAlreadyRobSingle2.size()>0) {
+                                    if (djAlreadyRobSingle2.size() > 0) {
                                         //消息推送
                                         MainUser user1 = userMapper.selectByPrimaryKey(userId2);
                                         String url1 = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
@@ -930,7 +929,7 @@ public class HouseService {
                     .andEqualTo(Clue.DATA_STATUS, 0)
                     .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
             List<Clue> djAlreadyRobSingle1 = clueMapper.selectByExample(example2);
-            if (djAlreadyRobSingle1.size()>0) {
+            if (djAlreadyRobSingle1.size() > 0) {
                 //消息推送
                 MainUser user = userMapper.selectByPrimaryKey(userId);
                 String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
@@ -991,7 +990,7 @@ public class HouseService {
                             .andEqualTo(Clue.DATA_STATUS, 0)
                             .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
                     List<Clue> djAlreadyRobSingle1 = clueMapper.selectByExample(example2);
-                    if (djAlreadyRobSingle1.size()>0) {
+                    if (djAlreadyRobSingle1.size() > 0) {
                         //消息推送
                         MainUser user = userMapper.selectByPrimaryKey(userId);
                         String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
@@ -1090,7 +1089,7 @@ public class HouseService {
                 .andEqualTo(Clue.DATA_STATUS, 0)
                 .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
         List<Clue> djAlreadyRobSingle1 = clueMapper.selectByExample(example2);
-        if (djAlreadyRobSingle1.size()>0) {
+        if (djAlreadyRobSingle1.size() > 0) {
             //消息推送
             MainUser user = userMapper.selectByPrimaryKey(userId);
             String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
@@ -1488,7 +1487,7 @@ public class HouseService {
                             .andEqualTo(Clue.DATA_STATUS, 0)
                             .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
                     List<Clue> djAlreadyRobSingle1 = clueMapper.selectByExample(example2);
-                    if (djAlreadyRobSingle1.size()>0) {
+                    if (djAlreadyRobSingle1.size() > 0) {
                         //消息推送
                         MainUser user = userMapper.selectByPrimaryKey(userId);
                         String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
@@ -1605,10 +1604,10 @@ public class HouseService {
                 .andEqualTo(Clue.DATA_STATUS, 0)
                 .andEqualTo(Clue.MEMBER_ID, customer.getMemberId());
         List<Clue> djAlreadyRobSingle1 = clueMapper.selectByExample(example2);
-        if (djAlreadyRobSingle1.size()>0) {
+        if (djAlreadyRobSingle1.size() > 0) {
             //消息推送
             MainUser user = userMapper.selectByPrimaryKey(userId);
-            if(user!=null&& CommonUtil.isEmpty(user.getMemberId())) {
+            if (user != null && CommonUtil.isEmpty(user.getMemberId())) {
                 String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
                 configMessageService.addConfigMessage(AppType.SALE, user.getMemberId(), "开工提醒",
                         "您有已确认开工的客户【" + house.getHouseName() + "】", 0, url
@@ -1798,7 +1797,7 @@ public class HouseService {
             example.createCriteria().andEqualTo(Clue.MEMBER_ID, member.getId())
                     .andIsNull(Clue.CUS_SERVICE);
             List<Clue> clues = clueMapper.selectByExample(example);
-            if(clues.size()>0) {
+            if (clues.size() > 0) {
                 djOrderSurface.setClueId(clues.get(0).getId());
                 djOrderSurfaceMapper.insert(djOrderSurface);
             }
@@ -1949,7 +1948,7 @@ public class HouseService {
                 houseFlow.setWorkType(2);//待抢单
                 houseFlow.setReleaseTime(new Date());//发布时间
                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
-                configMessageService.addConfigMessage(AppType.GONGJIANG, "wtId3" + houseFlow.getCityId(),
+                configMessageService.addConfigMessage(AppType.GONGJIANG, Utils.md5("wtId3" + houseFlow.getCityId()),
                         "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, 4, null, "您有新的装修订单，快去抢吧！");
                 //推送消息给业主等待大管家抢单
                 configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(),
@@ -2641,8 +2640,9 @@ public class HouseService {
      */
     public ServerResponse getHouseProfitList(HttpServletRequest request, PageDTO pageDTO, String villageId, String visitState, String searchKey) {
         try {
+            String cityId = request.getParameter(Constants.CITY_ID);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<DesignDTO> houseList = iHouseMapper.getHouseProfitList(villageId, visitState, searchKey);
+            List<DesignDTO> houseList = iHouseMapper.getHouseProfitList(cityId,villageId, visitState, searchKey);
             if (houseList.size() <= 0) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode()
                         , "查无数据");

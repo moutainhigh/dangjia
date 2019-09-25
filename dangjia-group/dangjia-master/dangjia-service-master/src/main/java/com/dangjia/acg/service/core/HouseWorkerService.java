@@ -44,6 +44,7 @@ import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.house.HouseService;
 import com.dangjia.acg.service.worker.EvaluateService;
+import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1031,7 +1032,8 @@ public class HouseWorkerService {
             houseFlow.setWorkType(2);
             houseFlow.setReleaseTime(new Date());//发布时间
             houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
-            configMessageService.addConfigMessage(AppType.GONGJIANG, "wtId" + houseFlow.getWorkerType() + houseFlow.getCityId(),
+            configMessageService.addConfigMessage(AppType.GONGJIANG,
+                    Utils.md5("wtId" + houseFlow.getWorkerType() + houseFlow.getCityId()),
                     "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, 4, null, "您有新的装修订单，快去抢吧！");
             return ServerResponse.createBySuccessMessage("提前进场成功");
         } catch (Exception e) {
