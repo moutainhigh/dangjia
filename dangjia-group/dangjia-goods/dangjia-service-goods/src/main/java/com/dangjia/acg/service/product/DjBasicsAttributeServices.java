@@ -42,15 +42,14 @@ public class DjBasicsAttributeServices {
     private DjBasicsProductMaterialMapper djBasicsProductMaterialMapper;
 
 
-
     //根据类别id查询关联属性
     public ServerResponse<PageInfo> queryGoodsAttribute(PageDTO pageDTO, String goodsCategoryId, String likeAttrName) {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         try {
-            List<DjBasicsAttribute> caList  = djBasicsAttributeMapper.queryAttributeByCategoryId(goodsCategoryId, likeAttrName);
+            List<DjBasicsAttribute> caList = djBasicsAttributeMapper.queryAttributeByCategoryId(goodsCategoryId, likeAttrName);
             List<Map<String, Object>> rListMap = new ArrayList<>();
             PageInfo pageResult = new PageInfo(caList);
-            caList.forEach(ca ->{
+            caList.forEach(ca -> {
                 Map<String, Object> caMap = new HashMap<>();
                 caMap.put("id", ca.getId());
                 caMap.put("name", ca.getName());
@@ -60,7 +59,7 @@ public class DjBasicsAttributeServices {
                 caMap.put("modifyDate", sdf.format(ca.getModifyDate()));
                 List<DjBasicsAttributeValuePO> avList = djBasicsAttributeValueMapper.queryPOByAttributeId(ca.getId());
                 List<Map<String, Object>> avListMap = new ArrayList<>();
-                avList.forEach(av ->{
+                avList.forEach(av -> {
                     Map<String, Object> avMap = new HashMap<>();
                     avMap.put("avId", av.getId());
                     avMap.put("avName", av.getName());
@@ -87,8 +86,8 @@ public class DjBasicsAttributeServices {
             if (name == null || "".equals(name)) {
                 caList = djBasicsAttributeMapper.selectAll();
             } else {
-                Example example=new Example(DjBasicsAttribute.class);
-                example.createCriteria().andLike(DjBasicsAttribute.NAME,"%" + name + "%");
+                Example example = new Example(DjBasicsAttribute.class);
+                example.createCriteria().andLike(DjBasicsAttribute.NAME, "%" + name + "%");
                 example.orderBy(DjBasicsAttribute.CREATE_DATE).desc();
                 caList = djBasicsAttributeMapper.selectByExample(example);
             }
@@ -101,8 +100,8 @@ public class DjBasicsAttributeServices {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 caMap.put("createDate", sdf.format(ca.getCreateDate()));
                 caMap.put("modifyDate", sdf.format(ca.getModifyDate()));
-                Example example=new Example(DjBasicsAttributeValue.class);
-                example.createCriteria().andEqualTo(DjBasicsAttributeValue.ATTRIBUTE_ID,ca.getId());
+                Example example = new Example(DjBasicsAttributeValue.class);
+                example.createCriteria().andEqualTo(DjBasicsAttributeValue.ATTRIBUTE_ID, ca.getId());
                 example.orderBy(DjBasicsAttributeValue.CREATE_DATE).desc();
                 List<DjBasicsAttributeValue> avList = djBasicsAttributeValueMapper.selectByExample(example);
                 List<Map<String, Object>> avListMap = new ArrayList<>();
@@ -133,8 +132,8 @@ public class DjBasicsAttributeServices {
                 gaMap.put("id", goodsAttribute.getId());
                 gaMap.put("name", goodsAttribute.getName());
                 gaMap.put("type", goodsAttribute.getType());
-                Example example=new Example(DjBasicsAttributeValue.class);
-                example.createCriteria().andEqualTo(DjBasicsAttributeValue.ATTRIBUTE_ID,goodsAttribute.getId());
+                Example example = new Example(DjBasicsAttributeValue.class);
+                example.createCriteria().andEqualTo(DjBasicsAttributeValue.ATTRIBUTE_ID, goodsAttribute.getId());
                 example.orderBy(DjBasicsAttributeValue.CREATE_DATE).desc();
                 List<DjBasicsAttributeValue> avList = djBasicsAttributeValueMapper.selectByExample(example);
                 List<Map<String, Object>> avListMap = new ArrayList<>();
@@ -198,7 +197,7 @@ public class DjBasicsAttributeServices {
 
     //修改属性及其属性选项
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse updateGoodsAttribute(String attributeId, String attributeName, Integer type, String jsonStr ,Integer isScreenConditions) {
+    public ServerResponse updateGoodsAttribute(String attributeId, String attributeName, Integer type, String jsonStr, Integer isScreenConditions) {
         try {
             DjBasicsAttribute djBasicsAttribute = djBasicsAttributeMapper.selectByPrimaryKey(attributeId);
             LOG.info("doModifyGoodsAttribute::::Id: " + attributeId + " name:" + attributeName);
@@ -228,8 +227,8 @@ public class DjBasicsAttributeServices {
                     }
                 }
                 int useCount = 0;
-                Example example=new Example(DjBasicsAttributeValue.class);
-                example.createCriteria().andEqualTo(DjBasicsAttributeValue.ATTRIBUTE_ID,attributeId);
+                Example example = new Example(DjBasicsAttributeValue.class);
+                example.createCriteria().andEqualTo(DjBasicsAttributeValue.ATTRIBUTE_ID, attributeId);
                 example.orderBy(DjBasicsAttributeValue.CREATE_DATE).desc();
                 List<DjBasicsAttributeValue> djBasicsAttributeValues = djBasicsAttributeValueMapper.selectByExample(example);
                 for (DjBasicsAttributeValue djBasicsAttributeValue : djBasicsAttributeValues) {
@@ -290,7 +289,7 @@ public class DjBasicsAttributeServices {
 //				LOG.info("gs name:"+ gs.getName());
                 //检查属性名已经存在   属性名是否有商品使用
                 List<DjBasicsProduct> productList = djBasicsProductMapper.queryByGoodsId(gs.getId());
-                Example example=new Example(DjBasicsProductMaterial.class);
+                Example example = new Example(DjBasicsProductMaterial.class);
                 String[] attributeIdArr = gs.getAttributeIdArr().split(",");
                 for (String anAttributeIdArr : attributeIdArr) {
                     DjBasicsAttribute ae = djBasicsAttributeMapper.selectByPrimaryKey(anAttributeIdArr);
@@ -300,8 +299,8 @@ public class DjBasicsAttributeServices {
             }
 
             djBasicsAttributeMapper.deleteByPrimaryKey(goodsAttributeId);//删除商品属性
-            Example example=new Example(DjBasicsAttributeValue.class);
-            example.createCriteria().andEqualTo(DjBasicsAttributeValue.ATTRIBUTE_ID,goodsAttributeId);
+            Example example = new Example(DjBasicsAttributeValue.class);
+            example.createCriteria().andEqualTo(DjBasicsAttributeValue.ATTRIBUTE_ID, goodsAttributeId);
             djBasicsAttributeValueMapper.deleteByExample(example);//删除属性选项
             return ServerResponse.createBySuccessMessage("删除成功");
         } catch (Exception e) {
@@ -315,8 +314,8 @@ public class DjBasicsAttributeServices {
         try {
             DjBasicsAttributeValue djBasicsAttributeValue = djBasicsAttributeValueMapper.selectByPrimaryKey(attributeValueId);
             DjBasicsAttribute djBasicsAttribute = djBasicsAttributeMapper.selectByPrimaryKey(djBasicsAttributeValue.getAttributeId());
-            Example example=new Example(DjBasicsGoods.class);
-            example.createCriteria().andEqualTo(DjBasicsGoods.CATEGORY_ID,djBasicsAttribute.getCategoryId());
+            Example example = new Example(DjBasicsGoods.class);
+            example.createCriteria().andEqualTo(DjBasicsGoods.CATEGORY_ID, djBasicsAttribute.getCategoryId());
             example.orderBy(DjBasicsGoods.CREATE_DATE).desc();
             List<DjBasicsGoods> djBasicsGoods = djBasicsGoodsMapper.selectByExample(example);
             if (djBasicsGoods.size() > 0)

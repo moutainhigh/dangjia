@@ -32,13 +32,14 @@ public class DjBasicsActuarialConfigurationServices {
 
     /**
      * 添加配置
+     *
      * @param jsonStr
      * @return
      */
     public ServerResponse addConfiguration(String jsonStr) {
         try {
             JSONObject villageObj = JSONObject.parseObject(jsonStr);
-            String phaseId=villageObj.getString("phaseId");
+            String phaseId = villageObj.getString("phaseId");
             //遍历标商品配置对象 数组  ， 一个阶段 对应 多个配置对象
             String djBasicsActuarialConfigurationList = villageObj.getString("djBasicsActuarialConfigurationList");
             JSONArray productLabelValArr = JSONArray.parseArray(djBasicsActuarialConfigurationList);
@@ -85,14 +86,15 @@ public class DjBasicsActuarialConfigurationServices {
 
     /**
      * 查询配置
+     *
      * @return
      */
     public ServerResponse queryConfiguration() {
         try {
             List<DjBasicsActuarialConfigurationDTO> djBasicsActuarialConfigurationDTOS = djBasicsActuarialConfigurationMapper.queryConfiguration();
-            if(djBasicsActuarialConfigurationDTOS.size()<=0)
-                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
-            return ServerResponse.createBySuccess("查询成功",djBasicsActuarialConfigurationDTOS);
+            if (djBasicsActuarialConfigurationDTOS.size() <= 0)
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            return ServerResponse.createBySuccess("查询成功", djBasicsActuarialConfigurationDTOS);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
@@ -102,16 +104,17 @@ public class DjBasicsActuarialConfigurationServices {
 
     /**
      * 查询单个配置
+     *
      * @param phaseId
      * @return
      */
     public ServerResponse querySingleConfiguration(String phaseId) {
         try {
-            SingleConfigurationDTO singleConfigurationDTO=new SingleConfigurationDTO();
+            SingleConfigurationDTO singleConfigurationDTO = new SingleConfigurationDTO();
             singleConfigurationDTO.setPhaseId(phaseId);
             List<DjBasicsActuarialConfiguration> djBasicsActuarialConfigurations = djBasicsActuarialConfigurationMapper.querySingleConfiguration(phaseId);
             singleConfigurationDTO.setDjBasicsActuarialConfiguration(djBasicsActuarialConfigurations);
-            return ServerResponse.createBySuccess("查询成功",singleConfigurationDTO);
+            return ServerResponse.createBySuccess("查询成功", singleConfigurationDTO);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");

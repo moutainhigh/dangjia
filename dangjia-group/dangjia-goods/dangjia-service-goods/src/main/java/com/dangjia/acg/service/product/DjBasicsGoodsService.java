@@ -63,22 +63,24 @@ public class DjBasicsGoodsService {
 
     /**
      * 货品打标签
+     *
      * @param goodsId
      * @param labels
      * @return
      */
     public ServerResponse addLabels(String goodsId, String labels) {
-        DjBasicsGoods djBasicsGoods=new DjBasicsGoods();
+        DjBasicsGoods djBasicsGoods = new DjBasicsGoods();
         djBasicsGoods.setId(goodsId);
         djBasicsGoods.setLabelIds(labels);
         djBasicsGoodsMapper.updateByPrimaryKeySelective(djBasicsGoods);
-        Example example=new Example(DjBasicsProduct.class);
-        example.createCriteria().andEqualTo(DjBasicsProduct.GOODS_ID,goodsId);
-        DjBasicsProduct djBasicsProduct=new DjBasicsProduct();
+        Example example = new Example(DjBasicsProduct.class);
+        example.createCriteria().andEqualTo(DjBasicsProduct.GOODS_ID, goodsId);
+        DjBasicsProduct djBasicsProduct = new DjBasicsProduct();
         djBasicsProduct.setLabelId(labels);
-        djBasicsProductMapper.updateByExampleSelective(djBasicsProduct,example);
+        djBasicsProductMapper.updateByExampleSelective(djBasicsProduct, example);
         return ServerResponse.createBySuccessMessage("货品打标签成功");
     }
+
     /**
      * 保存货品信息
      * <p>Title: saveBasicsGoods</p>
@@ -112,27 +114,29 @@ public class DjBasicsGoodsService {
             iBasicsGoodsMapper.insert(goods);
             return ServerResponse.createBySuccess("新增成功", goods.getId());
         } catch (Exception e) {
-            LOG.error("新增货品失败：",e);
+            LOG.error("新增货品失败：", e);
             return ServerResponse.createByErrorMessage("新增失败");
         }
     }
-    @Transactional(rollbackFor = Exception.class)
-    public ServerResponse updateBasicsGoods(BasicsGoodsDTO basicsGoodsDTO){
-            String id = basicsGoodsDTO.getId();
-            String name = basicsGoodsDTO.getName();
-            BasicsGoods oldBasicsGoods = iBasicsGoodsMapper.selectByPrimaryKey(id);
-            if (!oldBasicsGoods.getName().equals(name)) {
-                List<BasicsGoods> goodsList = iBasicsGoodsMapper.queryByName(name);
-                if (goodsList.size() > 0)
-                    return ServerResponse.createByErrorMessage("该货品已存在");
-            }
-            BasicsGoods goods = getBasicsGoods(basicsGoodsDTO);
-            goods.setId(basicsGoodsDTO.getId());
-            iBasicsGoodsMapper.updateByPrimaryKeySelective(goods);
 
-            djBasicsProductMapper.updateProductCategoryByGoodsId(id,oldBasicsGoods.getCategoryId());
-            return ServerResponse.createBySuccessMessage("修改成功");
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse updateBasicsGoods(BasicsGoodsDTO basicsGoodsDTO) {
+        String id = basicsGoodsDTO.getId();
+        String name = basicsGoodsDTO.getName();
+        BasicsGoods oldBasicsGoods = iBasicsGoodsMapper.selectByPrimaryKey(id);
+        if (!oldBasicsGoods.getName().equals(name)) {
+            List<BasicsGoods> goodsList = iBasicsGoodsMapper.queryByName(name);
+            if (goodsList.size() > 0)
+                return ServerResponse.createByErrorMessage("该货品已存在");
+        }
+        BasicsGoods goods = getBasicsGoods(basicsGoodsDTO);
+        goods.setId(basicsGoodsDTO.getId());
+        iBasicsGoodsMapper.updateByPrimaryKeySelective(goods);
+
+        djBasicsProductMapper.updateProductCategoryByGoodsId(id, oldBasicsGoods.getCategoryId());
+        return ServerResponse.createBySuccessMessage("修改成功");
     }
+
     /**
      * 对象转换
      *
@@ -164,6 +168,7 @@ public class DjBasicsGoodsService {
         }
         return goods;
     }
+
     /**
      * 根据id删除goods和下面的商品信息
      *
@@ -174,17 +179,17 @@ public class DjBasicsGoodsService {
     public ServerResponse deleteBasicsGoods(String id) {
 //            if (true)
 //                return ServerResponse.createByErrorMessage("不能执行删除操作");
-            iBasicsGoodsMapper.deleteByPrimaryKey(id);
+        iBasicsGoodsMapper.deleteByPrimaryKey(id);
 
-            //删除材料商品扩展表信息
-            djBasicsProductMapper.deleteProductMaterial(id);
-            //删除人工商品扩展表信息
-            djBasicsProductMapper.deleteProductWorker(id);
-            //删除货品下的商品信息
-            Example example = new Example(DjBasicsProduct.class);
-            example.createCriteria().andEqualTo("goodsId", id);
-            djBasicsProductMapper.deleteByExample(example);
-            return ServerResponse.createBySuccessMessage("删除成功");
+        //删除材料商品扩展表信息
+        djBasicsProductMapper.deleteProductMaterial(id);
+        //删除人工商品扩展表信息
+        djBasicsProductMapper.deleteProductWorker(id);
+        //删除货品下的商品信息
+        Example example = new Example(DjBasicsProduct.class);
+        example.createCriteria().andEqualTo("goodsId", id);
+        djBasicsProductMapper.deleteByExample(example);
+        return ServerResponse.createBySuccessMessage("删除成功");
     }
 
     /**
@@ -198,12 +203,12 @@ public class DjBasicsGoodsService {
     public ServerResponse getBasicsGoodsByGid(String goodsId) {
         try {
             BasicsGoods basicsGoods = iBasicsGoodsMapper.queryById(goodsId);
-            Map goodsMap= BeanUtils.beanToMap(basicsGoods);
-            List<BasicsGoodsCategory> goodsCategoryList=getAllCategoryChildById(basicsGoods.getCategoryId());
-            goodsMap.put("goodsCategoryList",goodsCategoryList);
+            Map goodsMap = BeanUtils.beanToMap(basicsGoods);
+            List<BasicsGoodsCategory> goodsCategoryList = getAllCategoryChildById(basicsGoods.getCategoryId());
+            goodsMap.put("goodsCategoryList", goodsCategoryList);
             return ServerResponse.createBySuccess("查询成功", goodsMap);
         } catch (Exception e) {
-            LOG.error("getBasicsGoodsByGid查询失败：",e);
+            LOG.error("getBasicsGoodsByGid查询失败：", e);
             return ServerResponse.createByErrorMessage("查询失败");
 
         }
@@ -211,14 +216,16 @@ public class DjBasicsGoodsService {
 
     /**
      * 根据类别I查询当前类别父类下面的甩有子类信息
+     *
      * @param categoryId
      * @return
      */
-    private List<BasicsGoodsCategory> getAllCategoryChildById(String categoryId){
-        BasicsGoodsCategory basicsGoodsCategory=iBasicsGoodsCategoryMapper.selectByPrimaryKey(categoryId);
-        List<BasicsGoodsCategory> goodsCategoryList=iBasicsGoodsCategoryMapper.getAllCategoryChildById(basicsGoodsCategory.getParentTop());
+    private List<BasicsGoodsCategory> getAllCategoryChildById(String categoryId) {
+        BasicsGoodsCategory basicsGoodsCategory = iBasicsGoodsCategoryMapper.selectByPrimaryKey(categoryId);
+        List<BasicsGoodsCategory> goodsCategoryList = iBasicsGoodsCategoryMapper.getAllCategoryChildById(basicsGoodsCategory.getParentTop());
         return goodsCategoryList;
     }
+
     /**
      * 模糊查询goods及下属product
      *
@@ -244,7 +251,7 @@ public class DjBasicsGoodsService {
                 List<DjBasicsProduct> productList = djBasicsProductMapper.queryByGoodsId(goods.getId());
                 for (DjBasicsProduct p : productList) {
                     //type表示： 是否禁用  0：禁用；1不禁用 ;  -1全部默认
-                    if (type!=null&& !type.equals(p.getType()) && -1 != type) //不等于 type 的不返回给前端
+                    if (type != null && !type.equals(p.getType()) && -1 != type) //不等于 type 的不返回给前端
                         continue;
                     StringBuilder imgUrlStr = new StringBuilder();
                     StringBuilder imgStr = new StringBuilder();
@@ -253,12 +260,12 @@ public class DjBasicsGoodsService {
                         StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
                     }
                     p.setImage(imgStr.toString());
-                    DjBasicsProductMaterial djBasicsProductMaterial =djBasicsProductMaterialMapper.queryProductMaterialByProductId(p.getId());
+                    DjBasicsProductMaterial djBasicsProductMaterial = djBasicsProductMaterialMapper.queryProductMaterialByProductId(p.getId());
                     DjBasicsProductWorker djBasicsProductWorker = djBasicsProductWorkerMapper.queryProductWorkerByProductId(p.getId());
                     Map<String, Object> map = BeanUtils.beanToMap(p);
                     map.put("imageUrl", imgUrlStr.toString());
                     StringBuilder strNewValueNameArr = new StringBuilder();
-                    if(djBasicsProductMaterial!=null&&StringUtils.isNotBlank(djBasicsProductMaterial.getId())){
+                    if (djBasicsProductMaterial != null && StringUtils.isNotBlank(djBasicsProductMaterial.getId())) {
                         map.putAll(BeanUtils.beanToMap(djBasicsProductMaterial));
                         map.put("convertUnitName", iUnitMapper.selectByPrimaryKey(djBasicsProductMaterial.getConvertUnit()).getName());
                     }
@@ -277,7 +284,7 @@ public class DjBasicsGoodsService {
                         }
                     }
                     map.put("newValueNameArr", strNewValueNameArr.toString());
-                    if(djBasicsProductWorker!=null&&StringUtils.isNotBlank(djBasicsProductWorker.getId())){
+                    if (djBasicsProductWorker != null && StringUtils.isNotBlank(djBasicsProductWorker.getId())) {
                         map.putAll(BeanUtils.beanToMap(djBasicsProductWorker));
                     }
 

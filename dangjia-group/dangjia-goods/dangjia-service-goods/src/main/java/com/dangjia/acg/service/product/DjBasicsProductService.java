@@ -21,7 +21,6 @@ import com.dangjia.acg.mapper.basics.ITechnologyMapper;
 import com.dangjia.acg.mapper.basics.IUnitMapper;
 import com.dangjia.acg.mapper.product.*;
 import com.dangjia.acg.modle.attribute.AttributeValue;
-import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.product.*;
@@ -135,65 +134,65 @@ public class DjBasicsProductService {
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse insertBatchProduct(String productArr) {
 
-            JSONArray jsonArr = JSONArray.parseArray(productArr);
-            //1.商品作校验，校验前端传过来的商品是否符合条件
-            String resCheckStr = checkProductData(jsonArr);
-            if(StringUtils.isNotBlank(resCheckStr)){
-                return ServerResponse.createByErrorMessage(resCheckStr);
-            }
+        JSONArray jsonArr = JSONArray.parseArray(productArr);
+        //1.商品作校验，校验前端传过来的商品是否符合条件
+        String resCheckStr = checkProductData(jsonArr);
+        if(StringUtils.isNotBlank(resCheckStr)){
+            return ServerResponse.createByErrorMessage(resCheckStr);
+        }
 
-            //2.添加商品信息
-            for (int i = 0; i < jsonArr.size(); i++) {
-                JSONObject obj = jsonArr.getJSONObject(i);
-                BasicsProductDTO basicsProductDTO = JSONObject.toJavaObject(obj, BasicsProductDTO.class);
-                String goodsId=basicsProductDTO.getGoodsId();//货品ID
-                DjBasicsGoods basicsGoods = djBasicsGoodsMapper.selectByPrimaryKey(goodsId);//查询货品表信息，判断是人工还是材料商品新增
-                //2.1添加商品主表信息
-                String[] imgArr = basicsProductDTO.getImage().split(",");
+        //2.添加商品信息
+        for (int i = 0; i < jsonArr.size(); i++) {
+            JSONObject obj = jsonArr.getJSONObject(i);
+            BasicsProductDTO basicsProductDTO = JSONObject.toJavaObject(obj, BasicsProductDTO.class);
+            String goodsId=basicsProductDTO.getGoodsId();//货品ID
+            DjBasicsGoods basicsGoods = djBasicsGoodsMapper.selectByPrimaryKey(goodsId);//查询货品表信息，判断是人工还是材料商品新增
+            //2.1添加商品主表信息
+            String[] imgArr = basicsProductDTO.getImage().split(",");
 //                String[] technologyIds = obj.getString("technologyIds").split(",");//工艺节点
-                StringBuilder imgStr = new StringBuilder();
-                for (int j = 0; j < imgArr.length; j++) {
-                    String img = imgArr[j];
-                    if (j == imgArr.length - 1) {
-                        imgStr.append(img);
-                    } else {
-                        imgStr.append(img).append(",");
-                    }
-                }
-                if (!StringUtils.isNotBlank(imgStr.toString()))
-                    return ServerResponse.createByErrorMessage("商品图片不能为空");
-                LOG.info("001----------添加商品主表 start:" + basicsProductDTO.getName());
-                String productId = insertBasicsProductData(basicsProductDTO,imgStr,0);
-                LOG.info("001----------添加商品主表 end productId:" + productId);
-
-                if(2 == basicsGoods.getType()){
-                    //2.2添加人工商品扩展信息
-                    LOG.info("002-----添加人工商品扩展信息 start :" + productId);
-                   String restr = insertBasicsProductDataWorker(basicsProductDTO,productId);
-                    if (StringUtils.isNotBlank(restr))
-                        return ServerResponse.createByErrorMessage(restr);
-                    LOG.info("002-----添加人工商品扩展信息 end :" + productId);
-
-                }else if(0 == basicsGoods.getType()||1 == basicsGoods.getType()){
-                    LOG.info("003------添加材料商品扩展信息 start:" + productId);
-                    //2.3添加材料商品扩展信息(材料和包工包料）
-                    insertBasicsProductDataMaterial(basicsProductDTO,productId);
-                    //添加材料商品的工艺信息
-                    LOG.info("003----1---添加材料商品工艺信息:" + productId);
-                    String ret = technologyService.insertTechnologyList(obj.getString("technologyList"), "0", 0, productId);
-                    if (!ret.equals("1"))  //如果不成功 ，弹出是错误提示
-                        return ServerResponse.createByErrorMessage(ret);
-
-                    LOG.info("003------添加材料商品扩展信息 end:" + productId);
-                }
-                //3.删除对应需要删除的工艺信息
-                String deleteTechnologyIds=obj.getString("deleteTechnologyIds");
-                String restr = deleteTechnologylist(deleteTechnologyIds);
-                if (StringUtils.isNotBlank(restr)) {
-                    return ServerResponse.createByErrorMessage(restr);
+            StringBuilder imgStr = new StringBuilder();
+            for (int j = 0; j < imgArr.length; j++) {
+                String img = imgArr[j];
+                if (j == imgArr.length - 1) {
+                    imgStr.append(img);
+                } else {
+                    imgStr.append(img).append(",");
                 }
             }
-            return ServerResponse.createBySuccessMessage("保存更新商品成功");
+            if (!StringUtils.isNotBlank(imgStr.toString()))
+                return ServerResponse.createByErrorMessage("商品图片不能为空");
+            LOG.info("001----------添加商品主表 start:" + basicsProductDTO.getName());
+            String productId = insertBasicsProductData(basicsProductDTO,imgStr,0);
+            LOG.info("001----------添加商品主表 end productId:" + productId);
+
+            if(2 == basicsGoods.getType()){
+                //2.2添加人工商品扩展信息
+                LOG.info("002-----添加人工商品扩展信息 start :" + productId);
+                String restr = insertBasicsProductDataWorker(basicsProductDTO,productId);
+                if (StringUtils.isNotBlank(restr))
+                    return ServerResponse.createByErrorMessage(restr);
+                LOG.info("002-----添加人工商品扩展信息 end :" + productId);
+
+            }else if(0 == basicsGoods.getType()||1 == basicsGoods.getType()){
+                LOG.info("003------添加材料商品扩展信息 start:" + productId);
+                //2.3添加材料商品扩展信息(材料和包工包料）
+                insertBasicsProductDataMaterial(basicsProductDTO,productId);
+                //添加材料商品的工艺信息
+                LOG.info("003----1---添加材料商品工艺信息:" + productId);
+                String ret = technologyService.insertTechnologyList(obj.getString("technologyList"), "0", 0, productId);
+                if (!ret.equals("1"))  //如果不成功 ，弹出是错误提示
+                    return ServerResponse.createByErrorMessage(ret);
+
+                LOG.info("003------添加材料商品扩展信息 end:" + productId);
+            }
+            //3.删除对应需要删除的工艺信息
+            String deleteTechnologyIds=obj.getString("deleteTechnologyIds");
+            String restr = deleteTechnologylist(deleteTechnologyIds);
+            if (StringUtils.isNotBlank(restr)) {
+                return ServerResponse.createByErrorMessage(restr);
+            }
+        }
+        return ServerResponse.createBySuccessMessage("保存更新商品成功");
     }
 
     /**
@@ -365,15 +364,16 @@ public class DjBasicsProductService {
             String id = basicsProductDTO.getId();//商品ID
             String name = basicsProductDTO.getName();//商品名称
             String productSn = basicsProductDTO.getProductSn();//商品编码
-            String categoryId=basicsProductDTO.getCategoryId();//商品类别Id
-            DjBasicsGoods basicsGoods = djBasicsGoodsMapper.selectByPrimaryKey(categoryId);
-            if("0".equals(basicsGoods.getType())||"1".equals(basicsGoods.getType())){
-                //判断当前添加的属性值是否有相同的已存在的商品（材料商品才有）
-                checkStr = checkProductAttr(basicsProductDTO,jsonArr);
-                if(StringUtils.isNotBlank(checkStr)){
-                    return checkStr;
-                }
+            //改版后，人工和材料都需要添加属性字段，故去掉判断
+            //String goodsId=basicsProductDTO.getGoodsId();//货品ID
+            //DjBasicsGoods basicsGoods = djBasicsGoodsMapper.selectByPrimaryKey(goodsId);
+            //if("0".equals(basicsGoods.getType())||"1".equals(basicsGoods.getType())){
+            //判断当前添加的属性值是否有相同的已存在的商品（材料商品才有）
+            checkStr = checkProductAttr(basicsProductDTO,jsonArr);
+            if(StringUtils.isNotBlank(checkStr)){
+                return checkStr;
             }
+            //  }
             //校验商品是否存在
             String ret = checkProduct(name, productSn, id, jsonArr);
             if (!ret.equals("ok")) {
@@ -556,11 +556,11 @@ public class DjBasicsProductService {
         DjBasicsGoods basicsGoods = djBasicsGoodsMapper.selectByPrimaryKey(goodsId);//查询货品表信息，判断是人工还是材料商品新增
         if(dataStatus == 0){
             //添加正式商品前的校验，商品名称和编码不能为空，且不能重复
-           String restr = checkSingleProductCommon(basicsProductDTO,basicsGoods.getType(),new JSONArray());
-           if(StringUtils.isNotBlank(restr)){
-               return ServerResponse.createByErrorMessage(restr);
-           }
-       }
+            String restr = checkSingleProductCommon(basicsProductDTO,basicsGoods.getType(),new JSONArray());
+            if(StringUtils.isNotBlank(restr)){
+                return ServerResponse.createByErrorMessage(restr);
+            }
+        }
         //2.1添加商品主表信息
         StringBuilder imgStr = new StringBuilder();
         if(StringUtils.isNotBlank(basicsProductDTO.getImage())){
@@ -693,18 +693,18 @@ public class DjBasicsProductService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse deleteBasicsProductById(String id) {
-            DjBasicsProduct djBasicsProduct = new DjBasicsProduct();
-            djBasicsProduct.setId(id);
-            djBasicsProductMapper.deleteByPrimaryKey(djBasicsProduct);
-            //删除材料商品扩展表
-            Example example = new Example(DjBasicsProductMaterial.class);
-            example.createCriteria().andEqualTo("productId", id);
-            djBasicsProductMaterialMapper.deleteByExample(example);
-            //删除人工商品扩展表
-            example = new Example(DjBasicsProductWorker.class);
-            example.createCriteria().andEqualTo("productId", id);
-            djBasicsProductWorkerMapper.deleteByExample(example);
-            return ServerResponse.createBySuccessMessage("删除成功");
+        DjBasicsProduct djBasicsProduct = new DjBasicsProduct();
+        djBasicsProduct.setId(id);
+        djBasicsProductMapper.deleteByPrimaryKey(djBasicsProduct);
+        //删除材料商品扩展表
+        Example example = new Example(DjBasicsProductMaterial.class);
+        example.createCriteria().andEqualTo("productId", id);
+        djBasicsProductMaterialMapper.deleteByExample(example);
+        //删除人工商品扩展表
+        example = new Example(DjBasicsProductWorker.class);
+        example.createCriteria().andEqualTo("productId", id);
+        djBasicsProductWorkerMapper.deleteByExample(example);
+        return ServerResponse.createBySuccessMessage("删除成功");
     }
 
 
@@ -847,7 +847,7 @@ public class DjBasicsProductService {
             DjBasicsProduct djBasicsProduct =djBasicsProductMapper.queryTemporaryStorage(goodsId,"2");
             Map<String,Object> map = null;
             if(djBasicsProduct!=null&&StringUtils.isNotBlank(djBasicsProduct.getId())){
-               map = getProductDetailByProductId(djBasicsProduct);
+                map = getProductDetailByProductId(djBasicsProduct);
             }
             return ServerResponse.createBySuccess("查询成功", map);
         } catch (Exception e) {

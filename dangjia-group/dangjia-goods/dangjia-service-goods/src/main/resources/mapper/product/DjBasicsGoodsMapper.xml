@@ -21,7 +21,8 @@
           `is_elevator_fee` AS isElevatorFee,
           `indicative_price` AS indicativePrice,
           `label_ids` AS labelIds,
-          is_reservation_deliver as isReservationDeliver
+          is_reservation_deliver as isReservationDeliver,
+          attribute_id_arr attributeIdArr
 	</sql>
 
 

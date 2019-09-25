@@ -891,7 +891,7 @@ public class EngineerService {
                 wareDTO.setNoSend(warehouse.getShopCount() - warehouse.getAskCount());
                 wareDTO.setLeftAskCount(warehouse.getShopCount() - warehouse.getAskCount() - warehouse.getOwnerBack());
                 if (visitState == 3) {
-                    wareDTO.setUseCount(warehouse.getReceive() - warehouse.getWorkBack());
+                    wareDTO.setUseCount(warehouse.getAskCount() - warehouse.getWorkBack());
                 }
                 warehouseMap.add(wareDTO);
             }

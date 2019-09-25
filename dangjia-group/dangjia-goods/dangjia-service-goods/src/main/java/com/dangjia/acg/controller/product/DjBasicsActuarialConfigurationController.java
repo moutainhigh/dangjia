@@ -22,7 +22,7 @@ public class DjBasicsActuarialConfigurationController implements DjBasicsActuari
 
     @Override
     @ApiMethod
-    public ServerResponse addConfiguration(HttpServletRequest request,String jsonStr) {
+    public ServerResponse addConfiguration(HttpServletRequest request, String jsonStr) {
         return djBasicsActuarialConfigurationServices.addConfiguration(jsonStr);
     }
 

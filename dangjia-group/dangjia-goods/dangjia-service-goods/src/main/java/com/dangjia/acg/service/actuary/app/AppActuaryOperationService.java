@@ -407,6 +407,7 @@ public class AppActuaryOperationService {
             DjBasicsProductWorker pt = djBasicsProductWorkerMapper.queryProductWorkerByProductId(workerGoods.getId());//目标product 对象
             WorkerGoodsDTO workerGoodsResult = new WorkerGoodsDTO();
             workerGoodsResult.setId(workerGoods.getId());
+            workerGoodsResult.setProductType(goods.getType());//材料类型
             workerGoodsResult.setIrreversibleReasons(goods.getIrreversibleReasons());
             workerGoodsResult.setName(workerGoods.getName());
             workerGoodsResult.setWorkerGoodsSn(workerGoods.getProductSn());
