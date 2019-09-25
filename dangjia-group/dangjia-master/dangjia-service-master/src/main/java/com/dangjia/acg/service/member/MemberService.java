@@ -1245,7 +1245,7 @@ public class MemberService {
         example.orderBy(Insurance.END_DATE).desc();
         List<Insurance> insurances = insuranceMapper.selectByExample(example);
         example = new Example(Insurance.class);
-        example.createCriteria().andEqualTo(Insurance.WORKER_ID, operator.getId()).andIsNull(Insurance.END_DATE);
+        example.createCriteria().andEqualTo(Insurance.WORKER_ID, operator.getId());
         List<Insurance> insurances2 = insuranceMapper.selectByExample(example);
         Insurance insurance;
         if (insurances2.size() > 0) {

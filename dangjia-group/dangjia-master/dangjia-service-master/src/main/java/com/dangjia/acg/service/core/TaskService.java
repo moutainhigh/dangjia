@@ -151,7 +151,7 @@ public class TaskService {
             if(hwList.size()>0) {
                 HouseWorker houseWorker =hwList.get(0);
                 example = new Example(Insurance.class);
-                example.createCriteria().andEqualTo(Insurance.WORKER_ID, member.getId());
+                example.createCriteria().andEqualTo(Insurance.WORKER_ID, member.getId()).andIsNotNull(Insurance.END_DATE);
                 example.orderBy(Insurance.END_DATE).desc();
                 List<Insurance> insurances = insuranceMapper.selectByExample(example);
 
@@ -334,7 +334,7 @@ public class TaskService {
             List<Insurance> insurances =null;
             if(hw!=null&&!CommonUtil.isEmpty(hw.getWorkerId())) {
                 example = new Example(Insurance.class);
-                example.createCriteria().andEqualTo(Insurance.WORKER_ID, hw.getWorkerId());
+                example.createCriteria().andEqualTo(Insurance.WORKER_ID, hw.getWorkerId()).andIsNotNull(Insurance.END_DATE);
                 example.orderBy(Insurance.END_DATE).desc();
                 insurances = insuranceMapper.selectByExample(example);
             }
