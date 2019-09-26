@@ -20,6 +20,10 @@ public class GoodsDTO {
     private String productId;
     private Integer sales;//退货性质0：可退；1：不可退
     private String irreversibleReasons;//不可退原因
+    private String marketingName;//营销名称
+    private String isInflueWarrantyPeriod;//是否影响质保年限（1是，0否）
+    private String refundPolicy;//退款政策
+    private String guaranteedPolicy;//保修政策
     private String goodsId;
     private String image;//product图 1张
     private String price;//价格加单位

@@ -331,6 +331,10 @@ public class AppActuaryOperationService {
                 goodsDTO.setUnitName(convertUnitName);//单位
                 goodsDTO.setProductType(goods.getType());//材料类型
 
+                goodsDTO.setMarketingName(targetProductMaterial.getMarketingName());//营销名称
+                goodsDTO.setIsInflueWarrantyPeriod(targetProductMaterial.getIsInflueWarrantyPeriod());//是否影响质保年限（1是，0否）
+                goodsDTO.setRefundPolicy(targetProductMaterial.getRefundPolicy());//退款政策
+                goodsDTO.setGuaranteedPolicy(targetProductMaterial.getGuaranteedPolicy());//保修政策
                 List<String> imageList = new ArrayList<>();//长图片 多图组合
                 imageList.add(getImage(targetProductMaterial.getDetailImage()));//属性图
                 GoodsGroup srcGoodsGroup = null;
