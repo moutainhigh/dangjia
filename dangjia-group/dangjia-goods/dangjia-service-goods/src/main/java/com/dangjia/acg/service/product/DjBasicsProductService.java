@@ -911,6 +911,7 @@ public class DjBasicsProductService {
         map.put("tTechnologymMapList", tTechnologymMapList);
         map.put("unitList",linkUnitList);
         map.put("imageUrl",imgUrlStr.toString());
+        map.put("id",djBasicsProduct.getId());
         return map;
     }
 

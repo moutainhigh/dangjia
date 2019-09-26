@@ -17,6 +17,7 @@
         value_name_arr valueNameArr,
         value_id_arr AS valueIdArr,
         type as type,
+        maket,
         istop,
         price as price,
         other_name as otherName,
