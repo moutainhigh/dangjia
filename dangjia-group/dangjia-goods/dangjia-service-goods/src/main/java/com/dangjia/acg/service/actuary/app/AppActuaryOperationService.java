@@ -326,7 +326,7 @@ public class AppActuaryOperationService {
                 }
                 goodsDTO.setImage(getImage(product.getImage()));//图一张
                 String convertUnitName = iUnitMapper.selectByPrimaryKey(targetProductMaterial.getConvertUnit()).getName();
-                goodsDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + convertUnitName);
+                goodsDTO.setPrice(String.format("%.2f", product.getPrice()));
                 goodsDTO.setName(product.getName());
                 goodsDTO.setUnitName(convertUnitName);//单位
                 goodsDTO.setProductType(goods.getType());//材料类型
