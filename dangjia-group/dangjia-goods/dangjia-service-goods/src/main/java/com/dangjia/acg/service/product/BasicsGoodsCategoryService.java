@@ -1,25 +1,17 @@
 package com.dangjia.acg.service.product;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.dao.ConfigUtil;
-import com.dangjia.acg.mapper.basics.IAttributeMapper;
 import com.dangjia.acg.mapper.basics.IBrandMapper;
-import com.dangjia.acg.mapper.basics.IGoodsMapper;
 import com.dangjia.acg.mapper.product.DjBasicsAttributeMapper;
 import com.dangjia.acg.mapper.product.IBasicsGoodsCategoryMapper;
 import com.dangjia.acg.mapper.product.IBasicsGoodsMapper;
 import com.dangjia.acg.mapper.product.ICategorySeriesMapper;
-import com.dangjia.acg.modle.attribute.Attribute;
-import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.brand.Brand;
-import com.dangjia.acg.modle.brand.BrandSeries;
-import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.BasicsGoodsCategory;
 import com.dangjia.acg.modle.product.CategorySeries;
@@ -54,6 +46,10 @@ public class BasicsGoodsCategoryService {
     private DjBasicsAttributeMapper djBasicsAttributeMapper;
     @Autowired
     private IBrandMapper iBrandMapper;
+
+    public BasicsGoodsCategory getGoodsCategory(String categoryId) {
+        return iBasicsGoodsCategoryMapper.selectByPrimaryKey(categoryId);
+    }
 
     public ServerResponse getBasicsGoodsCategory(String categoryId) {
         try {

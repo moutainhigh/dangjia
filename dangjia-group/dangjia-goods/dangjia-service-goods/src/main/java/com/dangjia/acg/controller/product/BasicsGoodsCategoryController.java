@@ -4,6 +4,8 @@ import com.dangjia.acg.api.product.BasicsGoodsCategoryAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.attribute.GoodsCategory;
+import com.dangjia.acg.modle.product.BasicsGoodsCategory;
 import com.dangjia.acg.service.basics.AttributeService;
 import com.dangjia.acg.service.product.BasicsGoodsCategoryService;
 import com.dangjia.acg.service.product.DjBasicsAttributeServices;
@@ -28,6 +30,12 @@ public class BasicsGoodsCategoryController implements BasicsGoodsCategoryAPI {
     private BasicsGoodsCategoryService basicsGoodsCategoryService;
     @Autowired
     private DjBasicsAttributeServices djBasicsAttributeServices;
+
+    @Override
+    @ApiMethod
+    public BasicsGoodsCategory getGoodsCategory(String cityId, String categoryId) {
+        return basicsGoodsCategoryService.getGoodsCategory(categoryId);
+    }
 
     /**
      * 商品分类类别查询
