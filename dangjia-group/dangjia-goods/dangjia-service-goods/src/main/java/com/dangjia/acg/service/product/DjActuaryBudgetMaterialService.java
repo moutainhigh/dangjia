@@ -325,6 +325,12 @@ public class DjActuaryBudgetMaterialService {
                                     basicsgDTO.setBuyStr("");
                                 }
                             }
+
+                            Double priceArr = bList.stream().filter
+                                    (a -> a.getPrice()!=null).mapToDouble
+                                    (BasicsgDTO::getPrice).sum();
+
+                            basicsGoodDTO.setPriceArr(priceArr);
                             basicsGoodDTO.setList(bList);
                             basicsGoodDTO.setName(bgc.getName());
                             bgdList.add(basicsGoodDTO);
