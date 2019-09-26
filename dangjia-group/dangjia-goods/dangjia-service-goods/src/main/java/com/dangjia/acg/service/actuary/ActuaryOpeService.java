@@ -24,6 +24,7 @@ import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.product.DjBasicsProduct;
 import com.dangjia.acg.service.product.DjBasicsProductService;
 import com.dangjia.acg.util.JdbcContextHolder;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -217,9 +218,14 @@ public class ActuaryOpeService {
                 //品牌+规格
                 String brandName=iBrandSeriesMapper.brandName(budgetWorker.getWorkerGoodsId());    //通过商品id去关联，然后组合商品名称
                 DjBasicsProduct djBasicsProduct=djBasicsProductService.queryDataByProductId(budgetWorker.getWorkerGoodsId());  //通过商品id去关联规格
-                String valueIdArr=djBasicsProduct.getValueIdArr();
-                String guige=djBasicsProductService.getNewValueNameArr(valueIdArr);
-                goodsItemDTO.setBrandName(brandName+" "+guige);
+                if(djBasicsProduct!=null&& StringUtils.isNotBlank(djBasicsProduct.getId())){
+                    String valueIdArr=djBasicsProduct.getValueIdArr();
+                    String guige=djBasicsProductService.getNewValueNameArr(valueIdArr);
+                    goodsItemDTO.setBrandName(brandName+" "+guige);
+                }else{
+                    goodsItemDTO.setBrandName(brandName);
+                }
+
                 goodsItemDTOList.add(goodsItemDTO);
 
             }
