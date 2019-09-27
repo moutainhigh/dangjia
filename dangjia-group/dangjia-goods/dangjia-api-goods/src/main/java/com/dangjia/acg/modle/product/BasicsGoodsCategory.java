@@ -50,7 +50,7 @@ public class BasicsGoodsCategory extends BaseEntity {
     @Column(name = "purchase_restrictions")
     @Desc(value = "购买限制")
     @ApiModelProperty("购买限制")
-    private String purchaseRestrictions;//购买限制（1自由购房；1有房无精算；2有房有精算）
+    private String purchaseRestrictions;//购买限制（0自由购房；1有房无精算；2有房有精算）
 
     @Column(name = "cover_image")
     @Desc(value = "上传封面图")
