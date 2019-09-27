@@ -106,10 +106,10 @@ public class WebWalletService {
     /**
      * 所有用户（工人和业主）流水
      */
-    public ServerResponse getAllWallet(PageDTO pageDTO, String workerId, String houseId, String likeMobile, String likeAddress) {
+    public ServerResponse getAllWallet(PageDTO pageDTO,String cityId, String workerId, String houseId, String likeMobile, String likeAddress) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<WorkerDetail> list = iWorkerDetailMapper.getAllWallet(workerId, houseId, likeMobile, likeAddress);
+            List<WorkerDetail> list = iWorkerDetailMapper.getAllWallet(cityId,workerId, houseId, likeMobile, likeAddress);
             List<WebWorkerDetailDTO> workerDetailDTOList = new ArrayList<>();
             for (WorkerDetail workerDetail : list) {
                 WebWorkerDetailDTO workerDetailDTO = new WebWorkerDetailDTO();

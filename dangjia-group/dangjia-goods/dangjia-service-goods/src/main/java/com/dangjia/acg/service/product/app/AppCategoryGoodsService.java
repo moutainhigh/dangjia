@@ -162,15 +162,12 @@ public class AppCategoryGoodsService {
             pageResult = new PageInfo<>(pList);
             for (DjBasicsProduct product : pList) {
                 String convertUnitName = iUnitMapper.selectByPrimaryKey(product.getUnitId()).getName();
-                String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
-                        String.format(DjConstants.YZPageAddress.GOODSDETAIL, "", cityId, "商品详情") +
-                        "&gId=" + product.getId();
                 JSONObject object = new JSONObject();
                 object.put("image", configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + product.getImage());
                 object.put("price", product.getPrice());
                 object.put("unitName", convertUnitName);
+                object.put("gId", product.getId());
                 object.put("name", product.getName());
-                object.put("url", url);//0:工艺；1：商品；2：人工
                 arr.add(object);
             }
 

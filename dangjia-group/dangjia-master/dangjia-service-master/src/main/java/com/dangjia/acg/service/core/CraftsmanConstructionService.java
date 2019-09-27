@@ -424,7 +424,7 @@ public class CraftsmanConstructionService {
      */
     private ServerResponse getCraftsmanBean(HttpServletRequest request, ConstructionByWorkerIdBean bean, HouseWorker hw, Member worker, House house, HouseFlow hf) {
         Example example = new Example(Insurance.class);
-        example.createCriteria().andEqualTo(Insurance.WORKER_ID, hw.getWorkerId());
+        example.createCriteria().andEqualTo(Insurance.WORKER_ID, hw.getWorkerId()).andIsNotNull(Insurance.END_DATE);
         example.orderBy(Insurance.END_DATE).desc();
         List<Insurance> insurances = insuranceMapper.selectByExample(example);
 

@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.basics.GoodsCategoryAPI;
 import com.dangjia.acg.api.basics.ProductAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
+import com.dangjia.acg.api.product.BasicsGoodsCategoryAPI;
 import com.dangjia.acg.api.product.DjBasicsProductAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
@@ -26,6 +27,7 @@ import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.product.BasicsGoods;
+import com.dangjia.acg.modle.product.BasicsGoodsCategory;
 import com.dangjia.acg.modle.product.DjBasicsProduct;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.github.pagehelper.PageInfo;
@@ -60,8 +62,9 @@ public class CartService {
     @Autowired
     private IWarehouseMapper warehouseMapper;
 
+
     @Autowired
-    private GoodsCategoryAPI goodsCategoryAPI;
+    private BasicsGoodsCategoryAPI basicsGoodsCategoryAPI;
 
     @Autowired
     private IHouseMapper iHouseMapper;
@@ -247,9 +250,9 @@ public class CartService {
                 map.put("image",address + product.getImage());
             }
             if(!containsKeyMap.containsKey(cart1.getCategoryId())){//判断是否有已有的大类
-                GoodsCategory goodsCategory = goodsCategoryAPI.getGoodsCategory(request.getParameter(Constants.CITY_ID), cart1.getCategoryId());
+                BasicsGoodsCategory goodsCategory = basicsGoodsCategoryAPI.getGoodsCategory(request.getParameter(Constants.CITY_ID), cart1.getCategoryId());
                 if (goodsCategory != null) {
-                    GoodsCategory goodsCategorytop = goodsCategoryAPI.getGoodsCategory(request.getParameter(Constants.CITY_ID), goodsCategory.getParentTop());
+                    BasicsGoodsCategory goodsCategorytop = basicsGoodsCategoryAPI.getGoodsCategory(request.getParameter(Constants.CITY_ID), goodsCategory.getParentTop());
                     if (goodsCategorytop != null) {
                         goodsCategory = goodsCategorytop;
                     }
@@ -388,9 +391,9 @@ public class CartService {
         List<Map<String, Object>> mapList = new ArrayList<>();
         Map<String, Object> mapTop = new HashMap<>();//记录以及添加的顶级分类
         for (String categoryId : orderCategory) {
-            GoodsCategory goodsCategory = goodsCategoryAPI.getGoodsCategory(cityId, categoryId);
+            BasicsGoodsCategory goodsCategory = basicsGoodsCategoryAPI.getGoodsCategory(cityId, categoryId);
             if (goodsCategory != null) {
-                GoodsCategory goodsCategorytop = goodsCategoryAPI.getGoodsCategory(cityId, goodsCategory.getParentTop());
+                BasicsGoodsCategory goodsCategorytop = basicsGoodsCategoryAPI.getGoodsCategory(cityId, goodsCategory.getParentTop());
                 if (goodsCategorytop != null) {
                     goodsCategory = goodsCategorytop;
                 }

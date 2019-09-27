@@ -4,6 +4,8 @@ import com.dangjia.acg.api.product.BasicsGoodsCategoryAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.attribute.GoodsCategory;
+import com.dangjia.acg.modle.product.BasicsGoodsCategory;
 import com.dangjia.acg.service.basics.AttributeService;
 import com.dangjia.acg.service.product.BasicsGoodsCategoryService;
 import com.dangjia.acg.service.product.DjBasicsAttributeServices;
@@ -29,6 +31,12 @@ public class BasicsGoodsCategoryController implements BasicsGoodsCategoryAPI {
     @Autowired
     private DjBasicsAttributeServices djBasicsAttributeServices;
 
+    @Override
+    @ApiMethod
+    public BasicsGoodsCategory getGoodsCategory(String cityId, String categoryId) {
+        return basicsGoodsCategoryService.getGoodsCategory(categoryId);
+    }
+
     /**
      * 商品分类类别查询
      *
@@ -51,7 +59,7 @@ public class BasicsGoodsCategoryController implements BasicsGoodsCategoryAPI {
      * @param parentTop            顶级ID
      * @param sort                 排序
      * @param isLastCategory       是否末级分类（1是，0否）
-     * @param purchaseRestrictions 购买限制（1自由购房；1有房无精算；2有房有精算）
+     * @param purchaseRestrictions 购买限制（0自由购房；1有房无精算；2有房有精算）
      * @param brandIds             关联的品牌ID，多个逗号分割
      * @param coverImage           上传封面图
      * @param categoryLabelId      分类标签ID
@@ -73,7 +81,7 @@ public class BasicsGoodsCategoryController implements BasicsGoodsCategoryAPI {
      * @param parentTop            顶级ID
      * @param sort                 排序
      * @param isLastCategory       是否末级分类（1是，0否）
-     * @param purchaseRestrictions 购买限制（1自由购房；1有房无精算；2有房有精算）
+     * @param purchaseRestrictions 购买限制（0自由购房；1有房无精算；2有房有精算）
      * @param brandIds             关联的品牌ID，多个逗号分割
      * @param coverImage           上传封面图
      * @param categoryLabelId      分类标签ID

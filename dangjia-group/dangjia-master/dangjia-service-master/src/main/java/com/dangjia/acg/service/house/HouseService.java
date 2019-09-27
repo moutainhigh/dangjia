@@ -65,6 +65,7 @@ import com.dangjia.acg.service.core.HouseFlowService;
 import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -591,8 +592,7 @@ public class HouseService {
             List<WorkerType> workerTypeList = workerTypeMapper.selectByExample(example);
             for (WorkerType workerType : workerTypeList) {
                 List<String> workerTypes = new ArrayList<>();
-                workerTypes.add("wtId" + workerType.getId());
-//                workerTypes.add(house.getId());
+                workerTypes.add(Utils.md5("wtId" + workerType.getId()));
                 configMessageService.addConfigMessage(AppType.GONGJIANG, StringUtils.join(workerTypes, ","),
                         "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, 4, null, "您有新的装修订单，快去抢吧！");
             }
@@ -1578,13 +1578,14 @@ public class HouseService {
         } else {
             house.setAbroadStats(0);
         }
-        List<Customer> ms = iCustomerMapper.getCustomerMemberIdList(member.getId());
-        if (ms != null) {
-            for (Customer m : ms) {
-                configMessageService.addConfigMessage(AppType.SALE, m.getMemberId(), "待抢单客户提醒",
-                        "您有一个新的待抢单客户，请及时查看。", 4, null, "您新的待有抢单客户快去查看吧！");
-            }
-        }
+        //提醒暂时取消，固定指定为优优抢单
+//        List<Customer> ms = iCustomerMapper.getCustomerMemberIdList(member.getId());
+//        if (ms != null) {
+//            for (Customer m : ms) {
+//                configMessageService.addConfigMessage(AppType.SALE, m.getMemberId(), "待抢单客户提醒",
+//                        "您有一个新的待抢单客户，请及时查看。", 4, null, "您新的待有抢单客户快去查看吧！");
+//            }
+//        }
         house.setIsRobStats(0);
         house.setSiteDisplay(0);
         house.setMemberId(member.getId());//用户id
@@ -1627,11 +1628,13 @@ public class HouseService {
         setSelectHouse(userToken, house.getId());
 
 
+        DjAlreadyRobSingle djAlreadyRobSingle = new DjAlreadyRobSingle();
         //野生客戶点击我要装修
         example = new Example(Customer.class);
         example.createCriteria().andEqualTo(Customer.MEMBER_ID, member.getId())
                 .andIsNull(Customer.USER_ID);
-        if (iCustomerMapper.selectByExample(example).size() > 0) {
+        List<Customer> customerList=iCustomerMapper.selectByExample(example);
+        if (customerList.size() > 0) {
             List<OrderStoreDTO> orderStore = iStoreMapper.getOrderStore(latitude, longitude, null);
             clueMapper.setDistribution(orderStore.get(0).getStoreId(), member.getId(), new Date());
             DjOrderSurface djOrderSurface = new DjOrderSurface();
@@ -1645,13 +1648,70 @@ public class HouseService {
             if (clues.size() > 0) {
                 djOrderSurface.setClueId(clues.get(0).getId());
                 djOrderSurfaceMapper.insert(djOrderSurface);
+                djAlreadyRobSingle.setClueId(djOrderSurface.getClueId());
             }
+            djAlreadyRobSingle.setMcId(customerList.get(0).getId());
 //            robService.notEnteredGrabSheet();
         }
+        djAlreadyRobSingle.setHouseId(house.getId());
+        djAlreadyRobSingle.setUserId("773075761552045112068");
+        djAlreadyRobSingle.setAbroadStats(0);
+        djAlreadyRobSingle.setIsRobStats(1);
+        djAlreadyRobSingle.setMemberId(member.getId());
 
+        //当家旗手重做完之前，临时固定优优抢单
+        upDateIsRobStats(djAlreadyRobSingle);
         return ServerResponse.createBySuccessMessage("操作成功");
     }
 
+    /**
+     * 抢单
+     *
+     * @param djAlreadyRobSingle
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse upDateIsRobStats(DjAlreadyRobSingle djAlreadyRobSingle) {
+        try {
+            if (!CommonUtil.isEmpty(djAlreadyRobSingle)) {
+                Example example = new Example(House.class);
+                example.createCriteria().andEqualTo(House.ID, djAlreadyRobSingle.getHouseId())
+                        .andEqualTo(House.DATA_STATUS, 0);
+                if (iHouseMapper.selectByExample(example).size() <= 0) {
+                    return ServerResponse.createByErrorMessage("业主已撤回");
+                }
+                example = new Example(DjAlreadyRobSingle.class);
+                example.createCriteria().andEqualTo(DjAlreadyRobSingle.HOUSE_ID, djAlreadyRobSingle.getHouseId());
+                if (djAlreadyRobSingleMapper.selectByExample(example).size() > 0) {
+                    return ServerResponse.createByErrorMessage("该订单已被抢");
+                }
+
+                //新增抢单表数据
+                djAlreadyRobSingleMapper.insert(djAlreadyRobSingle);
+
+                Map<String, Object> map = new HashMap<>();
+                map.put("id", djAlreadyRobSingle.getHouseId());
+                map.put("isRobStats", 1);
+                clueMapper.upDateIsRobStats(map);
+
+                map = new HashMap<>();
+                map.put("clueId", djAlreadyRobSingle.getClueId());
+                map.put("cusService", djAlreadyRobSingle.getUserId());
+                clueMapper.upDateClueCusService(map);
+
+                map = new HashMap<>();
+                map.put("mcId", djAlreadyRobSingle.getMcId());
+                map.put("userId", djAlreadyRobSingle.getUserId());
+                clueMapper.upDateMcUserId(map);
+                return ServerResponse.createBySuccessMessage("抢单成功");
+            }
+            return ServerResponse.createByErrorMessage("抢单失败");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("修改失败");
+        }
+
+    }
     private void setClue(Member member) {
         Example example = new Example(Clue.class);
         example.createCriteria().andEqualTo(Clue.PHONE, member.getMobile());
@@ -1793,7 +1853,7 @@ public class HouseService {
                 houseFlow.setWorkType(5);//待业主支付
                 houseFlow.setModifyDate(new Date());
                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
-                configMessageService.addConfigMessage(AppType.GONGJIANG, "wtId3" + houseFlow.getCityId(),
+                configMessageService.addConfigMessage(AppType.GONGJIANG, Utils.md5("wtId3" + houseFlow.getCityId()),
                         "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, 4, null, "您有新的装修订单，快去抢吧！");
                 //推送消息给业主等待大管家抢单
                 configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(),
@@ -2477,8 +2537,10 @@ public class HouseService {
      */
     public ServerResponse getHouseProfitList(HttpServletRequest request, PageDTO pageDTO, String villageId, String visitState, String searchKey) {
         try {
+
+            String cityId = request.getParameter(Constants.CITY_ID);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<DesignDTO> houseList = iHouseMapper.getHouseProfitList(villageId, visitState, searchKey);
+            List<DesignDTO> houseList = iHouseMapper.getHouseProfitList(cityId, villageId, visitState, searchKey);
             if (houseList.size() <= 0) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode()
                         , "查无数据");

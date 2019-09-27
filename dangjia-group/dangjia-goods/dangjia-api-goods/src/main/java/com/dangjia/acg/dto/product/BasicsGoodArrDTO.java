@@ -8,8 +8,7 @@ import java.util.List;
 
 @Data
 @FieldNameConstants(prefix = "")
-public class BasicsGoodDTO {
-    private String name;
-    List<BasicsgDTO> list;
+public class BasicsGoodArrDTO {
+    List<BasicsGoodDTO> List;
     private Double priceArr;
 }

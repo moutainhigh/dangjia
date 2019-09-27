@@ -22,6 +22,11 @@ import javax.servlet.http.HttpServletRequest;
 @FeignClient("dangjia-service-goods")
 public interface BasicsGoodsCategoryAPI {
 
+    @PostMapping("/product/basicsGoodsCategory/getGoodsCategory")
+    @ApiOperation(value = "根据类别ID查询商品类别", notes = "根据类别ID查询商品类别")
+    BasicsGoodsCategory getGoodsCategory(@RequestParam("cityId") String cityId, @RequestParam("categoryId") String categoryId);
+
+
     @PostMapping("/product/basicsGoodsCategory/getBasicsGoodsCategory")
     @ApiOperation(value = "商品类别明细", notes = "商品类别明细")
     ServerResponse getBasicsGoodsCategory(@RequestParam("cityId") String cityId, @RequestParam("categoryId") String categoryId);

@@ -736,7 +736,6 @@ public class MemberService {
                 MemberCustomerDTO mcDTO = new MemberCustomerDTO();
                 mcDTO.setMcId(customer.getId());
                 mcDTO.setPhaseStatus(customer.getPhaseStatus());
-                mcDTO.setOrderDate(member.getModifyDate());
                 mcDTO.setMemberId(member.getId());
                 mcDTO.setMemberName(member.getName());
                 mcDTO.setMemberNickName(member.getNickName());
@@ -800,8 +799,11 @@ public class MemberService {
                     mcDTO.setMemberCityID(listcity.get(0).getCityId());
                     mcDTO.setMemberCityName(listcity.get(0).getCityName());
                 }
+                Date orderDate=houseMapper.getHouseDateByMemberId( member.getId());
+                mcDTO.setOrderDate(orderDate);
                 mcDTOList.add(mcDTO);
             }
+
             pageResult.setList(mcDTOList);
             return ServerResponse.createBySuccess("查询用户列表成功", pageResult);
         } catch (Exception e) {
@@ -1245,7 +1247,7 @@ public class MemberService {
         example.orderBy(Insurance.END_DATE).desc();
         List<Insurance> insurances = insuranceMapper.selectByExample(example);
         example = new Example(Insurance.class);
-        example.createCriteria().andEqualTo(Insurance.WORKER_ID, operator.getId()).andIsNull(Insurance.END_DATE);
+        example.createCriteria().andEqualTo(Insurance.WORKER_ID, operator.getId());
         List<Insurance> insurances2 = insuranceMapper.selectByExample(example);
         Insurance insurance;
         if (insurances2.size() > 0) {

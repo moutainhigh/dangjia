@@ -384,7 +384,7 @@
 		SELECT
 			IFNULL(l.id,'-1') labelId,
 			IFNULL(l.name,'其他') labelName,
-			GROUP_CONCAT(c.id) categoryId
+			GROUP_CONCAT(c.id) categoryIds
 		FROM
 			dj_basics_goods_category c
 		LEFT JOIN dj_basics_category_label l ON FIND_IN_SET(l.id, c.category_label_ids)

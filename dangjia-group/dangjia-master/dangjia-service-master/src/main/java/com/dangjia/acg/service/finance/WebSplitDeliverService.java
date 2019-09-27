@@ -72,7 +72,7 @@ public class WebSplitDeliverService {
      * @param endDate    结束时间
      * @return
      */
-    public ServerResponse getAllSplitDeliver(PageDTO pageDTO, Integer applyState, String searchKey, String beginDate, String endDate) {
+    public ServerResponse getAllSplitDeliver(PageDTO pageDTO, String cityId,Integer applyState, String searchKey, String beginDate, String endDate) {
         try {
             if (applyState == null) {
                 applyState = -1;
@@ -87,7 +87,7 @@ public class WebSplitDeliverService {
                 }
             }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<WebSplitDeliverItemDTO> webSplitDeliverItemDTOLists = iSplitDeliverMapper.getWebSplitDeliverList(applyState, searchKey, beginDate, endDate);
+            List<WebSplitDeliverItemDTO> webSplitDeliverItemDTOLists = iSplitDeliverMapper.getWebSplitDeliverList(cityId,applyState, searchKey, beginDate, endDate);
             PageInfo pageResult = new PageInfo(webSplitDeliverItemDTOLists);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {

@@ -456,7 +456,7 @@ public class HouseFlowService {
         for (HouseWorker houseWorker : hwList) {
             if (DateUtil.addDateMinutes(houseWorker.getCreateDate(), 30).getTime() <= (new Date()).getTime()) {
                 example = new Example(Insurance.class);
-                example.createCriteria().andEqualTo(Insurance.WORKER_ID, houseWorker.getWorkerId());
+                example.createCriteria().andEqualTo(Insurance.WORKER_ID, houseWorker.getWorkerId()).andIsNotNull(Insurance.END_DATE);
                 example.orderBy(Insurance.END_DATE).desc();
                 List<Insurance> insurances = insuranceMapper.selectByExample(example);
 
@@ -465,8 +465,8 @@ public class HouseFlowService {
                 if (insurances.size() > 0) {
                     daynum = DateUtil.daysofTwo(new Date(), insurances.get(0).getEndDate());
                 }
-                //工人未购买保险
-                if (houseWorker.getWorkerType() > 2 && (insurances.size() == 0 || (insurances.size() > 0 & daynum <= 60))) {
+                //工人未购买保险-不首保，只续保
+                if (houseWorker.getWorkerType() > 2 && (insurances.size() > 0 & daynum <= 0)) {
                     Example exampleFlow = new Example(HouseFlow.class);
                     exampleFlow.createCriteria()
                             .andEqualTo(HouseFlow.WORKER_ID, houseWorker.getWorkerId())
@@ -495,7 +495,7 @@ public class HouseFlowService {
         List<HouseWorker> hwList = houseWorkerMapper.getWorkerHouse();
         for (HouseWorker houseWorker : hwList) {
             Example example = new Example(Insurance.class);
-            example.createCriteria().andEqualTo(Insurance.WORKER_ID, houseWorker.getWorkerId());
+            example.createCriteria().andEqualTo(Insurance.WORKER_ID, houseWorker.getWorkerId()).andIsNotNull(Insurance.END_DATE);
             example.orderBy(Insurance.END_DATE).desc();
             List<Insurance> insurances = insuranceMapper.selectByExample(example);
 
@@ -745,7 +745,7 @@ public class HouseFlowService {
         Map map = BeanUtils.beanToMap(houseFlow);
         map.put("workerDTO",workerDTO);//工匠信息
         Example example = new Example(Insurance.class);
-        example.createCriteria().andEqualTo(Insurance.WORKER_ID, houseWorker.getWorkerId());
+        example.createCriteria().andEqualTo(Insurance.WORKER_ID, houseWorker.getWorkerId()).andIsNotNull(Insurance.END_DATE);
         example.orderBy(Insurance.END_DATE).desc();
         List<Insurance> insurances = insuranceMapper.selectByExample(example);
         if(insurances.size()>0){

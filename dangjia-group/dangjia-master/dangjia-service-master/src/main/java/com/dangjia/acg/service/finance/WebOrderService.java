@@ -59,13 +59,13 @@ public class WebOrderService {
      * @param searchKey 模糊搜索：订单号,房屋信息,电话,支付单号(业务订单号)
      * @return
      */
-    public ServerResponse getAllOrders(PageDTO pageDTO, Integer state, String searchKey) {
+    public ServerResponse getAllOrders(PageDTO pageDTO,String cityId, Integer state, String searchKey) {
         try {
             if (state == null) {
                 state = -1;
             }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<WebOrderDTO> orderList = iBusinessOrderMapper.getWebOrderList(state, searchKey);
+            List<WebOrderDTO> orderList = iBusinessOrderMapper.getWebOrderList(cityId,state, searchKey);
             PageInfo pageResult = new PageInfo(orderList);
             for (WebOrderDTO webOrderDTO : orderList) {
                 if (webOrderDTO.getState() == 3) {
