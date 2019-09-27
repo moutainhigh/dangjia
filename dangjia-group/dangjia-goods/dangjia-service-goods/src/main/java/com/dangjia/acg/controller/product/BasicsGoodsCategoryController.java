@@ -59,7 +59,7 @@ public class BasicsGoodsCategoryController implements BasicsGoodsCategoryAPI {
      * @param parentTop            顶级ID
      * @param sort                 排序
      * @param isLastCategory       是否末级分类（1是，0否）
-     * @param purchaseRestrictions 购买限制（1自由购房；1有房无精算；2有房有精算）
+     * @param purchaseRestrictions 购买限制（0自由购房；1有房无精算；2有房有精算）
      * @param brandIds             关联的品牌ID，多个逗号分割
      * @param coverImage           上传封面图
      * @param categoryLabelId      分类标签ID
@@ -81,7 +81,7 @@ public class BasicsGoodsCategoryController implements BasicsGoodsCategoryAPI {
      * @param parentTop            顶级ID
      * @param sort                 排序
      * @param isLastCategory       是否末级分类（1是，0否）
-     * @param purchaseRestrictions 购买限制（1自由购房；1有房无精算；2有房有精算）
+     * @param purchaseRestrictions 购买限制（0自由购房；1有房无精算；2有房有精算）
      * @param brandIds             关联的品牌ID，多个逗号分割
      * @param coverImage           上传封面图
      * @param categoryLabelId      分类标签ID
