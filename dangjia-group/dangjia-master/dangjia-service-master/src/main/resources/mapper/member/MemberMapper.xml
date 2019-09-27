@@ -218,11 +218,11 @@
         <if test="type=='cc' and beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
             and w.create_date between #{beginDate} and #{endDate}
         </if>
-        ORDER by cr.remind_time desc,w.create_date
+        ORDER by w.create_date
         <if test="orderBy!=null and orderBy!=''and orderBy=='desc'">
             desc
         </if>
-
+        ,cr.remind_time desc
 
     </select>
 
