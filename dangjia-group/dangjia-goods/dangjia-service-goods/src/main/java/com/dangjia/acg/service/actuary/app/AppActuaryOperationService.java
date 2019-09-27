@@ -19,10 +19,7 @@ import com.dangjia.acg.dto.repair.MendOrderInfoDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
 import com.dangjia.acg.mapper.basics.*;
-import com.dangjia.acg.mapper.product.DjBasicsGoodsMapper;
-import com.dangjia.acg.mapper.product.DjBasicsProductMapper;
-import com.dangjia.acg.mapper.product.DjBasicsProductMaterialMapper;
-import com.dangjia.acg.mapper.product.DjBasicsProductWorkerMapper;
+import com.dangjia.acg.mapper.product.*;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.modle.basics.GoodsGroup;
@@ -33,10 +30,7 @@ import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
-import com.dangjia.acg.modle.product.DjBasicsGoods;
-import com.dangjia.acg.modle.product.DjBasicsProduct;
-import com.dangjia.acg.modle.product.DjBasicsProductMaterial;
-import com.dangjia.acg.modle.product.DjBasicsProductWorker;
+import com.dangjia.acg.modle.product.*;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.modle.repair.MendWorker;
 import com.dangjia.acg.util.DateUtils;
@@ -81,10 +75,10 @@ public class AppActuaryOperationService {
     @Autowired
     private DjBasicsProductWorkerMapper djBasicsProductWorkerMapper;
     @Autowired
-    private DjBasicsProductMapper djBasicsProductMapper;
-    @Autowired
     private ITechnologyMapper iTechnologyMapper;
 
+    @Autowired
+    private IBasicsGoodsCategoryMapper iBasicsGoodsCategoryMapper;
     protected static final Logger LOG = LoggerFactory.getLogger(AppActuaryOperationService.class);
 
     /**
@@ -312,9 +306,11 @@ public class AppActuaryOperationService {
     public Object goodsDetail(DjBasicsProduct product, String budgetMaterialId) {
         try {
             DjBasicsGoods goods = goodsMapper.selectByPrimaryKey(product.getGoodsId());
+            BasicsGoodsCategory goodsCategory= iBasicsGoodsCategoryMapper.selectByPrimaryKey(goods.getCategoryId());
             //如果商品为0：材料；1：服务
             if(goods.getType()==1 || goods.getType()==0) {
                 GoodsDTO goodsDTO = new GoodsDTO();//长图  品牌系列图+属性图(多个)
+                goodsDTO.setPurchaseRestrictions(goodsCategory.getPurchaseRestrictions());
                 goodsDTO.setSales(goods.getSales());
                 goodsDTO.setIrreversibleReasons(goods.getIrreversibleReasons());
                 DjBasicsProductMaterial targetProductMaterial = djBasicsProductMaterialMapper.queryProductMaterialByProductId(product.getId());//目标product 对象
@@ -374,7 +370,7 @@ public class AppActuaryOperationService {
                 List<DjBasicsProduct> productList = new ArrayList<>();
                 if (srcGoodsGroup != null) {//是关联组
                     for (String pId : pIdTargetGroupSet) {
-                        DjBasicsProduct djBasicsProduct=djBasicsProductMapper.selectByPrimaryKey(pId);
+                        DjBasicsProduct djBasicsProduct=productMapper.selectByPrimaryKey(pId);
                         //如果没有品牌，就只遍历属性
                         if (StringUtils.isNoneBlank(goods.getAttributeIdArr())
                                 && StringUtils.isNoneBlank(djBasicsProduct.getValueIdArr())) {
@@ -398,7 +394,12 @@ public class AppActuaryOperationService {
                 goodsDTO.setImageList(imageList);
                 return goodsDTO;
             }else{
-                WorkerGoodsDTO  workerGoodsDTO=assembleWorkerGoodsResult(product,goods);
+                WorkerGoodsDTO  workerGoodsDTO=assembleWorkerGoodsResult(product);
+                workerGoodsDTO.setPurchaseRestrictions(goodsCategory.getPurchaseRestrictions());
+                workerGoodsDTO.setProductType(goods.getType());//材料类型
+                workerGoodsDTO.setIrreversibleReasons(goods.getIrreversibleReasons());
+                workerGoodsDTO.setIstops(goods.getIstop());
+                workerGoodsDTO.setSales(goods.getSales());
                 return workerGoodsDTO;
             }
         } catch (Exception e) {
@@ -406,13 +407,11 @@ public class AppActuaryOperationService {
             return null;
         }
     }
-    public WorkerGoodsDTO assembleWorkerGoodsResult(DjBasicsProduct workerGoods,DjBasicsGoods goods) {
+    public WorkerGoodsDTO assembleWorkerGoodsResult(DjBasicsProduct workerGoods) {
         try {
             DjBasicsProductWorker pt = djBasicsProductWorkerMapper.queryProductWorkerByProductId(workerGoods.getId());//目标product 对象
             WorkerGoodsDTO workerGoodsResult = new WorkerGoodsDTO();
             workerGoodsResult.setId(workerGoods.getId());
-            workerGoodsResult.setProductType(goods.getType());//材料类型
-            workerGoodsResult.setIrreversibleReasons(goods.getIrreversibleReasons());
             workerGoodsResult.setName(workerGoods.getName());
             workerGoodsResult.setWorkerGoodsSn(workerGoods.getProductSn());
             workerGoodsResult.setImage(getImage(workerGoods.getImage()));
@@ -429,8 +428,6 @@ public class AppActuaryOperationService {
             }
             workerGoodsResult.setWorkerTypeName(workerTypeName);
             workerGoodsResult.setPrice(workerGoods.getPrice());
-            workerGoodsResult.setIstops(goods.getIstop());
-            workerGoodsResult.setSales(goods.getSales());
             workerGoodsResult.setWorkExplain(pt.getWorkExplain());
             workerGoodsResult.setWorkerStandard(pt.getWorkerStandard());
             workerGoodsResult.setWorkerTypeId(pt.getWorkerTypeId());
