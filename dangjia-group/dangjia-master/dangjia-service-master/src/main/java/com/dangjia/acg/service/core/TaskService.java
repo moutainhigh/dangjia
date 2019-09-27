@@ -352,7 +352,7 @@ public class TaskService {
                 }
             }
             Task task = new Task();
-            task.setDate(DateUtil.dateToString(hw.getModifyDate(), DateUtil.FORMAT11));
+            task.setDate(DateUtil.dateToString(houseFlow.getModifyDate(), DateUtil.FORMAT11));
             task.setName(workerType.getName() + "待支付");
             task.setImage(imageAddress + workerType.getImage());
             task.setHtmlUrl("");

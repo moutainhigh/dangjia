@@ -1493,13 +1493,13 @@ public class PaymentService {
                 if (houseFlow.getWorkType() == 4) {
                     return ServerResponse.createByErrorMessage("该订单已支付");
                 }
-                example = new Example(HouseWorker.class);
-                example.createCriteria().andEqualTo(HouseWorker.WORKER_TYPE_ID, houseFlow.getWorkerTypeId())
-                        .andEqualTo(HouseWorker.HOUSE_ID, houseId).andEqualTo(HouseWorker.WORK_TYPE, 1);
-                List<HouseWorker> houseWorkerList = houseWorkerMapper.selectByExample(example);
-                if (houseWorkerList.size() != 1) {
-                    return ServerResponse.createByErrorMessage("抢单异常,联系平台部");
-                }
+//                example = new Example(HouseWorker.class);
+//                example.createCriteria().andEqualTo(HouseWorker.WORKER_TYPE_ID, houseFlow.getWorkerTypeId())
+//                        .andEqualTo(HouseWorker.HOUSE_ID, houseId).andEqualTo(HouseWorker.WORK_TYPE, 1);
+//                List<HouseWorker> houseWorkerList = houseWorkerMapper.selectByExample(example);
+//                if (houseWorkerList.size() != 1) {
+//                    return ServerResponse.createByErrorMessage("抢单异常,联系平台部");
+//                }
                 WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
                 paymentDTO.setWorkerTypeName(workerType.getName());
                 List<BudgetLabelDTO> budgetLabelDTOS = forMasterAPI.queryBudgetLabel(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//精算工钱
