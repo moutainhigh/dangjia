@@ -33,7 +33,7 @@ public class WarehouseDTO {
     private Integer sales;//退货性质0：可退；1不可退
 
     /**
-     * 货品名称
+     * 货品+规格
      */
     private String brandName;
 }

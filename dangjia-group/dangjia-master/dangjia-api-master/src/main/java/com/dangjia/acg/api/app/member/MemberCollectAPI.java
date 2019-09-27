@@ -45,14 +45,5 @@ public interface MemberCollectAPI {
     ServerResponse delMemberCollect(@RequestParam("request") HttpServletRequest request,
                                     @RequestParam("houseId") String houseId,@RequestParam("collectType") String collectType);
 
-
-    /**
-     * ：查看更多工地  调用原有的接口
-     */
-
-    /**
-     * 推荐用户点击最多类别的商品，在类别内随机推荐
-     */
-
 }
 

@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.member;
 
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.actuary.app.AppActuaryOperationAPI;
 import com.dangjia.acg.api.product.DjBasicsProductAPI;
 import com.dangjia.acg.common.constants.Constants;
@@ -83,8 +84,7 @@ public class MemberCollectService {
             {
                 MemberCollectDTO memberCollectDTO=new MemberCollectDTO();
                 String houseId=memberCollect.getHouseId();
-                Object objectProduct=appActuaryOperationAPI.getNewCommo(request,houseId,null);
-                memberCollectDTO.setObject(objectProduct);
+                memberCollectDTO.setObject(JSONObject.parseObject(appActuaryOperationAPI.getCommo(request,houseId,null).getResultObj().toString()) );
                 memberCollectDTO.setConditionType(memberCollect.getConditionType());
                 memberCollectDTO.setHouseId(houseId);
                 memberCollectDTO.setMemberId(memberCollect.getMemberId());
@@ -173,11 +173,11 @@ public class MemberCollectService {
                             .andEqualTo(MemberCollect.CONDITION_TYPE,collectType);
                     List<MemberCollect> list = iMemberCollectMapper.selectByExample(example);
                     if(list.size()>0){
-                        return ServerResponse.createBySuccess("ok","1");
+                        return ServerResponse.createBySuccess("该商品已经被收藏!","1");
                     }
                 }
             }
-            return ServerResponse.createBySuccess("ok","0");
+            return ServerResponse.createBySuccess("该商品没有被收藏!","0");
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -242,11 +242,19 @@ public class MemberCollectService {
                     criteria.andEqualTo(MemberCollect.HOUSE_ID,houseId)
                             .andEqualTo(MemberCollect.MEMBER_ID,operator.getId())
                             .andEqualTo(MemberCollect.CONDITION_TYPE,collectType);
-                    iMemberCollectMapper.deleteByExample(example);
-                    return ServerResponse.createBySuccess("删除成功!","1");
+                    int i=iMemberCollectMapper.deleteByExample(example);
+                    if(i>=0)
+                    {
+                        return ServerResponse.createBySuccess("取消收藏成功!","1");
+                    }
+                    else
+                    {
+                        return ServerResponse.createBySuccess("取消收藏失败!","0");
+                    }
+
                 }
             }
-            return ServerResponse.createBySuccess("删除失败!","0");
+            return ServerResponse.createBySuccess("取消收藏失败!","0");
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("系统出错,取消收藏失败");

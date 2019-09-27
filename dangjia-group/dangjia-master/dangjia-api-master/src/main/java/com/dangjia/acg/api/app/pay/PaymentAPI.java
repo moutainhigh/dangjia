@@ -55,7 +55,7 @@ public interface PaymentAPI {
                                       @RequestParam("type") Integer type);
 
     @PostMapping("app/pay/payment/getPage")
-    @ApiOperation(value = "购物车接口", notes = "购物车接口")
+    @ApiOperation(value = "接口", notes = "购物车接口")
     ServerResponse getPaymentPage(@RequestParam("userToken") String userToken,
                                   @RequestParam("houseId") String houseId,
                                   @RequestParam("taskId") String taskId,
