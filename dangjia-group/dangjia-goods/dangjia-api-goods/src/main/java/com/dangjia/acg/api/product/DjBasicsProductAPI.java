@@ -4,6 +4,7 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.product.BasicsGoodsDTO;
 import com.dangjia.acg.dto.product.BasicsProductDTO;
+import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProduct;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -119,6 +121,8 @@ public interface DjBasicsProductAPI {
     ServerResponse getProductById(@RequestParam("cityId") String cityId,
                                   @RequestParam("id") String id);
 
+
+
     @PostMapping("/product/djBasicsProduct/getTemporaryStorageProductByGoodsId")
     @ApiOperation(value = "查询货品下暂存的商品信息", notes = "查询货品下暂存的商品信息")
     ServerResponse getTemporaryStorageProductByGoodsId(@RequestParam("cityId") String cityId,
@@ -133,6 +137,17 @@ public interface DjBasicsProductAPI {
     @ApiOperation(value = "根据类别Id查询所属货品", notes = "根据类别Id查询所属商品")
     ServerResponse getAllGoodsByCategoryId(@RequestParam("request") HttpServletRequest request,
                                            @RequestParam("categoryId") String categoryId);
+
+    /**
+     * 根据类别Id查询所属货品
+     *
+     * @return
+     */
+    @PostMapping("/product/djBasicsProduct/getAllProductByCategoryId")
+    @ApiOperation(value = "根据类别Id查询所属货品", notes = "根据类别Id查询所属货品")
+    List<DjBasicsProduct> getAllProductByCategoryId( @RequestParam("categoryId") String categoryId);
+
+
 
     /**
      * 根据货品ID查询商品

@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.product;
 
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.actuary.app.AppActuaryOperationAPI;
 import com.dangjia.acg.api.product.DjBasicsProductAPI;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -55,13 +56,12 @@ public class BrowseRecordService {
             {
                String productId= browseRecord.getProductId();
                //自动判断是人工、服务、商品
-                Object  obj=appActuaryOperationAPI.getNewCommo(request,productId,null);
                 BrowseRecordDTO browseRecordDTO=new BrowseRecordDTO();
                 browseRecordDTO.setMemberId(browseRecord.getMemberId());
                 browseRecordDTO.setVisitsNum(browseRecord.getVisitsNum());
                 browseRecordDTO.setVistsType(browseRecord.getVistsType());
                 browseRecordDTO.setProductId(productId);
-                browseRecordDTO.setObject(obj);
+                browseRecordDTO.setObject(JSONObject.parseObject(appActuaryOperationAPI.getCommo(request,productId,null).getResultObj().toString()));
                 browseRecordList.add(browseRecordDTO);
             }
             return ServerResponse.createBySuccess("查询浏览记录成功!",browseRecordList);

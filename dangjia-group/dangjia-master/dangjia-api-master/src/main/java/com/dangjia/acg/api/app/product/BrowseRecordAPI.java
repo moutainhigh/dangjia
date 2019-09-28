@@ -35,7 +35,7 @@ public interface BrowseRecordAPI {
                                    @RequestParam("productId") String productId, @RequestParam("vistsType") String vistsType);
 
     /**
-     * 我的收藏：商品调用新版方案，工地用以前老的方法
+     * ：商品调用新版方案，工地用以前老的方法
      * 购物车猜你喜欢：调用新方案
      * 商品详情页调用同级别货品下面的商品的随机12个
      */

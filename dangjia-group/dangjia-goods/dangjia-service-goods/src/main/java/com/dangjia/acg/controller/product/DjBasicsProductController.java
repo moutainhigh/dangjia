@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 
 /**
@@ -249,6 +250,17 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
     public ServerResponse getAllGoodsByCategoryId(HttpServletRequest request,String categoryId){
         return djBasicsProductService.getAllGoodsByCategoryId(categoryId);
     }
+
+    /**
+     * 根据类别Id查询同级商品
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public List<DjBasicsProduct> getAllProductByCategoryId(String categoryId) {
+        return djBasicsProductService.getAllProductByCategoryId(categoryId);
+    }
+
     /**
      * 根据货品ID查询商品
      * @param goodsId

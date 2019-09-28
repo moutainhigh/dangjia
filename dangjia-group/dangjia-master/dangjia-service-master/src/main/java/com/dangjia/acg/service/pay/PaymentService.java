@@ -60,6 +60,7 @@ import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.pay.PayOrder;
 import com.dangjia.acg.modle.pay.PurchaseOrder;
 import com.dangjia.acg.modle.product.DjBasicsProduct;
+import com.dangjia.acg.modle.product.ShoppingCart;
 import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.modle.repair.MendOrder;
@@ -200,11 +201,13 @@ public class PaymentService {
             payOrder.setState(2);//已支付
             payOrderMapper.updateByPrimaryKeySelective(payOrder);
             String payState = payOrder.getPayState();
-
             if (businessOrder.getType() == 1) {
                 //工序支付
                 this.payWorkerType(businessOrder.getNumber(), businessOrder.getTaskId(), payState);
-            } else if (businessOrder.getType() == 2) {
+            } else if (businessOrder.getType() == 10) {
+                //购物车结算第四步：订单支付状态更新，根据商品类型对应处理的方法
+
+            }else if (businessOrder.getType() == 2) {
                 //处理补货补人工
                 this.mendOrder(businessOrder, payState);
             } else if (businessOrder.getType() == 4) {//待付款 支付时业主包括取消的
@@ -933,8 +936,12 @@ public class PaymentService {
         }
     }
 
+    //购物车结算第二步：获取订单明细方法
+    public List<ShoppingCart> getPaymentAllOrderByShoppingCart(String userToken, String houseDistributionId, int type)
+    {
 
-
+            return null;
+    }
     /**
      * 支付页面(通用)
      */
@@ -957,6 +964,8 @@ public class PaymentService {
                     return ServerResponse.createByErrorMessage("该订单已支付，请勿重复支付！");
                 }
             }
+
+
             if (type == 9) {
                 Insurance insurance = insuranceMapper.selectByPrimaryKey(houseDistributionId);
                 if (insurance == null) {
@@ -985,6 +994,27 @@ public class PaymentService {
                 actuaryDTO.setPrice("¥" + String.format("%.2f", insurance.getMoney().doubleValue()));
                 actuaryDTO.setType(7);
                 actuaryDTOList.add(actuaryDTO);
+            } else if (type == 10) {
+                //购物车结算第三步：调用方法订单明细方法
+//                List<ShoppingCart>  list=  getPaymentAllOrderByShoppingCart(userToken,houseDistributionId,type);
+//                paymentDTO.setDatas("方法结果集");
+//                // 重新计算总价保存
+//                paymentDTO.setTotalPrice(productChangeOrder.getDifferencePrice());
+//                paymentDTO.setPayPrice(productChangeOrder.getDifferencePrice());//实付
+//                if (businessOrderList.size() == 0) {
+//                    businessOrder = new BusinessOrder();
+//                    businessOrder.setMemberId(insurance.getWorkerId()); //公众号唯一标识
+//                    businessOrder.setHouseId(null);
+//                    businessOrder.setNumber(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
+//                    businessOrder.setState(1);//刚生成
+//                    businessOrder.setTotalPrice(insurance.getMoney());
+//                    businessOrder.setDiscountsPrice(new BigDecimal(0));
+//                    businessOrder.setPayPrice(insurance.getMoney());
+//                    businessOrder.setType(10);//记录支付类型任务类型
+//                    businessOrder.setTaskId(houseDistributionId);//保存任务ID
+//                    businessOrderMapper.insert(businessOrder);
+//                }
+//                paymentDTO.setBusinessOrderNumber(businessOrder.getNumber());
             }else if (type == 1) {
                 HouseDistribution houseDistribution = iHouseDistributionMapper.selectByPrimaryKey(houseDistributionId);
                 if (houseDistribution == null) {

@@ -75,4 +75,6 @@ public class PaymentController implements PaymentAPI {
     public ServerResponse getPaymentPage(String userToken, String houseId, String taskId, int type) {
         return paymentService.getPaymentPage(userToken, houseId, taskId, type);
     }
+
+
 }

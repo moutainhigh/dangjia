@@ -103,6 +103,21 @@ public class DjBasicsProductService {
     }
 
     /**
+     * 根据类型查询同级货品
+     * @param categoryId
+     * @return
+     */
+    public List<DjBasicsProduct> getAllProductByCategoryId(String categoryId) {
+        try {
+            Example example = new Example(DjBasicsProduct.class);
+            example.createCriteria().andEqualTo(DjBasicsProduct.CATEGORY_ID,categoryId);
+            List<DjBasicsProduct> djBasicsProductList = djBasicsProductMapper.selectByExample(example); //根据商品编号查询对象
+            return djBasicsProductList;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+    /**
      * 查看商品详情
      * @param productId
      * @return
