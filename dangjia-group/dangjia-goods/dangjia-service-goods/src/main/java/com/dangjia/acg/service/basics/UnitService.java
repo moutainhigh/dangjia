@@ -46,7 +46,6 @@ public class UnitService {
             map.put("creatDate", dateStr);
             map.put("name", unit.getName());
             List<Unit> linkUnitList = new ArrayList<>();
-            linkUnitList.add(unit);
             if (unit.getLinkUnitIdArr() != null) {
                 String[] linkUnitIdArr = unit.getLinkUnitIdArr().split(",");
                 for (String linkUnitId : linkUnitIdArr) {
