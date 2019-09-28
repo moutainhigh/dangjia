@@ -205,7 +205,8 @@ public class PaymentService {
                 //工序支付
                 this.payWorkerType(businessOrder.getNumber(), businessOrder.getTaskId(), payState);
             } else if (businessOrder.getType() == 10) {
-                //购物车结算第四步：订单支付状态更新，根据商品类型对应处理的方法
+                //购物车结算第四步：订单支付状态更新，根据商品类型对应处理的方法  dj_pay_business_order
+
 
             }else if (businessOrder.getType() == 2) {
                 //处理补货补人工
@@ -937,10 +938,12 @@ public class PaymentService {
     }
 
     //购物车结算第二步：获取订单明细方法
-    public List<ShoppingCart> getPaymentAllOrderByShoppingCart(String userToken, String houseDistributionId, int type)
+    public List<ShoppingCart> getPaymentAllOrderByShoppingCart( String houseDistributionId)
     {
-
-            return null;
+        // String userToken,
+        //int type
+        List<ShoppingCart> list = new ArrayList<ShoppingCart>();
+        return list;
     }
     /**
      * 支付页面(通用)
@@ -995,21 +998,21 @@ public class PaymentService {
                 actuaryDTO.setType(7);
                 actuaryDTOList.add(actuaryDTO);
             } else if (type == 10) {
-                //购物车结算第三步：调用方法订单明细方法
-//                List<ShoppingCart>  list=  getPaymentAllOrderByShoppingCart(userToken,houseDistributionId,type);
-//                paymentDTO.setDatas("方法结果集");
+//                //购物车结算第三步：调用方法订单明细方法
+//                List<ShoppingCart>  list=  getPaymentAllOrderByShoppingCart(houseDistributionId);
+//                paymentDTO.setDatas(list);
 //                // 重新计算总价保存
-//                paymentDTO.setTotalPrice(productChangeOrder.getDifferencePrice());
-//                paymentDTO.setPayPrice(productChangeOrder.getDifferencePrice());//实付
+//                paymentDTO.setTotalPrice(list.get(0).getPrice());
+//                paymentDTO.setPayPrice(list.get(0).getPrice());//实付
 //                if (businessOrderList.size() == 0) {
 //                    businessOrder = new BusinessOrder();
-//                    businessOrder.setMemberId(insurance.getWorkerId()); //公众号唯一标识
+//                    businessOrder.setMemberId(list.get(0).getMemberId());
 //                    businessOrder.setHouseId(null);
 //                    businessOrder.setNumber(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
 //                    businessOrder.setState(1);//刚生成
-//                    businessOrder.setTotalPrice(insurance.getMoney());
+//                    businessOrder.setTotalPrice(list.get(0).getPrice());
 //                    businessOrder.setDiscountsPrice(new BigDecimal(0));
-//                    businessOrder.setPayPrice(insurance.getMoney());
+//                    businessOrder.setPayPrice(list.get(0).getPrice());
 //                    businessOrder.setType(10);//记录支付类型任务类型
 //                    businessOrder.setTaskId(houseDistributionId);//保存任务ID
 //                    businessOrderMapper.insert(businessOrder);

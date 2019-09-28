@@ -19,31 +19,31 @@ public class ShopCartController implements ShopCartAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryCartList(String userToken, ShoppingCart shoppingCart) {
-        return shopCartservice.queryCartList(userToken,shoppingCart);
+    public ServerResponse queryCartList(String userToken,  String productId) {
+        return shopCartservice.queryCartList(userToken,productId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse delCar(String userToken, ShoppingCart shoppingCart) {
-        return shopCartservice.delCar(userToken,shoppingCart);
+    public ServerResponse delCar(String userToken) {
+        return shopCartservice.delCar(userToken);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse updateCar(HttpServletRequest request, String userToken, ShoppingCart shoppingCart) {
-        return shopCartservice.updateCart(request,userToken,shoppingCart);
+    public ServerResponse updateCar(HttpServletRequest request, String userToken, String productId, Integer shopCount) {
+        return shopCartservice.updateCart(request,userToken,productId,shopCount);
     }
 
     @Override
     @ApiMethod
     public ServerResponse addCart(String userToken, String cityId,
-                                  String memberId,String productId,
+                                  String productId,
                                   String productSn,String productName,
                                   String price,String shopCount,
                                   String unitName,String categoryId,
                                   String productType,String seller) {
-        return shopCartservice.addCart(userToken, cityId,memberId,productId,productSn,productName,price,shopCount,unitName,categoryId,productType,seller);
+        return shopCartservice.addCart(userToken, cityId,productId,productSn,productName,price,shopCount,unitName,categoryId,productType,seller);
     }
 
 

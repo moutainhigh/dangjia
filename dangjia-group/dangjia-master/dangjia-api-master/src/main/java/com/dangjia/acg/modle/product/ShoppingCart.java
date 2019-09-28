@@ -15,7 +15,7 @@ import java.math.BigDecimal;
 
 @Data
 @Entity
-@Table(name = "dj_shopping_cart")
+@Table(name = "dj_repair_shopping_cart")
 @FieldNameConstants(prefix = "")
 @ApiModel(description = " 新版购物车表")
 public class ShoppingCart extends BaseEntity {

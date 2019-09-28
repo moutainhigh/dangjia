@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.product;
 
+import cn.jiguang.common.utils.StringUtils;
 import com.alibaba.fastjson.JSON;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.data.ForMasterAPI;
@@ -7,7 +8,9 @@ import com.dangjia.acg.api.product.DjBasicsProductAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.mapper.member.IMemberCollectMapper;
-import com.dangjia.acg.mapper.product.IShoppingCartmapper;
+import com.dangjia.acg.mapper.product.ISaleOrderDetailMapper;
+import com.dangjia.acg.mapper.product.ISaleOrderMapper;
+import com.dangjia.acg.mapper.product.IShoppingCartMapper;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.product.BasicsGoods;
@@ -43,17 +46,23 @@ public class ShopCartService {
     private CraftsmanConstructionService constructionService;
 
     @Autowired
-    private IShoppingCartmapper iShoppingCartmapper;
+    private IShoppingCartMapper iShoppingCartmapper;
 
     @Autowired
     private ForMasterAPI forMasterAPI;
+
+    @Autowired
+    private ISaleOrderMapper isaleOrderMapper ;
+
+    @Autowired
+    private ISaleOrderDetailMapper isaleOrderDetailMapper ;
+
     /**
      * 获取购物车列表
      * @param userToken
-     * @param shoppingCart
      * @return
      */
-    public ServerResponse queryCartList(String userToken, ShoppingCart shoppingCart) {
+    public ServerResponse queryCartList(String userToken,String productId) {
         try{
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
@@ -61,7 +70,12 @@ public class ShopCartService {
             }
             Member operator = (Member) object;
             Example example = new Example(ShoppingCart.class);
-            example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, operator.getId());
+            Example.Criteria criteria=example.createCriteria();
+            criteria.andEqualTo(ShoppingCart.MEMBER_ID,operator.getId());
+            if(StringUtils.isNotEmpty(productId))
+            {
+                criteria.andEqualTo(ShoppingCart.PRODUCT_ID, productId);
+            }
             List<ShoppingCart> list = iShoppingCartmapper.selectByExample(example);
             return ServerResponse.createBySuccess("获取购物车列表成功!",list);
         }
@@ -73,10 +87,9 @@ public class ShopCartService {
     /**
      * 清空购物车
      * @param userToken
-     * @param shoppingCart
      * @return
      */
-    public ServerResponse delCar(String userToken, ShoppingCart shoppingCart) {
+    public ServerResponse delCar(String userToken) {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
@@ -98,13 +111,12 @@ public class ShopCartService {
     }
 
     /**
-     *修改购物车数量
+     *修改购物车商品数量
      * @param request
      * @param userToken
-     * @param shoppingCart
      * @return
      */
-    public ServerResponse updateCart(HttpServletRequest request, String userToken, ShoppingCart shoppingCart) {
+    public ServerResponse updateCart(HttpServletRequest request, String userToken, String productId,Integer shopCount) {
         try {
             request.setAttribute(Constants.CITY_ID, request.getParameter(Constants.CITY_ID));
             Object object = constructionService.getMember(userToken);
@@ -114,23 +126,24 @@ public class ShopCartService {
             Member operator = (Member) object;
 
             Example example = new Example(ShoppingCart.class);
+            example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID,operator.getId()).andEqualTo(ShoppingCart.PRODUCT_ID,productId);
             List<ShoppingCart> list = iShoppingCartmapper.selectByExample(example);
             if (list.size() > 0) {
                 ShoppingCart mycart = list.get(0);
-                if (shoppingCart.getShopCount() < 0) {
+                if (shopCount < 0) {
                     iShoppingCartmapper.delete(mycart);
                 }
-                mycart.setShopCount(shoppingCart.getShopCount());
+                mycart.setShopCount(shopCount);
                 int i = iShoppingCartmapper.updateByPrimaryKeySelective(mycart);
                 if (i > 0) {
-                    return ServerResponse.createBySuccessMessage("操作成功!");
+                    return ServerResponse.createBySuccessMessage("修改购物车数量成功!");
 
                 } else {
-                    return ServerResponse.createBySuccessMessage("操作失败!");
+                    return ServerResponse.createBySuccessMessage("修改购物车数量失败!");
                 }
             } else {
-                if (shoppingCart.getShopCount() > 0) {
-                    ServerResponse serverResponse = djBasicsProductAPI.getProductById(request.getParameter(Constants.CITY_ID), shoppingCart.getProductId());
+                if (shopCount > 0) {
+                    ServerResponse serverResponse = djBasicsProductAPI.getProductById(request.getParameter(Constants.CITY_ID), productId);
                     if (serverResponse != null && serverResponse.getResultObj() != null) {
                         Product product = JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), Product.class);
                         BasicsGoods goods = forMasterAPI.getGoods(request.getParameter(Constants.CITY_ID), product.getGoodsId());
@@ -161,7 +174,6 @@ public class ShopCartService {
      * 加入购物车
      * @param userToken
      * @param cityId
-     * @param memberId
      * @param productId
      * @param productSn
      * @param productName
@@ -173,7 +185,7 @@ public class ShopCartService {
      * @param seller
      * @return
      */
-    public ServerResponse addCart(String userToken, String cityId,String memberId,String productId,
+    public ServerResponse addCart(String userToken, String cityId,String productId,
                                   String productSn, String productName,String price,String shopCount,
                                   String unitName,String categoryId,String productType,String seller) {
         try {
@@ -186,11 +198,11 @@ public class ShopCartService {
             //无房无精算  根据用户的member_id去区分
             //判断去重,如果有的话就购买数量加1
             Example example = new Example(ShoppingCart.class);
-            example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, memberId).andEqualTo(ShoppingCart.PRODUCT_ID, productId);
+            example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, operator.getId()).andEqualTo(ShoppingCart.PRODUCT_ID, productId);
             List<ShoppingCart> list = iShoppingCartmapper.selectByExample(example);
             if (list.size() == 0) {
                 ShoppingCart shoppingCart=new ShoppingCart();
-                shoppingCart.setMemberId(memberId);
+                shoppingCart.setMemberId(operator.getId());
                 shoppingCart.setProductId(productId);
                 shoppingCart.setProductSn(productSn);
                 shoppingCart.setProductName(productName);
@@ -230,7 +242,15 @@ public class ShopCartService {
                 return (ServerResponse) object;
             }
             Member operator = (Member) object;
+            //第一步
             //购物车结算：生成订单方法{获取购物车商品，插入订单}，并返回订单ID
+            Example example = new Example(ShoppingCart.class);
+            example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, operator.getId());
+            List<ShoppingCart> list = iShoppingCartmapper.selectByExample(example);
+            for(ShoppingCart shoppingCart :list)
+            {
+
+            }
             return null;
         } catch (Exception e) {
             return ServerResponse.createByErrorMessage("系统报错，删除已选商品失败!");
