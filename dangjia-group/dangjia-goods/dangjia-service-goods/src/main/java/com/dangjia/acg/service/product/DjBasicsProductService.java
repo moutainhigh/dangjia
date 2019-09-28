@@ -19,6 +19,7 @@ import com.dangjia.acg.mapper.basics.ITechnologyMapper;
 import com.dangjia.acg.mapper.basics.IUnitMapper;
 import com.dangjia.acg.mapper.product.*;
 import com.dangjia.acg.modle.attribute.AttributeValue;
+import com.dangjia.acg.modle.basics.Label;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.product.*;
@@ -1101,7 +1102,18 @@ public class DjBasicsProductService {
             List<String> strings = Arrays.asList(s.split(","));
             Example example=new Example(DjBasicsLabel.class);
             example.createCriteria().andIn(DjBasicsLabel.ID,strings);
-            return ServerResponse.createBySuccess("查询成功",iLabelMapper.selectByExample(example));
+            List<Label> labels = iLabelMapper.selectByExample(example);
+            List<DjBasicsLabelDTO> labelDTOS=new ArrayList<>();
+            labels.forEach(label -> {
+                DjBasicsLabelDTO djBasicsLabelDTO=new DjBasicsLabelDTO();
+                djBasicsLabelDTO.setId(label.getId());
+                djBasicsLabelDTO.setName(label.getName());
+                Example example1=new Example(DjBasicsLabelValue.class);
+                example1.createCriteria().andEqualTo(DjBasicsLabelValue.LABEL_ID,label.getId());
+                djBasicsLabelDTO.setLabelValueList(djBasicsLabelValueMapper.selectByExample(example1));
+                labelDTOS.add(djBasicsLabelDTO);
+            });
+            return ServerResponse.createBySuccess("查询成功",labelDTOS);
         }else{
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
