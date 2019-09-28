@@ -25,5 +25,10 @@ public interface DjBasicsGoodsAPI {
                              @RequestParam("goodsId") String goodsId,
                              @RequestParam("labels") String labels);
 
+    @PostMapping("/product/djBasicsGoods/queryGoodsLabels")
+    @ApiOperation(value = "查询货品标签", notes = "查询货品标签")
+    ServerResponse queryGoodsLabels(@RequestParam("request") HttpServletRequest request,
+                                    @RequestParam("goodsId") String goodsId);
+
 
 }

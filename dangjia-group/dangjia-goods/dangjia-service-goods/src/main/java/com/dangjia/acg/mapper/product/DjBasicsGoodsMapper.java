@@ -28,4 +28,6 @@ public interface DjBasicsGoodsMapper extends Mapper<DjBasicsGoods> {
     List<DjBasicsProduct> queryByGoodsId(@Param("goodsId") String goodsId);
 
     List<DjBasicsGoods> queryByCategoryId(@Param("categoryId")String categoryId);
+
+    String queryGoodsLabels(@Param("goodsId") String goodsId);
 }
