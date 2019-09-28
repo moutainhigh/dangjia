@@ -49,5 +49,9 @@ public class AppActuaryOperationController implements AppActuaryOperationAPI {
         return actuaryOperationService.getCommo(gId, null);
     }
 
+    @Override
+    public String getAttributeName( String cityId, String productId){
+        return actuaryOperationService.getAttributeName(productId);
+    }
 
 }

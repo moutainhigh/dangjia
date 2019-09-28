@@ -2,6 +2,7 @@ package com.dangjia.acg.dto.actuary;
 
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -14,5 +15,6 @@ public class BudgetLabelDTO {
     private String labelId;//标签ID
     private String labelName;//标签名称
     private String categoryIds;//分类ID组，逗号分隔
+    private BigDecimal totalPrice;//组总价
     private List<BudgetLabelGoodsDTO> goods;//分类标签下对应的商品集
 }

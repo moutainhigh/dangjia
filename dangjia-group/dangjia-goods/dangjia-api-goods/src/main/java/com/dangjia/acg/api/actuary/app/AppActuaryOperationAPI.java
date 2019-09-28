@@ -1,6 +1,7 @@
 package com.dangjia.acg.api.actuary.app;
 
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.product.DjBasicsProduct;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -59,6 +60,8 @@ public interface AppActuaryOperationAPI {
                             @RequestParam("gId") String gId,
                             @RequestParam("cityId") String cityId);
 
-
+    @PostMapping("/data/goods/attribute/name")
+    @ApiOperation(value = "商品规格名称", notes = "商品规格名称")
+    String getAttributeName(@RequestParam("cityId") String cityId,@RequestParam("productId") String productId);
 
 }

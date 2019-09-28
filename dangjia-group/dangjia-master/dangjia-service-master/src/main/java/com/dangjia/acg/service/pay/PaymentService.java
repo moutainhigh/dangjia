@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.actuary.BudgetMaterialAPI;
 import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
+import com.dangjia.acg.api.actuary.app.AppActuaryOperationAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
@@ -128,7 +129,7 @@ public class PaymentService {
     @Autowired
     private ForMasterAPI forMasterAPI;
     @Autowired
-    private GroupInfoService groupInfoService;
+    private AppActuaryOperationAPI appActuaryOperationAPI;
     @Autowired
     private ConfigUtil configUtil;
     @Autowired
@@ -1271,15 +1272,19 @@ public class PaymentService {
                 List<BudgetLabelDTO> budgetLabelDTOS = forMasterAPI.queryBudgetLabel(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//精算工钱
                 List<BudgetLabelGoodsDTO> budgetLabelGoodsDTOS = forMasterAPI.queryBudgetLabelGoods(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//精算工钱
                 for (BudgetLabelDTO budgetLabelDTO : budgetLabelDTOS) {
+                    BigDecimal totalZPrice = new BigDecimal(0);//组总价
                     String[] array = budgetLabelDTO.getCategoryIds().split(",");
                     List<BudgetLabelGoodsDTO> budgetLabelGoodss= new ArrayList<>();
                     for (BudgetLabelGoodsDTO budgetLabelGoodsDTO : budgetLabelGoodsDTOS) {
                         boolean flag = Arrays.asList(array).contains(budgetLabelGoodsDTO.getCategoryId());
                         if(flag){
                             paymentPrice = paymentPrice.add(budgetLabelGoodsDTO.getTotalPrice());
+                            totalZPrice = totalZPrice.add(budgetLabelGoodsDTO.getTotalPrice());
+                            budgetLabelGoodsDTO.setAttributeName(appActuaryOperationAPI.getAttributeName(house.getCityId(),budgetLabelGoodsDTO.getProductId()));
                             budgetLabelGoodss.add(budgetLabelGoodsDTO);
                         }
                     }
+                    budgetLabelDTO.setTotalPrice(totalZPrice);
                     budgetLabelDTO.setGoods(budgetLabelGoodss);
                 }
 
@@ -1535,15 +1540,19 @@ public class PaymentService {
                 List<BudgetLabelDTO> budgetLabelDTOS = forMasterAPI.queryBudgetLabel(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//精算工钱
                 List<BudgetLabelGoodsDTO> budgetLabelGoodsDTOS = forMasterAPI.queryBudgetLabelGoods(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//精算工钱
                 for (BudgetLabelDTO budgetLabelDTO : budgetLabelDTOS) {
+                    BigDecimal totalZPrice = new BigDecimal(0);//组总价
                     String[] array = budgetLabelDTO.getCategoryIds().split(",");
                     List<BudgetLabelGoodsDTO> budgetLabelGoodss= new ArrayList<>();
                     for (BudgetLabelGoodsDTO budgetLabelGoodsDTO : budgetLabelGoodsDTOS) {
                         boolean flag = Arrays.asList(array).contains(budgetLabelGoodsDTO.getCategoryId());
                         if(flag){
                             totalPrice = totalPrice.add(budgetLabelGoodsDTO.getTotalPrice());
+                            totalZPrice = totalZPrice.add(budgetLabelGoodsDTO.getTotalPrice());
+                            budgetLabelGoodsDTO.setAttributeName(appActuaryOperationAPI.getAttributeName(house.getCityId(),budgetLabelGoodsDTO.getProductId()));
                             budgetLabelGoodss.add(budgetLabelGoodsDTO);
                         }
                     }
+                    budgetLabelDTO.setTotalPrice(totalZPrice);
                     budgetLabelDTO.setGoods(budgetLabelGoodss);
                 }
 

@@ -498,5 +498,25 @@ public class AppActuaryOperationService {
         return attributeDTOList;
     }
 
+    //根据品牌系列找属性品牌
+    public String getAttributeName(String productId) {
+        StringBuilder strbuf = new StringBuilder();
+        DjBasicsProduct product = productMapper.selectByPrimaryKey(productId);//目标product 对象
+        //品牌
+        if (product!=null) {
+            DjBasicsGoods goods = goodsMapper.selectByPrimaryKey(product.getGoodsId());
+            Brand brand =null;
+            if (!CommonUtil.isEmpty(goods.getBrandId())) {
+                brand = iBrandMapper.selectByPrimaryKey(goods.getBrandId());
+            }
+            if (brand!=null) {
+                strbuf.append(brand.getName()).append(" ");
+            }
+            if (!CommonUtil.isEmpty(product.getValueIdArr())) {
+                strbuf.append(product.getValueNameArr().replaceAll(",", " "));
+            }
+        }
+        return strbuf.toString().trim();
+    }
 
 }
