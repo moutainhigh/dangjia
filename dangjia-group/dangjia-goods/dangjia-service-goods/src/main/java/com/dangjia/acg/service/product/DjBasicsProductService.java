@@ -11,10 +11,7 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
-import com.dangjia.acg.dto.product.ActuarialGoodsDTO;
-import com.dangjia.acg.dto.product.AppBasicsProductDTO;
-import com.dangjia.acg.dto.product.BasicsProductDTO;
-import com.dangjia.acg.dto.product.DjBasicsLabelDTO;
+import com.dangjia.acg.dto.product.*;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
 import com.dangjia.acg.mapper.basics.IAttributeValueMapper;
 import com.dangjia.acg.mapper.basics.ITechnologyMapper;
@@ -629,22 +626,22 @@ public class DjBasicsProductService {
      * @return
      */
     public ServerResponse queryProductLabels(String productId) {
-        DjBasicsProduct djBasicsProduct = djBasicsProductMapper.selectByPrimaryKey(productId);
-        List<DjBasicsLabelDTO> djBasicsLabelDTOList = new ArrayList<>();
-        Arrays.asList(djBasicsProduct.getLabelId().split(",")).forEach(str -> {
-            DjBasicsLabel djBasicsLabel = djBasicsLabelMapper.selectByPrimaryKey(str);
-            DjBasicsLabelDTO djBasicsLabelDTO = new DjBasicsLabelDTO();
-            djBasicsLabelDTO.setId(djBasicsLabel.getId());
-            djBasicsLabelDTO.setName(djBasicsLabel.getName());
-            Example example = new Example(DjBasicsLabelValue.class);
-            example.createCriteria().andEqualTo(DjBasicsLabelValue.LABEL_ID, str)
-                    .andEqualTo(DjBasicsLabelValue.DATA_STATUS, 0);
-            djBasicsLabelDTO.setLabelValueList(djBasicsLabelValueMapper.selectByExample(example));
-            djBasicsLabelDTOList.add(djBasicsLabelDTO);
+        Example example=new Example(DjBasicsProductLabelVal.class);
+        example.createCriteria().andEqualTo(DjBasicsProductLabelVal.PRODUCT_ID,productId);
+        List<DjBasicsProductLabelVal> djBasicsProductLabelVals = djBasicsProductLabelValMapper.selectByExample(example);
+        List<DjBasicsProductLabelDTO> djBasicsProductLabelDTOS = new ArrayList<>();
+        djBasicsProductLabelVals.forEach(dbpl ->{
+            DjBasicsLabel djBasicsLabel = djBasicsLabelMapper.selectByPrimaryKey(dbpl.getLabelId());
+            DjBasicsProductLabelDTO djBasicsProductLabelDTO = new DjBasicsProductLabelDTO();
+            djBasicsProductLabelDTO.setLabelId(djBasicsLabel.getId());
+            djBasicsProductLabelDTO.setLabelName(djBasicsLabel.getName());
+            djBasicsProductLabelDTO.setLabelValId(dbpl.getLabelValId());
+            djBasicsProductLabelDTO.setLabelValName(djBasicsLabelValueMapper.selectByPrimaryKey(dbpl.getLabelValId()).getName());
+            djBasicsProductLabelDTOS.add(djBasicsProductLabelDTO);
         });
-        if (djBasicsLabelDTOList.size() <= 0)
+        if (djBasicsProductLabelDTOS.size() <= 0)
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
-        return ServerResponse.createBySuccess("查询成功", djBasicsLabelDTOList);
+        return ServerResponse.createBySuccess("查询成功", djBasicsProductLabelDTOS);
     }
 
 

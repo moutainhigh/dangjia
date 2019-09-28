@@ -73,11 +73,6 @@ public class DjBasicsGoodsService {
         djBasicsGoods.setId(goodsId);
         djBasicsGoods.setLabelIds(labels);
         djBasicsGoodsMapper.updateByPrimaryKeySelective(djBasicsGoods);
-        Example example = new Example(DjBasicsProduct.class);
-        example.createCriteria().andEqualTo(DjBasicsProduct.GOODS_ID, goodsId);
-        DjBasicsProduct djBasicsProduct = new DjBasicsProduct();
-        djBasicsProduct.setLabelId(labels);
-        djBasicsProductMapper.updateByExampleSelective(djBasicsProduct, example);
         return ServerResponse.createBySuccessMessage("货品打标签成功");
     }
 

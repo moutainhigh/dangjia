@@ -40,8 +40,8 @@ public class DjBasicsLabelController implements DjBasicsLabelAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryCommodityLabelsById(HttpServletRequest request, String id) {
-        return djBasicsLabelService.queryCommodityLabelsById(id);
+    public ServerResponse queryCommodityLabelsById(HttpServletRequest request, String labelId) {
+        return djBasicsLabelService.queryCommodityLabelsById(labelId);
     }
 
     @Override

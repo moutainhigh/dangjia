@@ -118,18 +118,18 @@ public class DjBasicsLabelService {
 
 
     /**
-     * 根据id查询商品标签
+     * 根据标签id查询标签值
      *
-     * @param id
+     * @param labelId
      * @return
      */
-    public ServerResponse queryCommodityLabelsById(String id) {
-        DjBasicsLabel djBasicsLabel = djBasicsLabelMapper.selectByPrimaryKey(id);
+    public ServerResponse queryCommodityLabelsById(String labelId) {
+        DjBasicsLabel djBasicsLabel = djBasicsLabelMapper.selectByPrimaryKey(labelId);
         DjBasicsLabelDTO djBasicsLabelDTO = new DjBasicsLabelDTO();
         djBasicsLabelDTO.setId(djBasicsLabel.getId());
         djBasicsLabelDTO.setName(djBasicsLabel.getName());
         Example example = new Example(DjBasicsLabelValue.class);
-        example.createCriteria().andEqualTo(DjBasicsLabelValue.LABEL_ID, id)
+        example.createCriteria().andEqualTo(DjBasicsLabelValue.LABEL_ID, labelId)
                 .andEqualTo(DjBasicsLabelValue.DATA_STATUS, 0);
         djBasicsLabelDTO.setLabelValueList(djBasicsLabelValueMapper.selectByExample(example));
         return ServerResponse.createBySuccess("查询成功", djBasicsLabelDTO);
