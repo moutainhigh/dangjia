@@ -25,4 +25,10 @@ public class DjBasicsGoodsController implements DjBasicsGoodsAPI {
     public ServerResponse addLabels(HttpServletRequest request, String goodsId, String labels) {
         return djBasicsGoodsService.addLabels(goodsId, labels);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryGoodsLabels(HttpServletRequest request, String goodsId) {
+        return djBasicsGoodsService.queryGoodsLabels(goodsId);
+    }
 }

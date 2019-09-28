@@ -109,4 +109,11 @@
         </if>
         ORDER BY create_date desc
     </select>
+
+    <select id="queryGoodsLabels" resultType="java.lang.String">
+        SELECT
+          label_ids
+        FROM dj_basics_goods
+        where id =#{goodsId}
+    </select>
 </mapper>

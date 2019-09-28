@@ -1,6 +1,7 @@
 package com.dangjia.acg.service.product;
 
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
@@ -25,10 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -309,6 +307,25 @@ public class DjBasicsGoodsService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
+    }
+
+
+    /**
+     * 查询货品标签
+     * @param goodsId
+     * @return
+     */
+    public ServerResponse queryGoodsLabels(String goodsId) {
+        String s = djBasicsGoodsMapper.queryGoodsLabels(goodsId);
+        if(!CommonUtil.isEmpty(s)){
+            List<String> strings = Arrays.asList(s.split(","));
+            Example example=new Example(DjBasicsLabel.class);
+            example.createCriteria().andIn(DjBasicsLabel.ID,strings);
+            return ServerResponse.createBySuccess("查询成功",iLabelMapper.selectByExample(example));
+        }else{
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+
     }
 
 }
