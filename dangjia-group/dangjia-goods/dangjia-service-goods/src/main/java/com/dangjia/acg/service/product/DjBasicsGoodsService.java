@@ -293,6 +293,7 @@ public class DjBasicsGoodsService {
                         if (label!=null&&label.getName() != null)
                             map.put("labelName", label.getName());
                     }
+                    map.put("id",p.getId());
                     mapList.add(map);
                 }
                 gMap.put("productList", mapList);
