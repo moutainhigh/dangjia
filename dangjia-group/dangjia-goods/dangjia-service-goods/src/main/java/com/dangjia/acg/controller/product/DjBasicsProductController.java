@@ -304,4 +304,10 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
     public ServerResponse queryChooseGoods(HttpServletRequest request) {
         return djBasicsProductService.queryChooseGoods();
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryProductLabelsByProductId(HttpServletRequest request, String productId) {
+        return djBasicsProductService.queryProductLabelsByProductId(productId);
+    }
 }

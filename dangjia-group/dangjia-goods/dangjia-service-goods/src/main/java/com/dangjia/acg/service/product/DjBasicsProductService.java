@@ -14,6 +14,7 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.product.*;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
 import com.dangjia.acg.mapper.basics.IAttributeValueMapper;
+import com.dangjia.acg.mapper.basics.ILabelMapper;
 import com.dangjia.acg.mapper.basics.ITechnologyMapper;
 import com.dangjia.acg.mapper.basics.IUnitMapper;
 import com.dangjia.acg.mapper.product.*;
@@ -33,7 +34,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 /**
@@ -80,6 +80,8 @@ public class DjBasicsProductService {
     private ConfigUtil configUtil;
     @Autowired
     private IAttributeValueMapper iAttributeValueMapper;
+    @Autowired
+    private ILabelMapper iLabelMapper;
     /**
      * 查询商品信息
      *
@@ -1082,6 +1084,26 @@ public class DjBasicsProductService {
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+
+    /**
+     * 根据商品id查询标签
+     * @param productId
+     * @return
+     */
+    public ServerResponse queryProductLabelsByProductId(String productId) {
+        DjBasicsProduct djBasicsProduct = djBasicsProductMapper.selectByPrimaryKey(productId);
+        DjBasicsGoods djBasicsGoods = djBasicsGoodsMapper.selectByPrimaryKey(djBasicsProduct.getGoodsId());
+        String s = djBasicsGoods.getLabelIds();
+        if(!CommonUtil.isEmpty(s)){
+            List<String> strings = Arrays.asList(s.split(","));
+            Example example=new Example(DjBasicsLabel.class);
+            example.createCriteria().andIn(DjBasicsLabel.ID,strings);
+            return ServerResponse.createBySuccess("查询成功",iLabelMapper.selectByExample(example));
+        }else{
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
     }
 

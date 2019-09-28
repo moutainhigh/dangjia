@@ -201,4 +201,13 @@ public interface DjBasicsProductAPI {
     @ApiOperation(value = "确认开工页选择商品列表", notes = "确认开工页选择商品列表")
     ServerResponse queryChooseGoods(@RequestParam("request") HttpServletRequest request);
 
+
+
+
+    @PostMapping("/product/djBasicsProduct/queryProductLabelsByProductId")
+    @ApiOperation(value = "根据商品id查询标签", notes = "根据商品id查询标签")
+    ServerResponse queryProductLabelsByProductId(@RequestParam("request") HttpServletRequest request,
+                                                 @RequestParam("productId") String productId);
+
+
 }
