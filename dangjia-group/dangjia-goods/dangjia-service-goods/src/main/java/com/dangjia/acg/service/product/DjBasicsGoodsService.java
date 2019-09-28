@@ -58,6 +58,8 @@ public class DjBasicsGoodsService {
     private IAttributeValueMapper iAttributeValueMapper;
     @Autowired
     private ILabelMapper iLabelMapper;
+    @Autowired
+    private DjBasicsLabelValueMapper djBasicsLabelValueMapper;
 
     /**
      * 货品打标签
@@ -292,8 +294,8 @@ public class DjBasicsGoodsService {
                         map.put("labelName", "");
                     } else {
                         map.put("labelId", p.getLabelId());
-                        Label label = iLabelMapper.selectByPrimaryKey(p.getLabelId());
-                        if (label.getName() != null)
+                        DjBasicsLabelValue label = djBasicsLabelValueMapper.selectByPrimaryKey(p.getLabelId());
+                        if (label!=null&&label.getName() != null)
                             map.put("labelName", label.getName());
                     }
                     mapList.add(map);
