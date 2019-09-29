@@ -10,23 +10,19 @@ import com.dangjia.acg.dto.actuary.BudgetLabelGoodsDTO;
 import com.dangjia.acg.dto.product.ProductWorkerDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
+import com.dangjia.acg.mapper.basics.IBrandMapper;
 import com.dangjia.acg.mapper.basics.IBrandSeriesMapper;
 import com.dangjia.acg.mapper.basics.ITechnologyMapper;
 import com.dangjia.acg.mapper.basics.IUnitMapper;
-import com.dangjia.acg.mapper.product.DjBasicsProductMapper;
-import com.dangjia.acg.mapper.product.DjBasicsProductMaterialMapper;
-import com.dangjia.acg.mapper.product.DjBasicsProductWorkerMapper;
-import com.dangjia.acg.mapper.product.IBasicsGoodsMapper;
+import com.dangjia.acg.mapper.product.*;
 import com.dangjia.acg.mapper.sup.ISupplierMapper;
 import com.dangjia.acg.mapper.sup.ISupplierProductMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.modle.basics.Technology;
+import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.brand.Unit;
-import com.dangjia.acg.modle.product.BasicsGoods;
-import com.dangjia.acg.modle.product.DjBasicsProduct;
-import com.dangjia.acg.modle.product.DjBasicsProductMaterial;
-import com.dangjia.acg.modle.product.DjBasicsProductWorker;
+import com.dangjia.acg.modle.product.*;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
 import com.dangjia.acg.service.actuary.app.AppActuaryOperationService;
@@ -68,9 +64,13 @@ public class ForMasterService {
     private IUnitMapper unitMapper;
 
     @Autowired
+    private IBrandMapper iBrandMapper;
+    @Autowired
     private ConfigUtil configUtil;
     @Autowired
     private DjBasicsProductMapper djBasicsProductMapper;
+    @Autowired
+    private DjBasicsGoodsMapper goodsMapper;
     @Autowired
     private IBasicsGoodsMapper iBasicsGoodsMapper;
     @Autowired
@@ -291,7 +291,23 @@ public class ForMasterService {
                     if(budgetLabelGoodsDTO.getDeleteState()!=2) {
                         totalZPrice = totalZPrice.add(budgetLabelGoodsDTO.getTotalPrice());
                     }
-                    budgetLabelGoodsDTO.setAttributeName(actuaryOperationService.getAttributeName(budgetLabelGoodsDTO.getProductId()));
+                    if(!CommonUtil.isEmpty(budgetLabelGoodsDTO.getGoodsId())){
+                        DjBasicsGoods goods = goodsMapper.selectByPrimaryKey(budgetLabelGoodsDTO.getGoodsId());
+                        budgetLabelGoodsDTO.setBuy(goods.getBuy());
+                        budgetLabelGoodsDTO.setSales(goods.getSales());
+                        budgetLabelGoodsDTO.setIsInflueDecorationProgress(goods.getIsInflueDecorationProgress());
+
+                        Brand brand =null;
+                        if (!CommonUtil.isEmpty(goods.getBrandId())) {
+                            brand = iBrandMapper.selectByPrimaryKey(goods.getBrandId());
+                        }
+                        if (!CommonUtil.isEmpty(budgetLabelGoodsDTO.getAttributeName())) {
+                            budgetLabelGoodsDTO.setAttributeName(budgetLabelGoodsDTO.getAttributeName().replaceAll(",", " "));
+                        }
+                        if (brand!=null) {
+                            budgetLabelGoodsDTO.setAttributeName(brand.getName()+" "+budgetLabelGoodsDTO.getAttributeName());
+                        }
+                    }
                     budgetLabelGoodsDTO.setImage(CommonUtil.isEmpty(budgetLabelGoodsDTO.getImage())?"":imageAddress+budgetLabelGoodsDTO.getImage());
                     budgetLabelGoodss.add(budgetLabelGoodsDTO);
                 }
