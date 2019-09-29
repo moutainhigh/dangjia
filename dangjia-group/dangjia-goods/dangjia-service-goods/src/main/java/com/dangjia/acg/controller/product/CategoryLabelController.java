@@ -33,8 +33,8 @@ public class CategoryLabelController implements CatetgoryLabelAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse<PageInfo> getAllCategoryLabel(HttpServletRequest request, PageDTO pageDTO) {
-        return categoryLabelService.getAllCategoryLabel(pageDTO);
+    public ServerResponse<PageInfo> getAllCategoryLabel(HttpServletRequest request) {
+        return categoryLabelService.getAllCategoryLabel();
     }
 
     /**

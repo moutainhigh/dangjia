@@ -36,12 +36,9 @@ public class CategoryLabelService {
     protected static final Logger LOG = LoggerFactory.getLogger(CategoryLabelService.class);
 
     //查询所有的标签
-    public ServerResponse<PageInfo> getAllCategoryLabel(PageDTO pageDTO) {
+    public ServerResponse getAllCategoryLabel() {
         try {
-            if (pageDTO == null) {
-                pageDTO = new PageDTO();
-            }
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+
             List<Map<String, Object>> mapList = new ArrayList<>();
             List<CategoryLabel> labelList = iCategoryLabelMapper.getCategoryLabel();
             for (CategoryLabel categoryLabel : labelList) {
@@ -55,9 +52,7 @@ public class CategoryLabelService {
                 }
                 mapList.add(map);
             }
-            PageInfo pageResult = new PageInfo(labelList);
-            pageResult.setList(mapList);
-            return ServerResponse.createBySuccess("查询成功", pageResult);
+            return ServerResponse.createBySuccess("查询成功", mapList);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");

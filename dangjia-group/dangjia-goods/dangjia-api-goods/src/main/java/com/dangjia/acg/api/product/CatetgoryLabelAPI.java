@@ -28,8 +28,7 @@ public interface CatetgoryLabelAPI {
      */
     @PostMapping("/product/categoryLabel/getAllCategoryLabel")
     @ApiOperation(value = "查询所有类别标签", notes = "查询所有类别标签")
-    ServerResponse<PageInfo> getAllCategoryLabel(@RequestParam("request") HttpServletRequest request,
-                                                 @RequestParam("pageDTO") PageDTO pageDTO);
+    ServerResponse getAllCategoryLabel(@RequestParam("request") HttpServletRequest request);
 
     /**
      * 查询所有的分类标签列表
