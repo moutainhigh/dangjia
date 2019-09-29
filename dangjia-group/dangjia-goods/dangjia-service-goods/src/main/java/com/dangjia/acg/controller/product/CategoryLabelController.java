@@ -6,7 +6,13 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.product.CategoryLabelService;
 import com.github.pagehelper.PageInfo;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.Example;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -19,6 +25,7 @@ import javax.servlet.http.HttpServletRequest;
  */
 @RestController
 public class CategoryLabelController implements CatetgoryLabelAPI {
+    private static Logger logger = LoggerFactory.getLogger(CategoryLabelController.class);
     /**
      * service
      */
@@ -95,6 +102,25 @@ public class CategoryLabelController implements CatetgoryLabelAPI {
     @ApiMethod
     public ServerResponse deleteCategoryLabelById(HttpServletRequest request, String labelId) {
         return categoryLabelService.deleteCategoryLabelById(labelId);
+    }
+
+    /**
+     * 修改标签排序
+     * @param request
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getAllCategoryLabel(HttpServletRequest request,String beforeLabelId,
+                                       int beforeSort,String afterLabelId,int afterSort){
+        try{
+            return categoryLabelService.getAllCategoryLabel(beforeLabelId,beforeSort,afterLabelId,afterSort);
+        }catch(Exception e){
+            logger.error("修改失败：",e);
+            return ServerResponse.createByErrorMessage("修改失败");
+        }
+
+
     }
 
 

@@ -23,7 +23,6 @@ public interface CatetgoryLabelAPI {
     /**
      * 时间询所有类别标签
      * @param request
-     * @param pageDTO
      * @return
      */
     @PostMapping("/product/categoryLabel/getAllCategoryLabel")
@@ -84,5 +83,18 @@ public interface CatetgoryLabelAPI {
     @ApiOperation(value = "根据ID删除类别标签", notes = "根据ID删除类别标签")
     ServerResponse deleteCategoryLabelById(@RequestParam("request") HttpServletRequest request,
                                            @RequestParam("labelId") String labelId);
+
+    /**
+     * 修改标签排序
+     * @param request
+     * @return
+     */
+    @PostMapping("/product/categoryLabel/updateCategoryLabelSort")
+    @ApiOperation(value = "修改标签排序", notes = "修改标签排序")
+    ServerResponse getAllCategoryLabel(@RequestParam("request") HttpServletRequest request,
+                                       @RequestParam("beforeLabelId") String beforeLabelId,
+                                       @RequestParam("beforeSort") int beforeSort,
+                                       @RequestParam("afterLabelId") String afterLabelId,
+                                       @RequestParam("afterSort") int afterSort);
 
 }
