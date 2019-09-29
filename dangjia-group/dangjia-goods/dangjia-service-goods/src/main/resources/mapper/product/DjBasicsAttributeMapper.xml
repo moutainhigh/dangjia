@@ -71,7 +71,7 @@
             AND  p.`name` LIKE  CONCAT('%',#{wordKey},'%')
         </if>
         <if test="categoryId!=null and categoryId!=''">
-            AND category_id = #{categoryId}
+            AND p.category_id = #{categoryId}
         </if>
         GROUP BY
           vl.id

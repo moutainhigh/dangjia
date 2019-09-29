@@ -35,4 +35,7 @@ public class BudgetLabelGoodsDTO {
     private Integer productType;// 0：材料；1：包工包料；2：人工
     private String categoryId;//分类ID
     private String image;//商品图片
+    private String originalProductId;//更换前最初始的商品ID
+    private String goodsGroupId;//商品关联组ID
+
 }
