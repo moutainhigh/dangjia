@@ -456,7 +456,7 @@
 			INNER JOIN dj_basics_goods g ON p.goods_id = g.id
 			WHERE m.house_id = #{houseId}
 			and m.worker_type_id = #{workerTypeId}
-			and m.delete_state in (0, 4)
+			and m.delete_state in (0, 2, 4)
 			UNION ALL
 				SELECT
 					w.id,w.house_flow_id ,w.house_id,w.worker_type_id,w.steta,w.delete_state,w.worker_goods_id product_id,
@@ -469,7 +469,7 @@
 				INNER JOIN dj_basics_goods g ON p.goods_id = g.id
 				WHERE w.house_id = #{houseId}
 			and w.worker_type_id = #{workerTypeId}
-			and w.delete_state in (0, 4)
+			and w.delete_state in (0, 2, 4)
 		) w
 	</select>
 

@@ -2,17 +2,17 @@ package com.dangjia.acg.service.data;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
-import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.actuary.BudgetLabelDTO;
 import com.dangjia.acg.dto.actuary.BudgetLabelGoodsDTO;
-import com.dangjia.acg.dto.product.BasicsProductDTO;
 import com.dangjia.acg.dto.product.ProductWorkerDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
-import com.dangjia.acg.mapper.basics.*;
+import com.dangjia.acg.mapper.basics.IBrandSeriesMapper;
+import com.dangjia.acg.mapper.basics.ITechnologyMapper;
+import com.dangjia.acg.mapper.basics.IUnitMapper;
 import com.dangjia.acg.mapper.product.DjBasicsProductMapper;
 import com.dangjia.acg.mapper.product.DjBasicsProductMaterialMapper;
 import com.dangjia.acg.mapper.product.DjBasicsProductWorkerMapper;
@@ -36,7 +36,10 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 /**
  * author: Ronalcheng
@@ -285,7 +288,9 @@ public class ForMasterService {
             for (BudgetLabelGoodsDTO budgetLabelGoodsDTO : budgetLabelGoodsDTOS) {
                 boolean flag = Arrays.asList(array).contains(budgetLabelGoodsDTO.getCategoryId());
                 if(flag){
-                    totalZPrice = totalZPrice.add(budgetLabelGoodsDTO.getTotalPrice());
+                    if(budgetLabelGoodsDTO.getDeleteState()!=2) {
+                        totalZPrice = totalZPrice.add(budgetLabelGoodsDTO.getTotalPrice());
+                    }
                     budgetLabelGoodsDTO.setAttributeName(actuaryOperationService.getAttributeName(budgetLabelGoodsDTO.getProductId()));
                     budgetLabelGoodsDTO.setImage(CommonUtil.isEmpty(budgetLabelGoodsDTO.getImage())?"":imageAddress+budgetLabelGoodsDTO.getImage());
                     budgetLabelGoodss.add(budgetLabelGoodsDTO);

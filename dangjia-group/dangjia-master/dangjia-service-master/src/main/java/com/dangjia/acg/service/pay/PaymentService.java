@@ -10,18 +10,16 @@ import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
-import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
-import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.activity.ActivityRedPackRecordDTO;
 import com.dangjia.acg.dto.actuary.BudgetLabelDTO;
-import com.dangjia.acg.dto.actuary.BudgetLabelGoodsDTO;
 import com.dangjia.acg.dto.actuary.FlowActuaryDTO;
-import com.dangjia.acg.dto.group.GroupDTO;
-import com.dangjia.acg.dto.pay.*;
+import com.dangjia.acg.dto.pay.ActuaryDTO;
+import com.dangjia.acg.dto.pay.PaymentDTO;
+import com.dangjia.acg.dto.pay.SafeTypeDTO;
+import com.dangjia.acg.dto.pay.UpgradeSafeDTO;
 import com.dangjia.acg.mapper.activity.IActivityRedPackRecordMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
@@ -45,17 +43,13 @@ import com.dangjia.acg.mapper.worker.IInsuranceMapper;
 import com.dangjia.acg.modle.activity.ActivityRedPackRecord;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
-import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.core.HouseFlow;
-import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.*;
 import com.dangjia.acg.modle.design.HouseStyleType;
-import com.dangjia.acg.modle.group.Group;
 import com.dangjia.acg.modle.house.*;
 import com.dangjia.acg.modle.member.CustomerRecord;
-import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.other.WorkDeposit;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.pay.PayOrder;
@@ -73,10 +67,7 @@ import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.deliver.ProductChangeService;
 import com.dangjia.acg.service.design.HouseDesignPayService;
-import com.dangjia.acg.service.member.GroupInfoService;
 import com.dangjia.acg.service.repair.MendOrderCheckService;
-import com.github.pagehelper.PageInfo;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -1679,11 +1670,6 @@ public class PaymentService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
-    }
-
-    public ServerResponse setBudgetGoodsData(String houseId, String workerTypeId,String cityId) {
-
-        return ServerResponse.createByErrorMessage("查询失败");
     }
 
     /**
