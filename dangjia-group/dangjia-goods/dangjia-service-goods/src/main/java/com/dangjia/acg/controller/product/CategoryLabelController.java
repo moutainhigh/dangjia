@@ -64,8 +64,8 @@ public class CategoryLabelController implements CatetgoryLabelAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse updateCategoryLabel(HttpServletRequest request, String labelId, String labelName, int sort) {
-        return categoryLabelService.update(labelId, labelName, sort);
+    public ServerResponse updateCategoryLabel(HttpServletRequest request, String labelId, String labelName) {
+        return categoryLabelService.update(labelId, labelName);
     }
 
     /**

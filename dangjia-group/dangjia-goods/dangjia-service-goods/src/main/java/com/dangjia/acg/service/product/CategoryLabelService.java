@@ -100,7 +100,7 @@ public class CategoryLabelService {
     }
 
     //修改类别标签
-    public ServerResponse update(String labelId, String labelName, int sort) {
+    public ServerResponse update(String labelId, String labelName) {
         try {
             CategoryLabel oldLabel = iCategoryLabelMapper.selectByPrimaryKey(labelId);
             if (oldLabel == null)
@@ -112,7 +112,6 @@ public class CategoryLabelService {
             }
 //            oldLabel.setId(labelId);
             oldLabel.setName(labelName);
-            oldLabel.setSort(sort);
             oldLabel.setModifyDate(new Date());
             iCategoryLabelMapper.updateByPrimaryKeySelective(oldLabel);
             return ServerResponse.createBySuccessMessage("修改成功");
