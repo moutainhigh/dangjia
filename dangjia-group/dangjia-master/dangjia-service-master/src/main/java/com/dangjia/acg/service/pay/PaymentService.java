@@ -1178,7 +1178,6 @@ public class PaymentService {
                 return (ServerResponse) object;
             }
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-            String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
             if (type != 4) {
                 BusinessOrder busOrder = businessOrderMapper.byTaskId(taskId, type);
                 if (busOrder != null) {
@@ -1272,23 +1271,10 @@ public class PaymentService {
                 hwo.setTotalPrice(hwo.getWorkPrice().add(hwo.getMaterialPrice()));//工钱+拆料
                 houseWorkerOrderMapper.updateByPrimaryKey(hwo);
 
+
                 List<BudgetLabelDTO> budgetLabelDTOS = forMasterAPI.queryBudgetLabel(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//精算工钱
-                List<BudgetLabelGoodsDTO> budgetLabelGoodsDTOS = forMasterAPI.queryBudgetLabelGoods(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//精算工钱
                 for (BudgetLabelDTO budgetLabelDTO : budgetLabelDTOS) {
-                    BigDecimal totalZPrice = new BigDecimal(0);//组总价
-                    String[] array = budgetLabelDTO.getCategoryIds().split(",");
-                    List<BudgetLabelGoodsDTO> budgetLabelGoodss= new ArrayList<>();
-                    for (BudgetLabelGoodsDTO budgetLabelGoodsDTO : budgetLabelGoodsDTOS) {
-                        boolean flag = Arrays.asList(array).contains(budgetLabelGoodsDTO.getCategoryId());
-                        if(flag){
-                            paymentPrice = paymentPrice.add(budgetLabelGoodsDTO.getTotalPrice());
-                            totalZPrice = totalZPrice.add(budgetLabelGoodsDTO.getTotalPrice());
-                            budgetLabelGoodsDTO.setAttributeName(appActuaryOperationAPI.getAttributeName(house.getCityId(),budgetLabelGoodsDTO.getProductId()));
-                            budgetLabelGoodss.add(budgetLabelGoodsDTO);
-                        }
-                    }
-                    budgetLabelDTO.setTotalPrice(totalZPrice);
-                    budgetLabelDTO.setGoods(budgetLabelGoodss);
+                    paymentPrice = paymentPrice.add(budgetLabelDTO.getTotalPrice());
                 }
 
                 paymentDTO.setDatas(budgetLabelDTOS);
@@ -1541,22 +1527,8 @@ public class PaymentService {
                 WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
                 paymentDTO.setWorkerTypeName(workerType.getName());
                 List<BudgetLabelDTO> budgetLabelDTOS = forMasterAPI.queryBudgetLabel(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//精算工钱
-                List<BudgetLabelGoodsDTO> budgetLabelGoodsDTOS = forMasterAPI.queryBudgetLabelGoods(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//精算工钱
                 for (BudgetLabelDTO budgetLabelDTO : budgetLabelDTOS) {
-                    BigDecimal totalZPrice = new BigDecimal(0);//组总价
-                    String[] array = budgetLabelDTO.getCategoryIds().split(",");
-                    List<BudgetLabelGoodsDTO> budgetLabelGoodss= new ArrayList<>();
-                    for (BudgetLabelGoodsDTO budgetLabelGoodsDTO : budgetLabelGoodsDTOS) {
-                        boolean flag = Arrays.asList(array).contains(budgetLabelGoodsDTO.getCategoryId());
-                        if(flag){
-                            totalPrice = totalPrice.add(budgetLabelGoodsDTO.getTotalPrice());
-                            totalZPrice = totalZPrice.add(budgetLabelGoodsDTO.getTotalPrice());
-                            budgetLabelGoodsDTO.setAttributeName(appActuaryOperationAPI.getAttributeName(house.getCityId(),budgetLabelGoodsDTO.getProductId()));
-                            budgetLabelGoodss.add(budgetLabelGoodsDTO);
-                        }
-                    }
-                    budgetLabelDTO.setTotalPrice(totalZPrice);
-                    budgetLabelDTO.setGoods(budgetLabelGoodss);
+                    totalPrice = totalPrice.add(budgetLabelDTO.getTotalPrice());
                 }
 
                 paymentDTO.setDatas(budgetLabelDTOS);

@@ -3,6 +3,9 @@ package com.dangjia.acg.service.data;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.actuary.BudgetLabelDTO;
 import com.dangjia.acg.dto.actuary.BudgetLabelGoodsDTO;
 import com.dangjia.acg.dto.product.BasicsProductDTO;
@@ -26,14 +29,14 @@ import com.dangjia.acg.modle.product.DjBasicsProductMaterial;
 import com.dangjia.acg.modle.product.DjBasicsProductWorker;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
+import com.dangjia.acg.service.actuary.app.AppActuaryOperationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Properties;
+import java.math.BigDecimal;
+import java.util.*;
 
 /**
  * author: Ronalcheng
@@ -48,8 +51,8 @@ public class ForMasterService {
     private IBudgetWorkerMapper budgetWorkerMapper;
     @Autowired
     private IBudgetMaterialMapper budgetMaterialMapper;
-   // @Autowired
-   // private IWorkerGoodsMapper workerGoodsMapper;
+    @Autowired
+    private AppActuaryOperationService actuaryOperationService;
     @Autowired
     private ITechnologyMapper technologyMapper;
     @Autowired
@@ -61,6 +64,8 @@ public class ForMasterService {
     @Autowired
     private IUnitMapper unitMapper;
 
+    @Autowired
+    private ConfigUtil configUtil;
     @Autowired
     private DjBasicsProductMapper djBasicsProductMapper;
     @Autowired
@@ -270,9 +275,30 @@ public class ForMasterService {
 
     /*********************商品3.0改造**************************/
     public List<BudgetLabelDTO> queryBudgetLabel(String houseId, String workerTypeId){
-        return budgetMaterialMapper.queryBudgetLabel(houseId,workerTypeId);
+        String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+        List<BudgetLabelDTO> budgetLabelDTOS =  budgetMaterialMapper.queryBudgetLabel(houseId,workerTypeId);//精算工钱
+        List<BudgetLabelGoodsDTO> budgetLabelGoodsDTOS = queryBudgetLabelGoods(houseId,workerTypeId);//精算工钱
+        for (BudgetLabelDTO budgetLabelDTO : budgetLabelDTOS) {
+            BigDecimal totalZPrice = new BigDecimal(0);//组总价
+            String[] array = budgetLabelDTO.getCategoryIds().split(",");
+            List<BudgetLabelGoodsDTO> budgetLabelGoodss= new ArrayList<>();
+            for (BudgetLabelGoodsDTO budgetLabelGoodsDTO : budgetLabelGoodsDTOS) {
+                boolean flag = Arrays.asList(array).contains(budgetLabelGoodsDTO.getCategoryId());
+                if(flag){
+                    totalZPrice = totalZPrice.add(budgetLabelGoodsDTO.getTotalPrice());
+                    budgetLabelGoodsDTO.setAttributeName(actuaryOperationService.getAttributeName(budgetLabelGoodsDTO.getProductId()));
+                    budgetLabelGoodsDTO.setImage(CommonUtil.isEmpty(budgetLabelGoodsDTO.getImage())?"":imageAddress+budgetLabelGoodsDTO.getImage());
+                    budgetLabelGoodss.add(budgetLabelGoodsDTO);
+                }
+            }
+            budgetLabelDTO.setTotalPrice(totalZPrice);
+            budgetLabelDTO.setGoods(budgetLabelGoodss);
+        }
+        return budgetLabelDTOS;
     }
     public  List<BudgetLabelGoodsDTO> queryBudgetLabelGoods(String houseId, String workerTypeId){
         return budgetMaterialMapper.queryBudgetLabelGoods(houseId,workerTypeId);
     }
+
+
 }
