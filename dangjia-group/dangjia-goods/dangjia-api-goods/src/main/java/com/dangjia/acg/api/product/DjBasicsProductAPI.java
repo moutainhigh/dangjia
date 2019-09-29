@@ -38,7 +38,7 @@ public interface DjBasicsProductAPI {
 
 
     @PostMapping("/product/djBasicsProduct/queryProductLabels")
-    @ApiOperation(value = "查询商品标签", notes = "查询商品标签")
+    @ApiOperation(value = "查询商品打的标签", notes = "查询商品打的标签")
     ServerResponse queryProductLabels(@RequestParam("request")HttpServletRequest request,
                                       @RequestParam("productId")String productId);
 
