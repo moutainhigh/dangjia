@@ -2,6 +2,8 @@ package com.dangjia.acg.dto.product;
 
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * Created with IntelliJ IDEA.
  * author: wk
@@ -11,7 +13,5 @@ import lombok.Data;
 @Data
 public class DjBasicsProductLabelDTO {
     private String labelId;
-    private String labelName;
-    private String labelValId;
-    private String labelValName;
+    private List<String> labelValId;
 }

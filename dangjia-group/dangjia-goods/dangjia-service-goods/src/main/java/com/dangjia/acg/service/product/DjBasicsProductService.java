@@ -637,9 +637,7 @@ public class DjBasicsProductService {
             DjBasicsLabel djBasicsLabel = djBasicsLabelMapper.selectByPrimaryKey(dbpl.getLabelId());
             DjBasicsProductLabelDTO djBasicsProductLabelDTO = new DjBasicsProductLabelDTO();
             djBasicsProductLabelDTO.setLabelId(djBasicsLabel.getId());
-            djBasicsProductLabelDTO.setLabelName(djBasicsLabel.getName());
-            djBasicsProductLabelDTO.setLabelValId(dbpl.getLabelValId());
-            djBasicsProductLabelDTO.setLabelValName(djBasicsLabelValueMapper.selectByPrimaryKey(dbpl.getLabelValId()).getName());
+            djBasicsProductLabelDTO.setLabelValId(Arrays.asList(dbpl.getLabelValId().split(",")));
             djBasicsProductLabelDTOS.add(djBasicsProductLabelDTO);
         });
         if (djBasicsProductLabelDTOS.size() <= 0)
@@ -662,36 +660,47 @@ public class DjBasicsProductService {
             JSONArray productLabelValArr = JSONArray.parseArray(productLabelValList);
             for (int i = 0; i < productLabelValArr.size(); i++) {//遍历户型
                 JSONObject obj = productLabelValArr.getJSONObject(i);
-                String productLabelValId = obj.getString("id");//商品标签值id
                 String labelId = obj.getString("labelId");//标签id
                 String labelValId = obj.getString("labelValId");//标签值id
+                JSONArray jsonObject = JSONArray.parseArray(labelValId);
+                StringBuffer stringBuffer=new StringBuffer();
+                for (int i1 = 0; i1 < jsonObject.size(); i1++) {
+                    if(i1!=0)
+                        stringBuffer.append(",");
+                    stringBuffer.append(jsonObject.get(i1));
+                }
+                System.out.println(stringBuffer.toString());
                 DjBasicsProductLabelVal djBasicsProductLabelVal;
-                if (CommonUtil.isEmpty(productLabelValId)) {//没有id则新增
+                Example example=new Example(DjBasicsProductLabelVal.class);
+                example.createCriteria().andEqualTo(DjBasicsProductLabelVal.PRODUCT_ID,productId)
+                        .andEqualTo(DjBasicsProductLabelVal.LABEL_ID,labelId);
+                List<DjBasicsProductLabelVal> djBasicsProductLabelVals = djBasicsProductLabelValMapper.selectByExample(example);
+                if (djBasicsProductLabelVals.size()<=0) {//没有则新增
                     djBasicsProductLabelVal = new DjBasicsProductLabelVal();
                     djBasicsProductLabelVal.setProductId(productId);
                     djBasicsProductLabelVal.setDataStatus(0);
                     djBasicsProductLabelVal.setLabelId(labelId);
-                    djBasicsProductLabelVal.setLabelValId(labelValId);
+                    djBasicsProductLabelVal.setLabelValId(stringBuffer.toString());
                     djBasicsProductLabelValMapper.insert(djBasicsProductLabelVal);
                 } else {
-                    djBasicsProductLabelVal = djBasicsProductLabelValMapper.selectByPrimaryKey(productLabelValId);
-                    if (djBasicsProductLabelVal.getLabelId().equals(labelId) && djBasicsProductLabelVal.getLabelValId().equals(labelValId)) {
-                        return ServerResponse.createByErrorMessage("商品标签值已存在");
-                    }
-                    djBasicsProductLabelVal.setLabelId(labelId);
-                    djBasicsProductLabelVal.setLabelValId(labelValId);
-                    djBasicsProductLabelValMapper.updateByPrimaryKeySelective(djBasicsProductLabelVal);
+                    djBasicsProductLabelVal=new DjBasicsProductLabelVal();
+                    djBasicsProductLabelVal.setLabelValId(stringBuffer.toString());
+                    example=new Example(DjBasicsProductLabelVal.class);
+                    example.createCriteria().andEqualTo(DjBasicsProductLabelVal.PRODUCT_ID,productId)
+                            .andEqualTo(DjBasicsProductLabelVal.LABEL_ID,labelId);
+                    djBasicsProductLabelValMapper.updateByExampleSelective(djBasicsProductLabelVal,example);
                 }
             }
             //要删除商品标签值id数组，逗号分隔
-            String[] deleteproductLabelValIds = villageObj.getString("deleteproductLabelValIds").split(",");
-            for (String deleteproductLabelValId : deleteproductLabelValIds) {
-                if (djBasicsProductLabelValMapper.selectByPrimaryKey(deleteproductLabelValId) != null) {
-                    if (djBasicsProductLabelValMapper.deleteByPrimaryKey(deleteproductLabelValId) < 0)
-                        return ServerResponse.createByErrorMessage("删除id：" + deleteproductLabelValId + "失败");
-                }
-            }
+//            String[] deleteproductLabelValIds = villageObj.getString("deleteproductLabelValIds").split(",");
+//            for (String deleteproductLabelValId : deleteproductLabelValIds) {
+//                if (djBasicsProductLabelValMapper.selectByPrimaryKey(deleteproductLabelValId) != null) {
+//                    if (djBasicsProductLabelValMapper.deleteByPrimaryKey(deleteproductLabelValId) < 0)
+//                        return ServerResponse.createByErrorMessage("删除id：" + deleteproductLabelValId + "失败");
+//                }
+//            }
         } catch (Exception e) {
+            e.printStackTrace();
             return ServerResponse.createByErrorMessage("操作失败");
         }
         return ServerResponse.createBySuccessMessage("操作成功");
