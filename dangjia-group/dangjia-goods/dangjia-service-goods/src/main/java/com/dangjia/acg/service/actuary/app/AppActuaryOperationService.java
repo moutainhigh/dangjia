@@ -119,8 +119,13 @@ public class AppActuaryOperationService {
                 .andCondition("  FIND_IN_SET(product_id,'" + productId + "') ");
         List<BudgetMaterial> budgetMaterials = budgetMaterialMapper.selectByExample(example);
         for (BudgetMaterial budgetMaterial : budgetMaterials) {
-            if(!CommonUtil.isEmpty(budgetMaterial.getOriginalProductId())) {
-                changeProduct(budgetMaterial.getOriginalProductId(),budgetMaterial.getId(),houseId,budgetMaterial.getWorkerTypeId());
+            if(budgetMaterial.getDeleteState()==2){
+                budgetMaterial.setDeleteState(0);
+                budgetMaterialMapper.updateByPrimaryKey(budgetMaterial);
+            }else {
+                if (!CommonUtil.isEmpty(budgetMaterial.getOriginalProductId())) {
+                    changeProduct(budgetMaterial.getOriginalProductId(), budgetMaterial.getId(), houseId, budgetMaterial.getWorkerTypeId());
+                }
             }
         }
 
