@@ -55,23 +55,65 @@ public class BasicsGoodsCategoryService {
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             BasicsGoodsCategory basicsGoodsCategory = iBasicsGoodsCategoryMapper.selectByPrimaryKey(categoryId);
+            Map categoryMap = BeanUtils.beanToMap(basicsGoodsCategory);
             String image = basicsGoodsCategory.getImage();
             if (image != null && !"".equalsIgnoreCase(image)) {
-                basicsGoodsCategory.setImage(address + image);
+                categoryMap.put("imageUrl",getImageStr(image,address));
             }
             String coverImage = basicsGoodsCategory.getCoverImage();
             if (coverImage != null && !"".equalsIgnoreCase(coverImage)) {
-                basicsGoodsCategory.setCoverImage(address + coverImage);
+                categoryMap.put("coverImageUrl",getImageStr(coverImage,address));
             }
-            Map categoryMap = BeanUtils.beanToMap(basicsGoodsCategory);
+
             List<Brand> bList = iBasicsGoodsCategoryMapper.queryBrandByCategoryid(categoryId);
             categoryMap.put("brands", bList);
+            categoryMap.put("brandsIds", getBrandids(bList));
             return ServerResponse.createBySuccess("查询成功", categoryMap);
         } catch (Exception e) {
             logger.error("getBasicsGoodsCategory查询失败：", e);
             return ServerResponse.createByErrorMessage("查询失败");
 
         }
+    }
+
+    /**
+     * 获取图片的详情路径
+     * @param image
+     * @return
+     */
+    private String getImageStr(String image,String address){
+        String[] imgArr = image.split(",");
+//                String[] technologyIds = obj.getString("technologyIds").split(",");//工艺节点
+        StringBuilder imgStr = new StringBuilder();
+        for (int j = 0; j < imgArr.length; j++) {
+            String img = imgArr[j];
+            if (j == imgArr.length - 1) {
+                imgStr.append(address + img);
+            } else {
+                imgStr.append(address + img).append(",");
+            }
+        }
+        return imgStr.toString();
+    }
+
+    /**
+     * 获取品牌ID 字段，用逗号分隔
+     * @param list
+     * @return
+     */
+    private String getBrandids(List<Brand> list){
+        String brandsIds="";
+        if(list!=null&&list.size()>0){
+            for(int i=0;i<list.size();i++) {
+                Brand brand=list.get(i);
+                if("".equals(brandsIds)){
+                    brandsIds=brand.getId();
+                }else{
+                    brandsIds=brandsIds+","+brand.getId();
+                }
+            }
+        }
+        return brandsIds;
     }
 
     //新增商品类别
