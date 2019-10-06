@@ -129,7 +129,7 @@ public class DjBasicsGoodsService {
         iBasicsGoodsMapper.updateByPrimaryKeySelective(goods);
 
         djBasicsProductMapper.updateProductCategoryByGoodsId(id, oldBasicsGoods.getCategoryId());
-        return ServerResponse.createBySuccessMessage("修改成功");
+        return ServerResponse.createBySuccess("修改成功", id);
     }
 
     /**
