@@ -57,6 +57,7 @@ public class DjBasicsAttributeServices {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 caMap.put("createDate", sdf.format(ca.getCreateDate()));
                 caMap.put("modifyDate", sdf.format(ca.getModifyDate()));
+                caMap.put("isScreenConditions",ca.getIsScreenConditions());
                 List<DjBasicsAttributeValuePO> avList = djBasicsAttributeValueMapper.queryPOByAttributeId(ca.getId());
                 List<Map<String, Object>> avListMap = new ArrayList<>();
                 avList.forEach(av -> {
