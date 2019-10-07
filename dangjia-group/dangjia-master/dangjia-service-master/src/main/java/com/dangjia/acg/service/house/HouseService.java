@@ -2074,6 +2074,10 @@ public class HouseService {
         if (!CommonUtil.isEmpty(workerType)) {
             criteria.andEqualTo(HouseConstructionRecord.WORKER_TYPE, workerType);
         }
+        //展示动态类别为： 每日开工，每日完工，管家巡查，阶段完工，管家验收阶段完工，整体完工，管家整体完工验收，工艺节点展示；
+        String applyType="0,1,2,4,5";
+        String[] applyTypes = applyType.split(",");
+        criteria.andIn(HouseConstructionRecord.APPLY_TYPE,Arrays.asList(applyTypes));
         example.orderBy(HouseConstructionRecord.CREATE_DATE).desc();
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<HouseConstructionRecord> hfaList = houseConstructionRecordMapper.selectByExample(example);
