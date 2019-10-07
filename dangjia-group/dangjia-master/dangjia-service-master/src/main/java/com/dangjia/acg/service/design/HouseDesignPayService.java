@@ -224,6 +224,8 @@ public class HouseDesignPayService {
             designPayDTO.setButUrl(webAddress + "paymentAgreement?title=设计服务须知&protocolTpye=3");
             designPayDTO.setMoneyMessage("设计改图费用:¥" + order.getSumMoney().setScale(2, BigDecimal.ROUND_HALF_UP));
         }
+        house.setDataStatus(0);
+        houseMapper.updateByPrimaryKeySelective(house);
         return ServerResponse.createByErrorNeedToPay(designPayDTO);
     }
 

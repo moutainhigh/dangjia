@@ -384,6 +384,9 @@ public class HouseService {
                 }
                 srcHouse.setCustomSort(house.getCustomSort());
             }
+            if(!CommonUtil.isEmpty(house.getCustomEdit())){
+                srcHouse.setDataStatus(0);
+            }
             srcHouse.setOptionalLabel(house.getOptionalLabel());
             srcHouse.setCustomEdit(house.getCustomEdit());
             iHouseMapper.updateByPrimaryKeySelective(srcHouse);
