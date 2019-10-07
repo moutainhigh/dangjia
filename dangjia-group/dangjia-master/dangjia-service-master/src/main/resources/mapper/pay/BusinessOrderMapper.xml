@@ -117,7 +117,7 @@
 
         GROUP BY a.id
         ORDER BY
-        b.create_date DESC
+        a.create_date DESC
     </select>
 
     <select id="getOrderItem" resultType="com.dangjia.acg.dto.deliver.OrderItemByDTO">

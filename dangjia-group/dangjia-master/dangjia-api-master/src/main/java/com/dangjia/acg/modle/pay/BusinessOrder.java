@@ -50,8 +50,8 @@ public class BusinessOrder extends BaseEntity {
 	private String taskId;//工序支付   补货补人工  提前付
 
 	@Column(name = "state")
-	@Desc(value = "处理状态  1刚生成(可编辑),2去支付(不修改),3已支付")
-	@ApiModelProperty("处理状态  1刚生成(可编辑),2去支付(不修改),3已支付")
+	@Desc(value = "处理状态  1刚生成(可编辑),2去支付(不修改),3已支付,4已取消")
+	@ApiModelProperty("处理状态  1刚生成(可编辑),2去支付(不修改),3已支付,4已取消")
 	private Integer state;//
 
 	@Column(name = "total_price")

@@ -1,8 +1,10 @@
 package com.dangjia.acg.service.finance;
 
+import com.ctc.wstx.util.DataUtil;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.deliver.OrderItemByDTO;
 import com.dangjia.acg.dto.deliver.WebOrderDTO;
@@ -18,12 +20,15 @@ import com.dangjia.acg.modle.activity.ActivityRedPackRecord;
 import com.dangjia.acg.modle.activity.ActivityRedPackRule;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.WorkerType;
+import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -107,6 +112,12 @@ public class WebOrderService {
                     if (webOrderDTO.getType() == 7) {
                         webOrderDTO.setTypeText("设计/精算改图");
                     }
+                    if (webOrderDTO.getType() == 8) {
+                        webOrderDTO.setTypeText("业主购买");
+                    }
+                    if (webOrderDTO.getType() == 9) {
+                        webOrderDTO.setTypeText("工人保险");
+                    }
                 }
                 ActivityRedPackRecord activityRedPackRecord = iActivityRedPackRecordMapper.getRedPackRecordsByBusinessOrderNumber(webOrderDTO.getOrderId());
                 if (activityRedPackRecord != null) {
@@ -157,5 +168,18 @@ public class WebOrderService {
 
     }
 
+    /**
+     * 查询到时业主未审核申请
+     */
+    public void autoOrderCancel(){
+        BusinessOrder businessOrder=new BusinessOrder();
+        businessOrder.setId(null);
+        businessOrder.setCreateDate(null);
+        businessOrder.setState(4);
+        Example example = new Example(BusinessOrder.class);
+        example.createCriteria().andEqualTo(BusinessOrder.STATE, 1)
+                .andCondition(" DATE_SUB(CURDATE(), INTERVAL 7 DAY) > date(create_date) ");
+        iBusinessOrderMapper.updateByExample(businessOrder,example);
+    }
 }
 

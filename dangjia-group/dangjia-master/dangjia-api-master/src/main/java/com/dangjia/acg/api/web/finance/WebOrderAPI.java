@@ -33,4 +33,7 @@ public interface WebOrderAPI {
                                 @RequestParam("pageDTO") PageDTO pageDTO,
                                 @RequestParam("businessNumber") String businessNumber);
 
+    @PostMapping("job/auto/order/cancel")
+    @ApiOperation(value = "自动取消订单（超过7天）", notes = "自动取消订单（超过7天）")
+    void autoOrderCancel();
 }
