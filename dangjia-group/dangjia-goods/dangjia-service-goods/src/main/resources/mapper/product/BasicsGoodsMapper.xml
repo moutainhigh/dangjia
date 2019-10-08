@@ -114,18 +114,26 @@
     <!-- 查询某个分类的商品 模糊name -->
     <select id="queryGoodsListByCategoryLikeName" resultType="com.dangjia.acg.modle.product.BasicsGoods">
         SELECT
-        bg.id as id,
-        bg.`NAME` as name,
-        bg.category_id AS categoryId,
-        bg.type as type,
-        bg.buy as buy,
-        bg.sales as sales,
-        bg.unit_id AS unitId,
-        bg.other_name AS otherName,
-        bg.create_date AS createDate,
-        bg.modify_date AS modifyDate
+        id,
+        NAME,
+        category_id as categoryId,
+        type,
+        buy,
+        sales,
+        other_name AS otherName,
+        unit_id as unitId,
+        create_date,
+        modify_date,
+        is_influe_decoration_progress as isInflueDecorationProgress,
+        irreversible_reasons as irreversibleReasons,
+        istop,
+        brand_id as brandId,
+        is_elevator_fee as isElevatorFee,
+        indicative_price as indicativePrice,
+        label_ids as  labelIds,
+        is_reservation_deliver as isReservationDeliver,
+        attribute_id_arr attributeIdArr
         FROM dj_basics_goods bg
-        INNER JOIN dj_basics_product bp ON bp.goods_id = bg.id
         where 1=1
         <if test="categoryId!=null and categoryId!=''">
             and bg.category_id=#{categoryId}
@@ -134,6 +142,7 @@
             AND (
             bp.`name` LIKE CONCAT('%',#{name}, '%' )
             OR bg.`other_name` LIKE CONCAT( '%', #{name}, '%' )
+            or exists (select 1 from dj_basics_product_template t1 where t1.name like CONCAT('%',#{name}, '%'))
             )
         </if>
         GROUP BY bg.id
@@ -153,7 +162,6 @@
         bg.create_date AS createDate,
         bg.modify_date AS modifyDate
         FROM dj_basics_goods bg
-        INNER JOIN dj_basics_product bp ON bp.goods_id = bg.id
         where 1=1
         <if test="categoryId!=null and categoryId!=''">
             and bg.category_id=#{categoryId}
@@ -165,12 +173,13 @@
             and bg.buy !=#{buy}
         </if>
         <if test="buy!=null and buy!=''">
-            and (SELECT COUNT(*) > 0 as num FROM dj_basics_product p WHERE p.goods_id = bg.id and p.type =1)
+            and (SELECT COUNT(*) > 0 as num FROM dj_basics_product_template p WHERE p.goods_id = bg.id and p.type =1)
         </if>
         <if test="name!=null and name!=''">
             AND (
             bp.`name` LIKE CONCAT('%',#{name}, '%' )
             OR bg.`other_name` LIKE CONCAT( '%', #{name}, '%' )
+            or exists (select 1 from dj_basics_product_template t1 where t1.name like CONCAT('%',#{name}, '%'))
             )
         </if>
         GROUP BY bg.id

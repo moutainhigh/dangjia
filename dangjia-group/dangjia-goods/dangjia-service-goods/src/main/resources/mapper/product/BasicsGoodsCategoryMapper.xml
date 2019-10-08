@@ -67,17 +67,14 @@
             0 AS type,
             p. NAME AS NAME
             FROM
-            dj_basics_product p,
-            dj_basics_product_material p1,
+            dj_basics_product_template p,
             dj_basics_goods_category c,
             dj_basics_goods g,
             dj_basics_unit u
-        WHERE
-        p.id = p1.product_id
-        AND c.id = p.category_id
+        WHERE c.id = p.category_id
         AND p.goods_id=g.id
         and g.category_id=c.id
-        AND u.id = p1.convert_unit
+        AND u.id = p.convert_unit
         AND p.maket = 1
         AND p.type = 1
         and p.maket = 1
@@ -124,7 +121,7 @@
         b.modify_date AS modifyDate
         FROM
         dj_basics_brand b
-        INNER JOIN dj_basics_product p ON (p.`name` LIKE CONCAT('%', b. NAME, '%'))
+        INNER JOIN dj_basics_product_template p ON (p.`name` LIKE CONCAT('%', b. NAME, '%'))
         INNER JOIN dj_basics_goods_category c ON c.id = p.category_id
         WHERE p.maket = 1 AND p.type = 1
         <if test="wordKey!=null and wordKey!=''">

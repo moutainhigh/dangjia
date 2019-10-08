@@ -149,7 +149,7 @@ public class GoodsGroupService {
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();
-            throw new BaseException(ServerCode.WRONG_PARAM, "修改失败");
+            throw new BaseException(ServerCode.WRONG_PARAM, "查询失败");
         }
     }
 

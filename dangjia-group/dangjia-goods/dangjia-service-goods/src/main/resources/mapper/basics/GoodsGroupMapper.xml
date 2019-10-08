@@ -113,7 +113,7 @@
 	<!-- 根据商品id查询所有货品 -->
 	<select id="getProductList" resultMap="GoodsCategoryMap" parameterType="java.util.Map">	
 		SELECT id,name 
-		FROM dj_basics_product
+		FROM dj_basics_product_template
 		where goods_id=#{id}
 		ORDER BY create_date desc
 	</select>
@@ -143,7 +143,7 @@
 		 p.unit_name as unitName,
 		 p.convert_unit as convertUnit,
 		 unit.name as convertUnitName
-		FROM dj_basics_group_link as g, dj_basics_product as p, dj_basics_unit as unit
+		FROM dj_basics_group_link as g, dj_basics_product_template as p, dj_basics_unit as unit
 		where group_id= #{groupId} and p.id = g.product_id and unit.id = p.convert_unit
 		ORDER BY g.create_date desc
 	</select>

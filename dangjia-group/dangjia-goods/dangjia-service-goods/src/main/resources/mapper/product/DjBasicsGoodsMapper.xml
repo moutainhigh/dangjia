@@ -56,8 +56,9 @@
         </if>
         <if test="name!=null and name!=''">
             AND (
-            bp.`name` LIKE CONCAT('%',#{name}, '%' )
+            bg.`name` LIKE CONCAT('%',#{name}, '%' )
             OR bg.`other_name` LIKE CONCAT( '%', #{name}, '%' )
+            or exists (select 1 from dj_basics_product_template t1 where bg.id=t1.goods_id and  t1.name like CONCAT('%',#{name}, '%'))
             )
         </if>
         GROUP BY bg.id
@@ -92,7 +93,7 @@
     <select id="queryByGoodsId" resultType="com.dangjia.acg.modle.product.DjBasicsProduct">
         SELECT
         <include refid="all_columns"/>
-        FROM dj_basics_product
+        FROM dj_basics_product_template
         where goods_id=#{goodsId}
         and data_status=0
         ORDER BY istop DESC,create_date desc
