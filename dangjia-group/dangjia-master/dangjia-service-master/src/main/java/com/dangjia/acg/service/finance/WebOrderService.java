@@ -177,8 +177,7 @@ public class WebOrderService {
         businessOrder.setCreateDate(null);
         businessOrder.setState(4);
         Example example = new Example(BusinessOrder.class);
-        example.createCriteria().andEqualTo(BusinessOrder.STATE, 1)
-                .andCondition(" DATE_SUB(CURDATE(), INTERVAL 7 DAY) > date(create_date) ");
+        example.createCriteria().andEqualTo(BusinessOrder.STATE, 1);
         iBusinessOrderMapper.updateByExample(businessOrder,example);
     }
 }
