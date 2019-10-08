@@ -173,6 +173,32 @@ public class PaymentService {
     @Autowired
     private ICustomerRecordMapper customerRecordMapper;
 
+
+    @Autowired
+    private PayService payService;
+
+
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse setServersSuccess(String businessOrderId,BigDecimal money,String image ) {
+        try {
+            BusinessOrder businessOrder = businessOrderMapper.selectByPrimaryKey(businessOrderId);
+            businessOrder.setPayPrice(money);
+            businessOrder.setImage(image);
+            businessOrderMapper.updateByPrimaryKeySelective(businessOrder);
+
+            ServerResponse serverResponse=payService.getPOSSign(businessOrder.getNumber());
+            if(!serverResponse.isSuccess()){
+                return serverResponse;
+            }
+
+            return setServersSuccess((String)serverResponse.getResultObj());
+        } catch (Exception e) {
+            e.printStackTrace();
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return ServerResponse.createByErrorMessage("支付回调异常");
+        }
+    }
+
     /**
      * 服务器回调
      */

@@ -69,6 +69,12 @@ public class BusinessOrder extends BaseEntity {
 	@ApiModelProperty("实付")
 	private BigDecimal payPrice;//
 
+
+	@Column(name = "image")
+	@Desc(value = "支付回执单图片（多张，逗号分隔）")
+	@ApiModelProperty("支付回执单图片（多张，逗号分隔）")
+	private String image;//
+
 	@Column(name = "type")
 	@Desc(value = "支付类型  1工序支付任务,2补货补人工 ,4待付款进来只付材料, 5验房分销, 6换货单,7:设计精算补单,8:未购买,9:工人保险")
 	@ApiModelProperty("支付类型  1工序支付任务,2补货补人工 ,4待付款进来只付材料, 5验房分销, 6换货单,7:设计精算补单,9:工人保险")

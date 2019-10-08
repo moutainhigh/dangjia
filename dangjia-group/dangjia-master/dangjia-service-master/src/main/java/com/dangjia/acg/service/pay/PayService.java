@@ -202,6 +202,18 @@ public class PayService {
         return AliPayUtil.getAlipaySign(price, outTradeNo, basePath);
     }
 
+    /* POS支付 */
+    public ServerResponse getPOSSign(String businessOrderNumber) {
+       try {
+           //检测订单有效性
+           checkOrder(businessOrderNumber);
+           //生成支付流水
+           PayOrder payOrder= getPayOrder("3", businessOrderNumber);
+           return ServerResponse.createBySuccess("检查成功",payOrder.getId());
+       }catch (Exception e){
+           return ServerResponse.createByErrorMessage("检查失败-原因："+e.getMessage());
+       }
+    }
     private void checkOrder(String businessOrderNumber) {
         Example example = new Example(BusinessOrder.class);
         example.createCriteria().andEqualTo("number", businessOrderNumber).andEqualTo("state", 1);
