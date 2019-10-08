@@ -208,7 +208,13 @@ public class PayService {
            //检测订单有效性
            checkOrder(businessOrderNumber);
            //生成支付流水
-           PayOrder payOrder= getPayOrder("3", businessOrderNumber);
+           PayOrder payOrder = payOrderMapper.getByNumber(businessOrderNumber);
+           if (payOrder == null) {
+               payOrder = getPayOrder("3", businessOrderNumber);
+           }else{
+               payOrder.setPayState("3");
+               payOrderMapper.updateByPrimaryKeySelective(payOrder);
+           }
            return ServerResponse.createBySuccess("检查成功",payOrder.getId());
        }catch (Exception e){
            return ServerResponse.createByErrorMessage("检查失败-原因："+e.getMessage());
