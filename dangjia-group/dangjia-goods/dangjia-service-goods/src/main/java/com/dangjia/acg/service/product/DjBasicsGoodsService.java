@@ -249,8 +249,9 @@ public class DjBasicsGoodsService {
                       Map<String, Object> map = BeanUtils.beanToMap(p);
                     map.put("imageUrl", imgUrlStr.toString());
                     StringBuilder strNewValueNameArr = new StringBuilder();
-                    map.put("convertUnitName", iUnitMapper.selectByPrimaryKey(p.getConvertUnit()).getName());
-
+                    if(StringUtils.isNoneBlank(p.getConvertUnit())){
+                        map.put("convertUnitName", iUnitMapper.selectByPrimaryKey(p.getConvertUnit()).getName());
+                    }
                     if (StringUtils.isNotBlank(p.getValueIdArr())) {
                         String[] newValueNameArr = p.getValueIdArr().split(",");
                         for (int i = 0; i < newValueNameArr.length; i++) {
