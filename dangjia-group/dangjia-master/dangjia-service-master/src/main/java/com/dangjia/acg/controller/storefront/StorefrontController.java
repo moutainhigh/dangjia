@@ -28,5 +28,11 @@ public class StorefrontController implements BasicsStorefrontAPI {
         return storefrontService.addStorefront(userToken, storefront);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse updateStorefront(String userToken, Storefront storefront) {
+        return storefrontService.updateStorefront(userToken,storefront);
+    }
+
 
 }

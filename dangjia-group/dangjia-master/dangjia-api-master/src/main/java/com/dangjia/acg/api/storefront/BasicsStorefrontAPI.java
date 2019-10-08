@@ -20,4 +20,10 @@ public interface BasicsStorefrontAPI {
     @ApiOperation(value = "新增店铺信息", notes = "新增店铺信息")
     ServerResponse addStorefront(@RequestParam("userToken") String userToken, Storefront  storefront);
 
+
+    @PostMapping("/web/updateStorefront")
+    @ApiOperation(value = "修改店铺信息", notes = "修改店铺信息")
+    ServerResponse updateStorefront(@RequestParam("userToken") String userToken, Storefront  storefront);
+
+
 }
