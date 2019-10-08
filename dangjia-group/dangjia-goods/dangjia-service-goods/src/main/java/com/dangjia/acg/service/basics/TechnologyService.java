@@ -12,7 +12,6 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.actuary.ISearchBoxMapper;
 import com.dangjia.acg.mapper.basics.*;
-import com.dangjia.acg.mapper.product.DjBasicsProductMapper;
 import com.dangjia.acg.mapper.product.IBasicsProductTemplateMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.SearchBox;
@@ -54,8 +53,6 @@ public class TechnologyService {
     private IBasicsProductTemplateMapper iBasicsProductTemplateMapper;
     //@Autowired
     //private IWorkerGoodsMapper iWorkerGoodsMapper;
-    @Autowired
-    private DjBasicsProductMapper djBasicsProductMapper;
     @Autowired
     private IProductMapper iProductMapper;
     @Autowired
@@ -267,7 +264,7 @@ public class TechnologyService {
             example.createCriteria().andEqualTo(WorkerGoods.SHOW_GOODS,1)
                     .andCondition(" FIND_IN_SET( '"+t.getId()+"', technology_ids)");*/
           //  List<WorkerGoods> wList = iWorkerGoodsMapper.selectByExample(example);
-            List<DjBasicsProduct> wList=djBasicsProductMapper.queryProductByTechnologyIds(t.getId());
+            List<DjBasicsProductTemplate> wList=iBasicsProductTemplateMapper.queryProductByTechnologyIds(t.getId());
             List<Map<String, Object>> mapList = new ArrayList<>();
             String workerTypeName = "";
             ServerResponse response = workerTypeAPI.getWorkerType(t.getWorkerTypeId());
@@ -276,7 +273,7 @@ public class TechnologyService {
             }
             map.put("workerTypeName", workerTypeName);
             map.put("workerNum", wList.size());
-            for (DjBasicsProduct w : wList) {
+            for (DjBasicsProductTemplate w : wList) {
                 Map<String, Object> wmap = BeanUtils.beanToMap(w);
                 StringBuilder imgStr = new StringBuilder();
                 StringBuilder imgUrlStr = new StringBuilder();

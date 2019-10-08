@@ -12,10 +12,7 @@ import com.dangjia.acg.dto.actuary.AttributeDTO;
 import com.dangjia.acg.mapper.basics.IUnitMapper;
 import com.dangjia.acg.mapper.product.*;
 import com.dangjia.acg.modle.brand.Brand;
-import com.dangjia.acg.modle.product.BasicsGoodsCategory;
-import com.dangjia.acg.modle.product.CategoryLabel;
-import com.dangjia.acg.modle.product.DjBasicsMaintain;
-import com.dangjia.acg.modle.product.DjBasicsProduct;
+import com.dangjia.acg.modle.product.*;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -38,8 +35,6 @@ import java.util.Map;
 public class AppCategoryGoodsService {
 
     @Autowired
-    private DjBasicsProductMapper djBasicsProductMapper;
-    @Autowired
     private IUnitMapper iUnitMapper;
     @Autowired
     private ICategoryLabelMapper iCategoryLabelMapper;
@@ -51,6 +46,8 @@ public class AppCategoryGoodsService {
     @Autowired
     private DjBasicsMaintainMapper djBasicsMaintainMapper;
 
+    @Autowired
+    private IBasicsProductTemplateMapper iBasicsProductTemplateMapper;
     @Autowired
     private ConfigUtil configUtil;
 
@@ -158,9 +155,9 @@ public class AppCategoryGoodsService {
             if(!CommonUtil.isEmpty(attributeVal)){
                 attributeVals=attributeVal.split(",");
             }
-            List<DjBasicsProduct> pList = djBasicsProductMapper.serchCategoryProduct(categoryId,StringTool.getLikeV(name),brandVal,attributeVals,orderKey);
+            List<DjBasicsProductTemplate> pList = iBasicsProductTemplateMapper.serchCategoryProduct(categoryId,StringTool.getLikeV(name),brandVal,attributeVals,orderKey);
             pageResult = new PageInfo<>(pList);
-            for (DjBasicsProduct product : pList) {
+            for (DjBasicsProductTemplate product : pList) {
                 String convertUnitName = iUnitMapper.selectByPrimaryKey(product.getUnitId()).getName();
                 JSONObject object = new JSONObject();
                 object.put("image", configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + product.getImage());
