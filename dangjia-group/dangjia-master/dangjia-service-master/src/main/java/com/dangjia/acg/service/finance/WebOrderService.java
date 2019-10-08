@@ -178,7 +178,7 @@ public class WebOrderService {
         businessOrder.setState(4);
         Example example = new Example(BusinessOrder.class);
         example.createCriteria().andEqualTo(BusinessOrder.STATE, 1);
-        iBusinessOrderMapper.updateByExample(businessOrder,example);
+        iBusinessOrderMapper.updateByExampleSelective(businessOrder,example);
     }
 }
 
