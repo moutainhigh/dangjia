@@ -19,6 +19,7 @@ import com.dangjia.acg.mapper.sup.ISupplierMapper;
 import com.dangjia.acg.mapper.sup.ISupplierProductMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
+import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.brand.Unit;
@@ -68,15 +69,11 @@ public class ForMasterService {
     @Autowired
     private ConfigUtil configUtil;
     @Autowired
-    private DjBasicsProductMapper djBasicsProductMapper;
+    private IBasicsProductTemplateMapper iBasicsProductTemplateMapper;
     @Autowired
     private DjBasicsGoodsMapper goodsMapper;
     @Autowired
     private IBasicsGoodsMapper iBasicsGoodsMapper;
-    @Autowired
-    private DjBasicsProductWorkerMapper djBasicsProductWorkerMapper;
-    @Autowired
-    private DjBasicsProductMaterialMapper djBasicsProductMaterialMapper;
 
     public String getUnitName(String unitId){
         Unit unit = unitMapper.selectByPrimaryKey(unitId);
@@ -127,10 +124,10 @@ public class ForMasterService {
      * @param type 0=材料商品  1=人工商品
      */
     public void setProductOrWorkerGoodsIsTop(String gid,Integer type,String istop){
-        DjBasicsProduct djBasicsProduct= djBasicsProductMapper.selectByPrimaryKey(gid);
+        DjBasicsProductTemplate djBasicsProduct= iBasicsProductTemplateMapper.selectByPrimaryKey(gid);
         if(djBasicsProduct!=null){
             djBasicsProduct.setIstop(Integer.parseInt(istop));
-            djBasicsProductMapper.updateByPrimaryKeySelective(djBasicsProduct);
+            iBasicsProductTemplateMapper.updateByPrimaryKeySelective(djBasicsProduct);
         }
         /*if(type==0){
             Product product= productMapper.selectByPrimaryKey(gid);
@@ -147,25 +144,20 @@ public class ForMasterService {
         }*/
     }
     public ProductWorkerDTO getWorkerGoods(String workerGoodsId){
-        DjBasicsProduct djBasicsProduct = djBasicsProductMapper.selectByPrimaryKey(workerGoodsId);
+        DjBasicsProductTemplate djBasicsProduct = iBasicsProductTemplateMapper.selectByPrimaryKey(workerGoodsId);
         ProductWorkerDTO productWorkerDTO = JSON.parseObject(JSON.toJSONString(djBasicsProduct),new TypeReference<ProductWorkerDTO>() {});
-        DjBasicsProductWorker djBasicsProductWorker= djBasicsProductWorkerMapper.queryProductWorkerByProductId(workerGoodsId);
-        productWorkerDTO.setWorkerDec(djBasicsProductWorker.getWorkerDec());
-        productWorkerDTO.setWorkerTypeId(djBasicsProductWorker.getWorkerTypeId());
+         productWorkerDTO.setWorkerDec(djBasicsProduct.getWorkerDec());
+        productWorkerDTO.setWorkerTypeId(djBasicsProduct.getWorkerTypeId());
         productWorkerDTO.setShowGoods(djBasicsProduct.getMaket());
         return productWorkerDTO;
     }
     public BasicsGoods getGoods(String goodsId){
+
         return iBasicsGoodsMapper.selectByPrimaryKey(goodsId);
     }
-    public DjBasicsProduct getProduct(String productId){
-        return djBasicsProductMapper.selectByPrimaryKey(productId);
+    public DjBasicsProductTemplate getProduct(String productId){
+        return iBasicsProductTemplateMapper.selectByPrimaryKey(productId);
     }
-
-    public DjBasicsProductMaterial getProductMaterial(String productId){
-        return djBasicsProductMaterialMapper.queryProductMaterialByProductId(productId);
-    }
-
 
     /**
      * 支付回调获取材料精算
@@ -179,17 +171,16 @@ public class ForMasterService {
                     .andEqualTo(BudgetMaterial.STETA,1);
             List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.selectByExample(example);
             for (BudgetMaterial budgetMaterial : budgetMaterialList){
-                DjBasicsProduct product = djBasicsProductMapper.selectByPrimaryKey(budgetMaterial.getProductId());
+                DjBasicsProductTemplate product = iBasicsProductTemplateMapper.selectByPrimaryKey(budgetMaterial.getProductId());
                 if(product == null){
                     budgetMaterialList.remove(budgetMaterial);//移除
                     budgetMaterial.setDeleteState(1);//找不到商品标记删除
                     budgetMaterial.setModifyDate(new Date());
                     budgetMaterialMapper.updateByPrimaryKeySelective(budgetMaterial);
                 }else {
-                    DjBasicsProductMaterial djBasicsProductMaterial= djBasicsProductMaterialMapper.queryProductMaterialByProductId(product.getId());
-                    //重新记录支付时精算价格
+                     //重新记录支付时精算价格
                     budgetMaterial.setPrice(product.getPrice());
-                    budgetMaterial.setCost(djBasicsProductMaterial.getCost());
+                    budgetMaterial.setCost(product.getCost());
                     budgetMaterial.setTotalPrice(budgetMaterial.getConvertCount() * product.getPrice());//已支付 记录总价
                     budgetMaterial.setDeleteState(3);//已支付
                     budgetMaterial.setModifyDate(new Date());
@@ -215,7 +206,7 @@ public class ForMasterService {
             List<BudgetWorker> budgetWorkerList = budgetWorkerMapper.selectByExample(example);
             for(BudgetWorker budgetWorker : budgetWorkerList){
                 //WorkerGoods wg = workerGoodsMapper.selectByPrimaryKey(budgetWorker.getWorkerGoodsId());
-                DjBasicsProduct djBasicsProduct=djBasicsProductMapper.selectByPrimaryKey(budgetWorker.getWorkerGoodsId());
+                DjBasicsProductTemplate djBasicsProduct=iBasicsProductTemplateMapper.selectByPrimaryKey(budgetWorker.getWorkerGoodsId());
                 if (djBasicsProduct == null){
                     budgetWorkerList.remove(budgetWorker);//移除
                     budgetWorker.setDeleteState(1);//找不到商品标记删除

@@ -42,6 +42,7 @@ import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.product.DjBasicsProduct;
+import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.user.MainUser;
@@ -571,7 +572,7 @@ public class ComplainService {
                 List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
                 List<SplitDeliverItemDTO> splitDeliverItemDTOList = new ArrayList<>();
                 for (OrderSplitItem orderSplitItem : orderSplitItemList) {
-                    DjBasicsProduct product=forMasterAPI.getProduct(house.getCityId(), orderSplitItem.getProductId());
+                    DjBasicsProductTemplate product=forMasterAPI.getProduct(house.getCityId(), orderSplitItem.getProductId());
                     SplitDeliverItemDTO splitDeliverItemDTO = new SplitDeliverItemDTO();
                     splitDeliverItemDTO.setImage(address + product.getImage());
                     splitDeliverItemDTO.setProductSn(product.getProductSn());

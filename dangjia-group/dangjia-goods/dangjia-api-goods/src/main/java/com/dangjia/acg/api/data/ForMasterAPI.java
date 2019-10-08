@@ -6,12 +6,10 @@ import com.dangjia.acg.dto.actuary.BudgetLabelGoodsDTO;
 import com.dangjia.acg.dto.product.ProductWorkerDTO;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
-import com.dangjia.acg.modle.basics.Goods;
-import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProduct;
-import com.dangjia.acg.modle.product.DjBasicsProductMaterial;
+import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
 import io.swagger.annotations.Api;
@@ -85,11 +83,7 @@ public interface ForMasterAPI {
 
     @PostMapping("/data/forMaster/getProduct")
     @ApiOperation(value = "商品信息", notes = "商品信息")
-    DjBasicsProduct getProduct(@RequestParam("cityId") String cityId, @RequestParam("productId") String productId);
-
-    @PostMapping("/data/forMaster/getProductMaterial")
-    @ApiOperation(value = "商品信息扩展信息", notes = "商品信息扩展信息")
-    DjBasicsProductMaterial getProductMaterial(@RequestParam("cityId") String cityId, @RequestParam("productId") String productId);
+    DjBasicsProductTemplate getProduct(@RequestParam("cityId") String cityId, @RequestParam("productId") String productId);
 
     @PostMapping("/data/forMaster/caiLiao")
     @ApiOperation(value = "支付回调获取材料精算", notes = "支付回调获取材料精算")

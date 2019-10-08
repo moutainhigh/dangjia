@@ -33,7 +33,7 @@ import java.util.*;
 @Service
 public class BasicsGoodsCategoryService {
 
-    private static Logger logger = LoggerFactory.getLogger(DjBasicsProductService.class);
+    private static Logger logger = LoggerFactory.getLogger(BasicsGoodsCategoryService.class);
     @Autowired
     private IBasicsGoodsCategoryMapper iBasicsGoodsCategoryMapper;
     @Autowired

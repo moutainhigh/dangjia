@@ -11,7 +11,7 @@ import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProduct;
-import com.dangjia.acg.modle.product.DjBasicsProductMaterial;
+import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
 import com.dangjia.acg.service.data.ForMasterService;
@@ -101,14 +101,10 @@ public class ForMasterController implements ForMasterAPI {
     }
     @Override
     @ApiMethod
-    public DjBasicsProduct getProduct(String cityId, String productId){
+    public DjBasicsProductTemplate getProduct(String cityId, String productId){
         return forMasterService.getProduct(productId);
     }
-    @Override
-    @ApiMethod
-    public DjBasicsProductMaterial getProductMaterial(String cityId, String productId){
-        return forMasterService.getProductMaterial(productId);
-    }
+
 
 
 

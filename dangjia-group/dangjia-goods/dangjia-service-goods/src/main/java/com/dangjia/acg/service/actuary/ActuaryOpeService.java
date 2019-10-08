@@ -22,7 +22,8 @@ import com.dangjia.acg.modle.attribute.GoodsCategory;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.product.DjBasicsProduct;
-import com.dangjia.acg.service.product.DjBasicsProductService;
+import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
+import com.dangjia.acg.service.product.DjBasicsProductTemplateService;
 import com.dangjia.acg.util.JdbcContextHolder;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +58,7 @@ public class ActuaryOpeService {
     private IBrandSeriesMapper iBrandSeriesMapper;
 
     @Autowired
-    private DjBasicsProductService djBasicsProductService;
+    private DjBasicsProductTemplateService djBasicsProductTemplateService;
 
     /**
      * 根据分类list查询商品
@@ -217,10 +218,10 @@ public class ActuaryOpeService {
                 goodsItemDTO.setTolPrice(goodsItemDTO.getSurCount()*goodsItemDTO.getPrice());
                 //品牌+规格
                 String brandName=iBrandSeriesMapper.brandName(budgetWorker.getWorkerGoodsId());    //通过商品id去关联，然后组合商品名称
-                DjBasicsProduct djBasicsProduct=djBasicsProductService.queryDataByProductId(budgetWorker.getWorkerGoodsId());  //通过商品id去关联规格
+                DjBasicsProductTemplate djBasicsProduct=djBasicsProductTemplateService.queryDataByProductId(budgetWorker.getWorkerGoodsId());  //通过商品id去关联规格
                 if(djBasicsProduct!=null&& StringUtils.isNotBlank(djBasicsProduct.getId())){
                     String valueIdArr=djBasicsProduct.getValueIdArr();
-                    String guige=djBasicsProductService.getNewValueNameArr(valueIdArr);
+                    String guige=djBasicsProductTemplateService.getNewValueNameArr(valueIdArr);
                     goodsItemDTO.setBrandName(brandName+" "+guige);
                 }else{
                     goodsItemDTO.setBrandName(brandName);

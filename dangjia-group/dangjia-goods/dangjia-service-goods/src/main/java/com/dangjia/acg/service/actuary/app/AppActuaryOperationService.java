@@ -60,7 +60,7 @@ public class AppActuaryOperationService {
     @Autowired
     private DjBasicsGoodsMapper goodsMapper;
     @Autowired
-    private DjBasicsProductMapper productMapper;
+    private IBasicsProductTemplateMapper iBasicsProductTemplateMapper;
     @Autowired
     private IUnitMapper iUnitMapper;
     @Autowired
@@ -70,10 +70,6 @@ public class AppActuaryOperationService {
     @Autowired
     private IBrandMapper iBrandMapper;
 
-    @Autowired
-    private DjBasicsProductMaterialMapper djBasicsProductMaterialMapper;
-    @Autowired
-    private DjBasicsProductWorkerMapper djBasicsProductWorkerMapper;
     @Autowired
     private ITechnologyMapper iTechnologyMapper;
 
@@ -175,8 +171,7 @@ public class AppActuaryOperationService {
                             }
                             //查到 老的关联组 的精算
                             BudgetMaterial newBudgetMaterial = budgetMaterialMapper.getBudgetCaiListByGoodsId(houseId, workerTypeId, srcGroupLink.getGoodsId());
-                            DjBasicsProduct targetProduct = productMapper.selectByPrimaryKey(targetGroupLink.getProductId());//目标product 对象
-                            DjBasicsProductMaterial targetProductMaterial = djBasicsProductMaterialMapper.queryProductMaterialByProductId(targetGroupLink.getProductId());//目标product 对象
+                            DjBasicsProductTemplate targetProduct = iBasicsProductTemplateMapper.selectByPrimaryKey(targetGroupLink.getProductId());//目标product 对象
 
                             newBudgetMaterial.setProductId(targetProduct.getId());
                             newBudgetMaterial.setProductSn(targetProduct.getProductSn());
@@ -186,11 +181,11 @@ public class AppActuaryOperationService {
                             newBudgetMaterial.setGoodsGroupId(targetGroup.get(0).getGroupId());
                             GoodsGroup goodsGroup = iGoodsGroupMapper.selectByPrimaryKey(targetGroup.get(0).getGroupId());
                             newBudgetMaterial.setGroupType(goodsGroup.getName());
-                            newBudgetMaterial.setCost(targetProductMaterial.getCost());
+                            newBudgetMaterial.setCost(targetProduct.getCost());
                             //这里会更新 为 新product的 换算后的购买数量
 //                            newBudgetMaterial.setConvertCount(Math.ceil(newBudgetMaterial.getShopCount() / targetProduct.getConvertQuality()));
-                            double converCount = (newBudgetMaterial.getShopCount() / targetProductMaterial.getConvertQuality());
-                            Unit convertUnit = iUnitMapper.selectByPrimaryKey(targetProductMaterial.getConvertUnit());
+                            double converCount = (newBudgetMaterial.getShopCount() / targetProduct.getConvertQuality());
+                            Unit convertUnit = iUnitMapper.selectByPrimaryKey(targetProduct.getConvertUnit());
                             if (convertUnit.getType() == 1) {
                                 converCount = Math.ceil(converCount);
                             }
@@ -211,17 +206,16 @@ public class AppActuaryOperationService {
             } else {
 
                 BudgetMaterial newBudgetMaterial = budgetMaterialMapper.selectByPrimaryKey(budgetMaterialId);
-                DjBasicsProduct product = productMapper.selectByPrimaryKey(productId);//目标product 对象
-                DjBasicsProductMaterial targetProductMaterial = djBasicsProductMaterialMapper.queryProductMaterialByProductId(productId);//目标product 对象
+                DjBasicsProductTemplate product = iBasicsProductTemplateMapper.selectByPrimaryKey(productId);//目标product 对象
 
                 newBudgetMaterial.setProductId(productId);
                 newBudgetMaterial.setProductSn(product.getProductSn());
                 newBudgetMaterial.setProductName(product.getName());
                 newBudgetMaterial.setPrice(product.getPrice());
-                newBudgetMaterial.setCost(targetProductMaterial.getCost());
+                newBudgetMaterial.setCost(product.getCost());
                 //这里会更新 为 新product的 换算后的购买数量
-                double converCount = (newBudgetMaterial.getShopCount() / targetProductMaterial.getConvertQuality());
-                Unit convertUnit = iUnitMapper.selectByPrimaryKey(targetProductMaterial.getConvertUnit());
+                double converCount = (newBudgetMaterial.getShopCount() / product.getConvertQuality());
+                Unit convertUnit = iUnitMapper.selectByPrimaryKey(product.getConvertUnit());
                 if (convertUnit.getType() == 1) {
                     converCount = Math.ceil(converCount);
                 }
@@ -247,7 +241,7 @@ public class AppActuaryOperationService {
      */
     public ServerResponse selectProduct(String goodsId, String selectVal, String budgetMaterialId) {
         try {
-            DjBasicsProduct product = productMapper.selectByPrimaryKey(selectVal);//目标product 对象
+            DjBasicsProductTemplate product = iBasicsProductTemplateMapper.selectByPrimaryKey(selectVal);//目标product 对象
             Object goodsDTO = goodsDetail(product, budgetMaterialId);
             if (goodsDTO != null) {
                 return ServerResponse.createBySuccess("查询成功", goodsDTO);
@@ -266,7 +260,7 @@ public class AppActuaryOperationService {
      */
     public ServerResponse getCommo(String gId,String budgetMaterialId) {
         try {
-                DjBasicsProduct product = productMapper.selectByPrimaryKey(gId);//当前 货品
+                DjBasicsProductTemplate product = iBasicsProductTemplateMapper.selectByPrimaryKey(gId);//当前 货品
                 if(product == null){
                     return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "该商品已禁用！");
                 }
@@ -287,7 +281,7 @@ public class AppActuaryOperationService {
      * @param budgetMaterialId 传null ：表示不是精算里的商品。 如果是精算里的商品 ，可能有 关联组，关联组id 在 精算表里存的，所以，需要传精算id  ，
      * @return GoodsDTO
      */
-    public Object goodsDetail(DjBasicsProduct product, String budgetMaterialId) {
+    public Object goodsDetail(DjBasicsProductTemplate product, String budgetMaterialId) {
         try {
             DjBasicsGoods goods = goodsMapper.selectByPrimaryKey(product.getGoodsId());
             BasicsGoodsCategory goodsCategory= iBasicsGoodsCategoryMapper.selectByPrimaryKey(goods.getCategoryId());
@@ -297,7 +291,6 @@ public class AppActuaryOperationService {
                 goodsDTO.setPurchaseRestrictions(goodsCategory.getPurchaseRestrictions());
                 goodsDTO.setSales(goods.getSales());
                 goodsDTO.setIrreversibleReasons(goods.getIrreversibleReasons());
-                DjBasicsProductMaterial targetProductMaterial = djBasicsProductMaterialMapper.queryProductMaterialByProductId(product.getId());//目标product 对象
                 goodsDTO.setProductId(product.getId());
                 goodsDTO.setGoodsId(goods.getId());
                 goodsDTO.setMaket(1);
@@ -305,18 +298,18 @@ public class AppActuaryOperationService {
                     goodsDTO.setMaket(0);
                 }
                 goodsDTO.setImage(getImage(product.getImage()));//图一张
-                String convertUnitName = iUnitMapper.selectByPrimaryKey(targetProductMaterial.getConvertUnit()).getName();
+                String convertUnitName = iUnitMapper.selectByPrimaryKey(product.getConvertUnit()).getName();
                 goodsDTO.setPrice(String.format("%.2f", product.getPrice()));
                 goodsDTO.setName(product.getName());
                 goodsDTO.setUnitName(convertUnitName);//单位
                 goodsDTO.setProductType(goods.getType());//材料类型
 
-                goodsDTO.setMarketingName(targetProductMaterial.getMarketingName());//营销名称
-                goodsDTO.setIsInflueWarrantyPeriod(targetProductMaterial.getIsInflueWarrantyPeriod());//是否影响质保年限（1是，0否）
-                goodsDTO.setRefundPolicy(targetProductMaterial.getRefundPolicy());//退款政策
-                goodsDTO.setGuaranteedPolicy(targetProductMaterial.getGuaranteedPolicy());//保修政策
+                goodsDTO.setMarketingName(product.getMarketingName());//营销名称
+                goodsDTO.setIsInflueWarrantyPeriod(product.getIsInflueWarrantyPeriod());//是否影响质保年限（1是，0否）
+                goodsDTO.setRefundPolicy(product.getRefundPolicy());//退款政策
+                goodsDTO.setGuaranteedPolicy(product.getGuaranteedPolicy());//保修政策
                 List<String> imageList = new ArrayList<>();//长图片 多图组合
-                imageList.add(getImage(targetProductMaterial.getDetailImage()));//属性图
+                imageList.add(getImage(product.getDetailImage()));//属性图
                 GoodsGroup srcGoodsGroup = null;
                 //找到一个groupId 的可以切换的目标关联组
                 Set<String> pIdTargetGroupSet = new HashSet<>();//目标关联组下的所有productId
@@ -351,14 +344,14 @@ public class AppActuaryOperationService {
                         }
                     }
                 }
-                List<DjBasicsProduct> productList = new ArrayList<>();
+                List<DjBasicsProductTemplate> productList = new ArrayList<>();
                 if (srcGoodsGroup != null) {//是关联组
                     for (String pId : pIdTargetGroupSet) {
-                        DjBasicsProduct djBasicsProduct=productMapper.selectByPrimaryKey(pId);
+                        DjBasicsProductTemplate djBasicsProduct=iBasicsProductTemplateMapper.selectByPrimaryKey(pId);
                         //如果没有品牌，就只遍历属性
                         if (StringUtils.isNoneBlank(goods.getAttributeIdArr())
                                 && StringUtils.isNoneBlank(djBasicsProduct.getValueIdArr())) {
-                            DjBasicsProduct prot = productMapper.selectByPrimaryKey(pId);
+                            DjBasicsProductTemplate prot = iBasicsProductTemplateMapper.selectByPrimaryKey(pId);
                             productList.add(prot);
                         }
                     }
@@ -366,7 +359,7 @@ public class AppActuaryOperationService {
                     Example example = new Example(Product.class);
                     example.createCriteria().andEqualTo(DjBasicsProduct.GOODS_ID, goods.getId()).andEqualTo(DjBasicsProduct.TYPE, "1");
                     example.orderBy(DjBasicsProduct.CATEGORY_ID);
-                    productList = productMapper.selectByExample(example);
+                    productList = iBasicsProductTemplateMapper.selectByExample(example);
                 }
                 List<AttributeDTO> attrList = getAllAttributes(product, productList);
                 goodsDTO.setAttrList(attrList);
@@ -391,9 +384,9 @@ public class AppActuaryOperationService {
             return null;
         }
     }
-    public WorkerGoodsDTO assembleWorkerGoodsResult(DjBasicsProduct workerGoods) {
+    public WorkerGoodsDTO assembleWorkerGoodsResult(DjBasicsProductTemplate workerGoods) {
         try {
-            DjBasicsProductWorker pt = djBasicsProductWorkerMapper.queryProductWorkerByProductId(workerGoods.getId());//目标product 对象
+            DjBasicsProductTemplate pt = iBasicsProductTemplateMapper.selectByPrimaryKey(workerGoods.getId());//目标product 对象
             WorkerGoodsDTO workerGoodsResult = new WorkerGoodsDTO();
             workerGoodsResult.setId(workerGoods.getId());
             workerGoodsResult.setName(workerGoods.getName());
@@ -466,7 +459,7 @@ public class AppActuaryOperationService {
     }
 
     //根据品牌系列找属性品牌
-    private List<AttributeDTO> getAllAttributes(DjBasicsProduct product, List<DjBasicsProduct> productList) {
+    private List<AttributeDTO> getAllAttributes(DjBasicsProductTemplate product, List<DjBasicsProductTemplate> productList) {
         List<AttributeDTO> attributeDTOList = new ArrayList<>();
         //品牌
         if (productList.size() > 0) {
@@ -479,7 +472,7 @@ public class AppActuaryOperationService {
             if (!CommonUtil.isEmpty(goods.getBrandId())) {
                  brand = iBrandMapper.selectByPrimaryKey(goods.getBrandId());
             }
-            for (DjBasicsProduct atId : productList) {
+            for (DjBasicsProductTemplate atId : productList) {
                  StringBuilder strbuf = new StringBuilder();
                 if (brand!=null) {
                     strbuf.append(brand.getName()).append(" ");
@@ -506,7 +499,7 @@ public class AppActuaryOperationService {
     //根据品牌系列找属性品牌
     public String getAttributeName(String productId) {
         StringBuilder strbuf = new StringBuilder();
-        DjBasicsProduct product = productMapper.selectByPrimaryKey(productId);//目标product 对象
+        DjBasicsProductTemplate product = iBasicsProductTemplateMapper.selectByPrimaryKey(productId);//目标product 对象
         //品牌
         if (product!=null) {
             DjBasicsGoods goods = goodsMapper.selectByPrimaryKey(product.getGoodsId());

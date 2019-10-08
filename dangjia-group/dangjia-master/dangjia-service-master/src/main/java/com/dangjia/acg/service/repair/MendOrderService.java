@@ -25,8 +25,6 @@ import com.dangjia.acg.mapper.house.ISurplusWareHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberInfoMapper;
 import com.dangjia.acg.mapper.repair.*;
-import com.dangjia.acg.modle.basics.Goods;
-import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
@@ -39,7 +37,7 @@ import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProduct;
-import com.dangjia.acg.modle.product.DjBasicsProductMaterial;
+import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.repair.*;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
@@ -1051,7 +1049,7 @@ public class MendOrderService {
                 MendMateriel mendMateriels = mendMaterialMapper.getMendOrderGoods(mendOrder.getId(), productId);
                 if (mendMateriels == null) {
                     if (mendOrder.getType() == 2 || mendOrder.getType() == 4) {
-                        DjBasicsProduct product = forMasterAPI.getProduct(house.getCityId(), productId);
+                        DjBasicsProductTemplate product = forMasterAPI.getProduct(house.getCityId(), productId);
                         if (product != null) {
                             BasicsGoods goods = forMasterAPI.getGoods(house.getCityId(), product.getGoodsId());
                             //判断用户角色是否为业主业主可任意退
@@ -1082,9 +1080,8 @@ public class MendOrderService {
         MendMateriel mendMateriel = new MendMateriel();//补退材料明细
         double num = Double.parseDouble(shopCount);
         Warehouse warehouse = warehouseMapper.getByProductId(productId, house.getId());
-        DjBasicsProduct product = forMasterAPI.getProduct(house.getCityId(), productId);
-        DjBasicsProductMaterial pm=forMasterAPI.getProductMaterial(house.getCityId(), productId);
-        mendMateriel.setCityId(house.getCityId());
+        DjBasicsProductTemplate product = forMasterAPI.getProduct(house.getCityId(), productId);
+         mendMateriel.setCityId(house.getCityId());
         if (warehouse != null) {
             mendMateriel.setProductSn(product.getProductSn());
             mendMateriel.setProductName(product.getName());
@@ -1100,15 +1097,15 @@ public class MendOrderService {
             mendMateriel.setProductSn(product.getProductSn());
             mendMateriel.setProductName(product.getName());
             mendMateriel.setPrice(product.getPrice());
-            mendMateriel.setCost(pm.getCost());
+            mendMateriel.setCost(product.getCost());
             mendMateriel.setTotalPrice(num * product.getPrice());
             mendMateriel.setCategoryId(product.getCategoryId());
             mendMateriel.setImage(product.getImage());
-            String unitName = forMasterAPI.getUnitName(house.getCityId(), pm.getConvertUnit());
+            String unitName = forMasterAPI.getUnitName(house.getCityId(), product.getConvertUnit());
             mendMateriel.setUnitName(unitName);
             mendMateriel.setProductType(forMasterAPI.getGoods(house.getCityId(), product.getGoodsId()).getType());//0：材料；1：包工包料
         }
-        ServerResponse serverResponse = unitAPI.getUnitById(request, house.getCityId(), pm.getConvertUnit());
+        ServerResponse serverResponse = unitAPI.getUnitById(request, house.getCityId(), product.getConvertUnit());
         Unit unit;
         if (serverResponse.getResultObj() instanceof JSONObject) {
             unit = JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), Unit.class);

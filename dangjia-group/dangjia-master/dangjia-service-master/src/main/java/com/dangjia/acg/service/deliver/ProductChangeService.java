@@ -26,7 +26,6 @@ import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
-import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.deliver.ProductChange;
@@ -37,7 +36,7 @@ import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProduct;
-import com.dangjia.acg.modle.product.DjBasicsProductMaterial;
+import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.util.Utils;
@@ -317,9 +316,8 @@ public class ProductChangeService {
                     return ServerResponse.createByErrorMessage("不能大于商品剩余数");
                 }
                 Unit unit;
-                DjBasicsProduct product = forMasterAPI.getProduct(house.getCityId(), productChange.getDestProductId());
-                DjBasicsProductMaterial pm=forMasterAPI.getProductMaterial(house.getCityId(), productChange.getDestProductId());
-                ServerResponse serverResponse = unitAPI.getUnitById(request, house.getCityId(),pm.getConvertUnit());
+                DjBasicsProductTemplate product = forMasterAPI.getProduct(house.getCityId(), productChange.getDestProductId());
+                ServerResponse serverResponse = unitAPI.getUnitById(request, house.getCityId(),product.getConvertUnit());
                 if (serverResponse.getResultObj() instanceof JSONObject) {
                     unit = JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), Unit.class);
                 } else {
@@ -383,9 +381,8 @@ public class ProductChangeService {
                         return ServerResponse.createByErrorMessage("不能大于商品剩余数");
                     }
                     Unit unit;
-                    DjBasicsProduct product = forMasterAPI.getProduct(house.getCityId(), productChange.getDestProductId());
-                    DjBasicsProductMaterial pm = forMasterAPI.getProductMaterial(house.getCityId(), productChange.getDestProductId());
-                    ServerResponse serverResponse = unitAPI.getUnitById(request,house.getCityId(), pm.getConvertUnit());
+                    DjBasicsProductTemplate product = forMasterAPI.getProduct(house.getCityId(), productChange.getDestProductId());
+                    ServerResponse serverResponse = unitAPI.getUnitById(request,house.getCityId(), product.getConvertUnit());
                     if (serverResponse.getResultObj() instanceof JSONObject) {
                         unit = JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), Unit.class);
                     } else {

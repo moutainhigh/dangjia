@@ -41,11 +41,7 @@ public class DjBasicsGoodsService {
     @Autowired
     private DjBasicsGoodsMapper djBasicsGoodsMapper;
     @Autowired
-    private DjBasicsProductMapper djBasicsProductMapper;
-    @Autowired
-    private DjBasicsProductMaterialMapper djBasicsProductMaterialMapper;
-    @Autowired
-    DjBasicsProductWorkerMapper djBasicsProductWorkerMapper;
+    private IBasicsProductTemplateMapper iBasicsProductTemplateMapper;
     @Autowired
     private IBasicsGoodsMapper iBasicsGoodsMapper;
     @Autowired
@@ -128,7 +124,7 @@ public class DjBasicsGoodsService {
         goods.setId(basicsGoodsDTO.getId());
         iBasicsGoodsMapper.updateByPrimaryKeySelective(goods);
 
-        djBasicsProductMapper.updateProductCategoryByGoodsId(id, oldBasicsGoods.getCategoryId());
+        iBasicsProductTemplateMapper.updateProductCategoryByGoodsId(id, oldBasicsGoods.getCategoryId());
         return ServerResponse.createBySuccess("修改成功", id);
     }
 
@@ -175,15 +171,10 @@ public class DjBasicsGoodsService {
 //            if (true)
 //                return ServerResponse.createByErrorMessage("不能执行删除操作");
         iBasicsGoodsMapper.deleteByPrimaryKey(id);
-
-        //删除材料商品扩展表信息
-        djBasicsProductMapper.deleteProductMaterial(id);
-        //删除人工商品扩展表信息
-        djBasicsProductMapper.deleteProductWorker(id);
         //删除货品下的商品信息
         Example example = new Example(DjBasicsProduct.class);
         example.createCriteria().andEqualTo("goodsId", id);
-        djBasicsProductMapper.deleteByExample(example);
+        iBasicsProductTemplateMapper.deleteByExample(example);
         return ServerResponse.createBySuccessMessage("删除成功");
     }
 
@@ -243,8 +234,8 @@ public class DjBasicsGoodsService {
                 List<Map<String, Object>> mapList = new ArrayList<>();
                 gMap.put("goodsUnitName", iUnitMapper.selectByPrimaryKey(goods.getUnitId()).getName());
 
-                List<DjBasicsProduct> productList = djBasicsProductMapper.queryByGoodsId(goods.getId());
-                for (DjBasicsProduct p : productList) {
+                List<DjBasicsProductTemplate> productList = iBasicsProductTemplateMapper.queryByGoodsId(goods.getId());
+                for (DjBasicsProductTemplate p : productList) {
                     //type表示： 是否禁用  0：禁用；1不禁用 ;  -1全部默认
                     if (type != null && !type.equals(p.getType()) && -1 != type) //不等于 type 的不返回给前端
                         continue;
@@ -255,15 +246,11 @@ public class DjBasicsGoodsService {
                         StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
                     }
                     p.setImage(imgStr.toString());
-                    DjBasicsProductMaterial djBasicsProductMaterial = djBasicsProductMaterialMapper.queryProductMaterialByProductId(p.getId());
-                    DjBasicsProductWorker djBasicsProductWorker = djBasicsProductWorkerMapper.queryProductWorkerByProductId(p.getId());
-                    Map<String, Object> map = BeanUtils.beanToMap(p);
+                      Map<String, Object> map = BeanUtils.beanToMap(p);
                     map.put("imageUrl", imgUrlStr.toString());
                     StringBuilder strNewValueNameArr = new StringBuilder();
-                    if (djBasicsProductMaterial != null && StringUtils.isNotBlank(djBasicsProductMaterial.getId())) {
-                        map.putAll(BeanUtils.beanToMap(djBasicsProductMaterial));
-                        map.put("convertUnitName", iUnitMapper.selectByPrimaryKey(djBasicsProductMaterial.getConvertUnit()).getName());
-                    }
+                    map.put("convertUnitName", iUnitMapper.selectByPrimaryKey(p.getConvertUnit()).getName());
+
                     if (StringUtils.isNotBlank(p.getValueIdArr())) {
                         String[] newValueNameArr = p.getValueIdArr().split(",");
                         for (int i = 0; i < newValueNameArr.length; i++) {
@@ -279,10 +266,6 @@ public class DjBasicsGoodsService {
                         }
                     }
                     map.put("newValueNameArr", strNewValueNameArr.toString());
-                    if (djBasicsProductWorker != null && StringUtils.isNotBlank(djBasicsProductWorker.getId())) {
-                        map.putAll(BeanUtils.beanToMap(djBasicsProductWorker));
-                    }
-
 
                     if (!StringUtils.isNotBlank(p.getLabelId())) {
                         map.put("labelId", "");

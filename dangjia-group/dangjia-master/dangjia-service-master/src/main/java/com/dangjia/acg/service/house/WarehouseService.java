@@ -35,6 +35,7 @@ import com.dangjia.acg.modle.house.MaterialRecord;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProduct;
+import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -154,7 +155,7 @@ public class WarehouseService {
                 warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * warehouse.getPrice());
                // warehouseDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(house.getCityId(), warehouse.getProductId()));
                 warehouseDTO.setRepairCount(warehouse.getRepairCount());
-                DjBasicsProduct product = forMasterAPI.getProduct(house.getCityId(), warehouse.getProductId());
+                DjBasicsProductTemplate product = forMasterAPI.getProduct(house.getCityId(), warehouse.getProductId());
                 if (product != null) {
                     BasicsGoods goods = forMasterAPI.getGoods(house.getCityId(), product.getGoodsId());
                     if (goods != null) {
@@ -251,7 +252,7 @@ public class WarehouseService {
 
                         //品牌+规格
                         String brandName=forMasterAPI.brandName("",warehouse.getProductId());  //通过商品id去关联，然后组合商品名称
-                        DjBasicsProduct djBasicsProduct=djBasicsProductAPI.queryDataByProductId(warehouse.getProductId());  //通过商品id去关联规格
+                        DjBasicsProductTemplate djBasicsProduct=djBasicsProductAPI.queryDataByProductId(warehouse.getProductId());  //通过商品id去关联规格
                         String valueIdArr=djBasicsProduct.getValueIdArr();
                         String guige=djBasicsProductAPI.getNewValueNameArr(valueIdArr);
                         warehouseDTO.setBrandName(brandName+" "+guige);

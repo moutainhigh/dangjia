@@ -11,7 +11,7 @@ import com.dangjia.acg.dto.basics.TechnologyDTO;
 import com.dangjia.acg.dto.basics.WorkerGoodsDTO;
 import com.dangjia.acg.mapper.basics.ITechnologyMapper;
 import com.dangjia.acg.mapper.basics.IProductWorkerMapper;
-import com.dangjia.acg.mapper.product.DjBasicsProductWorkerMapper;
+import com.dangjia.acg.mapper.product.IBasicsProductTemplateMapper;
 import com.dangjia.acg.modle.basics.HomeProductDTO;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.core.WorkerType;
@@ -43,7 +43,7 @@ public class WorkerGoodsService {
     @Autowired
     private WorkerTypeAPI workerTypeAPI;
     @Autowired
-    private DjBasicsProductWorkerMapper djBasicsProductWorkerMapper;
+    private IBasicsProductTemplateMapper iBasicsProductTemplateMapper;
     /**
      * 每工种未删除 或 已支付工钱
      *
@@ -74,7 +74,7 @@ public class WorkerGoodsService {
 //                .andEqualTo(WorkerGoods.WORKER_TYPE_ID, workerTypeId)
 //        ;
 //        List<WorkerGoods> workerGoods = iWorkerGoodsMapper.selectByExample(example);
-        List<WorkerGoodsDTO> workerGoodsDTOS = djBasicsProductWorkerMapper.queryWorkerGoodsDTO(workerGoodsSn, workerTypeId);
+        List<WorkerGoodsDTO> workerGoodsDTOS = iBasicsProductTemplateMapper.queryWorkerGoodsDTO(workerGoodsSn, workerTypeId);
         WorkerGoodsDTO workerGoodsDTO = new WorkerGoodsDTO();
         if (workerGoodsDTOS != null && workerGoodsDTOS.size() > 0) {
             workerGoodsDTO = workerGoodsDTOS.get(0);

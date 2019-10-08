@@ -4,8 +4,7 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.product.BasicsGoodsDTO;
 import com.dangjia.acg.dto.product.BasicsProductDTO;
-import com.dangjia.acg.modle.product.BasicsGoods;
-import com.dangjia.acg.modle.product.DjBasicsProduct;
+import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -49,7 +48,7 @@ public interface DjBasicsProductAPI {
 
     @PostMapping("app/product/queryDataByProductId")
     @ApiOperation(value = "根据货品编号查看商品详情", notes = "根据货品编号查看商品详情")
-    DjBasicsProduct queryDataByProductId(@RequestParam("productId")String productId);
+    DjBasicsProductTemplate queryDataByProductId(@RequestParam("productId")String productId);
 
 
     @PostMapping("/product/djBasicsProduct/saveBasicsGoods")
@@ -145,7 +144,7 @@ public interface DjBasicsProductAPI {
      */
     @PostMapping("/product/djBasicsProduct/getAllProductByCategoryId")
     @ApiOperation(value = "根据类别Id查询所属货品", notes = "根据类别Id查询所属货品")
-    List<DjBasicsProduct> getAllProductByCategoryId( @RequestParam("categoryId") String categoryId);
+    List<DjBasicsProductTemplate> getAllProductByCategoryId( @RequestParam("categoryId") String categoryId);
 
 
 

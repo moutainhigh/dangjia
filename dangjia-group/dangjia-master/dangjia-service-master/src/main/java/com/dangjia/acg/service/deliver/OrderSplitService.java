@@ -23,7 +23,6 @@ import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
-import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.complain.Complain;
 import com.dangjia.acg.modle.deliver.OrderSplit;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
@@ -32,7 +31,7 @@ import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.product.DjBasicsProduct;
-import com.dangjia.acg.modle.product.DjBasicsProductMaterial;
+import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
@@ -196,12 +195,11 @@ public class OrderSplitService {
                 if (orderSplitItem.getReceive() == null) {
                     orderSplitItem.setReceive(0D);
                 }
-                DjBasicsProduct product=forMasterAPI.getProduct(house.getCityId(), orderSplitItem.getProductId());
-                DjBasicsProductMaterial pm=forMasterAPI.getProductMaterial(house.getCityId(), orderSplitItem.getProductId());
+                DjBasicsProductTemplate product=forMasterAPI.getProduct(house.getCityId(), orderSplitItem.getProductId());
                 OrderSplitItemDTO orderSplitItemDTO = new OrderSplitItemDTO();
                 orderSplitItemDTO.setProductName(product.getName());
                 orderSplitItemDTO.setNum(orderSplitItem.getNum());
-                orderSplitItemDTO.setCost(pm.getCost());
+                orderSplitItemDTO.setCost(product.getCost());
                 orderSplitItemDTO.setSupCost(orderSplitItem.getSupCost());
                 orderSplitItemDTO.setUnitName(orderSplitItem.getUnitName());
                 orderSplitItemDTO.setAskCount(orderSplitItem.getAskCount());

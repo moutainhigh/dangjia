@@ -6,9 +6,9 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.product.BasicsGoodsDTO;
 import com.dangjia.acg.dto.product.BasicsProductDTO;
-import com.dangjia.acg.modle.product.DjBasicsProduct;
+import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.service.product.DjBasicsGoodsService;
-import com.dangjia.acg.service.product.DjBasicsProductService;
+import com.dangjia.acg.service.product.DjBasicsProductTemplateService;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,10 +26,10 @@ import java.util.List;
  */
 @RestController
 public class DjBasicsProductController implements DjBasicsProductAPI {
-    private static Logger logger = LoggerFactory.getLogger(DjBasicsProductService.class);
+    private static Logger logger = LoggerFactory.getLogger(DjBasicsProductController.class);
 
     @Autowired
-    private DjBasicsProductService djBasicsProductService;
+    private DjBasicsProductTemplateService djBasicsProductService;
 
     @Autowired
     private DjBasicsGoodsService djBasicsGoodsService;
@@ -62,7 +62,7 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
 
     @Override
     @ApiMethod
-    public DjBasicsProduct queryDataByProductId(String productId) {
+    public DjBasicsProductTemplate queryDataByProductId(String productId) {
         return djBasicsProductService.queryDataByProductId(productId);
     }
 
@@ -257,7 +257,7 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
      */
     @Override
     @ApiMethod
-    public List<DjBasicsProduct> getAllProductByCategoryId(String categoryId) {
+    public List<DjBasicsProductTemplate> getAllProductByCategoryId(String categoryId) {
         return djBasicsProductService.getAllProductByCategoryId(categoryId);
     }
 

@@ -21,8 +21,8 @@ import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
 import com.dangjia.acg.mapper.basics.IUnitMapper;
 import com.dangjia.acg.mapper.product.DjBasicsGoodsMapper;
 import com.dangjia.acg.mapper.product.DjBasicsProductMapper;
-import com.dangjia.acg.mapper.product.DjBasicsProductMaterialMapper;
 import com.dangjia.acg.mapper.product.IBasicsGoodsCategoryMapper;
+import com.dangjia.acg.mapper.product.IBasicsProductTemplateMapper;
 import com.dangjia.acg.modle.actuary.ActuarialTemplate;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
@@ -66,9 +66,7 @@ public class DjActuaryBudgetMaterialService {
     @Autowired
     private IUnitMapper iUnitMapper;
     @Autowired
-    private DjBasicsProductMapper djBasicsProductMapper;
-    @Autowired
-    private DjBasicsProductMaterialMapper djBasicsProductMaterialMapper;
+    private IBasicsProductTemplateMapper iBasicsProductTemplateMapper;
     @Autowired
     private IActuarialTemplateMapper iActuarialTemplateMapper;
     @Autowired
@@ -123,9 +121,9 @@ public class DjActuaryBudgetMaterialService {
                         if (djBasicsGoods.getBuy() == 0 || djBasicsGoods.getBuy() == 1) {//0：必买；1可选；2自购
                             budgetMaterial.setSteta(1);//我们购
 
-                            DjBasicsProduct djBasicsProduct = djBasicsProductMapper.getById(productId);
+                            DjBasicsProductTemplate djBasicsProduct = iBasicsProductTemplateMapper.getById(productId);
                             if (djBasicsProduct == null) {
-                                List<DjBasicsProduct> pList = djBasicsProductMapper.queryByGoodsId(djBasicsGoods.getId());
+                                List<DjBasicsProductTemplate> pList = iBasicsProductTemplateMapper.queryByGoodsId(djBasicsGoods.getId());
                                 if (pList.size() > 0) {
                                     djBasicsProduct = pList.get(0);
                                 }
@@ -134,17 +132,13 @@ public class DjActuaryBudgetMaterialService {
                             budgetMaterial.setProductSn(djBasicsProduct.getProductSn());
                             budgetMaterial.setProductName(djBasicsProduct.getName());
                             budgetMaterial.setPrice(djBasicsProduct.getPrice());
-                            Example example = new Example(DjBasicsProductMaterial.class);
-                            example.createCriteria().andEqualTo(DjBasicsProductMaterial.DATA_STATUS, 0)
-                                    .andEqualTo(DjBasicsProductMaterial.PRODUCT_ID, djBasicsProduct.getId());
-                            List<DjBasicsProductMaterial> djBasicsProductMaterials = djBasicsProductMaterialMapper.selectByExample(example);
-                            budgetMaterial.setCost(djBasicsProductMaterials.size() > 0 ? djBasicsProductMaterials.get(0).getCost() : null);
+                            budgetMaterial.setCost( djBasicsProduct.getCost() );
                             budgetMaterial.setImage(djBasicsProduct.getImage());//货品图片
                            /* double a = actuarialQuantity / pro.getConvertQuality();
                             double shopCount = Math.ceil(a);*/
                             budgetMaterial.setShopCount(shopCount);
-                            Double converCount = (shopCount / djBasicsProductMaterials.get(0).getConvertQuality());
-                            Unit convertUnit = iUnitMapper.selectByPrimaryKey(djBasicsProductMaterials.get(0).getConvertUnit());
+                            Double converCount = (shopCount / djBasicsProduct.getConvertQuality());
+                            Unit convertUnit = iUnitMapper.selectByPrimaryKey(djBasicsProduct.getConvertUnit());
                             if (convertUnit.getType() == 1) {
                                 converCount = Math.ceil(converCount);
                             }
@@ -198,7 +192,7 @@ public class DjActuaryBudgetMaterialService {
                             continue;
                         }
                         BudgetWorker budgetWorker = new BudgetWorker();
-                        DjBasicsProduct workerGoods = djBasicsProductMapper.selectByPrimaryKey(productId);
+                        DjBasicsProductTemplate workerGoods = iBasicsProductTemplateMapper.selectByPrimaryKey(productId);
                         if (workerGoods == null) {
                             continue;
                         }
@@ -377,10 +371,10 @@ public class DjActuaryBudgetMaterialService {
             if (!CommonUtil.isEmpty(attributeVal)) {
                 attributeVals = attributeVal.split(",");
             }
-            List<DjBasicsProduct> pList = djBasicsProductMapper.serchCategoryProduct(categoryId, StringTool.getLikeV(name), brandVal, attributeVals, orderKey);
+            List<DjBasicsProductTemplate> pList = iBasicsProductTemplateMapper.serchCategoryProduct(categoryId, StringTool.getLikeV(name), brandVal, attributeVals, orderKey);
             pageResult = new PageInfo<>(pList);
             if (!pList.isEmpty()) {
-                for (DjBasicsProduct product : pList) {
+                for (DjBasicsProductTemplate product : pList) {
                     String convertUnitName = iUnitMapper.selectByPrimaryKey(product.getUnitId()).getName();
                     String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
                             String.format(DjConstants.YZPageAddress.GOODSDETAIL, " ", cityId, "商品详情") +
