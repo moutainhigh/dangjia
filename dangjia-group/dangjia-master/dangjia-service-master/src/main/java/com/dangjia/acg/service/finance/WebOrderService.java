@@ -78,6 +78,8 @@ public class WebOrderService {
                         HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(webOrderDTO.getTaskId());
                         if (houseFlow != null) {
                             webOrderDTO.setTypeText(workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId()).getName() + "抢单");
+                        }else{
+                            webOrderDTO.setTypeText("工序抢单");
                         }
                     }
                     if (webOrderDTO.getType() == 2) {//补货补人工
@@ -100,6 +102,8 @@ public class WebOrderService {
                         HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(webOrderDTO.getTaskId());
                         if (houseFlow != null) {
                             webOrderDTO.setTypeText(workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId()).getName() + "付材料");
+                        }else{
+                            webOrderDTO.setTypeText("工序付材料");
                         }
                     }
                     if (webOrderDTO.getType() == 5) {

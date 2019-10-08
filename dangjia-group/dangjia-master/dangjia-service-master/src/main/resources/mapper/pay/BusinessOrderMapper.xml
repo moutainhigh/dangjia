@@ -81,6 +81,7 @@
         a.pay_price AS actualPayment,
         b.create_date AS createDate,
         a.type AS type,
+        a.image ,
         a.state AS state,
         a.task_id AS taskId,
         b.pay_state AS payType,
