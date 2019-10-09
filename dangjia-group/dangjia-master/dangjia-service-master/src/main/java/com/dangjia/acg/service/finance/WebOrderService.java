@@ -22,13 +22,13 @@ import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.repair.MendOrder;
+import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -66,6 +66,7 @@ public class WebOrderService {
      */
     public ServerResponse getAllOrders(PageDTO pageDTO,String cityId, Integer state, String searchKey) {
         try {
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             if (state == null) {
                 state = -1;
             }
@@ -73,6 +74,7 @@ public class WebOrderService {
             List<WebOrderDTO> orderList = iBusinessOrderMapper.getWebOrderList(cityId,state, searchKey);
             PageInfo pageResult = new PageInfo(orderList);
             for (WebOrderDTO webOrderDTO : orderList) {
+                webOrderDTO.setImage(Utils.getImageAddress(address,webOrderDTO.getImage()));
                 if (webOrderDTO.getState() == 3) {
                     if (webOrderDTO.getType() == 1) {//工序支付
                         HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(webOrderDTO.getTaskId());

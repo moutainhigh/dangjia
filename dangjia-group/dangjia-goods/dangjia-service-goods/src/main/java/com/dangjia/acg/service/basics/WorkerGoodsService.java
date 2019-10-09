@@ -20,6 +20,7 @@ import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.basics.WorkerGoods;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.util.DateUtils;
+import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -97,21 +98,6 @@ public class WorkerGoodsService {
         return workerGoodsDTO;
     }
 
-    private String getImageAddress(String address, String image) {
-        StringBuilder imgStr = new StringBuilder();
-        if (!CommonUtil.isEmpty(image)) {
-            String[] imgArr = image.split(",");
-            for (int i = 0; i < imgArr.length; i++) {
-                if (i == imgArr.length - 1) {
-                    imgStr.append(address).append(imgArr[i]);
-                } else {
-                    imgStr.append(address).append(imgArr[i]).append(",");
-                }
-            }
-        }
-        return imgStr.toString();
-    }
-
     public WorkerGoodsDTO assembleWorkerGoodsResult(WorkerGoods workerGoods) {
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
@@ -119,9 +105,9 @@ public class WorkerGoodsService {
             workerGoodsResult.setId(workerGoods.getId());
             workerGoodsResult.setName(workerGoods.getName());
             workerGoodsResult.setWorkerGoodsSn(workerGoods.getWorkerGoodsSn());
-            workerGoodsResult.setImage(getImageAddress(address, workerGoods.getImage()));
+            workerGoodsResult.setImage(Utils.getImageAddress(address, workerGoods.getImage()));
             workerGoodsResult.setImageUrl(workerGoods.getImage());
-            workerGoodsResult.setWorkerDec(getImageAddress(address, workerGoods.getWorkerDec()));
+            workerGoodsResult.setWorkerDec(Utils.getImageAddress(address, workerGoods.getWorkerDec()));
             workerGoodsResult.setWorkerDecUrl(workerGoods.getWorkerDec());
             workerGoodsResult.setUnitId(workerGoods.getUnitId());
             workerGoodsResult.setUnitName(workerGoods.getUnitName());
@@ -157,7 +143,7 @@ public class WorkerGoodsService {
                 technologyResult.setName(technology.getName());
                 technologyResult.setWorkerTypeId(technology.getWorkerTypeId());
                 technologyResult.setContent(technology.getContent());
-                technologyResult.setImage(getImageAddress(address, technology.getImage()));
+                technologyResult.setImage(Utils.getImageAddress(address, technology.getImage()));
                 technologyResult.setImageUrl(technology.getImage());
                 technologyResult.setSampleImage(technology.getSampleImage());
                 technologyResult.setSampleImageUrl(address + technology.getSampleImage());
