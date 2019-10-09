@@ -119,6 +119,9 @@
         <if test="dataStatus == 1">
             AND house.data_status=1 AND house.visit_state=1 and house.designer_ok != 3
         </if>
+        <if test="dataStatus == 0">
+            AND house.data_status=0
+        </if>
         <if test="designerType == 0">
             AND house.designer_ok =4
         </if>
