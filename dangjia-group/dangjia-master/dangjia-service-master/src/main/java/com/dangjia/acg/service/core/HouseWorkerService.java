@@ -381,6 +381,7 @@ public class HouseWorkerService {
      * @param houseMapper 房子表mapper
      */
     public void grabSheet(Member worker, House house, HouseFlow houseFlow, IHouseMapper houseMapper) {
+        house.setDataStatus(0);
         if (worker.getWorkerType() == 1) {//设计师
             house.setDesignerOk(house.getDecorationType() == 2 ? 1 : 4);//有设计抢单待业主支付
             houseFlow.setWorkType(house.getDecorationType() == 2 ? 4 : 3);

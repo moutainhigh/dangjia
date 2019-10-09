@@ -516,6 +516,7 @@ public class HouseService {
                     houseFlowMapper.insert(houseFlow);
                 }
                 house.setDesignerOk(1);
+                house.setDataStatus(0);
             } else {//远程设计
                 WorkerType workerType = workerTypeMapper.selectByPrimaryKey("1");
                 Example example = new Example(HouseFlow.class);
@@ -2091,6 +2092,7 @@ public class HouseService {
                 insertConstructionRecord(hfa);
             }
             house.setBudgetOk(budgetOk);//精算状态:-1已精算没有发给业主,默认0未开始,1已开始精算,2已发给业主,3审核通过,4审核不通过
+            house.setDataStatus(0);
             iHouseMapper.updateByPrimaryKeySelective(house);
             return ServerResponse.createBySuccessMessage("修改房子精算状态成功");
         } catch (Exception e) {

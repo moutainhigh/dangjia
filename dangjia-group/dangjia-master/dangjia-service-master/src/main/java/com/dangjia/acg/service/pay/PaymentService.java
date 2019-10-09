@@ -615,6 +615,7 @@ public class PaymentService {
                 order.setPayment(payState);
                 orderMapper.insert(order);
                 house.setDesignerOk(1);
+                house.setDataStatus(0);
                 houseMapper.updateByPrimaryKeySelective(house);
             } else if (hwo.getWorkerType() == 2) {//精算费用处理
                 Order order = new Order();
@@ -629,6 +630,7 @@ public class PaymentService {
                 order.setPayment(payState);
                 orderMapper.insert(order);
                 house.setBudgetOk(1);//房间工种表里标记开始精算
+                house.setDataStatus(0);
                 houseMapper.updateByPrimaryKeySelective(house);
                 //推送消息给精算师业主已付款
                 configMessageService.addConfigMessage(null, AppType.GONGJIANG, house.getMemberId(),
