@@ -1227,6 +1227,7 @@ public class PaymentService {
                 businessOrder.setType(type);
                 businessOrderMapper.insert(businessOrder);
             }
+            businessOrder.setState(1);//刚生成
             businessOrder.setType(type);//记录支付类型任务类型
             businessOrder.setTaskId(taskId);//保存任务ID
 
