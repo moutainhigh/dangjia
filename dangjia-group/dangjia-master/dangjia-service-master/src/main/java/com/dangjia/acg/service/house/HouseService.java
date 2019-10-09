@@ -179,6 +179,8 @@ public class HouseService {
     @Autowired
     private DjOrderSurfaceMapper djOrderSurfaceMapper;
 
+    @Autowired
+    private IWebsiteVisitMapper websiteVisitMapper;
 
     /**
      * 切换房产
@@ -1942,6 +1944,10 @@ public class HouseService {
             }
             PageInfo pageResult = new PageInfo(houseList);
             for (HouseListDTO houseListDTO : houseList) {
+                Example example = new Example(WebsiteVisit.class);
+                example.createCriteria().andEqualTo(WebsiteVisit.ROUTE,houseListDTO.getHouseId());
+                int websiteCount= websiteVisitMapper.selectCountByExample(example);
+                houseListDTO.setWebsiteCount(websiteCount);
                 houseListDTO.setAddress(houseListDTO.getHouseName());
             }
             pageResult.setList(houseList);
