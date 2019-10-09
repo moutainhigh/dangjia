@@ -29,7 +29,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * ysl
@@ -149,7 +151,22 @@ public class WebOrderService {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<OrderItemByDTO> orderItemList= iBusinessOrderMapper.getOrderItem(businessNumber);
         PageInfo pageResult = new PageInfo(orderItemList);
-        ActivityRedPackRecord activityRedPackRecord = iActivityRedPackRecordMapper.getRedPackRecordsByBusinessOrderNumber(businessNumber);
+        for (OrderItemByDTO orderItemByDTO : orderItemList) {
+            orderItemByDTO.setImage(imageAddress+orderItemByDTO.getImage());
+        }
+        pageResult.setList(orderItemList);
+        return ServerResponse.createBySuccess("查询成功", pageResult);
+
+    }
+    /**
+     * 获取订单优惠券详情
+     * @param businessId
+     * @return
+     */
+    public ServerResponse getOrderRedItem(String businessId){
+        BusinessOrder businessOrder = iBusinessOrderMapper.selectByPrimaryKey(businessId);
+        ActivityRedPackRecord activityRedPackRecord = iActivityRedPackRecordMapper.getRedPackRecordsByBusinessOrderNumber(businessOrder.getNumber());
+
         String red;
         if(activityRedPackRecord!=null) {
             ActivityRedPack activityRedPack = iActivityRedPackMapper.selectByPrimaryKey(activityRedPackRecord.getRedPackId());
@@ -165,15 +182,12 @@ public class WebOrderService {
         }else {
             red="无";
         }
-        for (OrderItemByDTO orderItemByDTO : orderItemList) {
-            orderItemByDTO.setImage(imageAddress+orderItemByDTO.getImage());
-            orderItemByDTO.setRed(red);
-        }
-        pageResult.setList(orderItemList);
-        return ServerResponse.createBySuccess("查询成功", pageResult);
+        Map map=new HashMap<>();
+        map.put("red",red);
+        map.put("redPackAmount",businessOrder.getDiscountsPrice());
+        return ServerResponse.createBySuccess("查询成功", map);
 
     }
-
     /**
      * 查询到时业主未审核申请
      */

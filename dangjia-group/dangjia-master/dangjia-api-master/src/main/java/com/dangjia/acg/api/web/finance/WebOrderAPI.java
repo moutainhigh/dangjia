@@ -33,6 +33,12 @@ public interface WebOrderAPI {
                                 @RequestParam("pageDTO") PageDTO pageDTO,
                                 @RequestParam("businessNumber") String businessNumber);
 
+
+    @PostMapping("web/finance/order/getOrderRedItem")
+    @ApiOperation(value = "订单优惠券详情", notes = "订单优惠券详情")
+    ServerResponse getOrderRedItem(@RequestParam("request") HttpServletRequest request,
+                                @RequestParam("businessId") String businessId);
+
     @PostMapping("job/auto/order/cancel")
     @ApiOperation(value = "自动取消订单（超过7天）", notes = "自动取消订单（超过7天）")
     void autoOrderCancel();
