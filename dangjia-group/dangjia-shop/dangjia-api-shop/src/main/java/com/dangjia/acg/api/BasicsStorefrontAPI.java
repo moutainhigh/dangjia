@@ -1,4 +1,4 @@
-package com.dangjia.acg.api.storefront;
+package com.dangjia.acg.api;
 
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.storefront.Storefront;
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * chenyufeng  2019-10-08  店铺管理
  */
 @Api(description = "店铺管理接口")
-@FeignClient("dangjia-service-goods")
+@FeignClient("dangjia-service-shop")
 public interface BasicsStorefrontAPI {
 
     @PostMapping("/web/addStorefront")
