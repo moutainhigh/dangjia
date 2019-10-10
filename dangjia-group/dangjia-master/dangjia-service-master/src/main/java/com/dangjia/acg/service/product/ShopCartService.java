@@ -271,7 +271,7 @@ public class ShopCartService {
             example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, operator.getId()).andEqualTo(ShoppingCart.PRODUCT_ID, productId);
             int i = iShoppingCartmapper.deleteByExample(example);
             if (i >= 0) {
-                return ServerResponse.createBySuccess("删除已选商品成功!");
+                return ServerResponse.createBySuccessMessage("删除已选商品成功!");
             } else {
                 return ServerResponse.createBySuccessMessage("删除已选商品失败!");
             }
