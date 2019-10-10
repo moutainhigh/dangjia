@@ -8,8 +8,6 @@ import com.dangjia.acg.dto.storefront.StorefrontListDTO;
 import com.dangjia.acg.mapper.storefront.IStorefrontMapper;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.member.Member;
-import com.dangjia.acg.modle.sup.DjSupApplication;
-import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -30,8 +28,6 @@ public class StorefrontService {
     private MemberAPI memberAPI;
     @Autowired
     private IStorefrontMapper istorefrontMapper;
-    @Autowired
-    private DjSupApplicationAPI djSupApplicationAPI;
 
     public ServerResponse addStorefront(String userToken, String cityId, String storefrontName,
                                         String storefrontAddress, String storefrontDesc,
@@ -100,19 +96,10 @@ public class StorefrontService {
      * @param searchKey
      * @return
      */
-    public ServerResponse querySupplierApplicationShopList(PageDTO pageDTO,String searchKey, String supId) {
+    public ServerResponse querySupplierApplicationShopList(PageDTO pageDTO,String searchKey, String supId, String applicationStatus) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<StorefrontListDTO> storefrontListDTOS = istorefrontMapper.querySupplierApplicationShopList(searchKey);
-            List<DjSupApplication> djSupApplications = djSupApplicationAPI.queryDjSupApplicationBySupId(supId);
-            storefrontListDTOS.forEach(storefrontListDTO -> {
-                djSupApplications.forEach(djSupApplication -> {
-                    if(storefrontListDTO.getId().equals(djSupApplication.getShopId()))
-                        storefrontListDTO.setState(djSupApplication.getApplicationStatus());
-                    storefrontListDTO.setContract(djSupApplication.getContract());
-                    storefrontListDTO.setFailReason(djSupApplication.getFailReason());
-                });
-            });
+            List<StorefrontListDTO> storefrontListDTOS = istorefrontMapper.querySupplierApplicationShopList(searchKey,supId,applicationStatus);
             PageInfo pageResult = new PageInfo(storefrontListDTOS);
             return ServerResponse.createBySuccess("查询成功",pageResult);
         } catch (Exception e) {

@@ -2,7 +2,6 @@ package com.dangjia.acg.dto.storefront;
 
 import lombok.Data;
 
-import javax.persistence.Column;
 
 /**
  * Created with IntelliJ IDEA.
@@ -61,7 +60,7 @@ public class StorefrontListDTO {
      * 联系邮件
      */
     private String email;
-    private String state="-1"; //状态 0:申请中 1:已选择 2:被打回 -1:待选择
+    private String applicationStatus; //状态 0:申请中 1:已选择 2:被打回 -1:待选择
     private String contract;
     private String failReason;
 }

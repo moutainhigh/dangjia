@@ -42,8 +42,8 @@ public class StorefrontController implements BasicsStorefrontAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse querySupplierApplicationShopList(HttpServletRequest request, PageDTO pageDTO, String searchKey, String supId) {
-        return storefrontService.querySupplierApplicationShopList(pageDTO, searchKey, supId);
+    public ServerResponse querySupplierApplicationShopList(HttpServletRequest request, PageDTO pageDTO, String searchKey, String supId, String applicationStatus) {
+        return storefrontService.querySupplierApplicationShopList(pageDTO, searchKey, supId, applicationStatus);
     }
 
 

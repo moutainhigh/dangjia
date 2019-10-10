@@ -24,6 +24,12 @@ import javax.persistence.Table;
 @FieldNameConstants(prefix = "")
 public class DjRegisterApplication extends BaseEntity {
 
+
+    @Column(name = "city_id")
+    @Desc(value = "城市id")
+    @ApiModelProperty("城市id")
+    private String cityId;//用户名
+
     @Column(name = "user_name")
     @Desc(value = "用户名")
     @ApiModelProperty("用户名")

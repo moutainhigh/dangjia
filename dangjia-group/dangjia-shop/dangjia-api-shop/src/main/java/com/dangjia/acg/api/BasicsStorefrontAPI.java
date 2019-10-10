@@ -41,7 +41,8 @@ public interface BasicsStorefrontAPI {
     ServerResponse querySupplierApplicationShopList(@RequestParam("request") HttpServletRequest request,
                                                     @RequestParam("pageDTO") PageDTO pageDTO,
                                                     @RequestParam("searchKey") String searchKey,
-                                                    @RequestParam("supId") String supId);
+                                                    @RequestParam("supId") String supId,
+                                                    @RequestParam("supId") String applicationStatus);
 
 
 }

@@ -21,15 +21,41 @@
 
 
     <select id="querySupplierApplicationShopList" resultType="com.dangjia.acg.dto.storefront.StorefrontListDTO">
-        select
-          <include refid="all_column"/>
-        from dj_basics_storefront
+        SELECT
+            a.`id`,
+            a.`member_id` AS memberId,
+            a.`city_id` AS cityId,
+            a.`storefront_name` AS storefrontName,
+            a.`storefront_address` AS storefrontAddress,
+            a.`storefront_desc` AS storefrontDesc,
+            a.`storefront_logo` AS storefrontLogo,
+            a.`storekeeper_name` AS storekeeperName,
+            a.`contact`,
+            a.`email`,
+            a.`create_date` AS createDate,
+            a.`modify_date` AS modifyDate,
+            a.`data_status` AS dataStatus
+            b.application_status  AS applicationStatus,
+            b.fail_reason AS failReason,
+            b.contract
+        FROM
+          dj_basics_storefront a
+        LEFT JOIN (SELECT * FROM dj_sup_application WHERE sup_id = #{supId})b
+        ON a.id = b.shop_id
         where 1=1
         <if test="null!=searchKey and ''!=searchKey">
             and (
-            storefront_name LIKE CONCAT('%',#{searchKey},'%') or
-            contact LIKE CONCAT('%',#{searchKey},'%')
+            a.storefront_name LIKE CONCAT('%',#{searchKey},'%') or
+            a.contact LIKE CONCAT('%',#{searchKey},'%')
             )
         </if>
+        <choose>
+            <when test="applicationStatus!=-1">
+                and b.application_status not in(0,1,2)
+            </when>
+            <when test="null!=applicationStatus and ''!=applicationStatus">
+                and b.application_status=#{applicationStatus}
+            </when>
+        </choose>
     </select>
 </mapper>

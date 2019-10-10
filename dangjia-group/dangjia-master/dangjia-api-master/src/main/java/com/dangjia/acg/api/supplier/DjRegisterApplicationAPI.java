@@ -26,4 +26,9 @@ public interface DjRegisterApplicationAPI {
                                             @RequestParam("djRegisterApplication") DjRegisterApplication djRegisterApplication);
 
 
+    @PostMapping("/sup/djRegisterApplication/querySupAndStorefront")
+    @ApiOperation(value = "根据电话号码查询注册信息", notes = "供应商/店铺注册")
+    ServerResponse querySupAndStorefront(@RequestParam("request") HttpServletRequest request,
+                                         @RequestParam("mobile") String mobile,
+                                         @RequestParam("cityId") String cityId);
 }

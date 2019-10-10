@@ -28,4 +28,10 @@ public class DjRegisterApplicationController implements DjRegisterApplicationAPI
         return djSupplierServices.registerSupAndStorefront(djRegisterApplication);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse querySupAndStorefront(HttpServletRequest request, String mobile, String cityId) {
+        return djSupplierServices.querySupAndStorefront(mobile, cityId);
+    }
+
 }

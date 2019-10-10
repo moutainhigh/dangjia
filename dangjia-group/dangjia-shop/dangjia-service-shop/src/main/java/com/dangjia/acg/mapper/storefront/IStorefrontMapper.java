@@ -12,5 +12,7 @@ import java.util.List;
 public interface IStorefrontMapper extends Mapper<Storefront> {
 
 
-    List<StorefrontListDTO> querySupplierApplicationShopList(@Param("searchKey") String searchKey);
+    List<StorefrontListDTO> querySupplierApplicationShopList(@Param("searchKey") String searchKey,
+                                                             @Param("supId") String supId,
+                                                             @Param("applicationStatus") String applicationStatus);
 }
