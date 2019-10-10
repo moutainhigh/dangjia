@@ -42,7 +42,7 @@ public interface BasicsStorefrontAPI {
                                                     @RequestParam("pageDTO") PageDTO pageDTO,
                                                     @RequestParam("searchKey") String searchKey,
                                                     @RequestParam("supId") String supId,
-                                                    @RequestParam("supId") String applicationStatus);
+                                                    @RequestParam("applicationStatus") String applicationStatus);
 
 
 }
