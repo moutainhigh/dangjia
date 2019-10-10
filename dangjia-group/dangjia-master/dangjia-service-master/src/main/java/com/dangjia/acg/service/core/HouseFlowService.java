@@ -568,6 +568,7 @@ public class HouseFlowService {
                     hf.setWorkerId("");
                     houseFlowMapper.updateByPrimaryKeySelective(hf);
                     houseWorker.setWorkType(7);//抢单状态改为（7抢单后放弃）
+                    houseWorker.setModifyDate(new Date());
                     houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
                 } else {
                     if (hf.getSupervisorStart() != 0) {//已开工的状态不可放弃
@@ -587,6 +588,7 @@ public class HouseFlowService {
                             memberMapper.updateByPrimaryKeySelective(member);
                             //修改此单为放弃
                             houseWorker.setWorkType(7);//抢单状态改为（7抢单后放弃）
+                            houseWorker.setModifyDate(new Date());
                             houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
                         }
                     }
@@ -620,6 +622,7 @@ public class HouseFlowService {
                 }
                 //修改此单为放弃
                 houseWorker.setWorkType(7);//抢单状态改为（7抢单后放弃）
+                houseWorker.setModifyDate(new Date());
                 houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
                 House house = houseMapper.selectByPrimaryKey(hf.getHouseId());
                 WorkerType workerType = workerTypeMapper.selectByPrimaryKey(hf.getWorkerTypeId());

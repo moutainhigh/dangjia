@@ -565,6 +565,7 @@ public class PaymentService {
             HouseWorker houseWorker = houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), 1);
             houseWorker.setWorkType(6);
             hwo.setModifyDate(new Date());
+            houseWorker.setModifyDate(new Date());
             houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
 
             houseFlow.setWorkerId(hwo.getWorkerId());

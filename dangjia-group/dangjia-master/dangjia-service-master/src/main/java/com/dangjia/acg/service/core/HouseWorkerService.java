@@ -180,6 +180,7 @@ public class HouseWorkerService {
                 }
             }
         }
+        houseWorker.setModifyDate(new Date());
         houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
         houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
         return ServerResponse.createBySuccessMessage("操作成功");

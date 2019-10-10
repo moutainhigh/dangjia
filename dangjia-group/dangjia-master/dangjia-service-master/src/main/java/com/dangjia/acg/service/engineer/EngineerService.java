@@ -170,6 +170,7 @@ public class EngineerService {
                 return ServerResponse.createByErrorMessage("已支付,更换换人方式");
             }
             houseWorker.setWorkType(3);//被平台换
+            houseWorker.setModifyDate(new Date());
             houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
 
             HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(houseWorker.getHouseId(), houseWorker.getWorkerTypeId());
