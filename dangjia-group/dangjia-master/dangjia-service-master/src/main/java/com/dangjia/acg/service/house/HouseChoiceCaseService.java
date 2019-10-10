@@ -13,8 +13,10 @@ import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.house.TextContentDTO;
 import com.dangjia.acg.mapper.house.IHouseChoiceCaseMapper;
+import com.dangjia.acg.mapper.house.IWebsiteVisitMapper;
 import com.dangjia.acg.modle.activity.Activity;
 import com.dangjia.acg.modle.house.HouseChoiceCase;
+import com.dangjia.acg.modle.house.WebsiteVisit;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -38,6 +40,8 @@ public class HouseChoiceCaseService {
     @Autowired
     private IHouseChoiceCaseMapper houseChoiceCaseMapper;
 
+    @Autowired
+    private IWebsiteVisitMapper websiteVisitMapper;
     @Autowired
     private ConfigUtil configUtil;
 
@@ -110,6 +114,10 @@ public class HouseChoiceCaseService {
                 }
                 map.put("textContent", textContentDTOS);
             }
+            example = new Example(WebsiteVisit.class);
+            example.createCriteria().andEqualTo(WebsiteVisit.ROUTE,v.getId());
+           int websiteCount= websiteVisitMapper.selectCountByExample(example);
+            map.put("websiteCount", websiteCount);
             listmap.add(map);
         }
         pageResult.setList(listmap);

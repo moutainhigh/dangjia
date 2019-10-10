@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
+import com.dangjia.acg.auth.config.RedisSessionDAO;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
@@ -65,13 +66,16 @@ import com.dangjia.acg.service.core.HouseFlowService;
 import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import tk.mybatis.mapper.entity.Example;
 import tk.mybatis.mapper.util.StringUtil;
 
@@ -165,6 +169,7 @@ public class HouseService {
     private DjRoyaltyMatchMapper djRoyaltyMatchMapper;
     @Autowired
     private DjAreaMatchMapper djAreaMatchMapper;
+    protected static final Logger LOG = LoggerFactory.getLogger(HouseService.class);
     @Autowired
     private UserMapper userMapper;
     @Autowired
@@ -172,6 +177,8 @@ public class HouseService {
     @Autowired
     private DjOrderSurfaceMapper djOrderSurfaceMapper;
 
+    @Autowired
+    private IWebsiteVisitMapper websiteVisitMapper;
 
     /**
      * 切换房产
@@ -494,6 +501,7 @@ public class HouseService {
                     houseFlowMapper.insert(houseFlow);
                 }
                 house.setDesignerOk(1);
+                house.setDataStatus(0);
             } else {//远程设计
                 WorkerType workerType = workerTypeMapper.selectByPrimaryKey("1");
                 Example example = new Example(HouseFlow.class);
@@ -1785,6 +1793,10 @@ public class HouseService {
             }
             PageInfo pageResult = new PageInfo(houseList);
             for (HouseListDTO houseListDTO : houseList) {
+                Example example = new Example(WebsiteVisit.class);
+                example.createCriteria().andEqualTo(WebsiteVisit.ROUTE,houseListDTO.getHouseId());
+                int websiteCount= websiteVisitMapper.selectCountByExample(example);
+                houseListDTO.setWebsiteCount(websiteCount);
                 houseListDTO.setAddress(houseListDTO.getHouseName());
             }
             pageResult.setList(houseList);

@@ -59,6 +59,8 @@ public class WorkerGoodsDTO {
     private String otherName;
 
     private int productType;//2=人工商品
+    @ApiModelProperty(" 是否置顶 0=正常  1=置顶")
+    private String istop;
 
     private Double lastPrice;
     private Date lastTime;

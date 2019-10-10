@@ -1,5 +1,6 @@
 package com.dangjia.acg.util;
 
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dto.core.ButtonListBean;
 
 import java.io.UnsupportedEncodingException;
@@ -109,5 +110,21 @@ public class Utils {
             hex.append(Integer.toHexString(b & 0xFF));
         }
         return hex.toString();
+    }
+
+
+    public static String getImageAddress(String address, String image) {
+        StringBuilder imgStr = new StringBuilder();
+        if (!CommonUtil.isEmpty(image)) {
+            String[] imgArr = image.split(",");
+            for (int i = 0; i < imgArr.length; i++) {
+                if (i == imgArr.length - 1) {
+                    imgStr.append(address).append(imgArr[i]);
+                } else {
+                    imgStr.append(address).append(imgArr[i]).append(",");
+                }
+            }
+        }
+        return imgStr.toString();
     }
 }

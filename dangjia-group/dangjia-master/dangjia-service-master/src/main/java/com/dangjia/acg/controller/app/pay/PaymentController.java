@@ -8,6 +8,8 @@ import com.dangjia.acg.service.pay.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
+
 /**
  * author: Ronalcheng
  * Date: 2018/11/7 0007
@@ -21,6 +23,11 @@ public class PaymentController implements PaymentAPI {
     @Autowired
     private PayService payService;
 
+    @Override
+    @ApiMethod
+    public ServerResponse setServersSuccess(String businessOrderId, BigDecimal money, String image ){
+        return paymentService.setServersSuccess(businessOrderId, money,image);
+    }
     @Override
     @ApiMethod
     public void budgetCorrect(String businessOrderNumber, String payState, String houseFlowId) {

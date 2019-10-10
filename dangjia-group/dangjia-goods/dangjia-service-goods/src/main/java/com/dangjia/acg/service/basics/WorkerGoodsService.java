@@ -18,6 +18,10 @@ import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.util.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.dangjia.acg.util.Utils;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -79,9 +83,9 @@ public class WorkerGoodsService {
         if (workerGoodsDTOS != null && workerGoodsDTOS.size() > 0) {
             workerGoodsDTO = workerGoodsDTOS.get(0);
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            workerGoodsDTO.setImage(getImageAddress(address, workerGoodsDTO.getImage()));
+            workerGoodsDTO.setImage(Utils.getImageAddress(address, workerGoodsDTO.getImage()));
             workerGoodsDTO.setImageUrl(workerGoodsDTO.getImage());
-            workerGoodsDTO.setWorkerDec(getImageAddress(address, workerGoodsDTO.getWorkerDec()));
+            workerGoodsDTO.setWorkerDec(Utils.getImageAddress(address, workerGoodsDTO.getWorkerDec()));
             workerGoodsDTO.setWorkerDecUrl(workerGoodsDTO.getWorkerDec());
             String workerTypeName = "";
             ServerResponse response = workerTypeAPI.getWorkerType(workerGoodsDTO.getWorkerTypeId());
@@ -97,7 +101,7 @@ public class WorkerGoodsService {
                 technologyResult.setName(technology.getName());
                 technologyResult.setWorkerTypeId(technology.getWorkerTypeId());
                 technologyResult.setContent(technology.getContent());
-                technologyResult.setImage(getImageAddress(address, technology.getImage()));
+                technologyResult.setImage(Utils.getImageAddress(address, technology.getImage()));
                 technologyResult.setImageUrl(technology.getImage());
                 technologyResult.setSampleImage(technology.getSampleImage());
                 technologyResult.setSampleImageUrl(address + technology.getSampleImage());
@@ -120,20 +124,7 @@ public class WorkerGoodsService {
         return workerGoodsDTO;
     }
 
-    private String getImageAddress(String address, String image) {
-        StringBuilder imgStr = new StringBuilder();
-        if (!CommonUtil.isEmpty(image)) {
-            String[] imgArr = image.split(",");
-            for (int i = 0; i < imgArr.length; i++) {
-                if (i == imgArr.length - 1) {
-                    imgStr.append(address).append(imgArr[i]);
-                } else {
-                    imgStr.append(address).append(imgArr[i]).append(",");
-                }
-            }
-        }
-        return imgStr.toString();
-    }
+
     /**
      * 从精算表查工种已支付工钱
      *

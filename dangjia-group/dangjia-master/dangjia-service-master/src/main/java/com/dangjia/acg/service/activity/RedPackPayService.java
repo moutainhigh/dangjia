@@ -62,8 +62,10 @@ public class RedPackPayService {
     private IBusinessOrderMapper businessOrderMapper;
     @Autowired
     private BudgetMaterialAPI budgetMaterialAPI;
+
     @Autowired
     private BudgetWorkerAPI budgetWorkerAPI;
+
     @Autowired
     private CraftsmanConstructionService constructionService;
     @Autowired

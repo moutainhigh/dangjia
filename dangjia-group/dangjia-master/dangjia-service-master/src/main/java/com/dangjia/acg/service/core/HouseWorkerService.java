@@ -21,6 +21,7 @@ import com.dangjia.acg.dto.house.MyHouseFlowDTO;
 import com.dangjia.acg.mapper.complain.IComplainMapper;
 import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.house.IHouseMapper;
+import com.dangjia.acg.mapper.house.IModelingVillageMapper;
 import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberCityMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
@@ -33,6 +34,7 @@ import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.complain.Complain;
 import com.dangjia.acg.modle.core.*;
 import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.house.ModelingVillage;
 import com.dangjia.acg.modle.matter.TechnologyRecord;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberCity;
@@ -43,10 +45,9 @@ import com.dangjia.acg.modle.worker.Insurance;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.house.HouseService;
-import com.dangjia.acg.service.worker.EvaluateService;
+import com.dangjia.acg.util.LocationUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -473,10 +474,12 @@ public class HouseWorkerService {
         } else {
             return ServerResponse.createByErrorMessage("该工序（" + workerType.getName() + "）未开工，无法申请完工！");
         }
-        //包括所有申请 和 巡查
-        houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 0, worker.getId(), new Date());
-        if (houseFlowApplyList.size() > 0) {
-            return ServerResponse.createByErrorMessage("您今日已提交过此申请,请勿重复提交！");
+        if (active != null && active.equals("pre")) {
+            //包括所有申请 和 巡查
+            houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 0, worker.getId(), new Date());
+            if (houseFlowApplyList.size() > 0) {
+                return ServerResponse.createByErrorMessage("您今日已提交过此申请,请勿重复提交！");
+            }
         }
         /*待审核申请*/
         List<HouseFlowApply> hfaList = houseFlowApplyMapper.checkPendingApply(hf.getId(), worker.getId());
@@ -679,9 +682,11 @@ public class HouseWorkerService {
                 }
             }
         }
-        houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 4, worker.getId(), new Date());
-        if (houseFlowApplyList.size() > 0) {
-            return ServerResponse.createByErrorMessage("您今日已提交过此申请,请勿重复提交！");
+        if (active != null && active.equals("pre")) {
+            houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 4, worker.getId(), new Date());
+            if (houseFlowApplyList.size() > 0) {
+                return ServerResponse.createByErrorMessage("您今日已提交过此申请,请勿重复提交！");
+            }
         }
 //        houseFlowApplyList = getLeave(hf);
 //        if (houseFlowApplyList.size() > 0) {
@@ -777,9 +782,11 @@ public class HouseWorkerService {
             if (hf.getPause() == 1) {
                 return ServerResponse.createByErrorMessage("该工序（" + workerType.getName() + "）已暂停施工,请勿提交申请！");
             }
-            List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), applyType, worker.getId(), new Date());
-            if (houseFlowApplyList.size() > 0) {
-                return ServerResponse.createByErrorMessage("您今日已提交过此申请,请勿重复提交！");
+            if (active != null && active.equals("pre")) {
+                List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), applyType, worker.getId(), new Date());
+                if (houseFlowApplyList.size() > 0) {
+                    return ServerResponse.createByErrorMessage("您今日已提交过此申请,请勿重复提交！");
+                }
             }
             hfa = getHouseFlowApply(hf, applyType, supervisorHF);
 

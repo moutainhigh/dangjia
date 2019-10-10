@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.actuary.BudgetMaterialAPI;
 import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
-import com.dangjia.acg.api.actuary.app.AppActuaryOperationAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
@@ -170,6 +169,32 @@ public class PaymentService {
     private PurchaseOrderService purchaseOrderService;
     @Autowired
     private ICustomerRecordMapper customerRecordMapper;
+
+
+    @Autowired
+    private PayService payService;
+
+
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse setServersSuccess(String businessOrderId,BigDecimal money,String image ) {
+        try {
+            BusinessOrder businessOrder = businessOrderMapper.selectByPrimaryKey(businessOrderId);
+            businessOrder.setPayPrice(money);
+            businessOrder.setImage(image);
+            businessOrderMapper.updateByPrimaryKeySelective(businessOrder);
+
+            ServerResponse serverResponse=payService.getPOSSign(businessOrder.getNumber());
+            if(!serverResponse.isSuccess()){
+                return serverResponse;
+            }
+
+            return setServersSuccess((String)serverResponse.getResultObj());
+        } catch (Exception e) {
+            e.printStackTrace();
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return ServerResponse.createByErrorMessage("支付回调异常");
+        }
+    }
 
     /**
      * 服务器回调
@@ -586,6 +611,7 @@ public class PaymentService {
                 order.setPayment(payState);
                 orderMapper.insert(order);
                 house.setDesignerOk(1);
+                house.setDataStatus(0);
                 houseMapper.updateByPrimaryKeySelective(house);
             } else if (hwo.getWorkerType() == 2) {//精算费用处理
                 Order order = new Order();
@@ -600,6 +626,7 @@ public class PaymentService {
                 order.setPayment(payState);
                 orderMapper.insert(order);
                 house.setBudgetOk(1);//房间工种表里标记开始精算
+                house.setDataStatus(0);
                 houseMapper.updateByPrimaryKeySelective(house);
 //                //推送消息给精算师业主已付款
 //                configMessageService.addConfigMessage(null, AppType.GONGJIANG, house.getMemberId(),
@@ -1201,6 +1228,7 @@ public class PaymentService {
                 businessOrder.setType(type);
                 businessOrderMapper.insert(businessOrder);
             }
+            businessOrder.setState(1);//刚生成
             businessOrder.setType(type);//记录支付类型任务类型
             businessOrder.setTaskId(taskId);//保存任务ID
 
