@@ -95,7 +95,7 @@ public class BrowseRecordService {
                     record.setMemberId(member.getId());
                     record.setVistsType(vistsType);
                     iBrowseRecordMapper.updateByPrimaryKeySelective(record);
-                    return ServerResponse.createBySuccess("已经存在记录，修改成功!");
+                    return ServerResponse.createBySuccessMessage("已经存在记录，修改成功!");
                 }
             }
             BrowseRecord browseRecord=new BrowseRecord();
@@ -105,7 +105,7 @@ public class BrowseRecordService {
             browseRecord.setVistsType(vistsType);
             iBrowseRecordMapper.insert(browseRecord);
 
-            return ServerResponse.createBySuccess("添加用户浏览记录成功!");
+            return ServerResponse.createBySuccessMessage("添加用户浏览记录成功!");
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("系统出错,记录用户浏览商品痕迹失败!");
