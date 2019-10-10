@@ -3,6 +3,33 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.storefront.IStorefrontMapper">
+    <sql id="all_column">
+          `id`,
+          `member_id` AS memberId,
+          `city_id` AS cityId,
+          `storefront_name` AS storefrontName,
+          `storefront_address` AS storefrontAddress,
+          `storefront_desc` AS storefrontDesc,
+          `storefront_logo` AS storefrontLogo,
+          `storekeeper_name` AS storekeeperName,
+          `contact`,
+          `email`,
+          `create_date` AS createDate,
+          `modify_date` AS modifyDate,
+          `data_status` AS dataStatus
+    </sql>
 
 
+    <select id="querySupplierApplicationShopList" resultType="com.dangjia.acg.dto.storefront.StorefrontListDTO">
+        select
+          <include refid="all_column"/>
+        from dj_basics_storefront
+        where 1=1
+        <if test="null!=searchKey and ''!=searchKey">
+            and (
+            storefront_name LIKE CONCAT('%',#{searchKey},'%') or
+            contact LIKE CONCAT('%',#{searchKey},'%')
+            )
+        </if>
+    </select>
 </mapper>

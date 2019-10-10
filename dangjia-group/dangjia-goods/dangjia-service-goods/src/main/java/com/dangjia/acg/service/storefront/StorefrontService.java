@@ -1,15 +1,23 @@
 package com.dangjia.acg.service.storefront;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.app.member.MemberAPI;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dto.storefront.StorefrontListDTO;
 import com.dangjia.acg.mapper.storefront.IStorefrontMapper;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.sup.DjSupApplication;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class StorefrontService {
@@ -22,6 +30,8 @@ public class StorefrontService {
     private MemberAPI memberAPI;
     @Autowired
     private IStorefrontMapper istorefrontMapper;
+    @Autowired
+    private DjSupApplicationAPI djSupApplicationAPI;
 
     public ServerResponse addStorefront(String userToken, String cityId, String storefrontName,
                                         String storefrontAddress, String storefrontDesc,
@@ -80,6 +90,33 @@ public class StorefrontService {
             }
         } catch (Exception e) {
             logger.error("查询失败：", e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+
+    /**
+     * 查询供应商申请店铺列表
+     * @param searchKey
+     * @return
+     */
+    public ServerResponse querySupplierApplicationShopList(PageDTO pageDTO,String searchKey, String supId) {
+        try {
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<StorefrontListDTO> storefrontListDTOS = istorefrontMapper.querySupplierApplicationShopList(searchKey);
+            List<DjSupApplication> djSupApplications = djSupApplicationAPI.queryDjSupApplicationBySupId(supId);
+            storefrontListDTOS.forEach(storefrontListDTO -> {
+                djSupApplications.forEach(djSupApplication -> {
+                    if(storefrontListDTO.getId().equals(djSupApplication.getShopId()))
+                        storefrontListDTO.setState(djSupApplication.getApplicationStatus());
+                    storefrontListDTO.setContract(djSupApplication.getContract());
+                    storefrontListDTO.setFailReason(djSupApplication.getFailReason());
+                });
+            });
+            PageInfo pageResult = new PageInfo(storefrontListDTOS);
+            return ServerResponse.createBySuccess("查询成功",pageResult);
+        } catch (Exception e) {
+            e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
