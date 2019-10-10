@@ -48,9 +48,6 @@ public class TaskService {
     private IHouseFlowMapper houseFlowMapper;
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
-
-    @Autowired
-    private IHouseWorkerOrderMapper houseWorkerOrderMapper;
     @Autowired
     private IHouseMapper houseMapper;
     @Autowired

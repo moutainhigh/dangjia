@@ -51,6 +51,7 @@ public class HouseListDTO {
     private String operatorId;// 操作人ID
     private String operatorName;// 操作人名字
     private String operatorMobile;// 操作人电话
+    private Integer websiteCount;// 访问次数
     private Integer showUpdata;//是否显示上传图片按钮，0否，1是
     private String optionalLabel;//选配标签
 

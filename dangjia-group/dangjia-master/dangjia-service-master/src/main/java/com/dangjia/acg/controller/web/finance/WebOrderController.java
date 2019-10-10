@@ -34,4 +34,15 @@ public class WebOrderController implements WebOrderAPI {
     public ServerResponse getOrderItem(HttpServletRequest request,PageDTO pageDTO, String businessNumber) {
         return webOrderService.getOrderItem(pageDTO,businessNumber);
     }
+    @Override
+    @ApiMethod
+    public ServerResponse getOrderRedItem(HttpServletRequest request, String businessId) {
+        return webOrderService.getOrderRedItem(businessId);
+    }
+
+    @Override
+    @ApiMethod
+    public void autoOrderCancel() {
+         webOrderService.autoOrderCancel();
+    }
 }

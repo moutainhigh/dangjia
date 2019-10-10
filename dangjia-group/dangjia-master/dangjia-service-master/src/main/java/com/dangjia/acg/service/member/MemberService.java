@@ -721,10 +721,7 @@ public class MemberService {
                     customer.setClueType(0);
                     customer.setDataStatus(0);
                     customer.setTips("0");
-                    Example example = new Example(MemberCity.class);
-                    example.createCriteria().andEqualTo(MemberCity.MEMBER_ID, member.getId());
-                    List<MemberCity> memberCities = memberCityMapper.selectByExample(example);
-                    customer.setCityId(memberCities.size() > 0 ? memberCities.get(0).getCityId() : null);
+                    customer.setCityId(member.getCityId());
                     customer.setPhaseStatus(1);
                     iCustomerMapper.insert(customer);
                 } else {
@@ -788,22 +785,14 @@ public class MemberService {
                     memberLabelList = iMemberLabelMapper.selectByExample(example);
                 }
                 mcDTO.setMemberLabelList(memberLabelList);
+                mcDTO.setMemberCityID(member.getCityId());
+                mcDTO.setMemberCityName(member.getCityName());
 
-                Example example = new Example(MemberCity.class);
-                example.createCriteria()
-                        .andEqualTo(MemberCity.MEMBER_ID, member.getId())
-                        .andEqualTo(MemberCity.CITY_ID, cityId);
-                example.orderBy(MemberCity.CREATE_DATE);
-                List<MemberCity> listcity = memberCityMapper.selectByExample(example);
-                if (listcity.size() > 0) {
-                    mcDTO.setMemberCityID(listcity.get(0).getCityId());
-                    mcDTO.setMemberCityName(listcity.get(0).getCityName());
-                }
-                Date orderDate=houseMapper.getHouseDateByMemberId( member.getId());
-                mcDTO.setOrderDate(orderDate);
+
+                Date house = houseMapper.getHouseDateByMemberId(member.getId());
+                mcDTO.setOrderDate(house);
                 mcDTOList.add(mcDTO);
             }
-
             pageResult.setList(mcDTOList);
             return ServerResponse.createBySuccess("查询用户列表成功", pageResult);
         } catch (Exception e) {
@@ -1243,7 +1232,7 @@ public class MemberService {
         insuranceMoney = CommonUtil.isEmpty(insuranceMoney) ? "100" : insuranceMoney;
         Member operator = (Member) object;
         Example example = new Example(Insurance.class);
-        example.createCriteria().andEqualTo(Insurance.WORKER_ID, operator.getId());
+        example.createCriteria().andEqualTo(Insurance.WORKER_ID, operator.getId()).andIsNotNull(Insurance.END_DATE);
         example.orderBy(Insurance.END_DATE).desc();
         List<Insurance> insurances = insuranceMapper.selectByExample(example);
         example = new Example(Insurance.class);
@@ -1360,7 +1349,6 @@ public class MemberService {
 
     /**
      * 推广列表
-     *
      * @param userToken
      * @param pageDTO
      * @return
