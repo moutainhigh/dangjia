@@ -15,9 +15,6 @@ zuul:
     cache:
       path: /cache/**
       service-id: dangjia-service-cache
-    basic:
-      path: /basic/**
-      service-id: dangjia-service-basic
     job:
       path: /job/**
       service-id: dangjia-service-job
@@ -33,6 +30,12 @@ zuul:
     message:
       path: /message/**
       service-id: dangjia-service-message
+    bill:
+      path: /bill/**
+      service-id: dangjia-service-bill
+    shop:
+      path: /shop/**
+      service-id: dangjia-service-shop
     store:
       path: /store/**
       service-id: dangjia-service-store
