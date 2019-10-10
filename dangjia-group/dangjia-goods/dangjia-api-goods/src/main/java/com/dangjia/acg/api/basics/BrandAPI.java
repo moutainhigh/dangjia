@@ -60,6 +60,7 @@ public interface BrandAPI {
     ServerResponse updateBrand(@RequestParam("request") HttpServletRequest request,
                                @RequestParam("id") String id,
                                @RequestParam("name") String name,
+                               @RequestParam("image") String image,
                                @RequestParam("brandSeriesList") String brandSeriesList);
 
     /**
@@ -71,7 +72,8 @@ public interface BrandAPI {
     @ApiOperation(value = "添加品牌", notes = "添加品牌")
     ServerResponse insertBrand(@RequestParam("request") HttpServletRequest request,
                                @RequestParam("brandSeriesList") String brandSeriesList,
-                               @RequestParam("name") String name);
+                               @RequestParam("name") String name,
+                               @RequestParam("image") String image);
 
     /**
      * 删除品牌
