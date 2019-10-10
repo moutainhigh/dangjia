@@ -1,4 +1,4 @@
-package com.dangjia.acg.model.storefront;
+package com.dangjia.acg.modle.storefront;
 
 import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
