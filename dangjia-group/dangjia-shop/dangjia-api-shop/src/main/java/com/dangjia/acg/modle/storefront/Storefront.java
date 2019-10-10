@@ -19,8 +19,8 @@ public class Storefront extends BaseEntity {
     /**
      * 用户表ID
      */
-    @Column(name = "member_id")
-    private String memberId;
+    @Column(name = "user_id")
+    private String userId;
 
     /**
      * 城市ID

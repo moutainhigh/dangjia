@@ -54,7 +54,7 @@ public class StorefrontService {
                 return ServerResponse.createByErrorMessage("店铺介绍不能大于20个字!");
             }
             Storefront storefront = new Storefront();
-            storefront.setMemberId(worker.getId());
+            storefront.setUserId(worker.getId());
             storefront.setCityId(cityId);
             storefront.setStorefrontName(storefrontName);
             storefront.setStorefrontAddress(storefrontAddress);
