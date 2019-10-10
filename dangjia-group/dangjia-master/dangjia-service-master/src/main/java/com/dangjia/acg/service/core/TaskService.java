@@ -46,6 +46,9 @@ public class TaskService {
     private ConfigUtil configUtil;
     @Autowired
     private IHouseFlowMapper houseFlowMapper;
+
+    @Autowired
+    private IHouseWorkerOrderMapper houseWorkerOrderMapper;
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
     @Autowired

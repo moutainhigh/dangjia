@@ -21,14 +21,12 @@ import com.dangjia.acg.dto.pay.SafeTypeDTO;
 import com.dangjia.acg.dto.pay.UpgradeSafeDTO;
 import com.dangjia.acg.mapper.activity.IActivityRedPackRecordMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
-import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.deliver.*;
 import com.dangjia.acg.mapper.design.IHouseStyleTypeMapper;
 import com.dangjia.acg.mapper.house.*;
 import com.dangjia.acg.mapper.member.ICustomerRecordMapper;
-import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.other.IWorkDepositMapper;
 import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
 import com.dangjia.acg.mapper.pay.IPayOrderMapper;
@@ -53,7 +51,6 @@ import com.dangjia.acg.modle.other.WorkDeposit;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.pay.PayOrder;
 import com.dangjia.acg.modle.pay.PurchaseOrder;
-import com.dangjia.acg.modle.product.DjBasicsProduct;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.product.ShoppingCart;
 import com.dangjia.acg.modle.repair.ChangeOrder;
@@ -98,10 +95,6 @@ public class PaymentService {
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
     @Autowired
-    private IMemberMapper memberMapper;
-    @Autowired
-    private IHouseWorkerMapper houseWorkerMapper;
-    @Autowired
     private IHouseMapper houseMapper;
     @Autowired
     private IHouseStyleTypeMapper houseStyleTypeMapper;
@@ -119,8 +112,6 @@ public class PaymentService {
     private IHouseAccountsMapper houseAccountsMapper;
     @Autowired
     private ForMasterAPI forMasterAPI;
-    @Autowired
-    private AppActuaryOperationAPI appActuaryOperationAPI;
     @Autowired
     private ConfigUtil configUtil;
     @Autowired
