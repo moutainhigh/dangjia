@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.config.IServiceTypeMapper">
+
+	<sql id="all_columns">
+		id,
+		name,
+		image,
+		create_date,
+		modify_date
+	</sql>
+	<!-- 查询所有 -->
+	<select id="getServiceTypeList" resultType="com.dangjia.acg.modle.config.ServiceType">
+		SELECT
+			id,
+			name,
+			image,
+			create_date as  createDate,
+			modify_date as modifyDate
+		FROM dj_service_type_configuration
+		ORDER BY create_date desc
+	</select>
+
+	<!-- 删除对象 -->
+	<delete id="deleteById" parameterType="String">
+		DELETE FROM dj_service_type_configuration
+		WHERE id=#{id}
+	</delete>
+</mapper>
