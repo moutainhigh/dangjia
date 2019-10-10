@@ -1,10 +1,11 @@
 package com.dangjia.acg.service.storefront;
 
+import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.api.app.member.MemberAPI;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.mapper.storefront.IStorefrontMapper;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.member.Member;
-import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,7 @@ public class StorefrontService {
      */
     private static Logger logger = LoggerFactory.getLogger(StorefrontService.class);
     @Autowired
-    private CraftsmanConstructionService constructionService;
+    private MemberAPI memberAPI;
     @Autowired
     private IStorefrontMapper istorefrontMapper;
 
@@ -27,12 +28,12 @@ public class StorefrontService {
                                         String storefrontLogo, String storekeeperName,
                                         String contact, String email) {
         try {
-            Object object = constructionService.getMember(userToken);
+            Object object = memberAPI.getMember(userToken);
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
-            Member member = (Member) object;
-            String memberId=member.getId();
+            JSONObject job = (JSONObject)object;
+            Member worker = job.toJavaObject(Member.class);
 
             //店铺名称不能大于10个字
             if (storefrontName.length() > 10) {
@@ -47,7 +48,7 @@ public class StorefrontService {
                 return ServerResponse.createByErrorMessage("店铺介绍不能大于20个字!");
             }
             Storefront storefront = new Storefront();
-            storefront.setMemberId(memberId);
+            storefront.setMemberId(worker.getId());
             storefront.setCityId(cityId);
             storefront.setStorefrontName(storefrontName);
             storefront.setStorefrontAddress(storefrontAddress);
