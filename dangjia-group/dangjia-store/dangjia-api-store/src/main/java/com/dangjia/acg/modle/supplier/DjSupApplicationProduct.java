@@ -66,4 +66,15 @@ public class DjSupApplicationProduct extends BaseEntity {
     @Desc(value = "    @ApiModelProperty(\"供应关系 0:供应 1:停供\")\n")
     @ApiModelProperty("供应关系 0:供应 1:停供")
     private String supplyRelationShip;
+
+    @Column(name = "application_status")
+    @Desc(value = "申请状态 0:审核中 1:通过 2:不通过")
+    @ApiModelProperty("申请状态 0:审核中 1:通过 2:不通过")
+    private String applicationStatus;
+
+    @Column(name = "fail_reason")
+    @Desc(value = "失败原因")
+    @ApiModelProperty("失败原因")
+    private String failReason;
+
 }
