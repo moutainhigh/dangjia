@@ -22,13 +22,16 @@ import java.util.List;
 @FeignClient("dangjia-service-goods")
 public interface DjSupApplicationAPI {
 
-    @PostMapping("/sup/djSupApplication/queryDjSupApplicationBySupId")
-    @ApiOperation(value = "根据供应商查询关联店铺", notes = "按照名字模糊查询所有供应商")
-    List<DjSupApplication> queryDjSupApplicationBySupId(@RequestParam("supId") String supId);
-
     @PostMapping("/sup/djSupApplication/queryDjSupApplicationByShopID")
     @ApiOperation(value = "根据店铺ID查询申请供应商列表", notes = "根据店铺ID查询申请供应商列表")
     ServerResponse queryDjSupApplicationByShopID(@RequestParam("request") HttpServletRequest request,
                                                  @RequestParam("pageDTO") PageDTO pageDTO, @RequestParam("shopId") String shopId);
+
+    @PostMapping("/supplier/djSupplier/insertSupplierApplicationShop ")
+    @ApiOperation(value = "供应商申请供应店铺", notes = "供应商申请供应店铺")
+    ServerResponse insertSupplierApplicationShop(@RequestParam("request") HttpServletRequest request,
+                                                 @RequestParam("supId") String supId,
+                                                 @RequestParam("shopId") String shopId);
+
 
 }

@@ -24,24 +24,6 @@ public class DjSupApplicationService {
     @Autowired
     private DjSupApplicationMapper djSupApplicationMapper;
 
-    /**
-     * 根据供应商查询关联店铺
-     * @param supId
-     * @return
-     */
-    public List<DjSupApplication> queryDjSupApplicationBySupId(String supId) {
-        try {
-            Example example=new Example(DjSupApplication.class);
-            example.createCriteria().andEqualTo(DjSupApplication.SUP_ID,supId)
-                    .andEqualTo(DjSupApplication.DATA_STATUS,0);
-            List<DjSupApplication> djSupApplications = djSupApplicationMapper.selectByExample(example);
-            if(djSupApplications.size()>0)
-                return djSupApplications;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 
 
     /**
@@ -62,5 +44,36 @@ public class DjSupApplicationService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
+    }
+
+
+
+    /**
+     * 供应商申请供应店铺
+     * @param supId
+     * @param shopId
+     * @return
+     */
+    public ServerResponse insertSupplierApplicationShop(String supId, String shopId) {
+        try {
+            Example example=new Example(DjSupApplication.class);
+            example.createCriteria().andEqualTo(DjSupApplication.SUP_ID,supId)
+                    .andEqualTo(DjSupApplication.SHOP_ID,shopId)
+                    .andNotEqualTo(DjSupApplication.APPLICATION_STATUS,2)
+                    .andEqualTo(DjSupApplication.DATA_STATUS,0);
+            if(djSupApplicationMapper.selectByExample(example).size()>0)
+                return ServerResponse.createByErrorMessage("请勿重复申请");
+            DjSupApplication djSupApplication=new DjSupApplication();
+            djSupApplication.setShopId(shopId);
+            djSupApplication.setSupId(supId);
+            djSupApplication.setDataStatus(0);
+            djSupApplication.setApplicationStatus("0");
+            if(djSupApplicationMapper.insert(djSupApplication)>0)
+                return ServerResponse.createBySuccessMessage("申请成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("申请失败:"+e);
+        }
+        return ServerResponse.createByErrorMessage("申请失败");
     }
 }

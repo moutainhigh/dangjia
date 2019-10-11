@@ -1,5 +1,6 @@
 package com.dangjia.acg.api.supplier;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.supplier.DjSupplier;
 import io.swagger.annotations.Api;
@@ -20,9 +21,22 @@ import javax.servlet.http.HttpServletRequest;
 @FeignClient("dangjia-service-master")
 public interface DjSupplierAPI {
 
-    @PostMapping("/sup/djSupplier/updateBasicInformation ")
+    @PostMapping("/supplier/djSupplier/updateBasicInformation ")
     @ApiOperation(value = "供应商基础信息维护", notes = "供应商基础信息维护")
     ServerResponse updateBasicInformation(@RequestParam("request") HttpServletRequest request,
                                           @RequestParam("djSupplier") DjSupplier djSupplier);
 
+    @PostMapping("/supplier/djSupplier/selectSupplyList ")
+    @ApiOperation(value = "选择供货列表", notes = "选择供货列表")
+    ServerResponse querySupplyList(@RequestParam("request") HttpServletRequest request,
+                                    @RequestParam("pageDTO") PageDTO pageDTO,
+                                    @RequestParam("supId") String supId,
+                                    @RequestParam("searchKey") String searchKey);
+
+
+    @PostMapping("/supplier/djSupplier/querySupplierGoods ")
+    @ApiOperation(value = "供应商商品列表", notes = "供应商商品列表")
+    ServerResponse querySupplierGoods(@RequestParam("request") HttpServletRequest request,
+                                      @RequestParam("pageDTO") PageDTO pageDTO,
+                                      @RequestParam("supId") String supId);
 }
