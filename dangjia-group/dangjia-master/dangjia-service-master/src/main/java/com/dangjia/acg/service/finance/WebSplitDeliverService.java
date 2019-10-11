@@ -314,6 +314,7 @@ public class WebSplitDeliverService {
                             supplierDeliverDTO.setNumber(splitDeliver.getNumber());
                             supplierDeliverDTO.setShipAddress(splitDeliver.getShipAddress());
                             supplierDeliverDTO.setTotalAmount(splitDeliver.getTotalAmount());
+                            supplierDeliverDTO.setApplyMoney(splitDeliver.getApplyMoney());
                             supplierDeliverDTO.setDeliverType(1);
                             sd += splitDeliver.getTotalAmount();
                         }
@@ -324,6 +325,7 @@ public class WebSplitDeliverService {
                             supplierDeliverDTO.setId(mendDeliver.getId());
                             supplierDeliverDTO.setNumber(mendDeliver.getNumber());
                             supplierDeliverDTO.setShipAddress(mendDeliver.getShipAddress());
+                            supplierDeliverDTO.setApplyMoney(mendDeliver.getApplyMoney());
                             supplierDeliverDTO.setTotalAmount(mendDeliver.getTotalAmount());
                             supplierDeliverDTO.setDeliverType(2);
                             md += mendDeliver.getTotalAmount();
