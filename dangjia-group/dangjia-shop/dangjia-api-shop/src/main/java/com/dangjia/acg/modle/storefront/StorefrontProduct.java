@@ -31,8 +31,9 @@ public class StorefrontProduct extends BaseEntity {
     /**
      * 商品名称
      */
-    @Column(name = "name")
-    private String name;
+    @Column(name = "goods_name")
+    private String goodsName;
+
 
     /**
      * 上传商品图片

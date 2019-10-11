@@ -49,7 +49,6 @@ import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.google.gson.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -360,7 +359,7 @@ public class HouseFlowApplyService {
                 workerDetailMapper.insert(workerDetail);
                 worker.setHaveMoney(haveMoney);
                 worker.setSurplusMoney(surplusMoneys);
-                memberMapper.updateByPrimaryKeySelective(worker);
+                memberMapper.updateByPrimaryKeySelective(worker);//TODO 这里有问题 不能循环修改
             }
         }
     }
@@ -396,7 +395,7 @@ public class HouseFlowApplyService {
                 workerDetailMapper.insert(workerDetail);
                 worker.setHaveMoney(haveMoney);
                 worker.setSurplusMoney(surplusMoneys);
-                memberMapper.updateByPrimaryKeySelective(worker);
+                memberMapper.updateByPrimaryKeySelective(worker);//TODO 这里有问题 不能循环修改
             }
         }
     }

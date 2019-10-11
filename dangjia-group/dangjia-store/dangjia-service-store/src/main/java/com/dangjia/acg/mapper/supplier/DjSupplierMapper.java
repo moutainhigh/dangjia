@@ -1,5 +1,6 @@
 package com.dangjia.acg.mapper.supplier;
 
+import com.dangjia.acg.dto.supplier.DjSupplierDTO;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.supplier.DjSupplier;
 import org.apache.ibatis.annotations.Param;
@@ -18,4 +19,6 @@ import java.util.List;
 public interface DjSupplierMapper extends Mapper<DjSupplier> {
 
     List<Storefront> querySupplyList(@Param("supId") String supId,@Param("searchKey") String searchKey);
+    List<DjSupplierDTO>  queryDjSupplierByShopID(@Param("keyWord") String keyWord, @Param("applicationStatus") String applicationStatus, @Param("shopId") String shopId);
+    DjSupplierDTO  queryDJsupplierById( @Param("id") String id, @Param("shopId") String shopId);
 }

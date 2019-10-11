@@ -41,4 +41,29 @@ public class DjSupplierController implements DjSupplierAPI {
     public ServerResponse querySupplierGoods(HttpServletRequest request, PageDTO pageDTO, String supId) {
         return djSupplierServices.querySupplierGoods(pageDTO,supId);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryDjSupplierByShopID(HttpServletRequest request, PageDTO pageDTO, String keyWord, String applicationStatus, String shopId) {
+        return djSupplierServices.queryDjSupplierByShopID(request,pageDTO,keyWord,applicationStatus,shopId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse getDjSupplierByID(HttpServletRequest request, String id,String shopId) {
+        return djSupplierServices.getDjSupplierByID(request,id,shopId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setDjSupplierPass(HttpServletRequest request, String id, String applicationStatus) {
+        return djSupplierServices.setDjSupplierPass(request,id,applicationStatus);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setDjSupplierReject(HttpServletRequest request, String id, String applicationStatus, String failReason) {
+        return djSupplierServices.setDjSupplierReject(request,id,applicationStatus,failReason);
+    }
+
 }

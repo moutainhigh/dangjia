@@ -26,30 +26,7 @@ public class DjSupApplicationService {
     private DjSupApplicationMapper djSupApplicationMapper;
 
 
-    /**
-     * 店铺-审核供应商列表
-     * @param pageDTO
-     * @param shopId
-     * @param keyWord
-     * @param applicationStatus
-     * @return
-     */
-    public ServerResponse queryDjSupApplicationByShopID(PageDTO pageDTO,String shopId,String keyWord, String applicationStatus) {
-        try {
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            Example example=new Example(DjSupApplication.class);
-            example.createCriteria().andEqualTo(DjSupApplication.SHOP_ID,shopId)
-                    .andEqualTo(DjSupApplication.DATA_STATUS,0)
-                    .andEqualTo(DjSupApplication.APPLICATION_STATUS,applicationStatus)
-                    ;
-            List<DjSupApplication> djSupApplications = djSupApplicationMapper.selectByExample(example);
-            PageInfo pageResult = new PageInfo(djSupApplications);
-            return ServerResponse.createBySuccess("查询成功",pageResult);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("查询失败");
-        }
-    }
+
 
 
 

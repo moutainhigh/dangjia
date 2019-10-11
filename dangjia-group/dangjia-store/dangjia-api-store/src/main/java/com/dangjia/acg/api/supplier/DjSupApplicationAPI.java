@@ -20,13 +20,6 @@ import javax.servlet.http.HttpServletRequest;
 @FeignClient("dangjia-service-store")
 public interface DjSupApplicationAPI {
 
-    @PostMapping("/sup/djSupApplication/queryDjSupApplicationByShopID")
-    @ApiOperation(value = "店铺-审核供应商列表", notes = "店铺-审核供应商列表")
-    ServerResponse queryDjSupApplicationByShopID(@RequestParam("request") HttpServletRequest request,
-                                                 @RequestParam("pageDTO") PageDTO pageDTO,
-                                                 @RequestParam("keyWord") String keyWord,
-                                                 @RequestParam("applicationStatus") String applicationStatus,
-                                                 @RequestParam("shopId") String shopId);
 
     @PostMapping("/sup/djSupApplication/queryDjSupApplicationProductByShopID")
     @ApiOperation(value = "店铺-审核供货列表", notes = "店铺-审核供货列表")

@@ -34,4 +34,44 @@
         </if>
     </select>
 
+    <select id="queryDjSupplierByShopID" resultType="com.dangjia.acg.dto.supplier.DjSupplierDTO" >
+
+        SELECT
+            ds. NAME,
+            ds.address,
+            ds.check_people,
+            ds.telephone,
+            da.application_status
+        FROM
+            dj_sup_application da
+        INNER JOIN dj_supplier ds ON da.sup_id = ds.id
+        WHERE 1=1
+           and  da.shop_id = #{shopId}
+        <if test="null!=keyWord and ''!=keyWord">
+            AND (
+            ds.name LIKE CONCAT('%',#{keyWord},'%') or
+            ds.telephone LIKE CONCAT('%',#{keyWord},'%')
+            )
+        </if>
+
+    </select>
+
+    <select id="queryDJsupplierById" resultType="com.dangjia.acg.dto.supplier.DjSupplierDTO" >
+
+        SELECT
+        ds. NAME,
+        ds.address,
+        ds.check_people,
+        ds.telephone,
+        da.application_status
+        FROM
+        dj_sup_application da
+        INNER JOIN dj_supplier ds ON da.sup_id = ds.id
+        WHERE 1=1
+        and  da.shop_id = #{shopId}
+        and  ds.id=#{id}
+
+    </select>
+
+
 </mapper>
