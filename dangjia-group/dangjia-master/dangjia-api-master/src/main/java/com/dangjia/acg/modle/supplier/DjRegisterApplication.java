@@ -68,12 +68,12 @@ public class DjRegisterApplication extends BaseEntity {
     @Column(name = "application_type")
     @Desc(value = "申请类型 0:店铺 1:供应商")
     @ApiModelProperty("申请类型 0:店铺 1:供应商")
-    private String application_type;//申请类型 0:店铺 1:供应商
+    private String applicationType;//申请类型 0:店铺 1:供应商
 
     @Column(name = "application_status")
     @Desc(value = "审核状态 0:审核中 1:通过 2:不通过")
     @ApiModelProperty("审核状态 0:审核中 1:通过 2:不通过")
-    private String applicationStatus;//审核状态 0:审核中 1:通过 2:不通过
+    private Integer applicationStatus;//审核状态 0:审核中 1:通过 2:不通过
 
     @Column(name = "fail_reason")
     @Desc(value = "失败原因")
