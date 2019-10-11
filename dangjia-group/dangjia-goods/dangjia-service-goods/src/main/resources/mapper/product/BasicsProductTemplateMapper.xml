@@ -416,4 +416,51 @@
         and p.product_sn=#{productSn}
         and p.worker_type_id=#{workerTypeId}
     </select>
+
+    <select id="getProductListByStoreproductId" resultType="com.dangjia.acg.modle.product.DjBasicsProductTemplate">
+        SELECT
+            t1.id as id,
+            t.name as name,
+            t.goods_id as goodsId,
+            t.category_id as categoryId,
+            t.product_sn as productSn,
+            t.image as image,
+            t1.sell_price price
+        FROM dj_basics_product_template t,
+             dj_basics_storefront_product t1
+        WHERE
+           t.id = t1.prod_template_id
+           and t1.is_shelf_status = '1'
+           AND t1.id = #{storefontProductId}
+    </select>
+    <select  id="getGoodsListByStorefontId" resultType="com.dangjia.acg.modle.product.BasicsGoods">
+        SELECT
+          t2.id,
+          t2.name,
+          t1.sell_price price
+        FROM
+            dj_basics_product_template t,
+            dj_basics_storefront_product t1,
+            dj_basics_goods  t2
+        WHERE
+            t.id = t1.prod_template_id
+        AND t1.storefront_id = #{storefontId}
+        and t2.category_id = #{categoryId}
+        group by t2.name
+    </select>
+
+    <select  id="getproductTempListByStorefontId" resultType="com.dangjia.acg.modle.product.DjBasicsProductTemplate">
+        SELECT
+            t1.id,
+            t.name,
+            t1.sell_price price
+        FROM
+            dj_basics_product_template t,
+            dj_basics_storefront_product t1
+        WHERE
+            t.id = t1.prod_template_id
+        AND t1.storefront_id = #{storefontId}
+        and t.goods_id = #{goodsId}
+        group by t.name
+    </select>
 </mapper>

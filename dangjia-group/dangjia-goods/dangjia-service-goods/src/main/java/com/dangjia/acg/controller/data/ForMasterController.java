@@ -6,6 +6,7 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.actuary.BudgetLabelDTO;
 import com.dangjia.acg.dto.actuary.BudgetLabelGoodsDTO;
 import com.dangjia.acg.dto.product.ProductWorkerDTO;
+import com.dangjia.acg.dto.product.StorefontInfoDTO;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.modle.basics.Technology;
@@ -16,9 +17,12 @@ import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
 import com.dangjia.acg.service.data.ForMasterService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.xml.ws.Response;
 import java.util.List;
+import java.util.Map;
 
 /**
  * author: Ronalcheng
@@ -167,5 +171,16 @@ public class ForMasterController implements ForMasterAPI {
     @ApiMethod
     public  List<BudgetLabelGoodsDTO> queryBudgetLabelGoods(String houseId, String workerTypeId, String cityId){
         return forMasterService.queryBudgetLabelGoods(houseId,workerTypeId);
+    }
+
+    @Override
+    @ApiMethod
+    public StorefontInfoDTO getStroreProductInfo(String cityId, String storefontId, String productId){
+        return forMasterService.getStroreProductInfo(storefontId,productId);
+    }
+    @Override
+    @ApiMethod
+    public ServerResponse getproductTempListByStorefontId(String cityId, String storefontId, String goodsId){
+        return forMasterService.getproductTempListByStorefontId(storefontId,goodsId);
     }
 }

@@ -33,6 +33,16 @@ public class ServiceTypeService {
      * @param id
      * @return
      */
+    public ServiceType getServiceTypeById( String id) {
+         return iServiceTypeMapper.selectByPrimaryKey(id);
+
+    }
+
+    /**
+     * 根据ID查询服务详情
+     * @param id
+     * @return
+     */
     public ServerResponse selectServiceTypeById( String id) {
         try {
             ServiceType serviceType=iServiceTypeMapper.selectByPrimaryKey(id);

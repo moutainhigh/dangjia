@@ -55,7 +55,7 @@ public class HouseController implements HouseAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse setStartHouse(String userToken, String cityId, Integer houseType, Integer drawings,
+    public ServerResponse setStartHouse(String userToken, String cityId, String houseType, Integer drawings,
                                         String latitude, String longitude, String address, String name) {
         return houseService.setStartHouse(userToken, cityId, houseType, drawings, latitude, longitude, address, name);
     }
@@ -197,7 +197,7 @@ public class HouseController implements HouseAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getReferenceBudget(HttpServletRequest request, String cityId, String villageId, Double square, Integer houseType) {
+    public ServerResponse getReferenceBudget(HttpServletRequest request, String cityId, String villageId, Double square, String houseType) {
         if (square == null) {
             square = 15d;
         }

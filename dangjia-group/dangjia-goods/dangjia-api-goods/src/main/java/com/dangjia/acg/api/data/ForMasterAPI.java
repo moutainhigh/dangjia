@@ -4,6 +4,7 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.actuary.BudgetLabelDTO;
 import com.dangjia.acg.dto.actuary.BudgetLabelGoodsDTO;
 import com.dangjia.acg.dto.product.ProductWorkerDTO;
+import com.dangjia.acg.dto.product.StorefontInfoDTO;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.modle.basics.Technology;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * author: Ronalcheng
@@ -144,4 +146,17 @@ public interface ForMasterAPI {
     @PostMapping("/data/budget/label/goods")
     @ApiOperation(value = "查询工种材料未支付所有商品", notes = "查询工种材料未支付所有商品")
     List<BudgetLabelGoodsDTO> queryBudgetLabelGoods(@RequestParam("houseId") String houseId, @RequestParam("workerTypeId") String workerTypeId, @RequestParam("cityId") String cityId);
+
+    @PostMapping("/data/house/getStroreProductInfo")
+    @ApiOperation(value = "获取商品对应的基本信息及对应的货品，商品列表", notes = "获取商品对应的基本信息及对应的货品，商品列表")
+    StorefontInfoDTO getStroreProductInfo(@RequestParam("cityId") String cityId,
+                                          @RequestParam("storefontId") String storefontId,
+                                          @RequestParam("productId") String productId);
+
+    //
+    @PostMapping("/data/house/getproductTempListByStorefontId")
+    @ApiOperation(value = "查询当前店铺下对应货品下的所有商品", notes = "查询当前店铺下对应货品下的所有商品列表")
+    ServerResponse getproductTempListByStorefontId(@RequestParam("cityId") String cityId,
+                                                   @RequestParam("storefontId") String storefontId,
+                                                   @RequestParam("goodsId") String goodsId);
 }

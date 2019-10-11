@@ -2,6 +2,7 @@ package com.dangjia.acg.api.config;
 
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.config.ServiceType;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -18,6 +19,16 @@ import javax.servlet.http.HttpServletRequest;
 @FeignClient("dangjia-service-goods")
 public interface ServiceTypeAPI {
 
+    /**
+     * 根据ID找对应配置类型
+     *
+     * @param id
+     * @return
+     */
+    @PostMapping("/web/config/serviceType/getServiceTypeById")
+    @ApiOperation(value = "根据ID查询对应的装修类型", notes = "根据ID查询对应的装修类型")
+    ServiceType getServiceTypeById(@RequestParam("cityId") String cityId,
+                                      @RequestParam("id") String id);
     /**
      * 根据id找到服务类型
      *

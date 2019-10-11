@@ -4,6 +4,7 @@ import com.dangjia.acg.api.config.ServiceTypeAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.config.ServiceType;
 import com.dangjia.acg.service.config.ServiceTypeService;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,16 @@ public class ServiceTypeController implements ServiceTypeAPI {
     private ServiceTypeService serviceTypeService;
 
 
+    /**
+     * 根据ID查询服务详情
+     * @param id
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServiceType getServiceTypeById(String cityId, String id) {
+        return serviceTypeService.getServiceTypeById(id);
+    }
     /**
      * 根据ID查询服务详情
      * @param request

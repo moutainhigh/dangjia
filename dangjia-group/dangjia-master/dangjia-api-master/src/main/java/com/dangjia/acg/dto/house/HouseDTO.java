@@ -1,6 +1,9 @@
 package com.dangjia.acg.dto.house;
 
+import com.alipay.api.domain.OrderDetail;
 import lombok.Data;
+
+import java.util.List;
 
 /**
  * author: Ronalcheng
@@ -25,7 +28,13 @@ public class HouseDTO {
     private String style;//风格
     private String styleId;//风格Id
     private String workDepositId;//结算比例ID
-    private int houseType;//房子类型 0：新房；1：老房
+    private String houseType;//房子类型 0：新房；1：老房
     private int drawings;//有无图纸
     private int decorationType;//装修类型:1远程设计，2自带设计
+
+    /**
+     * //id 订单详情ID，orderId订单ID，productId商品ID，purchasePrice购买单价，purchaseNumber购买数量(面积），totalPurchasePrice购买总价,updateBy修改人
+     *
+     */
+    private List orderDetailList;
 }

@@ -3,7 +3,9 @@ package com.dangjia.acg.service.house;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alipay.api.domain.OrderDetail;
 import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
+import com.dangjia.acg.api.config.ServiceTypeAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.auth.config.RedisSessionDAO;
 import com.dangjia.acg.common.constants.Constants;
@@ -15,12 +17,14 @@ import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.BaseEntity;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.HouseFlowDTO;
 import com.dangjia.acg.dto.house.*;
+import com.dangjia.acg.dto.product.StorefontInfoDTO;
 import com.dangjia.acg.dto.repair.HouseProfitSummaryDTO;
 import com.dangjia.acg.dto.sale.royalty.DjAreaMatchDTO;
 import com.dangjia.acg.dto.sale.store.OrderStoreDTO;
@@ -42,6 +46,7 @@ import com.dangjia.acg.mapper.store.IStoreUserMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.clue.Clue;
+import com.dangjia.acg.modle.config.ServiceType;
 import com.dangjia.acg.modle.core.*;
 import com.dangjia.acg.modle.house.*;
 import com.dangjia.acg.modle.matter.RenovationManual;
@@ -51,6 +56,8 @@ import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Customer;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberCity;
+import com.dangjia.acg.modle.order.DjOrder;
+import com.dangjia.acg.modle.order.DjOrderDetail;
 import com.dangjia.acg.modle.other.City;
 import com.dangjia.acg.modle.other.WorkDeposit;
 import com.dangjia.acg.modle.repair.ChangeOrder;
@@ -123,6 +130,8 @@ public class HouseService {
     private IHouseFlowApplyImageMapper houseFlowApplyImageMapper;
     @Autowired
     private ForMasterAPI forMasterAPI;
+    @Autowired
+    private ServiceTypeAPI serviceTypeAPI;
     @Autowired
     private IHouseWorkerOrderMapper houseWorkerOrderMapper;
     @Autowired
@@ -325,6 +334,21 @@ public class HouseService {
             if (house != null)
                 houseDTO.setReferHouseName(house.getHouseName());
         }
+        //查询当前房子下面对应的订单详情
+        List<DjOrderDetail> djOrderDetailList=iHouseMapper.getOrderDetailInfoList(houseId);
+        List<Map<String,Object>> orderDetailList=new ArrayList<Map<String,Object>>();
+        if(djOrderDetailList!=null&&djOrderDetailList.size()>0){
+            //查找对应的可选择的货品，商品列表
+            for (DjOrderDetail djOrderDetail : djOrderDetailList) {
+                Map orderDetailMap= BeanUtils.beanToMap(djOrderDetail);
+                StorefontInfoDTO storefontInfoDTO = forMasterAPI.getStroreProductInfo(houseDTO.getCityId(),djOrderDetail.getStorefontId(),djOrderDetail.getProductId());
+                orderDetailMap.putAll(BeanUtils.beanToMap(storefontInfoDTO));
+                orderDetailList.add(orderDetailMap);
+            }
+
+        }
+        houseDTO.setOrderDetailList(orderDetailList);//增加房子订单详情商品的返回
+
         return ServerResponse.createBySuccess("查询成功", houseDTO);
     }
 
@@ -611,8 +635,30 @@ public class HouseService {
         } catch (Exception e) {
             System.out.println("建群失败，异常：" + e.getMessage());
         }
+        //修改商品3.0改版后，确认下单需修改对应的订单信息
+        updateOrderDetailProductInfo(houseDTO.getOrderDetailList());
+
         return ServerResponse.createBySuccessMessage("操作成功");
     }
+
+    /**
+     * 修改商品3.0改版后，确认下单需修改对应的订单信息
+     * @param orderDetailList
+     */
+    private void updateOrderDetailProductInfo(List orderDetailList){
+        //商品3.0修改对应业主下单后的订单信息
+        String orderId="";
+        if(orderDetailList!=null&&orderDetailList.size()>0){
+            for(int i=0;i<orderDetailList.size();i++){
+                Map orderMap=(Map)orderDetailList.get(i);
+                DjOrderDetail orderDetail=BeanUtils.mapToBean(DjOrderDetail.class,orderMap);
+                orderId=orderDetail.getOrderId();
+               iHouseMapper.updateOrderDetail(orderDetail);
+            }
+            iHouseMapper.updateOrder(orderId);
+        }
+    }
+
 
 
     /**
@@ -1523,7 +1569,7 @@ public class HouseService {
     /**
      * APP开始装修
      */
-    public ServerResponse setStartHouse(String userToken, String cityId, Integer houseType, Integer drawings,
+    public ServerResponse setStartHouse(String userToken, String cityId, String houseType, Integer drawings,
                                         String latitude, String longitude, String address, String name) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
@@ -1798,6 +1844,50 @@ public class HouseService {
                 int websiteCount= websiteVisitMapper.selectCountByExample(example);
                 houseListDTO.setWebsiteCount(websiteCount);
                 houseListDTO.setAddress(houseListDTO.getHouseName());
+            }
+            pageResult.setList(houseList);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    /**
+     * 房子装修列表(商品3.0改版新查询）
+     */
+    public ServerResponse getHouseList(PageDTO pageDTO, String userId, String cityKey, Integer visitState, String startDate, String endDate, String searchKey, String orderBy, String memberId) {
+        try {
+            userId = iStoreUserMapper.getVisitUser(userId);
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            if (!CommonUtil.isEmpty(startDate) && !CommonUtil.isEmpty(endDate)) {
+                if (startDate.equals(endDate)) {
+                    startDate = startDate + " " + "00:00:00";
+                    endDate = endDate + " " + "23:59:59";
+                }
+            }
+            List<HouseListDTO> houseList = iHouseMapper.getHouseList(cityKey, userId, memberId, visitState, startDate, endDate, orderBy, searchKey);
+            if (houseList.size() <= 0) {
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode()
+                        , "查无数据");
+            }
+            PageInfo pageResult = new PageInfo(houseList);
+            for (HouseListDTO houseListDTO : houseList) {
+                Example example = new Example(WebsiteVisit.class);
+                example.createCriteria().andEqualTo(WebsiteVisit.ROUTE,houseListDTO.getHouseId());
+                int websiteCount= websiteVisitMapper.selectCountByExample(example);
+                houseListDTO.setWebsiteCount(websiteCount);
+                houseListDTO.setAddress(houseListDTO.getHouseName());
+                //查询对应的订单表及状态----商品3.0增加
+                DjOrder djorder=iHouseMapper.getOrderInfo(houseListDTO.getHouseId());
+                if(djorder!=null&&StringUtils.isNotBlank(djorder.getId())){
+                    houseListDTO.setOrderId(djorder.getId());
+                }
+
+                ServiceType serviceType = serviceTypeAPI.getServiceTypeById(houseListDTO.getCityId(),houseListDTO.getHouseType());
+                if(serviceType!=null&&StringUtils.isNotBlank(serviceType.getName())){
+                    houseListDTO.setHouseTypeName(serviceType.getName());
+                }
             }
             pageResult.setList(houseList);
             return ServerResponse.createBySuccess("查询成功", pageResult);
@@ -2351,7 +2441,7 @@ public class HouseService {
      *
      * @return
      */
-    public ServerResponse getReferenceBudget(HttpServletRequest request, String cityId, String villageId, Double minSquare, Double maxSquare, Integer houseType) {
+    public ServerResponse getReferenceBudget(HttpServletRequest request, String cityId, String villageId, Double minSquare, Double maxSquare, String houseType) {
         House house = null;
         List<House> listHouse = iHouseMapper.getReferenceBudget(cityId, villageId, houseType, minSquare, maxSquare);
         if (listHouse.size() > 0) {//根据条件查询所选小区总价最少的房子

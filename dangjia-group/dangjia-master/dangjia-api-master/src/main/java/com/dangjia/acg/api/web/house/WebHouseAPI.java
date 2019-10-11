@@ -32,6 +32,17 @@ public interface WebHouseAPI {
                            @RequestParam("orderBy") String orderBy,
                            @RequestParam("memberId") String memberId);
 
+    @PostMapping("web/house/getHouseList")
+    @ApiOperation(value = "装修列表(新）", notes = "装修列表（新）")
+    ServerResponse getHouseList(@RequestParam("request") HttpServletRequest request,
+                           @RequestParam("pageDTO") PageDTO pageDTO,
+                           @RequestParam("visitState") Integer visitState,
+                           @RequestParam("startDate") String startDate,
+                           @RequestParam("endDate") String endDate,
+                           @RequestParam("searchKey") String searchKey,
+                           @RequestParam("orderBy") String orderBy,
+                           @RequestParam("memberId") String memberId);
+
 
     @PostMapping("web/house/startWorkPage")
     @ApiOperation(value = "确认开工页面", notes = "确认开工页面")
