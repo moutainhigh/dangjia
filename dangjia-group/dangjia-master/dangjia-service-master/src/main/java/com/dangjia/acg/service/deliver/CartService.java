@@ -76,7 +76,7 @@ public class CartService {
      * @return
      */
     public ServerResponse setCart(HttpServletRequest request, String userToken, Cart cart) {
-        request.setAttribute(Constants.CITY_ID, request.getParameter(Constants.CITY_ID));
+        House house = iHouseMapper.selectByPrimaryKey(cart.getHouseId());
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -98,10 +98,10 @@ public class CartService {
             cartMapper.updateByPrimaryKeySelective(cart1);
         } else {
             if (cart.getShopCount() > 0) {
-                ServerResponse serverResponse = productAPI.getProductById(request.getParameter(Constants.CITY_ID), cart.getProductId());
+                ServerResponse serverResponse = productAPI.getProductById(house.getCityId(), cart.getProductId());
                 if (serverResponse != null && serverResponse.getResultObj() != null) {
                     Product product = JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), Product.class);
-                    Goods goods = forMasterAPI.getGoods(request.getParameter(Constants.CITY_ID), product.getGoodsId());
+                    Goods goods = forMasterAPI.getGoods(house.getCityId(), product.getGoodsId());
                     cart.setProductSn(product.getProductSn());
                     cart.setProductName(product.getName());
                     cart.setMemberId(operator.getId());
@@ -110,7 +110,7 @@ public class CartService {
                     cart.setProductType(goods.getType());
                     cart.setUnitName(product.getUnitName());
                     cart.setCategoryId(product.getCategoryId());
-                    cart.setCityId(request.getParameter(Constants.CITY_ID));
+                    cart.setCityId(house.getCityId());
                     cartMapper.insert(cart);
                 }
             }
@@ -169,7 +169,7 @@ public class CartService {
         List<Map> listMap = new ArrayList<>();
         for (Cart cart1 : list) {
             Map map = BeanUtils.beanToMap(cart1);
-            ServerResponse serverResponse = productAPI.getProductById(request.getParameter(Constants.CITY_ID), cart.getProductId());
+            ServerResponse serverResponse = productAPI.getProductById(house.getCityId(), cart.getProductId());
             if (serverResponse != null && serverResponse.getResultObj() != null) {
                 Product product = JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), Product.class);
                 if (product.getType() == 0 || product.getMaket() == 0) {
@@ -193,7 +193,7 @@ public class CartService {
      */
     public ServerResponse askAndQuit(HttpServletRequest request, String userToken, PageDTO pageDTO, String houseId, String categoryId, String name) {
         try {
-            String cityId = request.getParameter(Constants.CITY_ID);
+            House house = iHouseMapper.selectByPrimaryKey(houseId);
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
@@ -219,7 +219,7 @@ public class CartService {
                 productIdArr[i] = warehouseList.get(i).getProductId();
                 warehouseMap.put(warehouseList.get(i).getProductId(), warehouseList.get(i));
             }
-            PageInfo pageResult = productAPI.queryProductData(cityId, pageDTO.getPageNum(), pageDTO.getPageSize(), name, categoryId, productType, productIdArr);
+            PageInfo pageResult = productAPI.queryProductData(house.getCityId(), pageDTO.getPageNum(), pageDTO.getPageSize(), name, categoryId, productType, productIdArr);
             List<JSONObject> products = pageResult.getList();
             for (JSONObject product : products) {
                 WarehouseDTO warehouseDTO = new WarehouseDTO();
@@ -234,7 +234,7 @@ public class CartService {
                 warehouseDTO.setImage(address + product.get(Product.IMAGE));
                 Warehouse warehouse = warehouseMap.get(warehouseDTO.getProductId());
                 if (warehouse != null) {
-                    Goods goods = forMasterAPI.getGoods(cityId, String.valueOf(product.get(Product.GOODS_ID)));
+                    Goods goods = forMasterAPI.getGoods(house.getCityId(), String.valueOf(product.get(Product.GOODS_ID)));
                     if (goods != null) {
                         warehouseDTO.setSales(goods.getSales());
                     }
@@ -253,7 +253,7 @@ public class CartService {
                     warehouseDTO.setBackTime(warehouse.getBackTime());
                     warehouseDTOS.add(warehouseDTO);
                 } else {
-                    String unit = forMasterAPI.getUnitName(cityId, String.valueOf(product.get(Product.CONVERT_UNIT)));
+                    String unit = forMasterAPI.getUnitName(house.getCityId(), String.valueOf(product.get(Product.CONVERT_UNIT)));
                     warehouseDTO.setUnitName(unit);
                     warehouseDTO.setShopCount(0.0);
                     warehouseDTO.setRepairCount(0.0);
@@ -279,8 +279,7 @@ public class CartService {
 
     //查询分类
     public ServerResponse queryGoodsCategory(HttpServletRequest request, String userToken, String houseId) {
-        String cityId = request.getParameter(Constants.CITY_ID);
-        request.setAttribute(Constants.CITY_ID, cityId);
+        House house = iHouseMapper.selectByPrimaryKey(houseId);
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -297,9 +296,9 @@ public class CartService {
         List<Map<String, Object>> mapList = new ArrayList<>();
         Map<String, Object> mapTop = new HashMap<>();//记录以及添加的顶级分类
         for (String categoryId : orderCategory) {
-            GoodsCategory goodsCategory = goodsCategoryAPI.getGoodsCategory(cityId, categoryId);
+            GoodsCategory goodsCategory = goodsCategoryAPI.getGoodsCategory(house.getCityId(), categoryId);
             if (goodsCategory != null) {
-                GoodsCategory goodsCategorytop = goodsCategoryAPI.getGoodsCategory(cityId, goodsCategory.getParentTop());
+                GoodsCategory goodsCategorytop = goodsCategoryAPI.getGoodsCategory(house.getCityId(), goodsCategory.getParentTop());
                 if (goodsCategorytop != null) {
                     goodsCategory = goodsCategorytop;
                 }
