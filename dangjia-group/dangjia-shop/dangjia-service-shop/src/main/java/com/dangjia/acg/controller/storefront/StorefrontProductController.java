@@ -19,4 +19,34 @@ public class StorefrontProductController implements StorefrontProductAPI {
     public ServerResponse queryStorefrontProductByType(String userToken, Storefront storefront) {
         return null;
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setSpStatusById(String userToken, String id, String isShelfStatus) {
+        return null;
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setAllStoreProductByIsShelfStatus(String userToken, String id, String isShelfStatus) {
+        return null;
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse delStorefrontProductById(String userToken, String id) {
+        return null;
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse updateStorefrontProductById(String userToken, String id) {
+        return null;
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryStorefrontProductBykey(String userToken, String key) {
+        return null;
+    }
 }
