@@ -209,4 +209,22 @@ public interface DjBasicsProductAPI {
                                                  @RequestParam("productId") String productId);
 
 
+
+
+    @PostMapping("/web/upperAndLowerRack")
+    @ApiOperation(value = "店铺商品上下架", notes = "店铺商品上下架")
+    ServerResponse upperAndLowerRack(@RequestParam("userToken") String userToken);
+
+    @PostMapping("/web/allUpperAndLowerRack")
+    @ApiOperation(value = "店铺批量上架", notes = "店铺商品上下架")
+    ServerResponse allUpperAndLowerRack(@RequestParam("userToken") String userToken);
+
+    @PostMapping("/web/delStorefrontProduct")
+    @ApiOperation(value = "店铺商品删除", notes = "店铺商品删除")
+    ServerResponse delStorefrontProduct(@RequestParam("userToken") String userToken);
+
+    @PostMapping("/web/editStorefrontProduct")
+    @ApiOperation(value = "编辑店铺商品", notes = "编辑店铺商品")
+    ServerResponse editStorefrontProduct(@RequestParam("userToken") String userToken);
+
 }
