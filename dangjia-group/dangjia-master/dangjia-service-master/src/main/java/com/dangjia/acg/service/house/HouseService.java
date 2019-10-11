@@ -194,7 +194,8 @@ public class HouseService {
         Example example = new Example(House.class);
         example.createCriteria()
                 .andEqualTo(House.MEMBER_ID, member.getId())
-                .andEqualTo(House.DATA_STATUS, 0);
+//                .andEqualTo(House.DATA_STATUS, 0)
+        ;
         List<House> houseList = iHouseMapper.selectByExample(example);
         for (House house : houseList) {
             if (house.getId().equals(houseId)) {
@@ -386,7 +387,7 @@ public class HouseService {
                 }
                 srcHouse.setCustomSort(house.getCustomSort());
             }
-            if(!CommonUtil.isEmpty(house.getCustomEdit())){
+            if (!CommonUtil.isEmpty(house.getCustomEdit())) {
                 srcHouse.setDataStatus(0);
             }
             srcHouse.setOptionalLabel(house.getOptionalLabel());
@@ -1795,7 +1796,7 @@ public class HouseService {
         example = new Example(Customer.class);
         example.createCriteria().andEqualTo(Customer.MEMBER_ID, member.getId())
                 .andIsNull(Customer.USER_ID);
-        List<Customer> customerList=iCustomerMapper.selectByExample(example);
+        List<Customer> customerList = iCustomerMapper.selectByExample(example);
         if (customerList.size() > 0) {
             List<OrderStoreDTO> orderStore = iStoreMapper.getOrderStore(latitude, longitude, null);
             clueMapper.setDistribution(orderStore.get(0).getStoreId(), member.getId(), new Date());
@@ -1946,8 +1947,8 @@ public class HouseService {
             PageInfo pageResult = new PageInfo(houseList);
             for (HouseListDTO houseListDTO : houseList) {
                 Example example = new Example(WebsiteVisit.class);
-                example.createCriteria().andEqualTo(WebsiteVisit.ROUTE,houseListDTO.getHouseId());
-                int websiteCount= websiteVisitMapper.selectCountByExample(example);
+                example.createCriteria().andEqualTo(WebsiteVisit.ROUTE, houseListDTO.getHouseId());
+                int websiteCount = websiteVisitMapper.selectCountByExample(example);
                 houseListDTO.setWebsiteCount(websiteCount);
                 houseListDTO.setAddress(houseListDTO.getHouseName());
             }
@@ -2244,9 +2245,9 @@ public class HouseService {
         }
 
         //展示动态类别为： 每日开工，每日完工，管家巡查，阶段完工，管家验收阶段完工，整体完工，管家整体完工验收，工艺节点展示；
-        String applyType="0,1,2,4,5";
+        String applyType = "0,1,2,4,5";
         String[] applyTypes = applyType.split(",");
-        criteria.andIn(HouseConstructionRecord.APPLY_TYPE,Arrays.asList(applyTypes));
+        criteria.andIn(HouseConstructionRecord.APPLY_TYPE, Arrays.asList(applyTypes));
         example.orderBy(HouseConstructionRecord.CREATE_DATE).desc();
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<HouseConstructionRecord> hfaList = houseConstructionRecordMapper.selectByExample(example);
@@ -2720,7 +2721,7 @@ public class HouseService {
         try {
             String cityId = request.getParameter(Constants.CITY_ID);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<DesignDTO> houseList = iHouseMapper.getHouseProfitList(cityId,villageId, visitState, searchKey);
+            List<DesignDTO> houseList = iHouseMapper.getHouseProfitList(cityId, villageId, visitState, searchKey);
             if (houseList.size() <= 0) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode()
                         , "查无数据");
