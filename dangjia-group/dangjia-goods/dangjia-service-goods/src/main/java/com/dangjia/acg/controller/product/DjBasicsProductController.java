@@ -311,26 +311,4 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
         return djBasicsProductService.queryProductLabelsByProductId(productId);
     }
 
-
-
-    @Override
-    @ApiMethod
-    public ServerResponse upperAndLowerRack(String userToken) {
-        return null;
-    }
-    @Override
-    @ApiMethod
-    public ServerResponse allUpperAndLowerRack(String userToken) {
-        return null;
-    }
-    @Override
-    @ApiMethod
-    public ServerResponse delStorefrontProduct(String userToken) {
-        return null;
-    }
-    @Override
-    @ApiMethod
-    public ServerResponse editStorefrontProduct(String userToken) {
-        return null;
-    }
 }

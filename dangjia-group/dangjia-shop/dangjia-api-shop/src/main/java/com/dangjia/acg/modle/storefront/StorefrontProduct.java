@@ -37,13 +37,13 @@ public class StorefrontProduct extends BaseEntity {
     /**
      * 上传商品图片
      */
-    @Column(name = "goods_img")
-    private String goodsImg;
+    @Column(name = "image")
+    private String image;
     /**
      * 上传商品详情图
      */
-    @Column(name = "goods_detail_img")
-    private String goodsDetailImg;
+    @Column(name = "detail_image")
+    private String detailImage;
 
     /**
      * 营销名称

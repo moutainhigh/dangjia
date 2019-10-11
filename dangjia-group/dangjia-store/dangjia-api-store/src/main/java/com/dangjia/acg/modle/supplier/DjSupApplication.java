@@ -49,4 +49,6 @@ public class DjSupApplication extends BaseEntity {
     @ApiModelProperty("合同地址")
     private String contract;
 
+
+
 }
