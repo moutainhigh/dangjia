@@ -23,15 +23,24 @@ import java.util.List;
 public interface DjSupApplicationAPI {
 
     @PostMapping("/sup/djSupApplication/queryDjSupApplicationByShopID")
-    @ApiOperation(value = "根据店铺ID查询申请供应商列表", notes = "根据店铺ID查询申请供应商列表")
+    @ApiOperation(value = "店铺-审核供应商列表", notes = "店铺-审核供应商列表")
     ServerResponse queryDjSupApplicationByShopID(@RequestParam("request") HttpServletRequest request,
-                                                 @RequestParam("pageDTO") PageDTO pageDTO, @RequestParam("shopId") String shopId);
+                                                 @RequestParam("pageDTO") PageDTO pageDTO,
+                                                 @RequestParam("keyWord") String keyWord,
+                                                 @RequestParam("applicationStatus") String applicationStatus,
+                                                 @RequestParam("shopId") String shopId);
+
+    @PostMapping("/sup/djSupApplication/queryDjSupApplicationProductByShopID")
+    @ApiOperation(value = "店铺-审核供货列表", notes = "店铺-审核供货列表")
+    ServerResponse queryDjSupApplicationProductByShopID(@RequestParam("request") HttpServletRequest request,
+                                                 @RequestParam("pageDTO") PageDTO pageDTO,
+                                                 @RequestParam("keyWord") String keyWord,
+                                                 @RequestParam("shopId") String shopId);
 
     @PostMapping("/supplier/djSupplier/insertSupplierApplicationShop ")
     @ApiOperation(value = "供应商申请供应店铺", notes = "供应商申请供应店铺")
     ServerResponse insertSupplierApplicationShop(@RequestParam("request") HttpServletRequest request,
                                                  @RequestParam("supId") String supId,
                                                  @RequestParam("shopId") String shopId);
-
 
 }
