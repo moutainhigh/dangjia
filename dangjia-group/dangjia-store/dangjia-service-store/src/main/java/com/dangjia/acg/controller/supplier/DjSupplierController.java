@@ -2,6 +2,7 @@ package com.dangjia.acg.controller.supplier;
 
 import com.dangjia.acg.api.supplier.DjSupplierAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.dangjia.acg.service.supplier.DjSupplierServices;
@@ -27,5 +28,17 @@ public class DjSupplierController implements DjSupplierAPI {
     @ApiMethod
     public ServerResponse updateBasicInformation(HttpServletRequest request, DjSupplier djSupplier) {
         return djSupplierServices.updateBasicInformation(djSupplier);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse querySupplyList(HttpServletRequest request, PageDTO pageDTO, String supId, String searchKey) {
+        return djSupplierServices.querySupplyList(pageDTO, supId, searchKey);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse querySupplierGoods(HttpServletRequest request, PageDTO pageDTO, String supId) {
+        return null;
     }
 }

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.supplier.DjSupplierMapper">
+
+
+    <select id="querySupplyList" resultType="com.dangjia.acg.modle.storefront.Storefront">
+        SELECT
+          b.id,
+          b.create_date as createDate,
+          b.modify_date as modifyDate,
+          b.data_status as dataStatus,
+          b.user_id as userId,
+          b.city_id as cityId,
+          b.storefront_name as storefrontName,
+          b.storefront_address as storefrontAddress,
+          b.storefront_desc as storefrontDesc,
+          b.storefront_logo as storefrontLogo,
+          b.storekeeper_name as storekeeperName,
+          b.contact,
+          b.email
+        FROM
+            dj_sup_application a
+        INNER JOIN dj_basics_storefront b ON a.shop_id = b.id
+        WHERE
+            a.sup_id =#{supId}
+        AND a.application_status = 1
+        AND a.data_status = 0
+        AND b.data_status = 0
+        <if test="null!=searchKey and ''!=searchKey">
+            AND (
+            b.storefront_name LIKE CONCAT('%',#{searchKey},'%') or
+            b.contact LIKE CONCAT('%',#{searchKey},'%')
+            )
+        </if>
+    </select>
+
+</mapper>

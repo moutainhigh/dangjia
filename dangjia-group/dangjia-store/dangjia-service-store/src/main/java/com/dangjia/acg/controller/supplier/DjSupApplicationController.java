@@ -4,13 +4,11 @@ import com.dangjia.acg.api.supplier.DjSupApplicationAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.modle.supplier.DjSupApplication;
 import com.dangjia.acg.service.supplier.DjSupApplicationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 
 
 /**
@@ -27,15 +25,14 @@ public class DjSupApplicationController implements DjSupApplicationAPI {
 
     @Override
     @ApiMethod
-    public List<DjSupApplication> queryDjSupApplicationBySupId(String supId) {
-        return djSupApplicationService.queryDjSupApplicationBySupId(supId);
-    }
-
-    @Override
-    @ApiMethod
     public ServerResponse queryDjSupApplicationByShopID(HttpServletRequest request, PageDTO pageDTO, String shopId) {
         return djSupApplicationService.queryDjSupApplicationByShopID(pageDTO,shopId);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse insertSupplierApplicationShop(HttpServletRequest request, String supId, String shopId) {
+        return djSupApplicationService.insertSupplierApplicationShop(supId,shopId);
+    }
 
 }
