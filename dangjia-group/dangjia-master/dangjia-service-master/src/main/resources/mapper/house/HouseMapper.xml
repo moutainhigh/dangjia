@@ -116,11 +116,11 @@
         <if test="designerType > 0 and workerKey!=null and workerKey!=''">
             AND CONCAT(gr.name,gr.mobile) like CONCAT('%',#{workerKey},'%')
         </if>
-        <if test="dataStatus!=null and dataStatus!=''">
-            AND house.data_status=#{dataStatus}
-        </if>
         <if test="dataStatus == 1">
-            AND house.visit_state=1
+            AND house.data_status=1 AND house.visit_state=1 and house.designer_ok != 3
+        </if>
+        <if test="dataStatus == 0">
+            AND house.data_status=0
         </if>
         <if test="designerType == 0">
             AND house.designer_ok =4
@@ -482,18 +482,21 @@
         <if test="budgetOk != 0 and workerKey!=null and workerKey!=''">
             AND CONCAT(gr.name,gr.mobile) like CONCAT('%',#{workerKey},'%')
         </if>
-        <if test="dataStatus!=null and dataStatus!=''">
-            AND h.data_status=#{dataStatus}
+        <if test="dataStatus == 1">
+            AND h.data_status=1  and h.budget_ok != 3 and h.budget_ok >0
+        </if>
+        <if test="dataStatus == 0">
+            AND h.data_status=0
         </if>
         <if test="cityId!=null and cityId!=''">
             and h.city_id = #{cityId}
         </if>
         <if test="budgetOk!=null and budgetOk!=''">
             <if test="budgetOk==1">
-                and (budget_ok =1 or budget_ok = 4)
+                and (h.budget_ok =1 or h.budget_ok = 4)
             </if>
             <if test="budgetOk!=1">
-                and budget_ok =#{budgetOk}
+                and h.budget_ok =#{budgetOk}
             </if>
         </if>
 

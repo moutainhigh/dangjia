@@ -1233,7 +1233,7 @@ public class MemberService {
         insuranceMoney = CommonUtil.isEmpty(insuranceMoney) ? "100" : insuranceMoney;
         Member operator = (Member) object;
         Example example = new Example(Insurance.class);
-        example.createCriteria().andEqualTo(Insurance.WORKER_ID, operator.getId());
+        example.createCriteria().andEqualTo(Insurance.WORKER_ID, operator.getId()).andIsNotNull(Insurance.END_DATE);
         example.orderBy(Insurance.END_DATE).desc();
         List<Insurance> insurances = insuranceMapper.selectByExample(example);
         example = new Example(Insurance.class);

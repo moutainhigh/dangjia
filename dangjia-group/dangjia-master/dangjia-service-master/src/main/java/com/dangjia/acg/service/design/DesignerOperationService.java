@@ -158,6 +158,7 @@ public class DesignerOperationService {
             return ServerResponse.createByErrorMessage("请上传平面图");
         }
         house.setDesignerOk(5);//平面图发给业主
+        house.setDataStatus(0);
         houseMapper.updateByPrimaryKeySelective(house);
         //app推送给业主
 
@@ -202,6 +203,7 @@ public class DesignerOperationService {
         } else {
             house.setDesignerOk(2);//施工图(其它图)发给业主
         }
+        house.setDataStatus(0);
         houseMapper.updateByPrimaryKeySelective(house);
         //app推送给业主
         HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(house.getId(), "1");
@@ -289,6 +291,7 @@ public class DesignerOperationService {
                     if (hwo != null) {
                         configMessageService.addConfigMessage(null, AppType.GONGJIANG, hwo.getWorkerId(), "0", "平面图已通过", String.format(DjConstants.PushMessage.PLANE_OK, house.getHouseName()), "");
                     }
+                    house.setDataStatus(0);
                     houseMapper.updateByPrimaryKeySelective(house);
                     return ServerResponse.createBySuccessMessage("操作成功");
                 } else if (type == 0) {//不通过
@@ -349,6 +352,7 @@ public class DesignerOperationService {
                     if (hwo != null) {
                         configMessageService.addConfigMessage(null, AppType.GONGJIANG, hwo.getWorkerId(), "0", "施工图已通过", String.format(DjConstants.PushMessage.CONSTRUCTION_OK, house.getHouseName()), "");
                     }
+                    house.setDataStatus(0);
                     houseMapper.updateByPrimaryKeySelective(house);
                     return ServerResponse.createBySuccessMessage("操作成功");
                 } else if (type == 0) {//不通过
@@ -509,6 +513,7 @@ public class DesignerOperationService {
                     }
                 }
                 house.setDesignerOk(9);
+                house.setDataStatus(0);
                 houseMapper.updateByPrimaryKeySelective(house);
                 //推送消息给业主已完成量房
                 configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(),

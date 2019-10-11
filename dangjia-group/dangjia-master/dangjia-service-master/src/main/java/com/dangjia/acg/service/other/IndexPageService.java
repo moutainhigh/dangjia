@@ -31,10 +31,12 @@ import com.dangjia.acg.modle.design.QuantityRoomImages;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.ModelingLayout;
 import com.dangjia.acg.modle.house.ModelingVillage;
+import com.dangjia.acg.modle.house.WebsiteVisit;
 import com.dangjia.acg.modle.label.OptionalLabel;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.design.DesignDataService;
+import com.dangjia.acg.service.house.HouseDistributionService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,6 +75,10 @@ public class IndexPageService {
     private IHouseFlowApplyImageMapper houseFlowApplyImageMapper;
     @Autowired
     private IHouseMapper iHouseMapper;
+    @Autowired
+    private HouseDistributionService houseDistributionService;
+
+
 
     /**
      * 根据城市，小区，最小最大面积查询房子
@@ -364,6 +370,10 @@ public class IndexPageService {
             }
             houseDetailsDTO.setDianList(dianList);
             houseDetailsDTO.setTotalPrice(house.getMoney());
+
+            WebsiteVisit websiteVisit=new WebsiteVisit();
+            websiteVisit.setRoute(houseId);
+            houseDistributionService.addWebsiteVisit(request,websiteVisit);
             return ServerResponse.createBySuccess("查询成功", houseDetailsDTO);
         } catch (Exception e) {
             e.printStackTrace();
