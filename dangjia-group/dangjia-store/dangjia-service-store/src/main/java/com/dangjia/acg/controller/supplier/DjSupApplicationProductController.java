@@ -5,6 +5,11 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.supplier.DjSupApplicationProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
+import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.service.supplier.DjSupApplicationProductService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -12,6 +17,27 @@ import javax.servlet.http.HttpServletRequest;
 @RestController
 public class DjSupApplicationProductController implements DjSupApplicationProductAPI {
 
+    @Autowired
+    private DjSupApplicationProductService djSupApplicationProductService;
+
+
+    @Override
+    @ApiMethod
+    public ServerResponse insertDjSupApplicationProduct(HttpServletRequest request, String jsonStr) {
+        return djSupApplicationProductService.insertDjSupApplicationProduct(jsonStr);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryHaveGoods(HttpServletRequest request, String supId, String shopId, PageDTO pageDTO) {
+        return djSupApplicationProductService.queryHaveGoods(supId, shopId, pageDTO);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse updateHaveGoods(HttpServletRequest request, String jsonStr) {
+        return null;
+    }
     @Autowired
     private DjSupApplicationProductService djSupApplicationProductService;
 

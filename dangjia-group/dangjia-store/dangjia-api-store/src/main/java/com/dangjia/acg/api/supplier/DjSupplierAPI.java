@@ -18,7 +18,7 @@ import javax.servlet.http.HttpServletRequest;
  * Time: 下午 2:03
  */
 @Api(description = "供应商管理接口")
-@FeignClient("dangjia-service-master")
+@FeignClient("dangjia-service-store")
 public interface DjSupplierAPI {
 
     @PostMapping("/supplier/djSupplier/updateBasicInformation ")
