@@ -20,4 +20,5 @@ public interface DjSupplierMapper extends Mapper<DjSupplier> {
 
     List<Storefront> querySupplyList(@Param("supId") String supId,@Param("searchKey") String searchKey);
     List<DjSupplierDTO>  queryDjSupplierByShopID(@Param("keyWord") String keyWord, @Param("applicationStatus") String applicationStatus, @Param("shopId") String shopId);
+    DjSupplierDTO  queryDJsupplierById( @Param("id") String id, @Param("shopId") String shopId);
 }

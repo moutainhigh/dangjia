@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.supplier;
 
+import cn.jiguang.common.utils.StringUtils;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -7,9 +8,11 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dto.supplier.DjSupSupplierProductDTO;
 import com.dangjia.acg.dto.supplier.DjSupplierDTO;
 import com.dangjia.acg.mapper.product.DjBasicsAttributeMapper;
+import com.dangjia.acg.mapper.supplier.DjSupApplicationMapper;
 import com.dangjia.acg.mapper.supplier.DjSupSupplierProductMapper;
 import com.dangjia.acg.mapper.supplier.DjSupplierMapper;
 import com.dangjia.acg.modle.storefront.Storefront;
+import com.dangjia.acg.modle.supplier.DjSupApplication;
 import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -36,6 +39,8 @@ public class DjSupplierServices {
     @Autowired
     private DjBasicsAttributeMapper djBasicsAttributeMapper;
 
+    @Autowired
+    private DjSupApplicationMapper djSupApplicationMapper ;
 
     /**
      * 供应商基础信息维护
@@ -122,6 +127,94 @@ public class DjSupplierServices {
             }
             PageInfo pageResult = new PageInfo(list);
             return ServerResponse.createBySuccess("查询成功", pageResult);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    /**
+     * 查询单个供应商申请详情
+     * @param request
+     * @param id
+     * @return
+     */
+    public ServerResponse getDjSupplierByID(HttpServletRequest request, String id,String shopId) {
+        try {
+            DjSupplierDTO djSupplierDTO=djSupplierMapper.queryDJsupplierById(id,shopId);
+            return ServerResponse.createBySuccess("查询成功", djSupplierDTO);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    /**
+     * 供应商申请通过
+     * @param request
+     * @param id
+     * @param applicationStatus
+     * @return
+     */
+    public ServerResponse setDjSupplierPass(HttpServletRequest request, String id, String applicationStatus) {
+        try {
+            if(StringUtils.isEmpty(applicationStatus))
+            {
+                return  ServerResponse.createBySuccessMessage("审核状态不能为空");
+            }
+            if(StringUtils.isEmpty(id))
+            {
+                return  ServerResponse.createBySuccessMessage("主键不能为空");
+            }
+            DjSupApplication djSupApplication=new DjSupApplication();
+            djSupApplication.setId(id);
+            djSupApplication.setApplicationStatus(applicationStatus);
+            int i=djSupApplicationMapper.updateByPrimaryKeySelective(djSupApplication);
+            if(i>0)
+            {
+               return  ServerResponse.createBySuccessMessage("修改成功");
+            }
+            else
+            {
+                return ServerResponse.createBySuccessMessage("没有修改");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    /**
+     * 驳回供应商申请
+     * @param request
+     * @param id
+     * @param applicationStatus
+     * @param failReason
+     * @return
+     */
+    public ServerResponse setDjSupplierReject(HttpServletRequest request, String id, String applicationStatus, String failReason) {
+        try {
+            if(StringUtils.isEmpty(failReason))
+            {
+                return  ServerResponse.createBySuccessMessage("驳回原因不能为空");
+            }
+            if(failReason.length()>20)
+            {
+                return  ServerResponse.createBySuccessMessage("驳回原因文字不能大于20字");
+            }
+            DjSupApplication djSupApplication=new DjSupApplication();
+            djSupApplication.setId(id);
+            djSupApplication.setApplicationStatus(applicationStatus);
+            djSupApplication.setFailReason(failReason);
+            int i=djSupApplicationMapper.updateByPrimaryKeySelective(djSupApplication);
+            if(i>0)
+            {
+                return  ServerResponse.createBySuccessMessage("修改成功");
+            }
+            else
+            {
+                return ServerResponse.createBySuccessMessage("没有修改");
+            }
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
