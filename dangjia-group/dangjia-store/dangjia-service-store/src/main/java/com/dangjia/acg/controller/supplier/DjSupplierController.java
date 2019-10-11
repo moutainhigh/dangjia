@@ -39,6 +39,6 @@ public class DjSupplierController implements DjSupplierAPI {
     @Override
     @ApiMethod
     public ServerResponse querySupplierGoods(HttpServletRequest request, PageDTO pageDTO, String supId) {
-        return null;
+        return djSupplierServices.querySupplierGoods(pageDTO,supId);
     }
 }

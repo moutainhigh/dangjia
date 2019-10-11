@@ -40,22 +40,28 @@ public class DjSupApplicationProduct extends BaseEntity {
     @ApiModelProperty("商品模板ID")
     private String productId;
 
+
+    @Column(name = "goods_id")
+    @Desc(value = "货品id")
+    @ApiModelProperty("货品id")
+    private String goodsId;
+
     @Column(name = "price")
     @Desc(value = "价格")
     @ApiModelProperty("价格")
-    private String price;
+    private Double price;
 
 
     @Column(name = "stock")
     @Desc(value = "库存")
     @ApiModelProperty("库存")
-    private String stock;
+    private Integer stock;
 
 
     @Column(name = "porterage")
     @Desc(value = "搬运费")
     @ApiModelProperty("搬运费")
-    private String porterage;
+    private Double porterage;
 
     @Column(name = "is_cartage_price")
     @Desc(value = "是否收取上楼费 0=否，1=是")

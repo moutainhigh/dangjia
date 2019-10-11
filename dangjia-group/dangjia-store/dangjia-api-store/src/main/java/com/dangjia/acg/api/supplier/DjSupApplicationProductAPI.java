@@ -42,4 +42,21 @@ public interface DjSupApplicationProductAPI {
                                                  @RequestParam("supId") String supId,
                                                  @RequestParam("shopId") String shopId);
 
+    @PostMapping("/supplier/djSupApplicationProduct/querySupplierGoods")
+    @ApiOperation(value = "供应商申请供应商品", notes = "供应商申请供应商品")
+    ServerResponse insertDjSupApplicationProduct(@RequestParam("request") HttpServletRequest request,
+                                                 @RequestParam("jsonStr") String jsonStr);
+
+    @PostMapping("/supplier/djSupApplicationProduct/queryHaveGoods")
+    @ApiOperation(value = "查询已供商品", notes = "查询已供商品")
+    ServerResponse queryHaveGoods(@RequestParam("request") HttpServletRequest request,
+                                  @RequestParam("supId") String supId,
+                                  @RequestParam("shopId") String shopId,
+                                  @RequestParam("pageDTO") PageDTO pageDTO);
+
+    @PostMapping("/supplier/djSupApplicationProduct/updateHaveGoods")
+    @ApiOperation(value = "编辑已供商品", notes = "编辑已供商品")
+    ServerResponse updateHaveGoods(@RequestParam("request") HttpServletRequest request,
+                                   @RequestParam("jsonStr") String jsonStr);
+
 }

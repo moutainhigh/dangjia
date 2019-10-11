@@ -4,6 +4,9 @@ import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.dto.supplier.DjSupSupplierProductDTO;
+import com.dangjia.acg.mapper.product.DjBasicsAttributeMapper;
+import com.dangjia.acg.mapper.supplier.DjSupSupplierProductMapper;
 import com.dangjia.acg.mapper.supplier.DjSupplierMapper;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.supplier.DjSupplier;
@@ -26,6 +29,10 @@ public class DjSupplierServices {
 
     @Autowired
     private DjSupplierMapper djSupplierMapper;
+    @Autowired
+    private DjSupSupplierProductMapper djSupSupplierProductMapper;
+    @Autowired
+    private DjBasicsAttributeMapper djBasicsAttributeMapper;
 
 
     /**
@@ -85,6 +92,21 @@ public class DjSupplierServices {
      * @return
      */
     public ServerResponse querySupplierGoods(PageDTO pageDTO, String supId) {
-        return null;
+        try {
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<DjSupSupplierProductDTO> djSupSupplierProductDTOS = djSupSupplierProductMapper.querySupplierGoods(supId);
+            djSupSupplierProductDTOS.forEach(djSupSupplierProductDTO -> {
+                String[] split = djSupSupplierProductDTO.getAttributeIdArr().split(",");
+                if(split.length>0)
+                    djSupSupplierProductDTO.setAttributeIdArr(djBasicsAttributeMapper.queryAttributeNameByIds(split));
+            });
+            PageInfo pageResult = new PageInfo(djSupSupplierProductDTOS);
+            if (djSupSupplierProductDTOS.size() <= 0)
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            return ServerResponse.createBySuccess("查询成功", pageResult);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
     }
 }
