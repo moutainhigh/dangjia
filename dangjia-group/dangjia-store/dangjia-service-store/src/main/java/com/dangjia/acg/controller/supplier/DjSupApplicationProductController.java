@@ -38,8 +38,6 @@ public class DjSupApplicationProductController implements DjSupApplicationProduc
     public ServerResponse updateHaveGoods(HttpServletRequest request, String jsonStr) {
         return null;
     }
-    @Autowired
-    private DjSupApplicationProductService djSupApplicationProductService;
 
     @Override
     @ApiMethod
