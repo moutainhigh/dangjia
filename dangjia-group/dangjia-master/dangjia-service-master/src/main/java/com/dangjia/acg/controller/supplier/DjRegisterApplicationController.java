@@ -34,4 +34,7 @@ public class DjRegisterApplicationController implements DjRegisterApplicationAPI
         return djSupplierServices.querySupAndStorefront(mobile, cityId);
     }
 
+    public ServerResponse checkSupAndStorefront(HttpServletRequest request, String registerId, Integer isAdopt, String departmentId, String jobId){
+        return djSupplierServices.checkSupAndStorefront(request, registerId,isAdopt,departmentId,jobId);
+    }
 }
