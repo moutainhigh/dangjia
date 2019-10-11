@@ -29,10 +29,16 @@ public class StorefrontProduct extends BaseEntity {
     private String prodTemplateId;
 
     /**
-     * 商品名称
+     * 货品ID
      */
-    @Column(name = "name")
-    private String name;
+    @Column(name = "goods_id")
+    private String goodsId;
+
+    /**
+     * 供应商id
+     */
+    @Column(name = "sup_id")
+    private String supId;
 
     /**
      * 上传商品图片
