@@ -5,6 +5,7 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dto.supplier.DjSupSupplierProductDTO;
+import com.dangjia.acg.dto.supplier.DjSupplierDTO;
 import com.dangjia.acg.mapper.product.DjBasicsAttributeMapper;
 import com.dangjia.acg.mapper.supplier.DjSupSupplierProductMapper;
 import com.dangjia.acg.mapper.supplier.DjSupplierMapper;
@@ -15,6 +16,7 @@ import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 
@@ -109,4 +111,21 @@ public class DjSupplierServices {
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
-}
+
+
+    public ServerResponse queryDjSupplierByShopID(HttpServletRequest request, PageDTO pageDTO, String keyWord, String applicationStatus, String shopId) {
+        try {
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<DjSupplierDTO>  list=djSupplierMapper.queryDjSupplierByShopID(keyWord,applicationStatus,shopId);
+            if (list.size() <= 0){
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            }
+            PageInfo pageResult = new PageInfo(list);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    }
