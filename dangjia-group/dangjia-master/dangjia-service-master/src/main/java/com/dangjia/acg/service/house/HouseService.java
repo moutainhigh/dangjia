@@ -192,7 +192,8 @@ public class HouseService {
         Example example = new Example(House.class);
         example.createCriteria()
                 .andEqualTo(House.MEMBER_ID, member.getId())
-                .andEqualTo(House.DATA_STATUS, 0);
+//                .andEqualTo(House.DATA_STATUS, 0)
+        ;
         List<House> houseList = iHouseMapper.selectByExample(example);
         for (House house : houseList) {
             if (house.getId().equals(houseId)) {

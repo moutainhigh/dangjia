@@ -31,4 +31,9 @@ public interface DjRegisterApplicationAPI {
     ServerResponse querySupAndStorefront(@RequestParam("request") HttpServletRequest request,
                                          @RequestParam("mobile") String mobile,
                                          @RequestParam("cityId") String cityId);
+
+
+    @PostMapping("/sup/register/check")
+    @ApiOperation(value = "提交审核注册的供应商或店铺", notes = "提交审核注册的供应商或店铺")
+    ServerResponse checkSupAndStorefront(HttpServletRequest request, String registerId, Integer isAdopt, String departmentId, String jobId);
 }

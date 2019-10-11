@@ -23,10 +23,17 @@ public class DjSupApplicationController implements DjSupApplicationAPI {
     @Autowired
     private DjSupApplicationService djSupApplicationService;
 
+
     @Override
     @ApiMethod
-    public ServerResponse queryDjSupApplicationByShopID(HttpServletRequest request, PageDTO pageDTO, String shopId) {
-        return djSupApplicationService.queryDjSupApplicationByShopID(pageDTO,shopId);
+    public ServerResponse queryDjSupApplicationByShopID(HttpServletRequest request, PageDTO pageDTO, String keyWord, String applicationStatus, String shopId) {
+        return djSupApplicationService.queryDjSupApplicationByShopID(pageDTO,shopId,keyWord,applicationStatus);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryDjSupApplicationProductByShopID(HttpServletRequest request, PageDTO pageDTO, String keyWord, String shopId) {
+        return djSupApplicationService.queryDjSupApplicationProductByShopID(request,pageDTO,keyWord,shopId);
     }
 
     @Override
