@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -48,5 +49,8 @@ public class RegisterApplicationDTO implements Serializable {
 
     @ApiModelProperty("审核人ID")
     private String auditUserId;//审核人ID
+
+    @ApiModelProperty("申请时间")
+    private Date createDate;//审核人ID
 
 }

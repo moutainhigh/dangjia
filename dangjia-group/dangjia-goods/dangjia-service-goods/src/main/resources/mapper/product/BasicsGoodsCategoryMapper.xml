@@ -165,4 +165,100 @@
     </select>
 
 
+    <!-- 根据父id查询下属商品类别，不查末级分类 -->
+    <select id="queryGoodsCategoryExistlastCategory" resultType="com.dangjia.acg.modle.product.BasicsGoodsCategory">
+        SELECT
+        <include refid="all_columns"/>
+        FROM dj_basics_goods_category where parent_id =#{parentId}
+         and is_last_category<![CDATA[ <> ]]> '1'
+        ORDER BY create_date desc
+    </select>
+
+
+    <resultMap type="com.dangjia.acg.dto.product.CategoryGoodsProductDTO" id="categoryGoodsProductMap">
+        <id property="id" column="id"/>
+        <result property="id" column="id"/>
+        <result property="categoryId" column="categoryId"/>
+        <result property="categoryName" column="categoryName"/>
+        <result property="goodsName" column="goodsName"/>
+        <collection property="goodsList" column="{id=id,goodsName=goodsName}" ofType="map" select="selectGoodsList"/>
+    </resultMap>
+
+    <resultMap id="categoryGoodsMap" type="com.dangjia.acg.dto.product.CategoryGoodsDTO">
+        <id property="id" column="id"/>
+        <result property="id" column="id"/>
+        <result property="goodsId" column="goodsId"/>
+        <result property="goodsName" column="goodsName"/>
+        <result property="categoryId" column="categoryId"/>
+        <result property="type" column="type"/>
+        <result property="buy" column="buy"/>
+        <result property="sales" column="sales"/>
+        <collection property="productList" column="{id=id}" ofType="map" select="selectProductList"/>
+    </resultMap>
+
+    <resultMap id="goodsProductMap" type="com.dangjia.acg.dto.product.GoodsProductDTO">
+        <id property="id" column="id"/>
+        <result property="productId" column="productId"/>
+        <result property="categoryId" column="categoryId"/>
+        <result property="productName" column="productName"/>
+        <result property="goodsId" column="goodsId"/>
+    </resultMap>
+
+
+    <select id="queryCategoryListByCategoryLikeName" resultMap="categoryGoodsProductMap">
+        SELECT
+            t.id,
+            t.id categoryId,
+            t.NAME categoryName,
+            #{goodsName} goodsName
+        FROM
+            dj_basics_goods_category t
+        WHERE
+            is_last_category = 1
+         and parent_id= #{categoryId}
+        <if test="goodsName!=null and goodsName!=''">
+            and exists (select 1 from dj_basics_goods t1 where t.id = t1.category_id and  t1.name like CONCAT('%',#{goodsName},'%'))
+        </if>
+        ORDER BY
+            create_date DESC
+
+    </select>
+
+    <select id="selectGoodsList" parameterType="java.util.Map" resultMap="categoryGoodsMap">
+
+        SELECT
+            id,
+            id goodsId,
+            NAME goodsName,
+            category_id categoryId,
+            type,
+            buy,
+            sales
+        FROM
+            dj_basics_goods
+        where category_id= #{id}
+        <if test="goodsName!=null and goodsName!=''">
+            and name like CONCAT('%',#{goodsName},'%')
+        </if>
+        order by create_date desc
+
+    </select>
+
+    <select id="selectProductList" parameterType="java.util.Map" resultMap="goodsProductMap">
+
+        SELECT
+        t.id productId,
+        t.NAME productName,
+        t.category_id categoryId,
+        t.goods_id goodsId
+        FROM
+        dj_basics_product_template t,
+        dj_basics_storefront_product t1
+        where t.id=t1.prod_template_id
+        and t.goods_id=#{id}
+        and t1.is_shelf_status = 1
+        group by productId,productName,categoryId,goodsId
+        order by t1.sell_price asc
+
+    </select>
 </mapper>

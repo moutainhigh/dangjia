@@ -180,4 +180,22 @@ public interface BasicsGoodsCategoryAPI {
     @PostMapping("/product/basicsGoodsCategory/queryBrandByCategoryId")
     @ApiOperation(value = "查询类别下所有品牌", notes = "查询类别下所有品牌")
     ServerResponse queryBrandByCategoryId(@RequestParam("request") HttpServletRequest request,@RequestParam("categoryId") String categoryId);
+
+    /**
+     * 查询商品类别列表
+     *
+     * @Title: getProduct
+     */
+    @PostMapping("/product/basicsGoodsCategory/queryGoodsCategoryExistlastCategory")
+    @ApiOperation(value = "查询商品类别列表，不包含末级分类类别", notes = "查询商品类别列表，不包含末级分类类别")
+    ServerResponse queryGoodsCategoryExistlastCategory(@RequestParam("request") HttpServletRequest request,
+                                      @RequestParam("parentId") String parentId);
+
+    @PostMapping("/product/basicsGoodsCategory/queryCategoryListByCategoryLikeName")
+    @ApiOperation(value = "按照name模糊查询商品及下属货品", notes = "按照name模糊查询商品及下属货品，type： 是否禁用  0：禁用；1不禁用 ;  -1全部默认")
+    ServerResponse queryCategoryListByCategoryLikeName(@RequestParam("request") HttpServletRequest request,
+                                                    @RequestParam("pageDTO") PageDTO pageDTO,
+                                                    @RequestParam("categoryId") String categoryId,
+                                                    @RequestParam("name") String name,
+                                                    @RequestParam("cityId") String cityId);
 }

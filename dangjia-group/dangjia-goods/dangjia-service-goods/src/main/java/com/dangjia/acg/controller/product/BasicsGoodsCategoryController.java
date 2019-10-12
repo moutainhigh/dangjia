@@ -239,4 +239,34 @@ public class BasicsGoodsCategoryController implements BasicsGoodsCategoryAPI {
     public ServerResponse queryBrandByCategoryId(HttpServletRequest request, String categoryId) {
         return basicsGoodsCategoryService.queryBrandByCategoryId(categoryId);
     }
+
+    /**
+     * 查询商品类别列表,不包含末级分类
+     *
+     * @Title: getProduct
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryGoodsCategoryExistlastCategory(HttpServletRequest request, String parentId) {
+        return basicsGoodsCategoryService.queryGoodsCategoryExistlastCategory(parentId);
+    }
+
+    /**
+     * 查询对应的末级分类，及对应的货品，商品
+     * @param request
+     * @param pageDTO 分页
+     * @param categoryId 类别ID
+     * @param name  类别名称
+     * @param cityId 城市ID
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryCategoryListByCategoryLikeName(HttpServletRequest request,
+                                                        PageDTO pageDTO,
+                                                        String categoryId,
+                                                        String name,
+                                                        String cityId){
+        return basicsGoodsCategoryService.queryCategoryListByCategoryLikeName(pageDTO, categoryId, name);
+    }
 }

@@ -3,9 +3,11 @@ package com.dangjia.acg.service.product;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.product.CategoryGoodsProductDTO;
 import com.dangjia.acg.mapper.basics.IBrandMapper;
 import com.dangjia.acg.mapper.product.DjBasicsAttributeMapper;
 import com.dangjia.acg.mapper.product.IBasicsGoodsCategoryMapper;
@@ -16,6 +18,8 @@ import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.BasicsGoodsCategory;
 import com.dangjia.acg.modle.product.CategorySeries;
 import com.dangjia.acg.modle.product.DjBasicsAttribute;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -311,4 +315,36 @@ public class BasicsGoodsCategoryService {
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
+
+    //查询商品属性列表 queryGoodsCategory
+    public ServerResponse queryGoodsCategoryExistlastCategory(String parentId) {
+        List<BasicsGoodsCategory> goodsCategoryList = iBasicsGoodsCategoryMapper.queryGoodsCategoryExistlastCategory(parentId);
+        if (goodsCategoryList.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+        return ServerResponse.createBySuccess("查询成功", goodsCategoryList);
+    }
+
+    /**
+     * 模糊查询goods及下属product
+     *
+     * @param pageDTO
+     * @param categoryId
+     * @param goodsName 货品名称
+     * @return
+     */
+    public ServerResponse queryCategoryListByCategoryLikeName(PageDTO pageDTO, String categoryId, String goodsName) {
+        try {
+            logger.info("queryCategoryListByCategoryLikeName type :" + categoryId);
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<CategoryGoodsProductDTO> categoryGoodsProductList  = iBasicsGoodsCategoryMapper.queryCategoryListByCategoryLikeName(categoryId,goodsName);
+            PageInfo pageResult = new PageInfo(categoryGoodsProductList);
+            pageResult.setList(categoryGoodsProductList);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
 }
