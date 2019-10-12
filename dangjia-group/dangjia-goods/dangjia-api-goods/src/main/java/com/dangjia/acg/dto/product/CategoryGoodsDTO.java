@@ -19,7 +19,7 @@ public class CategoryGoodsDTO {
 
     private String categoryId;//分类id
 
-    private Integer type;//0:材料；1：包工包料2：人工；3：体验；4：增值
+    private Integer type;//类型0：实物商品；1：服务商品；2：人工商品；3：体验；4：增值
 
     private Integer buy;//购买性质0：必买；1可选；2自购
 
