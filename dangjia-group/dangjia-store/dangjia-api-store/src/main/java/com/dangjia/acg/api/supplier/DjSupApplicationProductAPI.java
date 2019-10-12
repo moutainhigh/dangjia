@@ -18,7 +18,8 @@ public interface DjSupApplicationProductAPI {
     @PostMapping("/web/getExaminedProduct")
     @ApiOperation(value = "店铺-审核供货列表-根据供应商名称或号码", notes = "店铺-审核供货列表-根据供应商名称或号码")
     ServerResponse getExaminedProduct(@RequestParam("request") HttpServletRequest request,
-                                      @RequestParam("supId") String supId,
+                                      @RequestParam("pageDTO") PageDTO pageDTO,
+                                      @RequestParam("applicationStatus") String applicationStatus,
                                       @RequestParam("shopId") String shopId,
                                       @RequestParam("keyWord") String keyWord);
 
@@ -27,7 +28,9 @@ public interface DjSupApplicationProductAPI {
     @ApiOperation(value = "店铺-审核供货列表-已供商品", notes = "店铺-审核供货列表-已供商品")
     ServerResponse getSuppliedProduct(@RequestParam("request") HttpServletRequest request,
                                       @RequestParam("supId") String supId,
-                                      @RequestParam("shopId") String shopId);
+                                      @RequestParam("shopId") String shopId,
+                                      @RequestParam("applicationStatus") String applicationStatus,
+                                      @RequestParam("pageDTO") PageDTO pageDTO);
 
 
     @PostMapping("/web/rejectAllProduct")
@@ -40,6 +43,7 @@ public interface DjSupApplicationProductAPI {
     @PostMapping("/web/rejectPartProduct")
     @ApiOperation(value = "店铺-审核供货列表-部分通过", notes = "店铺-审核供货列表-部分通过")
     ServerResponse rejectPartProduct(@RequestParam("request") HttpServletRequest request,
+                                     @RequestParam("id") String id,
                                      @RequestParam("supId") String supId,
                                      @RequestParam("shopId") String shopId);
 
@@ -49,12 +53,12 @@ public interface DjSupApplicationProductAPI {
                                                  @RequestParam("jsonStr") String jsonStr);
 
     @PostMapping("/supplier/djSupApplicationProduct/queryHaveGoods")
-    @ApiOperation(value = "查询已供/打回商品", notes = "查询已供/打回商品")
+    @ApiOperation(value = "查询已供商品", notes = "查询已供商品")
     ServerResponse queryHaveGoods(@RequestParam("request") HttpServletRequest request,
                                   @RequestParam("supId") String supId,
                                   @RequestParam("shopId") String shopId,
-                                  @RequestParam("pageDTO") PageDTO pageDTO,
-                                  @RequestParam("applicationStatus") String applicationStatus);
+                                  @RequestParam("applicationStatus")String applicationStatus ,
+                                  @RequestParam("pageDTO") PageDTO pageDTO);
 
     @PostMapping("/supplier/djSupApplicationProduct/updateHaveGoods")
     @ApiOperation(value = "编辑已供商品", notes = "编辑已供商品")

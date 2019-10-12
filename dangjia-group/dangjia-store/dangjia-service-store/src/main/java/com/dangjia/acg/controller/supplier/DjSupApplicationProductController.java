@@ -5,7 +5,11 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.supplier.DjSupApplicationProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
+import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.service.supplier.DjSupApplicationProductService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -25,26 +29,28 @@ public class DjSupApplicationProductController implements DjSupApplicationProduc
 
     @Override
     @ApiMethod
-    public ServerResponse queryHaveGoods(HttpServletRequest request, String supId, String shopId, PageDTO pageDTO, String applicationStatus) {
-        return djSupApplicationProductService.queryHaveGoods(supId, shopId, pageDTO, applicationStatus);
+    public ServerResponse queryHaveGoods(HttpServletRequest request, String supId, String shopId,String applicationStatus , PageDTO pageDTO) {
+        return djSupApplicationProductService.queryHaveGoods(supId, shopId,applicationStatus, pageDTO);
     }
 
     @Override
     @ApiMethod
     public ServerResponse updateHaveGoods(HttpServletRequest request, String jsonStr) {
-        return djSupApplicationProductService.updateHaveGoods(jsonStr);
+        return null;
     }
 
     @Override
     @ApiMethod
-    public ServerResponse getExaminedProduct(HttpServletRequest request, String supId, String shopId,String keyWord) {
-        return djSupApplicationProductService.getExaminedProduct(request, supId, shopId,keyWord);
+    public ServerResponse getExaminedProduct(HttpServletRequest request, PageDTO pageDTO, String applicationStatus, String shopId, String keyWord) {
+        return djSupApplicationProductService.getExaminedProduct(request, pageDTO,applicationStatus, shopId,keyWord);
     }
+
+
 
     @Override
     @ApiMethod
-    public ServerResponse getSuppliedProduct(HttpServletRequest request, String supId, String shopId) {
-        return djSupApplicationProductService.getSuppliedProduct(request, supId, shopId);
+    public ServerResponse getSuppliedProduct(HttpServletRequest request, String supId, String shopId,String applicationStatus ,PageDTO pageDTO) {
+        return djSupApplicationProductService.getSuppliedProduct(request, supId, shopId,applicationStatus,pageDTO);
     }
 
     @Override
@@ -55,7 +61,7 @@ public class DjSupApplicationProductController implements DjSupApplicationProduc
 
     @Override
     @ApiMethod
-    public ServerResponse rejectPartProduct(HttpServletRequest request, String supId, String shopId) {
-        return djSupApplicationProductService.rejectPartProduct(request, supId, shopId);
+    public ServerResponse rejectPartProduct(HttpServletRequest request, String id, String supId, String shopId) {
+        return djSupApplicationProductService.rejectPartProduct(request, id,supId, shopId);
     }
 }

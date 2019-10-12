@@ -41,7 +41,9 @@
             ds.address,
             ds.check_people,
             ds.telephone,
-            da.application_status
+            da.application_status,
+            da.sup_id,
+            da.shop_id
         FROM
             dj_sup_application da
         INNER JOIN dj_supplier ds ON da.sup_id = ds.id

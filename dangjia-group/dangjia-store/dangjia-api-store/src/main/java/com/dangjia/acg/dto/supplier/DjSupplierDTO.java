@@ -24,5 +24,13 @@ public class DjSupplierDTO {
      * 审核状态
      */
     private String applicationStatus;
+    /**
+     * 供应商ID
+     */
+    private String supId;
+    /**
+     * 店铺ID
+     */
+    private String shopId;
 
 }
