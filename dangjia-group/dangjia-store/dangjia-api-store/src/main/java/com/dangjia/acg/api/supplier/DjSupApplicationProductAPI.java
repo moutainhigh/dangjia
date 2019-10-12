@@ -16,31 +16,32 @@ public interface DjSupApplicationProductAPI {
 
 
     @PostMapping("/web/getExaminedProduct")
-    @ApiOperation(value = "查询待审核的供应商品", notes = "查询待审核的供应商品")
+    @ApiOperation(value = "店铺-审核供货列表-根据供应商名称或号码", notes = "店铺-审核供货列表-根据供应商名称或号码")
     ServerResponse getExaminedProduct(@RequestParam("request") HttpServletRequest request,
-                                                 @RequestParam("supId") String supId,
-                                                 @RequestParam("shopId") String shopId);
+                                      @RequestParam("supId") String supId,
+                                      @RequestParam("shopId") String shopId,
+                                      @RequestParam("keyWord") String keyWord);
 
 
     @PostMapping("/web/getSuppliedProduct")
-    @ApiOperation(value = "已供商品", notes = "已供商品")
+    @ApiOperation(value = "店铺-审核供货列表-已供商品", notes = "店铺-审核供货列表-已供商品")
     ServerResponse getSuppliedProduct(@RequestParam("request") HttpServletRequest request,
-                                                 @RequestParam("supId") String supId,
-                                                 @RequestParam("shopId") String shopId);
+                                      @RequestParam("supId") String supId,
+                                      @RequestParam("shopId") String shopId);
 
 
     @PostMapping("/web/rejectAllProduct")
-    @ApiOperation(value = "全部打回", notes = "全部打回")
+    @ApiOperation(value = "店铺-审核供货列表-全部打回", notes = "店铺-审核供货列表-全部打回")
     ServerResponse rejectAllProduct(@RequestParam("request") HttpServletRequest request,
-                                                 @RequestParam("supId") String supId,
-                                                 @RequestParam("shopId") String shopId);
+                                    @RequestParam("supId") String supId,
+                                    @RequestParam("shopId") String shopId);
 
 
     @PostMapping("/web/rejectPartProduct")
-    @ApiOperation(value = "部分通过", notes = "部分通过")
+    @ApiOperation(value = "店铺-审核供货列表-部分通过", notes = "店铺-审核供货列表-部分通过")
     ServerResponse rejectPartProduct(@RequestParam("request") HttpServletRequest request,
-                                                 @RequestParam("supId") String supId,
-                                                 @RequestParam("shopId") String shopId);
+                                     @RequestParam("supId") String supId,
+                                     @RequestParam("shopId") String shopId);
 
     @PostMapping("/supplier/djSupApplicationProduct/querySupplierGoods")
     @ApiOperation(value = "供应商申请供应商品", notes = "供应商申请供应商品")

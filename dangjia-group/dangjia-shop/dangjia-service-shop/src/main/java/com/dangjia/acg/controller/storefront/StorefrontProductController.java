@@ -53,10 +53,5 @@ public class StorefrontProductController implements StorefrontProductAPI {
         return storefrontProductService.updateStorefrontProductById(userToken, id);
     }
 
-    @Override
-    @ApiMethod
-    public ServerResponse queryStorefrontProductBykey(String userToken, String key) {
 
-        return storefrontProductService.queryStorefrontProductBykey(userToken, key);
-    }
 }

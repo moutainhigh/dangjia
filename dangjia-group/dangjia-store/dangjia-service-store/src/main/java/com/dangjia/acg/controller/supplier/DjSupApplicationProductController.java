@@ -41,8 +41,8 @@ public class DjSupApplicationProductController implements DjSupApplicationProduc
 
     @Override
     @ApiMethod
-    public ServerResponse getExaminedProduct(HttpServletRequest request, String supId, String shopId) {
-        return djSupApplicationProductService.getExaminedProduct(request, supId, shopId);
+    public ServerResponse getExaminedProduct(HttpServletRequest request, String supId, String shopId,String keyWord) {
+        return djSupApplicationProductService.getExaminedProduct(request, supId, shopId,keyWord);
     }
 
     @Override

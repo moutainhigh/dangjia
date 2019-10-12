@@ -13,33 +13,28 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface StorefrontProductAPI {
 
     @PostMapping("/web/queryStorefrontProductByType")
-    @ApiOperation(value = "通过类别查询商品", notes = "通过类别查询商品")
+    @ApiOperation(value = "供货设置-通过货品或者商品名称查询", notes = "供货设置-通过货品或者商品名称查询")
     ServerResponse queryStorefrontProductByType(@RequestParam("userToken") String userToken, @RequestParam("type") String type);
 
 
     @PostMapping("/web/setSpStatusById")
-    @ApiOperation(value = "设置商品上下架", notes = "设置商品上下架")
+    @ApiOperation(value = "供货设置-设置商品上下架", notes = "设置商品上下架")
     ServerResponse setSpStatusById(@RequestParam("userToken") String userToken, @RequestParam("id") String id, @RequestParam("isShelfStatus") String isShelfStatus);
 
 
     @PostMapping("/web/setAllStoreProductByIsShelfStatus")
-    @ApiOperation(value = "设置商品批量架", notes = "设置商品批量架")
+    @ApiOperation(value = "供货设置-设置商品批量架", notes = "设置商品批量架")
     ServerResponse setAllStoreProductByIsShelfStatus(@RequestParam("userToken") String userToken, @RequestParam("isShelfStatus") String isShelfStatus);
 
 
     @PostMapping("/web/delStorefrontProductById")
-    @ApiOperation(value = "根据主键删除商品", notes = "根据主键删除商品")
+    @ApiOperation(value = "供货设置-根据主键删除商品", notes = "根据主键删除商品")
     ServerResponse delStorefrontProductById(@RequestParam("userToken") String userToken, @RequestParam("id") String id);
 
 
     @PostMapping("/web/updateStorefrontProductById")
-    @ApiOperation(value = "根据id修改店铺商品", notes = "根据id修改店铺商品")
+    @ApiOperation(value = "供货设置-根据id修改店铺商品", notes = "根据id修改店铺商品")
     ServerResponse updateStorefrontProductById(@RequestParam("userToken") String userToken, @RequestParam("id") String id);
-
-
-    @PostMapping("/web/queryStorefrontProductBykey")
-    @ApiOperation(value = "查询已选列表", notes = "查询已选列表")
-    ServerResponse queryStorefrontProductBykey(@RequestParam("userToken") String userToken, @RequestParam("key") String key);
 
 
 }

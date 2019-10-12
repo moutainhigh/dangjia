@@ -106,7 +106,7 @@ public class DjSupApplicationProductService {
      * @param shopId
      * @return
      */
-    public ServerResponse getExaminedProduct(HttpServletRequest request, String supId, String shopId) {
+    public ServerResponse getExaminedProduct(HttpServletRequest request, String supId, String shopId,String keyWord) {
         try {
             return null;
         } catch (Exception e) {

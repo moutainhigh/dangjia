@@ -100,22 +100,4 @@ public class StorefrontProductService {
         }
     }
 
-
-    /**
-     * 查询已选列表
-     *
-     * @param userToken
-     * @param key
-     * @return
-     */
-    public ServerResponse queryStorefrontProductBykey(String userToken, String key) {
-        try {
-            return null;
-        } catch (Exception e) {
-            logger.error("查询失败：", e);
-            return ServerResponse.createByErrorMessage("查询失败");
-        }
-    }
-
-
 }
