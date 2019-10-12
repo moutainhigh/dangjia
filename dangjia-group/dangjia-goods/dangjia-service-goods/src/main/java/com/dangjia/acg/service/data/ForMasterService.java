@@ -3,11 +3,14 @@ package com.dangjia.acg.service.data;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.actuary.BudgetLabelDTO;
 import com.dangjia.acg.dto.actuary.BudgetLabelGoodsDTO;
 import com.dangjia.acg.dto.product.ProductWorkerDTO;
+import com.dangjia.acg.dto.product.StorefontInfoDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
 import com.dangjia.acg.mapper.basics.IBrandMapper;
@@ -27,16 +30,14 @@ import com.dangjia.acg.modle.product.*;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
 import com.dangjia.acg.service.actuary.app.AppActuaryOperationService;
+import com.sun.javafx.collections.MappingChange;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * author: Ronalcheng
@@ -310,6 +311,29 @@ public class ForMasterService {
     }
     public  List<BudgetLabelGoodsDTO> queryBudgetLabelGoods(String houseId, String workerTypeId){
         return budgetMaterialMapper.queryBudgetLabelGoods(houseId,workerTypeId);
+    }
+
+    public StorefontInfoDTO getStroreProductInfo(String storefontId, String productId){
+        //根据店铺商品ID查询对应的店铺数据
+        DjBasicsProductTemplate djBasicsProductTemplate=iBasicsProductTemplateMapper.getProductListByStoreproductId(productId);
+        StorefontInfoDTO storefontInfoDTO=new StorefontInfoDTO();
+        if(djBasicsProductTemplate!=null){
+            Map<String,Object> resMap= BeanUtils.beanToMap(djBasicsProductTemplate);
+            //查询对应大类下符合条件的店铺货品及商品
+            List<BasicsGoods> goodsList=iBasicsProductTemplateMapper.getGoodsListByStorefontId(storefontId,djBasicsProductTemplate.getCategoryId());
+            List<DjBasicsProductTemplate> productList=iBasicsProductTemplateMapper.getproductTempListByStorefontId(storefontId,djBasicsProductTemplate.getGoodsId());
+            resMap.put("goodsList",goodsList);
+            resMap.put("productList",productList);
+            storefontInfoDTO=BeanUtils.mapToBean(StorefontInfoDTO.class,resMap);
+            storefontInfoDTO.setProductId(djBasicsProductTemplate.getId());
+            storefontInfoDTO.setGoodsId(djBasicsProductTemplate.getGoodsId());
+        }
+        return storefontInfoDTO;
+    }
+
+    public ServerResponse getproductTempListByStorefontId(String storefontId,String goodsId){
+        List<DjBasicsProductTemplate> productList=iBasicsProductTemplateMapper.getproductTempListByStorefontId(storefontId,goodsId);
+        return  ServerResponse.createBySuccess("查询成功",productList);
     }
 
 

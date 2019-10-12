@@ -2,6 +2,8 @@ package com.dangjia.acg.mapper.product;
 
 import com.dangjia.acg.dto.basics.WorkerGoodsDTO;
 import com.dangjia.acg.dto.product.AppBasicsProductDTO;
+import com.dangjia.acg.modle.product.BasicsGoods;
+import com.dangjia.acg.modle.product.DjBasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -94,4 +96,13 @@ public interface IBasicsProductTemplateMapper extends Mapper<DjBasicsProductTemp
     List<WorkerGoodsDTO> queryWorkerGoodsDTO(@Param("productSn") String productSn, @Param("workerTypeId") String workerTypeId);
 
 
+    DjBasicsProductTemplate getProductListByStoreproductId(@Param("storefontProductId") String storefontProductId);
+
+    //查询当前店铺下所有的货品
+    List<BasicsGoods> getGoodsListByStorefontId(@Param("storefontId") String storefontId,
+                                                @Param("categoryId") String categoryId);
+
+    //查询当前店铺下对应货品下的所有商品
+    List<DjBasicsProductTemplate> getproductTempListByStorefontId(@Param("storefontId") String storefontId,
+                                                                  @Param("goodsId") String goodsId);
 }

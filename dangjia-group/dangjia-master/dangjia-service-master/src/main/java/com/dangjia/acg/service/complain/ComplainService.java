@@ -269,7 +269,7 @@ public class ComplainService {
      * 查询申诉
      *
      * @param pageDTO      分页实体
-     * @param complainType 申诉类型 1:工匠被处罚后不服.2：业主要求整改.3：大管家（开工后）要求换人.4:部分收货申诉.
+     * @param complainType 申述类型 1: 被处罚申诉.2：要求整改.3：要求换人.4:部分收货申诉.5:提前结束装修.6业主要求换人.7:业主申诉退货
      * @param state        处理状态:0:待处理。1.驳回。2.接受。
      * @param searchKey    用户关键字查询，包含名称、手机号、昵称
      * @return
