@@ -35,10 +35,10 @@ public class DjRegisterApplication extends BaseEntity {
     @ApiModelProperty("用户名")
     private String userName;//用户名
 
-    @Column(name = "passward")
+    @Column(name = "password")
     @Desc(value = "密码")
     @ApiModelProperty("密码")
-    private String passward;//密码
+    private String password;//密码
 
     @Column(name = "name")
     @Desc(value = "姓名")

@@ -6,9 +6,11 @@ import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.supplier.DjSupSupplierProductDTO;
+import com.dangjia.acg.mapper.supplier.DjAdjustRecordMapper;
 import com.dangjia.acg.mapper.supplier.DjSupApplicationMapper;
 import com.dangjia.acg.mapper.supplier.DjSupApplicationProductMapper;
 import com.dangjia.acg.mapper.supplier.DjSupSupplierProductMapper;
+import com.dangjia.acg.modle.supplier.DjAdjustRecord;
 import com.dangjia.acg.modle.supplier.DjSupApplicationProduct;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -16,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -33,6 +36,8 @@ public class DjSupApplicationProductService {
     private DjSupApplicationProductMapper djSupApplicationProductMapper;
     @Autowired
     private DjSupSupplierProductMapper djSupSupplierProductMapper;
+    @Autowired
+    private DjAdjustRecordMapper djAdjustRecordMapper;
 
 
     /**
@@ -68,15 +73,15 @@ public class DjSupApplicationProductService {
 
 
     /**
-     * 查询已供商品
+     * 查询已供/打回商品
      * @param supId
      * @param shopId
      * @return
      */
-    public ServerResponse queryHaveGoods(String supId, String shopId, PageDTO pageDTO) {
+    public ServerResponse queryHaveGoods(String supId, String shopId, PageDTO pageDTO, String applicationStatus) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<DjSupSupplierProductDTO> djSupSupplierProductDTOS = djSupSupplierProductMapper.queryHaveGoods(supId, shopId);
+            List<DjSupSupplierProductDTO> djSupSupplierProductDTOS = djSupSupplierProductMapper.queryHaveGoods(supId, shopId,applicationStatus);
             PageInfo pageResult = new PageInfo(djSupSupplierProductDTOS);
             if(djSupSupplierProductDTOS.size()<=0)
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
@@ -94,8 +99,37 @@ public class DjSupApplicationProductService {
      * @return
      */
     public ServerResponse updateHaveGoods(String jsonStr) {
-
-        return null;
+        try {
+            JSONArray jsonArr = JSONArray.parseArray(jsonStr);
+            jsonArr.forEach(str ->{
+                JSONObject obj = (JSONObject) str;
+                String applicationProductId = obj.getString("applicationProductId");//供应商品表id
+                Double price = obj.getDouble("price");//供应价
+                Double porterage = obj.getDouble("porterage");//搬运费
+                Double adjustPrice = obj.getDouble("adjustPrice");//调后价
+                Date adjustTime = obj.getDate("adjustTime");//调价时间
+                String isCartagePrice = obj.getString("isCartagePrice");//是否收取上楼费 0=否，1=是
+                String supplyRelationship = obj.getString("supplyRelationship");//供应关系 0:供应 1:停供
+                String userId = obj.getString("userId");//操作人
+                DjSupApplicationProduct djSupApplicationProduct=new DjSupApplicationProduct();
+                djSupApplicationProduct.setId(applicationProductId);
+                djSupApplicationProduct.setPrice(price);
+                djSupApplicationProduct.setPorterage(porterage);
+                djSupApplicationProduct.setIsCartagePrice(isCartagePrice);
+                djSupApplicationProduct.setSupplyRelationShip(supplyRelationship);
+                djSupApplicationProductMapper.updateByPrimaryKeySelective(djSupApplicationProduct);
+                DjAdjustRecord djAdjustRecord=new DjAdjustRecord();
+                djAdjustRecord.setAdjustPrice(adjustPrice);
+                djAdjustRecord.setAdjustTime(adjustTime);
+                djAdjustRecord.setApplicationProductId(applicationProductId);
+                djAdjustRecord.setUserId(userId);
+                djAdjustRecordMapper.insert(djAdjustRecord);
+            });
+            return ServerResponse.createBySuccessMessage("编辑成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("编辑失败："+e);
+        }
     }
 
     /**

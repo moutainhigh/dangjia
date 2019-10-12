@@ -49,11 +49,12 @@ public interface DjSupApplicationProductAPI {
                                                  @RequestParam("jsonStr") String jsonStr);
 
     @PostMapping("/supplier/djSupApplicationProduct/queryHaveGoods")
-    @ApiOperation(value = "查询已供商品", notes = "查询已供商品")
+    @ApiOperation(value = "查询已供/打回商品", notes = "查询已供/打回商品")
     ServerResponse queryHaveGoods(@RequestParam("request") HttpServletRequest request,
                                   @RequestParam("supId") String supId,
                                   @RequestParam("shopId") String shopId,
-                                  @RequestParam("pageDTO") PageDTO pageDTO);
+                                  @RequestParam("pageDTO") PageDTO pageDTO,
+                                  @RequestParam("applicationStatus") String applicationStatus);
 
     @PostMapping("/supplier/djSupApplicationProduct/updateHaveGoods")
     @ApiOperation(value = "编辑已供商品", notes = "编辑已供商品")

@@ -46,7 +46,17 @@
         WHERE
             sap.sup_id = #{supId}
             sap.shop_id = #{shopId}
+            sap.application_status=#{applicationStatus}
     </select>
 
+
+    <select id="queryAttributeNameByIds" resultType="java.lang.String">
+        select
+        GROUP_CONCAT(name SEPARATOR '，')
+        AND p.id in
+        <foreach collection="ids" item="item" index="index" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </select>
 
 </mapper>

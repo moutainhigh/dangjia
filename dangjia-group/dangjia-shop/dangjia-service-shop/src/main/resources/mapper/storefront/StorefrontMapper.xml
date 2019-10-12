@@ -22,7 +22,9 @@
 
     <select id="querySupplierApplicationShopList" resultType="com.dangjia.acg.dto.storefront.StorefrontListDTO">
         SELECT
-            a.`id`,
+            b.`id`,
+            b.`sup_id` AS supId,
+            a.`id` AS shopId,
             a.`member_id` AS memberId,
             a.`city_id` AS cityId,
             a.`storefront_name` AS storefrontName,

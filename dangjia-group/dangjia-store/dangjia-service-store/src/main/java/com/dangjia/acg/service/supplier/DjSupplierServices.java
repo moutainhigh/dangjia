@@ -7,7 +7,6 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dto.supplier.DjSupSupplierProductDTO;
 import com.dangjia.acg.dto.supplier.DjSupplierDTO;
-import com.dangjia.acg.mapper.product.DjBasicsAttributeMapper;
 import com.dangjia.acg.mapper.supplier.DjSupApplicationMapper;
 import com.dangjia.acg.mapper.supplier.DjSupSupplierProductMapper;
 import com.dangjia.acg.mapper.supplier.DjSupplierMapper;
@@ -36,8 +35,6 @@ public class DjSupplierServices {
     private DjSupplierMapper djSupplierMapper;
     @Autowired
     private DjSupSupplierProductMapper djSupSupplierProductMapper;
-    @Autowired
-    private DjBasicsAttributeMapper djBasicsAttributeMapper;
 
     @Autowired
     private DjSupApplicationMapper djSupApplicationMapper ;
@@ -105,7 +102,7 @@ public class DjSupplierServices {
             djSupSupplierProductDTOS.forEach(djSupSupplierProductDTO -> {
                 String[] split = djSupSupplierProductDTO.getAttributeIdArr().split(",");
                 if(split.length>0)
-                    djSupSupplierProductDTO.setAttributeIdArr(djBasicsAttributeMapper.queryAttributeNameByIds(split));
+                    djSupSupplierProductDTO.setAttributeIdArr(djSupSupplierProductMapper.queryAttributeNameByIds(split));
             });
             PageInfo pageResult = new PageInfo(djSupSupplierProductDTOS);
             if (djSupSupplierProductDTOS.size() <= 0)

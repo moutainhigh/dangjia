@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -32,13 +31,12 @@ public class DjSupApplicationService {
 
     /**
      *  店铺-审核供货列表
-     * @param request
      * @param pageDTO
      * @param keyWord
      * @param shopId
      * @return
      */
-    public ServerResponse queryDjSupApplicationProductByShopID(HttpServletRequest request, PageDTO pageDTO, String keyWord, String shopId) {
+    public ServerResponse queryDjSupApplicationProductByShopID(PageDTO pageDTO, String keyWord, String shopId) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             Example example=new Example(DjSupApplication.class);
@@ -82,5 +80,25 @@ public class DjSupApplicationService {
             return ServerResponse.createByErrorMessage("申请失败:"+e);
         }
         return ServerResponse.createByErrorMessage("申请失败");
+    }
+
+
+    /**
+     * 上传合同
+     * @param id
+     * @param contract
+     * @return
+     */
+    public ServerResponse uploadContracts(String id,String contract) {
+        try {
+            DjSupApplication djSupApplication=new DjSupApplication();
+            djSupApplication.setId(id);
+            djSupApplication.setContract(contract);
+            djSupApplicationMapper.updateByPrimaryKeySelective(djSupApplication);
+            return ServerResponse.createBySuccessMessage("上传成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("申请失败:"+e);
+        }
     }
 }

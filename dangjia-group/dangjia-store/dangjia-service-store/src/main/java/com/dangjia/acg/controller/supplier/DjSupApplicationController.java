@@ -29,13 +29,19 @@ public class DjSupApplicationController implements DjSupApplicationAPI {
     @Override
     @ApiMethod
     public ServerResponse queryDjSupApplicationProductByShopID(HttpServletRequest request, PageDTO pageDTO, String keyWord, String shopId) {
-        return djSupApplicationService.queryDjSupApplicationProductByShopID(request,pageDTO,keyWord,shopId);
+        return djSupApplicationService.queryDjSupApplicationProductByShopID(pageDTO,keyWord,shopId);
     }
 
     @Override
     @ApiMethod
     public ServerResponse insertSupplierApplicationShop(HttpServletRequest request, String supId, String shopId) {
         return djSupApplicationService.insertSupplierApplicationShop(supId,shopId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse uploadContracts(HttpServletRequest request, String id, String contract) {
+        return djSupApplicationService.uploadContracts(id,contract);
     }
 
 }

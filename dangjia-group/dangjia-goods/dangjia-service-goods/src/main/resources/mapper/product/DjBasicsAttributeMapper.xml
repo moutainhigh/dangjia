@@ -79,12 +79,4 @@
             a.create_date DESC
 	</select>
 
-    <select id="queryAttributeNameByIds" resultType="java.lang.String">
-        select
-          GROUP_CONCAT(name SEPARATOR '，')
-        AND p.id in
-        <foreach collection="ids" item="item" index="index" open="(" close=")" separator=",">
-            #{item}
-        </foreach>
-    </select>
 </mapper>

@@ -10,6 +10,7 @@ import lombok.experimental.FieldNameConstants;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import java.util.Date;
 
 /**
  * Created with IntelliJ IDEA.
@@ -35,13 +36,13 @@ public class DjAdjustRecord extends BaseEntity {
     private String userId;
 
     @Column(name = "adjust_time")
-    @Desc(value = "申请状态 0:审核中 1:通过 2:不通过")
-    @ApiModelProperty("申请状态 0:审核中 1:通过 2:不通过")
-    private String adjustTime;
+    @Desc(value = "调价时间")
+    @ApiModelProperty("调价时间")
+    private Date adjustTime;
 
     @Column(name = "adjust_price")
     @Desc(value = "调后价")
     @ApiModelProperty("调后价")
-    private String adjustPrice;
+    private Double adjustPrice;
 
 }

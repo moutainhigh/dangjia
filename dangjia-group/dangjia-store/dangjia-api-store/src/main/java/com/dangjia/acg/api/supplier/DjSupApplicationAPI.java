@@ -28,10 +28,16 @@ public interface DjSupApplicationAPI {
                                                  @RequestParam("keyWord") String keyWord,
                                                  @RequestParam("shopId") String shopId);
 
-    @PostMapping("/supplier/djSupApplication/insertSupplierApplicationShop ")
+    @PostMapping("/supplier/djSupApplication/insertSupplierApplicationShop")
     @ApiOperation(value = "供应商申请供应店铺", notes = "供应商申请供应店铺")
     ServerResponse insertSupplierApplicationShop(@RequestParam("request") HttpServletRequest request,
                                                  @RequestParam("supId") String supId,
                                                  @RequestParam("shopId") String shopId);
+
+    @PostMapping("/supplier/djSupApplication/uploadContracts")
+    @ApiOperation(value = "上传合同", notes = "上传合同")
+    ServerResponse uploadContracts(@RequestParam("request") HttpServletRequest request,
+                                   @RequestParam("id") String id,
+                                   @RequestParam("contract") String contract);
 
 }

@@ -12,6 +12,8 @@ import lombok.Data;
 @Data
 public class StorefrontListDTO {
     private String id;
+    private String supId;
+    private String shopId;
     /**
      * 用户表ID
      */

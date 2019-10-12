@@ -60,7 +60,7 @@ public class DjRegisterApplicationServices {
             if(djRegisterApplicationMapper.selectByExample(example).size()>0)
                 return ServerResponse.createByErrorMessage("申请已存在");
             djRegisterApplication.setDataStatus(0);
-            djRegisterApplication.setPassward(DigestUtils.md5Hex(djRegisterApplication.getPassward()));
+            djRegisterApplication.setPassword(DigestUtils.md5Hex(djRegisterApplication.getPassword()));
             if(djRegisterApplicationMapper.insert(djRegisterApplication)>0)
                 return ServerResponse.createBySuccessMessage("申请成功");
         } catch (Exception e) {
@@ -121,7 +121,7 @@ public class DjRegisterApplicationServices {
 
             //注入用户信息
             MainUser user=new MainUser();
-            user.setPassword(djRegisterApplication.getPassward());
+            user.setPassword(djRegisterApplication.getPassword());
             user.setUsername(djRegisterApplication.getName());
             user.setMobile(djRegisterApplication.getMobile());
             user.setUserType(djRegisterApplication.getApplicationType());
