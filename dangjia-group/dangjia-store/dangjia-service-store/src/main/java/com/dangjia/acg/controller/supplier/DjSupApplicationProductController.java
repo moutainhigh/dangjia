@@ -5,11 +5,7 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.supplier.DjSupApplicationProductService;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
-import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.service.supplier.DjSupApplicationProductService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -36,13 +32,13 @@ public class DjSupApplicationProductController implements DjSupApplicationProduc
     @Override
     @ApiMethod
     public ServerResponse updateHaveGoods(HttpServletRequest request, String jsonStr) {
-        return null;
+        return djSupApplicationProductService.updateHaveGoods(jsonStr);
     }
 
     @Override
     @ApiMethod
     public ServerResponse getExaminedProduct(HttpServletRequest request, PageDTO pageDTO, String applicationStatus, String shopId, String keyWord) {
-        return djSupApplicationProductService.getExaminedProduct(request, pageDTO,applicationStatus, shopId,keyWord);
+        return djSupApplicationProductService.getExaminedProduct(pageDTO,applicationStatus, shopId,keyWord);
     }
 
 
@@ -50,18 +46,18 @@ public class DjSupApplicationProductController implements DjSupApplicationProduc
     @Override
     @ApiMethod
     public ServerResponse getSuppliedProduct(HttpServletRequest request, String supId, String shopId,String applicationStatus ,PageDTO pageDTO) {
-        return djSupApplicationProductService.getSuppliedProduct(request, supId, shopId,applicationStatus,pageDTO);
+        return djSupApplicationProductService.getSuppliedProduct(supId, shopId,applicationStatus,pageDTO);
     }
 
     @Override
     @ApiMethod
     public ServerResponse rejectAllProduct(HttpServletRequest request, String supId, String shopId) {
-        return djSupApplicationProductService.rejectAllProduct(request, supId, shopId);
+        return djSupApplicationProductService.rejectAllProduct(supId, shopId);
     }
 
     @Override
     @ApiMethod
     public ServerResponse rejectPartProduct(HttpServletRequest request, String id, String supId, String shopId) {
-        return djSupApplicationProductService.rejectPartProduct(request, id,supId, shopId);
+        return djSupApplicationProductService.rejectPartProduct(id,supId, shopId);
     }
 }

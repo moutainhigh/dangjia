@@ -7,10 +7,8 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.supplier.DjSupSupplierProductDTO;
 import com.dangjia.acg.dto.supplier.DjSupplierDTO;
-import com.dangjia.acg.mapper.supplier.DjSupApplicationMapper;
-import com.dangjia.acg.mapper.supplier.DjSupApplicationProductMapper;
-import com.dangjia.acg.mapper.supplier.DjSupSupplierProductMapper;
-import com.dangjia.acg.mapper.supplier.DjSupplierMapper;
+import com.dangjia.acg.mapper.supplier.*;
+import com.dangjia.acg.modle.supplier.DjAdjustRecord;
 import com.dangjia.acg.modle.supplier.DjSupApplicationProduct;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -18,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
-import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -36,6 +34,8 @@ public class DjSupApplicationProductService {
     private DjSupApplicationProductMapper djSupApplicationProductMapper;
     @Autowired
     private DjSupSupplierProductMapper djSupSupplierProductMapper;
+    @Autowired
+    private DjAdjustRecordMapper djAdjustRecordMapper;
 
 
     @Autowired
@@ -99,19 +99,47 @@ public class DjSupApplicationProductService {
      * @return
      */
     public ServerResponse updateHaveGoods(String jsonStr) {
-
-        return null;
+        try {
+            JSONArray jsonArr = JSONArray.parseArray(jsonStr);
+            jsonArr.forEach(str ->{
+                JSONObject obj = (JSONObject) str;
+                String applicationProductId = obj.getString("applicationProductId");//供应商品表id
+                Double price = obj.getDouble("price");//供应价
+                Double porterage = obj.getDouble("porterage");//搬运费
+                Double adjustPrice = obj.getDouble("adjustPrice");//调后价
+                Date adjustTime = obj.getDate("adjustTime");//调价时间
+                String isCartagePrice = obj.getString("isCartagePrice");//是否收取上楼费 0=否，1=是
+                String supplyRelationship = obj.getString("supplyRelationship");//供应关系 0:供应 1:停供
+                String userId = obj.getString("userId");//操作人
+                DjSupApplicationProduct djSupApplicationProduct=new DjSupApplicationProduct();
+                djSupApplicationProduct.setId(applicationProductId);
+                djSupApplicationProduct.setPrice(price);
+                djSupApplicationProduct.setPorterage(porterage);
+                djSupApplicationProduct.setIsCartagePrice(isCartagePrice);
+                djSupApplicationProduct.setSupplyRelationShip(supplyRelationship);
+                djSupApplicationProductMapper.updateByPrimaryKeySelective(djSupApplicationProduct);
+                DjAdjustRecord djAdjustRecord=new DjAdjustRecord();
+                djAdjustRecord.setAdjustPrice(adjustPrice);
+                djAdjustRecord.setAdjustTime(adjustTime);
+                djAdjustRecord.setApplicationProductId(applicationProductId);
+                djAdjustRecord.setUserId(userId);
+                djAdjustRecordMapper.insert(djAdjustRecord);
+            });
+            return ServerResponse.createBySuccessMessage("编辑成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("编辑失败："+e);
+        }
     }
 
     /**
      * 查询待审核的供应商品
-     * @param request
      * @param applicationStatus
      * @param shopId
      * @param keyWord
      * @return
      */
-    public ServerResponse getExaminedProduct(HttpServletRequest request, PageDTO pageDTO, String applicationStatus, String shopId,String keyWord) {
+    public ServerResponse getExaminedProduct( PageDTO pageDTO, String applicationStatus, String shopId,String keyWord) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<DjSupplierDTO>  list=djSupplierMapper.queryDjSupplierByShopID(keyWord,applicationStatus,shopId);
@@ -133,14 +161,13 @@ public class DjSupApplicationProductService {
 
     /**
      * 店铺-审核供货列表-已供商品
-     * @param request
      * @param supId
      * @param shopId
      * @param applicationStatus
      * @param pageDTO
      * @return
      */
-    public ServerResponse getSuppliedProduct(HttpServletRequest request, String supId, String shopId,String applicationStatus, PageDTO pageDTO  ) {
+    public ServerResponse getSuppliedProduct( String supId, String shopId,String applicationStatus, PageDTO pageDTO  ) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<DjSupSupplierProductDTO> djSupSupplierProductDTOS = djSupSupplierProductMapper.queryHaveGoods(supId, shopId,applicationStatus);
@@ -158,12 +185,11 @@ public class DjSupApplicationProductService {
     /**
      * 全部打回
      *
-     * @param request
      * @param supId
      * @param shopId
      * @return
      */
-    public ServerResponse rejectAllProduct(HttpServletRequest request, String supId, String shopId) {
+    public ServerResponse rejectAllProduct( String supId, String shopId) {
         try {
             Example example=new Example(DjSupApplicationProduct.class);
             //申请状态 0:审核中 1:通过 2:不通过
@@ -182,14 +208,12 @@ public class DjSupApplicationProductService {
     /**
      * 部分通过
      *
-     * @param request
      * @param supId
      * @param shopId
      * @return
      */
-    public ServerResponse rejectPartProduct(HttpServletRequest request, String id , String supId, String shopId) {
+    public ServerResponse rejectPartProduct( String id , String supId, String shopId) {
         try {
-
             DjSupApplicationProduct djSupApplicationProduct=new DjSupApplicationProduct();
             djSupApplicationProduct.setId(id);
             djSupApplicationProduct.setSupId(supId);
