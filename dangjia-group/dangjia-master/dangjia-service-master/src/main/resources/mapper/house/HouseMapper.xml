@@ -932,7 +932,10 @@
     </update>
 
     <update id="updateOrder" >
-        update dj_order set is_pay_money=1 where  id = #{orderId}
+         update dj_order
+         set is_pay_money=1,
+         total_order_price=(select sum(t.total_purchase_price) from dj_order_detail t where t.order_id=#{orderId})
+         where id=#{orderId}
     </update>
 
 </mapper>

@@ -653,9 +653,10 @@ public class HouseService {
                 Map orderMap=(Map)orderDetailList.get(i);
                 DjOrderDetail orderDetail=BeanUtils.mapToBean(DjOrderDetail.class,orderMap);
                 orderId=orderDetail.getOrderId();
-               iHouseMapper.updateOrderDetail(orderDetail);
+                iHouseMapper.updateOrderDetail(orderDetail);
+                iHouseMapper.updateOrder(orderId);
             }
-            iHouseMapper.updateOrder(orderId);
+
         }
     }
 
