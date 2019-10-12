@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.supplier;
 
+import cn.jiguang.common.utils.StringUtils;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.exception.ServerCode;
@@ -164,66 +165,75 @@ public class DjSupApplicationProductService {
      * @param supId
      * @param shopId
      * @param applicationStatus
-     * @param pageDTO
      * @return
      */
-    public ServerResponse getSuppliedProduct( String supId, String shopId,String applicationStatus, PageDTO pageDTO  ) {
+    public ServerResponse getSuppliedProduct( String supId, String shopId,String applicationStatus) {
         try {
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<DjSupSupplierProductDTO> djSupSupplierProductDTOS = djSupSupplierProductMapper.queryHaveGoods(supId, shopId,applicationStatus);
-            PageInfo pageResult = new PageInfo(djSupSupplierProductDTOS);
-            if(djSupSupplierProductDTOS.size()<=0)
+            List<DjSupSupplierProductDTO> djSupSupplierProductList= djSupSupplierProductMapper.queryHaveGoods(supId, shopId,applicationStatus);
+            if(djSupSupplierProductList.size()<=0){
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
-            return ServerResponse.createBySuccess("查询成功",pageResult);
+            }
+            return ServerResponse.createBySuccess("查询成功",djSupSupplierProductList);
         } catch (Exception e) {
             e.printStackTrace();
-            return ServerResponse.createByErrorMessage("查询失败");
+            return ServerResponse.createByErrorMessage("查询店铺-审核供货列表-已供商品失败");
         }
     }
 
 
     /**
-     * 全部打回
+     * 店铺-审核供货列表-全部打回
      *
-     * @param supId
-     * @param shopId
+     * @param id
      * @return
      */
-    public ServerResponse rejectAllProduct( String supId, String shopId) {
+    public ServerResponse rejectAllProduct( String id) {
         try {
-            Example example=new Example(DjSupApplicationProduct.class);
-            //申请状态 0:审核中 1:通过 2:不通过
-            example.createCriteria().andEqualTo(DjSupApplicationProduct.APPLICATION_STATUS,2)
-                    .andEqualTo(DjSupApplicationProduct.SUP_ID,supId)
-                    .andEqualTo(DjSupApplicationProduct.SHOP_ID,shopId);
-            djSupApplicationProductMapper.updateByExampleSelective(null,example);
+            if(StringUtils.isEmpty(id))
+            {
+                return ServerResponse.createByErrorMessage("供应商的商品id不能为空");
+            }
+            String[] iditem=id.split(",");
+            for (int i=0;i<iditem.length;i++)
+            {
+                DjSupApplicationProduct djSupApplicationProduct=new DjSupApplicationProduct();
+                djSupApplicationProduct.setId(iditem[i]);
+                djSupApplicationProduct.setApplicationStatus("2");//申请状态 0:审核中 1:通过 2:不通过
+                djSupApplicationProductMapper.updateByPrimaryKeySelective(djSupApplicationProduct);
+            }
             return ServerResponse.createBySuccessMessage("全部打回成功");
         } catch (Exception e) {
             e.printStackTrace();
-            return ServerResponse.createByErrorMessage("全部打回失败");
+            return ServerResponse.createByErrorMessage("店铺-审核供货列表-全部打回失败");
         }
     }
 
 
     /**
-     * 部分通过
+     * 店铺-审核供货列表-部分通过
      *
-     * @param supId
-     * @param shopId
+     * @param id
      * @return
      */
-    public ServerResponse rejectPartProduct( String id , String supId, String shopId) {
+    public ServerResponse rejectPartProduct( String id ) {
         try {
-            DjSupApplicationProduct djSupApplicationProduct=new DjSupApplicationProduct();
-            djSupApplicationProduct.setId(id);
-            djSupApplicationProduct.setSupId(supId);
-            djSupApplicationProduct.setShopId(shopId);
-            djSupApplicationProduct.setApplicationStatus("1");//申请状态 0:审核中 1:通过 2:不通过
-            djSupApplicationProductMapper.updateByPrimaryKeySelective(djSupApplicationProduct);
+
+            if(StringUtils.isEmpty(id))
+            {
+                return ServerResponse.createByErrorMessage("供应商的商品id不能为空");
+            }
+            String[] iditem=id.split(",");
+            for (int i=0;i<iditem.length;i++)
+            {
+                DjSupApplicationProduct djSupApplicationProduct=new DjSupApplicationProduct();
+                djSupApplicationProduct.setId(iditem[i]);
+                djSupApplicationProduct.setApplicationStatus("1");//申请状态 0:审核中 1:通过 2:不通过
+                djSupApplicationProductMapper.updateByPrimaryKeySelective(djSupApplicationProduct);
+            }
             return ServerResponse.createBySuccessMessage("部分通过成功");
         } catch (Exception e) {
             e.printStackTrace();
-            return ServerResponse.createByErrorMessage("部分通过失败");
+            return ServerResponse.createByErrorMessage("店铺-审核供货列表-部分通过失败");
         }
     }
 }

@@ -1,9 +1,10 @@
 package com.dangjia.acg.dto.supplier;
 
+import com.dangjia.acg.common.model.BaseEntity;
 import lombok.Data;
 
 @Data
-public class DjSupplierDTO {
+public class DjSupplierDTO extends BaseEntity {
     /**
      * 供应商名称
      */

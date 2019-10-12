@@ -24,6 +24,7 @@
 
     <select id="queryHaveGoods" resultType="com.dangjia.acg.dto.supplier.DjSupSupplierProductDTO">
         SELECT
+            sap.id,
             sap.goods_id AS goodsId,
             sap.product_id AS productId,
             bg. NAME AS goodsName,

@@ -1,5 +1,6 @@
 package com.dangjia.acg.dto.supplier;
 
+import com.dangjia.acg.common.model.BaseEntity;
 import lombok.Data;
 
 import java.util.Date;
@@ -11,7 +12,7 @@ import java.util.Date;
  * Time: 下午 2:17
  */
 @Data
-public class DjSupSupplierProductDTO {
+public class DjSupSupplierProductDTO extends BaseEntity {
 
     private String goodsId;
     private String goodsName;

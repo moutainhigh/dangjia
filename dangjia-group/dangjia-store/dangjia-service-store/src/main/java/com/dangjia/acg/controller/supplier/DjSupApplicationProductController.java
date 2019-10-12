@@ -45,19 +45,19 @@ public class DjSupApplicationProductController implements DjSupApplicationProduc
 
     @Override
     @ApiMethod
-    public ServerResponse getSuppliedProduct(HttpServletRequest request, String supId, String shopId,String applicationStatus ,PageDTO pageDTO) {
-        return djSupApplicationProductService.getSuppliedProduct(supId, shopId,applicationStatus,pageDTO);
+    public ServerResponse getSuppliedProduct(HttpServletRequest request, String supId, String shopId,String applicationStatus ) {
+        return djSupApplicationProductService.getSuppliedProduct(supId, shopId,applicationStatus);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse rejectAllProduct(HttpServletRequest request, String supId, String shopId) {
-        return djSupApplicationProductService.rejectAllProduct(supId, shopId);
+    public ServerResponse rejectAllProduct(HttpServletRequest request, String id) {
+        return djSupApplicationProductService.rejectAllProduct(id);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse rejectPartProduct(HttpServletRequest request, String id, String supId, String shopId) {
-        return djSupApplicationProductService.rejectPartProduct(id,supId, shopId);
+    public ServerResponse rejectPartProduct(HttpServletRequest request, String id) {
+        return djSupApplicationProductService.rejectPartProduct(id);
     }
 }
