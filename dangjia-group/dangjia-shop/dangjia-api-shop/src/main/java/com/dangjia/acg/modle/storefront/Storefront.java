@@ -1,7 +1,9 @@
 package com.dangjia.acg.modle.storefront;
 
+import com.dangjia.acg.common.annotation.Desc;
 import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
 
@@ -20,12 +22,16 @@ public class Storefront extends BaseEntity {
      * 用户表ID
      */
     @Column(name = "user_id")
+    @Desc(value = " 用户表ID")
+    @ApiModelProperty(" 用户表ID")
     private String userId;
 
     /**
      * 城市ID
      */
     @Column(name = "city_id")
+    @Desc(value = "  城市ID")
+    @ApiModelProperty("  城市ID")
     private String cityId;
 
 
@@ -33,18 +39,24 @@ public class Storefront extends BaseEntity {
      * 店铺名称
      */
     @Column(name = "storefront_name")
+    @Desc(value = "  店铺名称")
+    @ApiModelProperty("  店铺名称")
     private String storefrontName;
 
     /**
      * 店铺地址
      */
     @Column(name = "storefront_address")
+    @Desc(value = "  店铺地址")
+    @ApiModelProperty("  店铺地址")
     private String storefrontAddress;
 
     /**
      * 店铺介绍或者店铺描述
      */
     @Column(name = "storefront_desc")
+    @Desc(value = "  店铺介绍或者店铺描述")
+    @ApiModelProperty("  店铺介绍或者店铺描述")
     private String storefrontDesc;
 
 
@@ -52,6 +64,8 @@ public class Storefront extends BaseEntity {
      * 店铺LOGO
      */
     @Column(name = "storefront_logo")
+    @Desc(value = "  店铺LOGO")
+    @ApiModelProperty("  店铺LOGO")
     private String storefrontLogo;
 
 
@@ -59,12 +73,16 @@ public class Storefront extends BaseEntity {
      * 店铺联系人
      */
     @Column(name = "storekeeper_name")
+    @Desc(value = "  店铺联系人")
+    @ApiModelProperty("  店铺联系人")
     private String storekeeperName;
 
     /**
      * 联系电话
      */
     @Column(name = "contact")
+    @Desc(value = "  联系电话")
+    @ApiModelProperty("  联系电话")
     private String contact;
 
 
@@ -72,6 +90,8 @@ public class Storefront extends BaseEntity {
      * 联系邮件
      */
     @Column(name = "email")
+    @Desc(value = "  联系邮件")
+    @ApiModelProperty("  联系邮件")
     private String email;
 
 
