@@ -999,7 +999,7 @@ public class PaymentService {
         try {
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             Example example = new Example(BusinessOrder.class);
-            example.createCriteria().andEqualTo(BusinessOrder.TASK_ID, houseDistributionId).andNotEqualTo(BusinessOrder.STATE,4);;
+            example.createCriteria().andEqualTo(BusinessOrder.TASK_ID, houseDistributionId).andNotEqualTo(BusinessOrder.STATE,4);
             List<BusinessOrder> businessOrderList = businessOrderMapper.selectByExample(example);
             BusinessOrder businessOrder = null;
             if(businessOrderList.size()>0){
