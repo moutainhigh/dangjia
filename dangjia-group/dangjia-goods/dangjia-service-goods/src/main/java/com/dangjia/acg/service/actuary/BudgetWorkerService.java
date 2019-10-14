@@ -459,6 +459,7 @@ public class BudgetWorkerService {
                             budgetMaterial.setImage("");//货品图片
                             budgetMaterial.setShopCount(shopCount);
                             budgetMaterial.setTotalPrice(0.0);
+                            budgetMaterial.setStorefontId("");
                             Unit unit = iUnitMapper.selectByPrimaryKey(goods.getUnitId());
                             if (unit != null)
                                 budgetMaterial.setUnitName(unit.getName());
@@ -474,6 +475,7 @@ public class BudgetWorkerService {
                         budgetMaterial.setProductType(goods.getType());
                         budgetMaterial.setGroupType(groupType);
                         budgetMaterial.setGoodsGroupId(goodsGroupId);
+
 //                        budgetMaterial.setTemplateId(actuarialTemplateId);
                         iBudgetMaterialMapper.insert(budgetMaterial);
                     } catch (Exception e) {
