@@ -34,13 +34,23 @@ public class StorefrontProduct extends BaseEntity {
     @ApiModelProperty("商品模板ID")
     private String prodTemplateId;
 
+
+    /**
+     * 商品模板ID
+     */
+    @Column(name = "product_name")
+    @Desc(value = "商品名称")
+    @ApiModelProperty("商品名称")
+    private String productName;
+
+
     /**
      * 商品名称
      */
-    @Column(name = "goods_name")
+    @Column(name = "goods_id")
     @Desc(value = "商品名称")
     @ApiModelProperty("商品名称")
-    private String goodsName;
+    private String goodsId;
 
 
     /**

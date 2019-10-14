@@ -1,8 +1,11 @@
 package com.dangjia.acg.service.storefront;
 
+import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.api.app.member.MemberAPI;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.mapper.storefront.IStorefrontProductMapper;
-import com.dangjia.acg.modle.storefront.Storefront;
+import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,12 +17,74 @@ public class StorefrontProductService {
      * 声明日志
      */
     private static Logger logger = LoggerFactory.getLogger(StorefrontService.class);
-
     @Autowired
     private IStorefrontProductMapper istorefrontProductMapper;
 
+
+
     /**
-     * 通过类别查询商品
+     *供货设置-增加已选商品
+     * @param userToken
+     * @return
+     */
+    public ServerResponse addStorefrontProduct(String userToken) {
+        try {
+//            Object object = memberAPI.getMember(userToken);
+//            if (object instanceof ServerResponse) {
+//                return (ServerResponse) object;
+//            }
+//            JSONObject job = (JSONObject)object;
+//            Member member = job.toJavaObject(Member.class);
+
+            StorefrontProduct storefrontProduct=new StorefrontProduct();
+            int i=istorefrontProductMapper.insertSelective(storefrontProduct);
+            if(i>0)
+            {
+                return ServerResponse.createBySuccessMessage("增加店铺商品成功");
+            }
+            else
+            {
+                return ServerResponse.createBySuccessMessage("增加店铺商品失败");
+            }
+
+        } catch (Exception e) {
+            logger.error("增加店铺商品失败：", e);
+            return ServerResponse.createByErrorMessage("增加店铺商品失败");
+        }
+    }
+
+    /**
+     *供货设置-删除已选商品
+     * @param userToken
+     * @return
+     */
+    public ServerResponse delStorefrontProductById(String userToken,String id) {
+        try {
+//            Object object = memberAPI.getMember(userToken);
+//            if (object instanceof ServerResponse) {
+//                return (ServerResponse) object;
+//            }
+//            JSONObject job = (JSONObject)object;
+//            Member member = job.toJavaObject(Member.class);
+            int i=istorefrontProductMapper.deleteByPrimaryKey(id);
+            if(i>0)
+            {
+                return ServerResponse.createBySuccessMessage("删除成功");
+            }
+            else
+            {
+                return ServerResponse.createBySuccessMessage("删除失败");
+            }
+
+        } catch (Exception e) {
+            logger.error("删除已选商品失败：", e);
+            return ServerResponse.createByErrorMessage("删除已选商品失败");
+        }
+    }
+
+
+    /**
+     *供货设置-已选商品-通过货品或者商品名称查询
      *
      * @param userToken
      * @param type
@@ -61,6 +126,9 @@ public class StorefrontProductService {
      */
     public ServerResponse setAllStoreProductByIsShelfStatus(String userToken, String isShelfStatus) {
         try {
+            //获取列表集合
+            //批量插入到dj_basics_storefront_product中
+
             return null;
         } catch (Exception e) {
             logger.error("查询失败：", e);
@@ -68,21 +136,6 @@ public class StorefrontProductService {
         }
     }
 
-    /**
-     * 根据主键删除商品
-     *
-     * @param userToken
-     * @param id
-     * @return
-     */
-    public ServerResponse delStorefrontProductById(String userToken, String id) {
-        try {
-            return null;
-        } catch (Exception e) {
-            logger.error("查询失败：", e);
-            return ServerResponse.createByErrorMessage("查询失败");
-        }
-    }
 
     /**
      * 根据id修改店铺商品

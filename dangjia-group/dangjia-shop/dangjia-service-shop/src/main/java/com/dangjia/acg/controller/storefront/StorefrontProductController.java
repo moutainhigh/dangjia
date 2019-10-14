@@ -23,6 +23,18 @@ public class StorefrontProductController implements StorefrontProductAPI {
 
     @Override
     @ApiMethod
+    public ServerResponse addStorefrontProduct(String userToken) {
+        return storefrontProductService.addStorefrontProduct(userToken);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse delStorefrontProductById(String userToken,String id ) {
+        return storefrontProductService.delStorefrontProductById(userToken,id);
+    }
+
+    @Override
+    @ApiMethod
     public ServerResponse queryStorefrontProductByType(String userToken, String type) {
         return storefrontProductService.queryStorefrontProductByType(userToken, type);
     }
@@ -41,15 +53,7 @@ public class StorefrontProductController implements StorefrontProductAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse delStorefrontProductById(String userToken, String id) {
-
-        return storefrontProductService.delStorefrontProductById(userToken, id);
-    }
-
-    @Override
-    @ApiMethod
     public ServerResponse updateStorefrontProductById(String userToken, String id) {
-
         return storefrontProductService.updateStorefrontProductById(userToken, id);
     }
 

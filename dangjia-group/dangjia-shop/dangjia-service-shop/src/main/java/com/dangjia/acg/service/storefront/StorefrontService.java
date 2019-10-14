@@ -24,22 +24,25 @@ public class StorefrontService {
      * 声明日志
      */
     private static Logger logger = LoggerFactory.getLogger(StorefrontService.class);
-    @Autowired
-    private MemberAPI memberAPI;
+
+
+
     @Autowired
     private IStorefrontMapper istorefrontMapper;
+
+
 
     public ServerResponse addStorefront(String userToken, String cityId, String storefrontName,
                                         String storefrontAddress, String storefrontDesc,
                                         String storefrontLogo, String storekeeperName,
                                         String contact, String email) {
         try {
-            Object object = memberAPI.getMember(userToken);
-            if (object instanceof ServerResponse) {
-                return (ServerResponse) object;
-            }
-            JSONObject job = (JSONObject)object;
-            Member worker = job.toJavaObject(Member.class);
+//            Object object = memberAPI.getMember(userToken);
+//            if (object instanceof ServerResponse) {
+//                return (ServerResponse) object;
+//            }
+//            JSONObject job = (JSONObject)object;
+//            Member worker = job.toJavaObject(Member.class);
 
             //店铺名称不能大于10个字
             if (storefrontName.length() > 10) {
@@ -54,7 +57,7 @@ public class StorefrontService {
                 return ServerResponse.createByErrorMessage("店铺介绍不能大于20个字!");
             }
             Storefront storefront = new Storefront();
-            storefront.setUserId(worker.getId());
+            storefront.setUserId(null);
             storefront.setCityId(cityId);
             storefront.setStorefrontName(storefrontName);
             storefront.setStorefrontAddress(storefrontAddress);
