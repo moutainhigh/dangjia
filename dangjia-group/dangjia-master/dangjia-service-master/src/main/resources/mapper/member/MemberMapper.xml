@@ -32,6 +32,7 @@
         w.check_type AS checkType,
         w.praise_rate AS praiseRate,
         w.volume,
+        w.methods,
         w.evaluation_score AS evaluationScore,
         w.is_crowned AS isCrowned,
         w.smscode,

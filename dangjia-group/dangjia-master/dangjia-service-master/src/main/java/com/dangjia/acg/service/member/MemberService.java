@@ -681,6 +681,19 @@ public class MemberService {
     }
 
     /**
+     * 更新工匠持单量
+     */
+    public ServerResponse updateMethods(String workerId, Integer methods) {
+        Member user = memberMapper.selectByPrimaryKey(workerId);
+        user.setMethods(methods);
+        memberMapper.updateByPrimaryKeySelective(user);
+        user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
+        MainUser mainUser = userMapper.findUserByMobile(user.getMobile());
+        AccessToken accessToken = TokenUtil.generateAccessToken(user, mainUser);
+        redisClient.put(accessToken.getUserToken() + Constants.SESSIONUSERID, accessToken);
+        return ServerResponse.createBySuccessMessage("持单量设置成功");
+    }
+    /**
      * 业主列表
      */
     public ServerResponse getMemberList(PageDTO pageDTO, String cityId, String userKey, Integer stage, String userRole, String searchKey, String parentId, String childId, String orderBy, String type, String userId, String beginDate, String endDate) {
