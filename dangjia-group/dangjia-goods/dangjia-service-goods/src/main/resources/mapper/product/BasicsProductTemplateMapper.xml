@@ -383,39 +383,49 @@
             )
     </select>
 
-    <select id="queryWorkerGoodsDTO" resultType="com.dangjia.acg.dto.basics.WorkerGoodsDTO">
-        SELECT
-            p.id,
-            p. NAME as name,
-            p.product_sn as workerGoodsSn,
-            p.image,
-            p.worker_dec as workerDec,
-            p.unit_id as unitId,
-            p.unit_name as unitName,
-            p.other_name as otherName,
-            p.worker_type_id as workerTypeId,
-            p.price,
-            p.istop,
-            g.sales,
-            p.work_explain as workExplain,
-            p.worker_standard as workerStandard,
-            p.maket,
-            p.last_price as lastPrice,
-            p.last_time as lastTime,
-            p.technology_ids as technologyIds,
-            p.considerations as considerations,
-            p.calculate_content as calculateContent,
-            p.build_content as buildContent,
-            p.create_date as createDate,
-	        p.modify_date as modifyDate
+    <select id="queryStoreWorkerGoodsDTO" resultType="com.dangjia.acg.dto.basics.WorkerGoodsDTO">
+        SELECT DISTINCT
+         p.id,
+         p.NAME AS NAME,
+         p.product_sn AS workerGoodsSn,
+         p.image,
+         p.worker_dec AS workerDec,
+         p.unit_id AS unitId,
+         p.unit_name AS unitName,
+         p.other_name AS otherName,
+         p.worker_type_id AS workerTypeId,
+         p.price,
+         p.istop,
+         g.sales,
+         p.work_explain AS workExplain,
+         p.worker_standard AS workerStandard,
+         p.maket,
+         p.last_price AS lastPrice,
+         p.last_time AS lastTime,
+         p.technology_ids AS technologyIds,
+         p.considerations AS considerations,
+         p.calculate_content AS calculateContent,
+         p.build_content AS buildContent,
+         p.create_date AS createDate,
+         p.modify_date AS modifyDate,
+         t1.storefront_id storefrontId
         FROM
-            dj_basics_product_template p
-        INNER JOIN dj_basics_goods g ON p.goods_id = g.id
-        where p.data_status=0
-        and p.maket=1
-        and p.product_sn=#{productSn}
-        and p.worker_type_id=#{workerTypeId}
+            dj_basics_product_template p,
+            dj_basics_storefront_product t1,
+            dj_basics_goods g
+        WHERE
+            p.goods_id = g.id
+        AND p.id = t1.prod_template_id
+        AND p.data_status = 0
+        AND p.maket = 1
+        AND t1.is_shelf_status = '1'
+         and p.product_sn=#{productSn}
+         and p.worker_type_id=#{workerTypeId}
+        ORDER BY
+            t1.sell_price DESC
+        LIMIT 1
     </select>
+
 
     <select id="getProductListByStoreproductId" resultType="com.dangjia.acg.modle.product.DjBasicsProductTemplate">
         SELECT
@@ -432,6 +442,7 @@
            t.id = t1.prod_template_id
            and t1.is_shelf_status = '1'
            AND t1.id = #{storefontProductId}
+           and t1.data_status=0
     </select>
     <select  id="getGoodsListByStorefontId" resultType="com.dangjia.acg.modle.product.BasicsGoods">
         SELECT
@@ -446,6 +457,7 @@
             t.id = t1.prod_template_id
         AND t1.storefront_id = #{storefontId}
         and t2.category_id = #{categoryId}
+        and t1.data_status=0
         group by t2.name
     </select>
 
@@ -459,8 +471,50 @@
             dj_basics_storefront_product t1
         WHERE
             t.id = t1.prod_template_id
+        and t1.is_shelf_status = '1'
         AND t1.storefront_id = #{storefontId}
         and t.goods_id = #{goodsId}
         group by t.name
+    </select>
+
+    <!--根据商品模板ID查询对应店铺商品信息-->
+    <select id="getStorefrontInfoByprodTemplateId" resultType="com.dangjia.acg.dto.product.StorefrontProductDTO">
+        SELECT
+            t1.storefront_id storefrontId,
+            t1.id storefrontProductId,
+            t.id productTemplateId,
+            t.category_id categoryId,
+            t.product_sn productSn,
+            t1.product_name productName,
+            t.goods_id goodsId,
+            t.cost,
+            t1.sell_price sellPrice,
+            t1.image,
+            t.convert_quality convertQuality,
+            t.convert_unit convertUnit,
+            t.unit_id unitId,
+            t.unit_name unitName,
+            t.unit_id,
+            t.unit_name,
+            t.label_id
+        FROM
+            dj_basics_product_template t,
+            dj_basics_storefront_product t1
+        WHERE
+            t.id = t1.prod_template_id
+        and t1.is_shelf_status = '1'
+        and t1.data_status=0
+        and t.maket=1
+        and t.type=1
+        and t.data_status = 0
+        <if test="prodTemplateId!=null and prodTemplateId!=''">
+            AND t.id = #{prodTemplateId}
+        </if>
+        <if test="prodTemplateSn!=null and prodTemplateSn!=''">
+            AND t.product_sn = #{prodTemplateSn}
+        </if>
+        GROUP BY
+            t1.sell_price ASC
+        limit 1
     </select>
 </mapper>

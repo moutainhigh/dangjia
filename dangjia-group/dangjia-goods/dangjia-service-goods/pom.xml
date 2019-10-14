@@ -33,6 +33,12 @@
         </dependency>
         <dependency>
             <groupId>com.dangjia.acg</groupId>
+            <artifactId>dangjia-api-shop</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.dangjia.acg</groupId>
             <artifactId>dangjia-api-master</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
@@ -73,12 +79,12 @@
         </dependency>
         <!--消息队列-->
         <!--<dependency>-->
-            <!--<groupId>org.springframework.cloud</groupId>-->
-            <!--<artifactId>spring-cloud-starter-stream-rabbit</artifactId>-->
+        <!--<groupId>org.springframework.cloud</groupId>-->
+        <!--<artifactId>spring-cloud-starter-stream-rabbit</artifactId>-->
         <!--</dependency>-->
         <!--<dependency>-->
-            <!--<groupId>org.springframework.cloud</groupId>-->
-            <!--<artifactId>spring-cloud-stream-binder-rabbit</artifactId>-->
+        <!--<groupId>org.springframework.cloud</groupId>-->
+        <!--<artifactId>spring-cloud-stream-binder-rabbit</artifactId>-->
         <!--</dependency>-->
         <dependency>
             <groupId>org.springframework.cloud</groupId>

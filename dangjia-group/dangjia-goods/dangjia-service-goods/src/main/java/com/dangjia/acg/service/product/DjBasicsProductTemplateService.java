@@ -11,10 +11,8 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
-import com.dangjia.acg.dto.product.ActuarialGoodsDTO;
-import com.dangjia.acg.dto.product.BasicsProductDTO;
-import com.dangjia.acg.dto.product.DjBasicsLabelDTO;
-import com.dangjia.acg.dto.product.DjBasicsProductLabelDTO;
+import com.dangjia.acg.dto.basics.ProductDTO;
+import com.dangjia.acg.dto.product.*;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
 import com.dangjia.acg.mapper.basics.IAttributeValueMapper;
 import com.dangjia.acg.mapper.basics.ILabelMapper;
@@ -26,6 +24,7 @@ import com.dangjia.acg.modle.basics.Label;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.product.*;
+import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.service.basics.TechnologyService;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
@@ -992,6 +991,44 @@ public class DjBasicsProductTemplateService {
         }else{
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
+    }
+
+    /**
+     * 检查excel上传的商品是否有店铺售卖
+     * @param productSn
+     * @param shopCount
+     * @return
+     */
+    public ProductDTO getProductDTO(String productSn, String shopCount) {
+       /* Example example = new Example(DjBasicsProductTemplate.class);
+        example.createCriteria()
+                .andEqualTo(DjBasicsProductTemplate.DATA_STATUS, '0')
+                .andEqualTo(DjBasicsProductTemplate.PRODUCT_SN, productSn)
+                .andEqualTo(DjBasicsProductTemplate.TYPE, "1")
+                .andEqualTo(DjBasicsProductTemplate.MAKET, "1")*/
+//                .andEqualTo(Product.WORKER_TYPE_ID,workerTypeId)
+        ;
+        StorefrontProductDTO storefrontProductDTO=iBasicsProductTemplateMapper.getStorefrontInfoByprodTemplateId(null,DjBasicsProductTemplate.PRODUCT_SN);//查询店铺是否有售卖此商品
+       // List<DjBasicsProductTemplate> products = iBasicsProductTemplateMapper.selectByExample(example);
+        ProductDTO productsDTO = new ProductDTO();
+        if (storefrontProductDTO != null && StringUtils.isNotBlank(storefrontProductDTO.getStorefrontId())) {
+           productsDTO.setGoodsId(storefrontProductDTO.getGoodsId());
+            productsDTO.setProductId(storefrontProductDTO.getProductTemplateId());
+            productsDTO.setProductName(storefrontProductDTO.getProductName());
+            productsDTO.setUnitName(storefrontProductDTO.getUnitName());
+            //productsDTO.setLabelId(storefrontProductDTO.getLabelId());
+            productsDTO.setShopCount(shopCount);
+            BasicsGoods goods = iBasicsGoodsMapper.selectByPrimaryKey(storefrontProductDTO.getGoodsId());
+            if (goods != null) {
+                productsDTO.setGoodsName(goods.getName());
+                productsDTO.setProductType(String.valueOf(goods.getType()));
+                productsDTO.setBuy(String.valueOf(goods.getBuy()));
+            }
+        } else {
+            productsDTO.setProductSn(productSn);
+            productsDTO.setMsg("找不到该商品（" + productSn + "）,请检查是否上架或者停用！");
+        }
+        return productsDTO;
     }
 
 }

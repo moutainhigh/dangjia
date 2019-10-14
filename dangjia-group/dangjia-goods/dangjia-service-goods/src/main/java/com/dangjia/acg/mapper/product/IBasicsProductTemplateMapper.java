@@ -2,8 +2,8 @@ package com.dangjia.acg.mapper.product;
 
 import com.dangjia.acg.dto.basics.WorkerGoodsDTO;
 import com.dangjia.acg.dto.product.AppBasicsProductDTO;
+import com.dangjia.acg.dto.product.StorefrontProductDTO;
 import com.dangjia.acg.modle.product.BasicsGoods;
-import com.dangjia.acg.modle.product.DjBasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -71,13 +71,12 @@ public interface IBasicsProductTemplateMapper extends Mapper<DjBasicsProductTemp
      * 删除材料扩展表信息
      * @param goodsId 货品ID
      */
-    void deleteProductMaterial(@Param("goodsId") String goodsId);
+    //void deleteProductMaterial(@Param("goodsId") String goodsId);
 
     /**
      * 删除产品扩展表信息
-     * @param goodsId 货品ID
      */
-    void deleteProductWorker(@Param("goodsId") String goodsId);
+   // void deleteProductWorker(@Param("goodsId") String goodsId);
 
     List<DjBasicsProductTemplate> queryProductByCategoryId(@Param("categoryId") String categoryId);
 
@@ -93,7 +92,9 @@ public interface IBasicsProductTemplateMapper extends Mapper<DjBasicsProductTemp
 
 
     List<DjBasicsProductTemplate> queryChooseGoods();
-    List<WorkerGoodsDTO> queryWorkerGoodsDTO(@Param("productSn") String productSn, @Param("workerTypeId") String workerTypeId);
+   // List<WorkerGoodsDTO> queryWorkerGoodsDTO(@Param("productSn") String productSn, @Param("workerTypeId") String workerTypeId);
+
+    WorkerGoodsDTO queryStoreWorkerGoodsDTO(@Param("productSn") String productSn, @Param("workerTypeId") String workerTypeId);
 
 
     DjBasicsProductTemplate getProductListByStoreproductId(@Param("storefontProductId") String storefontProductId);
@@ -105,4 +106,8 @@ public interface IBasicsProductTemplateMapper extends Mapper<DjBasicsProductTemp
     //查询当前店铺下对应货品下的所有商品
     List<DjBasicsProductTemplate> getproductTempListByStorefontId(@Param("storefontId") String storefontId,
                                                                   @Param("goodsId") String goodsId);
+
+    //根据模板ID查询对应符合条件的商品信息
+    StorefrontProductDTO getStorefrontInfoByprodTemplateId(@Param("prodTemplateId") String prodTemplateId,@Param("prodTemplateSn") String prodTemplateSn);
+
 }
