@@ -3,7 +3,7 @@ package com.dangjia.acg.service.storefront;
 import cn.jiguang.common.utils.StringUtils;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.dto.storefront.StorefrontProductDTO;
+import com.dangjia.acg.dto.storefront.StorefrontProductListDTO;
 import com.dangjia.acg.dto.storefront.BasicsStorefrontProductDTO;
 import com.dangjia.acg.dto.storefront.BasicsStorefrontProductViewDTO;
 import com.dangjia.acg.mapper.storefront.IStorefrontProductMapper;
@@ -32,7 +32,7 @@ public class StorefrontProductService {
      * @param id
      * @return
      */
-    public StorefrontProductDTO querySingleStorefrontProductById(String id) {
+    public StorefrontProductListDTO querySingleStorefrontProductById(String id) {
         return istorefrontProductMapper.querySingleStorefrontProductById(id);
     }
 

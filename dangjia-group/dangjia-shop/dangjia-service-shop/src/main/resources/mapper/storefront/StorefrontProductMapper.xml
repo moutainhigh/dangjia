@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.storefront.IStorefrontProductMapper">
 
-    <select id="querySingleStorefrontProductById" resultType="com.dangjia.acg.dto.storefront.StorefrontProductDTO">
+    <select id="querySingleStorefrontProductById" resultType="com.dangjia.acg.dto.storefront.StorefrontProductListDTO">
           SELECT
             bsp.product_name AS productName,
             bpt.product_sn AS productSn,

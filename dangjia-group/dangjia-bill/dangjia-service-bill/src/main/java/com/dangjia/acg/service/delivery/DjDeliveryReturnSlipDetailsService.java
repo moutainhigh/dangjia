@@ -5,7 +5,7 @@ import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.delivery.DjDeliveryReturnSlipDetailsDTO;
 import com.dangjia.acg.dto.delivery.DjDeliveryReturnSlipDetailsProductDTO;
-import com.dangjia.acg.dto.storefront.StorefrontProductDTO;
+import com.dangjia.acg.dto.storefront.StorefrontProductListDTO;
 import com.dangjia.acg.mapper.delivery.DjDeliveryReturnSlipDetailsMapper;
 import com.dangjia.acg.mapper.delivery.DjDeliveryReturnSlipMapper;
 import com.dangjia.acg.modle.delivery.DjDeliveryReturnSlipDetails;
@@ -55,7 +55,7 @@ public class DjDeliveryReturnSlipDetailsService {
                      djDeliveryReturnSlipDetailsProductDTO.setQuantity(djDeliveryReturnSlipDetails1.getQuantity());
                      djDeliveryReturnSlipDetailsProductDTO.setTotalPrices(djDeliveryReturnSlipDetails1.getTotalPrices());
                      djDeliveryReturnSlipDetailsProductDTO.setUnitPrice(djDeliveryReturnSlipDetails1.getUnitPrice());
-                     StorefrontProductDTO storefrontProductDTO = StorefrontProductAPI.querySingleStorefrontProductById(djDeliveryReturnSlipDetails1.getStorefrontProductId());
+                     StorefrontProductListDTO storefrontProductDTO = StorefrontProductAPI.querySingleStorefrontProductById(djDeliveryReturnSlipDetails1.getStorefrontProductId());
                      djDeliveryReturnSlipDetailsProductDTO.setProductName(storefrontProductDTO.getProductName());
                      djDeliveryReturnSlipDetailsProductDTO.setProductSn(storefrontProductDTO.getProductSn());
                      djDeliveryReturnSlipDetailsProductDTOS.add(djDeliveryReturnSlipDetailsProductDTO);

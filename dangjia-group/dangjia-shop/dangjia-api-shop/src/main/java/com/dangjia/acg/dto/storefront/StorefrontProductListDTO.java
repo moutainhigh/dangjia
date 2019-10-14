@@ -9,7 +9,7 @@ import lombok.Data;
  * Time: 下午 4:58
  */
 @Data
-public class StorefrontProductDTO {
+public class StorefrontProductListDTO {
     private String productSn;
     private String productId;
     private String image;
