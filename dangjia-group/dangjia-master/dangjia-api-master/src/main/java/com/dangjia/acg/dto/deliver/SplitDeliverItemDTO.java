@@ -23,9 +23,6 @@ public class SplitDeliverItemDTO {
     private String productSn;//编号
     private Double shopCount;//购买总数
     private Double num;//本次发货数量
-
-    @ExcelField(titile = "单位", offset = 7)
-    private String unitName;//单位
     private String brandSeriesName;//品牌系列
     private Double cost;//平均成本价
     private Double price;//销售价
@@ -41,6 +38,8 @@ public class SplitDeliverItemDTO {
     @ExcelField(titile = "成本总价", offset = 6)
     private Double supCostTotal;//成本总价
 
+    @ExcelField(titile = "单位", offset = 7)
+    private String unitName;//单位
 
     private Double askCount;//要货数量
 }
