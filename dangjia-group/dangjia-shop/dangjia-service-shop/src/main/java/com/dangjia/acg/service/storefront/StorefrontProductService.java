@@ -3,13 +3,16 @@ package com.dangjia.acg.service.storefront;
 import cn.jiguang.common.utils.StringUtils;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.dto.storefront.StorefrontProductViewDTO;
+import com.dangjia.acg.dto.storefront.BasicsStorefrontProductDTO;
+import com.dangjia.acg.dto.storefront.BasicsStorefrontProductViewDTO;
 import com.dangjia.acg.mapper.storefront.IStorefrontProductMapper;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
 
@@ -27,16 +30,24 @@ public class StorefrontProductService {
      *
      * @return
      */
-    public ServerResponse addStorefrontProduct() {
+    public ServerResponse addStorefrontProduct(BasicsStorefrontProductDTO basicsStorefrontProductDTO) {
         try {
+            //判断是否重复添加
+            Example example = new Example(StorefrontProduct.class);
+            example.createCriteria().andEqualTo(StorefrontProduct.PROD_TEMPLATE_ID, basicsStorefrontProductDTO.getProdTemplateId());
+            List<StorefrontProduct> list = istorefrontProductMapper.selectByExample(example);
+            if (list.size() > 0) {
+                return ServerResponse.createBySuccessMessage("店铺商品已经添加，不能重复添加!");
+            }
+
             StorefrontProduct storefrontProduct = new StorefrontProduct();
+            BeanUtils.copyProperties(storefrontProduct, basicsStorefrontProductDTO);//实体对象赋值
             int i = istorefrontProductMapper.insertSelective(storefrontProduct);
             if (i > 0) {
                 return ServerResponse.createBySuccessMessage("增加店铺商品成功");
             } else {
                 return ServerResponse.createBySuccessMessage("增加店铺商品失败");
             }
-
         } catch (Exception e) {
             logger.error("增加店铺商品失败：", e);
             return ServerResponse.createByErrorMessage("增加店铺商品失败");
@@ -50,8 +61,7 @@ public class StorefrontProductService {
      */
     public ServerResponse delStorefrontProductById(String id) {
         try {
-            if(StringUtils.isEmpty(id))
-            {
+            if (StringUtils.isEmpty(id)) {
                 return ServerResponse.createBySuccessMessage("商品ID不能为空");
             }
             int i = istorefrontProductMapper.deleteByPrimaryKey(id);
@@ -76,7 +86,7 @@ public class StorefrontProductService {
      */
     public ServerResponse queryStorefrontProductByKeyWord(String keyWord) {
         try {
-            List<StorefrontProductViewDTO> list = istorefrontProductMapper.queryStorefrontProductViewDTOList(keyWord);
+            List<BasicsStorefrontProductViewDTO> list = istorefrontProductMapper.queryStorefrontProductViewDTOList(keyWord);
             if (list.size() <= 0) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
@@ -97,20 +107,18 @@ public class StorefrontProductService {
      */
     public ServerResponse setSpStatusById(String id, String isShelfStatus) {
         try {
-            if(StringUtils.isEmpty(id))
-            {
+            if (StringUtils.isEmpty(id)) {
                 return ServerResponse.createBySuccessMessage("店铺商品ID不能为空");
             }
 
-            if(StringUtils.isEmpty(isShelfStatus))
-            {
+            if (StringUtils.isEmpty(isShelfStatus)) {
                 return ServerResponse.createBySuccessMessage("商品上下架状态不能为空");
             }
 
-            StorefrontProduct storefrontProduct=new StorefrontProduct();
+            StorefrontProduct storefrontProduct = new StorefrontProduct();
             storefrontProduct.setId(id);
             storefrontProduct.setIsShelfStatus(isShelfStatus);
-            int i= istorefrontProductMapper.updateByPrimaryKeySelective(storefrontProduct);
+            int i = istorefrontProductMapper.updateByPrimaryKeySelective(storefrontProduct);
             if (i > 0) {
                 return ServerResponse.createBySuccessMessage("设置商品上下架成功");
             } else {
@@ -128,23 +136,20 @@ public class StorefrontProductService {
      * @param isShelfStatus
      * @return
      */
-    public ServerResponse setAllStoreProductByIsShelfStatus(String id,String isShelfStatus) {
+    public ServerResponse setAllStoreProductByIsShelfStatus(String id, String isShelfStatus) {
         try {
-            if(StringUtils.isEmpty(id))
-            {
+            if (StringUtils.isEmpty(id)) {
                 return ServerResponse.createBySuccessMessage("店铺商品ID集合不能为空");
             }
-            if(StringUtils.isEmpty(isShelfStatus))
-            {
+            if (StringUtils.isEmpty(isShelfStatus)) {
                 return ServerResponse.createBySuccessMessage("商品上下架状态不能为空");
             }
-            String [] iditem=id.split(",");
-            for(int i=0;i<iditem.length;i++)
-            {
-                StorefrontProduct storefrontProduct=new StorefrontProduct();
+            String[] iditem = id.split(",");
+            for (int i = 0; i < iditem.length; i++) {
+                StorefrontProduct storefrontProduct = new StorefrontProduct();
                 storefrontProduct.setId(iditem[i]);
                 storefrontProduct.setIsShelfStatus(isShelfStatus);
-                int k= istorefrontProductMapper.updateByPrimaryKeySelective(storefrontProduct);
+                int k = istorefrontProductMapper.updateByPrimaryKeySelective(storefrontProduct);
                 if (k > 0) {
                     return ServerResponse.createBySuccessMessage("设置商品上下架成功");
                 } else {
@@ -167,12 +172,11 @@ public class StorefrontProductService {
      */
     public ServerResponse updateStorefrontProductById(String id) {
         try {
-            if(StringUtils.isEmpty(id))
-            {
+            if (StringUtils.isEmpty(id)) {
                 return ServerResponse.createBySuccessMessage("商品ID不能为空");
             }
-
-            return null;
+            StorefrontProduct storefrontProduct = istorefrontProductMapper.selectByPrimaryKey(id);
+            return ServerResponse.createBySuccess("查询成功", storefrontProduct);
         } catch (Exception e) {
             logger.error("根据id修改店铺商品失败：", e);
             return ServerResponse.createByErrorMessage("根据id修改店铺商品失败");
@@ -182,17 +186,20 @@ public class StorefrontProductService {
     /**
      * 供货设置-保存编辑店铺商品
      *
-     * @param id
+     * @param storefrontProduct
      * @return
      */
-    public ServerResponse saveStorefrontProductById(String id) {
+    public ServerResponse saveStorefrontProductById(StorefrontProduct storefrontProduct) {
         try {
-            if(StringUtils.isEmpty(id))
-            {
+            if (StringUtils.isEmpty(storefrontProduct.getId())) {
                 return ServerResponse.createBySuccessMessage("商品ID不能为空");
             }
-
-            return null;
+            int i = istorefrontProductMapper.updateByPrimaryKeySelective(storefrontProduct);
+            if (i > 0) {
+                return ServerResponse.createBySuccessMessage("修改成功");
+            } else {
+                return ServerResponse.createBySuccessMessage("修改失败");
+            }
         } catch (Exception e) {
             logger.error("供货设置-保存编辑店铺商品失败：", e);
             return ServerResponse.createByErrorMessage("供货设置-保存编辑店铺商品失败");

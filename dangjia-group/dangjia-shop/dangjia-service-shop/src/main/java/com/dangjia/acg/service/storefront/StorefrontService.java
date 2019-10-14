@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.storefront;
 
+import cn.jiguang.common.utils.StringUtils;
 import com.dangjia.acg.api.app.member.MemberAPI;
 import com.dangjia.acg.common.model.PageDTO;
 
@@ -13,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
 
@@ -62,6 +64,18 @@ public class StorefrontService {
             storefront.setStorekeeperName(storekeeperName);
             storefront.setContact(contact);
             storefront.setEmail(email);
+
+            //判断是否重复添加
+            Example example=new Example(Storefront.class);
+            example.createCriteria().andEqualTo(Storefront.CITY_ID,cityId).
+                    andEqualTo(Storefront.STOREFRONT_NAME,storefrontName).andEqualTo(Storefront.CONTACT,contact);
+            List<Storefront> list=istorefrontMapper.selectByExample(example);
+            if(list.size()>0)
+            {
+                return ServerResponse.createBySuccessMessage("店铺已经添加，不能重复添加!");
+            }
+
+
             int i = istorefrontMapper.insert(storefront);
             if (i > 0) {
                 return ServerResponse.createBySuccessMessage("新增成功!");
@@ -82,6 +96,11 @@ public class StorefrontService {
 //                return (ServerResponse) object;
 //            }
 //            Member worker = (Member) object;
+
+            if(StringUtils.isEmpty(storefront.getId()))
+            {
+                return ServerResponse.createBySuccessMessage("店铺商品ID不能为空");
+            }
             int i = istorefrontMapper.updateByPrimaryKey(storefront);
             if (i > 0) {
                 return ServerResponse.createBySuccessMessage("修改成功!");

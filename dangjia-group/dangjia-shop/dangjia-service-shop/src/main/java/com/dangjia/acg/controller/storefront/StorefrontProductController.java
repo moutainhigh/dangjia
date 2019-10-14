@@ -3,6 +3,8 @@ package com.dangjia.acg.controller.storefront;
 import com.dangjia.acg.api.StorefrontProductAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dto.storefront.BasicsStorefrontProductDTO;
+import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.service.storefront.StorefrontProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,8 +24,9 @@ public class StorefrontProductController implements StorefrontProductAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse addStorefrontProduct() {
-        return storefrontProductService.addStorefrontProduct();
+    public ServerResponse addStorefrontProduct(BasicsStorefrontProductDTO basicsStorefrontProductDTO) {
+
+        return storefrontProductService.addStorefrontProduct(basicsStorefrontProductDTO);
     }
 
     @Override
@@ -46,8 +49,8 @@ public class StorefrontProductController implements StorefrontProductAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse setAllStoreProductByIsShelfStatus(String id,String isShelfStatus) {
-        return storefrontProductService.setAllStoreProductByIsShelfStatus(id,isShelfStatus);
+    public ServerResponse setAllStoreProductByIsShelfStatus(String id, String isShelfStatus) {
+        return storefrontProductService.setAllStoreProductByIsShelfStatus(id, isShelfStatus);
     }
 
     @Override
@@ -58,8 +61,8 @@ public class StorefrontProductController implements StorefrontProductAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse saveStorefrontProductById(String id) {
-        return storefrontProductService.saveStorefrontProductById(id);
+    public ServerResponse saveStorefrontProductById(StorefrontProduct storefrontProduct) {
+        return storefrontProductService.saveStorefrontProductById(storefrontProduct);
     }
 
 

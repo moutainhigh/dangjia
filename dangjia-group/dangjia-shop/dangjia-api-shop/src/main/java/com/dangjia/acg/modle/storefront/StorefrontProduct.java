@@ -36,7 +36,7 @@ public class StorefrontProduct extends BaseEntity {
 
 
     /**
-     * 商品模板ID
+     * 商品名称
      */
     @Column(name = "product_name")
     @Desc(value = "商品名称")
