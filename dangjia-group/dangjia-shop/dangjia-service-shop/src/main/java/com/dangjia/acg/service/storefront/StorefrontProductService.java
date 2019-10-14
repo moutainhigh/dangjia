@@ -1,11 +1,8 @@
 package com.dangjia.acg.service.storefront;
 
-import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.mapper.storefront.IStorefrontProductMapper;
-import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
-import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,30 +16,28 @@ public class StorefrontProductService {
     private static Logger logger = LoggerFactory.getLogger(StorefrontService.class);
     @Autowired
     private IStorefrontProductMapper istorefrontProductMapper;
-    @Autowired
-    private CraftsmanConstructionService constructionService;
+//    @Autowired
+//    private CraftsmanConstructionService constructionService;
 
     /**
-     *供货设置-增加已选商品
+     * 供货设置-增加已选商品
+     *
      * @param userToken
      * @return
      */
     public ServerResponse addStorefrontProduct(String userToken) {
         try {
-            Object object = constructionService.getMember(userToken);
-            if (object instanceof ServerResponse) {
-                return (ServerResponse) object;
-            }
-            Member worker = (Member) object;
+//            Object object = constructionService.getMember(userToken);
+//            if (object instanceof ServerResponse) {
+//                return (ServerResponse) object;
+//            }
+//            Member worker = (Member) object;
 
-            StorefrontProduct storefrontProduct=new StorefrontProduct();
-            int i=istorefrontProductMapper.insertSelective(storefrontProduct);
-            if(i>0)
-            {
+            StorefrontProduct storefrontProduct = new StorefrontProduct();
+            int i = istorefrontProductMapper.insertSelective(storefrontProduct);
+            if (i > 0) {
                 return ServerResponse.createBySuccessMessage("增加店铺商品成功");
-            }
-            else
-            {
+            } else {
                 return ServerResponse.createBySuccessMessage("增加店铺商品失败");
             }
 
@@ -53,25 +48,23 @@ public class StorefrontProductService {
     }
 
     /**
-     *供货设置-删除已选商品
+     * 供货设置-删除已选商品
+     *
      * @param userToken
      * @return
      */
-    public ServerResponse delStorefrontProductById(String userToken,String id) {
+    public ServerResponse delStorefrontProductById(String userToken, String id) {
         try {
-//            Object object = memberAPI.getMember(userToken);
+//            Object object = constructionService.getMember(userToken);
 //            if (object instanceof ServerResponse) {
 //                return (ServerResponse) object;
 //            }
-//            JSONObject job = (JSONObject)object;
-//            Member member = job.toJavaObject(Member.class);
-            int i=istorefrontProductMapper.deleteByPrimaryKey(id);
-            if(i>0)
-            {
+//            Member worker = (Member) object;
+
+            int i = istorefrontProductMapper.deleteByPrimaryKey(id);
+            if (i > 0) {
                 return ServerResponse.createBySuccessMessage("删除成功");
-            }
-            else
-            {
+            } else {
                 return ServerResponse.createBySuccessMessage("删除失败");
             }
 
@@ -83,7 +76,7 @@ public class StorefrontProductService {
 
 
     /**
-     *供货设置-已选商品-通过货品或者商品名称查询
+     * 供货设置-已选商品-通过货品或者商品名称查询
      *
      * @param userToken
      * @param type
@@ -91,6 +84,11 @@ public class StorefrontProductService {
      */
     public ServerResponse queryStorefrontProductByType(String userToken, String type) {
         try {
+//            Object object = constructionService.getMember(userToken);
+//            if (object instanceof ServerResponse) {
+//                return (ServerResponse) object;
+//            }
+//            Member worker = (Member) object;
             return null;
         } catch (Exception e) {
             logger.error("查询失败：", e);
@@ -109,6 +107,11 @@ public class StorefrontProductService {
      */
     public ServerResponse setSpStatusById(String userToken, String id, String isShelfStatus) {
         try {
+//            Object object = constructionService.getMember(userToken);
+//            if (object instanceof ServerResponse) {
+//                return (ServerResponse) object;
+//            }
+//            Member worker = (Member) object;
             return null;
         } catch (Exception e) {
             logger.error("查询失败：", e);
@@ -125,6 +128,11 @@ public class StorefrontProductService {
      */
     public ServerResponse setAllStoreProductByIsShelfStatus(String userToken, String isShelfStatus) {
         try {
+//            Object object = constructionService.getMember(userToken);
+//            if (object instanceof ServerResponse) {
+//                return (ServerResponse) object;
+//            }
+//            Member worker = (Member) object;
             //获取列表集合
             //批量插入到dj_basics_storefront_product中
 
@@ -145,6 +153,11 @@ public class StorefrontProductService {
      */
     public ServerResponse updateStorefrontProductById(String userToken, String id) {
         try {
+//            Object object = constructionService.getMember(userToken);
+//            if (object instanceof ServerResponse) {
+//                return (ServerResponse) object;
+//            }
+//            Member worker = (Member) object;
             return null;
         } catch (Exception e) {
             logger.error("查询失败：", e);

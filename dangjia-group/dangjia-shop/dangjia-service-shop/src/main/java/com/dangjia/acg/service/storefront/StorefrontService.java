@@ -5,9 +5,7 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.storefront.StorefrontListDTO;
 import com.dangjia.acg.mapper.storefront.IStorefrontMapper;
-import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.storefront.Storefront;
-import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -26,19 +24,19 @@ public class StorefrontService {
     private static Logger logger = LoggerFactory.getLogger(StorefrontService.class);
     @Autowired
     private IStorefrontMapper istorefrontMapper;
-    @Autowired
-    private CraftsmanConstructionService constructionService;
+//    @Autowired
+//    private CraftsmanConstructionService constructionService;
 
     public ServerResponse addStorefront(String userToken, String cityId, String storefrontName,
                                         String storefrontAddress, String storefrontDesc,
                                         String storefrontLogo, String storekeeperName,
                                         String contact, String email) {
         try {
-            Object object = constructionService.getMember(userToken);
-            if (object instanceof ServerResponse) {
-                return (ServerResponse) object;
-            }
-            Member worker = (Member) object;
+//            Object object = constructionService.getMember(userToken);
+//            if (object instanceof ServerResponse) {
+//                return (ServerResponse) object;
+//            }
+//            Member worker = (Member) object;
 
             //店铺名称不能大于10个字
             if (storefrontName.length() > 10) {
@@ -53,7 +51,7 @@ public class StorefrontService {
                 return ServerResponse.createByErrorMessage("店铺介绍不能大于20个字!");
             }
             Storefront storefront = new Storefront();
-            storefront.setUserId(worker.getId());
+            storefront.setUserId(null);
             storefront.setCityId(cityId);
             storefront.setStorefrontName(storefrontName);
             storefront.setStorefrontAddress(storefrontAddress);
@@ -77,6 +75,11 @@ public class StorefrontService {
     public ServerResponse updateStorefront(String userToken, Storefront storefront) {
 
         try {
+//            Object object = constructionService.getMember(userToken);
+//            if (object instanceof ServerResponse) {
+//                return (ServerResponse) object;
+//            }
+//            Member worker = (Member) object;
             int i = istorefrontMapper.updateByPrimaryKey(storefront);
             if (i > 0) {
                 return ServerResponse.createBySuccessMessage("修改成功!");
@@ -92,15 +95,16 @@ public class StorefrontService {
 
     /**
      * 查询供应商申请店铺列表
+     *
      * @param searchKey
      * @return
      */
-    public ServerResponse querySupplierApplicationShopList(PageDTO pageDTO,String searchKey, String supId, String applicationStatus) {
+    public ServerResponse querySupplierApplicationShopList(PageDTO pageDTO, String searchKey, String supId, String applicationStatus) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<StorefrontListDTO> storefrontListDTOS = istorefrontMapper.querySupplierApplicationShopList(searchKey,supId,applicationStatus);
+            List<StorefrontListDTO> storefrontListDTOS = istorefrontMapper.querySupplierApplicationShopList(searchKey, supId, applicationStatus);
             PageInfo pageResult = new PageInfo(storefrontListDTOS);
-            return ServerResponse.createBySuccess("查询成功",pageResult);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
