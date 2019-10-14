@@ -184,6 +184,7 @@ public class OrderService {
         businessOrderDTO.setDiscountsPrice(businessOrder.getDiscountsPrice());
         businessOrderDTO.setPayPrice(businessOrder.getPayPrice());
         businessOrderDTO.setType(businessOrder.getType());
+        businessOrderDTO.setState(businessOrder.getState());
         businessOrderDTO.setCarriage(0.0);//运费
         return ServerResponse.createBySuccess("查询成功", businessOrderDTO);
     }
@@ -250,6 +251,7 @@ public class OrderService {
             businessOrderDTO.setCreateDate(businessOrder.getCreateDate());
             businessOrderDTO.setNumber(businessOrder.getNumber());
             businessOrderDTO.setType(businessOrder.getType());
+            businessOrderDTO.setState(businessOrder.getState());
             businessOrderDTOS.add(businessOrderDTO);
         }
         pageResult.setList(businessOrderDTOS);
