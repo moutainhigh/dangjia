@@ -23,38 +23,38 @@ public class StorefrontProductController implements StorefrontProductAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse addStorefrontProduct(String userToken) {
-        return storefrontProductService.addStorefrontProduct(userToken);
+    public ServerResponse addStorefrontProduct() {
+        return storefrontProductService.addStorefrontProduct();
     }
 
     @Override
     @ApiMethod
-    public ServerResponse delStorefrontProductById(String userToken,String id ) {
-        return storefrontProductService.delStorefrontProductById(userToken,id);
+    public ServerResponse delStorefrontProductById(String id) {
+        return storefrontProductService.delStorefrontProductById(id);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse queryStorefrontProductByType(String userToken, String type) {
-        return storefrontProductService.queryStorefrontProductByType(userToken, type);
+    public ServerResponse queryStorefrontProductByType(String type) {
+        return storefrontProductService.queryStorefrontProductByType(type);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse setSpStatusById(String userToken, String id, String isShelfStatus) {
-        return storefrontProductService.setSpStatusById(userToken, id, isShelfStatus);
+    public ServerResponse setSpStatusById(String id, String isShelfStatus) {
+        return storefrontProductService.setSpStatusById(id, isShelfStatus);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse setAllStoreProductByIsShelfStatus(String userToken, String isShelfStatus) {
-        return storefrontProductService.setAllStoreProductByIsShelfStatus(userToken, isShelfStatus);
+    public ServerResponse setAllStoreProductByIsShelfStatus(String isShelfStatus) {
+        return storefrontProductService.setAllStoreProductByIsShelfStatus(isShelfStatus);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse updateStorefrontProductById(String userToken, String id) {
-        return storefrontProductService.updateStorefrontProductById(userToken, id);
+    public ServerResponse updateStorefrontProductById(String id) {
+        return storefrontProductService.updateStorefrontProductById(id);
     }
 
 

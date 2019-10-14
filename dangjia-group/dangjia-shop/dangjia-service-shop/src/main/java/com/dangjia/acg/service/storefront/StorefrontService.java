@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.storefront;
 
+import com.dangjia.acg.api.app.member.MemberAPI;
 import com.dangjia.acg.common.model.PageDTO;
 
 import com.dangjia.acg.common.response.ServerResponse;
@@ -26,6 +27,7 @@ public class StorefrontService {
     private IStorefrontMapper istorefrontMapper;
 //    @Autowired
 //    private CraftsmanConstructionService constructionService;
+
 
     public ServerResponse addStorefront(String userToken, String cityId, String storefrontName,
                                         String storefrontAddress, String storefrontDesc,

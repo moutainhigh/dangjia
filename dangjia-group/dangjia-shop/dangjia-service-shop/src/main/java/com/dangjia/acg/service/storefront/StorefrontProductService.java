@@ -16,22 +16,14 @@ public class StorefrontProductService {
     private static Logger logger = LoggerFactory.getLogger(StorefrontService.class);
     @Autowired
     private IStorefrontProductMapper istorefrontProductMapper;
-//    @Autowired
-//    private CraftsmanConstructionService constructionService;
 
     /**
      * 供货设置-增加已选商品
      *
-     * @param userToken
      * @return
      */
-    public ServerResponse addStorefrontProduct(String userToken) {
+    public ServerResponse addStorefrontProduct() {
         try {
-//            Object object = constructionService.getMember(userToken);
-//            if (object instanceof ServerResponse) {
-//                return (ServerResponse) object;
-//            }
-//            Member worker = (Member) object;
 
             StorefrontProduct storefrontProduct = new StorefrontProduct();
             int i = istorefrontProductMapper.insertSelective(storefrontProduct);
@@ -50,16 +42,10 @@ public class StorefrontProductService {
     /**
      * 供货设置-删除已选商品
      *
-     * @param userToken
      * @return
      */
-    public ServerResponse delStorefrontProductById(String userToken, String id) {
+    public ServerResponse delStorefrontProductById(String id) {
         try {
-//            Object object = constructionService.getMember(userToken);
-//            if (object instanceof ServerResponse) {
-//                return (ServerResponse) object;
-//            }
-//            Member worker = (Member) object;
 
             int i = istorefrontProductMapper.deleteByPrimaryKey(id);
             if (i > 0) {
@@ -78,17 +64,11 @@ public class StorefrontProductService {
     /**
      * 供货设置-已选商品-通过货品或者商品名称查询
      *
-     * @param userToken
      * @param type
      * @return
      */
-    public ServerResponse queryStorefrontProductByType(String userToken, String type) {
+    public ServerResponse queryStorefrontProductByType(String type) {
         try {
-//            Object object = constructionService.getMember(userToken);
-//            if (object instanceof ServerResponse) {
-//                return (ServerResponse) object;
-//            }
-//            Member worker = (Member) object;
             return null;
         } catch (Exception e) {
             logger.error("查询失败：", e);
@@ -100,18 +80,12 @@ public class StorefrontProductService {
     /**
      * 设置商品上下架
      *
-     * @param userToken
      * @param id
      * @param isShelfStatus
      * @return
      */
-    public ServerResponse setSpStatusById(String userToken, String id, String isShelfStatus) {
+    public ServerResponse setSpStatusById(String id, String isShelfStatus) {
         try {
-//            Object object = constructionService.getMember(userToken);
-//            if (object instanceof ServerResponse) {
-//                return (ServerResponse) object;
-//            }
-//            Member worker = (Member) object;
             return null;
         } catch (Exception e) {
             logger.error("查询失败：", e);
@@ -122,19 +96,11 @@ public class StorefrontProductService {
     /**
      * 设置商品批量架
      *
-     * @param userToken
      * @param isShelfStatus
      * @return
      */
-    public ServerResponse setAllStoreProductByIsShelfStatus(String userToken, String isShelfStatus) {
+    public ServerResponse setAllStoreProductByIsShelfStatus(String isShelfStatus) {
         try {
-//            Object object = constructionService.getMember(userToken);
-//            if (object instanceof ServerResponse) {
-//                return (ServerResponse) object;
-//            }
-//            Member worker = (Member) object;
-            //获取列表集合
-            //批量插入到dj_basics_storefront_product中
 
             return null;
         } catch (Exception e) {
@@ -147,17 +113,11 @@ public class StorefrontProductService {
     /**
      * 根据id修改店铺商品
      *
-     * @param userToken
      * @param id
      * @return
      */
-    public ServerResponse updateStorefrontProductById(String userToken, String id) {
+    public ServerResponse updateStorefrontProductById(String id) {
         try {
-//            Object object = constructionService.getMember(userToken);
-//            if (object instanceof ServerResponse) {
-//                return (ServerResponse) object;
-//            }
-//            Member worker = (Member) object;
             return null;
         } catch (Exception e) {
             logger.error("查询失败：", e);

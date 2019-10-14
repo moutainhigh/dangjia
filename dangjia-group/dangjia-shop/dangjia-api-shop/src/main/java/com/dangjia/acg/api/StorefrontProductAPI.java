@@ -14,33 +14,33 @@ public interface StorefrontProductAPI {
 
     @PostMapping("/web/addStorefrontProduct")
     @ApiOperation(value = "供货设置-增加已选商品", notes = "供货设置-增加已选商品")
-    ServerResponse addStorefrontProduct(@RequestParam("userToken") String userToken);
+    ServerResponse addStorefrontProduct();
 
     @PostMapping("/web/delStorefrontProductById")
     @ApiOperation(value = "供货设置-删除已选商品", notes = "供货设置-删除已选商品")
-    ServerResponse delStorefrontProductById(@RequestParam("userToken") String userToken, @RequestParam("id") String id);
+    ServerResponse delStorefrontProductById(@RequestParam("id") String id);
 
 
     @PostMapping("/web/queryStorefrontProductByType")
     @ApiOperation(value = "供货设置-已选商品-通过货品或者商品名称查询", notes = "供货设置-已选商品-通过货品或者商品名称查询")
-    ServerResponse queryStorefrontProductByType(@RequestParam("userToken") String userToken,
-                                                @RequestParam("keyWord") String keyWord);
+    ServerResponse queryStorefrontProductByType(
+            @RequestParam("keyWord") String keyWord);
 
     @PostMapping("/web/setSpStatusById")
     @ApiOperation(value = "供货设置-设置商品上下架", notes = "设置商品上下架")
-    ServerResponse setSpStatusById(@RequestParam("userToken") String userToken,
-                                   @RequestParam("id") String id,
-                                   @RequestParam("isShelfStatus") String isShelfStatus);
+    ServerResponse setSpStatusById(
+            @RequestParam("id") String id,
+            @RequestParam("isShelfStatus") String isShelfStatus);
 
     @PostMapping("/web/setAllStoreProductByIsShelfStatus")
     @ApiOperation(value = "供货设置-设置商品批量架", notes = "设置商品批量架")
-    ServerResponse setAllStoreProductByIsShelfStatus(@RequestParam("userToken") String userToken,
-                                                     @RequestParam("isShelfStatus") String isShelfStatus);
+    ServerResponse setAllStoreProductByIsShelfStatus(
+            @RequestParam("isShelfStatus") String isShelfStatus);
 
     @PostMapping("/web/updateStorefrontProductById")
     @ApiOperation(value = "供货设置-编辑店铺商品", notes = "供货设置-编辑店铺商品")
-    ServerResponse updateStorefrontProductById(@RequestParam("userToken") String userToken,
-                                               @RequestParam("id") String id);
+    ServerResponse updateStorefrontProductById(
+            @RequestParam("id") String id);
 
 
 }
