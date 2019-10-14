@@ -1,11 +1,11 @@
 package com.dangjia.acg.service.storefront;
 
 import com.alibaba.fastjson.JSONObject;
-import com.dangjia.acg.api.app.member.MemberAPI;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.mapper.storefront.IStorefrontProductMapper;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +19,8 @@ public class StorefrontProductService {
     private static Logger logger = LoggerFactory.getLogger(StorefrontService.class);
     @Autowired
     private IStorefrontProductMapper istorefrontProductMapper;
-
-
+    @Autowired
+    private CraftsmanConstructionService constructionService;
 
     /**
      *供货设置-增加已选商品
@@ -29,12 +29,11 @@ public class StorefrontProductService {
      */
     public ServerResponse addStorefrontProduct(String userToken) {
         try {
-//            Object object = memberAPI.getMember(userToken);
-//            if (object instanceof ServerResponse) {
-//                return (ServerResponse) object;
-//            }
-//            JSONObject job = (JSONObject)object;
-//            Member member = job.toJavaObject(Member.class);
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member worker = (Member) object;
 
             StorefrontProduct storefrontProduct=new StorefrontProduct();
             int i=istorefrontProductMapper.insertSelective(storefrontProduct);
