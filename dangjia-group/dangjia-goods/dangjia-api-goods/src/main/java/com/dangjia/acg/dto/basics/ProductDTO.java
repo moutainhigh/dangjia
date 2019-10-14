@@ -20,13 +20,15 @@ public class ProductDTO extends BaseEntity {
     private String unitName;
     private String productType;
 
+    private String storefrontId;//店铺ID
+
     private String labelId;
     private String labelName;
     private String buy;
     @ExcelField(titile = "精算数", offset = 8)
     private String shopCount;
     @ExcelField(titile = "货号编号", offset = 2)
-    private String productSn;//货号编号
+    private String productSn;//商品编号
     private String msg;
 
     

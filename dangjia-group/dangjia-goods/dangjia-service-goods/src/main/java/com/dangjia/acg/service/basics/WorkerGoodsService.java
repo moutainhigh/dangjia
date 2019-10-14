@@ -16,6 +16,7 @@ import com.dangjia.acg.modle.basics.HomeProductDTO;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.util.DateUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.dangjia.acg.util.Utils;
@@ -75,10 +76,9 @@ public class WorkerGoodsService {
 //                .andEqualTo(WorkerGoods.WORKER_TYPE_ID, workerTypeId)
 //        ;
 //        List<WorkerGoods> workerGoods = iWorkerGoodsMapper.selectByExample(example);
-        List<WorkerGoodsDTO> workerGoodsDTOS = iBasicsProductTemplateMapper.queryWorkerGoodsDTO(workerGoodsSn, workerTypeId);
+        WorkerGoodsDTO workerGoodsDTOS = iBasicsProductTemplateMapper.queryStoreWorkerGoodsDTO(workerGoodsSn, workerTypeId);
         WorkerGoodsDTO workerGoodsDTO = new WorkerGoodsDTO();
-        if (workerGoodsDTOS != null && workerGoodsDTOS.size() > 0) {
-            workerGoodsDTO = workerGoodsDTOS.get(0);
+        if (workerGoodsDTOS != null && StringUtils.isNotBlank(workerGoodsDTOS.getId())) {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             workerGoodsDTO.setImage(Utils.getImageAddress(address, workerGoodsDTO.getImage()));
             workerGoodsDTO.setImageUrl(workerGoodsDTO.getImage());

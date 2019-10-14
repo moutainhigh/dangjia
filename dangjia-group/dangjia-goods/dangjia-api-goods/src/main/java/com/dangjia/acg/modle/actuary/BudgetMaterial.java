@@ -24,6 +24,9 @@ public class BudgetMaterial extends BaseEntity{
 	@Column(name = "house_id")
 	private String houseId;//房间ID
 
+	@Column(name = "storefont_id")
+	private String storefontId;//店铺ID
+
 	@Column(name = "worker_type_id")
 	private String workerTypeId;//工种ID   3: 大管家 ，4：拆除 ，5：  ，6：水电 ，7：泥工 ，8：木工 ，9：油漆
 
