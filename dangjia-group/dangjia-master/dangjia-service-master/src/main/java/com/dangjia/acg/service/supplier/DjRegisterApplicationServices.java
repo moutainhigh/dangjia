@@ -11,9 +11,11 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.supplier.RegisterApplicationDTO;
 import com.dangjia.acg.mapper.other.ICityMapper;
 import com.dangjia.acg.mapper.supplier.DjRegisterApplicationMapper;
+import com.dangjia.acg.mapper.system.IJobMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.modle.other.City;
 import com.dangjia.acg.modle.supplier.DjRegisterApplication;
+import com.dangjia.acg.modle.system.Job;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
@@ -55,6 +57,7 @@ public class DjRegisterApplicationServices {
     private ConfigUtil configUtil;
     @Autowired
     private ICityMapper iCityMapper;
+    private IJobMapper jobMapper;
     /**
      * 供应商/店铺注册
      * @param djRegisterApplication
@@ -215,6 +218,14 @@ public class DjRegisterApplicationServices {
             City city =iCityMapper.selectByPrimaryKey(djRegisterApplication.getId());
             if(city!=null&&StringUtils.isNotBlank(city.getId())){
                 map.put("cityName",city.getName());
+            }
+            //查询用户当前已拥有的部门、岗位
+            MainUser mainUser = userMapper.findUserByMobile(djRegisterApplication.getUserName());
+            if(mainUser!=null&&StringUtils.isNotBlank(mainUser.getJobId())){
+                Job job = this.jobMapper.selectByPrimaryKey(mainUser.getJobId());
+                //获取部门名称，岗位名称
+                map.put("departmentName",job.getDepartmentName());
+                map.put("jobName",job.getName());
             }
             return ServerResponse.createBySuccess("查询成功", map);
         }catch (Exception e){
