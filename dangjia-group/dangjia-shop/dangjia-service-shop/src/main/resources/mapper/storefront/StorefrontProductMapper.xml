@@ -4,4 +4,29 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.storefront.IStorefrontProductMapper">
 
+    <select id="queryStorefrontProductViewDTOList" resultType="com.dangjia.acg.dto.storefront.StorefrontProductViewDTO">
+
+        SELECT
+        bsp.id,
+        bg. NAME AS goodsName,
+        -- 货品名称
+        bsp.product_name AS productName,
+        -- 商品名称
+        bg.attribute_id_arr AS attributeIdArr,
+        -- 属性
+        bsp.is_shelf_status AS isShelfStatus -- 是否上下架
+        FROM
+        dj_basics_storefront_product bsp
+        INNER JOIN dj_basics_product_template bpt ON bsp.prod_template_id = bpt.id
+        INNER JOIN dj_basics_goods bg ON bsp.goods_id = bg.id
+        where 1=1
+        <if test="null!=keyWord and ''!=keyWord">
+            and (
+            bg. NAME LIKE CONCAT('%',#{keyWord},'%') or
+            bsp.product_name LIKE CONCAT('%',#{keyWord},'%')
+            )
+        </if>
+    </select>
+
+
 </mapper>
