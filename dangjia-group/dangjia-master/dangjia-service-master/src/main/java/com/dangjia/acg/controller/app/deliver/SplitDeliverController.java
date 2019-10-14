@@ -8,6 +8,8 @@ import com.dangjia.acg.service.deliver.SplitDeliverService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * author: Ronalcheng
  * Date: 2018/12/5 0005
@@ -60,6 +62,14 @@ public class SplitDeliverController implements SplitDeliverAPI {
         return splitDeliverService.splitDeliverDetail(splitDeliverId);
     }
 
+    /**
+     * 发货单明细（导出）
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse exportDeliverDetail(HttpServletResponse response, Integer deliverType, String splitDeliverId){
+        return splitDeliverService.exportDeliverDetail(response,deliverType,splitDeliverId);
+    }
     /**
      * 收货列表
      * shipState  0待发货,1已发待收货,2已收货,3取消,4部分收

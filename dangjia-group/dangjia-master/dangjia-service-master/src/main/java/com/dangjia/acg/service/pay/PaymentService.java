@@ -1000,7 +1000,7 @@ public class PaymentService {
         try {
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             Example example = new Example(BusinessOrder.class);
-            example.createCriteria().andEqualTo(BusinessOrder.TASK_ID, houseDistributionId);
+            example.createCriteria().andEqualTo(BusinessOrder.TASK_ID, houseDistributionId).andNotEqualTo(BusinessOrder.STATE,4);
             List<BusinessOrder> businessOrderList = businessOrderMapper.selectByExample(example);
             BusinessOrder businessOrder = null;
             if(businessOrderList.size()>0){
@@ -1014,7 +1014,7 @@ public class PaymentService {
                 if (insurance == null) {
                     return ServerResponse.createByErrorMessage("保险记录不存在");
                 }
-                if (businessOrderList.size() == 0|| (businessOrder!=null && businessOrder.getState()==4)) {
+                if (businessOrderList.size() == 0) {
                     businessOrder = new BusinessOrder();
                     businessOrder.setMemberId(insurance.getWorkerId()); //公众号唯一标识
                     businessOrder.setHouseId(null);
@@ -1042,7 +1042,7 @@ public class PaymentService {
                 if (houseDistribution == null) {
                     return ServerResponse.createByErrorMessage("验房分销记录不存在");
                 }
-                if (businessOrderList.size() == 0|| (businessOrder!=null && businessOrder.getState()==4)) {
+                if (businessOrderList.size() == 0) {
                     businessOrder = new BusinessOrder();
                     businessOrder.setMemberId(houseDistribution.getOpenid()); //公众号唯一标识
                     businessOrder.setHouseId(houseDistribution.getOpenid());
@@ -1072,7 +1072,7 @@ public class PaymentService {
                     return ServerResponse.createByErrorMessage("订单记录不存在");
                 }
                 House house = houseMapper.selectByPrimaryKey(productChangeOrder.getHouseId());
-                if (businessOrderList.size() == 0|| (businessOrder!=null && businessOrder.getState()==4)) {
+                if (businessOrderList.size() == 0) {
                     businessOrder = new BusinessOrder();
                     businessOrder.setMemberId(house.getMemberId()); //公众号唯一标识
                     businessOrder.setHouseId(productChangeOrder.getHouseId());
@@ -1103,7 +1103,7 @@ public class PaymentService {
                 PurchaseOrder purchaseOrder = (PurchaseOrder) datas.get("purchaseOrder");
                 List<FlowActuaryDTO> flowActuaryDTOList = (List<FlowActuaryDTO>) datas.get("list");
                 House house = houseMapper.selectByPrimaryKey(purchaseOrder.getHouseId());
-                if (businessOrderList.size() == 0|| (businessOrder!=null && businessOrder.getState()==4)) {
+                if (businessOrderList.size() == 0) {
                     businessOrder = new BusinessOrder();
                     businessOrder.setMemberId(house.getMemberId()); //公众号唯一标识
                     businessOrder.setHouseId(purchaseOrder.getHouseId());
@@ -1127,7 +1127,7 @@ public class PaymentService {
                 }
                 House house = houseMapper.selectByPrimaryKey(mendOrder.getHouseId());
                 WorkerType workerType = workerTypeMapper.selectByPrimaryKey(mendOrder.getWorkerTypeId());
-                if (businessOrderList.size() == 0|| (businessOrder!=null && businessOrder.getState()==4)) {
+                if (businessOrderList.size() == 0) {
                     businessOrder = new BusinessOrder();
                     businessOrder.setMemberId(house.getMemberId()); //公众号唯一标识
                     businessOrder.setHouseId(mendOrder.getHouseId());
@@ -1206,7 +1206,7 @@ public class PaymentService {
                 }
             }
             Example example = new Example(BusinessOrder.class);
-            example.createCriteria().andEqualTo(BusinessOrder.TASK_ID, taskId);
+            example.createCriteria().andEqualTo(BusinessOrder.TASK_ID, taskId).andNotEqualTo(BusinessOrder.STATE,4);
             List<BusinessOrder> businessOrderList = businessOrderMapper.selectByExample(example);
             BusinessOrder businessOrder = null;
             if(businessOrderList.size()>0){
@@ -1216,7 +1216,7 @@ public class PaymentService {
                 }
             }
             House house = houseMapper.selectByPrimaryKey(houseId);
-            if (businessOrderList.size() == 0|| (businessOrder!=null && businessOrder.getState()==4)) {
+            if (businessOrderList.size() == 0) {
                 businessOrder = new BusinessOrder();
                 businessOrder.setMemberId(house.getMemberId());
                 businessOrder.setHouseId(houseId);
