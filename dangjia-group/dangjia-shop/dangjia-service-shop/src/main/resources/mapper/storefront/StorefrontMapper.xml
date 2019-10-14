@@ -25,7 +25,7 @@
             b.`id`,
             b.`sup_id` AS supId,
             a.`id` AS shopId,
-            a.`member_id` AS memberId,
+            a.`user_id` AS userId,
             a.`city_id` AS cityId,
             a.`storefront_name` AS storefrontName,
             a.`storefront_address` AS storefrontAddress,
@@ -36,13 +36,23 @@
             a.`email`,
             a.`create_date` AS createDate,
             a.`modify_date` AS modifyDate,
-            a.`data_status` AS dataStatus
+            a.`data_status` AS dataStatus,
             b.application_status  AS applicationStatus,
             b.fail_reason AS failReason,
             b.contract
         FROM
           dj_basics_storefront a
-        LEFT JOIN (SELECT * FROM dj_sup_application WHERE sup_id = #{supId})b
+        LEFT JOIN (
+            SELECT * FROM dj_sup_application WHERE sup_id = #{supId}
+            <choose>
+                <when test="applicationStatus!=-1 and null!=applicationStatus and ''!=applicationStatus">
+                    and application_status not in(0,1,2)
+                </when>
+                <when test="null!=applicationStatus and ''!=applicationStatus">
+                    and application_status=#{applicationStatus}
+                </when>
+            </choose>
+        )b
         ON a.id = b.shop_id
         where 1=1
         <if test="null!=searchKey and ''!=searchKey">
@@ -51,13 +61,5 @@
             a.contact LIKE CONCAT('%',#{searchKey},'%')
             )
         </if>
-        <choose>
-            <when test="applicationStatus!=-1">
-                and b.application_status not in(0,1,2)
-            </when>
-            <when test="null!=applicationStatus and ''!=applicationStatus">
-                and b.application_status=#{applicationStatus}
-            </when>
-        </choose>
     </select>
 </mapper>

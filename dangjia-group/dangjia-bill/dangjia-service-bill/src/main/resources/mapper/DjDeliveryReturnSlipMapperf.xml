@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.delivery.DjDeliveryReturnSlipMapper">
+
+
+
+    <select id="querySupplyTaskList" resultType="com.dangjia.acg.dto.delivery.DjDeliveryReturnSlipDTO">
+        SELECT
+            drs.shop_id,
+            drs.id,
+            drs.create_date,
+            hd.address,
+            drs.ship_name,
+            drs.ship_mobile,
+            drs.invoice_status,
+            drs.total
+        FROM
+            dj_delivery_return_slip drs
+        INNER JOIN dj_order o ON drs.order_id = o.id
+        INNER JOIN dj_house h ON h.id = o.house_id
+        INNER JOIN dj_house_address hd ON hd.house_id = h.id
+        where drs.sup_id=#{supId}
+        <if test="null!=searchKey and ''!=searchKey">
+          AND (
+            drs.id LIKE CONCAT('%',#{searchKey},'%') or
+            hd.address LIKE CONCAT('%',#{searchKey},'%')
+            )
+        </if>
+        <if test="null!=invoiceStatus and ''!=invoiceStatus">
+          AND drs.invoice_status=#{invoiceStatus}
+        </if>
+    </select>
+
+    <update id="setDeliveryTask">
+        UPDATE dj_delivery_return_slip drs
+        INNER JOIN dj_delivery_return_slip_details drsd ON drs.id = drsd.delivery_return_slip_id
+        SET drs.invoice_status = #{invoiceStatus},
+         drsd.invoice_status = #{invoiceStatus}
+        WHERE
+            drs.id = #{id}
+    </update>
+
+</mapper>

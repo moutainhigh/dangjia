@@ -17,7 +17,7 @@ public class StorefrontListDTO {
     /**
      * 用户表ID
      */
-    private String memberId;
+    private String userId;
 
     /**
      * 城市ID

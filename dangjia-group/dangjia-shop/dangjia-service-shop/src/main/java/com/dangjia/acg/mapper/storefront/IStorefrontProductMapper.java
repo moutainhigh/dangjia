@@ -1,5 +1,6 @@
 package com.dangjia.acg.mapper.storefront;
 
+import com.dangjia.acg.dto.storefront.StorefrontProductDTO;
 import com.dangjia.acg.dto.storefront.BasicsStorefrontProductViewDTO;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import org.apache.ibatis.annotations.Param;
@@ -9,6 +10,9 @@ import tk.mybatis.mapper.common.Mapper;
 import java.util.List;
 
 @Repository
-public interface IStorefrontProductMapper extends Mapper<StorefrontProduct> {
+public interface IStorefrontProductMapper  extends Mapper<StorefrontProduct> {
+
+    StorefrontProductDTO querySingleStorefrontProductById(@Param("id") String id);
+
     List<BasicsStorefrontProductViewDTO> queryStorefrontProductViewDTOList(@Param("keyWord") String keyWord);
 }

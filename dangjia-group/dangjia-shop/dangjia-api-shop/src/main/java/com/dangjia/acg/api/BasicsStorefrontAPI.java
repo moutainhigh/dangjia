@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 
 /**
@@ -18,6 +19,11 @@ import javax.servlet.http.HttpServletRequest;
 @Api(description = "店铺管理接口")
 @FeignClient("dangjia-service-shop")
 public interface BasicsStorefrontAPI {
+
+    @PostMapping("/web/querySingleStorefrontById")
+    @ApiOperation(value = "根据Id查询店铺信息", notes = "根据Id查询店铺信息")
+    Storefront querySingleStorefrontById(@RequestParam("id") String id);
+
 
     @PostMapping("/web/addStorefront")
     @ApiOperation(value = "注册店铺信息", notes = "注册店铺信息")
@@ -33,7 +39,8 @@ public interface BasicsStorefrontAPI {
 
     @PostMapping("/web/updateStorefront")
     @ApiOperation(value = "修改店铺信息", notes = "修改店铺信息")
-    ServerResponse updateStorefront(@RequestParam("userToken") String userToken, Storefront  storefront);
+    ServerResponse updateStorefront(@RequestParam("userToken") String userToken,
+                                    @RequestParam("storefront") Storefront  storefront);
 
 
     @PostMapping("/web/querySupplierApplicationShopList")

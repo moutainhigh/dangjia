@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.dangjia.acg.mapper.deliver.ISplitDeliverMapper">
+<mapper namespace="com.dangjia.acg.mapper.delivery.ISplitDeliverMapper">
 
     <!--授权大管家收货-->
     <update id="supState">

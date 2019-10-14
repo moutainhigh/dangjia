@@ -1,4 +1,4 @@
-package com.dangjia.acg.mapper.deliver;
+package com.dangjia.acg.mapper.delivery;
 
 import com.dangjia.acg.dto.deliver.SplitReportDeliverOrderDTO;
 import com.dangjia.acg.dto.deliver.SplitReportDeliverOrderItemDTO;

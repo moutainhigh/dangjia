@@ -1,6 +1,7 @@
 package com.dangjia.acg.api;
 
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dto.storefront.StorefrontProductDTO;
 import com.dangjia.acg.dto.storefront.BasicsStorefrontProductDTO;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import io.swagger.annotations.Api;
@@ -12,6 +13,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Api(description = "店铺商品管理接口")
 @FeignClient("dangjia-service-shop")
 public interface StorefrontProductAPI {
+
+    @PostMapping("/web/querySingleStorefrontProductById")
+    @ApiOperation(value = "根据id查询店铺商品信息", notes = "根据id查询店铺商品信息")
+    StorefrontProductDTO querySingleStorefrontProductById(@RequestParam("id") String id);
 
     @PostMapping("/web/addStorefrontProduct")
     @ApiOperation(value = "供货设置-增加已选商品", notes = "供货设置-增加已选商品")

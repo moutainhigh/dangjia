@@ -31,6 +31,24 @@ public class StorefrontService {
 //    private CraftsmanConstructionService constructionService;
 
 
+
+    /**
+     * 根据Id查询店铺信息
+     * @param id
+     * @return
+     */
+    public Storefront querySingleStorefrontById(String id) {
+        try {
+            Storefront storefront = istorefrontMapper.selectByPrimaryKey(id);
+            return storefront;
+        } catch (Exception e) {
+            logger.error("查询失败",e);
+            return null;
+        }
+    }
+
+
+
     public ServerResponse addStorefront(String userToken, String cityId, String storefrontName,
                                         String storefrontAddress, String storefrontDesc,
                                         String storefrontLogo, String storekeeperName,

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.delivery.DjDeliveryReturnSlipDetailsMapper">
+
+
+
+    <select id="queryOrderInformation" resultType="com.dangjia.acg.dto.delivery.DjDeliveryReturnSlipDetailsDTO">
+        SELECT
+            drs.id,
+            m.name,
+            m.mobile,
+            hd.address,
+            drs.ship_name,
+            drs.ship_mobile,
+            drs.total_price,
+            h.id
+        FROM
+            dj_delivery_return_slip drs
+        INNER JOIN dj_order o ON drs.order_id = o.id
+        INNER JOIN dj_house h ON h.id = o.house_id
+        INNER JOIN dj_house_address hd ON hd.house_id = h.id
+        INNER JOIN dj_member m ON h.member_id=m.id
+        where drs.id=#{id}
+    </select>
+
+    <select id="queryWorkerInfByHouseId" resultType="com.dangjia.acg.dto.delivery.DjDeliveryReturnSlipDetailsDTO">
+        SELECT
+            m.NAME as workerName,
+            m.mobile as workerMobile
+        FROM
+            dj_house h
+        INNER JOIN dj_core_house_flow chf ON h.id = chf.house_id
+        INNER JOIN dj_member m ON m.id = chf.worker_id
+        WHERE
+            chf.worker_type_id = 3
+        AND h.id = #{houeId}
+    </select>
+
+</mapper>

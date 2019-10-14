@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * @ClassName: StorefrontController
@@ -25,6 +26,12 @@ public class StorefrontController implements BasicsStorefrontAPI {
 
     @Autowired
     private StorefrontService storefrontService;
+
+    @Override
+    @ApiMethod
+    public Storefront querySingleStorefrontById( String id) {
+        return storefrontService.querySingleStorefrontById(id);
+    }
 
     @Override
     @ApiMethod
