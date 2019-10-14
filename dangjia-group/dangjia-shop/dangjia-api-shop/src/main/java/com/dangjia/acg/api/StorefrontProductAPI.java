@@ -35,7 +35,7 @@ public interface StorefrontProductAPI {
 
     @PostMapping("/web/updateStorefrontProductById")
     @ApiOperation(value = "供货设置-编辑店铺商品", notes = "供货设置-编辑店铺商品")
-    ServerResponse updateStorefrontProductById(@RequestParam("id") String id);
+    ServerResponse editStorefrontProductById(@RequestParam("id") String id);
 
     @PostMapping("/web/saveStorefrontProductById")
     @ApiOperation(value = "供货设置-保存编辑店铺商品", notes = "供货设置-保存编辑店铺商品")

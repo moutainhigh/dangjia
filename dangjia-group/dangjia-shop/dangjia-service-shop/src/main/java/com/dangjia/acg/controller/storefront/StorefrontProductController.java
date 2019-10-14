@@ -55,8 +55,8 @@ public class StorefrontProductController implements StorefrontProductAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse updateStorefrontProductById(String id) {
-        return storefrontProductService.updateStorefrontProductById(id);
+    public ServerResponse editStorefrontProductById(String id) {
+        return storefrontProductService.editStorefrontProductById(id);
     }
 
     @Override

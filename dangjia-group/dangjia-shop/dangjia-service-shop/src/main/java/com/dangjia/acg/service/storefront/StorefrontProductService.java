@@ -165,12 +165,11 @@ public class StorefrontProductService {
 
 
     /**
-     * 根据id修改店铺商品
-     *
+     * 根据id查询店铺商品
      * @param id
      * @return
      */
-    public ServerResponse updateStorefrontProductById(String id) {
+    public ServerResponse editStorefrontProductById(String id) {
         try {
             if (StringUtils.isEmpty(id)) {
                 return ServerResponse.createBySuccessMessage("商品ID不能为空");
