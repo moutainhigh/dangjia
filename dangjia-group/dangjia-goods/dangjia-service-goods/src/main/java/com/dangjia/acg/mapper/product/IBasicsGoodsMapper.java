@@ -26,12 +26,12 @@ public interface IBasicsGoodsMapper extends Mapper<BasicsGoods> {
 	List<BasicsGoods> queryByName(@Param("name") String name);
 
 	//根据商品id查询关联品牌
-	List<Brand> queryBrandByGid(@Param("goodsId") String goodsId);
+	//List<Brand> queryBrandByGid(@Param("goodsId") String goodsId);
 	//根据商品id和品牌id查询关联品牌系列
-	List<BrandSeries> queryBrandByGidAndBid(@Param("goodsId") String goodsId, @Param("brandId") String brandId);
+	//List<BrandSeries> queryBrandByGidAndBid(@Param("goodsId") String goodsId, @Param("brandId") String brandId);
 	List<BasicsGoods> queryByCategoryId(@Param("categoryId") String categoryId);
-	List<BasicsGoods> queryRepairGoods(@Param("name") String name, @Param("categoryId") String categoryId);
-	List<BasicsGoods> queryGoodsList(@Param("categoryId") String categoryId, @Param("name") String name);
+	//List<BasicsGoods> queryRepairGoods(@Param("name") String name, @Param("categoryId") String categoryId);
+	//List<BasicsGoods> queryGoodsList(@Param("categoryId") String categoryId, @Param("name") String name);
 
 	//查询某个分类的商品 模糊name（如果categoryId 为null，查询全部材料商品 ）
 	List<BasicsGoods> queryGoodsListByCategoryLikeName(@Param("categoryId") String categoryId, @Param("name") String name);
@@ -45,4 +45,6 @@ public interface IBasicsGoodsMapper extends Mapper<BasicsGoods> {
 	 * @return
 	 */
 	List<BasicsGoods> queryGoodsGroupListByCategoryLikeName(@Param("categoryId") String categoryId, @Param("name") String name, @Param("type") String type, @Param("buy") String buy);
+    //根据类别名称查询货品
+	List<BasicsGoods> queryByCategoryName(@Param("categoryName") String categoryName);
 }

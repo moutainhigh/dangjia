@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.actuary.DjSimulationTemplateConfigMapper">
+
+    <sql id="all_columns">
+        id,
+        config_name configName,
+        config_type configType
+        `create_date` AS createDate,
+        `modify_date` AS modifyDate,
+        `data_status` as dataStatus,
+         excel_address as excelAddress,
+         create_by as createBy,
+         update_by as updateBy
+    </sql>
+
+    <!-- 查询设计精算阶段的配置模板 -->
+    <select id="queryActuarialTemplateConfig" resultType="com.dangjia.acg.modle.actuary.DjActuarialTemplateConfig">
+        SELECT
+            id,
+            config_name configName,
+            config_type configType
+        FROM
+            dj_actuarial_template_config ac
+        where ac.config_type in(1,2)
+
+    </select>
+
+    <select id="queryActuarialProductByConfigId" resultType="com.dangjia.acg.modle.actuary.DjActuarialProductConfig">
+        SELECT
+            <include refid="all_columns"/>
+        FROM
+            dj_basics_actuarial_phase_configuration pc
+        INNER JOIN dj_basics_actuarial_configuration c ON pc.id = c.phase_id
+        WHERE
+            c.phase_id = #{actuarialTemplateId}
+    </select>
+
+</mapper>

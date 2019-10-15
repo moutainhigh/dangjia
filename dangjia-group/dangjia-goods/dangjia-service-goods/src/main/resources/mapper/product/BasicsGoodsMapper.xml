@@ -73,6 +73,37 @@
         ORDER BY create_date desc
     </select>
 
+    <select id="queryByCategoryName" resultType="com.dangjia.acg.modle.product.BasicsGoods">
+        SELECT
+            t.id,
+            t.NAME,
+            t.category_id as categoryId,
+            t.type,
+            t.buy,
+            t.sales,
+            t.other_name AS otherName,
+            t.unit_id as unitId,
+            t.create_date,
+            t.modify_date,
+            t.is_influe_decoration_progress as isInflueDecorationProgress,
+            t.irreversible_reasons as irreversibleReasons,
+            t.istop,
+            t.brand_id as brandId,
+            t.is_elevator_fee as isElevatorFee,
+            t.indicative_price as indicativePrice,
+            t.label_ids as  labelIds,
+            t.is_reservation_deliver as isReservationDeliver,
+            t.attribute_id_arr attributeIdArr
+        FROM
+            dj_basics_goods t,
+            dj_basics_goods_category t1
+        WHERE
+            t.category_id = t1.id
+        AND t1. NAME = #{categoryName}
+        and t.data_status= 0
+        ORDER BY create_date desc
+    </select>
+
     <!-- 根据name查询属性对象 -->
     <select id="queryByName" resultType="com.dangjia.acg.modle.product.DjBasicsGoods">
         SELECT

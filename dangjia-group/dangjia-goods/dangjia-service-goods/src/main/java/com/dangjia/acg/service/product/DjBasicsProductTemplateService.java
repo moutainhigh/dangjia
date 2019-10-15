@@ -614,9 +614,11 @@ public class DjBasicsProductTemplateService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse deleteBasicsProductById(String id) {
-        DjBasicsProduct djBasicsProduct = new DjBasicsProduct();
-        djBasicsProduct.setId(id);
-        iBasicsProductTemplateMapper.deleteByPrimaryKey(djBasicsProduct);
+        StorefrontProductDTO storefrontProductDTO=iBasicsProductTemplateMapper.getStorefrontInfoByprodTemplateId(id,null);
+        if(storefrontProductDTO!=null&&StringUtils.isNotBlank(storefrontProductDTO.getStorefrontId())){
+            return ServerResponse.createByErrorMessage("有店铺正在售卖此商品，不能删除");
+        }
+        iBasicsProductTemplateMapper.deleteByPrimaryKey(id);
         return ServerResponse.createBySuccessMessage("删除成功");
     }
 
