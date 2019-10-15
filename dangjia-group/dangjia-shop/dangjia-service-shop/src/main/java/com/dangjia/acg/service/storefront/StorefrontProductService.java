@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -29,6 +30,7 @@ public class StorefrontProductService {
 
     /**
      * 根据id查询店铺商品信息
+     *
      * @param id
      * @return
      */
@@ -156,18 +158,18 @@ public class StorefrontProductService {
                 return ServerResponse.createBySuccessMessage("商品上下架状态不能为空");
             }
             String[] iditem = id.split(",");
-            for (int i = 0; i < iditem.length; i++) {
-                StorefrontProduct storefrontProduct = new StorefrontProduct();
-                storefrontProduct.setId(iditem[i]);
-                storefrontProduct.setIsShelfStatus(isShelfStatus);
-                int k = istorefrontProductMapper.updateByPrimaryKeySelective(storefrontProduct);
-                if (k > 0) {
-                    return ServerResponse.createBySuccessMessage("设置商品上下架成功");
-                } else {
-                    return ServerResponse.createBySuccessMessage("设置商品上下架失败");
-                }
+            Example example = new Example(StorefrontProduct.class);
+            example.createCriteria().andIn(StorefrontProduct.ID, Arrays.asList(iditem));
+            StorefrontProduct storefrontProduct = new StorefrontProduct();
+            storefrontProduct.setIsShelfStatus(isShelfStatus);
+            storefrontProduct.setId(null);
+            storefrontProduct.setCreateDate(null);
+            int k = istorefrontProductMapper.updateByExampleSelective(storefrontProduct,example);
+            if (k > 0) {
+                return ServerResponse.createBySuccessMessage("设置商品上下架成功");
+            } else {
+                return ServerResponse.createBySuccessMessage("设置商品上下架失败");
             }
-            return null;
         } catch (Exception e) {
             logger.error("设置商品批量上架失败：", e);
             return ServerResponse.createByErrorMessage("设置商品批量上架失败");
@@ -177,6 +179,7 @@ public class StorefrontProductService {
 
     /**
      * 根据id查询店铺商品
+     *
      * @param id
      * @return
      */
