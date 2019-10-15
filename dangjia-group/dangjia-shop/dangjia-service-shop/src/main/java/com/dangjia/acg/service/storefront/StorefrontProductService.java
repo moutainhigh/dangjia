@@ -77,13 +77,15 @@ public class StorefrontProductService {
             if (StringUtils.isEmpty(id)) {
                 return ServerResponse.createByErrorMessage("商品ID不能为空");
             }
-            int i = istorefrontProductMapper.deleteByPrimaryKey(id);
+            StorefrontProduct storefrontProduct=new StorefrontProduct();
+            storefrontProduct.setId(id);
+            storefrontProduct.setDataStatus(1);//删除
+            int i=istorefrontProductMapper.updateByPrimaryKeySelective(storefrontProduct);
             if (i > 0) {
                 return ServerResponse.createBySuccessMessage("删除成功");
             } else {
                 return ServerResponse.createByErrorMessage("删除失败");
             }
-
         } catch (Exception e) {
             logger.error("删除已选商品失败：", e);
             return ServerResponse.createByErrorMessage("删除已选商品失败");
