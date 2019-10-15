@@ -146,7 +146,7 @@ public class StorefrontService {
             PageInfo pageResult = new PageInfo(storefrontListDTOS);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("查询失败：", e);
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
