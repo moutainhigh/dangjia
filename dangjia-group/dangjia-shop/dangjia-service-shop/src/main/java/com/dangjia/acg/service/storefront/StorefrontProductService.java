@@ -77,10 +77,11 @@ public class StorefrontProductService {
             if (StringUtils.isEmpty(id)) {
                 return ServerResponse.createByErrorMessage("商品ID不能为空");
             }
-            StorefrontProduct storefrontProduct=new StorefrontProduct();
+            StorefrontProduct storefrontProduct = new StorefrontProduct();
             storefrontProduct.setId(id);
             storefrontProduct.setDataStatus(1);//删除
-            int i=istorefrontProductMapper.updateByPrimaryKeySelective(storefrontProduct);
+            storefrontProduct.setCreateDate(null);
+            int i = istorefrontProductMapper.updateByPrimaryKeySelective(storefrontProduct);
             if (i > 0) {
                 return ServerResponse.createBySuccessMessage("删除成功");
             } else {
@@ -166,7 +167,7 @@ public class StorefrontProductService {
             storefrontProduct.setIsShelfStatus(isShelfStatus);
             storefrontProduct.setId(null);
             storefrontProduct.setCreateDate(null);
-            int k = istorefrontProductMapper.updateByExampleSelective(storefrontProduct,example);
+            int k = istorefrontProductMapper.updateByExampleSelective(storefrontProduct, example);
             if (k > 0) {
                 return ServerResponse.createBySuccessMessage("设置商品上下架成功");
             } else {
@@ -206,9 +207,10 @@ public class StorefrontProductService {
      */
     public ServerResponse saveStorefrontProductById(StorefrontProduct storefrontProduct) {
         try {
-            if (StringUtils.isEmpty(storefrontProduct.getId())) {
+            if (storefrontProduct == null || StringUtils.isEmpty(storefrontProduct.getId())) {
                 return ServerResponse.createByErrorMessage("商品ID不能为空");
             }
+            storefrontProduct.setCreateDate(null);
             int i = istorefrontProductMapper.updateByPrimaryKeySelective(storefrontProduct);
             if (i > 0) {
                 return ServerResponse.createBySuccessMessage("修改成功");
