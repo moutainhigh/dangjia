@@ -90,7 +90,7 @@ public class StorefrontService {
             List<Storefront> list=istorefrontMapper.selectByExample(example);
             if(list.size()>0)
             {
-                return ServerResponse.createBySuccessMessage("店铺已经添加，不能重复添加!");
+                return ServerResponse.createByErrorMessage("店铺已经添加，不能重复添加!");
             }
 
 
@@ -98,7 +98,7 @@ public class StorefrontService {
             if (i > 0) {
                 return ServerResponse.createBySuccessMessage("新增成功!");
             } else {
-                return ServerResponse.createBySuccessMessage("新增失败!");
+                return ServerResponse.createByErrorMessage("新增失败!");
             }
         } catch (Exception e) {
             logger.error("查询失败：", e);
@@ -117,13 +117,13 @@ public class StorefrontService {
 
             if(StringUtils.isEmpty(storefront.getId()))
             {
-                return ServerResponse.createBySuccessMessage("店铺商品ID不能为空");
+                return ServerResponse.createByErrorMessage("店铺商品ID不能为空");
             }
             int i = istorefrontMapper.updateByPrimaryKey(storefront);
             if (i > 0) {
                 return ServerResponse.createBySuccessMessage("修改成功!");
             } else {
-                return ServerResponse.createBySuccessMessage("修改失败!");
+                return ServerResponse.createByErrorMessage("修改失败!");
             }
         } catch (Exception e) {
             logger.error("查询失败：", e);
