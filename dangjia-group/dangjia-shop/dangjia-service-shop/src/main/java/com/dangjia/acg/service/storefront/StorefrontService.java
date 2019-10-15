@@ -115,10 +115,11 @@ public class StorefrontService {
 //            }
 //            Member worker = (Member) object;
 
-            if(StringUtils.isEmpty(storefront.getId()))
+            if(storefront==null||StringUtils.isEmpty(storefront.getId()))
             {
                 return ServerResponse.createByErrorMessage("店铺商品ID不能为空");
             }
+            storefront.setCreateDate(null);
             int i = istorefrontMapper.updateByPrimaryKey(storefront);
             if (i > 0) {
                 return ServerResponse.createBySuccessMessage("修改成功!");
