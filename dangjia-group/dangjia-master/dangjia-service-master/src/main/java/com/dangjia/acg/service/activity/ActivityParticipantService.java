@@ -85,7 +85,26 @@ public class ActivityParticipantService {
         pageResult.setList(mapList);
         return ServerResponse.createBySuccess("ok",pageResult);
     }
-
+    /**
+     * 获取当前用户是否已领取
+     * @param userToken
+     * @return
+     */
+    public ServerResponse getParticipant(HttpServletRequest request,String userToken) {
+        AccessToken accessToken = redisClient.getCache(userToken + Constants.SESSIONUSERID, AccessToken.class);
+        if (accessToken == null) {//无效的token
+            return ServerResponse.createbyUserTokenError();
+        }
+        Member user = memberMapper.selectByPrimaryKey(accessToken.getMemberId());
+        Example example = new Example(ActivityParticipant.class);
+        example.createCriteria().andEqualTo(ActivityParticipant.MEMBER_ID,user.getId());
+        List list =activityParticipantMapper.selectByExample(example);
+        if(list.size()>0){
+            return ServerResponse.createBySuccess("ok",list.get(0));
+        }else{
+            return ServerResponse.createBySuccessMessage("ok");
+        }
+    }
 
     /**
      * 修改

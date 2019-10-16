@@ -34,6 +34,10 @@ public interface ActivityParticipantAPI {
                                   @RequestParam("activityParticipant") ActivityParticipant activityParticipant);
 
 
+    @PostMapping("app/activity/participant/get")
+    @ApiOperation(value = "根据当前用户，检查是否已经领取", notes = "根据当前用户，检查是否已经领取")
+    ServerResponse getParticipant(@RequestParam("request")HttpServletRequest request,@RequestParam("userToken")String userToken);
+
     @PostMapping("web/activity/participant/exclude")
     @ApiOperation(value = "排除用户", notes = "排除用户")
     ServerResponse addCleanParticipant(@RequestParam("request") HttpServletRequest request, @RequestParam("activityParticipant") ActivityParticipant activityParticipant);
@@ -55,4 +59,5 @@ public interface ActivityParticipantAPI {
                                     @RequestParam("activityParticipant")ActivityParticipant activityParticipant,
                                     @RequestParam("startTime")Date startTime,
                                     @RequestParam("endTime")Date endTime);
+
 }

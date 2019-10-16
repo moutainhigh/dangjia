@@ -72,4 +72,10 @@ public class ActivityParticipantController implements ActivityParticipantAPI {
     public ServerResponse queryParticipant(HttpServletRequest request, PageDTO pageDTO, ActivityParticipant activityParticipant, Date startTime, Date endTime){
         return activityParticipantService.queryParticipant(request,pageDTO,activityParticipant,startTime,endTime);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse getParticipant(HttpServletRequest request,String userToken){
+        return activityParticipantService.getParticipant(request,userToken);
+    }
 }

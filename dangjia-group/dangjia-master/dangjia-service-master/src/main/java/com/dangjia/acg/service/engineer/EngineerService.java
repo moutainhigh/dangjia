@@ -325,7 +325,7 @@ public class EngineerService {
                 long num = houseWorkerMapper.grabControl(member.getId(),member.getWorkerType());//查询未完工工地
                 WorkerType wt = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
                 long methods=(member.getMethods()==null||member.getMethods()==0)?wt.getMethods():member.getMethods();
-                if (member.getWorkerType() != 7 && num >= methods) {
+                if (methods > 0 && member.getWorkerType() != 7 && num >= methods) {
                     return ServerResponse.createByErrorMessage("该工匠达到持单上限，无法设置！");
                 }
 
