@@ -132,8 +132,8 @@ public class StorefrontService {
                 return ServerResponse.createByErrorMessage("修改失败!");
             }
         } catch (Exception e) {
-            logger.error("查询失败：", e);
-            return ServerResponse.createByErrorMessage("查询失败");
+            logger.error("修改失败：", e);
+            return ServerResponse.createByErrorMessage("修改失败");
         }
     }
 
