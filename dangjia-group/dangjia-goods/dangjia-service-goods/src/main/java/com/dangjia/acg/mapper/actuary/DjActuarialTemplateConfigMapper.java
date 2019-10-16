@@ -18,5 +18,5 @@ import java.util.List;
 @Repository
 public interface DjActuarialTemplateConfigMapper extends Mapper<DjActuarialTemplateConfig> {
 
-    List<ActuarialTemplateConfigDTO> queryActuarialTemplateConfig(String id);
+    List<ActuarialTemplateConfigDTO> queryActuarialTemplateConfig(@Param("id") String id);
 }

@@ -18,7 +18,7 @@ import javax.persistence.Table;
  */
 @Data
 @Entity
-@Table(name = "dj_actuarial_template_config")
+@Table(name = "dj_simulation_template_config_detail")
 @ApiModel(description = "施工模拟花费模板详情配置表")
 @FieldNameConstants(prefix = "")
 public class DjSimulationTemplateConfigDetail extends BaseEntity {
@@ -48,10 +48,15 @@ public class DjSimulationTemplateConfigDetail extends BaseEntity {
     @ApiModelProperty("标签名称，多个用逗号分隔")
     private String labelName;
 
+    @Column(name = "config_status")
+    @Desc(value = "配置状态(1显示，0不显示）")
+    @ApiModelProperty("配置状态(1显示，0不显示）")
+    private Integer configStatus;
+
     @Column(name = "template_detail_index")
     @Desc(value = "模板序号，按每个模板类加的")
     @ApiModelProperty("模板序号，按每个模板类加的")
-    private int templateDetailIndex;
+    private Integer templateDetailIndex;
 
     @Column(name = "create_by")
     @Desc(value = "创建人")

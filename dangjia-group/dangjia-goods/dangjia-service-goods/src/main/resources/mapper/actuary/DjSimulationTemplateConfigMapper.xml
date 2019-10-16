@@ -2,38 +2,61 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.dangjia.acg.mapper.actuary.DjSimulationTemplateConfigMapper">
 
-    <sql id="all_columns">
-        id,
-        config_name configName,
-        config_type configType
-        `create_date` AS createDate,
-        `modify_date` AS modifyDate,
-        `data_status` as dataStatus,
-         excel_address as excelAddress,
-         create_by as createBy,
-         update_by as updateBy
-    </sql>
 
     <!-- 查询设计精算阶段的配置模板 -->
-    <select id="queryActuarialTemplateConfig" resultType="com.dangjia.acg.modle.actuary.DjActuarialTemplateConfig">
+    <select id="selectCurrentIndexByConfigType" resultType="java.lang.String">
+       select IFNULL(max(config_type_index),0)+1 as configTypeIndex from dj_simulation_template_config t where t.config_type=#{configType}
+    </select>
+
+    <resultMap id="simulateionTemplateMap" type="com.dangjia.acg.dto.actuary.SimulationTemplateConfigDTO">
+        <id property="id" column="id"/>
+        <result property="id" column="id"/>
+        <result property="configName" column="configName"/>
+        <result property="configType" column="configType"/>
+        <collection property="simulationDetailList" column="{simulationTemplateId=id}" ofType="map" select="selectSimulationDetailList"/>
+    </resultMap>
+
+    <resultMap id="simulateionDetailMap" type="com.dangjia.acg.dto.actuary.SimulationTemplateConfigDetailDTO">
+        <id property="id" column="id"/>
+        <result property="id" column="id"/>
+        <result property="simulationTemplateId" column="simulationTemplateId"/>
+        <result property="code" column="code"/>
+        <result property="name" column="name"/>
+        <result property="image" column="image"/>
+        <result property="labelName" column="labelName"/>
+    </resultMap>
+
+    <!-- 查询设计精算阶段的配置模板 -->
+    <select id="querySimulateionTemplateConfig" resultMap="simulateionTemplateMap">
+
         SELECT
             id,
             config_name configName,
             config_type configType
         FROM
-            dj_actuarial_template_config ac
-        where ac.config_type in(1,2)
-
+            dj_simulation_template_config t
+        where data_status = '0'
+        and exists (select 1 from dj_simulation_template_config_detail t1 where t.id=t1.simulation_template_id and t1.config_status = 0)
+        <if test="id!=null and id!=''">
+            and id=#{id}
+        </if>
+        order by config_type,create_date
     </select>
 
-    <select id="queryActuarialProductByConfigId" resultType="com.dangjia.acg.modle.actuary.DjActuarialProductConfig">
+    <select id="selectSimulationDetailList" resultMap="simulateionDetailMap">
         SELECT
-            <include refid="all_columns"/>
+            id,
+            simulation_template_id simulationTemplateId,
+            CODE,
+            NAME,
+            image,
+            label_name labelName
         FROM
-            dj_basics_actuarial_phase_configuration pc
-        INNER JOIN dj_basics_actuarial_configuration c ON pc.id = c.phase_id
-        WHERE
-            c.phase_id = #{actuarialTemplateId}
+            dj_simulation_template_config_detail
+        where config_status = 0
+        and simulation_template_id=#{simulationTemplateId}
+        order by template_detail_index
     </select>
+
 
 </mapper>

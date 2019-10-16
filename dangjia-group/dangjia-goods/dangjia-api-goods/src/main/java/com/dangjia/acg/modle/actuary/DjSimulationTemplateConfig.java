@@ -18,12 +18,12 @@ import javax.persistence.Table;
  */
 @Data
 @Entity
-@Table(name = "dj_actuarial_template_config")
+@Table(name = "dj_simulation_template_config")
 @ApiModel(description = "精算模拟模板表")
 @FieldNameConstants(prefix = "")
 public class DjSimulationTemplateConfig extends BaseEntity {
 
-    @Column(name = "config_id")
+    @Column(name = "config_name")
     @Desc(value = "名称")
     @ApiModelProperty("名称")
     private String configName;
@@ -36,12 +36,7 @@ public class DjSimulationTemplateConfig extends BaseEntity {
     @Column(name = "config_type_index")
     @Desc(value = "模板序号")
     @ApiModelProperty("模板序号")
-    private int configTypeIndex;
-
-    @Column(name = "config_status")
-    @Desc(value = "配置状态(1显示，0不显示）")
-    @ApiModelProperty("配置状态(1显示，0不显示）")
-    private int configStatus;
+    private Integer configTypeIndex;
 
     @Column(name = "create_by")
     @Desc(value = "创建人")

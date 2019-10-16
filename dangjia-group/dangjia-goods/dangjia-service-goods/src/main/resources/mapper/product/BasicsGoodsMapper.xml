@@ -95,13 +95,10 @@
             t.is_reservation_deliver as isReservationDeliver,
             t.attribute_id_arr attributeIdArr
         FROM
-            dj_basics_goods t,
-            dj_basics_goods_category t1
-        WHERE
-            t.category_id = t1.id
-        AND t1. NAME = #{categoryName}
+            dj_basics_goods t
+        WHERE t.type = #{goodsType}
         and t.data_status= 0
-        ORDER BY create_date desc
+        ORDER BY category_id
     </select>
 
     <!-- 根据name查询属性对象 -->
