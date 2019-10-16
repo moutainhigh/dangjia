@@ -115,7 +115,16 @@ public class DjSupplierServices {
     }
 
 
-    public ServerResponse queryDjSupplierByShopID(HttpServletRequest request, PageDTO pageDTO, String keyWord, String applicationStatus, String shopId) {
+    /**
+     * 分页
+     * @param request
+     * @param pageDTO
+     * @param keyWord
+     * @param applicationStatus
+     * @param shopId
+     * @return
+     */
+    public ServerResponse queryDjSupplierByShopIdPage(HttpServletRequest request, PageDTO pageDTO, String keyWord, String applicationStatus, String shopId) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<DjSupplierDTO>  list=djSupplierMapper.queryDjSupplierByShopID(keyWord,applicationStatus,shopId);
@@ -129,6 +138,28 @@ public class DjSupplierServices {
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
+
+    /**
+     * 不分页
+     * @param request
+     * @param keyWord
+     * @param applicationStatus
+     * @param shopId
+     * @return
+     */
+    public ServerResponse queryDjSupplierByShopID(HttpServletRequest request, String keyWord, String applicationStatus, String shopId) {
+        try {
+            List<DjSupplierDTO>  list=djSupplierMapper.queryDjSupplierByShopID(keyWord,applicationStatus,shopId);
+            if (list.size() <= 0){
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            }
+            return ServerResponse.createBySuccess("查询成功", list);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
 
     /**
      * 查询单个供应商申请详情

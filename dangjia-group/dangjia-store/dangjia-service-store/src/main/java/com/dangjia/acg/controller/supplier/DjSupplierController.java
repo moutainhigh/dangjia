@@ -44,9 +44,16 @@ public class DjSupplierController implements DjSupplierAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryDjSupplierByShopID(HttpServletRequest request, PageDTO pageDTO, String keyWord, String applicationStatus, String shopId) {
-        return djSupplierServices.queryDjSupplierByShopID(request,pageDTO,keyWord,applicationStatus,shopId);
+    public ServerResponse queryDjSupplierByShopIdPage(HttpServletRequest request, PageDTO pageDTO, String keyWord, String applicationStatus, String shopId) {
+        return djSupplierServices.queryDjSupplierByShopIdPage(request,pageDTO,keyWord,applicationStatus,shopId);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryDjSupplierByShopID(HttpServletRequest request,String keyWord, String applicationStatus, String shopId) {
+        return djSupplierServices.queryDjSupplierByShopID(request,keyWord,applicationStatus,shopId);
+    }
+
 
     @Override
     @ApiMethod

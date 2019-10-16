@@ -2,6 +2,7 @@ package com.dangjia.acg.api;
 
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dto.storefront.StorefrontDTO;
 import com.dangjia.acg.modle.storefront.Storefront;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -27,7 +28,7 @@ public interface BasicsStorefrontAPI {
 
     @PostMapping("/web/addStorefront")
     @ApiOperation(value = "注册店铺信息", notes = "注册店铺信息")
-    ServerResponse addStorefront(@RequestParam("userToken") String userToken,
+    ServerResponse addStorefront(@RequestParam("userId") String userId,
                                  @RequestParam("cityId") String cityId,
                                  @RequestParam("storefrontName") String storefrontName,
                                  @RequestParam("storefrontAddress") String storefrontAddress,
@@ -39,8 +40,7 @@ public interface BasicsStorefrontAPI {
 
     @PostMapping("/web/updateStorefront")
     @ApiOperation(value = "修改店铺信息", notes = "修改店铺信息")
-    ServerResponse updateStorefront(@RequestParam("userToken") String userToken,
-                                    @RequestParam("storefront") Storefront  storefront);
+    ServerResponse updateStorefront( StorefrontDTO storefrontDTO);
 
 
     @PostMapping("/web/querySupplierApplicationShopList")

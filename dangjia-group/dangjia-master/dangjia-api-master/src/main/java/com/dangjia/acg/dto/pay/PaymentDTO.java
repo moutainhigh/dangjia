@@ -1,6 +1,5 @@
 package com.dangjia.acg.dto.pay;
 
-import com.dangjia.acg.dto.actuary.BudgetLabelDTO;
 import lombok.Data;
 
 import java.math.BigDecimal;

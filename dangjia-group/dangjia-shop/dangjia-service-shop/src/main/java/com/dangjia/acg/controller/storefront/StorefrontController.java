@@ -7,6 +7,7 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 
 
+import com.dangjia.acg.dto.storefront.StorefrontDTO;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.service.storefront.StorefrontService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,16 +36,16 @@ public class StorefrontController implements BasicsStorefrontAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse addStorefront(String userToken, String cityId, String storefrontName, String storefrontAddress,
+    public ServerResponse addStorefront(String userId, String cityId, String storefrontName, String storefrontAddress,
                                         String storefrontDesc, String storefrontLogo, String storekeeperName, String contact, String email) {
-        return storefrontService.addStorefront(userToken, cityId, storefrontName, storefrontAddress, storefrontDesc,
+        return storefrontService.addStorefront(userId, cityId, storefrontName, storefrontAddress, storefrontDesc,
                 storefrontLogo, storekeeperName, contact, email);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse updateStorefront(String userToken, Storefront storefront) {
-        return storefrontService.updateStorefront(userToken,storefront);
+    public ServerResponse updateStorefront(StorefrontDTO storefrontDTO) {
+        return storefrontService.updateStorefront(storefrontDTO);
     }
 
     @Override

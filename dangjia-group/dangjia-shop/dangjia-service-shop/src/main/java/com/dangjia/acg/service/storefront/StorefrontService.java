@@ -5,6 +5,7 @@ import com.dangjia.acg.api.app.member.MemberAPI;
 import com.dangjia.acg.common.model.PageDTO;
 
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dto.storefront.StorefrontDTO;
 import com.dangjia.acg.dto.storefront.StorefrontListDTO;
 import com.dangjia.acg.mapper.storefront.IStorefrontMapper;
 import com.dangjia.acg.modle.storefront.Storefront;
@@ -12,6 +13,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -49,7 +51,7 @@ public class StorefrontService {
 
 
 
-    public ServerResponse addStorefront(String userToken, String cityId, String storefrontName,
+    public ServerResponse addStorefront(String userId, String cityId, String storefrontName,
                                         String storefrontAddress, String storefrontDesc,
                                         String storefrontLogo, String storekeeperName,
                                         String contact, String email) {
@@ -73,7 +75,7 @@ public class StorefrontService {
                 return ServerResponse.createByErrorMessage("店铺介绍不能大于20个字!");
             }
             Storefront storefront = new Storefront();
-            storefront.setUserId(null);
+            storefront.setUserId(userId);
             storefront.setCityId(cityId);
             storefront.setStorefrontName(storefrontName);
             storefront.setStorefrontAddress(storefrontAddress);
@@ -106,7 +108,7 @@ public class StorefrontService {
         }
     }
 
-    public ServerResponse updateStorefront(String userToken, Storefront storefront) {
+    public ServerResponse updateStorefront(StorefrontDTO storefrontDTO) {
 
         try {
 //            Object object = constructionService.getMember(userToken);
@@ -115,10 +117,13 @@ public class StorefrontService {
 //            }
 //            Member worker = (Member) object;
 
-            if(storefront==null||StringUtils.isEmpty(storefront.getId()))
+            if(storefrontDTO==null||StringUtils.isEmpty(storefrontDTO.getId()))
             {
                 return ServerResponse.createByErrorMessage("店铺商品ID不能为空");
             }
+
+            Storefront storefront=new Storefront();
+            BeanUtils.copyProperties(storefront,storefrontDTO);
             storefront.setCreateDate(null);
             int i = istorefrontMapper.updateByPrimaryKey(storefront);
             if (i > 0) {
