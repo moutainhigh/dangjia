@@ -37,13 +37,13 @@
     <select id="queryDjSupplierByShopID" resultType="com.dangjia.acg.dto.supplier.DjSupplierDTO" >
 
         SELECT
-            ds. NAME,
-            ds.address,
-            ds.check_people,
+            ds. NAME ,
+            ds.address ,
+            ds.check_people as checkPeople,
             ds.telephone,
-            da.application_status,
-            da.sup_id,
-            da.shop_id
+            da.application_status as applicationStatus,
+            da.sup_id as supId,
+            da.shop_id as shopId
         FROM
             dj_sup_application da
         INNER JOIN dj_supplier ds ON da.sup_id = ds.id
@@ -67,9 +67,9 @@
         SELECT
         ds. NAME,
         ds.address,
-        ds.check_people,
+        ds.check_people as checkPeople,
         ds.telephone,
-        da.application_status
+        da.application_status as applicationStatus
         FROM
         dj_sup_application da
         INNER JOIN dj_supplier ds ON da.sup_id = ds.id
