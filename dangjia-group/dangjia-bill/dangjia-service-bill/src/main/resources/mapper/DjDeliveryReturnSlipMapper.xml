@@ -16,8 +16,7 @@
             drs.total
         FROM
             dj_delivery_return_slip drs
-        INNER JOIN dj_order o ON drs.order_id = o.id
-        INNER JOIN dj_house h ON h.id = o.house_id
+        INNER JOIN dj_house h ON h.id = drs.house_id
         INNER JOIN dj_house_address hd ON hd.house_id = h.id
         where drs.sup_id=#{supId}
         <if test="null!=searchKey and ''!=searchKey">
@@ -39,5 +38,46 @@
         WHERE
             drs.id = #{id}
     </update>
+
+    <select id="querySupplierSettlementManagement"
+            resultType="com.dangjia.acg.dto.delivery.SupplierSettlementManagementDTO">
+        SELECT
+            count(0) as count,
+            shop_id as shopId,
+            sup_id as supId
+        FROM
+            dj_delivery_return_slip
+        WHERE
+        sup_id=#{supId}
+        <if test="applyState==1">
+            and apply_state = 0
+        </if>
+        <if test="applyState==2">
+            and apply_state in(1,2)
+        </if>
+        GROUP BY
+            shop_id
+    </select>
+
+    <select id="querySupplierSettlementList" resultType="com.dangjia.acg.modle.delivery.DjDeliveryReturnSlip">
+        SELECT
+            drs.id,
+            drs.create_date,
+            drs.ship_address,
+            drs.ship_name,
+            drs.apply_state,
+            drs.apply_money
+        FROM
+            dj_delivery_return_slip drs
+        WHERE
+            <if test="applyState==1">
+                and apply_state = 0
+            </if>
+            <if test="applyState==2">
+                and apply_state in(1,2)
+            </if>
+            and drs.sup_id=#{supId}
+	        and drs.shop_id=#{shopId}
+    </select>
 
 </mapper>

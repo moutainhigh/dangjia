@@ -42,17 +42,7 @@
             b.contract
         FROM
           dj_basics_storefront a
-        LEFT JOIN (
-            SELECT * FROM dj_sup_application WHERE sup_id = #{supId}
-            <choose>
-                <when test="applicationStatus!=-1 and null!=applicationStatus and ''!=applicationStatus">
-                    and application_status not in(0,1,2)
-                </when>
-                <when test="null!=applicationStatus and ''!=applicationStatus">
-                    and application_status=#{applicationStatus}
-                </when>
-            </choose>
-        )b
+        LEFT JOIN (SELECT * FROM dj_sup_application WHERE sup_id = #{supId})b
         ON a.id = b.shop_id
         where 1=1
         <if test="null!=searchKey and ''!=searchKey">
@@ -60,6 +50,12 @@
             a.storefront_name LIKE CONCAT('%',#{searchKey},'%') or
             a.contact LIKE CONCAT('%',#{searchKey},'%')
             )
+        </if>
+        <if test="applicationStatus=='-1'.toString()">
+            and application_status not in(0,1,2)
+        </if>
+        <if test="null!=applicationStatus and ''!=applicationStatus and applicationStatus!='-1'.toString()">
+            and application_status=#{applicationStatus}
         </if>
     </select>
 </mapper>

@@ -25,6 +25,11 @@ import java.util.Date;
 @FieldNameConstants(prefix = "")
 public class DjDeliveryReturnSlip extends BaseEntity {
 
+    @Column(name = "houseId")
+    @Desc(value = "房子id")
+    @ApiModelProperty("房子id")
+    private String houseId;//房子id
+
     @Column(name = "order_id")
     @Desc(value = "订单ID")
     @ApiModelProperty("订单ID")
@@ -84,5 +89,26 @@ public class DjDeliveryReturnSlip extends BaseEntity {
     @Desc(value = "收货地址")
     @ApiModelProperty("收货地址")
     private String shipAddress;
+
+    @Column(name = "apply_money")
+    @Desc(value = "供应商申请结算价格")
+    @ApiModelProperty("供应商申请结算价格")
+    private String applyMoney;
+
+    @Column(name = "apply_state")
+    @Desc(value = "供应商申请结算的状态：0申请中；1不通过；2通过")
+    @ApiModelProperty("供应商申请结算的状态：0申请中；1不通过；2通过")
+    private String applyState;
+
+    @Column(name = "invoice_type")
+    @Desc(value = "货单类型 0:退货单 1:发货单")
+    @ApiModelProperty("货单类型 0:退货单 1:发货单")
+    private String invoiceType;
+
+    @Column(name = "supervisor_id")
+    @Desc(value = "大管家")
+    @ApiModelProperty("大管家")
+    private String supervisorId;
+
 
 }

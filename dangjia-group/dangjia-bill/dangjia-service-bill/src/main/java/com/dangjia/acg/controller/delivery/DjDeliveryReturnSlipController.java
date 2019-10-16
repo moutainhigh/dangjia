@@ -33,4 +33,16 @@ public class DjDeliveryReturnSlipController implements DjDeliveryReturnSlipAPI {
     public ServerResponse setDeliveryTask(HttpServletRequest request, String id, String invoiceStatus) {
         return djDeliveryReturnSlipService.setDeliveryTask(id,invoiceStatus);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse querySupplierSettlementManagement(HttpServletRequest request, String supId, PageDTO pageDTO, Integer applyState) {
+        return djDeliveryReturnSlipService.querySupplierSettlementManagement(supId,pageDTO,applyState);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse querySupplierSettlementList(HttpServletRequest request, String supId, String shopId, Integer applyState) {
+        return djDeliveryReturnSlipService.querySupplierSettlementList(supId, shopId, applyState);
+    }
 }

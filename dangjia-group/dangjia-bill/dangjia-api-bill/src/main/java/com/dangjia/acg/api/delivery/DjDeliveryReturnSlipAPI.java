@@ -34,5 +34,17 @@ public interface DjDeliveryReturnSlipAPI {
                                    @RequestParam("id") String id,
                                    @RequestParam("invoiceStatus") String invoiceStatus);
 
+    @PostMapping("/delivery/djDeliveryReturnSlip/querySupplierSettlementManagement")
+    @ApiOperation(value = "供应商结算管理", notes = "供应商结算管理")
+    ServerResponse querySupplierSettlementManagement(@RequestParam("request") HttpServletRequest request,
+                                                     @RequestParam("supId") String supId,
+                                                     @RequestParam("pageDTO") PageDTO pageDTO,
+                                                     @RequestParam("applyState") Integer applyState);
 
+    @PostMapping("/delivery/djDeliveryReturnSlip/querySupplierSettlementList")
+    @ApiOperation(value = "供应商结算列表", notes = "供应商结算列表")
+    ServerResponse querySupplierSettlementList(@RequestParam("request") HttpServletRequest request,
+                                               @RequestParam("supId") String supId,
+                                               @RequestParam("shopId") String shopId,
+                                               @RequestParam("applyState") Integer applyState);
 }
