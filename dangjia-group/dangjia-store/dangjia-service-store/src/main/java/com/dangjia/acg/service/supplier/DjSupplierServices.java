@@ -152,9 +152,7 @@ public class DjSupplierServices {
      */
     public ServerResponse queryDjSupplierByShopID(String keyWord, String applicationStatus, String shopId) {
         try {
-            if (StringUtils.isEmpty(applicationStatus)) {
-                return ServerResponse.createByErrorMessage("审核状态不能为空!");
-            }
+
             if (StringUtils.isEmpty(shopId)) {
                 return ServerResponse.createByErrorMessage("店铺ID不能为空!");
             }
