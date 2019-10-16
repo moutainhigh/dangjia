@@ -329,7 +329,7 @@ public class HouseFlowService {
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
-            Member member = (Member) object;
+            Member member = memberMapper.selectByPrimaryKey(((Member) object).getId());
             HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowId);
             Example example = new Example(RewardPunishRecord.class);
             example.createCriteria().andEqualTo(RewardPunishRecord.MEMBER_ID, member.getId()).andEqualTo(RewardPunishRecord.STATE, "0");

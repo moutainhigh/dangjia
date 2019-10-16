@@ -94,6 +94,7 @@
             AND hw.work_type !=2
         </if>
         AND hw.work_type IN ( 1, 6 )
+        AND hf.work_steta != 1
         AND hf.work_steta != 2
         AND hf.work_steta != 6
         AND h.visit_state != 3

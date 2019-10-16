@@ -687,15 +687,6 @@ public class MemberService {
         Member user = memberMapper.selectByPrimaryKey(workerId);
         user.setMethods(methods);
         memberMapper.updateByPrimaryKeySelective(user);
-        user.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
-        MainUser mainUser = userMapper.findUserByMobile(user.getMobile());
-        String userRoleText = "role2:" + user.getId();
-        String token = redisClient.getCache(userRoleText, String.class);
-        AccessToken accessToken = TokenUtil.generateAccessToken(user, mainUser);
-        if(!CommonUtil.isEmpty(token)){
-            accessToken.setUserToken(token);
-        }
-        redisClient.put(accessToken.getUserToken() + Constants.SESSIONUSERID, accessToken);
         return ServerResponse.createBySuccessMessage("持单量设置成功");
     }
     /**
