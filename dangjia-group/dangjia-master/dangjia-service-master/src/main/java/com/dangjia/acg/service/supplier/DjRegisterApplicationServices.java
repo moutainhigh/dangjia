@@ -135,8 +135,14 @@ public class DjRegisterApplicationServices {
             djRegisterApplication.setModifyDate(new Date());//最后一次操作时间
             djRegisterApplicationMapper.updateByPrimaryKeySelective(djRegisterApplication);
             Map map=new HashMap();
+            if("1".equals(djRegisterApplication.getApplicationType())){
+                map.put("name","店铺");
+            }
+            if("2".equals(djRegisterApplication.getApplicationType())){
+                map.put("name","供应商");
+            }
             if(isAdopt==1){
-                map.put("msg","审核通过");
+                map.put("checkType","已通过");
                 //注入用户信息
                 MainUser user=new MainUser();
                 user.setPassword(djRegisterApplication.getPassword());
@@ -148,10 +154,10 @@ public class DjRegisterApplicationServices {
                 user.setJobId(jobId);
                 addUser(user);
             }else{
-                map.put("msg","审核失败："+failReason);
+                map.put("checkType","未通过，原因:"+failReason);
             }
             //发送短信通知至注册申请人手机成功与否
-            JsmsUtil.sendSMS(djRegisterApplication.getMobile(),"16885",map);
+            JsmsUtil.sendSMS(djRegisterApplication.getMobile(),"171137",map);
         } catch (Exception e) {
             logger.error("操作失败",e);
             return ServerResponse.createByErrorMessage("操作失败");

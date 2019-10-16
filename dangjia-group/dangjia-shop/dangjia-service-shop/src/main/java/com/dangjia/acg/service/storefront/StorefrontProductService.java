@@ -50,7 +50,7 @@ public class StorefrontProductService {
             example.createCriteria().andEqualTo(StorefrontProduct.PROD_TEMPLATE_ID, basicsStorefrontProductDTO.getProdTemplateId());
             List<StorefrontProduct> list = istorefrontProductMapper.selectByExample(example);
             if (list.size() > 0) {
-                return ServerResponse.createBySuccessMessage("店铺商品已经添加，不能重复添加!");
+                return ServerResponse.createByErrorMessage("店铺商品已经添加，不能重复添加!");
             }
 
             StorefrontProduct storefrontProduct = new StorefrontProduct();
@@ -59,7 +59,7 @@ public class StorefrontProductService {
             if (i > 0) {
                 return ServerResponse.createBySuccessMessage("增加店铺商品成功");
             } else {
-                return ServerResponse.createBySuccessMessage("增加店铺商品失败");
+                return ServerResponse.createByErrorMessage("增加店铺商品失败");
             }
         } catch (Exception e) {
             logger.error("增加店铺商品失败：", e);
@@ -75,15 +75,18 @@ public class StorefrontProductService {
     public ServerResponse delStorefrontProductById(String id) {
         try {
             if (StringUtils.isEmpty(id)) {
-                return ServerResponse.createBySuccessMessage("商品ID不能为空");
+                return ServerResponse.createByErrorMessage("商品ID不能为空");
             }
-            int i = istorefrontProductMapper.deleteByPrimaryKey(id);
+            StorefrontProduct storefrontProduct = new StorefrontProduct();
+            storefrontProduct.setId(id);
+            storefrontProduct.setDataStatus(1);//删除
+            storefrontProduct.setCreateDate(null);
+            int i = istorefrontProductMapper.updateByPrimaryKeySelective(storefrontProduct);
             if (i > 0) {
                 return ServerResponse.createBySuccessMessage("删除成功");
             } else {
-                return ServerResponse.createBySuccessMessage("删除失败");
+                return ServerResponse.createByErrorMessage("删除失败");
             }
-
         } catch (Exception e) {
             logger.error("删除已选商品失败：", e);
             return ServerResponse.createByErrorMessage("删除已选商品失败");
@@ -121,11 +124,11 @@ public class StorefrontProductService {
     public ServerResponse setSpStatusById(String id, String isShelfStatus) {
         try {
             if (StringUtils.isEmpty(id)) {
-                return ServerResponse.createBySuccessMessage("店铺商品ID不能为空");
+                return ServerResponse.createByErrorMessage("店铺商品ID不能为空");
             }
 
             if (StringUtils.isEmpty(isShelfStatus)) {
-                return ServerResponse.createBySuccessMessage("商品上下架状态不能为空");
+                return ServerResponse.createByErrorMessage("商品上下架状态不能为空");
             }
 
             StorefrontProduct storefrontProduct = new StorefrontProduct();
@@ -135,7 +138,7 @@ public class StorefrontProductService {
             if (i > 0) {
                 return ServerResponse.createBySuccessMessage("设置商品上下架成功");
             } else {
-                return ServerResponse.createBySuccessMessage("设置商品上下架失败");
+                return ServerResponse.createByErrorMessage("设置商品上下架失败");
             }
         } catch (Exception e) {
             logger.error("设置商品上下架失败：", e);
@@ -152,10 +155,10 @@ public class StorefrontProductService {
     public ServerResponse setAllStoreProductByIsShelfStatus(String id, String isShelfStatus) {
         try {
             if (StringUtils.isEmpty(id)) {
-                return ServerResponse.createBySuccessMessage("店铺商品ID集合不能为空");
+                return ServerResponse.createByErrorMessage("店铺商品ID集合不能为空");
             }
             if (StringUtils.isEmpty(isShelfStatus)) {
-                return ServerResponse.createBySuccessMessage("商品上下架状态不能为空");
+                return ServerResponse.createByErrorMessage("商品上下架状态不能为空");
             }
             String[] iditem = id.split(",");
             Example example = new Example(StorefrontProduct.class);
@@ -164,11 +167,11 @@ public class StorefrontProductService {
             storefrontProduct.setIsShelfStatus(isShelfStatus);
             storefrontProduct.setId(null);
             storefrontProduct.setCreateDate(null);
-            int k = istorefrontProductMapper.updateByExampleSelective(storefrontProduct,example);
+            int k = istorefrontProductMapper.updateByExampleSelective(storefrontProduct, example);
             if (k > 0) {
                 return ServerResponse.createBySuccessMessage("设置商品上下架成功");
             } else {
-                return ServerResponse.createBySuccessMessage("设置商品上下架失败");
+                return ServerResponse.createByErrorMessage("设置商品上下架失败");
             }
         } catch (Exception e) {
             logger.error("设置商品批量上架失败：", e);
@@ -186,7 +189,7 @@ public class StorefrontProductService {
     public ServerResponse editStorefrontProductById(String id) {
         try {
             if (StringUtils.isEmpty(id)) {
-                return ServerResponse.createBySuccessMessage("商品ID不能为空");
+                return ServerResponse.createByErrorMessage("商品ID不能为空");
             }
             StorefrontProduct storefrontProduct = istorefrontProductMapper.selectByPrimaryKey(id);
             return ServerResponse.createBySuccess("查询成功", storefrontProduct);
@@ -204,14 +207,15 @@ public class StorefrontProductService {
      */
     public ServerResponse saveStorefrontProductById(StorefrontProduct storefrontProduct) {
         try {
-            if (StringUtils.isEmpty(storefrontProduct.getId())) {
-                return ServerResponse.createBySuccessMessage("商品ID不能为空");
+            if (storefrontProduct == null || StringUtils.isEmpty(storefrontProduct.getId())) {
+                return ServerResponse.createByErrorMessage("商品ID不能为空");
             }
+            storefrontProduct.setCreateDate(null);
             int i = istorefrontProductMapper.updateByPrimaryKeySelective(storefrontProduct);
             if (i > 0) {
                 return ServerResponse.createBySuccessMessage("修改成功");
             } else {
-                return ServerResponse.createBySuccessMessage("修改失败");
+                return ServerResponse.createByErrorMessage("修改失败");
             }
         } catch (Exception e) {
             logger.error("供货设置-保存编辑店铺商品失败：", e);

@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 public interface WebOrderAPI {
 
     @PostMapping("web/finance/order/getAllOrders")
-    @ApiOperation(value = "支付订单流水", notes = "支付订单流水")
+    @ApiOperation(value = "支付订单流水(1:待付款2：支付中3：已支付4：已取消)", notes = "支付订单流水(1:待付款2：支付中3：已支付4：已取消)")
     ServerResponse getAllOrders(@RequestParam("request") HttpServletRequest request,
                                 @RequestParam("pageDTO") PageDTO pageDTO,
                                 @RequestParam("state") Integer state,
