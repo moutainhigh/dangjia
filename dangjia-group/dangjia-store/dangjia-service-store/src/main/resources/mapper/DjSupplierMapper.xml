@@ -48,14 +48,18 @@
             dj_sup_application da
         INNER JOIN dj_supplier ds ON da.sup_id = ds.id
         WHERE 1=1
-           and  da.shop_id = #{shopId}
+        <if test="null!=shopId and ''!=shopId">
+            and  da.shop_id = #{shopId}
+        </if>
+        <if test="null!=applicationStatus and ''!=applicationStatus">
+            AND   da.application_status=#{applicationStatus}
+        </if>
         <if test="null!=keyWord and ''!=keyWord">
             AND (
             ds.name LIKE CONCAT('%',#{keyWord},'%') or
             ds.telephone LIKE CONCAT('%',#{keyWord},'%')
             )
         </if>
-
     </select>
 
     <select id="queryDJsupplierById" resultType="com.dangjia.acg.dto.supplier.DjSupplierDTO" >

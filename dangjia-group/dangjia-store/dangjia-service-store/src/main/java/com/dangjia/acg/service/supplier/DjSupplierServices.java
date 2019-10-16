@@ -117,15 +117,21 @@ public class DjSupplierServices {
 
     /**
      * 分页
-     * @param request
      * @param pageDTO
      * @param keyWord
      * @param applicationStatus
      * @param shopId
      * @return
      */
-    public ServerResponse queryDjSupplierByShopIdPage(HttpServletRequest request, PageDTO pageDTO, String keyWord, String applicationStatus, String shopId) {
+    public ServerResponse queryDjSupplierByShopIdPage( PageDTO pageDTO, String keyWord, String applicationStatus, String shopId) {
         try {
+            if (StringUtils.isEmpty(applicationStatus)) {
+                return ServerResponse.createByErrorMessage("审核状态不能为空!");
+            }
+            if (StringUtils.isEmpty(shopId)) {
+                return ServerResponse.createByErrorMessage("店铺ID不能为空!");
+            }
+
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<DjSupplierDTO>  list=djSupplierMapper.queryDjSupplierByShopID(keyWord,applicationStatus,shopId);
             if (list.size() <= 0){
@@ -141,14 +147,19 @@ public class DjSupplierServices {
 
     /**
      * 不分页
-     * @param request
      * @param keyWord
      * @param applicationStatus
      * @param shopId
      * @return
      */
-    public ServerResponse queryDjSupplierByShopID(HttpServletRequest request, String keyWord, String applicationStatus, String shopId) {
+    public ServerResponse queryDjSupplierByShopID(String keyWord, String applicationStatus, String shopId) {
         try {
+            if (StringUtils.isEmpty(applicationStatus)) {
+                return ServerResponse.createByErrorMessage("审核状态不能为空!");
+            }
+            if (StringUtils.isEmpty(shopId)) {
+                return ServerResponse.createByErrorMessage("店铺ID不能为空!");
+            }
             List<DjSupplierDTO>  list=djSupplierMapper.queryDjSupplierByShopID(keyWord,applicationStatus,shopId);
             if (list.size() <= 0){
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());

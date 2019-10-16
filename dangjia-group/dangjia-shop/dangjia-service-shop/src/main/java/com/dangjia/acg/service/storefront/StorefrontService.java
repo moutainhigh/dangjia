@@ -103,8 +103,8 @@ public class StorefrontService {
                 return ServerResponse.createByErrorMessage("新增失败!");
             }
         } catch (Exception e) {
-            logger.error("查询失败：", e);
-            return ServerResponse.createByErrorMessage("查询失败");
+            logger.error("新增失败：", e);
+            return ServerResponse.createByErrorMessage("新增失败");
         }
     }
 
