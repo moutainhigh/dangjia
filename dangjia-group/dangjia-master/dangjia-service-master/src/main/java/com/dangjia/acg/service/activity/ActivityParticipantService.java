@@ -58,11 +58,11 @@ public class ActivityParticipantService {
         }
         if (activityParticipant.getState()!=null&&activityParticipant.getState()!=2) {
             criteria.andEqualTo(ActivityParticipant.STATE,activityParticipant.getState());
-            criteria.andNotEqualTo(ActivityParticipant.STATE,2);
         }
         if (activityParticipant.getState()!=null&&activityParticipant.getState()==2) {
             criteria.andCondition(" (data_status=1 or state=2 ) ");
         }else{
+            criteria.andNotEqualTo(ActivityParticipant.STATE,2);
             criteria.andEqualTo(ActivityParticipant.DATA_STATUS,0);
         }
         if(!CommonUtil.isEmpty(activityParticipant.getCityId())) {
