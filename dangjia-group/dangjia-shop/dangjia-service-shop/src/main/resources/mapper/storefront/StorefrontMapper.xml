@@ -58,4 +58,19 @@
             and application_status=#{applicationStatus}
         </if>
     </select>
+
+
+    <select id="queryLikeSingleStorefront">
+        select
+          <include refid="all_column"/>
+        from dj_basics_storefront
+        where
+        <if test="null!=searchKey and ''!=searchKey">
+            and (
+            storefront_name LIKE CONCAT('%',#{searchKey},'%') or
+            contact LIKE CONCAT('%',#{searchKey},'%') or
+            storekeeper_name LIKE CONCAT('%',#{searchKey},'%')
+            )
+        </if>
+    </select>
 </mapper>

@@ -76,7 +76,7 @@ public class DjRegisterApplicationServices {
                     .andEqualTo(DjRegisterApplication.DATA_STATUS,0)
                     .andEqualTo(DjRegisterApplication.MOBILE,djRegisterApplication.getMobile())
                     .andNotEqualTo(DjRegisterApplication.APPLICATION_STATUS,2)
-                    .andNotEqualTo(DjRegisterApplication.APPLICATION_TYPE,djRegisterApplication.getApplicationType());
+                    .andEqualTo(DjRegisterApplication.APPLICATION_TYPE,djRegisterApplication.getApplicationType());
             if(djRegisterApplicationMapper.selectByExample(example).size()>0)
                 return ServerResponse.createByErrorMessage("申请已存在");
             djRegisterApplication.setDataStatus(0);

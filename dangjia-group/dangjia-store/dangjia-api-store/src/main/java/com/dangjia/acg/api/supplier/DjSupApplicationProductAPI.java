@@ -2,6 +2,7 @@ package com.dangjia.acg.api.supplier;
 
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dto.delivery.SupplyDimensionDTO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -9,11 +10,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 @Api(description = "供应商申请商品表")
 @FeignClient("dangjia-service-store")
 public interface DjSupApplicationProductAPI {
 
+    @PostMapping("/web/queryDjSupSupplierProductList")
+    @ApiOperation(value = "根据供应商id查询供应商商品", notes = "根据供应商id查询供应商商品")
+    List<SupplyDimensionDTO> queryDjSupSupplierProductList(@RequestParam("supId") String supId,
+                                                           @RequestParam("searchKey") String searchKey);
 
     @PostMapping("/web/getExaminedProduct")
     @ApiOperation(value = "店铺-审核供货列表-根据供应商名称或号码", notes = "店铺-审核供货列表-根据供应商名称或号码")

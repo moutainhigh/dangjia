@@ -30,8 +30,8 @@ public class DjDeliveryReturnSlipController implements DjDeliveryReturnSlipAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse setDeliveryTask(HttpServletRequest request, String id, String invoiceStatus) {
-        return djDeliveryReturnSlipService.setDeliveryTask(id,invoiceStatus);
+    public ServerResponse setDeliveryTask(HttpServletRequest request, String id, Integer invoiceType, Integer shippingState) {
+        return djDeliveryReturnSlipService.setDeliveryTask(id, invoiceType, shippingState);
     }
 
     @Override
@@ -45,4 +45,29 @@ public class DjDeliveryReturnSlipController implements DjDeliveryReturnSlipAPI {
     public ServerResponse querySupplierSettlementList(HttpServletRequest request, String supId, String shopId, Integer applyState) {
         return djDeliveryReturnSlipService.querySupplierSettlementList(supId, shopId, applyState);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryBuyersDimensionList(HttpServletRequest request, PageDTO pageDTO, String supId, String searchKey) {
+        return djDeliveryReturnSlipService.queryBuyersDimensionList(pageDTO, supId, searchKey);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryBuyersDimensionDetailList(HttpServletRequest request, PageDTO pageDTO, String supId, String houseId, String searchKey) {
+        return djDeliveryReturnSlipService.queryBuyersDimensionDetailList(pageDTO, supId, houseId, searchKey);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse querySupplyDimensionList(HttpServletRequest request, PageDTO pageDTO, String supId, String searchKey) {
+        return djDeliveryReturnSlipService.querySupplyDimensionList(pageDTO,supId,searchKey);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse querySupplierStoreDimensionList(HttpServletRequest request, PageDTO pageDTO, String supId, String searchKey) {
+        return djDeliveryReturnSlipService.querySupplierStoreDimensionList(pageDTO, supId, searchKey);
+    }
+
 }

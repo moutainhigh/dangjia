@@ -4,80 +4,349 @@
 
 
 
-    <select id="querySupplyTaskList" resultType="com.dangjia.acg.dto.delivery.DjDeliveryReturnSlipDTO">
+    <select id="querySupplyDeliverTaskList" resultType="com.dangjia.acg.dto.delivery.DjDeliveryReturnSlipDTO">
         SELECT
-            drs.shop_id,
-            drs.id,
-            drs.create_date,
-            hd.address,
-            drs.ship_name,
-            drs.ship_mobile,
-            drs.invoice_status,
-            drs.total
+            dsd.seller_id as shopId,
+            dsd.number as number,
+            dsd.create_date as createDate,
+            dsd.ship_address as shipAddress,
+            dsd.ship_name as shipName,
+            dsd.ship_mobile as shipMobile,
+            dsd.shipping_state as shippingState,
+            dsd.total_amount as totalAmount,
+            dsd.order_split_id as splitId,
+            1 as invoiceType
         FROM
-            dj_delivery_return_slip drs
-        INNER JOIN dj_house h ON h.id = drs.house_id
-        INNER JOIN dj_house_address hd ON hd.house_id = h.id
-        where drs.sup_id=#{supId}
+          dj_deliver_split_deliver dsd
+        INNER JOIN dj_deliver_order_split_item dosi ON dsd.order_split_id = dosi.order_split_id
+        WHERE dsd.supplier_id =#{supId}
         <if test="null!=searchKey and ''!=searchKey">
           AND (
-            drs.id LIKE CONCAT('%',#{searchKey},'%') or
-            hd.address LIKE CONCAT('%',#{searchKey},'%')
+            dsd.number LIKE CONCAT('%',#{searchKey},'%') or
+            dsd.ship_address LIKE CONCAT('%',#{searchKey},'%')
             )
         </if>
         <if test="null!=invoiceStatus and ''!=invoiceStatus">
-          AND drs.invoice_status=#{invoiceStatus}
+          AND dsd.shipping_state=#{invoiceStatus}
         </if>
     </select>
 
+    <select id="querySupplyRepairTaskList" resultType="com.dangjia.acg.dto.delivery.DjDeliveryReturnSlipDTO">
+        SELECT
+            rmd.seller_id as shopId,
+            rmd.number as number,
+            rmd.create_date as createDate,
+            rmd.ship_address as shipAddress,
+            rmd.ship_mobile as shipMobile,
+            rmd.ship_name as shipName,
+            rmd.shipping_state as shippingState,
+            rmd.total_amount as totalAmount,
+            rmd.mend_order_id as splitId,
+            2 as invoiceType
+        FROM
+            dj_repair_mend_deliver rmd
+        INNER JOIN dj_repair_mend_materiel rmm ON rmd.mend_order_id = rmm.mend_order_id
+        WHERE rmd.supplier_id =#{supId}
+        <if test="null!=searchKey and ''!=searchKey">
+            AND (
+            rmd.number LIKE CONCAT('%',#{searchKey},'%') or
+            rmd.ship_address LIKE CONCAT('%',#{searchKey},'%')
+            )
+        </if>
+        <if test="null!=invoiceStatus and ''!=invoiceStatus">
+            AND rmd.shipping_state=#{invoiceStatus}
+        </if>
+    </select>
+
+    <select id="querySupplyTaskList" resultType="com.dangjia.acg.dto.delivery.DjDeliveryReturnSlipDTO">
+        SELECT
+            dsd.seller_id as shopId,
+            dsd.number as number,
+            dsd.create_date as createDate,
+            dsd.ship_address as shipAddress,
+            dsd.ship_name as shipName,
+            dsd.ship_mobile as shipMobile,
+            dsd.shipping_state as shippingState,
+            dsd.total_amount as totalAmount,
+            dsd.order_split_id as splitId,
+            1 as invoiceType
+        FROM
+          dj_deliver_split_deliver dsd
+        INNER JOIN dj_deliver_order_split_item dosi ON dsd.order_split_id = dosi.order_split_id
+        WHERE dsd.supplier_id =#{supId}
+        <if test="null!=searchKey and ''!=searchKey">
+            AND (
+            dsd.number LIKE CONCAT('%',#{searchKey},'%') or
+            dsd.ship_address LIKE CONCAT('%',#{searchKey},'%')
+            )
+        </if>
+          UNION ALL
+        SELECT
+            rmd.seller_id as shopId,
+            rmd.number as number,
+            rmd.create_date as createDate,
+            rmd.ship_address as shipAddress,
+            rmd.ship_mobile as shipMobile,
+            rmd.ship_name as shipName,
+            rmd.shipping_state as shippingState,
+            rmd.total_amount as totalAmount,
+            rmd.mend_order_id as splitId,
+            2 as invoiceType
+        FROM
+          dj_repair_mend_deliver rmd
+        INNER JOIN dj_repair_mend_materiel rmm ON rmd.mend_order_id = rmm.mend_order_id
+        WHERE rmd.supplier_id =#{supId}
+        <if test="null!=searchKey and ''!=searchKey">
+            AND (
+            rmd.number LIKE CONCAT('%',#{searchKey},'%') or
+            rmd.ship_address LIKE CONCAT('%',#{searchKey},'%')
+            )
+        </if>
+    </select>
+
+    <!--<update id="setDeliveryTask">-->
+        <!--UPDATE dj_delivery_return_slip drs-->
+        <!--INNER JOIN dj_delivery_return_slip_details drsd ON drs.id = drsd.delivery_return_slip_id-->
+        <!--SET drs.invoice_status = #{invoiceStatus},-->
+         <!--drsd.invoice_status = #{invoiceStatus}-->
+        <!--WHERE-->
+            <!--drs.id = #{id}-->
+    <!--</update>-->
+
     <update id="setDeliveryTask">
-        UPDATE dj_delivery_return_slip drs
-        INNER JOIN dj_delivery_return_slip_details drsd ON drs.id = drsd.delivery_return_slip_id
-        SET drs.invoice_status = #{invoiceStatus},
-         drsd.invoice_status = #{invoiceStatus}
-        WHERE
-            drs.id = #{id}
+        UPDATE
+        <if test="invoiceType==1">
+            dj_deliver_split_deliver
+            set shipping_state=1
+        </if>
+        <if test="invoiceType==2">
+            dj_repair_mend_deliver
+            set shipping_state=#{shippingState}
+        </if>
+        where id=#{id}
     </update>
 
     <select id="querySupplierSettlementManagement"
             resultType="com.dangjia.acg.dto.delivery.SupplierSettlementManagementDTO">
         SELECT
-            count(0) as count,
-            shop_id as shopId,
-            sup_id as supId
+            seller_id as shopId,
+            sum(count) as count,
+            supplier_id as supId
         FROM
-            dj_delivery_return_slip
-        WHERE
-        sup_id=#{supId}
+            (
+                SELECT
+                    supplier_id,
+                    count(0) AS count,
+                    seller_id
+                FROM
+                    dj_deliver_split_deliver
+                WHERE
+                    supplier_id = #{supId}
+                <if test="applyState==1">
+                    and apply_state = 0
+                </if>
+                <if test="applyState==2">
+                    and (
+                        apply_state =1 or
+                        apply_state=2
+                    )
+                </if>
+                GROUP BY seller_id
+                  UNION ALL
+                SELECT
+                    supplier_id as ,
+                    count(0) AS count,
+                    seller_id as
+                FROM
+                    dj_repair_mend_deliver
+                WHERE
+                    supplier_id = #{supId}
+                <if test="applyState==1">
+                    and apply_state = 0
+                </if>
+                <if test="applyState==2">
+                    and (
+                      apply_state =1 or
+                      apply_state=2
+                    )
+                </if>
+                GROUP BY seller_id
+            ) a
+        GROUP BY
+            seller_id
+    </select>
+
+    <!--<select id="querySupplierSettlementList" resultType="com.dangjia.acg.modle.delivery.DjDeliveryReturnSlip">-->
+        <!--SELECT-->
+            <!--drs.id,-->
+            <!--drs.create_date as createDate,-->
+            <!--drs.ship_address as shipAddress,-->
+            <!--drs.ship_name as shipName,-->
+            <!--drs.apply_state as applyState,-->
+            <!--drs.apply_money as applyMoney-->
+        <!--FROM-->
+            <!--dj_delivery_return_slip drs-->
+        <!--WHERE 1=1-->
+            <!--<if test="applyState==1">-->
+                <!--and apply_state = 0-->
+            <!--</if>-->
+            <!--<if test="applyState==2">-->
+                <!--and apply_state in(1,2)-->
+            <!--</if>-->
+            <!--and drs.sup_id=#{supId}-->
+	        <!--and drs.shop_id=#{shopId}-->
+    <!--</select>-->
+    <select id="querySupplierSettlementList" resultType="com.dangjia.acg.dto.delivery.DjDeliveryReturnSlipDTO">
+        SELECT
+            number,
+            supplier_id as supId,
+            seller_id as shopId,
+            create_date as createDate,
+            ship_address as shipAddress,
+            ship_name as shipName,
+            apply_state as applyState,
+            invoiceType
+        FROM
+            (
+                SELECT
+                    dsd.number,
+                    dsd.supplier_id,
+                    dsd.seller_id,
+                    dos.create_date,
+                    dsd.ship_address,
+                    dsd.ship_name,
+                    dsd.apply_state,
+                    dsd.order_split_id as splitId,
+                    1 as invoiceType
+                FROM
+                    dj_deliver_split_deliver dsd
+                INNER JOIN dj_deliver_order_split dos ON dsd.order_split_id = dos.id
+                UNION ALL
+                    SELECT
+                        rmd.number,
+                        rmd.supplier_id,
+                        rmd.seller_id,
+                        rmo.create_date,
+                        rmd.ship_address,
+                        rmd.ship_name,
+                        rmd.apply_state,
+                        rmd.mend_order_id as splitId,
+                        2 as invoiceType
+                    FROM
+                        dj_repair_mend_deliver rmd
+                    INNER JOIN dj_repair_mend_order rmo ON rmd.mend_order_id = rmo.id
+            ) a
+        WHERE supplier_id =#{supId}
+        AND seller_id =#{shopId}
         <if test="applyState==1">
             and apply_state = 0
         </if>
         <if test="applyState==2">
-            and apply_state in(1,2)
+            and (
+                apply_state =1 or
+                apply_state=2
+            )
         </if>
-        GROUP BY
-            shop_id
     </select>
 
-    <select id="querySupplierSettlementList" resultType="com.dangjia.acg.modle.delivery.DjDeliveryReturnSlip">
+    <!--<select id="queryBuyersDimensionList" resultType="com.dangjia.acg.dto.delivery.BuyersDimensionDTO">-->
+        <!--SELECT-->
+            <!--drs.sup_id AS supId,-->
+            <!--ha.address,-->
+            <!--m. NAME,-->
+            <!--m.mobile,-->
+            <!--sum(drsd.quantity) AS supplyQuantity,-->
+            <!--sum(drsd.total_prices) AS income,-->
+            <!--h.id as houseId-->
+        <!--FROM-->
+            <!--dj_delivery_return_slip drs-->
+        <!--INNER JOIN dj_house h ON drs.house_id = h.id-->
+        <!--INNER JOIN dj_house_address ha ON h.id = ha.house_id-->
+        <!--INNER JOIN dj_member m ON h.member_id = m.id-->
+        <!--INNER JOIN dj_delivery_return_slip_details drsd ON drsd.delivery_return_slip_id = drs.id-->
+        <!--WHERE drs.sup_id =#{supId}-->
+        <!--<if test="null!=searchKey and ''!=searchKey">-->
+            <!--AND (-->
+                <!--ha.address LIKE CONCAT('%',#{searchKey},'%') or-->
+                <!--m. NAME LIKE CONCAT('%',#{searchKey},'%') or-->
+                <!--m.mobile LIKE CONCAT('%',#{searchKey},'%')-->
+            <!--)-->
+        <!--</if>-->
+        <!--GROUP BY h.id-->
+    <!--</select>-->
+
+    <select id="queryBuyersDimensionList" resultType="com.dangjia.acg.dto.delivery.BuyersDimensionDTO">
         SELECT
-            drs.id,
-            drs.create_date,
-            drs.ship_address,
-            drs.ship_name,
-            drs.apply_state,
-            drs.apply_money
+            dsd.supplier_id AS supId,
+            dsd.ship_address AS shipAddress,
+            m. NAME,
+            m.mobile,
+            sum(dosi.shop_count) AS supplyQuantity,
+            sum(dsd.total_amount) AS income,
+            h.id AS houseId
         FROM
-            dj_delivery_return_slip drs
+            dj_deliver_split_deliver dsd
+        INNER JOIN dj_house h ON dsd.house_id = h.id
+        INNER JOIN dj_member m ON m.id = h.member_id
+        INNER JOIN dj_deliver_order_split_item dosi ON dsd.order_split_id = dosi.order_split_id
+        WHERE dsd.supplier_id = #{supId}
+        <if test="null!=searchKey and ''!=searchKey">
+            AND (
+            dsd.ship_address LIKE CONCAT('%',#{searchKey},'%') or
+            m. NAME LIKE CONCAT('%',#{searchKey},'%') or
+            m.mobile LIKE CONCAT('%',#{searchKey},'%')
+            )
+        </if>
+        GROUP BY h.id
+    </select>
+
+
+    <select id="queryBuyersDimensionDetailList" resultType="com.dangjia.acg.dto.delivery.BuyersDimensionDetailsDTO">
+        SELECT
+            dsd.order_split_id AS orderSplitId,
+            dsd.number,
+            dsd.send_time,
+            sum(dosi.shop_count) as shopCount,
+            dsd.total_amount as totalAmount
+        FROM
+            dj_deliver_split_deliver dsd
+        INNER JOIN dj_deliver_order_split_item dosi ON dsd.order_split_id = dosi.order_split_id
         WHERE
-            <if test="applyState==1">
-                and apply_state = 0
-            </if>
-            <if test="applyState==2">
-                and apply_state in(1,2)
-            </if>
-            and drs.sup_id=#{supId}
-	        and drs.shop_id=#{shopId}
+            dsd.house_id = "919760771553140750115"
+        AND dsd.supplier_id = "CS008"
+        GROUP BY
+            dsd.number
+    </select>
+
+    <select id="querySupplyDimensionList" resultType="com.dangjia.acg.dto.delivery.BuyersDimensionDTO">
+        SELECT
+            dsd.house_id as houseId,
+            dsd.ship_address as shipAddress,
+            dsd.supplier_id as supId,
+            sum(dosi.num) as supplyQuantity,
+	        sum(sup_cost) as income
+        FROM
+            dj_deliver_order_split_item dosi
+        INNER JOIN dj_deliver_split_deliver dsd ON dosi.split_deliver_id = dsd.id
+        WHERE
+            dosi.product_id = #{productId}
+        AND dsd.supplier_id = #{supId}
+        GROUP BY dsd.house_id;
+    </select>
+
+    <select id="querySupplierStoreDimensionList" resultType="com.dangjia.acg.dto.delivery.SupplierStoreDimensionDTO">
+        SELECT
+            dsd.seller_id AS shopId,
+            sum(dosi.num) as totalNumberSupply,
+            sum(total_price) as income
+        FROM
+            dj_deliver_split_deliver dsd
+        INNER JOIN dj_deliver_order_split_item dosi ON dsd.order_split_id = dosi.order_split_id
+        WHERE
+            dsd.supplier_id =#{supId}
+        and dsd.seller_id =#{shopId}
+        GROUP BY
+            dsd.seller_id
     </select>
 
 </mapper>

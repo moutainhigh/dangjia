@@ -2,7 +2,6 @@ package com.dangjia.acg.dto.delivery;
 
 import lombok.Data;
 
-import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -13,16 +12,20 @@ import java.util.List;
 @Data
 public class DjDeliveryReturnSlipDetailsDTO {
 
-    private String id;
+    private String number;
     private String name;//业主名字
     private String mobile;//业主电话号码
-    private String address;
+    private String shipAddress;
     private String shipName;
     private String shipMobile;
-    private String totalPrice;
+    private Double totalPrice;//总价
     private String workerName;//大管家名字
     private String workerMobile;//大管家电话
     private String houseId;
+    private Integer num;//本次发货数量
+    private Double price;//单价
+    private Integer shopCount;//购买数量
+    private String image;
 
-    private List<DjDeliveryReturnSlipDetailsProductDTO> djDeliveryReturnSlipDetailsProductDTOS;
+//    private List<DjDeliveryReturnSlipDetailsProductDTO> djDeliveryReturnSlipDetailsProductDTOS;
 }

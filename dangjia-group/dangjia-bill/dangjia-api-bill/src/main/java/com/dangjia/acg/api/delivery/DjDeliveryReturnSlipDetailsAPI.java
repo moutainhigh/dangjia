@@ -22,7 +22,8 @@ public interface DjDeliveryReturnSlipDetailsAPI {
     @PostMapping("/delivery/djDeliveryReturnSlip/queryTaskDetails")
     @ApiOperation(value = "任务详情", notes = "任务详情")
     ServerResponse queryTaskDetails(@RequestParam("request") HttpServletRequest request,
-                                    @RequestParam("id") String id);
+                                    @RequestParam("splitId") String splitId,
+                                    @RequestParam("invoiceType") Integer invoiceType);
 
 
 }

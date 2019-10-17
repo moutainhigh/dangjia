@@ -25,6 +25,9 @@ public interface BasicsStorefrontAPI {
     @ApiOperation(value = "根据Id查询店铺信息", notes = "根据Id查询店铺信息")
     Storefront querySingleStorefrontById(@RequestParam("id") String id);
 
+    @PostMapping("/web/queryLikeSingleStorefront")
+    @ApiOperation(value = "根据调件模糊查询店铺信息", notes = "根据调件模糊查询店铺信息")
+    List<Storefront> queryLikeSingleStorefront(@RequestParam("searchKey") String searchKey);
 
     @PostMapping("/web/addStorefront")
     @ApiOperation(value = "注册店铺信息", notes = "注册店铺信息")

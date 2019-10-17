@@ -60,4 +60,26 @@
         </foreach>
     </select>
 
+    <select id="queryDjSupSupplierProductList" resultType="com.dangjia.acg.dto.delivery.SupplyDimensionDTO">
+        SELECT
+            bpt.image,
+            bpt.name as productName,
+            bpt.product_sn as productSn,
+            ssp.stock,
+            ssp.price,
+            ssp.supplier_id as supId,
+            ssp.product_id as productId
+        FROM
+            dj_sup_supplier_product ssp
+            INNER JOIN dj_basics_product_template bpt ON ssp.product_id=bpt.id
+        WHERE
+            ssp.supplier_id =#{supId}
+            <if test="null!=searchKey and ''!=searchKey">
+                AND (
+                bpt.name LIKE CONCAT('%',#{searchKey},'%') or
+                bpt.product_sn LIKE CONCAT('%',#{searchKey},'%')
+                )
+            </if>
+    </select>
+
 </mapper>

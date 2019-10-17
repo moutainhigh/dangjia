@@ -24,7 +24,7 @@ public class DjDeliveryReturnSlipDetailsController implements DjDeliveryReturnSl
 
     @Override
     @ApiMethod
-    public ServerResponse queryTaskDetails(HttpServletRequest request, String id) {
-        return djDeliveryReturnSlipDetailsService.queryTaskDetails(id);
+    public ServerResponse queryTaskDetails(HttpServletRequest request, String splitId, Integer invoiceType) {
+        return djDeliveryReturnSlipDetailsService.queryTaskDetails(splitId,invoiceType);
     }
 }

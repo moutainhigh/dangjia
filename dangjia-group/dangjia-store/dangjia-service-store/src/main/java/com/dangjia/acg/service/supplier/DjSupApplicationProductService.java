@@ -6,11 +6,13 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dto.delivery.SupplyDimensionDTO;
 import com.dangjia.acg.dto.supplier.DjSupSupplierProductDTO;
 import com.dangjia.acg.dto.supplier.DjSupplierDTO;
 import com.dangjia.acg.mapper.supplier.*;
 import com.dangjia.acg.modle.supplier.DjAdjustRecord;
 import com.dangjia.acg.modle.supplier.DjSupApplicationProduct;
+import com.dangjia.acg.modle.supplier.DjSupSupplierProduct;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -235,5 +237,17 @@ public class DjSupApplicationProductService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("店铺-审核供货列表-部分通过失败");
         }
+    }
+
+
+    /**
+     * 根据供应商id查询供应商商品
+     * @param supId
+     * @param searchKey
+     * @return
+     */
+    public List<SupplyDimensionDTO> queryDjSupSupplierProductList(String supId, String searchKey) {
+        List<SupplyDimensionDTO> supplyDimensionDTOS = djSupSupplierProductMapper.queryDjSupSupplierProductList(supId, searchKey);
+        return supplyDimensionDTOS;
     }
 }

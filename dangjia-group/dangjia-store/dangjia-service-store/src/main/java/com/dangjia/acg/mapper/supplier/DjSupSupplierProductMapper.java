@@ -1,5 +1,6 @@
 package com.dangjia.acg.mapper.supplier;
 
+import com.dangjia.acg.dto.delivery.SupplyDimensionDTO;
 import com.dangjia.acg.dto.supplier.DjSupSupplierProductDTO;
 import com.dangjia.acg.modle.supplier.DjSupSupplierProduct;
 import org.apache.ibatis.annotations.Param;
@@ -24,5 +25,8 @@ public interface DjSupSupplierProductMapper extends Mapper<DjSupSupplierProduct>
                                                  @Param("applicationStatus") String applicationStatus);
 
     String queryAttributeNameByIds(@Param("ids") String [] ids);
+
+    List<SupplyDimensionDTO> queryDjSupSupplierProductList(@Param("supId") String supId,
+                                                           @Param("searchKey") String searchKey);
 
 }

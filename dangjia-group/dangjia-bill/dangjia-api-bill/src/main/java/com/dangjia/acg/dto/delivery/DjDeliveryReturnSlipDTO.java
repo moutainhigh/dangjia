@@ -1,7 +1,8 @@
 package com.dangjia.acg.dto.delivery;
 
-import com.dangjia.acg.common.model.BaseEntity;
 import lombok.Data;
+
+import java.util.Date;
 
 /**
  * Created with IntelliJ IDEA.
@@ -10,14 +11,20 @@ import lombok.Data;
  * Time: 上午 11:48
  */
 @Data
-public class DjDeliveryReturnSlipDTO extends BaseEntity {
+public class DjDeliveryReturnSlipDTO{
 
+    private String id;
+    private Date createDate;
     private String shopId;
     private String shopName;
     private String storekeeperName;
-    private String address;
+    private String shipAddress;
     private String shipName;
     private String shipMobile;
-    private String invoiceStatus;
-    private Double totalPrice;
+    private String shippingState;
+    private Double totalAmount;
+    private String number;
+    private String invoiceType;
+    private String applyState;
+    private String splitId;
 }

@@ -15,4 +15,7 @@ public interface IStorefrontMapper extends Mapper<Storefront> {
     List<StorefrontListDTO> querySupplierApplicationShopList(@Param("searchKey") String searchKey,
                                                              @Param("supId") String supId,
                                                              @Param("applicationStatus") String applicationStatus);
+
+
+    List<Storefront> queryLikeSingleStorefront(@Param("searchKey") String searchKey);
 }

@@ -32,7 +32,8 @@ public interface DjDeliveryReturnSlipAPI {
     @ApiOperation(value = "处理供货任务", notes = "处理供货任务")
     ServerResponse setDeliveryTask(@RequestParam("request") HttpServletRequest request,
                                    @RequestParam("id") String id,
-                                   @RequestParam("invoiceStatus") String invoiceStatus);
+                                   @RequestParam("invoiceType") Integer invoiceType,
+                                   @RequestParam("shippingState") Integer shippingState);
 
     @PostMapping("/delivery/djDeliveryReturnSlip/querySupplierSettlementManagement")
     @ApiOperation(value = "供应商结算管理", notes = "供应商结算管理")
@@ -47,4 +48,34 @@ public interface DjDeliveryReturnSlipAPI {
                                                @RequestParam("supId") String supId,
                                                @RequestParam("shopId") String shopId,
                                                @RequestParam("applyState") Integer applyState);
+
+
+    @PostMapping("/delivery/djDeliveryReturnSlip/queryBuyersDimensionList")
+    @ApiOperation(value = "供应商买家维度列表", notes = "供应商结算买家维度列表")
+    ServerResponse queryBuyersDimensionList(@RequestParam("request") HttpServletRequest request,
+                                            @RequestParam("pageDTO") PageDTO pageDTO,
+                                            @RequestParam("supId") String supId,
+                                            @RequestParam("searchKey") String searchKey);
+
+    @PostMapping("/delivery/djDeliveryReturnSlip/queryBuyersDimensionDetailList")
+    @ApiOperation(value = "供应商查看买家维度详情列表", notes = "供应商查看买家维度详情列表")
+    ServerResponse queryBuyersDimensionDetailList(@RequestParam("request") HttpServletRequest request,
+                                                  @RequestParam("pageDTO") PageDTO pageDTO,
+                                                  @RequestParam("supId") String supId,
+                                                  @RequestParam("houseId") String houseId,
+                                                  @RequestParam("searchKey") String searchKey);
+
+    @PostMapping("/delivery/djDeliveryReturnSlip/querySupplyDimensionList")
+    @ApiOperation(value = "供应商商品维度列表", notes = "供应商商品维度列表")
+    ServerResponse querySupplyDimensionList(@RequestParam("request") HttpServletRequest request,
+                                            @RequestParam("pageDTO") PageDTO pageDTO,
+                                            @RequestParam("supId") String supId,
+                                            @RequestParam("searchKey") String searchKey);
+
+    @PostMapping("/delivery/djDeliveryReturnSlip/querySupplierStoreDimensionList")
+    @ApiOperation(value = "供应商店铺维度列表", notes = "供应商店铺维度列表")
+    ServerResponse querySupplierStoreDimensionList(@RequestParam("request") HttpServletRequest request,
+                                                   @RequestParam("pageDTO") PageDTO pageDTO,
+                                                   @RequestParam("supId") String supId,
+                                                   @RequestParam("searchKey") String searchKey);
 }

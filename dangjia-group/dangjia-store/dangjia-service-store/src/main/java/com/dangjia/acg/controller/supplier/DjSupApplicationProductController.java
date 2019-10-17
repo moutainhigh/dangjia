@@ -3,12 +3,15 @@ package com.dangjia.acg.controller.supplier;
 import com.dangjia.acg.api.supplier.DjSupApplicationProductAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dto.delivery.SupplyDimensionDTO;
+import com.dangjia.acg.modle.supplier.DjSupSupplierProduct;
 import com.dangjia.acg.service.supplier.DjSupApplicationProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.dangjia.acg.common.model.PageDTO;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 @RestController
 public class DjSupApplicationProductController implements DjSupApplicationProductAPI {
@@ -33,6 +36,12 @@ public class DjSupApplicationProductController implements DjSupApplicationProduc
     @ApiMethod
     public ServerResponse updateHaveGoods(HttpServletRequest request, String jsonStr) {
         return djSupApplicationProductService.updateHaveGoods(jsonStr);
+    }
+
+    @Override
+    @ApiMethod
+    public List<SupplyDimensionDTO> queryDjSupSupplierProductList(String supId, String searchKey) {
+        return djSupApplicationProductService.queryDjSupSupplierProductList(supId, searchKey);
     }
 
     @Override

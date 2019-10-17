@@ -17,7 +17,11 @@ import java.util.List;
 @Repository
 public interface DjDeliveryReturnSlipDetailsMapper extends Mapper<DjDeliveryReturnSlipDetails> {
 
-    List<DjDeliveryReturnSlipDetailsDTO> queryOrderInformation(@Param("id") String id);
+//    List<DjDeliveryReturnSlipDetailsDTO> queryOrderInformation(@Param("id") String id);
+
+    List<DjDeliveryReturnSlipDetailsDTO> queryDeliverOrderInformation(@Param("orderSplitId") String orderSplitId);
+
+    List<DjDeliveryReturnSlipDetailsDTO> queryRepairOrderInformation(@Param("mendOrderId") String mendOrderId);
 
     DjDeliveryReturnSlipDetailsDTO queryWorkerInfByHouseId(@Param("houseId") String houseId);
 }

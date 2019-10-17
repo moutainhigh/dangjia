@@ -50,6 +50,22 @@ public class StorefrontService {
     }
 
 
+    /**
+     *  根据调件模糊查询店铺信息
+     * @param searchKey
+     * @return
+     */
+    public List<Storefront> queryLikeSingleStorefront(String searchKey) {
+        try {
+            List<Storefront> storefronts = istorefrontMapper.queryLikeSingleStorefront(searchKey);
+            return storefronts;
+        } catch (Exception e) {
+            logger.error("查询失败",e);
+            return null;
+        }
+    }
+
+
 
     public ServerResponse addStorefront(String userId, String cityId, String storefrontName,
                                         String storefrontAddress, String storefrontDesc,
