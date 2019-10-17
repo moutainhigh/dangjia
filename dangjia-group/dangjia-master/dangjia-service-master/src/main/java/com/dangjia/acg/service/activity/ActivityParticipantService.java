@@ -80,6 +80,10 @@ public class ActivityParticipantService {
         for (ActivityParticipant participant : list) {
             Map map = BeanUtils.beanToMap(participant);
             map.put("cityName", cityMapper.selectByPrimaryKey(participant.getCityId()).getName());
+            if (activityParticipant.getState()==1) {
+                Member user = memberMapper.selectByPrimaryKey(participant.getMemberId());
+                map.put(ActivityParticipant.CREATE_DATE, user.getCreateDate());
+            }
             mapList.add(map);
         }
         pageResult.setList(mapList);
