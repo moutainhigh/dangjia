@@ -10,8 +10,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -154,4 +158,43 @@ public class DjBasicsActuarialConfigurationController implements DjBasicsActuari
     public ServerResponse deleteSimulateDetailInfoById(HttpServletRequest  request,String simulationTemplateId){
         return djBasicsActuarialConfigurationServices.deleteSimulateDetailInfoById(simulationTemplateId);
     }
+
+    /**
+     * excel模拟精算数据导入
+     * @param request
+     * @param name excel名称
+     * @param fileName 上传的文件名
+     * @param address 文件地址
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse importSimulateExcelBudgets(StandardMultipartHttpServletRequest request,String name,String fileName,String address){
+
+        return djBasicsActuarialConfigurationServices.importSimulateExcelBudgets(name,fileName,address,request.getParameter(Constants.USERID));
+    }
+
+    /**
+     * 查询excel列表
+     * @param request
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse querySimulateExcelList(HttpServletRequest request){
+        return djBasicsActuarialConfigurationServices.querySimulateExcelList();
+    }
+
+    /**
+     * 根据excel表ID删除对应的excel数据
+     * @param request
+     * @param id
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse deleteSimulateExcelById(HttpServletRequest request,String id){
+        return djBasicsActuarialConfigurationServices.deleteSimulateExcelById(id);
+    }
+
 }

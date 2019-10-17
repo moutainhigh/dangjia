@@ -38,6 +38,11 @@ public class DjActuarialProductConfig extends BaseEntity {
     @ApiModelProperty("商品ID")
     private String productId;
 
+    @Column(name = "product_sn")
+    @Desc(value = "商品编码")
+    @ApiModelProperty("商品编码")
+    private String productSn;
+
     @Column(name = "purchase_quantity")
     @Desc(value = "购买数量")
     @ApiModelProperty("购买数量")

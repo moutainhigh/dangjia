@@ -5,6 +5,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
+import com.dangjia.acg.modle.actuary.DjActuarialTemplateConfig;
+import com.dangjia.acg.service.actuary.excel.ActuarialConfigExcelRead;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.actuary.ActuarialProductDTO;
 import com.dangjia.acg.dto.actuary.ActuarialTemplateConfigDTO;
@@ -29,6 +31,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 
@@ -357,7 +361,99 @@ public class DjBasicsActuarialConfigurationServices {
         }
     }
 
+    /**
+     * 模拟excel 精算导入
+     * @param name 上传文件名
+     * @param fileName 上传后生成的文件名
+     * @param address 上传后的路径
+     * @return
+     */
+    public ServerResponse importSimulateExcelBudgets (String name,String fileName,String address,String userId){
+      //  String addressPri = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+        String addressPri = "e://dangjia/";
+        try {
+            ActuarialConfigExcelRead actuarialConfigExcelRead = new ActuarialConfigExcelRead();
+            String postfix = actuarialConfigExcelRead.checkExcelType(fileName);
+            List<Map<String,Object>> actuarialExcelList=new ArrayList<>();
+            if ("xls".equals(postfix)) {
+                 actuarialExcelList = actuarialConfigExcelRead.readXls(new File(addressPri+address));
+            }else{
+                actuarialExcelList = actuarialConfigExcelRead.readXlsx(new File(addressPri+address));
+            }
+            if(actuarialExcelList!=null&&actuarialExcelList.size()>0){
+                //1.保存对应的excel文件
+                DjActuarialTemplateConfig djActuarialTemplateConfig=new DjActuarialTemplateConfig();
+                djActuarialTemplateConfig.setConfigName(name);
+                djActuarialTemplateConfig.setConfigType("3");
+                djActuarialTemplateConfig.setExcelFileName(fileName);
+                djActuarialTemplateConfig.setExcelAddress(address);
+                djActuarialTemplateConfig.setCreateBy(userId==null?"SYSTEM":userId);
+                djActuarialTemplateConfig.setUpdateBy(userId==null?"SYSTEM":userId);
+                djActuarialTemplateConfig.setCreateDate(new Date());
+                djActuarialTemplateConfig.setModifyDate(new Date());
+                djActuarialTemplateConfigMapper.insert(djActuarialTemplateConfig);
+                //2.保存excel文件中的内容
+                for(Map<String,Object> map:actuarialExcelList){
+                    String productSn = (String)map.get("productSn");
+                    String workTypeId = (String)map.get("workTypeId");
+                    String productCount = (String)map.get("productCount");
+                    DjActuarialProductConfig djActuarialProductConfig=new DjActuarialProductConfig();
+                    djActuarialProductConfig.setActuarialTemplateId(djActuarialTemplateConfig.getId());// excel上传地址ID
+                    djActuarialProductConfig.setProductSn(productSn);
+                    djActuarialProductConfig.setWorkerTypeId(workTypeId);
+                    djActuarialProductConfig.setPurchaseQuantity(productCount);
+                    //根据商品编码，查询对应的商品ID及货品ID
+                    List<DjBasicsProductTemplate> list=iBasicsProductTemplateMapper.queryByProductSn(productSn);
+                    if(list!=null&&list.size()>0){
+                        DjBasicsProductTemplate dj=list.get(0);
+                        djActuarialProductConfig.setGoodsId(dj.getGoodsId());
+                        djActuarialProductConfig.setProductId(dj.getId());
+                    }
+                    djActuarialProductConfigMapper.insert(djActuarialProductConfig);
 
+                }
+                 return ServerResponse.createBySuccessMessage("保存excel成功");
+            }
+            logger.info("excel读取结果值：{}",actuarialExcelList);
+            return ServerResponse.createByErrorMessage("未读取到有效的excel数据，请检查数据是否正确");
+        } catch (Exception e) {
+            logger.error("读取excel失败",e);
+            return ServerResponse.createByErrorMessage("保存excel失败");
+        }
+    }
 
+    /**
+     * 查询excel列表
+     * @return
+     */
+    public ServerResponse querySimulateExcelList(){
+        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+        Example example=new Example(DjActuarialTemplateConfig.class);
+        example.createCriteria().andEqualTo(DjActuarialTemplateConfig.CONFIG_TYPE,"3")
+        .andEqualTo(DjActuarialTemplateConfig.DATA_STATUS,0);//查类型为excel的数据列表
+        List<DjActuarialTemplateConfig> templateList = djActuarialTemplateConfigMapper.selectByExample(example);
+        List excelList=new ArrayList();
+        if(templateList!=null&&templateList.size()>0){
+            for(DjActuarialTemplateConfig dj :templateList){
+                Map djMap=new HashMap();
+                djMap.put("id",dj.getId());
+                djMap.put("name",dj.getConfigName());
+                djMap.put("fileName",dj.getExcelFileName());
+                djMap.put("excelAddress",dj.getExcelAddress());
+                djMap.put("excelAddressUrl",dj.getExcelAddress());
+                excelList.add(djMap);
+            }
+        }
+        return  ServerResponse.createBySuccess("查询成功",excelList);
+    }
+
+    //删除上传的excel文件(
+    public ServerResponse deleteSimulateExcelById(String id){
+        DjActuarialTemplateConfig djActuarialTemplateConfig = new DjActuarialTemplateConfig();
+        djActuarialTemplateConfig.setId(id);
+        djActuarialTemplateConfig.setDataStatus(1);//0正式数据，1删除
+        djActuarialTemplateConfigMapper.updateByPrimaryKeySelective(djActuarialTemplateConfig);
+        return ServerResponse.createBySuccess("删除成功",id);
+    }
 
 }

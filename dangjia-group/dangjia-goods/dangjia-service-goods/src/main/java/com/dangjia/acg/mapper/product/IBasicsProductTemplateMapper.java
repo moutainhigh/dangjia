@@ -50,10 +50,6 @@ public interface IBasicsProductTemplateMapper extends Mapper<DjBasicsProductTemp
      */
     List<DjBasicsProductTemplate> queryByProductSn(@Param("productSn") String productSn);
 
-    List<AppBasicsProductDTO> queryProductMaterial(@Param("productSn") String productSn);
-
-    List<AppBasicsProductDTO> queryProductWorker(@Param("productSn") String productSn);
-
     /*更新单位*/
     void updateProductValueId(@Param("valueId") String valueId);
 

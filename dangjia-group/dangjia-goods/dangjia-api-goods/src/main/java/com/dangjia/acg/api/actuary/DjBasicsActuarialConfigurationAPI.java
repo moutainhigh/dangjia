@@ -6,6 +6,8 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 import sun.misc.Request;
 
 import javax.servlet.http.HttpServletRequest;
@@ -87,4 +89,22 @@ public interface DjBasicsActuarialConfigurationAPI {
     @ApiOperation(value = "模拟花费--根据标题ID删除标题及对应的选项值", notes = "根据标题ID删除标题及对应的选项值")
     ServerResponse deleteSimulateDetailInfoById(@RequestParam("request") HttpServletRequest request,
                                           @RequestParam("simulationTemplateId") String simulationTemplateId);
+
+    @PostMapping("web/config/actuarialConfig/importSimulateExcelBudgets")
+    @ApiOperation(value = "Excel模拟精算数据导入", notes = "Excel模拟精算数据导入")
+    ServerResponse importSimulateExcelBudgets(
+            @RequestParam("request") StandardMultipartHttpServletRequest request,
+            @RequestParam("name")  String name,
+            @RequestParam("fileName")  String fileName,
+            @RequestParam("address")  String address);
+
+    @PostMapping("web/config/actuarialConfig/querySimulateExcelList")
+    @ApiOperation(value = "模拟花费--查询EXCEL列表", notes = "查询EXCEL列表")
+    ServerResponse querySimulateExcelList(@RequestParam("request") HttpServletRequest request);
+
+    @PostMapping("web/config/actuarialConfig/deleteSimulateExcelById")
+    @ApiOperation(value = "模拟花费--删除excel文件根据ID", notes = "删除excel文件根据ID")
+    ServerResponse deleteSimulateExcelById(@RequestParam("request") HttpServletRequest request,
+                                           @RequestParam("id") String id);
+
 }
