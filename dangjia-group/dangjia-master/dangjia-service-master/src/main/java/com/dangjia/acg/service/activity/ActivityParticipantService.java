@@ -82,6 +82,7 @@ public class ActivityParticipantService {
         List<Map> mapList=new ArrayList<>();
         for (ActivityParticipant participant : list) {
             Map map = BeanUtils.beanToMap(participant);
+            map.put(ActivityParticipant.PHONE,participant.getPhone());
             map.put("cityName", cityMapper.selectByPrimaryKey(participant.getCityId()).getName());
             if (activityParticipant.getState()!=null&&activityParticipant.getState()==2) {
                 Member user = memberMapper.selectByPrimaryKey(participant.getMemberId());
