@@ -90,7 +90,11 @@ public class MemberController implements MemberAPI {
     public ServerResponse updateForgotPassword(String phone, String password, String token) {
         return memberService.updateForgotPassword(phone, password, token);
     }
-
+    @Override
+    @ApiMethod
+    public ServerResponse updateMethods(String workerId, Integer methods) {
+        return memberService.updateMethods(workerId, methods);
+    }
     @Override
     @ApiMethod
     public ServerResponse getMyInvitation(String userToken, Integer userRole) {

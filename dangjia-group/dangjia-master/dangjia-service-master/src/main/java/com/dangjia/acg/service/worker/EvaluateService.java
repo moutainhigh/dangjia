@@ -497,7 +497,7 @@ public class EvaluateService {
             evaluateMapper.insert(evaluate);
 
             updateIntegral(evaluate);//工人积分
-            updateCrowned(worker);//皇冠
+            updateCrowned(worker.getId());//皇冠
             //评价之后修改工人的好评率
             updateFavorable(worker.getId());
 
@@ -594,8 +594,9 @@ public class EvaluateService {
                 evaluate.setStar(wStar);//工人
                 evaluateMapper.updateByPrimaryKeySelective(evaluate);
             }
-            updateIntegral(evaluate);//工人积分
 
+            updateIntegral(evaluate);//工人积分
+            updateCrowned(worker.getId());//皇冠
             //查大管家被业主的评价
             evaluate = evaluateMapper.getForCountMoney(houseFlowApply.getHouseFlowId(), houseFlowApply.getApplyType(), supervisor.getId());
             if (evaluate == null) {
@@ -620,10 +621,9 @@ public class EvaluateService {
                 evaluate.setStar(sStar);//管家
                 evaluateMapper.updateByPrimaryKeySelective(evaluate);
             }
-            updateIntegral(evaluate);//管家积分
 
-            updateCrowned(worker);//皇冠
-            updateCrowned(supervisor);//皇冠
+            updateIntegral(evaluate);//管家积分
+            updateCrowned(supervisor.getId());//皇冠
             //评价之后修改工人的好评率
             updateFavorable(worker.getId());
             updateFavorable(supervisor.getId());
@@ -708,12 +708,8 @@ public class EvaluateService {
         WorkIntegral workIntegral = new WorkIntegral();
 
         if (evaluate.getStar() == 5) {
-            BigDecimal evaluationScore = worker.getEvaluationScore().add(score);
-            worker.setEvaluationScore(evaluationScore);
             workIntegral.setIntegral(score);
         } else if (evaluate.getStar() == 1 || evaluate.getStar() == 2) {
-            BigDecimal evaluationScore = worker.getEvaluationScore().subtract((score.multiply(new BigDecimal(2))));
-            worker.setEvaluationScore(evaluationScore);//减双倍
             workIntegral.setIntegral(score.multiply(new BigDecimal(-2)));
         } else {
             workIntegral.setIntegral(new BigDecimal(0));  //不增不减
@@ -728,6 +724,8 @@ public class EvaluateService {
         workIntegral.setBriefed(desc + evaluate.getStar() + "星评价");
         workIntegralMapper.insert(workIntegral);
 
+        BigDecimal evaluationScore = worker.getEvaluationScore().add(workIntegral.getIntegral());
+        worker.setEvaluationScore(evaluationScore);
         memberMapper.updateByPrimaryKeySelective(worker);
     }
 
@@ -771,8 +769,9 @@ public class EvaluateService {
     /**
      * 皇冠规则
      */
-    private void updateCrowned(Member worker) {
+    private void updateCrowned(String workerId) {
         try {
+            Member worker = memberMapper.selectByPrimaryKey(workerId);
             if (worker.getEvaluationScore().compareTo(new BigDecimal("90")) >= 0) {
                 Example example = new Example(Evaluate.class);
                 example.createCriteria().andEqualTo(Evaluate.WORKER_ID, worker.getId());
