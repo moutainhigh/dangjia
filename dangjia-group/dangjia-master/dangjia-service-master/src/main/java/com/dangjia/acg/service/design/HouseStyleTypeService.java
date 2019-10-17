@@ -6,10 +6,12 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.mapper.design.IHouseStyleTypeMapper;
 import com.dangjia.acg.modle.design.HouseStyleType;
+import com.dangjia.acg.modle.design.PayConfiguration;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
@@ -42,7 +44,9 @@ public class HouseStyleTypeService {
      */
     public ServerResponse getStyleList(HttpServletRequest request, PageDTO pageDTO) {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        List<HouseStyleType> houseStyleTypeList = houseStyleTypeMapper.selectAll();
+        Example example = new Example(HouseStyleType.class);
+        example.orderBy("price").desc();
+        List<HouseStyleType> houseStyleTypeList = houseStyleTypeMapper.selectByExample(example);
         PageInfo pageResult = new PageInfo(houseStyleTypeList);
         return ServerResponse.createBySuccess("查询列表成功", pageResult);
     }
