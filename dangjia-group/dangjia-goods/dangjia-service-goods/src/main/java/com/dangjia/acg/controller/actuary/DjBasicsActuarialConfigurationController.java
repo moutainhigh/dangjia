@@ -171,7 +171,12 @@ public class DjBasicsActuarialConfigurationController implements DjBasicsActuari
     @ApiMethod
     public ServerResponse importSimulateExcelBudgets(StandardMultipartHttpServletRequest request,String name,String fileName,String address){
 
-        return djBasicsActuarialConfigurationServices.importSimulateExcelBudgets(name,fileName,address,request.getParameter(Constants.USERID));
+        try{
+            return djBasicsActuarialConfigurationServices.importSimulateExcelBudgets(name,fileName,address,request.getParameter(Constants.USERID));
+        } catch (Exception e) {
+        logger.error("读取excel失败",e);
+        return ServerResponse.createByErrorMessage("保存excel失败");
+        }
     }
 
     /**
@@ -196,5 +201,46 @@ public class DjBasicsActuarialConfigurationController implements DjBasicsActuari
     public ServerResponse deleteSimulateExcelById(HttpServletRequest request,String id){
         return djBasicsActuarialConfigurationServices.deleteSimulateExcelById(id);
     }
+
+    /**
+     * 组合精算，查询所有符合条件的组合列表
+     * @param request
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse querySimulateAssemblyList(HttpServletRequest request){
+        return djBasicsActuarialConfigurationServices.querySimulateAssemblyList();
+    }
+
+    /**
+     * 模拟花费，保存组合精算信息
+     * @param request
+     * @param assemblyInfoAttr 精算组合列表信息
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse saveSimulateAssemblyInfo(HttpServletRequest request,String  assemblyInfoAttr){
+        try{
+            return djBasicsActuarialConfigurationServices.saveSimulateAssemblyInfo(assemblyInfoAttr,request.getParameter(Constants.USERID));
+        }catch (Exception e){
+            logger.error("保存组合精算信息失败",e);
+            return ServerResponse.createByErrorMessage("保存组合精算信息失败");
+        }
+
+    }
+
+    /**
+     * 查询精算组合关系表
+     * @param request
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse querySimulateAssemblyRelateionList(HttpServletRequest request){
+        return djBasicsActuarialConfigurationServices.querySimulateAssemblyRelateionList();
+    }
+
 
 }

@@ -5,22 +5,13 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
-import com.dangjia.acg.modle.actuary.DjActuarialTemplateConfig;
+import com.dangjia.acg.dto.actuary.*;
+import com.dangjia.acg.mapper.actuary.*;
+import com.dangjia.acg.modle.actuary.*;
 import com.dangjia.acg.service.actuary.excel.ActuarialConfigExcelRead;
 import com.dangjia.acg.dao.ConfigUtil;
-import com.dangjia.acg.dto.actuary.ActuarialProductDTO;
-import com.dangjia.acg.dto.actuary.ActuarialTemplateConfigDTO;
-import com.dangjia.acg.dto.actuary.SimulationTemplateConfigDTO;
-import com.dangjia.acg.dto.actuary.SimulationTemplateConfigDetailDTO;
-import com.dangjia.acg.mapper.actuary.DjActuarialProductConfigMapper;
-import com.dangjia.acg.mapper.actuary.DjActuarialTemplateConfigMapper;
-import com.dangjia.acg.mapper.actuary.DjSimulationTemplateConfigDetailMapper;
-import com.dangjia.acg.mapper.actuary.DjSimulationTemplateConfigMapper;
 import com.dangjia.acg.mapper.product.IBasicsGoodsMapper;
 import com.dangjia.acg.mapper.product.IBasicsProductTemplateMapper;
-import com.dangjia.acg.modle.actuary.DjActuarialProductConfig;
-import com.dangjia.acg.modle.actuary.DjSimulationTemplateConfig;
-import com.dangjia.acg.modle.actuary.DjSimulationTemplateConfigDetail;
 import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import org.apache.commons.lang3.StringUtils;
@@ -29,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sun.applet.Main;
 import tk.mybatis.mapper.entity.Example;
 
 import java.io.File;
@@ -62,8 +54,13 @@ public class DjBasicsActuarialConfigurationServices {
     private  IBasicsProductTemplateMapper iBasicsProductTemplateMapper;
 
     @Autowired
+    private DjActuarialSimulationRelationMapper djActuarialSimulationRelationMapper;
+
+    @Autowired
     private ConfigUtil configUtil;
 
+    //对排列结果进行存贮的list
+    static List rangeList = new ArrayList();
     /**
      * 查询设计精算阶段配置
      *
@@ -236,10 +233,10 @@ public class DjBasicsActuarialConfigurationServices {
 
     /**
      * 编辑标题 信息
-     * @param userId
-     * @param configId
-     * @param configName
-     * @param configType
+     * @param userId 用户ID
+     * @param configId 标题 ID
+     * @param configName 标题 名称
+     * @param configType 模板类型
      * @return
      */
     private DjSimulationTemplateConfig editSimulateTemplateInfo(String userId,String configId,String configName,String configType){
@@ -275,7 +272,7 @@ public class DjBasicsActuarialConfigurationServices {
             String id=obj.getString("id");
             DjSimulationTemplateConfigDetail djSimulationTemplateConfigDetail=new DjSimulationTemplateConfigDetail();
             djSimulationTemplateConfigDetail.setImage(obj.getString("image"));
-            djSimulationTemplateConfigDetail.setName("name");
+            djSimulationTemplateConfigDetail.setName(obj.getString("name"));
             djSimulationTemplateConfigDetail.setConfigStatus(0);
             djSimulationTemplateConfigDetail.setLabelName(obj.getString("labelName"));
             djSimulationTemplateConfigDetail.setSimulationTemplateId(djSimulationTemplateConfig.getId());
@@ -368,58 +365,55 @@ public class DjBasicsActuarialConfigurationServices {
      * @param address 上传后的路径
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse importSimulateExcelBudgets (String name,String fileName,String address,String userId){
-      //  String addressPri = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-        String addressPri = "e://dangjia/";
-        try {
-            ActuarialConfigExcelRead actuarialConfigExcelRead = new ActuarialConfigExcelRead();
-            String postfix = actuarialConfigExcelRead.checkExcelType(fileName);
-            List<Map<String,Object>> actuarialExcelList=new ArrayList<>();
-            if ("xls".equals(postfix)) {
-                 actuarialExcelList = actuarialConfigExcelRead.readXls(new File(addressPri+address));
-            }else{
-                actuarialExcelList = actuarialConfigExcelRead.readXlsx(new File(addressPri+address));
-            }
-            if(actuarialExcelList!=null&&actuarialExcelList.size()>0){
-                //1.保存对应的excel文件
-                DjActuarialTemplateConfig djActuarialTemplateConfig=new DjActuarialTemplateConfig();
-                djActuarialTemplateConfig.setConfigName(name);
-                djActuarialTemplateConfig.setConfigType("3");
-                djActuarialTemplateConfig.setExcelFileName(fileName);
-                djActuarialTemplateConfig.setExcelAddress(address);
-                djActuarialTemplateConfig.setCreateBy(userId==null?"SYSTEM":userId);
-                djActuarialTemplateConfig.setUpdateBy(userId==null?"SYSTEM":userId);
-                djActuarialTemplateConfig.setCreateDate(new Date());
-                djActuarialTemplateConfig.setModifyDate(new Date());
-                djActuarialTemplateConfigMapper.insert(djActuarialTemplateConfig);
-                //2.保存excel文件中的内容
-                for(Map<String,Object> map:actuarialExcelList){
-                    String productSn = (String)map.get("productSn");
-                    String workTypeId = (String)map.get("workTypeId");
-                    String productCount = (String)map.get("productCount");
-                    DjActuarialProductConfig djActuarialProductConfig=new DjActuarialProductConfig();
-                    djActuarialProductConfig.setActuarialTemplateId(djActuarialTemplateConfig.getId());// excel上传地址ID
-                    djActuarialProductConfig.setProductSn(productSn);
-                    djActuarialProductConfig.setWorkerTypeId(workTypeId);
-                    djActuarialProductConfig.setPurchaseQuantity(productCount);
-                    //根据商品编码，查询对应的商品ID及货品ID
-                    List<DjBasicsProductTemplate> list=iBasicsProductTemplateMapper.queryByProductSn(productSn);
-                    if(list!=null&&list.size()>0){
-                        DjBasicsProductTemplate dj=list.get(0);
-                        djActuarialProductConfig.setGoodsId(dj.getGoodsId());
-                        djActuarialProductConfig.setProductId(dj.getId());
-                    }
-                    djActuarialProductConfigMapper.insert(djActuarialProductConfig);
-
-                }
-                 return ServerResponse.createBySuccessMessage("保存excel成功");
-            }
-            logger.info("excel读取结果值：{}",actuarialExcelList);
-            return ServerResponse.createByErrorMessage("未读取到有效的excel数据，请检查数据是否正确");
-        } catch (Exception e) {
-            logger.error("读取excel失败",e);
-            return ServerResponse.createByErrorMessage("保存excel失败");
+        String addressPri = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+        //String addressPri = "e://dangjia/";
+        ActuarialConfigExcelRead actuarialConfigExcelRead = new ActuarialConfigExcelRead();
+        String postfix = actuarialConfigExcelRead.checkExcelType(fileName);
+        List<Map<String,Object>> actuarialExcelList=new ArrayList<>();
+        if ("xls".equals(postfix)) {
+             actuarialExcelList = actuarialConfigExcelRead.readXls(new File(addressPri+address));
+        }else{
+            actuarialExcelList = actuarialConfigExcelRead.readXlsx(new File(addressPri+address));
         }
+        if(actuarialExcelList!=null&&actuarialExcelList.size()>0){
+            //1.保存对应的excel文件
+            DjActuarialTemplateConfig djActuarialTemplateConfig=new DjActuarialTemplateConfig();
+            djActuarialTemplateConfig.setConfigName(name);
+            djActuarialTemplateConfig.setConfigType("3");
+            djActuarialTemplateConfig.setExcelFileName(fileName);
+            djActuarialTemplateConfig.setExcelAddress(address);
+            djActuarialTemplateConfig.setCreateBy(userId==null?"SYSTEM":userId);
+            djActuarialTemplateConfig.setUpdateBy(userId==null?"SYSTEM":userId);
+            djActuarialTemplateConfig.setCreateDate(new Date());
+            djActuarialTemplateConfig.setModifyDate(new Date());
+            djActuarialTemplateConfigMapper.insert(djActuarialTemplateConfig);
+            //2.保存excel文件中的内容
+            for(Map<String,Object> map:actuarialExcelList){
+                String productSn = (String)map.get("productSn");
+                String workTypeId = (String)map.get("workTypeId");
+                String productCount = (String)map.get("productCount");
+                DjActuarialProductConfig djActuarialProductConfig=new DjActuarialProductConfig();
+                djActuarialProductConfig.setActuarialTemplateId(djActuarialTemplateConfig.getId());// excel上传地址ID
+                djActuarialProductConfig.setProductSn(productSn);
+                djActuarialProductConfig.setWorkerTypeId(workTypeId);
+                djActuarialProductConfig.setPurchaseQuantity(productCount);
+                //根据商品编码，查询对应的商品ID及货品ID
+                List<DjBasicsProductTemplate> list=iBasicsProductTemplateMapper.queryByProductSn(productSn);
+                if(list!=null&&list.size()>0){
+                    DjBasicsProductTemplate dj=list.get(0);
+                    djActuarialProductConfig.setGoodsId(dj.getGoodsId());
+                    djActuarialProductConfig.setProductId(dj.getId());
+                }
+                djActuarialProductConfigMapper.insert(djActuarialProductConfig);
+
+            }
+             return ServerResponse.createBySuccessMessage("保存excel成功");
+        }
+        logger.info("excel读取结果值：{}",actuarialExcelList);
+        return ServerResponse.createByErrorMessage("未读取到有效的excel数据，请检查数据是否正确");
+
     }
 
     /**
@@ -427,24 +421,30 @@ public class DjBasicsActuarialConfigurationServices {
      * @return
      */
     public ServerResponse querySimulateExcelList(){
-        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-        Example example=new Example(DjActuarialTemplateConfig.class);
-        example.createCriteria().andEqualTo(DjActuarialTemplateConfig.CONFIG_TYPE,"3")
-        .andEqualTo(DjActuarialTemplateConfig.DATA_STATUS,0);//查类型为excel的数据列表
-        List<DjActuarialTemplateConfig> templateList = djActuarialTemplateConfigMapper.selectByExample(example);
-        List excelList=new ArrayList();
-        if(templateList!=null&&templateList.size()>0){
-            for(DjActuarialTemplateConfig dj :templateList){
-                Map djMap=new HashMap();
-                djMap.put("id",dj.getId());
-                djMap.put("name",dj.getConfigName());
-                djMap.put("fileName",dj.getExcelFileName());
-                djMap.put("excelAddress",dj.getExcelAddress());
-                djMap.put("excelAddressUrl",dj.getExcelAddress());
-                excelList.add(djMap);
+        try{
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            Example example=new Example(DjActuarialTemplateConfig.class);
+            example.createCriteria().andEqualTo(DjActuarialTemplateConfig.CONFIG_TYPE,"3")
+                    .andEqualTo(DjActuarialTemplateConfig.DATA_STATUS,0);//查类型为excel的数据列表
+            List<DjActuarialTemplateConfig> templateList = djActuarialTemplateConfigMapper.selectByExample(example);
+            List excelList=new ArrayList();
+            if(templateList!=null&&templateList.size()>0){
+                for(DjActuarialTemplateConfig dj :templateList){
+                    Map djMap=new HashMap();
+                    djMap.put("id",dj.getId());
+                    djMap.put("name",dj.getConfigName());
+                    djMap.put("fileName",dj.getExcelFileName());
+                    djMap.put("excelAddress",dj.getExcelAddress());
+                    djMap.put("excelAddressUrl",dj.getExcelAddress());
+                    excelList.add(djMap);
+                }
             }
+            return  ServerResponse.createBySuccess("查询成功",excelList);
+        }catch (Exception e) {
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
         }
-        return  ServerResponse.createBySuccess("查询成功",excelList);
+
     }
 
     //删除上传的excel文件(
@@ -456,4 +456,175 @@ public class DjBasicsActuarialConfigurationServices {
         return ServerResponse.createBySuccess("删除成功",id);
     }
 
+    public ServerResponse querySimulateAssemblyList(){
+        try{
+            //查询code中返回的详情列表
+            List  templateList=djSimulationTemplateConfigMapper.queryTemplateListByType();
+            List listAll = new ArrayList();
+            List list = new ArrayList();
+            for(int i=0;i<templateList.size();i++){
+                Map  templateMap=(Map)templateList.get(i);
+                list.add(templateMap.get("templateDetailList"));
+            }
+            //初始化每次的list值
+            rangeList = new ArrayList();
+            logger.info("入参：list:{}"+list);
+            range(list, listAll);
+            logger.info("返回结果：{}"+rangeList);
+            return ServerResponse.createBySuccess("查询成功",getAssemblyList());
+        }catch (Exception e) {
+            logger.error("querySimulateAssemblyList查询失败",e);
+            return ServerResponse.createByErrorMessage("querySimulateAssemblyList查询失败");
+        }
+
+    }
+
+    /**
+     * 封装要返回给前端的参数
+     * @return
+     */
+    List getAssemblyList(){
+        List assemblyList=new ArrayList();
+        if(rangeList!=null&&rangeList.size()>0){
+            Map assemblyMap = new HashMap();
+            for(int i=0;i<rangeList.size();i++){
+                List detailList=(List)rangeList.get(i);
+                String assemblyCode="";
+                String assemblyName="";
+                for(Object obj:detailList){
+                    String[] strs=obj.toString().split(":");
+                    if(StringUtils.isBlank(assemblyCode)){
+                        assemblyCode=strs[0];
+                        assemblyName=strs[1];
+                    }else{
+                        assemblyCode=assemblyCode+","+strs[0];
+                        assemblyName=assemblyName+","+strs[1];
+                    }
+                }
+                assemblyMap=new HashMap();
+                assemblyMap.put("assemblyCode",assemblyCode);
+                assemblyMap.put("assemblyName",assemblyName);
+                assemblyList.add(assemblyMap);
+            }
+        }
+        return assemblyList;
+    }
+
+    //递归循环要排列的组合列表
+    void range(List list_range, List list_trans) {
+        //获得当前要排列的list的长度
+        int size = list_range.size();
+        //循环到最后一次
+        if (size == 1) {
+            //将排列结果汇总
+            for (Object object : (List) list_range.get(0)) {
+                List l_list = new ArrayList();
+                l_list.addAll(list_trans);
+                l_list.add(object);
+                //将此结果汇总
+                rangeList.add(l_list);
+            }
+        } else {
+            //没有循环到底
+            //给存排列结果的list添加排列
+            List loopList = (List) list_range.get(0);
+            List list_loop = new ArrayList();
+            list_loop.addAll(list_range);
+            list_loop.remove(0);
+            for (Object object : loopList) {
+                //将其添加到存排列结果的list中
+                List list_d = new ArrayList();
+                list_d.addAll(list_trans);
+                list_d.add(object);
+                //递归
+                range(list_loop, list_d);
+            }
+        }
+
+    }
+
+    /**
+     * 保存组合精算信息
+     * @param assemblyInfoAttr
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse saveSimulateAssemblyInfo(String assemblyInfoAttr,String userId){
+        if(assemblyInfoAttr!=null&&StringUtils.isNotBlank(assemblyInfoAttr)){
+            logger.info("开始进入saveSimulateAssemblyInfo：========start==========");
+            //1.获取需要保存的组合列表
+            List<DjActuarialSimulationRelation> actuarialSimulationRelationList=getActuarialSimulationRelationList(assemblyInfoAttr,userId);
+            if(actuarialSimulationRelationList!=null&&actuarialSimulationRelationList.size()>0){
+                logger.info("开始数据保存：==================");
+                //2.先删除历史正式数据的精算组合
+                Example example=new Example(DjSimulationTemplateConfigDetail.class);
+                example.createCriteria().andEqualTo(DjSimulationTemplateConfigDetail.DATA_STATUS,"0");
+                djActuarialSimulationRelationMapper.deleteByExample(example);
+                //3.删除正式数据关联的标题及精算表数据
+                example=new Example(DjSimulationTemplateConfigDetail.class);
+                example.createCriteria().andEqualTo(DjSimulationTemplateConfigDetail.CONFIG_STATUS,"1");
+                djSimulationTemplateConfigDetailMapper.deleteByExample(example);//删除标题下的选项值信息
+                djSimulationTemplateConfigMapper.deleteSimulationTemplate();//删除无用的标题数据
+                djActuarialProductConfigMapper.deleteActuarialProductByTemplate();//删除无用的精算详情数据
+                example=new Example(DjActuarialTemplateConfig.class);
+                example.createCriteria().andEqualTo(DjActuarialTemplateConfig.DATA_STATUS,"1");
+                example.createCriteria().andEqualTo(DjActuarialTemplateConfig.CONFIG_TYPE,"3");
+                djActuarialTemplateConfigMapper.deleteByExample(example);//删除无用的精算信息
+                //4.保存新的精算组合进去
+                djActuarialSimulationRelationMapper.batchInsertAssemblyInfo(actuarialSimulationRelationList);
+                //5.将临时数据的标题及详情改为正式数据，并重新拷贝一份临时数据出来，后续操作用
+                djSimulationTemplateConfigDetailMapper.updateTemplateDetailConfig();//修改临时数据为正式数据
+                djSimulationTemplateConfigDetailMapper.batchInsertTempateDetail();//批量添加一批新的临时数据
+            }
+        }
+
+        return ServerResponse.createBySuccessMessage("保存成功");
+    }
+
+    /**
+     * 获取需要保存的数据
+     * @param assemblyInfoAttr
+     * @param userId
+     */
+    private List<DjActuarialSimulationRelation> getActuarialSimulationRelationList(String assemblyInfoAttr, String userId){
+        List<DjActuarialSimulationRelation> actuarialSimulationRelationList=new ArrayList<>();
+        JSONArray jsonArr = JSONArray.parseArray(assemblyInfoAttr);
+        DjActuarialSimulationRelation djActuarialSimulationRelation;
+        for(int i=0;i<jsonArr.size();i++){
+            JSONObject obj = jsonArr.getJSONObject(i);
+            String actuarialExcelId = obj.getString("actuarialExcelId");
+            JSONArray assemblyInfoList = obj.getJSONArray("assemblyInfoList");
+            if(assemblyInfoList!=null&&assemblyInfoList.size()>0){
+                for(int j=0;j<assemblyInfoList.size();j++){
+                    Map assemblyMap=(Map)assemblyInfoList.get(j);
+                    djActuarialSimulationRelation=new DjActuarialSimulationRelation();
+                    djActuarialSimulationRelation.setActuarialTemplateId(actuarialExcelId);
+                    djActuarialSimulationRelation.setSimulationCodeGroup((String)assemblyMap.get("assemblyCode"));
+                    djActuarialSimulationRelation.setSimulationNameGroup((String)assemblyMap.get("assemblyName"));
+                    djActuarialSimulationRelation.setCreateBy(userId==null?"":userId);
+                    djActuarialSimulationRelation.setUpdateBy(userId==null?"":userId);
+                    djActuarialSimulationRelation.setCreateDate(new Date());
+                    djActuarialSimulationRelation.setModifyDate(new Date());
+                    actuarialSimulationRelationList.add(djActuarialSimulationRelation);
+                }
+            }
+        }
+        return actuarialSimulationRelationList;
+    }
+
+    /**
+     * 查询精算组合关系表
+     * @return
+     */
+    public  ServerResponse querySimulateAssemblyRelateionList(){
+        try{
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            List<ActuarialSimulateionReationDTO> relationList=djActuarialSimulationRelationMapper.querySimulateAssemblyRelateionList(address);
+            return ServerResponse.createBySuccess("查询成功",relationList);
+        }catch (Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+
+    }
 }

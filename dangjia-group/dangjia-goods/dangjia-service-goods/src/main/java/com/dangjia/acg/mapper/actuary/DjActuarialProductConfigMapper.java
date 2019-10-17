@@ -18,4 +18,9 @@ import java.util.List;
 public interface DjActuarialProductConfigMapper extends Mapper<DjActuarialProductConfig> {
 
     List<DjActuarialProductConfig> queryActuarialProductByConfigId(@Param("actuarialTemplateId") String actuarialTemplateId);
+
+    /**
+     *  删除 无用的精算详情数据
+     */
+    void deleteActuarialProductByTemplate();
 }

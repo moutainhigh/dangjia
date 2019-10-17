@@ -20,4 +20,12 @@ public interface DjSimulationTemplateConfigMapper extends Mapper<DjSimulationTem
     List<SimulationTemplateConfigDTO> querySimulateionTemplateConfig(@Param("id") String id);
 
     String  selectCurrentIndexByConfigType(@Param("configType") String configType);
+    //删除符合条件的标题数据
+    void deleteSimulationTemplate();
+
+    /**
+     * 查询组合返回列表
+     * @return
+     */
+    List queryTemplateListByType();
 }

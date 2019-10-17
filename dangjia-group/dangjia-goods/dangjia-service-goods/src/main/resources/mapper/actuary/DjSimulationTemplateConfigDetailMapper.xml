@@ -22,4 +22,46 @@
         and id=#{simulationDetailId}
     </select>
 
+    <!--将临时数据改为正式数据 -->
+    <update id="updateTemplateDetailConfig">
+       update dj_simulation_template_config_detail set config_status = 1 where config_status=0
+    </update>
+
+    <insert id="batchInsertTempateDetail">
+        INSERT INTO dj_simulation_template_config_detail (
+            id,
+            simulation_template_id,
+            CODE,
+            NAME,
+            image,
+            label_name,
+            template_detail_index,
+            config_status,
+            create_date,
+            modify_date,
+            create_by,
+            update_by
+        ) SELECT
+            CONCAT(
+                DATE_FORMAT(now(), '%Y%m%d%k%i%s'),
+                "",
+                CEILING(RAND() * 900000 + 100000)
+            ),
+            simulation_template_id,
+            CODE,
+            NAME,
+            image,
+            label_name,
+            template_detail_index,
+            0,
+            create_date,
+            modify_date,
+            create_by,
+            update_by
+        FROM
+            dj_simulation_template_config_detail
+        WHERE
+            config_status = 1
+    </insert>
+
 </mapper>

@@ -59,4 +59,36 @@
     </select>
 
 
+    <!-- 查询组合排列列表 -->
+    <resultMap id="templateMap" type="java.util.Map">
+        <id property="id" column="id"/>
+        <result property="id" column="id"/>
+        <collection property="templateDetailList" column="{simulationTemplateId=id" ofType="map" select="selectTemplateDetailList"/>
+    </resultMap>
+
+    <select id="queryTemplateListByType" resultMap="templateMap">
+
+        SELECT
+        id
+        FROM
+        dj_simulation_template_config t
+        where data_status = '0'
+        and exists (select 1 from dj_simulation_template_config_detail t1 where t.id=t1.simulation_template_id and t1.config_status = 0)
+        order by config_type,create_date
+    </select>
+
+    <select id="selectTemplateDetailList" resultType="java.lang.String">
+        SELECT
+            CONCAT(code,":",name)
+        FROM
+            dj_simulation_template_config_detail
+        where config_status = 0
+        and simulation_template_id=#{simulationTemplateId}
+        order by template_detail_index
+    </select>
+
+    <!-- 删除无用的标题数据 -->
+    <select id="deleteSimulationTemplate">
+        delete from dj_simulation_template_config where id not in(select distinct simulation_template_id from dj_simulation_template_config_detail)
+    </select>
 </mapper>

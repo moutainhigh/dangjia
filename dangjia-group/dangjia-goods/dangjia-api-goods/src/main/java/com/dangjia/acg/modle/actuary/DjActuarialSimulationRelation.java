@@ -18,7 +18,7 @@ import javax.persistence.Table;
  */
 @Data
 @Entity
-@Table(name = "dj_actuarial_template_config")
+@Table(name = "dj_actuarial_simulation_relation")
 @ApiModel(description = "花费和精算模板关系表")
 @FieldNameConstants(prefix = "")
 public class DjActuarialSimulationRelation extends BaseEntity {
@@ -32,6 +32,12 @@ public class DjActuarialSimulationRelation extends BaseEntity {
     @Desc(value = "花费模板编码组合")
     @ApiModelProperty("花费模板编码组合")
     private String simulationCodeGroup;
+
+    @Column(name = "simulation_name_group")
+    @Desc(value = "花费模板编码组合")
+    @ApiModelProperty("花费模板编码组合")
+    private String simulationNameGroup;
+
 
     @Column(name = "create_by")
     @Desc(value = "创建人")

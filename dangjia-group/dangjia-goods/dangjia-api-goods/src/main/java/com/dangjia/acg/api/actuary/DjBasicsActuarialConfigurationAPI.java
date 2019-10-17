@@ -107,4 +107,18 @@ public interface DjBasicsActuarialConfigurationAPI {
     ServerResponse deleteSimulateExcelById(@RequestParam("request") HttpServletRequest request,
                                            @RequestParam("id") String id);
 
+    @PostMapping("web/config/actuarialConfig/querySimulateAssemblyList")
+    @ApiOperation(value = "模拟花费--查询所有的组合列表", notes = "查询所有的组合列表")
+    ServerResponse querySimulateAssemblyList(@RequestParam("request") HttpServletRequest request);
+
+    @PostMapping("web/config/actuarialConfig/saveSimulateAssemblyInfo")
+    @ApiOperation(value = "模拟花费--保存组合精算信息(批量保存)", notes = "保存组合精算信息(批量保存)")
+    ServerResponse saveSimulateAssemblyInfo(@RequestParam("request") HttpServletRequest request,
+                                            @RequestParam("assemblyInfoAttr") String  assemblyInfoAttr);
+
+    @PostMapping("web/config/actuarialConfig/querySimulateAssemblyRelateionList")
+    @ApiOperation(value = "模拟花费--查询组合精算列表信息", notes = "查询组合精算列表信息")
+    ServerResponse querySimulateAssemblyRelateionList(@RequestParam("request") HttpServletRequest request);
+
+
 }
