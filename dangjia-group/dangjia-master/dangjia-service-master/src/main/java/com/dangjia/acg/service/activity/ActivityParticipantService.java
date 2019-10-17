@@ -58,6 +58,7 @@ public class ActivityParticipantService {
         }
         if (activityParticipant.getState()==0) {
             criteria.andEqualTo(ActivityParticipant.DATA_STATUS,0);
+            criteria.andNotEqualTo(ActivityParticipant.STATE,2);
         }
         if (activityParticipant.getState()==1) {
             criteria.andCondition(" (data_status=1 or state=2 ) ");
