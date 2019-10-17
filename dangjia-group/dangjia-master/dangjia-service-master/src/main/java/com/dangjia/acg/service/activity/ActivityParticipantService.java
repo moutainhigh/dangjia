@@ -56,12 +56,13 @@ public class ActivityParticipantService {
         if (!CommonUtil.isEmpty(activityParticipant.getNickName())) {
             criteria.andCondition(" CONCAT(nick_name,phone) like CONCAT('%','" + activityParticipant.getNickName() + "','%')");
         }
-        if (activityParticipant.getState()==0) {
-            criteria.andEqualTo(ActivityParticipant.DATA_STATUS,0);
-            criteria.andNotEqualTo(ActivityParticipant.STATE,2);
+        if (activityParticipant.getState()!=null&&activityParticipant.getState()!=2) {
+            criteria.andEqualTo(ActivityParticipant.STATE,activityParticipant.getState());
         }
-        if (activityParticipant.getState()==1) {
+        if (activityParticipant.getState()==2) {
             criteria.andCondition(" (data_status=1 or state=2 ) ");
+        }else{
+            criteria.andEqualTo(ActivityParticipant.DATA_STATUS,0);
         }
         if(!CommonUtil.isEmpty(activityParticipant.getCityId())) {
             criteria.andEqualTo(ActivityParticipant.CITY_ID,activityParticipant.getCityId());
