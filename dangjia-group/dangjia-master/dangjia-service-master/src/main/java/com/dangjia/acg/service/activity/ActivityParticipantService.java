@@ -193,7 +193,7 @@ public class ActivityParticipantService {
                 activityParticipant.setState(0);
             }
             this.activityParticipantMapper.insertSelective(activityParticipant);
-            return ServerResponse.createBySuccessMessage("领取成功");
+            return ServerResponse.createBySuccessMessage("礼品数量有限，先到先得，请联系工作人员线下发放礼品！");
         }else{
             return ServerResponse.createByErrorMessage("未达到领取条件！");
         }
