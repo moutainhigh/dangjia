@@ -191,7 +191,7 @@
 
         <if test="searchKey!=null and searchKey!=''">
             AND (w.nick_name LIKE CONCAT('%',#{searchKey},'%')
-            or w.mobile LIKE CONCAT('%',#{searchKey},'%'))
+            or w.mobile LIKE CONCAT('%',#{searchKey},'%')
             or w.name LIKE CONCAT('%',#{searchKey},'%'))
         </if>
 
