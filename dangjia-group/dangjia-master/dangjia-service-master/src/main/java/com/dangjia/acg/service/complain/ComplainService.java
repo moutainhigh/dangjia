@@ -616,6 +616,15 @@ public class ComplainService {
         if (!member.getId().equals(house.getMemberId())) {
             return ServerResponse.createByErrorMessage("您无权操作此房产");
         }
+        Example example = new Example(Complain.class);
+        example.createCriteria()
+                .andEqualTo(Complain.HOUSE_ID, house.getId())
+                .andEqualTo(Complain.STATUS, 0)
+                .andEqualTo(Complain.COMPLAIN_TYPE, 5);
+        List<Complain> complains = complainMapper.selectByExample(example);
+        if (complains.size()>0) {
+            return ServerResponse.createByErrorMessage("您已提交申请，请勿重复提交！");
+        }
         Complain complain = new Complain();
         complain.setHouseId(houseId);
         complain.setMemberId(member.getId());
