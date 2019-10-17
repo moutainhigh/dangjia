@@ -83,7 +83,7 @@ public class ActivityParticipantService {
         for (ActivityParticipant participant : list) {
             Map map = BeanUtils.beanToMap(participant);
             map.put("cityName", cityMapper.selectByPrimaryKey(participant.getCityId()).getName());
-            if (activityParticipant.getState()==1) {
+            if (activityParticipant.getState()!=null&&activityParticipant.getState()==2) {
                 Member user = memberMapper.selectByPrimaryKey(participant.getMemberId());
                 map.put(ActivityParticipant.CREATE_DATE, user.getCreateDate());
             }
