@@ -708,12 +708,8 @@ public class EvaluateService {
         WorkIntegral workIntegral = new WorkIntegral();
 
         if (evaluate.getStar() == 5) {
-            BigDecimal evaluationScore = worker.getEvaluationScore().add(score);
-            worker.setEvaluationScore(evaluationScore);
             workIntegral.setIntegral(score);
         } else if (evaluate.getStar() == 1 || evaluate.getStar() == 2) {
-            BigDecimal evaluationScore = worker.getEvaluationScore().subtract((score.multiply(new BigDecimal(2))));
-            worker.setEvaluationScore(evaluationScore);//减双倍
             workIntegral.setIntegral(score.multiply(new BigDecimal(-2)));
         } else {
             workIntegral.setIntegral(new BigDecimal(0));  //不增不减
@@ -728,6 +724,8 @@ public class EvaluateService {
         workIntegral.setBriefed(desc + evaluate.getStar() + "星评价");
         workIntegralMapper.insert(workIntegral);
 
+        BigDecimal evaluationScore = worker.getEvaluationScore().add(workIntegral.getIntegral());
+        worker.setEvaluationScore(evaluationScore);
         memberMapper.updateByPrimaryKeySelective(worker);
     }
 
