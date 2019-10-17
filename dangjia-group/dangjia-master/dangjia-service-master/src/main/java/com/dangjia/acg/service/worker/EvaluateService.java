@@ -594,8 +594,9 @@ public class EvaluateService {
                 evaluate.setStar(wStar);//工人
                 evaluateMapper.updateByPrimaryKeySelective(evaluate);
             }
-            updateIntegral(evaluate);//工人积分
 
+            updateCrowned(worker);//皇冠
+            updateIntegral(evaluate);//工人积分
             //查大管家被业主的评价
             evaluate = evaluateMapper.getForCountMoney(houseFlowApply.getHouseFlowId(), houseFlowApply.getApplyType(), supervisor.getId());
             if (evaluate == null) {
@@ -620,10 +621,8 @@ public class EvaluateService {
                 evaluate.setStar(sStar);//管家
                 evaluateMapper.updateByPrimaryKeySelective(evaluate);
             }
-            updateIntegral(evaluate);//管家积分
-
-            updateCrowned(worker);//皇冠
             updateCrowned(supervisor);//皇冠
+            updateIntegral(evaluate);//管家积分
             //评价之后修改工人的好评率
             updateFavorable(worker.getId());
             updateFavorable(supervisor.getId());

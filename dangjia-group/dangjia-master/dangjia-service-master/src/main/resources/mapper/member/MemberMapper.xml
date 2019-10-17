@@ -7,7 +7,7 @@
     <sql id="all_columns">
         w.id,
         w.user_name AS userName,
-        '' password,
+        null password,
         w.nick_name AS nickName,
         w.name,
         w.mobile,
