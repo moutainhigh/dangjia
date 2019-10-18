@@ -39,8 +39,8 @@ public class StorefrontProduct extends BaseEntity {
      * 商品名称
      */
     @Column(name = "product_name")
-    @Desc(value = "商品名称")
-    @ApiModelProperty("商品名称")
+    @Desc(value = "货品名称")
+    @ApiModelProperty("货品名称")
     private String productName;
 
 

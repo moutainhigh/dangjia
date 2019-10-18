@@ -35,10 +35,10 @@ public interface StorefrontProductAPI {
     ServerResponse setSpStatusById(@RequestParam("id") String id, @RequestParam("isShelfStatus") String isShelfStatus);
 
     @PostMapping("/web/setAllStoreProductByIsShelfStatus")
-    @ApiOperation(value = "供货设置-设置商品批量架", notes = "设置商品批量架")
+    @ApiOperation(value = "供货设置-设置商品批量上下架", notes = "设置商品批量上下架")
     ServerResponse setAllStoreProductByIsShelfStatus(@RequestParam("id") String id, @RequestParam("isShelfStatus") String isShelfStatus);
 
-    @PostMapping("/web/updateStorefrontProductById")
+    @PostMapping("/web/editStorefrontProductByIds")
     @ApiOperation(value = "供货设置-编辑店铺商品", notes = "供货设置-编辑店铺商品")
     ServerResponse editStorefrontProductById(@RequestParam("id") String id);
 
