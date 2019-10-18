@@ -22,8 +22,13 @@ import java.util.List;
 public interface BasicsStorefrontAPI {
 
     @PostMapping("/web/querySingleStorefrontById")
-    @ApiOperation(value = "根据Id查询店铺信息", notes = "根据Id查询店铺信息")
+    @ApiOperation(value = "根据Id查询店铺信息(实体对象)", notes = "根据Id查询店铺信息(实体对象)")
     Storefront querySingleStorefrontById(@RequestParam("id") String id);
+
+    @PostMapping("/web/queryStorefrontById")
+    @ApiOperation(value = "根据Id查询店铺信息", notes = "根据Id查询店铺信息")
+    ServerResponse queryStorefrontById(@RequestParam("id") String id);
+
 
     @PostMapping("/web/queryLikeSingleStorefront")
     @ApiOperation(value = "根据调件模糊查询店铺信息", notes = "根据调件模糊查询店铺信息")

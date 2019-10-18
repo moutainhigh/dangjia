@@ -36,6 +36,12 @@ public class StorefrontController implements BasicsStorefrontAPI {
 
     @Override
     @ApiMethod
+    public ServerResponse queryStorefrontById(String id) {
+        return storefrontService.queryStorefrontById(id);
+    }
+
+    @Override
+    @ApiMethod
     public List<Storefront> queryLikeSingleStorefront(String searchKey) {
         return storefrontService.queryLikeSingleStorefront(searchKey);
     }

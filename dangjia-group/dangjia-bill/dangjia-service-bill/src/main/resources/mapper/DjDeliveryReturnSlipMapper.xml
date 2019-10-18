@@ -6,7 +6,7 @@
 
     <select id="querySupplyDeliverTaskList" resultType="com.dangjia.acg.dto.delivery.DjDeliveryReturnSlipDTO">
         SELECT
-            dsd.seller_id as shopId,
+            dsd.storefront_id as shopId,
             dsd.number as number,
             dsd.create_date as createDate,
             dsd.ship_address as shipAddress,
@@ -33,7 +33,7 @@
 
     <select id="querySupplyRepairTaskList" resultType="com.dangjia.acg.dto.delivery.DjDeliveryReturnSlipDTO">
         SELECT
-            rmd.seller_id as shopId,
+            rmd.storefront_id as shopId,
             rmd.number as number,
             rmd.create_date as createDate,
             rmd.ship_address as shipAddress,
@@ -60,7 +60,7 @@
 
     <select id="querySupplyTaskList" resultType="com.dangjia.acg.dto.delivery.DjDeliveryReturnSlipDTO">
         SELECT
-            dsd.seller_id as shopId,
+            dsd.storefront_id as shopId,
             dsd.number as number,
             dsd.create_date as createDate,
             dsd.ship_address as shipAddress,
@@ -82,7 +82,7 @@
         </if>
           UNION ALL
         SELECT
-            rmd.seller_id as shopId,
+            rmd.storefront_id as shopId,
             rmd.number as number,
             rmd.create_date as createDate,
             rmd.ship_address as shipAddress,
@@ -129,7 +129,7 @@
     <select id="querySupplierSettlementManagement"
             resultType="com.dangjia.acg.dto.delivery.SupplierSettlementManagementDTO">
         SELECT
-            seller_id as shopId,
+        storefront_id as shopId,
             sum(count) as count,
             supplier_id as supId
         FROM
@@ -137,7 +137,7 @@
                 SELECT
                     supplier_id,
                     count(0) AS count,
-                    seller_id
+        storefront_id
                 FROM
                     dj_deliver_split_deliver
                 WHERE
@@ -151,12 +151,12 @@
                         apply_state=2
                     )
                 </if>
-                GROUP BY seller_id
+                GROUP BY storefront_id
                   UNION ALL
                 SELECT
                     supplier_id,
                     count(0) AS count,
-                    seller_id
+        storefront_id
                 FROM
                     dj_repair_mend_deliver
                 WHERE
@@ -170,9 +170,9 @@
                       apply_state=2
                     )
                 </if>
-                GROUP BY seller_id
+                GROUP BY storefront_id
             ) a
-        GROUP BY seller_id
+        GROUP BY storefront_id
     </select>
 
     <!--<select id="querySupplierSettlementList" resultType="com.dangjia.acg.modle.delivery.DjDeliveryReturnSlip">-->
@@ -199,7 +199,7 @@
         SELECT
             number,
             supplier_id as supId,
-            seller_id as shopId,
+        storefront_id as shopId,
             create_date as createDate,
             ship_address as shipAddress,
             ship_name as shipName,
@@ -210,7 +210,7 @@
                 SELECT
                     dsd.number,
                     dsd.supplier_id,
-                    dsd.seller_id,
+                    dsd.storefront_id,
                     dos.create_date,
                     dsd.ship_address,
                     dsd.ship_name,
@@ -224,7 +224,7 @@
                     SELECT
                         rmd.number,
                         rmd.supplier_id,
-                        rmd.seller_id,
+                        rmd.storefront_id,
                         rmo.create_date,
                         rmd.ship_address,
                         rmd.ship_name,
@@ -236,7 +236,7 @@
                     INNER JOIN dj_repair_mend_order rmo ON rmd.mend_order_id = rmo.id
             ) a
         WHERE supplier_id =#{supId}
-        AND seller_id =#{shopId}
+        AND storefront_id =#{shopId}
         <if test="applyState==1">
             and apply_state = 0
         </if>
@@ -335,7 +335,7 @@
 
     <select id="querySupplierStoreDimensionList" resultType="com.dangjia.acg.dto.delivery.SupplierStoreDimensionDTO">
         SELECT
-            dsd.seller_id AS shopId,
+            dsd.storefront_id AS shopId,
             sum(dosi.num) as totalNumberSupply,
             sum(total_price) as income
         FROM
@@ -343,9 +343,9 @@
         INNER JOIN dj_deliver_order_split_item dosi ON dsd.order_split_id = dosi.order_split_id
         WHERE
             dsd.supplier_id =#{supId}
-        and dsd.seller_id =#{shopId}
+        and dsd.storefront_id =#{shopId}
         GROUP BY
-            dsd.seller_id
+            dsd.storefront_id
     </select>
 
 </mapper>

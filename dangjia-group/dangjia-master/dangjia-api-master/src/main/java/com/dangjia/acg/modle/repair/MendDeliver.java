@@ -119,4 +119,10 @@ public class MendDeliver extends BaseEntity {
 	@ApiModelProperty("退货状态（0大管家待确认,1已确认,2已结算,3取消")
 	private Integer shippingState;
 
+	@Column(name = "storefront_id")
+	@Desc(value = "店铺ID")
+	@ApiModelProperty("店铺ID")
+	private String storefrontId;
+
+
 }

@@ -66,14 +66,14 @@ public class WebOrderService {
      * @param searchKey 模糊搜索：订单号,房屋信息,电话,支付单号(业务订单号)
      * @return
      */
-    public ServerResponse getAllOrders(PageDTO pageDTO,String cityId, Integer state, String searchKey) {
+    public ServerResponse getAllOrders(PageDTO pageDTO,String cityId, Integer state, String searchKey,String sellerId) {
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             if (state == null) {
                 state = -1;
             }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<WebOrderDTO> orderList = iBusinessOrderMapper.getWebOrderList(cityId,state, searchKey);
+            List<WebOrderDTO> orderList = iBusinessOrderMapper.getWebOrderList(cityId,state, searchKey,sellerId);
             PageInfo pageResult = new PageInfo(orderList);
             for (WebOrderDTO webOrderDTO : orderList) {
                 webOrderDTO.setImage(Utils.getImageAddress(address,webOrderDTO.getImage()));
@@ -127,6 +127,7 @@ public class WebOrderService {
                         webOrderDTO.setTypeText("工人保险");
                     }
                 }
+                //优惠卷
                 ActivityRedPackRecord activityRedPackRecord = iActivityRedPackRecordMapper.getRedPackRecordsByBusinessOrderNumber(webOrderDTO.getOrderId());
                 if (activityRedPackRecord != null) {
                     ActivityRedPack activityRedPack = iActivityRedPackMapper.selectByPrimaryKey(activityRedPackRecord.getRedPackId());

@@ -53,6 +53,20 @@ public class StorefrontService {
         }
     }
 
+    /**
+     * 根据Id查询店铺信息
+     * @param id
+     * @return
+     */
+    public ServerResponse queryStorefrontById(String id) {
+        try {
+            Storefront storefront = istorefrontMapper.selectByPrimaryKey(id);
+            return ServerResponse.createBySuccess("修改成功!",storefront);
+        } catch (Exception e) {
+            logger.error("修改失败：", e);
+            return ServerResponse.createByErrorMessage("修改失败");
+        }
+    }
 
     /**
      *  根据调件模糊查询店铺信息
@@ -199,6 +213,7 @@ public class StorefrontService {
         } catch (Exception e) {
             logger.error("查询失败：", e);
             return ServerResponse.createByErrorMessage("查询失败");
+
         }
     }
 }
