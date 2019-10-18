@@ -324,7 +324,8 @@ public class EngineerService {
             if (member.getWorkerType() > 3) {//其他工人
                 long num = houseWorkerMapper.grabControl(member.getId(),member.getWorkerType());//查询未完工工地
                 WorkerType wt = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
-                if (member.getWorkerType() != 7 && num >= wt.getMethods()) {
+                long methods=(member.getMethods()==null||member.getMethods()==0)?wt.getMethods():member.getMethods();
+                if (methods > 0 && member.getWorkerType() != 7 && num >= methods) {
                     return ServerResponse.createByErrorMessage("该工匠达到持单上限，无法设置！");
                 }
 
@@ -777,6 +778,8 @@ public class EngineerService {
                 }
                 artisanDTO.setCreateDate(member.getCreateDate());
                 artisanDTO.setInviteNum(member.getInviteNum());
+                artisanDTO.setMethods(member.getMethods());
+
                 artisanDTO.setCheckType(member.getCheckType());
                 artisanDTO.setEvaluationScore(member.getEvaluationScore());
 //                Example example = new Example(HouseWorker.class);

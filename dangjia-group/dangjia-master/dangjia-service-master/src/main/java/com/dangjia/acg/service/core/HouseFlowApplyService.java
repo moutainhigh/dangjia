@@ -426,7 +426,8 @@ public class HouseFlowApplyService {
             if (worker.getEvaluationScore() == null) {
                 worker.setEvaluationScore(new BigDecimal("60.0"));
             }
-            worker.setEvaluationScore(worker.getEvaluationScore().add(score));
+            BigDecimal evaluationScore = worker.getEvaluationScore().add(score);
+            worker.setEvaluationScore(evaluationScore);
             memberMapper.updateByPrimaryKeySelective(worker);
 
             if (score.compareTo(new BigDecimal("0")) == 1) {

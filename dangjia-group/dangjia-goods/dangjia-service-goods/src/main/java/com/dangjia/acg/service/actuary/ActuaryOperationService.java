@@ -30,6 +30,7 @@ import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.modle.repair.MendWorker;
 import com.dangjia.acg.service.basics.WorkerGoodsService;
+import com.dangjia.acg.util.JdbcContextHolder;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -531,6 +532,10 @@ public class ActuaryOperationService {
     public ServerResponse confirmActuaryDetail(String userToken, String houseId, String workerTypeId,
                                                int type, String cityId) {
         try {
+            House house = houseAPI.getHouseById(houseId);
+            cityId=house.getCityId();
+            //跟着工地的 城市切换数据源
+            JdbcContextHolder.putDataSource(cityId);
             String workerTypeName = "";
             if (type != 5 && type != 4) {
                 ServerResponse response = workerTypeAPI.getWorkerType(workerTypeId);

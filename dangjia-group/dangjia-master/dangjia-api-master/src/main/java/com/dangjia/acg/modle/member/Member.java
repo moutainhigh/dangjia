@@ -159,6 +159,13 @@ public class Member extends BaseEntity {
     @ApiModelProperty("成交量")
     private BigDecimal volume;//成交量
 
+
+    @Column(name = "methods")
+    @Desc(value = "持单量")
+    @ApiModelProperty("持单量")
+    private Integer methods;
+
+
     @Column(name = "evaluation_score")//evaluation
     @Desc(value = "评价积分")
     @ApiModelProperty("评价积分,70分以下押金按每单总额百分之五收取,铜牌工匠70.1-80上限为2000元,银牌工匠80.1-90上限为1500元,金牌工匠90.1~上限为500元")

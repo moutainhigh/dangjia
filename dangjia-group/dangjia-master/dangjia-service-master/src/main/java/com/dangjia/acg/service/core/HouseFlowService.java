@@ -346,7 +346,7 @@ public class HouseFlowService {
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
-            Member member = (Member) object;
+            Member member = memberMapper.selectByPrimaryKey(((Member) object).getId());
             HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowId);
             Example example = new Example(RewardPunishRecord.class);
             example.createCriteria().andEqualTo(RewardPunishRecord.MEMBER_ID, member.getId()).andEqualTo(RewardPunishRecord.STATE, "0");
@@ -422,8 +422,9 @@ public class HouseFlowService {
                 //持单数
                 long num = houseWorkerMapper.grabControl(member.getId(), member.getWorkerType());//查询未完工工地
                 WorkerType wt = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
-                if (wt.getMethods() > 0 && member.getWorkerType() != 7 && num >= wt.getMethods()) {
-                    return ServerResponse.createByErrorMessage("您有工地还未完工,暂不能抢单！");
+                long methods=(member.getMethods()==null||member.getMethods()==0)?wt.getMethods():member.getMethods();
+                if (methods > 0 && member.getWorkerType() != 7 && num >= methods) {
+                    return ServerResponse.createByErrorMessage("持单已经达到上限,暂不能抢单！");
                 }
 
                 //暂时注释

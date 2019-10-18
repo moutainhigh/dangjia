@@ -244,6 +244,7 @@ public class DesignerOperationService {
         House house = houseMapper.selectByPrimaryKey(houseId);
         if (house.getDataStatus() == 0) {
             house.setDataStatus(1);
+            house.setIsSelect(0);
             houseMapper.updateByPrimaryKeySelective(house);
             return ServerResponse.createBySuccessMessage("作废成功");
         } else {

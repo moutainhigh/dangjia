@@ -444,6 +444,9 @@ public interface MemberAPI {
                                         @RequestParam("password") String password,
                                         @RequestParam("token") String token);
 
+    @RequestMapping(value = "member/updateMethods", method = RequestMethod.POST)
+    @ApiOperation(value = "更新工匠持单量", notes = "更新工匠持单量")
+    ServerResponse updateMethods(@RequestParam("workerId") String workerId, @RequestParam("methods") Integer methods);
     /**
      * showdoc
      *

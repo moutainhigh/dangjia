@@ -8,9 +8,11 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.excel.ExportExcel;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.deliver.SplitDeliverDTO;
 import com.dangjia.acg.dto.deliver.SplitDeliverItemDTO;
+import com.dangjia.acg.dto.house.WareDTO;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.delivery.IOrderSplitItemMapper;
 import com.dangjia.acg.mapper.delivery.ISplitDeliverMapper;
@@ -32,6 +34,7 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 import tk.mybatis.mapper.util.StringUtil;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -237,7 +240,9 @@ public class SplitDeliverService {
                 splitDeliverItemDTO.setCost(orderSplitItem.getCost());
                 splitDeliverItemDTO.setId(orderSplitItem.getId());
                 splitDeliverItemDTO.setReceive(orderSplitItem.getReceive());//收货数量
+                splitDeliverItemDTO.setHouseName(house.getHouseName());
                 splitDeliverItemDTO.setSupCost(orderSplitItem.getSupCost());
+                splitDeliverItemDTO.setSupCostTotal(orderSplitItem.getReceive()*orderSplitItem.getSupCost());
                 splitDeliverItemDTO.setAskCount(orderSplitItem.getAskCount());
                 splitDeliverItemDTOList.add(splitDeliverItemDTO);
             }
@@ -249,7 +254,50 @@ public class SplitDeliverService {
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
-
+    /**
+     * 发货单明细(excel导出 )
+     */
+    public ServerResponse exportDeliverDetail(HttpServletResponse response,Integer deliverType, String splitDeliverId) {
+        try {
+            ExportExcel exportExcel = new ExportExcel();//创建表格实例
+            //预留退货单明细导出（暂不做）
+//            if(deliverType==1) {
+                SplitDeliver splitDeliver = splitDeliverMapper.selectByPrimaryKey(splitDeliverId);
+                Example example = new Example(OrderSplitItem.class);
+                example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID, splitDeliver.getId());
+                example.orderBy(OrderSplitItem.CATEGORY_ID).desc();
+                List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
+                List<SplitDeliverItemDTO> splitDeliverItemDTOList = new ArrayList<>();
+                House house = houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
+                for (OrderSplitItem orderSplitItem : orderSplitItemList) {
+                    if (orderSplitItem.getReceive() == null) {
+                        orderSplitItem.setReceive(0D);
+                    }
+                    SplitDeliverItemDTO splitDeliverItemDTO = new SplitDeliverItemDTO();
+                    splitDeliverItemDTO.setShopCount(orderSplitItem.getShopCount());
+                    splitDeliverItemDTO.setProductName(orderSplitItem.getProductName());
+                    splitDeliverItemDTO.setNum(orderSplitItem.getNum());
+                    splitDeliverItemDTO.setUnitName(orderSplitItem.getUnitName());
+                    splitDeliverItemDTO.setPrice(orderSplitItem.getPrice());
+                    splitDeliverItemDTO.setCost(orderSplitItem.getCost());
+                    splitDeliverItemDTO.setId(orderSplitItem.getId());
+                    splitDeliverItemDTO.setReceive(orderSplitItem.getReceive());//收货数量
+                    splitDeliverItemDTO.setHouseName(house.getHouseName());
+                    splitDeliverItemDTO.setSupplierName(splitDeliver.getSupplierName());
+                    splitDeliverItemDTO.setSupCost(orderSplitItem.getSupCost());
+                    splitDeliverItemDTO.setSupCostTotal(orderSplitItem.getReceive() * orderSplitItem.getSupCost());
+                    splitDeliverItemDTO.setAskCount(orderSplitItem.getAskCount());
+                    splitDeliverItemDTOList.add(splitDeliverItemDTO);
+                }
+                exportExcel.setDataList("结算单-详情", SplitDeliverItemDTO.class, splitDeliverItemDTOList);
+                exportExcel.write(response, splitDeliver.getNumber() + ".xlsx");
+//            }
+            return ServerResponse.createByErrorMessage("导出成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("导出失败");
+        }
+    }
     /**
      * 收货列表
      * shipState  0待发货,1已发待收货,2已收货,3取消  5所有
