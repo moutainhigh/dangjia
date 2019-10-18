@@ -169,7 +169,7 @@ public class DjRegisterApplicationServices {
             logger.error("操作失败",e);
             return ServerResponse.createByErrorMessage("操作失败");
         }
-        return ServerResponse.createByErrorMessage("操作成功");
+        return ServerResponse.createBySuccessMessage("操作成功");
     }
 
     @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.DEFAULT, timeout = 30000, rollbackFor = {
