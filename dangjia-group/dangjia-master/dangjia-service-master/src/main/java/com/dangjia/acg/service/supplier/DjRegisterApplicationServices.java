@@ -228,7 +228,7 @@ public class DjRegisterApplicationServices {
             Map<String, Object> map = BeanUtils.beanToMap(djRegisterApplication);
             map.put("cardImageUrl", imgUrlStr.toString());
             map.put("businessLicenseUrl", address+djRegisterApplication.getBusinessLicense());
-            City city =iCityMapper.selectByPrimaryKey(djRegisterApplication.getId());
+            City city =iCityMapper.selectByPrimaryKey(djRegisterApplication.getCityId());
             if(city!=null&&StringUtils.isNotBlank(city.getId())){
                 map.put("cityName",city.getName());
             }
