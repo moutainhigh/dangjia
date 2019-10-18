@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
-@Api(description = "供应商申请商品表")
+@Api(description = "供应商申请商品接口")
 @FeignClient("dangjia-service-store")
 public interface DjSupApplicationProductAPI {
 
@@ -49,6 +49,12 @@ public interface DjSupApplicationProductAPI {
     @ApiOperation(value = "店铺-审核供货列表-部分通过", notes = "店铺-审核供货列表-部分通过")
     ServerResponse rejectPartProduct(@RequestParam("request") HttpServletRequest request,
                                      @RequestParam("id") String id);
+
+    @PostMapping("/supplier/djSupApplicationProduct/queryNotForTheGoods")
+    @ApiOperation(value = "查询未供商品", notes = "查询未供商品")
+    ServerResponse queryNotForTheGoods(@RequestParam("request") HttpServletRequest request,
+                                       @RequestParam("supId") String supId,
+                                       @RequestParam("shopId") String shopId);
 
     @PostMapping("/supplier/djSupApplicationProduct/querySupplierGoods")
     @ApiOperation(value = "供应商申请供应商品", notes = "供应商申请供应商品")

@@ -61,7 +61,7 @@ public class DjDeliveryReturnSlipService {
             PageInfo pageResult=null;
             List<DjDeliveryReturnSlipDTO> djDeliveryReturnSlipDTOS = null;
             if(!CommonUtil.isEmpty(invoiceStatus)&&invoiceStatus.equals("0")){
-                djDeliveryReturnSlipDTOS = djDeliveryReturnSlipMapper.querySupplyTaskList(djSupplier.getId(), searchKey);
+                djDeliveryReturnSlipDTOS = djDeliveryReturnSlipMapper.querySupplyTaskList(djSupplier.getId(), searchKey, cityId);
                 pageResult = new PageInfo(djDeliveryReturnSlipDTOS);
                 djDeliveryReturnSlipDTOS.forEach(djDeliveryReturnSlipDTO -> {
                     Storefront storefront = basicsStorefrontAPI.querySingleStorefrontById(djDeliveryReturnSlipDTO.getShopId());
@@ -73,7 +73,7 @@ public class DjDeliveryReturnSlipService {
             }else if(!CommonUtil.isEmpty(invoiceStatus)){
                 String[] split = invoiceStatus.split(",");
                 if(split[0].equals("0")){
-                    djDeliveryReturnSlipDTOS = djDeliveryReturnSlipMapper.querySupplyDeliverTaskList(djSupplier.getId(), searchKey, split[1]);
+                    djDeliveryReturnSlipDTOS = djDeliveryReturnSlipMapper.querySupplyDeliverTaskList(djSupplier.getId(), searchKey, split[1], cityId);
                     pageResult = new PageInfo(djDeliveryReturnSlipDTOS);
                     djDeliveryReturnSlipDTOS.forEach(djDeliveryReturnSlipDTO -> {
                         Storefront storefront = basicsStorefrontAPI.querySingleStorefrontById(djDeliveryReturnSlipDTO.getShopId());
@@ -83,7 +83,7 @@ public class DjDeliveryReturnSlipService {
                         }
                     });
                 }else if(split[0].equals("1")){
-                    djDeliveryReturnSlipDTOS = djDeliveryReturnSlipMapper.querySupplyRepairTaskList(djSupplier.getId(), searchKey, split[1]);
+                    djDeliveryReturnSlipDTOS = djDeliveryReturnSlipMapper.querySupplyRepairTaskList(djSupplier.getId(), searchKey, split[1], cityId);
                     pageResult = new PageInfo(djDeliveryReturnSlipDTOS);
                     djDeliveryReturnSlipDTOS.forEach(djDeliveryReturnSlipDTO -> {
                         Storefront storefront = basicsStorefrontAPI.querySingleStorefrontById(djDeliveryReturnSlipDTO.getShopId());
@@ -126,15 +126,19 @@ public class DjDeliveryReturnSlipService {
 
     /**
      * 供应商结算管理
-     *
-     * @param supId
+     * @param userId
+     * @param cityId
+     * @param pageDTO
      * @param applyState
      * @return
      */
-    public ServerResponse querySupplierSettlementManagement(String supId, PageDTO pageDTO, Integer applyState) {
+    public ServerResponse querySupplierSettlementManagement(String userId, String cityId, PageDTO pageDTO, Integer applyState) {
         try {
+            DjSupplier djSupplier = djSupplierAPI.querySingleDjSupplier(userId, cityId);
+            if(null==djSupplier)
+                return ServerResponse.createByErrorMessage("暂无店铺信息");
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<SupplierSettlementManagementDTO> supplierSettlementManagementDTOS = djDeliveryReturnSlipMapper.querySupplierSettlementManagement(supId, applyState);
+            List<SupplierSettlementManagementDTO> supplierSettlementManagementDTOS = djDeliveryReturnSlipMapper.querySupplierSettlementManagement(djSupplier.getId(), applyState, cityId);
             PageInfo pageResult = new PageInfo(supplierSettlementManagementDTOS);
             supplierSettlementManagementDTOS.forEach(supplierSettlementManagementDTO -> {
                 Storefront storefront = basicsStorefrontAPI.querySingleStorefrontById(supplierSettlementManagementDTO.getShopId());
@@ -154,7 +158,7 @@ public class DjDeliveryReturnSlipService {
 
 
     /**
-     * 供应商结算管理
+     * 供应商结算列表
      *
      * @param supId
      * @param shopId
@@ -176,16 +180,19 @@ public class DjDeliveryReturnSlipService {
 
     /**
      * 供应商结算买家维度列表
-     *
      * @param pageDTO
-     * @param supId
+     * @param userId
+     * @param cityId
      * @param searchKey
      * @return
      */
-    public ServerResponse queryBuyersDimensionList(PageDTO pageDTO, String supId, String searchKey) {
+    public ServerResponse queryBuyersDimensionList(PageDTO pageDTO, String userId, String cityId, String searchKey) {
         try {
+            DjSupplier djSupplier = djSupplierAPI.querySingleDjSupplier(userId, cityId);
+            if(null==djSupplier)
+                return ServerResponse.createByErrorMessage("暂无店铺信息");
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<BuyersDimensionDTO> buyersDimensionDTOS = djDeliveryReturnSlipMapper.queryBuyersDimensionList(supId, searchKey);
+            List<BuyersDimensionDTO> buyersDimensionDTOS = djDeliveryReturnSlipMapper.queryBuyersDimensionList(djSupplier.getId(), searchKey,cityId);
             PageInfo pageResult = new PageInfo(buyersDimensionDTOS);
             if (buyersDimensionDTOS.size() <= 0)
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
@@ -204,10 +211,10 @@ public class DjDeliveryReturnSlipService {
      * @param houseId
      * @return
      */
-    public ServerResponse queryBuyersDimensionDetailList(PageDTO pageDTO, String supId, String houseId, String searchKey) {
+    public ServerResponse queryBuyersDimensionDetailList(PageDTO pageDTO, String supId, String houseId, String searchKey, String cityId) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<BuyersDimensionDetailsDTO> buyersDimensionDetailsDTOS = djDeliveryReturnSlipMapper.queryBuyersDimensionDetailList(supId, houseId, searchKey);
+            List<BuyersDimensionDetailsDTO> buyersDimensionDetailsDTOS = djDeliveryReturnSlipMapper.queryBuyersDimensionDetailList(supId, houseId, searchKey, cityId);
             PageInfo pageResult = new PageInfo(buyersDimensionDetailsDTOS);
             if (buyersDimensionDetailsDTOS.size() <= 0)
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
@@ -222,39 +229,52 @@ public class DjDeliveryReturnSlipService {
     /**
      * 供应商商品维度列表
      * @param pageDTO
-     * @param supId
+     * @param userId
+     * @param cityId
      * @param searchKey
      * @return
      */
-    public ServerResponse querySupplyDimensionList(PageDTO pageDTO, String supId, String searchKey) {
-        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        List<SupplyDimensionDTO> supplyDimensionDTOS = djSupApplicationProductAPI.queryDjSupSupplierProductList(supId, searchKey);
-        PageInfo pageResult = new PageInfo(supplyDimensionDTOS);
-        supplyDimensionDTOS.forEach(supplyDimensionDTO -> {
-            List<BuyersDimensionDTO> buyersDimensionDTOS = djDeliveryReturnSlipMapper.querySupplyDimensionList(supId, supplyDimensionDTO.getProductId());
-            supplyDimensionDTO.setBuyersDimensionDTOS(buyersDimensionDTOS);
-        });
-        if (supplyDimensionDTOS.size() <= 0)
-            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
-        return ServerResponse.createBySuccess("查询成功", pageResult);
+    public ServerResponse querySupplyDimensionList(PageDTO pageDTO, String userId, String cityId, String searchKey) {
+        try {
+            DjSupplier djSupplier = djSupplierAPI.querySingleDjSupplier(userId, cityId);
+            if(null==djSupplier)
+                return ServerResponse.createByErrorMessage("暂无店铺信息");
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<SupplyDimensionDTO> supplyDimensionDTOS = djSupApplicationProductAPI.queryDjSupSupplierProductList(djSupplier.getId(), searchKey);
+            PageInfo pageResult = new PageInfo(supplyDimensionDTOS);
+            supplyDimensionDTOS.forEach(supplyDimensionDTO -> {
+                List<BuyersDimensionDTO> buyersDimensionDTOS = djDeliveryReturnSlipMapper.querySupplyDimensionList(djSupplier.getId(), supplyDimensionDTO.getProductId(), cityId);
+                supplyDimensionDTO.setBuyersDimensionDTOS(buyersDimensionDTOS);
+            });
+            if (supplyDimensionDTOS.size() <= 0)
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            return ServerResponse.createBySuccess("查询成功", pageResult);
+        } catch (Exception e) {
+            logger.error("查询失败", e);
+            return ServerResponse.createByErrorMessage("查询失败: " + e);
+        }
     }
 
 
     /**
      * 供应商店铺维度列表
      * @param pageDTO
-     * @param supId
+     * @param userId
+     * @param cityId
      * @param searchKey
      * @return
      */
-    public ServerResponse querySupplierStoreDimensionList(PageDTO pageDTO, String supId, String searchKey) {
+    public ServerResponse querySupplierStoreDimensionList(PageDTO pageDTO, String userId, String cityId, String searchKey) {
         try {
+            DjSupplier djSupplier = djSupplierAPI.querySingleDjSupplier(userId, cityId);
+            if(null==djSupplier)
+                return ServerResponse.createByErrorMessage("暂无店铺信息");
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<Storefront> storefronts = basicsStorefrontAPI.queryLikeSingleStorefront(searchKey);
             PageInfo pageResult = new PageInfo(storefronts);
             List<SupplierStoreDimensionDTO> supplierStoreDimensionDTOS=null;
             for (Storefront storefront : storefronts) {
-                supplierStoreDimensionDTOS = djDeliveryReturnSlipMapper.querySupplierStoreDimensionList(supId, storefront.getId());
+                supplierStoreDimensionDTOS = djDeliveryReturnSlipMapper.querySupplierStoreDimensionList(djSupplier.getId(), storefront.getId(),cityId);
                 supplierStoreDimensionDTOS.forEach(supplierStoreDimensionDTO -> {
                     supplierStoreDimensionDTO.setStorefrontName(storefront.getStorefrontName());
                     supplierStoreDimensionDTO.setStorekeeperName(storefront.getStorekeeperName());

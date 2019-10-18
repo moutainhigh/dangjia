@@ -37,7 +37,7 @@
             a.`create_date` AS createDate,
             a.`modify_date` AS modifyDate,
             a.`data_status` AS dataStatus,
-            b.application_status  AS applicationStatus,
+            if(b.application_status=NULL or b.application_status="",b.application_status,-1) AS applicationStatus,
             b.fail_reason AS failReason,
             b.contract
         FROM
@@ -57,6 +57,7 @@
         <if test="null!=applicationStatus and ''!=applicationStatus and applicationStatus!='-1'.toString()">
             and application_status=#{applicationStatus}
         </if>
+        and a.`city_id`=#{cityId}
     </select>
 
 
@@ -108,6 +109,7 @@
         </if>
         and b.application_status=1
         and b.contract is not null
+        and a.`city_id`=#{cityId}
     </select>
 
 </mapper>

@@ -175,11 +175,20 @@ public class SystemServices {
             department.setModifyDate(new Date());
             if(departmentMapper.selectByPrimaryKey(department.getId())!=null){
                 departmentMapper.updateByPrimaryKeySelective(department);
-                return ServerResponse.createBySuccessMessage("修改成功");
             }else{
                 departmentMapper.insertSelective(department);
-                return ServerResponse.createBySuccessMessage("添加成功");
             }
+            Example example=new Example(Job.class);
+            example.createCriteria().andEqualTo(Job.DEPARTMENT_ID,department.getId());
+            List<Job> jobs = jobMapper.selectByExample(example);
+            for (Job job : jobs) {
+                job.setCityId(department.getCityId());
+                job.setCityName(department.getCityName());
+                job.setDepartmentName(department.getName());
+                job.setModifyDate(new Date());
+                this.jobMapper.updateByPrimaryKeySelective(job);
+            }
+            return ServerResponse.createBySuccessMessage("保存成功");
         } catch (Exception e) {
             e.printStackTrace();
             throw new BaseException(ServerCode.WRONG_PARAM, "操作失败");

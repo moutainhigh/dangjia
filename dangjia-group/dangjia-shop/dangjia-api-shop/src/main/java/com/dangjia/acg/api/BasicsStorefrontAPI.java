@@ -62,7 +62,7 @@ public interface BasicsStorefrontAPI {
 
 
     @PostMapping("/web/querySupplierSelectionSupply")
-    @ApiOperation(value = "供应商选择供货列表", notes = "供应商选择供货列表")
+    @ApiOperation(value = "查询供应商供货列表", notes = "查询供应商供货列表")
     ServerResponse querySupplierSelectionSupply(@RequestParam("request") HttpServletRequest request,
                                                 @RequestParam("pageDTO") PageDTO pageDTO,
                                                 @RequestParam("searchKey") String searchKey,
