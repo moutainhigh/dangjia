@@ -51,8 +51,18 @@ public interface BasicsStorefrontAPI {
     ServerResponse querySupplierApplicationShopList(@RequestParam("request") HttpServletRequest request,
                                                     @RequestParam("pageDTO") PageDTO pageDTO,
                                                     @RequestParam("searchKey") String searchKey,
-                                                    @RequestParam("supId") String supId,
-                                                    @RequestParam("applicationStatus") String applicationStatus);
+                                                    @RequestParam("applicationStatus") String applicationStatus,
+                                                    @RequestParam("userId") String userId,
+                                                    @RequestParam("cityId") String cityId);
+
+
+    @PostMapping("/web/querySupplierSelectionSupply")
+    @ApiOperation(value = "供应商选择供货列表", notes = "供应商选择供货列表")
+    ServerResponse querySupplierSelectionSupply(@RequestParam("request") HttpServletRequest request,
+                                                @RequestParam("pageDTO") PageDTO pageDTO,
+                                                @RequestParam("searchKey") String searchKey,
+                                                @RequestParam("userId") String userId,
+                                                @RequestParam("cityId") String cityId);
 
 
 }

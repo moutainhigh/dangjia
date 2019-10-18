@@ -44,4 +44,10 @@ public class DjSupApplicationController implements DjSupApplicationAPI {
         return djSupApplicationService.uploadContracts(id,contract);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse queryContracts(HttpServletRequest request, String id) {
+        return djSupApplicationService.queryContracts(id);
+    }
+
 }

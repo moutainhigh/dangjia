@@ -60,7 +60,7 @@
     </select>
 
 
-    <select id="queryLikeSingleStorefront">
+    <select id="queryLikeSingleStorefront" resultType="com.dangjia.acg.modle.storefront.Storefront">
         select
           <include refid="all_column"/>
         from dj_basics_storefront
@@ -73,4 +73,41 @@
             )
         </if>
     </select>
+
+
+    <select id="querySupplierSelectionSupply" resultType="com.dangjia.acg.dto.storefront.StorefrontListDTO">
+        SELECT
+            b.`id`,
+            b.`sup_id` AS supId,
+            a.`id` AS shopId,
+            a.`user_id` AS userId,
+            a.`city_id` AS cityId,
+            a.`storefront_name` AS storefrontName,
+            a.`storefront_address` AS storefrontAddress,
+            a.`storefront_desc` AS storefrontDesc,
+            a.`storefront_logo` AS storefrontLogo,
+            a.`storekeeper_name` AS storekeeperName,
+            a.`contact`,
+            a.`email`,
+            a.`create_date` AS createDate,
+            a.`modify_date` AS modifyDate,
+            a.`data_status` AS dataStatus,
+            b.application_status  AS applicationStatus,
+            b.fail_reason AS failReason,
+            b.contract
+        FROM
+            dj_basics_storefront a
+        LEFT JOIN (SELECT * FROM dj_sup_application WHERE sup_id = #{supId})b
+        ON a.id = b.shop_id
+        where 1=1
+        <if test="null!=searchKey and ''!=searchKey">
+            and (
+            a.storefront_name LIKE CONCAT('%',#{searchKey},'%') or
+            a.contact LIKE CONCAT('%',#{searchKey},'%')
+            )
+        </if>
+        and b.application_status=1
+        and b.contract is not null
+    </select>
+
 </mapper>

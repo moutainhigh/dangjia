@@ -24,8 +24,8 @@ public class DjDeliveryReturnSlipController implements DjDeliveryReturnSlipAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse querySupplyTaskList(HttpServletRequest request, PageDTO pageDTO, String supId, String searchKey, String invoiceStatus) {
-        return djDeliveryReturnSlipService.querySupplyTaskList(pageDTO, supId, searchKey, invoiceStatus);
+    public ServerResponse querySupplyTaskList(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String searchKey, String invoiceStatus) {
+        return djDeliveryReturnSlipService.querySupplyTaskList(pageDTO, userId, cityId, searchKey, invoiceStatus);
     }
 
     @Override

@@ -71,6 +71,12 @@ public class DjRegisterApplicationServices {
                 return ServerResponse.createByErrorMessage("电话号码不能为空");
             if(CommonUtil.isEmpty(djRegisterApplication.getCardNumber()))
                 return ServerResponse.createByErrorMessage("身份证号码不能为空");
+            if(CommonUtil.isEmpty(djRegisterApplication.getCityId()))
+                return ServerResponse.createByErrorMessage("城市不能为空");
+            if(CommonUtil.isEmpty(djRegisterApplication.getCardNumber()))
+                return ServerResponse.createByErrorMessage("身份证不能为空");
+            if(djRegisterApplication.getApplicationType().equals("2")&&CommonUtil.isEmpty(djRegisterApplication.getBusinessLicense()))
+                return ServerResponse.createByErrorMessage("营业执照不能为空");
             Example example=new Example(DjRegisterApplication.class);
             example.createCriteria().andEqualTo(DjRegisterApplication.CITY_ID,djRegisterApplication.getCityId())
                     .andEqualTo(DjRegisterApplication.DATA_STATUS,0)
@@ -80,7 +86,8 @@ public class DjRegisterApplicationServices {
             if(djRegisterApplicationMapper.selectByExample(example).size()>0)
                 return ServerResponse.createByErrorMessage("申请已存在");
             djRegisterApplication.setDataStatus(0);
-            djRegisterApplication.setPassword(DigestUtils.md5Hex(djRegisterApplication.getPassword()));
+            djRegisterApplication.setApplicationStatus(0);
+            djRegisterApplication.setPassWord(DigestUtils.md5Hex(djRegisterApplication.getPassWord()));
             if(djRegisterApplicationMapper.insert(djRegisterApplication)>0)
                 return ServerResponse.createBySuccessMessage("申请成功");
         } catch (Exception e) {
@@ -145,7 +152,7 @@ public class DjRegisterApplicationServices {
                 map.put("checkType","已通过");
                 //注入用户信息
                 MainUser user=new MainUser();
-                user.setPassword(djRegisterApplication.getPassword());
+                user.setPassword(djRegisterApplication.getPassWord());
                 user.setUsername(djRegisterApplication.getName());
                 user.setMobile(djRegisterApplication.getMobile());
                 user.setUserType(djRegisterApplication.getApplicationType());

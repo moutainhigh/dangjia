@@ -24,7 +24,8 @@ public interface DjDeliveryReturnSlipAPI {
     @ApiOperation(value = "供货任务列表", notes = "供货任务列表")
     ServerResponse querySupplyTaskList(@RequestParam("request") HttpServletRequest request,
                                        @RequestParam("pageDTO") PageDTO pageDTO,
-                                       @RequestParam("supId") String supId,
+                                       @RequestParam("userId") String userId,
+                                       @RequestParam("cityId") String cityId,
                                        @RequestParam("searchKey") String searchKey,
                                        @RequestParam("invoiceStatus") String invoiceStatus);
 

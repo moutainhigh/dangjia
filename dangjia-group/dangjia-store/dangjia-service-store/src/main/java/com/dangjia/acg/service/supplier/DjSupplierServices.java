@@ -17,8 +17,8 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 
@@ -39,6 +39,17 @@ public class DjSupplierServices {
     @Autowired
     private DjSupApplicationMapper djSupApplicationMapper ;
 
+
+    /**
+     * 根据userId查询供应商信息
+     * @param userId
+     * @param cityId
+     * @return
+     */
+    public DjSupplier querySingleDjSupplier(String userId, String cityId) {
+        return djSupplierMapper.querySingleDjSupplier(userId, cityId);
+    }
+
     /**
      * 供应商基础信息维护
      *
@@ -47,18 +58,37 @@ public class DjSupplierServices {
      */
     public ServerResponse updateBasicInformation(DjSupplier djSupplier) {
         try {
-            if (CommonUtil.isEmpty(djSupplier.getName()))
-                return ServerResponse.createByErrorMessage("用户名不能为空");
-            if (CommonUtil.isEmpty(djSupplier.getTelephone()))
-                return ServerResponse.createByErrorMessage("电话号码不能为空");
-            if (CommonUtil.isEmpty(djSupplier.getAddress()))
-                return ServerResponse.createByErrorMessage("地址不能为空");
-            if (CommonUtil.isEmpty(djSupplier.getEmail()))
-                return ServerResponse.createByErrorMessage("邮件不能为空");
-            if (CommonUtil.isEmpty(djSupplier.getCheckPeople()))
-                return ServerResponse.createByErrorMessage("联系人不能为空");
-            if (djSupplierMapper.updateByPrimaryKeySelective(djSupplier) > 0)
-                return ServerResponse.createBySuccessMessage("编辑成功");
+            Example example=new Example(DjSupplier.class);
+            example.createCriteria().andEqualTo(DjSupplier.USER_ID,djSupplier.getUserId())
+                    .andEqualTo(DjSupplier.CITY_ID,djSupplier.getCityId())
+                    .andEqualTo(DjSupplier.DATA_STATUS,0);
+            if(djSupplierMapper.selectByExample(example).size()>0) {
+                if (CommonUtil.isEmpty(djSupplier.getName()))
+                    return ServerResponse.createByErrorMessage("用户名不能为空");
+                if (CommonUtil.isEmpty(djSupplier.getTelephone()))
+                    return ServerResponse.createByErrorMessage("电话号码不能为空");
+                if (CommonUtil.isEmpty(djSupplier.getAddress()))
+                    return ServerResponse.createByErrorMessage("地址不能为空");
+                if (CommonUtil.isEmpty(djSupplier.getEmail()))
+                    return ServerResponse.createByErrorMessage("邮件不能为空");
+                if (CommonUtil.isEmpty(djSupplier.getCheckPeople()))
+                    return ServerResponse.createByErrorMessage("联系人不能为空");
+                if (djSupplierMapper.updateByPrimaryKeySelective(djSupplier) > 0)
+                    return ServerResponse.createBySuccessMessage("编辑成功");
+            }else{
+                if (CommonUtil.isEmpty(djSupplier.getName()))
+                    return ServerResponse.createByErrorMessage("用户名不能为空");
+                if (CommonUtil.isEmpty(djSupplier.getTelephone()))
+                    return ServerResponse.createByErrorMessage("电话号码不能为空");
+                if (CommonUtil.isEmpty(djSupplier.getAddress()))
+                    return ServerResponse.createByErrorMessage("地址不能为空");
+                if (CommonUtil.isEmpty(djSupplier.getEmail()))
+                    return ServerResponse.createByErrorMessage("邮件不能为空");
+                if (CommonUtil.isEmpty(djSupplier.getCheckPeople()))
+                    return ServerResponse.createByErrorMessage("联系人不能为空");
+                if (djSupplierMapper.insert(djSupplier)>0)
+                    return ServerResponse.createBySuccessMessage("编辑成功");
+            }
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("编辑失败");
@@ -170,11 +200,10 @@ public class DjSupplierServices {
 
     /**
      * 查询单个供应商申请详情
-     * @param request
      * @param id
      * @return
      */
-    public ServerResponse getDjSupplierByID(HttpServletRequest request, String id,String shopId) {
+    public ServerResponse getDjSupplierByID(String id,String shopId) {
         try {
             DjSupplierDTO djSupplierDTO=djSupplierMapper.queryDJsupplierById(id,shopId);
             return ServerResponse.createBySuccess("查询成功", djSupplierDTO);
@@ -186,12 +215,11 @@ public class DjSupplierServices {
 
     /**
      * 供应商申请通过
-     * @param request
      * @param id
      * @param applicationStatus
      * @return
      */
-    public ServerResponse setDjSupplierPass(HttpServletRequest request, String id, String applicationStatus) {
+    public ServerResponse setDjSupplierPass(String id, String applicationStatus) {
         try {
             if(StringUtils.isEmpty(applicationStatus))
             {
@@ -221,13 +249,12 @@ public class DjSupplierServices {
 
     /**
      * 驳回供应商申请
-     * @param request
      * @param id
      * @param applicationStatus
      * @param failReason
      * @return
      */
-    public ServerResponse setDjSupplierReject(HttpServletRequest request, String id, String applicationStatus, String failReason) {
+    public ServerResponse setDjSupplierReject(String id, String applicationStatus, String failReason) {
         try {
             if(StringUtils.isEmpty(failReason))
             {

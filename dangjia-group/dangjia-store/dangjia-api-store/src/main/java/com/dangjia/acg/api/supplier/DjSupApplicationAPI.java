@@ -40,4 +40,9 @@ public interface DjSupApplicationAPI {
                                    @RequestParam("id") String id,
                                    @RequestParam("contract") String contract);
 
+    @PostMapping("/supplier/djSupApplication/queryContracts")
+    @ApiOperation(value = "查看合同", notes = "查看合同")
+    ServerResponse queryContracts(@RequestParam("request") HttpServletRequest request,
+                                  @RequestParam("id") String id);
+
 }
