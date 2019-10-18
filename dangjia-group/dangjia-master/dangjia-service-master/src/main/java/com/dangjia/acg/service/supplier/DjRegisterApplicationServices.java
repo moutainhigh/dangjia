@@ -57,6 +57,7 @@ public class DjRegisterApplicationServices {
     private ConfigUtil configUtil;
     @Autowired
     private ICityMapper iCityMapper;
+    @Autowired
     private IJobMapper jobMapper;
     /**
      * 供应商/店铺注册
@@ -235,7 +236,7 @@ public class DjRegisterApplicationServices {
             //查询用户当前已拥有的部门、岗位
             MainUser mainUser = userMapper.findUserByMobile(djRegisterApplication.getUserName());
             if(mainUser!=null&&StringUtils.isNotBlank(mainUser.getJobId())){
-                Job job = this.jobMapper.selectByPrimaryKey(mainUser.getJobId());
+                Job job = jobMapper.selectByPrimaryKey(mainUser.getJobId());
                 //获取部门名称，岗位名称
                 map.put("departmentName",job.getDepartmentName());
                 map.put("jobName",job.getName());
