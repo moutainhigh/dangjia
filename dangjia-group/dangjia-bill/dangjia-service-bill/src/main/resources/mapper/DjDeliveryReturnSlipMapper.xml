@@ -154,9 +154,9 @@
                 GROUP BY seller_id
                   UNION ALL
                 SELECT
-                    supplier_id as ,
+                    supplier_id,
                     count(0) AS count,
-                    seller_id as
+                    seller_id
                 FROM
                     dj_repair_mend_deliver
                 WHERE
@@ -172,8 +172,7 @@
                 </if>
                 GROUP BY seller_id
             ) a
-        GROUP BY
-            seller_id
+        GROUP BY seller_id
     </select>
 
     <!--<select id="querySupplierSettlementList" resultType="com.dangjia.acg.modle.delivery.DjDeliveryReturnSlip">-->

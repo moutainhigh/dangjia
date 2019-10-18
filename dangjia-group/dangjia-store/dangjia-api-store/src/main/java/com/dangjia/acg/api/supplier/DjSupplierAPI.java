@@ -21,6 +21,11 @@ import javax.servlet.http.HttpServletRequest;
 @FeignClient("dangjia-service-store")
 public interface DjSupplierAPI {
 
+    @PostMapping("/supplier/djSupplier/querySingleDjSupplier")
+    @ApiOperation(value = "根据userId查询供应商信息", notes = "根据userId查询供应商信息")
+    DjSupplier querySingleDjSupplier(@RequestParam("userId") String userId,
+                                     @RequestParam("cityId") String cityId);
+
     @PostMapping("/supplier/djSupplier/updateBasicInformation")
     @ApiOperation(value = "供应商基础信息维护", notes = "供应商基础信息维护")
     ServerResponse updateBasicInformation(@RequestParam("request") HttpServletRequest request,

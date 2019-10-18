@@ -35,7 +35,6 @@
     </select>
 
     <select id="queryDjSupplierByShopID" resultType="com.dangjia.acg.dto.supplier.DjSupplierDTO" >
-
         SELECT
             ds. NAME ,
             ds.address ,
@@ -63,20 +62,34 @@
     </select>
 
     <select id="queryDJsupplierById" resultType="com.dangjia.acg.dto.supplier.DjSupplierDTO" >
-
         SELECT
-        ds. NAME,
-        ds.address,
-        ds.check_people as checkPeople,
-        ds.telephone,
-        da.application_status as applicationStatus
+            ds. NAME,
+            ds.address,
+            ds.check_people as checkPeople,
+            ds.telephone,
+            da.application_status as applicationStatus
         FROM
-        dj_sup_application da
+            dj_sup_application da
         INNER JOIN dj_supplier ds ON da.sup_id = ds.id
         WHERE 1=1
         and  da.shop_id = #{shopId}
         and  ds.id=#{id}
+    </select>
 
+    <select id="querySingleDjSupplier" resultType="com.dangjia.acg.modle.supplier.DjSupplier">
+        SELECT
+            id,
+            create_date,
+            modify_date,
+            data_status,
+            user_id,
+            city_id,
+            name,
+            address
+        FROM dj_supplier
+        where city_id=#{cityId}
+        and user_id=#{userId}
+        and data_status=0
     </select>
 
 

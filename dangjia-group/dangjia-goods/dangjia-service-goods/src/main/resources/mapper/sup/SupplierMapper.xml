@@ -95,30 +95,30 @@
     <!-- 根据供应商查询自己所供应的商品-->
     <select id="querySupplierProduct" resultType="com.dangjia.acg.modle.basics.Product">
 		select
-			p.id,
-			p.`name`,
-			p.goods_id AS goodsId,
-			p.category_id AS categoryId,
-			p.product_sn AS productSn,
-			p.image,
-			p.unit_name as unitName,
-			p.unit_id as unitId,
-			p1.weight,
-			p.type,
-			p.maket,
-			p1.cost,
-			p.price,
-			p1.profit,
-			p.value_name_arr AS valueNameArr,
-			p.value_id_arr AS valueIdArr,
-			p1.convert_unit AS convertUnit,
-			p1.convert_quality AS convertQuality,
-			p.create_date AS createDate,
-			p.modify_date AS modifyDate
+		p.id,
+		p.product_name `name`,
+		p1.goods_id AS goodsId,
+		p1.category_id AS categoryId,
+		p1.product_sn AS productSn,
+		p.image,
+		p1.unit_name as unitName,
+		p1.unit_id as unitId,
+		p1.weight,
+		p1.type,
+		p.is_shelf_status maket,
+		p1.cost,
+		p.sell_price prioce,
+		p1.profit,
+		p1.value_name_arr AS valueNameArr,
+		p1.value_id_arr AS valueIdArr,
+		p1.convert_unit AS convertUnit,
+		p1.convert_quality AS convertQuality,
+		p.create_date AS createDate,
+		p.modify_date AS modifyDate
 		from
-		   dj_basics_product p
+		dj_basics_storefront_product p
 		INNER JOIN dj_sup_supplier_product sp ON p.id = sp.product_id
-		INNER JOIN dj_basics_product_material p1 on p.id = p1.product_id
+		INNER JOIN dj_basics_product_template p1 on p.prod_template_id = p1.id
 		where  p.data_status=0
         <if test="supplierId!=null and supplierId!=''">
             and sp.supplier_id=#{supplierId}

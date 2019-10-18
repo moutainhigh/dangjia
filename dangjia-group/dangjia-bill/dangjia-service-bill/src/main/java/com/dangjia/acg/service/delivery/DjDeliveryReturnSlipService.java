@@ -2,7 +2,7 @@ package com.dangjia.acg.service.delivery;
 
 import com.dangjia.acg.api.BasicsStorefrontAPI;
 import com.dangjia.acg.api.supplier.DjSupApplicationProductAPI;
-import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.api.supplier.DjSupplierAPI;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -10,6 +10,7 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dto.delivery.*;
 import com.dangjia.acg.mapper.delivery.DjDeliveryReturnSlipMapper;
 import com.dangjia.acg.modle.storefront.Storefront;
+import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -34,9 +35,14 @@ public class DjDeliveryReturnSlipService {
 
     @Autowired
     private BasicsStorefrontAPI basicsStorefrontAPI;
+
     private static Logger logger = LoggerFactory.getLogger(DjDeliveryReturnSlipService.class);
+
     @Autowired
     private DjSupApplicationProductAPI djSupApplicationProductAPI;
+
+    @Autowired
+    private DjSupplierAPI djSupplierAPI;
 
     /**
      * 供货任务列表
@@ -46,13 +52,16 @@ public class DjDeliveryReturnSlipService {
      * @param invoiceStatus 0:全部  0,0:代发货  0,1:待收货  0,2:已收货  1,0:待退货  1,1:已确认  1,2:已结算  1,3:拒绝退货
      * @return
      */
-    public ServerResponse querySupplyTaskList(PageDTO pageDTO, String supId, String searchKey, String invoiceStatus) {
+    public ServerResponse querySupplyTaskList(PageDTO pageDTO, String userId, String cityId, String searchKey, String invoiceStatus) {
         try {
+            DjSupplier djSupplier = djSupplierAPI.querySingleDjSupplier(userId, cityId);
+            if(null==djSupplier)
+                return ServerResponse.createByErrorMessage("暂无店铺信息");
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             PageInfo pageResult=null;
             List<DjDeliveryReturnSlipDTO> djDeliveryReturnSlipDTOS = null;
             if(!CommonUtil.isEmpty(invoiceStatus)&&invoiceStatus.equals("0")){
-                djDeliveryReturnSlipDTOS = djDeliveryReturnSlipMapper.querySupplyTaskList(supId, searchKey);
+                djDeliveryReturnSlipDTOS = djDeliveryReturnSlipMapper.querySupplyTaskList(djSupplier.getId(), searchKey);
                 pageResult = new PageInfo(djDeliveryReturnSlipDTOS);
                 djDeliveryReturnSlipDTOS.forEach(djDeliveryReturnSlipDTO -> {
                     Storefront storefront = basicsStorefrontAPI.querySingleStorefrontById(djDeliveryReturnSlipDTO.getShopId());
@@ -64,7 +73,7 @@ public class DjDeliveryReturnSlipService {
             }else if(!CommonUtil.isEmpty(invoiceStatus)){
                 String[] split = invoiceStatus.split(",");
                 if(split[0].equals("0")){
-                    djDeliveryReturnSlipDTOS = djDeliveryReturnSlipMapper.querySupplyDeliverTaskList(supId, searchKey, split[1]);
+                    djDeliveryReturnSlipDTOS = djDeliveryReturnSlipMapper.querySupplyDeliverTaskList(djSupplier.getId(), searchKey, split[1]);
                     pageResult = new PageInfo(djDeliveryReturnSlipDTOS);
                     djDeliveryReturnSlipDTOS.forEach(djDeliveryReturnSlipDTO -> {
                         Storefront storefront = basicsStorefrontAPI.querySingleStorefrontById(djDeliveryReturnSlipDTO.getShopId());
@@ -74,7 +83,7 @@ public class DjDeliveryReturnSlipService {
                         }
                     });
                 }else if(split[0].equals("1")){
-                    djDeliveryReturnSlipDTOS = djDeliveryReturnSlipMapper.querySupplyRepairTaskList(supId, searchKey, split[1]);
+                    djDeliveryReturnSlipDTOS = djDeliveryReturnSlipMapper.querySupplyRepairTaskList(djSupplier.getId(), searchKey, split[1]);
                     pageResult = new PageInfo(djDeliveryReturnSlipDTOS);
                     djDeliveryReturnSlipDTOS.forEach(djDeliveryReturnSlipDTO -> {
                         Storefront storefront = basicsStorefrontAPI.querySingleStorefrontById(djDeliveryReturnSlipDTO.getShopId());

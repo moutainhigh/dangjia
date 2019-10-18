@@ -2,6 +2,7 @@ package com.dangjia.acg.service.storefront;
 
 import cn.jiguang.common.utils.StringUtils;
 import com.dangjia.acg.api.app.member.MemberAPI;
+import com.dangjia.acg.api.supplier.DjSupplierAPI;
 import com.dangjia.acg.common.model.PageDTO;
 
 import com.dangjia.acg.common.response.ServerResponse;
@@ -9,6 +10,7 @@ import com.dangjia.acg.dto.storefront.StorefrontDTO;
 import com.dangjia.acg.dto.storefront.StorefrontListDTO;
 import com.dangjia.acg.mapper.storefront.IStorefrontMapper;
 import com.dangjia.acg.modle.storefront.Storefront;
+import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -31,6 +33,8 @@ public class StorefrontService {
     private IStorefrontMapper istorefrontMapper;
 //    @Autowired
 //    private CraftsmanConstructionService constructionService;
+    @Autowired
+    private DjSupplierAPI djSupplierAPI;
 
 
 
@@ -160,10 +164,36 @@ public class StorefrontService {
      * @param searchKey
      * @return
      */
-    public ServerResponse querySupplierApplicationShopList(PageDTO pageDTO, String searchKey, String supId, String applicationStatus) {
+    public ServerResponse querySupplierApplicationShopList(PageDTO pageDTO, String searchKey, String applicationStatus, String userId, String cityId) {
         try {
+            DjSupplier djSupplier = djSupplierAPI.querySingleDjSupplier(userId, cityId);
+            if(null==djSupplier)
+                return ServerResponse.createByErrorMessage("暂无店铺信息");
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<StorefrontListDTO> storefrontListDTOS = istorefrontMapper.querySupplierApplicationShopList(searchKey, supId, applicationStatus);
+            List<StorefrontListDTO> storefrontListDTOS = istorefrontMapper.querySupplierApplicationShopList(searchKey, djSupplier.getId(), applicationStatus);
+            PageInfo pageResult = new PageInfo(storefrontListDTOS);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
+        } catch (Exception e) {
+            logger.error("查询失败：", e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+
+    /**
+     * 供应商选择供货列表
+     * @param pageDTO
+     * @param searchKey
+     * @param userId
+     * @return
+     */
+    public ServerResponse querySupplierSelectionSupply( PageDTO pageDTO, String searchKey, String userId, String cityId) {
+        try {
+            DjSupplier djSupplier = djSupplierAPI.querySingleDjSupplier(userId, cityId);
+            if(null==djSupplier)
+                return ServerResponse.createByErrorMessage("暂无店铺信息");
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<StorefrontListDTO> storefrontListDTOS = istorefrontMapper.querySupplierSelectionSupply(searchKey, djSupplier.getId());
             PageInfo pageResult = new PageInfo(storefrontListDTOS);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {

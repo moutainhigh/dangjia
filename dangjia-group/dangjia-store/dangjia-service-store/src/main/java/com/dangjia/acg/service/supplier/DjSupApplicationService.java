@@ -1,7 +1,9 @@
 package com.dangjia.acg.service.supplier;
 
+import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.supplier.DjSupApplicationMapper;
 import com.dangjia.acg.modle.supplier.DjSupApplication;
 import com.github.pagehelper.PageHelper;
@@ -23,7 +25,8 @@ public class DjSupApplicationService {
 
     @Autowired
     private DjSupApplicationMapper djSupApplicationMapper;
-
+    @Autowired
+    private ConfigUtil configUtil;
 
 
 
@@ -99,6 +102,26 @@ public class DjSupApplicationService {
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("申请失败:"+e);
+        }
+    }
+
+
+    /**
+     * 查看合同
+     * @param id
+     * @return
+     */
+    public ServerResponse queryContracts(String id) {
+        try {
+            DjSupApplication djSupApplication = djSupApplicationMapper.selectByPrimaryKey(id);
+            String[] split = djSupApplication.getContract().split(",");
+            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            for (int i = 0; i < split.length; i++) {
+                split[i]=imageAddress+split[i];
+            }
+            return ServerResponse.createBySuccess("查询成功",split);
+        } catch (Exception e) {
+            return ServerResponse.createByErrorMessage("查询失败:"+e);
         }
     }
 }

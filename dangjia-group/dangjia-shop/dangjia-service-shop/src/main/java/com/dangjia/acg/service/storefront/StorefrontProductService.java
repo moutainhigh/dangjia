@@ -50,7 +50,7 @@ public class StorefrontProductService {
             example.createCriteria().andEqualTo(StorefrontProduct.PROD_TEMPLATE_ID, basicsStorefrontProductDTO.getProdTemplateId());
             List<StorefrontProduct> list = istorefrontProductMapper.selectByExample(example);
             if (list.size() > 0) {
-                return ServerResponse.createByErrorMessage("店铺商品已经添加，不能重复添加!");
+                return ServerResponse.createByErrorMessage("店铺商品已经添加，不能重复添加!商品模板ID:"+list.get(0).getProdTemplateId());
             }
 
             StorefrontProduct storefrontProduct = new StorefrontProduct();

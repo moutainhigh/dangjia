@@ -57,6 +57,7 @@ public class DjRegisterApplicationServices {
     private ConfigUtil configUtil;
     @Autowired
     private ICityMapper iCityMapper;
+    @Autowired
     private IJobMapper jobMapper;
     /**
      * 供应商/店铺注册
@@ -71,6 +72,12 @@ public class DjRegisterApplicationServices {
                 return ServerResponse.createByErrorMessage("电话号码不能为空");
             if(CommonUtil.isEmpty(djRegisterApplication.getCardNumber()))
                 return ServerResponse.createByErrorMessage("身份证号码不能为空");
+            if(CommonUtil.isEmpty(djRegisterApplication.getCityId()))
+                return ServerResponse.createByErrorMessage("城市不能为空");
+            if(CommonUtil.isEmpty(djRegisterApplication.getCardNumber()))
+                return ServerResponse.createByErrorMessage("身份证不能为空");
+            if(djRegisterApplication.getApplicationType().equals("2")&&CommonUtil.isEmpty(djRegisterApplication.getBusinessLicense()))
+                return ServerResponse.createByErrorMessage("营业执照不能为空");
             Example example=new Example(DjRegisterApplication.class);
             example.createCriteria().andEqualTo(DjRegisterApplication.CITY_ID,djRegisterApplication.getCityId())
                     .andEqualTo(DjRegisterApplication.DATA_STATUS,0)
@@ -80,7 +87,8 @@ public class DjRegisterApplicationServices {
             if(djRegisterApplicationMapper.selectByExample(example).size()>0)
                 return ServerResponse.createByErrorMessage("申请已存在");
             djRegisterApplication.setDataStatus(0);
-            djRegisterApplication.setPassword(DigestUtils.md5Hex(djRegisterApplication.getPassword()));
+            djRegisterApplication.setApplicationStatus(0);
+            djRegisterApplication.setPassWord(DigestUtils.md5Hex(djRegisterApplication.getPassWord()));
             if(djRegisterApplicationMapper.insert(djRegisterApplication)>0)
                 return ServerResponse.createBySuccessMessage("申请成功");
         } catch (Exception e) {
@@ -145,7 +153,7 @@ public class DjRegisterApplicationServices {
                 map.put("checkType","已通过");
                 //注入用户信息
                 MainUser user=new MainUser();
-                user.setPassword(djRegisterApplication.getPassword());
+                user.setPassword(djRegisterApplication.getPassWord());
                 user.setUsername(djRegisterApplication.getName());
                 user.setMobile(djRegisterApplication.getMobile());
                 user.setUserType(djRegisterApplication.getApplicationType());
@@ -162,7 +170,7 @@ public class DjRegisterApplicationServices {
             logger.error("操作失败",e);
             return ServerResponse.createByErrorMessage("操作失败");
         }
-        return ServerResponse.createByErrorMessage("操作成功");
+        return ServerResponse.createBySuccessMessage("操作成功");
     }
 
     @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.DEFAULT, timeout = 30000, rollbackFor = {
@@ -221,14 +229,14 @@ public class DjRegisterApplicationServices {
             Map<String, Object> map = BeanUtils.beanToMap(djRegisterApplication);
             map.put("cardImageUrl", imgUrlStr.toString());
             map.put("businessLicenseUrl", address+djRegisterApplication.getBusinessLicense());
-            City city =iCityMapper.selectByPrimaryKey(djRegisterApplication.getId());
+            City city =iCityMapper.selectByPrimaryKey(djRegisterApplication.getCityId());
             if(city!=null&&StringUtils.isNotBlank(city.getId())){
                 map.put("cityName",city.getName());
             }
             //查询用户当前已拥有的部门、岗位
             MainUser mainUser = userMapper.findUserByMobile(djRegisterApplication.getUserName());
             if(mainUser!=null&&StringUtils.isNotBlank(mainUser.getJobId())){
-                Job job = this.jobMapper.selectByPrimaryKey(mainUser.getJobId());
+                Job job = jobMapper.selectByPrimaryKey(mainUser.getJobId());
                 //获取部门名称，岗位名称
                 map.put("departmentName",job.getDepartmentName());
                 map.put("jobName",job.getName());
