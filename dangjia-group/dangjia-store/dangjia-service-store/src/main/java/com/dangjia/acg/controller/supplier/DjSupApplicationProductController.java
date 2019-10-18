@@ -4,7 +4,6 @@ import com.dangjia.acg.api.supplier.DjSupApplicationProductAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.delivery.SupplyDimensionDTO;
-import com.dangjia.acg.modle.supplier.DjSupSupplierProduct;
 import com.dangjia.acg.service.supplier.DjSupApplicationProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.dangjia.acg.common.model.PageDTO;
@@ -68,5 +67,11 @@ public class DjSupApplicationProductController implements DjSupApplicationProduc
     @ApiMethod
     public ServerResponse rejectPartProduct(HttpServletRequest request, String id) {
         return djSupApplicationProductService.rejectPartProduct(id);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryNotForTheGoods(HttpServletRequest request, String supId, String shopId) {
+        return djSupApplicationProductService.queryNotForTheGoods(supId,shopId);
     }
 }

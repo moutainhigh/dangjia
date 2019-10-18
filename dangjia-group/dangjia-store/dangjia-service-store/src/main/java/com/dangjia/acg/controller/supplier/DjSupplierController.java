@@ -32,6 +32,12 @@ public class DjSupplierController implements DjSupplierAPI {
 
     @Override
     @ApiMethod
+    public ServerResponse querySingleDjSupplierDetail(String userId, String cityId) {
+        return djSupplierServices.querySingleDjSupplierDetail(userId,cityId);
+    }
+
+    @Override
+    @ApiMethod
     public ServerResponse updateBasicInformation(HttpServletRequest request, DjSupplier djSupplier) {
         return djSupplierServices.updateBasicInformation(djSupplier);
     }

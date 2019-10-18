@@ -51,6 +51,16 @@ public class DjSupplierServices {
     }
 
     /**
+     * 查询供应商基本信息
+     * @param userId
+     * @param cityId
+     * @return
+     */
+    public ServerResponse querySingleDjSupplierDetail(String userId, String cityId) {
+        return ServerResponse.createBySuccess("查询成功",djSupplierMapper.querySingleDjSupplier(userId, cityId));
+    }
+
+    /**
      * 供应商基础信息维护
      *
      * @param djSupplier

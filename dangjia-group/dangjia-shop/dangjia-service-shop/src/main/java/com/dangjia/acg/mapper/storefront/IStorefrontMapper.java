@@ -15,12 +15,14 @@ public interface IStorefrontMapper extends Mapper<Storefront> {
 
     List<StorefrontListDTO> querySupplierApplicationShopList(@Param("searchKey") String searchKey,
                                                              @Param("supId") String supId,
-                                                             @Param("applicationStatus") String applicationStatus);
+                                                             @Param("applicationStatus") String applicationStatus,
+                                                             @Param("cityId") String cityId);
 
 
     List<Storefront> queryLikeSingleStorefront(@Param("searchKey") String searchKey);
 
 
     List<StorefrontListDTO>  querySupplierSelectionSupply(@Param("searchKey") String searchKey,
-                                                          @Param("supId") String supId);
+                                                          @Param("supId") String supId,
+                                                          @Param("cityId") String cityId);
 }

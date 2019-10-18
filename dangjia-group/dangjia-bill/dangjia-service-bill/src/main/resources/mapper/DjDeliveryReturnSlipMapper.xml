@@ -29,6 +29,7 @@
         <if test="null!=invoiceStatus and ''!=invoiceStatus">
           AND dsd.shipping_state=#{invoiceStatus}
         </if>
+        and dsd.city_id=#{cityId}
     </select>
 
     <select id="querySupplyRepairTaskList" resultType="com.dangjia.acg.dto.delivery.DjDeliveryReturnSlipDTO">
@@ -56,6 +57,7 @@
         <if test="null!=invoiceStatus and ''!=invoiceStatus">
             AND rmd.shipping_state=#{invoiceStatus}
         </if>
+        and rmd.city_id=#{cityId}
     </select>
 
     <select id="querySupplyTaskList" resultType="com.dangjia.acg.dto.delivery.DjDeliveryReturnSlipDTO">
@@ -80,6 +82,7 @@
             dsd.ship_address LIKE CONCAT('%',#{searchKey},'%')
             )
         </if>
+        and dsd.city_id=#{cityId}
           UNION ALL
         SELECT
             rmd.seller_id as shopId,
@@ -102,6 +105,7 @@
             rmd.ship_address LIKE CONCAT('%',#{searchKey},'%')
             )
         </if>
+        and rmd.city_id=#{cityId}
     </select>
 
     <!--<update id="setDeliveryTask">-->
@@ -151,6 +155,7 @@
                         apply_state=2
                     )
                 </if>
+                and city_id=#{cityId}
                 GROUP BY seller_id
                   UNION ALL
                 SELECT
@@ -170,6 +175,7 @@
                       apply_state=2
                     )
                 </if>
+                and city_id=#{cityId}
                 GROUP BY seller_id
             ) a
         GROUP BY seller_id
@@ -296,6 +302,7 @@
             m.mobile LIKE CONCAT('%',#{searchKey},'%')
             )
         </if>
+        and dsd.city_id=#{cityId}
         GROUP BY h.id
     </select>
 
@@ -311,8 +318,9 @@
             dj_deliver_split_deliver dsd
         INNER JOIN dj_deliver_order_split_item dosi ON dsd.order_split_id = dosi.order_split_id
         WHERE
-            dsd.house_id = "919760771553140750115"
-        AND dsd.supplier_id = "CS008"
+            dsd.house_id = #{houseId}
+        AND dsd.supplier_id = #{supId}
+        and dsd.city_id=#{cityId}
         GROUP BY
             dsd.number
     </select>
@@ -330,6 +338,7 @@
         WHERE
             dosi.product_id = #{productId}
         AND dsd.supplier_id = #{supId}
+        and dosi.city_id=#{cityId}
         GROUP BY dsd.house_id;
     </select>
 
@@ -344,6 +353,7 @@
         WHERE
             dsd.supplier_id =#{supId}
         and dsd.seller_id =#{shopId}
+        and dsd.city_id=#{cityId}
         GROUP BY
             dsd.seller_id
     </select>
