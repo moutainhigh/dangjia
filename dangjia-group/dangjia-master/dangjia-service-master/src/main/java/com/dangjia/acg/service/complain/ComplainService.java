@@ -20,8 +20,8 @@ import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
-import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
-import com.dangjia.acg.mapper.deliver.ISplitDeliverMapper;
+import com.dangjia.acg.mapper.delivery.IOrderSplitItemMapper;
+import com.dangjia.acg.mapper.delivery.ISplitDeliverMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
@@ -31,7 +31,6 @@ import com.dangjia.acg.mapper.worker.IRewardPunishConditionMapper;
 import com.dangjia.acg.mapper.worker.IRewardPunishRecordMapper;
 import com.dangjia.acg.mapper.worker.IWorkIntegralMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
-import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.complain.Complain;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
@@ -41,6 +40,7 @@ import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.user.MainUser;
@@ -267,7 +267,7 @@ public class ComplainService {
      * 查询申诉
      *
      * @param pageDTO      分页实体
-     * @param complainType 申诉类型 1:工匠被处罚后不服.2：业主要求整改.3：大管家（开工后）要求换人.4:部分收货申诉.
+     * @param complainType 申述类型 1: 被处罚申诉.2：要求整改.3：要求换人.4:部分收货申诉.5:提前结束装修.6业主要求换人.7:业主申诉退货
      * @param state        处理状态:0:待处理。1.驳回。2.接受。
      * @param searchKey    用户关键字查询，包含名称、手机号、昵称
      * @return
@@ -479,8 +479,8 @@ public class ComplainService {
                         house.setCompletedDate(new Date());
                         house.setVisitState(4);
                         house.setHaveComplete(1);
-                        house.setDesignerOk(3);
-                        house.setBudgetOk(3);
+//                        house.setDesignerOk(3);
+//                        house.setBudgetOk(3);
                         JSONArray brandSeriesLists = JSONArray.parseArray(operateName);
                         List<Map<String, Object>> maps = new ArrayList<>();
                         if (backMoneyJudge(brandSeriesLists, maps))
@@ -570,7 +570,7 @@ public class ComplainService {
                 List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
                 List<SplitDeliverItemDTO> splitDeliverItemDTOList = new ArrayList<>();
                 for (OrderSplitItem orderSplitItem : orderSplitItemList) {
-                    Product product=forMasterAPI.getProduct(house.getCityId(), orderSplitItem.getProductId());
+                    DjBasicsProductTemplate product=forMasterAPI.getProduct(house.getCityId(), orderSplitItem.getProductId());
                     SplitDeliverItemDTO splitDeliverItemDTO = new SplitDeliverItemDTO();
                     splitDeliverItemDTO.setImage(address + product.getImage());
                     splitDeliverItemDTO.setProductSn(product.getProductSn());
@@ -615,6 +615,15 @@ public class ComplainService {
         }
         if (!member.getId().equals(house.getMemberId())) {
             return ServerResponse.createByErrorMessage("您无权操作此房产");
+        }
+        Example example = new Example(Complain.class);
+        example.createCriteria()
+                .andEqualTo(Complain.HOUSE_ID, house.getId())
+                .andEqualTo(Complain.STATUS, 0)
+                .andEqualTo(Complain.COMPLAIN_TYPE, 5);
+        List<Complain> complains = complainMapper.selectByExample(example);
+        if (complains.size()>0) {
+            return ServerResponse.createByErrorMessage("您已提交申请，请勿重复提交！");
         }
         Complain complain = new Complain();
         complain.setHouseId(houseId);
@@ -669,14 +678,14 @@ public class ComplainService {
             return ServerResponse.createByErrorMessage("没有查询到相关房子");
         }
         List<ComPlainStopDTO> comPlainStopDTOList = new ArrayList<>();
-        if (house.getDecorationType() != 2 && house.getDesignerOk() != 3) {
+        if (house.getDecorationType() != 2 && house.getDesignerState() != 3) {
             Example examples = new Example(HouseFlow.class);
             examples.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, house.getId())
                     .andEqualTo(HouseFlow.WORKER_TYPE, "1");
             List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(examples);
             getComPlainStop(comPlainStopDTOList, houseFlows);
         }
-        if (house.getBudgetOk() != 3) {
+        if (house.getBudgetState() != 3) {
             Example examples = new Example(HouseFlow.class);
             examples.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, house.getId())
                     .andEqualTo(HouseFlow.WORKER_TYPE, "2");
@@ -762,8 +771,8 @@ public class ComplainService {
         house.setCompletedDate(new Date());
         house.setVisitState(4);
         house.setHaveComplete(1);
-        house.setDesignerOk(3);
-        house.setBudgetOk(3);
+//        house.setDesignerOk(3);
+//        house.setBudgetOk(3);
         houseMapper.updateByPrimaryKeySelective(house);
         return ServerResponse.createBySuccessMessage("ok");
     }
@@ -786,7 +795,7 @@ public class ComplainService {
             return ServerResponse.createbyUserTokenError();
         }
         HouseWorkerOrder hwo2 = null;
-        if (house.getDecorationType() != 2 && house.getDesignerOk() != 3) {
+        if (house.getDecorationType() != 2 && house.getDesignerState() != 3) {
             Example examples = new Example(HouseFlow.class);
             examples.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, house.getId())
                     .andEqualTo(HouseFlow.WORKER_TYPE, "1");
@@ -797,7 +806,7 @@ public class ComplainService {
                     hwo2 = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId());
                 }
             }
-        } else if (house.getBudgetOk() != 3) {
+        } else if (house.getBudgetState() != 3) {
             Example examples = new Example(HouseFlow.class);
             examples.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, house.getId())
                     .andEqualTo(HouseFlow.WORKER_TYPE, "2");
@@ -822,8 +831,8 @@ public class ComplainService {
         house.setCompletedDate(new Date());
         house.setVisitState(4);
         house.setHaveComplete(1);
-        house.setDesignerOk(3);
-        house.setBudgetOk(3);
+//        house.setDesignerOk(3);
+//        house.setBudgetOk(3);
         houseMapper.updateByPrimaryKeySelective(house);
         return ServerResponse.createBySuccessMessage("操作成功");
     }

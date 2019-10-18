@@ -336,6 +336,9 @@ public class MessageService extends BaseService {
      */
     public void sendMemberIdPush(String appType, String[] memberId, String title, String alert, String speak) {
         memberId = getUserTags(memberId);
+        for (String s : memberId) {
+            LOG.error("msg-memberId: " + s);
+        }
         Collection<String> list = new LinkedList<String>();
         if (memberId != null && memberId.length > 0) {
             list.addAll(Arrays.asList(memberId));

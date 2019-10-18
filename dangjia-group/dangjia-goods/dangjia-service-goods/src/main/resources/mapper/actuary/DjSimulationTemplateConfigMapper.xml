@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.actuary.DjSimulationTemplateConfigMapper">
+
+
+    <!-- 查询设计精算阶段的配置模板 -->
+    <select id="selectCurrentIndexByConfigType" resultType="java.lang.String">
+       select IFNULL(max(config_type_index),0)+1 as configTypeIndex from dj_simulation_template_config t where t.config_type=#{configType}
+    </select>
+
+    <resultMap id="simulateionTemplateMap" type="com.dangjia.acg.dto.actuary.SimulationTemplateConfigDTO">
+        <id property="id" column="id"/>
+        <result property="id" column="id"/>
+        <result property="configName" column="configName"/>
+        <result property="configType" column="configType"/>
+        <collection property="simulationDetailList" column="{simulationTemplateId=id}" ofType="map" select="selectSimulationDetailList"/>
+    </resultMap>
+
+    <resultMap id="simulateionDetailMap" type="com.dangjia.acg.dto.actuary.SimulationTemplateConfigDetailDTO">
+        <id property="id" column="id"/>
+        <result property="id" column="id"/>
+        <result property="simulationTemplateId" column="simulationTemplateId"/>
+        <result property="code" column="code"/>
+        <result property="name" column="name"/>
+        <result property="image" column="image"/>
+        <result property="labelName" column="labelName"/>
+    </resultMap>
+
+    <!-- 查询设计精算阶段的配置模板 -->
+    <select id="querySimulateionTemplateConfig" resultMap="simulateionTemplateMap">
+
+        SELECT
+            id,
+            config_name configName,
+            config_type configType
+        FROM
+            dj_simulation_template_config t
+        where data_status = '0'
+        and exists (select 1 from dj_simulation_template_config_detail t1 where t.id=t1.simulation_template_id and t1.config_status = 0)
+        <if test="id!=null and id!=''">
+            and id=#{id}
+        </if>
+        order by config_type,create_date
+    </select>
+
+    <select id="selectSimulationDetailList" resultMap="simulateionDetailMap">
+        SELECT
+            id,
+            simulation_template_id simulationTemplateId,
+            CODE,
+            NAME,
+            image,
+            label_name labelName
+        FROM
+            dj_simulation_template_config_detail
+        where config_status = 0
+        and simulation_template_id=#{simulationTemplateId}
+        order by template_detail_index
+    </select>
+
+
+    <!-- 查询组合排列列表 -->
+    <resultMap id="templateMap" type="java.util.Map">
+        <id property="id" column="id"/>
+        <result property="id" column="id"/>
+        <collection property="templateDetailList" column="{simulationTemplateId=id" ofType="map" select="selectTemplateDetailList"/>
+    </resultMap>
+
+    <select id="queryTemplateListByType" resultMap="templateMap">
+
+        SELECT
+        id
+        FROM
+        dj_simulation_template_config t
+        where data_status = '0'
+        and exists (select 1 from dj_simulation_template_config_detail t1 where t.id=t1.simulation_template_id and t1.config_status = 0)
+        order by config_type,create_date
+    </select>
+
+    <select id="selectTemplateDetailList" resultType="java.lang.String">
+        SELECT
+            CONCAT(code,":",name)
+        FROM
+            dj_simulation_template_config_detail
+        where config_status = 0
+        and simulation_template_id=#{simulationTemplateId}
+        order by template_detail_index
+    </select>
+
+    <!-- 删除无用的标题数据 -->
+    <select id="deleteSimulationTemplate">
+        delete from dj_simulation_template_config where id not in(select distinct simulation_template_id from dj_simulation_template_config_detail)
+    </select>
+</mapper>

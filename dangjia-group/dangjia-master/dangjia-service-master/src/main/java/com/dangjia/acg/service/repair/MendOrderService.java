@@ -13,20 +13,18 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.product.ProductWorkerDTO;
 import com.dangjia.acg.dto.repair.MendOrderInfoDTO;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
-import com.dangjia.acg.mapper.deliver.IOrderSplitMapper;
+import com.dangjia.acg.mapper.delivery.IOrderSplitMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.ISurplusWareHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberInfoMapper;
 import com.dangjia.acg.mapper.repair.*;
-import com.dangjia.acg.modle.basics.Goods;
-import com.dangjia.acg.modle.basics.Product;
-import com.dangjia.acg.modle.basics.WorkerGoods;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
@@ -37,6 +35,8 @@ import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.SurplusWareHouse;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.product.BasicsGoods;
+import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.repair.*;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
@@ -694,7 +694,7 @@ public class MendOrderService {
                 MendWorker mendWorker = new MendWorker();//补退人工
                 String workerGoodsId = obj.getString("workerGoodsId");
                 double num = Double.parseDouble(obj.getString("num"));
-                WorkerGoods workerGoods = forMasterAPI.getWorkerGoods(house.getCityId(), workerGoodsId);
+                ProductWorkerDTO workerGoods = forMasterAPI.getWorkerGoods(house.getCityId(), workerGoodsId);
                 if (!workerGoods.getWorkerTypeId().equals(workerTypeId)) {
                     System.out.println("所选人工商品与所选工种不符");
                     TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
@@ -703,7 +703,7 @@ public class MendOrderService {
                 mendWorker.setMendOrderId(mendOrder.getId());
                 mendWorker.setWorkerGoodsId(workerGoodsId);
                 mendWorker.setWorkerGoodsName(workerGoods.getName());
-                mendWorker.setWorkerGoodsSn(workerGoods.getWorkerGoodsSn());
+                mendWorker.setWorkerGoodsSn(workerGoods.getProductSn());
                 mendWorker.setUnitName(workerGoods.getUnitName());
                 mendWorker.setPrice(workerGoods.getPrice());
                 mendWorker.setImage(workerGoods.getImage());
@@ -1048,9 +1048,9 @@ public class MendOrderService {
                 MendMateriel mendMateriels = mendMaterialMapper.getMendOrderGoods(mendOrder.getId(), productId);
                 if (mendMateriels == null) {
                     if (mendOrder.getType() == 2 || mendOrder.getType() == 4) {
-                        Product product = forMasterAPI.getProduct(house.getCityId(), productId);
+                        DjBasicsProductTemplate product = forMasterAPI.getProduct(house.getCityId(), productId);
                         if (product != null) {
-                            Goods goods = forMasterAPI.getGoods(house.getCityId(), product.getGoodsId());
+                            BasicsGoods goods = forMasterAPI.getGoods(house.getCityId(), product.getGoodsId());
                             //判断用户角色是否为业主业主可任意退
                             if (mendOrder.getType() == 2) {
                                 if (goods != null && goods.getSales() == 1) {
@@ -1079,8 +1079,8 @@ public class MendOrderService {
         MendMateriel mendMateriel = new MendMateriel();//补退材料明细
         double num = Double.parseDouble(shopCount);
         Warehouse warehouse = warehouseMapper.getByProductId(productId, house.getId());
-        Product product = forMasterAPI.getProduct(house.getCityId(), productId);
-        mendMateriel.setCityId(house.getCityId());
+        DjBasicsProductTemplate product = forMasterAPI.getProduct(house.getCityId(), productId);
+         mendMateriel.setCityId(house.getCityId());
         if (warehouse != null) {
             mendMateriel.setProductSn(product.getProductSn());
             mendMateriel.setProductName(product.getName());
@@ -1092,6 +1092,7 @@ public class MendOrderService {
             mendMateriel.setCategoryId(product.getCategoryId());
             mendMateriel.setImage(product.getImage());
         } else {
+
             mendMateriel.setProductSn(product.getProductSn());
             mendMateriel.setProductName(product.getName());
             mendMateriel.setPrice(product.getPrice());

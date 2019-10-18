@@ -55,8 +55,8 @@ public class PayOrder extends BaseEntity {
 	private String weixin;//
 
 	@Column(name = "pay_state")
-	@Desc(value = "1微信，2支付宝")
-	@ApiModelProperty("1微信，2支付宝")
+	@Desc(value = "1微信，2支付宝，3POS机支付")
+	@ApiModelProperty("1微信，2支付宝，2POS机支付")
 	private String payState;//paystate
 
 	@Column(name = "state")

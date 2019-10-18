@@ -1,12 +1,16 @@
 package com.dangjia.acg.api.data;
 
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dto.actuary.BudgetLabelDTO;
+import com.dangjia.acg.dto.actuary.BudgetLabelGoodsDTO;
+import com.dangjia.acg.dto.product.ProductWorkerDTO;
+import com.dangjia.acg.dto.product.StorefontInfoDTO;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
-import com.dangjia.acg.modle.basics.Goods;
-import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.Technology;
-import com.dangjia.acg.modle.basics.WorkerGoods;
+import com.dangjia.acg.modle.product.BasicsGoods;
+import com.dangjia.acg.modle.product.DjBasicsProduct;
+import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
 import io.swagger.annotations.Api;
@@ -16,6 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * author: Ronalcheng
@@ -57,9 +62,9 @@ public interface ForMasterAPI {
     @ApiOperation(value = "查工艺", notes = "查工艺")
     Technology byTechnologyId(@RequestParam("cityId") String cityId,@RequestParam("technologyId") String technologyId);
 
-    @PostMapping("/data/forMaster/brandSeriesName")
-    @ApiOperation(value = "查询品牌系列名", notes = "查询品牌系列名")
-    String brandSeriesName(@RequestParam("cityId") String cityId,@RequestParam("productId") String productId);
+    //@PostMapping("/data/forMaster/brandSeriesName")
+   //@ApiOperation(value = "查询品牌系列名", notes = "查询品牌系列名")
+    //String brandSeriesName(@RequestParam("cityId") String cityId,@RequestParam("productId") String productId);
 
     @PostMapping("/data/forMaster/brandName")
     @ApiOperation(value = "查询品牌名", notes = "查询品牌名")
@@ -67,19 +72,20 @@ public interface ForMasterAPI {
 
     @PostMapping("/data/forMaster/getWorkerGoods")
     @ApiOperation(value = "工价商品信息", notes = "工价商品信息")
-    WorkerGoods getWorkerGoods(@RequestParam("cityId") String cityId,@RequestParam("workerGoodsId") String workerGoodsId);
+    ProductWorkerDTO getWorkerGoods(@RequestParam("cityId") String cityId, @RequestParam("workerGoodsId") String workerGoodsId);
+   // WorkerGoods getWorkerGoods(@RequestParam("cityId") String cityId,@RequestParam("workerGoodsId") String workerGoodsId);
 
     @PostMapping("/data/goods/settop")
     @ApiOperation(value = "设置材料或者人工商品置顶或取消置顶", notes = "设置材料或者人工商品置顶或取消置顶")
     ServerResponse setProductOrWorkerGoodsIsTop(@RequestParam("gid") String gid, @RequestParam("type") Integer type,@RequestParam("istop") String istop);
 
     @PostMapping("/data/forMaster/getGoods")
-    @ApiOperation(value = "商品信息", notes = "商品信息")
-    Goods getGoods(@RequestParam("cityId") String cityId,@RequestParam("goodsId") String goodsId);
+    @ApiOperation(value = "货品信息", notes = "货品信息")
+    BasicsGoods getGoods(@RequestParam("cityId") String cityId, @RequestParam("goodsId") String goodsId);
 
     @PostMapping("/data/forMaster/getProduct")
-    @ApiOperation(value = "货品信息", notes = "货品信息")
-    Product getProduct(@RequestParam("cityId") String cityId,@RequestParam("productId") String productId);
+    @ApiOperation(value = "商品信息", notes = "商品信息")
+    DjBasicsProductTemplate getProduct(@RequestParam("cityId") String cityId, @RequestParam("productId") String productId);
 
     @PostMapping("/data/forMaster/caiLiao")
     @ApiOperation(value = "支付回调获取材料精算", notes = "支付回调获取材料精算")
@@ -131,4 +137,26 @@ public interface ForMasterAPI {
     Double getNotSerPrice(@RequestParam("houseId") String houseId,
                           @RequestParam("workerTypeId") String workerTypeId,
                           @RequestParam("cityId") String cityId);
+
+
+    @PostMapping("/data/budget/label")
+    @ApiOperation(value = "查询工种材料未支付所有商品的标签", notes = "查询工种材料未支付所有商品的标签")
+    List<BudgetLabelDTO> queryBudgetLabel(@RequestParam("houseId") String houseId, @RequestParam("workerTypeId") String workerTypeId, @RequestParam("cityId") String cityId);
+
+    @PostMapping("/data/budget/label/goods")
+    @ApiOperation(value = "查询工种材料未支付所有商品", notes = "查询工种材料未支付所有商品")
+    List<BudgetLabelGoodsDTO> queryBudgetLabelGoods(@RequestParam("houseId") String houseId, @RequestParam("workerTypeId") String workerTypeId, @RequestParam("cityId") String cityId);
+
+    @PostMapping("/data/house/getStroreProductInfo")
+    @ApiOperation(value = "获取商品对应的基本信息及对应的货品，商品列表", notes = "获取商品对应的基本信息及对应的货品，商品列表")
+    StorefontInfoDTO getStroreProductInfo(@RequestParam("cityId") String cityId,
+                                          @RequestParam("storefontId") String storefontId,
+                                          @RequestParam("productId") String productId);
+
+    //
+    @PostMapping("/data/house/getproductTempListByStorefontId")
+    @ApiOperation(value = "查询当前店铺下对应货品下的所有商品", notes = "查询当前店铺下对应货品下的所有商品列表")
+    ServerResponse getproductTempListByStorefontId(@RequestParam("cityId") String cityId,
+                                                   @RequestParam("storefontId") String storefontId,
+                                                   @RequestParam("goodsId") String goodsId);
 }

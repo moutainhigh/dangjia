@@ -64,4 +64,11 @@ public class BasicsGoods extends BaseEntity{
     @Column(name = "label_ids")
     private String labelIds;//标签id，多个用逗号分隔
 
+    @Column(name = "is_reservation_deliver")
+    private String isReservationDeliver;//是否业主预约发货(1是，0否)
+
+    @Column(name = "attribute_id_arr")
+    private String attributeIdArr;//属性选中值Id集合
+
+
 }

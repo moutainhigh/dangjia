@@ -1,8 +1,10 @@
 package com.dangjia.acg.service.finance;
 
+import com.ctc.wstx.util.DataUtil;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.deliver.OrderItemByDTO;
 import com.dangjia.acg.dto.deliver.WebOrderDTO;
@@ -18,13 +20,18 @@ import com.dangjia.acg.modle.activity.ActivityRedPackRecord;
 import com.dangjia.acg.modle.activity.ActivityRedPackRule;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.WorkerType;
+import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.repair.MendOrder;
+import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * ysl
@@ -59,20 +66,24 @@ public class WebOrderService {
      * @param searchKey 模糊搜索：订单号,房屋信息,电话,支付单号(业务订单号)
      * @return
      */
-    public ServerResponse getAllOrders(PageDTO pageDTO, Integer state, String searchKey) {
+    public ServerResponse getAllOrders(PageDTO pageDTO,String cityId, Integer state, String searchKey) {
         try {
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             if (state == null) {
                 state = -1;
             }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<WebOrderDTO> orderList = iBusinessOrderMapper.getWebOrderList(state, searchKey);
+            List<WebOrderDTO> orderList = iBusinessOrderMapper.getWebOrderList(cityId,state, searchKey);
             PageInfo pageResult = new PageInfo(orderList);
             for (WebOrderDTO webOrderDTO : orderList) {
+                webOrderDTO.setImage(Utils.getImageAddress(address,webOrderDTO.getImage()));
                 if (webOrderDTO.getState() == 3) {
                     if (webOrderDTO.getType() == 1) {//工序支付
                         HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(webOrderDTO.getTaskId());
                         if (houseFlow != null) {
                             webOrderDTO.setTypeText(workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId()).getName() + "抢单");
+                        }else{
+                            webOrderDTO.setTypeText("工序抢单");
                         }
                     }
                     if (webOrderDTO.getType() == 2) {//补货补人工
@@ -95,6 +106,8 @@ public class WebOrderService {
                         HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(webOrderDTO.getTaskId());
                         if (houseFlow != null) {
                             webOrderDTO.setTypeText(workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId()).getName() + "付材料");
+                        }else{
+                            webOrderDTO.setTypeText("工序付材料");
                         }
                     }
                     if (webOrderDTO.getType() == 5) {
@@ -106,6 +119,12 @@ public class WebOrderService {
                     } // 换货单
                     if (webOrderDTO.getType() == 7) {
                         webOrderDTO.setTypeText("设计/精算改图");
+                    }
+                    if (webOrderDTO.getType() == 8) {
+                        webOrderDTO.setTypeText("业主购买");
+                    }
+                    if (webOrderDTO.getType() == 9) {
+                        webOrderDTO.setTypeText("工人保险");
                     }
                 }
                 ActivityRedPackRecord activityRedPackRecord = iActivityRedPackRecordMapper.getRedPackRecordsByBusinessOrderNumber(webOrderDTO.getOrderId());
@@ -132,7 +151,22 @@ public class WebOrderService {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<OrderItemByDTO> orderItemList= iBusinessOrderMapper.getOrderItem(businessNumber);
         PageInfo pageResult = new PageInfo(orderItemList);
-        ActivityRedPackRecord activityRedPackRecord = iActivityRedPackRecordMapper.getRedPackRecordsByBusinessOrderNumber(businessNumber);
+        for (OrderItemByDTO orderItemByDTO : orderItemList) {
+            orderItemByDTO.setImage(imageAddress+orderItemByDTO.getImage());
+        }
+        pageResult.setList(orderItemList);
+        return ServerResponse.createBySuccess("查询成功", pageResult);
+
+    }
+    /**
+     * 获取订单优惠券详情
+     * @param businessId
+     * @return
+     */
+    public ServerResponse getOrderRedItem(String businessId){
+        BusinessOrder businessOrder = iBusinessOrderMapper.selectByPrimaryKey(businessId);
+        ActivityRedPackRecord activityRedPackRecord = iActivityRedPackRecordMapper.getRedPackRecordsByBusinessOrderNumber(businessOrder.getNumber());
+
         String red;
         if(activityRedPackRecord!=null) {
             ActivityRedPack activityRedPack = iActivityRedPackMapper.selectByPrimaryKey(activityRedPackRecord.getRedPackId());
@@ -148,14 +182,23 @@ public class WebOrderService {
         }else {
             red="无";
         }
-        for (OrderItemByDTO orderItemByDTO : orderItemList) {
-            orderItemByDTO.setImage(imageAddress+orderItemByDTO.getImage());
-            orderItemByDTO.setRed(red);
-        }
-        pageResult.setList(orderItemList);
-        return ServerResponse.createBySuccess("查询成功", pageResult);
+        Map map=new HashMap<>();
+        map.put("red",red);
+        map.put("redPackAmount",businessOrder.getDiscountsPrice());
+        return ServerResponse.createBySuccess("查询成功", map);
 
     }
-
+    /**
+     * 查询到时业主未审核申请
+     */
+    public void autoOrderCancel(){
+        BusinessOrder businessOrder=new BusinessOrder();
+        businessOrder.setId(null);
+        businessOrder.setCreateDate(null);
+        businessOrder.setState(4);
+        Example example = new Example(BusinessOrder.class);
+        example.createCriteria().andEqualTo(BusinessOrder.STATE, 1);
+        iBusinessOrderMapper.updateByExampleSelective(businessOrder,example);
+    }
 }
 

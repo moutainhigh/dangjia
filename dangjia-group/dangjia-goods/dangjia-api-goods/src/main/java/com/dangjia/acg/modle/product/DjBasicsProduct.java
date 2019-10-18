@@ -95,5 +95,15 @@ public class DjBasicsProduct extends BaseEntity {
     @ApiModelProperty("备注")
     private String remark;
 
+    @Column(name = "value_name_arr")
+    @Desc(value = "属性选项选中值name集合")
+    @ApiModelProperty("属性选项选中值name集合")
+    private String valueNameArr;//属性选项选中值name集合
+
+    @Column(name = "value_id_arr")
+    @Desc(value = "属性选项选中值id集合")
+    @ApiModelProperty("属性选项选中值id集合")
+    private String valueIdArr;//属性选项选中值id集合
+
 
 }

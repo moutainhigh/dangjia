@@ -121,10 +121,10 @@ public class HomeModularService {
                 object = myHouseService.getHouse(member.getId(), null);
                 if (object instanceof House) {
                     House house = (House) object;
-                    if (house.getDesignerOk() != 3) {//设计阶段
+                    if (house.getDesignerState() != 3) {//设计阶段
                         workerTypeIds.add("1");
                         workerTypeIds = setWorkerTypeIds(workerTypeIds);
-                    } else if (house.getBudgetOk() != 3) {//精算阶段
+                    } else if (house.getBudgetState() != 3) {//精算阶段
                         workerTypeIds.add("2");
                         workerTypeIds = setWorkerTypeIds(workerTypeIds);
                     } else {

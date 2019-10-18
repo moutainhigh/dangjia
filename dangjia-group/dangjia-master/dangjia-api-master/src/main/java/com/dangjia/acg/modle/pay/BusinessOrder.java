@@ -50,8 +50,8 @@ public class BusinessOrder extends BaseEntity {
 	private String taskId;//工序支付   补货补人工  提前付
 
 	@Column(name = "state")
-	@Desc(value = "处理状态  1刚生成(可编辑),2去支付(不修改),3已支付")
-	@ApiModelProperty("处理状态  1刚生成(可编辑),2去支付(不修改),3已支付")
+	@Desc(value = "处理状态  1刚生成(可编辑),2去支付(不修改),3已支付,4已取消")
+	@ApiModelProperty("处理状态  1刚生成(可编辑),2去支付(不修改),3已支付,4已取消")
 	private Integer state;//
 
 	@Column(name = "total_price")
@@ -68,6 +68,12 @@ public class BusinessOrder extends BaseEntity {
 	@Desc(value = "实付")
 	@ApiModelProperty("实付")
 	private BigDecimal payPrice;//
+
+
+	@Column(name = "image")
+	@Desc(value = "支付回执单图片（多张，逗号分隔）")
+	@ApiModelProperty("支付回执单图片（多张，逗号分隔）")
+	private String image;//
 
 	@Column(name = "type")
 	@Desc(value = "支付类型  1工序支付任务,2补货补人工 ,4待付款进来只付材料, 5验房分销, 6换货单,7:设计精算补单,8:未购买,9:工人保险")

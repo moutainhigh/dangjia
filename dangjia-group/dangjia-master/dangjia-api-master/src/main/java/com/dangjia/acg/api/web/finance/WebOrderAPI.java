@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 public interface WebOrderAPI {
 
     @PostMapping("web/finance/order/getAllOrders")
-    @ApiOperation(value = "支付订单流水", notes = "支付订单流水")
+    @ApiOperation(value = "支付订单流水(1:待付款2：支付中3：已支付4：已取消)", notes = "支付订单流水(1:待付款2：支付中3：已支付4：已取消)")
     ServerResponse getAllOrders(@RequestParam("request") HttpServletRequest request,
                                 @RequestParam("pageDTO") PageDTO pageDTO,
                                 @RequestParam("state") Integer state,
@@ -33,4 +33,13 @@ public interface WebOrderAPI {
                                 @RequestParam("pageDTO") PageDTO pageDTO,
                                 @RequestParam("businessNumber") String businessNumber);
 
+
+    @PostMapping("web/finance/order/getOrderRedItem")
+    @ApiOperation(value = "订单优惠券详情", notes = "订单优惠券详情")
+    ServerResponse getOrderRedItem(@RequestParam("request") HttpServletRequest request,
+                                @RequestParam("businessId") String businessId);
+
+    @PostMapping("job/auto/order/cancel")
+    @ApiOperation(value = "自动取消订单（超过7天）", notes = "自动取消订单（超过7天）")
+    void autoOrderCancel();
 }

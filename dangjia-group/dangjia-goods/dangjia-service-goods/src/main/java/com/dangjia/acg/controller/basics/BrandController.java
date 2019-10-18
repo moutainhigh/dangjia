@@ -65,8 +65,8 @@ public class BrandController implements BrandAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse updateBrand(HttpServletRequest request, String id, String name, String brandSeriesList) {
-        return brandService.update(id, name, brandSeriesList);
+    public ServerResponse updateBrand(HttpServletRequest request, String id, String name, String image,String brandSeriesList) {
+        return brandService.update(id, name,image, brandSeriesList);
 
     }
 
@@ -77,8 +77,8 @@ public class BrandController implements BrandAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse insertBrand(HttpServletRequest request, String brandSeriesList, String name) {
-        return brandService.insert(brandSeriesList, name);
+    public ServerResponse insertBrand(HttpServletRequest request, String brandSeriesList, String name,String image) {
+        return brandService.insert(brandSeriesList, name,image);
 
     }
 

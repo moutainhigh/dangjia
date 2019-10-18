@@ -24,7 +24,7 @@ public interface ClassificationAPI {
     /**
      * showdoc
      *
-     * @param cityId 必选 string 城市ID
+     *   *@param cityId 必选 string 城市ID
      * @return {"res":1000,"msg":{"resultObj":{返回参数说明},"resultCode":1000,"resultMsg":"成功"} }
      * @catalog 当家接口文档/分类模块
      * @title 获取所有的一级分类
@@ -51,9 +51,9 @@ public interface ClassificationAPI {
     /**
      * showdoc
      *
-     * @param pageNum    必选 int 页码
-     * @param pageSize   必选 int 记录数
-     * @param cityId     必选 string 城市ID
+     *      *@param pageNum    必选 int 页码
+     *      * @param pageSize   必选 int 记录数
+     *      * @param cityId     必选 string 城市ID
      * @param categoryId 可选 string 分类ID
      * @return {"res": 1000,"msg": {"resultCode": 1000, "resultMsg": "ok", "resultObj": { "pageNum": 0,"pageSize": 10,"size": 1,"startRow": 1,"endRow": 1,"total": 1, "pages": 1,"list": [{返回参数说明}],"prePage": 0, "nextPage": 1,"isFirstPage": false,"isLastPage": false,"hasPreviousPage": false,"hasNextPage": true,"navigatePages": 8,"navigatepageNums": [1],"navigateFirstPage": 1,"navigateLastPage": 1}}}
      * @catalog 当家接口文档/分类模块
@@ -114,9 +114,9 @@ public interface ClassificationAPI {
      * @Author: Ruking 18075121944
      * @Date: 2019/6/19 6:09 PM
      */
-    @PostMapping("classification/getWorkerGoodsList")
+    /*@PostMapping("classification/getWorkerGoodsList")
     @ApiOperation(value = "获取一级类别下的人工", notes = "获取一级类别下的人工")
     ServerResponse getWorkerGoodsList(@RequestParam("request") HttpServletRequest request,
                                       @RequestParam("pageDTO") PageDTO pageDTO,
-                                      @RequestParam("workerTypeId") String workerTypeId);
+                                      @RequestParam("workerTypeId") String workerTypeId);*/
 }

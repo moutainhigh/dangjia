@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.delivery.DjDeliveryReturnSlipDetailsMapper">
+
+
+
+    <!--<select id="queryOrderInformation" resultType="com.dangjia.acg.dto.delivery.DjDeliveryReturnSlipDetailsDTO">-->
+       <!--SELECT-->
+            <!--drs.id,-->
+            <!--m.name,-->
+            <!--m.mobile,-->
+            <!--hd.address,-->
+            <!--drs.ship_name as shipName,-->
+            <!--drs.ship_mobile as shipMobile,-->
+            <!--drs.total_price as totalPrice,-->
+            <!--h.id as houseId-->
+        <!--FROM-->
+            <!--dj_delivery_return_slip drs-->
+        <!--INNER JOIN dj_order o ON drs.order_id = o.id-->
+        <!--INNER JOIN dj_house h ON h.id = o.house_id-->
+        <!--INNER JOIN dj_house_address hd ON hd.house_id = h.id-->
+        <!--INNER JOIN dj_member m ON h.member_id=m.id-->
+        <!--where drs.id=#{id}-->
+    <!--</select>-->
+
+    <select id="queryDeliverOrderInformation" resultType="com.dangjia.acg.dto.delivery.DjDeliveryReturnSlipDetailsDTO">
+        SELECT
+            dsd.number,
+            dsd.house_id as houseId,
+            m. NAME,
+            m.mobile,
+            dsd.ship_address as shipAddress,
+            dosi.product_name as productName,
+            dosi.product_sn as productSn,
+            dosi.image,
+            dosi.num,
+            dosi.price,
+            dosi.total_price as totalPrice
+        FROM
+            dj_deliver_split_deliver dsd
+        INNER JOIN dj_deliver_order_split_item dosi ON dsd.order_split_id = dosi.order_split_id
+        INNER JOIN dj_house h ON h.id = dsd.house_id
+        INNER JOIN dj_member m ON h.member_id = m.id
+        WHERE dsd.order_split_id=#{orderSplitId}
+    </select>
+
+    <select id="queryRepairOrderInformation" resultType="com.dangjia.acg.dto.delivery.DjDeliveryReturnSlipDetailsDTO">
+        SELECT
+            rmd.number,
+            rmd.house_id as houseId,
+            m. NAME,
+            m.mobile,
+            rmd.ship_address as shipAddress,
+            rmm.product_name as productName,
+            rmm.product_sn as productSn,
+            rmm.image,
+            rmm.price,
+            rmm.total_price as totalPrice,
+            rmm.shop_count as shopCount,
+            rmm.actual_count as actualCount
+        FROM
+            dj_repair_mend_deliver rmd
+        INNER JOIN dj_repair_mend_materiel rmm ON rmm.mend_order_id = rmd.mend_order_id
+        INNER JOIN dj_house h ON h.id = rmd.house_id
+        INNER JOIN dj_member m ON h.member_id = m.id
+        WHERE rmd.mend_order_id = #{mendOrderId}
+    </select>
+
+    <select id="queryWorkerInfByHouseId" resultType="com.dangjia.acg.dto.delivery.DjDeliveryReturnSlipDetailsDTO">
+        SELECT
+            m.NAME as workerName,
+            m.mobile as workerMobile
+        FROM
+            dj_house h
+        INNER JOIN dj_core_house_flow chf ON h.id = chf.house_id
+        INNER JOIN dj_member m ON m.id = chf.worker_id
+        WHERE
+            chf.worker_type_id = 3
+        AND h.id = #{houseId}
+    </select>
+
+</mapper>

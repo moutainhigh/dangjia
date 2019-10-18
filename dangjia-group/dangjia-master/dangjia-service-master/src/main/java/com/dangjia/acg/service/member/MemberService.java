@@ -304,18 +304,18 @@ public class MemberService {
             redisClient.deleteCache(token + Constants.SESSIONUSERID);
         }
         redisClient.put(userRoleText, accessToken.getUserToken());
-//        switch (userRole) {
-//            case 1:
-//                groupInfoService.registerJGUsers(AppType.ZHUANGXIU.getDesc(), new String[]{member.getId()}, new String[1]);
-//                break;
-//            case 2:
-//                groupInfoService.registerJGUsers(AppType.GONGJIANG.getDesc(), new String[]{member.getId()}, new String[1]);
-//                break;
-//            case 3:
-//                if (!CommonUtil.isEmpty(accessToken.getUserId()))
-//                    groupInfoService.registerJGUsers(AppType.SALE.getDesc(), new String[]{accessToken.getUserId()}, new String[1]);
-//                break;
-//        }
+        switch (userRole) {
+            case 1:
+                groupInfoService.registerJGUsers(AppType.ZHUANGXIU.getDesc(), new String[]{member.getId()}, new String[1]);
+                break;
+            case 2:
+                groupInfoService.registerJGUsers(AppType.GONGJIANG.getDesc(), new String[]{member.getId()}, new String[1]);
+                break;
+            case 3:
+                if (!CommonUtil.isEmpty(accessToken.getUserId()))
+                    groupInfoService.registerJGUsers(AppType.SALE.getDesc(), new String[]{accessToken.getUserId()}, new String[1]);
+                break;
+        }
         return ServerResponse.createBySuccess(accessToken);
     }
 
@@ -681,6 +681,15 @@ public class MemberService {
     }
 
     /**
+     * 更新工匠持单量
+     */
+    public ServerResponse updateMethods(String workerId, Integer methods) {
+        Member user = memberMapper.selectByPrimaryKey(workerId);
+        user.setMethods(methods);
+        memberMapper.updateByPrimaryKeySelective(user);
+        return ServerResponse.createBySuccessMessage("持单量设置成功");
+    }
+    /**
      * 业主列表
      */
     public ServerResponse getMemberList(PageDTO pageDTO, String cityId, String userKey, Integer stage, String userRole, String searchKey, String parentId, String childId, String orderBy, String type, String userId, String beginDate, String endDate) {
@@ -721,10 +730,7 @@ public class MemberService {
                     customer.setClueType(0);
                     customer.setDataStatus(0);
                     customer.setTips("0");
-                    Example example = new Example(MemberCity.class);
-                    example.createCriteria().andEqualTo(MemberCity.MEMBER_ID, member.getId());
-                    List<MemberCity> memberCities = memberCityMapper.selectByExample(example);
-                    customer.setCityId(memberCities.size() > 0 ? memberCities.get(0).getCityId() : null);
+                    customer.setCityId(member.getCityId());
                     customer.setPhaseStatus(1);
                     iCustomerMapper.insert(customer);
                 } else {
@@ -736,7 +742,6 @@ public class MemberService {
                 MemberCustomerDTO mcDTO = new MemberCustomerDTO();
                 mcDTO.setMcId(customer.getId());
                 mcDTO.setPhaseStatus(customer.getPhaseStatus());
-                mcDTO.setOrderDate(member.getModifyDate());
                 mcDTO.setMemberId(member.getId());
                 mcDTO.setMemberName(member.getName());
                 mcDTO.setMemberNickName(member.getNickName());
@@ -789,17 +794,12 @@ public class MemberService {
                     memberLabelList = iMemberLabelMapper.selectByExample(example);
                 }
                 mcDTO.setMemberLabelList(memberLabelList);
+                mcDTO.setMemberCityID(member.getCityId());
+                mcDTO.setMemberCityName(member.getCityName());
 
-                Example example = new Example(MemberCity.class);
-                example.createCriteria()
-                        .andEqualTo(MemberCity.MEMBER_ID, member.getId())
-                        .andEqualTo(MemberCity.CITY_ID, cityId);
-                example.orderBy(MemberCity.CREATE_DATE);
-                List<MemberCity> listcity = memberCityMapper.selectByExample(example);
-                if (listcity.size() > 0) {
-                    mcDTO.setMemberCityID(listcity.get(0).getCityId());
-                    mcDTO.setMemberCityName(listcity.get(0).getCityName());
-                }
+
+                Date house = houseMapper.getHouseDateByMemberId(member.getId());
+                mcDTO.setOrderDate(house);
                 mcDTOList.add(mcDTO);
             }
             pageResult.setList(mcDTOList);
@@ -1241,11 +1241,11 @@ public class MemberService {
         insuranceMoney = CommonUtil.isEmpty(insuranceMoney) ? "100" : insuranceMoney;
         Member operator = (Member) object;
         Example example = new Example(Insurance.class);
-        example.createCriteria().andEqualTo(Insurance.WORKER_ID, operator.getId());
+        example.createCriteria().andEqualTo(Insurance.WORKER_ID, operator.getId()).andIsNotNull(Insurance.END_DATE);
         example.orderBy(Insurance.END_DATE).desc();
         List<Insurance> insurances = insuranceMapper.selectByExample(example);
         example = new Example(Insurance.class);
-        example.createCriteria().andEqualTo(Insurance.WORKER_ID, operator.getId()).andIsNull(Insurance.END_DATE);
+        example.createCriteria().andEqualTo(Insurance.WORKER_ID, operator.getId());
         List<Insurance> insurances2 = insuranceMapper.selectByExample(example);
         Insurance insurance;
         if (insurances2.size() > 0) {
@@ -1358,7 +1358,6 @@ public class MemberService {
 
     /**
      * 推广列表
-     *
      * @param userToken
      * @param pageDTO
      * @return

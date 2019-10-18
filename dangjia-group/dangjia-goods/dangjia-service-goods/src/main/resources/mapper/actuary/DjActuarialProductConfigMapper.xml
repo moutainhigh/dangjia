@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.actuary.DjActuarialProductConfigMapper">
+
+    <sql id="all_columns">
+            id,
+            actuarial_template_id,
+            goods_id,
+            product_id,
+            purchase_quantity,
+            worker_type_id,
+            create_date,
+            modify_date,
+            create_by,
+            update_by,
+            data_status
+    </sql>
+
+
+    <select id="queryActuarialProductByConfigId" resultType="com.dangjia.acg.modle.actuary.DjActuarialProductConfig">
+        SELECT
+        <include refid="all_columns"/>
+        FROM
+            dj_actuarial_product_config
+        WHERE
+	        actuarial_template_id = #{actuarialTemplateId}
+    </select>
+
+    <delete id="deleteActuarialProductByTemplate">
+        delete from dj_actuarial_product_config
+        where exists(select 1 from dj_actuarial_template_config t where t.data_status=1 and t.id=actuarial_template_id)
+    </delete>
+</mapper>

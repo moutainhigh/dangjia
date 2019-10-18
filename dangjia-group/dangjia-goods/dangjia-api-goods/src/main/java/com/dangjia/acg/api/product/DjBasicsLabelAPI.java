@@ -39,9 +39,9 @@ public interface DjBasicsLabelAPI {
 
 
     @PostMapping("/product/djBasicsLabel/queryCommodityLabelsById")
-    @ApiOperation(value = "根据id查询标签", notes = "根据id查询标签")
+    @ApiOperation(value = "根据标签id查询标签值", notes = "根据标签id查询标签值")
     ServerResponse queryCommodityLabelsById(@RequestParam("request") HttpServletRequest request,
-                                            @RequestParam("id") String id);
+                                            @RequestParam("labelId") String labelId);
 
     @PostMapping("/product/djBasicsLabel/queryCommodityLabels")
     @ApiOperation(value = "查询标签", notes = "查询标签")

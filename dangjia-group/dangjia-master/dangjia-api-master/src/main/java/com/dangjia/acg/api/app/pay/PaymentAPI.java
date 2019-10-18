@@ -7,6 +7,8 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.math.BigDecimal;
+
 /**
  * author: Ronalcheng
  * Date: 2018/11/6 0006
@@ -15,6 +17,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient("dangjia-service-master")
 @Api(value = "业主支付接口", description = "业主支付接口")
 public interface PaymentAPI {
+
+    @PostMapping("web/pay/payment/pos")
+    @ApiOperation(value = "POS确认支付", notes = "POS确认支付")
+    ServerResponse setServersSuccess(String businessOrderId, BigDecimal money, String image );
 
     @PostMapping("app/pay/payment/correct")
     @ApiOperation(value = "已付款，材料人工冲正", notes = "已付款，材料人工冲正")
@@ -55,7 +61,7 @@ public interface PaymentAPI {
                                       @RequestParam("type") Integer type);
 
     @PostMapping("app/pay/payment/getPage")
-    @ApiOperation(value = "购物车接口", notes = "购物车接口")
+    @ApiOperation(value = "接口", notes = "购物车接口")
     ServerResponse getPaymentPage(@RequestParam("userToken") String userToken,
                                   @RequestParam("houseId") String houseId,
                                   @RequestParam("taskId") String taskId,

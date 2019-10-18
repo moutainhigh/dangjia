@@ -2,11 +2,8 @@ package com.dangjia.acg.controller.basics;
 
 import com.dangjia.acg.api.basics.WorkerGoodsAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
-import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.modle.basics.WorkerGoods;
 import com.dangjia.acg.service.basics.WorkerGoodsService;
-import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -25,14 +22,14 @@ public class WorkerGoodsController implements WorkerGoodsAPI {
     @Autowired
     private WorkerGoodsService workerGoodsService;
 
-    /**
+   /* *//**
      * 查询工价商品
      *
      * @param pageDTO
      * @param workerTypeId
      * @param searchKey
      * @return
-     */
+     *//*
     @Override
     @ApiMethod
     public ServerResponse<PageInfo> getWorkerGoodses(HttpServletRequest request, PageDTO pageDTO,String istops ,String workerTypeId, String searchKey, String showGoods) {
@@ -41,7 +38,7 @@ public class WorkerGoodsController implements WorkerGoodsAPI {
         } catch (Exception e) {
             return ServerResponse.createByErrorMessage("查询工价商品失败");
         }
-    }
+    }*/
 
     /**
      * 新增或更新工价商品
@@ -50,7 +47,7 @@ public class WorkerGoodsController implements WorkerGoodsAPI {
      * @param technologyJsonList
      * @return
      */
-    @Override
+  /*  @Override
     @ApiMethod
     public ServerResponse<String> setWorkerGoods(HttpServletRequest request, WorkerGoods workerGoods, String technologyJsonList, String deleteTechnologyIds) {
 //    public ServerResponse<String> setWorkerGoods(HttpServletRequest request,WorkerGoods workerGoods, String technologyListJson) {
@@ -60,7 +57,7 @@ public class WorkerGoodsController implements WorkerGoodsAPI {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("新增或更新工价商品失败");
         }
-    }
+    }*/
 
     /**
      * 每工种未删除 或 已支付工钱
@@ -92,6 +89,19 @@ public class WorkerGoodsController implements WorkerGoodsAPI {
     @ApiMethod
     public ServerResponse getHomeProductList(HttpServletRequest request) {
         return workerGoodsService.getHomeProductList();
+    }
+
+    /**
+     * 从精算表查代购商品支付工钱
+     * @param cityId
+     * @param houseId
+     * @param houseFlowId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getAgencyPurchaseMoney(String cityId, String houseId, String houseFlowId){
+        return workerGoodsService.getAgencyPurchaseMoney(houseId, houseFlowId);
     }
 
 }

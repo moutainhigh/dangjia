@@ -7,10 +7,8 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.basics.IGoodsCategoryMapper;
-import com.dangjia.acg.mapper.basics.IWorkerGoodsMapper;
 import com.dangjia.acg.modle.attribute.GoodsCategory;
 import com.dangjia.acg.modle.basics.HomeProductDTO;
-import com.dangjia.acg.modle.basics.WorkerGoods;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,8 +28,8 @@ import java.util.List;
 public class ClassificationService {
     @Autowired
     private IGoodsCategoryMapper iGoodsCategoryMapper;
-    @Autowired
-    private IWorkerGoodsMapper iWorkerGoodsMapper;
+   // @Autowired
+    //private IWorkerGoodsMapper iWorkerGoodsMapper;
     @Autowired
     private ConfigUtil configUtil;
 
@@ -69,7 +67,7 @@ public class ClassificationService {
         return ServerResponse.createBySuccess("查询成功", pageResult);
     }
 
-    public ServerResponse getWorkerGoodsList(PageDTO pageDTO, String workerTypeId) {
+   /* public ServerResponse getWorkerGoodsList(PageDTO pageDTO, String workerTypeId) {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         Example example = new Example(WorkerGoods.class);
         example.createCriteria()
@@ -90,5 +88,5 @@ public class ClassificationService {
         }
         pageResult.setList(workerGoodsList);
         return ServerResponse.createBySuccess("查询成功", pageResult);
-    }
+    }*/
 }

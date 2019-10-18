@@ -29,6 +29,7 @@ import com.dangjia.acg.modle.worker.Insurance;
 import com.dangjia.acg.util.HouseUtil;
 import com.dangjia.acg.util.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
@@ -75,6 +76,9 @@ public class CraftsmanConstructionService {
 
     @Autowired
     private IInsuranceMapper insuranceMapper;
+
+    @Value("${spring.profiles.active}")
+    private String active;
 
     /**
      * 获取施工页面
@@ -139,16 +143,16 @@ public class CraftsmanConstructionService {
         Map<String, Object> dataMap = HouseUtil.getDesignDatas(house);
         bean.setDataList((List<Map<String, Object>>) dataMap.get("dataList"));
         List<ButtonListBean> buttonList = new ArrayList<>();
-//        if (house.getVisitState() == 1 && house.getDesignerOk() != 0 && house.getDesignerOk() != 4 && house.getDesignerOk() != 3) {
+//        if (house.getVisitState() == 1 && house.getDesignerState() != 0 && house.getDesignerState() != 4 && house.getDesignerState() != 3) {
 //            String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
 //            String data = "&houseId=" + house.getId() + "&houseFlowId=" + hf.getId();
 //            buttonList.add(Utils.getButton("提前结束", webAddress + "construction?title=填写原因" + data, 0));
 //        }
         if (house.getVisitState() == 1) {
-            if (house.getDecorationType() != 2 && house.getDesignerOk() == 1) {
+            if (house.getDecorationType() != 2 && house.getDesignerState() == 1) {
                 buttonList.add(Utils.getButton("去量房", 2));
             } else {
-                switch (house.getDesignerOk()) {
+                switch (house.getDesignerState()) {
                     case 1://1已支付-设计师待量房
                     case 9://9量房图发给业主
                         buttonList.add(Utils.getButton("上传平面图", 3));
@@ -213,9 +217,9 @@ public class CraftsmanConstructionService {
 //            buttonList.add(Utils.getButton("提前结束", webAddress + "construction?title=填写原因" + data, 0));
 //        }
         if (house.getVisitState() == 1 && house.getDecorationType() == 2) {
-            if (house.getBudgetOk() == 1 && house.getDesignerOk() != 3) {
+            if (house.getBudgetState() == 1 && house.getDesignerState() != 3) {
                 buttonList.add(Utils.getButton("上传设计图", 4));
-            } else if (house.getDesignerOk() == 3) {
+            } else if (house.getDesignerState() == 3) {
                 //3设计图完成后有需要改设计的
                 Example example = new Example(DesignBusinessOrder.class);
                 Example.Criteria criteria = example.createCriteria()
@@ -372,6 +376,11 @@ public class CraftsmanConstructionService {
         }
         //查询是否今天已经上传过巡查
         List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getTodayPatrol(hf.getHouseId(), new Date());
+        if (active != null && !active.equals("pre")) {
+            if (!((houseFlowApplyList.size() & 1) == 1)) {
+                houseFlowApplyList = new ArrayList<>();
+            }
+        }
         if (hf.getSupervisorStart() == 0) {//已开工之后都是巡查工地；1：巡查工地2：申请业主验收；3:确认开工
             List<HouseFlow> listStart = houseFlowMapper.getHouseIsStart(hf.getHouseId());
             if (listStart.size() > 0) {
@@ -424,18 +433,17 @@ public class CraftsmanConstructionService {
      */
     private ServerResponse getCraftsmanBean(HttpServletRequest request, ConstructionByWorkerIdBean bean, HouseWorker hw, Member worker, House house, HouseFlow hf) {
         Example example = new Example(Insurance.class);
-        example.createCriteria().andEqualTo(Insurance.WORKER_ID, hw.getWorkerId());
+        example.createCriteria().andEqualTo(Insurance.WORKER_ID, hw.getWorkerId()).andIsNotNull(Insurance.END_DATE);
         example.orderBy(Insurance.END_DATE).desc();
         List<Insurance> insurances = insuranceMapper.selectByExample(example);
-
         //保险服务剩余天数小于等于60天
-        Integer daynum = 0;
+        int daynum = 0;
         if (insurances.size() > 0) {
             daynum = DateUtil.daysofTwo(new Date(), insurances.get(0).getEndDate());
         }
-        Boolean isBX = true;
+        boolean isBX = true;
         //工人未购买保险
-        if (hw.getWorkerType() > 2 && ((insurances.size() == 0) || (insurances.size() > 0 & daynum <= 60))) {
+        if (hw.getWorkerType() > 2 && (insurances.size() == 0 || daynum <= 60)) {
             isBX = false;
         }
         bean.setWorkerType(1);//0:大管家；1：工匠；2：设计师；3：精算师
@@ -461,36 +469,6 @@ public class CraftsmanConstructionService {
         } else {
             bean.setIfBackOut(1);
         }
-//            Example example = new Example(HouseFlowApply.class);
-//            example.createCriteria()
-//                    .andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, hf.getId())
-//                    .andEqualTo(HouseFlowApply.APPLY_TYPE, 3)
-//                    .andEqualTo(HouseFlowApply.PAY_STATE, 1);
-//            List<HouseFlowApply> houseFlowApplies = houseFlowApplyMapper.selectByExample(example);
-//            if (houseFlowApplies != null && houseFlowApplies.size() > 0) {
-//                HouseFlowApply hfa = houseFlowApplies.get(0);
-//                switch (hfa.getMemberCheck()) {
-//                    case 0://0未审核
-//                        bean.setIfBackOut(4);//0可放弃；1：申请停工；2：已停工 3 审核中
-//                        break;
-//                    case 1://1审核通过
-//                        Date date = new Date();
-//                        if (hfa.getStartDate() != null && date.getTime() < hfa.getStartDate().getTime()) {
-//                            bean.setIfBackOut(4);//0可放弃；1：申请停工；2：已停工 3 审核中
-//                        } else if (hfa.getEndDate() != null && date.getTime() > hfa.getEndDate().getTime()) {
-//                            bean.setIfBackOut(1);//0可放弃；1：申请停工；2：已停工 3 审核中
-//                        } else {
-//                            bean.setIfBackOut(2);//0可放弃；1：申请停工；2：已停工 3 审核中
-//                        }
-//                        break;
-//                    default://2审核不通过
-//                        bean.setIfBackOut(1);//0可放弃；1：申请停工；2：已停工 3 审核中
-//                        break;
-//                }
-//            } else {
-//                bean.setIfBackOut(1);//0可放弃；1：申请停工；2：已停工 3 审核中
-//            }
-
         setMenus(bean, house, hf);
         List<String> promptList = new ArrayList<>();//消息提示list
         List<ButtonListBean> buttonList = new ArrayList<>();
@@ -601,6 +579,19 @@ public class CraftsmanConstructionService {
                             setDisplayState(hf, promptList, buttonList, checkFlowApp, true);
                         } else {
                             setDisplayState(hf, promptList, buttonList, checkFlowApp, false);
+                        }
+                    }
+                }
+                if (active != null && !active.equals("pre")) {//TODO 生产没有
+                    if (buttonList.size() <= 0) {
+                        buttonList.add(Utils.getButton("今日开工", 2));
+                        bean.setFootMessageTitle("今日开工任务");//每日开工事项
+                        bean.setFootMessageDescribe("（每日十二点前今日开工）");//每日开工事项
+                        List<WorkerEveryday> listWorDay = workerEverydayMapper.getWorkerEverydayList(1);//事项类型  1 开工事项 2 完工事项
+                        for (WorkerEveryday day : listWorDay) {
+                            ConstructionByWorkerIdBean.BigListBean.ListMapBean listMapBean = new ConstructionByWorkerIdBean.BigListBean.ListMapBean();
+                            listMapBean.setName(day.getName());
+                            workerEverydayList.add(listMapBean);
                         }
                     }
                 }

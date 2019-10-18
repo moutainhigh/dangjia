@@ -38,6 +38,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -99,7 +100,7 @@ public class DesignerOperationService {
         if (house.getVisitState() != 1) {
             return ServerResponse.createByErrorMessage("该房子不在装修中");
         }
-        if (house.getDesignerOk() == 3) {
+        if (house.getDesignerState() == 3) {
             Example example = new Example(DesignBusinessOrder.class);
             Example.Criteria criteria = example.createCriteria()
                     .andEqualTo(DesignBusinessOrder.DATA_STATUS, 0)
@@ -134,14 +135,14 @@ public class DesignerOperationService {
                 }
             }
         } else if (house.getDecorationType() == 2) {//自带设计流程
-            if (house.getDesignerOk() == 1 || house.getDesignerOk() == 6 ||
-                    house.getDesignerOk() == 7 || house.getDesignerOk() == 8) {
+            if (house.getDesignerState() == 1 || house.getDesignerState() == 6 ||
+                    house.getDesignerState() == 7 || house.getDesignerState() == 8) {
                 return constructionPlans(house);
             }
         } else {
-            if (house.getDesignerOk() == 9 || house.getDesignerOk() == 6) {
+            if (house.getDesignerState() == 9 || house.getDesignerState() == 6) {
                 return sendPlan(house);
-            } else if (house.getDesignerOk() == 7 || house.getDesignerOk() == 8) {
+            } else if (house.getDesignerState() == 7 || house.getDesignerState() == 8) {
                 return constructionPlans(house);
             }
         }
@@ -158,6 +159,7 @@ public class DesignerOperationService {
             return ServerResponse.createByErrorMessage("请上传平面图");
         }
         house.setDesignerOk(5);//平面图发给业主
+        house.setDataStatus(0);
         houseMapper.updateByPrimaryKeySelective(house);
         //app推送给业主
 
@@ -202,6 +204,7 @@ public class DesignerOperationService {
         } else {
             house.setDesignerOk(2);//施工图(其它图)发给业主
         }
+        house.setDataStatus(0);
         houseMapper.updateByPrimaryKeySelective(house);
         //app推送给业主
         HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(house.getId(), "1");
@@ -241,6 +244,7 @@ public class DesignerOperationService {
         House house = houseMapper.selectByPrimaryKey(houseId);
         if (house.getDataStatus() == 0) {
             house.setDataStatus(1);
+            house.setIsSelect(0);
             houseMapper.updateByPrimaryKeySelective(house);
             return ServerResponse.createBySuccessMessage("作废成功");
         } else {
@@ -282,13 +286,14 @@ public class DesignerOperationService {
         if (houseFlows.size() > 0) {
             hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(houseFlows.get(0).getHouseId(), houseFlows.get(0).getWorkerTypeId());
         }
-        switch (house.getDesignerOk()) {
+        switch (house.getDesignerState()) {
             case 5://审核平面图
                 if (type == 1) {//通过
                     house.setDesignerOk(7);
                     if (hwo != null) {
                         configMessageService.addConfigMessage(null, AppType.GONGJIANG, hwo.getWorkerId(), "0", "平面图已通过", String.format(DjConstants.PushMessage.PLANE_OK, house.getHouseName()), "");
                     }
+                    house.setDataStatus(0);
                     houseMapper.updateByPrimaryKeySelective(house);
                     return ServerResponse.createBySuccessMessage("操作成功");
                 } else if (type == 0) {//不通过
@@ -340,7 +345,8 @@ public class DesignerOperationService {
                         houseFlow.setHouseId(house.getId());
                         houseFlow.setState(workerType.getState());
                         houseFlow.setSort(workerType.getSort());
-                        houseFlow.setWorkType(2);//设置可抢单
+                        houseFlow.setWorkType(5);//设置可业主支付
+                        houseFlow.setModifyDate(new Date());
                         //这里算出精算费
                         WorkDeposit workDeposit = workDepositMapper.selectByPrimaryKey(house.getWorkDepositId());//结算比例表
                         houseFlow.setWorkPrice(house.getSquare().multiply(workDeposit.getBudgetCost()));
@@ -349,6 +355,7 @@ public class DesignerOperationService {
                     if (hwo != null) {
                         configMessageService.addConfigMessage(null, AppType.GONGJIANG, hwo.getWorkerId(), "0", "施工图已通过", String.format(DjConstants.PushMessage.CONSTRUCTION_OK, house.getHouseName()), "");
                     }
+                    house.setDataStatus(0);
                     houseMapper.updateByPrimaryKeySelective(house);
                     return ServerResponse.createBySuccessMessage("操作成功");
                 } else if (type == 0) {//不通过
@@ -435,7 +442,7 @@ public class DesignerOperationService {
                 if (house.getDecorationType() == 2) {
                     return ServerResponse.createByErrorMessage("自带设计无需量房");
                 }
-                if (house.getDesignerOk() != 1) {
+                if (house.getDesignerState() != 1) {
                     return ServerResponse.createByErrorMessage("该阶段无法上传量房信息");
                 }
                 if (CommonUtil.isEmpty(elevator)) {
@@ -447,11 +454,11 @@ public class DesignerOperationService {
                 break;
             case 1:
                 if (house.getDecorationType() == 2) {
-                    if (house.getDesignerOk() != 1 && house.getDesignerOk() != 6) {
+                    if (house.getDesignerState() != 1 && house.getDesignerState() != 6) {
                         return ServerResponse.createByErrorMessage("该阶段无法上传平面图");
                     }
                 } else {
-                    if (house.getDesignerOk() != 9 && house.getDesignerOk() != 6) {
+                    if (house.getDesignerState() != 9 && house.getDesignerState() != 6) {
                         return ServerResponse.createByErrorMessage("该阶段无法上传平面图");
                     }
                 }
@@ -476,7 +483,7 @@ public class DesignerOperationService {
                     }
                 }
                 if (house.getDecorationType() != 2) {//自带设计不需要判断
-                    if (house.getDesignerOk() != 7 && house.getDesignerOk() != 8) {
+                    if (house.getDesignerState() != 7 && house.getDesignerState() != 8) {
                         return ServerResponse.createByErrorMessage("该阶段无法上传施工图");
                     }
                 }
@@ -509,6 +516,7 @@ public class DesignerOperationService {
                     }
                 }
                 house.setDesignerOk(9);
+                house.setDataStatus(0);
                 houseMapper.updateByPrimaryKeySelective(house);
                 //推送消息给业主已完成量房
                 configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(),

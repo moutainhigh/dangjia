@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.supplier.DjSupplierMapper">
+
+
+    <select id="querySupplyList" resultType="com.dangjia.acg.modle.storefront.Storefront">
+        SELECT
+          b.id,
+          b.create_date as createDate,
+          b.modify_date as modifyDate,
+          b.data_status as dataStatus,
+          b.user_id as userId,
+          b.city_id as cityId,
+          b.storefront_name as storefrontName,
+          b.storefront_address as storefrontAddress,
+          b.storefront_desc as storefrontDesc,
+          b.storefront_logo as storefrontLogo,
+          b.storekeeper_name as storekeeperName,
+          b.contact,
+          b.email
+        FROM
+            dj_sup_application a
+        INNER JOIN dj_basics_storefront b ON a.shop_id = b.id
+        WHERE
+            a.sup_id =#{supId}
+        AND a.application_status = 1
+        AND a.data_status = 0
+        AND b.data_status = 0
+        <if test="null!=searchKey and ''!=searchKey">
+            AND (
+            b.storefront_name LIKE CONCAT('%',#{searchKey},'%') or
+            b.contact LIKE CONCAT('%',#{searchKey},'%')
+            )
+        </if>
+    </select>
+
+    <select id="queryDjSupplierByShopID" resultType="com.dangjia.acg.dto.supplier.DjSupplierDTO" >
+        SELECT
+            ds. NAME ,
+            ds.address ,
+            ds.check_people as checkPeople,
+            ds.telephone,
+            da.application_status as applicationStatus,
+            da.sup_id as supId,
+            da.shop_id as shopId
+        FROM
+            dj_sup_application da
+        INNER JOIN dj_supplier ds ON da.sup_id = ds.id
+        WHERE 1=1
+        <if test="null!=shopId and ''!=shopId">
+            and  da.shop_id = #{shopId}
+        </if>
+        <if test="null!=applicationStatus and ''!=applicationStatus">
+            AND   da.application_status=#{applicationStatus}
+        </if>
+        <if test="null!=keyWord and ''!=keyWord">
+            AND (
+            ds.name LIKE CONCAT('%',#{keyWord},'%') or
+            ds.telephone LIKE CONCAT('%',#{keyWord},'%')
+            )
+        </if>
+    </select>
+
+    <select id="queryDJsupplierById" resultType="com.dangjia.acg.dto.supplier.DjSupplierDTO" >
+        SELECT
+            ds. NAME,
+            ds.address,
+            ds.check_people as checkPeople,
+            ds.telephone,
+            da.application_status as applicationStatus
+        FROM
+            dj_sup_application da
+        INNER JOIN dj_supplier ds ON da.sup_id = ds.id
+        WHERE 1=1
+        and  da.shop_id = #{shopId}
+        and  ds.id=#{id}
+    </select>
+
+    <select id="querySingleDjSupplier" resultType="com.dangjia.acg.modle.supplier.DjSupplier">
+        SELECT
+            id,
+            create_date,
+            modify_date,
+            data_status,
+            user_id,
+            city_id,
+            name,
+            address
+        FROM dj_supplier
+        where city_id=#{cityId}
+        and user_id=#{userId}
+        and data_status=0
+    </select>
+
+
+</mapper>

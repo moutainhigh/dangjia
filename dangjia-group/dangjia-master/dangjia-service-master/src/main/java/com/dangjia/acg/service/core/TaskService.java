@@ -8,10 +8,7 @@ import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.ButtonDTO;
 import com.dangjia.acg.dto.core.Task;
-import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
-import com.dangjia.acg.mapper.core.IHouseFlowMapper;
-import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
-import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
+import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.design.IDesignBusinessOrderMapper;
 import com.dangjia.acg.mapper.house.IHouseExpendMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
@@ -19,10 +16,7 @@ import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
 import com.dangjia.acg.mapper.repair.IMendDeliverMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.mapper.worker.IInsuranceMapper;
-import com.dangjia.acg.modle.core.HouseFlow;
-import com.dangjia.acg.modle.core.HouseFlowApply;
-import com.dangjia.acg.modle.core.HouseWorker;
-import com.dangjia.acg.modle.core.WorkerType;
+import com.dangjia.acg.modle.core.*;
 import com.dangjia.acg.modle.design.DesignBusinessOrder;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.HouseExpend;
@@ -52,6 +46,9 @@ public class TaskService {
     private ConfigUtil configUtil;
     @Autowired
     private IHouseFlowMapper houseFlowMapper;
+
+    @Autowired
+    private IHouseWorkerOrderMapper houseWorkerOrderMapper;
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
     @Autowired
@@ -154,7 +151,7 @@ public class TaskService {
             if(hwList.size()>0) {
                 HouseWorker houseWorker =hwList.get(0);
                 example = new Example(Insurance.class);
-                example.createCriteria().andEqualTo(Insurance.WORKER_ID, member.getId());
+                example.createCriteria().andEqualTo(Insurance.WORKER_ID, member.getId()).andIsNotNull(Insurance.END_DATE);
                 example.orderBy(Insurance.END_DATE).desc();
                 List<Insurance> insurances = insuranceMapper.selectByExample(example);
 
@@ -328,41 +325,71 @@ public class TaskService {
 
         //查询待支付工序
         Example example = new Example(HouseFlow.class);
-        example.createCriteria().andEqualTo(HouseFlow.WORK_TYPE, 3).andEqualTo(HouseFlow.HOUSE_ID, houseId)
+        example.createCriteria().andEqualTo(HouseFlow.WORK_TYPE, 5).andEqualTo(HouseFlow.HOUSE_ID, houseId)
                 .andNotEqualTo(HouseFlow.STATE, 2);
         List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
         for (HouseFlow houseFlow : houseFlowList) {
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
             HouseWorker hw = houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), 1);
-            List<Insurance> insurances =null;
             if(hw!=null&&!CommonUtil.isEmpty(hw.getWorkerId())) {
                 example = new Example(Insurance.class);
-                example.createCriteria().andEqualTo(Insurance.WORKER_ID, hw.getWorkerId());
+                example.createCriteria().andEqualTo(Insurance.WORKER_ID, hw.getWorkerId()).andIsNotNull(Insurance.END_DATE);
                 example.orderBy(Insurance.END_DATE).desc();
-                insurances = insuranceMapper.selectByExample(example);
+                List<Insurance>  insurances = insuranceMapper.selectByExample(example);
+                //保险服务剩余天数小于等于60天
+                Integer daynum = 0;
+                if (insurances.size() > 0) {
+                    daynum = DateUtil.daysofTwo(new Date(), insurances.get(0).getEndDate());
+                }
+                //工人未购买保险
+                if (workerType.getType() > 2 && ((insurances.size() == 0) || (insurances.size() > 0 & daynum <= 60))) {
+                    //系统检查该工匠是否剩余保险天数超过60天，
+                    // 是则正常流程走，
+                    // 否则提示剩余保险天数为XX天，请购买保险再继续工作；
+                    //
+                    // 工匠有30分钟时间购买保险，30分钟内购买成功按正常流程走，未购买成功则自动放弃。30分钟内业主看不到工序支付任务
+                    return taskList;
+                }
             }
-            //保险服务剩余天数小于等于60天
-            Integer daynum = 0;
-            if (insurances.size() > 0) {
-                daynum = DateUtil.daysofTwo(new Date(), insurances.get(0).getEndDate());
-            }
-            //工人未购买保险
-            if (workerType.getType() > 2 && ((insurances.size() == 0) || (insurances.size() > 0 & daynum <= 60))) {
-                //系统检查该工匠是否剩余保险天数超过60天，
-                // 是则正常流程走，
-                // 否则提示剩余保险天数为XX天，请购买保险再继续工作；
-                //
-                // 工匠有30分钟时间购买保险，30分钟内购买成功按正常流程走，未购买成功则自动放弃。30分钟内业主看不到工序支付任务
-            } else {
+            Task task = new Task();
+            task.setDate(DateUtil.dateToString(houseFlow.getModifyDate(), DateUtil.FORMAT11));
+            task.setName(workerType.getName() + "待支付");
+            task.setImage(imageAddress + workerType.getImage());
+            task.setHtmlUrl("");
+            task.setType(1);
+            task.setTaskId(houseFlow.getId());
+            taskList.add(task);
+        }
+        //查询待确认的工序
+        example = new Example(HouseFlow.class);
+        example.createCriteria().andEqualTo(HouseFlow.WORK_TYPE, 3).andEqualTo(HouseFlow.HOUSE_ID, houseId)
+                .andNotEqualTo(HouseFlow.STATE, 2);
+        houseFlowList = houseFlowMapper.selectByExample(example);
+        for (HouseFlow houseFlow : houseFlowList) {
+            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
+            HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(house.getHouseId(), houseFlow.getWorkerTypeId());
+            //检查是否该工序订单已经被业主支付，才能审核
+            if(hwo!=null&&hwo.getPayState()==1){
                 Task task = new Task();
-                task.setDate(DateUtil.dateToString(hw.getModifyDate(), DateUtil.FORMAT11));
+                task.setDate(DateUtil.dateToString(houseFlow.getModifyDate(), DateUtil.FORMAT11));
+                task.setName("审核"+workerType.getName() + "工匠");
+                task.setImage(imageAddress + workerType.getImage());
+                task.setHtmlUrl("");
+                task.setType(5);
+                task.setTaskId(houseFlow.getId());
+                taskList.add(task);
+            }else{
+                //检测到存在未支付的工序，提示业主去支付
+                Task task = new Task();
+                task.setDate(DateUtil.dateToString(houseFlow.getModifyDate(), DateUtil.FORMAT11));
                 task.setName(workerType.getName() + "待支付");
-                task.setImage(imageAddress + "icon/chaichu.png");
+                task.setImage(imageAddress + workerType.getImage());
                 task.setHtmlUrl("");
                 task.setType(1);
                 task.setTaskId(houseFlow.getId());
                 taskList.add(task);
             }
+
         }
         //补材料补包工包料
         example = new Example(MendOrder.class);
@@ -408,7 +435,7 @@ public class TaskService {
         }
         //设计审核任务
         boolean isDesigner = false;
-        if (house.getDesignerOk() == 3) {
+        if (house.getDesignerState() == 3) {
             Example example1 = new Example(DesignBusinessOrder.class);
             example1.createCriteria()
                     .andEqualTo(DesignBusinessOrder.DATA_STATUS, 0)
@@ -424,10 +451,10 @@ public class TaskService {
                 }
             }
         }
-        if (isDesigner || house.getDesignerOk() == 5 || house.getDesignerOk() == 2) {
+        if (isDesigner || house.getDesignerState() == 5 || house.getDesignerState() == 2) {
             Task task = new Task();
             task.setDate(DateUtil.dateToString(house.getModifyDate(), DateUtil.FORMAT11));
-            task.setName(house.getDesignerOk() == 5 ? "平面图审核" : "施工图审核");
+            task.setName(house.getDesignerState() == 5 ? "平面图审核" : "施工图审核");
             task.setImage(imageAddress + "icon/sheji.png");
             String url = address + String.format(DjConstants.YZPageAddress.DESIGNLIST, userToken, house.getCityId(), task.getName()) + "&houseId=" + house.getId();
             task.setHtmlUrl(url);
@@ -436,7 +463,7 @@ public class TaskService {
             taskList.add(task);
         }
         //精算审核任务
-        if (house.getBudgetOk() == 2) {
+        if (house.getBudgetState() == 2) {
             Task task = new Task();
             task.setDate(DateUtil.dateToString(house.getModifyDate(), DateUtil.FORMAT11));
             task.setName("精算审核");
@@ -464,7 +491,7 @@ public class TaskService {
             } else if (houseFlowApply.getApplyType() == 2) {
                 task.setName(workerType.getName() + "整体完工待验收");
             }
-            task.setImage(imageAddress + "icon/chaichu.png");
+            task.setImage(imageAddress + workerType.getImage());
             task.setHtmlUrl(address + String.format(DjConstants.YZPageAddress.CONFIRMAPPLY + "&houseFlowApplyId=%s",
                     userToken, house.getCityId(), "验收工匠完工申请", houseFlowApply.getId()));
             task.setType(3);

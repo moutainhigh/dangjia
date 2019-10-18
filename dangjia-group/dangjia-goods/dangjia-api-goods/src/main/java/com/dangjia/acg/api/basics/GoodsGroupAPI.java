@@ -109,5 +109,4 @@ public interface GoodsGroupAPI {
                                                          @RequestParam("pageDTO") PageDTO pageDTO,
                                                          @RequestParam("categoryId") String categoryId,
                                                          @RequestParam("name") String name);
-
 }

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.storefront.IStorefrontMapper">
+    <sql id="all_column">
+          `id`,
+          `member_id` AS memberId,
+          `city_id` AS cityId,
+          `storefront_name` AS storefrontName,
+          `storefront_address` AS storefrontAddress,
+          `storefront_desc` AS storefrontDesc,
+          `storefront_logo` AS storefrontLogo,
+          `storekeeper_name` AS storekeeperName,
+          `contact`,
+          `email`,
+          `create_date` AS createDate,
+          `modify_date` AS modifyDate,
+          `data_status` AS dataStatus
+    </sql>
+
+
+    <select id="querySupplierApplicationShopList" resultType="com.dangjia.acg.dto.storefront.StorefrontListDTO">
+        SELECT
+            b.`id`,
+            b.`sup_id` AS supId,
+            a.`id` AS shopId,
+            a.`user_id` AS userId,
+            a.`city_id` AS cityId,
+            a.`storefront_name` AS storefrontName,
+            a.`storefront_address` AS storefrontAddress,
+            a.`storefront_desc` AS storefrontDesc,
+            a.`storefront_logo` AS storefrontLogo,
+            a.`storekeeper_name` AS storekeeperName,
+            a.`contact`,
+            a.`email`,
+            a.`create_date` AS createDate,
+            a.`modify_date` AS modifyDate,
+            a.`data_status` AS dataStatus,
+            b.application_status  AS applicationStatus,
+            b.fail_reason AS failReason,
+            b.contract
+        FROM
+          dj_basics_storefront a
+        LEFT JOIN (SELECT * FROM dj_sup_application WHERE sup_id = #{supId})b
+        ON a.id = b.shop_id
+        where 1=1
+        <if test="null!=searchKey and ''!=searchKey">
+            and (
+            a.storefront_name LIKE CONCAT('%',#{searchKey},'%') or
+            a.contact LIKE CONCAT('%',#{searchKey},'%')
+            )
+        </if>
+        <if test="applicationStatus=='-1'.toString()">
+            and application_status not in(0,1,2)
+        </if>
+        <if test="null!=applicationStatus and ''!=applicationStatus and applicationStatus!='-1'.toString()">
+            and application_status=#{applicationStatus}
+        </if>
+    </select>
+
+
+    <select id="queryLikeSingleStorefront" resultType="com.dangjia.acg.modle.storefront.Storefront">
+        select
+          <include refid="all_column"/>
+        from dj_basics_storefront
+        where
+        <if test="null!=searchKey and ''!=searchKey">
+            and (
+            storefront_name LIKE CONCAT('%',#{searchKey},'%') or
+            contact LIKE CONCAT('%',#{searchKey},'%') or
+            storekeeper_name LIKE CONCAT('%',#{searchKey},'%')
+            )
+        </if>
+    </select>
+
+
+    <select id="querySupplierSelectionSupply" resultType="com.dangjia.acg.dto.storefront.StorefrontListDTO">
+        SELECT
+            b.`id`,
+            b.`sup_id` AS supId,
+            a.`id` AS shopId,
+            a.`user_id` AS userId,
+            a.`city_id` AS cityId,
+            a.`storefront_name` AS storefrontName,
+            a.`storefront_address` AS storefrontAddress,
+            a.`storefront_desc` AS storefrontDesc,
+            a.`storefront_logo` AS storefrontLogo,
+            a.`storekeeper_name` AS storekeeperName,
+            a.`contact`,
+            a.`email`,
+            a.`create_date` AS createDate,
+            a.`modify_date` AS modifyDate,
+            a.`data_status` AS dataStatus,
+            b.application_status  AS applicationStatus,
+            b.fail_reason AS failReason,
+            b.contract
+        FROM
+            dj_basics_storefront a
+        LEFT JOIN (SELECT * FROM dj_sup_application WHERE sup_id = #{supId})b
+        ON a.id = b.shop_id
+        where 1=1
+        <if test="null!=searchKey and ''!=searchKey">
+            and (
+            a.storefront_name LIKE CONCAT('%',#{searchKey},'%') or
+            a.contact LIKE CONCAT('%',#{searchKey},'%')
+            )
+        </if>
+        and b.application_status=1
+        and b.contract is not null
+    </select>
+
+</mapper>

@@ -88,7 +88,7 @@ public class HouseFlow extends BaseEntity {
 
     @Column(name = "work_type")
     @Desc(value = "默认0, 抢单状态，1还没有发布，只是默认房产,2等待被抢，3有工匠抢单,4已采纳已支付")
-    @ApiModelProperty("默认0, 抢单状态，1还没有发布，只是默认房产,2等待被抢，3有工匠抢单,4已采纳已支付")
+    @ApiModelProperty("默认0, 抢单状态，1还没有发布，只是默认房产,5等待业主支付，2已支付待工匠抢单,3有工匠抢单待确认,4已采纳已支付")
 	private Integer workType;  //worktype
 
     @Column(name = "release_time")

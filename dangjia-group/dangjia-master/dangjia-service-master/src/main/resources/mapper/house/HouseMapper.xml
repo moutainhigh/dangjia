@@ -95,7 +95,7 @@
         member.mobile AS mobile,
         s.store_name storeName
         <if test="designerType > 0 ">
-           ,gr.name operatorName,
+            ,gr.name operatorName,
             gr.mobile operatorMobile,
             gr.id operatorId
         </if>
@@ -116,11 +116,8 @@
         <if test="designerType > 0 and workerKey!=null and workerKey!=''">
             AND CONCAT(gr.name,gr.mobile) like CONCAT('%',#{workerKey},'%')
         </if>
-        <if test="dataStatus!=null and dataStatus!=''">
-            AND house.data_status=#{dataStatus}
-        </if>
         <if test="dataStatus == 1">
-            AND house.visit_state=1
+            AND house.data_status=1 AND house.visit_state=1 and house.designer_ok != 3
         </if>
         <if test="designerType == 0">
             AND house.designer_ok =4
@@ -212,7 +209,7 @@
         (SELECT COUNT(*) from dj_deliver_order_split where apply_status = 1 and house_id = house.id) as waitCount,
         (SELECT COUNT(*) from dj_deliver_order_split where apply_status = 2 and house_id = house.id) as sendCount
         FROM dj_house as house
-        WHERE 1=1
+        WHERE house.visit_state > 0
         <if test="cityId!=null and cityId!=''">
             and house.city_id = #{cityId}
         </if>
@@ -482,18 +479,18 @@
         <if test="budgetOk != 0 and workerKey!=null and workerKey!=''">
             AND CONCAT(gr.name,gr.mobile) like CONCAT('%',#{workerKey},'%')
         </if>
-        <if test="dataStatus!=null and dataStatus!=''">
-            AND h.data_status=#{dataStatus}
+        <if test="dataStatus == 1">
+            AND h.data_status=1  and h.budget_ok != 3 and h.budget_ok >0
         </if>
         <if test="cityId!=null and cityId!=''">
             and h.city_id = #{cityId}
         </if>
         <if test="budgetOk!=null and budgetOk!=''">
             <if test="budgetOk==1">
-                and (budget_ok =1 or budget_ok = 4)
+                and (h.budget_ok =1 or h.budget_ok = 4)
             </if>
             <if test="budgetOk!=1">
-                and budget_ok =#{budgetOk}
+                and h.budget_ok =#{budgetOk}
             </if>
         </if>
 
@@ -573,16 +570,16 @@
         FROM
         dj_house h
         INNER JOIN (
-            SELECT f.house_id,f.supervisor_start ,m.`name` supName,m.mobile supMobile
-            FROM dj_core_house_flow f
-            LEFT JOIN dj_member m ON f.worker_id = m.id
-            WHERE f.worker_type=3 and f.work_type > 1
+        SELECT f.house_id,f.supervisor_start ,m.`name` supName,m.mobile supMobile
+        FROM dj_core_house_flow f
+        LEFT JOIN dj_member m ON f.worker_id = m.id
+        WHERE f.worker_type=3 and f.work_type > 1
         ) f ON h.id=f.house_id
         INNER JOIN dj_member m ON h.member_id = m.id
         <if test="(visitState &lt;= 0 ) and !(startDate!=null and endDate!=null and startDate!='' and endDate!='')">
             LEFT JOIN (
-                SELECT po.house_id,MIN(po.create_date) create_date from dj_core_house_flow_apply po  where po.apply_type = 4
-                GROUP BY po.house_id
+            SELECT po.house_id,MIN(po.create_date) create_date from dj_core_house_flow_apply po  where po.apply_type = 4
+            GROUP BY po.house_id
             ) o on o.house_id=h.id
         </if>
         <if test="(visitState &gt; 0 ) or (startDate!=null and endDate!=null and startDate!='' and endDate!='')">
@@ -631,10 +628,10 @@
 
     <select id="getHouseDateByMemberId" parameterType="String" resultType="date">
         SELECT
-         h.create_date
+         h.construction_date
          from dj_member m
          INNER join dj_house h on m.id=h.member_id where m.id=#{memberId} and h.data_status =0 and h.visit_state =1
-         ORDER BY create_date DESC limit 1
+         ORDER BY  h.construction_date limit 1
     </select>
 
     <select id="getRepairMend" resultType="com.dangjia.acg.dto.repair.RepairMendDTO">
@@ -697,8 +694,12 @@
         dj_house house
         INNER JOIN dj_member member ON member.id = house.member_id
         WHERE house.data_status=0
+
         <if test="villageId!=null and villageId!=''">
             AND FIND_IN_SET(house.village_id,#{villageId})
+        </if>
+        <if test="cityId!=null and cityId!=''">
+            AND house.city_id=#{cityId}
         </if>
         <if test="visitState!=null and visitState!=''">
             AND house.visit_state=#{visitState}
@@ -876,11 +877,66 @@
 
     <select id="queryPromotionListHouse" resultType="com.dangjia.acg.modle.house.House">
         select
-          <include refid="basic_columns"/>
+        <include refid="basic_columns"/>
         from dj_house
         where member_id=#{memberId}
         ORDER BY create_date desc
         limit 1
     </select>
+
+    <select id="getOrderInfo" resultType="com.dangjia.acg.modle.order.DjOrder">
+        SELECT
+            id,
+            order_status orderStatus,
+            order_generation_time orderGenerationTime
+        FROM
+            dj_order
+        WHERE
+            house_id = #{houseId}
+        AND order_type = '1'
+        AND (parent_order_id = '0' or parent_order_id is null)
+        limit 1
+
+    </select>
+
+    <select id="getOrderDetailInfoList" resultType="com.dangjia.acg.modle.order.DjOrderDetail">
+        SELECT
+            t1.id,
+            t1.order_id orderId,
+            t1.storefont_id storefontId,
+            t1.product_id productId,
+            t1.purchase_price purchasePrice,
+            t1.purchase_number purchaseNumber,
+            t1.total_purchase_price totalPurchasePrice,
+            t1.order_type orderType
+        FROM
+            dj_order t,
+            dj_order_detail t1
+        WHERE
+            t.id = t1.order_id
+        AND t.house_id = #{houseId}
+        AND t.order_type = '1'
+
+    </select>
+
+    <update id="updateOrderDetail" parameterType="com.dangjia.acg.modle.order.DjOrderDetail">
+        UPDATE dj_order_detail
+        SET  product_id = #{productId},
+             purchase_price = #{purchasePrice},
+             purchase_number = #{purchaseNumber},
+             total_purchase_price = #{totalPurchasePrice},
+             update_by = #{updateBy},
+             update_date = SYSDATE()
+        WHERE
+            id = #{id}
+    </update>
+
+    <update id="updateOrder" >
+         update dj_order
+         set is_pay_money=1,
+         total_order_price=(select sum(t.total_purchase_price) from dj_order_detail t where t.order_id=#{orderId})
+         where id=#{orderId}
+    </update>
+
 </mapper>
 

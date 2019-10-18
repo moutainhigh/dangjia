@@ -4,7 +4,7 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.product.BasicsGoodsDTO;
 import com.dangjia.acg.dto.product.BasicsProductDTO;
-import com.dangjia.acg.modle.product.DjBasicsProduct;
+import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -24,19 +25,19 @@ import javax.servlet.http.HttpServletRequest;
 @FeignClient("dangjia-service-goods")
 public interface DjBasicsProductAPI {
 
-    @PostMapping("/product/djBasicsProduct/queryProductData")
-    @ApiOperation(value = "查询商品信息", notes = "查询商品信息")
+    @PostMapping("/app/product/djBasicsProduct/queryProductData")
+    @ApiOperation(value = "app根据商品名称查询商品信息", notes = "app根据商品名称查询商品信息")
     ServerResponse queryProductData(@RequestParam("request")HttpServletRequest request,
                                     @RequestParam("name")String name);
 
-    @PostMapping("/product/djBasicsProduct/queryProductDataByID")
-    @ApiOperation(value = "根据主键查询商品信息", notes = "根据主键查询商品信息")
-    DjBasicsProduct queryProductDataByID(@RequestParam("request")HttpServletRequest request,
-                                         @RequestParam("id")String id);
+
+    @PostMapping("/app/product/djBasicsProduct/getNewValueNameArr")
+    @ApiOperation(value = "根据货品id查询规格", notes = "根据货品id查询规格")
+    String getNewValueNameArr(@RequestParam("valueIdArr")String valueIdArr);
 
 
     @PostMapping("/product/djBasicsProduct/queryProductLabels")
-    @ApiOperation(value = "查询商品标签", notes = "查询商品标签")
+    @ApiOperation(value = "查询商品打的标签", notes = "查询商品打的标签")
     ServerResponse queryProductLabels(@RequestParam("request")HttpServletRequest request,
                                       @RequestParam("productId")String productId);
 
@@ -45,10 +46,9 @@ public interface DjBasicsProductAPI {
     ServerResponse addLabelsValue(@RequestParam("request")HttpServletRequest request,
                                   @RequestParam("jsonStr")String jsonStr);
 
-    @PostMapping("/product/djBasicsProduct/queryDataByProductId")
+    @PostMapping("app/product/queryDataByProductId")
     @ApiOperation(value = "根据货品编号查看商品详情", notes = "根据货品编号查看商品详情")
-    ServerResponse queryDataByProductId(@RequestParam("request")HttpServletRequest request,
-                                    @RequestParam("productId")String productId);
+    DjBasicsProductTemplate queryDataByProductId(@RequestParam("productId")String productId);
 
 
     @PostMapping("/product/djBasicsProduct/saveBasicsGoods")
@@ -120,6 +120,8 @@ public interface DjBasicsProductAPI {
     ServerResponse getProductById(@RequestParam("cityId") String cityId,
                                   @RequestParam("id") String id);
 
+
+
     @PostMapping("/product/djBasicsProduct/getTemporaryStorageProductByGoodsId")
     @ApiOperation(value = "查询货品下暂存的商品信息", notes = "查询货品下暂存的商品信息")
     ServerResponse getTemporaryStorageProductByGoodsId(@RequestParam("cityId") String cityId,
@@ -136,6 +138,17 @@ public interface DjBasicsProductAPI {
                                            @RequestParam("categoryId") String categoryId);
 
     /**
+     * 根据类别Id查询所属货品
+     *
+     * @return
+     */
+    @PostMapping("/product/djBasicsProduct/getAllProductByCategoryId")
+    @ApiOperation(value = "根据类别Id查询所属货品", notes = "根据类别Id查询所属货品")
+    List<DjBasicsProductTemplate> getAllProductByCategoryId( @RequestParam("categoryId") String categoryId);
+
+
+
+    /**
      * 根据货品ID查询商品
      *
      * @param goodsId
@@ -145,5 +158,54 @@ public interface DjBasicsProductAPI {
     @ApiOperation(value = "根据货品ID查询所有商品", notes = "根据货品ID查询所有商品")
     ServerResponse getAllProductByGoodsId(@RequestParam("request") HttpServletRequest request,
                                           @RequestParam("goodsId") String goodsId);
+
+    @PostMapping("/product/djBasicsProduct/queryGoodsList")
+    @ApiOperation(value = "按照name模糊查询商品及下属货品", notes = "按照name模糊查询商品及下属货品，type： 是否禁用  0：禁用；1不禁用 ;  -1全部默认")
+    ServerResponse queryGoodsList(@RequestParam("request") HttpServletRequest request,
+                                                    @RequestParam("pageDTO") PageDTO pageDTO,
+                                                    @RequestParam("categoryId") String categoryId,
+                                                    @RequestParam("name") String name,
+                                                    @RequestParam("cityId") String cityId,
+                                                    @RequestParam("type") Integer type);
+
+
+    /**
+     * 猜你喜欢(商品详情列表，随机返回同类别下的12个商品)
+     * @param request
+     * @param goodsId
+     * @return
+     * chenyufeng
+     */
+    @PostMapping("app/product/randQueryProduct")
+    @ApiOperation(value = "猜你喜欢(商品详情列表，随机返回同类别下的12个商品)", notes = "猜你喜欢(商品详情列表，随机返回同类别下的12个商品)")
+    ServerResponse randQueryProduct(@RequestParam("request") HttpServletRequest request,@RequestParam("goodsId") String goodsId);
+
+    @PostMapping("app/product/djBasicsProduct/queryBasicsProductData")
+    @ApiOperation(value = "商品库检索查询", notes = "商品库检索查询")
+    PageInfo queryBasicsProductData(@RequestParam("cityId") String cityId,
+                              @RequestParam("pageNum") Integer pageNum,
+                              @RequestParam("pageSize") Integer pageSize,
+                              @RequestParam("name") String name,
+                              @RequestParam("categoryId") String categoryId,
+                              @RequestParam("productType") String productType,
+                              @RequestParam("productId") String[] productId);
+
+
+    /**
+     * 确认开工页选择商铺列表
+     * @param request
+     * @return
+     */
+    @PostMapping("web/product/queryChooseGoods")
+    @ApiOperation(value = "确认开工页选择商品列表", notes = "确认开工页选择商品列表")
+    ServerResponse queryChooseGoods(@RequestParam("request") HttpServletRequest request);
+
+
+
+
+    @PostMapping("/product/djBasicsProduct/queryProductLabelsByProductId")
+    @ApiOperation(value = "根据商品id查询标签", notes = "根据商品id查询标签")
+    ServerResponse queryProductLabelsByProductId(@RequestParam("request") HttpServletRequest request,
+                                                 @RequestParam("productId") String productId);
 
 }

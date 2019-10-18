@@ -52,11 +52,11 @@ public class HouseDataController implements HouseDataAPI {
     /**
      * 人工详情
      */
-    @Override
+   /* @Override
     @ApiMethod
     public ServerResponse workerGoodsDetail(String cityId, String workerGoodsId) {
         return actuaryOperationService.getCommo(workerGoodsId, 1);//人工详情
-    }
+    }*/
 
     /**
      * 查询工序人工
@@ -70,11 +70,11 @@ public class HouseDataController implements HouseDataAPI {
     /**
      * 材料详情
      */
-    @Override
+   /* @Override
     @ApiMethod
     public ServerResponse goodsDetail(String cityId, String productId) {
         return actuaryOperationService.getCommo(productId, 2);//材料详情
-    }
+    }*/
 
     /**
      * 查询工序材料

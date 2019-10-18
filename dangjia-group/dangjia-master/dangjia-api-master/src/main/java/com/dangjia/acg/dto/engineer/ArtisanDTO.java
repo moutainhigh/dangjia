@@ -22,6 +22,7 @@ public class ArtisanDTO {
     private Integer checkType;//状态:0审核中，1审核未通过,2审核已通过, 3账户已禁用,  5未提交资料
     private BigDecimal evaluationScore;//评价积分
     private Integer volume;//成交量
+    private Integer methods;//持单量
     private String superior;//邀请人
 
     private Integer surDay;//保险剩余天数

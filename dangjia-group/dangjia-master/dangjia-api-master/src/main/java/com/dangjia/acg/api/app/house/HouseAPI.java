@@ -72,7 +72,7 @@ public interface HouseAPI {
     @ApiOperation(value = "app开始装修", notes = "app开始装修")
     ServerResponse setStartHouse(@RequestParam("userToken") String userToken,
                                  @RequestParam("cityId") String cityId,
-                                 @RequestParam("houseType") Integer houseType,
+                                 @RequestParam("houseType") String houseType,
                                  @RequestParam("drawings") Integer drawings,
                                  @RequestParam("latitude") String latitude,
                                  @RequestParam("longitude") String longitude,
@@ -214,7 +214,7 @@ public interface HouseAPI {
                                       @RequestParam("cityId") String cityId,
                                       @RequestParam("villageId") String villageId,
                                       @RequestParam("square") Double square,
-                                      @RequestParam("houseType") Integer houseType);
+                                      @RequestParam("houseType") String houseType);
 
 
     @PostMapping("app/house/house/updateByHouseId")

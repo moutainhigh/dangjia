@@ -124,7 +124,7 @@
 			y.text_content AS textContent
 		FROM
 			dj_actuary_budget_worker w
-			INNER JOIN `dj_basics_worker_goods` g ON w.worker_goods_id = g.id
+			INNER JOIN `dj_basics_product_worker` g ON w.worker_goods_id = g.product_id
 			INNER JOIN dj_basics_technology y ON FIND_IN_SET( y.id, g.technology_ids )
 		WHERE
 		    w.house_id=#{houseId}
@@ -278,7 +278,7 @@
 	<!--更新人工商品名称-->
 	<update id="updateBudgetMaterialById" parameterType="java.lang.String">
 		UPDATE dj_actuary_budget_worker p1
-		INNER JOIN `dj_basics_worker_goods` p ON p.id = p1.worker_goods_id
+		INNER JOIN `dj_basics_product` p ON p.id = p1.worker_goods_id
 		SET p1.name = p.`name`,p1.image=p.image,p1.price=p.price,p1.unit_name=p.unit_name
 		WHERE p.id=#{id}
 	</update>
@@ -290,4 +290,55 @@
 		SET p1.name = p.`name`,p1.image=p.image,p1.price=p.price,p1.unit_name=p.unit_name
 		WHERE p.id=#{id}
 	</update>
+
+
+
+    <!-- 根据房子id和工序id查询人工精算总价 -->
+    <select id="queryMakeBudgetsList" resultType="com.dangjia.acg.dto.product.BasicsgDTO">
+        select
+            bgc.id as bgcId,
+            bp.id as bpId,
+            bg.id as bgId,
+            bg.buy as buy,
+            abw.id as abwId,
+            bgc.name as name,
+            abw.price as price,
+            abw.image as image,
+            abw.unit_name as unitName,
+            abw.total_price as totalPrice,
+            abw.house_id AS houseId,
+            abw.steta AS steta,
+            abw.worker_goods_id AS workerGoodsId,
+            abw.worker_goods_sn AS workerGoodsSn
+        from dj_basics_goods_category bgc
+        INNER JOIN dj_basics_product bp on bgc.id = bp.category_id
+        INNER JOIN dj_actuary_budget_worker abw on bp.id = abw.worker_goods_id
+        INNER JOIN dj_basics_goods bg on bg.id = bp.goods_id
+        where abw.data_status = 0 and abw.house_id = #{houseId} and bgc.id = #{id}
+    </select>
+
+    <!-- 根据房子id和工序id查询人工精算总价 -->
+    <select id="queryMakeBudgetsBmList" resultType="com.dangjia.acg.dto.product.BasicsgDTO">
+        select
+            bg.id as bgId,
+            bg.buy as buy,
+            bgc.id as bgcId,
+            abm.id as abmId,
+            abm.goods_name as name,
+            abm.product_name as productName,
+            abm.price as price,
+            abm.cost as cost,
+            abm.shop_count AS shopCount,
+            abm.convert_count AS convertCount,
+            abm.unit_name AS unitName,
+            abm.image AS image,
+            abm.category_id AS categoryId,
+            abm.product_id AS bpId
+        from  dj_basics_goods_category bgc
+        INNER JOIN dj_basics_goods bg on bg.category_id = bgc.id
+        INNER JOIN dj_actuary_budget_material abm on bgc.id = abm.category_id
+        and abm.goods_id = bg.id
+		where abm.data_status = 0 AND abm.house_id = #{houseId} and bgc.id = #{id}
+    </select>
+
 </mapper>

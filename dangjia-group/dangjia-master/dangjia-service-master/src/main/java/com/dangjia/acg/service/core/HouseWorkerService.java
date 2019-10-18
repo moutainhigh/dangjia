@@ -46,6 +46,7 @@ import com.dangjia.acg.service.house.HouseService;
 import com.dangjia.acg.service.worker.EvaluateService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -315,7 +316,7 @@ public class HouseWorkerService {
                 memberCityMapper.insert(userCity);
             }
             example = new Example(Insurance.class);
-            example.createCriteria().andEqualTo(Insurance.WORKER_ID, houseWorker.getWorkerId());
+            example.createCriteria().andEqualTo(Insurance.WORKER_ID, houseWorker.getWorkerId()).andIsNotNull(Insurance.END_DATE);
             example.orderBy(Insurance.END_DATE).desc();
             List<Insurance> insurances = insuranceMapper.selectByExample(example);
 
@@ -472,10 +473,12 @@ public class HouseWorkerService {
         } else {
             return ServerResponse.createByErrorMessage("该工序（" + workerType.getName() + "）未开工，无法申请完工！");
         }
-        //包括所有申请 和 巡查
-        houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 0, worker.getId(), new Date());
-        if (houseFlowApplyList.size() > 0) {
-            return ServerResponse.createByErrorMessage("您今日已提交过此申请,请勿重复提交！");
+        if (active != null && active.equals("pre")) {
+            //包括所有申请 和 巡查
+            houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 0, worker.getId(), new Date());
+            if (houseFlowApplyList.size() > 0) {
+                return ServerResponse.createByErrorMessage("您今日已提交过此申请,请勿重复提交！");
+            }
         }
         /*待审核申请*/
         List<HouseFlowApply> hfaList = houseFlowApplyMapper.checkPendingApply(hf.getId(), worker.getId());
@@ -678,9 +681,11 @@ public class HouseWorkerService {
                 }
             }
         }
-        houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 4, worker.getId(), new Date());
-        if (houseFlowApplyList.size() > 0) {
-            return ServerResponse.createByErrorMessage("您今日已提交过此申请,请勿重复提交！");
+        if (active != null && active.equals("pre")) {
+            houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), 4, worker.getId(), new Date());
+            if (houseFlowApplyList.size() > 0) {
+                return ServerResponse.createByErrorMessage("您今日已提交过此申请,请勿重复提交！");
+            }
         }
 //        houseFlowApplyList = getLeave(hf);
 //        if (houseFlowApplyList.size() > 0) {
@@ -776,9 +781,11 @@ public class HouseWorkerService {
             if (hf.getPause() == 1) {
                 return ServerResponse.createByErrorMessage("该工序（" + workerType.getName() + "）已暂停施工,请勿提交申请！");
             }
-            List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), applyType, worker.getId(), new Date());
-            if (houseFlowApplyList.size() > 0) {
-                return ServerResponse.createByErrorMessage("您今日已提交过此申请,请勿重复提交！");
+            if (active != null && active.equals("pre")) {
+                List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getTodayHouseFlowApply(hf.getId(), applyType, worker.getId(), new Date());
+                if (houseFlowApplyList.size() > 0) {
+                    return ServerResponse.createByErrorMessage("您今日已提交过此申请,请勿重复提交！");
+                }
             }
             hfa = getHouseFlowApply(hf, applyType, supervisorHF);
 
@@ -1021,9 +1028,12 @@ public class HouseWorkerService {
             } else if (houseFlow.getWorkType() == null) {
                 houseFlow.setWorkType(0);//
             }
-            houseFlow.setWorkType(2);
-            houseFlow.setReleaseTime(new Date());//发布时间
+            houseFlow.setWorkType(5);
+            houseFlow.setModifyDate(new Date());
             houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
+            configMessageService.addConfigMessage(AppType.GONGJIANG,
+                    DigestUtils.md5Hex("wtId" + houseFlow.getWorkerTypeId() + houseFlow.getCityId()),
+                    "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, 4, null, "您有新的装修订单，快去抢吧！");
             return ServerResponse.createBySuccessMessage("提前进场成功");
         } catch (Exception e) {
             e.printStackTrace();

@@ -4,8 +4,11 @@ import com.dangjia.acg.common.response.ServerResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * author: Ronalcheng
@@ -48,6 +51,9 @@ public interface SplitDeliverAPI {
     @ApiOperation(value = "发货单明细", notes = "发货单明细")
     ServerResponse splitDeliverDetail(@RequestParam("splitDeliverId") String splitDeliverId);
 
+    @GetMapping("/web/deliver/splitDeliver/export")
+    @ApiOperation(value = "发货单明细-导出", notes = "发货单明细-导出", produces = "*/*,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/octet-stream")
+    ServerResponse exportDeliverDetail(HttpServletResponse response, Integer deliverType, String splitDeliverId);
     /**
      * 收货列表
      * shipState  0待发货,1已发待收货,2已收货,3取消,4部分收

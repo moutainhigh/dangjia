@@ -2,23 +2,23 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.dangjia.acg.mapper.product.ICategoryLabelMapper">
     <sql id="Base_Column_List">
-    id, name, create_date, modify_date
+    id, name, create_date createDate, modify_date modifyDate,sort
     </sql>
 
 
     <select id="getCategoryLabel" resultType="com.dangjia.acg.modle.product.CategoryLabel">
         SELECT
-           id, name, create_date as createDate, modify_date as modifyDate
-        from dj_baiscs_category_label
-        ORDER BY createDate desc
+           id, name, create_date as createDate, modify_date as modifyDate,sort
+        from dj_basics_category_label
+        ORDER BY sort asc,createDate asc
     </select>
 
     <!-- 根据标签名称查询 -->
     <select id="getCategoryLabelByName" parameterType="String" resultType="com.dangjia.acg.modle.product.CategoryLabel">
 		SELECT
-			id, name, create_date as createDate, modify_date as modifyDate
-		FROM dj_baiscs_category_label WHERE name=#{name}
-		ORDER BY create_date desc
+			id, name, create_date as createDate, modify_date as modifyDate,sort
+		FROM dj_basics_category_label WHERE name=#{name}
+		ORDER BY sort asc,createDate asc
 	</select>
 
     <!-- 查询绑定过的标签 -->
@@ -27,13 +27,16 @@
             l.id,
             l.name,
             l.create_date AS createDate,
-            l.modify_date AS modifyDate
+            l.modify_date AS modifyDate,
+            l.sort
         FROM
-            dj_baiscs_category_label l
-        INNER JOIN dj_basics_goods_category c on FIND_IN_SET(l.id,c.category_label_id)
+            dj_basics_category_label l
+        INNER JOIN dj_basics_goods_category c on FIND_IN_SET(l.id,c.category_label_ids)
         GROUP BY l.id
-        ORDER BY
-            createDate DESC
+            ORDER BY sort asc,createDate asc
     </select>
 
+    <select id="getCategoryCountLabel" resultType="java.lang.Integer">
+       select count(1) from dj_basics_category_label
+    </select>
 </mapper>

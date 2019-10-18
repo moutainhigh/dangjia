@@ -16,6 +16,7 @@ import java.util.List;
 public interface IWithdrawDepositMapper extends Mapper<WithdrawDeposit> {
 
     List<WebWithdrawDTO> getWebWithdrawList(@Param("state") Integer state,
+                                            @Param("cityId") String cityId,
                                             @Param("searchKey") String searchKey,
                                             @Param("beginDate") String beginDate,
                                             @Param("endDate") String endDate);

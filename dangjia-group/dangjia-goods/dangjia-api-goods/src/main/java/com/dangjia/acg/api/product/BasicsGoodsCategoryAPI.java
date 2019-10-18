@@ -22,6 +22,11 @@ import javax.servlet.http.HttpServletRequest;
 @FeignClient("dangjia-service-goods")
 public interface BasicsGoodsCategoryAPI {
 
+    @PostMapping("/product/basicsGoodsCategory/getGoodsCategory")
+    @ApiOperation(value = "根据类别ID查询商品类别", notes = "根据类别ID查询商品类别")
+    BasicsGoodsCategory getGoodsCategory(@RequestParam("cityId") String cityId, @RequestParam("categoryId") String categoryId);
+
+
     @PostMapping("/product/basicsGoodsCategory/getBasicsGoodsCategory")
     @ApiOperation(value = "商品类别明细", notes = "商品类别明细")
     ServerResponse getBasicsGoodsCategory(@RequestParam("cityId") String cityId, @RequestParam("categoryId") String categoryId);
@@ -110,27 +115,28 @@ public interface BasicsGoodsCategoryAPI {
      *
      * @Title: getProduct
      */
-    @PostMapping("/product/basicsGoodsCategory/insertGoodsAttribute")
+    @PostMapping("/product/basicsGoodsCategory/addGoodsAttribute")
     @ApiOperation(value = "新增属性及其属性选项", notes = "新增属性及其属性选项")
-    ServerResponse insertGoodsAttribute(@RequestParam("request") HttpServletRequest request,
-                                        @RequestParam("goodsCategoryId") String goodsCategoryId,
-                                        @RequestParam("attributeName") String attributeName,
-                                        @RequestParam("type") Integer type,
-                                        @RequestParam("jsonStr") String jsonStr);
+    ServerResponse addGoodsAttribute(@RequestParam("request") HttpServletRequest request,
+                                     @RequestParam("goodsCategoryId") String goodsCategoryId,
+                                     @RequestParam("attributeName") String attributeName,
+                                     @RequestParam("type") Integer type,
+                                     @RequestParam("jsonStr") String jsonStr,
+                                     @RequestParam("isScreenConditions") Integer isScreenConditions);
 
     /**
      * 修改属性及其属性选项
      *
      * @Title: getProduct
      */
-    @PostMapping("/product/basicsGoodsCategory/doModifyGoodsAttribute")
+    @PostMapping("/product/basicsGoodsCategory/updateGoodsAttribute")
     @ApiOperation(value = "修改属性及其属性选项", notes = "修改属性及其属性选项")
-    ServerResponse doModifyGoodsAttribute(@RequestParam("request") HttpServletRequest request,
-                                          @RequestParam("attributeId") String attributeId,
-                                          @RequestParam("attributeName") String attributeName,
-                                          @RequestParam("type") Integer type,
-                                          @RequestParam("jsonStr") String jsonStr);
-
+    ServerResponse updateGoodsAttribute(@RequestParam("request") HttpServletRequest request,
+                                        @RequestParam("attributeId") String attributeId,
+                                        @RequestParam("attributeName") String attributeName,
+                                        @RequestParam("type") Integer type,
+                                        @RequestParam("jsonStr") String jsonStr,
+                                        @RequestParam("isScreenConditions") Integer isScreenConditions);
     /**
      * 删除商品属性
      */
@@ -174,4 +180,22 @@ public interface BasicsGoodsCategoryAPI {
     @PostMapping("/product/basicsGoodsCategory/queryBrandByCategoryId")
     @ApiOperation(value = "查询类别下所有品牌", notes = "查询类别下所有品牌")
     ServerResponse queryBrandByCategoryId(@RequestParam("request") HttpServletRequest request,@RequestParam("categoryId") String categoryId);
+
+    /**
+     * 查询商品类别列表
+     *
+     * @Title: getProduct
+     */
+    @PostMapping("/product/basicsGoodsCategory/queryGoodsCategoryExistlastCategory")
+    @ApiOperation(value = "查询商品类别列表，不包含末级分类类别", notes = "查询商品类别列表，不包含末级分类类别")
+    ServerResponse queryGoodsCategoryExistlastCategory(@RequestParam("request") HttpServletRequest request,
+                                      @RequestParam("parentId") String parentId);
+
+    @PostMapping("/product/basicsGoodsCategory/queryCategoryListByCategoryLikeName")
+    @ApiOperation(value = "按照name模糊查询商品及下属货品", notes = "按照name模糊查询商品及下属货品，type： 是否禁用  0：禁用；1不禁用 ;  -1全部默认")
+    ServerResponse queryCategoryListByCategoryLikeName(@RequestParam("request") HttpServletRequest request,
+                                                    @RequestParam("pageDTO") PageDTO pageDTO,
+                                                    @RequestParam("categoryId") String categoryId,
+                                                    @RequestParam("name") String name,
+                                                    @RequestParam("cityId") String cityId);
 }

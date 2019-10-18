@@ -14,12 +14,12 @@ import com.dangjia.acg.dto.house.WarehouseDTO;
 import com.dangjia.acg.dto.repair.BudgetMaterialDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.basics.IGoodsMapper;
-import com.dangjia.acg.mapper.basics.IProductMapper;
+import com.dangjia.acg.mapper.product.IBasicsProductTemplateMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.basics.Goods;
-import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.service.actuary.ActuaryOperationService;
 import com.dangjia.acg.service.data.ForMasterService;
@@ -40,8 +40,10 @@ import java.util.Map;
  */
 @Service
 public class FillMaterielService {
+    //@Autowired
+   // private IProductMapper iProductMapper;
     @Autowired
-    private IProductMapper iProductMapper;
+    private IBasicsProductTemplateMapper iBasicsProductTemplateMapper;
     @Autowired
     private ConfigUtil configUtil;
     @Autowired
@@ -96,7 +98,7 @@ public class FillMaterielService {
                 Object warehouseStr = response.getResultObj();
                 Warehouse warehouse = JSON.parseObject(JSON.toJSONString(warehouseStr), Warehouse.class);
                 if (warehouse == null) continue;
-                Product product = iProductMapper.selectByPrimaryKey(warehouse.getProductId());
+                DjBasicsProductTemplate product = iBasicsProductTemplateMapper.selectByPrimaryKey(warehouse.getProductId());
                 WarehouseDTO warehouseDTO = new WarehouseDTO();
                 warehouseDTO.setImage(address + product.getImage());
                 warehouseDTO.setShopCount(warehouse.getShopCount());
@@ -162,7 +164,7 @@ public class FillMaterielService {
                 Warehouse warehouse = JSON.parseObject(JSON.toJSONString(warehouseStr), Warehouse.class);
                 if (warehouse == null) continue;
                 WarehouseDTO warehouseDTO = new WarehouseDTO();
-                Product product = iProductMapper.selectByPrimaryKey(warehouse.getProductId());
+                DjBasicsProductTemplate product = iBasicsProductTemplateMapper.selectByPrimaryKey(warehouse.getProductId());
                 warehouseDTO.setMaket(1);
                 if (product.getMaket() == 0 || product.getType() == 0) {
                     warehouseDTO.setMaket(0);
@@ -225,10 +227,10 @@ public class FillMaterielService {
                 productType = "1";
             }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<Product> productList = iProductMapper.queryProductData(name, categoryId, productType, null);
+            List<DjBasicsProductTemplate> productList = iBasicsProductTemplateMapper.queryProductData(name, categoryId, productType, null);
             PageInfo pageResult = new PageInfo(productList);
             if (productList.size() > 0) {
-                for (Product product : productList) {
+                for (DjBasicsProductTemplate product : productList) {
                     GoodsDTO goodsDTO = actuaryOperationService.goodsDetail(product, null);
                     if (goodsDTO != null) {
                         goodsDTOList.add(goodsDTO);
@@ -267,7 +269,7 @@ public class FillMaterielService {
                 if (warehouse == null) continue;
                 WarehouseDTO warehouseDTO = new WarehouseDTO();
 
-                Product product = iProductMapper.selectByPrimaryKey(warehouse.getProductId());
+                DjBasicsProductTemplate product = iBasicsProductTemplateMapper.selectByPrimaryKey(warehouse.getProductId());
                 warehouseDTO.setImage(address + product.getImage());
                 warehouseDTO.setShopCount(warehouse.getShopCount());
                 warehouseDTO.setAskCount(warehouse.getAskCount());
@@ -307,7 +309,7 @@ public class FillMaterielService {
             PageInfo pageResult = new PageInfo(budgetMaterialList);
             List<BudgetMaterialDTO> budgetMaterialDTOS = new ArrayList<>();
             for (BudgetMaterial budgetMaterial : budgetMaterialList) {
-                Product product = iProductMapper.selectByPrimaryKey(budgetMaterial.getProductId());
+                DjBasicsProductTemplate product = iBasicsProductTemplateMapper.selectByPrimaryKey(budgetMaterial.getProductId());
                 BudgetMaterialDTO budgetMaterialDTO = new BudgetMaterialDTO();
                 budgetMaterialDTO.setId(budgetMaterial.getId());
                 budgetMaterialDTO.setProductId(budgetMaterial.getProductId());

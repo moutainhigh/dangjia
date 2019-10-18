@@ -24,6 +24,9 @@ public class BudgetMaterial extends BaseEntity{
 	@Column(name = "house_id")
 	private String houseId;//房间ID
 
+	@Column(name = "storefont_id")
+	private String storefontId;//店铺ID
+
 	@Column(name = "worker_type_id")
 	private String workerTypeId;//工种ID   3: 大管家 ，4：拆除 ，5：  ，6：水电 ，7：泥工 ，8：木工 ，9：油漆
 
@@ -38,6 +41,9 @@ public class BudgetMaterial extends BaseEntity{
 
 	@Column(name = "product_id")
 	private String productId;//货号ID
+
+	@Column(name = "original_product_id")
+	private String originalProductId;//最初始的商品ID,精算师设置的商品，用与更换商品用
 
 	@Column(name = "product_sn")
 	private String productSn;// 货号编号

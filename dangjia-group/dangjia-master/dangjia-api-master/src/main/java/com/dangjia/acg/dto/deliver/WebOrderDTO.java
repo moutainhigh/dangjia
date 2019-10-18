@@ -23,6 +23,7 @@ public class WebOrderDTO {
     private BigDecimal redPackAmount;//优惠
     private BigDecimal actualPayment;//实付 （精算价格）
     private String redPackName;//优惠券名字
+    private String image;//回执图片
     private Date createDate;//支付日期
     private Integer type;// 1工序支付任务,2补货补人工 ,4待付款进来只付材料, 5验房分销
     private String typeText; // 1工序支付任务,2补货补人工 ,4待付款进来只付材料, 5验房分销

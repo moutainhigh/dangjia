@@ -7,7 +7,7 @@
     <sql id="all_columns">
         w.id,
         w.user_name AS userName,
-        '' password,
+        null password,
         w.nick_name AS nickName,
         w.name,
         w.mobile,
@@ -32,6 +32,7 @@
         w.check_type AS checkType,
         w.praise_rate AS praiseRate,
         w.volume,
+        w.methods,
         w.evaluation_score AS evaluationScore,
         w.is_crowned AS isCrowned,
         w.smscode,
@@ -162,47 +163,36 @@
         w.paycode,
         w.referrals,
         w.remarks,
+        mt.city_id cityId,
+        mt.city_name cityName,
         w.create_date AS createDate,
-        w.data_status AS dataStatus,
-        h.construction_date AS modifyDate
+        w.data_status AS dataStatus
         FROM dj_member w
         INNER JOIN dj_member_info mi on mi.member_id = w.id and mi.policy_id=#{userRole}
-        INNER JOIN ( SELECT c.member_id, GROUP_CONCAT( c.city_id ) city_id FROM dj_member_city c GROUP BY c.member_id )
+        INNER JOIN ( SELECT c.member_id, GROUP_CONCAT( c.city_id ) city_id,c.city_name  FROM dj_member_city c GROUP BY c.member_id )
         mt ON mt.member_id = w.id
         AND FIND_IN_SET(#{cityId}, mt.city_id )
-
-        <choose>
-            <when test="(userId==null or userId=='') and (userKey==null or userKey=='')">
-                LEFT JOIN dj_member_customer mc on mc.member_id = w.id
-                LEFT JOIN dj_member_customer_record mcr on mc.remind_record_id = mcr.id
-            </when>
-            <otherwise>
-                INNER JOIN dj_member_customer mc on mc.member_id = w.id
-                <if test="userId!=null and userId!=''">
-                    and mc.user_id=#{userId}
-                </if>
-                <if test="userKey!=null and userKey!=''">
-                    AND FIND_IN_SET(mc.user_id,#{userKey})
-                </if>
-                LEFT JOIN dj_member_customer_record mcr on mc.remind_record_id = mcr.id
-            </otherwise>
-        </choose>
-
-        <if test="type=='bb'">
-            INNER
-            JOIN dj_house h ON h.member_id = w.id and h.data_status =0
+        LEFT JOIN (SELECT cr.member_id,cr.remind_time ,cr.describes  FROM dj_member_customer_record cr GROUP BY cr.member_id ORDER BY cr.remind_time DESC)
+        cr on cr.member_id = w.id
+        <if test="(childsLabelIdArr!=null and childsLabelIdArr!='') or ((stage &gt;= 0 and stage &lt;= 4) or stage == 7)">
+            INNER JOIN dj_member_customer mc on mc.member_id = w.id
+            <if test="userId!=null and userId!=''">
+                and mc.user_id=#{userId}
+            </if>
+            <if test="userKey!=null and userKey!=''">
+                AND FIND_IN_SET(mc.user_id,#{userKey})
+            </if>
+        </if>
+        <if test="(type=='bb' and beginDate!=null and beginDate!='' and endDate!=null and endDate!='') or stage == 5 or stage == 6">
+            INNER JOIN dj_house h ON h.member_id = w.id and h.data_status =0
             WHERE w.data_status = 0
         </if>
 
-        <if test="type!='bb'">
-            LEFT
-            JOIN dj_house h ON h.member_id = w.id and h.data_status =0
-            WHERE w.data_status = 0
-        </if>
 
         <if test="searchKey!=null and searchKey!=''">
             AND (w.nick_name LIKE CONCAT('%',#{searchKey},'%')
-            or w.mobile LIKE CONCAT('%',#{searchKey},'%'))
+            or w.mobile LIKE CONCAT('%',#{searchKey},'%')
+            or w.name LIKE CONCAT('%',#{searchKey},'%'))
         </if>
 
         <if test="stage &gt;= 0 and stage &lt;= 4">
@@ -225,16 +215,16 @@
             </foreach>
         </if>
         <if test="type=='bb' and beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
-            and h.create_date between #{beginDate} and #{endDate}
+            and h.construction_date between #{beginDate} and #{endDate}
         </if>
         <if test="type=='cc' and beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
             and w.create_date between #{beginDate} and #{endDate}
         </if>
-        ORDER by mcr.remind_time desc,w.create_date
+        ORDER by w.create_date
         <if test="orderBy!=null and orderBy!=''and orderBy=='desc'">
             desc
         </if>
-
+        ,cr.remind_time desc
 
     </select>
 
@@ -271,7 +261,6 @@
             o.worker_id = #{workerId}
             AND o.work_type = 6
             AND h.budget_ok in (2,3,4)
-            AND h.visit_state != 4
             <if test="startDate!=null and endDate!=null and startDate!='' and endDate!=''">
                 and o.create_date BETWEEN #{startDate} and #{endDate}
             </if>
@@ -282,19 +271,20 @@
             o.worker_id = #{workerId}
             AND o.work_type = 6
             AND h.budget_ok = 3
-            AND h.visit_state != 4
             <if test="startDate!=null and endDate!=null and startDate!='' and endDate!=''">
                 and o.create_date BETWEEN #{startDate} and #{endDate}
             </if>
         </if>
         <if test="type==5">
             INNER JOIN dj_house h ON h.id = o.house_id
+            INNER JOIN dj_core_house_worker o2 ON o2.house_id = o.house_id
             WHERE
             o.worker_id = #{workerId}
             AND o.work_type = 6
+            AND o2.work_type = 6
+            AND o2.worker_type = 3
             AND h.budget_ok = 3
             AND h.construction_date IS NOT NULL
-            AND h.visit_state != 4
             <if test="startDate!=null and endDate!=null and startDate!='' and endDate!=''">
                 and o.create_date BETWEEN #{startDate} and #{endDate}
             </if>
@@ -303,11 +293,10 @@
             INNER JOIN dj_house h ON h.id = o.house_id
             WHERE
             o.worker_id = #{workerId}
-            AND o.work_type = 6
-            AND h.budget_ok != 3
+            AND o.work_type NOT IN (2, 3, 4, 5, 7)
             AND h.visit_state = 4
             <if test="startDate!=null and endDate!=null and startDate!='' and endDate!=''">
-                and o.create_date BETWEEN #{startDate} and #{endDate}
+                and h.completed_date BETWEEN #{startDate} and #{endDate}
             </if>
         </if>
     </select>
@@ -408,7 +397,7 @@
             INNER JOIN dj_design_quantity_room r ON r.house_id = h.id
             WHERE
             r.type = 2
-            AND h.designer_ok IN (3 )
+            AND h.designer_ok = 3
             GROUP BY h.id
             ) h ON h.id = o.house_id
             WHERE
@@ -419,8 +408,8 @@
         </if>
         <if test="type==8">
             INNER JOIN dj_house h ON h.id = o.house_id
-            AND h.budget_ok > 0
-            AND h.visit_state != 4
+            AND h.budget_ok in (1, 2, 3, 4)
+            AND h.designer_ok = 3
             WHERE
             o.worker_id = #{workerId}
             <if test="startDate!=null and endDate!=null and startDate!='' and endDate!=''">
@@ -429,12 +418,12 @@
         </if>
         <if test="type==9">
             INNER JOIN dj_house h ON h.id = o.house_id
-            AND h.visit_state = 4
             WHERE
             o.worker_id = #{workerId}
-            AND o.work_type = 6
+            AND o.work_type NOT IN (2, 3, 4, 5, 7)
+            AND h.visit_state = 4
             <if test="startDate!=null and endDate!=null and startDate!='' and endDate!=''">
-                and o.create_date BETWEEN #{startDate} and #{endDate}
+                and h.completed_date BETWEEN #{startDate} and #{endDate}
             </if>
         </if>
     </select>

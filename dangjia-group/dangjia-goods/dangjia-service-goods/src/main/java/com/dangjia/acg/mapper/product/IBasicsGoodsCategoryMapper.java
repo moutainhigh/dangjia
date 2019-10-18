@@ -1,5 +1,6 @@
 package com.dangjia.acg.mapper.product;
 
+import com.dangjia.acg.dto.product.CategoryGoodsProductDTO;
 import com.dangjia.acg.modle.basics.HomeProductDTO;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.product.BasicsGoodsCategory;
@@ -35,7 +36,14 @@ public interface IBasicsGoodsCategoryMapper extends Mapper<BasicsGoodsCategory> 
     //根据商品id查询关联品牌
     List<Brand> queryBrandByCategoryid(@Param("categoryId")String categoryId);
     //根据商分类顶级id查询关联品牌
-    List<Brand> queryBrandByTopCategoryid(@Param("categoryId")String categoryId);
+    List<Brand> queryBrandByTopCategoryid(@Param("categoryId")String categoryId,@Param("wordKey")String wordKey);
 
+    List<BasicsGoodsCategory> getAllCategoryChildById(@Param("parentTop")String parentTop);
+
+	//根据父id查询下属商品类型
+	List<BasicsGoodsCategory> queryGoodsCategoryExistlastCategory(@Param("parentId") String parentId);
+
+    List<CategoryGoodsProductDTO> queryCategoryListByCategoryLikeName(@Param("categoryId") String categoryId,
+																@Param("goodsName") String goodsName);
 
 }

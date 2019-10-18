@@ -21,6 +21,7 @@ public class BusinessOrderDTO {
     private BigDecimal totalPrice;//应付
     private BigDecimal discountsPrice;//优惠
     private BigDecimal payPrice;//实付
+    private Integer state;//处理状态  1刚生成(可编辑),2去支付(不修改),3已支付,4已取消
     private Double carriage;//运费
     private Integer type; // 订单类型  1工序支付,2补货/补人工,4材料付款, 5验房分销, 6换货单,7:设计/精算补单
 }

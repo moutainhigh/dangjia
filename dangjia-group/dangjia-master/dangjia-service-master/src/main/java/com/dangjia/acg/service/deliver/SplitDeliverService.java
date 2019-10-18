@@ -8,22 +8,24 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.excel.ExportExcel;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.deliver.SplitDeliverDTO;
 import com.dangjia.acg.dto.deliver.SplitDeliverItemDTO;
+import com.dangjia.acg.dto.house.WareDTO;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
-import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
-import com.dangjia.acg.mapper.deliver.ISplitDeliverMapper;
+import com.dangjia.acg.mapper.delivery.IOrderSplitItemMapper;
+import com.dangjia.acg.mapper.delivery.ISplitDeliverMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
-import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
@@ -32,6 +34,7 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 import tk.mybatis.mapper.util.StringUtil;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -80,7 +83,7 @@ public class SplitDeliverService {
             splitDeliver.setShippingState(4);//部分收货
             splitDeliver.setImage(image);//收货图片
             splitDeliver.setRecTime(new Date());
-            double applyMoney=0d;
+            double applyMoney = 0d;
             JSONArray arr = JSONArray.parseArray(splitItemList);
             for (int i = 0; i < arr.size(); i++) {
                 JSONObject obj = arr.getJSONObject(i);
@@ -94,12 +97,10 @@ public class SplitDeliverService {
                 warehouse.setReceive(warehouse.getReceive() + receive);
                 //部分收货则未收货的商品数量要退回到业主仓库中
                 //未收货的数量
-                Double noReceive =orderSplitItem.getNum()-receive;
-                if(noReceive>0) {
-                    warehouse.setAskCount(warehouse.getAskCount() - noReceive);
-                }
+                Double noReceive =warehouse.getAskCount()-(orderSplitItem.getNum()-receive);
+                warehouse.setAskCount(noReceive);
                 warehouseMapper.updateByPrimaryKeySelective(warehouse);
-                applyMoney+=orderSplitItem.getSupCost()*orderSplitItem.getReceive();
+                applyMoney += orderSplitItem.getSupCost() * orderSplitItem.getReceive();
             }
             splitDeliver.setApplyMoney(applyMoney);
             splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
@@ -132,7 +133,7 @@ public class SplitDeliverService {
             splitDeliver.setRecTime(new Date());
             splitDeliver.setModifyDate(new Date());//收货时间
             orderSplitItemMapper.affirmSplitDeliver(splitDeliverId);
-            double applyMoney=0d;
+            double applyMoney = 0d;
             /*统计收货数量*/
             Example example = new Example(OrderSplitItem.class);
             example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID, splitDeliverId);
@@ -141,7 +142,7 @@ public class SplitDeliverService {
                 Warehouse warehouse = warehouseMapper.getByProductId(orderSplitItem.getProductId(), splitDeliver.getHouseId());
                 warehouse.setReceive(warehouse.getReceive() + orderSplitItem.getNum());
                 warehouseMapper.updateByPrimaryKeySelective(warehouse);
-                applyMoney+=orderSplitItem.getSupCost()*orderSplitItem.getReceive();
+                applyMoney += orderSplitItem.getSupCost() * orderSplitItem.getReceive();
 
             }
             splitDeliver.setApplyMoney(applyMoney);
@@ -184,7 +185,7 @@ public class SplitDeliverService {
             splitDeliverDTO.setCreateDate(splitDeliver.getCreateDate());
             splitDeliverDTO.setSendTime(splitDeliver.getSendTime());
             splitDeliverDTO.setSubmitTime(splitDeliver.getSubmitTime());
-            splitDeliverDTO.setRecTime(splitDeliver.getRecTime() == null ? splitDeliver.getModifyDate() : splitDeliver.getRecTime());//收货时间
+            splitDeliverDTO.setRecTime(splitDeliver.getRecTime());//收货时间
             splitDeliverDTO.setTotalAmount(splitDeliver.getTotalAmount());
             splitDeliverDTO.setSupState(splitDeliver.getSupState());//大管家收货状态
             splitDeliverDTO.setSupName(splitDeliver.getSupplierName());
@@ -215,31 +216,33 @@ public class SplitDeliverService {
             List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
             List<SplitDeliverItemDTO> splitDeliverItemDTOList = new ArrayList<>();
             House house = houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
-            double sumprice=0d;
+            double sumprice = 0d;
             for (OrderSplitItem orderSplitItem : orderSplitItemList) {
-                if(orderSplitItem.getReceive()==null){
+                if (orderSplitItem.getReceive() == null) {
                     orderSplitItem.setReceive(0D);
                 }
-                Product product=forMasterAPI.getProduct(house.getCityId(), orderSplitItem.getProductId());
+                DjBasicsProductTemplate product = forMasterAPI.getProduct(house.getCityId(), orderSplitItem.getProductId());
                 SplitDeliverItemDTO splitDeliverItemDTO = new SplitDeliverItemDTO();
                 splitDeliverItemDTO.setImage(address + product.getImage());
                 splitDeliverItemDTO.setProductName(product.getName());
-                if(splitDeliver.getShippingState()==2||splitDeliver.getShippingState()==4||splitDeliver.getShippingState()==5){
-                    splitDeliverItemDTO.setTotalPrice(orderSplitItem.getPrice()*orderSplitItem.getReceive());
-                    sumprice+=orderSplitItem.getPrice()*orderSplitItem.getReceive();
-                }else{
-                    splitDeliverItemDTO.setTotalPrice(orderSplitItem.getPrice()*orderSplitItem.getNum());
-                    sumprice+=orderSplitItem.getPrice()*orderSplitItem.getNum();
+                if (splitDeliver.getShippingState() == 2 || splitDeliver.getShippingState() == 4 || splitDeliver.getShippingState() == 5) {
+                    splitDeliverItemDTO.setTotalPrice(orderSplitItem.getPrice() * orderSplitItem.getReceive());
+                    sumprice += orderSplitItem.getPrice() * orderSplitItem.getReceive();
+                } else {
+                    splitDeliverItemDTO.setTotalPrice(orderSplitItem.getPrice() * orderSplitItem.getNum());
+                    sumprice += orderSplitItem.getPrice() * orderSplitItem.getNum();
                 }
                 splitDeliverItemDTO.setShopCount(orderSplitItem.getShopCount());
                 splitDeliverItemDTO.setNum(orderSplitItem.getNum());
                 splitDeliverItemDTO.setUnitName(orderSplitItem.getUnitName());
-                splitDeliverItemDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(house.getCityId(), orderSplitItem.getProductId()));
+                //splitDeliverItemDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(house.getCityId(), orderSplitItem.getProductId()));
                 splitDeliverItemDTO.setPrice(orderSplitItem.getPrice());
                 splitDeliverItemDTO.setCost(orderSplitItem.getCost());
                 splitDeliverItemDTO.setId(orderSplitItem.getId());
                 splitDeliverItemDTO.setReceive(orderSplitItem.getReceive());//收货数量
+                splitDeliverItemDTO.setHouseName(house.getHouseName());
                 splitDeliverItemDTO.setSupCost(orderSplitItem.getSupCost());
+                splitDeliverItemDTO.setSupCostTotal(orderSplitItem.getReceive()*orderSplitItem.getSupCost());
                 splitDeliverItemDTO.setAskCount(orderSplitItem.getAskCount());
                 splitDeliverItemDTOList.add(splitDeliverItemDTO);
             }
@@ -251,7 +254,50 @@ public class SplitDeliverService {
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
-
+    /**
+     * 发货单明细(excel导出 )
+     */
+    public ServerResponse exportDeliverDetail(HttpServletResponse response,Integer deliverType, String splitDeliverId) {
+        try {
+            ExportExcel exportExcel = new ExportExcel();//创建表格实例
+            //预留退货单明细导出（暂不做）
+//            if(deliverType==1) {
+                SplitDeliver splitDeliver = splitDeliverMapper.selectByPrimaryKey(splitDeliverId);
+                Example example = new Example(OrderSplitItem.class);
+                example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID, splitDeliver.getId());
+                example.orderBy(OrderSplitItem.CATEGORY_ID).desc();
+                List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
+                List<SplitDeliverItemDTO> splitDeliverItemDTOList = new ArrayList<>();
+                House house = houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
+                for (OrderSplitItem orderSplitItem : orderSplitItemList) {
+                    if (orderSplitItem.getReceive() == null) {
+                        orderSplitItem.setReceive(0D);
+                    }
+                    SplitDeliverItemDTO splitDeliverItemDTO = new SplitDeliverItemDTO();
+                    splitDeliverItemDTO.setShopCount(orderSplitItem.getShopCount());
+                    splitDeliverItemDTO.setProductName(orderSplitItem.getProductName());
+                    splitDeliverItemDTO.setNum(orderSplitItem.getNum());
+                    splitDeliverItemDTO.setUnitName(orderSplitItem.getUnitName());
+                    splitDeliverItemDTO.setPrice(orderSplitItem.getPrice());
+                    splitDeliverItemDTO.setCost(orderSplitItem.getCost());
+                    splitDeliverItemDTO.setId(orderSplitItem.getId());
+                    splitDeliverItemDTO.setReceive(orderSplitItem.getReceive());//收货数量
+                    splitDeliverItemDTO.setHouseName(house.getHouseName());
+                    splitDeliverItemDTO.setSupplierName(splitDeliver.getSupplierName());
+                    splitDeliverItemDTO.setSupCost(orderSplitItem.getSupCost());
+                    splitDeliverItemDTO.setSupCostTotal(orderSplitItem.getReceive() * orderSplitItem.getSupCost());
+                    splitDeliverItemDTO.setAskCount(orderSplitItem.getAskCount());
+                    splitDeliverItemDTOList.add(splitDeliverItemDTO);
+                }
+                exportExcel.setDataList("结算单-详情", SplitDeliverItemDTO.class, splitDeliverItemDTOList);
+                exportExcel.write(response, splitDeliver.getNumber() + ".xlsx");
+//            }
+            return ServerResponse.createByErrorMessage("导出成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("导出失败");
+        }
+    }
     /**
      * 收货列表
      * shipState  0待发货,1已发待收货,2已收货,3取消  5所有
@@ -277,7 +323,7 @@ public class SplitDeliverService {
                 splitDeliverDTO.setShipState(splitDeliver.getShippingState());
                 splitDeliverDTO.setNumber(splitDeliver.getNumber());
                 splitDeliverDTO.setSendTime(splitDeliver.getSendTime());//发货时间
-                splitDeliverDTO.setRecTime(splitDeliver.getRecTime() == null ? splitDeliver.getModifyDate() : splitDeliver.getRecTime());//收货时间
+                splitDeliverDTO.setRecTime(splitDeliver.getRecTime());//收货时间
                 Supplier supplier = forMasterAPI.getSupplier(house.getCityId(), splitDeliver.getSupplierId());
                 if (supplier != null) {
                     splitDeliverDTO.setSupId(supplier.getId());//供应商id

@@ -70,9 +70,9 @@ public interface BudgetWorkerAPI {
      *
      * @return
      */
-    @PostMapping("/actuary/budgetWorker/getAllWorkerGoods")
+    /*@PostMapping("/actuary/budgetWorker/getAllWorkerGoods")
     @ApiOperation(value = "获取所有人工商品", notes = "获取所有人工商品")
-    ServerResponse getAllWorkerGoods(@RequestParam("request") HttpServletRequest request);
+    ServerResponse getAllWorkerGoods(@RequestParam("request") HttpServletRequest request);*/
 
     /**
      * 制作精算模板

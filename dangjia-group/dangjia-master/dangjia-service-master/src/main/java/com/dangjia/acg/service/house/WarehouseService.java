@@ -5,6 +5,7 @@ import com.dangjia.acg.api.actuary.ActuaryOpeAPI;
 import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
 import com.dangjia.acg.api.basics.GoodsCategoryAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
+import com.dangjia.acg.api.product.DjBasicsProductAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
@@ -16,22 +17,23 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.budget.BudgetItemDTO;
 import com.dangjia.acg.dto.house.WarehouseDTO;
 import com.dangjia.acg.dto.house.WarehouseGoodsDTO;
-import com.dangjia.acg.mapper.deliver.IOrderItemMapper;
-import com.dangjia.acg.mapper.deliver.IOrderSplitItemMapper;
-import com.dangjia.acg.mapper.deliver.IProductChangeMapper;
+import com.dangjia.acg.mapper.delivery.IOrderItemMapper;
+import com.dangjia.acg.mapper.delivery.IOrderSplitItemMapper;
+import com.dangjia.acg.mapper.delivery.IProductChangeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IMaterialRecordMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.repair.IMendMaterialMapper;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.modle.attribute.GoodsCategory;
-import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.deliver.OrderItem;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.MaterialRecord;
 import com.dangjia.acg.modle.house.Warehouse;
+import com.dangjia.acg.modle.product.BasicsGoods;
+import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -77,7 +79,8 @@ public class WarehouseService {
     @Autowired
     private IMendMaterialMapper mendMaterielMapper;
 
-
+    @Autowired
+    private DjBasicsProductAPI djBasicsProductAPI;
     private static Logger LOG = LoggerFactory.getLogger(WarehouseService.class);
 
 
@@ -147,11 +150,11 @@ public class WarehouseService {
                 warehouseDTO.setBackCount((warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()));
                 warehouseDTO.setSurCount(warehouse.getShopCount() - (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()) - warehouse.getAskCount());//剩余数量 所有买的数量 - 业主退货 - 要的
                 warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * warehouse.getPrice());
-                warehouseDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(house.getCityId(), warehouse.getProductId()));
+               // warehouseDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(house.getCityId(), warehouse.getProductId()));
                 warehouseDTO.setRepairCount(warehouse.getRepairCount());
-                Product product = forMasterAPI.getProduct(house.getCityId(), warehouse.getProductId());
+                DjBasicsProductTemplate product = forMasterAPI.getProduct(house.getCityId(), warehouse.getProductId());
                 if (product != null) {
-                    Goods goods = forMasterAPI.getGoods(house.getCityId(), product.getGoodsId());
+                    BasicsGoods goods = forMasterAPI.getGoods(house.getCityId(), product.getGoodsId());
                     if (goods != null) {
                         warehouseDTO.setSales(goods.getSales());
                     }
@@ -236,13 +239,21 @@ public class WarehouseService {
                         warehouseDTO.setReceive(warehouse.getReceive() - (warehouse.getWorkBack() == null ? 0D : warehouse.getWorkBack()));
                         warehouseDTO.setSurCount(warehouse.getShopCount() - (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()) - warehouse.getAskCount());
                         warehouseDTO.setTolPrice((warehouse.getShopCount() - (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack())  - warehouse.getWorkBack()) * warehouse.getPrice());
-                        warehouseDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(house.getCityId(), warehouse.getProductId()));
+                       // warehouseDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(house.getCityId(), warehouse.getProductId()));
                         // type为空时查询 是否更换
                         if (CommonUtil.isEmpty(type)) {
                             if (productChangeMapper.queryProductChangeExist(warehouse.getHouseId(), warehouse.getProductId(), "0") > 0) {
                                 warehouseDTO.setChangeType(1);
                             }
                         }
+
+                        //品牌+规格
+                        String brandName=forMasterAPI.brandName("",warehouse.getProductId());  //通过商品id去关联，然后组合商品名称
+                        DjBasicsProductTemplate djBasicsProduct=djBasicsProductAPI.queryDataByProductId(warehouse.getProductId());  //通过商品id去关联规格
+                        String valueIdArr=djBasicsProduct.getValueIdArr();
+                        String guige=djBasicsProductAPI.getNewValueNameArr(valueIdArr);
+                        warehouseDTO.setBrandName(brandName+" "+guige);
+
                         warehouseDTOS.add(warehouseDTO);
                         rowPrice = rowPrice.add(new BigDecimal(warehouseDTO.getTolPrice()));
                     }

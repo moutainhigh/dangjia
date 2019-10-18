@@ -33,6 +33,10 @@ public interface CartAPI {
     @ApiOperation(value = "查询购物车商品", notes = "查询购物车商品")
     ServerResponse queryCart(String userToken, Cart cart);
 
+    @PostMapping("app/cart/queryCategoryCart")
+    @ApiOperation(value = "查询购物车商品(分类)", notes = "查询购物车商品（分类）")
+    ServerResponse queryCategoryCart(String userToken, Cart cart);
+
     @PostMapping("app/cart/category")
     @ApiOperation(value = "查询商品分类", notes = "查询商品分类")
     ServerResponse queryGoodsCategory(HttpServletRequest request, String userToken,String houseId);

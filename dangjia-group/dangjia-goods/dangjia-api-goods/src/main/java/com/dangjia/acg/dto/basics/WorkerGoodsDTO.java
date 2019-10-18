@@ -24,6 +24,11 @@ public class WorkerGoodsDTO {
     @ApiModelProperty("name")
     private String name;
 
+    @ApiModelProperty("storefrontId")
+    private String storefrontId;//店铺ID
+
+    private Integer sales;//退货性质0：可退；1：不可退
+    private String irreversibleReasons;//不可退原因
     @ExcelField(titile = "商品编号", offset = 2)
     private String workerGoodsSn;
     @ApiModelProperty("image")
@@ -34,8 +39,6 @@ public class WorkerGoodsDTO {
     private String unitName;
     @ApiModelProperty("price")
     private Double price;
-    @ApiModelProperty("sales")
-    private Integer sales;
     @ApiModelProperty("workExplain")
     private String workExplain;
     @ApiModelProperty("workerDec")
@@ -59,6 +62,9 @@ public class WorkerGoodsDTO {
     @ApiModelProperty("otherName")
     private String otherName;
 
+    private int productType;//2=人工商品
+    @ApiModelProperty(" 是否置顶 0=正常  1=置顶")
+    private String istop;
 
     private Double lastPrice;
     private Date lastTime;
@@ -71,6 +77,7 @@ public class WorkerGoodsDTO {
     private String shopCount;//精算数
     private String msg;//异常说明
 
+    private String purchaseRestrictions;//购买限制（0自由购房；1有房无精算；2有房有精算）
     @ApiModelProperty("technologies")
     private List<TechnologyDTO> technologies;
 

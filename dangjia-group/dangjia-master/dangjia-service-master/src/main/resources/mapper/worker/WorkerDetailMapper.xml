@@ -81,10 +81,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         house.member_id,
         member.mobile
         FROM dj_worker_worker_detail as wwd
-        left  JOIN dj_house as house
-        on (wwd.house_id = house.id  )
-        left  JOIN dj_member as member
-        on (member.id = wwd.worker_id )
+        INNER JOIN dj_member AS member ON member.id = wwd.worker_id
+        INNER JOIN ( SELECT c.member_id, GROUP_CONCAT( c.city_id ) city_id,c.city_name  FROM dj_member_city c GROUP BY c.member_id )
+        mt ON mt.member_id = member.id AND FIND_IN_SET(#{cityId}, mt.city_id )
+        LEFT  JOIN dj_house as house on (wwd.house_id = house.id  )
         where 1=1
         <if test="workerId!=null and workerId!=''">
             and wwd.worker_id=#{workerId}

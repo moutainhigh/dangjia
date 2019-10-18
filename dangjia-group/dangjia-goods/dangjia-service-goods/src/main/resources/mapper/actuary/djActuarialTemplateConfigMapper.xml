@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.actuary.DjActuarialTemplateConfigMapper">
+
+    <sql id="all_columns">
+        id,
+        config_name configName,
+        config_type configType
+        `create_date` AS createDate,
+        `modify_date` AS modifyDate,
+        `data_status` as dataStatus,
+         excel_address as excelAddress,
+         create_by as createBy,
+         update_by as updateBy
+    </sql>
+
+    <resultMap id="actuarialTemplateMap" type="com.dangjia.acg.dto.actuary.ActuarialTemplateConfigDTO">
+        <id property="id" column="id"/>
+        <result property="id" column="id"/>
+        <result property="configName" column="configName"/>
+        <result property="configType" column="configType"/>
+        <collection property="productList" column="{actuarialTemplateId=id}" ofType="map" select="selectProductList"/>
+    </resultMap>
+
+    <resultMap id="actuarialProductMap" type="java.util.Map">
+        <id property="id" column="id"/>
+        <result property="id" column="id"/>
+        <result property="productId" column="productId"/>
+        <result property="productName" column="productName"/>
+        <result property="goodsId" column="goodsId"/>
+        <result property="goodsName" column="goodsName"/>
+    </resultMap>
+
+    <!-- 查询设计精算阶段的配置模板 -->
+    <select id="queryActuarialTemplateConfig" resultMap="actuarialTemplateMap">
+        SELECT
+            id,
+            config_name configName,
+            config_type configType
+        FROM
+            dj_actuarial_template_config ac
+        where ac.config_type in(1,2)
+        <if test="id!=null and id!=''">
+            and ac.id=#{id}
+        </if>
+    </select>
+
+    <select id="selectProductList" resultMap="actuarialProductMap">
+        SELECT
+            t1.id,
+          t1.product_id productId,
+          t3.name productName,
+          t1.goods_id goodsId,
+          t2.`name` goodsName
+        FROM
+            dj_actuarial_product_config t1,
+            dj_basics_goods t2,
+            dj_basics_product_template t3
+        WHERE
+            t1.goods_id = t2.id
+        AND t1.product_id = t3.id
+        and t1.actuarial_template_id=#{actuarialTemplateId}
+    </select>
+</mapper>

@@ -38,6 +38,30 @@ public class WebHouseController implements WebHouseAPI {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
         return houseService.getList(pageDTO, userID,cityKey ,visitState, startDate, endDate, searchKey, orderBy, memberId);
+        //return houseService.getHouseList(pageDTO, userID,cityKey ,visitState, startDate, endDate, searchKey, orderBy, memberId);
+    }
+
+    /**
+     * 装修列表，新查询
+     * @param request
+     * @param pageDTO
+     * @param visitState
+     * @param startDate
+     * @param endDate
+     * @param searchKey
+     * @param orderBy
+     * @param memberId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getHouseList(HttpServletRequest request, PageDTO pageDTO, Integer visitState, String startDate, String endDate, String searchKey, String orderBy, String memberId) {
+        String userID = request.getParameter(Constants.USERID);
+        String cityKey = request.getParameter(Constants.CITY_ID);
+        if (CommonUtil.isEmpty(cityKey)) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+        return houseService.getHouseList(pageDTO, userID,cityKey ,visitState, startDate, endDate, searchKey, orderBy, memberId);
     }
 
     @Override

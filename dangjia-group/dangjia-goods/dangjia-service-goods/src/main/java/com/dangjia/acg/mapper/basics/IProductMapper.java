@@ -82,6 +82,7 @@ public interface IProductMapper extends Mapper<Product> {
      */
     List<Product> serchBoxName(@Param("name") String name);
 
+
     Product selectProductByGoodsIdAndBrandIdAndBrandSeriesId(String goodsId, String brandId, String brandSeriesId);
 
 

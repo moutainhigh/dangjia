@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.supplier.DjSupSupplierProductMapper">
+
+    <select id="querySupplierGoods" resultType="com.dangjia.acg.dto.supplier.DjSupSupplierProductDTO">
+        SELECT
+            ssp.goods_id AS goodsId,
+	        ssp.product_id AS productId,
+            bg.name AS goodsName,
+            bpt.name AS productName,
+            bpt.image,
+            bg.attribute_id_arr AS attributeIdArr,
+            ssp.price,
+            ssp.stock,
+            bpt.price AS salesPrice,
+            bpt.cartage_price AS cartagePrice,
+            bg.is_elevator_fee AS isElevatorFee
+        FROM
+            dj_sup_supplier_product ssp
+        INNER JOIN dj_basics_goods bg ON ssp.goods_id = bg.id
+        INNER JOIN dj_basics_product_template bpt ON ssp.product_id = bpt.id
+        WHERE ssp.supplier_id=#{supId}
+    </select>
+
+    <select id="queryHaveGoods" resultType="com.dangjia.acg.dto.supplier.DjSupSupplierProductDTO">
+        SELECT
+            sap.id,
+            sap.goods_id AS goodsId,
+            sap.product_id AS productId,
+            bg. NAME AS goodsName,
+            bpt. NAME AS productName,
+            bpt.image,
+            bg.attribute_id_arr AS attributeIdArr,
+            sap.price,
+            sap.stock,
+            bpt.price AS salesPrice,
+            bpt.cartage_price AS cartagePrice,
+            sap.is_cartage_price AS isElevatorFee,
+            sap.supply_relationship AS supplyRelationship,
+            ar.adjust_time as adjustTime,
+            ar.adjust_price as adjustprice
+        FROM
+            dj_sup_application_product sap
+        INNER JOIN dj_basics_goods bg ON sap.goods_id = bg.id
+        INNER JOIN dj_basics_product_template bpt ON sap.product_id = bpt.id
+        LEFT JOIN (SELECT * FROM (select * from dj_adjust_record  order by create_date DESC) b GROUP BY b.application_product_id) ar ON ar.application_product_id=sap.id
+        WHERE
+            sap.sup_id = #{supId}
+            sap.shop_id = #{shopId}
+            sap.application_status=#{applicationStatus}
+    </select>
+
+
+    <select id="queryAttributeNameByIds" resultType="java.lang.String">
+        select
+        GROUP_CONCAT(name SEPARATOR '，')
+        AND p.id in
+        <foreach collection="ids" item="item" index="index" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="queryDjSupSupplierProductList" resultType="com.dangjia.acg.dto.delivery.SupplyDimensionDTO">
+        SELECT
+            bpt.image,
+            bpt.name as productName,
+            bpt.product_sn as productSn,
+            ssp.stock,
+            ssp.price,
+            ssp.supplier_id as supId,
+            ssp.product_id as productId
+        FROM
+            dj_sup_supplier_product ssp
+            INNER JOIN dj_basics_product_template bpt ON ssp.product_id=bpt.id
+        WHERE
+            ssp.supplier_id =#{supId}
+            <if test="null!=searchKey and ''!=searchKey">
+                AND (
+                bpt.name LIKE CONCAT('%',#{searchKey},'%') or
+                bpt.product_sn LIKE CONCAT('%',#{searchKey},'%')
+                )
+            </if>
+    </select>
+
+</mapper>

@@ -6,9 +6,9 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.product.BasicsGoodsDTO;
 import com.dangjia.acg.dto.product.BasicsProductDTO;
-import com.dangjia.acg.modle.product.DjBasicsProduct;
+import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.service.product.DjBasicsGoodsService;
-import com.dangjia.acg.service.product.DjBasicsProductService;
+import com.dangjia.acg.service.product.DjBasicsProductTemplateService;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 
 /**
@@ -25,10 +26,10 @@ import javax.servlet.http.HttpServletRequest;
  */
 @RestController
 public class DjBasicsProductController implements DjBasicsProductAPI {
-    private static Logger logger = LoggerFactory.getLogger(DjBasicsProductService.class);
+    private static Logger logger = LoggerFactory.getLogger(DjBasicsProductController.class);
 
     @Autowired
-    private DjBasicsProductService djBasicsProductService;
+    private DjBasicsProductTemplateService djBasicsProductService;
 
     @Autowired
     private DjBasicsGoodsService djBasicsGoodsService;
@@ -42,9 +43,11 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
 
     @Override
     @ApiMethod
-    public DjBasicsProduct queryProductDataByID(HttpServletRequest request, String id) {
-        return djBasicsProductService.queryProductDataByID(request,id);
+    public String getNewValueNameArr(String valueIdArr) {
+        return djBasicsProductService.getNewValueNameArr(valueIdArr);
     }
+
+
     @Override
     @ApiMethod
     public ServerResponse queryProductLabels(HttpServletRequest request, String productId) {
@@ -59,8 +62,8 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryDataByProductId(HttpServletRequest request, String productSn) {
-        return djBasicsProductService.queryDataByProductId(request,productSn);
+    public DjBasicsProductTemplate queryDataByProductId(String productId) {
+        return djBasicsProductService.queryDataByProductId(productId);
     }
 
     /**
@@ -247,6 +250,17 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
     public ServerResponse getAllGoodsByCategoryId(HttpServletRequest request,String categoryId){
         return djBasicsProductService.getAllGoodsByCategoryId(categoryId);
     }
+
+    /**
+     * 根据类别Id查询同级商品
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public List<DjBasicsProductTemplate> getAllProductByCategoryId(String categoryId) {
+        return djBasicsProductService.getAllProductByCategoryId(categoryId);
+    }
+
     /**
      * 根据货品ID查询商品
      * @param goodsId
@@ -257,4 +271,44 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
     public ServerResponse  getAllProductByGoodsId(HttpServletRequest request,String goodsId){
         return djBasicsProductService.getAllProductByGoodsId(goodsId);
     }
+
+    /**
+     * 查询商品及下属货品
+     *
+     * @param request
+     * @param pageDTO
+     * @param categoryId
+     * @param name
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryGoodsList(HttpServletRequest request, PageDTO pageDTO, String categoryId, String name, String cityId, Integer type) {
+        return djBasicsGoodsService.queryGoodsList(pageDTO, categoryId, name, type);
+    }
+
+
+    @Override
+    @ApiMethod
+    public ServerResponse randQueryProduct(HttpServletRequest request, String goodsId) {
+        return djBasicsProductService.getAllProductByGoodsIdLimit12(goodsId);
+    }
+    @Override
+    public PageInfo queryBasicsProductData(String  cityId, Integer pageNum,Integer pageSize, String name, String categoryId, String productType, String[] productId) {
+        PageInfo productList = djBasicsProductService.queryBasicsProductData(pageNum,pageSize, name, categoryId, productType, productId);
+        return productList;
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryChooseGoods(HttpServletRequest request) {
+        return djBasicsProductService.queryChooseGoods();
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryProductLabelsByProductId(HttpServletRequest request, String productId) {
+        return djBasicsProductService.queryProductLabelsByProductId(productId);
+    }
+
 }

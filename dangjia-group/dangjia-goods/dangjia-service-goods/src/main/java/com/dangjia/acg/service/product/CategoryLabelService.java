@@ -2,17 +2,15 @@ package com.dangjia.acg.service.product;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.mapper.product.ICategoryLabelMapper;
 import com.dangjia.acg.modle.product.CategoryLabel;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -25,6 +23,7 @@ import java.util.*;
 
 @Service
 public class CategoryLabelService {
+    private static Logger logger = LoggerFactory.getLogger(CategoryLabelService.class);
     /**
      * 注入LabelDao接口
      */
@@ -35,12 +34,9 @@ public class CategoryLabelService {
     protected static final Logger LOG = LoggerFactory.getLogger(CategoryLabelService.class);
 
     //查询所有的标签
-    public ServerResponse<PageInfo> getAllCategoryLabel(PageDTO pageDTO) {
+    public ServerResponse getAllCategoryLabel() {
         try {
-            if (pageDTO == null) {
-                pageDTO = new PageDTO();
-            }
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+
             List<Map<String, Object>> mapList = new ArrayList<>();
             List<CategoryLabel> labelList = iCategoryLabelMapper.getCategoryLabel();
             for (CategoryLabel categoryLabel : labelList) {
@@ -48,17 +44,17 @@ public class CategoryLabelService {
                 if (!StringUtils.isNotBlank(categoryLabel.getId())) {
                     map.put("labelId", "");
                     map.put("labelName", "");
+                    map.put("sort", "");
                 } else {
                     map.put("labelId", categoryLabel.getId());
                     map.put("labelName", categoryLabel.getName());
+                    map.put("sort", categoryLabel.getSort());
                 }
                 mapList.add(map);
             }
-            PageInfo pageResult = new PageInfo(labelList);
-            pageResult.setList(mapList);
-            return ServerResponse.createBySuccess("查询成功", pageResult);
+            return ServerResponse.createBySuccess("查询成功", mapList);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("查询失败：",e);
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
@@ -79,9 +75,9 @@ public class CategoryLabelService {
                 }
                 mapList.add(map);
             }
-            return ServerResponse.createBySuccess("查询成功",mapList);
+            return ServerResponse.createBySuccess("查询成功", mapList);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("查询失败",e);
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
@@ -91,13 +87,14 @@ public class CategoryLabelService {
         try {
             if (iCategoryLabelMapper.getCategoryLabelByName(labelName).size() > 0)
                 return ServerResponse.createByErrorMessage("标签名称已存在");
-
+            int countLabel = iCategoryLabelMapper.getCategoryCountLabel();
             CategoryLabel categoryLabel = new CategoryLabel();
             categoryLabel.setName(labelName);
+            categoryLabel.setSort(countLabel + 1);
             iCategoryLabelMapper.insert(categoryLabel);
             return ServerResponse.createBySuccessMessage("新增成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("新增失败：",e);
             return ServerResponse.createByErrorMessage("新增失败");
         }
     }
@@ -119,7 +116,7 @@ public class CategoryLabelService {
             iCategoryLabelMapper.updateByPrimaryKeySelective(oldLabel);
             return ServerResponse.createBySuccessMessage("修改成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("修改失败：", e);
             return ServerResponse.createByErrorMessage("修改失败");
         }
     }
@@ -142,7 +139,7 @@ public class CategoryLabelService {
             }
             return ServerResponse.createBySuccessMessage("保存成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("保存失败：",e);
             return ServerResponse.createByErrorMessage("保存失败");
         }
 
@@ -158,7 +155,7 @@ public class CategoryLabelService {
             map.put("name", categoryLabel.getName());
             return ServerResponse.createBySuccess("查询成功", map);
         } catch (Exception e) {
-            e.printStackTrace();
+           logger.error("查询失败：",e);
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
@@ -169,8 +166,25 @@ public class CategoryLabelService {
             iCategoryLabelMapper.deleteByPrimaryKey(labelId);
             return ServerResponse.createBySuccessMessage("删除成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("删除失败：",e);
             return ServerResponse.createByErrorMessage("删除失败");
         }
+    }
+    /*
+     *修改标签排序
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse getAllCategoryLabel(String beforeLabelId,
+                               int beforeSort, String afterLabelId, int afterSort){
+        //修改前后标签的排序字段，将顺序替换
+        CategoryLabel categoryLabel=new CategoryLabel();
+        categoryLabel.setId(beforeLabelId);
+        categoryLabel.setSort(afterSort);
+        iCategoryLabelMapper.updateByPrimaryKeySelective(categoryLabel);
+        categoryLabel=new CategoryLabel();
+        categoryLabel.setId(afterLabelId);
+        categoryLabel.setSort(beforeSort);
+        iCategoryLabelMapper.updateByPrimaryKeySelective(categoryLabel);
+        return ServerResponse.createBySuccessMessage("修改成功");
     }
 }

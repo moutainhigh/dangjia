@@ -1,26 +1,43 @@
 package com.dangjia.acg.service.data;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
+import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
+import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.actuary.BudgetLabelDTO;
+import com.dangjia.acg.dto.actuary.BudgetLabelGoodsDTO;
+import com.dangjia.acg.dto.product.ProductWorkerDTO;
+import com.dangjia.acg.dto.product.StorefontInfoDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
-import com.dangjia.acg.mapper.basics.*;
+import com.dangjia.acg.mapper.basics.IBrandMapper;
+import com.dangjia.acg.mapper.basics.IBrandSeriesMapper;
+import com.dangjia.acg.mapper.basics.ITechnologyMapper;
+import com.dangjia.acg.mapper.basics.IUnitMapper;
+import com.dangjia.acg.mapper.product.*;
 import com.dangjia.acg.mapper.sup.ISupplierMapper;
 import com.dangjia.acg.mapper.sup.ISupplierProductMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
-import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.Technology;
-import com.dangjia.acg.modle.basics.WorkerGoods;
+import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.brand.Unit;
+import com.dangjia.acg.modle.product.*;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
+import com.dangjia.acg.service.actuary.app.AppActuaryOperationService;
+import com.sun.javafx.collections.MappingChange;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.Date;
-import java.util.List;
+import java.math.BigDecimal;
+import java.util.*;
 
 /**
  * author: Ronalcheng
@@ -36,13 +53,9 @@ public class ForMasterService {
     @Autowired
     private IBudgetMaterialMapper budgetMaterialMapper;
     @Autowired
-    private IWorkerGoodsMapper workerGoodsMapper;
-    @Autowired
-    private IProductMapper productMapper;
+    private AppActuaryOperationService actuaryOperationService;
     @Autowired
     private ITechnologyMapper technologyMapper;
-    @Autowired
-    private IGoodsMapper goodsMapper;
     @Autowired
     private IBrandSeriesMapper brandSeriesMapper;
     @Autowired
@@ -52,6 +65,16 @@ public class ForMasterService {
     @Autowired
     private IUnitMapper unitMapper;
 
+    @Autowired
+    private IBrandMapper iBrandMapper;
+    @Autowired
+    private ConfigUtil configUtil;
+    @Autowired
+    private IBasicsProductTemplateMapper iBasicsProductTemplateMapper;
+    @Autowired
+    private DjBasicsGoodsMapper goodsMapper;
+    @Autowired
+    private IBasicsGoodsMapper iBasicsGoodsMapper;
 
     public String getUnitName(String unitId){
         Unit unit = unitMapper.selectByPrimaryKey(unitId);
@@ -102,7 +125,12 @@ public class ForMasterService {
      * @param type 0=材料商品  1=人工商品
      */
     public void setProductOrWorkerGoodsIsTop(String gid,Integer type,String istop){
-        if(type==0){
+        DjBasicsProductTemplate djBasicsProduct= iBasicsProductTemplateMapper.selectByPrimaryKey(gid);
+        if(djBasicsProduct!=null){
+            djBasicsProduct.setIstop(Integer.parseInt(istop));
+            iBasicsProductTemplateMapper.updateByPrimaryKeySelective(djBasicsProduct);
+        }
+        /*if(type==0){
             Product product= productMapper.selectByPrimaryKey(gid);
             if(product!=null){
                 product.setIstop(istop);
@@ -114,16 +142,22 @@ public class ForMasterService {
                 workerGoods.setIstop(istop);
                 workerGoodsMapper.updateByPrimaryKeySelective(workerGoods);
             }
-        }
+        }*/
     }
-    public WorkerGoods getWorkerGoods(String workerGoodsId){
-        return workerGoodsMapper.selectByPrimaryKey(workerGoodsId);
+    public ProductWorkerDTO getWorkerGoods(String workerGoodsId){
+        DjBasicsProductTemplate djBasicsProduct = iBasicsProductTemplateMapper.selectByPrimaryKey(workerGoodsId);
+        ProductWorkerDTO productWorkerDTO = JSON.parseObject(JSON.toJSONString(djBasicsProduct),new TypeReference<ProductWorkerDTO>() {});
+         productWorkerDTO.setWorkerDec(djBasicsProduct.getWorkerDec());
+        productWorkerDTO.setWorkerTypeId(djBasicsProduct.getWorkerTypeId());
+        productWorkerDTO.setShowGoods(djBasicsProduct.getMaket());
+        return productWorkerDTO;
     }
-    public Goods getGoods(String goodsId){
-        return goodsMapper.selectByPrimaryKey(goodsId);
+    public BasicsGoods getGoods(String goodsId){
+
+        return iBasicsGoodsMapper.selectByPrimaryKey(goodsId);
     }
-    public Product getProduct(String productId){
-        return productMapper.selectByPrimaryKey(productId);
+    public DjBasicsProductTemplate getProduct(String productId){
+        return iBasicsProductTemplateMapper.selectByPrimaryKey(productId);
     }
 
     /**
@@ -138,14 +172,14 @@ public class ForMasterService {
                     .andEqualTo(BudgetMaterial.STETA,1);
             List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.selectByExample(example);
             for (BudgetMaterial budgetMaterial : budgetMaterialList){
-                Product product = productMapper.selectByPrimaryKey(budgetMaterial.getProductId());
+                DjBasicsProductTemplate product = iBasicsProductTemplateMapper.selectByPrimaryKey(budgetMaterial.getProductId());
                 if(product == null){
                     budgetMaterialList.remove(budgetMaterial);//移除
                     budgetMaterial.setDeleteState(1);//找不到商品标记删除
                     budgetMaterial.setModifyDate(new Date());
                     budgetMaterialMapper.updateByPrimaryKeySelective(budgetMaterial);
                 }else {
-                    //重新记录支付时精算价格
+                     //重新记录支付时精算价格
                     budgetMaterial.setPrice(product.getPrice());
                     budgetMaterial.setCost(product.getCost());
                     budgetMaterial.setTotalPrice(budgetMaterial.getConvertCount() * product.getPrice());//已支付 记录总价
@@ -172,15 +206,16 @@ public class ForMasterService {
             example.createCriteria().andEqualTo(BudgetWorker.HOUSE_FLOW_ID, houseFlowId).andEqualTo(BudgetWorker.DELETE_STATE, 0);
             List<BudgetWorker> budgetWorkerList = budgetWorkerMapper.selectByExample(example);
             for(BudgetWorker budgetWorker : budgetWorkerList){
-                WorkerGoods wg = workerGoodsMapper.selectByPrimaryKey(budgetWorker.getWorkerGoodsId());
-                if (wg == null){
+                //WorkerGoods wg = workerGoodsMapper.selectByPrimaryKey(budgetWorker.getWorkerGoodsId());
+                DjBasicsProductTemplate djBasicsProduct=iBasicsProductTemplateMapper.selectByPrimaryKey(budgetWorker.getWorkerGoodsId());
+                if (djBasicsProduct == null){
                     budgetWorkerList.remove(budgetWorker);//移除
                     budgetWorker.setDeleteState(1);//找不到商品标记删除
                     budgetWorker.setModifyDate(new Date());
                     budgetWorkerMapper.updateByPrimaryKeySelective(budgetWorker);
                 }else {
-                    budgetWorker.setPrice(wg.getPrice());
-                    budgetWorker.setTotalPrice(budgetWorker.getShopCount() * wg.getPrice());
+                    budgetWorker.setPrice(djBasicsProduct.getPrice());
+                    budgetWorker.setTotalPrice(budgetWorker.getShopCount() * djBasicsProduct.getPrice());
                     budgetWorker.setDeleteState(3);//已支付
                     budgetWorker.setModifyDate(new Date());
                     budgetWorkerMapper.updateByPrimaryKeySelective(budgetWorker);
@@ -229,4 +264,77 @@ public class ForMasterService {
     public Double getNotCaiPrice(String houseId,String workerTypeId){
         return budgetMaterialMapper.getNotCaiPrice(houseId,workerTypeId);
     }
+
+
+
+
+    /*********************商品3.0改造**************************/
+    public List<BudgetLabelDTO> queryBudgetLabel(String houseId, String workerTypeId){
+        String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+        List<BudgetLabelDTO> budgetLabelDTOS =  budgetMaterialMapper.queryBudgetLabel(houseId,workerTypeId);//精算工钱
+        List<BudgetLabelGoodsDTO> budgetLabelGoodsDTOS = queryBudgetLabelGoods(houseId,workerTypeId);//精算工钱
+        for (BudgetLabelDTO budgetLabelDTO : budgetLabelDTOS) {
+            BigDecimal totalZPrice = new BigDecimal(0);//组总价
+            String[] array = budgetLabelDTO.getCategoryIds().split(",");
+            List<BudgetLabelGoodsDTO> budgetLabelGoodss= new ArrayList<>();
+            for (BudgetLabelGoodsDTO budgetLabelGoodsDTO : budgetLabelGoodsDTOS) {
+                boolean flag = Arrays.asList(array).contains(budgetLabelGoodsDTO.getCategoryId());
+                if(flag){
+                    if(budgetLabelGoodsDTO.getDeleteState()!=2) {
+                        totalZPrice = totalZPrice.add(budgetLabelGoodsDTO.getTotalPrice());
+                    }
+                    if(!CommonUtil.isEmpty(budgetLabelGoodsDTO.getGoodsId())){
+                        DjBasicsGoods goods = goodsMapper.selectByPrimaryKey(budgetLabelGoodsDTO.getGoodsId());
+                        budgetLabelGoodsDTO.setBuy(goods.getBuy());
+                        budgetLabelGoodsDTO.setSales(goods.getSales());
+                        budgetLabelGoodsDTO.setIsInflueDecorationProgress(goods.getIsInflueDecorationProgress());
+
+                        Brand brand =null;
+                        if (!CommonUtil.isEmpty(goods.getBrandId())) {
+                            brand = iBrandMapper.selectByPrimaryKey(goods.getBrandId());
+                        }
+                        if (!CommonUtil.isEmpty(budgetLabelGoodsDTO.getAttributeName())) {
+                            budgetLabelGoodsDTO.setAttributeName(budgetLabelGoodsDTO.getAttributeName().replaceAll(",", " "));
+                        }
+                        if (brand!=null) {
+                            budgetLabelGoodsDTO.setAttributeName(brand.getName()+" "+budgetLabelGoodsDTO.getAttributeName());
+                        }
+                    }
+                    budgetLabelGoodsDTO.setImage(CommonUtil.isEmpty(budgetLabelGoodsDTO.getImage())?"":imageAddress+budgetLabelGoodsDTO.getImage());
+                    budgetLabelGoodss.add(budgetLabelGoodsDTO);
+                }
+            }
+            budgetLabelDTO.setTotalPrice(totalZPrice);
+            budgetLabelDTO.setGoods(budgetLabelGoodss);
+        }
+        return budgetLabelDTOS;
+    }
+    public  List<BudgetLabelGoodsDTO> queryBudgetLabelGoods(String houseId, String workerTypeId){
+        return budgetMaterialMapper.queryBudgetLabelGoods(houseId,workerTypeId);
+    }
+
+    public StorefontInfoDTO getStroreProductInfo(String storefontId, String productId){
+        //根据店铺商品ID查询对应的店铺数据
+        DjBasicsProductTemplate djBasicsProductTemplate=iBasicsProductTemplateMapper.getProductListByStoreproductId(productId);
+        StorefontInfoDTO storefontInfoDTO=new StorefontInfoDTO();
+        if(djBasicsProductTemplate!=null){
+            Map<String,Object> resMap= BeanUtils.beanToMap(djBasicsProductTemplate);
+            //查询对应大类下符合条件的店铺货品及商品
+            List<BasicsGoods> goodsList=iBasicsProductTemplateMapper.getGoodsListByStorefontId(storefontId,djBasicsProductTemplate.getCategoryId());
+            List<DjBasicsProductTemplate> productList=iBasicsProductTemplateMapper.getproductTempListByStorefontId(storefontId,djBasicsProductTemplate.getGoodsId());
+            resMap.put("goodsList",goodsList);
+            resMap.put("productList",productList);
+            storefontInfoDTO=BeanUtils.mapToBean(StorefontInfoDTO.class,resMap);
+            storefontInfoDTO.setProductId(djBasicsProductTemplate.getId());
+            storefontInfoDTO.setGoodsId(djBasicsProductTemplate.getGoodsId());
+        }
+        return storefontInfoDTO;
+    }
+
+    public ServerResponse getproductTempListByStorefontId(String storefontId,String goodsId){
+        List<DjBasicsProductTemplate> productList=iBasicsProductTemplateMapper.getproductTempListByStorefontId(storefontId,goodsId);
+        return  ServerResponse.createBySuccess("查询成功",productList);
+    }
+
+
 }

@@ -3,9 +3,10 @@ package com.dangjia.acg.controller.app.product;
 import com.dangjia.acg.api.app.product.ShopCartAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.dto.product.CartDTO;
-import com.dangjia.acg.service.product.ShopCartservice;
+import com.dangjia.acg.modle.product.ShoppingCart;
+import com.dangjia.acg.service.product.ShopCartService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -14,41 +15,48 @@ import javax.servlet.http.HttpServletRequest;
 public class ShopCartController implements ShopCartAPI {
 
     @Autowired
-    private ShopCartservice shopCartservice;
+    private ShopCartService shopCartservice;
 
     @Override
     @ApiMethod
-    public ServerResponse add(HttpServletRequest request, String userToken, CartDTO cartDTO ) {
-        return shopCartservice.add(request,userToken,cartDTO);
+    public ServerResponse queryCartList(String userToken,  String productId) {
+        return shopCartservice.queryCartList(userToken,productId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse getCartList(HttpServletRequest request, String userToken) {
-        return shopCartservice.getCartList(request,userToken);
+    public ServerResponse delCar(String userToken) {
+        return shopCartservice.delCar(userToken);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse updateCartNum(HttpServletRequest request, String userToken, String productId, int num) {
-        return shopCartservice.updateCartNum(request,userToken,productId,num);
+    public ServerResponse updateCar(HttpServletRequest request, String userToken, String productId, Integer shopCount) {
+        return shopCartservice.updateCart(request,userToken,productId,shopCount);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse checkAll(HttpServletRequest request, String userToken, String checked) {
-        return shopCartservice.checkAll(request,userToken,checked);
+    public ServerResponse addCart(String userToken, String cityId,
+                                  String productId,
+                                  String productSn,String productName,
+                                  String price,String shopCount,
+                                  String unitName,String categoryId,
+                                  String productType,String seller) {
+        return shopCartservice.addCart(userToken, cityId,productId,productSn,productName,price,shopCount,unitName,categoryId,productType,seller);
+    }
+
+
+
+    @Override
+    @ApiMethod
+    public ServerResponse delCheckCart(String userToken,String productId) {
+        return shopCartservice.delCheckCart(userToken,productId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse delCartProduct(HttpServletRequest request, String userToken, String productId) {
-        return shopCartservice.delCartProduct(request,userToken,productId);
-    }
-
-    @Override
-    @ApiMethod
-    public ServerResponse delCart(HttpServletRequest request, String userToken) {
-        return shopCartservice.delCart(request,userToken);
+    public ServerResponse cartSettle(String userToken) {
+        return shopCartservice.cartSettle(userToken);
     }
 }

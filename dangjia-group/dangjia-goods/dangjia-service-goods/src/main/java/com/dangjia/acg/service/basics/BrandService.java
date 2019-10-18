@@ -57,6 +57,7 @@ public class BrandService {
                 Map<String, Object> map = new HashMap<>();
                 map.put("id", brand.getId());
                 map.put("name", brand.getName());
+                map.put("image", brand.getImage());
                 map.put("createDate", brand.getCreateDate().getTime());
                 map.put("modifyDate", brand.getModifyDate().getTime());
                 List<BrandSeries> mapList = iBrandSeriesMapper.queryBrandSeries(brand.getId());
@@ -72,6 +73,7 @@ public class BrandService {
                     mapList2.add(mapSeries);
                 }
                 obj.put("mapList", mapList2);
+                map.put("imageUrl",address+brand.getImage());
                 obj.put("brand", map);
                 list.add(obj);
             }
@@ -99,7 +101,9 @@ public class BrandService {
                 mapSeries.put("imageUrl", imageUrl);
                 mapList2.add(mapSeries);
             }
-            obj.put("brand", brand);
+            Map brandMap=BeanUtils.beanToMap(brand);
+            brandMap.put("imageUrl",address+brand.getImage());
+            obj.put("brand", brandMap);
             obj.put("mapList", mapList2);
             return ServerResponse.createBySuccess("查询成功", obj);
         } catch (Exception e) {
@@ -110,7 +114,7 @@ public class BrandService {
 
     //修改品牌
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse update(String id, String name, String brandSeriesList)throws RuntimeException{
+    public ServerResponse update(String id, String name,String brandImage, String brandSeriesList)throws RuntimeException{
         try {
             List<Brand> brList = iBrandMapper.getBrandByName(name);
             Brand brand1 = iBrandMapper.selectByPrimaryKey(id);
@@ -125,6 +129,7 @@ public class BrandService {
             Brand brand = new Brand();
             brand.setId(id);
             brand.setName(name);
+            brand.setImage(brandImage);
             brand.setModifyDate(new Date());
             iBrandMapper.updateByPrimaryKeySelective(brand);
             JSONArray brandSeriesLists = JSONArray.parseArray(brandSeriesList);
@@ -158,7 +163,7 @@ public class BrandService {
     }
 
     //新增品牌
-    public ServerResponse insert(String brandSeriesList, String name) {
+    public ServerResponse insert(String brandSeriesList, String name,String brandImage) {
         try {
             Example example = new Example(Brand.class);
             example.createCriteria().andEqualTo("name", name);
@@ -168,6 +173,7 @@ public class BrandService {
             }
             Brand brand = new Brand();
             brand.setName(name);
+            brand.setImage(brandImage);
             brand.setCreateDate(new Date());
             brand.setModifyDate(new Date());
             iBrandMapper.insert(brand);
@@ -218,7 +224,9 @@ public class BrandService {
                     mapList2.add(mapSeries);
                 }
                 Map<String, Object> map = new HashMap<String, Object>();
-                map.put("brand", brand);
+                Map brandMap=BeanUtils.beanToMap(brand);
+                brandMap.put("imageUrl",address+brand.getImage());
+                map.put("brand", brandMap);
                 map.put("mapList", mapList2);
                 list.add(map);
             }

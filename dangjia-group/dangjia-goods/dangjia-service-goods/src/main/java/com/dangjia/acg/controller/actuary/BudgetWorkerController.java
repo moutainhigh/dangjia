@@ -69,11 +69,11 @@ public class BudgetWorkerController implements BudgetWorkerAPI {
      *
      * @return
      */
-    @Override
+   /* @Override
     @ApiMethod
     public ServerResponse getAllWorkerGoods(HttpServletRequest request) {
         return budgetWorkerService.getAllWorkerGoods();
-    }
+    }*/
 
     /**
      * 制作精算模板

@@ -30,6 +30,6 @@ public interface IBrandSeriesMapper extends Mapper<BrandSeries> {
 	List<BrandSeries> queryBrandSeries(@Param("brandId") String brandId);
 	/**根据拿到的Id删除品牌*/
 	void deleteById(String brandExplainId);
-	/**根据商品id查询关联品牌系列*/
-	List<BrandSeries> queryBrandByGid(@Param("goodsId") String goodsId);
+	/**根据商品id查询关联品牌系列*//*
+	List<BrandSeries> queryBrandByGid(@Param("goodsId") String goodsId);*/
 }

@@ -1,19 +1,24 @@
 package com.dangjia.acg.service.product.app;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
-import com.dangjia.acg.common.exception.ServerCode;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
-import com.dangjia.acg.mapper.basics.IAttributeMapper;
-import com.dangjia.acg.mapper.basics.IGoodsCategoryMapper;
-import com.dangjia.acg.mapper.basics.IGoodsMapper;
-import com.dangjia.acg.mapper.product.IBasicsGoodsCategoryMapper;
-import com.dangjia.acg.mapper.product.ICategoryLabelMapper;
+import com.dangjia.acg.dto.actuary.AttributeDTO;
+import com.dangjia.acg.mapper.basics.IUnitMapper;
+import com.dangjia.acg.mapper.product.*;
 import com.dangjia.acg.modle.brand.Brand;
-import com.dangjia.acg.modle.product.BasicsGoodsCategory;
-import com.dangjia.acg.modle.product.CategoryLabel;
+import com.dangjia.acg.modle.product.*;
+import com.dangjia.acg.util.StringTool;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,9 +35,19 @@ import java.util.Map;
 public class AppCategoryGoodsService {
 
     @Autowired
+    private IUnitMapper iUnitMapper;
+    @Autowired
     private ICategoryLabelMapper iCategoryLabelMapper;
     @Autowired
     private IBasicsGoodsCategoryMapper iBasicsGoodsCategoryMapper;
+
+    @Autowired
+    private DjBasicsAttributeMapper djBasicsAttributeMapper;
+    @Autowired
+    private DjBasicsMaintainMapper djBasicsMaintainMapper;
+
+    @Autowired
+    private IBasicsProductTemplateMapper iBasicsProductTemplateMapper;
     @Autowired
     private ConfigUtil configUtil;
 
@@ -42,8 +57,14 @@ public class AppCategoryGoodsService {
      * @return
      */
     public ServerResponse queryTopCategoryLabel() {
+        List<CategoryLabel> list =new ArrayList<>();
+        CategoryLabel categoryLabel =new CategoryLabel();
+        categoryLabel.setName("全部");
+        categoryLabel.setId("");
+        list.add(categoryLabel);
         List<CategoryLabel> goodsCategoryList = iCategoryLabelMapper.queryAPPCategoryLabel();
-        return ServerResponse.createBySuccess("查询成功", goodsCategoryList);
+        list.addAll(goodsCategoryList);
+        return ServerResponse.createBySuccess("查询成功", list);
     }
 
     /**
@@ -70,7 +91,7 @@ public class AppCategoryGoodsService {
             mapBrand.put("name","推荐品牌");
             mapBrand.put("type",1);//type: 0=分类ID  1=品牌ID
             List<Map<String, Object>> mapTwoBrandList = new ArrayList<>();
-            List<Brand> brands = iBasicsGoodsCategoryMapper.queryBrandByTopCategoryid(parentId);
+            List<Brand> brands = iBasicsGoodsCategoryMapper.queryBrandByTopCategoryid(parentId,null);
             for (Brand brand : brands) {
                 Map<String, Object> mapTwo = new HashMap<>();
                 mapTwo.put("id", brand.getId());
@@ -108,5 +129,70 @@ public class AppCategoryGoodsService {
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
+
+    /**
+     * 第四部分：二级商品列表搜索页面
+     * @return
+     */
+    public ServerResponse serchCategoryProduct(PageDTO pageDTO, String cityId, String categoryId,String name,String attributeVal, String brandVal,String orderKey) {
+        JSONArray arr = new JSONArray();
+        PageInfo pageResult = null;
+        try {
+
+            if(!CommonUtil.isEmpty(name)){
+                Example example = new Example(DjBasicsMaintain.class);
+                example.createCriteria().andLike(DjBasicsMaintain.SEARCH_ITEM,name);
+                //根据搜索词,查询关键词名称
+                List<DjBasicsMaintain> list = djBasicsMaintainMapper.selectByExample(example);
+                if(list.size() > 0){
+                    name = list.get(0).getKeywordName();
+                }
+            }
+
+            //根据内容模糊搜索商品
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            String[] attributeVals=null;
+            if(!CommonUtil.isEmpty(attributeVal)){
+                attributeVals=attributeVal.split(",");
+            }
+            List<DjBasicsProductTemplate> pList = iBasicsProductTemplateMapper.serchCategoryProduct(categoryId,StringTool.getLikeV(name),brandVal,attributeVals,orderKey);
+            pageResult = new PageInfo<>(pList);
+            for (DjBasicsProductTemplate product : pList) {
+                String convertUnitName = iUnitMapper.selectByPrimaryKey(product.getUnitId()).getName();
+                JSONObject object = new JSONObject();
+                object.put("image", configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + product.getImage());
+                object.put("price", product.getPrice());
+                object.put("unitName", convertUnitName);
+                object.put("gId", product.getId());
+                object.put("name", product.getName());
+                arr.add(object);
+            }
+
+            pageResult.setList(arr);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+        return ServerResponse.createBySuccess("查询成功", pageResult);
+    }
+
+    /**
+     * 第四部分：二级商品品牌筛选数据
+     * @return
+     */
+    public ServerResponse queryBrandDatas(String categoryId,String wordKey) {
+        List<Brand> brands = iBasicsGoodsCategoryMapper.queryBrandByTopCategoryid(categoryId,StringTool.getLikeV(wordKey));
+        return ServerResponse.createBySuccess("查询成功", brands);
+    }
+    /**
+     * 第四部分：二级商品规格筛选数据
+     * @return
+     */
+    public ServerResponse queryAttributeDatas(String categoryId,String wordKey) {
+        List<AttributeDTO> attributeDTOS = djBasicsAttributeMapper.queryAttributeDatas(categoryId,StringTool.getLikeV(wordKey));
+        return ServerResponse.createBySuccess("查询成功", attributeDTOS);
+    }
+
+
     /************************APP 商品3.0 分类模块********************************/
 }

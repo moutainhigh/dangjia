@@ -3,19 +3,26 @@ package com.dangjia.acg.controller.data;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dto.actuary.BudgetLabelDTO;
+import com.dangjia.acg.dto.actuary.BudgetLabelGoodsDTO;
+import com.dangjia.acg.dto.product.ProductWorkerDTO;
+import com.dangjia.acg.dto.product.StorefontInfoDTO;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
-import com.dangjia.acg.modle.basics.Goods;
-import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.Technology;
-import com.dangjia.acg.modle.basics.WorkerGoods;
+import com.dangjia.acg.modle.product.BasicsGoods;
+import com.dangjia.acg.modle.product.DjBasicsProduct;
+import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
 import com.dangjia.acg.service.data.ForMasterService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.xml.ws.Response;
 import java.util.List;
+import java.util.Map;
 
 /**
  * author: Ronalcheng
@@ -69,19 +76,19 @@ public class ForMasterController implements ForMasterAPI {
         return forMasterService.byTechnologyId(technologyId);
     }
 
-    @Override
+    /*@Override
     @ApiMethod
     public String brandSeriesName(String cityId,String productId){
         return forMasterService.brandSeriesName(productId);
-    }
+    }*/
     @Override
     @ApiMethod
     public String brandName(String cityId,String productId){
         return forMasterService.brandName(productId);
     }
-    @Override
+   @Override
     @ApiMethod
-    public WorkerGoods getWorkerGoods(String cityId,String workerGoodsId){
+    public ProductWorkerDTO getWorkerGoods(String cityId, String workerGoodsId){
         return forMasterService.getWorkerGoods(workerGoodsId);
     }
 
@@ -93,14 +100,17 @@ public class ForMasterController implements ForMasterAPI {
     }
     @Override
     @ApiMethod
-    public Goods getGoods(String cityId,String goodsId){
+    public BasicsGoods getGoods(String cityId, String goodsId){
         return forMasterService.getGoods(goodsId);
     }
     @Override
     @ApiMethod
-    public Product getProduct(String cityId, String productId){
+    public DjBasicsProductTemplate getProduct(String cityId, String productId){
         return forMasterService.getProduct(productId);
     }
+
+
+
 
     @Override
     @ApiMethod
@@ -151,4 +161,26 @@ public class ForMasterController implements ForMasterAPI {
         return forMasterService.getNotCaiPrice(houseId,workerTypeId);
     }
 
+    /*********************商品3.0改造**************************/
+    @Override
+    @ApiMethod
+    public List<BudgetLabelDTO> queryBudgetLabel(String houseId, String workerTypeId, String cityId){
+        return forMasterService.queryBudgetLabel(houseId,workerTypeId);
+    }
+    @Override
+    @ApiMethod
+    public  List<BudgetLabelGoodsDTO> queryBudgetLabelGoods(String houseId, String workerTypeId, String cityId){
+        return forMasterService.queryBudgetLabelGoods(houseId,workerTypeId);
+    }
+
+    @Override
+    @ApiMethod
+    public StorefontInfoDTO getStroreProductInfo(String cityId, String storefontId, String productId){
+        return forMasterService.getStroreProductInfo(storefontId,productId);
+    }
+    @Override
+    @ApiMethod
+    public ServerResponse getproductTempListByStorefontId(String cityId, String storefontId, String goodsId){
+        return forMasterService.getproductTempListByStorefontId(storefontId,goodsId);
+    }
 }

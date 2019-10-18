@@ -44,11 +44,11 @@ public class ActuaryOperationController implements ActuaryOperationAPI {
         return actuaryOperationService.selectProduct(goodsId,  selectVal,  attributeIdArr, budgetMaterialId);
     }
 
-    @Override
+    /*@Override
     @ApiMethod
     public ServerResponse getCommo(HttpServletRequest request, String gId, String cityId, int type) {
         return actuaryOperationService.getCommo(gId, type);
-    }
+    }*/
 
     @Override
     @ApiMethod

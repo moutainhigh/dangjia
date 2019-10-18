@@ -196,9 +196,9 @@ public class House extends BaseEntity {
     private Integer again;
 
     @Column(name = "house_type")
-    @Desc(value = "装修的房子类型0：新房；1：老房")
+    @Desc(value = "装修的房子类型0：新房；1：老房(yf")
     @ApiModelProperty("装修的房子类型0：新房；1：老房")
-    private Integer houseType;
+    private String houseType;
 
     @Column(name = "drawings")
     @Desc(value = "有无图纸0：无图纸；1：有图纸")
@@ -271,6 +271,7 @@ public class House extends BaseEntity {
     private Integer isType;
 
 
+
     @Transient
     private String houseId;
     @Transient
@@ -295,6 +296,21 @@ public class House extends BaseEntity {
     public House() {
 
     }
+
+    public Integer getDesignerState() {
+        if (visitState == 4) {
+            return 3;
+        }
+        return designerOk;
+    }
+
+    public Integer getBudgetState() {
+        if (visitState == 4) {
+            return 3;
+        }
+        return budgetOk;
+    }
+
 
     public House(boolean isIni) {
         if (isIni) {
@@ -326,14 +342,15 @@ public class House extends BaseEntity {
                 + (CommonUtil.isEmpty(getNumber()) ? "*" : getNumber()) + "号";
     }
 
-    public boolean equals(Object obj){
-        if(obj instanceof House){
-            House house=(House) obj;
+    public boolean equals(Object obj) {
+        if (obj instanceof House) {
+            House house = (House) obj;
             return (house.getId().equals(house.getId()));
         }
         return super.equals(obj);
     }
-    public int hashCode(){
+
+    public int hashCode() {
         return id.hashCode();
     }
 }

@@ -29,4 +29,5 @@ public class PaymentDTO<T> {
     private int type;
     private String agreementName;//协议名
     private String agreementUrl;//协议链接
+
 }

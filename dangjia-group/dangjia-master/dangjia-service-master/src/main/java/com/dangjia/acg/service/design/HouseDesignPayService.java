@@ -93,6 +93,7 @@ public class HouseDesignPayService {
                 return insertBusinessOrder(house, payConfiguration, worker);
             } else {
                 house.setPlaneFrequency(planeFrequency + 1);
+                house.setDataStatus(0);
                 house.setDesignerOk(6);
                 if (hwo != null) {
                     configMessageService.addConfigMessage(null, AppType.GONGJIANG, hwo.getWorkerId(), "0", "平面图未通过", String.format(DjConstants.PushMessage.PLANE_ERROR, house.getHouseName()), "");
@@ -110,6 +111,7 @@ public class HouseDesignPayService {
             } else {
                 house.setConstructionFrequency(constructionFrequency + 1);
                 house.setDesignerOk(8);
+                house.setDataStatus(0);
                 if (hwo != null) {
                     configMessageService.addConfigMessage(null, AppType.GONGJIANG, hwo.getWorkerId(), "0", "施工图未通过", String.format(DjConstants.PushMessage.CONSTRUCTION_ERROR, house.getHouseName()), "");
                 }
@@ -184,7 +186,7 @@ public class HouseDesignPayService {
                 designPayDTO.setMessage("您当前已确认设计图需支付修改精算费用" + payConfiguration.getSumMoney().setScale(2, BigDecimal.ROUND_HALF_UP) + "元。");
                 break;
             case 4:
-                if (house.getBudgetOk() == 3) {
+                if (house.getBudgetState() == 3) {
                     example = new Example(PayConfiguration.class);
                     Example.Criteria criteria = example.createCriteria()
                             .andEqualTo(PayConfiguration.DATA_STATUS, 0);
@@ -224,6 +226,8 @@ public class HouseDesignPayService {
             designPayDTO.setButUrl(webAddress + "paymentAgreement?title=设计服务须知&protocolTpye=3");
             designPayDTO.setMoneyMessage("设计改图费用:¥" + order.getSumMoney().setScale(2, BigDecimal.ROUND_HALF_UP));
         }
+        house.setDataStatus(0);
+        houseMapper.updateByPrimaryKeySelective(house);
         return ServerResponse.createByErrorNeedToPay(designPayDTO);
     }
 
@@ -254,6 +258,7 @@ public class HouseDesignPayService {
                 }
                 house.setPlaneFrequency(planeFrequency + 1);
                 house.setDesignerOk(6);
+                house.setDataStatus(0);
                 if (hwo != null) {
                     configMessageService.addConfigMessage(null, AppType.GONGJIANG, hwo.getWorkerId(), "0", "平面图未通过", String.format(DjConstants.PushMessage.PLANE_ERROR, house.getHouseName()), "");
                 }
@@ -266,6 +271,7 @@ public class HouseDesignPayService {
                 }
                 house.setConstructionFrequency(constructionFrequency + 1);
                 house.setDesignerOk(8);
+                house.setDataStatus(0);
                 if (hwo != null) {
                     configMessageService.addConfigMessage(null, AppType.GONGJIANG, hwo.getWorkerId(), "0", "施工图未通过", String.format(DjConstants.PushMessage.CONSTRUCTION_ERROR, house.getHouseName()), "");
                 }
@@ -282,6 +288,7 @@ public class HouseDesignPayService {
                 if (designBusinessOrders != null && designBusinessOrders.size() > 0) {
                     designBusinessOrder.setOperationState(2);
                     house.setBudgetOk(1);
+                    house.setDataStatus(0);
                     DesignBusinessOrder order = designBusinessOrders.get(0);
                     order.setOperationState(2);
                     if (hwo != null) {
@@ -406,7 +413,7 @@ public class HouseDesignPayService {
             DesignBusinessOrder order = designBusinessOrders.get(0);
             if (order.getOperationState() == 1) {
                 if (type == 1) {
-                    if (house.getBudgetOk() == 3) {
+                    if (house.getBudgetState() == 3) {
                         example = new Example(PayConfiguration.class);
                         Example.Criteria criteria = example.createCriteria()
                                 .andEqualTo(PayConfiguration.DATA_STATUS, 0);

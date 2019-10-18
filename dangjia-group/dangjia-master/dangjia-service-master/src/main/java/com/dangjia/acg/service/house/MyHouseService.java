@@ -93,9 +93,9 @@ public class MyHouseService {
         Example example = new Example(House.class);
         example.createCriteria()
                 .andEqualTo(House.MEMBER_ID, memberId)
+                .andNotEqualTo(House.VISIT_STATE, 2);
 //                .andNotEqualTo(House.VISIT_STATE, 0)
-                .andNotEqualTo(House.VISIT_STATE, 2)
-                .andEqualTo(House.DATA_STATUS, 0);
+//                .andEqualTo(House.DATA_STATUS, 0);
         return example;
     }
 
@@ -341,10 +341,10 @@ public class MyHouseService {
                 .andEqualTo(MendOrder.STATE, 3);//补材料审核状态全通过
         mendOrderList = mendOrderMapper.selectByExample(example);
         task += mendOrderList.size();
-        if (house.getDesignerOk() == 5 || house.getDesignerOk() == 2) {
+        if (house.getDesignerState() == 5 || house.getDesignerState() == 2) {
             task++;
         }
-        if (house.getBudgetOk() == 2) {
+        if (house.getBudgetState() == 2) {
             task++;
         }
         //验收任务

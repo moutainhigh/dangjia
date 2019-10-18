@@ -31,28 +31,19 @@ public interface MemberCollectAPI {
 
 
     @RequestMapping(value = "member/collect/add", method = RequestMethod.POST)
-    @ApiOperation(value = "添加收藏", notes = "添加收藏，conditionType:0->代表收藏房子 1->代表收藏商品")
+    @ApiOperation(value = "添加收藏", notes = "添加收藏，collectType:0->代表收藏房子 1->代表收藏商品")
     ServerResponse addMemberCollect(@RequestParam("request") HttpServletRequest request,
-                                    @RequestParam("houseId") String houseId,@RequestParam("conditionType") String conditionType);
+                                    @RequestParam("houseId") String houseId,@RequestParam("collectType") String collectType);
 
     @RequestMapping(value = "member/collect/check", method = RequestMethod.POST)
-    @ApiOperation(value = "检测是否收藏", notes = "检测是否收藏，conditionType:0->代表收藏房子 1->代表收藏商品")
+    @ApiOperation(value = "检测是否收藏", notes = "检测是否收藏，collectType:0->代表收藏房子 1->代表收藏商品")
     ServerResponse isMemberCollect(@RequestParam("request") HttpServletRequest request,
-                                   @RequestParam("houseId") String houseId,@RequestParam("conditionType") String conditionType);
+                                   @RequestParam("houseId") String houseId,@RequestParam("collectType") String collectType);
 
     @RequestMapping(value = "member/collect/del", method = RequestMethod.POST)
-    @ApiOperation(value = "取消收藏", notes = "取消收藏,conditionType:0->代表收藏房子 1->代表收藏商品")
+    @ApiOperation(value = "取消收藏", notes = "取消收藏,collectType:0->代表收藏房子 1->代表收藏商品")
     ServerResponse delMemberCollect(@RequestParam("request") HttpServletRequest request,
-                                    @RequestParam("houseId") String houseId,@RequestParam("conditionType") String conditionType);
-
-
-    /**
-     * 我的收藏：查看更多工地 需求有问题，待开发
-     */
-
-    /**
-     * 推荐用户点击最多类别的商品，在类别内随机推荐   需求有问题，待开发
-     */
+                                    @RequestParam("houseId") String houseId,@RequestParam("collectType") String collectType);
 
 }
 
