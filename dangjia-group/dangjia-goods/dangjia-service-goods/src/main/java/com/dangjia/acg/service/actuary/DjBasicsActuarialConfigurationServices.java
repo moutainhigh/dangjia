@@ -90,6 +90,15 @@ public class DjBasicsActuarialConfigurationServices {
                 List<ActuarialTemplateConfigDTO> djBasicsActuarialConfigurationDTOS = djActuarialTemplateConfigMapper.queryActuarialTemplateConfig(null);
                 if(djBasicsActuarialConfigurationDTOS!=null&&djBasicsActuarialConfigurationDTOS.size()>0){
                     actuarialTemplateConfigDTO=djBasicsActuarialConfigurationDTOS.get(0);
+                    if(actuarialTemplateConfigDTO.getProductList()!=null&&actuarialTemplateConfigDTO.getProductList().size()>0){
+                        List productList=new ArrayList();
+                        for(int i=0;i<actuarialTemplateConfigDTO.getProductList().size();i++){
+                            Map productMap=(Map)actuarialTemplateConfigDTO.getProductList().get(i);
+                            productMap.put("prodList",getProdListByGoodsID((String)productMap.get("goodsId")));//商品列表
+                            productList.add(productMap);
+                        }
+                        actuarialTemplateConfigDTO.setProductList(productList);
+                    }
 
                 }
             }
@@ -199,18 +208,23 @@ public class DjBasicsActuarialConfigurationServices {
     public ServerResponse getActuarialProductListByGoodsId(String goodsId){
         try {
             logger.info("查询当前货品下所有已上架的商品");
-            Example example=new Example(DjBasicsProductTemplate.class);
-            example.createCriteria().andEqualTo(DjBasicsProductTemplate.DATA_STATUS,0).
-                    andEqualTo(DjBasicsProductTemplate.MAKET,1).
-                    andEqualTo(DjBasicsProductTemplate.TYPE,1).
-                    andEqualTo(DjBasicsProductTemplate.GOODS_ID,goodsId);
-            List<DjBasicsProductTemplate> mapList = iBasicsProductTemplateMapper.selectByExample(example);
-            return ServerResponse.createBySuccess("查询成功", mapList);
+
+            return ServerResponse.createBySuccess("查询成功", getProdListByGoodsID( goodsId));
         } catch (Exception e) {
             logger.error("getActuarialProductListByGoodsId查询失败:",e);
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
+    private List<DjBasicsProductTemplate> getProdListByGoodsID(String goodsId){
+        Example example=new Example(DjBasicsProductTemplate.class);
+        example.createCriteria().andEqualTo(DjBasicsProductTemplate.DATA_STATUS,0).
+                andEqualTo(DjBasicsProductTemplate.MAKET,1).
+                andEqualTo(DjBasicsProductTemplate.TYPE,1).
+                andEqualTo(DjBasicsProductTemplate.GOODS_ID,goodsId);
+        List<DjBasicsProductTemplate> mapList = iBasicsProductTemplateMapper.selectByExample(example);
+        return mapList;
+    }
+
 
     /**
      *
