@@ -40,8 +40,22 @@ public class StorefrontService {
     @Autowired
     private ConfigUtil configUtil;
 
-
-
+    /**
+     * 根据用户Id查询店铺信息
+     * @param userId
+     * @return
+     */
+    public Storefront queryStorefrontByUserID(String userId) {
+        try {
+            Example example=new Example(Storefront.class);
+            example.createCriteria().andEqualTo(Storefront.USER_ID,userId);
+            Storefront storefront =istorefrontMapper.selectByExample(example).get(0);
+            return storefront;
+        } catch (Exception e) {
+            logger.error("查询失败",e);
+            return null;
+        }
+    }
     /**
      * 根据Id查询店铺信息
      * @param id
@@ -133,7 +147,7 @@ public class StorefrontService {
             //判断是否重复添加
             Example example=new Example(Storefront.class);
             example.createCriteria().andEqualTo(Storefront.CITY_ID,cityId).
-                    andEqualTo(Storefront.STOREFRONT_NAME,storefrontName).andEqualTo(Storefront.CONTACT,contact);
+                    andEqualTo(Storefront.USER_ID,userId);
             List<Storefront> list=istorefrontMapper.selectByExample(example);
             if(list.size()>0)
             {
