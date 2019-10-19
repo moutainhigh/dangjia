@@ -1888,6 +1888,8 @@ public class HouseService {
                 ServiceType serviceType = serviceTypeAPI.getServiceTypeById(houseListDTO.getCityId(),houseListDTO.getHouseType());
                 if(serviceType!=null&&StringUtils.isNotBlank(serviceType.getName())){
                     houseListDTO.setHouseTypeName(serviceType.getName());
+                }else{
+                    houseListDTO.setHouseTypeName("0".equals(houseListDTO.getHouseType())?"新房装修":"旧房装修");
                 }
             }
             pageResult.setList(houseList);

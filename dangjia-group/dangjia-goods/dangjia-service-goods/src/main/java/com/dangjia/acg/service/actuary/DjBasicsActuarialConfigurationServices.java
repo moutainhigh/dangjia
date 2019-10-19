@@ -242,7 +242,7 @@ public class DjBasicsActuarialConfigurationServices {
        //编辑（添加修改标题 下的选项值详情信息）
         JSONArray jsonArr = JSONArray.parseArray(configDetailArr);
         editSimulateTemplateDetailList(jsonArr,djSimulationTemplateConfig);
-        return  ServerResponse.createByErrorMessage("保存成功");
+        return  ServerResponse.createBySuccessMessage("保存成功");
     }
 
     /**
