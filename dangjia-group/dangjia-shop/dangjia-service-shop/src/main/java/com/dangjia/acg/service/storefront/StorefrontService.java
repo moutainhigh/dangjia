@@ -65,9 +65,16 @@ public class StorefrontService {
     public ServerResponse queryStorefrontById(String id) {
         try {
             Storefront storefront = istorefrontMapper.selectByPrimaryKey(id);
-            return ServerResponse.createBySuccess("修改成功!",storefront);
+            if(storefront!=null)
+            {
+                return ServerResponse.createBySuccess("检索到数据",storefront);
+            }
+            else
+            {
+                return ServerResponse.createBySuccess("没有检索到数据");
+            }
         } catch (Exception e) {
-            logger.error("修改失败：", e);
+            logger.error("查询失败：", e);
             return ServerResponse.createByErrorMessage("修改失败");
         }
     }
