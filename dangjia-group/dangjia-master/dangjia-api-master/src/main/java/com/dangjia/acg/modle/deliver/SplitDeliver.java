@@ -136,4 +136,31 @@ public class SplitDeliver extends BaseEntity {
     @Desc(value = "操作收货人id")
     @ApiModelProperty("操作收货人id")
     private String operatorId;
+
+
+    @Column(name = "storefront_id")
+    @Desc(value = "店铺ID")
+    @ApiModelProperty("店铺ID")
+    private String storefrontId;
+
+    @Column(name = "install_name")
+    @Desc(value = "安装人姓名")
+    @ApiModelProperty("安装人姓名")
+    private String installName;
+
+    @Column(name = "install_mobile")
+    @Desc(value = "安装人号码")
+    @ApiModelProperty("安装人号码")
+    private String installMobile;
+
+    @Column(name = "delibery_name")
+    @Desc(value = "送货人姓名")
+    @ApiModelProperty("送货人姓名")
+    private String deliberyName;
+
+    @Column(name = "delivery_mobile")
+    @Desc(value = "送货人号码")
+    @ApiModelProperty("送货人号码")
+    private String deliveryMobile;
+
 }

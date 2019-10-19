@@ -60,6 +60,17 @@ public class OrderSplit extends BaseEntity {
 	@Desc(value = "工种id")
 	@ApiModelProperty("工种id")
 	private String workerTypeId;
+
+	@Column(name = "subscribe")
+	@Desc(value = "是否需要预约")
+	@ApiModelProperty("是否需要预约")
+	private String subscribe;
+
+	@Column(name = "storefront_id")
+	@Desc(value = "店铺ID")
+	@ApiModelProperty("店铺ID")
+	private String storefrontId;
+
 }
 
 

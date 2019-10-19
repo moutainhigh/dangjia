@@ -1,16 +1,18 @@
 package com.dangjia.acg.service.storefront;
 
 import cn.jiguang.common.utils.StringUtils;
+import com.alibaba.fastjson.JSON;
+import com.dangjia.acg.api.product.DjBasicsProductAPI;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.storefront.StorefrontProductListDTO;
 import com.dangjia.acg.dto.storefront.BasicsStorefrontProductDTO;
 import com.dangjia.acg.dto.storefront.BasicsStorefrontProductViewDTO;
 import com.dangjia.acg.mapper.storefront.IStorefrontProductMapper;
+import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -26,6 +28,9 @@ public class StorefrontProductService {
     private static Logger logger = LoggerFactory.getLogger(StorefrontService.class);
     @Autowired
     private IStorefrontProductMapper istorefrontProductMapper;
+
+    @Autowired
+    private DjBasicsProductAPI djBasicsProductAPI ;
 
 
     /**
@@ -52,10 +57,27 @@ public class StorefrontProductService {
             if (list.size() > 0) {
                 return ServerResponse.createByErrorMessage("店铺商品已经添加，不能重复添加!商品模板ID:"+list.get(0).getProdTemplateId());
             }
-
+            DjBasicsProductTemplate djBasicsProductTemplate=null;
+            ServerResponse serverResponse=djBasicsProductAPI.getProductById(null,basicsStorefrontProductDTO.getProdTemplateId());
+            if (serverResponse != null && serverResponse.getResultObj() != null) {
+                djBasicsProductTemplate = JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), DjBasicsProductTemplate.class);
+            }
             StorefrontProduct storefrontProduct = new StorefrontProduct();
-            BeanUtils.copyProperties(storefrontProduct, basicsStorefrontProductDTO);//实体对象赋值
-            int i = istorefrontProductMapper.insertSelective(storefrontProduct);
+            storefrontProduct.setStorefrontId(basicsStorefrontProductDTO.getStorefrontId());
+            storefrontProduct.setImage(basicsStorefrontProductDTO.getImage());
+            storefrontProduct.setDetailImage(basicsStorefrontProductDTO.getDetailImage());
+            storefrontProduct.setMarketName(basicsStorefrontProductDTO.getMarketName());
+            storefrontProduct.setSellPrice(basicsStorefrontProductDTO.getSellPrice());
+            storefrontProduct.setSuppliedNum(basicsStorefrontProductDTO.getSuppliedNum());
+            storefrontProduct.setIsUpstairsCost(basicsStorefrontProductDTO.getIsUpstairsCost());
+            storefrontProduct.setIsDeliveryInstall(basicsStorefrontProductDTO.getIsDeliveryInstall());
+            storefrontProduct.setMoveCost(basicsStorefrontProductDTO.getMoveCost());
+            storefrontProduct.setIsShelfStatus(basicsStorefrontProductDTO.getIsShelfStatus());
+            storefrontProduct.setProdTemplateId(basicsStorefrontProductDTO.getProdTemplateId());
+            storefrontProduct.setGoodsId( djBasicsProductTemplate.getGoodsId());
+            storefrontProduct.setProductName(djBasicsProductTemplate.getName());
+            System.out.println(storefrontProduct.toString());
+            int i = istorefrontProductMapper.insert(storefrontProduct);
             if (i > 0) {
                 return ServerResponse.createBySuccessMessage("增加店铺商品成功");
             } else {

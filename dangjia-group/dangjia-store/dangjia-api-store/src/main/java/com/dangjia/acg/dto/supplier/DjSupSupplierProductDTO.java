@@ -28,4 +28,6 @@ public class DjSupSupplierProductDTO extends BaseEntity {
     private String supplyRelationship;//供应关系 0:供应 1:停供
     private Double adjustPrice;//调后价格
     private Date adjustTime;//调价时间
+    private String valueNameArr;
+    private String valueIdArr;
 }

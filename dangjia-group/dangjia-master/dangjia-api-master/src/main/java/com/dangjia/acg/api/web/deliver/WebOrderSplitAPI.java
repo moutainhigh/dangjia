@@ -41,6 +41,17 @@ public interface WebOrderSplitAPI {
     ServerResponse sentSupplier(@RequestParam("orderSplitId") String orderSplitId,
                                 @RequestParam("splitItemList") String splitItemList);
 
+    @PostMapping("web/deliver/orderSplit/sentSupplierNew")
+    @ApiOperation(value = "发送供应商", notes = "发送供应商")
+    ServerResponse sentSupplierNew(@RequestParam("orderSplitId") String orderSplitId,
+                                   @RequestParam("splitItemList") String splitItemList,
+                                   @RequestParam("installName") String installName,
+                                   @RequestParam("installMobile") String installMobile,
+                                   @RequestParam("deliberyName") String deliberyName,
+                                   @RequestParam("deliveryMobile") String deliveryMobile
+    );
+
+
     @PostMapping("web/deliver/orderSplit/cancelOrderSplit")
     @ApiOperation(value = "取消打回", notes = "取消打回")
     ServerResponse cancelOrderSplit(@RequestParam("orderSplitId") String orderSplitId);

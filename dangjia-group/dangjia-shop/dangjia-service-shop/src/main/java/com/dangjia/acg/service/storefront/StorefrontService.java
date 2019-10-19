@@ -1,11 +1,12 @@
 package com.dangjia.acg.service.storefront;
 
 import cn.jiguang.common.utils.StringUtils;
-import com.dangjia.acg.api.app.member.MemberAPI;
 import com.dangjia.acg.api.supplier.DjSupplierAPI;
+import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.storefront.StorefrontDTO;
 import com.dangjia.acg.dto.storefront.StorefrontListDTO;
 import com.dangjia.acg.mapper.storefront.IStorefrontMapper;
@@ -36,8 +37,25 @@ public class StorefrontService {
     @Autowired
     private DjSupplierAPI djSupplierAPI;
 
+    @Autowired
+    private ConfigUtil configUtil;
 
-
+    /**
+     * 根据用户Id查询店铺信息
+     * @param userId
+     * @return
+     */
+    public Storefront queryStorefrontByUserID(String userId) {
+        try {
+            Example example=new Example(Storefront.class);
+            example.createCriteria().andEqualTo(Storefront.USER_ID,userId);
+            Storefront storefront =istorefrontMapper.selectByExample(example).get(0);
+            return storefront;
+        } catch (Exception e) {
+            logger.error("查询失败",e);
+            return null;
+        }
+    }
     /**
      * 根据Id查询店铺信息
      * @param id
@@ -53,6 +71,27 @@ public class StorefrontService {
         }
     }
 
+    /**
+     * 根据Id查询店铺信息
+     * @param id
+     * @return
+     */
+    public ServerResponse queryStorefrontById(String id) {
+        try {
+            Storefront storefront = istorefrontMapper.selectByPrimaryKey(id);
+            if(storefront!=null)
+            {
+                return ServerResponse.createBySuccess("检索到数据",storefront);
+            }
+            else
+            {
+                return ServerResponse.createBySuccess("没有检索到数据",storefront);
+            }
+        } catch (Exception e) {
+            logger.error("查询失败：", e);
+            return ServerResponse.createByErrorMessage("修改失败");
+        }
+    }
 
     /**
      *  根据调件模糊查询店铺信息
@@ -108,7 +147,7 @@ public class StorefrontService {
             //判断是否重复添加
             Example example=new Example(Storefront.class);
             example.createCriteria().andEqualTo(Storefront.CITY_ID,cityId).
-                    andEqualTo(Storefront.STOREFRONT_NAME,storefrontName).andEqualTo(Storefront.CONTACT,contact);
+                    andEqualTo(Storefront.USER_ID,userId);
             List<Storefront> list=istorefrontMapper.selectByExample(example);
             if(list.size()>0)
             {
@@ -166,11 +205,15 @@ public class StorefrontService {
      */
     public ServerResponse querySupplierApplicationShopList(PageDTO pageDTO, String searchKey, String applicationStatus, String userId, String cityId) {
         try {
+            String imageaddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             DjSupplier djSupplier = djSupplierAPI.querySingleDjSupplier(userId, cityId);
             if(null==djSupplier)
                 return ServerResponse.createByErrorMessage("暂无店铺信息");
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<StorefrontListDTO> storefrontListDTOS = istorefrontMapper.querySupplierApplicationShopList(searchKey, djSupplier.getId(), applicationStatus);
+            List<StorefrontListDTO> storefrontListDTOS = istorefrontMapper.querySupplierApplicationShopList(searchKey, djSupplier.getId(), applicationStatus,cityId);
+            storefrontListDTOS.forEach(storefrontListDTO -> {
+                storefrontListDTO.setStorefrontLogo(imageaddress+storefrontListDTO.getStorefrontLogo());
+            });
             PageInfo pageResult = new PageInfo(storefrontListDTOS);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
@@ -189,16 +232,21 @@ public class StorefrontService {
      */
     public ServerResponse querySupplierSelectionSupply( PageDTO pageDTO, String searchKey, String userId, String cityId) {
         try {
+            String imageaddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             DjSupplier djSupplier = djSupplierAPI.querySingleDjSupplier(userId, cityId);
             if(null==djSupplier)
                 return ServerResponse.createByErrorMessage("暂无店铺信息");
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<StorefrontListDTO> storefrontListDTOS = istorefrontMapper.querySupplierSelectionSupply(searchKey, djSupplier.getId());
+            List<StorefrontListDTO> storefrontListDTOS = istorefrontMapper.querySupplierSelectionSupply(searchKey, djSupplier.getId(),cityId);
+            storefrontListDTOS.forEach(storefrontListDTO -> {
+                storefrontListDTO.setStorefrontLogo(imageaddress+storefrontListDTO.getStorefrontLogo());
+            });
             PageInfo pageResult = new PageInfo(storefrontListDTOS);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             logger.error("查询失败：", e);
             return ServerResponse.createByErrorMessage("查询失败");
+
         }
     }
 }

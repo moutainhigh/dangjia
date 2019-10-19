@@ -26,7 +26,7 @@ public class BasicsStorefrontProductDTO {
     /**
      * 商品名称
      */
-    private String goodsId;
+   private String goodsId;
 
 
     /**

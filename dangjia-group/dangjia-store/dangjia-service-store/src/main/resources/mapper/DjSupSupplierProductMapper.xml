@@ -31,6 +31,8 @@
             bpt. NAME AS productName,
             bpt.image,
             bg.attribute_id_arr AS attributeIdArr,
+            bpt.value_name_arr AS valueNameArr,
+            bpt.value_id_arr as valueIdArr,
             sap.price,
             sap.stock,
             bpt.price AS salesPrice,
@@ -46,8 +48,8 @@
         LEFT JOIN (SELECT * FROM (select * from dj_adjust_record  order by create_date DESC) b GROUP BY b.application_product_id) ar ON ar.application_product_id=sap.id
         WHERE
             sap.sup_id = #{supId}
-            sap.shop_id = #{shopId}
-            sap.application_status=#{applicationStatus}
+            and sap.shop_id = #{shopId}
+            and sap.application_status=#{applicationStatus}
     </select>
 
 
@@ -80,6 +82,36 @@
                 bpt.product_sn LIKE CONCAT('%',#{searchKey},'%')
                 )
             </if>
+    </select>
+
+    <select id="queryNotForTheGoods" resultType="com.dangjia.acg.dto.supplier.DjSupSupplierProductDTO">
+        SELECT
+            ssp.id,
+            ssp.goods_id AS goodsId,
+            ssp.product_id AS productId,
+            bg. NAME AS goodsName,
+            bpt. NAME AS productName,
+            bpt.image,
+            bg.attribute_id_arr AS attributeIdArr,
+            bpt.value_name_arr AS valueNameArr,
+            bpt.value_id_arr as valueIdArr,
+            ssp.price,
+            ssp.stock,
+            bpt.price AS salesPrice,
+            bpt.cartage_price AS cartagePrice,
+            bg.is_elevator_fee AS isElevatorFee
+        FROM
+            dj_sup_supplier_product ssp
+        INNER JOIN dj_basics_goods bg ON ssp.goods_id = bg.id
+        INNER JOIN dj_basics_product_template bpt ON ssp.product_id = bpt.id
+        WHERE
+            ssp.supplier_id = #{supId}
+        <if test="null!=productIds and productIds.size>0">
+            and ssp.product_id not in
+            <foreach collection="productIds" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
     </select>
 
 </mapper>

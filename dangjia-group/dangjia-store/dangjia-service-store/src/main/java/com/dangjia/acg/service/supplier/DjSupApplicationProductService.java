@@ -12,15 +12,15 @@ import com.dangjia.acg.dto.supplier.DjSupplierDTO;
 import com.dangjia.acg.mapper.supplier.*;
 import com.dangjia.acg.modle.supplier.DjAdjustRecord;
 import com.dangjia.acg.modle.supplier.DjSupApplicationProduct;
-import com.dangjia.acg.modle.supplier.DjSupSupplierProduct;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import tk.mybatis.mapper.entity.Example;
-
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created with IntelliJ IDEA.
@@ -39,6 +39,7 @@ public class DjSupApplicationProductService {
     private DjSupSupplierProductMapper djSupSupplierProductMapper;
     @Autowired
     private DjAdjustRecordMapper djAdjustRecordMapper;
+    private Logger logger = LoggerFactory.getLogger(DjSupApplicationProductService.class);
 
 
     @Autowired
@@ -247,7 +248,37 @@ public class DjSupApplicationProductService {
      * @return
      */
     public List<SupplyDimensionDTO> queryDjSupSupplierProductList(String supId, String searchKey) {
-        List<SupplyDimensionDTO> supplyDimensionDTOS = djSupSupplierProductMapper.queryDjSupSupplierProductList(supId, searchKey);
-        return supplyDimensionDTOS;
+        try {
+            List<SupplyDimensionDTO> supplyDimensionDTOS = djSupSupplierProductMapper.queryDjSupSupplierProductList(supId, searchKey);
+            return supplyDimensionDTOS;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return  null;
+    }
+
+
+    /**
+     * 查询未供商品
+     * @param supId
+     * @param shopId
+     * @return
+     */
+    public ServerResponse queryNotForTheGoods(String supId, String shopId) {
+        try {
+            List<DjSupSupplierProductDTO> djSupSupplierProductDTOS = djSupSupplierProductMapper.queryHaveGoods(supId, shopId,"1");
+            //Stream表达式取出已选商品的id
+            List<String> productIds=djSupSupplierProductDTOS.stream()
+                    .map(DjSupSupplierProductDTO::getProductId)
+                    .collect(Collectors.toList());
+            List<DjSupSupplierProductDTO> djSupSupplierProductDTOS1 = djSupSupplierProductMapper.queryNotForTheGoods(supId, productIds);
+            if(djSupSupplierProductDTOS1.size()<=0){
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
+            }
+            return ServerResponse.createBySuccess("查询成功",djSupSupplierProductDTOS1);
+        } catch (Exception e) {
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败"+e);
+        }
     }
 }

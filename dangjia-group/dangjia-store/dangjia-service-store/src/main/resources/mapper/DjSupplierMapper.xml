@@ -82,10 +82,13 @@
             create_date,
             modify_date,
             data_status,
-            user_id,
-            city_id,
-            name,
-            address
+            user_id userId,
+            city_id cityId,
+            NAME,
+            address,
+            check_people checkPeople,
+            telephone,
+            email
         FROM dj_supplier
         where city_id=#{cityId}
         and user_id=#{userId}
