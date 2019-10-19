@@ -71,7 +71,7 @@ public class StorefrontService {
             }
             else
             {
-                return ServerResponse.createBySuccess("没有检索到数据");
+                return ServerResponse.createBySuccess("没有检索到数据",storefront);
             }
         } catch (Exception e) {
             logger.error("查询失败：", e);
