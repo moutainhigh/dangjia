@@ -25,6 +25,8 @@ public class SimulationTemplateConfigDTO {
     @ApiModelProperty("模板类型：A图片和文字，B仅图片，C仅文字")
     private String configType;
 
+    private String addressUrl;
+
     @ApiModelProperty("标题详情列表")
     private List<SimulationTemplateConfigDetailDTO>  simulationDetailList;//
 }
