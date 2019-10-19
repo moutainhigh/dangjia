@@ -591,6 +591,7 @@ public class PaymentService {
             HouseWorker houseWorker = houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), 1);
             houseWorker.setWorkType(6);
             hwo.setModifyDate(new Date());
+            houseWorker.setModifyDate(new Date());
             houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
 
             houseFlow.setWorkerId(hwo.getWorkerId());
@@ -1286,21 +1287,11 @@ public class PaymentService {
                     // protocolTpye=4 9.9设计商品定义
                     // protocolTpye=5 18.8设计商品定义
                     // protocolTpye=6 28.8设计商品定义
+                    // protocolTpye=7 88.8设计商品定义
                     if (house.getStyle() != null) {
-                        switch (house.getStyle()) {
-                            case "极简需求":
-                                paymentDTO.setAgreementName("《设计服务须知》");
-                                paymentDTO.setAgreementUrl(webAddress + "paymentAgreement?title=设计服务须知&protocolTpye=4");
-                                break;
-                            case "简单装修":
-                                paymentDTO.setAgreementName("《设计服务须知》");
-                                paymentDTO.setAgreementUrl(webAddress + "paymentAgreement?title=设计服务须知&protocolTpye=5");
-                                break;
-                            case "个性化":
-                                paymentDTO.setAgreementName("《设计服务须知》");
-                                paymentDTO.setAgreementUrl(webAddress + "paymentAgreement?title=设计服务须知&protocolTpye=6");
-                                break;
-                        }
+                        paymentDTO.setAgreementName("《设计服务须知》");
+                        //orderList字段对应前端h5的protocolTpye
+                        paymentDTO.setAgreementUrl(webAddress + "paymentAgreement?title=设计服务须知&protocolTpye="+houseStyleType.getOrderList());
                     }
                 } else if (houseFlow.getWorkerType() == 2) {
                     paymentDTO.setAgreementName("《精算服务须知》");
