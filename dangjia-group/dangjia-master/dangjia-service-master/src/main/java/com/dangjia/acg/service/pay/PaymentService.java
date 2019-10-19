@@ -1287,6 +1287,7 @@ public class PaymentService {
                     // protocolTpye=4 9.9设计商品定义
                     // protocolTpye=5 18.8设计商品定义
                     // protocolTpye=6 28.8设计商品定义
+                    // protocolTpye=7 88.8设计商品定义
                     if (house.getStyle() != null) {
                         paymentDTO.setAgreementName("《设计服务须知》");
                         //orderList字段对应前端h5的protocolTpye
