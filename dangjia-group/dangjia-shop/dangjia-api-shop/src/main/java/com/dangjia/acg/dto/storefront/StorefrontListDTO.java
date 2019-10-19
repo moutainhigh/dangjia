@@ -55,7 +55,7 @@ public class StorefrontListDTO {
     /**
      * 联系电话
      */
-    private String contact;
+    private String mobile;
 
 
     /**

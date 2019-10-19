@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.member;
 
+import com.dangjia.acg.api.BasicsStorefrontAPI;
 import com.dangjia.acg.api.MessageAPI;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.sup.SupplierProductAPI;
@@ -33,6 +34,7 @@ import com.dangjia.acg.modle.menu.MenuConfiguration;
 import com.dangjia.acg.modle.other.City;
 import com.dangjia.acg.modle.store.Store;
 import com.dangjia.acg.modle.store.StoreUser;
+import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.modle.worker.Insurance;
@@ -122,6 +124,11 @@ public class MemberService {
     private IStoreMapper iStoreMapper;
     @Autowired
     private IStoreUserMapper iStoreUserMapper;
+
+
+
+    @Autowired
+    private BasicsStorefrontAPI basicsStorefrontAPI ;
 
     /**
      * 获取用户手机号
@@ -214,6 +221,15 @@ public class MemberService {
     }
 
     ServerResponse getUser(Member user, Integer userRole) {
+        //通过用户ID获取店铺信息,然后存储到reids中
+        Storefront Storefront = basicsStorefrontAPI.queryStorefrontByUserID(user.getId());
+        if(Storefront!=null)
+        {
+            redisClient.put(Constants.FENGJIAN_STOREFRONT+user.getId(), Storefront);
+        }
+
+
+
         if (userRole == 1) {
             Example example = new Example(Customer.class);
             example.createCriteria().andEqualTo(Customer.MEMBER_ID, user.getId());

@@ -12,7 +12,7 @@
           `storefront_desc` AS storefrontDesc,
           `storefront_logo` AS storefrontLogo,
           `storekeeper_name` AS storekeeperName,
-          `contact`,
+          `mobile`,
           `email`,
           `create_date` AS createDate,
           `modify_date` AS modifyDate,
@@ -32,7 +32,7 @@
             a.`storefront_desc` AS storefrontDesc,
             a.`storefront_logo` AS storefrontLogo,
             a.`storekeeper_name` AS storekeeperName,
-            a.`contact`,
+            a.`mobile`,
             a.`email`,
             a.`create_date` AS createDate,
             a.`modify_date` AS modifyDate,
@@ -48,7 +48,7 @@
         <if test="null!=searchKey and ''!=searchKey">
             and (
             a.storefront_name LIKE CONCAT('%',#{searchKey},'%') or
-            a.contact LIKE CONCAT('%',#{searchKey},'%')
+            a.mobile LIKE CONCAT('%',#{searchKey},'%')
             )
         </if>
         <if test="applicationStatus=='-1'.toString()">
@@ -69,7 +69,7 @@
         <if test="null!=searchKey and ''!=searchKey">
             and (
             storefront_name LIKE CONCAT('%',#{searchKey},'%') or
-            contact LIKE CONCAT('%',#{searchKey},'%') or
+            mobile LIKE CONCAT('%',#{searchKey},'%') or
             storekeeper_name LIKE CONCAT('%',#{searchKey},'%')
             )
         </if>
@@ -88,7 +88,7 @@
             a.`storefront_desc` AS storefrontDesc,
             a.`storefront_logo` AS storefrontLogo,
             a.`storekeeper_name` AS storekeeperName,
-            a.`contact`,
+            a.`mobile`,
             a.`email`,
             a.`create_date` AS createDate,
             a.`modify_date` AS modifyDate,
@@ -104,7 +104,7 @@
         <if test="null!=searchKey and ''!=searchKey">
             and (
             a.storefront_name LIKE CONCAT('%',#{searchKey},'%') or
-            a.contact LIKE CONCAT('%',#{searchKey},'%')
+            a.mobile LIKE CONCAT('%',#{searchKey},'%')
             )
         </if>
         and b.application_status=1

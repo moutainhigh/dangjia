@@ -8,6 +8,8 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpServletRequest;
+
 
 @FeignClient("dangjia-service-master")
 @Api(value = "发货统计管理web接口", description = "发货统计管理web接口")
@@ -16,7 +18,7 @@ public interface WebSplitReportAPI {
 
     @PostMapping("web/deliver/split/report/suppliers")
     @ApiOperation(value = "指定房子所有发货的供应商", notes = "指定房子所有发货的供应商")
-    ServerResponse getSplitReportSuppliers(@RequestParam("houseId") String houseId);
+    ServerResponse getSplitReportSuppliers(@RequestParam("request") HttpServletRequest request,@RequestParam("houseId") String houseId);
 
     /*根据供应商和房子查看要货订单*/
     @PostMapping("web/deliver/split/report/deliverOrder")

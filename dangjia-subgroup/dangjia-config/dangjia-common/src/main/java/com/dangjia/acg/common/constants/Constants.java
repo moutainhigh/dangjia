@@ -5,6 +5,11 @@ package com.dangjia.acg.common.constants;
  */
 public final class Constants {
 
+  /**
+   * 店铺信息
+   */
+  public static final String FENGJIAN_STOREFRONT = "fengjian_storefront";
+
 
   /**
    * 加密密钥

@@ -2,6 +2,7 @@ package com.dangjia.acg.service.deliver;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.api.BasicsStorefrontAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
@@ -80,6 +81,7 @@ public class OrderSplitService {
     private IComplainMapper complainMapper;
     @Autowired
     private ConfigMessageService configMessageService;
+
 
     /**
      * 修改 供应商结算状态
@@ -563,11 +565,11 @@ public class OrderSplitService {
     /**
      * 材料员看房子列表
      */
-    public ServerResponse getHouseList(String cityId,PageDTO pageDTO, String likeAddress,String startDate, String endDate) {
+    public ServerResponse getHouseList(String storefrontId,String cityId,PageDTO pageDTO, String likeAddress,String startDate, String endDate) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
 //        List<House> houseList = houseMapper.selectAll();
-            List<House> houseList = houseMapper.getByLikeAddress(cityId,likeAddress,startDate,endDate);
+            List<House> houseList = houseMapper.getByLikeAddress(storefrontId,cityId,likeAddress,startDate,endDate);
             PageInfo pageResult = new PageInfo(houseList);
 
             List<DeliverHouseDTO> deliverHouseDTOList = new ArrayList<DeliverHouseDTO>();

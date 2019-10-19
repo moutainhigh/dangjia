@@ -30,6 +30,12 @@ public class StorefrontController implements BasicsStorefrontAPI {
 
     @Override
     @ApiMethod
+    public Storefront queryStorefrontByUserID(String userId) {
+        return storefrontService.queryStorefrontByUserID(userId);
+    }
+
+    @Override
+    @ApiMethod
     public Storefront querySingleStorefrontById( String id) {
         return storefrontService.querySingleStorefrontById(id);
     }
@@ -49,9 +55,9 @@ public class StorefrontController implements BasicsStorefrontAPI {
     @Override
     @ApiMethod
     public ServerResponse addStorefront(String userId, String cityId, String storefrontName, String storefrontAddress,
-                                        String storefrontDesc, String storefrontLogo, String storekeeperName, String contact, String email) {
+                                        String storefrontDesc, String storefrontLogo, String storekeeperName, String mobile, String email) {
         return storefrontService.addStorefront(userId, cityId, storefrontName, storefrontAddress, storefrontDesc,
-                storefrontLogo, storekeeperName, contact, email);
+                storefrontLogo, storekeeperName, mobile, email);
     }
 
     @Override

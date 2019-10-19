@@ -113,7 +113,7 @@ public class StorefrontService {
     public ServerResponse addStorefront(String userId, String cityId, String storefrontName,
                                         String storefrontAddress, String storefrontDesc,
                                         String storefrontLogo, String storekeeperName,
-                                        String contact, String email) {
+                                        String mobile, String email) {
         try {
 //            Object object = constructionService.getMember(userToken);
 //            if (object instanceof ServerResponse) {
@@ -141,7 +141,7 @@ public class StorefrontService {
             storefront.setStorefrontDesc(storefrontDesc);
             storefront.setStorefrontLogo(storefrontLogo);
             storefront.setStorekeeperName(storekeeperName);
-            storefront.setContact(contact);
+            storefront.setMobile(mobile);
             storefront.setEmail(email);
 
             //判断是否重复添加

@@ -144,7 +144,7 @@ public class DjDeliveryReturnSlipService {
                 Storefront storefront = basicsStorefrontAPI.querySingleStorefrontById(supplierSettlementManagementDTO.getShopId());
                 supplierSettlementManagementDTO.setShopId(storefront.getId());
                 supplierSettlementManagementDTO.setStorefrontName(storefront.getStorefrontName());
-                supplierSettlementManagementDTO.setContact(storefront.getContact());
+                supplierSettlementManagementDTO.setMobile(storefront.getMobile());
                 supplierSettlementManagementDTO.setStorekeeperName(storefront.getStorekeeperName());
             });
             if (supplierSettlementManagementDTOS.size() <= 0)

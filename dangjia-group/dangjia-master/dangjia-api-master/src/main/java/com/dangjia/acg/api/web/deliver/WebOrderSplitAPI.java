@@ -9,6 +9,8 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpServletRequest;
+
 
 @FeignClient("dangjia-service-master")
 @Api(value = "发货管理web接口", description = "发货管理web接口")
@@ -66,7 +68,8 @@ public interface WebOrderSplitAPI {
 
     @PostMapping("web/deliver/orderSplit/getHouseList")
     @ApiOperation(value = "材料员看房子列表", notes = "材料员看房子列表")
-    ServerResponse getHouseList(@RequestParam("cityId") String cityId,
+    ServerResponse getHouseList(@RequestParam("request") HttpServletRequest request,
+                                @RequestParam("cityId") String cityId,
                                 @RequestParam("pageDTO") PageDTO pageDTO,
                                 @RequestParam("likeAddress") String likeAddress,
                                 @RequestParam("startDate")String startDate,

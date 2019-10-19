@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.engineer;
 
+import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
@@ -30,6 +31,7 @@ import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.matter.WorkerDisclosure;
 import com.dangjia.acg.modle.matter.WorkerEveryday;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.worker.Insurance;
 import com.dangjia.acg.modle.worker.RewardPunishCondition;
 import com.dangjia.acg.modle.worker.RewardPunishRecord;
@@ -92,6 +94,8 @@ public class EngineerService {
     @Autowired
     private IHouseStyleTypeMapper houseStyleTypeMapper;
 
+    @Autowired
+    private RedisClient redisClient;
     /**
      * 已支付换工匠
      */
@@ -819,10 +823,14 @@ public class EngineerService {
         }
     }
 
-    public ServerResponse getWareHouse(String houseId, PageDTO pageDTO) {
+    public ServerResponse getWareHouse( HttpServletRequest request,String houseId, PageDTO pageDTO) {
+        String userID = request.getParameter(Constants.USERID);
+        //通过缓存查询店铺信息
+        Storefront storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userID,Storefront.class);
+
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         Example example = new Example(Warehouse.class);
-        example.createCriteria().andEqualTo(Warehouse.HOUSE_ID, houseId);
+        example.createCriteria().andEqualTo(Warehouse.HOUSE_ID, houseId).andEqualTo(Warehouse.STOREFRONT_ID,storefront.getId());
         example.orderBy(Warehouse.PRODUCT_SN).desc();
         List<Warehouse> warehouseList = iWarehouseMapper.selectByExample(example);
         if (warehouseList == null) {

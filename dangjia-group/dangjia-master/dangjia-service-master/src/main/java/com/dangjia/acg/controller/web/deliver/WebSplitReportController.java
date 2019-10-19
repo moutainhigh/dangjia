@@ -8,6 +8,8 @@ import com.dangjia.acg.service.deliver.SplitDeliverReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+
 
 @RestController
 public class WebSplitReportController implements WebSplitReportAPI {
@@ -22,8 +24,8 @@ public class WebSplitReportController implements WebSplitReportAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getSplitReportSuppliers(String houseId){
-        return splitDeliverReportService.getSplitReportSuppliers(houseId);
+    public ServerResponse getSplitReportSuppliers(HttpServletRequest request,String houseId){
+        return splitDeliverReportService.getSplitReportSuppliers(request,houseId);
     }
 
     /**

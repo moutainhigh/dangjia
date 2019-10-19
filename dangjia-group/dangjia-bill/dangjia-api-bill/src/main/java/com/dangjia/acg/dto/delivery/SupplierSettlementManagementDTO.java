@@ -13,7 +13,7 @@ public class SupplierSettlementManagementDTO {
     private String shopId;
     private String storefrontName;//店铺名称
     private String supId;
-    private String contact;//店铺联系电话
+    private String mobile;//店铺联系电话
     private Integer count;
     private String storekeeperName;//店铺联系人
 

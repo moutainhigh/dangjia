@@ -109,7 +109,7 @@ public interface WebEngineerAPI {
     ServerResponse getMemberStyles(@RequestParam("request") HttpServletRequest request,@RequestParam("mamberId")  String mamberId);
     @PostMapping(value = "web/engineer/getWareHouse")
     @ApiOperation(value = "仓库列表", notes = "仓库列表")
-    ServerResponse getWareHouse(@RequestParam("houseId") String houseId,
+    ServerResponse getWareHouse(@RequestParam("request") HttpServletRequest request,@RequestParam("houseId") String houseId,
                                @RequestParam("pageDTO") PageDTO pageDTO);
 
     @GetMapping("/web/engineer/exportWareHouse")

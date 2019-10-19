@@ -147,6 +147,11 @@ public class Warehouse extends BaseEntity {
 	@ApiModelProperty("业主退")
 	private Double ownerBack;//业主退
 
+	@Column(name = "storefront_id")
+	@Desc(value = "店铺表ID")
+	@ApiModelProperty("店铺表ID")
+	private String storefrontId;
+
 	public void initPath(String address){
 		this.image = StringUtils.isEmpty(this.image)?null:address+this.image;
 	}

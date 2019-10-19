@@ -16,7 +16,7 @@
           b.storefront_desc as storefrontDesc,
           b.storefront_logo as storefrontLogo,
           b.storekeeper_name as storekeeperName,
-          b.contact,
+          b.mobile,
           b.email
         FROM
             dj_sup_application a
@@ -29,7 +29,7 @@
         <if test="null!=searchKey and ''!=searchKey">
             AND (
             b.storefront_name LIKE CONCAT('%',#{searchKey},'%') or
-            b.contact LIKE CONCAT('%',#{searchKey},'%')
+            b.mobile LIKE CONCAT('%',#{searchKey},'%')
             )
         </if>
     </select>

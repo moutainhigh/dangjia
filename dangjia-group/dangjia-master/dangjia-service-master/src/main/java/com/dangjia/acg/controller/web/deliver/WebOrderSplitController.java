@@ -1,13 +1,19 @@
 package com.dangjia.acg.controller.web.deliver;
 
+import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.web.deliver.WebOrderSplitAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.SerializeUtils;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
+import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.service.deliver.OrderSplitService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
 
 
 @RestController
@@ -16,6 +22,8 @@ public class WebOrderSplitController implements WebOrderSplitAPI {
     @Autowired
     private OrderSplitService orderSplitService;//生成发货单
 
+    @Autowired
+    private RedisClient redisClient;
 
     /**
      * 供应商发货
@@ -104,8 +112,12 @@ public class WebOrderSplitController implements WebOrderSplitAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getHouseList( String cityId,PageDTO pageDTO, String likeAddress,String startDate, String endDate) {
-        return orderSplitService.getHouseList(cityId,pageDTO, likeAddress, startDate,  endDate);
+    public ServerResponse getHouseList(HttpServletRequest request, String cityId, PageDTO pageDTO, String likeAddress, String startDate, String endDate) {
+        //redisClient.put(SUFFIX + sessionId.toString(), SerializeUtils.serialize(session));
+        String userID = request.getParameter(Constants.USERID);
+        //通过缓存查询店铺信息
+        Storefront storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userID,Storefront.class);
+        return orderSplitService.getHouseList(storefront.getId(),cityId,pageDTO, likeAddress, startDate,  endDate);
     }
 
     @Override
