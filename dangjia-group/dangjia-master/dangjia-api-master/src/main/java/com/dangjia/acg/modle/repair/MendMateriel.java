@@ -121,4 +121,8 @@ public class MendMateriel extends BaseEntity {
 	}
 
 
+	@Column(name = "storefront_id")
+	@Desc(value = "店铺ID")
+	@ApiModelProperty("店铺ID")
+	private String storefrontId;
 }

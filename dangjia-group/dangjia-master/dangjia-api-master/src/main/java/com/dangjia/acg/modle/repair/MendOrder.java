@@ -88,4 +88,10 @@ public class MendOrder extends BaseEntity {
 	@ApiModelProperty("实际总价（不含运费）")
 	private Double actualTotalAmount;
 
+
+	@Column(name = "storefront_id")
+	@Desc(value = "店铺ID")
+	@ApiModelProperty("店铺ID")
+	private String storefrontId;
+
 }

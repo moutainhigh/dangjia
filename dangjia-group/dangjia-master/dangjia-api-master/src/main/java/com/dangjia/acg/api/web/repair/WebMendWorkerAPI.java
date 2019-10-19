@@ -8,6 +8,8 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * author: Ronalcheng
  * Date: 2018/12/11 0011
@@ -19,7 +21,8 @@ public interface WebMendWorkerAPI {
 
     @PostMapping(value = "web/repair/webMendWorker/workerBackState")
     @ApiOperation(value = "查询退人工列表", notes = "查询退人工列表")
-    ServerResponse workerBackState(@RequestParam("houseId") String houseId,
+    ServerResponse workerBackState(@RequestParam("request") HttpServletRequest request,
+                                   @RequestParam("houseId") String houseId,
                                    @RequestParam("pageDTO") PageDTO pageDTO,
                                    @RequestParam("beginDate") String beginDate,
                                    @RequestParam("endDate") String endDate,
@@ -31,9 +34,11 @@ public interface WebMendWorkerAPI {
 
     @PostMapping(value = "web/repair/webMendWorker/workerOrderState")
     @ApiOperation(value = "补人工单列表", notes = "补人工单列表")
-    ServerResponse workerOrderState(@RequestParam("houseId") String houseId,
-                                    @RequestParam("pageDTO") PageDTO pageDTO,
-                                    @RequestParam("beginDate") String beginDate,
-                                    @RequestParam("endDate") String endDate,
-                                    @RequestParam("likeAddress") String likeAddress);
+    ServerResponse workerOrderState(
+            @RequestParam("request") HttpServletRequest request,
+            @RequestParam("houseId") String houseId,
+            @RequestParam("pageDTO") PageDTO pageDTO,
+            @RequestParam("beginDate") String beginDate,
+            @RequestParam("endDate") String endDate,
+            @RequestParam("likeAddress") String likeAddress);
 }

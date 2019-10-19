@@ -39,6 +39,9 @@ public class DjSupplierServices {
     @Autowired
     private DjSupApplicationMapper djSupApplicationMapper ;
 
+    public DjSupplier queryDjSupplierByPass(String supplierId) {
+        return djSupplierMapper.queryDjSupplierByPass(supplierId);
+    }
 
     /**
      * 根据userId查询供应商信息

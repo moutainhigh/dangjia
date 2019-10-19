@@ -3,6 +3,7 @@ package com.dangjia.acg.service.deliver;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.data.ForMasterAPI;
+import com.dangjia.acg.api.supplier.DjSupplierAPI;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
@@ -27,6 +28,7 @@ import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.sup.Supplier;
+import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,7 +69,8 @@ public class SplitDeliverService {
     private CraftsmanConstructionService constructionService;
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
-
+    @Autowired
+    private DjSupplierAPI djSupplierAPI ;
     /**
      * 部分收货
      */
@@ -324,11 +327,12 @@ public class SplitDeliverService {
                 splitDeliverDTO.setNumber(splitDeliver.getNumber());
                 splitDeliverDTO.setSendTime(splitDeliver.getSendTime());//发货时间
                 splitDeliverDTO.setRecTime(splitDeliver.getRecTime());//收货时间
-                Supplier supplier = forMasterAPI.getSupplier(house.getCityId(), splitDeliver.getSupplierId());
-                if (supplier != null) {
-                    splitDeliverDTO.setSupId(supplier.getId());//供应商id
-                    splitDeliverDTO.setSupMobile(supplier.getTelephone());
-                    splitDeliverDTO.setSupName(supplier.getName());
+                //Supplier supplier = forMasterAPI.getSupplier(house.getCityId(), splitDeliver.getSupplierId());
+                DjSupplier djSupplier =djSupplierAPI.queryDjSupplierByPass(splitDeliver.getSupplierId());
+                if (djSupplier != null) {
+                    splitDeliverDTO.setSupId(djSupplier.getId());//供应商id
+                    splitDeliverDTO.setSupMobile(djSupplier.getTelephone());
+                    splitDeliverDTO.setSupName(djSupplier.getName());
                 }
                 splitDeliverDTO.setTotalAmount(splitDeliver.getTotalAmount());
                 example = new Example(OrderSplitItem.class);

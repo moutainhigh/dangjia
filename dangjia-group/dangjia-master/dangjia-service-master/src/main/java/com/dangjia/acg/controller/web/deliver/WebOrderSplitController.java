@@ -73,21 +73,14 @@ public class WebOrderSplitController implements WebOrderSplitAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse sentSupplier(String orderSplitId, String splitItemList) {
-        return orderSplitService.sentSupplier(orderSplitId, splitItemList);
+    public ServerResponse sentSupplier(String orderSplitId, String splitItemList, String installName
+            , String installMobile
+            , String deliberyName
+            , String deliveryMobile) {
+        return orderSplitService.sentSupplier(orderSplitId, splitItemList, installName, installMobile, deliberyName, deliveryMobile);
     }
 
-    /**
-     * 发送供应商
-     * 分发不同供应商
-     */
-    @Override
-    @ApiMethod
-    public ServerResponse sentSupplierNew(String orderSplitId, String splitItemList,
-                                          String installName,String installMobile,
-                                          String deliberyName,String deliveryMobile) {
-        return orderSplitService.sentSupplierNew(orderSplitId, splitItemList,installName,installMobile,deliberyName,deliveryMobile);
-    }
+
 
     @Override
     @ApiMethod
