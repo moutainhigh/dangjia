@@ -605,11 +605,12 @@ public class OrderSplitService {
     /**
      * 根据房子id查询要货单列表
      */
-    public ServerResponse getOrderSplitList(String houseId) {
+    public ServerResponse getOrderSplitList(String storefrontId,String houseId) {
         try {
             Example example = new Example(OrderSplit.class);
             example.createCriteria()
                     .andEqualTo(OrderSplit.HOUSE_ID, houseId)
+                    .andEqualTo(OrderSplit.STOREFRONT_ID,storefrontId)
                     .andGreaterThan(OrderSplit.APPLY_STATUS, 0)//大于0
                     .andNotEqualTo(OrderSplit.APPLY_STATUS, 4);//过滤业主未支付
             example.orderBy(OrderSplit.CREATE_DATE).desc();

@@ -21,7 +21,7 @@ public interface IBusinessOrderMapper extends Mapper<BusinessOrder> {
 
     BusinessOrder byTaskId(@Param("taskId") String taskId, @Param("type") int type);
 
-    List<WebOrderDTO> getWebOrderList(@Param("cityId") String cityId,@Param("state") Integer state, @Param("searchKey") String searchKey,@Param("sellerId") String sellerId);
+    List<WebOrderDTO> getWebOrderList(@Param("cityId") String cityId,@Param("state") Integer state, @Param("searchKey") String searchKey,@Param("storefrontId") String storefrontId);
 
     List<OrderItemByDTO> getOrderItem(@Param("number") String number);
 }

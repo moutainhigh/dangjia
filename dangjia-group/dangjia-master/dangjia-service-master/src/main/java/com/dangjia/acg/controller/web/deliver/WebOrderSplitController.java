@@ -122,8 +122,11 @@ public class WebOrderSplitController implements WebOrderSplitAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getOrderSplitList(String houseId) {
-        return orderSplitService.getOrderSplitList(houseId);
+    public ServerResponse getOrderSplitList(HttpServletRequest request,String houseId) {
+        String userID = request.getParameter(Constants.USERID);
+        //通过缓存查询店铺信息
+        Storefront storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userID,Storefront.class);
+        return orderSplitService.getOrderSplitList(storefront.getId(),houseId);
     }
 
     @Override

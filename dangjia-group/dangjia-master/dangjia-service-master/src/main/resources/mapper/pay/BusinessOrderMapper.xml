@@ -83,6 +83,7 @@
         b.create_date AS createDate,
         a.type AS type,
         a.image ,
+        a.storefront_id as storefrontId,
         a.state AS state,
         a.task_id AS taskId,
         b.pay_state AS payType,
@@ -100,6 +101,9 @@
         )
         WHERE
         a.data_status = 0
+        <if test="storefrontId!=null and storefrontId!=''">
+            and a.storefront_id = #{storefrontId}
+        </if>
         <if test="state != -1">
             and a.state = #{state}
         </if>
