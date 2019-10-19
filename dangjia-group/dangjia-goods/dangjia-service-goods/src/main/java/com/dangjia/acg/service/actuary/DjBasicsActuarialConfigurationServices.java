@@ -242,7 +242,7 @@ public class DjBasicsActuarialConfigurationServices {
        //编辑（添加修改标题 下的选项值详情信息）
         JSONArray jsonArr = JSONArray.parseArray(configDetailArr);
         editSimulateTemplateDetailList(jsonArr,djSimulationTemplateConfig);
-        return  ServerResponse.createByErrorMessage("保存成功");
+        return  ServerResponse.createBySuccessMessage("保存成功");
     }
 
     /**
@@ -309,8 +309,9 @@ public class DjBasicsActuarialConfigurationServices {
      * @return
      */
     public ServerResponse querySimulateionTemplateConfig(){
+        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         try{
-            List<SimulationTemplateConfigDTO> simulationTemplateConfigDTOList=djSimulationTemplateConfigMapper.querySimulateionTemplateConfig(null);
+            List<SimulationTemplateConfigDTO> simulationTemplateConfigDTOList=djSimulationTemplateConfigMapper.querySimulateionTemplateConfig(null,address);
             return ServerResponse.createBySuccess("查询成功", simulationTemplateConfigDTOList);
         } catch (Exception e) {
             logger.error("querySimulateionTemplateConfig查询失败:",e);
@@ -325,10 +326,11 @@ public class DjBasicsActuarialConfigurationServices {
      * @return
      */
     public ServerResponse querySimulateionTemplateConfigById(String simulationTemplateId){
+        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         try{
             SimulationTemplateConfigDTO simulationTemplateConfigDTO=new SimulationTemplateConfigDTO();
             if(StringUtils.isNotBlank(simulationTemplateId)){
-                List<SimulationTemplateConfigDTO> simulationTemplateConfigDTOList=djSimulationTemplateConfigMapper.querySimulateionTemplateConfig(simulationTemplateId);
+                List<SimulationTemplateConfigDTO> simulationTemplateConfigDTOList=djSimulationTemplateConfigMapper.querySimulateionTemplateConfig(simulationTemplateId,address);
                 if(simulationTemplateConfigDTOList!=null&&simulationTemplateConfigDTOList.size()>0){
                     simulationTemplateConfigDTO=simulationTemplateConfigDTOList.get(0);
 
