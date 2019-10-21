@@ -276,14 +276,14 @@ public class DjSupApplicationProductService {
      */
     public ServerResponse queryNotForTheGoods(String supId, String shopId) {
         try {
-            List<DjSupSupplierProductDTO> djSupSupplierProductDTOS = djSupSupplierProductMapper.queryHaveGoods(supId, shopId,"1");
+            List<DjSupSupplierProductDTO> djSupSupplierProductDTOS = djSupSupplierProductMapper.queryHaveGoods(supId, shopId, "1");
             //Stream表达式取出已选商品的id
-            List<String> productIds=djSupSupplierProductDTOS.stream()
+            List<String> productIds = djSupSupplierProductDTOS.stream()
                     .map(DjSupSupplierProductDTO::getProductId)
                     .collect(Collectors.toList());
             List<DjSupSupplierProductDTO> djSupSupplierProductDTOS1 = djSupSupplierProductMapper.queryNotForTheGoods(supId, productIds);
-            if(djSupSupplierProductDTOS1.size()<=0){
-                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
+            if (djSupSupplierProductDTOS1.size() <= 0) {
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
             return ServerResponse.createBySuccess("查询成功",djSupSupplierProductDTOS1);
         } catch (Exception e) {

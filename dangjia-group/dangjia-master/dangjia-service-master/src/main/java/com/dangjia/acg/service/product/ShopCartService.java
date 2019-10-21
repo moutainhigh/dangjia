@@ -244,13 +244,10 @@ public class ShopCartService {
             Member operator = (Member) object;
             //第一步
             //购物车结算：生成订单方法{获取购物车商品，插入订单}，并返回订单ID
-            Example example = new Example(ShoppingCart.class);
-            example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, operator.getId());
-            List<ShoppingCart> list = iShoppingCartmapper.selectByExample(example);
-            for(ShoppingCart shoppingCart :list)
-            {
+            /**
+             *    购物车有变动，重写
+             */
 
-            }
             return null;
         } catch (Exception e) {
             return ServerResponse.createByErrorMessage("系统报错，删除已选商品失败!");
