@@ -327,7 +327,16 @@ public class ForMasterService {
             storefontInfoDTO=BeanUtils.mapToBean(StorefontInfoDTO.class,resMap);
             storefontInfoDTO.setProductId(djBasicsProductTemplate.getId());
             storefontInfoDTO.setGoodsId(djBasicsProductTemplate.getGoodsId());
+            storefontInfoDTO.setStorefontId(storefontId);
         }
+        return storefontInfoDTO;
+    }
+
+    public StorefontInfoDTO getStroreProductInfoById(String productId){
+        //根据店铺商品ID查询对应的店铺数据
+        DjBasicsProductTemplate djBasicsProductTemplate=iBasicsProductTemplateMapper.getProductListByStoreproductId(productId);
+        StorefontInfoDTO storefontInfoDTO=new StorefontInfoDTO();
+        BeanUtils.beanToBean(storefontInfoDTO,djBasicsProductTemplate);
         return storefontInfoDTO;
     }
 

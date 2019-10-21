@@ -10,12 +10,13 @@ import java.util.List;
 @Data
 @ApiModel
 public class StorefontInfoDTO {
-    private String productId;
+    private String productId;//商品ID
+    private String storefontId;//店铺ID
     private String name;
     private String goodsId;
     private String categoryId;
     private String productSn;
-    private BigDecimal price;
+    private Double price;
     private String image;
     List goodsList;
     List productList;
