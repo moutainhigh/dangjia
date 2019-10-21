@@ -87,7 +87,7 @@ public class DjBasicsActuarialConfigurationServices {
         try {
             ActuarialTemplateConfigDTO actuarialTemplateConfigDTO=new ActuarialTemplateConfigDTO();
             if(StringUtils.isNotBlank(actuarialTemplateId)){
-                List<ActuarialTemplateConfigDTO> djBasicsActuarialConfigurationDTOS = djActuarialTemplateConfigMapper.queryActuarialTemplateConfig(null);
+                List<ActuarialTemplateConfigDTO> djBasicsActuarialConfigurationDTOS = djActuarialTemplateConfigMapper.queryActuarialTemplateConfig(actuarialTemplateId);
                 if(djBasicsActuarialConfigurationDTOS!=null&&djBasicsActuarialConfigurationDTOS.size()>0){
                     actuarialTemplateConfigDTO=djBasicsActuarialConfigurationDTOS.get(0);
                     if(actuarialTemplateConfigDTO.getProductList()!=null&&actuarialTemplateConfigDTO.getProductList().size()>0){

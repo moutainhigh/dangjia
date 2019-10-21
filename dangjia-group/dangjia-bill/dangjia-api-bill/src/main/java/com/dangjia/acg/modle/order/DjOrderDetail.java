@@ -10,6 +10,8 @@ import lombok.experimental.FieldNameConstants;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
 
 /**
  * Created with IntelliJ IDEA.
@@ -46,47 +48,47 @@ public class DjOrderDetail extends BaseEntity {
     @Column(name = "purchase_price")
     @Desc(value = "购买单价")
     @ApiModelProperty("购买单价")
-    private String purchasePrice;//购买单价
+    private Double purchasePrice;//购买单价
 
     @Column(name = "purchase_number")
     @Desc(value = "购买数量")
     @ApiModelProperty("购买数量")
-    private String purchaseNumber;//购买数量
+    private Double purchaseNumber;//购买数量
 
     @Column(name = "total_purchase_price")
     @Desc(value = "购买总价")
     @ApiModelProperty("购买总价")
-    private String totalPurchasePrice;//购买总价
+    private Double totalPurchasePrice;//购买总价
 
     @Column(name = "discount_price")
     @Desc(value = "优惠价钱")
     @ApiModelProperty("优惠价钱")
-    private String discountPrice;//优惠价钱
+    private Double discountPrice;//优惠价钱
 
     @Column(name = "actual_payment_price")
     @Desc(value = "实付价钱")
     @ApiModelProperty("实付价钱")
-    private String actualPaymentPrice;//实付价钱
+    private Double actualPaymentPrice;//实付价钱
 
     @Column(name = "stevedorage_cost")
     @Desc(value = "搬运费")
     @ApiModelProperty("搬运费")
-    private String stevedorageCost;//搬运费
+    private Double stevedorageCost;//搬运费
 
     @Column(name = "transportation_cost")
     @Desc(value = "运费")
     @ApiModelProperty("运费")
-    private String transportationCost;//运费
+    private Double transportationCost;//运费
 
     @Column(name = "required_number")
     @Desc(value = "已要货数量")
     @ApiModelProperty("已要货数量")
-    private String requiredNumber;//已要货数量
+    private Double requiredNumber;//已要货数量
 
     @Column(name = "shipment_number")
     @Desc(value = "已发货数量")
     @ApiModelProperty("已发货数量")
-    private String shipmentNumber;//已发货数量
+    private Double shipmentNumber;//已发货数量
 
     @Column(name = "order_type")
     @Desc(value = "订单类型（1设计，2精算，3其它）")

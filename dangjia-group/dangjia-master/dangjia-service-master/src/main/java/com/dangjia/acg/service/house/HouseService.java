@@ -25,6 +25,7 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.HouseFlowDTO;
 import com.dangjia.acg.dto.house.*;
 import com.dangjia.acg.dto.product.StorefontInfoDTO;
+import com.dangjia.acg.dto.product.StorefrontProductDTO;
 import com.dangjia.acg.dto.repair.HouseProfitSummaryDTO;
 import com.dangjia.acg.dto.sale.royalty.DjAreaMatchDTO;
 import com.dangjia.acg.dto.sale.store.OrderStoreDTO;
@@ -81,6 +82,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import tk.mybatis.mapper.entity.Example;
@@ -351,6 +353,8 @@ public class HouseService {
 
         return ServerResponse.createBySuccess("查询成功", houseDTO);
     }
+
+
 
     /**
      * 修改房子工序顺序以及选配标签
@@ -636,7 +640,7 @@ public class HouseService {
             System.out.println("建群失败，异常：" + e.getMessage());
         }
         //修改商品3.0改版后，确认下单需修改对应的订单信息
-        updateOrderDetailProductInfo(houseDTO.getOrderDetailList());
+        updateOrderDetailProductInfo(houseDTO.getOrderDetailList(),house.getCityId());
 
         return ServerResponse.createBySuccessMessage("操作成功");
     }
@@ -645,14 +649,21 @@ public class HouseService {
      * 修改商品3.0改版后，确认下单需修改对应的订单信息
      * @param orderDetailList
      */
-    private void updateOrderDetailProductInfo(List orderDetailList){
+    private void updateOrderDetailProductInfo(List orderDetailList,String cityId){
         //商品3.0修改对应业主下单后的订单信息
         String orderId="";
         if(orderDetailList!=null&&orderDetailList.size()>0){
             for(int i=0;i<orderDetailList.size();i++){
                 Map orderMap=(Map)orderDetailList.get(i);
                 DjOrderDetail orderDetail=BeanUtils.mapToBean(DjOrderDetail.class,orderMap);
+                //查询对应的商品信息
+                StorefontInfoDTO storefontInfoDTO=forMasterAPI.getStroreProductInfoById(cityId,orderDetail.getProductId());
                 orderId=orderDetail.getOrderId();
+                Double price=storefontInfoDTO.getPrice();
+                orderDetail.setPurchasePrice(price);
+                if(price!=null&&orderDetail.getPurchaseNumber()!=null){
+                    orderDetail.setTotalPurchasePrice((new BigDecimal(price).multiply(new BigDecimal(orderDetail.getPurchaseNumber()))).doubleValue());
+                }
                 iHouseMapper.updateOrderDetail(orderDetail);
                 iHouseMapper.updateOrder(orderId);
             }

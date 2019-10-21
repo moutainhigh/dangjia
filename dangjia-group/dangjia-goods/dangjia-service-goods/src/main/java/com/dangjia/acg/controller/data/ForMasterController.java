@@ -178,6 +178,18 @@ public class ForMasterController implements ForMasterAPI {
     public StorefontInfoDTO getStroreProductInfo(String cityId, String storefontId, String productId){
         return forMasterService.getStroreProductInfo(storefontId,productId);
     }
+    /**
+     * 查询店铺商品基础信息
+     * @param cityId
+     * @param productId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public StorefontInfoDTO getStroreProductInfoById(@RequestParam("cityId") String cityId,
+                                                     @RequestParam("productId") String productId){
+        return forMasterService.getStroreProductInfoById(productId);
+    }
     @Override
     @ApiMethod
     public ServerResponse getproductTempListByStorefontId(String cityId, String storefontId, String goodsId){
