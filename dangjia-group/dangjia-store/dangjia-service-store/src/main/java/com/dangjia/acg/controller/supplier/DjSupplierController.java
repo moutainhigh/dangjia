@@ -87,7 +87,7 @@ public class DjSupplierController implements DjSupplierAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse setDjSupplierReject(HttpServletRequest request, String id, String applicationStatus, String failReason) {
+    public ServerResponse setDjSupplierReject( String id, String applicationStatus, String failReason) {
         return djSupplierServices.setDjSupplierReject(id,applicationStatus,failReason);
     }
 

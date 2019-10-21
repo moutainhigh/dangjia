@@ -80,8 +80,7 @@ public interface DjSupplierAPI {
 
     @PostMapping("/sup/setDjSupplierReject")
     @ApiOperation(value = "店铺-审核供应商-驳回", notes = "店铺-审核供应商-驳回")
-    ServerResponse setDjSupplierReject(@RequestParam("request") HttpServletRequest request,
-                                       @RequestParam("id") String id,
+    ServerResponse setDjSupplierReject(@RequestParam("id") String id,
                                        @RequestParam("applicationStatus") String applicationStatus,
                                        @RequestParam("failReason") String failReason);
 
