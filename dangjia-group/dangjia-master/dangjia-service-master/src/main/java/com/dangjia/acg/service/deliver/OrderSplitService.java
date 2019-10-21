@@ -306,7 +306,7 @@ public class OrderSplitService {
                 if (splitDeliverList.size() > 0) {
                     splitDeliver = splitDeliverList.get(0);
                     //2代表已收货,且是非平台
-                    if (splitDeliver.getShippingState() == 2 && djSupplier.getName().equals("非平台供应商ID")) {
+                    if (splitDeliver.getShippingState() == 2 && djSupplier.getIsNonPlatformSupperlier()==1) {
                         splitDeliver.setInstallMobile(installMobile);// 安装人号码
                         splitDeliver.setInstallName(installName);//安装人姓名
                     }
@@ -331,7 +331,7 @@ public class OrderSplitService {
                     splitDeliver.setShippingState(0);//待发货状态
                     splitDeliver.setApplyState(null);
                     //判断是非平台供应商
-                    if(djSupplier.getName().equals("非平台供应商ID"))
+                    if(djSupplier.getIsNonPlatformSupperlier()==1)
                     {
                         splitDeliver.setDeliberyName(deliberyName);//送货人姓名
                         splitDeliver.setDeliveryMobile(deliveryMobile);//送货人号码

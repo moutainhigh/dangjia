@@ -36,5 +36,5 @@ public class DjSupplierDTO extends BaseEntity {
     /**
      *   是否非平台供应商（1是，0否）
      */
-    private String isNonPlatformSupperlier;
+    private Integer isNonPlatformSupperlier;
 }
