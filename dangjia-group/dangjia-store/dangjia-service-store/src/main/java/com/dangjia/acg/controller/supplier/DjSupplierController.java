@@ -72,16 +72,15 @@ public class DjSupplierController implements DjSupplierAPI {
         return djSupplierServices.queryDjSupplierByShopID(keyWord,applicationStatus,shopId);
     }
 
-
     @Override
     @ApiMethod
-    public ServerResponse getDjSupplierByID(HttpServletRequest request, String id,String shopId) {
+    public ServerResponse getDjSupplierByID(String id,String shopId) {
         return djSupplierServices.getDjSupplierByID(id,shopId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse setDjSupplierPass(HttpServletRequest request, String id, String applicationStatus) {
+    public ServerResponse setDjSupplierPass(String id, String applicationStatus) {
         return djSupplierServices.setDjSupplierPass(id,applicationStatus);
     }
 
