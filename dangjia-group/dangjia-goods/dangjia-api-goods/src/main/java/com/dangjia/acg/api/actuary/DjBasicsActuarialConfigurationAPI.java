@@ -36,6 +36,8 @@ public interface DjBasicsActuarialConfigurationAPI {
     @ApiOperation(value = "设计精算--批量添加修改设计精算阶段对应的商品信息", notes = "批量添加修改设计精算阶段对应的商品信息")
     ServerResponse editActuarialProduct(@RequestParam("request") HttpServletRequest request,
                                         @RequestParam("actuarialProductStr") String actuarialProductStr,
+                                        @RequestParam("actuarialTemplateId") String actuarialTemplateId,
+                                        @RequestParam("workTypeId") String workTypeId,
                                         @RequestParam("userId") String userId);
 
     @PostMapping("web/config/actuarialConfig/deleteActuarialProduct")
@@ -93,7 +95,7 @@ public interface DjBasicsActuarialConfigurationAPI {
     @PostMapping("web/config/actuarialConfig/importSimulateExcelBudgets")
     @ApiOperation(value = "Excel模拟精算数据导入", notes = "Excel模拟精算数据导入")
     ServerResponse importSimulateExcelBudgets(
-            @RequestParam("request") StandardMultipartHttpServletRequest request,
+            @RequestParam("request") HttpServletRequest request,
             @RequestParam("name")  String name,
             @RequestParam("fileName")  String fileName,
             @RequestParam("address")  String address);

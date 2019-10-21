@@ -86,4 +86,15 @@ public interface IHouseMapper extends Mapper<House> {
 
     //修改商品订单表是否可付款状态
     void updateOrder(@Param("orderId") String orderId);
+
+    /**
+     * 修改订单状态为已取消
+     * @param houseId
+     */
+    void updateOrderStatusByHouseId(@Param("houseId") String houseId);
+    /**
+     * 修改订单详情状态为已取消
+     * @param houseId
+     */
+    void updateOrderDetailStatusByHouseId(@Param("houseId") String houseId);
 }

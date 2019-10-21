@@ -931,7 +931,7 @@
              purchase_number = #{purchaseNumber},
              total_purchase_price = #{totalPurchasePrice},
              update_by = #{updateBy},
-             update_date = SYSDATE()
+             modify_date = now()
         WHERE
             id = #{id}
     </update>

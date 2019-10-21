@@ -460,9 +460,9 @@ public class HouseService {
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse startWork(HttpServletRequest request, HouseDTO houseDTO, String userToken, String userId) {
 
-        if (houseDTO.getDecorationType() >= 3 || houseDTO.getDecorationType() == 0) {
+       /* if (houseDTO.getDecorationType() >= 3 || houseDTO.getDecorationType() == 0) {
             return ServerResponse.createByErrorMessage("装修类型参数错误");
-        }
+        }*/
         if (StringUtils.isEmpty(houseDTO.getHouseId()) || StringUtils.isEmpty(houseDTO.getVillageId())) {
             return ServerResponse.createByErrorMessage("参数为空");
         }
@@ -504,7 +504,7 @@ public class HouseService {
         house.setDecorationType(houseDTO.getDecorationType());
         house.setConstructionDate(new Date());
         HouseFlow houseFlow;
-        try {
+        try {//表结构定下后需修改
             //修改-自带设计和远程设计都需要进行抢单
             if (house.getDecorationType() == 2) {//自带设计,上传施工图先
                 WorkerType workerType = workerTypeMapper.selectByPrimaryKey("2");
@@ -640,21 +640,22 @@ public class HouseService {
             System.out.println("建群失败，异常：" + e.getMessage());
         }
         //修改商品3.0改版后，确认下单需修改对应的订单信息
-        updateOrderDetailProductInfo(houseDTO.getOrderDetailList(),house.getCityId());
+        updateOrderDetailProductInfo(houseDTO.getOrderDetailInfoAttr(),house.getCityId());
 
         return ServerResponse.createBySuccessMessage("操作成功");
     }
 
     /**
      * 修改商品3.0改版后，确认下单需修改对应的订单信息
-     * @param orderDetailList
+     * @param orderDetailInfoAttr
      */
-    private void updateOrderDetailProductInfo(List orderDetailList,String cityId){
+    private void updateOrderDetailProductInfo(String orderDetailInfoAttr,String cityId){
         //商品3.0修改对应业主下单后的订单信息
         String orderId="";
-        if(orderDetailList!=null&&orderDetailList.size()>0){
-            for(int i=0;i<orderDetailList.size();i++){
-                Map orderMap=(Map)orderDetailList.get(i);
+        if(orderDetailInfoAttr!=null&&StringUtils.isNotBlank(orderDetailInfoAttr)){
+            JSONArray jsonStr=JSONArray.parseArray(orderDetailInfoAttr);
+            for(int i=0;i<jsonStr.size();i++){
+                Map orderMap=(Map)jsonStr.get(i);
                 DjOrderDetail orderDetail=BeanUtils.mapToBean(DjOrderDetail.class,orderMap);
                 //查询对应的商品信息
                 StorefontInfoDTO storefontInfoDTO=forMasterAPI.getStroreProductInfoById(cityId,orderDetail.getProductId());
@@ -671,6 +672,25 @@ public class HouseService {
         }
     }
 
+    /**
+     * 取消订单
+     * @param houseId
+     * @param userId
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse calcelOrder(String houseId,String userId){
+        House house = new House();
+        house.setId(houseId);
+        house.setVisitState(4);//已取消
+        iHouseMapper.updateByPrimaryKeySelective(house);//修改装修列表的状态
+        //修改已下订单的状态
+        //1.修改订单的状态为已取消
+       // iHouseMapper.updateOrderStatusByHouseId(houseId);
+        //2.修改订单详情的状态为已取消
+        //iHouseMapper.updateOrderDetailStatusByHouseId(houseId);
+        return ServerResponse.createBySuccessMessage("取消成功");
+    }
 
 
     /**

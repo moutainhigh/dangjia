@@ -56,6 +56,13 @@ public interface WebHouseAPI {
                              @RequestParam("userToken")String userToken,
                              @RequestParam("user_id")String user_id);
 
+    @PostMapping("web/house/calcelOrder")
+    @ApiOperation(value = "取消订单", notes = "取消订单")
+    ServerResponse calcelOrder(@RequestParam("request") HttpServletRequest request,
+                             @RequestParam("houseId") String houseId,
+                             @RequestParam("userToken")String userToken,
+                             @RequestParam("userId")String userId);
+
     @PostMapping("web/house/setHouseInfo")
     @ApiOperation(value = "修改房子工序顺序以及选配标签", notes = "修改房子工序顺序以及选配标签")
     ServerResponse setHouseInfo(@RequestParam("request") HttpServletRequest request,

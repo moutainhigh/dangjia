@@ -12,6 +12,7 @@ import com.dangjia.acg.dto.house.HouseDTO;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.service.house.HouseService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -69,7 +70,11 @@ public class WebHouseController implements WebHouseAPI {
     public ServerResponse startWorkPage(HttpServletRequest request, String houseId) {
         return houseService.startWorkPage(request, houseId);
     }
-
+    @Override
+    @ApiMethod
+    public ServerResponse calcelOrder(HttpServletRequest request,String houseId,String userToken,String userId){
+        return houseService.calcelOrder(houseId,userId);
+    }
     @Override
     @ApiMethod
     public ServerResponse startWork(HttpServletRequest request, HouseDTO houseDTO,String userToken,String userId) {
