@@ -104,7 +104,7 @@
             city_id cityId,
             NAME,
             address,
-            check_people checkPeople,
+            check_people as checkPeople,
             telephone,
             email
         FROM dj_supplier

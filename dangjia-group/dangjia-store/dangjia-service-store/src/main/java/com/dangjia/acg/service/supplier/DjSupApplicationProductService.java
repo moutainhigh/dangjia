@@ -3,15 +3,18 @@ package com.dangjia.acg.service.supplier;
 import cn.jiguang.common.utils.StringUtils;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.delivery.SupplyDimensionDTO;
 import com.dangjia.acg.dto.supplier.DjSupSupplierProductDTO;
 import com.dangjia.acg.dto.supplier.DjSupplierDTO;
 import com.dangjia.acg.mapper.supplier.*;
 import com.dangjia.acg.modle.supplier.DjAdjustRecord;
 import com.dangjia.acg.modle.supplier.DjSupApplicationProduct;
+import com.dangjia.acg.sql.config.DruidConfig;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -44,6 +47,8 @@ public class DjSupApplicationProductService {
     private DjAdjustRecordMapper djAdjustRecordMapper;
     private Logger logger = LoggerFactory.getLogger(DjSupApplicationProductService.class);
 
+    @Autowired
+    private ConfigUtil configUtil;
 
     @Autowired
     private DjSupplierMapper djSupplierMapper;
@@ -87,8 +92,12 @@ public class DjSupApplicationProductService {
      */
     public ServerResponse queryHaveGoods(String supId, String shopId,String applicationStatus, PageDTO pageDTO) {
         try {
+            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<DjSupSupplierProductDTO> djSupSupplierProductDTOS = djSupSupplierProductMapper.queryHaveGoods(supId, shopId,applicationStatus);
+            djSupSupplierProductDTOS.forEach(djSupSupplierProductDTO -> {
+                djSupSupplierProductDTO.setImage(imageAddress+djSupSupplierProductDTO.getImage());
+            });
             PageInfo pageResult = new PageInfo(djSupSupplierProductDTOS);
             if(djSupSupplierProductDTOS.size()<=0)
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
@@ -130,6 +139,7 @@ public class DjSupApplicationProductService {
                 djAdjustRecord.setAdjustTime(adjustTime);
                 djAdjustRecord.setApplicationProductId(applicationProductId);
                 djAdjustRecord.setUserId(userId);
+                djAdjustRecord.setOriginalCost(price);
                 djAdjustRecordMapper.insert(djAdjustRecord);
             });
             return ServerResponse.createBySuccessMessage("编辑成功");
@@ -276,12 +286,16 @@ public class DjSupApplicationProductService {
      */
     public ServerResponse queryNotForTheGoods(String supId, String shopId) {
         try {
+            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             List<DjSupSupplierProductDTO> djSupSupplierProductDTOS = djSupSupplierProductMapper.queryHaveGoods(supId, shopId, "1");
             //Stream表达式取出已选商品的id
             List<String> productIds = djSupSupplierProductDTOS.stream()
                     .map(DjSupSupplierProductDTO::getProductId)
                     .collect(Collectors.toList());
             List<DjSupSupplierProductDTO> djSupSupplierProductDTOS1 = djSupSupplierProductMapper.queryNotForTheGoods(supId, productIds);
+            djSupSupplierProductDTOS1.forEach(djSupSupplierProductDTO -> {
+                djSupSupplierProductDTO.setImage(imageAddress+djSupSupplierProductDTO.getImage());
+            });
             if (djSupSupplierProductDTOS1.size() <= 0) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
@@ -289,6 +303,31 @@ public class DjSupApplicationProductService {
         } catch (Exception e) {
             logger.error("查询失败",e);
             return ServerResponse.createByErrorMessage("查询失败"+e);
+        }
+    }
+
+
+    /**
+     * 被打回商品申请
+     * @param jsonStr
+     * @return
+     */
+    public ServerResponse updateReapply(String jsonStr) {
+        try {
+            JSONArray jsonArr = JSONArray.parseArray(jsonStr);
+            jsonArr.forEach(str ->{
+                JSONObject obj = (JSONObject) str;
+                DjSupApplicationProduct djSupApplicationProduct=new DjSupApplicationProduct();
+                djSupApplicationProduct.setId(obj.getString("id"));//供应商申请供应商品表id
+                djSupApplicationProduct.setPrice(obj.getDouble("price"));//供应价
+                djSupApplicationProduct.setPorterage(obj.getDouble("porterage"));//搬运费
+                djSupApplicationProduct.setIsCartagePrice(obj.getString("isCartagePrice"));//是否收取上楼费 0=否，1=是
+                djSupApplicationProductMapper.updateByPrimaryKeySelective(djSupApplicationProduct);
+            });
+            return ServerResponse.createBySuccessMessage("申请成功");
+        } catch (Exception e) {
+            logger.info("申请失败",e);
+            return ServerResponse.createByErrorMessage("申请失败");
         }
     }
 }

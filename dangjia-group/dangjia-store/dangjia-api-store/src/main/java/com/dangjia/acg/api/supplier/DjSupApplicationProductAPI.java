@@ -74,4 +74,9 @@ public interface DjSupApplicationProductAPI {
     ServerResponse updateHaveGoods(@RequestParam("request") HttpServletRequest request,
                                    @RequestParam("jsonStr") String jsonStr);
 
+    @PostMapping("/supplier/djSupApplicationProduct/updateReapply")
+    @ApiOperation(value = "被打回商品申请", notes = "被打回商品申请")
+    ServerResponse updateReapply(@RequestParam("request") HttpServletRequest request,
+                                 @RequestParam("jsonStr") String jsonStr);
+
 }
