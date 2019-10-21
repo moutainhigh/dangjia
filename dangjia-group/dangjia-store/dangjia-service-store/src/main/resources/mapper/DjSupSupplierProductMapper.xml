@@ -19,7 +19,7 @@
             dj_sup_supplier_product ssp
         INNER JOIN dj_basics_goods bg ON ssp.goods_id = bg.id
         INNER JOIN dj_basics_product_template bpt ON ssp.product_id = bpt.id
-        WHERE 1=1 and  and ssp.data_status=0 and ssp.supplier_id=#{supId}
+        WHERE 1=1   and ssp.data_status=0 and ssp.supplier_id=#{supId}
     </select>
 
     <select id="queryHaveGoods" resultType="com.dangjia.acg.dto.supplier.DjSupSupplierProductDTO">
@@ -47,7 +47,7 @@
         INNER JOIN dj_basics_product_template bpt ON sap.product_id = bpt.id
         LEFT JOIN (SELECT * FROM (select * from dj_adjust_record  order by create_date DESC) b GROUP BY b.application_product_id) ar ON ar.application_product_id=sap.id
         WHERE 1=1
-            sap.sup_id = #{supId}
+            and  sap.sup_id = #{supId}
             and sap.data_status=0
             and sap.shop_id = #{shopId}
             and sap.application_status=#{applicationStatus}
@@ -75,7 +75,7 @@
         FROM
         dj_sup_supplier_product ssp
         INNER JOIN dj_basics_product_template bpt ON ssp.product_id=bpt.id
-        WHERE 1=1 and ssp.data_status=0
+        WHERE 1=1 and ssp.data_status=0 and
         ssp.supplier_id =#{supId}
         <if test="null!=searchKey and ''!=searchKey">
             AND (
