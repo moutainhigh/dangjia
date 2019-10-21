@@ -18,6 +18,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
+
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -197,12 +200,16 @@ public class DjSupApplicationProductService {
                 return ServerResponse.createByErrorMessage("供应商的商品id不能为空");
             }
             String[] iditem=id.split(",");
-            for (int i=0;i<iditem.length;i++)
+            Example example = new Example(DjSupApplicationProduct.class);
+            example.createCriteria().andIn(DjSupApplicationProduct.ID, Arrays.asList(iditem));
+            DjSupApplicationProduct djSupApplicationProduct=new DjSupApplicationProduct();
+            djSupApplicationProduct.setId(null);
+            djSupApplicationProduct.setCreateDate(null);
+            djSupApplicationProduct.setApplicationStatus("2");
+            int i=djSupApplicationProductMapper.updateByExample(djSupApplicationProduct,example);
+            if (i<=0)
             {
-                DjSupApplicationProduct djSupApplicationProduct=new DjSupApplicationProduct();
-                djSupApplicationProduct.setId(iditem[i]);
-                djSupApplicationProduct.setApplicationStatus("2");//申请状态 0:审核中 1:通过 2:不通过
-                djSupApplicationProductMapper.updateByPrimaryKeySelective(djSupApplicationProduct);
+                return ServerResponse.createBySuccessMessage("全部打回失败");
             }
             return ServerResponse.createBySuccessMessage("全部打回成功");
         } catch (Exception e) {
@@ -220,20 +227,23 @@ public class DjSupApplicationProductService {
      */
     public ServerResponse rejectPartProduct( String id ) {
         try {
-
             if(StringUtils.isEmpty(id))
             {
                 return ServerResponse.createByErrorMessage("供应商的商品id不能为空");
             }
             String[] iditem=id.split(",");
-            for (int i=0;i<iditem.length;i++)
+            Example example = new Example(DjSupApplicationProduct.class);
+            example.createCriteria().andIn(DjSupApplicationProduct.ID, Arrays.asList(iditem));
+            DjSupApplicationProduct djSupApplicationProduct=new DjSupApplicationProduct();
+            djSupApplicationProduct.setId(null);
+            djSupApplicationProduct.setCreateDate(null);
+            djSupApplicationProduct.setApplicationStatus("1");
+            int i=djSupApplicationProductMapper.updateByExample(djSupApplicationProduct,example);
+            if (i<=0)
             {
-                DjSupApplicationProduct djSupApplicationProduct=new DjSupApplicationProduct();
-                djSupApplicationProduct.setId(iditem[i]);
-                djSupApplicationProduct.setApplicationStatus("1");//申请状态 0:审核中 1:通过 2:不通过
-                djSupApplicationProductMapper.updateByPrimaryKeySelective(djSupApplicationProduct);
+                return ServerResponse.createByErrorMessage("店铺-审核供货列表-部分不通过");
             }
-            return ServerResponse.createBySuccessMessage("部分通过成功");
+            return ServerResponse.createBySuccessMessage("店铺-审核供货列表-部分通过成功");
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("店铺-审核供货列表-部分通过失败");

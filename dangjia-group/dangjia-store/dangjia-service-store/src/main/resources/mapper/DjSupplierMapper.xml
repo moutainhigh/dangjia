@@ -46,7 +46,7 @@
         FROM
             dj_sup_application da
         INNER JOIN dj_supplier ds ON da.sup_id = ds.id
-        WHERE 1=1
+        WHERE 1=1 and da.data_status=0
         <if test="null!=shopId and ''!=shopId">
             and  da.shop_id = #{shopId}
         </if>

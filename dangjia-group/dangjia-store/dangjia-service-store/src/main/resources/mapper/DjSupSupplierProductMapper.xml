@@ -19,7 +19,7 @@
             dj_sup_supplier_product ssp
         INNER JOIN dj_basics_goods bg ON ssp.goods_id = bg.id
         INNER JOIN dj_basics_product_template bpt ON ssp.product_id = bpt.id
-        WHERE ssp.supplier_id=#{supId}
+        WHERE 1=1 and  and ssp.data_status=0 and ssp.supplier_id=#{supId}
     </select>
 
     <select id="queryHaveGoods" resultType="com.dangjia.acg.dto.supplier.DjSupSupplierProductDTO">
@@ -46,8 +46,9 @@
         INNER JOIN dj_basics_goods bg ON sap.goods_id = bg.id
         INNER JOIN dj_basics_product_template bpt ON sap.product_id = bpt.id
         LEFT JOIN (SELECT * FROM (select * from dj_adjust_record  order by create_date DESC) b GROUP BY b.application_product_id) ar ON ar.application_product_id=sap.id
-        WHERE
+        WHERE 1=1
             sap.sup_id = #{supId}
+            and sap.data_status=0
             and sap.shop_id = #{shopId}
             and sap.application_status=#{applicationStatus}
     </select>
@@ -64,24 +65,24 @@
 
     <select id="queryDjSupSupplierProductList" resultType="com.dangjia.acg.dto.delivery.SupplyDimensionDTO">
         SELECT
-            bpt.image,
-            bpt.name as productName,
-            bpt.product_sn as productSn,
-            ssp.stock,
-            ssp.price,
-            ssp.supplier_id as supId,
-            ssp.product_id as productId
+        bpt.image,
+        bpt.name as productName,
+        bpt.product_sn as productSn,
+        ssp.stock,
+        ssp.price,
+        ssp.supplier_id as supId,
+        ssp.product_id as productId
         FROM
-            dj_sup_supplier_product ssp
-            INNER JOIN dj_basics_product_template bpt ON ssp.product_id=bpt.id
-        WHERE
-            ssp.supplier_id =#{supId}
-            <if test="null!=searchKey and ''!=searchKey">
-                AND (
-                bpt.name LIKE CONCAT('%',#{searchKey},'%') or
-                bpt.product_sn LIKE CONCAT('%',#{searchKey},'%')
-                )
-            </if>
+        dj_sup_supplier_product ssp
+        INNER JOIN dj_basics_product_template bpt ON ssp.product_id=bpt.id
+        WHERE 1=1 and ssp.data_status=0
+        ssp.supplier_id =#{supId}
+        <if test="null!=searchKey and ''!=searchKey">
+            AND (
+            bpt.name LIKE CONCAT('%',#{searchKey},'%') or
+            bpt.product_sn LIKE CONCAT('%',#{searchKey},'%')
+            )
+        </if>
     </select>
 
     <select id="queryNotForTheGoods" resultType="com.dangjia.acg.dto.supplier.DjSupSupplierProductDTO">
@@ -104,8 +105,10 @@
             dj_sup_supplier_product ssp
         INNER JOIN dj_basics_goods bg ON ssp.goods_id = bg.id
         INNER JOIN dj_basics_product_template bpt ON ssp.product_id = bpt.id
-        WHERE
-            ssp.supplier_id = #{supId}
+        WHERE 1=1 and ssp.data_status=0
+        <if test="null!=supId and ''!=supId">
+            and ssp.supplier_id = #{supId}
+        </if>
         <if test="null!=productIds and productIds.size>0">
             and ssp.product_id not in
             <foreach collection="productIds" index="index" item="item" open="(" separator="," close=")">
