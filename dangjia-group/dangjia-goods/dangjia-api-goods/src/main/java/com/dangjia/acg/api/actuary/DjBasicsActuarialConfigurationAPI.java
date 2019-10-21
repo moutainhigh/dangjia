@@ -27,7 +27,7 @@ public interface DjBasicsActuarialConfigurationAPI {
     @ApiOperation(value = "设计精算--查询设计精算阶段配置", notes = "查询设计精算阶段配置")
     ServerResponse queryActuarialTemplateConfig(@RequestParam("request") HttpServletRequest request);
 
-    @PostMapping("web/config/actuarialConfig/queryActuarialTemplateConfigById")
+    @PostMapping("web/config/actuarialConfig/queryActuarialProductByConfigId")
     @ApiOperation(value = "设计精算--查询阶段详情信息", notes = "查询阶段详情信息")
     ServerResponse queryActuarialProductByConfigId(@RequestParam("request") HttpServletRequest request,
                                             @RequestParam("actuarialTemplateId") String actuarialTemplateId);
