@@ -182,12 +182,12 @@ public class ShopCartService {
      * @param unitName
      * @param categoryId
      * @param productType
-     * @param seller
+     * @param storefrontId
      * @return
      */
     public ServerResponse addCart(String userToken, String cityId,String productId,
                                   String productSn, String productName,String price,String shopCount,
-                                  String unitName,String categoryId,String productType,String seller) {
+                                  String unitName,String categoryId,String productType,String storefrontId) {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
@@ -211,7 +211,7 @@ public class ShopCartService {
                 shoppingCart.setUnitName(unitName);
                 shoppingCart.setCategoryId(categoryId);
                 shoppingCart.setProductType(Integer.parseInt(productType));
-                shoppingCart.setSeller(seller);
+                shoppingCart.setStorefrontId(storefrontId);
                 int i = iShoppingCartmapper.insert(shoppingCart);
                 if (i > 0) {
                     return ServerResponse.createBySuccessMessage("加入购物车成功!");

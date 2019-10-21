@@ -948,7 +948,7 @@ public class PaymentService {
         }
     }
 
-    //购物车结算第二步：获取订单明细方法
+    //购物车结算：获取订单明细方法
     public List<ShoppingCart> getPaymentAllOrderByShoppingCart( String houseDistributionId)
     {
         // String userToken,

@@ -42,8 +42,8 @@ public class ShopCartController implements ShopCartAPI {
                                   String productSn,String productName,
                                   String price,String shopCount,
                                   String unitName,String categoryId,
-                                  String productType,String seller) {
-        return shopCartservice.addCart(userToken, cityId,productId,productSn,productName,price,shopCount,unitName,categoryId,productType,seller);
+                                  String productType,String storefrontId) {
+        return shopCartservice.addCart(userToken, cityId,productId,productSn,productName,price,shopCount,unitName,categoryId,productType,storefrontId);
     }
 
 
