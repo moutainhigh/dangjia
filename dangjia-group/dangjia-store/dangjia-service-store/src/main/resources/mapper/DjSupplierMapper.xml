@@ -21,8 +21,8 @@
         FROM
             dj_sup_application a
         INNER JOIN dj_basics_storefront b ON a.shop_id = b.id
-        WHERE
-            a.sup_id =#{supId}
+        WHERE    1=1
+        and a.sup_id =#{supId}
         AND a.application_status = 1
         AND a.data_status = 0
         AND b.data_status = 0
@@ -62,7 +62,7 @@
     </select>
 
     <select id="queryDjSupplierByPass" resultType="com.dangjia.acg.modle.supplier.DjSupplier" >
-            SELECT
+             SELECT
             ds.id,
             ds.create_date,
             ds.modify_date,
@@ -74,9 +74,10 @@
             ds.check_people checkPeople,
             ds.telephone,
             ds.email
-            FROM dj_supplier ds INNER JOIN dj_sup_application dsa ON ds.id=dsa.sup_id AND dsa.application_status=1
-            AND ds.id=#{supplierId}
+            FROM dj_supplier ds INNER JOIN dj_sup_application dsa ON ds.id=dsa.sup_id
+            WHERE  1=1 and  ds.id=#{supplierId}
             ORDER BY ds.create_date DESC
+
     </select>
 
     <select id="queryDJsupplierById" resultType="com.dangjia.acg.dto.supplier.DjSupplierDTO" >
@@ -89,8 +90,7 @@
         FROM
             dj_sup_application da
         INNER JOIN dj_supplier ds ON da.sup_id = ds.id
-        WHERE 1=1
-        and  da.shop_id = #{shopId}
+        WHERE 1=1 and da.shop_id = #{shopId}
         and  ds.id=#{id}
     </select>
 
