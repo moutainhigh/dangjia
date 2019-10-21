@@ -60,7 +60,8 @@ public class DjSupplierServices {
      * @return
      */
     public ServerResponse querySingleDjSupplierDetail(String userId, String cityId) {
-        return ServerResponse.createBySuccess("查询成功",djSupplierMapper.querySingleDjSupplier(userId, cityId));
+        DjSupplier djSupplier = djSupplierMapper.querySingleDjSupplier(userId, cityId);
+        return ServerResponse.createBySuccess("查询成功",djSupplier);
     }
 
     /**

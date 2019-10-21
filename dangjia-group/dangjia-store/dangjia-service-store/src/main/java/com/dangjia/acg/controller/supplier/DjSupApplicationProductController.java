@@ -39,6 +39,12 @@ public class DjSupApplicationProductController implements DjSupApplicationProduc
 
     @Override
     @ApiMethod
+    public ServerResponse updateReapply(HttpServletRequest request, String jsonStr) {
+        return djSupApplicationProductService.updateReapply(jsonStr);
+    }
+
+    @Override
+    @ApiMethod
     public List<SupplyDimensionDTO> queryDjSupSupplierProductList(String supId, String searchKey) {
         return djSupApplicationProductService.queryDjSupSupplierProductList(supId, searchKey);
     }

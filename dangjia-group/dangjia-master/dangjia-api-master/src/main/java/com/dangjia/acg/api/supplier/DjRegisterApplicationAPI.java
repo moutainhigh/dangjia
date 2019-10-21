@@ -48,6 +48,12 @@ public interface DjRegisterApplicationAPI {
     @PostMapping("/sup/register/getRegisterInfoById")
     @ApiOperation(value = "查询申请ID查询对应的申请信息", notes = "查询申请ID查询对应的申请信息")
     ServerResponse getRegisterInfoById(@RequestParam("request") HttpServletRequest request,
-                                             @RequestParam("id") String id);
+                                       @RequestParam("id") String id);
+
+    @PostMapping("/sup/register/insertApplyNewStatus")
+    @ApiOperation(value = "申请新身份", notes = "申请新身份")
+    ServerResponse insertApplyNewStatus(@RequestParam("request") HttpServletRequest request,
+                                        @RequestParam("userId") String userId,
+                                        @RequestParam("djRegisterApplication") DjRegisterApplication djRegisterApplication);
 
 }

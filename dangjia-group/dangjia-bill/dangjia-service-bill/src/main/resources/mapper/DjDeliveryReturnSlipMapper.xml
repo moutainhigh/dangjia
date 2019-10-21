@@ -6,6 +6,7 @@
 
     <select id="querySupplyDeliverTaskList" resultType="com.dangjia.acg.dto.delivery.DjDeliveryReturnSlipDTO">
         SELECT
+            dsd.id,
             dsd.storefront_id as shopId,
             dsd.number as number,
             dsd.create_date as createDate,
@@ -15,10 +16,12 @@
             dsd.shipping_state as shippingState,
             dsd.total_amount as totalAmount,
             dsd.order_split_id as splitId,
-            1 as invoiceType
+            1 as invoiceType,
+            c.status
         FROM
           dj_deliver_split_deliver dsd
         INNER JOIN dj_deliver_order_split_item dosi ON dsd.order_split_id = dosi.order_split_id
+        LEFT  JOIN dj_complain c on c.business_id=dsd.id
         WHERE dsd.supplier_id =#{supId}
         <if test="null!=searchKey and ''!=searchKey">
           AND (
@@ -34,6 +37,7 @@
 
     <select id="querySupplyRepairTaskList" resultType="com.dangjia.acg.dto.delivery.DjDeliveryReturnSlipDTO">
         SELECT
+            rmd.id,
             rmd.storefront_id as shopId,
             rmd.number as number,
             rmd.create_date as createDate,
@@ -62,6 +66,7 @@
 
     <select id="querySupplyTaskList" resultType="com.dangjia.acg.dto.delivery.DjDeliveryReturnSlipDTO">
         SELECT
+            dsd.id,
             dsd.storefront_id as shopId,
             dsd.number as number,
             dsd.create_date as createDate,
@@ -71,10 +76,12 @@
             dsd.shipping_state as shippingState,
             dsd.total_amount as totalAmount,
             dsd.order_split_id as splitId,
-            1 as invoiceType
+            1 as invoiceType,
+            c.status
         FROM
           dj_deliver_split_deliver dsd
         INNER JOIN dj_deliver_order_split_item dosi ON dsd.order_split_id = dosi.order_split_id
+        LEFT  JOIN dj_complain c on c.business_id=dsd.id
         WHERE dsd.supplier_id =#{supId}
         <if test="null!=searchKey and ''!=searchKey">
             AND (
@@ -85,6 +92,7 @@
         and dsd.city_id=#{cityId}
           UNION ALL
         SELECT
+            rmd.id,
             rmd.storefront_id as shopId,
             rmd.number as number,
             rmd.create_date as createDate,
@@ -94,7 +102,8 @@
             rmd.shipping_state as shippingState,
             rmd.total_amount as totalAmount,
             rmd.mend_order_id as splitId,
-            2 as invoiceType
+            2 as invoiceType,
+            null as status
         FROM
           dj_repair_mend_deliver rmd
         INNER JOIN dj_repair_mend_materiel rmm ON rmd.mend_order_id = rmm.mend_order_id

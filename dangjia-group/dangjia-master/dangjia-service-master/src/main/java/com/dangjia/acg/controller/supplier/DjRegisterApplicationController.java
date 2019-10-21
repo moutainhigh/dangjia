@@ -68,5 +68,11 @@ public class DjRegisterApplicationController implements DjRegisterApplicationAPI
         return djSupplierServices.getRegisterInfoById(id);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse insertApplyNewStatus(HttpServletRequest request, String userId, DjRegisterApplication djRegisterApplication) {
+        return djSupplierServices.insertApplyNewStatus(userId,djRegisterApplication);
+    }
+
 
 }

@@ -76,8 +76,6 @@ public class DjRegisterApplicationServices {
                 return ServerResponse.createByErrorMessage("城市不能为空");
             if(CommonUtil.isEmpty(djRegisterApplication.getCardNumber()))
                 return ServerResponse.createByErrorMessage("身份证不能为空");
-            if(djRegisterApplication.getApplicationType().equals("2")&&CommonUtil.isEmpty(djRegisterApplication.getBusinessLicense()))
-                return ServerResponse.createByErrorMessage("营业执照不能为空");
             Example example=new Example(DjRegisterApplication.class);
             example.createCriteria().andEqualTo(DjRegisterApplication.CITY_ID,djRegisterApplication.getCityId())
                     .andEqualTo(DjRegisterApplication.DATA_STATUS,0)
@@ -220,7 +218,7 @@ public class DjRegisterApplicationServices {
     public ServerResponse getRegisterInfoById(String id){
         try{
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-             DjRegisterApplication djRegisterApplication=djRegisterApplicationMapper.selectByPrimaryKey(id);
+            DjRegisterApplication djRegisterApplication=djRegisterApplicationMapper.selectByPrimaryKey(id);
             String[] imgArr = djRegisterApplication.getCardImage().split(",");
             StringBuilder imgStr = new StringBuilder();
             StringBuilder imgUrlStr = new StringBuilder();
@@ -247,6 +245,47 @@ public class DjRegisterApplicationServices {
             return ServerResponse.createByErrorMessage("查询失败");
         }
 
+    }
+
+
+    /**
+     * 申请新身份
+     * @param djRegisterApplication
+     * @return
+     */
+    public ServerResponse insertApplyNewStatus(String userId,DjRegisterApplication djRegisterApplication) {
+        try {
+            MainUser mainUser = userMapper.selectByPrimaryKey(userId);
+            Example example=new Example(DjRegisterApplication.class);
+            example.createCriteria().andEqualTo(DjRegisterApplication.CITY_ID,djRegisterApplication.getCityId())
+                    .andEqualTo(DjRegisterApplication.DATA_STATUS,0)
+                    .andEqualTo(DjRegisterApplication.MOBILE,mainUser.getMobile())
+                    .andNotEqualTo(DjRegisterApplication.APPLICATION_STATUS,2)
+                    .andLike(DjRegisterApplication.APPLICATION_TYPE,"%"+djRegisterApplication.getApplicationType()+"%");
+            List<DjRegisterApplication> djRegisterApplications = djRegisterApplicationMapper.selectByExample(example);
+            if(djRegisterApplications.size()>0)
+                return ServerResponse.createByErrorMessage("请勿重复申请");
+            example=new Example(DjRegisterApplication.class);
+            example.createCriteria().andEqualTo(DjRegisterApplication.CITY_ID,djRegisterApplication.getCityId())
+                    .andEqualTo(DjRegisterApplication.DATA_STATUS,0)
+                    .andEqualTo(DjRegisterApplication.MOBILE,mainUser.getMobile())
+                    .andNotEqualTo(DjRegisterApplication.APPLICATION_STATUS,2);
+            djRegisterApplications = djRegisterApplicationMapper.selectByExample(example);
+            if(djRegisterApplication.getApplicationType().equals("2")&&CommonUtil.isEmpty(djRegisterApplication.getBusinessLicense()))
+                return ServerResponse.createByErrorMessage("营业执照不能为空");
+            djRegisterApplication.setUserName(djRegisterApplications.get(0).getUserName());
+            djRegisterApplication.setPassWord(djRegisterApplications.get(0).getPassWord());
+            djRegisterApplication.setName(djRegisterApplications.get(0).getName());
+            djRegisterApplication.setMobile(djRegisterApplications.get(0).getMobile());
+            djRegisterApplication.setCardNumber(djRegisterApplications.get(0).getCardNumber());
+            djRegisterApplication.setCardImage(djRegisterApplications.get(0).getCardImage());
+            if(djRegisterApplicationMapper.insert(djRegisterApplication)>0)
+                return ServerResponse.createBySuccessMessage("申请成功");
+        } catch (Exception e) {
+            logger.error("申请失败",e);
+            return ServerResponse.createByErrorMessage("申请失败");
+        }
+        return ServerResponse.createByErrorMessage("申请失败");
     }
 
 
