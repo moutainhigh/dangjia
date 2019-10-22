@@ -46,5 +46,19 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             t1.actuarial_template_id = t2.id
     </select>
 
+    <!--根据组合编码查询对应的精算模板-->
+    <select id="querySimulateAssemblyRelateionInfo" resultType="com.dangjia.acg.modle.actuary.DjActuarialSimulationRelation">
+         select
+            id,
+            actuarial_template_id actuarialTemplateId,
+            simulation_code_group simulationCodeGroup,
+            simulation_name_group simulationNameGroup
+        from dj_actuarial_simulation_relation
+        WHERE data_status= '0'
+        <foreach collection="codeList" item="item" index="index" >
+            and FIND_IN_SET(#{item},simulation_code_group)
+        </foreach>
+        limit 1
+    </select>
 </mapper>
 

@@ -22,4 +22,10 @@ public interface DjActuarialSimulationRelationMapper extends Mapper<DjActuarialS
 
     List<ActuarialSimulateionReationDTO> querySimulateAssemblyRelateionList(@Param("address") String address);
 
+    /**
+     * 根据code组合，查询对应的精算模板
+     * @param codeList code编码列表
+     * @return
+     */
+    DjActuarialSimulationRelation querySimulateAssemblyRelateionInfo(@Param("codeList") List  codeList);
 }

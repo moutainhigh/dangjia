@@ -72,8 +72,8 @@ public class WebHouseController implements WebHouseAPI {
     }
     @Override
     @ApiMethod
-    public ServerResponse calcelOrder(HttpServletRequest request,String houseId,String userToken,String userId){
-        return houseService.calcelOrder(houseId,userId);
+    public ServerResponse calcelOrder(HttpServletRequest request,String houseId,String userToken,String user_id){
+        return houseService.calcelOrder(houseId,user_id);
     }
     @Override
     @ApiMethod

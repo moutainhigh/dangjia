@@ -2,6 +2,7 @@ package com.dangjia.acg.mapper.actuary;
 
 
 import com.dangjia.acg.dto.actuary.SimulationTemplateConfigDTO;
+import com.dangjia.acg.dto.actuary.app.SimulationTemplateAppConfigDTO;
 import com.dangjia.acg.modle.actuary.DjSimulationTemplateConfig;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -28,4 +29,11 @@ public interface DjSimulationTemplateConfigMapper extends Mapper<DjSimulationTem
      * @return
      */
     List queryTemplateListByType();
+
+    /**
+     * 我要装修--模拟花费标题查询
+     * @return
+     */
+    List<SimulationTemplateAppConfigDTO> searchSimulationTitleList();
+
 }

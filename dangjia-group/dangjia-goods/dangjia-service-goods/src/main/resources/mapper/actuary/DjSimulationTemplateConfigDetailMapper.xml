@@ -64,4 +64,20 @@
             config_status = 1
     </insert>
 
+    <!--我要装修：根据标题 ID查询标题 详情列表信息-->
+    <select id="searchSimulationTitleDetailList" resultType="com.dangjia.acg.dto.actuary.app.SimulationTemplateConfigDetailAppDTO">
+        SELECT
+            id titleDetailId,
+            CODE,
+            NAME,
+            image,
+            CONCAT(#{addressUrl},image) imageUrl,
+            label_name labelName
+        FROM
+            dj_simulation_template_config_detail
+        where config_status = 1
+        and data_status = 0
+        and simulation_template_id=#{simulationTemplateId}
+        order by template_detail_index
+    </select>
 </mapper>
