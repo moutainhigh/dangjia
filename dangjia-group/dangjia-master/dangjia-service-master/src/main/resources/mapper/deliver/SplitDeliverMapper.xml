@@ -191,7 +191,7 @@
         SELECT
         id,
         number AS number,
-        create_date AS createDate,
+        rec_time AS createDate,
         total_amount AS totalAmount,
         apply_money AS applyMoney,
         apply_state AS applyState,
