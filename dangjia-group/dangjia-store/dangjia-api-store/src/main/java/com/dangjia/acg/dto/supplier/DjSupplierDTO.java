@@ -39,4 +39,14 @@ public class DjSupplierDTO  {
      *   是否非平台供应商（1是，0否）
      */
     private Integer isNonPlatformSupperlier;
+
+    /**
+     *   失败原因
+     */
+    private String failReason;
+    /**
+     *   合同地址
+     */
+    private String contract;
+
 }

@@ -114,6 +114,10 @@ public class DjSupApplicationService {
     public ServerResponse queryContracts(String id) {
         try {
             DjSupApplication djSupApplication = djSupApplicationMapper.selectByPrimaryKey(id);
+            if(djSupApplication==null)
+            {
+                return ServerResponse.createByErrorMessage("没有查询到合同!");
+            }
             String[] split = djSupApplication.getContract().split(",");
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             for (int i = 0; i < split.length; i++) {
