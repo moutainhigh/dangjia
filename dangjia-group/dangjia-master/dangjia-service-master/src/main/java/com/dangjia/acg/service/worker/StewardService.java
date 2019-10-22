@@ -279,6 +279,15 @@ public class StewardService {
             if (!hf.getWorkerId().equals(worker.getId())) {
                 return ServerResponse.createByErrorMessage("交底人不匹配");
             }
+            Object object1 = constructionService.getHouseWorker(null, hf.getWorkerId());
+            String houseId=null;
+            if (object1 instanceof HouseWorker) {
+                HouseWorker hw = (HouseWorker) object1;
+                houseId = hw.getHouseId();
+            }
+            if (CommonUtil.isEmpty(houseId)||!houseId.equals(hf.getHouseId())) {
+                return ServerResponse.createByErrorMessage("交底工人与大管家选择的不是同一个工地");
+            }
             String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
                     String.format(DjConstants.GJPageAddress.READPROJECTINFO, userToken, hf.getCityId(), "交底详情") + "&houseFlowId=" + houseFlowId;
             return ServerResponse.createBySuccess("交底成功", url);
