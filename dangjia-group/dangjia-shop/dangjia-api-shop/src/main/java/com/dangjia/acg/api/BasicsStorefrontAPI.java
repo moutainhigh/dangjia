@@ -31,9 +31,9 @@ public interface BasicsStorefrontAPI {
     @ApiOperation(value = "根据Id查询店铺信息(实体对象)", notes = "根据Id查询店铺信息(实体对象)")
     Storefront querySingleStorefrontById(@RequestParam("id") String id);
 
-    @PostMapping("/web/queryStorefrontById")
-    @ApiOperation(value = "根据Id查询店铺信息", notes = "根据Id查询店铺信息")
-    ServerResponse queryStorefrontById(@RequestParam("id") String id);
+    @PostMapping("/web/queryStorefrontByUserId")
+    @ApiOperation(value = "根据userId查询店铺信息", notes = "根据userId查询店铺信息")
+    ServerResponse queryStorefrontById(@RequestParam("userId") String userId);
 
 
     @PostMapping("/web/queryLikeSingleStorefront")

@@ -35,7 +35,7 @@ public interface DjRegisterApplicationAPI {
                                          @RequestParam("cityId") String cityId);
 
 
-    @PostMapping("/sup/register/check")
+    @PostMapping("/sup/register/checkSupAndStorefront")
     @ApiOperation(value = "提交审核注册的供应商或店铺", notes = "提交审核注册的供应商或店铺")
     ServerResponse checkSupAndStorefront(HttpServletRequest request, String registerId, Integer isAdopt, String departmentId, String jobId,String failReason);
 
@@ -55,5 +55,9 @@ public interface DjRegisterApplicationAPI {
     ServerResponse insertApplyNewStatus(@RequestParam("request") HttpServletRequest request,
                                         @RequestParam("userId") String userId,
                                         @RequestParam("djRegisterApplication") DjRegisterApplication djRegisterApplication);
+
+    @PostMapping("/sup/register/getUserIdExamine")
+    @ApiOperation(value = "查询用户是否通过审核(供店铺端使用)", notes = "查询用户是否通过审核(供店铺端使用)")
+    String getUserIdExamine(@RequestParam("userId") String userId);
 
 }

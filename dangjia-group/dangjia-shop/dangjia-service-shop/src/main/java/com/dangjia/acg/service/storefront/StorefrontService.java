@@ -1,6 +1,7 @@
 package com.dangjia.acg.service.storefront;
 
 import cn.jiguang.common.utils.StringUtils;
+//import com.dangjia.acg.api.supplier.DjRegisterApplicationAPI;
 import com.dangjia.acg.api.supplier.DjSupplierAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
@@ -40,6 +41,8 @@ public class StorefrontService {
     @Autowired
     private ConfigUtil configUtil;
 
+//    @Autowired
+//    private DjRegisterApplicationAPI djRegisterApplicationAPI;
     /**
      * 根据用户Id查询店铺信息
      * @param userId
@@ -73,23 +76,31 @@ public class StorefrontService {
 
     /**
      * 根据Id查询店铺信息
-     * @param id
+     * @param userId
      * @return
      */
-    public ServerResponse queryStorefrontById(String id) {
+    public ServerResponse queryStorefrontById(String userId) {
         try {
-            Storefront storefront = istorefrontMapper.selectByPrimaryKey(id);
-            if(storefront!=null)
+
+            //判断是否审核通过，是否是店铺，如果是就显示
+            //String checkUserid= djRegisterApplicationAPI.getUserIdExamine(userId);
+            //判断是否注册
+//            if(StringUtils.isEmpty(checkUserid))
+//            {
+//                return ServerResponse.createBySuccessMessage("用户审核不通过");
+//            }
+            Example example=new Example(Storefront.class);
+            example.createCriteria().andEqualTo(Storefront.USER_ID,userId);
+            List<Storefront> list =istorefrontMapper.selectByExample(example);
+                    ;
+            if(list.size()<=0)
             {
-                return ServerResponse.createBySuccess("检索到数据",storefront);
+                return ServerResponse.createByErrorMessage("没有检索到店铺信息数据");
             }
-            else
-            {
-                return ServerResponse.createBySuccess("没有检索到数据",storefront);
-            }
+            return ServerResponse.createBySuccess("检索到数据",list.get(0));
         } catch (Exception e) {
-            logger.error("查询失败：", e);
-            return ServerResponse.createByErrorMessage("修改失败");
+            logger.error("查询店铺信息异常：", e);
+            return ServerResponse.createByErrorMessage("查询店铺信息异常");
         }
     }
 
@@ -180,11 +191,19 @@ public class StorefrontService {
             {
                 return ServerResponse.createByErrorMessage("店铺商品ID不能为空");
             }
-
             Storefront storefront=new Storefront();
-            BeanUtils.copyProperties(storefront,storefrontDTO);
+            storefront.setId(storefrontDTO.getId());
+            storefront.setUserId(storefrontDTO.getUserId());
+            storefront.setCityId(storefrontDTO.getCityId());
+            storefront.setStorefrontName(storefrontDTO.getStorefrontName());
+            storefront.setStorefrontAddress(storefrontDTO.getStorefrontAddress());
+            storefront.setStorefrontDesc(storefrontDTO.getStorefrontDesc());
+            storefront.setStorefrontLogo(storefrontDTO.getStorefrontLogo());
+            storefront.setStorefrontName(storefrontDTO.getStorefrontName());
+            storefront.setMobile(storefrontDTO.getMobile());
+            storefront.setEmail(storefrontDTO.getEmail());
             storefront.setCreateDate(null);
-            int i = istorefrontMapper.updateByPrimaryKey(storefront);
+            int i = istorefrontMapper.updateByPrimaryKeySelective(storefront);
             if (i > 0) {
                 return ServerResponse.createBySuccessMessage("修改成功!");
             } else {

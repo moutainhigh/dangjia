@@ -69,7 +69,7 @@ public interface DjSupplierAPI {
                                            @RequestParam("shopId") String shopId);
 
     @PostMapping("/sup/getDjSupplierByID")
-    @ApiOperation(value = "店铺-审核供应商-查看单个详情", notes = "店铺-审核供应商-查看详情")
+    @ApiOperation(value = "店铺-审核供应商-查看供应商品列表", notes = "店铺-审核供应商-查看供应商品列表")
     ServerResponse getDjSupplierByID(@RequestParam("id") String id, @RequestParam("shopId") String shopId);
 
     @PostMapping("/sup/setDjSupplierPass")
@@ -82,6 +82,5 @@ public interface DjSupplierAPI {
     ServerResponse setDjSupplierReject(@RequestParam("id") String id,
                                        @RequestParam("applicationStatus") String applicationStatus,
                                        @RequestParam("failReason") String failReason);
-
 
 }

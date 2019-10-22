@@ -59,6 +59,13 @@ public class DjRegisterApplicationServices {
     private ICityMapper iCityMapper;
     @Autowired
     private IJobMapper jobMapper;
+
+
+    public String getUserIdExamine(String userId )
+    {
+        return djRegisterApplicationMapper.getUserIdExamine(userId);
+    }
+
     /**
      * 供应商/店铺注册
      * @param djRegisterApplication
