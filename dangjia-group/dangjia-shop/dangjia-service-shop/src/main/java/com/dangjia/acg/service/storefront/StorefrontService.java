@@ -17,7 +17,6 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -49,12 +48,11 @@ public class StorefrontService {
      * @return
      */
     public Storefront queryStorefrontByUserID(String userId,String cityId) {
-    public Storefront queryStorefrontByUserID(String userId,String cityid) {
         try {
             Example example=new Example(Storefront.class);
             example.createCriteria().andEqualTo(Storefront.USER_ID,userId)
                     .andEqualTo(Storefront.CITY_ID,cityId);
-            example.createCriteria().andEqualTo(Storefront.USER_ID,userId).andEqualTo(Storefront.CITY_ID,cityid);
+            example.createCriteria().andEqualTo(Storefront.USER_ID,userId).andEqualTo(Storefront.CITY_ID,cityId);
             Storefront storefront =istorefrontMapper.selectByExample(example).get(0);
             return storefront;
         } catch (Exception e) {

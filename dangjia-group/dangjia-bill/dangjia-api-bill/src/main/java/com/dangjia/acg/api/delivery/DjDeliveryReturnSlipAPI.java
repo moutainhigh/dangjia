@@ -95,7 +95,7 @@ public interface DjDeliveryReturnSlipAPI {
                                                          @RequestParam("cityId") String cityId);
     /******************************店铺利润********************************************************/
     @PostMapping("/delivery/djDeliveryReturnSlip/a")
-    @ApiOperation(value = "店铺利润统计-供应商维度", notes = "店铺利润统计-供应商维度")
+    @ApiOperation(value = "-供应商维度", notes = "店铺利润统计-供应商维度")
     ServerResponse a(@RequestParam("request") HttpServletRequest request,
                                                    @RequestParam("pageDTO") PageDTO pageDTO,
                                                    @RequestParam("userId") String userId,
