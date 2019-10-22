@@ -48,10 +48,10 @@ public class StorefrontService {
      * @param userId
      * @return
      */
-    public Storefront queryStorefrontByUserID(String userId) {
+    public Storefront queryStorefrontByUserID(String userId,String cityid) {
         try {
             Example example=new Example(Storefront.class);
-            example.createCriteria().andEqualTo(Storefront.USER_ID,userId);
+            example.createCriteria().andEqualTo(Storefront.USER_ID,userId).andEqualTo(Storefront.CITY_ID,cityid);
             Storefront storefront =istorefrontMapper.selectByExample(example).get(0);
             return storefront;
         } catch (Exception e) {
