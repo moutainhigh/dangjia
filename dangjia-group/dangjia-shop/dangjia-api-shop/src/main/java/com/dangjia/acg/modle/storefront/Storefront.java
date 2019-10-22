@@ -95,4 +95,5 @@ public class Storefront extends BaseEntity {
     private String email;
 
 
+
 }

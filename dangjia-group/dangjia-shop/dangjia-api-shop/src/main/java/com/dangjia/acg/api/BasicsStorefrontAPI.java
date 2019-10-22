@@ -28,12 +28,14 @@ public interface BasicsStorefrontAPI {
 
 
     @PostMapping("/web/querySingleStorefrontById")
-    @ApiOperation(value = "根据Id查询店铺信息(实体对象)", notes = "根据Id查询店铺信息(实体对象)")
+    @ApiOperation(value = "根据主键ID查询店铺", notes = "根据主键ID查询店铺")
     Storefront querySingleStorefrontById(@RequestParam("id") String id);
 
     @PostMapping("/web/queryStorefrontByUserId")
     @ApiOperation(value = "根据userId查询店铺信息", notes = "根据userId查询店铺信息")
-    ServerResponse queryStorefrontById(@RequestParam("userId") String userId);
+    ServerResponse queryStorefrontByUserId(@RequestParam("userId") String userId,
+                                           @RequestParam("cityId") String cityId
+    );
 
 
     @PostMapping("/web/queryLikeSingleStorefront")

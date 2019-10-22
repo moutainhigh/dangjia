@@ -64,5 +64,8 @@ public class StorefrontDTO {
      */
     private String email;
 
-
+    /**
+     * 店铺LOGO
+     */
+    private String storefrontSigleLogo;
 }
