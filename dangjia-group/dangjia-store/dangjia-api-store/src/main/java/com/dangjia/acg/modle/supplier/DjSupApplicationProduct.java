@@ -69,7 +69,7 @@ public class DjSupApplicationProduct extends BaseEntity {
     private String isCartagePrice;
 
     @Column(name = "supply_relationship")
-    @Desc(value = "    @ApiModelProperty(\"供应关系 0:供应 1:停供\")\n")
+    @Desc(value = " 供应关系 0:供应 1:停供")
     @ApiModelProperty("供应关系 0:供应 1:停供")
     private String supplyRelationShip;
 

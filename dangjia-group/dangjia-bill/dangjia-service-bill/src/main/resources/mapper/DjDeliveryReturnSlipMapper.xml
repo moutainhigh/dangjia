@@ -20,7 +20,6 @@
             c.status
         FROM
           dj_deliver_split_deliver dsd
-        INNER JOIN dj_deliver_order_split_item dosi ON dsd.order_split_id = dosi.order_split_id
         LEFT  JOIN dj_complain c on c.business_id=dsd.id
         WHERE dsd.supplier_id =#{supId}
         <if test="null!=searchKey and ''!=searchKey">
@@ -50,7 +49,6 @@
             2 as invoiceType
         FROM
             dj_repair_mend_deliver rmd
-        INNER JOIN dj_repair_mend_materiel rmm ON rmd.mend_order_id = rmm.mend_order_id
         WHERE rmd.supplier_id =#{supId}
         <if test="null!=searchKey and ''!=searchKey">
             AND (
@@ -80,7 +78,6 @@
             c.status
         FROM
           dj_deliver_split_deliver dsd
-        INNER JOIN dj_deliver_order_split_item dosi ON dsd.order_split_id = dosi.order_split_id
         LEFT  JOIN dj_complain c on c.business_id=dsd.id
         WHERE dsd.supplier_id =#{supId}
         <if test="null!=searchKey and ''!=searchKey">
@@ -106,7 +103,6 @@
             null as status
         FROM
           dj_repair_mend_deliver rmd
-        INNER JOIN dj_repair_mend_materiel rmm ON rmd.mend_order_id = rmm.mend_order_id
         WHERE rmd.supplier_id =#{supId}
         <if test="null!=searchKey and ''!=searchKey">
             AND (
@@ -150,7 +146,7 @@
                 SELECT
                     supplier_id,
                     count(0) AS count,
-                    seller_id
+                    storefront_id
                 FROM
                     dj_deliver_split_deliver
                 WHERE
@@ -170,7 +166,7 @@
                 SELECT
                     supplier_id,
                     count(0) AS count,
-        storefront_id
+                    storefront_id
                 FROM
                     dj_repair_mend_deliver
                 WHERE
@@ -214,12 +210,14 @@
         SELECT
             number,
             supplier_id as supId,
-        storefront_id as shopId,
+            storefront_id as shopId,
             create_date as createDate,
             ship_address as shipAddress,
             ship_name as shipName,
             apply_state as applyState,
-            invoiceType
+            invoiceType,
+            sum(applyMoney) as applyMoney,
+            splitId
         FROM
             (
                 SELECT
@@ -231,7 +229,8 @@
                     dsd.ship_name,
                     dsd.apply_state,
                     dsd.order_split_id as splitId,
-                    1 as invoiceType
+                    1 as invoiceType,
+                    dsd.apply_money as applyMoney
                 FROM
                     dj_deliver_split_deliver dsd
                 INNER JOIN dj_deliver_order_split dos ON dsd.order_split_id = dos.id
@@ -245,7 +244,8 @@
                         rmd.ship_name,
                         rmd.apply_state,
                         rmd.mend_order_id as splitId,
-                        2 as invoiceType
+                        2 as invoiceType,
+                        rmd.apply_money as applyMoney
                     FROM
                         dj_repair_mend_deliver rmd
                     INNER JOIN dj_repair_mend_order rmo ON rmd.mend_order_id = rmo.id
@@ -302,7 +302,7 @@
             dj_deliver_split_deliver dsd
         INNER JOIN dj_house h ON dsd.house_id = h.id
         INNER JOIN dj_member m ON m.id = h.member_id
-        INNER JOIN dj_deliver_order_split_item dosi ON dsd.order_split_id = dosi.order_split_id
+        INNER JOIN dj_deliver_order_split_item dosi ON dsd.id = dosi.split_deliver_id
         WHERE dsd.supplier_id = #{supId}
         <if test="null!=searchKey and ''!=searchKey">
             AND (
@@ -325,7 +325,7 @@
             dsd.total_amount as totalAmount
         FROM
             dj_deliver_split_deliver dsd
-        INNER JOIN dj_deliver_order_split_item dosi ON dsd.order_split_id = dosi.order_split_id
+        INNER JOIN dj_deliver_order_split_item dosi ON dsd.id = dosi.split_deliver_id
         WHERE
             dsd.house_id = #{houseId}
         AND dsd.supplier_id = #{supId}
@@ -343,28 +343,52 @@
 	        sum(sup_cost) as income
         FROM
             dj_deliver_order_split_item dosi
-        INNER JOIN dj_deliver_split_deliver dsd ON dosi.split_deliver_id = dsd.id
+        INNER JOIN dj_deliver_split_deliver dsd ON dsd.id = dosi.split_deliver_id
         WHERE
             dosi.product_id = #{productId}
         AND dsd.supplier_id = #{supId}
         and dosi.city_id=#{cityId}
-        GROUP BY dsd.house_id;
+        GROUP BY dsd.house_id
     </select>
 
     <select id="querySupplierStoreDimensionList" resultType="com.dangjia.acg.dto.delivery.SupplierStoreDimensionDTO">
         SELECT
             dsd.storefront_id AS shopId,
             sum(dosi.num) as totalNumberSupply,
-            sum(total_price) as income
+            sum(total_price) as income,
+            dsd.supplier_id as supId
         FROM
             dj_deliver_split_deliver dsd
-        INNER JOIN dj_deliver_order_split_item dosi ON dsd.order_split_id = dosi.order_split_id
+        INNER JOIN dj_deliver_order_split_item dosi ON dsd.id = dosi.split_deliver_id
         WHERE
             dsd.supplier_id =#{supId}
         and dsd.storefront_id =#{shopId}
         and dsd.city_id=#{cityId}
         GROUP BY
             dsd.storefront_id
+    </select>
+
+
+    <select id="querySupplierStoreDimensionDetailList"
+            resultType="com.dangjia.acg.dto.delivery.BuyersDimensionDetailsDTO">
+         SELECT
+            dsd.order_split_id AS orderSplitId,
+            dsd.number,
+            dsd.send_time as createDate,
+            sum(dosi.shop_count) as shopCount,
+            dsd.total_amount as totalAmount
+        FROM
+            dj_deliver_split_deliver dsd
+        INNER JOIN dj_deliver_order_split_item dosi ON dsd.id = dosi.split_deliver_id
+        WHERE
+            dsd.storefront_id = #{shopId}
+        AND dsd.supplier_id = #{supId}
+        and dsd.city_id=#{cityId}
+        <if test="null!=searchKey and ''!=searchKey">
+            AND dsd.number LIKE CONCAT('%',#{searchKey},'%')
+        </if>
+        GROUP BY
+            dsd.number
     </select>
 
 </mapper>

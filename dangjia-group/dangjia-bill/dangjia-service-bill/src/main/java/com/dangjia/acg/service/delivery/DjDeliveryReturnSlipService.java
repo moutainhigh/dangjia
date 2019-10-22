@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -58,10 +59,10 @@ public class DjDeliveryReturnSlipService {
             DjSupplier djSupplier = djSupplierAPI.querySingleDjSupplier(userId, cityId);
             if(null==djSupplier)
                 return ServerResponse.createByErrorMessage("暂无店铺信息");
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             PageInfo pageResult=null;
             List<DjDeliveryReturnSlipDTO> djDeliveryReturnSlipDTOS = null;
             if(!CommonUtil.isEmpty(invoiceStatus)&&invoiceStatus.equals("0")){
+                PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
                 djDeliveryReturnSlipDTOS = djDeliveryReturnSlipMapper.querySupplyTaskList(djSupplier.getId(), searchKey, cityId);
                 pageResult = new PageInfo(djDeliveryReturnSlipDTOS);
                 djDeliveryReturnSlipDTOS.forEach(djDeliveryReturnSlipDTO -> {
@@ -74,6 +75,7 @@ public class DjDeliveryReturnSlipService {
             }else if(!CommonUtil.isEmpty(invoiceStatus)){
                 String[] split = invoiceStatus.split(",");
                 if(split[0].equals("0")){
+                    PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
                     djDeliveryReturnSlipDTOS = djDeliveryReturnSlipMapper.querySupplyDeliverTaskList(djSupplier.getId(), searchKey, split[1], cityId);
                     pageResult = new PageInfo(djDeliveryReturnSlipDTOS);
                     djDeliveryReturnSlipDTOS.forEach(djDeliveryReturnSlipDTO -> {
@@ -85,6 +87,7 @@ public class DjDeliveryReturnSlipService {
 
                     });
                 }else if(split[0].equals("1")){
+                    PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
                     djDeliveryReturnSlipDTOS = djDeliveryReturnSlipMapper.querySupplyRepairTaskList(djSupplier.getId(), searchKey, split[1], cityId);
                     pageResult = new PageInfo(djDeliveryReturnSlipDTOS);
                     djDeliveryReturnSlipDTOS.forEach(djDeliveryReturnSlipDTO -> {
@@ -274,17 +277,43 @@ public class DjDeliveryReturnSlipService {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<Storefront> storefronts = basicsStorefrontAPI.queryLikeSingleStorefront(searchKey);
             PageInfo pageResult = new PageInfo(storefronts);
-            List<SupplierStoreDimensionDTO> supplierStoreDimensionDTOS=null;
+            List<SupplierStoreDimensionDTO> supplierStoreDimensionDTOS=new ArrayList<>();
             for (Storefront storefront : storefronts) {
-                supplierStoreDimensionDTOS = djDeliveryReturnSlipMapper.querySupplierStoreDimensionList(djSupplier.getId(), storefront.getId(),cityId);
-                supplierStoreDimensionDTOS.forEach(supplierStoreDimensionDTO -> {
+                List<SupplierStoreDimensionDTO> supplierStoreDimensionDTOS1 = djDeliveryReturnSlipMapper.querySupplierStoreDimensionList(djSupplier.getId(), storefront.getId(), cityId);
+                supplierStoreDimensionDTOS1.forEach(supplierStoreDimensionDTO -> {
                     supplierStoreDimensionDTO.setStorefrontName(storefront.getStorefrontName());
                     supplierStoreDimensionDTO.setStorekeeperName(storefront.getStorekeeperName());
+                    supplierStoreDimensionDTO.setMobile(storefront.getMobile());
                 });
+                supplierStoreDimensionDTOS.addAll(supplierStoreDimensionDTOS1);
             }
+            System.out.println(supplierStoreDimensionDTOS);
             if (supplierStoreDimensionDTOS.size() <= 0)
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             return ServerResponse.createBySuccess("查询成功", supplierStoreDimensionDTOS);
+        } catch (Exception e) {
+            logger.error("查询失败", e);
+            return ServerResponse.createByErrorMessage("查询失败: " + e);
+        }
+    }
+
+
+    /**
+     *
+     * @param supId
+     * @param shopId
+     * @param searchKey
+     * @param cityId
+     * @return
+     */
+    public ServerResponse querySupplierStoreDimensionDetailList(PageDTO pageDTO,String supId, String shopId, String searchKey, String cityId) {
+        try {
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<BuyersDimensionDetailsDTO> buyersDimensionDetailsDTOS = djDeliveryReturnSlipMapper.querySupplierStoreDimensionDetailList(supId, shopId,cityId, searchKey);
+            PageInfo pageResult = new PageInfo(buyersDimensionDetailsDTOS);
+            if (buyersDimensionDetailsDTOS.size() <= 0)
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             logger.error("查询失败", e);
             return ServerResponse.createByErrorMessage("查询失败: " + e);

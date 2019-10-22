@@ -222,11 +222,11 @@ public class MemberService {
 
     ServerResponse getUser(Member user, Integer userRole) {
         //通过用户ID获取店铺信息,然后存储到reids中
-        Storefront Storefront = basicsStorefrontAPI.queryStorefrontByUserID(user.getId());
-        if(Storefront!=null)
-        {
-            redisClient.put(Constants.FENGJIAN_STOREFRONT+user.getId(), Storefront);
-        }
+//        Storefront Storefront = basicsStorefrontAPI.queryStorefrontByUserID(user.getId(),user.getCityId());
+//        if(Storefront!=null)
+//        {
+//            redisClient.put(Constants.FENGJIAN_STOREFRONT+user.getId(), Storefront);
+//        }
 
 
 

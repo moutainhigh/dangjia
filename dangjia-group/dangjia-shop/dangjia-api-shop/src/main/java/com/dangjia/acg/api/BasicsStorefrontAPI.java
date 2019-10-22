@@ -23,18 +23,17 @@ public interface BasicsStorefrontAPI {
 
     @PostMapping("/web/queryStorefrontByUserID")
     @ApiOperation(value = "通过用户ID查询店铺", notes = "通过用户ID查询店铺")
-    Storefront queryStorefrontByUserID(@RequestParam("userId") String userId);
-
-
+    Storefront queryStorefrontByUserID(@RequestParam("userId") String userId,
+                                       @RequestParam("cityId") String cityId);
 
     @PostMapping("/web/querySingleStorefrontById")
-    @ApiOperation(value = "根据Id查询店铺信息(实体对象)", notes = "根据Id查询店铺信息(实体对象)")
+    @ApiOperation(value = "根据主键ID查询店铺", notes = "根据主键ID查询店铺")
     Storefront querySingleStorefrontById(@RequestParam("id") String id);
 
     @PostMapping("/web/queryStorefrontByUserId")
     @ApiOperation(value = "根据userId查询店铺信息", notes = "根据userId查询店铺信息")
-    ServerResponse queryStorefrontById(@RequestParam("userId") String userId);
-
+    ServerResponse queryStorefrontByUserId(@RequestParam("userId") String userId,@RequestParam("cityId") String cityId
+    );
 
     @PostMapping("/web/queryLikeSingleStorefront")
     @ApiOperation(value = "根据调件模糊查询店铺信息", notes = "根据调件模糊查询店铺信息")
@@ -54,7 +53,7 @@ public interface BasicsStorefrontAPI {
 
     @PostMapping("/web/updateStorefront")
     @ApiOperation(value = "修改店铺信息", notes = "修改店铺信息")
-    ServerResponse updateStorefront( StorefrontDTO storefrontDTO);
+    ServerResponse updateStorefront(StorefrontDTO storefrontDTO);
 
 
     @PostMapping("/web/querySupplierApplicationShopList")

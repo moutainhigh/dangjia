@@ -39,7 +39,7 @@ public interface DjDeliveryReturnSlipAPI {
     @PostMapping("/delivery/djDeliveryReturnSlip/querySupplierSettlementManagement")
     @ApiOperation(value = "供应商结算管理", notes = "供应商结算管理")
     ServerResponse querySupplierSettlementManagement(@RequestParam("request") HttpServletRequest request,
-                                                     @RequestParam("userId") String userId,
+                                                     @RequestParam("user_id") String userId,
                                                      @RequestParam("cityId") String cityId,
                                                      @RequestParam("pageDTO") PageDTO pageDTO,
                                                      @RequestParam("applyState") Integer applyState);
@@ -85,6 +85,13 @@ public interface DjDeliveryReturnSlipAPI {
                                                    @RequestParam("cityId") String cityId,
                                                    @RequestParam("searchKey") String searchKey);
 
-
+    @PostMapping("/delivery/djDeliveryReturnSlip/querySupplierStoreDimensionDetailList")
+    @ApiOperation(value = "供应商店铺维度详情列表", notes = "供应商店铺维度详情列表")
+    ServerResponse querySupplierStoreDimensionDetailList(@RequestParam("request") HttpServletRequest request,
+                                                         @RequestParam("pageDTO") PageDTO pageDTO,
+                                                         @RequestParam("supId") String supId,
+                                                         @RequestParam("shopId") String shopId,
+                                                         @RequestParam("searchKey") String searchKey,
+                                                         @RequestParam("cityId") String cityId);
 
 }

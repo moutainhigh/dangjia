@@ -30,8 +30,8 @@ public class StorefrontController implements BasicsStorefrontAPI {
 
     @Override
     @ApiMethod
-    public Storefront queryStorefrontByUserID(String userId) {
-        return storefrontService.queryStorefrontByUserID(userId);
+    public Storefront queryStorefrontByUserID(String userId,String cityId) {
+        return storefrontService.queryStorefrontByUserID(userId,cityId);
     }
 
     @Override
@@ -42,8 +42,8 @@ public class StorefrontController implements BasicsStorefrontAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryStorefrontById(String userId) {
-        return storefrontService.queryStorefrontById(userId);
+    public ServerResponse queryStorefrontByUserId(String userId,String cityId) {
+        return storefrontService.queryStorefrontByUserId(userId,cityId);
     }
 
     @Override
