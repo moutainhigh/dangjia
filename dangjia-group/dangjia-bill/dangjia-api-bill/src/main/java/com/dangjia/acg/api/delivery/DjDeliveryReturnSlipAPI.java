@@ -85,6 +85,47 @@ public interface DjDeliveryReturnSlipAPI {
                                                    @RequestParam("cityId") String cityId,
                                                    @RequestParam("searchKey") String searchKey);
 
+    /******************************店铺利润********************************************************/
+    @PostMapping("/delivery/djDeliveryReturnSlip/a")
+    @ApiOperation(value = "店铺利润统计-供应商维度", notes = "店铺利润统计-供应商维度")
+    ServerResponse a(@RequestParam("request") HttpServletRequest request,
+                                                   @RequestParam("pageDTO") PageDTO pageDTO,
+                                                   @RequestParam("userId") String userId,
+                                                   @RequestParam("cityId") String cityId,
+                                                   @RequestParam("searchKey") String searchKey);
 
+    @PostMapping("/delivery/djDeliveryReturnSlip/b")
+    @ApiOperation(value = "店铺利润统计-商品维度", notes = "店铺利润统计-商品维度")
+    ServerResponse b(@RequestParam("request") HttpServletRequest request,
+                                                   @RequestParam("pageDTO") PageDTO pageDTO,
+                                                   @RequestParam("userId") String userId,
+                                                   @RequestParam("cityId") String cityId,
+                                                   @RequestParam("searchKey") String searchKey);
+
+    @PostMapping("/delivery/djDeliveryReturnSlip/c")
+    @ApiOperation(value = "店铺利润统计-卖家维度", notes = "店铺利润统计-卖家维度")
+    ServerResponse c(@RequestParam("request") HttpServletRequest request,
+                                                   @RequestParam("pageDTO") PageDTO pageDTO,
+                                                   @RequestParam("userId") String userId,
+                                                   @RequestParam("cityId") String cityId,
+                                                   @RequestParam("searchKey") String searchKey);
+
+    @PostMapping("/delivery/djDeliveryReturnSlip/d")
+    @ApiOperation(value = "店铺利润统计-查看供应详情", notes = "店铺利润统计-查看供应详情")
+    ServerResponse d(@RequestParam("request") HttpServletRequest request,
+                                                  @RequestParam("pageDTO") PageDTO pageDTO,
+                                                  @RequestParam("supId") String supId,
+                                                  @RequestParam("houseId") String houseId,
+                                                  @RequestParam("searchKey") String searchKey,
+                                                  @RequestParam("cityId") String cityId);
+
+    @PostMapping("/delivery/djDeliveryReturnSlip/e")
+    @ApiOperation(value = "店铺利润统计-查看货单详情", notes = "店铺利润统计-查看货单详情")
+    ServerResponse e(@RequestParam("request") HttpServletRequest request,
+                     @RequestParam("pageDTO") PageDTO pageDTO,
+                     @RequestParam("supId") String supId,
+                     @RequestParam("houseId") String houseId,
+                     @RequestParam("searchKey") String searchKey,
+                     @RequestParam("cityId") String cityId);
 
 }

@@ -36,6 +36,7 @@
 
     <select id="queryDjSupplierByShopID" resultType="com.dangjia.acg.dto.supplier.DjSupplierDTO" >
         SELECT
+            da.id,
             ds. NAME ,
             ds.address ,
             ds.check_people as checkPeople,

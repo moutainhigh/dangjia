@@ -247,17 +247,14 @@ public class DjSupplierServices {
             djSupApplication.setId(id);
             djSupApplication.setApplicationStatus(applicationStatus);
             int i=djSupApplicationMapper.updateByPrimaryKeySelective(djSupApplication);
-            if(i>0)
+            if(i<=0)
             {
-               return  ServerResponse.createBySuccessMessage("修改成功");
+                ServerResponse.createByErrorMessage("供应商申请失败");
             }
-            else
-            {
-                return ServerResponse.createBySuccessMessage("没有修改");
-            }
+            return  ServerResponse.createBySuccessMessage("供应商申请成功");
         } catch (Exception e) {
             e.printStackTrace();
-            return ServerResponse.createByErrorMessage("查询失败");
+            return ServerResponse.createByErrorMessage("供应商申请异常");
         }
     }
 
@@ -283,17 +280,15 @@ public class DjSupplierServices {
             djSupApplication.setApplicationStatus(applicationStatus);
             djSupApplication.setFailReason(failReason);
             int i=djSupApplicationMapper.updateByPrimaryKeySelective(djSupApplication);
-            if(i>0)
+            if(i<=0)
             {
-                return  ServerResponse.createBySuccessMessage("修改成功");
+                return ServerResponse.createBySuccessMessage("驳回供应商申请失败");
+
             }
-            else
-            {
-                return ServerResponse.createBySuccessMessage("没有修改");
-            }
+            return  ServerResponse.createBySuccessMessage("驳回供应商申请成功");
         } catch (Exception e) {
             e.printStackTrace();
-            return ServerResponse.createByErrorMessage("查询失败");
+            return ServerResponse.createByErrorMessage("驳回供应商申请异常");
         }
     }
 
