@@ -8,7 +8,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             SELECT
             id,
             number AS number,
-            create_date AS createDate,
+            back_time AS createDate,
             total_amount AS totalAmount,
             apply_money AS applyMoney,
             apply_state AS applyState,
