@@ -38,7 +38,7 @@
             dosi.total_price as totalPrice
         FROM
             dj_deliver_split_deliver dsd
-        INNER JOIN dj_deliver_order_split_item dosi ON dsd.order_split_id = dosi.order_split_id
+        INNER JOIN dj_deliver_order_split_item dosi ON dsd.id = dosi.split_deliver_id
         INNER JOIN dj_house h ON h.id = dsd.house_id
         INNER JOIN dj_member m ON h.member_id = m.id
         WHERE dsd.order_split_id=#{orderSplitId}
@@ -60,7 +60,7 @@
             rmm.actual_count as actualCount
         FROM
             dj_repair_mend_deliver rmd
-        INNER JOIN dj_repair_mend_materiel rmm ON rmm.mend_order_id = rmd.mend_order_id
+        INNER JOIN dj_repair_mend_materiel rmm ON rmm.repair_mend_deliver_id = rmd.id
         INNER JOIN dj_house h ON h.id = rmd.house_id
         INNER JOIN dj_member m ON h.member_id = m.id
         WHERE rmd.mend_order_id = #{mendOrderId}

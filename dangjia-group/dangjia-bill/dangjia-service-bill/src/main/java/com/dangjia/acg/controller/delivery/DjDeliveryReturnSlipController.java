@@ -70,4 +70,9 @@ public class DjDeliveryReturnSlipController implements DjDeliveryReturnSlipAPI {
         return djDeliveryReturnSlipService.querySupplierStoreDimensionList(pageDTO, userId,cityId, searchKey);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse querySupplierStoreDimensionDetailList(HttpServletRequest request, PageDTO pageDTO,String supId, String shopId, String searchKey, String cityId) {
+        return djDeliveryReturnSlipService.querySupplierStoreDimensionDetailList(pageDTO,supId,shopId,searchKey,cityId);
+    }
 }
