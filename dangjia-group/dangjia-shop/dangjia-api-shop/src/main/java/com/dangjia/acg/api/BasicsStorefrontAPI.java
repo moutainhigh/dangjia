@@ -23,7 +23,8 @@ public interface BasicsStorefrontAPI {
 
     @PostMapping("/web/queryStorefrontByUserID")
     @ApiOperation(value = "通过用户ID查询店铺", notes = "通过用户ID查询店铺")
-    Storefront queryStorefrontByUserID(@RequestParam("userId") String userId, @RequestParam("cityId") String cityId);
+    Storefront queryStorefrontByUserID(@RequestParam("userId") String userId,
+                                       @RequestParam("cityId") String cityId);
 
     @PostMapping("/web/querySingleStorefrontById")
     @ApiOperation(value = "根据主键ID查询店铺", notes = "根据主键ID查询店铺")

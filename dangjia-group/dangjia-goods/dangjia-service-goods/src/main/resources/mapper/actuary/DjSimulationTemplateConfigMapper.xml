@@ -95,4 +95,15 @@
     <select id="deleteSimulationTemplate">
         delete from dj_simulation_template_config where id not in(select distinct simulation_template_id from dj_simulation_template_config_detail)
     </select>
+
+    <select id="searchSimulationTitleList" resultType="com.dangjia.acg.dto.actuary.app.SimulationTemplateAppConfigDTO">
+        SELECT
+            id titleId,
+            config_name titleName,
+            config_type titleType
+        FROM
+            dj_simulation_template_config t
+        where data_status = '0'
+        order by config_type,create_date
+    </select>
 </mapper>

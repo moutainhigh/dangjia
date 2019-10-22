@@ -31,12 +31,12 @@ public class ActuarialProductDTO  {
     @ExcelField(titile = "商品编码", offset = 1)
     private String productSn;
 
-    @ApiModelProperty("商品编码")
-    @ExcelField(titile = "商品编码", offset = 3)
+    @ApiModelProperty("商品数量")
+    @ExcelField(titile = "商品数量", offset = 3)
     private String purchaseQuantity;
 
-    @ApiModelProperty("商品编码")
-    @ExcelField(titile = "商品编码", offset = 4)
+    @ApiModelProperty("商品类型（0材料商品，2服务商品，3人工商品）")
+    @ExcelField(titile = "商品类型", offset = 4)
     private String prodType;
 
     @ApiModelProperty("工种类型（1设计师，2精算师，3大管家,4拆除，6水电，8泥工,9木工，10油漆工）")

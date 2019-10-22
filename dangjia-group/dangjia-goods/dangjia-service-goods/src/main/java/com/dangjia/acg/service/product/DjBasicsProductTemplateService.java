@@ -572,7 +572,6 @@ public class DjBasicsProductTemplateService {
                         stringBuffer.append(",");
                     stringBuffer.append(jsonObject.get(i1));
                 }
-                System.out.println(stringBuffer.toString());
                 DjBasicsProductLabelVal djBasicsProductLabelVal;
                 Example example=new Example(DjBasicsProductLabelVal.class);
                 example.createCriteria().andEqualTo(DjBasicsProductLabelVal.PRODUCT_ID,productId)

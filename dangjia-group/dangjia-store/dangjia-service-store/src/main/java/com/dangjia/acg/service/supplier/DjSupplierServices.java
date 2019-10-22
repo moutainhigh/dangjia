@@ -50,7 +50,8 @@ public class DjSupplierServices {
      * @return
      */
     public DjSupplier querySingleDjSupplier(String userId, String cityId) {
-        return djSupplierMapper.querySingleDjSupplier(userId, cityId);
+        DjSupplier djSupplier = djSupplierMapper.querySingleDjSupplier(userId, cityId);
+        return djSupplier;
     }
 
     /**

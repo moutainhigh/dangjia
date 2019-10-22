@@ -26,6 +26,8 @@ public class DjDeliveryReturnSlipDetailsDTO {
     private Double price;//单价
     private Integer shopCount;//购买数量
     private String image;
+    private String productName;
+    private String productSn;
 
 //    private List<DjDeliveryReturnSlipDetailsProductDTO> djDeliveryReturnSlipDetailsProductDTOS;
 }
