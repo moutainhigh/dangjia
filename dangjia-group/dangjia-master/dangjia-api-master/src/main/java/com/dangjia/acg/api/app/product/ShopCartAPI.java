@@ -33,7 +33,7 @@ public interface ShopCartAPI {
                            @RequestParam("unitName") String unitName,
                            @RequestParam("categoryId") String categoryId,
                            @RequestParam("productType") String productType,
-                           @RequestParam("seller") String seller
+                           @RequestParam("storefrontId") String storefrontId
                            );
 
     @PostMapping("app/shopping/queryCartList")

@@ -26,6 +26,12 @@ public class DjSupplierController implements DjSupplierAPI {
 
     @Override
     @ApiMethod
+    public DjSupplier queryDjSupplierByPass(String supplierId) {
+        return djSupplierServices.queryDjSupplierByPass(supplierId);
+    }
+
+    @Override
+    @ApiMethod
     public DjSupplier querySingleDjSupplier(String userId, String cityId) {
         return djSupplierServices.querySingleDjSupplier(userId,cityId);
     }
@@ -66,22 +72,21 @@ public class DjSupplierController implements DjSupplierAPI {
         return djSupplierServices.queryDjSupplierByShopID(keyWord,applicationStatus,shopId);
     }
 
-
     @Override
     @ApiMethod
-    public ServerResponse getDjSupplierByID(HttpServletRequest request, String id,String shopId) {
+    public ServerResponse getDjSupplierByID(String id,String shopId) {
         return djSupplierServices.getDjSupplierByID(id,shopId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse setDjSupplierPass(HttpServletRequest request, String id, String applicationStatus) {
+    public ServerResponse setDjSupplierPass(String id, String applicationStatus) {
         return djSupplierServices.setDjSupplierPass(id,applicationStatus);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse setDjSupplierReject(HttpServletRequest request, String id, String applicationStatus, String failReason) {
+    public ServerResponse setDjSupplierReject( String id, String applicationStatus, String failReason) {
         return djSupplierServices.setDjSupplierReject(id,applicationStatus,failReason);
     }
 

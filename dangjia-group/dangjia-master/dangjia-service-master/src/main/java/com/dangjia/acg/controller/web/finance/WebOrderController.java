@@ -1,10 +1,12 @@
 package com.dangjia.acg.controller.web.finance;
 
+import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.web.finance.WebOrderAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.service.finance.WebOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,11 +24,17 @@ public class WebOrderController implements WebOrderAPI {
     @Autowired
     private WebOrderService webOrderService;
 
+    @Autowired
+    private RedisClient redisClient;
+
     @Override
     @ApiMethod
-    public ServerResponse getAllOrders(HttpServletRequest request, PageDTO pageDTO, Integer state, String searchKey,String sellerId) {
+    public ServerResponse getAllOrders(HttpServletRequest request, PageDTO pageDTO, Integer state, String searchKey) {
         String cityId = request.getParameter(Constants.CITY_ID);
-        return webOrderService.getAllOrders(pageDTO,cityId, state, searchKey,sellerId);
+        String userID = request.getParameter(Constants.USERID);
+        //通过缓存查询店铺信息
+        Storefront storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userID,Storefront.class);
+        return webOrderService.getAllOrders(pageDTO,cityId, state, searchKey,storefront.getId());
     }
 
     @Override

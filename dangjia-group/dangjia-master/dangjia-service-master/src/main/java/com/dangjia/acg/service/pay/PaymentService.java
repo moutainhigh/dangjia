@@ -948,9 +948,12 @@ public class PaymentService {
         }
     }
 
-    //购物车结算第二步：获取订单明细方法
+    //购物车结算：获取订单明细方法
     public List<ShoppingCart> getPaymentAllOrderByShoppingCart( String houseDistributionId)
     {
+        /**
+         *    购物车有变动，重写
+         */
         // String userToken,
         //int type
         List<ShoppingCart> list = new ArrayList<ShoppingCart>();
@@ -1009,6 +1012,9 @@ public class PaymentService {
                 actuaryDTO.setType(7);
                 actuaryDTOList.add(actuaryDTO);
             } else if (type == 10) {
+                /**
+                 *    购物车有变动，重写
+                 */
 //                //购物车结算第三步：调用方法订单明细方法
 //                List<ShoppingCart>  list=  getPaymentAllOrderByShoppingCart(houseDistributionId);
 //                paymentDTO.setDatas(list);

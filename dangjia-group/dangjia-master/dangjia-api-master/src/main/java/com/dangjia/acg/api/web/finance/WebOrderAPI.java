@@ -24,8 +24,7 @@ public interface WebOrderAPI {
     ServerResponse getAllOrders(@RequestParam("request") HttpServletRequest request,
                                 @RequestParam("pageDTO") PageDTO pageDTO,
                                 @RequestParam("state") Integer state,
-                                @RequestParam("searchKey") String searchKey,
-                                @RequestParam("sellerId") String sellerId);
+                                @RequestParam("searchKey") String searchKey);
 
 
     @PostMapping("web/finance/order/getOrderItem")

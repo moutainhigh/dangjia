@@ -80,10 +80,10 @@ public class Storefront extends BaseEntity {
     /**
      * 联系电话
      */
-    @Column(name = "contact")
+    @Column(name = "mobile")
     @Desc(value = "  联系电话")
     @ApiModelProperty("  联系电话")
-    private String contact;
+    private String mobile;
 
 
     /**

@@ -206,11 +206,15 @@
         house.create_date as createDate,
         house.construction_date as constructionDate,
         house.modify_date as modifyDate,
-        (SELECT COUNT(*) from dj_deliver_order_split where apply_status = 1 and house_id = house.id) as waitCount,
-        (SELECT COUNT(*) from dj_deliver_order_split where apply_status = 2 and house_id = house.id) as sendCount
+        (SELECT COUNT(*) from dj_deliver_order_split ddos where ddos.apply_status = 1 and ddos.house_id = house.id) as waitCount,
+        (SELECT COUNT(*) from dj_deliver_order_split ddos where ddos.apply_status = 2 and ddos.house_id = house.id) as sendCount
         FROM dj_house as house
+        inner join dj_deliver_order_split  as dos on dos.house_id=house.id
         WHERE house.visit_state > 0
-        <if test="cityId!=null and cityId!=''">
+        <if test="storefrontId!=null and storefrontId!=''">
+            and dos.storefront_id = #{storefrontId}
+        </if>
+        <if test="cityId!=null and cityId!=''">-
             and house.city_id = #{cityId}
         </if>
         <if test="startDate!=null and endDate!=null and startDate!='' and endDate!=''">
@@ -228,6 +232,7 @@
             CONCAT('%',#{likeAddress},'%')
 
         </if>
+        group by house.id
         ORDER BY waitCount DESC,sendCount DESC,house.create_date DESC
     </select>
 
@@ -926,7 +931,7 @@
              purchase_number = #{purchaseNumber},
              total_purchase_price = #{totalPurchasePrice},
              update_by = #{updateBy},
-             update_date = SYSDATE()
+             modify_date = now()
         WHERE
             id = #{id}
     </update>

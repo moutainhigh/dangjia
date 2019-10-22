@@ -1,5 +1,7 @@
 package com.dangjia.acg.service.deliver;
 
+import com.dangjia.acg.api.RedisClient;
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -8,11 +10,13 @@ import com.dangjia.acg.dto.deliver.SplitReportDeliverOrderDTO;
 import com.dangjia.acg.dto.deliver.SplitReportDeliverOrderItemDTO;
 import com.dangjia.acg.dto.deliver.SplitReportSupplierDTO;
 import com.dangjia.acg.mapper.delivery.IOrderSplitItemMapper;
+import com.dangjia.acg.modle.storefront.Storefront;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -28,9 +32,15 @@ public class SplitDeliverReportService {
     @Autowired
     private ConfigUtil configUtil;
 
+    @Autowired
+    private RedisClient redisClient;
 
-    public ServerResponse getSplitReportSuppliers(String houseId){
-        List<SplitReportSupplierDTO> splitDeliverDTOList=orderSplitItemMapper.getSplitReportSuppliers(houseId);
+    public ServerResponse getSplitReportSuppliers(HttpServletRequest request, String houseId){
+        String userID = request.getParameter(Constants.USERID);
+        //通过缓存查询店铺信息
+        Storefront storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userID,Storefront.class);
+
+        List<SplitReportSupplierDTO> splitDeliverDTOList=orderSplitItemMapper.getSplitReportSuppliers(houseId,storefront.getId());
         return ServerResponse.createBySuccess("查询成功", splitDeliverDTOList);
     }
 

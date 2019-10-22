@@ -30,6 +30,9 @@ public class SimulationTemplateConfigDetailDTO {
     @ApiModelProperty("图片")
     private String image;
 
+    @ApiModelProperty("图片地址")
+    private String imageUrl;
+
     @ApiModelProperty("标签名称，多个用逗号分隔")
     private String labelName;
 }

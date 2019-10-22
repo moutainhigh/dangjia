@@ -9,6 +9,8 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpServletRequest;
+
 
 @FeignClient("dangjia-service-master")
 @Api(value = "发货管理web接口", description = "发货管理web接口")
@@ -38,19 +40,13 @@ public interface WebOrderSplitAPI {
 
     @PostMapping("web/deliver/orderSplit/sentSupplier")
     @ApiOperation(value = "发送供应商", notes = "发送供应商")
-    ServerResponse sentSupplier(@RequestParam("orderSplitId") String orderSplitId,
-                                @RequestParam("splitItemList") String splitItemList);
-
-    @PostMapping("web/deliver/orderSplit/sentSupplierNew")
-    @ApiOperation(value = "发送供应商", notes = "发送供应商")
-    ServerResponse sentSupplierNew(@RequestParam("orderSplitId") String orderSplitId,
-                                   @RequestParam("splitItemList") String splitItemList,
-                                   @RequestParam("installName") String installName,
-                                   @RequestParam("installMobile") String installMobile,
-                                   @RequestParam("deliberyName") String deliberyName,
-                                   @RequestParam("deliveryMobile") String deliveryMobile
-    );
-
+    ServerResponse sentSupplier(
+            @RequestParam("orderSplitId") String orderSplitId,
+            @RequestParam("splitItemList") String splitItemList,
+            @RequestParam("installName") String installName,
+            @RequestParam("installMobile") String installMobile,
+            @RequestParam("deliberyName") String deliberyName,
+            @RequestParam("deliveryMobile") String deliveryMobile);
 
     @PostMapping("web/deliver/orderSplit/cancelOrderSplit")
     @ApiOperation(value = "取消打回", notes = "取消打回")
@@ -66,7 +62,8 @@ public interface WebOrderSplitAPI {
 
     @PostMapping("web/deliver/orderSplit/getHouseList")
     @ApiOperation(value = "材料员看房子列表", notes = "材料员看房子列表")
-    ServerResponse getHouseList(@RequestParam("cityId") String cityId,
+    ServerResponse getHouseList(@RequestParam("request") HttpServletRequest request,
+                                @RequestParam("cityId") String cityId,
                                 @RequestParam("pageDTO") PageDTO pageDTO,
                                 @RequestParam("likeAddress") String likeAddress,
                                 @RequestParam("startDate")String startDate,
@@ -75,7 +72,7 @@ public interface WebOrderSplitAPI {
 
     @PostMapping("web/deliver/orderSplit/getOrderSplitList")
     @ApiOperation(value = "根据房子id查询要货单列表", notes = "根据房子id查询要货单列表")
-    ServerResponse getOrderSplitList(@RequestParam("houseId") String houseId);
+    ServerResponse getOrderSplitList(@RequestParam("request") HttpServletRequest request,@RequestParam("houseId") String houseId);
 
     @PostMapping("web/deliver/orderSplit/setSplitDeliver")
     @ApiOperation(value = "修改 供应商结算状态", notes = "修改 供应商结算状态")

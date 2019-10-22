@@ -45,6 +45,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             `dj_deliver_order_split_item` si
         INNER JOIN dj_deliver_split_deliver sd ON si.split_deliver_id = sd.id
         AND sd.supplier_id IS NOT NULL
+
+        <if test="storefrontId!=null and storefrontId!=''">
+            and sd.storefront_id =#{storefrontId}
+        </if>
+
         WHERE si.house_id= #{houseId}
         GROUP BY
             sd.supplier_id,

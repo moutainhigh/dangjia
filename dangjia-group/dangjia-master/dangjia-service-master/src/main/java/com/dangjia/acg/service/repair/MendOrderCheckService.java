@@ -3,6 +3,7 @@ package com.dangjia.acg.service.repair;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.data.ForMasterAPI;
+import com.dangjia.acg.api.supplier.DjSupplierAPI;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
@@ -30,6 +31,7 @@ import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.*;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
+import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
@@ -95,7 +97,8 @@ public class MendOrderCheckService {
     private IOrderSplitMapper orderSplitMapper;
     @Autowired
     private MendOrderService mendOrderService;
-
+    @Autowired
+    private DjSupplierAPI djSupplierAPI ;
     /**
      * 根据mendOrderId查询审核情况
      */
@@ -160,11 +163,12 @@ public class MendOrderCheckService {
                         JSONObject obj = arr.getJSONObject(i);
                         String id = obj.getString("id");
                         String supplierId = obj.getString("supplierId");
-                        Supplier supplier = forMasterAPI.getSupplier(house.getCityId(), supplierId);
+                        //Supplier supplier = forMasterAPI.getSupplier(house.getCityId(), supplierId);
+                        DjSupplier djSupplier =djSupplierAPI.queryDjSupplierByPass(supplierId);
                         MendMateriel mendMateriel = mendMaterialMapper.selectByPrimaryKey(id);
                         mendMateriel.setSupplierId(supplierId);//供应商id
-                        mendMateriel.setSupplierTelephone(supplier.getTelephone());//供应商联系电话
-                        mendMateriel.setSupplierName(supplier.getName());//供应商供应商名称
+                        mendMateriel.setSupplierTelephone(djSupplier.getTelephone());//供应商联系电话
+                        mendMateriel.setSupplierName(djSupplier.getName());//供应商供应商名称
 
                         Example example = new Example(MendDeliver.class);
                         example.createCriteria().andEqualTo(MendDeliver.HOUSE_ID, mendOrder.getHouseId()).andEqualTo(MendDeliver.SUPPLIER_ID, supplierId)
@@ -186,8 +190,8 @@ public class MendOrderCheckService {
                             mendDeliver.setShipMobile(member.getMobile());
                             mendDeliver.setShipAddress(house.getHouseName());
                             mendDeliver.setSupplierId(supplierId);//供应商id
-                            mendDeliver.setSupplierTelephone(supplier.getTelephone());//供应商联系电话
-                            mendDeliver.setSupplierName(supplier.getName());//供应商供应商名称
+                            mendDeliver.setSupplierTelephone(djSupplier.getTelephone());//供应商联系电话
+                            mendDeliver.setSupplierName(djSupplier.getName());//供应商供应商名称
                             mendDeliver.setSubmitTime(new Date());
                             mendDeliver.setShippingState(0);//待发货状态
                             mendDeliver.setApplyState(0);

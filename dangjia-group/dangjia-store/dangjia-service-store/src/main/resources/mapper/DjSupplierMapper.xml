@@ -16,20 +16,20 @@
           b.storefront_desc as storefrontDesc,
           b.storefront_logo as storefrontLogo,
           b.storekeeper_name as storekeeperName,
-          b.contact,
+          b.mobile,
           b.email
         FROM
             dj_sup_application a
         INNER JOIN dj_basics_storefront b ON a.shop_id = b.id
-        WHERE
-            a.sup_id =#{supId}
+        WHERE    1=1
+        and a.sup_id =#{supId}
         AND a.application_status = 1
         AND a.data_status = 0
         AND b.data_status = 0
         <if test="null!=searchKey and ''!=searchKey">
             AND (
             b.storefront_name LIKE CONCAT('%',#{searchKey},'%') or
-            b.contact LIKE CONCAT('%',#{searchKey},'%')
+            b.mobile LIKE CONCAT('%',#{searchKey},'%')
             )
         </if>
     </select>
@@ -46,7 +46,7 @@
         FROM
             dj_sup_application da
         INNER JOIN dj_supplier ds ON da.sup_id = ds.id
-        WHERE 1=1
+        WHERE 1=1 and da.data_status=0
         <if test="null!=shopId and ''!=shopId">
             and  da.shop_id = #{shopId}
         </if>
@@ -61,6 +61,25 @@
         </if>
     </select>
 
+    <select id="queryDjSupplierByPass" resultType="com.dangjia.acg.modle.supplier.DjSupplier" >
+             SELECT
+            ds.id,
+            ds.create_date,
+            ds.modify_date,
+            ds.data_status,
+            ds.user_id userId,
+            ds.city_id cityId,
+            ds.NAME,
+            ds.address,
+            ds.check_people checkPeople,
+            ds.telephone,
+            ds.email
+            FROM dj_supplier ds INNER JOIN dj_sup_application dsa ON ds.id=dsa.sup_id
+            WHERE  1=1 and  ds.id=#{supplierId}
+            ORDER BY ds.create_date DESC
+
+    </select>
+
     <select id="queryDJsupplierById" resultType="com.dangjia.acg.dto.supplier.DjSupplierDTO" >
         SELECT
             ds. NAME,
@@ -71,8 +90,7 @@
         FROM
             dj_sup_application da
         INNER JOIN dj_supplier ds ON da.sup_id = ds.id
-        WHERE 1=1
-        and  da.shop_id = #{shopId}
+        WHERE 1=1 and da.shop_id = #{shopId}
         and  ds.id=#{id}
     </select>
 
@@ -86,7 +104,7 @@
             city_id cityId,
             NAME,
             address,
-            check_people checkPeople,
+            check_people as checkPeople,
             telephone,
             email
         FROM dj_supplier

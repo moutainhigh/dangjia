@@ -69,9 +69,8 @@ public class ShoppingCart extends BaseEntity {
     private Integer productType;
 
 
-    @Column(name = "seller")
-    @Desc(value = "店铺")
-    @ApiModelProperty("店铺")
-    private String seller;
-
+    @Column(name = "storefront_id")
+    @Desc(value = "店铺表ID")
+    @ApiModelProperty("店铺表ID")
+    private String storefrontId;
 }

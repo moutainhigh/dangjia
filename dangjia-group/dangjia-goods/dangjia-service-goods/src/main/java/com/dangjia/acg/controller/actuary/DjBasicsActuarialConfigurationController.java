@@ -45,9 +45,9 @@ public class DjBasicsActuarialConfigurationController implements DjBasicsActuari
      */
     @Override
     @ApiMethod
-    public ServerResponse  editActuarialProduct(HttpServletRequest request,String actuarialProductStr,String userId){
+    public ServerResponse  editActuarialProduct(HttpServletRequest request,String actuarialProductStr,String actuarialTemplateId,String workTypeId,String userId){
         try{
-            return djBasicsActuarialConfigurationServices.editActuarialProduct(actuarialProductStr,userId);
+            return djBasicsActuarialConfigurationServices.editActuarialProduct(actuarialProductStr,actuarialTemplateId, workTypeId,userId);
         }catch (Exception e){
             logger.error("批量编辑异常：",e);
             return ServerResponse.createByErrorMessage("保存失败！");
@@ -169,7 +169,7 @@ public class DjBasicsActuarialConfigurationController implements DjBasicsActuari
      */
     @Override
     @ApiMethod
-    public ServerResponse importSimulateExcelBudgets(StandardMultipartHttpServletRequest request,String name,String fileName,String address){
+    public ServerResponse importSimulateExcelBudgets(HttpServletRequest request,String name,String fileName,String address){
 
         try{
             return djBasicsActuarialConfigurationServices.importSimulateExcelBudgets(name,fileName,address,request.getParameter(Constants.USERID));

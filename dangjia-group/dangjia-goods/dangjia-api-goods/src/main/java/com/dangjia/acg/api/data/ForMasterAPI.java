@@ -159,4 +159,9 @@ public interface ForMasterAPI {
     ServerResponse getproductTempListByStorefontId(@RequestParam("cityId") String cityId,
                                                    @RequestParam("storefontId") String storefontId,
                                                    @RequestParam("goodsId") String goodsId);
+
+    @PostMapping("/data/house/getStroreProductInfoById")
+    @ApiOperation(value = "获取商品对应的基本信息(店铺商品信息)", notes = "获取商品对应的基本信息(店铺商品信息)")
+    StorefontInfoDTO getStroreProductInfoById(@RequestParam("cityId") String cityId,
+                                          @RequestParam("productId") String productId);
 }

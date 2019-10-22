@@ -221,7 +221,7 @@ public class ProductService {
                             }
                         }
 
-                        //统计 没有品牌和系列时，同属性的
+                        // 没有品牌和系列时，同属性的
                         for (int j = 0; j < jsonArr.size(); j++) {
                             JSONObject objJ = jsonArr.getJSONObject(j);
                             if (brandId.equals(objJ.getString("brandId"))

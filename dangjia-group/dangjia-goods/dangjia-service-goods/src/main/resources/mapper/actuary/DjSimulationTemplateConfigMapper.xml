@@ -13,7 +13,8 @@
         <result property="id" column="id"/>
         <result property="configName" column="configName"/>
         <result property="configType" column="configType"/>
-        <collection property="simulationDetailList" column="{simulationTemplateId=id}" ofType="map" select="selectSimulationDetailList"/>
+        <result property="addressUrl" column="addressUrl"/>
+        <collection property="simulationDetailList" column="{simulationTemplateId=id,addressUrl=addressUrl}" ofType="map" select="selectSimulationDetailList"/>
     </resultMap>
 
     <resultMap id="simulateionDetailMap" type="com.dangjia.acg.dto.actuary.SimulationTemplateConfigDetailDTO">
@@ -23,6 +24,7 @@
         <result property="code" column="code"/>
         <result property="name" column="name"/>
         <result property="image" column="image"/>
+        <result property="imageUrl" column="imageUrl"/>
         <result property="labelName" column="labelName"/>
     </resultMap>
 
@@ -32,7 +34,8 @@
         SELECT
             id,
             config_name configName,
-            config_type configType
+            config_type configType,
+            #{addressUrl} addressUrl
         FROM
             dj_simulation_template_config t
         where data_status = '0'
@@ -50,6 +53,7 @@
             CODE,
             NAME,
             image,
+            CONCAT(#{addressUrl},image) imageUrl,
             label_name labelName
         FROM
             dj_simulation_template_config_detail

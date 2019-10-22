@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
 
@@ -49,7 +50,7 @@ public class DjDeliveryReturnSlipService {
      *
      * @param pageDTO
      * @param searchKey
-     * @param invoiceStatus 0:全部  0,0:代发货  0,1:待收货  0,2:已收货  1,0:待退货  1,1:已确认  1,2:已结算  1,3:拒绝退货
+     * @param invoiceStatus 0:全部  0,0:代发货  0,1:已发货待收货  0,2:已收货  0,4:部分收货  1,0:待退货  1,1:已确认  1,2:已结算  1,3:拒绝退货
      * @return
      */
     public ServerResponse querySupplyTaskList(PageDTO pageDTO, String userId, String cityId, String searchKey, String invoiceStatus) {
@@ -81,6 +82,7 @@ public class DjDeliveryReturnSlipService {
                             djDeliveryReturnSlipDTO.setShopName(storefront.getStorefrontName());
                             djDeliveryReturnSlipDTO.setStorekeeperName(storefront.getStorekeeperName());
                         }
+
                     });
                 }else if(split[0].equals("1")){
                     djDeliveryReturnSlipDTOS = djDeliveryReturnSlipMapper.querySupplyRepairTaskList(djSupplier.getId(), searchKey, split[1], cityId);
@@ -144,7 +146,7 @@ public class DjDeliveryReturnSlipService {
                 Storefront storefront = basicsStorefrontAPI.querySingleStorefrontById(supplierSettlementManagementDTO.getShopId());
                 supplierSettlementManagementDTO.setShopId(storefront.getId());
                 supplierSettlementManagementDTO.setStorefrontName(storefront.getStorefrontName());
-                supplierSettlementManagementDTO.setContact(storefront.getContact());
+                supplierSettlementManagementDTO.setMobile(storefront.getMobile());
                 supplierSettlementManagementDTO.setStorekeeperName(storefront.getStorekeeperName());
             });
             if (supplierSettlementManagementDTOS.size() <= 0)

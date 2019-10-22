@@ -16,7 +16,7 @@
 		unit_name as unitName,
 		category_id as categoryId,
 		product_type as productType,
-		seller ,
+		storefront_id as storefrontId ,
 		create_date AS createDate,
         modify_date AS modifyDate,
         data_status AS dataStatus

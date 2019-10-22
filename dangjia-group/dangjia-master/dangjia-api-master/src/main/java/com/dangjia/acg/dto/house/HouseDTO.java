@@ -37,4 +37,9 @@ public class HouseDTO {
      *
      */
     private List orderDetailList;
+    /**
+     * //id 订单详情ID，orderId订单ID，productId商品ID，purchasePrice购买单价，purchaseNumber购买数量(面积），totalPurchasePrice购买总价,updateBy修改人
+     *
+     */
+    private String  orderDetailInfoAttr;
 }

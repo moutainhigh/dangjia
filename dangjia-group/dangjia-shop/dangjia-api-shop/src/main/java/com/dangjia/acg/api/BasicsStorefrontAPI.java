@@ -21,6 +21,12 @@ import java.util.List;
 @FeignClient("dangjia-service-shop")
 public interface BasicsStorefrontAPI {
 
+    @PostMapping("/web/queryStorefrontByUserID")
+    @ApiOperation(value = "通过用户ID查询店铺", notes = "通过用户ID查询店铺")
+    Storefront queryStorefrontByUserID(@RequestParam("userId") String userId);
+
+
+
     @PostMapping("/web/querySingleStorefrontById")
     @ApiOperation(value = "根据Id查询店铺信息(实体对象)", notes = "根据Id查询店铺信息(实体对象)")
     Storefront querySingleStorefrontById(@RequestParam("id") String id);
@@ -43,7 +49,7 @@ public interface BasicsStorefrontAPI {
                                  @RequestParam("storefrontDesc") String storefrontDesc,
                                  @RequestParam("storefrontLogo") String storefrontLogo,
                                  @RequestParam("storekeeperName") String storekeeperName,
-                                 @RequestParam("contact") String contact,
+                                 @RequestParam("mobile") String mobile,
                                  @RequestParam("email") String email);
 
     @PostMapping("/web/updateStorefront")

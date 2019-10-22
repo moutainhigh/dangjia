@@ -69,4 +69,9 @@ public class DjSupplier extends BaseEntity {
     @ApiModelProperty("修改人")
     private String updateBy;//修改人
 
+    @Column(name = "is_non_platform_supplier")
+    @Desc(value = "是否非平台供应商（1是，0否）")
+    @ApiModelProperty("是否非平台供应商（1是，0否）")
+    private Integer isNonPlatformSupperlier;
+
 }

@@ -52,10 +52,12 @@ public interface IMendOrderMapper extends Mapper<MendOrder>{
      * @param likeAddress
      * @return
      */
-    List<MendOrder> materialByStateAndLikeAddress(@Param("houseId") String houseId,
-                                    @Param("type") Integer type,
-                                    @Param("beginDate") String beginDate,
-                                    @Param("endDate") String endDate,
-                                    @Param("likeAddress") String likeAddress);
+    List<MendOrder> materialByStateAndLikeAddress(
+            @Param("storefrontId") String storefrontId,
+            @Param("houseId") String houseId,
+            @Param("type") Integer type,
+            @Param("beginDate") String beginDate,
+            @Param("endDate") String endDate,
+            @Param("likeAddress") String likeAddress);
 
 }

@@ -25,7 +25,7 @@ public class WorkerGoodsDTO {
     private String name;
 
     @ApiModelProperty("storefrontId")
-    private String storefrontId;//店铺ID
+    private String storefrontId;//
 
     private Integer sales;//退货性质0：可退；1：不可退
     private String irreversibleReasons;//不可退原因

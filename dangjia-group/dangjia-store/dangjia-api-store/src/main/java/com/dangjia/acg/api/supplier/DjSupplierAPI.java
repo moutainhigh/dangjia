@@ -21,6 +21,10 @@ import javax.servlet.http.HttpServletRequest;
 @FeignClient("dangjia-service-store")
 public interface DjSupplierAPI {
 
+    @PostMapping("/supplier/djSupplier/queryDjSupplierByPass")
+    @ApiOperation(value = "根据主键ID查询审核通过的供应商信息", notes = "根据主键ID查询审核通过的供应商信息")
+    DjSupplier queryDjSupplierByPass(@RequestParam("supplierId") String supplierId);
+
     @PostMapping("/supplier/djSupplier/querySingleDjSupplier")
     @ApiOperation(value = "根据userId查询供应商信息", notes = "根据userId查询供应商信息")
     DjSupplier querySingleDjSupplier(@RequestParam("userId") String userId,
@@ -50,12 +54,13 @@ public interface DjSupplierAPI {
                                       @RequestParam("pageDTO") PageDTO pageDTO,
                                       @RequestParam("supId") String supId);
 
+
     @PostMapping("/sup/djSupApplication/queryDjSupplierByShopIdPage")
     @ApiOperation(value = "店铺-审核供应商列表(分页)", notes = "店铺-审核供应商列表(分页)")
     ServerResponse queryDjSupplierByShopIdPage(@RequestParam("pageDTO") PageDTO pageDTO,
-                                                 @RequestParam("keyWord") String keyWord,
-                                                 @RequestParam("applicationStatus") String applicationStatus,
-                                                 @RequestParam("shopId") String shopId);
+                                               @RequestParam("keyWord") String keyWord,
+                                               @RequestParam("applicationStatus") String applicationStatus,
+                                               @RequestParam("shopId") String shopId);
 
     @PostMapping("/sup/djSupApplication/queryDjSupApplicationByShopID")
     @ApiOperation(value = "店铺-审核供应商列表", notes = "店铺-审核供应商列表")
@@ -65,19 +70,16 @@ public interface DjSupplierAPI {
 
     @PostMapping("/sup/getDjSupplierByID")
     @ApiOperation(value = "店铺-审核供应商-查看单个详情", notes = "店铺-审核供应商-查看详情")
-    ServerResponse getDjSupplierByID(@RequestParam("request") HttpServletRequest request,
-                                     @RequestParam("id") String id,@RequestParam("shopId") String shopId);
+    ServerResponse getDjSupplierByID(@RequestParam("id") String id, @RequestParam("shopId") String shopId);
 
     @PostMapping("/sup/setDjSupplierPass")
     @ApiOperation(value = "店铺-审核供应商-通过", notes = "店铺-审核供应商-通过")
-    ServerResponse setDjSupplierPass(@RequestParam("request") HttpServletRequest request,
-                                     @RequestParam("id") String id,
+    ServerResponse setDjSupplierPass(@RequestParam("id") String id,
                                      @RequestParam("applicationStatus") String applicationStatus);
 
     @PostMapping("/sup/setDjSupplierReject")
     @ApiOperation(value = "店铺-审核供应商-驳回", notes = "店铺-审核供应商-驳回")
-    ServerResponse setDjSupplierReject(@RequestParam("request") HttpServletRequest request,
-                                       @RequestParam("id") String id,
+    ServerResponse setDjSupplierReject(@RequestParam("id") String id,
                                        @RequestParam("applicationStatus") String applicationStatus,
                                        @RequestParam("failReason") String failReason);
 

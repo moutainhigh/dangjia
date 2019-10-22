@@ -1,6 +1,7 @@
 package com.dangjia.acg.service.repair;
 
 import com.dangjia.acg.api.data.ForMasterAPI;
+import com.dangjia.acg.api.supplier.DjSupplierAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -20,6 +21,7 @@ import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.sup.Supplier;
+import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +54,8 @@ public class MendMaterielService {
     private ForMasterAPI forMasterAPI;
     @Autowired
     private ISplitDeliverMapper splitDeliverMapper;
+    @Autowired
+    private DjSupplierAPI djSupplierAPI ;
 
     /**
      * 要货退货 查询补材料
@@ -66,11 +70,11 @@ public class MendMaterielService {
      * landlordState
      * 0生成中,1平台审核中,2不通过,3通过
      */
-    public ServerResponse landlordState(String houseId, PageDTO pageDTO, String beginDate, String endDate, String likeAddress) {
+    public ServerResponse landlordState(String storefrontId,String houseId, PageDTO pageDTO, String beginDate, String endDate, String likeAddress) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
 //            List<MendOrder> mendOrderList = mendOrderMapper.landlordState(houseId);
-            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(houseId, 4, beginDate, endDate, likeAddress);
+            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(storefrontId,houseId, 4, beginDate, endDate, likeAddress);
             PageInfo pageResult = new PageInfo(mendOrderList);
             List<MendOrderDTO> mendOrderDTOS = getMendOrderDTOList(mendOrderList);
             pageResult.setList(mendOrderDTOS);
@@ -86,11 +90,11 @@ public class MendMaterielService {
      * material_back_state
      * 0生成中,1平台审核中，2平台审核不通过，3审核通过，4管家取消
      */
-    public ServerResponse materialBackState(String houseId, PageDTO pageDTO, String beginDate, String endDate, String likeAddress) {
+    public ServerResponse materialBackState(String storefrontId,String houseId, PageDTO pageDTO, String beginDate, String endDate, String likeAddress) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
 //            List<MendOrder> mendOrderList = mendOrderMapper.materialBackState(houseId); 2
-            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(houseId, 2, beginDate, endDate, likeAddress);
+            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(storefrontId,houseId, 2, beginDate, endDate, likeAddress);
             PageInfo pageResult = new PageInfo(mendOrderList);
             List<MendOrderDTO> mendOrderDTOS = getMendOrderDTOList(mendOrderList);
             pageResult.setList(mendOrderDTOS);
@@ -128,13 +132,14 @@ public class MendMaterielService {
                 }
             }
             List<String> supplierId = splitDeliverMapper.getSupplierGoodsId(mendOrder.getHouseId(), mendMateriel.getProductSn());
-            List<Supplier> suppliers = new ArrayList<>();
+            List<DjSupplier> djSuppliers = new ArrayList<DjSupplier>();
             if (supplierId.size() > 0) {
                 for (int i = 0; i < supplierId.size(); i++) {
-                    Supplier supplier = forMasterAPI.getSupplier(house.getCityId(), supplierId.get(i));
-                    suppliers.add(supplier);
+                    //Supplier supplier = forMasterAPI.getSupplier(house.getCityId(), supplierId.get(i));
+                    DjSupplier djSupplier =djSupplierAPI.queryDjSupplierByPass(supplierId.get(i));
+                    djSuppliers.add(djSupplier);
                 }
-                map.put("suppliers", suppliers);
+                map.put("suppliers", djSuppliers);
             }
             mendMaterielMaps.add(map);
         }
@@ -146,7 +151,7 @@ public class MendMaterielService {
      * materialOrderState
      * 0生成中,1平台审核中，2平台审核不通过，3平台审核通过待业主支付,4业主已支付，5业主不同意，6管家取消
      */
-    public ServerResponse materialOrderState(String houseId, PageDTO pageDTO, String beginDate, String endDate, String likeAddress) {
+    public ServerResponse materialOrderState(String storefrontId,String houseId, PageDTO pageDTO, String beginDate, String endDate, String likeAddress) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             if (!CommonUtil.isEmpty(beginDate) && !CommonUtil.isEmpty(endDate)) {
@@ -156,7 +161,7 @@ public class MendMaterielService {
                 }
             }
 //            List<MendOrder> mendOrderList = mendOrderMapper.materialOrderState(houseId);
-            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(houseId, 0, beginDate, endDate, likeAddress);
+            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(storefrontId,houseId, 0, beginDate, endDate, likeAddress);
             PageInfo pageResult = new PageInfo(mendOrderList);
             List<MendOrderDTO> mendOrderDTOS = getMendOrderDTOList(mendOrderList);
             pageResult.setList(mendOrderDTOS);

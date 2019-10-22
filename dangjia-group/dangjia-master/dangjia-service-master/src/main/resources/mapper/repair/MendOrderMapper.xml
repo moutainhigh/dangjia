@@ -20,7 +20,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		carriage,
 		data_status as dataStatus,
 		create_date as createDate,
-		modify_date as modifyDate
+		modify_date as modifyDate,
+		storefront_id as storefrontId
 	</sql>
 
 
@@ -203,6 +204,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         on (rmo.house_id = house.id  )
         where 1=1
         and rmo.state > 0
+
+        <if test = "storefrontId!=null and storefrontId!=''">
+            and  rmo.storefront_id = #{storefrontId}
+        </if>
+
         <if test = "houseId!=null and houseId!=''">
             and  rmo.house_id = #{houseId}
         </if>

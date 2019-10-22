@@ -5,10 +5,11 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
+import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.excel.ImportExcel;
 import com.dangjia.acg.dto.actuary.*;
 import com.dangjia.acg.mapper.actuary.*;
 import com.dangjia.acg.modle.actuary.*;
-import com.dangjia.acg.service.actuary.excel.ActuarialConfigExcelRead;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.product.IBasicsGoodsMapper;
 import com.dangjia.acg.mapper.product.IBasicsProductTemplateMapper;
@@ -20,11 +21,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sun.applet.Main;
 import tk.mybatis.mapper.entity.Example;
 
-import java.io.File;
-import java.io.IOException;
+import java.net.*;
 import java.util.*;
 
 
@@ -87,7 +86,7 @@ public class DjBasicsActuarialConfigurationServices {
         try {
             ActuarialTemplateConfigDTO actuarialTemplateConfigDTO=new ActuarialTemplateConfigDTO();
             if(StringUtils.isNotBlank(actuarialTemplateId)){
-                List<ActuarialTemplateConfigDTO> djBasicsActuarialConfigurationDTOS = djActuarialTemplateConfigMapper.queryActuarialTemplateConfig(null);
+                List<ActuarialTemplateConfigDTO> djBasicsActuarialConfigurationDTOS = djActuarialTemplateConfigMapper.queryActuarialTemplateConfig(actuarialTemplateId);
                 if(djBasicsActuarialConfigurationDTOS!=null&&djBasicsActuarialConfigurationDTOS.size()>0){
                     actuarialTemplateConfigDTO=djBasicsActuarialConfigurationDTOS.get(0);
                     if(actuarialTemplateConfigDTO.getProductList()!=null&&actuarialTemplateConfigDTO.getProductList().size()>0){
@@ -115,7 +114,7 @@ public class DjBasicsActuarialConfigurationServices {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse editActuarialProduct(String actuarialProductStr,String userId){
+    public ServerResponse editActuarialProduct(String actuarialProductStr,String actuarialTemplateId,String workTypeId,String userId){
         logger.info("批量编辑设计精算阶段的货品商品---------start----{}",userId);
         JSONArray jsonArr = JSONArray.parseArray(actuarialProductStr);
         //1.商品作校验，校验前端传过来的商品是否符合条件
@@ -130,10 +129,10 @@ public class DjBasicsActuarialConfigurationServices {
             ActuarialProductDTO actuarialProductDTO = JSONObject.toJavaObject(obj, ActuarialProductDTO.class);
             String productId = actuarialProductDTO.getId();
             DjActuarialProductConfig actuarialProductConfig=new DjActuarialProductConfig();
-            actuarialProductConfig.setActuarialTemplateId(actuarialProductDTO.getActuarialTemplateId());
+            actuarialProductConfig.setActuarialTemplateId(actuarialTemplateId);
             actuarialProductConfig.setProductId(actuarialProductDTO.getProductId());
             actuarialProductConfig.setGoodsId(actuarialProductDTO.getGoodsId());
-            actuarialProductConfig.setWorkerTypeId(actuarialProductDTO.getWorkerTypeId());
+            actuarialProductConfig.setWorkerTypeId(workTypeId);
             actuarialProductConfig.setUpdateBy(userId);
             actuarialProductConfig.setModifyDate(new Date());
             //判断是添加还是更新
@@ -242,7 +241,7 @@ public class DjBasicsActuarialConfigurationServices {
        //编辑（添加修改标题 下的选项值详情信息）
         JSONArray jsonArr = JSONArray.parseArray(configDetailArr);
         editSimulateTemplateDetailList(jsonArr,djSimulationTemplateConfig);
-        return  ServerResponse.createByErrorMessage("保存成功");
+        return  ServerResponse.createBySuccessMessage("保存成功");
     }
 
     /**
@@ -309,8 +308,9 @@ public class DjBasicsActuarialConfigurationServices {
      * @return
      */
     public ServerResponse querySimulateionTemplateConfig(){
+        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         try{
-            List<SimulationTemplateConfigDTO> simulationTemplateConfigDTOList=djSimulationTemplateConfigMapper.querySimulateionTemplateConfig(null);
+            List<SimulationTemplateConfigDTO> simulationTemplateConfigDTOList=djSimulationTemplateConfigMapper.querySimulateionTemplateConfig(null,address);
             return ServerResponse.createBySuccess("查询成功", simulationTemplateConfigDTOList);
         } catch (Exception e) {
             logger.error("querySimulateionTemplateConfig查询失败:",e);
@@ -325,10 +325,11 @@ public class DjBasicsActuarialConfigurationServices {
      * @return
      */
     public ServerResponse querySimulateionTemplateConfigById(String simulationTemplateId){
+        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         try{
             SimulationTemplateConfigDTO simulationTemplateConfigDTO=new SimulationTemplateConfigDTO();
             if(StringUtils.isNotBlank(simulationTemplateId)){
-                List<SimulationTemplateConfigDTO> simulationTemplateConfigDTOList=djSimulationTemplateConfigMapper.querySimulateionTemplateConfig(simulationTemplateId);
+                List<SimulationTemplateConfigDTO> simulationTemplateConfigDTOList=djSimulationTemplateConfigMapper.querySimulateionTemplateConfig(simulationTemplateId,address);
                 if(simulationTemplateConfigDTOList!=null&&simulationTemplateConfigDTOList.size()>0){
                     simulationTemplateConfigDTO=simulationTemplateConfigDTOList.get(0);
 
@@ -381,16 +382,17 @@ public class DjBasicsActuarialConfigurationServices {
      */
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse importSimulateExcelBudgets (String name,String fileName,String address,String userId){
-        String addressPri = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+
         //String addressPri = "e://dangjia/";
-        ActuarialConfigExcelRead actuarialConfigExcelRead = new ActuarialConfigExcelRead();
-        String postfix = actuarialConfigExcelRead.checkExcelType(fileName);
-        List<Map<String,Object>> actuarialExcelList=new ArrayList<>();
-        if ("xls".equals(postfix)) {
-             actuarialExcelList = actuarialConfigExcelRead.readXls(new File(addressPri+address));
-        }else{
-            actuarialExcelList = actuarialConfigExcelRead.readXlsx(new File(addressPri+address));
-        }
+
+        List<ActuarialProductDTO> actuarialExcelList=new ArrayList<>();
+        actuarialExcelList.addAll(getDataInfoList(address, fileName, 0, 0,"3"));//大管家
+        actuarialExcelList.addAll(getDataInfoList(address, fileName, 0, 1,"4"));//拆除
+        actuarialExcelList.addAll(getDataInfoList(address, fileName, 0, 2,"6"));//水电
+        actuarialExcelList.addAll(getDataInfoList(address, fileName, 0, 3,"8"));//泥工
+        actuarialExcelList.addAll(getDataInfoList(address, fileName, 0, 4,"9"));//木工
+        actuarialExcelList.addAll(getDataInfoList(address, fileName, 0, 5,"10"));//油漆
+
         if(actuarialExcelList!=null&&actuarialExcelList.size()>0){
             //1.保存对应的excel文件
             DjActuarialTemplateConfig djActuarialTemplateConfig=new DjActuarialTemplateConfig();
@@ -404,17 +406,14 @@ public class DjBasicsActuarialConfigurationServices {
             djActuarialTemplateConfig.setModifyDate(new Date());
             djActuarialTemplateConfigMapper.insert(djActuarialTemplateConfig);
             //2.保存excel文件中的内容
-            for(Map<String,Object> map:actuarialExcelList){
-                String productSn = (String)map.get("productSn");
-                String workTypeId = (String)map.get("workTypeId");
-                String productCount = (String)map.get("productCount");
-                DjActuarialProductConfig djActuarialProductConfig=new DjActuarialProductConfig();
+            for(ActuarialProductDTO actuarialProductDTO:actuarialExcelList){
+                DjActuarialProductConfig djActuarialProductConfig = new DjActuarialProductConfig();
                 djActuarialProductConfig.setActuarialTemplateId(djActuarialTemplateConfig.getId());// excel上传地址ID
-                djActuarialProductConfig.setProductSn(productSn);
-                djActuarialProductConfig.setWorkerTypeId(workTypeId);
-                djActuarialProductConfig.setPurchaseQuantity(productCount);
+                djActuarialProductConfig.setProductSn(actuarialProductDTO.getProductSn());
+                djActuarialProductConfig.setPurchaseQuantity(actuarialProductDTO.getPurchaseQuantity());
+                djActuarialProductConfig.setWorkerTypeId(actuarialProductDTO.getWorkerTypeId());
                 //根据商品编码，查询对应的商品ID及货品ID
-                List<DjBasicsProductTemplate> list=iBasicsProductTemplateMapper.queryByProductSn(productSn);
+                List<DjBasicsProductTemplate> list=iBasicsProductTemplateMapper.queryByProductSn(djActuarialProductConfig.getProductSn());
                 if(list!=null&&list.size()>0){
                     DjBasicsProductTemplate dj=list.get(0);
                     djActuarialProductConfig.setGoodsId(dj.getGoodsId());
@@ -429,6 +428,41 @@ public class DjBasicsActuarialConfigurationServices {
         return ServerResponse.createByErrorMessage("未读取到有效的excel数据，请检查数据是否正确");
 
     }
+
+    /**
+     * 读取excel中的数据
+     * @param addressUrl
+     * @param fileName
+     * @param headerNum 首列
+     * @param sheetIndex 表格
+     * @return
+     */
+    private List<ActuarialProductDTO> getDataInfoList(String addressUrl,String fileName,int headerNum,int sheetIndex,String workTypeId){
+        List<ActuarialProductDTO> actuarialExcelList=new ArrayList<>();
+        try{
+            String addressPri = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            URL url = new URL(addressPri+addressUrl);
+            ImportExcel productInfo = new ImportExcel(fileName, url.openStream(),headerNum, sheetIndex);//商品信息
+            List<ActuarialProductDTO> caiLiaoList = productInfo.getDataList(ActuarialProductDTO.class, 0);
+            for (int i = 0; i < caiLiaoList.size(); i++) {
+                ActuarialProductDTO actuarialProductDTO = caiLiaoList.get(i);
+                if (CommonUtil.isEmpty(actuarialProductDTO)) {
+                    break;
+                }
+                if (CommonUtil.isEmpty(actuarialProductDTO.getProductSn())) {
+                    continue;
+                }
+                actuarialProductDTO.setWorkerTypeId(workTypeId);
+                actuarialExcelList.add(actuarialProductDTO);
+            }
+
+        }catch (Exception e){
+            logger.error("读取EXCEL异常：",e);
+        }
+        return actuarialExcelList;
+
+    }
+
 
     /**
      * 查询excel列表
