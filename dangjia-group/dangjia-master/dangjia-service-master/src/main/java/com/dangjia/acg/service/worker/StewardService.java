@@ -30,7 +30,6 @@ import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.matter.WorkerDisclosure;
-import com.dangjia.acg.modle.matter.WorkerDisclosureHouseFlow;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
