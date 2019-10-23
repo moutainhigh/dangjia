@@ -370,7 +370,11 @@ public class DjActuaryBudgetMaterialService {
             if (!CommonUtil.isEmpty(attributeVal)) {
                 attributeVals = attributeVal.split(",");
             }
-            List<DjBasicsProductTemplate> pList = iBasicsProductTemplateMapper.serchCategoryProduct(categoryId, StringTool.getLikeV(name), brandVal, attributeVals, orderKey);
+            String[] names=null;
+            if(!CommonUtil.isEmpty(name)){
+                names=name.split(",");
+            }
+            List<DjBasicsProductTemplate> pList = iBasicsProductTemplateMapper.serchCategoryProduct(categoryId, names, brandVal, attributeVals, orderKey);
             pageResult = new PageInfo<>(pList);
             if (!pList.isEmpty()) {
                 for (DjBasicsProductTemplate product : pList) {
