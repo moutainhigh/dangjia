@@ -138,7 +138,7 @@
     <select id="querySupplierSettlementManagement"
             resultType="com.dangjia.acg.dto.delivery.SupplierSettlementManagementDTO">
         SELECT
-        storefront_id as shopId,
+            storefront_id as shopId,
             sum(count) as count,
             supplier_id as supId
         FROM
@@ -161,6 +161,12 @@
                     )
                 </if>
                 and city_id=#{cityId}
+                <if test="null!=storefronts and storefronts.size>0">
+                    and storefront_id in
+                    <foreach collection="storefronts" index="index" item="item" open="(" separator="," close=")">
+                        #{item.id}
+                    </foreach>
+                </if>
                 GROUP BY storefront_id
                   UNION ALL
                 SELECT
@@ -181,6 +187,12 @@
                     )
                 </if>
                 and city_id=#{cityId}
+                <if test="null!=storefronts and storefronts.size>0">
+                    and storefront_id in
+                    <foreach collection="storefronts" index="index" item="item" open="(" separator="," close=")">
+                        #{item.id}
+                    </foreach>
+                </if>
                 GROUP BY storefront_id
             ) a
         GROUP BY storefront_id

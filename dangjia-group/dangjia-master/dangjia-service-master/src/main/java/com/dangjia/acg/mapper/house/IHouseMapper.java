@@ -1,14 +1,13 @@
 package com.dangjia.acg.mapper.house;
 
-import com.alipay.api.domain.OrderDetail;
 import com.dangjia.acg.dto.house.DesignDTO;
 import com.dangjia.acg.dto.house.HouseDTO;
 import com.dangjia.acg.dto.house.HouseListDTO;
 import com.dangjia.acg.dto.repair.HouseProfitSummaryDTO;
 import com.dangjia.acg.dto.repair.RepairMendDTO;
+import com.dangjia.acg.modle.deliver.Order;
+import com.dangjia.acg.modle.deliver.OrderItem;
 import com.dangjia.acg.modle.house.House;
-import com.dangjia.acg.modle.order.DjOrder;
-import com.dangjia.acg.modle.order.DjOrderDetail;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
@@ -72,29 +71,5 @@ public interface IHouseMapper extends Mapper<House> {
 
     House queryPromotionListHouse(@Param("memberId") String memberId);
 
-    /**
-     * 根据房屋ID查对应的精算订单信息
-     * @return
-     */
-    DjOrder getOrderInfo(@Param("houseId") String houseId);
 
-    //根据房子ID查询对应的订单详情
-    List<DjOrderDetail> getOrderDetailInfoList(@Param("houseId") String houseId);
-
-    //修改商品订单对应的信息
-    void updateOrderDetail(DjOrderDetail orderDetail);
-
-    //修改商品订单表是否可付款状态
-    void updateOrder(@Param("orderId") String orderId);
-
-    /**
-     * 修改订单状态为已取消
-     * @param houseId
-     */
-    void updateOrderStatusByHouseId(@Param("houseId") String houseId);
-    /**
-     * 修改订单详情状态为已取消
-     * @param houseId
-     */
-    void updateOrderDetailStatusByHouseId(@Param("houseId") String houseId);
 }

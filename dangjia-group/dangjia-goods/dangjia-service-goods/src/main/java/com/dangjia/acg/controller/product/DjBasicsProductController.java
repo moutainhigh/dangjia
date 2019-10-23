@@ -36,6 +36,18 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
 
     @Override
     @ApiMethod
+    public List<DjBasicsProductTemplate> queryRandomProduct(String limit) {
+            return djBasicsProductService.queryRandomProduct(limit);
+    }
+
+    @Override
+    @ApiMethod
+    public List<DjBasicsProductTemplate> queryRandomProductByCategoryId(String productId,String limit) {
+        return djBasicsProductService.queryRandomProductByCategoryId(productId,limit);
+    }
+
+    @Override
+    @ApiMethod
     public ServerResponse queryProductData(HttpServletRequest request, String name) {
         return djBasicsProductService.queryProductData(name);
 

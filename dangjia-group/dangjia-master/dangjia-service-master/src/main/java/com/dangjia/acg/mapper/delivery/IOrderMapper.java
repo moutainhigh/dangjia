@@ -1,6 +1,7 @@
 package com.dangjia.acg.mapper.delivery;
 
 import com.dangjia.acg.modle.deliver.Order;
+import com.dangjia.acg.modle.deliver.OrderItem;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
@@ -22,4 +23,30 @@ public interface IOrderMapper extends Mapper<Order> {
 
     /**查询所有订单*/
     List<Order> getAllOrders(@Param("houseId")String houseId,@Param("workerTypeId")String workerTypeId);
+
+    /**
+     * 根据房屋ID查对应的精算订单信息
+     * @return
+     */
+    Order getOrderInfo(@Param("houseId") String houseId);
+
+    //根据房子ID查询对应的订单详情
+    List<OrderItem> getOrderDetailInfoList(@Param("houseId") String houseId);
+
+    //修改商品订单对应的信息
+    void updateOrderDetail(OrderItem orderDetail);
+
+    //修改商品订单表是否可付款状态
+    void updateOrder(@Param("orderId") String orderId);
+
+    /**
+     * 修改订单状态为已取消
+     * @param houseId
+     */
+    void updateOrderStatusByHouseId(@Param("houseId") String houseId);
+    /**
+     * 修改订单详情状态为已取消
+     * @param houseId
+     */
+    void updateOrderDetailStatusByHouseId(@Param("houseId") String houseId);
 }

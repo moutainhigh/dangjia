@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
 
 /**
  * author: Ronalcheng
@@ -32,8 +33,6 @@ public interface HouseAPI {
     /**
      * showdoc
      *
-     * @param pageNum   必选 int 页码
-     * @param pageSize  必选 int 记录数
      * @param userToken 必选 string userToken
      * @return {"res": 1000,"msg": {"resultCode": 1000, "resultMsg": "ok", "resultObj": { "pageNum": 0,"pageSize": 10,"size": 1,"startRow": 1,"endRow": 1,"total": 1, "pages": 1,"list": [{返回参数说明}],"prePage": 0, "nextPage": 1,"isFirstPage": false,"isLastPage": false,"hasPreviousPage": false,"hasNextPage": true,"navigatePages": 8,"navigatepageNums": [1],"navigateFirstPage": 1,"navigateLastPage": 1}}}
      * @catalog 当家接口文档/房产任务模块
@@ -65,19 +64,45 @@ public interface HouseAPI {
     ServerResponse queryMyHouse(@RequestParam("userToken") String userToken);
 
     /**
-     * @param houseType 装修的房子类型0：新房；1：老房
-     * @param drawings  有无图纸0：无图纸；1：有图纸
+     * 我要装修，APP开始装修
+     * @param userToken 用户token
+     * @param cityId 城市ID
+     * @param houseType 房屋ID
+     * @param latitude 纬度
+     * @param longitude 经度
+     * @param address 地址
+     * @param name 地址名称
+     * @param square 面积
+     * @param actuarialDesignAttr 设计精算列表 商品列表(
+     * id	String	设计精算模板ID
+     * configName	String	设计精算名称
+     * configType	String	配置类型1：设计阶段 2：精算阶段
+     * productList	List	商品列表
+     * productList.productId	String	商品ID
+     * productList.productName	String	商品名称
+     * productList.productSn	String	商品编码
+     * productList.goodsId	String	货品ID
+     * productList.storefrontId	String	店铺ID
+     * productList.price	double	商品价格
+     * productList.unit	String	商品单位
+     * productList.unitName	String	单位名称
+     * productList.image	String	图片
+     * productList.imageUrl	String	详情图片地址
+     * productList.valueIdArr	String	商品规格ID
+     * productList.valueNameArr	String	商品规格名称
+     * @return
      */
     @PostMapping("app/house/house/setStartHouse")
     @ApiOperation(value = "app开始装修", notes = "app开始装修")
     ServerResponse setStartHouse(@RequestParam("userToken") String userToken,
                                  @RequestParam("cityId") String cityId,
                                  @RequestParam("houseType") String houseType,
-                                 @RequestParam("drawings") Integer drawings,
                                  @RequestParam("latitude") String latitude,
                                  @RequestParam("longitude") String longitude,
                                  @RequestParam("address") String address,
-                                 @RequestParam("name") String name);
+                                 @RequestParam("name") String name,
+                                 @RequestParam("square") BigDecimal square,
+                                 @RequestParam("actuarialDesignAttr") String actuarialDesignAttr);
 
     @PostMapping("app/house/house/revokeHouse")
     @ApiOperation(value = "撤销房子装修", notes = "撤销房子装修")
@@ -112,8 +137,6 @@ public interface HouseAPI {
     /**
      * showdoc
      *
-     * @param pageNum    必选 int 页码
-     * @param pageSize   必选 int 记录数
      * @param houseId    必选 string 房子ID
      * @param day        可选 string 时间
      * @param workerType 可选 string 工种类型

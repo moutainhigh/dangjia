@@ -2,6 +2,7 @@ package com.dangjia.acg.mapper.delivery;
 
 import com.dangjia.acg.dto.delivery.*;
 import com.dangjia.acg.modle.delivery.DjDeliveryReturnSlip;
+import com.dangjia.acg.modle.storefront.Storefront;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
@@ -60,7 +61,8 @@ public interface DjDeliveryReturnSlipMapper extends Mapper<DjDeliveryReturnSlip>
 
     List<SupplierSettlementManagementDTO> querySupplierSettlementManagement(@Param("supId") String supId,
                                                                             @Param("applyState") Integer applyState,
-                                                                            @Param("cityId") String cityId);
+                                                                            @Param("cityId") String cityId,
+                                                                            @Param("storefronts") List<Storefront> storefronts);
 
     List<DjDeliveryReturnSlipDTO> querySupplierSettlementList(@Param("supId") String supId,
                                                               @Param("shopId") String shopId,

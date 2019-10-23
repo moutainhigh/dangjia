@@ -137,24 +137,29 @@ public class DjDeliveryReturnSlipService {
      * @param applyState
      * @return
      */
-    public ServerResponse querySupplierSettlementManagement(String userId, String cityId, PageDTO pageDTO, Integer applyState) {
+    public ServerResponse querySupplierSettlementManagement(String userId, String cityId, PageDTO pageDTO, Integer applyState, String searchKey) {
         try {
             DjSupplier djSupplier = djSupplierAPI.querySingleDjSupplier(userId, cityId);
             if(null==djSupplier)
                 return ServerResponse.createByErrorMessage("暂无店铺信息");
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<SupplierSettlementManagementDTO> supplierSettlementManagementDTOS = djDeliveryReturnSlipMapper.querySupplierSettlementManagement(djSupplier.getId(), applyState, cityId);
-            PageInfo pageResult = new PageInfo(supplierSettlementManagementDTOS);
-            supplierSettlementManagementDTOS.forEach(supplierSettlementManagementDTO -> {
-                Storefront storefront = basicsStorefrontAPI.querySingleStorefrontById(supplierSettlementManagementDTO.getShopId());
-                supplierSettlementManagementDTO.setShopId(storefront.getId());
-                supplierSettlementManagementDTO.setStorefrontName(storefront.getStorefrontName());
-                supplierSettlementManagementDTO.setMobile(storefront.getMobile());
-                supplierSettlementManagementDTO.setStorekeeperName(storefront.getStorekeeperName());
-            });
-            if (supplierSettlementManagementDTOS.size() <= 0)
+            List<Storefront> storefronts = basicsStorefrontAPI.queryLikeSingleStorefront(searchKey);
+            if(storefronts.size()>0) {
+                PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+                List<SupplierSettlementManagementDTO> supplierSettlementManagementDTOS = djDeliveryReturnSlipMapper.querySupplierSettlementManagement(djSupplier.getId(), applyState, cityId, storefronts);
+                PageInfo pageResult = new PageInfo(supplierSettlementManagementDTOS);
+                supplierSettlementManagementDTOS.forEach(supplierSettlementManagementDTO -> {
+                    Storefront storefront = basicsStorefrontAPI.querySingleStorefrontById(supplierSettlementManagementDTO.getShopId());
+                    supplierSettlementManagementDTO.setShopId(storefront.getId());
+                    supplierSettlementManagementDTO.setStorefrontName(storefront.getStorefrontName());
+                    supplierSettlementManagementDTO.setMobile(storefront.getMobile());
+                    supplierSettlementManagementDTO.setStorekeeperName(storefront.getStorekeeperName());
+                });
+                if (supplierSettlementManagementDTOS.size() <= 0)
+                    return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+                return ServerResponse.createBySuccess("查询成功", pageResult);
+            }else{
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
-            return ServerResponse.createBySuccess("查询成功", pageResult);
+            }
         } catch (Exception e) {
             logger.error("查询失败", e);
             return ServerResponse.createByErrorMessage("查询失败: " + e);
@@ -173,6 +178,12 @@ public class DjDeliveryReturnSlipService {
     public ServerResponse querySupplierSettlementList(String supId, String shopId, Integer applyState) {
         try {
             List<DjDeliveryReturnSlipDTO> djDeliveryReturnSlipDTOS = djDeliveryReturnSlipMapper.querySupplierSettlementList(supId, shopId, applyState);
+            Storefront storefront = basicsStorefrontAPI.querySingleStorefrontById(shopId);
+            djDeliveryReturnSlipDTOS.forEach(djDeliveryReturnSlipDTO -> {
+                djDeliveryReturnSlipDTO.setShopName(storefront.getStorefrontName());
+                djDeliveryReturnSlipDTO.setStorekeeperName(storefront.getStorekeeperName());
+                djDeliveryReturnSlipDTO.setMobile(storefront.getMobile());
+            });
             if (djDeliveryReturnSlipDTOS.size() > 0)
                 return ServerResponse.createBySuccess("查询成功", djDeliveryReturnSlipDTOS);
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());

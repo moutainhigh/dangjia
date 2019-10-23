@@ -47,10 +47,9 @@ public class BrowseRecordService {
                 return (ServerResponse) object;
             }
             Member member = (Member) object;
-            String memberId=member.getId();
             //图片路径前缀
            // String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-            List<BrowseRecord> list=iBrowseRecordMapper.queryBrowseRecord(memberId,vistsType);
+            List<BrowseRecord> list=iBrowseRecordMapper.queryBrowseRecord(member.getId(),vistsType);
             List<BrowseRecordDTO>  browseRecordList=new ArrayList<BrowseRecordDTO>();
             for(BrowseRecord browseRecord:list)
             {

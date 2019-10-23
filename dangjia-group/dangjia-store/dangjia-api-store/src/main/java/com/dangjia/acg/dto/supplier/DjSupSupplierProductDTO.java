@@ -30,4 +30,5 @@ public class DjSupSupplierProductDTO extends BaseEntity {
     private Date adjustTime;//调价时间
     private String valueNameArr;
     private String valueIdArr;
+    private Double porterage;
 }

@@ -36,8 +36,8 @@ public class DjDeliveryReturnSlipController implements DjDeliveryReturnSlipAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse querySupplierSettlementManagement(HttpServletRequest request, String userId, String cityId, PageDTO pageDTO, Integer applyState) {
-        return djDeliveryReturnSlipService.querySupplierSettlementManagement(userId,cityId,pageDTO,applyState);
+    public ServerResponse querySupplierSettlementManagement(HttpServletRequest request, String userId, String cityId, PageDTO pageDTO, Integer applyState, String searchKey) {
+        return djDeliveryReturnSlipService.querySupplierSettlementManagement(userId,cityId,pageDTO,applyState,searchKey);
     }
 
     @Override

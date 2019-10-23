@@ -3,11 +3,9 @@ package com.dangjia.acg.service.house;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.alipay.api.domain.OrderDetail;
 import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
 import com.dangjia.acg.api.config.ServiceTypeAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
-import com.dangjia.acg.auth.config.RedisSessionDAO;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
@@ -25,12 +23,13 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.HouseFlowDTO;
 import com.dangjia.acg.dto.house.*;
 import com.dangjia.acg.dto.product.StorefontInfoDTO;
-import com.dangjia.acg.dto.product.StorefrontProductDTO;
 import com.dangjia.acg.dto.repair.HouseProfitSummaryDTO;
 import com.dangjia.acg.dto.sale.royalty.DjAreaMatchDTO;
 import com.dangjia.acg.dto.sale.store.OrderStoreDTO;
 import com.dangjia.acg.mapper.clue.ClueMapper;
 import com.dangjia.acg.mapper.core.*;
+import com.dangjia.acg.mapper.delivery.IOrderItemMapper;
+import com.dangjia.acg.mapper.delivery.IOrderMapper;
 import com.dangjia.acg.mapper.house.*;
 import com.dangjia.acg.mapper.matter.IRenovationManualMapper;
 import com.dangjia.acg.mapper.matter.IRenovationManualMemberMapper;
@@ -49,6 +48,9 @@ import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.clue.Clue;
 import com.dangjia.acg.modle.config.ServiceType;
 import com.dangjia.acg.modle.core.*;
+import com.dangjia.acg.modle.deliver.Order;
+import com.dangjia.acg.modle.deliver.OrderItem;
+import com.dangjia.acg.modle.design.HouseStyleType;
 import com.dangjia.acg.modle.house.*;
 import com.dangjia.acg.modle.matter.RenovationManual;
 import com.dangjia.acg.modle.matter.RenovationManualMember;
@@ -57,8 +59,6 @@ import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Customer;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberCity;
-import com.dangjia.acg.modle.order.DjOrder;
-import com.dangjia.acg.modle.order.DjOrderDetail;
 import com.dangjia.acg.modle.other.City;
 import com.dangjia.acg.modle.other.WorkDeposit;
 import com.dangjia.acg.modle.repair.ChangeOrder;
@@ -74,17 +74,16 @@ import com.dangjia.acg.service.core.HouseFlowService;
 import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.google.gson.JsonArray;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
+import org.aspectj.weaver.ast.Or;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import tk.mybatis.mapper.entity.Example;
 import tk.mybatis.mapper.util.StringUtil;
 
@@ -191,6 +190,11 @@ public class HouseService {
     @Autowired
     private IWebsiteVisitMapper websiteVisitMapper;
 
+    @Autowired
+    private IOrderMapper iOrderMapper;
+
+    @Autowired
+    private IOrderItemMapper iOrderItemMapper;
     /**
      * 切换房产
      */
@@ -337,14 +341,17 @@ public class HouseService {
                 houseDTO.setReferHouseName(house.getHouseName());
         }
         //查询当前房子下面对应的订单详情
-        List<DjOrderDetail> djOrderDetailList=iHouseMapper.getOrderDetailInfoList(houseId);
+        List<OrderItem> djOrderDetailList=iOrderMapper.getOrderDetailInfoList(houseId);
         List<Map<String,Object>> orderDetailList=new ArrayList<Map<String,Object>>();
         if(djOrderDetailList!=null&&djOrderDetailList.size()>0){
             //查找对应的可选择的货品，商品列表
-            for (DjOrderDetail djOrderDetail : djOrderDetailList) {
+            for (OrderItem djOrderDetail : djOrderDetailList) {
                 Map orderDetailMap= BeanUtils.beanToMap(djOrderDetail);
                 StorefontInfoDTO storefontInfoDTO = forMasterAPI.getStroreProductInfo(houseDTO.getCityId(),djOrderDetail.getStorefontId(),djOrderDetail.getProductId());
                 orderDetailMap.putAll(BeanUtils.beanToMap(storefontInfoDTO));
+                orderDetailMap.put("purchaseNumber",djOrderDetail.getShopCount());
+                orderDetailMap.put("purchasePrice",djOrderDetail.getPrice());
+                orderDetailMap.put("totalPurchasePrice",djOrderDetail.getTotalPrice());
                 orderDetailList.add(orderDetailMap);
             }
 
@@ -656,17 +663,18 @@ public class HouseService {
             JSONArray jsonStr=JSONArray.parseArray(orderDetailInfoAttr);
             for(int i=0;i<jsonStr.size();i++){
                 Map orderMap=(Map)jsonStr.get(i);
-                DjOrderDetail orderDetail=BeanUtils.mapToBean(DjOrderDetail.class,orderMap);
+                OrderItem orderDetail=BeanUtils.mapToBean(OrderItem.class,orderMap);
                 //查询对应的商品信息
                 StorefontInfoDTO storefontInfoDTO=forMasterAPI.getStroreProductInfoById(cityId,orderDetail.getProductId());
                 orderId=orderDetail.getOrderId();
                 Double price=storefontInfoDTO.getPrice();
-                orderDetail.setPurchasePrice(price);
-                if(price!=null&&orderDetail.getPurchaseNumber()!=null){
-                    orderDetail.setTotalPurchasePrice((new BigDecimal(price).multiply(new BigDecimal(orderDetail.getPurchaseNumber()))).doubleValue());
+                orderDetail.setPrice(price);
+                orderDetail.setShopCount((Double)orderMap.get("purchaseNumber"));
+                if(price!=null&&orderDetail.getShopCount()!=null){
+                    orderDetail.setShopCount((new BigDecimal(price).multiply(new BigDecimal(orderDetail.getShopCount()))).doubleValue());
                 }
-                iHouseMapper.updateOrderDetail(orderDetail);
-                iHouseMapper.updateOrder(orderId);
+                iOrderMapper.updateOrderDetail(orderDetail);
+                iOrderMapper.updateOrder(orderId);
             }
 
         }
@@ -680,10 +688,14 @@ public class HouseService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse calcelOrder(String houseId,String userId){
-        House house = new House();
+        House house = iHouseMapper.selectByPrimaryKey(houseId);
+        //1.修改房子信息
         house.setId(houseId);
         house.setVisitState(4);//已取消
+        house.setDataStatus(1);
         iHouseMapper.updateByPrimaryKeySelective(house);//修改装修列表的状态
+        //2.修改房子相关业务表信息
+        updateRevokeHouseInfo(house);
         //修改已下订单的状态
         //1.修改订单的状态为已取消
        // iHouseMapper.updateOrderStatusByHouseId(houseId);
@@ -1567,30 +1579,7 @@ public class HouseService {
                     //iHouseMapper.deleteByPrimaryKey(house);
                     house.setDataStatus(1);
                     iHouseMapper.updateByPrimaryKeySelective(house);
-                    DjAlreadyRobSingle djAlreadyRobSingle = new DjAlreadyRobSingle();
-                    djAlreadyRobSingle.setHouseId(house.getHouseId());
-                    djAlreadyRobSingleMapper.delete(djAlreadyRobSingle);
-                    Customer customer = new Customer();
-                    customer.setId(null);
-                    customer.setStage(1);
-                    example = new Example(Customer.class);
-                    example.createCriteria().andEqualTo(Customer.MEMBER_ID, house.getMemberId());
-                    iCustomerMapper.updateByExampleSelective(customer, example);
-                    Clue clue = new Clue();
-                    clue.setId(null);
-                    clue.setStage(1);
-                    example = new Example(Clue.class);
-                    example.createCriteria().andEqualTo(Clue.MEMBER_ID, house.getMemberId());
-                    clueMapper.updateByExampleSelective(clue, example);
-
-                    Clue c = clueMapper.getClueId(house.getMemberId());
-                    if (c != null) {
-                        c.setStoreId(null);
-                        clueMapper.updateByPrimaryKey(c);
-                        example = new Example(DjOrderSurface.class);
-                        example.createCriteria().andEqualTo(DjOrderSurface.CLUE_ID, c.getId());
-                        djOrderSurfaceMapper.deleteByExample(example);
-                    }
+                    updateRevokeHouseInfo(house);
                     return ServerResponse.createBySuccessMessage("操作成功");
                 }
             }
@@ -1599,75 +1588,234 @@ public class HouseService {
     }
 
     /**
-     * APP开始装修
+     *修改取消后的相关表信息
+     * @param house
      */
-    public ServerResponse setStartHouse(String userToken, String cityId, String houseType, Integer drawings,
-                                        String latitude, String longitude, String address, String name) {
+    void updateRevokeHouseInfo(House house){
+        DjAlreadyRobSingle djAlreadyRobSingle = new DjAlreadyRobSingle();
+        djAlreadyRobSingle.setHouseId(house.getHouseId());
+        djAlreadyRobSingleMapper.delete(djAlreadyRobSingle);
+        Customer customer = new Customer();
+        customer.setId(null);
+        customer.setStage(1);
+        Example example = new Example(Customer.class);
+        example.createCriteria().andEqualTo(Customer.MEMBER_ID, house.getMemberId());
+        iCustomerMapper.updateByExampleSelective(customer, example);
+        Clue clue = new Clue();
+        clue.setId(null);
+        clue.setStage(1);
+        example = new Example(Clue.class);
+        example.createCriteria().andEqualTo(Clue.MEMBER_ID, house.getMemberId());
+        clueMapper.updateByExampleSelective(clue, example);
+
+        Clue c = clueMapper.getClueId(house.getMemberId());
+        if (c != null) {
+            c.setStoreId(null);
+            clueMapper.updateByPrimaryKey(c);
+            example = new Example(DjOrderSurface.class);
+            example.createCriteria().andEqualTo(DjOrderSurface.CLUE_ID, c.getId());
+            djOrderSurfaceMapper.deleteByExample(example);
+        }
+    }
+
+    /**
+     *我要装修---APP开始装修下单
+     * @param userToken 用户token
+     * @param cityId 城市ID
+     * @param houseType 房屋ID
+     * @param latitude 纬度
+     * @param longitude 经度
+     * @param address 地址
+     * @param name 地址名称
+     * @param square 面积
+     * @param actuarialDesignAttr 设计精算列表 (
+     *      *      * id	String	设计精算模板ID
+     *      *      * configName	String	设计精算名称
+     *      *      * configType	String	配置类型1：设计阶段 2：精算阶段
+     *      *      * productList	List	商品列表
+     *      *      * productList.productId	String	商品ID
+     *      *      * productList.productName	String	商品名称
+     *      *      * productList.productSn	String	商品编码
+     *      *      * productList.goodsId	String	货品ID
+     *      *      * productList.storefrontId	String	店铺ID
+     *      *      * productList.price	double	商品价格
+     *      *      * productList.unit	String	商品单位
+     *      *      * productList.unitName	String	单位名称
+     *      *      * productList.image	String	图片
+     *      *      * productList.imageUrl	String	详情图片地址
+     *      *      * productList.valueIdArr	String	商品规格ID
+     *      *      * productList.valueNameArr	String	商品规格名称
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse setStartHouse(String userToken, String cityId, String houseType,
+                                        String latitude, String longitude, String address, String name,
+                                        BigDecimal square,String actuarialDesignAttr) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
         }
         Member member = (Member) object;
-        //针对以前老数据操作
+        //1.针对以前老数据操作,增加修改线索信息
         setClue(member);
-
-        Example example = new Example(House.class);
-        example.createCriteria()
-                .andEqualTo(House.MEMBER_ID, member.getId())
-                .andEqualTo(House.DATA_STATUS, 0);
-        //获取结算比例对象
+        //2.获取结算比例对象
         Example workDepositExample = new Example(WorkDeposit.class);
         workDepositExample.orderBy(WorkDeposit.CREATE_DATE).desc();
         List<WorkDeposit> workDeposits = workDepositMapper.selectByExample(workDepositExample);
-        List<House> houseList = iHouseMapper.selectByExample(example);
-        int again = 1;
-        if (houseList.size() > 0) {
-            again += houseList.size();
-            for (House house : houseList) {
-                if (house.getVisitState() == 0) { //0待确认开工,1装修中,2休眠中,3已完工
-                    //默认切换至未确认开工的房子
-                    setSelectHouse(userToken, house.getId());
-                    return ServerResponse.createByErrorMessage("有房子未确认开工,不能再装");
+        //3.判断是否有未完工的房子
+        int again=1;
+        String str=checkHouseStatus(again,userToken,member.getId());//判断是否有未完工的房子
+        if(StringUtils.isNotBlank(str)){
+            return ServerResponse.createByErrorMessage("有房子未确认开工,不能再装");
+        }
+        //4.修改销售相关的基础信息表
+        editHouseReationTable(member.getId());
+        //判断是否有图纸(循环订单信息）drawings 有无图纸0：无图纸；1：有图纸
+        int drawings=1;
+        JSONArray actuarialDesignList=JSON.parseArray(actuarialDesignAttr);
+        if(actuarialDesignList!=null&&actuarialDesignList.size()>0){
+           for(int i=0;i<actuarialDesignList.size();i++){
+               JSONObject obj=(JSONObject)actuarialDesignList.get(i);
+               String configType=(String)obj.get("configType");
+               if(configType!=null&&"1".equals(configType)){
+                   drawings=0;
+                   break;
+               }
+           }
+        }
+        //5.添加房产信息表
+        House house = insertHouseInfo(member,cityId, houseType,latitude, longitude, address,  name,square,again, drawings, workDeposits);
+        //6.添加房产订单信息表
+        insertOrderInfo(actuarialDesignAttr,house,square);
+        //默认切换至未确认开工的房子
+        setSelectHouse(userToken, house.getId());
+        //当家旗手重做完之前，临时固定优优抢单
+        DjAlreadyRobSingle djAlreadyRobSingle = getDjAlreadyRobSingleInfo(house.getId(),member.getId(),latitude,longitude);
+        upDateIsRobStats(djAlreadyRobSingle);
+
+        return ServerResponse.createBySuccessMessage("操作成功");
+    }
+
+    /***
+     * 添加对应的订单数据
+     * @param actuarialDesignAttr
+     * @param house
+     * @param square
+     */
+    void insertOrderInfo(String actuarialDesignAttr,House house,BigDecimal square){
+       JSONArray actuarialDesignList=JSON.parseArray(actuarialDesignAttr);
+        if(actuarialDesignList!=null&&actuarialDesignList.size()>0){
+            String parentOrderId="";
+            //如果有两条数据，需添加一个总订单，再添加设计精算对应的子订单，否则，则只添加一条订单就可以了
+            Order order=new Order();
+            if(actuarialDesignList.size()>1){
+                order = new Order();
+                order.setHouseId(house.getId());
+                order.setBusinessOrderNumber("");
+                order.setStyleName(house.getStyle());
+                order.setType(1);//人工订单
+                order.setOrderType("1");//订单类型（1设计，精算，2其它）
+                order.setOrderNumber(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
+                // order.setPayment(payState);
+                iOrderMapper.insert(order);
+                parentOrderId=order.getId();
+            }
+            for(int i=0;i<actuarialDesignList.size();i++){
+                BigDecimal totalParPrice=new BigDecimal(0.0);
+                BigDecimal totalPrice=new BigDecimal(0.0);
+                String storefrontId="";
+                JSONObject obj=(JSONObject)actuarialDesignList.get(i);
+                String configType=(String)obj.get("configType");
+                //添加对应的子订单和子订单详细信息
+                order=new Order();
+                order.setHouseId(house.getId());
+                order.setBusinessOrderNumber("");
+                order.setParentOrderId(parentOrderId);
+                order.setWorkerTypeName("1".equals(configType)?"设计订单":"精算订单");
+                order.setWorkerTypeId(configType);
+                order.setStyleName(house.getStyle());
+                order.setOrderType("1");//订单类型（1设计，精算，2其它）
+                //order.setStylePrice(houseStyleType.getPrice());//风格价格
+                order.setType(1);//人工订单
+                order.setOrderNumber(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
+
+                //获取商品信息
+                JSONArray productList=obj.getJSONArray("productList");
+                for(int j=0;j<productList.size();j++){
+                    JSONObject productObj=productList.getJSONObject(j);
+                    OrderItem orderItem=new OrderItem();
+                    orderItem.setOrderId(order.getId());
+                    orderItem.setHouseId(house.getHouseId());
+                    Double price=(Double)productObj.get("price");
+                    orderItem.setPrice(price);//销售价
+                    orderItem.setShopCount(square.doubleValue());//购买总数
+                    orderItem.setUnitName((String)productObj.get("unitName"));//单位
+                    totalPrice=new BigDecimal(price).multiply(square);
+                    totalParPrice = totalParPrice.add(totalPrice);
+                    orderItem.setTotalPrice(totalPrice.doubleValue());//总价
+                    orderItem.setProductId((String)productObj.get("productId"));
+                    orderItem.setProductSn((String)productObj.get("productSn"));
+                    orderItem.setProductName((String)productObj.get("productName"));
+                    orderItem.setImage((String)productObj.get("image"));
+                    orderItem.setCityId(house.getCityId());
+                    storefrontId=(String)productObj.get("image");
+                    orderItem.setStorefontId(storefrontId);
+                    iOrderItemMapper.insert(orderItem);
                 }
+                order.setTotalAmount(totalParPrice);//总费用
+                order.setStorefontId(storefrontId);
+                iOrderMapper.insert(order);
+
             }
         }
-        Map<String, Object> map = new HashedMap();
-        map.put("memberId", member.getId());
-        map.put("stage", 5);
-        map.put("tips", 1);
-        clueMapper.setStage(map);//修改线索的阶段
-        example = new Example(Customer.class);
-        example.createCriteria().andEqualTo(Customer.MEMBER_ID, member.getId());
-        Customer customer = new Customer();
-        customer.setId(null);
-        customer.setStage(5);
-        iCustomerMapper.updateByExampleSelective(customer, example);
-        Integer type = iCustomerMapper.queryType(member.getId());
-        Integer result = clueMapper.queryTClue(member.getMobile());
-        City city = iCityMapper.selectByPrimaryKey(cityId);
-        House house = new House(true);//新增房产信息
-        //0:场内录入，1:场外录入
-        if (null != type) {
-            if (type == 0) {
-                house.setIsType(0);
-            } else {
-                house.setIsType(1);
-            }
-        } else {
-            house.setIsType(1);
-        }
-        if (null != result) {
-            if (result == 1) {
-                //一个销售人员下单
-                house.setAbroadStats(0);
-            } else if (result > 1) {
-                //两个销售人员同时下单
-                house.setAbroadStats(1);
-            }
-        } else {
-            house.setAbroadStats(0);
-        }
-        //提醒暂时取消，固定指定为优优抢单
+    }
+
+
+
+    /**
+     * 添加房屋相关信息表
+     * @param member
+     * @param cityId
+     * @param houseType
+     * @param latitude
+     * @param longitude
+     * @param address
+     * @param name
+     * @param square
+     * @param again
+     * @param drawings
+     * @param workDeposits
+     * @return
+     */
+     House insertHouseInfo(Member member,String cityId, String houseType,
+                           String latitude, String longitude, String address, String name,
+                           BigDecimal square,int again,int drawings,List<WorkDeposit> workDeposits){
+         Integer type = iCustomerMapper.queryType(member.getId());
+         Integer result = clueMapper.queryTClue(member.getMobile());
+         City city = iCityMapper.selectByPrimaryKey(cityId);
+         House house = new House(true);//新增房产信息
+         //0:场内录入，1:场外录入
+         if (null != type) {
+             if (type == 0) {
+                 house.setIsType(0);
+             } else {
+                 house.setIsType(1);
+             }
+         } else {
+             house.setIsType(1);
+         }
+         if (null != result) {
+             if (result == 1) {
+                 //一个销售人员下单
+                 house.setAbroadStats(0);
+             } else if (result > 1) {
+                 //两个销售人员同时下单
+                 house.setAbroadStats(1);
+             }
+         } else {
+             house.setAbroadStats(0);
+         }
+         //提醒暂时取消，固定指定为优优抢单
 //        List<Customer> ms = iCustomerMapper.getCustomerMemberIdList(member.getId());
 //        if (ms != null) {
 //            for (Customer m : ms) {
@@ -1675,63 +1823,68 @@ public class HouseService {
 //                        "您有一个新的待抢单客户，请及时查看。", 4, null, "您新的待有抢单客户快去查看吧！");
 //            }
 //        }
-        house.setIsRobStats(0);
-        house.setSiteDisplay(0);
-        house.setMemberId(member.getId());//用户id
-        if (city != null)
-            house.setCityName(city.getName());//城市名
-        house.setCityId(cityId);
-        house.setAgain(again);//第几套房产
-        house.setHouseType(houseType);//装修的房子类型0：新房；1：老房
-        house.setDrawings(drawings);//有无图纸0：无图纸；1：有图纸
-        house.setWorkDepositId(workDeposits.get(0).getId());
-        iHouseMapper.insert(house);
-        //保存业主选择的地理位置
-        HouseAddress houseAddress = new HouseAddress();
-        houseAddress.setHouseId(house.getId());
-        houseAddress.setLatitude(latitude);
-        houseAddress.setLongitude(longitude);
-        houseAddress.setAddress(address);
-        houseAddress.setName(name);
-        houseAddress.setHouseType(houseType);//装修的房子类型0：新房；1：老房
-        iHouseAddressMapper.insert(houseAddress);
-        example = new Example(MemberCity.class);
-        example.createCriteria()
-                .andEqualTo(MemberCity.MEMBER_ID, member.getId())
-                .andEqualTo(MemberCity.CITY_ID, cityId);
-        List list = memberCityMapper.selectByExample(example);
-        if (list.size() == 0) {
-            MemberCity userCity = new MemberCity();
-            userCity.setMemberId(member.getId());
-            userCity.setCityId(cityId);
-            if (city != null)
-                userCity.setCityName(city.getName());
-            memberCityMapper.insert(userCity);
-        }
+         house.setIsRobStats(0);
+         house.setSiteDisplay(0);
+         house.setMemberId(member.getId());//用户id
+         if (city != null)
+             house.setCityName(city.getName());//城市名
+         house.setCityId(cityId);
+         house.setAgain(again);//第几套房产
+         house.setHouseType(houseType);//装修的房子类型0：新房；1：老房
+         house.setDrawings(drawings);//有无图纸0：无图纸；1：有图纸
+         house.setSquare(square);
+         house.setWorkDepositId(workDeposits.get(0).getId());
+         iHouseMapper.insert(house);
+         //保存业主选择的地理位置
+         HouseAddress houseAddress = new HouseAddress();
+         houseAddress.setHouseId(house.getId());
+         houseAddress.setLatitude(latitude);
+         houseAddress.setLongitude(longitude);
+         houseAddress.setAddress(address);
+         houseAddress.setName(name);
+         houseAddress.setHouseType(houseType);//装修的房子类型0：新房；1：老房
+         iHouseAddressMapper.insert(houseAddress);
+         //添加用户城市信息
+         Example example = new Example(MemberCity.class);
+         example.createCriteria()
+                 .andEqualTo(MemberCity.MEMBER_ID, member.getId())
+                 .andEqualTo(MemberCity.CITY_ID, cityId);
+         List list = memberCityMapper.selectByExample(example);
+         if (list.size() == 0) {
+             MemberCity userCity = new MemberCity();
+             userCity.setMemberId(member.getId());
+             userCity.setCityId(cityId);
+             if (city != null)
+                 userCity.setCityName(city.getName());
+             memberCityMapper.insert(userCity);
+         }
+         //房子花费
+         HouseExpend houseExpend = new HouseExpend(true);
+         houseExpend.setHouseId(house.getId());
+         houseExpendMapper.insert(houseExpend);
+         return  house;
+     }
 
-        //房子花费
-        HouseExpend houseExpend = new HouseExpend(true);
-        houseExpend.setHouseId(house.getId());
-        houseExpendMapper.insert(houseExpend);
-        //默认切换至未确认开工的房子
-        setSelectHouse(userToken, house.getId());
-
-
+    /**
+     * 设置对应的抢单信息
+     * @return
+     */
+    DjAlreadyRobSingle getDjAlreadyRobSingleInfo(String houseId,String memberId,String latitude,String longitude){
         DjAlreadyRobSingle djAlreadyRobSingle = new DjAlreadyRobSingle();
         //野生客戶点击我要装修
-        example = new Example(Customer.class);
-        example.createCriteria().andEqualTo(Customer.MEMBER_ID, member.getId())
+        Example example = new Example(Customer.class);
+        example.createCriteria().andEqualTo(Customer.MEMBER_ID, memberId)
                 .andIsNull(Customer.USER_ID);
         List<Customer> customerList = iCustomerMapper.selectByExample(example);
         if (customerList.size() > 0) {
             List<OrderStoreDTO> orderStore = iStoreMapper.getOrderStore(latitude, longitude, null);
-            clueMapper.setDistribution(orderStore.get(0).getStoreId(), member.getId(), new Date());
+            clueMapper.setDistribution(orderStore.get(0).getStoreId(), memberId, new Date());
             DjOrderSurface djOrderSurface = new DjOrderSurface();
             djOrderSurface.setDataStatus(0);
             djOrderSurface.setStoreId(orderStore.get(0).getStoreId());
             djOrderSurface.setRobDateId("0");
             example = new Example(Clue.class);
-            example.createCriteria().andEqualTo(Clue.MEMBER_ID, member.getId())
+            example.createCriteria().andEqualTo(Clue.MEMBER_ID, memberId)
                     .andIsNull(Clue.CUS_SERVICE);
             List<Clue> clues = clueMapper.selectByExample(example);
             if (clues.size() > 0) {
@@ -1742,15 +1895,55 @@ public class HouseService {
             djAlreadyRobSingle.setMcId(customerList.get(0).getId());
 //            robService.notEnteredGrabSheet();
         }
-        djAlreadyRobSingle.setHouseId(house.getId());
+        djAlreadyRobSingle.setHouseId(houseId);
         djAlreadyRobSingle.setUserId("773075761552045112068");
         djAlreadyRobSingle.setAbroadStats(0);
         djAlreadyRobSingle.setIsRobStats(1);
-        djAlreadyRobSingle.setMemberId(member.getId());
+        djAlreadyRobSingle.setMemberId(memberId);
+        return djAlreadyRobSingle;
+    }
 
-        //当家旗手重做完之前，临时固定优优抢单
-        upDateIsRobStats(djAlreadyRobSingle);
-        return ServerResponse.createBySuccessMessage("操作成功");
+
+    /**
+     * 相改相关表阶段状态，线索，用户相关业务表
+     * @param memberId
+     */
+    void editHouseReationTable(String memberId){
+        //4.修改线索阶段
+        Map<String, Object> map = new HashedMap();
+        map.put("memberId", memberId);
+        map.put("stage", 5);
+        map.put("tips", 1);
+        clueMapper.setStage(map);//修改线索的阶段
+        //5.修改用户维护的基础信息
+        Example example = new Example(Customer.class);
+        example.createCriteria().andEqualTo(Customer.MEMBER_ID, memberId);
+        Customer customer = new Customer();
+        customer.setId(null);
+        customer.setStage(5);
+        iCustomerMapper.updateByExampleSelective(customer, example);
+    }
+    /**
+     *  判断是否有未完工的房子
+     */
+    private String checkHouseStatus(int again,String userToken,String memberId){
+        Example example = new Example(House.class);
+        example.createCriteria()
+                .andEqualTo(House.MEMBER_ID, memberId)
+                .andEqualTo(House.DATA_STATUS, 0);
+        List<House> houseList = iHouseMapper.selectByExample(example);
+        again = 1;
+        if (houseList.size() > 0) {
+            again += houseList.size();
+            for (House house : houseList) {
+                if (house.getVisitState() == 0) { //0待确认开工,1装修中,2休眠中,3已完工
+                    //默认切换至未确认开工的房子
+                    setSelectHouse(userToken, house.getId());
+                    return "有房子未确认开工,不能再装";
+                }
+            }
+        }
+        return "";
     }
 
     /**
@@ -1911,7 +2104,7 @@ public class HouseService {
                 houseListDTO.setWebsiteCount(websiteCount);
                 houseListDTO.setAddress(houseListDTO.getHouseName());
                 //查询对应的订单表及状态----商品3.0增加
-                DjOrder djorder=iHouseMapper.getOrderInfo(houseListDTO.getHouseId());
+                Order djorder=iOrderMapper.getOrderInfo(houseListDTO.getHouseId());
                 if(djorder!=null&&StringUtils.isNotBlank(djorder.getId())){
                     houseListDTO.setOrderId(djorder.getId());
                 }

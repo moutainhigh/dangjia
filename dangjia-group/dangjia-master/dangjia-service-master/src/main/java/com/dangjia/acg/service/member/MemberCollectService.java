@@ -14,14 +14,20 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.product.MemberCollectDTO;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyImageMapper;
 
+import com.dangjia.acg.mapper.house.IWebsiteVisitMapper;
 import com.dangjia.acg.mapper.member.IMemberCollectMapper;
 import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.house.WebsiteVisit;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberCollect;
+import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.other.IndexPageService;
+import com.dangjia.acg.sql.config.DruidConfig;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -52,9 +58,13 @@ public class MemberCollectService {
     private DjBasicsProductAPI djBasicsProductAPI;
     @Autowired
     private AppActuaryOperationAPI appActuaryOperationAPI;
+    @Autowired
+    private IWebsiteVisitMapper iWebsiteVisitMapper;
+
+    private Logger logger = LoggerFactory.getLogger(MemberCollectService.class);
 
     /**
-     * 新增查询收藏的(人工或者服务)商品记录
+     * 查询收藏的商品记录
      *
      * @param request
      * @param userToken
@@ -67,11 +77,12 @@ public class MemberCollectService {
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
-            Member member = (Member) object;//获取用户信息
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());//初始化分页插件
+            Member member = (Member) object;//
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());//初始化分页插获取用户信息件
             //根据商品用户编号查询收藏记录
             Example example = new Example(MemberCollect.class);
-            example.createCriteria().andEqualTo(MemberCollect.MEMBER_ID, member.getId());
+            example.createCriteria().andEqualTo(MemberCollect.MEMBER_ID, member.getId())
+                    .andEqualTo(MemberCollect.CONDITION_TYPE,1);
             List<MemberCollect> MemberCollectList = iMemberCollectMapper.selectByExample(example);
             if (MemberCollectList.size() <= 0) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
@@ -80,7 +91,7 @@ public class MemberCollectService {
             List<MemberCollectDTO> memberCollectDTOList = new ArrayList<MemberCollectDTO>();
             for (MemberCollect memberCollect : MemberCollectList) {
                 MemberCollectDTO memberCollectDTO = new MemberCollectDTO();
-                String houseId = memberCollect.getHouseId();
+                String houseId = memberCollect.getCollectId();
                 memberCollectDTO.setObject(JSONObject.parseObject(appActuaryOperationAPI.getCommo(request, houseId, null).getResultObj().toString()));
                 memberCollectDTO.setConditionType(memberCollect.getConditionType());
                 memberCollectDTO.setHouseId(houseId);
@@ -91,8 +102,8 @@ public class MemberCollectService {
             pageResult.setList(memberCollectDTOList);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("系统出错,获取数据失败");
+            logger.info("系统出错,添加收藏失败",e);
+            return ServerResponse.createByErrorMessage("系统出错,添加收藏失败");
         }
     }
 
@@ -128,7 +139,6 @@ public class MemberCollectService {
                 List<String> dianList = new ArrayList<>();
                 if (!CommonUtil.isEmpty(house.getStyle())) {
                     dianList.add(house.getStyle());
-
                 }
                 if (!CommonUtil.isEmpty(house.getLiangDian())) {
                     Collections.addAll(dianList, liangArr);
@@ -144,8 +154,8 @@ public class MemberCollectService {
             pageResult.setList(houseMap);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("系统出错,获取数据失败");
+            logger.info("系统出错,添加收藏失败",e);
+            return ServerResponse.createByErrorMessage("系统出错,添加收藏失败");
         }
     }
 
@@ -167,7 +177,7 @@ public class MemberCollectService {
                     Example example = new Example(MemberCollect.class);
                     example.createCriteria()
                             .andEqualTo(MemberCollect.MEMBER_ID, operator.getId())
-                            .andEqualTo(MemberCollect.HOUSE_ID, houseId)
+                            .andEqualTo(MemberCollect.COLLECT_ID, houseId)
                             .andEqualTo(MemberCollect.CONDITION_TYPE, collectType);
                     List<MemberCollect> list = iMemberCollectMapper.selectByExample(example);
                     if (list.size() > 0) {
@@ -183,78 +193,101 @@ public class MemberCollectService {
     }
 
     /**
-     * 优化添加收藏
-     *
-     * @param request userToken
-     * @param houseId 房子ID或者房子
+     * 添加收藏
+     * @param userToken
+     * @param collectId 房子ID或者商品ID
      * @return
      */
-    public ServerResponse addMemberCollect(HttpServletRequest request, String houseId, String collectType) {
+    public ServerResponse addMemberCollect(String userToken, String collectId, String collectType) {
         try {
-            String userToken = request.getParameter(Constants.USER_TOKEY);
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse)
+                return (ServerResponse) object;
+            Member member = (Member) object;
             MemberCollect memberCollect = new MemberCollect();
-            if (userToken != null) {
-                Object object = constructionService.getMember(userToken);
-                if (object instanceof Member) {
-                    Member operator = (Member) object;
-                    memberCollect.setMemberId(operator.getId());
-                    memberCollect.setHouseId(houseId);
-                    memberCollect.setConditionType(collectType);
-
-                    //判断是否重复收藏
-                    Example example = new Example(MemberCollect.class);
-                    example.createCriteria().andEqualTo(MemberCollect.HOUSE_ID, houseId).andEqualTo(MemberCollect.MEMBER_ID, operator.getId());
-                    List<MemberCollect> listMemberCollect = iMemberCollectMapper.selectByExample(example);
-                    if (listMemberCollect.size() > 0) {
-                        return ServerResponse.createBySuccess("该商品已经被收藏!", "2");
-                    }
-                    iMemberCollectMapper.insertSelective(memberCollect);
-                    return ServerResponse.createBySuccess("商品收藏成功!", "1");
-                }
-            }
-            return ServerResponse.createBySuccess("用户token失效,请重新登录!", "0");
+            memberCollect.setMemberId(member.getId());
+            memberCollect.setCollectId(collectId);
+            memberCollect.setConditionType(collectType);
+            //判断是否重复收藏
+            Example example = new Example(MemberCollect.class);
+            example.createCriteria().andEqualTo(MemberCollect.COLLECT_ID, collectId)
+                    .andEqualTo(MemberCollect.MEMBER_ID, member.getId());
+            List<MemberCollect> listMemberCollect = iMemberCollectMapper.selectByExample(example);
+            if (listMemberCollect.size() > 0)
+                return ServerResponse.createByErrorMessage("该商品已经被收藏!");
+            iMemberCollectMapper.insertSelective(memberCollect);
+            return ServerResponse.createBySuccessMessage("商品收藏成功!");
         } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("系统出错,添加收藏失败");
+           logger.info("系统出错,添加收藏失败",e);
+           return ServerResponse.createByErrorMessage("系统出错,添加收藏失败");
         }
 
     }
 
+
     /**
-     * 优化
-     *
-     * @param request userToken
-     * @param houseId 删除收藏的工地ID或者房子
+     * 取消收藏
+     * @param userToken
+     * @param collectId
+     * @param collectType
      * @return
      */
-    public ServerResponse delMemberCollect(HttpServletRequest request, String houseId, String collectType) {
+    public ServerResponse delMemberCollect(String userToken, String collectId, String collectType) {
         try {
-            String userToken = request.getParameter(Constants.USER_TOKEY);
-            if (userToken != null) {
-                Object object = constructionService.getMember(userToken);
-                if (object instanceof Member) {
-                    Member operator = (Member) object;
-                    Example example = new Example(MemberCollect.class);
-                    Example.Criteria criteria = example.createCriteria();
-                    criteria.andEqualTo(MemberCollect.HOUSE_ID, houseId)
-                            .andEqualTo(MemberCollect.MEMBER_ID, operator.getId())
-                            .andEqualTo(MemberCollect.CONDITION_TYPE, collectType);
-                    int i = iMemberCollectMapper.deleteByExample(example);
-                    if (i >= 0) {
-                        return ServerResponse.createBySuccess("取消收藏成功!", "1");
-                    } else {
-                        return ServerResponse.createBySuccess("取消收藏失败!", "0");
-                    }
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse)
+                return (ServerResponse) object;
+            Member member = (Member) object;
+            Example example = new Example(MemberCollect.class);
+            Example.Criteria criteria = example.createCriteria();
+            criteria.andEqualTo(MemberCollect.COLLECT_ID, collectId)
+                    .andEqualTo(MemberCollect.MEMBER_ID, member.getId())
+                    .andEqualTo(MemberCollect.CONDITION_TYPE, collectType);
+            iMemberCollectMapper.deleteByExample(example);
+            return ServerResponse.createBySuccessMessage("取消收藏成功!");
+        } catch (Exception e) {
+            logger.info("系统出错,添加收藏失败",e);
+            return ServerResponse.createByErrorMessage("系统出错,添加收藏失败");
+        }
+    }
 
+
+    /**
+     * 猜你喜欢
+     * @param userToken
+     * @return
+     */
+    public ServerResponse queryRelated(String userToken) {
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member member = (Member) object;
+        Example example=new Example(WebsiteVisit.class);
+        example.createCriteria().andLike(WebsiteVisit.ROUTE,"%"+member.getId()+"%")
+                .andEqualTo(WebsiteVisit.DATA_STATUS,0);
+        example.orderBy(WebsiteVisit.COUNT).desc();
+        List<WebsiteVisit> websiteVisits = iWebsiteVisitMapper.selectByExample(example);
+        if(websiteVisits.size()<=0){
+            List<DjBasicsProductTemplate> djBasicsProductTemplates = djBasicsProductAPI.queryRandomProduct("12");
+            return ServerResponse.createBySuccess("查询成功",djBasicsProductTemplates);
+        }else{
+            List<DjBasicsProductTemplate> djBasicsProductTemplates=new ArrayList<>();
+            for (int i = 0; i < websiteVisits.size(); i++) {
+                if(!CommonUtil.isEmpty(websiteVisits.get(i).getRoute())){
+                    String[] split = websiteVisits.get(i).getRoute().split(",");
+                    List<DjBasicsProductTemplate> djBasicsProductTemplates1 = djBasicsProductAPI.queryRandomProductByCategoryId(split[1], (12-djBasicsProductTemplates.size())+"");
+                    djBasicsProductTemplates.addAll(djBasicsProductTemplates1);
+                    if(djBasicsProductTemplates.size()==12){
+                        break;
+                    }
                 }
             }
-            return ServerResponse.createBySuccess("取消收藏失败!", "0");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("系统出错,取消收藏失败");
+            if(djBasicsProductTemplates.size()<12){
+                djBasicsProductTemplates.addAll(djBasicsProductAPI.queryRandomProduct((12-djBasicsProductTemplates.size())+""));
+            }
+            return ServerResponse.createBySuccess("查询成功",djBasicsProductTemplates);
         }
-
-
     }
 
 

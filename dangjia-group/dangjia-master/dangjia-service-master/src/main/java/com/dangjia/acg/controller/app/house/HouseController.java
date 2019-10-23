@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
 
 /**
  * author: Ronalcheng
@@ -48,16 +49,41 @@ public class HouseController implements HouseAPI {
         return houseService.queryMyHouse(userToken);
     }
 
+
     /**
-     * @param userToken
-     * @param houseType 装修的房子类型0：新房；1：老房
-     * @param drawings  有无图纸0：无图纸；1：有图纸
+     *
+     * @param userToken 用户token
+     * @param cityId 城市ID
+     * @param houseType 房屋ID
+     * @param latitude 纬度
+     * @param longitude 经度
+     * @param address 地址
+     * @param name 地址名称
+     * @param square 面积
+     * @param actuarialDesignAttr 设计精算列表 (
+     *      * id	String	设计精算模板ID
+     *      * configName	String	设计精算名称
+     *      * configType	String	配置类型1：设计阶段 2：精算阶段
+     *      * productList	List	商品列表
+     *      * productList.productId	String	商品ID
+     *      * productList.productName	String	商品名称
+     *      * productList.productSn	String	商品编码
+     *      * productList.goodsId	String	货品ID
+     *      * productList.storefrontId	String	店铺ID
+     *      * productList.price	double	商品价格
+     *      * productList.unit	String	商品单位
+     *      * productList.unitName	String	单位名称
+     *      * productList.image	String	图片
+     *      * productList.imageUrl	String	详情图片地址
+     *      * productList.valueIdArr	String	商品规格ID
+     *      * productList.valueNameArr	String	商品规格名称
+     * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse setStartHouse(String userToken, String cityId, String houseType, Integer drawings,
-                                        String latitude, String longitude, String address, String name) {
-        return houseService.setStartHouse(userToken, cityId, houseType, drawings, latitude, longitude, address, name);
+    public ServerResponse setStartHouse(String userToken, String cityId, String houseType,
+                                        String latitude, String longitude, String address, String name, BigDecimal square, String actuarialDesignAttr) {
+        return houseService.setStartHouse(userToken, cityId, houseType, latitude, longitude, address, name,square,actuarialDesignAttr);
     }
 
     /**

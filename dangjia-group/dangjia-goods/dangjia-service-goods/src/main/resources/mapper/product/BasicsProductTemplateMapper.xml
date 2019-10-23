@@ -584,4 +584,31 @@
             t1.sell_price ASC
         limit 1
     </select>
+
+
+    <select id="queryRandomProduct" resultType="com.dangjia.acg.modle.product.DjBasicsProductTemplate">
+        select
+          <include refid="new_columns"/>
+        from dj_basics_product_template
+        ORDER BY RAND() LIMIT #{limit}
+    </select>
+
+
+    <select id="queryRandomProductByCategoryId" resultType="com.dangjia.acg.modle.product.DjBasicsProductTemplate">
+        SELECT
+          <include refid="new_columns"/>
+        FROM
+            dj_basics_product_template
+        WHERE
+            category_id = (
+                SELECT
+                    bg.category_id
+                FROM
+                    dj_basics_product_template bpt
+                INNER JOIN dj_basics_goods bg ON bpt.goods_id = bg.id
+                WHERE
+                    bpt.id =#{productId}
+            )
+        ORDER BY RAND() LIMIT #{limit}
+    </select>
 </mapper>
