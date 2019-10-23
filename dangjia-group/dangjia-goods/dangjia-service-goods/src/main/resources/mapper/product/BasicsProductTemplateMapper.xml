@@ -254,23 +254,25 @@
 
     <select id="serchCategoryProduct" resultType="com.dangjia.acg.modle.product.DjBasicsProductTemplate">
         SELECT
-        bp.id,
+        p.id,
         bp.goods_id,
-        bp.`name`,
-        bp.image,
-        bp.price,
+        p.product_name name,
+        p.image,
+        p.sell_price price,
         bg.type,
         bp.istop,
-        IFNULL(bp.convert_unit,bp.unit_id) AS unitId
+        IFNULL(bp.convert_unit, bp.unit_id) AS unitId,
+        s.storefront_name storefrontName
         FROM
         dj_basics_goods bg
         INNER JOIN dj_basics_product_template bp ON bp.goods_id = bg.id
+        INNER JOIN dj_basics_storefront_product p ON bp.id = p.prod_template_id
+        INNER JOIN dj_basics_storefront s ON s.id = p.storefront_id
         WHERE
-        bp.maket = 1
-        AND bp.type = 1
+        p.is_shelf_status = 1
         AND bg.data_status = 0
         <if test="name!=null and name!=''">
-            AND CONCAT(bg.name,bp.name) LIKE CONCAT('%', #{name}, '%')
+            AND CONCAT(p.product_name) LIKE CONCAT('%', #{name}, '%')
         </if>
         <if test="categoryId!=null and categoryId!=''">
             AND bg.category_id = #{categoryId}

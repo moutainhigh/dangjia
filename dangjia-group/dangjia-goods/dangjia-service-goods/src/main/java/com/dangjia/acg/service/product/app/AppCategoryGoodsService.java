@@ -165,6 +165,8 @@ public class AppCategoryGoodsService {
                 object.put("unitName", convertUnitName);
                 object.put("gId", product.getId());
                 object.put("name", product.getName());
+                object.put("productType", product.getType());
+                object.put("storefrontName", product.getStorefrontName());
                 arr.add(object);
             }
 
