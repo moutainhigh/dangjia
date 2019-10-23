@@ -17,6 +17,13 @@
             bsp.id = #{id}
     </select>
 
+    <select id="selectProductByGoodsType" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM dj_basics_storefront_product dbsp
+        INNER JOIN dj_basics_product_template dbpt ON dbsp.prod_template_id=dbpt.id
+        INNER JOIN dj_basics_goods dbg ON dbpt.goods_id=dbg.id AND dbg.type=2
+        WHERE dbsp.id =#{id}
+    </select>
+
     <select id="queryStorefrontProductViewDTOList" resultType="com.dangjia.acg.dto.storefront.BasicsStorefrontProductViewDTO">
 
         SELECT

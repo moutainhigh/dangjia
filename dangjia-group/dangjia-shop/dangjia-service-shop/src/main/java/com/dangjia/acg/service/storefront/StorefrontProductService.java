@@ -152,21 +152,24 @@ public class StorefrontProductService {
             if (StringUtils.isEmpty(isShelfStatus)) {
                 return ServerResponse.createByErrorMessage("商品上下架状态不能为空");
             }
-
             //判断，如果是人工商品，提示不能上架
+            Integer k=istorefrontProductMapper.selectProductByGoodsType(id);
 
+            if(k>0)
+            {
+                return ServerResponse.createByErrorMessage("温馨提示：人工商品提示不能上架");
+            }
             StorefrontProduct storefrontProduct = new StorefrontProduct();
             storefrontProduct.setId(id);
             storefrontProduct.setIsShelfStatus(isShelfStatus);
             int i = istorefrontProductMapper.updateByPrimaryKeySelective(storefrontProduct);
-            if (i > 0) {
-                return ServerResponse.createBySuccessMessage("设置商品上下架成功");
-            } else {
-                return ServerResponse.createByErrorMessage("设置商品上下架失败");
+            if (i <= 0) {
+                return ServerResponse.createByErrorMessage("商品上下架失败");
             }
+            return ServerResponse.createBySuccessMessage("商品上下架成功");
         } catch (Exception e) {
-            logger.error("设置商品上下架失败：", e);
-            return ServerResponse.createByErrorMessage("设置商品上下架失败");
+            logger.error("商品上下架失败：", e);
+            return ServerResponse.createByErrorMessage("商品上下架失败");
         }
     }
 

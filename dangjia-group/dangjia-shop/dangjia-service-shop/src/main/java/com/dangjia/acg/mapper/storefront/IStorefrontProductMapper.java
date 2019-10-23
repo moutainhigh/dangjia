@@ -15,4 +15,6 @@ public interface IStorefrontProductMapper  extends Mapper<StorefrontProduct> {
     StorefrontProductListDTO querySingleStorefrontProductById(@Param("id") String id);
 
     List<BasicsStorefrontProductViewDTO> queryStorefrontProductViewDTOList(@Param("keyWord") String keyWord);
+
+    int selectProductByGoodsType(@Param("id") String id);
 }
