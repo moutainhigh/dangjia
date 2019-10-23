@@ -120,8 +120,8 @@ public class StorefrontProduct extends BaseEntity {
      * 是否上架
      */
     @Column(name = "is_shelf_status")
-    @Desc(value = " 是否上架")
-    @ApiModelProperty("是否上架")
+    @Desc(value = " 是否上架 1：上架  0:下架 ")
+    @ApiModelProperty("是否上架 1：上架  0:下架")
     private String isShelfStatus;
 
 }

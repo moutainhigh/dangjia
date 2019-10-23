@@ -10,6 +10,7 @@ import lombok.experimental.FieldNameConstants;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.util.Date;
 
 /**
@@ -227,5 +228,8 @@ public class DjBasicsProductTemplate extends BaseEntity {
     @Desc(value = " 是否为代买（1是，0否）")
     @ApiModelProperty(" 是否为代买（1是，0否）")
     private String isAgencyPurchase;
+
+    @Transient
+    private String storefrontName;
 
 }
