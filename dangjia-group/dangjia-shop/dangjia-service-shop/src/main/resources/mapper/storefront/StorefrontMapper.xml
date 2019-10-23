@@ -98,7 +98,7 @@
             b.contract
         FROM
             dj_basics_storefront a
-        LEFT JOIN (SELECT * FROM dj_sup_application WHERE sup_id = #{supId})b
+        LEFT JOIN (SELECT * FROM dj_sup_application WHERE sup_id = #{supId}) b
         ON a.id = b.shop_id
         where 1=1
         <if test="null!=searchKey and ''!=searchKey">

@@ -93,8 +93,8 @@ public interface DjDeliveryReturnSlipAPI {
                                                          @RequestParam("shopId") String shopId,
                                                          @RequestParam("searchKey") String searchKey,
                                                          @RequestParam("cityId") String cityId);
-    /******************************店铺利润********************************************************/
-    @PostMapping("/delivery/djDeliveryReturnSlip/a")
+    /******************************店铺利润*******dj_basics_storefront*************************************************/
+    @PostMapping("/delivery/djBasicsStorefrontProfit/supplierDimension")
     @ApiOperation(value = "店铺利润统计-供应商维度", notes = "店铺利润统计-供应商维度")
     ServerResponse a(@RequestParam("request") HttpServletRequest request,
                                                    @RequestParam("pageDTO") PageDTO pageDTO,
@@ -102,7 +102,7 @@ public interface DjDeliveryReturnSlipAPI {
                                                    @RequestParam("cityId") String cityId,
                                                    @RequestParam("searchKey") String searchKey);
 
-    @PostMapping("/delivery/djDeliveryReturnSlip/b")
+    @PostMapping("/delivery/djBasicsStorefrontProfit/b")
     @ApiOperation(value = "店铺利润统计-商品维度", notes = "店铺利润统计-商品维度")
     ServerResponse b(@RequestParam("request") HttpServletRequest request,
                                                    @RequestParam("pageDTO") PageDTO pageDTO,
@@ -110,7 +110,7 @@ public interface DjDeliveryReturnSlipAPI {
                                                    @RequestParam("cityId") String cityId,
                                                    @RequestParam("searchKey") String searchKey);
 
-    @PostMapping("/delivery/djDeliveryReturnSlip/c")
+    @PostMapping("/delivery/djBasicsStorefrontProfit/c")
     @ApiOperation(value = "店铺利润统计-卖家维度", notes = "店铺利润统计-卖家维度")
     ServerResponse c(@RequestParam("request") HttpServletRequest request,
                                                    @RequestParam("pageDTO") PageDTO pageDTO,
@@ -118,7 +118,7 @@ public interface DjDeliveryReturnSlipAPI {
                                                    @RequestParam("cityId") String cityId,
                                                    @RequestParam("searchKey") String searchKey);
 
-    @PostMapping("/delivery/djDeliveryReturnSlip/d")
+    @PostMapping("/delivery/djBasicsStorefrontProfit/d")
     @ApiOperation(value = "店铺利润统计-查看供应详情", notes = "店铺利润统计-查看供应详情")
     ServerResponse d(@RequestParam("request") HttpServletRequest request,
                                                   @RequestParam("pageDTO") PageDTO pageDTO,
@@ -127,7 +127,7 @@ public interface DjDeliveryReturnSlipAPI {
                                                   @RequestParam("searchKey") String searchKey,
                                                   @RequestParam("cityId") String cityId);
 
-    @PostMapping("/delivery/djDeliveryReturnSlip/e")
+    @PostMapping("/delivery/djBasicsStorefrontProfit/e")
     @ApiOperation(value = "店铺利润统计-查看货单详情", notes = "店铺利润统计-查看货单详情")
     ServerResponse e(@RequestParam("request") HttpServletRequest request,
                      @RequestParam("pageDTO") PageDTO pageDTO,

@@ -287,6 +287,22 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
         return djBasicsGoodsService.queryGoodsList(pageDTO, categoryId, name, type);
     }
 
+    /**
+     * 查询商品及下属货品
+     * @param request
+     * @param pageDTO
+     * @param categoryId
+     * @param name
+     * @param cityId
+     * @param type
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryGoodsListStorefront(HttpServletRequest request, PageDTO pageDTO, String categoryId, String name, String cityId, Integer type) {
+        return djBasicsGoodsService.queryGoodsListStorefront(pageDTO, categoryId, name, type);
+    }
+
 
     @Override
     @ApiMethod

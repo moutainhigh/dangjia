@@ -8,6 +8,7 @@ import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.product.BasicsGoodsDTO;
+import com.dangjia.acg.dto.product.DjBasicsProductTemplateDTO;
 import com.dangjia.acg.mapper.basics.IAttributeValueMapper;
 import com.dangjia.acg.mapper.basics.ILabelMapper;
 import com.dangjia.acg.mapper.basics.IUnitMapper;
@@ -210,6 +211,79 @@ public class DjBasicsGoodsService {
         BasicsGoodsCategory basicsGoodsCategory = iBasicsGoodsCategoryMapper.selectByPrimaryKey(categoryId);
         List<BasicsGoodsCategory> goodsCategoryList = iBasicsGoodsCategoryMapper.getAllCategoryChildById(basicsGoodsCategory.getParentTop());
         return goodsCategoryList;
+    }
+
+    /**
+     * 供店铺使用
+     * 模糊查询goods及下属product
+     *
+     * @param pageDTO
+     * @param categoryId
+     * @param name
+     * @param type       是否禁用  0：禁用；1不禁用 ;  -1全部默认
+     * @return
+     */
+    public ServerResponse queryGoodsListStorefront(PageDTO pageDTO, String categoryId, String name, Integer type) {
+        try {
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            List<DjBasicsProductTemplateDTO> productList = iBasicsProductTemplateMapper.queryProductTemplateByGoodsId(categoryId);
+            PageInfo pageResult = new PageInfo(productList);
+            for (DjBasicsProductTemplateDTO p : productList) {
+                //type表示： 是否禁用  0：禁用；1不禁用 ;  -1全部默认
+                if (type != null && !type.equals(p.getType()) && -1 != type) //不等于 type 的不返回给前端
+                    continue;
+                //图片路径+前缀
+                StringBuilder imgUrlStr = new StringBuilder();
+                StringBuilder imgStr = new StringBuilder();
+                if (!CommonUtil.isEmpty(p.getImage())) {
+                    String[] imgArr = p.getImage().split(",");
+                    StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
+                }
+                p.setImage(imgStr.toString());
+
+                p.setImageUrl(imgUrlStr.toString());
+
+                if (StringUtils.isNoneBlank(p.getConvertUnit())) {
+                    p.setConvertUnitName(iUnitMapper.selectByPrimaryKey(p.getConvertUnit()).getName());
+                }
+
+                StringBuilder strNewValueNameArr = new StringBuilder();
+                if (StringUtils.isNotBlank(p.getValueIdArr())) {
+                    String[] newValueNameArr = p.getValueIdArr().split(",");
+                    for (int i = 0; i < newValueNameArr.length; i++) {
+                        String valueId = newValueNameArr[i];
+                        if (StringUtils.isNotBlank(valueId)) {
+                            AttributeValue attributeValue = iAttributeValueMapper.selectByPrimaryKey(valueId);
+                            if (i == 0) {
+                                strNewValueNameArr = new StringBuilder(attributeValue.getName());
+                            } else {
+                                strNewValueNameArr.append(",").append(attributeValue.getName());
+                            }
+                        }
+                    }
+                }
+                p.setNewValueNameArr(strNewValueNameArr.toString());
+
+
+                if (!StringUtils.isNotBlank(p.getLabelId())) {
+                    p.setLabelId("");
+                    p.setLabelName("");
+                } else {
+                    DjBasicsLabelValue label = djBasicsLabelValueMapper.selectByPrimaryKey(p.getLabelId());
+                    if (label != null && label.getName() != null)
+                        p.setLabelName(label.getName());
+                }
+
+            }
+
+
+            pageResult.setList(productList);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
     }
 
     /**

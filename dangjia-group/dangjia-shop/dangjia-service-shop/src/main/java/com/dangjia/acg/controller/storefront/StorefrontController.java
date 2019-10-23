@@ -30,20 +30,20 @@ public class StorefrontController implements BasicsStorefrontAPI {
 
     @Override
     @ApiMethod
-    public Storefront queryStorefrontByUserID(String userId,String cityId) {
-        return storefrontService.queryStorefrontByUserID(userId,cityId);
+    public Storefront queryStorefrontByUserID(String userId, String cityId) {
+        return storefrontService.queryStorefrontByUserID(userId, cityId);
     }
 
     @Override
     @ApiMethod
-    public Storefront querySingleStorefrontById( String id) {
+    public Storefront querySingleStorefrontById(String id) {
         return storefrontService.querySingleStorefrontById(id);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse queryStorefrontByUserId(String userId,String cityId) {
-        return storefrontService.queryStorefrontByUserId(userId,cityId);
+    public ServerResponse queryStorefrontByUserId(String userId, String cityId) {
+        return storefrontService.queryStorefrontByUserId(userId, cityId);
     }
 
     @Override
@@ -75,7 +75,7 @@ public class StorefrontController implements BasicsStorefrontAPI {
     @Override
     @ApiMethod
     public ServerResponse querySupplierSelectionSupply(HttpServletRequest request, PageDTO pageDTO, String searchKey, String userId, String cityId) {
-        return storefrontService.querySupplierSelectionSupply(pageDTO,searchKey,userId,cityId);
+        return storefrontService.querySupplierSelectionSupply(pageDTO, searchKey, userId, cityId);
     }
 
 
