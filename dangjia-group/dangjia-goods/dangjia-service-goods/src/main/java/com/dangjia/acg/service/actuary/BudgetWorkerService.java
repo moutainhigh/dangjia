@@ -332,9 +332,12 @@ public class BudgetWorkerService {
 //                    budgetMaterial.setSteta(1);//我们购
                 String productId = obj.get("productId").toString();
                 //DjBasicsProduct pro = djBasicsProductMapper.selectByPrimaryKey(productId);
-                DjBasicsProductTemplate djBasicsProductMaterial=iBasicsProductTemplateMapper.selectByPrimaryKey(productId);
-                Unit unit = iUnitMapper.selectByPrimaryKey(djBasicsProductMaterial.getConvertUnit());
-                obj.put("convertUnitName", unit.getName());
+                DjBasicsProductTemplate djBasicsProductMaterial=iBasicsProductTemplateMapper.getProductListByStoreproductId(productId);
+                if(djBasicsProductMaterial!=null&&StringUtils.isNotBlank(djBasicsProductMaterial.getConvertUnit())){
+                    Unit unit = iUnitMapper.selectByPrimaryKey(djBasicsProductMaterial.getConvertUnit());
+                    obj.put("convertUnitName", unit.getName());
+                }
+
             } else {//自购
                 Unit unit = iUnitMapper.selectByPrimaryKey(goods.getUnitId());
                 if (unit != null)
@@ -387,6 +390,7 @@ public class BudgetWorkerService {
             redisClient.deleteCache("HOUSEID-ACTUARY-"+houseId+"1");
             redisClient.deleteCache("HOUSEID-ACTUARY-"+houseId+"2");
             JSONArray goodsList = JSONArray.parseArray(listOfGoods);
+            logger.info("listGoods==========:"+listOfGoods);
             for (int i = 0; i < goodsList.size(); i++) {
                 JSONObject job = goodsList.getJSONObject(i);
                 String goodsId = job.getString("goodsId");//货品Id

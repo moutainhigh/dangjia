@@ -51,8 +51,6 @@ public class BudgetWorker extends BaseEntity {
     @Column(name = "name")
     private String name;//人工商品名
 
-    private String productName;//人工商品名
-
     @Column(name = "image")
     private String image;//人工商品图片
 
