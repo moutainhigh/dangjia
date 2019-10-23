@@ -327,6 +327,15 @@ public class HouseService {
             if (house != null)
                 houseDTO.setReferHouseName(house.getHouseName());
         }
+
+        //查询业主填写地址
+        Example example = new Example(HouseAddress.class);
+        example.createCriteria()
+                .andEqualTo(HouseAddress.HOUSE_ID, houseId);
+        List<HouseAddress> houseAddressList = iHouseAddressMapper.selectByExample(example);
+        if(!houseAddressList.isEmpty()){
+            houseDTO.setAddress(houseAddressList.get(0).getAddress());
+        }
         return ServerResponse.createBySuccess("查询成功", houseDTO);
     }
 

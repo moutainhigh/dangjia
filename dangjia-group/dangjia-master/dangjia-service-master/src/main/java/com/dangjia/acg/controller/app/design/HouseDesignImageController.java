@@ -4,6 +4,7 @@ import com.dangjia.acg.api.app.design.HouseDesignImageAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.house.HouseRemark;
 import com.dangjia.acg.service.design.DesignDataService;
 import com.dangjia.acg.service.design.DesignerOperationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -112,4 +113,18 @@ public class HouseDesignImageController implements HouseDesignImageAPI {
     public ServerResponse getHouseStatistics(String cityId,String workerTypeId,PageDTO pageDTO,String startDate, String endDate){
         return designDataService.getHouseStatistics(cityId,workerTypeId,pageDTO,startDate,endDate);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse addHouseRemark(HttpServletRequest request, HouseRemark houseRemark){
+        return designDataService.addHouseRemark(houseRemark);
+    }
+
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryHouseRemark(HttpServletRequest request,String remarkType, String houseId){
+        return designDataService.queryHouseRemark(remarkType,houseId);
+    }
+
 }

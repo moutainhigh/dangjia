@@ -16,6 +16,7 @@ import com.dangjia.acg.mapper.design.IDesignBusinessOrderMapper;
 import com.dangjia.acg.mapper.design.IPayConfigurationMapper;
 import com.dangjia.acg.mapper.design.IQuantityRoomImagesMapper;
 import com.dangjia.acg.mapper.design.IQuantityRoomMapper;
+import com.dangjia.acg.mapper.house.HouseRemarkMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
@@ -23,7 +24,10 @@ import com.dangjia.acg.modle.design.DesignBusinessOrder;
 import com.dangjia.acg.modle.design.PayConfiguration;
 import com.dangjia.acg.modle.design.QuantityRoomImages;
 import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.house.HouseRemark;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.sale.royalty.DjRobSingle;
+import com.dangjia.acg.modle.store.StoreUser;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.util.Utils;
@@ -68,6 +72,8 @@ public class DesignDataService {
     private IPayConfigurationMapper payConfigurationMapper;
     @Autowired
     private IDesignBusinessOrderMapper designBusinessOrderMapper;
+    @Autowired
+    private HouseRemarkMapper houseRemarkMapper;
 
     /**
      * 获取平面图
@@ -463,4 +469,43 @@ public class DesignDataService {
         pageResult.setList(memberMapList);
         return ServerResponse.createBySuccess("获取成功", pageResult);
     }
+
+    /**
+     * 新增房子备注信息
+     * @param houseRemark
+     * @return
+     */
+    public ServerResponse addHouseRemark(HouseRemark houseRemark){
+        try {
+            if (!CommonUtil.isEmpty(houseRemark)) {
+                houseRemarkMapper.insert(houseRemark);
+                return ServerResponse.createBySuccessMessage("新增成功");
+            }
+            return ServerResponse.createByErrorMessage("新增失败");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("新增失败");
+        }
+    }
+
+    /**
+     * 查询房子备注信息
+     * @param remarkType
+     * @param houseId
+     * @return
+     */
+    public ServerResponse queryHouseRemark(String remarkType, String houseId){
+        Example example = new Example(HouseRemark.class);
+        example.createCriteria().andEqualTo(HouseRemark.REMARK_TYPE, remarkType)
+                .andEqualTo(HouseRemark.HOUSE_ID, houseId);
+        example.orderBy(HouseRemark.CREATE_DATE).desc();
+        List<HouseRemark> storeList = houseRemarkMapper.selectByExample(example);
+        if (storeList.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+        return ServerResponse.createBySuccess("查询成功", storeList);
+    }
+
+
+
 }
