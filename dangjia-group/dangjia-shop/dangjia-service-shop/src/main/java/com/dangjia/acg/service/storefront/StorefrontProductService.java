@@ -153,6 +153,8 @@ public class StorefrontProductService {
                 return ServerResponse.createByErrorMessage("商品上下架状态不能为空");
             }
 
+            //判断，如果是人工商品，提示不能上架
+
             StorefrontProduct storefrontProduct = new StorefrontProduct();
             storefrontProduct.setId(id);
             storefrontProduct.setIsShelfStatus(isShelfStatus);

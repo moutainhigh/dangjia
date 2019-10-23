@@ -193,6 +193,68 @@
     </update>
 
     <!-- 根据商品Id查询所有货品 -->
+    <select id="queryProductTemplateByGoodsId" resultType="com.dangjia.acg.dto.product.DjBasicsProductTemplateDTO">
+        SELECT bpt.id AS id,
+        bpt.name AS NAME,
+        bpt.goods_id AS goodsId,
+        bpt.category_id AS categoryId,
+        bpt.product_sn AS productSn,
+        bpt.image AS image,
+        bpt.unit_id AS unitId,
+        bpt.label_id AS labelId,
+        bpt.unit_name AS unitName,
+        bpt.value_name_arr valueNameArr,
+        bpt.value_id_arr AS valueIdArr,
+        bpt.type AS TYPE,
+        bpt.maket,
+        bpt.istop,
+        bpt.price AS price,
+        bpt.other_name AS otherName,
+        bpt.create_date AS createDate,
+        bpt.modify_date AS modifyDate,
+        bpt.weight,
+        bpt.cost,
+        bpt.profit,
+        bpt.convert_unit convertUnit,
+        bpt.convert_quality convertQuality,
+        bpt.is_influe_warranty_period AS isInflueWarrantyPeriod,
+        bpt.max_warranty_period_year AS maxWarrantyPeriodYear,
+        bpt.min_warranty_period_year AS minWarrantyPeriodYear,
+        bpt.marketing_name AS marketingName,
+        bpt.cartage_price cartagePrice,
+        bpt.detail_image detailImage,
+        bpt.guaranteed_policy guaranteedPolicy,
+        bpt.refund_policy refundPolicy,
+        bpt.work_explain AS workExplain,
+        bpt.worker_dec AS workerDec,
+        bpt.worker_standard AS workerStandard,
+        bpt.worker_type_id AS workerTypeId,
+        bpt.last_price AS lastPrice,
+        bpt.last_time AS lastTime,
+        bpt.technology_ids AS technologyIds,
+        bpt.considerations,
+        bpt.calculate_content calculateContent,
+        bpt.build_content buildContent,
+        bpt.is_agency_purchase isAgencyPurchase,
+        dbg.NAME AS goodsName,
+        IFNULL(dsap.sell_price,bpt.price) sellPrice,
+        IFNULL(dsap.supplied_num,0) AS suppliedNum,
+        IFNULL(dsap.is_shelf_status,0)  AS isShelfStatus
+        FROM dj_basics_product_template bpt
+        LEFT  JOIN dj_basics_goods dbg ON dbg.id=bpt.goods_id
+        LEFT JOIN dj_basics_storefront_product dsap ON dsap.prod_template_id=bpt.id
+        WHERE
+        1=1
+        <if test="categoryId!=null and categoryId!=''">
+           and  bpt.category_id=#{categoryId}
+        </if>
+        AND bpt.data_status = 0
+        ORDER BY bpt.istop DESC,bpt.create_date DESC
+
+    </select>
+
+
+    <!-- 根据商品Id查询所有货品 -->
     <select id="queryByGoodsId" resultType="com.dangjia.acg.modle.product.DjBasicsProductTemplate">
         SELECT
         <include refid="new_columns"/>

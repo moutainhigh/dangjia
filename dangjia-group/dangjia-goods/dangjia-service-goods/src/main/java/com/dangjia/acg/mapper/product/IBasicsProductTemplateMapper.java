@@ -2,6 +2,7 @@ package com.dangjia.acg.mapper.product;
 
 import com.dangjia.acg.dto.basics.WorkerGoodsDTO;
 import com.dangjia.acg.dto.product.AppBasicsProductDTO;
+import com.dangjia.acg.dto.product.DjBasicsProductTemplateDTO;
 import com.dangjia.acg.dto.product.StorefrontProductDTO;
 import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
@@ -53,7 +54,7 @@ public interface IBasicsProductTemplateMapper extends Mapper<DjBasicsProductTemp
     /*更新单位*/
     void updateProductValueId(@Param("valueId") String valueId);
 
-
+    List<DjBasicsProductTemplateDTO>  queryProductTemplateByGoodsId(@Param("categoryId") String  categoryId);
     //根据商品Id查货品
     List<DjBasicsProductTemplate> queryByGoodsId(@Param("goodsId") String goodsId);
 
