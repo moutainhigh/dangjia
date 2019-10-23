@@ -62,6 +62,9 @@ public class AppActuaryOperationService {
     @Autowired
     private IBasicsProductTemplateMapper iBasicsProductTemplateMapper;
     @Autowired
+    private IShopProductMapper iShopProductMapper;
+
+    @Autowired
     private IUnitMapper iUnitMapper;
     @Autowired
     private IGroupLinkMapper iGroupLinkMapper;
