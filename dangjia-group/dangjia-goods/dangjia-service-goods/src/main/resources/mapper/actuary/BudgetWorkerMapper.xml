@@ -166,7 +166,27 @@
 	<!-- 根据houseId和wokerTypeId查询房子人工精算 -->
 	<select id="getBudgetWorkerById" resultType="java.util.Map">
 		SELECT
-		    <include refid="all_columns"/>
+		    id,
+			house_flow_id as houseFlowId,
+			house_id as houseId,
+			worker_type_id as workerTypeId,
+			steta,
+			template_id as templateId,
+			delete_state as deleteState,
+			worker_goods_id as workerGoodsId,
+			worker_goods_sn as workerGoodsSn,
+			name productName,
+			image,
+			price,
+			description,
+			shop_count as shopCount,
+			repair_count as repairCount,
+			back_count as backCount,
+			unit_name as unitName,
+			total_price as totalPrice,
+			data_status as dataStatus,
+			create_date as createDate,
+			modify_date as modifyDate
 		FROM dj_actuary_budget_worker
 		WHERE house_id=#{houseId}
 		and worker_type_id =#{workerTypeId}
