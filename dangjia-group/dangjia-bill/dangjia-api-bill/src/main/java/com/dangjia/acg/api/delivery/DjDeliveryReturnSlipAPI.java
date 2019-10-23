@@ -42,7 +42,8 @@ public interface DjDeliveryReturnSlipAPI {
                                                      @RequestParam("user_id") String userId,
                                                      @RequestParam("cityId") String cityId,
                                                      @RequestParam("pageDTO") PageDTO pageDTO,
-                                                     @RequestParam("applyState") Integer applyState);
+                                                     @RequestParam("applyState") Integer applyState,
+                                                     @RequestParam("searchKey") String searchKey);
 
     @PostMapping("/delivery/djDeliveryReturnSlip/querySupplierSettlementList")
     @ApiOperation(value = "供应商结算列表", notes = "供应商结算列表")

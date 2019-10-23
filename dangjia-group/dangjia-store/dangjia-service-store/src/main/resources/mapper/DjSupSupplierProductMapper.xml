@@ -39,8 +39,9 @@
             bpt.cartage_price AS cartagePrice,
             sap.is_cartage_price AS isElevatorFee,
             sap.supply_relationship AS supplyRelationship,
-            ar.adjust_time as adjustTime,
-            ar.adjust_price as adjustprice
+            if(ar.adjust_time is not null and ar.adjust_time!="",ar.adjust_time,current_timestamp()) as adjustTime,
+            if(ar.adjust_price is not null and ar.adjust_price!="",ar.adjust_price,0) as adjustprice,
+            sap.porterage
         FROM
             dj_sup_application_product sap
         INNER JOIN dj_basics_goods bg ON sap.goods_id = bg.id

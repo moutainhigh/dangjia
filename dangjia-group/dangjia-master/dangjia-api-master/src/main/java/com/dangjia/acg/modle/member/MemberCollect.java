@@ -24,10 +24,10 @@ public class MemberCollect extends BaseEntity {
     private String memberId;
 
 
-    @Column(name = "house_id")
-    @Desc(value = "房子ID")
-    @ApiModelProperty("房子ID")
-    private String houseId;
+    @Column(name = "collect_id")
+    @Desc(value = "房子ID或者商品ID")
+    @ApiModelProperty("房子ID或者商品ID")
+    private String collectId;
 
 
     @Column(name = "condition_type")
