@@ -2027,15 +2027,17 @@ public class HouseService {
                 }
                 //通知大管家抢单
                 HouseFlow houseFlow = houseFlowMapper.getHouseFlowByHidAndWty(houseId, 3);
-                houseFlow.setWorkType(2);//待抢单
-                houseFlow.setReleaseTime(new Date());//发布时间
-                houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
-                configMessageService.addConfigMessage(AppType.GONGJIANG, Utils.md5("wtId3" + houseFlow.getCityId()),
-                        "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, 4, null, "您有新的装修订单，快去抢吧！");
-                //推送消息给业主等待大管家抢单
-                configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(),
-                        "0", "等待大管家抢单", String.format(DjConstants.PushMessage.ACTUARIAL_COMPLETION,
-                                house.getHouseName()), "");
+                if(houseFlow.getWorkType()!=3 && houseFlow.getWorkType()!=4) {
+                    houseFlow.setWorkType(2);//待抢单
+                    houseFlow.setReleaseTime(new Date());//发布时间
+                    houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
+                    configMessageService.addConfigMessage(AppType.GONGJIANG, Utils.md5("wtId3" + houseFlow.getCityId()),
+                            "新的装修订单", DjConstants.PushMessage.SNAP_UP_ORDER, 4, null, "您有新的装修订单，快去抢吧！");
+                    //推送消息给业主等待大管家抢单
+                    configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(),
+                            "0", "等待大管家抢单", String.format(DjConstants.PushMessage.ACTUARIAL_COMPLETION,
+                                    house.getHouseName()), "");
+                }
                 //告知工程部精算已通过
                 Map<String, String> temp_para = new HashMap();
                 temp_para.put("house_name", house.getHouseName());
