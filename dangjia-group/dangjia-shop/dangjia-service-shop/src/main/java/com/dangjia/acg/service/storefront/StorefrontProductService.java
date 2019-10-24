@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 
@@ -67,12 +68,12 @@ public class StorefrontProductService {
             storefrontProduct.setImage(basicsStorefrontProductDTO.getImage());
             storefrontProduct.setDetailImage(basicsStorefrontProductDTO.getDetailImage());
             storefrontProduct.setMarketName(basicsStorefrontProductDTO.getMarketName());
-            storefrontProduct.setSellPrice(basicsStorefrontProductDTO.getSellPrice());
-            storefrontProduct.setSuppliedNum(basicsStorefrontProductDTO.getSuppliedNum());
-            storefrontProduct.setIsUpstairsCost(basicsStorefrontProductDTO.getIsUpstairsCost());
-            storefrontProduct.setIsDeliveryInstall(basicsStorefrontProductDTO.getIsDeliveryInstall());
-            storefrontProduct.setMoveCost(basicsStorefrontProductDTO.getMoveCost());
-            storefrontProduct.setIsShelfStatus(basicsStorefrontProductDTO.getIsShelfStatus());
+            storefrontProduct.setSellPrice(Double.parseDouble(basicsStorefrontProductDTO.getSellPrice()));
+            storefrontProduct.setSuppliedNum(Double.parseDouble(basicsStorefrontProductDTO.getSuppliedNum()));
+            storefrontProduct.setIsUpstairsCost(Double.parseDouble(basicsStorefrontProductDTO.getIsUpstairsCost()));
+            storefrontProduct.setIsDeliveryInstall(Double.parseDouble(basicsStorefrontProductDTO.getIsDeliveryInstall()));
+            storefrontProduct.setMoveCost(new BigDecimal(basicsStorefrontProductDTO.getMoveCost()));
+            storefrontProduct.setIsShelfStatus(Integer.parseInt(basicsStorefrontProductDTO.getIsShelfStatus()));
             storefrontProduct.setProdTemplateId(basicsStorefrontProductDTO.getProdTemplateId());
             storefrontProduct.setGoodsId( djBasicsProductTemplate.getGoodsId());
             storefrontProduct.setProductName(djBasicsProductTemplate.getName());
@@ -161,7 +162,7 @@ public class StorefrontProductService {
             }
             StorefrontProduct storefrontProduct = new StorefrontProduct();
             storefrontProduct.setId(id);
-            storefrontProduct.setIsShelfStatus(isShelfStatus);
+            storefrontProduct.setIsShelfStatus(Integer.parseInt(isShelfStatus));
             int i = istorefrontProductMapper.updateByPrimaryKeySelective(storefrontProduct);
             if (i <= 0) {
                 return ServerResponse.createByErrorMessage("商品上下架失败");
@@ -191,7 +192,7 @@ public class StorefrontProductService {
             Example example = new Example(StorefrontProduct.class);
             example.createCriteria().andIn(StorefrontProduct.ID, Arrays.asList(iditem));
             StorefrontProduct storefrontProduct = new StorefrontProduct();
-            storefrontProduct.setIsShelfStatus(isShelfStatus);
+            storefrontProduct.setIsShelfStatus(Integer.parseInt(isShelfStatus));
             storefrontProduct.setId(null);
             storefrontProduct.setCreateDate(null);
             int k = istorefrontProductMapper.updateByExampleSelective(storefrontProduct, example);
