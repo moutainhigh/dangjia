@@ -1,6 +1,6 @@
 package com.dangjia.acg.dto.actuary;
 
-import com.dangjia.acg.modle.sup.Storefront;
+import com.dangjia.acg.modle.sup.Shop;
 import lombok.Data;
 
 import java.util.List;
@@ -36,5 +36,5 @@ public class GoodsDTO {
     private List<AttributeDTO> attrList;//品牌，系列，价格属性,
     private String purchaseRestrictions;//购买限制（0自由购房；1有房无精算；2有房有精算）
 
-    private Storefront storefront;//店铺信息
+    private Shop shop;//店铺信息
 }

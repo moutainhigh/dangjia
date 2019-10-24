@@ -16,7 +16,7 @@ import javax.persistence.Table;
 @Table(name = "dj_basics_storefront")
 @ApiModel(description = "店铺表")
 @FieldNameConstants(prefix = "")
-public class Storefront extends BaseEntity {
+public class Shop extends BaseEntity {
 
     /**
      * 用户表ID

@@ -3,7 +3,7 @@ package com.dangjia.acg.dto.basics;
 
 import com.dangjia.acg.common.annotation.ExcelField;
 import com.dangjia.acg.dto.actuary.AttributeDTO;
-import com.dangjia.acg.modle.sup.Storefront;
+import com.dangjia.acg.modle.sup.Shop;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -83,7 +83,7 @@ public class WorkerGoodsDTO {
     @ApiModelProperty("technologies")
     private List<TechnologyDTO> technologies;
 
-    private Storefront storefront;//店铺信息
+    private Shop shop;//店铺信息
     private List<AttributeDTO> attrList;//品牌，系列，价格属性,
 
 }
