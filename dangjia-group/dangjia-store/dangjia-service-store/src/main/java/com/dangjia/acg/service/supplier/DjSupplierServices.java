@@ -170,17 +170,16 @@ public class DjSupplierServices {
      */
     public ServerResponse queryDjSupplierByShopIdPage( PageDTO pageDTO, String keyWord, String applicationStatus, String shopId) {
         try {
-
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             if (StringUtils.isEmpty(shopId)) {
                 return ServerResponse.createByErrorMessage("店铺ID不能为空!");
             }
-
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<DjSupplierDTO>  list=djSupplierMapper.queryDjSupplierByShopID(keyWord,applicationStatus,shopId);
             if (list.size() <= 0){
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
             PageInfo pageResult = new PageInfo(list);
+            //pageResult.setList(list);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();

@@ -94,7 +94,7 @@ public interface DjDeliveryReturnSlipAPI {
                                                          @RequestParam("shopId") String shopId,
                                                          @RequestParam("searchKey") String searchKey,
                                                          @RequestParam("cityId") String cityId);
-    /******************************店铺利润*******dj_basics_storefront*************************************************/
+    /*************************************店铺利润统计*************************************************/
     @PostMapping("/delivery/djBasicsStorefrontProfit/supplierDimension")
     @ApiOperation(value = "店铺利润统计-供应商维度", notes = "店铺利润统计-供应商维度")
     ServerResponse a(@RequestParam("request") HttpServletRequest request,
