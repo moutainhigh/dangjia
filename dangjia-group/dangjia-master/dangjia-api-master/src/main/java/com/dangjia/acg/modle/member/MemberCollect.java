@@ -35,4 +35,10 @@ public class MemberCollect extends BaseEntity {
     @ApiModelProperty("收藏类型")
     private String conditionType;
 
+    @Column(name = "storefront_id")
+    @Desc(value = "店铺id")
+    @ApiModelProperty("店铺id")
+    private String storefrontId;
+
+
 }

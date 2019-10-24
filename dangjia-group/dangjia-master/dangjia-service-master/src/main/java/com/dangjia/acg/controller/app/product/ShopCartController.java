@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
 
 @RestController
 public class ShopCartController implements ShopCartAPI {
@@ -19,13 +20,13 @@ public class ShopCartController implements ShopCartAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryCartList(String userToken,  String productId) {
-        return shopCartservice.queryCartList(userToken,productId);
+    public ServerResponse queryCartList(HttpServletRequest request,String userToken,String cityId) {
+        return shopCartservice.queryCartList(userToken,cityId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse delCar(String userToken) {
+    public ServerResponse delCar(HttpServletRequest request,String userToken) {
         return shopCartservice.delCar(userToken);
     }
 
@@ -37,26 +38,29 @@ public class ShopCartController implements ShopCartAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse addCart(String userToken, String cityId,
-                                  String productId,
-                                  String productSn,String productName,
-                                  String price,String shopCount,
-                                  String unitName,String categoryId,
-                                  String productType,String storefrontId) {
-        return shopCartservice.addCart(userToken, cityId,productId,productSn,productName,price,shopCount,unitName,categoryId,productType,storefrontId);
+    public ServerResponse addCart(HttpServletRequest request, String userToken, String cityId, String productId,
+                                  String productSn, String productName, String price,String shopCount, String unitName,
+                                  String categoryId, String productType,String storefrontId,String image) {
+        return shopCartservice.addCart(userToken, cityId,productId,productSn,productName,price,shopCount,unitName,categoryId,productType,storefrontId,image);
     }
 
 
 
     @Override
     @ApiMethod
-    public ServerResponse delCheckCart(String userToken,String productId) {
+    public ServerResponse delCheckCart(HttpServletRequest request,String userToken,String productId) {
         return shopCartservice.delCheckCart(userToken,productId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse cartSettle(String userToken) {
+    public ServerResponse cartSettle(HttpServletRequest request,String userToken) {
         return shopCartservice.cartSettle(userToken);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse replaceShoppingCart(HttpServletRequest request, String shoppingCartId, String productId, String productSn, String productName, String image, BigDecimal price) {
+        return shopCartservice.replaceShoppingCart(shoppingCartId, productId, productSn, productName, image, price);
     }
 }

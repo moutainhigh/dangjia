@@ -48,5 +48,41 @@
         </if>
     </select>
 
+    <select id="queryCartList" resultType="com.dangjia.acg.dto.product.ShoppingCartProductDTO">
+          SELECT
+            bsp.prod_template_id AS productId,
+            bsp.product_name AS productName,
+            bsp.sell_price AS sellPrice,
+            bsp.image,
+            CONCAT_WS(
+                " ",
+                bb.`name`,
+                bpt.value_name_arr
+            ) AS specificationAttributes
+        FROM
+            dj_basics_storefront_product bsp
+        INNER JOIN dj_basics_product_template bpt ON bsp.prod_template_id = bpt.id
+        INNER JOIN dj_basics_goods bg ON bg.id = bpt.goods_id
+        INNER JOIN dj_basics_brand bb ON bb.id = bg.brand_id
+        WHERE
+            bsp.storefront_id =#{storefrontId}
+        AND bsp.prod_template_id =#{productId}
+    </select>
+
+
+    <select id="queryCollectGood" resultType="com.dangjia.acg.dto.product.MemberCollectDTO">
+        SELECT
+            bsp.prod_template_id AS productId,
+            bsp.product_name AS productName,
+            bsp.image,
+            bpt.unit_name AS unitName
+        FROM
+            dj_basics_storefront_product bsp
+        INNER JOIN dj_basics_product_template bpt ON bsp.prod_template_id = bpt.id
+        WHERE
+            bsp.prod_template_id =#{productId}
+            and bsp.storefront_id=#{storefrontId}
+    </select>
+
 
 </mapper>

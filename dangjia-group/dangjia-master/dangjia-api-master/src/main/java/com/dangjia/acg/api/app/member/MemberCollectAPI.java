@@ -18,40 +18,40 @@ import javax.servlet.http.HttpServletRequest;
 public interface MemberCollectAPI {
 
 
-    @PostMapping("member/memberCollect/queryCollectHouse")
+    @PostMapping("app/member/memberCollect/queryCollectHouse")
     @ApiOperation(value = "查询收藏的工地记录", notes = "查询收藏的工地记录")
     ServerResponse queryCollectHouse(@RequestParam("request") HttpServletRequest request,
                                      @RequestParam("userToken") String userToken,
                                      @RequestParam("pageDTO") PageDTO pageDTO);
 
-    @PostMapping("member/memberCollect/queryCollectGood")
+    @PostMapping("app/member/memberCollect/queryCollectGood")
     @ApiOperation(value = "查询收藏的商品记录", notes = "查询收藏的商品记录")
     ServerResponse queryCollectGood(@RequestParam("request") HttpServletRequest request,
                                     @RequestParam("userToken") String userToken,
                                     @RequestParam("pageDTO") PageDTO pageDTO);
 
 
-    @PostMapping("member/memberCollect/addMemberCollect")
+    @PostMapping("app/member/memberCollect/addMemberCollect")
     @ApiOperation(value = "添加收藏", notes = "添加收藏,collectType:0->代表收藏房子 1->代表收藏商品")
     ServerResponse addMemberCollect(@RequestParam("request") HttpServletRequest request,
                                     @RequestParam("userToken") String userToken,
                                     @RequestParam("collectId") String collectId,
                                     @RequestParam("collectType") String collectType);
 
-    @RequestMapping(value = "member/collect/check", method = RequestMethod.POST)
+    @PostMapping("app/member/memberCollect/isMemberCollect")
     @ApiOperation(value = "检测是否收藏", notes = "检测是否收藏，collectType:0->代表收藏房子 1->代表收藏商品")
     ServerResponse isMemberCollect(@RequestParam("request") HttpServletRequest request,
-                                   @RequestParam("houseId") String houseId,@RequestParam("collectType") String collectType);
+                                   @RequestParam("userToken") String userToken,
+                                   @RequestParam("collectId") String collectId,
+                                   @RequestParam("collectType") String collectType);
 
-    @PostMapping("member/memberCollect/delMemberCollect")
+    @PostMapping("app/member/memberCollect/delMemberCollect")
     @ApiOperation(value = "取消收藏", notes = "取消收藏,collectType:0->代表收藏房子 1->代表收藏商品")
     ServerResponse delMemberCollect(@RequestParam("request") HttpServletRequest request,
-                                    @RequestParam("userToken") String userToken,
-                                    @RequestParam("collectId") String collectId,
-                                    @RequestParam("collectType") String collectType);
+                                    @RequestParam("id") String id);
 
 
-    @PostMapping("member/memberCollect/queryRelated")
+    @PostMapping("app/member/memberCollect/queryRelated")
     @ApiOperation(value = "猜你喜欢", notes = "猜你喜欢")
     ServerResponse queryRelated(@RequestParam("request") HttpServletRequest request,
                                 @RequestParam("userToken") String userToken);

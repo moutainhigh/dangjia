@@ -284,7 +284,7 @@ public class DjSupApplicationProductService {
      * @param shopId
      * @return
      */
-    public ServerResponse queryNotForTheGoods(String supId, String shopId) {
+    public ServerResponse queryNotForTheGoods(String supId, String shopId,PageDTO pageDTO) {
         try {
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             List<DjSupSupplierProductDTO> djSupSupplierProductDTOS = djSupSupplierProductMapper.queryHaveGoods(supId, shopId, "1");
@@ -292,6 +292,7 @@ public class DjSupApplicationProductService {
             List<String> productIds = djSupSupplierProductDTOS.stream()
                     .map(DjSupSupplierProductDTO::getProductId)
                     .collect(Collectors.toList());
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<DjSupSupplierProductDTO> djSupSupplierProductDTOS1 = djSupSupplierProductMapper.queryNotForTheGoods(supId, productIds);
             djSupSupplierProductDTOS1.forEach(djSupSupplierProductDTO -> {
                 djSupSupplierProductDTO.setImage(imageAddress+djSupSupplierProductDTO.getImage());
@@ -299,7 +300,8 @@ public class DjSupApplicationProductService {
             if (djSupSupplierProductDTOS1.size() <= 0) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
-            return ServerResponse.createBySuccess("查询成功",djSupSupplierProductDTOS1);
+            PageInfo pageResult = new PageInfo(djSupSupplierProductDTOS1);
+            return ServerResponse.createBySuccess("查询成功",pageResult);
         } catch (Exception e) {
             logger.error("查询失败",e);
             return ServerResponse.createByErrorMessage("查询失败"+e);

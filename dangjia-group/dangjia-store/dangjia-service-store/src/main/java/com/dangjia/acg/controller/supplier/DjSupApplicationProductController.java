@@ -77,7 +77,7 @@ public class DjSupApplicationProductController implements DjSupApplicationProduc
 
     @Override
     @ApiMethod
-    public ServerResponse queryNotForTheGoods(HttpServletRequest request, String supId, String shopId) {
-        return djSupApplicationProductService.queryNotForTheGoods(supId,shopId);
+    public ServerResponse queryNotForTheGoods(HttpServletRequest request, String supId, String shopId,PageDTO pageDTO) {
+        return djSupApplicationProductService.queryNotForTheGoods(supId,shopId,pageDTO);
     }
 }

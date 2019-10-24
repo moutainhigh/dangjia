@@ -11,6 +11,7 @@
 		product_id as productId,
 		product_sn as productSn,
 		product_name as productName,
+		image,
 		price ,
 		shopCount,
 		unit_name as unitName,
@@ -22,11 +23,26 @@
         data_status AS dataStatus
 	</sql>
 
-    <select id="queryShoppingCart" resultType="com.dangjia.acg.modle.product.ShoppingCart">
-        SELECT
-        <include refid="all_columns"/>
-        FROM
-        dj_shopping_cart where 1=1
-    </select>
+  	<select id="queryCartList" resultType="com.dangjia.acg.modle.product.ShoppingCart">
+		SELECT
+			<include refid="all_columns"/>
+		FROM
+			dj_repair_shopping_cart
+		WHERE
+			member_id =#{memberId}
+		AND city_id =#{cityId}
+		and storefront_id=#{storefrontId}
+	</select>
+
+	<select id="queryStorefrontIds" resultType="java.lang.String">
+		SELECT
+		  	storefront_id
+		FROM
+			dj_repair_shopping_cart
+		WHERE
+			member_id =#{memberId}
+			AND city_id =#{cityId}
+		group by storefront_id
+	</select>
 </mapper>
 

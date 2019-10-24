@@ -3,12 +3,16 @@ package com.dangjia.acg.controller.storefront;
 import com.dangjia.acg.api.StorefrontProductAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dto.product.MemberCollectDTO;
+import com.dangjia.acg.dto.product.ShoppingCartProductDTO;
 import com.dangjia.acg.dto.storefront.StorefrontProductListDTO;
 import com.dangjia.acg.dto.storefront.BasicsStorefrontProductDTO;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.service.storefront.StorefrontProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * @ClassName: StorefrontController
@@ -70,6 +74,18 @@ public class StorefrontProductController implements StorefrontProductAPI {
     @ApiMethod
     public ServerResponse saveStorefrontProductById(StorefrontProduct storefrontProduct) {
         return storefrontProductService.saveStorefrontProductById(storefrontProduct);
+    }
+
+    @Override
+    @ApiMethod
+    public List<ShoppingCartProductDTO> queryCartList(String storefrontId, String productId) {
+        return storefrontProductService.queryCartList(storefrontId,productId);
+    }
+
+    @Override
+    @ApiMethod
+    public List<MemberCollectDTO> queryCollectGood(String productId,String storefrontId) {
+        return storefrontProductService.queryCollectGood(productId,storefrontId);
     }
 
 

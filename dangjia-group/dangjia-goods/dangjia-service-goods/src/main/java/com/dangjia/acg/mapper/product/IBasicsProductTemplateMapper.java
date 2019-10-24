@@ -108,9 +108,9 @@ public interface IBasicsProductTemplateMapper extends Mapper<DjBasicsProductTemp
     StorefrontProductDTO getStorefrontInfoByprodTemplateId(@Param("prodTemplateId") String prodTemplateId,@Param("prodTemplateSn") String prodTemplateSn);
 
 
-    List<DjBasicsProductTemplate> queryRandomProduct(@Param("limit") String limit);
+    List<DjBasicsProductTemplate> queryRandomProduct(@Param("limit") Integer limit);
 
 
-    List<DjBasicsProductTemplate> queryRandomProductByCategoryId(@Param("productId") String productId,@Param("limit") String limit);
+    List<DjBasicsProductTemplate> queryRandomProductByCategoryId(@Param("productId") String productId,@Param("limit") Integer limit);
 
 }

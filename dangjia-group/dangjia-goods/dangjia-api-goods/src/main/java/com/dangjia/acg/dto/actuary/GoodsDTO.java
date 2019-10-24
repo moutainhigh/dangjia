@@ -32,7 +32,7 @@ public class GoodsDTO {
     private int productType;//0:材料；1：包工包料；2：人工
     private List<String> imageList;//长图片 多图组合
     private List<BrandDTO> brandDTOList;//品牌系列
-    private Integer maket;//是否上架  0:未上架；1已上架
+    private String maket;//是否上架  0:未上架；1已上架
     private List<AttributeDTO> attrList;//品牌，系列，价格属性,
     private String purchaseRestrictions;//购买限制（0自由购房；1有房无精算；2有房有精算）
 

@@ -5,6 +5,8 @@ import com.alibaba.fastjson.JSON;
 import com.dangjia.acg.api.product.DjBasicsProductAPI;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dto.product.MemberCollectDTO;
+import com.dangjia.acg.dto.product.ShoppingCartProductDTO;
 import com.dangjia.acg.dto.storefront.StorefrontProductListDTO;
 import com.dangjia.acg.dto.storefront.BasicsStorefrontProductDTO;
 import com.dangjia.acg.dto.storefront.BasicsStorefrontProductViewDTO;
@@ -249,6 +251,29 @@ public class StorefrontProductService {
             logger.error("供货设置-保存编辑店铺商品失败：", e);
             return ServerResponse.createByErrorMessage("供货设置-保存编辑店铺商品失败");
         }
+    }
+
+
+    /**
+     * 查询商品信息
+     * @param storefrontId
+     * @param productId
+     * @return
+     */
+    public List<ShoppingCartProductDTO> queryCartList(String storefrontId, String productId) {
+        List<ShoppingCartProductDTO> shoppingCartProductDTOS = istorefrontProductMapper.queryCartList(storefrontId, productId);
+        return shoppingCartProductDTOS;
+    }
+
+
+    /**
+     * 查询收藏商品
+     * @param productId
+     * @return
+     */
+    public List<MemberCollectDTO> queryCollectGood(String productId,String storefrontId) {
+        List<MemberCollectDTO> memberCollectDTOS = istorefrontProductMapper.queryCollectGood(productId,storefrontId);
+        return memberCollectDTOS;
     }
 
 }
