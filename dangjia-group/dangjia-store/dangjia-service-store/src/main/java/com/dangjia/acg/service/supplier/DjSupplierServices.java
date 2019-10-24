@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -243,10 +244,17 @@ public class DjSupplierServices {
             {
                 return  ServerResponse.createBySuccessMessage("主键不能为空");
             }
+
+            String[] iditem = id.split(",");
+            Example example = new Example(DjSupApplication.class);
+            example.createCriteria().andIn(DjSupApplication.ID, Arrays.asList(iditem));
+
             DjSupApplication djSupApplication=new DjSupApplication();
-            djSupApplication.setId(id);
+            djSupApplication.setId(null);
             djSupApplication.setApplicationStatus(applicationStatus);
-            int i=djSupApplicationMapper.updateByPrimaryKeySelective(djSupApplication);
+            djSupApplication.setCreateDate(null);
+            int i=djSupApplicationMapper.updateByExampleSelective(djSupApplication,example);
+
             if(i<=0)
             {
                 ServerResponse.createByErrorMessage("供应商申请失败");
@@ -275,11 +283,16 @@ public class DjSupplierServices {
             {
                 return  ServerResponse.createBySuccessMessage("驳回原因文字不能大于20字");
             }
+            String[] iditem = id.split(",");
+            Example example = new Example(DjSupApplication.class);
+            example.createCriteria().andIn(DjSupApplication.ID, Arrays.asList(iditem));
+
             DjSupApplication djSupApplication=new DjSupApplication();
-            djSupApplication.setId(id);
+            djSupApplication.setId(null);
             djSupApplication.setApplicationStatus(applicationStatus);
             djSupApplication.setFailReason(failReason);
-            int i=djSupApplicationMapper.updateByPrimaryKeySelective(djSupApplication);
+            djSupApplication.setCreateDate(null);
+            int i=djSupApplicationMapper.updateByExampleSelective(djSupApplication,example);
             if(i<=0)
             {
                 return ServerResponse.createBySuccessMessage("驳回供应商申请失败");
