@@ -1226,7 +1226,17 @@ public class MemberService {
         return list;
     }
 
-
+    /**
+     * 更新工匠保险信息
+     *
+     * @param insurance
+     * @return
+     */
+    public ServerResponse updateInsurances(Insurance insurance) {
+        insurance.setModifyDate(new Date());
+        insuranceMapper.updateByPrimaryKeySelective(insurance);
+        return ServerResponse.createBySuccess("ok", insurance.getId());
+    }
     /**
      * 新增工匠保险信息
      *
