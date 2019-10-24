@@ -192,7 +192,7 @@ public class ForMasterController implements ForMasterAPI {
     }
     @Override
     @ApiMethod
-    public ServerResponse getproductTempListByStorefontId(String cityId, String storefontId, String goodsId){
-        return forMasterService.getproductTempListByStorefontId(storefontId,goodsId);
+    public ServerResponse getProductTempListByStorefontId(String cityId, String storefontId, String goodsId){
+        return forMasterService.getProductTempListByStorefontId(storefontId,goodsId);
     }
 }

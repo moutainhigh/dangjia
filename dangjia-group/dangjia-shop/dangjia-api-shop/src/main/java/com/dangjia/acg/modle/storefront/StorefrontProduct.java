@@ -10,6 +10,7 @@ import lombok.experimental.FieldNameConstants;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import java.math.BigDecimal;
 
 @Data
 @Entity
@@ -82,7 +83,7 @@ public class StorefrontProduct extends BaseEntity {
     @Column(name = "sell_price")
     @Desc(value = "销售价格")
     @ApiModelProperty("销售价格")
-    private String sellPrice;
+    private Double sellPrice;
 
     /**
      * 供货数量
@@ -90,7 +91,7 @@ public class StorefrontProduct extends BaseEntity {
     @Column(name = "supplied_num")
     @Desc(value = "供货数量")
     @ApiModelProperty("供货数量")
-    private String suppliedNum;
+    private Double suppliedNum;
 
     /**
      *  师傅是否按一层收取上楼费
@@ -98,7 +99,7 @@ public class StorefrontProduct extends BaseEntity {
     @Column(name = "is_upstairs_cost")
     @Desc(value = " 师傅是否按一层收取上楼费")
     @ApiModelProperty(" 师傅是否按一层收取上楼费")
-    private String isUpstairsCost;
+    private Double isUpstairsCost;
 
     /**
      *  是否送货与安装/施工分开
@@ -106,7 +107,7 @@ public class StorefrontProduct extends BaseEntity {
     @Column(name = "is_delivery_install")
     @Desc(value = " 是否送货与安装/施工分开")
     @ApiModelProperty(" 是否送货与安装/施工分开")
-    private String isDeliveryInstall;
+    private Double isDeliveryInstall;
 
     /**
      * 搬运费
@@ -114,7 +115,7 @@ public class StorefrontProduct extends BaseEntity {
     @Column(name = "move_cost")
     @Desc(value = " 搬运费")
     @ApiModelProperty("搬运费")
-    private String moveCost;
+    private BigDecimal moveCost;
 
     /**
      * 是否上架
@@ -122,6 +123,6 @@ public class StorefrontProduct extends BaseEntity {
     @Column(name = "is_shelf_status")
     @Desc(value = " 是否上架 1：上架  0:下架 ")
     @ApiModelProperty("是否上架 1：上架  0:下架")
-    private String isShelfStatus;
+    private Integer isShelfStatus;
 
 }

@@ -101,7 +101,7 @@ public interface IBasicsProductTemplateMapper extends Mapper<DjBasicsProductTemp
                                                 @Param("categoryId") String categoryId);
 
     //查询当前店铺下对应货品下的所有商品
-    List<DjBasicsProductTemplate> getproductTempListByStorefontId(@Param("storefontId") String storefontId,
+    List<DjBasicsProductTemplate> getProductTempListByStorefontId(@Param("storefontId") String storefontId,
                                                                   @Param("goodsId") String goodsId);
 
     //根据模板ID查询对应符合条件的商品信息
