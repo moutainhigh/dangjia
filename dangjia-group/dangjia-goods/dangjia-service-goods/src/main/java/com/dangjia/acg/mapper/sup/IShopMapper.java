@@ -1,6 +1,6 @@
 package com.dangjia.acg.mapper.sup;
 
-import com.dangjia.acg.modle.storefront.Storefront;
+import com.dangjia.acg.modle.sup.Storefront;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 

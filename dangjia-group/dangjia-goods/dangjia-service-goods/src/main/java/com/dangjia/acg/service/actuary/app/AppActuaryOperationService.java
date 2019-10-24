@@ -1,42 +1,36 @@
 package com.dangjia.acg.service.actuary.app;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.dangjia.acg.api.app.house.HouseAPI;
-import com.dangjia.acg.api.app.repair.MendOrderAPI;
-import com.dangjia.acg.api.data.GetForBudgetAPI;
 import com.dangjia.acg.api.data.WorkerTypeAPI;
-import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
-import com.dangjia.acg.dto.actuary.*;
+import com.dangjia.acg.dto.actuary.AttributeDTO;
+import com.dangjia.acg.dto.actuary.AttributeValueDTO;
+import com.dangjia.acg.dto.actuary.GoodsDTO;
 import com.dangjia.acg.dto.basics.TechnologyDTO;
 import com.dangjia.acg.dto.basics.WorkerGoodsDTO;
-import com.dangjia.acg.dto.repair.MendOrderInfoDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
-import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
 import com.dangjia.acg.mapper.basics.*;
-import com.dangjia.acg.mapper.product.*;
+import com.dangjia.acg.mapper.product.DjBasicsGoodsMapper;
+import com.dangjia.acg.mapper.product.IBasicsGoodsCategoryMapper;
+import com.dangjia.acg.mapper.product.IBasicsProductTemplateMapper;
 import com.dangjia.acg.mapper.sup.IShopMapper;
 import com.dangjia.acg.mapper.sup.IShopProductMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
-import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.modle.basics.GoodsGroup;
 import com.dangjia.acg.modle.basics.GroupLink;
-import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.core.WorkerType;
-import com.dangjia.acg.modle.house.House;
-import com.dangjia.acg.modle.product.*;
-import com.dangjia.acg.modle.repair.MendMateriel;
-import com.dangjia.acg.modle.repair.MendWorker;
-import com.dangjia.acg.modle.storefront.Storefront;
+import com.dangjia.acg.modle.product.BasicsGoodsCategory;
+import com.dangjia.acg.modle.product.DjBasicsGoods;
+import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
+import com.dangjia.acg.modle.sup.Storefront;
 import com.dangjia.acg.util.DateUtils;
 import com.dangjia.acg.util.StringTool;
 import org.apache.commons.lang3.StringUtils;
@@ -46,8 +40,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
-import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * author: qiyuxiang

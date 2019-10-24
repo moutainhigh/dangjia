@@ -1,7 +1,6 @@
 package com.dangjia.acg.dto.actuary;
 
-import com.dangjia.acg.modle.storefront.Storefront;
-import io.swagger.annotations.ApiModelProperty;
+import com.dangjia.acg.modle.sup.Storefront;
 import lombok.Data;
 
 import java.util.List;

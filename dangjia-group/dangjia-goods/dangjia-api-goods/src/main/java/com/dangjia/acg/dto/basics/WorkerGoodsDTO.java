@@ -3,7 +3,7 @@ package com.dangjia.acg.dto.basics;
 
 import com.dangjia.acg.common.annotation.ExcelField;
 import com.dangjia.acg.dto.actuary.AttributeDTO;
-import com.dangjia.acg.modle.storefront.Storefront;
+import com.dangjia.acg.modle.sup.Storefront;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
