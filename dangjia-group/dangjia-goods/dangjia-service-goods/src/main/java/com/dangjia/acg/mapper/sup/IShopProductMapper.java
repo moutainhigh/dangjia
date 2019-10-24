@@ -1,4 +1,4 @@
-package com.dangjia.acg.mapper.product;
+package com.dangjia.acg.mapper.sup;
 
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import org.springframework.stereotype.Repository;
