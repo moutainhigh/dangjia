@@ -396,7 +396,7 @@ public class MemberService {
             user.setIsCrowned(0);
             user.setHead(Utils.getHead());
             user.setPassword(DigestUtils.md5Hex(password));//验证码正确设置密码
-            user.setCityId(request.getParameter(Constants.CITY_ID));
+            user.setCityId(CommonUtil.isEmpty(request.getParameter(Constants.CITY_ID))?"402881882ba8753a012ba93101120116":request.getParameter(Constants.CITY_ID));
             user.setPolicyId(String.valueOf(userRole));
             if (!CommonUtil.isEmpty(user.getCityId())) {
                 City city = iCityMapper.selectByPrimaryKey(user.getCityId());
