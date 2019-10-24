@@ -50,8 +50,6 @@ public class StorefrontService {
     public Storefront queryStorefrontByUserID(String userId,String cityId) {
         try {
             Example example=new Example(Storefront.class);
-            example.createCriteria().andEqualTo(Storefront.USER_ID,userId)
-                    .andEqualTo(Storefront.CITY_ID,cityId);
             example.createCriteria().andEqualTo(Storefront.USER_ID,userId).andEqualTo(Storefront.CITY_ID,cityId);
             Storefront storefront =istorefrontMapper.selectByExample(example).get(0);
             return storefront;
