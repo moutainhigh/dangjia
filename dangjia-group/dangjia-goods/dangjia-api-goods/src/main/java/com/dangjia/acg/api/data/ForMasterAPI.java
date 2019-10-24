@@ -156,7 +156,7 @@ public interface ForMasterAPI {
     //
     @PostMapping("/data/house/getproductTempListByStorefontId")
     @ApiOperation(value = "查询当前店铺下对应货品下的所有商品", notes = "查询当前店铺下对应货品下的所有商品列表")
-    ServerResponse getproductTempListByStorefontId(@RequestParam("cityId") String cityId,
+    ServerResponse getProductTempListByStorefontId(@RequestParam("cityId") String cityId,
                                                    @RequestParam("storefontId") String storefontId,
                                                    @RequestParam("goodsId") String goodsId);
 

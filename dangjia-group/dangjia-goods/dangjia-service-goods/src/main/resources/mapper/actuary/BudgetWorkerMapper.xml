@@ -166,32 +166,45 @@
 	<!-- 根据houseId和wokerTypeId查询房子人工精算 -->
 	<select id="getBudgetWorkerById" resultType="java.util.Map">
 		SELECT
-		    id,
-			house_flow_id as houseFlowId,
-			house_id as houseId,
-			worker_type_id as workerTypeId,
-			steta,
-			template_id as templateId,
-			delete_state as deleteState,
-			worker_goods_id as workerGoodsId,
-			worker_goods_sn as workerGoodsSn,
-			name productName,
-			image,
-			price,
-			description,
-			shop_count as shopCount,
-			repair_count as repairCount,
-			back_count as backCount,
-			unit_name as unitName,
-			total_price as totalPrice,
-			data_status as dataStatus,
-			create_date as createDate,
-			modify_date as modifyDate
-		FROM dj_actuary_budget_worker
-		WHERE house_id=#{houseId}
-		and worker_type_id =#{workerTypeId}
-		and delete_state!=1
-		ORDER BY worker_goods_sn and create_date desc
+			t1.id,
+			t2.prod_template_id prodTemplateId,
+			t1.house_flow_id AS houseFlowId,
+			t1.house_id AS houseId,
+			t1.worker_type_id AS workerTypeId,
+			t1.steta,
+			t1.template_id AS templateId,
+			t1.delete_state AS deleteState,
+			t1.worker_goods_id AS workerGoodsId,
+			t1.worker_goods_sn AS workerGoodsSn,
+			t1. NAME,
+			t1. NAME productName,
+			t1.image,
+			t1.price,
+			t1.description,
+			t1.shop_count AS shopCount,
+			t1.repair_count AS repairCount,
+			t1.back_count AS backCount,
+			t1.unit_name AS unitName,
+			t1.total_price AS totalPrice,
+			t1.data_status AS dataStatus,
+			t1.create_date AS createDate,
+			t1.modify_date AS modifyDate,
+			t4.id goodsId,
+			t4.NAME goodsName,
+			t4.type productType
+		FROM
+			dj_actuary_budget_worker t1,
+			dj_basics_storefront_product t2,
+			dj_basics_product_template t3,
+			dj_basics_goods t4
+		WHERE
+			t1.worker_goods_id = t2.id
+		AND t2.prod_template_id = t3.id
+		AND t3.goods_id = t4.id
+		and t1.house_id=#{houseId}
+		and t1.worker_type_id =#{workerTypeId}
+		and t1.delete_state!=1
+		ORDER BY t1.worker_goods_sn and t1.create_date desc
 	</select>
 
 	<!-- 根据houseId和wokerTypeId查询房子人工精算 -->

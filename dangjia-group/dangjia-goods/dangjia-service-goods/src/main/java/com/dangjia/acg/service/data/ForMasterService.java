@@ -321,7 +321,7 @@ public class ForMasterService {
             Map<String,Object> resMap= BeanUtils.beanToMap(djBasicsProductTemplate);
             //查询对应大类下符合条件的店铺货品及商品
             List<BasicsGoods> goodsList=iBasicsProductTemplateMapper.getGoodsListByStorefontId(storefontId,djBasicsProductTemplate.getCategoryId());
-            List<DjBasicsProductTemplate> productList=iBasicsProductTemplateMapper.getproductTempListByStorefontId(storefontId,djBasicsProductTemplate.getGoodsId());
+            List<DjBasicsProductTemplate> productList=iBasicsProductTemplateMapper.getProductTempListByStorefontId(storefontId,djBasicsProductTemplate.getGoodsId());
             resMap.put("goodsList",goodsList);
             resMap.put("productList",productList);
             storefontInfoDTO=BeanUtils.mapToBean(StorefontInfoDTO.class,resMap);
@@ -340,8 +340,8 @@ public class ForMasterService {
         return storefontInfoDTO;
     }
 
-    public ServerResponse getproductTempListByStorefontId(String storefontId,String goodsId){
-        List<DjBasicsProductTemplate> productList=iBasicsProductTemplateMapper.getproductTempListByStorefontId(storefontId,goodsId);
+    public ServerResponse getProductTempListByStorefontId(String storefontId,String goodsId){
+        List<DjBasicsProductTemplate> productList=iBasicsProductTemplateMapper.getProductTempListByStorefontId(storefontId,goodsId);
         return  ServerResponse.createBySuccess("查询成功",productList);
     }
 
