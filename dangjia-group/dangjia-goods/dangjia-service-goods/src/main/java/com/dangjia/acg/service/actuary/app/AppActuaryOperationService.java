@@ -20,6 +20,8 @@ import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
 import com.dangjia.acg.mapper.basics.*;
 import com.dangjia.acg.mapper.product.*;
+import com.dangjia.acg.mapper.sup.IShopMapper;
+import com.dangjia.acg.mapper.sup.IShopProductMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.modle.basics.GoodsGroup;
@@ -33,6 +35,7 @@ import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.product.*;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.modle.repair.MendWorker;
+import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.util.DateUtils;
 import com.dangjia.acg.util.StringTool;
@@ -65,6 +68,8 @@ public class AppActuaryOperationService {
     private IBasicsProductTemplateMapper iBasicsProductTemplateMapper;
     @Autowired
     private IShopProductMapper iShopProductMapper;
+    @Autowired
+    private IShopMapper iShopMapper;
 
     @Autowired
     private IUnitMapper iUnitMapper;
@@ -294,9 +299,12 @@ public class AppActuaryOperationService {
             DjBasicsProductTemplate productTemplate = iBasicsProductTemplateMapper.selectByPrimaryKey(product.getProdTemplateId());//目标product 对象
             DjBasicsGoods goods = goodsMapper.selectByPrimaryKey(product.getGoodsId());
             BasicsGoodsCategory goodsCategory= iBasicsGoodsCategoryMapper.selectByPrimaryKey(goods.getCategoryId());
+            Storefront storefront= iShopMapper.selectByPrimaryKey(product.getStorefrontId());
+
             //如果商品为0：材料；1：服务
             if(goods.getType()==1 || goods.getType()==0) {
                 GoodsDTO goodsDTO = new GoodsDTO();//长图  品牌系列图+属性图(多个)
+                goodsDTO.setStorefront(storefront);
                 goodsDTO.setPurchaseRestrictions(goodsCategory.getPurchaseRestrictions());
                 goodsDTO.setSales(goods.getSales());
                 goodsDTO.setIrreversibleReasons(goods.getIrreversibleReasons());
@@ -379,7 +387,7 @@ public class AppActuaryOperationService {
                 workerGoodsDTO.setIrreversibleReasons(goods.getIrreversibleReasons());
                 workerGoodsDTO.setIstops(goods.getIstop());
                 workerGoodsDTO.setSales(goods.getSales());
-
+                workerGoodsDTO.setStorefront(storefront);
                 List<DjBasicsProductTemplate> productList=iBasicsProductTemplateMapper.getProductTempListByStorefontId(product.getStorefrontId(),goods.getId());
                 List<AttributeDTO> attrList = getAllAttributes(product, productList);
                 workerGoodsDTO.setAttrList(attrList);

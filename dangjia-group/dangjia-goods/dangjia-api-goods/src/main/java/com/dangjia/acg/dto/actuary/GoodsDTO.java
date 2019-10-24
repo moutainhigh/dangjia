@@ -1,5 +1,6 @@
 package com.dangjia.acg.dto.actuary;
 
+import com.dangjia.acg.modle.storefront.Storefront;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -35,4 +36,6 @@ public class GoodsDTO {
     private Integer maket;//是否上架  0:未上架；1已上架
     private List<AttributeDTO> attrList;//品牌，系列，价格属性,
     private String purchaseRestrictions;//购买限制（0自由购房；1有房无精算；2有房有精算）
+
+    private Storefront storefront;//店铺信息
 }
