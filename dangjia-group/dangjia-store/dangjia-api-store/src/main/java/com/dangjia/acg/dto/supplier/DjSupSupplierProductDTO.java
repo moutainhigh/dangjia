@@ -14,11 +14,11 @@ import java.util.Date;
 @Data
 public class DjSupSupplierProductDTO extends BaseEntity {
 
-    private String goodsId;
-    private String goodsName;
-    private String productId;
-    private String productName;
-    private String image;
+    private String goodsId;//商品id
+    private String goodsName;//商品名称
+    private String productId;//货品id
+    private String productName;//货品名称
+    private String image;//货品模板图片
     private String attributeIdArr;//标签id逗号分隔
     private Double price;//价格
     private Integer stock;//库存
@@ -30,5 +30,5 @@ public class DjSupSupplierProductDTO extends BaseEntity {
     private Date adjustTime;//调价时间
     private String valueNameArr;
     private String valueIdArr;
-    private Double porterage;
+    private Double porterage;//搬运费
 }
