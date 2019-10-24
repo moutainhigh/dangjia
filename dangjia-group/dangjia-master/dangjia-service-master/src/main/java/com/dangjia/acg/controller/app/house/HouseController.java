@@ -6,6 +6,8 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.service.house.HouseService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,7 +22,7 @@ import java.math.BigDecimal;
  */
 @RestController
 public class HouseController implements HouseAPI {
-
+    protected static final Logger logger = LoggerFactory.getLogger(HouseController.class);
     @Autowired
     private HouseService houseService;
 
@@ -83,7 +85,13 @@ public class HouseController implements HouseAPI {
     @ApiMethod
     public ServerResponse setStartHouse(String userToken, String cityId, String houseType,
                                         String latitude, String longitude, String address, String name, BigDecimal square, String actuarialDesignAttr) {
-        return houseService.setStartHouse(userToken, cityId, houseType, latitude, longitude, address, name,square,actuarialDesignAttr);
+        try{
+            return houseService.setStartHouse(userToken, cityId, houseType, latitude, longitude, address, name,square,actuarialDesignAttr);
+
+        }catch (Exception e){
+            logger.error("提交失败",e);
+            return ServerResponse.createByErrorMessage("操作失败");
+        }
     }
 
     /**
@@ -96,6 +104,17 @@ public class HouseController implements HouseAPI {
     @ApiMethod
     public ServerResponse revokeHouse(@RequestParam("userToken") String userToken) {
         return houseService.revokeHouse(userToken);
+    }
+    /**
+     * 查询房子提交的货品记录
+     *
+     * @param userToken
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse searchBudgetInfoList(String userToken){
+        return houseService.searchBudgetInfoList(userToken);
     }
 
     /**

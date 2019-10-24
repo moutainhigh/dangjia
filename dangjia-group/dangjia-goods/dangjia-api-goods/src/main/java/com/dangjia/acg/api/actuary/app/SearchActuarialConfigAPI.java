@@ -40,9 +40,11 @@ public interface SearchActuarialConfigAPI {
 
 
     @PostMapping("app/search/actuarialConfig/searchSimulateCostInfoList")
-    @ApiOperation(value = "模拟花费--模拟花费花费详情展示", notes = "模拟花费花费详情展示")
+    @ApiOperation(value = "我要装修--模拟花费花费详情展示", notes = "模拟花费花费详情展示")
     ServerResponse searchSimulateCostInfoList(@RequestParam("request") HttpServletRequest request,
                                               @RequestParam("groupCode") String groupCode);
+
+
 
 
 }

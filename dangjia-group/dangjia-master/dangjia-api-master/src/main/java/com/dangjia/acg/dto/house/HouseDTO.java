@@ -33,13 +33,11 @@ public class HouseDTO {
     private int decorationType;//装修类型:1远程设计，2自带设计
 
     /**
-     * //id 订单详情ID，orderId订单ID，productId商品ID，purchasePrice购买单价，purchaseNumber购买数量(面积），totalPurchasePrice购买总价,updateBy修改人
-     *
+     * 设计精算对应的商品信息
      */
-    private List orderDetailList;
+    private List actuarialDesignList;
     /**
-     * //id 订单详情ID，orderId订单ID，productId商品ID，purchasePrice购买单价，purchaseNumber购买数量(面积），totalPurchasePrice购买总价,updateBy修改人
-     *
+     * 设计精算，商品信息
      */
-    private String  orderDetailInfoAttr;
+    private String  actuarialDesignInfoAttr;
 }

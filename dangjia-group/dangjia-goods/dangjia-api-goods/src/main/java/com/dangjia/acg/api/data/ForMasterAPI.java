@@ -19,6 +19,7 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -161,7 +162,24 @@ public interface ForMasterAPI {
                                                    @RequestParam("goodsId") String goodsId);
 
     @PostMapping("/data/house/getStroreProductInfoById")
-    @ApiOperation(value = "获取商品对应的基本信息(店铺商品信息)", notes = "获取商品对应的基本信息(店铺商品信息)")
+    @ApiOperation(value = "获取商品对应的基本信息(店铺上加商品信息)", notes = "获取商品对应的基本信息(店铺商品信息)")
     StorefontInfoDTO getStroreProductInfoById(@RequestParam("cityId") String cityId,
                                           @RequestParam("productId") String productId);
+
+    @PostMapping("/data/house/insertActuarialDesignInfo")
+    @ApiOperation(value = "添加对应的精算信息", notes = "添加对应的精算信息")
+    void  insertActuarialDesignInfo(@RequestParam("cityId") String cityId,
+                              @RequestParam("actuarialDesignAttr") String actuarialDesignAttr,
+                              @RequestParam("houseId") String houseId,
+                              @RequestParam("square") BigDecimal square);
+
+    @PostMapping("/data/house/getAllBudgetMaterialWorkerList")
+    @ApiOperation(value = "获取对应房屋对应工种的精算信息(中台，我要装修列表用)", notes = "获取对应房屋对应工种的精算信息(中台，我要装修列表用)")
+    Map<String, Object> getAllBudgetMaterialWorkerList(@RequestParam("cityId") String cityId,
+                                                     @RequestParam("houseId") String houseId,
+                                                     @RequestParam("workerTypeId") String workerTypeId);
+    @PostMapping("/data/house/getHouseDetailInfoList")
+    @ApiOperation(value = "APP我要装修页面，下单详情显示", notes = "APP我要装修页面，下单详情显示)")
+    List<Map<String,Object>> getHouseDetailInfoList(@RequestParam("cityId") String cityId,
+                                                    @RequestParam("houseId") String houseId);
 }
