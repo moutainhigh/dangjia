@@ -1,7 +1,6 @@
 package com.dangjia.acg.api.app.product;
 
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.modle.product.ShoppingCart;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
