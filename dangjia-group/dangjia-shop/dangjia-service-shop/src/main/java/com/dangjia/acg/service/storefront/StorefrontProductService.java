@@ -68,12 +68,12 @@ public class StorefrontProductService {
             storefrontProduct.setImage(basicsStorefrontProductDTO.getImage());
             storefrontProduct.setDetailImage(basicsStorefrontProductDTO.getDetailImage());
             storefrontProduct.setMarketName(basicsStorefrontProductDTO.getMarketName());
-            storefrontProduct.setSellPrice(Double.parseDouble(basicsStorefrontProductDTO.getSellPrice()));
-            storefrontProduct.setSuppliedNum(Double.parseDouble(basicsStorefrontProductDTO.getSuppliedNum()));
-            storefrontProduct.setIsUpstairsCost(Double.parseDouble(basicsStorefrontProductDTO.getIsUpstairsCost()));
-            storefrontProduct.setIsDeliveryInstall(Double.parseDouble(basicsStorefrontProductDTO.getIsDeliveryInstall()));
-            storefrontProduct.setMoveCost(new BigDecimal(basicsStorefrontProductDTO.getMoveCost()));
-            storefrontProduct.setIsShelfStatus(Integer.parseInt(basicsStorefrontProductDTO.getIsShelfStatus()));
+            storefrontProduct.setSellPrice(basicsStorefrontProductDTO.getSellPrice()!=null?Double.parseDouble(basicsStorefrontProductDTO.getSellPrice()):null);
+            storefrontProduct.setSuppliedNum(basicsStorefrontProductDTO.getSuppliedNum()!=null?Double.parseDouble(basicsStorefrontProductDTO.getSuppliedNum()):null);
+            storefrontProduct.setIsUpstairsCost(basicsStorefrontProductDTO.getIsUpstairsCost()!=null?Double.parseDouble(basicsStorefrontProductDTO.getIsUpstairsCost()):null);
+            storefrontProduct.setIsDeliveryInstall(basicsStorefrontProductDTO.getIsDeliveryInstall()!=null?Double.parseDouble(basicsStorefrontProductDTO.getIsDeliveryInstall()):null);
+            storefrontProduct.setMoveCost(basicsStorefrontProductDTO.getMoveCost()!=null?new BigDecimal(basicsStorefrontProductDTO.getMoveCost()):null);
+            storefrontProduct.setIsShelfStatus(basicsStorefrontProductDTO.getIsShelfStatus()!=null?Integer.parseInt(basicsStorefrontProductDTO.getIsShelfStatus()):null);
             storefrontProduct.setProdTemplateId(basicsStorefrontProductDTO.getProdTemplateId());
             storefrontProduct.setGoodsId( djBasicsProductTemplate.getGoodsId());
             storefrontProduct.setProductName(djBasicsProductTemplate.getName());

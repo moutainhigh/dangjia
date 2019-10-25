@@ -62,7 +62,7 @@ public interface DjSupplierAPI {
                                                @RequestParam("applicationStatus") String applicationStatus,
                                                @RequestParam("shopId") String shopId);
 
-    @PostMapping("/sup/djSupApplication/queryDjSupApplicationByShopID")
+    @PostMapping("/sup/djSupApplication/queryDjSupplierByShopID")
     @ApiOperation(value = "店铺-审核供应商列表", notes = "店铺-审核供应商列表")
     ServerResponse queryDjSupplierByShopID(@RequestParam("keyWord") String keyWord,
                                            @RequestParam("applicationStatus") String applicationStatus,

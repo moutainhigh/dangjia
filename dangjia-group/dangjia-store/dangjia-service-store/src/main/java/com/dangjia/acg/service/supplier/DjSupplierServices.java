@@ -4,6 +4,7 @@ import cn.jiguang.common.utils.StringUtils;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dto.supplier.DjSupSupplierProductDTO;
 import com.dangjia.acg.dto.supplier.DjSupplierDTO;
@@ -19,8 +20,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -43,6 +46,10 @@ public class DjSupplierServices {
     public DjSupplier queryDjSupplierByPass(String supplierId) {
         return djSupplierMapper.queryDjSupplierByPass(supplierId);
     }
+
+
+    @Autowired
+    private DjSupApplicationProductService djSupApplicationProductService;
 
     /**
      * 根据userId查询供应商信息
@@ -169,6 +176,7 @@ public class DjSupplierServices {
      * @param shopId
      * @return
      */
+
     public ServerResponse queryDjSupplierByShopIdPage( PageDTO pageDTO, String keyWord, String applicationStatus, String shopId) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
@@ -179,8 +187,15 @@ public class DjSupplierServices {
             if (list.size() <= 0){
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
-            PageInfo pageResult = new PageInfo(list);
-            //pageResult.setList(list);
+            List<Map<String,Object>> djSupplierDTOList=new ArrayList<Map<String,Object>>();
+            for(DjSupplierDTO djSupplierDTO:list)
+            {
+                Map<String,Object> resMap= BeanUtils.beanToMap(djSupplierDTO);
+                Integer i=djSupApplicationProductService.queryHaveGoodsSize(djSupplierDTO.getSupId(), djSupplierDTO.getShopId(),"0");
+                resMap.put("listSize",i);
+                djSupplierDTOList.add(resMap);
+            }
+            PageInfo pageResult = new PageInfo(djSupplierDTOList);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();

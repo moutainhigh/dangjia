@@ -83,6 +83,30 @@ public class DjSupApplicationProductService {
         }
     }
 
+    /**
+     * 查询已供商品
+     * @param supId
+     * @param shopId
+     * @return
+     */
+    public Integer queryHaveGoodsSize(String supId, String shopId,String applicationStatus) {
+        try {
+            List<DjSupSupplierProductDTO> list = djSupSupplierProductMapper.queryHaveGoods(supId, shopId,applicationStatus);
+            if(list!=null)
+            {
+                return list.size();
+            }
+            else
+            {
+                return 0;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 
     /**
      * 查询已供商品
@@ -251,12 +275,12 @@ public class DjSupApplicationProductService {
             int i=djSupApplicationProductMapper.updateByExample(djSupApplicationProduct,example);
             if (i<=0)
             {
-                return ServerResponse.createByErrorMessage("店铺-审核供货列表-部分不通过");
+                return ServerResponse.createByErrorMessage("审核供货列表不通过");
             }
-            return ServerResponse.createBySuccessMessage("店铺-审核供货列表-部分通过成功");
+            return ServerResponse.createBySuccessMessage("审核供货列表通过");
         } catch (Exception e) {
             e.printStackTrace();
-            return ServerResponse.createByErrorMessage("店铺-审核供货列表-部分通过失败");
+            return ServerResponse.createByErrorMessage("审核供货列表异常");
         }
     }
 
