@@ -25,6 +25,10 @@ public class ActuarialTemplateConfigAppDTO {
     @ApiModelProperty("配置类型1：设计阶段 2：精算阶段 3：施工阶段")
     private String configType;
 
+    @ApiModelProperty("描述")
+    private String configDetail;
+
+
     @ApiModelProperty("阶段下面的商品列表")
     private List<ActuarialProductAppDTO>  productList;//阶段下面的商品列表
 }

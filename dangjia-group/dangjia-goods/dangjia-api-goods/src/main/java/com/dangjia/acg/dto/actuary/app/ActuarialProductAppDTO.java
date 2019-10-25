@@ -28,6 +28,9 @@ public class ActuarialProductAppDTO {
     @ApiModelProperty("店铺ID")
     private String storefrontId;
 
+    @ApiModelProperty("类别ID")
+    private String categoryId;
+
     @ApiModelProperty("商品名称")
     private String productName;
 
@@ -45,6 +48,9 @@ public class ActuarialProductAppDTO {
 
     @ApiModelProperty("商品单价")
     private BigDecimal price;
+
+    @ApiModelProperty("是否按面积计算参考价格(1是，0否)")
+    private String isCalculatedArea;
 
     @ApiModelProperty("购买总数")
     private Double shopCount;//购买总数 (精算的时候，用户手动填写的购买数量， 该单位是 product 的convertUnit换算单位 )

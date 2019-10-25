@@ -47,6 +47,8 @@
         <result property="valueIdArr" column="valueIdArr"/>
         <result property="valueNameArr" column="valueNameArr"/>
         <result property="brandId" column="brandId"/>
+        <result property="isCalculatedArea" column="isCalculatedArea"/>
+        <result property="categoryId" column="categoryId"/>
     </resultMap>
     <select id="searchChangeProductList" resultMap="searchAppProductMap">
         SELECT
@@ -62,14 +64,15 @@
             t3.unit_name unitName,
             t3.value_id_arr valueIdArr,
             t3.value_name_arr valueNameArr,
-            t4.brand_id brandId
+            t4.brand_id brandId,
+            IFNULL(t1.is_calculated_area,'0') isCalculatedArea,
+            t4.category_id categoryId
         FROM
-            dj_basics_storefront_product t2,
-            dj_basics_product_template t3,
-            dj_basics_goods t4
-        WHERE t3.id=t2.prod_template_id
-        and   t3.goods_id=t4.id
-        and   t3.goods_id =#{goodsId}
+            dj_basics_storefront_product t2
+        INNER JOIN dj_basics_product_template t3 ON t2.prod_template_id=t3.id
+        INNER JOIN dj_basics_goods t4 ON T3.goods_id=T4.id
+        LEFT JOIN dj_actuarial_product_config t1 on t2.prod_template_id=t1.product_id
+        WHERE   t3.goods_id =#{goodsId}
         and   t2.is_shelf_status='1'
     </select>
     <!--查询模拟花费分类汇总-->

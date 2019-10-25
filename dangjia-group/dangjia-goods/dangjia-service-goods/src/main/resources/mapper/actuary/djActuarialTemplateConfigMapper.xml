@@ -10,6 +10,7 @@
         `modify_date` AS modifyDate,
         `data_status` as dataStatus,
          excel_address as excelAddress,
+         config_detail configDetail,
          create_by as createBy,
          update_by as updateBy
     </sql>
@@ -19,6 +20,7 @@
         <result property="id" column="id"/>
         <result property="configName" column="configName"/>
         <result property="configType" column="configType"/>
+        <result property="configDetail" column="configDetail"/>
         <collection property="productList" column="{actuarialTemplateId=id}" ofType="map" select="selectProductList"/>
     </resultMap>
 
@@ -36,7 +38,8 @@
         SELECT
             id,
             config_name configName,
-            config_type configType
+            config_type configType,
+            config_detail configDetail
         FROM
             dj_actuarial_template_config ac
         where ac.config_type in(1,2)
@@ -70,6 +73,7 @@
         <result property="id" column="id"/>
         <result property="configName" column="configName"/>
         <result property="configType" column="configType"/>
+        <result property="configDetail" column="configDetail"/>
         <collection property="productList" column="{actuarialTemplateId=id}" ofType="map" select="selectAppProductList"/>
     </resultMap>
 
@@ -88,6 +92,8 @@
         <result property="valueIdArr" column="valueIdArr"/>
         <result property="valueNameArr" column="valueNameArr"/>
         <result property="brandId" column="brandId"/>
+        <result property="isCalculatedArea" column="isCalculatedArea"/>
+        <result property="categoryId" column="categoryId"/>
     </resultMap>
 
     <!-- 我要装修（设计精算数据查询) -->
@@ -95,7 +101,8 @@
         SELECT
         id,
         config_name configName,
-        config_type configType
+        config_type configType,
+        config_detail configDetail
         FROM
         dj_actuarial_template_config ac
         where ac.config_type in(1,2)
@@ -116,7 +123,9 @@
             t3.unit_name unitName,
             t3.value_id_arr valueIdArr,
             t3.value_name_arr valueNameArr,
-            t4.brand_id brandId
+            t4.brand_id brandId,
+            t1.is_calculated_area isCalculatedArea,
+            t4.category_id categoryId
         FROM
             dj_actuarial_product_config t1,
             dj_basics_storefront_product t2,
