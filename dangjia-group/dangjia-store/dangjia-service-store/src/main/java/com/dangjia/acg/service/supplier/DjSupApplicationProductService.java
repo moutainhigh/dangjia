@@ -240,7 +240,7 @@ public class DjSupApplicationProductService {
             djSupApplicationProduct.setId(null);
             djSupApplicationProduct.setCreateDate(null);
             djSupApplicationProduct.setApplicationStatus("2");
-            int i=djSupApplicationProductMapper.updateByExample(djSupApplicationProduct,example);
+            int i=djSupApplicationProductMapper.updateByExampleSelective(djSupApplicationProduct,example);
             if (i<=0)
             {
                 return ServerResponse.createBySuccessMessage("全部打回失败");
@@ -272,7 +272,7 @@ public class DjSupApplicationProductService {
             djSupApplicationProduct.setId(null);
             djSupApplicationProduct.setCreateDate(null);
             djSupApplicationProduct.setApplicationStatus("1");
-            int i=djSupApplicationProductMapper.updateByExample(djSupApplicationProduct,example);
+            int i=djSupApplicationProductMapper.updateByExampleSelective(djSupApplicationProduct,example);
             if (i<=0)
             {
                 return ServerResponse.createByErrorMessage("审核供货列表不通过");
