@@ -20,6 +20,9 @@ public class ServiceType extends BaseEntity{
     @Column(name = "name")
     private String name;//名称
 
+    @Column(name = "cover_image")
+    private String coverImage;//图片
+
     @Column(name = "image")
     private String image;//图片
 }

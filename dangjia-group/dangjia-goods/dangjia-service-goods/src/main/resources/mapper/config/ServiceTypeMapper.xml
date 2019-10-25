@@ -7,6 +7,7 @@
 	<sql id="all_columns">
 		id,
 		name,
+		cover_image,
 		image,
 		create_date,
 		modify_date
@@ -17,9 +18,11 @@
 			id,
 			name,
 			image,
+			cover_image,
 			create_date as  createDate,
 			modify_date as modifyDate
 		FROM dj_service_type_configuration
+		where data_status =0
 		ORDER BY create_date desc
 	</select>
 
