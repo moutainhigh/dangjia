@@ -48,7 +48,7 @@ public class ServiceTypeService {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             ServiceType serviceType=iServiceTypeMapper.selectByPrimaryKey(id);
             Map<String, Object> map = BeanUtils.beanToMap(serviceType);
-            map.put("coverImageUrl",address+serviceType.getImage());
+            map.put("coverImageUrl",address+serviceType.getCoverImage());
             map.put("imageUrl",address+serviceType.getImage());
             return ServerResponse.createBySuccess("查询成功", map);
         } catch (Exception e) {
@@ -71,7 +71,7 @@ public class ServiceTypeService {
             List<Map<String, Object>> list = new ArrayList<>();
             for (ServiceType serviceType : serviceTypeList) {
                 Map<String, Object> map = BeanUtils.beanToMap(serviceType);
-                map.put("coverImageUrl",address+serviceType.getImage());
+                map.put("coverImageUrl",address+serviceType.getCoverImage());
                 map.put("imageUrl",address+serviceType.getImage());
                 list.add(map);
             }

@@ -7,7 +7,7 @@
 	<sql id="all_columns">
 		id,
 		name,
-		cover_image,
+		cover_image coverImage,
 		image,
 		create_date,
 		modify_date
@@ -18,7 +18,7 @@
 			id,
 			name,
 			image,
-			cover_image,
+			cover_image coverImage,
 			create_date as  createDate,
 			modify_date as modifyDate
 		FROM dj_service_type_configuration
