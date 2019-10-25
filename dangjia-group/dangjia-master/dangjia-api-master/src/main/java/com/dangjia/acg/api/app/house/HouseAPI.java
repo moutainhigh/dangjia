@@ -108,6 +108,10 @@ public interface HouseAPI {
     @ApiOperation(value = "撤销房子装修", notes = "撤销房子装修")
     ServerResponse revokeHouse(@RequestParam("userToken") String userToken);
 
+    @PostMapping("app/house/house/searchBudgetInfoList")
+    @ApiOperation(value = "我要装修--已提交商品详情展示", notes = "已提交商品详情展示")
+    ServerResponse searchBudgetInfoList(@RequestParam("userToken") String userToken);
+
     /**
      * 修改房子精算状态
      */

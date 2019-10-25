@@ -618,4 +618,34 @@
             )
         ORDER BY RAND() LIMIT #{limit}
     </select>
+
+    <select id="getProductStoreListByGoodsId"  resultType="java.util.Map" >
+        SELECT
+            t1.prod_template_id productId,
+            t1.prod_template_id productTemplateId,
+            t2.goods_id goodsId,
+            t2.product_sn productSn,
+            t2.`name` productName,
+            t3. NAME goodsName,
+            t2.category_id categoryId,
+          t4.name unitName
+        FROM
+            dj_basics_storefront_product t1
+            INNER JOIN dj_basics_product_template t2 on t1.prod_template_id = t2.id
+            INNER JOIN dj_basics_goods t3 on t2.goods_id = t3.id
+        LEFT JOIN dj_basics_unit t4 on t3.unit_id=t4.id
+        WHERE t2.goods_id = #{goodsId}
+        AND t1.is_shelf_status = '1'
+        AND t1.data_status = '0'
+        GROUP BY
+            t1.prod_template_id,
+            t2.goods_id,
+            t2.product_sn,
+            t2. NAME,
+            t3. NAME,
+            t2.category_id,
+            t4.name
+
+
+    </select>
 </mapper>

@@ -1,6 +1,8 @@
 package com.dangjia.acg.api;
 
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dto.product.MemberCollectDTO;
+import com.dangjia.acg.dto.product.ShoppingCartProductDTO;
 import com.dangjia.acg.dto.storefront.StorefrontProductListDTO;
 import com.dangjia.acg.dto.storefront.BasicsStorefrontProductDTO;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
@@ -9,6 +11,8 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
 
 @Api(description = "店铺商品管理接口")
 @FeignClient("dangjia-service-shop")
@@ -44,6 +48,16 @@ public interface StorefrontProductAPI {
 
     @PostMapping("/web/saveStorefrontProductById")
     @ApiOperation(value = "供货设置-保存编辑店铺商品", notes = "供货设置-保存编辑店铺商品")
-    ServerResponse saveStorefrontProductById(StorefrontProduct storefrontProduct);
+    ServerResponse saveStorefrontProductById(@RequestParam("storefrontProduct") StorefrontProduct storefrontProduct);
 
+    @PostMapping("/web/queryCartList")
+    @ApiOperation(value = "查询购物车商品信息", notes = "查询购物车商品信息")
+    List<ShoppingCartProductDTO> queryCartList(@RequestParam("storefrontId") String storefrontId,
+                                               @RequestParam("productId") String productId);
+
+
+    @PostMapping("/web/queryCollectGood")
+    @ApiOperation(value = "查询收藏商品", notes = "查询收藏商品")
+    List<MemberCollectDTO> queryCollectGood(@RequestParam("productId") String productId,
+                                            @RequestParam("storefrontId") String storefrontId);
 }

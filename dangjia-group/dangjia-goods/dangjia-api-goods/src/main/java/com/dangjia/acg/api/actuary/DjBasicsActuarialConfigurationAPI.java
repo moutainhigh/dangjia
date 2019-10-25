@@ -44,9 +44,10 @@ public interface DjBasicsActuarialConfigurationAPI {
     ServerResponse deleteActuarialProduct(@RequestParam("request") HttpServletRequest request,
                                         @RequestParam("id") String id);
 
-    @PostMapping("web/config/actuarialConfig/getActuarialGoodsList")
-    @ApiOperation(value = "设计精算--查询对应设计精算的货品列表", notes = "查询对应设计精算的货品列表")
-    ServerResponse getActuarialGoodsList(@RequestParam("request") HttpServletRequest request);
+    @PostMapping("web/config/actuarialConfig/getActuarialGoodsListByCategoryId")
+    @ApiOperation(value = "设计精算--根据类别ID查询对应的货品列表", notes = "根据类别ID查询对应的货品列表")
+    ServerResponse getActuarialGoodsListByCategoryId(@RequestParam("request") HttpServletRequest request,
+                                                     @RequestParam("categoryId") String categoryId);
 
     @PostMapping("web/config/actuarialConfig/getActuarialProductListByGoodsId")
     @ApiOperation(value = "设计精算--查询对应设计精算的货品下的商品列表", notes = "查询对应设计精算的货品下的商品列表")

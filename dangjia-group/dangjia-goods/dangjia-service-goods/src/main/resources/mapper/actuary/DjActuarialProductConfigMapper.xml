@@ -35,6 +35,7 @@
     <resultMap id="searchAppProductMap" type="com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO">
         <id property="id" column="id"/>
         <result property="goodsId" column="goodsId"/>
+        <result property="productTemplateId" column="productTemplateId"/>
         <result property="productId" column="productId"/>
         <result property="productName" column="productName"/>
         <result property="storefrontId" column="storefrontId"/>
@@ -51,6 +52,7 @@
         SELECT
             t2.id productId,
             t2.storefront_id storefrontId,
+            t3.id productTemplateId,
             t3.product_sn productSn,
             t2.product_name productName,
             t3.goods_id goodsId,
@@ -68,7 +70,7 @@
         WHERE t3.id=t2.prod_template_id
         and   t3.goods_id=t4.id
         and   t3.goods_id =#{goodsId}
-        and   t2.is_shelf_status=1
+        and   t2.is_shelf_status='1'
     </select>
     <!--查询模拟花费分类汇总-->
     <select id="querySimulationCostByCategoryId" resultType="com.dangjia.acg.dto.actuary.app.SimulationCostCategoryDTO">

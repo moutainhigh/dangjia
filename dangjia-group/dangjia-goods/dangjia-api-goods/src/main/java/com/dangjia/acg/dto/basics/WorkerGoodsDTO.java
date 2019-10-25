@@ -56,7 +56,7 @@ public class WorkerGoodsDTO {
     @ApiModelProperty("workerTypeName")
     private String workerTypeName;
     @ApiModelProperty("showGoods")
-    private Integer showGoods;
+    private String showGoods;
     @ApiModelProperty("createDate")
     private String createDate;
     @ApiModelProperty("modifyDate")

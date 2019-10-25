@@ -99,7 +99,7 @@ public class StorefrontProduct extends BaseEntity {
     @Column(name = "is_upstairs_cost")
     @Desc(value = " 师傅是否按一层收取上楼费")
     @ApiModelProperty(" 师傅是否按一层收取上楼费")
-    private Double isUpstairsCost;
+    private String isUpstairsCost;
 
     /**
      *  是否送货与安装/施工分开
@@ -107,7 +107,7 @@ public class StorefrontProduct extends BaseEntity {
     @Column(name = "is_delivery_install")
     @Desc(value = " 是否送货与安装/施工分开")
     @ApiModelProperty(" 是否送货与安装/施工分开")
-    private Double isDeliveryInstall;
+    private String isDeliveryInstall;
 
     /**
      * 搬运费
@@ -123,6 +123,6 @@ public class StorefrontProduct extends BaseEntity {
     @Column(name = "is_shelf_status")
     @Desc(value = " 是否上架 1：上架  0:下架 ")
     @ApiModelProperty("是否上架 1：上架  0:下架")
-    private Integer isShelfStatus;
+    private String isShelfStatus;
 
 }

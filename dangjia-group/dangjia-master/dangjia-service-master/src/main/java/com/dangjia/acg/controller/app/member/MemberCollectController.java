@@ -41,14 +41,14 @@ public class MemberCollectController implements MemberCollectAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse isMemberCollect(HttpServletRequest request,String houseId,String collectType){
-        return memberCollectService.isMemberCollect(request, houseId,collectType);
+    public ServerResponse isMemberCollect(HttpServletRequest request, String userToken, String collectId,String collectType){
+        return memberCollectService.isMemberCollect(request, userToken, collectId,collectType);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse delMemberCollect(HttpServletRequest request, String userToken, String collectId, String collectType){
-        return memberCollectService.delMemberCollect(userToken, collectId,collectType);
+    public ServerResponse delMemberCollect(HttpServletRequest request, String id){
+        return memberCollectService.delMemberCollect(id);
     }
 
     @Override

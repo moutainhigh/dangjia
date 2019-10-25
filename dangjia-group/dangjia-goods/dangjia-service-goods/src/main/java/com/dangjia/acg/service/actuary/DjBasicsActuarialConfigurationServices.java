@@ -187,11 +187,11 @@ public class DjBasicsActuarialConfigurationServices {
      * 查询设计精算的货品列表
      * @return
      */
-    public ServerResponse getActuarialGoodsList(){
+    public ServerResponse getActuarialGoodsListByCategoryId(String categoryId){
         try {
             logger.info("查询所有类型为人工的货品");
             //查询所有的人工货品
-            List<BasicsGoods> mapList = iBasicsGoodsMapper.queryByCategoryName(2);
+            List<BasicsGoods> mapList = iBasicsGoodsMapper.getActuarialGoodsListByCategoryId(categoryId);
             return ServerResponse.createBySuccess("查询成功", mapList);
         } catch (Exception e) {
             logger.error("getActuarialGoodsList查询失败:",e);
@@ -200,20 +200,21 @@ public class DjBasicsActuarialConfigurationServices {
     }
 
     /**
-     * 查询当前货品下所有已上架的商品
+     * 查询当前货品下所有已上架的商品(店铺已售买的商品）
      * @param goodsId
      * @return
      */
     public ServerResponse getActuarialProductListByGoodsId(String goodsId){
         try {
-            logger.info("查询当前货品下所有已上架的商品");
-
-            return ServerResponse.createBySuccess("查询成功", getProdListByGoodsID( goodsId));
+            logger.info("查询当前货品下所有已上架的商品(所有店铺有售卖的商品)");
+            List<Map<String,Object>> productList= iBasicsProductTemplateMapper.getProductStoreListByGoodsId(goodsId);
+            return ServerResponse.createBySuccess("查询成功", productList);
         } catch (Exception e) {
             logger.error("getActuarialProductListByGoodsId查询失败:",e);
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
+
     private List<DjBasicsProductTemplate> getProdListByGoodsID(String goodsId){
         Example example=new Example(DjBasicsProductTemplate.class);
         example.createCriteria().andEqualTo(DjBasicsProductTemplate.DATA_STATUS,0).

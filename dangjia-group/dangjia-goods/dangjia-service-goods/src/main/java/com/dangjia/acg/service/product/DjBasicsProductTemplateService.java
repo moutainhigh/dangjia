@@ -86,7 +86,7 @@ public class DjBasicsProductTemplateService {
      * 随机查询商品
      * @return
      */
-    public List<DjBasicsProductTemplate> queryRandomProduct(String limit) {
+    public List<DjBasicsProductTemplate> queryRandomProduct(Integer limit) {
         List<DjBasicsProductTemplate> djBasicsProductTemplates = iBasicsProductTemplateMapper.queryRandomProduct(limit);
         return djBasicsProductTemplates;
     }
@@ -97,7 +97,7 @@ public class DjBasicsProductTemplateService {
      * @param productId
      * @return
      */
-    public List<DjBasicsProductTemplate> queryRandomProductByCategoryId(String productId,String limit) {
+    public List<DjBasicsProductTemplate> queryRandomProductByCategoryId(String productId,Integer limit) {
         List<DjBasicsProductTemplate> djBasicsProductTemplates = iBasicsProductTemplateMapper.queryRandomProductByCategoryId(productId, limit);
         return djBasicsProductTemplates;
     }

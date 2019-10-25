@@ -1,6 +1,8 @@
 package com.dangjia.acg.service.data;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -9,6 +11,7 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.actuary.BudgetLabelDTO;
 import com.dangjia.acg.dto.actuary.BudgetLabelGoodsDTO;
+import com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO;
 import com.dangjia.acg.dto.product.ProductWorkerDTO;
 import com.dangjia.acg.dto.product.StorefontInfoDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
@@ -29,9 +32,16 @@ import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.product.*;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
+import com.dangjia.acg.service.actuary.BudgetWorkerService;
 import com.dangjia.acg.service.actuary.app.AppActuaryOperationService;
+import com.dangjia.acg.service.actuary.app.SearchActuarialConfigServices;
 import com.sun.javafx.collections.MappingChange;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.ibatis.jdbc.Null;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.expression.spel.ast.NullLiteral;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import tk.mybatis.mapper.entity.Example;
@@ -48,12 +58,13 @@ import java.util.*;
 @Service
 public class ForMasterService {
 
+    private static Logger logger = LoggerFactory.getLogger(ForMasterService.class);
     @Autowired
     private IBudgetWorkerMapper budgetWorkerMapper;
     @Autowired
     private IBudgetMaterialMapper budgetMaterialMapper;
     @Autowired
-    private AppActuaryOperationService actuaryOperationService;
+    private SearchActuarialConfigServices searchActuarialConfigServices;
     @Autowired
     private ITechnologyMapper technologyMapper;
     @Autowired
@@ -75,6 +86,8 @@ public class ForMasterService {
     private DjBasicsGoodsMapper goodsMapper;
     @Autowired
     private IBasicsGoodsMapper iBasicsGoodsMapper;
+    @Autowired
+    private BudgetWorkerService budgetWorkerService;
 
     public String getUnitName(String unitId){
         Unit unit = unitMapper.selectByPrimaryKey(unitId);
@@ -340,6 +353,102 @@ public class ForMasterService {
         return storefontInfoDTO;
     }
 
+
+    /**
+     * 添加对应的设计、精算信息到精算表中去
+     * 添加设计精算信息
+     * @param actuarialDesignAttr (设计精算信息）
+     *                            设计精算列表 (
+     *      *      *      * id	String	设计精算模板ID
+     *      *      *      * configName	String	设计精算名称
+     *      *      *      * configType	String	配置类型1：设计阶段 2：精算阶段
+     *      *      *      * productList	List	商品列表
+     *                      productList.productTemplateId 商品模板Id
+     *      *      *      * productList.productId	String	商品ID
+     *      *      *      * productList.productName	String	商品名称
+     *      *      *      * productList.productSn	String	商品编码
+     *      *      *      * productList.goodsId	String	货品ID
+     *      *      *      * productList.storefrontId	String	店铺ID
+     *      *      *      * productList.price	double	商品价格
+     *      *      *      * productList.unit	String	商品单位
+     *      *      *      * productList.unitName	String	单位名称
+     *      *      *      * productList.image	String	图片
+     *      *      *      * productList.imageUrl	String	详情图片地址
+     *      *      *      * productList.valueIdArr	String	商品规格ID
+     *      *      *      * productList.valueNameArr	String	商品规格名称
+     * @param houseId 房子ID
+     * @param square 房子面积
+     * @return
+     */
+    public void insertActuarialDesignInfo(String actuarialDesignAttr,String houseId,BigDecimal square){
+        logger.info("修改商品："+actuarialDesignAttr);
+        JSONArray actuarialDesignList=JSONArray.parseArray(actuarialDesignAttr);
+        if(actuarialDesignList!=null&&actuarialDesignList.size()>0){
+            for(int i=0;i<actuarialDesignList.size();i++){
+                JSONObject obj=(JSONObject)actuarialDesignList.get(i);
+                String workerTypeId=(String)obj.get("configType");
+                //获取商品信息
+                JSONArray productList=obj.getJSONArray("productList");
+                JSONArray listOfGoods=new JSONArray();
+                for(int j=0;j<productList.size();j++){
+                    JSONObject productObj=productList.getJSONObject(j);
+                    JSONObject jsonObject = new JSONObject();
+                    String goodsId = productObj.getString("goodsId");//货品Id
+                    BasicsGoods basicsGoods=iBasicsGoodsMapper.selectByPrimaryKey(goodsId);
+                    jsonObject.put("productId",productObj.getString("productTemplateId"));//商品模板ID
+                    jsonObject.put("goodsId",goodsId);
+                    jsonObject.put("productType",basicsGoods.getType());//0:材料；1：包工包料；2:人工
+                    jsonObject.put("groupType","");
+                    jsonObject.put("goodsGroupId","");
+                    if(productObj.getString("shopCount")!=null&& StringUtils.isNotBlank(productObj.getString("shopCount"))){
+                        Double shopCount = Double.parseDouble(productObj.getString("shopCount"));//数量
+                        jsonObject.put("shopCount",shopCount);//数量
+                    }else{
+                        jsonObject.put("shopCount",square.doubleValue());//数量
+                    }
+                    listOfGoods.add(jsonObject);
+                }
+
+                budgetWorkerService.makeBudgets(null,houseId,workerTypeId,listOfGoods.toJSONString());
+            }
+        }
+
+    }
+
+    /**
+     * 中台装修列表，我要装修信息查询
+     * @param houseId
+     * @param workerTypeId
+     * @return
+     */
+    public Map<String, Object> getAllBudgetMaterialWorkerList(String houseId,String workerTypeId){
+        Map<String,Object> resBudgetMap=new HashMap<>();
+        resBudgetMap.put("configType",workerTypeId);
+        resBudgetMap.put("configName","1".equals(workerTypeId)?"设计阶段":"精算阶段");
+        List<Map<String,Object>> budgetList = budgetWorkerMapper.getAllBudgetMaterialWorkerList(houseId,workerTypeId);
+        resBudgetMap.put("budgetProductList",budgetList);//设计精算商品列表
+        return resBudgetMap;
+
+    }
+
+    /**
+     * APP端，我要装修列表下单详情显示
+     * @param houseId 房子ID
+     * @return
+     */
+    public List<Map<String,Object>> getHouseDetailInfoList(String houseId) {
+        //先查询店铺汇总信息，再查询对应的商品信息(包含 店铺ID，总价钱
+        List<Map<String, Object>> houseDetailList = budgetWorkerMapper.getHouseDetailInfoList(houseId);
+        if (houseDetailList != null && houseDetailList.size() > 0) {
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            for (Map<String, Object> houseMap : houseDetailList) {
+                List<ActuarialProductAppDTO> productlist = budgetWorkerMapper.getBudgetProductList(houseId, (String) houseMap.get("storefrontId"));
+                searchActuarialConfigServices.getProductList(productlist, address);
+                houseMap.put("productList", productlist);
+            }
+        }
+        return houseDetailList;
+    }
     public ServerResponse getProductTempListByStorefontId(String storefontId,String goodsId){
         List<DjBasicsProductTemplate> productList=iBasicsProductTemplateMapper.getProductTempListByStorefontId(storefontId,goodsId);
         return  ServerResponse.createBySuccess("查询成功",productList);
