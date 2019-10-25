@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @类 名： ProductDao
@@ -112,5 +113,12 @@ public interface IBasicsProductTemplateMapper extends Mapper<DjBasicsProductTemp
 
 
     List<DjBasicsProductTemplate> queryRandomProductByCategoryId(@Param("productId") String productId,@Param("limit") Integer limit);
+
+    /**
+     * 查询商品库中的商品（但必须商品在店铺已上架，作配置商品用)
+     * @param goodsId
+     * @return
+     */
+    List<Map<String,Object>> getProductStoreListByGoodsId(@Param("goodsId") String goodsId);
 
 }

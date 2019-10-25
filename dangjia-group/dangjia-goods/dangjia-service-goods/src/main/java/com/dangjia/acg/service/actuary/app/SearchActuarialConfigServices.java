@@ -57,12 +57,6 @@ public class SearchActuarialConfigServices {
     private DjSimulationTemplateConfigDetailMapper djSimulationTemplateConfigDetailMapper;
 
     @Autowired
-    private IBasicsGoodsMapper iBasicsGoodsMapper;
-
-    @Autowired
-    private  IBasicsProductTemplateMapper iBasicsProductTemplateMapper;
-
-    @Autowired
     private DjActuarialSimulationRelationMapper djActuarialSimulationRelationMapper;
 
     @Autowired
@@ -99,7 +93,7 @@ public class SearchActuarialConfigServices {
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
-    private  void getProductList(List<ActuarialProductAppDTO> productList,String address){
+    public  void getProductList(List<ActuarialProductAppDTO> productList,String address){
         if(productList!=null&&productList.size()>0){
             for(ActuarialProductAppDTO ap:productList){
                 String image=ap.getImage();

@@ -22,6 +22,9 @@ public class ActuarialProductAppDTO {
     @ApiModelProperty("商品ID")
     private String productId;
 
+    @ApiModelProperty("商品模板ID")
+    private String productTemplateId;
+
     @ApiModelProperty("店铺ID")
     private String storefrontId;
 

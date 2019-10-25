@@ -77,6 +77,7 @@
         <id property="id" column="id"/>
         <result property="goodsId" column="goodsId"/>
         <result property="productId" column="productId"/>
+        <result property="productTemplateId" column="productTemplateId"/>
         <result property="productName" column="productName"/>
         <result property="storefrontId" column="storefrontId"/>
         <result property="price" column="price"/>
@@ -105,9 +106,10 @@
         SELECT
             t2.id productId,
             t2.storefront_id storefrontId,
+            t3.id productTemplateId,
             t3.product_sn productSn,
             t2.product_name productName,
-            t1.goods_id goodsId,
+            t3.goods_id goodsId,
             t2.sell_price price,
             t3.image,
             t3.unit_id unit,

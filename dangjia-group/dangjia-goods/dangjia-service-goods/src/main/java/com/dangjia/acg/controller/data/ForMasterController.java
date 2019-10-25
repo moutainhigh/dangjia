@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.xml.ws.Response;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -190,9 +191,54 @@ public class ForMasterController implements ForMasterAPI {
                                                      @RequestParam("productId") String productId){
         return forMasterService.getStroreProductInfoById(productId);
     }
+
+    /**
+     * 添加设计精算信息
+     * @param cityId
+     * @param actuarialDesignAttr (设计精算信息）
+     *                            设计精算列表 (
+     *      *      *      * id	String	设计精算模板ID
+     *      *      *      * configName	String	设计精算名称
+     *      *      *      * configType	String	配置类型1：设计阶段 2：精算阶段
+     *      *      *      * productList	List	商品列表
+     *      *      *      * productList.productId	String	商品ID
+     *      *      *      * productList.productName	String	商品名称
+     *      *      *      * productList.productSn	String	商品编码
+     *      *      *      * productList.goodsId	String	货品ID
+     *      *      *      * productList.storefrontId	String	店铺ID
+     *      *      *      * productList.price	double	商品价格
+     *      *      *      * productList.unit	String	商品单位
+     *      *      *      * productList.unitName	String	单位名称
+     *      *      *      * productList.image	String	图片
+     *      *      *      * productList.imageUrl	String	详情图片地址
+     *      *      *      * productList.valueIdArr	String	商品规格ID
+     *      *      *      * productList.valueNameArr	String	商品规格名称
+     * @param houseId 房子ID
+     * @param square 房子面积
+     * @return
+     */
     @Override
     @ApiMethod
-    public ServerResponse getProductTempListByStorefontId(String cityId, String storefontId, String goodsId){
-        return forMasterService.getProductTempListByStorefontId(storefontId,goodsId);
+    public void  insertActuarialDesignInfo(String cityId,String actuarialDesignAttr,String houseId,BigDecimal square){
+        forMasterService.insertActuarialDesignInfo(actuarialDesignAttr,houseId,square);
+    }
+    @Override
+    @ApiMethod
+    public ServerResponse getProductTempListByStorefontId(String cityId, String storefontId, String goodsId) {
+        return forMasterService.getProductTempListByStorefontId(storefontId, goodsId);
+    }
+
+    public Map<String, Object> getAllBudgetMaterialWorkerList(String cityId,String houseId,String workerTypeId){
+        return forMasterService.getAllBudgetMaterialWorkerList(houseId,workerTypeId);
+    }
+
+    /**
+     * APP端，我要装修列表下单详情显示
+     * @param cityId
+     * @param houseId
+     * @return
+     */
+    public List<Map<String,Object>> getHouseDetailInfoList(String cityId,String houseId){
+        return forMasterService.getHouseDetailInfoList(houseId);
     }
 }
