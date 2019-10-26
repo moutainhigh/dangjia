@@ -51,6 +51,7 @@ import com.dangjia.acg.modle.deliver.*;
 import com.dangjia.acg.modle.design.HouseStyleType;
 import com.dangjia.acg.modle.group.Group;
 import com.dangjia.acg.modle.house.*;
+import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.CustomerRecord;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.other.WorkDeposit;
@@ -1846,5 +1847,33 @@ public class PaymentService {
             }
         }
         return ServerResponse.createBySuccess("查询成功", mapList);
+    }
+
+    /**
+     *查询保险信息
+     * @param userToken
+     * @param workerId
+     * @return
+     */
+    public ServerResponse queryInsuranceInfo(String userToken, String workerId) {
+
+//        Object object = constructionService.getAccessToken(userToken);
+//        if (object instanceof ServerResponse) {
+//            return (ServerResponse) object;
+//        }
+//        AccessToken accessToken = (AccessToken) object;
+//        if (CommonUtil.isEmpty(accessToken.getUserId())) {
+//            return ServerResponse.createbyUserTokenError();
+//        }
+//
+//        if(CommonUtil.isEmpty(workerId)){
+//            workerId = accessToken.getUserId();
+//        }
+
+        Example example = new Example(Insurance.class);
+        example.createCriteria().andEqualTo(Insurance.WORKER_ID, workerId);
+        List<Insurance> houseFlowList = insuranceMapper.selectByExample(example);
+
+        return ServerResponse.createBySuccess("查询成功", houseFlowList);
     }
 }

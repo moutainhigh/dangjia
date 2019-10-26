@@ -5,6 +5,7 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.worker.Insurance;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.member.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -116,6 +117,12 @@ public class MemberController implements MemberAPI {
         return memberService.getMyHomePage(userToken, userRole);
     }
 
+
+    @Override
+    @ApiMethod
+    public ServerResponse  updateInsurances(Insurance insurance){
+        return memberService.updateInsurances(insurance);
+    }
     @Override
     @ApiMethod
     public ServerResponse  addInsurances(String userToken){

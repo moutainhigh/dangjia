@@ -1226,7 +1226,17 @@ public class MemberService {
         return list;
     }
 
-
+    /**
+     * 更新工匠保险信息
+     *
+     * @param insurance
+     * @return
+     */
+    public ServerResponse updateInsurances(Insurance insurance) {
+        insurance.setModifyDate(new Date());
+        insuranceMapper.updateByPrimaryKeySelective(insurance);
+        return ServerResponse.createBySuccess("保存成功", insurance.getId());
+    }
     /**
      * 新增工匠保险信息
      *
@@ -1279,7 +1289,7 @@ public class MemberService {
      * @return
      */
     public ServerResponse queryInsurances(String type, String searchKey, PageDTO pageDTO) {
-
+        String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         List<Map<String, Object>> datas = new ArrayList<>();
         Example example = new Example(Insurance.class);
         Example.Criteria criteria = example.createCriteria();
@@ -1297,6 +1307,7 @@ public class MemberService {
         if (infos != null && infos.size() > 0) {
             for (Insurance info : infos) {
                 Map<String, Object> map = BeanUtils.beanToMap(info);
+                map.put(Insurance.HEAD, Utils.getImageAddress(imageAddress,info.getHead()));
                 map.put("surDay", 0);
                 if (info.getEndDate() != null) {
                     Integer daynum = DateUtil.daysofTwo(new Date(), info.getEndDate());

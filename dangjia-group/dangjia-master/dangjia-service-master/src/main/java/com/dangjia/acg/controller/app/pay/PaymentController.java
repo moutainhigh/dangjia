@@ -8,6 +8,7 @@ import com.dangjia.acg.service.pay.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 
 /**
@@ -82,4 +83,13 @@ public class PaymentController implements PaymentAPI {
     public ServerResponse getPaymentPage(String userToken, String houseId, String taskId, int type) {
         return paymentService.getPaymentPage(userToken, houseId, taskId, type);
     }
+
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryInsuranceInfo(HttpServletRequest request,String userToken, String workerId) {
+        return paymentService.queryInsuranceInfo(userToken,workerId);
+    }
+
+
 }

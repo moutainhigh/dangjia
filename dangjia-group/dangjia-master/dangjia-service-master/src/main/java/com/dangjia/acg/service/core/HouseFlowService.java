@@ -344,6 +344,10 @@ public class HouseFlowService {
                 //审核中的人不能抢单
                 return ServerResponse.createByErrorMessage("您的账户正在审核中！");
             }
+            if (member.getEvaluationScore().intValue() < 60) {
+                //审核中的人不能抢单
+                return ServerResponse.createByErrorMessage("当前积分低于60，不能接单，请到当家学院接受培训后，可重新接单！");
+            }
             if (member.getCheckType() == 1) {
                 //审核未通过 的人不能抢单
                 return ServerResponse.createByErrorMessage("您的帐户审核未通过！");

@@ -1,5 +1,6 @@
 package com.dangjia.acg.dto.house;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
@@ -28,4 +29,7 @@ public class HouseDTO {
     private int houseType;//房子类型 0：新房；1：老房
     private int drawings;//有无图纸
     private int decorationType;//装修类型:1远程设计，2自带设计
+
+    @ApiModelProperty("地址")
+    private String address;
 }
