@@ -74,4 +74,11 @@ public interface ShopCartAPI {
                                        @RequestParam("productName") String productName,
                                        @RequestParam("image") String image,
                                        @RequestParam("price") BigDecimal price);
+
+
+    @PostMapping("app/shopping/insertToCollect")
+    @ApiOperation(value = "购物车移入收藏", notes = "购物车移入收藏")
+    ServerResponse insertToCollect(@RequestParam("request") HttpServletRequest request,
+                                   @RequestParam("userToken") String userToken,
+                                   @RequestParam("jsonStr") String jsonStr);
 }

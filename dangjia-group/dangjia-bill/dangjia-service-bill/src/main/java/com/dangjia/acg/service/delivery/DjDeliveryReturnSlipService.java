@@ -51,7 +51,7 @@ public class DjDeliveryReturnSlipService {
      *
      * @param pageDTO
      * @param searchKey
-     * @param invoiceStatus 0:全部  0,0:代发货  0,1:已发货待收货  0,2:已收货  0,4:部分收货  1,0:待退货  1,1:已确认  1,2:已结算  1,3:拒绝退货
+     * @param invoiceStatus 0:全部  0,0:代发货  0,1:已发货待收货  0,2:已收货  0,4:部分收货  1,0:待退货  1,1:已确认  1,2:已结算(已退货)  1,3:拒绝退货
      * @return
      */
     public ServerResponse querySupplyTaskList(PageDTO pageDTO, String userId, String cityId, String searchKey, String invoiceStatus) {
