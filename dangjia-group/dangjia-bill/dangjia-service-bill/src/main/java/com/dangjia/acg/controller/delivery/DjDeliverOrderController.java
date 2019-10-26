@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 public class DjDeliverOrderController implements DjDeliverOrderAPI {
 
 
+
     @Override
     @ApiMethod
     public ServerResponse queryAllDeliverOrder(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId) {
@@ -27,7 +28,25 @@ public class DjDeliverOrderController implements DjDeliverOrderAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryAllDeliverOrderDetail(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId) {
+    public ServerResponse queryAllDeliverOrderItem(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId) {
+        return null;
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse xx3(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId) {
+        return null;
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse xx2(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId) {
+        return null;
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse xx(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId) {
         return null;
     }
 }
