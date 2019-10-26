@@ -79,20 +79,6 @@ public class OrderItem extends BaseEntity {
 	@Column(name = "image")
 	private String image;//图片
 
-	@Column(name = "worker_goods_name")
-	@Desc(value = "人工商品名称")
-	@ApiModelProperty("人工商品名称")
-	private String workerGoodsName;//人工商品name
-
-	@Column(name = "worker_goods_sn")
-	@Desc(value = "人工商品编号")
-	@ApiModelProperty("人工商品编号")
-	private String workerGoodsSn;//人工商品编号
-
-	@Column(name = "worker_goods_id")
-	@Desc(value = "人工商品id")
-	@ApiModelProperty("人工商品id")
-	private String workerGoodsId;
 
 	@Column(name = "storefont_id")
 	@Desc(value = "店铺ID")

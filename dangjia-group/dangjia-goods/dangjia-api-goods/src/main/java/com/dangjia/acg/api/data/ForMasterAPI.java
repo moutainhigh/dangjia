@@ -3,6 +3,7 @@ package com.dangjia.acg.api.data;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.actuary.BudgetLabelDTO;
 import com.dangjia.acg.dto.actuary.BudgetLabelGoodsDTO;
+import com.dangjia.acg.dto.actuary.ShopGoodsDTO;
 import com.dangjia.acg.dto.product.ProductWorkerDTO;
 import com.dangjia.acg.dto.product.StorefontInfoDTO;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
@@ -142,11 +143,8 @@ public interface ForMasterAPI {
 
     @PostMapping("/data/budget/label")
     @ApiOperation(value = "查询工种材料未支付所有商品的标签", notes = "查询工种材料未支付所有商品的标签")
-    List<BudgetLabelDTO> queryBudgetLabel(@RequestParam("houseId") String houseId, @RequestParam("workerTypeId") String workerTypeId, @RequestParam("cityId") String cityId);
+    List<ShopGoodsDTO> queryShopGoods(@RequestParam("houseId") String houseId, @RequestParam("workerTypeId") String workerTypeId, @RequestParam("cityId") String cityId);
 
-    @PostMapping("/data/budget/label/goods")
-    @ApiOperation(value = "查询工种材料未支付所有商品", notes = "查询工种材料未支付所有商品")
-    List<BudgetLabelGoodsDTO> queryBudgetLabelGoods(@RequestParam("houseId") String houseId, @RequestParam("workerTypeId") String workerTypeId, @RequestParam("cityId") String cityId);
 
     @PostMapping("/data/house/getStroreProductInfo")
     @ApiOperation(value = "获取商品对应的基本信息及对应的货品，商品列表", notes = "获取商品对应的基本信息及对应的货品，商品列表")

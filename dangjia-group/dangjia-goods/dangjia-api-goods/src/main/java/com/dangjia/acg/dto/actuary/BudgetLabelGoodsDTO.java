@@ -26,6 +26,7 @@ public class BudgetLabelGoodsDTO {
     private String productName;//商品名称
     private String attributeName;//规格名称
     private String goodsId;//货品ID
+    private String storefontId;//店铺ID
 
     private BigDecimal price;//销售单价
     private Double shopCount;//精算数
