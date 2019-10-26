@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 
-@Api(description = "发货退货单接口")
+@Api(description = "所有订单表(装修所需的订单流水表)接口")
 @FeignClient("dangjia-service-bill")
 public interface DjDeliverOrderAPI {
     /**
@@ -28,7 +28,7 @@ public interface DjDeliverOrderAPI {
      */
     @PostMapping("/app/deliverOrder/queryAllDeliverOrderDetail")
     @ApiOperation(value = "下单后--订单查询--订单详情展示", notes = "下单后--订单查询--订单详情展示")
-    ServerResponse queryAllDeliverOrderDetail(@RequestParam("request") HttpServletRequest request,
+    ServerResponse queryAllDeliverOrderItem(@RequestParam("request") HttpServletRequest request,
                                        @RequestParam("pageDTO") PageDTO pageDTO,
                                        @RequestParam("userId") String userId,
                                        @RequestParam("cityId") String cityId);
