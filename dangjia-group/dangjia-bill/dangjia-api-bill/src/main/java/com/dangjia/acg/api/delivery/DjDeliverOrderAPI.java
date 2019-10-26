@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 @FeignClient("dangjia-service-bill")
 public interface DjDeliverOrderAPI {
     /**
+     * OrderAPI
      * 下单后--订单查询--全部订单
      */
     @PostMapping("/app/deliverOrder/queryAllDeliverOrder")

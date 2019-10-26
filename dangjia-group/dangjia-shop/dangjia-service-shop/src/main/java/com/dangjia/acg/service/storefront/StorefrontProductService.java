@@ -7,6 +7,7 @@ import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.product.MemberCollectDTO;
 import com.dangjia.acg.dto.product.ShoppingCartProductDTO;
+import com.dangjia.acg.dto.storefront.StorefrontDTO;
 import com.dangjia.acg.dto.storefront.StorefrontProductListDTO;
 import com.dangjia.acg.dto.storefront.BasicsStorefrontProductDTO;
 import com.dangjia.acg.dto.storefront.BasicsStorefrontProductViewDTO;
@@ -35,7 +36,15 @@ public class StorefrontProductService {
     @Autowired
     private DjBasicsProductAPI djBasicsProductAPI ;
 
-
+    /**
+     * 根据店铺id查询商品
+     * @param storefrontId
+     * @param searchKey
+     * @return
+     */
+    public List<StorefrontDTO> queryStorefrontListByStorefrontId(String storefrontId, String searchKey) {
+        return istorefrontProductMapper.queryStorefrontListByStorefrontId( storefrontId,  searchKey);
+    }
     /**
      * 根据id查询店铺商品信息
      *
@@ -70,12 +79,12 @@ public class StorefrontProductService {
             storefrontProduct.setImage(basicsStorefrontProductDTO.getImage());
             storefrontProduct.setDetailImage(basicsStorefrontProductDTO.getDetailImage());
             storefrontProduct.setMarketName(basicsStorefrontProductDTO.getMarketName());
-            storefrontProduct.setSellPrice(basicsStorefrontProductDTO.getSellPrice()!=null?Double.parseDouble(basicsStorefrontProductDTO.getSellPrice()):null);
-            storefrontProduct.setSuppliedNum(basicsStorefrontProductDTO.getSuppliedNum()!=null?Double.parseDouble(basicsStorefrontProductDTO.getSuppliedNum()):null);
-            storefrontProduct.setIsUpstairsCost(basicsStorefrontProductDTO.getIsUpstairsCost()!=null?Double.parseDouble(basicsStorefrontProductDTO.getIsUpstairsCost()):null);
-            storefrontProduct.setIsDeliveryInstall(basicsStorefrontProductDTO.getIsDeliveryInstall()!=null?Double.parseDouble(basicsStorefrontProductDTO.getIsDeliveryInstall()):null);
-            storefrontProduct.setMoveCost(basicsStorefrontProductDTO.getMoveCost()!=null?new BigDecimal(basicsStorefrontProductDTO.getMoveCost()):null);
-            storefrontProduct.setIsShelfStatus(basicsStorefrontProductDTO.getIsShelfStatus()!=null?Integer.parseInt(basicsStorefrontProductDTO.getIsShelfStatus()):null);
+            storefrontProduct.setSellPrice(basicsStorefrontProductDTO.getSellPrice());
+            storefrontProduct.setSuppliedNum(basicsStorefrontProductDTO.getSuppliedNum());
+            storefrontProduct.setIsUpstairsCost(basicsStorefrontProductDTO.getIsUpstairsCost());
+            storefrontProduct.setIsDeliveryInstall(basicsStorefrontProductDTO.getIsDeliveryInstall());
+            storefrontProduct.setMoveCost(basicsStorefrontProductDTO.getMoveCost());
+            storefrontProduct.setIsShelfStatus(basicsStorefrontProductDTO.getIsShelfStatus());
             storefrontProduct.setProdTemplateId(basicsStorefrontProductDTO.getProdTemplateId());
             storefrontProduct.setGoodsId( djBasicsProductTemplate.getGoodsId());
             storefrontProduct.setProductName(djBasicsProductTemplate.getName());
@@ -164,7 +173,7 @@ public class StorefrontProductService {
             }
             StorefrontProduct storefrontProduct = new StorefrontProduct();
             storefrontProduct.setId(id);
-            storefrontProduct.setIsShelfStatus(Integer.parseInt(isShelfStatus));
+            storefrontProduct.setIsShelfStatus(isShelfStatus);
             int i = istorefrontProductMapper.updateByPrimaryKeySelective(storefrontProduct);
             if (i <= 0) {
                 return ServerResponse.createByErrorMessage("商品上下架失败");
@@ -194,7 +203,7 @@ public class StorefrontProductService {
             Example example = new Example(StorefrontProduct.class);
             example.createCriteria().andIn(StorefrontProduct.ID, Arrays.asList(iditem));
             StorefrontProduct storefrontProduct = new StorefrontProduct();
-            storefrontProduct.setIsShelfStatus(Integer.parseInt(isShelfStatus));
+            storefrontProduct.setIsShelfStatus(isShelfStatus);
             storefrontProduct.setId(null);
             storefrontProduct.setCreateDate(null);
             int k = istorefrontProductMapper.updateByExampleSelective(storefrontProduct, example);

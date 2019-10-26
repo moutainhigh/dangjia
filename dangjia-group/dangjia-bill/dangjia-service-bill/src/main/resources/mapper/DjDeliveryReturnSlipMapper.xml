@@ -363,6 +363,7 @@
         GROUP BY dsd.house_id
     </select>
 
+
     <select id="querySupplierStoreDimensionList" resultType="com.dangjia.acg.dto.delivery.SupplierStoreDimensionDTO">
         SELECT
             dsd.storefront_id AS shopId,
@@ -402,5 +403,22 @@
         GROUP BY
             dsd.number
     </select>
+
+
+    <!--店铺利润-商品维度
+    <select id="" resultType="">
+
+    </select>
+-->
+    <!--店铺利润-供应商维度
+    <select id="" resultType="">
+
+    </select>
+-->
+    <!--店铺利润-买家维度
+    <select id="storefrontProductDimensionList" resultType="com.dangjia.acg.dto.delivery.BuyersDimensionDTO">
+
+    </select>
+-->
 
 </mapper>

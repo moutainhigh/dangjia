@@ -137,7 +137,7 @@ public class StorefrontService {
     public ServerResponse addStorefront(String userId, String cityId, String storefrontName,
                                         String storefrontAddress, String storefrontDesc,
                                         String storefrontLogo, String storekeeperName,
-                                        String mobile, String email) {
+                                        String mobile, String email,String freight, String belowUnitPrice) {
         try {
 //            Object object = constructionService.getMember(userToken);
 //            if (object instanceof ServerResponse) {
@@ -167,7 +167,8 @@ public class StorefrontService {
             storefront.setStorekeeperName(storekeeperName);
             storefront.setMobile(mobile);
             storefront.setEmail(email);
-
+            storefront.setFreight(freight);
+            storefront.setBelowUnitPrice(belowUnitPrice);
             //判断是否重复添加
             Example example=new Example(Storefront.class);
             example.createCriteria().andEqualTo(Storefront.CITY_ID,cityId).

@@ -78,31 +78,31 @@ public class DjDeliveryReturnSlipController implements DjDeliveryReturnSlipAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse a(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String searchKey) {
-        return null;
+    public ServerResponse supplierDimension(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String searchKey) {
+        return djDeliveryReturnSlipService.supplierDimension(pageDTO,userId,cityId,searchKey);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse b(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String searchKey) {
-        return null;
+    public ServerResponse storefrontProductDimension(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String searchKey) {
+        return djDeliveryReturnSlipService.storefrontProductDimension(pageDTO,userId,cityId,searchKey);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse c(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String searchKey) {
-        return null;
+    public ServerResponse sellerDimension(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String searchKey) {
+        return djDeliveryReturnSlipService.sellerDimension(pageDTO,userId,cityId,searchKey);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse d(HttpServletRequest request, PageDTO pageDTO, String supId, String houseId, String searchKey, String cityId) {
-        return null;
+    public ServerResponse supplyDetails(HttpServletRequest request, PageDTO pageDTO, String supId, String houseId, String searchKey, String cityId) {
+        return djDeliveryReturnSlipService.supplyDetails(pageDTO,supId,houseId,searchKey,cityId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse e(HttpServletRequest request, PageDTO pageDTO, String supId, String houseId, String searchKey, String cityId) {
-        return null;
+    public ServerResponse shippingDetails(HttpServletRequest request, PageDTO pageDTO, String supId, String houseId, String searchKey, String cityId) {
+        return djDeliveryReturnSlipService.shippingDetails(pageDTO,supId,houseId,searchKey,cityId);
     }
 }

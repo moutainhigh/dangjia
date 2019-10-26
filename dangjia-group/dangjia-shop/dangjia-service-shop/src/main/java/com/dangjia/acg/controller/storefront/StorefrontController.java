@@ -55,9 +55,9 @@ public class StorefrontController implements BasicsStorefrontAPI {
     @Override
     @ApiMethod
     public ServerResponse addStorefront(String userId, String cityId, String storefrontName, String storefrontAddress,
-                                        String storefrontDesc, String storefrontLogo, String storekeeperName, String mobile, String email) {
+                                        String storefrontDesc, String storefrontLogo, String storekeeperName, String mobile, String email,String freight,String belowUnitPrice) {
         return storefrontService.addStorefront(userId, cityId, storefrontName, storefrontAddress, storefrontDesc,
-                storefrontLogo, storekeeperName, mobile, email);
+                storefrontLogo, storekeeperName, mobile, email, freight, belowUnitPrice);
     }
 
     @Override

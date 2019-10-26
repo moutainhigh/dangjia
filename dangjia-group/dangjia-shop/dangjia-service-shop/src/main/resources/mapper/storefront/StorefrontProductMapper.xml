@@ -84,5 +84,43 @@
             and bsp.storefront_id=#{storefrontId}
     </select>
 
+<!--根据店铺id查询供应的商品-->
+    <select id="queryStorefrontListByStorefrontId" resultType="com.dangjia.acg.dto.storefront.StorefrontDTO">
+
+        SELECT
+            bsp.prod_template_id AS productId,
+            bsp.product_name AS productName,
+            bsp.image,
+            bpt.unit_name AS unitName
+        FROM
+            dj_basics_storefront_product bsp
+        INNER JOIN dj_basics_product_template bpt ON bsp.prod_template_id = bpt.id
+        WHERE
+            bsp.prod_template_id =#{productId}
+            and bsp.storefront_id=#{storefrontId}
+
+        SELECT
+        bpt.image, -- 商品图片
+        bpt.name as productName, -- 商品名称
+        bpt.product_sn as productSn, -- 商品编号
+        ssp.stock, -- 总购买数
+        ssp.price, -- 供货数
+        ssp.supplier_id as supId, -- 成本价格
+        ssp.product_id as productId , -- 销售价格
+        lirun -- 利润
+        FROM
+        dj_sup_supplier_product ssp
+        INNER JOIN dj_basics_product_template bpt ON ssp.product_id=bpt.id
+        WHERE 1=1 and ssp.data_status=0 and
+        ssp.supplier_id =#{supId}
+        <if test="null!=searchKey and ''!=searchKey">
+            AND (
+            bpt.name LIKE CONCAT('%',#{searchKey},'%') or
+            bpt.product_sn LIKE CONCAT('%',#{searchKey},'%')
+            )
+        </if>
+
+    </select>
+
 
 </mapper>

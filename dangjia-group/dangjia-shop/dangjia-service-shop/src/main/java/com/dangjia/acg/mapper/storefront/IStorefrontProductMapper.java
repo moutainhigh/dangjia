@@ -2,6 +2,7 @@ package com.dangjia.acg.mapper.storefront;
 
 import com.dangjia.acg.dto.product.MemberCollectDTO;
 import com.dangjia.acg.dto.product.ShoppingCartProductDTO;
+import com.dangjia.acg.dto.storefront.StorefrontDTO;
 import com.dangjia.acg.dto.storefront.StorefrontProductListDTO;
 import com.dangjia.acg.dto.storefront.BasicsStorefrontProductViewDTO;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
@@ -23,4 +24,7 @@ public interface IStorefrontProductMapper  extends Mapper<StorefrontProduct> {
     List<ShoppingCartProductDTO> queryCartList(@Param("storefrontId") String storefrontId, @Param("productId") String productId);
 
     List<MemberCollectDTO> queryCollectGood(@Param("productId") String productId,@Param("storefrontId") String storefrontId);
+
+    List<StorefrontDTO> queryStorefrontListByStorefrontId(String storefrontId, String searchKey);
+
 }

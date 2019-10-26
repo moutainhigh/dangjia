@@ -3,6 +3,7 @@ package com.dangjia.acg.api;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.product.MemberCollectDTO;
 import com.dangjia.acg.dto.product.ShoppingCartProductDTO;
+import com.dangjia.acg.dto.storefront.StorefrontDTO;
 import com.dangjia.acg.dto.storefront.StorefrontProductListDTO;
 import com.dangjia.acg.dto.storefront.BasicsStorefrontProductDTO;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
@@ -17,6 +18,11 @@ import java.util.List;
 @Api(description = "店铺商品管理接口")
 @FeignClient("dangjia-service-shop")
 public interface StorefrontProductAPI {
+
+    @PostMapping("/web/queryStorefrontListByStorefrontId")
+    @ApiOperation(value = "根据店铺id查询供应商商品", notes = "根据店铺id查询供应商商品")
+    List<StorefrontDTO> queryStorefrontListByStorefrontId(@RequestParam("storefrontId") String storefrontId,
+                                                          @RequestParam("searchKey") String searchKey);
 
     @PostMapping("/web/querySingleStorefrontProductById")
     @ApiOperation(value = "根据id查询店铺商品信息", notes = "根据id查询店铺商品信息")

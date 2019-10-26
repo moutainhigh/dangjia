@@ -81,6 +81,7 @@ public interface DjDeliveryReturnSlipMapper extends Mapper<DjDeliveryReturnSlip>
                                                       @Param("productId") String productId,
                                                       @Param("cityId") String cityId);
 
+
     List<SupplierStoreDimensionDTO> querySupplierStoreDimensionList(@Param("supId") String supId,
                                                                     @Param("shopId") String shopId,
                                                                     @Param("cityId") String cityId);
@@ -90,4 +91,8 @@ public interface DjDeliveryReturnSlipMapper extends Mapper<DjDeliveryReturnSlip>
                                                                           @Param("shopId") String shopId,
                                                                           @Param("cityId") String cityId,
                                                                           @Param("searchKey") String searchKey);
+
+    List<BuyersDimensionDTO> storefrontProductDimensionList(@Param("storefrontId") String supId,
+                                                            @Param("productId") String productId,
+                                                            @Param("cityId") String cityId);
 }
