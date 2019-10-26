@@ -6,7 +6,7 @@
 
     <select id="querySupplyDeliverTaskList" resultType="com.dangjia.acg.dto.delivery.DjDeliveryReturnSlipDTO">
         SELECT
-            dsd.id,
+            dsd.id as splitId,
             dsd.storefront_id as shopId,
             dsd.number as number,
             dsd.create_date as createDate,
@@ -15,9 +15,10 @@
             dsd.ship_mobile as shipMobile,
             dsd.shipping_state as shippingState,
             dsd.total_amount as totalAmount,
-            dsd.order_split_id as splitId,
             1 as invoiceType,
-            c.status
+            c.status,
+            dsd.house_id as houseId,
+            dsd.supplier_id as supId
         FROM
           dj_deliver_split_deliver dsd
         LEFT  JOIN dj_complain c on c.business_id=dsd.id
@@ -32,11 +33,12 @@
           AND dsd.shipping_state=#{invoiceStatus}
         </if>
         and dsd.city_id=#{cityId}
+        ORDER BY dsd.create_date desc
     </select>
 
     <select id="querySupplyRepairTaskList" resultType="com.dangjia.acg.dto.delivery.DjDeliveryReturnSlipDTO">
         SELECT
-            rmd.id,
+            rmd.id as splitId,
             rmd.storefront_id as shopId,
             rmd.number as number,
             rmd.create_date as createDate,
@@ -45,8 +47,9 @@
             rmd.ship_name as shipName,
             rmd.shipping_state as shippingState,
             rmd.total_amount as totalAmount,
-            rmd.mend_order_id as splitId,
-            2 as invoiceType
+            2 as invoiceType,
+            rmd.house_id as houseId,
+            rmd.supplier_id as supId
         FROM
             dj_repair_mend_deliver rmd
         WHERE rmd.supplier_id =#{supId}
@@ -60,11 +63,27 @@
             AND rmd.shipping_state=#{invoiceStatus}
         </if>
         and rmd.city_id=#{cityId}
+        ORDER BY rmd.create_date desc
     </select>
 
     <select id="querySupplyTaskList" resultType="com.dangjia.acg.dto.delivery.DjDeliveryReturnSlipDTO">
         SELECT
-            dsd.id,
+            splitId,
+            shopId,
+            number,
+            createDate,
+            shipAddress,
+            shipName,
+            shipMobile,
+            shippingState,
+            totalAmount,
+            invoiceType,
+            STATUS,
+            houseId,
+            supId
+        FROM (
+            SELECT
+            dsd.id as splitId,
             dsd.storefront_id as shopId,
             dsd.number as number,
             dsd.create_date as createDate,
@@ -73,44 +92,47 @@
             dsd.ship_mobile as shipMobile,
             dsd.shipping_state as shippingState,
             dsd.total_amount as totalAmount,
-            dsd.order_split_id as splitId,
             1 as invoiceType,
-            c.status
-        FROM
-          dj_deliver_split_deliver dsd
-        LEFT  JOIN dj_complain c on c.business_id=dsd.id
-        WHERE dsd.supplier_id =#{supId}
-        <if test="null!=searchKey and ''!=searchKey">
-            AND (
-            dsd.number LIKE CONCAT('%',#{searchKey},'%') or
-            dsd.ship_address LIKE CONCAT('%',#{searchKey},'%')
-            )
-        </if>
-        and dsd.city_id=#{cityId}
-          UNION ALL
-        SELECT
-            rmd.id,
-            rmd.storefront_id as shopId,
-            rmd.number as number,
-            rmd.create_date as createDate,
-            rmd.ship_address as shipAddress,
-            rmd.ship_mobile as shipMobile,
-            rmd.ship_name as shipName,
-            rmd.shipping_state as shippingState,
-            rmd.total_amount as totalAmount,
-            rmd.mend_order_id as splitId,
-            2 as invoiceType,
-            null as status
-        FROM
-          dj_repair_mend_deliver rmd
-        WHERE rmd.supplier_id =#{supId}
-        <if test="null!=searchKey and ''!=searchKey">
-            AND (
-            rmd.number LIKE CONCAT('%',#{searchKey},'%') or
-            rmd.ship_address LIKE CONCAT('%',#{searchKey},'%')
-            )
-        </if>
-        and rmd.city_id=#{cityId}
+            c.status,
+            dsd.house_id as houseId,
+            dsd.supplier_id as supId
+            FROM
+            dj_deliver_split_deliver dsd
+            LEFT JOIN dj_complain c on c.business_id=dsd.id
+            WHERE dsd.supplier_id =#{supId}
+            <if test="null!=searchKey and ''!=searchKey">AND (
+                dsd.number
+                LIKE CONCAT('%',#{searchKey},'%') or
+                dsd.ship_address LIKE CONCAT('%',#{searchKey},'%')
+                )
+            </if>
+                and dsd.city_id=#{cityId}
+                  UNION ALL
+                SELECT
+                    rmd.id as splitId,
+                    rmd.storefront_id as shopId,
+                    rmd.number as number,
+                    rmd.create_date as createDate,
+                    rmd.ship_address as shipAddress,
+                    rmd.ship_mobile as shipMobile,
+                    rmd.ship_name as shipName,
+                    rmd.shipping_state as shippingState,
+                    rmd.total_amount as totalAmount,
+                    2 as invoiceType,
+                    null as status,
+                    rmd.house_id as houseId,
+                    rmd.supplier_id as supId
+                FROM
+                  dj_repair_mend_deliver rmd
+                WHERE rmd.supplier_id =#{supId}
+                <if test="null!=searchKey and ''!=searchKey">
+                    AND (
+                    rmd.number LIKE CONCAT('%',#{searchKey},'%') or
+                    rmd.ship_address LIKE CONCAT('%',#{searchKey},'%')
+                    )
+                </if>
+                and rmd.city_id=#{cityId}
+            )a ORDER BY createDate desc
     </select>
 
     <!--<update id="setDeliveryTask">-->
@@ -229,7 +251,8 @@
             apply_state as applyState,
             invoiceType,
             sum(applyMoney) as applyMoney,
-            splitId
+            splitId,
+            houseId
         FROM
             (
                 SELECT
@@ -240,9 +263,10 @@
                     dsd.ship_address,
                     dsd.ship_name,
                     dsd.apply_state,
-                    dsd.order_split_id as splitId,
+                    dsd.id as splitId,
                     1 as invoiceType,
-                    dsd.apply_money as applyMoney
+                    dsd.apply_money as applyMoney,
+                    dsd.house_id as houseId
                 FROM
                     dj_deliver_split_deliver dsd
                 INNER JOIN dj_deliver_order_split dos ON dsd.order_split_id = dos.id
@@ -255,9 +279,10 @@
                         rmd.ship_address,
                         rmd.ship_name,
                         rmd.apply_state,
-                        rmd.mend_order_id as splitId,
+                        rmd.id as splitId,
                         2 as invoiceType,
-                        rmd.apply_money as applyMoney
+                        rmd.apply_money as applyMoney,
+                        rmd.house_id as houseId
                     FROM
                         dj_repair_mend_deliver rmd
                     INNER JOIN dj_repair_mend_order rmo ON rmd.mend_order_id = rmo.id

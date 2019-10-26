@@ -31,7 +31,8 @@ public interface DjSupApplicationAPI {
     @PostMapping("/supplier/djSupApplication/insertSupplierApplicationShop")
     @ApiOperation(value = "供应商申请供应店铺", notes = "供应商申请供应店铺")
     ServerResponse insertSupplierApplicationShop(@RequestParam("request") HttpServletRequest request,
-                                                 @RequestParam("supId") String supId,
+                                                 @RequestParam("userId") String userId,
+                                                 @RequestParam("cityId") String cityId,
                                                  @RequestParam("shopId") String shopId);
 
     @PostMapping("/supplier/djSupApplication/uploadContracts")
