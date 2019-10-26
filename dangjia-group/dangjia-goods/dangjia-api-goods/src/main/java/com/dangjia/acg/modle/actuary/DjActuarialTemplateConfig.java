@@ -43,6 +43,13 @@ public class DjActuarialTemplateConfig extends BaseEntity {
     @ApiModelProperty("精算Excel上传后的文件名")
     private String excelFileName;
 
+
+
+    @Column(name = "config_detail")
+    @Desc(value = "描述")
+    @ApiModelProperty("描述")
+    private String configDetail;
+
     @Column(name = "create_by")
     @Desc(value = "创建人")
     @ApiModelProperty("创建人")

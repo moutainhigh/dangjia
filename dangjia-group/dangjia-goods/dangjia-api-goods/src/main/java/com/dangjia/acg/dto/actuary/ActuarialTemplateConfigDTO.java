@@ -36,6 +36,11 @@ public class ActuarialTemplateConfigDTO  {
     @ApiModelProperty("精算Excel地址")
     private String excelAddress;
 
+    @ApiModelProperty("描述")
+    private String configDetail;
+
+
+
     @ApiModelProperty("阶段下面的商品列表")
     private List  productList;//阶段下面的商品列表
 }

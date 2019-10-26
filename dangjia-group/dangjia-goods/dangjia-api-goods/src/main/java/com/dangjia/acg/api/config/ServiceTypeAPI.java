@@ -58,6 +58,7 @@ public interface ServiceTypeAPI {
     ServerResponse updateServiceType(@RequestParam("request") HttpServletRequest request,
                                @RequestParam("id") String id,
                                @RequestParam("name") String name,
+                               @RequestParam("coverImage") String coverImage,
                                @RequestParam("image") String image);
 
     /**
@@ -69,6 +70,7 @@ public interface ServiceTypeAPI {
     @ApiOperation(value = "新增服务类型", notes = "新增服务类型")
     ServerResponse insertServiceType(@RequestParam("request") HttpServletRequest request,
                                @RequestParam("name") String name,
+                               @RequestParam("coverImage") String coverImage,
                                @RequestParam("image") String image);
 
     /**

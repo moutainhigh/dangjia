@@ -45,8 +45,12 @@ public class ServiceTypeService {
      */
     public ServerResponse selectServiceTypeById( String id) {
         try {
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             ServiceType serviceType=iServiceTypeMapper.selectByPrimaryKey(id);
-            return ServerResponse.createBySuccess("查询成功", serviceType);
+            Map<String, Object> map = BeanUtils.beanToMap(serviceType);
+            map.put("coverImageUrl",address+serviceType.getCoverImage());
+            map.put("imageUrl",address+serviceType.getImage());
+            return ServerResponse.createBySuccess("查询成功", map);
         } catch (Exception e) {
             logger.error("selectServiceTypeById查询失败",e);
             return ServerResponse.createByErrorMessage("查询失败");
@@ -67,6 +71,7 @@ public class ServiceTypeService {
             List<Map<String, Object>> list = new ArrayList<>();
             for (ServiceType serviceType : serviceTypeList) {
                 Map<String, Object> map = BeanUtils.beanToMap(serviceType);
+                map.put("coverImageUrl",address+serviceType.getCoverImage());
                 map.put("imageUrl",address+serviceType.getImage());
                 list.add(map);
             }
@@ -86,11 +91,12 @@ public class ServiceTypeService {
      * @param image
      * @return
      */
-    public ServerResponse updateServiceType( String id, String name, String image) {
+    public ServerResponse updateServiceType( String id, String name,String coverImage, String image) {
         try{
             ServiceType serviceType=new ServiceType();
             serviceType.setId(id);
             serviceType.setName(name);
+            serviceType.setCoverImage(coverImage);
             serviceType.setImage(image);
             iServiceTypeMapper.updateByPrimaryKeySelective(serviceType);
             return ServerResponse.createBySuccess("修改成功", serviceType.getId());
@@ -107,10 +113,11 @@ public class ServiceTypeService {
      * @param image
      * @return
      */
-    public ServerResponse insertServiceType(String name, String image) {
+    public ServerResponse insertServiceType(String name,String coverImage, String image) {
         try{
             ServiceType serviceType=new ServiceType();
             serviceType.setName(name);
+            serviceType.setCoverImage(coverImage);
             serviceType.setImage(image);
             iServiceTypeMapper.insert(serviceType);
             return ServerResponse.createBySuccess("新增成功", serviceType.getId());
@@ -128,7 +135,11 @@ public class ServiceTypeService {
      */
     public ServerResponse deleteServiceType( String id) {
         try{
-            iServiceTypeMapper.deleteById(id);
+            ServiceType serviceType=new ServiceType();
+            serviceType.setDataStatus(1);
+            serviceType.setId(id);
+            iServiceTypeMapper.updateByPrimaryKeySelective(serviceType);
+            //iServiceTypeMapper.deleteById(id);
             return ServerResponse.createBySuccessMessage("删除成功");
         } catch (Exception e) {
             logger.error("删除成功",e);

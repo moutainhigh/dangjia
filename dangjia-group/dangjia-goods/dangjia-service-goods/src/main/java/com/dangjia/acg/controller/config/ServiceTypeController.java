@@ -67,8 +67,8 @@ public class ServiceTypeController implements ServiceTypeAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse updateServiceType(HttpServletRequest request, String id, String name, String image) {
-        return serviceTypeService.updateServiceType(id,name,image);
+    public ServerResponse updateServiceType(HttpServletRequest request, String id, String name,String coverImage, String image) {
+        return serviceTypeService.updateServiceType(id,name,coverImage,image);
     }
 
     /**
@@ -80,8 +80,8 @@ public class ServiceTypeController implements ServiceTypeAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse insertServiceType(HttpServletRequest request, String name, String image) {
-        return serviceTypeService.insertServiceType(name,image);
+    public ServerResponse insertServiceType(HttpServletRequest request, String name,String coverImage, String image) {
+        return serviceTypeService.insertServiceType(name,coverImage,image);
     }
 
     /**
