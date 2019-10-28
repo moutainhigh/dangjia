@@ -84,6 +84,7 @@ public class DjSupApplicationService {
             djSupApplication.setSupId(djSupplier.getId());
             djSupApplication.setDataStatus(0);
             djSupApplication.setApplicationStatus("0");
+            djSupApplication.setCityId(cityId);
             if(djSupApplicationMapper.insert(djSupApplication)>0)
                 return ServerResponse.createBySuccessMessage("申请成功");
         } catch (Exception e) {
