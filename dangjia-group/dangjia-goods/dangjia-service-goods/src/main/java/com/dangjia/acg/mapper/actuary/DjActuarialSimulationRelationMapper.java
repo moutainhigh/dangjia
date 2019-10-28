@@ -20,7 +20,7 @@ public interface DjActuarialSimulationRelationMapper extends Mapper<DjActuarialS
 
     void batchInsertAssemblyInfo(@Param("list") List<DjActuarialSimulationRelation> list);
 
-    List<ActuarialSimulateionReationDTO> querySimulateAssemblyRelateionList(@Param("address") String address);
+    List<ActuarialSimulateionReationDTO> querySimulateAssemblyRelateionList(@Param("address") String address,@Param("cityId") String cityId);
 
     /**
      * 根据code组合，查询对应的精算模板

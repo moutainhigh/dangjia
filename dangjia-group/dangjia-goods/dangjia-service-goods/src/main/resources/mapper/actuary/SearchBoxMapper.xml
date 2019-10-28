@@ -17,6 +17,7 @@
 		select
 		<include refid="all_columns"/>
 		from dj_actuary_search_box
+		and city_id=#{cityId}
 		order by number desc  limit 0,4
 	</select>
 </mapper>

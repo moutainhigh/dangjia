@@ -46,7 +46,8 @@ public interface ClassificationAPI {
      */
     @PostMapping("classification/getGoodsCategoryList")
     @ApiOperation(value = "获取所有的一级分类", notes = "获取所有的一级分类")
-    ServerResponse getGoodsCategoryList(@RequestParam("request") HttpServletRequest request);
+    ServerResponse getGoodsCategoryList(@RequestParam("request") HttpServletRequest request,
+                                        @RequestParam("cityId") String cityId);
 
     /**
      * showdoc
@@ -77,7 +78,8 @@ public interface ClassificationAPI {
     @ApiOperation(value = "获取一级类别下的商品", notes = "获取一级类别下的商品")
     ServerResponse getProductList(@RequestParam("request") HttpServletRequest request,
                                   @RequestParam("pageDTO") PageDTO pageDTO,
-                                  @RequestParam("categoryId") String categoryId);
+                                  @RequestParam("categoryId") String categoryId,
+                                  @RequestParam("cityId") String cityId);
 
     /**
      * showdoc

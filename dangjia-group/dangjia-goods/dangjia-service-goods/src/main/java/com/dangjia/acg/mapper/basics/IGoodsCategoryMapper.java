@@ -27,5 +27,5 @@ public interface IGoodsCategoryMapper extends Mapper<GoodsCategory> {
 	List<GoodsCategory> queryCategoryByName(@Param("name") String name);
 
 	//根据name查询商品对象
-	List<HomeProductDTO> getProductList(@Param("categoryId") String categoryId);
+	List<HomeProductDTO> getProductList(@Param("categoryId") String categoryId,@Param("cityId") String cityId);
 }

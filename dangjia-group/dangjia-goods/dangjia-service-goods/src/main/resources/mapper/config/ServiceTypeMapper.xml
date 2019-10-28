@@ -23,6 +23,7 @@
 			modify_date as modifyDate
 		FROM dj_service_type_configuration
 		where data_status =0
+		and city_id=#{cityId}
 		ORDER BY create_date desc
 	</select>
 

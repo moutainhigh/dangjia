@@ -39,6 +39,7 @@
         FROM
             dj_simulation_template_config t
         where data_status = '0'
+        and city_id = #{cityId}
         and exists (select 1 from dj_simulation_template_config_detail t1 where t.id=t1.simulation_template_id and t1.config_status = 0)
         <if test="id!=null and id!=''">
             and id=#{id}
@@ -77,6 +78,7 @@
         FROM
         dj_simulation_template_config t
         where data_status = '0'
+        and t.city_id=#{cityId}
         and exists (select 1 from dj_simulation_template_config_detail t1 where t.id=t1.simulation_template_id and t1.config_status = 0)
         order by config_type,create_date
     </select>
@@ -93,7 +95,9 @@
 
     <!-- 删除无用的标题数据 -->
     <select id="deleteSimulationTemplate">
-        delete from dj_simulation_template_config where id not in(select distinct simulation_template_id from dj_simulation_template_config_detail)
+        delete from dj_simulation_template_config
+        where id not in(select distinct simulation_template_id from dj_simulation_template_config_detail)
+        and city_id=#{cityId}
     </select>
 
     <select id="searchSimulationTitleList" resultType="com.dangjia.acg.dto.actuary.app.SimulationTemplateAppConfigDTO">

@@ -63,11 +63,11 @@ public class ServiceTypeService {
      * @param pageDTO
      * @return
      */
-    public ServerResponse<PageInfo> selectServiceTypeList( PageDTO pageDTO) {
+    public ServerResponse<PageInfo> selectServiceTypeList( PageDTO pageDTO,String cityId) {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            List<ServiceType> serviceTypeList = iServiceTypeMapper.getServiceTypeList();
+            List<ServiceType> serviceTypeList = iServiceTypeMapper.getServiceTypeList(cityId);
             List<Map<String, Object>> list = new ArrayList<>();
             for (ServiceType serviceType : serviceTypeList) {
                 Map<String, Object> map = BeanUtils.beanToMap(serviceType);
@@ -92,13 +92,14 @@ public class ServiceTypeService {
      * @param image
      * @return
      */
-    public ServerResponse updateServiceType( String id, String name,String coverImage, String image) {
+    public ServerResponse updateServiceType( String id, String name,String coverImage, String image,String cityId) {
         try{
             ServiceType serviceType=new ServiceType();
             serviceType.setId(id);
             serviceType.setName(name);
             serviceType.setCoverImage(coverImage);
             serviceType.setImage(image);
+            serviceType.setCityId(cityId);
             iServiceTypeMapper.updateByPrimaryKeySelective(serviceType);
             return ServerResponse.createBySuccess("修改成功", serviceType.getId());
         } catch (Exception e) {
@@ -114,12 +115,13 @@ public class ServiceTypeService {
      * @param image
      * @return
      */
-    public ServerResponse insertServiceType(String name,String coverImage, String image) {
+    public ServerResponse insertServiceType(String name,String coverImage, String image,String cityId) {
         try{
             ServiceType serviceType=new ServiceType();
             serviceType.setName(name);
             serviceType.setCoverImage(coverImage);
             serviceType.setImage(image);
+            serviceType.setCityId(cityId);
             iServiceTypeMapper.insert(serviceType);
             return ServerResponse.createBySuccess("新增成功", serviceType.getId());
         } catch (Exception e) {

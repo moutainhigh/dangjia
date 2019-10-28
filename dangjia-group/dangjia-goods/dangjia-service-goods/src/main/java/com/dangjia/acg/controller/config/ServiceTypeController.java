@@ -52,9 +52,9 @@ public class ServiceTypeController implements ServiceTypeAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse<PageInfo> selectServiceTypeList(HttpServletRequest request, PageDTO pageDTO) {
+    public ServerResponse<PageInfo> selectServiceTypeList(HttpServletRequest request, PageDTO pageDTO,String cityId) {
 
-        return serviceTypeService.selectServiceTypeList(pageDTO);
+        return serviceTypeService.selectServiceTypeList(pageDTO,cityId);
     }
 
     /**
@@ -67,8 +67,8 @@ public class ServiceTypeController implements ServiceTypeAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse updateServiceType(HttpServletRequest request, String id, String name,String coverImage, String image) {
-        return serviceTypeService.updateServiceType(id,name,coverImage,image);
+    public ServerResponse updateServiceType(HttpServletRequest request, String id, String name,String coverImage, String image,String cityId) {
+        return serviceTypeService.updateServiceType(id,name,coverImage,image,cityId);
     }
 
     /**
@@ -80,8 +80,8 @@ public class ServiceTypeController implements ServiceTypeAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse insertServiceType(HttpServletRequest request, String name,String coverImage, String image) {
-        return serviceTypeService.insertServiceType(name,coverImage,image);
+    public ServerResponse insertServiceType(HttpServletRequest request, String name,String coverImage, String image,String cityId) {
+        return serviceTypeService.insertServiceType(name,coverImage,image,cityId);
     }
 
     /**

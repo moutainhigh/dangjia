@@ -43,6 +43,7 @@
         FROM
             dj_actuarial_template_config ac
         where ac.config_type in(1,2)
+        and city_id=#{cityId}
         <if test="id!=null and id!=''">
             and ac.id=#{id}
         </if>

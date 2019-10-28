@@ -24,12 +24,14 @@ public interface DjBasicsActuarialConfigurationAPI {
 
     @PostMapping("web/config/actuarialConfig/queryActuarialTemplateConfig")
     @ApiOperation(value = "设计精算--查询设计精算阶段配置", notes = "查询设计精算阶段配置")
-    ServerResponse queryActuarialTemplateConfig(@RequestParam("request") HttpServletRequest request);
+    ServerResponse queryActuarialTemplateConfig(@RequestParam("request") HttpServletRequest request,
+                                                @RequestParam("cityId") String cityId);
 
     @PostMapping("web/config/actuarialConfig/queryActuarialProductByConfigId")
     @ApiOperation(value = "设计精算--查询阶段详情信息", notes = "查询阶段详情信息")
     ServerResponse queryActuarialProductByConfigId(@RequestParam("request") HttpServletRequest request,
-                                            @RequestParam("actuarialTemplateId") String actuarialTemplateId);
+                                                   @RequestParam("actuarialTemplateId") String actuarialTemplateId,
+                                                   @RequestParam("cityId") String cityId);
 
     @PostMapping("web/config/actuarialConfig/editActuarialProduct")
     @ApiOperation(value = "设计精算--批量添加修改设计精算阶段对应的商品信息", notes = "批量添加修改设计精算阶段对应的商品信息")
@@ -37,7 +39,8 @@ public interface DjBasicsActuarialConfigurationAPI {
                                         @RequestParam("actuarialProductStr") String actuarialProductStr,
                                         @RequestParam("actuarialTemplateId") String actuarialTemplateId,
                                         @RequestParam("workTypeId") String workTypeId,
-                                        @RequestParam("userId") String userId);
+                                        @RequestParam("userId") String userId,
+                                        @RequestParam("cityId") String cityId);
 
     @PostMapping("web/config/actuarialConfig/deleteActuarialProduct")
     @ApiOperation(value = "设计精算--删除对应的设计精算配置商品", notes = "删除对应的设计精算配置商品")
@@ -71,16 +74,19 @@ public interface DjBasicsActuarialConfigurationAPI {
                                         @RequestParam("configDetailArr") String configDetailArr,
                                         @RequestParam("configId") String configId,
                                         @RequestParam("configName") String configName,
-                                        @RequestParam("configType") String configType);
+                                        @RequestParam("configType") String configType,
+                                        @RequestParam("cityId") String cityId);
 
     @PostMapping("web/config/actuarialConfig/querySimulateionTemplateConfig")
     @ApiOperation(value = "模拟花费--查询标题列表", notes = "查询标题列表")
-    ServerResponse querySimulateionTemplateConfig(@RequestParam("request") HttpServletRequest request);
+    ServerResponse querySimulateionTemplateConfig(@RequestParam("request") HttpServletRequest request,
+                                                  @RequestParam("cityId") String cityId);
 
     @PostMapping("web/config/actuarialConfig/querySimulateionTemplateConfigById")
     @ApiOperation(value = "模拟花费--单个标题信息", notes = "单个标题信息")
     ServerResponse querySimulateionTemplateConfigById(@RequestParam("request") HttpServletRequest request,
-                                                   @RequestParam("simulationTemplateId") String simulationTemplateId);
+                                                      @RequestParam("simulationTemplateId") String simulationTemplateId,
+                                                      @RequestParam("cityId") String cityId);
 
     @PostMapping("web/config/actuarialConfig/querySimulateionDetailInfoById")
     @ApiOperation(value = "模拟花费--查询单个标题对应的详情信息", notes = "查询单个标题对应的详情信息")
@@ -98,11 +104,13 @@ public interface DjBasicsActuarialConfigurationAPI {
             @RequestParam("request") HttpServletRequest request,
             @RequestParam("name")  String name,
             @RequestParam("fileName")  String fileName,
-            @RequestParam("address")  String address);
+            @RequestParam("address")  String address,
+            @RequestParam("cityId") String cityId);
 
     @PostMapping("web/config/actuarialConfig/querySimulateExcelList")
     @ApiOperation(value = "模拟花费--查询EXCEL列表", notes = "查询EXCEL列表")
-    ServerResponse querySimulateExcelList(@RequestParam("request") HttpServletRequest request);
+    ServerResponse querySimulateExcelList(@RequestParam("request") HttpServletRequest request,
+                                          @RequestParam("cityId") String cityId);
 
     @PostMapping("web/config/actuarialConfig/deleteSimulateExcelById")
     @ApiOperation(value = "模拟花费--删除excel文件根据ID", notes = "删除excel文件根据ID")
@@ -111,16 +119,19 @@ public interface DjBasicsActuarialConfigurationAPI {
 
     @PostMapping("web/config/actuarialConfig/querySimulateAssemblyList")
     @ApiOperation(value = "模拟花费--查询所有的组合列表", notes = "查询所有的组合列表")
-    ServerResponse querySimulateAssemblyList(@RequestParam("request") HttpServletRequest request);
+    ServerResponse querySimulateAssemblyList(@RequestParam("request") HttpServletRequest request,
+                                             @RequestParam("cityId") String cityId);
 
     @PostMapping("web/config/actuarialConfig/saveSimulateAssemblyInfo")
     @ApiOperation(value = "模拟花费--保存组合精算信息(批量保存)", notes = "保存组合精算信息(批量保存)")
     ServerResponse saveSimulateAssemblyInfo(@RequestParam("request") HttpServletRequest request,
-                                            @RequestParam("assemblyInfoAttr") String  assemblyInfoAttr);
+                                            @RequestParam("assemblyInfoAttr") String  assemblyInfoAttr,
+                                            @RequestParam("cityId") String cityId);
 
     @PostMapping("web/config/actuarialConfig/querySimulateAssemblyRelateionList")
     @ApiOperation(value = "模拟花费--查询组合精算列表信息", notes = "查询组合精算列表信息")
-    ServerResponse querySimulateAssemblyRelateionList(@RequestParam("request") HttpServletRequest request);
+    ServerResponse querySimulateAssemblyRelateionList(@RequestParam("request") HttpServletRequest request,
+                                                      @RequestParam("cityId") String cityId);
 
 
 }

@@ -32,8 +32,8 @@ public class ServerPortController implements ServerPortAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getHeatSearchBox(HttpServletRequest request) {
-        return technologyService.getHeatSearchBox();
+    public ServerResponse getHeatSearchBox(HttpServletRequest request,String cityId) {
+        return technologyService.getHeatSearchBox(cityId);
     }
 
     @Override
