@@ -34,8 +34,8 @@ public class SearchActuarialConfigController implements SearchActuarialConfigAPI
      */
     @Override
     @ApiMethod
-    public ServerResponse searchActuarialList(HttpServletRequest request) {
-        return searchActuarialConfigServices.searchActuarialList();
+    public ServerResponse searchActuarialList(HttpServletRequest request,String cityId) {
+        return searchActuarialConfigServices.searchActuarialList(cityId);
     }
 
     /**
@@ -57,8 +57,8 @@ public class SearchActuarialConfigController implements SearchActuarialConfigAPI
      */
     @Override
     @ApiMethod
-    public ServerResponse searchSimulationTitleList(HttpServletRequest request){
-        return searchActuarialConfigServices.searchSimulationTitleList();
+    public ServerResponse searchSimulationTitleList(HttpServletRequest request,String cityId){
+        return searchActuarialConfigServices.searchSimulationTitleList(cityId);
     }
 
     /**
@@ -69,8 +69,8 @@ public class SearchActuarialConfigController implements SearchActuarialConfigAPI
      */
     @Override
     @ApiMethod
-    public ServerResponse searchSimulationTitleDetailList(HttpServletRequest request,String titleId){
-        return searchActuarialConfigServices.searchSimulationTitleDetailList(titleId);
+    public ServerResponse searchSimulationTitleDetailList(HttpServletRequest request,String titleId,String cityId){
+        return searchActuarialConfigServices.searchSimulationTitleDetailList(titleId,cityId);
     }
 
     /**
@@ -81,7 +81,7 @@ public class SearchActuarialConfigController implements SearchActuarialConfigAPI
      */
     @Override
     @ApiMethod
-    public ServerResponse searchSimulateCostInfoList(HttpServletRequest request,String groupCode){
-        return searchActuarialConfigServices.searchSimulateCostInfoList(groupCode);
+    public ServerResponse searchSimulateCostInfoList(HttpServletRequest request,String groupCode,String cityId){
+        return searchActuarialConfigServices.searchSimulateCostInfoList(groupCode,cityId);
     }
 }

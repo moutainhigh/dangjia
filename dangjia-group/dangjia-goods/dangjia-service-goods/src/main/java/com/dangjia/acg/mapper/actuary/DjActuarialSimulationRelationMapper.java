@@ -27,5 +27,5 @@ public interface DjActuarialSimulationRelationMapper extends Mapper<DjActuarialS
      * @param codeList code编码列表
      * @return
      */
-    DjActuarialSimulationRelation querySimulateAssemblyRelateionInfo(@Param("codeList") List  codeList);
+    DjActuarialSimulationRelation querySimulateAssemblyRelateionInfo(@Param("codeList") List  codeList,@Param("cityId") String cityId);
 }

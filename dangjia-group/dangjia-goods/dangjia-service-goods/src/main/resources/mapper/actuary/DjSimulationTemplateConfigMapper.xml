@@ -108,6 +108,7 @@
         FROM
             dj_simulation_template_config t
         where data_status = '0'
+        and t.city_id=#{cityId}
         order by config_type,create_date
     </select>
 </mapper>

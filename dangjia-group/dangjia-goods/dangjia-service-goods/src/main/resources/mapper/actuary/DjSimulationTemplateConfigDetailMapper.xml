@@ -80,6 +80,7 @@
             dj_simulation_template_config_detail
         where config_status = 1
         and data_status = 0
+        and city_id=#{cityId}
         and simulation_template_id=#{simulationTemplateId}
         order by template_detail_index
     </select>

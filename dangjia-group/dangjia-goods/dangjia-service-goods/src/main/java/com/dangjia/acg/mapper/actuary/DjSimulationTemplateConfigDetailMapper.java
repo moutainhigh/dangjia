@@ -46,5 +46,5 @@ public interface DjSimulationTemplateConfigDetailMapper extends Mapper<DjSimulat
      * @param addressUrl
      * @return
      */
-    List<SimulationTemplateConfigDetailAppDTO> searchSimulationTitleDetailList(@Param("simulationTemplateId")String simulationTemplateId, @Param("addressUrl") String addressUrl);
+    List<SimulationTemplateConfigDetailAppDTO> searchSimulationTitleDetailList(@Param("simulationTemplateId")String simulationTemplateId, @Param("addressUrl") String addressUrl,@Param("cityId") String cityId);
 }

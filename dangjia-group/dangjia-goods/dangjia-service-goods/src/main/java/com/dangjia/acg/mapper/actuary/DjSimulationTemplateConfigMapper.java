@@ -34,6 +34,6 @@ public interface DjSimulationTemplateConfigMapper extends Mapper<DjSimulationTem
      * 我要装修--模拟花费标题查询
      * @return
      */
-    List<SimulationTemplateAppConfigDTO> searchSimulationTitleList();
+    List<SimulationTemplateAppConfigDTO> searchSimulationTitleList(@Param("cityId") String cityId);
 
 }
