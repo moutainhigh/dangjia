@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * author: zmj
  * Date: 2018/11/9 0009
  * Time: 10:55
+ * 订单要货操作迁移到dj-bill之后，此功能停用
  */
 @FeignClient("dangjia-service-master")
 @Api(value = "订单要货操作", description = "订单要货操作")

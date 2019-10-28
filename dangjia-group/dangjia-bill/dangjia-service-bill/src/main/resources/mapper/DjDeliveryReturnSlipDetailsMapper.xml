@@ -35,7 +35,8 @@
             dosi.image,
             dosi.num,
             dosi.price,
-            dosi.total_price as totalPrice
+            dosi.total_price as totalPrice,
+            dosi.receive
         FROM
             dj_deliver_split_deliver dsd
         INNER JOIN dj_deliver_order_split_item dosi ON dsd.id = dosi.split_deliver_id
@@ -78,7 +79,8 @@
     <select id="queryMemberInfByHouseId" resultType="com.dangjia.acg.dto.delivery.DjDeliveryReturnSlipDetailsListDTO">
         SELECT
             if(m.NAME!="" and m.NAME is not null,m.NAME,m.nick_name) as name,
-            m.mobile as mobile
+            m.mobile as mobile,
+            m.id as memberId
         FROM
             dj_house h
         INNER JOIN dj_member m ON m.id = h.member_id

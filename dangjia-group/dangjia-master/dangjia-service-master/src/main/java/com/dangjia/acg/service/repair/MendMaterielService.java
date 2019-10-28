@@ -109,7 +109,7 @@ public class MendMaterielService {
     /**
      * 根据mendOrderId查明细
      */
-    public ServerResponse mendMaterialList(String mendOrderId) {
+    public ServerResponse mendMaterialList(String mendOrderId,String userId) {
         MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);
         House house = houseMapper.selectByPrimaryKey(mendOrder.getHouseId());
         List<MendMateriel> mendMaterielList = mendMaterialMapper.byMendOrderId(mendOrderId);

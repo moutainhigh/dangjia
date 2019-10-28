@@ -121,11 +121,11 @@ public class ForMasterController implements ForMasterAPI {
        return forMasterService.renGong(houseFlowId);
     }
 
-    @Override
+  /*  @Override
     @ApiMethod
     public Double getBudgetWorkerPrice(String houseId, String workerTypeId, String cityId){
         return forMasterService.getBudgetWorkerPrice(houseId,workerTypeId);
-    }
+    }*/
     @Override
     @ApiMethod
     public Double getBudgetCaiPrice(String houseId, String workerTypeId,String cityId){
@@ -219,17 +219,5 @@ public class ForMasterController implements ForMasterAPI {
         return forMasterService.getProductTempListByStorefontId(storefontId, goodsId);
     }
 
-    public Map<String, Object> getAllBudgetMaterialWorkerList(String cityId,String houseId,String workerTypeId){
-        return forMasterService.getAllBudgetMaterialWorkerList(houseId,workerTypeId);
-    }
 
-    /**
-     * APP端，我要装修列表下单详情显示
-     * @param cityId
-     * @param houseId
-     * @return
-     */
-    public List<Map<String,Object>> getHouseDetailInfoList(String cityId,String houseId){
-        return forMasterService.getHouseDetailInfoList(houseId);
-    }
 }

@@ -22,6 +22,7 @@ import com.dangjia.acg.dto.pay.UpgradeSafeDTO;
 import com.dangjia.acg.mapper.activity.IActivityRedPackRecordMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
+import com.dangjia.acg.mapper.core.IMasterBudgetMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.delivery.*;
 import com.dangjia.acg.mapper.house.*;
@@ -146,6 +147,9 @@ public class PaymentService {
     private PurchaseOrderService purchaseOrderService;
     @Autowired
     private ICustomerRecordMapper customerRecordMapper;
+
+    @Autowired
+    private IMasterBudgetMapper iMasterBudgetMapper;
 
 
     @Autowired
@@ -1004,7 +1008,7 @@ public class PaymentService {
                     houseWorkerOrderMapper.updateByPrimaryKey(hwo);
                 }
 
-                Double workerPrice = forMasterAPI.getBudgetWorkerPrice(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//精算工钱
+                Double workerPrice = iMasterBudgetMapper.getMasterBudgetWorkerPrice(houseId, houseFlow.getWorkerTypeId());//精算工钱
                 Double caiPrice = forMasterAPI.getBudgetCaiPrice(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//精算材料钱
                 Double serPrice = forMasterAPI.getBudgetSerPrice(houseId, houseFlow.getWorkerTypeId(), house.getCityId());//精算包工包料钱
                 hwo.setWorkPrice(new BigDecimal(workerPrice));//工钱

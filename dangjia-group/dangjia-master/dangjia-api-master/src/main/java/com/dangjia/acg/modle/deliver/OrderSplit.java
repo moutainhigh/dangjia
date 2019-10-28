@@ -62,8 +62,8 @@ public class OrderSplit extends BaseEntity {
 	private String workerTypeId;
 
 	@Column(name = "subscribe")
-	@Desc(value = "是否需要预约")
-	@ApiModelProperty("是否需要预约")
+	@Desc(value = "是否需要预约(1是，0否）")
+	@ApiModelProperty("是否需要预约(1是，0否）")
 	private String subscribe;
 
 	@Column(name = "storefront_id")

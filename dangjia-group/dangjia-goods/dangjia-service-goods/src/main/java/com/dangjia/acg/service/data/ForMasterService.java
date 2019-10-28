@@ -221,10 +221,10 @@ public class ForMasterService {
 
     /**
      * 支付时工种人工总价
-     */
+     *//*
     public Double getBudgetWorkerPrice(String houseId, String workerTypeId){
         return budgetWorkerMapper.getBudgetWorkerPrice(houseId,workerTypeId);
-    }
+    }*/
     /**
      * 支付时工种材料总价
      */
@@ -398,41 +398,6 @@ public class ForMasterService {
             }
         }
 
-    }
-
-    /**
-     * 中台装修列表，我要装修信息查询
-     * @param houseId
-     * @param workerTypeId
-     * @return
-     */
-    public Map<String, Object> getAllBudgetMaterialWorkerList(String houseId,String workerTypeId){
-        Map<String,Object> resBudgetMap=new HashMap<>();
-        resBudgetMap.put("configType",workerTypeId);
-        resBudgetMap.put("configName","1".equals(workerTypeId)?"设计阶段":"精算阶段");
-        List<Map<String,Object>> budgetList = budgetWorkerMapper.getAllBudgetMaterialWorkerList(houseId,workerTypeId);
-        resBudgetMap.put("budgetProductList",budgetList);//设计精算商品列表
-        return resBudgetMap;
-
-    }
-
-    /**
-     * APP端，我要装修列表下单详情显示
-     * @param houseId 房子ID
-     * @return
-     */
-    public List<Map<String,Object>> getHouseDetailInfoList(String houseId) {
-        //先查询店铺汇总信息，再查询对应的商品信息(包含 店铺ID，总价钱
-        List<Map<String, Object>> houseDetailList = budgetWorkerMapper.getHouseDetailInfoList(houseId);
-        if (houseDetailList != null && houseDetailList.size() > 0) {
-            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            for (Map<String, Object> houseMap : houseDetailList) {
-                List<ActuarialProductAppDTO> productlist = budgetWorkerMapper.getBudgetProductList(houseId, (String) houseMap.get("storefrontId"));
-                searchActuarialConfigServices.getProductList(productlist, address);
-                houseMap.put("productList", productlist);
-            }
-        }
-        return houseDetailList;
     }
     public ServerResponse getProductTempListByStorefontId(String storefontId,String goodsId){
         List<DjBasicsProductTemplate> productList=iBasicsProductTemplateMapper.getProductTempListByStorefontId(storefontId,goodsId);

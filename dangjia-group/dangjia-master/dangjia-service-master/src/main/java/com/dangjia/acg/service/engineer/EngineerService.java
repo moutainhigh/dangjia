@@ -824,10 +824,13 @@ public class EngineerService {
     }
 
     public ServerResponse getWareHouse( HttpServletRequest request,String houseId, PageDTO pageDTO) {
-        String userID = request.getParameter(Constants.USERID);
+        String userID = request.getParameter("userId");
         //通过缓存查询店铺信息
         Storefront storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userID,Storefront.class);
-
+        if(storefront==null)
+        {
+            return ServerResponse.createByErrorMessage("不存在店铺信息");
+        }
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         Example example = new Example(Warehouse.class);
         example.createCriteria().andEqualTo(Warehouse.HOUSE_ID, houseId).andEqualTo(Warehouse.STOREFRONT_ID,storefront.getId());

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.core.IMasterBudgetMapper">
+	<!--支付时工种人工总价-->
+	<select id="getMasterBudgetWorkerPrice" resultType="java.lang.Double">
+		SELECT
+			IFNULL(sum(bw.price * bw.shop_count),0) workerPrice
+		FROM
+			dj_actuary_budget_material bw
+		WHERE  bw.house_id = #{houseId}
+		and product_type='2'
+	    and bw.delete_state = 0
+	    and bw.worker_type_id = #{workerTypeId}
+	</select>
+
+
+	<!-- 根据houseId和wokerTypeId查询房子人工和房子所有的精算 -->
+	<select id="getAllBudgetMaterialWorkerList" resultType="java.util.Map">
+		    SELECT
+				t1.prod_template_id productId,
+				t1.prod_template_id productTemplateId,
+				t.goods_id goodsId,
+				t.product_sn productSn,
+				t.product_name productName,
+				t.goods_name goodsName,
+				t.shop_count shopCount,
+				t.storefont_id storefontId,
+				t.category_id categoryId
+			FROM
+				dj_actuary_budget_material t,
+				dj_basics_storefront_product t1
+			WHERE
+				t.product_id = t1.id
+			AND t.house_id = #{houseId}
+			AND t.worker_type_id = #{workerTypeId}
+			and t.delete_state!=1
+
+	</select>
+
+
+
+	<!--按店铺汇总的设计精算阶段的商品总价钱-->
+	<select id="getHouseDetailInfoList" resultType="java.util.Map">
+		SELECT
+			t.storefont_id storefrontId,
+			t1.storefront_name storefrontName,
+			sum(t.total_price) totalPrice
+		FROM
+			dj_actuary_budget_material t
+		LEFT JOIN dj_basics_storefront t1 ON t.storefont_id = t1.id
+		WHERE
+			t.house_id = #{houseId}
+		AND t.worker_type_id IN (1, 2)
+		AND t.delete_state != 1
+		GROUP BY
+			t.storefont_id,
+		t1.storefront_name
+
+	</select>
+
+	<!--店铺下面的商品详情信息-->
+	<select id="getBudgetProductList" resultType="com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO">
+		SELECT
+			t2.id productId,
+			t2.storefront_id storefrontId,
+			t3.id productTemplateId,
+			t3.product_sn productSn,
+			t2.product_name productName,
+			t3.goods_id goodsId,
+			t5.price price,
+			t3.image,
+			t3.unit_id unit,
+			t3.unit_name unitName,
+			t3.value_id_arr valueIdArr,
+			t3.value_name_arr valueNameArr,
+			t4.brand_id brandId
+		FROM
+			dj_actuarial_product_config t1,
+			dj_basics_storefront_product t2,
+			dj_basics_product_template t3,
+			dj_basics_goods t4,
+			(SELECT
+				t.product_id productId,
+				t.storefont_id storefrontId,
+				t.price
+			FROM
+				dj_actuary_budget_material t
+			WHERE
+				t.house_id = #{houseId}
+			AND t.storefont_id = #{storefrontId}
+			AND t.worker_type_id IN (1, 2)
+			AND t.delete_state != 1
+
+			) t5
+		WHERE
+			t1.product_id = t2.prod_template_id
+		AND t1.product_id = t3.id
+		AND t3.goods_id = t4.id
+		AND t2.is_shelf_status = 1
+		AND t2.id = t5.productId
+	</select>
+
+</mapper>
