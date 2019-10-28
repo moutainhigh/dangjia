@@ -50,4 +50,8 @@ public class DjAdjustRecord extends BaseEntity {
     @ApiModelProperty("原价")
     private Double originalCost;
 
+    @Column(name = "city_id")
+    @Desc(value = "城市ID")
+    @ApiModelProperty("城市ID")
+    private String cityId;//城市ID
 }

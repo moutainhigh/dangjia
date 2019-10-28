@@ -49,6 +49,10 @@ public class DjSupApplication extends BaseEntity {
     @ApiModelProperty("合同地址")
     private String contract;
 
+    @Column(name = "city_id")
+    @Desc(value = "城市ID")
+    @ApiModelProperty("城市ID")
+    private String cityId;//城市ID
 
 
 }
