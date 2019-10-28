@@ -3,8 +3,10 @@ package com.dangjia.acg.service.deliver;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.BasicsStorefrontAPI;
+import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.api.supplier.DjSupplierAPI;
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
@@ -34,6 +36,7 @@ import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.repair.MendOrder;
+import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
 import com.dangjia.acg.modle.supplier.DjSupplier;
@@ -86,6 +89,10 @@ public class OrderSplitService {
 
     @Autowired
     private DjSupplierAPI djSupplierAPI ;
+
+
+    @Autowired
+    private RedisClient redisClient;
     /**
      * 修改 供应商结算状态
      * id 供应商结算id
@@ -498,11 +505,16 @@ public class OrderSplitService {
     /**
      * 材料员看房子列表
      */
-    public ServerResponse getHouseList(String storefrontId,String cityId,PageDTO pageDTO, String likeAddress,String startDate, String endDate) {
+    public ServerResponse getHouseList(String userID,String cityId,PageDTO pageDTO, String likeAddress,String startDate, String endDate) {
         try {
+            Storefront storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userID,Storefront.class);
+            if(storefront==null)
+            {
+                return ServerResponse.createByErrorMessage("不存在店铺信息");
+            }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
 //        List<House> houseList = houseMapper.selectAll();
-            List<House> houseList = houseMapper.getByLikeAddress(storefrontId,cityId,likeAddress,startDate,endDate);
+            List<House> houseList = houseMapper.getByLikeAddress(storefront.getId(),cityId,likeAddress,startDate,endDate);
             PageInfo pageResult = new PageInfo(houseList);
 
             List<DeliverHouseDTO> deliverHouseDTOList = new ArrayList<DeliverHouseDTO>();
@@ -538,12 +550,18 @@ public class OrderSplitService {
     /**
      * 根据房子id查询要货单列表
      */
-    public ServerResponse getOrderSplitList(String storefrontId,String houseId) {
+    public ServerResponse getOrderSplitList(String userID,String houseId) {
         try {
+            //通过缓存查询店铺信息
+            Storefront storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userID,Storefront.class);
+            if(storefront==null)
+            {
+                return ServerResponse.createByErrorMessage("不存在店铺信息");
+            }
             Example example = new Example(OrderSplit.class);
             example.createCriteria()
                     .andEqualTo(OrderSplit.HOUSE_ID, houseId)
-                    .andEqualTo(OrderSplit.STOREFRONT_ID,storefrontId)
+                    .andEqualTo(OrderSplit.STOREFRONT_ID,storefront.getId())
                     .andGreaterThan(OrderSplit.APPLY_STATUS, 0)//大于0
                     .andNotEqualTo(OrderSplit.APPLY_STATUS, 4);//过滤业主未支付
             example.orderBy(OrderSplit.CREATE_DATE).desc();

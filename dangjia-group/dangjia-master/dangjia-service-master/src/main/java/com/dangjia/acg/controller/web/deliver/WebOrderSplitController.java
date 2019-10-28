@@ -22,8 +22,6 @@ public class WebOrderSplitController implements WebOrderSplitAPI {
     @Autowired
     private OrderSplitService orderSplitService;//生成发货单
 
-    @Autowired
-    private RedisClient redisClient;
 
     /**
      * 供应商发货
@@ -106,20 +104,17 @@ public class WebOrderSplitController implements WebOrderSplitAPI {
     @Override
     @ApiMethod
     public ServerResponse getHouseList(HttpServletRequest request, String cityId, PageDTO pageDTO, String likeAddress, String startDate, String endDate) {
-        //redisClient.put(SUFFIX + sessionId.toString(), SerializeUtils.serialize(session));
         String userID = request.getParameter(Constants.USERID);
         //通过缓存查询店铺信息
-        Storefront storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userID,Storefront.class);
-        return orderSplitService.getHouseList(storefront.getId(),cityId,pageDTO, likeAddress, startDate,  endDate);
+        return orderSplitService.getHouseList(userID,cityId,pageDTO, likeAddress, startDate,  endDate);
     }
 
     @Override
     @ApiMethod
     public ServerResponse getOrderSplitList(HttpServletRequest request,String houseId) {
         String userID = request.getParameter(Constants.USERID);
-        //通过缓存查询店铺信息
-        Storefront storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userID,Storefront.class);
-        return orderSplitService.getOrderSplitList(storefront.getId(),houseId);
+
+        return orderSplitService.getOrderSplitList(userID,houseId);
     }
 
     @Override
