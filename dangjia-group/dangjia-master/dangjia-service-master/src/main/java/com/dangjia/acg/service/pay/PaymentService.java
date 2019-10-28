@@ -14,6 +14,7 @@ import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.activity.ActivityRedPackRecordDTO;
 import com.dangjia.acg.dto.actuary.BudgetLabelDTO;
+import com.dangjia.acg.dto.actuary.BudgetLabelGoodsDTO;
 import com.dangjia.acg.dto.actuary.FlowActuaryDTO;
 import com.dangjia.acg.dto.actuary.ShopGoodsDTO;
 import com.dangjia.acg.dto.pay.ActuaryDTO;
@@ -98,8 +99,6 @@ public class PaymentService {
     @Autowired
     private IHouseMapper houseMapper;
     @Autowired
-    private IHouseStyleTypeMapper houseStyleTypeMapper;
-    @Autowired
     private IWorkerTypeSafeMapper workerTypeSafeMapper;
     @Autowired
     private IWorkerTypeSafeOrderMapper workerTypeSafeOrderMapper;
@@ -133,8 +132,6 @@ public class PaymentService {
     private IWarehouseMapper warehouseMapper;//仓库
     @Autowired
     private IWarehouseDetailMapper warehouseDetailMapper;//流水
-    @Autowired
-    private IWorkDepositMapper workDepositMapper;
     @Autowired
     private BudgetMaterialAPI budgetMaterialAPI;
     @Autowired
@@ -217,11 +214,6 @@ public class PaymentService {
             }else if (businessOrder.getType() == 2) {
                 //处理补货补人工
                 this.mendOrder(businessOrder, payState);
-            } else if (businessOrder.getType() == 4) {//待付款 支付时业主包括取消的
-                //待付款 提前付材料
-                this.awaitPay(businessOrder, payState);
-            } else if (businessOrder.getType() == 8) {//待付款 支付时业主包括取消的
-                this.awaitPayPurchaseOrder(businessOrder, payState);
             } else if (businessOrder.getType() == 9) {//工人保险
                 Insurance insurance = insuranceMapper.selectByPrimaryKey(businessOrder.getTaskId());
                 if(insurance.getStartDate()==null){
@@ -252,13 +244,6 @@ public class PaymentService {
                 customerRecord.setRemindTime(calendar.getTime());
                 customerRecordMapper.updateByPrimaryKeySelective(customerRecord);
                 return ServerResponse.createBySuccessMessage("支付成功");
-            } else if (businessOrder.getType() == 6) {//待付款 更换结算
-                HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
-                        .getRequest();
-                House house = houseMapper.selectByPrimaryKey(businessOrder.getHouseId());
-                request.setAttribute(Constants.CITY_ID, house.getCityId());
-                //待付款 提前付材料
-                productChangeService.orderBackFun(request, businessOrder.getTaskId());
             } else if (businessOrder.getType() == 7) {
                 houseDesignPayService.setPaySuccess(businessOrder);
             }
@@ -640,65 +625,7 @@ public class PaymentService {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
         }
     }
-    /**
-     * 处理待付款提前付生成订单
-     */
-    private void awaitPay(BusinessOrder businessOrder, String payState) {
-        try {
-            House house = houseMapper.selectByPrimaryKey(businessOrder.getHouseId());
-            List<BudgetMaterial> budgetMaterialList = forMasterAPI.caiLiao(house.getCityId(), businessOrder.getTaskId());
-            if (budgetMaterialList.size() > 0) {
-                HouseExpend houseExpend = houseExpendMapper.getByHouseId(businessOrder.getHouseId());
-                houseExpend.setMaterialMoney(houseExpend.getMaterialMoney() + businessOrder.getTotalPrice().doubleValue());//材料钱
-                houseExpendMapper.updateByPrimaryKeySelective(houseExpend);
 
-                HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(businessOrder.getTaskId());
-                WorkerType wt = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
-                Order order = new Order();
-                order.setHouseId(house.getId());
-                order.setBusinessOrderNumber(businessOrder.getNumber());//业务订单
-                order.setTotalAmount(businessOrder.getTotalPrice());// 订单总额(材料总钱)
-                order.setWorkerTypeName(wt.getName() + "先付材料订单");
-                order.setWorkerTypeId(wt.getId());
-                order.setType(2);//材料
-                order.setPayment(payState);// 支付方式
-                orderMapper.insert(order);
-
-                this.addWarehouse(budgetMaterialList, businessOrder.getHouseId(), order.getId(), 2);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-        }
-    }
-
-    /**
-     * 未购买支付成功
-     */
-    private void awaitPayPurchaseOrder(BusinessOrder businessOrder, String payState) {
-        try {
-            House house = houseMapper.selectByPrimaryKey(businessOrder.getHouseId());
-            List<BudgetMaterial> budgetMaterialList = purchaseOrderService.payPurchaseOrder(businessOrder.getTaskId());
-            if (budgetMaterialList.size() > 0) {
-                HouseExpend houseExpend = houseExpendMapper.getByHouseId(businessOrder.getHouseId());
-                houseExpend.setMaterialMoney(houseExpend.getMaterialMoney() + businessOrder.getTotalPrice().doubleValue());//材料钱
-                houseExpendMapper.updateByPrimaryKeySelective(houseExpend);
-                Order order = new Order();
-                order.setHouseId(house.getId());
-                order.setBusinessOrderNumber(businessOrder.getNumber());//业务订单
-                order.setTotalAmount(businessOrder.getTotalPrice());// 订单总额(材料总钱)
-                order.setWorkerTypeName("材料订单");
-                order.setWorkerTypeId("");
-                order.setType(2);//材料
-                order.setPayment(payState);// 支付方式
-                orderMapper.insert(order);
-                this.addWarehouse(budgetMaterialList, businessOrder.getHouseId(), order.getId(), 2);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-        }
-    }
 
     /**
      * 处理精算人工生成人工订单
@@ -1171,6 +1098,84 @@ public class PaymentService {
         }
     }
 
+    /**
+     * 处理精算人工生成人工订单
+     */
+    private boolean generateOrder(String businessOrderNumber, HouseWorkerOrder hwo,  ShopGoodsDTO budgetLabelDTO) {
+        try {
+            //处理人工
+            House house = houseMapper.selectByPrimaryKey(hwo.getHouseId());
+            if (budgetLabelDTO!=null) {
+                List<BudgetLabelGoodsDTO> rgGoods=new ArrayList<>();
+                List<BudgetLabelGoodsDTO> clGoods=new ArrayList<>();
+                for (BudgetLabelDTO labelDTO : budgetLabelDTO.getLabelDTOS()) {
+                    for (BudgetLabelGoodsDTO good : labelDTO.getGoods()) {
+                        if(good.getProductType()==2){
+                            rgGoods.add(good);
+                        }else{
+                            clGoods.add(good);
+                        }
+                    }
+                }
+                WorkerType wt = workerTypeMapper.selectByPrimaryKey(hwo.getWorkerTypeId());
+                if(rgGoods.size()>0) {
+                    Order order = new Order();
+                    order.setStorefontId(budgetLabelDTO.getShopId());
+                    order.setHouseId(house.getId());
+                    order.setBusinessOrderNumber(businessOrderNumber);//业务订单
+                    order.setTotalAmount(hwo.getWorkPrice());// 订单总额(工钱)
+                    order.setWorkerTypeName(wt.getName() + "订单");
+                    order.setWorkerTypeId(hwo.getWorkerTypeId());
+                    order.setType(1);//人工
+//                            `total_amount` decimal(10,0) DEFAULT NULL COMMENT '订单总额',
+//                            `worker_type_name` varchar(255) COLLATE utf8_bin DEFAULT NULL COMMENT '工种名称',
+//                            `worker_type_id` varchar(32) COLLATE utf8_bin DEFAULT NULL COMMENT '工种类型ID',
+//                            `type` int(2) DEFAULT '0' COMMENT '1人工订单 2材料订单',
+//                            `parent_order_id` varchar(60) COLLATE utf8_bin DEFAULT '0' COMMENT '父订单ID',
+//                            `order_number` varchar(60) COLLATE utf8_bin DEFAULT '0' COMMENT '订单编号',
+//                            `member_id` varchar(60) COLLATE utf8_bin NOT NULL COMMENT '用户ID',
+//                            `worker_id` varchar(60) COLLATE utf8_bin NOT NULL COMMENT '工人ID',
+//                            `address_id` varchar(60) COLLATE utf8_bin DEFAULT NULL COMMENT '地址ID',
+//                            `storefont_id` varchar(60) COLLATE utf8_bin DEFAULT NULL COMMENT '店铺ID',
+//                            `city_id` varchar(60) COLLATE utf8_bin NOT NULL COMMENT '城市ID',
+//                            `total_discount_price` decimal(10,2) DEFAULT NULL COMMENT '优惠总价钱',
+//                            `total_stevedorage_cost` decimal(10,2) DEFAULT NULL COMMENT '总搬运费',
+//                            `total_transportation_cost` decimal(10,2) DEFAULT NULL COMMENT '总运费',
+//                            `order_type` varchar(20) COLLATE utf8_bin DEFAULT NULL COMMENT '订单类型（1设计，精算，2其它）',
+//                            `actual_payment_price` decimal(10,2) DEFAULT NULL COMMENT '实付总价',
+//                            `is_pay_money` varchar(2) COLLATE utf8_bin DEFAULT NULL COMMENT '是否可付款（1不可付款，2可付款）',
+//                            `is_show_order` varchar(2) COLLATE utf8_bin DEFAULT '1' COMMENT '是否显示该订单（1是，2否）',
+//                            `order_status` varchar(32) COLLATE utf8_bin DEFAULT NULL COMMENT '订单状态（1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭）',
+//                            `order_generation_time` datetime DEFAULT NULL COMMENT '订单生成时间',
+//                            `order_pay_time` datetime DEFAULT NULL COMMENT '订单支付时间',
+//                            `order_source` varchar(2) COLLATE utf8_bin DEFAULT '2' COMMENT '订单来源(1,精算制作，2业主自购，3购物车）',
+//                            `create_by` varchar(60) COLLATE utf8_bin DEFAULT NULL COMMENT '创建人',
+//                            `update_by` varchar(60) COLLATE utf8_bin DEFAULT NULL COMMENT '修改人',
+                    orderMapper.insert(order);
+//                    for (BudgetWorker budgetWorker : budgetLabelDTO.getLabelDTOS()) {
+//                        OrderItem orderItem = new OrderItem();
+//                        orderItem.setOrderId(order.getId());
+//                        orderItem.setHouseId(hwo.getHouseId());
+//                        orderItem.setPrice(budgetWorker.getPrice());//销售价
+//                        orderItem.setShopCount(budgetWorker.getShopCount().doubleValue());//购买总数
+//                        orderItem.setUnitName(budgetWorker.getUnitName());//单位
+//                        orderItem.setTotalPrice(budgetWorker.getTotalPrice());//总价
+//                        orderItem.setProductName(budgetWorker.getName());
+//                        orderItem.setProductSn(budgetWorker.getWorkerGoodsSn());
+//                        orderItem.setProductId(budgetWorker.getWorkerGoodsId());
+//                        orderItem.setImage(budgetWorker.getImage());
+//                        orderItem.setCityId(house.getCityId());
+//                        orderItemMapper.insert(orderItem);
+//                    }
+                }
+            }
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return false;
+        }
+    }
     /**
      * 可用优惠券数据
      *
