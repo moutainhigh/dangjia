@@ -25,8 +25,6 @@ import com.dangjia.acg.mapper.product.*;
 import com.dangjia.acg.mapper.sup.ISupplierMapper;
 import com.dangjia.acg.mapper.sup.ISupplierProductMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
-import com.dangjia.acg.modle.actuary.BudgetWorker;
-import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.brand.Unit;
@@ -34,15 +32,11 @@ import com.dangjia.acg.modle.product.*;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
 import com.dangjia.acg.service.actuary.BudgetWorkerService;
-import com.dangjia.acg.service.actuary.app.AppActuaryOperationService;
 import com.dangjia.acg.service.actuary.app.SearchActuarialConfigServices;
-import com.sun.javafx.collections.MappingChange;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.ibatis.jdbc.Null;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.expression.spel.ast.NullLiteral;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import tk.mybatis.mapper.entity.Example;
@@ -108,7 +102,7 @@ public class ForMasterService {
      * 增加退数量
      */
     public void backCount (String houseId,String workerGoodsId,Double num){
-        BudgetWorker budgetWorker = budgetWorkerMapper.byWorkerGoodsId(houseId,workerGoodsId);
+        BudgetMaterial budgetWorker = budgetWorkerMapper.byWorkerGoodsId(houseId,workerGoodsId);
         budgetWorker.setBackCount(budgetWorker.getBackCount() + num);
         budgetWorkerMapper.updateByPrimaryKeySelective(budgetWorker);
     }
@@ -117,7 +111,7 @@ public class ForMasterService {
      * 增加补数量
      */
     public void repairCount(String houseId,String workerGoodsId,Double num){
-        BudgetWorker budgetWorker = budgetWorkerMapper.byWorkerGoodsId(houseId,workerGoodsId);
+        BudgetMaterial budgetWorker = budgetWorkerMapper.byWorkerGoodsId(houseId,workerGoodsId);
         budgetWorker.setRepairCount(budgetWorker.getRepairCount() + num);
         budgetWorkerMapper.updateByPrimaryKeySelective(budgetWorker);
     }
@@ -205,12 +199,12 @@ public class ForMasterService {
      * 支付回调修改人工精算
      * 业主取消的又改为待付款
      */
-    public List<BudgetWorker> renGong(String houseFlowId){
+    public List<BudgetMaterial> renGong(String houseFlowId){
         try{
-            Example example = new Example(BudgetWorker.class);
-            example.createCriteria().andEqualTo(BudgetWorker.HOUSE_FLOW_ID, houseFlowId).andEqualTo(BudgetWorker.DELETE_STATE, 0);
-            List<BudgetWorker> budgetWorkerList = budgetWorkerMapper.selectByExample(example);
-            for(BudgetWorker budgetWorker : budgetWorkerList){
+            Example example = new Example(BudgetMaterial.class);
+            example.createCriteria().andEqualTo(BudgetMaterial.HOUSE_FLOW_ID, houseFlowId).andEqualTo(BudgetMaterial.DELETE_STATE, 0);
+            List<BudgetMaterial> budgetWorkerList = budgetWorkerMapper.selectByExample(example);
+            for(BudgetMaterial budgetWorker : budgetWorkerList){
                 budgetWorker.setPrice(budgetWorker.getPrice());
                 budgetWorker.setTotalPrice(budgetWorker.getShopCount() * budgetWorker.getPrice());
                 budgetWorker.setDeleteState(3);//已支付

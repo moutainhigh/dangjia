@@ -1,16 +1,12 @@
 package com.dangjia.acg.api.data;
 
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.dto.actuary.BudgetLabelDTO;
-import com.dangjia.acg.dto.actuary.BudgetLabelGoodsDTO;
 import com.dangjia.acg.dto.actuary.ShopGoodsDTO;
 import com.dangjia.acg.dto.product.ProductWorkerDTO;
 import com.dangjia.acg.dto.product.StorefontInfoDTO;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
-import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.product.BasicsGoods;
-import com.dangjia.acg.modle.product.DjBasicsProduct;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
@@ -95,7 +91,7 @@ public interface ForMasterAPI {
 
     @PostMapping("/data/forMaster/renGong")
     @ApiOperation(value = "支付回调修改人工精算", notes = "支付回调修改人工精算")
-    List<BudgetWorker> renGong(@RequestParam("cityId") String cityId,@RequestParam("houseFlowId") String houseFlowId);
+    List<BudgetMaterial> renGong(@RequestParam("cityId") String cityId,@RequestParam("houseFlowId") String houseFlowId);
 
     @PostMapping("/data/forMaster/getBudgetWorkerPrice")
     @ApiOperation(value = "支付时工种人工总价", notes = "支付时工种人工总价")

@@ -28,13 +28,44 @@
 		modify_date as modifyDate
 	</sql>
 
+	<sql id="new_columns">
+		id,
+		house_flow_id as houseFlowId,
+		house_id as houseId,
+		worker_type_id as workerTypeId,
+		steta,
+		template_id as templateId,
+		convert_count as convertCount,
+		delete_state as deleteState,
+		product_id as productId,
+		product_sn as productSn,
+		product_name as productName,
+		product_nick_name as productNickName,
+		goods_id as goodsId,
+		goods_name as goodsName,
+		price,
+		cost,
+		description,
+		shop_count as shopCount,
+		unit_name as unitName,
+		total_price as totalPrice,
+		group_type as groupType,
+		product_type as productType,
+		goods_group_id as goodsGroupId,
+		category_id as categoryId,
+		repair_count as repairCount,
+		back_count as backCount,
+		image,
+		create_date as createDate,
+		modify_date as modifyDate
+	</sql>
 	<!--精算工种人工(支付和未支付)-->
-	<select id="getTypeAllList" resultType="com.dangjia.acg.modle.actuary.BudgetWorker">
+	<select id="getTypeAllList" resultType="com.dangjia.acg.modle.actuary.BudgetMaterial">
 		SELECT
-		<include refid="all_columns"/>
-		FROM dj_actuary_budget_worker
-		WHERE
-		house_id=#{houseId}
+		<include refid="new_columns"/>
+		FROM dj_actuary_budget_material
+		WHERE product_type='2'
+		and house_id=#{houseId}
 		<if test = "workerTypeId!=null and workerTypeId!=''">
 			and worker_type_id =#{workerTypeId}
 		</if>
@@ -52,8 +83,9 @@
 		SELECT
 			IFNULL(sum(bw.price * bw.shop_count),0) workerPrice
 		FROM
-		dj_actuary_budget_worker bw
+		dj_actuary_budget_material bw
 		WHERE  bw.house_id = #{houseId}
+		and bw.product_type='2'
 		<if test = "deleteState!=null and deleteState!=''">
 			and bw.delete_state = #{deleteState}
 		</if>
@@ -80,35 +112,36 @@
 	<!--查询精算工种-->
 	<select id="workerTypeList" resultType="java.lang.String">
 		select DISTINCT bw.worker_type_id
-		from dj_actuary_budget_worker bw
+		from dj_actuary_budget_material bw
  		where bw.house_id = #{houseId}
  		and bw.delete_state in (0,2,3)
  		order by bw.worker_type_id
 	</select>
 
-	<select id="byWorkerGoodsId" resultType="com.dangjia.acg.modle.actuary.BudgetWorker" >
+	<select id="byWorkerGoodsId" resultType="com.dangjia.acg.modle.actuary.BudgetMaterial" >
 		SELECT
-		    <include refid="all_columns"/>
-		FROM dj_actuary_budget_worker
-		WHERE
-			worker_goods_id=#{workerGoodsId}
+		    <include refid="new_columns"/>
+		FROM dj_actuary_budget_material
+		WHERE product_type='2'
+		and worker_goods_id=#{workerGoodsId}
 		and
 			house_id=#{houseId}
 	</select>
 
 	<!--根据houseFlowId-->
-	<select id="getByHouseFlowId" resultType="com.dangjia.acg.modle.actuary.BudgetWorker">
+	<select id="getByHouseFlowId" resultType="com.dangjia.acg.modle.actuary.BudgetMaterial">
 		SELECT
-		<include refid="all_columns"/>
-		FROM dj_actuary_budget_worker
-		WHERE
-		    house_id=#{houseId}
+		<include refid="new_columns"/>
+		FROM dj_actuary_budget_material
+		WHERE product_type='2'
+		and house_id=#{houseId}
 		and house_flow_id = #{houseFlowId}
 		and delete_state = 3;
 	</select>
 	<!--根据houseFlowId-->
 	<select id="getByHouseFlowTechnologyId" resultType="com.dangjia.acg.modle.basics.Technology">
-		SELECT
+
+SELECT
 			y.id,
 			y.NAME,
 			y.material_or_worker AS materialOrWorker,
@@ -123,12 +156,14 @@
 			y.considerations,
 			y.text_content AS textContent
 		FROM
-			dj_actuary_budget_worker w
-			INNER JOIN `dj_basics_product_worker` g ON w.worker_goods_id = g.product_id
-			INNER JOIN dj_basics_technology y ON FIND_IN_SET( y.id, g.technology_ids )
+			dj_actuary_budget_material w
+      INNER JOIN dj_basics_storefront_product g on w.product_id = g.id
+      INNER JOIN dj_basics_product_template t1 on g.prod_template_id=t1.id
+			INNER JOIN dj_basics_technology y ON FIND_IN_SET( y.id, t1.technology_ids )
 		WHERE
 		    w.house_id=#{houseId}
 			AND w.house_flow_id = #{houseFlowId}
+            and w.product_type='2'
 			AND w.delete_state = 3
 			AND ( w.shop_count + w.repair_count ) > 0
 			AND y.type IN ( 2, 3 )
@@ -140,18 +175,20 @@
 		SELECT
 			IFNULL(sum(bw.price * bw.shop_count),0) workerPrice
 		FROM
-			dj_actuary_budget_worker bw
+			dj_actuary_budget_material bw
 		WHERE  bw.house_id = #{houseId}
+		and product_type='2'
 	    and bw.delete_state = 0
 	    and bw.worker_type_id = #{workerTypeId}
 	</select>
 
-	<select id="getBudgetWorkerList" resultType="com.dangjia.acg.modle.actuary.BudgetWorker">
+	<select id="getBudgetWorkerList" resultType="com.dangjia.acg.modle.actuary.BudgetMaterial">
 		SELECT
-		<include refid="all_columns"/>
-		FROM dj_actuary_budget_worker
+		<include refid="new_columns"/>
+		FROM dj_actuary_budget_material
 		WHERE
 		   house_id=#{houseId}
+		   and product_type='2'
 		   and worker_type_id =#{workerTypeId}
 		   and delete_state=0;
 	</select>
@@ -160,7 +197,7 @@
 	<select id="getBudgetWorker" resultType="java.util.Map">
 		SELECT
 		     <include refid="all_columns"/>
-		FROM dj_actuary_budget_worker ORDER BY create_date desc
+		FROM dj_actuary_budget_material where product_type='2' ORDER BY create_date desc
 	</select>
 
 	<!-- 根据houseId和wokerTypeId查询房子人工精算 -->
@@ -174,10 +211,10 @@
 			t1.steta,
 			t1.template_id AS templateId,
 			t1.delete_state AS deleteState,
-			t1.worker_goods_id AS workerGoodsId,
-			t1.worker_goods_sn AS workerGoodsSn,
-			t1. NAME,
-			t1. NAME productName,
+			t1.product_id AS workerGoodsId,
+			t1.product_sn AS workerGoodsSn,
+			t1.product_name NAME,
+			t1.product_name productName,
 			t1.image,
 			t1.price,
 			t1.description,
@@ -193,26 +230,28 @@
 			t4.NAME goodsName,
 			t4.type productType
 		FROM
-			dj_actuary_budget_worker t1,
+			dj_actuary_budget_material t1,
 			dj_basics_storefront_product t2,
 			dj_basics_product_template t3,
 			dj_basics_goods t4
 		WHERE
-			t1.worker_goods_id = t2.id
+			t1.product_id = t2.id
+		and t1.product_type='2'
 		AND t2.prod_template_id = t3.id
 		AND t3.goods_id = t4.id
 		and t1.house_id=#{houseId}
 		and t1.worker_type_id =#{workerTypeId}
 		and t1.delete_state!=1
-		ORDER BY t1.worker_goods_sn and t1.create_date desc
+		ORDER BY t1.product_sn and t1.create_date desc
 	</select>
 
 	<!-- 根据houseId和wokerTypeId查询房子人工精算 -->
-	<select id="getBudgetWorkerByHouseIdAndWorkerTypeId" resultType="com.dangjia.acg.modle.actuary.BudgetWorker">
+	<select id="getBudgetWorkerByHouseIdAndWorkerTypeId" resultType="com.dangjia.acg.modle.actuary.BudgetMaterial">
 		SELECT
-		<include refid="all_columns"/>
-		FROM dj_actuary_budget_worker
+		<include refid="new_columns"/>
+		FROM dj_actuary_budget_material
 		WHERE house_id=#{houseId}
+		and product_type='2'
 		and worker_type_id =#{workerTypeId}
 		ORDER BY create_date desc
 	</select>
@@ -221,25 +260,27 @@
 	<select id="getAllbudgetTemplates" resultType="java.util.Map">
 		SELECT
 		    <include refid="all_columns"/>
-		FROM dj_actuary_budget_worker WHERE template_id=#{template_id} and steta=3  ORDER BY create_date desc
+		FROM dj_actuary_budget_material WHERE product_type='2' template_id=#{template_id} and steta=3  ORDER BY create_date desc
 	</select>
 
 	<!-- 删除对象 -->
 	<delete id="deleteById" parameterType="java.lang.String">
-		DELETE FROM dj_actuary_budget_worker 
+		DELETE FROM dj_actuary_budget_material
 		WHERE id=#{id}
 	</delete>
 
 	<!-- 删除对象 -->
 	<delete id="deleteBytemplateId" parameterType="java.lang.String">
-		DELETE FROM dj_actuary_budget_worker 
+		DELETE FROM dj_actuary_budget_material
 		WHERE template_id=#{template_id}
+		and product_type='2'
 	</delete>
 
 	<!-- 根据houseId和工种id删除人工精算 -->
 	<delete id="deleteByhouseId" parameterType="java.lang.String">
-		DELETE FROM dj_actuary_budget_worker
+		DELETE FROM dj_actuary_budget_material
 		WHERE house_id=#{houseId}
+		and product_type='2'
 		and worker_type_id =#{workerTypeId}
 	</delete>
 
@@ -248,14 +289,15 @@
 		SELECT
 			 IFNULL(sum(abw.price * abw.shop_count),0) AS totalPrice
 		FROM
-			dj_actuary_budget_worker abw
+			dj_actuary_budget_material abw
 		WHERE
 			abw.house_id = #{houseId}
+		and abw.product_type='2'
 		AND abw.delete_state != 1
 		AND abw.worker_type_id = #{workerTypeId}
     </select>
 
-	<insert id="insertByBatch" parameterType="java.util.List">
+	<!--<insert id="insertByBatch" parameterType="java.util.List">
 		INSERT INTO dj_actuary_budget_worker (
 		id,
 		house_flow_id,
@@ -307,8 +349,8 @@
 			)
 		</foreach>
 	</insert>
-
-	<!--更新人工商品名称-->
+-->
+	<!--&lt;!&ndash;更新人工商品名称&ndash;&gt;
 	<update id="updateBudgetMaterialById" parameterType="java.lang.String">
 		UPDATE dj_actuary_budget_worker p1
 		INNER JOIN `dj_basics_product` p ON p.id = p1.worker_goods_id
@@ -316,14 +358,14 @@
 		WHERE p.id=#{id}
 	</update>
 
-	<!--更新人工商品名称商品3.0改版后调用-->
+	&lt;!&ndash;更新人工商品名称商品3.0改版后调用&ndash;&gt;
 	<update id="updateBudgetMaterialByProductId" parameterType="java.lang.String">
 		UPDATE dj_actuary_budget_worker p1
 		INNER JOIN `dj_basics_product` p ON p.id = p1.worker_goods_id
 		SET p1.name = p.`name`,p1.image=p.image,p1.price=p.price,p1.unit_name=p.unit_name
 		WHERE p.id=#{id}
 	</update>
-
+-->
 
 
     <!-- 根据房子id和工序id查询人工精算总价 -->

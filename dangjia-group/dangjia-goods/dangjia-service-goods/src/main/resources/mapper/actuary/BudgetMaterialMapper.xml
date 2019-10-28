@@ -35,11 +35,10 @@
 
 	<!--精算阶段花费统计-->
 	<select id="getHouseBudgetStageCost" resultType="com.dangjia.acg.dto.actuary.BudgetStageCostDTO">
-		(
 		SELECT
 		house_id houseId,
 		worker_type_id workerTypeId,
-		'0' type,
+		product_type type,
 		SUM(total_price) totalAmount
 		FROM
 		`dj_actuary_budget_material`
@@ -51,38 +50,12 @@
 		AND `house_id` = #{houseId}
 		GROUP BY
 		houseId,
-		workerTypeId
-		)
-		UNION ALL
-		(
-		SELECT
-		house_id houseId,
-		worker_type_id workerTypeId,
-		'2' type,
-		SUM(total_price) totalAmount
-		FROM
-		`dj_actuary_budget_worker`
-		WHERE
-		delete_state != 1
-		<if test = "workerTypeId!=null and workerTypeId!=''">
-			AND `worker_type_id` = #{workerTypeId}
-		</if>
-		AND `house_id` = #{houseId}
-		GROUP BY
-		houseId,
-		workerTypeId
-		);
+		workerTypeId,
+		type
 	</select>
 	<!--精算阶段总花费统计-->
 	<select id="getHouseBudgetTotalAmount" resultType="java.math.BigDecimal">
-		SELECT
-			SUM(a.totalAmount) totalAmount
-		FROM
-		(
-			( SELECT SUM( total_price ) totalAmount FROM `dj_actuary_budget_material` WHERE delete_state != 1 AND `house_id` = #{houseId})
-				UNION ALL
-			( SELECT SUM( total_price ) totalAmount FROM `dj_actuary_budget_worker` WHERE delete_state != 1 AND `house_id` = #{houseId})
-		) a
+		SELECT SUM( total_price ) totalAmount FROM `dj_actuary_budget_material` WHERE delete_state != 1 AND `house_id` = #{houseId}
 	</select>
 	<!--精算分类(支付和未支付)-->
 	<select id="getCategoryAllList" resultType="com.dangjia.acg.modle.actuary.BudgetMaterial">
@@ -410,33 +383,27 @@
         and abm.house_flow_id=#{houseFlowId}
 	</select>
 	<select id="queryShopGoods" resultType="com.dangjia.acg.dto.actuary.ShopGoodsDTO">
-		SELECT
-			l.id shopId , l.storefront_name shopName
-		FROM
-			dj_basics_storefront l
-		WHERE
-			l.id IN (
-				SELECT
-					w.storefont_id
-				FROM
-					(
-						SELECT
-								m.storefont_id
-						FROM
-							dj_actuary_budget_material m
-						WHERE m.house_id = #{houseId}
-						and m.worker_type_id = #{workerTypeId}
-						UNION ALL
-							SELECT
-									w.storefont_id
-							FROM
-								dj_actuary_budget_worker w
-							WHERE w.house_id = #{houseId}
-							and w.worker_type_id = #{workerTypeId}
-					) w GROUP BY w.storefont_id
-			)
-		GROUP BY l.id
-		ORDER BY l.id desc
+	SELECT
+		l.id shopId,
+		l.storefront_name shopName
+	FROM
+		dj_basics_storefront l
+	WHERE
+		l.id IN (
+			SELECT
+				m.storefont_id
+			FROM
+				dj_actuary_budget_material m
+			WHERE
+				m.house_id =  #{houseId}
+			AND m.worker_type_id =  #{workerTypeId}
+			GROUP BY
+				m.storefont_id
+		)
+	GROUP BY
+		l.id
+	ORDER BY
+		l.id DESC
 	</select>
 	<!--查询工种材料未支付所有商品的标签-->
 	<select id="queryBudgetLabel" resultType="com.dangjia.acg.dto.actuary.BudgetLabelDTO">
@@ -449,30 +416,16 @@
 		LEFT JOIN dj_basics_goods_category l ON l.id=c.parent_id
 		WHERE
 			c.id IN (
-				SELECT
-					w.category_id
-				FROM
-					(
-						SELECT
-							p.category_id
-						FROM
-							dj_actuary_budget_material m
-						INNER JOIN dj_basics_product p ON m.product_id = p.id
-						WHERE m.house_id = #{houseId}
-						and m.worker_type_id = #{workerTypeId}
-						and m.storefont_id = #{storefontId}
-						and m.delete_state in (0, 4)
-						UNION ALL
-							SELECT
-								p.category_id
-							FROM
-								dj_actuary_budget_worker w
-							INNER JOIN dj_basics_product p ON w.worker_goods_id = p.id
-							WHERE w.house_id = #{houseId}
-							and w.worker_type_id = #{workerTypeId}
-							and w.storefont_id = #{storefontId}
-							and w.delete_state in (0, 4)
-					) w GROUP BY w.category_id
+					SELECT
+						p.category_id
+					FROM
+						dj_actuary_budget_material m
+					INNER JOIN dj_basics_product p ON m.product_id = p.id
+					WHERE m.house_id = #{houseId}
+					and m.worker_type_id = #{workerTypeId}
+					and m.storefont_id = #{storefontId}
+					and m.delete_state in (0, 4)
+					GROUP BY m.category_id
 			)
 		GROUP BY l.id
 		ORDER BY l.id desc
@@ -519,19 +472,6 @@
 			and m.worker_type_id = #{workerTypeId}
 			and m.storefont_id = #{storefontId}
 			and m.delete_state in (0, 2, 4)
-			UNION ALL
-				SELECT
-					w.id,w.house_flow_id ,w.house_id,w.worker_type_id,w.steta,w.delete_state,w.worker_goods_id product_id,
-					w.worker_goods_sn product_sn,w.name product_name,w.price,w.shop_count,w.unit_name,w.total_price,
-					w.create_date,w.modify_date,2 product_type,w.data_status,p.category_id,m.storefont_id
-					w.image,null original_product_id,null goods_group_id,null value_name_arr,p.goods_id
-				FROM
-					dj_actuary_budget_worker w
-				INNER JOIN dj_basics_product_template p ON w.template_id = p.id
-				WHERE w.house_id = #{houseId}
-			and w.worker_type_id = #{workerTypeId}
-			and w.storefont_id = #{storefontId}
-			and w.delete_state in (0, 2, 4)
 		) w
 	</select>
 

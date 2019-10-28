@@ -24,7 +24,7 @@ import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IMaterialRecordMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.repair.IMendMaterialMapper;
-import com.dangjia.acg.modle.actuary.BudgetWorker;
+import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.attribute.GoodsCategory;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.deliver.OrderItem;
@@ -393,10 +393,10 @@ public class WarehouseService {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }else{
             House house = houseMapper.selectByPrimaryKey(houseId);
-            BudgetWorker budgetWorker= budgetWorkerAPI.getHouseBudgetWorkerId(house.getCityId(),house.getId(),gid);
+            BudgetMaterial budgetWorker= budgetWorkerAPI.getHouseBudgetWorkerId(house.getCityId(),house.getId(),gid);
             Map warehouseDTO = new HashMap();
             if(budgetWorker!=null) {
-                warehouseDTO.put("name", budgetWorker.getName());//商品名字
+                warehouseDTO.put("name", budgetWorker.getProductName());//商品名字
                 warehouseDTO.put("image", address+budgetWorker.getImage());//图片地址
                 warehouseDTO.put("type", type);
                 warehouseDTO.put("repairCount", budgetWorker.getRepairCount());//补人工数

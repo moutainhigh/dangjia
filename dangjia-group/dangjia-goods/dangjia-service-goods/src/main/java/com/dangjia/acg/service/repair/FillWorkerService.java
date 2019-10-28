@@ -9,7 +9,7 @@ import com.dangjia.acg.dto.product.ProductWorkerDTO;
 import com.dangjia.acg.dto.repair.BudgetWorkerDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
 import com.dangjia.acg.mapper.basics.IProductWorkerMapper;
-import com.dangjia.acg.modle.actuary.BudgetWorker;
+import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.product.DjBasicsProduct;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -55,24 +55,25 @@ public class FillWorkerService {
         PageInfo pageResult;
         try {
             if (type == 0) {//精算内
-                Example example = new Example(BudgetWorker.class);
+                Example example = new Example(BudgetMaterial.class);
                 Example.Criteria criteria = example.createCriteria();
-                criteria.andEqualTo(BudgetWorker.WORKER_TYPE_ID, workerTypeId);
-                criteria.andEqualTo(BudgetWorker.HOUSE_ID, houseId);
-                criteria.andNotEqualTo(BudgetWorker.DELETE_STATE, "1");
+                criteria.andEqualTo(BudgetMaterial.WORKER_TYPE_ID, workerTypeId);
+                criteria.andEqualTo(BudgetMaterial.HOUSE_ID, houseId);
+                criteria.andEqualTo(BudgetMaterial.PRODUCT_TYPE, "2");
+                criteria.andNotEqualTo(BudgetMaterial.DELETE_STATE, "1");
                 criteria.andCondition(" ( `name` IS NOT NULL OR `name` <> '' ) ");
                 if (!CommonUtil.isEmpty(name)) {
-                    criteria.andLike(BudgetWorker.NAME, "%" + name + "%");
+                    criteria.andLike(BudgetMaterial.PRODUCT_NAME, "%" + name + "%");
                 }
-                List<BudgetWorker> budgetWorkerList = budgetWorkerMapper.selectByExample(example);
+                List<BudgetMaterial> budgetWorkerList = budgetWorkerMapper.selectByExample(example);
                 pageResult = new PageInfo(budgetWorkerList);
-                for (BudgetWorker budgetWorker : budgetWorkerList) {
-                    DjBasicsProduct workerGoods = workerGoodsMapper.selectByPrimaryKey(budgetWorker.getWorkerGoodsId());
+                for (BudgetMaterial budgetWorker : budgetWorkerList) {
+                    DjBasicsProduct workerGoods = workerGoodsMapper.selectByPrimaryKey(budgetWorker.getProductId());
                     BudgetWorkerDTO budgetWorkerDTO = new BudgetWorkerDTO();
-                    budgetWorkerDTO.setWorkerGoodsId(budgetWorker.getWorkerGoodsId());
+                    budgetWorkerDTO.setWorkerGoodsId(budgetWorker.getProductId());
                     budgetWorkerDTO.setWorkerTypeId(budgetWorker.getWorkerTypeId());
-                    budgetWorkerDTO.setWorkerGoodsSn(budgetWorker.getWorkerGoodsSn());
-                    budgetWorkerDTO.setName(budgetWorker.getName());
+                    budgetWorkerDTO.setWorkerGoodsSn(budgetWorker.getProductSn());
+                    budgetWorkerDTO.setName(budgetWorker.getProductName());
                     budgetWorkerDTO.setPrice(budgetWorker.getPrice());
                     budgetWorkerDTO.setShopCount(budgetWorker.getShopCount() - budgetWorker.getBackCount() + budgetWorker.getRepairCount());
                     budgetWorkerDTO.setUnitName(budgetWorker.getUnitName());

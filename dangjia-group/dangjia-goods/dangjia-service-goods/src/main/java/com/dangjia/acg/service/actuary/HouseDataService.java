@@ -19,7 +19,6 @@ import com.dangjia.acg.mapper.basics.IGoodsMapper;
 import com.dangjia.acg.mapper.basics.IProductMapper;
 import com.dangjia.acg.mapper.basics.IUnitMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
-import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.core.WorkerType;
@@ -216,8 +215,8 @@ public class HouseDataService {
 
                     //根据houseId和wokerTypeId查询房子人工精算
                     //                List<Map<String, Object>> workerMapList = iBudgetWorkerMapper.getBudgetWorkerById(houseId, workerTypeId);
-                    List<BudgetWorker> workerMapList = iBudgetWorkerMapper.getBudgetWorkerByHouseIdAndWorkerTypeId(houseId, workerType.getString(WorkerType.ID));
-                    for (BudgetWorker worker : workerMapList) {
+                    List<BudgetMaterial> workerMapList = iBudgetWorkerMapper.getBudgetWorkerByHouseIdAndWorkerTypeId(houseId, workerType.getString(WorkerType.ID));
+                    for (BudgetMaterial worker : workerMapList) {
                         TActuaryGoods tActuaryGoods = new TActuaryGoods();
                         tActuaryGoods.setName(workerType.getString(WorkerType.NAME));
 
@@ -238,16 +237,16 @@ public class HouseDataService {
                         }
 
                         tActuaryGoods.setGoodsType("人工");//商品类型 : 人工，材料，包工包料
-                        if (CommonUtil.isEmpty(worker.getName()))
+                        if (CommonUtil.isEmpty(worker.getProductName()))
                             continue;
-                        tActuaryGoods.setProductName(worker.getName());
+                        tActuaryGoods.setProductName(worker.getProductName());
                         tActuaryGoods.setProductNum(worker.getShopCount());
                         tActuaryGoods.setShopNum(worker.getShopCount());
                         tActuaryGoods.setGoodsUnitName(worker.getUnitName());
                         tActuaryGoods.setPrice(worker.getPrice());
                         tActuaryGoods.setPriceTotal(worker.getTotalPrice());
                         tActuaryGoods.setUnit(worker.getUnitName());
-                        tActuaryGoods.setProductSn(worker.getWorkerGoodsSn());
+                        tActuaryGoods.setProductSn(worker.getProductSn());
                         tActuaryGoodsList.add(tActuaryGoods);
 
                         TActuaryGoodsTotal total = mapsTotal.get(workerType.getString(WorkerType.ID) + "-2");

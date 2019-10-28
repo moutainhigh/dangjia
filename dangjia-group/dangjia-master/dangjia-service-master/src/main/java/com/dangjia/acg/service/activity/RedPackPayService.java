@@ -21,7 +21,6 @@ import com.dangjia.acg.modle.activity.ActivityRedPack;
 import com.dangjia.acg.modle.activity.ActivityRedPackRecord;
 import com.dangjia.acg.modle.activity.ActivityRedPackRule;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
-import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.pay.BusinessOrder;
@@ -167,7 +166,7 @@ public class RedPackPayService {
 
             if (retMaterial.getResultObj() != null || retWorker.getResultObj() != null) {
                 List<BudgetMaterial> budgetMaterialList = JSONObject.parseArray(retMaterial.getResultObj().toString(), BudgetMaterial.class);
-                List<BudgetWorker> budgetWorkerList = JSONObject.parseArray(retWorker.getResultObj().toString(), BudgetWorker.class);
+                List<BudgetMaterial> budgetWorkerList = JSONObject.parseArray(retWorker.getResultObj().toString(), BudgetMaterial.class);
 
                 for (ActivityRedPackRecordDTO redPacketRecord : redPacketRecordList) {
                     BigDecimal workerTotal = new BigDecimal(0);
@@ -175,7 +174,7 @@ public class RedPackPayService {
                     BigDecimal productTotal = new BigDecimal(0);
 
                     if (budgetWorkerList.size() > 0) {
-                        for (BudgetWorker budgetWorker : budgetWorkerList) {
+                        for (BudgetMaterial budgetWorker : budgetWorkerList) {
                             //判断工种的优惠券是否匹配
                             if (budgetWorker.getWorkerTypeId().equals(redPacketRecord.getRedPack().getFromObject()) && redPacketRecord.getRedPack().getFromObjectType() == 0) {
                                 workerTotal = workerTotal.add(new BigDecimal(budgetWorker.getTotalPrice()));
@@ -302,10 +301,10 @@ public class RedPackPayService {
                     BigDecimal productTotal = new BigDecimal(0);
                     if (retMaterial.getResultObj() != null || retWorker.getResultObj() != null) {
                         List<BudgetMaterial> budgetMaterialList = JSONObject.parseArray(retMaterial.getResultObj().toString(), BudgetMaterial.class);
-                        List<BudgetWorker> budgetWorkerList = JSONObject.parseArray(retWorker.getResultObj().toString(), BudgetWorker.class);
+                        List<BudgetMaterial> budgetWorkerList = JSONObject.parseArray(retWorker.getResultObj().toString(), BudgetMaterial.class);
 
                         if (budgetWorkerList.size() > 0) {
-                            for (BudgetWorker budgetWorker : budgetWorkerList) {
+                            for (BudgetMaterial budgetWorker : budgetWorkerList) {
                                 //判断工种的优惠券是否匹配
                                 if (budgetWorker.getWorkerTypeId().equals(redPack.getFromObject()) && redPack.getFromObjectType() == 0) {
                                     workerTotal = workerTotal.add(new BigDecimal(budgetWorker.getTotalPrice()));

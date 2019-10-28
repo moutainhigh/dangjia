@@ -2,7 +2,7 @@ package com.dangjia.acg.api.actuary;
 
 import com.alibaba.fastjson.JSONArray;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.modle.actuary.BudgetWorker;
+import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -51,9 +51,9 @@ public interface BudgetWorkerAPI {
 
     @PostMapping("/actuary/budgetWorker/getHouseBudgetWorkerId")
     @ApiOperation(value = "根据工地Id和人工ID查询精算", notes = "根据工地Id和人工ID查询精算")
-    BudgetWorker getHouseBudgetWorkerId(@RequestParam("cityId") String cityId,
-                                        @RequestParam("houseId") String houseId,
-                                        @RequestParam("workerGoodsId") String workerGoodsId);
+    BudgetMaterial getHouseBudgetWorkerId(@RequestParam("cityId") String cityId,
+                                          @RequestParam("houseId") String houseId,
+                                          @RequestParam("workerGoodsId") String workerGoodsId);
     /**
      * 根据houseId和wokerTypeId查询房子人工精算
      *

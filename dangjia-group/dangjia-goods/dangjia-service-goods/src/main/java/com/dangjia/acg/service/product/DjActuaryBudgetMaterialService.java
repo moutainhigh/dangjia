@@ -24,10 +24,8 @@ import com.dangjia.acg.mapper.product.IBasicsGoodsCategoryMapper;
 import com.dangjia.acg.mapper.product.IBasicsProductTemplateMapper;
 import com.dangjia.acg.modle.actuary.ActuarialTemplate;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
-import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.product.*;
-import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -182,15 +180,15 @@ public class DjActuaryBudgetMaterialService {
                     }
                 } else if (2 == productType) {//人工商品
                     try {
-                        Example example1 = new Example(BudgetWorker.class);
-                        example1.createCriteria().andEqualTo(BudgetWorker.HOUSE_ID, houseId)
-                                .andEqualTo(BudgetWorker.WORKER_GOODS_ID, productId)
-                                .andEqualTo(BudgetWorker.WORKER_TYPE_ID, workerTypeId);
+                        Example example1 = new Example(BudgetMaterial.class);
+                        example1.createCriteria().andEqualTo(BudgetMaterial.HOUSE_ID, houseId)
+                                .andEqualTo(BudgetMaterial.PRODUCT_ID, productId)
+                                .andEqualTo(BudgetMaterial.WORKER_TYPE_ID, workerTypeId);
                         int num = iBudgetWorkerMapper.selectCountByExample(example1);
                         if (num > 0) {
                             continue;
                         }
-                        BudgetWorker budgetWorker = new BudgetWorker();
+                        BudgetMaterial budgetWorker = new BudgetMaterial();
                         DjBasicsProductTemplate workerGoods = iBasicsProductTemplateMapper.selectByPrimaryKey(productId);
                         if (workerGoods == null) {
                             continue;
@@ -202,9 +200,9 @@ public class DjActuaryBudgetMaterialService {
                         budgetWorker.setDeleteState(0);
                         budgetWorker.setRepairCount(0.0);
                         budgetWorker.setBackCount(0.0);
-                        budgetWorker.setWorkerGoodsId(workerGoods.getId());
-                        budgetWorker.setWorkerGoodsSn(workerGoods.getProductSn());
-                        budgetWorker.setName(workerGoods.getName());
+                        budgetWorker.setProductId(workerGoods.getId());
+                        budgetWorker.setProductSn(workerGoods.getProductSn());
+                        budgetWorker.setProductName(workerGoods.getName());
                         budgetWorker.setPrice(workerGoods.getPrice());
                         budgetWorker.setImage(workerGoods.getImage());
                         budgetWorker.setShopCount(shopCount);

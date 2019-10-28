@@ -17,11 +17,27 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient("dangjia-service-bill")
 public interface RefundAfterSalesAPI {
 
-    @PostMapping("/refund/refundOrder/queryRefundOrderList")
+    @PostMapping("/app/refund/refundOrder/queryRefundOnlyOrderList")
     @ApiOperation(value = "查询需退款的订单", notes = "查询需退款的订单")
-    ServerResponse queryRefundOrderList(@RequestParam("userToken") String userToken,
+    ServerResponse queryRefundOnlyOrderList(@RequestParam("userToken") String userToken,
                                         @RequestParam("cityId") String cityId,
-                                        @RequestParam("houseId") String houseId);
+                                        @RequestParam("houseId") String houseId,
+                                        @RequestParam("searchKey") String searchKey);
+
+    /**
+     * 仅退款提交
+     * @param userToken  用户token
+     * @param cityId 城市ID
+     * @param houseId 房屋ID
+     * @param orderProductAttr  需退款商品列表
+     * @return
+     */
+    @PostMapping("/app/refund/refundOrder/saveRefundonlyInfo")
+    @ApiOperation(value = "查询需退款的订单", notes = "查询需退款的订单")
+    ServerResponse saveRefundonlyInfo(@RequestParam("userToken") String userToken,
+                                        @RequestParam("cityId") String cityId,
+                                        @RequestParam("houseId") String houseId,
+                                        @RequestParam("orderProductAttr") String orderProductAttr);
 
 
 }

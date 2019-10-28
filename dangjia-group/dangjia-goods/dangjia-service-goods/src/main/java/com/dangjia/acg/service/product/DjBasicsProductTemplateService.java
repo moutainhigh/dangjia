@@ -303,11 +303,11 @@ public class DjBasicsProductTemplateService {
                 return "更新商品失败";
             } else if(productType==2){//如果是人工商品，则作相应更新
                 //相关联表也更新
-                iBudgetWorkerMapper.updateBudgetMaterialByProductId(productId);
-                Example example = new Example(DjBasicsProductTemplate.class);
+               // iBudgetWorkerMapper.updateBudgetMaterialByProductId(productId);
+              /*  Example example = new Example(DjBasicsProductTemplate.class);
                 example.createCriteria().andEqualTo(DjBasicsProductTemplate.ID, productId);
                 List<DjBasicsProductTemplate> list = iBasicsProductTemplateMapper.selectByExample(example);
-                masterMendWorkerAPI.updateMendWorker(JSON.toJSONString(list));
+                masterMendWorkerAPI.updateMendWorker(JSON.toJSONString(list));*/
             }
         }
         return product.getId();

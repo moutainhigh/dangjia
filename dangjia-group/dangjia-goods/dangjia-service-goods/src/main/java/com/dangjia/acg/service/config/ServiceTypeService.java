@@ -73,6 +73,7 @@ public class ServiceTypeService {
                 Map<String, Object> map = BeanUtils.beanToMap(serviceType);
                 map.put("coverImageUrl",address+serviceType.getCoverImage());
                 map.put("imageUrl",address+serviceType.getImage());
+                map.put("houseType",serviceType.getId());
                 list.add(map);
             }
             PageInfo pageResult = new PageInfo(serviceTypeList);

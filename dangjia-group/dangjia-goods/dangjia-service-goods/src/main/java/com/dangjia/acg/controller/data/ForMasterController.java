@@ -3,16 +3,12 @@ package com.dangjia.acg.controller.data;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.dto.actuary.BudgetLabelDTO;
-import com.dangjia.acg.dto.actuary.BudgetLabelGoodsDTO;
 import com.dangjia.acg.dto.actuary.ShopGoodsDTO;
 import com.dangjia.acg.dto.product.ProductWorkerDTO;
 import com.dangjia.acg.dto.product.StorefontInfoDTO;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
-import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.product.BasicsGoods;
-import com.dangjia.acg.modle.product.DjBasicsProduct;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
@@ -21,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.xml.ws.Response;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -122,7 +117,7 @@ public class ForMasterController implements ForMasterAPI {
 
     @Override
     @ApiMethod
-    public List<BudgetWorker> renGong(String cityId,String houseFlowId){
+    public List<BudgetMaterial> renGong(String cityId,String houseFlowId){
        return forMasterService.renGong(houseFlowId);
     }
 

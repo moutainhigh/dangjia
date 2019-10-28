@@ -86,7 +86,7 @@ public interface IBudgetMaterialMapper extends Mapper<BudgetMaterial> {
 	/**根据houseFlow查询未支付实时精算价格*/
 	Double getAbmCasualByHfId(@Param("houseFlowId")String houseFlowId);
 
-	void insertByBatch(@Param("list")List<BudgetMaterial> list);
+	//void insertByBatch(@Param("list")List<BudgetMaterial> list);
 
 
 	/*****************商品3.0 精算结算新接口********开始*************/

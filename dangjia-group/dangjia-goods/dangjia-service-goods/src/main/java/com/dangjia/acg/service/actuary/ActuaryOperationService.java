@@ -20,7 +20,6 @@ import com.dangjia.acg.mapper.basics.*;
 import com.dangjia.acg.mapper.product.IBasicsGoodsMapper;
 import com.dangjia.acg.mapper.product.IBasicsProductTemplateMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
-import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.modle.basics.*;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.core.WorkerType;
@@ -561,14 +560,14 @@ public class ActuaryOperationService {
                 return ServerResponse.createByErrorMessage("type参数错误");
             }
             if (type == DjConstants.GXType.RENGGONG) {
-                List<BudgetWorker> budgetWorkerList = budgetWorkerMapper.getBudgetWorkerList(houseId, workerTypeId);
-                for (BudgetWorker bw : budgetWorkerList) {
+                List<BudgetMaterial> budgetWorkerList = budgetWorkerMapper.getBudgetWorkerList(houseId, workerTypeId);
+                for (BudgetMaterial bw : budgetWorkerList) {
                    // WorkerGoods workerGoods = workerGoodsMapper.selectByPrimaryKey(bw.getWorkerGoodsId());
-                    DjBasicsProductTemplate djBasicsProduct =iBasicsProductTemplateMapper.selectByPrimaryKey(bw.getWorkerGoodsId());
+                    DjBasicsProductTemplate djBasicsProduct =iBasicsProductTemplateMapper.selectByPrimaryKey(bw.getProductId());
                     FlowActuaryDTO flowActuaryDTO = new FlowActuaryDTO();
                     flowActuaryDTO.setBudgetMaterialId(bw.getId());
                     flowActuaryDTO.setId(djBasicsProduct.getId());
-                    flowActuaryDTO.setName(bw.getName());
+                    flowActuaryDTO.setName(bw.getProductName());
                     flowActuaryDTO.setImage(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + djBasicsProduct.getImage());
                     flowActuaryDTO.setTypeName(typsValue);
                     flowActuaryDTO.setType(type);
@@ -759,7 +758,7 @@ public class ActuaryOperationService {
             FlowDetailsDTO flowDetailsDTO = new FlowDetailsDTO();
             flowDetailsDTO.setName(name);
             List<DetailsDTO> detailsDTOList = new ArrayList<>();//人工材料包工包料
-            List<BudgetWorker> budgetWorkerList = budgetWorkerMapper.getBudgetWorkerList(houseId, workerTypeId);//人工明细
+            List<BudgetMaterial> budgetWorkerList = budgetWorkerMapper.getBudgetWorkerList(houseId, workerTypeId);//人工明细
             List<BudgetMaterial> materialCaiList = budgetMaterialMapper.getBudgetCaiList(houseId, workerTypeId);//材料明细
             List<BudgetMaterial> materialSerList = budgetMaterialMapper.getBudgetSerList(houseId, workerTypeId);//包工包料明细
             List<Map> mapworker = new ArrayList<>();

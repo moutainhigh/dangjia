@@ -5,7 +5,6 @@ import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.actuary.BudgetMaterialAPI;
 import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
-import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
@@ -15,7 +14,6 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.activity.ActivityRedPackRecordDTO;
 import com.dangjia.acg.dto.actuary.BudgetLabelDTO;
 import com.dangjia.acg.dto.actuary.BudgetLabelGoodsDTO;
-import com.dangjia.acg.dto.actuary.FlowActuaryDTO;
 import com.dangjia.acg.dto.actuary.ShopGoodsDTO;
 import com.dangjia.acg.dto.pay.ActuaryDTO;
 import com.dangjia.acg.dto.pay.PaymentDTO;
@@ -26,10 +24,8 @@ import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.delivery.*;
-import com.dangjia.acg.mapper.design.IHouseStyleTypeMapper;
 import com.dangjia.acg.mapper.house.*;
 import com.dangjia.acg.mapper.member.ICustomerRecordMapper;
-import com.dangjia.acg.mapper.other.IWorkDepositMapper;
 import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
 import com.dangjia.acg.mapper.pay.IPayOrderMapper;
 import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
@@ -41,20 +37,15 @@ import com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper;
 import com.dangjia.acg.mapper.worker.IInsuranceMapper;
 import com.dangjia.acg.modle.activity.ActivityRedPackRecord;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
-import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.*;
-import com.dangjia.acg.modle.design.HouseStyleType;
 import com.dangjia.acg.modle.house.*;
 import com.dangjia.acg.modle.member.CustomerRecord;
-import com.dangjia.acg.modle.other.WorkDeposit;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.pay.PayOrder;
-import com.dangjia.acg.modle.pay.PurchaseOrder;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
-import com.dangjia.acg.modle.product.ShoppingCart;
 import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.modle.repair.MendOrder;
@@ -71,11 +62,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import tk.mybatis.mapper.entity.Example;
 
-import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -634,7 +622,7 @@ public class PaymentService {
         try {
             //处理人工
             House house = houseMapper.selectByPrimaryKey(hwo.getHouseId());
-            List<BudgetWorker> budgetWorkerList = forMasterAPI.renGong(house.getCityId(), houseFlowId);
+            List<BudgetMaterial> budgetWorkerList = forMasterAPI.renGong(house.getCityId(), houseFlowId);
             if (budgetWorkerList.size() > 0) {
                 WorkerType wt = workerTypeMapper.selectByPrimaryKey(hwo.getWorkerTypeId());
                 Order order = new Order();
@@ -647,7 +635,7 @@ public class PaymentService {
                 order.setPayment(payState);// 支付方式
                 orderMapper.insert(order);
 
-                for (BudgetWorker budgetWorker : budgetWorkerList) {
+                for (BudgetMaterial budgetWorker : budgetWorkerList) {
                     OrderItem orderItem = new OrderItem();
                     orderItem.setOrderId(order.getId());
                     orderItem.setHouseId(hwo.getHouseId());
@@ -655,9 +643,9 @@ public class PaymentService {
                     orderItem.setShopCount(budgetWorker.getShopCount().doubleValue());//购买总数
                     orderItem.setUnitName(budgetWorker.getUnitName());//单位
                     orderItem.setTotalPrice(budgetWorker.getTotalPrice());//总价
-                    orderItem.setProductName(budgetWorker.getName());
-                    orderItem.setProductSn(budgetWorker.getWorkerGoodsSn());
-                    orderItem.setProductId(budgetWorker.getWorkerGoodsId());
+                    orderItem.setProductName(budgetWorker.getProductName());
+                    orderItem.setProductSn(budgetWorker.getProductSn());
+                    orderItem.setProductId(budgetWorker.getProductId());
                     orderItem.setImage(budgetWorker.getImage());
                     orderItem.setCityId(house.getCityId());
                     orderItemMapper.insert(orderItem);
@@ -1216,7 +1204,7 @@ public class PaymentService {
 
             if (retMaterial.getResultObj() != null || retWorker.getResultObj() != null) {
                 List<BudgetMaterial> budgetMaterialList = JSONObject.parseArray(retMaterial.getResultObj().toString(), BudgetMaterial.class);
-                List<BudgetWorker> budgetWorkerList = JSONObject.parseArray(retWorker.getResultObj().toString(), BudgetWorker.class);
+                List<BudgetMaterial> budgetWorkerList = JSONObject.parseArray(retWorker.getResultObj().toString(), BudgetMaterial.class);
 
                 for (ActivityRedPackRecordDTO redPacketRecord : redPacketRecordList) {
                     BigDecimal workerTotal = new BigDecimal(0);
@@ -1224,7 +1212,7 @@ public class PaymentService {
                     BigDecimal productTotal = new BigDecimal(0);
 
                     if (budgetWorkerList.size() > 0) {
-                        for (BudgetWorker budgetWorker : budgetWorkerList) {
+                        for (BudgetMaterial budgetWorker : budgetWorkerList) {
                             //判断工种的优惠券是否匹配
                             if (budgetWorker.getWorkerTypeId().equals(redPacketRecord.getRedPack().getFromObject()) && redPacketRecord.getRedPack().getFromObjectType() == 0) {
                                 workerTotal = workerTotal.add(new BigDecimal(budgetWorker.getTotalPrice()));
