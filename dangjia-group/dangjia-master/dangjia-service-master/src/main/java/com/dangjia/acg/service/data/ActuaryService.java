@@ -6,9 +6,11 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dto.house.HouseListDTO;
 import com.dangjia.acg.dto.house.UserInfoDateDTO;
+import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
 import com.dangjia.acg.mapper.design.IDesignBusinessOrderMapper;
 import com.dangjia.acg.mapper.house.HouseRemarkMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
+import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.design.DesignBusinessOrder;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.HouseRemark;
@@ -33,6 +35,8 @@ import java.util.Map;
 public class ActuaryService {
 
     @Autowired
+    private IHouseWorkerMapper houseWorkerMapper;
+    @Autowired
     private IHouseMapper houseMapper;
     @Autowired
     private IDesignBusinessOrderMapper designBusinessOrderMapper;
@@ -56,7 +60,8 @@ public class ActuaryService {
         List<HouseListDTO> houseList = houseMapper.getActuaryAll(cityId, budgetOk, name, workerKey, dataStatus);
         PageInfo pageResult = new PageInfo(houseList);
         for (HouseListDTO houseListDTO : houseList) {
-
+            HouseWorker houseWorker = houseWorkerMapper.getByWorkerTypeId(houseListDTO.getHouseId(), "2", 6);
+            houseListDTO.setHouseWorkerId(houseWorker==null?"":houseWorker.getId());
             //查询销售名称跟手机号码
             UserInfoDateDTO userInfoDTO =houseMapper.getUserList(houseListDTO.getMemberId());
             if(userInfoDTO != null){

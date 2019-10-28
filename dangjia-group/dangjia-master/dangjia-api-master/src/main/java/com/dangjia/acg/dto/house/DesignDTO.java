@@ -17,6 +17,7 @@ public class DesignDTO {
     private String houseId;
     private int designerOk;
     private String residential;//小区名
+    private String houseWorkerId;//工人抢单ID
     private String building;
     private String unit;
     private String number;

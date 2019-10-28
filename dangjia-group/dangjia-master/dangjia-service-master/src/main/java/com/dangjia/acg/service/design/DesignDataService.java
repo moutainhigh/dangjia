@@ -351,7 +351,8 @@ public class DesignDataService {
         List<DesignDTO> designDTOList = houseMapper.getDesignList(designerType, cityKey, searchKey,workerKey, dataStatus,flag,userId);
         PageInfo pageResult = new PageInfo(designDTOList);
         for (DesignDTO designDTO : designDTOList) {
-
+            HouseWorker houseWorker = houseWorkerMapper.getByWorkerTypeId(designDTO.getHouseId(), "1", 6);
+            designDTO.setHouseWorkerId(houseWorker==null?"":houseWorker.getId());
             //查询销售名称跟手机号码
             UserInfoDateDTO userInfoDTO =houseMapper.getUserList(designDTO.getMemberId());
             if(userInfoDTO != null){
