@@ -1,7 +1,7 @@
 package com.dangjia.acg.modle.attribute;
 
 import com.dangjia.acg.common.annotation.Desc;
-import com.dangjia.acg.common.model.BaseEntity;
+import com.dangjia.acg.modle.GoodsBaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -24,7 +24,7 @@ import java.math.BigDecimal;
 @Table(name = "dj_basics_goods_category")
 @ApiModel(description = "商品材料类别")
 @FieldNameConstants(prefix = "")
-public class GoodsCategory extends BaseEntity {
+public class GoodsCategory extends GoodsBaseEntity {
 
 	@Column(name = "parent_id")
     private String parentId;//上级id

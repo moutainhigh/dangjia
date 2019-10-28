@@ -1,7 +1,7 @@
 package com.dangjia.acg.modle.basics;
 
 import com.dangjia.acg.common.annotation.Desc;
-import com.dangjia.acg.common.model.BaseEntity;
+import com.dangjia.acg.modle.GoodsBaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -21,7 +21,7 @@ import javax.persistence.Table;
 @Table(name = "dj_basics_group_link")
 @ApiModel(description = "商品关联组")
 @FieldNameConstants(prefix = "")
-public class GroupLink extends BaseEntity {
+public class GroupLink extends GoodsBaseEntity {
 
 	//关联组id
 	@Column(name = "group_id")

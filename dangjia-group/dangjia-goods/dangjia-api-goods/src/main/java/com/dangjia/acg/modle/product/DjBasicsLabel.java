@@ -1,7 +1,7 @@
 package com.dangjia.acg.modle.product;
 
 import com.dangjia.acg.common.annotation.Desc;
-import com.dangjia.acg.common.model.BaseEntity;
+import com.dangjia.acg.modle.GoodsBaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -22,7 +22,7 @@ import javax.persistence.Table;
 @Table(name = "dj_basics_label")
 @ApiModel(description = "商品标签表")
 @FieldNameConstants(prefix = "")
-public class DjBasicsLabel extends BaseEntity {
+public class DjBasicsLabel extends GoodsBaseEntity {
     @Column(name = "name")
     @Desc(value = "标签名称")
     @ApiModelProperty("标签名称")

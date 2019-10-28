@@ -1,7 +1,7 @@
 package com.dangjia.acg.modle.actuary;
 
 import com.dangjia.acg.common.annotation.Desc;
-import com.dangjia.acg.common.model.BaseEntity;
+import com.dangjia.acg.modle.GoodsBaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -21,7 +21,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "dj_actuary_actuarial_template")
 @ApiModel(description = "精算模板表")
-public class ActuarialTemplate extends BaseEntity {
+public class ActuarialTemplate extends GoodsBaseEntity {
 
     @Column(name = "user_id")
     @Desc(value = "用户ID")

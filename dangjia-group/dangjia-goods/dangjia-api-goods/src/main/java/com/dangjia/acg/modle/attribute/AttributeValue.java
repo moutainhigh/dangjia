@@ -1,6 +1,6 @@
 package com.dangjia.acg.modle.attribute;
 
-import com.dangjia.acg.common.model.BaseEntity;
+import com.dangjia.acg.modle.GoodsBaseEntity;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
@@ -15,7 +15,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "dj_basics_attribute_value")
 @ApiModel(description = "属性选项")
-public class AttributeValue extends BaseEntity {
+public class AttributeValue extends GoodsBaseEntity {
 
     @Column(name = "attribute_id")
     private String attributeId;//属性id

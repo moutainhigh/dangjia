@@ -1,6 +1,6 @@
 package com.dangjia.acg.modle.actuary;
 
-import com.dangjia.acg.common.model.BaseEntity;
+import com.dangjia.acg.modle.GoodsBaseEntity;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
@@ -16,7 +16,7 @@ import javax.persistence.Table;
 @Table(name = "dj_actuary_budget_material")
 @ApiModel(description = "材料精算表")
 @FieldNameConstants(prefix = "")
-public class BudgetMaterial extends BaseEntity{
+public class BudgetMaterial extends GoodsBaseEntity{
 
 	@Column(name = "house_flow_id")
 	private String houseFlowId;

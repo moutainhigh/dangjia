@@ -1,7 +1,7 @@
 package com.dangjia.acg.modle.basics;
 
 import com.dangjia.acg.common.annotation.Desc;
-import com.dangjia.acg.common.model.BaseEntity;
+import com.dangjia.acg.modle.GoodsBaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -21,7 +21,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "dj_basics_technology")
 @ApiModel(description = "工艺说明")
-public class Technology extends BaseEntity {
+public class Technology extends GoodsBaseEntity {
 
     @Column(name = "name")
     private String name;

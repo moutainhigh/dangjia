@@ -1,6 +1,6 @@
 package com.dangjia.acg.modle.brand;
 
-import com.dangjia.acg.common.model.BaseEntity;
+import com.dangjia.acg.modle.GoodsBaseEntity;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
@@ -15,7 +15,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "dj_basics_brand")
 @ApiModel(description = "品牌")
-public class Brand extends BaseEntity{
+public class Brand extends GoodsBaseEntity{
 
     @Column(name = "name")
     private String name;//名称

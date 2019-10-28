@@ -2,7 +2,7 @@ package com.dangjia.acg.dto.product;
 
 import com.dangjia.acg.common.annotation.Desc;
 import com.dangjia.acg.common.annotation.ExcelField;
-import com.dangjia.acg.common.model.BaseEntity;
+import com.dangjia.acg.modle.GoodsBaseEntity;
 import com.dangjia.acg.dto.basics.TechnologyDTO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -18,7 +18,7 @@ import java.util.List;
  */
 @Data
 @FieldNameConstants(prefix = "")
-public class AppBasicsProductDTO extends BaseEntity {
+public class AppBasicsProductDTO extends GoodsBaseEntity {
     private String id;
     private String name;
     private String goodsId;
