@@ -43,6 +43,15 @@ public class Order extends BaseEntity {
 	@ApiModelProperty("用户ID")
 	private String memberId;//memberid
 
+	@Column(name = "address_id")
+	@Desc(value = "地址ID")
+	@ApiModelProperty("地址ID")
+	private String addressId;
+
+	@Column(name = "worker_id")
+	@Desc(value = "工人ID")
+	@ApiModelProperty("工人ID")
+	private String workerId;
 	@Column(name = "worker_type_name")
 	@Desc(value = "工种名称")
 	@ApiModelProperty("工种名称")
@@ -88,10 +97,6 @@ public class Order extends BaseEntity {
 	@ApiModelProperty("父订单ID")
 	private String parentOrderId;//父订单ID
 
-	@Column(name = "address_id")
-	@Desc(value = "地址ID")
-	@ApiModelProperty("地址ID")
-	private String addressId;//地址ID
 
 	@Column(name = "storefont_id")
 	@Desc(value = "店铺ID")
