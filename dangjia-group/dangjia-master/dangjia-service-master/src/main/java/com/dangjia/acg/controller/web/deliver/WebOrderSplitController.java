@@ -104,17 +104,16 @@ public class WebOrderSplitController implements WebOrderSplitAPI {
     @Override
     @ApiMethod
     public ServerResponse getHouseList(HttpServletRequest request, String cityId, PageDTO pageDTO, String likeAddress, String startDate, String endDate) {
-        String userID = request.getParameter(Constants.USERID);
+        String userId = request.getParameter("userId");
         //通过缓存查询店铺信息
-        return orderSplitService.getHouseList(userID,cityId,pageDTO, likeAddress, startDate,  endDate);
+        return orderSplitService.getHouseList(userId,cityId,pageDTO, likeAddress, startDate,  endDate);
     }
 
     @Override
     @ApiMethod
     public ServerResponse getOrderSplitList(HttpServletRequest request,String houseId) {
-        String userID = request.getParameter(Constants.USERID);
-
-        return orderSplitService.getOrderSplitList(userID,houseId);
+        String userId = request.getParameter("userId");
+        return orderSplitService.getOrderSplitList(userId,houseId);
     }
 
     @Override

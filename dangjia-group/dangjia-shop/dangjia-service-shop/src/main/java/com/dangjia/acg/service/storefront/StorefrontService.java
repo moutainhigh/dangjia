@@ -110,6 +110,8 @@ public class StorefrontService {
             storefrontDTO.setStorekeeperName(storefront.getStorekeeperName());
             storefrontDTO.setMobile(storefront.getMobile());
             storefrontDTO.setEmail(storefront.getEmail());
+            storefrontDTO.setFreight(storefront.getFreight());
+            storefrontDTO.setBelowUnitPrice(storefront.getBelowUnitPrice());
             return ServerResponse.createBySuccess("检索到数据",storefrontDTO);
         } catch (Exception e) {
             logger.error("查询店铺信息异常：", e);

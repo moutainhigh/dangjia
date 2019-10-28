@@ -42,7 +42,8 @@ public interface WebMendMaterielAPI {
 
     @PostMapping(value = "web/repair/webMendMateriel/mendMaterialList")
     @ApiOperation(value = "补退单查明细", notes = "补退单查明细")
-    ServerResponse mendMaterialList(@RequestParam("mendOrderId") String mendOrderId);
+    ServerResponse mendMaterialList(@RequestParam("mendOrderId") String mendOrderId,
+                                    @RequestParam("userId") String userId);
 
     @PostMapping(value = "web/repair/webMendMateriel/materialOrderState")
     @ApiOperation(value = "房子id查询补货单列表", notes = "房子id查询补货单列表")

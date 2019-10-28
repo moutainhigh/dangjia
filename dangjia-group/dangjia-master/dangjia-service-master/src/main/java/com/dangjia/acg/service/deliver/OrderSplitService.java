@@ -505,9 +505,9 @@ public class OrderSplitService {
     /**
      * 材料员看房子列表
      */
-    public ServerResponse getHouseList(String userID,String cityId,PageDTO pageDTO, String likeAddress,String startDate, String endDate) {
+    public ServerResponse getHouseList(String userId,String cityId,PageDTO pageDTO, String likeAddress,String startDate, String endDate) {
         try {
-            Storefront storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userID,Storefront.class);
+            Storefront storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userId,Storefront.class);
             if(storefront==null)
             {
                 return ServerResponse.createByErrorMessage("不存在店铺信息");
@@ -550,10 +550,10 @@ public class OrderSplitService {
     /**
      * 根据房子id查询要货单列表
      */
-    public ServerResponse getOrderSplitList(String userID,String houseId) {
+    public ServerResponse getOrderSplitList(String userId,String houseId) {
         try {
             //通过缓存查询店铺信息
-            Storefront storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userID,Storefront.class);
+            Storefront storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userId,Storefront.class);
             if(storefront==null)
             {
                 return ServerResponse.createByErrorMessage("不存在店铺信息");
@@ -572,6 +572,7 @@ public class OrderSplitService {
                 Map map = BeanUtils.beanToMap(orderSplit);
                 example = new Example(SplitDeliver.class);
                 example.createCriteria().andEqualTo(SplitDeliver.HOUSE_ID, orderSplit.getHouseId())
+                        .andEqualTo(SplitDeliver.STOREFRONT_ID,storefront.getId())
                         .andCondition(" shipping_state in (0,6)").andEqualTo(SplitDeliver.ORDER_SPLIT_ID, orderSplit.getId());
                 int splitDeliverList = splitDeliverMapper.selectCountByExample(example);
                 map.put("num", splitDeliverList);
