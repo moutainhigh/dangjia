@@ -214,7 +214,7 @@
         <if test="storefrontId!=null and storefrontId!=''">
             and dos.storefront_id = #{storefrontId}
         </if>
-        <if test="cityId!=null and cityId!=''">-
+        <if test="cityId!=null and cityId!=''">
             and house.city_id = #{cityId}
         </if>
         <if test="startDate!=null and endDate!=null and startDate!='' and endDate!=''">

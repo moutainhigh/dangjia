@@ -45,7 +45,7 @@ public interface WebOrderSplitAPI {
             @RequestParam("splitItemList") String splitItemList,
             @RequestParam("installName") String installName,
             @RequestParam("installMobile") String installMobile,
-            @RequestParam("deliberyName") String deliberyName,
+            @RequestParam("deliveryName") String deliberyName,
             @RequestParam("deliveryMobile") String deliveryMobile);
 
     @PostMapping("web/deliver/orderSplit/cancelOrderSplit")

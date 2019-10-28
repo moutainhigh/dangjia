@@ -279,7 +279,7 @@ public class OrderSplitService {
      * 分发不同供应商
      */
     public ServerResponse sentSupplier(String orderSplitId, String splitItemList,String installName,
-                                       String installMobile, String deliberyName, String deliveryMobile) {
+                                       String installMobile, String deliveryName, String deliveryMobile) {
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
             OrderSplit orderSplit = orderSplitMapper.selectByPrimaryKey(orderSplitId);
@@ -333,7 +333,7 @@ public class OrderSplitService {
                     //判断是非平台供应商
                     if(djSupplier.getIsNonPlatformSupperlier()==1)
                     {
-                        splitDeliver.setDeliberyName(deliberyName);//送货人姓名
+                        splitDeliver.setDeliveryName(deliveryName);//送货人姓名
                         splitDeliver.setDeliveryMobile(deliveryMobile);//送货人号码
                     }
                     splitDeliverMapper.insert(splitDeliver);
