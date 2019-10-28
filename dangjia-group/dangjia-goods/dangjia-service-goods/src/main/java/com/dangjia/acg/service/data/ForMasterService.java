@@ -11,6 +11,7 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.actuary.BudgetLabelDTO;
 import com.dangjia.acg.dto.actuary.BudgetLabelGoodsDTO;
+import com.dangjia.acg.dto.actuary.ShopGoodsDTO;
 import com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO;
 import com.dangjia.acg.dto.product.ProductWorkerDTO;
 import com.dangjia.acg.dto.product.StorefontInfoDTO;
@@ -185,21 +186,12 @@ public class ForMasterService {
                     .andEqualTo(BudgetMaterial.STETA,1);
             List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.selectByExample(example);
             for (BudgetMaterial budgetMaterial : budgetMaterialList){
-                DjBasicsProductTemplate product = iBasicsProductTemplateMapper.selectByPrimaryKey(budgetMaterial.getProductId());
-                if(product == null){
-                    budgetMaterialList.remove(budgetMaterial);//移除
-                    budgetMaterial.setDeleteState(1);//找不到商品标记删除
-                    budgetMaterial.setModifyDate(new Date());
-                    budgetMaterialMapper.updateByPrimaryKeySelective(budgetMaterial);
-                }else {
-                     //重新记录支付时精算价格
-                    budgetMaterial.setPrice(product.getPrice());
-                    budgetMaterial.setCost(product.getCost());
-                    budgetMaterial.setTotalPrice(budgetMaterial.getConvertCount() * product.getPrice());//已支付 记录总价
+                    budgetMaterial.setPrice(budgetMaterial.getPrice());
+                    budgetMaterial.setCost(budgetMaterial.getCost());
+                    budgetMaterial.setTotalPrice(budgetMaterial.getConvertCount() * budgetMaterial.getPrice());//已支付 记录总价
                     budgetMaterial.setDeleteState(3);//已支付
                     budgetMaterial.setModifyDate(new Date());
                     budgetMaterialMapper.updateByPrimaryKeySelective(budgetMaterial);
-                }
             }
             return budgetMaterialList;
         }catch (Exception e){
@@ -219,20 +211,11 @@ public class ForMasterService {
             example.createCriteria().andEqualTo(BudgetWorker.HOUSE_FLOW_ID, houseFlowId).andEqualTo(BudgetWorker.DELETE_STATE, 0);
             List<BudgetWorker> budgetWorkerList = budgetWorkerMapper.selectByExample(example);
             for(BudgetWorker budgetWorker : budgetWorkerList){
-                //WorkerGoods wg = workerGoodsMapper.selectByPrimaryKey(budgetWorker.getWorkerGoodsId());
-                DjBasicsProductTemplate djBasicsProduct=iBasicsProductTemplateMapper.selectByPrimaryKey(budgetWorker.getWorkerGoodsId());
-                if (djBasicsProduct == null){
-                    budgetWorkerList.remove(budgetWorker);//移除
-                    budgetWorker.setDeleteState(1);//找不到商品标记删除
-                    budgetWorker.setModifyDate(new Date());
-                    budgetWorkerMapper.updateByPrimaryKeySelective(budgetWorker);
-                }else {
-                    budgetWorker.setPrice(djBasicsProduct.getPrice());
-                    budgetWorker.setTotalPrice(budgetWorker.getShopCount() * djBasicsProduct.getPrice());
-                    budgetWorker.setDeleteState(3);//已支付
-                    budgetWorker.setModifyDate(new Date());
-                    budgetWorkerMapper.updateByPrimaryKeySelective(budgetWorker);
-                }
+                budgetWorker.setPrice(budgetWorker.getPrice());
+                budgetWorker.setTotalPrice(budgetWorker.getShopCount() * budgetWorker.getPrice());
+                budgetWorker.setDeleteState(3);//已支付
+                budgetWorker.setModifyDate(new Date());
+                budgetWorkerMapper.updateByPrimaryKeySelective(budgetWorker);
             }
             return budgetWorkerList;
         }catch (Exception e){
@@ -281,11 +264,19 @@ public class ForMasterService {
 
 
 
-    /*********************商品3.0改造**************************/
-    public List<BudgetLabelDTO> queryBudgetLabel(String houseId, String workerTypeId){
+    /*********************商品3.0改造 **************************/
+
+    public List<ShopGoodsDTO> queryShopGoods(String houseId, String workerTypeId){
+        List<ShopGoodsDTO> budgetLabelDTOS =  budgetMaterialMapper.queryShopGoods(houseId,workerTypeId);
+        for (ShopGoodsDTO budgetLabelDTO : budgetLabelDTOS) {
+            budgetLabelDTO.setLabelDTOS(queryBudgetLabel(houseId,workerTypeId,budgetLabelDTO.getShopId()));
+        }
+        return budgetLabelDTOS;
+    }
+    public List<BudgetLabelDTO> queryBudgetLabel(String houseId, String workerTypeId,String storefontId){
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-        List<BudgetLabelDTO> budgetLabelDTOS =  budgetMaterialMapper.queryBudgetLabel(houseId,workerTypeId);//精算工钱
-        List<BudgetLabelGoodsDTO> budgetLabelGoodsDTOS = queryBudgetLabelGoods(houseId,workerTypeId);//精算工钱
+        List<BudgetLabelDTO> budgetLabelDTOS =  budgetMaterialMapper.queryBudgetLabel(houseId,workerTypeId,storefontId);//精算工钱
+        List<BudgetLabelGoodsDTO> budgetLabelGoodsDTOS = queryBudgetLabelGoods(houseId,workerTypeId,storefontId);//精算工钱
         for (BudgetLabelDTO budgetLabelDTO : budgetLabelDTOS) {
             BigDecimal totalZPrice = new BigDecimal(0);//组总价
             String[] array = budgetLabelDTO.getCategoryIds().split(",");
@@ -322,8 +313,8 @@ public class ForMasterService {
         }
         return budgetLabelDTOS;
     }
-    public  List<BudgetLabelGoodsDTO> queryBudgetLabelGoods(String houseId, String workerTypeId){
-        return budgetMaterialMapper.queryBudgetLabelGoods(houseId,workerTypeId);
+    public  List<BudgetLabelGoodsDTO> queryBudgetLabelGoods(String houseId, String workerTypeId,String storefontId){
+        return budgetMaterialMapper.queryBudgetLabelGoods(houseId,workerTypeId,storefontId);
     }
 
     public StorefontInfoDTO getStroreProductInfo(String storefontId, String productId){

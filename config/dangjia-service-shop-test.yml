@@ -21,7 +21,7 @@ spring:
     filters: stat,wall,log4j
     connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
     changsha:
-      url: jdbc:mysql://114.116.77.199:3306/dj_changsha?useUnicode=true
+      url: jdbc:mysql://114.116.77.199:3306/dj_master?useUnicode=true
       username: root
       password: root
   elasticsearch:

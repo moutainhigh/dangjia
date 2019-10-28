@@ -142,7 +142,7 @@ public class OrderService {
                     itemDTO.setPrice("¥" + String.format("%.2f", orderItem.getPrice()));
                     itemDTO.setShopCount(orderItem.getShopCount());
                     if (order.getType() == 1) {//人工
-                        itemDTO.setName(orderItem.getWorkerGoodsName());
+                        itemDTO.setName(orderItem.getProductName());
                         itemDTO.setProductType(2);//人工
                     } else if (order.getType() == 2) {//材料
                         itemDTO.setName(orderItem.getProductName());

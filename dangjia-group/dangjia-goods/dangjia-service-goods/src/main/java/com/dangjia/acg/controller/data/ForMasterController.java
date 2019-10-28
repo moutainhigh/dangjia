@@ -5,6 +5,7 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.actuary.BudgetLabelDTO;
 import com.dangjia.acg.dto.actuary.BudgetLabelGoodsDTO;
+import com.dangjia.acg.dto.actuary.ShopGoodsDTO;
 import com.dangjia.acg.dto.product.ProductWorkerDTO;
 import com.dangjia.acg.dto.product.StorefontInfoDTO;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
@@ -165,13 +166,8 @@ public class ForMasterController implements ForMasterAPI {
     /*********************商品3.0改造**************************/
     @Override
     @ApiMethod
-    public List<BudgetLabelDTO> queryBudgetLabel(String houseId, String workerTypeId, String cityId){
-        return forMasterService.queryBudgetLabel(houseId,workerTypeId);
-    }
-    @Override
-    @ApiMethod
-    public  List<BudgetLabelGoodsDTO> queryBudgetLabelGoods(String houseId, String workerTypeId, String cityId){
-        return forMasterService.queryBudgetLabelGoods(houseId,workerTypeId);
+    public List<ShopGoodsDTO> queryShopGoods(String houseId, String workerTypeId, String cityId){
+        return forMasterService.queryShopGoods(houseId,workerTypeId);
     }
 
     @Override
