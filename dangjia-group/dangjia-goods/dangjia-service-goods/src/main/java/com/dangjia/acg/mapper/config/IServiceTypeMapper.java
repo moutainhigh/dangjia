@@ -1,6 +1,7 @@
 package com.dangjia.acg.mapper.config;
 
 import com.dangjia.acg.modle.config.ServiceType;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
@@ -17,5 +18,5 @@ public interface IServiceTypeMapper extends Mapper<ServiceType> {
 	 * 查询服务列表
 	 * @return
 	 */
-	List<ServiceType> getServiceTypeList();
+	List<ServiceType> getServiceTypeList(@Param("cityId") String cityId);
 }

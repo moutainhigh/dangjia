@@ -226,11 +226,11 @@ public class BudgetWorkerController implements BudgetWorkerAPI {
 
     public boolean workerPatrolList(String cityId,
                                     String workerGoodsId){
-        return budgetWorkerService.workerPatrolList(workerGoodsId);
+        return budgetWorkerService.workerPatrolList(workerGoodsId,cityId);
     }
 
     public boolean patrolList(String cityId,
                               String workerGoodsId){
-        return budgetWorkerService.patrolList(workerGoodsId);
+        return budgetWorkerService.patrolList(workerGoodsId,cityId);
     }
 }

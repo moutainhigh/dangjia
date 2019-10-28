@@ -408,9 +408,9 @@ public class TechnologyService {
     /**
      * 查询热门搜索
      */
-    public ServerResponse getHeatSearchBox() {
+    public ServerResponse getHeatSearchBox(String cityId) {
         try {
-            return ServerResponse.createBySuccess("查询成功", searchBoxMapper.getHeatSearchBox());
+            return ServerResponse.createBySuccess("查询成功", searchBoxMapper.getHeatSearchBox(cityId));
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");

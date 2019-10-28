@@ -505,7 +505,8 @@
             t1.sell_price price,
             t.type,
             t.value_id_arr valueIdArr,
-            t.value_id_arr value_name_arr
+            t.value_id_arr value_name_arr,
+            t.technology_ids technologyIds
         FROM dj_basics_product_template t,
              dj_basics_storefront_product t1
         WHERE

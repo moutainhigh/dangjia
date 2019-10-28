@@ -45,7 +45,7 @@ public class FillWorkerService {
      *             <p>
      *             补人工,退人工共用此接口(精算内)
      */
-    public ServerResponse repairBudgetWorker(int type, String workerTypeId, String houseId, String name, PageDTO pageDTO) {
+    public ServerResponse repairBudgetWorker(int type, String workerTypeId, String houseId, String name, PageDTO pageDTO,String cityId) {
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         if (StringUtil.isEmpty(workerTypeId)) {
             return ServerResponse.createByErrorMessage("workerTypeId不能为空");
@@ -61,6 +61,7 @@ public class FillWorkerService {
                 criteria.andEqualTo(BudgetMaterial.HOUSE_ID, houseId);
                 criteria.andEqualTo(BudgetMaterial.PRODUCT_TYPE, "2");
                 criteria.andNotEqualTo(BudgetMaterial.DELETE_STATE, "1");
+                criteria.andEqualTo(BudgetMaterial.CITY_ID,cityId);
                 criteria.andCondition(" ( `name` IS NOT NULL OR `name` <> '' ) ");
                 if (!CommonUtil.isEmpty(name)) {
                     criteria.andLike(BudgetMaterial.PRODUCT_NAME, "%" + name + "%");
@@ -90,7 +91,7 @@ public class FillWorkerService {
                 }*/
 
                 PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-                List<ProductWorkerDTO> workerGoodsList = workerGoodsMapper.getProductWorker(workerTypeId,name);
+                List<ProductWorkerDTO> workerGoodsList = workerGoodsMapper.getProductWorker(workerTypeId,name,cityId);
                 pageResult = new PageInfo(workerGoodsList);
                 for (ProductWorkerDTO  workerGoods : workerGoodsList) {
                     BudgetWorkerDTO budgetWorkerDTO = new BudgetWorkerDTO();

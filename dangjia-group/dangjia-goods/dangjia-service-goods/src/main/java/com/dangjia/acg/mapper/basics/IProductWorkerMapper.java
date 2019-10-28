@@ -31,5 +31,5 @@ public interface IProductWorkerMapper extends Mapper<DjBasicsProduct> {
      * @param name 商品名称
      * @return
      */
-    List<ProductWorkerDTO> getProductWorker(@Param("workerTypeId") String workerTypeId,@Param("name") String name );
+    List<ProductWorkerDTO> getProductWorker(@Param("workerTypeId") String workerTypeId,@Param("name") String name,@Param("cityId") String cityId );
 }

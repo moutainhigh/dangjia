@@ -33,11 +33,12 @@ public class ClassificationService {
     @Autowired
     private ConfigUtil configUtil;
 
-    public ServerResponse getGoodsCategoryList() {
+    public ServerResponse getGoodsCategoryList(String cityId) {
         Example example = new Example(GoodsCategory.class);
         example.createCriteria()
                 .andEqualTo(GoodsCategory.PARENT_TOP, "1")
-                .andEqualTo(GoodsCategory.DATA_STATUS, 0);
+                .andEqualTo(GoodsCategory.DATA_STATUS, 0)
+                .andEqualTo(GoodsCategory.CITY_ID,cityId);
         example.orderBy(GoodsCategory.SORT).asc();
         List<GoodsCategory> goodsCategoryList = iGoodsCategoryMapper.selectByExample(example);
         if (goodsCategoryList.size() <= 0) {
@@ -51,9 +52,9 @@ public class ClassificationService {
         return ServerResponse.createBySuccess("查询成功", goodsCategoryList);
     }
 
-    public ServerResponse getProductList(PageDTO pageDTO, String categoryId) {
+    public ServerResponse getProductList(PageDTO pageDTO, String categoryId,String cityId) {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        List<HomeProductDTO> homeProductDTOS = iGoodsCategoryMapper.getProductList(categoryId);
+        List<HomeProductDTO> homeProductDTOS = iGoodsCategoryMapper.getProductList(categoryId,cityId);
         if (homeProductDTOS.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }

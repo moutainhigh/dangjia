@@ -1,6 +1,7 @@
 package com.dangjia.acg.mapper.actuary;
 
 import com.dangjia.acg.modle.actuary.SearchBox;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
@@ -16,5 +17,5 @@ import java.util.List;
  */
 @Repository
 public interface ISearchBoxMapper extends Mapper<SearchBox> {
-	List<SearchBox> getHeatSearchBox();
+	List<SearchBox> getHeatSearchBox(@Param("cityId") String cityId);
 }
