@@ -71,7 +71,7 @@ public class DjSupApplicationService {
         try {
             DjSupplier djSupplier = djSupplierMapper.querySingleDjSupplier(userId, cityId);
             if(null==djSupplier)
-                return ServerResponse.createByErrorMessage("暂无店铺信息");
+                return ServerResponse.createByErrorMessage("暂无供应商信息");
             Example example=new Example(DjSupApplication.class);
             example.createCriteria().andEqualTo(DjSupApplication.SUP_ID,djSupplier.getId())
                     .andEqualTo(DjSupApplication.SHOP_ID,shopId)

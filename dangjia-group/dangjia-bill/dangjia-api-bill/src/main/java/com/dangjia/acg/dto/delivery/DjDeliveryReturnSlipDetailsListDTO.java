@@ -19,5 +19,6 @@ public class DjDeliveryReturnSlipDetailsListDTO {
     private String workerName;//大管家名字
     private String workerMobile;//大管家电话
     private Double sumPrice;
+    private String memberId;
     private List<DjDeliveryReturnSlipDetailsDTO> djDeliveryReturnSlipDetailsDTOS;
 }
