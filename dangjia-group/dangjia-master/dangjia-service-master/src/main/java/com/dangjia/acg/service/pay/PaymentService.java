@@ -1870,9 +1870,16 @@ public class PaymentService {
 //            workerId = accessToken.getUserId();
 //        }
 
+        //获取图片url
+        String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+
         Example example = new Example(Insurance.class);
         example.createCriteria().andEqualTo(Insurance.WORKER_ID, workerId);
         List<Insurance> houseFlowList = insuranceMapper.selectByExample(example);
+
+        for (Insurance insurance: houseFlowList) {
+            insurance.setHead(imageAddress + insurance.getHead());
+        }
 
         return ServerResponse.createBySuccess("查询成功", houseFlowList);
     }

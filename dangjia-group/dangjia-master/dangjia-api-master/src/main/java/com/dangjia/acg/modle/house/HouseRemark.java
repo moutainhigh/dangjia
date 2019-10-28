@@ -46,5 +46,8 @@ public class HouseRemark extends BaseEntity {
     @ApiModelProperty("房子id")
     private String houseId;
 
-
+    @Column(name = "is_type")
+    @Desc(value = "0-备注   1-移除")
+    @ApiModelProperty("0-备注   1-移除")
+    private Integer isType;
 }

@@ -57,6 +57,16 @@ public class HouseListDTO {
 
     private String storeName;// 归属分店
 
+
+    protected Date startDate;//创建时间
+    private String username;// 销售名称
+    private String userMobile;// 销售手机号码
+
+    private String remarkInfo;//备注详情
+    private Date remarkDate;//备注时间
+
+
+
     public String getHouseName() {
         return (CommonUtil.isEmpty(getResidential()) ? "*" : getResidential())
                 + (CommonUtil.isEmpty(getBuilding()) ? "*" : getBuilding()) + "栋"

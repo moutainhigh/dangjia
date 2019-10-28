@@ -12,6 +12,7 @@ import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
 import com.dangjia.acg.mapper.design.IDesignBusinessOrderMapper;
 import com.dangjia.acg.mapper.design.IPayConfigurationMapper;
+import com.dangjia.acg.mapper.design.IQuantityRoomMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
@@ -20,6 +21,7 @@ import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.design.DesignBusinessOrder;
 import com.dangjia.acg.modle.design.PayConfiguration;
+import com.dangjia.acg.modle.design.QuantityRoom;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.pay.BusinessOrder;
@@ -64,7 +66,8 @@ public class HouseDesignPayService {
     private IWorkerDetailMapper workerDetailMapper;
     @Autowired
     private ConfigUtil configUtil;
-
+    @Autowired
+    private IQuantityRoomMapper quantityRoomMapper;
     /**
      * 判断次数后确认是否需要支付
      *
@@ -99,6 +102,13 @@ public class HouseDesignPayService {
                     configMessageService.addConfigMessage(null, AppType.GONGJIANG, hwo.getWorkerId(), "0", "平面图未通过", String.format(DjConstants.PushMessage.PLANE_ERROR, house.getHouseName()), "");
                 }
                 houseMapper.updateByPrimaryKeySelective(house);
+                //增加平面审核流水
+                QuantityRoom quantityRoom = new QuantityRoom();
+                quantityRoom.setHouseId(house.getHouseId());
+                quantityRoom.setOwnerId(worker.getId());
+                quantityRoom.setFlag(1);
+                quantityRoom.setType(1);
+                quantityRoomMapper.insert(quantityRoom);
                 return ServerResponse.createBySuccessMessage("操作成功");
             }
         } else {
@@ -111,6 +121,13 @@ public class HouseDesignPayService {
             } else {
                 house.setConstructionFrequency(constructionFrequency + 1);
                 house.setDesignerOk(8);
+                //增加施工审核流水
+                QuantityRoom quantityRoom = new QuantityRoom();
+                quantityRoom.setHouseId(house.getHouseId());
+                quantityRoom.setOwnerId(house.getMemberId());
+                quantityRoom.setRoomType(1);
+                quantityRoom.setType(2);
+                quantityRoomMapper.insert(quantityRoom);
                 house.setDataStatus(0);
                 if (hwo != null) {
                     configMessageService.addConfigMessage(null, AppType.GONGJIANG, hwo.getWorkerId(), "0", "施工图未通过", String.format(DjConstants.PushMessage.CONSTRUCTION_ERROR, house.getHouseName()), "");
@@ -259,6 +276,16 @@ public class HouseDesignPayService {
                 house.setPlaneFrequency(planeFrequency + 1);
                 house.setDesignerOk(6);
                 house.setDataStatus(0);
+
+                //增加平面审核流水
+                QuantityRoom quantityRoom = new QuantityRoom();
+                quantityRoom.setHouseId(house.getHouseId());
+                quantityRoom.setOwnerId(businessOrder.getMemberId());
+                quantityRoom.setFlag(1);
+                quantityRoom.setType(1);
+                quantityRoomMapper.insert(quantityRoom);
+
+
                 if (hwo != null) {
                     configMessageService.addConfigMessage(null, AppType.GONGJIANG, hwo.getWorkerId(), "0", "平面图未通过", String.format(DjConstants.PushMessage.PLANE_ERROR, house.getHouseName()), "");
                 }
@@ -272,6 +299,14 @@ public class HouseDesignPayService {
                 house.setConstructionFrequency(constructionFrequency + 1);
                 house.setDesignerOk(8);
                 house.setDataStatus(0);
+                //增加施工审核流水
+                quantityRoom = new QuantityRoom();
+                quantityRoom.setHouseId(house.getHouseId());
+                quantityRoom.setOwnerId(house.getMemberId());
+                quantityRoom.setRoomType(1);
+                quantityRoom.setType(2);
+                quantityRoomMapper.insert(quantityRoom);
+
                 if (hwo != null) {
                     configMessageService.addConfigMessage(null, AppType.GONGJIANG, hwo.getWorkerId(), "0", "施工图未通过", String.format(DjConstants.PushMessage.CONSTRUCTION_ERROR, house.getHouseName()), "");
                 }
