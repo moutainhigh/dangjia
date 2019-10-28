@@ -1087,7 +1087,7 @@ public class PaymentService {
     }
 
     /**
-     * 处理精算人工生成人工订单
+     * 提交订单
      */
     private boolean generateOrder(String businessOrderNumber, HouseWorkerOrder hwo,  ShopGoodsDTO budgetLabelDTO) {
         try {
@@ -1114,17 +1114,13 @@ public class PaymentService {
                     order.setTotalAmount(hwo.getWorkPrice());// 订单总额(工钱)
                     order.setWorkerTypeName(wt.getName() + "订单");
                     order.setWorkerTypeId(hwo.getWorkerTypeId());
-                    order.setType(1);//人工
+                    order.setType(0);//人工
+                    order.setOrderNumber(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
+                    order.setMemberId(house.getMemberId());
 //                            `total_amount` decimal(10,0) DEFAULT NULL COMMENT '订单总额',
-//                            `worker_type_name` varchar(255) COLLATE utf8_bin DEFAULT NULL COMMENT '工种名称',
-//                            `worker_type_id` varchar(32) COLLATE utf8_bin DEFAULT NULL COMMENT '工种类型ID',
-//                            `type` int(2) DEFAULT '0' COMMENT '1人工订单 2材料订单',
 //                            `parent_order_id` varchar(60) COLLATE utf8_bin DEFAULT '0' COMMENT '父订单ID',
-//                            `order_number` varchar(60) COLLATE utf8_bin DEFAULT '0' COMMENT '订单编号',
-//                            `member_id` varchar(60) COLLATE utf8_bin NOT NULL COMMENT '用户ID',
 //                            `worker_id` varchar(60) COLLATE utf8_bin NOT NULL COMMENT '工人ID',
 //                            `address_id` varchar(60) COLLATE utf8_bin DEFAULT NULL COMMENT '地址ID',
-//                            `storefont_id` varchar(60) COLLATE utf8_bin DEFAULT NULL COMMENT '店铺ID',
 //                            `city_id` varchar(60) COLLATE utf8_bin NOT NULL COMMENT '城市ID',
 //                            `total_discount_price` decimal(10,2) DEFAULT NULL COMMENT '优惠总价钱',
 //                            `total_stevedorage_cost` decimal(10,2) DEFAULT NULL COMMENT '总搬运费',

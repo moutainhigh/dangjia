@@ -38,6 +38,11 @@ public class Order extends BaseEntity {
 	@ApiModelProperty("订单总额")
 	private BigDecimal totalAmount;
 
+	@Column(name = "member_id")
+	@Desc(value = "用户ID")
+	@ApiModelProperty("用户ID")
+	private String memberId;//memberid
+
 	@Column(name = "worker_type_name")
 	@Desc(value = "工种名称")
 	@ApiModelProperty("工种名称")
