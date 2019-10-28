@@ -77,7 +77,11 @@
             <artifactId>dangjia-common</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.dangjia.acg</groupId>
+            <artifactId>dangjia-api-store</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
         <dependency>
             <groupId>com.dangjia.acg</groupId>
             <artifactId>dangjia-api-bill</artifactId>
