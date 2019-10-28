@@ -152,7 +152,9 @@ public class AppCategoryGoodsService {
             //根据内容模糊搜索商品
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             String[] attributeVals=null;
-
+            if(!CommonUtil.isEmpty(attributeVal)){
+                attributeVals=attributeVal.split(",");
+            }
             String[] names=null;
             if(!CommonUtil.isEmpty(name)){
                 names=name.split(",");
