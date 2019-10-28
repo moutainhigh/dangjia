@@ -63,4 +63,10 @@ public class ShopCartController implements ShopCartAPI {
     public ServerResponse replaceShoppingCart(HttpServletRequest request, String shoppingCartId, String productId, String productSn, String productName, String image, BigDecimal price) {
         return shopCartservice.replaceShoppingCart(shoppingCartId, productId, productSn, productName, image, price);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse insertToCollect(HttpServletRequest request, String userToken, String jsonStr) {
+        return shopCartservice.insertToCollect(userToken,jsonStr);
+    }
 }

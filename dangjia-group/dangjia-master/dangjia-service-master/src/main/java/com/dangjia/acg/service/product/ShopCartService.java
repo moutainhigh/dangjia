@@ -1,6 +1,8 @@
 package com.dangjia.acg.service.product;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.BasicsStorefrontAPI;
 import com.dangjia.acg.api.StorefrontProductAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
@@ -11,9 +13,11 @@ import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.product.ShoppingCartDTO;
 import com.dangjia.acg.dto.product.ShoppingCartProductDTO;
+import com.dangjia.acg.mapper.member.IMemberCollectMapper;
 import com.dangjia.acg.mapper.product.IShoppingCartMapper;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.member.MemberCollect;
 import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.ShoppingCart;
 import com.dangjia.acg.modle.storefront.Storefront;
@@ -58,6 +62,9 @@ public class ShopCartService {
 
     @Autowired
     private StorefrontProductAPI storefrontProductAPI;
+
+    @Autowired
+    private IMemberCollectMapper iMemberCollectMapper;
 
     /**
      * 获取购物车列表
@@ -309,7 +316,52 @@ public class ShopCartService {
             iShoppingCartmapper.updateByPrimaryKeySelective(shoppingCart);
             return ServerResponse.createBySuccessMessage("更换成功!");
         } catch (Exception e) {
+            logger.info("系统报错,更换失败!",e);
             return ServerResponse.createByErrorMessage("系统报错,更换失败!");
+        }
+    }
+
+
+    /**
+     * 购物车移入收藏
+     * @param userToken
+     * @param jsonStr
+     * @return
+     */
+    public ServerResponse insertToCollect(String userToken, String jsonStr) {
+        try {
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;
+            JSONArray jsonArr = JSONArray.parseArray(jsonStr);
+            Example example=new Example(MemberCollect.class);
+            for (Object o : jsonArr) {
+                JSONObject obj = (JSONObject) o;
+                String id=obj.getString("id");
+                String storefrontId = obj.getString("storefrontId");
+                String productId=obj.getString("productIds");
+                example.createCriteria().andEqualTo(MemberCollect.CONDITION_TYPE,1)
+                        .andEqualTo(MemberCollect.DATA_STATUS,0)
+                        .andEqualTo(MemberCollect.COLLECT_ID,productId)
+                        .andEqualTo(MemberCollect.MEMBER_ID,member.getId())
+                        .andEqualTo(MemberCollect.STOREFRONT_ID,storefrontId);
+                List<MemberCollect> memberCollects = iMemberCollectMapper.selectByExample(example);
+                if(memberCollects.size()>0)
+                    return ServerResponse.createBySuccessMessage("移入成功");
+                MemberCollect memberCollect=new MemberCollect();
+                memberCollect.setCollectId(productId);
+                memberCollect.setConditionType("1");
+                memberCollect.setMemberId(member.getId());
+                memberCollect.setStorefrontId(storefrontId);
+                iMemberCollectMapper.insert(memberCollect);
+                iShoppingCartmapper.deleteByPrimaryKey(id);
+            }
+            return ServerResponse.createBySuccessMessage("移入成功");
+        } catch (Exception e) {
+            logger.info("添加失败",e);
+            return ServerResponse.createByErrorMessage("系统报错，移入失败!");
         }
     }
 }

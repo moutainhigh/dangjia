@@ -5,6 +5,7 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.product.MemberCollectDTO;
 import com.dangjia.acg.dto.product.ShoppingCartProductDTO;
+import com.dangjia.acg.dto.storefront.StorefrontDTO;
 import com.dangjia.acg.dto.storefront.StorefrontProductListDTO;
 import com.dangjia.acg.dto.storefront.BasicsStorefrontProductDTO;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
@@ -26,6 +27,12 @@ public class StorefrontProductController implements StorefrontProductAPI {
     @Autowired
     private StorefrontProductService storefrontProductService;
 
+
+    @Override
+    @ApiMethod
+    public List<StorefrontDTO> queryStorefrontListByStorefrontId(String storefrontId, String searchKey) {
+        return storefrontProductService.queryStorefrontListByStorefrontId(storefrontId,searchKey);
+    }
 
     @Override
     @ApiMethod
