@@ -125,4 +125,11 @@ public class StorefrontProduct extends BaseEntity {
     @ApiModelProperty("是否上架 1：上架  0:下架")
     private String isShelfStatus;
 
+    /**
+     * 城市ID
+     */
+    @Column(name = "city_id")
+    @Desc(value = "  城市ID")
+    @ApiModelProperty("  城市ID")
+    private String cityId;
 }

@@ -9,4 +9,9 @@ public class BasicsStorefrontProductViewDTO {
     private String productName;
     private String attributeIdArr;
     private String isShelfStatus;
+    /**
+     * 城市ID
+     */
+    private String cityId;
+
 }

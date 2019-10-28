@@ -31,4 +31,9 @@ public class DjSupSupplierProductDTO extends BaseEntity {
     private String valueNameArr;
     private String valueIdArr;
     private Double porterage;//搬运费
+    /**
+     * 城市ID
+     */
+    private String cityId;
+
 }

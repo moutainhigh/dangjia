@@ -75,4 +75,10 @@ public class BasicsStorefrontProductDTO {
      */
     private String isShelfStatus;
 
+
+    /**
+     * 城市id
+     */
+    private String cityId;
+
 }
