@@ -49,4 +49,8 @@ public class DjSupplierDTO  {
      */
     private String contract;
 
+    /**
+     * 城市ID
+     */
+    private String cityId;
 }
