@@ -177,7 +177,7 @@ public class DjSupplierServices {
      * @return
      */
 
-    public ServerResponse queryDjSupplierByShopIdPage( PageDTO pageDTO, String keyWord, String applicationStatus, String shopId) {
+    public ServerResponse queryDjSupplierByShopIdPage( PageDTO pageDTO, String keyWord, String applicationStatus, String shopId,String cityId) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             if (StringUtils.isEmpty(shopId)) {
@@ -210,7 +210,7 @@ public class DjSupplierServices {
      * @param shopId
      * @return
      */
-    public ServerResponse queryDjSupplierByShopID(String keyWord, String applicationStatus, String shopId) {
+    public ServerResponse queryDjSupplierByShopID(String keyWord, String applicationStatus, String shopId,String cityId) {
         try {
 
             if (StringUtils.isEmpty(shopId)) {
@@ -233,7 +233,7 @@ public class DjSupplierServices {
      * @param id
      * @return
      */
-    public ServerResponse getDjSupplierByID(String id,String shopId) {
+    public ServerResponse getDjSupplierByID(String id,String shopId,String cityId) {
         try {
             DjSupplierDTO djSupplierDTO=djSupplierMapper.queryDJsupplierById(id,shopId);
             return ServerResponse.createBySuccess("查询成功", djSupplierDTO);
@@ -249,7 +249,7 @@ public class DjSupplierServices {
      * @param applicationStatus
      * @return
      */
-    public ServerResponse setDjSupplierPass(String id, String applicationStatus) {
+    public ServerResponse setDjSupplierPass(String id, String applicationStatus,String cityId) {
         try {
             if(StringUtils.isEmpty(applicationStatus))
             {
@@ -288,7 +288,7 @@ public class DjSupplierServices {
      * @param failReason
      * @return
      */
-    public ServerResponse setDjSupplierReject(String id, String applicationStatus, String failReason) {
+    public ServerResponse setDjSupplierReject(String id, String applicationStatus, String failReason,String cityId) {
         try {
             if(StringUtils.isEmpty(failReason))
             {

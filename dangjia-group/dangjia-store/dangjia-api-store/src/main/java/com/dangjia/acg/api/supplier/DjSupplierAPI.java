@@ -60,27 +60,27 @@ public interface DjSupplierAPI {
     ServerResponse queryDjSupplierByShopIdPage(@RequestParam("pageDTO") PageDTO pageDTO,
                                                @RequestParam("keyWord") String keyWord,
                                                @RequestParam("applicationStatus") String applicationStatus,
-                                               @RequestParam("shopId") String shopId);
+                                               @RequestParam("shopId") String shopId,@RequestParam("cityId") String cityId);
 
     @PostMapping("/sup/djSupApplication/queryDjSupplierByShopID")
     @ApiOperation(value = "店铺-审核供应商列表", notes = "店铺-审核供应商列表")
     ServerResponse queryDjSupplierByShopID(@RequestParam("keyWord") String keyWord,
                                            @RequestParam("applicationStatus") String applicationStatus,
-                                           @RequestParam("shopId") String shopId);
+                                           @RequestParam("shopId") String shopId,@RequestParam("cityId") String cityId);
 
     @PostMapping("/sup/getDjSupplierByID")
     @ApiOperation(value = "店铺-审核供应商-查看供应商品列表", notes = "店铺-审核供应商-查看供应商品列表")
-    ServerResponse getDjSupplierByID(@RequestParam("id") String id, @RequestParam("shopId") String shopId);
+    ServerResponse getDjSupplierByID(@RequestParam("id") String id, @RequestParam("shopId") String shopId,@RequestParam("cityId") String cityId);
 
     @PostMapping("/sup/setDjSupplierPass")
     @ApiOperation(value = "店铺-审核供应商-通过", notes = "店铺-审核供应商-通过")
     ServerResponse setDjSupplierPass(@RequestParam("id") String id,
-                                     @RequestParam("applicationStatus") String applicationStatus);
+                                     @RequestParam("applicationStatus") String applicationStatus,@RequestParam("cityId") String cityId);
 
     @PostMapping("/sup/setDjSupplierReject")
     @ApiOperation(value = "店铺-审核供应商-驳回", notes = "店铺-审核供应商-驳回")
     ServerResponse setDjSupplierReject(@RequestParam("id") String id,
                                        @RequestParam("applicationStatus") String applicationStatus,
-                                       @RequestParam("failReason") String failReason);
+                                       @RequestParam("failReason") String failReason,@RequestParam("cityId") String cityId);
 
 }

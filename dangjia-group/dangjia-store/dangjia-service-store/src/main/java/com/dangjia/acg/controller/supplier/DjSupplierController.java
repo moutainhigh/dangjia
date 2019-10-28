@@ -62,32 +62,32 @@ public class DjSupplierController implements DjSupplierAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryDjSupplierByShopIdPage(PageDTO pageDTO, String keyWord, String applicationStatus, String shopId) {
-        return djSupplierServices.queryDjSupplierByShopIdPage(pageDTO,keyWord,applicationStatus,shopId);
+    public ServerResponse queryDjSupplierByShopIdPage(PageDTO pageDTO, String keyWord, String applicationStatus, String shopId,String cityId) {
+        return djSupplierServices.queryDjSupplierByShopIdPage(pageDTO,keyWord,applicationStatus,shopId,cityId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse queryDjSupplierByShopID(String keyWord, String applicationStatus, String shopId) {
-        return djSupplierServices.queryDjSupplierByShopID(keyWord,applicationStatus,shopId);
+    public ServerResponse queryDjSupplierByShopID(String keyWord, String applicationStatus, String shopId,String cityId) {
+        return djSupplierServices.queryDjSupplierByShopID(keyWord,applicationStatus,shopId,cityId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse getDjSupplierByID(String id,String shopId) {
-        return djSupplierServices.getDjSupplierByID(id,shopId);
+    public ServerResponse getDjSupplierByID(String id,String shopId,String cityId) {
+        return djSupplierServices.getDjSupplierByID(id,shopId,cityId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse setDjSupplierPass(String id, String applicationStatus) {
-        return djSupplierServices.setDjSupplierPass(id,applicationStatus);
+    public ServerResponse setDjSupplierPass(String id, String applicationStatus,String cityId) {
+        return djSupplierServices.setDjSupplierPass(id,applicationStatus,cityId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse setDjSupplierReject( String id, String applicationStatus, String failReason) {
-        return djSupplierServices.setDjSupplierReject(id,applicationStatus,failReason);
+    public ServerResponse setDjSupplierReject( String id, String applicationStatus, String failReason,String cityId) {
+        return djSupplierServices.setDjSupplierReject(id,applicationStatus,failReason,cityId);
     }
 
 }
