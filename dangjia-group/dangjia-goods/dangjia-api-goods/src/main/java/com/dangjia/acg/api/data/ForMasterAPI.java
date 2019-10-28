@@ -93,12 +93,12 @@ public interface ForMasterAPI {
     @ApiOperation(value = "支付回调修改人工精算", notes = "支付回调修改人工精算")
     List<BudgetMaterial> renGong(@RequestParam("cityId") String cityId,@RequestParam("houseFlowId") String houseFlowId);
 
-    @PostMapping("/data/forMaster/getBudgetWorkerPrice")
+   /* @PostMapping("/data/forMaster/getBudgetWorkerPrice")
     @ApiOperation(value = "支付时工种人工总价", notes = "支付时工种人工总价")
     Double getBudgetWorkerPrice(@RequestParam("houseId") String houseId,
                                 @RequestParam("workerTypeId") String workerTypeId,
                                 @RequestParam("cityId") String cityId);
-
+*/
     @PostMapping("/data/forMaster/getBudgetCaiPrice")
     @ApiOperation(value = "支付时工种材料总价", notes = "支付时工种材料总价")
     Double getBudgetCaiPrice(@RequestParam("houseId") String houseId,
@@ -166,14 +166,4 @@ public interface ForMasterAPI {
                               @RequestParam("actuarialDesignAttr") String actuarialDesignAttr,
                               @RequestParam("houseId") String houseId,
                               @RequestParam("square") BigDecimal square);
-
-    @PostMapping("/data/house/getAllBudgetMaterialWorkerList")
-    @ApiOperation(value = "获取对应房屋对应工种的精算信息(中台，我要装修列表用)", notes = "获取对应房屋对应工种的精算信息(中台，我要装修列表用)")
-    Map<String, Object> getAllBudgetMaterialWorkerList(@RequestParam("cityId") String cityId,
-                                                     @RequestParam("houseId") String houseId,
-                                                     @RequestParam("workerTypeId") String workerTypeId);
-    @PostMapping("/data/house/getHouseDetailInfoList")
-    @ApiOperation(value = "APP我要装修页面，下单详情显示", notes = "APP我要装修页面，下单详情显示)")
-    List<Map<String,Object>> getHouseDetailInfoList(@RequestParam("cityId") String cityId,
-                                                    @RequestParam("houseId") String houseId);
 }

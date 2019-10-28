@@ -21,7 +21,8 @@ public interface SearchActuarialConfigAPI {
 
     @PostMapping("app/search/actuarialConfig/searchActuarialList")
     @ApiOperation(value = "我要装修--查询设计精算阶段配置列表", notes = "查询设计精算阶段配置列表")
-    ServerResponse searchActuarialList(@RequestParam("request") HttpServletRequest request);
+    ServerResponse searchActuarialList(@RequestParam("request") HttpServletRequest request,
+                                       @RequestParam("cityId") String cityId);
 
     @PostMapping("app/search/actuarialConfig/searchChangeProductList")
     @ApiOperation(value = "我要装修--查询设计精算可切换商品列表", notes = "查询设计精算可切换商品列表")
@@ -30,19 +31,22 @@ public interface SearchActuarialConfigAPI {
 
     @PostMapping("app/search/actuarialConfig/searchSimulationTitleList")
     @ApiOperation(value = "我要装修--模拟花费标题查询", notes = "模拟花费标题查询")
-    ServerResponse searchSimulationTitleList(@RequestParam("request") HttpServletRequest request);
+    ServerResponse searchSimulationTitleList(@RequestParam("request") HttpServletRequest request,
+                                             @RequestParam("cityId") String cityId);
 
     @PostMapping("app/search/actuarialConfig/searchSimulationTitleDetailList")
     @ApiOperation(value = "我要装修--模拟花费标题详情列表查询", notes = "模拟花费标题详情列表查询")
     ServerResponse searchSimulationTitleDetailList(@RequestParam("request") HttpServletRequest request,
-                                                   @RequestParam("titleId") String titleId);
+                                                   @RequestParam("titleId") String titleId,
+                                                   @RequestParam("cityId") String cityId);
 
 
 
     @PostMapping("app/search/actuarialConfig/searchSimulateCostInfoList")
     @ApiOperation(value = "我要装修--模拟花费花费详情展示", notes = "模拟花费花费详情展示")
     ServerResponse searchSimulateCostInfoList(@RequestParam("request") HttpServletRequest request,
-                                              @RequestParam("groupCode") String groupCode);
+                                              @RequestParam("groupCode") String groupCode,
+                                              @RequestParam("cityId") String cityId);
 
 
 

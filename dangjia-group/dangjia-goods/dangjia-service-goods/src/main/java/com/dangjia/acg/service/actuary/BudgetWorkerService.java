@@ -847,8 +847,8 @@ public class BudgetWorkerService {
         }
     }
 
-    public boolean workerPatrolList(String workerGoodsId) {
-        DjBasicsProductTemplate wg = iBasicsProductTemplateMapper.selectByPrimaryKey(workerGoodsId);
+    public boolean workerPatrolList(String workerGoodsId,String cityId) {
+        DjBasicsProductTemplate wg = iBasicsProductTemplateMapper.getProductListByStoreproductId(workerGoodsId);
         if(wg==null|| StringUtils.isBlank(wg.getId())){
             return false;
         }
@@ -860,8 +860,8 @@ public class BudgetWorkerService {
         }
     }
 
-    public boolean patrolList(String workerGoodsId) {
-        DjBasicsProductTemplate wg = iBasicsProductTemplateMapper.selectByPrimaryKey(workerGoodsId);
+    public boolean patrolList(String workerGoodsId,String cityId) {
+        DjBasicsProductTemplate wg = iBasicsProductTemplateMapper.getProductListByStoreproductId(workerGoodsId);
         if(wg==null|| StringUtils.isBlank(wg.getId())){
             return false;
         }

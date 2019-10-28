@@ -96,6 +96,7 @@ public class DjDeliveryReturnSlipDetailsService {
             DjDeliveryReturnSlipDetailsListDTO djDeliveryReturnSlipDetailsListDTO2 = djDeliveryReturnSlipDetailsMapper.queryMemberInfByHouseId(houseId);
             if(djDeliveryReturnSlipDetailsListDTO2==null)
                 return ServerResponse.createByErrorMessage("房子信息不存在");
+            djDeliveryReturnSlipDetailsListDTO.setMemberId(djDeliveryReturnSlipDetailsListDTO2.getMemberId());
             djDeliveryReturnSlipDetailsListDTO.setName(djDeliveryReturnSlipDetailsListDTO2.getName());
             djDeliveryReturnSlipDetailsListDTO.setMobile(djDeliveryReturnSlipDetailsListDTO2.getMobile());
             djDeliveryReturnSlipDetailsDTOS.forEach(djDeliveryReturnSlipDetailsDTO -> {

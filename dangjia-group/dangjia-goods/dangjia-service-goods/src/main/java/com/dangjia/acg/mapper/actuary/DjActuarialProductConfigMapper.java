@@ -24,7 +24,7 @@ public interface DjActuarialProductConfigMapper extends Mapper<DjActuarialProduc
     /**
      *  删除 无用的精算详情数据
      */
-    void deleteActuarialProductByTemplate();
+    void deleteActuarialProductByTemplate(@Param("cityId") String cityId);
 
     /**
      * 根据货品ID要询可切换的商品

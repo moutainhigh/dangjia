@@ -44,6 +44,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             dj_actuarial_template_config t2
         WHERE
             t1.actuarial_template_id = t2.id
+        and t1.city_id=#{cityId}
     </select>
 
     <!--根据组合编码查询对应的精算模板-->
@@ -55,6 +56,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             simulation_name_group simulationNameGroup
         from dj_actuarial_simulation_relation
         WHERE data_status= '0'
+        and city_id=#{cityId}
         <foreach collection="codeList" item="item" index="index" >
             and FIND_IN_SET(#{item},simulation_code_group)
         </foreach>

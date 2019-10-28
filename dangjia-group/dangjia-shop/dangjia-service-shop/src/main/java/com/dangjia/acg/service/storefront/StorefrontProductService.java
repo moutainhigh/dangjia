@@ -85,6 +85,12 @@ public class StorefrontProductService {
             storefrontProduct.setIsDeliveryInstall(basicsStorefrontProductDTO.getIsDeliveryInstall());
             storefrontProduct.setMoveCost(basicsStorefrontProductDTO.getMoveCost());
             storefrontProduct.setIsShelfStatus(basicsStorefrontProductDTO.getIsShelfStatus());
+            storefrontProduct.setSellPrice(basicsStorefrontProductDTO.getSellPrice()!=null?basicsStorefrontProductDTO.getSellPrice():null);
+            storefrontProduct.setSuppliedNum(basicsStorefrontProductDTO.getSuppliedNum()!=null?basicsStorefrontProductDTO.getSuppliedNum():null);
+            storefrontProduct.setIsUpstairsCost(basicsStorefrontProductDTO.getIsUpstairsCost()!=null?basicsStorefrontProductDTO.getIsUpstairsCost():null);
+            storefrontProduct.setIsDeliveryInstall(basicsStorefrontProductDTO.getIsDeliveryInstall()!=null?basicsStorefrontProductDTO.getIsDeliveryInstall():null);
+            storefrontProduct.setMoveCost(basicsStorefrontProductDTO.getMoveCost()!=null?basicsStorefrontProductDTO.getMoveCost():null);
+            storefrontProduct.setIsShelfStatus(basicsStorefrontProductDTO.getIsShelfStatus()!=null?basicsStorefrontProductDTO.getIsShelfStatus():null);
             storefrontProduct.setProdTemplateId(basicsStorefrontProductDTO.getProdTemplateId());
             storefrontProduct.setGoodsId( djBasicsProductTemplate.getGoodsId());
             storefrontProduct.setProductName(djBasicsProductTemplate.getName());
