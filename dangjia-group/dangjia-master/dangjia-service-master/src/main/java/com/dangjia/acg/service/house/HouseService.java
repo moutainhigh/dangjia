@@ -15,21 +15,18 @@ import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.BaseEntity;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO;
 import com.dangjia.acg.dto.core.HouseFlowDTO;
 import com.dangjia.acg.dto.house.*;
-import com.dangjia.acg.dto.product.StorefontInfoDTO;
 import com.dangjia.acg.dto.repair.HouseProfitSummaryDTO;
 import com.dangjia.acg.dto.sale.royalty.DjAreaMatchDTO;
 import com.dangjia.acg.dto.sale.store.OrderStoreDTO;
 import com.dangjia.acg.mapper.clue.ClueMapper;
 import com.dangjia.acg.mapper.core.*;
-import com.dangjia.acg.mapper.delivery.IOrderItemMapper;
-import com.dangjia.acg.mapper.delivery.IOrderMapper;
 import com.dangjia.acg.mapper.house.*;
 import com.dangjia.acg.mapper.matter.IRenovationManualMapper;
 import com.dangjia.acg.mapper.matter.IRenovationManualMemberMapper;
@@ -45,12 +42,12 @@ import com.dangjia.acg.mapper.store.IStoreMapper;
 import com.dangjia.acg.mapper.store.IStoreUserMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
+import com.dangjia.acg.modle.attribute.AttributeValue;
+import com.dangjia.acg.modle.brand.Brand;
+import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.clue.Clue;
 import com.dangjia.acg.modle.config.ServiceType;
 import com.dangjia.acg.modle.core.*;
-import com.dangjia.acg.modle.deliver.Order;
-import com.dangjia.acg.modle.deliver.OrderItem;
-import com.dangjia.acg.modle.design.HouseStyleType;
 import com.dangjia.acg.modle.house.*;
 import com.dangjia.acg.modle.matter.RenovationManual;
 import com.dangjia.acg.modle.matter.RenovationManualMember;
@@ -71,13 +68,12 @@ import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseFlowService;
+import com.dangjia.acg.util.StringTool;
 import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.google.gson.JsonArray;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
-import org.aspectj.weaver.ast.Or;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -130,7 +126,7 @@ public class HouseService {
     @Autowired
     private IHouseFlowApplyImageMapper houseFlowApplyImageMapper;
     @Autowired
-    private ForMasterAPI forMasterAPI;
+    private IMasterBudgetMapper iMasterBudgetMapper;
     @Autowired
     private ServiceTypeAPI serviceTypeAPI;
     @Autowired
@@ -179,7 +175,7 @@ public class HouseService {
     private DjRoyaltyMatchMapper djRoyaltyMatchMapper;
     @Autowired
     private DjAreaMatchMapper djAreaMatchMapper;
-    protected static final Logger LOG = LoggerFactory.getLogger(HouseService.class);
+    protected static final Logger logger = LoggerFactory.getLogger(HouseService.class);
     @Autowired
     private UserMapper userMapper;
     @Autowired
@@ -191,10 +187,16 @@ public class HouseService {
     private IWebsiteVisitMapper websiteVisitMapper;
 
     @Autowired
-    private IOrderMapper iOrderMapper;
+    private IMasterBrandMapper iMasterBrandMapper;
 
     @Autowired
-    private IOrderItemMapper iOrderItemMapper;
+    private IMasterUnitMapper iMasterUnitMapper;
+
+    @Autowired
+    private IMasterAttributeValueMapper iMasterAttributeValueMapper;
+    @Autowired
+    private ForMasterAPI forMasterAPI;
+
     /**
      * 切换房产
      */
@@ -343,8 +345,8 @@ public class HouseService {
 
         List productList=new ArrayList();
         //查询对应用户选择的设计精算商品
-        Map<String,Object> map1 = forMasterAPI.getAllBudgetMaterialWorkerList(houseDTO.getCityId(),houseId,"1");//设计商品
-        Map<String,Object> map2 = forMasterAPI.getAllBudgetMaterialWorkerList(houseDTO.getCityId(),houseId,"2");//精算商品
+        Map<String,Object> map1 = getAllBudgetMaterialWorkerList(houseId,"1");//设计商品
+        Map<String,Object> map2 = getAllBudgetMaterialWorkerList(houseId,"2");//精算商品
         productList.add(map1);
         productList.add(map2);
         houseDTO.setActuarialDesignList(productList);
@@ -352,6 +354,93 @@ public class HouseService {
     }
 
 
+    /**
+     * 中台装修列表，我要装修信息查询
+     * @param houseId
+     * @param workerTypeId
+     * @return
+     */
+    public Map<String, Object> getAllBudgetMaterialWorkerList(String houseId,String workerTypeId){
+        Map<String,Object> resBudgetMap=new HashMap<>();
+        resBudgetMap.put("configType",workerTypeId);
+        resBudgetMap.put("configName","1".equals(workerTypeId)?"设计阶段":"精算阶段");
+        List<Map<String,Object>> budgetList = iMasterBudgetMapper.getAllBudgetMaterialWorkerList(houseId,workerTypeId);
+        resBudgetMap.put("budgetProductList",budgetList);//设计精算商品列表
+        return resBudgetMap;
+
+    }
+
+    /**
+     * APP端，我要装修列表下单详情显示
+     * @param houseId 房子ID
+     * @return
+     */
+    public List<Map<String,Object>> getHouseDetailInfoList(String houseId) {
+        //先查询店铺汇总信息，再查询对应的商品信息(包含 店铺ID，总价钱
+        List<Map<String, Object>> houseDetailList = iMasterBudgetMapper.getHouseDetailInfoList(houseId);
+        if (houseDetailList != null && houseDetailList.size() > 0) {
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            for (Map<String, Object> houseMap : houseDetailList) {
+                List<ActuarialProductAppDTO> productlist = iMasterBudgetMapper.getBudgetProductList(houseId, (String) houseMap.get("storefrontId"));
+                getProductList(productlist, address);
+                houseMap.put("productList", productlist);
+            }
+        }
+        return houseDetailList;
+    }
+    public  void getProductList(List<ActuarialProductAppDTO> productList,String address){
+        if(productList!=null&&productList.size()>0){
+            for(ActuarialProductAppDTO ap:productList){
+                String image=ap.getImage();
+                if (image == null) {
+                    continue;
+                }
+                //添加图片详情地址字段
+                String[] imgArr = image.split(",");
+                StringBuilder imgStr = new StringBuilder();
+                StringBuilder imgUrlStr = new StringBuilder();
+                StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
+                ap.setImageUrl(imgStr.toString());//图片详情地址设置
+                //查询单位
+                if(ap.getUnit()!=null&&StringUtils.isNotBlank(ap.getUnit())){
+                    Unit unit= iMasterUnitMapper.selectByPrimaryKey(ap.getUnit());
+                    ap.setUnitName(unit!=null?unit.getName():"");
+                }
+                //查询规格名称
+                if (StringUtils.isNotBlank(ap.getValueIdArr())) {
+                    ap.setValueNameArr(getNewValueNameArr(ap.getValueIdArr()));
+                }
+                if(StringUtils.isNotBlank(ap.getBrandId())){
+                    Brand brand=iMasterBrandMapper.selectByPrimaryKey(ap.getBrandId());
+                    ap.setBrandName(brand!=null?brand.getName():"");
+                }
+            }
+        }
+    }
+    /**
+     * 获取对应的属性值信息
+     * @param valueIdArr
+     * @return
+     */
+    public String getNewValueNameArr(String valueIdArr){
+        String strNewValueNameArr = "";
+        String[] newValueNameArr = valueIdArr.split(",");
+        for (int i = 0; i < newValueNameArr.length; i++) {
+            String valueId = newValueNameArr[i];
+            if (StringUtils.isNotBlank(valueId)) {
+                AttributeValue attributeValue = iMasterAttributeValueMapper.selectByPrimaryKey(valueId);
+                if(attributeValue!=null&&StringUtils.isNotBlank(attributeValue.getName())){
+                    if (i == 0) {
+                        strNewValueNameArr = attributeValue.getName();
+                    } else {
+                        strNewValueNameArr = strNewValueNameArr + "," + attributeValue.getName();
+                    }
+                }
+
+            }
+        }
+        return strNewValueNameArr;
+    }
 
     /**
      * 修改房子工序顺序以及选配标签
@@ -649,16 +738,13 @@ public class HouseService {
             }
 
         } catch (Exception e) {
-            LOG.error("建群失败，异常：" , e);
+            logger.error("建群失败，异常：" , e);
         }
         //修改商品3.0改版后，添加对应的精算信息
         forMasterAPI.insertActuarialDesignInfo(houseDTO.getCityId(),houseDTO.getActuarialDesignInfoAttr(),houseDTO.getHouseId(),new BigDecimal(houseDTO.getSquare()));
 
         return ServerResponse.createBySuccessMessage("操作成功");
     }
-
-
-
     /**
      * 取消订单
      * @param houseId
@@ -1581,7 +1667,7 @@ public class HouseService {
         if(houseList!=null&&houseList.size()>0){
             House house=houseList.get(0);
             //根据房子ID查询对应下单的商品信息(商品名称，商品规格，店铺名称，价钱汇总等信息)
-            List houseDetailInfoList=forMasterAPI.getHouseDetailInfoList(house.getCityId(),house.getId());
+            List houseDetailInfoList=iMasterBudgetMapper.getHouseDetailInfoList(house.getId());
             return ServerResponse.createBySuccess("查询成功",houseDetailInfoList);
         }
         return ServerResponse.createByErrorMessage("未找到对应的提交信息，请核实！");
@@ -2060,7 +2146,7 @@ public class HouseService {
             }
             WorkDeposit workDeposit = workDepositMapper.selectByPrimaryKey(house.getWorkDepositId());//结算比例表
             if (budgetOk == 2) {//打算发送给业主,验证精算完整性
-                Double price = forMasterAPI.getBudgetWorkerPrice(houseId, "3", house.getCityId());
+                Double price = iMasterBudgetMapper.getMasterBudgetWorkerPrice(houseId, "3");
                 if (price == 0) {
                     return ServerResponse.createByErrorMessage("大管家没有精算人工费,请重新添加");
                 }
@@ -2123,7 +2209,7 @@ public class HouseService {
                 int time = 0;//累计管家总阶段验收和完工验收次数
                 for (HouseFlow hf : houseFlowList) {
                     //查出该工种工钱
-                    Double workerTotal = forMasterAPI.getBudgetWorkerPrice(houseId, hf.getWorkerTypeId(), house.getCityId());
+                    Double workerTotal = iMasterBudgetMapper.getMasterBudgetWorkerPrice(houseId, hf.getWorkerTypeId());
                     int inspectNumber = workerTypeMapper.selectByPrimaryKey(hf.getWorkerTypeId()).getInspectNumber();//该工种配置默认巡查次数
                     int thisCheck = (int) (workerTotal / workDeposit.getPatrolPrice().intValue());//该工种钱算出来的巡查次数
                     if (thisCheck > inspectNumber) {
@@ -2141,7 +2227,7 @@ public class HouseService {
                     }
                 }
                 //拿到这个大管家工钱
-                Double moneySup = forMasterAPI.getBudgetWorkerPrice(houseId, "3", house.getCityId());
+                Double moneySup = iMasterBudgetMapper.getMasterBudgetWorkerPrice(houseId, "3");
                 //算管家每次巡查钱
                 double patrolMoney = 0;
                 if (check > 0) {

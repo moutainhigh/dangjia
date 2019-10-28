@@ -74,21 +74,4 @@ public interface IBudgetWorkerMapper extends Mapper<BudgetMaterial> {
 
 
     List<BasicsgDTO> queryMakeBudgetsBmList(@Param("houseId")String houseId, @Param("id")String id);
-
-    List<Map<String,Object>> getAllBudgetMaterialWorkerList(@Param("houseId") String  houseId,@Param("workerTypeId") String workerTypeId);
-
-	/**
-	 * 查询下单按店铺汇总的价钱
-	 * @param houseId
-	 * @return
-	 */
-	List<Map<String,Object>> getHouseDetailInfoList(@Param("houseId") String  houseId);
-
-	/**
-	 * 查询对应店铺下已精算的商品信息
-	 * @param houseId
-	 * @param storefrontId
-	 * @return
-	 */
-	List<ActuarialProductAppDTO> getBudgetProductList(@Param("houseId") String houseId, @Param("storefrontId")String storefrontId);
 }
