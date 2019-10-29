@@ -21,7 +21,6 @@ import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.design.DesignBusinessOrder;
 import com.dangjia.acg.modle.design.PayConfiguration;
-import com.dangjia.acg.modle.design.QuantityRoom;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.pay.BusinessOrder;
