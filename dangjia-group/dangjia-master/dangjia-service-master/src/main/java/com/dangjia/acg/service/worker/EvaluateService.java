@@ -347,9 +347,9 @@ public class EvaluateService {
             if (houseFlowApply.getSupervisorCheck() == 1) {//大管家已审核通过过 不要重复
                 return ServerResponse.createByErrorMessage("重复审核");
             }
-            ServerResponse serverResponse = getUserToHouseDistance(latitude, longitude, house.getVillageId());
-            if (!serverResponse.isSuccess())
-                return serverResponse;
+//            ServerResponse serverResponse = getUserToHouseDistance(latitude, longitude, house.getVillageId());
+//            if (!serverResponse.isSuccess())
+//                return serverResponse;
             Member supervisor = memberMapper.getSupervisor(houseFlowApply.getHouseId());//houseId获得大管家
             Evaluate evaluate = new Evaluate();
             evaluate.setContent(content);
