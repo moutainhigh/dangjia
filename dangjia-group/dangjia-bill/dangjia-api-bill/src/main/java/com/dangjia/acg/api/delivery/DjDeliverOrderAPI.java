@@ -34,34 +34,6 @@ public interface DjDeliverOrderAPI {
                                        @RequestParam("userId") String userId,
                                        @RequestParam("cityId") String cityId);
 
-    /**
-     * 当前花费
-     */
-    @PostMapping("/app/deliverOrder/xx3")
-    @ApiOperation(value = "下单后--当前花费", notes = "下单后--当前花费")
-    ServerResponse xx3(@RequestParam("request") HttpServletRequest request,
-                       @RequestParam("pageDTO") PageDTO pageDTO,
-                       @RequestParam("userId") String userId,
-                       @RequestParam("cityId") String cityId);
 
-    /**
-     * 录入价格
-     */
-    @PostMapping("/app/deliverOrder/xx2")
-    @ApiOperation(value = "下单后--录入价格", notes = "下单后--录入价格")
-    ServerResponse xx2(@RequestParam("request") HttpServletRequest request,
-                      @RequestParam("pageDTO") PageDTO pageDTO,
-                      @RequestParam("userId") String userId,
-                      @RequestParam("cityId") String cityId);
-
-    /**
-     * 下单后--查看工匠详情
-     */
-    @PostMapping("/app/deliverOrder/xx")
-    @ApiOperation(value = "下单后--查看工匠详情", notes = "下单后--查看工匠详情")
-    ServerResponse xx(@RequestParam("request") HttpServletRequest request,
-                                              @RequestParam("pageDTO") PageDTO pageDTO,
-                                              @RequestParam("userId") String userId,
-                                              @RequestParam("cityId") String cityId);
 
 }
