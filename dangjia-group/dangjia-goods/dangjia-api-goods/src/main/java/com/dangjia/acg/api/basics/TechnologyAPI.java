@@ -37,7 +37,8 @@ public interface TechnologyAPI {
                                              @RequestParam("pageDTO") PageDTO pageDTO,
                                              @RequestParam("workerTypeId") String workerTypeId,
                                              @RequestParam("name") String name,
-                                             @RequestParam("materialOrWorker") Integer materialOrWorker);
+                                             @RequestParam("materialOrWorker") Integer materialOrWorker,
+                                             @RequestParam("cityId") String cityId);
 
     @PostMapping("/basics/technology/getTechnology")
     @ApiOperation(value = "根据id查询工艺实体", notes = "根据id查询工艺实体")
@@ -47,11 +48,15 @@ public interface TechnologyAPI {
     @PostMapping("/basics/technology/queryTechnologyByWgId")
     @ApiOperation(value = "根据商品id查询人工商品关联工艺实体", notes = "根据商品id查询人工商品关联工艺实体")
     ServerResponse queryTechnologyByWgId(@RequestParam("request") HttpServletRequest request,
-                                         @RequestParam("workerGoodsId") String workerGoodsId);
+                                         @RequestParam("workerGoodsId") String workerGoodsId,
+                                         @RequestParam("cityId") String cityId);
 
 
     @PostMapping("/basics/technology/queryByName")
     @ApiOperation(value = "根据名称查询所有工艺（名称去重）", notes = "根据名称查询所有工艺（名称去重）")
-    ServerResponse queryByName(@RequestParam("request") HttpServletRequest request, @RequestParam("name") String name, @RequestParam("workerTypeId") String workerTypeId);
+    ServerResponse queryByName(@RequestParam("request") HttpServletRequest request,
+                               @RequestParam("name") String name,
+                               @RequestParam("workerTypeId") String workerTypeId,
+                               @RequestParam("cityId") String cityId);
 
 }

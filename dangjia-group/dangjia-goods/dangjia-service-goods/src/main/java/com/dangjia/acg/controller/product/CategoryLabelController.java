@@ -40,8 +40,8 @@ public class CategoryLabelController implements CatetgoryLabelAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse<PageInfo> getAllCategoryLabel(HttpServletRequest request) {
-        return categoryLabelService.getAllCategoryLabel();
+    public ServerResponse<PageInfo> getAllCategoryLabel(HttpServletRequest request,String cityId) {
+        return categoryLabelService.getAllCategoryLabel(cityId);
     }
 
     /**
@@ -51,8 +51,8 @@ public class CategoryLabelController implements CatetgoryLabelAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getAllCategoryLabelList(HttpServletRequest request) {
-        return categoryLabelService.getAllCategoryLabelList();
+    public ServerResponse getAllCategoryLabelList(HttpServletRequest request,String cityId) {
+        return categoryLabelService.getAllCategoryLabelList(cityId);
     }
 
     /**
@@ -64,8 +64,9 @@ public class CategoryLabelController implements CatetgoryLabelAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse updateCategoryLabel(HttpServletRequest request, String labelId, String labelName) {
-        return categoryLabelService.update(labelId, labelName);
+    public ServerResponse updateCategoryLabel(HttpServletRequest request, String labelId,
+                                              String labelName,String cityId) {
+        return categoryLabelService.update(labelId, labelName,cityId);
     }
 
     /**
@@ -76,8 +77,8 @@ public class CategoryLabelController implements CatetgoryLabelAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse insertCategoryLabel(HttpServletRequest request, String labelName) {
-        return categoryLabelService.insert(labelName);
+    public ServerResponse insertCategoryLabel(HttpServletRequest request, String labelName,String cityId) {
+        return categoryLabelService.insert(labelName,cityId);
     }
 
     /**

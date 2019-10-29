@@ -76,7 +76,7 @@ public class TechnologyService {
      * @param goodsId          根据 materialOrWorker字段决定：  0:服务productId;  1:人工商品
      * @return
      */
-    public String insertTechnologyList(String jsonStr, String workerTypeId, Integer materialOrWorker, String goodsId) {
+    public String insertTechnologyList(String jsonStr, String workerTypeId, Integer materialOrWorker, String goodsId,String cityId) {
         try {
             if (!StringUtils.isNotBlank(jsonStr))
                 return "1";
@@ -91,7 +91,7 @@ public class TechnologyService {
                     if (nameJ.equals(name))
                         return "工艺名称不能有重复的";
                 }
-                List<Technology> technologyList = iTechnologyMapper.getByName(workerTypeId, name, materialOrWorker, goodsId);
+                List<Technology> technologyList = iTechnologyMapper.getByName(workerTypeId, name, materialOrWorker, goodsId,cityId);
                 if (!StringUtils.isNotBlank(id)) {//为空 ： 就是新增
                     if (technologyList.size() > 0)
                         return "工艺名称已经存在";
@@ -118,6 +118,7 @@ public class TechnologyService {
                 t.setImage(image);
                 t.setSampleImage(sampleImage);
                 t.setType(type);
+                t.setCityId(cityId);
                 //0服务工艺;1:人工工艺
                 if (materialOrWorker == 1) { //1人工工艺
                     t.setWorkerTypeId(workerTypeId);
@@ -131,6 +132,7 @@ public class TechnologyService {
                     iTechnologyMapper.insertSelective(t);
                 } else { //修改
                     Technology technology = iTechnologyMapper.selectByPrimaryKey(id);
+                    technology.setCityId(cityId);
                     technology.setName(t.getName());
                     technology.setContent(t.getContent());
                     technology.setGoodsId(t.getGoodsId());
@@ -155,7 +157,7 @@ public class TechnologyService {
      */
     public ServerResponse insertTechnology(Technology technology) {
         try {
-            List<Technology> technologyList = iTechnologyMapper.query(technology.getWorkerTypeId(), technology.getName(), technology.getMaterialOrWorker());
+            List<Technology> technologyList = iTechnologyMapper.query(technology.getWorkerTypeId(), technology.getName(), technology.getMaterialOrWorker(),technology.getCityId());
             if (technologyList.size() > 0) {
                 return ServerResponse.createByErrorMessage("工艺名称不能重复");
             }
@@ -183,7 +185,7 @@ public class TechnologyService {
                 return ServerResponse.createByErrorMessage("不存在此工艺,修改失败");
             }
             if (!t.getName().equals(technology.getName())) {//如果修改了名称 就判断，修改的名字 是否已经存在
-                List<Technology> technologyList = iTechnologyMapper.query(t.getWorkerTypeId(), technology.getName(), t.getMaterialOrWorker());
+                List<Technology> technologyList = iTechnologyMapper.query(t.getWorkerTypeId(), technology.getName(), t.getMaterialOrWorker(),t.getCityId());
                 if (technologyList.size() > 0)
                     return ServerResponse.createByErrorMessage("工艺名称已存在");
             }
@@ -213,11 +215,13 @@ public class TechnologyService {
     }
 
     //根据工种查询所有工艺说明
-    public ServerResponse queryTechnology(PageDTO pageDTO, String workerTypeId, String name, Integer materialOrWorker) {
+    public ServerResponse queryTechnology(PageDTO pageDTO, String workerTypeId,
+                                          String name, Integer materialOrWorker,
+                                          String cityId) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            List<Technology> tList = iTechnologyMapper.query(workerTypeId, name, materialOrWorker);
+            List<Technology> tList = iTechnologyMapper.query(workerTypeId, name, materialOrWorker,cityId);
             PageInfo pageResult = new PageInfo(tList);
             List<Map<String, Object>> mapList = new ArrayList<>();
             for (Technology t : tList) {
@@ -301,9 +305,9 @@ public class TechnologyService {
         }
     }
     //根据名称查询所有工艺（名称去重）
-    public ServerResponse queryByName(String name,String workerTypeId) {
+    public ServerResponse queryByName(String name,String workerTypeId,String cityId) {
         try {
-            List<Technology> tList = iTechnologyMapper.queryByName(name, workerTypeId);
+            List<Technology> tList = iTechnologyMapper.queryByName(name, workerTypeId,cityId);
             return ServerResponse.createBySuccess("查询成功", tList);
         } catch (Exception e) {
             e.printStackTrace();
@@ -311,7 +315,7 @@ public class TechnologyService {
         }
     }
     //根据商品id查询人工商品关联工艺实体
-    public ServerResponse queryTechnologyByWgId(String workerGoodsId) {
+    public ServerResponse queryTechnologyByWgId(String workerGoodsId,String cityId) {
         try {
 
             //WorkerGoods wg = iWorkerGoodsMapper.selectByPrimaryKey(workerGoodsId);

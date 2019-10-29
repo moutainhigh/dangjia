@@ -21,10 +21,10 @@ public interface IGoodsCategoryMapper extends Mapper<GoodsCategory> {
 	List<GoodsCategory> query();
 
 	//根据父id查询下属商品类型
-	List<GoodsCategory> queryCategoryByParentId(@Param("parentId") String parentId);
+	List<GoodsCategory> queryCategoryByParentId(@Param("parentId") String parentId,@Param("cityId") String cityId);
 
 	//根据name查询商品对象
-	List<GoodsCategory> queryCategoryByName(@Param("name") String name);
+	List<GoodsCategory> queryCategoryByName(@Param("name") String name,@Param("cityId") String cityId);
 
 	//根据name查询商品对象
 	List<HomeProductDTO> getProductList(@Param("categoryId") String categoryId,@Param("cityId") String cityId);

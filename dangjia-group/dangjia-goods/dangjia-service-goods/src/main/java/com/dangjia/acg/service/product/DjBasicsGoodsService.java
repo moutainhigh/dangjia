@@ -65,8 +65,9 @@ public class DjBasicsGoodsService {
      * @param labels
      * @return
      */
-    public ServerResponse addLabels(String goodsId, String labels) {
+    public ServerResponse addLabels(String goodsId, String labels,String cityId) {
         DjBasicsGoods djBasicsGoods = new DjBasicsGoods();
+        djBasicsGoods.setCityId(cityId);
         djBasicsGoods.setId(goodsId);
         djBasicsGoods.setLabelIds(labels);
         djBasicsGoodsMapper.updateByPrimaryKeySelective(djBasicsGoods);
@@ -82,6 +83,7 @@ public class DjBasicsGoodsService {
      */
     public ServerResponse saveBasicsGoods(BasicsGoodsDTO basicsGoodsDTO) {
         try {
+            String cityId = basicsGoodsDTO.getCityId();
             String name = basicsGoodsDTO.getName();
             String unitId = basicsGoodsDTO.getUnitId();
             String categoryId = basicsGoodsDTO.getCategoryId();
@@ -89,7 +91,7 @@ public class DjBasicsGoodsService {
             if (!StringUtils.isNotBlank(name))
                 return ServerResponse.createByErrorMessage("名字不能为空");
 
-            List<BasicsGoods> goodsList = iBasicsGoodsMapper.queryByName(name);
+            List<BasicsGoods> goodsList = iBasicsGoodsMapper.queryByName(name,cityId);
             if (goodsList.size() > 0)
                 return ServerResponse.createByErrorMessage("名字不能重复");
 
@@ -103,6 +105,7 @@ public class DjBasicsGoodsService {
                 return ServerResponse.createByErrorMessage("性质不能为空");
 
             BasicsGoods goods = getBasicsGoods(basicsGoodsDTO);
+            goods.setCityId(cityId);
             iBasicsGoodsMapper.insert(goods);
             return ServerResponse.createBySuccess("新增成功", goods.getId());
         } catch (Exception e) {
@@ -117,7 +120,7 @@ public class DjBasicsGoodsService {
         String name = basicsGoodsDTO.getName();
         BasicsGoods oldBasicsGoods = iBasicsGoodsMapper.selectByPrimaryKey(id);
         if (!oldBasicsGoods.getName().equals(name)) {
-            List<BasicsGoods> goodsList = iBasicsGoodsMapper.queryByName(name);
+            List<BasicsGoods> goodsList = iBasicsGoodsMapper.queryByName(name,basicsGoodsDTO.getCityId());
             if (goodsList.size() > 0)
                 return ServerResponse.createByErrorMessage("该货品已存在");
         }
@@ -302,12 +305,12 @@ public class DjBasicsGoodsService {
      * @param type       是否禁用  0：禁用；1不禁用 ;  -1全部默认
      * @return
      */
-    public ServerResponse queryGoodsList(PageDTO pageDTO, String categoryId, String name, Integer type) {
+    public ServerResponse queryGoodsList(PageDTO pageDTO, String categoryId, String name, Integer type,String cityId) {
         try {
             LOG.info("tqueryGoodsListByCategoryLikeName type :" + type);
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<DjBasicsGoods> goodsList = djBasicsGoodsMapper.queryGoodsListByCategoryLikeName(categoryId, name);
+            List<DjBasicsGoods> goodsList = djBasicsGoodsMapper.queryGoodsListByCategoryLikeName(categoryId, name,cityId);
             PageInfo pageResult = new PageInfo(goodsList);
             List<Map<String, Object>> gMapList = new ArrayList<>();
             for (DjBasicsGoods goods : goodsList) {

@@ -23,21 +23,22 @@ public class DjBasicsMaintainController implements DjBasicsMaintainAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryMatchWord(HttpServletRequest request, String name) {
-        return djBasicsMaintainService.queryMatchWord(name);
+    public ServerResponse queryMatchWord(HttpServletRequest request, String name,String cityId) {
+        return djBasicsMaintainService.queryMatchWord(name,cityId);
 
     }
 
     @Override
     @ApiMethod
-    public ServerResponse addKeywords(HttpServletRequest request, String keywordName, String searchItem) {
-        return djBasicsMaintainService.addKeywords(keywordName, searchItem);
+    public ServerResponse addKeywords(HttpServletRequest request, String keywordName, String searchItem,String cityId) {
+        return djBasicsMaintainService.addKeywords(keywordName, searchItem,cityId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse updateKeywords(HttpServletRequest request, String id, String keywordName, String searchItem) {
-        return djBasicsMaintainService.updateKeywords(id, keywordName, searchItem);
+    public ServerResponse updateKeywords(HttpServletRequest request, String id, String keywordName,
+                                         String searchItem,String cityId) {
+        return djBasicsMaintainService.updateKeywords(id, keywordName, searchItem,cityId);
     }
 
     @Override
@@ -54,7 +55,7 @@ public class DjBasicsMaintainController implements DjBasicsMaintainAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryKeywords(HttpServletRequest request, String id) {
-        return djBasicsMaintainService.queryKeywords(id);
+    public ServerResponse queryKeywords(HttpServletRequest request, String id,String cityId) {
+        return djBasicsMaintainService.queryKeywords(id,cityId);
     }
 }

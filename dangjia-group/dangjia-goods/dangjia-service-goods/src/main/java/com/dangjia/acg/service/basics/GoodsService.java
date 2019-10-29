@@ -68,7 +68,7 @@ public class GoodsService {
      * @return
      */
     public ServerResponse saveGoods(String name, String categoryId, Integer buy,
-                                    Integer sales, String unitId, Integer type, String arrString,String otherName) {
+                                    Integer sales, String unitId, Integer type, String arrString,String otherName,String cityId) {
         try {
             if (!StringUtils.isNotBlank(name))
                 return ServerResponse.createByErrorMessage("名字不能为空");
@@ -87,6 +87,7 @@ public class GoodsService {
                 return ServerResponse.createByErrorMessage("性质不能为空");
 
             Goods goods = new Goods();
+            goods.setCityId(cityId);
             goods.setName(name);
             goods.setOtherName(otherName);//别名
             goods.setCategoryId(categoryId);//分类
@@ -189,7 +190,7 @@ public class GoodsService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse updateGoods(String id, String name, String categoryId, Integer buy,
-                                      Integer sales, String unitId, Integer type, String arrString,String otherName)throws RuntimeException {
+                                      Integer sales, String unitId, Integer type, String arrString,String otherName,String cityId)throws RuntimeException {
         try {
             Goods oldGoods = iGoodsMapper.selectByPrimaryKey(id);
             if (!oldGoods.getName().equals(name)) {
@@ -199,6 +200,7 @@ public class GoodsService {
             }
 
             Goods goods = new Goods();
+            goods.setCityId(cityId);
             goods.setId(id);
             goods.setName(name);
             goods.setCategoryId(categoryId);//分类
@@ -247,12 +249,12 @@ public class GoodsService {
      * @param type       是否禁用  0：禁用；1不禁用 ;  -1全部默认
      * @return
      */
-    public ServerResponse queryGoodsListByCategoryLikeName(PageDTO pageDTO, String categoryId, String name, Integer type) {
+    public ServerResponse queryGoodsListByCategoryLikeName(PageDTO pageDTO, String categoryId, String name,String cityId, Integer type) {
         try {
             LOG.info("tqueryGoodsListByCategoryLikeName type :" + type);
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<Goods> goodsList = iGoodsMapper.queryGoodsListByCategoryLikeName(categoryId, name);
+            List<Goods> goodsList = iGoodsMapper.queryGoodsListByCategoryLikeName(categoryId, name,cityId);
             PageInfo pageResult = new PageInfo(goodsList);
             List<Map<String, Object>> gMapList = new ArrayList<>();
             for (Goods goods : goodsList) {
@@ -260,7 +262,7 @@ public class GoodsService {
                 List<Map<String, Object>> mapList = new ArrayList<>();
                 gMap.put("goodsUnitName", iUnitMapper.selectByPrimaryKey(goods.getUnitId()).getName());
                 if (2 != goods.getBuy()){
-                    List<Product> productList = iProductMapper.queryByGoodsId(goods.getId());
+                    List<Product> productList = iProductMapper.queryByGoodsId(goods.getId(),cityId);
                     for (Product p : productList) {
                         //type表示： 是否禁用  0：禁用；1不禁用 ;  -1全部默认
                         if (type!=null&& !type.equals(p.getType()) && -1 != type) //不等于 type 的不返回给前端
@@ -322,7 +324,7 @@ public class GoodsService {
      * @param srcLabelId :   srcLabelId
      * @return
      */
-    public ServerResponse queryProductListByGoodsIdAndLabelId(String goodsArr, String srcLabelId) {
+    public ServerResponse queryProductListByGoodsIdAndLabelId(String goodsArr, String srcLabelId,String cityId) {
         try {
 //            LOG.info("queryProductListByGoodsIdAndLabelId goodsArr::" + goodsArr + " id:" + srcLabelId);
 //            List<String> goodsList = Arrays.asList(goodsArr);
@@ -343,7 +345,7 @@ public class GoodsService {
                 if (goods == null)
                     return ServerResponse.createByErrorMessage("货品不存在");
 
-                List<Product> products = iProductMapper.queryByGoodsId(goods.getId());
+                List<Product> products = iProductMapper.queryByGoodsId(goods.getId(),cityId);
                 for (Product product : products) {
                     if (product.getLabelId() != null) {
                         if (!product.getLabelId().equals(srcLabelId))

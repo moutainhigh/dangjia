@@ -41,7 +41,8 @@ public class DjBasicsAttributeServices {
 
 
     //根据类别id查询关联属性
-    public ServerResponse<PageInfo> queryGoodsAttribute(PageDTO pageDTO, String goodsCategoryId, String likeAttrName) {
+    public ServerResponse<PageInfo> queryGoodsAttribute(PageDTO pageDTO, String goodsCategoryId,
+                                                        String likeAttrName,String cityId) {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         try {
             List<DjBasicsAttribute> caList = djBasicsAttributeMapper.queryAttributeByCategoryId(goodsCategoryId, likeAttrName);
@@ -77,7 +78,7 @@ public class DjBasicsAttributeServices {
 
 
     //根据属性名称模糊查询属性
-    public ServerResponse<PageInfo> queryGoodsAttributelikeName(PageDTO pageDTO, String name) {
+    public ServerResponse<PageInfo> queryGoodsAttributelikeName(PageDTO pageDTO, String name,String cityId) {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         try {
             List<DjBasicsAttribute> caList;
@@ -86,7 +87,8 @@ public class DjBasicsAttributeServices {
                 caList = djBasicsAttributeMapper.selectAll();
             } else {
                 Example example = new Example(DjBasicsAttribute.class);
-                example.createCriteria().andLike(DjBasicsAttribute.NAME, "%" + name + "%");
+                example.createCriteria().andLike(DjBasicsAttribute.NAME, "%" + name + "%").
+                        andEqualTo(DjBasicsAttribute.CITY_ID,cityId);
                 example.orderBy(DjBasicsAttribute.CREATE_DATE).desc();
                 caList = djBasicsAttributeMapper.selectByExample(example);
             }
@@ -153,7 +155,9 @@ public class DjBasicsAttributeServices {
 
 
     //新增属性及其属性选项
-    public ServerResponse addGoodsAttribute(String goodsCategoryId, String attributeName, Integer type, String jsonStr, Integer isScreenConditions) {
+    public ServerResponse addGoodsAttribute(String goodsCategoryId, String attributeName,
+                                            Integer type, String jsonStr,
+                                            Integer isScreenConditions,String cityId) {
         try {
             List<DjBasicsAttribute> djBasicsAttributes = djBasicsAttributeMapper.queryAttributeByCategoryId(goodsCategoryId, null);
             for (DjBasicsAttribute djBasicsAttribute : djBasicsAttributes) {
@@ -174,6 +178,7 @@ public class DjBasicsAttributeServices {
                 }
             }
             DjBasicsAttribute djBasicsAttribute = new DjBasicsAttribute();
+            djBasicsAttribute.setCityId(cityId);
             djBasicsAttribute.setName(attributeName);
             djBasicsAttribute.setType(type);
             djBasicsAttribute.setCategoryId(goodsCategoryId);
@@ -182,6 +187,7 @@ public class DjBasicsAttributeServices {
             for (int i = 0; i < jsonArr.size(); i++) {
                 JSONObject obj = jsonArr.getJSONObject(i);
                 DjBasicsAttributeValue djBasicsAttributeValue = new DjBasicsAttributeValue();
+                djBasicsAttributeValue.setCityId(cityId);
                 djBasicsAttributeValue.setAttributeId(djBasicsAttribute.getId());
                 djBasicsAttributeValue.setName(obj.getString("name"));
                 djBasicsAttributeValueMapper.insert(djBasicsAttributeValue);
@@ -196,7 +202,10 @@ public class DjBasicsAttributeServices {
 
     //修改属性及其属性选项
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse updateGoodsAttribute(String attributeId, String attributeName, Integer type, String jsonStr, Integer isScreenConditions) {
+    public ServerResponse updateGoodsAttribute(String attributeId, String attributeName,
+                                               Integer type, String jsonStr,
+                                               Integer isScreenConditions,
+                                               String cityId) {
         try {
             DjBasicsAttribute djBasicsAttribute = djBasicsAttributeMapper.selectByPrimaryKey(attributeId);
             LOG.info("doModifyGoodsAttribute::::Id: " + attributeId + " name:" + attributeName);
@@ -240,6 +249,7 @@ public class DjBasicsAttributeServices {
                 }
             }
             DjBasicsAttribute djBasicsAttribute1 = new DjBasicsAttribute();
+            djBasicsAttribute1.setCityId(cityId);
             djBasicsAttribute1.setId(attributeId);
             djBasicsAttribute1.setName(attributeName);
             djBasicsAttribute1.setType(type);
@@ -251,11 +261,13 @@ public class DjBasicsAttributeServices {
                 if (obj.getString("id") == null || "".equals(obj.getString("id"))) {//新增
                     djBasicsAttributeValue.setAttributeId(djBasicsAttribute1.getId());
                     djBasicsAttributeValue.setName(obj.getString("name"));
+                    djBasicsAttributeValue.setCityId(cityId);
                     djBasicsAttributeValueMapper.insert(djBasicsAttributeValue);
                 } else {//修改
                     djBasicsAttributeValue.setId(obj.getString("id"));
                     djBasicsAttributeValue.setAttributeId(djBasicsAttribute1.getId());
                     djBasicsAttributeValue.setName(obj.getString("name"));
+                    djBasicsAttributeValue.setCityId(cityId);
                     djBasicsAttributeValueMapper.updateByPrimaryKeySelective(djBasicsAttributeValue);
 //                    //更新指定属性值关联的商品属性名称
                     iBasicsProductTemplateMapper.updateProductValueId(djBasicsAttributeValue.getId());

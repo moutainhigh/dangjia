@@ -184,6 +184,7 @@
 		FROM dj_basics_group_link
 		where group_id=#{groupId}
 		and product_id=#{productId}
+		and city_id = #{cityId}
 		ORDER BY create_date desc
 	</select>
 

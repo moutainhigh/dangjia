@@ -28,8 +28,8 @@ public class GoodsGroupController implements GoodsGroupAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse<PageInfo> getAllList(HttpServletRequest request, PageDTO pageDTO, String name, Integer state) {
-        return goodsGroupService.getAllList(pageDTO, name, state);
+    public ServerResponse<PageInfo> getAllList(HttpServletRequest request, PageDTO pageDTO, String name, Integer state,String cityId) {
+        return goodsGroupService.getAllList(pageDTO, name, state,cityId);
     }
 
     /*
@@ -46,8 +46,8 @@ public class GoodsGroupController implements GoodsGroupAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getGoodsGroupById(HttpServletRequest request, String goodsGroupId) {
-        return goodsGroupService.getGoodsGroupById(goodsGroupId);
+    public ServerResponse getGoodsGroupById(HttpServletRequest request, String goodsGroupId,String cityId) {
+        return goodsGroupService.getGoodsGroupById(goodsGroupId,cityId);
     }
 
     /*
@@ -55,8 +55,8 @@ public class GoodsGroupController implements GoodsGroupAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getGoodsCategoryList(HttpServletRequest request) {
-        return goodsGroupService.getGoodsCategoryList();
+    public ServerResponse getGoodsCategoryList(HttpServletRequest request,String cityId) {
+        return goodsGroupService.getGoodsCategoryList(cityId);
     }
 
     /*
@@ -91,8 +91,8 @@ public class GoodsGroupController implements GoodsGroupAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse addGoodsGroup(HttpServletRequest request, String jsonStr) {
-        return goodsGroupService.addGoodsGroup(jsonStr);
+    public ServerResponse addGoodsGroup(HttpServletRequest request, String jsonStr,String cityId) {
+        return goodsGroupService.addGoodsGroup(jsonStr,cityId);
     }
 
     /*
@@ -124,7 +124,7 @@ public class GoodsGroupController implements GoodsGroupAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse queryGoodsGroupListByCategoryLikeName(HttpServletRequest request, PageDTO pageDTO, String categoryId, String name) {
-        return goodsGroupService.queryGoodsGroupListByCategoryLikeName(pageDTO, categoryId, name);
+    public ServerResponse queryGoodsGroupListByCategoryLikeName(HttpServletRequest request, PageDTO pageDTO, String categoryId, String name,String cityId) {
+        return goodsGroupService.queryGoodsGroupListByCategoryLikeName(pageDTO, categoryId, name,cityId);
     }
 }

@@ -74,7 +74,8 @@ public class DjActuaryBudgetMaterialService {
     /**
      * 生成精算
      */
-    public ServerResponse makeBudgets(String actuarialTemplateId, String houseId, String workerTypeId, String listOfGoods) {
+    public ServerResponse makeBudgets(String actuarialTemplateId, String houseId,
+                                      String workerTypeId, String listOfGoods,String cityId) {
         try {
             LOG.info("makeBudgets ***** :" + actuarialTemplateId);
             ServerResponse serverResponse = getForBudgetAPI.actuarialForBudget(houseId, workerTypeId);
@@ -172,6 +173,7 @@ public class DjActuaryBudgetMaterialService {
                         budgetMaterial.setProductType(djBasicsGoods.getType());
                         budgetMaterial.setGroupType(groupType);
                         budgetMaterial.setGoodsGroupId(goodsGroupId);
+                        budgetMaterial.setCityId(cityId);
 //                        budgetMaterial.setTemplateId(actuarialTemplateId);
                         iBudgetMaterialMapper.insert(budgetMaterial);
                     } catch (Exception e) {
@@ -213,6 +215,7 @@ public class DjActuaryBudgetMaterialService {
                         budgetWorker.setTotalPrice(totalPrice);
                         budgetWorker.setCreateDate(new Date());
                         budgetWorker.setModifyDate(new Date());
+                        budgetWorker.setCityId(cityId);
                         iBudgetWorkerMapper.insert(budgetWorker);
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -224,6 +227,7 @@ public class DjActuaryBudgetMaterialService {
             ActuarialTemplate actuarialTemplate = iActuarialTemplateMapper.selectByPrimaryKey(actuarialTemplateId);
             if (actuarialTemplate != null) {
                 actuarialTemplate.setNumberOfUse(actuarialTemplate.getNumberOfUse() + 1);
+                actuarialTemplate.setCityId(cityId);
                 iActuarialTemplateMapper.updateByPrimaryKeySelective(actuarialTemplate);
             }
 
@@ -243,13 +247,14 @@ public class DjActuaryBudgetMaterialService {
      * @param houseId
      * @return
      */
-    public ServerResponse queryMakeBudgetsList(String bclId, String categoryId, String houseId) {
+    public ServerResponse queryMakeBudgetsList(String bclId, String categoryId, String houseId,String cityId) {
 
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
 //        String imageAddress ="";
         BasicsGoodArrDTO basicsGoodArrDTO = new BasicsGoodArrDTO();
         Example example = new Example(DjBasicsGoods.class);
-        example.createCriteria().andEqualTo(DjBasicsGoods.CATEGORY_ID, categoryId);
+        example.createCriteria().andEqualTo(DjBasicsGoods.CATEGORY_ID, categoryId).
+        andEqualTo(DjBasicsGoods.CITY_ID,cityId);
         List<DjBasicsGoods> list = djBasicsGoodsMapper.selectByExample(example);
 
         BasicsGoodsCategory djBasicsGoodsCategory = djBasicsGoodsCategoryMapper.selectByPrimaryKey(categoryId);
@@ -302,7 +307,7 @@ public class DjActuaryBudgetMaterialService {
                 if(!CommonUtil.isEmpty(djBasicsGoodsCategory)){
                     example = new Example(BasicsGoodsCategory.class);
                     example.createCriteria().andEqualTo(BasicsGoodsCategory.PARENT_ID,
-                            djBasicsGoodsCategory.getParentId());
+                            djBasicsGoodsCategory.getParentId()).andEqualTo(BasicsGoodsCategory.CITY_ID,cityId);
                     List<BasicsGoodsCategory> li = djBasicsGoodsCategoryMapper.selectByExample(example);
                     if (!li.isEmpty()) {
                         for (BasicsGoodsCategory bgc : li) {

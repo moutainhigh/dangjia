@@ -52,7 +52,7 @@
         SELECT
 		<include refid="all_columns" />
         from dj_basics_goods_group
-        where 1=1
+        where 1=1 and city_id = #{cityId}
 		<if test="name!=null and name!=''">
 			and
 			name like CONCAT('%',#{name},'%')
@@ -69,7 +69,7 @@
 		SELECT
 		<include refid="all_columns" />
 		from dj_basics_goods_group
-		where 1=1
+		where 1=1 and city_id = #{cityId}
 		<if test="name!=null and name!=''">
 			and
 			name =#{name}
@@ -90,7 +90,7 @@
 	<select id="getParentTopList" resultMap="GoodsCategoryMap" parameterType="java.util.Map">	
 		SELECT id,name 
 		FROM dj_basics_goods_category 
-		where parent_id=1
+		where parent_id=1 and city_id = #{cityId}
 		ORDER BY create_date desc
 	</select>
 	
@@ -122,7 +122,7 @@
 		SELECT
 		<include refid="all_Base_columns"/>
 		FROM dj_basics_group_link
-		where group_id=#{groupId}
+		where group_id=#{groupId} and city_id = #{cityId}
 		ORDER BY create_date desc
 	</select>
 	<!-- 根据关联组id查询关联货品关系 多返回了一个 unitName -->

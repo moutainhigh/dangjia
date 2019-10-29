@@ -63,7 +63,7 @@ public interface IBasicsProductTemplateMapper extends Mapper<DjBasicsProductTemp
     List<DjBasicsProductTemplate> queryByGoodsIdLimit12(@Param("goodsId") String goodsId);
 
     //根据货品ID查询商品（暂存商品）
-    DjBasicsProductTemplate queryTemporaryStorage(@Param("goodsId") String goodsId,@Param("dataStatus") String dataStatus);
+    DjBasicsProductTemplate queryTemporaryStorage(@Param("cityId") String cityId,@Param("goodsId") String goodsId,@Param("dataStatus") String dataStatus);
 
     /**
      * 删除材料扩展表信息
@@ -109,7 +109,7 @@ public interface IBasicsProductTemplateMapper extends Mapper<DjBasicsProductTemp
     StorefrontProductDTO getStorefrontInfoByprodTemplateId(@Param("prodTemplateId") String prodTemplateId,@Param("prodTemplateSn") String prodTemplateSn);
 
 
-    List<DjBasicsProductTemplate> queryRandomProduct(@Param("limit") Integer limit);
+    List<DjBasicsProductTemplate> queryRandomProduct(@Param("limit") Integer limit,@Param("cityId") String cityId);
 
 
     List<DjBasicsProductTemplate> queryRandomProductByCategoryId(@Param("productId") String productId,@Param("limit") Integer limit);

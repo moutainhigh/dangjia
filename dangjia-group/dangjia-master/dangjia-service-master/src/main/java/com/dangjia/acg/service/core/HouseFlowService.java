@@ -273,7 +273,8 @@ public class HouseFlowService {
                 return ServerResponse.createByErrorMessage("根据workerTypeId查询失败");
             }
             Example example = new Example(HouseFlow.class);
-            example.createCriteria().andEqualTo("houseId", houseId).andEqualTo("workerTypeId", workerTypeId);
+            example.createCriteria().andEqualTo("houseId", houseId).
+                    andEqualTo("workerTypeId", workerTypeId);
             List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
             if (houseFlowList.size() > 1) {
                 return ServerResponse.createByErrorMessage("精算异常,请联系平台部");

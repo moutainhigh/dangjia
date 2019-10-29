@@ -23,7 +23,7 @@ public interface IBasicsGoodsMapper extends Mapper<BasicsGoods> {
 	void deleteById(String id);
 	List<BasicsGoods> query(@Param("categoryId") String categoryId);
 	BasicsGoods queryById(String id);
-	List<BasicsGoods> queryByName(@Param("name") String name);
+	List<BasicsGoods> queryByName(@Param("name") String name,@Param("cityId") String cityId);
 
 	//根据商品id查询关联品牌
 	//List<Brand> queryBrandByGid(@Param("goodsId") String goodsId);

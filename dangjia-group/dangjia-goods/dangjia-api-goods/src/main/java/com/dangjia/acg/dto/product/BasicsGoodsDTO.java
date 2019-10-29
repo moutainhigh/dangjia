@@ -45,5 +45,5 @@ public class BasicsGoodsDTO extends GoodsBaseEntity {
 
     private String attributeIdArr;//属性选中值Id集合
 
-    
+    private String cityId;//属性选中值Id集合
 }

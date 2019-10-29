@@ -26,15 +26,16 @@ public interface DjActuaryBudgetMaterialAPI {
                                @RequestParam("actuarialTemplateId") String actuarialTemplateId,
                                @RequestParam("houseId") String houseId,
                                @RequestParam("workerTypeId") String workerTypeId,
-                               @RequestParam("listOfGoods") String listOfGoods);
-
+                               @RequestParam("listOfGoods") String listOfGoods,
+                               @RequestParam("cityId") String cityId);
 
     @PostMapping("/app/product/djActuaryBudgetMaterial/queryMakeBudgetsList")
     @ApiOperation(value = "查询精算列表", notes = "查询精算列表")
     ServerResponse queryMakeBudgetsList(@RequestParam("request") HttpServletRequest request,
                                         @RequestParam("bclId") String bclId,
                                         @RequestParam("categoryId") String categoryId,
-                                        @RequestParam("houseId") String houseId);
+                                        @RequestParam("houseId") String houseId,
+                                        @RequestParam("cityId") String cityId);
 
 
     @PostMapping("/app/product/djActuaryBudgetMaterial/queryBasicsProduct")

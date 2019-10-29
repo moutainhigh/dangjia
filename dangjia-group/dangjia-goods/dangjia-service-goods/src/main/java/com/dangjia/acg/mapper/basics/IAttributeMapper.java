@@ -21,7 +21,7 @@ public interface IAttributeMapper extends Mapper<Attribute> {
 	/**根据类别id查询关联价格属性*/
 	List<Attribute> queryPriceAttribute(String categoryId);
 	void deleteById(String id);
-	List<Attribute> query();
+	List<Attribute> query(@Param("cityId")String cityId);
 	//根据id查询属性对象
 	Attribute queryById(String id);
 
@@ -29,11 +29,11 @@ public interface IAttributeMapper extends Mapper<Attribute> {
 	AttributePO queryPOById(String id);
 
 	//根据类别id查询关联属性
-	List<Attribute> queryAttributeByCategoryId(@Param("categoryId") String categoryId,@Param("likeAttrName") String likeAttrName);
+	List<Attribute> queryAttributeByCategoryId(@Param("categoryId") String categoryId,@Param("likeAttrName") String likeAttrName,@Param("cityId")String cityId);
 
-	List<Attribute> queryAttributeByCategoryIdAndAttrName(@Param("categoryId") String categoryId,@Param("attrName") String attrName);
+	List<Attribute> queryAttributeByCategoryIdAndAttrName(@Param("categoryId") String categoryId,@Param("attrName") String attrName,@Param("cityId")String cityId);
 
 	//根据属性名称模糊查询属性
-	List<Attribute> queryGoodsAttributelikeName(String name);
+	List<Attribute> queryGoodsAttributelikeName(@Param("name")String name,@Param("cityId")String cityId);
 
 }

@@ -32,8 +32,8 @@ public class BrandSeriesController implements BrandSeriesAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse<PageInfo> getAllBrandExplain(HttpServletRequest request, PageDTO pageDTO) {
-        return brandExplainService.getAllBrandExplain(pageDTO);
+    public ServerResponse<PageInfo> getAllBrandExplain(HttpServletRequest request, PageDTO pageDTO,String cityId) {
+        return brandExplainService.getAllBrandExplain(pageDTO,cityId);
     }
 
     /**
@@ -44,8 +44,8 @@ public class BrandSeriesController implements BrandSeriesAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse updateBrandExplain(HttpServletRequest request, String id, String name, String content) {
-        return brandExplainService.update(id, name, content);
+    public ServerResponse updateBrandExplain(HttpServletRequest request, String id, String name, String content,String cityId) {
+        return brandExplainService.update(id, name, content,cityId);
     }
 
     /**
@@ -56,8 +56,8 @@ public class BrandSeriesController implements BrandSeriesAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse insetBrandExplain(HttpServletRequest request, String name, String content, String brandId) {
-        return brandExplainService.insert(name, content, brandId);
+    public ServerResponse insetBrandExplain(HttpServletRequest request, String name, String content, String brandId,String cityId) {
+        return brandExplainService.insert(name, content, brandId,cityId);
     }
 
     /**

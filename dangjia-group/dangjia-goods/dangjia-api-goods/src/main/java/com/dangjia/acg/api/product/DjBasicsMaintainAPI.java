@@ -25,14 +25,16 @@ public interface DjBasicsMaintainAPI {
     @ApiOperation(value = "添加关键词", notes = "添加关键词")
     ServerResponse addKeywords(@RequestParam("request") HttpServletRequest request,
                                @RequestParam("keywordName") String keywordName,
-                               @RequestParam("searchItem") String searchItem);
+                               @RequestParam("searchItem") String searchItem,
+                               @RequestParam("cityId")String cityId);
 
     @PostMapping("/product/djBasicsMaintain/updateKeywords")
     @ApiOperation(value = "编辑关键词", notes = "编辑关键词")
     ServerResponse updateKeywords(@RequestParam("request") HttpServletRequest request,
                                   @RequestParam("id") String id,
                                   @RequestParam("keywordName") String keywordName,
-                                  @RequestParam("searchItem") String searchItem);
+                                  @RequestParam("searchItem") String searchItem,
+                                  @RequestParam("cityId")String cityId);
 
     @PostMapping("/product/djBasicsMaintain/addRelatedTags")
     @ApiOperation(value = "关联标签", notes = "关联标签")
@@ -42,14 +44,18 @@ public interface DjBasicsMaintainAPI {
 
     @PostMapping("/product/djBasicsMaintain/delKeywords")
     @ApiOperation(value = "删除关键词", notes = "删除关键词")
-    ServerResponse delKeywords(@RequestParam("request") HttpServletRequest request,@RequestParam("id") String id);
+    ServerResponse delKeywords(@RequestParam("request") HttpServletRequest request,
+                               @RequestParam("id") String id);
 
     @PostMapping("/product/djBasicsMaintain/queryKeywords")
     @ApiOperation(value = "查询关键词", notes = "查询关键词")
-    ServerResponse queryKeywords(@RequestParam("request") HttpServletRequest request,@RequestParam("id") String id);
+    ServerResponse queryKeywords(@RequestParam("request") HttpServletRequest request,
+                                 @RequestParam("id") String id,
+                                 @RequestParam("cityId")String cityId);
 
     @PostMapping("/app/product/djBasicsMaintain/queryMatchWord")
     @ApiOperation(value = "查询配置关键词名称", notes = "查询配置关键词名称")
     ServerResponse queryMatchWord(@RequestParam("request")HttpServletRequest request,
-                                  @RequestParam("name")String name);
+                                  @RequestParam("name")String name,
+                                  @RequestParam("cityId")String cityId);
 }

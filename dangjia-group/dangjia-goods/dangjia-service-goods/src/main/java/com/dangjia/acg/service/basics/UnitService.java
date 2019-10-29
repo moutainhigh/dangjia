@@ -31,9 +31,9 @@ public class UnitService {
     private IUnitMapper iUnitMapper;
 
     //查询所有的单位
-    public ServerResponse<PageInfo> getAllUnit(PageDTO pageDTO) {
+    public ServerResponse<PageInfo> getAllUnit(PageDTO pageDTO,String cityId) {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        List<Unit> unitList = iUnitMapper.getUnit();
+        List<Unit> unitList = iUnitMapper.getUnit(cityId);
         if (unitList.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
@@ -61,13 +61,14 @@ public class UnitService {
     }
 
     //新增商品单位
-    public ServerResponse insert(String unitName, String linkUnitIdArr) {
-        List<Unit> unitList = iUnitMapper.getUnitByName(unitName);
+    public ServerResponse insert(String unitName, String linkUnitIdArr,String cityId) {
+        List<Unit> unitList = iUnitMapper.getUnitByName(unitName,cityId);
         if (unitList != null && unitList.size() > 0) {
             return ServerResponse.createByErrorMessage("单位名称重复");
         }
         Unit unit = new Unit();
         unit.setName(unitName);
+        unit.setCityId(cityId);
         if (CommonUtil.isEmpty(linkUnitIdArr))
             unit.setLinkUnitIdArr(unit.getId());
         else
@@ -78,14 +79,14 @@ public class UnitService {
 
     //修改商品单位
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse update(String unitId, String unitName, String linkUnitIdArr) {
+    public ServerResponse update(String unitId, String unitName, String linkUnitIdArr,String cityId) {
         if (CommonUtil.isEmpty(unitName))
             return ServerResponse.createByErrorMessage("单位名称不能为空");
         Unit unit = iUnitMapper.selectByPrimaryKey(unitId);
         if (unit == null)
             return ServerResponse.createByErrorMessage("该单位不存在");
         if (!unit.getName().equals(unitName)) {
-            if (iUnitMapper.getUnitByName(unitName).size() > 0)
+            if (iUnitMapper.getUnitByName(unitName,cityId).size() > 0)
                 return ServerResponse.createByErrorMessage("单位名称已存在");
         }
         unit.setName(unitName);
@@ -94,6 +95,7 @@ public class UnitService {
         else
             unit.setLinkUnitIdArr(unit.getId() + "," + linkUnitIdArr);//包括本身
         unit.setModifyDate(new Date());
+        unit.setCityId(cityId);
         iUnitMapper.updateByPrimaryKeySelective(unit);
         return ServerResponse.createBySuccessMessage("修改成功");
     }
