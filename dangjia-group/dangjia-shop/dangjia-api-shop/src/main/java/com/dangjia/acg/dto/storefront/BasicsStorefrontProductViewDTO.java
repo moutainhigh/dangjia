@@ -14,4 +14,6 @@ public class BasicsStorefrontProductViewDTO {
      */
     private String cityId;
 
+    private String prodTemplateId;
+
 }

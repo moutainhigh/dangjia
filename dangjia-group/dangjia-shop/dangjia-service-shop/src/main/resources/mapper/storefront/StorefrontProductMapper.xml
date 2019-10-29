@@ -34,15 +34,13 @@
         -- 商品名称
         bg.attribute_id_arr AS attributeIdArr,
         -- 属性
-        bsp.is_shelf_status AS isShelfStatus -- 是否上下架
+        IFNULL(bsp.is_shelf_status,null )   AS isShelfStatus ,-- 是否上下架
+        prod_template_id as prodTemplateId -- 商品模板id
         FROM
         dj_basics_storefront_product bsp
         INNER JOIN dj_basics_product_template bpt ON bsp.prod_template_id = bpt.id
         INNER JOIN dj_basics_goods bg ON bsp.goods_id = bg.id
-        where 1=1
-        <if test="null!=storefrontId and ''!=storefrontId">
-            and  bsp.storefront_id=#{storefrontId}
-        </if>
+        where 1=1 and   bsp.data_status=0 and bsp.storefront_id=#{storefrontId}
         <if test="null!=cityId and ''!=cityId">
             and  bsp.city_id=#{cityId}
         </if>

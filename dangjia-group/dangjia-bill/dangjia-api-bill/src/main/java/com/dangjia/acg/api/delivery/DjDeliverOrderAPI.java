@@ -35,5 +35,10 @@ public interface DjDeliverOrderAPI {
                                        @RequestParam("cityId") String cityId);
 
 
-
+    @PostMapping("web/house/calcelOrder")
+    @ApiOperation(value = "取消订单", notes = "取消订单")
+    ServerResponse calcelOrder(@RequestParam("request") HttpServletRequest request,
+                               @RequestParam("houseId") String houseId,
+                               @RequestParam("userToken") String userToken,
+                               @RequestParam("user_id") String user_id);
 }

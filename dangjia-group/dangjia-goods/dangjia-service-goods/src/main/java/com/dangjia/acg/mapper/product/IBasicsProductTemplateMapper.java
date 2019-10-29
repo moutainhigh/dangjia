@@ -55,7 +55,7 @@ public interface IBasicsProductTemplateMapper extends Mapper<DjBasicsProductTemp
     /*更新单位*/
     void updateProductValueId(@Param("valueId") String valueId);
 
-    List<DjBasicsProductTemplateDTO>  queryProductTemplateByGoodsId(@Param("categoryId") String  categoryId);
+    List<DjBasicsProductTemplateDTO>  queryProductTemplateByGoodsId(@Param("categoryId") String  categoryId,@Param("storefontId") String  storefontId);
     //根据商品Id查货品
     List<DjBasicsProductTemplate> queryByGoodsId(@Param("goodsId") String goodsId);
 

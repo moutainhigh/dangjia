@@ -37,6 +37,42 @@ public class StorefrontProductService {
     private DjBasicsProductAPI djBasicsProductAPI ;
 
     /**
+     * 供货设置-根据货品id，城市id，店铺id删除店铺商品
+     * @param productId
+     * @param storefrontId
+     * @param cityId
+     * @return
+     */
+    public ServerResponse delProductByProIdAndStoreIdAndCityId(String productId, String storefrontId, String cityId) {
+        try {
+            if (StringUtils.isEmpty(productId)) {
+                return ServerResponse.createByErrorMessage("货品ID不能为空");
+            }
+            if (StringUtils.isEmpty(storefrontId)) {
+                return ServerResponse.createByErrorMessage("店铺ID不能为空");
+            }
+            if (StringUtils.isEmpty(cityId)) {
+                return ServerResponse.createByErrorMessage("城市ID不能为空");
+            }
+            Example example=new Example(StorefrontProduct.class);
+            example.createCriteria().andEqualTo(StorefrontProduct.PROD_TEMPLATE_ID,productId)
+                    .andEqualTo(StorefrontProduct.STOREFRONT_ID,storefrontId)
+                    .andEqualTo(StorefrontProduct.CITY_ID,cityId);
+
+            StorefrontProduct storefrontProduct=new StorefrontProduct();
+            storefrontProduct.setDataStatus(1);
+            int i=istorefrontProductMapper.updateByExampleSelective(storefrontProduct,example);
+            if (i <= 0) {
+                return ServerResponse.createByErrorMessage("删除失败");
+
+            }
+            return ServerResponse.createBySuccessMessage("删除成功");
+        } catch (Exception e) {
+            logger.error("供货设置-根据货品id，城市id，店铺id删除店铺商品异常：", e);
+            return ServerResponse.createByErrorMessage("供货设置-根据货品id，城市id，店铺id删除店铺商品异常");
+        }
+    }
+    /**
      * 根据店铺id查询商品
      * @param storefrontId
      * @param searchKey
@@ -68,7 +104,15 @@ public class StorefrontProductService {
             .andEqualTo(StorefrontProduct.STOREFRONT_ID,basicsStorefrontProductDTO.getStorefrontId());
             List<StorefrontProduct> list = istorefrontProductMapper.selectByExample(example);
             if (list.size() > 0) {
-                return ServerResponse.createByErrorMessage("店铺商品已经添加，不能重复添加!商品模板ID:"+list.get(0).getProdTemplateId());
+                Example example2=new Example(StorefrontProduct.class);
+                example.createCriteria().andEqualTo(StorefrontProduct.ID,list.get(0).getId());
+
+                StorefrontProduct storefrontProduct=new StorefrontProduct();
+                storefrontProduct.setDataStatus(0);
+                int i=istorefrontProductMapper.updateByExampleSelective(storefrontProduct,example2);
+                if (i<0)
+                    return ServerResponse.createByErrorMessage("店铺商品新增成功");
+                return ServerResponse.createBySuccessMessage("店铺商品新增成功");
             }
             DjBasicsProductTemplate djBasicsProductTemplate=null;
             ServerResponse serverResponse=djBasicsProductAPI.getProductById(null,basicsStorefrontProductDTO.getProdTemplateId());
@@ -89,6 +133,7 @@ public class StorefrontProductService {
             storefrontProduct.setProdTemplateId(djBasicsProductTemplate.getId());//货品id
             storefrontProduct.setGoodsId( djBasicsProductTemplate.getGoodsId());// 商品id
             storefrontProduct.setProductName(djBasicsProductTemplate.getName());//模板名称
+            storefrontProduct.setCityId(basicsStorefrontProductDTO.getCityId());
             int i = istorefrontProductMapper.insert(storefrontProduct);
             if (i > 0) {
                 return ServerResponse.createBySuccessMessage("增加店铺商品成功");
@@ -111,16 +156,17 @@ public class StorefrontProductService {
             if (StringUtils.isEmpty(id)) {
                 return ServerResponse.createByErrorMessage("商品ID不能为空");
             }
-            StorefrontProduct storefrontProduct = new StorefrontProduct();
-            storefrontProduct.setId(id);
-            storefrontProduct.setDataStatus(1);//删除
-            storefrontProduct.setCreateDate(null);
-            int i = istorefrontProductMapper.updateByPrimaryKeySelective(storefrontProduct);
-            if (i > 0) {
-                return ServerResponse.createBySuccessMessage("删除成功");
-            } else {
+
+            Example example=new Example(StorefrontProduct.class);
+            example.createCriteria().andEqualTo(StorefrontProduct.ID,id);
+
+            StorefrontProduct storefrontProduct=new StorefrontProduct();
+            storefrontProduct.setDataStatus(1);
+            int i = istorefrontProductMapper.updateByExampleSelective(storefrontProduct,example);
+            if (i <= 0) {
                 return ServerResponse.createByErrorMessage("删除失败");
             }
+            return ServerResponse.createBySuccessMessage("删除成功");
         } catch (Exception e) {
             logger.error("删除已选商品失败：", e);
             return ServerResponse.createByErrorMessage("删除已选商品失败");
@@ -147,9 +193,6 @@ public class StorefrontProductService {
             }
 
             List<BasicsStorefrontProductViewDTO> list = istorefrontProductMapper.queryStorefrontProductViewDTOList(keyWord,storefrontId,cityId);
-            if (list.size() <= 0) {
-                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
-            }
 
             return ServerResponse.createBySuccess("查询成功", list);
         } catch (Exception e) {

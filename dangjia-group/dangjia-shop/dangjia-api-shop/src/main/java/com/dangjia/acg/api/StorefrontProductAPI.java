@@ -36,6 +36,12 @@ public interface StorefrontProductAPI {
     @ApiOperation(value = "供货设置-删除已选商品", notes = "供货设置-删除已选商品")
     ServerResponse delStorefrontProductById(@RequestParam("id") String id);
 
+    @PostMapping("/web/delProductByProIdAndStoreIdAndCityId")
+    @ApiOperation(value = "供货设置-根据货品id，城市id，店铺id删除店铺商品", notes = "供货设置-根据货品id，城市id，店铺id删除店铺商品")
+    ServerResponse delProductByProIdAndStoreIdAndCityId(@RequestParam("productId") String productId,
+                                                        @RequestParam("storefrontId") String storefrontId, @RequestParam("cityId") String cityId);
+
+
     @PostMapping("/web/queryStorefrontProductByKeyWord")
     @ApiOperation(value = "供货设置-已选商品-通过货品或者商品名称查询", notes = "供货设置-已选商品-通过货品或者商品名称查询")
     ServerResponse queryStorefrontProductByKeyWord(@RequestParam("keyWord") String keyWord,

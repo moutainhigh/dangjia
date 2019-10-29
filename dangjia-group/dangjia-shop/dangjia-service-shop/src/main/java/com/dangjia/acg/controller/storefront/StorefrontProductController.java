@@ -55,6 +55,12 @@ public class StorefrontProductController implements StorefrontProductAPI {
 
     @Override
     @ApiMethod
+    public ServerResponse delProductByProIdAndStoreIdAndCityId(String productId, String storefrontId, String cityId) {
+        return storefrontProductService.delProductByProIdAndStoreIdAndCityId(productId,storefrontId,cityId);
+    }
+
+    @Override
+    @ApiMethod
     public ServerResponse queryStorefrontProductByKeyWord(String keyWord,String storefrontId,String cityId) {
         return storefrontProductService.queryStorefrontProductByKeyWord(keyWord,storefrontId,cityId);
     }

@@ -35,6 +35,7 @@ public class BasicsStorefrontProductDTO {
      * 上传商品图片
      */
     private String image;
+
     /**
      * 上传商品详情图
      */
