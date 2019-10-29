@@ -116,17 +116,15 @@ public class OrderItem extends BaseEntity {
 	@ApiModelProperty("已要总数")
 	private Double askCount;
 
-	@Column(name = "required_number")
-	@Desc(value = "已要货数量")
-	@ApiModelProperty("已要货数量")
-	private Double requiredNumber;//已要货数量
+	@Column(name = "return_count")
+	@Desc(value = "退货数")
+	@ApiModelProperty("退货数")
+	private Double returnCount;
 
-	@Column(name = "shipment_number")
-	@Desc(value = "已发货数量")
-	@ApiModelProperty("已发货数量")
-	private Double shipmentNumber;//已发货数量
-
-
+	@Column(name = "receive_count")
+	@Desc(value = "收货数")
+	@ApiModelProperty("收货数")
+	private Double receiveCount;
 
 
 	@Column(name = "is_reservation_deliver")
