@@ -27,7 +27,8 @@ public interface CatetgoryLabelAPI {
      */
     @PostMapping("/product/categoryLabel/getAllCategoryLabel")
     @ApiOperation(value = "查询所有类别标签", notes = "查询所有类别标签")
-    ServerResponse getAllCategoryLabel(@RequestParam("request") HttpServletRequest request);
+    ServerResponse getAllCategoryLabel(@RequestParam("request") HttpServletRequest request,
+                                       @RequestParam("cityId") String cityId);
 
     /**
      * 查询所有的分类标签列表
@@ -36,7 +37,8 @@ public interface CatetgoryLabelAPI {
      */
     @PostMapping("/product/categoryLabel/getAllCategoryLabelList")
     @ApiOperation(value = "查询所有类别标签列表", notes = "查询所有类别标签列表")
-    ServerResponse getAllCategoryLabelList(@RequestParam("request") HttpServletRequest request);
+    ServerResponse getAllCategoryLabelList(@RequestParam("request") HttpServletRequest request,
+                                           @RequestParam("cityId") String cityId);
     /**
      * 修改类别标签
      *
@@ -48,7 +50,8 @@ public interface CatetgoryLabelAPI {
     @ApiOperation(value = "修改类别标签", notes = "修改类别标签")
     ServerResponse updateCategoryLabel(@RequestParam("request") HttpServletRequest request,
                                        @RequestParam("labelId") String labelId,
-                                       @RequestParam("labelName") String labelName);
+                                       @RequestParam("labelName") String labelName,
+                                       @RequestParam("cityId") String cityId);
 
     /**
      * 新增类别标签
@@ -59,7 +62,8 @@ public interface CatetgoryLabelAPI {
     @PostMapping("/product/categoryLabel/insertCategoryLabel")
     @ApiOperation(value = "新增类别标签", notes = "新增类别标签")
     ServerResponse insertCategoryLabel(@RequestParam("request") HttpServletRequest request,
-                                       @RequestParam("labelName") String labelName);
+                                       @RequestParam("labelName") String labelName,
+                                       @RequestParam("cityId") String cityId);
 
     /**
      * 根据id查询类别对象

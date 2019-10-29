@@ -34,11 +34,11 @@ public class CategoryLabelService {
     protected static final Logger LOG = LoggerFactory.getLogger(CategoryLabelService.class);
 
     //查询所有的标签
-    public ServerResponse getAllCategoryLabel() {
+    public ServerResponse getAllCategoryLabel(String cityId) {
         try {
 
             List<Map<String, Object>> mapList = new ArrayList<>();
-            List<CategoryLabel> labelList = iCategoryLabelMapper.getCategoryLabel();
+            List<CategoryLabel> labelList = iCategoryLabelMapper.getCategoryLabel(cityId);
             for (CategoryLabel categoryLabel : labelList) {
                 Map<String, Object> map = new HashMap<>();
                 if (!StringUtils.isNotBlank(categoryLabel.getId())) {
@@ -60,10 +60,10 @@ public class CategoryLabelService {
     }
 
     //查询所有的标签(分类下拉选项,不需要分页）
-    public ServerResponse getAllCategoryLabelList() {
+    public ServerResponse getAllCategoryLabelList(String cityId) {
         try {
             List<Map<String, Object>> mapList = new ArrayList<>();
-            List<CategoryLabel> labelList = iCategoryLabelMapper.getCategoryLabel();
+            List<CategoryLabel> labelList = iCategoryLabelMapper.getCategoryLabel(cityId);
             for (CategoryLabel categoryLabel : labelList) {
                 Map<String, Object> map = new HashMap<>();
                 if (!StringUtils.isNotBlank(categoryLabel.getId())) {
@@ -83,12 +83,13 @@ public class CategoryLabelService {
     }
 
     //新增商品标签
-    public ServerResponse insert(String labelName) {
+    public ServerResponse insert(String labelName,String cityId) {
         try {
-            if (iCategoryLabelMapper.getCategoryLabelByName(labelName).size() > 0)
+            if (iCategoryLabelMapper.getCategoryLabelByName(labelName,cityId).size() > 0)
                 return ServerResponse.createByErrorMessage("标签名称已存在");
-            int countLabel = iCategoryLabelMapper.getCategoryCountLabel();
+            int countLabel = iCategoryLabelMapper.getCategoryCountLabel(cityId);
             CategoryLabel categoryLabel = new CategoryLabel();
+            categoryLabel.setCityId(cityId);
             categoryLabel.setName(labelName);
             categoryLabel.setSort(countLabel + 1);
             iCategoryLabelMapper.insert(categoryLabel);
@@ -100,14 +101,14 @@ public class CategoryLabelService {
     }
 
     //修改类别标签
-    public ServerResponse update(String labelId, String labelName) {
+    public ServerResponse update(String labelId, String labelName,String cityId) {
         try {
             CategoryLabel oldLabel = iCategoryLabelMapper.selectByPrimaryKey(labelId);
             if (oldLabel == null)
                 return ServerResponse.createByErrorMessage("没有该类别标签");
 
             if (!oldLabel.getName().equals(labelName)) {
-                if (iCategoryLabelMapper.getCategoryLabelByName(labelName).size() > 0)
+                if (iCategoryLabelMapper.getCategoryLabelByName(labelName,cityId).size() > 0)
                     return ServerResponse.createByErrorMessage("标签名称已存在");
             }
 //            oldLabel.setId(labelId);

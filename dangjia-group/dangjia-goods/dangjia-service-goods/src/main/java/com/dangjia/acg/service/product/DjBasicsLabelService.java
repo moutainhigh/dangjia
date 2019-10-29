@@ -36,10 +36,10 @@ public class DjBasicsLabelService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse addCommodityLabels(String labelName, String labelValue) {
+    public ServerResponse addCommodityLabels(String labelName, String labelValue,String cityId) {
         Example example = new Example(DjBasicsLabel.class);
         example.createCriteria().andEqualTo(DjBasicsLabel.NAME, labelName)
-                .andEqualTo(DjBasicsLabel.DATA_STATUS, 0);
+                .andEqualTo(DjBasicsLabel.DATA_STATUS, 0).andEqualTo(DjBasicsLabel.CITY_ID,cityId);
         if (djBasicsLabelMapper.selectByExample(example).size() > 0)
             return ServerResponse.createByErrorMessage("该标签名称已存在");
         List<String> strings = Arrays.asList(labelValue.split(","));
@@ -48,6 +48,7 @@ public class DjBasicsLabelService {
         if (count < strings.size())
             return ServerResponse.createByErrorMessage("标签值重复");
         DjBasicsLabel djBasicsLabel = new DjBasicsLabel();
+        djBasicsLabel.setCityId(cityId);
         djBasicsLabel.setName(labelName);
         djBasicsLabel.setDataStatus(0);
         djBasicsLabelMapper.insert(djBasicsLabel);
@@ -56,6 +57,7 @@ public class DjBasicsLabelService {
             djBasicsLabelValue.setLabelId(djBasicsLabel.getId());
             djBasicsLabelValue.setName(str);
             djBasicsLabelValue.setDataStatus(0);
+            djBasicsLabelValue.setCityId(cityId);
             djBasicsLabelValueMapper.insert(djBasicsLabelValue);
         });
         return ServerResponse.createBySuccessMessage("添加成功");
@@ -71,15 +73,16 @@ public class DjBasicsLabelService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse updateCommodityLabels(String id, String labelName, String labelValue) {
+    public ServerResponse updateCommodityLabels(String id, String labelName, String labelValue,String cityId) {
         DjBasicsLabel djBasicsLabel = djBasicsLabelMapper.selectByPrimaryKey(id);
         if (!djBasicsLabel.getName().equals(labelName)) {
             Example example = new Example(DjBasicsLabel.class);
             example.createCriteria().andEqualTo(DjBasicsLabel.NAME, labelName)
-                    .andEqualTo(DjBasicsLabel.DATA_STATUS, 0);
+                    .andEqualTo(DjBasicsLabel.DATA_STATUS, 0).andEqualTo(DjBasicsLabel.CITY_ID,cityId);
             if (djBasicsLabelMapper.selectByExample(example).size() > 0)
                 return ServerResponse.createByErrorMessage("该标签名称已存在");
             djBasicsLabel.setName(labelName);
+            djBasicsLabel.setCityId(cityId);
             djBasicsLabelMapper.updateByPrimaryKeySelective(djBasicsLabel);
         }
         List<String> strings = Arrays.asList(labelValue.split(","));
@@ -95,6 +98,7 @@ public class DjBasicsLabelService {
             djBasicsLabelValue.setLabelId(djBasicsLabel.getId());
             djBasicsLabelValue.setName(str);
             djBasicsLabelValue.setDataStatus(0);
+            djBasicsLabelValue.setCityId(cityId);
             djBasicsLabelValueMapper.insert(djBasicsLabelValue);
         });
         return ServerResponse.createBySuccessMessage("编辑成功");

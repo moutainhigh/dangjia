@@ -21,10 +21,10 @@ public interface IProductMapper extends Mapper<Product> {
 
     Product getById(String id);
 
-    List<Product> query(@Param("category_id") String category_id);
+    List<Product> query(@Param("category_id") String category_id,@Param("cityId") String cityId);
 
     //根据商品Id查货品
-    List<Product> queryByGoodsId(@Param("goodsId") String goodsId);
+    List<Product> queryByGoodsId(@Param("goodsId") String goodsId,@Param("cityId")String cityId);
 
     //根据商品Id 和 品牌系列id查货品
     List<Product> queryByGoodsIdAndbrandSeriesId(@Param("goodsId") String goodsId, @Param("brandSeriesId") String brandSeriesId);
@@ -50,9 +50,10 @@ public interface IProductMapper extends Mapper<Product> {
     Product selectProduct(@Param("goodsId") String goodsId, @Param("brandId") String brandId, @Param("brandSeriesId") String brandSeriesId, @Param("valueIdArr") String[] valueIdArr);
 //    Product selectProduct(@Param("goodsId") String goodsId, @Param("brandId") String brandId, @Param("brandSeriesId") String brandSeriesId, @Param("valueIdArr") String valueIdArr);
 
-    List<Product> getPListByBrandSeriesId(@Param("brandId") String brandId, @Param("brandSeriesId") String brandSeriesId, @Param("valueIdArr") String valueIdArr);
+    List<Product> getPListByBrandSeriesId(@Param("brandId") String brandId, @Param("brandSeriesId") String brandSeriesId, @Param("valueIdArr") String valueIdArr,
+                                          @Param("cityId") String cityId);
 
-    List<Product> getPListByValueIdArrByNullBrandId(@Param("valueIdArr") String valueIdArr);
+    List<Product> getPListByValueIdArrByNullBrandId(@Param("valueIdArr") String valueIdArr,@Param("cityId") String cityId);
 
     /**
      * 按照 属性id 和属性值查找商品
@@ -61,12 +62,12 @@ public interface IProductMapper extends Mapper<Product> {
      * @param valueIdArr
      * @return
      */
-    List<Product> getPListByValueIdArrOrAttrId(@Param("attributeIdArr") String attributeIdArr, @Param("valueIdArr") String valueIdArr);
+    List<Product> getPListByValueIdArrOrAttrId(@Param("attributeIdArr") String attributeIdArr, @Param("valueIdArr") String valueIdArr,@Param("cityId") String cityId);
 
     //查询 无品牌无系列有属性值的商品
     List<Product> getPListByGoodsIdAndNullBrandId(@Param("goodsId") String goodsId);
 
-    List<Product> getPListByBrandSeriesIdAndNullValueId(@Param("brandId") String brandId, @Param("brandSeriesId") String brandSeriesId);
+    List<Product> getPListByBrandSeriesIdAndNullValueId(@Param("brandId") String brandId, @Param("brandSeriesId") String brandSeriesId,@Param("cityId") String cityId);
 
     List<Product> queryRepairBudgetMaterial(@Param("houseId") String houseId, @Param("name") String name, @Param("categoryId") String categoryId);
 

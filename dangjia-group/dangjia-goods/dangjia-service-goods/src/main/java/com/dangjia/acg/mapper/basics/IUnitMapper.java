@@ -10,7 +10,7 @@ import java.util.List;
 public interface IUnitMapper extends Mapper<Unit> {
 
     /**c查找所有的单位*/
-    List<Unit> getUnit();
+    List<Unit> getUnit(String cityId);
     /**根据拿到的name拿到单位对象*/
-    List<Unit> getUnitByName(String name);
+    List<Unit> getUnitByName(String name,String cityId);
 }

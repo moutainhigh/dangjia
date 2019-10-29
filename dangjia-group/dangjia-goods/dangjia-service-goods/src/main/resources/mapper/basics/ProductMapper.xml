@@ -133,11 +133,11 @@
     <select id="query" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.basics.Product">
         SELECT
         <include refid="new_columns"/>
-        FROM dj_basics_product
+        FROM dj_basics_product where 1=1
         <if test="category_id!=null and category_id!=''">
-            where
-            category_id=#{category_id}
+            and category_id=#{category_id}
         </if>
+        and city_id = #{cityId}
         ORDER BY istop DESC,create_date desc
     </select>
 
@@ -147,7 +147,7 @@
         SELECT
         <include refid="new_columns"/>
         FROM dj_basics_product
-        where goods_id=#{goodsId}
+        where goods_id=#{goodsId} and city_id = #{cityId}
         ORDER BY istop DESC,create_date desc
     </select>
     <!-- 根据货品id查询货品对象 -->
@@ -300,7 +300,7 @@
         p.value_id_arr AS valueIdArr
         from dj_basics_product p
         where
-        type=1 and maket=1
+        type=1 and maket=1 and city_id = #{cityId}
         <if test="attributeIdArr!=null and attributeIdArr!=''">
             and FIND_IN_SET(#{attributeIdArr},p.attribute_id_arr)
         </if>
@@ -332,7 +332,7 @@
         p.value_id_arr AS valueIdArr
         from dj_basics_product p
         where
-        type=1 and maket=1
+        type=1 and maket=1 and city_id = #{cityId}
         and isnull(p.brand_id)
         and isnull(p.brand_series_id)
         <if test="valueIdArr!=null and valueIdArr!=''">
@@ -394,7 +394,7 @@
         p.value_id_arr AS valueIdArr
         from dj_basics_product p
         where
-        type=1 and maket=1
+        type=1 and maket=1 and city_id = #{cityId}
         and isnull(p.attribute_id_arr)
         and (isnull(p.value_id_arr) or p.value_id_arr = '')
         <if test="brandId!=null and brandId!=''">
@@ -428,7 +428,7 @@
         p.value_id_arr AS valueIdArr
         from dj_basics_product p
         where
-        type=1 and maket=1
+        type=1 and maket=1 and city_id = #{cityId}
         <if test="brandId!=null and brandId!=''">
             and p.brand_id=#{brandId}
         </if>

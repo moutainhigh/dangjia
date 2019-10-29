@@ -33,8 +33,8 @@ public class UnitController implements UnitAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse<PageInfo> getAllUnit(HttpServletRequest request, PageDTO pageDTO) {
-        return unitService.getAllUnit(pageDTO);
+    public ServerResponse<PageInfo> getAllUnit(HttpServletRequest request, PageDTO pageDTO,String cityId) {
+        return unitService.getAllUnit(pageDTO,cityId);
     }
 
     /**
@@ -46,8 +46,11 @@ public class UnitController implements UnitAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse updateUnit(HttpServletRequest request, String unitId, String unitName, String linkUnitIdArr) {
-        return unitService.update(unitId, unitName, linkUnitIdArr);
+    public ServerResponse updateUnit(HttpServletRequest request, String unitId,
+                                     String unitName,
+                                     String linkUnitIdArr,
+                                     String cityId) {
+        return unitService.update(unitId, unitName, linkUnitIdArr,cityId);
     }
 
     /**
@@ -58,8 +61,10 @@ public class UnitController implements UnitAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse insertUnit(HttpServletRequest request, String unitName, String linkUnitIdArr) {
-        return unitService.insert(unitName, linkUnitIdArr);
+    public ServerResponse insertUnit(HttpServletRequest request, String unitName,
+                                     String linkUnitIdArr,
+                                     String cityId) {
+        return unitService.insert(unitName, linkUnitIdArr,cityId);
     }
 
     @Override

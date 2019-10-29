@@ -23,7 +23,8 @@ public interface DjBasicsGoodsAPI {
     @ApiOperation(value = "货品打标签", notes = "货品打标签")
     ServerResponse addLabels(@RequestParam("request") HttpServletRequest request,
                              @RequestParam("goodsId") String goodsId,
-                             @RequestParam("labels") String labels);
+                             @RequestParam("labels") String labels,
+                             @RequestParam("cityId")String cityId);
 
     @PostMapping("/product/djBasicsGoods/queryGoodsLabels")
     @ApiOperation(value = "查询货品标签", notes = "查询货品标签")

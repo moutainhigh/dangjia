@@ -28,7 +28,8 @@ public interface UnitAPI {
     @PostMapping("/basics/unit/getAllUnit")
     @ApiOperation(value = "查询所有商品单位", notes = "查询所有商品单位")
     ServerResponse<PageInfo> getAllUnit(@RequestParam("request") HttpServletRequest request,
-                                        @RequestParam("pageDTO") PageDTO pageDTO);
+                                        @RequestParam("pageDTO") PageDTO pageDTO,
+                                        @RequestParam("cityId") String cityId);
 
     /**
      * 修改商品单位
@@ -42,7 +43,8 @@ public interface UnitAPI {
     ServerResponse updateUnit(@RequestParam("request") HttpServletRequest request,
                               @RequestParam("unitId") String unitId,
                               @RequestParam("unitName") String unitName,
-                              @RequestParam("linkUnitIdArr") String linkUnitIdArr);
+                              @RequestParam("linkUnitIdArr") String linkUnitIdArr,
+                              @RequestParam("cityId") String cityId);
 
 
     /**
@@ -55,7 +57,8 @@ public interface UnitAPI {
     @ApiOperation(value = "新增商品单位", notes = "新增商品单位")
     ServerResponse insertUnit(@RequestParam("request") HttpServletRequest request,
                               @RequestParam("unitName") String unitName,
-                              @RequestParam("linkUnitIdArr") String linkUnitIdArr);
+                              @RequestParam("linkUnitIdArr") String linkUnitIdArr,
+                              @RequestParam("cityId") String cityId);
 
     /**
      * 根据id查询单位对象

@@ -36,12 +36,13 @@ public class GoodsCategoryService {
     }
 
     //新增商品类别
-    public ServerResponse insertGoodsCategory(String name, String parentId, String parentTop, Integer sort) {
+    public ServerResponse insertGoodsCategory(String name, String parentId, String parentTop, Integer sort,String cityId) {
         try {
-            List<GoodsCategory> goodsCategoryList = iGoodsCategoryMapper.queryCategoryByName(name);//根据name查询商品对象
+            List<GoodsCategory> goodsCategoryList = iGoodsCategoryMapper.queryCategoryByName(name,cityId);//根据name查询商品对象
             if (goodsCategoryList.size() > 0)
                 return ServerResponse.createByErrorMessage("不能重复添加类别");
             GoodsCategory category = new GoodsCategory();
+            category.setCityId(cityId);
             category.setName(name);
             category.setParentId(parentId);
             category.setParentTop(parentTop);
@@ -59,16 +60,17 @@ public class GoodsCategoryService {
     }
 
     //修改商品类别
-    public ServerResponse doModifyGoodsCategory(String id, String name, String parentId, String parentTop, Integer sort) {
+    public ServerResponse doModifyGoodsCategory(String id, String name, String parentId, String parentTop, Integer sort,String cityId) {
         try {
             GoodsCategory oldCategory = iGoodsCategoryMapper.selectByPrimaryKey(id);
             if (!oldCategory.getName().equals(name)) { //如果 是修改name
-                List<GoodsCategory> goodsCategoryList = iGoodsCategoryMapper.queryCategoryByName(name);//根据name查询商品对象
+                List<GoodsCategory> goodsCategoryList = iGoodsCategoryMapper.queryCategoryByName(name,cityId);//根据name查询商品对象
                 if (goodsCategoryList.size() > 0)
                     return ServerResponse.createByErrorMessage("该类别已存在");
             }
 
             GoodsCategory category = new GoodsCategory();
+            category.setCityId(cityId);
             category.setId(id);
             category.setName(name);
             category.setParentId(parentId);
@@ -86,8 +88,8 @@ public class GoodsCategoryService {
     }
 
     //查询商品属性列表 queryGoodsCategory
-    public ServerResponse queryGoodsCategory(String parentId) {
-        List<GoodsCategory> goodsCategoryList = iGoodsCategoryMapper.queryCategoryByParentId(parentId);
+    public ServerResponse queryGoodsCategory(String parentId,String cityId) {
+        List<GoodsCategory> goodsCategoryList = iGoodsCategoryMapper.queryCategoryByParentId(parentId,cityId);
         if (goodsCategoryList.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
@@ -95,11 +97,11 @@ public class GoodsCategoryService {
     }
 
     //删除商品类别
-    public ServerResponse deleteGoodsCategory(String id) {
+    public ServerResponse deleteGoodsCategory(String id,String cityId) {
         try {
-            List<GoodsCategory> goodsCategoryList = iGoodsCategoryMapper.queryCategoryByParentId(id);//根据id查询是否有下级类别
+            List<GoodsCategory> goodsCategoryList = iGoodsCategoryMapper.queryCategoryByParentId(id,cityId);//根据id查询是否有下级类别
             List<Goods> goodsList = iGoodsMapper.queryByCategoryId(id);//根据id查询是否有关联商品
-            List<Attribute> GoodsAList = attributeMapper.queryAttributeByCategoryId(id, null);//根据id查询是否有关联属性
+            List<Attribute> GoodsAList = attributeMapper.queryAttributeByCategoryId(id, null,cityId);//根据id查询是否有关联属性
             if (goodsCategoryList.size() > 0) {
                 return ServerResponse.createByErrorMessage("此类别有下级不能删除");
             }
@@ -118,7 +120,7 @@ public class GoodsCategoryService {
     }
 
     //查询类别id查询所有父级以及父级属性
-    public ServerResponse queryAttributeListById(String goodsCategoryId) {
+    public ServerResponse queryAttributeListById(String goodsCategoryId,String cityId) {
         try {
             if (!StringUtils.isNoneBlank(goodsCategoryId)) {
                 return ServerResponse.createByErrorMessage("goodsCategoryId不能为null");
@@ -127,11 +129,11 @@ public class GoodsCategoryService {
             if (goodsCategory == null) {
                 return ServerResponse.createByErrorMessage("查询失败");
             }
-            List<Attribute> gaList = attributeMapper.queryAttributeByCategoryId(goodsCategory.getId(), null);
+            List<Attribute> gaList = attributeMapper.queryAttributeByCategoryId(goodsCategory.getId(), null,cityId);
             while (goodsCategory != null) {
                 goodsCategory = iGoodsCategoryMapper.selectByPrimaryKey(goodsCategory.getParentId());
                 if (goodsCategory != null) {
-                    gaList.addAll(attributeMapper.queryAttributeByCategoryId(goodsCategory.getId(), null));
+                    gaList.addAll(attributeMapper.queryAttributeByCategoryId(goodsCategory.getId(), null,cityId));
                 }
             }
             return ServerResponse.createBySuccess("查询成功", gaList);
@@ -142,16 +144,16 @@ public class GoodsCategoryService {
     }
 
     //查询两级商品分类
-    public ServerResponse queryGoodsCategoryTwo() {
+    public ServerResponse queryGoodsCategoryTwo(String cityId) {
         try {
             List<Map<String, Object>> mapList = new ArrayList<>();
-            List<GoodsCategory> goodsCategoryList = iGoodsCategoryMapper.queryCategoryByParentId("1");
+            List<GoodsCategory> goodsCategoryList = iGoodsCategoryMapper.queryCategoryByParentId("1",cityId);
             for (GoodsCategory goodsCategory : goodsCategoryList) {
                 Map<String, Object> map = new HashMap<>();
                 map.put("id", goodsCategory.getId());
                 map.put("name", goodsCategory.getName());
                 List<Map<String, Object>> mapTwoList = new ArrayList<>();
-                List<GoodsCategory> goodsCategoryList2 = iGoodsCategoryMapper.queryCategoryByParentId(goodsCategory.getId());
+                List<GoodsCategory> goodsCategoryList2 = iGoodsCategoryMapper.queryCategoryByParentId(goodsCategory.getId(),cityId);
                 for (GoodsCategory goodsCategory2 : goodsCategoryList2) {
                     Map<String, Object> mapTwo = new HashMap<>();
                     mapTwo.put("id", goodsCategory2.getId());

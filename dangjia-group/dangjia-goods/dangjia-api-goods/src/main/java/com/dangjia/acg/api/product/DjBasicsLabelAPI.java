@@ -23,14 +23,16 @@ public interface DjBasicsLabelAPI {
     @ApiOperation(value = "添加商品标签", notes = "添加商品标签")
     ServerResponse addCommodityLabels(@RequestParam("request") HttpServletRequest request,
                                       @RequestParam("labelName") String labelName,
-                                      @RequestParam("labelValue") String labelValue);
+                                      @RequestParam("labelValue") String labelValue,
+                                      @RequestParam("cityId")String cityId);
 
     @PostMapping("/product/djBasicsLabel/updateCommodityLabels")
     @ApiOperation(value = "编辑商品标签", notes = "编辑商品标签")
     ServerResponse updateCommodityLabels(@RequestParam("request") HttpServletRequest request,
                                          @RequestParam("id") String id,
                                          @RequestParam("labelName") String labelName,
-                                         @RequestParam("labelValue") String labelValue);
+                                         @RequestParam("labelValue") String labelValue,
+                                         @RequestParam("cityId")String cityId);
 
     @PostMapping("/product/djBasicsLabel/delCommodityLabels")
     @ApiOperation(value = "删除商品标签", notes = "删除商品标签")

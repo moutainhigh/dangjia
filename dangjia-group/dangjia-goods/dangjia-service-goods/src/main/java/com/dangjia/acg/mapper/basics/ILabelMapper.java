@@ -10,7 +10,7 @@ import java.util.List;
 public interface ILabelMapper extends Mapper<Label> {
 
     /**c查找所有的单位*/
-    List<Label> getLabel();
+    List<Label> getLabel(String cityId);
     /**根据拿到的name拿到单位对象*/
     List<Label> getLabelByName(String name);
 }

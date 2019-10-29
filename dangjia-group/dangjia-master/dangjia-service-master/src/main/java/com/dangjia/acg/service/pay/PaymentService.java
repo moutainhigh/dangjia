@@ -938,7 +938,7 @@ public class PaymentService {
      * 支付页面
      * type   1工序支付任务,2补货补人工,3审核任务,4待付款进来只付材料 5
      */
-    public ServerResponse getPaymentOrder(String userToken, String houseId, String taskId, int type) {
+    public ServerResponse getPaymentOrder(String userToken, String houseId, String taskId,String addressId, int type) {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
@@ -1025,7 +1025,8 @@ public class PaymentService {
                 }
 
                 paymentDTO.setDatas(budgetLabelDTOS);
-
+                //生成订单
+                generateOrder(businessOrder.getNumber(),houseId,hwo.getWorkerTypeId(),hwo.getWorkerId(),null,budgetLabelDTOS);
                 if (houseFlow.getWorkerType() > 2) {//精算师和设计师不存在保险订单
                     //查出有没有生成保险订单
                     example = new Example(WorkerTypeSafeOrder.class);
@@ -1091,75 +1092,68 @@ public class PaymentService {
     }
 
     /**
-     * 处理精算人工生成人工订单
+     * 提交订单
      */
-    private boolean generateOrder(String businessOrderNumber, HouseWorkerOrder hwo,  ShopGoodsDTO budgetLabelDTO) {
+    private boolean generateOrder(String businessOrderNumber,String houseId, String workerTypeId, String workerId, String addressId,List<ShopGoodsDTO> budgetLabelDTOS) {
         try {
             //处理人工
-            House house = houseMapper.selectByPrimaryKey(hwo.getHouseId());
-            if (budgetLabelDTO!=null) {
-                List<BudgetLabelGoodsDTO> rgGoods=new ArrayList<>();
-                List<BudgetLabelGoodsDTO> clGoods=new ArrayList<>();
-                for (BudgetLabelDTO labelDTO : budgetLabelDTO.getLabelDTOS()) {
-                    for (BudgetLabelGoodsDTO good : labelDTO.getGoods()) {
-                        if(good.getProductType()==2){
-                            rgGoods.add(good);
-                        }else{
-                            clGoods.add(good);
+            BigDecimal paymentPrice = new BigDecimal(0);//总共钱
+            House house = houseMapper.selectByPrimaryKey(houseId);
+            if (budgetLabelDTOS!=null) {
+                WorkerType wt = workerTypeMapper.selectByPrimaryKey(workerTypeId);
+                Order order = new Order();
+                order.setHouseId(house.getId());
+                order.setWorkerTypeName(wt.getName() + "订单");
+                order.setWorkerTypeId(workerTypeId);
+                order.setBusinessOrderNumber(businessOrderNumber);
+                order.setType(0);
+                order.setCityId(house.getCityId());
+                order.setOrderNumber(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
+                order.setMemberId(house.getMemberId());
+                order.setTotalDiscountPrice(new BigDecimal(0));
+                order.setTotalStevedorageCost(new BigDecimal(0));
+                order.setTotalTransportationCost(new BigDecimal(0));
+                order.setActualPaymentPrice(new BigDecimal(0));
+                order.setOrderStatus("1");
+                order.setOrderGenerationTime(new Date());
+                order.setOrderSource(1);//精算制作
+                order.setCreateBy(house.getMemberId());
+                order.setWorkerId(workerId);
+                order.setAddressId(addressId);
+                order.setCreateBy(house.getMemberId());
+                orderMapper.insert(order);
+                for (ShopGoodsDTO budgetLabelDTO : budgetLabelDTOS) {
+                    for (BudgetLabelDTO labelDTO : budgetLabelDTO.getLabelDTOS()) {
+                        paymentPrice = paymentPrice.add(labelDTO.getTotalPrice());
+                        for (BudgetLabelGoodsDTO good : labelDTO.getGoods()) {
+                            OrderItem orderItem = new OrderItem();
+                            orderItem.setOrderId(order.getId());
+                            orderItem.setHouseId(houseId);
+                            orderItem.setPrice(good.getPrice().doubleValue());//销售价
+                            orderItem.setShopCount(good.getShopCount().doubleValue());//购买总数
+                            orderItem.setUnitName(good.getUnitName());//单位
+                            orderItem.setTotalPrice(good.getTotalPrice().doubleValue());//总价
+                            orderItem.setProductName(good.getProductName());
+                            orderItem.setProductSn(good.getProductSn());
+                            orderItem.setCategoryId(good.getCategoryId());
+                            orderItem.setProductId(good.getProductId());
+                            orderItem.setImage(good.getImage());
+                            orderItem.setCityId(house.getCityId());
+                            orderItem.setProductType(good.getProductType());
+                            orderItem.setStorefontId(good.getStorefontId());
+                            orderItem.setAskCount(0d);
+                            orderItem.setDiscountPrice(0d);
+                            orderItem.setActualPaymentPrice(0d);
+                            orderItem.setStevedorageCost(0d);
+                            orderItem.setTransportationCost(0d);
+                            orderItem.setOrderStatus("1");//1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭
+                            orderItem.setCreateBy(house.getMemberId());
+                            orderItemMapper.insert(orderItem);
                         }
                     }
                 }
-                WorkerType wt = workerTypeMapper.selectByPrimaryKey(hwo.getWorkerTypeId());
-                if(rgGoods.size()>0) {
-                    Order order = new Order();
-                    order.setStorefontId(budgetLabelDTO.getShopId());
-                    order.setHouseId(house.getId());
-                    order.setBusinessOrderNumber(businessOrderNumber);//业务订单
-                    order.setTotalAmount(hwo.getWorkPrice());// 订单总额(工钱)
-                    order.setWorkerTypeName(wt.getName() + "订单");
-                    order.setWorkerTypeId(hwo.getWorkerTypeId());
-                    order.setType(1);//人工
-//                            `total_amount` decimal(10,0) DEFAULT NULL COMMENT '订单总额',
-//                            `worker_type_name` varchar(255) COLLATE utf8_bin DEFAULT NULL COMMENT '工种名称',
-//                            `worker_type_id` varchar(32) COLLATE utf8_bin DEFAULT NULL COMMENT '工种类型ID',
-//                            `type` int(2) DEFAULT '0' COMMENT '1人工订单 2材料订单',
-//                            `parent_order_id` varchar(60) COLLATE utf8_bin DEFAULT '0' COMMENT '父订单ID',
-//                            `order_number` varchar(60) COLLATE utf8_bin DEFAULT '0' COMMENT '订单编号',
-//                            `member_id` varchar(60) COLLATE utf8_bin NOT NULL COMMENT '用户ID',
-//                            `worker_id` varchar(60) COLLATE utf8_bin NOT NULL COMMENT '工人ID',
-//                            `address_id` varchar(60) COLLATE utf8_bin DEFAULT NULL COMMENT '地址ID',
-//                            `storefont_id` varchar(60) COLLATE utf8_bin DEFAULT NULL COMMENT '店铺ID',
-//                            `city_id` varchar(60) COLLATE utf8_bin NOT NULL COMMENT '城市ID',
-//                            `total_discount_price` decimal(10,2) DEFAULT NULL COMMENT '优惠总价钱',
-//                            `total_stevedorage_cost` decimal(10,2) DEFAULT NULL COMMENT '总搬运费',
-//                            `total_transportation_cost` decimal(10,2) DEFAULT NULL COMMENT '总运费',
-//                            `order_type` varchar(20) COLLATE utf8_bin DEFAULT NULL COMMENT '订单类型（1设计，精算，2其它）',
-//                            `actual_payment_price` decimal(10,2) DEFAULT NULL COMMENT '实付总价',
-//                            `is_pay_money` varchar(2) COLLATE utf8_bin DEFAULT NULL COMMENT '是否可付款（1不可付款，2可付款）',
-//                            `is_show_order` varchar(2) COLLATE utf8_bin DEFAULT '1' COMMENT '是否显示该订单（1是，2否）',
-//                            `order_status` varchar(32) COLLATE utf8_bin DEFAULT NULL COMMENT '订单状态（1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭）',
-//                            `order_generation_time` datetime DEFAULT NULL COMMENT '订单生成时间',
-//                            `order_pay_time` datetime DEFAULT NULL COMMENT '订单支付时间',
-//                            `order_source` varchar(2) COLLATE utf8_bin DEFAULT '2' COMMENT '订单来源(1,精算制作，2业主自购，3购物车）',
-//                            `create_by` varchar(60) COLLATE utf8_bin DEFAULT NULL COMMENT '创建人',
-//                            `update_by` varchar(60) COLLATE utf8_bin DEFAULT NULL COMMENT '修改人',
-                    orderMapper.insert(order);
-//                    for (BudgetWorker budgetWorker : budgetLabelDTO.getLabelDTOS()) {
-//                        OrderItem orderItem = new OrderItem();
-//                        orderItem.setOrderId(order.getId());
-//                        orderItem.setHouseId(hwo.getHouseId());
-//                        orderItem.setPrice(budgetWorker.getPrice());//销售价
-//                        orderItem.setShopCount(budgetWorker.getShopCount().doubleValue());//购买总数
-//                        orderItem.setUnitName(budgetWorker.getUnitName());//单位
-//                        orderItem.setTotalPrice(budgetWorker.getTotalPrice());//总价
-//                        orderItem.setProductName(budgetWorker.getName());
-//                        orderItem.setProductSn(budgetWorker.getWorkerGoodsSn());
-//                        orderItem.setProductId(budgetWorker.getWorkerGoodsId());
-//                        orderItem.setImage(budgetWorker.getImage());
-//                        orderItem.setCityId(house.getCityId());
-//                        orderItemMapper.insert(orderItem);
-//                    }
-                }
+                order.setTotalAmount(paymentPrice);// 订单总额(工钱)
+                orderMapper.updateByPrimaryKeySelective(order);
             }
             return true;
         } catch (Exception e) {

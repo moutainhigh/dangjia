@@ -40,8 +40,9 @@ public class ProductController implements ProductAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse<PageInfo> queryProduct(HttpServletRequest request, PageDTO pageDTO, String categoryId) {
-        return productService.queryProduct(pageDTO, categoryId);
+    public ServerResponse<PageInfo> queryProduct(HttpServletRequest request, PageDTO pageDTO, String categoryId,
+                                                 String cityId) {
+        return productService.queryProduct(pageDTO, categoryId,cityId);
     }
 
     /**
@@ -55,8 +56,8 @@ public class ProductController implements ProductAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse queryUnit(HttpServletRequest request) {
-        return productService.queryUnit();
+    public ServerResponse queryUnit(HttpServletRequest request,String cityId) {
+        return productService.queryUnit(cityId);
     }
 
     /**
@@ -70,8 +71,8 @@ public class ProductController implements ProductAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse queryBrand(HttpServletRequest request) {
-        return productService.queryBrand();
+    public ServerResponse queryBrand(HttpServletRequest request,String cityId) {
+        return productService.queryBrand(cityId);
     }
 
     /**
@@ -85,8 +86,8 @@ public class ProductController implements ProductAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse queryBrandSeries(HttpServletRequest request, String brandId) {
-        return productService.queryBrandSeries(brandId);
+    public ServerResponse queryBrandSeries(HttpServletRequest request, String brandId,String cityId) {
+        return productService.queryBrandSeries(brandId,cityId);
     }
 
     /**
@@ -95,8 +96,8 @@ public class ProductController implements ProductAPI {
     @Override
     @ApiMethod
     public ServerResponse saveGoods(HttpServletRequest request, String name, String categoryId, Integer buy,
-                                    Integer sales, String unitId, Integer type, String arrString, String otherName) {
-        return goodsService.saveGoods(name, categoryId, buy, sales, unitId, type, arrString, otherName);
+                                    Integer sales, String unitId, Integer type, String arrString, String otherName,String cityId) {
+        return goodsService.saveGoods(name, categoryId, buy, sales, unitId, type, arrString, otherName,cityId);
 
     }
 
@@ -125,8 +126,8 @@ public class ProductController implements ProductAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse insertProduct(HttpServletRequest request, String productArr) {
-        return productService.insertProduct(productArr);
+    public ServerResponse insertProduct(HttpServletRequest request, String productArr,String cityId) {
+        return productService.insertProduct(productArr,cityId);
 
     }
 
@@ -146,8 +147,8 @@ public class ProductController implements ProductAPI {
     @Override
     @ApiMethod
     public ServerResponse updateGoods(HttpServletRequest request, String id, String name, String categoryId, Integer buy,
-                                      Integer sales, String unitId, Integer type, String arrString, String otherName) {
-        return goodsService.updateGoods(id, name, categoryId, buy, sales, unitId, type, arrString, otherName);
+                                      Integer sales, String unitId, Integer type, String arrString, String otherName,String cityId) {
+        return goodsService.updateGoods(id, name, categoryId, buy, sales, unitId, type, arrString, otherName,cityId);
 
     }
 
@@ -211,7 +212,7 @@ public class ProductController implements ProductAPI {
     @Override
     @ApiMethod
     public ServerResponse queryGoodsListByCategoryLikeName(HttpServletRequest request, PageDTO pageDTO, String categoryId, String name, String cityId, Integer type) {
-        return goodsService.queryGoodsListByCategoryLikeName(pageDTO, categoryId, name, type);
+        return goodsService.queryGoodsListByCategoryLikeName(pageDTO, categoryId, name, cityId,type);
     }
 
     /**
@@ -223,8 +224,8 @@ public class ProductController implements ProductAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse updateProductLabelList(HttpServletRequest request, String productLabelList) {
-        return productService.updateProductLabelList(productLabelList);
+    public ServerResponse updateProductLabelList(HttpServletRequest request, String productLabelList,String cityId) {
+        return productService.updateProductLabelList(productLabelList,cityId);
     }
 
     /*
@@ -232,8 +233,8 @@ public class ProductController implements ProductAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse queryProductListByGoodsIdAndLabelId(HttpServletRequest request, String goodsArr, String labelId) {
-        return goodsService.queryProductListByGoodsIdAndLabelId(goodsArr, labelId);
+    public ServerResponse queryProductListByGoodsIdAndLabelId(HttpServletRequest request, String goodsArr, String labelId,String cityId) {
+        return goodsService.queryProductListByGoodsIdAndLabelId(goodsArr, labelId,cityId);
     }
 
     @Override

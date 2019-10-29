@@ -20,20 +20,24 @@ public interface ProductAPI {
     @ApiOperation(value = "查询所有货品", notes = "查询所有货品")
     ServerResponse<PageInfo> queryProduct(@RequestParam("request") HttpServletRequest request,
                                           @RequestParam("pageDTO") PageDTO pageDTO,
-                                          @RequestParam("categoryId") String categoryId);
+                                          @RequestParam("categoryId") String categoryId,
+                                          @RequestParam("cityId") String cityId);
 
     @PostMapping("/basics/product/queryUnit")
     @ApiOperation(value = "查询所有单位", notes = "查询所有单位")
-    ServerResponse queryUnit(@RequestParam("request") HttpServletRequest request);
+    ServerResponse queryUnit(@RequestParam("request") HttpServletRequest request,
+                             @RequestParam("cityId") String cityId);
 
     @PostMapping("/basics/product/queryBrand")
     @ApiOperation(value = "查询所有品牌", notes = "查询所有品牌")
-    ServerResponse queryBrand(@RequestParam("request") HttpServletRequest request);
+    ServerResponse queryBrand(@RequestParam("request") HttpServletRequest request,
+                              @RequestParam("cityId") String cityId);
 
     @PostMapping("/basics/product/queryBrandSeries")
     @ApiOperation(value = "根据品牌查询所有品牌系列", notes = "根据品牌查询所有品牌系列")
     ServerResponse queryBrandSeries(@RequestParam("request") HttpServletRequest request,
-                                    @RequestParam("brandId") String brandId);
+                                    @RequestParam("brandId") String brandId,
+                                    @RequestParam("cityId")String cityId);
 
     @PostMapping("/basics/product/saveGoods")
     @ApiOperation(value = "新增商品", notes = "新增商品")
@@ -45,7 +49,8 @@ public interface ProductAPI {
                              @RequestParam("unitId") String unitId,
                              @RequestParam("type") Integer type,
                              @RequestParam("arrString") String arrString,
-                             @RequestParam("otherName") String otherName);
+                             @RequestParam("otherName") String otherName,
+                             @RequestParam("cityId")String cityId);
 
     /*@PostMapping("/basics/product/queryBrandByGid")
     @ApiOperation(value = "根据商品id查询关联品牌", notes = "根据商品id查询关联品牌")
@@ -72,7 +77,8 @@ public interface ProductAPI {
     @PostMapping("/basics/product/insertProduct")
     @ApiOperation(value = "新增货品", notes = "新增货品")
     ServerResponse insertProduct(@RequestParam("request") HttpServletRequest request,
-                                 @RequestParam("productArr") String productArr);
+                                 @RequestParam("productArr") String productArr,
+                                 @RequestParam("cityId") String cityId);
 
   /*  @PostMapping("/basics/product/getGoodsByGid")
     @ApiOperation(value = "根据商品id查询对应商品", notes = "根据商品id查询对应商品")
@@ -90,7 +96,8 @@ public interface ProductAPI {
                                @RequestParam("unitId") String unitId,
                                @RequestParam("type") Integer type,
                                @RequestParam("arrString") String arrString,
-                               @RequestParam("otherName") String otherName);
+                               @RequestParam("otherName") String otherName,
+                               @RequestParam("cityId") String cityId);
 
     @PostMapping("/basics/product/getProductById")
     @ApiOperation(value = "根据货品id查询货品对象", notes = "根据货品id查询货品对象")
@@ -119,13 +126,15 @@ public interface ProductAPI {
     @PostMapping("/basics/product/updateProductLabelList")
     @ApiOperation(value = "批量添加/修改货品标签", notes = "批量添加/修改货品标签")
     ServerResponse updateProductLabelList(@RequestParam("request") HttpServletRequest request,
-                                          @RequestParam("productLabeList") String productLabeList);
+                                          @RequestParam("productLabeList") String productLabeList,
+                                          @RequestParam("cityId") String cityId);
 
     @PostMapping("/basics/product/queryProductListByGoodsIdAndLabelId")
     @ApiOperation(value = "根据商品id和标签id ，查出对应的货品对象集合", notes = "根据商品id和标签id ，查出对应的货品对象集合")
     ServerResponse queryProductListByGoodsIdAndLabelId(@RequestParam("request") HttpServletRequest request,
                                                        @RequestParam("jsonArr") String goodsArr,
-                                                       @RequestParam("labelId") String labelId);
+                                                       @RequestParam("labelId") String labelId,
+                                                       @RequestParam("cityId") String cityId);
 
     @PostMapping("/basics/product/data")
     @ApiOperation(value = "商品库检索查询", notes = "商品库检索查询")

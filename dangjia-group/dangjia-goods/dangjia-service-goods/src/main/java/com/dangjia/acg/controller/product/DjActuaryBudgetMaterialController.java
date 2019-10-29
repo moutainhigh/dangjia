@@ -23,8 +23,11 @@ public class DjActuaryBudgetMaterialController implements DjActuaryBudgetMateria
 
     @Override
     @ApiMethod
-    public ServerResponse makeBudgets(HttpServletRequest request, String actuarialTemplateId, String houseId, String workerTypeId, String listOfGoods) {
-        return djActuaryBudgetMaterialService.makeBudgets(actuarialTemplateId, houseId, workerTypeId, listOfGoods);
+    public ServerResponse makeBudgets(HttpServletRequest request, String actuarialTemplateId,
+                                      String houseId, String workerTypeId, String listOfGoods,
+                                      String cityId) {
+        return djActuaryBudgetMaterialService.makeBudgets(actuarialTemplateId, houseId,
+                workerTypeId, listOfGoods,cityId);
     }
 
     /**
@@ -38,8 +41,9 @@ public class DjActuaryBudgetMaterialController implements DjActuaryBudgetMateria
      */
     @Override
     @ApiMethod
-    public ServerResponse queryMakeBudgetsList(HttpServletRequest request, String bclId, String categoryId, String houseId) {
-        return djActuaryBudgetMaterialService.queryMakeBudgetsList(bclId, categoryId, houseId);
+    public ServerResponse queryMakeBudgetsList(HttpServletRequest request, String bclId,
+                                               String categoryId, String houseId,String cityId) {
+        return djActuaryBudgetMaterialService.queryMakeBudgetsList(bclId, categoryId, houseId,cityId);
     }
 
 

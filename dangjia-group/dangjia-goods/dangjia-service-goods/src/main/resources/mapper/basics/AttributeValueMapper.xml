@@ -43,7 +43,7 @@
 		SELECT
             *
 		FROM dj_basics_attribute_value
-		where attribute_id= #{attributeId}
+		where attribute_id= #{attributeId} and city_id = #{cityId}
 		ORDER BY create_date desc
 	</select>
 
@@ -66,7 +66,7 @@
 		SELECT
            *
 		FROM dj_basics_attribute_value
-		where attribute_id= #{attributeId}
+		where attribute_id= #{attributeId} and city_id =#{cityId}
 		ORDER BY create_date desc
 	</select>
 

@@ -79,7 +79,7 @@
 		FROM dj_basics_brand_series
 		<if test="brandId!=null">
 		where
-			brand_id=#{brandId}
+			brand_id=#{brandId} and city_id = #{cityId}
 		</if>
 		ORDER BY create_date desc
 	</select>

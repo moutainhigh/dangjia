@@ -41,8 +41,8 @@ public class GoodsCategoryController implements GoodsCategoryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse insertGoodsCategory(HttpServletRequest request, String name, String parentId, String parentTop, Integer sort) {
-        return goodsCategoryService.insertGoodsCategory(name, parentId, parentTop, sort);
+    public ServerResponse insertGoodsCategory(HttpServletRequest request, String name, String parentId, String parentTop, Integer sort,String cityId) {
+        return goodsCategoryService.insertGoodsCategory(name, parentId, parentTop, sort,cityId);
     }
 
     /**
@@ -52,8 +52,8 @@ public class GoodsCategoryController implements GoodsCategoryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse doModifyGoodsCategory(HttpServletRequest request, String id, String name, String parentId, String parentTop, Integer sort) {
-        return goodsCategoryService.doModifyGoodsCategory(id, name, parentId, parentTop, sort);
+    public ServerResponse doModifyGoodsCategory(HttpServletRequest request, String id, String name, String parentId, String parentTop, Integer sort,String cityId) {
+        return goodsCategoryService.doModifyGoodsCategory(id, name, parentId, parentTop, sort,cityId);
     }
 
     /**
@@ -63,8 +63,8 @@ public class GoodsCategoryController implements GoodsCategoryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse queryGoodsCategory(HttpServletRequest request, String parentId) {
-        return goodsCategoryService.queryGoodsCategory(parentId);
+    public ServerResponse queryGoodsCategory(HttpServletRequest request, String parentId,String cityId) {
+        return goodsCategoryService.queryGoodsCategory(parentId,cityId);
     }
 
     /**
@@ -74,8 +74,8 @@ public class GoodsCategoryController implements GoodsCategoryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse<PageInfo> queryGoodsAttribute(HttpServletRequest request, PageDTO pageDTO, String goodsCategoryId, String likeAttrName) {
-        return goodsAttributeService.queryGoodsAttribute(pageDTO, goodsCategoryId, likeAttrName);
+    public ServerResponse<PageInfo> queryGoodsAttribute(HttpServletRequest request, PageDTO pageDTO, String goodsCategoryId, String likeAttrName,String cityId) {
+        return goodsAttributeService.queryGoodsAttribute(pageDTO, goodsCategoryId, likeAttrName,cityId);
     }
 
     /**
@@ -85,8 +85,8 @@ public class GoodsCategoryController implements GoodsCategoryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse<PageInfo> queryGoodsAttributelikeName(HttpServletRequest request, PageDTO pageDTO, String name) {
-        return goodsAttributeService.queryGoodsAttributelikeName(pageDTO, name);
+    public ServerResponse<PageInfo> queryGoodsAttributelikeName(HttpServletRequest request, PageDTO pageDTO, String name,String cityId) {
+        return goodsAttributeService.queryGoodsAttributelikeName(pageDTO, name,cityId);
     }
 
     /**
@@ -96,8 +96,8 @@ public class GoodsCategoryController implements GoodsCategoryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse queryAttributeValue(HttpServletRequest request, String goodsAttributeId) {
-        return goodsAttributeService.queryAttributeValue(goodsAttributeId);
+    public ServerResponse queryAttributeValue(HttpServletRequest request, String goodsAttributeId,String cityId) {
+        return goodsAttributeService.queryAttributeValue(goodsAttributeId,cityId);
     }
 
     /**
@@ -107,8 +107,8 @@ public class GoodsCategoryController implements GoodsCategoryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse insertGoodsAttribute(HttpServletRequest request, String goodsCategoryId, String attributeName, Integer type, String jsonStr) {
-        return goodsAttributeService.insertGoodsAttribute(goodsCategoryId, attributeName, type, jsonStr);
+    public ServerResponse insertGoodsAttribute(HttpServletRequest request, String goodsCategoryId, String attributeName, Integer type, String jsonStr,String cityId) {
+        return goodsAttributeService.insertGoodsAttribute(goodsCategoryId, attributeName, type, jsonStr,cityId);
     }
 
     /**
@@ -118,8 +118,8 @@ public class GoodsCategoryController implements GoodsCategoryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse doModifyGoodsAttribute(HttpServletRequest request, String attributeId, String attributeName, Integer type, String jsonStr) {
-        return goodsAttributeService.doModifyGoodsAttribute(attributeId, attributeName, type, jsonStr);
+    public ServerResponse doModifyGoodsAttribute(HttpServletRequest request, String attributeId, String attributeName, Integer type, String jsonStr,String cityId) {
+        return goodsAttributeService.doModifyGoodsAttribute(attributeId, attributeName, type, jsonStr,cityId);
     }
 
     /**
@@ -127,8 +127,8 @@ public class GoodsCategoryController implements GoodsCategoryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse deleteGoodsAttribute(HttpServletRequest request, String goodsAttributeId) {
-        return goodsAttributeService.deleteGoodsAttribute(goodsAttributeId);
+    public ServerResponse deleteGoodsAttribute(HttpServletRequest request, String goodsAttributeId,String cityId) {
+        return goodsAttributeService.deleteGoodsAttribute(goodsAttributeId,cityId);
     }
 
     /**
@@ -136,8 +136,8 @@ public class GoodsCategoryController implements GoodsCategoryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse deleteByAttributeId(HttpServletRequest request, String attributeValueId) {
-        return goodsAttributeService.deleteByAttributeId(attributeValueId);
+    public ServerResponse deleteByAttributeId(HttpServletRequest request, String attributeValueId,String cityId) {
+        return goodsAttributeService.deleteByAttributeId(attributeValueId,cityId);
     }
 
     /**
@@ -147,8 +147,8 @@ public class GoodsCategoryController implements GoodsCategoryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse deleteGoodsCategory(HttpServletRequest request, String id) {
-        return goodsCategoryService.deleteGoodsCategory(id);
+    public ServerResponse deleteGoodsCategory(HttpServletRequest request, String id,String cityId) {
+        return goodsCategoryService.deleteGoodsCategory(id,cityId);
     }
 
     /**
@@ -158,8 +158,8 @@ public class GoodsCategoryController implements GoodsCategoryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse queryAttributeListById(HttpServletRequest request, String goodsCategoryId) {
-        return goodsCategoryService.queryAttributeListById(goodsCategoryId);
+    public ServerResponse queryAttributeListById(HttpServletRequest request, String goodsCategoryId,String cityId) {
+        return goodsCategoryService.queryAttributeListById(goodsCategoryId,cityId);
     }
 
     /**
@@ -169,7 +169,7 @@ public class GoodsCategoryController implements GoodsCategoryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse queryGoodsCategoryTwo(HttpServletRequest request) {
-        return goodsCategoryService.queryGoodsCategoryTwo();
+    public ServerResponse queryGoodsCategoryTwo(HttpServletRequest request,String cityId) {
+        return goodsCategoryService.queryGoodsCategoryTwo(cityId);
     }
 }

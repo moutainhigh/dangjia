@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.api.sup.SupplierProductAPI;
+import com.dangjia.acg.api.supplier.DjSupplierAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
@@ -42,7 +43,7 @@ import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
-import com.dangjia.acg.modle.sup.Supplier;
+import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.modle.worker.RewardPunishCondition;
 import com.dangjia.acg.modle.worker.RewardPunishRecord;
@@ -109,6 +110,9 @@ public class ComplainService {
 
     @Autowired
     private ForMasterAPI forMasterAPI;
+
+    @Autowired
+    private DjSupplierAPI djSupplierAPI;
     /**
      * 添加申诉
      *
@@ -160,11 +164,11 @@ public class ComplainService {
         complain.setFiles(files);
 //        1:工匠被处罚后不服.2：业主要求整改.3：要求换人.4:部分收货申诉.
         if (complainType == 4) {
-            Supplier supplier = supplierProductAPI.getSupplier(house.getCityId(),complain.getUserId());
-            if (supplier != null) {
-                complain.setUserMobile(supplier.getTelephone());
-                complain.setUserName(supplier.getName());
-                complain.setUserNickName("供应商-" + supplier.getCheckPeople());
+            DjSupplier djSupplier = djSupplierAPI.queryDjSupplierByPass(complain.getUserId());
+            if (djSupplier != null) {
+                complain.setUserMobile(djSupplier.getTelephone());
+                complain.setUserName(djSupplier.getName());
+                complain.setUserNickName("供应商-" + djSupplier.getCheckPeople());
             }
         } else {
             String field = "业主-";

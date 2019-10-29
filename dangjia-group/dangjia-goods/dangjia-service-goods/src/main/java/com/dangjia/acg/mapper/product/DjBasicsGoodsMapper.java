@@ -18,7 +18,9 @@ import java.util.List;
 public interface DjBasicsGoodsMapper extends Mapper<DjBasicsGoods> {
 
     //查询某个分类的商品 模糊name（如果categoryId 为null，查询全部材料商品 ）
-    List<DjBasicsGoods> queryGoodsListByCategoryLikeName(@Param("categoryId") String categoryId, @Param("name")String name);
+    List<DjBasicsGoods> queryGoodsListByCategoryLikeName(@Param("categoryId") String categoryId,
+                                                         @Param("name")String name,
+                                                         @Param("cityId")String cityId);
 
     List<DjBasicsGoods> queryGoodsListByCategoryId(@Param("categoryId") String categoryId);
 

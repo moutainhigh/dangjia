@@ -61,7 +61,7 @@ public class PaymentController implements PaymentAPI {
     @Override
     @ApiMethod
     public ServerResponse getPaymentOrder(String userToken, String houseId, String taskId, int type) {
-        return paymentService.getPaymentOrder(userToken, houseId, taskId, type);
+        return paymentService.getPaymentOrder(userToken, houseId, taskId,null, type);
     }
 
     /**

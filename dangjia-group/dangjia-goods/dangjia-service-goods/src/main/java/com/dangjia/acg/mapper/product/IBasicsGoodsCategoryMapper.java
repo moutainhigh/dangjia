@@ -26,7 +26,7 @@ public interface IBasicsGoodsCategoryMapper extends Mapper<BasicsGoodsCategory> 
 	List<BasicsGoodsCategory> queryCategoryByParentId(@Param("parentId") String parentId,@Param("categoryLabelId") String categoryLabelId);
 
 	//根据name查询商品对象
-	List<BasicsGoodsCategory> queryCategoryByName(@Param("name") String name);
+	List<BasicsGoodsCategory> queryCategoryByName(@Param("name") String name,@Param("cityId") String cityId);
 
 	//根据name查询商品对象
 	List<HomeProductDTO> getProductList(@Param("categoryId") String categoryId);
@@ -34,14 +34,16 @@ public interface IBasicsGoodsCategoryMapper extends Mapper<BasicsGoodsCategory> 
 	//删除类别关联品牌系列
 	void deleteCategorysSeries(@Param("categoryId")String categoryId);
     //根据商品id查询关联品牌
-    List<Brand> queryBrandByCategoryid(@Param("categoryId")String categoryId);
+    List<Brand> queryBrandByCategoryid(@Param("categoryId")String categoryId,
+									   @Param("cityId")String cityId);
     //根据商分类顶级id查询关联品牌
     List<Brand> queryBrandByTopCategoryid(@Param("categoryId")String categoryId,@Param("wordKey")String wordKey);
 
     List<BasicsGoodsCategory> getAllCategoryChildById(@Param("parentTop")String parentTop);
 
 	//根据父id查询下属商品类型
-	List<BasicsGoodsCategory> queryGoodsCategoryExistlastCategory(@Param("parentId") String parentId);
+	List<BasicsGoodsCategory> queryGoodsCategoryExistlastCategory(@Param("parentId") String parentId,
+																  @Param("cityId") String cityId);
 
     List<CategoryGoodsProductDTO> queryCategoryListByCategoryLikeName(@Param("categoryId") String categoryId,
 																@Param("goodsName") String goodsName);

@@ -29,10 +29,10 @@ public interface IAttributeValueMapper extends Mapper<AttributeValue> {
 	List<AttributeValue> query();
 
 	//根据属性id查询所有属性选项PO对象
-	List<AttributeValuePO> queryPOByAttributeId(@Param("attributeId")String attributeId);
+	List<AttributeValuePO> queryPOByAttributeId(@Param("attributeId")String attributeId,@Param("cityId")String cityId);
 
 	//根据属性id查询所有属性选项
-	List<AttributeValue> queryByAttributeId(@Param("attributeId")String attributeId);
+	List<AttributeValue> queryByAttributeId(@Param("attributeId")String attributeId,@Param("cityId")String cityId);
 	//根据属性id删除所有属性选项
 	void deleteByAttributeId(@Param("attributeId")String attributeId);
 }

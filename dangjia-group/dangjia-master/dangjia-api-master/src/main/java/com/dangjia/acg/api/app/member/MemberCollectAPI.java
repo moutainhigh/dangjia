@@ -54,7 +54,8 @@ public interface MemberCollectAPI {
     @PostMapping("app/member/memberCollect/queryRelated")
     @ApiOperation(value = "猜你喜欢", notes = "猜你喜欢")
     ServerResponse queryRelated(@RequestParam("request") HttpServletRequest request,
-                                @RequestParam("userToken") String userToken);
+                                @RequestParam("userToken") String userToken,
+                                @RequestParam("cityId") String cityId);
 
 }
 

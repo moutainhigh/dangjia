@@ -39,7 +39,7 @@
             a.`create_date` AS createDate,
             a.`modify_date` AS modifyDate,
             a.`data_status` AS dataStatus,
-            if(b.application_status=NULL or b.application_status="",b.application_status,-1) AS applicationStatus,
+            if(b.application_status is not null and b.application_status!="",b.application_status,-1) AS applicationStatus,
             b.fail_reason AS failReason,
             b.contract,
             a.freight,
@@ -56,7 +56,7 @@
             )
         </if>
         <if test="applicationStatus=='-1'.toString()">
-            and application_status not in(0,1,2)
+            AND( application_status is null or application_status NOT IN(0, 1, 2))
         </if>
         <if test="null!=applicationStatus and ''!=applicationStatus and applicationStatus!='-1'.toString()">
             and application_status=#{applicationStatus}

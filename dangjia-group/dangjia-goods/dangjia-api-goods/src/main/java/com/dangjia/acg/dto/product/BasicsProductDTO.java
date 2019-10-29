@@ -103,7 +103,7 @@ public class BasicsProductDTO extends GoodsBaseEntity {
     private String isAgencyPurchase;//是否为代买（1是，0否）
 
 
-
+    private String cityId;//
 
 
 }

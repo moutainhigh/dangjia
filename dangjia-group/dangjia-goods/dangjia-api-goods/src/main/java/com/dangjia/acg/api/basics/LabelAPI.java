@@ -28,7 +28,8 @@ public interface LabelAPI {
     @PostMapping("/basics/label/getAllLabel")
     @ApiOperation(value = "查询所有商品标签", notes = "查询所有商品标签")
     ServerResponse<PageInfo> getAllLabel(@RequestParam("request") HttpServletRequest request,
-                                         @RequestParam("pageDTO") PageDTO pageDTO);
+                                         @RequestParam("pageDTO") PageDTO pageDTO,
+                                         @RequestParam("cityId") String cityId);
 
     /**
      * 修改商品标签
@@ -41,7 +42,8 @@ public interface LabelAPI {
     @ApiOperation(value = "修改商品标签", notes = "修改商品标签")
     ServerResponse updateLabel(@RequestParam("request") HttpServletRequest request,
                                @RequestParam("labelId") String labelId,
-                               @RequestParam("labelName") String labelName);
+                               @RequestParam("labelName") String labelName,
+                               @RequestParam("cityId") String cityId);
 
     /**
      * 新增商品标签
@@ -52,7 +54,8 @@ public interface LabelAPI {
     @PostMapping("/basics/label/insertLabel")
     @ApiOperation(value = "新增商品标签", notes = "新增商品标签")
     ServerResponse insertLabel(@RequestParam("request") HttpServletRequest request,
-                               @RequestParam("labelName") String labelName);
+                               @RequestParam("labelName") String labelName,
+                               @RequestParam("cityId") String cityId);
 
     /**
      * 根据id查询标签对象
