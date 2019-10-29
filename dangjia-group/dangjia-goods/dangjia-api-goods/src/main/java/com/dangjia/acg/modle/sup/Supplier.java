@@ -1,7 +1,9 @@
 package com.dangjia.acg.modle.sup;
 
+import com.dangjia.acg.common.annotation.Desc;
 import com.dangjia.acg.modle.GoodsBaseEntity;
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
 
@@ -17,36 +19,59 @@ import javax.persistence.Table;
  */
 @Data
 @Entity
-@Table(name = "dj_sup_supplier")
+@Table(name = "dj_supplier")
 @ApiModel(description = "供应商")
 @FieldNameConstants(prefix = "")
 public class Supplier extends GoodsBaseEntity {
 
+    @Column(name = "user_id")
+    @Desc(value = "用户ID")
+    @ApiModelProperty("用户ID")
+    private String userId;//用户ID
+
+    @Column(name = "city_id")
+    @Desc(value = "城市ID")
+    @ApiModelProperty("城市ID")
+    private String cityId;//城市ID
+
     @Column(name = "name")
+    @Desc(value = "供应商名称")
+    @ApiModelProperty("供应商名称")
     private String name;//供应商名称
 
     @Column(name = "address")
-    private String address;//地址
+    @Desc(value = "供应商地址")
+    @ApiModelProperty("供应商地址")
+    private String address;//供应商地址
 
-    @Column(name = "telephone")
-    private String telephone;//联系电话
-
-    @Column(name = "checkPeople")
+    @Column(name = "check_people")
+    @Desc(value = "联系人姓名")
+    @ApiModelProperty("联系人姓名")
     private String checkPeople;//联系人姓名
 
-    @Column(name = "gender")
-    private Integer gender;//联系人性别  1男 2女   0 未选
+    @Column(name = "telephone")
+    @Desc(value = "联系电话")
+    @ApiModelProperty("联系电话")
+    private String telephone;//联系电话
 
     @Column(name = "email")
-    private String email;//电子邮件
+    @Desc(value = "邮箱")
+    @ApiModelProperty("邮箱")
+    private String email;//邮箱
 
-    @Column(name = "notice")
-    private String notice;//发货须知
+    @Column(name = "create_by")
+    @Desc(value = "创建人")
+    @ApiModelProperty("创建人")
+    private String createBy;//创建人
 
-    @Column(name = "supplier_level")
-    private Integer supplierLevel;//供应商级别
+    @Column(name = "update_by")
+    @Desc(value = "修改人")
+    @ApiModelProperty("修改人")
+    private String updateBy;//修改人
 
-    @Column(name = "state")
-    private Integer state;//供应商状态  1正常供货 2停止供货
+    @Column(name = "is_non_platform_supplier")
+    @Desc(value = "是否非平台供应商（1是，0否）")
+    @ApiModelProperty("是否非平台供应商（1是，0否）")
+    private Integer isNonPlatformSupperlier;
 
 }

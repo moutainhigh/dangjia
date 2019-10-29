@@ -13,7 +13,7 @@
 		product_name as productName,
 		image,
 		price ,
-		shopCount,
+		shop_count as shopCount,
 		unit_name as unitName,
 		category_id as categoryId,
 		product_type as productType,
@@ -23,15 +23,28 @@
         data_status AS dataStatus
 	</sql>
 
-  	<select id="queryCartList" resultType="com.dangjia.acg.modle.product.ShoppingCart">
+  	<select id="queryCartList" resultType="com.dangjia.acg.dto.product.ShoppingCartListDTO">
 		SELECT
-			<include refid="all_columns"/>
+			a.id,
+			a.price,
+			a.shop_count as shopCount,
+			a.unit_name as unitName,
+			a.product_type as productType,
+			a.storefront_id as storefrontId ,
+			b.prod_template_id AS productId,
+			b.product_name AS productName,
+			b.product_sn as productSn,
+			b.image,
+			b.sell_price AS sellPrice,
+			d.type
 		FROM
-			dj_repair_shopping_cart
-		WHERE
-			member_id =#{memberId}
+			dj_repair_shopping_cart a
+		INNER JOIN dj_basics_storefront_product b ON a.product_id = b.id
+		INNER JOIN dj_basics_product_template c ON b.prod_template_id = c.id
+		INNER JOIN dj_basics_goods d ON b.goods_id = d.id
+		WHERE member_id =#{memberId}
 		AND city_id =#{cityId}
-		and storefront_id=#{storefrontId}
+		AND storefront_id=#{storefrontId}
 	</select>
 
 	<select id="queryStorefrontIds" resultType="java.lang.String">

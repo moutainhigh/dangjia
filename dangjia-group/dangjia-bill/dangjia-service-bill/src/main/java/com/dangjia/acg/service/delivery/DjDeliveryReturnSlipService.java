@@ -3,10 +3,12 @@ package com.dangjia.acg.service.delivery;
 import com.dangjia.acg.api.BasicsStorefrontAPI;
 import com.dangjia.acg.api.supplier.DjSupApplicationProductAPI;
 import com.dangjia.acg.api.supplier.DjSupplierAPI;
+import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.delivery.*;
 import com.dangjia.acg.mapper.delivery.DjDeliveryReturnSlipMapper;
 import com.dangjia.acg.modle.complain.Complain;
@@ -47,6 +49,9 @@ public class DjDeliveryReturnSlipService {
 
     @Autowired
     private DjSupplierAPI djSupplierAPI;
+
+    @Autowired
+    private ConfigUtil configUtil;
 
 
     /**
@@ -209,7 +214,7 @@ public class DjDeliveryReturnSlipService {
         try {
             DjSupplier djSupplier = djSupplierAPI.querySingleDjSupplier(userId, cityId);
             if(null==djSupplier)
-                return ServerResponse.createByErrorMessage("暂无店铺信息");
+                return ServerResponse.createByErrorMessage("暂无供应商信息");
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<BuyersDimensionDTO> buyersDimensionDTOS = djDeliveryReturnSlipMapper.queryBuyersDimensionList(djSupplier.getId(), searchKey,cityId);
             PageInfo pageResult = new PageInfo(buyersDimensionDTOS);
@@ -255,6 +260,7 @@ public class DjDeliveryReturnSlipService {
      */
     public ServerResponse querySupplyDimensionList(PageDTO pageDTO, String userId, String cityId, String searchKey) {
         try {
+            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             DjSupplier djSupplier = djSupplierAPI.querySingleDjSupplier(userId, cityId);
             if(null==djSupplier)
                 return ServerResponse.createByErrorMessage("暂无店铺信息");
@@ -264,6 +270,7 @@ public class DjDeliveryReturnSlipService {
             supplyDimensionDTOS.forEach(supplyDimensionDTO -> {
                 List<BuyersDimensionDTO> buyersDimensionDTOS = djDeliveryReturnSlipMapper.querySupplyDimensionList(djSupplier.getId(), supplyDimensionDTO.getProductId(), cityId);
                 supplyDimensionDTO.setBuyersDimensionDTOS(buyersDimensionDTOS);
+                supplyDimensionDTO.setImage(imageAddress+supplyDimensionDTO.getImage());
             });
             if (supplyDimensionDTOS.size() <= 0)
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
@@ -290,7 +297,6 @@ public class DjDeliveryReturnSlipService {
                 return ServerResponse.createByErrorMessage("暂无店铺信息");
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<Storefront> storefronts = basicsStorefrontAPI.queryLikeSingleStorefront(searchKey);
-            PageInfo pageResult = new PageInfo(storefronts);
             List<SupplierStoreDimensionDTO> supplierStoreDimensionDTOS=new ArrayList<>();
             for (Storefront storefront : storefronts) {
                 List<SupplierStoreDimensionDTO> supplierStoreDimensionDTOS1 = djDeliveryReturnSlipMapper.querySupplierStoreDimensionList(djSupplier.getId(), storefront.getId(), cityId);
@@ -301,10 +307,10 @@ public class DjDeliveryReturnSlipService {
                 });
                 supplierStoreDimensionDTOS.addAll(supplierStoreDimensionDTOS1);
             }
-            System.out.println(supplierStoreDimensionDTOS);
             if (supplierStoreDimensionDTOS.size() <= 0)
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
-            return ServerResponse.createBySuccess("查询成功", supplierStoreDimensionDTOS);
+            PageInfo pageResult = new PageInfo(supplierStoreDimensionDTOS);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             logger.error("查询失败", e);
             return ServerResponse.createByErrorMessage("查询失败: " + e);
