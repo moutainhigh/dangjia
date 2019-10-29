@@ -53,8 +53,8 @@ public class MemberCollectController implements MemberCollectAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryRelated(HttpServletRequest request, String userToken) {
-        return memberCollectService.queryRelated(userToken);
+    public ServerResponse queryRelated(HttpServletRequest request, String userToken,String cityId) {
+        return memberCollectService.queryRelated(userToken,cityId);
     }
 }
 

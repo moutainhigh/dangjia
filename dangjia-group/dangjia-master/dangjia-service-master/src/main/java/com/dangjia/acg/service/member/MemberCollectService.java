@@ -246,7 +246,7 @@ public class MemberCollectService {
      * @param userToken
      * @return
      */
-    public ServerResponse queryRelated(String userToken) {
+    public ServerResponse queryRelated(String userToken,String cityId) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -258,7 +258,7 @@ public class MemberCollectService {
         example.orderBy(WebsiteVisit.COUNT).desc();
         List<WebsiteVisit> websiteVisits = iWebsiteVisitMapper.selectByExample(example);
         if(websiteVisits.size()<=0){
-            List<DjBasicsProductTemplate> djBasicsProductTemplates = djBasicsProductAPI.queryRandomProduct(12);
+            List<DjBasicsProductTemplate> djBasicsProductTemplates = djBasicsProductAPI.queryRandomProduct(12,cityId);
             return ServerResponse.createBySuccess("查询成功",djBasicsProductTemplates);
         }else{
             List<DjBasicsProductTemplate> djBasicsProductTemplates=new ArrayList<>();
@@ -274,7 +274,7 @@ public class MemberCollectService {
                 }
             }
             if(djBasicsProductTemplates.size()<12){
-                djBasicsProductTemplates.addAll(djBasicsProductAPI.queryRandomProduct(12-djBasicsProductTemplates.size()));
+                djBasicsProductTemplates.addAll(djBasicsProductAPI.queryRandomProduct(12-djBasicsProductTemplates.size(),cityId));
             }
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             djBasicsProductTemplates.forEach(djBasicsProductTemplate -> {
