@@ -40,6 +40,12 @@
         INNER JOIN dj_basics_product_template bpt ON bsp.prod_template_id = bpt.id
         INNER JOIN dj_basics_goods bg ON bsp.goods_id = bg.id
         where 1=1
+        <if test="null!=storefrontId and ''!=storefrontId">
+            and  bsp.storefront_id=#{storefrontId}
+        </if>
+        <if test="null!=cityId and ''!=cityId">
+            and  bsp.city_id=#{cityId}
+        </if>
         <if test="null!=keyWord and ''!=keyWord">
             and (
             bg. NAME LIKE CONCAT('%',#{keyWord},'%') or

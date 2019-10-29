@@ -1,7 +1,9 @@
 package com.dangjia.acg.service.repair;
 
+import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.api.supplier.DjSupplierAPI;
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -20,6 +22,7 @@ import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.modle.repair.MendOrder;
+import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.github.pagehelper.PageHelper;
@@ -56,7 +59,8 @@ public class MendMaterielService {
     private ISplitDeliverMapper splitDeliverMapper;
     @Autowired
     private DjSupplierAPI djSupplierAPI ;
-
+    @Autowired
+    private RedisClient redisClient;
     /**
      * 要货退货 查询补材料
      */
@@ -70,11 +74,12 @@ public class MendMaterielService {
      * landlordState
      * 0生成中,1平台审核中,2不通过,3通过
      */
-    public ServerResponse landlordState(String storefrontId,String houseId, PageDTO pageDTO, String beginDate, String endDate, String likeAddress) {
+    public ServerResponse landlordState(String userId,String houseId, PageDTO pageDTO, String beginDate, String endDate, String likeAddress) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
 //            List<MendOrder> mendOrderList = mendOrderMapper.landlordState(houseId);
-            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(storefrontId,houseId, 4, beginDate, endDate, likeAddress);
+            Storefront storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userId,Storefront.class);
+            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(storefront.getId(),houseId, 4, beginDate, endDate, likeAddress);
             PageInfo pageResult = new PageInfo(mendOrderList);
             List<MendOrderDTO> mendOrderDTOS = getMendOrderDTOList(mendOrderList);
             pageResult.setList(mendOrderDTOS);
@@ -90,11 +95,13 @@ public class MendMaterielService {
      * material_back_state
      * 0生成中,1平台审核中，2平台审核不通过，3审核通过，4管家取消
      */
-    public ServerResponse materialBackState(String storefrontId,String houseId, PageDTO pageDTO, String beginDate, String endDate, String likeAddress) {
+    public ServerResponse materialBackState(String userId,String houseId, PageDTO pageDTO, String beginDate, String endDate, String likeAddress) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            //通过缓存查询店铺信息
+            Storefront storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userId,Storefront.class);
 //            List<MendOrder> mendOrderList = mendOrderMapper.materialBackState(houseId); 2
-            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(storefrontId,houseId, 2, beginDate, endDate, likeAddress);
+            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(storefront.getId(),houseId, 2, beginDate, endDate, likeAddress);
             PageInfo pageResult = new PageInfo(mendOrderList);
             List<MendOrderDTO> mendOrderDTOS = getMendOrderDTOList(mendOrderList);
             pageResult.setList(mendOrderDTOS);

@@ -31,10 +31,9 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
     @Override
     @ApiMethod
     public ServerResponse landlordState(HttpServletRequest request,String houseId, PageDTO pageDTO, String beginDate, String endDate, String likeAddress) {
-        String userID = request.getParameter(Constants.USERID);
+        String userId = request.getParameter("userId");
         //通过缓存查询店铺信息
-        Storefront storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userID,Storefront.class);
-        return mendMaterielService.landlordState(storefront.getId(),houseId, pageDTO, beginDate, endDate, likeAddress);
+        return mendMaterielService.landlordState(userId,houseId, pageDTO, beginDate, endDate, likeAddress);
     }
 
     /**
@@ -43,10 +42,9 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
     @Override
     @ApiMethod
     public ServerResponse materialBackState(HttpServletRequest request,String houseId, PageDTO pageDTO, String beginDate, String endDate, String likeAddress) {
-        String userID = request.getParameter(Constants.USERID);
-        //通过缓存查询店铺信息
-        Storefront storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userID,Storefront.class);
-        return mendMaterielService.materialBackState(storefront.getId(),houseId, pageDTO, beginDate, endDate, likeAddress);
+        String userId = request.getParameter("userId");
+
+        return mendMaterielService.materialBackState(userId,houseId, pageDTO, beginDate, endDate, likeAddress);
     }
 
     /**

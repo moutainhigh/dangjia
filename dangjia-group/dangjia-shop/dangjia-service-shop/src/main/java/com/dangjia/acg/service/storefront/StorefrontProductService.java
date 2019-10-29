@@ -64,7 +64,8 @@ public class StorefrontProductService {
         try {
             //判断是否重复添加
             Example example = new Example(StorefrontProduct.class);
-            example.createCriteria().andEqualTo(StorefrontProduct.PROD_TEMPLATE_ID, basicsStorefrontProductDTO.getProdTemplateId());
+            example.createCriteria().andEqualTo(StorefrontProduct.PROD_TEMPLATE_ID, basicsStorefrontProductDTO.getProdTemplateId())
+            .andEqualTo(StorefrontProduct.STOREFRONT_ID,basicsStorefrontProductDTO.getStorefrontId());
             List<StorefrontProduct> list = istorefrontProductMapper.selectByExample(example);
             if (list.size() > 0) {
                 return ServerResponse.createByErrorMessage("店铺商品已经添加，不能重复添加!商品模板ID:"+list.get(0).getProdTemplateId());
@@ -76,25 +77,18 @@ public class StorefrontProductService {
             }
             StorefrontProduct storefrontProduct = new StorefrontProduct();
             storefrontProduct.setStorefrontId(basicsStorefrontProductDTO.getStorefrontId());
-            storefrontProduct.setImage(basicsStorefrontProductDTO.getImage());
-            storefrontProduct.setDetailImage(basicsStorefrontProductDTO.getDetailImage());
-            storefrontProduct.setMarketName(basicsStorefrontProductDTO.getMarketName());
-            storefrontProduct.setSellPrice(basicsStorefrontProductDTO.getSellPrice());
-            storefrontProduct.setSuppliedNum(basicsStorefrontProductDTO.getSuppliedNum());
-            storefrontProduct.setIsUpstairsCost(basicsStorefrontProductDTO.getIsUpstairsCost());
-            storefrontProduct.setIsDeliveryInstall(basicsStorefrontProductDTO.getIsDeliveryInstall());
-            storefrontProduct.setMoveCost(basicsStorefrontProductDTO.getMoveCost());
-            storefrontProduct.setIsShelfStatus(basicsStorefrontProductDTO.getIsShelfStatus());
-            storefrontProduct.setSellPrice(basicsStorefrontProductDTO.getSellPrice()!=null?basicsStorefrontProductDTO.getSellPrice():null);
-            storefrontProduct.setSuppliedNum(basicsStorefrontProductDTO.getSuppliedNum()!=null?basicsStorefrontProductDTO.getSuppliedNum():null);
-            storefrontProduct.setIsUpstairsCost(basicsStorefrontProductDTO.getIsUpstairsCost()!=null?basicsStorefrontProductDTO.getIsUpstairsCost():null);
-            storefrontProduct.setIsDeliveryInstall(basicsStorefrontProductDTO.getIsDeliveryInstall()!=null?basicsStorefrontProductDTO.getIsDeliveryInstall():null);
-            storefrontProduct.setMoveCost(basicsStorefrontProductDTO.getMoveCost()!=null?basicsStorefrontProductDTO.getMoveCost():null);
-            storefrontProduct.setIsShelfStatus(basicsStorefrontProductDTO.getIsShelfStatus()!=null?basicsStorefrontProductDTO.getIsShelfStatus():null);
-            storefrontProduct.setProdTemplateId(basicsStorefrontProductDTO.getProdTemplateId());
-            storefrontProduct.setGoodsId( djBasicsProductTemplate.getGoodsId());
-            storefrontProduct.setProductName(djBasicsProductTemplate.getName());
-            System.out.println(storefrontProduct.toString());
+            storefrontProduct.setImage(djBasicsProductTemplate.getImage());//大图
+            storefrontProduct.setDetailImage(djBasicsProductTemplate.getDetailImage());//缩略图
+            storefrontProduct.setMarketName(djBasicsProductTemplate.getMarketingName());//营销名称
+            storefrontProduct.setSellPrice(basicsStorefrontProductDTO.getSellPrice());//销售价格
+            storefrontProduct.setSuppliedNum(basicsStorefrontProductDTO.getSuppliedNum());//供货数量
+            storefrontProduct.setIsUpstairsCost(basicsStorefrontProductDTO.getIsUpstairsCost());//师傅是否按一层收取上楼费
+            storefrontProduct.setIsDeliveryInstall(basicsStorefrontProductDTO.getIsDeliveryInstall());//是否送货与安装/施工分开
+            storefrontProduct.setMoveCost(basicsStorefrontProductDTO.getMoveCost());// 搬运费
+            storefrontProduct.setIsShelfStatus(basicsStorefrontProductDTO.getIsShelfStatus());//是否上下架
+            storefrontProduct.setProdTemplateId(djBasicsProductTemplate.getId());//货品id
+            storefrontProduct.setGoodsId( djBasicsProductTemplate.getGoodsId());// 商品id
+            storefrontProduct.setProductName(djBasicsProductTemplate.getName());//模板名称
             int i = istorefrontProductMapper.insert(storefrontProduct);
             if (i > 0) {
                 return ServerResponse.createBySuccessMessage("增加店铺商品成功");
@@ -140,12 +134,23 @@ public class StorefrontProductService {
      * @param keyWord
      * @return
      */
-    public ServerResponse queryStorefrontProductByKeyWord(String keyWord) {
+    public ServerResponse queryStorefrontProductByKeyWord(String keyWord,String storefrontId,String cityId) {
         try {
-            List<BasicsStorefrontProductViewDTO> list = istorefrontProductMapper.queryStorefrontProductViewDTOList(keyWord);
+
+
+            if (StringUtils.isEmpty(storefrontId)) {
+                return ServerResponse.createByErrorMessage("店铺ID不能为空!");
+            }
+
+            if (StringUtils.isEmpty(cityId)) {
+                return ServerResponse.createByErrorMessage("城市ID不能为空!");
+            }
+
+            List<BasicsStorefrontProductViewDTO> list = istorefrontProductMapper.queryStorefrontProductViewDTOList(keyWord,storefrontId,cityId);
             if (list.size() <= 0) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
+
             return ServerResponse.createBySuccess("查询成功", list);
         } catch (Exception e) {
             logger.error("查询失败：", e);

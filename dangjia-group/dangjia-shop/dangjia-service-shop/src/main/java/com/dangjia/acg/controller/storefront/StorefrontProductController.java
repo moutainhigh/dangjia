@@ -55,8 +55,8 @@ public class StorefrontProductController implements StorefrontProductAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryStorefrontProductByKeyWord(String keyWord) {
-        return storefrontProductService.queryStorefrontProductByKeyWord(keyWord);
+    public ServerResponse queryStorefrontProductByKeyWord(String keyWord,String storefrontId,String cityId) {
+        return storefrontProductService.queryStorefrontProductByKeyWord(keyWord,storefrontId,cityId);
     }
 
     @Override

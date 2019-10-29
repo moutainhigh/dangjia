@@ -38,7 +38,8 @@ public interface StorefrontProductAPI {
 
     @PostMapping("/web/queryStorefrontProductByKeyWord")
     @ApiOperation(value = "供货设置-已选商品-通过货品或者商品名称查询", notes = "供货设置-已选商品-通过货品或者商品名称查询")
-    ServerResponse queryStorefrontProductByKeyWord(@RequestParam("keyWord") String keyWord);
+    ServerResponse queryStorefrontProductByKeyWord(@RequestParam("keyWord") String keyWord,
+            @RequestParam("storefrontId") String storefrontId,@RequestParam("cityId") String cityId);
 
     @PostMapping("/web/setSpStatusById")
     @ApiOperation(value = "供货设置-设置商品上下架", notes = "设置商品上下架")
