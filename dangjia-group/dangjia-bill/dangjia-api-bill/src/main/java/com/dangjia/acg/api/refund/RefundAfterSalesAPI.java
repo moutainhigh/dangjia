@@ -1,6 +1,8 @@
 package com.dangjia.acg.api.refund;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -19,10 +21,11 @@ public interface RefundAfterSalesAPI {
 
     @PostMapping("/app/refund/refundOrder/queryRefundOnlyOrderList")
     @ApiOperation(value = "查询需退款的订单", notes = "查询需退款的订单")
-    ServerResponse queryRefundOnlyOrderList(@RequestParam("userToken") String userToken,
-                                        @RequestParam("cityId") String cityId,
-                                        @RequestParam("houseId") String houseId,
-                                        @RequestParam("searchKey") String searchKey);
+    ServerResponse<PageInfo> queryRefundOnlyOrderList(@RequestParam("pageDTO") PageDTO pageDTO,
+                                                      @RequestParam("userToken") String userToken,
+                                                      @RequestParam("cityId") String cityId,
+                                                      @RequestParam("houseId") String houseId,
+                                                      @RequestParam("searchKey") String searchKey);
 
     /**
      * 仅退款提交

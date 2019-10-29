@@ -2,8 +2,10 @@ package com.dangjia.acg.controller.refund;
 
 import com.dangjia.acg.api.refund.RefundAfterSalesAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.refund.RefundAfterSalesService;
+import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,8 +36,8 @@ public class RefundAfterSalesController implements RefundAfterSalesAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse queryRefundOnlyOrderList(String userToken,String cityId,String houseId,String searchKey){
-        return refundAfterSalesService.queryRefundOnlyOrderList(cityId,houseId,searchKey);
+    public ServerResponse<PageInfo> queryRefundOnlyOrderList(PageDTO pageDTO, String userToken, String cityId, String houseId, String searchKey){
+        return refundAfterSalesService.queryRefundOnlyOrderList(pageDTO,cityId,houseId,searchKey);
     }
 
     /**

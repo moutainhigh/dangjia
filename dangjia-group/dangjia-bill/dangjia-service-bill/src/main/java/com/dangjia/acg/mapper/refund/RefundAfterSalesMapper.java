@@ -32,5 +32,6 @@ public interface RefundAfterSalesMapper extends Mapper<Order> {
      */
     List<RefundOrderItemDTO> queryRefundOrderItemList(@Param("orderId") String orderId,@Param("searchKey") String searchKey);
 
+    RefundOrderItemDTO queryRefundOrderItemInfo(@Param("orderItemId") String orderItemId);
 
 }

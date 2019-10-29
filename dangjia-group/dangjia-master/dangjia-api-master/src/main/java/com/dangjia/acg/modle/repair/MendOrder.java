@@ -94,4 +94,14 @@ public class MendOrder extends BaseEntity {
 	@ApiModelProperty("店铺ID")
 	private String storefrontId;
 
+	@Column(name = "address_id")
+	@Desc(value = "地址ID")
+	@ApiModelProperty("地址ID")
+	private String addressId;
+
+	@Column(name = "order_id")
+	@Desc(value = "订单ID")
+	@ApiModelProperty("订单ID")
+	private String orderId;
+
 }
