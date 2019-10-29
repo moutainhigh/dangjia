@@ -12,6 +12,7 @@ import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.product.ShoppingCartDTO;
+import com.dangjia.acg.dto.product.ShoppingCartListDTO;
 import com.dangjia.acg.dto.product.ShoppingCartProductDTO;
 import com.dangjia.acg.mapper.member.IMemberCollectMapper;
 import com.dangjia.acg.mapper.product.IShoppingCartMapper;
@@ -86,8 +87,8 @@ public class ShopCartService {
                 Storefront storefront = basicsStorefrontAPI.querySingleStorefrontById(str);
                 shoppingCartDTO.setStorefrontName(storefront.getStorefrontName());
                 shoppingCartDTO.setStorefrontId(storefront.getId());
-                List<ShoppingCart> shoppingCarts = iShoppingCartmapper.queryCartList(member.getId(), cityId,str);
-                shoppingCartDTO.setShoppingCarts(shoppingCarts);
+                List<ShoppingCartListDTO> shoppingCartListDTOS = iShoppingCartmapper.queryCartList(member.getId(), cityId, str);
+                shoppingCartDTO.setShoppingCartListDTOS(shoppingCartListDTOS);
                 shoppingCartDTOS.add(shoppingCartDTO);
             });
             if(shoppingCartDTOS.size()<=0)

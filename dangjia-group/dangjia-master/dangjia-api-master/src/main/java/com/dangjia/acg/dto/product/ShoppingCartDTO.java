@@ -1,6 +1,5 @@
 package com.dangjia.acg.dto.product;
 
-import com.dangjia.acg.modle.product.ShoppingCart;
 import lombok.Data;
 
 import java.util.List;
@@ -13,6 +12,6 @@ public class ShoppingCartDTO{
 
     private String  storefrontName;
 
-    private List<ShoppingCart> shoppingCarts;
+    private List<ShoppingCartListDTO> shoppingCartListDTOS;
 
 }

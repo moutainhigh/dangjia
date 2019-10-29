@@ -53,7 +53,7 @@ public class ShoppingCart extends BaseEntity {
     @ApiModelProperty("销售单价")
     private BigDecimal price;
 
-    @Column(name = "shopCount")
+    @Column(name = "shop_count")
     @Desc(value = "购买数量")
     @ApiModelProperty("购买数量")
     private Integer shopCount;

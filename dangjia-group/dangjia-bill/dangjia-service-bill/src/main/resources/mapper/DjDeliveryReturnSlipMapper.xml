@@ -363,9 +363,9 @@
 
     <select id="queryBuyersDimensionDetailList" resultType="com.dangjia.acg.dto.delivery.BuyersDimensionDetailsDTO">
         SELECT
-            dsd.order_split_id AS orderSplitId,
+            dsd.id AS orderSplitId,
             dsd.number,
-            dsd.send_time,
+            dsd.send_time as createDate,
             sum(dosi.shop_count) as shopCount,
             dsd.total_amount as totalAmount
         FROM
@@ -418,7 +418,7 @@
     <select id="querySupplierStoreDimensionDetailList"
             resultType="com.dangjia.acg.dto.delivery.BuyersDimensionDetailsDTO">
         SELECT
-        dsd.order_split_id AS orderSplitId,
+        dsd.id AS orderSplitId,
         dsd.number,
         dsd.send_time as createDate,
         sum(dosi.shop_count) as shopCount,
