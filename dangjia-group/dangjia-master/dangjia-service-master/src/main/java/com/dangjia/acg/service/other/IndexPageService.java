@@ -260,8 +260,6 @@ public class IndexPageService {
                 house = setHouseTotalPrice(request, house);
                 houses.add(getHouseImage(request, address, house));
             }
-        }else{
-            houses=houses1;
         }
         return ServerResponse.createBySuccess("查询成功", houses);
     }
