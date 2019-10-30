@@ -230,6 +230,13 @@ public class BasicsGoodsCategoryService {
         return ServerResponse.createBySuccess("查询成功", goodsCategoryList);
     }
 
+    public ServerResponse queryLastCategoryList(String cityId,String searchKey){
+        List<BasicsGoodsCategory> goodsCategoryList = iBasicsGoodsCategoryMapper.queryLastCategoryList(cityId, searchKey);
+        if (goodsCategoryList.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+        return ServerResponse.createBySuccess("查询成功", goodsCategoryList);
+    }
     //删除商品类别
     public ServerResponse deleteGoodsCategory(String id) {
         try {

@@ -25,6 +25,9 @@ public interface IBasicsGoodsCategoryMapper extends Mapper<BasicsGoodsCategory> 
 	//根据父id查询下属商品类型
 	List<BasicsGoodsCategory> queryCategoryByParentId(@Param("parentId") String parentId,@Param("categoryLabelId") String categoryLabelId);
 
+	//查询所有的末级分类的类别
+	List<BasicsGoodsCategory>  queryLastCategoryList(@Param("cityId") String cityId,@Param("searchKey") String  searchKey);
+
 	//根据name查询商品对象
 	List<BasicsGoodsCategory> queryCategoryByName(@Param("name") String name,@Param("cityId") String cityId);
 

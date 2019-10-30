@@ -203,6 +203,12 @@ public interface BasicsGoodsCategoryAPI {
                                                         @RequestParam("parentId") String parentId,
                                                        @RequestParam("cityId") String cityId);
 
+    @PostMapping("/product/basicsGoodsCategory/queryLastCategoryList")
+    @ApiOperation(value = "查询所有的末级分类", notes = "查询商品类别列表，不包含末级分类类别")
+    ServerResponse queryLastCategoryList(@RequestParam("request") HttpServletRequest request,
+                                         @RequestParam("cityId") String cityId,
+                                         @RequestParam("searchKey") String searchKey);
+
     @PostMapping("/product/basicsGoodsCategory/queryCategoryListByCategoryLikeName")
     @ApiOperation(value = "按照name模糊查询商品及下属货品", notes = "按照name模糊查询商品及下属货品，type： 是否禁用  0：禁用；1不禁用 ;  -1全部默认")
     ServerResponse queryCategoryListByCategoryLikeName(@RequestParam("request") HttpServletRequest request,

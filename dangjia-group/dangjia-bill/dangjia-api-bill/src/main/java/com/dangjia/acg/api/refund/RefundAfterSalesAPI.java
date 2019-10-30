@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface RefundAfterSalesAPI {
 
     @PostMapping("/app/refund/refundOrder/queryRefundOnlyOrderList")
-    @ApiOperation(value = "查询需退款的订单", notes = "查询需退款的订单")
+    @ApiOperation(value = "查询需仅退款的订单", notes = "查询需仅退款的订单")
     ServerResponse<PageInfo> queryRefundOnlyOrderList(@RequestParam("pageDTO") PageDTO pageDTO,
                                                       @RequestParam("userToken") String userToken,
                                                       @RequestParam("cityId") String cityId,
@@ -42,5 +42,31 @@ public interface RefundAfterSalesAPI {
                                         @RequestParam("houseId") String houseId,
                                         @RequestParam("orderProductAttr") String orderProductAttr);
 
+    /**
+     *  查询仅退款订单的历史记录
+     * @param pageDTO
+     * @param userToken
+     * @param cityId
+     * @param houseId
+     * @param searchKey
+     * @return
+     */
+    @PostMapping("/app/refund/refundOrder/queryRefundOnlyHistoryOrderList")
+    @ApiOperation(value = "查询仅退款的历史退款记录", notes = "查询仅退款的历史退款记录")
+    ServerResponse<PageInfo> queryRefundOnlyHistoryOrderList(@RequestParam("pageDTO") PageDTO pageDTO,
+                                                      @RequestParam("userToken") String userToken,
+                                                      @RequestParam("cityId") String cityId,
+                                                      @RequestParam("houseId") String houseId,
+                                                      @RequestParam("searchKey") String searchKey);
 
+    /**
+     * 查询退款详情
+     * @param cityId
+     * @param repairMendOrderId
+     * @return
+     */
+    @PostMapping("/app/refund/refundOrder/queryRefundOnlyHistoryOrderInfo")
+    @ApiOperation(value = "查询仅退款的退款详情根据退货单", notes = "查询仅退款的退款详情根据退货单")
+    ServerResponse queryRefundOnlyHistoryOrderInfo(@RequestParam("cityId") String cityId,
+                                                             @RequestParam("repairMendOrderId") String repairMendOrderId);
 }

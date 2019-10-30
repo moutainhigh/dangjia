@@ -10,8 +10,7 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
-import com.dangjia.acg.dto.refund.RefundOrderDTO;
-import com.dangjia.acg.dto.refund.RefundOrderItemDTO;
+import com.dangjia.acg.dto.refund.*;
 import com.dangjia.acg.mapper.order.IBillOrderProgressMapper;
 import com.dangjia.acg.mapper.refund.*;
 import com.dangjia.acg.modle.attribute.AttributeValue;
@@ -82,6 +81,7 @@ public class RefundAfterSalesService {
 
     @Autowired
     private IBillOrderProgressMapper iBillOrderProgressMapper;
+
     /**
      * 查询可退款的商品
      * @param cityId 城市ID
@@ -119,44 +119,55 @@ public class RefundAfterSalesService {
     private  void getProductList(List<RefundOrderItemDTO> productList, String address){
         if(productList!=null&&productList.size()>0){
             for(RefundOrderItemDTO ap:productList){
-                String productTemplateId=ap.getProductTemplateId();
-                DjBasicsProductTemplate pt=iBillProductTemplateMapper.selectByPrimaryKey(productTemplateId);
-                if(pt==null||StringUtils.isBlank(pt.getId())){
-                    continue;
-                }
-                String image=ap.getImage();
-                if (image == null) {
-                    image=pt.getImage();
-                }
-                ap.setConvertUnit(pt.getConvertUnit());
-                ap.setCost(pt.getCost());
-                ap.setCategoryId(pt.getCategoryId());
-                //添加图片详情地址字段
-                String[] imgArr = image.split(",");
-                StringBuilder imgStr = new StringBuilder();
-                StringBuilder imgUrlStr = new StringBuilder();
-                StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
-                ap.setImageUrl(imgStr.toString());//图片详情地址设置
-                //查询单位
-                if(pt.getUnitId()!=null&& StringUtils.isNotBlank(pt.getUnitId())){
-                    Unit unit= iBillUnitMapper.selectByPrimaryKey(pt.getUnitId());
-                    ap.setUnitId(pt.getUnitId());
-                    ap.setUnitName(unit!=null?unit.getName():"");
-                }
-                //查询规格名称
-                if (StringUtils.isNotBlank(pt.getValueIdArr())) {
-                    ap.setValueIdArr(pt.getValueIdArr());
-                    ap.setValueNameArr(getNewValueNameArr(pt.getValueIdArr()));
-                }
-                BasicsGoods goods=iBillBasicsGoodsMapper.selectByPrimaryKey(pt.getGoodsId());
-                if(StringUtils.isNotBlank(goods.getBrandId())){
-                    Brand brand=iBillBrandMapper.selectByPrimaryKey(goods.getBrandId());
-                    ap.setBrandId(goods.getId());
-                    ap.setBrandName(brand!=null?brand.getName():"");
-                }
+                setProductInfo(ap,address);
             }
         }
     }
+
+    /**
+     * 替换对应的信息
+     * @param ap
+     * @param address
+     */
+    private  void setProductInfo(RefundOrderItemDTO ap,String address){
+        String productTemplateId=ap.getProductTemplateId();
+        DjBasicsProductTemplate pt=iBillProductTemplateMapper.selectByPrimaryKey(productTemplateId);
+        if(pt!=null&&StringUtils.isNotBlank(pt.getId())){
+            String image=ap.getImage();
+            if (image == null) {
+                image=pt.getImage();
+            }
+            ap.setConvertUnit(pt.getConvertUnit());
+            ap.setCost(pt.getCost());
+            ap.setCategoryId(pt.getCategoryId());
+            //添加图片详情地址字段
+            String[] imgArr = image.split(",");
+            StringBuilder imgStr = new StringBuilder();
+            StringBuilder imgUrlStr = new StringBuilder();
+            StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
+            ap.setImageUrl(imgStr.toString());//图片详情地址设置
+            //查询单位
+            if(pt.getUnitId()!=null&& StringUtils.isNotBlank(pt.getUnitId())){
+                Unit unit= iBillUnitMapper.selectByPrimaryKey(pt.getUnitId());
+                ap.setUnitId(pt.getUnitId());
+                ap.setUnitName(unit!=null?unit.getName():"");
+            }
+            //查询规格名称
+            if (StringUtils.isNotBlank(pt.getValueIdArr())) {
+                ap.setValueIdArr(pt.getValueIdArr());
+                ap.setValueNameArr(getNewValueNameArr(pt.getValueIdArr()));
+            }
+            BasicsGoods goods=iBillBasicsGoodsMapper.selectByPrimaryKey(pt.getGoodsId());
+            ap.setProductType(goods.getType().toString());
+            if(StringUtils.isNotBlank(goods.getBrandId())){
+                Brand brand=iBillBrandMapper.selectByPrimaryKey(goods.getBrandId());
+                ap.setBrandId(goods.getId());
+                ap.setBrandName(brand!=null?brand.getName():"");
+            }
+        }
+
+    }
+
     /**
      * 获取对应的属性值信息
      * @param valueIdArr
@@ -196,6 +207,7 @@ public class RefundAfterSalesService {
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
         }
+        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         Member member = (Member) object;
         MendOrder mendOrder;
         Example example;
@@ -227,6 +239,7 @@ public class RefundAfterSalesService {
                     if(refundOrderItemDTO==null){
                         return ServerResponse.createByErrorMessage("未找到对应的退货单信息");
                     }
+                    setProductInfo(refundOrderItemDTO,address);
                     Double surplusCount=refundOrderItemDTO.getSurplusCount();
                     logger.info("退货量{}，可退量{}",returnCount,surplusCount);
                     if((new BigDecimal(surplusCount).compareTo(new BigDecimal(returnCount)))<0){
@@ -248,6 +261,7 @@ public class RefundAfterSalesService {
                 iBillMendOrderMapper.insert(mendOrder);
                 //添加对应的流水记录节点信息
                 updateOrderProgressInfo(mendOrder.getId(),"2","REFUND_AFTER_SALES","RA_001",member.getId());
+                updateOrderProgressInfo(mendOrder.getId(),"2","REFUND_AFTER_SALES","RA_002",member.getId());
             }
         }
         return  ServerResponse.createBySuccessMessage("提交成功");
@@ -299,13 +313,14 @@ public class RefundAfterSalesService {
         mendMateriel.setImage(refundOrderItemDTO.getImage());
         mendMateriel.setStorefrontId(refundOrderItemDTO.getStorefrontId());
         mendMateriel.setOrderItemId(refundOrderItemDTO.getOrderItemId());
-        mendMateriel.setShopCount(refundOrderItemDTO.getShopCount());
+        mendMateriel.setShopCount(returnCount.doubleValue());
         Unit unit = iBillUnitMapper.selectByPrimaryKey(refundOrderItemDTO.getConvertUnit());
         if (unit!=null&&unit.getType() == 1) {
-            mendMateriel.setShopCount(Math.ceil(refundOrderItemDTO.getShopCount()));
+            mendMateriel.setShopCount(Math.ceil(returnCount.doubleValue()));
         }
         mendMateriel.setMendOrderId(mendOrder.getId());
         mendMateriel.setProductId(productId);
+        mendMateriel.setCategoryId(refundOrderItemDTO.getCategoryId());
         iBillMendMaterialMapper.insertSelective(mendMateriel);
         return mendMateriel;
     }
@@ -330,4 +345,167 @@ public class RefundAfterSalesService {
         return worker;
     }
 
+    /**
+     *查询仅退款信息的历史退款记录
+     * @param pageDTO 分页
+     * @param cityId 城市ID
+     * @param houseId 房子ID
+     * @param searchKey
+     * @return
+     */
+    public ServerResponse<PageInfo> queryRefundOnlyHistoryOrderList(PageDTO pageDTO,String cityId,String houseId,String searchKey){
+        try{
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            logger.info("queryRefundOrderList查询可退款的商品：city={},houseId={}",cityId,houseId);
+            List<RefundRepairOrderDTO> repairOrderDTOList=refundAfterSalesMapper.queryRefundOnlyHistoryOrderList(houseId);
+            if(repairOrderDTOList!=null&&repairOrderDTOList.size()>0){
+                String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+                for(RefundRepairOrderDTO refundRepairOrderDTO:repairOrderDTOList){
+                   String  repairMendOrderId=refundRepairOrderDTO.getRepairMendOrderId();
+                    List<RefundRepairOrderMaterialDTO> repairMaterialList=refundAfterSalesMapper.queryRefundOnlyHistoryOrderMaterialList(repairMendOrderId);
+                    //getRepairOrderProductList(repairMaterialList,address);
+                   // refundRepairOrderDTO.setRepairOrderMaterialDTO(repairMaterialList);
+                    refundRepairOrderDTO.setRepairProductCount(repairMaterialList.size());
+                    refundRepairOrderDTO.setStateName(getStateName(refundRepairOrderDTO.getState()));
+                    refundRepairOrderDTO.setRepairProductImageArr(getStartTwoImage(repairMaterialList,address));
+                    if(repairMaterialList!=null&&repairMaterialList.size()>0){
+                        RefundRepairOrderMaterialDTO rm=repairMaterialList.get(0);
+                        refundRepairOrderDTO.setRepairProductName(rm.getProductName());
+                    }
+
+                }
+            }
+            PageInfo pageResult = new PageInfo(repairOrderDTOList);
+            return  ServerResponse.createBySuccess("查询成功",pageResult);
+        }catch (Exception e){
+            logger.error("查询仅退款商品历史记录异常：",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    String getStateName(String state){
+        //（0生成中,1处理中,2不通过取消,3已通过,4已全部结算,5已撤回）
+        String stateName="";
+        switch (state){
+            case "1" :
+                stateName="退款待处理";
+                break;
+            case "2":
+                stateName="已拒绝退款";
+                break;
+            case "3":
+            case "4":
+                stateName="退款成功";
+                break;
+            case "5":
+                stateName="退款关闭";
+                break;
+            default:
+                  break;
+        }
+        return stateName;
+    }
+
+    /**
+     * 获取前两个商品的图片
+     * @return
+     */
+    String getStartTwoImage(List<RefundRepairOrderMaterialDTO> repairMaterialList,String address){
+        String imageUrl="";
+        if(repairMaterialList!=null&&repairMaterialList.size()>0){
+            for(RefundRepairOrderMaterialDTO ap:repairMaterialList){
+                String image=ap.getImage();
+                //添加图片详情地址字段
+                if(StringUtils.isNotBlank(image)){
+                    String[] imgArr = image.split(",");
+                    if(StringUtils.isBlank(imageUrl)){
+                       imageUrl=address+imgArr[0];
+                    }else{
+                        imageUrl=imageUrl+","+address+imgArr[0];
+                        break;
+                    }
+                }
+
+            }
+        }
+        return imageUrl;
+    }
+
+
+    //加载商品规格等数据
+    void getRepairOrderProductList(List<RefundRepairOrderMaterialDTO> repairMaterialList,String address){
+        if(repairMaterialList!=null&&repairMaterialList.size()>0){
+            for(RefundRepairOrderMaterialDTO ap:repairMaterialList){
+                setRepairOrderProductInfo(ap,address);
+            }
+        }
+    }
+    /**
+     * 替换对应的信息
+     * @param ap
+     * @param address
+     */
+    private  void setRepairOrderProductInfo(RefundRepairOrderMaterialDTO ap,String address){
+        String productTemplateId=ap.getProductTemplateId();
+        DjBasicsProductTemplate pt=iBillProductTemplateMapper.selectByPrimaryKey(productTemplateId);
+        if(pt!=null&&StringUtils.isNotBlank(pt.getId())){
+            String image=ap.getImage();
+            if (image == null) {
+                image=pt.getImage();
+            }
+            ap.setConvertUnit(pt.getConvertUnit());
+            ap.setCost(pt.getCost());
+            ap.setCategoryId(pt.getCategoryId());
+            //添加图片详情地址字段
+            String[] imgArr = image.split(",");
+            StringBuilder imgStr = new StringBuilder();
+            StringBuilder imgUrlStr = new StringBuilder();
+            StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
+            ap.setImageUrl(imgStr.toString());//图片详情地址设置
+            //查询单位
+            if(pt.getUnitId()!=null&& StringUtils.isNotBlank(pt.getUnitId())){
+                Unit unit= iBillUnitMapper.selectByPrimaryKey(pt.getUnitId());
+                ap.setUnitId(pt.getUnitId());
+                ap.setUnitName(unit!=null?unit.getName():"");
+            }
+            //查询规格名称
+            if (StringUtils.isNotBlank(pt.getValueIdArr())) {
+                ap.setValueIdArr(pt.getValueIdArr());
+                ap.setValueNameArr(getNewValueNameArr(pt.getValueIdArr()));
+            }
+            BasicsGoods goods=iBillBasicsGoodsMapper.selectByPrimaryKey(pt.getGoodsId());
+            ap.setProductType(goods.getType().toString());
+            if(StringUtils.isNotBlank(goods.getBrandId())){
+                Brand brand=iBillBrandMapper.selectByPrimaryKey(goods.getBrandId());
+                ap.setBrandId(goods.getId());
+                ap.setBrandName(brand!=null?brand.getName():"");
+            }
+        }
+
+    }
+
+
+    /**
+     * 查询退货单详情数据
+     * @param cityId 城市ID
+     * @param repairMendOrderId 退货单ID
+     * @return
+     */
+    public ServerResponse queryRefundOnlyHistoryOrderInfo(String cityId,String repairMendOrderId){
+        logger.info("queryRefundOrderList查询可退款的商品：city={},repairMendOrderId={}",cityId,repairMendOrderId);
+        try{
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            RefundRepairOrderDTO refundRepairOrderDTO=refundAfterSalesMapper.queryRefundOnlyHistoryOrderInfo(repairMendOrderId);//退款订单详情查询
+            List<RefundRepairOrderMaterialDTO> repairMaterialList=refundAfterSalesMapper.queryRefundOnlyHistoryOrderMaterialList(repairMendOrderId);//退款商品列表查询
+            getRepairOrderProductList(repairMaterialList,address);
+            refundRepairOrderDTO.setOrderMaterialList(repairMaterialList);//将退款材料明细放入对象中
+            //查询对应的流水节点信息(根据订单ID）
+            List<OrderProgressDTO> orderProgressDTOList=iBillOrderProgressMapper.queryOrderProgressListByOrderId(repairMendOrderId);
+            refundRepairOrderDTO.setOrderProgressList(orderProgressDTOList);
+            return ServerResponse.createBySuccess("查询成功",refundRepairOrderDTO);
+        }catch (Exception e){
+            logger.error("queryRefundOnlyHistoryOrderInfo查询退款详情失败：",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
 }
