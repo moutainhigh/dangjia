@@ -204,11 +204,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         on (rmo.house_id = house.id  )
         where 1=1
         and rmo.state > 0
-
-        <if test = "storefrontId!=null and storefrontId!=''">
-            and  rmo.storefront_id = #{storefrontId}
+        and  rmo.storefront_id = #{storefrontId}
+        <if test = "state!=null and state!=''">
+            and  rmo.state = #{state}
         </if>
-
         <if test = "houseId!=null and houseId!=''">
             and  rmo.house_id = #{houseId}
         </if>
@@ -218,7 +217,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <if test="beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
             and rmo.create_date between  #{beginDate}  and #{endDate}
         </if>
-
         <if test="likeAddress!=null and likeAddress!=''">
             AND CONCAT(
             house.residential,
@@ -230,7 +228,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             )  LIKE CONCAT('%',#{likeAddress},'%')
 
         </if>
-
         ORDER BY rmo.create_date desc
     </select>
 

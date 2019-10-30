@@ -6,6 +6,7 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dto.storefront.StorefrontDTO;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.service.repair.MendWorkerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,11 +32,11 @@ public class WebMendWorkerController implements WebMendWorkerAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse workerBackState(HttpServletRequest request,String houseId, PageDTO pageDTO, String beginDate, String endDate, String likeAddress) {
+    public ServerResponse workerBackState(HttpServletRequest request,String houseId, PageDTO pageDTO, String beginDate, String endDate,String state, String likeAddress) {
         String userID = request.getParameter(Constants.USERID);
         //通过缓存查询店铺信息
-        Storefront storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userID,Storefront.class);
-        return mendWorkerService.workerBackState(storefront.getId(),houseId, pageDTO, beginDate, endDate, likeAddress);
+        StorefrontDTO storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userID, StorefrontDTO.class);
+        return mendWorkerService.workerBackState(storefront.getId(),houseId, pageDTO, beginDate, endDate, state,likeAddress);
     }
 
     @Override
@@ -46,10 +47,10 @@ public class WebMendWorkerController implements WebMendWorkerAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse workerOrderState(HttpServletRequest request, String houseId, PageDTO pageDTO, String beginDate, String endDate, String likeAddress) {
+    public ServerResponse workerOrderState(HttpServletRequest request, String houseId, PageDTO pageDTO, String beginDate, String endDate, String state,String likeAddress) {
         String userID = request.getParameter(Constants.USERID);
         //通过缓存查询店铺信息
-        Storefront storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userID,Storefront.class);
-        return mendWorkerService.workerOrderState(storefront.getId(),houseId, pageDTO, beginDate, endDate, likeAddress);
+        StorefrontDTO storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userID,StorefrontDTO.class);
+        return mendWorkerService.workerOrderState(storefront.getId(),houseId, pageDTO, beginDate, endDate,state, likeAddress);
     }
 }

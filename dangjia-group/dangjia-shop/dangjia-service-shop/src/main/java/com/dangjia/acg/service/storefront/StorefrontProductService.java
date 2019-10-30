@@ -198,8 +198,13 @@ public class StorefrontProductService {
             for (BasicsStorefrontProductViewDTO basicsStorefrontProductViewDTO:list) {
                 Map<String,Object> resMap= BeanUtils.beanToMap(basicsStorefrontProductViewDTO);
                 String id=basicsStorefrontProductViewDTO.getId();
-                StorefrontProduct storefrontProduct = istorefrontProductMapper.selectByPrimaryKey(id);
-                resMap.put("storefrontProduct",storefrontProduct);
+                StorefrontProduct spdto= istorefrontProductMapper.selectByPrimaryKey(id);
+               if(spdto==null)
+               {
+                   resMap.put("storefrontProduct",null);
+               }
+                resMap.put("storefrontProduct",spdto);
+
                 basicsStorefrontProductViewDTOList.add(resMap);
             }
             PageInfo pageResult = new PageInfo(basicsStorefrontProductViewDTOList);

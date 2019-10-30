@@ -58,6 +58,7 @@ public interface IMendOrderMapper extends Mapper<MendOrder>{
             @Param("type") Integer type,
             @Param("beginDate") String beginDate,
             @Param("endDate") String endDate,
+             @Param("state") String state,
             @Param("likeAddress") String likeAddress);
 
 }

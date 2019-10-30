@@ -27,9 +27,21 @@ public interface WebMendMaterielAPI {
                                  @RequestParam("pageDTO") PageDTO pageDTO,
                                  @RequestParam("beginDate") String beginDate,
                                  @RequestParam("endDate") String endDate,
+                                 @RequestParam("state") String state,
                                  @RequestParam("likeAddress") String likeAddress);
 
 
+    /**
+     *
+     * @param request
+     * @param houseId 房子id
+     * @param pageDTO
+     * @param beginDate 开始时间
+     * @param endDate 结束时间
+     * @param state 状态：（0生成中,1处理中,2不通过取消,3已通过,4已全部结算,5已撤回,5已关闭）
+     * @param likeAddress 模糊查询参数
+     * @return
+     */
     @PostMapping(value = "web/repair/webMendMateriel/materialBackState")
     @ApiOperation(value = "房子id查询退货单列表", notes = "房子id查询退货单列表")
     ServerResponse materialBackState(
@@ -38,6 +50,7 @@ public interface WebMendMaterielAPI {
             @RequestParam("pageDTO") PageDTO pageDTO,
             @RequestParam("beginDate") String beginDate,
             @RequestParam("endDate") String endDate,
+            @RequestParam("state") String state,
             @RequestParam("likeAddress") String likeAddress);
 
     @PostMapping(value = "web/repair/webMendMateriel/mendMaterialList")
@@ -53,5 +66,6 @@ public interface WebMendMaterielAPI {
             @RequestParam("pageDTO") PageDTO pageDTO,
             @RequestParam("beginDate") String beginDate,
             @RequestParam("endDate") String endDate,
+            @RequestParam("state") String state,
             @RequestParam("likeAddress") String likeAddress);
 }

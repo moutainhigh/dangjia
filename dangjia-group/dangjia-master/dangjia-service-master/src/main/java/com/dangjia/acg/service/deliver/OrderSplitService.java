@@ -19,6 +19,7 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.deliver.DeliverHouseDTO;
 import com.dangjia.acg.dto.deliver.OrderSplitItemDTO;
 import com.dangjia.acg.dto.deliver.SplitDeliverDetailDTO;
+import com.dangjia.acg.dto.storefront.StorefrontDTO;
 import com.dangjia.acg.mapper.complain.IComplainMapper;
 import com.dangjia.acg.mapper.delivery.IOrderSplitItemMapper;
 import com.dangjia.acg.mapper.delivery.IOrderSplitMapper;
@@ -507,7 +508,7 @@ public class OrderSplitService {
      */
     public ServerResponse getHouseList(String userId,String cityId,PageDTO pageDTO, String likeAddress,String startDate, String endDate) {
         try {
-            Storefront storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userId,Storefront.class);
+            StorefrontDTO storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userId, StorefrontDTO.class);
             if(storefront==null)
             {
                 return ServerResponse.createByErrorMessage("不存在店铺信息");
@@ -553,7 +554,7 @@ public class OrderSplitService {
     public ServerResponse getOrderSplitList(String userId,String houseId) {
         try {
             //通过缓存查询店铺信息
-            Storefront storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userId,Storefront.class);
+            StorefrontDTO storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userId,StorefrontDTO.class);
             if(storefront==null)
             {
                 return ServerResponse.createByErrorMessage("不存在店铺信息");

@@ -14,6 +14,7 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.engineer.ArtisanDTO;
 import com.dangjia.acg.dto.house.WareDTO;
 import com.dangjia.acg.dto.repair.RepairMendDTO;
+import com.dangjia.acg.dto.storefront.StorefrontDTO;
 import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.design.IHouseStyleTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
@@ -826,7 +827,7 @@ public class EngineerService {
     public ServerResponse getWareHouse( HttpServletRequest request,String houseId, PageDTO pageDTO) {
         String userID = request.getParameter("userId");
         //通过缓存查询店铺信息
-        Storefront storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userID,Storefront.class);
+        StorefrontDTO storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userID, StorefrontDTO.class);
         if(storefront==null)
         {
             return ServerResponse.createByErrorMessage("不存在店铺信息");

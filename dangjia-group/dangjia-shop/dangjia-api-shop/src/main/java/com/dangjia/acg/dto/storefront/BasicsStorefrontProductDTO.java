@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 @Data
 public class BasicsStorefrontProductDTO {
 
-
+   private String id;
     /**
      * 店铺表ID
      */

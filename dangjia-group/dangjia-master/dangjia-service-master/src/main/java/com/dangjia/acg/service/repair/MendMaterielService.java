@@ -11,6 +11,7 @@ import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.repair.MendOrderDTO;
+import com.dangjia.acg.dto.storefront.StorefrontDTO;
 import com.dangjia.acg.mapper.delivery.ISplitDeliverMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
@@ -74,12 +75,12 @@ public class MendMaterielService {
      * landlordState
      * 0生成中,1平台审核中,2不通过,3通过
      */
-    public ServerResponse landlordState(String userId,String houseId, PageDTO pageDTO, String beginDate, String endDate, String likeAddress) {
+    public ServerResponse landlordState(String userId,String houseId, PageDTO pageDTO, String beginDate, String endDate, String state,String likeAddress) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
 //            List<MendOrder> mendOrderList = mendOrderMapper.landlordState(houseId);
-            Storefront storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userId,Storefront.class);
-            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(storefront.getId(),houseId, 4, beginDate, endDate, likeAddress);
+            StorefrontDTO storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userId, StorefrontDTO.class);
+            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(storefront.getId(),houseId, 4, beginDate, endDate, state,likeAddress);
             PageInfo pageResult = new PageInfo(mendOrderList);
             List<MendOrderDTO> mendOrderDTOS = getMendOrderDTOList(mendOrderList);
             pageResult.setList(mendOrderDTOS);
@@ -95,13 +96,13 @@ public class MendMaterielService {
      * material_back_state
      * 0生成中,1平台审核中，2平台审核不通过，3审核通过，4管家取消
      */
-    public ServerResponse materialBackState(String userId,String houseId, PageDTO pageDTO, String beginDate, String endDate, String likeAddress) {
+    public ServerResponse materialBackState(String userId,String houseId, PageDTO pageDTO, String beginDate, String endDate, String state,String likeAddress) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             //通过缓存查询店铺信息
-            Storefront storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userId,Storefront.class);
+            StorefrontDTO storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userId,StorefrontDTO.class);
 //            List<MendOrder> mendOrderList = mendOrderMapper.materialBackState(houseId); 2
-            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(storefront.getId(),houseId, 2, beginDate, endDate, likeAddress);
+            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(storefront.getId(),houseId, 2, beginDate, endDate, state,likeAddress);
             PageInfo pageResult = new PageInfo(mendOrderList);
             List<MendOrderDTO> mendOrderDTOS = getMendOrderDTOList(mendOrderList);
             pageResult.setList(mendOrderDTOS);
@@ -158,7 +159,7 @@ public class MendMaterielService {
      * materialOrderState
      * 0生成中,1平台审核中，2平台审核不通过，3平台审核通过待业主支付,4业主已支付，5业主不同意，6管家取消
      */
-    public ServerResponse materialOrderState(String storefrontId,String houseId, PageDTO pageDTO, String beginDate, String endDate, String likeAddress) {
+    public ServerResponse materialOrderState(String storefrontId,String houseId, PageDTO pageDTO, String beginDate, String endDate,String state, String likeAddress) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             if (!CommonUtil.isEmpty(beginDate) && !CommonUtil.isEmpty(endDate)) {
@@ -168,7 +169,7 @@ public class MendMaterielService {
                 }
             }
 //            List<MendOrder> mendOrderList = mendOrderMapper.materialOrderState(houseId);
-            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(storefrontId,houseId, 0, beginDate, endDate, likeAddress);
+            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(storefrontId,houseId, 0, beginDate, endDate, state,likeAddress);
             PageInfo pageResult = new PageInfo(mendOrderList);
             List<MendOrderDTO> mendOrderDTOS = getMendOrderDTOList(mendOrderList);
             pageResult.setList(mendOrderDTOS);

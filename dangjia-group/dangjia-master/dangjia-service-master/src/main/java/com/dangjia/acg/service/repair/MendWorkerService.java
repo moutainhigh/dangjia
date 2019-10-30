@@ -40,11 +40,11 @@ public class MendWorkerService {
     /**
      * 房子id查询退人工
      */
-    public ServerResponse workerBackState(String storefrontId,String houseId, PageDTO pageDTO, String beginDate, String endDate, String likeAddress) {
+    public ServerResponse workerBackState(String storefrontId,String houseId, PageDTO pageDTO, String beginDate, String endDate, String state,String likeAddress) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
 //            List<MendOrder> mendOrderList = mendOrderMapper.workerBackState(houseId); 3
-            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(storefrontId,houseId, 3, beginDate, endDate, likeAddress);
+            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(storefrontId,houseId, 3, beginDate, endDate, state,likeAddress);
             PageInfo pageResult = new PageInfo(mendOrderList);
             List<MendOrderDTO> mendOrderDTOS = mendMaterielService.getMendOrderDTOList(mendOrderList);
             pageResult.setList(mendOrderDTOS);
@@ -69,7 +69,7 @@ public class MendWorkerService {
     /**
      * 房子id查询补人工单列表
      */
-    public ServerResponse workerOrderState(String storefrontId,String houseId, PageDTO pageDTO, String beginDate, String endDate, String likeAddress) {
+    public ServerResponse workerOrderState(String storefrontId,String houseId, PageDTO pageDTO, String beginDate, String endDate,String state, String likeAddress) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             if (!CommonUtil.isEmpty(beginDate) && !CommonUtil.isEmpty(endDate)) {
@@ -77,7 +77,7 @@ public class MendWorkerService {
                     endDate = endDate + " " + "23:59:59";
             }
 //            List<MendOrder> mendOrderList = mendOrderMapper.workerOrderState(houseId);
-            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(storefrontId,houseId, 1, beginDate, endDate, likeAddress);
+            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(storefrontId,houseId, 1, beginDate, endDate, state,likeAddress);
             PageInfo pageResult = new PageInfo(mendOrderList);
             List<MendOrderDTO> mendOrderDTOS = mendMaterielService.getMendOrderDTOList(mendOrderList);
             pageResult.setList(mendOrderDTOS);

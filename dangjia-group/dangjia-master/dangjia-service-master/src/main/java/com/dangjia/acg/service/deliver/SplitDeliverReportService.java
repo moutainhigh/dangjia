@@ -9,6 +9,7 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.deliver.SplitReportDeliverOrderDTO;
 import com.dangjia.acg.dto.deliver.SplitReportDeliverOrderItemDTO;
 import com.dangjia.acg.dto.deliver.SplitReportSupplierDTO;
+import com.dangjia.acg.dto.storefront.StorefrontDTO;
 import com.dangjia.acg.mapper.delivery.IOrderSplitItemMapper;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.github.pagehelper.PageHelper;
@@ -38,7 +39,7 @@ public class SplitDeliverReportService {
     public ServerResponse getSplitReportSuppliers(HttpServletRequest request, String houseId){
         String userID = request.getParameter(Constants.USERID);
         //通过缓存查询店铺信息
-        Storefront storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userID,Storefront.class);
+        StorefrontDTO storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userID,StorefrontDTO.class);
 
         List<SplitReportSupplierDTO> splitDeliverDTOList=orderSplitItemMapper.getSplitReportSuppliers(houseId,storefront.getId());
         return ServerResponse.createBySuccess("查询成功", splitDeliverDTOList);

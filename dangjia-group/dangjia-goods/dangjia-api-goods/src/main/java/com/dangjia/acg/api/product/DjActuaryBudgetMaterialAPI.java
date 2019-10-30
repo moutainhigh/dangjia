@@ -50,4 +50,26 @@ public interface DjActuaryBudgetMaterialAPI {
                                       @RequestParam("brandVal")String brandVal,
                                       @RequestParam("orderKey")String orderKey);
 
+    /**
+     * 新版精算列表展示(精算+自购)
+     */
+
+
+    /**
+     * 新版精算二级展示
+     */
+
+
+
+    /**
+     * 新版精算审核页展示
+     */
+
+
+    /**
+     * 新版精算审核二级展示
+     */
+
+
+
 }
