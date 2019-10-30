@@ -200,6 +200,13 @@ public class DesignerOperationService {
         }
         if (house.getDecorationType() == 2) {//自带设计直接上传施工图
             house.setDesignerOk(3);
+            //增加施工审核流水
+            QuantityRoom quantityRoom = new QuantityRoom();
+            quantityRoom.setHouseId(house.getHouseId());
+            quantityRoom.setOwnerId(house.getMemberId());
+            quantityRoom.setRoomType(0);
+            quantityRoom.setType(2);
+            quantityRoomMapper.insert(quantityRoom);
         } else {
             house.setDesignerOk(2);//施工图(其它图)发给业主
         }
@@ -289,6 +296,15 @@ public class DesignerOperationService {
             case 5://审核平面图
                 if (type == 1) {//通过
                     house.setDesignerOk(7);
+
+                    //增加平面审核流水
+                    QuantityRoom quantityRoom = new QuantityRoom();
+                    quantityRoom.setHouseId(house.getHouseId());
+                    quantityRoom.setOwnerId(house.getMemberId());
+                    quantityRoom.setFlag(0);
+                    quantityRoom.setType(1);
+                    quantityRoomMapper.insert(quantityRoom);
+
                     if (hwo != null) {
                         configMessageService.addConfigMessage(null, AppType.GONGJIANG, hwo.getWorkerId(), "0", "平面图已通过", String.format(DjConstants.PushMessage.PLANE_OK, house.getHouseName()), "");
                     }
@@ -301,7 +317,16 @@ public class DesignerOperationService {
                 return ServerResponse.createByErrorMessage("请选择是否通过");
             case 2://审核施工图
                 if (type == 1) {//通过
+                    //增加施工审核流水
+                    QuantityRoom quantityRoom = new QuantityRoom();
+                    quantityRoom.setHouseId(house.getHouseId());
+                    quantityRoom.setOwnerId(house.getMemberId());
+                    quantityRoom.setRoomType(0);
+                    quantityRoom.setType(2);
+                    quantityRoomMapper.insert(quantityRoom);
+
                     house.setDesignerOk(3);
+
                     if (hwo != null) {
                         //订单拿钱更新
                         hwo.setHaveMoney(hwo.getWorkPrice());
@@ -498,6 +523,8 @@ public class DesignerOperationService {
         quantityRoom.setFloor(floor);
         quantityRoom.setType(type);
         quantityRoom.setOperationType(0);
+        quantityRoom.setRoomType(0);
+        quantityRoom.setFlag(3);
         switch (type) {
             case 0:
                 String[] image = imageString.split(",");

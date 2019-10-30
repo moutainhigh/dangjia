@@ -435,9 +435,9 @@ public class HouseWorkerService {
             case 2:
                 return setWholeCompletion(worker, hf, house, imageList);
             case 4:
-                ServerResponse serverResponse = evaluateService.getUserToHouseDistance(latitude, longitude, house.getVillageId());
-                if (!serverResponse.isSuccess())
-                    return serverResponse;
+//                ServerResponse serverResponse = evaluateService.getUserToHouseDistance(latitude, longitude, house.getVillageId());
+//                if (!serverResponse.isSuccess())
+//                    return serverResponse;
                 return setStartDaily(worker, hf, house, imageList);
             case 5:
             case 6:

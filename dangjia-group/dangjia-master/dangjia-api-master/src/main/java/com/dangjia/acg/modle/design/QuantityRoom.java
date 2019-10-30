@@ -60,4 +60,18 @@ public class QuantityRoom extends BaseEntity {
     @ApiModelProperty("楼层")
     private String floor;//
 
+    @Column(name = "room_type")
+    @Desc(value = "流水状态 0-设计流水  1-精算流水")
+    @ApiModelProperty("流水状态 0-设计流水  1-精算流水")
+    private Integer roomType;//
+
+    @Column(name = "flag")
+    @Desc(value = "0-通过  1-未通过 3-默认")
+    @ApiModelProperty("0-通过  1-未通过 3-默认")
+    private Integer flag;//
+
+    @Column(name = "owner_id")
+    @Desc(value = "业主id")
+    @ApiModelProperty("业主id")
+    private String ownerId;//
 }

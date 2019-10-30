@@ -90,6 +90,8 @@
         house.unit AS unit,
         house.decoration_type AS decorationType,
         house.number AS number,
+        house.member_id as memberId,
+        house.create_date as startDate,
         member.nick_name AS nickName,
         member.NAME AS NAME,
         member.mobile AS mobile,
@@ -115,6 +117,9 @@
         WHERE 1=1
         <if test="designerType > 0 and workerKey!=null and workerKey!=''">
             AND CONCAT(gr.name,gr.mobile) like CONCAT('%',#{workerKey},'%')
+        </if>
+        <if test="designerType > 0 and userId!=null and userId!=''">
+            AND gr.id = #{userId}
         </if>
         <if test="dataStatus == 1">
             AND house.data_status=1 AND house.visit_state=1 and house.designer_ok != 3
@@ -143,6 +148,15 @@
         </if>
         <if test="designerType == 4">
             AND house.designer_ok =3
+        </if>
+        <!--增加抢单提前结束 designerType = 5-抢单  designerType = 6 -提前结束 -->
+        <if test="designerType == 5">
+            AND house.designer_ok = 4
+        </if>
+        <!--增加抢单提前结束 designerType = 5-抢单  designerType = 6 -提前结束 -->
+        <if test="designerType == 6">
+            AND house.visit_state = 4
+            AND house.budget_ok = 0
         </if>
         <if test="cityKey!=null and cityKey!=''">
             AND FIND_IN_SET(house.city_id,#{cityKey})
@@ -458,7 +472,7 @@
         h.optional_label as optionalLabel,
         ( CASE WHEN (h.decoration_type = 2 AND h.designer_ok != 3) THEN 1 ELSE 0 END ) AS showUpdata,
         s.store_name storeName
-        <if test="budgetOk != 0 and workerKey!=null and workerKey!=''">
+        <if test="budgetOk > 0 ">
             ,gr.name operatorName,
             gr.mobile operatorMobile,
             gr.id operatorId
@@ -466,7 +480,7 @@
         FROM
         dj_house h
         INNER JOIN dj_member m ON h.member_id = m.id
-        <if test="budgetOk != 0 and workerKey!=null and workerKey!=''">
+        <if test="budgetOk > 0 ">
             INNER JOIN dj_core_house_worker wk ON wk.house_id = h.id
             AND wk.worker_type = 2
             AND wk.work_type = 6
@@ -481,6 +495,9 @@
 
         <if test="budgetOk != 0 and workerKey!=null and workerKey!=''">
             AND CONCAT(gr.name,gr.mobile) like CONCAT('%',#{workerKey},'%')
+        </if>
+        <if test="budgetOk > 0 and userId!=null and userId!=''">
+            and gr.id = #{userId}
         </if>
         <if test="dataStatus == 1">
             AND h.data_status=1  and h.budget_ok != 3 and h.budget_ok >0
@@ -889,5 +906,49 @@
         ORDER BY create_date desc
         limit 1
     </select>
+
+
+    <select id="getUserList" resultType="com.dangjia.acg.dto.house.UserInfoDateDTO">
+        select username,mobile from dj_user where id =
+        (select  user_id from dj_member_customer where
+        member_id = #{memberId} limit 1)
+    </select>
+
+    <select id="getDesignListInfo" resultType="com.dangjia.acg.dto.house.UserInfoDateDTO">
+        SELECT
+        house.id AS houseId,
+        house.designer_ok AS designerOk,
+        house.residential AS residential,
+        house.building AS building,
+        house.unit AS unit,
+        house.decoration_type AS decorationType,
+        house.number AS number,
+        house.member_id as memberId,
+        house.create_date as startDate,
+        member.nick_name AS nickName,
+        member.NAME AS NAME,
+        member.mobile AS mobile,
+        gr.name as operatorName,
+        gr.mobile as operatorMobile,
+        gr.id as operatorId
+        FROM
+        dj_house house
+        INNER JOIN dj_member member ON member.id = house.member_id
+        INNER JOIN dj_core_house_worker wk ON wk.house_id = house.id
+            AND wk.worker_type = 1
+            AND wk.work_type = 6
+            INNER JOIN dj_member gr ON gr.id = wk.worker_id
+        WHERE 1=1 and house.id = #{houseId}
+    </select>
+
+    <select id="getModifyDate" resultType="java.util.Date">
+        SELECT
+            pho.modify_date as modifyDate
+        FROM
+            dj_pay_business_order pho
+        WHERE pho.task_id = #{taskId} AND pay_order_number IS NOT NULL
+    </select>
+
+
 </mapper>
 
