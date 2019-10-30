@@ -1,5 +1,6 @@
 package com.dangjia.acg.api;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.product.MemberCollectDTO;
 import com.dangjia.acg.dto.product.ShoppingCartProductDTO;
@@ -41,11 +42,21 @@ public interface StorefrontProductAPI {
     ServerResponse delProductByProIdAndStoreIdAndCityId(@RequestParam("productId") String productId,
                                                         @RequestParam("storefrontId") String storefrontId, @RequestParam("cityId") String cityId);
 
-
+    /**
+     *
+     * @param keyWord
+     * @param storefrontId
+     * @param pageDTO
+     * @param cityId
+     * @return
+     */
     @PostMapping("/web/queryStorefrontProductByKeyWord")
     @ApiOperation(value = "供货设置-已选商品-通过货品或者商品名称查询", notes = "供货设置-已选商品-通过货品或者商品名称查询")
-    ServerResponse queryStorefrontProductByKeyWord(@RequestParam("keyWord") String keyWord,
-            @RequestParam("storefrontId") String storefrontId,@RequestParam("cityId") String cityId);
+    ServerResponse queryStorefrontProductByKeyWord(
+            @RequestParam("keyWord") String keyWord,
+            @RequestParam("storefrontId") String storefrontId,
+            @RequestParam("pageDTO") PageDTO pageDTO,
+            @RequestParam("cityId") String cityId);
 
     @PostMapping("/web/setSpStatusById")
     @ApiOperation(value = "供货设置-设置商品上下架", notes = "设置商品上下架")
@@ -54,10 +65,6 @@ public interface StorefrontProductAPI {
     @PostMapping("/web/setAllStoreProductByIsShelfStatus")
     @ApiOperation(value = "供货设置-设置商品批量上下架", notes = "设置商品批量上下架")
     ServerResponse setAllStoreProductByIsShelfStatus(@RequestParam("id") String id, @RequestParam("isShelfStatus") String isShelfStatus);
-
-    @PostMapping("/web/editStorefrontProductByIds")
-    @ApiOperation(value = "供货设置-编辑店铺商品", notes = "供货设置-编辑店铺商品")
-    ServerResponse editStorefrontProductById(@RequestParam("id") String id);
 
     @PostMapping("/web/saveStorefrontProductById")
     @ApiOperation(value = "供货设置-保存编辑店铺商品", notes = "供货设置-保存编辑店铺商品")

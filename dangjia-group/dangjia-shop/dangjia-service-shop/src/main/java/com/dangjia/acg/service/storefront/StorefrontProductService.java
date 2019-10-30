@@ -3,8 +3,9 @@ package com.dangjia.acg.service.storefront;
 import cn.jiguang.common.utils.StringUtils;
 import com.alibaba.fastjson.JSON;
 import com.dangjia.acg.api.product.DjBasicsProductAPI;
-import com.dangjia.acg.common.exception.ServerCode;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.dto.product.MemberCollectDTO;
 import com.dangjia.acg.dto.product.ShoppingCartProductDTO;
 import com.dangjia.acg.dto.storefront.StorefrontDTO;
@@ -14,15 +15,18 @@ import com.dangjia.acg.dto.storefront.BasicsStorefrontProductViewDTO;
 import com.dangjia.acg.mapper.storefront.IStorefrontProductMapper;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
-import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class StorefrontProductService {
@@ -180,21 +184,26 @@ public class StorefrontProductService {
      * @param keyWord
      * @return
      */
-    public ServerResponse queryStorefrontProductByKeyWord(String keyWord,String storefrontId,String cityId) {
+    public ServerResponse queryStorefrontProductByKeyWord(String keyWord, String storefrontId, PageDTO pageDTO,String cityId) {
         try {
-
-
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             if (StringUtils.isEmpty(storefrontId)) {
                 return ServerResponse.createByErrorMessage("店铺ID不能为空!");
             }
-
             if (StringUtils.isEmpty(cityId)) {
                 return ServerResponse.createByErrorMessage("城市ID不能为空!");
             }
-
+            List<Map<String,Object>> basicsStorefrontProductViewDTOList=new ArrayList<Map<String,Object>>();
             List<BasicsStorefrontProductViewDTO> list = istorefrontProductMapper.queryStorefrontProductViewDTOList(keyWord,storefrontId,cityId);
-
-            return ServerResponse.createBySuccess("查询成功", list);
+            for (BasicsStorefrontProductViewDTO basicsStorefrontProductViewDTO:list) {
+                Map<String,Object> resMap= BeanUtils.beanToMap(basicsStorefrontProductViewDTO);
+                String id=basicsStorefrontProductViewDTO.getId();
+                StorefrontProduct storefrontProduct = istorefrontProductMapper.selectByPrimaryKey(id);
+                resMap.put("storefrontProduct",storefrontProduct);
+                basicsStorefrontProductViewDTOList.add(resMap);
+            }
+            PageInfo pageResult = new PageInfo(basicsStorefrontProductViewDTOList);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             logger.error("查询失败：", e);
             return ServerResponse.createByErrorMessage("查询失败");
@@ -272,25 +281,6 @@ public class StorefrontProductService {
         }
     }
 
-
-    /**
-     * 根据id查询店铺商品
-     *
-     * @param id
-     * @return
-     */
-    public ServerResponse editStorefrontProductById(String id) {
-        try {
-            if (StringUtils.isEmpty(id)) {
-                return ServerResponse.createByErrorMessage("商品ID不能为空");
-            }
-            StorefrontProduct storefrontProduct = istorefrontProductMapper.selectByPrimaryKey(id);
-            return ServerResponse.createBySuccess("查询成功", storefrontProduct);
-        } catch (Exception e) {
-            logger.error("根据id修改店铺商品失败：", e);
-            return ServerResponse.createByErrorMessage("根据id修改店铺商品失败");
-        }
-    }
 
     /**
      * 供货设置-保存编辑店铺商品

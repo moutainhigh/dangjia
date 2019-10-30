@@ -41,4 +41,11 @@ public interface DjDeliverOrderAPI {
                                @RequestParam("houseId") String houseId,
                                @RequestParam("userToken") String userToken,
                                @RequestParam("user_id") String user_id);
+
+    //下单后--搬运费、运费查询
+
+
+    //提交订单接口
+
+
 }

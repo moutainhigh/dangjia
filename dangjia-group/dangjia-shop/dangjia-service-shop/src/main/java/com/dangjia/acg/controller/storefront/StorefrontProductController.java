@@ -2,6 +2,7 @@ package com.dangjia.acg.controller.storefront;
 
 import com.dangjia.acg.api.StorefrontProductAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.product.MemberCollectDTO;
 import com.dangjia.acg.dto.product.ShoppingCartProductDTO;
@@ -61,8 +62,8 @@ public class StorefrontProductController implements StorefrontProductAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryStorefrontProductByKeyWord(String keyWord,String storefrontId,String cityId) {
-        return storefrontProductService.queryStorefrontProductByKeyWord(keyWord,storefrontId,cityId);
+    public ServerResponse queryStorefrontProductByKeyWord(String keyWord, String storefrontId,PageDTO pageDTO, String cityId) {
+        return storefrontProductService.queryStorefrontProductByKeyWord(keyWord,storefrontId,pageDTO,cityId);
     }
 
     @Override
@@ -77,11 +78,7 @@ public class StorefrontProductController implements StorefrontProductAPI {
         return storefrontProductService.setAllStoreProductByIsShelfStatus(id, isShelfStatus);
     }
 
-    @Override
-    @ApiMethod
-    public ServerResponse editStorefrontProductById(String id) {
-        return storefrontProductService.editStorefrontProductById(id);
-    }
+
 
     @Override
     @ApiMethod
