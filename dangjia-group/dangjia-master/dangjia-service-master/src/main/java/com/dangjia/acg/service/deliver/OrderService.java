@@ -491,9 +491,9 @@ public class OrderService {
                     mendMaterialMapper.deleteByExample(example);
                     orderSplit.setMendNumber("");
                 }
-                orderSplit.setSupervisorId(worker.getId());
-                orderSplit.setSupervisorName(worker.getName());
-                orderSplit.setSupervisorTel(worker.getMobile());
+                orderSplit.setMemberId(worker.getId());
+                orderSplit.setMemberName(worker.getName());
+                orderSplit.setMobile(worker.getMobile());
                 orderSplit.setWorkerTypeId(worker.getWorkerTypeId());
                 orderSplitMapper.updateByPrimaryKeySelective(orderSplit);
             } else {
@@ -502,9 +502,9 @@ public class OrderService {
                 orderSplit.setNumber("DJ" + 200000 + orderSplitMapper.selectCountByExample(example));//要货单号
                 orderSplit.setHouseId(houseId);
                 orderSplit.setApplyStatus(0);//后台审核状态：0生成中, 1申请中, 2通过, 3不通过, 4业主待支付补货材料 后台(材料员)
-                orderSplit.setSupervisorId(worker.getId());
-                orderSplit.setSupervisorName(worker.getName());
-                orderSplit.setSupervisorTel(worker.getMobile());
+                orderSplit.setMemberId(worker.getId());
+                orderSplit.setMemberName(worker.getName());
+                orderSplit.setMobile(worker.getMobile());
                 orderSplit.setWorkerTypeId(worker.getWorkerTypeId());
                 orderSplitMapper.insert(orderSplit);
             }

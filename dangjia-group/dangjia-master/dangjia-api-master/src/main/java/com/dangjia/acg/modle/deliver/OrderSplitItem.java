@@ -98,4 +98,30 @@ public class OrderSplitItem extends BaseEntity {
 		this.image = StringUtils.isEmpty(this.image)?null:address+this.image;
 	}
 
+	@Column(name = "address_id")
+	@Desc(value = "地址id")
+	@ApiModelProperty("地址id")
+	private String addressId;
+
+	@Column(name = "storefront_id")
+	@Desc(value = "店铺ID")
+	@ApiModelProperty("店铺ID")
+	private String storefrontId;
+
+	@Column(name = "is_delivery_install")
+	@Desc(value = "'是否送货与安装/施工分开'")
+	@ApiModelProperty("'是否送货与安装/施工分开'")
+	private String isDeliveryInstall;
+
+
+	@Column(name = "order_item_id")
+	@Desc(value = "'是否送货与安装/施工分开'")
+	@ApiModelProperty("'是否送货与安装/施工分开'")
+	private String orderItemId;
+
+	@Column(name = "order_item_str")
+	@Desc(value = "'是否送货与安装/施工分开'")
+	@ApiModelProperty("'是否送货与安装/施工分开'")
+	private String orderItemStr;
+
 }

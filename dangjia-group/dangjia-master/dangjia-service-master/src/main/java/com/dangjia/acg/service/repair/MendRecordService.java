@@ -171,10 +171,9 @@ public class MendRecordService {
                     mendOrderDetail.setIsShow(1);
                 }
                 mendOrderDetail.setHouseId(orderSplit.getHouseId());
-                mendOrderDetail.setApplicantId(orderSplit.getSupervisorId());
-                mendOrderDetail.setApplicantName(orderSplit.getSupervisorName());
-                mendOrderDetail.setApplicantMobile(orderSplit.getSupervisorTel());
-                mendOrderDetail.setApplicantId(orderSplit.getSupervisorId());
+                mendOrderDetail.setApplicantId(orderSplit.getMemberId());
+                mendOrderDetail.setApplicantName(orderSplit.getMemberName());
+                mendOrderDetail.setApplicantMobile(orderSplit.getMobile());
                 mendOrderDetail.setNumber(orderSplit.getNumber());
                 mendOrderDetail.setMendOrderId(orderSplit.getMendNumber());
                 mendOrderDetail.setType(5);
