@@ -681,7 +681,19 @@ public class DesignDataService {
                     ddd.setUpFName("上传施工图");
                 }
             }
+        }else if(type == 3){
+            for (QuantityRoomDTO ddd : quantityRoomDTOS) {
+                if (ddd.getFlag() == 0) {
+                    ddd.setUpFaName("精算通过");
+                } else if (ddd.getFlag() == 1) {
+                    ddd.setUpFName("精算未通过");
+                } else {
+                    ddd.setUpFName("上传精算");
+                }
+            }
         }
+
+
         PageInfo pageResult = new PageInfo(quantityRoomDTOS);
         for (QuantityRoomDTO quantityRoomDTO : quantityRoomDTOS) {
             quantityRoomDTO.setUserType(-1);
@@ -763,9 +775,44 @@ public class DesignDataService {
             Lists.add(map);
         }
 
-        quantityInfoDTO.setNumberType(0);
         quantityInfoDTO.setListFour(Lists);
+
+        //获取精算信息
+        PageInfo oneList = getJInfo(houseId,2);
+        quantityInfoDTO.setJinList(oneList);
+
+        quantityInfoDTO.setNumberType(0);
+        if(Lists.size() > 0){
+            quantityInfoDTO.setNumberType(2);
+        }
+        if(oneList.getSize()>0){
+            quantityInfoDTO.setNumberType(3);
+        }
+
         return ServerResponse.createBySuccess("查询成功", quantityInfoDTO);
+    }
+
+    public PageInfo getJInfo(String houseId, int type){
+        List<QuantityRoomDTO> quantityRoomDTOS = quantityRoomMapper.getQuantityRoomList(houseId, type);
+        if(type == 2){
+            for (QuantityRoomDTO ddd : quantityRoomDTOS) {
+                if (ddd.getFlag() == 0) {
+                    ddd.setUpFaName("精算通过");
+                } else if (ddd.getFlag() == 1) {
+                    ddd.setUpFName("精算未通过");
+                } else {
+                    ddd.setUpFName("上传精算");
+                }
+            }
+        }
+
+        PageInfo pageResult = new PageInfo(quantityRoomDTOS);
+        for (QuantityRoomDTO quantityRoomDTO : quantityRoomDTOS) {
+            quantityRoomDTO.setUserType(-1);
+            getUserName1(quantityRoomDTO);
+        }
+        pageResult.setList(quantityRoomDTOS);
+        return pageResult;
     }
 
 

@@ -21,6 +21,7 @@ import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.design.DesignBusinessOrder;
 import com.dangjia.acg.modle.design.PayConfiguration;
+import com.dangjia.acg.modle.design.QuantityRoom;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.pay.BusinessOrder;
@@ -124,7 +125,7 @@ public class HouseDesignPayService {
                 QuantityRoom quantityRoom = new QuantityRoom();
                 quantityRoom.setHouseId(house.getHouseId());
                 quantityRoom.setOwnerId(house.getMemberId());
-                quantityRoom.setRoomType(1);
+                quantityRoom.setRoomType(0);
                 quantityRoom.setType(2);
                 quantityRoomMapper.insert(quantityRoom);
                 house.setDataStatus(0);
@@ -302,7 +303,7 @@ public class HouseDesignPayService {
                 quantityRoom = new QuantityRoom();
                 quantityRoom.setHouseId(house.getHouseId());
                 quantityRoom.setOwnerId(house.getMemberId());
-                quantityRoom.setRoomType(1);
+                quantityRoom.setRoomType(0);
                 quantityRoom.setType(2);
                 quantityRoomMapper.insert(quantityRoom);
 
@@ -325,6 +326,7 @@ public class HouseDesignPayService {
                     house.setDataStatus(0);
                     DesignBusinessOrder order = designBusinessOrders.get(0);
                     order.setOperationState(2);
+
                     if (hwo != null) {
                         configMessageService.addConfigMessage(null, AppType.GONGJIANG, hwo.getWorkerId(), "0", "设计图已通过", String.format("恭喜！您设计的【%s】设计图已通过。", house.getHouseName()), "");
                     }

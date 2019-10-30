@@ -22,5 +22,7 @@ public class QuantityRoomDTO extends QuantityRoom {
     private String upOName;//量房name
     private String upTName;//平面图name
     private String upFName;//施工图name
+
+    private String upFaName;//精算图name
     private List<QuantityRoomImages> images;
 }

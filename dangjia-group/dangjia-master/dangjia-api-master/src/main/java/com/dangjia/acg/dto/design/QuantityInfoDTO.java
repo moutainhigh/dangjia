@@ -18,6 +18,8 @@ public class QuantityInfoDTO {
     private PageInfo typeTwoList;//平面图
     private PageInfo typeThreeList;//施工图
 
+    private PageInfo jinList;//精算List
+
     private String username;// 销售名称
     private String userMobile;// 销售手机号码
     private String name;// 业主名称
