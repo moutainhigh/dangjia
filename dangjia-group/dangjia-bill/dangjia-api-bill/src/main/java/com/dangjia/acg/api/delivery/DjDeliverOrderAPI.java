@@ -13,39 +13,22 @@ import javax.servlet.http.HttpServletRequest;
 @Api(description = "所有订单表(装修所需的订单流水表)接口")
 @FeignClient("dangjia-service-bill")
 public interface DjDeliverOrderAPI {
+
     /**
-     * OrderAPI
      * 下单后--订单查询--全部订单
+     * @param request
+     * @param pageDTO
+     * @param userId 用户id
+     * @param userToken 用户登录token
+     * @param orderStatus 订单状态
+     * @return
      */
     @PostMapping("/app/deliverOrder/queryAllDeliverOrder")
     @ApiOperation(value = "下单后--订单查询--全部订单", notes = "下单后--订单查询--全部订单")
     ServerResponse queryAllDeliverOrder(@RequestParam("request") HttpServletRequest request,
-                                       @RequestParam("pageDTO") PageDTO pageDTO,
-                                       @RequestParam("userId") String userId,
-                                       @RequestParam("cityId") String cityId);
-
-    /**
-     * 下单后--订单查询--订单详情展示
-     */
-    @PostMapping("/app/deliverOrder/queryAllDeliverOrderDetail")
-    @ApiOperation(value = "下单后--订单查询--订单详情展示", notes = "下单后--订单查询--订单详情展示")
-    ServerResponse queryAllDeliverOrderItem(@RequestParam("request") HttpServletRequest request,
-                                       @RequestParam("pageDTO") PageDTO pageDTO,
-                                       @RequestParam("userId") String userId,
-                                       @RequestParam("cityId") String cityId);
-
-
-    @PostMapping("web/house/calcelOrder")
-    @ApiOperation(value = "取消订单", notes = "取消订单")
-    ServerResponse calcelOrder(@RequestParam("request") HttpServletRequest request,
-                               @RequestParam("houseId") String houseId,
-                               @RequestParam("userToken") String userToken,
-                               @RequestParam("user_id") String user_id);
-
-    //下单后--搬运费、运费查询
-
-
-    //提交订单接口
-
+                                        @RequestParam("pageDTO") PageDTO pageDTO,
+                                        @RequestParam("userId") String userId,
+                                        @RequestParam("userToken") String userToken,
+                                        @RequestParam("orderStatus") String orderStatus);
 
 }

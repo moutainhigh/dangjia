@@ -43,7 +43,6 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
     @ApiMethod
     public ServerResponse materialBackState(HttpServletRequest request,String houseId, PageDTO pageDTO, String beginDate, String endDate, String likeAddress) {
         String userId = request.getParameter("userId");
-
         return mendMaterielService.materialBackState(userId,houseId, pageDTO, beginDate, endDate, likeAddress);
     }
 

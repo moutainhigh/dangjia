@@ -1,7 +1,7 @@
 package com.dangjia.acg.mapper.delivery;
 
 
-import com.dangjia.acg.modle.deliver.Order;
+import com.dangjia.acg.modle.delivery.DjDeliverOrder;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
@@ -13,7 +13,7 @@ import tk.mybatis.mapper.common.Mapper;
  * Time: 下午 3:57
  */
 @Repository
-public interface DjDeliverOrderMapper extends Mapper<Order> {
+public interface DjDeliverOrderMapper extends Mapper<DjDeliverOrder> {
 
 
 

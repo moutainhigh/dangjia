@@ -2,7 +2,9 @@ package com.dangjia.acg.service.storefront;
 
 import cn.jiguang.common.utils.StringUtils;
 //import com.dangjia.acg.api.supplier.DjRegisterApplicationAPI;
+import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.supplier.DjSupplierAPI;
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 
@@ -39,6 +41,9 @@ public class StorefrontService {
 
     @Autowired
     private ConfigUtil configUtil;
+
+    @Autowired
+    private RedisClient redisClient;
 
 //    @Autowired
 //    private DjRegisterApplicationAPI djRegisterApplicationAPI;
@@ -230,6 +235,12 @@ public class StorefrontService {
             if (i <= 0) {
                 return ServerResponse.createByErrorMessage("修改失败!");
             }
+            Storefront sf=redisClient.getCache(Constants.FENGJIAN_STOREFRONT+storefront.getUserId(),Storefront.class);
+            if(sf==null)
+            {
+                redisClient.put(Constants.FENGJIAN_STOREFRONT+storefront.getUserId(),storefront);
+            }
+
             return ServerResponse.createBySuccessMessage("修改成功!");
         } catch (Exception e) {
             logger.error("修改失败：", e);
