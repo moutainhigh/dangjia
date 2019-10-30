@@ -2,6 +2,8 @@ package com.dangjia.acg.mapper.refund;
 
 import com.dangjia.acg.dto.refund.RefundOrderDTO;
 import com.dangjia.acg.dto.refund.RefundOrderItemDTO;
+import com.dangjia.acg.dto.refund.RefundRepairOrderDTO;
+import com.dangjia.acg.dto.refund.RefundRepairOrderMaterialDTO;
 import com.dangjia.acg.modle.deliver.Order;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -31,7 +33,33 @@ public interface RefundAfterSalesMapper extends Mapper<Order> {
      * @return
      */
     List<RefundOrderItemDTO> queryRefundOrderItemList(@Param("orderId") String orderId,@Param("searchKey") String searchKey);
-
+    /**
+     * 查询可退款的订单详情 根据订单详情ID
+     * @param orderItemId
+     * @return
+     */
     RefundOrderItemDTO queryRefundOrderItemInfo(@Param("orderItemId") String orderItemId);
+
+
+    /**
+     * 查询仅退款历史退款记录
+     * @param houseId
+     * @return
+     */
+    List<RefundRepairOrderDTO> queryRefundOnlyHistoryOrderList(@Param("houseId") String houseId);
+
+    /**
+     * 查询退款退货详情信息
+     * @param repairMendOrderId
+     * @return
+     */
+    List<RefundRepairOrderMaterialDTO> queryRefundOnlyHistoryOrderMaterialList(@Param("repairMendOrderId") String repairMendOrderId);
+
+    /**
+     * 根据退货单ID查询退货详情信息
+     * @param repairMendOrderId
+     * @return
+     */
+    RefundRepairOrderDTO queryRefundOnlyHistoryOrderInfo(@Param("repairMendOrderId") String repairMendOrderId);
 
 }

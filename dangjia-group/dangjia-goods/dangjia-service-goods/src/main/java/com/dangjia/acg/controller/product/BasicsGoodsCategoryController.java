@@ -11,6 +11,7 @@ import com.dangjia.acg.service.product.BasicsGoodsCategoryService;
 import com.dangjia.acg.service.product.DjBasicsAttributeServices;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -114,6 +115,18 @@ public class BasicsGoodsCategoryController implements BasicsGoodsCategoryAPI {
         return basicsGoodsCategoryService.queryBasicsGoodsCategory(parentId);
     }
 
+    /**
+     * 查询所有的末级分类类别
+     * @param request
+     * @param cityId
+     * @param searchKey
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryLastCategoryList(HttpServletRequest request,String cityId,String searchKey){
+        return basicsGoodsCategoryService.queryLastCategoryList(cityId,searchKey);
+    }
 
     /**
      * 根据类别id查询关联属性

@@ -45,6 +45,17 @@ public class OrderNode extends BaseEntity {
     @ApiModelProperty("描述")
     private String describe;
 
+    @Column(name = "associated_operation")
+    @Desc(value = "关联操作编码")
+    @ApiModelProperty("关联操作编码")
+    private String associatedOperation;
+
+    @Column(name = "associated_operation_name")
+    @Desc(value = "关联操作名称")
+    @ApiModelProperty("关联操作名称")
+    private String associatedOperationName;
+
+
     @Column(name = "remark")
     @Desc(value = "备注")
     @ApiModelProperty("备注")

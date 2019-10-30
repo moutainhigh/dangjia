@@ -6,9 +6,11 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.refund.RefundAfterSalesService;
 import com.github.pagehelper.PageInfo;
+import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -57,5 +59,33 @@ public class RefundAfterSalesController implements RefundAfterSalesAPI {
             logger.error("saveRefundonlyInfo 提交失败：",e);
         }
         return ServerResponse.createByErrorMessage("提交失败");
+    }
+
+    /**
+     *
+     * @param pageDTO 分页
+     * @param userToken  用户token
+     * @param cityId 城市ID
+     * @param houseId 房子ID
+     * @param searchKey
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse<PageInfo> queryRefundOnlyHistoryOrderList(PageDTO pageDTO, String userToken,
+                                                             String cityId,String houseId,String searchKey){
+        return refundAfterSalesService.queryRefundOnlyHistoryOrderList(pageDTO,cityId,houseId,searchKey);
+    }
+
+    /**
+     * 根据退货单查询退款详情
+     * @param cityId
+     * @param repairMendOrderId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryRefundOnlyHistoryOrderInfo(String cityId,String repairMendOrderId){
+        return refundAfterSalesService.queryRefundOnlyHistoryOrderInfo(cityId,repairMendOrderId);
     }
 }

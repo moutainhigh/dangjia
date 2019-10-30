@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.order.IBillOrderProgressMapper">
+
+     <select id="queryOrderProgressListByOrderId" resultType="com.dangjia.acg.dto.refund.OrderProgressDTO">
+         SELECT
+          t1.id,
+          t1.create_date createDate,
+          t1.progress_order_id progressOrderId,
+          t1.progress_type progressType,
+          t2.`code` nodeCode,
+          t2.`name` nodeName,
+          t2.`describe` nodeDescribe,
+          t2.associated_operation associatedOperation,
+          t2.associated_operation_name  associatedOperationName
+        FROM
+            dj_deliver_order_progress t1,
+            dj_deliver_order_node t2
+        WHERE
+            t1.progress_order_id = #{repairMendOrderId}
+        AND t1.node_type = t2.type
+        AND t1.node_code = t2.`code`
+        and t1.progress_type=2
+
+     </select>
+</mapper>
