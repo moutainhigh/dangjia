@@ -54,7 +54,12 @@ public interface IHouseMapper extends Mapper<House> {
                                    @Param("minSquare") Double minSquare, @Param("maxSquare") Double maxSquare);
 
 
-    List<HouseListDTO> getActuaryAll(@Param("cityId") String cityId, @Param("budgetOk") String budgetOk, @Param("searchKey") String searchKey, @Param("workerKey") String workerKey, @Param("dataStatus") String dataStatus);
+    List<HouseListDTO> getActuaryAll(@Param("cityId") String cityId,
+                                     @Param("budgetOk") String budgetOk,
+                                     @Param("searchKey") String searchKey,
+                                     @Param("workerKey") String workerKey,
+                                     @Param("dataStatus") String dataStatus,
+                                     @Param("userId") String userId);
 
     List<HouseListDTO> getHouseList(@Param("cityKey") String cityKey, @Param("userKey") String userKey, @Param("memberId") String memberId, @Param("visitState") Integer visitState, @Param("startDate") String startDate, @Param("endDate") String endDate, @Param("orderBy") String orderBy, @Param("searchKey") String searchKey);
 

@@ -118,7 +118,7 @@
         <if test="designerType > 0 and workerKey!=null and workerKey!=''">
             AND CONCAT(gr.name,gr.mobile) like CONCAT('%',#{workerKey},'%')
         </if>
-        <if test="flag == 1">
+        <if test="designerType > 0 and userId!=null and userId!=''">
             AND gr.id = #{userId}
         </if>
         <if test="dataStatus == 1">
@@ -495,6 +495,9 @@
 
         <if test="budgetOk != 0 and workerKey!=null and workerKey!=''">
             AND CONCAT(gr.name,gr.mobile) like CONCAT('%',#{workerKey},'%')
+        </if>
+        <if test="budgetOk > 0 and userId!=null and userId!=''">
+            and gr.id = #{userId}
         </if>
         <if test="dataStatus == 1">
             AND h.data_status=1  and h.budget_ok != 3 and h.budget_ok >0
