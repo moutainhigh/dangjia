@@ -2038,10 +2038,10 @@ public class HouseService {
                             "0", "等待大管家抢单", String.format(DjConstants.PushMessage.ACTUARIAL_COMPLETION,
                                     house.getHouseName()), "");
                 }
-                //告知工程部精算已通过
-                Map<String, String> temp_para = new HashMap();
-                temp_para.put("house_name", house.getHouseName());
-                JsmsUtil.sendSMS("13574147081", "165204", temp_para);
+//                //告知工程部精算已通过
+//                Map<String, String> temp_para = new HashMap();
+//                temp_para.put("house_name", house.getHouseName());
+//                JsmsUtil.sendSMS("13574147081", "165204", temp_para);
 
                 //在这里算出大管家每次巡查拿的钱 和 每次验收拿的钱 记录到大管家的 houseflow里 houseflow,新增两个字段.
                 List<HouseFlow> houseFlowList = houseFlowMapper.getForCheckMoney(houseId);
