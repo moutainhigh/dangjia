@@ -9,11 +9,9 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.delivery.AppointmentDTO;
 import com.dangjia.acg.dto.delivery.AppointmentListDTO;
 import com.dangjia.acg.dto.delivery.OrderStorefrontDTO;
-import com.dangjia.acg.mapper.delivery.BillDjDeliverOrderSplitItemMapper;
-import com.dangjia.acg.mapper.delivery.BillDjDeliverOrderSplitMapper;
-import com.dangjia.acg.mapper.delivery.DjDeliverOrderItemMapper;
-import com.dangjia.acg.mapper.delivery.DjDeliverOrderMapper;
+import com.dangjia.acg.mapper.delivery.*;
 import com.dangjia.acg.mapper.storeFront.BillStoreFrontProductMapper;
+import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.deliver.OrderItem;
 import com.dangjia.acg.modle.deliver.OrderSplit;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
@@ -43,9 +41,9 @@ import java.util.List;
 public class BillAppointmentService {
 
     @Autowired
-    private DjDeliverOrderMapper djDeliverOrderMapper;
+    private IBillDjDeliverOrderMapper djDeliverOrderMapper;
     @Autowired
-    private DjDeliverOrderItemMapper djDeliverOrderItemMapper;
+    private IBillDjDeliverOrderItemMapper djDeliverOrderItemMapper;
     @Autowired
     private BillDjDeliverOrderSplitMapper billDjDeliverOrderSplitMapper;
 
@@ -112,7 +110,7 @@ public class BillAppointmentService {
                 JSONObject obj = (JSONObject) str;
                 String orderId=obj.getString("orderId");
                 Date reservationDeliverTime=obj.getDate("reservationDeliverTime");
-                DjDeliverOrder djDeliverOrder = djDeliverOrderMapper.selectByPrimaryKey(orderId);
+                Order djDeliverOrder = djDeliverOrderMapper.selectByPrimaryKey(orderId);
                 OrderSplit orderSplit=new OrderSplit();
                 Example example = new Example(OrderSplit.class);
                 orderSplit.setNumber("DJ" + 200000 + djDeliverOrderItemMapper.selectCountByExample(example));//要货单号

@@ -31,4 +31,10 @@ public interface DjDeliverOrderAPI {
                                         @RequestParam("userToken") String userToken,
                                         @RequestParam("orderStatus") String orderStatus);
 
+
+
+    @PostMapping("/app/deliverOrder/queryOrderNumber")
+    @ApiOperation(value = "查询我要装修首页", notes = "查询我要装修首页")
+    ServerResponse queryOrderNumber(@RequestParam("request") HttpServletRequest request,
+                                    @RequestParam("houseId") String userId);
 }
