@@ -137,4 +137,32 @@ public class RefundAfterSalesController implements RefundAfterSalesAPI {
             return ServerResponse.createByErrorMessage("申诉失败");
         }
     }
+
+    /**
+     * 驳回退款申诉
+     * @param repairMendOrderId 退款申请单ID
+     */
+    @Override
+    @ApiMethod
+    public void rejectRepairApplication(String repairMendOrderId,String userId){
+        try{
+             refundAfterSalesService.rejectRepairApplication(repairMendOrderId,userId);
+        }catch (Exception e){
+            logger.error("驳回申诉失败",e);
+        }
+    }
+
+    /**
+     * 同意退款申诉
+     * @param repairMendOrderId 退款申请单ID
+     */
+    @Override
+    @ApiMethod
+    public void agreeRepairApplication(String repairMendOrderId,String userId){
+        try{
+            refundAfterSalesService.agreeRepairApplication(repairMendOrderId,userId);
+        }catch (Exception e){
+            logger.error("同意申诉失败",e);
+        }
+    }
 }

@@ -25,4 +25,8 @@
         and t1.data_status = 0
 
      </select>
+
+    <update id="updateOrderStatusByNodeCode">
+        update dj_deliver_order_progress set data_status=1 where node_type=#{nodeType} and progress_order_id=#{repairMendOrderId} and node_code=#{nodeCode}
+    </update>
 </mapper>

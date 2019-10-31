@@ -689,6 +689,18 @@ public class RefundAfterSalesService {
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse cancelRepairApplication(String  cityId,String repairMendOrderId){
         RefundRepairOrderDTO refundRepairOrderDTO=refundAfterSalesMapper.queryRefundOnlyHistoryOrderInfo(repairMendOrderId);//退款订单详情查询
+        updateRepairOrderInfo(refundRepairOrderDTO,repairMendOrderId, 5);//已撤销
+        //添加对应的流水记录节点信息
+        updateOrderProgressInfo(repairMendOrderId,"2","REFUND_AFTER_SALES","RA_011",refundRepairOrderDTO.getApplyMemberId());
+        return ServerResponse.createBySuccessMessage("撤销成功");
+    }
+
+    /**
+     * 修改对应的退款申请单信息
+     * @param repairMendOrderId
+     * @param state
+     */
+    void updateRepairOrderInfo(RefundRepairOrderDTO refundRepairOrderDTO,String repairMendOrderId,Integer state){
         List<RefundRepairOrderMaterialDTO> repairMaterialList=refundAfterSalesMapper.queryRefundOnlyHistoryOrderMaterialList(repairMendOrderId);//退款商品列表查询
         if(repairMaterialList!=null&&repairMaterialList.size()>0){
             for(RefundRepairOrderMaterialDTO rm:repairMaterialList){
@@ -703,13 +715,46 @@ public class RefundAfterSalesService {
         }
         MendOrder mendOrder=new MendOrder();
         mendOrder.setId(refundRepairOrderDTO.getRepairMendOrderId());
-        mendOrder.setState(5);//已撤销
+        mendOrder.setState(state);
         mendOrder.setModifyDate(new Date());
-        iBillMendOrderMapper.updateByPrimaryKeySelective(mendOrder);//修改退款申请单的状态为已撤销
-        //添加对应的流水记录节点信息
-        updateOrderProgressInfo(mendOrder.getId(),"2","REFUND_AFTER_SALES","RA_011",refundRepairOrderDTO.getApplyMemberId());
-        return ServerResponse.createBySuccessMessage("撤销成功");
+        iBillMendOrderMapper.updateByPrimaryKeySelective(mendOrder);//修改退款申请单的状态为已撤销或已驳回
     }
+
+    /**
+     * 驳回申诉（退货申请）
+     * @param repairMendOrderId
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void rejectRepairApplication(String repairMendOrderId,String userId){
+        RefundRepairOrderDTO refundRepairOrderDTO=refundAfterSalesMapper.queryRefundOnlyHistoryOrderInfo(repairMendOrderId);//退款订单详情查询
+        updateRepairOrderInfo(refundRepairOrderDTO,repairMendOrderId, 6);//退款关闭
+        //更新平台介入按钮的状态为已删除
+        iBillOrderProgressMapper.updateOrderStatusByNodeCode(repairMendOrderId,"REFUND_AFTER_SALES","RA_005");
+        //添加对应的流水记录节点信息,平台已拒绝
+        updateOrderProgressInfo(repairMendOrderId,"2","REFUND_AFTER_SALES","RA_007",userId);
+         //添加对应的流水记录节点信息，退款关闭
+        updateOrderProgressInfo(repairMendOrderId,"2","REFUND_AFTER_SALES","RA_009",userId);
+    }
+
+    /**
+     * 同意退款申诉（退货申请）
+     * @param repairMendOrderId
+     */
+    public void agreeRepairApplication(String repairMendOrderId,String userId){
+        //修改退款申诉的状态
+        MendOrder mendOrder=new MendOrder();
+        mendOrder.setId(repairMendOrderId);
+        mendOrder.setState(3);
+        mendOrder.setModifyDate(new Date());
+        iBillMendOrderMapper.updateByPrimaryKeySelective(mendOrder);//修改退款申请单的状态同意
+        //更新平台介入按钮的状态为已删除
+        iBillOrderProgressMapper.updateOrderStatusByNodeCode(repairMendOrderId,"REFUND_AFTER_SALES","RA_005");
+        //添加对应的流水记录节点信息,平台已拒绝
+        updateOrderProgressInfo(repairMendOrderId,"2","REFUND_AFTER_SALES","RA_006",userId);
+        //添加对应的流水记录节点信息，退款关闭
+        updateOrderProgressInfo(repairMendOrderId,"2","REFUND_AFTER_SALES","RA_008",userId);
+    }
+
     /**
      * 业主申诉退货
      * @param userToken

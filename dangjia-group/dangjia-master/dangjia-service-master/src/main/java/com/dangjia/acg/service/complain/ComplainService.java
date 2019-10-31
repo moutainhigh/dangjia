@@ -3,6 +3,7 @@ package com.dangjia.acg.service.complain;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.data.ForMasterAPI;
+import com.dangjia.acg.api.refund.RefundAfterSalesAPI;
 import com.dangjia.acg.api.sup.SupplierProductAPI;
 import com.dangjia.acg.api.supplier.DjSupplierAPI;
 import com.dangjia.acg.common.constants.SysConfig;
@@ -82,7 +83,7 @@ public class ComplainService {
     @Autowired
     private IWorkerTypeMapper iWorkerTypeMapper;
     @Autowired
-    private SupplierProductAPI supplierProductAPI;
+    private RefundAfterSalesAPI refundAfterSalesAPI;
     @Autowired
     private UserMapper userMapper;
     @Autowired
@@ -497,6 +498,12 @@ public class ComplainService {
                         }
                         houseMapper.updateByPrimaryKeySelective(house);
                         break;
+                    case 7://业主申请退货(同意后的处理）
+                        String businessId = complain.getBusinessId();//业务订单号
+                        //修改订单状态为已同意
+                        refundAfterSalesAPI.agreeRepairApplication(businessId,userId);
+                        //将店铺的钱转到对应的业主钱包中
+                        break;
                 }
             }
         } else {
@@ -512,6 +519,10 @@ public class ComplainService {
                 house.setVisitState(1);
                 house.setModifyDate(new Date());
                 houseMapper.updateByPrimaryKeySelective(house);
+            }
+            if (complain.getComplainType() != null && complain.getComplainType() == 7) {//业主申请退货，不同意后的处理
+               //对应订单数据退回，订单流水记录生成
+                refundAfterSalesAPI.rejectRepairApplication(complain.getBusinessId(),userId);
             }
 
         }

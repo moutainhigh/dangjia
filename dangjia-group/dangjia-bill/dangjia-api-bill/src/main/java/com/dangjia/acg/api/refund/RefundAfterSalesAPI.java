@@ -100,4 +100,14 @@ public interface RefundAfterSalesAPI {
                                      @RequestParam("content") String content,
                                      @RequestParam("houseId") String houseId,
                                      @RequestParam("repairMendOrderId") String repairMendOrderId);
+
+    @PostMapping("/app/refund/refundOrder/rejectRepairApplication")
+    @ApiOperation(value = "驳回退款申诉", notes = "驳回退款申诉")
+    void rejectRepairApplication(@RequestParam("repairMendOrderId") String repairMendOrderId,
+                                 @RequestParam("userId") String userId);
+
+    @PostMapping("/app/refund/refundOrder/agreeRepairApplication")
+    @ApiOperation(value = "同意退款申诉", notes = "同意退款申诉")
+    void agreeRepairApplication(@RequestParam("repairMendOrderId") String repairMendOrderId,
+                                 @RequestParam("userId") String userId);
 }
