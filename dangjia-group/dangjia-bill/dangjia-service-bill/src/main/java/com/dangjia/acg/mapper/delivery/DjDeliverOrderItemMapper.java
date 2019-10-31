@@ -2,6 +2,7 @@ package com.dangjia.acg.mapper.delivery;
 
 
 import com.dangjia.acg.modle.deliver.OrderItem;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
@@ -15,6 +16,6 @@ import tk.mybatis.mapper.common.Mapper;
 @Repository
 public interface DjDeliverOrderItemMapper extends Mapper<OrderItem> {
 
-
+    int updateDjDeliverOrderItemByOrderId(@Param("orderId") String orderId);
 
 }

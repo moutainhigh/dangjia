@@ -52,7 +52,8 @@
             IFNULL(t.ask_count,0) askCount,
             IFNULL(t.return_count,0) returnCount,
             (t.shop_count - (IFNULL(t.ask_count, 0)+IFNULL(t.return_count,0))) surplusCount,
-            t1.prod_template_id productTemplateId
+            t1.prod_template_id productTemplateId,
+            t.reservation_deliver_time as reservationDeliverTime
         FROM
             dj_deliver_order_item t,
             dj_basics_storefront_product t1
@@ -63,5 +64,68 @@
     </select>
 
 
+    <select id="queryReservedStorefront" resultType="com.dangjia.acg.dto.delivery.OrderStorefrontDTO">
+        SELECT
+            t1.storefront_id storefrontId,
+            t1.id orderSplitId,
+            t1.address_id addressId,
+            t1.house_id houseId,
+            t4.storefront_name storefrontName,
+            t1.order_id orderId
+        FROM
+            dj_deliver_order_split t1,
+            dj_basics_storefront t4
+        WHERE
+            t1.storefront_id = t4.id
+        AND t1.house_id=#{houseId}
+        AND EXISTS (
+            SELECT
+                1
+            FROM
+                dj_deliver_order_split_item t2
+            WHERE
+                t1.id = t2.order_split_id
+            AND t2.data_status = 0
+            AND t2.is_reservation_deliver = 1
+            AND t2.reservation_deliver_time IS NOT NULL
+        )
+    </select>
+
+
+    <select id="queryReserved" resultType="com.dangjia.acg.dto.delivery.AppointmentDTO">
+        SELECT
+            t.product_id productId,
+            t.id as orderSplitItemId,
+            t.storefront_id storefrontId,
+            t.product_name productName,
+            t.product_sn productSn,
+            t.product_type productType,
+            t.price price,
+            IFNULL(t.image, t1.image) image,
+            IFNULL(t.ask_count, 0) askCount,
+            t1.prod_template_id productTemplateId,
+            t.reservation_deliver_time AS reservationDeliverTime,
+            t.unit_name as unitName,
+            t.order_split_id as orderSplitId
+        FROM
+            dj_deliver_order_split_item t,
+            dj_basics_storefront_product t1
+        WHERE
+            t.product_id = t1.id
+        AND t.data_status = 0
+        AND t.order_id =  #{orderId}
+    </select>
+
+    <!--取消预约-->
+    <delete id="cancelBooking">
+        DELETE dj_deliver_order_split a,
+         dj_deliver_order_split_item b
+        FROM
+            dj_deliver_order_split a,
+            dj_deliver_order_split_item b
+        WHERE
+            a.id = b.order_split_id
+        AND a.id = #{orderSplitId}
+    </delete>
 
 </mapper>

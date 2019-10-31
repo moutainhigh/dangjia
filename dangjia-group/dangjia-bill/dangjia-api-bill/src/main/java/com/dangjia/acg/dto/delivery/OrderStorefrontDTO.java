@@ -18,4 +18,5 @@ public class OrderStorefrontDTO {
     private String businessOrderNumber;
     private String orderNumber;
     private String storefrontName;
+    private String orderSplitId;
 }

@@ -2,7 +2,12 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.dangjia.acg.mapper.delivery.DjDeliverOrderItemMapper">
 
-
+    <update id="updateDjDeliverOrderItemByOrderId">
+        UPDATE dj_deliver_order_item
+        SET is_reservation_deliver = 0,
+         reservation_deliver_time = NULL
+        WHERE order_id = #{orderId}
+    </update>
 
 
 </mapper>

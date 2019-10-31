@@ -2,6 +2,8 @@ package com.dangjia.acg.dto.delivery;
 
 import lombok.Data;
 
+import java.util.Date;
+
 /**
  * Created with IntelliJ IDEA.
  * author: wk
@@ -22,4 +24,8 @@ public class AppointmentDTO {
     private Double askCount;
     private Double returnCount;
     private Double surplusCount;
+    private Date reservationDeliverTime;//预约发货时间
+    private String unitName;
+    private String orderSplitItemId;
+    private String orderSplitId;
 }

@@ -12,6 +12,7 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.refund.*;
+import com.dangjia.acg.mapper.delivery.DjDeliverOrderItemMapper;
 import com.dangjia.acg.mapper.config.IBillComplainMapper;
 import com.dangjia.acg.mapper.config.IBillConfigMapper;
 import com.dangjia.acg.mapper.order.IBillOrderProgressMapper;
@@ -83,7 +84,7 @@ public class RefundAfterSalesService {
     private IBillMendMaterialMapper iBillMendMaterialMapper;
 
     @Autowired
-    private IBillOrderItemMapper iBillOrderItemMapper;
+    private DjDeliverOrderItemMapper djDeliverOrderItemMapper;
 
     @Autowired
     private IBillOrderProgressMapper iBillOrderProgressMapper;
@@ -264,6 +265,8 @@ public class RefundAfterSalesService {
                     BigDecimal newReturnCount=new BigDecimal(orderItem.getReturnCount()).add(new BigDecimal(returnCount));
                     orderItem.setReturnCount(newReturnCount.doubleValue());
                     iBillOrderItemMapper.updateByPrimaryKeySelective(orderItem);
+                    orderItem.setReturnCount(returnCount);
+                    djDeliverOrderItemMapper.updateByPrimaryKeySelective(orderItem);
                     //添回退款申请明细信息
                     MendMateriel mendMateriel = saveBillMendMaterial(mendOrder,cityId,refundOrderItemDTO,productId,surplusCount);
                     mendOrder.setTotalAmount(mendOrder.getTotalAmount() + mendMateriel.getTotalPrice());//修改总价
