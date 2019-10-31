@@ -16,6 +16,7 @@ import com.dangjia.acg.dto.refund.*;
 import com.dangjia.acg.mapper.delivery.DjDeliverOrderItemMapper;
 import com.dangjia.acg.mapper.config.IBillComplainMapper;
 import com.dangjia.acg.mapper.config.IBillConfigMapper;
+import com.dangjia.acg.mapper.delivery.IBillDjDeliverOrderItemMapper;
 import com.dangjia.acg.mapper.order.IBillOrderProgressMapper;
 import com.dangjia.acg.mapper.order.IBillQuantityRoomMapper;
 import com.dangjia.acg.mapper.refund.*;
@@ -44,6 +45,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -78,8 +80,9 @@ public class RefundAfterSalesService {
     private IBillMendOrderMapper iBillMendOrderMapper;
     @Autowired
     private IBillMendMaterialMapper iBillMendMaterialMapper;
+
     @Autowired
-    private IBillOrderItemMapper iBillOrderItemMapper;
+    private IBillDjDeliverOrderItemMapper iBillDjDeliverOrderItemMapper;
     @Autowired
     private IBillOrderProgressMapper iBillOrderProgressMapper;
     @Autowired
@@ -346,7 +349,7 @@ public class RefundAfterSalesService {
                     OrderItem orderItem=new OrderItem();
                     orderItem.setId(refundOrderItemDTO.getOrderItemId());
                     orderItem.setReturnCount(MathUtil.add(orderItem.getReturnCount(),returnCount));
-                    iBillOrderItemMapper.updateByPrimaryKeySelective(orderItem);
+                    iBillDjDeliverOrderItemMapper.updateByPrimaryKeySelective(orderItem);
                     Double price = refundOrderItemDTO.getPrice();//购买单价
                     Double shopCount=refundOrderItemDTO.getShopCount();//购买数据
                     Double transportationCost=refundOrderItemDTO.getTransportationCost();//运费
@@ -692,11 +695,11 @@ public class RefundAfterSalesService {
             for(RefundRepairOrderMaterialDTO rm:repairMaterialList){
                 Double returnCount=rm.getReturnCount();
                 //修改订单详情表的退货字段
-                OrderItem orderItem=iBillOrderItemMapper.selectByPrimaryKey(rm.getOrderItemId());
+                OrderItem orderItem=iBillDjDeliverOrderItemMapper.selectByPrimaryKey(rm.getOrderItemId());
                 orderItem.setId(rm.getOrderItemId());
                 BigDecimal newReturnCount=new BigDecimal(orderItem.getReturnCount()).subtract(new BigDecimal(returnCount));
                 orderItem.setReturnCount(newReturnCount.doubleValue());
-                iBillOrderItemMapper.updateByPrimaryKeySelective(orderItem);
+                iBillDjDeliverOrderItemMapper.updateByPrimaryKeySelective(orderItem);
             }
         }
         MendOrder mendOrder=new MendOrder();
