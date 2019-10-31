@@ -9,14 +9,20 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.refund.*;
+import com.dangjia.acg.mapper.config.IBillComplainMapper;
+import com.dangjia.acg.mapper.config.IBillConfigMapper;
 import com.dangjia.acg.mapper.order.IBillOrderProgressMapper;
 import com.dangjia.acg.mapper.refund.*;
+import com.dangjia.acg.model.Config;
 import com.dangjia.acg.modle.attribute.AttributeValue;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.brand.Unit;
+import com.dangjia.acg.modle.complain.Complain;
 import com.dangjia.acg.modle.deliver.OrderItem;
+import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.order.OrderProgress;
@@ -81,6 +87,12 @@ public class RefundAfterSalesService {
 
     @Autowired
     private IBillOrderProgressMapper iBillOrderProgressMapper;
+
+    @Autowired
+    private IBillConfigMapper iBillConfigMapper;
+
+    @Autowired
+    private IBillComplainMapper iBillComplainMapper;
 
     /**
      * 查询可退款的商品
@@ -249,7 +261,8 @@ public class RefundAfterSalesService {
                     //修改订单中的退货量为当前退货的量
                     OrderItem orderItem=new OrderItem();
                     orderItem.setId(refundOrderItemDTO.getOrderItemId());
-                    orderItem.setReturnCount(returnCount);
+                    BigDecimal newReturnCount=new BigDecimal(orderItem.getReturnCount()).add(new BigDecimal(returnCount));
+                    orderItem.setReturnCount(newReturnCount.doubleValue());
                     iBillOrderItemMapper.updateByPrimaryKeySelective(orderItem);
                     //添回退款申请明细信息
                     MendMateriel mendMateriel = saveBillMendMaterial(mendOrder,cityId,refundOrderItemDTO,productId,surplusCount);
@@ -500,12 +513,134 @@ public class RefundAfterSalesService {
             getRepairOrderProductList(repairMaterialList,address);
             refundRepairOrderDTO.setOrderMaterialList(repairMaterialList);//将退款材料明细放入对象中
             //查询对应的流水节点信息(根据订单ID）
-            List<OrderProgressDTO> orderProgressDTOList=iBillOrderProgressMapper.queryOrderProgressListByOrderId(repairMendOrderId);
+            List<OrderProgressDTO> orderProgressDTOList=iBillOrderProgressMapper.queryOrderProgressListByOrderId(repairMendOrderId,"2");//仅退款
             refundRepairOrderDTO.setOrderProgressList(orderProgressDTOList);
+           if(orderProgressDTOList!=null&&orderProgressDTOList.size()>0){//判断最后节点，及剩余处理时间
+               OrderProgressDTO orderProgressDTO=orderProgressDTOList.get(orderProgressDTOList.size()-1);
+               refundRepairOrderDTO.setRepairNewNode(orderProgressDTO.getNodeName());
+               refundRepairOrderDTO.setReparirRemainingTime(getRemainingTime(orderProgressDTO));
+           }
             return ServerResponse.createBySuccess("查询成功",refundRepairOrderDTO);
         }catch (Exception e){
             logger.error("queryRefundOnlyHistoryOrderInfo查询退款详情失败：",e);
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
+
+    /**
+     * 获取当前阶段剩余可处理时间
+     * @return
+     */
+    private String getRemainingTime(OrderProgressDTO orderProgressDTO){
+        try{
+            String nodeCode=orderProgressDTO.getNodeCode();
+            String parayKey=getParayKey(nodeCode);
+            if(parayKey!=null&&StringUtils.isNotBlank(parayKey)){
+                Config config=iBillConfigMapper.selectConfigInfoByParamKey(parayKey);//获取对应阶段需处理剩余时间
+                if(config!=null&&StringUtils.isNotBlank(config.getId())){
+                    Date createDate=orderProgressDTO.getCreateDate();
+                    String hour=config.getParamValue();
+                    Date newDate=DateUtil.addDateHours(createDate,Integer.parseInt(hour));
+                    return DateUtil.daysBetweenMinute(newDate,new Date());
+                }
+            }
+        }catch (Exception e){
+            logger.error("获取剩余时间异常:",e);
+        }
+
+        return "";
+    }
+
+    String getParayKey(String nodeCode){
+        String parayKey="";
+        switch (nodeCode){
+            case "RA_001" :
+            case "RA_002" :
+                parayKey="RETURN_MERCHANT_PROCESS_TIME";//店铺申请等待商家处理时间（单位H）
+                break;
+            case "RA_004":
+                parayKey="RETURN_PLATFORM_INTERVENTION_TIME";//店铺拒绝退货，等待申请平台介入时间（单位H）
+                break;
+            case "RA_005":
+                parayKey="RETURN_PLATFORM_PROCESS_TIME";//业主申诉后，等待平台处理时间（单位H）
+                break;
+            default:
+                break;
+        }
+        return parayKey;
+    }
+
+    /**
+     * 撤销退款申请
+     * @param cityId
+     * @param repairMendOrderId 申请单ID
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse cancelRepairApplication(String  cityId,String repairMendOrderId){
+        RefundRepairOrderDTO refundRepairOrderDTO=refundAfterSalesMapper.queryRefundOnlyHistoryOrderInfo(repairMendOrderId);//退款订单详情查询
+        List<RefundRepairOrderMaterialDTO> repairMaterialList=refundAfterSalesMapper.queryRefundOnlyHistoryOrderMaterialList(repairMendOrderId);//退款商品列表查询
+        if(repairMaterialList!=null&&repairMaterialList.size()>0){
+            for(RefundRepairOrderMaterialDTO rm:repairMaterialList){
+                Double returnCount=rm.getReturnCount();
+                //修改订单详情表的退货字段
+                OrderItem orderItem=iBillOrderItemMapper.selectByPrimaryKey(rm.getOrderItemId());
+                orderItem.setId(rm.getOrderItemId());
+                BigDecimal newReturnCount=new BigDecimal(orderItem.getReturnCount()).subtract(new BigDecimal(returnCount));
+                orderItem.setReturnCount(newReturnCount.doubleValue());
+                iBillOrderItemMapper.updateByPrimaryKeySelective(orderItem);
+            }
+        }
+        MendOrder mendOrder=new MendOrder();
+        mendOrder.setId(refundRepairOrderDTO.getRepairMendOrderId());
+        mendOrder.setState(5);//已撤销
+        mendOrder.setModifyDate(new Date());
+        iBillMendOrderMapper.updateByPrimaryKeySelective(mendOrder);//修改退款申请单的状态为已撤销
+        //添加对应的流水记录节点信息
+        updateOrderProgressInfo(mendOrder.getId(),"2","REFUND_AFTER_SALES","RA_011",refundRepairOrderDTO.getApplyMemberId());
+        return ServerResponse.createBySuccessMessage("撤销成功");
+    }
+    /**
+     * 业主申诉退货
+     * @param userToken
+     * @param content  申诉内容
+     * @param houseId  房子ID
+     * @param repairMendOrderId  申诉单号
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse addRepairComplain(String userToken,String content,String houseId,String repairMendOrderId){
+        Object object = getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member member = (Member) object;
+        Example example = new Example(Complain.class);
+        example.createCriteria()
+                .andEqualTo(Complain.MEMBER_ID, member.getId())
+                .andEqualTo(Complain.COMPLAIN_TYPE, "7")
+                .andEqualTo(Complain.BUSINESS_ID, repairMendOrderId)
+                .andEqualTo(Complain.STATUS, 0);
+        List list = iBillComplainMapper.selectByExample(example);
+        if (list.size() > 0) {
+            return ServerResponse.createByErrorMessage("请勿重复提交申请！");
+        }
+        //添加申诉信息
+        Complain complain = new Complain();
+        complain.setHouseId(houseId);
+        complain.setMemberId(member.getId());
+        complain.setComplainType(7);
+        complain.setContent(content);
+        complain.setStatus(0);
+        complain.setUserNickName(member.getNickName());
+        complain.setUserName(member.getName());
+        complain.setUserMobile(member.getMobile());
+        complain.setUserId(member.getId());
+        complain.setBusinessId(repairMendOrderId);
+        iBillComplainMapper.insert(complain);
+        //添加对应的申诉流水信息(增加平台介入记录信息）
+        updateOrderProgressInfo(repairMendOrderId,"2","REFUND_AFTER_SALES","RA_005",member.getId());
+        return ServerResponse.createBySuccessMessage("申诉提交成功");
+    }
+
 }

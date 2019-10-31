@@ -165,6 +165,7 @@ public class DateUtil implements AutoCloseable, Serializable {
 
     }
 
+
     /***
      * 转换为日期
      *
@@ -641,6 +642,39 @@ public class DateUtil implements AutoCloseable, Serializable {
         long minutes = (mills % rateD % rateH) / rateM;
         long seconds = (mills % rateD % rateH % rateM) / rateS;
         return "" + days + "天" + hours + "时" + minutes + "分" + seconds + "秒";
+    }
+
+    /**
+     * 两个时间相差多少天多少秒多少小时(只到分，如果相差为负数，返回，0天0时0分
+     * @param first
+     * @param second
+     * @return
+     * @throws ParseException
+     */
+    public static String daysBetweenMinute(Date first, Date second) throws ParseException {
+        SimpleDateFormat sformat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        first = sformat.parse(sformat.format(first));
+        second = sformat.parse(sformat.format(second));
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(first);
+        long firstMills = calendar.getTimeInMillis();
+        calendar.setTime(second);
+        long secondMills = calendar.getTimeInMillis();
+        long rateD = 1000 * 60 * 60 * 24;
+        long rateH = 1000 * 60 * 60;
+        long rateM = 1000 * 60;
+        long rateS = 1000;
+        long mills = secondMills - firstMills;
+        long days = mills / rateD;
+        long hours = (mills % rateD) / rateH;
+        long minutes = (mills % rateD % rateH) / rateM;
+        long seconds = (mills % rateD % rateH % rateM) / rateS;
+        if(days>=0&&hours>=0&&minutes>=0){
+            return "" + days + "天" + hours + "时" + minutes + "分" ;
+        }else{
+            return "" + 0 + "天" + 0 + "时" + 0 + "分" ;
+        }
+
     }
 
     /***

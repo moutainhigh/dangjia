@@ -53,4 +53,6 @@ public class RefundRepairOrderMaterialDTO {
     private String valueNameArr;//商品规格名称
 
     private String categoryId;//分类ID
+
+    private String orderItemId;//订单详情ID
 }

@@ -10,6 +10,8 @@ package com.dangjia.acg.dto.refund;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.util.Date;
+
 @Data
 public class OrderProgressDTO {
 
@@ -47,4 +49,10 @@ public class OrderProgressDTO {
 
     @ApiModelProperty("修改人")
     private String updateBy;
+
+    @ApiModelProperty("创建时间")
+    private Date createDate;
+
+    @ApiModelProperty("修改时间")
+    private Date modifyDate;
 }

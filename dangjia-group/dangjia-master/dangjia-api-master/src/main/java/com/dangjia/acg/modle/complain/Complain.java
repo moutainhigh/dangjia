@@ -24,8 +24,8 @@ public class Complain extends BaseEntity {
     private String memberId;
 
     @Column(name = "complain_type")
-    @Desc(value = "申诉类型 1:工匠被处罚后不服.2：业主要求整改.3：大管家（开工后）要求换人.4:部分收货申诉.5提前结束装修")
-    @ApiModelProperty("申诉类型 1:工匠被处罚后不服.2：业主要求整改.3：大管家（开工后）要求换人.4:部分收货申诉.5提前结束装修")
+    @Desc(value = "申述类型 1: 被处罚申诉.2：要求整改.3：要求换人.4:部分收货申诉.5:提前结束装修.6业主要求换人.7:业主申诉退货")
+    @ApiModelProperty("申述类型 1: 被处罚申诉.2：要求整改.3：要求换人.4:部分收货申诉.5:提前结束装修.6业主要求换人.7:业主申诉退货")
     private Integer complainType;
 
     @Column(name = "user_id")

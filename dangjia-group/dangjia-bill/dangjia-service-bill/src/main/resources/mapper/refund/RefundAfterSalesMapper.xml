@@ -129,7 +129,8 @@
           IFNULL(t.stevedorage_cost,0) stevedorageCost,
           IFNULL(t.transportation_cost,0) transportationCost,
           IFNULL(t.image,t1.image) image,
-          t1.prod_template_id productTemplateId
+          t1.prod_template_id productTemplateId,
+          t.order_item_id orderItemId
         FROM
             dj_repair_mend_materiel t,
           dj_basics_storefront_product t1
