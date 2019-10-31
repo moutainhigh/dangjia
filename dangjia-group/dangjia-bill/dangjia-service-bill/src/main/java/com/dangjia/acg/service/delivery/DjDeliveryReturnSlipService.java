@@ -377,6 +377,10 @@ public class DjDeliveryReturnSlipService {
     public ServerResponse storefrontProductDimension(PageDTO pageDTO, String userId, String cityId, String searchKey) {
         try {
             Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
+            if(storefront==null)
+            {
+                return ServerResponse.createByErrorMessage("不存在店铺信息");
+            }
             if (storefront == null)
                 return ServerResponse.createByErrorMessage("暂无店铺信息");
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());

@@ -13,6 +13,7 @@ import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.common.util.MathUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.refund.*;
+import com.dangjia.acg.mapper.delivery.DjDeliverOrderItemMapper;
 import com.dangjia.acg.mapper.config.IBillComplainMapper;
 import com.dangjia.acg.mapper.config.IBillConfigMapper;
 import com.dangjia.acg.mapper.order.IBillOrderProgressMapper;
@@ -425,7 +426,7 @@ public class RefundAfterSalesService {
         mendMateriel.setPrice(refundOrderItemDTO.getPrice());
         mendMateriel.setCost(refundOrderItemDTO.getCost());
         mendMateriel.setUnitName(refundOrderItemDTO.getUnitName());
-        mendMateriel.setTotalPrice(MathUtil.mul(returnCount.doubleValue() ,refundOrderItemDTO.getPrice()));
+        mendMateriel.setTotalPrice(returnCount.doubleValue() * refundOrderItemDTO.getPrice());
         mendMateriel.setProductType(Integer.parseInt(refundOrderItemDTO.getProductType()));//0：材料；1：包工包料
         mendMateriel.setCategoryId(refundOrderItemDTO.getCategoryId());
         mendMateriel.setImage(refundOrderItemDTO.getImage());
@@ -518,7 +519,6 @@ public class RefundAfterSalesService {
                 stateName="退款成功";
                 break;
             case "5":
-            case "6":
                 stateName="退款关闭";
                 break;
             default:
@@ -687,12 +687,6 @@ public class RefundAfterSalesService {
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse cancelRepairApplication(String  cityId,String repairMendOrderId){
         RefundRepairOrderDTO refundRepairOrderDTO=refundAfterSalesMapper.queryRefundOnlyHistoryOrderInfo(repairMendOrderId);//退款订单详情查询
-        if("5".equals(refundRepairOrderDTO.getState())){
-            return ServerResponse.createByErrorMessage("请勿重复撤销");
-        }
-        if(!"1".equals(refundRepairOrderDTO.getState())){
-            return ServerResponse.createByErrorMessage("只能撤回状态为待处进的单");
-        }
         List<RefundRepairOrderMaterialDTO> repairMaterialList=refundAfterSalesMapper.queryRefundOnlyHistoryOrderMaterialList(repairMendOrderId);//退款商品列表查询
         if(repairMaterialList!=null&&repairMaterialList.size()>0){
             for(RefundRepairOrderMaterialDTO rm:repairMaterialList){
@@ -700,8 +694,8 @@ public class RefundAfterSalesService {
                 //修改订单详情表的退货字段
                 OrderItem orderItem=iBillOrderItemMapper.selectByPrimaryKey(rm.getOrderItemId());
                 orderItem.setId(rm.getOrderItemId());
-                Double newReturnCount=MathUtil.sub(orderItem.getReturnCount(),returnCount);
-                orderItem.setReturnCount(newReturnCount<0?0:newReturnCount);
+                BigDecimal newReturnCount=new BigDecimal(orderItem.getReturnCount()).subtract(new BigDecimal(returnCount));
+                orderItem.setReturnCount(newReturnCount.doubleValue());
                 iBillOrderItemMapper.updateByPrimaryKeySelective(orderItem);
             }
         }
@@ -738,10 +732,6 @@ public class RefundAfterSalesService {
         List list = iBillComplainMapper.selectByExample(example);
         if (list.size() > 0) {
             return ServerResponse.createByErrorMessage("请勿重复提交申请！");
-        }
-        RefundRepairOrderDTO refundRepairOrderDTO=refundAfterSalesMapper.queryRefundOnlyHistoryOrderInfo(repairMendOrderId);//退款订单详情查询
-        if(!("1".equals(refundRepairOrderDTO.getState())||"2".equals(refundRepairOrderDTO.getState()))){
-            return ServerResponse.createByErrorMessage("不是处理中的单，不能申请平台申诉");
         }
         //添加申诉信息
         Complain complain = new Complain();

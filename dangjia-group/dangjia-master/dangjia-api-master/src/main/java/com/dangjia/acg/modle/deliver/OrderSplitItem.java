@@ -11,6 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import java.util.Date;
 
 @Data
 @Entity
@@ -123,5 +124,16 @@ public class OrderSplitItem extends BaseEntity {
 	@Desc(value = "'是否送货与安装/施工分开'")
 	@ApiModelProperty("'是否送货与安装/施工分开'")
 	private String orderItemStr;
+
+	@Column(name = "is_reservation_deliver")
+	@Desc(value = "是否需要预约(1是，0否）")
+	@ApiModelProperty("是否需要预约(1是，0否）")
+	private Integer isReservationDeliver;
+
+	@Column(name = "reservation_deliver_time")
+	@Desc(value = "预约发货时间")
+	@ApiModelProperty("预约发货时间")
+	private Date reservationDeliverTime;
+
 
 }

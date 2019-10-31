@@ -111,9 +111,9 @@ public class WebOrderSplitController implements WebOrderSplitAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getOrderSplitList(HttpServletRequest request,String houseId) {
+    public ServerResponse getOrderSplitList(HttpServletRequest request,String cityId,String houseId) {
         String userId = request.getParameter("userId");
-        return orderSplitService.getOrderSplitList(userId,houseId);
+        return orderSplitService.getOrderSplitList(userId,cityId,houseId);
     }
 
     @Override

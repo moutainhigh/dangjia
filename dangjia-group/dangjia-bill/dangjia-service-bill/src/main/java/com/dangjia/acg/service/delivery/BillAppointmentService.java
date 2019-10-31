@@ -9,12 +9,11 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.delivery.AppointmentDTO;
 import com.dangjia.acg.dto.delivery.AppointmentListDTO;
 import com.dangjia.acg.dto.delivery.OrderStorefrontDTO;
+import com.dangjia.acg.mapper.delivery.BillDjDeliverOrderSplitItemMapper;
 import com.dangjia.acg.mapper.delivery.BillDjDeliverOrderSplitMapper;
 import com.dangjia.acg.mapper.delivery.DjDeliverOrderItemMapper;
 import com.dangjia.acg.mapper.delivery.DjDeliverOrderMapper;
-import com.dangjia.acg.mapper.refund.IBillOrderItemMapper;
 import com.dangjia.acg.mapper.storeFront.BillStoreFrontProductMapper;
-import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.deliver.OrderItem;
 import com.dangjia.acg.modle.deliver.OrderSplit;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
@@ -26,6 +25,7 @@ import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
@@ -58,7 +58,7 @@ public class BillAppointmentService {
     private MemberAPI memberAPI;
 
     @Autowired
-    private IBillOrderItemMapper billOrderItemMapper;
+    private BillDjDeliverOrderSplitItemMapper billDjDeliverOrderSplitItemMapper;
 
 
     /**
@@ -76,9 +76,11 @@ public class BillAppointmentService {
             orderStorefrontDTOS.forEach(orderStorefrontDTO -> {
                 AppointmentListDTO appointmentListDTO = new AppointmentListDTO();
                 List<AppointmentDTO> appointmentDTOS = djDeliverOrderMapper.queryAppointment(orderStorefrontDTO.getOrderId());
-                appointmentListDTO.setAppointmentDTOS(appointmentDTOS);
-                appointmentListDTO.setOrderStorefrontDTO(orderStorefrontDTO);
-                appointmentListDTOS.add(appointmentListDTO);
+                if(appointmentDTOS.size()>0) {
+                    appointmentListDTO.setAppointmentDTOS(appointmentDTOS);
+                    appointmentListDTO.setOrderStorefrontDTO(orderStorefrontDTO);
+                    appointmentListDTOS.add(appointmentListDTO);
+                }
             });
             if(appointmentListDTOS.size()<=0)
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
@@ -120,9 +122,7 @@ public class BillAppointmentService {
                 orderSplit.setMemberName(member.getName());
                 orderSplit.setMobile(member.getMobile());
                 orderSplit.setWorkerTypeId(member.getWorkerTypeId());
-                orderSplit.setIsReservationDeliver(1);//是否需要预约(1是，0否）
                 orderSplit.setStorefrontId(orderSplit.getStorefrontId());
-                orderSplit.setReservationDeliverTime(reservationDeliverTime);
                 orderSplit.setCityId(djDeliverOrder.getCityId());
                 orderSplit.setOrderId(orderId);
                 billDjDeliverOrderSplitMapper.insert(orderSplit);
@@ -151,13 +151,67 @@ public class BillAppointmentService {
                     StorefrontProduct storefrontProduct = billStoreFrontProductMapper.selectByPrimaryKey(orderItem.getProductId());
                     orderSplitItem.setIsDeliveryInstall(storefrontProduct.getIsDeliveryInstall());
                     orderSplitItem.setOrderItemId(orderItem.getId());
-                    billOrderItemMapper.insert(orderItem);
+                    orderSplitItem.setIsReservationDeliver(1);//是否需要预约(1是，0否）
+                    orderSplitItem.setReservationDeliverTime(reservationDeliverTime);
+                    billDjDeliverOrderSplitItemMapper.insert(orderSplitItem);
+                    orderItem.setIsReservationDeliver("1");
+                    orderItem.setReservationDeliverTime(reservationDeliverTime);
+                    djDeliverOrderItemMapper.updateByPrimaryKey(orderItem);
                 }
             });
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             logger.info("操作失败",e);
             return ServerResponse.createByErrorMessage("操作失败");
+        }
+    }
+
+
+    /**
+     * 已预约
+     * @param pageDTO
+     * @param houseId
+     * @return
+     */
+    public ServerResponse queryReserved(PageDTO pageDTO, String houseId) {
+        try {
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<OrderStorefrontDTO> orderStorefrontDTOS = djDeliverOrderMapper.queryReservedStorefront(houseId);
+            List<AppointmentListDTO> appointmentListDTOS = null;
+            orderStorefrontDTOS.forEach(orderStorefrontDTO -> {
+                AppointmentListDTO appointmentListDTO = new AppointmentListDTO();
+                List<AppointmentDTO> appointmentDTOS = djDeliverOrderMapper.queryReserved(orderStorefrontDTO.getOrderId());
+                if(appointmentDTOS.size()>0) {
+                    appointmentListDTO.setAppointmentDTOS(appointmentDTOS);
+                    appointmentListDTO.setOrderStorefrontDTO(orderStorefrontDTO);
+                    appointmentListDTOS.add(appointmentListDTO);
+                }
+            });
+            if(appointmentListDTOS.size()<=0)
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
+            PageInfo pageResult = new PageInfo(appointmentListDTOS);
+            return ServerResponse.createBySuccess("查询成功",pageResult);
+        } catch (Exception e) {
+            logger.info("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败"+e);
+        }
+    }
+
+
+    /**
+     * 取消预约
+     * @param orderSplitId
+     * @return
+     */
+    public ServerResponse updateReserved(String orderSplitId) {
+        try {
+            OrderSplit orderSplit = billDjDeliverOrderSplitMapper.selectByPrimaryKey(orderSplitId);
+            djDeliverOrderItemMapper.updateDjDeliverOrderItemByOrderId(orderSplit.getOrderId());
+            djDeliverOrderMapper.cancelBooking(orderSplitId);
+            return ServerResponse.createBySuccessMessage("操作成功");
+        } catch (Exception e) {
+            logger.info("操作失败",e);
+            return ServerResponse.createByErrorMessage("操作失败"+e);
         }
     }
 
