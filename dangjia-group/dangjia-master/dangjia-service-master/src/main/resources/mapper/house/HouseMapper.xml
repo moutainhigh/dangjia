@@ -512,9 +512,16 @@
             <if test="budgetOk==1">
                 and (h.budget_ok =1 or h.budget_ok = 4)
             </if>
-            <if test="budgetOk!=1">
-                and h.budget_ok =#{budgetOk}
-            </if>
+            <choose>
+                <when test="userId != null and userId != ''">
+
+                </when>
+                <otherwise>
+                    <if test="budgetOk!=1">
+                        and h.budget_ok =#{budgetOk}
+                    </if>
+                </otherwise>
+            </choose>
         </if>
 
         <if test="searchKey!=null and searchKey!=''">
