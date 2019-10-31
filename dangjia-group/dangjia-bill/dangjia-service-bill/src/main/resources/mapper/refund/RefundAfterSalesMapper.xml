@@ -25,8 +25,26 @@
         <if test="null!=searchKey and ''!=searchKey">
             AND t2.product_name LIKE CONCAT('%',#{searchKey},'%')
         </if>)
+    </select>
 
-
+    <select id="queryRefundOrderInfoById" resultType="com.dangjia.acg.dto.refund.RefundOrderDTO">
+        SELECT
+            t1.storefont_id storefrontId,
+            t1.id orderId,
+            t1.address_id addressId,
+            t1.house_id houseId,
+            t1.business_order_number businessOrderNumber,
+            t1.order_number orderNumber,
+            t4.storefront_name storefrontName
+        FROM
+            dj_deliver_order t1,
+            dj_pay_business_order t3,
+            dj_basics_storefront t4
+        WHERE t1.business_order_number = t3.number
+        and t1.storefont_id=t4.id
+        AND t1.payment IS NOT NULL
+        AND t3.state = 3
+        AND t1.id = #{orderId}
     </select>
 
     <select id="queryRefundOrderItemList" resultType="com.dangjia.acg.dto.refund.RefundOrderItemDTO">
@@ -46,7 +64,9 @@
             (t.shop_count - (IFNULL(t.ask_count, 0)+IFNULL(t.return_count,0))) surplusCount,
             IFNULL(t.stevedorage_cost,0) stevedorageCost,
             IFNULL(t.transportation_cost,0) transportationCost,
-            t1.prod_template_id productTemplateId
+            t1.prod_template_id productTemplateId,
+            t1.is_upstairs_cost isUpstairsCost,
+            IFNULL(t1.move_cost,0) moveCost
         FROM
             dj_deliver_order_item t,
             dj_basics_storefront_product t1
@@ -76,7 +96,9 @@
             (t.shop_count - (IFNULL(t.ask_count, 0)+IFNULL(t.return_count,0))) surplusCount,
             IFNULL(t.stevedorage_cost,0) stevedorageCost,
             IFNULL(t.transportation_cost,0) transportationCost,
-            t1.prod_template_id productTemplateId
+            t1.prod_template_id productTemplateId,
+            t1.is_upstairs_cost isUpstairsCost,
+            IFNULL(t1.move_cost,0) moveCost
         FROM
             dj_deliver_order_item t,
             dj_basics_storefront_product t1

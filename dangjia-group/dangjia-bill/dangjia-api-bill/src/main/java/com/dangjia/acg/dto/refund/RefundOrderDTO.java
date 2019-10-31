@@ -21,5 +21,13 @@ public class RefundOrderDTO {
 
     private String orderNumber;//订单编号
 
+    private Double totalRransportationCost;//可退运费
+
+    private Double totalStevedorageCost;//可退搬运费
+
+    private Double actualTotalAmount;//退货金额（不含运费）
+
+    private Double totalAmount;//实退款(含运费)
+
     private List<RefundOrderItemDTO> orderDetailList;
 }

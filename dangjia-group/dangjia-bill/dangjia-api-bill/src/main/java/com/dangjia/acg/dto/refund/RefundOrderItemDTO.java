@@ -58,4 +58,8 @@ public class RefundOrderItemDTO {
     private String valueNameArr;//商品规格名称
 
     private String categoryId;//分类ID
+
+    private String isUpstairsCost;//是否按1层收取上楼费
+
+    private Double moveCost;//每层搬运费
 }

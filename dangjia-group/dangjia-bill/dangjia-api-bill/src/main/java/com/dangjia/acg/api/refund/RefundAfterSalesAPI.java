@@ -28,6 +28,22 @@ public interface RefundAfterSalesAPI {
                                                       @RequestParam("searchKey") String searchKey);
 
     /**
+     * 申请退款列表显示
+     *
+     * @param userToken        用户token
+     * @param cityId           城市ID
+     * @param houseId          房屋ID
+     * @param orderProductAttr 需退款商品列表
+     * @return
+     */
+    @PostMapping("/app/refund/refundOrder/queryRefundonlyInfoList")
+    @ApiOperation(value = "申请退款列表显示", notes = "申请退款列表显示")
+    ServerResponse queryRefundonlyInfoList(@RequestParam("userToken") String userToken,
+                                      @RequestParam("cityId") String cityId,
+                                      @RequestParam("houseId") String houseId,
+                                      @RequestParam("orderProductAttr") String orderProductAttr);
+
+    /**
      * 仅退款提交
      *
      * @param userToken        用户token
@@ -37,7 +53,7 @@ public interface RefundAfterSalesAPI {
      * @return
      */
     @PostMapping("/app/refund/refundOrder/saveRefundonlyInfo")
-    @ApiOperation(value = "查询需退款的订单", notes = "查询需退款的订单")
+    @ApiOperation(value = "仅退款提交", notes = "仅退款提交")
     ServerResponse saveRefundonlyInfo(@RequestParam("userToken") String userToken,
                                       @RequestParam("cityId") String cityId,
                                       @RequestParam("houseId") String houseId,

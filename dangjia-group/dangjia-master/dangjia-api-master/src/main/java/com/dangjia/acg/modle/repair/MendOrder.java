@@ -82,6 +82,11 @@ public class MendOrder extends BaseEntity {
 	@ApiModelProperty("运费")
 	private Double carriage;
 
+	@Column(name = "total_stevedorage_cost")
+	@Desc(value = "搬运费")
+	@ApiModelProperty("搬运费")
+	private Double totalStevedorageCost;
+
 
 	@Column(name = "actual_total_amount")
 	@Desc(value = "实际总价（不含运费）")
