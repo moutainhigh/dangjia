@@ -105,4 +105,27 @@
 
     </select>
 
+    <select id="queryStorefrontProductById" resultType="com.dangjia.acg.modle.storefront.StorefrontProduct">
+        select
+        id,
+        storefront_id as 'storefrontId',
+        prod_template_id as 'prodTemplateId',
+        goods_id as 'goodsId',
+        image,
+        IFNULL(detail_image,'')  as 'detailImage',
+        IFNULL(market_name,'')  as 'marketName',
+        sell_price as 'sellPrice',
+        supplied_num as 'suppliedNum',
+        IFNULL(is_upstairs_cost,'')  as 'isUpstairsCost',
+        IFNULL(is_delivery_install,'')  as 'isdeliveryInstall',
+        IFNULL(move_cost,'')   as 'moveCost',
+        is_shelf_status as 'isShelfStatus',
+        create_date as 'createDate',
+        modify_date as 'modifyDate',
+        data_status as 'dataStatus',
+        product_name as 'productName',
+        city_id as 'cityId'
+        from
+        dj_basics_storefront_product where id=#{id}
+    </select>
 </mapper>

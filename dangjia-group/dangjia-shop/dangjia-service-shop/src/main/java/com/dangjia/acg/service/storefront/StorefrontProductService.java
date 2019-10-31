@@ -195,15 +195,14 @@ public class StorefrontProductService {
             }
             List<Map<String,Object>> basicsStorefrontProductViewDTOList=new ArrayList<Map<String,Object>>();
             List<BasicsStorefrontProductViewDTO> list = istorefrontProductMapper.queryStorefrontProductViewDTOList(keyWord,storefrontId,cityId);
-            for (BasicsStorefrontProductViewDTO basicsStorefrontProductViewDTO:list) {
-                Map<String,Object> resMap= BeanUtils.beanToMap(basicsStorefrontProductViewDTO);
-                String id=basicsStorefrontProductViewDTO.getId();
-                StorefrontProduct spdto= istorefrontProductMapper.selectByPrimaryKey(id);
-               if(spdto==null)
-               {
-                   resMap.put("storefrontProduct",null);
-               }
-                resMap.put("storefrontProduct",spdto);
+            for (BasicsStorefrontProductViewDTO basicsStorefrontProductViewDTO : list) {
+                Map<String, Object> resMap = BeanUtils.beanToMap(basicsStorefrontProductViewDTO);
+                String id = basicsStorefrontProductViewDTO.getId();
+                StorefrontProduct spdto = istorefrontProductMapper.queryStorefrontProductById(id);
+                if (spdto == null) {
+                    resMap.put("storefrontProduct", null);
+                }
+                resMap.put("storefrontProduct", spdto);
 
                 basicsStorefrontProductViewDTOList.add(resMap);
             }

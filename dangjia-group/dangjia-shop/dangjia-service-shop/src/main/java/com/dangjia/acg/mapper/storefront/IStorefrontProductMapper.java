@@ -28,4 +28,6 @@ public interface IStorefrontProductMapper  extends Mapper<StorefrontProduct> {
 
     List<StorefrontDTO> queryStorefrontListByStorefrontId(String storefrontId, String searchKey);
 
+    StorefrontProduct queryStorefrontProductById(@Param("id") String id);
+
 }

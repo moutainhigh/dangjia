@@ -30,7 +30,7 @@ public interface StorefrontProductAPI {
     StorefrontProductListDTO querySingleStorefrontProductById(@RequestParam("id") String id);
 
     @PostMapping("/web/addStorefrontProduct")
-    @ApiOperation(value = "供货设置-增加已选商品", notes = "供货设置-增加已选商品")
+    @ApiOperation(value = "-增加已选商品", notes = "供货设置-增加已选商品")
     ServerResponse addStorefrontProduct(BasicsStorefrontProductDTO basicsStorefrontProductDTO);
 
     @PostMapping("/web/delStorefrontProductById")
