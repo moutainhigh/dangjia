@@ -10,12 +10,14 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
+import com.dangjia.acg.common.util.MathUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.refund.*;
-import com.dangjia.acg.mapper.delivery.DjDeliverOrderItemMapper;
 import com.dangjia.acg.mapper.config.IBillComplainMapper;
 import com.dangjia.acg.mapper.config.IBillConfigMapper;
+import com.dangjia.acg.mapper.delivery.IBillDjDeliverOrderItemMapper;
 import com.dangjia.acg.mapper.order.IBillOrderProgressMapper;
+import com.dangjia.acg.mapper.order.IBillQuantityRoomMapper;
 import com.dangjia.acg.mapper.refund.*;
 import com.dangjia.acg.model.Config;
 import com.dangjia.acg.modle.attribute.AttributeValue;
@@ -23,7 +25,7 @@ import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.complain.Complain;
 import com.dangjia.acg.modle.deliver.OrderItem;
-import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.design.QuantityRoom;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.order.OrderProgress;
@@ -43,6 +45,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -58,42 +61,35 @@ public class RefundAfterSalesService {
     protected static final Logger logger = LoggerFactory.getLogger(RefundAfterSalesService.class);
     @Autowired
     private RefundAfterSalesMapper refundAfterSalesMapper;
-
     @Autowired
     private IBillUnitMapper iBillUnitMapper;
     @Autowired
     private IBillBrandMapper iBillBrandMapper;
     @Autowired
     private IBillAttributeValueMapper iBillAttributeValueMapper;
-
     @Autowired
     private IBillProductTemplateMapper iBillProductTemplateMapper;
-
     @Autowired
     private IBillBasicsGoodsMapper iBillBasicsGoodsMapper;
-
     @Autowired
     private ConfigUtil configUtil;
-
     @Autowired
     private RedisClient redisClient;//缓存
     @Autowired
     private IBillMendOrderMapper iBillMendOrderMapper;
-
     @Autowired
     private IBillMendMaterialMapper iBillMendMaterialMapper;
 
     @Autowired
-    private DjDeliverOrderItemMapper djDeliverOrderItemMapper;
-
+    private IBillDjDeliverOrderItemMapper iBillDjDeliverOrderItemMapper;
     @Autowired
     private IBillOrderProgressMapper iBillOrderProgressMapper;
-
     @Autowired
     private IBillConfigMapper iBillConfigMapper;
-
     @Autowired
     private IBillComplainMapper iBillComplainMapper;
+    @Autowired
+    private IBillQuantityRoomMapper iBillQuantityRoomMapper;
 
     /**
      * 查询可退款的商品
@@ -123,6 +119,8 @@ public class RefundAfterSalesService {
         }
 
     }
+
+
 
     /**
      * 查询商品对应的规格详情，品牌，单位信息
@@ -205,7 +203,84 @@ public class RefundAfterSalesService {
         }
         return strNewValueNameArr;
     }
+    /**
+     * 申请退款页面，列表展示
+     * @param userToken        用户token
+     * @param cityId           城市ID
+     * @param houseId          房屋ID
+     * @param orderProductAttr 需退款商品列表
+     * @return
+     */
+    public ServerResponse queryRefundonlyInfoList(String userToken,String cityId,String houseId,String orderProductAttr){
+        try{
+            //查询房子信息，获取房子对应的楼层
+            QuantityRoom quantityRoom=iBillQuantityRoomMapper.getBillQuantityRoom(houseId,0);
+            Integer elevator= 1;//是否电梯房
+            String floor="1";
+            if(quantityRoom!=null&&StringUtils.isNotBlank(quantityRoom.getId())){
+                 elevator=quantityRoom.getElevator();//是否电梯房
+                 floor=quantityRoom.getFloor();//楼层
+            }
+            //获取退款商品列表
+            List<RefundOrderDTO> orderlist=new ArrayList<>();
+            JSONArray orderArrayList=JSONArray.parseArray(orderProductAttr);
+            if(orderArrayList!=null&&orderArrayList.size()>0) {
+                String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+                for (int i = 0; i < orderArrayList.size(); i++) {
+                    JSONObject obj = (JSONObject) orderArrayList.get(i);
+                    String orderId = (String) obj.get("orderId");
+                    RefundOrderDTO orderInfo = refundAfterSalesMapper.queryRefundOrderInfoById(orderId);
+                    Double totalRransportationCost = 0.0;//可退运费
+                    Double totalStevedorageCost = 0.0;//可退搬运费
+                    Double actualTotalAmount=0.0;//退货总额
+                    List<RefundOrderItemDTO> orderItemList=new ArrayList<>();
+                    //获取商品信息
+                    JSONArray orderItemProductList = obj.getJSONArray("orderItemProductList");
+                    for (int j = 0; j < orderItemProductList.size(); j++) {
+                        JSONObject productObj = (JSONObject) orderItemProductList.get(j);
+                        String orderItemId = (String) productObj.get("orderItemId");//订单详情号
+                       // String productId = (String) productObj.get("productId");//产品ID
+                        Double returnCount = productObj.getDouble("returnCount");//退货量
+                        RefundOrderItemDTO refundOrderItemDTO = refundAfterSalesMapper.queryRefundOrderItemInfo(orderItemId);
+                        if (refundOrderItemDTO == null) {
+                            return ServerResponse.createByErrorMessage("未找到对应的退货单信息");
+                        }
+                        setProductInfo(refundOrderItemDTO,address);
+                        Double price = refundOrderItemDTO.getPrice();//购买单价
+                        Double shopCount=refundOrderItemDTO.getShopCount();//购买数据
+                        Double transportationCost=refundOrderItemDTO.getTransportationCost();//运费
+                        Double stevedorageCost=refundOrderItemDTO.getStevedorageCost();//搬运费
+                        //计算可退运费
+                        if(transportationCost>0.0) {
+                            Double returnRransportationCost = CommonUtil.getReturnRransportationCost(price, shopCount, returnCount,transportationCost);
+                            totalRransportationCost=MathUtil.add(totalRransportationCost,returnRransportationCost);
+                        }
+                        //计算可退搬费
+                        if(stevedorageCost>0.0){
+                            String isUpstairsCost=refundOrderItemDTO.getIsUpstairsCost();//是否按1层收取上楼费
+                            Double moveCost=refundOrderItemDTO.getMoveCost();//每层搬超级赛亚人费
+                            Double returnStevedorageCost=CommonUtil.getReturnStevedorageCost(elevator,floor,isUpstairsCost,moveCost,returnCount);
+                            totalStevedorageCost=MathUtil.add(totalStevedorageCost,returnStevedorageCost);
+                        }
+                        actualTotalAmount=MathUtil.add(actualTotalAmount,MathUtil.mul(price,returnCount));
+                        orderItemList.add(refundOrderItemDTO);
+                    }
+                    orderInfo.setTotalRransportationCost(totalRransportationCost);//可退运费
+                    orderInfo.setTotalStevedorageCost(totalStevedorageCost);//可退搬运费
+                    orderInfo.setOrderDetailList(orderItemList);
+                    orderInfo.setActualTotalAmount(actualTotalAmount);//退货总额
+                    orderInfo.setTotalAmount(MathUtil.add(MathUtil.add(actualTotalAmount,totalRransportationCost),totalStevedorageCost));//实退款
+                    //添加对应的信息
+                    orderlist.add(orderInfo);
+                }
+            }
+            return ServerResponse.createBySuccess("查询成功",orderlist);
+        }catch (Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
 
+    }
     /**
      * 仅退款提交
      * @param userToken  用户token
@@ -222,6 +297,14 @@ public class RefundAfterSalesService {
         }
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         Member member = (Member) object;
+        //查询房子信息，获取房子对应的楼层
+        QuantityRoom quantityRoom=iBillQuantityRoomMapper.getBillQuantityRoom(houseId,0);
+        Integer elevator= 1;//是否电梯房
+        String floor="1";
+        if(quantityRoom!=null&&StringUtils.isNotBlank(quantityRoom.getId())){
+            elevator=quantityRoom.getElevator();//是否电梯房
+            floor=quantityRoom.getFloor();//楼层
+        }
         MendOrder mendOrder;
         Example example;
         JSONArray orderArrayList=JSONArray.parseArray(orderProductAttr);
@@ -240,7 +323,9 @@ public class RefundAfterSalesService {
                 mendOrder.setState(0);//生成中
                 mendOrder.setStorefrontId(storefrontId);
                 mendOrder.setOrderId(orderId);
-                mendOrder.setTotalAmount(0.0);
+                Double totalRransportationCost = 0.0;//可退运费
+                Double totalStevedorageCost = 0.0;//可退搬运费
+                Double actualTotalAmount=0.0;//退货总额
                 //获取商品信息
                 JSONArray orderItemProductList = obj.getJSONArray("orderItemProductList");
                 for (int j = 0; j < orderItemProductList.size(); j++) {
@@ -255,24 +340,44 @@ public class RefundAfterSalesService {
                     setProductInfo(refundOrderItemDTO,address);
                     Double surplusCount=refundOrderItemDTO.getSurplusCount();
                     logger.info("退货量{}，可退量{}",returnCount,surplusCount);
-                    if((new BigDecimal(surplusCount).compareTo(new BigDecimal(returnCount)))<0){
+                    if(MathUtil.sub(surplusCount,returnCount)<0){
                         return ServerResponse.createByErrorMessage("退货量大于可退货量，不能退。");
                     }
                     refundOrderItemDTO.setReturnCount(returnCount);
                     //修改订单中的退货量为当前退货的量
                     OrderItem orderItem=new OrderItem();
                     orderItem.setId(refundOrderItemDTO.getOrderItemId());
-                    BigDecimal newReturnCount=new BigDecimal(orderItem.getReturnCount()).add(new BigDecimal(returnCount));
-                    orderItem.setReturnCount(newReturnCount.doubleValue());
-                    iBillOrderItemMapper.updateByPrimaryKeySelective(orderItem);
-                    orderItem.setReturnCount(returnCount);
-                    djDeliverOrderItemMapper.updateByPrimaryKeySelective(orderItem);
+                    orderItem.setReturnCount(MathUtil.add(orderItem.getReturnCount(),returnCount));
+                    iBillDjDeliverOrderItemMapper.updateByPrimaryKeySelective(orderItem);
+                    Double price = refundOrderItemDTO.getPrice();//购买单价
+                    Double shopCount=refundOrderItemDTO.getShopCount();//购买数据
+                    Double transportationCost=refundOrderItemDTO.getTransportationCost();//运费
+                    Double stevedorageCost=refundOrderItemDTO.getStevedorageCost();//搬运费
+                    //计算可退运费
+                    if(transportationCost>0.0) {
+                        Double returnRransportationCost = CommonUtil.getReturnRransportationCost(price, shopCount, returnCount,transportationCost);
+                        totalRransportationCost=MathUtil.add(totalRransportationCost,returnRransportationCost);
+                        refundOrderItemDTO.setTransportationCost(returnRransportationCost);
+                    }
+                    //计算可退搬费
+                    if(stevedorageCost>0.0){
+                        String isUpstairsCost=refundOrderItemDTO.getIsUpstairsCost();//是否按1层收取上楼费
+                        Double moveCost=refundOrderItemDTO.getMoveCost();//每层搬超级赛亚人费
+                        Double returnStevedorageCost=CommonUtil.getReturnStevedorageCost(elevator,floor,isUpstairsCost,moveCost,returnCount);
+                        totalStevedorageCost=MathUtil.add(totalStevedorageCost,returnStevedorageCost);
+                        refundOrderItemDTO.setStevedorageCost(totalStevedorageCost);
+                    }
                     //添回退款申请明细信息
                     MendMateriel mendMateriel = saveBillMendMaterial(mendOrder,cityId,refundOrderItemDTO,productId,surplusCount);
-                    mendOrder.setTotalAmount(mendOrder.getTotalAmount() + mendMateriel.getTotalPrice());//修改总价
+                    actualTotalAmount=MathUtil.add(actualTotalAmount,MathUtil.mul(price,returnCount));
+
                 }
                 mendOrder.setModifyDate(new Date());
                 mendOrder.setState(1);
+                mendOrder.setCarriage(totalRransportationCost);//运费
+                mendOrder.setTotalStevedorageCost(totalStevedorageCost);//搬运费
+                mendOrder.setActualTotalAmount(actualTotalAmount);//退货总额
+                mendOrder.setTotalAmount(MathUtil.add(MathUtil.add(actualTotalAmount,totalRransportationCost),totalStevedorageCost));//实退款，含运费
                 //添加对应的申请退货单信息
                 iBillMendOrderMapper.insert(mendOrder);
                 //添加对应的流水记录节点信息
@@ -334,6 +439,8 @@ public class RefundAfterSalesService {
         if (unit!=null&&unit.getType() == 1) {
             mendMateriel.setShopCount(Math.ceil(returnCount.doubleValue()));
         }
+        mendMateriel.setStevedorageCost(refundOrderItemDTO.getStevedorageCost());
+        mendMateriel.setTransportationCost(refundOrderItemDTO.getTransportationCost());
         mendMateriel.setMendOrderId(mendOrder.getId());
         mendMateriel.setProductId(productId);
         mendMateriel.setCategoryId(refundOrderItemDTO.getCategoryId());
@@ -587,11 +694,11 @@ public class RefundAfterSalesService {
             for(RefundRepairOrderMaterialDTO rm:repairMaterialList){
                 Double returnCount=rm.getReturnCount();
                 //修改订单详情表的退货字段
-                OrderItem orderItem=iBillOrderItemMapper.selectByPrimaryKey(rm.getOrderItemId());
+                OrderItem orderItem=iBillDjDeliverOrderItemMapper.selectByPrimaryKey(rm.getOrderItemId());
                 orderItem.setId(rm.getOrderItemId());
                 BigDecimal newReturnCount=new BigDecimal(orderItem.getReturnCount()).subtract(new BigDecimal(returnCount));
                 orderItem.setReturnCount(newReturnCount.doubleValue());
-                iBillOrderItemMapper.updateByPrimaryKeySelective(orderItem);
+                iBillDjDeliverOrderItemMapper.updateByPrimaryKeySelective(orderItem);
             }
         }
         MendOrder mendOrder=new MendOrder();

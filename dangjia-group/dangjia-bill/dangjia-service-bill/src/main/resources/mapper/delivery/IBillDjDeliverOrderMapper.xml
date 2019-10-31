@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.dangjia.acg.mapper.delivery.DjDeliverOrderMapper">
+<mapper namespace="com.dangjia.acg.mapper.delivery.IBillDjDeliverOrderMapper">
+
+
+    <select id="queryApplyDec" resultType="java.lang.String">
+        select apply_dec as applyDec
+        from dj_core_house_flow_apply
+        order by create_date DESC limit 4
+    </select>
 
     <select id="queryDjDeliverOrderStorefront" resultType="com.dangjia.acg.dto.delivery.OrderStorefrontDTO">
         SELECT
@@ -127,5 +134,6 @@
             a.id = b.order_split_id
         AND a.id = #{orderSplitId}
     </delete>
+
 
 </mapper>

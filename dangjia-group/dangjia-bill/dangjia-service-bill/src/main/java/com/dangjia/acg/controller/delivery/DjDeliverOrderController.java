@@ -19,14 +19,25 @@ import javax.servlet.http.HttpServletRequest;
  */
 @RestController
 public class DjDeliverOrderController implements DjDeliverOrderAPI {
+
     @Autowired
     private DjDeliverOrderService djDeliverOrderService;
+
 
     @Override
     @ApiMethod
     public ServerResponse queryAllDeliverOrder(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId,String orderStatus) {
         return djDeliverOrderService.queryAllDeliverOrder(pageDTO,userId,cityId,orderStatus);
     }
+
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryOrderNumber(HttpServletRequest request,String houseId) {
+        return djDeliverOrderService.queryOrderNumber(houseId);
+    }
+
+
 
 
 }

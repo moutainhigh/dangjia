@@ -1,7 +1,7 @@
 package com.dangjia.acg.common.util;
 
 import com.alibaba.fastjson.JSON;
-import org.apache.commons.beanutils.PropertyUtilsBean;
+import com.google.common.math.DoubleMath;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.shiro.web.session.HttpServletSession;
@@ -9,7 +9,6 @@ import org.apache.shiro.web.session.HttpServletSession;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.beans.PropertyDescriptor;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.net.InetAddress;
@@ -474,5 +473,47 @@ public class CommonUtil {
       }
     }
     return valueLength;
+  }
+
+  /**
+   * 计算可退搬运费
+   * @param price 单价
+   * @param shopCount 购买总数
+   * @param returnCount 退货数量
+   * @param transportationCost  购买时运费
+   * @deprecated  计算规则为可退运费=(可退价钱/购买总价)*购买时总运费,四舍五入
+   * @return
+   */
+  public static Double getReturnRransportationCost(Double price, Double shopCount, Double returnCount, Double transportationCost){
+    Double returnTotalPrice=MathUtil.mul(price,returnCount);//可退价钱
+    Double totalPrice=MathUtil.mul(price,shopCount);//购买总价
+    Double returnRransportationCost=MathUtil.mul(MathUtil.div(returnTotalPrice,totalPrice),transportationCost);
+    return new Long(Math.round(returnRransportationCost)).doubleValue();
+  }
+
+  /**
+   * 计算可退搬运费
+   * @param elevator 是否电梯房（1是，0否）
+   * @param floor 电梯楼层
+   * @param isUpstairsCost 是否按1层收取上楼费(1是，0否）
+   * @param moveCost 每层搬运费
+   * @param returnCount 退货量
+   * @deprecated 1.先判断是否按1层收取上楼费
+   *             1.1若为否，则判断是否为电梯房
+   *             1.2若为否，则楼层数设置为实际楼层数，
+   *             1.3若都不为否，则楼层数设为1
+   *            可退搬运费=楼层数*每层搬运费*退货量
+   * @return
+   */
+  public static Double getReturnStevedorageCost(int elevator,String floor,String isUpstairsCost,Double moveCost,Double returnCount){
+      Double floorCount=1.0;//楼层数
+      if("0".equals(isUpstairsCost)){//判断是否按1层收取上楼费，若为否
+           if(elevator==0){//若不为电梯房，则楼层数设置为实际楼层数
+             if(StringUtils.isNotBlank(floor)){
+               floorCount=new Double(floor).doubleValue();
+             }
+           }
+      }
+      return MathUtil.mul(MathUtil.mul(floorCount,moveCost),returnCount);
   }
 }

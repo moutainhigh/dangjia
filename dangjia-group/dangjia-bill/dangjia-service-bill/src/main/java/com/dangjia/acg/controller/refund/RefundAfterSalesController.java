@@ -43,6 +43,19 @@ public class RefundAfterSalesController implements RefundAfterSalesAPI {
     }
 
     /**
+     * 申请退款页面，列表展示
+     * @param userToken        用户token
+     * @param cityId           城市ID
+     * @param houseId          房屋ID
+     * @param orderProductAttr 需退款商品列表
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryRefundonlyInfoList(String userToken,String cityId,String houseId,String orderProductAttr){
+        return refundAfterSalesService.queryRefundonlyInfoList(userToken,cityId,houseId,orderProductAttr);
+    }
+    /**
      *
      * @param userToken  用户token
      * @param cityId 城市ID

@@ -28,6 +28,12 @@ public interface RefundAfterSalesMapper extends Mapper<Order> {
     List<RefundOrderDTO> queryRefundOrderList(@Param("houseId") String houseId,@Param("searchKey") String searchKey);
 
     /**
+     * 根据订单ID查询订单信息
+     * @param orderId
+     * @return
+     */
+    RefundOrderDTO queryRefundOrderInfoById(@Param("orderId") String orderId);
+    /**
      * 查询可退款的订单详情
      * @param orderId
      * @return
