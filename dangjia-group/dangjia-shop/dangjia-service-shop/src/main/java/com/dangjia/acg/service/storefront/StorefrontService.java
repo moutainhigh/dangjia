@@ -235,12 +235,6 @@ public class StorefrontService {
             if (i <= 0) {
                 return ServerResponse.createByErrorMessage("修改失败!");
             }
-            StorefrontDTO sf=redisClient.getCache(Constants.FENGJIAN_STOREFRONT+storefrontDTO.getUserId(),StorefrontDTO.class);
-            if(sf==null)
-            {
-                redisClient.put(Constants.FENGJIAN_STOREFRONT+storefrontDTO.getUserId(),storefrontDTO);
-            }
-
             return ServerResponse.createBySuccessMessage("修改成功!");
         } catch (Exception e) {
             logger.error("修改失败：", e);

@@ -23,6 +23,7 @@ public interface WebMendMaterielAPI {
     @PostMapping(value = "web/repair/webMendMateriel/landlordState")
     @ApiOperation(value = "业主退货单列表", notes = "业主退货单列表")
     ServerResponse landlordState(@RequestParam("request") HttpServletRequest request,
+                                 @RequestParam("cityId") String cityId,
                                  @RequestParam("houseId") String houseId,
                                  @RequestParam("pageDTO") PageDTO pageDTO,
                                  @RequestParam("beginDate") String beginDate,
@@ -46,6 +47,7 @@ public interface WebMendMaterielAPI {
     @ApiOperation(value = "房子id查询退货单列表", notes = "房子id查询退货单列表")
     ServerResponse materialBackState(
             @RequestParam("request") HttpServletRequest request,
+            @RequestParam("cityId") String cityId,
             @RequestParam("houseId") String houseId,
             @RequestParam("pageDTO") PageDTO pageDTO,
             @RequestParam("beginDate") String beginDate,
