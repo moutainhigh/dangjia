@@ -88,4 +88,40 @@ public class RefundAfterSalesController implements RefundAfterSalesAPI {
     public ServerResponse queryRefundOnlyHistoryOrderInfo(String cityId,String repairMendOrderId){
         return refundAfterSalesService.queryRefundOnlyHistoryOrderInfo(cityId,repairMendOrderId);
     }
+
+    /**
+     * 撤销退款申请
+     * @param cityId
+     * @param repairMendOrderId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse cancelRepairApplication(String cityId,String repairMendOrderId){
+        try{
+            return refundAfterSalesService.cancelRepairApplication(cityId,repairMendOrderId);
+        }catch (Exception e){
+            logger.error("撤销失败",e);
+            return ServerResponse.createByErrorMessage("撤销失败");
+        }
+    }
+
+    /**
+     * 业主申诉退货
+     * @param userToken
+     * @param content  申诉内容
+     * @param houseId  房子ID
+     * @param repairMendOrderId  申诉单号
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse addRepairComplain(String userToken,String content,String houseId,String repairMendOrderId){
+        try{
+            return refundAfterSalesService.addRepairComplain(userToken,content,houseId,repairMendOrderId);
+        }catch (Exception e){
+            logger.error("申诉失败",e);
+            return ServerResponse.createByErrorMessage("申诉失败");
+        }
+    }
 }

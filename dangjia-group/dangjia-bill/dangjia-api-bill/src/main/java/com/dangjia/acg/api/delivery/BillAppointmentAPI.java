@@ -35,4 +35,14 @@ public interface BillAppointmentAPI {
                                      @RequestParam("userToken") String userToken,
                                      @RequestParam("jsonStr") String jsonStr);
 
+    @PostMapping("/app/billAppointment/queryReserved")
+    @ApiOperation(value = "已预约", notes = "已预约")
+    ServerResponse queryReserved(@RequestParam("request") HttpServletRequest request,
+                                 @RequestParam("pageDTO") PageDTO pageDTO,
+                                 @RequestParam("houseId") String houseId);
+
+    @PostMapping("/app/billAppointment/updateReserved")
+    @ApiOperation(value = "取消预约", notes = "取消预约")
+    ServerResponse updateReserved(@RequestParam("request") HttpServletRequest request,
+                                  @RequestParam("orderSplitId") String orderSplitId);
 }

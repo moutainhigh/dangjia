@@ -11,6 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import java.util.Date;
 
 /**
  *  订单明细
@@ -135,7 +136,7 @@ public class OrderItem extends BaseEntity {
 	@Column(name = "reservation_deliver_time")
 	@Desc(value = "预约发货时间")
 	@ApiModelProperty("预约发货时间")
-	private String reservationDeliverTime;//预约发货时间
+	private Date reservationDeliverTime;//预约发货时间
 
 	@Column(name = "order_status")
 	@Desc(value = "订单状态（1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭）")

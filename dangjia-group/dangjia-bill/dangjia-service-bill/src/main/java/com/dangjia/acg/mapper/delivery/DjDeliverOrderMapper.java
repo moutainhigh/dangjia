@@ -28,8 +28,33 @@ public interface DjDeliverOrderMapper extends Mapper<DjDeliverOrder> {
     List<OrderStorefrontDTO> queryDjDeliverOrderStorefront(@Param("houseId") String houseId);
 
 
+    /**
+     * 预约发货商品
+     * @param orderId
+     * @return
+     */
     List<AppointmentDTO> queryAppointment(@Param("orderId") String orderId);
 
 
+    /**
+     * 已预约发货店铺对象
+     * @param houseId
+     * @return
+     */
+    List<OrderStorefrontDTO> queryReservedStorefront(@Param("houseId") String houseId);
+
+    /**
+     * 已预约发货商品
+     * @param orderId
+     * @return
+     */
+    List<AppointmentDTO> queryReserved(@Param("orderId") String orderId);
+
+
+    /**
+     * 取消预约
+     * @param orderSplitId
+     */
+    int cancelBooking(@Param("orderSplitId") String orderSplitId);
 
 }

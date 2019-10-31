@@ -42,6 +42,10 @@ public class RefundRepairOrderDTO {
 
     private String repairProductName;//退款商品名称（一个商品时才有）
 
+    private String repairNewNode;//最新处理节点
+
+    private String reparirRemainingTime;//订单剩余处理时间
+
     private List<RefundRepairOrderMaterialDTO> orderMaterialList;
 
     private List<OrderProgressDTO> orderProgressList;
