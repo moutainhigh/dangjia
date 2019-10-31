@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.delivery.IBillDjDeliverOrderItemMapper">
+
+    <select id="queryMaterialNumber" resultType="com.dangjia.acg.dto.delivery.MaterialNumberDTO">
+        select
+        cwt.type,
+        doi.house_id as houseId,
+        doi.shop_count as shopCount,
+        doi.ask_count as askCount,
+        doi.return_count as returnCount
+        from dj_deliver_order doa
+        INNER JOIN dj_deliver_order_item doi on doa.id = doi.order_id
+        INNER JOIN dj_core_worker_type cwt on doa.worker_type_id = cwt.id
+        where doa.house_id = #{houseId}
+    </select>
+
+
+
+    <select id="queryNodeNumber" resultType="com.dangjia.acg.dto.delivery.NodeNumberDTO">
+        select
+        mtr.state,
+        mtr.house_id as houseId,
+        chf.type
+        from
+        dj_matter_technology_record mtr
+        INNER  JOIN dj_core_worker_type chf on mtr.worker_type_id = chf.id
+        where mtr.house_id = #{houseId}
+    </select>
+
+
+</mapper>

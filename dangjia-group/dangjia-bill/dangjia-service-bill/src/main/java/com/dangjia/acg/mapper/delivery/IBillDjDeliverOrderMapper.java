@@ -3,6 +3,7 @@ package com.dangjia.acg.mapper.delivery;
 
 import com.dangjia.acg.dto.delivery.AppointmentDTO;
 import com.dangjia.acg.dto.delivery.OrderStorefrontDTO;
+import com.dangjia.acg.modle.deliver.Order;
 import org.apache.ibatis.annotations.Param;
 import com.dangjia.acg.modle.delivery.DjDeliverOrder;
 import org.springframework.stereotype.Repository;
@@ -18,7 +19,7 @@ import java.util.List;
  * Time: 下午 3:57
  */
 @Repository
-public interface DjDeliverOrderMapper extends Mapper<DjDeliverOrder> {
+public interface IBillDjDeliverOrderMapper extends Mapper<Order> {
 
     /**
      * 预约发货店铺对象
@@ -36,6 +37,7 @@ public interface DjDeliverOrderMapper extends Mapper<DjDeliverOrder> {
     List<AppointmentDTO> queryAppointment(@Param("orderId") String orderId);
 
 
+    List<String> queryApplyDec();
     /**
      * 已预约发货店铺对象
      * @param houseId
