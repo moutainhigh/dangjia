@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.repair;
 
+import com.dangjia.acg.api.BasicsStorefrontAPI;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.api.supplier.DjSupplierAPI;
@@ -62,6 +63,9 @@ public class MendMaterielService {
     private DjSupplierAPI djSupplierAPI ;
     @Autowired
     private RedisClient redisClient;
+    @Autowired
+    private BasicsStorefrontAPI basicsStorefrontAPI;
+
     /**
      * 要货退货 查询补材料
      */
@@ -75,11 +79,15 @@ public class MendMaterielService {
      * landlordState
      * 0生成中,1平台审核中,2不通过,3通过
      */
-    public ServerResponse landlordState(String userId,String houseId, PageDTO pageDTO, String beginDate, String endDate, String state,String likeAddress) {
+    public ServerResponse landlordState(String userId,String cityId,String houseId, PageDTO pageDTO, String beginDate, String endDate, String state,String likeAddress) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
 //            List<MendOrder> mendOrderList = mendOrderMapper.landlordState(houseId);
-            StorefrontDTO storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userId, StorefrontDTO.class);
+            Storefront storefront= basicsStorefrontAPI.queryStorefrontByUserID(userId,cityId);
+            if(storefront==null)
+            {
+                return ServerResponse.createByErrorMessage("不存在店铺信息");
+            }
             List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(storefront.getId(),houseId, 4, beginDate, endDate, state,likeAddress);
             PageInfo pageResult = new PageInfo(mendOrderList);
             List<MendOrderDTO> mendOrderDTOS = getMendOrderDTOList(mendOrderList);
@@ -96,11 +104,15 @@ public class MendMaterielService {
      * material_back_state
      * 0生成中,1平台审核中，2平台审核不通过，3审核通过，4管家取消
      */
-    public ServerResponse materialBackState(String userId,String houseId, PageDTO pageDTO, String beginDate, String endDate, String state,String likeAddress) {
+    public ServerResponse materialBackState(String userId,String cityId,String houseId, PageDTO pageDTO, String beginDate, String endDate, String state,String likeAddress) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             //通过缓存查询店铺信息
-            StorefrontDTO storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userId,StorefrontDTO.class);
+            Storefront storefront= basicsStorefrontAPI.queryStorefrontByUserID(userId,cityId);
+            if(storefront==null)
+            {
+                return ServerResponse.createByErrorMessage("不存在店铺信息");
+            }
 //            List<MendOrder> mendOrderList = mendOrderMapper.materialBackState(houseId); 2
             List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(storefront.getId(),houseId, 2, beginDate, endDate, state,likeAddress);
             PageInfo pageResult = new PageInfo(mendOrderList);

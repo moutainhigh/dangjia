@@ -91,6 +91,8 @@ public class OrderSplitService {
     @Autowired
     private DjSupplierAPI djSupplierAPI ;
 
+    @Autowired
+    private BasicsStorefrontAPI basicsStorefrontAPI;
 
     @Autowired
     private RedisClient redisClient;
@@ -551,10 +553,10 @@ public class OrderSplitService {
     /**
      * 根据房子id查询要货单列表
      */
-    public ServerResponse getOrderSplitList(String userId,String houseId) {
+    public ServerResponse getOrderSplitList(String userId,String cityId,String houseId) {
         try {
             //通过缓存查询店铺信息
-            StorefrontDTO storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userId,StorefrontDTO.class);
+            Storefront storefront= basicsStorefrontAPI.queryStorefrontByUserID(userId,cityId);
             if(storefront==null)
             {
                 return ServerResponse.createByErrorMessage("不存在店铺信息");

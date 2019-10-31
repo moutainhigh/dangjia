@@ -203,7 +203,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         left  JOIN dj_house as house
         on (rmo.house_id = house.id  )
         where 1=1
-        and rmo.state > 0
         and  rmo.storefront_id = #{storefrontId}
         <if test = "state!=null and state!=''">
             and  rmo.state = #{state}
@@ -211,7 +210,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <if test = "houseId!=null and houseId!=''">
             and  rmo.house_id = #{houseId}
         </if>
-        <if test = "type>-1">
+        <if test = "type!=null and type!=''">
             and rmo.type = #{type}
         </if>
         <if test="beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">

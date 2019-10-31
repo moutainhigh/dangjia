@@ -31,10 +31,10 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse landlordState(HttpServletRequest request,String houseId, PageDTO pageDTO, String beginDate, String endDate, String state,String likeAddress) {
+    public ServerResponse landlordState(HttpServletRequest request,String cityId,String houseId, PageDTO pageDTO, String beginDate, String endDate, String state,String likeAddress) {
         String userId = request.getParameter("userId");
         //通过缓存查询店铺信息
-        return mendMaterielService.landlordState(userId,houseId, pageDTO, beginDate, endDate,state, likeAddress);
+        return mendMaterielService.landlordState(userId,cityId,houseId, pageDTO, beginDate, endDate,state, likeAddress);
     }
 
     /**
@@ -42,9 +42,9 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse materialBackState(HttpServletRequest request,String houseId, PageDTO pageDTO, String beginDate, String endDate,String state, String likeAddress) {
+    public ServerResponse materialBackState(HttpServletRequest request,String cityId,String houseId, PageDTO pageDTO, String beginDate, String endDate,String state, String likeAddress) {
         String userId = request.getParameter("userId");
-        return mendMaterielService.materialBackState(userId,houseId, pageDTO, beginDate, endDate, state,likeAddress);
+        return mendMaterielService.materialBackState(userId,cityId,houseId, pageDTO, beginDate, endDate, state,likeAddress);
     }
 
     /**
