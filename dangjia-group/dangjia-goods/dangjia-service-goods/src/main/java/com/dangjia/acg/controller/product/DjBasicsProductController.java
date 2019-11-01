@@ -1,5 +1,6 @@
 package com.dangjia.acg.controller.product;
 
+import com.dangjia.acg.api.BasicsStorefrontAPI;
 import com.dangjia.acg.api.product.DjBasicsProductAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
@@ -7,6 +8,7 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.product.BasicsGoodsDTO;
 import com.dangjia.acg.dto.product.BasicsProductDTO;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
+import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.service.product.DjBasicsGoodsService;
 import com.dangjia.acg.service.product.DjBasicsProductTemplateService;
 import com.github.pagehelper.PageInfo;
@@ -33,6 +35,9 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
 
     @Autowired
     private DjBasicsGoodsService djBasicsGoodsService;
+
+    @Autowired
+    private BasicsStorefrontAPI basicsStorefrontAPI ;
 
     @Override
     @ApiMethod
@@ -314,7 +319,8 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
     @ApiMethod
     public ServerResponse queryGoodsListStorefront(HttpServletRequest request, PageDTO pageDTO, String categoryId, String name, String cityId, Integer type) {
         String userId=request.getParameter("userId");
-        return djBasicsGoodsService.queryGoodsListStorefront(userId,pageDTO, categoryId, name, type);
+        Storefront storefront=basicsStorefrontAPI.queryStorefrontByUserID(userId,cityId);
+        return djBasicsGoodsService.queryGoodsListStorefront(storefront.getId(),pageDTO, categoryId, name, type);
     }
 
 

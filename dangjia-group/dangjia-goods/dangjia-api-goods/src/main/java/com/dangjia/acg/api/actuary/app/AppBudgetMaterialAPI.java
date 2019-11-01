@@ -37,20 +37,6 @@ public interface AppBudgetMaterialAPI {
                                          @RequestParam("houseId") String houseId,
                                          @RequestParam("productType") String productType);
 
-    /**
-     *
-     * @param request
-     * @param cityId 城市id
-     * @param houseId  房子id
-     * @param workerTypeId 工种ID
-     * @return
-     */
-    @PostMapping("/actuary/budgetMaterial/getHouseBudgetStageCost")
-    @ApiOperation(value = "精算阶段花费统计", notes = "精算阶段花费统计")
-    ServerResponse getHouseBudgetStageCost(
-            @RequestParam("request") HttpServletRequest request,
-            @RequestParam("cityId") String cityId,
-            @RequestParam("houseId") String houseId,
-            @RequestParam("workerTypeId") String workerTypeId);
+
 
 }

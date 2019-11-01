@@ -109,16 +109,17 @@ public class StorefrontProductService {
             //判断是否重复添加
             Example example = new Example(StorefrontProduct.class);
             example.createCriteria().andEqualTo(StorefrontProduct.PROD_TEMPLATE_ID, basicsStorefrontProductDTO.getProdTemplateId())
-            .andEqualTo(StorefrontProduct.STOREFRONT_ID,basicsStorefrontProductDTO.getStorefrontId());
+            .andEqualTo(StorefrontProduct.STOREFRONT_ID,basicsStorefrontProductDTO.getStorefrontId())
+            .andEqualTo(StorefrontProduct.CITY_ID,basicsStorefrontProductDTO.getCityId());
             List<StorefrontProduct> list = istorefrontProductMapper.selectByExample(example);
             if (list.size() > 0) {
-                Example example2=new Example(StorefrontProduct.class);
-                example.createCriteria().andEqualTo(StorefrontProduct.ID,list.get(0).getId());
-
-                StorefrontProduct storefrontProduct=new StorefrontProduct();
+                Example exampleup = new Example(StorefrontProduct.class);
+                exampleup.createCriteria().andEqualTo(StorefrontProduct.ID, list.get(0).getId());
+                StorefrontProduct storefrontProduct = new StorefrontProduct();
                 storefrontProduct.setDataStatus(0);
-                int i=istorefrontProductMapper.updateByExampleSelective(storefrontProduct,example2);
-                if (i<0)
+                int i = istorefrontProductMapper.updateByExampleSelective(storefrontProduct, exampleup);
+
+                if (i < 0)
                     return ServerResponse.createByErrorMessage("店铺商品新增成功");
                 return ServerResponse.createBySuccessMessage("店铺商品新增成功");
             }
@@ -212,19 +213,17 @@ public class StorefrontProductService {
                 String[] imgArr = spdto.getImage().split(",");
                 StringBuilder imgStr = new StringBuilder();
                 StringBuilder imgUrlStr = new StringBuilder();
-                StringTool.getImages(address, imgArr, imgUrlStr,imgStr );
-                spdto.setImage(imgStr.toString());
-                spdto.setImageUrl(imgUrlStr.toString());
-
+                StringTool.getImages(address, imgArr, imgStr , imgUrlStr);
+                spdto.setImage(imgUrlStr.toString());
+                spdto.setImageUrl(imgStr.toString());
 
 
                 String[] dtimgArr = spdto.getDetailImage().split(",");
                 StringBuilder dtimgStr = new StringBuilder();
                 StringBuilder dtimgUrlStr = new StringBuilder();
-                StringTool.getImages(address, dtimgArr,dtimgUrlStr , dtimgStr);
-                spdto.setDetailImage(imgStr.toString());
-                spdto.setDetailImageUrl(imgUrlStr.toString());
-
+                StringTool.getImages(address, dtimgArr,dtimgStr  ,dtimgUrlStr );
+                spdto.setDetailImage(dtimgUrlStr.toString());
+                spdto.setDetailImageUrl(dtimgStr.toString());
 
 
                 resMap.put("storefrontProduct", spdto);

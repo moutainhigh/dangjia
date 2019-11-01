@@ -48,6 +48,24 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
     }
 
     /**
+     *
+     * @param request
+     * @param cityId
+     * @param houseId 房子id
+     * @param pageDTO
+     * @param beginDate 开始时间
+     * @param endDate 结束时间
+     * @param state 状态：（0生成中,1处理中,2不通过取消,3已通过,4已全部结算,5已撤回,5已关闭）
+     * @param likeAddress 模糊查询参数
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse materialBackStateHandle(HttpServletRequest request, String cityId, String houseId, PageDTO pageDTO, String beginDate, String endDate, String state, String likeAddress) {
+        return mendMaterielService.materialBackStateHandle(request,cityId,houseId,pageDTO,beginDate,endDate,state,likeAddress);
+    }
+
+    /**
      * 根据mendOrderId查明细
      */
     @Override

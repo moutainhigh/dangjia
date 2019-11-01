@@ -19,8 +19,6 @@ import javax.servlet.http.HttpServletRequest;
 @RestController
 public class AppBudgetMaterialController implements AppBudgetMaterialAPI {
 
-    @Autowired
-    private BudgetMaterialService budgetMaterialService;
 
     @Override
     @ApiMethod
@@ -34,8 +32,4 @@ public class AppBudgetMaterialController implements AppBudgetMaterialAPI {
         return null;
     }
 
-    @Override
-    public ServerResponse getHouseBudgetStageCost(HttpServletRequest request, String cityId, String houseId, String workerTypeId) {
-        return budgetMaterialService.getHouseBudgetStageCost(houseId,workerTypeId);
-    }
 }

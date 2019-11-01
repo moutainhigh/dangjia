@@ -55,6 +55,34 @@ public interface WebMendMaterielAPI {
             @RequestParam("state") String state,
             @RequestParam("likeAddress") String likeAddress);
 
+
+
+    /**
+     * auther:chenyufeng
+     * date:2019.11.01
+     * @param request
+     * @param houseId 房子id
+     * @param pageDTO
+     * @param beginDate 开始时间
+     * @param endDate 结束时间
+     * @param state 状态：（0生成中,1处理中,2不通过取消,3已通过,4已全部结算,5已撤回,5已关闭）
+     * @param likeAddress 模糊查询参数
+     * @return
+     */
+    @PostMapping(value = "web/repair/webMendMateriel/materialBackStateHandle")
+    @ApiOperation(value = "店铺管理—售后管理—工匠退货(已经处理)", notes = "店铺管理—售后管理—工匠退货(已经处理)")
+    ServerResponse materialBackStateHandle(
+            @RequestParam("request") HttpServletRequest request,
+            @RequestParam("cityId") String cityId,
+            @RequestParam("houseId") String houseId,
+            @RequestParam("pageDTO") PageDTO pageDTO,
+            @RequestParam("beginDate") String beginDate,
+            @RequestParam("endDate") String endDate,
+            @RequestParam("state") String state,
+            @RequestParam("likeAddress") String likeAddress);
+
+
+
     @PostMapping(value = "web/repair/webMendMateriel/mendMaterialList")
     @ApiOperation(value = "补退单查明细", notes = "补退单查明细")
     ServerResponse mendMaterialList(@RequestParam("mendOrderId") String mendOrderId,
