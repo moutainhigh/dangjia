@@ -15,7 +15,8 @@ public class StorefrontRuleConfigController implements StorefrontRuleConfigAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryStorefrontRuleConfigByIdAndKey(String userId, String storefrontKey) {
-        return storefrontRuleConfigService.queryStorefrontRuleConfigByIdAndKey(userId, storefrontKey);
+    public ServerResponse queryStorefrontRuleConfigByIdAndprice(String storefrontId, String belowUnitPrice) {
+        return storefrontRuleConfigService.queryStorefrontRuleConfigByIdAndprice(storefrontId, belowUnitPrice);
     }
+
 }
