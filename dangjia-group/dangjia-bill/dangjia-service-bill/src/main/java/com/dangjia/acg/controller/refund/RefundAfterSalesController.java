@@ -144,11 +144,12 @@ public class RefundAfterSalesController implements RefundAfterSalesAPI {
      */
     @Override
     @ApiMethod
-    public void rejectRepairApplication(String repairMendOrderId,String userId){
+    public ServerResponse rejectRepairApplication(String repairMendOrderId,String userId){
         try{
-             refundAfterSalesService.rejectRepairApplication(repairMendOrderId,userId);
+           return  refundAfterSalesService.rejectRepairApplication(repairMendOrderId,userId);
         }catch (Exception e){
             logger.error("驳回申诉失败",e);
+            return ServerResponse.createByErrorMessage("驳回申诉失败");
         }
     }
 
@@ -158,11 +159,12 @@ public class RefundAfterSalesController implements RefundAfterSalesAPI {
      */
     @Override
     @ApiMethod
-    public void agreeRepairApplication(String repairMendOrderId,String userId){
+    public ServerResponse agreeRepairApplication(String repairMendOrderId,String userId){
         try{
-            refundAfterSalesService.agreeRepairApplication(repairMendOrderId,userId);
+          return  refundAfterSalesService.agreeRepairApplication(repairMendOrderId,userId);
         }catch (Exception e){
             logger.error("同意申诉失败",e);
+            return ServerResponse.createByErrorMessage("同意申诉失败");
         }
     }
 }
