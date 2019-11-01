@@ -417,10 +417,9 @@
 		WHERE
 			c.id IN (
 					SELECT
-						p.category_id
+						m.category_id
 					FROM
 						dj_actuary_budget_material m
-					INNER JOIN dj_basics_product p ON m.product_id = p.id
 					WHERE m.house_id = #{houseId}
 					and m.worker_type_id = #{workerTypeId}
 					and m.storefont_id = #{storefontId}
