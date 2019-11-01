@@ -109,16 +109,17 @@ public class StorefrontProductService {
             //判断是否重复添加
             Example example = new Example(StorefrontProduct.class);
             example.createCriteria().andEqualTo(StorefrontProduct.PROD_TEMPLATE_ID, basicsStorefrontProductDTO.getProdTemplateId())
-            .andEqualTo(StorefrontProduct.STOREFRONT_ID,basicsStorefrontProductDTO.getStorefrontId());
+            .andEqualTo(StorefrontProduct.STOREFRONT_ID,basicsStorefrontProductDTO.getStorefrontId())
+            .andEqualTo(StorefrontProduct.CITY_ID,basicsStorefrontProductDTO.getCityId());
             List<StorefrontProduct> list = istorefrontProductMapper.selectByExample(example);
             if (list.size() > 0) {
-                Example example2=new Example(StorefrontProduct.class);
-                example.createCriteria().andEqualTo(StorefrontProduct.ID,list.get(0).getId());
-
-                StorefrontProduct storefrontProduct=new StorefrontProduct();
+                Example exampleup = new Example(StorefrontProduct.class);
+                exampleup.createCriteria().andEqualTo(StorefrontProduct.ID, list.get(0).getId());
+                StorefrontProduct storefrontProduct = new StorefrontProduct();
                 storefrontProduct.setDataStatus(0);
-                int i=istorefrontProductMapper.updateByExampleSelective(storefrontProduct,example2);
-                if (i<0)
+                int i = istorefrontProductMapper.updateByExampleSelective(storefrontProduct, exampleup);
+
+                if (i < 0)
                     return ServerResponse.createByErrorMessage("店铺商品新增成功");
                 return ServerResponse.createBySuccessMessage("店铺商品新增成功");
             }
