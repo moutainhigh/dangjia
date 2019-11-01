@@ -225,7 +225,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             IFNULL(house.number, '*'),
             '号'
             )  LIKE CONCAT('%',#{likeAddress},'%')
-
         </if>
         ORDER BY rmo.create_date desc
     </select>

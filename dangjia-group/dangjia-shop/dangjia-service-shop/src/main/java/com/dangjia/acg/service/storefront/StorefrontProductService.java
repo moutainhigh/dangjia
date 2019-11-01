@@ -212,19 +212,17 @@ public class StorefrontProductService {
                 String[] imgArr = spdto.getImage().split(",");
                 StringBuilder imgStr = new StringBuilder();
                 StringBuilder imgUrlStr = new StringBuilder();
-                StringTool.getImages(address, imgArr, imgUrlStr,imgStr );
-                spdto.setImage(imgStr.toString());
-                spdto.setImageUrl(imgUrlStr.toString());
-
+                StringTool.getImages(address, imgArr, imgStr , imgUrlStr);
+                spdto.setImage(imgUrlStr.toString());
+                spdto.setImageUrl(imgStr.toString());
 
 
                 String[] dtimgArr = spdto.getDetailImage().split(",");
                 StringBuilder dtimgStr = new StringBuilder();
                 StringBuilder dtimgUrlStr = new StringBuilder();
-                StringTool.getImages(address, dtimgArr,dtimgUrlStr , dtimgStr);
-                spdto.setDetailImage(imgStr.toString());
-                spdto.setDetailImageUrl(imgUrlStr.toString());
-
+                StringTool.getImages(address, dtimgArr,dtimgStr  ,dtimgUrlStr );
+                spdto.setDetailImage(dtimgUrlStr.toString());
+                spdto.setDetailImageUrl(dtimgStr.toString());
 
 
                 resMap.put("storefrontProduct", spdto);
