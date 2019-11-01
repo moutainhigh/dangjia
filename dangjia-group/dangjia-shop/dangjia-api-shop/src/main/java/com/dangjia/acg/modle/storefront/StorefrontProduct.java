@@ -10,6 +10,7 @@ import lombok.experimental.FieldNameConstants;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.math.BigDecimal;
 
 @Data
@@ -132,4 +133,17 @@ public class StorefrontProduct extends BaseEntity {
     @Desc(value = "  城市ID")
     @ApiModelProperty("  城市ID")
     private String cityId;
+
+
+    /**
+     * 非必须字段
+     */
+    @Transient
+    private String imageUrl;
+    /**
+     * 非必须字段
+     */
+    @Transient
+    private String detailImageUrl;
+
 }

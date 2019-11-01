@@ -3,9 +3,11 @@ package com.dangjia.acg.service.storefront;
 import cn.jiguang.common.utils.StringUtils;
 import com.alibaba.fastjson.JSON;
 import com.dangjia.acg.api.product.DjBasicsProductAPI;
+import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
+import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.product.MemberCollectDTO;
 import com.dangjia.acg.dto.product.ShoppingCartProductDTO;
 import com.dangjia.acg.dto.storefront.StorefrontDTO;
@@ -15,6 +17,7 @@ import com.dangjia.acg.dto.storefront.BasicsStorefrontProductViewDTO;
 import com.dangjia.acg.mapper.storefront.IStorefrontProductMapper;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
+import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -39,7 +42,8 @@ public class StorefrontProductService {
 
     @Autowired
     private DjBasicsProductAPI djBasicsProductAPI ;
-
+    @Autowired
+    private ConfigUtil configUtil;
     /**
      * 供货设置-根据货品id，城市id，店铺id删除店铺商品
      * @param productId
@@ -195,6 +199,8 @@ public class StorefrontProductService {
             }
             List<Map<String,Object>> basicsStorefrontProductViewDTOList=new ArrayList<Map<String,Object>>();
             List<BasicsStorefrontProductViewDTO> list = istorefrontProductMapper.queryStorefrontProductViewDTOList(keyWord,storefrontId,cityId);
+            //图片前缀路径
+            String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             for (BasicsStorefrontProductViewDTO basicsStorefrontProductViewDTO : list) {
                 Map<String, Object> resMap = BeanUtils.beanToMap(basicsStorefrontProductViewDTO);
                 String id = basicsStorefrontProductViewDTO.getId();
@@ -202,6 +208,25 @@ public class StorefrontProductService {
                 if (spdto == null) {
                     resMap.put("storefrontProduct", null);
                 }
+
+                String[] imgArr = spdto.getImage().split(",");
+                StringBuilder imgStr = new StringBuilder();
+                StringBuilder imgUrlStr = new StringBuilder();
+                StringTool.getImages(address, imgArr, imgUrlStr,imgStr );
+                spdto.setImage(imgStr.toString());
+                spdto.setImageUrl(imgUrlStr.toString());
+
+
+
+                String[] dtimgArr = spdto.getDetailImage().split(",");
+                StringBuilder dtimgStr = new StringBuilder();
+                StringBuilder dtimgUrlStr = new StringBuilder();
+                StringTool.getImages(address, dtimgArr,dtimgUrlStr , dtimgStr);
+                spdto.setDetailImage(imgStr.toString());
+                spdto.setDetailImageUrl(imgUrlStr.toString());
+
+
+
                 resMap.put("storefrontProduct", spdto);
 
                 basicsStorefrontProductViewDTOList.add(resMap);
