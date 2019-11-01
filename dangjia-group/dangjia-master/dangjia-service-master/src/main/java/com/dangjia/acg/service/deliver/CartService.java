@@ -17,6 +17,7 @@ import com.dangjia.acg.mapper.delivery.ICartMapper;
 import com.dangjia.acg.mapper.delivery.IOrderSplitMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
+import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.deliver.Cart;
 import com.dangjia.acg.modle.house.House;
@@ -25,6 +26,7 @@ import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.BasicsGoodsCategory;
 import com.dangjia.acg.modle.product.DjBasicsProduct;
+import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,10 +36,8 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * author: qyx
@@ -54,20 +54,18 @@ public class CartService {
     private DjBasicsProductAPI djBasicsProductAPI;
     @Autowired
     private IOrderSplitMapper orderSplitMapper;
-
     @Autowired
     private IWarehouseMapper warehouseMapper;
-
-
     @Autowired
     private BasicsGoodsCategoryAPI basicsGoodsCategoryAPI;
-
     @Autowired
     private IHouseMapper iHouseMapper;
     @Autowired
     private ForMasterAPI forMasterAPI;
     @Autowired
     private CraftsmanConstructionService constructionService;
+    @Autowired
+    private IMasterStorefrontProductMapper iMasterStorefrontProductMapper;
 
     /**
      * 设置购物车商品数量
@@ -307,7 +305,14 @@ public class CartService {
                 warehouseMap.put(warehouseList.get(i).getProductId(), warehouseList.get(i));
             }
            // PageInfo pageResult = productAPI.queryProductData(cityId, pageDTO.getPageNum(), pageDTO.getPageSize(), name, categoryId, productType, productIdArr);
-            PageInfo pageResult = djBasicsProductAPI.queryBasicsProductData(house.getCityId(), pageDTO.getPageNum(), pageDTO.getPageSize(), name, categoryId, productType, productIdArr);
+            example=new Example(StorefrontProduct.class);
+            example.createCriteria().andEqualTo(StorefrontProduct.DATA_STATUS,0)
+                    .andIn(StorefrontProduct.ID, Arrays.asList(productIdArr));
+            String[] productIds = iMasterStorefrontProductMapper.selectByExample(example)
+                    .stream()
+                    .map(StorefrontProduct::getProdTemplateId)
+                    .toArray(String[]::new);
+            PageInfo pageResult = djBasicsProductAPI.queryBasicsProductData(house.getCityId(), pageDTO.getPageNum(), pageDTO.getPageSize(), name, categoryId, productType, productIds);
             List<JSONObject> products = pageResult.getList();
             for (JSONObject product : products) {
                 WarehouseDTO warehouseDTO = new WarehouseDTO();
