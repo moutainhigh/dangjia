@@ -233,8 +233,8 @@ public class HouseFlowScheduleService {
                     Map map = new HashMap<>();
                     map.put("info", "当前为" + houseFlow.getWorkerTypeName() + "开工日期");
                     map.put("date", DateUtil.dateToString(houseFlow.getCreateDate(), DateUtil.FORMAT2));
-                    map.put("type", 1);
-                    amap.put("state", 1);
+                    map.put("type", 1);//1,正常;2,特殊;3,其他;4,正常+特殊;5,其他+特殊
+                    amap.put("state", 1);//1=开始时间圈圈标记   2=结束时间圈圈标记
                     plans.add(map);
                 }
                 if (e.equals(o)) {
