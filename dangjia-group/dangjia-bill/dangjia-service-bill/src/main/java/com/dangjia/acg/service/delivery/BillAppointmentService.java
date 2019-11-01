@@ -11,11 +11,7 @@ import com.dangjia.acg.dto.delivery.AppointmentListDTO;
 import com.dangjia.acg.dto.delivery.OrderStorefrontDTO;
 import com.dangjia.acg.mapper.delivery.*;
 import com.dangjia.acg.mapper.storeFront.BillStoreFrontProductMapper;
-import com.dangjia.acg.modle.deliver.Order;
-import com.dangjia.acg.modle.deliver.OrderItem;
-import com.dangjia.acg.modle.deliver.OrderSplit;
-import com.dangjia.acg.modle.deliver.OrderSplitItem;
-import com.dangjia.acg.modle.delivery.DjDeliverOrder;
+import com.dangjia.acg.modle.deliver.*;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.github.pagehelper.PageHelper;
@@ -23,7 +19,6 @@ import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
@@ -57,6 +52,9 @@ public class BillAppointmentService {
 
     @Autowired
     private BillDjDeliverOrderSplitItemMapper billDjDeliverOrderSplitItemMapper;
+
+    @Autowired
+    private BillDjDeliverSplitDeliverMapper billDjDeliverSplitDeliverMapper;
 
 
     /**
@@ -203,6 +201,12 @@ public class BillAppointmentService {
      */
     public ServerResponse updateReserved(String orderSplitId) {
         try {
+            Example example=new Example(OrderSplitItem.class);
+            example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID,orderSplitId)
+                    .andIsNotNull(OrderSplitItem.SPLIT_DELIVER_ID);
+            List<OrderSplitItem> orderSplitItems = billDjDeliverOrderSplitItemMapper.selectByExample(example);
+            if(orderSplitItems.size()>0)
+                return ServerResponse.createByErrorMessage("供应商已发货不能取消");
             OrderSplit orderSplit = billDjDeliverOrderSplitMapper.selectByPrimaryKey(orderSplitId);
             djDeliverOrderItemMapper.updateDjDeliverOrderItemByOrderId(orderSplit.getOrderId());
             djDeliverOrderMapper.cancelBooking(orderSplitId);

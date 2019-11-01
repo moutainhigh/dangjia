@@ -29,4 +29,13 @@
     </select>
 
 
+
+    <update id="updateDjDeliverOrderItemByOrderId">
+        UPDATE dj_deliver_order_item
+        SET reservation_deliver_time = NULL
+        WHERE
+            order_id = #{orderId}
+    </update>
+
+
 </mapper>
