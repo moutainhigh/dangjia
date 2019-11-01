@@ -52,7 +52,7 @@ public interface RefundAfterSalesMapper extends Mapper<Order> {
      * @param houseId
      * @return
      */
-    List<RefundRepairOrderDTO> queryRefundOnlyHistoryOrderList(@Param("houseId") String houseId);
+    List<RefundRepairOrderDTO> queryRefundOnlyHistoryOrderList(@Param("houseId") String houseId,@Param("type") Integer type);
 
     /**
      * 查询退款退货详情信息

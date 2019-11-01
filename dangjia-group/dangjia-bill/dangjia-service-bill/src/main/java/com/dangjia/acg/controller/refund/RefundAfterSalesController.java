@@ -34,6 +34,7 @@ public class RefundAfterSalesController implements RefundAfterSalesAPI {
      * @param userToken
      * @param cityId 城市ID
      * @param houseId 房屋ID
+     * @param searchKey 订单号或商品名称
      * @return
      */
     @Override
@@ -75,7 +76,7 @@ public class RefundAfterSalesController implements RefundAfterSalesAPI {
     }
 
     /**
-     *
+     * 仅退款详情列表查询
      * @param pageDTO 分页
      * @param userToken  用户token
      * @param cityId 城市ID
@@ -87,7 +88,7 @@ public class RefundAfterSalesController implements RefundAfterSalesAPI {
     @ApiMethod
     public ServerResponse<PageInfo> queryRefundOnlyHistoryOrderList(PageDTO pageDTO, String userToken,
                                                              String cityId,String houseId,String searchKey){
-        return refundAfterSalesService.queryRefundOnlyHistoryOrderList(pageDTO,cityId,houseId,searchKey);
+        return refundAfterSalesService.queryRefundOnlyHistoryOrderList(pageDTO,cityId,houseId,searchKey,4);
     }
 
     /**
@@ -167,4 +168,64 @@ public class RefundAfterSalesController implements RefundAfterSalesAPI {
             return ServerResponse.createByErrorMessage("同意申诉失败");
         }
     }
+
+    /**
+     * 查询可退货退款的商品
+     * @param userToken
+     * @param cityId 城市ID
+     * @param houseId 房屋ID
+     * @param searchKey 订单号或商品名称
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse<PageInfo> queryReturnRefundOrderList(PageDTO pageDTO,String userToken,String cityId,String houseId,String searchKey){
+        return refundAfterSalesService.queryReturnRefundOrderList(pageDTO,cityId,houseId,searchKey);
+    }
+
+    /**
+     * 申请退货退款列表展示
+     * @param userToken        用户token
+     * @param cityId           城市ID
+     * @param houseId          房屋ID
+     * @param orderProductAttr 需退款商品列表
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryReturnRefundInfoList(String userToken,String cityId,String houseId,String orderProductAttr){
+        return refundAfterSalesService.queryReturnRefundInfoList(userToken,cityId,houseId,orderProductAttr);
+    }
+    /**
+     * 退货退款提交
+     * @param userToken        用户token
+     * @param cityId           城市ID
+     * @param houseId          房屋ID
+     * @param orderProductAttr 需退款商品列表
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse saveReturnRefundInfo(String userToken,String cityId,String houseId,String orderProductAttr){
+        try{
+            return  refundAfterSalesService.saveReturnRefundInfo(userToken,cityId,houseId,orderProductAttr);
+        }catch (Exception e){
+            logger.error("saveReturnRefundInfo 提交失败：",e);
+        }
+        return ServerResponse.createByErrorMessage("提交失败");
+    }
+    /**
+     * 退货退款历史记录查询
+     * @param userToken        用户token
+     * @param cityId           城市ID
+     * @param houseId          房屋ID
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse<PageInfo> queryReturnRefundHistoryOrderList(PageDTO pageDTO,String userToken,String cityId,String houseId,
+                                                               String searchKey){
+        return refundAfterSalesService.queryRefundOnlyHistoryOrderList(pageDTO,cityId,houseId,searchKey,5);
+    }
+
 }

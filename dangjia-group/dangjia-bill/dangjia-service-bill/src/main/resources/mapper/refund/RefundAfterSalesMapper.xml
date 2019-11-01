@@ -23,7 +23,8 @@
         AND t1.house_id = #{houseId}
         and exists (select 1 from dj_deliver_order_item t2 where t1.id=t2.order_id AND t2.shop_count > (IFNULL(t2.ask_count, 0)+IFNULL(t2.return_count,0)) AND t2.data_status = 0
         <if test="null!=searchKey and ''!=searchKey">
-            AND t2.product_name LIKE CONCAT('%',#{searchKey},'%')
+            AND (t2.product_name LIKE CONCAT('%',#{searchKey},'%')
+            or t1.order_number LIKE CONCAT('%',#{searchKey},'%'))
         </if>)
     </select>
 
@@ -69,13 +70,16 @@
             IFNULL(t1.move_cost,0) moveCost
         FROM
             dj_deliver_order_item t,
-            dj_basics_storefront_product t1
+            dj_basics_storefront_product t1,
+            dj_deliver_order t2,
         WHERE t.product_id =t1.id
         and t.order_id =  #{orderId}
         AND t.shop_count > (IFNULL(t.ask_count, 0)+IFNULL(t.return_count,0))
-        and t.data_status = 0
+        and t.data_status = '0'
+        and t.order_id=t2.id
         <if test="null!=searchKey and ''!=searchKey">
-            AND t.product_name LIKE CONCAT('%',#{searchKey},'%')
+            AND (t.product_name LIKE CONCAT('%',#{searchKey},'%')
+            or t2.order_number LIKE CONCAT('%',#{searchKey},'%'))
         </if>
     </select>
 
@@ -104,7 +108,7 @@
             dj_basics_storefront_product t1
         WHERE t.product_id =t1.id
         AND t.shop_count > (IFNULL(t.ask_count, 0)+IFNULL(t.return_count,0))
-        and t.data_status = 0
+        and t.data_status = '0'
         AND t.id = #{orderItemId}
     </select>
 
@@ -124,7 +128,9 @@
             t2.`name` applyMemberName,
             IFNULL(t.actual_total_amount,t.total_amount+IFNULL(t.carriage,0)) actualTotalAmount,
             t.total_amount totalAmount,
-            t.state
+            t.state,
+            t.type,
+            t.image_arr imageArr
         FROM
             dj_repair_mend_order t,
             dj_basics_storefront t1,
@@ -132,7 +138,7 @@
         where t.storefront_id=t1.id
         and t.apply_member_id=t2.id
         and t.house_id=#{houseId}
-        and t.type=4
+        and t.type=#{type}
         and t.state<![CDATA[<>]]>0
     </select>
 
@@ -174,7 +180,9 @@
             t2.`name` applyMemberName,
             IFNULL(t.actual_total_amount,t.total_amount+IFNULL(t.carriage,0)) actualTotalAmount,
             t.total_amount totalAmount,
-            t.state
+            t.state,
+            t.type,
+            t.image_arr imageArr
         FROM
             dj_repair_mend_order t,
             dj_basics_storefront t1,
@@ -182,7 +190,6 @@
         where t.storefront_id=t1.id
         and t.apply_member_id=t2.id
         and t.id=#{repairMendOrderId}
-        and t.type=4
         and t.state<![CDATA[<>]]>0
     </select>
 </mapper>

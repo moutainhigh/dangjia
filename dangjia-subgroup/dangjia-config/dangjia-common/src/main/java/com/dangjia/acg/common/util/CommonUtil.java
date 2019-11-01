@@ -516,4 +516,59 @@ public class CommonUtil {
       }
       return MathUtil.mul(MathUtil.mul(floorCount,moveCost),returnCount);
   }
+
+  /**
+   * 等待时间值查询
+   * @param nodeCode
+   * @return
+   */
+  public static String getParayKey(String nodeCode){
+    String parayKey="";
+    switch (nodeCode){
+      case "RA_001" :
+      case "RA_002" :
+        parayKey="RETURN_MERCHANT_PROCESS_TIME";//店铺申请等待商家处理时间（单位H）
+        break;
+      case "RA_004":
+        parayKey="RETURN_PLATFORM_INTERVENTION_TIME";//店铺拒绝退货，等待申请平台介入时间（单位H）
+        break;
+      case "RA_005":
+        parayKey="RETURN_PLATFORM_PROCESS_TIME";//业主申诉后，等待平台处理时间（单位H）
+        break;
+      default:
+        break;
+    }
+    return parayKey;
+  }
+
+
+  /**
+   * 退货单中的状态显示
+   * @param state
+   * @return
+   */
+  public static String getStateName(String state){
+    //（0生成中,1处理中,2不通过取消,3已通过,4已全部结算,5已撤回）
+    String stateName="";
+    switch (state){
+      case "1" :
+        stateName="退款待处理";
+        break;
+      case "2":
+        stateName="已拒绝退款";
+        break;
+      case "3":
+      case "4":
+        stateName="退款成功";
+        break;
+      case "5":
+      case "6":
+        stateName="退款关闭";
+        break;
+      default:
+        break;
+    }
+    return stateName;
+  }
+
 }

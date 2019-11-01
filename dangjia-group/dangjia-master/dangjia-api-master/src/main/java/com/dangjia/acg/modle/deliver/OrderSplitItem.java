@@ -50,6 +50,7 @@ public class OrderSplitItem extends BaseEntity {
 	@ApiModelProperty("货品名称")
 	private String productName;
 
+
 	@Column(name = "product_nick_name")
 	private String productNickName;//货品昵称
 
@@ -134,6 +135,12 @@ public class OrderSplitItem extends BaseEntity {
 	@Desc(value = "预约发货时间")
 	@ApiModelProperty("预约发货时间")
 	private Date reservationDeliverTime;
+
+
+	@Column(name = "return_count")
+	@Desc(value = "退货量")
+	@ApiModelProperty("退货量")
+	private Double returnCount;
 
 
 }
