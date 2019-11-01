@@ -378,7 +378,7 @@ public class RefundAfterSalesService {
                     }
 
                     //添回退款申请明细信息
-                    MendMateriel mendMateriel = saveBillMendMaterial(mendOrder,cityId,refundOrderItemDTO,productId,surplusCount);
+                    MendMateriel mendMateriel = saveBillMendMaterial(mendOrder,cityId,refundOrderItemDTO,productId,returnCount);
                     actualTotalAmount=MathUtil.add(actualTotalAmount,MathUtil.mul(price,returnCount));
 
                 }
@@ -1005,7 +1005,7 @@ public class RefundAfterSalesService {
                     }
                     refundOrderItemDTO.setOrderItemId(refundOrderItemDTO.getOrderSplitItemId());//传退货单详情ID
                     //添回退款申请明细信息
-                    MendMateriel mendMateriel = saveBillMendMaterial(mendOrder,cityId,refundOrderItemDTO,productId,surplusCount);
+                    MendMateriel mendMateriel = saveBillMendMaterial(mendOrder,cityId,refundOrderItemDTO,productId,returnCount);
                     actualTotalAmount=MathUtil.add(actualTotalAmount,MathUtil.mul(price,returnCount));
 
                 }
