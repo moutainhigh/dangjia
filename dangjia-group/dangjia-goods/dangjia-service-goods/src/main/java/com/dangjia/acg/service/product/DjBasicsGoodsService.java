@@ -226,7 +226,7 @@ public class DjBasicsGoodsService {
      * @param type       是否禁用  0：禁用；1不禁用 ;  -1全部默认
      * @return
      */
-    public ServerResponse queryGoodsListStorefront(String userId,PageDTO pageDTO, String categoryId, String name, Integer type) {
+    public ServerResponse queryGoodsListStorefront(String storefontId,PageDTO pageDTO, String categoryId, String name, Integer type) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
@@ -239,7 +239,7 @@ public class DjBasicsGoodsService {
             }
 
 
-            List<DjBasicsProductTemplateDTO> productList = iBasicsProductTemplateMapper.queryProductTemplateByGoodsId(categoryId,userId);
+            List<DjBasicsProductTemplateDTO> productList = iBasicsProductTemplateMapper.queryProductTemplateByGoodsId(categoryId,storefontId);
             PageInfo pageResult = new PageInfo(productList);
             for (DjBasicsProductTemplateDTO p : productList) {
                 //type表示： 是否禁用  0：禁用；1不禁用 ;  -1全部默认
