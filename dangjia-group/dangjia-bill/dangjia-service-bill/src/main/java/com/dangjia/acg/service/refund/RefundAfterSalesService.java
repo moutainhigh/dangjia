@@ -732,8 +732,11 @@ public class RefundAfterSalesService {
      * @param repairMendOrderId
      */
     @Transactional(rollbackFor = Exception.class)
-    public void rejectRepairApplication(String repairMendOrderId,String userId){
+    public ServerResponse<Object> rejectRepairApplication(String repairMendOrderId, String userId){
         RefundRepairOrderDTO refundRepairOrderDTO=refundAfterSalesMapper.queryRefundOnlyHistoryOrderInfo(repairMendOrderId);//退款订单详情查询
+        if(!("1".equals(refundRepairOrderDTO.getState())||"2".equals(refundRepairOrderDTO.getState()))){
+            return ServerResponse.createByErrorMessage("此单已处理完成，请勿重复操作");
+        }
         updateRepairOrderInfo(refundRepairOrderDTO,repairMendOrderId, 6);//退款关闭
         //更新平台介入按钮的状态为已删除
         iBillOrderProgressMapper.updateOrderStatusByNodeCode(repairMendOrderId,"REFUND_AFTER_SALES","RA_005");
@@ -741,13 +744,18 @@ public class RefundAfterSalesService {
         updateOrderProgressInfo(repairMendOrderId,"2","REFUND_AFTER_SALES","RA_007",userId);
          //添加对应的流水记录节点信息，退款关闭
         updateOrderProgressInfo(repairMendOrderId,"2","REFUND_AFTER_SALES","RA_009",userId);
+        return ServerResponse.createBySuccess("操作成功");
     }
 
     /**
      * 同意退款申诉（退货申请）
      * @param repairMendOrderId
      */
-    public void agreeRepairApplication(String repairMendOrderId,String userId){
+    public ServerResponse agreeRepairApplication(String repairMendOrderId,String userId){
+        RefundRepairOrderDTO refundRepairOrderDTO=refundAfterSalesMapper.queryRefundOnlyHistoryOrderInfo(repairMendOrderId);//退款订单详情查询
+       if(!("1".equals(refundRepairOrderDTO.getState())||"2".equals(refundRepairOrderDTO.getState()))){
+            return ServerResponse.createByErrorMessage("此单已处理完成，请勿重复操作");
+        }
         //修改退款申诉的状态
         MendOrder mendOrder=new MendOrder();
         mendOrder.setId(repairMendOrderId);
@@ -760,6 +768,7 @@ public class RefundAfterSalesService {
         updateOrderProgressInfo(repairMendOrderId,"2","REFUND_AFTER_SALES","RA_006",userId);
         //添加对应的流水记录节点信息，退款关闭
         updateOrderProgressInfo(repairMendOrderId,"2","REFUND_AFTER_SALES","RA_008",userId);
+        return ServerResponse.createBySuccess("操作成功");
     }
 
     /**
