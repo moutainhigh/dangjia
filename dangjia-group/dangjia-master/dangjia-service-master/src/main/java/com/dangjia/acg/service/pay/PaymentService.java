@@ -1015,9 +1015,13 @@ public class PaymentService {
                     }
                 }
             }
+            paymentDTO.setFreight(order.getTotalTransportationCost());//运费
+            paymentDTO.setMoveDost(order.getTotalStevedorageCost());//搬运费
             //保存总价
             businessOrder.setTotalPrice(paymentPrice);
             BigDecimal payPrice = businessOrder.getTotalPrice().subtract(businessOrder.getDiscountsPrice());
+            payPrice = payPrice.add(paymentDTO.getFreight());
+            payPrice = payPrice.add(paymentDTO.getMoveDost());
             businessOrder.setPayPrice(payPrice);
             businessOrderMapper.updateByPrimaryKeySelective(businessOrder);
 
@@ -1028,8 +1032,6 @@ public class PaymentService {
             } else {
                 paymentDTO.setDiscounts(0);//
             }
-            paymentDTO.setFreight(order.getTotalTransportationCost());
-            paymentDTO.setMoveDost(order.getTotalStevedorageCost());
             paymentDTO.setTotalPrice(paymentPrice);
             paymentDTO.setDiscountsPrice(businessOrder.getDiscountsPrice());
             paymentDTO.setPayPrice(payPrice);//实付
