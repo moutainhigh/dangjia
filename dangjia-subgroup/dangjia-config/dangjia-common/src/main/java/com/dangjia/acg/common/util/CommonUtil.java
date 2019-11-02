@@ -505,7 +505,7 @@ public class CommonUtil {
    *            可退搬运费=楼层数*每层搬运费*退货量
    * @return
    */
-  public static Double getReturnStevedorageCost(int elevator,String floor,String isUpstairsCost,Double moveCost,Double returnCount){
+  public static Double getReturnStevedorageCost(Integer elevator,String floor,String isUpstairsCost,Double moveCost,Double returnCount){
       Double floorCount=1.0;//楼层数
       if("0".equals(isUpstairsCost)){//判断是否按1层收取上楼费，若为否
            if(elevator==0){//若不为电梯房，则楼层数设置为实际楼层数
@@ -564,6 +564,36 @@ public class CommonUtil {
       case "5":
       case "6":
         stateName="退款关闭";
+        break;
+      default:
+        break;
+    }
+    return stateName;
+  }
+
+  /**
+   * 退货单中的状态显示
+   * @param state
+   * @return
+   */
+  public static String getStateWorkerName(String state){
+    //（0生成中,1处理中,2不通过取消,3已通过,4已全部结算,5已撤回）
+    String stateName="大管家审核中";
+    switch (state){
+      case "RA_012" :
+      case "RA_013" :
+        stateName="大管家审核中";
+        break;
+      case "RA_014":
+      case "RA_017":
+        stateName="退人工关闭";
+        break;
+      case "RA_015":
+      case "RA_016":
+        stateName="工匠审核中";
+        break;
+      case "RA_018":
+        stateName="退人工成功";
         break;
       default:
         break;

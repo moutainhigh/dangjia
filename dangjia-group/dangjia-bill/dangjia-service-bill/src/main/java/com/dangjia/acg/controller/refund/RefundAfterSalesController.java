@@ -228,4 +228,31 @@ public class RefundAfterSalesController implements RefundAfterSalesAPI {
         return refundAfterSalesService.queryRefundOnlyHistoryOrderList(pageDTO,cityId,houseId,searchKey,5);
     }
 
+    /**
+     * 查询退人工历史记录列表
+     * @param pageDTO
+     * @param userToken
+     * @param cityId
+     * @param houseId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse<PageInfo> queryRetrunWorkerHistoryList(PageDTO pageDTO,String userToken,String cityId,String houseId){
+        return refundAfterSalesService.queryRetrunWorkerHistoryList(pageDTO,cityId,houseId);
+    }
+
+    /**
+     * 退人工详情页面
+     * @param cityId
+     * @param repairWorkOrderId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryRetrunWorkerHistoryDetail(String cityId,String repairWorkOrderId){
+        return refundAfterSalesService.queryRetrunWorkerHistoryDetail(cityId,repairWorkOrderId);
+    }
+
+
 }

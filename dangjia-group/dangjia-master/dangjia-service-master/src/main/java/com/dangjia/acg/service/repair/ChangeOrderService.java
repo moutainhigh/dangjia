@@ -8,6 +8,7 @@ import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
+import com.dangjia.acg.mapper.delivery.IMasterOrderProgressMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderCheckMapper;
@@ -18,6 +19,7 @@ import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.order.OrderProgress;
 import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.repair.MendOrderCheck;
@@ -30,6 +32,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -61,6 +64,8 @@ public class ChangeOrderService {
     private IHouseFlowMapper houseFlowMapper;
     @Autowired
     private IHouseWorkerOrderMapper houseWorkerOrderMapper;
+    @Autowired
+    private IMasterOrderProgressMapper iMasterOrderProgressMapper;
 
     /**
      * 管家审核变更单
@@ -79,6 +84,7 @@ public class ChangeOrderService {
                 changeOrder.setState(check);
                 changeOrder.setSupId(member.getId());
                 changeOrderMapper.updateByPrimaryKeySelective(changeOrder);
+
             }
 
             House house = houseMapper.selectByPrimaryKey(changeOrder.getHouseId());
@@ -89,6 +95,11 @@ public class ChangeOrderService {
             } else {//退
                 configMessageService.addConfigMessage(null, AppType.GONGJIANG, house.getMemberId(), "0", "业主退人工变更", String.format
                         (DjConstants.PushMessage.STEWARD_T_CHECK_WORK, house.getHouseName()), "");
+                //退人工流水记录判断
+                if(check!=2){
+                    //fzh.3.0大管家审核不通过，流水记录
+                    updateOrderProgressInfo(changeOrder.getId(),"2","REFUND_AFTER_SALES","RA_014",member.getId());//您的退人工申请已提交
+                }
             }
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
@@ -204,8 +215,34 @@ public class ChangeOrderService {
         changeOrder.setContentB(contentB);
         changeOrder.setState(0);
         changeOrderMapper.insert(changeOrder);
+        //增加节点（退人工流水记录状态)
+        if (type == 2) {
+            updateOrderProgressInfo(changeOrder.getId(),"2","REFUND_AFTER_SALES","RA_012",member.getId());//您的退人工申请已提交
+            updateOrderProgressInfo(changeOrder.getId(),"2","REFUND_AFTER_SALES","RA_013",member.getId());//大管家审核中
+        }
         return ServerResponse.createBySuccessMessage("操作成功");
     }
+    /**
+     * //添加进度信息
+     * @param orderId 订单ID
+     * @param progressType 订单类型
+     * @param nodeType 节点类型
+     * @param nodeCode 节点编码
+     * @param userId 用户id
+     */
+    private void updateOrderProgressInfo(String orderId,String progressType,String nodeType,String nodeCode,String userId){
+        OrderProgress orderProgress=new OrderProgress();
+        orderProgress.setProgressOrderId(orderId);
+        orderProgress.setProgressType(progressType);
+        orderProgress.setNodeType(nodeType);
+        orderProgress.setNodeCode(nodeCode);
+        orderProgress.setCreateBy(userId);
+        orderProgress.setUpdateBy(userId);
+        orderProgress.setCreateDate(new Date());
+        orderProgress.setModifyDate(new Date());
+        iMasterOrderProgressMapper.insert(orderProgress);
+    }
+
 
     /**
      * 请求地址：app/repair/changeOrder/checkHouseFlowApply
