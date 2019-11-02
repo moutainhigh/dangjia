@@ -28,7 +28,13 @@ public class RefundRepairOrderDTO {
 
     private Double totalAmount;//退款货物总价（不含运费）
 
+    private String imageArr;//相关凭证
+
+    private String imageArrUrl;//相关凭证详情地址
+
     private String state;//退款状态：（0生成中,1处理中,2不通过取消,3已通过,4已全部结算,5已撤回）
+
+    private Integer type;//类型：（0:补材料;1:补人工;2:退材料(剩余材料登记);3:退人工,4:业主退材料;5业主退货退款）
 
     private Double totalStevedorageCost;//退款总运费
 

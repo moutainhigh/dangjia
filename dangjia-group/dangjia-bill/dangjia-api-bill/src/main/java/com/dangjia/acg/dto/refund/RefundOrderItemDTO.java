@@ -11,6 +11,10 @@ public class RefundOrderItemDTO {
 
     private String orderItemId;//订单详情ID
 
+    private  String orderSplitId;//要货单ID
+
+    private  String orderSplitItemId;//要货单详情ID
+
     private String storefrontId;//店铺ID
 
     private String productId;//商品ID

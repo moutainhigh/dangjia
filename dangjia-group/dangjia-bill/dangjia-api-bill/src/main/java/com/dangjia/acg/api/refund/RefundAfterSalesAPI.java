@@ -85,29 +85,87 @@ public interface RefundAfterSalesAPI {
      * @return
      */
     @PostMapping("/app/refund/refundOrder/queryRefundOnlyHistoryOrderInfo")
-    @ApiOperation(value = "查询仅退款的退款详情根据退货单", notes = "查询仅退款的退款详情根据退货单")
+    @ApiOperation(value = "查询退款/退货退款的退款详情根据退货单", notes = "查询仅退款的退款详情根据退货单")
     ServerResponse queryRefundOnlyHistoryOrderInfo(@RequestParam("cityId") String cityId,
                                                    @RequestParam("repairMendOrderId") String repairMendOrderId);
 
     @PostMapping("/app/refund/refundOrder/cancelRepairApplication")
-    @ApiOperation(value = "撤销退款申请", notes = "撤销退款申请")
+    @ApiOperation(value = "撤销退款/退货退款申请", notes = "撤销退款申请")
     ServerResponse cancelRepairApplication(@RequestParam("cityId") String cityId,
                                            @RequestParam("repairMendOrderId") String repairMendOrderId);
 
     @PostMapping("/app/refund/refundOrder/addRepairComplain")
-    @ApiOperation(value = "业主申诉退货", notes = "业主申诉退货")
+    @ApiOperation(value = "退款/退货退款业主申诉退货", notes = "业主申诉退货")
     ServerResponse addRepairComplain(@RequestParam("userToken") String userToken,
                                      @RequestParam("content") String content,
                                      @RequestParam("houseId") String houseId,
                                      @RequestParam("repairMendOrderId") String repairMendOrderId);
 
     @PostMapping("/app/refund/refundOrder/rejectRepairApplication")
-    @ApiOperation(value = "驳回退款申诉", notes = "驳回退款申诉")
+    @ApiOperation(value = "退款/退货退款驳回退款申诉", notes = "驳回退款申诉")
     ServerResponse rejectRepairApplication(@RequestParam("repairMendOrderId") String repairMendOrderId,
                                  @RequestParam("userId") String userId);
 
     @PostMapping("/app/refund/refundOrder/agreeRepairApplication")
-    @ApiOperation(value = "同意退款申诉", notes = "同意退款申诉")
+    @ApiOperation(value = "退款/退货退款同意退款申诉", notes = "同意退款申诉")
     ServerResponse agreeRepairApplication(@RequestParam("repairMendOrderId") String repairMendOrderId,
                                  @RequestParam("userId") String userId);
+
+    @PostMapping("/app/refund/refundOrder/queryReturnRefundOrderList")
+    @ApiOperation(value = "查询需退货退款的订单", notes = "查询需退货退款的订单")
+    ServerResponse<PageInfo> queryReturnRefundOrderList(@RequestParam("pageDTO") PageDTO pageDTO,
+                                                      @RequestParam("userToken") String userToken,
+                                                      @RequestParam("cityId") String cityId,
+                                                      @RequestParam("houseId") String houseId,
+                                                      @RequestParam("searchKey") String searchKey);
+
+    /**
+     * 申请退货退款列表显示
+     *
+     * @param userToken        用户token
+     * @param cityId           城市ID
+     * @param houseId          房屋ID
+     * @param orderProductAttr 需退款商品列表
+     * @return
+     */
+    @PostMapping("/app/refund/refundOrder/queryReturnRefundInfoList")
+    @ApiOperation(value = "申请退货退款列表显示", notes = "申请退货退款列表显示")
+    ServerResponse queryReturnRefundInfoList(@RequestParam("userToken") String userToken,
+                                           @RequestParam("cityId") String cityId,
+                                           @RequestParam("houseId") String houseId,
+                                           @RequestParam("orderProductAttr") String orderProductAttr);
+
+    /**
+     * 退货退款提交
+     *
+     * @param userToken        用户token
+     * @param cityId           城市ID
+     * @param houseId          房屋ID
+     * @param orderProductAttr 需退款商品列表
+     * @return
+     */
+    @PostMapping("/app/refund/refundOrder/saveReturnRefundInfo")
+    @ApiOperation(value = "退货退款提交", notes = "退货退款提交")
+    ServerResponse saveReturnRefundInfo(@RequestParam("userToken") String userToken,
+                                      @RequestParam("cityId") String cityId,
+                                      @RequestParam("houseId") String houseId,
+                                      @RequestParam("orderProductAttr") String orderProductAttr);
+
+    /**
+     * 查询仅退款订单的历史记录
+     *
+     * @param pageDTO
+     * @param userToken
+     * @param cityId
+     * @param houseId
+     * @param searchKey
+     * @return
+     */
+    @PostMapping("/app/refund/refundOrder/queryReturnRefundHistoryOrderList")
+    @ApiOperation(value = "查询退货退款的历史退款记录", notes = "查询退货退款的历史退款记录")
+    ServerResponse<PageInfo> queryReturnRefundHistoryOrderList(@RequestParam("pageDTO") PageDTO pageDTO,
+                                                             @RequestParam("userToken") String userToken,
+                                                             @RequestParam("cityId") String cityId,
+                                                             @RequestParam("houseId") String houseId,
+                                                             @RequestParam("searchKey") String searchKey);
 }

@@ -18,8 +18,8 @@ import javax.persistence.Table;
 public interface StorefrontRuleConfigAPI {
 
     @PostMapping("/web/queryStorefrontRuleConfigByIdAndKey")
-    @ApiOperation(value = "通过用户id和关键值查询店铺运费规则", notes = "通过用户id和关键值查询店铺运费规则")
-    ServerResponse queryStorefrontRuleConfigByIdAndKey(@RequestParam("userId") String userId, @RequestParam("storefrontKey") String storefrontKey);
+    @ApiOperation(value = "通过店铺id和总价，查询返回运费", notes = "通过店铺id和总价，查询返回运费")
+    ServerResponse queryStorefrontRuleConfigByIdAndprice(@RequestParam("storefrontId") String storefrontId, @RequestParam("belowUnitPrice") String belowUnitPrice);
 
 
 }
