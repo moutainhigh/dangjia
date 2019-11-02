@@ -67,4 +67,20 @@ public interface PaymentAPI {
                                   @RequestParam("taskId") String taskId,
                                   @RequestParam("cityId") String cityId,
                                   @RequestParam("type") Integer type);
+
+    @PostMapping("app/order/generate/shop")
+    @ApiOperation(value = "购物车提交订单接口", notes = "购物车提交订单接口")
+    ServerResponse generateOrder(@RequestParam("userToken") String userToken,
+                                 @RequestParam("cityId") String cityId,
+                                 @RequestParam("houseId") String houseId,
+                                 @RequestParam("workerId") String workerId,
+                                 @RequestParam("addressId") String addressId);
+
+
+    @PostMapping("app/order/generate/budget")
+    @ApiOperation(value = "精算提交订单接口", notes = "精算提交订单接口")
+    ServerResponse generateBudgetOrder(@RequestParam("userToken") String userToken,
+                                       @RequestParam("cityId") String cityId,
+                                       @RequestParam("houseFlowId") String houseFlowId,
+                                       @RequestParam("addressId") String addressId);
 }
