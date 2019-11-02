@@ -29,4 +29,7 @@ public class PaymentDTO<T> {
     private String agreementName;//协议名
     private String agreementUrl;//协议链接
 
+
+    private BigDecimal freight;//运费
+    private BigDecimal moveDost;//搬运费
 }

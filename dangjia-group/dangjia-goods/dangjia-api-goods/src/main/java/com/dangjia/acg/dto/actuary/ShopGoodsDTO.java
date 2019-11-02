@@ -14,5 +14,6 @@ public class ShopGoodsDTO {
 
     private String shopId;//店铺ID
     private String shopName;//店铺名称
+    private BigDecimal totalMaterialPrice;//实物总价
     private List<BudgetLabelDTO> labelDTOS;//分类标签下对应的商品集
 }

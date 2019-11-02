@@ -432,46 +432,37 @@
 	<!--查询工种材料未支付所有商品-->
 	<select id="queryBudgetLabelGoods" resultType="com.dangjia.acg.dto.actuary.BudgetLabelGoodsDTO">
 		SELECT
-		w.id,
-		w.house_flow_id houseFlowId,
-		w.house_id houseId,
-		w.worker_type_id workerTypeId,
-		w.steta,
-		w.delete_state deleteState,
-		w.product_id productId,
-		w.original_product_id originalProductId,
-		w.goods_group_id goodsGroupId,
-		w.product_sn productSn,
-		w.product_name productName,
-		w.price,
-		w.shop_count shopCount,
-		w.unit_name unitName,
-		w.total_price totalPrice,
-		w.create_date createDate,
-		w.create_date createDate,
-		w.product_type productType,
-		w.data_status dataStatus,
-		w.category_id categoryId,
-		w.image,
-		w.storefont_id storefontId,
-		w.goods_id goodsId,
-		w.value_name_arr attributeName
-
+			m.id,
+			m.house_flow_id houseFlowId,
+			m.house_id houseId,
+			m.worker_type_id workerTypeId,
+			m.steta,
+			m.delete_state deleteState,
+			m.product_id productId,
+			m.original_product_id originalProductId,
+			m.goods_group_id goodsGroupId,
+			m.product_sn productSn,
+			m.product_name productName,
+			m.price,
+			m.shop_count shopCount,
+			m.unit_name unitName,
+			m.total_price totalPrice,
+			m.create_date createDate,
+			m.create_date createDate,
+			m.product_type productType,
+			m.data_status dataStatus,
+			p.category_id categoryId,
+			m.image,
+			m.storefont_id storefontId,
+			p.goods_id goodsId,
+			p.value_name_arr attributeName
 		FROM
-		(
-			SELECT
-				m.id,m.house_flow_id,m.house_id,m.worker_type_id,m.steta,m.delete_state,m.product_id,
-				m.product_sn,m.product_name,m.price,m.convert_count shop_count,m.unit_name,m.total_price,
-				m.create_date,m.modify_date,m.product_type,m.data_status,p.category_id,
-				m.image,m.original_product_id,m.goods_group_id,p.value_name_arr,p.goods_id,m.storefont_id
-			FROM
-				dj_actuary_budget_material m
-			INNER JOIN dj_basics_product_template p ON m.template_id = p.id
-			WHERE m.house_id = #{houseId}
-			and m.worker_type_id = #{workerTypeId}
-			and m.storefont_id = #{storefontId}
-			and m.delete_state in (0, 2, 4)
-		) w
+			dj_actuary_budget_material m
+		INNER JOIN dj_basics_product_template p ON m.template_id = p.id
+		WHERE m.house_id = #{houseId}
+		and m.worker_type_id = #{workerTypeId}
+		and m.storefont_id = #{storefontId}
+		and m.delete_state in (0, 2, 4)
 	</select>
 
 	<insert id="insertByBatch" parameterType="java.util.List">

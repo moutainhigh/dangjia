@@ -15,6 +15,7 @@ public class ShoppingCartDTO{
 
     private  BigDecimal totalPrice;
 
+    private BigDecimal totalMaterialPrice;//实物总价
 
     private List<ShoppingCartListDTO> shoppingCartListDTOS;
 

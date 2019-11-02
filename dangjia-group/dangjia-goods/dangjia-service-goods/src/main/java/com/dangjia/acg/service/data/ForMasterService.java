@@ -12,7 +12,6 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.actuary.BudgetLabelDTO;
 import com.dangjia.acg.dto.actuary.BudgetLabelGoodsDTO;
 import com.dangjia.acg.dto.actuary.ShopGoodsDTO;
-import com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO;
 import com.dangjia.acg.dto.product.ProductWorkerDTO;
 import com.dangjia.acg.dto.product.StorefontInfoDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
@@ -21,14 +20,18 @@ import com.dangjia.acg.mapper.basics.IBrandMapper;
 import com.dangjia.acg.mapper.basics.IBrandSeriesMapper;
 import com.dangjia.acg.mapper.basics.ITechnologyMapper;
 import com.dangjia.acg.mapper.basics.IUnitMapper;
-import com.dangjia.acg.mapper.product.*;
+import com.dangjia.acg.mapper.product.DjBasicsGoodsMapper;
+import com.dangjia.acg.mapper.product.IBasicsGoodsMapper;
+import com.dangjia.acg.mapper.product.IBasicsProductTemplateMapper;
 import com.dangjia.acg.mapper.sup.ISupplierMapper;
 import com.dangjia.acg.mapper.sup.ISupplierProductMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.brand.Unit;
-import com.dangjia.acg.modle.product.*;
+import com.dangjia.acg.modle.product.BasicsGoods;
+import com.dangjia.acg.modle.product.DjBasicsGoods;
+import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
 import com.dangjia.acg.service.actuary.BudgetWorkerService;
@@ -264,6 +267,15 @@ public class ForMasterService {
         List<ShopGoodsDTO> budgetLabelDTOS =  budgetMaterialMapper.queryShopGoods(houseId,workerTypeId);
         for (ShopGoodsDTO budgetLabelDTO : budgetLabelDTOS) {
             budgetLabelDTO.setLabelDTOS(queryBudgetLabel(houseId,workerTypeId,budgetLabelDTO.getShopId()));
+            BigDecimal totalMaterialPrice = new BigDecimal(0);//组总价
+            for (BudgetLabelDTO labelDTO : budgetLabelDTO.getLabelDTOS()) {
+                for (BudgetLabelGoodsDTO good : labelDTO.getGoods()) {
+                    if(good.getProductType()==0) {
+                        totalMaterialPrice = totalMaterialPrice.add(good.getTotalPrice());
+                    }
+                }
+            }
+            budgetLabelDTO.setTotalMaterialPrice(totalMaterialPrice);
         }
         return budgetLabelDTOS;
     }

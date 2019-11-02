@@ -97,8 +97,8 @@ public class OrderItem extends BaseEntity {
 	private Double discountPrice;//优惠价钱
 
 	@Column(name = "actual_payment_price")
-	@Desc(value = "实付价钱")
-	@ApiModelProperty("实付价钱")
+	@Desc(value = "实付价钱+运费+搬运费-优惠金额")
+	@ApiModelProperty("实付价钱+运费+搬运费-优惠金额")
 	private Double actualPaymentPrice;//实付价钱
 
 	@Column(name = "stevedorage_cost")

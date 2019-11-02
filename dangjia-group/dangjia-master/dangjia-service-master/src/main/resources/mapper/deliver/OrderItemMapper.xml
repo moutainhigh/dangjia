@@ -74,6 +74,33 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		GROUP BY l.id
 		ORDER BY l.id desc
 	</select>
+	<select id="queryBudgetLabelGoods" resultType="com.dangjia.acg.dto.actuary.BudgetLabelGoodsDTO">
+		SELECT
+			m.id,
+			p.is_agency_purchase steta,
+			m.product_id productId,
+			m.product_sn productSn,
+			m.product_name productName,
+			m.price,
+			m.shop_count shopCount,
+			m.unit_name unitName,
+			(m.price * m.shop_count) totalPrice,
+			m.create_date createDate,
+			m.create_date createDate,
+			m.product_type productType,
+			m.data_status dataStatus,
+			p.category_id categoryId,
+			m.image,
+			m.storefont_id storefontId,
+			p.goods_id goodsId,
+			p.value_name_arr attributeName
+		FROM
+			dj_deliver_order_item m
+		INNER JOIN dj_basics_storefront_product sp ON sp.id = m.product_id
+		INNER JOIN dj_basics_product_template p ON sp.prod_template_id = p.id
+		WHERE 	m.order_id =  #{orderId}
+		  and m.storefont_id = #{storefontId}
+	</select>
     <!-- 模糊查询 -->
     <select id="orderItemList" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.deliver.OrderItem">
         SELECT
