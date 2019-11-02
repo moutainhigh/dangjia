@@ -46,7 +46,10 @@ import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.core.WorkerType;
-import com.dangjia.acg.modle.deliver.*;
+import com.dangjia.acg.modle.deliver.Order;
+import com.dangjia.acg.modle.deliver.OrderItem;
+import com.dangjia.acg.modle.deliver.OrderSplit;
+import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.house.*;
 import com.dangjia.acg.modle.member.CustomerRecord;
 import com.dangjia.acg.modle.member.Member;
@@ -62,6 +65,7 @@ import com.dangjia.acg.modle.safe.WorkerTypeSafe;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.worker.Insurance;
+import com.dangjia.acg.service.acquisition.MasterCostAcquisitionService;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.design.HouseDesignPayService;
@@ -169,6 +173,8 @@ public class PaymentService {
 
     @Autowired
     private IMasterBudgetMapper iMasterBudgetMapper;
+    @Autowired
+    private MasterCostAcquisitionService masterCostAcquisitionService;
 
 
     @Autowired
@@ -1110,6 +1116,7 @@ public class PaymentService {
             List<ShoppingCartDTO> shoppingCartDTOS=new ArrayList<>();
             BigDecimal paymentPrice = new BigDecimal(0);//总共钱
             BigDecimal freightPrice = new BigDecimal(0);//总运费
+            BigDecimal totalMoveDost = new BigDecimal(0);//搬运费
             List<String> strings = iShoppingCartMapper.queryStorefrontIds(member.getId(),cityId);
             for (String str : strings) {
                 BigDecimal totalSellPrice = new BigDecimal(0);//总价
@@ -1182,6 +1189,14 @@ public class PaymentService {
                             Double transportationCost=(orderItem.getTotalPrice()/shoppingCartDTO.getTotalMaterialPrice().doubleValue())*freight;
                             orderItem.setTransportationCost(transportationCost);
                         }
+
+                        //搬运费运算
+                        Double moveDost=masterCostAcquisitionService.getStevedorageCost(house.getId(),orderItem.getProductId(),orderItem.getShopCount());
+                        totalMoveDost=totalMoveDost.add(new BigDecimal(moveDost));
+                        if(moveDost>0){
+                            //均摊运费
+                            orderItem.setStevedorageCost(moveDost);
+                        }
                         orderItem.setOrderStatus("1");//1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭
                         orderItem.setCreateBy(member.getId());
                         orderItemMapper.insert(orderItem);
@@ -1214,7 +1229,7 @@ public class PaymentService {
                     businessOrderMapper.insert(businessOrder);
                 }
                 order.setTotalTransportationCost(freightPrice);//总运费
-                order.setTotalStevedorageCost(new BigDecimal(0));//总搬运费
+                order.setTotalStevedorageCost(totalMoveDost);//总搬运费
                 order.setBusinessOrderNumber(businessOrder.getNumber());
                 order.setTotalAmount(paymentPrice);// 订单总额(工钱)
                 orderMapper.updateByPrimaryKeySelective(order);
@@ -1252,6 +1267,7 @@ public class PaymentService {
             List<ShopGoodsDTO> budgetLabelDTOS;
             BigDecimal paymentPrice = new BigDecimal(0);//总共钱
             BigDecimal freightPrice = new BigDecimal(0);//总运费
+            BigDecimal totalMoveDost = new BigDecimal(0);//搬运费
                 budgetLabelDTOS = forMasterAPI.queryShopGoods(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), house.getCityId());//精算工钱
                 for (ShopGoodsDTO budgetLabelDTO : budgetLabelDTOS) {
                     for (BudgetLabelDTO labelDTO : budgetLabelDTO.getLabelDTOS()) {
@@ -1314,6 +1330,13 @@ public class PaymentService {
                                 Double transportationCost=(orderItem.getTotalPrice()/budgetLabelDTO.getTotalMaterialPrice().doubleValue())*freight;
                                 orderItem.setTransportationCost(transportationCost);
                             }
+                            //搬运费运算
+                            Double moveDost=masterCostAcquisitionService.getStevedorageCost(house.getId(),orderItem.getProductId(),orderItem.getShopCount());
+                            totalMoveDost=totalMoveDost.add(new BigDecimal(moveDost));
+                            if(moveDost>0){
+                                //均摊运费
+                                orderItem.setStevedorageCost(moveDost);
+                            }
                             orderItem.setOrderStatus("1");//1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭
                             orderItem.setCreateBy(member.getId());
                             orderItemMapper.insert(orderItem);
@@ -1347,7 +1370,7 @@ public class PaymentService {
                     businessOrderMapper.insert(businessOrder);
                 }
                 order.setTotalTransportationCost(freightPrice);//总运费
-                order.setTotalStevedorageCost(new BigDecimal(0));//总搬运费
+                order.setTotalStevedorageCost(totalMoveDost);//总搬运费
                 order.setBusinessOrderNumber(businessOrder.getNumber());
                 order.setTotalAmount(paymentPrice);// 订单总额(工钱)
                 orderMapper.updateByPrimaryKeySelective(order);
