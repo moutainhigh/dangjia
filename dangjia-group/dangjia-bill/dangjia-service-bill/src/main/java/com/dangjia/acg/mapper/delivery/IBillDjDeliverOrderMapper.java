@@ -2,7 +2,10 @@ package com.dangjia.acg.mapper.delivery;
 
 
 import com.dangjia.acg.dto.delivery.AppointmentDTO;
+import com.dangjia.acg.dto.delivery.HouseFlowDataDTO;
+import com.dangjia.acg.dto.delivery.HouseFlowInfoDTO;
 import com.dangjia.acg.dto.delivery.OrderStorefrontDTO;
+import com.dangjia.acg.dto.member.WorkerTypeDTO;
 import com.dangjia.acg.modle.deliver.Order;
 import org.apache.ibatis.annotations.Param;
 import com.dangjia.acg.modle.delivery.DjDeliverOrder;
@@ -37,7 +40,7 @@ public interface IBillDjDeliverOrderMapper extends Mapper<Order> {
     List<AppointmentDTO> queryAppointment(@Param("orderId") String orderId);
 
 
-    List<String> queryApplyDec();
+    List<HouseFlowDataDTO> queryApplyDec();
     /**
      * 已预约发货店铺对象
      * @param houseId
@@ -58,5 +61,12 @@ public interface IBillDjDeliverOrderMapper extends Mapper<Order> {
      * @param orderSplitId
      */
     int cancelBooking(@Param("orderSplitId") String orderSplitId);
+
+    /**
+     * 查询装修状态
+     * @param houseId
+     * @return
+     */
+    List<WorkerTypeDTO> queryType(@Param("houseId") String houseId);
 
 }

@@ -3,8 +3,8 @@
 <mapper namespace="com.dangjia.acg.mapper.delivery.IBillDjDeliverOrderMapper">
 
 
-    <select id="queryApplyDec" resultType="java.lang.String">
-        select apply_dec as applyDec
+    <select id="queryApplyDec" resultType="com.dangjia.acg.dto.delivery.HouseFlowDataDTO">
+        select apply_dec as applyDec,create_date AS createDate
         from dj_core_house_flow_apply
         order by create_date DESC limit 4
     </select>
@@ -135,5 +135,17 @@
         AND a.id = #{orderSplitId}
     </delete>
 
+
+    <select id="queryType" resultType="com.dangjia.acg.dto.member.WorkerTypeDTO" parameterType="java.lang.String">
+        select
+            cwt.type as type,
+            chf.worker_type_id as workerTypeId,
+            chf.work_steta as workSteta
+        from
+        dj_core_house_flow chf INNER JOIN
+        dj_core_worker_type cwt on chf.worker_type_id = cwt.id
+        where chf.house_id = #{houseId}
+        ORDER BY chf.modify_date desc
+    </select>
 
 </mapper>
