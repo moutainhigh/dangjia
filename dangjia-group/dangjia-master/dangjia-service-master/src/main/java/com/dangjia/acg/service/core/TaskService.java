@@ -462,7 +462,7 @@ public class TaskService {
             task.setTaskId("");
             taskList.add(task);
         }
-        //精算审核任务
+        //任务
         if (house.getBudgetState() == 2) {
             Task task = new Task();
             task.setDate(DateUtil.dateToString(house.getModifyDate(), DateUtil.FORMAT11));

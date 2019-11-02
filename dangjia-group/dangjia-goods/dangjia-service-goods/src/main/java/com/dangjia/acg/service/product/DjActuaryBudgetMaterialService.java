@@ -350,6 +350,116 @@ public class DjActuaryBudgetMaterialService {
 
 
     /**
+     * 查询精算列表
+     * @param bclId
+     * @param categoryId
+     * @param houseId
+     * @return
+     */
+    public ServerResponse queryMakeBudgetsList2(String bclId, String categoryId, String houseId,String cityId) {
+
+        String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+//        String imageAddress ="";
+        BasicsGoodArrDTO basicsGoodArrDTO = new BasicsGoodArrDTO();
+        Example example = new Example(DjBasicsGoods.class);
+        example.createCriteria().andEqualTo(DjBasicsGoods.CATEGORY_ID, categoryId).
+                andEqualTo(DjBasicsGoods.CITY_ID,cityId);
+        List<DjBasicsGoods> list = djBasicsGoodsMapper.selectByExample(example);
+
+        BasicsGoodsCategory djBasicsGoodsCategory = djBasicsGoodsCategoryMapper.selectByPrimaryKey(categoryId);
+        if (list.size() > 0) {
+            int i = list.get(0).getType();
+            if (i == 2) {
+                //2 人工
+                List<BasicsGoodDTO> bgdList = new ArrayList<>();
+                if(!CommonUtil.isEmpty(djBasicsGoodsCategory)){
+                    example = new Example(BasicsGoodsCategory.class);
+                    example.createCriteria().andEqualTo(BasicsGoodsCategory.PARENT_ID,
+                            djBasicsGoodsCategory.getParentId());
+                    List<BasicsGoodsCategory> li = djBasicsGoodsCategoryMapper.selectByExample(example);
+                    if (!li.isEmpty()) {
+                        for (BasicsGoodsCategory bgc : li) {
+                            BasicsGoodDTO basicsGoodDTO = new BasicsGoodDTO();
+                            List<BasicsgDTO> bList = iBudgetWorkerMapper.queryMakeBudgetsList(houseId, bgc.getId());
+                            for (BasicsgDTO basicsgDTO : bList) {
+                                basicsgDTO.setImage(imageAddress + basicsgDTO.getImage());
+                                if (basicsgDTO.getBuy() == 2) {
+                                    basicsgDTO.setBuyStr("自购商品需自行购买 ");
+                                } else {
+                                    basicsgDTO.setBuyStr("");
+                                }
+                            }
+
+                            Double priceArr = bList.stream().filter
+                                    (a -> a.getPrice()!=null).mapToDouble
+                                    (BasicsgDTO::getPrice).sum();
+
+                            basicsGoodDTO.setPriceArr(priceArr);
+                            basicsGoodDTO.setList(bList);
+                            basicsGoodDTO.setName(bgc.getName());
+                            bgdList.add(basicsGoodDTO);
+                        }
+                    }
+
+                    Double priceArr = bgdList.stream().filter
+                            (a -> a.getPriceArr()!=null).mapToDouble
+                            (BasicsGoodDTO::getPriceArr).sum();
+
+                    basicsGoodArrDTO.setPriceArr(priceArr);
+                    basicsGoodArrDTO.setList(bgdList);
+                }
+                return ServerResponse.createBySuccess("查询成功", basicsGoodArrDTO);
+            } else if (i == 0 || i == 1) {
+                //0：材料；1：服务
+
+                List<BasicsGoodDTO> bgdList = new ArrayList<>();
+                if(!CommonUtil.isEmpty(djBasicsGoodsCategory)){
+                    example = new Example(BasicsGoodsCategory.class);
+                    example.createCriteria().andEqualTo(BasicsGoodsCategory.PARENT_ID,
+                            djBasicsGoodsCategory.getParentId()).andEqualTo(BasicsGoodsCategory.CITY_ID,cityId);
+                    List<BasicsGoodsCategory> li = djBasicsGoodsCategoryMapper.selectByExample(example);
+                    if (!li.isEmpty()) {
+                        for (BasicsGoodsCategory bgc : li) {
+                            BasicsGoodDTO basicsGoodDTO = new BasicsGoodDTO();
+                            List<BasicsgDTO> bList = iBudgetWorkerMapper.queryMakeBudgetsBmList(houseId, bgc.getId());
+                            for (BasicsgDTO basicsgDTO : bList) {
+                                basicsgDTO.setImage(imageAddress + basicsgDTO.getImage());
+                                if (basicsgDTO.getBuy() == 2) {
+                                    basicsgDTO.setBuyStr("自购商品需自行购买");
+                                } else {
+                                    basicsgDTO.setBuyStr("");
+                                }
+                            }
+
+                            Double priceArr = bList.stream().filter
+                                    (a -> a.getPrice()!=null).mapToDouble
+                                    (BasicsgDTO::getPrice).sum();
+
+                            basicsGoodDTO.setPriceArr(priceArr);
+                            basicsGoodDTO.setList(bList);
+                            basicsGoodDTO.setName(bgc.getName());
+                            bgdList.add(basicsGoodDTO);
+                        }
+                    }
+
+                    Double priceArr = bgdList.stream().filter
+                            (a -> a.getPriceArr()!=null).mapToDouble
+                            (BasicsGoodDTO::getPriceArr).sum();
+
+                    basicsGoodArrDTO.setPriceArr(priceArr);
+                    basicsGoodArrDTO.setList(bgdList);
+                }
+                return ServerResponse.createBySuccess("查询成功", basicsGoodArrDTO);
+            }else {
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            }
+        }
+        return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+    }
+
+
+
+    /**
      * 查询精算详情列表
      *
      * @return
@@ -362,6 +472,61 @@ public class DjActuaryBudgetMaterialService {
                                              String attributeVal,
                                              String brandVal,
                                              String orderKey) {
+        String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+//        String imageAddress ="";
+        JSONArray arr = new JSONArray();
+        PageInfo pageResult = null;
+        try {
+            //根据内容模糊搜索商品
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            String[] attributeVals = null;
+            if (!CommonUtil.isEmpty(attributeVal)) {
+                attributeVals = attributeVal.split(",");
+            }
+            String[] names=null;
+            if(!CommonUtil.isEmpty(name)){
+                names=name.split(",");
+            }
+            List<DjBasicsProductTemplate> pList = iBasicsProductTemplateMapper.serchCategoryProduct(categoryId, names, brandVal, attributeVals, orderKey);
+            pageResult = new PageInfo<>(pList);
+            if (!pList.isEmpty()) {
+                for (DjBasicsProductTemplate product : pList) {
+                    String convertUnitName = iUnitMapper.selectByPrimaryKey(product.getUnitId()).getName();
+                    String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
+                            String.format(DjConstants.YZPageAddress.GOODSDETAIL, " ", cityId, "商品详情") +
+                            "&gId=" + product.getId();
+                    JSONObject object = new JSONObject();
+                    if (productId.equals(product.getId())) {
+                        //勾选商品标识
+                        object.put("flag", true);
+                    } else {
+                        //未勾选商品标识
+                        object.put("flag", false);
+                    }
+                    object.put("image", imageAddress + product.getImage());
+                    object.put("price", product.getPrice());
+                    object.put("unitName", convertUnitName);
+                    object.put("name", product.getName());
+                    object.put("id", product.getId());
+                    object.put("url", url);//0:工艺；1：商品；2：人工
+                    arr.add(object);
+                }
+            }
+            pageResult.setList(arr);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+        return ServerResponse.createBySuccess("查询成功", pageResult);
+    }
+
+
+    /**
+     * 查询精算详情列表
+     *
+     * @return
+     */
+    public ServerResponse queryBasicsProduct2(String productId,PageDTO pageDTO,String cityId,String categoryId, String name,String attributeVal, String brandVal, String orderKey) {
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
 //        String imageAddress ="";
         JSONArray arr = new JSONArray();

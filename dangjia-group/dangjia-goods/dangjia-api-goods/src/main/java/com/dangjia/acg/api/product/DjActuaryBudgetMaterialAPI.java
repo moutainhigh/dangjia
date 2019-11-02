@@ -12,8 +12,8 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * Created with IntelliJ IDEA.
- * author: wk
- * Date: 2019/9/17
+ * author: chenyufeng
+ * Date: 2019/11.2
  * Time: 14:15
  */
 @Api(description = "材料精算接口")
@@ -53,23 +53,18 @@ public interface DjActuaryBudgetMaterialAPI {
     /**
      * 新版精算列表展示(精算+自购)
      */
+    @PostMapping("/app/product/djActuaryBudgetMaterial/queryMakeBudgetsList2")
+    @ApiOperation(value = "查询精算列表", notes = "查询精算列表")
+    ServerResponse queryMakeBudgetsList2(@RequestParam("request") HttpServletRequest request,
+                                        @RequestParam("bclId") String bclId,
+                                        @RequestParam("categoryId") String categoryId,
+                                        @RequestParam("houseId") String houseId,
+                                        @RequestParam("cityId") String cityId);
 
 
     /**
      * 新版精算二级展示
      */
-
-
-
-    /**
-     * 新版精算审核页展示
-     */
-
-
-    /**
-     * 新版精算审核二级展示
-     */
-
 
 
 }
