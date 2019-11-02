@@ -13,6 +13,7 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
+import com.dangjia.acg.mapper.delivery.IMasterOrderProgressMapper;
 import com.dangjia.acg.mapper.delivery.IOrderSplitMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseDetailMapper;
@@ -28,6 +29,7 @@ import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.house.WarehouseDetail;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.order.OrderProgress;
 import com.dangjia.acg.modle.repair.*;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
@@ -99,6 +101,8 @@ public class MendOrderCheckService {
     private MendOrderService mendOrderService;
     @Autowired
     private DjSupplierAPI djSupplierAPI ;
+    @Autowired
+    private IMasterOrderProgressMapper iMasterOrderProgressMapper;
     /**
      * 根据mendOrderId查询审核情况
      */
@@ -225,6 +229,61 @@ public class MendOrderCheckService {
         }
     }
 
+    /**
+     * //添加进度信息
+     * @param orderId 订单ID
+     * @param progressType 订单类型
+     * @param nodeType 节点类型
+     * @param nodeCode 节点编码
+     * @param userId 用户id
+     */
+    private void updateOrderProgressInfo(String orderId,String progressType,String nodeType,String nodeCode,String userId){
+        OrderProgress orderProgress=new OrderProgress();
+        orderProgress.setProgressOrderId(orderId);
+        orderProgress.setProgressType(progressType);
+        orderProgress.setNodeType(nodeType);
+        orderProgress.setNodeCode(nodeCode);
+        orderProgress.setCreateBy(userId);
+        orderProgress.setUpdateBy(userId);
+        orderProgress.setCreateDate(new Date());
+        orderProgress.setModifyDate(new Date());
+        iMasterOrderProgressMapper.insert(orderProgress);
+    }
+
+    private void editOrderProgressStatus(Integer state,String roleType,String changeOrderId,String auditorId){
+        //退人工审核流水记录
+        if(state == 1){//不通过时
+            if("2".equals(roleType)){//大管家审核结果
+                //更新大管家审核中按钮的状态为已删除
+                iMasterOrderProgressMapper.updateOrderStatusByNodeCode(changeOrderId,"REFUND_AFTER_SALES","RA_013");
+                //fzh.3.0大管家审核不通过，流水记录
+                updateOrderProgressInfo(changeOrderId,"2","REFUND_AFTER_SALES","RA_014",auditorId);//大管家审核未通过，退人工关闭
+            }
+            if("3".equals(roleType)){//工匠审核结果
+                iMasterOrderProgressMapper.updateOrderStatusByNodeCode(changeOrderId,"REFUND_AFTER_SALES","RA_016");
+                //fzh.3.0大管家审核不通过，流水记录
+                updateOrderProgressInfo(changeOrderId,"2","REFUND_AFTER_SALES","RA_017",auditorId);//工匠审核未通过
+            }
+
+        }else{//审核通过时
+            if("2".equals(roleType)){//大管家审核结果(通过时的处理）
+                //更新大管家审核中按钮的状态为已删除
+                iMasterOrderProgressMapper.updateOrderStatusByNodeCode(changeOrderId,"REFUND_AFTER_SALES","RA_013");
+                //fzh.3.0大管家审核通过，流水记录
+                updateOrderProgressInfo(changeOrderId,"2","REFUND_AFTER_SALES","RA_015",auditorId);//大管家审核通过
+                updateOrderProgressInfo(changeOrderId,"2","REFUND_AFTER_SALES","RA_016",auditorId);//工匠家审核中
+            }
+            if("3".equals(roleType)){//工匠审核结果
+                iMasterOrderProgressMapper.updateOrderStatusByNodeCode(changeOrderId,"REFUND_AFTER_SALES","RA_016");
+                //fzh.3.0大管家审核不通过，流水记录
+                updateOrderProgressInfo(changeOrderId,"2","REFUND_AFTER_SALES","RA_018",auditorId);//工匠审核通过
+
+            }
+        }
+
+
+    }
+
     /** 审核补退人工单
      *  roleType 角色  1业主,2管家,3工匠,4材料员,5供应商
      *  state  1不通过,2通过
@@ -251,6 +310,11 @@ public class MendOrderCheckService {
                     mendOrderCheck.setModifyDate(new Date());
                     mendOrderCheckMapper.updateByPrimaryKeySelective(mendOrderCheck);
                 }
+                if(mendOrder.getType()==3){
+                    //退人工流水记录存储
+                    editOrderProgressStatus(state,mendOrderCheck.getRoleType(),mendOrder.getChangeOrderId(),auditorId);
+                }
+
             }
 
             if (state == 1){
@@ -261,6 +325,10 @@ public class MendOrderCheckService {
                     changeOrder.setState(1);//管家提交的数量单取消 需重新提交
                     changeOrderMapper.updateByPrimaryKeySelective(changeOrder);
                     pushMessage(mendOrder,roleType);
+                }
+                if(mendOrderCheck==null&&mendOrder.getType()==3){//退人工记录流水信息
+                    //fzh.3.0大管家审核不通过，流水记录
+                    updateOrderProgressInfo(mendOrder.getChangeOrderId(),"2","REFUND_AFTER_SALES","RA_014",auditorId);//退人工不通过
 
                 }
                 Example example = new Example(OrderSplit.class);
@@ -290,6 +358,8 @@ public class MendOrderCheckService {
                     mendOrder.setState(3);//流程全部通过
                     mendOrder.setCarriage(0.0);//运费
                     mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
+                    //判断流水帐单中的状态是否为已通过，若不是，则需更新对应的状态
+                    editProgressLastStatus(mendOrder,auditorId);
                     //消息推送
                     pushMessage(mendOrder,roleType);
                     /*全部通过执行补退单不同操作  计算运费*/
@@ -301,6 +371,22 @@ public class MendOrderCheckService {
             e.printStackTrace();
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return ServerResponse.createByErrorMessage("操作失败");
+        }
+    }
+    private void editProgressLastStatus(MendOrder mendOrder,String auditorId){
+        if(mendOrder.getType()==3){
+            Example example = new Example(OrderProgress.class);
+            example.createCriteria().andEqualTo(OrderProgress.PROGRESS_ORDER_ID, mendOrder.getChangeOrderId());
+            List<OrderProgress> orderProgressesList = iMasterOrderProgressMapper.selectByExample(example);//当前节点的流水
+            if(orderProgressesList!=null&&orderProgressesList.size()>0){
+               OrderProgress orderProgress=orderProgressesList.get(orderProgressesList.size()-1);
+               if("RA_013".equals(orderProgress.getNodeCode())||"RA_016".equals(orderProgress.getNodeCode())){
+                   iMasterOrderProgressMapper.updateOrderStatusByNodeCode(mendOrder.getChangeOrderId(),"REFUND_AFTER_SALES",orderProgress.getNodeCode());
+                   //fzh.3.0大管家审核不通过，流水记录
+                   updateOrderProgressInfo(mendOrder.getChangeOrderId(),"2","REFUND_AFTER_SALES","RA_018",auditorId);//工匠审核通过
+
+               }
+            }
         }
     }
     private void pushMessage(MendOrder mendOrder,String roleType){
