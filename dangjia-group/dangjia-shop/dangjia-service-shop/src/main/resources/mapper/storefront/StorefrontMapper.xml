@@ -5,7 +5,7 @@
 <mapper namespace="com.dangjia.acg.mapper.storefront.IStorefrontMapper">
     <sql id="all_column">
           `id`,
-          `member_id` AS memberId,
+          `user_id` AS userId,
           `city_id` AS cityId,
           `storefront_name` AS storefrontName,
           `storefront_address` AS storefrontAddress,
@@ -16,7 +16,9 @@
           `email`,
           `create_date` AS createDate,
           `modify_date` AS modifyDate,
-          `data_status` AS dataStatus
+          `data_status` AS dataStatus,
+           `freight` ,
+           `below_unit_price` as belowUnitPrice
     </sql>
 
 
@@ -37,9 +39,11 @@
             a.`create_date` AS createDate,
             a.`modify_date` AS modifyDate,
             a.`data_status` AS dataStatus,
-            if(b.application_status=NULL or b.application_status="",b.application_status,-1) AS applicationStatus,
+            if(b.application_status is not null and b.application_status!="",b.application_status,-1) AS applicationStatus,
             b.fail_reason AS failReason,
-            b.contract
+            b.contract,
+            a.freight,
+            a.below_unit_price
         FROM
           dj_basics_storefront a
         LEFT JOIN (SELECT * FROM dj_sup_application WHERE sup_id = #{supId})b
@@ -52,7 +56,7 @@
             )
         </if>
         <if test="applicationStatus=='-1'.toString()">
-            and application_status not in(0,1,2)
+            AND( application_status is null or application_status NOT IN(0, 1, 2))
         </if>
         <if test="null!=applicationStatus and ''!=applicationStatus and applicationStatus!='-1'.toString()">
             and application_status=#{applicationStatus}
@@ -65,7 +69,7 @@
         select
           <include refid="all_column"/>
         from dj_basics_storefront
-        where
+        where 1=1
         <if test="null!=searchKey and ''!=searchKey">
             and (
             storefront_name LIKE CONCAT('%',#{searchKey},'%') or
@@ -95,10 +99,12 @@
             a.`data_status` AS dataStatus,
             b.application_status  AS applicationStatus,
             b.fail_reason AS failReason,
-            b.contract
+            b.contract,
+            a.freight,
+            a.below_unit_price
         FROM
             dj_basics_storefront a
-        LEFT JOIN (SELECT * FROM dj_sup_application WHERE sup_id = #{supId})b
+        LEFT JOIN (SELECT * FROM dj_sup_application WHERE sup_id = #{supId}) b
         ON a.id = b.shop_id
         where 1=1
         <if test="null!=searchKey and ''!=searchKey">

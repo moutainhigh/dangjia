@@ -26,7 +26,8 @@ public interface BrandAPI {
     @PostMapping("/basics/brand/selectBrandById")
     @ApiOperation(value = "根据id找到品牌", notes = "根据id找到品牌")
     ServerResponse selectBrandById(@RequestParam("request") HttpServletRequest request,
-                                   @RequestParam("brandId") String brandId);
+                                   @RequestParam("brandId") String brandId,
+                                   @RequestParam("cityId") String cityId);
 
     /**
      * 根据名称找到品牌
@@ -38,7 +39,8 @@ public interface BrandAPI {
     @ApiOperation(value = "根据名称找到品牌", notes = "根据名称找到品牌")
     ServerResponse<PageInfo> selectBrandByName(@RequestParam("request") HttpServletRequest request,
                                                @RequestParam("pageDTO") PageDTO pageDTO,
-                                               @RequestParam(value = "name") String name);
+                                               @RequestParam(value = "name") String name,
+                                               @RequestParam("cityId") String cityId);
 
     /**
      * 查找到所有品牌
@@ -48,7 +50,8 @@ public interface BrandAPI {
     @PostMapping("/basics/brand/getAllBrand")
     @ApiOperation(value = "查找到所有品牌", notes = "查找到所有品牌")
     ServerResponse<PageInfo> getAllBrand(@RequestParam("request") HttpServletRequest request,
-                                         @RequestParam("pageDTO") PageDTO pageDTO);
+                                         @RequestParam("pageDTO") PageDTO pageDTO,
+                                         @RequestParam("cityId")String cityId);
 
     /**
      * 修改品牌信息
@@ -61,7 +64,8 @@ public interface BrandAPI {
                                @RequestParam("id") String id,
                                @RequestParam("name") String name,
                                @RequestParam("image") String image,
-                               @RequestParam("brandSeriesList") String brandSeriesList);
+                               @RequestParam("brandSeriesList") String brandSeriesList,
+                               @RequestParam("cityId")String cityId);
 
     /**
      * 添加品牌
@@ -73,7 +77,8 @@ public interface BrandAPI {
     ServerResponse insertBrand(@RequestParam("request") HttpServletRequest request,
                                @RequestParam("brandSeriesList") String brandSeriesList,
                                @RequestParam("name") String name,
-                               @RequestParam("image") String image);
+                               @RequestParam("image") String image,
+                               @RequestParam("cityId")String cityId);
 
     /**
      * 删除品牌

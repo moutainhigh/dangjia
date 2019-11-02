@@ -55,7 +55,7 @@ public class BasicsGoodsCategoryService {
         return iBasicsGoodsCategoryMapper.selectByPrimaryKey(categoryId);
     }
 
-    public ServerResponse getBasicsGoodsCategory(String categoryId) {
+    public ServerResponse getBasicsGoodsCategory(String categoryId,String cityId) {
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             BasicsGoodsCategory basicsGoodsCategory = iBasicsGoodsCategoryMapper.selectByPrimaryKey(categoryId);
@@ -69,7 +69,7 @@ public class BasicsGoodsCategoryService {
                 categoryMap.put("coverImageUrl",getImageStr(coverImage,address));
             }
 
-            List<Brand> bList = iBasicsGoodsCategoryMapper.queryBrandByCategoryid(categoryId);
+            List<Brand> bList = iBasicsGoodsCategoryMapper.queryBrandByCategoryid(categoryId,cityId);
             categoryMap.put("brands", bList);
             categoryMap.put("brandsIds", getBrandids(bList));
             return ServerResponse.createBySuccess("查询成功", categoryMap);
@@ -121,9 +121,15 @@ public class BasicsGoodsCategoryService {
     }
 
     //新增商品类别
-    public ServerResponse insertBasicsGoodsCategory(String name, String parentId, String parentTop, Integer sort, String isLastCategory, String purchaseRestrictions, String brandIds, String coverImage, String categoryLabelId) {
+    public ServerResponse insertBasicsGoodsCategory(String name, String parentId,
+                                                    String parentTop, Integer sort,
+                                                    String isLastCategory,
+                                                    String purchaseRestrictions,
+                                                    String brandIds, String coverImage,
+                                                    String categoryLabelId,
+                                                    String cityId) {
         try {
-            List<BasicsGoodsCategory> goodsCategoryList = iBasicsGoodsCategoryMapper.queryCategoryByName(name);//根据name查询商品对象
+            List<BasicsGoodsCategory> goodsCategoryList = iBasicsGoodsCategoryMapper.queryCategoryByName(name,cityId);//根据name查询商品对象
             if (goodsCategoryList.size() > 0)
                 return ServerResponse.createByErrorMessage("不能重复添加类别");
             BasicsGoodsCategory category = new BasicsGoodsCategory();
@@ -139,6 +145,7 @@ public class BasicsGoodsCategoryService {
             category.setPurchaseRestrictions(purchaseRestrictions);
             category.setCoverImage(coverImage);
             category.setCategoryLabelId(categoryLabelId);
+            category.setCityId(cityId);
             iBasicsGoodsCategoryMapper.insert(category);
             //如果品牌不为空，则添加品牌信息
             if (StringUtils.isNoneBlank(brandIds)) {
@@ -146,6 +153,7 @@ public class BasicsGoodsCategoryService {
                 for (int i = 0; i < arr.length; i++) {//新增goods关联品牌系列
                     String brandId = arr[i];
                     CategorySeries gs = new CategorySeries();
+                    gs.setCityId(cityId);
                     gs.setGoodsId(category.getId());
                     if (StringUtils.isNoneBlank(brandId)) {
                         gs.setBrandId(brandId);
@@ -161,16 +169,23 @@ public class BasicsGoodsCategoryService {
     }
 
     //修改商品类别
-    public ServerResponse doModifyBasicsGoodsCategory(String id, String name, String parentId, String parentTop, Integer sort, String isLastCategory, String purchaseRestrictions, String brandIds, String coverImage, String categoryLabelId) {
+    public ServerResponse doModifyBasicsGoodsCategory(String id, String name, String parentId,
+                                                      String parentTop, Integer sort,
+                                                      String isLastCategory,
+                                                      String purchaseRestrictions,
+                                                      String brandIds, String coverImage,
+                                                      String categoryLabelId,
+                                                      String cityId) {
         try {
             BasicsGoodsCategory oldCategory = iBasicsGoodsCategoryMapper.selectByPrimaryKey(id);
             if (!oldCategory.getName().equals(name)) { //如果 是修改name
-                List<BasicsGoodsCategory> goodsCategoryList = iBasicsGoodsCategoryMapper.queryCategoryByName(name);//根据name查询商品对象
+                List<BasicsGoodsCategory> goodsCategoryList = iBasicsGoodsCategoryMapper.queryCategoryByName(name,cityId);//根据name查询商品对象
                 if (goodsCategoryList.size() > 0)
                     return ServerResponse.createByErrorMessage("该类别已存在");
             }
 
             BasicsGoodsCategory category = new BasicsGoodsCategory();
+            category.setCityId(cityId);
             category.setId(id);
             category.setName(name);
             category.setParentId(parentId);
@@ -190,6 +205,7 @@ public class BasicsGoodsCategoryService {
                 for (int i = 0; i < arr.length; i++) {//新增goods关联品牌系列
                     String brandId = arr[i];
                     CategorySeries gs = new CategorySeries();
+                    gs.setCityId(cityId);
                     gs.setGoodsId(category.getId());
                     if (StringUtils.isNoneBlank(brandId)) {
                         gs.setBrandId(brandId);
@@ -214,6 +230,13 @@ public class BasicsGoodsCategoryService {
         return ServerResponse.createBySuccess("查询成功", goodsCategoryList);
     }
 
+    public ServerResponse queryLastCategoryList(String cityId,String searchKey){
+        List<BasicsGoodsCategory> goodsCategoryList = iBasicsGoodsCategoryMapper.queryLastCategoryList(cityId, searchKey);
+        if (goodsCategoryList.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+        return ServerResponse.createBySuccess("查询成功", goodsCategoryList);
+    }
     //删除商品类别
     public ServerResponse deleteGoodsCategory(String id) {
         try {
@@ -289,9 +312,9 @@ public class BasicsGoodsCategoryService {
     }
 
     //查询品牌
-    public ServerResponse queryBrand() {
+    public ServerResponse queryBrand(String cityId) {
         try {
-            List<Brand> brandList = iBrandMapper.getBrands();
+            List<Brand> brandList = iBrandMapper.getBrands(cityId);
             return ServerResponse.createBySuccess("查询成功", brandList);
         } catch (Exception e) {
             logger.error("queryBrand查询失败：", e);
@@ -305,10 +328,10 @@ public class BasicsGoodsCategoryService {
      * @param categoryId
      * @return
      */
-    public ServerResponse queryBrandByCategoryId(String categoryId) {
+    public ServerResponse queryBrandByCategoryId(String categoryId,String cityId) {
 
         try {
-            List<Brand> bList = iBasicsGoodsCategoryMapper.queryBrandByCategoryid(categoryId);
+            List<Brand> bList = iBasicsGoodsCategoryMapper.queryBrandByCategoryid(categoryId,cityId);
             return ServerResponse.createBySuccess("查询成功", bList);
         } catch (Exception e) {
             logger.error("queryBrandByCategoryId查询失败：", e);
@@ -317,8 +340,8 @@ public class BasicsGoodsCategoryService {
     }
 
     //查询商品属性列表 queryGoodsCategory
-    public ServerResponse queryGoodsCategoryExistlastCategory(String parentId) {
-        List<BasicsGoodsCategory> goodsCategoryList = iBasicsGoodsCategoryMapper.queryGoodsCategoryExistlastCategory(parentId);
+    public ServerResponse queryGoodsCategoryExistlastCategory(String parentId,String cityId) {
+        List<BasicsGoodsCategory> goodsCategoryList = iBasicsGoodsCategoryMapper.queryGoodsCategoryExistlastCategory(parentId,cityId);
         if (goodsCategoryList.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.product.IShoppingCartMapper">
+
+    <sql id="all_columns">
+		id,
+		city_id as cityId,
+		member_id as memberId,
+		product_id as productId,
+		product_sn as productSn,
+		product_name as productName,
+		image,
+		price ,
+		shop_count as shopCount,
+		unit_name as unitName,
+		category_id as categoryId,
+		product_type as productType,
+		storefront_id as storefrontId ,
+		create_date AS createDate,
+        modify_date AS modifyDate,
+        data_status AS dataStatus
+	</sql>
+
+  	<select id="queryCartList" resultType="com.dangjia.acg.dto.product.ShoppingCartListDTO">
+		SELECT
+			a.id,
+			a.price,
+			a.shop_count as shopCount,
+			a.unit_name as unitName,
+			a.product_type as productType,
+			a.storefront_id as storefrontId ,
+			b.prod_template_id AS productId,
+			b.product_name AS productName,
+			b.product_sn as productSn,
+			b.image,
+			b.sell_price AS sellPrice,
+			d.type
+		FROM
+			dj_repair_shopping_cart a
+		INNER JOIN dj_basics_storefront_product b ON a.product_id = b.id
+		INNER JOIN dj_basics_product_template c ON b.prod_template_id = c.id
+		INNER JOIN dj_basics_goods d ON b.goods_id = d.id
+		WHERE member_id =#{memberId}
+		AND city_id =#{cityId}
+		AND storefront_id=#{storefrontId}
+	</select>
+
+	<select id="queryStorefrontIds" resultType="java.lang.String">
+		SELECT
+		  	storefront_id
+		FROM
+			dj_repair_shopping_cart
+		WHERE
+			member_id =#{memberId}
+			AND city_id =#{cityId}
+		group by storefront_id
+	</select>
+</mapper>
+

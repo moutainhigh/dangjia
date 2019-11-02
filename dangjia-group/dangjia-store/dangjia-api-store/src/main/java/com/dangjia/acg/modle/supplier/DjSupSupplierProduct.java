@@ -53,4 +53,9 @@ public class DjSupSupplierProduct extends BaseEntity {
     @Desc(value = "是否供应")
     @ApiModelProperty("是否供应")
     private Integer isSupply;//是否供应；0停供，1供应
+
+    @Column(name = "city_id")
+    @Desc(value = "城市ID")
+    @ApiModelProperty("城市ID")
+    private String cityId;//城市ID
 }

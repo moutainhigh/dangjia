@@ -26,10 +26,10 @@ import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.modle.complain.Complain;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
+import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.matter.WorkerDisclosure;
-import com.dangjia.acg.modle.matter.WorkerDisclosureHouseFlow;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
@@ -124,7 +124,16 @@ public class StewardService {
         //根据房子id找出该房子大管家
         Member stewardHouse = memberMapper.getSupervisor(hf.getHouseId());
         if (!stewardHouse.getId().equals(member.getId())) {
-            return ServerResponse.createByErrorMessage("工人与大管家不是同一个工地");
+            return ServerResponse.createByErrorMessage("工地大管家不符，请核对选择的工地是否一致！");
+        }
+        Object object1 = constructionService.getHouseWorker(null, member.getId());
+        String houseId=null;
+        if (object1 instanceof HouseWorker) {
+            HouseWorker hw = (HouseWorker) object1;
+            houseId = hw.getHouseId();
+        }
+        if (CommonUtil.isEmpty(houseId)||!houseId.equals(hf.getHouseId())) {
+            return ServerResponse.createByErrorMessage("工人与大管家选择的不是同一个工地");
         }
         double longitude1;
         double latitude1;
@@ -269,6 +278,15 @@ public class StewardService {
             HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowId);//查询houseFlow
             if (!hf.getWorkerId().equals(worker.getId())) {
                 return ServerResponse.createByErrorMessage("交底人不匹配");
+            }
+            Object object1 = constructionService.getHouseWorker(null, hf.getWorkerId());
+            String houseId=null;
+            if (object1 instanceof HouseWorker) {
+                HouseWorker hw = (HouseWorker) object1;
+                houseId = hw.getHouseId();
+            }
+            if (CommonUtil.isEmpty(houseId)||!houseId.equals(hf.getHouseId())) {
+                return ServerResponse.createByErrorMessage("交底工人与大管家选择的不是同一个工地");
             }
             String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
                     String.format(DjConstants.GJPageAddress.READPROJECTINFO, userToken, hf.getCityId(), "交底详情") + "&houseFlowId=" + houseFlowId;

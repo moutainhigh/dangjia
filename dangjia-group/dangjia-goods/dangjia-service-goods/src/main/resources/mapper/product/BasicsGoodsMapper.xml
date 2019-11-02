@@ -73,32 +73,25 @@
         ORDER BY create_date desc
     </select>
 
-    <select id="queryByCategoryName" resultType="com.dangjia.acg.modle.product.BasicsGoods">
+    <select id="getActuarialGoodsListByCategoryId" resultType="com.dangjia.acg.modle.product.BasicsGoods">
         SELECT
-            t.id,
-            t.NAME,
-            t.category_id as categoryId,
-            t.type,
-            t.buy,
-            t.sales,
-            t.other_name AS otherName,
-            t.unit_id as unitId,
-            t.create_date,
-            t.modify_date,
-            t.is_influe_decoration_progress as isInflueDecorationProgress,
-            t.irreversible_reasons as irreversibleReasons,
-            t.istop,
-            t.brand_id as brandId,
-            t.is_elevator_fee as isElevatorFee,
-            t.indicative_price as indicativePrice,
-            t.label_ids as  labelIds,
-            t.is_reservation_deliver as isReservationDeliver,
-            t.attribute_id_arr attributeIdArr
+            t3.id ,
+            t3.NAME ,
+            t3.category_id categoryId
         FROM
-            dj_basics_goods t
-        WHERE t.type = #{goodsType}
-        and t.data_status= 0
-        ORDER BY category_id
+            dj_basics_storefront_product t1,
+            dj_basics_product_template t2,
+            dj_basics_goods t3
+        WHERE
+            t1.prod_template_id = t2.id
+        AND t2.goods_id = t3.id
+        AND t3.category_id = #{categoryId}
+        and t1.is_shelf_status='1'
+        and t1.data_status= 0
+        GROUP BY
+            t3.id,
+            t3.NAME,
+            t3.category_id
     </select>
 
     <!-- 根据name查询属性对象 -->
@@ -108,6 +101,7 @@
         FROM dj_basics_goods
         where data_status = 0
         AND name LIKE CONCAT('%',#{name},'%')
+        and city_id = #{cityId}
         ORDER BY create_date desc
     </select>
 

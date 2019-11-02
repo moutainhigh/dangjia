@@ -214,7 +214,7 @@
         <if test="storefrontId!=null and storefrontId!=''">
             and dos.storefront_id = #{storefrontId}
         </if>
-        <if test="cityId!=null and cityId!=''">-
+        <if test="cityId!=null and cityId!=''">
             and house.city_id = #{cityId}
         </if>
         <if test="startDate!=null and endDate!=null and startDate!='' and endDate!=''">
@@ -889,59 +889,6 @@
         limit 1
     </select>
 
-    <select id="getOrderInfo" resultType="com.dangjia.acg.modle.order.DjOrder">
-        SELECT
-            id,
-            order_status orderStatus,
-            order_generation_time orderGenerationTime
-        FROM
-            dj_order
-        WHERE
-            house_id = #{houseId}
-        AND order_type = '1'
-        AND (parent_order_id = '0' or parent_order_id is null)
-        limit 1
-
-    </select>
-
-    <select id="getOrderDetailInfoList" resultType="com.dangjia.acg.modle.order.DjOrderDetail">
-        SELECT
-            t1.id,
-            t1.order_id orderId,
-            t1.storefont_id storefontId,
-            t1.product_id productId,
-            t1.purchase_price purchasePrice,
-            t1.purchase_number purchaseNumber,
-            t1.total_purchase_price totalPurchasePrice,
-            t1.order_type orderType
-        FROM
-            dj_order t,
-            dj_order_detail t1
-        WHERE
-            t.id = t1.order_id
-        AND t.house_id = #{houseId}
-        AND t.order_type = '1'
-
-    </select>
-
-    <update id="updateOrderDetail" parameterType="com.dangjia.acg.modle.order.DjOrderDetail">
-        UPDATE dj_order_detail
-        SET  product_id = #{productId},
-             purchase_price = #{purchasePrice},
-             purchase_number = #{purchaseNumber},
-             total_purchase_price = #{totalPurchasePrice},
-             update_by = #{updateBy},
-             modify_date = now()
-        WHERE
-            id = #{id}
-    </update>
-
-    <update id="updateOrder" >
-         update dj_order
-         set is_pay_money=1,
-         total_order_price=(select sum(t.total_purchase_price) from dj_order_detail t where t.order_id=#{orderId})
-         where id=#{orderId}
-    </update>
 
 </mapper>
 

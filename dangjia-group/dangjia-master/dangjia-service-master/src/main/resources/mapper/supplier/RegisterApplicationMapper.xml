@@ -55,4 +55,21 @@
 	</select>
 
 
+    <select id="getUserIdExamine" resultType="java.lang.String">
+        SELECT
+            u.id
+        FROM
+            dj_register_application d
+        LEFT JOIN dj_user u ON d.mobile = u.mobile
+        WHERE
+            1 = 1
+        AND u.id = #{userId}
+        AND u.is_del = 0
+        AND u.is_job = 0
+        AND u.data_status = 0
+        AND d.application_type = 1
+        AND application_status = 1
+        AND d.data_status = 0
+    </select>
+
 </mapper>

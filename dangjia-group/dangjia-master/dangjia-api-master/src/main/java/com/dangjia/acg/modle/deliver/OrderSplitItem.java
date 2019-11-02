@@ -11,6 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import java.util.Date;
 
 @Data
 @Entity
@@ -48,6 +49,7 @@ public class OrderSplitItem extends BaseEntity {
 	@Desc(value = "货品名称")
 	@ApiModelProperty("货品名称")
 	private String productName;
+
 
 	@Column(name = "product_nick_name")
 	private String productNickName;//货品昵称
@@ -97,5 +99,48 @@ public class OrderSplitItem extends BaseEntity {
 	public void initPath(String address){
 		this.image = StringUtils.isEmpty(this.image)?null:address+this.image;
 	}
+
+	@Column(name = "address_id")
+	@Desc(value = "地址id")
+	@ApiModelProperty("地址id")
+	private String addressId;
+
+	@Column(name = "storefront_id")
+	@Desc(value = "店铺ID")
+	@ApiModelProperty("店铺ID")
+	private String storefrontId;
+
+	@Column(name = "is_delivery_install")
+	@Desc(value = "'是否送货与安装/施工分开'")
+	@ApiModelProperty("'是否送货与安装/施工分开'")
+	private String isDeliveryInstall;
+
+
+	@Column(name = "order_item_id")
+	@Desc(value = "'是否送货与安装/施工分开'")
+	@ApiModelProperty("'是否送货与安装/施工分开'")
+	private String orderItemId;
+
+	@Column(name = "order_item_str")
+	@Desc(value = "'是否送货与安装/施工分开'")
+	@ApiModelProperty("'是否送货与安装/施工分开'")
+	private String orderItemStr;
+
+	@Column(name = "is_reservation_deliver")
+	@Desc(value = "是否需要预约(1是，0否）")
+	@ApiModelProperty("是否需要预约(1是，0否）")
+	private Integer isReservationDeliver;
+
+	@Column(name = "reservation_deliver_time")
+	@Desc(value = "预约发货时间")
+	@ApiModelProperty("预约发货时间")
+	private Date reservationDeliverTime;
+
+
+	@Column(name = "return_count")
+	@Desc(value = "退货量")
+	@ApiModelProperty("退货量")
+	private Double returnCount;
+
 
 }

@@ -503,7 +503,7 @@ public class ProductChangeService {
                         workerDetail.setMoney(toDifferPrice);
                         workerDetail.setApplyMoney(toDifferPrice);
                         workerDetail.setWalletMoney(surplusMoney);
-                        workerDetail.setState(4);//进钱//业主退
+                        workerDetail.setState(4);//进钱//业主退0
                         workerDetailMapper.insert(workerDetail);
 
                         member.setHaveMoney(haveMoney);

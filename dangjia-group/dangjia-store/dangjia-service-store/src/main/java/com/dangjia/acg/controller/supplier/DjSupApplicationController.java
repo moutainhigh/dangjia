@@ -34,8 +34,8 @@ public class DjSupApplicationController implements DjSupApplicationAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse insertSupplierApplicationShop(HttpServletRequest request, String supId, String shopId) {
-        return djSupApplicationService.insertSupplierApplicationShop(supId,shopId);
+    public ServerResponse insertSupplierApplicationShop(HttpServletRequest request, String userId, String cityId, String shopId) {
+        return djSupApplicationService.insertSupplierApplicationShop(userId,cityId,shopId);
     }
 
     @Override

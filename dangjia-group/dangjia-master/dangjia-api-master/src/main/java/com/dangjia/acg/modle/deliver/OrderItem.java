@@ -11,6 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import java.util.Date;
 
 /**
  *  订单明细
@@ -79,20 +80,78 @@ public class OrderItem extends BaseEntity {
 	@Column(name = "image")
 	private String image;//图片
 
-	@Column(name = "worker_goods_name")
-	@Desc(value = "人工商品名称")
-	@ApiModelProperty("人工商品名称")
-	private String workerGoodsName;//人工商品name
 
-	@Column(name = "worker_goods_sn")
-	@Desc(value = "人工商品编号")
-	@ApiModelProperty("人工商品编号")
-	private String workerGoodsSn;//人工商品编号
+	@Column(name = "storefont_id")
+	@Desc(value = "店铺ID")
+	@ApiModelProperty("店铺ID")
+	private String storefontId;//店铺ID
 
-	@Column(name = "worker_goods_id")
-	@Desc(value = "人工商品id")
-	@ApiModelProperty("人工商品id")
-	private String workerGoodsId;
+	@Column(name = "activity_red_pack_id")
+	@Desc(value = "优惠卷ID")
+	@ApiModelProperty("优惠卷ID")
+	private String activityRedPackId;//优惠卷ID
+
+	@Column(name = "discount_price")
+	@Desc(value = "优惠价钱")
+	@ApiModelProperty("优惠价钱")
+	private Double discountPrice;//优惠价钱
+
+	@Column(name = "actual_payment_price")
+	@Desc(value = "实付价钱+运费+搬运费-优惠金额")
+	@ApiModelProperty("实付价钱+运费+搬运费-优惠金额")
+	private Double actualPaymentPrice;//实付价钱
+
+	@Column(name = "stevedorage_cost")
+	@Desc(value = "搬运费")
+	@ApiModelProperty("搬运费")
+	private Double stevedorageCost;//搬运费
+
+	@Column(name = "transportation_cost")
+	@Desc(value = "运费")
+	@ApiModelProperty("运费")
+	private Double transportationCost;//运费
+
+
+	@Column(name = "ask_count")
+	@Desc(value = "已要总数")
+	@ApiModelProperty("已要总数")
+	private Double askCount;
+
+	@Column(name = "return_count")
+	@Desc(value = "退货数")
+	@ApiModelProperty("退货数")
+	private Double returnCount;
+
+	@Column(name = "receive_count")
+	@Desc(value = "收货数")
+	@ApiModelProperty("收货数")
+	private Double receiveCount;
+
+
+	@Column(name = "is_reservation_deliver")
+	@Desc(value = "是否预约发货(1是，0否）")
+	@ApiModelProperty("是否预约发货(1是，0否）")
+	private String isReservationDeliver;//是否预约发货(1是，0否）
+
+	@Column(name = "reservation_deliver_time")
+	@Desc(value = "预约发货时间")
+	@ApiModelProperty("预约发货时间")
+	private Date reservationDeliverTime;//预约发货时间
+
+	@Column(name = "order_status")
+	@Desc(value = "订单状态（1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭）")
+	@ApiModelProperty("订单状态（1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭）")
+	private String orderStatus;//订单状态（1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭）
+
+	@Column(name = "create_by")
+	@Desc(value = "创建人")
+	@ApiModelProperty("创建人")
+	private String createBy;//创建人
+
+	@Column(name = "update_by")
+	@Desc(value = "修改人")
+	@ApiModelProperty("修改人")
+	private String updateBy;//修改人
 
 	public void initPath(String address){
 		this.image = StringUtils.isEmpty(this.image)?null:address+this.image;

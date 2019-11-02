@@ -80,16 +80,40 @@ public class DjBasicsProductTemplateService {
     private IAttributeValueMapper iAttributeValueMapper;
     @Autowired
     private ILabelMapper iLabelMapper;
+
+
+    /**
+     * 随机查询商品
+     * @return
+     */
+    public List<DjBasicsProductTemplate> queryRandomProduct(Integer limit,String cityId) {
+        List<DjBasicsProductTemplate> djBasicsProductTemplates = iBasicsProductTemplateMapper.queryRandomProduct(limit,cityId);
+        return djBasicsProductTemplates;
+    }
+
+
+    /**
+     * 根据商品类别随机查询商品
+     * @param productId
+     * @return
+     */
+    public List<DjBasicsProductTemplate> queryRandomProductByCategoryId(String productId,Integer limit) {
+        List<DjBasicsProductTemplate> djBasicsProductTemplates = iBasicsProductTemplateMapper.queryRandomProductByCategoryId(productId, limit);
+        return djBasicsProductTemplates;
+    }
+
+
     /**
      * 查询商品信息
      *
      * @param name
      * @return
      */
-    public ServerResponse queryProductData(String name) {
+    public ServerResponse queryProductData(String name,String cityId) {
         Example example = new Example(DjBasicsProduct.class);
         if (!CommonUtil.isEmpty(name)) {
-            example.createCriteria().andLike(DjBasicsProduct.NAME, "%" + name + "%");
+            example.createCriteria().andLike(DjBasicsProduct.NAME, "%" + name + "%").
+                    andEqualTo(DjBasicsProduct.CITY_ID,cityId);
             List<DjBasicsProductTemplate> list = iBasicsProductTemplateMapper.selectByExample(example);
             if (list.size() <= 0) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
@@ -104,16 +128,18 @@ public class DjBasicsProductTemplateService {
      * @param categoryId
      * @return
      */
-    public List<DjBasicsProductTemplate> getAllProductByCategoryId(String categoryId) {
+    public List<DjBasicsProductTemplate> getAllProductByCategoryId(String categoryId,String cityId) {
         try {
             Example example = new Example(DjBasicsProduct.class);
-            example.createCriteria().andEqualTo(DjBasicsProduct.CATEGORY_ID,categoryId);
+            example.createCriteria().andEqualTo(DjBasicsProduct.CATEGORY_ID,categoryId)
+            .andEqualTo(DjBasicsProduct.CITY_ID,cityId);
             List<DjBasicsProductTemplate> djBasicsProductList = iBasicsProductTemplateMapper.selectByExample(example); //根据商品编号查询对象
             return djBasicsProductList;
         } catch (Exception e) {
             return null;
         }
     }
+
     /**
      * 查看商品详情
      * @param productId
@@ -144,7 +170,7 @@ public class DjBasicsProductTemplateService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse insertBatchProduct(String productArr) {
+    public ServerResponse insertBatchProduct(String productArr,String cityId) {
 
         JSONArray jsonArr = JSONArray.parseArray(productArr);
         //1.商品作校验，校验前端传过来的商品是否符合条件
@@ -279,11 +305,11 @@ public class DjBasicsProductTemplateService {
                 return "更新商品失败";
             } else if(productType==2){//如果是人工商品，则作相应更新
                 //相关联表也更新
-                iBudgetWorkerMapper.updateBudgetMaterialByProductId(productId);
-                Example example = new Example(DjBasicsProductTemplate.class);
+               // iBudgetWorkerMapper.updateBudgetMaterialByProductId(productId);
+              /*  Example example = new Example(DjBasicsProductTemplate.class);
                 example.createCriteria().andEqualTo(DjBasicsProductTemplate.ID, productId);
                 List<DjBasicsProductTemplate> list = iBasicsProductTemplateMapper.selectByExample(example);
-                masterMendWorkerAPI.updateMendWorker(JSON.toJSONString(list));
+                masterMendWorkerAPI.updateMendWorker(JSON.toJSONString(list));*/
             }
         }
         return product.getId();
@@ -531,9 +557,10 @@ public class DjBasicsProductTemplateService {
      * @param productId
      * @return
      */
-    public ServerResponse queryProductLabels(String productId) {
+    public ServerResponse queryProductLabels(String productId,String cityId) {
         Example example=new Example(DjBasicsProductLabelVal.class);
-        example.createCriteria().andEqualTo(DjBasicsProductLabelVal.PRODUCT_ID,productId);
+        example.createCriteria().andEqualTo(DjBasicsProductLabelVal.PRODUCT_ID,productId)
+        .andEqualTo(DjBasicsProductLabelVal.CITY_ID,cityId);
         List<DjBasicsProductLabelVal> djBasicsProductLabelVals = djBasicsProductLabelValMapper.selectByExample(example);
         List<DjBasicsProductLabelDTO> djBasicsProductLabelDTOS = new ArrayList<>();
         djBasicsProductLabelVals.forEach(dbpl ->{
@@ -554,7 +581,7 @@ public class DjBasicsProductTemplateService {
      *
      * @return
      */
-    public ServerResponse addLabelsValue(String jsonStr) {
+    public ServerResponse addLabelsValue(String jsonStr,String cityId) {
         try {
             JSONObject villageObj = JSONObject.parseObject(jsonStr);
             String productId = villageObj.getString("productId");//商品id
@@ -572,7 +599,6 @@ public class DjBasicsProductTemplateService {
                         stringBuffer.append(",");
                     stringBuffer.append(jsonObject.get(i1));
                 }
-                System.out.println(stringBuffer.toString());
                 DjBasicsProductLabelVal djBasicsProductLabelVal;
                 Example example=new Example(DjBasicsProductLabelVal.class);
                 example.createCriteria().andEqualTo(DjBasicsProductLabelVal.PRODUCT_ID,productId)
@@ -580,6 +606,7 @@ public class DjBasicsProductTemplateService {
                 List<DjBasicsProductLabelVal> djBasicsProductLabelVals = djBasicsProductLabelValMapper.selectByExample(example);
                 if (djBasicsProductLabelVals.size()<=0) {//没有则新增
                     djBasicsProductLabelVal = new DjBasicsProductLabelVal();
+                    djBasicsProductLabelVal.setCityId(cityId);
                     djBasicsProductLabelVal.setProductId(productId);
                     djBasicsProductLabelVal.setDataStatus(0);
                     djBasicsProductLabelVal.setLabelId(labelId);
@@ -587,6 +614,7 @@ public class DjBasicsProductTemplateService {
                     djBasicsProductLabelValMapper.insert(djBasicsProductLabelVal);
                 } else {
                     djBasicsProductLabelVal=new DjBasicsProductLabelVal();
+                    djBasicsProductLabelVal.setCityId(cityId);
                     djBasicsProductLabelVal.setLabelValId(stringBuffer.toString());
                     example=new Example(DjBasicsProductLabelVal.class);
                     example.createCriteria().andEqualTo(DjBasicsProductLabelVal.PRODUCT_ID,productId)
@@ -633,11 +661,13 @@ public class DjBasicsProductTemplateService {
      * @param type 是否禁用  0：禁用；1不禁用 ;  -1全部默认
      * @return
      */
-    public ServerResponse queryGoodsListByCategoryLikeName(PageDTO pageDTO, String categoryId, String name, Integer type, String categoryName) {
+    public ServerResponse queryGoodsListByCategoryLikeName(PageDTO pageDTO, String categoryId,
+                                                           String name, Integer type,
+                                                           String categoryName, String cityId) {
         try {
             LOG.info("tqueryGoodsListByCategoryLikeName type :" + type);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<DjBasicsGoods> djBasicsGoods = djBasicsGoodsMapper.queryGoodsListByCategoryLikeName(categoryId, name);
+            List<DjBasicsGoods> djBasicsGoods = djBasicsGoodsMapper.queryGoodsListByCategoryLikeName(categoryId, name,cityId);
             PageInfo pageResult = new PageInfo(djBasicsGoods);
             List<ActuarialGoodsDTO> actuarialGoodsDTOS=new ArrayList<>();
             List<Map<String, Object>> gMapList = new ArrayList<>();
@@ -711,9 +741,9 @@ public class DjBasicsProductTemplateService {
      * 查询所有单位列表
      * @return
      */
-    public ServerResponse queryUnit() {
+    public ServerResponse queryUnit(String cityId) {
         try {
-            List<Unit> unitList = iUnitMapper.getUnit();
+            List<Unit> unitList = iUnitMapper.getUnit(cityId);
             return ServerResponse.createBySuccess("查询成功", unitList);
         } catch (Exception e) {
             LOG.error("查询失败：",e);
@@ -747,9 +777,9 @@ public class DjBasicsProductTemplateService {
      * @param goodsId
      * @return
      */
-    public ServerResponse getTemporaryStorageProductByGoodsId(String goodsId) {
+    public ServerResponse getTemporaryStorageProductByGoodsId(String cityId,String goodsId) {
         try {
-            DjBasicsProductTemplate djBasicsProduct =iBasicsProductTemplateMapper.queryTemporaryStorage(goodsId,"2");
+            DjBasicsProductTemplate djBasicsProduct =iBasicsProductTemplateMapper.queryTemporaryStorage(cityId,goodsId,"2");
             Map<String,Object> map = null;
             if(djBasicsProduct!=null&&StringUtils.isNotBlank(djBasicsProduct.getId())){
                 map = getProductDetailByProductId(djBasicsProduct);
@@ -897,7 +927,7 @@ public class DjBasicsProductTemplateService {
      * @param goodsId
      * @return
      */
-    public ServerResponse getAllProductByGoodsId(String goodsId) {
+    public ServerResponse getAllProductByGoodsId(String goodsId,String cityId) {
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             List<DjBasicsProductTemplate> pList = iBasicsProductTemplateMapper.queryByGoodsId(goodsId);
@@ -952,7 +982,7 @@ public class DjBasicsProductTemplateService {
      * 确认开工选择商品列表
      * @return
      */
-    public ServerResponse queryChooseGoods() {
+    public ServerResponse queryChooseGoods(String cityId) {
         try {
             List<DjBasicsProductTemplate> djBasicsProducts = iBasicsProductTemplateMapper.queryChooseGoods();
             if(djBasicsProducts.size()<=0)

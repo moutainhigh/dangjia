@@ -5,7 +5,9 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.supplier.DjSupApplicationMapper;
+import com.dangjia.acg.mapper.supplier.DjSupplierMapper;
 import com.dangjia.acg.modle.supplier.DjSupApplication;
+import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +29,8 @@ public class DjSupApplicationService {
     private DjSupApplicationMapper djSupApplicationMapper;
     @Autowired
     private ConfigUtil configUtil;
+    @Autowired
+    private DjSupplierMapper djSupplierMapper;
 
 
 
@@ -58,14 +62,18 @@ public class DjSupApplicationService {
 
     /**
      * 供应商申请供应店铺
-     * @param supId
+     * @param userId
+     * @param cityId
      * @param shopId
      * @return
      */
-    public ServerResponse insertSupplierApplicationShop(String supId, String shopId) {
+    public ServerResponse insertSupplierApplicationShop(String userId,String cityId, String shopId) {
         try {
+            DjSupplier djSupplier = djSupplierMapper.querySingleDjSupplier(userId, cityId);
+            if(null==djSupplier)
+                return ServerResponse.createByErrorMessage("暂无供应商信息");
             Example example=new Example(DjSupApplication.class);
-            example.createCriteria().andEqualTo(DjSupApplication.SUP_ID,supId)
+            example.createCriteria().andEqualTo(DjSupApplication.SUP_ID,djSupplier.getId())
                     .andEqualTo(DjSupApplication.SHOP_ID,shopId)
                     .andNotEqualTo(DjSupApplication.APPLICATION_STATUS,2)
                     .andEqualTo(DjSupApplication.DATA_STATUS,0);
@@ -73,9 +81,10 @@ public class DjSupApplicationService {
                 return ServerResponse.createByErrorMessage("请勿重复申请");
             DjSupApplication djSupApplication=new DjSupApplication();
             djSupApplication.setShopId(shopId);
-            djSupApplication.setSupId(supId);
+            djSupApplication.setSupId(djSupplier.getId());
             djSupApplication.setDataStatus(0);
             djSupApplication.setApplicationStatus("0");
+            djSupApplication.setCityId(cityId);
             if(djSupApplicationMapper.insert(djSupApplication)>0)
                 return ServerResponse.createBySuccessMessage("申请成功");
         } catch (Exception e) {
@@ -114,6 +123,10 @@ public class DjSupApplicationService {
     public ServerResponse queryContracts(String id) {
         try {
             DjSupApplication djSupApplication = djSupApplicationMapper.selectByPrimaryKey(id);
+            if(djSupApplication==null)
+            {
+                return ServerResponse.createByErrorMessage("没有查询到合同!");
+            }
             String[] split = djSupApplication.getContract().split(",");
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             for (int i = 0; i < split.length; i++) {

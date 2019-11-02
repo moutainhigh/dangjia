@@ -16,11 +16,13 @@ import java.util.List;
  */
 @Repository
 public interface DjRegisterApplicationMapper extends Mapper<DjRegisterApplication> {
-
+    String getUserIdExamine(@Param("userId") String userId);
     /**
      * 查询服务列表
      * @return
      */
     List<RegisterApplicationDTO> getAllRegistList(@Param("applicationStatus") String applicationStatus,
                                                   @Param("searchKey") String searchKey);
+
+
 }

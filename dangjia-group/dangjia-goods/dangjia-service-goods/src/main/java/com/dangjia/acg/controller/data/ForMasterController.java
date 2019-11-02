@@ -3,15 +3,12 @@ package com.dangjia.acg.controller.data;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.dto.actuary.BudgetLabelDTO;
-import com.dangjia.acg.dto.actuary.BudgetLabelGoodsDTO;
+import com.dangjia.acg.dto.actuary.ShopGoodsDTO;
 import com.dangjia.acg.dto.product.ProductWorkerDTO;
 import com.dangjia.acg.dto.product.StorefontInfoDTO;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
-import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.product.BasicsGoods;
-import com.dangjia.acg.modle.product.DjBasicsProduct;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
@@ -20,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.xml.ws.Response;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -120,15 +117,15 @@ public class ForMasterController implements ForMasterAPI {
 
     @Override
     @ApiMethod
-    public List<BudgetWorker> renGong(String cityId,String houseFlowId){
+    public List<BudgetMaterial> renGong(String cityId,String houseFlowId){
        return forMasterService.renGong(houseFlowId);
     }
 
-    @Override
+  /*  @Override
     @ApiMethod
     public Double getBudgetWorkerPrice(String houseId, String workerTypeId, String cityId){
         return forMasterService.getBudgetWorkerPrice(houseId,workerTypeId);
-    }
+    }*/
     @Override
     @ApiMethod
     public Double getBudgetCaiPrice(String houseId, String workerTypeId,String cityId){
@@ -164,13 +161,8 @@ public class ForMasterController implements ForMasterAPI {
     /*********************商品3.0改造**************************/
     @Override
     @ApiMethod
-    public List<BudgetLabelDTO> queryBudgetLabel(String houseId, String workerTypeId, String cityId){
-        return forMasterService.queryBudgetLabel(houseId,workerTypeId);
-    }
-    @Override
-    @ApiMethod
-    public  List<BudgetLabelGoodsDTO> queryBudgetLabelGoods(String houseId, String workerTypeId, String cityId){
-        return forMasterService.queryBudgetLabelGoods(houseId,workerTypeId);
+    public List<ShopGoodsDTO> queryShopGoods(String houseId, String workerTypeId, String cityId){
+        return forMasterService.queryShopGoods(houseId,workerTypeId);
     }
 
     @Override
@@ -190,9 +182,42 @@ public class ForMasterController implements ForMasterAPI {
                                                      @RequestParam("productId") String productId){
         return forMasterService.getStroreProductInfoById(productId);
     }
+
+    /**
+     * 添加设计精算信息
+     * @param cityId
+     * @param actuarialDesignAttr (设计精算信息）
+     *                            设计精算列表 (
+     *      *      *      * id	String	设计精算模板ID
+     *      *      *      * configName	String	设计精算名称
+     *      *      *      * configType	String	配置类型1：设计阶段 2：精算阶段
+     *      *      *      * productList	List	商品列表
+     *      *      *      * productList.productId	String	商品ID
+     *      *      *      * productList.productName	String	商品名称
+     *      *      *      * productList.productSn	String	商品编码
+     *      *      *      * productList.goodsId	String	货品ID
+     *      *      *      * productList.storefrontId	String	店铺ID
+     *      *      *      * productList.price	double	商品价格
+     *      *      *      * productList.unit	String	商品单位
+     *      *      *      * productList.unitName	String	单位名称
+     *      *      *      * productList.image	String	图片
+     *      *      *      * productList.imageUrl	String	详情图片地址
+     *      *      *      * productList.valueIdArr	String	商品规格ID
+     *      *      *      * productList.valueNameArr	String	商品规格名称
+     * @param houseId 房子ID
+     * @param square 房子面积
+     * @return
+     */
     @Override
     @ApiMethod
-    public ServerResponse getproductTempListByStorefontId(String cityId, String storefontId, String goodsId){
-        return forMasterService.getproductTempListByStorefontId(storefontId,goodsId);
+    public void  insertActuarialDesignInfo(String cityId,String actuarialDesignAttr,String houseId,BigDecimal square){
+        forMasterService.insertActuarialDesignInfo(actuarialDesignAttr,houseId,square);
     }
+    @Override
+    @ApiMethod
+    public ServerResponse getProductTempListByStorefontId(String cityId, String storefontId, String goodsId) {
+        return forMasterService.getProductTempListByStorefontId(storefontId, goodsId);
+    }
+
+
 }

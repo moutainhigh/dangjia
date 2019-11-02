@@ -8,6 +8,7 @@ import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.product.BasicsGoodsDTO;
+import com.dangjia.acg.dto.product.DjBasicsProductTemplateDTO;
 import com.dangjia.acg.mapper.basics.IAttributeValueMapper;
 import com.dangjia.acg.mapper.basics.ILabelMapper;
 import com.dangjia.acg.mapper.basics.IUnitMapper;
@@ -64,8 +65,9 @@ public class DjBasicsGoodsService {
      * @param labels
      * @return
      */
-    public ServerResponse addLabels(String goodsId, String labels) {
+    public ServerResponse addLabels(String goodsId, String labels,String cityId) {
         DjBasicsGoods djBasicsGoods = new DjBasicsGoods();
+        djBasicsGoods.setCityId(cityId);
         djBasicsGoods.setId(goodsId);
         djBasicsGoods.setLabelIds(labels);
         djBasicsGoodsMapper.updateByPrimaryKeySelective(djBasicsGoods);
@@ -81,6 +83,7 @@ public class DjBasicsGoodsService {
      */
     public ServerResponse saveBasicsGoods(BasicsGoodsDTO basicsGoodsDTO) {
         try {
+            String cityId = basicsGoodsDTO.getCityId();
             String name = basicsGoodsDTO.getName();
             String unitId = basicsGoodsDTO.getUnitId();
             String categoryId = basicsGoodsDTO.getCategoryId();
@@ -88,7 +91,7 @@ public class DjBasicsGoodsService {
             if (!StringUtils.isNotBlank(name))
                 return ServerResponse.createByErrorMessage("名字不能为空");
 
-            List<BasicsGoods> goodsList = iBasicsGoodsMapper.queryByName(name);
+            List<BasicsGoods> goodsList = iBasicsGoodsMapper.queryByName(name,cityId);
             if (goodsList.size() > 0)
                 return ServerResponse.createByErrorMessage("名字不能重复");
 
@@ -102,6 +105,7 @@ public class DjBasicsGoodsService {
                 return ServerResponse.createByErrorMessage("性质不能为空");
 
             BasicsGoods goods = getBasicsGoods(basicsGoodsDTO);
+            goods.setCityId(cityId);
             iBasicsGoodsMapper.insert(goods);
             return ServerResponse.createBySuccess("新增成功", goods.getId());
         } catch (Exception e) {
@@ -116,7 +120,7 @@ public class DjBasicsGoodsService {
         String name = basicsGoodsDTO.getName();
         BasicsGoods oldBasicsGoods = iBasicsGoodsMapper.selectByPrimaryKey(id);
         if (!oldBasicsGoods.getName().equals(name)) {
-            List<BasicsGoods> goodsList = iBasicsGoodsMapper.queryByName(name);
+            List<BasicsGoods> goodsList = iBasicsGoodsMapper.queryByName(name,basicsGoodsDTO.getCityId());
             if (goodsList.size() > 0)
                 return ServerResponse.createByErrorMessage("该货品已存在");
         }
@@ -213,6 +217,7 @@ public class DjBasicsGoodsService {
     }
 
     /**
+     * 供店铺使用
      * 模糊查询goods及下属product
      *
      * @param pageDTO
@@ -221,12 +226,93 @@ public class DjBasicsGoodsService {
      * @param type       是否禁用  0：禁用；1不禁用 ;  -1全部默认
      * @return
      */
-    public ServerResponse queryGoodsList(PageDTO pageDTO, String categoryId, String name, Integer type) {
+    public ServerResponse queryGoodsListStorefront(String storefontId,PageDTO pageDTO, String categoryId, String name, Integer type) {
+        try {
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            if(StringUtils.isEmpty(categoryId))
+            {
+                List<DjBasicsProductTemplateDTO> productList=null;
+                PageInfo pageResult = new PageInfo(productList);
+                pageResult.setList(productList);
+                return ServerResponse.createBySuccess("查询成功", pageResult);
+            }
+
+
+            List<DjBasicsProductTemplateDTO> productList = iBasicsProductTemplateMapper.queryProductTemplateByGoodsId(categoryId,storefontId);
+            PageInfo pageResult = new PageInfo(productList);
+            for (DjBasicsProductTemplateDTO p : productList) {
+                //type表示： 是否禁用  0：禁用；1不禁用 ;  -1全部默认
+                if (type != null && !type.equals(p.getType()) && -1 != type) //不等于 type 的不返回给前端
+                    continue;
+                //图片路径+前缀
+                StringBuilder imgUrlStr = new StringBuilder();
+                StringBuilder imgStr = new StringBuilder();
+                if (!CommonUtil.isEmpty(p.getImage())) {
+                    String[] imgArr = p.getImage().split(",");
+                    StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
+                }
+                p.setImage(imgStr.toString());
+
+                p.setImageUrl(imgUrlStr.toString());
+
+                if (StringUtils.isNoneBlank(p.getConvertUnit())) {
+                    p.setConvertUnitName(iUnitMapper.selectByPrimaryKey(p.getConvertUnit()).getName());
+                }
+
+                StringBuilder strNewValueNameArr = new StringBuilder();
+                if (StringUtils.isNotBlank(p.getValueIdArr())) {
+                    String[] newValueNameArr = p.getValueIdArr().split(",");
+                    for (int i = 0; i < newValueNameArr.length; i++) {
+                        String valueId = newValueNameArr[i];
+                        if (StringUtils.isNotBlank(valueId)) {
+                            AttributeValue attributeValue = iAttributeValueMapper.selectByPrimaryKey(valueId);
+                            if (i == 0) {
+                                strNewValueNameArr = new StringBuilder(attributeValue.getName());
+                            } else {
+                                strNewValueNameArr.append(",").append(attributeValue.getName());
+                            }
+                        }
+                    }
+                }
+                p.setNewValueNameArr(strNewValueNameArr.toString());
+
+
+                if (!StringUtils.isNotBlank(p.getLabelId())) {
+                    p.setLabelId("");
+                    p.setLabelName("");
+                } else {
+                    DjBasicsLabelValue label = djBasicsLabelValueMapper.selectByPrimaryKey(p.getLabelId());
+                    if (label != null && label.getName() != null)
+                        p.setLabelName(label.getName());
+                }
+
+            }
+
+
+            pageResult.setList(productList);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    /**
+     * 模糊查询goods及下属product
+     *
+     * @param pageDTO
+     * @param categoryId
+     * @param name
+     * @param type       是否禁用  0：禁用；1不禁用 ;  -1全部默认
+     * @return
+     */
+    public ServerResponse queryGoodsList(PageDTO pageDTO, String categoryId, String name, Integer type,String cityId) {
         try {
             LOG.info("tqueryGoodsListByCategoryLikeName type :" + type);
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<DjBasicsGoods> goodsList = djBasicsGoodsMapper.queryGoodsListByCategoryLikeName(categoryId, name);
+            List<DjBasicsGoods> goodsList = djBasicsGoodsMapper.queryGoodsListByCategoryLikeName(categoryId, name,cityId);
             PageInfo pageResult = new PageInfo(goodsList);
             List<Map<String, Object>> gMapList = new ArrayList<>();
             for (DjBasicsGoods goods : goodsList) {

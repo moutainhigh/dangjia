@@ -3,12 +3,15 @@ package com.dangjia.acg.service.delivery;
 import com.dangjia.acg.api.BasicsStorefrontAPI;
 import com.dangjia.acg.api.supplier.DjSupApplicationProductAPI;
 import com.dangjia.acg.api.supplier.DjSupplierAPI;
+import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.delivery.*;
 import com.dangjia.acg.mapper.delivery.DjDeliveryReturnSlipMapper;
+import com.dangjia.acg.modle.complain.Complain;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.github.pagehelper.PageHelper;
@@ -19,6 +22,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -45,12 +50,16 @@ public class DjDeliveryReturnSlipService {
     @Autowired
     private DjSupplierAPI djSupplierAPI;
 
+    @Autowired
+    private ConfigUtil configUtil;
+
+
     /**
      * 供货任务列表
      *
      * @param pageDTO
      * @param searchKey
-     * @param invoiceStatus 0:全部  0,0:代发货  0,1:已发货待收货  0,2:已收货  0,4:部分收货  1,0:待退货  1,1:已确认  1,2:已结算  1,3:拒绝退货
+     * @param invoiceStatus 0:全部  0,0:代发货  0,1:已发货待收货  0,2:已收货  0,4:部分收货  1,0:待退货  1,1:已确认  1,2:已结算(已退货)  1,3:拒绝退货
      * @return
      */
     public ServerResponse querySupplyTaskList(PageDTO pageDTO, String userId, String cityId, String searchKey, String invoiceStatus) {
@@ -58,10 +67,10 @@ public class DjDeliveryReturnSlipService {
             DjSupplier djSupplier = djSupplierAPI.querySingleDjSupplier(userId, cityId);
             if(null==djSupplier)
                 return ServerResponse.createByErrorMessage("暂无店铺信息");
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             PageInfo pageResult=null;
             List<DjDeliveryReturnSlipDTO> djDeliveryReturnSlipDTOS = null;
             if(!CommonUtil.isEmpty(invoiceStatus)&&invoiceStatus.equals("0")){
+                PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
                 djDeliveryReturnSlipDTOS = djDeliveryReturnSlipMapper.querySupplyTaskList(djSupplier.getId(), searchKey, cityId);
                 pageResult = new PageInfo(djDeliveryReturnSlipDTOS);
                 djDeliveryReturnSlipDTOS.forEach(djDeliveryReturnSlipDTO -> {
@@ -74,6 +83,7 @@ public class DjDeliveryReturnSlipService {
             }else if(!CommonUtil.isEmpty(invoiceStatus)){
                 String[] split = invoiceStatus.split(",");
                 if(split[0].equals("0")){
+                    PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
                     djDeliveryReturnSlipDTOS = djDeliveryReturnSlipMapper.querySupplyDeliverTaskList(djSupplier.getId(), searchKey, split[1], cityId);
                     pageResult = new PageInfo(djDeliveryReturnSlipDTOS);
                     djDeliveryReturnSlipDTOS.forEach(djDeliveryReturnSlipDTO -> {
@@ -85,6 +95,7 @@ public class DjDeliveryReturnSlipService {
 
                     });
                 }else if(split[0].equals("1")){
+                    PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
                     djDeliveryReturnSlipDTOS = djDeliveryReturnSlipMapper.querySupplyRepairTaskList(djSupplier.getId(), searchKey, split[1], cityId);
                     pageResult = new PageInfo(djDeliveryReturnSlipDTOS);
                     djDeliveryReturnSlipDTOS.forEach(djDeliveryReturnSlipDTO -> {
@@ -134,24 +145,29 @@ public class DjDeliveryReturnSlipService {
      * @param applyState
      * @return
      */
-    public ServerResponse querySupplierSettlementManagement(String userId, String cityId, PageDTO pageDTO, Integer applyState) {
+    public ServerResponse querySupplierSettlementManagement(String userId, String cityId, PageDTO pageDTO, Integer applyState, String searchKey) {
         try {
             DjSupplier djSupplier = djSupplierAPI.querySingleDjSupplier(userId, cityId);
             if(null==djSupplier)
                 return ServerResponse.createByErrorMessage("暂无店铺信息");
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<SupplierSettlementManagementDTO> supplierSettlementManagementDTOS = djDeliveryReturnSlipMapper.querySupplierSettlementManagement(djSupplier.getId(), applyState, cityId);
-            PageInfo pageResult = new PageInfo(supplierSettlementManagementDTOS);
-            supplierSettlementManagementDTOS.forEach(supplierSettlementManagementDTO -> {
-                Storefront storefront = basicsStorefrontAPI.querySingleStorefrontById(supplierSettlementManagementDTO.getShopId());
-                supplierSettlementManagementDTO.setShopId(storefront.getId());
-                supplierSettlementManagementDTO.setStorefrontName(storefront.getStorefrontName());
-                supplierSettlementManagementDTO.setMobile(storefront.getMobile());
-                supplierSettlementManagementDTO.setStorekeeperName(storefront.getStorekeeperName());
-            });
-            if (supplierSettlementManagementDTOS.size() <= 0)
+            List<Storefront> storefronts = basicsStorefrontAPI.queryLikeSingleStorefront(searchKey);
+            if(storefronts.size()>0) {
+                PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+                List<SupplierSettlementManagementDTO> supplierSettlementManagementDTOS = djDeliveryReturnSlipMapper.querySupplierSettlementManagement(djSupplier.getId(), applyState, cityId, storefronts);
+                PageInfo pageResult = new PageInfo(supplierSettlementManagementDTOS);
+                supplierSettlementManagementDTOS.forEach(supplierSettlementManagementDTO -> {
+                    Storefront storefront = basicsStorefrontAPI.querySingleStorefrontById(supplierSettlementManagementDTO.getShopId());
+                    supplierSettlementManagementDTO.setShopId(storefront.getId());
+                    supplierSettlementManagementDTO.setStorefrontName(storefront.getStorefrontName());
+                    supplierSettlementManagementDTO.setMobile(storefront.getMobile());
+                    supplierSettlementManagementDTO.setStorekeeperName(storefront.getStorekeeperName());
+                });
+                if (supplierSettlementManagementDTOS.size() <= 0)
+                    return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+                return ServerResponse.createBySuccess("查询成功", pageResult);
+            }else{
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
-            return ServerResponse.createBySuccess("查询成功", pageResult);
+            }
         } catch (Exception e) {
             logger.error("查询失败", e);
             return ServerResponse.createByErrorMessage("查询失败: " + e);
@@ -170,6 +186,12 @@ public class DjDeliveryReturnSlipService {
     public ServerResponse querySupplierSettlementList(String supId, String shopId, Integer applyState) {
         try {
             List<DjDeliveryReturnSlipDTO> djDeliveryReturnSlipDTOS = djDeliveryReturnSlipMapper.querySupplierSettlementList(supId, shopId, applyState);
+            Storefront storefront = basicsStorefrontAPI.querySingleStorefrontById(shopId);
+            djDeliveryReturnSlipDTOS.forEach(djDeliveryReturnSlipDTO -> {
+                djDeliveryReturnSlipDTO.setShopName(storefront.getStorefrontName());
+                djDeliveryReturnSlipDTO.setStorekeeperName(storefront.getStorekeeperName());
+                djDeliveryReturnSlipDTO.setMobile(storefront.getMobile());
+            });
             if (djDeliveryReturnSlipDTOS.size() > 0)
                 return ServerResponse.createBySuccess("查询成功", djDeliveryReturnSlipDTOS);
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
@@ -192,7 +214,7 @@ public class DjDeliveryReturnSlipService {
         try {
             DjSupplier djSupplier = djSupplierAPI.querySingleDjSupplier(userId, cityId);
             if(null==djSupplier)
-                return ServerResponse.createByErrorMessage("暂无店铺信息");
+                return ServerResponse.createByErrorMessage("暂无供应商信息");
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<BuyersDimensionDTO> buyersDimensionDTOS = djDeliveryReturnSlipMapper.queryBuyersDimensionList(djSupplier.getId(), searchKey,cityId);
             PageInfo pageResult = new PageInfo(buyersDimensionDTOS);
@@ -238,6 +260,7 @@ public class DjDeliveryReturnSlipService {
      */
     public ServerResponse querySupplyDimensionList(PageDTO pageDTO, String userId, String cityId, String searchKey) {
         try {
+            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             DjSupplier djSupplier = djSupplierAPI.querySingleDjSupplier(userId, cityId);
             if(null==djSupplier)
                 return ServerResponse.createByErrorMessage("暂无店铺信息");
@@ -247,6 +270,7 @@ public class DjDeliveryReturnSlipService {
             supplyDimensionDTOS.forEach(supplyDimensionDTO -> {
                 List<BuyersDimensionDTO> buyersDimensionDTOS = djDeliveryReturnSlipMapper.querySupplyDimensionList(djSupplier.getId(), supplyDimensionDTO.getProductId(), cityId);
                 supplyDimensionDTO.setBuyersDimensionDTOS(buyersDimensionDTOS);
+                supplyDimensionDTO.setImage(imageAddress+supplyDimensionDTO.getImage());
             });
             if (supplyDimensionDTOS.size() <= 0)
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
@@ -273,21 +297,161 @@ public class DjDeliveryReturnSlipService {
                 return ServerResponse.createByErrorMessage("暂无店铺信息");
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<Storefront> storefronts = basicsStorefrontAPI.queryLikeSingleStorefront(searchKey);
-            PageInfo pageResult = new PageInfo(storefronts);
-            List<SupplierStoreDimensionDTO> supplierStoreDimensionDTOS=null;
+            List<SupplierStoreDimensionDTO> supplierStoreDimensionDTOS=new ArrayList<>();
             for (Storefront storefront : storefronts) {
-                supplierStoreDimensionDTOS = djDeliveryReturnSlipMapper.querySupplierStoreDimensionList(djSupplier.getId(), storefront.getId(),cityId);
-                supplierStoreDimensionDTOS.forEach(supplierStoreDimensionDTO -> {
+                List<SupplierStoreDimensionDTO> supplierStoreDimensionDTOS1 = djDeliveryReturnSlipMapper.querySupplierStoreDimensionList(djSupplier.getId(), storefront.getId(), cityId);
+                supplierStoreDimensionDTOS1.forEach(supplierStoreDimensionDTO -> {
                     supplierStoreDimensionDTO.setStorefrontName(storefront.getStorefrontName());
                     supplierStoreDimensionDTO.setStorekeeperName(storefront.getStorekeeperName());
+                    supplierStoreDimensionDTO.setMobile(storefront.getMobile());
                 });
+                supplierStoreDimensionDTOS.addAll(supplierStoreDimensionDTOS1);
             }
             if (supplierStoreDimensionDTOS.size() <= 0)
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
-            return ServerResponse.createBySuccess("查询成功", supplierStoreDimensionDTOS);
+            PageInfo pageResult = new PageInfo(supplierStoreDimensionDTOS);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             logger.error("查询失败", e);
             return ServerResponse.createByErrorMessage("查询失败: " + e);
+        }
+    }
+
+
+    /**
+     *供应商店铺维度详情列表
+     * @param supId
+     * @param shopId
+     * @param searchKey
+     * @param cityId
+     * @return
+     */
+    public ServerResponse querySupplierStoreDimensionDetailList(PageDTO pageDTO,String supId, String shopId, String searchKey, String cityId) {
+        try {
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<BuyersDimensionDetailsDTO> buyersDimensionDetailsDTOS = djDeliveryReturnSlipMapper.querySupplierStoreDimensionDetailList(supId, shopId,cityId, searchKey);
+            PageInfo pageResult = new PageInfo(buyersDimensionDetailsDTOS);
+            if (buyersDimensionDetailsDTOS.size() <= 0)
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            return ServerResponse.createBySuccess("查询成功", pageResult);
+        } catch (Exception e) {
+            logger.error("查询失败", e);
+            return ServerResponse.createByErrorMessage("查询失败: " + e);
+        }
+    }
+
+    /**
+     * 店铺利润统计-供应商维度
+     * @param pageDTO
+     * @param userId
+     * @param cityId
+     * @param searchKey
+     * @return
+     */
+    public ServerResponse supplierDimension(PageDTO pageDTO, String userId, String cityId, String searchKey) {
+        try {
+
+            Storefront storefront=basicsStorefrontAPI.queryStorefrontByUserID(userId,cityId);
+            if(storefront==null)
+            {
+                return ServerResponse.createByErrorMessage("暂无店铺信息");
+            }
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+
+            StoreSupplierDimensionDTO  storeSupplierDimensionDTO=new StoreSupplierDimensionDTO();
+            return ServerResponse.createBySuccess("查询成功",null );
+        } catch (Exception e) {
+            logger.error("店铺利润统计供应商维度异常", e);
+            return ServerResponse.createByErrorMessage("店铺利润统计供应商维度异常: " + e);
+        }
+    }
+
+    /**
+     * 店铺利润统计-商品维度
+     * @param pageDTO
+     * @param userId
+     * @param cityId
+     * @param searchKey
+     * @return
+     */
+    public ServerResponse storefrontProductDimension(PageDTO pageDTO, String userId, String cityId, String searchKey) {
+        try {
+            Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
+            if(storefront==null)
+            {
+                return ServerResponse.createByErrorMessage("不存在店铺信息");
+            }
+            if (storefront == null)
+                return ServerResponse.createByErrorMessage("暂无店铺信息");
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            return null;
+        } catch (Exception e) {
+            logger.error("店铺利润统计商品维度异常", e);
+            return ServerResponse.createByErrorMessage("店铺利润统计商品维度异常: " + e);
+        }
+    }
+
+    /**
+     * 店铺利润统计-卖家维度
+     * @param pageDTO
+     * @param userId
+     * @param cityId
+     * @param searchKey
+     * @return
+     */
+    public ServerResponse sellerDimension(PageDTO pageDTO, String userId, String cityId, String searchKey) {
+        try {
+            /**
+             *  DjSupplier djSupplier = djSupplierAPI.querySingleDjSupplier(userId, cityId);
+             *             if(null==djSupplier)
+             *                 return ServerResponse.createByErrorMessage("暂无店铺信息");
+             *             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+             *             List<BuyersDimensionDTO> buyersDimensionDTOS = djDeliveryReturnSlipMapper.queryBuyersDimensionList(djSupplier.getId(), searchKey,cityId);
+             *             PageInfo pageResult = new PageInfo(buyersDimensionDTOS);
+             *             if (buyersDimensionDTOS.size() <= 0)
+             *                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+             *             return ServerResponse.createBySuccess("查询成功", pageResult);
+             */
+            return null;
+        } catch (Exception e) {
+            logger.error("店铺利润统计卖家维度异常", e);
+            return ServerResponse.createByErrorMessage("店铺利润统计卖家维度异常: " + e);
+        }
+    }
+
+    /**
+     *店铺利润统计-查看供应详情
+     * @param pageDTO
+     * @param supId
+     * @param houseId
+     * @param searchKey
+     * @param cityId
+     * @return
+     */
+    public ServerResponse supplyDetails(PageDTO pageDTO, String supId, String houseId, String searchKey, String cityId) {
+        try {
+            return null;
+        } catch (Exception e) {
+            logger.error("店铺利润统计查看供应详情异常", e);
+            return ServerResponse.createByErrorMessage("店铺利润统计查看供应详情异常: " + e);
+        }
+    }
+
+    /**
+     *店铺利润统计-查看货单详情
+     * @param pageDTO
+     * @param supId
+     * @param houseId
+     * @param searchKey
+     * @param cityId
+     * @return
+     */
+    public ServerResponse shippingDetails(PageDTO pageDTO, String supId, String houseId, String searchKey, String cityId) {
+        try {
+            return null;
+        } catch (Exception e) {
+            logger.error("店铺利润统计查看货单详情异常", e);
+            return ServerResponse.createByErrorMessage("店铺利润统计查看货单详情异常: " + e);
         }
     }
 }

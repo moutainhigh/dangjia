@@ -15,13 +15,13 @@ public interface IGoodsGroupMapper extends Mapper<GoodsGroup> {
 	/**
 	 * 获取所有关联组
 	 */
-	List<GoodsGroup> getAllList(@Param("name") String name,@Param("state") Integer state);
+	List<GoodsGroup> getAllList(@Param("name") String name,@Param("state") Integer state,@Param("cityId")String cityId);
 
-	List<GoodsGroup> selectByName(@Param("name") String name);
+	List<GoodsGroup> selectByName(@Param("name") String name,@Param("cityId") String cityId);
 
 	void addGoodsGroup(GoodsGroup goodsGroup);
 
-	List<Map<String, Object>> getParentTopList();
+	List<Map<String, Object>> getParentTopList(@Param("cityId") String cityId);
 
 	List<Map<String, Object>> getChildList(String id);
 
@@ -36,7 +36,7 @@ public interface IGoodsGroupMapper extends Mapper<GoodsGroup> {
 //	void updateGroupLink(GroupLink groupLink);
     //根据关联组id查询关联货品关系
 	List<Map<String, Object>> queryMapGroupLinkByGid(String groupId);
-	List<GroupLink> queryGroupLinkByGid(String groupId);
+	List<GroupLink> queryGroupLinkByGid(@Param("groupId") String groupId,@Param("cityId") String cityId);
 	//根据关联组id和货品id查询关联关系
 	List<GroupLink> queryGroupLinkByGidAndPid(@Param("groupId")String groupId , @Param("productId")String productId);
 

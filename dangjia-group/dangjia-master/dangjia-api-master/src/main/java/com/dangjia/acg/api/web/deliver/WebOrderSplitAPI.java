@@ -45,7 +45,7 @@ public interface WebOrderSplitAPI {
             @RequestParam("splitItemList") String splitItemList,
             @RequestParam("installName") String installName,
             @RequestParam("installMobile") String installMobile,
-            @RequestParam("deliberyName") String deliberyName,
+            @RequestParam("deliveryName") String deliberyName,
             @RequestParam("deliveryMobile") String deliveryMobile);
 
     @PostMapping("web/deliver/orderSplit/cancelOrderSplit")
@@ -72,7 +72,9 @@ public interface WebOrderSplitAPI {
 
     @PostMapping("web/deliver/orderSplit/getOrderSplitList")
     @ApiOperation(value = "根据房子id查询要货单列表", notes = "根据房子id查询要货单列表")
-    ServerResponse getOrderSplitList(@RequestParam("request") HttpServletRequest request,@RequestParam("houseId") String houseId);
+    ServerResponse getOrderSplitList(@RequestParam("request") HttpServletRequest request,
+                                     @RequestParam("cityId") String cityId,
+                                     @RequestParam("houseId") String houseId);
 
     @PostMapping("web/deliver/orderSplit/setSplitDeliver")
     @ApiOperation(value = "修改 供应商结算状态", notes = "修改 供应商结算状态")

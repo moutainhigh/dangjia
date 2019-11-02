@@ -25,7 +25,9 @@ public interface IGoodsMapper extends Mapper<Goods> {
 	List<Goods> queryGoodsList(@Param("categoryId")String categoryId,@Param("name")String name);
 
 	//查询某个分类的商品 模糊name（如果categoryId 为null，查询全部材料商品 ）
-	List<Goods> queryGoodsListByCategoryLikeName(@Param("categoryId")String categoryId,@Param("name")String name);
+	List<Goods> queryGoodsListByCategoryLikeName(@Param("categoryId")String categoryId,
+												 @Param("name")String name,
+												 @Param("cityId")String cityId);
 
 	/**
 	 * 查询某个分类的商品 模糊name（如果categoryId 为null，查询全部材料商品 ）  // 去除：自购 包工包料 禁用 查询 product 为空

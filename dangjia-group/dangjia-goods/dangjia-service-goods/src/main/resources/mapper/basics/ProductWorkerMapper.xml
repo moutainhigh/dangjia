@@ -52,24 +52,22 @@
             t.other_name AS otherName,
             t.create_date AS createDate,
             t.modify_date AS modifyDate,
-            t1.work_explain AS workExplain,
-            t1.worker_dec AS workerDec,
-            t1.worker_standard AS workerStandard,
-            t1.worker_type_id AS workerTypeId,
-            t1.last_price AS lastPrice,
-            t1.last_time AS lastTime,
-            t1.technology_ids AS technologyIds,
-            t1.considerations,
-            t1.calculate_content calculateContent,
-            t1.build_content buildContent,
-            t1.is_agency_purchase isAgencyPurchase
+            t.work_explain AS workExplain,
+            t.worker_dec AS workerDec,
+            t.worker_standard AS workerStandard,
+            t.worker_type_id AS workerTypeId,
+            t.last_price AS lastPrice,
+            t.last_time AS lastTime,
+            t.technology_ids AS technologyIds,
+            t.considerations,
+            t.calculate_content calculateContent,
+            t.build_content buildContent,
+            t.is_agency_purchase isAgencyPurchase
         FROM
-            dj_basics_product t,
-            dj_basics_product_worker t1
-        WHERE
-            t.id = t1.product_id
-        AND t.maket = 1
-        AND t1.worker_type_id = #{workerTypeId}
+            dj_basics_product_template t
+        WHERE t.maket = 1
+        AND t.worker_type_id = #{workerTypeId}
+        and t.city_id=#{cityId}
         <if test="name!=null and name!=''">
             AND t.`name` LIKE CONCAT('%', #{name}, '%')
         </if>
@@ -83,47 +81,25 @@
         where unit_id=#{unitId}
     </update>
     <select id="getHomeProductList" resultType="com.dangjia.acg.modle.basics.HomeProductDTO">
-
-( SELECT
+      SELECT
             p.id AS id,
             p.image AS image,
-            p.price AS price,
-            p.unit_name AS unitName,
+            p.sell_price AS price,
+            t.unit_name AS unitName,
             g.type AS goodsType,
-            0 AS type,
-            p.NAME AS NAME
+            g.type AS type,
+            p.product_name AS NAME
             FROM
-                dj_basics_product p
+                dj_basics_storefront_product  p
+                INNER JOIN dj_basics_product_template t on p.prod_template_id=t.id
                 INNER JOIN dj_basics_goods g ON g.id = p.goods_id
             WHERE
                 p.data_status = 0
-                AND p.type = 1
-                AND p.maket = 1
-                AND p.image !='qrcode/moren.png'
+                AND t.type = 1
+                AND p.is_shelf_status = 1
+                AND t.image !='qrcode/moren.png'
             ORDER BY
                 rand( )
                 LIMIT 6
-                ) UNION ALL
-                (
-            SELECT
-                p.id AS id,
-                image AS image,
-                price AS price,
-                unit_name AS unitName,
-                NULL AS goodsType,
-                1 AS type,
-            NAME AS NAME
-            FROM
-                dj_basics_product p,dj_basics_product_worker p1
-            WHERE p.id = p1.product_id
-                and p.data_status = 0
-                AND p.maket = 1
-                AND image !='qrcode/moren.png'
-                AND p1.worker_dec !=''
-                AND p1.worker_dec is not null
-            ORDER BY
-                rand( )
-                LIMIT 6
-                )
     </select>
 </mapper>

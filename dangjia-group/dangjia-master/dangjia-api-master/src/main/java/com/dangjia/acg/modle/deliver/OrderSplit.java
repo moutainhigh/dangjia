@@ -10,6 +10,7 @@ import lombok.experimental.FieldNameConstants;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import java.util.Date;
 
 /**
  * 要货单
@@ -41,36 +42,57 @@ public class OrderSplit extends BaseEntity {
 	@ApiModelProperty("后台审核状态：0生成中, 1申请中, 2通过(发给供应商), 3不通过, 4待业主支付,5已撤回")
 	private Integer applyStatus;
 
-	@Column(name = "supervisor_id")
+	@Column(name = "member_id")
 	@Desc(value = "要货人id")
 	@ApiModelProperty("要货人id")
-	private String supervisorId;//
+	private String memberId;//
 
-	@Column(name = "supervisor_name")
+	@Column(name = "member_name")
 	@Desc(value = "要货人姓名")
 	@ApiModelProperty("要货人姓名")
-	private String supervisorName;//
+	private String memberName;//
 
-	@Column(name = "supervisor_tel")
+	@Column(name = "mobile")
 	@Desc(value = "要货人电话")
 	@ApiModelProperty("要货人电话")
-	private String supervisorTel;
+	private String mobile;
 
 	@Column(name = "worker_type_id")
 	@Desc(value = "工种id")
 	@ApiModelProperty("工种id")
 	private String workerTypeId;
 
-	@Column(name = "subscribe")
-	@Desc(value = "是否需要预约")
-	@ApiModelProperty("是否需要预约")
-	private String subscribe;
 
 	@Column(name = "storefront_id")
 	@Desc(value = "店铺ID")
 	@ApiModelProperty("店铺ID")
 	private String storefrontId;
 
+
+	@Column(name = "address_id")
+	@Desc(value = "地址ID")
+	@ApiModelProperty("地址ID")
+	private String addressId;
+
+	@Column(name = "city_id")
+	@Desc(value = "城市id")
+	@ApiModelProperty("城市id")
+	private String cityId;
+
+	@Column(name = "order_id")
+	@Desc(value = "订单ID")
+	@ApiModelProperty("订单ID")
+	private String orderId;
+
+	@Column(name = "is_reservation_deliver")
+	@Desc(value = "是否需要预约(1是，0否）")
+	@ApiModelProperty("是否需要预约(1是，0否）")
+	private String isReservationDeliver;
+
+	@Column(name = "reservation_deliver_time")
+	@Desc(value = "预约发货时间")
+	@ApiModelProperty("预约发货时间")
+	private Date reservationDeliverTime;
 }
 
 

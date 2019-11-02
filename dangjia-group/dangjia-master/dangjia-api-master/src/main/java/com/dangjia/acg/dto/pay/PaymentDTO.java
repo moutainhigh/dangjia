@@ -14,7 +14,6 @@ import java.util.List;
 public class PaymentDTO<T> {
     private WorkerDTO workerDTO;//工匠信息
     private UpgradeDesignDTO upgradeDesignDTO;//升级设计
-    private List<ActuaryDTO> actuaryDTOList;//商品
     private List<T> datas;//数据集合
     private UpgradeSafeDTO upgradeSafeDTO;//升级保险
     private String workerTypeName;//阶段名
@@ -30,4 +29,7 @@ public class PaymentDTO<T> {
     private String agreementName;//协议名
     private String agreementUrl;//协议链接
 
+
+    private BigDecimal freight;//运费
+    private BigDecimal moveDost;//搬运费
 }

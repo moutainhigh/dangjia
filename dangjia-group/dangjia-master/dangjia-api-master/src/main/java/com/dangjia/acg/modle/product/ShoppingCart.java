@@ -43,12 +43,17 @@ public class ShoppingCart extends BaseEntity {
     @ApiModelProperty("货品名称")
     private String productName;
 
+    @Column(name = "image")
+    @Desc(value = "商品图片")
+    @ApiModelProperty("商品图片")
+    private String image;
+
     @Column(name = "price")
     @Desc(value = "销售单价")
     @ApiModelProperty("销售单价")
     private BigDecimal price;
 
-    @Column(name = "shopCount")
+    @Column(name = "shop_count")
     @Desc(value = "购买数量")
     @ApiModelProperty("购买数量")
     private Integer shopCount;

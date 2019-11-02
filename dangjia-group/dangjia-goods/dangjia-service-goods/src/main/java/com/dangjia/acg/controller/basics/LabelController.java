@@ -34,8 +34,8 @@ public class LabelController implements LabelAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse<PageInfo> getAllLabel(HttpServletRequest request, PageDTO pageDTO){
-        return labelService.getAllLabel(pageDTO);
+    public ServerResponse<PageInfo> getAllLabel(HttpServletRequest request, PageDTO pageDTO,String cityId){
+        return labelService.getAllLabel(pageDTO,cityId);
     }
 
     /**
@@ -46,8 +46,8 @@ public class LabelController implements LabelAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse updateLabel(HttpServletRequest request,String labelId,String labelName){
-        return labelService.update(labelId, labelName);
+    public ServerResponse updateLabel(HttpServletRequest request,String labelId,String labelName,String cityId){
+        return labelService.update(labelId, labelName,cityId);
     }
     /**
      * 新增商品标签
@@ -56,8 +56,8 @@ public class LabelController implements LabelAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse insertLabel(HttpServletRequest request,String labelName){
-        return labelService.insert( labelName);
+    public ServerResponse insertLabel(HttpServletRequest request,String labelName,String cityId){
+        return labelService.insert(labelName,cityId);
     }
 
     /**

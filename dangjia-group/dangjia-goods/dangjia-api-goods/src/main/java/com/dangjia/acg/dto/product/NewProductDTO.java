@@ -1,7 +1,7 @@
 package com.dangjia.acg.dto.product;
 
 import com.dangjia.acg.common.annotation.ExcelField;
-import com.dangjia.acg.common.model.BaseEntity;
+import com.dangjia.acg.modle.GoodsBaseEntity;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
 
@@ -11,7 +11,7 @@ import lombok.experimental.FieldNameConstants;
  */
 @Data
 @FieldNameConstants(prefix = "")
-public class NewProductDTO extends BaseEntity {
+public class NewProductDTO extends GoodsBaseEntity {
 
     private String goodsId;
     private String goodsName;

@@ -1,7 +1,6 @@
 package com.dangjia.acg.api.app.product;
 
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.modle.product.ShoppingCart;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -9,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
 
 /**
  * @Author ChenYufeng
@@ -21,9 +21,10 @@ import javax.servlet.http.HttpServletRequest;
 @Api(value = "新版商品购物车接口", description = "新版商品购物车接口")
 public interface ShopCartAPI {
 
-    @PostMapping("app/shopping/addCart")
+    @PostMapping("app/product/shopCart/addCart")
     @ApiOperation(value = "购物车-->商品加入购物车", notes = "购物车-->商品加入购物车")
-    ServerResponse addCart(@RequestParam("userToken") String userToken,
+    ServerResponse addCart(@RequestParam("request") HttpServletRequest request,
+                           @RequestParam("userToken") String userToken,
                            @RequestParam("cityId") String cityId,
                            @RequestParam("productId") String productId,
                            @RequestParam("productSn") String productSn,
@@ -33,26 +34,51 @@ public interface ShopCartAPI {
                            @RequestParam("unitName") String unitName,
                            @RequestParam("categoryId") String categoryId,
                            @RequestParam("productType") String productType,
-                           @RequestParam("storefrontId") String storefrontId
-                           );
+                           @RequestParam("storefrontId") String storefrontId,
+                           @RequestParam("image") String image);
 
-    @PostMapping("app/shopping/queryCartList")
+    @PostMapping("app/product/shopCart/queryCartList")
     @ApiOperation(value = "购物车-->查询购物车列表接口", notes = "购物车-->查询购物车列表接口")
-    ServerResponse queryCartList(@RequestParam("userToken") String userToken,@RequestParam("productId")  String productId );
+    ServerResponse queryCartList(@RequestParam("request") HttpServletRequest request,
+                                 @RequestParam("userToken") String userToken,
+                                 @RequestParam("cityId") String cityId);
 
-    @PostMapping("app/shopping/delCart")
+    @PostMapping("app/product/shopCart/delCar")
     @ApiOperation(value = "购物车-->清空购物车", notes = "购物车-->清空删除购物车")
-    ServerResponse delCar(@RequestParam("userToken") String userToken);
+    ServerResponse delCar(@RequestParam("request") HttpServletRequest request,
+                          @RequestParam("userToken") String userToken);
 
     @PostMapping("app/shopping/updateCart")
     @ApiOperation(value = "购物车-->设置购物车商品数量", notes = "购物车-->设置购物车商品数量")
-    ServerResponse updateCar(HttpServletRequest request, @RequestParam("userToken") String userToken,@RequestParam("productId") String productId,@RequestParam("shopCount") Integer shopCount);
+    ServerResponse updateCar(@RequestParam("request") HttpServletRequest request,
+                             @RequestParam("userToken") String userToken,
+                             @RequestParam("productId") String productId,
+                             @RequestParam("shopCount") Integer shopCount);
 
     @PostMapping("app/shopping/delCheckCart")
     @ApiOperation(value = "购物车-->删除勾选商品", notes = "购物车-->删除勾选商品")
-    ServerResponse delCheckCart(@RequestParam("userToken") String userToken,String productId);
+    ServerResponse delCheckCart(@RequestParam("request") HttpServletRequest request,
+                                @RequestParam("userToken") String userToken, String productId);
 
     @PostMapping("app/shopping/cartSettle")
     @ApiOperation(value = "购物车-->结算", notes = "购物车-->结算")
-    ServerResponse cartSettle(@RequestParam("userToken") String userToken);
+    ServerResponse cartSettle(@RequestParam("request") HttpServletRequest request,
+                              @RequestParam("userToken") String userToken);
+
+    @PostMapping("app/shopping/replaceShoppingCart")
+    @ApiOperation(value = "更换购物车商品", notes = "更换购物车商品")
+    ServerResponse replaceShoppingCart(@RequestParam("request") HttpServletRequest request,
+                                       @RequestParam("shoppingCartId") String shoppingCartId,
+                                       @RequestParam("productId") String productId,
+                                       @RequestParam("productSn") String productSn,
+                                       @RequestParam("productName") String productName,
+                                       @RequestParam("image") String image,
+                                       @RequestParam("price") BigDecimal price);
+
+
+    @PostMapping("app/shopping/insertToCollect")
+    @ApiOperation(value = "购物车移入收藏", notes = "购物车移入收藏")
+    ServerResponse insertToCollect(@RequestParam("request") HttpServletRequest request,
+                                   @RequestParam("userToken") String userToken,
+                                   @RequestParam("jsonStr") String jsonStr);
 }

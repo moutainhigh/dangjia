@@ -65,9 +65,9 @@ public class DjBasicsActuarialConfigurationServices {
      *
      * @return
      */
-    public ServerResponse queryActuarialTemplateConfig() {
+    public ServerResponse queryActuarialTemplateConfig(String cityId) {
         try {
-            List<ActuarialTemplateConfigDTO> djBasicsActuarialConfigurationDTOS = djActuarialTemplateConfigMapper.queryActuarialTemplateConfig(null);
+            List<ActuarialTemplateConfigDTO> djBasicsActuarialConfigurationDTOS = djActuarialTemplateConfigMapper.queryActuarialTemplateConfig(null,cityId);
             return ServerResponse.createBySuccess("查询成功", djBasicsActuarialConfigurationDTOS);
         } catch (Exception e) {
             logger.error("queryActuarialTemplateConfig查询失败:",e);
@@ -82,11 +82,11 @@ public class DjBasicsActuarialConfigurationServices {
      * @param actuarialTemplateId(阶段模板ID)
      * @return
      */
-    public ServerResponse queryActuarialProductByConfigId(String actuarialTemplateId) {
+    public ServerResponse queryActuarialProductByConfigId(String actuarialTemplateId,String cityId) {
         try {
             ActuarialTemplateConfigDTO actuarialTemplateConfigDTO=new ActuarialTemplateConfigDTO();
             if(StringUtils.isNotBlank(actuarialTemplateId)){
-                List<ActuarialTemplateConfigDTO> djBasicsActuarialConfigurationDTOS = djActuarialTemplateConfigMapper.queryActuarialTemplateConfig(actuarialTemplateId);
+                List<ActuarialTemplateConfigDTO> djBasicsActuarialConfigurationDTOS = djActuarialTemplateConfigMapper.queryActuarialTemplateConfig(actuarialTemplateId,cityId);
                 if(djBasicsActuarialConfigurationDTOS!=null&&djBasicsActuarialConfigurationDTOS.size()>0){
                     actuarialTemplateConfigDTO=djBasicsActuarialConfigurationDTOS.get(0);
                     if(actuarialTemplateConfigDTO.getProductList()!=null&&actuarialTemplateConfigDTO.getProductList().size()>0){
@@ -114,7 +114,7 @@ public class DjBasicsActuarialConfigurationServices {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse editActuarialProduct(String actuarialProductStr,String actuarialTemplateId,String workTypeId,String userId){
+    public ServerResponse editActuarialProduct(String actuarialProductStr,String actuarialTemplateId,String workTypeId,String userId,String cityId){
         logger.info("批量编辑设计精算阶段的货品商品---------start----{}",userId);
         JSONArray jsonArr = JSONArray.parseArray(actuarialProductStr);
         //1.商品作校验，校验前端传过来的商品是否符合条件
@@ -135,6 +135,7 @@ public class DjBasicsActuarialConfigurationServices {
             actuarialProductConfig.setWorkerTypeId(workTypeId);
             actuarialProductConfig.setUpdateBy(userId);
             actuarialProductConfig.setModifyDate(new Date());
+            actuarialProductConfig.setCityId(cityId);
             //判断是添加还是更新
             if(StringUtils.isNotBlank(productId)){
                 actuarialProductConfig.setCreateBy(userId);
@@ -187,11 +188,11 @@ public class DjBasicsActuarialConfigurationServices {
      * 查询设计精算的货品列表
      * @return
      */
-    public ServerResponse getActuarialGoodsList(){
+    public ServerResponse getActuarialGoodsListByCategoryId(String categoryId){
         try {
             logger.info("查询所有类型为人工的货品");
             //查询所有的人工货品
-            List<BasicsGoods> mapList = iBasicsGoodsMapper.queryByCategoryName(2);
+            List<BasicsGoods> mapList = iBasicsGoodsMapper.getActuarialGoodsListByCategoryId(categoryId);
             return ServerResponse.createBySuccess("查询成功", mapList);
         } catch (Exception e) {
             logger.error("getActuarialGoodsList查询失败:",e);
@@ -200,20 +201,21 @@ public class DjBasicsActuarialConfigurationServices {
     }
 
     /**
-     * 查询当前货品下所有已上架的商品
+     * 查询当前货品下所有已上架的商品(店铺已售买的商品）
      * @param goodsId
      * @return
      */
     public ServerResponse getActuarialProductListByGoodsId(String goodsId){
         try {
-            logger.info("查询当前货品下所有已上架的商品");
-
-            return ServerResponse.createBySuccess("查询成功", getProdListByGoodsID( goodsId));
+            logger.info("查询当前货品下所有已上架的商品(所有店铺有售卖的商品)");
+            List<Map<String,Object>> productList= iBasicsProductTemplateMapper.getProductStoreListByGoodsId(goodsId);
+            return ServerResponse.createBySuccess("查询成功", productList);
         } catch (Exception e) {
             logger.error("getActuarialProductListByGoodsId查询失败:",e);
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
+
     private List<DjBasicsProductTemplate> getProdListByGoodsID(String goodsId){
         Example example=new Example(DjBasicsProductTemplate.class);
         example.createCriteria().andEqualTo(DjBasicsProductTemplate.DATA_STATUS,0).
@@ -235,12 +237,12 @@ public class DjBasicsActuarialConfigurationServices {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse editSimulateionTemplateConfig(String userId,String configId,String configName,String configType,String configDetailArr){
+    public ServerResponse editSimulateionTemplateConfig(String userId,String configId,String configName,String configType,String configDetailArr,String cityId){
         //编辑（添加修改标题数据）
-        DjSimulationTemplateConfig djSimulationTemplateConfig = editSimulateTemplateInfo(userId,configId,configName,configType);
+        DjSimulationTemplateConfig djSimulationTemplateConfig = editSimulateTemplateInfo(userId,configId,configName,configType,cityId);
        //编辑（添加修改标题 下的选项值详情信息）
         JSONArray jsonArr = JSONArray.parseArray(configDetailArr);
-        editSimulateTemplateDetailList(jsonArr,djSimulationTemplateConfig);
+        editSimulateTemplateDetailList(jsonArr,djSimulationTemplateConfig,cityId);
         return  ServerResponse.createBySuccessMessage("保存成功");
     }
 
@@ -252,12 +254,13 @@ public class DjBasicsActuarialConfigurationServices {
      * @param configType 模板类型
      * @return
      */
-    private DjSimulationTemplateConfig editSimulateTemplateInfo(String userId,String configId,String configName,String configType){
+    private DjSimulationTemplateConfig editSimulateTemplateInfo(String userId,String configId,String configName,String configType,String cityId){
         //判断标题是新增还是修改
         DjSimulationTemplateConfig djSimulationTemplateConfig=new DjSimulationTemplateConfig();
         djSimulationTemplateConfig.setConfigName(configName);
         djSimulationTemplateConfig.setModifyDate(new Date());
         djSimulationTemplateConfig.setUpdateBy(userId);
+        djSimulationTemplateConfig.setCityId(cityId);
         if(configId!=null&&StringUtils.isNotBlank(configId)){
             djSimulationTemplateConfig.setId(configId);
             djSimulationTemplateConfigMapper.updateByPrimaryKeySelective(djSimulationTemplateConfig);
@@ -279,7 +282,7 @@ public class DjBasicsActuarialConfigurationServices {
      * @param jsonArr  标题 详情列表信息（id 详情ID，simulationTemplateId 标题ID，name名称,image图片，labelName多个逗号分隔）
      * @param djSimulationTemplateConfig  标题对应的基本信息
      */
-    private void editSimulateTemplateDetailList(JSONArray jsonArr,DjSimulationTemplateConfig djSimulationTemplateConfig){
+    private void editSimulateTemplateDetailList(JSONArray jsonArr,DjSimulationTemplateConfig djSimulationTemplateConfig,String cityId){
         for (int i = 0; i < jsonArr.size(); i++) {
             JSONObject obj = jsonArr.getJSONObject(i);
             String id=obj.getString("id");
@@ -289,6 +292,7 @@ public class DjBasicsActuarialConfigurationServices {
             djSimulationTemplateConfigDetail.setConfigStatus(0);
             djSimulationTemplateConfigDetail.setLabelName(obj.getString("labelName"));
             djSimulationTemplateConfigDetail.setSimulationTemplateId(djSimulationTemplateConfig.getId());
+            djSimulationTemplateConfigDetail.setCityId(cityId);
             //判断是添加还是修改
             if(id!=null&&StringUtils.isNotBlank(id)){
                 djSimulationTemplateConfigDetail.setId(id);
@@ -307,10 +311,10 @@ public class DjBasicsActuarialConfigurationServices {
      * 查询标题 列表信息
      * @return
      */
-    public ServerResponse querySimulateionTemplateConfig(){
+    public ServerResponse querySimulateionTemplateConfig(String cityId){
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         try{
-            List<SimulationTemplateConfigDTO> simulationTemplateConfigDTOList=djSimulationTemplateConfigMapper.querySimulateionTemplateConfig(null,address);
+            List<SimulationTemplateConfigDTO> simulationTemplateConfigDTOList=djSimulationTemplateConfigMapper.querySimulateionTemplateConfig(null,address,cityId);
             return ServerResponse.createBySuccess("查询成功", simulationTemplateConfigDTOList);
         } catch (Exception e) {
             logger.error("querySimulateionTemplateConfig查询失败:",e);
@@ -324,12 +328,12 @@ public class DjBasicsActuarialConfigurationServices {
      * @param simulationTemplateId 标题 ID
      * @return
      */
-    public ServerResponse querySimulateionTemplateConfigById(String simulationTemplateId){
+    public ServerResponse querySimulateionTemplateConfigById(String simulationTemplateId,String cityId){
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         try{
             SimulationTemplateConfigDTO simulationTemplateConfigDTO=new SimulationTemplateConfigDTO();
             if(StringUtils.isNotBlank(simulationTemplateId)){
-                List<SimulationTemplateConfigDTO> simulationTemplateConfigDTOList=djSimulationTemplateConfigMapper.querySimulateionTemplateConfig(simulationTemplateId,address);
+                List<SimulationTemplateConfigDTO> simulationTemplateConfigDTOList=djSimulationTemplateConfigMapper.querySimulateionTemplateConfig(simulationTemplateId,address,cityId);
                 if(simulationTemplateConfigDTOList!=null&&simulationTemplateConfigDTOList.size()>0){
                     simulationTemplateConfigDTO=simulationTemplateConfigDTOList.get(0);
 
@@ -381,7 +385,7 @@ public class DjBasicsActuarialConfigurationServices {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse importSimulateExcelBudgets (String name,String fileName,String address,String userId){
+    public ServerResponse importSimulateExcelBudgets (String name,String fileName,String address,String userId,String cityId){
 
         //String addressPri = "e://dangjia/";
 
@@ -404,6 +408,7 @@ public class DjBasicsActuarialConfigurationServices {
             djActuarialTemplateConfig.setUpdateBy(userId==null?"SYSTEM":userId);
             djActuarialTemplateConfig.setCreateDate(new Date());
             djActuarialTemplateConfig.setModifyDate(new Date());
+            djActuarialTemplateConfig.setCityId(cityId);
             djActuarialTemplateConfigMapper.insert(djActuarialTemplateConfig);
             //2.保存excel文件中的内容
             for(ActuarialProductDTO actuarialProductDTO:actuarialExcelList){
@@ -412,6 +417,7 @@ public class DjBasicsActuarialConfigurationServices {
                 djActuarialProductConfig.setProductSn(actuarialProductDTO.getProductSn());
                 djActuarialProductConfig.setPurchaseQuantity(actuarialProductDTO.getPurchaseQuantity());
                 djActuarialProductConfig.setWorkerTypeId(actuarialProductDTO.getWorkerTypeId());
+                djActuarialProductConfig.setCityId(cityId);
                 //根据商品编码，查询对应的商品ID及货品ID
                 List<DjBasicsProductTemplate> list=iBasicsProductTemplateMapper.queryByProductSn(djActuarialProductConfig.getProductSn());
                 if(list!=null&&list.size()>0){
@@ -468,12 +474,13 @@ public class DjBasicsActuarialConfigurationServices {
      * 查询excel列表
      * @return
      */
-    public ServerResponse querySimulateExcelList(){
+    public ServerResponse querySimulateExcelList(String cityId){
         try{
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             Example example=new Example(DjActuarialTemplateConfig.class);
             example.createCriteria().andEqualTo(DjActuarialTemplateConfig.CONFIG_TYPE,"3")
-                    .andEqualTo(DjActuarialTemplateConfig.DATA_STATUS,0);//查类型为excel的数据列表
+                    .andEqualTo(DjActuarialTemplateConfig.DATA_STATUS,0)
+                    .andEqualTo(DjActuarialTemplateConfig.CITY_ID,cityId);//查类型为excel的数据列表
             List<DjActuarialTemplateConfig> templateList = djActuarialTemplateConfigMapper.selectByExample(example);
             List excelList=new ArrayList();
             if(templateList!=null&&templateList.size()>0){
@@ -504,10 +511,10 @@ public class DjBasicsActuarialConfigurationServices {
         return ServerResponse.createBySuccess("删除成功",id);
     }
 
-    public ServerResponse querySimulateAssemblyList(){
+    public ServerResponse querySimulateAssemblyList(String cityId){
         try{
             //查询code中返回的详情列表
-            List  templateList=djSimulationTemplateConfigMapper.queryTemplateListByType();
+            List  templateList=djSimulationTemplateConfigMapper.queryTemplateListByType(cityId);
             List listAll = new ArrayList();
             List list = new ArrayList();
             for(int i=0;i<templateList.size();i++){
@@ -597,32 +604,35 @@ public class DjBasicsActuarialConfigurationServices {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse saveSimulateAssemblyInfo(String assemblyInfoAttr,String userId){
+    public ServerResponse saveSimulateAssemblyInfo(String assemblyInfoAttr,String userId,String cityId){
         if(assemblyInfoAttr!=null&&StringUtils.isNotBlank(assemblyInfoAttr)){
             logger.info("开始进入saveSimulateAssemblyInfo：========start==========");
             //1.获取需要保存的组合列表
-            List<DjActuarialSimulationRelation> actuarialSimulationRelationList=getActuarialSimulationRelationList(assemblyInfoAttr,userId);
+            List<DjActuarialSimulationRelation> actuarialSimulationRelationList=getActuarialSimulationRelationList(assemblyInfoAttr,userId,cityId);
             if(actuarialSimulationRelationList!=null&&actuarialSimulationRelationList.size()>0){
                 logger.info("开始数据保存：==================");
                 //2.先删除历史正式数据的精算组合
                 Example example=new Example(DjSimulationTemplateConfigDetail.class);
-                example.createCriteria().andEqualTo(DjSimulationTemplateConfigDetail.DATA_STATUS,"0");
+                example.createCriteria().andEqualTo(DjSimulationTemplateConfigDetail.DATA_STATUS,"0")
+                                        .andEqualTo(DjSimulationTemplateConfigDetail.CITY_ID,cityId);
                 djActuarialSimulationRelationMapper.deleteByExample(example);
                 //3.删除正式数据关联的标题及精算表数据
                 example=new Example(DjSimulationTemplateConfigDetail.class);
-                example.createCriteria().andEqualTo(DjSimulationTemplateConfigDetail.CONFIG_STATUS,"1");
+                example.createCriteria().andEqualTo(DjSimulationTemplateConfigDetail.CONFIG_STATUS,"1")
+                                        .andEqualTo(DjSimulationTemplateConfigDetail.CITY_ID,cityId);
                 djSimulationTemplateConfigDetailMapper.deleteByExample(example);//删除标题下的选项值信息
-                djSimulationTemplateConfigMapper.deleteSimulationTemplate();//删除无用的标题数据
-                djActuarialProductConfigMapper.deleteActuarialProductByTemplate();//删除无用的精算详情数据
+                djSimulationTemplateConfigMapper.deleteSimulationTemplate(cityId);//删除无用的标题数据
+                djActuarialProductConfigMapper.deleteActuarialProductByTemplate(cityId);//删除无用的精算详情数据
                 example=new Example(DjActuarialTemplateConfig.class);
-                example.createCriteria().andEqualTo(DjActuarialTemplateConfig.DATA_STATUS,"1");
-                example.createCriteria().andEqualTo(DjActuarialTemplateConfig.CONFIG_TYPE,"3");
+                example.createCriteria().andEqualTo(DjActuarialTemplateConfig.DATA_STATUS,"1")
+                                        .andEqualTo(DjActuarialTemplateConfig.CONFIG_TYPE,"3")
+                                        .andEqualTo(DjSimulationTemplateConfig.CITY_ID,cityId);
                 djActuarialTemplateConfigMapper.deleteByExample(example);//删除无用的精算信息
                 //4.保存新的精算组合进去
                 djActuarialSimulationRelationMapper.batchInsertAssemblyInfo(actuarialSimulationRelationList);
                 //5.将临时数据的标题及详情改为正式数据，并重新拷贝一份临时数据出来，后续操作用
-                djSimulationTemplateConfigDetailMapper.updateTemplateDetailConfig();//修改临时数据为正式数据
-                djSimulationTemplateConfigDetailMapper.batchInsertTempateDetail();//批量添加一批新的临时数据
+                djSimulationTemplateConfigDetailMapper.updateTemplateDetailConfig(cityId);//修改临时数据为正式数据
+                djSimulationTemplateConfigDetailMapper.batchInsertTempateDetail(cityId);//批量添加一批新的临时数据
             }
         }
 
@@ -634,7 +644,7 @@ public class DjBasicsActuarialConfigurationServices {
      * @param assemblyInfoAttr
      * @param userId
      */
-    private List<DjActuarialSimulationRelation> getActuarialSimulationRelationList(String assemblyInfoAttr, String userId){
+    private List<DjActuarialSimulationRelation> getActuarialSimulationRelationList(String assemblyInfoAttr, String userId,String cityId){
         List<DjActuarialSimulationRelation> actuarialSimulationRelationList=new ArrayList<>();
         JSONArray jsonArr = JSONArray.parseArray(assemblyInfoAttr);
         DjActuarialSimulationRelation djActuarialSimulationRelation;
@@ -653,6 +663,7 @@ public class DjBasicsActuarialConfigurationServices {
                     djActuarialSimulationRelation.setUpdateBy(userId==null?"":userId);
                     djActuarialSimulationRelation.setCreateDate(new Date());
                     djActuarialSimulationRelation.setModifyDate(new Date());
+                    djActuarialSimulationRelation.setCityId(cityId);
                     actuarialSimulationRelationList.add(djActuarialSimulationRelation);
                 }
             }
@@ -664,10 +675,10 @@ public class DjBasicsActuarialConfigurationServices {
      * 查询精算组合关系表
      * @return
      */
-    public  ServerResponse querySimulateAssemblyRelateionList(){
+    public  ServerResponse querySimulateAssemblyRelateionList(String cityId){
         try{
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            List<ActuarialSimulateionReationDTO> relationList=djActuarialSimulationRelationMapper.querySimulateAssemblyRelateionList(address);
+            List<ActuarialSimulateionReationDTO> relationList=djActuarialSimulationRelationMapper.querySimulateAssemblyRelateionList(address,cityId);
             return ServerResponse.createBySuccess("查询成功",relationList);
         }catch (Exception e){
             logger.error("查询失败",e);

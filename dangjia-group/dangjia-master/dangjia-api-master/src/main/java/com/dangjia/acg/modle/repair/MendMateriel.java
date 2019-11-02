@@ -125,4 +125,19 @@ public class MendMateriel extends BaseEntity {
 	@Desc(value = "店铺ID")
 	@ApiModelProperty("店铺ID")
 	private String storefrontId;
+
+	@Column(name = "order_item_id")
+	@Desc(value = "地址ID")
+	@ApiModelProperty("地址ID")
+	private String orderItemId;
+
+	@Column(name = "stevedorage_cost")
+	@Desc(value = "店铺ID")
+	@ApiModelProperty("店铺ID")
+	private Double stevedorageCost;//搬运费
+
+	@Column(name = "transportation_cost")
+	@Desc(value = "店铺ID")
+	@ApiModelProperty("店铺ID")
+	private Double transportationCost;//运费
 }

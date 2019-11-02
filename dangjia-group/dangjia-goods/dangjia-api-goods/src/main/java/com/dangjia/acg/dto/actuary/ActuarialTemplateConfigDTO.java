@@ -1,7 +1,7 @@
 package com.dangjia.acg.dto.actuary;
 
 import com.dangjia.acg.common.annotation.Desc;
-import com.dangjia.acg.common.model.BaseEntity;
+import com.dangjia.acg.modle.GoodsBaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -35,6 +35,11 @@ public class ActuarialTemplateConfigDTO  {
 
     @ApiModelProperty("精算Excel地址")
     private String excelAddress;
+
+    @ApiModelProperty("描述")
+    private String configDetail;
+
+
 
     @ApiModelProperty("阶段下面的商品列表")
     private List  productList;//阶段下面的商品列表

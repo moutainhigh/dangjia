@@ -1,5 +1,6 @@
 package com.dangjia.acg.controller.product;
 
+import com.dangjia.acg.api.BasicsStorefrontAPI;
 import com.dangjia.acg.api.product.DjBasicsProductAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
@@ -7,6 +8,7 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.product.BasicsGoodsDTO;
 import com.dangjia.acg.dto.product.BasicsProductDTO;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
+import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.service.product.DjBasicsGoodsService;
 import com.dangjia.acg.service.product.DjBasicsProductTemplateService;
 import com.github.pagehelper.PageInfo;
@@ -34,10 +36,26 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
     @Autowired
     private DjBasicsGoodsService djBasicsGoodsService;
 
+    @Autowired
+    private BasicsStorefrontAPI basicsStorefrontAPI ;
+
     @Override
     @ApiMethod
-    public ServerResponse queryProductData(HttpServletRequest request, String name) {
-        return djBasicsProductService.queryProductData(name);
+    public List<DjBasicsProductTemplate> queryRandomProduct(Integer limit,String cityId) {
+            return djBasicsProductService.queryRandomProduct(limit,cityId);
+    }
+
+    @Override
+    @ApiMethod
+    public List<DjBasicsProductTemplate> queryRandomProductByCategoryId(String productId,Integer limit) {
+        List<DjBasicsProductTemplate> djBasicsProductTemplates = djBasicsProductService.queryRandomProductByCategoryId(productId, limit);
+        return djBasicsProductTemplates;
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryProductData(HttpServletRequest request, String name,String cityId) {
+        return djBasicsProductService.queryProductData(name,cityId);
 
     }
 
@@ -50,14 +68,14 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryProductLabels(HttpServletRequest request, String productId) {
-        return djBasicsProductService.queryProductLabels(productId);
+    public ServerResponse queryProductLabels(HttpServletRequest request, String productId,String cityId) {
+        return djBasicsProductService.queryProductLabels(productId,cityId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse addLabelsValue(HttpServletRequest request, String jsonStr) {
-        return djBasicsProductService.addLabelsValue(jsonStr);
+    public ServerResponse addLabelsValue(HttpServletRequest request, String jsonStr,String cityId) {
+        return djBasicsProductService.addLabelsValue(jsonStr,cityId);
     }
 
     @Override
@@ -92,9 +110,9 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse insertBatchProduct(HttpServletRequest request, String productArr) {
+    public ServerResponse insertBatchProduct(HttpServletRequest request, String productArr,String cityId) {
         try{
-            return djBasicsProductService.insertBatchProduct(productArr);
+            return djBasicsProductService.insertBatchProduct(productArr,cityId);
         }catch (Exception e){
             logger.error("新增商品信息失败：",e);
             return ServerResponse.createBySuccessMessage("新增失败");
@@ -105,7 +123,7 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
     @Override
     @ApiMethod
     public ServerResponse queryGoodsListByCategoryLikeName(HttpServletRequest request, PageDTO pageDTO, String categoryId, String name, String cityId, Integer type,String categoryName) {
-        return djBasicsProductService.queryGoodsListByCategoryLikeName(pageDTO, categoryId, name, type,categoryName);
+        return djBasicsProductService.queryGoodsListByCategoryLikeName(pageDTO, categoryId, name, type,categoryName,cityId);
     }
     /**
      * 单个新增修改商品信息
@@ -214,8 +232,8 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse queryUnit(HttpServletRequest request) {
-        return djBasicsProductService.queryUnit();
+    public ServerResponse queryUnit(HttpServletRequest request, String cityId) {
+        return djBasicsProductService.queryUnit(cityId);
     }
     /**
      * 根据商品ID查询商品对象
@@ -238,7 +256,7 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
     @Override
     @ApiMethod
     public ServerResponse getTemporaryStorageProductByGoodsId(String cityId, String goodsId) {
-        return djBasicsProductService.getTemporaryStorageProductByGoodsId(goodsId);
+        return djBasicsProductService.getTemporaryStorageProductByGoodsId(cityId,goodsId);
     }
 
     /**
@@ -257,8 +275,8 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
      */
     @Override
     @ApiMethod
-    public List<DjBasicsProductTemplate> getAllProductByCategoryId(String categoryId) {
-        return djBasicsProductService.getAllProductByCategoryId(categoryId);
+    public List<DjBasicsProductTemplate> getAllProductByCategoryId(String categoryId,String cityId) {
+        return djBasicsProductService.getAllProductByCategoryId(categoryId,cityId);
     }
 
     /**
@@ -268,8 +286,8 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse  getAllProductByGoodsId(HttpServletRequest request,String goodsId){
-        return djBasicsProductService.getAllProductByGoodsId(goodsId);
+    public ServerResponse  getAllProductByGoodsId(HttpServletRequest request,String goodsId,String cityId){
+        return djBasicsProductService.getAllProductByGoodsId(goodsId,cityId);
     }
 
     /**
@@ -284,7 +302,29 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
     @Override
     @ApiMethod
     public ServerResponse queryGoodsList(HttpServletRequest request, PageDTO pageDTO, String categoryId, String name, String cityId, Integer type) {
-        return djBasicsGoodsService.queryGoodsList(pageDTO, categoryId, name, type);
+        return djBasicsGoodsService.queryGoodsList(pageDTO, categoryId, name, type,cityId);
+    }
+
+    /**
+     * 查询商品及下属货品
+     * @param request
+     * @param pageDTO
+     * @param categoryId
+     * @param name
+     * @param cityId
+     * @param type
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryGoodsListStorefront(HttpServletRequest request, PageDTO pageDTO, String categoryId, String name, String cityId, Integer type) {
+        String userId=request.getParameter("userId");
+        Storefront storefront=basicsStorefrontAPI.queryStorefrontByUserID(userId,cityId);
+        if(storefront==null)
+        {
+            return ServerResponse.createByErrorMessage("没有店铺信息");
+        }
+        return djBasicsGoodsService.queryGoodsListStorefront(storefront.getId(),pageDTO, categoryId, name, type);
     }
 
 
@@ -301,8 +341,8 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryChooseGoods(HttpServletRequest request) {
-        return djBasicsProductService.queryChooseGoods();
+    public ServerResponse queryChooseGoods(HttpServletRequest request,String cityId) {
+        return djBasicsProductService.queryChooseGoods(cityId);
     }
 
     @Override

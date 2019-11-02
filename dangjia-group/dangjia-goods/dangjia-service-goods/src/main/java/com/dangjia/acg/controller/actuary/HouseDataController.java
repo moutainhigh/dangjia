@@ -36,7 +36,7 @@ public class HouseDataController implements HouseDataAPI {
     @Override
     @ApiMethod
     public ServerResponse workerGoodsAll(String cityId, String workerTypeId, PageDTO pageDTO) {
-        return fillWorkerService.repairBudgetWorker(1, workerTypeId, null, null, pageDTO);
+        return fillWorkerService.repairBudgetWorker(1, workerTypeId, null, null, pageDTO,cityId);
     }
 
     /**
@@ -64,7 +64,7 @@ public class HouseDataController implements HouseDataAPI {
     @Override
     @ApiMethod
     public ServerResponse getBudgetWorker(String cityId, String houseId, String workerTypeId, PageDTO pageDTO) {
-        return fillWorkerService.repairBudgetWorker(0, workerTypeId, houseId, "", pageDTO);
+        return fillWorkerService.repairBudgetWorker(0, workerTypeId, houseId, "", pageDTO,cityId);
     }
 
     /**

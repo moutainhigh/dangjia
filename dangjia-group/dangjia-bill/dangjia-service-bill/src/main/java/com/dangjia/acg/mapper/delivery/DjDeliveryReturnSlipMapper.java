@@ -2,6 +2,7 @@ package com.dangjia.acg.mapper.delivery;
 
 import com.dangjia.acg.dto.delivery.*;
 import com.dangjia.acg.modle.delivery.DjDeliveryReturnSlip;
+import com.dangjia.acg.modle.storefront.Storefront;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
@@ -60,7 +61,8 @@ public interface DjDeliveryReturnSlipMapper extends Mapper<DjDeliveryReturnSlip>
 
     List<SupplierSettlementManagementDTO> querySupplierSettlementManagement(@Param("supId") String supId,
                                                                             @Param("applyState") Integer applyState,
-                                                                            @Param("cityId") String cityId);
+                                                                            @Param("cityId") String cityId,
+                                                                            @Param("storefronts") List<Storefront> storefronts);
 
     List<DjDeliveryReturnSlipDTO> querySupplierSettlementList(@Param("supId") String supId,
                                                               @Param("shopId") String shopId,
@@ -79,7 +81,18 @@ public interface DjDeliveryReturnSlipMapper extends Mapper<DjDeliveryReturnSlip>
                                                       @Param("productId") String productId,
                                                       @Param("cityId") String cityId);
 
+
     List<SupplierStoreDimensionDTO> querySupplierStoreDimensionList(@Param("supId") String supId,
                                                                     @Param("shopId") String shopId,
                                                                     @Param("cityId") String cityId);
+
+
+    List<BuyersDimensionDetailsDTO> querySupplierStoreDimensionDetailList(@Param("supId") String supId,
+                                                                          @Param("shopId") String shopId,
+                                                                          @Param("cityId") String cityId,
+                                                                          @Param("searchKey") String searchKey);
+
+    List<BuyersDimensionDTO> storefrontProductDimensionList(@Param("storefrontId") String supId,
+                                                            @Param("productId") String productId,
+                                                            @Param("cityId") String cityId);
 }

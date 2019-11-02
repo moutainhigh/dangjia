@@ -8,7 +8,7 @@ public final class Constants {
   /**
    * 店铺信息
    */
-  public static final String FENGJIAN_STOREFRONT = "fengjian_storefront";
+  public static final String FENGJIAN_STOREFRONT = "fengjian_storefront_";
 
 
   /**

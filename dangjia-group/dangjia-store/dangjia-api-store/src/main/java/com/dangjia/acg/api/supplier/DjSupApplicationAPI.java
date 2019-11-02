@@ -24,14 +24,15 @@ public interface DjSupApplicationAPI {
     @PostMapping("/sup/djSupApplication/queryDjSupApplicationProductByShopID")
     @ApiOperation(value = "店铺-审核供货列表", notes = "店铺-审核供货列表")
     ServerResponse queryDjSupApplicationProductByShopID(@RequestParam("request") HttpServletRequest request,
-                                                 @RequestParam("pageDTO") PageDTO pageDTO,
-                                                 @RequestParam("keyWord") String keyWord,
-                                                 @RequestParam("shopId") String shopId);
+                                                        @RequestParam("pageDTO") PageDTO pageDTO,
+                                                        @RequestParam("keyWord") String keyWord,
+                                                        @RequestParam("shopId") String shopId);
 
     @PostMapping("/supplier/djSupApplication/insertSupplierApplicationShop")
     @ApiOperation(value = "供应商申请供应店铺", notes = "供应商申请供应店铺")
     ServerResponse insertSupplierApplicationShop(@RequestParam("request") HttpServletRequest request,
-                                                 @RequestParam("supId") String supId,
+                                                 @RequestParam("userId") String userId,
+                                                 @RequestParam("cityId") String cityId,
                                                  @RequestParam("shopId") String shopId);
 
     @PostMapping("/supplier/djSupApplication/uploadContracts")

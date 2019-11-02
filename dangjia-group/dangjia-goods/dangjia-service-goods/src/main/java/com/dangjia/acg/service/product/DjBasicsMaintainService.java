@@ -31,10 +31,11 @@ public class DjBasicsMaintainService {
      * @param name
      * @return
      */
-    public ServerResponse queryMatchWord(String name) {
+    public ServerResponse queryMatchWord(String name,String cityId) {
         Example example = new Example(DjBasicsMaintain.class);
         if (!CommonUtil.isEmpty(name)) {
-            example.createCriteria().andLike(DjBasicsMaintain.SEARCH_ITEM, "%" + name + "%");
+            example.createCriteria().andLike(DjBasicsMaintain.SEARCH_ITEM, "%" + name + "%")
+            .andEqualTo(DjBasicsMaintain.CITY_ID,cityId);
             List<DjBasicsMaintain> list = djBasicsMaintainMapper.selectByExample(example);
             if (list.size() <= 0) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
@@ -53,10 +54,10 @@ public class DjBasicsMaintainService {
      * @param searchItem
      * @return
      */
-    public ServerResponse addKeywords(String keywordName, String searchItem) {
+    public ServerResponse addKeywords(String keywordName, String searchItem,String cityId) {
         Example example = new Example(DjBasicsMaintain.class);
         example.createCriteria().andEqualTo(DjBasicsMaintain.KEYWORD_NAME, keywordName)
-                .andEqualTo(DjBasicsMaintain.DATA_STATUS, 0);
+                .andEqualTo(DjBasicsMaintain.DATA_STATUS, 0).andEqualTo(DjBasicsMaintain.CITY_ID,cityId);
         List<DjBasicsMaintain> djBasicsMaintains = djBasicsMaintainMapper.selectByExample(example);
         if (djBasicsMaintains.size() > 0)
             return ServerResponse.createByErrorMessage("该关键词名称已存在");
@@ -65,7 +66,7 @@ public class DjBasicsMaintainService {
         long count = strings.stream().distinct().count();
         if (count < strings.size())
             return ServerResponse.createByErrorMessage("搜索词重复");
-        if (djBasicsMaintainMapper.duplicateRemoval(strings).size() > 0) {
+        if (djBasicsMaintainMapper.duplicateRemoval(strings,cityId).size() > 0) {
             return ServerResponse.createByErrorMessage("搜索词已存在");
         }
         DjBasicsMaintain djBasicsMaintain = new DjBasicsMaintain();
@@ -86,12 +87,12 @@ public class DjBasicsMaintainService {
      * @param searchItem
      * @return
      */
-    public ServerResponse updateKeywords(String id, String keywordName, String searchItem) {
+    public ServerResponse updateKeywords(String id, String keywordName, String searchItem,String cityId) {
         DjBasicsMaintain djBasicsMaintain = djBasicsMaintainMapper.selectByPrimaryKey(id);
         if (!djBasicsMaintain.getKeywordName().equals(keywordName)) {
             Example example = new Example(DjBasicsMaintain.class);
             example.createCriteria().andEqualTo(DjBasicsMaintain.KEYWORD_NAME, keywordName)
-                    .andEqualTo(DjBasicsMaintain.DATA_STATUS, 0);
+                    .andEqualTo(DjBasicsMaintain.DATA_STATUS, 0).andEqualTo(DjBasicsMaintain.CITY_ID,cityId);
             if (djBasicsMaintainMapper.selectByExample(example).size() > 0)
                 return ServerResponse.createByErrorMessage("该关键词名称已存在");
         }
@@ -102,12 +103,13 @@ public class DjBasicsMaintainService {
         if (count < strings.size()) {
             return ServerResponse.createByErrorMessage("搜索词重复");
         }
-        if (djBasicsMaintainMapper.duplicateRemoval(strings).size() > 0) {
+        if (djBasicsMaintainMapper.duplicateRemoval(strings,cityId).size() > 0) {
             return ServerResponse.createByErrorMessage("搜索词已存在");
         }
         djBasicsMaintain.setKeywordName(keywordName);
         djBasicsMaintain.setSearchItem(searchItem);
         djBasicsMaintain.setDataStatus(0);
+        djBasicsMaintain.setCityId(cityId);
         djBasicsMaintainMapper.updateByPrimaryKeySelective(djBasicsMaintain);
         return ServerResponse.createBySuccessMessage("编辑成功");
     }
@@ -151,11 +153,12 @@ public class DjBasicsMaintainService {
      * @param id
      * @return
      */
-    public ServerResponse queryKeywords(String id) {
+    public ServerResponse queryKeywords(String id,String cityId) {
         if (!CommonUtil.isEmpty(id))
             return ServerResponse.createBySuccess("查询成功", djBasicsMaintainMapper.selectByPrimaryKey(id));
         Example example = new Example(DjBasicsMaintain.class);
-        example.createCriteria().andEqualTo(DjBasicsMaintain.DATA_STATUS, 0);
+        example.createCriteria().andEqualTo(DjBasicsMaintain.DATA_STATUS, 0).
+                andEqualTo(DjBasicsMaintain.CITY_ID,cityId);
         example.orderBy(DjBasicsMaintain.CREATE_DATE).desc();
         List<DjBasicsMaintain> djBasicsMaintains = djBasicsMaintainMapper.selectByExample(example);
         if (djBasicsMaintains.size() <= 0)

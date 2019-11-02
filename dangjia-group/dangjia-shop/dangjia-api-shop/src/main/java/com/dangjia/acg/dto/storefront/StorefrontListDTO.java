@@ -62,7 +62,30 @@ public class StorefrontListDTO {
      * 联系邮件
      */
     private String email;
-    private String applicationStatus; //状态 0:申请中 1:已选择 2:被打回 -1:待选择
+
+    /**
+     *  状态 0:申请中 1:已选择 2:被打回 -1:待选择
+     */
+    private String applicationStatus;
+
+    /**
+     * 联系人
+     */
     private String contract;
+
+    /**
+     * 失败原因
+     */
     private String failReason;
+
+    /**
+     * 其他设置(收取运费)
+     */
+    private String freight;
+
+
+    /**
+     * 其他设置(每单价格低于)
+     */
+    private String belowUnitPrice;
 }

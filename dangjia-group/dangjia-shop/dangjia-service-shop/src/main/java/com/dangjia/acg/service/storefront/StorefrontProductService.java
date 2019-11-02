@@ -3,22 +3,33 @@ package com.dangjia.acg.service.storefront;
 import cn.jiguang.common.utils.StringUtils;
 import com.alibaba.fastjson.JSON;
 import com.dangjia.acg.api.product.DjBasicsProductAPI;
-import com.dangjia.acg.common.exception.ServerCode;
+import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
+import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.product.MemberCollectDTO;
+import com.dangjia.acg.dto.product.ShoppingCartProductDTO;
+import com.dangjia.acg.dto.storefront.StorefrontDTO;
 import com.dangjia.acg.dto.storefront.StorefrontProductListDTO;
 import com.dangjia.acg.dto.storefront.BasicsStorefrontProductDTO;
 import com.dangjia.acg.dto.storefront.BasicsStorefrontProductViewDTO;
 import com.dangjia.acg.mapper.storefront.IStorefrontProductMapper;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
+import com.dangjia.acg.util.StringTool;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class StorefrontProductService {
@@ -31,8 +42,53 @@ public class StorefrontProductService {
 
     @Autowired
     private DjBasicsProductAPI djBasicsProductAPI ;
+    @Autowired
+    private ConfigUtil configUtil;
+    /**
+     * 供货设置-根据货品id，城市id，店铺id删除店铺商品
+     * @param productId
+     * @param storefrontId
+     * @param cityId
+     * @return
+     */
+    public ServerResponse delProductByProIdAndStoreIdAndCityId(String productId, String storefrontId, String cityId) {
+        try {
+            if (StringUtils.isEmpty(productId)) {
+                return ServerResponse.createByErrorMessage("货品ID不能为空");
+            }
+            if (StringUtils.isEmpty(storefrontId)) {
+                return ServerResponse.createByErrorMessage("店铺ID不能为空");
+            }
+            if (StringUtils.isEmpty(cityId)) {
+                return ServerResponse.createByErrorMessage("城市ID不能为空");
+            }
+            Example example=new Example(StorefrontProduct.class);
+            example.createCriteria().andEqualTo(StorefrontProduct.PROD_TEMPLATE_ID,productId)
+                    .andEqualTo(StorefrontProduct.STOREFRONT_ID,storefrontId)
+                    .andEqualTo(StorefrontProduct.CITY_ID,cityId);
 
+            StorefrontProduct storefrontProduct=new StorefrontProduct();
+            storefrontProduct.setDataStatus(1);
+            int i=istorefrontProductMapper.updateByExampleSelective(storefrontProduct,example);
+            if (i <= 0) {
+                return ServerResponse.createByErrorMessage("删除失败");
 
+            }
+            return ServerResponse.createBySuccessMessage("删除成功");
+        } catch (Exception e) {
+            logger.error("供货设置-根据货品id，城市id，店铺id删除店铺商品异常：", e);
+            return ServerResponse.createByErrorMessage("供货设置-根据货品id，城市id，店铺id删除店铺商品异常");
+        }
+    }
+    /**
+     * 根据店铺id查询商品
+     * @param storefrontId
+     * @param searchKey
+     * @return
+     */
+    public List<StorefrontDTO> queryStorefrontListByStorefrontId(String storefrontId, String searchKey) {
+        return istorefrontProductMapper.queryStorefrontListByStorefrontId( storefrontId,  searchKey);
+    }
     /**
      * 根据id查询店铺商品信息
      *
@@ -52,10 +108,20 @@ public class StorefrontProductService {
         try {
             //判断是否重复添加
             Example example = new Example(StorefrontProduct.class);
-            example.createCriteria().andEqualTo(StorefrontProduct.PROD_TEMPLATE_ID, basicsStorefrontProductDTO.getProdTemplateId());
+            example.createCriteria().andEqualTo(StorefrontProduct.PROD_TEMPLATE_ID, basicsStorefrontProductDTO.getProdTemplateId())
+            .andEqualTo(StorefrontProduct.STOREFRONT_ID,basicsStorefrontProductDTO.getStorefrontId())
+            .andEqualTo(StorefrontProduct.CITY_ID,basicsStorefrontProductDTO.getCityId());
             List<StorefrontProduct> list = istorefrontProductMapper.selectByExample(example);
             if (list.size() > 0) {
-                return ServerResponse.createByErrorMessage("店铺商品已经添加，不能重复添加!商品模板ID:"+list.get(0).getProdTemplateId());
+                Example exampleup = new Example(StorefrontProduct.class);
+                exampleup.createCriteria().andEqualTo(StorefrontProduct.ID, list.get(0).getId());
+                StorefrontProduct storefrontProduct = new StorefrontProduct();
+                storefrontProduct.setDataStatus(0);
+                int i = istorefrontProductMapper.updateByExampleSelective(storefrontProduct, exampleup);
+
+                if (i < 0)
+                    return ServerResponse.createByErrorMessage("店铺商品新增成功");
+                return ServerResponse.createBySuccessMessage("店铺商品新增成功");
             }
             DjBasicsProductTemplate djBasicsProductTemplate=null;
             ServerResponse serverResponse=djBasicsProductAPI.getProductById(null,basicsStorefrontProductDTO.getProdTemplateId());
@@ -64,19 +130,19 @@ public class StorefrontProductService {
             }
             StorefrontProduct storefrontProduct = new StorefrontProduct();
             storefrontProduct.setStorefrontId(basicsStorefrontProductDTO.getStorefrontId());
-            storefrontProduct.setImage(basicsStorefrontProductDTO.getImage());
-            storefrontProduct.setDetailImage(basicsStorefrontProductDTO.getDetailImage());
-            storefrontProduct.setMarketName(basicsStorefrontProductDTO.getMarketName());
-            storefrontProduct.setSellPrice(basicsStorefrontProductDTO.getSellPrice());
-            storefrontProduct.setSuppliedNum(basicsStorefrontProductDTO.getSuppliedNum());
-            storefrontProduct.setIsUpstairsCost(basicsStorefrontProductDTO.getIsUpstairsCost());
-            storefrontProduct.setIsDeliveryInstall(basicsStorefrontProductDTO.getIsDeliveryInstall());
-            storefrontProduct.setMoveCost(basicsStorefrontProductDTO.getMoveCost());
-            storefrontProduct.setIsShelfStatus(basicsStorefrontProductDTO.getIsShelfStatus());
-            storefrontProduct.setProdTemplateId(basicsStorefrontProductDTO.getProdTemplateId());
-            storefrontProduct.setGoodsId( djBasicsProductTemplate.getGoodsId());
-            storefrontProduct.setProductName(djBasicsProductTemplate.getName());
-            System.out.println(storefrontProduct.toString());
+            storefrontProduct.setImage(djBasicsProductTemplate.getImage());//大图
+            storefrontProduct.setDetailImage(djBasicsProductTemplate.getDetailImage());//缩略图
+            storefrontProduct.setMarketName(djBasicsProductTemplate.getMarketingName());//营销名称
+            storefrontProduct.setSellPrice(basicsStorefrontProductDTO.getSellPrice());//销售价格
+            storefrontProduct.setSuppliedNum(basicsStorefrontProductDTO.getSuppliedNum());//供货数量
+            storefrontProduct.setIsUpstairsCost(basicsStorefrontProductDTO.getIsUpstairsCost());//师傅是否按一层收取上楼费
+            storefrontProduct.setIsDeliveryInstall(basicsStorefrontProductDTO.getIsDeliveryInstall());//是否送货与安装/施工分开
+            storefrontProduct.setMoveCost(basicsStorefrontProductDTO.getMoveCost());// 搬运费
+            storefrontProduct.setIsShelfStatus(basicsStorefrontProductDTO.getIsShelfStatus());//是否上下架
+            storefrontProduct.setProdTemplateId(djBasicsProductTemplate.getId());//货品id
+            storefrontProduct.setGoodsId( djBasicsProductTemplate.getGoodsId());// 商品id
+            storefrontProduct.setProductName(djBasicsProductTemplate.getName());//模板名称
+            storefrontProduct.setCityId(basicsStorefrontProductDTO.getCityId());
             int i = istorefrontProductMapper.insert(storefrontProduct);
             if (i > 0) {
                 return ServerResponse.createBySuccessMessage("增加店铺商品成功");
@@ -99,16 +165,17 @@ public class StorefrontProductService {
             if (StringUtils.isEmpty(id)) {
                 return ServerResponse.createByErrorMessage("商品ID不能为空");
             }
-            StorefrontProduct storefrontProduct = new StorefrontProduct();
-            storefrontProduct.setId(id);
-            storefrontProduct.setDataStatus(1);//删除
-            storefrontProduct.setCreateDate(null);
-            int i = istorefrontProductMapper.updateByPrimaryKeySelective(storefrontProduct);
-            if (i > 0) {
-                return ServerResponse.createBySuccessMessage("删除成功");
-            } else {
+
+            Example example=new Example(StorefrontProduct.class);
+            example.createCriteria().andEqualTo(StorefrontProduct.ID,id);
+
+            StorefrontProduct storefrontProduct=new StorefrontProduct();
+            storefrontProduct.setDataStatus(1);
+            int i = istorefrontProductMapper.updateByExampleSelective(storefrontProduct,example);
+            if (i <= 0) {
                 return ServerResponse.createByErrorMessage("删除失败");
             }
+            return ServerResponse.createBySuccessMessage("删除成功");
         } catch (Exception e) {
             logger.error("删除已选商品失败：", e);
             return ServerResponse.createByErrorMessage("删除已选商品失败");
@@ -122,13 +189,49 @@ public class StorefrontProductService {
      * @param keyWord
      * @return
      */
-    public ServerResponse queryStorefrontProductByKeyWord(String keyWord) {
+    public ServerResponse queryStorefrontProductByKeyWord(String keyWord, String storefrontId, PageDTO pageDTO,String cityId) {
         try {
-            List<BasicsStorefrontProductViewDTO> list = istorefrontProductMapper.queryStorefrontProductViewDTOList(keyWord);
-            if (list.size() <= 0) {
-                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            if (StringUtils.isEmpty(storefrontId)) {
+                return ServerResponse.createByErrorMessage("店铺ID不能为空!");
             }
-            return ServerResponse.createBySuccess("查询成功", list);
+            if (StringUtils.isEmpty(cityId)) {
+                return ServerResponse.createByErrorMessage("城市ID不能为空!");
+            }
+            List<Map<String,Object>> basicsStorefrontProductViewDTOList=new ArrayList<Map<String,Object>>();
+            List<BasicsStorefrontProductViewDTO> list = istorefrontProductMapper.queryStorefrontProductViewDTOList(keyWord,storefrontId,cityId);
+            //图片前缀路径
+            String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            for (BasicsStorefrontProductViewDTO basicsStorefrontProductViewDTO : list) {
+                Map<String, Object> resMap = BeanUtils.beanToMap(basicsStorefrontProductViewDTO);
+                String id = basicsStorefrontProductViewDTO.getId();
+                StorefrontProduct spdto = istorefrontProductMapper.queryStorefrontProductById(id);
+                if (spdto == null) {
+                    resMap.put("storefrontProduct", null);
+                }
+
+                String[] imgArr = spdto.getImage().split(",");
+                StringBuilder imgStr = new StringBuilder();
+                StringBuilder imgUrlStr = new StringBuilder();
+                StringTool.getImages(address, imgArr, imgStr , imgUrlStr);
+                spdto.setImage(imgUrlStr.toString());
+                spdto.setImageUrl(imgStr.toString());
+
+
+                String[] dtimgArr = spdto.getDetailImage().split(",");
+                StringBuilder dtimgStr = new StringBuilder();
+                StringBuilder dtimgUrlStr = new StringBuilder();
+                StringTool.getImages(address, dtimgArr,dtimgStr  ,dtimgUrlStr );
+                spdto.setDetailImage(dtimgUrlStr.toString());
+                spdto.setDetailImageUrl(dtimgStr.toString());
+
+
+                resMap.put("storefrontProduct", spdto);
+
+                basicsStorefrontProductViewDTOList.add(resMap);
+            }
+            PageInfo pageResult = new PageInfo(basicsStorefrontProductViewDTOList);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             logger.error("查询失败：", e);
             return ServerResponse.createByErrorMessage("查询失败");
@@ -152,19 +255,24 @@ public class StorefrontProductService {
             if (StringUtils.isEmpty(isShelfStatus)) {
                 return ServerResponse.createByErrorMessage("商品上下架状态不能为空");
             }
+            //判断，如果是人工商品，提示不能上架
+            Integer k=istorefrontProductMapper.selectProductByGoodsType(id);
 
+            if(k>0)
+            {
+                return ServerResponse.createByErrorMessage("温馨提示：人工商品提示不能上架");
+            }
             StorefrontProduct storefrontProduct = new StorefrontProduct();
             storefrontProduct.setId(id);
             storefrontProduct.setIsShelfStatus(isShelfStatus);
             int i = istorefrontProductMapper.updateByPrimaryKeySelective(storefrontProduct);
-            if (i > 0) {
-                return ServerResponse.createBySuccessMessage("设置商品上下架成功");
-            } else {
-                return ServerResponse.createByErrorMessage("设置商品上下架失败");
+            if (i <= 0) {
+                return ServerResponse.createByErrorMessage("商品上下架失败");
             }
+            return ServerResponse.createBySuccessMessage("商品上下架成功");
         } catch (Exception e) {
-            logger.error("设置商品上下架失败：", e);
-            return ServerResponse.createByErrorMessage("设置商品上下架失败");
+            logger.error("商品上下架失败：", e);
+            return ServerResponse.createByErrorMessage("商品上下架失败");
         }
     }
 
@@ -203,25 +311,6 @@ public class StorefrontProductService {
 
 
     /**
-     * 根据id查询店铺商品
-     *
-     * @param id
-     * @return
-     */
-    public ServerResponse editStorefrontProductById(String id) {
-        try {
-            if (StringUtils.isEmpty(id)) {
-                return ServerResponse.createByErrorMessage("商品ID不能为空");
-            }
-            StorefrontProduct storefrontProduct = istorefrontProductMapper.selectByPrimaryKey(id);
-            return ServerResponse.createBySuccess("查询成功", storefrontProduct);
-        } catch (Exception e) {
-            logger.error("根据id修改店铺商品失败：", e);
-            return ServerResponse.createByErrorMessage("根据id修改店铺商品失败");
-        }
-    }
-
-    /**
      * 供货设置-保存编辑店铺商品
      *
      * @param storefrontProduct
@@ -243,6 +332,29 @@ public class StorefrontProductService {
             logger.error("供货设置-保存编辑店铺商品失败：", e);
             return ServerResponse.createByErrorMessage("供货设置-保存编辑店铺商品失败");
         }
+    }
+
+
+    /**
+     * 查询商品信息
+     * @param storefrontId
+     * @param productId
+     * @return
+     */
+    public List<ShoppingCartProductDTO> queryCartList(String storefrontId, String productId) {
+        List<ShoppingCartProductDTO> shoppingCartProductDTOS = istorefrontProductMapper.queryCartList(storefrontId, productId);
+        return shoppingCartProductDTOS;
+    }
+
+
+    /**
+     * 查询收藏商品
+     * @param productId
+     * @return
+     */
+    public List<MemberCollectDTO> queryCollectGood(String productId,String storefrontId) {
+        List<MemberCollectDTO> memberCollectDTOS = istorefrontProductMapper.queryCollectGood(productId,storefrontId);
+        return memberCollectDTOS;
     }
 
 }

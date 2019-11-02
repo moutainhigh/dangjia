@@ -153,10 +153,10 @@ public class SplitDeliver extends BaseEntity {
     @ApiModelProperty("安装人号码")
     private String installMobile;
 
-    @Column(name = "delibery_name")
+    @Column(name = "delivery_name")
     @Desc(value = "送货人姓名")
     @ApiModelProperty("送货人姓名")
-    private String deliberyName;
+    private String deliveryName;
 
     @Column(name = "delivery_mobile")
     @Desc(value = "送货人号码")

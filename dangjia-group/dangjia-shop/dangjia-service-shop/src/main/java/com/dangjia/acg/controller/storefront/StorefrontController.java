@@ -30,20 +30,20 @@ public class StorefrontController implements BasicsStorefrontAPI {
 
     @Override
     @ApiMethod
-    public Storefront queryStorefrontByUserID(String userId) {
-        return storefrontService.queryStorefrontByUserID(userId);
+    public Storefront queryStorefrontByUserID(String userId, String cityId) {
+        return storefrontService.queryStorefrontByUserID(userId, cityId);
     }
 
     @Override
     @ApiMethod
-    public Storefront querySingleStorefrontById( String id) {
+    public Storefront querySingleStorefrontById(String id) {
         return storefrontService.querySingleStorefrontById(id);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse queryStorefrontById(String id) {
-        return storefrontService.queryStorefrontById(id);
+    public ServerResponse queryStorefrontByUserId(String userId, String cityId) {
+        return storefrontService.queryStorefrontByUserId(userId, cityId);
     }
 
     @Override
@@ -55,9 +55,9 @@ public class StorefrontController implements BasicsStorefrontAPI {
     @Override
     @ApiMethod
     public ServerResponse addStorefront(String userId, String cityId, String storefrontName, String storefrontAddress,
-                                        String storefrontDesc, String storefrontLogo, String storekeeperName, String mobile, String email) {
+                                        String storefrontDesc, String storefrontLogo, String storekeeperName, String mobile, String email,String freight,String belowUnitPrice) {
         return storefrontService.addStorefront(userId, cityId, storefrontName, storefrontAddress, storefrontDesc,
-                storefrontLogo, storekeeperName, mobile, email);
+                storefrontLogo, storekeeperName, mobile, email, freight, belowUnitPrice);
     }
 
     @Override
@@ -75,7 +75,7 @@ public class StorefrontController implements BasicsStorefrontAPI {
     @Override
     @ApiMethod
     public ServerResponse querySupplierSelectionSupply(HttpServletRequest request, PageDTO pageDTO, String searchKey, String userId, String cityId) {
-        return storefrontService.querySupplierSelectionSupply(pageDTO,searchKey,userId,cityId);
+        return storefrontService.querySupplierSelectionSupply(pageDTO, searchKey, userId, cityId);
     }
 
 

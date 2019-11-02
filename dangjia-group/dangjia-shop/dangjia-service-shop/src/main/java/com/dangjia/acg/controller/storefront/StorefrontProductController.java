@@ -2,13 +2,19 @@ package com.dangjia.acg.controller.storefront;
 
 import com.dangjia.acg.api.StorefrontProductAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dto.product.MemberCollectDTO;
+import com.dangjia.acg.dto.product.ShoppingCartProductDTO;
+import com.dangjia.acg.dto.storefront.StorefrontDTO;
 import com.dangjia.acg.dto.storefront.StorefrontProductListDTO;
 import com.dangjia.acg.dto.storefront.BasicsStorefrontProductDTO;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.service.storefront.StorefrontProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * @ClassName: StorefrontController
@@ -22,6 +28,12 @@ public class StorefrontProductController implements StorefrontProductAPI {
     @Autowired
     private StorefrontProductService storefrontProductService;
 
+
+    @Override
+    @ApiMethod
+    public List<StorefrontDTO> queryStorefrontListByStorefrontId(String storefrontId, String searchKey) {
+        return storefrontProductService.queryStorefrontListByStorefrontId(storefrontId,searchKey);
+    }
 
     @Override
     @ApiMethod
@@ -44,8 +56,14 @@ public class StorefrontProductController implements StorefrontProductAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryStorefrontProductByKeyWord(String keyWord) {
-        return storefrontProductService.queryStorefrontProductByKeyWord(keyWord);
+    public ServerResponse delProductByProIdAndStoreIdAndCityId(String productId, String storefrontId, String cityId) {
+        return storefrontProductService.delProductByProIdAndStoreIdAndCityId(productId,storefrontId,cityId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryStorefrontProductByKeyWord(String keyWord, String storefrontId,PageDTO pageDTO, String cityId) {
+        return storefrontProductService.queryStorefrontProductByKeyWord(keyWord,storefrontId,pageDTO,cityId);
     }
 
     @Override
@@ -60,16 +78,24 @@ public class StorefrontProductController implements StorefrontProductAPI {
         return storefrontProductService.setAllStoreProductByIsShelfStatus(id, isShelfStatus);
     }
 
-    @Override
-    @ApiMethod
-    public ServerResponse editStorefrontProductById(String id) {
-        return storefrontProductService.editStorefrontProductById(id);
-    }
+
 
     @Override
     @ApiMethod
     public ServerResponse saveStorefrontProductById(StorefrontProduct storefrontProduct) {
         return storefrontProductService.saveStorefrontProductById(storefrontProduct);
+    }
+
+    @Override
+    @ApiMethod
+    public List<ShoppingCartProductDTO> queryCartList(String storefrontId, String productId) {
+        return storefrontProductService.queryCartList(storefrontId,productId);
+    }
+
+    @Override
+    @ApiMethod
+    public List<MemberCollectDTO> queryCollectGood(String productId,String storefrontId) {
+        return storefrontProductService.queryCollectGood(productId,storefrontId);
     }
 
 

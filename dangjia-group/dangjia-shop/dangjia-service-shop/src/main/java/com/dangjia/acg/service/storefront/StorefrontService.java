@@ -1,7 +1,10 @@
 package com.dangjia.acg.service.storefront;
 
 import cn.jiguang.common.utils.StringUtils;
+//import com.dangjia.acg.api.supplier.DjRegisterApplicationAPI;
+import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.supplier.DjSupplierAPI;
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 
@@ -16,7 +19,6 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -40,15 +42,20 @@ public class StorefrontService {
     @Autowired
     private ConfigUtil configUtil;
 
+    @Autowired
+    private RedisClient redisClient;
+
+//    @Autowired
+//    private DjRegisterApplicationAPI djRegisterApplicationAPI;
     /**
      * 根据用户Id查询店铺信息
      * @param userId
      * @return
      */
-    public Storefront queryStorefrontByUserID(String userId) {
+    public Storefront queryStorefrontByUserID(String userId,String cityId) {
         try {
             Example example=new Example(Storefront.class);
-            example.createCriteria().andEqualTo(Storefront.USER_ID,userId);
+            example.createCriteria().andEqualTo(Storefront.USER_ID,userId).andEqualTo(Storefront.CITY_ID,cityId);
             Storefront storefront =istorefrontMapper.selectByExample(example).get(0);
             return storefront;
         } catch (Exception e) {
@@ -73,23 +80,47 @@ public class StorefrontService {
 
     /**
      * 根据Id查询店铺信息
-     * @param id
+     * @param userId
      * @return
      */
-    public ServerResponse queryStorefrontById(String id) {
+    public ServerResponse queryStorefrontByUserId(String userId,String cityId) {
         try {
-            Storefront storefront = istorefrontMapper.selectByPrimaryKey(id);
-            if(storefront!=null)
+
+            //判断是否审核通过，是否是店铺，如果是就显示
+            //String checkUserid= djRegisterApplicationAPI.getUserIdExamine(userId);
+            //判断是否注册
+//            if(StringUtils.isEmpty(checkUserid))
+//            {
+//                return ServerResponse.createBySuccessMessage("用户审核不通过");
+//            }
+            Example example=new Example(Storefront.class);
+            example.createCriteria().andEqualTo(Storefront.USER_ID,userId).
+                    andEqualTo(Storefront.CITY_ID,cityId);
+            List<Storefront> list =istorefrontMapper.selectByExample(example);
+            if(list.size()<=0)
             {
-                return ServerResponse.createBySuccess("检索到数据",storefront);
+                return ServerResponse.createByErrorMessage("没有检索到店铺信息数据");
             }
-            else
-            {
-                return ServerResponse.createBySuccess("没有检索到数据",storefront);
-            }
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            StorefrontDTO storefrontDTO =new StorefrontDTO();
+            Storefront storefront=list.get(0);
+            storefrontDTO.setId(storefront.getId());
+            storefrontDTO.setCityId(storefront.getCityId());
+            storefrontDTO.setUserId(storefront.getUserId());
+            storefrontDTO.setStorefrontName(storefront.getStorefrontName());
+            storefrontDTO.setStorefrontAddress(storefront.getStorefrontAddress());
+            storefrontDTO.setStorefrontDesc(storefront.getStorefrontDesc());
+            storefrontDTO.setStorefrontLogo(address+storefront.getStorefrontLogo());
+            storefrontDTO.setStorefrontSigleLogo(storefront.getStorefrontLogo());
+            storefrontDTO.setStorekeeperName(storefront.getStorekeeperName());
+            storefrontDTO.setMobile(storefront.getMobile());
+            storefrontDTO.setEmail(storefront.getEmail());
+            storefrontDTO.setFreight(storefront.getFreight());
+            storefrontDTO.setBelowUnitPrice(storefront.getBelowUnitPrice());
+            return ServerResponse.createBySuccess("检索到数据",storefrontDTO);
         } catch (Exception e) {
-            logger.error("查询失败：", e);
-            return ServerResponse.createByErrorMessage("修改失败");
+            logger.error("查询店铺信息异常：", e);
+            return ServerResponse.createByErrorMessage("查询店铺信息异常");
         }
     }
 
@@ -113,7 +144,7 @@ public class StorefrontService {
     public ServerResponse addStorefront(String userId, String cityId, String storefrontName,
                                         String storefrontAddress, String storefrontDesc,
                                         String storefrontLogo, String storekeeperName,
-                                        String mobile, String email) {
+                                        String mobile, String email,String freight, String belowUnitPrice) {
         try {
 //            Object object = constructionService.getMember(userToken);
 //            if (object instanceof ServerResponse) {
@@ -143,7 +174,8 @@ public class StorefrontService {
             storefront.setStorekeeperName(storekeeperName);
             storefront.setMobile(mobile);
             storefront.setEmail(email);
-
+            storefront.setFreight(freight);
+            storefront.setBelowUnitPrice(belowUnitPrice);
             //判断是否重复添加
             Example example=new Example(Storefront.class);
             example.createCriteria().andEqualTo(Storefront.CITY_ID,cityId).
@@ -176,20 +208,34 @@ public class StorefrontService {
 //            }
 //            Member worker = (Member) object;
 
-            if(storefrontDTO==null||StringUtils.isEmpty(storefrontDTO.getId()))
+            if(storefrontDTO==null||StringUtils.isEmpty(storefrontDTO.getUserId()))
             {
-                return ServerResponse.createByErrorMessage("店铺商品ID不能为空");
+                return ServerResponse.createByErrorMessage("用户编号不能为空");
             }
+            if(storefrontDTO==null||StringUtils.isEmpty(storefrontDTO.getCityId()))
+            {
+                return ServerResponse.createByErrorMessage("城市编号不能为空");
+            }
+            Example example = new Example(Storefront.class);
+            example.createCriteria().andEqualTo(Storefront.USER_ID, storefrontDTO.getUserId()).andEqualTo(Storefront.CITY_ID, storefrontDTO.getCityId());
 
             Storefront storefront=new Storefront();
-            BeanUtils.copyProperties(storefront,storefrontDTO);
+            storefront.setUserId(storefrontDTO.getUserId());
+            storefront.setCityId(storefrontDTO.getCityId());
+            storefront.setStorefrontName(storefrontDTO.getStorefrontName());
+            storefront.setStorefrontAddress(storefrontDTO.getStorefrontAddress());
+            storefront.setStorefrontDesc(storefrontDTO.getStorefrontDesc());
+            storefront.setStorefrontLogo(storefrontDTO.getStorefrontLogo());
+            storefront.setStorekeeperName(storefrontDTO.getStorekeeperName());
+            storefront.setMobile(storefrontDTO.getMobile());
+            storefront.setEmail(storefrontDTO.getEmail());
             storefront.setCreateDate(null);
-            int i = istorefrontMapper.updateByPrimaryKey(storefront);
-            if (i > 0) {
-                return ServerResponse.createBySuccessMessage("修改成功!");
-            } else {
+            storefront.setId(null);
+            int i = istorefrontMapper.updateByExample(storefront,example);
+            if (i <= 0) {
                 return ServerResponse.createByErrorMessage("修改失败!");
             }
+            return ServerResponse.createBySuccessMessage("修改成功!");
         } catch (Exception e) {
             logger.error("修改失败：", e);
             return ServerResponse.createByErrorMessage("修改失败");

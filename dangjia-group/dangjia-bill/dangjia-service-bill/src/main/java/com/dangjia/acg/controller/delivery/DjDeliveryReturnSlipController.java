@@ -36,8 +36,8 @@ public class DjDeliveryReturnSlipController implements DjDeliveryReturnSlipAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse querySupplierSettlementManagement(HttpServletRequest request, String userId, String cityId, PageDTO pageDTO, Integer applyState) {
-        return djDeliveryReturnSlipService.querySupplierSettlementManagement(userId,cityId,pageDTO,applyState);
+    public ServerResponse querySupplierSettlementManagement(HttpServletRequest request, String userId, String cityId, PageDTO pageDTO, Integer applyState, String searchKey) {
+        return djDeliveryReturnSlipService.querySupplierSettlementManagement(userId,cityId,pageDTO,applyState,searchKey);
     }
 
     @Override
@@ -70,4 +70,39 @@ public class DjDeliveryReturnSlipController implements DjDeliveryReturnSlipAPI {
         return djDeliveryReturnSlipService.querySupplierStoreDimensionList(pageDTO, userId,cityId, searchKey);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse querySupplierStoreDimensionDetailList(HttpServletRequest request, PageDTO pageDTO,String supId, String shopId, String searchKey, String cityId) {
+        return djDeliveryReturnSlipService.querySupplierStoreDimensionDetailList(pageDTO,supId,shopId,searchKey,cityId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse supplierDimension(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String searchKey) {
+        return djDeliveryReturnSlipService.supplierDimension(pageDTO,userId,cityId,searchKey);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse storefrontProductDimension(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String searchKey) {
+        return djDeliveryReturnSlipService.storefrontProductDimension(pageDTO,userId,cityId,searchKey);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse sellerDimension(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String searchKey) {
+        return djDeliveryReturnSlipService.sellerDimension(pageDTO,userId,cityId,searchKey);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse supplyDetails(HttpServletRequest request, PageDTO pageDTO, String supId, String houseId, String searchKey, String cityId) {
+        return djDeliveryReturnSlipService.supplyDetails(pageDTO,supId,houseId,searchKey,cityId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse shippingDetails(HttpServletRequest request, PageDTO pageDTO, String supId, String houseId, String searchKey, String cityId) {
+        return djDeliveryReturnSlipService.shippingDetails(pageDTO,supId,houseId,searchKey,cityId);
+    }
 }

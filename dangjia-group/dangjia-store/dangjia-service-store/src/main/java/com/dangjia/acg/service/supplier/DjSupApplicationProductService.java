@@ -83,6 +83,30 @@ public class DjSupApplicationProductService {
         }
     }
 
+    /**
+     * 查询已供商品
+     * @param supId
+     * @param shopId
+     * @return
+     */
+    public Integer queryHaveGoodsSize(String supId, String shopId,String applicationStatus) {
+        try {
+            List<DjSupSupplierProductDTO> list = djSupSupplierProductMapper.queryHaveGoods(supId, shopId,applicationStatus);
+            if(list!=null)
+            {
+                return list.size();
+            }
+            else
+            {
+                return 0;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 
     /**
      * 查询已供商品
@@ -216,7 +240,7 @@ public class DjSupApplicationProductService {
             djSupApplicationProduct.setId(null);
             djSupApplicationProduct.setCreateDate(null);
             djSupApplicationProduct.setApplicationStatus("2");
-            int i=djSupApplicationProductMapper.updateByExample(djSupApplicationProduct,example);
+            int i=djSupApplicationProductMapper.updateByExampleSelective(djSupApplicationProduct,example);
             if (i<=0)
             {
                 return ServerResponse.createBySuccessMessage("全部打回失败");
@@ -248,15 +272,15 @@ public class DjSupApplicationProductService {
             djSupApplicationProduct.setId(null);
             djSupApplicationProduct.setCreateDate(null);
             djSupApplicationProduct.setApplicationStatus("1");
-            int i=djSupApplicationProductMapper.updateByExample(djSupApplicationProduct,example);
+            int i=djSupApplicationProductMapper.updateByExampleSelective(djSupApplicationProduct,example);
             if (i<=0)
             {
-                return ServerResponse.createByErrorMessage("店铺-审核供货列表-部分不通过");
+                return ServerResponse.createByErrorMessage("审核供货列表不通过");
             }
-            return ServerResponse.createBySuccessMessage("店铺-审核供货列表-部分通过成功");
+            return ServerResponse.createBySuccessMessage("审核供货列表通过");
         } catch (Exception e) {
             e.printStackTrace();
-            return ServerResponse.createByErrorMessage("店铺-审核供货列表-部分通过失败");
+            return ServerResponse.createByErrorMessage("审核供货列表异常");
         }
     }
 
@@ -284,7 +308,7 @@ public class DjSupApplicationProductService {
      * @param shopId
      * @return
      */
-    public ServerResponse queryNotForTheGoods(String supId, String shopId) {
+    public ServerResponse queryNotForTheGoods(String supId, String shopId,PageDTO pageDTO) {
         try {
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             List<DjSupSupplierProductDTO> djSupSupplierProductDTOS = djSupSupplierProductMapper.queryHaveGoods(supId, shopId, "1");
@@ -292,6 +316,7 @@ public class DjSupApplicationProductService {
             List<String> productIds = djSupSupplierProductDTOS.stream()
                     .map(DjSupSupplierProductDTO::getProductId)
                     .collect(Collectors.toList());
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<DjSupSupplierProductDTO> djSupSupplierProductDTOS1 = djSupSupplierProductMapper.queryNotForTheGoods(supId, productIds);
             djSupSupplierProductDTOS1.forEach(djSupSupplierProductDTO -> {
                 djSupSupplierProductDTO.setImage(imageAddress+djSupSupplierProductDTO.getImage());
@@ -299,7 +324,8 @@ public class DjSupApplicationProductService {
             if (djSupSupplierProductDTOS1.size() <= 0) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
-            return ServerResponse.createBySuccess("查询成功",djSupSupplierProductDTOS1);
+            PageInfo pageResult = new PageInfo(djSupSupplierProductDTOS1);
+            return ServerResponse.createBySuccess("查询成功",pageResult);
         } catch (Exception e) {
             logger.error("查询失败",e);
             return ServerResponse.createByErrorMessage("查询失败"+e);

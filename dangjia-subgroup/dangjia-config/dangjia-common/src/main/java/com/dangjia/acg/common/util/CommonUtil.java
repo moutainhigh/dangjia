@@ -1,7 +1,7 @@
 package com.dangjia.acg.common.util;
 
 import com.alibaba.fastjson.JSON;
-import org.apache.commons.beanutils.PropertyUtilsBean;
+import com.google.common.math.DoubleMath;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.shiro.web.session.HttpServletSession;
@@ -9,7 +9,6 @@ import org.apache.shiro.web.session.HttpServletSession;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.beans.PropertyDescriptor;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.net.InetAddress;
@@ -475,4 +474,101 @@ public class CommonUtil {
     }
     return valueLength;
   }
+
+  /**
+   * 计算可退搬运费
+   * @param price 单价
+   * @param shopCount 购买总数
+   * @param returnCount 退货数量
+   * @param transportationCost  购买时运费
+   * @deprecated  计算规则为可退运费=(可退价钱/购买总价)*购买时总运费,四舍五入
+   * @return
+   */
+  public static Double getReturnRransportationCost(Double price, Double shopCount, Double returnCount, Double transportationCost){
+    Double returnTotalPrice=MathUtil.mul(price,returnCount);//可退价钱
+    Double totalPrice=MathUtil.mul(price,shopCount);//购买总价
+    Double returnRransportationCost=MathUtil.mul(MathUtil.div(returnTotalPrice,totalPrice),transportationCost);
+    return new Long(Math.round(returnRransportationCost)).doubleValue();
+  }
+
+  /**
+   * 计算可退搬运费
+   * @param elevator 是否电梯房（1是，0否）
+   * @param floor 电梯楼层
+   * @param isUpstairsCost 是否按1层收取上楼费(1是，0否）
+   * @param moveCost 每层搬运费
+   * @param returnCount 退货量
+   * @deprecated 1.先判断是否按1层收取上楼费
+   *             1.1若为否，则判断是否为电梯房
+   *             1.2若为否，则楼层数设置为实际楼层数，
+   *             1.3若都不为否，则楼层数设为1
+   *            可退搬运费=楼层数*每层搬运费*退货量
+   * @return
+   */
+  public static Double getReturnStevedorageCost(int elevator,String floor,String isUpstairsCost,Double moveCost,Double returnCount){
+      Double floorCount=1.0;//楼层数
+      if("0".equals(isUpstairsCost)){//判断是否按1层收取上楼费，若为否
+           if(elevator==0){//若不为电梯房，则楼层数设置为实际楼层数
+             if(StringUtils.isNotBlank(floor)){
+               floorCount=new Double(floor).doubleValue();
+             }
+           }
+      }
+      return MathUtil.mul(MathUtil.mul(floorCount,moveCost),returnCount);
+  }
+
+  /**
+   * 等待时间值查询
+   * @param nodeCode
+   * @return
+   */
+  public static String getParayKey(String nodeCode){
+    String parayKey="";
+    switch (nodeCode){
+      case "RA_001" :
+      case "RA_002" :
+        parayKey="RETURN_MERCHANT_PROCESS_TIME";//店铺申请等待商家处理时间（单位H）
+        break;
+      case "RA_004":
+        parayKey="RETURN_PLATFORM_INTERVENTION_TIME";//店铺拒绝退货，等待申请平台介入时间（单位H）
+        break;
+      case "RA_005":
+        parayKey="RETURN_PLATFORM_PROCESS_TIME";//业主申诉后，等待平台处理时间（单位H）
+        break;
+      default:
+        break;
+    }
+    return parayKey;
+  }
+
+
+  /**
+   * 退货单中的状态显示
+   * @param state
+   * @return
+   */
+  public static String getStateName(String state){
+    //（0生成中,1处理中,2不通过取消,3已通过,4已全部结算,5已撤回）
+    String stateName="";
+    switch (state){
+      case "1" :
+        stateName="退款待处理";
+        break;
+      case "2":
+        stateName="已拒绝退款";
+        break;
+      case "3":
+      case "4":
+        stateName="退款成功";
+        break;
+      case "5":
+      case "6":
+        stateName="退款关闭";
+        break;
+      default:
+        break;
+    }
+    return stateName;
+  }
+
 }

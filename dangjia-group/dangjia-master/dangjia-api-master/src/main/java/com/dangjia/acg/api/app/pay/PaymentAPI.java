@@ -52,7 +52,7 @@ public interface PaymentAPI {
     ServerResponse getPaymentOrder(@RequestParam("userToken") String userToken,
                                    @RequestParam("houseId") String houseId,
                                    @RequestParam("taskId") String taskId,
-                                   @RequestParam("type") int type);
+                                   @RequestParam("type") Integer type);
 
     @PostMapping("app/pay/payment/order")
     @ApiOperation(value = "支付页面接口(通用)", notes = "支付页面接口(通用)")
@@ -65,5 +65,22 @@ public interface PaymentAPI {
     ServerResponse getPaymentPage(@RequestParam("userToken") String userToken,
                                   @RequestParam("houseId") String houseId,
                                   @RequestParam("taskId") String taskId,
-                                  @RequestParam("type") int type);
+                                  @RequestParam("cityId") String cityId,
+                                  @RequestParam("type") Integer type);
+
+    @PostMapping("app/order/generate/shop")
+    @ApiOperation(value = "购物车提交订单接口", notes = "购物车提交订单接口")
+    ServerResponse generateOrder(@RequestParam("userToken") String userToken,
+                                 @RequestParam("cityId") String cityId,
+                                 @RequestParam("houseId") String houseId,
+                                 @RequestParam("workerId") String workerId,
+                                 @RequestParam("addressId") String addressId);
+
+
+    @PostMapping("app/order/generate/budget")
+    @ApiOperation(value = "精算提交订单接口", notes = "精算提交订单接口")
+    ServerResponse generateBudgetOrder(@RequestParam("userToken") String userToken,
+                                       @RequestParam("cityId") String cityId,
+                                       @RequestParam("houseFlowId") String houseFlowId,
+                                       @RequestParam("addressId") String addressId);
 }

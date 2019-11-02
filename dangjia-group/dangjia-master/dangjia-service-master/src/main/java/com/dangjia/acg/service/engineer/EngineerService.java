@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.engineer;
 
+import com.dangjia.acg.api.BasicsStorefrontAPI;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
@@ -14,6 +15,7 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.engineer.ArtisanDTO;
 import com.dangjia.acg.dto.house.WareDTO;
 import com.dangjia.acg.dto.repair.RepairMendDTO;
+import com.dangjia.acg.dto.storefront.StorefrontDTO;
 import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.design.IHouseStyleTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
@@ -96,6 +98,10 @@ public class EngineerService {
 
     @Autowired
     private RedisClient redisClient;
+
+    @Autowired
+    private BasicsStorefrontAPI basicsStorefrontAPI;
+
     /**
      * 已支付换工匠
      */
@@ -823,11 +829,14 @@ public class EngineerService {
         }
     }
 
-    public ServerResponse getWareHouse( HttpServletRequest request,String houseId, PageDTO pageDTO) {
-        String userID = request.getParameter(Constants.USERID);
+    public ServerResponse getWareHouse( HttpServletRequest request,String cityId,String houseId, PageDTO pageDTO) {
+        String userID = request.getParameter("userId");
         //通过缓存查询店铺信息
-        Storefront storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userID,Storefront.class);
-
+        Storefront storefront= basicsStorefrontAPI.queryStorefrontByUserID(userID,cityId);
+        if(storefront==null)
+        {
+            return ServerResponse.createByErrorMessage("不存在店铺信息");
+        }
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         Example example = new Example(Warehouse.class);
         example.createCriteria().andEqualTo(Warehouse.HOUSE_ID, houseId).andEqualTo(Warehouse.STOREFRONT_ID,storefront.getId());

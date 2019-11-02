@@ -6,19 +6,16 @@ import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.delivery.DjDeliveryReturnSlipDetailsDTO;
-import com.dangjia.acg.dto.delivery.DjDeliveryReturnSlipDetailsProductDTO;
-import com.dangjia.acg.dto.storefront.StorefrontProductListDTO;
+import com.dangjia.acg.dto.delivery.DjDeliveryReturnSlipDetailsListDTO;
 import com.dangjia.acg.mapper.delivery.DjDeliveryReturnSlipDetailsMapper;
 import com.dangjia.acg.mapper.delivery.DjDeliveryReturnSlipMapper;
-import com.dangjia.acg.modle.delivery.DjDeliveryReturnSlipDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import tk.mybatis.mapper.entity.Example;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Created with IntelliJ IDEA.
@@ -81,7 +78,7 @@ public class DjDeliveryReturnSlipDetailsService {
 //    }
 
 
-    public ServerResponse queryTaskDetails(String splitId, Integer invoiceType) {
+    public ServerResponse queryTaskDetails(String houseId,String number,String splitId, Integer invoiceType) {
         try {
             String imageaddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             List<DjDeliveryReturnSlipDetailsDTO> djDeliveryReturnSlipDetailsDTOS=null;
@@ -90,16 +87,29 @@ public class DjDeliveryReturnSlipDetailsService {
             }else {
                 djDeliveryReturnSlipDetailsDTOS = djDeliveryReturnSlipDetailsMapper.queryRepairOrderInformation(splitId);
             }
+            DjDeliveryReturnSlipDetailsListDTO djDeliveryReturnSlipDetailsListDTO=new DjDeliveryReturnSlipDetailsListDTO();
+            DjDeliveryReturnSlipDetailsListDTO djDeliveryReturnSlipDetailsListDTO1 = djDeliveryReturnSlipDetailsMapper.queryWorkerInfByHouseId(houseId);
+            if(djDeliveryReturnSlipDetailsListDTO1==null)
+                return ServerResponse.createByErrorMessage("房子信息不存在");
+            djDeliveryReturnSlipDetailsListDTO.setWorkerName(djDeliveryReturnSlipDetailsListDTO1.getWorkerName());
+            djDeliveryReturnSlipDetailsListDTO.setWorkerMobile(djDeliveryReturnSlipDetailsListDTO1.getWorkerMobile());
+            DjDeliveryReturnSlipDetailsListDTO djDeliveryReturnSlipDetailsListDTO2 = djDeliveryReturnSlipDetailsMapper.queryMemberInfByHouseId(houseId);
+            if(djDeliveryReturnSlipDetailsListDTO2==null)
+                return ServerResponse.createByErrorMessage("房子信息不存在");
+            djDeliveryReturnSlipDetailsListDTO.setMemberId(djDeliveryReturnSlipDetailsListDTO2.getMemberId());
+            djDeliveryReturnSlipDetailsListDTO.setName(djDeliveryReturnSlipDetailsListDTO2.getName());
+            djDeliveryReturnSlipDetailsListDTO.setMobile(djDeliveryReturnSlipDetailsListDTO2.getMobile());
             djDeliveryReturnSlipDetailsDTOS.forEach(djDeliveryReturnSlipDetailsDTO -> {
-                DjDeliveryReturnSlipDetailsDTO djDeliveryReturnSlipDetailsDTO1 = djDeliveryReturnSlipDetailsMapper.queryWorkerInfByHouseId(djDeliveryReturnSlipDetailsDTO.getHouseId());
-                djDeliveryReturnSlipDetailsDTO.setWorkerName(djDeliveryReturnSlipDetailsDTO1.getWorkerName());
-                djDeliveryReturnSlipDetailsDTO.setWorkerMobile(djDeliveryReturnSlipDetailsDTO1.getWorkerMobile());
                 djDeliveryReturnSlipDetailsDTO.setImage(imageaddress+djDeliveryReturnSlipDetailsDTO.getImage());
+                djDeliveryReturnSlipDetailsListDTO.setShipAddress(djDeliveryReturnSlipDetailsDTO.getShipAddress());
             });
-            if (djDeliveryReturnSlipDetailsDTOS.size() <= 0) {
-                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
-            }
-            return ServerResponse.createBySuccess("查询成功", djDeliveryReturnSlipDetailsDTOS);
+            Double sumPrice = djDeliveryReturnSlipDetailsDTOS.stream().filter
+                    (a -> a.getTotalPrice()!=null).mapToDouble
+                    (DjDeliveryReturnSlipDetailsDTO::getTotalPrice).sum();
+            djDeliveryReturnSlipDetailsListDTO.setNumber(number);
+            djDeliveryReturnSlipDetailsListDTO.setSumPrice(sumPrice);
+            djDeliveryReturnSlipDetailsListDTO.setDjDeliveryReturnSlipDetailsDTOS(djDeliveryReturnSlipDetailsDTOS);
+            return ServerResponse.createBySuccess("查询成功", djDeliveryReturnSlipDetailsListDTO);
         } catch (Exception e) {
             logger.error("查询失败", e);
             return ServerResponse.createByErrorMessage("查询失败" + e);

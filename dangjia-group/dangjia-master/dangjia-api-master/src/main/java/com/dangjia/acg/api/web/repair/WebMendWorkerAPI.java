@@ -26,6 +26,7 @@ public interface WebMendWorkerAPI {
                                    @RequestParam("pageDTO") PageDTO pageDTO,
                                    @RequestParam("beginDate") String beginDate,
                                    @RequestParam("endDate") String endDate,
+                                   @RequestParam("state") String state,
                                    @RequestParam("likeAddress") String likeAddress);
 
     @PostMapping(value = "web/repair/webMendWorker/mendWorkerList")
@@ -40,5 +41,6 @@ public interface WebMendWorkerAPI {
             @RequestParam("pageDTO") PageDTO pageDTO,
             @RequestParam("beginDate") String beginDate,
             @RequestParam("endDate") String endDate,
+            @RequestParam("state") String state,
             @RequestParam("likeAddress") String likeAddress);
 }

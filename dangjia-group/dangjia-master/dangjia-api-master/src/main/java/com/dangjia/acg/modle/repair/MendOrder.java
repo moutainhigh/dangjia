@@ -63,8 +63,8 @@ public class MendOrder extends BaseEntity {
 	private String applyMemberId;
 
 	@Column(name = "type")
-	@Desc(value = "0:补材料;1:补人工;2:退材料(剩余材料登记);3:退人工,4:业主退材料")
-	@ApiModelProperty("0:补材料;1:补人工;2:退材料(剩余材料登记);3:退人工,4:业主退材料")
+	@Desc(value = "类型：（0:补材料;1:补人工;2:退材料(剩余材料登记);3:退人工,4:业主退材料）;5业主退货退款")
+	@ApiModelProperty("类型：（0:补材料;1:补人工;2:退材料(剩余材料登记);3:退人工,4:业主退材料）;5业主退货退款")
 	private Integer type;
 
 	@Column(name = "state")
@@ -82,6 +82,11 @@ public class MendOrder extends BaseEntity {
 	@ApiModelProperty("运费")
 	private Double carriage;
 
+	@Column(name = "total_stevedorage_cost")
+	@Desc(value = "搬运费")
+	@ApiModelProperty("搬运费")
+	private Double totalStevedorageCost;
+
 
 	@Column(name = "actual_total_amount")
 	@Desc(value = "实际总价（不含运费）")
@@ -93,5 +98,15 @@ public class MendOrder extends BaseEntity {
 	@Desc(value = "店铺ID")
 	@ApiModelProperty("店铺ID")
 	private String storefrontId;
+
+	@Column(name = "address_id")
+	@Desc(value = "地址ID")
+	@ApiModelProperty("地址ID")
+	private String addressId;
+
+	@Column(name = "order_id")
+	@Desc(value = "订单ID")
+	@ApiModelProperty("订单ID")
+	private String orderId;
 
 }

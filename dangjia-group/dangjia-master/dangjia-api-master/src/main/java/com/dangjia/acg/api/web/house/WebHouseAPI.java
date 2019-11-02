@@ -60,8 +60,8 @@ public interface WebHouseAPI {
     @ApiOperation(value = "取消订单", notes = "取消订单")
     ServerResponse calcelOrder(@RequestParam("request") HttpServletRequest request,
                              @RequestParam("houseId") String houseId,
-                             @RequestParam("userToken")String userToken,
-                             @RequestParam("userId")String userId);
+                             @RequestParam("userToken") String userToken,
+                             @RequestParam("user_id") String user_id);
 
     @PostMapping("web/house/setHouseInfo")
     @ApiOperation(value = "修改房子工序顺序以及选配标签", notes = "修改房子工序顺序以及选配标签")
@@ -83,7 +83,7 @@ public interface WebHouseAPI {
     /**
      * 根据房子装修状态查询所有的房子
      *
-     * @param visitState 0待确认开工,1装修中,2休眠中,3已完工
+     * @param visitState 0待确认开工,1装修中,2休眠中,3已完工，4已取消
      * @return
      */
     @PostMapping("web/house/getAllHouseByVisitState")

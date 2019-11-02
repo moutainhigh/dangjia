@@ -1,7 +1,7 @@
 package com.dangjia.acg.modle.product;
 
 import com.dangjia.acg.common.annotation.Desc;
-import com.dangjia.acg.common.model.BaseEntity;
+import com.dangjia.acg.modle.GoodsBaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -23,7 +23,7 @@ import javax.persistence.Transient;
 @Table(name = "dj_basics_goods_category")
 @ApiModel(description = "商品类别")
 @FieldNameConstants(prefix = "")
-public class BasicsGoodsCategory extends BaseEntity {
+public class BasicsGoodsCategory extends GoodsBaseEntity {
 
 	@Column(name = "parent_id")
     private String parentId;//上级id

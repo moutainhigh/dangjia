@@ -1,7 +1,7 @@
 package com.dangjia.acg.dto.product;
 
 import com.dangjia.acg.common.annotation.ExcelField;
-import com.dangjia.acg.common.model.BaseEntity;
+import com.dangjia.acg.modle.GoodsBaseEntity;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
 
@@ -14,7 +14,7 @@ import java.util.List;
  */
 @Data
 @FieldNameConstants(prefix = "")
-public class BasicsProductDTO extends BaseEntity {
+public class BasicsProductDTO extends GoodsBaseEntity {
 
     private String id;
 
@@ -103,7 +103,7 @@ public class BasicsProductDTO extends BaseEntity {
     private String isAgencyPurchase;//是否为代买（1是，0否）
 
 
-
+    private String cityId;//
 
 
 }

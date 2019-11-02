@@ -35,7 +35,8 @@ public interface ServerPortAPI {
     //查询热门搜索
     @PostMapping("/actuary/serverPort/getHeatSearchBox")
     @ApiOperation(value = "查询热门搜索", notes = "查询热门搜索")
-    ServerResponse getHeatSearchBox(@RequestParam("request") HttpServletRequest request);
+    ServerResponse getHeatSearchBox(@RequestParam("request") HttpServletRequest request,
+                                    @RequestParam("cityId") String cityId);
 
 
     @PostMapping("serverPort/getBudgetMaterialList")

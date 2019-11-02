@@ -1,5 +1,8 @@
 package com.dangjia.acg.mapper.delivery;
 
+import com.dangjia.acg.dto.actuary.BudgetLabelDTO;
+import com.dangjia.acg.dto.actuary.BudgetLabelGoodsDTO;
+import com.dangjia.acg.dto.actuary.ShopGoodsDTO;
 import com.dangjia.acg.modle.deliver.OrderItem;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -19,5 +22,10 @@ public interface IOrderItemMapper extends Mapper<OrderItem> {
                                   @Param("name")String name);
 
     List<OrderItem> byOrderIdList(@Param("orderId")String orderId);
+
+
+    List<ShopGoodsDTO> queryShopGoods(@Param("orderId")String orderId);
+    List<BudgetLabelDTO>  queryBudgetLabel(@Param("orderId")String orderId ,@Param("storefontId")String storefontId);
+    List<BudgetLabelGoodsDTO>  queryBudgetLabelGoods(@Param("orderId")String orderId ,@Param("storefontId")String storefontId);
 
 }

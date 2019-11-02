@@ -94,5 +94,21 @@ public class Storefront extends BaseEntity {
     @ApiModelProperty("  联系邮件")
     private String email;
 
+    /**
+     * 其他设置(收取运费)
+     */
+    @Column(name = "freight")
+    @Desc(value = "  其他设置(收取运费)")
+    @ApiModelProperty("  其他设置(收取运费)")
+    private String freight;
+
+
+    /**
+     * 其他设置(每单价格低于)
+     */
+    @Column(name = "below_unit_price")
+    @Desc(value = "  其他设置(每单价格低于)")
+    @ApiModelProperty("  其他设置(每单价格低于)")
+    private String belowUnitPrice;
 
 }

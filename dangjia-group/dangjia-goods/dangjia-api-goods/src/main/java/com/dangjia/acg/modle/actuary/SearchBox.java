@@ -1,6 +1,6 @@
 package com.dangjia.acg.modle.actuary;
 
-import com.dangjia.acg.common.model.BaseEntity;
+import com.dangjia.acg.modle.GoodsBaseEntity;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
@@ -15,7 +15,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "dj_actuary_search_box")
 @ApiModel(description = "搜索记录")
-public class SearchBox extends BaseEntity{
+public class SearchBox extends GoodsBaseEntity{
 	@Column(name = "content")
 	private String content;//内容
 

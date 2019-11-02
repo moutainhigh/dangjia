@@ -24,15 +24,21 @@ public class MemberCollect extends BaseEntity {
     private String memberId;
 
 
-    @Column(name = "house_id")
-    @Desc(value = "房子ID")
-    @ApiModelProperty("房子ID")
-    private String houseId;
+    @Column(name = "collect_id")
+    @Desc(value = "房子ID或者商品ID")
+    @ApiModelProperty("房子ID或者商品ID")
+    private String collectId;
 
 
     @Column(name = "condition_type")
     @Desc(value = "收藏类型,0:代表收藏房子 1：代表收藏商品")
     @ApiModelProperty("收藏类型")
     private String conditionType;
+
+    @Column(name = "storefront_id")
+    @Desc(value = "店铺id")
+    @ApiModelProperty("店铺id")
+    private String storefrontId;
+
 
 }

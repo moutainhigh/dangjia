@@ -1,7 +1,7 @@
 package com.dangjia.acg.modle.actuary;
 
 import com.dangjia.acg.common.annotation.Desc;
-import com.dangjia.acg.common.model.BaseEntity;
+import com.dangjia.acg.modle.GoodsBaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -21,7 +21,7 @@ import javax.persistence.Table;
 @Table(name = "dj_actuarial_template_config")
 @ApiModel(description = "设计阶段模板配置")
 @FieldNameConstants(prefix = "")
-public class DjActuarialTemplateConfig extends BaseEntity {
+public class DjActuarialTemplateConfig extends GoodsBaseEntity {
 
     @Column(name = "config_name")
     @Desc(value = "阶段名称")
@@ -42,6 +42,13 @@ public class DjActuarialTemplateConfig extends BaseEntity {
     @Desc(value = "精算Excel上传后的文件名")
     @ApiModelProperty("精算Excel上传后的文件名")
     private String excelFileName;
+
+
+
+    @Column(name = "config_detail")
+    @Desc(value = "描述")
+    @ApiModelProperty("描述")
+    private String configDetail;
 
     @Column(name = "create_by")
     @Desc(value = "创建人")

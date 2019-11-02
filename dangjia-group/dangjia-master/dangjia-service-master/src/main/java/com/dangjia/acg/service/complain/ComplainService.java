@@ -3,7 +3,9 @@ package com.dangjia.acg.service.complain;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.data.ForMasterAPI;
+import com.dangjia.acg.api.refund.RefundAfterSalesAPI;
 import com.dangjia.acg.api.sup.SupplierProductAPI;
+import com.dangjia.acg.api.supplier.DjSupplierAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
@@ -42,7 +44,7 @@ import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
-import com.dangjia.acg.modle.sup.Supplier;
+import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.modle.worker.RewardPunishCondition;
 import com.dangjia.acg.modle.worker.RewardPunishRecord;
@@ -81,7 +83,7 @@ public class ComplainService {
     @Autowired
     private IWorkerTypeMapper iWorkerTypeMapper;
     @Autowired
-    private SupplierProductAPI supplierProductAPI;
+    private RefundAfterSalesAPI refundAfterSalesAPI;
     @Autowired
     private UserMapper userMapper;
     @Autowired
@@ -109,6 +111,9 @@ public class ComplainService {
 
     @Autowired
     private ForMasterAPI forMasterAPI;
+
+    @Autowired
+    private DjSupplierAPI djSupplierAPI;
     /**
      * 添加申诉
      *
@@ -160,11 +165,11 @@ public class ComplainService {
         complain.setFiles(files);
 //        1:工匠被处罚后不服.2：业主要求整改.3：要求换人.4:部分收货申诉.
         if (complainType == 4) {
-            Supplier supplier = supplierProductAPI.getSupplier(house.getCityId(),complain.getUserId());
-            if (supplier != null) {
-                complain.setUserMobile(supplier.getTelephone());
-                complain.setUserName(supplier.getName());
-                complain.setUserNickName("供应商-" + supplier.getCheckPeople());
+            DjSupplier djSupplier = djSupplierAPI.queryDjSupplierByPass(complain.getUserId());
+            if (djSupplier != null) {
+                complain.setUserMobile(djSupplier.getTelephone());
+                complain.setUserName(djSupplier.getName());
+                complain.setUserNickName("供应商-" + djSupplier.getCheckPeople());
             }
         } else {
             String field = "业主-";
@@ -493,6 +498,12 @@ public class ComplainService {
                         }
                         houseMapper.updateByPrimaryKeySelective(house);
                         break;
+                    case 7://业主申请退货(同意后的处理）
+                        String businessId = complain.getBusinessId();//业务订单号
+                        //修改订单状态为已同意
+                        refundAfterSalesAPI.agreeRepairApplication(businessId,userId);
+                        //将店铺的钱转到对应的业主钱包中
+                        break;
                 }
             }
         } else {
@@ -508,6 +519,10 @@ public class ComplainService {
                 house.setVisitState(1);
                 house.setModifyDate(new Date());
                 houseMapper.updateByPrimaryKeySelective(house);
+            }
+            if (complain.getComplainType() != null && complain.getComplainType() == 7) {//业主申请退货，不同意后的处理
+               //对应订单数据退回，订单流水记录生成
+                refundAfterSalesAPI.rejectRepairApplication(complain.getBusinessId(),userId);
             }
 
         }

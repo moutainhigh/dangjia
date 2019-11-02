@@ -14,4 +14,9 @@ public class StorefrontProductListDTO {
     private String productId;
     private String image;
     private String productName;
+    /**
+     * 城市ID
+     */
+    private String cityId;
+
 }

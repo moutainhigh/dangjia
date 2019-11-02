@@ -11,6 +11,7 @@ import com.dangjia.acg.service.product.BasicsGoodsCategoryService;
 import com.dangjia.acg.service.product.DjBasicsAttributeServices;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -46,8 +47,8 @@ public class BasicsGoodsCategoryController implements BasicsGoodsCategoryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getBasicsGoodsCategory(String cityId, String categoryId) {
-        return basicsGoodsCategoryService.getBasicsGoodsCategory(categoryId);
+    public ServerResponse getBasicsGoodsCategory(String categoryId,String cityId) {
+        return basicsGoodsCategoryService.getBasicsGoodsCategory(categoryId,cityId);
     }
 
     /**
@@ -67,8 +68,8 @@ public class BasicsGoodsCategoryController implements BasicsGoodsCategoryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse insertBasicsGoodsCategory(HttpServletRequest request, String name, String parentId, String parentTop, Integer sort, String isLastCategory, String purchaseRestrictions, String brandIds, String coverImage, String categoryLabelId) {
-        return basicsGoodsCategoryService.insertBasicsGoodsCategory(name, parentId, parentTop, sort, isLastCategory, purchaseRestrictions, brandIds, coverImage, categoryLabelId);
+    public ServerResponse insertBasicsGoodsCategory(HttpServletRequest request, String name, String parentId, String parentTop, Integer sort, String isLastCategory, String purchaseRestrictions, String brandIds, String coverImage, String categoryLabelId,String cityId) {
+        return basicsGoodsCategoryService.insertBasicsGoodsCategory(name, parentId, parentTop, sort, isLastCategory, purchaseRestrictions, brandIds, coverImage, categoryLabelId,cityId);
     }
 
     /**
@@ -89,8 +90,16 @@ public class BasicsGoodsCategoryController implements BasicsGoodsCategoryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse doModifyBasicsGoodsCategory(HttpServletRequest request, String id, String name, String parentId, String parentTop, Integer sort, String isLastCategory, String purchaseRestrictions, String brandIds, String coverImage, String categoryLabelId) {
-        return basicsGoodsCategoryService.doModifyBasicsGoodsCategory(id, name, parentId, parentTop, sort, isLastCategory, purchaseRestrictions, brandIds, coverImage, categoryLabelId);
+    public ServerResponse doModifyBasicsGoodsCategory(HttpServletRequest request, String id, String name,
+                                                      String parentId, String parentTop,
+                                                      Integer sort,
+                                                      String isLastCategory,
+                                                      String purchaseRestrictions,
+                                                      String brandIds, String coverImage,
+                                                      String categoryLabelId,
+                                                      String cityId) {
+        return basicsGoodsCategoryService.doModifyBasicsGoodsCategory(id, name, parentId, parentTop,
+                sort, isLastCategory, purchaseRestrictions, brandIds, coverImage, categoryLabelId,cityId);
     }
 
     /**
@@ -106,6 +115,18 @@ public class BasicsGoodsCategoryController implements BasicsGoodsCategoryAPI {
         return basicsGoodsCategoryService.queryBasicsGoodsCategory(parentId);
     }
 
+    /**
+     * 查询所有的末级分类类别
+     * @param request
+     * @param cityId
+     * @param searchKey
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryLastCategoryList(HttpServletRequest request,String cityId,String searchKey){
+        return basicsGoodsCategoryService.queryLastCategoryList(cityId,searchKey);
+    }
 
     /**
      * 根据类别id查询关联属性
@@ -114,8 +135,11 @@ public class BasicsGoodsCategoryController implements BasicsGoodsCategoryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse<PageInfo> queryBasicsGoodsAttribute(HttpServletRequest request, PageDTO pageDTO, String goodsCategoryId, String likeAttrName) {
-        return djBasicsAttributeServices.queryGoodsAttribute(pageDTO, goodsCategoryId, likeAttrName);
+    public ServerResponse<PageInfo> queryBasicsGoodsAttribute(HttpServletRequest request, PageDTO pageDTO,
+                                                              String goodsCategoryId,
+                                                              String likeAttrName,
+                                                              String cityId) {
+        return djBasicsAttributeServices.queryGoodsAttribute(pageDTO, goodsCategoryId, likeAttrName,cityId);
     }
 
     /**
@@ -125,8 +149,11 @@ public class BasicsGoodsCategoryController implements BasicsGoodsCategoryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse<PageInfo> queryGoodsAttributelikeName(HttpServletRequest request, PageDTO pageDTO, String name) {
-        return djBasicsAttributeServices.queryGoodsAttributelikeName(pageDTO, name);
+    public ServerResponse<PageInfo> queryGoodsAttributelikeName(HttpServletRequest request,
+                                                                PageDTO pageDTO,
+                                                                String name,
+                                                                String cityId) {
+        return djBasicsAttributeServices.queryGoodsAttributelikeName(pageDTO, name,cityId);
     }
 
     /**
@@ -147,8 +174,12 @@ public class BasicsGoodsCategoryController implements BasicsGoodsCategoryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse addGoodsAttribute(HttpServletRequest request, String goodsCategoryId, String attributeName, Integer type, String jsonStr, Integer isScreenConditions) {
-        return djBasicsAttributeServices.addGoodsAttribute(goodsCategoryId, attributeName, type, jsonStr, isScreenConditions);
+    public ServerResponse addGoodsAttribute(HttpServletRequest request, String goodsCategoryId,
+                                            String attributeName, Integer type, String jsonStr,
+                                            Integer isScreenConditions,
+                                            String cityId) {
+        return djBasicsAttributeServices.addGoodsAttribute(goodsCategoryId, attributeName, type,
+                jsonStr, isScreenConditions,cityId);
     }
 
     /**
@@ -158,8 +189,13 @@ public class BasicsGoodsCategoryController implements BasicsGoodsCategoryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse updateGoodsAttribute(HttpServletRequest request, String attributeId, String attributeName, Integer type, String jsonStr, Integer isScreenConditions) {
-        return djBasicsAttributeServices.updateGoodsAttribute(attributeId, attributeName, type, jsonStr, isScreenConditions);
+    public ServerResponse updateGoodsAttribute(HttpServletRequest request, String attributeId,
+                                               String attributeName, Integer type,
+                                               String jsonStr,
+                                               Integer isScreenConditions,
+                                               String cityId) {
+        return djBasicsAttributeServices.updateGoodsAttribute(attributeId, attributeName, type,
+                jsonStr, isScreenConditions,cityId);
     }
 
     /**
@@ -222,9 +258,9 @@ public class BasicsGoodsCategoryController implements BasicsGoodsCategoryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse queryBrand(HttpServletRequest request) {
+    public ServerResponse queryBrand(HttpServletRequest request,String cityId) {
 
-        return basicsGoodsCategoryService.queryBrand();
+        return basicsGoodsCategoryService.queryBrand(cityId);
     }
 
     /**
@@ -236,8 +272,8 @@ public class BasicsGoodsCategoryController implements BasicsGoodsCategoryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse queryBrandByCategoryId(HttpServletRequest request, String categoryId) {
-        return basicsGoodsCategoryService.queryBrandByCategoryId(categoryId);
+    public ServerResponse queryBrandByCategoryId(HttpServletRequest request, String categoryId,String cityId) {
+        return basicsGoodsCategoryService.queryBrandByCategoryId(categoryId,cityId);
     }
 
     /**
@@ -247,8 +283,10 @@ public class BasicsGoodsCategoryController implements BasicsGoodsCategoryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse queryGoodsCategoryExistlastCategory(HttpServletRequest request, String parentId) {
-        return basicsGoodsCategoryService.queryGoodsCategoryExistlastCategory(parentId);
+    public ServerResponse queryGoodsCategoryExistlastCategory(HttpServletRequest request,
+                                                              String parentId,
+                                                              String cityId) {
+        return basicsGoodsCategoryService.queryGoodsCategoryExistlastCategory(parentId,cityId);
     }
 
     /**

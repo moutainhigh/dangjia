@@ -1,4 +1,4 @@
-package com.dangjia.acg.modle.order;
+package com.dangjia.acg.modle.delivery;
 
 import com.dangjia.acg.common.annotation.Desc;
 import com.dangjia.acg.common.model.BaseEntity;
@@ -6,34 +6,76 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
+import org.apache.commons.lang.StringUtils;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import java.math.BigDecimal;
-import java.text.DecimalFormat;
 
-/**
- * Created with IntelliJ IDEA.
- * Date: 8/10/2019
- * Time: 下午 2:23
- */
 @Data
 @Entity
-@Table(name = "dj_order_detail")
-@ApiModel(description = "订单详情表")
+@Table(name = "dj_deliver_order_item")
+@ApiModel(description = "订单明细")
 @FieldNameConstants(prefix = "")
-public class DjOrderDetail extends BaseEntity {
+public class DjDeliverOrderItem extends BaseEntity {
 
+    @Column(name = "city_id")
+    @Desc(value = "城市id")
+    @ApiModelProperty("城市id")
+
+    private String cityId;
     @Column(name = "order_id")
     @Desc(value = "订单ID")
     @ApiModelProperty("订单ID")
-    private String orderId;//订单ID
+    private String orderId;
+
+    @Column(name = "house_id")
+    @Desc(value = "房子ID")
+    @ApiModelProperty("房子ID")
+    private String houseId;
 
     @Column(name = "product_id")
-    @Desc(value = "商品ID")
-    @ApiModelProperty("商品ID")
-    private String productId;//商品ID
+    @Desc(value = "货品id")
+    @ApiModelProperty("货品id")
+    private String productId;
+
+    @Column(name = "product_sn")
+    @Desc(value = "货品编号")
+    @ApiModelProperty("货品编号")
+    private String productSn;
+
+    @Column(name = "product_name")
+    @Desc(value = "货品名称")
+    @ApiModelProperty("货品名称")
+    private String productName;
+
+    @Column(name = "product_nick_name")
+    private String productNickName;//货品昵称
+
+    @Column(name = "price")
+    private Double price;// 销售价
+
+    @Column(name = "cost")
+    private Double cost;// 成本价
+
+    @Column(name = "shop_count")
+    private Double shopCount;//购买总数
+
+    @Column(name = "unit_name")
+    private String unitName;//单位
+
+    @Column(name = "total_price")
+    private Double totalPrice; //总价
+
+    @Column(name = "product_type")
+    private Integer productType; //0：材料；1：包工包料
+
+    @Column(name = "category_id")
+    private String categoryId;//分类id
+
+    @Column(name = "image")
+    private String image;//图片
+
 
     @Column(name = "storefont_id")
     @Desc(value = "店铺ID")
@@ -44,21 +86,6 @@ public class DjOrderDetail extends BaseEntity {
     @Desc(value = "优惠卷ID")
     @ApiModelProperty("优惠卷ID")
     private String activityRedPackId;//优惠卷ID
-
-    @Column(name = "purchase_price")
-    @Desc(value = "购买单价")
-    @ApiModelProperty("购买单价")
-    private Double purchasePrice;//购买单价
-
-    @Column(name = "purchase_number")
-    @Desc(value = "购买数量")
-    @ApiModelProperty("购买数量")
-    private Double purchaseNumber;//购买数量
-
-    @Column(name = "total_purchase_price")
-    @Desc(value = "购买总价")
-    @ApiModelProperty("购买总价")
-    private Double totalPurchasePrice;//购买总价
 
     @Column(name = "discount_price")
     @Desc(value = "优惠价钱")
@@ -80,20 +107,22 @@ public class DjOrderDetail extends BaseEntity {
     @ApiModelProperty("运费")
     private Double transportationCost;//运费
 
-    @Column(name = "required_number")
-    @Desc(value = "已要货数量")
-    @ApiModelProperty("已要货数量")
-    private Double requiredNumber;//已要货数量
 
-    @Column(name = "shipment_number")
-    @Desc(value = "已发货数量")
-    @ApiModelProperty("已发货数量")
-    private Double shipmentNumber;//已发货数量
+    @Column(name = "ask_count")
+    @Desc(value = "已要总数")
+    @ApiModelProperty("已要总数")
+    private Double askCount;
 
-    @Column(name = "order_type")
-    @Desc(value = "订单类型（1设计，2精算，3其它）")
-    @ApiModelProperty("订单类型（1设计，2精算，3其它）")
-    private String orderType;//订单类型（1设计，精算，2其它）
+    @Column(name = "return_count")
+    @Desc(value = "退货数")
+    @ApiModelProperty("退货数")
+    private Double returnCount;
+
+    @Column(name = "receive_count")
+    @Desc(value = "收货数")
+    @ApiModelProperty("收货数")
+    private Double receiveCount;
+
 
     @Column(name = "is_reservation_deliver")
     @Desc(value = "是否预约发货(1是，0否）")
@@ -120,4 +149,7 @@ public class DjOrderDetail extends BaseEntity {
     @ApiModelProperty("修改人")
     private String updateBy;//修改人
 
+    public void initPath(String address){
+        this.image = StringUtils.isEmpty(this.image)?null:address+this.image;
+    }
 }

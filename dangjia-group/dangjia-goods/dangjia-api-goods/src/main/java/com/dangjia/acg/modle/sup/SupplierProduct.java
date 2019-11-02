@@ -1,7 +1,7 @@
 package com.dangjia.acg.modle.sup;
 
 import com.dangjia.acg.common.annotation.Desc;
-import com.dangjia.acg.common.model.BaseEntity;
+import com.dangjia.acg.modle.GoodsBaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -25,7 +25,7 @@ import java.io.Serializable;
 @Table(name = "dj_sup_supplier_product")
 @ApiModel(description = "供应商关联货品表")
 @FieldNameConstants(prefix = "")
-public class SupplierProduct extends BaseEntity implements Serializable{
+public class SupplierProduct extends GoodsBaseEntity implements Serializable{
 
 	@Column(name = "product_id")
 	@Desc(value = "商品id")

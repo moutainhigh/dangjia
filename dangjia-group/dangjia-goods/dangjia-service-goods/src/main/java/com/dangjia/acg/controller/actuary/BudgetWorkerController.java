@@ -4,10 +4,9 @@ import com.alibaba.fastjson.JSONArray;
 import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.modle.actuary.BudgetWorker;
+import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.service.actuary.BudgetWorkerService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
@@ -50,7 +49,7 @@ public class BudgetWorkerController implements BudgetWorkerAPI {
     }
 
     @Override
-    public BudgetWorker getHouseBudgetWorkerId(String cityId, String houseId, String workerGoodsId) {
+    public BudgetMaterial getHouseBudgetWorkerId(String cityId, String houseId, String workerGoodsId) {
         return budgetWorkerService.getHouseBudgetWorkerId(houseId,workerGoodsId);
     }
     /**
@@ -227,11 +226,11 @@ public class BudgetWorkerController implements BudgetWorkerAPI {
 
     public boolean workerPatrolList(String cityId,
                                     String workerGoodsId){
-        return budgetWorkerService.workerPatrolList(workerGoodsId);
+        return budgetWorkerService.workerPatrolList(workerGoodsId,cityId);
     }
 
     public boolean patrolList(String cityId,
                               String workerGoodsId){
-        return budgetWorkerService.patrolList(workerGoodsId);
+        return budgetWorkerService.patrolList(workerGoodsId,cityId);
     }
 }

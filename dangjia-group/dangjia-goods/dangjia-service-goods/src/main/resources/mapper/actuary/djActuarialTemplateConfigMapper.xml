@@ -10,6 +10,7 @@
         `modify_date` AS modifyDate,
         `data_status` as dataStatus,
          excel_address as excelAddress,
+         config_detail configDetail,
          create_by as createBy,
          update_by as updateBy
     </sql>
@@ -19,6 +20,7 @@
         <result property="id" column="id"/>
         <result property="configName" column="configName"/>
         <result property="configType" column="configType"/>
+        <result property="configDetail" column="configDetail"/>
         <collection property="productList" column="{actuarialTemplateId=id}" ofType="map" select="selectProductList"/>
     </resultMap>
 
@@ -36,10 +38,12 @@
         SELECT
             id,
             config_name configName,
-            config_type configType
+            config_type configType,
+            config_detail configDetail
         FROM
             dj_actuarial_template_config ac
         where ac.config_type in(1,2)
+        and city_id=#{cityId}
         <if test="id!=null and id!=''">
             and ac.id=#{id}
         </if>
@@ -61,4 +65,79 @@
         AND t1.product_id = t3.id
         and t1.actuarial_template_id=#{actuarialTemplateId}
     </select>
+
+
+
+
+    <resultMap id="searchAppActuarialMap" type="com.dangjia.acg.dto.actuary.app.ActuarialTemplateConfigAppDTO">
+        <id property="id" column="id"/>
+        <result property="id" column="id"/>
+        <result property="configName" column="configName"/>
+        <result property="configType" column="configType"/>
+        <result property="configDetail" column="configDetail"/>
+        <collection property="productList" column="{actuarialTemplateId=id}" ofType="map" select="selectAppProductList"/>
+    </resultMap>
+
+    <resultMap id="searchAppProductMap" type="com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO">
+        <id property="id" column="id"/>
+        <result property="goodsId" column="goodsId"/>
+        <result property="productId" column="productId"/>
+        <result property="productTemplateId" column="productTemplateId"/>
+        <result property="productName" column="productName"/>
+        <result property="storefrontId" column="storefrontId"/>
+        <result property="price" column="price"/>
+        <result property="image" column="image"/>
+        <result property="productSn" column="productSn"/>
+        <result property="unit" column="unit"/>
+        <result property="unitName" column="unitName"/>
+        <result property="valueIdArr" column="valueIdArr"/>
+        <result property="valueNameArr" column="valueNameArr"/>
+        <result property="brandId" column="brandId"/>
+        <result property="isCalculatedArea" column="isCalculatedArea"/>
+        <result property="categoryId" column="categoryId"/>
+    </resultMap>
+
+    <!-- 我要装修（设计精算数据查询) -->
+    <select id="searchAppActuarialList" resultMap="searchAppActuarialMap">
+        SELECT
+        id,
+        config_name configName,
+        config_type configType,
+        config_detail configDetail
+        FROM
+        dj_actuarial_template_config ac
+        where ac.config_type in(1,2)
+        and ac.city_id=#{cityId}
+        order by configType
+    </select>
+
+    <select id="selectAppProductList" resultMap="searchAppProductMap">
+        SELECT
+            t2.id productId,
+            t2.storefront_id storefrontId,
+            t3.id productTemplateId,
+            t3.product_sn productSn,
+            t2.product_name productName,
+            t3.goods_id goodsId,
+            t2.sell_price price,
+            t3.image,
+            t3.unit_id unit,
+            t3.unit_name unitName,
+            t3.value_id_arr valueIdArr,
+            t3.value_name_arr valueNameArr,
+            t4.brand_id brandId,
+            t1.is_calculated_area isCalculatedArea,
+            t4.category_id categoryId
+        FROM
+            dj_actuarial_product_config t1,
+            dj_basics_storefront_product t2,
+            dj_basics_product_template t3,
+            dj_basics_goods t4
+        WHERE t1.product_id=t2.prod_template_id
+        and t1.product_id = t3.id
+        and t3.goods_id=t4.id
+        and t2.is_shelf_status=1
+        and t1.actuarial_template_id =#{actuarialTemplateId}
+    </select>
+
 </mapper>

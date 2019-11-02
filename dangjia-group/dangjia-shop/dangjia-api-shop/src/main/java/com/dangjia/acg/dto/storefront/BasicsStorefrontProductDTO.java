@@ -2,10 +2,12 @@ package com.dangjia.acg.dto.storefront;
 
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 @Data
 public class BasicsStorefrontProductDTO {
 
-
+   private String id;
     /**
      * 店铺表ID
      */
@@ -33,6 +35,7 @@ public class BasicsStorefrontProductDTO {
      * 上传商品图片
      */
     private String image;
+
     /**
      * 上传商品详情图
      */
@@ -46,12 +49,12 @@ public class BasicsStorefrontProductDTO {
     /**
      * 销售价格
      */
-    private String sellPrice;
+    private Double sellPrice;
 
     /**
      * 供货数量
      */
-    private String suppliedNum;
+    private Double suppliedNum;
 
     /**
      * 师傅是否按一层收取上楼费
@@ -66,11 +69,17 @@ public class BasicsStorefrontProductDTO {
     /**
      * 搬运费
      */
-    private String moveCost;
+    private BigDecimal moveCost;
 
     /**
      * 是否上架
      */
     private String isShelfStatus;
+
+
+    /**
+     * 城市id
+     */
+    private String cityId;
 
 }

@@ -59,6 +59,13 @@ public class DjRegisterApplicationServices {
     private ICityMapper iCityMapper;
     @Autowired
     private IJobMapper jobMapper;
+
+
+    public String getUserIdExamine(String userId )
+    {
+        return djRegisterApplicationMapper.getUserIdExamine(userId);
+    }
+
     /**
      * 供应商/店铺注册
      * @param djRegisterApplication
@@ -271,8 +278,8 @@ public class DjRegisterApplicationServices {
                     .andEqualTo(DjRegisterApplication.MOBILE,mainUser.getMobile())
                     .andNotEqualTo(DjRegisterApplication.APPLICATION_STATUS,2);
             djRegisterApplications = djRegisterApplicationMapper.selectByExample(example);
-            if(djRegisterApplication.getApplicationType().equals("2")&&CommonUtil.isEmpty(djRegisterApplication.getBusinessLicense()))
-                return ServerResponse.createByErrorMessage("营业执照不能为空");
+            if(djRegisterApplications.size()<=0)
+                return ServerResponse.createByErrorMessage("暂无店铺供应商信息,请先注册");
             djRegisterApplication.setUserName(djRegisterApplications.get(0).getUserName());
             djRegisterApplication.setPassWord(djRegisterApplications.get(0).getPassWord());
             djRegisterApplication.setName(djRegisterApplications.get(0).getName());

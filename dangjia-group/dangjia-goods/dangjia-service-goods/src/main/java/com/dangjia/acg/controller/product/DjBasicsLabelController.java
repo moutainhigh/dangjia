@@ -22,14 +22,16 @@ public class DjBasicsLabelController implements DjBasicsLabelAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse addCommodityLabels(HttpServletRequest request, String labelName, String labelValue) {
-        return djBasicsLabelService.addCommodityLabels(labelName, labelValue);
+    public ServerResponse addCommodityLabels(HttpServletRequest request, String labelName,
+                                             String labelValue,String cityId) {
+        return djBasicsLabelService.addCommodityLabels(labelName, labelValue,cityId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse updateCommodityLabels(HttpServletRequest request, String id, String labelName, String labelValue) {
-        return djBasicsLabelService.updateCommodityLabels(id, labelName, labelValue);
+    public ServerResponse updateCommodityLabels(HttpServletRequest request, String id,
+                                                String labelName, String labelValue,String cityId) {
+        return djBasicsLabelService.updateCommodityLabels(id, labelName, labelValue,cityId);
     }
 
     @Override

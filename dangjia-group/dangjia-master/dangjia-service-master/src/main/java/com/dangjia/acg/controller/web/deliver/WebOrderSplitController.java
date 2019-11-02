@@ -22,8 +22,6 @@ public class WebOrderSplitController implements WebOrderSplitAPI {
     @Autowired
     private OrderSplitService orderSplitService;//生成发货单
 
-    @Autowired
-    private RedisClient redisClient;
 
     /**
      * 供应商发货
@@ -75,9 +73,9 @@ public class WebOrderSplitController implements WebOrderSplitAPI {
     @ApiMethod
     public ServerResponse sentSupplier(String orderSplitId, String splitItemList, String installName
             , String installMobile
-            , String deliberyName
+            , String deliveryName
             , String deliveryMobile) {
-        return orderSplitService.sentSupplier(orderSplitId, splitItemList, installName, installMobile, deliberyName, deliveryMobile);
+        return orderSplitService.sentSupplier(orderSplitId, splitItemList, installName, installMobile, deliveryName, deliveryMobile);
     }
 
 
@@ -106,20 +104,16 @@ public class WebOrderSplitController implements WebOrderSplitAPI {
     @Override
     @ApiMethod
     public ServerResponse getHouseList(HttpServletRequest request, String cityId, PageDTO pageDTO, String likeAddress, String startDate, String endDate) {
-        //redisClient.put(SUFFIX + sessionId.toString(), SerializeUtils.serialize(session));
-        String userID = request.getParameter(Constants.USERID);
+        String userId = request.getParameter("userId");
         //通过缓存查询店铺信息
-        Storefront storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userID,Storefront.class);
-        return orderSplitService.getHouseList(storefront.getId(),cityId,pageDTO, likeAddress, startDate,  endDate);
+        return orderSplitService.getHouseList(userId,cityId,pageDTO, likeAddress, startDate,  endDate);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse getOrderSplitList(HttpServletRequest request,String houseId) {
-        String userID = request.getParameter(Constants.USERID);
-        //通过缓存查询店铺信息
-        Storefront storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userID,Storefront.class);
-        return orderSplitService.getOrderSplitList(storefront.getId(),houseId);
+    public ServerResponse getOrderSplitList(HttpServletRequest request,String cityId,String houseId) {
+        String userId = request.getParameter("userId");
+        return orderSplitService.getOrderSplitList(userId,cityId,houseId);
     }
 
     @Override

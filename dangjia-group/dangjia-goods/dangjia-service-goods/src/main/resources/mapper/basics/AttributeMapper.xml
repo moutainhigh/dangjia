@@ -75,7 +75,7 @@
 			type,
 			create_date as createDate,
 			modify_date as modifyDate
-		FROM dj_basics_attribute
+		FROM dj_basics_attribute where city_id = #{cityId}
 		ORDER BY create_date desc
 	</select>
 
@@ -96,7 +96,7 @@
 			*
 		FROM dj_basics_attribute
 		where 
-		     name like CONCAT('%',#{name},'%')
+		     name like CONCAT('%',#{name},'%') and city_id = #{cityId}
 		ORDER BY create_date desc
 	</select>
 
@@ -115,6 +115,7 @@
 			<if test="likeAttrName!=null and likeAttrName!=''">
 				and  name like CONCAT('%',#{likeAttrName},'%')
 			</if>
+			and city_id = #{cityId}
 		   ORDER BY create_date desc
 	</select>
 
@@ -123,7 +124,7 @@
 			resultType="com.dangjia.acg.modle.attribute.Attribute">
 		select*
 		from dj_basics_attribute
-		where 1=1
+		where 1=1 and city_id = #{cityId}
 		<if test="categoryId!=null and categoryId!=''">
 			and  category_id =#{categoryId}
 		</if>

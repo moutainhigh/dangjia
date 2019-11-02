@@ -1,6 +1,6 @@
 package com.dangjia.acg.modle.config;
 
-import com.dangjia.acg.common.model.BaseEntity;
+import com.dangjia.acg.modle.GoodsBaseEntity;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
@@ -15,10 +15,13 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "dj_service_type_configuration")
 @ApiModel(description = "品牌")
-public class ServiceType extends BaseEntity{
+public class ServiceType extends GoodsBaseEntity{
 
     @Column(name = "name")
     private String name;//名称
+
+    @Column(name = "cover_image")
+    private String coverImage;//图片
 
     @Column(name = "image")
     private String image;//图片

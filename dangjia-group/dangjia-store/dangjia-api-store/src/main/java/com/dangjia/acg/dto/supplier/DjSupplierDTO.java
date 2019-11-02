@@ -4,7 +4,9 @@ import com.dangjia.acg.common.model.BaseEntity;
 import lombok.Data;
 
 @Data
-public class DjSupplierDTO extends BaseEntity {
+public class DjSupplierDTO  {
+
+    private String id;
     /**
      * 供应商名称
      */
@@ -37,4 +39,18 @@ public class DjSupplierDTO extends BaseEntity {
      *   是否非平台供应商（1是，0否）
      */
     private Integer isNonPlatformSupperlier;
+
+    /**
+     *   失败原因
+     */
+    private String failReason;
+    /**
+     *   合同地址
+     */
+    private String contract;
+
+    /**
+     * 城市ID
+     */
+    private String cityId;
 }

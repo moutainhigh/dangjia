@@ -2,6 +2,7 @@ package com.dangjia.acg.mapper.product;
 
 import com.dangjia.acg.dto.basics.WorkerGoodsDTO;
 import com.dangjia.acg.dto.product.AppBasicsProductDTO;
+import com.dangjia.acg.dto.product.DjBasicsProductTemplateDTO;
 import com.dangjia.acg.dto.product.StorefrontProductDTO;
 import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @类 名： ProductDao
@@ -53,7 +55,7 @@ public interface IBasicsProductTemplateMapper extends Mapper<DjBasicsProductTemp
     /*更新单位*/
     void updateProductValueId(@Param("valueId") String valueId);
 
-
+    List<DjBasicsProductTemplateDTO>  queryProductTemplateByGoodsId(@Param("categoryId") String  categoryId,@Param("storefontId") String  storefontId);
     //根据商品Id查货品
     List<DjBasicsProductTemplate> queryByGoodsId(@Param("goodsId") String goodsId);
 
@@ -61,7 +63,7 @@ public interface IBasicsProductTemplateMapper extends Mapper<DjBasicsProductTemp
     List<DjBasicsProductTemplate> queryByGoodsIdLimit12(@Param("goodsId") String goodsId);
 
     //根据货品ID查询商品（暂存商品）
-    DjBasicsProductTemplate queryTemporaryStorage(@Param("goodsId") String goodsId,@Param("dataStatus") String dataStatus);
+    DjBasicsProductTemplate queryTemporaryStorage(@Param("cityId") String cityId,@Param("goodsId") String goodsId,@Param("dataStatus") String dataStatus);
 
     /**
      * 删除材料扩展表信息
@@ -76,7 +78,7 @@ public interface IBasicsProductTemplateMapper extends Mapper<DjBasicsProductTemp
 
     List<DjBasicsProductTemplate> queryProductByCategoryId(@Param("categoryId") String categoryId);
 
-    List<DjBasicsProductTemplate> serchCategoryProduct(@Param("categoryId") String categoryId, @Param("name") String name, @Param("brandVal") String brandVal, @Param("attributeVal") String[] attributeVal, @Param("orderKey") String orderKey);
+    List<DjBasicsProductTemplate> serchCategoryProduct(@Param("categoryId") String categoryId, @Param("name")String[]   name, @Param("brandVal") String brandVal, @Param("attributeVal") String[] attributeVal, @Param("orderKey") String orderKey);
 
     List<DjBasicsProductTemplate> queryProductByTechnologyIds(@Param("technologyId") String technologyId);
 
@@ -100,10 +102,23 @@ public interface IBasicsProductTemplateMapper extends Mapper<DjBasicsProductTemp
                                                 @Param("categoryId") String categoryId);
 
     //查询当前店铺下对应货品下的所有商品
-    List<DjBasicsProductTemplate> getproductTempListByStorefontId(@Param("storefontId") String storefontId,
+    List<DjBasicsProductTemplate> getProductTempListByStorefontId(@Param("storefontId") String storefontId,
                                                                   @Param("goodsId") String goodsId);
 
     //根据模板ID查询对应符合条件的商品信息
     StorefrontProductDTO getStorefrontInfoByprodTemplateId(@Param("prodTemplateId") String prodTemplateId,@Param("prodTemplateSn") String prodTemplateSn);
+
+
+    List<DjBasicsProductTemplate> queryRandomProduct(@Param("limit") Integer limit,@Param("cityId") String cityId);
+
+
+    List<DjBasicsProductTemplate> queryRandomProductByCategoryId(@Param("productId") String productId,@Param("limit") Integer limit);
+
+    /**
+     * 查询商品库中的商品（但必须商品在店铺已上架，作配置商品用)
+     * @param goodsId
+     * @return
+     */
+    List<Map<String,Object>> getProductStoreListByGoodsId(@Param("goodsId") String goodsId);
 
 }

@@ -1,6 +1,6 @@
 package com.dangjia.acg.modle.actuary;
 
-import com.dangjia.acg.common.model.BaseEntity;
+import com.dangjia.acg.modle.GoodsBaseEntity;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
@@ -16,7 +16,7 @@ import javax.persistence.Table;
 @Table(name = "dj_actuary_budget_material")
 @ApiModel(description = "材料精算表")
 @FieldNameConstants(prefix = "")
-public class BudgetMaterial extends BaseEntity{
+public class BudgetMaterial extends GoodsBaseEntity{
 
 	@Column(name = "house_flow_id")
 	private String houseFlowId;
@@ -71,6 +71,14 @@ public class BudgetMaterial extends BaseEntity{
 
 	@Column(name = "shop_count")
 	private Double shopCount;//购买总数 (精算的时候，用户手动填写的购买数量， 该单位是 product 的convertUnit换算单位 )
+
+
+	@Column(name = "repair_count")
+	private Double repairCount;//补总数（人工）
+
+
+	@Column(name = "back_count")
+	private Double backCount;//退总数（人工）
 
 	//单位换算成 goods 表里的unit_name 后的购买总数
 	// （相当于 小单位 转成 大单位后的购买数量  公式：budgetMaterial.setConvertCount(Math.ceil(shopCount / pro.getConvertQuality()));）

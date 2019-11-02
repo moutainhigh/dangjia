@@ -74,5 +74,9 @@ public class DjRegisterApplicationController implements DjRegisterApplicationAPI
         return djSupplierServices.insertApplyNewStatus(userId,djRegisterApplication);
     }
 
-
+    @Override
+    @ApiMethod
+    public String getUserIdExamine(String userId) {
+        return djSupplierServices.getUserIdExamine(userId);
+    }
 }

@@ -23,8 +23,9 @@ import com.dangjia.acg.mapper.delivery.IProductChangeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IMaterialRecordMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
+import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
 import com.dangjia.acg.mapper.repair.IMendMaterialMapper;
-import com.dangjia.acg.modle.actuary.BudgetWorker;
+import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.attribute.GoodsCategory;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.deliver.OrderItem;
@@ -35,6 +36,7 @@ import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.repair.MendMateriel;
+import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -56,7 +58,6 @@ public class WarehouseService {
     private GoodsCategoryAPI goodsCategoryAPI;
     @Autowired
     private ConfigUtil configUtil;
-
     @Autowired
     private ForMasterAPI forMasterAPI;
     @Autowired
@@ -67,9 +68,6 @@ public class WarehouseService {
     private IHouseMapper houseMapper;
     @Autowired
     private IProductChangeMapper productChangeMapper;
-
-
-
     @Autowired
     private IMaterialRecordMapper materialRecordMapper;
     @Autowired
@@ -78,10 +76,11 @@ public class WarehouseService {
     private IOrderSplitItemMapper orderSplitItemMapper;
     @Autowired
     private IMendMaterialMapper mendMaterielMapper;
-
     @Autowired
     private DjBasicsProductAPI djBasicsProductAPI;
     private static Logger LOG = LoggerFactory.getLogger(WarehouseService.class);
+    @Autowired
+    private IMasterStorefrontProductMapper iMasterStorefrontProductMapper;
 
 
     /**
@@ -152,9 +151,10 @@ public class WarehouseService {
                 warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * warehouse.getPrice());
                // warehouseDTO.setBrandSeriesName(forMasterAPI.brandSeriesName(house.getCityId(), warehouse.getProductId()));
                 warehouseDTO.setRepairCount(warehouse.getRepairCount());
-                DjBasicsProductTemplate product = forMasterAPI.getProduct(house.getCityId(), warehouse.getProductId());
-                if (product != null) {
-                    BasicsGoods goods = forMasterAPI.getGoods(house.getCityId(), product.getGoodsId());
+//                DjBasicsProductTemplate product = forMasterAPI.getProduct(house.getCityId(), warehouse.getProductId());
+                StorefrontProduct storefrontProduct = iMasterStorefrontProductMapper.selectByPrimaryKey(warehouse.getProductId());
+                if (storefrontProduct != null) {
+                    BasicsGoods goods = forMasterAPI.getGoods(house.getCityId(), storefrontProduct.getGoodsId());
                     if (goods != null) {
                         warehouseDTO.setSales(goods.getSales());
                     }
@@ -393,10 +393,10 @@ public class WarehouseService {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }else{
             House house = houseMapper.selectByPrimaryKey(houseId);
-            BudgetWorker budgetWorker= budgetWorkerAPI.getHouseBudgetWorkerId(house.getCityId(),house.getId(),gid);
+            BudgetMaterial budgetWorker= budgetWorkerAPI.getHouseBudgetWorkerId(house.getCityId(),house.getId(),gid);
             Map warehouseDTO = new HashMap();
             if(budgetWorker!=null) {
-                warehouseDTO.put("name", budgetWorker.getName());//商品名字
+                warehouseDTO.put("name", budgetWorker.getProductName());//商品名字
                 warehouseDTO.put("image", address+budgetWorker.getImage());//图片地址
                 warehouseDTO.put("type", type);
                 warehouseDTO.put("repairCount", budgetWorker.getRepairCount());//补人工数

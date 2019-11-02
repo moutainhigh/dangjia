@@ -46,7 +46,8 @@ public interface ServiceTypeAPI {
     @PostMapping("/web/config/serviceType/selectServiceTypeList")
     @ApiOperation(value = "查找到所有服务类型", notes = "查找到所有服务类型")
     ServerResponse<PageInfo> selectServiceTypeList(@RequestParam("request") HttpServletRequest request,
-                                         @RequestParam("pageDTO") PageDTO pageDTO);
+                                                   @RequestParam("pageDTO") PageDTO pageDTO,
+                                                   @RequestParam("cityId") String cityId);
 
     /**
      * 修改服务类型信息
@@ -58,7 +59,9 @@ public interface ServiceTypeAPI {
     ServerResponse updateServiceType(@RequestParam("request") HttpServletRequest request,
                                @RequestParam("id") String id,
                                @RequestParam("name") String name,
-                               @RequestParam("image") String image);
+                               @RequestParam("coverImage") String coverImage,
+                               @RequestParam("image") String image,
+                               @RequestParam("cityId") String cityId);
 
     /**
      * 新增服务类型
@@ -69,7 +72,9 @@ public interface ServiceTypeAPI {
     @ApiOperation(value = "新增服务类型", notes = "新增服务类型")
     ServerResponse insertServiceType(@RequestParam("request") HttpServletRequest request,
                                @RequestParam("name") String name,
-                               @RequestParam("image") String image);
+                               @RequestParam("coverImage") String coverImage,
+                               @RequestParam("image") String image,
+                                @RequestParam("cityId") String cityId);
 
     /**
      * 删除服务类型

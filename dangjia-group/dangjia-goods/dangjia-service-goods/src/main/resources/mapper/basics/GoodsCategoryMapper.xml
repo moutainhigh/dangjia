@@ -47,7 +47,7 @@
     <select id="queryCategoryByParentId" resultType="com.dangjia.acg.modle.attribute.GoodsCategory">
         SELECT
         <include refid="all_columns"/>
-        FROM dj_basics_goods_category where parent_id =#{parentId}
+        FROM dj_basics_goods_category where parent_id =#{parentId} and city_id = #{cityId}
         ORDER BY create_date desc
     </select>
 
@@ -55,34 +55,32 @@
     <select id="queryCategoryByName" resultType="com.dangjia.acg.modle.attribute.GoodsCategory">
         SELECT
         <include refid="all_columns"/>
-        FROM dj_basics_goods_category where name =#{name}
+        FROM dj_basics_goods_category where name =#{name} and city_id = #{cityId}
         ORDER BY create_date desc
     </select>
     <select id="getProductList" resultType="com.dangjia.acg.modle.basics.HomeProductDTO">
         SELECT
-            p.id AS id,
-            p.image AS image,
-            p.price AS price,
-            u. NAME AS unitName,
-            g.type AS goodsType,
-            0 AS type,
-            p. NAME AS NAME
-            FROM
-            dj_basics_product p,
-            dj_basics_product_material p1,
-            dj_basics_goods_category c,
-            dj_basics_goods g,
-            dj_basics_unit u
-        WHERE
-        p.id = p1.product_id
-        AND c.id = p.category_id
+        p.id AS id,
+        p.image AS image,
+        p.price AS price,
+        u. NAME AS unitName,
+        g.type AS goodsType,
+        0 AS type,
+        p. NAME AS NAME
+        FROM
+        dj_basics_product_template p,
+        dj_basics_goods_category c,
+        dj_basics_goods g,
+        dj_basics_unit u
+        WHERE c.id = p.category_id
         AND p.goods_id=g.id
         and g.category_id=c.id
-        AND u.id = p1.convert_unit
+        AND u.id = p.convert_unit
         AND p.maket = 1
         AND p.type = 1
         and p.maket = 1
         AND p.type = 1
+        and p.city_id=#{cityId}
         <if test="categoryId!=null and categoryId!=''">
             AND c.parent_top = #{categoryId}
         </if>

@@ -85,11 +85,7 @@ public class SupplierService {
         supplier.setAddress(address);//地址
         supplier.setTelephone(telephone);//联系电话
         supplier.setCheckPeople(checkPeople);//联系人姓名
-        supplier.setGender(gender);//1男 2女   0 未选
         supplier.setEmail(email);
-        supplier.setNotice(notice);
-        supplier.setSupplierLevel(supplierLevel);//级别
-        supplier.setState(state);//供应商状态  1正常供货 2停止供货
         iSupplierMapper.insert(supplier);
         return ServerResponse.createBySuccess("新增成功", supplier);
     }
@@ -126,20 +122,8 @@ public class SupplierService {
         if (!CommonUtil.isEmpty(checkPeople)) {
             supplier.setCheckPeople(checkPeople);//联系人姓名
         }
-        if (!CommonUtil.isEmpty(gender)) {
-            supplier.setGender(gender);//1男 2女   0 未选
-        }
         if (!CommonUtil.isEmpty(email)) {
             supplier.setEmail(email);
-        }
-        if (!CommonUtil.isEmpty(notice)) {
-            supplier.setNotice(notice);
-        }
-        if (!CommonUtil.isEmpty(supplier_level)) {
-            supplier.setSupplierLevel(supplier_level);//级别
-        }
-        if (!CommonUtil.isEmpty(state)) {
-            supplier.setState(state);//供应商状态  1正常供货 2停止供货
         }
         supplier.setModifyDate(new Date());
         iSupplierMapper.updateByPrimaryKeySelective(supplier);

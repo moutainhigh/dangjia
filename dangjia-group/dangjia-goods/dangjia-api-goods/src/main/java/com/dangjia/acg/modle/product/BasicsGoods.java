@@ -1,6 +1,6 @@
 package com.dangjia.acg.modle.product;
 
-import com.dangjia.acg.common.model.BaseEntity;
+import com.dangjia.acg.modle.GoodsBaseEntity;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
@@ -20,7 +20,7 @@ import javax.persistence.Table;
 @Table(name = "dj_basics_goods")
 @ApiModel(description = "货品")
 @FieldNameConstants(prefix = "")
-public class BasicsGoods extends BaseEntity{
+public class BasicsGoods extends GoodsBaseEntity {
 
 	@Column(name = "name")
     private String name;

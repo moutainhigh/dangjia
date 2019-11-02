@@ -17,6 +17,13 @@
             bsp.id = #{id}
     </select>
 
+    <select id="selectProductByGoodsType" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM dj_basics_storefront_product dbsp
+        INNER JOIN dj_basics_product_template dbpt ON dbsp.prod_template_id=dbpt.id
+        INNER JOIN dj_basics_goods dbg ON dbpt.goods_id=dbg.id AND dbg.type=2
+        WHERE dbsp.id =#{id}
+    </select>
+
     <select id="queryStorefrontProductViewDTOList" resultType="com.dangjia.acg.dto.storefront.BasicsStorefrontProductViewDTO">
 
         SELECT
@@ -27,12 +34,16 @@
         -- 商品名称
         bg.attribute_id_arr AS attributeIdArr,
         -- 属性
-        bsp.is_shelf_status AS isShelfStatus -- 是否上下架
+        IFNULL(bsp.is_shelf_status,null )   AS isShelfStatus ,-- 是否上下架
+        prod_template_id as prodTemplateId -- 商品模板id
         FROM
         dj_basics_storefront_product bsp
         INNER JOIN dj_basics_product_template bpt ON bsp.prod_template_id = bpt.id
         INNER JOIN dj_basics_goods bg ON bsp.goods_id = bg.id
-        where 1=1
+        where 1=1 and   bsp.data_status=0 and bsp.storefront_id=#{storefrontId}
+        <if test="null!=cityId and ''!=cityId">
+            and  bsp.city_id=#{cityId}
+        </if>
         <if test="null!=keyWord and ''!=keyWord">
             and (
             bg. NAME LIKE CONCAT('%',#{keyWord},'%') or
@@ -41,5 +52,80 @@
         </if>
     </select>
 
+    <select id="queryCartList" resultType="com.dangjia.acg.dto.product.ShoppingCartProductDTO">
+          SELECT
+            bsp.prod_template_id AS productId,
+            bsp.product_name AS productName,
+            bsp.sell_price AS sellPrice,
+            bsp.image,
+            CONCAT_WS(
+                " ",
+                bb.`name`,
+                bpt.value_name_arr
+            ) AS specificationAttributes
+        FROM
+            dj_basics_storefront_product bsp
+        INNER JOIN dj_basics_product_template bpt ON bsp.prod_template_id = bpt.id
+        INNER JOIN dj_basics_goods bg ON bg.id = bpt.goods_id
+        INNER JOIN dj_basics_brand bb ON bb.id = bg.brand_id
+        WHERE
+            bsp.storefront_id =#{storefrontId}
+        AND bsp.prod_template_id =#{productId}
+    </select>
 
+
+    <select id="queryCollectGood" resultType="com.dangjia.acg.dto.product.MemberCollectDTO">
+        SELECT
+            bsp.prod_template_id AS productId,
+            bsp.product_name AS productName,
+            bsp.image,
+            bpt.unit_name AS unitName
+        FROM
+            dj_basics_storefront_product bsp
+        INNER JOIN dj_basics_product_template bpt ON bsp.prod_template_id = bpt.id
+        WHERE
+            bsp.prod_template_id =#{productId}
+            and bsp.storefront_id=#{storefrontId}
+    </select>
+
+<!--根据店铺id查询供应的商品-->
+    <select id="queryStorefrontListByStorefrontId" resultType="com.dangjia.acg.dto.storefront.StorefrontDTO">
+
+        SELECT
+            bsp.prod_template_id AS productId,
+            bsp.product_name AS productName,
+            bsp.image,
+            bpt.unit_name AS unitName
+        FROM
+            dj_basics_storefront_product bsp
+        INNER JOIN dj_basics_product_template bpt ON bsp.prod_template_id = bpt.id
+        WHERE
+            bsp.prod_template_id =#{productId}
+            and bsp.storefront_id=#{storefrontId}
+
+    </select>
+
+    <select id="queryStorefrontProductById" resultType="com.dangjia.acg.modle.storefront.StorefrontProduct">
+        select
+        id,
+        storefront_id as 'storefrontId',
+        prod_template_id as 'prodTemplateId',
+        goods_id as 'goodsId',
+        image,
+        IFNULL(detail_image,'')  as 'detailImage',
+        IFNULL(market_name,'')  as 'marketName',
+        sell_price as 'sellPrice',
+        supplied_num as 'suppliedNum',
+        IFNULL(is_upstairs_cost,'')  as 'isUpstairsCost',
+        IFNULL(is_delivery_install,'')  as 'isdeliveryInstall',
+        IFNULL(move_cost,'')   as 'moveCost',
+        is_shelf_status as 'isShelfStatus',
+        create_date as 'createDate',
+        modify_date as 'modifyDate',
+        data_status as 'dataStatus',
+        product_name as 'productName',
+        city_id as 'cityId'
+        from
+        dj_basics_storefront_product where id=#{id}
+    </select>
 </mapper>

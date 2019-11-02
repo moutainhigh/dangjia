@@ -141,11 +141,11 @@ public class AppCategoryGoodsService {
 
             if(!CommonUtil.isEmpty(name)){
                 Example example = new Example(DjBasicsMaintain.class);
-                example.createCriteria().andLike(DjBasicsMaintain.SEARCH_ITEM,name);
+                example.createCriteria().andCondition(" FIND_IN_SET(search_item,'"+name+"')");
                 //根据搜索词,查询关键词名称
                 List<DjBasicsMaintain> list = djBasicsMaintainMapper.selectByExample(example);
                 if(list.size() > 0){
-                    name = list.get(0).getKeywordName();
+                    name = list.get(0).getSearchItem();
                 }
             }
 
@@ -155,7 +155,12 @@ public class AppCategoryGoodsService {
             if(!CommonUtil.isEmpty(attributeVal)){
                 attributeVals=attributeVal.split(",");
             }
-            List<DjBasicsProductTemplate> pList = iBasicsProductTemplateMapper.serchCategoryProduct(categoryId,StringTool.getLikeV(name),brandVal,attributeVals,orderKey);
+            String[] names=null;
+            if(!CommonUtil.isEmpty(name)){
+                names=name.split(",");
+            }
+//            StringTool.getLikeV(name)
+            List<DjBasicsProductTemplate> pList = iBasicsProductTemplateMapper.serchCategoryProduct(categoryId,names,brandVal,attributeVals,orderKey);
             pageResult = new PageInfo<>(pList);
             for (DjBasicsProductTemplate product : pList) {
                 String convertUnitName = iUnitMapper.selectByPrimaryKey(product.getUnitId()).getName();
@@ -165,6 +170,8 @@ public class AppCategoryGoodsService {
                 object.put("unitName", convertUnitName);
                 object.put("gId", product.getId());
                 object.put("name", product.getName());
+                object.put("productType", product.getType());
+                object.put("storefrontName", product.getStorefrontName());
                 arr.add(object);
             }
 

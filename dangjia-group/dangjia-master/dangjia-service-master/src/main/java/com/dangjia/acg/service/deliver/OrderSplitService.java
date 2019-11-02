@@ -3,8 +3,10 @@ package com.dangjia.acg.service.deliver;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.BasicsStorefrontAPI;
+import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.api.supplier.DjSupplierAPI;
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
@@ -17,6 +19,7 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.deliver.DeliverHouseDTO;
 import com.dangjia.acg.dto.deliver.OrderSplitItemDTO;
 import com.dangjia.acg.dto.deliver.SplitDeliverDetailDTO;
+import com.dangjia.acg.dto.storefront.StorefrontDTO;
 import com.dangjia.acg.mapper.complain.IComplainMapper;
 import com.dangjia.acg.mapper.delivery.IOrderSplitItemMapper;
 import com.dangjia.acg.mapper.delivery.IOrderSplitMapper;
@@ -34,6 +37,7 @@ import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.repair.MendOrder;
+import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
 import com.dangjia.acg.modle.supplier.DjSupplier;
@@ -86,6 +90,12 @@ public class OrderSplitService {
 
     @Autowired
     private DjSupplierAPI djSupplierAPI ;
+
+    @Autowired
+    private BasicsStorefrontAPI basicsStorefrontAPI;
+
+    @Autowired
+    private RedisClient redisClient;
     /**
      * 修改 供应商结算状态
      * id 供应商结算id
@@ -279,7 +289,7 @@ public class OrderSplitService {
      * 分发不同供应商
      */
     public ServerResponse sentSupplier(String orderSplitId, String splitItemList,String installName,
-                                       String installMobile, String deliberyName, String deliveryMobile) {
+                                       String installMobile, String deliveryName, String deliveryMobile) {
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
             OrderSplit orderSplit = orderSplitMapper.selectByPrimaryKey(orderSplitId);
@@ -333,7 +343,7 @@ public class OrderSplitService {
                     //判断是非平台供应商
                     if(djSupplier.getIsNonPlatformSupperlier()==1)
                     {
-                        splitDeliver.setDeliberyName(deliberyName);//送货人姓名
+                        splitDeliver.setDeliveryName(deliveryName);//送货人姓名
                         splitDeliver.setDeliveryMobile(deliveryMobile);//送货人号码
                     }
                     splitDeliverMapper.insert(splitDeliver);
@@ -498,11 +508,17 @@ public class OrderSplitService {
     /**
      * 材料员看房子列表
      */
-    public ServerResponse getHouseList(String storefrontId,String cityId,PageDTO pageDTO, String likeAddress,String startDate, String endDate) {
+    public ServerResponse getHouseList(String userId,String cityId,PageDTO pageDTO, String likeAddress,String startDate, String endDate) {
         try {
+            //通过缓存查询店铺信息
+            Storefront storefront= basicsStorefrontAPI.queryStorefrontByUserID(userId,cityId);
+            if(storefront==null)
+            {
+                return ServerResponse.createByErrorMessage("不存在店铺信息");
+            }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
 //        List<House> houseList = houseMapper.selectAll();
-            List<House> houseList = houseMapper.getByLikeAddress(storefrontId,cityId,likeAddress,startDate,endDate);
+            List<House> houseList = houseMapper.getByLikeAddress(storefront.getId(),cityId,likeAddress,startDate,endDate);
             PageInfo pageResult = new PageInfo(houseList);
 
             List<DeliverHouseDTO> deliverHouseDTOList = new ArrayList<DeliverHouseDTO>();
@@ -538,12 +554,18 @@ public class OrderSplitService {
     /**
      * 根据房子id查询要货单列表
      */
-    public ServerResponse getOrderSplitList(String storefrontId,String houseId) {
+    public ServerResponse getOrderSplitList(String userId,String cityId,String houseId) {
         try {
+            //通过缓存查询店铺信息
+            Storefront storefront= basicsStorefrontAPI.queryStorefrontByUserID(userId,cityId);
+            if(storefront==null)
+            {
+                return ServerResponse.createByErrorMessage("不存在店铺信息");
+            }
             Example example = new Example(OrderSplit.class);
             example.createCriteria()
                     .andEqualTo(OrderSplit.HOUSE_ID, houseId)
-                    .andEqualTo(OrderSplit.STOREFRONT_ID,storefrontId)
+                    .andEqualTo(OrderSplit.STOREFRONT_ID,storefront.getId())
                     .andGreaterThan(OrderSplit.APPLY_STATUS, 0)//大于0
                     .andNotEqualTo(OrderSplit.APPLY_STATUS, 4);//过滤业主未支付
             example.orderBy(OrderSplit.CREATE_DATE).desc();
@@ -554,6 +576,7 @@ public class OrderSplitService {
                 Map map = BeanUtils.beanToMap(orderSplit);
                 example = new Example(SplitDeliver.class);
                 example.createCriteria().andEqualTo(SplitDeliver.HOUSE_ID, orderSplit.getHouseId())
+                        .andEqualTo(SplitDeliver.STOREFRONT_ID,storefront.getId())
                         .andCondition(" shipping_state in (0,6)").andEqualTo(SplitDeliver.ORDER_SPLIT_ID, orderSplit.getId());
                 int splitDeliverList = splitDeliverMapper.selectCountByExample(example);
                 map.put("num", splitDeliverList);

@@ -28,7 +28,79 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		create_date as createDate,
 		modify_date as modifyDate
 	</sql>
-
+	<select id="queryShopGoods" resultType="com.dangjia.acg.dto.actuary.ShopGoodsDTO">
+	SELECT
+		l.id shopId,
+		l.storefront_name shopName
+	FROM
+		dj_basics_storefront l
+	WHERE
+		l.id IN (
+			SELECT
+				m.storefont_id
+			FROM
+				dj_deliver_order_item m
+			WHERE
+				m.order_id = #{orderId}
+			GROUP BY
+				m.storefont_id
+		)
+	GROUP BY
+		l.id
+	ORDER BY
+		l.id DESC
+	</select>
+	<!--查询工种材料未支付所有商品的标签-->
+	<select id="queryBudgetLabel" resultType="com.dangjia.acg.dto.actuary.BudgetLabelDTO">
+		SELECT
+			IFNULL(l.id,'-1') labelId,
+			IFNULL(l.name,'其他') labelName,
+			GROUP_CONCAT(c.id) categoryIds
+		FROM
+			dj_basics_goods_category c
+		LEFT JOIN dj_basics_goods_category l ON l.id=c.parent_id
+		WHERE
+			c.id IN (
+				SELECT
+					m.category_id
+				FROM
+					dj_deliver_order_item m
+				WHERE
+					m.order_id =  #{orderId}
+					and m.storefont_id = #{storefontId}
+				GROUP BY
+					m.category_id
+			  )
+		GROUP BY l.id
+		ORDER BY l.id desc
+	</select>
+	<select id="queryBudgetLabelGoods" resultType="com.dangjia.acg.dto.actuary.BudgetLabelGoodsDTO">
+		SELECT
+			m.id,
+			p.is_agency_purchase steta,
+			m.product_id productId,
+			m.product_sn productSn,
+			m.product_name productName,
+			m.price,
+			m.shop_count shopCount,
+			m.unit_name unitName,
+			(m.price * m.shop_count) totalPrice,
+			m.create_date createDate,
+			m.create_date createDate,
+			m.product_type productType,
+			m.data_status dataStatus,
+			p.category_id categoryId,
+			m.image,
+			m.storefont_id storefontId,
+			p.goods_id goodsId,
+			p.value_name_arr attributeName
+		FROM
+			dj_deliver_order_item m
+		INNER JOIN dj_basics_storefront_product sp ON sp.id = m.product_id
+		INNER JOIN dj_basics_product_template p ON sp.prod_template_id = p.id
+		WHERE 	m.order_id =  #{orderId}
+		  and m.storefont_id = #{storefontId}
+	</select>
     <!-- 模糊查询 -->
     <select id="orderItemList" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.deliver.OrderItem">
         SELECT
