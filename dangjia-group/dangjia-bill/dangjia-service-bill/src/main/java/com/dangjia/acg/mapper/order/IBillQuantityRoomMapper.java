@@ -13,5 +13,10 @@ import java.util.List;
 @Repository
 public interface IBillQuantityRoomMapper extends Mapper<QuantityRoom> {
     //根据房子和类型查询对应的数据
-    QuantityRoom getBillQuantityRoom(@Param("houseId") String houseId, @Param("type") Integer type);
+    QuantityRoom getBillQuantityRoom(@Param("houseId") String houseId,
+                                     @Param("type") Integer type);
+
+
+    List<QuantityRoomDTO> getQuantityRoomList(@Param("houseId") String houseId);
+
 }
