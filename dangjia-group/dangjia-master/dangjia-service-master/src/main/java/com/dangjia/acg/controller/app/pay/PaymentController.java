@@ -28,11 +28,6 @@ public class PaymentController implements PaymentAPI {
     public ServerResponse setServersSuccess(String businessOrderId, BigDecimal money, String image ){
         return paymentService.setServersSuccess(businessOrderId, money,image);
     }
-    @Override
-    @ApiMethod
-    public void budgetCorrect(String businessOrderNumber, String payState, String houseFlowId) {
-        paymentService.budgetCorrect(businessOrderNumber, payState, houseFlowId);
-    }
 
     @Override
     @ApiMethod
