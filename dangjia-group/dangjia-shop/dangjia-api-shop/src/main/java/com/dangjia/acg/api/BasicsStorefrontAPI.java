@@ -49,9 +49,7 @@ public interface BasicsStorefrontAPI {
                                  @RequestParam("storefrontLogo") String storefrontLogo,
                                  @RequestParam("storekeeperName") String storekeeperName,
                                  @RequestParam("mobile") String mobile,
-                                 @RequestParam("email") String email,
-                                 @RequestParam("freight") String freight,
-                                 @RequestParam("belowUnitPrice") String belowUnitPrice
+                                 @RequestParam("email") String email
                                  );
 
     @PostMapping("/web/updateStorefront")

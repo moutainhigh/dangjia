@@ -78,14 +78,5 @@ public class StorefrontListDTO {
      */
     private String failReason;
 
-    /**
-     * 其他设置(收取运费)
-     */
-    private String freight;
 
-
-    /**
-     * 其他设置(每单价格低于)
-     */
-    private String belowUnitPrice;
 }

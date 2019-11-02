@@ -18,8 +18,9 @@ public interface DjDeliverOrderItemAPI {
      */
     @PostMapping("/app/deliverOrder/queryAllDeliverOrderDetail")
     @ApiOperation(value = "下单后--订单查询--订单详情展示", notes = "下单后--订单查询--订单详情展示")
-    ServerResponse queryAllDeliverOrderItem(@RequestParam("request") HttpServletRequest request,
+    ServerResponse queryAllDeliverOrderDetail(@RequestParam("request") HttpServletRequest request,
                                             @RequestParam("pageDTO") PageDTO pageDTO,
+                                              @RequestParam("orderId") String orderId,
                                             @RequestParam("userId") String userId,
                                             @RequestParam("cityId") String cityId);
 }

@@ -16,9 +16,7 @@
           `email`,
           `create_date` AS createDate,
           `modify_date` AS modifyDate,
-          `data_status` AS dataStatus,
-           `freight` ,
-           `below_unit_price` as belowUnitPrice
+          `data_status` AS dataStatus
     </sql>
 
 
