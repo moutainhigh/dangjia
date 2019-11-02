@@ -13,7 +13,7 @@ public class DjDeliverOrderItemController implements DjDeliverOrderItemAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryAllDeliverOrderItem(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId) {
+    public ServerResponse queryAllDeliverOrderDetail(HttpServletRequest request, PageDTO pageDTO,  String orderId,String userId, String cityId) {
         return null;
     }
 

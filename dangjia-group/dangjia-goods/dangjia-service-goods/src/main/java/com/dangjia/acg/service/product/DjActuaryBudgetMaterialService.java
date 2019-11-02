@@ -465,68 +465,9 @@ public class DjActuaryBudgetMaterialService {
      * @return
      */
     public ServerResponse queryBasicsProduct(String productId,
-                                             PageDTO pageDTO,
-                                             String cityId,
-                                             String categoryId,
-                                             String name,
-                                             String attributeVal,
-                                             String brandVal,
-                                             String orderKey) {
-        String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-//        String imageAddress ="";
-        JSONArray arr = new JSONArray();
-        PageInfo pageResult = null;
-        try {
-            //根据内容模糊搜索商品
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            String[] attributeVals = null;
-            if (!CommonUtil.isEmpty(attributeVal)) {
-                attributeVals = attributeVal.split(",");
-            }
-            String[] names=null;
-            if(!CommonUtil.isEmpty(name)){
-                names=name.split(",");
-            }
-            List<DjBasicsProductTemplate> pList = iBasicsProductTemplateMapper.serchCategoryProduct(categoryId, names, brandVal, attributeVals, orderKey);
-            pageResult = new PageInfo<>(pList);
-            if (!pList.isEmpty()) {
-                for (DjBasicsProductTemplate product : pList) {
-                    String convertUnitName = iUnitMapper.selectByPrimaryKey(product.getUnitId()).getName();
-                    String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
-                            String.format(DjConstants.YZPageAddress.GOODSDETAIL, " ", cityId, "商品详情") +
-                            "&gId=" + product.getId();
-                    JSONObject object = new JSONObject();
-                    if (productId.equals(product.getId())) {
-                        //勾选商品标识
-                        object.put("flag", true);
-                    } else {
-                        //未勾选商品标识
-                        object.put("flag", false);
-                    }
-                    object.put("image", imageAddress + product.getImage());
-                    object.put("price", product.getPrice());
-                    object.put("unitName", convertUnitName);
-                    object.put("name", product.getName());
-                    object.put("id", product.getId());
-                    object.put("url", url);//0:工艺；1：商品；2：人工
-                    arr.add(object);
-                }
-            }
-            pageResult.setList(arr);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("查询失败");
-        }
-        return ServerResponse.createBySuccess("查询成功", pageResult);
-    }
-
-
-    /**
-     * 查询精算详情列表
-     *
-     * @return
-     */
-    public ServerResponse queryBasicsProduct2(String productId,PageDTO pageDTO,String cityId,String categoryId, String name,String attributeVal, String brandVal, String orderKey) {
+                                             PageDTO pageDTO,String cityId,String categoryId,
+                                             String name, String attributeVal,
+                                             String brandVal,String orderKey) {
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
 //        String imageAddress ="";
         JSONArray arr = new JSONArray();
