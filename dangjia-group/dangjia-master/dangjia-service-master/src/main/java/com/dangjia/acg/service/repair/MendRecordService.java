@@ -9,6 +9,7 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.repair.MendOrderDetail;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
+import com.dangjia.acg.mapper.delivery.IMasterOrderProgressMapper;
 import com.dangjia.acg.mapper.delivery.IOrderSplitItemMapper;
 import com.dangjia.acg.mapper.delivery.IOrderSplitMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
@@ -23,6 +24,7 @@ import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.order.OrderProgress;
 import com.dangjia.acg.modle.repair.*;
 import com.dangjia.acg.modle.worker.Evaluate;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
@@ -76,6 +78,8 @@ public class MendRecordService {
 
     @Autowired
     private IEvaluateMapper evaluateMapper;
+    @Autowired
+    private IMasterOrderProgressMapper iMasterOrderProgressMapper;
 
     @Autowired
     private RedisClient redisClient;//缓存
@@ -787,6 +791,10 @@ public class MendRecordService {
                     ChangeOrder changeOrder = changeOrderMapper.selectByPrimaryKey(mendOrder.getChangeOrderId());
                     changeOrder.setState(7);
                     changeOrderMapper.updateByPrimaryKeySelective(changeOrder);
+                    //退人工后，记录流水
+                    if(mendOrder.getType()==3){//撤销退人工申请
+                        updateOrderProgressInfo(changeOrder.getId(),"2","REFUND_AFTER_SALES","RA_019",changeOrder.getMemberId());//撤销退人工申请
+                    }
                 }
                 return ServerResponse.createBySuccessMessage("撤回成功");
             } else {
@@ -797,7 +805,26 @@ public class MendRecordService {
             }
         }
     }
-
+    /**
+     * //添加进度信息
+     * @param orderId 订单ID
+     * @param progressType 订单类型
+     * @param nodeType 节点类型
+     * @param nodeCode 节点编码
+     * @param userId 用户id
+     */
+    private void updateOrderProgressInfo(String orderId,String progressType,String nodeType,String nodeCode,String userId){
+        OrderProgress orderProgress=new OrderProgress();
+        orderProgress.setProgressOrderId(orderId);
+        orderProgress.setProgressType(progressType);
+        orderProgress.setNodeType(nodeType);
+        orderProgress.setNodeCode(nodeCode);
+        orderProgress.setCreateBy(userId);
+        orderProgress.setUpdateBy(userId);
+        orderProgress.setCreateDate(new Date());
+        orderProgress.setModifyDate(new Date());
+        iMasterOrderProgressMapper.insert(orderProgress);
+    }
     private ServerResponse getServerResponse(MendOrder mendOrder) {
         switch (mendOrder.getState()) {
             case 3:
