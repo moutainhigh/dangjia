@@ -917,9 +917,9 @@ public class PaymentService {
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
-
+            Order order= orderMapper.selectByPrimaryKey(orderId);
             Example example = new Example(BusinessOrder.class);
-            example.createCriteria().andEqualTo(BusinessOrder.TASK_ID, orderId).andNotEqualTo(BusinessOrder.STATE,4);
+            example.createCriteria().andEqualTo(BusinessOrder.NUMBER, order.getBusinessOrderNumber()).andNotEqualTo(BusinessOrder.STATE,4);
             List<BusinessOrder> businessOrderList = businessOrderMapper.selectByExample(example);
             BusinessOrder businessOrder = null;
             if(businessOrderList.size()>0){
@@ -928,7 +928,7 @@ public class PaymentService {
                     return ServerResponse.createByErrorMessage("该订单已支付，请勿重复支付！");
                 }
             }
-            Order order= orderMapper.selectByPrimaryKey(orderId);
+
             House house = houseMapper.selectByPrimaryKey(houseId);
             businessOrder.setState(2);//刚生成
 
@@ -1368,7 +1368,7 @@ public class PaymentService {
                     businessOrder.setDiscountsPrice(new BigDecimal(0));
                     businessOrder.setPayPrice(paymentPrice);
                     businessOrder.setType(1);//记录支付类型任务类型
-                    businessOrder.setTaskId(order.getId());//保存任务ID
+                    businessOrder.setTaskId(taskId);//保存任务ID
                     businessOrderMapper.insert(businessOrder);
                 }
                 order.setTotalTransportationCost(freightPrice);//总运费
