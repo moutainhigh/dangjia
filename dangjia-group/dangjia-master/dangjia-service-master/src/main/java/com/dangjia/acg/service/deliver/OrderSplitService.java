@@ -510,7 +510,8 @@ public class OrderSplitService {
      */
     public ServerResponse getHouseList(String userId,String cityId,PageDTO pageDTO, String likeAddress,String startDate, String endDate) {
         try {
-            StorefrontDTO storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userId, StorefrontDTO.class);
+            //通过缓存查询店铺信息
+            Storefront storefront= basicsStorefrontAPI.queryStorefrontByUserID(userId,cityId);
             if(storefront==null)
             {
                 return ServerResponse.createByErrorMessage("不存在店铺信息");

@@ -320,6 +320,10 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
     public ServerResponse queryGoodsListStorefront(HttpServletRequest request, PageDTO pageDTO, String categoryId, String name, String cityId, Integer type) {
         String userId=request.getParameter("userId");
         Storefront storefront=basicsStorefrontAPI.queryStorefrontByUserID(userId,cityId);
+        if(storefront==null)
+        {
+            return ServerResponse.createByErrorMessage("没有店铺信息");
+        }
         return djBasicsGoodsService.queryGoodsListStorefront(storefront.getId(),pageDTO, categoryId, name, type);
     }
 

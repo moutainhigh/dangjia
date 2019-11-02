@@ -66,4 +66,22 @@ public class DjActuaryBudgetMaterialController implements DjActuaryBudgetMateria
         return djActuaryBudgetMaterialService.queryBasicsProduct(productId, pageDTO, cityId, categoryId, name, attributeVal, brandVal, orderKey);
     }
 
+
+     /*
+     * 查询精算首页列表
+     *
+     * @param request
+     * @param bclId
+     * @param categoryId
+     * @param houseId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryMakeBudgetsList2(HttpServletRequest request, String bclId,
+                                               String categoryId, String houseId,String cityId) {
+        return djActuaryBudgetMaterialService.queryMakeBudgetsList2(bclId, categoryId, houseId,cityId);
+    }
+
+
 }

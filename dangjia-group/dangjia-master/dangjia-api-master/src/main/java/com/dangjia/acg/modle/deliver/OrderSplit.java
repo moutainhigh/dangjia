@@ -84,6 +84,15 @@ public class OrderSplit extends BaseEntity {
 	@ApiModelProperty("订单ID")
 	private String orderId;
 
+	@Column(name = "is_reservation_deliver")
+	@Desc(value = "是否需要预约(1是，0否）")
+	@ApiModelProperty("是否需要预约(1是，0否）")
+	private String isReservationDeliver;
+
+	@Column(name = "reservation_deliver_time")
+	@Desc(value = "预约发货时间")
+	@ApiModelProperty("预约发货时间")
+	private Date reservationDeliverTime;
 }
 
 

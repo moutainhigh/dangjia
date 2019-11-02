@@ -62,6 +62,15 @@ public interface IMendOrderMapper extends Mapper<MendOrder>{
             @Param("likeAddress") String likeAddress);
 
 
+    List<MendOrder> materialBackStateProcessing(
+            @Param("storefrontId") String storefrontId,
+            @Param("houseId") String houseId,
+            @Param("type") Integer type,
+            @Param("beginDate") String beginDate,
+            @Param("endDate") String endDate,
+            @Param("state") String state,
+            @Param("likeAddress") String likeAddress);
+
     /**
      * 按state 和 收货地址 搜索
      * @param houseId

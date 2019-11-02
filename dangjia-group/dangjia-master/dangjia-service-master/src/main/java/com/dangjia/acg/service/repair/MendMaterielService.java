@@ -133,6 +133,39 @@ public class MendMaterielService {
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
+
+    /**
+     *
+     * @param userId
+     * @param cityId
+     * @param houseId 房子id
+     * @param pageDTO
+     * @param beginDate 开始时间
+     * @param endDate 结束时间
+     * @param state 状态：（0生成中,1处理中,2不通过取消,3已通过,4已全部结算,5已撤回,5已关闭）
+     * @param likeAddress 模糊查询参数
+     * @return
+     */
+    public ServerResponse  materialBackStateProcessing (String userId,String cityId,String houseId, PageDTO pageDTO, String beginDate, String endDate, String state,String likeAddress) {
+        try {
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            //通过缓存查询店铺信息
+            Storefront storefront= basicsStorefrontAPI.queryStorefrontByUserID(userId,cityId);
+            if(storefront==null)
+            {
+                return ServerResponse.createByErrorMessage("不存在店铺信息");
+            }
+            List<MendOrder> mendOrderList = mendOrderMapper.materialBackStateProcessing(storefront.getId(),houseId, 2, beginDate, endDate, state,likeAddress);
+            PageInfo pageResult = new PageInfo(mendOrderList);
+            List<MendOrderDTO> mendOrderDTOS = getMendOrderDTOList(mendOrderList);
+            pageResult.setList(mendOrderDTOS);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
     /**
      * 房子id查询退货单列表
      * material_back_state
