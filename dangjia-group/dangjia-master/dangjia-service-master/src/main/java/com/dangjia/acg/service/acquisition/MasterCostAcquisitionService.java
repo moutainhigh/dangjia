@@ -83,7 +83,7 @@ public class MasterCostAcquisitionService {
             QuantityRoom quantityRoom=iQuantityRoomMapper.getQuantityRoom(houseId,0);
             Integer elevator= 1;//是否电梯房
             String floor="1";
-            if(quantityRoom!=null&& StringUtils.isNotBlank(quantityRoom.getId())){
+            if(quantityRoom!=null&& StringUtils.isNotBlank(quantityRoom.getFloor())){
                 elevator=quantityRoom.getElevator();//是否电梯房
                 floor=quantityRoom.getFloor();//楼层
             }
@@ -97,12 +97,8 @@ public class MasterCostAcquisitionService {
             }
             //计算楼层数
             Double floorCount=1.0;//楼层数
-            if("0".equals(isUpstairsCost)){//判断是否按1层收取上楼费，若为否
-                if(elevator==0){//若不为电梯房，则楼层数设置为实际楼层数
-                    if(org.apache.commons.lang.StringUtils.isNotBlank(floor)){
-                        floorCount=new Double(floor).doubleValue();
-                    }
-                }
+            if("0".equals(isUpstairsCost)&&elevator==0){//判断是否按1层收取上楼费，若为否//若不为电梯房，则楼层数设置为实际楼层数
+                floorCount=new Double(floor).doubleValue();
             }
             return MathUtil.mul(MathUtil.mul(floorCount,moveCost),count);
         }catch (Exception e){
