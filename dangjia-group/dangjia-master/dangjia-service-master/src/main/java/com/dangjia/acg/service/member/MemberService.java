@@ -1234,6 +1234,7 @@ public class MemberService {
      */
     public ServerResponse updateInsurances(Insurance insurance) {
         insurance.setModifyDate(new Date());
+        insurance.setCreateDate(null);
         insuranceMapper.updateByPrimaryKeySelective(insurance);
         return ServerResponse.createBySuccess("保存成功", insurance.getId());
     }
