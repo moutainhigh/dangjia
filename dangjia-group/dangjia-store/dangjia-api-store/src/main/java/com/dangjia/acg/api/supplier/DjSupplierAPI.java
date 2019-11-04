@@ -60,7 +60,7 @@ public interface DjSupplierAPI {
     ServerResponse queryDjSupplierByShopIdPage(@RequestParam("pageDTO") PageDTO pageDTO,
                                                @RequestParam("keyWord") String keyWord,
                                                @RequestParam("applicationStatus") String applicationStatus,
-                                               @RequestParam("shopId") String shopId,@RequestParam("cityId") String cityId);
+                                               @RequestParam("userId") String userId,@RequestParam("cityId") String cityId);
 
     @PostMapping("/sup/djSupApplication/queryDjSupplierByShopID")
     @ApiOperation(value = "店铺-审核供应商列表", notes = "店铺-审核供应商列表")

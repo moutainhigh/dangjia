@@ -123,13 +123,16 @@ public class OrderService {
             order1.setDataStatus(1);
             orderMapper.updateByExampleSelective(order1,orderexample);
             //订单详情删除
+
             Example  orderItemexample=new Example(OrderItem.class);
             orderItemexample.createCriteria().andEqualTo(Order.ID,orderId);
             OrderItem orderItem=new OrderItem();
             orderItem.setDataStatus(1);
             orderItemMapper.updateByExampleSelective(orderItem,orderItemexample);
 
-            //要货单删除
+            //要货单以及要货单详情表删除 orderSplitMapper  orderSplitItemMapper
+
+
 
             //发货单删除
 

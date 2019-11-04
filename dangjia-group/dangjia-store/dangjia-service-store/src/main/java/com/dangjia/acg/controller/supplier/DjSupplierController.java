@@ -62,8 +62,8 @@ public class DjSupplierController implements DjSupplierAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryDjSupplierByShopIdPage(PageDTO pageDTO, String keyWord, String applicationStatus, String shopId,String cityId) {
-        return djSupplierServices.queryDjSupplierByShopIdPage(pageDTO,keyWord,applicationStatus,shopId,cityId);
+    public ServerResponse queryDjSupplierByShopIdPage(PageDTO pageDTO, String keyWord, String applicationStatus, String userId,String cityId) {
+        return djSupplierServices.queryDjSupplierByShopIdPage(pageDTO,keyWord,applicationStatus,userId,cityId);
     }
 
     @Override
