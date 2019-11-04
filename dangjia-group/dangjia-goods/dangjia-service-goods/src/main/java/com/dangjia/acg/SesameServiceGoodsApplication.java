@@ -3,16 +3,12 @@ package com.dangjia.acg;
 import org.apache.shiro.codec.Base64;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.web.servlet.MultipartConfigFactory;
 import org.springframework.cloud.client.SpringCloudApplication;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.cloud.netflix.feign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.cors.CorsConfiguration;
-
-import javax.servlet.MultipartConfigElement;
 
 /**
  * @author: QiYuXiang
@@ -35,12 +31,12 @@ public class SesameServiceGoodsApplication implements CommandLineRunner {
     SpringApplication.run(SesameServiceGoodsApplication.class, args);
   }
 
-  @Bean
-  MultipartConfigElement multipartConfigElement() {
-    MultipartConfigFactory factory = new MultipartConfigFactory();
-    factory.setLocation("e:/dangjia/temporary/");
-    return factory.createMultipartConfig();
-  }
+//  @Bean
+//  MultipartConfigElement multipartConfigElement() {
+//    MultipartConfigFactory factory = new MultipartConfigFactory();
+//    factory.setLocation("e:/dangjia/temporary/");
+//    return factory.createMultipartConfig();
+//  }
 
   @Override
   public void run(String... args) throws Exception {
