@@ -2,6 +2,7 @@ package com.dangjia.acg.dto.delivery;
 
 import lombok.Data;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -11,17 +12,14 @@ import java.util.Map;
  * Time: 下午 3:22
  */
 @Data
-public class WorkNodeListDTO {
+public class HouseFlowInfoDTO {
 
 
+    private Integer number;
 
-    private List<Map<String,Object>> lists;
+    List<HouseFlowDataDTO> houseFlowDataDTOS;
 
-    private String image;
 
-    private String workName;
-
-    private Integer hundred;
 
 
 }

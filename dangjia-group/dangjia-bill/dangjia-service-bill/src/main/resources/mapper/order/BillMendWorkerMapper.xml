@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.order.IBillMendWorkerMapper">
+
+    <!--查询退人工对应的人工商品信息-->
+     <select id="queryBillMendOrderId" resultType="com.dangjia.acg.dto.refund.RefundRepairOrderMaterialDTO">
+        SELECT
+            t.mend_order_id repairMendOrderId,
+            t.id repairOrderMaterialId,
+            t.worker_goods_id productId,
+            t.worker_goods_name productName,
+            t.worker_goods_sn productSn,
+            '2' productType,
+            t.price price,
+            t.unit_name unitName,
+            t.shop_count returnCount,
+            t1.prod_template_id productTemplateId
+        FROM
+            dj_repair_mend_worker t,
+            dj_basics_storefront_product t1
+        WHERE
+            t.worker_goods_id = t1.id
+        AND t.mend_order_id = #{mendOrderId}
+     </select>
+
+</mapper>

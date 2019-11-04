@@ -50,21 +50,6 @@ public interface DjActuaryBudgetMaterialAPI {
                                       @RequestParam("brandVal")String brandVal,
                                       @RequestParam("orderKey")String orderKey);
 
-    /**
-     * 新版精算列表展示(精算+自购)
-     */
-    @PostMapping("/app/product/djActuaryBudgetMaterial/queryMakeBudgetsList2")
-    @ApiOperation(value = "查询精算列表", notes = "查询精算列表")
-    ServerResponse queryMakeBudgetsList2(@RequestParam("request") HttpServletRequest request,
-                                        @RequestParam("bclId") String bclId,
-                                        @RequestParam("categoryId") String categoryId,
-                                        @RequestParam("houseId") String houseId,
-                                        @RequestParam("cityId") String cityId);
-
-
-    /**
-     * 新版精算二级展示
-     */
 
 
 }

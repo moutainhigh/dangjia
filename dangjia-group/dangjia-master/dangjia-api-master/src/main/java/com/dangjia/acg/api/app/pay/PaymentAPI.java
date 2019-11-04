@@ -22,10 +22,6 @@ public interface PaymentAPI {
     @ApiOperation(value = "POS确认支付", notes = "POS确认支付")
     ServerResponse setServersSuccess(String businessOrderId, BigDecimal money, String image );
 
-    @PostMapping("app/pay/payment/correct")
-    @ApiOperation(value = "已付款，材料人工冲正", notes = "已付款，材料人工冲正")
-    void budgetCorrect(String businessOrderNumber,  String payState, String houseFlowId);
-
     @PostMapping("app/pay/payment/setPaying")
     @ApiOperation(value = "待付款提前付款", notes = "待付款提前付款")
     ServerResponse setPaying(@RequestParam("userToken") String userToken,

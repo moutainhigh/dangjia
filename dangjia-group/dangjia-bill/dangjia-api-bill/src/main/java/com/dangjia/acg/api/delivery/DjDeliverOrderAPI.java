@@ -36,5 +36,17 @@ public interface DjDeliverOrderAPI {
     @PostMapping("/app/deliverOrder/queryOrderNumber")
     @ApiOperation(value = "查询我要装修首页", notes = "查询我要装修首页")
     ServerResponse queryOrderNumber(@RequestParam("request") HttpServletRequest request,
-                                    @RequestParam("houseId") String userId);
+                                    @RequestParam("userToken") String userToken,
+                                    @RequestParam("houseId") String houseId);
+
+
+    @PostMapping("app/design/getDesignImag")
+    @ApiOperation(value = "获取设计图", notes = "获取设计图")
+    ServerResponse getDesignImag(@RequestParam("request") HttpServletRequest request,
+                               @RequestParam("houseId") String houseId);
+
+    @PostMapping("app/design/getDesignInfo")
+    @ApiOperation(value = "获取设计验收过程", notes = "获取设计验收过程")
+    ServerResponse getDesignInfo(@RequestParam("request") HttpServletRequest request,
+                                 @RequestParam("houseId") String houseId);
 }

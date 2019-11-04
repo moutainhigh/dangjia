@@ -24,10 +24,8 @@ public class DjActuaryBudgetMaterialController implements DjActuaryBudgetMateria
     @Override
     @ApiMethod
     public ServerResponse makeBudgets(HttpServletRequest request, String actuarialTemplateId,
-                                      String houseId, String workerTypeId, String listOfGoods,
-                                      String cityId) {
-        return djActuaryBudgetMaterialService.makeBudgets(actuarialTemplateId, houseId,
-                workerTypeId, listOfGoods,cityId);
+                                      String houseId, String workerTypeId, String listOfGoods,String cityId) {
+        return djActuaryBudgetMaterialService.makeBudgets(actuarialTemplateId, houseId,workerTypeId, listOfGoods,cityId);
     }
 
     /**
@@ -41,8 +39,7 @@ public class DjActuaryBudgetMaterialController implements DjActuaryBudgetMateria
      */
     @Override
     @ApiMethod
-    public ServerResponse queryMakeBudgetsList(HttpServletRequest request, String bclId,
-                                               String categoryId, String houseId,String cityId) {
+    public ServerResponse queryMakeBudgetsList(HttpServletRequest request, String bclId,String categoryId, String houseId,String cityId) {
         return djActuaryBudgetMaterialService.queryMakeBudgetsList(bclId, categoryId, houseId,cityId);
     }
 
@@ -54,34 +51,9 @@ public class DjActuaryBudgetMaterialController implements DjActuaryBudgetMateria
      */
     @Override
     @ApiMethod
-    public ServerResponse queryBasicsProduct(HttpServletRequest request,
-                                             String productId,
-                                             PageDTO pageDTO,
-                                             String cityId,
-                                             String categoryId,
-                                             String name,
-                                             String attributeVal,
-                                             String brandVal,
-                                             String orderKey) {
+    public ServerResponse queryBasicsProduct(HttpServletRequest request,String productId,PageDTO pageDTO,String cityId,String categoryId,
+                                             String name,String attributeVal,String brandVal, String orderKey) {
         return djActuaryBudgetMaterialService.queryBasicsProduct(productId, pageDTO, cityId, categoryId, name, attributeVal, brandVal, orderKey);
     }
-
-
-     /*
-     * 查询精算首页列表
-     *
-     * @param request
-     * @param bclId
-     * @param categoryId
-     * @param houseId
-     * @return
-     */
-    @Override
-    @ApiMethod
-    public ServerResponse queryMakeBudgetsList2(HttpServletRequest request, String bclId,
-                                               String categoryId, String houseId,String cityId) {
-        return djActuaryBudgetMaterialService.queryMakeBudgetsList2(bclId, categoryId, houseId,cityId);
-    }
-
 
 }

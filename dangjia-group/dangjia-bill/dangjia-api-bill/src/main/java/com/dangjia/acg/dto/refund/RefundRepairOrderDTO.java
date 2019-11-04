@@ -1,5 +1,6 @@
 package com.dangjia.acg.dto.refund;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.util.Date;
@@ -51,6 +52,12 @@ public class RefundRepairOrderDTO {
     private String repairNewNode;//最新处理节点
 
     private String reparirRemainingTime;//订单剩余处理时间
+
+    @ApiModelProperty("可操作编码")
+    private String associatedOperation;
+
+    @ApiModelProperty("可操作编码描述")
+    private String associatedOperationName;
 
     private List<RefundRepairOrderMaterialDTO> orderMaterialList;
 

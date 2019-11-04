@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.delivery.IBillHouseFlowApplyMapper">
+
+    <sql id="all_columns">
+        id,
+        house_flow_id as houseFlowId,
+        worker_id as workerId,
+        worker_type_id as workerTypeId,
+        worker_type as workerType,
+        house_id as houseId,
+        apply_type as applyType,
+        suspend_day as suspendDay,
+        end_date as endDate,
+        start_date as startDate,
+        apply_dec as applyDec,
+        member_check as memberCheck,
+        supervisor_check as supervisorCheck,
+        apply_money as applyMoney,
+        pay_state as payState,
+        other_money as otherMoney,
+        supervisor_money as supervisorMoney,
+        create_date as createDate,
+        modify_date as modifyDate
+    </sql>
+
+
+    <!--管家已审核业主未审核申请 -->
+    <select id="getMemberCheckList" parameterType="java.lang.String"
+            resultType="com.dangjia.acg.modle.core.HouseFlowApply">
+        select
+        <include refid="all_columns"/>
+        from dj_core_house_flow_apply
+        where member_check = 0
+        and house_id = #{houseId}
+
+        and ( ((apply_type=1 or apply_type=2) and (supervisor_check = 1))
+        or apply_type=0 )
+    </select>
+
+
+
+
+</mapper>
+

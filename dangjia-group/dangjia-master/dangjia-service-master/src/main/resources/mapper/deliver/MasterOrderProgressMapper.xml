@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.delivery.IMasterOrderProgressMapper">
+
+
+    <update id="updateOrderStatusByNodeCode">
+        update dj_deliver_order_progress set data_status=1 where node_type=#{nodeType} and progress_order_id=#{repairMendOrderId} and node_code=#{nodeCode}
+    </update>
+</mapper>

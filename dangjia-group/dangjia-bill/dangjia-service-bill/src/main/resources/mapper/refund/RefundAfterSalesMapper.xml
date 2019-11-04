@@ -140,6 +140,7 @@
         and t.house_id=#{houseId}
         and t.type=#{type}
         and t.state<![CDATA[<>]]>0
+        order by t.create_date desc
     </select>
 
     <select id="queryRefundOnlyHistoryOrderMaterialList"  resultType="com.dangjia.acg.dto.refund.RefundRepairOrderMaterialDTO">
