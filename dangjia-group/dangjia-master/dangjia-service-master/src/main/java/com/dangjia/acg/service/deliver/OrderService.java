@@ -97,6 +97,49 @@ public class OrderService {
     private ICartMapper cartMapper;
 
     /**
+     * 删除订单
+     */
+    public ServerResponse delBusinessOrderById( String userToken, String orderId) {
+        try {
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;
+
+
+            Order order = orderMapper.selectByPrimaryKey(orderId);
+            if (order == null) {
+                return ServerResponse.createByErrorMessage("该订单不存在");
+            }
+            House house = houseMapper.selectByPrimaryKey(order.getHouseId());
+            if (house == null) {
+                return ServerResponse.createByErrorMessage("该房产不存在");
+            }
+            //主订单删除
+            Example  orderexample=new Example(Order.class);
+            orderexample.createCriteria().andEqualTo(Order.ID,orderId).andEqualTo(Order.MEMBER_ID,member.getId());
+            Order order1=new Order();
+            order1.setDataStatus(1);
+            orderMapper.updateByExampleSelective(order1,orderexample);
+            //订单详情删除
+            Example  orderItemexample=new Example(OrderItem.class);
+            orderItemexample.createCriteria().andEqualTo(Order.ID,orderId);
+            OrderItem orderItem=new OrderItem();
+            orderItem.setDataStatus(1);
+            orderItemMapper.updateByExampleSelective(orderItem,orderItemexample);
+
+            //要货单删除
+
+            //发货单删除
+            return ServerResponse.createBySuccess("删除成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("删除订单异常");
+        }
+    }
+
+    /**
      * 订单详情
      */
     public ServerResponse orderDetail(String orderId) {
@@ -155,6 +198,7 @@ public class OrderService {
         orderItemDTO.setItemDTOList(itemDTOList);
         return ServerResponse.createBySuccess("查询成功", orderItemDTO);
     }
+
 
     /**
      * 订单详情

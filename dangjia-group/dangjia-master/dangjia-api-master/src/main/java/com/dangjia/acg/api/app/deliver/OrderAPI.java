@@ -12,14 +12,14 @@ import org.springframework.web.bind.annotation.RequestParam;
  * author: zmj
  * Date: 2018/11/9 0009
  * Time: 10:55
- * 订单要货操作迁移到dj-bill之后，此功能停用
+ *
  */
 @FeignClient("dangjia-service-master")
 @Api(value = "订单要货操作", description = "订单要货操作")
 public interface OrderAPI {
 
     @PostMapping("app/order/orderDetail")
-    @ApiOperation(value = "订单详情", notes = "订单详情")
+    @ApiOperation(value = "子订单详情", notes = "子订单详情")
     ServerResponse orderDetail(@RequestParam("orderId") String orderId);
 
     @PostMapping("app/order/orderList")
@@ -48,4 +48,17 @@ public interface OrderAPI {
     ServerResponse saveOrderSplit(@RequestParam("productArr") String productArr,
                                   @RequestParam("houseId") String houseId,
                                   @RequestParam("userToken") String userToken);
+
+    /**
+     * 批量退款  调用正红的批量退款
+     */
+
+    /**
+     * 删除订单 --删除已经购物的订单
+     */
+    @PostMapping("app/order/delBusinessOrderById")
+    @ApiOperation(value = "删除订单", notes = "删除订单")
+    ServerResponse delBusinessOrderById(@RequestParam("userToken") String userToken, @RequestParam("orderId") String orderId);
+
+
 }

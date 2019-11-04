@@ -33,6 +33,7 @@ import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 import tk.mybatis.mapper.util.StringUtil;
 
@@ -116,6 +117,47 @@ public class SplitDeliverService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("操作失败");
         }
+    }
+
+
+    /**
+     *  确认安装
+     * @param userToken
+     * @param splitDeliverId
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse confirmInstallation( String userToken,String splitDeliverId) {
+
+        try {
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member operator = (Member) object;
+
+            if(StringUtil.isEmpty(splitDeliverId))
+            {
+                return ServerResponse.createByErrorMessage("发货单ID不能为空");
+            }
+
+            //发货单
+            SplitDeliver splitDeliver = splitDeliverMapper.selectByPrimaryKey(splitDeliverId);
+            String orderSplitId=splitDeliver.getOrderSplitId();
+
+            //要货单
+
+
+            //订单明细
+
+
+            return null;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("操作失败");
+        }
+
     }
 
     /**

@@ -87,7 +87,7 @@ public class MendMaterielService {
             Storefront storefront= basicsStorefrontAPI.queryStorefrontByUserID(userId,cityId);
             if(storefront==null)
             {
-                return ServerResponse.createByErrorMessage("不存在店铺信息");
+                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
             List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(storefront.getId(),houseId, 4, beginDate, endDate, state,likeAddress);
             PageInfo pageResult = new PageInfo(mendOrderList);
@@ -120,7 +120,7 @@ public class MendMaterielService {
             Storefront storefront= basicsStorefrontAPI.queryStorefrontByUserID(userId,cityId);
             if(storefront==null)
             {
-                return ServerResponse.createByErrorMessage("不存在店铺信息");
+                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
 //            List<MendOrder> mendOrderList = mendOrderMapper.materialBackState(houseId); 2
             List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddressHandle(storefront.getId(),houseId, 2, beginDate, endDate, state,likeAddress);
@@ -153,7 +153,7 @@ public class MendMaterielService {
             Storefront storefront= basicsStorefrontAPI.queryStorefrontByUserID(userId,cityId);
             if(storefront==null)
             {
-                return ServerResponse.createByErrorMessage("不存在店铺信息");
+                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
             List<MendOrder> mendOrderList = mendOrderMapper.materialBackStateProcessing(storefront.getId(),houseId, 2, beginDate, endDate, state,likeAddress);
             PageInfo pageResult = new PageInfo(mendOrderList);
@@ -178,7 +178,7 @@ public class MendMaterielService {
             Storefront storefront= basicsStorefrontAPI.queryStorefrontByUserID(userId,cityId);
             if(storefront==null)
             {
-                return ServerResponse.createByErrorMessage("不存在店铺信息");
+                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
 //            List<MendOrder> mendOrderList = mendOrderMapper.materialBackState(houseId); 2
             List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(storefront.getId(),houseId, 2, beginDate, endDate, state,likeAddress);

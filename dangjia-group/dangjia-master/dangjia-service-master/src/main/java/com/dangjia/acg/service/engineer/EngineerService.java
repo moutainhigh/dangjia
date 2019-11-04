@@ -835,7 +835,7 @@ public class EngineerService {
         Storefront storefront= basicsStorefrontAPI.queryStorefrontByUserID(userID,cityId);
         if(storefront==null)
         {
-            return ServerResponse.createByErrorMessage("不存在店铺信息");
+            return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
         }
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         Example example = new Example(Warehouse.class);

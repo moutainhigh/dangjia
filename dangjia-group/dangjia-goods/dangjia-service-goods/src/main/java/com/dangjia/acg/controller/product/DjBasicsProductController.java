@@ -322,7 +322,7 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
         Storefront storefront=basicsStorefrontAPI.queryStorefrontByUserID(userId,cityId);
         if(storefront==null)
         {
-            return ServerResponse.createByErrorMessage("没有店铺信息，请先维护店铺信息");
+            return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
         }
         return djBasicsGoodsService.queryGoodsListStorefront(storefront.getId(),pageDTO, categoryId, name, type);
     }
