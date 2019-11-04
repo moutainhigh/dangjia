@@ -13,14 +13,15 @@ import com.dangjia.acg.common.util.excel.ExportExcel;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.deliver.SplitDeliverDTO;
 import com.dangjia.acg.dto.deliver.SplitDeliverItemDTO;
-import com.dangjia.acg.dto.house.WareDTO;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
+import com.dangjia.acg.mapper.delivery.IOrderItemMapper;
 import com.dangjia.acg.mapper.delivery.IOrderSplitItemMapper;
 import com.dangjia.acg.mapper.delivery.ISplitDeliverMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.modle.core.WorkerType;
+import com.dangjia.acg.modle.deliver.OrderItem;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.house.House;
@@ -72,6 +73,9 @@ public class SplitDeliverService {
     private IWorkerTypeMapper workerTypeMapper;
     @Autowired
     private DjSupplierAPI djSupplierAPI ;
+
+    @Autowired
+    private IOrderItemMapper orderItemMapper;
     /**
      * 部分收货
      */
@@ -140,19 +144,35 @@ public class SplitDeliverService {
             {
                 return ServerResponse.createByErrorMessage("发货单ID不能为空");
             }
-
             //发货单
             SplitDeliver splitDeliver = splitDeliverMapper.selectByPrimaryKey(splitDeliverId);
-            String orderSplitId=splitDeliver.getOrderSplitId();
+            String orderSplitId=null;//要货单明细表Id
+            if(splitDeliver==null)
+            {
+                return ServerResponse.createByErrorMessage("不存在发货单信息");
+            }
+            else
+            {
+                splitDeliver.setShippingState(8);//配送状态（0待发货,1已发待收货,2已收货,3取消,4部分收,5已结算,6材料员撤回(只待发货才能撤回),7待安装，8已完成））
+                splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
 
-            //要货单
-
-
-            //订单明细
-
-
-            return null;
-
+                orderSplitId=splitDeliver.getOrderSplitId();
+                OrderSplitItem  orderSplitItem=orderSplitItemMapper.selectByPrimaryKey(orderSplitId); //要货单
+                String orderItemId=null;
+                if(orderSplitItem!=null)
+                {
+                     orderItemId=orderSplitItem.getOrderItemId();
+                }
+                String args[]=orderItemId.split(",");
+                for(String str:args)
+                {
+                    OrderItem orderItem =orderItemMapper.selectByPrimaryKey(str);
+                    orderItem.setOrderStatus("4");//订单状态（1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭,8待安装
+                    orderItemMapper.updateByPrimaryKeySelective(orderItem);
+                }
+                //订单明细
+                return ServerResponse.createBySuccessMessage("确认安装成功");
+            }
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("操作失败");

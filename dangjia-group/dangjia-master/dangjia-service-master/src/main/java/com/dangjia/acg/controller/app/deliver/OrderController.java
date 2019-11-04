@@ -44,6 +44,12 @@ public class OrderController implements OrderAPI {
         return orderService.businessOrderList(pageDTO, userToken, houseId, queryId);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse queryBusinessOrderListByStatus(PageDTO pageDTO, String userToken, String houseId, String queryId, String orderStatus) {
+        return orderService.queryBusinessOrderListByStatus(pageDTO,userToken,houseId,queryId,orderStatus);
+    }
+
     /**
      * 删除订单
      * @param userToken
