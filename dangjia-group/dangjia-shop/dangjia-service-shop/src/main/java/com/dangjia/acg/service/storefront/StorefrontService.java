@@ -213,26 +213,53 @@ public class StorefrontService {
             {
                 return ServerResponse.createByErrorMessage("城市编号不能为空");
             }
-            Example example = new Example(Storefront.class);
-            example.createCriteria().andEqualTo(Storefront.USER_ID, storefrontDTO.getUserId()).andEqualTo(Storefront.CITY_ID, storefrontDTO.getCityId());
 
-            Storefront storefront=new Storefront();
-            storefront.setUserId(storefrontDTO.getUserId());
-            storefront.setCityId(storefrontDTO.getCityId());
-            storefront.setStorefrontName(storefrontDTO.getStorefrontName());
-            storefront.setStorefrontAddress(storefrontDTO.getStorefrontAddress());
-            storefront.setStorefrontDesc(storefrontDTO.getStorefrontDesc());
-            storefront.setStorefrontLogo(storefrontDTO.getStorefrontLogo());
-            storefront.setStorekeeperName(storefrontDTO.getStorekeeperName());
-            storefront.setMobile(storefrontDTO.getMobile());
-            storefront.setEmail(storefrontDTO.getEmail());
-            storefront.setCreateDate(null);
-            storefront.setId(null);
-            int i = istorefrontMapper.updateByExample(storefront,example);
-            if (i <= 0) {
-                return ServerResponse.createByErrorMessage("修改失败!");
+
+            Example exampleStorefront=new Example(Storefront.class);
+            exampleStorefront.createCriteria().andEqualTo(Storefront.USER_ID,storefrontDTO.getUserId()).
+                    andEqualTo(Storefront.CITY_ID, storefrontDTO.getCityId());
+            List<Storefront> list =istorefrontMapper.selectByExample(exampleStorefront);
+            if(list.size()<=0)
+            {
+                Storefront storefront=new Storefront();
+                storefront.setUserId(storefrontDTO.getUserId());
+                storefront.setCityId(storefrontDTO.getCityId());
+                storefront.setStorefrontName(storefrontDTO.getStorefrontName());
+                storefront.setStorefrontAddress(storefrontDTO.getStorefrontAddress());
+                storefront.setStorefrontDesc(storefrontDTO.getStorefrontDesc());
+                storefront.setStorefrontLogo(storefrontDTO.getStorefrontLogo());
+                storefront.setStorekeeperName(storefrontDTO.getStorekeeperName());
+                storefront.setMobile(storefrontDTO.getMobile());
+                storefront.setEmail(storefrontDTO.getEmail());
+                int i = istorefrontMapper.insert(storefront);
+                if (i <= 0) {
+                    return ServerResponse.createByErrorMessage("修改失败!");
+                }
+                return ServerResponse.createBySuccessMessage("修改成功!");
             }
-            return ServerResponse.createBySuccessMessage("修改成功!");
+            else
+            {
+                Example example = new Example(Storefront.class);
+                example.createCriteria().andEqualTo(Storefront.USER_ID, storefrontDTO.getUserId()).andEqualTo(Storefront.CITY_ID, storefrontDTO.getCityId());
+                Storefront storefront=new Storefront();
+                storefront.setUserId(storefrontDTO.getUserId());
+                storefront.setCityId(storefrontDTO.getCityId());
+                storefront.setStorefrontName(storefrontDTO.getStorefrontName());
+                storefront.setStorefrontAddress(storefrontDTO.getStorefrontAddress());
+                storefront.setStorefrontDesc(storefrontDTO.getStorefrontDesc());
+                storefront.setStorefrontLogo(storefrontDTO.getStorefrontLogo());
+                storefront.setStorekeeperName(storefrontDTO.getStorekeeperName());
+                storefront.setMobile(storefrontDTO.getMobile());
+                storefront.setEmail(storefrontDTO.getEmail());
+                storefront.setCreateDate(null);
+                storefront.setId(null);
+                int i = istorefrontMapper.updateByExample(storefront,example);
+                if (i <= 0) {
+                    return ServerResponse.createByErrorMessage("修改失败!");
+                }
+                return ServerResponse.createBySuccessMessage("修改成功!");
+            }
+
         } catch (Exception e) {
             logger.error("修改失败：", e);
             return ServerResponse.createByErrorMessage("修改失败");

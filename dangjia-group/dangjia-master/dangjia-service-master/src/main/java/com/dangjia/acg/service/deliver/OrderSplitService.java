@@ -514,7 +514,7 @@ public class OrderSplitService {
             Storefront storefront= basicsStorefrontAPI.queryStorefrontByUserID(userId,cityId);
             if(storefront==null)
             {
-                return ServerResponse.createByErrorMessage("不存在店铺信息");
+                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
 //        List<House> houseList = houseMapper.selectAll();
@@ -560,7 +560,7 @@ public class OrderSplitService {
             Storefront storefront= basicsStorefrontAPI.queryStorefrontByUserID(userId,cityId);
             if(storefront==null)
             {
-                return ServerResponse.createByErrorMessage("不存在店铺信息");
+                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
             Example example = new Example(OrderSplit.class);
             example.createCriteria()

@@ -166,9 +166,9 @@ public class Order extends BaseEntity {
 	private Date orderPayTime;//订单支付时间
 
 	@Column(name = "order_source")
-	@Desc(value = "订单来源(1,精算制作，2业主自购，3购物车）")
-	@ApiModelProperty("订单来源(1,精算制作，2业主自购，3购物车）")
-	private int orderSource;//订单来源(1,精算制作，2业主自购，3购物车）
+	@Desc(value = "订单来源(1,精算制作，2购物车，3补货单）")
+	@ApiModelProperty("订单来源(1,精算制作，2购物车，3补货单）")
+	private int orderSource;//订单来源(1,精算制作，2购物车，3补货单）
 
 	@Column(name = "create_by")
 	@Desc(value = "创建人")

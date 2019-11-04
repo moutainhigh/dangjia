@@ -62,4 +62,19 @@ public interface SplitDeliverAPI {
     @ApiOperation(value = "收货列表", notes = "收货列表")
     ServerResponse splitDeliverList(@RequestParam("houseId") String houseId,
                                     @RequestParam("shipState") int shipState);
+
+
+
+    /**
+     * 确认安装
+     * @param splitDeliverId
+     * @param userToken
+     * @return
+     */
+    @PostMapping("app/deliver/order/confirmInstallation")
+    @ApiOperation(value = "确认安装", notes = "确认安装")
+    ServerResponse confirmInstallation(@RequestParam("userToken") String userToken,@RequestParam("splitDeliverId") String splitDeliverId);
+
+
+
 }
