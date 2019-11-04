@@ -19,7 +19,6 @@ public class OrderController implements OrderAPI {
     @Autowired
     private OrderService orderService;
 
-
     /**
      * 订单详情
      */
@@ -35,6 +34,7 @@ public class OrderController implements OrderAPI {
         return orderService.orderList(businessOrderId);
     }
 
+
     /**
      * 业务订单列表
      */
@@ -42,6 +42,24 @@ public class OrderController implements OrderAPI {
     @ApiMethod
     public ServerResponse businessOrderList(PageDTO pageDTO, String userToken, String houseId, String queryId) {
         return orderService.businessOrderList(pageDTO, userToken, houseId, queryId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryBusinessOrderListByStatus(PageDTO pageDTO, String userToken, String houseId, String queryId, String orderStatus) {
+        return orderService.queryBusinessOrderListByStatus(pageDTO,userToken,houseId,queryId,orderStatus);
+    }
+
+    /**
+     * 删除订单
+     * @param userToken
+     * @param orderId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse delBusinessOrderById( String userToken, String orderId) {
+        return orderService.delBusinessOrderById(userToken,orderId);
     }
 
     /**

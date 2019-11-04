@@ -97,6 +97,50 @@ public class OrderService {
     private ICartMapper cartMapper;
 
     /**
+     * 删除订单
+     */
+    public ServerResponse delBusinessOrderById( String userToken, String orderId) {
+        try {
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;
+
+
+            Order order = orderMapper.selectByPrimaryKey(orderId);
+            if (order == null) {
+                return ServerResponse.createByErrorMessage("该订单不存在");
+            }
+            House house = houseMapper.selectByPrimaryKey(order.getHouseId());
+            if (house == null) {
+                return ServerResponse.createByErrorMessage("该房产不存在");
+            }
+            //主订单删除
+            Example  orderexample=new Example(Order.class);
+            orderexample.createCriteria().andEqualTo(Order.ID,orderId).andEqualTo(Order.MEMBER_ID,member.getId());
+            Order order1=new Order();
+            order1.setDataStatus(1);
+            orderMapper.updateByExampleSelective(order1,orderexample);
+            //订单详情删除
+            Example  orderItemexample=new Example(OrderItem.class);
+            orderItemexample.createCriteria().andEqualTo(Order.ID,orderId);
+            OrderItem orderItem=new OrderItem();
+            orderItem.setDataStatus(1);
+            orderItemMapper.updateByExampleSelective(orderItem,orderItemexample);
+
+            //要货单删除
+
+            //发货单删除
+
+            return ServerResponse.createBySuccess("删除成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("删除订单异常");
+        }
+    }
+
+    /**
      * 订单详情
      */
     public ServerResponse orderDetail(String orderId) {
@@ -156,6 +200,7 @@ public class OrderService {
         return ServerResponse.createBySuccess("查询成功", orderItemDTO);
     }
 
+
     /**
      * 订单详情
      */
@@ -188,6 +233,86 @@ public class OrderService {
         businessOrderDTO.setState(businessOrder.getState());
         businessOrderDTO.setCarriage(0.0);//运费
         return ServerResponse.createBySuccess("查询成功", businessOrderDTO);
+    }
+
+    /**
+     * 根据订单状态查询订单列表
+     * @param pageDTO
+     * @param userToken
+     * @param houseId
+     * @param queryId
+     * @param orderStatus
+     * @return
+     */
+    public ServerResponse queryBusinessOrderListByStatus(PageDTO pageDTO, String userToken, String houseId, String queryId, String orderStatus) {
+        try {
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<BusinessOrder> businessOrderList = businessOrderMapper.byMemberId(member.getId(), houseId, queryId);
+            PageInfo pageResult = new PageInfo(businessOrderList);
+            List<BusinessOrderDTO> businessOrderDTOS = new ArrayList<>();
+            for (BusinessOrder businessOrder : businessOrderList) {
+                BusinessOrderDTO businessOrderDTO = new BusinessOrderDTO();
+                House house = houseMapper.selectByPrimaryKey(businessOrder.getHouseId());
+                String info = "";//1工序支付任务,2补货补人工 ,4待付款进来只付材料, 5验房分销, 6换货单,7:设计精算补单
+                switch (businessOrder.getType()) {
+                    case 1:
+                        info = "(工序订单)";
+                        break;
+                    case 2:
+                        info = "(补货/补人工单)";
+                        break;
+                    case 4:
+                        info = "(材料订单)";
+                        break;
+                    case 5:
+                        info = "(验房分销单)";
+                        break;
+                    case 6:
+                        info = "(换货单)";
+                        break;
+                    case 7:
+                        info = "(设计/精算单)";
+                        break;
+                    case 8:
+                        info = "(未购买单)";
+                        break;
+                }
+                if (businessOrder.getType() == 5) {//验房分销
+                    HouseDistribution houseDistribution = iHouseDistributionMapper.selectByPrimaryKey(businessOrder.getTaskId());
+                    businessOrderDTO.setHouseName(houseDistribution.getInfo());
+                } else {
+                    businessOrderDTO.setHouseName(house == null ? "" : house.getHouseName());
+                }
+                businessOrderDTO.setHouseName(businessOrderDTO.getHouseName() + info);
+                List<OrderDTO> orderDTOList = this.orderDTOList(businessOrder.getNumber(), house == null ? "" : house.getStyle(),orderStatus);
+                if (orderDTOList.size() > 0) {
+                    BigDecimal payPrice = new BigDecimal(0);
+                    for (OrderDTO orderDTO : orderDTOList) {
+                        payPrice = payPrice.add(orderDTO.getTotalAmount());
+                    }
+                    businessOrderDTO.setPayPrice(payPrice);
+                } else {
+                    businessOrderDTO.setPayPrice(businessOrder.getPayPrice());
+                }
+                businessOrderDTO.setOrderDTOList(orderDTOList);
+                businessOrderDTO.setBusinessOrderId(businessOrder.getId());
+                businessOrderDTO.setCreateDate(businessOrder.getCreateDate());
+                businessOrderDTO.setNumber(businessOrder.getNumber());
+                businessOrderDTO.setType(businessOrder.getType());
+                businessOrderDTO.setState(businessOrder.getState());
+                businessOrderDTOS.add(businessOrderDTO);
+            }
+            pageResult.setList(businessOrderDTOS);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("失败");
+        }
     }
 
     /**
@@ -257,6 +382,47 @@ public class OrderService {
         }
         pageResult.setList(businessOrderDTOS);
         return ServerResponse.createBySuccess("查询成功", pageResult);
+    }
+
+    /*根据订单状态查询订单流水*/
+    private List<OrderDTO> orderDTOList(String businessOrderNumber, String style,String orderStatus) {
+        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+        List<OrderDTO> orderDTOList = new ArrayList<>();
+        List<Order> orderList = orderMapper.byBusinessOrderNumberAndOrderStatus(businessOrderNumber,orderStatus);
+        for (Order order : orderList) {
+            OrderDTO orderDTO = new OrderDTO();
+            orderDTO.setOrderId(order.getId());
+            orderDTO.setTotalAmount(order.getTotalAmount());
+            orderDTO.setWorkerTypeName(order.getWorkerTypeName());
+            if (StringUtil.isEmpty(order.getWorkerTypeId())) {
+                if (order.getType() == 2) {//材料
+                    orderDTO.setImage(address + "icon/bucailiao.png");
+                    orderDTO.setName("补材料商品");
+                } else {
+                    orderDTO.setImage(address + "icon/burengong.png");
+                    orderDTO.setName("人工商品");
+                }
+            } else if (order.getWorkerTypeId().equals("1")) {//设计
+                orderDTO.setName(style);
+                orderDTO.setImage(address + "icon/shejiF.png");
+            } else if (order.getWorkerTypeId().equals("2")) {
+                orderDTO.setName("当家精算");
+                orderDTO.setImage(address + "icon/jingsuanF.png");
+            } else {
+                List<OrderItem> orderItemList = orderItemMapper.byOrderIdList(order.getId());
+                if (orderItemList.size() > 0) {
+                    if (order.getType() == 1) {//人工
+                        orderDTO.setImage(address + "icon/Arengong.png");
+                        orderDTO.setName("人工类商品");
+                    } else if (order.getType() == 2) {//材料
+                        orderDTO.setImage(address + "icon/Acailiao.png");
+                        orderDTO.setName("材料类商品");
+                    }
+                }
+            }
+            orderDTOList.add(orderDTO);
+        }
+        return orderDTOList;
     }
 
     /*订单流水*/

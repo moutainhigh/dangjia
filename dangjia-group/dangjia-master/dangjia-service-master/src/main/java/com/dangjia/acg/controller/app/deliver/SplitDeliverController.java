@@ -79,4 +79,17 @@ public class SplitDeliverController implements SplitDeliverAPI {
     public ServerResponse splitDeliverList(String houseId, int shipState) {
         return splitDeliverService.splitDeliverList(houseId, shipState);
     }
+
+    /**
+     * 确认安装
+     * @param userToken
+     * @param splitDeliverId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse confirmInstallation( String userToken,String splitDeliverId) {
+        return splitDeliverService.confirmInstallation(userToken,splitDeliverId);
+    }
+
 }

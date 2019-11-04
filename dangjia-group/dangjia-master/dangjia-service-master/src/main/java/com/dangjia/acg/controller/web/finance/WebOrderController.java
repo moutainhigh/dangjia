@@ -40,6 +40,10 @@ public class WebOrderController implements WebOrderAPI {
         //通过缓存查询店铺信息
         //StorefrontDTO storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userID, StorefrontDTO.class);
         Storefront storefront= basicsStorefrontAPI.queryStorefrontByUserID(userID,cityId);
+        if(storefront==null)
+        {
+            return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
+        }
         return webOrderService.getAllOrders(pageDTO,cityId, state, searchKey,storefront.getId());
     }
 
