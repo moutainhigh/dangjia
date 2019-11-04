@@ -19,6 +19,7 @@ import com.dangjia.acg.mapper.actuary.IActuarialTemplateMapper;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
 import com.dangjia.acg.mapper.basics.*;
+import com.dangjia.acg.mapper.product.IBasicsGoodsMapper;
 import com.dangjia.acg.mapper.product.IBasicsProductTemplateMapper;
 import com.dangjia.acg.modle.actuary.ActuarialTemplate;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
@@ -29,6 +30,7 @@ import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.design.HouseStyleType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
+import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.service.basics.WorkerGoodsService;
 import com.dangjia.acg.service.product.DjBasicsProductTemplateService;
@@ -52,7 +54,8 @@ public class BudgetWorkerService {
     @Autowired
     private IProductWorkerMapper iWorkerGoodsMapper;
     @Autowired
-    private IGoodsMapper iGoodsMapper;
+    private IBasicsGoodsMapper iBasicsGoodsMapper;
+   // private IGoodsMapper iGoodsMapper;
     //@Autowired
     //private IProductMapper iProductMapper;
     @Autowired
@@ -193,7 +196,7 @@ public class BudgetWorkerService {
                 try {
                     BudgetMaterial budgetMaterial = new BudgetMaterial();
                     budgetMaterial.setConvertCount(1d);
-                    Goods goods = iGoodsMapper.queryById(jobT.getGoodsId());
+                    BasicsGoods goods = iBasicsGoodsMapper.queryById(jobT.getGoodsId());
                     if (goods == null) {
                         continue;
                     }
@@ -305,7 +308,7 @@ public class BudgetWorkerService {
 
             for (Map<String, Object> obj : materialList) {
                 String goodsId = obj.get("goodsId").toString();
-                Goods goods = iGoodsMapper.queryById(goodsId);
+                BasicsGoods goods = iBasicsGoodsMapper.queryById(goodsId);
                 Unit unit = iUnitMapper.selectByPrimaryKey(goods.getUnitId());
                 if (unit != null)
                     obj.put("goodsUnitName", unit.getName());
@@ -324,7 +327,7 @@ public class BudgetWorkerService {
         for (Map<String, Object> obj : materialList) {
             String goodsId = obj.get("goodsId").toString();
 //            Goods goods = iGoodsMapper.queryById(goodsId);
-            Goods goods = iGoodsMapper.selectByPrimaryKey(goodsId);
+            BasicsGoods goods = iBasicsGoodsMapper.selectByPrimaryKey(goodsId);
             obj.put("goodsBuy", goods.getBuy());
             if (goods.getBuy() == 0 || goods.getBuy() == 1) {//0：必买；1可选；2自购
 //                    budgetMaterial.setSteta(1);//我们购
@@ -372,7 +375,7 @@ public class BudgetWorkerService {
     /**
      * 生成精算
      */
-    public ServerResponse makeBudgets(String actuarialTemplateId, String houseId, String workerTypeId, String listOfGoods) {
+    public ServerResponse makeBudgets(String actuarialTemplateId, String houseId, String workerTypeId, String listOfGoods,String cityId) {
         try {
             logger.info("makeBudgets ***** :" + actuarialTemplateId);
             ServerResponse serverResponse = getForBudgetAPI.actuarialForBudget(houseId, workerTypeId);
@@ -410,7 +413,7 @@ public class BudgetWorkerService {
                     }
                     try {
                         BudgetMaterial budgetMaterial = new BudgetMaterial();
-                        Goods goods = iGoodsMapper.queryById(goodsId);
+                        BasicsGoods goods = iBasicsGoodsMapper.queryById(goodsId);
                         if (goods == null) {
                             continue;
                         }
@@ -468,7 +471,7 @@ public class BudgetWorkerService {
                             budgetMaterial.setProductId("");
                             budgetMaterial.setProductSn("");
                             budgetMaterial.setProductName("");
-                            budgetMaterial.setPrice(0.0);
+                            budgetMaterial.setPrice(goods.getIndicativePrice());//自购商品参考价格
                             budgetMaterial.setCost(0.0);
                             budgetMaterial.setImage("");//货品图片
                             budgetMaterial.setShopCount(shopCount);
@@ -488,6 +491,7 @@ public class BudgetWorkerService {
                         budgetMaterial.setProductType(goods.getType());
                         budgetMaterial.setGroupType(groupType);
                         budgetMaterial.setGoodsGroupId(goodsGroupId);
+                        budgetMaterial.setCityId(cityId);
                         //budgetMaterial.setTemplateId(actuarialTemplateId);
                         iBudgetMaterialMapper.insert(budgetMaterial);
                     } catch (Exception e) {
@@ -653,7 +657,7 @@ public class BudgetWorkerService {
                 List<BudgetMaterial> abmList = iBudgetMaterialMapper.selectByExample(example);//获取每个工序对应的材料表
                 for (BudgetMaterial abm : abmList) {//每个商品
                     DjBasicsProductTemplate product = iBasicsProductTemplateMapper.selectByPrimaryKey(abm.getProductId());
-                    Goods goods = iGoodsMapper.selectByPrimaryKey(abm.getGoodsId());
+                    BasicsGoods goods = iBasicsGoodsMapper.selectByPrimaryKey(abm.getGoodsId());
                     rlistResult = new RlistResult();
                     rlistResult.setRId(abm.getId());//id
                     if (aHflist.getWorkType() == 4) {

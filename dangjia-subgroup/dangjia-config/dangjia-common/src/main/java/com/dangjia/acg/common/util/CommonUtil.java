@@ -577,7 +577,6 @@ public class CommonUtil {
    * @return
    */
   public static String getStateWorkerName(String state){
-    //（0生成中,1处理中,2不通过取消,3已通过,4已全部结算,5已撤回）
     String stateName="大管家审核中";
     switch (state){
       case "RA_012" :
@@ -593,6 +592,32 @@ public class CommonUtil {
         stateName="工匠审核中";
         break;
       case "RA_018":
+        stateName="退人工成功";
+        break;
+      default:
+        break;
+    }
+    return stateName;
+  }
+
+  public static String getChangeStateName(String state){
+    //状态：0管家处理中,1管家取消,2管家通过(补:业主审核中,退:工匠审核中),3管家重新提交数量,4补人工支付完成,5待业主支付,6退人工完成,7已撤回
+    String stateName="大管家审核中";
+    switch (state){
+      case "0" :
+        stateName="大管家审核中";
+        break;
+      case "1":
+      case "7":
+        stateName="退人工关闭";
+        break;
+      case "2":
+        stateName="工匠审核中";
+        break;
+      case "3":
+      case "4":
+      case "5":
+      case "6":
         stateName="退人工成功";
         break;
       default:

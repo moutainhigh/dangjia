@@ -1034,6 +1034,8 @@ public class RefundAfterSalesService {
                     if(orderProgressDTOList!=null&&orderProgressDTOList.size()>0){//判断最后节点，及剩余处理时间
                         OrderProgressDTO orderProgressDTO=orderProgressDTOList.get(orderProgressDTOList.size()-1);
                         returnWorkOrderDTO.setStateName(CommonUtil.getStateWorkerName(orderProgressDTO.getNodeName()));
+                    }else{
+                        returnWorkOrderDTO.setStateName(CommonUtil.getChangeStateName(returnWorkOrderDTO.getState()));
                     }
                 }
             }
@@ -1065,7 +1067,7 @@ public class RefundAfterSalesService {
                 returnWorkOrderDTO.setAssociatedOperationName(orderProgressDTO.getAssociatedOperationName());
             }else{
                 //状态优化
-                returnWorkOrderDTO.setStateName(CommonUtil.getStateName(returnWorkOrderDTO.getState()));
+                returnWorkOrderDTO.setStateName(CommonUtil.getChangeStateName(returnWorkOrderDTO.getState()));
             }
             //流水节点放入
             returnWorkOrderDTO.setOrderProgressList(orderProgressDTOList);
@@ -1078,7 +1080,6 @@ public class RefundAfterSalesService {
             MendOrder mendOrder=iBillMendOrderMapper.selectOneByExample(example);
             if(mendOrder!=null&&StringUtils.isNotBlank(mendOrder.getId())){
                 returnWorkOrderDTO.setRepairWorkOrderNumber(mendOrder.getNumber());//设置申请单号
-                //查询对应的人工订单信息
             }
             List<RefundRepairOrderMaterialDTO> repairWorkerList=iBillMendWorkerMapper.queryBillMendOrderId(repairWorkOrderId);//退款商品列表查询
             getRepairOrderProductList(repairWorkerList,address);
@@ -1107,12 +1108,14 @@ public class RefundAfterSalesService {
         }else{
             //只撤回变更申请单即可
             ChangeOrder changeOrder = iBillChangeOrderMapper.selectByPrimaryKey(repairWorkOrderId);
+            if(changeOrder.getState()!=null&&"7".equals(changeOrder.getState())){
+               return ServerResponse.createBySuccess("退人工申请已撤销，请勿重复申请。");
+            }
             changeOrder.setState(7);
             iBillChangeOrderMapper.updateByPrimaryKeySelective(changeOrder);
             //退人工后，记录流水
-            if(mendOrder.getType()==3){//撤销退人工申请
-                updateOrderProgressInfo(changeOrder.getId(),"2","REFUND_AFTER_SALES","RA_019",changeOrder.getMemberId());//撤销退人工申请
-            }
+            updateOrderProgressInfo(changeOrder.getId(),"2","REFUND_AFTER_SALES","RA_019",changeOrder.getMemberId());//撤销退人工申请
+
         }
         return ServerResponse.createBySuccess("撤销成功");
     }

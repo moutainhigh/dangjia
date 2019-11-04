@@ -137,8 +137,8 @@ public class BudgetWorkerController implements BudgetWorkerAPI {
     @SuppressWarnings("static-access")
     @Override
     @ApiMethod
-    public ServerResponse makeBudgets(HttpServletRequest request, String actuarialTemplateId, String houseId, String workerTypeId, String listOfGoods) {
-        return budgetWorkerService.makeBudgets(actuarialTemplateId, houseId, workerTypeId, listOfGoods);
+    public ServerResponse makeBudgets(HttpServletRequest request, String actuarialTemplateId, String houseId, String workerTypeId, String listOfGoods,String cityId) {
+        return budgetWorkerService.makeBudgets(actuarialTemplateId, houseId, workerTypeId, listOfGoods,cityId);
     }
     /**
      * 生成精算（xls导入）

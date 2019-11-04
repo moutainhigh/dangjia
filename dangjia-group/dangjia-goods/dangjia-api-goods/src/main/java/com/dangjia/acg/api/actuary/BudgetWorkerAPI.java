@@ -140,7 +140,8 @@ public interface BudgetWorkerAPI {
                                @RequestParam("actuarialTemplateId") String actuarialTemplateId,
                                @RequestParam("houseId") String houseId,
                                @RequestParam("workerTypeId") String workerTypeId,
-                               @RequestParam("listOfGoods") String listOfGoods);
+                               @RequestParam("listOfGoods") String listOfGoods,
+                               @RequestParam("cityId") String cityId);
 
     @PostMapping("/actuary/budgetWorker/importExcelBudgets")
     @ApiOperation(value = "Excel导入精算", notes = "Excel导入精算")

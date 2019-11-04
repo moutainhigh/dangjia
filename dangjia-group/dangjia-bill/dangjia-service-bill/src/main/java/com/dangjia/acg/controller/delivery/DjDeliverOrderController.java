@@ -50,6 +50,4 @@ public class DjDeliverOrderController implements DjDeliverOrderAPI {
         return djDeliverOrderService.getDesignInfo(houseId);
     }
 
-
-
 }
