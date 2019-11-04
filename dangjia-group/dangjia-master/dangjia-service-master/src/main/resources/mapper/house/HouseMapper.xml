@@ -512,9 +512,16 @@
             <if test="budgetOk==1">
                 and (h.budget_ok =1 or h.budget_ok = 4)
             </if>
-            <if test="budgetOk!=1">
-                and h.budget_ok =#{budgetOk}
-            </if>
+            <choose>
+                <when test="userId != null and userId != ''">
+
+                </when>
+                <otherwise>
+                    <if test="budgetOk!=1">
+                        and h.budget_ok =#{budgetOk}
+                    </if>
+                </otherwise>
+            </choose>
         </if>
 
         <if test="searchKey!=null and searchKey!=''">
@@ -935,9 +942,7 @@
         dj_house house
         INNER JOIN dj_member member ON member.id = house.member_id
         INNER JOIN dj_core_house_worker wk ON wk.house_id = house.id
-            AND wk.worker_type = 1
-            AND wk.work_type = 6
-            INNER JOIN dj_member gr ON gr.id = wk.worker_id
+        INNER JOIN dj_member gr ON gr.id = wk.worker_id
         WHERE 1=1 and house.id = #{houseId}
     </select>
 
