@@ -611,22 +611,24 @@ public class PaymentService {
                     orderItem.setOrderId(orderNew.getId());
                     orderItemMapper.updateByPrimaryKeySelective(orderItem);
 
-                    if(houseFlowId!=null) {
-                        Example example = new Example(BudgetMaterial.class);
-                        example.createCriteria()
-                                .andEqualTo(BudgetMaterial.HOUSE_FLOW_ID, houseFlowId)
-                                .andEqualTo(BudgetMaterial.PRODUCT_ID, good.getProductId())
-                                .andEqualTo(BudgetMaterial.STETA, 1);
-                        List<BudgetMaterial> budgetMaterialList = iMasterBudgetMapper.selectByExample(example);
-                        for (BudgetMaterial budgetMaterial : budgetMaterialList) {
-                            budgetMaterial.setTotalPrice(budgetMaterial.getConvertCount() * budgetMaterial.getPrice());//已支付 记录总价
-                            budgetMaterial.setDeleteState(3);//已支付
-                            budgetMaterial.setModifyDate(new Date());
-                            iMasterBudgetMapper.updateByPrimaryKeySelective(budgetMaterial);
+                    if(good.getProductType()<3) {
+                        if (houseFlowId != null) {
+                            Example example = new Example(BudgetMaterial.class);
+                            example.createCriteria()
+                                    .andEqualTo(BudgetMaterial.HOUSE_FLOW_ID, houseFlowId)
+                                    .andEqualTo(BudgetMaterial.PRODUCT_ID, good.getProductId())
+                                    .andEqualTo(BudgetMaterial.STETA, 1);
+                            List<BudgetMaterial> budgetMaterialList = iMasterBudgetMapper.selectByExample(example);
+                            for (BudgetMaterial budgetMaterial : budgetMaterialList) {
+                                budgetMaterial.setTotalPrice(budgetMaterial.getConvertCount() * budgetMaterial.getPrice());//已支付 记录总价
+                                budgetMaterial.setDeleteState(3);//已支付
+                                budgetMaterial.setModifyDate(new Date());
+                                iMasterBudgetMapper.updateByPrimaryKeySelective(budgetMaterial);
+                            }
                         }
-                    }
-                    if(!CommonUtil.isEmpty(order.getHouseId())) {
-                        addWarehouse(orderItem, houseFlowId, order.getHouseId());
+                        if (!CommonUtil.isEmpty(order.getHouseId())) {
+                            addWarehouse(orderItem, houseFlowId, order.getHouseId());
+                        }
                     }
                 }
             }
@@ -873,7 +875,6 @@ public class PaymentService {
                             }
                             if(good.getProductType()==2){//人工
                                 workerPrice+=good.getTotalPrice().doubleValue();
-
                             }
                         }
                     }
@@ -1053,7 +1054,7 @@ public class PaymentService {
                 order.setActualPaymentPrice(new BigDecimal(0));
                 order.setOrderStatus("1");
                 order.setOrderGenerationTime(new Date());
-                order.setOrderSource(1);//精算制作
+                order.setOrderSource(2);//来源购物车
                 order.setWorkerId(workerId);
                 order.setAddressId(addressId);
                 order.setCreateBy(member.getId());
