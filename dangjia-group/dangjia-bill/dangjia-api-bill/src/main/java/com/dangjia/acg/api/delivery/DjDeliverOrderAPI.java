@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 
+/**
+ * 迁移到master工程上面
+ */
 @Api(description = "所有订单表(装修所需的订单流水表)接口")
 @FeignClient("dangjia-service-bill")
 public interface DjDeliverOrderAPI {
@@ -37,4 +40,8 @@ public interface DjDeliverOrderAPI {
     @ApiOperation(value = "查询我要装修首页", notes = "查询我要装修首页")
     ServerResponse queryOrderNumber(@RequestParam("request") HttpServletRequest request,
                                     @RequestParam("houseId") String userId);
+
+
+
+
 }

@@ -11,10 +11,4 @@ import javax.servlet.http.HttpServletRequest;
 @RestController
 public class DjDeliverOrderItemController implements DjDeliverOrderItemAPI {
 
-    @Override
-    @ApiMethod
-    public ServerResponse queryAllDeliverOrderDetail(HttpServletRequest request, PageDTO pageDTO,  String orderId,String userId, String cityId) {
-        return null;
-    }
-
 }
