@@ -148,4 +148,227 @@
         ORDER BY chf.modify_date desc
     </select>
 
+    <!--  查询当前用户的花费，根据类别汇总 -->
+    <select id="searchDecorationCostList" resultType="com.dangjia.acg.dto.order.DecorationCostDTO">
+        SELECT
+            m.categoryId,
+            m.categoryName,
+            sum(actualPaymentPrice) actualPaymentPrice,
+          sum(purchaseTotalPrice) purchaseTotalPrice
+        FROM
+            (
+                SELECT
+                    t5.id categoryId,
+                    t5. NAME categoryName,
+                    IFNULL(
+                        t2.actual_payment_price,
+                        IFNULL(
+                            t2.total_price,
+                            t2.price * t2.shop_count
+                        )
+                    ) actualPaymentPrice,
+              0 purchaseTotalPrice
+                FROM
+                    dj_deliver_order t1,
+                    dj_deliver_order_item t2,
+                    dj_basics_storefront_product t3,
+                    dj_basics_product_template t4,
+                    dj_basics_goods_category t5
+                WHERE
+                    t1.id = t2.order_id
+                AND t2.product_id = t3.id
+                AND t3.prod_template_id = t4.id
+                AND t4.category_id = t5.id
+                AND t1.house_id = #{houseId}
+                <if test="null!=labelValId and ''!=labelValId">
+                    and FIND_IN_SET(#{labelValId} ,t5.category_label_ids)
+                </if>
+                UNION ALL
+                    SELECT
+                        t3.id categoryId,
+                        t3.`name` categoryName,
+                        IFNULL(t1.total_price, 0) actualPaymentPrice,
+                IFNULL(t1.total_price, 0) purchaseTotalPrice
+                    FROM
+                        dj_actuary_budget_material t1,
+                        dj_basics_goods t2,
+                        dj_basics_goods_category t3
+                    WHERE
+                        t1.steta = 2
+                    AND t1.goods_id = t2.id
+                    AND t2.category_id = t3.id
+                    AND t1.delete_state != 1
+                    AND t1.product_id IS NULL
+                    AND t1.house_id = #{houseId}
+                    <if test="null!=labelValId and ''!=labelValId">
+                        and FIND_IN_SET(#{labelValId} ,t3.category_label_ids)
+                    </if>
+                    AND EXISTS (
+                        SELECT
+                            1
+                        FROM
+                            dj_deliver_order t4
+                        WHERE
+                            t1.house_id = t4.house_id
+                        AND t1.worker_type_id = t4.worker_type_id
+                    )
+            ) m
+        group by m.categoryId,
+            m.categoryName
+
+    </select>
+    <!--  查询当前用户的花费，具体详情花费 -->
+    <select id="searchDecorationCostDetailList" resultType="com.dangjia.acg.dto.order.DecorationCostItemDTO">
+
+        SELECT
+          t5.category_id categoryId,
+          t4.goods_id goodsId,
+          t5.name goodsName,
+          t2.product_id productId,
+          t4.id productTemplateId,
+          t2.product_name productName,
+          t4.product_sn productSn,
+          t4.image,
+          t2.price price,
+          t2.shop_count shopCount,
+          IFNULL(t2.actual_payment_price,IFNULL(t2.total_price,t2.price*t2.shop_count)) actualPaymentPrice,
+          1 steta,
+          '' actuaryBudgetId
+        FROM
+            dj_deliver_order t1,
+            dj_deliver_order_item t2,
+            dj_basics_storefront_product t3,
+            dj_basics_product_template t4,
+            dj_basics_goods t5,
+            dj_basics_goods_category t6
+        WHERE
+            t1.id = t2.order_id
+        and t2.product_id=t3.id
+        and t3.prod_template_id=t4.id
+        and t4.goods_id=t5.id
+        and t5.category_id = t6.id
+        and t1.house_id=#{houseId}
+        and t5.category_id=#{categoryId}
+        <if test="null!=labelValId and ''!=labelValId">
+            and FIND_IN_SET(#{labelValId} ,t6.category_label_ids)
+        </if>
+        union all
+        SELECT
+                t2.category_id categoryId,
+                t2.id goodsId,
+                t2.name goodsName,
+                '' productId,
+                '' productTemplateId,
+                '' productName,
+                '' productSn,
+                '' image,
+                t1.price,
+                t1.shop_count shopCount,
+                t1.total_price actualPaymentPrice,
+                2 steta,
+                t1.id actuaryBudgetId
+            FROM
+                dj_actuary_budget_material t1,
+                dj_basics_goods t2,
+                dj_basics_goods_category t3
+            WHERE
+                t1.steta = 2
+            AND t1.goods_id = t2.id
+            AND t2.category_id = t3.id
+            AND t1.delete_state != 1
+            AND t1.product_id IS NULL
+            AND t1.house_id = #{houseId}
+            and t2.category_id=#{categoryId}
+            <if test="null!=labelValId and ''!=labelValId">
+                and FIND_IN_SET(#{labelValId} ,t3.category_label_ids)
+            </if>
+            AND EXISTS (
+                SELECT
+                    1
+                FROM
+                    dj_deliver_order t4
+                WHERE
+                    t1.house_id = t4.house_id
+                AND t1.worker_type_id = t4.worker_type_id
+            )
+    </select>
+
+    <!--按类别标签汇总花费信息-->
+    <select id="searchDecorationCategoryLabelList" resultType="com.dangjia.acg.dto.order.DecorationCostDTO">
+        SELECT
+            m.labelValId,
+            m.labelValName,
+            sum(actualPaymentPrice) actualPaymentPrice,
+            sum(purchaseTotalPrice) purchaseTotalPrice
+        FROM
+            (
+                SELECT
+                    t5.id categoryId,
+                    t5. NAME categoryName,
+                    t6.id labelValId,
+                    t6. NAME labelValName,
+                    IFNULL(
+                        t2.actual_payment_price,
+                        IFNULL(
+                            t2.total_price,
+                            t2.price * t2.shop_count
+                        )
+                    ) actualPaymentPrice,
+                    0 purchaseTotalPrice
+                FROM
+                    dj_deliver_order t1,
+                    dj_deliver_order_item t2,
+                    dj_basics_storefront_product t3,
+                    dj_basics_product_template t4,
+                    dj_basics_goods_category t5,
+                    dj_basics_category_label t6
+                WHERE
+                    t1.id = t2.order_id
+                AND t2.product_id = t3.id
+                AND t3.prod_template_id = t4.id
+                AND t4.category_id = t5.id
+                AND t1.house_id = '2c911c24658445830165933af3690f97'
+                AND FIND_IN_SET(
+                    t6.id,
+                    t5.category_label_ids
+                )
+                UNION ALL
+                    SELECT
+                        t3.id categoryId,
+                        t3.`name` categoryName,
+                        t4.id labelValId,
+                        t4. NAME labelValName,
+                        IFNULL(t1.total_price, 0) actualPaymentPrice,
+                        IFNULL(t1.total_price, 0) purchaseTotalPrice
+                    FROM
+                        dj_actuary_budget_material t1,
+                        dj_basics_goods t2,
+                        dj_basics_goods_category t3,
+                        dj_basics_category_label t4
+                    WHERE
+                        t1.steta = 2
+                    AND t1.goods_id = t2.id
+                    AND t2.category_id = t3.id
+                    AND t1.delete_state != 1
+                    AND t1.product_id IS NULL
+                    AND t1.house_id = '2c911c24658445830165933af3690f97'
+                    AND FIND_IN_SET(
+                        t4.id,
+                        t3.category_label_ids
+                    )
+                    AND EXISTS (
+                        SELECT
+                            1
+                        FROM
+                            dj_deliver_order t4
+                        WHERE
+                            t1.house_id = t4.house_id
+                        AND t1.worker_type_id = t4.worker_type_id
+                    )
+            ) m
+        GROUP BY
+            m.labelValId,
+            m.labelValName
+    </select>
+
 </mapper>
