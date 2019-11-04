@@ -180,4 +180,9 @@ public interface RefundAfterSalesAPI {
     @ApiOperation(value = "查询退人工历史记录详情", notes = "查询退人工历史记录列表")
     ServerResponse queryRetrunWorkerHistoryDetail(@RequestParam("cityId") String cityId,
                                                           @RequestParam("repairWorkOrderId") String repairWorkOrderId);
+
+    @PostMapping("/app/refund/refundOrder/cancelWorkerApplication")
+    @ApiOperation(value = "撤销退人工申请", notes = "撤销退人工申请")
+    ServerResponse cancelWorkerApplication(@RequestParam("cityId") String cityId,
+                                           @RequestParam("repairWorkOrderId") String repairWorkOrderId);
 }

@@ -377,7 +377,7 @@ public class ForMasterService {
      * @param square 房子面积
      * @return
      */
-    public void insertActuarialDesignInfo(String actuarialDesignAttr,String houseId,BigDecimal square){
+    public void insertActuarialDesignInfo(String actuarialDesignAttr,String houseId,BigDecimal square,String cityId){
         logger.info("修改商品："+actuarialDesignAttr);
         JSONArray actuarialDesignList=JSONArray.parseArray(actuarialDesignAttr);
         if(actuarialDesignList!=null&&actuarialDesignList.size()>0){
@@ -406,7 +406,7 @@ public class ForMasterService {
                     listOfGoods.add(jsonObject);
                 }
 
-                budgetWorkerService.makeBudgets(null,houseId,workerTypeId,listOfGoods.toJSONString());
+                budgetWorkerService.makeBudgets(null,houseId,workerTypeId,listOfGoods.toJSONString(),cityId);
             }
         }
 

@@ -254,5 +254,22 @@ public class RefundAfterSalesController implements RefundAfterSalesAPI {
         return refundAfterSalesService.queryRetrunWorkerHistoryDetail(cityId,repairWorkOrderId);
     }
 
+    /**
+     * 撤销退人工申请
+     * @param cityId
+     * @param repairWorkOrderId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse cancelWorkerApplication(String cityId,String repairWorkOrderId){
+        try{
+            return refundAfterSalesService.cancelWorkerApplication(cityId,repairWorkOrderId);
+        }catch (Exception e){
+            logger.error("撤销失败",e);
+            return ServerResponse.createByErrorMessage("撤销失败");
+        }
+
+    }
 
 }

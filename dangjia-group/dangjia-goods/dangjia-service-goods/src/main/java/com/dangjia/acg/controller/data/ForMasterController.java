@@ -211,7 +211,7 @@ public class ForMasterController implements ForMasterAPI {
     @Override
     @ApiMethod
     public void  insertActuarialDesignInfo(String cityId,String actuarialDesignAttr,String houseId,BigDecimal square){
-        forMasterService.insertActuarialDesignInfo(actuarialDesignAttr,houseId,square);
+        forMasterService.insertActuarialDesignInfo(actuarialDesignAttr,houseId,square,cityId);
     }
     @Override
     @ApiMethod
