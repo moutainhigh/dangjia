@@ -80,15 +80,15 @@ public class StorefrontProductService {
             return ServerResponse.createByErrorMessage("供货设置-根据货品id，城市id，店铺id删除店铺商品异常");
         }
     }
-    /**
-     * 根据店铺id查询商品
-     * @param storefrontId
-     * @param searchKey
-     * @return
-     */
-    public List<StorefrontDTO> queryStorefrontListByStorefrontId(String storefrontId, String searchKey) {
-        return istorefrontProductMapper.queryStorefrontListByStorefrontId( storefrontId,  searchKey);
-    }
+//    /**
+//     * 根据店铺id查询商品
+//     * @param storefrontId
+//     * @param searchKey
+//     * @return
+//     */
+//    public List<StorefrontDTO> queryStorefrontListByStorefrontId(String storefrontId, String searchKey) {
+//        return istorefrontProductMapper.queryStorefrontListByStorefrontId( storefrontId,  searchKey);
+//    }
     /**
      * 根据id查询店铺商品信息
      *

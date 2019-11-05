@@ -20,17 +20,17 @@ import java.util.List;
 @FeignClient("dangjia-service-shop")
 public interface StorefrontProductAPI {
 
-    @PostMapping("/web/queryStorefrontListByStorefrontId")
-    @ApiOperation(value = "根据店铺id查询供应商商品", notes = "根据店铺id查询供应商商品")
-    List<StorefrontDTO> queryStorefrontListByStorefrontId(@RequestParam("storefrontId") String storefrontId,
-                                                          @RequestParam("searchKey") String searchKey);
+//    @PostMapping("/web/queryStorefrontListByStorefrontId")
+//    @ApiOperation(value = "根据店铺id查询供应商商品", notes = "根据店铺id查询供应商商品")
+//    List<StorefrontDTO> queryStorefrontListByStorefrontId(@RequestParam("storefrontId") String storefrontId,
+//                                                          @RequestParam("searchKey") String searchKey);
 
     @PostMapping("/web/querySingleStorefrontProductById")
     @ApiOperation(value = "根据id查询店铺商品信息", notes = "根据id查询店铺商品信息")
     StorefrontProductListDTO querySingleStorefrontProductById(@RequestParam("id") String id);
 
     @PostMapping("/web/addStorefrontProduct")
-    @ApiOperation(value = "-增加已选商品", notes = "供货设置-增加已选商品")
+    @ApiOperation(value = "增加已选商品", notes = "供货设置-增加已选商品")
     ServerResponse addStorefrontProduct(BasicsStorefrontProductDTO basicsStorefrontProductDTO);
 
     @PostMapping("/web/delStorefrontProductById")
@@ -42,21 +42,11 @@ public interface StorefrontProductAPI {
     ServerResponse delProductByProIdAndStoreIdAndCityId(@RequestParam("productId") String productId,
                                                         @RequestParam("storefrontId") String storefrontId, @RequestParam("cityId") String cityId);
 
-    /**
-     *
-     * @param keyWord
-     * @param storefrontId
-     * @param pageDTO
-     * @param cityId
-     * @return
-     */
     @PostMapping("/web/queryStorefrontProductByKeyWord")
     @ApiOperation(value = "供货设置-已选商品-通过货品或者商品名称查询", notes = "供货设置-已选商品-通过货品或者商品名称查询")
     ServerResponse queryStorefrontProductByKeyWord(
-            @RequestParam("keyWord") String keyWord,
-            @RequestParam("storefrontId") String storefrontId,
-            @RequestParam("pageDTO") PageDTO pageDTO,
-            @RequestParam("cityId") String cityId);
+            @RequestParam("keyWord") String keyWord,@RequestParam("storefrontId") String storefrontId,
+            @RequestParam("pageDTO") PageDTO pageDTO,@RequestParam("cityId") String cityId);
 
     @PostMapping("/web/setSpStatusById")
     @ApiOperation(value = "供货设置-设置商品上下架", notes = "设置商品上下架")
@@ -74,7 +64,6 @@ public interface StorefrontProductAPI {
     @ApiOperation(value = "查询购物车商品信息", notes = "查询购物车商品信息")
     List<ShoppingCartProductDTO> queryCartList(@RequestParam("storefrontId") String storefrontId,
                                                @RequestParam("productId") String productId);
-
 
     @PostMapping("/web/queryCollectGood")
     @ApiOperation(value = "查询收藏商品", notes = "查询收藏商品")

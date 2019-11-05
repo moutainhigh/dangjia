@@ -88,7 +88,7 @@
             and bsp.storefront_id=#{storefrontId}
     </select>
 
-<!--根据店铺id查询供应的商品-->
+<!--根据店铺id查询供应的商品
     <select id="queryStorefrontListByStorefrontId" resultType="com.dangjia.acg.dto.storefront.StorefrontDTO">
 
         SELECT
@@ -103,7 +103,7 @@
             bsp.prod_template_id =#{productId}
             and bsp.storefront_id=#{storefrontId}
 
-    </select>
+    </select>-->
 
     <select id="queryStorefrontProductById" resultType="com.dangjia.acg.modle.storefront.StorefrontProduct">
         select
