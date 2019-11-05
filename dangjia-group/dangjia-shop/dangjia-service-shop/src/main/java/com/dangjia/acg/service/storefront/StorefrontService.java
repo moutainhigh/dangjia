@@ -56,8 +56,10 @@ public class StorefrontService {
         try {
             Example example=new Example(Storefront.class);
             example.createCriteria().andEqualTo(Storefront.USER_ID,userId).andEqualTo(Storefront.CITY_ID,cityId);
-            Storefront storefront =istorefrontMapper.selectByExample(example).get(0);
-            return storefront;
+            List<Storefront> list =istorefrontMapper.selectByExample(example);
+            if(list.size()<=0)
+                return null;
+            return list.get(0);
         } catch (Exception e) {
             logger.error("查询失败",e);
             return null;
