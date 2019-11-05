@@ -50,4 +50,11 @@ public class DjDeliverOrderController implements DjDeliverOrderAPI {
         return djDeliverOrderService.getDesignInfo(houseId);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse getActuaryInfo(HttpServletRequest request,String houseId) {
+        return djDeliverOrderService.getActuaryInfo(houseId);
+    }
+
+
 }
