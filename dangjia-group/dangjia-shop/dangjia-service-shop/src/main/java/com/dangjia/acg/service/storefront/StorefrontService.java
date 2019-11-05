@@ -9,6 +9,7 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.storefront.StorefrontDTO;
 import com.dangjia.acg.dto.storefront.StorefrontListDTO;
@@ -56,8 +57,10 @@ public class StorefrontService {
         try {
             Example example=new Example(Storefront.class);
             example.createCriteria().andEqualTo(Storefront.USER_ID,userId).andEqualTo(Storefront.CITY_ID,cityId);
-            Storefront storefront =istorefrontMapper.selectByExample(example).get(0);
-            return storefront;
+            List<Storefront> list =istorefrontMapper.selectByExample(example);
+            if(list.size()<=0)
+                return null;
+            return list.get(0);
         } catch (Exception e) {
             logger.error("查询失败",e);
             return null;
@@ -282,6 +285,9 @@ public class StorefrontService {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<StorefrontListDTO> storefrontListDTOS = istorefrontMapper.querySupplierApplicationShopList(searchKey, djSupplier.getId(), applicationStatus,cityId);
             storefrontListDTOS.forEach(storefrontListDTO -> {
+                if(CommonUtil.isEmpty(storefrontListDTO)){
+                    storefrontListDTO.setContract("");
+                }
                 storefrontListDTO.setStorefrontLogo(imageaddress+storefrontListDTO.getStorefrontLogo());
             });
             PageInfo pageResult = new PageInfo(storefrontListDTOS);
