@@ -1024,6 +1024,8 @@ public class MendOrderService {
                 mendOrderMapper.insert(mendOrder);
             }
             ServerResponse serverResponse = this.addMendMateriel(worker.getId(), productArr, mendOrder);
+            //补货单详情加上店铺id
+            mendMaterialMapper.setStorefrontId(mendOrder.getId());
             if (!serverResponse.isSuccess()) {
                 return serverResponse;
             }

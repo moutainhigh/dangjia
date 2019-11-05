@@ -317,7 +317,7 @@ public class DjSupApplicationProductService {
                     .map(DjSupSupplierProductDTO::getProductId)
                     .collect(Collectors.toList());
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<DjSupSupplierProductDTO> djSupSupplierProductDTOS1 = djSupSupplierProductMapper.queryNotForTheGoods(supId, productIds);
+            List<DjSupSupplierProductDTO> djSupSupplierProductDTOS1 = djSupSupplierProductMapper.queryNotForTheGoods(shopId, productIds);
             djSupSupplierProductDTOS1.forEach(djSupSupplierProductDTO -> {
                 djSupSupplierProductDTO.setImage(imageAddress+djSupSupplierProductDTO.getImage());
             });

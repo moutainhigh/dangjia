@@ -73,8 +73,8 @@ public class Warehouse extends BaseEntity {
 	private Double backCount;
 
 	@Column(name = "product_id")
-	@Desc(value = "货品id")
-	@ApiModelProperty("货品id")
+	@Desc(value = "店铺商品表id")
+	@ApiModelProperty("店铺商品表id")
 	private String productId;
 
 	@Column(name = "product_sn")

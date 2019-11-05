@@ -1,6 +1,7 @@
 package com.dangjia.acg.service.deliver;
 
 import com.alibaba.fastjson.JSON;
+import com.dangjia.acg.api.StorefrontConfigAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
@@ -20,7 +21,9 @@ import com.dangjia.acg.mapper.house.IHouseDistributionMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseDetailMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
+import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
+import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
 import com.dangjia.acg.mapper.repair.IMendMaterialMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.modle.core.WorkerType;
@@ -34,6 +37,9 @@ import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.repair.MendMateriel;
+import com.dangjia.acg.modle.repair.MendOrder;
+import com.dangjia.acg.modle.storefront.StorefrontProduct;
+import com.dangjia.acg.service.acquisition.MasterCostAcquisitionService;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.repair.MendOrderService;
@@ -41,14 +47,12 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import tk.mybatis.mapper.entity.Example;
 import tk.mybatis.mapper.util.StringUtil;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 要货
@@ -95,6 +99,14 @@ public class OrderService {
     private MendOrderService mendOrderService;
     @Autowired
     private ICartMapper cartMapper;
+    @Autowired
+    private IMasterStorefrontProductMapper iMasterStorefrontProductMapper;
+    @Autowired
+    private StorefrontConfigAPI storefrontConfigAPI;
+    @Autowired
+    private MasterCostAcquisitionService masterCostAcquisitionService;
+    @Autowired
+    private IMemberMapper iMemberMapper;
 
     /**
      * 删除订单
@@ -541,6 +553,107 @@ public class OrderService {
 
 
     /**
+     * 补货提交订单接口
+     * @param userToken
+     * @param houseId
+     * @return
+     */
+    public ServerResponse abrufbildungSubmitOrder(String userToken,String cityId, String houseId,
+                                                  String mendOrderId, String addressId) {
+        try {
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;
+            MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);
+            Member worker = iMemberMapper.selectByPrimaryKey(mendOrder.getApplyMemberId());
+            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(worker.getWorkerTypeId());
+            Order order = new Order();
+            order.setHouseId(houseId);
+            order.setTotalAmount(new BigDecimal(mendOrder.getTotalAmount()));
+            order.setWorkerTypeName(workerType.getName());
+            order.setWorkerTypeId(workerType.getId());
+            order.setType(mendOrder.getType());
+            order.setDataStatus(0);
+            order.setOrderNumber(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
+            order.setMemberId(member.getId());
+            order.setWorkerId(worker.getId());
+            order.setCityId(cityId);
+            order.setTotalDiscountPrice(new BigDecimal(0));
+            order.setTotalStevedorageCost(new BigDecimal(0));
+            order.setTotalTransportationCost(new BigDecimal(0));
+            order.setActualPaymentPrice(new BigDecimal(0));
+            order.setOrderType("2");
+            order.setOrderStatus("1");
+            order.setOrderGenerationTime(new Date());
+            order.setOrderSource(2);//来源补货
+            order.setWorkerId(member.getId());
+            order.setAddressId(addressId);
+            order.setCreateBy(member.getId());
+            orderMapper.insert(order);
+
+            BigDecimal paymentPrice = new BigDecimal(0);//总共钱
+            BigDecimal freightPrice = new BigDecimal(0);//总运费
+            BigDecimal totalMoveDost = new BigDecimal(0);//搬运费
+            Example example=new Example(MendMateriel.class);
+            example.createCriteria().andEqualTo(MendMateriel.MEND_ORDER_ID,mendOrderId);
+            List<MendMateriel> mendMateriels = mendMaterialMapper.selectByExample(example);
+            for (MendMateriel mendMateriel : mendMateriels) {
+                BigDecimal totalMaterialPrice = new BigDecimal(0);//组总价
+                BigDecimal totalPrice = new BigDecimal(mendMateriel.getPrice()*mendMateriel.getShopCount());
+                if(mendMateriel.getProductType()==0) {
+                    totalMaterialPrice = totalMaterialPrice.add(totalPrice);
+                }
+                paymentPrice = paymentPrice.add(totalPrice);
+                Double freight=storefrontConfigAPI.getFreightPrice(mendMateriel.getStorefrontId(),totalMaterialPrice.doubleValue());
+                freightPrice=freightPrice.add(new BigDecimal(freight));
+                //搬运费运算
+                Double moveDost=masterCostAcquisitionService.getStevedorageCost(houseId,mendMateriel.getProductId(),mendMateriel.getShopCount());
+                totalMoveDost=totalMoveDost.add(new BigDecimal(moveDost));
+            }
+
+            // 生成支付业务单
+            example = new Example(BusinessOrder.class);
+            example.createCriteria().andEqualTo(BusinessOrder.TASK_ID, order.getId())
+                    .andNotEqualTo(BusinessOrder.STATE, 4);
+            List<BusinessOrder> businessOrderList = businessOrderMapper.selectByExample(example);
+            BusinessOrder businessOrder = null;
+            if (businessOrderList.size() > 0) {
+                businessOrder = businessOrderList.get(0);
+                if (businessOrder.getState() == 3) {
+                    return ServerResponse.createByErrorMessage("该订单已支付，请勿重复支付！");
+                }
+            }
+            if (businessOrderList.size() == 0) {
+                businessOrder = new BusinessOrder();
+                businessOrder.setMemberId(member.getId());
+                businessOrder.setHouseId(houseId);
+                businessOrder.setNumber(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
+                businessOrder.setState(1);//刚生成
+                businessOrder.setTotalPrice(paymentPrice);
+                businessOrder.setDiscountsPrice(new BigDecimal(0));
+                businessOrder.setPayPrice(paymentPrice);
+                businessOrder.setType(2);//记录支付类型任务类型
+                businessOrder.setTaskId(order.getId());//保存任务ID
+                businessOrderMapper.insert(businessOrder);
+            }
+            order.setTotalTransportationCost(freightPrice);//总运费
+            order.setTotalStevedorageCost(totalMoveDost);//总搬运费
+            order.setBusinessOrderNumber(businessOrder.getNumber());
+            order.setTotalAmount(paymentPrice);// 订单总额(工钱)
+            orderMapper.updateByPrimaryKeySelective(order);
+            return ServerResponse.createBySuccess("提交成功", order.getId());
+        } catch (Exception e) {
+            e.printStackTrace();
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return ServerResponse.createByErrorMessage("提交失败：原因："+e.getMessage());
+        }
+    }
+
+
+
+    /**
      * 返回已添加要货单明细
      */
     public ServerResponse getOrderItemList(String userToken, String houseId) {
@@ -640,7 +753,8 @@ public class OrderService {
             }
 
             example = new Example(OrderSplit.class);
-            example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId).andEqualTo(OrderSplit.APPLY_STATUS, 0)
+            example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, houseId)
+                    .andEqualTo(OrderSplit.APPLY_STATUS, 0)
                     .andEqualTo(OrderSplit.WORKER_TYPE_ID, worker.getWorkerTypeId());
             List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
             OrderSplit orderSplit;
@@ -685,7 +799,9 @@ public class OrderService {
                 Double num = aCartList.getShopCount();
                 String productId = aCartList.getProductId();
                 Warehouse warehouse = warehouseMapper.getByProductId(productId, houseId);//定位到仓库id
-                DjBasicsProductTemplate product = forMasterAPI.getProduct(house.getCityId(), productId);
+                //增加店铺概念 现在cart productId为店铺商品表主键id
+                StorefrontProduct storefrontProduct = iMasterStorefrontProductMapper.selectByPrimaryKey(productId);
+                DjBasicsProductTemplate product = forMasterAPI.getProduct(house.getCityId(), storefrontProduct.getProdTemplateId());
                 example = new Example(OrderSplitItem.class);
                 example.createCriteria()
                         .andEqualTo(OrderSplitItem.PRODUCT_ID, productId)
@@ -699,9 +815,9 @@ public class OrderService {
                 if (warehouse != null) {
                     orderSplitItem.setOrderSplitId(orderSplit.getId());
                     orderSplitItem.setWarehouseId(warehouse.getId());//仓库子项id
-                    orderSplitItem.setProductId(product.getId());
-                    orderSplitItem.setProductSn(product.getProductSn());
-                    orderSplitItem.setProductName(product.getName());
+                    orderSplitItem.setProductId(aCartList.getProductId());
+                    orderSplitItem.setProductSn(aCartList.getProductSn());
+                    orderSplitItem.setProductName(aCartList.getProductName());
                     orderSplitItem.setPrice(warehouse.getPrice());
                     orderSplitItem.setAskCount(warehouse.getAskCount());
                     orderSplitItem.setCost(warehouse.getCost());
@@ -711,16 +827,16 @@ public class OrderService {
                     orderSplitItem.setTotalPrice(warehouse.getPrice() * num);//单项总价 销售价
                     orderSplitItem.setProductType(warehouse.getProductType());
                     orderSplitItem.setCategoryId(warehouse.getCategoryId());
-                    orderSplitItem.setImage(product.getImage());//货品图片
+                    orderSplitItem.setImage(storefrontProduct.getImage());//货品图片
                     orderSplitItem.setHouseId(houseId);
                     orderSplitItemMapper.insert(orderSplitItem);
                 } else {
                     BasicsGoods goods = forMasterAPI.getGoods(house.getCityId(), product.getGoodsId());
                     orderSplitItem.setOrderSplitId(orderSplit.getId());
-                    orderSplitItem.setProductId(product.getId());
-                    orderSplitItem.setProductSn(product.getProductSn());
-                    orderSplitItem.setProductName(product.getName());
-                    orderSplitItem.setPrice(product.getPrice());
+                    orderSplitItem.setProductId(aCartList.getProductId());
+                    orderSplitItem.setProductSn(aCartList.getProductSn());
+                    orderSplitItem.setProductName(aCartList.getProductName());
+                    orderSplitItem.setPrice(storefrontProduct.getSellPrice());
                     orderSplitItem.setAskCount(0d);
                     orderSplitItem.setCost(product.getCost());
                     orderSplitItem.setShopCount(0d);
@@ -729,7 +845,7 @@ public class OrderService {
                     orderSplitItem.setTotalPrice(product.getPrice() * num);//单项总价 销售价
                     orderSplitItem.setProductType(goods.getType());
                     orderSplitItem.setCategoryId(product.getCategoryId());
-                    orderSplitItem.setImage(product.getImage());//货品图片
+                    orderSplitItem.setImage(storefrontProduct.getImage());//货品图片
                     orderSplitItem.setHouseId(houseId);
                     orderSplitItemMapper.insert(orderSplitItem);
                 }

@@ -209,12 +209,12 @@ public interface DjBasicsProductAPI {
     @PostMapping("app/product/djBasicsProduct/queryBasicsProductData")
     @ApiOperation(value = "商品库检索查询", notes = "商品库检索查询")
     PageInfo queryBasicsProductData(@RequestParam("cityId") String cityId,
-                              @RequestParam("pageNum") Integer pageNum,
-                              @RequestParam("pageSize") Integer pageSize,
-                              @RequestParam("name") String name,
-                              @RequestParam("categoryId") String categoryId,
-                              @RequestParam("productType") String productType,
-                              @RequestParam("productId") String[] productId);
+                                    @RequestParam("pageNum") Integer pageNum,
+                                    @RequestParam("pageSize") Integer pageSize,
+                                    @RequestParam("name") String name,
+                                    @RequestParam("categoryId") String categoryId,
+                                    @RequestParam("productType") String productType,
+                                    @RequestParam("productId") String[] productId);
 
 
     /**

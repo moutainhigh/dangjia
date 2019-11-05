@@ -88,30 +88,32 @@
 
     <select id="queryNotForTheGoods" resultType="com.dangjia.acg.dto.supplier.DjSupSupplierProductDTO">
         SELECT
-            ssp.id,
-            ssp.goods_id AS goodsId,
-            ssp.product_id AS productId,
+            bsp.id,
+            bsp.goods_id AS goodsId,
+            bsp.prod_template_id AS productId,
             bg. NAME AS goodsName,
             bpt. NAME AS productName,
             bpt.image,
             bg.attribute_id_arr AS attributeIdArr,
             bpt.value_name_arr AS valueNameArr,
-            bpt.value_id_arr as valueIdArr,
-            ssp.price,
-            ssp.stock,
+            bpt.value_id_arr AS valueIdArr,
+            bsp.sell_price AS price,
+            bsp.supplied_num AS stock,
             bpt.price AS salesPrice,
             bpt.cartage_price AS cartagePrice,
             bg.is_elevator_fee AS isElevatorFee
         FROM
-            dj_sup_supplier_product ssp
-        INNER JOIN dj_basics_goods bg ON ssp.goods_id = bg.id
-        INNER JOIN dj_basics_product_template bpt ON ssp.product_id = bpt.id
-        WHERE 1=1 and ssp.data_status=0
-        <if test="null!=supId and ''!=supId">
-            and ssp.supplier_id = #{supId}
+            dj_basics_storefront_product bsp
+        INNER JOIN dj_basics_goods bg ON bsp.goods_id = bg.id
+        INNER JOIN dj_basics_product_template bpt ON bsp.prod_template_id = bpt.id
+        WHERE 1 = 1
+        AND bsp.data_status = 0
+        AND bsp.is_shelf_status=1
+        <if test="null!=shopId and ''!=shopId">
+            and bsp.storefront_id = #{shopId}
         </if>
         <if test="null!=productIds and productIds.size>0">
-            and ssp.product_id not in
+            and bsp.prod_template_id not in
             <foreach collection="productIds" index="index" item="item" open="(" separator="," close=")">
                 #{item}
             </foreach>

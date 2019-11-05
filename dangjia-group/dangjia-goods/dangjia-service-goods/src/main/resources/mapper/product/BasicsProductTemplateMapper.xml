@@ -382,17 +382,18 @@
     <!--补货查询商品库服务-->
     <select id="queryProductData" resultType="com.dangjia.acg.modle.product.DjBasicsProductTemplate">
     select
+        sp.id as storefrontProductId,
         p.id as id,
         p.name as name,
         p.goods_id as goodsId,
         p.category_id as categoryId,
         p.product_sn as productSn,
-        p.image as image,
+        sp.image as image,
         p.unit_id as unitId,
         p.label_id as labelId,
         p.unit_name as unitName,
         p.type as type,
-        p.price as price,
+        sp.sell_price as price,
         p.istop,
         p.value_id_arr AS valueIdArr,
         p.value_name_arr AS valueNameArr
@@ -400,15 +401,11 @@
         dj_basics_product_template p
     INNER JOIN dj_basics_goods g ON p.goods_id = g.id
     INNER JOIN dj_basics_goods_category ca ON ca.id = p.category_id
+    INNER JOIN dj_dj_basics_storefront_product sp ON p.id=sp.prod_template_id
     <if test="name!=null and name!=''">
         INNER JOIN dj_basics_goods_category tca ON tca.id = ca.parent_top
     </if>
-    WHERE   p.data_status = 0
-
-    <!--<if test="productId==null or productId==''">-->
-    <!--AND p.type = 1-->
-    <!--</if>-->
-
+    WHERE p.data_status = 0
     <if test="productType!=null and productType!=''">
         AND g.type =#{productType}
     </if>
@@ -426,7 +423,7 @@
     </if>
 
         <if test="productId!=null and productId!=''">
-            AND p.id in
+            AND sp.id in
             <foreach collection="productId" item="id" index="index" open="(" close=")" separator=",">
                 #{id}
             </foreach>
@@ -624,8 +621,8 @@
 
     <select id="getProductStoreListByGoodsId"  resultType="java.util.Map" >
         SELECT
-            t1.prod_template_id productId,
-            t1.prod_template_id productTemplateId,
+            t2.id productId,
+            t2.id productTemplateId,
             t2.goods_id goodsId,
             t2.product_sn productSn,
             t2.`name` productName,

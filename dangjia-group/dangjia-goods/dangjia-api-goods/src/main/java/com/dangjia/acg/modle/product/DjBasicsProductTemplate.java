@@ -232,4 +232,7 @@ public class DjBasicsProductTemplate extends GoodsBaseEntity {
     @Transient
     private String storefrontName;
 
+    @Transient
+    private String storefrontProductId;
+
 }

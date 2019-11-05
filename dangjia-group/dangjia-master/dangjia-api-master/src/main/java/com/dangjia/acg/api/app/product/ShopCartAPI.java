@@ -51,14 +51,13 @@ public interface ShopCartAPI {
     @PostMapping("app/shopping/updateCart")
     @ApiOperation(value = "购物车-->设置购物车商品数量", notes = "购物车-->设置购物车商品数量")
     ServerResponse updateCar(@RequestParam("request") HttpServletRequest request,
-                             @RequestParam("userToken") String userToken,
-                             @RequestParam("productId") String productId,
+                             @RequestParam("shopCartId") String shopCartId,
                              @RequestParam("shopCount") Integer shopCount);
 
     @PostMapping("app/shopping/delCheckCart")
     @ApiOperation(value = "购物车-->删除勾选商品", notes = "购物车-->删除勾选商品")
     ServerResponse delCheckCart(@RequestParam("request") HttpServletRequest request,
-                                @RequestParam("userToken") String userToken, String productId);
+                                @RequestParam("shopCartIds") String shopCartIds);
 
     @PostMapping("app/shopping/cartSettle")
     @ApiOperation(value = "购物车-->结算", notes = "购物车-->结算")
