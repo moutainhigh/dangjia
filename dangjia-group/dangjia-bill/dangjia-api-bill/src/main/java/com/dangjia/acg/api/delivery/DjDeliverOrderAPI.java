@@ -49,4 +49,10 @@ public interface DjDeliverOrderAPI {
     @ApiOperation(value = "获取设计验收过程", notes = "获取设计验收过程")
     ServerResponse getDesignInfo(@RequestParam("request") HttpServletRequest request,
                                  @RequestParam("houseId") String houseId);
+
+    @PostMapping("app/design/getActuaryInfo")
+    @ApiOperation(value = "获取精算信息", notes = "获取精算信息")
+    ServerResponse getActuaryInfo(@RequestParam("request") HttpServletRequest request,
+                                 @RequestParam("houseId") String houseId);
+
 }

@@ -32,6 +32,7 @@ import com.dangjia.acg.modle.design.QuantityRoomImages;
 import com.dangjia.acg.modle.group.GroupUserConfig;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.menu.MenuConfiguration;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.sale.royalty.DjAlreadyRobSingle;
 import com.dangjia.acg.modle.user.MainUser;
@@ -91,6 +92,9 @@ public class DjDeliverOrderService {
     private IBillMendOrderMapper iBillMendOrderMapper;
     @Autowired
     private IBillHouseFlowApplyMapper iBillHouseFlowApplyMapper;
+    @Autowired
+    private IBillMenuConfigurationMapper iBillMenuConfigurationMapper;
+
 
     public Object getHouse(String memberId, HouseResult houseResult) {
         //该城市该用户所有开工房产
@@ -269,14 +273,15 @@ public class DjDeliverOrderService {
         example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID,houseId)
                 .andEqualTo(HouseFlow.DATA_STATUS, 0);
         List<HouseFlow> houseFlows = iBillHouseFlowMapper.selectByExample(example);
+        for (HouseFlow o : houseFlows) {
+            if (o.getWorkerType() <= 3) {
+                setMenus(workInFoDTO, house, o);
+            }
+        }
 
         //获取工序信息
         List<Object> workNodeListDTO = summationMethod(houseFlows,houseId);
         workInFoDTO.setWorkList(workNodeListDTO);
-
-
-
-
 
         //获取客服明细
         Example example1 = new Example(DjAlreadyRobSingle.class);
@@ -314,7 +319,43 @@ public class DjDeliverOrderService {
             }
         }
 
+
         return ServerResponse.createBySuccess("查询成功", workInFoDTO);
+    }
+
+
+    /**
+     * 设置菜单
+     */
+    private  void setMenus(WorkInFoDTO workInFoDTO,House house, HouseFlow hf) {
+        String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+        String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
+        List<WorkInFoDTO.ListMapBean> bigList = new ArrayList<>();
+        Example example = new Example(MenuConfiguration.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andEqualTo(MenuConfiguration.DATA_STATUS, 0);
+        if (hf.getWorkerType() == 1) {
+            criteria.andEqualTo(MenuConfiguration.MENU_TYPE, 2);
+        } else if (hf.getWorkerType() == 2) {
+            criteria.andEqualTo(MenuConfiguration.MENU_TYPE, 3);
+        } else {
+            criteria.andEqualTo(MenuConfiguration.MENU_TYPE, 4);
+        }
+
+        example.orderBy(MenuConfiguration.SORT).asc();
+        List<MenuConfiguration> menuConfigurations2 = iBillMenuConfigurationMapper.selectByExample(example);
+        for (MenuConfiguration configuration : menuConfigurations2) {
+            configuration.initPath(imageAddress, webAddress, house.getId(), hf.getId(), null);
+            WorkInFoDTO.ListMapBean mapBean = new WorkInFoDTO.ListMapBean();
+            mapBean.setName(configuration.getName());
+            mapBean.setUrl(configuration.getUrl());
+            mapBean.setApiUrl(configuration.getApiUrl());
+            mapBean.setImage(configuration.getImage());
+            mapBean.setType(configuration.getType());
+            bigList.add(mapBean);
+        }
+        workInFoDTO.setBigList(bigList);//添加菜单到返回体中
+
     }
 
     /**
@@ -956,16 +997,52 @@ public class DjDeliverOrderService {
                 }
             }else if(quantityRoomDTO.getType() == 2){
                 if (quantityRoomDTO.getFlag() == 0) {
-                    quantityRoomDTO.setName("精算通过");
+                    quantityRoomDTO.setName("施工图审核通过");
                 } else if (quantityRoomDTO.getFlag() == 1) {
-                    quantityRoomDTO.setName("精算未通过");
+                    quantityRoomDTO.setName("施工图审核未通过");
                 } else {
-                    quantityRoomDTO.setName("上传精算");
+                    quantityRoomDTO.setName("上传施工图");
                 }
             }
         });
 
         return ServerResponse.createBySuccess("查询成功", quantityRoomDTOS);
     }
+
+
+
+    /**
+     * 查询精算信息
+     * @param houseId
+     * @return
+     */
+    public ServerResponse getActuaryInfo(String houseId) {
+
+        Example example = new Example(HouseFlow.class);
+        example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID,houseId)
+                .andEqualTo(HouseFlow.DATA_STATUS, 0)
+                .andEqualTo(HouseFlow.WORKER_TYPE,2);
+        List<HouseFlow> houseFlows = iBillHouseFlowMapper.selectByExample(example);
+
+        List<Map<String,Object>> list = new ArrayList<>();
+        if(!houseFlows.isEmpty()){
+            houseFlows.forEach(houseFlow -> {
+                Map<String,Object> map = new HashMap<>();
+                map.put("name","精算确认");
+                map.put("date",houseFlow.getCreateDate());
+                list.add(map);
+                if(houseFlow.getStartDate() != null) {
+                    map = new HashMap<>();
+                    map.put("name","开始精算");
+                    map.put("date", houseFlow.getStartDate());
+                    list.add(map);
+                }
+            });
+        }
+
+        return ServerResponse.createBySuccess("查询成功", list);
+    }
+
+
 
 }
