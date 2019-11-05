@@ -1,6 +1,7 @@
 package com.dangjia.acg.service.supplier;
 
 import cn.jiguang.common.utils.StringUtils;
+import com.dangjia.acg.api.BasicsStorefrontAPI;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -39,6 +40,9 @@ public class DjSupplierServices {
     private DjSupplierMapper djSupplierMapper;
     @Autowired
     private DjSupSupplierProductMapper djSupSupplierProductMapper;
+
+    @Autowired
+    private BasicsStorefrontAPI basicsStorefrontAPI ;
 
     @Autowired
     private DjSupApplicationMapper djSupApplicationMapper ;
@@ -173,17 +177,25 @@ public class DjSupplierServices {
      * @param pageDTO
      * @param keyWord
      * @param applicationStatus
-     * @param shopId
+     * @param userId
+     * *@param cityId
      * @return
      */
 
-    public ServerResponse queryDjSupplierByShopIdPage( PageDTO pageDTO, String keyWord, String applicationStatus, String shopId,String cityId) {
+    public ServerResponse queryDjSupplierByShopIdPage( PageDTO pageDTO, String keyWord, String applicationStatus, String userId,String cityId) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            if (StringUtils.isEmpty(shopId)) {
-                return ServerResponse.createByErrorMessage("店铺ID不能为空!");
+            if (StringUtils.isEmpty(userId)) {
+                return ServerResponse.createByErrorMessage("用户ID不能为空!");
             }
-            List<DjSupplierDTO>  list=djSupplierMapper.queryDjSupplierByShopID(keyWord,applicationStatus,shopId);
+
+            Storefront storefront= basicsStorefrontAPI.queryStorefrontByUserID(userId,cityId);
+            if(storefront==null)
+            {
+                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
+            }
+
+            List<DjSupplierDTO>  list=djSupplierMapper.queryDjSupplierByShopID(keyWord,applicationStatus,storefront.getId());
             if (list.size() <= 0){
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }

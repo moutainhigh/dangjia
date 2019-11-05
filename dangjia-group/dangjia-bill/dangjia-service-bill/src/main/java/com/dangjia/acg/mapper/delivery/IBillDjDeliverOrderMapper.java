@@ -3,12 +3,12 @@ package com.dangjia.acg.mapper.delivery;
 
 import com.dangjia.acg.dto.delivery.AppointmentDTO;
 import com.dangjia.acg.dto.delivery.HouseFlowDataDTO;
-import com.dangjia.acg.dto.delivery.HouseFlowInfoDTO;
 import com.dangjia.acg.dto.delivery.OrderStorefrontDTO;
 import com.dangjia.acg.dto.member.WorkerTypeDTO;
+import com.dangjia.acg.dto.order.DecorationCostDTO;
+import com.dangjia.acg.dto.order.DecorationCostItemDTO;
 import com.dangjia.acg.modle.deliver.Order;
 import org.apache.ibatis.annotations.Param;
-import com.dangjia.acg.modle.delivery.DjDeliverOrder;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
@@ -69,4 +69,28 @@ public interface IBillDjDeliverOrderMapper extends Mapper<Order> {
      */
     List<WorkerTypeDTO> queryType(@Param("houseId") String houseId);
 
+    /**
+     * 查询当前花费汇总信息(根据类别汇总)
+     * @param houseId 房子ID
+     * @param labelValId 标签ID
+     * @return
+     */
+    List<DecorationCostDTO> searchDecorationCostList(@Param("houseId") String  houseId, @Param("labelValId") String  labelValId);
+
+    /**
+     * 查询当前花费详细花费信息
+     * @param categoryId 类别ID
+     * @param houseId 房子ID
+     * @param labelValId 标签 ID
+     * @return
+     */
+    List<DecorationCostItemDTO> searchDecorationCostDetailList(@Param("categoryId") String  categoryId,@Param("houseId") String  houseId,
+                                                               @Param("labelValId") String  labelValId);
+
+    /**
+     * 查询按分类标签汇总花费信息
+     * @param houseId
+     * @return
+     */
+    List<DecorationCostDTO> searchDecorationCategoryLabelList(@Param("houseId") String  houseId);
 }
