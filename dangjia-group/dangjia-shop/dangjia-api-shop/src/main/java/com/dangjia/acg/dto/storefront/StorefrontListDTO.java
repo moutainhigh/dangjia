@@ -69,7 +69,7 @@ public class StorefrontListDTO {
     private String applicationStatus;
 
     /**
-     * 联系人
+     * 合同
      */
     private String contract;
 
