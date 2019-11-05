@@ -20,6 +20,7 @@ import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
+import tk.mybatis.mapper.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -202,6 +203,12 @@ public class DjSupplierServices {
             List<Map<String,Object>> djSupplierDTOList=new ArrayList<Map<String,Object>>();
             for(DjSupplierDTO djSupplierDTO:list)
             {
+                String contract=djSupplierDTO.getContract();
+                if (StringUtil.isEmpty(contract))
+                    djSupplierDTO.setContractState("0");
+                else
+                    djSupplierDTO.setContractState("1");
+
                 Map<String,Object> resMap= BeanUtils.beanToMap(djSupplierDTO);
                 Integer i=djSupApplicationProductService.queryHaveGoodsSize(djSupplierDTO.getSupId(), djSupplierDTO.getShopId(),"0");
                 resMap.put("listSize",i);
