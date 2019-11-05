@@ -1,13 +1,11 @@
 package com.dangjia.acg.service.supplier;
 
-import com.dangjia.acg.api.BasicsStorefrontAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.supplier.DjSupApplicationMapper;
 import com.dangjia.acg.mapper.supplier.DjSupplierMapper;
-import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.supplier.DjSupApplication;
 import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.github.pagehelper.PageHelper;
@@ -36,8 +34,6 @@ public class DjSupApplicationService {
 
 
 
-    @Autowired
-    private BasicsStorefrontAPI basicsStorefrontAPI ;
 
 
     /**
@@ -83,14 +79,8 @@ public class DjSupApplicationService {
                     .andEqualTo(DjSupApplication.DATA_STATUS,0);
             if(djSupApplicationMapper.selectByExample(example).size()>0)
                 return ServerResponse.createByErrorMessage("请勿重复申请");
-
-            Storefront storefront= basicsStorefrontAPI.queryStorefrontByUserID(userId,cityId);
-            if(storefront==null)
-            {
-                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
-            }
             DjSupApplication djSupApplication=new DjSupApplication();
-            djSupApplication.setShopId(storefront.getId());
+            djSupApplication.setShopId(shopId);
             djSupApplication.setSupId(djSupplier.getId());
             djSupApplication.setDataStatus(0);
             djSupApplication.setApplicationStatus("0");
