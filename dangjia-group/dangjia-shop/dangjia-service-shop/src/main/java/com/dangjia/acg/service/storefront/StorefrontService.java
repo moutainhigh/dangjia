@@ -285,7 +285,7 @@ public class StorefrontService {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<StorefrontListDTO> storefrontListDTOS = istorefrontMapper.querySupplierApplicationShopList(searchKey, djSupplier.getId(), applicationStatus,cityId);
             storefrontListDTOS.forEach(storefrontListDTO -> {
-                if(CommonUtil.isEmpty(storefrontListDTO)){
+                if(CommonUtil.isEmpty(storefrontListDTO.getContract())){
                     storefrontListDTO.setContract("");
                 }
                 storefrontListDTO.setStorefrontLogo(imageaddress+storefrontListDTO.getStorefrontLogo());
