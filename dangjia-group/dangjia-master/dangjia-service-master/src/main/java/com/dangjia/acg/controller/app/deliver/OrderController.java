@@ -73,6 +73,18 @@ public class OrderController implements OrderAPI {
     }
 
     /**
+     * 补货提交订单接口
+     *
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse abrufbildungSubmitOrder(String userToken,String cityId, String houseId,
+                                                  String mendOrderId, String addressId) {
+        return orderService.abrufbildungSubmitOrder(userToken, cityId, houseId, mendOrderId, addressId);
+    }
+
+
+    /**
      * 返回已添加要货单明细
      */
     @Override

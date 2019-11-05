@@ -121,6 +121,8 @@ public class BillAppointmentService {
                 orderSplit.setStorefrontId(orderSplit.getStorefrontId());
                 orderSplit.setCityId(djDeliverOrder.getCityId());
                 orderSplit.setOrderId(orderId);
+                orderSplit.setIsReservationDeliver("1");
+                orderSplit.setReservationDeliverTime(reservationDeliverTime);
                 billDjDeliverOrderSplitMapper.insert(orderSplit);
                 String[] orderItemsIds = obj.getString("orderItemsId").split(",");
                 for (String orderItemsId : orderItemsIds) {
@@ -150,7 +152,6 @@ public class BillAppointmentService {
                     orderSplitItem.setIsReservationDeliver(1);//是否需要预约(1是，0否）
                     orderSplitItem.setReservationDeliverTime(reservationDeliverTime);
                     billDjDeliverOrderSplitItemMapper.insert(orderSplitItem);
-                    orderItem.setIsReservationDeliver("1");
                     orderItem.setReservationDeliverTime(reservationDeliverTime);
                     djDeliverOrderItemMapper.updateByPrimaryKey(orderItem);
                 }

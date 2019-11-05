@@ -147,5 +147,13 @@
         GROUP BY
                 o.id
     </select>
+
+    <update id="setStorefrontId">
+        UPDATE dj_repair_mend_materiel a
+        INNER JOIN dj_basics_storefront_product b ON a.product_id = b.id
+        SET a.storefront_id = b.storefront_id
+        WHERE
+            a.mend_order_id = #{mendOrderId}
+    </update>
 </mapper>
 

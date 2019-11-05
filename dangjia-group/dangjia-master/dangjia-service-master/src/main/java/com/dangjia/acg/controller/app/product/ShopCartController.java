@@ -32,8 +32,8 @@ public class ShopCartController implements ShopCartAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse updateCar(HttpServletRequest request, String userToken, String productId, Integer shopCount) {
-        return shopCartservice.updateCart(request,userToken,productId,shopCount);
+    public ServerResponse updateCar(HttpServletRequest request, String shopCartId, Integer shopCount) {
+        return shopCartservice.updateCart(shopCartId,shopCount);
     }
 
     @Override
@@ -48,8 +48,8 @@ public class ShopCartController implements ShopCartAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse delCheckCart(HttpServletRequest request,String userToken,String productId) {
-        return shopCartservice.delCheckCart(userToken,productId);
+    public ServerResponse delCheckCart(HttpServletRequest request,String shopCartIds) {
+        return shopCartservice.delCheckCart(shopCartIds);
     }
 
     @Override

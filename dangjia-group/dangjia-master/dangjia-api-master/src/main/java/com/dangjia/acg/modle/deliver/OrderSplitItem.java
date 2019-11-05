@@ -117,13 +117,13 @@ public class OrderSplitItem extends BaseEntity {
 
 
 	@Column(name = "order_item_id")
-	@Desc(value = "'是否送货与安装/施工分开'")
-	@ApiModelProperty("'是否送货与安装/施工分开'")
+	@Desc(value = "订单明细ID（多个逗号分隔)")
+	@ApiModelProperty("订单明细ID(多个逗号分隔)")
 	private String orderItemId;
 
 	@Column(name = "order_item_str")
-	@Desc(value = "'是否送货与安装/施工分开'")
-	@ApiModelProperty("'是否送货与安装/施工分开'")
+	@Desc(value = "订单扣减描述(多个逗号分隔）")
+	@ApiModelProperty("订单扣减描述(多个逗号分隔）")
 	private String orderItemStr;
 
 	@Column(name = "is_reservation_deliver")

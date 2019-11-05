@@ -47,8 +47,8 @@ public class Cart extends BaseEntity {
 	private String type;
 
 	@Column(name = "product_id")
-	@Desc(value = "货品id")
-	@ApiModelProperty("货品id")
+	@Desc(value = "店铺商品表id")
+	@ApiModelProperty("店铺商品表id")
 	private String productId;
 
 	@Column(name = "product_sn")
@@ -62,17 +62,32 @@ public class Cart extends BaseEntity {
 	private String productName;
 
 	@Column(name = "price")
+	@Desc(value = "销售价")
+	@ApiModelProperty("销售价")
 	private Double price;// 销售价
 
 	@Column(name = "shop_count")
+	@Desc(value = "购买总数")
+	@ApiModelProperty("购买总数")
 	private Double shopCount;//购买总数
 
 	@Column(name = "unit_name")
+	@Desc(value = "单位")
+	@ApiModelProperty("单位")
 	private String unitName;//单位
 
-	@Column(name = "category_id")
+	@Column(name = "unit_name")
+	@Desc(value = "分类id")
+	@ApiModelProperty("分类id")
 	private String categoryId;//分类id
 
 	@Column(name = "product_type")
+	@Desc(value = "0：材料；1：包工包料")
+	@ApiModelProperty("0：材料；1：包工包料")
 	private Integer productType; //0：材料；1：包工包料
+
+	@Column(name = "storefront_id")
+	@Desc(value = "店铺ID")
+	@ApiModelProperty("店铺ID")
+	private String storefrontId;
 }

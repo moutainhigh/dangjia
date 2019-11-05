@@ -57,5 +57,29 @@
 			AND city_id =#{cityId}
 		group by storefront_id
 	</select>
+
+	<select id="queryPurchaseRestrictions" resultType="java.lang.Integer">
+		SELECT
+			bgc.purchase_restrictions
+		FROM
+			dj_basics_storefront_product bsp,
+			dj_basics_product_template bst,
+			dj_basics_goods_category bgc
+		WHERE
+			bsp.prod_template_id = bst.id
+		AND bgc.id = bst.category_id
+		AND bsp.id = #{storefrontProductId}
+	</select>
+
+	<select id="queryWhetherThereIsActuarial" resultType="com.dangjia.acg.modle.house.House">
+		SELECT
+			h.*
+		FROM
+			dj_house h,
+			dj_actuary_budget_material abm
+		WHERE
+			h.id = abm.house_id
+		AND h.member_id =
+	</select>
 </mapper>
 

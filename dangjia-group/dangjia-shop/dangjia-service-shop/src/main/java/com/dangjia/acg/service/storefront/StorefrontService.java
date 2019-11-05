@@ -281,7 +281,7 @@ public class StorefrontService {
             String imageaddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             DjSupplier djSupplier = djSupplierAPI.querySingleDjSupplier(userId, cityId);
             if(null==djSupplier)
-                return ServerResponse.createByErrorMessage("暂无店铺信息");
+                return ServerResponse.createByErrorMessage("暂无供应商信息");
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<StorefrontListDTO> storefrontListDTOS = istorefrontMapper.querySupplierApplicationShopList(searchKey, djSupplier.getId(), applicationStatus,cityId);
             storefrontListDTOS.forEach(storefrontListDTO -> {
@@ -311,7 +311,7 @@ public class StorefrontService {
             String imageaddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             DjSupplier djSupplier = djSupplierAPI.querySingleDjSupplier(userId, cityId);
             if(null==djSupplier)
-                return ServerResponse.createByErrorMessage("暂无店铺信息");
+                return ServerResponse.createByErrorMessage("暂无供应商信息");
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<StorefrontListDTO> storefrontListDTOS = istorefrontMapper.querySupplierSelectionSupply(searchKey, djSupplier.getId(),cityId);
             storefrontListDTOS.forEach(storefrontListDTO -> {

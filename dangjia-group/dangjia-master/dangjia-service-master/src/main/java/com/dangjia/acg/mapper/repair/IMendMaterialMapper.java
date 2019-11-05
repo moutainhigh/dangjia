@@ -20,4 +20,6 @@ public interface IMendMaterialMapper extends Mapper<MendMateriel> {
 
     List<WarehouseGoodsDTO> getWarehouseGoods(@Param("productId") String productId,@Param("houseId") String houseId);
     List<WarehouseGoodsDTO> getWarehouseWorker(@Param("productId") String productId,@Param("houseId") String houseId);
+
+    int setStorefrontId(@Param("mendOrderId") String mendOrderId);
 }

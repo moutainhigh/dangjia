@@ -154,6 +154,12 @@ public class MemberService {
                     mobile = supplier.getTelephone();
                 }
                 break;
+            case "4":
+                Storefront storefront = basicsStorefrontAPI.querySingleStorefrontById(id);
+                if (storefront != null) {
+                    mobile = storefront.getMobile();
+                }
+                break;
             case "5":
                 HouseDistribution distribution = iHouseDistributionMapper.selectByPrimaryKey(id);
                 if (distribution != null) {
