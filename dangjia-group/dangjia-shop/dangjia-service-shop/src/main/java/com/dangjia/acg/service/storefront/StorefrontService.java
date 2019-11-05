@@ -9,6 +9,7 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.storefront.StorefrontDTO;
 import com.dangjia.acg.dto.storefront.StorefrontListDTO;
@@ -284,6 +285,9 @@ public class StorefrontService {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<StorefrontListDTO> storefrontListDTOS = istorefrontMapper.querySupplierApplicationShopList(searchKey, djSupplier.getId(), applicationStatus,cityId);
             storefrontListDTOS.forEach(storefrontListDTO -> {
+                if(CommonUtil.isEmpty(storefrontListDTO)){
+                    storefrontListDTO.setContract("");
+                }
                 storefrontListDTO.setStorefrontLogo(imageaddress+storefrontListDTO.getStorefrontLogo());
             });
             PageInfo pageResult = new PageInfo(storefrontListDTOS);
