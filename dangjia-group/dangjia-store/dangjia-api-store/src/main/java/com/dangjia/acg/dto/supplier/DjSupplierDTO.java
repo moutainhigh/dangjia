@@ -53,4 +53,6 @@ public class DjSupplierDTO  {
      * 城市ID
      */
     private String cityId;
+
+    private String contractState;
 }

@@ -55,4 +55,9 @@ public interface DjDeliverOrderAPI {
     ServerResponse getActuaryInfo(@RequestParam("request") HttpServletRequest request,
                                  @RequestParam("houseId") String houseId);
 
+    @PostMapping("app/design/getCollectInfo")
+    @ApiOperation(value = "查询验收过程", notes = "查询验收过程")
+    ServerResponse getCollectInfo(@RequestParam("request") HttpServletRequest request,
+                                  @RequestParam("houseId") String houseId);
+
 }
