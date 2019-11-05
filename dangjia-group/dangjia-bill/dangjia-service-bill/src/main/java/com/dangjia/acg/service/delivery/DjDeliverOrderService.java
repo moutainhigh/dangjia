@@ -13,6 +13,7 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.UserInfoResultDTO;
 import com.dangjia.acg.dto.core.HouseResult;
 import com.dangjia.acg.dto.delivery.*;
+import com.dangjia.acg.dto.design.CollectDataDTO;
 import com.dangjia.acg.dto.design.QuantityRoomDTO;
 import com.dangjia.acg.dto.member.WorkerTypeDTO;
 import com.dangjia.acg.mapper.delivery.*;
@@ -25,6 +26,7 @@ import com.dangjia.acg.mapper.sale.IBillMemberMapper;
 import com.dangjia.acg.mapper.sale.IBillUserMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
+import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.design.QuantityRoom;
@@ -984,27 +986,30 @@ public class DjDeliverOrderService {
      */
     public ServerResponse getDesignInfo(String houseId) {
         List<QuantityRoomDTO> quantityRoomDTOS = iBillQuantityRoomMapper.getQuantityRoomList(houseId);
-        quantityRoomDTOS.forEach(quantityRoomDTO -> {
-            if(quantityRoomDTO.getType() == 0){
-                quantityRoomDTO.setName("量房");
-            }else if(quantityRoomDTO.getType() == 1){
-                if(quantityRoomDTO.getFlag() == 0){
-                    quantityRoomDTO.setName("平面图审核通过");
-                }else if(quantityRoomDTO.getFlag() == 1){
-                    quantityRoomDTO.setName("平面图审核未通过");
-                }else{
-                    quantityRoomDTO.setName("上传平面图");
+        if(!quantityRoomDTOS.isEmpty()){
+            quantityRoomDTOS.forEach(quantityRoomDTO -> {
+                if(quantityRoomDTO.getType() == 0){
+                    quantityRoomDTO.setName("量房");
+                }else if(quantityRoomDTO.getType() == 1){
+                    if(quantityRoomDTO.getFlag() == 0){
+                        quantityRoomDTO.setName("平面图审核通过");
+                    }else if(quantityRoomDTO.getFlag() == 1){
+                        quantityRoomDTO.setName("平面图审核未通过");
+                    }else{
+                        quantityRoomDTO.setName("上传平面图");
+                    }
+                }else if(quantityRoomDTO.getType() == 2){
+                    if (quantityRoomDTO.getFlag() == 0) {
+                        quantityRoomDTO.setName("施工图审核通过");
+                    } else if (quantityRoomDTO.getFlag() == 1) {
+                        quantityRoomDTO.setName("施工图审核未通过");
+                    } else {
+                        quantityRoomDTO.setName("上传施工图");
+                    }
                 }
-            }else if(quantityRoomDTO.getType() == 2){
-                if (quantityRoomDTO.getFlag() == 0) {
-                    quantityRoomDTO.setName("施工图审核通过");
-                } else if (quantityRoomDTO.getFlag() == 1) {
-                    quantityRoomDTO.setName("施工图审核未通过");
-                } else {
-                    quantityRoomDTO.setName("上传施工图");
-                }
-            }
-        });
+            });
+
+        }
 
         return ServerResponse.createBySuccess("查询成功", quantityRoomDTOS);
     }
@@ -1044,5 +1049,176 @@ public class DjDeliverOrderService {
     }
 
 
+
+    /**
+     * 查询验收过程
+     * @param houseId
+     * @return
+     */
+    public ServerResponse getCollectInfo(String houseId) {
+        CollectDataDTO collectDataDTO = new CollectDataDTO();
+        //查询预计完工时间
+        Date date = iBillQuantityRoomMapper.selectMaxEndDate(houseId);
+
+        //查询验收过程时间
+        List<HouseFlowApply> houseFlowApplies = iBillQuantityRoomMapper.selectApplyInfo(houseId);
+
+        //查询工人进场时间
+        List<HouseWorker> houseWorkers = iBillQuantityRoomMapper.selectWorkerInfo(houseId);
+
+        List<Map<String,Object>> list = new ArrayList<>();
+        Map<String,Object> map = new HashMap<>();
+
+
+        for (HouseFlowApply houseFlowApply : houseFlowApplies) {
+            for (HouseWorker houseWorker:houseWorkers) {
+               if(houseFlowApply.getWorkerType() == 4 && houseWorker.getWorkerType() == 4){
+                    map = new HashMap<>();
+                    map.put("name","拆除进场");
+                    map.put("date",houseWorker.getModifyDate());
+                    list.add(map);
+                    if(houseFlowApply.getApplyType() == 1){
+                        map = new HashMap<>();
+                        map.put("name","拆除申请阶段完工");
+                        map.put("date",houseFlowApply.getCreateDate());
+                        list.add(map);
+                    }
+                    if(houseFlowApply.getMemberCheck() == 1){
+                        map = new HashMap<>();
+                        map.put("name","拆除申请阶段通过");
+                        map.put("date",houseFlowApply.getModifyDate());
+                        list.add(map);
+                    }else{
+                        map = new HashMap<>();
+                        map.put("name","拆除申请阶段未通过");
+                        map.put("date",houseFlowApply.getModifyDate());
+                        list.add(map);
+                    }
+                }else if(houseFlowApply.getWorkerType() == 6 && houseWorker.getWorkerType() == 6){
+                    map = new HashMap<>();
+                    map.put("name","水电工进场");
+                    map.put("date",houseWorker.getModifyDate());
+                    list.add(map);
+                    if(houseFlowApply.getApplyType() == 1){
+                        map = new HashMap<>();
+                        map.put("name","水电工申请阶段完工");
+                        map.put("date",houseFlowApply.getCreateDate());
+                        list.add(map);
+                    }
+                    if(houseFlowApply.getMemberCheck() == 1){
+                        map = new HashMap<>();
+                        map.put("name","水电工申请阶段通过");
+                        map.put("date",houseFlowApply.getModifyDate());
+                        list.add(map);
+                    }else{
+                        map = new HashMap<>();
+                        map.put("name","水电工申请阶段未通过");
+                        map.put("date",houseFlowApply.getModifyDate());
+                        list.add(map);
+                    }
+                }else if(houseFlowApply.getWorkerType() == 7 && houseWorker.getWorkerType() == 7){
+                    map = new HashMap<>();
+                    map.put("name","防水进场");
+                    map.put("date",houseWorker.getModifyDate());
+                    list.add(map);
+                    if(houseFlowApply.getApplyType() == 1){
+                        map = new HashMap<>();
+                        map.put("name","防水申请阶段完工");
+                        map.put("date",houseFlowApply.getCreateDate());
+                        list.add(map);
+                    }
+                    if(houseFlowApply.getMemberCheck() == 1){
+                        map = new HashMap<>();
+                        map.put("name","防水申请阶段通过");
+                        map.put("date",houseFlowApply.getModifyDate());
+                        list.add(map);
+                    }else{
+                        map = new HashMap<>();
+                        map.put("name","防水申请阶段未通过");
+                        map.put("date",houseFlowApply.getModifyDate());
+                        list.add(map);
+                    }
+                }else if(houseFlowApply.getWorkerType() == 8 && houseWorker.getWorkerType() == 8){
+                    map = new HashMap<>();
+                    map.put("name","泥工进场");
+                    map.put("date",houseWorker.getModifyDate());
+                    list.add(map);
+                    if(houseFlowApply.getApplyType() == 1){
+                        map = new HashMap<>();
+                        map.put("name","泥工申请阶段完工");
+                        map.put("date",houseFlowApply.getCreateDate());
+                        list.add(map);
+                    }
+                    if(houseFlowApply.getMemberCheck() == 1){
+                        map = new HashMap<>();
+                        map.put("name","泥工申请阶段通过");
+                        map.put("date",houseFlowApply.getModifyDate());
+                        list.add(map);
+                    }else{
+                        map = new HashMap<>();
+                        map.put("name","泥工申请阶段未通过");
+                        map.put("date",houseFlowApply.getModifyDate());
+                        list.add(map);
+                    }
+                }else if(houseFlowApply.getWorkerType() == 9 && houseWorker.getWorkerType() == 9){
+                    map = new HashMap<>();
+                    map.put("name","木工进场");
+                    map.put("date",houseWorker.getModifyDate());
+                    list.add(map);
+                    if(houseFlowApply.getApplyType() == 1){
+                        map = new HashMap<>();
+                        map.put("name","木工申请阶段完工");
+                        map.put("date",houseFlowApply.getCreateDate());
+                        list.add(map);
+                    }
+                    if(houseFlowApply.getMemberCheck() == 1){
+                        map = new HashMap<>();
+                        map.put("name","木工申请阶段通过");
+                        map.put("date",houseFlowApply.getModifyDate());
+                        list.add(map);
+                    }else{
+                        map = new HashMap<>();
+                        map.put("name","木工申请阶段未通过");
+                        map.put("date",houseFlowApply.getModifyDate());
+                        list.add(map);
+                    }
+                }else if(houseFlowApply.getWorkerType() == 10 && houseWorker.getWorkerType() == 10){
+                    map = new HashMap<>();
+                    map.put("name","油漆工进场");
+                    map.put("date",houseWorker.getModifyDate());
+                    list.add(map);
+                    if(houseFlowApply.getApplyType() == 1){
+                        map = new HashMap<>();
+                        map.put("name","油漆工申请阶段完工");
+                        map.put("date",houseFlowApply.getCreateDate());
+                        list.add(map);
+                    }
+                    if(houseFlowApply.getMemberCheck() == 1){
+                        map = new HashMap<>();
+                        map.put("name","油漆工申请阶段通过");
+                        map.put("date",houseFlowApply.getModifyDate());
+                        list.add(map);
+                    }else{
+                        map = new HashMap<>();
+                        map.put("name","油漆工申请阶段未通过");
+                        map.put("date",houseFlowApply.getModifyDate());
+                        list.add(map);
+                    }
+                }
+            }
+        }
+        for (HouseWorker houseWorker1 : houseWorkers) {
+            if (houseWorker1.getWorkerType() == 3) {
+                map = new HashMap<>();
+                map.put("name", "大管家进场");
+                map.put("date", houseWorker1.getModifyDate());
+                list.add(map);
+            }
+        }
+
+        collectDataDTO.setDate(date);
+        collectDataDTO.setList(list);
+        return ServerResponse.createBySuccess("查询成功", collectDataDTO);
+    }
 
 }

@@ -1,6 +1,7 @@
 package com.dangjia.acg.mapper.core;
 
 import com.dangjia.acg.modle.core.HouseFlowApply;
+import com.dangjia.acg.modle.worker.Evaluate;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
@@ -87,5 +88,12 @@ public interface IHouseFlowApplyMapper extends Mapper<HouseFlowApply> {
 
 
     List<HouseFlowApply> getBroadcastList(@Param("cityId") String cityId);
+
+
+
+    List<Evaluate> getOwnerComment(@Param("houseId") String houseId,
+                                   @Param("workerId") String workerId,
+                                   @Param("applyType") Integer applyType,
+                                   @Param("workerType") Integer workerType);
 
 }
