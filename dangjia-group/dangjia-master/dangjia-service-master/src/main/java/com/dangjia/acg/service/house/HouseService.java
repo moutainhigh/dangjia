@@ -17,7 +17,6 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
-import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.HouseFlowDTO;
 import com.dangjia.acg.dto.house.*;
@@ -41,7 +40,6 @@ import com.dangjia.acg.mapper.store.IStoreMapper;
 import com.dangjia.acg.mapper.store.IStoreUserMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
-import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.clue.Clue;
 import com.dangjia.acg.modle.core.*;
 import com.dangjia.acg.modle.house.*;
@@ -67,7 +65,6 @@ import com.dangjia.acg.service.core.HouseFlowService;
 import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -2256,7 +2253,7 @@ public class HouseService {
         }
 
         //展示动态类别为： 每日开工，每日完工，管家巡查，阶段完工，管家验收阶段完工，整体完工，管家整体完工验收，工艺节点展示；
-        String applyType = "0,1,2,4,5";
+        String applyType = "0,1,2,4,5,6,7";
         String[] applyTypes = applyType.split(",");
         criteria.andIn(HouseConstructionRecord.APPLY_TYPE, Arrays.asList(applyTypes));
         example.orderBy(HouseConstructionRecord.CREATE_DATE).desc();
