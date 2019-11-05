@@ -64,6 +64,7 @@ import com.dangjia.acg.modle.sale.residential.ResidentialBuilding;
 import com.dangjia.acg.modle.sale.residential.ResidentialRange;
 import com.dangjia.acg.modle.sale.royalty.*;
 import com.dangjia.acg.modle.user.MainUser;
+import com.dangjia.acg.modle.worker.Evaluate;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
@@ -2506,6 +2507,13 @@ public class HouseService {
             nodeMap.add(map1);
         }
         map.put("recordList", nodeMap);
+
+        List<Evaluate> evaluates = houseFlowApplyMapper.getOwnerComment(hfa.getHouseId(),hfa.getWorkerId(),hfa.getApplyType(),hfa.getWorkerType());
+        if(!evaluates.isEmpty()){
+            map.put("star",evaluates.get(0).getStar());
+            map.put("content",evaluates.get(0).getContent());
+        }
+
         return map;
     }
 

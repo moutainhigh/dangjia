@@ -390,5 +390,24 @@
         f.create_date DESC
         LIMIT 20
     </select>
+
+
+
+    <select id="getOwnerComment" resultType="com.dangjia.acg.modle.worker.Evaluate">
+        select content,star from
+        dj_worker_evaluate we INNER  JOIN dj_core_house_flow_apply chf
+        on we.house_flow_apply_id = chf.id
+        where
+        we.house_id = #{houseId}
+        and we.state = 1
+        and we.worker_id = #{workerId}
+        and we.apply_type = #{applyType}
+        and chf.worker_type = #{workerType}
+
+
+
+
+    </select>
+
 </mapper>
 
