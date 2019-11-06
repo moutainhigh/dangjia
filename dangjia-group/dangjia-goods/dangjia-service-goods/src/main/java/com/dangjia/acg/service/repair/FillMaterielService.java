@@ -15,12 +15,14 @@ import com.dangjia.acg.dto.repair.BudgetMaterialDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.basics.IGoodsMapper;
 import com.dangjia.acg.mapper.product.IBasicsProductTemplateMapper;
+import com.dangjia.acg.mapper.storefront.IGoodsStorefrontProductMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.repair.MendMateriel;
+import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.service.actuary.ActuaryOperationService;
 import com.dangjia.acg.service.data.ForMasterService;
 import com.github.pagehelper.PageHelper;
@@ -60,6 +62,8 @@ public class FillMaterielService {
     private IGoodsMapper goodsMapper;
     @Autowired
     private MemberAPI memberAPI;
+    @Autowired
+    private IGoodsStorefrontProductMapper iGoodsStorefrontProductMapper;
 
     /**
      * 管家审核验收申请
@@ -164,22 +168,23 @@ public class FillMaterielService {
                 Warehouse warehouse = JSON.parseObject(JSON.toJSONString(warehouseStr), Warehouse.class);
                 if (warehouse == null) continue;
                 WarehouseDTO warehouseDTO = new WarehouseDTO();
-                DjBasicsProductTemplate product = iBasicsProductTemplateMapper.selectByPrimaryKey(warehouse.getProductId());
+                StorefrontProduct storefrontProduct = iGoodsStorefrontProductMapper.selectByPrimaryKey(id);
+                DjBasicsProductTemplate product = iBasicsProductTemplateMapper.selectByPrimaryKey(storefrontProduct.getProdTemplateId());
                 warehouseDTO.setMaket(1);
-                if (product.getMaket() == 0 || product.getType() == 0) {
+                if (storefrontProduct.getIsShelfStatus().equals("0") || product.getType() == 0) {
                     warehouseDTO.setMaket(0);
                 }
                 Goods goods = goodsMapper.selectByPrimaryKey(product.getGoodsId());
                 if (goods != null) {
                     warehouseDTO.setSales(goods.getSales());
                 }
-                warehouseDTO.setImage(address + product.getImage());
+                warehouseDTO.setImage(address + storefrontProduct.getImage());
                 warehouseDTO.setShopCount(warehouse.getShopCount());
                 warehouseDTO.setAskCount(warehouse.getAskCount());
                 warehouseDTO.setBackCount((warehouse.getWorkBack() == null ? 0D : warehouse.getWorkBack()));
                 warehouseDTO.setRealCount(warehouse.getShopCount() - warehouse.getBackCount());
                 warehouseDTO.setSurCount(warehouse.getShopCount() - (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()) - warehouse.getAskCount());//所有买的数量 - 退货 - 收的=仓库剩余
-                warehouseDTO.setProductName(product.getName());
+                warehouseDTO.setProductName(storefrontProduct.getProductName());
                 warehouseDTO.setPrice(warehouse.getPrice());
                 warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * warehouse.getPrice());
                 warehouseDTO.setReceive(warehouse.getReceive() - (warehouse.getWorkBack() == null ? 0D : warehouse.getWorkBack()));

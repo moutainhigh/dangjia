@@ -60,7 +60,7 @@
             and application_status=#{applicationStatus}
         </if>
         and a.`city_id`=#{cityId}
-        /*and exists (select 1 from dj_basics_storefront_product t where a.id=t.storefront_id and t.is_shelf_status=1)*/
+        <!-- and exists (select 1 from dj_basics_storefront_product t where a.id=t.storefront_id and t.is_shelf_status=1)-->
     </select>
 
 
