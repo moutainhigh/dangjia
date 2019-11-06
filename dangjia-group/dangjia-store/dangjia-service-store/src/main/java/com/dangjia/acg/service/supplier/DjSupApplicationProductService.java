@@ -144,7 +144,7 @@ public class DjSupApplicationProductService {
             JSONArray jsonArr = JSONArray.parseArray(jsonStr);
             jsonArr.forEach(str ->{
                 JSONObject obj = (JSONObject) str;
-                String applicationProductId = obj.getString("applicationProductId");//供应商品表id
+                String applicationProductId = obj.getString("id");//供应商品表id
                 Double price = obj.getDouble("price");//供应价
                 Double porterage = obj.getDouble("porterage");//搬运费
                 Double adjustPrice = obj.getDouble("adjustPrice");//调后价
@@ -272,7 +272,7 @@ public class DjSupApplicationProductService {
             DjSupApplicationProduct djSupApplicationProduct=new DjSupApplicationProduct();
             djSupApplicationProduct.setId(null);
             djSupApplicationProduct.setCreateDate(null);
-            djSupApplicationProduct.setApplicationStatus("1");
+            djSupApplicationProduct.setApplicationStatus("2");
             int i=djSupApplicationProductMapper.updateByExampleSelective(djSupApplicationProduct,example);
             if (i<=0)
             {
