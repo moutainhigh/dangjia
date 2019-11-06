@@ -1,9 +1,7 @@
 package com.dangjia.acg.service.product;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.dangjia.acg.api.app.repair.MasterMendWorkerAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
@@ -13,7 +11,6 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.basics.ProductDTO;
 import com.dangjia.acg.dto.product.*;
-import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
 import com.dangjia.acg.mapper.basics.IAttributeValueMapper;
 import com.dangjia.acg.mapper.basics.ILabelMapper;
 import com.dangjia.acg.mapper.basics.ITechnologyMapper;
@@ -24,8 +21,6 @@ import com.dangjia.acg.modle.basics.Label;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.product.*;
-import com.dangjia.acg.modle.storefront.StorefrontProduct;
-import com.dangjia.acg.service.basics.TechnologyService;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;

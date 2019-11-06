@@ -1,12 +1,10 @@
 package com.dangjia.acg.dto.product;
 
-import com.dangjia.acg.common.annotation.ExcelField;
 import com.dangjia.acg.modle.GoodsBaseEntity;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
 
 import java.util.Date;
-import java.util.List;
 
 /**
  * 产品实体类
