@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 public interface DjDeliverOrderAPI {
 
     /**
-     * 下单后--订单查询--全部订单
+     * 下单后--订单查询--全部订单(方法废弃)
      * @param request
      * @param pageDTO
      * @param userId 用户id

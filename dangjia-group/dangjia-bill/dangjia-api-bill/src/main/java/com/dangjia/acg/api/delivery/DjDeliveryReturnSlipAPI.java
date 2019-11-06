@@ -99,6 +99,7 @@ public interface DjDeliveryReturnSlipAPI {
     @ApiOperation(value = "店铺利润统计-供应商维度", notes = "店铺利润统计-供应商维度")
     ServerResponse supplierDimension(@RequestParam("request") HttpServletRequest request,
                                                    @RequestParam("pageDTO") PageDTO pageDTO,
+                                                   @RequestParam("supId") String supId,
                                                    @RequestParam("userId") String userId,
                                                    @RequestParam("cityId") String cityId,
                                                    @RequestParam("searchKey") String searchKey);
