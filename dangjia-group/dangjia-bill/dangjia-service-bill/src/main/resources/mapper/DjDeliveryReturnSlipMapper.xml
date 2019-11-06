@@ -389,10 +389,11 @@
         FROM
             dj_deliver_order_split_item dosi
         INNER JOIN dj_deliver_split_deliver dsd ON dsd.id = dosi.split_deliver_id
+        INNER JOIN dj_basics_storefront_product bsp ON dosi.product_id=bsp.id
         WHERE
-            dosi.product_id = #{productId}
+            bsp.prod_template_id = #{productId}
         AND dsd.supplier_id = #{supId}
-        and dosi.city_id=#{cityId}
+        AND dosi.city_id=#{cityId}
         GROUP BY dsd.house_id
     </select>
 
