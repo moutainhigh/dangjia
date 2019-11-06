@@ -472,7 +472,7 @@
         h.optional_label as optionalLabel,
         ( CASE WHEN (h.decoration_type = 2 AND h.designer_ok != 3) THEN 1 ELSE 0 END ) AS showUpdata,
         s.store_name storeName
-        <if test="budgetOk > 0 ">
+        <if test="budgetOk > 0 and budgetOk !=5">
             ,gr.name operatorName,
             gr.mobile operatorMobile,
             gr.id operatorId
@@ -480,7 +480,7 @@
         FROM
         dj_house h
         INNER JOIN dj_member m ON h.member_id = m.id
-        <if test="budgetOk > 0 ">
+        <if test="budgetOk > 0  and budgetOk !=5">
             INNER JOIN dj_core_house_worker wk ON wk.house_id = h.id
             AND wk.worker_type = 2
             AND wk.work_type = 6
@@ -496,7 +496,7 @@
         <if test="budgetOk != 0 and workerKey!=null and workerKey!=''">
             AND CONCAT(gr.name,gr.mobile) like CONCAT('%',#{workerKey},'%')
         </if>
-        <if test="budgetOk > 0 and userId!=null and userId!=''">
+        <if test="budgetOk > 0 and budgetOk !=5 and  userId!=null and userId!=''">
             and gr.id = #{userId}
         </if>
         <if test="dataStatus == 1">
