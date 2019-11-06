@@ -4,9 +4,8 @@
     <!--每工种未删除 或 已支付工钱-->
     <select id="getWorkertoCheck" resultType="java.lang.Double">
         select sum(wg.price*abw.shop_count)
-        from dj_basics_product wg,dj_actuary_budget_worker abw
-        where wg.data_status = 0
-        and wg.id = abw.worker_goods_id
+        from dj_actuary_budget_material abw
+        where abw.data_status = 0
         and abw.house_id=#{houseId}
         and abw.delete_state!=1
         and abw.delete_state!=2
@@ -14,24 +13,25 @@
     </select>
     <!--从精算表查每工种已支付工钱-->
     <select id="getPayedWorker" resultType="java.lang.Double">
-        select sum(wg.price*abw.shop_count)
-        from dj_basics_product wg,dj_actuary_budget_worker abw
-        where wg.data_status = 0
-        and wg.id = abw.worker_goods_id
+        select sum(abw.price*abw.shop_count)
+        from dj_actuary_budget_material abw
+        where abw.data_status = 0
+        and abw.product_type=2
         and abw.house_id=#{houseId}
         and abw.delete_state =3
         and abw.house_flow_id=#{houseFlowId}
     </select>
     <!-- 从精算表查代购商品支付工钱 -->
     <select id="getAgencyPurchaseMoney" resultType="java.lang.Double">
-        SELECT
+       SELECT
             sum(t.total_price)
         FROM
-            dj_actuary_budget_worker t, dj_basics_product_worker t1
-        WHERE t.worker_goods_id = t1.product_id
+            dj_actuary_budget_material t,dj_basics_storefront_product t1, dj_basics_product_template t2
+        WHERE t.product_id = t1.id
+        and t1.prod_template_id=t2.id
         and t.house_id = #{houseId}
         AND t.house_flow_id = #{houseFlowId}
-        AND t1.is_agency_purchase = 1
+        AND t2.is_agency_purchase = 1
         AND t.delete_state = 3
     </select>
 
