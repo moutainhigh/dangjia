@@ -51,7 +51,14 @@
             and  sap.sup_id = #{supId}
             and sap.data_status=0
             and sap.shop_id = #{shopId}
-            and sap.application_status=#{applicationStatus}
+            <choose>
+                <when test='applicationStatus.contains(",")'>
+                    and sap.application_status in(${applicationStatus})
+                </when>
+                <otherwise>
+                    and sap.application_status=#{applicationStatus}
+                </otherwise>
+            </choose>
     </select>
 
 
@@ -69,15 +76,16 @@
         bpt.image,
         bpt.name as productName,
         bpt.product_sn as productSn,
-        ssp.stock,
-        ssp.price,
-        ssp.supplier_id as supId,
-        ssp.product_id as productId
+        sap.stock,
+        sap.price,
+        sap.sup_id as supId,
+        sap.product_id as productId
         FROM
-        dj_sup_supplier_product ssp
-        INNER JOIN dj_basics_product_template bpt ON ssp.product_id=bpt.id
-        WHERE 1=1 and ssp.data_status=0 and
-        ssp.supplier_id =#{supId}
+        dj_sup_application_product sap
+        INNER JOIN dj_basics_product_template bpt ON sap.product_id=bpt.id
+        WHERE 1=1 and sap.data_status=0
+        and sap.sup_id =#{supId}
+        and sap.application_status =1
         <if test="null!=searchKey and ''!=searchKey">
             AND (
             bpt.name LIKE CONCAT('%',#{searchKey},'%') or
@@ -101,7 +109,7 @@
             bsp.supplied_num AS stock,
             bpt.price AS price,
             bpt.cartage_price AS cartagePrice,
-            bg.is_elevator_fee AS isElevatorFee
+            bg.is_elevator_fee AS isCartagePrice
         FROM
             dj_basics_storefront_product bsp
         INNER JOIN dj_basics_goods bg ON bsp.goods_id = bg.id

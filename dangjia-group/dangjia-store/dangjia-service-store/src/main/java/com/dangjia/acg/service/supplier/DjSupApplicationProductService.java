@@ -57,23 +57,24 @@ public class DjSupApplicationProductService {
      * @param jsonStr
      * @return
      */
-    public ServerResponse insertDjSupApplicationProduct(String jsonStr) {
+    public ServerResponse insertDjSupApplicationProduct(String jsonStr,String cityId, String supId, String shopId) {
         try {
             JSONArray jsonArr = JSONArray.parseArray(jsonStr);
             jsonArr.forEach(str ->{
                 JSONObject obj = (JSONObject) str;
                 DjSupApplicationProduct djSupApplicationProduct=new DjSupApplicationProduct();
                 djSupApplicationProduct.setDataStatus(0);
-                djSupApplicationProduct.setSupId(obj.getString("supId"));
-                djSupApplicationProduct.setShopId(obj.getString("shopId"));
+                djSupApplicationProduct.setSupId(supId);
+                djSupApplicationProduct.setShopId(shopId);
                 djSupApplicationProduct.setProductId(obj.getString("productId"));
                 djSupApplicationProduct.setPrice(obj.getDouble("price"));
                 djSupApplicationProduct.setStock(obj.getInteger("stock"));
                 djSupApplicationProduct.setPorterage(obj.getDouble("porterage"));
                 djSupApplicationProduct.setIsCartagePrice(obj.getString("isCartagePrice"));
-                djSupApplicationProduct.setSupplyRelationShip(obj.getString("supplyRelationShip"));
+                djSupApplicationProduct.setSupplyRelationShip("0");
                 djSupApplicationProduct.setApplicationStatus("0");
                 djSupApplicationProduct.setGoodsId(obj.getString("goodsId"));
+                djSupApplicationProduct.setCityId(cityId);
                 djSupApplicationProductMapper.insert(djSupApplicationProduct);
             });
             return ServerResponse.createBySuccessMessage("申请成功");
@@ -311,7 +312,7 @@ public class DjSupApplicationProductService {
     public ServerResponse queryNotForTheGoods(String supId, String shopId,PageDTO pageDTO) {
         try {
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-            List<DjSupSupplierProductDTO> djSupSupplierProductDTOS = djSupSupplierProductMapper.queryHaveGoods(supId, shopId, "1");
+            List<DjSupSupplierProductDTO> djSupSupplierProductDTOS = djSupSupplierProductMapper.queryHaveGoods(supId, shopId, "1,2");
             //Stream表达式取出已选商品的id
             List<String> productIds = djSupSupplierProductDTOS.stream()
                     .map(DjSupSupplierProductDTO::getProductId)

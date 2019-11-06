@@ -40,6 +40,7 @@ import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.modle.repair.MendOrder;
+import com.dangjia.acg.service.order.BillMendOrderCheckService;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -103,7 +104,9 @@ public class RefundAfterSalesService {
     private BillDjDeliverOrderSplitMapper billDjDeliverOrderSplitMapper;
     @Autowired
     private BillDjDeliverOrderSplitItemMapper billDjDeliverOrderSplitItemMapper;
-
+    @Autowired
+    private BillMendOrderCheckService billMendOrderCheckService;
+    @Autowired
     private MendRecordAPI mendRecordAPI;
 
     /**
@@ -733,6 +736,7 @@ public class RefundAfterSalesService {
      * 同意退款申诉（退货申请）
      * @param repairMendOrderId
      */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse agreeRepairApplication(String repairMendOrderId,String userId){
         RefundRepairOrderDTO refundRepairOrderDTO=refundAfterSalesMapper.queryRefundOnlyHistoryOrderInfo(repairMendOrderId);//退款订单详情查询
        if(!("1".equals(refundRepairOrderDTO.getState())||"2".equals(refundRepairOrderDTO.getState()))){
@@ -746,10 +750,11 @@ public class RefundAfterSalesService {
         iBillMendOrderMapper.updateByPrimaryKeySelective(mendOrder);//修改退款申请单的状态同意
         //更新平台介入按钮的状态为已删除
         iBillOrderProgressMapper.updateOrderStatusByNodeCode(repairMendOrderId,"REFUND_AFTER_SALES","RA_005");
-        //添加对应的流水记录节点信息,平台已拒绝
+        //添加对应的流水记录节点信息,平台已同意
         updateOrderProgressInfo(repairMendOrderId,"2","REFUND_AFTER_SALES","RA_006",userId);
         //添加对应的流水记录节点信息，退款关闭
         updateOrderProgressInfo(repairMendOrderId,"2","REFUND_AFTER_SALES","RA_008",userId);
+        billMendOrderCheckService.settleMendOrder(repairMendOrderId);//退钱给业主
         return ServerResponse.createBySuccess("操作成功");
     }
 
