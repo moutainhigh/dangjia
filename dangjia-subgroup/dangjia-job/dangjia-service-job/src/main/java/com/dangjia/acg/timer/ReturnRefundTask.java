@@ -44,18 +44,18 @@ public class ReturnRefundTask {
      */
     @Scheduled(cron = "0 0/1 * * * ?")//1分钟执行一次
     public void couponApply() {
-        log.info(format.format(new Date()) + "开始执行完工申请管家检测任务...");
+        log.info(format.format(new Date()) + "开始执行店铺申请等待商家处理任务...");
         refundAfterSalesJobAPI.returnMechantProcessTime();//店铺申请等待商家处理（到期自动处理)
-        log.info(format.format(new Date()) + "结束执行完工申请管家检测任务...");
+        log.info(format.format(new Date()) + "结束执行店铺申请等待商家处理任务...");
 
-        log.info(format.format(new Date()) + "开始执行完工申请业主检测任务...");
+        log.info(format.format(new Date()) + "开始执行店铺拒绝退货，等待申请平台介入任务...");
         refundAfterSalesJobAPI.returnPlatformInterventionTime();//店铺拒绝退货，等待申请平台介入(到期自动处理）
-        log.info(format.format(new Date()) + "结束执行完工申请业主检测任务...");
+        log.info(format.format(new Date()) + "结束执行店铺拒绝退货，等待申请平台介入任务...");
 
 
-        log.info(format.format(new Date()) + "开始执行工匠保险检测任务...");
+        log.info(format.format(new Date()) + "开始执行业主申诉后，等待平台处理任务...");
         refundAfterSalesJobAPI.returnPlatformProcessTime();//业主申诉后，等待平台处理(到期自动处理）
-        log.info(format.format(new Date()) + "结束执行工匠保险检测任务...");
+        log.info(format.format(new Date()) + "结束执行业主申诉后，等待平台处理任务...");
 
 
 
