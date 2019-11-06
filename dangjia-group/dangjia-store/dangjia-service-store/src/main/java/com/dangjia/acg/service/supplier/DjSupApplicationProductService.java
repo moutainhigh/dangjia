@@ -57,7 +57,7 @@ public class DjSupApplicationProductService {
      * @param jsonStr
      * @return
      */
-    public ServerResponse insertDjSupApplicationProduct(String jsonStr,String city) {
+    public ServerResponse insertDjSupApplicationProduct(String jsonStr,String cityId) {
         try {
             JSONArray jsonArr = JSONArray.parseArray(jsonStr);
             jsonArr.forEach(str ->{
@@ -74,7 +74,7 @@ public class DjSupApplicationProductService {
                 djSupApplicationProduct.setSupplyRelationShip(obj.getString("supplyRelationShip"));
                 djSupApplicationProduct.setApplicationStatus("0");
                 djSupApplicationProduct.setGoodsId(obj.getString("goodsId"));
-                djSupApplicationProduct.setCityId(city);
+                djSupApplicationProduct.setCityId(cityId);
                 djSupApplicationProductMapper.insert(djSupApplicationProduct);
             });
             return ServerResponse.createBySuccessMessage("申请成功");
