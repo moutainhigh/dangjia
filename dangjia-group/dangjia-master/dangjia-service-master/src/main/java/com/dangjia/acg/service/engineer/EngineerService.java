@@ -605,6 +605,8 @@ public class EngineerService {
                 map.put("supName", supervisor.getName());
                 map.put("supMobile", supervisor.getMobile());
             }
+            map.put("designerOk", house.getDesignerOk());
+            map.put("budgetOk", house.getBudgetOk());
             map.put("createDate", houseFlow.getCreateDate());
             map.put("workerTypeId", houseFlow.getWorkerTypeId());
             map.put("workerType", houseFlow.getWorkerType());
