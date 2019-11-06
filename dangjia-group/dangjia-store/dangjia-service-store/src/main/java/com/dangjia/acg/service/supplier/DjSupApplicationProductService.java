@@ -143,7 +143,7 @@ public class DjSupApplicationProductService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse updateHaveGoods(String jsonStr) {
+    public ServerResponse updateHaveGoods(String jsonStr,String userId) {
         try {
             JSONArray jsonArr = JSONArray.parseArray(jsonStr);
             jsonArr.forEach(str -> {
@@ -155,7 +155,6 @@ public class DjSupApplicationProductService {
                 Date adjustTime = obj.getDate("adjustTime");//调价时间
                 String isCartagePrice = obj.getString("isCartagePrice");//是否收取上楼费 0=否，1=是
                 String supplyRelationship = obj.getString("supplyRelationship");//供应关系 0:供应 1:停供
-                String userId = obj.getString("userId");//操作人
                 DjSupApplicationProduct djSupApplicationProduct = new DjSupApplicationProduct();
                 djSupApplicationProduct.setId(applicationProductId);
                 djSupApplicationProduct.setPrice(price);
