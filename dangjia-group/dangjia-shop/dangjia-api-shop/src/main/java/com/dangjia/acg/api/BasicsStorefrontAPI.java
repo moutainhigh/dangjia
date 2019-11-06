@@ -36,7 +36,7 @@ public interface BasicsStorefrontAPI {
     );
 
     @PostMapping("/web/queryLikeSingleStorefront")
-    @ApiOperation(value = "根据调件模糊查询店铺信息", notes = "根据调件模糊查询店铺信息")
+    @ApiOperation(value = "根据条件模糊查询店铺信息", notes = "根据条件模糊查询店铺信息")
     List<Storefront> queryLikeSingleStorefront(@RequestParam("searchKey") String searchKey);
 
     @PostMapping("/web/addStorefront")

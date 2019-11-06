@@ -118,8 +118,6 @@ public class OrderService {
                 return (ServerResponse) object;
             }
             Member member = (Member) object;
-
-
             Order order = orderMapper.selectByPrimaryKey(orderId);
             if (order == null) {
                 return ServerResponse.createByErrorMessage("该订单不存在");
@@ -142,12 +140,25 @@ public class OrderService {
             orderItem.setDataStatus(1);
             orderItemMapper.updateByExampleSelective(orderItem,orderItemexample);
 
-            //要货单以及要货单详情表删除 orderSplitMapper  orderSplitItemMapper
-
-
-
-            //发货单删除
-
+            List<OrderItem> OrderItemList=orderItemMapper.selectByExample(orderItemexample);
+            for(OrderItem OrderItem:OrderItemList)
+            {
+                //要货单以及要货单详情表删除 orderSplitMapper  orderSplitItemMapper
+                String id=OrderItem.getId();
+                Example  OrderSplitItemexample=new Example(OrderSplitItem.class);
+                OrderSplitItemexample.createCriteria().andEqualTo(OrderSplitItem.ORDER_ITEM_ID,id);
+                OrderSplitItem orderSplitItem=new OrderSplitItem();
+                orderSplitItem.setDataStatus(1);
+                orderSplitItemMapper.updateByExampleSelective(orderSplitItem,OrderSplitItemexample);
+                orderSplitItem=orderSplitItemMapper.selectByPrimaryKey(id);
+                //发货单删除
+                String splitItemId=orderSplitItem.getId();
+                Example  splitDeliverExample=new Example(SplitDeliver.class);
+                splitDeliverExample.createCriteria().andEqualTo(SplitDeliver.NUMBER,splitItemId);
+                SplitDeliver splitDeliver=new SplitDeliver();
+                splitDeliver.setDataStatus(1);
+                splitDeliverMapper.updateByExampleSelective(splitDeliver,splitDeliverExample);
+            }
             return ServerResponse.createBySuccess("删除成功");
         } catch (Exception e) {
             e.printStackTrace();

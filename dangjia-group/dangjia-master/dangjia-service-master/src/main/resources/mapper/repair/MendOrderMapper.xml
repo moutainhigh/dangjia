@@ -230,33 +230,36 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <select id="materialBackStateProcessing" resultType="com.dangjia.acg.modle.repair.MendOrder">
+
         SELECT
         rmo.id,
-        rmo.number,
-        rmo.change_order_id as changeOrderId,
-        rmo.image_arr as imageArr,
-        rmo.business_order_number as businessOrderNumber,
-        rmo.order_name as orderName,
-        rmo.house_id as houseId,
-        rmo.worker_type_id as workerTypeId,
-        rmo.apply_member_id as applyMemberId,
-        rmo.type,
-        rmo.state,
-        rmo.total_amount as totalAmount,
-        rmo.carriage,
-        rmo.data_status as dataStatus,
-        rmo.create_date as createDate,
-        rmo.modify_date as modifyDate,
-        house.id,
-        house.residential as residential,
-        house.building as building,
-        house.unit as unit,
-        house.number as number,
-        house.member_id as memberId
-        FROM dj_repair_mend_order as rmo
-        left  JOIN dj_house as house
-        on (rmo.house_id = house.id  )
-        where 1=1
+        rmo.number, -- 订单号
+        rmo.change_order_id AS changeOrderId,
+        rmo.image_arr AS imageArr, -- 相关凭证
+        rmo.business_order_number AS businessOrderNumber,-- 订单号
+        rmo.order_name AS orderName, -- 订单描述
+        rmo.house_id AS houseId, -- 房间ID
+        rmo.worker_type_id AS workerTypeId,-- 工种ID
+        rmo.apply_member_id AS applyMemberId,-- 申请人id
+        rmo.type,-- 类型：（0:补材料;1:补人工;2:退材料(剩余材料登记);3:退人工,4:业主退材料;5业主退货退款）
+        rmo.state,-- 状态：（0生成中,1处理中,2不通过取消,3已通过,4已全部结算,5已撤回,6已关闭）
+        rmo.total_amount AS totalAmount, -- 总价
+        rmo.carriage, -- 运费
+        rmo.data_status AS dataStatus, -- 数据状态
+        rmo.create_date AS createDate, -- 创建时间
+        rmo.modify_date AS modifyDate, -- 修改时间
+        house.id, -- 房子id
+        house.residential AS residential,-- 小区名
+        house.building AS building -- 楼栋，后台客服填写 ,
+        house.unit AS unit -- 单元号，后台客服填写 ,
+        house.number AS number -- 房间号，后台客服填写 ,
+        house.member_id AS memberId -- 用户ID ,
+        rmo.storefront_id as storefrontId-- 店铺id
+        FROM
+        dj_repair_mend_order AS rmo
+        LEFT JOIN dj_house AS house ON (rmo.house_id = house.id)
+        WHERE
+        1 = 1
         and  rmo.storefront_id = #{storefrontId}
         <if test = "state!=null and state!=''">
             and  rmo.state = #{state}

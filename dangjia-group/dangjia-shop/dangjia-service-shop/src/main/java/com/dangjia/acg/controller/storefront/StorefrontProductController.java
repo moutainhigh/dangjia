@@ -29,11 +29,11 @@ public class StorefrontProductController implements StorefrontProductAPI {
     private StorefrontProductService storefrontProductService;
 
 
-    @Override
-    @ApiMethod
-    public List<StorefrontDTO> queryStorefrontListByStorefrontId(String storefrontId, String searchKey) {
-        return storefrontProductService.queryStorefrontListByStorefrontId(storefrontId,searchKey);
-    }
+//    @Override
+//    @ApiMethod
+//    public List<StorefrontDTO> queryStorefrontListByStorefrontId(String storefrontId, String searchKey) {
+//        return storefrontProductService.queryStorefrontListByStorefrontId(storefrontId,searchKey);
+//    }
 
     @Override
     @ApiMethod

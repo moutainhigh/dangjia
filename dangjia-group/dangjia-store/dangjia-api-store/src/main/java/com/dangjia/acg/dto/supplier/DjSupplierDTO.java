@@ -6,7 +6,14 @@ import lombok.Data;
 @Data
 public class DjSupplierDTO  {
 
+    /**
+     * 合同id
+     */
     private String id;
+    /**
+     * 供应商id
+     */
+   private String dsId;
     /**
      * 供应商名称
      */

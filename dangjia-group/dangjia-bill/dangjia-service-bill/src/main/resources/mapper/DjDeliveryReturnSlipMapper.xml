@@ -438,20 +438,53 @@
     </select>
 
 
-    <!--店铺利润-商品维度
+    <!--店铺利润-商品维度-->
+    <select id="supplierDimension" resultType="com.dangjia.acg.dto.delivery.SellerDimensionDTO">
+        SELECT
+            dsd.supplier_id AS supId,
+            -- 供应商id
+            sum(total_price) AS income,
+            -- 收入
+            sum(apply_money) AS expenditure,
+            -- 支出
+            sum(total_price) - sum(apply_money) AS profit -- 利润
+        FROM
+            dj_deliver_split_deliver dsd
+        INNER JOIN dj_deliver_order_split_item dosi ON dsd.id = dosi.split_deliver_id
+        WHERE
+            dsd.supplier_id = #{supId}
+        AND dsd.storefront_id = #{shopId}
+        AND dsd.city_id = #{cityId}
+        GROUP BY
+            dsd.supplier_id
+    </select>
+
+    <!--店铺利润-供应商维度-->
     <select id="" resultType="">
+        SELECT
+        dsd.id AS orderSplitId,
+        dsd.number,
+        dsd.send_time as createDate,
+        sum(dosi.shop_count) as shopCount,
+        dsd.total_amount as totalAmount
+        FROM
+        dj_deliver_split_deliver dsd
+        INNER JOIN dj_deliver_order_split_item dosi ON dsd.id = dosi.split_deliver_id
+        WHERE
+        dsd.storefront_id = #{shopId}
+        AND dsd.supplier_id = #{supId}
+        and dsd.city_id=#{cityId}
+        <if test="null!=searchKey and ''!=searchKey">
+            AND dsd.number LIKE CONCAT('%',#{searchKey},'%')
+        </if>
+        GROUP BY
+        dsd.number
+    </select>
+
+    <!--店铺利润-买家维度    -->
+    <select id="sellerDimension" resultType="com.dangjia.acg.dto.delivery.BuyersDimensionDTO">
 
     </select>
--->
-    <!--店铺利润-供应商维度
-    <select id="" resultType="">
 
-    </select>
--->
-    <!--店铺利润-买家维度
-    <select id="storefrontProductDimensionList" resultType="com.dangjia.acg.dto.delivery.BuyersDimensionDTO">
-
-    </select>
--->
 
 </mapper>

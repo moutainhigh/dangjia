@@ -50,8 +50,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <include refid="all_columns"/>
         from dj_deliver_order
         where
-        business_order_number = #{businessOrderNumber} and
-        orderStatus = #{orderStatus}
+        business_order_number = #{businessOrderNumber}
+        <if test="orderStatus!=null and orderStatus!=''">
+            and orderStatus = #{orderStatus}
+        </if>
         ORDER BY create_date desc
     </select>
 
