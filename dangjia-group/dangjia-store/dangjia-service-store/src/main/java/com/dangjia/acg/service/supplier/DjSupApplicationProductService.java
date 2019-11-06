@@ -71,7 +71,7 @@ public class DjSupApplicationProductService {
                 djSupApplicationProduct.setStock(obj.getInteger("stock"));
                 djSupApplicationProduct.setPorterage(obj.getDouble("porterage"));
                 djSupApplicationProduct.setIsCartagePrice(obj.getString("isCartagePrice"));
-                djSupApplicationProduct.setSupplyRelationShip(obj.getString("supplyRelationShip"));
+                djSupApplicationProduct.setSupplyRelationShip("0");
                 djSupApplicationProduct.setApplicationStatus("0");
                 djSupApplicationProduct.setGoodsId(obj.getString("goodsId"));
                 djSupApplicationProduct.setCityId(cityId);

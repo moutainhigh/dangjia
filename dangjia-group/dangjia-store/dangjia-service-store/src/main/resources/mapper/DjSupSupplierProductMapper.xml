@@ -102,7 +102,7 @@
             bsp.supplied_num AS stock,
             bpt.price AS price,
             bpt.cartage_price AS cartagePrice,
-            bg.is_elevator_fee AS isElevatorFee
+            bg.is_elevator_fee AS isCartagePrice
         FROM
             dj_basics_storefront_product bsp
         INNER JOIN dj_basics_goods bg ON bsp.goods_id = bg.id
