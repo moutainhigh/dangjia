@@ -349,6 +349,7 @@ public class DjSupApplicationProductService {
                 djSupApplicationProduct.setPrice(obj.getDouble("price"));//供应价
                 djSupApplicationProduct.setPorterage(obj.getDouble("porterage"));//搬运费
                 djSupApplicationProduct.setIsCartagePrice(obj.getString("isCartagePrice"));//是否收取上楼费 0=否，1=是
+                djSupApplicationProduct.setApplicationStatus("0");
                 djSupApplicationProductMapper.updateByPrimaryKeySelective(djSupApplicationProduct);
             });
             return ServerResponse.createBySuccessMessage("申请成功");
