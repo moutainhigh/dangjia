@@ -33,8 +33,8 @@ public class DjSupApplicationProductController implements DjSupApplicationProduc
 
     @Override
     @ApiMethod
-    public ServerResponse updateHaveGoods(HttpServletRequest request, String jsonStr) {
-        return djSupApplicationProductService.updateHaveGoods(jsonStr);
+    public ServerResponse updateHaveGoods(HttpServletRequest request, String jsonStr, String userId) {
+        return djSupApplicationProductService.updateHaveGoods(jsonStr,userId);
     }
 
     @Override
