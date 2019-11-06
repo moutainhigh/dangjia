@@ -57,15 +57,15 @@ public class DjSupApplicationProductService {
      * @param jsonStr
      * @return
      */
-    public ServerResponse insertDjSupApplicationProduct(String jsonStr,String cityId) {
+    public ServerResponse insertDjSupApplicationProduct(String jsonStr,String cityId, String supId, String shopId) {
         try {
             JSONArray jsonArr = JSONArray.parseArray(jsonStr);
             jsonArr.forEach(str ->{
                 JSONObject obj = (JSONObject) str;
                 DjSupApplicationProduct djSupApplicationProduct=new DjSupApplicationProduct();
                 djSupApplicationProduct.setDataStatus(0);
-                djSupApplicationProduct.setSupId(obj.getString("supId"));
-                djSupApplicationProduct.setShopId(obj.getString("shopId"));
+                djSupApplicationProduct.setSupId(supId);
+                djSupApplicationProduct.setShopId(shopId);
                 djSupApplicationProduct.setProductId(obj.getString("productId"));
                 djSupApplicationProduct.setPrice(obj.getDouble("price"));
                 djSupApplicationProduct.setStock(obj.getInteger("stock"));
