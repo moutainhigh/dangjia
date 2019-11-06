@@ -121,7 +121,7 @@ public class EngineerService {
             hw.setWorkerId(houseWorker.getWorkerId());
             hw.setWorkerTypeId(houseWorker.getWorkerTypeId());
             hw.setCreateDate(houseWorker.getCreateDate());
-            hw.setModifyDate(houseWorker.getModifyDate());
+            hw.setModifyDate(new Date());
             hw.setWorkerType(houseWorker.getWorkerType());
             hw.setWorkType(4);//4已支付被平台换
             hw.setIsSelect(0);
@@ -140,8 +140,6 @@ public class EngineerService {
             houseFlow.setNominator(workerId);
             houseFlow.setWorkType(4);
             houseFlow.setWorkerId(workerId);
-            hw.setCreateDate(new Date());
-            hw.setModifyDate(new Date());
             houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
 
             houseWorker.setCreateDate(new Date());
