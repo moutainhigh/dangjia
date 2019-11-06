@@ -387,7 +387,7 @@ public class EngineerService {
             map.put("workerType", worker.getWorkerType());
             map.put("workerTypeName", workerType.getName());
             map.put("mobile", worker.getMobile());
-            if(houseFlow.getWorkerType()>2){
+            if(houseFlow.getWorkerType()>3){
                 List<HouseFlowApply> earliestTime = houseFlowApplyMapper.getEarliestTimeHouseApply(houseFlow.getHouseId(), houseFlow.getWorkerId());//查询最早的每日开工申请
                if(earliestTime.size()>0) {
                    map.put("createDate", earliestTime.get(0).getCreateDate());
