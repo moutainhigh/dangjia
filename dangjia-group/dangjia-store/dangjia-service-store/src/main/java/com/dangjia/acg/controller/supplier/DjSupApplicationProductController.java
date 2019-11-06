@@ -21,8 +21,8 @@ public class DjSupApplicationProductController implements DjSupApplicationProduc
 
     @Override
     @ApiMethod
-    public ServerResponse insertDjSupApplicationProduct(HttpServletRequest request, String jsonStr) {
-        return djSupApplicationProductService.insertDjSupApplicationProduct(jsonStr);
+    public ServerResponse insertDjSupApplicationProduct(HttpServletRequest request, String jsonStr, String cityId, String supId, String shopId) {
+        return djSupApplicationProductService.insertDjSupApplicationProduct(jsonStr,cityId,supId,shopId);
     }
 
     @Override
