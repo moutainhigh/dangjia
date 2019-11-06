@@ -82,4 +82,6 @@ public class BasicsStorefrontProductDTO {
      */
     private String cityId;
 
+    private String userId;
+
 }

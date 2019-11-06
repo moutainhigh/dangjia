@@ -16,6 +16,7 @@ import com.dangjia.acg.dto.storefront.BasicsStorefrontProductDTO;
 import com.dangjia.acg.dto.storefront.BasicsStorefrontProductViewDTO;
 import com.dangjia.acg.mapper.storefront.IStorefrontProductMapper;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
+import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
@@ -44,6 +45,10 @@ public class StorefrontProductService {
     private DjBasicsProductAPI djBasicsProductAPI ;
     @Autowired
     private ConfigUtil configUtil;
+
+    @Autowired
+    private StorefrontService storefrontService;
+
     /**
      * 供货设置-根据货品id，城市id，店铺id删除店铺商品
      * @param productId
@@ -106,11 +111,26 @@ public class StorefrontProductService {
      */
     public ServerResponse addStorefrontProduct(BasicsStorefrontProductDTO basicsStorefrontProductDTO) {
         try {
+
+            String userId=basicsStorefrontProductDTO.getUserId();
+            String cityId=basicsStorefrontProductDTO.getCityId();
+            if (StringUtils.isEmpty(userId)) {
+                return ServerResponse.createByErrorMessage("用户ID不能为空!");
+            }
+            if (StringUtils.isEmpty(cityId)) {
+                return ServerResponse.createByErrorMessage("城市ID不能为空!");
+            }
+            Storefront storefront=storefrontService.queryStorefrontByUserID(userId,cityId);
+            if(storefront==null)
+            {
+                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息!");
+            }
+
             //判断是否重复添加
             Example example = new Example(StorefrontProduct.class);
             example.createCriteria().andEqualTo(StorefrontProduct.PROD_TEMPLATE_ID, basicsStorefrontProductDTO.getProdTemplateId())
-            .andEqualTo(StorefrontProduct.STOREFRONT_ID,basicsStorefrontProductDTO.getStorefrontId())
-            .andEqualTo(StorefrontProduct.CITY_ID,basicsStorefrontProductDTO.getCityId());
+            .andEqualTo(StorefrontProduct.STOREFRONT_ID,storefront.getId())
+            .andEqualTo(StorefrontProduct.CITY_ID,cityId);
             List<StorefrontProduct> list = istorefrontProductMapper.selectByExample(example);
             if (list.size() > 0) {
                 Example exampleup = new Example(StorefrontProduct.class);
@@ -129,7 +149,7 @@ public class StorefrontProductService {
                 djBasicsProductTemplate = JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), DjBasicsProductTemplate.class);
             }
             StorefrontProduct storefrontProduct = new StorefrontProduct();
-            storefrontProduct.setStorefrontId(basicsStorefrontProductDTO.getStorefrontId());
+            storefrontProduct.setStorefrontId(storefront.getId());//店铺id
             storefrontProduct.setImage(djBasicsProductTemplate.getImage());//大图
             storefrontProduct.setDetailImage(djBasicsProductTemplate.getDetailImage());//缩略图
             storefrontProduct.setMarketName(djBasicsProductTemplate.getMarketingName());//营销名称
