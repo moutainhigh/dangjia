@@ -51,7 +51,14 @@
             and  sap.sup_id = #{supId}
             and sap.data_status=0
             and sap.shop_id = #{shopId}
-            and sap.application_status=#{applicationStatus}
+            <choose>
+                <when test='applicationStatus.contains(",")'>
+                    and sap.application_status in(${applicationStatus})
+                </when>
+                <otherwise>
+                    and sap.application_status=#{applicationStatus}
+                </otherwise>
+            </choose>
     </select>
 
 
