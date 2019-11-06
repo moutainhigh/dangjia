@@ -74,6 +74,7 @@ public class DjSupApplicationProductService {
                 djSupApplicationProduct.setSupplyRelationShip(obj.getString("supplyRelationShip"));
                 djSupApplicationProduct.setApplicationStatus("0");
                 djSupApplicationProduct.setGoodsId(obj.getString("goodsId"));
+                djSupApplicationProduct.setCityId(obj.getString("cityId"));
                 djSupApplicationProductMapper.insert(djSupApplicationProduct);
             });
             return ServerResponse.createBySuccessMessage("申请成功");
