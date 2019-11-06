@@ -229,6 +229,11 @@ public class DjBasicsProductTemplate extends GoodsBaseEntity {
     @ApiModelProperty(" 是否为代买（1是，0否）")
     private String isAgencyPurchase;
 
+    @Column(name = "is_relateion_product")
+    @Desc(value = " 是否关联商品（1是，0否）")
+    @ApiModelProperty(" 是否关联商品（1是，0否）")
+    private String isRelateionProduct;
+
     @Transient
     private String storefrontName;
 

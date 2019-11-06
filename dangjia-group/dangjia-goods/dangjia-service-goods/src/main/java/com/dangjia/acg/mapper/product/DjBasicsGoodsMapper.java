@@ -1,7 +1,7 @@
 package com.dangjia.acg.mapper.product;
 
 import com.dangjia.acg.modle.product.DjBasicsGoods;
-import com.dangjia.acg.modle.product.DjBasicsProduct;
+import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
@@ -27,7 +27,7 @@ public interface DjBasicsGoodsMapper extends Mapper<DjBasicsGoods> {
     DjBasicsGoods queryById(String id);
 
     //根据商品Id查货品
-    List<DjBasicsProduct> queryByGoodsId(@Param("goodsId") String goodsId);
+    List<DjBasicsProductTemplate> queryByGoodsId(@Param("goodsId") String goodsId);
 
     List<DjBasicsGoods> queryByCategoryId(@Param("categoryId")String categoryId);
 

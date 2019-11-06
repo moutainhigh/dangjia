@@ -102,6 +102,10 @@ public class BasicsProductDTO extends GoodsBaseEntity {
 
     private String isAgencyPurchase;//是否为代买（1是，0否）
 
+    private String isRelateionProduct;//是否关联商品（1是，0否）
+
+    private String relationProductIds;//关联商品编码（多个用逗号分隔）
+
 
     private String cityId;//
 
