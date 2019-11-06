@@ -121,4 +121,11 @@ public interface IBasicsProductTemplateMapper extends Mapper<DjBasicsProductTemp
      */
     List<Map<String,Object>> getProductStoreListByGoodsId(@Param("goodsId") String goodsId);
 
+    /**
+     * 查询所有的人工商品
+     * @param name
+     * @return
+     */
+    List<Map<String,Object>> queryAllWorkerProductList(@Param("name") String name);
+
 }
