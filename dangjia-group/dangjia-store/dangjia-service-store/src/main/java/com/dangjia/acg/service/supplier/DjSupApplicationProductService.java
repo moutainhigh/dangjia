@@ -271,7 +271,7 @@ public class DjSupApplicationProductService {
             DjSupApplicationProduct djSupApplicationProduct=new DjSupApplicationProduct();
             djSupApplicationProduct.setId(null);
             djSupApplicationProduct.setCreateDate(null);
-            djSupApplicationProduct.setApplicationStatus("1");
+            djSupApplicationProduct.setApplicationStatus("2");
             int i=djSupApplicationProductMapper.updateByExampleSelective(djSupApplicationProduct,example);
             if (i<=0)
             {

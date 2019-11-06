@@ -211,7 +211,7 @@ public class DjSupplierServices {
 
                 Map<String,Object> resMap= BeanUtils.beanToMap(djSupplierDTO);
                 Integer i=djSupApplicationProductService.queryHaveGoodsSize(djSupplierDTO.getSupId(), djSupplierDTO.getShopId(),"0");
-                resMap.put("listSize",i);
+                resMap.put("listSize",i);//是否有供应商的供应商品
                 djSupplierDTOList.add(resMap);
             }
             PageInfo pageResult = new PageInfo(djSupplierDTOList);
