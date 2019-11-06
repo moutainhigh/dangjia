@@ -193,4 +193,22 @@
         and t.id=#{repairMendOrderId}
         and t.state<![CDATA[<>]]>0
     </select>
+
+    <!--获取符合条件的数据-->
+    <select id="queryRefundJobList" resultType="java.util.Map">
+      <![CDATA[
+        SELECT
+          tt1.id repairMendOrderId,tt1.total_amount totalAmount,tt1.apply_member_id memberId,tt2.node_code nodeCode
+        FROM
+            dj_repair_mend_order tt1,
+            dj_deliver_order_progress tt2
+        WHERE
+           tt1.id = tt2.progress_order_id
+        and tt2.create_date=(select max(t.create_date) from dj_deliver_order_progress t where t.progress_order_id=tt2.progress_order_id)
+        and tt2.node_code=#{nodeCode}
+        and tt1.type in(4,5)
+        and tt2.create_date<date_add(now(), interval -(select param_value from dj_config where param_key=#{paramNodeKey}) hour)
+        ]]>
+    </select>
+
 </mapper>

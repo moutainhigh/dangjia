@@ -7,7 +7,10 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.config.ConfigMessage;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -63,5 +66,21 @@ public class ConfigMessageController implements ConfigMessageAPI {
     @ApiMethod
     public ServerResponse addConfigMessage(String memberId, String title, String alert, int type, String data) {
         return configMessageService.addConfigMessage(AppType.SALE,memberId,title,alert,type,data);
+    }
+
+    /**
+     *  业主退货退款，消息推送
+     * @param memberId
+     * @param title
+     * @param alert
+     * @param targetType
+     * @param typeText
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse addRefundConfigMessage(HttpServletRequest request,AppType appType,String memberId,String targetType,
+                                                 String title,String alert,String typeText){
+        return configMessageService.addConfigMessage(request,AppType.ZHUANGXIU,memberId,title,alert,targetType,typeText);
     }
 }

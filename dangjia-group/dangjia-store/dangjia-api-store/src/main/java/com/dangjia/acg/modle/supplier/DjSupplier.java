@@ -74,4 +74,19 @@ public class DjSupplier extends BaseEntity {
     @ApiModelProperty("是否非平台供应商（1是，0否）")
     private Integer isNonPlatformSupperlier;
 
+    @Column(name = "total_account")
+    @Desc(value = "账户总额")
+    @ApiModelProperty("账户总额")
+    private Double totalAccount;
+
+    @Column(name = "surplus_money")
+    @Desc(value = "可提现余额")
+    @ApiModelProperty("可提现余额")
+    private Double surplusMoney;
+
+    @Column(name = "retention_money")
+    @Desc(value = "滞留金")
+    @ApiModelProperty("滞留金")
+    private Double retentionMoney;
+
 }

@@ -29,6 +29,11 @@
         </dependency>
         <dependency>
             <groupId>com.dangjia.acg</groupId>
+            <artifactId>dangjia-api-bill</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.dangjia.acg</groupId>
             <artifactId>dangjia-api-master</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
