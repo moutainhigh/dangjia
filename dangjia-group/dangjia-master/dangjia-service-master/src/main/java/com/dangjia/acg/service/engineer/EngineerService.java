@@ -129,9 +129,9 @@ public class EngineerService {
             hw.setHouseId(houseWorker.getHouseId());
             hw.setWorkerId(houseWorker.getWorkerId());
             hw.setWorkerTypeId(houseWorker.getWorkerTypeId());
-            hw.setWorkerType(houseWorker.getWorkerType());
-            hw.setCreateDate(new Date());
+            hw.setCreateDate(houseWorker.getCreateDate());
             hw.setModifyDate(new Date());
+            hw.setWorkerType(houseWorker.getWorkerType());
             hw.setWorkType(4);//4已支付被平台换
             hw.setIsSelect(0);
             houseWorkerMapper.insert(hw);
