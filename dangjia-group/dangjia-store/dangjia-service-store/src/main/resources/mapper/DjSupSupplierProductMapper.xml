@@ -36,12 +36,13 @@
             sap.price,
             sap.stock,
             bpt.price AS salesPrice,
-            bpt.cartage_price AS porterage,
+            bpt.cartage_price AS cartagePrice,
             sap.is_cartage_price AS isCartagePrice,
             sap.supply_relationship AS supplyRelationship,
             if(ar.adjust_time is not null and ar.adjust_time!="",ar.adjust_time,current_timestamp()) as adjustTime,
             if(ar.adjust_price is not null and ar.adjust_price!="",ar.adjust_price,0) as adjustprice,
-            sap.porterage
+            if(sap.porterage is not null and sap.porterage!="",sap.porterage,0) as porterage
+
         FROM
             dj_sup_application_product sap
         INNER JOIN dj_basics_goods bg ON sap.goods_id = bg.id

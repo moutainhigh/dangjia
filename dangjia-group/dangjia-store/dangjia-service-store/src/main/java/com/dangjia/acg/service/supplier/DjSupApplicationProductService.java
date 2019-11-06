@@ -131,7 +131,7 @@ public class DjSupApplicationProductService {
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();
-            return ServerResponse.createByErrorMessage("查询成功失败：" + e);
+            return ServerResponse.createByErrorMessage("查询已供商品失败：" + e);
         }
     }
 
