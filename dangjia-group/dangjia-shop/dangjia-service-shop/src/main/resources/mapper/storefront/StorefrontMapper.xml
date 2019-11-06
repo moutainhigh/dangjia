@@ -71,7 +71,7 @@
         where 1=1
         <if test="null!=searchKey and ''!=searchKey">
             and (
-            storefront_name LIKE CONCAT('%',#{searchKey},'%') or
+            storefront_name LIKE CONCgouAT('%',#{searchKey},'%') or
             mobile LIKE CONCAT('%',#{searchKey},'%') or
             storekeeper_name LIKE CONCAT('%',#{searchKey},'%')
             )

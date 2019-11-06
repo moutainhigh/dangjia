@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -67,5 +68,14 @@ public interface RefundAfterSalesMapper extends Mapper<Order> {
      * @return
      */
     RefundRepairOrderDTO queryRefundOnlyHistoryOrderInfo(@Param("repairMendOrderId") String repairMendOrderId);
+
+    /**
+     * 查询符合条件的数据信息
+     * @param nodeType  节点ID
+     * @param paramNodeKey 获取需处理的判断的时间值的key
+     * @return
+     */
+    List<Map<String,Object>> queryRefundJobList(@Param("nodeCode") String nodeType,@Param("paramNodeKey") String paramNodeKey);
+
 
 }

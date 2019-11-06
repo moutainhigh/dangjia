@@ -15,7 +15,6 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.engineer.ArtisanDTO;
 import com.dangjia.acg.dto.house.WareDTO;
 import com.dangjia.acg.dto.repair.RepairMendDTO;
-import com.dangjia.acg.dto.storefront.StorefrontDTO;
 import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.design.IHouseStyleTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
@@ -130,9 +129,9 @@ public class EngineerService {
             hw.setHouseId(houseWorker.getHouseId());
             hw.setWorkerId(houseWorker.getWorkerId());
             hw.setWorkerTypeId(houseWorker.getWorkerTypeId());
-            hw.setCreateDate(houseWorker.getCreateDate());
-            hw.setModifyDate(houseWorker.getModifyDate());
             hw.setWorkerType(houseWorker.getWorkerType());
+            hw.setCreateDate(new Date());
+            hw.setModifyDate(new Date());
             hw.setWorkType(4);//4已支付被平台换
             hw.setIsSelect(0);
             houseWorkerMapper.insert(hw);
@@ -150,8 +149,6 @@ public class EngineerService {
             houseFlow.setNominator(workerId);
             houseFlow.setWorkType(4);
             houseFlow.setWorkerId(workerId);
-            hw.setCreateDate(new Date());
-            hw.setModifyDate(new Date());
             houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
 
             houseWorker.setCreateDate(new Date());
