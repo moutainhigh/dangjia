@@ -121,7 +121,7 @@ public class EngineerService {
             hw.setWorkerId(houseWorker.getWorkerId());
             hw.setWorkerTypeId(houseWorker.getWorkerTypeId());
             hw.setCreateDate(houseWorker.getCreateDate());
-            hw.setModifyDate(houseWorker.getModifyDate());
+            hw.setModifyDate(new Date());
             hw.setWorkerType(houseWorker.getWorkerType());
             hw.setWorkType(4);//4已支付被平台换
             hw.setIsSelect(0);
@@ -140,8 +140,6 @@ public class EngineerService {
             houseFlow.setNominator(workerId);
             houseFlow.setWorkType(4);
             houseFlow.setWorkerId(workerId);
-            hw.setCreateDate(new Date());
-            hw.setModifyDate(new Date());
             houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
 
             houseWorker.setCreateDate(new Date());
@@ -609,6 +607,8 @@ public class EngineerService {
                 map.put("supMobile", supervisor.getMobile());
             }
             map.put("createDate", houseFlow.getCreateDate());
+            map.put("workerTypeId", houseFlow.getWorkerTypeId());
+            map.put("workerType", houseFlow.getWorkerType());
             map.put("workSteta", houseFlow.getWorkSteta()); //0待确认开工,1装修中,2休眠中,3已完工,4提前结束装修 5提前结束装修申请中
             mapList.add(map);
         }
