@@ -388,7 +388,14 @@ public class EngineerService {
             map.put("workerType", worker.getWorkerType());
             map.put("workerTypeName", workerType.getName());
             map.put("mobile", worker.getMobile());
-            map.put("createDate", houseFlow.getCreateDate());
+            if(houseFlow.getWorkerType()>3){
+                List<HouseFlowApply> earliestTime = houseFlowApplyMapper.getEarliestTimeHouseApply(houseFlow.getHouseId(), houseFlow.getWorkerId());//查询最早的每日开工申请
+               if(earliestTime.size()>0) {
+                   map.put("createDate", earliestTime.get(0).getCreateDate());
+               }
+            }else{
+                map.put("createDate", houseFlow.getCreateDate());
+            }
             map.put("workSteta", houseFlow.getWorkSteta());
             map.put("EndTime", null);
             if (houseFlow.getWorkSteta() == 2) {
@@ -606,6 +613,8 @@ public class EngineerService {
                 map.put("supName", supervisor.getName());
                 map.put("supMobile", supervisor.getMobile());
             }
+            map.put("designerOk", house.getDesignerOk());
+            map.put("budgetOk", house.getBudgetOk());
             map.put("createDate", houseFlow.getCreateDate());
             map.put("workerTypeId", houseFlow.getWorkerTypeId());
             map.put("workerType", houseFlow.getWorkerType());
