@@ -61,7 +61,9 @@ public interface DjSupApplicationProductAPI {
     @ApiOperation(value = "供应商申请供应商品", notes = "供应商申请供应商品")
     ServerResponse insertDjSupApplicationProduct(@RequestParam("request") HttpServletRequest request,
                                                  @RequestParam("jsonStr") String jsonStr,
-                                                 @RequestParam("cityId") String cityId);
+                                                 @RequestParam("cityId") String cityId,
+                                                 @RequestParam("supId") String supId,
+                                                 @RequestParam("shopId") String shopId);
 
     @PostMapping("/supplier/djSupApplicationProduct/queryHaveGoods")
     @ApiOperation(value = "查询已供商品", notes = "查询已供商品")
