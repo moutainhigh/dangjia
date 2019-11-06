@@ -459,7 +459,7 @@
             dsd.supplier_id
     </select>
 
-    <!--店铺利润-供应商维度-->
+    <!--店铺利润-供应商维度
     <select id="" resultType="">
         SELECT
         dsd.id AS orderSplitId,
@@ -479,7 +479,7 @@
         </if>
         GROUP BY
         dsd.number
-    </select>
+    </select>-->
 
     <!--店铺利润-买家维度    -->
     <select id="sellerDimension" resultType="com.dangjia.acg.dto.delivery.BuyersDimensionDTO">
