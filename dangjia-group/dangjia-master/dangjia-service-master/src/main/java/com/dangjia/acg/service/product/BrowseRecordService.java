@@ -9,7 +9,6 @@ import com.dangjia.acg.dto.product.BrowseRecordDTO;
 import com.dangjia.acg.mapper.product.IBrowseRecordMapper;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.product.BrowseRecord;
-import com.dangjia.acg.modle.product.DjBasicsProduct;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,7 +17,6 @@ import tk.mybatis.mapper.entity.Example;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class BrowseRecordService {
