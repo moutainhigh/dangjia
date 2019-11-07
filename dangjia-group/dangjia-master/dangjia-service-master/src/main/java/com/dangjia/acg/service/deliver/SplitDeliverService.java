@@ -157,18 +157,23 @@ public class SplitDeliverService {
                 splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
 
                 orderSplitId=splitDeliver.getOrderSplitId();
-                OrderSplitItem  orderSplitItem=orderSplitItemMapper.selectByPrimaryKey(orderSplitId); //要货单
+                Example example=new Example(OrderSplitItem.class);
+                example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID,orderSplitId);
+                List<OrderSplitItem>  orderSplitItemList=orderSplitItemMapper.selectByExample(example); //要货单
+
                 String orderItemId=null;
-                if(orderSplitItem!=null)
+                if(orderSplitItemList!=null)
                 {
-                     orderItemId=orderSplitItem.getOrderItemId();
-                }
-                String args[]=orderItemId.split(",");
-                for(String str:args)
-                {
-                    OrderItem orderItem =orderItemMapper.selectByPrimaryKey(str);
-                    orderItem.setOrderStatus("4");//订单状态（1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭,8待安装
-                    orderItemMapper.updateByPrimaryKeySelective(orderItem);
+                    for (OrderSplitItem orderSplitItem:orderSplitItemList) {
+                        orderItemId=orderSplitItem.getOrderItemId();
+                        String args[]=orderItemId.split(",");
+                        for(String str:args)
+                        {
+                            OrderItem orderItem =orderItemMapper.selectByPrimaryKey(str);
+                            orderItem.setOrderStatus("4");//订单状态（1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭,8待安装
+                            orderItemMapper.updateByPrimaryKeySelective(orderItem);
+                        }
+                    }
                 }
                 //订单明细
                 return ServerResponse.createBySuccessMessage("确认安装成功");

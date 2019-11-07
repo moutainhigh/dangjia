@@ -38,4 +38,9 @@ public class DjSupSupplierProductDTO extends BaseEntity {
      */
     private String cityId;
 
+    /**
+     * 模板表中的搬运费
+     */
+    private String cartagePrice;
+
 }
