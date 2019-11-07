@@ -235,4 +235,10 @@ public interface DjBasicsProductAPI {
     ServerResponse queryProductLabelsByProductId(@RequestParam("request") HttpServletRequest request,
                                                  @RequestParam("productId") String productId);
 
+    @PostMapping("/app/product/djBasicsProduct/queryAllWorkerProductList")
+    @ApiOperation(value = "查询所有的人工商品", notes = "查询所有的人工商品")
+    ServerResponse queryAllWorkerProductList(@RequestParam("request")HttpServletRequest request,
+                                    @RequestParam("name")String name,
+                                    @RequestParam("cityId")String cityId);
+
 }

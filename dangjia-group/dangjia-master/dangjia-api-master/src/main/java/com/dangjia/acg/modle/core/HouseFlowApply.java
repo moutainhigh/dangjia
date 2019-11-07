@@ -107,4 +107,10 @@ public class HouseFlowApply extends BaseEntity {
 	@Desc(value = "操作人ID")
 	@ApiModelProperty("操作人ID")
 	private String operator;
+
+	@Column(name = "is_read_type")
+	@Desc(value = "0-未读  1-已读")
+	@ApiModelProperty("0-未读  1-已读")
+	private Integer isReadType;
+
 }

@@ -18,14 +18,12 @@ import com.dangjia.acg.mapper.delivery.IOrderSplitMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
-import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.deliver.Cart;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.BasicsGoodsCategory;
-import com.dangjia.acg.modle.product.DjBasicsProduct;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
@@ -38,7 +36,6 @@ import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * author: qyx
@@ -230,7 +227,7 @@ public class CartService {
             Map map = BeanUtils.beanToMap(cart1);
             ServerResponse serverResponse = djBasicsProductAPI.getProductById(request.getParameter(Constants.CITY_ID), cart1.getProductId());
             if (serverResponse != null && serverResponse.getResultObj() != null) {
-                DjBasicsProduct product = JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), DjBasicsProduct.class);
+                DjBasicsProductTemplate product = JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), DjBasicsProductTemplate.class);
                 map.put("shopCount",0D);//购买量
                 map.put("surCount",0D);//剩余量
                 if (product.getType() == 0 || product.getMaket() == 0) {

@@ -403,11 +403,13 @@
         and we.worker_id = #{workerId}
         and we.apply_type = #{applyType}
         and chf.worker_type = #{workerType}
-
-
-
-
     </select>
+
+    <update id="updateIsReadType" parameterType="java.util.Map">
+        update dj_core_house_flow_apply
+        set is_read_type = 1
+        where house_id = #{houseId}
+    </update>
 
 </mapper>
 

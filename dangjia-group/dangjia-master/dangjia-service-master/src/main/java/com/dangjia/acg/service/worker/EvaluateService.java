@@ -29,7 +29,6 @@ import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.mapper.worker.IEvaluateMapper;
 import com.dangjia.acg.mapper.worker.IWorkIntegralMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
-import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.clue.Clue;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
@@ -40,7 +39,6 @@ import com.dangjia.acg.modle.house.MaterialRecord;
 import com.dangjia.acg.modle.house.ModelingVillage;
 import com.dangjia.acg.modle.member.Customer;
 import com.dangjia.acg.modle.member.Member;
-import com.dangjia.acg.modle.product.DjBasicsProduct;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.modle.worker.Evaluate;
@@ -407,6 +405,7 @@ public class EvaluateService {
                 hfa.setApplyDec("尊敬的业主，您好！<br/>" +
                         "当家大管家【" + supervisor.getName() + "】为您新家质量保驾护航，工地【" + workerType.getName() + "】已" + (houseFlowApply.getApplyType() == 1 ? "阶段完工" : "整体完工") + "，已经根据平台施工验收标准进行验收，未发现漏项及施工不合格情况，请您查收。<br/>");//描述
 //                hfa.setApplyDec("业主您好，我是大管家，我已验收了" + worker.getName() + (houseFlowApply.getApplyType() == 1 ? "的阶段完工" : "的整体完工"));//描述
+                hfa.setIsReadType(0);
                 houseFlowApplyMapper.insert(hfa);
                 houseService.insertConstructionRecord(hfa);
                 houseWorkerService.setHouseFlowApplyImage(hfa, house, imageList);

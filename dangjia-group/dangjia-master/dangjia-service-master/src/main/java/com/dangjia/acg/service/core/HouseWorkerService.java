@@ -511,6 +511,7 @@ public class HouseWorkerService {
         hfa.setApplyDec("尊敬的业主，您好！当家工匠【" + worker.getName() + "】为您新家施工，今日实际施工为:<br/>" +
                 applyDec +
                 "<br/>现向您发送完成情况，请您查收。");//描述
+        hfa.setIsReadType(0);
         houseFlowApplyMapper.insert(hfa);
         houseService.insertConstructionRecord(hfa);
         //每日完工
@@ -639,6 +640,7 @@ public class HouseWorkerService {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DAY_OF_YEAR, 3);//管家倒计时
         hfa.setStartDate(calendar.getTime());
+        hfa.setIsReadType(0);
         houseFlowApplyMapper.insert(hfa);
         houseService.insertConstructionRecord(hfa);
         configMessageService.addConfigMessage(null, AppType.GONGJIANG, supervisorHF.getWorkerId(), "0", "整体完工申请",
@@ -712,6 +714,7 @@ public class HouseWorkerService {
 
         hfa.setMemberCheck(1);//默认业主审核状态通过
         hfa.setSupervisorCheck(1);//默认大管家审核状态通过
+        hfa.setIsReadType(0);
         houseFlowApplyMapper.insert(hfa);
         houseService.insertConstructionRecord(hfa);
         setHouseFlowApplyImage(hfa, house, imageList);
@@ -849,6 +852,7 @@ public class HouseWorkerService {
             hfa.setMemberCheck(1);//默认业主审核状态通过
             hfa.setSupervisorCheck(1);//默认大管家审核状态通过
         }
+        hfa.setIsReadType(0);
         houseFlowApplyMapper.insert(hfa);
         houseService.insertConstructionRecord(hfa);
         //推送消息给业主大管家巡查完成
@@ -1152,6 +1156,7 @@ public class HouseWorkerService {
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.DAY_OF_YEAR, 7);//业主倒计时
             hfa.setEndDate(calendar.getTime());
+            hfa.setIsReadType(0);
             houseFlowApplyMapper.insert(hfa);
             houseService.insertConstructionRecord(hfa);
             House house = houseMapper.selectByPrimaryKey(hfa.getHouseId());

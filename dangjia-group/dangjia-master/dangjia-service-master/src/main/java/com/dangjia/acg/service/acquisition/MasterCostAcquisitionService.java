@@ -1,50 +1,15 @@
 package com.dangjia.acg.service.acquisition;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.ctc.wstx.sw.EncodingXmlWriter;
-import com.dangjia.acg.api.data.ForMasterAPI;
-import com.dangjia.acg.api.product.BasicsGoodsCategoryAPI;
-import com.dangjia.acg.api.product.DjBasicsProductAPI;
-import com.dangjia.acg.common.constants.Constants;
-import com.dangjia.acg.common.constants.SysConfig;
-import com.dangjia.acg.common.exception.ServerCode;
-import com.dangjia.acg.common.model.PageDTO;
-import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.common.util.BeanUtils;
-import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.MathUtil;
-import com.dangjia.acg.dao.ConfigUtil;
-import com.dangjia.acg.dto.house.WarehouseDTO;
-import com.dangjia.acg.mapper.delivery.ICartMapper;
-import com.dangjia.acg.mapper.delivery.IOrderSplitMapper;
 import com.dangjia.acg.mapper.design.IQuantityRoomMapper;
-import com.dangjia.acg.mapper.house.IHouseMapper;
-import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
-import com.dangjia.acg.modle.basics.Product;
-import com.dangjia.acg.modle.deliver.Cart;
 import com.dangjia.acg.modle.design.QuantityRoom;
-import com.dangjia.acg.modle.house.House;
-import com.dangjia.acg.modle.house.Warehouse;
-import com.dangjia.acg.modle.member.Member;
-import com.dangjia.acg.modle.product.BasicsGoods;
-import com.dangjia.acg.modle.product.BasicsGoodsCategory;
-import com.dangjia.acg.modle.product.DjBasicsProduct;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
-import com.dangjia.acg.service.core.CraftsmanConstructionService;
-import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
-import tk.mybatis.mapper.entity.Example;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.*;
 
 /**
  * author: fzh
