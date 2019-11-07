@@ -14,7 +14,7 @@ public interface IShoppingCartMapper extends Mapper<ShoppingCart> {
 
     List<ShoppingCartListDTO> queryCartList(@Param("memberId") String memberId,
                                             @Param("cityId") String cityId,
-                                            @Param("storefrontId") String StorefrontId);
+                                            @Param("storefrontId") String StorefrontId,@Param("productIds")  String[] productIds);
 
     List<String> queryStorefrontIds(@Param("memberId") String memberId,
                                     @Param("cityId") String cityId);
