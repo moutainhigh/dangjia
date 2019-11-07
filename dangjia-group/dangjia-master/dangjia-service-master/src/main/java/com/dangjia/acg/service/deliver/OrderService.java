@@ -294,9 +294,21 @@ public class OrderService {
             if (StringUtils.isEmpty(cityId)) {
                 return ServerResponse.createByErrorMessage("城市ID不能为空!");
             }
+            List<Map<String,Object>> mapArrayList=new ArrayList<Map<String,Object>>();
 
             List<Order> list = orderMapper.selectDeliverOrderByHouse(cityId,houseId,orderStatus);
-            PageInfo pageResult = new PageInfo(list);
+            for(Order order:list)
+            {
+                Map<String, Object> resMap = BeanUtils.beanToMap(order);
+                String businessOrderNumber= order.getBusinessOrderNumber();
+                List<OrderItem> OrderItemList = orderItemMapper.orderItemList(houseId,businessOrderNumber,null,null);
+                if (OrderItemList != null) {
+                    resMap.put("OrderItemSize", OrderItemList.size());
+                    resMap.put("OrderItemList", OrderItemList);
+                }
+                mapArrayList.add(resMap);
+            }
+            PageInfo pageResult = new PageInfo(mapArrayList);
             return ServerResponse.createBySuccess("查询所有订单", pageResult);
         } catch (Exception e) {
             logger.error("查询所有订单异常", e);
