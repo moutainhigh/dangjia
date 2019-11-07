@@ -70,7 +70,8 @@ public interface PaymentAPI {
                                  @RequestParam("cityId") String cityId,
                                  @RequestParam("houseId") String houseId,
                                  @RequestParam("workerId") String workerId,
-                                 @RequestParam("addressId") String addressId);
+                                 @RequestParam("addressId") String addressId,
+                                 @RequestParam("productIds") String productIds);
 
 
     @PostMapping("app/order/generate/budget")

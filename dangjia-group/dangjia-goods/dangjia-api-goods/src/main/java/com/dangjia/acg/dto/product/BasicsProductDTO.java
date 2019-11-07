@@ -1,12 +1,10 @@
 package com.dangjia.acg.dto.product;
 
-import com.dangjia.acg.common.annotation.ExcelField;
 import com.dangjia.acg.modle.GoodsBaseEntity;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
 
 import java.util.Date;
-import java.util.List;
 
 /**
  * 产品实体类
@@ -101,6 +99,10 @@ public class BasicsProductDTO extends GoodsBaseEntity {
     private String buildContent;//施工说明内容，json串
 
     private String isAgencyPurchase;//是否为代买（1是，0否）
+
+    private String isRelateionProduct;//是否关联商品（1是，0否）
+
+    private String relationProductIds;//关联商品编码（多个用逗号分隔）
 
 
     private String cityId;//

@@ -2,7 +2,7 @@ package com.dangjia.acg.mapper.basics;
 
 import com.dangjia.acg.dto.product.ProductWorkerDTO;
 import com.dangjia.acg.modle.basics.HomeProductDTO;
-import com.dangjia.acg.modle.product.DjBasicsProduct;
+import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
@@ -17,7 +17,7 @@ import java.util.List;
  * @date on 2018/9/12 上午11:09
  */
 @Repository
-public interface IProductWorkerMapper extends Mapper<DjBasicsProduct> {
+public interface IProductWorkerMapper extends Mapper<DjBasicsProductTemplate> {
 
     Double getWorkertoCheck(@Param("houseId") String houseId, @Param("houseFlowId") String houseFlowId);
 

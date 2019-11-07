@@ -90,7 +90,7 @@
     </select>
 
     <!-- 根据商品Id查询所有货品 -->
-    <select id="queryByGoodsId" resultType="com.dangjia.acg.modle.product.DjBasicsProduct">
+    <select id="queryByGoodsId" resultType="com.dangjia.acg.modle.product.DjBasicsProductTemplate">
         SELECT
         <include refid="all_columns"/>
         FROM dj_basics_product_template

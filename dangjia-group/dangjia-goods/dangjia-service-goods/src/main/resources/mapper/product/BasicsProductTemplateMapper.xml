@@ -648,4 +648,22 @@
 
 
     </select>
+    <!--查询所有的人工商品-->
+    <select id="queryAllWorkerProductList" resultType="java.util.Map">
+        SELECT
+            t.id,
+            t.name
+        FROM
+            dj_basics_product_template t,
+            dj_basics_goods t1
+        WHERE
+            t.goods_id = t1.id
+        AND t1.type = 2
+        AND t.maket = 1
+        AND t.data_status = 0
+        <if test="name!=null and name!=''">
+            and t.name like CONCAT('%',#{name},'%')
+        </if>
+
+    </select>
 </mapper>

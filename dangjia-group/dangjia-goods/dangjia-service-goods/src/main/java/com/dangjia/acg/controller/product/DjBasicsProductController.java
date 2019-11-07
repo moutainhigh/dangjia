@@ -15,6 +15,7 @@ import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -349,6 +350,19 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
     @ApiMethod
     public ServerResponse queryProductLabelsByProductId(HttpServletRequest request, String productId) {
         return djBasicsProductService.queryProductLabelsByProductId(productId);
+    }
+
+    /**
+     * 查询所有的人工商品
+     * @param request
+     * @param name
+     * @param cityId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryAllWorkerProductList(HttpServletRequest request,String name,String cityId){
+        return djBasicsProductService.queryAllWorkerProductList(name,cityId);
     }
 
 }

@@ -1,5 +1,7 @@
 package com.dangjia.acg.service.refund;
 
+import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dto.refund.RefundRepairOrderDTO;
 import com.dangjia.acg.mapper.config.IBillComplainMapper;
 import com.dangjia.acg.mapper.order.IBillOrderProgressMapper;
 import com.dangjia.acg.mapper.refund.IBillMendOrderMapper;
@@ -32,6 +34,8 @@ public class RefundAfterSalesJobService {
     @Autowired
     private IBillComplainMapper iBillComplainMapper;
 
+    @Autowired
+    private RefundAfterSalesService refundAfterSalesService;
     @Autowired
     private BillMendOrderCheckService billMendOrderCheckService;
     /**
@@ -99,13 +103,12 @@ public class RefundAfterSalesJobService {
         if(refundJobList!=null&&refundJobList.size()>0){
             for (Map jobMap:refundJobList){
                 String repairMendOrderId= (String) jobMap.get("repairMendOrderId");
-                //修改退款申诉的状态
-                MendOrder mendOrder=new MendOrder();
-                mendOrder.setId(repairMendOrderId);
-                mendOrder.setState(6);//超时关闭
-                mendOrder.setModifyDate(new Date());
-                iBillMendOrderMapper.updateByPrimaryKeySelective(mendOrder);//修改退款申请单的状态关闭
-                //添加对应的流水记录节点信息,超时关闭
+                RefundRepairOrderDTO refundRepairOrderDTO=refundAfterSalesMapper.queryRefundOnlyHistoryOrderInfo(repairMendOrderId);//退款订单详情查询
+                if(!("1".equals(refundRepairOrderDTO.getState())||"2".equals(refundRepairOrderDTO.getState()))){
+                    continue;
+                }
+                refundAfterSalesService.updateRepairOrderInfo(refundRepairOrderDTO,repairMendOrderId, 6,refundRepairOrderDTO.getType());//退款关闭
+               //添加对应的流水记录节点信息,超时关闭
                 updateOrderProgressInfo(repairMendOrderId,"2","REFUND_AFTER_SALES","RA_010","SYSTEM");
             }
         }

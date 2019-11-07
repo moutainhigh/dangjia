@@ -2,7 +2,6 @@ package com.dangjia.acg.mapper.member;
 
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.MemberCollect;
-import com.dangjia.acg.modle.product.DjBasicsProduct;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
