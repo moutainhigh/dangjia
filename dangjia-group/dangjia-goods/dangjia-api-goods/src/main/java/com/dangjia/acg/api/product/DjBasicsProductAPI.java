@@ -25,15 +25,6 @@ import java.util.List;
 @FeignClient("dangjia-service-goods")
 public interface DjBasicsProductAPI {
 
-    @PostMapping("/app/product/djBasicsProduct/queryRandomProduct")
-    @ApiOperation(value = "随机查询商品", notes = "随机查询商品")
-    List<DjBasicsProductTemplate> queryRandomProduct(@RequestParam("limit") Integer limit,
-                                                     @RequestParam("cityId") String cityId);
-
-    @PostMapping("/app/product/djBasicsProduct/queryRandomProductByCategoryId")
-    @ApiOperation(value = "根据商品类别随机查询商品", notes = "根据商品类别随机查询商品")
-    List<DjBasicsProductTemplate> queryRandomProductByCategoryId(@RequestParam("productId") String productId,
-                                                                 @RequestParam("limit") Integer limit);
 
     @PostMapping("/app/product/djBasicsProduct/queryProductData")
     @ApiOperation(value = "app根据商品名称查询商品信息", notes = "app根据商品名称查询商品信息")

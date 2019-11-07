@@ -380,8 +380,8 @@ public class StorefrontProductService {
      * @param productId
      * @return
      */
-    public List<MemberCollectDTO> queryCollectGood(String productId,String storefrontId) {
-        List<MemberCollectDTO> memberCollectDTOS = istorefrontProductMapper.queryCollectGood(productId,storefrontId);
+    public List<MemberCollectDTO> queryCollectGood(String productId) {
+        List<MemberCollectDTO> memberCollectDTOS = istorefrontProductMapper.queryCollectGood(productId);
         return memberCollectDTOS;
     }
 
