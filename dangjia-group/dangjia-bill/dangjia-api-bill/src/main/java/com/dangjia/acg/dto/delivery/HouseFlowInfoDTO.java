@@ -14,6 +14,7 @@ import java.util.Map;
 @Data
 public class HouseFlowInfoDTO {
 
+    private Date date;
 
     private Integer number;
 

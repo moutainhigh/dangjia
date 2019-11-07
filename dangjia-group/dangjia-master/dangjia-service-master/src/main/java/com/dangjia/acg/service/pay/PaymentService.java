@@ -56,6 +56,7 @@ import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.pay.PayOrder;
 import com.dangjia.acg.modle.product.DjBasicsGoods;
+import com.dangjia.acg.modle.product.ShoppingCart;
 import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.safe.WorkerTypeSafe;
@@ -172,8 +173,6 @@ public class PaymentService {
     private IMasterBudgetMapper iMasterBudgetMapper;
     @Autowired
     private MasterCostAcquisitionService masterCostAcquisitionService;
-
-
     @Autowired
     private PayService payService;
 
@@ -974,6 +973,7 @@ public class PaymentService {
                     if(!CommonUtil.isEmpty(budgetLabelGoodsDTO.getGoodsId())){
                         Brand brand =null;
                         DjBasicsGoods goods=iMasterBasicsGoodsMapper.selectByPrimaryKey(budgetLabelGoodsDTO.getGoodsId());
+                        budgetLabelGoodsDTO.setIsReservationDeliver(goods.getIsReservationDeliver());
                         if (!CommonUtil.isEmpty(goods.getBrandId())) {
                             brand = iMasterBrandMapper.selectByPrimaryKey(goods.getBrandId());
                         }
@@ -1000,7 +1000,7 @@ public class PaymentService {
      * @param addressId 地址ID
      * @return
      */
-    public ServerResponse generateOrder(String userToken,String cityId,String houseId, String workerId, String addressId) {
+    public ServerResponse generateOrder(String userToken,String cityId,String houseId, String workerId, String addressId, String productIds) {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
@@ -1012,6 +1012,10 @@ public class PaymentService {
             if(house!=null){
                 cityId=house.getCityId();
             }
+            String[] productIdlist=null;
+            if(!CommonUtil.isEmpty(productIds)){
+                productIdlist=productIds.split(",");
+            }
             List<ShoppingCartDTO> shoppingCartDTOS=new ArrayList<>();
             BigDecimal paymentPrice = new BigDecimal(0);//总共钱
             BigDecimal freightPrice = new BigDecimal(0);//总运费
@@ -1022,7 +1026,7 @@ public class PaymentService {
                 BigDecimal totalMaterialPrice = new BigDecimal(0);//组总价
                 ShoppingCartDTO shoppingCartDTO=new ShoppingCartDTO();
                 shoppingCartDTO.setStorefrontId(str);
-                List<ShoppingCartListDTO> shoppingCartListDTOS = iShoppingCartMapper.queryCartList(member.getId(),cityId, str);
+                List<ShoppingCartListDTO> shoppingCartListDTOS = iShoppingCartMapper.queryCartList(member.getId(),cityId, str,productIdlist);
                 for (ShoppingCartListDTO shoppingCartListDTO : shoppingCartListDTOS) {
                     BigDecimal totalPrice = new BigDecimal(shoppingCartListDTO.getPrice()*shoppingCartListDTO.getSellPrice());
                     if(shoppingCartListDTO.getProductType()==0) {
@@ -1034,7 +1038,9 @@ public class PaymentService {
                 shoppingCartDTO.setTotalMaterialPrice(totalMaterialPrice);
                 shoppingCartDTO.setTotalPrice(totalSellPrice);
                 shoppingCartDTO.setShoppingCartListDTOS(shoppingCartListDTOS);
-                shoppingCartDTOS.add(shoppingCartDTO);
+                if(shoppingCartListDTOS.size()>0) {
+                    shoppingCartDTOS.add(shoppingCartDTO);
+                }
             }
 
             if (shoppingCartDTOS!=null) {
@@ -1064,6 +1070,7 @@ public class PaymentService {
                     freightPrice=freightPrice.add(new BigDecimal(freight));
                     for (ShoppingCartListDTO good : shoppingCartDTO.getShoppingCartListDTOS()) {
                         OrderItem orderItem = new OrderItem();
+                        orderItem.setIsReservationDeliver(good.getIsReservationDeliver());
                         orderItem.setOrderId(order.getId());
                         orderItem.setHouseId(houseId);
                         orderItem.setPrice(good.getPrice().doubleValue());//销售价
@@ -1132,6 +1139,11 @@ public class PaymentService {
                 order.setBusinessOrderNumber(businessOrder.getNumber());
                 order.setTotalAmount(paymentPrice);// 订单总额(工钱)
                 orderMapper.updateByPrimaryKeySelective(order);
+
+                example = new Example(ShoppingCart.class);
+                example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, member.getId())
+                        .andIn(ShoppingCart.PRODUCT_ID,Arrays.asList(productIdlist));
+                iShoppingCartMapper.deleteByExample(example);
                 return ServerResponse.createBySuccess("提交成功", order.getId());
             }
             return ServerResponse.createBySuccess("提交成功");
@@ -1205,6 +1217,7 @@ public class PaymentService {
                     for (BudgetLabelDTO labelDTO : budgetLabelDTO.getLabelDTOS()) {
                         for (BudgetLabelGoodsDTO good : labelDTO.getGoods()) {
                             OrderItem orderItem = new OrderItem();
+                            orderItem.setIsReservationDeliver(good.getIsReservationDeliver());
                             orderItem.setOrderId(order.getId());
                             orderItem.setHouseId(house.getId());
                             orderItem.setPrice(good.getPrice().doubleValue());//销售价
@@ -1480,7 +1493,7 @@ public class PaymentService {
                     Storefront storefront = basicsStorefrontAPI.querySingleStorefrontById(str);
                     shoppingCartDTO.setStorefrontName(storefront.getStorefrontName());
                     shoppingCartDTO.setStorefrontId(storefront.getId());
-                    List<ShoppingCartListDTO> shoppingCartListDTOS = iShoppingCartMapper.queryCartList(member.getId(),cityId, str);
+                    List<ShoppingCartListDTO> shoppingCartListDTOS = iShoppingCartMapper.queryCartList(member.getId(),cityId, str,null);
                     for (ShoppingCartListDTO shoppingCartListDTO : shoppingCartListDTOS) {
                         totalSellPrice = totalSellPrice.add(new BigDecimal(shoppingCartListDTO.getPrice()*shoppingCartListDTO.getSellPrice()));
                         totalPrice = totalPrice.add(new BigDecimal(shoppingCartListDTO.getPrice()*shoppingCartListDTO.getSellPrice()));

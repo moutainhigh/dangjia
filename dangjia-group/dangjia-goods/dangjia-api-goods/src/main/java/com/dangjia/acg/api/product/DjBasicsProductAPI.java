@@ -25,15 +25,6 @@ import java.util.List;
 @FeignClient("dangjia-service-goods")
 public interface DjBasicsProductAPI {
 
-    @PostMapping("/app/product/djBasicsProduct/queryRandomProduct")
-    @ApiOperation(value = "随机查询商品", notes = "随机查询商品")
-    List<DjBasicsProductTemplate> queryRandomProduct(@RequestParam("limit") Integer limit,
-                                                     @RequestParam("cityId") String cityId);
-
-    @PostMapping("/app/product/djBasicsProduct/queryRandomProductByCategoryId")
-    @ApiOperation(value = "根据商品类别随机查询商品", notes = "根据商品类别随机查询商品")
-    List<DjBasicsProductTemplate> queryRandomProductByCategoryId(@RequestParam("productId") String productId,
-                                                                 @RequestParam("limit") Integer limit);
 
     @PostMapping("/app/product/djBasicsProduct/queryProductData")
     @ApiOperation(value = "app根据商品名称查询商品信息", notes = "app根据商品名称查询商品信息")
@@ -234,5 +225,11 @@ public interface DjBasicsProductAPI {
     @ApiOperation(value = "根据商品id查询标签", notes = "根据商品id查询标签")
     ServerResponse queryProductLabelsByProductId(@RequestParam("request") HttpServletRequest request,
                                                  @RequestParam("productId") String productId);
+
+    @PostMapping("/app/product/djBasicsProduct/queryAllWorkerProductList")
+    @ApiOperation(value = "查询所有的人工商品", notes = "查询所有的人工商品")
+    ServerResponse queryAllWorkerProductList(@RequestParam("request")HttpServletRequest request,
+                                    @RequestParam("name")String name,
+                                    @RequestParam("cityId")String cityId);
 
 }

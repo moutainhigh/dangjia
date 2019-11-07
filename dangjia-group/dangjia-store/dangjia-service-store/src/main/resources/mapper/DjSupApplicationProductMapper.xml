@@ -3,4 +3,33 @@
 <mapper namespace="com.dangjia.acg.mapper.supplier.DjSupApplicationProductMapper">
 
 
+    <select id="querySupplierProduct" resultType="com.dangjia.acg.modle.supplier.DjSupApplicationProduct">
+		select
+		sp.id,
+		sp.product_id AS productId,
+		sp.sup_id AS supId,
+		sp.price,
+		sp.stock,
+		sp.supply_relationship AS supplyRelationShip,
+		sp.goods_id AS goodsId,
+		sp.create_date AS createDate,
+		sp.modify_date AS modifyDate,
+		sp.data_status AS dataStatus
+		FROM
+		dj_sup_application_product  sp
+		INNER JOIN dj_basics_storefront_product p ON sp.product_id=p.id
+		INNER JOIN dj_basics_product_template p1 on p.prod_template_id=p1.id
+		WHERE  sp.supply_relationship = 0
+		<if test="productId!=null and productId!=''">
+			and sp.product_id =#{productId}
+		</if>
+		<if test="supId!=null and supId!=''">
+			and sp.sup_id =#{supId}
+		</if>
+		ORDER BY
+		p1.category_id DESC
+
+
+    </select>
+
 </mapper>

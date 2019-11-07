@@ -176,7 +176,7 @@ public class DjBasicsGoodsService {
 //                return ServerResponse.createByErrorMessage("不能执行删除操作");
         iBasicsGoodsMapper.deleteByPrimaryKey(id);
         //删除货品下的商品信息
-        Example example = new Example(DjBasicsProduct.class);
+        Example example = new Example(DjBasicsProductTemplate.class);
         example.createCriteria().andEqualTo("goodsId", id);
         iBasicsProductTemplateMapper.deleteByExample(example);
         return ServerResponse.createBySuccessMessage("删除成功");

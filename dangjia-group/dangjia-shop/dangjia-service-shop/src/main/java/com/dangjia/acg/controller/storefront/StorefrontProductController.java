@@ -94,8 +94,8 @@ public class StorefrontProductController implements StorefrontProductAPI {
 
     @Override
     @ApiMethod
-    public List<MemberCollectDTO> queryCollectGood(String productId,String storefrontId) {
-        return storefrontProductService.queryCollectGood(productId,storefrontId);
+    public List<MemberCollectDTO> queryCollectGood(String productId) {
+        return storefrontProductService.queryCollectGood(productId);
     }
 
 

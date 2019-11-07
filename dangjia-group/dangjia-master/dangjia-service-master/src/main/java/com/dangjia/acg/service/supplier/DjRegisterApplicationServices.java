@@ -83,6 +83,10 @@ public class DjRegisterApplicationServices {
                 return ServerResponse.createByErrorMessage("城市不能为空");
             if(CommonUtil.isEmpty(djRegisterApplication.getCardNumber()))
                 return ServerResponse.createByErrorMessage("身份证不能为空");
+            if(CommonUtil.isEmpty(djRegisterApplication.getPayPassword()))
+                return ServerResponse.createByErrorMessage("支付密码不能为空");
+            if(djRegisterApplication.getPayPassword().length()!=6)
+                return ServerResponse.createByErrorMessage("请设置6位数支付密码");
             Example example=new Example(DjRegisterApplication.class);
             example.createCriteria().andEqualTo(DjRegisterApplication.CITY_ID,djRegisterApplication.getCityId())
                     .andEqualTo(DjRegisterApplication.DATA_STATUS,0)
@@ -94,6 +98,7 @@ public class DjRegisterApplicationServices {
             djRegisterApplication.setDataStatus(0);
             djRegisterApplication.setApplicationStatus(0);
             djRegisterApplication.setPassWord(DigestUtils.md5Hex(djRegisterApplication.getPassWord()));
+            djRegisterApplication.setPayPassword(DigestUtils.md5Hex(djRegisterApplication.getPayPassword()));
             if(djRegisterApplicationMapper.insert(djRegisterApplication)>0)
                 return ServerResponse.createBySuccessMessage("申请成功");
         } catch (Exception e) {
@@ -165,6 +170,7 @@ public class DjRegisterApplicationServices {
                 user.setInsertUid(userID);
                 user.setDepartmentId(departmentId);
                 user.setJobId(jobId);
+                user.setPayPassword(djRegisterApplication.getPayPassword());
                 addUser(user);
             }else{
                 map.put("checkType","未通过，原因:"+failReason);

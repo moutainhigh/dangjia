@@ -15,6 +15,7 @@ import com.dangjia.acg.dto.core.HouseResult;
 import com.dangjia.acg.dto.delivery.*;
 import com.dangjia.acg.dto.design.CollectDataDTO;
 import com.dangjia.acg.dto.design.QuantityRoomDTO;
+import com.dangjia.acg.dto.design.WorkChartListDTO;
 import com.dangjia.acg.dto.member.WorkerTypeDTO;
 import com.dangjia.acg.mapper.delivery.*;
 import com.dangjia.acg.mapper.order.IBillHouseMapper;
@@ -259,8 +260,11 @@ public class DjDeliverOrderService {
         HouseFlowInfoDTO houseFlowInfoDTO = new HouseFlowInfoDTO();
         //查询今日播报信息
         List<HouseFlowDataDTO> sowingList = IBillDjDeliverOrderMapper.queryApplyDec();
-        houseFlowInfoDTO.setNumber(2);
-        houseFlowInfoDTO.setHouseFlowDataDTOS(sowingList);
+        if(sowingList != null && !sowingList.isEmpty()){
+            houseFlowInfoDTO.setDate(sowingList.get(0).getCreateDate());
+            houseFlowInfoDTO.setHouseFlowDataDTOS(sowingList);
+        }
+        houseFlowInfoDTO.setNumber(IBillDjDeliverOrderMapper.queryApplyPayState(houseId).size());
         workInFoDTO.setHouseFlowInfoDTO(houseFlowInfoDTO);
 
 
@@ -893,41 +897,6 @@ public class DjDeliverOrderService {
     }
 
 
-    /**
-     * 查询所有订单
-     *
-     * @param pageDTO
-     * @param userId
-     * @param cityId
-     * @return
-     */
-    public ServerResponse queryAllDeliverOrder(PageDTO pageDTO, String userId, String cityId, String orderStatus) {
-        try {
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            if (StringUtils.isEmpty(userId)) {
-                return ServerResponse.createByErrorMessage("用户ID不能为空!");
-            }
-            if (StringUtils.isEmpty(cityId)) {
-                return ServerResponse.createByErrorMessage("城市ID不能为空!");
-            }
-//            if (StringUtils.isEmpty(orderStatus)) {
-////                return ServerResponse.createByErrorMessage("订单状态不能为空!");
-////            }
-            Example example = new Example(DjDeliverOrder.class);
-            example.createCriteria()
-                    .andEqualTo(DjDeliverOrder.CITY_ID,cityId)
-                    .andEqualTo(DjDeliverOrder.ORDER_STATUS,orderStatus)
-                    .andEqualTo(DjDeliverOrder.MEMBER_ID,userId)
-                    .andEqualTo(DjDeliverOrder.STOREFONT_ID,userId);
-            List<Order> list = IBillDjDeliverOrderMapper.selectByExample(example);
-
-            PageInfo pageResult = new PageInfo(list);
-            return ServerResponse.createBySuccess("查询所有订单", pageResult);
-        } catch (Exception e) {
-            logger.error("查询所有订单异常", e);
-            return ServerResponse.createByErrorMessage("查询所有订单异常" + e);
-        }
-    }
 
 
     /**
@@ -938,22 +907,37 @@ public class DjDeliverOrderService {
     public ServerResponse getDesignImag(String houseId) {
         //0:量房，，
         List<Object> list = new ArrayList<>();
+        WorkChartListDTO workChartListDTO = new WorkChartListDTO();
+
         QuantityRoom quantityRoom = iBillQuantityRoomMapper.getBillQuantityRoom(houseId, 0);
         List<QuantityRoomImages> quantityRoomImages = getQuantityRoom(quantityRoom);
-        if(!quantityRoomImages.isEmpty()){
-            list.add(quantityRoomImages);
+        if(quantityRoomImages != null && !quantityRoomImages.isEmpty()){
+            workChartListDTO = new WorkChartListDTO();
+            workChartListDTO.setDate(quantityRoomImages.get(0).getCreateDate());
+            workChartListDTO.setName("量房");
+            workChartListDTO.setList(quantityRoomImages);
+            workChartListDTO.setType(0);
+            list.add(workChartListDTO);
         }
         //1平面图
         QuantityRoom quantityRoom1 = iBillQuantityRoomMapper.getBillQuantityRoom(houseId, 1);
         List<QuantityRoomImages> quantityRoomImages1 = getQuantityRoom(quantityRoom1);
-        if(!quantityRoomImages1.isEmpty()){
-            list.add(quantityRoomImages1);
+        if(quantityRoomImages1 != null && !quantityRoomImages1.isEmpty()){
+            workChartListDTO = new WorkChartListDTO();
+            workChartListDTO.setDate(quantityRoomImages1.get(0).getCreateDate());
+            workChartListDTO.setName("平面图");
+            workChartListDTO.setList(quantityRoomImages1);
+            list.add(workChartListDTO);
         }
         //2施工图
         QuantityRoom quantityRoom2 = iBillQuantityRoomMapper.getBillQuantityRoom(houseId, 2);
         List<QuantityRoomImages> quantityRoomImages2 = getQuantityRoom(quantityRoom2);
-        if(!quantityRoomImages2.isEmpty()){
-            list.add(quantityRoomImages2);
+        if(quantityRoomImages2 != null && !quantityRoomImages2.isEmpty()){
+            workChartListDTO = new WorkChartListDTO();
+            workChartListDTO.setDate(quantityRoomImages2.get(0).getCreateDate());
+            workChartListDTO.setName("施工图");
+            workChartListDTO.setList(quantityRoomImages2);
+            list.add(workChartListDTO);
         }
 
         return ServerResponse.createBySuccess("查询成功", list);

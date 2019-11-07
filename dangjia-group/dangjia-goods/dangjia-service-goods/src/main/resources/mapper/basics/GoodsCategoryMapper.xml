@@ -47,7 +47,7 @@
     <select id="queryCategoryByParentId" resultType="com.dangjia.acg.modle.attribute.GoodsCategory">
         SELECT
         <include refid="all_columns"/>
-        FROM dj_basics_goods_category where parent_id =#{parentId} and city_id = #{cityId}
+        FROM dj_basics_goods_category where parent_id =#{parentId}
         ORDER BY create_date desc
     </select>
 
@@ -55,7 +55,7 @@
     <select id="queryCategoryByName" resultType="com.dangjia.acg.modle.attribute.GoodsCategory">
         SELECT
         <include refid="all_columns"/>
-        FROM dj_basics_goods_category where name =#{name} and city_id = #{cityId}
+        FROM dj_basics_goods_category where name =#{name}
         ORDER BY create_date desc
     </select>
     <select id="getProductList" resultType="com.dangjia.acg.modle.basics.HomeProductDTO">
@@ -80,7 +80,6 @@
         AND p.type = 1
         and p.maket = 1
         AND p.type = 1
-        and p.city_id=#{cityId}
         <if test="categoryId!=null and categoryId!=''">
             AND c.parent_top = #{categoryId}
         </if>

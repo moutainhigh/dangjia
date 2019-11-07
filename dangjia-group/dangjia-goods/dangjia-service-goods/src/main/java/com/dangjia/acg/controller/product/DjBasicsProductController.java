@@ -39,18 +39,6 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
     @Autowired
     private BasicsStorefrontAPI basicsStorefrontAPI ;
 
-    @Override
-    @ApiMethod
-    public List<DjBasicsProductTemplate> queryRandomProduct(Integer limit,String cityId) {
-            return djBasicsProductService.queryRandomProduct(limit,cityId);
-    }
-
-    @Override
-    @ApiMethod
-    public List<DjBasicsProductTemplate> queryRandomProductByCategoryId(String productId,Integer limit) {
-        List<DjBasicsProductTemplate> djBasicsProductTemplates = djBasicsProductService.queryRandomProductByCategoryId(productId, limit);
-        return djBasicsProductTemplates;
-    }
 
     @Override
     @ApiMethod
@@ -349,6 +337,19 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
     @ApiMethod
     public ServerResponse queryProductLabelsByProductId(HttpServletRequest request, String productId) {
         return djBasicsProductService.queryProductLabelsByProductId(productId);
+    }
+
+    /**
+     * 查询所有的人工商品
+     * @param request
+     * @param name
+     * @param cityId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryAllWorkerProductList(HttpServletRequest request,String name,String cityId){
+        return djBasicsProductService.queryAllWorkerProductList(name,cityId);
     }
 
 }

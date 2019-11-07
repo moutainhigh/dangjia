@@ -10,7 +10,7 @@ import com.dangjia.acg.dto.repair.BudgetWorkerDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
 import com.dangjia.acg.mapper.basics.IProductWorkerMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
-import com.dangjia.acg.modle.product.DjBasicsProduct;
+import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -69,7 +69,7 @@ public class FillWorkerService {
                 List<BudgetMaterial> budgetWorkerList = budgetWorkerMapper.selectByExample(example);
                 pageResult = new PageInfo(budgetWorkerList);
                 for (BudgetMaterial budgetWorker : budgetWorkerList) {
-                    DjBasicsProduct workerGoods = workerGoodsMapper.selectByPrimaryKey(budgetWorker.getProductId());
+                    DjBasicsProductTemplate workerGoods = workerGoodsMapper.selectByPrimaryKey(budgetWorker.getProductId());
                     BudgetWorkerDTO budgetWorkerDTO = new BudgetWorkerDTO();
                     budgetWorkerDTO.setWorkerGoodsId(budgetWorker.getProductId());
                     budgetWorkerDTO.setWorkerTypeId(budgetWorker.getWorkerTypeId());

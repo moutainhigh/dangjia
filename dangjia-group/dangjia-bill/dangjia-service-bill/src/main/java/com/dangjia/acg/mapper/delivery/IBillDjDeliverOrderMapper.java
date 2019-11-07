@@ -41,6 +41,11 @@ public interface IBillDjDeliverOrderMapper extends Mapper<Order> {
 
 
     List<HouseFlowDataDTO> queryApplyDec();
+
+
+    List<HouseFlowDataDTO> queryApplyPayState(@Param("houseId") String houseId);
+
+
     /**
      * 已预约发货店铺对象
      * @param houseId

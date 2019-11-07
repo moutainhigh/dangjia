@@ -36,6 +36,7 @@
 			b.product_sn as productSn,
 			b.image,
 			b.sell_price AS sellPrice,
+			d.is_reservation_deliver AS isReservationDeliver,
 			d.type
 		FROM
 			dj_repair_shopping_cart a
@@ -45,6 +46,12 @@
 		WHERE member_id =#{memberId}
 		AND city_id =#{cityId}
 		AND storefront_id=#{storefrontId}
+		<if test="null!=productIds and productIds.size>0">
+			AND a.product_id in
+			<foreach collection="productIds" index="index" item="item" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</if>
 	</select>
 
 	<select id="queryStorefrontIds" resultType="java.lang.String">

@@ -182,6 +182,7 @@ public class DesignerOperationService {
         hfa.setSupervisorCheck(1);//大管家审核状态0未审核，1审核通过，2审核不通过
         hfa.setPayState(0);//是否付款
         hfa.setApplyDec("我是设计师，我已经上传了设计图 ");//描述
+        hfa.setIsReadType(0);
         houseFlowApplyMapper.insert(hfa);
         houseService.insertConstructionRecord(hfa);
         configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "设计图上传提醒",
@@ -233,6 +234,7 @@ public class DesignerOperationService {
         } else {
             hfa.setApplyDec("我是精算师，我已经上传了施工图");//描述
         }
+        hfa.setIsReadType(0);
         houseFlowApplyMapper.insert(hfa);
         houseService.insertConstructionRecord(hfa);
         configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "设计图上传提醒",

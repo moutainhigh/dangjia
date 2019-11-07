@@ -46,8 +46,8 @@ public class OrderController implements OrderAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryBusinessOrderListByStatus(PageDTO pageDTO, String userToken, String houseId, String queryId, String orderStatus) {
-        return orderService.queryBusinessOrderListByStatus(pageDTO,userToken,houseId,queryId,orderStatus);
+    public ServerResponse queryDeliverOrderListByStatus(PageDTO pageDTO, String userToken, String houseId, String cityId, String orderStatus) {
+        return orderService.queryDeliverOrderListByStatus(pageDTO,userToken,houseId,cityId,orderStatus);
     }
 
     /**
@@ -81,6 +81,18 @@ public class OrderController implements OrderAPI {
     public ServerResponse abrufbildungSubmitOrder(String userToken,String cityId, String houseId,
                                                   String mendOrderId, String addressId) {
         return orderService.abrufbildungSubmitOrder(userToken, cityId, houseId, mendOrderId, addressId);
+    }
+
+
+
+    /**
+     * 补货提交订单回调接口
+     *
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse setOrderQuantity(String mendOrderId) {
+        return orderService.setOrderQuantity(mendOrderId);
     }
 
 

@@ -109,10 +109,6 @@ public interface IBasicsProductTemplateMapper extends Mapper<DjBasicsProductTemp
     StorefrontProductDTO getStorefrontInfoByprodTemplateId(@Param("prodTemplateId") String prodTemplateId,@Param("prodTemplateSn") String prodTemplateSn);
 
 
-    List<DjBasicsProductTemplate> queryRandomProduct(@Param("limit") Integer limit,@Param("cityId") String cityId);
-
-
-    List<DjBasicsProductTemplate> queryRandomProductByCategoryId(@Param("productId") String productId,@Param("limit") Integer limit);
 
     /**
      * 查询商品库中的商品（但必须商品在店铺已上架，作配置商品用)
@@ -120,5 +116,12 @@ public interface IBasicsProductTemplateMapper extends Mapper<DjBasicsProductTemp
      * @return
      */
     List<Map<String,Object>> getProductStoreListByGoodsId(@Param("goodsId") String goodsId);
+
+    /**
+     * 查询所有的人工商品
+     * @param name
+     * @return
+     */
+    List<Map<String,Object>> queryAllWorkerProductList(@Param("name") String name);
 
 }

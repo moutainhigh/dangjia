@@ -1,9 +1,7 @@
 package com.dangjia.acg.service.product;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.dangjia.acg.api.app.repair.MasterMendWorkerAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
@@ -13,7 +11,6 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.basics.ProductDTO;
 import com.dangjia.acg.dto.product.*;
-import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
 import com.dangjia.acg.mapper.basics.IAttributeValueMapper;
 import com.dangjia.acg.mapper.basics.ILabelMapper;
 import com.dangjia.acg.mapper.basics.ITechnologyMapper;
@@ -24,8 +21,6 @@ import com.dangjia.acg.modle.basics.Label;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.product.*;
-import com.dangjia.acg.modle.storefront.StorefrontProduct;
-import com.dangjia.acg.service.basics.TechnologyService;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -60,7 +55,7 @@ public class DjBasicsProductTemplateService {
     @Autowired
     private IBasicsGoodsMapper iBasicsGoodsMapper;
     @Autowired
-    private TechnologyService technologyService;
+    private IProductAddedRelationMapper iProductAddedRelationMapper;
 
     @Autowired
     private ITechnologyMapper iTechnologyMapper;
@@ -68,10 +63,6 @@ public class DjBasicsProductTemplateService {
     @Autowired
     private DjBasicsGoodsMapper djBasicsGoodsMapper;
 
-    @Autowired
-    private IBudgetWorkerMapper iBudgetWorkerMapper;
-    @Autowired
-    private MasterMendWorkerAPI masterMendWorkerAPI;
     @Autowired
     private IUnitMapper iUnitMapper;
     @Autowired
@@ -82,25 +73,6 @@ public class DjBasicsProductTemplateService {
     private ILabelMapper iLabelMapper;
 
 
-    /**
-     * 随机查询商品
-     * @return
-     */
-    public List<DjBasicsProductTemplate> queryRandomProduct(Integer limit,String cityId) {
-        List<DjBasicsProductTemplate> djBasicsProductTemplates = iBasicsProductTemplateMapper.queryRandomProduct(limit,cityId);
-        return djBasicsProductTemplates;
-    }
-
-
-    /**
-     * 根据商品类别随机查询商品
-     * @param productId
-     * @return
-     */
-    public List<DjBasicsProductTemplate> queryRandomProductByCategoryId(String productId,Integer limit) {
-        List<DjBasicsProductTemplate> djBasicsProductTemplates = iBasicsProductTemplateMapper.queryRandomProductByCategoryId(productId, limit);
-        return djBasicsProductTemplates;
-    }
 
 
     /**
@@ -110,10 +82,10 @@ public class DjBasicsProductTemplateService {
      * @return
      */
     public ServerResponse queryProductData(String name,String cityId) {
-        Example example = new Example(DjBasicsProduct.class);
+        Example example = new Example(DjBasicsProductTemplate.class);
         if (!CommonUtil.isEmpty(name)) {
-            example.createCriteria().andLike(DjBasicsProduct.NAME, "%" + name + "%").
-                    andEqualTo(DjBasicsProduct.CITY_ID,cityId);
+            example.createCriteria().andLike(DjBasicsProductTemplate.NAME, "%" + name + "%").
+                    andEqualTo(DjBasicsProductTemplate.CITY_ID,cityId);
             List<DjBasicsProductTemplate> list = iBasicsProductTemplateMapper.selectByExample(example);
             if (list.size() <= 0) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
@@ -130,9 +102,9 @@ public class DjBasicsProductTemplateService {
      */
     public List<DjBasicsProductTemplate> getAllProductByCategoryId(String categoryId,String cityId) {
         try {
-            Example example = new Example(DjBasicsProduct.class);
-            example.createCriteria().andEqualTo(DjBasicsProduct.CATEGORY_ID,categoryId)
-            .andEqualTo(DjBasicsProduct.CITY_ID,cityId);
+            Example example = new Example(DjBasicsProductTemplate.class);
+            example.createCriteria().andEqualTo(DjBasicsProductTemplate.CATEGORY_ID,categoryId)
+            .andEqualTo(DjBasicsProductTemplate.CITY_ID,cityId);
             List<DjBasicsProductTemplate> djBasicsProductList = iBasicsProductTemplateMapper.selectByExample(example); //根据商品编号查询对象
             return djBasicsProductList;
         } catch (Exception e) {
@@ -147,8 +119,8 @@ public class DjBasicsProductTemplateService {
      */
     public DjBasicsProductTemplate queryDataByProductId(String productId) {
         try {
-            Example example = new Example(DjBasicsProduct.class);
-            example.createCriteria().andEqualTo(DjBasicsProduct.ID,productId);
+            Example example = new Example(DjBasicsProductTemplate.class);
+            example.createCriteria().andEqualTo(DjBasicsProductTemplate.ID,productId);
             DjBasicsProductTemplate djBasicsProduct = iBasicsProductTemplateMapper.selectByPrimaryKey(example); //根据商品编号查询对象
             return djBasicsProduct;
         } catch (Exception e) {
@@ -202,6 +174,10 @@ public class DjBasicsProductTemplateService {
             LOG.info("001----------添加商品主表 start:" + basicsProductDTO.getName());
             String productId = insertBasicsProductData(basicsProductDTO,imgStr,0,basicsGoods.getType());
             LOG.info("001----------添加商品主表 end productId:" + productId);
+            if(basicsProductDTO.getIsRelateionProduct()!=null&&"1".equals(basicsProductDTO.getIsRelateionProduct())){
+                //添加关联商品信息
+                insertAddedValueProductRelation(productId,basicsProductDTO.getRelationProductIds());
+            }
 
             //3.删除对应需要删除的工艺信息
             String deleteTechnologyIds=obj.getString("deleteTechnologyIds");
@@ -290,6 +266,7 @@ public class DjBasicsProductTemplateService {
         product.setDetailImage(basicsProductDTO.getDetailImage());
         product.setGuaranteedPolicy(basicsProductDTO.getGuaranteedPolicy());
         product.setRefundPolicy(basicsProductDTO.getRefundPolicy());
+        product.setIsRelateionProduct(basicsProductDTO.getIsRelateionProduct());
 
         if (productId == null || "".equals(productId)) {//没有id则新增
             product.setCreateDate(new Date());
@@ -544,12 +521,38 @@ public class DjBasicsProductTemplateService {
         LOG.info("001----------添加商品主表 start:" +basicsProductDTO.getId()+"-----"+ basicsProductDTO.getName());
         String productId = insertBasicsProductData(basicsProductDTO,imgStr,dataStatus,basicsGoods.getType());
         LOG.info("001----------添加商品主表 end productId:" + productId);
+        if(basicsProductDTO.getIsRelateionProduct()!=null&&"1".equals(basicsProductDTO.getIsRelateionProduct())){
+            //添加关联商品信息
+            insertAddedValueProductRelation(productId,basicsProductDTO.getRelationProductIds());
+        }
         //3.删除对应需要删除的工艺信息
         String restr = deleteTechnologylist(deleteTechnologyIds);
         if (StringUtils.isNotBlank(restr)) {
             return ServerResponse.createByErrorMessage(restr);
         }
         return ServerResponse.createBySuccess("保存成功",productId);
+    }
+
+    /**
+     * 增加增值关联商品信息(先删除再添加）
+     * @param productId
+     * @param relationProductIds
+     */
+    void insertAddedValueProductRelation(String productId,String relationProductIds){
+
+        Example example=new Example(ProductAddedRelation.class);
+        example.createCriteria().andEqualTo(ProductAddedRelation.ADDED_PRODUCT_TEMPLATE_ID, productId);
+        iProductAddedRelationMapper.deleteByExample(example);
+        if(relationProductIds!=null&&StringUtils.isNotBlank(relationProductIds)){
+            String[] rpds=relationProductIds.split(",");
+            for(int i=0;i<rpds.length;i++){
+                ProductAddedRelation par=new ProductAddedRelation();
+                par.setProductTemplateId(rpds[i]);//关联商品ID
+                par.setAddedProductTemplateId(productId);//增值商品ID
+                iProductAddedRelationMapper.insert(par);
+            }
+
+        }
     }
     /**
      * 查询商品标签
@@ -833,6 +836,15 @@ public class DjBasicsProductTemplateService {
         map.put("unitList",linkUnitList);
         map.put("imageUrl",imgUrlStr.toString());
         map.put("id",djBasicsProduct.getId());
+
+        //只有增值类关联商品才会有此数据
+        if(StringUtils.isNotBlank(djBasicsProduct.getIsRelateionProduct())&&"1".equals(djBasicsProduct.getIsRelateionProduct())){
+            Example example=new Example(ProductAddedRelation.class);
+            example.createCriteria().andEqualTo(ProductAddedRelation.ADDED_PRODUCT_TEMPLATE_ID, djBasicsProduct.getId());
+            List<ProductAddedRelation> productAddedRelations=iProductAddedRelationMapper.selectByExample(example);
+            map.put("relateionProductList",productAddedRelations);//关联商品列表
+        }
+
         return map;
     }
 
@@ -1061,6 +1073,17 @@ public class DjBasicsProductTemplateService {
             productsDTO.setMsg("找不到该商品（" + productSn + "）,请检查是否上架或者停用！");
         }
         return productsDTO;
+    }
+
+    public ServerResponse queryAllWorkerProductList(String name,String cityId){
+        try{
+            LOG.info("查询人工商品接口name={},cityId={}",name,cityId);
+            List<Map<String,Object>> productList=iBasicsProductTemplateMapper.queryAllWorkerProductList(name);
+            return ServerResponse.createBySuccess("查询成功",productList);
+        }catch (Exception e){
+            LOG.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
     }
 
 }

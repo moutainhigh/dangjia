@@ -9,6 +9,11 @@
         order by create_date DESC limit 4
     </select>
 
+    <select id="queryApplyPayState" resultType="com.dangjia.acg.dto.delivery.HouseFlowDataDTO">
+        select apply_dec as applyDec,create_date AS createDate
+        from dj_core_house_flow_apply WHERE is_read_type = 0 and house_id = #{houseId}
+    </select>
+
     <select id="queryDjDeliverOrderStorefront" resultType="com.dangjia.acg.dto.delivery.OrderStorefrontDTO">
         SELECT
             t1.storefont_id storefrontId,
@@ -327,7 +332,7 @@
                 AND t2.product_id = t3.id
                 AND t3.prod_template_id = t4.id
                 AND t4.category_id = t5.id
-                AND t1.house_id = '2c911c24658445830165933af3690f97'
+                AND t1.house_id = #{houseId}
                 AND FIND_IN_SET(
                     t6.id,
                     t5.category_label_ids
@@ -351,7 +356,7 @@
                     AND t2.category_id = t3.id
                     AND t1.delete_state != 1
                     AND t1.product_id IS NULL
-                    AND t1.house_id = '2c911c24658445830165933af3690f97'
+                    AND t1.house_id = #{houseId}
                     AND FIND_IN_SET(
                         t4.id,
                         t3.category_label_ids

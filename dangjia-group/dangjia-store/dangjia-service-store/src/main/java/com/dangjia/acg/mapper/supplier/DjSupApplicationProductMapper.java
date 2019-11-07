@@ -2,8 +2,11 @@ package com.dangjia.acg.mapper.supplier;
 
         import com.dangjia.acg.modle.supplier.DjSupApplication;
         import com.dangjia.acg.modle.supplier.DjSupApplicationProduct;
+        import org.apache.ibatis.annotations.Param;
         import org.springframework.stereotype.Repository;
         import tk.mybatis.mapper.common.Mapper;
+
+        import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -14,4 +17,5 @@ package com.dangjia.acg.mapper.supplier;
 @Repository
 public interface DjSupApplicationProductMapper extends Mapper<DjSupApplicationProduct> {
 
+       List<DjSupApplicationProduct> querySupplierProduct(@Param("supId") String supId, @Param("productId") String productId);
 }

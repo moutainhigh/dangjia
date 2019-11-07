@@ -9,11 +9,13 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.delivery.SupplyDimensionDTO;
+import com.dangjia.acg.dto.sup.SupplierDTO;
 import com.dangjia.acg.dto.supplier.DjSupSupplierProductDTO;
 import com.dangjia.acg.dto.supplier.DjSupplierDTO;
 import com.dangjia.acg.mapper.supplier.*;
 import com.dangjia.acg.modle.supplier.DjAdjustRecord;
 import com.dangjia.acg.modle.supplier.DjSupApplicationProduct;
+import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.dangjia.acg.sql.config.DruidConfig;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -24,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -356,6 +359,36 @@ public class DjSupApplicationProductService {
         } catch (Exception e) {
             logger.info("申请失败", e);
             return ServerResponse.createByErrorMessage("申请失败");
+        }
+    }
+
+    /**
+     * 发货任务-新版查询供应商
+     * @param cityId
+     * @param productId
+     * @return
+     */
+    public ServerResponse supplierList(String cityId, String productId) {
+        try {
+             List<DjSupApplicationProduct> djSupApplicationProductList = djSupApplicationProductMapper.querySupplierProduct(null, productId);
+            if (djSupApplicationProductList.size() <= 0) {
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            }
+            List<SupplierDTO> supplierDTOList = new ArrayList<SupplierDTO>();
+            for (DjSupApplicationProduct djSupApplicationProduct : djSupApplicationProductList) {
+                DjSupplier supplier = djSupplierMapper.selectByPrimaryKey(djSupApplicationProduct.getSupId());
+                if (supplier != null) {
+                    SupplierDTO supplierDTO = new SupplierDTO();
+                    supplierDTO.setSupplierId(djSupApplicationProduct.getSupId());
+                    supplierDTO.setSupplierPrice(djSupApplicationProduct.getPrice());//供应价
+                    supplierDTO.setName(supplier.getName());
+                    supplierDTOList.add(supplierDTO);
+                }
+            }
+            return ServerResponse.createBySuccess("查询成功", supplierDTOList);
+        } catch (Exception e) {
+            logger.info("新版查询供应商异常", e);
+            return ServerResponse.createByErrorMessage("新版查询供应商异常");
         }
     }
 }

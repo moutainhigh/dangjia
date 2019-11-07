@@ -593,31 +593,6 @@
     </select>
 
 
-    <select id="queryRandomProduct" resultType="com.dangjia.acg.modle.product.DjBasicsProductTemplate">
-        select
-          <include refid="new_columns"/>
-        from dj_basics_product_template where city_id = #{cityId}
-        ORDER BY RAND() LIMIT #{limit}
-    </select>
-
-
-    <select id="queryRandomProductByCategoryId" resultType="com.dangjia.acg.modle.product.DjBasicsProductTemplate">
-        SELECT
-          <include refid="new_columns"/>
-        FROM
-            dj_basics_product_template
-        WHERE
-            category_id = (
-                SELECT
-                    bg.category_id
-                FROM
-                    dj_basics_product_template bpt
-                INNER JOIN dj_basics_goods bg ON bpt.goods_id = bg.id
-                WHERE
-                    bpt.id =#{productId}
-            )
-        ORDER BY RAND() LIMIT #{limit}
-    </select>
 
     <select id="getProductStoreListByGoodsId"  resultType="java.util.Map" >
         SELECT
@@ -646,6 +621,24 @@
             t2.category_id,
             t4.name
 
+
+    </select>
+    <!--查询所有的人工商品-->
+    <select id="queryAllWorkerProductList" resultType="java.util.Map">
+        SELECT
+            t.id,
+            t.name
+        FROM
+            dj_basics_product_template t,
+            dj_basics_goods t1
+        WHERE
+            t.goods_id = t1.id
+        AND t1.type = 2
+        AND t.maket = 1
+        AND t.data_status = 0
+        <if test="name!=null and name!=''">
+            and t.name like CONCAT('%',#{name},'%')
+        </if>
 
     </select>
 </mapper>

@@ -2261,6 +2261,7 @@ public class HouseService {
                 hfa.setSupervisorCheck(1);//大管家审核状态0未审核，1审核通过，2审核不通过
                 hfa.setPayState(0);//是否付款
                 hfa.setApplyDec("我是精算师，我已经精算完成！ ");//描述
+                hfa.setIsReadType(0);
                 houseFlowApplyMapper.insert(hfa);
                 insertConstructionRecord(hfa);
             }
@@ -2508,12 +2509,16 @@ public class HouseService {
         }
         map.put("recordList", nodeMap);
 
+        //获取业主评论
         List<Evaluate> evaluates = houseFlowApplyMapper.getOwnerComment(hfa.getHouseId(),hfa.getWorkerId(),hfa.getApplyType(),hfa.getWorkerType());
         if(!evaluates.isEmpty()){
             map.put("star",evaluates.get(0).getStar());
             map.put("content",evaluates.get(0).getContent());
         }
 
+        Map<String,Object> mm = new HashMap<>();
+        mm.put("houseId",hfa.getHouseId());
+        houseFlowApplyMapper.updateIsReadType(null);
         return map;
     }
 

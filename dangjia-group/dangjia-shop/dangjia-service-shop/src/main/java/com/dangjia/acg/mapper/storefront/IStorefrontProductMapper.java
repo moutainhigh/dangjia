@@ -24,7 +24,7 @@ public interface IStorefrontProductMapper  extends Mapper<StorefrontProduct> {
 
     List<ShoppingCartProductDTO> queryCartList(@Param("storefrontId") String storefrontId, @Param("productId") String productId);
 
-    List<MemberCollectDTO> queryCollectGood(@Param("productId") String productId,@Param("storefrontId") String storefrontId);
+    List<MemberCollectDTO> queryCollectGood(@Param("productId") String productId);
 
     List<StorefrontDTO> queryStorefrontListByStorefrontId(String storefrontId, String searchKey);
 

@@ -83,4 +83,10 @@ public class MainUser extends BaseEntity {
 	@Desc(value = "用户身份（0员工，1店铺，2供应商，4其它）")
 	@ApiModelProperty("用户身份（0员工，1店铺，2供应商，4其它）")
 	private String userType;
+
+
+	@Column(name = "pay_password")
+	@Desc(value = "支付密码")
+	@ApiModelProperty("支付密码")
+	private String payPassword;
 }

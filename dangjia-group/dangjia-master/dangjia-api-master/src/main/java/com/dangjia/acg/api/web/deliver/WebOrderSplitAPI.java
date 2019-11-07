@@ -80,4 +80,5 @@ public interface WebOrderSplitAPI {
     @ApiOperation(value = "修改 供应商结算状态", notes = "修改 供应商结算状态")
     ServerResponse setSplitDeliver(@RequestParam("splitDeliver") SplitDeliver splitDeliver);
 
+
 }

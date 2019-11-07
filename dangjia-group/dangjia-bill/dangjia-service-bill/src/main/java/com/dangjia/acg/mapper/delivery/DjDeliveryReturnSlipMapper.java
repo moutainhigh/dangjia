@@ -92,28 +92,35 @@ public interface DjDeliveryReturnSlipMapper extends Mapper<DjDeliveryReturnSlip>
                                                                           @Param("cityId") String cityId,
                                                                           @Param("searchKey") String searchKey);
 
+
     /**
-     *店铺利润-买家维度
+     * 店铺利润-买家维度
+     * @param supId
      * @param storefrontId
-     * @param productId
      * @param cityId
      * @return
      */
-    List<BuyersDimensionDTO> sellerDimension(@Param("storefrontId") String storefrontId,
-                                                            @Param("productId") String productId,
-                                                            @Param("cityId") String cityId);
+    List<BuyersDimensionDTO> sellerDimension(@Param("supId") String supId,@Param("storefrontId") String storefrontId, @Param("cityId") String cityId);
 
 
     /**
      * 店铺利润统计-供应商维度
      * @param supId
-     * @param productId
+     * @param storefrontId
      * @param cityId
      * @return
      */
-    List<BuyersDimensionDTO>  supplierDimension (@Param("supId") String supId,@Param("storefrontId") String storefrontId, @Param("productId") String productId, @Param("cityId") String cityId);
+    List<BuyersDimensionDTO>  supplierDimension (@Param("supId") String supId,@Param("storefrontId") String storefrontId, @Param("cityId") String cityId);
 
 
+    /**
+     * 店铺利润统计-商品维度
+     * @param supId
+     * @param storefrontId
+     * @param cityId
+     * @return
+     */
+    List<BuyersDimensionDTO> storefrontProductDimension (@Param("supId") String supId,@Param("storefrontId") String storefrontId, @Param("cityId") String cityId);
 }
 
 

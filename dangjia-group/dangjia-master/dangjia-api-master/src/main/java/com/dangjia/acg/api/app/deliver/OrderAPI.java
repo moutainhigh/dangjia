@@ -34,12 +34,12 @@ public interface OrderAPI {
                                      @RequestParam("queryId") String queryId);
 
 
-    @PostMapping("app/order/queryBusinessOrderListByStatus")
+    @PostMapping("app/order/queryDeliverOrderListByStatus")
     @ApiOperation(value = "根据订单状态查询订单列表", notes = "根据订单状态查询订单列表")
-    ServerResponse queryBusinessOrderListByStatus(@RequestParam("pageDTO") PageDTO pageDTO,
+    ServerResponse queryDeliverOrderListByStatus(@RequestParam("pageDTO") PageDTO pageDTO,
                                                   @RequestParam("userToken") String userToken,
                                                   @RequestParam("houseId") String houseId,
-                                                  @RequestParam("queryId") String queryId,
+                                                  @RequestParam("cityId") String queryId,
                                                   @RequestParam("orderStatus") String orderStatus);
 
     @PostMapping("app/deliver/order/confirmOrderSplit")
@@ -48,12 +48,16 @@ public interface OrderAPI {
                                      @RequestParam("userToken") String userToken);
 
     @PostMapping("app/deliver/order/abrufbildungSubmitOrder")
-    @ApiOperation(value = "补货提交订单接口", notes = "管家确认要货")
+    @ApiOperation(value = "补货提交订单接口", notes = "补货提交订单接口")
     ServerResponse abrufbildungSubmitOrder(@RequestParam("userToken") String userToken,
                                            @RequestParam("cityId") String cityId,
                                            @RequestParam("houseId") String houseId,
                                            @RequestParam("mendOrderId") String mendOrderId,
                                            @RequestParam("addressId") String addressId);
+
+    @PostMapping("app/deliver/order/setOrderQuantity")
+    @ApiOperation(value = "补货提交订单回调接口", notes = "补货提交订单回调接口")
+    ServerResponse setOrderQuantity(@RequestParam("mendOrderId") String mendOrderId);
 
     @PostMapping("app/deliver/order/getOrderItemList")
     @ApiOperation(value = "已添加要货单明细", notes = "已添加要货单明细")
