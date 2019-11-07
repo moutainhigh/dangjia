@@ -45,6 +45,12 @@ public class DjSupApplicationProductController implements DjSupApplicationProduc
 
     @Override
     @ApiMethod
+    public ServerResponse supplierList(String cityId, String productId) {
+        return djSupApplicationProductService.supplierList(cityId,productId);
+    }
+
+    @Override
+    @ApiMethod
     public List<SupplyDimensionDTO> queryDjSupSupplierProductList(String supId, String searchKey) {
         return djSupApplicationProductService.queryDjSupSupplierProductList(supId, searchKey);
     }

@@ -84,4 +84,11 @@ public interface DjSupApplicationProductAPI {
     ServerResponse updateReapply(@RequestParam("request") HttpServletRequest request,
                                  @RequestParam("jsonStr") String jsonStr);
 
+
+    @PostMapping("/supplier/djSupApplicationProduct/supplierList")
+    @ApiOperation(value = "查询供应商", notes = "查询供应商")
+    ServerResponse supplierList(@RequestParam("cityId") String cityId,
+                                @RequestParam("productId") String productId);
+
+
 }
