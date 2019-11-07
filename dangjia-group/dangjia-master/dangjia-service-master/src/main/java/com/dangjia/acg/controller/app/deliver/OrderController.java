@@ -84,6 +84,18 @@ public class OrderController implements OrderAPI {
     }
 
 
+
+    /**
+     * 补货提交订单回调接口
+     *
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse setOrderQuantity(String mendOrderId) {
+        return orderService.setOrderQuantity(mendOrderId);
+    }
+
+
     /**
      * 返回已添加要货单明细
      */

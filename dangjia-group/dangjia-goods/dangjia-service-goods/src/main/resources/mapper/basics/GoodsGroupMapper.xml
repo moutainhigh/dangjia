@@ -90,7 +90,7 @@
 	<select id="getParentTopList" resultMap="GoodsCategoryMap" parameterType="java.util.Map">	
 		SELECT id,name 
 		FROM dj_basics_goods_category 
-		where parent_id=1 and city_id = #{cityId}
+		where parent_id=1
 		ORDER BY create_date desc
 	</select>
 	

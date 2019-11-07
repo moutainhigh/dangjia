@@ -9,7 +9,7 @@
     <select id="getCategoryLabel" resultType="com.dangjia.acg.modle.product.CategoryLabel">
         SELECT
            id, name, create_date as createDate, modify_date as modifyDate,sort
-        from dj_basics_category_label where city_id = #{cityId}
+        from dj_basics_category_label
         ORDER BY sort asc,createDate asc
     </select>
 
@@ -17,7 +17,7 @@
     <select id="getCategoryLabelByName" parameterType="String" resultType="com.dangjia.acg.modle.product.CategoryLabel">
 		SELECT
 			id, name, create_date as createDate, modify_date as modifyDate,sort
-		FROM dj_basics_category_label WHERE name=#{name} and city_id = #{cityId}
+		FROM dj_basics_category_label WHERE name=#{name}
 		ORDER BY sort asc,createDate asc
 	</select>
 

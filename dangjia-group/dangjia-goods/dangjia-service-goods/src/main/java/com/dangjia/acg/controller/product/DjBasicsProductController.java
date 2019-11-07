@@ -15,7 +15,6 @@ import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -40,18 +39,6 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
     @Autowired
     private BasicsStorefrontAPI basicsStorefrontAPI ;
 
-    @Override
-    @ApiMethod
-    public List<DjBasicsProductTemplate> queryRandomProduct(Integer limit,String cityId) {
-            return djBasicsProductService.queryRandomProduct(limit,cityId);
-    }
-
-    @Override
-    @ApiMethod
-    public List<DjBasicsProductTemplate> queryRandomProductByCategoryId(String productId,Integer limit) {
-        List<DjBasicsProductTemplate> djBasicsProductTemplates = djBasicsProductService.queryRandomProductByCategoryId(productId, limit);
-        return djBasicsProductTemplates;
-    }
 
     @Override
     @ApiMethod

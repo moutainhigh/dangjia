@@ -73,25 +73,6 @@ public class DjBasicsProductTemplateService {
     private ILabelMapper iLabelMapper;
 
 
-    /**
-     * 随机查询商品
-     * @return
-     */
-    public List<DjBasicsProductTemplate> queryRandomProduct(Integer limit,String cityId) {
-        List<DjBasicsProductTemplate> djBasicsProductTemplates = iBasicsProductTemplateMapper.queryRandomProduct(limit,cityId);
-        return djBasicsProductTemplates;
-    }
-
-
-    /**
-     * 根据商品类别随机查询商品
-     * @param productId
-     * @return
-     */
-    public List<DjBasicsProductTemplate> queryRandomProductByCategoryId(String productId,Integer limit) {
-        List<DjBasicsProductTemplate> djBasicsProductTemplates = iBasicsProductTemplateMapper.queryRandomProductByCategoryId(productId, limit);
-        return djBasicsProductTemplates;
-    }
 
 
     /**

@@ -101,7 +101,6 @@
         FROM dj_basics_goods
         where data_status = 0
         AND name LIKE CONCAT('%',#{name},'%')
-        and city_id = #{cityId}
         ORDER BY create_date desc
     </select>
 

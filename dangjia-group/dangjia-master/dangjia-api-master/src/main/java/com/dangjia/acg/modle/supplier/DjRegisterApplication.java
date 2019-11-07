@@ -84,4 +84,9 @@ public class DjRegisterApplication extends BaseEntity {
     @Desc(value = "审核人ID")
     @ApiModelProperty("审核人ID")
     private String auditUserId;//审核人ID
+
+    @Column(name = "pay_password")
+    @Desc(value = "支付密码")
+    @ApiModelProperty("支付密码")
+    private String payPassword;
 }

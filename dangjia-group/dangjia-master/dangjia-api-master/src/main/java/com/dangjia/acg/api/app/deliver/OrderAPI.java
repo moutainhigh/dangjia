@@ -48,12 +48,16 @@ public interface OrderAPI {
                                      @RequestParam("userToken") String userToken);
 
     @PostMapping("app/deliver/order/abrufbildungSubmitOrder")
-    @ApiOperation(value = "补货提交订单接口", notes = "管家确认要货")
+    @ApiOperation(value = "补货提交订单接口", notes = "补货提交订单接口")
     ServerResponse abrufbildungSubmitOrder(@RequestParam("userToken") String userToken,
                                            @RequestParam("cityId") String cityId,
                                            @RequestParam("houseId") String houseId,
                                            @RequestParam("mendOrderId") String mendOrderId,
                                            @RequestParam("addressId") String addressId);
+
+    @PostMapping("app/deliver/order/setOrderQuantity")
+    @ApiOperation(value = "补货提交订单回调接口", notes = "补货提交订单回调接口")
+    ServerResponse setOrderQuantity(@RequestParam("mendOrderId") String mendOrderId);
 
     @PostMapping("app/deliver/order/getOrderItemList")
     @ApiOperation(value = "已添加要货单明细", notes = "已添加要货单明细")

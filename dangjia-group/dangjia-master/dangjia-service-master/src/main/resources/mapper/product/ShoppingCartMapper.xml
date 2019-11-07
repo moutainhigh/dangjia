@@ -36,6 +36,7 @@
 			b.product_sn as productSn,
 			b.image,
 			b.sell_price AS sellPrice,
+			d.is_reservation_deliver AS isReservationDeliver,
 			d.type
 		FROM
 			dj_repair_shopping_cart a

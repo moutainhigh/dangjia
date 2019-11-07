@@ -1,10 +1,6 @@
 package com.dangjia.acg.service.member;
 
-import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.StorefrontProductAPI;
-import com.dangjia.acg.api.actuary.app.AppActuaryOperationAPI;
-import com.dangjia.acg.api.product.DjBasicsProductAPI;
-import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
@@ -24,7 +20,6 @@ import com.dangjia.acg.modle.member.MemberCollect;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.other.IndexPageService;
-import com.dangjia.acg.sql.config.DruidConfig;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -54,14 +49,8 @@ public class MemberCollectService {
     private IndexPageService indexPageService;
     @Autowired
     private IHouseFlowApplyImageMapper houseFlowApplyImageMapper;
-
-    @Autowired
-    private DjBasicsProductAPI djBasicsProductAPI;
-    @Autowired
-    private AppActuaryOperationAPI appActuaryOperationAPI;
     @Autowired
     private IWebsiteVisitMapper iWebsiteVisitMapper;
-
     private Logger logger = LoggerFactory.getLogger(MemberCollectService.class);
     @Autowired
     private StorefrontProductAPI storefrontProductAPI;
@@ -93,7 +82,7 @@ public class MemberCollectService {
             //组装新list
             List<MemberCollectDTO> memberCollectDTOList = new ArrayList<MemberCollectDTO>();
             memberCollectList.forEach(memberCollect -> {
-                List<MemberCollectDTO> memberCollectDTOS = storefrontProductAPI.queryCollectGood(memberCollect.getCollectId(),memberCollect.getStorefrontId());
+                List<MemberCollectDTO> memberCollectDTOS = storefrontProductAPI.queryCollectGood(memberCollect.getCollectId());
                 memberCollectDTOS.forEach(memberCollectDTO -> {
                     memberCollectDTO.setId(memberCollect.getId());
                 });
@@ -183,9 +172,9 @@ public class MemberCollectService {
                     .andEqualTo(MemberCollect.CONDITION_TYPE, collectType);
             List<MemberCollect> list = iMemberCollectMapper.selectByExample(example);
             if (list.size() > 0) {
-                return ServerResponse.createBySuccess("该商品已经被收藏!", "1");
+                return ServerResponse.createBySuccessMessage("已经被收藏!");
             }
-            return ServerResponse.createBySuccess("该商品没有被收藏!", "0");
+            return ServerResponse.createBySuccessMessage("没有被收藏!");
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("系统出错,检测该工地是否已收藏失败");
@@ -214,9 +203,9 @@ public class MemberCollectService {
                     .andEqualTo(MemberCollect.MEMBER_ID, member.getId());
             List<MemberCollect> listMemberCollect = iMemberCollectMapper.selectByExample(example);
             if (listMemberCollect.size() > 0)
-                return ServerResponse.createByErrorMessage("该商品已经被收藏!");
+                return ServerResponse.createByErrorMessage("已被收藏!");
             iMemberCollectMapper.insertSelective(memberCollect);
-            return ServerResponse.createBySuccessMessage("商品收藏成功!");
+            return ServerResponse.createBySuccessMessage("收藏成功!");
         } catch (Exception e) {
            logger.info("系统出错,添加收藏失败",e);
            return ServerResponse.createByErrorMessage("系统出错,添加收藏失败");
@@ -258,7 +247,7 @@ public class MemberCollectService {
         example.orderBy(WebsiteVisit.COUNT).desc();
         List<WebsiteVisit> websiteVisits = iWebsiteVisitMapper.selectByExample(example);
         if(websiteVisits.size()<=0){
-            List<DjBasicsProductTemplate> djBasicsProductTemplates = djBasicsProductAPI.queryRandomProduct(12,cityId);
+            List<DjBasicsProductTemplate> djBasicsProductTemplates = iMemberCollectMapper.queryRandomProduct(12, cityId);
             return ServerResponse.createBySuccess("查询成功",djBasicsProductTemplates);
         }else{
             List<DjBasicsProductTemplate> djBasicsProductTemplates=new ArrayList<>();
@@ -266,7 +255,7 @@ public class MemberCollectService {
                 if(!CommonUtil.isEmpty(websiteVisits.get(i).getRoute())){
                     String[] split = websiteVisits.get(i).getRoute().split(",");
                     System.out.println(split[1]+(12-djBasicsProductTemplates.size()));
-                    List<DjBasicsProductTemplate> djBasicsProductTemplates1 = djBasicsProductAPI.queryRandomProductByCategoryId(split[1], 12-djBasicsProductTemplates.size());
+                    List<DjBasicsProductTemplate> djBasicsProductTemplates1 = iMemberCollectMapper.queryRandomProductByCategoryId(split[1], 12-djBasicsProductTemplates.size());
                     djBasicsProductTemplates.addAll(djBasicsProductTemplates1);
                     if(djBasicsProductTemplates.size()==12){
                         break;
@@ -274,7 +263,7 @@ public class MemberCollectService {
                 }
             }
             if(djBasicsProductTemplates.size()<12){
-                djBasicsProductTemplates.addAll(djBasicsProductAPI.queryRandomProduct(12-djBasicsProductTemplates.size(),cityId));
+                djBasicsProductTemplates.addAll(iMemberCollectMapper.queryRandomProduct(12-djBasicsProductTemplates.size(),cityId));
             }
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             djBasicsProductTemplates.forEach(djBasicsProductTemplate -> {
