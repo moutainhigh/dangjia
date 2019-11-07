@@ -893,41 +893,6 @@ public class DjDeliverOrderService {
     }
 
 
-    /**
-     * 查询所有订单
-     *
-     * @param pageDTO
-     * @param userId
-     * @param cityId
-     * @return
-     */
-    public ServerResponse queryAllDeliverOrder(PageDTO pageDTO, String userId, String cityId, String orderStatus) {
-        try {
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            if (StringUtils.isEmpty(userId)) {
-                return ServerResponse.createByErrorMessage("用户ID不能为空!");
-            }
-            if (StringUtils.isEmpty(cityId)) {
-                return ServerResponse.createByErrorMessage("城市ID不能为空!");
-            }
-//            if (StringUtils.isEmpty(orderStatus)) {
-////                return ServerResponse.createByErrorMessage("订单状态不能为空!");
-////            }
-            Example example = new Example(DjDeliverOrder.class);
-            example.createCriteria()
-                    .andEqualTo(DjDeliverOrder.CITY_ID,cityId)
-                    .andEqualTo(DjDeliverOrder.ORDER_STATUS,orderStatus)
-                    .andEqualTo(DjDeliverOrder.MEMBER_ID,userId)
-                    .andEqualTo(DjDeliverOrder.STOREFONT_ID,userId);
-            List<Order> list = IBillDjDeliverOrderMapper.selectByExample(example);
-
-            PageInfo pageResult = new PageInfo(list);
-            return ServerResponse.createBySuccess("查询所有订单", pageResult);
-        } catch (Exception e) {
-            logger.error("查询所有订单异常", e);
-            return ServerResponse.createByErrorMessage("查询所有订单异常" + e);
-        }
-    }
 
 
     /**

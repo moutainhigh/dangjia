@@ -34,12 +34,12 @@ public interface OrderAPI {
                                      @RequestParam("queryId") String queryId);
 
 
-    @PostMapping("app/order/queryBusinessOrderListByStatus")
+    @PostMapping("app/order/queryDeliverOrderListByStatus")
     @ApiOperation(value = "根据订单状态查询订单列表", notes = "根据订单状态查询订单列表")
-    ServerResponse queryBusinessOrderListByStatus(@RequestParam("pageDTO") PageDTO pageDTO,
+    ServerResponse queryDeliverOrderListByStatus(@RequestParam("pageDTO") PageDTO pageDTO,
                                                   @RequestParam("userToken") String userToken,
                                                   @RequestParam("houseId") String houseId,
-                                                  @RequestParam("queryId") String queryId,
+                                                  @RequestParam("cityId") String queryId,
                                                   @RequestParam("orderStatus") String orderStatus);
 
     @PostMapping("app/deliver/order/confirmOrderSplit")

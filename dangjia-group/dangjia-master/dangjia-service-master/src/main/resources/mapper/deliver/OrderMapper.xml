@@ -127,5 +127,33 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
          where id=#{orderId}
     </update>
 
+
+    <select id="selectDeliverOrderByHouse" resultType="com.dangjia.acg.modle.deliver.Order">
+        SELECT
+        ddo.id,
+        ddo.house_id as houseId,
+        ddo.business_order_number as businessOrderNumber,
+        ddo.total_amount as totalAmount,
+        ddo.worker_type_name as workerTypeName,
+        ddo.worker_type_id as workerTypeId,
+        ddo.style_name as styleName,
+        ddo.style_price as stylePrice,
+        ddo.budget_cost as budgetCost,
+        ddo.type,
+        ddo.payment,
+        ddo.create_date as createDate,
+        ddo.modify_date as modifyDate,
+        ddo.data_status as dataStatus
+        from dj_deliver_order ddo
+        where
+        ddo.house_id = #{houseId}
+        <if test="cityId!=null and cityId!=''">
+            and  ddo.city_id = #{cityId}
+        </if>
+        <if test="orderStatus!=null and orderStatus!=''">
+            and  ddo.order_status = #{orderStatus}
+        </if>
+    </select>
+
 </mapper>
 

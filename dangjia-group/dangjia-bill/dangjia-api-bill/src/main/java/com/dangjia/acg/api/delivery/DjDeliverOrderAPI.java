@@ -14,22 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 @FeignClient("dangjia-service-bill")
 public interface DjDeliverOrderAPI {
 
-    /**
-     * 下单后--订单查询--全部订单(方法废弃)
-     * @param request
-     * @param pageDTO
-     * @param userId 用户id
-     * @param userToken 用户登录token
-     * @param orderStatus 订单状态
-     * @return
-     */
-    @PostMapping("/app/deliverOrder/queryAllDeliverOrder")
-    @ApiOperation(value = "下单后--订单查询--全部订单", notes = "下单后--订单查询--全部订单")
-    ServerResponse queryAllDeliverOrder(@RequestParam("request") HttpServletRequest request,
-                                        @RequestParam("pageDTO") PageDTO pageDTO,
-                                        @RequestParam("userId") String userId,
-                                        @RequestParam("userToken") String userToken,
-                                        @RequestParam("orderStatus") String orderStatus);
+
 
 
 

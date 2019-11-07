@@ -352,15 +352,18 @@ public class DjDeliveryReturnSlipService {
      */
     public ServerResponse supplierDimension(PageDTO pageDTO,  String supId,String userId, String cityId, String searchKey) {
         try {
-
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             Storefront storefront=basicsStorefrontAPI.queryStorefrontByUserID(userId,cityId);
             if(storefront==null)
             {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            djDeliveryReturnSlipMapper.supplierDimension(supId, storefront.getId(),cityId, searchKey);
-            return ServerResponse.createBySuccess("查询成功",null );
+            List<BuyersDimensionDTO> list=djDeliveryReturnSlipMapper.supplierDimension(supId, storefront.getId(),cityId);
+            PageInfo pageResult = new PageInfo(list);
+            if (list.size() <= 0)
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             logger.error("店铺利润统计供应商维度异常", e);
             return ServerResponse.createByErrorMessage("店铺利润统计供应商维度异常: " + e);
@@ -377,21 +380,25 @@ public class DjDeliveryReturnSlipService {
      */
     public ServerResponse storefrontProductDimension(PageDTO pageDTO,String userId, String cityId, String searchKey) {
         try {
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
             if(storefront==null)
             {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            return null;
+            List<BuyersDimensionDTO> list=djDeliveryReturnSlipMapper.storefrontProductDimension(null, storefront.getId(),null);
+            PageInfo pageResult = new PageInfo(list);
+            if (list.size() <= 0)
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
-            logger.error("店铺利润统计商品维度异常", e);
-            return ServerResponse.createByErrorMessage("店铺利润统计商品维度异常: " + e);
+            logger.error("店铺利润统计-商品维度异常", e);
+            return ServerResponse.createByErrorMessage("店铺利润统计-商品维度异常: " + e);
         }
     }
 
     /**
-     * 店铺利润统计-卖家维度
+     * 店铺利润统计-买家维度
      * @param pageDTO
      * @param userId
      * @param cityId
@@ -402,49 +409,68 @@ public class DjDeliveryReturnSlipService {
         try {
 
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<BuyersDimensionDTO> sellerDimension=djDeliveryReturnSlipMapper.sellerDimension(null,null,null);
-            return null;
+            Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
+            if(storefront==null)
+            {
+                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
+            }
+            List<BuyersDimensionDTO> list=djDeliveryReturnSlipMapper.sellerDimension(null,null,null);
+            PageInfo pageResult = new PageInfo(list);
+            if (list.size() <= 0)
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
-            logger.error("店铺利润统计卖家维度异常", e);
-            return ServerResponse.createByErrorMessage("店铺利润统计卖家维度异常: " + e);
+            logger.error("店铺利润统计-卖家维度异常", e);
+            return ServerResponse.createByErrorMessage("店铺利润统计-卖家维度异常: " + e);
         }
     }
 
     /**
      *店铺利润统计-查看供应详情
      * @param pageDTO
-     * @param supId
+     * @param userId
      * @param houseId
      * @param searchKey
      * @param cityId
      * @return
      */
-    public ServerResponse supplyDetails(PageDTO pageDTO, String supId, String houseId, String searchKey, String cityId) {
+    public ServerResponse supplyDetails(PageDTO pageDTO, String userId, String houseId, String searchKey, String cityId) {
         try {
+
+            Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
+            if(storefront==null)
+            {
+                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
+            }
 
             return null;
         } catch (Exception e) {
-            logger.error("店铺利润统计查看供应详情异常", e);
-            return ServerResponse.createByErrorMessage("店铺利润统计查看供应详情异常: " + e);
+            logger.error("店铺利润统计-查看供应详情异常", e);
+            return ServerResponse.createByErrorMessage("店铺利润统计-查看供应详情异常: " + e);
         }
     }
 
     /**
      *店铺利润统计-查看货单详情
      * @param pageDTO
-     * @param supId
+     * @param userId
      * @param houseId
      * @param searchKey
      * @param cityId
      * @return
      */
-    public ServerResponse shippingDetails(PageDTO pageDTO, String supId, String houseId, String searchKey, String cityId) {
+    public ServerResponse shippingDetails(PageDTO pageDTO, String userId, String houseId, String searchKey, String cityId) {
         try {
+            Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
+            if(storefront==null)
+            {
+                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
+            }
 
             return null;
         } catch (Exception e) {
-            logger.error("店铺利润统计查看货单详情异常", e);
-            return ServerResponse.createByErrorMessage("店铺利润统计查看货单详情异常: " + e);
+            logger.error("店铺利润统计-查看货单详情异常", e);
+            return ServerResponse.createByErrorMessage("店铺利润统计-查看货单详情异常: " + e);
         }
     }
 }

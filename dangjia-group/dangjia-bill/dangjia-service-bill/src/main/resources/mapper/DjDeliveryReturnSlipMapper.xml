@@ -440,7 +440,7 @@
 
 
     <!--店铺利润-商品维度-->
-    <select id="supplierDimension" resultType="com.dangjia.acg.dto.delivery.SellerDimensionDTO">
+    <select id="storefrontProductDimension" resultType="com.dangjia.acg.dto.delivery.SellerDimensionDTO">
         SELECT
             dsd.supplier_id AS supId,
             -- 供应商id
@@ -460,8 +460,8 @@
             dsd.supplier_id
     </select>
 
-    <!--店铺利润-供应商维度
-    <select id="" resultType="">
+    <!--店铺利润-供应商维度-->
+    <select id="supplierDimension" resultType="com.dangjia.acg.dto.delivery.BuyersDimensionDTO">
         SELECT
         dsd.id AS orderSplitId,
         dsd.number,
@@ -480,12 +480,32 @@
         </if>
         GROUP BY
         dsd.number
-    </select>-->
+    </select>
 
     <!--店铺利润-买家维度    -->
     <select id="sellerDimension" resultType="com.dangjia.acg.dto.delivery.BuyersDimensionDTO">
-
+        SELECT
+        dsd.supplier_id AS supId,
+        dsd.ship_address AS shipAddress,
+        m. NAME,
+        m.mobile,
+        sum(dosi.shop_count) AS supplyQuantity,
+        sum(dsd.total_amount) AS income,
+        h.id AS houseId
+        FROM
+        dj_deliver_split_deliver dsd
+        INNER JOIN dj_house h ON dsd.house_id = h.id
+        INNER JOIN dj_member m ON m.id = h.member_id
+        INNER JOIN dj_deliver_order_split_item dosi ON dsd.id = dosi.split_deliver_id
+        WHERE dsd.supplier_id = #{supId}
+        <if test="null!=searchKey and ''!=searchKey">
+            AND (
+            dsd.ship_address LIKE CONCAT('%',#{searchKey},'%') or
+            m. NAME LIKE CONCAT('%',#{searchKey},'%') or
+            m.mobile LIKE CONCAT('%',#{searchKey},'%')
+            )
+        </if>
+        and dsd.city_id=#{cityId}
+        GROUP BY h.id
     </select>
-
-
 </mapper>

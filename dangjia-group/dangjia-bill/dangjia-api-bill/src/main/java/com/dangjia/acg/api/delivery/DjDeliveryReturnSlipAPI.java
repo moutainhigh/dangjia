@@ -113,7 +113,7 @@ public interface DjDeliveryReturnSlipAPI {
                                                    @RequestParam("searchKey") String searchKey);
 
     @PostMapping("/delivery/djBasicsStorefrontProfit/sellerDimension")
-    @ApiOperation(value = "店铺利润统计-卖家维度", notes = "店铺利润统计-卖家维度")
+    @ApiOperation(value = "店铺利润统计-买家维度", notes = "店铺利润统计-买家维度")
     ServerResponse sellerDimension(@RequestParam("request") HttpServletRequest request,
                                                    @RequestParam("pageDTO") PageDTO pageDTO,
                                                    @RequestParam("userId") String userId,
@@ -124,7 +124,7 @@ public interface DjDeliveryReturnSlipAPI {
     @ApiOperation(value = "店铺利润统计-查看供应详情", notes = "店铺利润统计-查看供应详情")
     ServerResponse supplyDetails(@RequestParam("request") HttpServletRequest request,
                                                   @RequestParam("pageDTO") PageDTO pageDTO,
-                                                  @RequestParam("supId") String supId,
+                                                  @RequestParam("userId") String userId,
                                                   @RequestParam("houseId") String houseId,
                                                   @RequestParam("searchKey") String searchKey,
                                                   @RequestParam("cityId") String cityId);
@@ -133,9 +133,8 @@ public interface DjDeliveryReturnSlipAPI {
     @ApiOperation(value = "店铺利润统计-查看货单详情", notes = "店铺利润统计-查看货单详情")
     ServerResponse shippingDetails(@RequestParam("request") HttpServletRequest request,
                      @RequestParam("pageDTO") PageDTO pageDTO,
-                     @RequestParam("supId") String supId,
+                     @RequestParam("userId") String userId,
                      @RequestParam("houseId") String houseId,
                      @RequestParam("searchKey") String searchKey,
                      @RequestParam("cityId") String cityId);
-
 }
