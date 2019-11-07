@@ -1141,7 +1141,8 @@ public class PaymentService {
                 orderMapper.updateByPrimaryKeySelective(order);
 
                 example = new Example(ShoppingCart.class);
-                example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, member.getId());
+                example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, member.getId())
+                        .andIn(ShoppingCart.PRODUCT_ID,Arrays.asList(productIdlist));
                 iShoppingCartMapper.deleteByExample(example);
                 return ServerResponse.createBySuccess("提交成功", order.getId());
             }
