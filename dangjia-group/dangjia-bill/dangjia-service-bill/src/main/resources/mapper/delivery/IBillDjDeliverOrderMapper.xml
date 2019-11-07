@@ -9,6 +9,11 @@
         order by create_date DESC limit 4
     </select>
 
+    <select id="queryApplyPayState" resultType="com.dangjia.acg.dto.delivery.HouseFlowDataDTO">
+        select apply_dec as applyDec,create_date AS createDate
+        from dj_core_house_flow_apply WHERE is_read_type = 0 and house_id = #{houseId}
+    </select>
+
     <select id="queryDjDeliverOrderStorefront" resultType="com.dangjia.acg.dto.delivery.OrderStorefrontDTO">
         SELECT
             t1.storefont_id storefrontId,

@@ -8,6 +8,7 @@ import tk.mybatis.mapper.common.Mapper;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public interface IHouseFlowApplyMapper extends Mapper<HouseFlowApply> {
@@ -95,5 +96,7 @@ public interface IHouseFlowApplyMapper extends Mapper<HouseFlowApply> {
                                    @Param("workerId") String workerId,
                                    @Param("applyType") Integer applyType,
                                    @Param("workerType") Integer workerType);
+
+    void updateIsReadType(Map<String,Object> map);
 
 }

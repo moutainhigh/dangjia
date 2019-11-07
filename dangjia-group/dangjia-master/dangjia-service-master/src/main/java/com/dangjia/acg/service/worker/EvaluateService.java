@@ -407,6 +407,7 @@ public class EvaluateService {
                 hfa.setApplyDec("尊敬的业主，您好！<br/>" +
                         "当家大管家【" + supervisor.getName() + "】为您新家质量保驾护航，工地【" + workerType.getName() + "】已" + (houseFlowApply.getApplyType() == 1 ? "阶段完工" : "整体完工") + "，已经根据平台施工验收标准进行验收，未发现漏项及施工不合格情况，请您查收。<br/>");//描述
 //                hfa.setApplyDec("业主您好，我是大管家，我已验收了" + worker.getName() + (houseFlowApply.getApplyType() == 1 ? "的阶段完工" : "的整体完工"));//描述
+                hfa.setIsReadType(0);
                 houseFlowApplyMapper.insert(hfa);
                 houseService.insertConstructionRecord(hfa);
                 houseWorkerService.setHouseFlowApplyImage(hfa, house, imageList);
