@@ -51,6 +51,7 @@ public class ShoppingCartListDTO {
     @ApiModelProperty("产品类型:0：材料；1：包工包料 2:人工")
     private Integer productType;
 
+    private String isReservationDeliver;//是否业主预约发货(1是，0否)
     private Double sellPrice;
 
     private Integer type;

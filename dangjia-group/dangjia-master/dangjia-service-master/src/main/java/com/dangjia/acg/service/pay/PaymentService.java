@@ -173,8 +173,6 @@ public class PaymentService {
     private IMasterBudgetMapper iMasterBudgetMapper;
     @Autowired
     private MasterCostAcquisitionService masterCostAcquisitionService;
-
-
     @Autowired
     private PayService payService;
 
@@ -975,6 +973,7 @@ public class PaymentService {
                     if(!CommonUtil.isEmpty(budgetLabelGoodsDTO.getGoodsId())){
                         Brand brand =null;
                         DjBasicsGoods goods=iMasterBasicsGoodsMapper.selectByPrimaryKey(budgetLabelGoodsDTO.getGoodsId());
+                        budgetLabelGoodsDTO.setIsReservationDeliver(goods.getIsReservationDeliver());
                         if (!CommonUtil.isEmpty(goods.getBrandId())) {
                             brand = iMasterBrandMapper.selectByPrimaryKey(goods.getBrandId());
                         }
@@ -1071,6 +1070,7 @@ public class PaymentService {
                     freightPrice=freightPrice.add(new BigDecimal(freight));
                     for (ShoppingCartListDTO good : shoppingCartDTO.getShoppingCartListDTOS()) {
                         OrderItem orderItem = new OrderItem();
+                        orderItem.setIsReservationDeliver(good.getIsReservationDeliver());
                         orderItem.setOrderId(order.getId());
                         orderItem.setHouseId(houseId);
                         orderItem.setPrice(good.getPrice().doubleValue());//销售价
@@ -1217,6 +1217,7 @@ public class PaymentService {
                     for (BudgetLabelDTO labelDTO : budgetLabelDTO.getLabelDTOS()) {
                         for (BudgetLabelGoodsDTO good : labelDTO.getGoods()) {
                             OrderItem orderItem = new OrderItem();
+                            orderItem.setIsReservationDeliver(good.getIsReservationDeliver());
                             orderItem.setOrderId(order.getId());
                             orderItem.setHouseId(house.getId());
                             orderItem.setPrice(good.getPrice().doubleValue());//销售价
