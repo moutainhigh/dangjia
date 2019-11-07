@@ -1,6 +1,8 @@
 package com.dangjia.acg.service.deliver;
 
+import cn.jiguang.common.utils.StringUtils;
 import com.alibaba.fastjson.JSON;
+import com.dangjia.acg.api.BasicsStorefrontAPI;
 import com.dangjia.acg.api.StorefrontConfigAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.DjConstants;
@@ -28,6 +30,7 @@ import com.dangjia.acg.mapper.repair.IMendMaterialMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.*;
+import com.dangjia.acg.modle.delivery.DjDeliverOrder;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.HouseDistribution;
 import com.dangjia.acg.modle.house.Warehouse;
@@ -38,6 +41,7 @@ import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.modle.repair.MendOrder;
+import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.service.acquisition.MasterCostAcquisitionService;
 import com.dangjia.acg.service.config.ConfigMessageService;
@@ -45,6 +49,8 @@ import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.repair.MendOrderService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
@@ -107,6 +113,10 @@ public class OrderService {
     private MasterCostAcquisitionService masterCostAcquisitionService;
     @Autowired
     private IMemberMapper iMemberMapper;
+
+    private static Logger logger = LoggerFactory.getLogger(OrderService.class);
+
+
 
     /**
      * 删除订单
@@ -266,11 +276,11 @@ public class OrderService {
      * @param pageDTO
      * @param userToken
      * @param houseId
-     * @param queryId
+     * @param cityId
      * @param orderStatus
      * @return
      */
-    public ServerResponse queryBusinessOrderListByStatus(PageDTO pageDTO, String userToken, String houseId, String queryId, String orderStatus) {
+    public ServerResponse queryDeliverOrderListByStatus(PageDTO pageDTO, String userToken, String houseId, String cityId, String orderStatus) {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
@@ -278,67 +288,33 @@ public class OrderService {
             }
             Member member = (Member) object;
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<BusinessOrder> businessOrderList = businessOrderMapper.byMemberId(member.getId(), houseId, queryId);
-            PageInfo pageResult = new PageInfo(businessOrderList);
-            List<BusinessOrderDTO> businessOrderDTOS = new ArrayList<>();
-            for (BusinessOrder businessOrder : businessOrderList) {
-                BusinessOrderDTO businessOrderDTO = new BusinessOrderDTO();
-                House house = houseMapper.selectByPrimaryKey(businessOrder.getHouseId());
-                String info = "";//1工序支付任务,2补货补人工 ,4待付款进来只付材料, 5验房分销, 6换货单,7:设计精算补单
-                switch (businessOrder.getType()) {
-                    case 1:
-                        info = "(工序订单)";
-                        break;
-                    case 2:
-                        info = "(补货/补人工单)";
-                        break;
-                    case 4:
-                        info = "(材料订单)";
-                        break;
-                    case 5:
-                        info = "(验房分销单)";
-                        break;
-                    case 6:
-                        info = "(换货单)";
-                        break;
-                    case 7:
-                        info = "(设计/精算单)";
-                        break;
-                    case 8:
-                        info = "(未购买单)";
-                        break;
-                }
-                if (businessOrder.getType() == 5) {//验房分销
-                    HouseDistribution houseDistribution = iHouseDistributionMapper.selectByPrimaryKey(businessOrder.getTaskId());
-                    businessOrderDTO.setHouseName(houseDistribution.getInfo());
-                } else {
-                    businessOrderDTO.setHouseName(house == null ? "" : house.getHouseName());
-                }
-                businessOrderDTO.setHouseName(businessOrderDTO.getHouseName() + info);
-                List<OrderDTO> orderDTOList = this.orderDTOList(businessOrder.getNumber(), house == null ? "" : house.getStyle(),orderStatus);
-                if (orderDTOList.size() > 0) {
-                    BigDecimal payPrice = new BigDecimal(0);
-                    for (OrderDTO orderDTO : orderDTOList) {
-                        payPrice = payPrice.add(orderDTO.getTotalAmount());
-                    }
-                    businessOrderDTO.setPayPrice(payPrice);
-                } else {
-                    businessOrderDTO.setPayPrice(businessOrder.getPayPrice());
-                }
-                businessOrderDTO.setOrderDTOList(orderDTOList);
-                businessOrderDTO.setBusinessOrderId(businessOrder.getId());
-                businessOrderDTO.setCreateDate(businessOrder.getCreateDate());
-                businessOrderDTO.setNumber(businessOrder.getNumber());
-                businessOrderDTO.setType(businessOrder.getType());
-                businessOrderDTO.setState(businessOrder.getState());
-                businessOrderDTOS.add(businessOrderDTO);
+            if (StringUtils.isEmpty(member.getId())) {
+                return ServerResponse.createByErrorMessage("用户ID不能为空!");
             }
-            pageResult.setList(businessOrderDTOS);
-            return ServerResponse.createBySuccess("查询成功", pageResult);
+            if (StringUtils.isEmpty(cityId)) {
+                return ServerResponse.createByErrorMessage("城市ID不能为空!");
+            }
+            List<Map<String,Object>> mapArrayList=new ArrayList<Map<String,Object>>();
+
+            List<Order> list = orderMapper.selectDeliverOrderByHouse(cityId,houseId,orderStatus);
+            for(Order order:list)
+            {
+                Map<String, Object> resMap = BeanUtils.beanToMap(order);
+                String businessOrderNumber= order.getBusinessOrderNumber();
+                List<OrderItem> OrderItemList = orderItemMapper.orderItemList(houseId,businessOrderNumber,null,null);
+                if (OrderItemList != null) {
+                    resMap.put("OrderItemSize", OrderItemList.size());
+                    resMap.put("OrderItemList", OrderItemList);
+                }
+                mapArrayList.add(resMap);
+            }
+            PageInfo pageResult = new PageInfo(mapArrayList);
+            return ServerResponse.createBySuccess("查询所有订单", pageResult);
         } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("失败");
+            logger.error("查询所有订单异常", e);
+            return ServerResponse.createByErrorMessage("查询所有订单异常" + e);
         }
+
     }
 
     /**

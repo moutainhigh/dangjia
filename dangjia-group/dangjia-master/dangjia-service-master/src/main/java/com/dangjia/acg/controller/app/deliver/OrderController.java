@@ -46,8 +46,8 @@ public class OrderController implements OrderAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryBusinessOrderListByStatus(PageDTO pageDTO, String userToken, String houseId, String queryId, String orderStatus) {
-        return orderService.queryBusinessOrderListByStatus(pageDTO,userToken,houseId,queryId,orderStatus);
+    public ServerResponse queryDeliverOrderListByStatus(PageDTO pageDTO, String userToken, String houseId, String cityId, String orderStatus) {
+        return orderService.queryDeliverOrderListByStatus(pageDTO,userToken,houseId,cityId,orderStatus);
     }
 
     /**

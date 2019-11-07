@@ -105,10 +105,10 @@ public class DjDeliverOrder extends BaseEntity {
     @ApiModelProperty("城市ID")
     private String cityId;//城市ID
 
-    @Column(name = "total_order_price")
-    @Desc(value = "订单总价钱")
-    @ApiModelProperty("订单总价钱")
-    private BigDecimal totalOrderPrice;//订单总价钱
+//    @Column(name = "total_order_price")
+//    @Desc(value = "订单总价钱")
+//    @ApiModelProperty("订单总价钱")
+//    private BigDecimal totalOrderPrice;//订单总价钱
 
     @Column(name = "total_discount_price")
     @Desc(value = "优惠总价钱")

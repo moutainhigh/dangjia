@@ -918,6 +918,7 @@ public class ComplainService {
                 hfa.setSupervisorCheck(1);//大管家审核状态0未审核，1审核通过，2审核不通过
                 hfa.setPayState(1);//是否付款
                 hfa.setApplyDec("提前结束装修");//描述
+                hfa.setIsReadType(0);
                 houseFlowApplyMapper.insert(hfa);
                 houseService.insertConstructionRecord(hfa);
             }
@@ -972,6 +973,7 @@ public class ComplainService {
             hfa.setSupervisorCheck(1);//大管家审核状态0未审核，1审核通过，2审核不通过
             hfa.setPayState(1);//是否付款
             hfa.setApplyDec(content);//描述
+            hfa.setIsReadType(0);
             houseFlowApplyMapper.insert(hfa);
             houseService.insertConstructionRecord(hfa);
         }

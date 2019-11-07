@@ -10,6 +10,7 @@ import lombok.experimental.FieldNameConstants;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -108,10 +109,10 @@ public class Order extends BaseEntity {
 	@ApiModelProperty("城市ID")
 	private String cityId;//城市ID
 
-	@Column(name = "total_order_price")
-	@Desc(value = "订单总价钱")
-	@ApiModelProperty("订单总价钱")
-	private BigDecimal totalOrderPrice;//订单总价钱
+//	@Column(name = "total_order_price")
+//	@Desc(value = "订单总价钱")
+//	@ApiModelProperty("订单总价钱")
+//	private BigDecimal totalOrderPrice;//订单总价钱
 
 	@Column(name = "total_discount_price")
 	@Desc(value = "优惠总价钱")
@@ -179,5 +180,9 @@ public class Order extends BaseEntity {
 	@Desc(value = "修改人")
 	@ApiModelProperty("修改人")
 	private String updateBy;//修改人
+
+	//业主
+	@Transient
+	private String storefrontName;
 
 }
