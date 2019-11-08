@@ -31,6 +31,7 @@
         <result property="productName" column="productName"/>
         <result property="goodsId" column="goodsId"/>
         <result property="goodsName" column="goodsName"/>
+        <result property="isCalculatedArea" column="isCalculatedArea"/>
     </resultMap>
 
     <!-- 查询设计精算阶段的配置模板 -->
@@ -55,7 +56,8 @@
           t1.product_id productId,
           t3.name productName,
           t1.goods_id goodsId,
-          t2.`name` goodsName
+          t2.`name` goodsName,
+          t1.is_calculated_area isCalculatedArea
         FROM
             dj_actuarial_product_config t1,
             dj_basics_goods t2,
