@@ -32,6 +32,8 @@
         <result property="goodsId" column="goodsId"/>
         <result property="goodsName" column="goodsName"/>
         <result property="isCalculatedArea" column="isCalculatedArea"/>
+        <result property="categoryId" column="categoryId"/>
+        <result property="categoryName" column="categoryName"/>
     </resultMap>
 
     <!-- 查询设计精算阶段的配置模板 -->
@@ -51,20 +53,25 @@
     </select>
 
     <select id="selectProductList" resultMap="actuarialProductMap">
+
         SELECT
             t1.id,
           t1.product_id productId,
           t3.name productName,
           t1.goods_id goodsId,
           t2.`name` goodsName,
-          t1.is_calculated_area isCalculatedArea
+          t1.is_calculated_area isCalculatedArea,
+          t4.id categoryId,
+          t4.name categoryName
         FROM
             dj_actuarial_product_config t1,
             dj_basics_goods t2,
-            dj_basics_product_template t3
+            dj_basics_product_template t3,
+            dj_basics_goods_category t4
         WHERE
             t1.goods_id = t2.id
         AND t1.product_id = t3.id
+        and t3.category_id=t4.id
         and t1.actuarial_template_id=#{actuarialTemplateId}
     </select>
 
