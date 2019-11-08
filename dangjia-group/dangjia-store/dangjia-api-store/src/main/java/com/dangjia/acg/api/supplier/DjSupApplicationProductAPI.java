@@ -3,6 +3,7 @@ package com.dangjia.acg.api.supplier;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.delivery.SupplyDimensionDTO;
+import com.dangjia.acg.modle.supplier.DjSupApplicationProduct;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -96,5 +97,9 @@ public interface DjSupApplicationProductAPI {
     ServerResponse supplierList(@RequestParam("cityId") String cityId,
                                 @RequestParam("productId") String productId);
 
-
+    @PostMapping("/supplier/djSupApplicationProduct/getDjSupApplicationProduct")
+    @ApiOperation(value = "查询供应商商品", notes = "查询供应商商品")
+    DjSupApplicationProduct getDjSupApplicationProduct(@RequestParam("cityId") String cityId,
+                                                       @RequestParam("supplierId") String supplierId,
+                                                       @RequestParam("productId") String productId);
 }
