@@ -8,6 +8,7 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.delivery.SupplyDimensionDTO;
 import com.dangjia.acg.dto.sup.SupplierDTO;
@@ -70,6 +71,11 @@ public class DjSupApplicationProductService {
      */
     public ServerResponse insertDjSupApplicationProduct(String jsonStr, String cityId, String supId, String shopId) {
         try {
+            DjSupplier djSupplier = djSupplierMapper.selectByPrimaryKey(shopId);
+            if(null==djSupplier)
+                return ServerResponse.createBySuccessMessage("供应商不存在");
+            if(null==djSupplier.getRetentionMoney()||!(djSupplier.getRetentionMoney()>0))
+                return ServerResponse.createBySuccessMessage("请先交纳滞留金");
             JSONArray jsonArr = JSONArray.parseArray(jsonStr);
             jsonArr.forEach(str -> {
                 JSONObject obj = (JSONObject) str;
