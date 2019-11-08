@@ -288,7 +288,7 @@ public class OrderSplitService {
      * 发送供应商
      * 分发不同供应商
      */
-    public ServerResponse sentSupplier(String orderSplitId, String splitItemList,String installName,
+    public ServerResponse sentSupplier(String orderSplitId, String splitItemList,String cityId,String userId,String installName,
                                        String installMobile, String deliveryName, String deliveryMobile) {
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
@@ -321,6 +321,11 @@ public class OrderSplitService {
                         splitDeliver.setInstallName(installName);//安装人姓名
                     }
                 } else {
+                    Storefront storefront= basicsStorefrontAPI.queryStorefrontByUserID(userId,cityId);
+                    if(storefront==null)
+                    {
+                        return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
+                    }
                     example = new Example(SplitDeliver.class);
                     splitDeliver = new SplitDeliver();
                     splitDeliver.setNumber(orderSplit.getNumber() + "00" + splitDeliverMapper.selectCountByExample(example));//发货单号
@@ -340,6 +345,8 @@ public class OrderSplitService {
                     splitDeliver.setSupState(0);
                     splitDeliver.setShippingState(0);//待发货状态
                     splitDeliver.setApplyState(null);
+                    splitDeliver.setCityId(cityId);//城市id
+                    splitDeliver.setStorefrontId(storefront.getId());//店铺id
                     //判断是非平台供应商
 
                     if(djSupplier.getIsNonPlatformSupperlier()!=null)

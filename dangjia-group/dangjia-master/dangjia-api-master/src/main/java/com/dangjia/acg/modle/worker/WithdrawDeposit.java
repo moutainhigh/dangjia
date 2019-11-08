@@ -60,14 +60,14 @@ public class WithdrawDeposit extends BaseEntity {
     @Column(name = "role_type")
     @Desc(value = "来源类型")
     @ApiModelProperty("来源类型")
-    private Integer roleType;//roleType   1：业主端  2 大管家 3：工匠端
+    private Integer roleType;//roleType   1：业主端  2 大管家 3：工匠端 4：供应商 5：店铺
     @Column(name = "state")
     @Desc(value = "0未处理,1同意 2不同意(驳回)")
     @ApiModelProperty("0未处理,1同意 2不同意(驳回)")
     private Integer state;//
     @Column(name = "worker_id")
-    @Desc(value = "工人id")
-    @ApiModelProperty("工人id")
+    @Desc(value = "持卡人id")
+    @ApiModelProperty("持卡人id")
     private String workerId;//workerid
 
 }
