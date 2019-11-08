@@ -45,6 +45,12 @@ public class DjSupApplicationProductController implements DjSupApplicationProduc
 
     @Override
     @ApiMethod
+    public void setCommodityPricing() {
+        djSupApplicationProductService.setCommodityPricing();
+    }
+
+    @Override
+    @ApiMethod
     public ServerResponse supplierList(String cityId, String productId) {
         return djSupApplicationProductService.supplierList(cityId,productId);
     }

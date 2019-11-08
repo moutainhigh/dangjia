@@ -2,6 +2,7 @@ package com.dangjia.acg.timer;
 
 import com.dangjia.acg.api.config.ConfigMessageAPI;
 import com.dangjia.acg.api.sale.rob.RobAPI;
+import com.dangjia.acg.api.supplier.DjSupApplicationProductAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.clue.ClueTalkDTO;
@@ -30,6 +31,8 @@ public class ClueTalkTask {
     private RobAPI robAPI;
     @Autowired
     private ConfigMessageAPI configMessageAPI;
+    @Autowired
+    private DjSupApplicationProductAPI djSupApplicationProductAPI;
 
     private Logger log = LoggerFactory.getLogger(ClueTalkTask.class);
     private final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -57,6 +60,10 @@ public class ClueTalkTask {
         log.info(format.format(new Date()) + "开始执行销售抢单计时任务...");
         robAPI.notEnteredGrabSheet();
         log.info(format.format(new Date()) + "结束执行销售抢单计时任务...");
+
+        log.info(format.format(new Date()) + "开始执行定时调价任务...");
+        djSupApplicationProductAPI.setCommodityPricing();
+        log.info(format.format(new Date()) + "结束执行定时调价任务...");
     }
 
 

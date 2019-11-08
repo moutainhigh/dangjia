@@ -76,7 +76,7 @@
 
     <!--更新单位-->
     <update id="updateWorkerGoodsByUnitId" parameterType="java.lang.String">
-        update dj_basics_product
+        update dj_basics_product_template
         set unit_name=#{unitName}
         where unit_id=#{unitId}
     </update>

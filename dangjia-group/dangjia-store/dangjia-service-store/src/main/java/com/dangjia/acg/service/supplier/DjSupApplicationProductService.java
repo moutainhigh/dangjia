@@ -362,6 +362,15 @@ public class DjSupApplicationProductService {
         }
     }
 
+
+    /**
+     * 商品调价定时任务
+     * @return
+     */
+    public void setCommodityPricing() {
+        djSupApplicationProductMapper.setCommodityPricing();
+    }
+
     /**
      * 发货任务-新版查询供应商
      * @param cityId

@@ -84,6 +84,12 @@ public interface DjSupApplicationProductAPI {
     ServerResponse updateReapply(@RequestParam("request") HttpServletRequest request,
                                  @RequestParam("jsonStr") String jsonStr);
 
+    @PostMapping("/supplier/djSupApplicationProduct/setCommodityPricing")
+    @ApiOperation(value = "商品调价定时任务", notes = "商品调价定时任务")
+    void setCommodityPricing();
+
+
+
 
     @PostMapping("/supplier/djSupApplicationProduct/supplierList")
     @ApiOperation(value = "查询供应商", notes = "查询供应商")
