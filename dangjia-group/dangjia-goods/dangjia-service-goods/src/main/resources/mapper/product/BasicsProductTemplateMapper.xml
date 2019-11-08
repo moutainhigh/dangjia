@@ -46,7 +46,8 @@
         considerations,
         calculate_content calculateContent,
         build_content buildContent,
-        is_agency_purchase isAgencyPurchase
+        is_agency_purchase isAgencyPurchase,
+        is_relateion_product isRelateionProduct
     </sql>
 
     <!-- 查询当前添加商品的属性值是否已被用(存在相关属性值的商品) -->
@@ -90,7 +91,8 @@
         p.considerations,
         p.calculate_content calculateContent,
         p.build_content buildContent,
-        p.is_agency_purchase isAgencyPurchase
+        p.is_agency_purchase isAgencyPurchase,
+        p.is_relateion_product isRelateionProduct
         from dj_basics_product_template p
         where p.data_status = 0
         and type=1 and maket=1
@@ -236,6 +238,7 @@
         bpt.calculate_content calculateContent,
         bpt.build_content buildContent,
         bpt.is_agency_purchase isAgencyPurchase,
+        bpt.is_relateion_product isRelateionProduct,
         dbg.NAME AS goodsName,
         IFNULL(dsap.sell_price,bpt.price) sellPrice,
         IFNULL(dsap.supplied_num,0) AS suppliedNum,
