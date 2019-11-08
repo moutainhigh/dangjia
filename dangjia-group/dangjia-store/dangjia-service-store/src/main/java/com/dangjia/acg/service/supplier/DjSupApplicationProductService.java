@@ -400,4 +400,27 @@ public class DjSupApplicationProductService {
             return ServerResponse.createByErrorMessage("新版查询供应商异常");
         }
     }
+
+    /**
+     * 查询供应商商品
+     * @param cityId
+     * @param supplierId
+     * @param productId
+     * @return
+     */
+    public DjSupApplicationProduct getDjSupApplicationProduct(String cityId, String supplierId, String productId) {
+        try {
+            Example example = new Example(DjSupApplicationProduct.class);
+            example.createCriteria().andEqualTo(DjSupApplicationProduct.SUP_ID, supplierId).andEqualTo(DjSupApplicationProduct.PRODUCT_ID, productId);
+            List<DjSupApplicationProduct> list = djSupApplicationProductMapper.selectByExample(example);
+            if (list == null) {
+                return null;
+            }
+            return list.get(0);
+        } catch (Exception e) {
+            logger.info("查询异常", e);
+            return null;
+        }
+
+    }
 }

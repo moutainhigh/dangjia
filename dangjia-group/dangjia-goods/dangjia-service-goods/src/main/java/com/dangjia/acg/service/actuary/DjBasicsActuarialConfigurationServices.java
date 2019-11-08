@@ -136,6 +136,7 @@ public class DjBasicsActuarialConfigurationServices {
             actuarialProductConfig.setUpdateBy(userId);
             actuarialProductConfig.setModifyDate(new Date());
             actuarialProductConfig.setCityId(cityId);
+            actuarialProductConfig.setIsCalculatedArea(actuarialProductDTO.getIsCalculatedArea());
             //判断是添加还是更新
             if(StringUtils.isNotBlank(productId)){
                 actuarialProductConfig.setCreateBy(userId);

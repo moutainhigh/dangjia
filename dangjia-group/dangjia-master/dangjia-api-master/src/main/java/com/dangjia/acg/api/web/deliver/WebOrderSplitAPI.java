@@ -43,6 +43,8 @@ public interface WebOrderSplitAPI {
     ServerResponse sentSupplier(
             @RequestParam("orderSplitId") String orderSplitId,
             @RequestParam("splitItemList") String splitItemList,
+            @RequestParam("cityId") String cityId,
+            @RequestParam("userId") String userId,
             @RequestParam("installName") String installName,
             @RequestParam("installMobile") String installMobile,
             @RequestParam("deliveryName") String deliberyName,

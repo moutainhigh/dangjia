@@ -63,5 +63,10 @@ public class DjActuarialProductConfig extends GoodsBaseEntity {
     @ApiModelProperty("修改人")
     private String updateBy;
 
+    @Column(name = "is_calculated_area")
+    @Desc(value = "否按面积计算参考价格(1是，0否)")
+    @ApiModelProperty("否按面积计算参考价格(1是，0否)")
+    private String isCalculatedArea;
+
 
 }
