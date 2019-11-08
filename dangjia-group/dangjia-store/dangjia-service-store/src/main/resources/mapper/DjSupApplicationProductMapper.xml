@@ -2,6 +2,14 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.dangjia.acg.mapper.supplier.DjSupApplicationProductMapper">
 
+    <update id="setCommodityPricing">
+        UPDATE dj_adjust_record ar
+        INNER JOIN dj_sup_application_product sap ON ar.application_product_id = sap.id
+        SET sap.price = ar.adjust_price
+        WHERE
+            DATE_FORMAT(SYSDATE(), '%Y-%m-%d') = date_format(ar.adjust_time, '%Y-%m-%d');
+    </update>
+
 
     <select id="querySupplierProduct" resultType="com.dangjia.acg.modle.supplier.DjSupApplicationProduct">
 		select

@@ -23,6 +23,7 @@ import com.dangjia.acg.mapper.basics.IUnitMapper;
 import com.dangjia.acg.mapper.product.DjBasicsGoodsMapper;
 import com.dangjia.acg.mapper.product.IBasicsGoodsMapper;
 import com.dangjia.acg.mapper.product.IBasicsProductTemplateMapper;
+import com.dangjia.acg.mapper.storefront.IGoodsStorefrontProductMapper;
 import com.dangjia.acg.mapper.sup.ISupplierMapper;
 import com.dangjia.acg.mapper.sup.ISupplierProductMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
@@ -32,6 +33,7 @@ import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
+import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
 import com.dangjia.acg.service.actuary.BudgetWorkerService;
@@ -86,6 +88,8 @@ public class ForMasterService {
     private IBasicsGoodsMapper iBasicsGoodsMapper;
     @Autowired
     private BudgetWorkerService budgetWorkerService;
+    @Autowired
+    private IGoodsStorefrontProductMapper iGoodsStorefrontProductMapper;
 
     public String getUnitName(String unitId){
         Unit unit = unitMapper.selectByPrimaryKey(unitId);
@@ -391,8 +395,13 @@ public class ForMasterService {
                     JSONObject productObj=productList.getJSONObject(j);
                     JSONObject jsonObject = new JSONObject();
                     String goodsId = productObj.getString("goodsId");//货品Id
+                    String productId=productObj.getString("productId");
                     BasicsGoods basicsGoods=iBasicsGoodsMapper.selectByPrimaryKey(goodsId);
                     jsonObject.put("productId",productObj.getString("productTemplateId"));//商品模板ID
+                    StorefrontProduct storefrontProduct= iGoodsStorefrontProductMapper.selectByPrimaryKey(productId);
+                    if(storefrontProduct!=null&&StringUtils.isNotBlank(storefrontProduct.getProdTemplateId())){
+                        jsonObject.put("productId",storefrontProduct.getProdTemplateId());//商品模板ID
+                    }
                     jsonObject.put("goodsId",goodsId);
                     jsonObject.put("productType",basicsGoods.getType());//0:材料；1：包工包料；2:人工
                     jsonObject.put("groupType","");

@@ -17,5 +17,7 @@ package com.dangjia.acg.mapper.supplier;
 @Repository
 public interface DjSupApplicationProductMapper extends Mapper<DjSupApplicationProduct> {
 
+        int setCommodityPricing();
+
        List<DjSupApplicationProduct> querySupplierProduct(@Param("supId") String supId, @Param("productId") String productId);
 }

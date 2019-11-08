@@ -126,14 +126,14 @@
     <!-- 删除对象 -->
     <delete id="deleteById" parameterType="java.lang.String">
         DELETE
-        FROM dj_basics_product
+        FROM dj_basics_product_template
         WHERE id = #{id}
     </delete>
     <!-- 查询所有 -->
     <select id="query" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.basics.Product">
         SELECT
         <include refid="new_columns"/>
-        FROM dj_basics_product where 1=1
+        FROM dj_basics_product_template where 1=1
         <if test="category_id!=null and category_id!=''">
             and category_id=#{category_id}
         </if>
@@ -146,7 +146,7 @@
     <select id="queryByGoodsId" resultType="com.dangjia.acg.modle.basics.Product">
         SELECT
         <include refid="new_columns"/>
-        FROM dj_basics_product
+        FROM dj_basics_product_template
         where goods_id=#{goodsId} and city_id = #{cityId}
         ORDER BY istop DESC,create_date desc
     </select>
@@ -154,7 +154,7 @@
     <select id="getById" resultType="com.dangjia.acg.modle.basics.Product">
         SELECT
         <include refid="new_columns"/>
-        FROM dj_basics_product
+        FROM dj_basics_product_template
         where id=#{id}
         ORDER BY istop DESC,create_date desc
     </select>
@@ -163,7 +163,7 @@
     <select id="queryByLabelId" resultType="com.dangjia.acg.modle.basics.Product">
         SELECT
         <include refid="new_columns"/>
-        FROM dj_basics_product
+        FROM dj_basics_product_template
         where label_id=#{labelId}
         ORDER BY istop DESC,create_date desc
     </select>
@@ -172,7 +172,7 @@
     <select id="queryPOByLabelId" resultMap="productPOMap">
         SELECT
         <include refid="new_columns"/>
-        FROM dj_basics_product
+        FROM dj_basics_product_template
         where label_id=#{labelId}
         ORDER BY istop DESC,create_date desc
     </select>
@@ -181,7 +181,7 @@
     <select id="queryByName" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.basics.Product">
         SELECT
         <include refid="new_columns"/>
-        FROM dj_basics_product
+        FROM dj_basics_product_template
         where data_status = 0
         <if test="name!=null and name!=''">
             and
@@ -194,7 +194,7 @@
     <select id="queryByProductSn" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.basics.Product">
         SELECT
         <include refid="new_columns"/>
-        FROM dj_basics_product
+        FROM dj_basics_product_template
         where data_status = 0
         <if test="productSn!=null and productSn!=''">
             and
@@ -207,7 +207,7 @@
     <select id="queryByLikeName" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.basics.Product">
         SELECT
         <include refid="new_columns"/>
-        FROM dj_basics_product
+        FROM dj_basics_product_template
         where data_status = 0
         <if test="name!=null and name!=''">
             and (
@@ -245,7 +245,7 @@
         p.convert_quality as convertQuality,
         p.create_date as createDate,
         p.modify_date as modifyDate
-        from dj_basics_product p
+        from dj_basics_product_template p
         where
         type=1 and maket=1
         <if test="goodsId!=null and goodsId!=''">
@@ -298,7 +298,7 @@
         p.attribute_id_arr AS attributeIdArr,
         p.value_name_arr AS valueNameArr,
         p.value_id_arr AS valueIdArr
-        from dj_basics_product p
+        from dj_basics_product_template p
         where
         type=1 and maket=1 and city_id = #{cityId}
         <if test="attributeIdArr!=null and attributeIdArr!=''">
@@ -330,7 +330,7 @@
         p.attribute_id_arr AS attributeIdArr,
         p.value_name_arr AS valueNameArr,
         p.value_id_arr AS valueIdArr
-        from dj_basics_product p
+        from dj_basics_product_template p
         where
         type=1 and maket=1 and city_id = #{cityId}
         and isnull(p.brand_id)
@@ -360,7 +360,7 @@
         p.attribute_id_arr AS attributeIdArr,
         p.value_name_arr AS valueNameArr,
         p.value_id_arr AS valueIdArr
-        from dj_basics_product p
+        from dj_basics_product_template p
         where
         type=1 and maket=1
         <if test="goodsId!=null and goodsId!=''">
@@ -392,7 +392,7 @@
         p.attribute_id_arr AS attributeIdArr,
         p.value_name_arr AS valueNameArr,
         p.value_id_arr AS valueIdArr
-        from dj_basics_product p
+        from dj_basics_product_template p
         where
         type=1 and maket=1 and city_id = #{cityId}
         and isnull(p.attribute_id_arr)
@@ -426,7 +426,7 @@
         p.attribute_id_arr AS attributeIdArr,
         p.value_name_arr AS valueNameArr,
         p.value_id_arr AS valueIdArr
-        from dj_basics_product p
+        from dj_basics_product_template p
         where
         type=1 and maket=1 and city_id = #{cityId}
         <if test="brandId!=null and brandId!=''">
@@ -460,7 +460,7 @@
         p.attribute_id_arr AS attributeIdArr,
         p.value_name_arr AS valueNameArr,
         p.value_id_arr AS valueIdArr
-        from dj_basics_product p
+        from dj_basics_product_template p
         where
         type=1 and maket=1
         and p.goods_id=#{goodsId}
@@ -489,7 +489,7 @@
         p.attribute_id_arr AS attributeIdArr,
         p.value_name_arr AS valueNameArr,
         p.value_id_arr AS valueIdArr
-        from dj_basics_product p
+        from dj_basics_product_template p
         where
         type=1 and maket=1
         and p.goods_id=#{goodsId}
@@ -529,7 +529,7 @@
         p.convert_quality AS convertQuality,
         p.create_date AS createDate,
         p.modify_date AS modifyDate
-        from dj_actuary_budget_material abm ,dj_basics_product p
+        from dj_actuary_budget_material abm ,dj_basics_product_template p
         WHERE abm.product_id =p.id
         and abm.delete_state!=1
         and abm.steta=1
@@ -576,7 +576,7 @@
         p.create_date AS createDate,
         p.modify_date AS modifyDate
         FROM
-        dj_basics_product p
+        dj_basics_product_template p
         INNER JOIN dj_basics_goods g ON p.goods_id = g.id
         INNER JOIN dj_basics_goods_category ca ON ca.id = p.category_id
         <if test="name!=null and name!=''">
@@ -624,7 +624,7 @@
     <select id="getSwitchProduct" resultType="com.dangjia.acg.modle.basics.Product">
         select
         <include refid="new_columns"/>
-        from dj_basics_product p
+        from dj_basics_product_template p
         where
         type=1 and maket=1
         and p.brand_series_id=#{brandSeriesId}
@@ -646,7 +646,7 @@
         bp.convert_unit AS convertUnit
         FROM
         dj_basics_goods bg
-        INNER JOIN dj_basics_product bp ON bp.goods_id = bg.id
+        INNER JOIN dj_basics_product_template bp ON bp.goods_id = bg.id
 
 
         WHERE
@@ -669,7 +669,7 @@
             resultType="com.dangjia.acg.modle.basics.Product">
         SELECT
         <include refid="all_columns"/>
-        FROM dj_basics_product
+        FROM dj_basics_product_template
         WHERE 1 = 1
         AND goods_id = 'HP0261'
         AND brand_id = 'PP027'
@@ -678,7 +678,7 @@
 
     <!--更新货品属性-->
     <update id="updateProductValueId" parameterType="java.lang.String">
-        UPDATE `dj_basics_product` p
+        UPDATE `dj_basics_product_template` p
         SET p.value_name_arr =
           ( SELECT GROUP_CONCAT( v.NAME ) FROM dj_basics_attribute_value v WHERE FIND_IN_SET( v.id, p.value_id_arr ) )
         WHERE
