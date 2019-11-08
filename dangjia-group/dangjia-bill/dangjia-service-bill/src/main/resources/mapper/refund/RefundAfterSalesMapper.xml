@@ -71,7 +71,7 @@
         FROM
             dj_deliver_order_item t,
             dj_basics_storefront_product t1,
-            dj_deliver_order t2,
+            dj_deliver_order t2
         WHERE t.product_id =t1.id
         and t.order_id =  #{orderId}
         AND t.shop_count > (IFNULL(t.ask_count, 0)+IFNULL(t.return_count,0))
