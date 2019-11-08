@@ -71,11 +71,12 @@ public class WebOrderSplitController implements WebOrderSplitAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse sentSupplier(String orderSplitId, String splitItemList, String installName
+    public ServerResponse sentSupplier(String orderSplitId, String splitItemList,
+                                       String cityId,String userId,String installName
             , String installMobile
             , String deliveryName
             , String deliveryMobile) {
-        return orderSplitService.sentSupplier(orderSplitId, splitItemList, installName, installMobile, deliveryName, deliveryMobile);
+        return orderSplitService.sentSupplier(orderSplitId, splitItemList,cityId,userId, installName, installMobile, deliveryName, deliveryMobile);
     }
 
 
