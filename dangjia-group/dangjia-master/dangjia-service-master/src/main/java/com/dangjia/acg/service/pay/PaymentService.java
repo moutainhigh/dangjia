@@ -63,6 +63,7 @@ import com.dangjia.acg.modle.safe.WorkerTypeSafe;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.worker.Insurance;
+import com.dangjia.acg.service.account.MasterAccountFlowRecordService;
 import com.dangjia.acg.service.acquisition.MasterCostAcquisitionService;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
@@ -105,6 +106,9 @@ public class PaymentService {
     private IWorkerTypeSafeMapper workerTypeSafeMapper;
     @Autowired
     private IWorkerTypeSafeOrderMapper workerTypeSafeOrderMapper;
+
+    @Autowired
+    private MasterAccountFlowRecordService masterAccountFlowRecordService;
 
 
     @Autowired
@@ -652,6 +656,12 @@ public class PaymentService {
         order.setPayment(payState);// 支付方式
 
         orderMapper.updateByPrimaryKeySelective(order);
+        /**
+         * 订单钱存入店铺账号余额，记录对应的流水信息
+         */
+        if(!CommonUtil.isEmpty(order.getStorefontId())) {
+            masterAccountFlowRecordService.updateStoreAccountMoney(order.getStorefontId(),order.getHouseId(),0,order.getId(),order.getTotalAmount().doubleValue(),order.getWorkerTypeName(),"SYSTEM");
+        }
     }
 
     /**
