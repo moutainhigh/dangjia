@@ -386,7 +386,7 @@ SELECT
             abw.worker_goods_id AS workerGoodsId,
             abw.worker_goods_sn AS workerGoodsSn
         from dj_basics_goods_category bgc
-        INNER JOIN dj_basics_product bp on bgc.id = bp.category_id
+        INNER JOIN dj_basics_product_template bp on bgc.id = bp.category_id
         INNER JOIN dj_actuary_budget_worker abw on bp.id = abw.worker_goods_id
         INNER JOIN dj_basics_goods bg on bg.id = bp.goods_id
         where abw.data_status = 0 and abw.house_id = #{houseId} and bgc.id = #{id}
