@@ -7,6 +7,7 @@ import com.dangjia.acg.api.supplier.DjSupplierAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 
 import com.dangjia.acg.common.response.ServerResponse;
@@ -340,7 +341,15 @@ public class StorefrontService {
      */
     public ServerResponse queryStorefrontWallet(HttpServletRequest request, PageDTO pageDTO, String searchKey, String userId, String cityId) {
         try {
-            return null;
+            Example exampleStorefront=new Example(Storefront.class);
+            exampleStorefront.createCriteria().andEqualTo(Storefront.USER_ID,userId).andEqualTo(Storefront.CITY_ID, cityId);
+            List<Storefront> list =istorefrontMapper.selectByExample(exampleStorefront);
+            if(list==null)
+            {
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            }
+            //可体现余额(七天之内支付到款的订单)需要重新计算
+            return ServerResponse.createBySuccess(list);
         } catch (Exception e) {
             logger.error("店铺-我的钱包异常：", e);
             return ServerResponse.createByErrorMessage("店铺-我的钱包异常");

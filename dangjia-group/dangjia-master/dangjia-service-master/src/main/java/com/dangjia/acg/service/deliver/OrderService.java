@@ -1004,4 +1004,20 @@ public class OrderService {
         }
     }
 
+    /**
+     * 店铺收支记录
+     * @param userToken
+     * @param cityId
+     * @return
+     */
+    public ServerResponse queryStorefrontIncomeRecords(String userToken, String cityId) {
+        try {
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询店铺收支记录");
+        }
+
+    }
+
 }

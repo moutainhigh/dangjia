@@ -3,6 +3,7 @@ package com.dangjia.acg.service.supplier;
 import cn.jiguang.common.utils.StringUtils;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.api.BasicsStorefrontAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
@@ -13,6 +14,7 @@ import com.dangjia.acg.dto.sup.SupplierDTO;
 import com.dangjia.acg.dto.supplier.DjSupSupplierProductDTO;
 import com.dangjia.acg.dto.supplier.DjSupplierDTO;
 import com.dangjia.acg.mapper.supplier.*;
+import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.supplier.DjAdjustRecord;
 import com.dangjia.acg.modle.supplier.DjSupApplicationProduct;
 import com.dangjia.acg.modle.supplier.DjSupplier;
@@ -56,6 +58,9 @@ public class DjSupApplicationProductService {
 
     @Autowired
     private DjSupplierMapper djSupplierMapper;
+
+    @Autowired
+    private BasicsStorefrontAPI basicsStorefrontAPI;
 
     /**
      * 供应商申请供应商品
@@ -377,9 +382,15 @@ public class DjSupApplicationProductService {
      * @param productId
      * @return
      */
-    public ServerResponse supplierList(String cityId, String productId) {
+    public ServerResponse supplierList(String cityId, String userId,String productId) {
         try {
-             List<DjSupApplicationProduct> djSupApplicationProductList = djSupApplicationProductMapper.querySupplierProduct(null, productId);
+            Storefront storefront= basicsStorefrontAPI.queryStorefrontByUserID(userId,cityId);
+            if(storefront==null)
+            {
+                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
+            }
+
+             List<DjSupApplicationProduct> djSupApplicationProductList = djSupApplicationProductMapper.querySupplierProduct(storefront.getId(), productId);
             if (djSupApplicationProductList.size() <= 0) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
