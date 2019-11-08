@@ -3,10 +3,9 @@ package com.dangjia.acg.service.deliver;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.BasicsStorefrontAPI;
-import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.data.ForMasterAPI;
+import com.dangjia.acg.api.supplier.DjSupApplicationProductAPI;
 import com.dangjia.acg.api.supplier.DjSupplierAPI;
-import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
@@ -19,7 +18,6 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.deliver.DeliverHouseDTO;
 import com.dangjia.acg.dto.deliver.OrderSplitItemDTO;
 import com.dangjia.acg.dto.deliver.SplitDeliverDetailDTO;
-import com.dangjia.acg.dto.storefront.StorefrontDTO;
 import com.dangjia.acg.mapper.complain.IComplainMapper;
 import com.dangjia.acg.mapper.delivery.IOrderSplitItemMapper;
 import com.dangjia.acg.mapper.delivery.IOrderSplitMapper;
@@ -40,6 +38,7 @@ import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
+import com.dangjia.acg.modle.supplier.DjSupApplicationProduct;
 import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.github.pagehelper.PageHelper;
@@ -94,8 +93,9 @@ public class OrderSplitService {
     @Autowired
     private BasicsStorefrontAPI basicsStorefrontAPI;
 
+
     @Autowired
-    private RedisClient redisClient;
+    private DjSupApplicationProductAPI djSupApplicationProductAPI;
     /**
      * 修改 供应商结算状态
      * id 供应商结算id
@@ -341,20 +341,24 @@ public class OrderSplitService {
                     splitDeliver.setShippingState(0);//待发货状态
                     splitDeliver.setApplyState(null);
                     //判断是非平台供应商
-                    if(djSupplier.getIsNonPlatformSupperlier()==1)
+
+                    if(djSupplier.getIsNonPlatformSupperlier()!=null)
                     {
-                        splitDeliver.setDeliveryName(deliveryName);//送货人姓名
-                        splitDeliver.setDeliveryMobile(deliveryMobile);//送货人号码
+                        if(djSupplier.getIsNonPlatformSupperlier()==1)
+                        {
+                            splitDeliver.setDeliveryName(deliveryName);//送货人姓名
+                            splitDeliver.setDeliveryMobile(deliveryMobile);//送货人号码
+                        }
                     }
                     splitDeliverMapper.insert(splitDeliver);
                 }
 
-                SupplierProduct supplierProduct = forMasterAPI.getSupplierProduct(house.getCityId(), supplierId, orderSplitItem.getProductId());
-                orderSplitItem.setSupCost(supplierProduct.getPrice());//供应价
+                DjSupApplicationProduct djSupApplicationProduct = djSupApplicationProductAPI.getDjSupApplicationProduct(house.getCityId(), supplierId, orderSplitItem.getProductId());
+                orderSplitItem.setSupCost(djSupApplicationProduct.getPrice());//供应价
                 orderSplitItem.setSplitDeliverId(splitDeliver.getId());
                 orderSplitItemMapper.updateByPrimaryKeySelective(orderSplitItem);
 
-                splitDeliver.setTotalAmount(supplierProduct.getPrice() * orderSplitItem.getNum() + splitDeliver.getTotalAmount());//累计供应商价总价
+                splitDeliver.setTotalAmount(djSupApplicationProduct.getPrice() * orderSplitItem.getNum() + splitDeliver.getTotalAmount());//累计供应商价总价
                 splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
 //                orderSplitItemMapper.setSupplierId(id, splitDeliver.getId());
             }
