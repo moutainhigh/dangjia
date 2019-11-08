@@ -38,6 +38,9 @@ public class WorkInFoDTO {
     //房子名称
     private String houseName;
 
+    //房子id
+    private String houseId;
+
     //房子状态
     private Integer houseType;
 

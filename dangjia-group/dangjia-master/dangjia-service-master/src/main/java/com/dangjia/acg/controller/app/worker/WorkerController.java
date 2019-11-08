@@ -81,8 +81,8 @@ public class WorkerController implements WorkerAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getMyBankCard(String userToken){
-        return  workerService.getMyBankCard(userToken);
+    public ServerResponse getMyBankCard(String userToken,String userId){
+        return  workerService.getMyBankCard(userToken,userId);
     }
     /**
      * 添加银行卡
@@ -91,8 +91,8 @@ public class WorkerController implements WorkerAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse addMyBankCard(HttpServletRequest request, String userToken,WorkerBankCard bankCard){
-        return  workerService.addMyBankCard(request,userToken,bankCard);
+    public ServerResponse addMyBankCard(HttpServletRequest request, String userToken,WorkerBankCard bankCard,String userId){
+        return  workerService.addMyBankCard(request,userToken,bankCard,userId);
     }
 
     /**
@@ -104,6 +104,16 @@ public class WorkerController implements WorkerAPI {
     @ApiMethod
     public ServerResponse delMyBankCard(HttpServletRequest request, String userToken,String workerBankCardId){
         return  workerService.delMyBankCard(request,userToken,workerBankCardId);
+    }
+
+    /**
+     * 解绑银行卡
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse untyingBankCard(HttpServletRequest request,String userId, String workerBankCardId,String payPassword){
+        return  workerService.untyingBankCard(userId,workerBankCardId,payPassword);
     }
 
     /**

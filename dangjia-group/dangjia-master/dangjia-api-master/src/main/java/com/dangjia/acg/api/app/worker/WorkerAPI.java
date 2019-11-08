@@ -47,19 +47,29 @@ public interface WorkerAPI {
 
     @PostMapping("app/worker/getMyBankCard")
     @ApiOperation(value = "我的银行卡", notes = "我的银行卡")
-    ServerResponse getMyBankCard(@RequestParam("userToken") String userToken);
+    ServerResponse getMyBankCard(@RequestParam("userToken") String userToken,
+                                 @RequestParam("userId")  String userId);
 
     @PostMapping("app/worker/addMyBankCard")
     @ApiOperation(value = "添加银行卡", notes = "添加银行卡")
     ServerResponse addMyBankCard(@RequestParam("request") HttpServletRequest request,
                                  @RequestParam("userToken") String userToken,
-                                 @RequestParam("bankCard") WorkerBankCard bankCard);
+                                 @RequestParam("bankCard") WorkerBankCard bankCard,
+                                 @RequestParam("userId")  String userId);
 
     @PostMapping("app/worker/delMyBankCard")
     @ApiOperation(value = "删除银行卡", notes = "删除银行卡")
     ServerResponse delMyBankCard(@RequestParam("request") HttpServletRequest request,
                                  @RequestParam("userToken") String userToken,
                                  @RequestParam("workerBankCardId") String workerBankCardId);
+
+    @PostMapping("app/worker/untyingBankCard")
+    @ApiOperation(value = "解绑银行卡", notes = "解绑银行卡")
+    ServerResponse untyingBankCard(@RequestParam("request") HttpServletRequest request,
+                                   @RequestParam("userId") String userId,
+                                   @RequestParam("workerBankCardId") String workerBankCardId,
+                                   @RequestParam("payPassword") String payPassword);
+
 
     @PostMapping("app/worker/getRanking")
     @ApiOperation(value = "邀请排行榜", notes = "邀请排行榜")
