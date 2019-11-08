@@ -93,7 +93,8 @@ public class DjBasicsActuarialConfigurationServices {
                         List productList=new ArrayList();
                         for(int i=0;i<actuarialTemplateConfigDTO.getProductList().size();i++){
                             Map productMap=(Map)actuarialTemplateConfigDTO.getProductList().get(i);
-                            productMap.put("prodList",getProdListByGoodsID((String)productMap.get("goodsId")));//商品列表
+                            productMap.put("prodList", iBasicsProductTemplateMapper.getProductStoreListByGoodsId((String)productMap.get("goodsId")));//商品列表
+                            productMap.put("goodsList",iBasicsGoodsMapper.getActuarialGoodsListByCategoryId((String)productMap.get("categoryId")));//商品列表
                             productList.add(productMap);
                         }
                         actuarialTemplateConfigDTO.setProductList(productList);
@@ -226,6 +227,7 @@ public class DjBasicsActuarialConfigurationServices {
         List<DjBasicsProductTemplate> mapList = iBasicsProductTemplateMapper.selectByExample(example);
         return mapList;
     }
+
 
 
     /**
