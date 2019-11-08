@@ -194,26 +194,30 @@ public class DjDeliverOrderService {
 
     /**
      * 查询我要装修首页
-     * @param houseId
+     * @param userToken
      * @return
      */
-    public ServerResponse queryOrderNumber(String userToken,String houseId){
+    public ServerResponse queryOrderNumber(String userToken){
         String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
 
-//        Object object = memberAPI.getMember(userToken);
-//        if (object instanceof ServerResponse) {
-//            return (ServerResponse) object;
-//        }
-//        JSONObject job = (JSONObject)object;
-//        Member member = job.toJavaObject(Member.class);
-//        HouseResult houseResult = new HouseResult();
-//        object = getHouse(member.getId(), houseResult);
-//        if (object instanceof ServerResponse) {
-//            return ServerResponse.createByErrorCodeResultObj(ServerCode.NO_DATA.getCode(), HouseUtil.getWorkerDatas(null, address));
-//        }
+        Object object = memberAPI.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        JSONObject job = (JSONObject)object;
+        Member member = job.toJavaObject(Member.class);
+        HouseResult houseResult = new HouseResult();
+        object = getHouse(member.getId(), houseResult);
+        if (object instanceof ServerResponse) {
+            return ServerResponse.createByErrorCodeResultObj(ServerCode.NO_DATA.getCode(), HouseUtil.getWorkerDatas(null, address));
+        }
+
+        House house = (House) object;
+        String houseId = house.getId();
 
         //订单状态 1待付款，2已付款，3待收货
         WorkInFoDTO workInFoDTO = new WorkInFoDTO();
+        workInFoDTO.setHouseId(houseId);
         Example example = new Example(Order.class);
         //待付款
         example.createCriteria().andEqualTo(Order.HOUSE_ID,houseId)
@@ -240,7 +244,7 @@ public class DjDeliverOrderService {
         workInFoDTO.setOrderMap(map);
 
 
-        House house = iBillHouseMapper.selectByPrimaryKey(houseId);
+//        House house = iBillHouseMapper.selectByPrimaryKey(houseId);
         if(house != null) {
             String houseName = house.getResidential() + house.getBuilding() + "栋" +
                     house.getUnit() + "单元" + house.getNumber() + "号";
@@ -274,7 +278,7 @@ public class DjDeliverOrderService {
             workInFoDTO.setType(wtdList.get(0).getType());
         }
 
-        //查询房子工种类型
+        //设置菜单
         example = new Example(HouseFlow.class);
         example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID,houseId)
                 .andEqualTo(HouseFlow.DATA_STATUS, 0);
@@ -391,19 +395,19 @@ public class DjDeliverOrderService {
                 List<WorkerType> workerType = iBillWorkerTypeMapper.selectByExample(example);
                 gList = new ArrayList<>();
                 listMap = new HashMap<>();
-                listMap.put("name","预计工期");
+                listMap.put("name","预计工期" );
                 if(houseFlow.getStartDate() == null){
-                    listMap.put("value",0);
+                    listMap.put("value",0 + "天");
                 }else{
-                    listMap.put("value",  DateUtil.getDiffDays(new Date(),houseFlow.getStartDate()));
+                    listMap.put("value",  DateUtil.getDiffDays(new Date(),houseFlow.getStartDate()) + "天");
                 }
                 gList.add(listMap);
                 listMap = new HashMap<>();
                 listMap.put("name","实际工期");
                 if(houseFlow.getEndDate() == null){
-                    listMap.put("value",0);
+                    listMap.put("value",0 + "天");
                 }else{
-                    listMap.put("value",  DateUtil.getDiffDays(houseFlow.getEndDate(),houseFlow.getStartDate()));
+                    listMap.put("value",  DateUtil.getDiffDays(houseFlow.getEndDate(),houseFlow.getStartDate()) + "天");
                 }
                 gList.add(listMap);
 
@@ -413,11 +417,11 @@ public class DjDeliverOrderService {
                 Long iEnd = nodeNumberDTOS.stream().filter(x -> x.getType() == 1).count();
                 listMap = new HashMap<>();
                 if(iEnd == 0){
-                    listMap.put("name","施工节点");//全部节点
+                    listMap.put("name","施工节点" );//全部节点
                     listMap.put("value",100 + "/" +100);//全部节点
                     workNodeListDTO.setHundred(100);
                 }else{
-                    listMap.put("name","施工节点");//全部节点
+                    listMap.put("name","施工节点" );//全部节点
                     listMap.put("value",iEnd + "/" +iStart);//全部节点
                     workNodeListDTO.setHundred((int)(iStart / iEnd * 100));
                 }
@@ -449,18 +453,18 @@ public class DjDeliverOrderService {
                 listMap = new HashMap<>();
                 listMap.put("name","预计工期");
                 if(houseFlow.getStartDate() == null){
-                    listMap.put("value",0);
+                    listMap.put("value",0 + "天");
                 }else{
-                    listMap.put("value",  DateUtil.getDiffDays(new Date(),houseFlow.getStartDate()));
+                    listMap.put("value",  DateUtil.getDiffDays(new Date(),houseFlow.getStartDate()) + "天");
                 }
                 gList.add(listMap);
 
                 listMap = new HashMap<>();
                 listMap.put("name","实际工期");
                 if(houseFlow.getEndDate() == null){
-                    listMap.put("value",0);
+                    listMap.put("value",0 + "天");
                 }else{
-                    listMap.put("value",  DateUtil.getDiffDays(houseFlow.getEndDate(),houseFlow.getStartDate()));
+                    listMap.put("value",  DateUtil.getDiffDays(houseFlow.getEndDate(),houseFlow.getStartDate())+ "天");
                 }
                 gList.add(listMap);
 
@@ -506,17 +510,17 @@ public class DjDeliverOrderService {
                 listMap = new HashMap<>();
                 listMap.put("name","预计工期");
                 if(houseFlow.getStartDate() == null){
-                    listMap.put("value",0);
+                    listMap.put("value",0+ "天");
                 }else{
-                    listMap.put("value",  DateUtil.getDiffDays(new Date(),houseFlow.getStartDate()));
+                    listMap.put("value",  DateUtil.getDiffDays(new Date(),houseFlow.getStartDate()) + "天");
                 }
                 gList.add(listMap);
                 listMap = new HashMap<>();
                 listMap.put("name","实际工期");
                 if(houseFlow.getEndDate() == null){
-                    listMap.put("value",0);
+                    listMap.put("value",0 + "天");
                 }else{
-                    listMap.put("value",  DateUtil.getDiffDays(houseFlow.getEndDate(),houseFlow.getStartDate()));
+                    listMap.put("value",  DateUtil.getDiffDays(houseFlow.getEndDate(),houseFlow.getStartDate()) + "天");
                 }
                 gList.add(listMap);
 
@@ -563,17 +567,17 @@ public class DjDeliverOrderService {
 
                 listMap.put("name","预计工期");
                 if(houseFlow.getStartDate() == null){
-                    listMap.put("value",0);
+                    listMap.put("value",0 + "天");
                 }else{
-                    listMap.put("value",  DateUtil.getDiffDays(new Date(),houseFlow.getStartDate()));
+                    listMap.put("value",  DateUtil.getDiffDays(new Date(),houseFlow.getStartDate()) + "天");
                 }
                 gList.add(listMap);
                 listMap = new HashMap<>();
                 listMap.put("name","实际工期");
                 if(houseFlow.getEndDate() == null){
-                    listMap.put("value",0);
+                    listMap.put("value",0 + "天");
                 }else{
-                    listMap.put("value",  DateUtil.getDiffDays(houseFlow.getEndDate(),houseFlow.getStartDate()));
+                    listMap.put("value",  DateUtil.getDiffDays(houseFlow.getEndDate(),houseFlow.getStartDate()) + "天");
                 }
                 gList.add(listMap);
 
@@ -619,17 +623,17 @@ public class DjDeliverOrderService {
 
                 listMap.put("name","预计工期");
                 if(houseFlow.getStartDate() == null){
-                    listMap.put("value",0);
+                    listMap.put("value",0 + "天");
                 }else{
-                    listMap.put("value",  DateUtil.getDiffDays(new Date(),houseFlow.getStartDate()));
+                    listMap.put("value",  DateUtil.getDiffDays(new Date(),houseFlow.getStartDate()) + "天");
                 }
                 gList.add(listMap);
                 listMap = new HashMap<>();
                 listMap.put("name","实际工期");
                 if(houseFlow.getEndDate() == null){
-                    listMap.put("value",0);
+                    listMap.put("value",0 + "天");
                 }else{
-                    listMap.put("value",  DateUtil.getDiffDays(houseFlow.getEndDate(),houseFlow.getStartDate()));
+                    listMap.put("value",  DateUtil.getDiffDays(houseFlow.getEndDate(),houseFlow.getStartDate()) + "天");
                 }
                 gList.add(listMap);
 
@@ -676,17 +680,17 @@ public class DjDeliverOrderService {
 
                 listMap.put("name","预计工期");
                 if(houseFlow.getStartDate() == null){
-                    listMap.put("value",0);
+                    listMap.put("value",0 + "天");
                 }else{
-                    listMap.put("value",  DateUtil.getDiffDays(new Date(),houseFlow.getStartDate()));
+                    listMap.put("value",  DateUtil.getDiffDays(new Date(),houseFlow.getStartDate()) + "天");
                 }
                 gList.add(listMap);
                 listMap = new HashMap<>();
                 listMap.put("name","实际工期");
                 if(houseFlow.getEndDate() == null){
-                    listMap.put("value",0);
+                    listMap.put("value",0 + "天");
                 }else{
-                    listMap.put("value",  DateUtil.getDiffDays(houseFlow.getEndDate(),houseFlow.getStartDate()));
+                    listMap.put("value",  DateUtil.getDiffDays(houseFlow.getEndDate(),houseFlow.getStartDate()) + "天");
                 }
                 gList.add(listMap);
 
@@ -733,17 +737,17 @@ public class DjDeliverOrderService {
 
                 listMap.put("name","预计工期");
                 if(houseFlow.getStartDate() == null){
-                    listMap.put("value",0);
+                    listMap.put("value",0 + "天");
                 }else{
-                    listMap.put("value",  DateUtil.getDiffDays(new Date(),houseFlow.getStartDate()));
+                    listMap.put("value",  DateUtil.getDiffDays(new Date(),houseFlow.getStartDate()) + "天");
                 }
                 gList.add(listMap);
                 listMap = new HashMap<>();
                 listMap.put("name","实际工期");
                 if(houseFlow.getEndDate() == null){
-                    listMap.put("value",0);
+                    listMap.put("value",0 + "天");
                 }else{
-                    listMap.put("value",  DateUtil.getDiffDays(houseFlow.getEndDate(),houseFlow.getStartDate()));
+                    listMap.put("value",  DateUtil.getDiffDays(houseFlow.getEndDate(),houseFlow.getStartDate()) + "天");
                 }
                 gList.add(listMap);
 
@@ -789,17 +793,17 @@ public class DjDeliverOrderService {
                 listMap = new HashMap<>();
                 listMap.put("name","预计工期");
                 if(houseFlow.getStartDate() == null){
-                    listMap.put("value",0);
+                    listMap.put("value",0 + "天");
                 }else{
-                    listMap.put("value",  DateUtil.getDiffDays(new Date(),houseFlow.getStartDate()));
+                    listMap.put("value",  DateUtil.getDiffDays(new Date(),houseFlow.getStartDate()) + "天");
                 }
                 gList.add(listMap);
                 listMap = new HashMap<>();
                 listMap.put("name","实际工期");
                 if(houseFlow.getEndDate() == null){
-                    listMap.put("value",0);
+                    listMap.put("value",0 + "天");
                 }else{
-                    listMap.put("value",  DateUtil.getDiffDays(houseFlow.getEndDate(),houseFlow.getStartDate()));
+                    listMap.put("value",  DateUtil.getDiffDays(houseFlow.getEndDate(),houseFlow.getStartDate()) + "天");
                 }
                 gList.add(listMap);
 
@@ -845,17 +849,17 @@ public class DjDeliverOrderService {
                 listMap = new HashMap<>();
                 listMap.put("name","预计工期");
                 if(houseFlow.getStartDate() == null){
-                    listMap.put("value",0);
+                    listMap.put("value",0 + "天");
                 }else{
-                    listMap.put("value",  DateUtil.getDiffDays(new Date(),houseFlow.getStartDate()));
+                    listMap.put("value",  DateUtil.getDiffDays(new Date(),houseFlow.getStartDate()) + "天");
                 }
                 gList.add(listMap);
                 listMap = new HashMap<>();
                 listMap.put("name","实际工期");
                 if(houseFlow.getEndDate() == null){
-                    listMap.put("value",0);
+                    listMap.put("value",0 + "天");
                 }else{
-                    listMap.put("value",  DateUtil.getDiffDays(houseFlow.getEndDate(),houseFlow.getStartDate()));
+                    listMap.put("value",  DateUtil.getDiffDays(houseFlow.getEndDate(),houseFlow.getStartDate()) + "天");
                 }
                 gList.add(listMap);
 

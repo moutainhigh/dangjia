@@ -60,6 +60,6 @@ public class BankCardController implements BankCardAPI {
     @Override
     @ApiMethod
     public ServerResponse addBankCard(HttpServletRequest request,BankCard bankCard) {
-        return bankCardService.editBankCard(request,bankCard);
+        return bankCardService.addBankCard(request,bankCard);
     }
 }

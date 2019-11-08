@@ -11,6 +11,7 @@ import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.other.IBankCardMapper;
+import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.mapper.worker.IWithdrawDepositMapper;
 import com.dangjia.acg.mapper.worker.IWorkerBankCardMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
@@ -21,6 +22,7 @@ import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.other.BankCard;
+import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.modle.worker.WithdrawDeposit;
 import com.dangjia.acg.modle.worker.WorkerBankCard;
 import com.dangjia.acg.modle.worker.WorkerDetail;
@@ -67,6 +69,9 @@ public class WorkerService {
     private IHouseFlowApplyMapper houseFlowApplyMapper;
     @Autowired
     private IHouseFlowMapper houseFlowMapper;
+
+    @Autowired
+    private UserMapper userMapper;
 
     /**
      * 查询通讯录
@@ -279,14 +284,26 @@ public class WorkerService {
      * @param userToken
      * @return
      */
-    public ServerResponse getMyBankCard(String userToken) {
-        Object object = constructionService.getMember(userToken);
-        if (object instanceof ServerResponse) {
-            return (ServerResponse) object;
+    public ServerResponse getMyBankCard(String userToken,String userId) {
+
+        String id = null;
+        //如果 userToken 为空，代表中台登录 供应商，店铺 添加银行卡 2019/11/7 添加
+        if (CommonUtil.isEmpty(userToken)) {
+            if (CommonUtil.isEmpty(userId)) {
+                return ServerResponse.createByErrorMessage("userId不能为空");
+            }
+            id = userId;
+        }else{
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member worker = (Member) object;
+            id = worker.getId();
         }
-        Member worker = (Member) object;
+
         Example example = new Example(WorkerBankCard.class);
-        example.createCriteria().andEqualTo(WorkerBankCard.WORKER_ID, worker.getId())
+        example.createCriteria().andEqualTo(WorkerBankCard.WORKER_ID, id)
                 .andEqualTo(WorkerBankCard.DATA_STATUS, 0);
         List<WorkerBankCard> wbList = workerBankCardMapper.selectByExample(example);
         List<Map<String, Object>> mapList = new ArrayList<>();
@@ -309,7 +326,7 @@ public class WorkerService {
      * @param bankCard
      * @return
      */
-    public ServerResponse addMyBankCard(HttpServletRequest request, String userToken, WorkerBankCard bankCard) {
+    public ServerResponse addMyBankCard(HttpServletRequest request, String userToken, WorkerBankCard bankCard,String userId) {
         try {
             if (CommonUtil.isEmpty(bankCard.getBankCardNumber())) {
                 return ServerResponse.createByErrorMessage("请输入银行卡卡号");
@@ -317,20 +334,32 @@ public class WorkerService {
             if (CommonUtil.isEmpty(bankCard.getBankCardId())) {
                 return ServerResponse.createByErrorMessage("请选择银行卡类型");
             }
-            Object object = constructionService.getMember(userToken);
-            if (object instanceof ServerResponse) {
-                return (ServerResponse) object;
+
+            String id = null;
+            //如果 userToken 为空，代表中台登录 供应商，店铺 添加银行卡 2019/11/7 添加
+            if (CommonUtil.isEmpty(userToken)) {
+                if (CommonUtil.isEmpty(userId)) {
+                    return ServerResponse.createByErrorMessage("userId不能为空");
+                }
+                id = userId;
+            }else{
+                Object object = constructionService.getMember(userToken);
+                if (object instanceof ServerResponse) {
+                    return (ServerResponse) object;
+                }
+                Member worker = (Member) object;
+                id = worker.getId();
             }
-            Member worker = (Member) object;
+
             Example example = new Example(WorkerBankCard.class);
             example.createCriteria()
                     .andEqualTo(WorkerBankCard.BANK_CARD_NUMBER, bankCard.getBankCardNumber())
-                    .andEqualTo(WorkerBankCard.WORKER_ID, worker.getId())
+                    .andEqualTo(WorkerBankCard.WORKER_ID, id)
                     .andEqualTo(WorkerBankCard.DATA_STATUS, 0);
             if (workerBankCardMapper.selectByExample(example).size() > 0) {
                 return ServerResponse.createByErrorMessage("添加失败，银行卡已被使用！");
             }
-            bankCard.setWorkerId(worker.getId());
+            bankCard.setWorkerId(id);
             bankCard.setDataStatus(0);
             bankCard.setStatus(0);
             this.workerBankCardMapper.insertSelective(bankCard);
@@ -365,6 +394,44 @@ public class WorkerService {
             workerBankCard.setDataStatus(1);
             workerBankCardMapper.updateByPrimaryKeySelective(workerBankCard);
             return ServerResponse.createBySuccessMessage("删除成功");
+        } catch (Exception e) {
+            return ServerResponse.createByErrorMessage("操作失败，请您稍后再试");
+        }
+    }
+
+    /**
+     * 解绑银行卡
+     * @param userId
+     * @param workerBankCardId 银行卡ID
+     * @return
+     */
+    public ServerResponse untyingBankCard(String userId, String workerBankCardId,String payPassword) {
+        try {
+            if (CommonUtil.isEmpty(userId)) {
+                return ServerResponse.createByErrorMessage("userId不能为空");
+            }
+            if (CommonUtil.isEmpty(payPassword)) {
+                return ServerResponse.createByErrorMessage("支付密码必输");
+            }
+
+            //查询用户信息
+            MainUser mainUser = userMapper.selectByPrimaryKey(userId);
+
+            if(mainUser == null){
+                return ServerResponse.createByErrorMessage("用户不存在");
+            }
+            if(!mainUser.getPayPassword().equals(payPassword)){
+                return ServerResponse.createByErrorMessage("解绑失败,支付密码错误");
+            }
+
+            WorkerBankCard workerBankCard = workerBankCardMapper.selectByPrimaryKey(workerBankCardId);
+            if (workerBankCard == null) {
+                return ServerResponse.createByErrorMessage("没有找到对应的银行卡");
+            }
+
+            workerBankCard.setDataStatus(1);
+            workerBankCardMapper.updateByPrimaryKeySelective(workerBankCard);
+            return ServerResponse.createBySuccessMessage("解绑成功");
         } catch (Exception e) {
             return ServerResponse.createByErrorMessage("操作失败，请您稍后再试");
         }
