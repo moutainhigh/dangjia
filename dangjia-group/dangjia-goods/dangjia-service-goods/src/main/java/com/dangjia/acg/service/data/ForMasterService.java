@@ -397,8 +397,11 @@ public class ForMasterService {
                     String goodsId = productObj.getString("goodsId");//货品Id
                     String productId=productObj.getString("productId");
                     BasicsGoods basicsGoods=iBasicsGoodsMapper.selectByPrimaryKey(goodsId);
+                    jsonObject.put("productId",productObj.getString("productTemplateId"));//商品模板ID
                     StorefrontProduct storefrontProduct= iGoodsStorefrontProductMapper.selectByPrimaryKey(productId);
-                    jsonObject.put("productId",storefrontProduct.getProdTemplateId());//商品模板ID
+                    if(storefrontProduct!=null&&StringUtils.isNotBlank(storefrontProduct.getProdTemplateId())){
+                        jsonObject.put("productId",storefrontProduct.getProdTemplateId());//商品模板ID
+                    }
                     jsonObject.put("goodsId",goodsId);
                     jsonObject.put("productType",basicsGoods.getType());//0:材料；1：包工包料；2:人工
                     jsonObject.put("groupType","");
