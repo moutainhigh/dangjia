@@ -372,6 +372,7 @@ public class OrderSplitService {
             orderSplit.setApplyStatus(2);//发给供应商
             orderSplitMapper.updateByPrimaryKeySelective(orderSplit);
 
+
             /*
              * 计算是否超过免费要货次数,收取工匠运费
              */

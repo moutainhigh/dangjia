@@ -78,5 +78,29 @@ public class StorefrontController implements BasicsStorefrontAPI {
         return storefrontService.querySupplierSelectionSupply(pageDTO, searchKey, userId, cityId);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse queryStorefrontWallet(HttpServletRequest request, PageDTO pageDTO, String searchKey, String userId, String cityId) {
+        return storefrontService.queryStorefrontWallet(request,pageDTO,searchKey,userId,cityId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse operationStorefrontReflect(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId) {
+        return storefrontService.operationStorefrontReflect(request,pageDTO,userId,cityId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse operationStorefrontRecharge(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId) {
+        return storefrontService.operationStorefrontRecharge(request,pageDTO,userId,cityId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse paymentRetentionMoney(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId) {
+        return storefrontService.paymentRetentionMoney(request,pageDTO,userId,cityId);
+    }
+
 
 }

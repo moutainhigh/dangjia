@@ -76,4 +76,48 @@ public interface BasicsStorefrontAPI {
                                                 @RequestParam("cityId") String cityId);
 
 
+    /**
+     * 我的钱包
+     */
+    @PostMapping("/web/queryStorefrontWallet")
+    @ApiOperation(value = "店铺-我的钱包", notes = "店铺-我的钱包")
+    ServerResponse queryStorefrontWallet(@RequestParam("request") HttpServletRequest request,
+                                                @RequestParam("pageDTO") PageDTO pageDTO,
+                                                @RequestParam("searchKey") String searchKey,
+                                                @RequestParam("userId") String userId,
+                                                @RequestParam("cityId") String cityId);
+
+
+
+    /**
+     * 体现
+     */
+    @PostMapping("/web/queryStorefrontReflect")
+    @ApiOperation(value = "店铺-店铺体现", notes = "店铺-店铺体现")
+    ServerResponse operationStorefrontReflect(@RequestParam("request") HttpServletRequest request,
+                                         @RequestParam("pageDTO") PageDTO pageDTO,
+                                         @RequestParam("userId") String userId,
+                                         @RequestParam("cityId") String cityId);
+
+
+
+    /**
+     * 充值
+     */
+    @PostMapping("/web/queryStorefrontRecharge")
+    @ApiOperation(value = "店铺-店铺充值", notes = "店铺-店铺充值")
+    ServerResponse operationStorefrontRecharge(@RequestParam("request") HttpServletRequest request,
+                                          @RequestParam("pageDTO") PageDTO pageDTO,
+                                          @RequestParam("userId") String userId,
+                                          @RequestParam("cityId") String cityId);
+
+    /**
+     * 缴纳滞留金
+     */
+    @PostMapping("/web/paymentRetentionMoney")
+    @ApiOperation(value = "店铺-缴纳滞留金", notes = "店铺-缴纳滞留金")
+    ServerResponse paymentRetentionMoney(@RequestParam("request") HttpServletRequest request,
+                                           @RequestParam("pageDTO") PageDTO pageDTO,
+                                           @RequestParam("userId") String userId,
+                                           @RequestParam("cityId") String cityId);
 }
