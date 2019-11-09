@@ -110,8 +110,8 @@ public class DjSupplierController implements DjSupplierAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse SupplierRecharge(String supId,String payState, Double rechargeAmount, String payPassword, String businessOrderType, String userId) {
-        return djSupplierServices.SupplierRecharge(supId,payPassword,rechargeAmount,payPassword,businessOrderType, userId);
+    public ServerResponse supplierRecharge(String supId,String payState, Double rechargeAmount, String payPassword, String businessOrderType, String userId) {
+        return djSupplierServices.supplierRecharge(supId,payPassword,rechargeAmount,payPassword,businessOrderType, userId);
     }
 
     @Override

@@ -1,8 +1,6 @@
 package com.dangjia.acg.service.supplier;
 
 import cn.jiguang.common.utils.StringUtils;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.BasicsStorefrontAPI;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
@@ -12,6 +10,7 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dto.supplier.DjSupSupplierProductDTO;
 import com.dangjia.acg.dto.supplier.DjSupplierDTO;
 import com.dangjia.acg.mapper.delivery.IStoreSplitDeliverMapper;
+import com.dangjia.acg.mapper.pay.IStoreBusinessOrderMapper;
 import com.dangjia.acg.mapper.receipt.IStoreReceiptMapper;
 import com.dangjia.acg.mapper.repair.IStoreMendDeliverMapper;
 import com.dangjia.acg.mapper.supplier.DjSupApplicationMapper;
@@ -20,10 +19,9 @@ import com.dangjia.acg.mapper.supplier.DjSupplierMapper;
 import com.dangjia.acg.mapper.supplier.DjSupplierPayOrderMapper;
 import com.dangjia.acg.mapper.user.IStoreUserMapper;
 import com.dangjia.acg.mapper.worker.IStoreWithdrawDepositMapper;
-import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.other.BankCard;
+import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.receipt.Receipt;
-import com.dangjia.acg.modle.repair.MendDeliver;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.supplier.DjSupApplication;
 import com.dangjia.acg.modle.supplier.DjSupplier;
@@ -66,6 +64,10 @@ public class DjSupplierServices {
     private IStoreWithdrawDepositMapper iStoreWithdrawDepositMapper;
     @Autowired
     private DjSupplierPayOrderMapper djSupplierPayOrderMapper;
+    @Autowired
+    private IStoreBusinessOrderMapper iStoreBusinessOrderMapper;
+
+
     @Autowired
     private DjSupApplicationProductService djSupApplicationProductService;
     @Autowired
@@ -440,7 +442,7 @@ public class DjSupplierServices {
      * @param payPassword
      * @return
      */
-    public ServerResponse SupplierRecharge(String supId, String payState, Double rechargeAmount,
+    public ServerResponse supplierRecharge(String supId, String payState, Double rechargeAmount,
                                            String payPassword, String businessOrderType,String userId) {
         try {
             DjSupplier djSupplier = djSupplierMapper.selectByPrimaryKey(supId);
@@ -460,7 +462,33 @@ public class DjSupplierServices {
             djSupplierPayOrder.setState(0);
             djSupplierPayOrder.setUserId(userId);
             djSupplierPayOrderMapper.insert(djSupplierPayOrder);
-            return ServerResponse.createBySuccessMessage("提交成功待审核中");
+
+            // 生成支付业务单
+            Example example = new Example(BusinessOrder.class);
+            example.createCriteria().andEqualTo(BusinessOrder.TASK_ID, djSupplierPayOrder.getId()).andNotEqualTo(BusinessOrder.STATE, 4);
+            List<BusinessOrder> businessOrderList = iStoreBusinessOrderMapper.selectByExample(example);
+            BusinessOrder businessOrder = null;
+            if (businessOrderList.size() > 0) {
+                businessOrder = businessOrderList.get(0);
+                if (businessOrder.getState() == 3) {
+                    return ServerResponse.createByErrorMessage("该订单已支付，请勿重复支付！");
+                }
+            }
+            if (businessOrderList.size() == 0) {
+                businessOrder = new BusinessOrder();
+                businessOrder.setMemberId(djSupplierPayOrder.getUserId());
+                businessOrder.setNumber(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
+                businessOrder.setState(1);//刚生成
+                businessOrder.setTotalPrice(new BigDecimal(rechargeAmount));
+                businessOrder.setDiscountsPrice(new BigDecimal(0));
+                businessOrder.setPayPrice(new BigDecimal(rechargeAmount));
+                businessOrder.setType(3);//记录支付类型任务类型
+                businessOrder.setTaskId(djSupplierPayOrder.getId());//保存任务ID
+                iStoreBusinessOrderMapper.insert(businessOrder);
+            }
+            djSupplierPayOrder.setBusinessOrderNumber(businessOrder.getNumber());
+            djSupplierPayOrderMapper.updateByPrimaryKeySelective(djSupplierPayOrder);
+            return ServerResponse.createBySuccess("提交成功",djSupplierPayOrder.getBusinessOrderNumber());
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("提交失败");
@@ -495,18 +523,6 @@ public class DjSupplierServices {
      * @return
      */
     public ServerResponse queryIncomeRecordDetail(String supId,String merge) {
-        JSONArray jsonArr = JSONArray.parseArray(merge);
-        jsonArr.forEach(str -> {
-            JSONObject obj = (JSONObject) str;
-            String id=obj.getString("id");
-            Integer deliverType=obj.getInteger("deliverType");
-            //发货单
-            if(deliverType==1){
-                SplitDeliver splitDeliver = iStoreSplitDeliverMapper.selectByPrimaryKey(id);
-            } else if(deliverType==2){//退货单
-                MendDeliver mendDeliver = iStoreMendDeliverMapper.selectByPrimaryKey(id);
-            }
-        });
         return null;
     }
 

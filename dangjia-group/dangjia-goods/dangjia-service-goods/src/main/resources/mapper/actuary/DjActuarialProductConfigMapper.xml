@@ -50,6 +50,10 @@
         <result property="brandId" column="brandId"/>
         <result property="isCalculatedArea" column="isCalculatedArea"/>
         <result property="categoryId" column="categoryId"/>
+        <result property="goodsType" column="goodsType"/>
+        <result property="convertQuality" column="convertQuality"/>
+        <result property="convertUnit" column="convertUnit"/>
+        <result property="goodsBuy" column="goodsBuy"/>
     </resultMap>
     <select id="searchChangeProductList" resultMap="searchAppProductMap">
         SELECT
@@ -67,7 +71,11 @@
             t3.value_name_arr valueNameArr,
             t4.brand_id brandId,
             IFNULL(t1.is_calculated_area,'0') isCalculatedArea,
-            t4.category_id categoryId
+            t4.category_id categoryId,
+            t4.type goodsType,
+            t4.buy goodsBuy,
+            t3.convert_quality convertQuality,
+            t3.convert_unit convertUnit
         FROM
             dj_basics_storefront_product t2
         INNER JOIN dj_basics_product_template t3 ON t2.prod_template_id=t3.id
@@ -108,7 +116,11 @@
             t2.value_name_arr valueNameArr,
             t4.brand_id brandId,
             IFNULL(t1.purchase_quantity,1) shopCount,
-            CEIL(IFNULL(t1.purchase_quantity,1)/IFNULL(t2.convert_quality,1))  convertCount
+            CEIL(IFNULL(t1.purchase_quantity,1)/IFNULL(t2.convert_quality,1))  convertCount,
+            t4.type goodsType,
+            t4.buy goodsBuy,
+            t3.convert_quality convertQuality,
+            t3.convert_unit convertUnit
         FROM
             dj_actuarial_product_config t1,
             dj_basics_product_template t2,

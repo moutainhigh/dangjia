@@ -26,6 +26,8 @@ public class WeiXinPayUtil {
     private final static String mch_id = "1500837831";
     //付费方法类型(固定值)
     private final static String trade_type = "APP";
+    //支付交易类型
+    private final static String trade_type_native = "NATIVE";
     //商户密钥(固定值) 公众号共用
     public final static String key = "8888888888fengjiangitV9999999999";
     //统一下单API接口链接  (固定值)
@@ -88,11 +90,49 @@ public class WeiXinPayUtil {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            return ServerResponse.createBySuccessMessage("微信app支付下单出错");
+            return ServerResponse.createByErrorMessage("微信app支付下单出错");
         }
-        return ServerResponse.createBySuccessMessage("获取失败");
+        return ServerResponse.createByErrorMessage("获取失败");
     }
 
+    /**
+     * 微信支付调用接口
+     *
+     * @return JSON形式的参数值
+     */
+    public static ServerResponse getWeiXinSignURL(String price, String out_trade_no, String basePath, Integer userRole) {
+        Map<String, String> m = new HashMap<>();
+        try {
+            String price1 = Integer.toString((int) ((Double.parseDouble(price) * 100)));
+            //将获取到的map值转换为xml格式
+            m.put("appid", (userRole == null || userRole == 1) ? WeiXinPayUtil.appid : WeiXinPayUtil.appid2);//微信的应用ID(固定值)
+            m.put("body", "当家App-微信支付");//商品描述（其实可有可无）
+            m.put("mch_id", WeiXinPayUtil.mch_id);//微信支付商户信息号（固定值）
+            m.put("nonce_str", out_trade_no);//支付订单号 不长于32位
+            m.put("notify_url", basePath + notify_url);//接收微信支付异步通知回调地址，通知url必须为直接可访问的url，不能携带参数。
+            m.put("out_trade_no", out_trade_no);//商户系统内部的订单号,32个字符内、可包含字母
+            m.put("total_fee", price1);//订单总金额，单位为分
+            m.put("trade_type", WeiXinPayUtil.trade_type_native);//固定值
+            Map<String, String> sPara = WeiXinPayUtil.paraFilter(m);
+            String prestr = WeiXinPayUtil.createLinkString(sPara);
+            String mysign = WeiXinPayUtil.sign(prestr, WeiXinPayUtil.key, "utf-8").toUpperCase();
+            m.put("sign", mysign);//sign签名,第一次随机签名
+            //打包要发送的xml
+            String respXml = WeiXinPayUtil.getRequestXML(m);
+            //发起服务器请求
+            String result = WeiXinPayUtil.httpRequest(WeiXinPayUtil.url, "POST", respXml);
+            Map<?, ?> map = WeiXinPayUtil.doXMLParse(result);
+            //返回状态码
+            String codeUrl = (String) map.get("code_url");
+            return ServerResponse.createBySuccess("获取成功", codeUrl);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("微信app支付下单出错");
+        }
+    }
+    public static void main(String[] args) {
+        System.out.println("============="+getWeiXinSignURL("0.01", "555565413857", "http://172.16.30.95/",null));
+    }
     /**
      * 拼接XML请求路径，获取签名
      *

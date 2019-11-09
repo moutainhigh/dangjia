@@ -100,7 +100,7 @@ public interface DjSupplierAPI {
 
     @PostMapping("/sup/SupplierRecharge")
     @ApiOperation(value = "供应商充值", notes = "供应商充值")
-    ServerResponse SupplierRecharge(@RequestParam("supId") String supId,
+    ServerResponse supplierRecharge(@RequestParam("supId") String supId,
                                     @RequestParam("payState") String payState,
                                     @RequestParam("rechargeAmount") Double rechargeAmount,
                                     @RequestParam("payPassword") String payPassword,
