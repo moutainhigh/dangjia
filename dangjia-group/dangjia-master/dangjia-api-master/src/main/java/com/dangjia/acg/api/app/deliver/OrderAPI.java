@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestParam;
  * author: zmj
  * Date: 2018/11/9 0009
  * Time: 10:55
- *
  */
 @FeignClient("dangjia-service-master")
 @Api(value = "订单要货操作", description = "订单要货操作")
@@ -37,10 +36,10 @@ public interface OrderAPI {
     @PostMapping("app/order/queryDeliverOrderListByStatus")
     @ApiOperation(value = "根据订单状态查询订单列表", notes = "根据订单状态查询订单列表")
     ServerResponse queryDeliverOrderListByStatus(@RequestParam("pageDTO") PageDTO pageDTO,
-                                                  @RequestParam("userToken") String userToken,
-                                                  @RequestParam("houseId") String houseId,
-                                                  @RequestParam("cityId") String queryId,
-                                                  @RequestParam("orderStatus") String orderStatus);
+                                                 @RequestParam("userToken") String userToken,
+                                                 @RequestParam("houseId") String houseId,
+                                                 @RequestParam("cityId") String queryId,
+                                                 @RequestParam("orderStatus") String orderStatus);
 
     @PostMapping("app/deliver/order/confirmOrderSplit")
     @ApiOperation(value = "管家确认要货", notes = "管家确认要货")
@@ -54,10 +53,6 @@ public interface OrderAPI {
                                            @RequestParam("houseId") String houseId,
                                            @RequestParam("mendOrderId") String mendOrderId,
                                            @RequestParam("addressId") String addressId);
-
-    @PostMapping("app/deliver/order/setOrderQuantity")
-    @ApiOperation(value = "补货提交订单回调接口", notes = "补货提交订单回调接口")
-    ServerResponse setOrderQuantity(@RequestParam("mendOrderId") String mendOrderId);
 
     @PostMapping("app/deliver/order/getOrderItemList")
     @ApiOperation(value = "已添加要货单明细", notes = "已添加要货单明细")
@@ -73,6 +68,7 @@ public interface OrderAPI {
 
     /**
      * 删除已经购物的订单
+     *
      * @param userToken
      * @param orderId
      * @return
@@ -87,7 +83,8 @@ public interface OrderAPI {
      */
     @PostMapping("app/order/queryStorefrontIncomeRecords")
     @ApiOperation(value = "店铺-收入记录", notes = "店铺-收入记录")
-    ServerResponse queryStorefrontIncomeRecords(@RequestParam("userId") String userId, @RequestParam("cityId") String cityId);
+    ServerResponse queryStorefrontIncomeRecords(@RequestParam("userToken") String userToken,
+                                                @RequestParam("cityId") String cityId);
 
 
 }
