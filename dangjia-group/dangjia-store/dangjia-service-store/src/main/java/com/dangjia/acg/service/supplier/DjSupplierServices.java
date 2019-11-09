@@ -11,6 +11,7 @@ import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dto.supplier.DjSupSupplierProductDTO;
 import com.dangjia.acg.dto.supplier.DjSupplierDTO;
+import com.dangjia.acg.dto.supplier.DjSupplierDeliverDTO;
 import com.dangjia.acg.mapper.delivery.IStoreSplitDeliverMapper;
 import com.dangjia.acg.mapper.receipt.IStoreReceiptMapper;
 import com.dangjia.acg.mapper.repair.IStoreMendDeliverMapper;
@@ -440,7 +441,7 @@ public class DjSupplierServices {
      * @param payPassword
      * @return
      */
-    public ServerResponse SupplierRecharge(String supId, String payState, Double rechargeAmount,
+    public ServerResponse supplierRecharge(String supId, String payState, Double rechargeAmount,
                                            String payPassword, String businessOrderType,String userId) {
         try {
             DjSupplier djSupplier = djSupplierMapper.selectByPrimaryKey(supId);
@@ -495,7 +496,9 @@ public class DjSupplierServices {
      * @return
      */
     public ServerResponse queryIncomeRecordDetail(String supId,String merge) {
+        DjSupplier djSupplier = djSupplierMapper.selectByPrimaryKey(supId);
         JSONArray jsonArr = JSONArray.parseArray(merge);
+        List<DjSupplierDeliverDTO> djSupplierDeliverDTOS=new ArrayList<>();
         jsonArr.forEach(str -> {
             JSONObject obj = (JSONObject) str;
             String id=obj.getString("id");
