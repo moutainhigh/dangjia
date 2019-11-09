@@ -165,10 +165,13 @@ public class RefundAfterSalesService {
             ap.setCategoryId(pt.getCategoryId());
             //添加图片详情地址字段
             String[] imgArr = image.split(",");
-            StringBuilder imgStr = new StringBuilder();
-            StringBuilder imgUrlStr = new StringBuilder();
-            StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
-            ap.setImageUrl(imgStr.toString());//图片详情地址设置
+            //StringBuilder imgStr = new StringBuilder();
+           // StringBuilder imgUrlStr = new StringBuilder();
+           // StringTool.get.getImages(address, imgArr, imgStr, imgUrlStr);
+            if(imgArr!=null&&imgArr.length>0){
+                ap.setImageUrl(address+imgArr[0]);//图片详情地址设置
+            }
+
             String unitId=pt.getUnitId();
             //查询单位
             if(pt.getConvertQuality()!=null&&pt.getConvertQuality()>0){
@@ -588,10 +591,13 @@ public class RefundAfterSalesService {
             ap.setCategoryId(pt.getCategoryId());
             //添加图片详情地址字段
             String[] imgArr = image.split(",");
-            StringBuilder imgStr = new StringBuilder();
-            StringBuilder imgUrlStr = new StringBuilder();
-            StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
-            ap.setImageUrl(imgStr.toString());//图片详情地址设置
+            //StringBuilder imgStr = new StringBuilder();
+            //StringBuilder imgUrlStr = new StringBuilder();
+            //StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
+            if(imgArr!=null&&imgArr.length>0){
+                ap.setImageUrl(address+imgArr[0]);//图片详情地址设置
+            }
+           // ap.setImageUrl(imgStr.toString());//图片详情地址设置
             //查询单位
             String unitId=pt.getUnitId();
             if(pt.getConvertQuality()!=null&&pt.getConvertQuality()>0){
