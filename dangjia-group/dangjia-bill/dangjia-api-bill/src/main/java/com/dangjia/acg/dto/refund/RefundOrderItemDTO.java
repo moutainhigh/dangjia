@@ -66,4 +66,6 @@ public class RefundOrderItemDTO {
     private String isUpstairsCost;//是否按1层收取上楼费
 
     private Double moveCost;//每层搬运费
+
+    private int unitType;//单位数值类型 1=整数单位，2=小数单位
 }

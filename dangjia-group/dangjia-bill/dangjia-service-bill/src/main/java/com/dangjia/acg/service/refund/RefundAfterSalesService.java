@@ -171,11 +171,16 @@ public class RefundAfterSalesService {
             StringBuilder imgUrlStr = new StringBuilder();
             StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
             ap.setImageUrl(imgStr.toString());//图片详情地址设置
+            String unitId=pt.getUnitId();
             //查询单位
-            if(pt.getUnitId()!=null&& StringUtils.isNotBlank(pt.getUnitId())){
-                Unit unit= iBillUnitMapper.selectByPrimaryKey(pt.getUnitId());
-                ap.setUnitId(pt.getUnitId());
+            if(pt.getConvertQuality()!=null&&pt.getConvertQuality()>0){
+                unitId=pt.getConvertUnit();
+            }
+            if(unitId!=null&& StringUtils.isNotBlank(unitId)){
+                Unit unit= iBillUnitMapper.selectByPrimaryKey(unitId);
+                ap.setUnitId(unitId);
                 ap.setUnitName(unit!=null?unit.getName():"");
+                ap.setUnitType(unit!=null?unit.getType():2);
             }
             //查询规格名称
             if (StringUtils.isNotBlank(pt.getValueIdArr())) {
@@ -574,10 +579,15 @@ public class RefundAfterSalesService {
             StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
             ap.setImageUrl(imgStr.toString());//图片详情地址设置
             //查询单位
-            if(pt.getUnitId()!=null&& StringUtils.isNotBlank(pt.getUnitId())){
-                Unit unit= iBillUnitMapper.selectByPrimaryKey(pt.getUnitId());
-                ap.setUnitId(pt.getUnitId());
+            String unitId=pt.getUnitId();
+            if(pt.getConvertQuality()!=null&&pt.getConvertQuality()>0){
+                unitId=pt.getConvertUnit();
+            }
+            if(unitId!=null&& StringUtils.isNotBlank(unitId)){
+                Unit unit= iBillUnitMapper.selectByPrimaryKey(unitId);
+                ap.setUnitId(unitId);
                 ap.setUnitName(unit!=null?unit.getName():"");
+                ap.setUnitType(unit!=null?unit.getType():2);
             }
             //查询规格名称
             if (StringUtils.isNotBlank(pt.getValueIdArr())) {

@@ -55,4 +55,6 @@ public class RefundRepairOrderMaterialDTO {
     private String categoryId;//分类ID
 
     private String orderItemId;//订单详情ID
+
+    private int unitType;//单位数值类型 1=整数单位，2=小数单位
 }
