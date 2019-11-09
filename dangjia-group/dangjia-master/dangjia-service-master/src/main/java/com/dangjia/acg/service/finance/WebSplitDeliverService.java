@@ -259,6 +259,7 @@ public class WebSplitDeliverService {
                 }
                 //添加回执
                 Receipt receipt = new Receipt();
+                receipt.setNumber(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
                 receipt.setImage(image);
                 receipt.setMerge(merge);
                 receipt.setCreateDate(new Date());

@@ -113,4 +113,16 @@ public class DjSupplierController implements DjSupplierAPI {
     public ServerResponse SupplierRecharge(String supId,String payState, Double rechargeAmount, String payPassword, String businessOrderType, String userId) {
         return djSupplierServices.SupplierRecharge(supId,payPassword,rechargeAmount,payPassword,businessOrderType, userId);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryIncomeRecord(String supId) {
+        return djSupplierServices.queryIncomeRecord(supId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryIncomeRecordDetail(String merge) {
+        return djSupplierServices.queryIncomeRecordDetail(merge);
+    }
 }

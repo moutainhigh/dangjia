@@ -43,4 +43,9 @@ public class Receipt extends BaseEntity {
     @Desc(value = "该订单总价")
     @ApiModelProperty("该订单总价")
     private Double totalAmount;
+
+    @Column(name = "number")
+    @Desc(value = "合併結算单号")
+    @ApiModelProperty("合併結算单号")
+    private String number;
 }

@@ -1,6 +1,8 @@
 package com.dangjia.acg.service.supplier;
 
 import cn.jiguang.common.utils.StringUtils;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.BasicsStorefrontAPI;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
@@ -9,13 +11,19 @@ import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dto.supplier.DjSupSupplierProductDTO;
 import com.dangjia.acg.dto.supplier.DjSupplierDTO;
+import com.dangjia.acg.mapper.delivery.IStoreSplitDeliverMapper;
+import com.dangjia.acg.mapper.receipt.IStoreReceiptMapper;
+import com.dangjia.acg.mapper.repair.IStoreMendDeliverMapper;
 import com.dangjia.acg.mapper.supplier.DjSupApplicationMapper;
 import com.dangjia.acg.mapper.supplier.DjSupSupplierProductMapper;
 import com.dangjia.acg.mapper.supplier.DjSupplierMapper;
 import com.dangjia.acg.mapper.supplier.DjSupplierPayOrderMapper;
 import com.dangjia.acg.mapper.user.IStoreUserMapper;
 import com.dangjia.acg.mapper.worker.IStoreWithdrawDepositMapper;
+import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.other.BankCard;
+import com.dangjia.acg.modle.receipt.Receipt;
+import com.dangjia.acg.modle.repair.MendDeliver;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.supplier.DjSupApplication;
 import com.dangjia.acg.modle.supplier.DjSupplier;
@@ -58,15 +66,19 @@ public class DjSupplierServices {
     private IStoreWithdrawDepositMapper iStoreWithdrawDepositMapper;
     @Autowired
     private DjSupplierPayOrderMapper djSupplierPayOrderMapper;
+    @Autowired
+    private DjSupApplicationProductService djSupApplicationProductService;
+    @Autowired
+    private IStoreReceiptMapper iStoreReceiptMapper;
+    @Autowired
+    private IStoreSplitDeliverMapper iStoreSplitDeliverMapper;
+    @Autowired
+    private IStoreMendDeliverMapper iStoreMendDeliverMapper;
 
 
     public DjSupplier queryDjSupplierByPass(String supplierId) {
         return djSupplierMapper.queryDjSupplierByPass(supplierId);
     }
-
-
-    @Autowired
-    private DjSupApplicationProductService djSupApplicationProductService;
     /**
      * 根据Id查询供应商信息
      * @param supplierId
@@ -454,4 +466,51 @@ public class DjSupplierServices {
             return ServerResponse.createByErrorMessage("提交失败");
         }
     }
+
+
+    /**
+     * 供应商收入记录
+     * @param supId
+     * @return
+     */
+    public ServerResponse queryIncomeRecord(String supId) {
+        try {
+            Example example=new Example(Receipt.class);
+            example.createCriteria().andEqualTo(Receipt.SUPPLIER_ID,supId)
+                    .andEqualTo(Receipt.DATA_STATUS,0);
+            List<Receipt> receipts = iStoreReceiptMapper.selectByExample(example);
+            if(receipts.size()<=0)
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
+            return ServerResponse.createBySuccess("查询成功",receipts);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+
+    /**
+     * 供应商收入记录详情
+     * @param merge
+     * @return
+     */
+    public ServerResponse queryIncomeRecordDetail(String merge) {
+        JSONArray jsonArr = JSONArray.parseArray(merge);
+        jsonArr.forEach(str -> {
+            JSONObject obj = (JSONObject) str;
+            String id=obj.getString("id");
+            Integer deliverType=obj.getInteger("deliverType");
+            //发货单
+            if(deliverType==1){
+                SplitDeliver splitDeliver = iStoreSplitDeliverMapper.selectByPrimaryKey(id);
+            } else if(deliverType==2){//退货单
+                MendDeliver mendDeliver = iStoreMendDeliverMapper.selectByPrimaryKey(id);
+            }
+        });
+        return null;
+    }
+
+
+
+
 }
