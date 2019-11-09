@@ -8,10 +8,16 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.finance.WebWithdrawDTO;
+import com.dangjia.acg.mapper.account.IMasterAccountFlowRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.mapper.product.IMasterStorefrontMapper;
+import com.dangjia.acg.mapper.supplier.IMaterSupplierMapper;
 import com.dangjia.acg.mapper.worker.IWithdrawDepositMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
+import com.dangjia.acg.modle.account.AccountFlowRecord;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.storefront.Storefront;
+import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.dangjia.acg.modle.worker.WithdrawDeposit;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
@@ -42,7 +48,12 @@ public class WebWithdrawDepositService {
     private ConfigMessageService configMessageService;
     @Autowired
     private ConfigUtil configUtil;
-
+    @Autowired
+    private IMaterSupplierMapper iMaterSupplierMapper;
+    @Autowired
+    private IMasterStorefrontMapper iMasterStorefrontMapper;
+    @Autowired
+    private IMasterAccountFlowRecordMapper iMasterAccountFlowRecordMapper;
 
     /**
      * 查询所有提现申请
@@ -153,6 +164,62 @@ public class WebWithdrawDepositService {
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+
+    /**
+     * 同意供应商/店铺提现
+     */
+    public void setAgreeWithdraw(String roleType,String sourceId,String workerId,Double money,String withdrawDepositId){
+        try {
+            AccountFlowRecord accountFlowRecord=new AccountFlowRecord();
+            //供应商提现
+            if(roleType.equals("4")){
+                DjSupplier djSupplier = iMaterSupplierMapper.selectByPrimaryKey(sourceId);
+                accountFlowRecord.setFlowType("2");
+                accountFlowRecord.setDefinedAccountId(djSupplier.getId());
+                accountFlowRecord.setDefinedName("供应商提现："+money);
+                accountFlowRecord.setAmountBeforeMoney(djSupplier.getTotalAccount());
+                accountFlowRecord.setAmountAfterMoney(djSupplier.getTotalAccount()+money);
+            }else if(roleType.equals("5")){//店铺提现
+                Storefront storefront = iMasterStorefrontMapper.selectByPrimaryKey(sourceId);
+                accountFlowRecord.setFlowType("1");
+                accountFlowRecord.setDefinedAccountId(storefront.getId());
+                accountFlowRecord.setDefinedName("店铺提现："+money);
+                accountFlowRecord.setAmountBeforeMoney(storefront.getTotalAccount());
+                accountFlowRecord.setAmountAfterMoney(storefront.getTotalAccount()+money);
+            }
+            accountFlowRecord.setState(1);
+            accountFlowRecord.setMoney(money);
+            accountFlowRecord.setHouseOrderId(withdrawDepositId);
+            accountFlowRecord.setCreateBy(workerId);
+            accountFlowRecord.setDataStatus(0);
+            iMasterAccountFlowRecordMapper.insert(accountFlowRecord);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 拒绝供应商/店铺提现
+     */
+    public void setRefusedWithdraw(String roleType,String sourceId,Double money){
+        try {
+            //拒绝供应商提现
+            if(roleType.equals("4")){
+                DjSupplier djSupplier = iMaterSupplierMapper.selectByPrimaryKey(sourceId);
+                djSupplier.setTotalAccount(djSupplier.getTotalAccount()+money);
+                djSupplier.setSurplusMoney(djSupplier.getSurplusMoney()+money);
+                iMaterSupplierMapper.updateByPrimaryKeySelective(djSupplier);
+            }else if(roleType.equals("5")){//拒绝店铺提现
+                Storefront storefront = iMasterStorefrontMapper.selectByPrimaryKey(sourceId);
+                storefront.setTotalAccount(storefront.getTotalAccount()+money);
+                storefront.setSurplusMoney(storefront.getSurplusMoney()+money);
+                iMasterStorefrontMapper.updateByPrimaryKeySelective(storefront);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

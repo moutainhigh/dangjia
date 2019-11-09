@@ -24,6 +24,7 @@ import com.dangjia.acg.dto.pay.SafeTypeDTO;
 import com.dangjia.acg.dto.pay.UpgradeSafeDTO;
 import com.dangjia.acg.dto.product.ShoppingCartDTO;
 import com.dangjia.acg.dto.product.ShoppingCartListDTO;
+import com.dangjia.acg.mapper.account.IMasterAccountFlowRecordMapper;
 import com.dangjia.acg.mapper.activity.IActivityRedPackRecordMapper;
 import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.delivery.*;
@@ -33,6 +34,7 @@ import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
 import com.dangjia.acg.mapper.pay.IMasterSupplierPayOrderMapper;
 import com.dangjia.acg.mapper.pay.IPayOrderMapper;
+import com.dangjia.acg.mapper.product.IMasterStorefrontMapper;
 import com.dangjia.acg.mapper.product.IShoppingCartMapper;
 import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
 import com.dangjia.acg.mapper.repair.IMendMaterialMapper;
@@ -40,7 +42,9 @@ import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.mapper.repair.IMendWorkerMapper;
 import com.dangjia.acg.mapper.safe.IWorkerTypeSafeMapper;
 import com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper;
+import com.dangjia.acg.mapper.supplier.IMaterSupplierMapper;
 import com.dangjia.acg.mapper.worker.IInsuranceMapper;
+import com.dangjia.acg.modle.account.AccountFlowRecord;
 import com.dangjia.acg.modle.activity.ActivityRedPackRecord;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.brand.Brand;
@@ -63,6 +67,7 @@ import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.safe.WorkerTypeSafe;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
 import com.dangjia.acg.modle.storefront.Storefront;
+import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.dangjia.acg.modle.supplier.DjSupplierPayOrder;
 import com.dangjia.acg.modle.worker.Insurance;
 import com.dangjia.acg.service.account.MasterAccountFlowRecordService;
@@ -183,6 +188,14 @@ public class PaymentService {
     private MasterCostAcquisitionService masterCostAcquisitionService;
     @Autowired
     private PayService payService;
+    @Autowired
+    private IMasterSupplierPayOrderMapper iMasterSupplierPayOrderMapper;
+    @Autowired
+    private IMaterSupplierMapper iMaterSupplierMapper;
+    @Autowired
+    private IMasterStorefrontMapper iMasterStorefrontMapper;
+    @Autowired
+    private IMasterAccountFlowRecordMapper iMasterAccountFlowRecordMapper;
 
 
     @Transactional(rollbackFor = Exception.class)
@@ -342,8 +355,7 @@ public class PaymentService {
         DjSupplierPayOrder djSupplierPayOrder = masterSupplierPayOrderMapper.selectByPrimaryKey(businessOrder.getTaskId());
         djSupplierPayOrder.setState(1);
         masterSupplierPayOrderMapper.updateByPrimaryKeySelective(djSupplierPayOrder);
-
-
+        this.setSurplusMoney(djSupplierPayOrder);
     }
     /**
      * 处理补货补人工
@@ -1576,5 +1588,61 @@ public class PaymentService {
             }
         }
         return ServerResponse.createBySuccess("查询成功", mapList);
+    }
+
+
+    /**
+     * 更新(供应商/店铺)(余额/滞纳金)
+     * @param djSupplierPayOrder
+     * @return
+     */
+    public ServerResponse setSurplusMoney(DjSupplierPayOrder djSupplierPayOrder) {
+        try {
+            if(djSupplierPayOrder.getState()==1) {
+                AccountFlowRecord accountFlowRecord = new AccountFlowRecord();
+                accountFlowRecord.setState(2);
+                accountFlowRecord.setDefinedAccountId(djSupplierPayOrder.getSupplierId());
+                accountFlowRecord.setHouseOrderId(accountFlowRecord.getId());
+                accountFlowRecord.setCreateBy(djSupplierPayOrder.getUserId());
+                if (djSupplierPayOrder.getState() == 1 && djSupplierPayOrder.getSourceType() == 1) {
+                    DjSupplier djSupplier = iMaterSupplierMapper.selectByPrimaryKey(djSupplierPayOrder.getSupplierId());
+                    accountFlowRecord.setAmountBeforeMoney(djSupplier.getTotalAccount());//入账前金额
+                    if (djSupplierPayOrder.getBusinessOrderType().equals("1")) {
+                        djSupplier.setTotalAccount(djSupplier.getTotalAccount() + djSupplierPayOrder.getPrice());
+                        djSupplier.setSurplusMoney(djSupplier.getSurplusMoney() + djSupplierPayOrder.getPrice());
+                        accountFlowRecord.setDefinedName("供应商充值：" + djSupplierPayOrder.getPrice());
+                    } else if (djSupplierPayOrder.getBusinessOrderType().equals("2")) {
+                        djSupplier.setTotalAccount(djSupplier.getTotalAccount() + djSupplierPayOrder.getPrice());
+                        djSupplier.setRetentionMoney(djSupplier.getRetentionMoney() + djSupplierPayOrder.getPrice());
+                        accountFlowRecord.setDefinedName("供应商交纳滞留金：" + djSupplierPayOrder.getPrice());
+                    }
+                    iMaterSupplierMapper.updateByPrimaryKeySelective(djSupplier);
+                    accountFlowRecord.setFlowType("2");
+                    accountFlowRecord.setMoney(djSupplierPayOrder.getPrice());
+                    accountFlowRecord.setAmountAfterMoney(djSupplier.getTotalAccount());//入账后金额
+                } else if (djSupplierPayOrder.getState() == 1 && djSupplierPayOrder.getSourceType() == 2) {
+                    Storefront storefront = iMasterStorefrontMapper.selectByPrimaryKey(djSupplierPayOrder.getSupplierId());
+                    accountFlowRecord.setAmountBeforeMoney(storefront.getTotalAccount());//入账前金额
+                    if (djSupplierPayOrder.getBusinessOrderType().equals("1")) {
+                        storefront.setTotalAccount(storefront.getTotalAccount() + djSupplierPayOrder.getPrice());
+                        storefront.setSurplusMoney(storefront.getSurplusMoney()+ djSupplierPayOrder.getPrice());
+                        accountFlowRecord.setDefinedName("店铺充值：" + djSupplierPayOrder.getPrice());
+                    } else if (djSupplierPayOrder.getBusinessOrderType().equals("2")) {
+                        storefront.setTotalAccount(storefront.getTotalAccount() + djSupplierPayOrder.getPrice());
+                        storefront.setRetentionMoney(storefront.getRetentionMoney() + djSupplierPayOrder.getPrice());
+                        accountFlowRecord.setDefinedName("店铺交纳滞留金：" + djSupplierPayOrder.getPrice());
+                    }
+                    iMasterStorefrontMapper.updateByPrimaryKeySelective(storefront);
+                    accountFlowRecord.setFlowType("1");
+                    accountFlowRecord.setMoney(storefront.getTotalAccount());//入账后金额
+                }
+                //生成流水
+                iMasterAccountFlowRecordMapper.insert(accountFlowRecord);
+            }
+            return ServerResponse.createBySuccessMessage("充值成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("充值失败");
+        }
     }
 }

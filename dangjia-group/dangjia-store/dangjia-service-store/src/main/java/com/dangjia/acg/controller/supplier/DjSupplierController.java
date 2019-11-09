@@ -110,8 +110,9 @@ public class DjSupplierController implements DjSupplierAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse supplierRecharge(String supId,String payState, Double rechargeAmount, String payPassword, String businessOrderType, String userId) {
-        return djSupplierServices.supplierRecharge(supId,payPassword,rechargeAmount,payPassword,businessOrderType, userId);
+    public ServerResponse supplierRecharge(String supId,String payState, Double rechargeAmount, String payPassword,
+                                           String businessOrderType, String userId, Integer sourceType) {
+        return djSupplierServices.supplierRecharge(supId,payPassword,rechargeAmount,payPassword,businessOrderType, userId, sourceType);
     }
 
     @Override
@@ -125,4 +126,11 @@ public class DjSupplierController implements DjSupplierAPI {
     public ServerResponse queryIncomeRecordDetail(String supId,String merge) {
         return djSupplierServices.queryIncomeRecordDetail(supId,merge);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryExpenditure(String supId) {
+        return djSupplierServices.queryExpenditure(supId);
+    }
+
 }
