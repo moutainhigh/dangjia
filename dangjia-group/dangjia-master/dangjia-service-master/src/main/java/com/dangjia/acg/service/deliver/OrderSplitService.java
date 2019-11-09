@@ -505,6 +505,11 @@ public class OrderSplitService {
                     List<String> supplierId = splitDeliverMapper.getSupplierGoodsId(v.getHouseId(), v.getProductSn());
                     if (supplierId.size() > 0) {
                         map.put(SplitDeliver.SUPPLIER_ID, supplierId.get(0));
+                        DjSupplier djSupplier=   djSupplierAPI.queryDjSupplierById(supplierId.get(0));
+                        if(djSupplier!=null)
+                        {
+                            map.put(DjSupplier.IS_NON_PLATFORM_SUPPERLIER, djSupplier.getIsNonPlatformSupperlier());
+                        }
                     }
                     mapList.add(map);
                 }

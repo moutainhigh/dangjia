@@ -93,8 +93,9 @@ public interface DjSupApplicationProductAPI {
 
 
     @PostMapping("/supplier/djSupApplicationProduct/supplierList")
-    @ApiOperation(value = "查询供应商", notes = "查询供应商")
+    @ApiOperation(value = "新版-查询供应商", notes = "新版-查询供应商")
     ServerResponse supplierList(@RequestParam("cityId") String cityId,
+                                @RequestParam("userId") String userId,
                                 @RequestParam("productId") String productId);
 
     @PostMapping("/supplier/djSupApplicationProduct/getDjSupApplicationProduct")

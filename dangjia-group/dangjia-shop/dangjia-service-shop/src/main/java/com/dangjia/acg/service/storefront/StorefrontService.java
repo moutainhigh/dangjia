@@ -4,8 +4,10 @@ import cn.jiguang.common.utils.StringUtils;
 //import com.dangjia.acg.api.supplier.DjRegisterApplicationAPI;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.supplier.DjSupplierAPI;
+import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 
 import com.dangjia.acg.common.response.ServerResponse;
@@ -24,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @Service
@@ -323,6 +326,84 @@ public class StorefrontService {
             logger.error("查询失败：", e);
             return ServerResponse.createByErrorMessage("查询失败");
 
+        }
+    }
+
+
+    /**
+     *店铺-我的钱包
+     * @param request
+     * @param pageDTO
+     * @param searchKey
+     * @param userId
+     * @param cityId
+     * @return
+     */
+    public ServerResponse queryStorefrontWallet(HttpServletRequest request, PageDTO pageDTO, String searchKey, String userId, String cityId) {
+        try {
+            Example exampleStorefront=new Example(Storefront.class);
+            exampleStorefront.createCriteria().andEqualTo(Storefront.USER_ID,userId).andEqualTo(Storefront.CITY_ID, cityId);
+            List<Storefront> list =istorefrontMapper.selectByExample(exampleStorefront);
+            if(list==null)
+            {
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            }
+            //可体现余额(七天之内支付到款的订单)需要重新计算
+            return ServerResponse.createBySuccess(list);
+        } catch (Exception e) {
+            logger.error("店铺-我的钱包异常：", e);
+            return ServerResponse.createByErrorMessage("店铺-我的钱包异常");
+        }
+    }
+
+    /**
+     *店铺-店铺体现
+     * @param request
+     * @param pageDTO
+     * @param userId
+     * @param cityId
+     * @return
+     */
+    public ServerResponse operationStorefrontReflect(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId) {
+        try {
+            return null;
+        } catch (Exception e) {
+            logger.error("店铺-店铺体现异常：", e);
+            return ServerResponse.createByErrorMessage("店铺-店铺体现异常");
+        }
+    }
+
+    /**
+     *店铺-店铺充值
+     * @param request
+     * @param pageDTO
+     * @param userId
+     * @param cityId
+     * @return
+     */
+    public ServerResponse operationStorefrontRecharge(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId) {
+        try {
+            return null;
+        } catch (Exception e) {
+            logger.error("店铺-店铺充值异常：", e);
+            return ServerResponse.createByErrorMessage("店铺-店铺充值异常");
+        }
+    }
+
+    /**
+     * 店铺-缴纳滞留金
+     * @param request
+     * @param pageDTO
+     * @param userId
+     * @param cityId
+     * @return
+     */
+    public ServerResponse paymentRetentionMoney(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId) {
+        try {
+            return null;
+        } catch (Exception e) {
+            logger.error("店铺-缴纳滞留金异常：", e);
+            return ServerResponse.createByErrorMessage("店铺-缴纳滞留金异常");
         }
     }
 }

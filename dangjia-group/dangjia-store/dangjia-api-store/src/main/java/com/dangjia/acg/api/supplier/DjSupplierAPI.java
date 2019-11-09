@@ -21,6 +21,10 @@ import javax.servlet.http.HttpServletRequest;
 @FeignClient("dangjia-service-store")
 public interface DjSupplierAPI {
 
+    @PostMapping("/supplier/djSupplier/queryDjSupplierById")
+    @ApiOperation(value = "根据主键ID查询供应商信息", notes = "根据主键ID查询供应商信息")
+    DjSupplier queryDjSupplierById(@RequestParam("supplierId") String supplierId);
+
     @PostMapping("/supplier/djSupplier/queryDjSupplierByPass")
     @ApiOperation(value = "根据主键ID查询审核通过的供应商信息", notes = "根据主键ID查询审核通过的供应商信息")
     DjSupplier queryDjSupplierByPass(@RequestParam("supplierId") String supplierId);
@@ -83,4 +87,23 @@ public interface DjSupplierAPI {
                                        @RequestParam("applicationStatus") String applicationStatus,
                                        @RequestParam("failReason") String failReason,@RequestParam("cityId") String cityId);
 
+    @PostMapping("/sup/myWallet")
+    @ApiOperation(value = "我的钱包", notes = "我的钱包")
+    ServerResponse myWallet(@RequestParam("supId") String supId);
+
+    @PostMapping("/sup/supplierWithdrawal")
+    @ApiOperation(value = "供应商提现", notes = "供应商提现")
+    ServerResponse supplierWithdrawal(@RequestParam("supId") String supId,
+                                      @RequestParam("bankCard") String bankCard,
+                                      @RequestParam("surplusMoney") Double surplusMoney,
+                                      @RequestParam("payPassword") String payPassword);
+
+    @PostMapping("/sup/SupplierRecharge")
+    @ApiOperation(value = "供应商充值", notes = "供应商充值")
+    ServerResponse SupplierRecharge(@RequestParam("supId") String supId,
+                                    @RequestParam("payState") String payState,
+                                    @RequestParam("rechargeAmount") Double rechargeAmount,
+                                    @RequestParam("payPassword") String payPassword,
+                                    @RequestParam("businessOrderType") String businessOrderType,
+                                    @RequestParam("userId") String userId);
 }

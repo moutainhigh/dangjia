@@ -29,6 +29,9 @@
 		<if test="productId!=null and productId!=''">
 			and sp.product_id =#{productId}
 		</if>
+		<if test="storefrontId!=null and storefrontId!=''">
+			and sp.shop_id =#{storefrontId}
+		</if>
 		ORDER BY
 		sp.price DESC
 

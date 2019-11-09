@@ -63,6 +63,18 @@ public class OrderController implements OrderAPI {
     }
 
     /**
+     * 店铺-收支记录
+     * @param userId
+     * @param cityId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryStorefrontIncomeRecords(String userId, String cityId) {
+        return orderService.queryStorefrontIncomeRecords(userId,cityId);
+    }
+
+    /**
      * 管家确认要货
      * 提交到后台材料员审核
      */

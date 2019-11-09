@@ -117,5 +117,18 @@
         and data_status=0
     </select>
 
+    <select id="myWallet" resultType="java.lang.Double">
+        SELECT
+            sum(total_amount)
+        FROM
+            dj_deliver_split_deliver
+        WHERE
+            supplier_id =#{supId}
+        AND shipping_state IN (1, 2, 4, 5, 7, 8)
+        <if test="null!=date and ''!=date">
+            AND TIMESTAMPDIFF(DAY,send_time,SYSDATE())>=7
+        </if>
+    </select>
+
 
 </mapper>
