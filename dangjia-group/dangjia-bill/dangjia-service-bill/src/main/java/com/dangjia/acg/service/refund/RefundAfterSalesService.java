@@ -301,8 +301,8 @@ public class RefundAfterSalesService {
                 }
 
                 map.put("actualTotalAmount",actualTotalAmountT);
-                map.put("totalRransportationCost",+totalRransportationCostT);
-                map.put("totalStevedorageCost",+totalStevedorageCostT);
+                map.put("totalRransportationCost","+"+totalRransportationCostT);
+                map.put("totalStevedorageCost","+"+totalStevedorageCostT);
                 map.put("totalAmount",totalAmountT);
                 map.put("orderlist",orderlist);
             }
@@ -939,8 +939,8 @@ public class RefundAfterSalesService {
                 }
 
                 map.put("actualTotalAmount",actualTotalAmountT);
-                map.put("totalRransportationCost",-totalRransportationCostT);
-                map.put("totalStevedorageCost",-totalStevedorageCostT);
+                map.put("totalRransportationCost","-"+totalRransportationCostT);
+                map.put("totalStevedorageCost","-"+totalStevedorageCostT);
                 map.put("totalAmount",totalAmountT);
                 map.put("orderlist",orderlist);
             }
