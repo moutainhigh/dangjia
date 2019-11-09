@@ -31,6 +31,7 @@ import com.dangjia.acg.mapper.house.*;
 import com.dangjia.acg.mapper.member.ICustomerRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
+import com.dangjia.acg.mapper.pay.IMasterSupplierPayOrderMapper;
 import com.dangjia.acg.mapper.pay.IPayOrderMapper;
 import com.dangjia.acg.mapper.product.IShoppingCartMapper;
 import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
@@ -62,6 +63,7 @@ import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.safe.WorkerTypeSafe;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
 import com.dangjia.acg.modle.storefront.Storefront;
+import com.dangjia.acg.modle.supplier.DjSupplierPayOrder;
 import com.dangjia.acg.modle.worker.Insurance;
 import com.dangjia.acg.service.account.MasterAccountFlowRecordService;
 import com.dangjia.acg.service.acquisition.MasterCostAcquisitionService;
@@ -85,6 +87,8 @@ import java.util.*;
  */
 @Service
 public class PaymentService {
+    @Autowired
+    private IMasterSupplierPayOrderMapper masterSupplierPayOrderMapper;
     @Autowired
     private IActivityRedPackRecordMapper activityRedPackRecordMapper;
     @Autowired
@@ -231,7 +235,10 @@ public class PaymentService {
             }else if (businessOrder.getType() == 2) {
                 //业主购
                 this.mendOrder(businessOrder, payState);
-            } else if (businessOrder.getType() == 9) {//工人保险
+            } else if (businessOrder.getType() == 3) {
+                //充值
+                this.recharge(businessOrder, payState);
+            }else if (businessOrder.getType() == 9) {//工人保险
                 Insurance insurance = insuranceMapper.selectByPrimaryKey(businessOrder.getTaskId());
                 if(insurance.getStartDate()==null){
                     insurance.setStartDate(new Date());
@@ -331,6 +338,13 @@ public class PaymentService {
         }
     }
 
+    private void recharge(BusinessOrder businessOrder, String payState){
+        DjSupplierPayOrder djSupplierPayOrder = masterSupplierPayOrderMapper.selectByPrimaryKey(businessOrder.getTaskId());
+        djSupplierPayOrder.setState(1);
+        masterSupplierPayOrderMapper.updateByPrimaryKeySelective(djSupplierPayOrder);
+
+
+    }
     /**
      * 处理补货补人工
      */
