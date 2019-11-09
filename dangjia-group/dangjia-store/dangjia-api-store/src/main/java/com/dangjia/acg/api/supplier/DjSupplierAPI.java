@@ -87,4 +87,23 @@ public interface DjSupplierAPI {
                                        @RequestParam("applicationStatus") String applicationStatus,
                                        @RequestParam("failReason") String failReason,@RequestParam("cityId") String cityId);
 
+    @PostMapping("/sup/myWallet")
+    @ApiOperation(value = "我的钱包", notes = "我的钱包")
+    ServerResponse myWallet(@RequestParam("supId") String supId);
+
+    @PostMapping("/sup/supplierWithdrawal")
+    @ApiOperation(value = "供应商提现", notes = "供应商提现")
+    ServerResponse supplierWithdrawal(@RequestParam("supId") String supId,
+                                      @RequestParam("bankCard") String bankCard,
+                                      @RequestParam("surplusMoney") Double surplusMoney,
+                                      @RequestParam("payPassword") String payPassword);
+
+    @PostMapping("/sup/SupplierRecharge")
+    @ApiOperation(value = "供应商充值", notes = "供应商充值")
+    ServerResponse SupplierRecharge(@RequestParam("supId") String supId,
+                                    @RequestParam("payState") String payState,
+                                    @RequestParam("rechargeAmount") Double rechargeAmount,
+                                    @RequestParam("payPassword") String payPassword,
+                                    @RequestParam("businessOrderType") String businessOrderType,
+                                    @RequestParam("userId") String userId);
 }

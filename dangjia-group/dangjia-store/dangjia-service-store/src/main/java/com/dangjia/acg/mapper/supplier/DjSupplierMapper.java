@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -23,4 +24,6 @@ public interface DjSupplierMapper extends Mapper<DjSupplier> {
     DjSupplierDTO  queryDJsupplierById( @Param("id") String id, @Param("shopId") String shopId);
     DjSupplier queryDjSupplierByPass(@Param("supplierId") String supplierId);
     DjSupplier querySingleDjSupplier(@Param("userId") String userId, @Param("cityId") String cityId);
+
+    Double myWallet(@Param("supId") String supId, @Param("date") Date date);
 }

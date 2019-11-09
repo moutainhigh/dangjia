@@ -96,4 +96,21 @@ public class DjSupplierController implements DjSupplierAPI {
         return djSupplierServices.setDjSupplierReject(id,applicationStatus,failReason,cityId);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse myWallet(String supId) {
+        return djSupplierServices.myWallet(supId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse supplierWithdrawal(String supId, String bankCard, Double surplusMoney, String payPassword) {
+        return djSupplierServices.supplierWithdrawal(supId, bankCard, surplusMoney, payPassword);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse SupplierRecharge(String supId,String payState, Double rechargeAmount, String payPassword, String businessOrderType, String userId) {
+        return djSupplierServices.SupplierRecharge(supId,payPassword,rechargeAmount,payPassword,businessOrderType, userId);
+    }
 }
