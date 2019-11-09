@@ -52,9 +52,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 
 /**
@@ -231,6 +229,7 @@ public class RefundAfterSalesService {
      */
     public ServerResponse queryRefundonlyInfoList(String userToken,String cityId,String houseId,String orderProductAttr){
         try{
+            Map<String,Object> map=new HashMap<String,Object>();
             //查询房子信息，获取房子对应的楼层
             QuantityRoom quantityRoom=iBillQuantityRoomMapper.getBillQuantityRoom(houseId,0);
             Integer elevator= 1;//是否电梯房
@@ -239,6 +238,10 @@ public class RefundAfterSalesService {
                  elevator=quantityRoom.getElevator();//是否电梯房
                  floor=quantityRoom.getFloor();//楼层
             }
+            Double actualTotalAmountT=0.0;//退货总额
+            Double totalRransportationCostT = 0.0;//可退运费
+            Double totalStevedorageCostT = 0.0;//可退搬运费
+            Double totalAmountT=0.0;//实退款
             //获取退款商品列表
             List<RefundOrderDTO> orderlist=new ArrayList<>();
             JSONArray orderArrayList=JSONArray.parseArray(orderProductAttr);
@@ -283,6 +286,7 @@ public class RefundAfterSalesService {
                         actualTotalAmount=MathUtil.add(actualTotalAmount,MathUtil.mul(price,returnCount));
                         orderItemList.add(refundOrderItemDTO);
                     }
+
                     orderInfo.setTotalRransportationCost(totalRransportationCost);//可退运费
                     orderInfo.setTotalStevedorageCost(totalStevedorageCost);//可退搬运费
                     orderInfo.setOrderDetailList(orderItemList);
@@ -290,9 +294,19 @@ public class RefundAfterSalesService {
                     orderInfo.setTotalAmount(MathUtil.add(MathUtil.add(actualTotalAmount,totalRransportationCost),totalStevedorageCost));//实退款
                     //添加对应的信息
                     orderlist.add(orderInfo);
+                    actualTotalAmountT=MathUtil.add(actualTotalAmountT,orderInfo.getActualTotalAmount());
+                    totalRransportationCostT= MathUtil.add(totalRransportationCostT,orderInfo.getTotalRransportationCost());
+                    totalStevedorageCostT=MathUtil.add(totalStevedorageCostT,orderInfo.getTotalStevedorageCost());
+                    totalAmountT=MathUtil.add(totalAmountT,orderInfo.getTotalAmount());
                 }
+
+                map.put("actualTotalAmount",actualTotalAmountT);
+                map.put("totalRransportationCost",+totalRransportationCostT);
+                map.put("totalStevedorageCost",+totalStevedorageCostT);
+                map.put("totalAmount",totalAmountT);
+                map.put("orderlist",orderlist);
             }
-            return ServerResponse.createBySuccess("查询成功",orderlist);
+            return ServerResponse.createBySuccess("查询成功",map);
         }catch (Exception e){
             logger.error("查询失败",e);
             return ServerResponse.createByErrorMessage("查询失败");
@@ -854,6 +868,7 @@ public class RefundAfterSalesService {
      */
     public ServerResponse queryReturnRefundInfoList(String userToken,String cityId,String houseId,String orderProductAttr){
         try{
+            Map<String,Object> map=new HashMap<String,Object>();
             //查询房子信息，获取房子对应的楼层
             QuantityRoom quantityRoom=iBillQuantityRoomMapper.getBillQuantityRoom(houseId,0);
             Integer elevator= 1;//是否电梯房
@@ -862,6 +877,10 @@ public class RefundAfterSalesService {
                 elevator=quantityRoom.getElevator();//是否电梯房
                 floor=quantityRoom.getFloor();//楼层
             }
+            Double actualTotalAmountT=0.0;//退货总额
+            Double totalRransportationCostT = 0.0;//可退运费
+            Double totalStevedorageCostT = 0.0;//可退搬运费
+            Double totalAmountT=0.0;//实退款
             //获取退款商品列表
             List<RefundOrderDTO> orderlist=new ArrayList<>();
             JSONArray orderArrayList=JSONArray.parseArray(orderProductAttr);
@@ -913,9 +932,19 @@ public class RefundAfterSalesService {
                     orderInfo.setTotalAmount(MathUtil.sub(MathUtil.sub(actualTotalAmount,totalRransportationCost),totalStevedorageCost));//实退款
                     //添加对应的信息
                     orderlist.add(orderInfo);
+                    actualTotalAmountT=MathUtil.add(actualTotalAmountT,orderInfo.getActualTotalAmount());
+                    totalRransportationCostT= MathUtil.add(totalRransportationCostT,orderInfo.getTotalRransportationCost());
+                    totalStevedorageCostT=MathUtil.add(totalStevedorageCostT,orderInfo.getTotalStevedorageCost());
+                    totalAmountT=MathUtil.add(totalAmountT,orderInfo.getTotalAmount());
                 }
+
+                map.put("actualTotalAmount",actualTotalAmountT);
+                map.put("totalRransportationCost",-totalRransportationCostT);
+                map.put("totalStevedorageCost",-totalStevedorageCostT);
+                map.put("totalAmount",totalAmountT);
+                map.put("orderlist",orderlist);
             }
-            return ServerResponse.createBySuccess("查询成功",orderlist);
+            return ServerResponse.createBySuccess("查询成功",map);
         }catch (Exception e){
             logger.error("查询失败",e);
             return ServerResponse.createByErrorMessage("查询失败");
