@@ -143,6 +143,15 @@ public class WebWithdrawDepositService {
                             withdrawDeposit.getWorkerId(),
                             "0", "提现结果",
                             DjConstants.PushMessage.WITHDRAW_CASH_ERROR, "");
+
+                    if(withdrawDeposit.getRoleType()==4 || 5 == withdrawDeposit.getRoleType()){
+                        //拒绝供应商/店铺提现
+                        setRefusedWithdraw(withdrawDeposit.getRoleType(),
+                                withdrawDeposit.getSourceId(),
+                                withdrawDeposit.getMoney());
+                    }
+
+
                 }
                 if (withdrawDeposit.getState() == 1) {//1同意
                     srcWithdrawDeposit.setState(1);
@@ -154,10 +163,21 @@ public class WebWithdrawDepositService {
                             withdrawDeposit.getWorkerId(),
                             "0", "提现结果",
                             DjConstants.PushMessage.WITHDRAW_CASH_SUCCESS, "");
+
+                    if(withdrawDeposit.getRoleType()==4 || 5 == withdrawDeposit.getRoleType()){
+                        //同意供应商/店铺提现
+                        setAgreeWithdraw(withdrawDeposit.getRoleType(),
+                                withdrawDeposit.getSourceId(),
+                                withdrawDeposit.getWorkerId(),
+                                withdrawDeposit.getMoney(),
+                                withdrawDeposit.getId());
+
+                    }
                 }
                 srcWithdrawDeposit.setModifyDate(new Date());
                 srcWithdrawDeposit.setProcessingDate(new Date());
                 iWithdrawDepositMapper.updateByPrimaryKey(srcWithdrawDeposit);
+
             }
 
             return ServerResponse.createBySuccessMessage("保存成功");
@@ -171,27 +191,31 @@ public class WebWithdrawDepositService {
     /**
      * 同意供应商/店铺提现
      */
-    public void setAgreeWithdraw(String roleType,String sourceId,String workerId,Double money,String withdrawDepositId){
+    public void setAgreeWithdraw(Integer roleType,
+                                 String sourceId,
+                                 String workerId,
+                                 BigDecimal money,
+                                 String withdrawDepositId){
         try {
             AccountFlowRecord accountFlowRecord=new AccountFlowRecord();
             //供应商提现
-            if(roleType.equals("4")){
+            if(roleType==4){
                 DjSupplier djSupplier = iMaterSupplierMapper.selectByPrimaryKey(sourceId);
                 accountFlowRecord.setFlowType("2");
                 accountFlowRecord.setDefinedAccountId(djSupplier.getId());
                 accountFlowRecord.setDefinedName("供应商提现："+money);
                 accountFlowRecord.setAmountBeforeMoney(djSupplier.getTotalAccount());
-                accountFlowRecord.setAmountAfterMoney(djSupplier.getTotalAccount()+money);
-            }else if(roleType.equals("5")){//店铺提现
+                accountFlowRecord.setAmountAfterMoney(djSupplier.getTotalAccount()+money.doubleValue());
+            }else if(roleType==5){//店铺提现
                 Storefront storefront = iMasterStorefrontMapper.selectByPrimaryKey(sourceId);
                 accountFlowRecord.setFlowType("1");
                 accountFlowRecord.setDefinedAccountId(storefront.getId());
                 accountFlowRecord.setDefinedName("店铺提现："+money);
                 accountFlowRecord.setAmountBeforeMoney(storefront.getTotalAccount());
-                accountFlowRecord.setAmountAfterMoney(storefront.getTotalAccount()+money);
+                accountFlowRecord.setAmountAfterMoney(storefront.getTotalAccount()+money.doubleValue());
             }
             accountFlowRecord.setState(1);
-            accountFlowRecord.setMoney(money);
+            accountFlowRecord.setMoney(money.doubleValue());
             accountFlowRecord.setHouseOrderId(withdrawDepositId);
             accountFlowRecord.setCreateBy(workerId);
             accountFlowRecord.setDataStatus(0);
@@ -204,18 +228,18 @@ public class WebWithdrawDepositService {
     /**
      * 拒绝供应商/店铺提现
      */
-    public void setRefusedWithdraw(String roleType,String sourceId,Double money){
+    public void setRefusedWithdraw(Integer roleType,String sourceId,BigDecimal money){
         try {
             //拒绝供应商提现
-            if(roleType.equals("4")){
+            if(roleType==4){
                 DjSupplier djSupplier = iMaterSupplierMapper.selectByPrimaryKey(sourceId);
-                djSupplier.setTotalAccount(djSupplier.getTotalAccount()+money);
-                djSupplier.setSurplusMoney(djSupplier.getSurplusMoney()+money);
+                djSupplier.setTotalAccount(djSupplier.getTotalAccount()+money.doubleValue());
+                djSupplier.setSurplusMoney(djSupplier.getSurplusMoney()+money.doubleValue());
                 iMaterSupplierMapper.updateByPrimaryKeySelective(djSupplier);
-            }else if(roleType.equals("5")){//拒绝店铺提现
+            }else if(roleType==5){//拒绝店铺提现
                 Storefront storefront = iMasterStorefrontMapper.selectByPrimaryKey(sourceId);
-                storefront.setTotalAccount(storefront.getTotalAccount()+money);
-                storefront.setSurplusMoney(storefront.getSurplusMoney()+money);
+                storefront.setTotalAccount(storefront.getTotalAccount()+money.doubleValue());
+                storefront.setSurplusMoney(storefront.getSurplusMoney()+money.doubleValue());
                 iMasterStorefrontMapper.updateByPrimaryKeySelective(storefront);
             }
         } catch (Exception e) {

@@ -55,7 +55,14 @@ public interface WorkerAPI {
     ServerResponse addMyBankCard(@RequestParam("request") HttpServletRequest request,
                                  @RequestParam("userToken") String userToken,
                                  @RequestParam("bankCard") WorkerBankCard bankCard,
-                                 @RequestParam("userId")  String userId);
+                                 @RequestParam("userId")  String userId,
+                                 @RequestParam("phone") String phone,
+                                 @RequestParam("smscode") int smscode);
+
+    @PostMapping("web/worker/registerCode")
+    @ApiOperation(value = "绑定银行卡验证码", notes = "绑定银行卡验证码")
+    ServerResponse registerCode(@RequestParam("request") HttpServletRequest request,
+                                @RequestParam("phone") String phone);
 
     @PostMapping("app/worker/delMyBankCard")
     @ApiOperation(value = "删除银行卡", notes = "删除银行卡")
