@@ -68,14 +68,14 @@ public class StorefrontProductController implements StorefrontProductAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse setSpStatusById(String id, String isShelfStatus) {
-        return storefrontProductService.setSpStatusById(id, isShelfStatus);
+    public ServerResponse setSpStatusById(String storefrontId,String id, String isShelfStatus) {
+        return storefrontProductService.setSpStatusById(storefrontId,id, isShelfStatus);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse setAllStoreProductByIsShelfStatus(String id, String isShelfStatus) {
-        return storefrontProductService.setAllStoreProductByIsShelfStatus(id, isShelfStatus);
+    public ServerResponse setAllStoreProductByIsShelfStatus(String storefrontId,String id, String isShelfStatus) {
+        return storefrontProductService.setAllStoreProductByIsShelfStatus(storefrontId,id, isShelfStatus);
     }
 
 

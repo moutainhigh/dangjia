@@ -50,11 +50,11 @@ public interface StorefrontProductAPI {
 
     @PostMapping("/web/setSpStatusById")
     @ApiOperation(value = "供货设置-设置商品上下架", notes = "设置商品上下架")
-    ServerResponse setSpStatusById(@RequestParam("id") String id, @RequestParam("isShelfStatus") String isShelfStatus);
+    ServerResponse setSpStatusById( @RequestParam("storefrontId") String storefrontId,@RequestParam("id") String id, @RequestParam("isShelfStatus") String isShelfStatus);
 
     @PostMapping("/web/setAllStoreProductByIsShelfStatus")
     @ApiOperation(value = "供货设置-设置商品批量上下架", notes = "设置商品批量上下架")
-    ServerResponse setAllStoreProductByIsShelfStatus(@RequestParam("id") String id, @RequestParam("isShelfStatus") String isShelfStatus);
+    ServerResponse setAllStoreProductByIsShelfStatus(@RequestParam("storefrontId") String storefrontId,@RequestParam("id") String id, @RequestParam("isShelfStatus") String isShelfStatus);
 
     @PostMapping("/web/saveStorefrontProductById")
     @ApiOperation(value = "供货设置-保存编辑店铺商品", notes = "供货设置-保存编辑店铺商品")
