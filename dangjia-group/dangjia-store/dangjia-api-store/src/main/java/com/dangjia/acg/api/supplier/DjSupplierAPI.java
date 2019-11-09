@@ -106,4 +106,12 @@ public interface DjSupplierAPI {
                                     @RequestParam("payPassword") String payPassword,
                                     @RequestParam("businessOrderType") String businessOrderType,
                                     @RequestParam("userId") String userId);
+
+    @PostMapping("/sup/queryIncomeRecord")
+    @ApiOperation(value = "供应商收入记录", notes = "供应商收入记录")
+    ServerResponse queryIncomeRecord(@RequestParam("supId") String supId);
+
+    @PostMapping("/sup/queryIncomeRecordDetail")
+    @ApiOperation(value = "供应商收入记录详情", notes = "供应商收入记录详情")
+    ServerResponse queryIncomeRecordDetail(@RequestParam("supId") String supId,@RequestParam("merge") String merge);
 }

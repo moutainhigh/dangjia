@@ -47,31 +47,33 @@ public class OrderController implements OrderAPI {
     @Override
     @ApiMethod
     public ServerResponse queryDeliverOrderListByStatus(PageDTO pageDTO, String userToken, String houseId, String cityId, String orderStatus) {
-        return orderService.queryDeliverOrderListByStatus(pageDTO,userToken,houseId,cityId,orderStatus);
+        return orderService.queryDeliverOrderListByStatus(pageDTO, userToken, houseId, cityId, orderStatus);
     }
 
     /**
      * 删除订单
+     *
      * @param userToken
      * @param orderId
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse delBusinessOrderById( String userToken, String orderId) {
-        return orderService.delBusinessOrderById(userToken,orderId);
+    public ServerResponse delBusinessOrderById(String userToken, String orderId) {
+        return orderService.delBusinessOrderById(userToken, orderId);
     }
 
     /**
      * 店铺-收支记录
-     * @param userId
+     *
+     * @param userToken
      * @param cityId
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse queryStorefrontIncomeRecords(String userId, String cityId) {
-        return orderService.queryStorefrontIncomeRecords(userId,cityId);
+    public ServerResponse queryStorefrontIncomeRecords(String userToken, String cityId) {
+        return orderService.queryStorefrontIncomeRecords(userToken, cityId);
     }
 
     /**
@@ -86,27 +88,13 @@ public class OrderController implements OrderAPI {
 
     /**
      * 补货提交订单接口
-     *
      */
     @Override
     @ApiMethod
-    public ServerResponse abrufbildungSubmitOrder(String userToken,String cityId, String houseId,
+    public ServerResponse abrufbildungSubmitOrder(String userToken, String cityId, String houseId,
                                                   String mendOrderId, String addressId) {
         return orderService.abrufbildungSubmitOrder(userToken, cityId, houseId, mendOrderId, addressId);
     }
-
-
-
-    /**
-     * 补货提交订单回调接口
-     *
-     */
-    @Override
-    @ApiMethod
-    public ServerResponse setOrderQuantity(String mendOrderId) {
-        return orderService.setOrderQuantity(mendOrderId);
-    }
-
 
     /**
      * 返回已添加要货单明细

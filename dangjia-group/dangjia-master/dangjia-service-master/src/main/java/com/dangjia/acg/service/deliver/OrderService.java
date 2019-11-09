@@ -117,17 +117,20 @@ public class OrderService {
     private MasterCostAcquisitionService masterCostAcquisitionService;
     @Autowired
     private IMemberMapper iMemberMapper;
+    @Autowired
+    private IWarehouseMapper iWarehouseMapper;
 
     private static Logger logger = LoggerFactory.getLogger(OrderService.class);
 
     @Autowired
     private BasicsStorefrontAPI basicsStorefrontAPI;
 
+
     /**
      * 删除订单
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse delBusinessOrderById( String userToken, String orderId) {
+    public ServerResponse delBusinessOrderById(String userToken, String orderId) {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
@@ -143,37 +146,36 @@ public class OrderService {
                 return ServerResponse.createByErrorMessage("该房产不存在");
             }
             //主订单删除
-            Example  orderexample=new Example(Order.class);
-            orderexample.createCriteria().andEqualTo(Order.ID,orderId).andEqualTo(Order.MEMBER_ID,member.getId());
-            Order order1=new Order();
+            Example orderexample = new Example(Order.class);
+            orderexample.createCriteria().andEqualTo(Order.ID, orderId).andEqualTo(Order.MEMBER_ID, member.getId());
+            Order order1 = new Order();
             order1.setDataStatus(1);
-            orderMapper.updateByExampleSelective(order1,orderexample);
+            orderMapper.updateByExampleSelective(order1, orderexample);
             //订单详情删除
 
-            Example  orderItemexample=new Example(OrderItem.class);
-            orderItemexample.createCriteria().andEqualTo(Order.ID,orderId);
-            OrderItem orderItem=new OrderItem();
+            Example orderItemexample = new Example(OrderItem.class);
+            orderItemexample.createCriteria().andEqualTo(Order.ID, orderId);
+            OrderItem orderItem = new OrderItem();
             orderItem.setDataStatus(1);
-            orderItemMapper.updateByExampleSelective(orderItem,orderItemexample);
+            orderItemMapper.updateByExampleSelective(orderItem, orderItemexample);
 
-            List<OrderItem> OrderItemList=orderItemMapper.selectByExample(orderItemexample);
-            for(OrderItem OrderItem:OrderItemList)
-            {
+            List<OrderItem> OrderItemList = orderItemMapper.selectByExample(orderItemexample);
+            for (OrderItem OrderItem : OrderItemList) {
                 //要货单以及要货单详情表删除 orderSplitMapper  orderSplitItemMapper
-                String id=OrderItem.getId();
-                Example  OrderSplitItemexample=new Example(OrderSplitItem.class);
-                OrderSplitItemexample.createCriteria().andEqualTo(OrderSplitItem.ORDER_ITEM_ID,id);
-                OrderSplitItem orderSplitItem=new OrderSplitItem();
+                String id = OrderItem.getId();
+                Example OrderSplitItemexample = new Example(OrderSplitItem.class);
+                OrderSplitItemexample.createCriteria().andEqualTo(OrderSplitItem.ORDER_ITEM_ID, id);
+                OrderSplitItem orderSplitItem = new OrderSplitItem();
                 orderSplitItem.setDataStatus(1);
-                orderSplitItemMapper.updateByExampleSelective(orderSplitItem,OrderSplitItemexample);
-                orderSplitItem=orderSplitItemMapper.selectByPrimaryKey(id);
+                orderSplitItemMapper.updateByExampleSelective(orderSplitItem, OrderSplitItemexample);
+                orderSplitItem = orderSplitItemMapper.selectByPrimaryKey(id);
                 //发货单删除
-                String splitItemId=orderSplitItem.getId();
-                Example  splitDeliverExample=new Example(SplitDeliver.class);
-                splitDeliverExample.createCriteria().andEqualTo(SplitDeliver.NUMBER,splitItemId);
-                SplitDeliver splitDeliver=new SplitDeliver();
+                String splitItemId = orderSplitItem.getId();
+                Example splitDeliverExample = new Example(SplitDeliver.class);
+                splitDeliverExample.createCriteria().andEqualTo(SplitDeliver.NUMBER, splitItemId);
+                SplitDeliver splitDeliver = new SplitDeliver();
                 splitDeliver.setDataStatus(1);
-                splitDeliverMapper.updateByExampleSelective(splitDeliver,splitDeliverExample);
+                splitDeliverMapper.updateByExampleSelective(splitDeliver, splitDeliverExample);
             }
             return ServerResponse.createBySuccess("删除成功");
         } catch (Exception e) {
@@ -279,6 +281,7 @@ public class OrderService {
 
     /**
      * 根据订单状态查询订单列表
+     *
      * @param pageDTO
      * @param userToken
      * @param houseId
@@ -300,14 +303,13 @@ public class OrderService {
             if (StringUtils.isEmpty(cityId)) {
                 return ServerResponse.createByErrorMessage("城市ID不能为空!");
             }
-            List<Map<String,Object>> mapArrayList=new ArrayList<Map<String,Object>>();
+            List<Map<String, Object>> mapArrayList = new ArrayList<Map<String, Object>>();
 
-            List<Order> list = orderMapper.selectDeliverOrderByHouse(cityId,houseId,orderStatus);
-            for(Order order:list)
-            {
+            List<Order> list = orderMapper.selectDeliverOrderByHouse(cityId, houseId, orderStatus);
+            for (Order order : list) {
                 Map<String, Object> resMap = BeanUtils.beanToMap(order);
-                String businessOrderNumber= order.getBusinessOrderNumber();
-                List<OrderItem> OrderItemList = orderItemMapper.orderItemList(houseId,businessOrderNumber,null,null);
+                String businessOrderNumber = order.getBusinessOrderNumber();
+                List<OrderItem> OrderItemList = orderItemMapper.orderItemList(houseId, businessOrderNumber, null, null);
                 if (OrderItemList != null) {
                     resMap.put("OrderItemSize", OrderItemList.size());
                     resMap.put("OrderItemList", OrderItemList);
@@ -393,10 +395,10 @@ public class OrderService {
     }
 
     /*根据订单状态查询订单流水*/
-    private List<OrderDTO> orderDTOList(String businessOrderNumber, String style,String orderStatus) {
+    private List<OrderDTO> orderDTOList(String businessOrderNumber, String style, String orderStatus) {
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         List<OrderDTO> orderDTOList = new ArrayList<>();
-        List<Order> orderList = orderMapper.byBusinessOrderNumberAndOrderStatus(businessOrderNumber,orderStatus);
+        List<Order> orderList = orderMapper.byBusinessOrderNumberAndOrderStatus(businessOrderNumber, orderStatus);
         for (Order order : orderList) {
             OrderDTO orderDTO = new OrderDTO();
             orderDTO.setOrderId(order.getId());
@@ -547,11 +549,12 @@ public class OrderService {
 
     /**
      * 补货提交订单接口
+     *
      * @param userToken
      * @param houseId
      * @return
      */
-    public ServerResponse abrufbildungSubmitOrder(String userToken,String cityId, String houseId,
+    public ServerResponse abrufbildungSubmitOrder(String userToken, String cityId, String houseId,
                                                   String mendOrderId, String addressId) {
         try {
             Object object = constructionService.getMember(userToken);
@@ -560,7 +563,7 @@ public class OrderService {
             }
             Member member = (Member) object;
             MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);
-            if(null==mendOrder)
+            if (null == mendOrder)
                 return ServerResponse.createByErrorMessage("货单不存在");
             Member worker = iMemberMapper.selectByPrimaryKey(mendOrder.getApplyMemberId());
             Order order = new Order();
@@ -570,10 +573,10 @@ public class OrderService {
             order.setDataStatus(0);
             order.setOrderNumber(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
             order.setMemberId(member.getId());
-            if(null!=worker) {
+            if (null != worker) {
                 order.setWorkerId(worker.getId());
                 WorkerType workerType = workerTypeMapper.selectByPrimaryKey(worker.getWorkerTypeId());
-                if(null!=workerType) {
+                if (null != workerType) {
                     order.setWorkerTypeName(workerType.getName());
                     order.setWorkerTypeId(workerType.getId());
                 }
@@ -592,31 +595,27 @@ public class OrderService {
             order.setCreateBy(member.getId());
             orderMapper.insert(order);
 
-            //补货单对应订单
-            mendOrder.setOrderId(order.getId());
-            mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
-
 
             BigDecimal paymentPrice = new BigDecimal(0);//总共钱
             BigDecimal freightPrice = new BigDecimal(0);//总运费
             BigDecimal totalMoveDost = new BigDecimal(0);//搬运费
-            Example example=new Example(MendMateriel.class);
-            example.createCriteria().andEqualTo(MendMateriel.MEND_ORDER_ID,mendOrderId);
+            Example example = new Example(MendMateriel.class);
+            example.createCriteria().andEqualTo(MendMateriel.MEND_ORDER_ID, mendOrderId);
             List<MendMateriel> mendMateriels = mendMaterialMapper.selectByExample(example);
             for (MendMateriel mendMateriel : mendMateriels) {
                 BigDecimal totalMaterialPrice = new BigDecimal(0);//组总价
-                BigDecimal totalPrice = new BigDecimal(mendMateriel.getPrice()*mendMateriel.getShopCount());
-                if(mendMateriel.getProductType()==0) {
+                BigDecimal totalPrice = new BigDecimal(mendMateriel.getPrice() * mendMateriel.getShopCount());
+                if (mendMateriel.getProductType() == 0) {
                     totalMaterialPrice = totalMaterialPrice.add(totalPrice);
                 }
                 paymentPrice = paymentPrice.add(totalPrice);
-                Double freight=storefrontConfigAPI.getFreightPrice(mendMateriel.getStorefrontId(),totalMaterialPrice.doubleValue());
-                freightPrice=freightPrice.add(new BigDecimal(freight));
+                Double freight = storefrontConfigAPI.getFreightPrice(mendMateriel.getStorefrontId(), totalMaterialPrice.doubleValue());
+                freightPrice = freightPrice.add(new BigDecimal(freight));
                 //搬运费运算
-                Double moveDost=masterCostAcquisitionService.getStevedorageCost(houseId,mendMateriel.getProductId(),mendMateriel.getShopCount());
-                totalMoveDost=totalMoveDost.add(new BigDecimal(moveDost));
+                Double moveDost = masterCostAcquisitionService.getStevedorageCost(houseId, mendMateriel.getProductId(), mendMateriel.getShopCount());
+                totalMoveDost = totalMoveDost.add(new BigDecimal(moveDost));
                 //生成订单明细
-                OrderItem orderItem=new OrderItem();
+                OrderItem orderItem = new OrderItem();
                 orderItem.setOrderId(order.getId());
                 orderItem.setCityId(cityId);
                 orderItem.setHouseId(houseId);
@@ -631,19 +630,19 @@ public class OrderService {
                 orderItem.setPrice(mendMateriel.getPrice());
                 orderItem.setShopCount(mendMateriel.getShopCount());//购买总数
                 orderItem.setAskCount(mendMateriel.getShopCount());//要货数
-                orderItem.setTotalPrice(mendMateriel.getShopCount()*mendMateriel.getPrice());//总价
+                orderItem.setTotalPrice(mendMateriel.getShopCount() * mendMateriel.getPrice());//总价
                 orderItem.setStorefontId(mendMateriel.getStorefrontId());
                 orderItem.setDiscountPrice(0d);
                 orderItem.setActualPaymentPrice(0d);
                 orderItem.setStevedorageCost(0d);
                 orderItem.setTransportationCost(0d);
-                if(mendMateriel.getProductType()==0&&freight>0){
+                if (mendMateriel.getProductType() == 0 && freight > 0) {
                     //均摊运费
-                    Double transportationCost=(orderItem.getTotalPrice()/totalMaterialPrice.doubleValue())*freight;
+                    Double transportationCost = (orderItem.getTotalPrice() / totalMaterialPrice.doubleValue()) * freight;
                     orderItem.setTransportationCost(transportationCost);
                 }
                 //搬运费运算
-                if(moveDost>0){
+                if (moveDost > 0) {
                     //均摊运费
                     orderItem.setStevedorageCost(moveDost);
                 }
@@ -682,70 +681,115 @@ public class OrderService {
             order.setBusinessOrderNumber(businessOrder.getNumber());
             order.setTotalAmount(paymentPrice);// 订单总额(工钱)
             orderMapper.updateByPrimaryKeySelective(order);
+            //补货单对应订单
+            mendOrder.setOrderId(order.getId());
+            mendOrder.setBusinessOrderNumber(businessOrder.getNumber());
+            mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
             return ServerResponse.createBySuccess("提交成功", order.getId());
         } catch (Exception e) {
             e.printStackTrace();
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-            return ServerResponse.createByErrorMessage("提交失败：原因："+e.getMessage());
+            return ServerResponse.createByErrorMessage("提交失败：原因：" + e.getMessage());
         }
+    }
+
+    /**
+     * 补货提交订单回调接口根据businessOrderNumber
+     *
+     * @param businessOrderNumber
+     * @return
+     */
+    public ServerResponse setOrderQuantityBybusinessByOrderNumber(String businessOrderNumber) {
+        Example example = new Example(MendOrder.class);
+        example.createCriteria().andEqualTo(MendOrder.BUSINESS_ORDER_NUMBER, businessOrderNumber);
+        List<MendOrder> mendOrders = mendOrderMapper.selectByExample(example);
+        List<String> mendOrderNumbers = mendOrders.stream()
+                .map(MendOrder::getNumber)
+                .collect(Collectors.toList());
+        //根据补货单number查找要货单
+        example = new Example(OrderSplit.class);
+        example.createCriteria().andIn(OrderSplit.MEMBER_NAME, mendOrderNumbers)
+                .andEqualTo(OrderSplit.DATA_STATUS, 0);
+        List<OrderSplit> orderSplits = orderSplitMapper.selectByExample(example);
+
+        //根据要货单查询要货单明细
+        List<String> orderSplitIds = orderSplits.stream()
+                .map(OrderSplit::getId)
+                .collect(Collectors.toList());
+        example = new Example(OrderSplitItem.class);
+        example.createCriteria().andEqualTo(OrderSplitItem.DATA_STATUS, 0)
+                .andIn(OrderSplitItem.ORDER_SPLIT_ID, orderSplitIds);
+        List<OrderSplitItem> orderSplitItems = orderSplitItemMapper.selectByExample(example);
+        return this.setOrderQuantity(orderSplitItems);
+    }
+
+
+    /**
+     * 补货提交订单回调接口根据orderSplitId
+     *
+     * @param orderSplitId
+     * @return
+     */
+    public ServerResponse setOrderQuantityBybusinessByOrderSplitId(String orderSplitId) {
+        Example example = new Example(OrderSplitItem.class);
+        example.createCriteria().andEqualTo(OrderSplitItem.DATA_STATUS, 0)
+                .andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplitId);
+        List<OrderSplitItem> orderSplitItems = orderSplitItemMapper.selectByExample(example);
+        return this.setOrderQuantity(orderSplitItems);
     }
 
 
     /**
      * 补货提交订单回调接口
-     * @param mendOrderId
+     *
+     * @param orderSplitItems
      * @return
      */
-    public ServerResponse setOrderQuantity(String mendOrderId){
+    public ServerResponse setOrderQuantity(List<OrderSplitItem> orderSplitItems) {
         try {
-            MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);
-            //根据补货单number查找要货单
-            Example example=new Example(OrderSplit.class);
-            example.createCriteria().andEqualTo(OrderSplit.MEMBER_NAME,mendOrder.getNumber())
-                    .andEqualTo(OrderSplit.DATA_STATUS,0);
-            List<OrderSplit> orderSplits = orderSplitMapper.selectByExample(example);
-            //根据要货单查询要货单明细
-            List<String> orderSplitIds = orderSplits.stream()
-                    .map(OrderSplit::getId)
-                    .collect(Collectors.toList());
-            example=new Example(OrderSplitItem.class);
-            example.createCriteria().andEqualTo(OrderSplitItem.DATA_STATUS,0)
-                    .andIn(OrderSplitItem.ORDER_SPLIT_ID,orderSplitIds);
-            List<OrderSplitItem> orderSplitItems = orderSplitItemMapper.selectByExample(example);
-            Example example1=new Example(OrderItem.class);
+            Example example = new Example(OrderItem.class);
             orderSplitItems.forEach(orderSplitItem -> {
-                example1.createCriteria().andEqualTo(OrderItem.HOUSE_ID)
-                        .andEqualTo(OrderItem.PRODUCT_ID);
-                List<OrderItem> orderItems = orderItemMapper.selectByExample(example1);
+                example.createCriteria().andEqualTo(OrderItem.HOUSE_ID, orderSplitItem.getHouseId())
+                        .andEqualTo(OrderItem.PRODUCT_ID, orderSplitItem.getProductId());
+                List<OrderItem> orderItems = orderItemMapper.selectByExample(example);
                 //要货量
-                Double askCount=orderSplitItem.getAskCount();
+                Double askCount = orderSplitItem.getAskCount();
                 //订单明细ID
-                List<String> orderItemIds=new ArrayList<>();
+                List<String> orderItemIds = new ArrayList<>();
                 //订单扣减描述
-                StringBuilder stringBuilder=new StringBuilder();
+                StringBuilder stringBuilder = new StringBuilder();
+                Example example1 = new Example(Warehouse.class);
                 for (OrderItem orderItem : orderItems) {
                     //剩余量
-                    Double surplus= MathUtil.sub(MathUtil.sub(orderItem.getShopCount(),orderItem.getAskCount()),orderItem.getReturnCount());
+                    Double surplus = MathUtil.sub(MathUtil.sub(orderItem.getShopCount(), orderItem.getAskCount()), orderItem.getReturnCount());
                     //判断订单剩余量是否大于要货量
-                    if(surplus>=askCount){
+                    if (surplus >= askCount) {
                         //订单明细剩余量大于要货量,订单明细要货量=本订单要货量+原来要货量
-                        orderItem.setAskCount(MathUtil.add(orderItem.getAskCount(),askCount));
+                        orderItem.setAskCount(MathUtil.add(orderItem.getAskCount(), askCount));
                         //修改订单
                         orderItemMapper.updateByPrimaryKeySelective(orderItem);
                         orderItemIds.add(orderItem.getId());
-                        stringBuilder.append("订单："+ orderItem.getId() +"要货数"+orderItem.getAskCount()+";");
+                        stringBuilder.append("订单：" + orderItem.getId() + "，要货数：" + orderItem.getAskCount() + ";");
                         break;
-                    //判断订单明细剩余量>0并且订单剩余量小于要货量
-                    }else if(surplus>0){
+                        //判断订单明细剩余量>0并且订单剩余量小于要货量
+                    } else if (surplus > 0) {
                         //订单明细剩余量小于要货量,订单明细要货量=本订单要货量+原来要货量
-                        orderItem.setAskCount(MathUtil.add(orderItem.getAskCount(),surplus));
+                        orderItem.setAskCount(MathUtil.add(orderItem.getAskCount(), surplus));
                         //剩余要货量继续从下一个订单里扣除
-                        askCount=MathUtil.sub(askCount,surplus);
+                        askCount = MathUtil.sub(askCount, surplus);
                         //修改订单
                         orderItemMapper.updateByPrimaryKeySelective(orderItem);
                         orderItemIds.add(orderItem.getId());
-                        stringBuilder.append("订单："+ orderItem.getId() +"要货数"+orderItem.getAskCount()+";");
+                        stringBuilder.append("订单：" + orderItem.getId() + "，要货数：" + orderItem.getAskCount() + ";");
                     }
+                    //业主仓库数量加减
+                    example1.createCriteria()
+                            .andEqualTo(Warehouse.PRODUCT_ID, orderSplitItem.getProductId())
+                            .andEqualTo(Warehouse.HOUSE_ID, orderSplitItem.getHouseId());
+                    Warehouse warehouse = iWarehouseMapper.selectOneByExample(example1);
+                    warehouse.setAskCount(orderItem.getAskCount());
+                    warehouse.setAskTime(warehouse.getAskTime() + 1);//更新要货次数
+                    iWarehouseMapper.updateByPrimaryKeySelective(warehouse);
                 }
                 //添加订单明细ID到要货单明细
                 orderSplitItem.setOrderItemId(orderItemIds.stream().collect(Collectors.joining(",")));
@@ -756,10 +800,9 @@ public class OrderService {
         } catch (Exception e) {
             e.printStackTrace();
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-            return ServerResponse.createByErrorMessage("提交失败：原因："+e.getMessage());
+            return ServerResponse.createByErrorMessage("提交失败：原因：" + e.getMessage());
         }
     }
-
 
 
     /**
@@ -802,21 +845,21 @@ public class OrderService {
                 example = new Example(OrderSplitItem.class);
                 example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplit.getId());
                 List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
-                List<Map<String,Object>> resMapList=new ArrayList<>();
+                List<Map<String, Object>> resMapList = new ArrayList<>();
                 for (OrderSplitItem v : orderSplitItemList) {
                     v.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
                     //增加当前仓库商品的购买量和剩余量字段的显示
                     example = new Example(Warehouse.class);
                     example.createCriteria().andEqualTo(Warehouse.HOUSE_ID, houseId).andEqualTo(Warehouse.PRODUCT_ID, v.getProductId());
                     List<Warehouse> warehouseList = warehouseMapper.selectByExample(example);
-                    Map orderSplitMap= BeanUtils.beanToMap(v);
+                    Map orderSplitMap = BeanUtils.beanToMap(v);
                     if (warehouseList.size() > 0) {
                         Warehouse warehouse = warehouseList.get(0);
-                        orderSplitMap.put("shopCount",warehouse.getShopCount());//购买量
-                        orderSplitMap.put("surCount",warehouse.getShopCount() - (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()) - warehouse.getAskCount());
-                    }else{
-                        orderSplitMap.put("shopCount",0D);//购买量
-                        orderSplitMap.put("surCount",0D);//剩余量
+                        orderSplitMap.put("shopCount", warehouse.getShopCount());//购买量
+                        orderSplitMap.put("surCount", warehouse.getShopCount() - (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()) - warehouse.getAskCount());
+                    } else {
+                        orderSplitMap.put("shopCount", 0D);//购买量
+                        orderSplitMap.put("surCount", 0D);//剩余量
                     }
                     resMapList.add(orderSplitMap);
                 }
@@ -1007,6 +1050,8 @@ public class OrderService {
 
     /**
      * 店铺收支记录
+     *
+     * @param userToken
      * @param userId
      * @param cityId
      * @return
