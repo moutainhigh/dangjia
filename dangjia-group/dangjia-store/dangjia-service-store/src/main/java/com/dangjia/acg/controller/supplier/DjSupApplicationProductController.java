@@ -8,6 +8,7 @@ import com.dangjia.acg.modle.supplier.DjSupApplicationProduct;
 import com.dangjia.acg.service.supplier.DjSupApplicationProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.dangjia.acg.common.model.PageDTO;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -52,8 +53,8 @@ public class DjSupApplicationProductController implements DjSupApplicationProduc
 
     @Override
     @ApiMethod
-    public ServerResponse supplierList(String cityId, String productId) {
-        return djSupApplicationProductService.supplierList(cityId,productId);
+    public ServerResponse supplierList(String cityId,  String userId, String productId) {
+        return djSupApplicationProductService.supplierList(cityId, userId,productId);
     }
 
     @Override

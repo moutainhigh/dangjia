@@ -19,5 +19,5 @@ public interface DjSupApplicationProductMapper extends Mapper<DjSupApplicationPr
 
         int setCommodityPricing();
 
-       List<DjSupApplicationProduct> querySupplierProduct(@Param("supId") String supId, @Param("productId") String productId);
+       List<DjSupApplicationProduct> querySupplierProduct(@Param("storefrontId") String storefrontId,@Param("productId") String productId);
 }
