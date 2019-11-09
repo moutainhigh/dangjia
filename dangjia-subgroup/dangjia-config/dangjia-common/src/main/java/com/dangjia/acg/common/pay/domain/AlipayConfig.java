@@ -26,7 +26,7 @@ public class AlipayConfig
       synchronized (AlipayConfig.class)
       {
         if (alipayClient == null) {
-          alipayClient = new DefaultAlipayClient("https://openapi.alipay.com/gateway.do", "2017100909210538", RSA_PRIVATE_KEY, "json", "utf-8", ALIPAY_PUBLIC_KEY, "RSA2");
+          alipayClient = new DefaultAlipayClient(URL, ALIPAY_APPID, RSA_PRIVATE_KEY, FORMAT, CHARSET, ALIPAY_PUBLIC_KEY, SIGNTYPE);
         }
       }
     }
