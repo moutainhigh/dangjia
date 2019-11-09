@@ -55,4 +55,9 @@ public class DjSupplierPayOrder extends BaseEntity {
     @Desc(value = "申请人id")
     @ApiModelProperty("申请人id")
     private String userId;
+
+    @Column(name = "business_order_number")
+    @Desc(value = "业务订单号")
+    @ApiModelProperty("业务订单号")
+    private String businessOrderNumber;
 }

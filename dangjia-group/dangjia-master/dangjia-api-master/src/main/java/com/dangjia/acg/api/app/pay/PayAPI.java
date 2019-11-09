@@ -1,5 +1,6 @@
 package com.dangjia.acg.api.app.pay;
 
+import com.dangjia.acg.common.response.ServerResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -30,4 +31,9 @@ public interface PayAPI {
     @ApiOperation(value = "微信异步回调", notes = "微信异步回调")
     void weixinAsynchronous(@RequestParam("request")HttpServletRequest request,
                             @RequestParam("response") HttpServletResponse response);
+
+
+    @PostMapping("app/pay/url")
+    @ApiOperation(value = "获取支付地址", notes = "获取支付地址")
+    ServerResponse getPayURL(@RequestParam("businessOrderNumber") String businessOrderNumber);
 }

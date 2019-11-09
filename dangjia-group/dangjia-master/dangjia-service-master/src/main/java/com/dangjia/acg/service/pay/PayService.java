@@ -10,10 +10,12 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseDistributionMapper;
 import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
+import com.dangjia.acg.mapper.pay.IMasterSupplierPayOrderMapper;
 import com.dangjia.acg.mapper.pay.IPayOrderMapper;
 import com.dangjia.acg.modle.house.HouseDistribution;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.pay.PayOrder;
+import com.dangjia.acg.modle.supplier.DjSupplierPayOrder;
 import com.dangjia.acg.util.Utils;
 import org.jdom.Document;
 import org.jdom.Element;
@@ -46,6 +48,9 @@ public class PayService {
     private ConfigUtil configUtil;
     @Autowired
     private IBusinessOrderMapper businessOrderMapper;
+    @Autowired
+    private IMasterSupplierPayOrderMapper masterSupplierPayOrderMapper;
+
     @Autowired
     private IPayOrderMapper payOrderMapper;
     @Autowired
@@ -169,8 +174,29 @@ public class PayService {
     }
 
     /*
-    微信签名
+    获取支付地址
      */
+    public ServerResponse getPayURL(String businessOrderNumber) {
+        //API路径
+        String basePath = configUtil.getValue(SysConfig.DANGJIA_API_LOCAL, String.class);
+        LOG.info(basePath + "getWeiXinSignURL**********************************************");
+
+        //检测订单有效性
+        String payState=checkOrder(businessOrderNumber);
+        //生成支付流水
+        PayOrder payOrder = getPayOrder("4", businessOrderNumber);
+        String price = payOrder.getPrice().toString();
+        String outTradeNo = payOrder.getNumber();//支付订单号
+        if("1".equals(payState)){
+            return WeiXinPayUtil.getWeiXinSignURL(price, outTradeNo, basePath, null);
+        }else{
+            return AliPayUtil.getAlipaySignUrl(price, outTradeNo, basePath);
+        }
+
+    }
+    /*
+   微信签名
+    */
     public ServerResponse getWeiXinSign(String businessOrderNumber, Integer userRole) {
         //API路径
         String basePath = configUtil.getValue(SysConfig.DANGJIA_API_LOCAL, String.class);
@@ -220,7 +246,8 @@ public class PayService {
            return ServerResponse.createByErrorMessage("检查失败-原因："+e.getMessage());
        }
     }
-    private void checkOrder(String businessOrderNumber) {
+    private String checkOrder(String businessOrderNumber) {
+        String payState="0";
         Example example = new Example(BusinessOrder.class);
         example.createCriteria().andEqualTo("number", businessOrderNumber).andEqualTo("state", 1);
         List<BusinessOrder> businessOrderList = businessOrderMapper.selectByExample(example);
@@ -234,6 +261,20 @@ public class PayService {
         if (businessOrder.getState() == 3) {
             throw new BaseException(ServerCode.ERROR, "该订单不能重复支付");
         }
+
+        if (businessOrder.getType() == 3) {
+            DjSupplierPayOrder djSupplierPayOrder = masterSupplierPayOrderMapper.selectByPrimaryKey(businessOrder.getTaskId());
+            if (djSupplierPayOrder == null) {
+                throw new BaseException(ServerCode.ERROR, "该订单不存在");
+            }
+            if (djSupplierPayOrder.getState() == 1) {
+                throw new BaseException(ServerCode.ERROR, "该订单不能重复支付");
+            }
+            if (djSupplierPayOrder.getPrice().compareTo(0D) <= 0) {
+                throw new BaseException(ServerCode.ERROR, "金额错误");
+            }
+            payState=djSupplierPayOrder.getPayState();
+        }
         if (businessOrder.getType() == 5) {
             HouseDistribution houseDistribution = iHouseDistributionMapper.selectByPrimaryKey(businessOrder.getTaskId());
             if (houseDistribution == null) {
@@ -246,9 +287,15 @@ public class PayService {
                 throw new BaseException(ServerCode.ERROR, "金额错误");
             }
         }
-
+        return payState;
     }
 
+    /**
+     *
+     * @param payState 1微信，2支付宝，3POS，4微信(PC)，5支付宝扫码(PC)
+     * @param businessOrderNumber
+     * @return
+     */
     private PayOrder getPayOrder(String payState, String businessOrderNumber) {
         PayOrder payOrder = new PayOrder();
         Example example = new Example(BusinessOrder.class);

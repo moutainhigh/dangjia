@@ -107,8 +107,14 @@ public class SearchActuarialConfigServices {
                 StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
                 ap.setImageUrl(imgStr.toString());//图片详情地址设置
                 //查询单位
-                if(ap.getUnit()!=null&&StringUtils.isNotBlank(ap.getUnit())){
-                    Unit unit= iUnitMapper.selectByPrimaryKey(ap.getUnit());
+                String unitId=ap.getUnit();
+                //查询单位
+                if(ap.getConvertQuality()!=null&&ap.getConvertQuality()>0){
+                    unitId=ap.getConvertUnit();
+                }
+
+                if(unitId!=null&& StringUtils.isNotBlank(unitId)){
+                    Unit unit= iUnitMapper.selectByPrimaryKey(unitId);
                     ap.setUnitName(unit!=null?unit.getName():"");
                 }
                 //查询规格名称
