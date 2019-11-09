@@ -10,8 +10,8 @@
             dj_other_bank_card obc
         WHERE
             wwbc.bank_card_id = obc.id
-        AND wwbc.bank_card_number = #{}
-        AND wwbc.worker_id = #{}
+        AND wwbc.bank_card_number = #{bankCardNumber}
+        AND wwbc.worker_id = #{workerId}
     </select>
 
 </mapper>

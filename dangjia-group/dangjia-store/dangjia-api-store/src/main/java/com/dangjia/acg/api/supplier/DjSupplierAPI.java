@@ -113,5 +113,5 @@ public interface DjSupplierAPI {
 
     @PostMapping("/sup/queryIncomeRecordDetail")
     @ApiOperation(value = "供应商收入记录详情", notes = "供应商收入记录详情")
-    ServerResponse queryIncomeRecordDetail(@RequestParam("merge") String merge);
+    ServerResponse queryIncomeRecordDetail(@RequestParam("supId") String supId,@RequestParam("merge") String merge);
 }

@@ -494,7 +494,7 @@ public class DjSupplierServices {
      * @param merge
      * @return
      */
-    public ServerResponse queryIncomeRecordDetail(String merge) {
+    public ServerResponse queryIncomeRecordDetail(String supId,String merge) {
         JSONArray jsonArr = JSONArray.parseArray(merge);
         jsonArr.forEach(str -> {
             JSONObject obj = (JSONObject) str;

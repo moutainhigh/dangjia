@@ -122,7 +122,7 @@ public class DjSupplierController implements DjSupplierAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryIncomeRecordDetail(String merge) {
-        return djSupplierServices.queryIncomeRecordDetail(merge);
+    public ServerResponse queryIncomeRecordDetail(String supId,String merge) {
+        return djSupplierServices.queryIncomeRecordDetail(supId,merge);
     }
 }
