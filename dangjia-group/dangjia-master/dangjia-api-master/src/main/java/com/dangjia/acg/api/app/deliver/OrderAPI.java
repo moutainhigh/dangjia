@@ -87,9 +87,7 @@ public interface OrderAPI {
      */
     @PostMapping("app/order/queryStorefrontIncomeRecords")
     @ApiOperation(value = "店铺-收入记录", notes = "店铺-收入记录")
-    ServerResponse queryStorefrontIncomeRecords(@RequestParam("userToken") String userToken,
-                                                @RequestParam("cityId") String cityId
-                                                );
+    ServerResponse queryStorefrontIncomeRecords(@RequestParam("userId") String userId, @RequestParam("cityId") String cityId);
 
 
 }

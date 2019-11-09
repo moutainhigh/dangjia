@@ -120,7 +120,8 @@ public class OrderService {
 
     private static Logger logger = LoggerFactory.getLogger(OrderService.class);
 
-
+    @Autowired
+    private BasicsStorefrontAPI basicsStorefrontAPI;
 
     /**
      * 删除订单
@@ -1006,18 +1007,23 @@ public class OrderService {
 
     /**
      * 店铺收支记录
-     * @param userToken
+     * @param userId
      * @param cityId
      * @return
      */
-    public ServerResponse queryStorefrontIncomeRecords(String userToken, String cityId) {
+    public ServerResponse queryStorefrontIncomeRecords(String userId, String cityId) {
         try {
+            Storefront storefront= basicsStorefrontAPI.queryStorefrontByUserID(userId,cityId);
+            if(storefront==null)
+            {
+                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
+            }
+
             return null;
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询店铺收支记录");
         }
-
     }
 
 }

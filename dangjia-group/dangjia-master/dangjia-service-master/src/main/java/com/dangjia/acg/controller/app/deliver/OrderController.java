@@ -64,14 +64,14 @@ public class OrderController implements OrderAPI {
 
     /**
      * 店铺-收支记录
-     * @param userToken
+     * @param userId
      * @param cityId
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse queryStorefrontIncomeRecords(String userToken, String cityId) {
-        return orderService.queryStorefrontIncomeRecords(userToken,cityId);
+    public ServerResponse queryStorefrontIncomeRecords(String userId, String cityId) {
+        return orderService.queryStorefrontIncomeRecords(userId,cityId);
     }
 
     /**

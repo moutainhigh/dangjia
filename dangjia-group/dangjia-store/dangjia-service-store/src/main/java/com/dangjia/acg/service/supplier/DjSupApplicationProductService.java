@@ -60,8 +60,7 @@ public class DjSupApplicationProductService {
     private DjSupplierMapper djSupplierMapper;
 
     @Autowired
-    private BasicsStorefrontAPI basicsStorefrontAPI;
-
+    private BasicsStorefrontAPI basicsStorefrontAPI ;
     /**
      * 供应商申请供应商品
      *

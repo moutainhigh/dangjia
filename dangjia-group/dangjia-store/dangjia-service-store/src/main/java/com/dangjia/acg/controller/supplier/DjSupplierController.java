@@ -26,6 +26,12 @@ public class DjSupplierController implements DjSupplierAPI {
 
     @Override
     @ApiMethod
+    public DjSupplier queryDjSupplierById(String supplierId) {
+        return djSupplierServices.queryDjSupplierById(supplierId);
+    }
+
+    @Override
+    @ApiMethod
     public DjSupplier queryDjSupplierByPass(String supplierId) {
         return djSupplierServices.queryDjSupplierByPass(supplierId);
     }

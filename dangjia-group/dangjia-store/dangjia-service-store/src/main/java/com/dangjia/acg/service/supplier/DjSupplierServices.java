@@ -55,6 +55,15 @@ public class DjSupplierServices {
 
     @Autowired
     private DjSupApplicationProductService djSupApplicationProductService;
+    /**
+     * 根据Id查询供应商信息
+     * @param supplierId
+     * @return
+     */
+    public DjSupplier queryDjSupplierById(String supplierId) {
+        DjSupplier djSupplier =  djSupplierMapper.selectByPrimaryKey(supplierId);
+        return djSupplier;
+    }
 
     /**
      * 根据userId查询供应商信息
