@@ -14,6 +14,7 @@ import com.dangjia.acg.dto.storefront.StorefrontDTO;
 import com.dangjia.acg.dto.storefront.StorefrontProductListDTO;
 import com.dangjia.acg.dto.storefront.BasicsStorefrontProductDTO;
 import com.dangjia.acg.dto.storefront.BasicsStorefrontProductViewDTO;
+import com.dangjia.acg.mapper.storefront.IStorefrontMapper;
 import com.dangjia.acg.mapper.storefront.IStorefrontProductMapper;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.storefront.Storefront;
@@ -48,6 +49,8 @@ public class StorefrontProductService {
 
     @Autowired
     private StorefrontService storefrontService;
+    @Autowired
+    private IStorefrontMapper iStorefrontMapper;
 
     /**
      * 供货设置-根据货品id，城市id，店铺id删除店铺商品
@@ -274,7 +277,7 @@ public class StorefrontProductService {
      * @param isShelfStatus
      * @return
      */
-    public ServerResponse setSpStatusById(String id, String isShelfStatus) {
+    public ServerResponse setSpStatusById(String storefrontId,String id, String isShelfStatus) {
         try {
             if (StringUtils.isEmpty(id)) {
                 return ServerResponse.createByErrorMessage("店铺商品ID不能为空");
@@ -283,21 +286,39 @@ public class StorefrontProductService {
             if (StringUtils.isEmpty(isShelfStatus)) {
                 return ServerResponse.createByErrorMessage("商品上下架状态不能为空");
             }
-            //判断，如果是人工商品，提示不能上架
-            Integer k=istorefrontProductMapper.selectProductByGoodsType(id);
 
-            if(k>0)
+            if (StringUtils.isEmpty(storefrontId)) {
+                return ServerResponse.createByErrorMessage("店铺id不能为空");
+            }
+
+            Storefront storefront=iStorefrontMapper.selectByPrimaryKey(storefrontId);
+            if(storefront.getIfDjselfManage()==1)
             {
-                return ServerResponse.createByErrorMessage("温馨提示：人工商品提示不能上架");
+                StorefrontProduct storefrontProduct = new StorefrontProduct();
+                storefrontProduct.setId(id);
+                storefrontProduct.setIsShelfStatus(isShelfStatus);
+                int i = istorefrontProductMapper.updateByPrimaryKeySelective(storefrontProduct);
+                if (i <= 0) {
+                    return ServerResponse.createByErrorMessage("商品上下架失败");
+                }
+                return ServerResponse.createBySuccessMessage("商品上下架成功");
+            } else {
+                //判断，如果是人工商品，提示不能上架
+                Integer k = istorefrontProductMapper.selectProductByGoodsType(id);
+                if (k<=0) {
+                    return ServerResponse.createByErrorMessage("温馨提示：人工、增值、体验商品不能上架");
+                }
+                StorefrontProduct storefrontProduct = new StorefrontProduct();
+                storefrontProduct.setId(id);
+                storefrontProduct.setIsShelfStatus(isShelfStatus);
+                int i = istorefrontProductMapper.updateByPrimaryKeySelective(storefrontProduct);
+                if (i <= 0) {
+                    return ServerResponse.createByErrorMessage("商品上下架失败");
+                }
+                return ServerResponse.createBySuccessMessage("商品上下架成功");
             }
-            StorefrontProduct storefrontProduct = new StorefrontProduct();
-            storefrontProduct.setId(id);
-            storefrontProduct.setIsShelfStatus(isShelfStatus);
-            int i = istorefrontProductMapper.updateByPrimaryKeySelective(storefrontProduct);
-            if (i <= 0) {
-                return ServerResponse.createByErrorMessage("商品上下架失败");
-            }
-            return ServerResponse.createBySuccessMessage("商品上下架成功");
+
+
         } catch (Exception e) {
             logger.error("商品上下架失败：", e);
             return ServerResponse.createByErrorMessage("商品上下架失败");
@@ -310,7 +331,7 @@ public class StorefrontProductService {
      * @param isShelfStatus
      * @return
      */
-    public ServerResponse setAllStoreProductByIsShelfStatus(String id, String isShelfStatus) {
+    public ServerResponse setAllStoreProductByIsShelfStatus(String storefrontId,String id, String isShelfStatus) {
         try {
             if (StringUtils.isEmpty(id)) {
                 return ServerResponse.createByErrorMessage("店铺商品ID集合不能为空");
@@ -318,19 +339,63 @@ public class StorefrontProductService {
             if (StringUtils.isEmpty(isShelfStatus)) {
                 return ServerResponse.createByErrorMessage("商品上下架状态不能为空");
             }
-            String[] iditem = id.split(",");
-            Example example = new Example(StorefrontProduct.class);
-            example.createCriteria().andIn(StorefrontProduct.ID, Arrays.asList(iditem));
-            StorefrontProduct storefrontProduct = new StorefrontProduct();
-            storefrontProduct.setIsShelfStatus(isShelfStatus);
-            storefrontProduct.setId(null);
-            storefrontProduct.setCreateDate(null);
-            int k = istorefrontProductMapper.updateByExampleSelective(storefrontProduct, example);
-            if (k > 0) {
-                return ServerResponse.createBySuccessMessage("设置商品上下架成功");
-            } else {
-                return ServerResponse.createByErrorMessage("设置商品上下架失败");
+            if (StringUtils.isEmpty(storefrontId)) {
+                return ServerResponse.createByErrorMessage("店铺id不能为空");
             }
+
+            Storefront storefront=iStorefrontMapper.selectByPrimaryKey(storefrontId);
+            if(storefront.getIfDjselfManage()==1)
+            {
+                String[] iditem = id.split(",");
+                Example example = new Example(StorefrontProduct.class);
+                example.createCriteria().andIn(StorefrontProduct.ID, Arrays.asList(iditem));
+                StorefrontProduct storefrontProduct = new StorefrontProduct();
+                storefrontProduct.setIsShelfStatus(isShelfStatus);
+                storefrontProduct.setId(null);
+                storefrontProduct.setCreateDate(null);
+                int k = istorefrontProductMapper.updateByExampleSelective(storefrontProduct, example);
+                if (k > 0) {
+                    return ServerResponse.createBySuccessMessage("设置商品上下架成功");
+                } else {
+                    return ServerResponse.createByErrorMessage("设置商品上下架失败");
+                }
+            }
+            else
+            {
+                //非自营点
+                String[] iditem = id.split(",");
+
+                StringBuffer zy=null;//当家自营店
+                StringBuffer fzy=null;//非当家自营店
+                for (String str : iditem) {
+                    Integer k = istorefrontProductMapper.selectProductByGoodsType(str);//判断是否是实物和服务
+                    if (k>0) {
+                        fzy.append(str+",");
+                    }
+                    else
+                    {
+                        zy.append(str+",");
+                    }
+                }
+
+                Example example = new Example(StorefrontProduct.class);
+                example.createCriteria().andIn(StorefrontProduct.ID, Arrays.asList(fzy.toString().substring(0,fzy.length()-1).split(",")));
+                StorefrontProduct storefrontProduct = new StorefrontProduct();
+                storefrontProduct.setIsShelfStatus(isShelfStatus);
+                storefrontProduct.setId(null);
+                storefrontProduct.setCreateDate(null);
+                int j = istorefrontProductMapper.updateByExampleSelective(storefrontProduct, example);
+                if (j > 0) {
+                    if(zy!=null)
+                    {
+                        return ServerResponse.createBySuccess("部分商品上下架成功,如下商品属于当家自营商品，不能商家",zy.toString().substring(0,zy.length()-1));
+                    }
+                    return ServerResponse.createBySuccessMessage("设置商品上下架成功");
+                } else {
+                    return ServerResponse.createByErrorMessage("设置商品上下架失败");
+                }
+            }
+
         } catch (Exception e) {
             logger.error("设置商品批量上架失败：", e);
             return ServerResponse.createByErrorMessage("设置商品批量上架失败");

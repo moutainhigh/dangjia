@@ -60,4 +60,9 @@ public class DjSupplierPayOrder extends BaseEntity {
     @Desc(value = "业务订单号")
     @ApiModelProperty("业务订单号")
     private String businessOrderNumber;
+
+    @Column(name = "source_type")
+    @Desc(value = "来源类型 1：供应商 2：店铺")
+    @ApiModelProperty("来源类型 1：供应商 2：店铺")
+    private Integer sourceType;
 }
