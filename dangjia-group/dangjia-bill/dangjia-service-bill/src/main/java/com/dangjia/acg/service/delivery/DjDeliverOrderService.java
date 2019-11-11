@@ -197,23 +197,23 @@ public class DjDeliverOrderService {
      * @param userToken
      * @return
      */
-    public ServerResponse queryOrderNumber(String userToken){
+    public ServerResponse queryOrderNumber(String userToken,String houseId){
         String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
 
-        Object object = memberAPI.getMember(userToken);
-        if (object instanceof ServerResponse) {
-            return (ServerResponse) object;
-        }
-        JSONObject job = (JSONObject)object;
-        Member member = job.toJavaObject(Member.class);
-        HouseResult houseResult = new HouseResult();
-        object = getHouse(member.getId(), houseResult);
-        if (object instanceof ServerResponse) {
-            return ServerResponse.createByErrorCodeResultObj(ServerCode.NO_DATA.getCode(), HouseUtil.getWorkerDatas(null, address));
-        }
+//        Object object = memberAPI.getMember(userToken);
+//        if (object instanceof ServerResponse) {
+//            return (ServerResponse) object;
+//        }
+//        JSONObject job = (JSONObject)object;
+//        Member member = job.toJavaObject(Member.class);
+//        HouseResult houseResult = new HouseResult();
+//        object = getHouse(member.getId(), houseResult);
+//        if (object instanceof ServerResponse) {
+//            return ServerResponse.createByErrorCodeResultObj(ServerCode.NO_DATA.getCode(), HouseUtil.getWorkerDatas(null, address));
+//        }
 
-        House house = (House) object;
-        String houseId = house.getId();
+//        House house = (House) object;
+//        String houseId = house.getId();
 
         //订单状态 1待付款，2已付款，3待收货
         WorkInFoDTO workInFoDTO = new WorkInFoDTO();
@@ -244,7 +244,8 @@ public class DjDeliverOrderService {
         workInFoDTO.setOrderMap(map);
 
 
-//        House house = iBillHouseMapper.selectByPrimaryKey(houseId);
+        House house = iBillHouseMapper.selectByPrimaryKey(houseId);
+
         if(house != null) {
             String houseName = house.getResidential() + house.getBuilding() + "栋" +
                     house.getUnit() + "单元" + house.getNumber() + "号";
@@ -368,6 +369,46 @@ public class DjDeliverOrderService {
 
     }
 
+
+
+    public List< Map<String,Object>> optimizationHander(HouseFlow houseFlow){
+        //1设计师，2精算师，3大管家,4拆除，6水电工，7防水，8泥工,9木工，10油漆工
+        Map<String,Object> maps = new HashMap<>();
+        if(houseFlow.getWorkerType() == 1){
+            maps.put("i",1);
+            maps.put("name","设计师");
+        }else if(houseFlow.getWorkerType() == 2){
+            maps.put("i",2);
+            maps.put("name","精算师");
+        }else if(houseFlow.getWorkerType() == 3){
+            maps.put("i",3);
+            maps.put("name","大管家");
+        }else if(houseFlow.getWorkerType() == 4){
+            maps.put("i",4);
+            maps.put("name","拆除");
+        }else if(houseFlow.getWorkerType() == 6){
+            maps.put("i",6);
+            maps.put("name","水电工");
+        }else if(houseFlow.getWorkerType() == 7){
+            maps.put("i",7);
+            maps.put("name","防水");
+        }else if(houseFlow.getWorkerType() == 8){
+            maps.put("i",8);
+            maps.put("name","泥工");
+        }else if(houseFlow.getWorkerType() == 9){
+            maps.put("i",9);
+            maps.put("name","木工");
+        }else if(houseFlow.getWorkerType() == 10){
+            maps.put("i",10);
+            maps.put("name","油漆工");
+        }
+        List< Map<String,Object>> mapList = new ArrayList<>();
+        mapList.add(maps);
+        return mapList;
+    }
+
+
+
     /**
      * 获取工序信息
      * @param houseId
@@ -385,16 +426,17 @@ public class DjDeliverOrderService {
         List<Object> workList = new ArrayList<>();
         List<Map<String,Object>> gList = new ArrayList<>();
         Map<String,Object> listMap = new HashMap<>();
-        Map<String,Object> maps = new HashMap<>();
+
         //1设计师，2精算师，3大管家,4拆除，6水电工，7防水，8泥工,9木工，10油漆工
         for (HouseFlow houseFlow : houseFlows) {
-            if(houseFlow.getWorkerType() == 1){
+                List<Map<String,Object>> mapList = optimizationHander(houseFlow);
                 example = new Example(WorkerType.class);
                 example.createCriteria().andEqualTo(WorkerType.TYPE,houseFlow.getWorkerType())
                         .andEqualTo(WorkerType.DATA_STATUS, 0);
                 List<WorkerType> workerType = iBillWorkerTypeMapper.selectByExample(example);
                 gList = new ArrayList<>();
                 listMap = new HashMap<>();
+                workNodeListDTO = new WorkNodeListDTO();
                 listMap.put("name","预计工期" );
                 if(houseFlow.getStartDate() == null){
                     listMap.put("value",0 + "天");
@@ -412,26 +454,26 @@ public class DjDeliverOrderService {
                 gList.add(listMap);
 
                 //获取工序已验收节点
-                Long iStart = nodeNumberDTOS.stream().filter(x -> x.getState() == 1 && x.getType() == 1).count();
+                Long iStart = nodeNumberDTOS.stream().filter(x -> x.getState() == 1 && x.getType() == mapList.get(0).get("i")).count();
                 //获取工序全部节点
-                Long iEnd = nodeNumberDTOS.stream().filter(x -> x.getType() == 1).count();
+                Long iEnd = nodeNumberDTOS.stream().filter(x -> x.getType() ==  mapList.get(0).get("i")).count();
                 listMap = new HashMap<>();
                 if(iEnd == 0){
-                    listMap.put("name","施工节点" );//全部节点
-                    listMap.put("value",100 + "/" +100);//全部节点
-                    workNodeListDTO.setHundred(100);
+                    listMap.put("name","施工节点" );
+                    listMap.put("value",0 + "/" + 0);
+                    workNodeListDTO.setHundred(0);
                 }else{
-                    listMap.put("name","施工节点" );//全部节点
-                    listMap.put("value",iEnd + "/" +iStart);//全部节点
+                    listMap.put("name","施工节点" );
+                    listMap.put("value",iEnd + "/" +iStart);
                     workNodeListDTO.setHundred((int)(iStart / iEnd * 100));
                 }
                 gList.add(listMap);
 
-                int ss = materialNumberDTOS.stream().filter(x -> x.getType() == 1
+                int ss = materialNumberDTOS.stream().filter(x -> x.getType() ==  mapList.get(0).get("i")
                         && x.getShopCount() != null).mapToInt(MaterialNumberDTO :: getShopCount).sum();
-                int aa = materialNumberDTOS.stream().filter(x -> x.getType() == 1
+                int aa = materialNumberDTOS.stream().filter(x -> x.getType() ==  mapList.get(0).get("i")
                         && x.getAskCount() != null).mapToInt(MaterialNumberDTO :: getAskCount).sum();
-                int rr = materialNumberDTOS.stream().filter(x -> x.getType() == 1
+                int rr = materialNumberDTOS.stream().filter(x -> x.getType() ==  mapList.get(0).get("i")
                         && x.getReturnCount() != null).mapToInt(MaterialNumberDTO :: getReturnCount).sum();
                 listMap = new HashMap<>();
                 listMap.put("name","材料使用");//全部节点
@@ -440,461 +482,8 @@ public class DjDeliverOrderService {
                 workNodeListDTO.setLists(gList);
 
                 workNodeListDTO.setImage(address +workerType.get(0).getImage());
-                workNodeListDTO.setWorkName("设计师");
+                workNodeListDTO.setWorkName((String) mapList.get(0).get("name"));
                 workList.add(workNodeListDTO);
-            }else if(houseFlow.getWorkerType() == 2){
-                workNodeListDTO = new WorkNodeListDTO();
-                example = new Example(WorkerType.class);
-                example.createCriteria().andEqualTo(WorkerType.TYPE,houseFlow.getWorkerType())
-                        .andEqualTo(WorkerType.DATA_STATUS, 0);
-                List<WorkerType> workerType = iBillWorkerTypeMapper.selectByExample(example);
-
-                gList = new ArrayList<>();
-                listMap = new HashMap<>();
-                listMap.put("name","预计工期");
-                if(houseFlow.getStartDate() == null){
-                    listMap.put("value",0 + "天");
-                }else{
-                    listMap.put("value",  DateUtil.getDiffDays(new Date(),houseFlow.getStartDate()) + "天");
-                }
-                gList.add(listMap);
-
-                listMap = new HashMap<>();
-                listMap.put("name","实际工期");
-                if(houseFlow.getEndDate() == null){
-                    listMap.put("value",0 + "天");
-                }else{
-                    listMap.put("value",  DateUtil.getDiffDays(houseFlow.getEndDate(),houseFlow.getStartDate())+ "天");
-                }
-                gList.add(listMap);
-
-                //获取工序已验收节点
-                Long iStart = nodeNumberDTOS.stream().filter(x -> x.getState() == 1 && x.getType() == 2).count();
-                //获取工序全部节点
-                Long iEnd = nodeNumberDTOS.stream().filter(x -> x.getType() == 2).count();
-                listMap = new HashMap<>();
-                if(iEnd == 0){
-                    listMap.put("name","施工节点");//全部节点
-                    listMap.put("value",100 + "/" +100);//全部节点
-                    workNodeListDTO.setHundred(100);
-                }else{
-                    listMap.put("name","施工节点");//全部节点
-                    listMap.put("value",iEnd + "/" +iStart);//全部节点
-                    workNodeListDTO.setHundred((int)(iStart / iEnd * 100));
-                }
-                gList.add(listMap);
-
-                int ss = materialNumberDTOS.stream().filter(x -> x.getType() == 2
-                        && x.getShopCount() != null).mapToInt(MaterialNumberDTO :: getShopCount).sum();
-                int aa = materialNumberDTOS.stream().filter(x -> x.getType() == 2
-                        && x.getAskCount() != null).mapToInt(MaterialNumberDTO :: getAskCount).sum();
-                int rr = materialNumberDTOS.stream().filter(x -> x.getType() == 2
-                        && x.getReturnCount() != null).mapToInt(MaterialNumberDTO :: getReturnCount).sum();
-                listMap = new HashMap<>();
-                listMap.put("name","材料使用");//全部节点
-                listMap.put("value",aa + rr + "/" + ss);//全部节点
-                gList.add(listMap);
-
-                workNodeListDTO.setLists(gList);
-                workNodeListDTO.setImage(address +workerType.get(0).getImage());
-                workNodeListDTO.setWorkName("精算师");
-                workList.add(workNodeListDTO);
-            }else if(houseFlow.getWorkerType() == 3){
-                workNodeListDTO = new WorkNodeListDTO();
-                example = new Example(WorkerType.class);
-                example.createCriteria().andEqualTo(WorkerType.TYPE,houseFlow.getWorkerType())
-                        .andEqualTo(WorkerType.DATA_STATUS, 0);
-                List<WorkerType> workerType = iBillWorkerTypeMapper.selectByExample(example);
-
-                gList = new ArrayList<>();
-                listMap = new HashMap<>();
-                listMap.put("name","预计工期");
-                if(houseFlow.getStartDate() == null){
-                    listMap.put("value",0+ "天");
-                }else{
-                    listMap.put("value",  DateUtil.getDiffDays(new Date(),houseFlow.getStartDate()) + "天");
-                }
-                gList.add(listMap);
-                listMap = new HashMap<>();
-                listMap.put("name","实际工期");
-                if(houseFlow.getEndDate() == null){
-                    listMap.put("value",0 + "天");
-                }else{
-                    listMap.put("value",  DateUtil.getDiffDays(houseFlow.getEndDate(),houseFlow.getStartDate()) + "天");
-                }
-                gList.add(listMap);
-
-                //获取工序已验收节点
-                Long iStart = nodeNumberDTOS.stream().filter(x -> x.getState() == 1 && x.getType() == 3).count();
-                //获取工序全部节点
-                Long iEnd = nodeNumberDTOS.stream().filter(x -> x.getType() == 3).count();
-                listMap = new HashMap<>();
-                if(iEnd == 0){
-                    listMap.put("name","施工节点");//全部节点
-                    listMap.put("value",100 + "/" +100);//全部节点
-                    workNodeListDTO.setHundred(100);
-                }else{
-                    listMap.put("name","施工节点");//全部节点
-                    listMap.put("value",iEnd + "/" +iStart);//全部节点
-                    workNodeListDTO.setHundred((int)(iStart / iEnd * 100));
-                }
-                gList.add(listMap);
-
-                int ss = materialNumberDTOS.stream().filter(x -> x.getType() == 3
-                        && x.getShopCount() != null).mapToInt(MaterialNumberDTO :: getShopCount).sum();
-                int aa = materialNumberDTOS.stream().filter(x -> x.getType() == 3
-                        && x.getAskCount() != null).mapToInt(MaterialNumberDTO :: getAskCount).sum();
-                int rr = materialNumberDTOS.stream().filter(x -> x.getType() == 3
-                        && x.getReturnCount() != null).mapToInt(MaterialNumberDTO :: getReturnCount).sum();
-                listMap = new HashMap<>();
-                listMap.put("name","材料使用");//全部节点
-                listMap.put("value",aa + rr + "/" + ss);//全部节点
-                gList.add(listMap);
-                workNodeListDTO.setLists(gList);
-
-                workNodeListDTO.setImage(address +workerType.get(0).getImage());
-                workNodeListDTO.setWorkName("大管家");
-                workList.add(workNodeListDTO);
-            }else if(houseFlow.getWorkerType() == 4){
-                workNodeListDTO = new WorkNodeListDTO();
-                example = new Example(WorkerType.class);
-                example.createCriteria().andEqualTo(WorkerType.TYPE,houseFlow.getWorkerType())
-                        .andEqualTo(WorkerType.DATA_STATUS, 0);
-                List<WorkerType> workerType = iBillWorkerTypeMapper.selectByExample(example);
-
-                gList = new ArrayList<>();
-                listMap = new HashMap<>();
-
-                listMap.put("name","预计工期");
-                if(houseFlow.getStartDate() == null){
-                    listMap.put("value",0 + "天");
-                }else{
-                    listMap.put("value",  DateUtil.getDiffDays(new Date(),houseFlow.getStartDate()) + "天");
-                }
-                gList.add(listMap);
-                listMap = new HashMap<>();
-                listMap.put("name","实际工期");
-                if(houseFlow.getEndDate() == null){
-                    listMap.put("value",0 + "天");
-                }else{
-                    listMap.put("value",  DateUtil.getDiffDays(houseFlow.getEndDate(),houseFlow.getStartDate()) + "天");
-                }
-                gList.add(listMap);
-
-                //获取工序已验收节点
-                Long iStart = nodeNumberDTOS.stream().filter(x -> x.getState() == 1 && x.getType() == 4).count();
-                //获取工序全部节点
-                Long iEnd = nodeNumberDTOS.stream().filter(x -> x.getType() == 4).count();
-                listMap = new HashMap<>();
-                if(iEnd == 0){
-                    listMap.put("name","施工节点");//全部节点
-                    listMap.put("value",100 + "/" +100);//全部节点
-                    workNodeListDTO.setHundred(100);
-                }else{
-                    listMap.put("name","施工节点");//全部节点
-                    listMap.put("value",iEnd + "/" +iStart);//全部节点
-                    workNodeListDTO.setHundred((int)(iStart / iEnd * 100));
-                }
-                gList.add(listMap);
-
-                int ss = materialNumberDTOS.stream().filter(x -> x.getType() == 4
-                        && x.getShopCount() != null).mapToInt(MaterialNumberDTO :: getShopCount).sum();
-                int aa = materialNumberDTOS.stream().filter(x -> x.getType() == 4
-                        && x.getAskCount() != null).mapToInt(MaterialNumberDTO :: getAskCount).sum();
-                int rr = materialNumberDTOS.stream().filter(x -> x.getType() == 4
-                        && x.getReturnCount() != null).mapToInt(MaterialNumberDTO :: getReturnCount).sum();
-                listMap = new HashMap<>();
-                listMap.put("name","材料使用");//全部节点
-                listMap.put("value",aa + rr + "/" + ss);//全部节点
-                gList.add(listMap);
-                workNodeListDTO.setLists(gList);
-
-                workNodeListDTO.setImage(address +workerType.get(0).getImage());
-                workNodeListDTO.setWorkName("拆除");
-                workList.add(workNodeListDTO);
-            }else if(houseFlow.getWorkerType() == 6){
-                workNodeListDTO = new WorkNodeListDTO();
-                example = new Example(WorkerType.class);
-                example.createCriteria().andEqualTo(WorkerType.TYPE,houseFlow.getWorkerType())
-                        .andEqualTo(WorkerType.DATA_STATUS, 0);
-                List<WorkerType> workerType = iBillWorkerTypeMapper.selectByExample(example);
-                gList = new ArrayList<>();
-                listMap = new HashMap<>();
-
-                listMap.put("name","预计工期");
-                if(houseFlow.getStartDate() == null){
-                    listMap.put("value",0 + "天");
-                }else{
-                    listMap.put("value",  DateUtil.getDiffDays(new Date(),houseFlow.getStartDate()) + "天");
-                }
-                gList.add(listMap);
-                listMap = new HashMap<>();
-                listMap.put("name","实际工期");
-                if(houseFlow.getEndDate() == null){
-                    listMap.put("value",0 + "天");
-                }else{
-                    listMap.put("value",  DateUtil.getDiffDays(houseFlow.getEndDate(),houseFlow.getStartDate()) + "天");
-                }
-                gList.add(listMap);
-
-                //获取工序已验收节点
-                Long iStart = nodeNumberDTOS.stream().filter(x -> x.getState() == 1 && x.getType() == 6).count();
-                //获取工序全部节点
-                Long iEnd = nodeNumberDTOS.stream().filter(x -> x.getType() == 6).count();
-                listMap = new HashMap<>();
-                if(iEnd == 0){
-                    listMap.put("name","施工节点");//全部节点
-                    listMap.put("value",100 + "/" +100);//全部节点
-                    workNodeListDTO.setHundred(100);
-                }else{
-                    listMap.put("name","施工节点");//全部节点
-                    listMap.put("value",iEnd + "/" +iStart);//全部节点
-                    workNodeListDTO.setHundred((int)(iStart / iEnd * 100));
-                }
-                gList.add(listMap);
-
-                int ss = materialNumberDTOS.stream().filter(x -> x.getType() == 6
-                        && x.getShopCount() != null).mapToInt(MaterialNumberDTO :: getShopCount).sum();
-                int aa = materialNumberDTOS.stream().filter(x -> x.getType() == 6
-                        && x.getAskCount() != null).mapToInt(MaterialNumberDTO :: getAskCount).sum();
-                int rr = materialNumberDTOS.stream().filter(x -> x.getType() == 6
-                        && x.getReturnCount() != null).mapToInt(MaterialNumberDTO :: getReturnCount).sum();
-                listMap = new HashMap<>();
-                listMap.put("name","材料使用");//全部节点
-                listMap.put("value",aa + rr + "/" + ss);//全部节点
-                gList.add(listMap);
-                workNodeListDTO.setLists(gList);
-
-                workNodeListDTO.setImage(address +workerType.get(0).getImage());
-                workNodeListDTO.setWorkName("水电工");
-                workList.add(workNodeListDTO);
-            }else if(houseFlow.getWorkerType() == 7){
-                workNodeListDTO = new WorkNodeListDTO();
-                example = new Example(WorkerType.class);
-                example.createCriteria().andEqualTo(WorkerType.TYPE,houseFlow.getWorkerType())
-                        .andEqualTo(WorkerType.DATA_STATUS, 0);
-                List<WorkerType> workerType = iBillWorkerTypeMapper.selectByExample(example);
-
-                gList = new ArrayList<>();
-                listMap = new HashMap<>();
-
-                listMap.put("name","预计工期");
-                if(houseFlow.getStartDate() == null){
-                    listMap.put("value",0 + "天");
-                }else{
-                    listMap.put("value",  DateUtil.getDiffDays(new Date(),houseFlow.getStartDate()) + "天");
-                }
-                gList.add(listMap);
-                listMap = new HashMap<>();
-                listMap.put("name","实际工期");
-                if(houseFlow.getEndDate() == null){
-                    listMap.put("value",0 + "天");
-                }else{
-                    listMap.put("value",  DateUtil.getDiffDays(houseFlow.getEndDate(),houseFlow.getStartDate()) + "天");
-                }
-                gList.add(listMap);
-
-                //获取工序已验收节点
-                Long iStart = nodeNumberDTOS.stream().filter(x -> x.getState() == 1 && x.getType() == 7).count();
-                //获取工序全部节点
-                Long iEnd = nodeNumberDTOS.stream().filter(x -> x.getType() == 7).count();
-                listMap = new HashMap<>();
-                if(iEnd == 0){
-                    listMap.put("name","施工节点");//全部节点
-                    listMap.put("value",100 + "/" +100);//全部节点
-                    workNodeListDTO.setHundred(100);
-                }else{
-                    listMap.put("name","施工节点");//全部节点
-                    listMap.put("value",iEnd + "/" +iStart);//全部节点
-                    workNodeListDTO.setHundred((int)(iStart / iEnd * 100));
-                }
-                gList.add(listMap);
-
-                int ss = materialNumberDTOS.stream().filter(x -> x.getType() == 7
-                        && x.getShopCount() != null).mapToInt(MaterialNumberDTO :: getShopCount).sum();
-                int aa = materialNumberDTOS.stream().filter(x -> x.getType() == 7
-                        && x.getAskCount() != null).mapToInt(MaterialNumberDTO :: getAskCount).sum();
-                int rr = materialNumberDTOS.stream().filter(x -> x.getType() == 7
-                        && x.getReturnCount() != null).mapToInt(MaterialNumberDTO :: getReturnCount).sum();
-                listMap = new HashMap<>();
-                listMap.put("name","材料使用");//全部节点
-                listMap.put("value",aa + rr + "/" + ss);//全部节点
-                gList.add(listMap);
-                workNodeListDTO.setLists(gList);
-
-                workNodeListDTO.setImage(address +workerType.get(0).getImage());
-                workNodeListDTO.setWorkName("防水");
-                workList.add(workNodeListDTO);
-            }else if(houseFlow.getWorkerType() == 8){
-                workNodeListDTO = new WorkNodeListDTO();
-                example = new Example(WorkerType.class);
-                example.createCriteria().andEqualTo(WorkerType.TYPE,houseFlow.getWorkerType())
-                        .andEqualTo(WorkerType.DATA_STATUS, 0);
-                List<WorkerType> workerType = iBillWorkerTypeMapper.selectByExample(example);
-
-                gList = new ArrayList<>();
-                listMap = new HashMap<>();
-
-                listMap.put("name","预计工期");
-                if(houseFlow.getStartDate() == null){
-                    listMap.put("value",0 + "天");
-                }else{
-                    listMap.put("value",  DateUtil.getDiffDays(new Date(),houseFlow.getStartDate()) + "天");
-                }
-                gList.add(listMap);
-                listMap = new HashMap<>();
-                listMap.put("name","实际工期");
-                if(houseFlow.getEndDate() == null){
-                    listMap.put("value",0 + "天");
-                }else{
-                    listMap.put("value",  DateUtil.getDiffDays(houseFlow.getEndDate(),houseFlow.getStartDate()) + "天");
-                }
-                gList.add(listMap);
-
-                //获取工序已验收节点
-                Long iStart = nodeNumberDTOS.stream().filter(x -> x.getState() == 1 && x.getType() == 8).count();
-                //获取工序全部节点
-                Long iEnd = nodeNumberDTOS.stream().filter(x -> x.getType() == 8).count();
-                listMap = new HashMap<>();
-                if(iEnd == 0){
-                    listMap.put("name","施工节点");//全部节点
-                    listMap.put("value",100 + "/" +100);//全部节点
-                    workNodeListDTO.setHundred(100);
-                }else{
-                    listMap.put("name","施工节点");//全部节点
-                    listMap.put("value",iEnd + "/" +iStart);//全部节点
-                    workNodeListDTO.setHundred((int)(iStart / iEnd * 100));
-                }
-                gList.add(listMap);
-
-                int ss = materialNumberDTOS.stream().filter(x -> x.getType() == 8
-                        && x.getShopCount() != null).mapToInt(MaterialNumberDTO :: getShopCount).sum();
-                int aa = materialNumberDTOS.stream().filter(x -> x.getType() == 8
-                        && x.getAskCount() != null).mapToInt(MaterialNumberDTO :: getAskCount).sum();
-                int rr = materialNumberDTOS.stream().filter(x -> x.getType() == 8
-                        && x.getReturnCount() != null).mapToInt(MaterialNumberDTO :: getReturnCount).sum();
-                listMap = new HashMap<>();
-                listMap.put("name","材料使用");//全部节点
-                listMap.put("value",aa + rr + "/" + ss);//全部节点
-                gList.add(listMap);
-                workNodeListDTO.setLists(gList);
-
-                workNodeListDTO.setImage(address +workerType.get(0).getImage());
-                workNodeListDTO.setWorkName("泥工");
-                workList.add(workNodeListDTO);
-            }else if(houseFlow.getWorkerType() == 9){
-                workNodeListDTO = new WorkNodeListDTO();
-                example = new Example(WorkerType.class);
-                example.createCriteria().andEqualTo(WorkerType.TYPE,houseFlow.getWorkerType())
-                        .andEqualTo(WorkerType.DATA_STATUS, 0);
-                List<WorkerType> workerType = iBillWorkerTypeMapper.selectByExample(example);
-
-                gList = new ArrayList<>();
-                listMap = new HashMap<>();
-                listMap.put("name","预计工期");
-                if(houseFlow.getStartDate() == null){
-                    listMap.put("value",0 + "天");
-                }else{
-                    listMap.put("value",  DateUtil.getDiffDays(new Date(),houseFlow.getStartDate()) + "天");
-                }
-                gList.add(listMap);
-                listMap = new HashMap<>();
-                listMap.put("name","实际工期");
-                if(houseFlow.getEndDate() == null){
-                    listMap.put("value",0 + "天");
-                }else{
-                    listMap.put("value",  DateUtil.getDiffDays(houseFlow.getEndDate(),houseFlow.getStartDate()) + "天");
-                }
-                gList.add(listMap);
-
-                //获取工序已验收节点
-                Long iStart = nodeNumberDTOS.stream().filter(x -> x.getState() == 1 && x.getType() == 9).count();
-                //获取工序全部节点
-                Long iEnd = nodeNumberDTOS.stream().filter(x -> x.getType() == 9).count();
-                listMap = new HashMap<>();
-                if(iEnd == 0){
-                    listMap.put("name","施工节点");//全部节点
-                    listMap.put("value",100 + "/" +100);//全部节点
-                    workNodeListDTO.setHundred(100);
-                }else{
-                    listMap.put("name","施工节点");//全部节点
-                    listMap.put("value",iEnd + "/" +iStart);//全部节点
-                    workNodeListDTO.setHundred((int)(iStart / iEnd * 100));
-                }
-                gList.add(listMap);
-
-                int ss = materialNumberDTOS.stream().filter(x -> x.getType() == 9
-                        && x.getShopCount() != null).mapToInt(MaterialNumberDTO :: getShopCount).sum();
-                int aa = materialNumberDTOS.stream().filter(x -> x.getType() == 9
-                        && x.getAskCount() != null).mapToInt(MaterialNumberDTO :: getAskCount).sum();
-                int rr = materialNumberDTOS.stream().filter(x -> x.getType() == 9
-                        && x.getReturnCount() != null).mapToInt(MaterialNumberDTO :: getReturnCount).sum();
-                listMap = new HashMap<>();
-                listMap.put("name","材料使用");//全部节点
-                listMap.put("value",aa + rr + "/" + ss);//全部节点
-                gList.add(listMap);
-                workNodeListDTO.setLists(gList);
-
-                workNodeListDTO.setImage(address +workerType.get(0).getImage());
-                workNodeListDTO.setWorkName("木工");
-                workList.add(workNodeListDTO);
-            }else if(houseFlow.getWorkerType() == 10){
-                workNodeListDTO = new WorkNodeListDTO();
-                example = new Example(WorkerType.class);
-                example.createCriteria().andEqualTo(WorkerType.TYPE,houseFlow.getWorkerType())
-                        .andEqualTo(WorkerType.DATA_STATUS, 0);
-                List<WorkerType> workerType = iBillWorkerTypeMapper.selectByExample(example);
-
-                gList = new ArrayList<>();
-                listMap = new HashMap<>();
-                listMap.put("name","预计工期");
-                if(houseFlow.getStartDate() == null){
-                    listMap.put("value",0 + "天");
-                }else{
-                    listMap.put("value",  DateUtil.getDiffDays(new Date(),houseFlow.getStartDate()) + "天");
-                }
-                gList.add(listMap);
-                listMap = new HashMap<>();
-                listMap.put("name","实际工期");
-                if(houseFlow.getEndDate() == null){
-                    listMap.put("value",0 + "天");
-                }else{
-                    listMap.put("value",  DateUtil.getDiffDays(houseFlow.getEndDate(),houseFlow.getStartDate()) + "天");
-                }
-                gList.add(listMap);
-
-                //获取工序已验收节点
-                Long iStart = nodeNumberDTOS.stream().filter(x -> x.getState() == 1 && x.getType() == 10).count();
-                //获取工序全部节点
-                Long iEnd = nodeNumberDTOS.stream().filter(x -> x.getType() == 10).count();
-                listMap = new HashMap<>();
-                if(iEnd == 0){
-                    listMap.put("name","施工节点");//全部节点
-                    listMap.put("value",100 + "/" +100);//全部节点
-                    workNodeListDTO.setHundred(100);
-                }else{
-                    listMap.put("name","施工节点");//全部节点
-                    listMap.put("value",iEnd + "/" +iStart);//全部节点
-                    workNodeListDTO.setHundred((int)(iStart / iEnd * 100));
-                }
-                gList.add(listMap);
-
-                int ss = materialNumberDTOS.stream().filter(x -> x.getType() == 10
-                        && x.getShopCount() != null).mapToInt(MaterialNumberDTO :: getShopCount).sum();
-                int aa = materialNumberDTOS.stream().filter(x -> x.getType() == 10
-                        && x.getAskCount() != null).mapToInt(MaterialNumberDTO :: getAskCount).sum();
-                int rr = materialNumberDTOS.stream().filter(x -> x.getType() == 10
-                        && x.getReturnCount() != null).mapToInt(MaterialNumberDTO :: getReturnCount).sum();
-                listMap = new HashMap<>();
-                listMap.put("name","材料使用");//全部节点
-                listMap.put("value",aa + rr + "/" + ss);//全部节点
-                gList.add(listMap);
-                workNodeListDTO.setLists(gList);
-
-                workNodeListDTO.setImage(address +workerType.get(0).getImage());
-                workNodeListDTO.setWorkName("油漆工");
-                workList.add(workNodeListDTO);
-            }
         }
 
         return workList;
