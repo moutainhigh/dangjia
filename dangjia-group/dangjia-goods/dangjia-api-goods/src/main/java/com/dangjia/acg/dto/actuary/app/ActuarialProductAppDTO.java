@@ -30,6 +30,9 @@ public class ActuarialProductAppDTO {
     @ApiModelProperty("店铺名称")
     private String storefrontName;
 
+    @ApiModelProperty("店铺图标")
+    private String storefrontIcon;
+
     @ApiModelProperty("类别ID")
     private String categoryId;
 
