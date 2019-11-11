@@ -18,6 +18,7 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.common.util.JsmsUtil;
+import com.dangjia.acg.common.util.MathUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO;
 import com.dangjia.acg.dto.core.HouseFlowDTO;
@@ -376,7 +377,10 @@ public class HouseService {
      * @param houseId 房子ID
      * @return
      */
-    public List<Map<String,Object>> getHouseDetailInfoList(String houseId) {
+    public Map<String,Object> getHouseDetailInfoList(String houseId) {
+        Map resultMap=new HashMap();
+        Double actualTotalAmount=0.0;
+        Double totalAmount=0.0;
         //先查询店铺汇总信息，再查询对应的商品信息(包含 店铺ID，总价钱
         List<Map<String, Object>> houseDetailList = iMasterBudgetMapper.getHouseDetailInfoList(houseId);
         if (houseDetailList != null && houseDetailList.size() > 0) {
@@ -384,10 +388,16 @@ public class HouseService {
             for (Map<String, Object> houseMap : houseDetailList) {
                 List<ActuarialProductAppDTO> productlist = iMasterBudgetMapper.getBudgetProductList(houseId, (String) houseMap.get("storefrontId"));
                 getProductList(productlist, address);
+                //判断是否要按面积计算参考价格
+                actualTotalAmount= MathUtil.add(actualTotalAmount,(Double)houseMap.get("totalPrice"));
+                totalAmount= MathUtil.add(totalAmount,(Double)houseMap.get("totalPrice"));
                 houseMap.put("productList", productlist);
             }
         }
-        return houseDetailList;
+        resultMap.put("actualTotalAmount",actualTotalAmount);//商品总额
+        resultMap.put("totalAmount",totalAmount);//实付款
+        resultMap.put("houseDetailList",houseDetailList);//房子订单详情信息
+        return resultMap;
     }
     public  void getProductList(List<ActuarialProductAppDTO> productList,String address){
         if(productList!=null&&productList.size()>0){
@@ -403,8 +413,14 @@ public class HouseService {
                 StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
                 ap.setImageUrl(imgStr.toString());//图片详情地址设置
                 //查询单位
-                if(ap.getUnit()!=null&&StringUtils.isNotBlank(ap.getUnit())){
-                    Unit unit= iMasterUnitMapper.selectByPrimaryKey(ap.getUnit());
+                String unitId=ap.getUnit();
+                //查询单位
+                if(ap.getConvertQuality()!=null&&ap.getConvertQuality()>0){
+                    unitId=ap.getConvertUnit();
+                }
+
+                if(unitId!=null&& StringUtils.isNotBlank(unitId)){
+                    Unit unit= iMasterUnitMapper.selectByPrimaryKey(unitId);
                     ap.setUnitName(unit!=null?unit.getName():"");
                 }
                 //查询规格名称
@@ -1668,8 +1684,8 @@ public class HouseService {
         if(houseList!=null&&houseList.size()>0){
             House house=houseList.get(0);
             //根据房子ID查询对应下单的商品信息(商品名称，商品规格，店铺名称，价钱汇总等信息)
-            List houseDetailInfoList=iMasterBudgetMapper.getHouseDetailInfoList(house.getId());
-            return ServerResponse.createBySuccess("查询成功",houseDetailInfoList);
+            Map houseMap=getHouseDetailInfoList(house.getId());
+            return ServerResponse.createBySuccess("查询成功",houseMap);
         }
         return ServerResponse.createByErrorMessage("未找到对应的提交信息，请核实！");
     }

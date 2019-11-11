@@ -46,7 +46,8 @@
         t.address_id addressId,
         t.house_id houseId,
         t.number orderSplitNumber,
-        t1.storefront_name storefrontName
+        t1.storefront_name storefrontName,
+        t1.system_logo storefrontIcon
         FROM
         dj_deliver_order_split t
         INNER JOIN dj_basics_storefront t1 ON t.storefront_id = t1.id
