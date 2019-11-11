@@ -7,6 +7,8 @@ import lombok.Data;
  */
 @Data
 public class StoreSupplierDimensionDTO {
+    //店铺id
+    private String storefrontId;
     //供应商名称
     private String name;
     //联系人
@@ -19,5 +21,7 @@ public class StoreSupplierDimensionDTO {
     private Double expenditure;
     //利润
     private Double profit;
+    //供应商id
+    private String  supId;
 
 }

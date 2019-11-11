@@ -4,12 +4,15 @@ import com.dangjia.acg.api.supplier.DjSupplierAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dto.supplier.DjSupplierDTO;
+import com.dangjia.acg.dto.supplier.SupplierLikeDTO;
 import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.dangjia.acg.service.supplier.DjSupplierServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -131,6 +134,12 @@ public class DjSupplierController implements DjSupplierAPI {
     @ApiMethod
     public ServerResponse queryExpenditure(String supId) {
         return djSupplierServices.queryExpenditure(supId);
+    }
+
+    @Override
+    @ApiMethod
+    public List<SupplierLikeDTO> queryLikeSupplier(String searchKey) {
+        return djSupplierServices.queryLikeSupplier(searchKey);
     }
 
 }

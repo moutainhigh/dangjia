@@ -70,4 +70,6 @@ public class StorefrontDTO {
     private String storefrontSigleLogo;
 
 
+    private String  systemLogo;
+
 }

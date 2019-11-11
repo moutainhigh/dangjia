@@ -12,6 +12,7 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dto.supplier.DjSupSupplierProductDTO;
 import com.dangjia.acg.dto.supplier.DjSupplierDTO;
 import com.dangjia.acg.dto.supplier.DjSupplierDeliverDTO;
+import com.dangjia.acg.dto.supplier.SupplierLikeDTO;
 import com.dangjia.acg.mapper.account.IStoreAccountFlowRecordMapper;
 import com.dangjia.acg.mapper.delivery.IStoreSplitDeliverMapper;
 import com.dangjia.acg.mapper.pay.IStoreBusinessOrderMapper;
@@ -38,6 +39,8 @@ import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.modle.worker.WithdrawDeposit;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -87,6 +90,7 @@ public class DjSupplierServices {
     @Autowired
     private IStoreAccountFlowRecordMapper iStoreAccountFlowRecordMapper;
 
+    private static Logger logger = LoggerFactory.getLogger(DjSupplierServices.class);
 
     public DjSupplier queryDjSupplierByPass(String supplierId) {
         return djSupplierMapper.queryDjSupplierByPass(supplierId);
@@ -614,5 +618,14 @@ public class DjSupplierServices {
         }
     }
 
-
+    public List<SupplierLikeDTO> queryLikeSupplier(String searchKey)
+    {
+        try {
+            List<SupplierLikeDTO> list = djSupplierMapper.queryLikeSupplier(searchKey);
+            return list;
+        } catch (Exception e) {
+            logger.error("查询失败",e);
+            return null;
+        }
+    }
 }

@@ -2,6 +2,8 @@ package com.dangjia.acg.api.supplier;
 
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dto.supplier.DjSupplierDTO;
+import com.dangjia.acg.dto.supplier.SupplierLikeDTO;
 import com.dangjia.acg.modle.supplier.DjSupplier;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -120,4 +123,9 @@ public interface DjSupplierAPI {
     @PostMapping("/sup/queryExpenditure")
     @ApiOperation(value = "供应商支出记录", notes = "供应商支出记录")
     ServerResponse queryExpenditure(@RequestParam("supId") String supId);
+
+    @PostMapping("/sup/queryLikeSupplier")
+    @ApiOperation(value = "根据条件模糊查询供应商信息", notes = "根据条件模糊查询供应商信息")
+    List<SupplierLikeDTO> queryLikeSupplier(@RequestParam("searchKey") String searchKey);
+
 }
