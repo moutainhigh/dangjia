@@ -269,6 +269,7 @@ public class RefundAfterSalesService {
                         if (refundOrderItemDTO == null) {
                             return ServerResponse.createByErrorMessage("未找到对应的退货单信息");
                         }
+                        refundOrderItemDTO.setSurplusCount(returnCount);
                         setProductInfo(refundOrderItemDTO,address);
                         Double price = refundOrderItemDTO.getPrice();//购买单价
                         Double shopCount=refundOrderItemDTO.getShopCount();//购买数据
@@ -911,6 +912,7 @@ public class RefundAfterSalesService {
                         if (refundOrderItemDTO == null) {
                             return ServerResponse.createByErrorMessage("未找到对应的退货单信息");
                         }
+                        refundOrderItemDTO.setSurplusCount(returnCount);
                         setProductInfo(refundOrderItemDTO,address);
                         Double price = refundOrderItemDTO.getPrice();//购买单价
                         Double shopCount=refundOrderItemDTO.getShopCount();//购买数据
