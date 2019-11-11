@@ -70,4 +70,12 @@ public abstract class SysConfig {
             "100", "工人购买保险金额", APP_TYPE);
 
 
+
+    public static final ConfigBean<String> ORDER_DANGJIA_ICON = new ConfigBean<String>("ORDER_DANGJIA_ICON",
+            "/icon/order/dangjia.png", "当家图标", APP_TYPE);
+
+    public static final ConfigBean<String> ORDER_DIANPU_ICON = new ConfigBean<String>("ORDER_DIANPU_ICON",
+            "/icon/order/dianpu.png", "店铺图标", APP_TYPE);
+
+
 }

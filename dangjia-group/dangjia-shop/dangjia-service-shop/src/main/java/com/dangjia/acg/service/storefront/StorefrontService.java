@@ -237,6 +237,8 @@ public class StorefrontService {
                 storefront.setStorekeeperName(storefrontDTO.getStorekeeperName());
                 storefront.setMobile(storefrontDTO.getMobile());
                 storefront.setEmail(storefrontDTO.getEmail());
+                String systemlogo = configUtil.getValue(SysConfig.ORDER_DIANPU_ICON, String.class);
+                storefront.setSystemLogo(systemlogo);
                 int i = istorefrontMapper.insert(storefront);
                 if (i <= 0) {
                     return ServerResponse.createByErrorMessage("修改失败!");
