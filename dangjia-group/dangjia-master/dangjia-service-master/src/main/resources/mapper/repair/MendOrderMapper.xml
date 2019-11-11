@@ -250,10 +250,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         rmo.modify_date AS modifyDate, -- 修改时间
         house.id, -- 房子id
         house.residential AS residential,-- 小区名
-        house.building AS building -- 楼栋，后台客服填写 ,
-        house.unit AS unit -- 单元号，后台客服填写 ,
-        house.number AS number -- 房间号，后台客服填写 ,
-        house.member_id AS memberId -- 用户ID ,
+        house.building AS building, -- 楼栋，后台客服填写 ,
+        house.unit AS unit, -- 单元号，后台客服填写 ,
+        house.number AS number, -- 房间号，后台客服填写 ,
+        house.member_id AS memberId, -- 用户ID ,
         rmo.storefront_id as storefrontId-- 店铺id
         FROM
         dj_repair_mend_order AS rmo
@@ -269,9 +269,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </if>
         <if test = "type!=null and type!=''">
             and rmo.type = #{type}
-        </if>
-        <if test="beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
-            and rmo.create_date between  #{beginDate}  and #{endDate}
         </if>
         <if test="likeAddress!=null and likeAddress!=''">
             AND CONCAT(
@@ -325,9 +322,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </if>
         <if test = "type!=null and type!=''">
             and rmo.type = #{type}
-        </if>
-        <if test="beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
-            and rmo.create_date between  #{beginDate}  and #{endDate}
         </if>
         <if test="likeAddress!=null and likeAddress!=''">
             AND CONCAT(

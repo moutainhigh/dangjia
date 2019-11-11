@@ -95,12 +95,11 @@ public interface DjDeliveryReturnSlipMapper extends Mapper<DjDeliveryReturnSlip>
 
     /**
      * 店铺利润-买家维度
-     * @param supId
      * @param storefrontId
      * @param cityId
      * @return
      */
-    List<BuyersDimensionDTO> sellerDimension(@Param("supId") String supId,@Param("storefrontId") String storefrontId, @Param("cityId") String cityId);
+    List<StoreBuyersDimensionDTO> sellerDimension(@Param("storefrontId") String storefrontId, @Param("cityId") String cityId,@Param("searchKey") String searchKey);
 
 
     /**
