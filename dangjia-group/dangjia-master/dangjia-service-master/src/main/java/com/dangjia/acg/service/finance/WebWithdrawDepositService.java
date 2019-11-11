@@ -11,7 +11,7 @@ import com.dangjia.acg.dto.finance.WebWithdrawDTO;
 import com.dangjia.acg.mapper.account.IMasterAccountFlowRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.product.IMasterStorefrontMapper;
-import com.dangjia.acg.mapper.supplier.IMaterSupplierMapper;
+import com.dangjia.acg.mapper.supplier.IMasterSupplierMapper;
 import com.dangjia.acg.mapper.worker.IWithdrawDepositMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.account.AccountFlowRecord;
@@ -49,7 +49,7 @@ public class WebWithdrawDepositService {
     @Autowired
     private ConfigUtil configUtil;
     @Autowired
-    private IMaterSupplierMapper iMaterSupplierMapper;
+    private IMasterSupplierMapper iMaterSupplierMapper;
     @Autowired
     private IMasterStorefrontMapper iMasterStorefrontMapper;
     @Autowired

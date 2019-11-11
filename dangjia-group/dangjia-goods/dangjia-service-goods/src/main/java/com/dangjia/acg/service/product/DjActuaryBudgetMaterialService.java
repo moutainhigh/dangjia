@@ -5,13 +5,13 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.app.house.HouseAPI;
 import com.dangjia.acg.api.data.GetForBudgetAPI;
-import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO;
 import com.dangjia.acg.dto.product.BasicsGoodArrDTO;
 import com.dangjia.acg.dto.product.BasicsGoodDTO;
 import com.dangjia.acg.dto.product.BasicsgDTO;
@@ -25,7 +25,10 @@ import com.dangjia.acg.mapper.product.IBasicsProductTemplateMapper;
 import com.dangjia.acg.modle.actuary.ActuarialTemplate;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.brand.Unit;
-import com.dangjia.acg.modle.product.*;
+import com.dangjia.acg.modle.product.BasicsGoodsCategory;
+import com.dangjia.acg.modle.product.DjBasicsGoods;
+import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
+import com.dangjia.acg.service.actuary.app.SearchActuarialConfigServices;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -71,6 +74,8 @@ public class DjActuaryBudgetMaterialService {
     @Autowired
     private GetForBudgetAPI getForBudgetAPI;
 
+    @Autowired
+    private SearchActuarialConfigServices searchActuarialConfigServices;
     /**
      * 生成精算
      */
@@ -469,8 +474,7 @@ public class DjActuaryBudgetMaterialService {
                                              String name, String attributeVal,
                                              String brandVal,String orderKey) {
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-//        String imageAddress ="";
-        JSONArray arr = new JSONArray();
+        List<ActuarialProductAppDTO> arr = new ArrayList<>();
         PageInfo pageResult = null;
         try {
             //根据内容模糊搜索商品
@@ -479,33 +483,27 @@ public class DjActuaryBudgetMaterialService {
             if (!CommonUtil.isEmpty(attributeVal)) {
                 attributeVals = attributeVal.split(",");
             }
+            String[] brandVals = null;
+            if (!CommonUtil.isEmpty(brandVal)) {
+                brandVals = brandVal.split(",");
+            }
             String[] names=null;
             if(!CommonUtil.isEmpty(name)){
                 names=name.split(",");
             }
-            List<DjBasicsProductTemplate> pList = iBasicsProductTemplateMapper.serchCategoryProduct(categoryId, names, brandVal, attributeVals, orderKey);
+            List<ActuarialProductAppDTO> pList = iBasicsProductTemplateMapper.serchCategoryProduct(categoryId, names, brandVals, attributeVals, orderKey);
             pageResult = new PageInfo<>(pList);
             if (!pList.isEmpty()) {
-                for (DjBasicsProductTemplate product : pList) {
-                    String convertUnitName = iUnitMapper.selectByPrimaryKey(product.getUnitId()).getName();
-                    String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) +
-                            String.format(DjConstants.YZPageAddress.GOODSDETAIL, " ", cityId, "商品详情") +
-                            "&gId=" + product.getId();
-                    JSONObject object = new JSONObject();
-                    if (productId.equals(product.getId())) {
+                searchActuarialConfigServices.getProductList(pList, imageAddress);
+                for (ActuarialProductAppDTO product : pList) {
+                    if (productId.equals(product.getProductId())) {
                         //勾选商品标识
-                        object.put("flag", true);
+                        product.setFlag(true);
                     } else {
                         //未勾选商品标识
-                        object.put("flag", false);
+                        product.setFlag(false);
                     }
-                    object.put("image", imageAddress + product.getImage());
-                    object.put("price", product.getPrice());
-                    object.put("unitName", convertUnitName);
-                    object.put("name", product.getName());
-                    object.put("id", product.getId());
-                    object.put("url", url);//0:工艺；1：商品；2：人工
-                    arr.add(object);
+                    arr.add(product);
                 }
             }
             pageResult.setList(arr);

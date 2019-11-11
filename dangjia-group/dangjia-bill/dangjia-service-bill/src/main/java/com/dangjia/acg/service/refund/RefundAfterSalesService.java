@@ -165,10 +165,13 @@ public class RefundAfterSalesService {
             ap.setCategoryId(pt.getCategoryId());
             //添加图片详情地址字段
             String[] imgArr = image.split(",");
-            StringBuilder imgStr = new StringBuilder();
-            StringBuilder imgUrlStr = new StringBuilder();
-            StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
-            ap.setImageUrl(imgStr.toString());//图片详情地址设置
+            //StringBuilder imgStr = new StringBuilder();
+           // StringBuilder imgUrlStr = new StringBuilder();
+           // StringTool.get.getImages(address, imgArr, imgStr, imgUrlStr);
+            if(imgArr!=null&&imgArr.length>0){
+                ap.setImageUrl(address+imgArr[0]);//图片详情地址设置
+            }
+
             String unitId=pt.getUnitId();
             //查询单位
             if(pt.getConvertQuality()!=null&&pt.getConvertQuality()>0){
@@ -266,6 +269,7 @@ public class RefundAfterSalesService {
                         if (refundOrderItemDTO == null) {
                             return ServerResponse.createByErrorMessage("未找到对应的退货单信息");
                         }
+                        refundOrderItemDTO.setSurplusCount(returnCount);
                         setProductInfo(refundOrderItemDTO,address);
                         Double price = refundOrderItemDTO.getPrice();//购买单价
                         Double shopCount=refundOrderItemDTO.getShopCount();//购买数据
@@ -292,17 +296,20 @@ public class RefundAfterSalesService {
                     orderInfo.setOrderDetailList(orderItemList);
                     orderInfo.setActualTotalAmount(actualTotalAmount);//退货总额
                     orderInfo.setTotalAmount(MathUtil.add(MathUtil.add(actualTotalAmount,totalRransportationCost),totalStevedorageCost));//实退款
+                    orderInfo.setTotalRransportationCostRemark("运费："+orderInfo.getTotalRransportationCost());//运费描述
+                    orderInfo.setTotalStevedorageCostRemark("搬运费："+orderInfo.getTotalStevedorageCost());//搬运费描述
                     //添加对应的信息
                     orderlist.add(orderInfo);
                     actualTotalAmountT=MathUtil.add(actualTotalAmountT,orderInfo.getActualTotalAmount());
                     totalRransportationCostT= MathUtil.add(totalRransportationCostT,orderInfo.getTotalRransportationCost());
                     totalStevedorageCostT=MathUtil.add(totalStevedorageCostT,orderInfo.getTotalStevedorageCost());
                     totalAmountT=MathUtil.add(totalAmountT,orderInfo.getTotalAmount());
+
                 }
 
                 map.put("actualTotalAmount",actualTotalAmountT);
-                map.put("totalRransportationCost",+totalRransportationCostT);
-                map.put("totalStevedorageCost",+totalStevedorageCostT);
+                map.put("totalRransportationCost",totalRransportationCostT);
+                map.put("totalStevedorageCost",totalStevedorageCostT);
                 map.put("totalAmount",totalAmountT);
                 map.put("orderlist",orderlist);
             }
@@ -588,10 +595,13 @@ public class RefundAfterSalesService {
             ap.setCategoryId(pt.getCategoryId());
             //添加图片详情地址字段
             String[] imgArr = image.split(",");
-            StringBuilder imgStr = new StringBuilder();
-            StringBuilder imgUrlStr = new StringBuilder();
-            StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
-            ap.setImageUrl(imgStr.toString());//图片详情地址设置
+            //StringBuilder imgStr = new StringBuilder();
+            //StringBuilder imgUrlStr = new StringBuilder();
+            //StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
+            if(imgArr!=null&&imgArr.length>0){
+                ap.setImageUrl(address+imgArr[0]);//图片详情地址设置
+            }
+           // ap.setImageUrl(imgStr.toString());//图片详情地址设置
             //查询单位
             String unitId=pt.getUnitId();
             if(pt.getConvertQuality()!=null&&pt.getConvertQuality()>0){
@@ -905,6 +915,7 @@ public class RefundAfterSalesService {
                         if (refundOrderItemDTO == null) {
                             return ServerResponse.createByErrorMessage("未找到对应的退货单信息");
                         }
+                        refundOrderItemDTO.setSurplusCount(returnCount);
                         setProductInfo(refundOrderItemDTO,address);
                         Double price = refundOrderItemDTO.getPrice();//购买单价
                         Double shopCount=refundOrderItemDTO.getShopCount();//购买数据
@@ -930,6 +941,9 @@ public class RefundAfterSalesService {
                     orderInfo.setOrderDetailList(orderItemList);
                     orderInfo.setActualTotalAmount(actualTotalAmount);//退货总额
                     orderInfo.setTotalAmount(MathUtil.sub(MathUtil.sub(actualTotalAmount,totalRransportationCost),totalStevedorageCost));//实退款
+
+                    orderInfo.setTotalRransportationCostRemark("运费："+orderInfo.getTotalRransportationCost());//运费描述
+                    orderInfo.setTotalStevedorageCostRemark("搬运费："+orderInfo.getTotalStevedorageCost());//搬运费描述
                     //添加对应的信息
                     orderlist.add(orderInfo);
                     actualTotalAmountT=MathUtil.add(actualTotalAmountT,orderInfo.getActualTotalAmount());
@@ -939,8 +953,8 @@ public class RefundAfterSalesService {
                 }
 
                 map.put("actualTotalAmount",actualTotalAmountT);
-                map.put("totalRransportationCost",-totalRransportationCostT);
-                map.put("totalStevedorageCost",-totalStevedorageCostT);
+                map.put("totalRransportationCost",MathUtil.sub(0,totalRransportationCostT));
+                map.put("totalStevedorageCost",MathUtil.sub(0,totalStevedorageCostT));
                 map.put("totalAmount",totalAmountT);
                 map.put("orderlist",orderlist);
             }

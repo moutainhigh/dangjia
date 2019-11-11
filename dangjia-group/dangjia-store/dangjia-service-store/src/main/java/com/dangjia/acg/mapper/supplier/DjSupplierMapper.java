@@ -1,6 +1,7 @@
 package com.dangjia.acg.mapper.supplier;
 
 import com.dangjia.acg.dto.supplier.DjSupplierDTO;
+import com.dangjia.acg.dto.supplier.SupplierLikeDTO;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.supplier.DjSupplier;
 import org.apache.ibatis.annotations.Param;
@@ -26,4 +27,7 @@ public interface DjSupplierMapper extends Mapper<DjSupplier> {
     DjSupplier querySingleDjSupplier(@Param("userId") String userId, @Param("cityId") String cityId);
 
     Double myWallet(@Param("supId") String supId, @Param("date") Date date);
+
+    List<SupplierLikeDTO> queryLikeSupplier(@Param("searchKey") String searchKey);
+
 }

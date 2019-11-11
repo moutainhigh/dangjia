@@ -1,7 +1,7 @@
 package com.dangjia.acg.mapper.product;
 
+import com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO;
 import com.dangjia.acg.dto.basics.WorkerGoodsDTO;
-import com.dangjia.acg.dto.product.AppBasicsProductDTO;
 import com.dangjia.acg.dto.product.DjBasicsProductTemplateDTO;
 import com.dangjia.acg.dto.product.StorefrontProductDTO;
 import com.dangjia.acg.modle.product.BasicsGoods;
@@ -78,7 +78,7 @@ public interface IBasicsProductTemplateMapper extends Mapper<DjBasicsProductTemp
 
     List<DjBasicsProductTemplate> queryProductByCategoryId(@Param("categoryId") String categoryId);
 
-    List<DjBasicsProductTemplate> serchCategoryProduct(@Param("categoryId") String categoryId, @Param("name")String[]   name, @Param("brandVal") String brandVal, @Param("attributeVal") String[] attributeVal, @Param("orderKey") String orderKey);
+    List<ActuarialProductAppDTO> serchCategoryProduct(@Param("categoryId") String categoryId, @Param("name")String[]   name, @Param("brandVal") String[] brandVal, @Param("attributeVal") String[] attributeVal, @Param("orderKey") String orderKey);
 
     List<DjBasicsProductTemplate> queryProductByTechnologyIds(@Param("technologyId") String technologyId);
 
