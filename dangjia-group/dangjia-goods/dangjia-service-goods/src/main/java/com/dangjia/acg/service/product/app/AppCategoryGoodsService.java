@@ -1,18 +1,20 @@
 package com.dangjia.acg.service.product.app;
 
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.actuary.AttributeDTO;
+import com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO;
 import com.dangjia.acg.mapper.basics.IUnitMapper;
 import com.dangjia.acg.mapper.product.*;
 import com.dangjia.acg.modle.brand.Brand;
-import com.dangjia.acg.modle.product.*;
+import com.dangjia.acg.modle.product.BasicsGoodsCategory;
+import com.dangjia.acg.modle.product.CategoryLabel;
+import com.dangjia.acg.modle.product.DjBasicsMaintain;
+import com.dangjia.acg.service.actuary.app.SearchActuarialConfigServices;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -50,6 +52,10 @@ public class AppCategoryGoodsService {
     private IBasicsProductTemplateMapper iBasicsProductTemplateMapper;
     @Autowired
     private ConfigUtil configUtil;
+
+
+    @Autowired
+    private SearchActuarialConfigServices searchActuarialConfigServices;
 
     /************************APP 商品3.0 分类模块********************************/
     /**
@@ -138,7 +144,7 @@ public class AppCategoryGoodsService {
         JSONArray arr = new JSONArray();
         PageInfo pageResult = null;
         try {
-
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             if(!CommonUtil.isEmpty(name)){
                 Example example = new Example(DjBasicsMaintain.class);
                 example.createCriteria().andCondition(" FIND_IN_SET(search_item,'"+name+"')");
@@ -155,27 +161,19 @@ public class AppCategoryGoodsService {
             if(!CommonUtil.isEmpty(attributeVal)){
                 attributeVals=attributeVal.split(",");
             }
+            String[] brandVals = null;
+            if (!CommonUtil.isEmpty(brandVal)) {
+                brandVals = brandVal.split(",");
+            }
             String[] names=null;
             if(!CommonUtil.isEmpty(name)){
                 names=name.split(",");
             }
 //            StringTool.getLikeV(name)
-            List<DjBasicsProductTemplate> pList = iBasicsProductTemplateMapper.serchCategoryProduct(categoryId,names,brandVal,attributeVals,orderKey);
+            List<ActuarialProductAppDTO> pList = iBasicsProductTemplateMapper.serchCategoryProduct(categoryId,names,brandVals,attributeVals,orderKey);
             pageResult = new PageInfo<>(pList);
-            for (DjBasicsProductTemplate product : pList) {
-                String convertUnitName = iUnitMapper.selectByPrimaryKey(product.getUnitId()).getName();
-                JSONObject object = new JSONObject();
-                object.put("image", configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + product.getImage());
-                object.put("price", product.getPrice());
-                object.put("unitName", convertUnitName);
-                object.put("gId", product.getId());
-                object.put("name", product.getName());
-                object.put("productType", product.getType());
-                object.put("storefrontName", product.getStorefrontName());
-                arr.add(object);
-            }
-
-            pageResult.setList(arr);
+            searchActuarialConfigServices.getProductList(pList,address);
+            pageResult.setList(pList);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
