@@ -33,5 +33,9 @@ public class RefundOrderDTO {
 
     private Double totalAmount;//实退款(含运费)
 
+    private String totalRransportationCostRemark;//可退运费描述
+
+    private String totalStevedorageCostRemark;//可退搬运费描述
+
     private List<RefundOrderItemDTO> orderDetailList;
 }
