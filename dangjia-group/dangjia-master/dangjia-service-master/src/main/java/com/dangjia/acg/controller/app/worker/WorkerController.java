@@ -91,8 +91,21 @@ public class WorkerController implements WorkerAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse addMyBankCard(HttpServletRequest request, String userToken,WorkerBankCard bankCard,String userId){
-        return  workerService.addMyBankCard(request,userToken,bankCard,userId);
+    public ServerResponse addMyBankCard(HttpServletRequest request, String userToken,WorkerBankCard bankCard,
+                                        String userId,String phone,int smscode){
+        return  workerService.addMyBankCard(request,userToken,bankCard,userId,phone,smscode);
+    }
+
+
+    /**
+     * 绑定银行卡验证码
+     * @param phone
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse registerCode(HttpServletRequest request,String phone) {
+        return  workerService.registerCode(phone);
     }
 
     /**

@@ -70,6 +70,11 @@ public class WithdrawDeposit extends BaseEntity {
     @ApiModelProperty("持卡人id")
     private String workerId;//workerid
 
+    @Column(name = "source_id")
+    @Desc(value = "来源id(供应商/店铺id)")
+    @ApiModelProperty("来源id(供应商/店铺id)")
+    private String sourceId;//sourceId
+
 }
 
 

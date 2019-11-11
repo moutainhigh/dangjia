@@ -98,14 +98,15 @@ public interface DjSupplierAPI {
                                       @RequestParam("surplusMoney") Double surplusMoney,
                                       @RequestParam("payPassword") String payPassword);
 
-    @PostMapping("/sup/SupplierRecharge")
+    @PostMapping("/sup/supplierRecharge")
     @ApiOperation(value = "供应商充值", notes = "供应商充值")
     ServerResponse supplierRecharge(@RequestParam("supId") String supId,
                                     @RequestParam("payState") String payState,
                                     @RequestParam("rechargeAmount") Double rechargeAmount,
                                     @RequestParam("payPassword") String payPassword,
                                     @RequestParam("businessOrderType") String businessOrderType,
-                                    @RequestParam("userId") String userId);
+                                    @RequestParam("userId") String userId,
+                                    @RequestParam("sourceType") Integer sourceType);
 
     @PostMapping("/sup/queryIncomeRecord")
     @ApiOperation(value = "供应商收入记录", notes = "供应商收入记录")
@@ -113,5 +114,10 @@ public interface DjSupplierAPI {
 
     @PostMapping("/sup/queryIncomeRecordDetail")
     @ApiOperation(value = "供应商收入记录详情", notes = "供应商收入记录详情")
-    ServerResponse queryIncomeRecordDetail(@RequestParam("supId") String supId,@RequestParam("merge") String merge);
+    ServerResponse queryIncomeRecordDetail(@RequestParam("supId") String supId,
+                                           @RequestParam("merge") String merge);
+
+    @PostMapping("/sup/queryExpenditure")
+    @ApiOperation(value = "供应商支出记录", notes = "供应商支出记录")
+    ServerResponse queryExpenditure(@RequestParam("supId") String supId);
 }

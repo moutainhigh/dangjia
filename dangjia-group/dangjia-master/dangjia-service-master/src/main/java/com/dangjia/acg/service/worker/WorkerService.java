@@ -1,12 +1,14 @@
 package com.dangjia.acg.service.worker;
 
+import com.dangjia.acg.api.MessageAPI;
+import com.dangjia.acg.api.RedisClient;
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.common.util.BeanUtils;
-import com.dangjia.acg.common.util.CommonUtil;
-import com.dangjia.acg.common.util.DateUtil;
+import com.dangjia.acg.common.util.*;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.mapper.config.ISmsMapper;
 import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
@@ -15,6 +17,7 @@ import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.mapper.worker.IWithdrawDepositMapper;
 import com.dangjia.acg.mapper.worker.IWorkerBankCardMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
+import com.dangjia.acg.modle.config.Sms;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.HouseWorker;
@@ -72,7 +75,10 @@ public class WorkerService {
 
     @Autowired
     private UserMapper userMapper;
-
+    @Autowired
+    private RedisClient redisClient;
+    @Autowired
+    private ISmsMapper smsMapper;
     /**
      * 查询通讯录
      */
@@ -326,13 +332,21 @@ public class WorkerService {
      * @param bankCard
      * @return
      */
-    public ServerResponse addMyBankCard(HttpServletRequest request, String userToken, WorkerBankCard bankCard,String userId) {
+    public ServerResponse addMyBankCard(HttpServletRequest request, String userToken, WorkerBankCard bankCard,String userId,String phone,int smscode) {
         try {
             if (CommonUtil.isEmpty(bankCard.getBankCardNumber())) {
                 return ServerResponse.createByErrorMessage("请输入银行卡卡号");
             }
             if (CommonUtil.isEmpty(bankCard.getBankCardId())) {
                 return ServerResponse.createByErrorMessage("请选择银行卡类型");
+            }
+
+            if (!Validator.isMobileNo(phone)) {
+                return ServerResponse.createBySuccessMessage("手机号不正确");
+            }
+            Integer registerCode = redisClient.getCache(Constants.SMS_CODE + phone, Integer.class);
+            if (registerCode == null || smscode != registerCode) {
+                return ServerResponse.createByErrorMessage("无效验证码");
             }
 
             String id = null;
@@ -368,6 +382,45 @@ public class WorkerService {
             return ServerResponse.createByErrorMessage("操作失败，请您稍后再试");
         }
     }
+
+    /*
+     * 绑定银行卡验证码
+     */
+    public ServerResponse registerCode(String phone) {
+        if (!Validator.isMobileNo(phone)) {
+            return ServerResponse.createByErrorMessage("手机号不正确");
+        }
+        Integer registerCode = redisClient.getCache(Constants.SMS_CODE + phone, Integer.class);
+        if (registerCode == null || registerCode == 0) {
+            registerCode = (int) (Math.random() * 9000 + 1000);
+        }
+        redisClient.put(Constants.SMS_CODE + phone, registerCode);
+        JsmsUtil.SMS(registerCode, phone);
+        //记录短信发送
+        Sms sms = new Sms();
+        sms.setCode(String.valueOf(registerCode));
+        sms.setMobile(phone);
+        smsMapper.insert(sms);
+        return ServerResponse.createBySuccessMessage("验证码已发送");
+    }
+
+    /*
+     * 查询验证码
+     */
+    public ServerResponse getSmsCode(String phone) {
+        if (!Validator.isMobileNo(phone)) {
+            return ServerResponse.createBySuccessMessage("手机号不正确");
+        }
+        Example example = new Example(Sms.class);
+        example.createCriteria().andEqualTo("mobile", phone);
+        example.orderBy(Sms.CREATE_DATE).desc();
+        List<Sms> sms = smsMapper.selectByExample(example);
+        if (sms == null || sms.size() == 0) {
+            return ServerResponse.createBySuccessMessage("无效验证码");
+        }
+        return ServerResponse.createBySuccess("验证码获取成功", sms.get(0).getCode());
+    }
+
 
     /**
      * 删除银行卡
