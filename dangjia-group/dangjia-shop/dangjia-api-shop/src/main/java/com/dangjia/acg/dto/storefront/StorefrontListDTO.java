@@ -1,6 +1,10 @@
 package com.dangjia.acg.dto.storefront;
 
+import com.dangjia.acg.common.annotation.Desc;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+
+import javax.persistence.Column;
 
 
 /**
@@ -78,5 +82,7 @@ public class StorefrontListDTO {
      */
     private String failReason;
 
+
+    private String  systemLogo;
 
 }
