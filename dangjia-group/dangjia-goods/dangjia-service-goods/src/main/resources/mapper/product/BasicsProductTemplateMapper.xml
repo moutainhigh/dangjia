@@ -346,7 +346,7 @@
         bp.convert_quality convertQuality,
         bp.convert_unit convertUnit,
         '0' isActivityRedPack,
-        bg.brand_id brandId,
+        bg.brand_id brandId
 
 
         FROM
