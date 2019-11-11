@@ -414,7 +414,7 @@ public class DjDeliveryReturnSlipService {
             {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
-            List<BuyersDimensionDTO> list=djDeliveryReturnSlipMapper.sellerDimension(null,null,null);
+            List<StoreBuyersDimensionDTO> list=djDeliveryReturnSlipMapper.sellerDimension(storefront.getId(),cityId,searchKey);
             PageInfo pageResult = new PageInfo(list);
             if (list.size() <= 0)
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());

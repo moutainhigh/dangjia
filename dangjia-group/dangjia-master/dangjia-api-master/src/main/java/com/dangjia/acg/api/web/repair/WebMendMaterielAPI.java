@@ -62,21 +62,17 @@ public interface WebMendMaterielAPI {
      * @param request
      * @param houseId 房子id
      * @param pageDTO
-     * @param beginDate 开始时间
-     * @param endDate 结束时间
      * @param state 状态：（0生成中,1处理中,2不通过取消,3已通过,4已全部结算,5已撤回,5已关闭）
      * @param likeAddress 模糊查询参数
      * @return
      */
     @PostMapping(value = "web/repair/webMendMateriel/materialBackStateProcessing")
-    @ApiOperation(value = "工匠申请退货（待处理和处理中）", notes = "工匠申请退货（待处理和处理中）")
+    @ApiOperation(value = "工匠申请退货（处理中）", notes = "工匠申请退货（处理中）")
     ServerResponse materialBackStateProcessing(
             @RequestParam("request") HttpServletRequest request,
             @RequestParam("cityId") String cityId,
             @RequestParam("houseId") String houseId,
             @RequestParam("pageDTO") PageDTO pageDTO,
-            @RequestParam("beginDate") String beginDate,
-            @RequestParam("endDate") String endDate,
             @RequestParam("state") String state,
             @RequestParam("likeAddress") String likeAddress);
 
@@ -88,12 +84,11 @@ public interface WebMendMaterielAPI {
      * @param request
      * @param houseId 房子id
      * @param pageDTO
-     * @param beginDate 开始时间
-     * @param endDate 结束时间
      * @param state 状态：（0生成中,1处理中,2不通过取消,3已通过,4已全部结算,5已撤回,5已关闭）
      * @param likeAddress 模糊查询参数
      * @return
      */
+
     @PostMapping(value = "web/repair/webMendMateriel/materialBackStateHandle")
     @ApiOperation(value = "店铺管理—售后管理—工匠退货(已经处理)", notes = "店铺管理—售后管理—工匠退货(已经处理)")
     ServerResponse materialBackStateHandle(
@@ -101,8 +96,6 @@ public interface WebMendMaterielAPI {
             @RequestParam("cityId") String cityId,
             @RequestParam("houseId") String houseId,
             @RequestParam("pageDTO") PageDTO pageDTO,
-            @RequestParam("beginDate") String beginDate,
-            @RequestParam("endDate") String endDate,
             @RequestParam("state") String state,
             @RequestParam("likeAddress") String likeAddress);
 

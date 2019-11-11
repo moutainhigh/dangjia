@@ -483,26 +483,25 @@
     </select>
 
     <!--店铺利润-买家维度    -->
-    <select id="sellerDimension" resultType="com.dangjia.acg.dto.delivery.BuyersDimensionDTO">
+    <select id="sellerDimension" resultType="com.dangjia.acg.dto.delivery.StoreBuyersDimensionDTO">
         SELECT
-        dsd.supplier_id AS supId,
-        dsd.ship_address AS shipAddress,
-        m. NAME,
-        m.mobile,
-        sum(dosi.shop_count) AS supplyQuantity,
-        sum(dsd.total_amount) AS income,
-        h.id AS houseId
+        IFNULL(dsd.storefront_id ,'') as storefrontId, -- 店铺id
+        IFNULL(dsd.ship_address ,'')AS shipAddress, -- 房子地址
+        m. NAME, -- 业主姓名
+        IFNULL(sum(dsd.total_amount),'') AS income, -- 收入
+        IFNULL(sum(dsd.apply_money),'') AS expenditure,-- 支出
+        sum(dsd.total_amount)- IFNULL(dsd.apply_money,'')AS profit, -- 利润
+        h.id AS houseId -- 房子id
         FROM
-        dj_deliver_split_deliver dsd
-        INNER JOIN dj_house h ON dsd.house_id = h.id
-        INNER JOIN dj_member m ON m.id = h.member_id
-        INNER JOIN dj_deliver_order_split_item dosi ON dsd.id = dosi.split_deliver_id
-        WHERE dsd.supplier_id = #{supId}
+        dj_deliver_split_deliver dsd  -- 后台生成发货单
+        INNER JOIN dj_house h ON dsd.house_id = h.id -- 房子
+        INNER JOIN dj_member m ON m.id = h.member_id -- 工人
+        INNER JOIN dj_deliver_order_split_item dosi ON dsd.id = dosi.split_deliver_id -- 要货单明细
+        WHERE dsd.storefront_id = #{storefrontId}
         <if test="null!=searchKey and ''!=searchKey">
             AND (
             dsd.ship_address LIKE CONCAT('%',#{searchKey},'%') or
-            m. NAME LIKE CONCAT('%',#{searchKey},'%') or
-            m.mobile LIKE CONCAT('%',#{searchKey},'%')
+            m. NAME LIKE CONCAT('%',#{searchKey},'%')
             )
         </if>
         and dsd.city_id=#{cityId}
