@@ -42,7 +42,7 @@ import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.mapper.repair.IMendWorkerMapper;
 import com.dangjia.acg.mapper.safe.IWorkerTypeSafeMapper;
 import com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper;
-import com.dangjia.acg.mapper.supplier.IMaterSupplierMapper;
+import com.dangjia.acg.mapper.supplier.IMasterSupplierMapper;
 import com.dangjia.acg.mapper.worker.IInsuranceMapper;
 import com.dangjia.acg.modle.account.AccountFlowRecord;
 import com.dangjia.acg.modle.activity.ActivityRedPackRecord;
@@ -191,7 +191,7 @@ public class PaymentService {
     @Autowired
     private IMasterSupplierPayOrderMapper iMasterSupplierPayOrderMapper;
     @Autowired
-    private IMaterSupplierMapper iMaterSupplierMapper;
+    private IMasterSupplierMapper iMaterSupplierMapper;
     @Autowired
     private IMasterStorefrontMapper iMasterStorefrontMapper;
     @Autowired
