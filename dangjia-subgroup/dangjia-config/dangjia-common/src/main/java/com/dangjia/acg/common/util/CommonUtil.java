@@ -518,6 +518,25 @@ public class CommonUtil {
   }
 
   /**
+   * 获取计算搬运费的楼层数
+   * @param elevator
+   * @param floor
+   * @param isUpstairsCost
+   * @return
+   */
+  public Double getFloorCount(Integer elevator,String floor,String isUpstairsCost){
+    Double floorCount=1.0;//楼层数
+    if("0".equals(isUpstairsCost)){//判断是否按1层收取上楼费，若为否
+      if(elevator==0){//若不为电梯房，则楼层数设置为实际楼层数
+        if(StringUtils.isNotBlank(floor)){
+          floorCount=new Double(floor).doubleValue();
+        }
+      }
+    }
+    return floorCount;
+  }
+
+  /**
    * 等待时间值查询
    * @param nodeCode
    * @return
