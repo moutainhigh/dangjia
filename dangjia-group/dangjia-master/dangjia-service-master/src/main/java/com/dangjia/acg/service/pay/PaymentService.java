@@ -11,7 +11,6 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.dao.ConfigUtil;
@@ -51,7 +50,6 @@ import com.dangjia.acg.modle.deliver.*;
 import com.dangjia.acg.modle.design.HouseStyleType;
 import com.dangjia.acg.modle.group.Group;
 import com.dangjia.acg.modle.house.*;
-import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.CustomerRecord;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.other.WorkDeposit;
@@ -584,10 +582,7 @@ public class PaymentService {
                 house.setMoney(new BigDecimal(0));
             }
             HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId());
-            HouseWorkerOrder houseWorkerOrdernew = new HouseWorkerOrder();
-            houseWorkerOrdernew.setId(hwo.getId());
-            houseWorkerOrdernew.setPayState(1);
-            houseWorkerOrderMapper.updateByPrimaryKeySelective(houseWorkerOrdernew);
+            hwo.setPayState(1);
 
             HouseWorker houseWorker = houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), 1);
             houseWorker.setWorkType(6);
