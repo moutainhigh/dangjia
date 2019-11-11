@@ -35,7 +35,7 @@ public interface BasicsStorefrontAPI {
     ServerResponse queryStorefrontByUserId(@RequestParam("userId") String userId,@RequestParam("cityId") String cityId
     );
 
-    @PostMapping("/web/queryLikeSingleStorefront")
+       @PostMapping("/web/queryLikeSingleStorefront")
     @ApiOperation(value = "根据条件模糊查询店铺信息", notes = "根据条件模糊查询店铺信息")
     List<Storefront> queryLikeSingleStorefront(@RequestParam("searchKey") String searchKey);
 

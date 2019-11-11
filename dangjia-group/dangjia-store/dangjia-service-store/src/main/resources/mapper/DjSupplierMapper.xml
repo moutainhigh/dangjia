@@ -131,4 +131,32 @@
     </select>
 
 
+
+
+
+    <select id="queryLikeSupplier" resultType="com.dangjia.acg.dto.supplier.SupplierLikeDTO">
+        select
+        ds.id,
+        ds.create_date,
+        ds.modify_date,
+        ds.data_status,
+        ds.user_id userId,
+        ds.city_id cityId,
+        ds.NAME,
+        ds.address,
+        ds.check_people checkPeople,
+        ds.telephone,
+        ds.email
+        from dj_supplier ds
+        where 1=1
+        <if test="null!=searchKey and ''!=searchKey">
+            and (
+            ds.name LIKE CONCAT('%',#{searchKey},'%') or
+            ds.check_people LIKE CONCAT('%',#{searchKey},'%') or
+            ds.telephone LIKE CONCAT('%',#{searchKey},'%')
+            )
+        </if>
+    </select>
+
+
 </mapper>
