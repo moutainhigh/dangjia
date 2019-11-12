@@ -695,11 +695,11 @@ public class RefundAfterSalesService {
             op.setNodeStatus(1);//先打勾
             //如果为商家已拒绝或退款关闭，则打叉
             if("RA_004".equals(op.getNodeCode())||"RA_009".equals(op.getNodeCode())){//
-                op.setNodeStatus(3);//打黑叉
+                op.setNodeStatus(2);//打黑叉
             }
             //如果为商家已拒绝,最新节点也为已拒绝，则打红叉
             if("RA_004".equals(op.getNodeCode())&&"RA_004".equals(orderProgressDTO.getNodeCode())){//
-                op.setNodeStatus(2);//打红叉
+                op.setNodeStatus(3);//打红叉
             }
             //如果最新节点为RA_001，RA_002等待商家审核 状态，且当前显示节点为001的话，则显示“撤销按钮”,否则，则不显示
             if(!(("RA_001".equals(orderProgressDTO.getNodeCode())||"RA_002".equals(orderProgressDTO.getNodeCode())))&&"RA_001".equals(op.getNodeCode())){

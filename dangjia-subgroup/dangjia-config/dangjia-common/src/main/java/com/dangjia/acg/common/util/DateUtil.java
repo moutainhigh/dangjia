@@ -634,7 +634,7 @@ public class DateUtil implements AutoCloseable, Serializable {
         long secondMills = calendar.getTimeInMillis();
 
         long mills = secondMills - firstMills;
-        return mills>0?mills:0;
+        return mills>0?mills/1000:0;
     }
 
     /**
