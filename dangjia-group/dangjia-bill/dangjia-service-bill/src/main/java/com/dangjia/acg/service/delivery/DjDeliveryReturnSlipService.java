@@ -410,6 +410,8 @@ public class DjDeliveryReturnSlipService {
             if (list.size() <= 0)
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             for (StoreSupplyDimensionDTO storeSupplyDimensionDTO:list ) {
+                String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+                storeSupplyDimensionDTO.setImageDetail(imageAddress+storeSupplyDimensionDTO.getImage());
                 Map brandMap= BeanUtils.beanToMap(storeSupplyDimensionDTO);
                 String prodTemplateId= storeSupplyDimensionDTO.getProdTemplateId();
                 List<StoreSupplyDimensionDetailDTO> listDetail=djDeliveryReturnSlipMapper.storefrontProductDimensionDetail(storefront.getId(),prodTemplateId,cityId);

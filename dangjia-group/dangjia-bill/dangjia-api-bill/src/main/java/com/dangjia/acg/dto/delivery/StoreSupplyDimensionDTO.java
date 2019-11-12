@@ -14,6 +14,7 @@ import java.util.List;
 @Data
 public class StoreSupplyDimensionDTO {
     private String image;// 商品图片
+    private String imageDetail;//图片详情
     private String productName;//商品名称
     private String productSn;//商品编号
     private String prodTemplateId;//商品id

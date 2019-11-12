@@ -446,17 +446,17 @@
                 -- 房子id
                 dsd.ship_address AS shipAddress,
                 -- 房子地址
-                dsd.submit_time,
+                dsd.submit_time as submitTime,
                 -- 下单时间
                 dsd.supplier_id AS supId,
                 -- 供应商id
-                dosi.num AS supplyQuantity,
+                IFNULL(dosi.num,'') AS supplyQuantity,
                 -- 本次供货数
-                dsd.total_amount AS totalAmount,
-                -- 销售价
-                dsd.apply_money AS applyMoney,
-                -- 成本价
-                sum(dsd.total_amount) - IFNULL(dsd.apply_money, '') AS profit -- 利润
+                IFNULL(dsd.total_amount,'') AS totalAmount,
+                -- 销售价(发货单总额)
+                IFNULL(dsd.apply_money,'') AS applyMoney,
+                -- 成本价（供应商结算价格）
+             	sum(dosi.sup_cost) as profit-- 利润
             FROM
                 dj_deliver_order_split_item dosi -- 要货单明细
             INNER JOIN dj_deliver_split_deliver dsd ON dsd.id = dosi.split_deliver_id -- 发货单详情
@@ -486,9 +486,9 @@
         -- 总购买数
         bsp.supplied_num AS suppliedNum,
         -- 供货数
-        sum(doi.cost) AS cost,
+        IFNULL(sum(doi.cost),'') AS cost,
         -- 成本总价
-        sum(doi.price) AS price,
+        IFNULL(sum(doi.price),'') AS price,
         -- 销售总价
         IFNULL(
         sum(doi.price) - sum(doi.cost),
@@ -507,9 +507,7 @@
         AND bsp.storefront_id = #{storefrontId}
         <if test = "null!=searchKey and ''!=searchKey" >
             AND (
-            bpt.product_name LIKE CONCAT(
-            '%',
-            #{searchKey},'%') or
+            bsp.product_name LIKE CONCAT('%',#{searchKey},'%') or
             bpt.product_sn LIKE CONCAT('%', #{searchKey},'%')
             )
         </if>
@@ -553,7 +551,7 @@
         <if test="null!=searchKey and ''!=searchKey">
             AND (
             dsd.ship_address LIKE CONCAT('%',#{searchKey},'%') or
-            m. NAME LIKE CONCAT('%',#{searchKey},'%')
+            m.NAME LIKE CONCAT('%',#{searchKey},'%')
             )
         </if>
         and dsd.city_id=#{cityId}
