@@ -36,7 +36,8 @@
             dosi.num,
             dosi.price,
             dosi.total_price as totalPrice,
-            dosi.receive
+            dosi.receive,
+            dosi.id as orderSplitItemId
         FROM
             dj_deliver_split_deliver dsd
         INNER JOIN dj_deliver_order_split_item dosi ON dsd.id = dosi.split_deliver_id

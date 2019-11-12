@@ -25,7 +25,8 @@ public interface ComplainAPI {
                                @RequestParam("complainType") Integer complainType,
                                @RequestParam("businessId") String businessId,
                                @RequestParam("houseId") String houseId,
-                               @RequestParam("files") String files);
+                               @RequestParam("files") String files,
+                               @RequestParam("orderSplitItemId") String orderSplitItemId);
 
     @PostMapping("/complain/getComplainList")
     @ApiOperation(value = "查询申诉", notes = "查询申诉")

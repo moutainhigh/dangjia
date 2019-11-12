@@ -130,7 +130,7 @@ public class ComplainService {
      */
 
     public ServerResponse addComplain(String userToken, String memberId, Integer complainType,
-                                      String businessId, String houseId, String files) {
+                                      String businessId, String houseId, String files, String orderSplitItemId) {
         if (CommonUtil.isEmpty(complainType) || CommonUtil.isEmpty(businessId)) {
             return ServerResponse.createByErrorMessage("参数错误");
         }
@@ -171,6 +171,10 @@ public class ComplainService {
                 complain.setUserName(djSupplier.getName());
                 complain.setUserNickName("供应商-" + djSupplier.getCheckPeople());
             }
+            OrderSplitItem orderSplitItem=new OrderSplitItem();
+            orderSplitItem.setId(orderSplitItemId);
+            orderSplitItem.setShippingState(1);
+            orderSplitItemMapper.updateByPrimaryKeySelective(orderSplitItem);
         } else {
             String field = "业主-";
             Member member = memberMapper.selectByPrimaryKey(complain.getUserId());
@@ -581,7 +585,8 @@ public class ComplainService {
                 splitDeliverDTO.setSupId(splitDeliver.getSupervisorId());
                 splitDeliverDTO.setSupMobile(splitDeliver.getShipMobile());
                 Example example = new Example(OrderSplitItem.class);
-                example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID, splitDeliver.getId());
+                example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID, splitDeliver.getId())
+                        .andEqualTo(OrderSplitItem.SHIPPING_STATE,1);
                 List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
                 List<SplitDeliverItemDTO> splitDeliverItemDTOList = new ArrayList<>();
                 for (OrderSplitItem orderSplitItem : orderSplitItemList) {

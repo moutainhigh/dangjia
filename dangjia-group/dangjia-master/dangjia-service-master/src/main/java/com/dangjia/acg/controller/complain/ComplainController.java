@@ -22,8 +22,8 @@ public class ComplainController implements ComplainAPI {
     @Override
     @ApiMethod
     public ServerResponse addComplain(HttpServletRequest request, String userToken, String memberId, Integer complainType, String businessId,
-                                      String houseId, String files) {
-        return complainService.addComplain(userToken, memberId, complainType, businessId, houseId, files);
+                                      String houseId, String files, String orderSplitItemId) {
+        return complainService.addComplain(userToken, memberId, complainType, businessId, houseId, files, orderSplitItemId);
     }
 
     //查询申诉

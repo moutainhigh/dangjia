@@ -4,6 +4,7 @@ import com.dangjia.acg.common.annotation.Desc;
 import com.dangjia.acg.common.model.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import io.swagger.models.auth.In;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
 import org.apache.commons.lang.StringUtils;
@@ -141,6 +142,11 @@ public class OrderSplitItem extends BaseEntity {
 	@Desc(value = "退货量")
 	@ApiModelProperty("退货量")
 	private Double returnCount;
+
+	@Column(name = "shipping_state")
+	@Desc(value = "0:无 1：部分收获申诉")
+	@ApiModelProperty("0:无 1：部分收获申诉")
+	private Integer shippingState;
 
 
 }
