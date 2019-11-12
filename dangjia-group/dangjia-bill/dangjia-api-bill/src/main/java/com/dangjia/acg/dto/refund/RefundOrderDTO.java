@@ -21,6 +21,8 @@ public class RefundOrderDTO {
 
     private String storefrontName;//店铺名称
 
+    private String storefrontIcon;//店铺图标
+
     private String businessOrderNumber;//业务订单号
 
     private String orderNumber;//订单编号
@@ -32,6 +34,10 @@ public class RefundOrderDTO {
     private Double actualTotalAmount;//退货金额（不含运费）
 
     private Double totalAmount;//实退款(含运费)
+
+    private String totalRransportationCostRemark;//可退运费描述
+
+    private String totalStevedorageCostRemark;//可退搬运费描述
 
     private List<RefundOrderItemDTO> orderDetailList;
 }

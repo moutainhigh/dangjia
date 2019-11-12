@@ -14,6 +14,8 @@ public class RefundRepairOrderMaterialDTO {
 
     private String storefrontId;//店铺ID
 
+    private String storefrontIcon;//店铺图标
+
     private String productId;//商品ID
 
     private String productTemplateId;//

@@ -4,12 +4,15 @@ import com.dangjia.acg.api.supplier.DjSupplierAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dto.supplier.DjSupplierDTO;
+import com.dangjia.acg.dto.supplier.SupplierLikeDTO;
 import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.dangjia.acg.service.supplier.DjSupplierServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -98,39 +101,45 @@ public class DjSupplierController implements DjSupplierAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse myWallet(String supId) {
-        return djSupplierServices.myWallet(supId);
+    public ServerResponse myWallet(String userId, String cityId) {
+        return djSupplierServices.myWallet(userId,cityId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse supplierWithdrawal(String supId, String bankCard, Double surplusMoney, String payPassword) {
-        return djSupplierServices.supplierWithdrawal(supId, bankCard, surplusMoney, payPassword);
+    public ServerResponse supplierWithdrawal(String userId, String cityId, String bankCard, Double surplusMoney, String payPassword) {
+        return djSupplierServices.supplierWithdrawal(userId,cityId, bankCard, surplusMoney, payPassword);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse supplierRecharge(String supId,String payState, Double rechargeAmount, String payPassword,
-                                           String businessOrderType, String userId, Integer sourceType) {
-        return djSupplierServices.supplierRecharge(supId,payPassword,rechargeAmount,payPassword,businessOrderType, userId, sourceType);
+    public ServerResponse supplierRecharge(String userId, String cityId,String payState, Double rechargeAmount, String payPassword,
+                                           String businessOrderType, Integer sourceType) {
+        return djSupplierServices.supplierRecharge(userId,cityId,payPassword,rechargeAmount,payPassword,businessOrderType, sourceType);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse queryIncomeRecord(String supId) {
-        return djSupplierServices.queryIncomeRecord(supId);
+    public ServerResponse queryIncomeRecord(String userId, String cityId) {
+        return djSupplierServices.queryIncomeRecord(userId, cityId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse queryIncomeRecordDetail(String supId,String merge) {
-        return djSupplierServices.queryIncomeRecordDetail(supId,merge);
+    public ServerResponse queryIncomeRecordDetail(String userId, String cityId,String merge) {
+        return djSupplierServices.queryIncomeRecordDetail(userId,cityId,merge);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse queryExpenditure(String supId) {
-        return djSupplierServices.queryExpenditure(supId);
+    public ServerResponse queryExpenditure(String userId, String cityId) {
+        return djSupplierServices.queryExpenditure(userId,cityId);
+    }
+
+    @Override
+    @ApiMethod
+    public List<SupplierLikeDTO> queryLikeSupplier(String searchKey) {
+        return djSupplierServices.queryLikeSupplier(searchKey);
     }
 
 }

@@ -119,8 +119,8 @@
             CEIL(IFNULL(t1.purchase_quantity,1)/IFNULL(t2.convert_quality,1))  convertCount,
             t4.type goodsType,
             t4.buy goodsBuy,
-            t3.convert_quality convertQuality,
-            t3.convert_unit convertUnit
+            t2.convert_quality convertQuality,
+            t2.convert_unit convertUnit
         FROM
             dj_actuarial_product_config t1,
             dj_basics_product_template t2,

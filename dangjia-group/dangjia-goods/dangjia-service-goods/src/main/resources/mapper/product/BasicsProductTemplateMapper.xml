@@ -319,17 +319,36 @@
     </select>
 
 
-    <select id="serchCategoryProduct" resultType="com.dangjia.acg.modle.product.DjBasicsProductTemplate">
+    <select id="serchCategoryProduct" resultType="com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO">
         SELECT
-        p.id,
-        bp.goods_id,
-        p.product_name name,
-        p.image,
+
+        p.id productId,
+        s.id storefrontId,
+        s.storefront_name storefrontName,
+        s.system_logo storefrontIcon,
+        p.product_name productName,
+        p.image image,
+        p.product_sn productSn,
         p.sell_price price,
-        bg.type,
-        bp.istop,
-        IFNULL(bp.convert_unit, bp.unit_id) AS unitId,
-        s.storefront_name storefrontName
+
+        bp.id productTemplateId,
+        bp.category_id categoryId,
+        bp.id productId,
+        bp.product_sn productSn,
+        bp.name productName,
+        bp.goods_id goodsId,
+        bp.unit_id unit,
+        bp.unit_name unitName,
+        bp.value_id_arr valueIdArr,
+        bp.value_name_arr valueNameArr,
+        bg.type goodsType,
+        bg.buy goodsBuy,
+        bp.convert_quality convertQuality,
+        bp.convert_unit convertUnit,
+        '0' isActivityRedPack,
+        bg.brand_id brandId
+
+
         FROM
         dj_basics_goods bg
         INNER JOIN dj_basics_product_template bp ON bp.goods_id = bg.id
@@ -354,7 +373,10 @@
             </foreach>
         </if>
         <if test="brandVal!=null and brandVal!=''">
-            AND  FIND_IN_SET(bg.brand_id,#{brandVal})
+            AND
+            <foreach collection="brandVal" index="index" item="item" open="(" separator="OR" close=")">
+                bg.brand_id = #{item}
+            </foreach>
         </if>
         <if test="orderKey!=null and orderKey!='' and orderKey==0 ">
             ORDER BY bp.price

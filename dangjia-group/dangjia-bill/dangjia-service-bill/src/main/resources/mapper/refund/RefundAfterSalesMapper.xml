@@ -36,7 +36,8 @@
             t1.house_id houseId,
             t1.business_order_number businessOrderNumber,
             t1.order_number orderNumber,
-            t4.storefront_name storefrontName
+            t4.storefront_name storefrontName,
+            t4.system_logo storefrontIcon
         FROM
             dj_deliver_order t1,
             dj_pay_business_order t3,
@@ -119,6 +120,8 @@
             t.id repairMendOrderId,
             t.storefront_id storefrontId,
             t1.storefront_name storefrontName,
+            t1.system_logo storefrontIcon,
+            t1.mobile storefrontMobile,
             t.house_id houseId,
             t.number repairOrderNum,
             IFNULL(t.total_stevedorage_cost,0) totalStevedorageCost,
@@ -172,6 +175,7 @@
             t.id repairMendOrderId,
             t.storefront_id storefrontId,
             t1.storefront_name storefrontName,
+            t1.system_logo storefrontIcon,
             t.house_id houseId,
             t.number repairOrderNum,
             IFNULL(t.total_stevedorage_cost,0) totalStevedorageCost,

@@ -2,6 +2,8 @@ package com.dangjia.acg.api.supplier;
 
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dto.supplier.DjSupplierDTO;
+import com.dangjia.acg.dto.supplier.SupplierLikeDTO;
 import com.dangjia.acg.modle.supplier.DjSupplier;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -89,35 +92,45 @@ public interface DjSupplierAPI {
 
     @PostMapping("/sup/myWallet")
     @ApiOperation(value = "我的钱包", notes = "我的钱包")
-    ServerResponse myWallet(@RequestParam("supId") String supId);
+    ServerResponse myWallet(@RequestParam("user_id") String userId,
+                            @RequestParam("cityId") String cityId);
 
     @PostMapping("/sup/supplierWithdrawal")
     @ApiOperation(value = "供应商提现", notes = "供应商提现")
-    ServerResponse supplierWithdrawal(@RequestParam("supId") String supId,
+    ServerResponse supplierWithdrawal(@RequestParam("user_id") String userId,
+                                      @RequestParam("cityId") String cityId,
                                       @RequestParam("bankCard") String bankCard,
                                       @RequestParam("surplusMoney") Double surplusMoney,
                                       @RequestParam("payPassword") String payPassword);
 
     @PostMapping("/sup/supplierRecharge")
     @ApiOperation(value = "供应商充值", notes = "供应商充值")
-    ServerResponse supplierRecharge(@RequestParam("supId") String supId,
+    ServerResponse supplierRecharge(@RequestParam("user_id") String userId,
+                                    @RequestParam("cityId") String cityId,
                                     @RequestParam("payState") String payState,
                                     @RequestParam("rechargeAmount") Double rechargeAmount,
                                     @RequestParam("payPassword") String payPassword,
                                     @RequestParam("businessOrderType") String businessOrderType,
-                                    @RequestParam("userId") String userId,
                                     @RequestParam("sourceType") Integer sourceType);
 
     @PostMapping("/sup/queryIncomeRecord")
     @ApiOperation(value = "供应商收入记录", notes = "供应商收入记录")
-    ServerResponse queryIncomeRecord(@RequestParam("supId") String supId);
+    ServerResponse queryIncomeRecord(@RequestParam("user_id") String userId,
+                                     @RequestParam("cityId") String cityId);
 
     @PostMapping("/sup/queryIncomeRecordDetail")
     @ApiOperation(value = "供应商收入记录详情", notes = "供应商收入记录详情")
-    ServerResponse queryIncomeRecordDetail(@RequestParam("supId") String supId,
+    ServerResponse queryIncomeRecordDetail(@RequestParam("user_id") String userId,
+                                           @RequestParam("cityId") String cityId,
                                            @RequestParam("merge") String merge);
 
     @PostMapping("/sup/queryExpenditure")
     @ApiOperation(value = "供应商支出记录", notes = "供应商支出记录")
-    ServerResponse queryExpenditure(@RequestParam("supId") String supId);
+    ServerResponse queryExpenditure(@RequestParam("user_id") String userId,
+                                    @RequestParam("cityId") String cityId);
+
+    @PostMapping("/sup/queryLikeSupplier")
+    @ApiOperation(value = "根据条件模糊查询供应商信息", notes = "根据条件模糊查询供应商信息")
+    List<SupplierLikeDTO> queryLikeSupplier(@RequestParam("searchKey") String searchKey);
+
 }

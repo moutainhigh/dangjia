@@ -1,40 +1,26 @@
 package com.dangjia.acg.service.actuary.app;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.common.util.BeanUtils;
-import com.dangjia.acg.common.util.CommonUtil;
-import com.dangjia.acg.common.util.excel.ImportExcel;
 import com.dangjia.acg.dao.ConfigUtil;
-import com.dangjia.acg.dto.actuary.*;
 import com.dangjia.acg.dto.actuary.app.*;
 import com.dangjia.acg.mapper.actuary.*;
 import com.dangjia.acg.mapper.basics.IAttributeValueMapper;
 import com.dangjia.acg.mapper.basics.IBrandMapper;
 import com.dangjia.acg.mapper.basics.IUnitMapper;
-import com.dangjia.acg.mapper.product.IBasicsGoodsMapper;
-import com.dangjia.acg.mapper.product.IBasicsProductTemplateMapper;
-import com.dangjia.acg.modle.actuary.*;
+import com.dangjia.acg.modle.actuary.DjActuarialSimulationRelation;
 import com.dangjia.acg.modle.attribute.AttributeValue;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.brand.Unit;
-import com.dangjia.acg.modle.product.BasicsGoods;
-import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.util.StringTool;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.ibatis.annotations.Param;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import sun.rmi.log.LogInputStream;
-import tk.mybatis.mapper.entity.Example;
 
-import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**

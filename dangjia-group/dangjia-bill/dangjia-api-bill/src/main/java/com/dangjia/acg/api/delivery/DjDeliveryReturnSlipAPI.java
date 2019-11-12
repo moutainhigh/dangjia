@@ -99,10 +99,10 @@ public interface DjDeliveryReturnSlipAPI {
     @ApiOperation(value = "店铺利润统计-供应商维度", notes = "店铺利润统计-供应商维度")
     ServerResponse supplierDimension(@RequestParam("request") HttpServletRequest request,
                                                    @RequestParam("pageDTO") PageDTO pageDTO,
-                                                   @RequestParam("supId") String supId,
                                                    @RequestParam("userId") String userId,
                                                    @RequestParam("cityId") String cityId,
                                                    @RequestParam("searchKey") String searchKey);
+
 
     @PostMapping("/delivery/djBasicsStorefrontProfit/storefrontProductDimension")
     @ApiOperation(value = "店铺利润统计-商品维度", notes = "店铺利润统计-商品维度")
@@ -137,4 +137,10 @@ public interface DjDeliveryReturnSlipAPI {
                      @RequestParam("houseId") String houseId,
                      @RequestParam("searchKey") String searchKey,
                      @RequestParam("cityId") String cityId);
+
+
+    //店铺利润统计-商品详情
+
+    //店铺利润统计-订单详情
+
 }

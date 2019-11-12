@@ -24,5 +24,6 @@ public class DjDeliveryReturnSlipDetailsDTO {
     private String productSn;
     private Integer actualCount;
     private Integer receive;
+    private String orderSplitItemId;
 
 }

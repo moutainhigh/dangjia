@@ -3,7 +3,6 @@ package com.dangjia.acg.dto.actuary.app;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import javax.persistence.Column;
 import java.math.BigDecimal;
 
 /**
@@ -27,6 +26,12 @@ public class ActuarialProductAppDTO {
 
     @ApiModelProperty("店铺ID")
     private String storefrontId;
+
+    @ApiModelProperty("店铺名称")
+    private String storefrontName;
+
+    @ApiModelProperty("店铺图标")
+    private String storefrontIcon;
 
     @ApiModelProperty("类别ID")
     private String categoryId;
@@ -90,7 +95,7 @@ public class ActuarialProductAppDTO {
     @ApiModelProperty("是否有优惠卷(1：有，0：否)")
     private Integer  isActivityRedPack=0;
 
-
+    private boolean flag;
 
 
 }

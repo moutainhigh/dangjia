@@ -34,6 +34,9 @@ public class OrderProgressDTO {
     @ApiModelProperty("节点名称")
     private String nodeName;
 
+    @ApiModelProperty("节点显示状态(1黑勾，2黑叉，3红叉，4灰掉）")
+    private int nodeStatus;
+
     @ApiModelProperty("节点描述")
     private String nodeDescribe;
 
