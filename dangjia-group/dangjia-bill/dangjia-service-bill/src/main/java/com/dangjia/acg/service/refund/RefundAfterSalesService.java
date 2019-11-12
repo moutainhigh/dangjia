@@ -24,6 +24,7 @@ import com.dangjia.acg.mapper.order.IBillMendWorkerMapper;
 import com.dangjia.acg.mapper.order.IBillOrderProgressMapper;
 import com.dangjia.acg.mapper.order.IBillQuantityRoomMapper;
 import com.dangjia.acg.mapper.refund.*;
+import com.dangjia.acg.mapper.sale.IBillMemberMapper;
 import com.dangjia.acg.model.Config;
 import com.dangjia.acg.modle.attribute.AttributeValue;
 import com.dangjia.acg.modle.brand.Brand;
@@ -106,6 +107,8 @@ public class RefundAfterSalesService {
     private BillMendOrderCheckService billMendOrderCheckService;
     @Autowired
     private MendRecordAPI mendRecordAPI;
+    @Autowired
+    private IBillMemberMapper iBillMemberMapper;
 
     /**
      * 查询可退款的商品
@@ -653,14 +656,21 @@ public class RefundAfterSalesService {
             refundRepairOrderDTO.setOrderMaterialList(repairMaterialList);//将退款材料明细放入对象中
             //查询对应的流水节点信息(根据订单ID）
             List<OrderProgressDTO> orderProgressDTOList=iBillOrderProgressMapper.queryOrderProgressListByOrderId(repairMendOrderId,"2");//仅退款
-            refundRepairOrderDTO.setOrderProgressList(orderProgressDTOList);
+            refundRepairOrderDTO.setShowRepairDateType(1);//显示时间判断（1订单剩余时间，2最新处理时间）
            if(orderProgressDTOList!=null&&orderProgressDTOList.size()>0){//判断最后节点，及剩余处理时间
                OrderProgressDTO orderProgressDTO=orderProgressDTOList.get(orderProgressDTOList.size()-1);
                refundRepairOrderDTO.setRepairNewNode(orderProgressDTO.getNodeName());
                refundRepairOrderDTO.setReparirRemainingTime(getRemainingTime(orderProgressDTO));
                refundRepairOrderDTO.setAssociatedOperation(orderProgressDTO.getAssociatedOperation());
                refundRepairOrderDTO.setAssociatedOperationName(orderProgressDTO.getAssociatedOperationName());
+               refundRepairOrderDTO.setRepairNewDate(orderProgressDTO.getCreateDate());
+               //前端节点显示
+               refundRepairOrderDTO.setOrderProgressList(setOrderProgressList(orderProgressDTOList,orderProgressDTO));//返回显示，节点优化
+               if("RA_008".equals(orderProgressDTO.getNodeCode())||"RA_008".equals(orderProgressDTO.getNodeCode())||"RA_010".equals(orderProgressDTO.getNodeCode())){
+                   refundRepairOrderDTO.setShowRepairDateType(2);
+               }
            }
+
             refundRepairOrderDTO.setStorefrontIcon(address+refundRepairOrderDTO.getStorefrontIcon());
             //相关凭证图片地址存储
             String imageArr=refundRepairOrderDTO.getImageArr();
@@ -677,11 +687,46 @@ public class RefundAfterSalesService {
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
+    //判断对就原按钮显不显示
+    private List<OrderProgressDTO> setOrderProgressList(List<OrderProgressDTO> orderProgressDTOList,OrderProgressDTO orderProgressDTO){
+        List<OrderProgressDTO> list=new ArrayList<>();
+        for(int i=0;i<orderProgressDTOList.size();i++){
+            OrderProgressDTO op=orderProgressDTOList.get(i);
+            op.setNodeStatus(1);//先打勾
+            //如果为商家已拒绝或退款关闭，则打叉
+            if("RA_004".equals(op.getNodeCode())||"RA_009".equals(op.getNodeCode())){//
+                op.setNodeStatus(3);//打黑叉
+            }
+            //如果为商家已拒绝,最新节点也为已拒绝，则打红叉
+            if("RA_004".equals(op.getNodeCode())&&"RA_004".equals(orderProgressDTO.getNodeCode())){//
+                op.setNodeStatus(2);//打红叉
+            }
+            //如果最新节点为RA_001，RA_002等待商家审核 状态，且当前显示节点为001的话，则显示“撤销按钮”,否则，则不显示
+            if(!(("RA_001".equals(orderProgressDTO.getNodeCode())||"RA_002".equals(orderProgressDTO.getNodeCode())))&&"RA_001".equals(op.getNodeCode())){
+                op.setAssociatedOperation("");//清空按钮数据
+                op.setAssociatedOperationName("");//清空按钮数据
+            }
+            if(!("RA_004".equals(orderProgressDTO.getNodeCode()))&&"RA_004".equals(op.getNodeCode())){//如果当前节点或最新节点都 为商家拒绝，则增加等待"平台介入"按钮,否则，则去掉按钮
+                op.setAssociatedOperation("");//清空按钮数据
+                op.setAssociatedOperationName("");//清空按钮数据
+            }
+            list.add(op);
+        }
+        if("RA_002".equals(orderProgressDTO.getNodeCode())||"RA_005".equals(orderProgressDTO.getNodeCode())){//如果最新节点为等待高家审核 或等待平如介入，则增加退款关闭，灰度显示
+            OrderProgressDTO lastOrder=new OrderProgressDTO();
+            lastOrder.setNodeCode("RA_008");
+            lastOrder.setNodeName("退款成功");
+            lastOrder.setNodeStatus(4);
+            list.add(lastOrder);
+        }
+
+        return list;
+     }
     /**
      * 获取当前阶段剩余可处理时间
      * @return
      */
-    private String getRemainingTime(OrderProgressDTO orderProgressDTO){
+    private long getRemainingTime(OrderProgressDTO orderProgressDTO){
         try{
             String nodeCode=orderProgressDTO.getNodeCode();
             String parayKey=CommonUtil.getParayKey(nodeCode);
@@ -691,14 +736,14 @@ public class RefundAfterSalesService {
                     Date createDate=orderProgressDTO.getCreateDate();
                     String hour=config.getParamValue();
                     Date newDate=DateUtil.addDateHours(createDate,Integer.parseInt(hour));
-                    return DateUtil.daysBetweenMinute(newDate,new Date());
+                    return DateUtil.daysBetweenTime(new Date(),newDate);
                 }
             }
         }catch (Exception e){
             logger.error("获取剩余时间异常:",e);
         }
 
-        return "";
+        return 0;
     }
     /**
      * 撤销退款申请
@@ -940,7 +985,7 @@ public class RefundAfterSalesService {
                         //计算可退搬费
                         if(stevedorageCost>0.0){
                             String isUpstairsCost=refundOrderItemDTO.getIsUpstairsCost();//是否按1层收取上楼费
-                            Double moveCost=refundOrderItemDTO.getMoveCost();//每层搬超级赛亚人费
+                            Double moveCost=refundOrderItemDTO.getMoveCost();//每层搬运费
                             Double returnStevedorageCost=CommonUtil.getReturnStevedorageCost(elevator,floor,isUpstairsCost,moveCost,returnCount);
                             totalStevedorageCost=MathUtil.add(totalStevedorageCost,returnStevedorageCost);
                         }
@@ -1135,12 +1180,21 @@ public class RefundAfterSalesService {
                 returnWorkOrderDTO.setRepairNewNode(orderProgressDTO.getNodeName());
                 returnWorkOrderDTO.setAssociatedOperation(orderProgressDTO.getAssociatedOperation());
                 returnWorkOrderDTO.setAssociatedOperationName(orderProgressDTO.getAssociatedOperationName());
+                //流水节点放入
+                returnWorkOrderDTO.setOrderProgressList(setOrderWorkerProgressList(orderProgressDTOList,orderProgressDTO));
+
             }else{
                 //状态优化
                 returnWorkOrderDTO.setStateName(CommonUtil.getChangeStateName(returnWorkOrderDTO.getState()));
             }
-            //流水节点放入
-            returnWorkOrderDTO.setOrderProgressList(orderProgressDTOList);
+            String supId=returnWorkOrderDTO.getSupId();
+            //查询大管家电话
+            Member member=iBillMemberMapper.selectByPrimaryKey(supId);
+            if(member!=null&&StringUtils.isNotBlank(member.getMobile())){
+                returnWorkOrderDTO.setSupMobile(member.getMobile());
+
+            }
+
             returnWorkOrderDTO.setRepairWorkOrderNumber(returnWorkOrderDTO.getRepairWorkOrderId());
             //查询对应的需审核的商品信息(根据变列申请单ID）
             Example example = new Example(MendOrder.class);
@@ -1150,6 +1204,8 @@ public class RefundAfterSalesService {
             MendOrder mendOrder=iBillMendOrderMapper.selectOneByExample(example);
             if(mendOrder!=null&&StringUtils.isNotBlank(mendOrder.getId())){
                 returnWorkOrderDTO.setRepairWorkOrderNumber(mendOrder.getNumber());//设置申请单号
+                returnWorkOrderDTO.setActualTotalAmount(mendOrder.getActualTotalAmount());
+                returnWorkOrderDTO.setTotalAmount(mendOrder.getTotalAmount());
             }
             List<RefundRepairOrderMaterialDTO> repairWorkerList=iBillMendWorkerMapper.queryBillMendOrderId(repairWorkOrderId);//退款商品列表查询
             getRepairOrderProductList(repairWorkerList,address);
@@ -1159,6 +1215,36 @@ public class RefundAfterSalesService {
             logger.error("queryRetrunWorkerHistoryDetail查询退人工历史记录详情异常：",e);
             return ServerResponse.createByErrorMessage("查询失败");
         }
+    }
+
+    //判断对就原按钮显不显示
+    private List<OrderProgressDTO> setOrderWorkerProgressList(List<OrderProgressDTO> orderProgressDTOList,OrderProgressDTO orderProgressDTO){
+        List<OrderProgressDTO> list=new ArrayList<>();
+        for(int i=0;i<orderProgressDTOList.size();i++){
+            OrderProgressDTO op=orderProgressDTOList.get(i);
+            op.setNodeStatus(1);//先打勾
+            //大管家审核未能过
+            if("RA_014".equals(op.getNodeCode())){
+                op.setNodeStatus(3);//打黑叉
+            }
+            //如果最新节点为RA_012，RA_013您的退人工申请已提交 状态，或为RA_015，RA_016工匠审核 中，且当前显示节点为RA_012的话，则显示“撤销按钮”,否则，则不显示
+            if(!(("RA_012".equals(orderProgressDTO.getNodeCode())||"RA_013".equals(orderProgressDTO.getNodeCode())
+            ||"RA_015".equals(orderProgressDTO.getNodeCode())||"RA_016".equals(orderProgressDTO.getNodeCode())))
+                    &&"RA_012".equals(op.getNodeCode())){
+                op.setAssociatedOperation("");//清空按钮数据
+                op.setAssociatedOperationName("");//清空按钮数据
+            }
+            list.add(op);
+        }
+        if("RA_013".equals(orderProgressDTO.getNodeCode())){//如果最新节点为退人工申请已提交
+            OrderProgressDTO lastOrder=new OrderProgressDTO();
+            lastOrder.setNodeCode("RA_016");
+            lastOrder.setNodeName("工匠审核");
+            lastOrder.setNodeStatus(4);
+            list.add(lastOrder);
+        }
+
+        return list;
     }
 
     /**

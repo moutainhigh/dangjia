@@ -53,7 +53,11 @@ public class RefundRepairOrderDTO {
 
     private String repairNewNode;//最新处理节点
 
-    private String reparirRemainingTime;//订单剩余处理时间
+    private Date repairNewDate;//最新处理时间
+
+    private int showRepairDateType;//显示时间判断（1订单剩余时间，2最新处理时间）
+
+    private long reparirRemainingTime;//订单剩余处理时间
 
     @ApiModelProperty("可操作编码")
     private String associatedOperation;
