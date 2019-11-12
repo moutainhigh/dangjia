@@ -21,6 +21,8 @@ public class RefundOrderDTO {
 
     private String storefrontName;//店铺名称
 
+    private String storefrontIcon;//店铺图标
+
     private String businessOrderNumber;//业务订单号
 
     private String orderNumber;//订单编号

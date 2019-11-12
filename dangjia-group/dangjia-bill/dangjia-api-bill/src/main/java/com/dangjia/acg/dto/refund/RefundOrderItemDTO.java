@@ -17,6 +17,8 @@ public class RefundOrderItemDTO {
 
     private String storefrontId;//店铺ID
 
+    private String storefrontIcon;//店铺ID
+
     private String productId;//商品ID
 
     private String productTemplateId;//商品模板ID

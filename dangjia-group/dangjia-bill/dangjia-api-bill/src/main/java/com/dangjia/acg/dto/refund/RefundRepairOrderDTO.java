@@ -19,6 +19,8 @@ public class RefundRepairOrderDTO {
 
     private String storefrontName;//店铺名称
 
+    private String storefrontIcon;//店铺图标
+
     private Date applyDate;//退款申请时间
 
     private String applyMemberId;//申请人ID

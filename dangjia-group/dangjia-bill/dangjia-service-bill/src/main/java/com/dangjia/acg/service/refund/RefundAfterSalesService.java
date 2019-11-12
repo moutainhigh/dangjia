@@ -124,6 +124,7 @@ public class RefundAfterSalesService {
                     String orderId=order.getOrderId();
                     List<RefundOrderItemDTO> orderItemList=refundAfterSalesMapper.queryRefundOrderItemList(orderId,searchKey);
                     getProductList(orderItemList,address);
+                    order.setStorefrontIcon(address+order.getStorefrontIcon());
                     order.setOrderDetailList(orderItemList);
                 }
             }
@@ -163,6 +164,9 @@ public class RefundAfterSalesService {
             ap.setConvertUnit(pt.getConvertUnit());
             ap.setCost(pt.getCost());
             ap.setCategoryId(pt.getCategoryId());
+            if(ap.getStorefrontIcon()!=null&&StringUtils.isNotBlank(ap.getStorefrontIcon())){
+                ap.setStorefrontIcon(address+ap.getStorefrontIcon());
+            }
             //添加图片详情地址字段
             String[] imgArr = image.split(",");
             //StringBuilder imgStr = new StringBuilder();
@@ -305,6 +309,7 @@ public class RefundAfterSalesService {
                     totalStevedorageCostT=MathUtil.add(totalStevedorageCostT,orderInfo.getTotalStevedorageCost());
                     totalAmountT=MathUtil.add(totalAmountT,orderInfo.getTotalAmount());
 
+                    orderInfo.setStorefrontIcon(address+orderInfo.getStorefrontIcon());
                 }
 
                 map.put("actualTotalAmount",actualTotalAmountT);
@@ -534,6 +539,7 @@ public class RefundAfterSalesService {
                         RefundRepairOrderMaterialDTO rm=repairMaterialList.get(0);
                         refundRepairOrderDTO.setRepairProductName(rm.getProductName());
                     }
+                    refundRepairOrderDTO.setStorefrontIcon(address+refundRepairOrderDTO.getStorefrontIcon());
                 }
             }
             PageInfo pageResult = new PageInfo(repairOrderDTOList);
@@ -593,6 +599,9 @@ public class RefundAfterSalesService {
             ap.setConvertUnit(pt.getConvertUnit());
             ap.setCost(pt.getCost());
             ap.setCategoryId(pt.getCategoryId());
+            if(ap.getStorefrontIcon()!=null&&StringUtils.isNotBlank(ap.getStorefrontIcon())){
+                ap.setStorefrontIcon(address+ap.getStorefrontIcon());
+            }
             //添加图片详情地址字段
             String[] imgArr = image.split(",");
             //StringBuilder imgStr = new StringBuilder();
@@ -652,6 +661,7 @@ public class RefundAfterSalesService {
                refundRepairOrderDTO.setAssociatedOperation(orderProgressDTO.getAssociatedOperation());
                refundRepairOrderDTO.setAssociatedOperationName(orderProgressDTO.getAssociatedOperationName());
            }
+            refundRepairOrderDTO.setStorefrontIcon(address+refundRepairOrderDTO.getStorefrontIcon());
             //相关凭证图片地址存储
             String imageArr=refundRepairOrderDTO.getImageArr();
             if(StringUtils.isNotBlank(imageArr)){
@@ -859,6 +869,7 @@ public class RefundAfterSalesService {
                     List<RefundOrderItemDTO> orderItemList=billDjDeliverOrderSplitItemMapper.queryReturnRefundOrderItemList(orderSplitId,searchKey);
                     getProductList(orderItemList,address);
                     order.setOrderDetailList(orderItemList);
+                    order.setStorefrontIcon(address+order.getStorefrontIcon());
                 }
             }
             PageInfo pageResult = new PageInfo(orderlist);
@@ -944,6 +955,7 @@ public class RefundAfterSalesService {
 
                     orderInfo.setTotalRransportationCostRemark("运费："+orderInfo.getTotalRransportationCost());//运费描述
                     orderInfo.setTotalStevedorageCostRemark("搬运费："+orderInfo.getTotalStevedorageCost());//搬运费描述
+                    orderInfo.setStorefrontIcon(address+orderInfo.getStorefrontIcon());
                     //添加对应的信息
                     orderlist.add(orderInfo);
                     actualTotalAmountT=MathUtil.add(actualTotalAmountT,orderInfo.getActualTotalAmount());
