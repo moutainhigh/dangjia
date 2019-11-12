@@ -175,6 +175,7 @@
             t.id repairMendOrderId,
             t.storefront_id storefrontId,
             t1.storefront_name storefrontName,
+            t1.mobile storefrontMobile,
             t1.system_logo storefrontIcon,
             t.house_id houseId,
             t.number repairOrderNum,
