@@ -492,6 +492,12 @@ public class ComplainService {
                                     "业主提前结束装修，原因为" + complain.getContent());
                         }
                         houseMapper.updateByPrimaryKeySelective(house);
+
+                        List<HouseFlowApply> houseFlowApplys =  houseFlowApplyMapper.getMemberCheckList(house.getId());
+                        for (HouseFlowApply flowApply : houseFlowApplys) {
+                            flowApply.setMemberCheck(2);
+                            houseFlowApplyMapper.updateByPrimaryKeySelective(flowApply);
+                        }
                         break;
                 }
             }
@@ -774,6 +780,12 @@ public class ComplainService {
 //        house.setDesignerOk(3);
 //        house.setBudgetOk(3);
         houseMapper.updateByPrimaryKeySelective(house);
+
+        List<HouseFlowApply> houseFlowApplys =  houseFlowApplyMapper.getMemberCheckList(house.getId());
+        for (HouseFlowApply flowApply : houseFlowApplys) {
+            flowApply.setMemberCheck(2);
+            houseFlowApplyMapper.updateByPrimaryKeySelective(flowApply);
+        }
         return ServerResponse.createBySuccessMessage("ok");
     }
 
@@ -834,6 +846,8 @@ public class ComplainService {
 //        house.setDesignerOk(3);
 //        house.setBudgetOk(3);
         houseMapper.updateByPrimaryKeySelective(house);
+
+
         return ServerResponse.createBySuccessMessage("操作成功");
     }
 
