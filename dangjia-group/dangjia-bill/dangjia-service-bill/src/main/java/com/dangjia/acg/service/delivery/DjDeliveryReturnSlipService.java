@@ -7,6 +7,7 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.delivery.*;
@@ -27,6 +28,7 @@ import tk.mybatis.mapper.entity.Example;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -403,10 +405,18 @@ public class DjDeliveryReturnSlipService {
             {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
-            List<BuyersDimensionDTO> list=djDeliveryReturnSlipMapper.storefrontProductDimension(null, storefront.getId(),null);
-            PageInfo pageResult = new PageInfo(list);
+            List<Map> bListMap =new ArrayList<>();
+            List<StoreSupplyDimensionDTO> list=djDeliveryReturnSlipMapper.storefrontProductDimension(storefront.getId(),searchKey);
             if (list.size() <= 0)
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            for (StoreSupplyDimensionDTO storeSupplyDimensionDTO:list ) {
+                Map brandMap= BeanUtils.beanToMap(storeSupplyDimensionDTO);
+                String prodTemplateId= storeSupplyDimensionDTO.getProdTemplateId();
+                List<StoreSupplyDimensionDetailDTO> listDetail=djDeliveryReturnSlipMapper.storefrontProductDimensionDetail(storefront.getId(),prodTemplateId,cityId);
+                bListMap.add(brandMap);
+                brandMap.put("StoreSupplyDimensionDetailDTO",listDetail);
+            }
+            PageInfo pageResult = new PageInfo(bListMap);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             logger.error("店铺利润统计-商品维度异常", e);

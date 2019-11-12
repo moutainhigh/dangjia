@@ -438,26 +438,83 @@
         dsd.number
     </select>
 
+    <select id="storefrontProductDimensionDetail" resultType="com.dangjia.acg.dto.delivery.StoreSupplyDimensionDetailDTO">
+            SELECT
+                dsd.number,
+                -- 发货单号
+                dsd.house_id AS houseId,
+                -- 房子id
+                dsd.ship_address AS shipAddress,
+                -- 房子地址
+                dsd.submit_time,
+                -- 下单时间
+                dsd.supplier_id AS supId,
+                -- 供应商id
+                dosi.num AS supplyQuantity,
+                -- 本次供货数
+                dsd.total_amount AS totalAmount,
+                -- 销售价
+                dsd.apply_money AS applyMoney,
+                -- 成本价
+                sum(dsd.total_amount) - IFNULL(dsd.apply_money, '') AS profit -- 利润
+            FROM
+                dj_deliver_order_split_item dosi -- 要货单明细
+            INNER JOIN dj_deliver_split_deliver dsd ON dsd.id = dosi.split_deliver_id -- 发货单详情
+            INNER JOIN dj_basics_storefront_product bsp ON dosi.product_id = bsp.prod_template_id -- 店铺商品
+            WHERE
+                1 = 1
+            AND bsp.prod_template_id = #{productId}
+            AND dsd.storefront_id = #{storefrontId}
+            AND dosi.city_id = #{cityId}
+            GROUP BY
+            dsd.house_id
+    </select>
+
 
     <!--店铺利润-商品维度-->
-    <select id="storefrontProductDimension" resultType="com.dangjia.acg.dto.delivery.SellerDimensionDTO">
+    <select id="storefrontProductDimension" resultType="com.dangjia.acg.dto.delivery.StoreSupplyDimensionDTO">
         SELECT
-            dsd.supplier_id AS supId,
-            -- 供应商id
-            sum(total_price) AS income,
-            -- 收入
-            sum(apply_money) AS expenditure,
-            -- 支出
-            sum(total_price) - sum(apply_money) AS profit -- 利润
+        bsp.image,
+        -- 图片
+        bsp.product_name AS productName,
+        -- 商品名称
+        bpt.product_sn AS productSn,
+        -- 商品编号
+        bsp.prod_template_id AS prodTemplateId,
+        -- 商品id
+        doi.shop_count AS shopCount,
+        -- 总购买数
+        bsp.supplied_num AS suppliedNum,
+        -- 供货数
+        sum(doi.cost) AS cost,
+        -- 成本总价
+        sum(doi.price) AS price,
+        -- 销售总价
+        IFNULL(
+        sum(doi.price) - sum(doi.cost),
+        ''
+        ) AS profit,
+        -- 利润
+        doi.product_id AS productId -- 商品id
         FROM
-            dj_deliver_split_deliver dsd
-        INNER JOIN dj_deliver_order_split_item dosi ON dsd.id = dosi.split_deliver_id
+        dj_basics_storefront_product bsp -- 店铺商品
+        INNER JOIN dj_basics_product_template bpt ON bsp.prod_template_id = bpt.id -- 商品模板
+        INNER JOIN dj_deliver_order_item doi ON doi.product_id = bpt.id -- 订单详情
         WHERE
-            dsd.supplier_id = #{supId}
-        AND dsd.storefront_id = #{shopId}
-        AND dsd.city_id = #{cityId}
+        1 = 1
+        AND bsp.data_status = 0
+        AND bsp.is_shelf_status = 1
+        AND bsp.storefront_id = #{storefrontId}
+        <if test = "null!=searchKey and ''!=searchKey" >
+            AND (
+            bpt.product_name LIKE CONCAT(
+            '%',
+            #{searchKey},'%') or
+            bpt.product_sn LIKE CONCAT('%', #{searchKey},'%')
+            )
+        </if>
         GROUP BY
-            dsd.supplier_id
+        bsp.prod_template_id
     </select>
 
     <!--店铺利润-供应商维度-->
