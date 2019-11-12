@@ -604,6 +604,7 @@ public class CommonUtil {
         break;
       case "RA_014":
       case "RA_017":
+      case "RA_019":
         stateName="退人工关闭";
         break;
       case "RA_015":

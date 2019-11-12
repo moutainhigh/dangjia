@@ -670,7 +670,7 @@ public class RefundAfterSalesService {
                    refundRepairOrderDTO.setShowRepairDateType(2);
                }
            }
-
+            refundRepairOrderDTO.setMobile(refundRepairOrderDTO.getStorefrontMobile());//拨打电话
             refundRepairOrderDTO.setStorefrontIcon(address+refundRepairOrderDTO.getStorefrontIcon());
             //相关凭证图片地址存储
             String imageArr=refundRepairOrderDTO.getImageArr();
@@ -1148,7 +1148,7 @@ public class RefundAfterSalesService {
                     List<OrderProgressDTO> orderProgressDTOList=iBillOrderProgressMapper.queryOrderProgressListByOrderId(repairWorkOrderId,"2");//退款历史记录
                     if(orderProgressDTOList!=null&&orderProgressDTOList.size()>0){//判断最后节点，及剩余处理时间
                         OrderProgressDTO orderProgressDTO=orderProgressDTOList.get(orderProgressDTOList.size()-1);
-                        returnWorkOrderDTO.setStateName(CommonUtil.getStateWorkerName(orderProgressDTO.getNodeName()));
+                        returnWorkOrderDTO.setStateName(CommonUtil.getStateWorkerName(orderProgressDTO.getNodeCode()));
                     }else{
                         returnWorkOrderDTO.setStateName(CommonUtil.getChangeStateName(returnWorkOrderDTO.getState()));
                     }
@@ -1173,28 +1173,31 @@ public class RefundAfterSalesService {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             logger.info("退人工详情页面：repairWorkOrderId={}",repairWorkOrderId);
             ReturnWorkOrderDTO returnWorkOrderDTO=iBillChangeOrderMapper.queryReturnWorkerInfo(repairWorkOrderId);
-            List<OrderProgressDTO> orderProgressDTOList=iBillOrderProgressMapper.queryOrderProgressListByOrderId(repairWorkOrderId,"2");//退款历史记录
-            if(orderProgressDTOList!=null&&orderProgressDTOList.size()>0){//判断最后节点，及剩余处理时间
-                OrderProgressDTO orderProgressDTO=orderProgressDTOList.get(orderProgressDTOList.size()-1);
-                returnWorkOrderDTO.setStateName(CommonUtil.getStateWorkerName(orderProgressDTO.getNodeName()));
-                returnWorkOrderDTO.setRepairNewNode(orderProgressDTO.getNodeName());
-                returnWorkOrderDTO.setAssociatedOperation(orderProgressDTO.getAssociatedOperation());
-                returnWorkOrderDTO.setAssociatedOperationName(orderProgressDTO.getAssociatedOperationName());
-                //流水节点放入
-                returnWorkOrderDTO.setOrderProgressList(setOrderWorkerProgressList(orderProgressDTOList,orderProgressDTO));
-
-            }else{
-                //状态优化
-                returnWorkOrderDTO.setStateName(CommonUtil.getChangeStateName(returnWorkOrderDTO.getState()));
-            }
             String supId=returnWorkOrderDTO.getSupId();
             //查询大管家电话
             Member member=iBillMemberMapper.selectByPrimaryKey(supId);
+
             if(member!=null&&StringUtils.isNotBlank(member.getMobile())){
                 returnWorkOrderDTO.setSupMobile(member.getMobile());
 
             }
 
+            List<OrderProgressDTO> orderProgressDTOList=iBillOrderProgressMapper.queryOrderProgressListByOrderId(repairWorkOrderId,"2");//退款历史记录
+            if(orderProgressDTOList!=null&&orderProgressDTOList.size()>0){//判断最后节点，及剩余处理时间
+                OrderProgressDTO orderProgressDTO=orderProgressDTOList.get(orderProgressDTOList.size()-1);
+                returnWorkOrderDTO.setStateName(CommonUtil.getStateWorkerName(orderProgressDTO.getNodeCode()));
+                returnWorkOrderDTO.setRepairNewNode(orderProgressDTO.getNodeName());
+                returnWorkOrderDTO.setAssociatedOperation(orderProgressDTO.getAssociatedOperation());
+                returnWorkOrderDTO.setAssociatedOperationName(orderProgressDTO.getAssociatedOperationName());
+                //流水节点放入
+                returnWorkOrderDTO.setOrderProgressList(setOrderWorkerProgressList(orderProgressDTOList,orderProgressDTO,returnWorkOrderDTO.getSupMobile()));
+
+            }else{
+                //状态优化
+                returnWorkOrderDTO.setStateName(CommonUtil.getChangeStateName(returnWorkOrderDTO.getState()));
+            }
+
+            returnWorkOrderDTO.setMobile(returnWorkOrderDTO.getWorkerMobile());//拨打电话
             returnWorkOrderDTO.setRepairWorkOrderNumber(returnWorkOrderDTO.getRepairWorkOrderId());
             //查询对应的需审核的商品信息(根据变列申请单ID）
             Example example = new Example(MendOrder.class);
@@ -1218,7 +1221,7 @@ public class RefundAfterSalesService {
     }
 
     //判断对就原按钮显不显示
-    private List<OrderProgressDTO> setOrderWorkerProgressList(List<OrderProgressDTO> orderProgressDTOList,OrderProgressDTO orderProgressDTO){
+    private List<OrderProgressDTO> setOrderWorkerProgressList(List<OrderProgressDTO> orderProgressDTOList,OrderProgressDTO orderProgressDTO,String mobile){
         List<OrderProgressDTO> list=new ArrayList<>();
         for(int i=0;i<orderProgressDTOList.size();i++){
             OrderProgressDTO op=orderProgressDTOList.get(i);
@@ -1226,6 +1229,7 @@ public class RefundAfterSalesService {
             //大管家审核未能过
             if("RA_014".equals(op.getNodeCode())){
                 op.setNodeStatus(3);//打黑叉
+                op.setMobile(mobile);//拨打电话，大管家审核 不通过
             }
             //如果最新节点为RA_012，RA_013您的退人工申请已提交 状态，或为RA_015，RA_016工匠审核 中，且当前显示节点为RA_012的话，则显示“撤销按钮”,否则，则不显示
             if(!(("RA_012".equals(orderProgressDTO.getNodeCode())||"RA_013".equals(orderProgressDTO.getNodeCode())
@@ -1234,6 +1238,7 @@ public class RefundAfterSalesService {
                 op.setAssociatedOperation("");//清空按钮数据
                 op.setAssociatedOperationName("");//清空按钮数据
             }
+
             list.add(op);
         }
         if("RA_013".equals(orderProgressDTO.getNodeCode())){//如果最新节点为退人工申请已提交

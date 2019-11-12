@@ -31,6 +31,8 @@ public class ReturnWorkOrderDTO {
 
     private String supMobile;//管家电话
 
+    private String mobile;//拨打电话
+
     private String content;//申诉内容
 
     private Date applyDate;//申请时间

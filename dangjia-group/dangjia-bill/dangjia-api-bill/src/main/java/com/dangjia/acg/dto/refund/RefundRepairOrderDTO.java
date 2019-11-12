@@ -23,6 +23,8 @@ public class RefundRepairOrderDTO {
 
     private String storefrontMobile;//店铺电话
 
+    private String mobile;//拨打电话
+
     private Date applyDate;//退款申请时间
 
     private String applyMemberId;//申请人ID
