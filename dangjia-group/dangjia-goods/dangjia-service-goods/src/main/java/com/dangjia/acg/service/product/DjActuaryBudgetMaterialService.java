@@ -470,7 +470,7 @@ public class DjActuaryBudgetMaterialService {
      * @return
      */
     public ServerResponse queryBasicsProduct(String productId,
-                                             PageDTO pageDTO,String cityId,String categoryId,
+                                             PageDTO pageDTO,String cityId,String categoryId,String goodsId,
                                              String name, String attributeVal,
                                              String brandVal,String orderKey) {
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
@@ -491,7 +491,7 @@ public class DjActuaryBudgetMaterialService {
             if(!CommonUtil.isEmpty(name)){
                 names=name.split(",");
             }
-            List<ActuarialProductAppDTO> pList = iBasicsProductTemplateMapper.serchCategoryProduct(categoryId, names, brandVals, attributeVals, orderKey);
+            List<ActuarialProductAppDTO> pList = iBasicsProductTemplateMapper.serchCategoryProduct(categoryId, goodsId,names, brandVals, attributeVals, orderKey);
             pageResult = new PageInfo<>(pList);
             if (!pList.isEmpty()) {
                 searchActuarialConfigServices.getProductList(pList, imageAddress);

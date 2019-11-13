@@ -362,6 +362,10 @@
                 CONCAT(p.product_name) LIKE CONCAT('%', #{item}, '%')
             </foreach>
         </if>
+        goodsId
+        <if test="goodsId!=null and goodsId!=''">
+            AND bg.id = #{goodsId}
+        </if>
         <if test="categoryId!=null and categoryId!=''">
             AND bg.category_id = #{categoryId}
         </if>
