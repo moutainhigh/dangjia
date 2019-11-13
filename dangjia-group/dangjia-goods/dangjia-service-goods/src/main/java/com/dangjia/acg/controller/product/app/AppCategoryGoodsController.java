@@ -47,8 +47,8 @@ public class AppCategoryGoodsController implements AppCategoryGoodsAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse serchCategoryProduct(PageDTO pageDTO, String cityId, String categoryId,String name,String attributeVal, String brandVal,String orderKey){
-        return appCategoryGoodsService.serchCategoryProduct( pageDTO,  cityId,  categoryId, name, attributeVal,  brandVal, orderKey);
+    public ServerResponse serchCategoryProduct(PageDTO pageDTO, String cityId, String categoryId,String goodsId,String name,String attributeVal, String brandVal,String orderKey){
+        return appCategoryGoodsService.serchCategoryProduct(pageDTO,  cityId,  categoryId, goodsId,name, attributeVal,  brandVal, orderKey);
     }
 
     /**
