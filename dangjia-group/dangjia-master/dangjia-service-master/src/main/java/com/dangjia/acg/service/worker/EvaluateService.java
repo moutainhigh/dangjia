@@ -461,6 +461,9 @@ public class EvaluateService {
         try {
             HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
             House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
+            if(house.getVisitState()==4){
+                return ServerResponse.createByErrorMessage("已提前结束");
+            }
             if (houseFlowApply.getMemberCheck() == 1 || houseFlowApply.getMemberCheck() == 3) {
                 return ServerResponse.createByErrorMessage("重复审核");
             }
@@ -540,6 +543,9 @@ public class EvaluateService {
             House house = houseMapper.selectByPrimaryKey(houseFlowApply.getHouseId());
             if (house == null) {
                 return ServerResponse.createByErrorMessage("该房产不存在");
+            }
+            if(house.getVisitState()==4){
+                return ServerResponse.createByErrorMessage("已提前结束");
             }
             if (houseFlowApply.getMemberCheck() == 1 || houseFlowApply.getMemberCheck() == 3) {
                 return ServerResponse.createByErrorMessage("重复审核");

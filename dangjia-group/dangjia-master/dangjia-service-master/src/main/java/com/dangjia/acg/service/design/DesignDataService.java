@@ -9,19 +9,27 @@ import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.design.DesignListDTO;
+import com.dangjia.acg.dto.design.QuantityInfoDTO;
 import com.dangjia.acg.dto.design.QuantityRoomDTO;
 import com.dangjia.acg.dto.house.DesignDTO;
+import com.dangjia.acg.dto.house.UserInfoDateDTO;
+import com.dangjia.acg.mapper.core.IHouseFlowMapper;
+import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
 import com.dangjia.acg.mapper.design.IDesignBusinessOrderMapper;
 import com.dangjia.acg.mapper.design.IPayConfigurationMapper;
 import com.dangjia.acg.mapper.design.IQuantityRoomImagesMapper;
 import com.dangjia.acg.mapper.design.IQuantityRoomMapper;
+import com.dangjia.acg.mapper.house.HouseRemarkMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
+import com.dangjia.acg.modle.core.HouseFlow;
+import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.design.DesignBusinessOrder;
 import com.dangjia.acg.modle.design.PayConfiguration;
 import com.dangjia.acg.modle.design.QuantityRoomImages;
 import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.house.HouseRemark;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
@@ -34,9 +42,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Ruking.Cheng
@@ -65,6 +71,12 @@ public class DesignDataService {
     private IPayConfigurationMapper payConfigurationMapper;
     @Autowired
     private IDesignBusinessOrderMapper designBusinessOrderMapper;
+    @Autowired
+    private HouseRemarkMapper houseRemarkMapper;
+    @Autowired
+    private IHouseFlowMapper houseFlowMapper;
+    @Autowired
+    private IHouseWorkerMapper houseWorkerMapper;
 
     /**
      * 获取平面图
@@ -227,6 +239,7 @@ public class DesignDataService {
             quantityRoomDTO.setUserType(-1);
             getUserName(quantityRoomDTO);
         }
+
         pageResult.setList(quantityRoomDTOS);
         return ServerResponse.createBySuccess("查询历史记录成功", pageResult);
 
@@ -311,10 +324,19 @@ public class DesignDataService {
      * @param designerType 0：未支付和设计师未抢单，1：带量房，2：平面图，3：施工图，4：完工
      * @param searchKey    业主手机号/房子名称
      */
-    public ServerResponse getDesignList(HttpServletRequest request, PageDTO pageDTO, int designerType, String searchKey,String workerKey) {
+    public ServerResponse getDesignList(HttpServletRequest request, PageDTO pageDTO, int designerType,
+                                        String searchKey,String workerKey,String userId) {
         String userID = request.getParameter(Constants.USERID);
 
+        Member member = memberMapper.selectByPrimaryKey(userId);
+        int  flag= 0;
+        if(member != null){
+             //设计师
+             flag= member.getWorkerType();
+        }
+
         String cityKey = request.getParameter(Constants.CITY_ID);
+//        String cityKey = "402881882ba8753a012ba93101120116";
 //        String cityKey = redisClient.getCache(Constants.CITY_KEY + userID, String.class);
         if (CommonUtil.isEmpty(cityKey)) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
@@ -325,9 +347,30 @@ public class DesignDataService {
             //当类型小于0时，则查询移除的数据
             dataStatus = "1";
         }
-        List<DesignDTO> designDTOList = houseMapper.getDesignList(designerType, cityKey, searchKey,workerKey, dataStatus);
+        List<DesignDTO> designDTOList = houseMapper.getDesignList(designerType, cityKey, searchKey,workerKey, dataStatus,flag,userId);
         PageInfo pageResult = new PageInfo(designDTOList);
         for (DesignDTO designDTO : designDTOList) {
+            HouseWorker houseWorker = houseWorkerMapper.getByWorkerTypeId(designDTO.getHouseId(), "1", 6);
+            designDTO.setHouseWorkerId(houseWorker==null?"":houseWorker.getId());
+            //查询销售名称跟手机号码
+            UserInfoDateDTO userInfoDTO =houseMapper.getUserList(designDTO.getMemberId());
+            if(userInfoDTO != null){
+                designDTO.setUserMobile(userInfoDTO.getUserMobile());
+                designDTO.setUsername(userInfoDTO.getUsername());
+            }
+
+            //查询备注信息 取最新一条展示
+            Example example1 = new Example(HouseRemark.class);
+            example1.createCriteria().andEqualTo(HouseRemark.REMARK_TYPE, 0)
+                    .andEqualTo(HouseRemark.HOUSE_ID, designDTO.getHouseId());
+            example1.orderBy(HouseRemark.CREATE_DATE).desc();
+            List<HouseRemark> storeList = houseRemarkMapper.selectByExample(example1);
+            if(storeList.size() > 0){
+                designDTO.setRemarkInfo(storeList.get(0).getRemarkInfo());
+                designDTO.setRemarkDate(storeList.get(0).getCreateDate());
+            }
+
+
             ServerResponse serverResponse = getPlaneMap(designDTO.getHouseId());
             if (!serverResponse.isSuccess()) {
                 serverResponse = getConstructionPlans(designDTO.getHouseId());
@@ -461,4 +504,316 @@ public class DesignDataService {
         pageResult.setList(memberMapList);
         return ServerResponse.createBySuccess("获取成功", pageResult);
     }
+
+    /**
+     * 新增房子备注信息
+     * @param houseRemark
+     * @return
+     */
+    public ServerResponse addHouseRemark(HouseRemark houseRemark,String userId){
+        try {
+
+            if(!CommonUtil.isEmpty(userId)){
+                if(!CommonUtil.isEmpty(houseRemark.getClient())){
+                    //查询中台操作人
+                    MainUser mainUser = userMapper.selectByPrimaryKey(userId);
+                    if(mainUser != null){
+                        houseRemark.setRemarkName(mainUser.getUsername());
+                    }
+                }else{
+                    //查询app操作人
+                    Member member = memberMapper.selectByPrimaryKey(userId);
+                    if(member != null){
+                        houseRemark.setRemarkName(member.getNickName());
+                    }
+                }
+            }
+
+            if (!CommonUtil.isEmpty(houseRemark)) {
+                houseRemarkMapper.insert(houseRemark);
+                return ServerResponse.createBySuccessMessage("新增成功");
+            }
+            return ServerResponse.createByErrorMessage("新增失败");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("新增失败");
+        }
+    }
+
+    /**
+     * 查询房子备注信息
+     * @param remarkType
+     * @param houseId
+     * @return
+     */
+    public ServerResponse queryHouseRemark(PageDTO pageDTO,String remarkType, String houseId){
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        Example example = new Example(HouseRemark.class);
+        example.createCriteria().andEqualTo(HouseRemark.REMARK_TYPE, remarkType)
+                .andEqualTo(HouseRemark.HOUSE_ID, houseId);
+        example.orderBy(HouseRemark.CREATE_DATE).desc();
+        List<HouseRemark> storeList = houseRemarkMapper.selectByExample(example);
+        if (storeList.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+        return ServerResponse.createBySuccess("查询成功", storeList);
+    }
+
+
+    /**
+     * 一次获取所有设计阶段历史记录
+     * @param houseId houseId
+     * @return ServerResponse
+     */
+    public ServerResponse getArrOdlQuantityRoomList(String houseId) {
+        QuantityInfoDTO quantityInfoDTO = new QuantityInfoDTO();
+        // type 事务类型：0:量房，1平面图，2施工图
+        //查询业主名称，手机号码
+        UserInfoDateDTO storeList = houseMapper.getDesignListInfo(houseId);
+        //房子信息list
+        quantityInfoDTO.setRowList(storeList);
+
+        if(storeList != null){
+            String str = storeList.getResidential() + storeList.getBuilding() + "栋" +
+                    storeList.getUnit() + "单元" + storeList.getNumber() + "号";
+            quantityInfoDTO.setArrHouseName(str);
+            quantityInfoDTO.setName(storeList.getName());
+            quantityInfoDTO.setMobile(storeList.getMobile());
+
+            //查询销售名称跟手机号码
+            UserInfoDateDTO userInfoDTO =houseMapper.getUserList(storeList.getMemberId());
+            if(userInfoDTO != null){
+                quantityInfoDTO.setUserMobile(userInfoDTO.getMobile());
+                quantityInfoDTO.setUsername(userInfoDTO.getUsername());
+            }
+        }
+
+        //查询抢单信息
+        Example example = new Example(HouseWorker.class);
+        example.createCriteria().andEqualTo(HouseWorker.HOUSE_ID, houseId)
+                .andEqualTo(HouseWorker.WORKER_TYPE_ID, 1);
+        example.orderBy(HouseWorker.CREATE_DATE).desc();
+        //查询抢单时间
+        List<HouseWorker> houseWorkers = houseWorkerMapper.selectByExample(example);
+
+        List<Map<String,Object>> Lists = new ArrayList<>();
+
+        Map<String,Object> map = new HashMap();
+        if(houseWorkers.size() > 0){
+            map.put("createDate",houseWorkers.get(0).getCreateDate());
+            map.put("type","抢单");
+            map.put("name",storeList.getName());
+            Lists.add(map);
+        }
+
+        //查询支付时间
+        example = new Example(HouseFlow.class);
+        example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, houseId)
+                .andEqualTo(HouseFlow.WORKER_TYPE_ID, 1);
+        List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example);
+        Date dd =null;
+        if(houseFlows.size() > 0 ){
+            map = new HashMap();
+            dd = houseMapper.getModifyDate(houseFlows.get(0).getId());
+            map.put("createDate",dd);
+            map.put("type","支付");
+            map.put("name",storeList.getOperatorName());
+            Lists.add(map);
+        }
+        quantityInfoDTO.setListFour(Lists);
+
+
+        //获取量房信息
+        PageInfo oneList = getInfo(houseId,0);
+        //获取平面图信息
+        PageInfo twoList = getInfo(houseId,1);
+        //获取施工图信息
+        PageInfo threeList = getInfo(houseId,2);
+        quantityInfoDTO.setTypeOneList(oneList);
+        quantityInfoDTO.setTypeTwoList(twoList);
+        quantityInfoDTO.setTypeThreeList(threeList);
+
+
+        quantityInfoDTO.setNumberType(0);
+        if(oneList.getSize()>0){
+            quantityInfoDTO.setNumberType(2);
+        }
+        if(twoList.getSize()>0){
+            quantityInfoDTO.setNumberType(3);
+        }
+        if(threeList.getSize() > 0){
+            quantityInfoDTO.setNumberType(4);
+        }
+
+        List<QuantityRoomDTO> ddd = threeList.getList();
+        for (QuantityRoomDTO aa:ddd) {
+            if(aa.getFlag() == 0){
+                quantityInfoDTO.setNumberType(5);
+            }
+        }
+
+        return ServerResponse.createBySuccess("查询成功", quantityInfoDTO);
+    }
+
+    public PageInfo getInfo(String houseId, int type){
+        List<QuantityRoomDTO> quantityRoomDTOS = quantityRoomMapper.getQuantityRoomList(houseId, type);
+        if(type == 0){
+            for (QuantityRoomDTO ddd:quantityRoomDTOS) {
+                ddd.setUpOName("上传量房");
+            }
+        }else if(type == 1){
+            for (QuantityRoomDTO ddd:quantityRoomDTOS) {
+                if(ddd.getFlag() == 0){
+                    ddd.setUpTName("审核通过");
+                }else if(ddd.getFlag() == 1){
+                    ddd.setUpTName("审核未通过");
+                }else{
+                    ddd.setUpTName("上传平面图");
+                }
+            }
+        }else if(type == 2) {
+            for (QuantityRoomDTO ddd : quantityRoomDTOS) {
+                if (ddd.getFlag() == 0) {
+                    ddd.setUpFName("审核通过");
+                } else if (ddd.getFlag() == 1) {
+                    ddd.setUpFName("审核未通过");
+                } else {
+                    ddd.setUpFName("上传施工图");
+                }
+            }
+        }else if(type == 3){
+            for (QuantityRoomDTO ddd : quantityRoomDTOS) {
+                if (ddd.getFlag() == 0) {
+                    ddd.setUpFaName("精算通过");
+                } else if (ddd.getFlag() == 1) {
+                    ddd.setUpFName("精算未通过");
+                } else {
+                    ddd.setUpFName("上传精算");
+                }
+            }
+        }
+
+
+        PageInfo pageResult = new PageInfo(quantityRoomDTOS);
+        for (QuantityRoomDTO quantityRoomDTO : quantityRoomDTOS) {
+            quantityRoomDTO.setUserType(-1);
+            getUserName1(quantityRoomDTO);
+        }
+
+        pageResult.setList(quantityRoomDTOS);
+        return pageResult;
+    }
+
+    private void getUserName1(QuantityRoomDTO quantityRoomDTO) {
+        Member member = memberMapper.selectByPrimaryKey(quantityRoomDTO.getOwnerId());
+        if (member != null) {
+            quantityRoomDTO.setUserType(1);
+            quantityRoomDTO.setMemberName(CommonUtil.isEmpty(member.getName()) ? member.getNickName() : member.getName());
+        }
+
+        MainUser mainUser = userMapper.selectByPrimaryKey(quantityRoomDTO.getUserId());
+        if (mainUser != null) {
+            quantityRoomDTO.setUserType(1);
+            quantityRoomDTO.setUserName(mainUser.getUsername());
+        }
+    }
+
+    /**
+     * 一次获取所有 精算阶段 历史记录
+     * @param houseId houseId
+     * @return ServerResponse
+     */
+    public ServerResponse getArrCountList(String houseId) {
+        QuantityInfoDTO quantityInfoDTO = new QuantityInfoDTO();
+        //查询业主名称，手机号码
+        UserInfoDateDTO storeList = houseMapper.getDesignListInfo(houseId);
+        //房子信息list
+        quantityInfoDTO.setRowList(storeList);
+
+        if(storeList != null){
+            String str = storeList.getResidential() + storeList.getBuilding() + "栋" +
+                    storeList.getUnit() + "单元" + storeList.getNumber() + "号";
+            quantityInfoDTO.setArrHouseName(str);
+            quantityInfoDTO.setName(storeList.getName());
+            quantityInfoDTO.setMobile(storeList.getMobile());
+
+            //查询销售名称跟手机号码
+            UserInfoDateDTO userInfoDTO =houseMapper.getUserList(storeList.getMemberId());
+            if(userInfoDTO != null){
+                quantityInfoDTO.setUserMobile(userInfoDTO.getMobile());
+                quantityInfoDTO.setUsername(userInfoDTO.getUsername());
+            }
+        }
+
+        Example example = new Example(HouseWorker.class);
+        example.createCriteria().andEqualTo(HouseWorker.HOUSE_ID, houseId)
+                .andEqualTo(HouseWorker.WORKER_TYPE_ID, 2);
+        example.orderBy(HouseWorker.CREATE_DATE).desc();
+        //查询精算抢单信息
+        List<HouseWorker> houseWorkers = houseWorkerMapper.selectByExample(example);
+        List<Map<String,Object>> Lists = new ArrayList<>();
+        Map<String,Object> map = new HashMap();
+        if(houseWorkers.size() > 0){
+            map.put("createDate",houseWorkers.get(0).getCreateDate());
+            map.put("type","抢单");
+            map.put("name",storeList.getName());
+            Lists.add(map);
+        }
+
+        //查询精算支付时间
+        example = new Example(HouseFlow.class);
+        example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, houseId)
+                .andEqualTo(HouseFlow.WORKER_TYPE_ID, 2);
+        List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example);
+        Date dd =null;
+        if(houseFlows.size() > 0 ){
+            map = new HashMap();
+            dd = houseMapper.getModifyDate(houseFlows.get(0).getId());
+            map.put("createDate",dd);
+            map.put("type","支付");
+            map.put("name",storeList.getOperatorName());
+            Lists.add(map);
+        }
+
+        quantityInfoDTO.setListFour(Lists);
+
+        //获取精算信息
+        PageInfo oneList = getJInfo(houseId,2);
+        quantityInfoDTO.setJinList(oneList);
+
+        quantityInfoDTO.setNumberType(0);
+        if(Lists.size() > 0){
+            quantityInfoDTO.setNumberType(2);
+        }
+        if(oneList.getSize()>0){
+            quantityInfoDTO.setNumberType(3);
+        }
+
+        return ServerResponse.createBySuccess("查询成功", quantityInfoDTO);
+    }
+
+    public PageInfo getJInfo(String houseId, int type){
+        List<QuantityRoomDTO> quantityRoomDTOS = quantityRoomMapper.getQuantityRoomList(houseId, type);
+        if(type == 2){
+            for (QuantityRoomDTO ddd : quantityRoomDTOS) {
+                if (ddd.getFlag() == 0) {
+                    ddd.setUpFaName("精算通过");
+                } else if (ddd.getFlag() == 1) {
+                    ddd.setUpFName("精算未通过");
+                } else {
+                    ddd.setUpFName("上传精算");
+                }
+            }
+        }
+
+        PageInfo pageResult = new PageInfo(quantityRoomDTOS);
+        for (QuantityRoomDTO quantityRoomDTO : quantityRoomDTOS) {
+            quantityRoomDTO.setUserType(-1);
+            getUserName1(quantityRoomDTO);
+        }
+        pageResult.setList(quantityRoomDTOS);
+        return pageResult;
+    }
+
+
 }

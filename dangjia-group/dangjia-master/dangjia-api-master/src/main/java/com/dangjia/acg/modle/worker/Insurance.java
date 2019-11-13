@@ -66,4 +66,9 @@ public class Insurance extends BaseEntity {
 	@Desc(value = "支付金额")
 	@ApiModelProperty("支付金额")
 	private BigDecimal money;
+
+	@Column(name = "head")
+	@Desc(value = "图片")
+	@ApiModelProperty("图片")
+	private String head;
 }

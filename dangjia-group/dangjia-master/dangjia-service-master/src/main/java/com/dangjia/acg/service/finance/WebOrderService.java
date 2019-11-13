@@ -4,6 +4,7 @@ import com.ctc.wstx.util.DataUtil;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.deliver.OrderItemByDTO;
@@ -14,14 +15,18 @@ import com.dangjia.acg.mapper.activity.IActivityRedPackRuleMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
+import com.dangjia.acg.mapper.pay.IPayOrderMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
+import com.dangjia.acg.mapper.store.IStoreMapper;
 import com.dangjia.acg.modle.activity.ActivityRedPack;
 import com.dangjia.acg.modle.activity.ActivityRedPackRecord;
 import com.dangjia.acg.modle.activity.ActivityRedPackRule;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.pay.BusinessOrder;
+import com.dangjia.acg.modle.pay.PayOrder;
 import com.dangjia.acg.modle.repair.MendOrder;
+import com.dangjia.acg.modle.store.Store;
 import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -46,6 +51,13 @@ public class WebOrderService {
     private IActivityRedPackRecordMapper iActivityRedPackRecordMapper;
     @Autowired
     private IActivityRedPackMapper iActivityRedPackMapper;
+
+    @Autowired
+    private IPayOrderMapper iPayOrderMapper;
+    @Autowired
+    private IStoreMapper iStoreMapper;
+
+
     @Autowired
     private IHouseFlowMapper houseFlowMapper;
     @Autowired
@@ -76,6 +88,22 @@ public class WebOrderService {
             List<WebOrderDTO> orderList = iBusinessOrderMapper.getWebOrderList(cityId,state, searchKey,storefrontId);
             PageInfo pageResult = new PageInfo(orderList);
             for (WebOrderDTO webOrderDTO : orderList) {
+                if(!CommonUtil.isEmpty(webOrderDTO.getPayOrderNumber())) {
+                    PayOrder payOrder= iPayOrderMapper.getByNumber(webOrderDTO.getPayOrderNumber());
+                    if(payOrder!=null){
+                        webOrderDTO.setCreateDate(payOrder.getCreateDate());
+                        webOrderDTO.setPayType(Integer.parseInt(payOrder.getPayState()));
+                    }
+                }
+                if(!CommonUtil.isEmpty(webOrderDTO.getStoreName())) {
+                    Example example=new Example(Store.class);
+                    example.createCriteria().andLike(Store.VILLAGES,"%" + webOrderDTO.getStoreName() + "%");
+                    List<Store> stores = iStoreMapper.selectByExample(example);
+                    if(stores.size()>0){
+                        webOrderDTO.setStoreName(stores.size()>0?stores.get(0).getStoreName():null);
+                    }
+                }
+
                 webOrderDTO.setImage(Utils.getImageAddress(address,webOrderDTO.getImage()));
                 if (webOrderDTO.getState() == 3) {
                     if (webOrderDTO.getType() == 1) {//工序支付

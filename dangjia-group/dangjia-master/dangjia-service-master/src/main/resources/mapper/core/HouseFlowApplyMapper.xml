@@ -146,6 +146,7 @@
         and worker_id = #{workerId}
         and apply_type = 4
         and to_days(create_date) = to_days(#{time})
+        LIMIT 1
     </select>
 
     <select id="getTodayStart1" resultType="com.dangjia.acg.modle.core.HouseFlowApply">

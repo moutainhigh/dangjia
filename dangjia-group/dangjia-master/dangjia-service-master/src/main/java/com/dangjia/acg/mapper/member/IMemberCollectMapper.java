@@ -1,5 +1,6 @@
 package com.dangjia.acg.mapper.member;
 
+import com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.MemberCollect;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
@@ -19,8 +20,8 @@ public interface IMemberCollectMapper extends Mapper<MemberCollect> {
 
     List<House> queryCollectHouse(@Param("memberId") String memberId);
 
-    List<DjBasicsProductTemplate> queryRandomProduct(@Param("limit") Integer limit,@Param("cityId") String cityId);
+    List<ActuarialProductAppDTO> queryRandomProduct(@Param("limit") Integer limit, @Param("cityId") String cityId);
 
-    List<DjBasicsProductTemplate> queryRandomProductByCategoryId(@Param("storefrontProductId") String storefrontProductId,@Param("limit") Integer limit);
+    List<ActuarialProductAppDTO> queryRandomProductByCategoryId(@Param("storefrontProductId") String storefrontProductId,@Param("limit") Integer limit);
 }
 

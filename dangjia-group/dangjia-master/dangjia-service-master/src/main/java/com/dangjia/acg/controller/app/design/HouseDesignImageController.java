@@ -4,9 +4,11 @@ import com.dangjia.acg.api.app.design.HouseDesignImageAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.house.HouseRemark;
 import com.dangjia.acg.service.design.DesignDataService;
 import com.dangjia.acg.service.design.DesignerOperationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -32,8 +34,9 @@ public class HouseDesignImageController implements HouseDesignImageAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getDesignList(HttpServletRequest request, PageDTO pageDTO, int designerType, String searchKey,String workerKey) {
-        return designDataService.getDesignList(request, pageDTO, designerType, searchKey, workerKey);
+    public ServerResponse getDesignList(HttpServletRequest request, PageDTO pageDTO, int designerType,
+                                        String searchKey,String workerKey,String userId) {
+        return designDataService.getDesignList(request, pageDTO, designerType, searchKey, workerKey,userId);
     }
 
     @Override
@@ -112,4 +115,34 @@ public class HouseDesignImageController implements HouseDesignImageAPI {
     public ServerResponse getHouseStatistics(String cityId,String workerTypeId,PageDTO pageDTO,String startDate, String endDate){
         return designDataService.getHouseStatistics(cityId,workerTypeId,pageDTO,startDate,endDate);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse addHouseRemark(HttpServletRequest request, HouseRemark houseRemark,String userId){
+        return designDataService.addHouseRemark(houseRemark,userId);
+    }
+
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryHouseRemark(HttpServletRequest request,
+                                           PageDTO pageDTO,
+                                           String remarkType,
+                                           String houseId){
+        return designDataService.queryHouseRemark(pageDTO,remarkType,houseId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse getArrOdlQuantityRoomList(HttpServletRequest request,String houseId){
+        return designDataService.getArrOdlQuantityRoomList(houseId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse getArrCountList(HttpServletRequest request,String houseId){
+        return designDataService.getArrCountList(houseId);
+    }
+
+
 }

@@ -70,11 +70,11 @@ public class DjSupApplicationProductService {
      */
     public ServerResponse insertDjSupApplicationProduct(String jsonStr, String cityId, String supId, String shopId) {
         try {
-            DjSupplier djSupplier = djSupplierMapper.selectByPrimaryKey(shopId);
+            DjSupplier djSupplier = djSupplierMapper.selectByPrimaryKey(supId);
             if(null==djSupplier)
-                return ServerResponse.createBySuccessMessage("供应商不存在");
+                return ServerResponse.createByErrorMessage("供应商不存在");
             if(null==djSupplier.getRetentionMoney()||!(djSupplier.getRetentionMoney()>0))
-                return ServerResponse.createBySuccessMessage("请先交纳滞留金");
+                return ServerResponse.createByErrorMessage("请先交纳滞留金");
             JSONArray jsonArr = JSONArray.parseArray(jsonStr);
             jsonArr.forEach(str -> {
                 JSONObject obj = (JSONObject) str;

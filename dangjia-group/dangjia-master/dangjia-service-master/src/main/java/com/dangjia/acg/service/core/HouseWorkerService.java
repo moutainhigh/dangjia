@@ -432,9 +432,9 @@ public class HouseWorkerService {
             case 2:
                 return setWholeCompletion(worker, hf, house, imageList);
             case 4:
-                ServerResponse serverResponse = evaluateService.getUserToHouseDistance(latitude, longitude, house.getVillageId());
-                if (!serverResponse.isSuccess())
-                    return serverResponse;
+//                ServerResponse serverResponse = evaluateService.getUserToHouseDistance(latitude, longitude, house.getVillageId());
+//                if (!serverResponse.isSuccess())
+//                    return serverResponse;
                 return setStartDaily(worker, hf, house, imageList);
             case 5:
             case 6:
@@ -793,7 +793,7 @@ public class HouseWorkerService {
             hfa = getHouseFlowApply(hf, applyType, supervisorHF);
 
             hfa.setApplyDec("尊敬的业主，您好！\n" +
-                    "当家大管家【" + supervisor.getName() + "】为您新家质量保驾护航，工地现为【" + applyDec + "】阶段，今日巡查房屋现场情况如下，未发现施工不合格情况，请您查收。");//描述
+                    "当家大管家【" + supervisor.getName() + "】为您新家质量保驾护航，工地现为【" + workerType.getName() + "】阶段，今日巡查房屋现场情况如下：" + applyDec + "，未发现施工不合格情况，请您查收。");//描述
 //            hfa.setApplyDec("业主您好，我已巡查了" + workerType.getName() + "，现场情况如下：" + applyDec);//描述
             //描述
             hfa.setMemberCheck(1);//默认业主审核状态通过
