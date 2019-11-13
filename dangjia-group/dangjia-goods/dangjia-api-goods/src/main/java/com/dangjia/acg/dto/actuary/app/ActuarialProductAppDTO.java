@@ -110,8 +110,7 @@ public class ActuarialProductAppDTO {
     /***********************商品明细相关内容**************************/
 
 
-    @ApiModelProperty("店铺信息")
-    private Shop shop;
+
 
     @ApiModelProperty("购买限制（0自由购房；1有房无精算；2有房有精算")
     private String purchaseRestrictions;
@@ -180,12 +179,12 @@ public class ActuarialProductAppDTO {
     @ApiModelProperty("该product所在的原关联组id")
     private String srcGroupId;
 
-    @ApiModelProperty("属性组")
-    private List<AttributeDTO> attrList;
-
     @ApiModelProperty("关联的工艺ID，多个逗号分割")
     private String technologyIds;
-
+    @ApiModelProperty("店铺信息")
+    private Shop shop;
+    @ApiModelProperty("属性组")
+    private List<AttributeDTO> attrList;
     @ApiModelProperty("营销名称")
     private List<TechnologyDTO> technologies;
     /***********************商品明细相关内容**************************/
