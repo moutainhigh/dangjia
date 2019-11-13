@@ -10,6 +10,7 @@ import lombok.experimental.FieldNameConstants;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 /**
  * 实体类 -补人工 补材料 退人工 退材料
@@ -109,4 +110,8 @@ public class MendOrder extends BaseEntity {
 	@ApiModelProperty("订单ID")
 	private String orderId;
 
+	@Transient
+	private String deliverNumber;//退货单号
+	@Transient
+	private String supplierName;//供应商名称
 }
