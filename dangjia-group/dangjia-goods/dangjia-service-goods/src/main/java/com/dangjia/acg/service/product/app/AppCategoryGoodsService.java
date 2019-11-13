@@ -169,7 +169,6 @@ public class AppCategoryGoodsService {
             if(!CommonUtil.isEmpty(name)){
                 names=name.split(",");
             }
-//            StringTool.getLikeV(name)
             List<ActuarialProductAppDTO> pList = iBasicsProductTemplateMapper.serchCategoryProduct(categoryId,names,brandVals,attributeVals,orderKey);
             pageResult = new PageInfo<>(pList);
             searchActuarialConfigServices.getProductList(pList,address);
