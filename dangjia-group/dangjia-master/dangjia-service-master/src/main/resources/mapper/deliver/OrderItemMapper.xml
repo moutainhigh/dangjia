@@ -136,5 +136,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</select>
 	<!--更新名称-->
 
+	<select id="queryDeliverOrderItemDetail" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.deliver.OrderItem">
+		SELECT
+		<include refid="all_columns"/>
+		FROM dj_deliver_order_item
+		where
+		order_id = #{orderId}
+		ORDER BY create_date desc
+	</select>
+
+
 </mapper>
 
