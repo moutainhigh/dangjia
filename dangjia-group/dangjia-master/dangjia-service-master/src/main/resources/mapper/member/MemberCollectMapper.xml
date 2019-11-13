@@ -61,7 +61,7 @@
     <select id="queryRandomProduct" resultType="com.dangjia.acg.modle.product.DjBasicsProductTemplate">
         SELECT
             bsp.id AS storefrontProductId,
-            bsp.product_name AS productName,
+            bsp.product_name AS name,
             bpt.id,
             bsp.image,
             bsp.sell_price AS price,
@@ -80,7 +80,7 @@
     <select id="queryRandomProductByCategoryId" resultType="com.dangjia.acg.modle.product.DjBasicsProductTemplate">
         SELECT
             bsp.id AS storefrontProductId,
-            bsp.product_name AS productName,
+            bsp.product_name AS name,
             bpt.id,
             bsp.image,
             bsp.sell_price AS price,
