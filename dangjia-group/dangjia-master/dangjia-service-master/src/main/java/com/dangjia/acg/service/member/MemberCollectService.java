@@ -66,16 +66,16 @@ public class MemberCollectService {
      */
     public ServerResponse queryCollectGood(HttpServletRequest request, String userToken, PageDTO pageDTO) {
         try {
-//            Object object = constructionService.getMember(userToken);
-//            if (object instanceof ServerResponse) {
-//                return (ServerResponse) object;
-//            }
-//            Member member = (Member) object;
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());//初始化分页插获取用户信息件
             //根据商品用户编号查询收藏记录
             Example example = new Example(MemberCollect.class);
-            example.createCriteria().andEqualTo(MemberCollect.MEMBER_ID,"1")
+            example.createCriteria().andEqualTo(MemberCollect.MEMBER_ID,member.getId())
                     .andEqualTo(MemberCollect.CONDITION_TYPE,1);
             List<MemberCollect> memberCollectList = iMemberCollectMapper.selectByExample(example);
             if (memberCollectList.size() <= 0) {
@@ -111,13 +111,13 @@ public class MemberCollectService {
      */
     public ServerResponse queryCollectHouse(HttpServletRequest request, String userToken, PageDTO pageDTO) {
         try {
-//            Object object = constructionService.getMember(userToken);
-//            if (object instanceof ServerResponse) {
-//                return (ServerResponse) object;
-//            }
-//            Member member = (Member) object;
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<House> houseList = iMemberCollectMapper.queryCollectHouse("1");
+            List<House> houseList = iMemberCollectMapper.queryCollectHouse(member.getId());
             if (houseList.size() <= 0) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
@@ -192,12 +192,12 @@ public class MemberCollectService {
      */
     public ServerResponse addMemberCollect(String userToken, String collectId, String collectType) {
         try {
-//            Object object = constructionService.getMember(userToken);
-//            if (object instanceof ServerResponse)
-//                return (ServerResponse) object;
-//            Member member = (Member) object;
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse)
+                return (ServerResponse) object;
+            Member member = (Member) object;
             MemberCollect memberCollect = new MemberCollect();
-            memberCollect.setMemberId("1");
+            memberCollect.setMemberId(member.getId());
             memberCollect.setCollectId(collectId);
             memberCollect.setConditionType(collectType);
             //判断是否重复收藏
@@ -250,13 +250,13 @@ public class MemberCollectService {
      * @return
      */
     public ServerResponse queryRelated(String userToken,String cityId) {
-//        Object object = constructionService.getMember(userToken);
-//        if (object instanceof ServerResponse) {
-//            return (ServerResponse) object;
-//        }
-//        Member member = (Member) object;
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member member = (Member) object;
         Example example=new Example(WebsiteVisit.class);
-        example.createCriteria().andLike(WebsiteVisit.ROUTE,"%"+1+",%")
+        example.createCriteria().andLike(WebsiteVisit.ROUTE,"%"+member.getId()+",%")
                 .andEqualTo(WebsiteVisit.DATA_STATUS,0);
         example.orderBy(WebsiteVisit.COUNT).desc();
         List<WebsiteVisit> websiteVisits = iWebsiteVisitMapper.selectByExample(example);
