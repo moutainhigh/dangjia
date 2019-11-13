@@ -496,16 +496,16 @@ public class DjDeliveryReturnSlipService {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             StoreBuyersDimensionDTO storeBuyersDimensionDTO=djDeliveryReturnSlipMapper.sellerDimensionById(orderSplitId);
             List<Map> bListMap =new ArrayList<>();
-
             Map brandMap= BeanUtils.beanToMap(storeBuyersDimensionDTO);
+            bListMap.add(brandMap);
 
             List<StoreBuyersDimensionOrderDetailDTO> list=djDeliveryReturnSlipMapper.shippingDetails(orderSplitId);
             for(StoreBuyersDimensionOrderDetailDTO sbdod:list)
             {
                 sbdod.setImageDetail(address+sbdod.getImage());
             }
-            bListMap.add(brandMap);
-            brandMap.put("StoreBuyersDimensionOrderDetailList","list");
+
+            brandMap.put("StoreBuyersDimensionOrderDetailList",list);
             PageInfo pageResult = new PageInfo(bListMap);
 
             return ServerResponse.createBySuccess("查询成功", pageResult);

@@ -596,13 +596,13 @@
 
     <select id="shippingDetails" resultType="com.dangjia.acg.dto.delivery.StoreBuyersDimensionOrderDetailDTO">
           SELECT
-                bsp.product_name as productName, -- 商品名称
-                bsp.image,-- 商品图片
-                bpt.product_sn as productSn,-- 商品编号
-                IFNULL(dosi.num,''),-- 发货数量
-                IFNULL(dosi.receive,''),-- 收货数量
-                IFNULL(dosi.cost,''),-- 成本单价
-                IFNULL(dosi.total_price,'') * IFNULL(dosi.num,'') costTotalPrice,-- 成本总价
+                IFNULL(bsp.product_name,'') as productName, -- 商品名称
+                IFNULL(bsp.image,'') as image,-- 商品图片
+                IFNULL(bpt.product_sn,'') as productSn,-- 商品编号
+                IFNULL(dosi.num,'') as num ,-- 发货数量
+                IFNULL(dosi.receive,'') as receive,-- 收货数量
+                IFNULL(dosi.cost,'') as cost,-- 成本单价
+                IFNULL(dosi.total_price,'') * IFNULL(dosi.num,'') as costTotalPrice,-- 成本总价
                 IFNULL(bsp.sell_price,'') as sellPrice,-- 销售价
                 IFNULL(bsp.sell_price,'') * IFNULL( dosi.num,'') as sellTotalPrice-- 销售总价
             FROM

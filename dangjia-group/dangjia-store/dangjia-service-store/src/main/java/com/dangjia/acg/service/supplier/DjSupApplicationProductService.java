@@ -283,7 +283,7 @@ public class DjSupApplicationProductService {
             DjSupApplicationProduct djSupApplicationProduct = new DjSupApplicationProduct();
             djSupApplicationProduct.setId(null);
             djSupApplicationProduct.setCreateDate(null);
-            djSupApplicationProduct.setApplicationStatus("2");
+            djSupApplicationProduct.setApplicationStatus("1");
             int i = djSupApplicationProductMapper.updateByExampleSelective(djSupApplicationProduct, example);
             if (i <= 0) {
                 return ServerResponse.createByErrorMessage("审核供货列表不通过");
