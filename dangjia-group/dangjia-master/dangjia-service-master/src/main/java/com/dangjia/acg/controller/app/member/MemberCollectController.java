@@ -47,8 +47,8 @@ public class MemberCollectController implements MemberCollectAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse delMemberCollect(HttpServletRequest request, String id){
-        return memberCollectService.delMemberCollect(id);
+    public ServerResponse delMemberCollect(HttpServletRequest request, String userToken, String collectId, String collectType) {
+        return memberCollectService.delMemberCollect(userToken,collectId,collectType);
     }
 
     @Override
