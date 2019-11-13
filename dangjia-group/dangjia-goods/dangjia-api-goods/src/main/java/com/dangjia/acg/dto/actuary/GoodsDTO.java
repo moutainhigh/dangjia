@@ -3,6 +3,7 @@ package com.dangjia.acg.dto.actuary;
 import com.dangjia.acg.modle.sup.Shop;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -26,7 +27,7 @@ public class GoodsDTO {
     private String guaranteedPolicy;//保修政策
     private String goodsId;
     private String image;//product图 1张
-    private String price;//价格加单位
+    private BigDecimal price;//价格加单位
     private String name;
     private String unitName;//单位
     private int productType;//0:材料；1：包工包料；2：人工

@@ -1,9 +1,14 @@
 package com.dangjia.acg.dto.actuary.app;
 
+import com.dangjia.acg.dto.actuary.AttributeDTO;
+import com.dangjia.acg.dto.basics.TechnologyDTO;
+import com.dangjia.acg.modle.sup.Shop;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -44,6 +49,9 @@ public class ActuarialProductAppDTO {
 
     @ApiModelProperty("商品图片详细地址")
     private String imageUrl;
+
+    @ApiModelProperty("上传商品详情图详细地址")
+    private String detailImage;
 
     @ApiModelProperty("商品编码")
     private String productSn;
@@ -95,7 +103,91 @@ public class ActuarialProductAppDTO {
     @ApiModelProperty("是否有优惠卷(1：有，0：否)")
     private Integer  isActivityRedPack=0;
 
+
+    @ApiModelProperty("是否勾选商品标识")
     private boolean flag;
+
+    /***********************商品明细相关内容**************************/
+
+
+
+
+    @ApiModelProperty("购买限制（0自由购房；1有房无精算；2有房有精算")
+    private String purchaseRestrictions;
+
+    @ApiModelProperty("退货性质0：可退；1：不可退")
+    private Integer sales;
+
+    @ApiModelProperty("不可退原因")
+    private String irreversibleReasons;
+
+    @ApiModelProperty("是否上架  0:未上架；1已上架")
+    private String isShelfStatus;
+
+    @ApiModelProperty("营销名称")
+    private String marketingName;
+
+    @ApiModelProperty("是否影响质保年限（1是，0否）")
+    private String isInflueWarrantyPeriod;
+
+    @ApiModelProperty("退款政策")
+    private String refundPolicy;
+
+    @ApiModelProperty("保修政策")
+    private String guaranteedPolicy;
+
+    @ApiModelProperty("可切换性0:可切换；1不可切换")
+    private int isSwitch;
+
+    @ApiModelProperty("商品介绍图片")
+    private String workerDec;
+
+    @ApiModelProperty("商品介绍图片(全路径)")
+    private String workerDecUrl;
+
+
+    @ApiModelProperty("工种ID")
+    private String workerTypeId;
+
+    @ApiModelProperty("工种名称")
+    private String workerTypeName;
+
+    @ApiModelProperty("工作说明")
+    private String workExplain;
+
+    @ApiModelProperty("工艺标准")
+    private String workerStandard;
+
+    @ApiModelProperty("别名")
+    private String otherName;
+
+    @ApiModelProperty("调后单价")
+    private Double LastPrice;
+
+    @ApiModelProperty("调价时间")
+    private Date LastTime;
+
+    @ApiModelProperty("注意事项")
+    private String considerations;
+
+    @ApiModelProperty("计价说明，json串")
+    private String calculateContent;
+
+    @ApiModelProperty("施工说明，json串")
+    private String buildContent;
+
+    @ApiModelProperty("该product所在的原关联组id")
+    private String srcGroupId;
+
+    @ApiModelProperty("关联的工艺ID，多个逗号分割")
+    private String technologyIds;
+    @ApiModelProperty("店铺信息")
+    private Shop shop;
+    @ApiModelProperty("属性组")
+    private List<AttributeDTO> attrList;
+    @ApiModelProperty("工艺集合")
+    private List<TechnologyDTO> technologies;
+    /***********************商品明细相关内容**************************/
 
 
 }

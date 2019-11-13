@@ -328,7 +328,6 @@
         s.system_logo storefrontIcon,
         p.product_name productName,
         p.image image,
-        p.product_sn productSn,
         p.sell_price price,
 
         bp.id productTemplateId,
