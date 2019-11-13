@@ -84,6 +84,24 @@ public class DjDeliveryReturnSlipController implements DjDeliveryReturnSlipAPI {
 
     @Override
     @ApiMethod
+    public ServerResponse supplierDimensionSupplyDetails(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String searchKey) {
+        return djDeliveryReturnSlipService.supplierDimensionSupplyDetails(request,pageDTO,userId,cityId,searchKey);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse supplierDimensionOrderDetails(HttpServletRequest request,PageDTO pageDTO,  String userId, String cityId,String houseId) {
+        return djDeliveryReturnSlipService.supplierDimensionOrderDetails(request,pageDTO,userId,cityId,houseId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse supplierDimensionGoodsDetails(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String orderSplitId) {
+        return djDeliveryReturnSlipService.supplierDimensionGoodsDetails(request,pageDTO,userId,cityId,orderSplitId);
+    }
+
+    @Override
+    @ApiMethod
     public ServerResponse storefrontProductDimension(HttpServletRequest request, PageDTO pageDTO,String userId, String cityId, String searchKey) {
         return djDeliveryReturnSlipService.storefrontProductDimension(pageDTO,userId,cityId,searchKey);
     }
@@ -102,7 +120,7 @@ public class DjDeliveryReturnSlipController implements DjDeliveryReturnSlipAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse shippingDetails(HttpServletRequest request, PageDTO pageDTO, String userId, String houseId, String searchKey, String cityId) {
-        return djDeliveryReturnSlipService.shippingDetails(pageDTO,userId,houseId,searchKey,cityId);
+    public ServerResponse shippingDetails(HttpServletRequest request, PageDTO pageDTO, String orderSplitId) {
+        return djDeliveryReturnSlipService.shippingDetails(pageDTO,orderSplitId);
     }
 }

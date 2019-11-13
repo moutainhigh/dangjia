@@ -185,6 +185,67 @@ public class OrderService {
     }
 
     /**
+     * 查询订单详情
+     * @param orderId
+     * @return
+     */
+    public ServerResponse queryDeliverOrderItemDetail(String orderId) {
+        Order order = orderMapper.selectByPrimaryKey(orderId);
+        if (order == null) {
+            return ServerResponse.createByErrorMessage("该订单不存在");
+        }
+        House house = houseMapper.selectByPrimaryKey(order.getHouseId());
+        if (house == null) {
+            return ServerResponse.createByErrorMessage("该房产不存在");
+        }
+        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+        OrderItemDTO orderItemDTO = new OrderItemDTO();
+        orderItemDTO.setOrderId(order.getId());
+        orderItemDTO.setTotalAmount(order.getTotalAmount());
+        List<ItemDTO> itemDTOList = new ArrayList<>();
+        switch (order.getWorkerTypeId()) {
+            case "1": {//设计
+                ItemDTO itemDTO = new ItemDTO();
+                itemDTO.setName(house.getStyle());
+                itemDTO.setImage(address + "icon/shejiF.png");
+                itemDTO.setPrice("¥" + String.format("%.2f", order.getStylePrice().doubleValue()) + "/㎡");
+                itemDTO.setShopCount(house.getSquare().doubleValue());
+                itemDTO.setProductType(3);
+                itemDTOList.add(itemDTO);
+                break;
+            }
+            case "2": {
+                ItemDTO itemDTO = new ItemDTO();
+                itemDTO.setName("当家精算");
+                itemDTO.setImage(address + "icon/jingsuanF.png");
+                itemDTO.setPrice("¥" + String.format("%.2f", order.getBudgetCost().doubleValue()) + "/㎡");
+                itemDTO.setShopCount(house.getSquare().doubleValue());
+                itemDTO.setProductType(3);
+                itemDTOList.add(itemDTO);
+                break;
+            }
+            default:
+                List<OrderItem> orderItemList = orderItemMapper.queryDeliverOrderItemDetail(orderId);
+                for (OrderItem orderItem : orderItemList) {
+                    ItemDTO itemDTO = new ItemDTO();
+                    itemDTO.setImage(address + orderItem.getImage());
+                    itemDTO.setPrice("¥" + String.format("%.2f", orderItem.getPrice()));
+                    itemDTO.setShopCount(orderItem.getShopCount());
+                    if (order.getType() == 1) {//人工
+                        itemDTO.setName(orderItem.getProductName());
+                        itemDTO.setProductType(2);//人工
+                    } else if (order.getType() == 2) {//材料
+                        itemDTO.setName(orderItem.getProductName());
+                        itemDTO.setProductType(orderItem.getProductType());
+                    }
+                    itemDTOList.add(itemDTO);
+                }
+                break;
+        }
+        orderItemDTO.setItemDTOList(itemDTOList);
+        return ServerResponse.createBySuccess("查询成功", orderItemDTO);
+    }
+    /**
      * 订单详情
      */
     public ServerResponse orderDetail(String orderId) {
@@ -308,8 +369,8 @@ public class OrderService {
             List<Order> list = orderMapper.selectDeliverOrderByHouse(cityId, houseId, orderStatus);
             for (Order order : list) {
                 Map<String, Object> resMap = BeanUtils.beanToMap(order);
-                String businessOrderNumber = order.getBusinessOrderNumber();
-                List<OrderItem> OrderItemList = orderItemMapper.orderItemList(houseId, businessOrderNumber, null, null);
+                String orderId = order.getId();
+                List<OrderItem> OrderItemList = orderItemMapper.orderItemList(houseId, orderId, null, null);
                 if (OrderItemList != null) {
                     resMap.put("OrderItemSize", OrderItemList.size());
                     resMap.put("OrderItemList", OrderItemList);

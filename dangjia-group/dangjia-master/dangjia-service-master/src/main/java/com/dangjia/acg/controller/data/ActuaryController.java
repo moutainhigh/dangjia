@@ -33,8 +33,8 @@ public class ActuaryController implements ActuaryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getActuaryBudgetOk(HttpServletRequest request,PageDTO pageDTO,String name,String budgetOk, String workerKey){
-        return actuaryService.getActuaryAll(request,pageDTO,name,budgetOk,  workerKey);
+    public ServerResponse getActuaryBudgetOk(HttpServletRequest request,PageDTO pageDTO,String name,String budgetOk, String workerKey,String userId){
+        return actuaryService.getActuaryAll(request,pageDTO,name,budgetOk,  workerKey,userId);
 
     }
     /**
@@ -43,8 +43,9 @@ public class ActuaryController implements ActuaryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getActuaryWaitPay(HttpServletRequest request,PageDTO pageDTO,String name, String workerKey){
-        return actuaryService.getActuaryAll(request,pageDTO,name,"5",workerKey);
+    public ServerResponse getActuaryWaitPay(HttpServletRequest request,PageDTO pageDTO,String name,
+                                            String workerKey){
+        return actuaryService.getActuaryAll(request,pageDTO,name,"5",workerKey,null);
 
     }
 
@@ -56,7 +57,7 @@ public class ActuaryController implements ActuaryAPI {
     @ApiMethod
     public ServerResponse getActuaryCommit(HttpServletRequest request,PageDTO pageDTO,String name, String workerKey){
 
-        return actuaryService.getActuaryAll(request,pageDTO,name,"1",workerKey);
+        return actuaryService.getActuaryAll(request,pageDTO,name,"1",workerKey,null);
     }
 
     /**
@@ -66,7 +67,7 @@ public class ActuaryController implements ActuaryAPI {
     @Override
     @ApiMethod
     public ServerResponse getActuaryConfirm(HttpServletRequest request,PageDTO pageDTO,String name, String workerKey){
-        return actuaryService.getActuaryAll(request,pageDTO,name,"2",workerKey);
+        return actuaryService.getActuaryAll(request,pageDTO,name,"2",workerKey,null);
     }
 
     /**
@@ -76,7 +77,7 @@ public class ActuaryController implements ActuaryAPI {
     @Override
     @ApiMethod
     public ServerResponse getActuaryComplete(HttpServletRequest request,PageDTO pageDTO,String name, String workerKey){
-        return actuaryService.getActuaryAll(request,pageDTO,name,"3",workerKey);
+        return actuaryService.getActuaryAll(request,pageDTO,name,"3",workerKey,null);
     }
 
     /**

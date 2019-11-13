@@ -23,6 +23,7 @@ public interface IOrderItemMapper extends Mapper<OrderItem> {
 
     List<OrderItem> byOrderIdList(@Param("orderId")String orderId);
 
+    List<OrderItem> queryDeliverOrderItemDetail(@Param("orderId")String orderId);
 
     List<ShopGoodsDTO> queryShopGoods(@Param("orderId")String orderId);
     List<BudgetLabelDTO>  queryBudgetLabel(@Param("orderId")String orderId ,@Param("storefontId")String storefontId);
