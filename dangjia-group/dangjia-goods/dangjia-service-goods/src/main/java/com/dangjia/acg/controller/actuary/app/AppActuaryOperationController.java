@@ -45,8 +45,8 @@ public class AppActuaryOperationController implements AppActuaryOperationAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getCommo(HttpServletRequest request, String gId, String cityId) {
-        return actuaryOperationService.getCommo(gId, null);
+    public ServerResponse getCommo(HttpServletRequest request, String productId, String cityId) {
+        return actuaryOperationService.getCommo(productId, null);
     }
 
     @Override

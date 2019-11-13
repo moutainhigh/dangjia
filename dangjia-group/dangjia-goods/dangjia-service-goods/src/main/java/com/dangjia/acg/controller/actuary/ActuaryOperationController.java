@@ -44,17 +44,6 @@ public class ActuaryOperationController implements ActuaryOperationAPI {
         return actuaryOperationService.selectProduct(goodsId,  selectVal,  attributeIdArr, budgetMaterialId);
     }
 
-    /*@Override
-    @ApiMethod
-    public ServerResponse getCommo(HttpServletRequest request, String gId, String cityId, int type) {
-        return actuaryOperationService.getCommo(gId, type);
-    }*/
-
-    @Override
-    @ApiMethod
-    public ServerResponse getGoodsDetail(HttpServletRequest request, String gId,int type) {
-        return actuaryOperationService.getGoodsDetail(gId,type);
-    }
 
     @Override
     @ApiMethod

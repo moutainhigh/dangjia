@@ -45,6 +45,7 @@ public interface DjActuaryBudgetMaterialAPI {
                                       @RequestParam("pageDTO") PageDTO pageDTO,
                                       @RequestParam("cityId")String cityId,
                                       @RequestParam("categoryId")String categoryId,
+                                      @RequestParam("goodsId")String goodsId,
                                       @RequestParam("name")String name,
                                       @RequestParam("attributeVal")String attributeVal,
                                       @RequestParam("brandVal")String brandVal,

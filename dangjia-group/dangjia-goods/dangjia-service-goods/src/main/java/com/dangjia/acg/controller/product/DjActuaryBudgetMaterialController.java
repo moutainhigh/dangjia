@@ -51,9 +51,9 @@ public class DjActuaryBudgetMaterialController implements DjActuaryBudgetMateria
      */
     @Override
     @ApiMethod
-    public ServerResponse queryBasicsProduct(HttpServletRequest request,String productId,PageDTO pageDTO,String cityId,String categoryId,
+    public ServerResponse queryBasicsProduct(HttpServletRequest request,String productId,PageDTO pageDTO,String cityId,String categoryId,String goodsId,
                                              String name,String attributeVal,String brandVal, String orderKey) {
-        return djActuaryBudgetMaterialService.queryBasicsProduct(productId, pageDTO, cityId, categoryId, name, attributeVal, brandVal, orderKey);
+        return djActuaryBudgetMaterialService.queryBasicsProduct(productId, pageDTO, cityId, categoryId, goodsId, name, attributeVal, brandVal, orderKey);
     }
 
 }

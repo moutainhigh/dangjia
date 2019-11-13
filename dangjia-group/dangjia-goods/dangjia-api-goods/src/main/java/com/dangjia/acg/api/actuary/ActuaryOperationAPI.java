@@ -69,15 +69,6 @@ public interface ActuaryOperationAPI {
                             @RequestParam("cityId") String cityId,
                             @RequestParam("type") int type);*/
 
-    /**
-     * 商品详情
-     * gId:  WorkerGoodsId   ProductId
-     */
-    @PostMapping("/actuary/actuaryOperation/goodsDetail")
-    @ApiOperation(value = "普通-商品详情", notes = "普通-商品详情")
-    ServerResponse getGoodsDetail(@RequestParam("request") HttpServletRequest request,
-                                  @RequestParam("gId") String gId,
-                                  @RequestParam("type") int type);
 
     /**
      * 工序明细

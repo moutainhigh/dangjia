@@ -56,7 +56,7 @@ public interface AppActuaryOperationAPI {
     @PostMapping("/app/actuary/actuaryOperation/getCommo")
     @ApiOperation(value = "商品详情", notes = "商品详情")
     ServerResponse getCommo(@RequestParam("request") HttpServletRequest request,
-                            @RequestParam("gId") String gId,
+                            @RequestParam("productId") String productId,
                             @RequestParam("cityId") String cityId);
 
     @PostMapping("/data/goods/attribute/name")

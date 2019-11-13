@@ -23,7 +23,7 @@
         AND t1.node_code = t2.`code`
         and t1.progress_type=#{progresType}
         and t1.data_status = 0
-
+        order by t1.create_date,t2.code
      </select>
 
     <update id="updateOrderStatusByNodeCode">

@@ -111,6 +111,11 @@ public class Shop extends GoodsBaseEntity {
     private Double retentionMoney;
 
 
+    @Column(name = "system_logo")
+    @Desc(value = "系统图标")
+    @ApiModelProperty("系统图标")
+    private String  systemLogo;
+
 
 
 }

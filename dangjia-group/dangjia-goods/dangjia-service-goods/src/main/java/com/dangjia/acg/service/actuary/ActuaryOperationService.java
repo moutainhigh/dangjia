@@ -8,7 +8,6 @@ import com.dangjia.acg.api.data.GetForBudgetAPI;
 import com.dangjia.acg.api.data.WorkerTypeAPI;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
-import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
@@ -20,7 +19,10 @@ import com.dangjia.acg.mapper.basics.*;
 import com.dangjia.acg.mapper.product.IBasicsGoodsMapper;
 import com.dangjia.acg.mapper.product.IBasicsProductTemplateMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
-import com.dangjia.acg.modle.basics.*;
+import com.dangjia.acg.modle.basics.Goods;
+import com.dangjia.acg.modle.basics.GoodsGroup;
+import com.dangjia.acg.modle.basics.GroupLink;
+import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
@@ -293,133 +295,9 @@ public class ActuaryOperationService {
         }
     }
 
-    /**
-     * 商品详情
-     * gId:  budgetWorkerId   budgetMaterialId
-     */
-    /*public ServerResponse getCommo(String gId, int type) {
-        try {
-            if (type == 1 || type == 4) {//人工
-                WorkerGoods workerGoods;
-                if (type == 1) {
-                    BudgetWorker budgetWorker = budgetWorkerMapper.selectByPrimaryKey(gId);
-                    workerGoods = workerGoodsMapper.selectByPrimaryKey(budgetWorker.getWorkerGoodsId());//人工商品
-                } else {
-                    workerGoods = workerGoodsMapper.selectByPrimaryKey(gId);//人工商品
-                }
-                WorkerGoodsDTO wGoodsDTO = workerGoodsService.assembleWorkerGoodsResult(workerGoods);
-                return ServerResponse.createBySuccess("查询成功", wGoodsDTO);
-            } else if (type == 2 || type == 3 || type == 5) {//材料商品  包工包料商品
-                Product product;
-                String budgetMaterialId = null;
-                if (type != 5) {
-                    BudgetMaterial budgetMaterial = budgetMaterialMapper.selectByPrimaryKey(gId);
-                    if (budgetMaterial != null) {
-                        product = productMapper.selectByPrimaryKey(budgetMaterial.getProductId());//当前 货品
-                        budgetMaterialId = budgetMaterial.getId();
-                    } else {
-                        product = productMapper.selectByPrimaryKey(gId);//当前 货品
-                    }
-                } else {
-                    product = productMapper.selectByPrimaryKey(gId);//当前 货品
-                }
-                if(product == null){
-                    return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "该商品已禁用！");
-                }
-                GoodsDTO goodsDTO = goodsDetail(product, budgetMaterialId);
-                if (goodsDTO != null) {
-                    return ServerResponse.createBySuccess("查询成功", goodsDTO);
-                } else {
-                    return ServerResponse.createByErrorMessage("查询失败,数据异常");
-                }
 
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("查询失败,数据异常");
-        }
-        return ServerResponse.createByErrorMessage("查询失败,type错误");
-    }*/
 
-    /**
-     * 新版商品详情
-     * gId:  WorkerGoodsId   ProductId
-     */
-    public ServerResponse getGoodsDetailNew(String gId, int type) {
-        try {
-            /*if (type == 1 || type == 4) {//人工
-                WorkerGoods workerGoods = workerGoodsMapper.selectByPrimaryKey(gId);//人工商品
-                WorkerGoodsDTO wGoodsDTO = workerGoodsService.assembleWorkerGoodsResult(workerGoods);
-                return ServerResponse.createBySuccess("查询成功", wGoodsDTO);
-            } else if (type == 2 || type == 3 || type == 5) {//材料商品  包工包料商品
-                Product product = productMapper.selectByPrimaryKey(gId);//当前 货品
-                if(product == null){
-                    return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "该商品已禁用！");
-                }
-                GoodsDTO goodsDTO = goodsDetail(product, null);
-                if (goodsDTO != null) {
-                    return ServerResponse.createBySuccess("查询成功", goodsDTO);
-                } else {
-                    return ServerResponse.createByErrorMessage("查询失败,数据异常");
-                }
 
-            }*/
-            DjBasicsProductTemplate product = iBasicsProductTemplateMapper.selectByPrimaryKey(gId);//当前 货品
-            if(product == null){
-                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "该商品已禁用！");
-            }
-            GoodsDTO goodsDTO = goodsDetail(product, null);
-            if (goodsDTO != null) {
-                return ServerResponse.createBySuccess("查询成功", goodsDTO);
-            } else {
-                return ServerResponse.createByErrorMessage("查询失败,数据异常");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("查询失败,数据异常");
-        }
-        //return ServerResponse.createByErrorMessage("查询失败,type错误");
-    }
-
-    /**
-     * 商品详情
-     * gId:  WorkerGoodsId   ProductId
-     */
-    public ServerResponse getGoodsDetail(String gId, int type) {
-        try {
-            /*if (type == 1 || type == 4) {//人工
-                WorkerGoods workerGoods = workerGoodsMapper.selectByPrimaryKey(gId);//人工商品
-                WorkerGoodsDTO wGoodsDTO = workerGoodsService.assembleWorkerGoodsResult(workerGoods);
-                return ServerResponse.createBySuccess("查询成功", wGoodsDTO);
-            } else if (type == 2 || type == 3 || type == 5) {//材料商品  包工包料商品
-                Product product = productMapper.selectByPrimaryKey(gId);//当前 货品
-                if(product == null){
-                    return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "该商品已禁用！");
-                }
-                GoodsDTO goodsDTO = goodsDetail(product, null);
-                if (goodsDTO != null) {
-                    return ServerResponse.createBySuccess("查询成功", goodsDTO);
-                } else {
-                    return ServerResponse.createByErrorMessage("查询失败,数据异常");
-                }
-
-            }*/
-            DjBasicsProductTemplate product = iBasicsProductTemplateMapper.selectByPrimaryKey(gId);//当前 货品
-            if(product == null){
-                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "该商品已禁用！");
-            }
-            GoodsDTO goodsDTO = goodsDetail(product, null);
-            if (goodsDTO != null) {
-                return ServerResponse.createBySuccess("查询成功", goodsDTO);
-            } else {
-                return ServerResponse.createByErrorMessage("查询失败,数据异常");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("查询失败,数据异常");
-        }
-     //   return ServerResponse.createByErrorMessage("查询失败,type错误");
-    }
 
     /**
      * @param budgetMaterialId 传null ：表示不是精算里的商品。 如果是精算里的商品 ，可能有 关联组，关联组id 在 精算表里存的，所以，需要传精算id  ，
@@ -437,7 +315,7 @@ public class ActuaryOperationService {
             }
             goodsDTO.setImage(getImage(product.getImage()));//图一张
             String convertUnitName = iUnitMapper.selectByPrimaryKey(product.getConvertUnit()).getName();
-            goodsDTO.setPrice("¥" + String.format("%.2f", product.getPrice()) + "/" + convertUnitName);
+            goodsDTO.setPrice(new BigDecimal(product.getPrice()));
             goodsDTO.setName(product.getName());
             goodsDTO.setUnitName(convertUnitName);//单位
             goodsDTO.setProductType(goods.getType());//材料类型

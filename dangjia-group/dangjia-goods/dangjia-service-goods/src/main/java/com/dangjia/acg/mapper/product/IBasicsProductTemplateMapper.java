@@ -78,7 +78,7 @@ public interface IBasicsProductTemplateMapper extends Mapper<DjBasicsProductTemp
 
     List<DjBasicsProductTemplate> queryProductByCategoryId(@Param("categoryId") String categoryId);
 
-    List<ActuarialProductAppDTO> serchCategoryProduct(@Param("categoryId") String categoryId, @Param("name")String[]   name, @Param("brandVal") String[] brandVal, @Param("attributeVal") String[] attributeVal, @Param("orderKey") String orderKey);
+    List<ActuarialProductAppDTO> serchCategoryProduct(@Param("categoryId") String categoryId,@Param("goodsId") String goodsId ,@Param("name")String[]   name, @Param("brandVal") String[] brandVal, @Param("attributeVal") String[] attributeVal, @Param("orderKey") String orderKey);
 
     List<DjBasicsProductTemplate> queryProductByTechnologyIds(@Param("technologyId") String technologyId);
 
