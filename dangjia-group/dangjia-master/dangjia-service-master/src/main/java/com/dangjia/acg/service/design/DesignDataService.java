@@ -10,7 +10,6 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.design.DesignListDTO;
 import com.dangjia.acg.dto.design.QuantityInfoDTO;
-import com.dangjia.acg.dto.design.QuantityMobileDTO;
 import com.dangjia.acg.dto.design.QuantityRoomDTO;
 import com.dangjia.acg.dto.house.DesignDTO;
 import com.dangjia.acg.dto.house.UserInfoDateDTO;
@@ -76,6 +75,8 @@ public class DesignDataService {
     private HouseRemarkMapper houseRemarkMapper;
     @Autowired
     private IHouseFlowMapper houseFlowMapper;
+    @Autowired
+    private IHouseWorkerMapper houseWorkerMapper;
 
     /**
      * 获取平面图
