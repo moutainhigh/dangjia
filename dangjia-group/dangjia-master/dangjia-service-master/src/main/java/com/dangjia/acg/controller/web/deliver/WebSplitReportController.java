@@ -18,7 +18,7 @@ public class WebSplitReportController implements WebSplitReportAPI {
     private SplitDeliverReportService splitDeliverReportService;
 
     /**
-     * 指定房子所有发货的供应商
+     * 指定房子所有的供应商
      * @param houseId
      * @return
      */
