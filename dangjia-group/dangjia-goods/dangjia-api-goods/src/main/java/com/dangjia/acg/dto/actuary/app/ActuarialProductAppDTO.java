@@ -185,7 +185,7 @@ public class ActuarialProductAppDTO {
     private Shop shop;
     @ApiModelProperty("属性组")
     private List<AttributeDTO> attrList;
-    @ApiModelProperty("营销名称")
+    @ApiModelProperty("工艺集合")
     private List<TechnologyDTO> technologies;
     /***********************商品明细相关内容**************************/
 
