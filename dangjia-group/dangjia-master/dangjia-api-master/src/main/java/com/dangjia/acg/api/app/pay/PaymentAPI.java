@@ -7,6 +7,7 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 
 /**
@@ -80,4 +81,11 @@ public interface PaymentAPI {
                                        @RequestParam("cityId") String cityId,
                                        @RequestParam("houseFlowId") String houseFlowId,
                                        @RequestParam("addressId") String addressId);
+
+    @PostMapping("app/pay/payment/queryInsuranceInfo")
+    @ApiOperation(value = "查询保险信息", notes = "查询保险信息")
+    ServerResponse queryInsuranceInfo(@RequestParam("request") HttpServletRequest request,
+                                      @RequestParam("userToken") String userToken,
+                                      @RequestParam("workerId") String workerId);
+
 }

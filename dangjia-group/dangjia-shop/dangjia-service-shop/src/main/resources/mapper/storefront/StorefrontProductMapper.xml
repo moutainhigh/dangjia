@@ -123,7 +123,7 @@
         modify_date as 'modifyDate',
         data_status as 'dataStatus',
         product_name as 'productName',
-        city_id as 'cityId',
+        city_id as 'cityId'
 
         from
         dj_basics_storefront_product where id=#{id}

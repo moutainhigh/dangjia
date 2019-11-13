@@ -58,11 +58,11 @@
     </select>
 
 
-    <select id="queryRandomProduct" resultType="com.dangjia.acg.modle.product.DjBasicsProductTemplate">
+    <select id="queryRandomProduct" resultType="com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO">
         SELECT
-            bsp.id AS storefrontProductId,
+            bsp.id AS productId,
             bsp.product_name AS productName,
-            bpt.id,
+            bpt.id as productTemplateId,
             bsp.image,
             bsp.sell_price AS price,
             bpt.unit_id AS unitId,
@@ -77,11 +77,11 @@
     </select>
 
 
-    <select id="queryRandomProductByCategoryId" resultType="com.dangjia.acg.modle.product.DjBasicsProductTemplate">
+    <select id="queryRandomProductByCategoryId" resultType="com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO">
         SELECT
-            bsp.id AS storefrontProductId,
+            bsp.id AS productId,
             bsp.product_name AS productName,
-            bpt.id,
+            bpt.id as productTemplateId,
             bsp.image,
             bsp.sell_price AS price,
             bpt.unit_id AS unitId,

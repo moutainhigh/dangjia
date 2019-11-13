@@ -283,7 +283,12 @@ public class MendMaterielService {
             mendOrderDTO.setType(mendOrder.getType());
             mendOrderDTO.setState(mendOrder.getState());
             mendOrderDTO.setTotalAmount(mendOrder.getTotalAmount());
+
+            mendOrderDTO.setDeliverNumber(mendOrder.getDeliverNumber());
+            mendOrderDTO.setSupplierName(mendOrder.getSupplierName());
+
             mendOrderDTOS.add(mendOrderDTO);
+
         }
 
         return mendOrderDTOS;

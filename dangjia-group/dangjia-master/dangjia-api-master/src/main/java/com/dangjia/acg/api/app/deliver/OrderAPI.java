@@ -32,6 +32,10 @@ public interface OrderAPI {
                                      @RequestParam("houseId") String houseId,
                                      @RequestParam("queryId") String queryId);
 
+    @PostMapping("app/order/queryDeliverOrderItemDetail")
+    @ApiOperation(value = "新版子订单详情", notes = "新版子订单详情")
+    ServerResponse queryDeliverOrderItemDetail(@RequestParam("orderId") String orderId);
+
 
     @PostMapping("app/order/queryDeliverOrderListByStatus")
     @ApiOperation(value = "根据订单状态查询订单列表", notes = "根据订单状态查询订单列表")

@@ -5,10 +5,15 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dto.house.HouseListDTO;
+import com.dangjia.acg.dto.house.UserInfoDateDTO;
+import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
 import com.dangjia.acg.mapper.design.IDesignBusinessOrderMapper;
+import com.dangjia.acg.mapper.house.HouseRemarkMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
+import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.design.DesignBusinessOrder;
 import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.house.HouseRemark;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,17 +35,22 @@ import java.util.Map;
 public class ActuaryService {
 
     @Autowired
+    private IHouseWorkerMapper houseWorkerMapper;
+    @Autowired
     private IHouseMapper houseMapper;
     @Autowired
     private IDesignBusinessOrderMapper designBusinessOrderMapper;
 
-
+    @Autowired
+    private HouseRemarkMapper houseRemarkMapper;
     /**
      * 查询房子精算数据
      *
      * @return
      */
-    public ServerResponse getActuaryAll(HttpServletRequest request, PageDTO pageDTO, String name, String budgetOk, String workerKey) {
+    public ServerResponse getActuaryAll(HttpServletRequest request, PageDTO pageDTO,
+                                        String name, String budgetOk, String workerKey,
+                                        String userId) {
         String cityId = request.getParameter(Constants.CITY_ID);
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         String dataStatus = "0";//正常数据
@@ -49,9 +59,30 @@ public class ActuaryService {
             dataStatus = "1";
             budgetOk = "";
         }
-        List<HouseListDTO> houseList = houseMapper.getActuaryAll(cityId, budgetOk, name, workerKey, dataStatus);
+        List<HouseListDTO> houseList = houseMapper.getActuaryAll(cityId, budgetOk, name, workerKey, dataStatus,userId);
         PageInfo pageResult = new PageInfo(houseList);
         for (HouseListDTO houseListDTO : houseList) {
+            HouseWorker houseWorker = houseWorkerMapper.getByWorkerTypeId(houseListDTO.getHouseId(), "2", 6);
+            houseListDTO.setHouseWorkerId(houseWorker==null?"":houseWorker.getId());
+            //查询销售名称跟手机号码
+            UserInfoDateDTO userInfoDTO =houseMapper.getUserList(houseListDTO.getMemberId());
+            if(userInfoDTO != null){
+                houseListDTO.setUserMobile(userInfoDTO.getUserMobile());
+                houseListDTO.setUsername(userInfoDTO.getUsername());
+            }
+
+            //查询备注信息 取最新一条展示
+            Example example1 = new Example(HouseRemark.class);
+            example1.createCriteria().andEqualTo(HouseRemark.REMARK_TYPE, 0)
+                    .andEqualTo(HouseRemark.HOUSE_ID, houseListDTO.getHouseId());
+            example1.orderBy(HouseRemark.CREATE_DATE).desc();
+            List<HouseRemark> storeList = houseRemarkMapper.selectByExample(example1);
+            if(storeList.size() > 0){
+                houseListDTO.setRemarkInfo(storeList.get(0).getRemarkInfo());
+                houseListDTO.setRemarkDate(storeList.get(0).getCreateDate());
+            }
+
+
             houseListDTO.setShowUpdata(0);
             if (houseListDTO.getDecorationType() == 2) {
                 if (houseListDTO.getBudgetOk() == 1 && houseListDTO.getDesignerOk() != 3) {

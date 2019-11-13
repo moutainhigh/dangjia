@@ -48,7 +48,9 @@ public interface MemberCollectAPI {
     @PostMapping("app/member/memberCollect/delMemberCollect")
     @ApiOperation(value = "取消收藏", notes = "取消收藏,collectType:0->代表收藏房子 1->代表收藏商品")
     ServerResponse delMemberCollect(@RequestParam("request") HttpServletRequest request,
-                                    @RequestParam("id") String id);
+                                    @RequestParam("userToken") String userToken,
+                                    @RequestParam("collectId") String collectId,
+                                    @RequestParam("collectType") String collectType);
 
 
     @PostMapping("app/member/memberCollect/queryRelated")

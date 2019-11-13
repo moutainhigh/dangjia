@@ -1,6 +1,6 @@
 package com.dangjia.acg.dto.house;
 
-import com.alipay.api.domain.OrderDetail;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.util.List;
@@ -40,4 +40,7 @@ public class HouseDTO {
      * 设计精算，商品信息
      */
     private String  actuarialDesignInfoAttr;
+
+    @ApiModelProperty("地址")
+    private String address;
 }

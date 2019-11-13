@@ -840,6 +840,15 @@ public class HouseFlowApplyService {
             } else {
                 star = evaluate.getStar();//几星？
             }
+            //计算大管家整体完工金额
+            HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(hfa.getHouseId(), hfa.getWorkerTypeId());  //处理工人评分扣钱
+            if (hwo.getDeductPrice() == null) {
+                hwo.setDeductPrice(new BigDecimal(0.0));
+            }
+            //管家押金处理
+            deposit(hwo, hfa);
+            houseFlowApplyMapper.updateByPrimaryKeySelective(hfa);
+
             //评分扣钱
             BigDecimal deductPrice = new BigDecimal(0);
             BigDecimal totalAgencyMoney=hfa.getApplyMoney().subtract(getTotalAgencyPurchasePrice(hfa.getId()));
@@ -855,14 +864,6 @@ public class HouseFlowApplyService {
                 applyDeductMoney = totalAgencyMoney.multiply(new BigDecimal(0.8));
                 deductPrice = totalAgencyMoney.subtract(applyDeductMoney);
             }
-            //计算大管家整体完工金额
-            HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(hfa.getHouseId(), hfa.getWorkerTypeId());  //处理工人评分扣钱
-            if (hwo.getDeductPrice() == null) {
-                hwo.setDeductPrice(new BigDecimal(0.0));
-            }
-            //管家押金处理
-            deposit(hwo, hfa);
-            houseFlowApplyMapper.updateByPrimaryKeySelective(hfa);
             //管家钱
             BigDecimal applyMoney = hfa.getApplyMoney().subtract(deductPrice);
 
