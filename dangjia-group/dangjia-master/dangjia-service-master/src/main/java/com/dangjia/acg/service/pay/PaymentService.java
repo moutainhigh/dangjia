@@ -1215,12 +1215,12 @@ public class PaymentService {
             BigDecimal paymentPrice = new BigDecimal(0);//总共钱
             BigDecimal freightPrice = new BigDecimal(0);//总运费
             BigDecimal totalMoveDost = new BigDecimal(0);//搬运费
-                budgetLabelDTOS = forMasterAPI.queryShopGoods(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), house.getCityId());//精算工钱
-                for (ShopGoodsDTO budgetLabelDTO : budgetLabelDTOS) {
-                    for (BudgetLabelDTO labelDTO : budgetLabelDTO.getLabelDTOS()) {
-                        paymentPrice = paymentPrice.add(labelDTO.getTotalPrice());
-                    }
+            budgetLabelDTOS = forMasterAPI.queryShopGoods(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), house.getCityId());//精算工钱
+            for (ShopGoodsDTO budgetLabelDTO : budgetLabelDTOS) {
+                for (BudgetLabelDTO labelDTO : budgetLabelDTO.getLabelDTOS()) {
+                    paymentPrice = paymentPrice.add(labelDTO.getTotalPrice());
                 }
+            }
 
             if (budgetLabelDTOS!=null) {
                 Order order = new Order();
@@ -1644,5 +1644,40 @@ public class PaymentService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("充值失败");
         }
+    }
+
+    /**
+     *查询保险信息
+     * @param userToken
+     * @param workerId
+     * @return
+     */
+    public ServerResponse queryInsuranceInfo(String userToken, String workerId) {
+
+//        Object object = constructionService.getAccessToken(userToken);
+//        if (object instanceof ServerResponse) {
+//            return (ServerResponse) object;
+//        }
+//        AccessToken accessToken = (AccessToken) object;
+//        if (CommonUtil.isEmpty(accessToken.getUserId())) {
+//            return ServerResponse.createbyUserTokenError();
+//        }
+//
+//        if(CommonUtil.isEmpty(workerId)){
+//            workerId = accessToken.getUserId();
+//        }
+
+        //获取图片url
+        String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+
+        Example example = new Example(Insurance.class);
+        example.createCriteria().andEqualTo(Insurance.WORKER_ID, workerId);
+        List<Insurance> houseFlowList = insuranceMapper.selectByExample(example);
+
+        for (Insurance insurance: houseFlowList) {
+            insurance.setHead(imageAddress + insurance.getHead());
+        }
+
+        return ServerResponse.createBySuccess("查询成功", houseFlowList);
     }
 }

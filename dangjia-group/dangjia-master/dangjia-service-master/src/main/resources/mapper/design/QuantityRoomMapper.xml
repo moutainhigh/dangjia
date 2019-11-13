@@ -59,7 +59,9 @@
             type,
             elevator,
             floor,
-            operation_type AS operationType
+            operation_type AS operationType,
+            flag as flag,
+            owner_id AS ownerId
         FROM
             dj_design_quantity_room
         WHERE

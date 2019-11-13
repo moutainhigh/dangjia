@@ -3,6 +3,7 @@ package com.dangjia.acg.api.app.member;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.worker.Insurance;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -544,6 +545,10 @@ public interface MemberAPI {
     @RequestMapping(value = "member/insurances/add", method = RequestMethod.POST)
     @ApiOperation(value = "添加用户保险单信息", notes = "添加用户保险单信息")
     ServerResponse  addInsurances(String userToken);
+
+    @RequestMapping(value = "member/insurances/edit", method = RequestMethod.POST)
+    @ApiOperation(value = "更新用户保险单信息", notes = "更新用户保险单信息")
+    ServerResponse updateInsurances(Insurance insurance);
 
     @RequestMapping(value = "member/insurances/my", method = RequestMethod.POST)
     @ApiOperation(value = "我的保险单信息", notes = "我的保险单信息")

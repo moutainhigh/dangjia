@@ -1,7 +1,6 @@
 package com.dangjia.acg.dto.house;
 
 import com.dangjia.acg.common.util.CommonUtil;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -55,10 +54,21 @@ public class HouseListDTO {
     private Integer showUpdata;//是否显示上传图片按钮，0否，1是
     private String optionalLabel;//选配标签
 
+    private String houseWorkerId;//工人抢单ID
     private String storeName;// 归属分店
 
     private String houseTypeName;//服务类型
     private String orderId;// 订单ID
+
+
+    protected Date startDate;//创建时间
+    private String username;// 销售名称
+    private String userMobile;// 销售手机号码
+
+    private String remarkInfo;//备注详情
+    private Date remarkDate;//备注时间
+
+
 
     public String getHouseName() {
         return (CommonUtil.isEmpty(getResidential()) ? "*" : getResidential())
