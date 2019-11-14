@@ -62,7 +62,7 @@ import java.util.List;
 @Service
 public class DjDeliverOrderService {
     @Autowired
-    private IBillDjDeliverOrderMapper IBillDjDeliverOrderMapper;
+    private IBillDjDeliverOrderMapper iBillDjDeliverOrderMapper;
     @Autowired
     private IBillDjAlreadyRobSingleMapper iBillDjAlreadyRobSingleMapper;
     @Autowired
@@ -200,20 +200,22 @@ public class DjDeliverOrderService {
     public ServerResponse queryOrderNumber(String userToken,String houseId){
         String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
 
-//        Object object = memberAPI.getMember(userToken);
-//        if (object instanceof ServerResponse) {
-//            return (ServerResponse) object;
-//        }
-//        JSONObject job = (JSONObject)object;
-//        Member member = job.toJavaObject(Member.class);
-//        HouseResult houseResult = new HouseResult();
-//        object = getHouse(member.getId(), houseResult);
-//        if (object instanceof ServerResponse) {
-//            return ServerResponse.createByErrorCodeResultObj(ServerCode.NO_DATA.getCode(), HouseUtil.getWorkerDatas(null, address));
-//        }
+        Object object = memberAPI.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        JSONObject job = (JSONObject)object;
+        Member member = job.toJavaObject(Member.class);
+        HouseResult houseResult = new HouseResult();
+        object = getHouse(member.getId(), houseResult);
+        if (object instanceof ServerResponse) {
+            return ServerResponse.createByErrorCodeResultObj(ServerCode.NO_DATA.getCode(), HouseUtil.getWorkerDatas(null, address));
+        }
 
-//        House house = (House) object;
-//        String houseId = house.getId();
+        House house = (House) object;
+        houseId = house.getId();
+
+//        House house = iBillHouseMapper.selectByPrimaryKey(houseId);
 
         //订单状态 1待付款，2已付款，3待收货
         WorkInFoDTO workInFoDTO = new WorkInFoDTO();
@@ -224,27 +226,24 @@ public class DjDeliverOrderService {
                 .andEqualTo(Order.DATA_STATUS, 0)
                 .andEqualTo(Order.ORDER_STATUS,1);
         Map<String,Object> map = new HashMap<>();
-        map.put("one", IBillDjDeliverOrderMapper.selectCountByExample(example));
+        map.put("one", iBillDjDeliverOrderMapper.selectCountByExample(example));
 
         //已付款
         example = new Example(Order.class);
         example.createCriteria().andEqualTo(Order.HOUSE_ID,houseId)
                 .andEqualTo(Order.DATA_STATUS, 0)
                 .andEqualTo(Order.ORDER_STATUS,2);
-        map.put("two", IBillDjDeliverOrderMapper.selectCountByExample(example));
+        map.put("two", iBillDjDeliverOrderMapper.selectCountByExample(example));
 
         //待收货
         example = new Example(Order.class);
         example.createCriteria().andEqualTo(Order.HOUSE_ID,houseId)
                 .andEqualTo(Order.DATA_STATUS, 0)
                 .andEqualTo(Order.ORDER_STATUS,3);
-        map.put("three", IBillDjDeliverOrderMapper.selectCountByExample(example));
+        map.put("three", iBillDjDeliverOrderMapper.selectCountByExample(example));
         map.put("four", 0);
         map.put("five", 0);
         workInFoDTO.setOrderMap(map);
-
-
-        House house = iBillHouseMapper.selectByPrimaryKey(houseId);
 
         if(house != null) {
             String houseName = house.getResidential() + house.getBuilding() + "栋" +
@@ -252,32 +251,39 @@ public class DjDeliverOrderService {
             workInFoDTO.setHouseName(houseName);
         }
 
-        //1-销售阶段 2-房子 销售接单
-        if(house != null && house.getVisitState() == 0){
-            workInFoDTO.setHouseType(1);
-        }else if(house != null && house.getIsRobStats() == 1){
-            workInFoDTO.setHouseType(2);
-        }else{
-            workInFoDTO.setHouseType(3);
-        }
-
-
         HouseFlowInfoDTO houseFlowInfoDTO = new HouseFlowInfoDTO();
         //查询今日播报信息
-        List<HouseFlowDataDTO> sowingList = IBillDjDeliverOrderMapper.queryApplyDec();
+        List<HouseFlowDataDTO> sowingList = iBillDjDeliverOrderMapper.queryApplyDec();
         if(sowingList != null && !sowingList.isEmpty()){
             houseFlowInfoDTO.setDate(sowingList.get(0).getCreateDate());
             houseFlowInfoDTO.setHouseFlowDataDTOS(sowingList);
         }
-        houseFlowInfoDTO.setNumber(IBillDjDeliverOrderMapper.queryApplyPayState(houseId).size());
+        houseFlowInfoDTO.setNumber(iBillDjDeliverOrderMapper.queryApplyPayState(houseId).size());
         workInFoDTO.setHouseFlowInfoDTO(houseFlowInfoDTO);
 
+        //1-下单后（销售阶段） 2-下单后（销售接单） 3-下单后（设计阶段）4-下单后（精算阶段）5-下单后(施工阶段)
+        if(house != null && house.getVisitState() == 0){
+            workInFoDTO.setHouseType(1);
+        }else if(house != null && house.getIsRobStats() == 1){
+            workInFoDTO.setHouseType(2);
+        }
 
         //查询当前房子状态
-        List<WorkerTypeDTO> wtdList = IBillDjDeliverOrderMapper.queryType(houseId);
+        List<WorkerTypeDTO> wtdList = iBillDjDeliverOrderMapper.queryType(houseId);
         if(!wtdList.isEmpty()){
             workInFoDTO.setType(wtdList.get(0).getType());
+            if(wtdList.get(0).getType() == 1){
+                //3-下单后（设计阶段）
+                workInFoDTO.setHouseType(3);
+            }else if(wtdList.get(0).getType() == 2){
+                //4-下单后（精算阶段）
+                workInFoDTO.setHouseType(4);
+            }else{
+                //5-下单后(施工阶段
+                workInFoDTO.setHouseType(5);
+            }
         }
+
 
         //设置菜单
         example = new Example(HouseFlow.class);
@@ -369,37 +375,35 @@ public class DjDeliverOrderService {
 
     }
 
-
-
     public List< Map<String,Object>> optimizationHander(HouseFlow houseFlow){
         //1设计师，2精算师，3大管家,4拆除，6水电工，7防水，8泥工,9木工，10油漆工
         Map<String,Object> maps = new HashMap<>();
         if(houseFlow.getWorkerType() == 1){
-            maps.put("i",1);
+            maps.put("i",houseFlow.getWorkerType());
             maps.put("name","设计师");
         }else if(houseFlow.getWorkerType() == 2){
-            maps.put("i",2);
+            maps.put("i",houseFlow.getWorkerType());
             maps.put("name","精算师");
         }else if(houseFlow.getWorkerType() == 3){
-            maps.put("i",3);
+            maps.put("i",houseFlow.getWorkerType());
             maps.put("name","大管家");
         }else if(houseFlow.getWorkerType() == 4){
-            maps.put("i",4);
+            maps.put("i",houseFlow.getWorkerType());
             maps.put("name","拆除");
         }else if(houseFlow.getWorkerType() == 6){
-            maps.put("i",6);
+            maps.put("i",houseFlow.getWorkerType());
             maps.put("name","水电工");
         }else if(houseFlow.getWorkerType() == 7){
-            maps.put("i",7);
+            maps.put("i",houseFlow.getWorkerType());
             maps.put("name","防水");
         }else if(houseFlow.getWorkerType() == 8){
-            maps.put("i",8);
+            maps.put("i",houseFlow.getWorkerType());
             maps.put("name","泥工");
         }else if(houseFlow.getWorkerType() == 9){
-            maps.put("i",9);
+            maps.put("i",houseFlow.getWorkerType());
             maps.put("name","木工");
         }else if(houseFlow.getWorkerType() == 10){
-            maps.put("i",10);
+            maps.put("i",houseFlow.getWorkerType());
             maps.put("name","油漆工");
         }
         List< Map<String,Object>> mapList = new ArrayList<>();
@@ -407,25 +411,23 @@ public class DjDeliverOrderService {
         return mapList;
     }
 
-
-
     /**
      * 获取工序信息
      * @param houseId
      * @return
      */
     public List<Object> summationMethod(List<HouseFlow> houseFlows,String houseId){
-        WorkNodeListDTO workNodeListDTO = new WorkNodeListDTO();
+        WorkNodeListDTO workNodeListDTO;
         //查询工序节点
         List<NodeNumberDTO> nodeNumberDTOS = iBillDjDeliverOrderItemMapper.queryNodeNumber(houseId);
         //查询材料数量
         List<MaterialNumberDTO> materialNumberDTOS = iBillDjDeliverOrderItemMapper.queryMaterialNumber(houseId);
 
-        Example example = new Example(WorkerType.class);
+        Example example;
         String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
         List<Object> workList = new ArrayList<>();
-        List<Map<String,Object>> gList = new ArrayList<>();
-        Map<String,Object> listMap = new HashMap<>();
+        List<Map<String,Object>> gList;
+        Map<String,Object> listMap;
 
         //1设计师，2精算师，3大管家,4拆除，6水电工，7防水，8泥工,9木工，10油漆工
         for (HouseFlow houseFlow : houseFlows) {
@@ -500,7 +502,7 @@ public class DjDeliverOrderService {
     public ServerResponse getDesignImag(String houseId) {
         //0:量房，，
         List<Object> list = new ArrayList<>();
-        WorkChartListDTO workChartListDTO = new WorkChartListDTO();
+        WorkChartListDTO workChartListDTO;
 
         QuantityRoom quantityRoom = iBillQuantityRoomMapper.getBillQuantityRoom(houseId, 0);
         List<QuantityRoomImages> quantityRoomImages = getQuantityRoom(quantityRoom);
@@ -644,7 +646,7 @@ public class DjDeliverOrderService {
         List<HouseWorker> houseWorkers = iBillQuantityRoomMapper.selectWorkerInfo(houseId);
 
         List<Map<String,Object>> list = new ArrayList<>();
-        Map<String,Object> map = new HashMap<>();
+        Map<String,Object> map;
 
 
         for (HouseFlowApply houseFlowApply : houseFlowApplies) {
@@ -792,7 +794,7 @@ public class DjDeliverOrderService {
                 list.add(map);
             }
         }
-
+        collectDataDTO.setName("预计完工");
         collectDataDTO.setDate(date);
         collectDataDTO.setList(list);
         return ServerResponse.createBySuccess("查询成功", collectDataDTO);
