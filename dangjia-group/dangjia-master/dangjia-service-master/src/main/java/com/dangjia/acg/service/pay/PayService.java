@@ -67,18 +67,19 @@ public class PayService {
             LOG.info("获取支付宝异步通知支付订单号" + out_trade_no);
             LOG.info("交易状态" + trade_status);
             //total_amount 单位元
-
+            PrintWriter out = response.getWriter();
             //交易成功
             if (trade_status.equals("TRADE_SUCCESS")) {
                 // 成功或app已回调
                 if (this.asynchronousInform(out_trade_no)) {
                     response.setContentType("text/html;charset=UTF-8");
-                    PrintWriter out = response.getWriter();
                     out.println("success");//返回成功关闭支付宝异步通知
                 } else {
+                    out.println("fail");//返回成功关闭支付宝异步通知
                     LOG.info("支付宝回调异常,赶快看看");
                 }
             } else {
+                out.println("fail");//返回成功关闭支付宝异步通知
                 LOG.info("支付宝异步通知支付失败");
             }
         } catch (Exception e) {

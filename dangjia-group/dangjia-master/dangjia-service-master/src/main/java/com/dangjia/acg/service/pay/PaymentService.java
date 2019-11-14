@@ -303,6 +303,7 @@ public class PaymentService {
         try {
             Example examplePayOrder = new Example(PayOrder.class);
             examplePayOrder.createCriteria().andEqualTo(PayOrder.BUSINESS_ORDER_NUMBER, businessOrderNumber);
+            examplePayOrder.orderBy(PayOrder.CREATE_DATE).desc();
             List<PayOrder> payOrderList = payOrderMapper.selectByExample(examplePayOrder);
             if (payOrderList.size() == 0) {
                 return ServerResponse.createByErrorMessage("支付订单不存在");
@@ -313,6 +314,10 @@ public class PaymentService {
                 returnMap.put("businessOrderNumber", businessOrderNumber);
                 returnMap.put("price", payOrder.getPrice());
                 return ServerResponse.createBySuccess("支付成功", returnMap);
+            }
+            //临时支付宝代替回调
+            if (payOrder.getState() == 0 && "2".equals(payOrder.getPayState())) {
+                setServersSuccess(payOrder.getId());
             }
             Example example = new Example(BusinessOrder.class);
             example.createCriteria().andEqualTo(BusinessOrder.NUMBER, businessOrderNumber);
