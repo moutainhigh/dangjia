@@ -227,8 +227,8 @@ public class StorefrontProductService {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息!");
             }
 
-            List<Map<String,Object>> basicsStorefrontProductViewDTOList=new ArrayList<Map<String,Object>>();
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<Map<String,Object>> basicsStorefrontProductViewDTOList=new ArrayList<Map<String,Object>>();
             List<BasicsStorefrontProductViewDTO> list = istorefrontProductMapper.queryStorefrontProductViewDTOList(keyWord,storefront.getId(),cityId);
             //图片前缀路径
             String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
