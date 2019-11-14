@@ -198,10 +198,6 @@ public class MemberCollectService {
             if (object instanceof ServerResponse)
                 return (ServerResponse) object;
             Member member = (Member) object;
-            MemberCollect memberCollect = new MemberCollect();
-            memberCollect.setMemberId(member.getId());
-            memberCollect.setCollectId(collectId);
-            memberCollect.setConditionType(collectType);
             //判断是否重复收藏
             Example example = new Example(MemberCollect.class);
             example.createCriteria().andEqualTo(MemberCollect.COLLECT_ID, collectId)
@@ -211,6 +207,10 @@ public class MemberCollectService {
             if (count > 0) {
                 return ServerResponse.createBySuccessMessage("已被收藏!");
             }
+            MemberCollect memberCollect = new MemberCollect();
+            memberCollect.setMemberId(member.getId());
+            memberCollect.setCollectId(collectId);
+            memberCollect.setConditionType(collectType);
             iMemberCollectMapper.insertSelective(memberCollect);
             return ServerResponse.createBySuccessMessage("收藏成功!");
         } catch (Exception e) {

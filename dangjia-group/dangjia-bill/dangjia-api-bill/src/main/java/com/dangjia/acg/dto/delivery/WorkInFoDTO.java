@@ -41,7 +41,7 @@ public class WorkInFoDTO {
     //房子id
     private String houseId;
 
-    //房子状态
+    //1-下单后（销售阶段） 2-下单后（销售接单） 3-下单后（设计阶段）4-下单后（精算阶段）5-下单后(施工阶段)
     private Integer houseType;
 
 

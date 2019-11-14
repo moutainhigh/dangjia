@@ -193,7 +193,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         rmo.data_status as dataStatus,
         rmo.create_date as createDate,
         rmo.modify_date as modifyDate,
-        house.id,
+        house.id ,
         house.residential as residential,
         house.building as building,
         house.unit as unit,
@@ -233,6 +233,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
         SELECT
         rmo.id,
+        IFNULL(rmd.number,'') deliverNumber, -- 退货单号
+        IFNULL(rmd.supplier_name,'') as supplierName, -- 供应商名称
         rmo.number, -- 订单号
         rmo.change_order_id AS changeOrderId,
         rmo.image_arr AS imageArr, -- 相关凭证
@@ -248,16 +250,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         rmo.data_status AS dataStatus, -- 数据状态
         rmo.create_date AS createDate, -- 创建时间
         rmo.modify_date AS modifyDate, -- 修改时间
-        house.id, -- 房子id
+        -- house.id as houseId, 房子id
         house.residential AS residential,-- 小区名
         house.building AS building, -- 楼栋，后台客服填写 ,
         house.unit AS unit, -- 单元号，后台客服填写 ,
-        house.number AS number, -- 房间号，后台客服填写 ,
+        --  house.number AS number, 房间号，后台客服填写 ,
         house.member_id AS memberId, -- 用户ID ,
         rmo.storefront_id as storefrontId-- 店铺id
         FROM
         dj_repair_mend_order AS rmo
         LEFT JOIN dj_house AS house ON (rmo.house_id = house.id)
+        left join dj_repair_mend_deliver as rmd on rmd.mend_order_id=rmo.id
         WHERE
         1 = 1
         and  rmo.storefront_id = #{storefrontId}
@@ -288,8 +291,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <select id="materialByStateAndLikeAddressHandle" resultType="com.dangjia.acg.modle.repair.MendOrder">
         SELECT
         rmo.id,
-        rmd.number as deliverNumber, -- 退货单号
-        rmd.supplier_name as supplierName, -- 供应商名称
+        IFNULL(rmd.number,'') deliverNumber, -- 退货单号
+        IFNULL(rmd.supplier_name,'') as supplierName, -- 供应商名称
         rmo.number, -- 订单号
         rmo.change_order_id AS changeOrderId,
         rmo.image_arr AS imageArr, -- 相关凭证
@@ -305,11 +308,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         rmo.data_status AS dataStatus, -- 数据状态
         rmo.create_date AS createDate, -- 创建时间
         rmo.modify_date AS modifyDate, -- 修改时间
-        house.id, -- 房子id
+        -- house.id , 房子id
         house.residential AS residential,-- 小区名
         house.building AS building, -- 楼栋，后台客服填写 ,
         house.unit AS unit, -- 单元号，后台客服填写 ,
-        house.number AS number, -- 房间号，后台客服填写 ,
+        --  house.number AS number,  房间号，后台客服填写 ,
         house.member_id AS memberId, -- 用户ID ,
         rmo.storefront_id as storefrontId-- 店铺id
         FROM
