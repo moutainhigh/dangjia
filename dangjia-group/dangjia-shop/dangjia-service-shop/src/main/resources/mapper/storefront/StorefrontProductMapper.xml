@@ -32,7 +32,7 @@
         -- 货品名称
         bsp.product_name AS productName,
         -- 商品名称
-        bg.attribute_id_arr AS attributeIdArr,
+        bpt.value_name_arr AS valueNameArr,
         -- 属性
         IFNULL(bsp.is_shelf_status,null )   AS isShelfStatus ,-- 是否上下架
         prod_template_id as prodTemplateId -- 商品模板id

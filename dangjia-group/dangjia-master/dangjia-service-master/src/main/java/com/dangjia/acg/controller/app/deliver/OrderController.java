@@ -46,8 +46,8 @@ public class OrderController implements OrderAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryDeliverOrderItemDetail(String orderId) {
-        return orderService.queryDeliverOrderItemDetail(orderId);
+    public ServerResponse queryDeliverOrderItemDetail(String orderId,String orderStatus) {
+        return orderService.queryDeliverOrderItemDetail(orderId, orderStatus);
     }
 
     @Override

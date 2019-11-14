@@ -22,7 +22,8 @@ public interface ISplitDeliverMapper extends Mapper<SplitDeliver> {
      */
     void supState(@Param("splitDeliverId") String splitDeliverId);
 
-    List<WebSplitDeliverItemDTO> getWebSplitDeliverList(@Param("cityId") String cityId,
+    List<WebSplitDeliverItemDTO> getWebSplitDeliverList(  @Param("storefrontId") String storefrontId,
+                                                        @Param("cityId") String cityId,
                                                         @Param("applyState") Integer applyState,
                                                         @Param("searchKey") String searchKey,
                                                         @Param("beginDate") String beginDate,

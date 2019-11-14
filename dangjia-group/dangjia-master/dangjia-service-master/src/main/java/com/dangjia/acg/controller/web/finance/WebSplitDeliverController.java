@@ -30,7 +30,8 @@ public class WebSplitDeliverController implements WebSplitDeliverAPI {
                                              Integer applyState, String searchKey,
                                              String beginDate, String endDate) {
         String cityId = request.getParameter(Constants.CITY_ID);
-        return webSplitDeliverService.getAllSplitDeliver(pageDTO, cityId, applyState, searchKey, beginDate, endDate);
+        String userId=request.getParameter("userId");
+        return webSplitDeliverService.getAllSplitDeliver(pageDTO, cityId,userId, applyState, searchKey, beginDate, endDate);
     }
 
     @Override

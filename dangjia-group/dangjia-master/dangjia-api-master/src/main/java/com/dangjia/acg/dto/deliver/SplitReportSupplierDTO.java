@@ -23,7 +23,7 @@ public class SplitReportSupplierDTO {
     private String houseId;//房子ID
     private BigDecimal totalPrice;//总售价
     private BigDecimal totalProfit;//总利润
-    private String num;//供应数量
+    private String num;//量
     private String shopcount;//购买总数
     private String askCount;//已要总数
     private String receive;//收货数量
