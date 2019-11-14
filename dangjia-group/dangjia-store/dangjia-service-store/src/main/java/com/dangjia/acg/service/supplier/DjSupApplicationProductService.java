@@ -245,7 +245,7 @@ public class DjSupApplicationProductService {
     public ServerResponse rejectAllProduct(String id) {
         try {
             if (StringUtils.isEmpty(id)) {
-            return ServerResponse.createByErrorMessage("供应商的商品编号不能为空");
+            return ServerResponse.createByErrorMessage("该用户没有选择商品");
             }
             String[] iditem = id.split(",");
             Example example = new Example(DjSupApplicationProduct.class);
@@ -275,7 +275,7 @@ public class DjSupApplicationProductService {
     public ServerResponse rejectPartProduct(String id) {
         try {
             if (StringUtils.isEmpty(id)) {
-                return ServerResponse.createByErrorMessage("供应商的商品id不能为空");
+                return ServerResponse.createByErrorMessage("该用户没有选择商品");
             }
             String[] iditem = id.split(",");
             Example example = new Example(DjSupApplicationProduct.class);
