@@ -12,7 +12,7 @@ import java.util.Map;
 @Data
 public class CollectDataDTO {
     private Date date;
-
+    private String name;
     private List<Map<String,Object>> list;
 
 }
