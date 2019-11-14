@@ -3,6 +3,7 @@ package com.dangjia.acg.service.finance;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.api.BasicsStorefrontAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
@@ -26,6 +27,7 @@ import com.dangjia.acg.modle.receipt.Receipt;
 import com.dangjia.acg.modle.repair.MendDeliver;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.modle.repair.MendOrder;
+import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.sup.SupplierProduct;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -62,6 +64,8 @@ public class WebSplitDeliverService {
     @Autowired
     private ConfigUtil configUtil;
 
+    @Autowired
+    private BasicsStorefrontAPI basicsStorefrontAPI;
     /**
      * 所有供应商
      *
@@ -72,8 +76,12 @@ public class WebSplitDeliverService {
      * @param endDate    结束时间
      * @return
      */
-    public ServerResponse getAllSplitDeliver(PageDTO pageDTO, String cityId,Integer applyState, String searchKey, String beginDate, String endDate) {
+    public ServerResponse getAllSplitDeliver(PageDTO pageDTO, String cityId,String userId,Integer applyState, String searchKey, String beginDate, String endDate) {
         try {
+            Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
+            if (storefront == null) {
+                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
+            }
             if (applyState == null) {
                 applyState = -1;
             }
@@ -87,7 +95,7 @@ public class WebSplitDeliverService {
                 }
             }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<WebSplitDeliverItemDTO> webSplitDeliverItemDTOLists = iSplitDeliverMapper.getWebSplitDeliverList(cityId,applyState, searchKey, beginDate, endDate);
+            List<WebSplitDeliverItemDTO> webSplitDeliverItemDTOLists = iSplitDeliverMapper.getWebSplitDeliverList(storefront.getId(),cityId,applyState, searchKey, beginDate, endDate);
             PageInfo pageResult = new PageInfo(webSplitDeliverItemDTOLists);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {

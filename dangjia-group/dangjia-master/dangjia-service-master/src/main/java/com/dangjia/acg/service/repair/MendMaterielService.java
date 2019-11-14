@@ -61,7 +61,7 @@ public class MendMaterielService {
     @Autowired
     private ISplitDeliverMapper splitDeliverMapper;
     @Autowired
-    private DjSupplierAPI djSupplierAPI ;
+    private DjSupplierAPI djSupplierAPI;
     @Autowired
     private RedisClient redisClient;
     @Autowired
@@ -80,16 +80,106 @@ public class MendMaterielService {
      * landlordState
      * 0生成中,1平台审核中,2不通过,3通过
      */
-    public ServerResponse landlordState(String userId,String cityId,String houseId, PageDTO pageDTO, String beginDate, String endDate, String state,String likeAddress) {
+    public ServerResponse landlordState(String userId, String cityId, String houseId, PageDTO pageDTO, String beginDate, String endDate, String state, String likeAddress) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
 //            List<MendOrder> mendOrderList = mendOrderMapper.landlordState(houseId);
-            Storefront storefront= basicsStorefrontAPI.queryStorefrontByUserID(userId,cityId);
-            if(storefront==null)
-            {
+            Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
+            if (storefront == null) {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
-            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(storefront.getId(),houseId, 4, beginDate, endDate, state,likeAddress);
+            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(storefront.getId(), houseId, 4, beginDate, endDate, state, likeAddress);
+            PageInfo pageResult = new PageInfo(mendOrderList);
+            List<MendOrderDTO> mendOrderDTOS = getMendOrderDTOList(mendOrderList);
+            pageResult.setList(mendOrderDTOS);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+    //业主仅退款(已经处理)
+    public ServerResponse landlordStateHandle(HttpServletRequest request, String cityId, String houseId, PageDTO pageDTO, String beginDate, String endDate, String state, String likeAddress) {
+        try {
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        //通过缓存查询店铺信息
+        String userId = request.getParameter("userId");
+        Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
+        if (storefront == null) {
+            return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
+        }
+        List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddressHandle(storefront.getId(), houseId, 4, state, likeAddress);
+        PageInfo pageResult = new PageInfo(mendOrderList);
+        List<MendOrderDTO> mendOrderDTOS = getMendOrderDTOList(mendOrderList);
+        pageResult.setList(mendOrderDTOS);
+       return ServerResponse.createBySuccess("查询成功", pageResult);
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ServerResponse.createByErrorMessage("查询失败");
+    }
+    }
+    //店铺管理—售后管理—业主退货退款(待处理)
+    public ServerResponse ownerReturnHandleIng(HttpServletRequest request, String cityId, String houseId, PageDTO pageDTO, String state, String likeAddress) {
+        try {
+            try {
+                PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+                String userId = request.getParameter("userId");
+                //通过缓存查询店铺信息
+                Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
+                if (storefront == null) {
+                    return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
+                }
+                List<MendOrder> mendOrderList = mendOrderMapper.materialBackStateProcessing(storefront.getId(), houseId, 5, state, likeAddress);
+                PageInfo pageResult = new PageInfo(mendOrderList);
+                List<MendOrderDTO> mendOrderDTOS = getMendOrderDTOList(mendOrderList);
+                pageResult.setList(mendOrderDTOS);
+                return ServerResponse.createBySuccess("查询成功", pageResult);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return ServerResponse.createByErrorMessage("查询失败");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+    //店铺管理—售后管理—业主退货退款(处理中)
+    public ServerResponse ownerReturnProssing(HttpServletRequest request, String cityId, String houseId, PageDTO pageDTO, String state, String likeAddress) {
+        try {
+            try {
+                PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+                //通过缓存查询店铺信息
+                String userId = request.getParameter("userId");
+                Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
+                if (storefront == null) {
+                    return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
+                }
+                List<MendOrder> mendOrderList = mendOrderMapper.materialBackStateProcessing(storefront.getId(), houseId, 5, state, likeAddress);
+                PageInfo pageResult = new PageInfo(mendOrderList);
+                List<MendOrderDTO> mendOrderDTOS = getMendOrderDTOList(mendOrderList);
+                pageResult.setList(mendOrderDTOS);
+                return ServerResponse.createBySuccess("查询成功", pageResult);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return ServerResponse.createByErrorMessage("查询失败");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+    //店铺管理—售后管理—业主退货退款(已经处理)
+    public ServerResponse ownerReturnHandle(HttpServletRequest request, String cityId, String houseId, PageDTO pageDTO, String state, String likeAddress) {
+        try {
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            //通过缓存查询店铺信息
+            String userId = request.getParameter("userId");
+            Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
+            if (storefront == null) {
+                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
+            }
+//            List<MendOrder> mendOrderList = mendOrderMapper.materialBackState(houseId); 2
+            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddressHandle(storefront.getId(), houseId, 5, state, likeAddress);
             PageInfo pageResult = new PageInfo(mendOrderList);
             List<MendOrderDTO> mendOrderDTOS = getMendOrderDTOList(mendOrderList);
             pageResult.setList(mendOrderDTOS);
@@ -100,28 +190,26 @@ public class MendMaterielService {
         }
     }
 
-    /**
-     *
-     * @param request
-     * @param cityId
-     * @param houseId 房子id
-     * @param pageDTO
-     * @param state 状态：（0生成中,1处理中,2不通过取消,3已通过,4已全部结算,5已撤回,5已关闭）
-     * @param likeAddress 模糊查询参数
-     * @return
-     */
+            /**
+             * @param request
+             * @param cityId
+             * @param houseId     房子id
+             * @param pageDTO
+             * @param state       状态：（0生成中,1处理中,2不通过取消,3已通过,4已全部结算,5已撤回,5已关闭）
+             * @param likeAddress 模糊查询参数
+             * @return
+             */
     public ServerResponse materialBackStateHandle(HttpServletRequest request, String cityId, String houseId, PageDTO pageDTO, String state, String likeAddress) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             //通过缓存查询店铺信息
             String userId = request.getParameter("userId");
-            Storefront storefront= basicsStorefrontAPI.queryStorefrontByUserID(userId,cityId);
-            if(storefront==null)
-            {
+            Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
+            if (storefront == null) {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
 //            List<MendOrder> mendOrderList = mendOrderMapper.materialBackState(houseId); 2
-            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddressHandle(storefront.getId(),houseId, 2, state,likeAddress);
+            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddressHandle(storefront.getId(), houseId, 2, state, likeAddress);
             PageInfo pageResult = new PageInfo(mendOrderList);
             List<MendOrderDTO> mendOrderDTOS = getMendOrderDTOList(mendOrderList);
             pageResult.setList(mendOrderDTOS);
@@ -133,25 +221,23 @@ public class MendMaterielService {
     }
 
     /**
-     *
      * @param userId
      * @param cityId
-     * @param houseId 房子id
+     * @param houseId     房子id
      * @param pageDTO
-     * @param state 状态：（0生成中,1处理中,2不通过取消,3已通过,4已全部结算,5已撤回,5已关闭）
+     * @param state       状态：（0生成中,1处理中,2不通过取消,3已通过,4已全部结算,5已撤回,5已关闭）
      * @param likeAddress 模糊查询参数
      * @return
      */
-    public ServerResponse  materialBackStateProcessing (String userId,String cityId,String houseId, PageDTO pageDTO, String state,String likeAddress) {
+    public ServerResponse materialBackStateProcessing(String userId, String cityId, String houseId, PageDTO pageDTO, String state, String likeAddress) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             //通过缓存查询店铺信息
-            Storefront storefront= basicsStorefrontAPI.queryStorefrontByUserID(userId,cityId);
-            if(storefront==null)
-            {
+            Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
+            if (storefront == null) {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
-            List<MendOrder> mendOrderList = mendOrderMapper.materialBackStateProcessing(storefront.getId(),houseId, 2, state,likeAddress);
+            List<MendOrder> mendOrderList = mendOrderMapper.materialBackStateProcessing(storefront.getId(), houseId, 2, state, likeAddress);
             PageInfo pageResult = new PageInfo(mendOrderList);
             List<MendOrderDTO> mendOrderDTOS = getMendOrderDTOList(mendOrderList);
             pageResult.setList(mendOrderDTOS);
@@ -167,17 +253,16 @@ public class MendMaterielService {
      * material_back_state
      * 0生成中,1平台审核中，2平台审核不通过，3审核通过，4管家取消
      */
-    public ServerResponse materialBackState(String userId,String cityId,String houseId, PageDTO pageDTO, String beginDate, String endDate, String state,String likeAddress) {
+    public ServerResponse materialBackState(String userId, String cityId, String houseId, PageDTO pageDTO, String beginDate, String endDate, String state, String likeAddress) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             //通过缓存查询店铺信息
-            Storefront storefront= basicsStorefrontAPI.queryStorefrontByUserID(userId,cityId);
-            if(storefront==null)
-            {
+            Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
+            if (storefront == null) {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
 //            List<MendOrder> mendOrderList = mendOrderMapper.materialBackState(houseId); 2
-            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(storefront.getId(),houseId, 2, beginDate, endDate, state,likeAddress);
+            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(storefront.getId(), houseId, 2, beginDate, endDate, state, likeAddress);
             PageInfo pageResult = new PageInfo(mendOrderList);
             List<MendOrderDTO> mendOrderDTOS = getMendOrderDTOList(mendOrderList);
             pageResult.setList(mendOrderDTOS);
@@ -192,7 +277,7 @@ public class MendMaterielService {
     /**
      * 根据mendOrderId查明细
      */
-    public ServerResponse mendMaterialList(String mendOrderId,String userId) {
+    public ServerResponse mendMaterialList(String mendOrderId, String userId) {
         MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);
         House house = houseMapper.selectByPrimaryKey(mendOrder.getHouseId());
         List<MendMateriel> mendMaterielList = mendMaterialMapper.byMendOrderId(mendOrderId);
@@ -219,7 +304,7 @@ public class MendMaterielService {
             if (supplierId.size() > 0) {
                 for (int i = 0; i < supplierId.size(); i++) {
                     //Supplier supplier = forMasterAPI.getSupplier(house.getCityId(), supplierId.get(i));
-                    DjSupplier djSupplier =djSupplierAPI.queryDjSupplierByPass(supplierId.get(i));
+                    DjSupplier djSupplier = djSupplierAPI.queryDjSupplierByPass(supplierId.get(i));
                     djSuppliers.add(djSupplier);
                 }
                 map.put("suppliers", djSuppliers);
@@ -234,7 +319,7 @@ public class MendMaterielService {
      * materialOrderState
      * 0生成中,1平台审核中，2平台审核不通过，3平台审核通过待业主支付,4业主已支付，5业主不同意，6管家取消
      */
-    public ServerResponse materialOrderState(String storefrontId,String houseId, PageDTO pageDTO, String beginDate, String endDate,String state, String likeAddress) {
+    public ServerResponse materialOrderState(String storefrontId, String houseId, PageDTO pageDTO, String beginDate, String endDate, String state, String likeAddress) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             if (!CommonUtil.isEmpty(beginDate) && !CommonUtil.isEmpty(endDate)) {
@@ -244,7 +329,7 @@ public class MendMaterielService {
                 }
             }
 //            List<MendOrder> mendOrderList = mendOrderMapper.materialOrderState(houseId);
-            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(storefrontId,houseId, 0, beginDate, endDate, state,likeAddress);
+            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(storefrontId, houseId, 0, beginDate, endDate, state, likeAddress);
             PageInfo pageResult = new PageInfo(mendOrderList);
             List<MendOrderDTO> mendOrderDTOS = getMendOrderDTOList(mendOrderList);
             pageResult.setList(mendOrderDTOS);
@@ -275,7 +360,7 @@ public class MendMaterielService {
                 }
             }
             Member worker = memberMapper.selectByPrimaryKey(mendOrder.getApplyMemberId());
-            if(worker!=null) {
+            if (worker != null) {
                 mendOrderDTO.setApplyMemberId(worker.getId());
                 mendOrderDTO.setApplyName(CommonUtil.isEmpty(worker.getName()) ? worker.getNickName() : worker.getName());
                 mendOrderDTO.setApplyMobile(worker.getMobile());

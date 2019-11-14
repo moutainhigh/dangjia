@@ -189,7 +189,7 @@ public class OrderService {
      * @param orderId
      * @return
      */
-    public ServerResponse queryDeliverOrderItemDetail(String orderId) {
+    public ServerResponse queryDeliverOrderItemDetail(String orderId,String orderStatus) {
         Order order = orderMapper.selectByPrimaryKey(orderId);
         if (order == null) {
             return ServerResponse.createByErrorMessage("该订单不存在");
@@ -225,7 +225,7 @@ public class OrderService {
                 break;
             }
             default:
-                List<OrderItem> orderItemList = orderItemMapper.queryDeliverOrderItemDetail(orderId);
+                List<OrderItem> orderItemList = orderItemMapper.queryDeliverOrderItemDetail(orderId);//orderStatus
                 for (OrderItem orderItem : orderItemList) {
                     ItemDTO itemDTO = new ItemDTO();
                     itemDTO.setImage(address + orderItem.getImage());
@@ -1112,7 +1112,6 @@ public class OrderService {
     /**
      * 店铺收支记录
      *
-     * @param userToken
      * @param userId
      * @param cityId
      * @return

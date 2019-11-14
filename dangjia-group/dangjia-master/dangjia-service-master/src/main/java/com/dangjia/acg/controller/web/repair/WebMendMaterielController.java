@@ -37,6 +37,8 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
         return mendMaterielService.landlordState(userId,cityId,houseId, pageDTO, beginDate, endDate,state, likeAddress);
     }
 
+
+
     /**
      * 房子id查询退货单列表
      */
@@ -54,6 +56,12 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
         return mendMaterielService.materialBackStateProcessing(userId,cityId,houseId, pageDTO, state,likeAddress);
     }
 
+
+
+
+
+
+
     /**
      *
      * @param request
@@ -68,6 +76,30 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
     @ApiMethod
     public ServerResponse materialBackStateHandle(HttpServletRequest request, String cityId, String houseId, PageDTO pageDTO, String state, String likeAddress) {
         return mendMaterielService.materialBackStateHandle(request,cityId,houseId,pageDTO,state,likeAddress);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse landlordStateHandle(HttpServletRequest request, String cityId, String houseId, PageDTO pageDTO, String beginDate, String endDate, String state, String likeAddress) {
+        return mendMaterielService.landlordStateHandle(request,cityId,houseId,pageDTO,state,beginDate,endDate,likeAddress);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse ownerReturnHandleIng(HttpServletRequest request, String cityId, String houseId, PageDTO pageDTO, String state, String likeAddress) {
+        return mendMaterielService.ownerReturnHandleIng(request,cityId,houseId,pageDTO,state,likeAddress);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse ownerReturnProssing(HttpServletRequest request, String cityId, String houseId, PageDTO pageDTO, String state, String likeAddress) {
+        return mendMaterielService.ownerReturnProssing(request,cityId,houseId,pageDTO,state,likeAddress);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse ownerReturnHandle(HttpServletRequest request, String cityId, String houseId, PageDTO pageDTO, String state, String likeAddress) {
+        return mendMaterielService.ownerReturnHandle(request,cityId,houseId,pageDTO,state,likeAddress);
     }
 
     /**
@@ -89,5 +121,17 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
         //通过缓存查询店铺信息
         StorefrontDTO storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userID, StorefrontDTO.class);
         return mendMaterielService.materialOrderState(storefront.getId(),houseId, pageDTO, beginDate, endDate,state, likeAddress);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse landlordStateRefundList(HttpServletRequest request, String cityId, String houseId, PageDTO pageDTO, String beginDate, String endDate, String state, String likeAddress) {
+        return null;
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse landlordStateRefundAudit(HttpServletRequest request, String cityId, String houseId, PageDTO pageDTO, String beginDate, String endDate, String state, String likeAddress) {
+        return null;
     }
 }

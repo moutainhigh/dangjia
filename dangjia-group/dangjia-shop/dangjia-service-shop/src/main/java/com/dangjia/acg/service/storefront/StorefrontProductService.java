@@ -52,6 +52,33 @@ public class StorefrontProductService {
     @Autowired
     private IStorefrontMapper iStorefrontMapper;
 
+    public ServerResponse  countStorefrontProduct(String userId, String cityId)
+    {
+        try{
+            if (StringUtils.isEmpty(userId)) {
+                return ServerResponse.createByErrorMessage("用户ID不能为空!");
+            }
+            if (StringUtils.isEmpty(cityId)) {
+                return ServerResponse.createByErrorMessage("城市ID不能为空!");
+            }
+            Storefront storefront=storefrontService.queryStorefrontByUserID(userId,cityId);
+            if(storefront==null)
+            {
+                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息!");
+            }
+            Example example=new Example(StorefrontProduct.class);
+            example.createCriteria().andEqualTo(StorefrontProduct.STOREFRONT_ID,storefront.getId())
+                    .andEqualTo(StorefrontProduct.DATA_STATUS,0).andEqualTo(StorefrontProduct.IS_SHELF_STATUS,1);
+           List<StorefrontProduct>  list =istorefrontProductMapper.selectByExample(example);
+           if(list==null)
+               return ServerResponse.createBySuccess("删除成功",list.size());
+            return ServerResponse.createBySuccess("删除成功",list.size());
+        } catch (Exception e) {
+            logger.error("供货设置-根据货品id，城市id，店铺id删除店铺商品异常：", e);
+            return ServerResponse.createByErrorMessage("供货设置-根据货品id，城市id，店铺id删除店铺商品异常");
+        }
+    }
+
     /**
      * 供货设置-根据货品id，城市id，店铺id删除店铺商品
      * @param productId
