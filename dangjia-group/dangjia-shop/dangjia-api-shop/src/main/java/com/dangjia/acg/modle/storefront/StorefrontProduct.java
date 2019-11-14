@@ -68,7 +68,7 @@ public class StorefrontProduct extends BaseEntity {
     @Column(name = "detail_image")
     @Desc(value = "上传商品详情图")
     @ApiModelProperty("上传商品详情图")
-    private String detailImage;
+    private String detailImage;//
 
     /**
      * 营销名称

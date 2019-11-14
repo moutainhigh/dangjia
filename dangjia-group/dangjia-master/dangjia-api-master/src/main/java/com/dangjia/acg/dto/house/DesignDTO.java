@@ -1,6 +1,7 @@
 package com.dangjia.acg.dto.house;
 
 import com.dangjia.acg.dto.repair.HouseProfitSummaryDTO;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.util.Date;
@@ -16,6 +17,7 @@ public class DesignDTO {
     private String houseId;
     private int designerOk;
     private String residential;//小区名
+    private String houseWorkerId;//工人抢单ID
     private String building;
     private String unit;
     private String number;
@@ -39,4 +41,12 @@ public class DesignDTO {
     private List<HouseProfitSummaryDTO> profitSummarys;// 利润集合
 
     private String storeName;// 归属分店
+
+    protected Date startDate;//创建时间
+    private String username;// 销售名称
+    private String userMobile;// 销售手机号码
+    private String memberId;// 客户id
+
+    private String remarkInfo;//备注详情
+    private Date remarkDate;//备注时间
 }

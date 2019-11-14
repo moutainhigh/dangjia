@@ -130,7 +130,7 @@ public class ComplainService {
      */
 
     public ServerResponse addComplain(String userToken, String memberId, Integer complainType,
-                                      String businessId, String houseId, String files) {
+                                      String businessId, String houseId, String files, String orderSplitItemId) {
         if (CommonUtil.isEmpty(complainType) || CommonUtil.isEmpty(businessId)) {
             return ServerResponse.createByErrorMessage("参数错误");
         }
@@ -171,6 +171,10 @@ public class ComplainService {
                 complain.setUserName(djSupplier.getName());
                 complain.setUserNickName("供应商-" + djSupplier.getCheckPeople());
             }
+            OrderSplitItem orderSplitItem=new OrderSplitItem();
+            orderSplitItem.setId(orderSplitItemId);
+            orderSplitItem.setShippingState(1);
+            orderSplitItemMapper.updateByPrimaryKeySelective(orderSplitItem);
         } else {
             String field = "业主-";
             Member member = memberMapper.selectByPrimaryKey(complain.getUserId());
@@ -497,6 +501,12 @@ public class ComplainService {
                                     "业主提前结束装修，原因为" + complain.getContent());
                         }
                         houseMapper.updateByPrimaryKeySelective(house);
+
+                        List<HouseFlowApply> houseFlowApplys =  houseFlowApplyMapper.getMemberCheckList(house.getId());
+                        for (HouseFlowApply flowApply : houseFlowApplys) {
+                            flowApply.setMemberCheck(2);
+                            houseFlowApplyMapper.updateByPrimaryKeySelective(flowApply);
+                        }
                         break;
                     case 7://业主申请退货(同意后的处理）
                         String businessId = complain.getBusinessId();//业务订单号
@@ -581,7 +591,8 @@ public class ComplainService {
                 splitDeliverDTO.setSupId(splitDeliver.getSupervisorId());
                 splitDeliverDTO.setSupMobile(splitDeliver.getShipMobile());
                 Example example = new Example(OrderSplitItem.class);
-                example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID, splitDeliver.getId());
+                example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID, splitDeliver.getId())
+                        .andEqualTo(OrderSplitItem.SHIPPING_STATE,1);
                 List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
                 List<SplitDeliverItemDTO> splitDeliverItemDTOList = new ArrayList<>();
                 for (OrderSplitItem orderSplitItem : orderSplitItemList) {
@@ -789,6 +800,12 @@ public class ComplainService {
 //        house.setDesignerOk(3);
 //        house.setBudgetOk(3);
         houseMapper.updateByPrimaryKeySelective(house);
+
+        List<HouseFlowApply> houseFlowApplys =  houseFlowApplyMapper.getMemberCheckList(house.getId());
+        for (HouseFlowApply flowApply : houseFlowApplys) {
+            flowApply.setMemberCheck(2);
+            houseFlowApplyMapper.updateByPrimaryKeySelective(flowApply);
+        }
         return ServerResponse.createBySuccessMessage("ok");
     }
 
@@ -849,6 +866,8 @@ public class ComplainService {
 //        house.setDesignerOk(3);
 //        house.setBudgetOk(3);
         houseMapper.updateByPrimaryKeySelective(house);
+
+
         return ServerResponse.createBySuccessMessage("操作成功");
     }
 

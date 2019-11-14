@@ -70,11 +70,11 @@ public class DjSupApplicationProductService {
      */
     public ServerResponse insertDjSupApplicationProduct(String jsonStr, String cityId, String supId, String shopId) {
         try {
-            DjSupplier djSupplier = djSupplierMapper.selectByPrimaryKey(shopId);
+            DjSupplier djSupplier = djSupplierMapper.selectByPrimaryKey(supId);
             if(null==djSupplier)
-                return ServerResponse.createBySuccessMessage("供应商不存在");
+                return ServerResponse.createByErrorMessage("供应商不存在");
             if(null==djSupplier.getRetentionMoney()||!(djSupplier.getRetentionMoney()>0))
-                return ServerResponse.createBySuccessMessage("请先交纳滞留金");
+                return ServerResponse.createByErrorMessage("请先交纳滞留金");
             JSONArray jsonArr = JSONArray.parseArray(jsonStr);
             jsonArr.forEach(str -> {
                 JSONObject obj = (JSONObject) str;
@@ -245,7 +245,7 @@ public class DjSupApplicationProductService {
     public ServerResponse rejectAllProduct(String id) {
         try {
             if (StringUtils.isEmpty(id)) {
-                return ServerResponse.createByErrorMessage("供应商的商品id不能为空");
+            return ServerResponse.createByErrorMessage("该用户没有选择商品");
             }
             String[] iditem = id.split(",");
             Example example = new Example(DjSupApplicationProduct.class);
@@ -275,7 +275,7 @@ public class DjSupApplicationProductService {
     public ServerResponse rejectPartProduct(String id) {
         try {
             if (StringUtils.isEmpty(id)) {
-                return ServerResponse.createByErrorMessage("供应商的商品id不能为空");
+                return ServerResponse.createByErrorMessage("该用户没有选择商品");
             }
             String[] iditem = id.split(",");
             Example example = new Example(DjSupApplicationProduct.class);
@@ -283,7 +283,7 @@ public class DjSupApplicationProductService {
             DjSupApplicationProduct djSupApplicationProduct = new DjSupApplicationProduct();
             djSupApplicationProduct.setId(null);
             djSupApplicationProduct.setCreateDate(null);
-            djSupApplicationProduct.setApplicationStatus("2");
+            djSupApplicationProduct.setApplicationStatus("1");
             int i = djSupApplicationProductMapper.updateByExampleSelective(djSupApplicationProduct, example);
             if (i <= 0) {
                 return ServerResponse.createByErrorMessage("审核供货列表不通过");

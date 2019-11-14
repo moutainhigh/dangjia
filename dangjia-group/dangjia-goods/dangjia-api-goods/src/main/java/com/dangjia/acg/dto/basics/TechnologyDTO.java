@@ -37,4 +37,6 @@ public class TechnologyDTO {
     private String sampleImage;//示例图片
     @ApiModelProperty("sampleImageUrl")
     private String sampleImageUrl;//示例图片链接
+
+
 }

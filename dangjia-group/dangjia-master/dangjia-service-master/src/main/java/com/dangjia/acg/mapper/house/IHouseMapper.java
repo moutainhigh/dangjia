@@ -3,6 +3,7 @@ package com.dangjia.acg.mapper.house;
 import com.dangjia.acg.dto.house.DesignDTO;
 import com.dangjia.acg.dto.house.HouseDTO;
 import com.dangjia.acg.dto.house.HouseListDTO;
+import com.dangjia.acg.dto.house.UserInfoDateDTO;
 import com.dangjia.acg.dto.repair.HouseProfitSummaryDTO;
 import com.dangjia.acg.dto.repair.RepairMendDTO;
 import com.dangjia.acg.modle.deliver.Order;
@@ -37,7 +38,13 @@ public interface IHouseMapper extends Mapper<House> {
 
     List<House> getByLikeAddress(@Param("storefrontId") String storefrontId,@Param("cityId") String cityId,@Param("likeAddress") String likeAddress,@Param("startDate") String startDate, @Param("endDate") String endDate);
 
-    List<DesignDTO> getDesignList(@Param("designerType") int designerType, @Param("cityKey") String cityKey,@Param("searchKey") String searchKey,@Param("workerKey") String workerKey, @Param("dataStatus") String dataStatus);
+    List<DesignDTO> getDesignList(@Param("designerType") int designerType,
+                                  @Param("cityKey") String cityKey,
+                                  @Param("searchKey") String searchKey,
+                                  @Param("workerKey") String workerKey,
+                                  @Param("dataStatus") String dataStatus,
+                                  @Param("flag") int flag,
+                                  @Param("userId") String userId);
 
     List<House> getSameLayout(@Param("cityId") String cityId, @Param("villageId") String villageId,
                               @Param("minSquare") Double minSquare, @Param("maxSquare") Double maxSquare, @Param("houseType") Integer houseType);
@@ -49,7 +56,12 @@ public interface IHouseMapper extends Mapper<House> {
                                    @Param("minSquare") Double minSquare, @Param("maxSquare") Double maxSquare);
 
 
-    List<HouseListDTO> getActuaryAll(@Param("cityId")String cityId ,@Param("budgetOk") String budgetOk, @Param("searchKey") String searchKey,@Param("workerKey") String workerKey, @Param("dataStatus") String dataStatus);
+    List<HouseListDTO> getActuaryAll(@Param("cityId") String cityId,
+                                     @Param("budgetOk") String budgetOk,
+                                     @Param("searchKey") String searchKey,
+                                     @Param("workerKey") String workerKey,
+                                     @Param("dataStatus") String dataStatus,
+                                     @Param("userId") String userId);
 
     List<HouseListDTO> getHouseList(@Param("cityKey")  String cityKey,@Param("userKey") String userKey,@Param("memberId") String memberId, @Param("visitState") Integer visitState, @Param("startDate") String startDate, @Param("endDate") String endDate, @Param("orderBy") String orderBy, @Param("searchKey") String searchKey);
 
@@ -71,5 +83,11 @@ public interface IHouseMapper extends Mapper<House> {
 
     House queryPromotionListHouse(@Param("memberId") String memberId);
 
+
+    UserInfoDateDTO getUserList(@Param("memberId") String memberId);
+
+    UserInfoDateDTO getDesignListInfo(@Param("houseId") String houseId);
+
+    Date getModifyDate(@Param("taskId") String taskId);
 
 }

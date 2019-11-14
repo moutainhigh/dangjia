@@ -27,11 +27,21 @@ public class ReturnWorkOrderDTO {
 
     private String workerMobile;//工匠电话
 
+    private String supId;//管家ID
+
+    private String supMobile;//管家电话
+
+    private String mobile;//拨打电话
+
     private String content;//申诉内容
 
     private Date applyDate;//申请时间
 
     private String stateName;//申请状态
+
+    private Double actualTotalAmount;//退款总价
+
+    private Double totalAmount;//实退款
 
     private String state;
 

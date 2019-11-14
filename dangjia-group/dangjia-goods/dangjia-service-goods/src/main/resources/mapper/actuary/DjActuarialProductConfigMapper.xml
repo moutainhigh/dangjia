@@ -119,6 +119,7 @@
             CEIL(IFNULL(t1.purchase_quantity,1)/IFNULL(t2.convert_quality,1))  convertCount,
             t4.type goodsType,
             t4.buy goodsBuy,
+            t4.category_id categoryId,
             t2.convert_quality convertQuality,
             t2.convert_unit convertUnit
         FROM

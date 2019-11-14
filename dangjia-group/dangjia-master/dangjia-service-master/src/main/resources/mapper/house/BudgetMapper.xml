@@ -46,22 +46,25 @@
 		SELECT
 			t.storefont_id storefrontId,
 			t1.storefront_name storefrontName,
-			sum(t.total_price) totalPrice
+			t1.system_logo storefrontIcon,
+            sum(t.price*(case IFNULL(T2.is_calculated_area,'0') when '0' then 1 else t.shop_count end)) totalPrice
 		FROM
 			dj_actuary_budget_material t
 		LEFT JOIN dj_basics_storefront t1 ON t.storefont_id = t1.id
+        LEFT JOIN (select tt.is_calculated_area,tt.product_id,tt1.prod_template_id from  dj_actuarial_product_config tt,dj_basics_storefront_product tt1 where tt.worker_type_id in('1','2') and tt.product_id=tt1.id) t2 on t.product_id=t2.prod_template_id
 		WHERE
 			t.house_id = #{houseId}
 		AND t.worker_type_id IN (1, 2)
 		AND t.delete_state != 1
 		GROUP BY
-			t.storefont_id,
+		t.storefont_id,
 		t1.storefront_name
 
 	</select>
 
 	<!--店铺下面的商品详情信息-->
 	<select id="getBudgetProductList" resultType="com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO">
+
 		SELECT
 			t2.id productId,
 			t2.storefront_id storefrontId,
@@ -77,29 +80,20 @@
 			t3.value_name_arr valueNameArr,
 			t4.brand_id brandId
 		FROM
-			dj_actuarial_product_config t1,
 			dj_basics_storefront_product t2,
 			dj_basics_product_template t3,
 			dj_basics_goods t4,
-			(SELECT
-				t.product_id productId,
-				t.storefont_id storefrontId,
-				t.price
-			FROM
-				dj_actuary_budget_material t
-			WHERE
-				t.house_id = #{houseId}
-			AND t.storefont_id = #{storefrontId}
-			AND t.worker_type_id IN (1, 2)
-			AND t.delete_state != 1
-
-			) t5
+			dj_actuary_budget_material t5
 		WHERE
-			t1.product_id = t2.prod_template_id
-		AND t1.product_id = t3.id
-		AND t3.goods_id = t4.id
+			t3.goods_id = t4.id
 		AND t2.is_shelf_status = 1
-		AND t2.id = t5.productId
+		and t2.prod_template_id=t3.id
+		AND t2.id = t5.product_id
+		AND t5.house_id = #{houseId}
+		AND t5.storefont_id = #{storefrontId}
+		AND t5.worker_type_id IN ('1', '2')
+		AND t5.delete_state != 1
+
 	</select>
 
 </mapper>

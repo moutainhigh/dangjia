@@ -2,6 +2,7 @@ package com.dangjia.acg.api.app.design;
 
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.house.HouseRemark;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -81,7 +82,8 @@ public interface HouseDesignImageAPI {
                                  @RequestParam("pageDTO") PageDTO pageDTO,
                                  @RequestParam("designerType") int designerType,
                                  @RequestParam("searchKey") String searchKey,
-                                 @RequestParam("workerKey") String workerKey);
+                                 @RequestParam("workerKey") String workerKey,
+                                 @RequestParam("userId") String userId);
 
 
     /**
@@ -462,4 +464,30 @@ public interface HouseDesignImageAPI {
                                       @RequestParam("pageDTO") PageDTO pageDTO,
                                       @RequestParam("startDate") String startDate,
                                       @RequestParam("endDate") String endDate);
+
+
+    @PostMapping("web/house/addHouseRemark")
+    @ApiOperation(value = "新增房子备注", notes = "新增房子备注")
+    ServerResponse addHouseRemark(@RequestParam("request") HttpServletRequest request,
+                                  @RequestParam("houseRemark") HouseRemark houseRemark,
+                                  @RequestParam("userId") String userId);
+
+    @PostMapping("web/house/queryHouseRemark")
+    @ApiOperation(value = "查询房子备注信息", notes = "查询房子备注信息")
+    ServerResponse queryHouseRemark(@RequestParam("request") HttpServletRequest request,
+                                    @RequestParam("pageDTO") PageDTO pageDTO,
+                                    @RequestParam("remarkType") String remarkType,
+                                    @RequestParam("houseId") String houseId);
+
+
+    @PostMapping("web/house/getArrOdlQuantityRoomList")
+    @ApiOperation(value = "查询房子设计历史记录", notes = "查询房子设计历史记录")
+    ServerResponse getArrOdlQuantityRoomList(@RequestParam("request") HttpServletRequest request,
+                                             @RequestParam("houseId") String houseId);
+
+    @PostMapping("web/house/getArrCountList")
+    @ApiOperation(value = "查询房子精算历史记录", notes = "查询房子精算历史记录")
+    ServerResponse getArrCountList(@RequestParam("request") HttpServletRequest request,
+                                             @RequestParam("houseId") String houseId);
+
 }

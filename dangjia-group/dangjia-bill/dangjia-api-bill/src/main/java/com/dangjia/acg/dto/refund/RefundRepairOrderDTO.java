@@ -19,6 +19,12 @@ public class RefundRepairOrderDTO {
 
     private String storefrontName;//店铺名称
 
+    private String storefrontIcon;//店铺图标
+
+    private String storefrontMobile;//店铺电话
+
+    private String mobile;//拨打电话
+
     private Date applyDate;//退款申请时间
 
     private String applyMemberId;//申请人ID
@@ -51,7 +57,11 @@ public class RefundRepairOrderDTO {
 
     private String repairNewNode;//最新处理节点
 
-    private String reparirRemainingTime;//订单剩余处理时间
+    private Date repairNewDate;//最新处理时间
+
+    private int showRepairDateType;//显示时间判断（1订单剩余时间，2最新处理时间）
+
+    private long reparirRemainingTime;//订单剩余处理时间
 
     @ApiModelProperty("可操作编码")
     private String associatedOperation;
