@@ -166,7 +166,7 @@ public class MemberCollectService {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
-                return (ServerResponse) object;
+                return ServerResponse.createBySuccess("没有被收藏!", 0);
             }
             Member member = (Member) object;
             Example example = new Example(MemberCollect.class);
