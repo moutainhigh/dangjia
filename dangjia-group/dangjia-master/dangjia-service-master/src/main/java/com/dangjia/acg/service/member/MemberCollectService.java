@@ -23,6 +23,7 @@ import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.other.IndexPageService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.poi.ss.formula.functions.Count;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,8 +76,8 @@ public class MemberCollectService {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());//初始化分页插获取用户信息件
             //根据商品用户编号查询收藏记录
             Example example = new Example(MemberCollect.class);
-            example.createCriteria().andEqualTo(MemberCollect.MEMBER_ID,member.getId())
-                    .andEqualTo(MemberCollect.CONDITION_TYPE,1);
+            example.createCriteria().andEqualTo(MemberCollect.MEMBER_ID, member.getId())
+                    .andEqualTo(MemberCollect.CONDITION_TYPE, 1);
             List<MemberCollect> memberCollectList = iMemberCollectMapper.selectByExample(example);
             if (memberCollectList.size() <= 0) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
@@ -87,7 +88,7 @@ public class MemberCollectService {
                 List<MemberCollectDTO> memberCollectDTOS = storefrontProductAPI.queryCollectGood(memberCollect.getCollectId());
                 memberCollectDTOS.forEach(memberCollectDTO -> {
                     memberCollectDTO.setId(memberCollect.getId());
-                    memberCollectDTO.setImage(imageAddress+memberCollectDTO.getImage());
+                    memberCollectDTO.setImage(imageAddress + memberCollectDTO.getImage());
                 });
                 memberCollectDTOList.addAll(memberCollectDTOS);
             });
@@ -96,7 +97,7 @@ public class MemberCollectService {
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.info("系统出错,查询失败",e);
+            logger.info("系统出错,查询失败", e);
             return ServerResponse.createByErrorMessage("系统出错,查询失败");
         }
     }
@@ -148,7 +149,7 @@ public class MemberCollectService {
             pageResult.setList(houseMap);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
-            logger.info("系统出错,添加收藏失败",e);
+            logger.info("系统出错,添加收藏失败", e);
             return ServerResponse.createByErrorMessage("系统出错,添加收藏失败");
         }
     }
@@ -157,11 +158,11 @@ public class MemberCollectService {
     /**
      * 优化检测该工地是否已收藏
      *
-     * @param request userToken
+     * @param userToken userToken
      * @param collectId 房子ID或者商品
      * @return
      */
-    public ServerResponse isMemberCollect(HttpServletRequest request, String userToken, String collectId, String collectType) {
+    public ServerResponse isMemberCollect(String userToken, String collectId, String collectType) {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
@@ -169,15 +170,15 @@ public class MemberCollectService {
             }
             Member member = (Member) object;
             Example example = new Example(MemberCollect.class);
-            example.createCriteria()
-                    .andEqualTo(MemberCollect.MEMBER_ID, member.getId())
-                    .andEqualTo(MemberCollect.COLLECT_ID, collectId)
-                    .andEqualTo(MemberCollect.CONDITION_TYPE, collectType);
-            List<MemberCollect> list = iMemberCollectMapper.selectByExample(example);
-            if (list.size() > 0) {
-                return ServerResponse.createBySuccess("已经被收藏!",1);
+            example.createCriteria().andEqualTo(MemberCollect.COLLECT_ID, collectId)
+                    .andEqualTo(MemberCollect.CONDITION_TYPE, collectType)
+                    .andEqualTo(MemberCollect.MEMBER_ID, member.getId());
+            int count = iMemberCollectMapper.selectCountByExample(example);
+            if (count > 0) {
+                return ServerResponse.createBySuccess("已经被收藏!", 1);
+            } else {
+                return ServerResponse.createBySuccess("没有被收藏!", 0);
             }
-            return ServerResponse.createBySuccess("没有被收藏!",0);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("系统出错,检测该工地是否已收藏失败");
@@ -186,6 +187,7 @@ public class MemberCollectService {
 
     /**
      * 添加收藏
+     *
      * @param userToken
      * @param collectId 房子ID或者商品ID
      * @return
@@ -196,22 +198,24 @@ public class MemberCollectService {
             if (object instanceof ServerResponse)
                 return (ServerResponse) object;
             Member member = (Member) object;
+            //判断是否重复收藏
+            Example example = new Example(MemberCollect.class);
+            example.createCriteria().andEqualTo(MemberCollect.COLLECT_ID, collectId)
+                    .andEqualTo(MemberCollect.CONDITION_TYPE, collectType)
+                    .andEqualTo(MemberCollect.MEMBER_ID, member.getId());
+            int count = iMemberCollectMapper.selectCountByExample(example);
+            if (count > 0) {
+                return ServerResponse.createBySuccessMessage("已被收藏!");
+            }
             MemberCollect memberCollect = new MemberCollect();
             memberCollect.setMemberId(member.getId());
             memberCollect.setCollectId(collectId);
             memberCollect.setConditionType(collectType);
-            //判断是否重复收藏
-            Example example = new Example(MemberCollect.class);
-            example.createCriteria().andEqualTo(MemberCollect.COLLECT_ID, collectId)
-                    .andEqualTo(MemberCollect.MEMBER_ID, "1");
-            List<MemberCollect> listMemberCollect = iMemberCollectMapper.selectByExample(example);
-            if (listMemberCollect.size() > 0)
-                return ServerResponse.createBySuccessMessage("已被收藏!");
             iMemberCollectMapper.insertSelective(memberCollect);
             return ServerResponse.createBySuccessMessage("收藏成功!");
         } catch (Exception e) {
-           logger.info("系统出错,添加收藏失败",e);
-           return ServerResponse.createByErrorMessage("系统出错,添加收藏失败");
+            logger.info("系统出错,添加收藏失败", e);
+            return ServerResponse.createByErrorMessage("系统出错,添加收藏失败");
         }
 
     }
@@ -219,26 +223,27 @@ public class MemberCollectService {
 
     /**
      * 取消收藏
+     *
      * @param userToken
      * @param collectId
      * @param collectType
      * @return
      */
-    public ServerResponse delMemberCollect(String userToken,String collectId,String collectType) {
+    public ServerResponse delMemberCollect(String userToken, String collectId, String collectType) {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
             Member member = (Member) object;
-            Example example=new Example(MemberCollect.class);
-            example.createCriteria().andEqualTo(MemberCollect.COLLECT_ID,collectId)
-                    .andEqualTo(MemberCollect.CONDITION_TYPE,collectType)
-                    .andEqualTo(MemberCollect.MEMBER_ID,member.getId());
+            Example example = new Example(MemberCollect.class);
+            example.createCriteria().andEqualTo(MemberCollect.COLLECT_ID, collectId)
+                    .andEqualTo(MemberCollect.CONDITION_TYPE, collectType)
+                    .andEqualTo(MemberCollect.MEMBER_ID, member.getId());
             iMemberCollectMapper.deleteByExample(example);
             return ServerResponse.createBySuccessMessage("取消收藏成功!");
         } catch (Exception e) {
-            logger.info("系统出错,添加收藏失败",e);
+            logger.info("系统出错,添加收藏失败", e);
             return ServerResponse.createByErrorMessage("系统出错,添加收藏失败");
         }
     }
@@ -246,44 +251,45 @@ public class MemberCollectService {
 
     /**
      * 猜你喜欢
+     *
      * @param userToken
      * @return
      */
-    public ServerResponse queryRelated(String userToken,String cityId) {
+    public ServerResponse queryRelated(String userToken, String cityId) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
         }
         Member member = (Member) object;
-        Example example=new Example(WebsiteVisit.class);
-        example.createCriteria().andLike(WebsiteVisit.ROUTE,"%"+member.getId()+",%")
-                .andEqualTo(WebsiteVisit.DATA_STATUS,0);
+        Example example = new Example(WebsiteVisit.class);
+        example.createCriteria().andLike(WebsiteVisit.ROUTE, "%" + member.getId() + ",%")
+                .andEqualTo(WebsiteVisit.DATA_STATUS, 0);
         example.orderBy(WebsiteVisit.COUNT).desc();
         List<WebsiteVisit> websiteVisits = iWebsiteVisitMapper.selectByExample(example);
-        if(websiteVisits.size()<=0){
+        if (websiteVisits.size() <= 0) {
             List<ActuarialProductAppDTO> djBasicsProductTemplates = iMemberCollectMapper.queryRandomProduct(12, cityId);
-            return ServerResponse.createBySuccess("查询成功",djBasicsProductTemplates);
-        }else{
-            List<ActuarialProductAppDTO> djBasicsProductTemplates=new ArrayList<>();
+            return ServerResponse.createBySuccess("查询成功", djBasicsProductTemplates);
+        } else {
+            List<ActuarialProductAppDTO> djBasicsProductTemplates = new ArrayList<>();
             for (int i = 0; i < websiteVisits.size(); i++) {
-                if(!CommonUtil.isEmpty(websiteVisits.get(i).getRoute())){
+                if (!CommonUtil.isEmpty(websiteVisits.get(i).getRoute())) {
                     String[] split = websiteVisits.get(i).getRoute().split(",");
-                    System.out.println(split[1]+(12-djBasicsProductTemplates.size()));
-                    List<ActuarialProductAppDTO> djBasicsProductTemplates1 = iMemberCollectMapper.queryRandomProductByCategoryId(split[1], 12-djBasicsProductTemplates.size());
+                    System.out.println(split[1] + (12 - djBasicsProductTemplates.size()));
+                    List<ActuarialProductAppDTO> djBasicsProductTemplates1 = iMemberCollectMapper.queryRandomProductByCategoryId(split[1], 12 - djBasicsProductTemplates.size());
                     djBasicsProductTemplates.addAll(djBasicsProductTemplates1);
-                    if(djBasicsProductTemplates.size()==12){
+                    if (djBasicsProductTemplates.size() == 12) {
                         break;
                     }
                 }
             }
-            if(djBasicsProductTemplates.size()<12){
-                djBasicsProductTemplates.addAll(iMemberCollectMapper.queryRandomProduct(12-djBasicsProductTemplates.size(),cityId));
+            if (djBasicsProductTemplates.size() < 12) {
+                djBasicsProductTemplates.addAll(iMemberCollectMapper.queryRandomProduct(12 - djBasicsProductTemplates.size(), cityId));
             }
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             djBasicsProductTemplates.forEach(djBasicsProductTemplate -> {
-                djBasicsProductTemplate.setImage(imageAddress+djBasicsProductTemplate.getImage());
+                djBasicsProductTemplate.setImage(imageAddress + djBasicsProductTemplate.getImage());
             });
-            return ServerResponse.createBySuccess("查询成功",djBasicsProductTemplates);
+            return ServerResponse.createBySuccess("查询成功", djBasicsProductTemplates);
         }
     }
 

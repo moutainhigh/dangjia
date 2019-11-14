@@ -23,38 +23,38 @@ public class MemberCollectController implements MemberCollectAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryCollectHouse(HttpServletRequest request, String userToken, PageDTO pageDTO){
+    public ServerResponse queryCollectHouse(HttpServletRequest request, String userToken, PageDTO pageDTO) {
         return memberCollectService.queryCollectHouse(request, userToken, pageDTO);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse queryCollectGood(HttpServletRequest request, String userToken, PageDTO pageDTO){
+    public ServerResponse queryCollectGood(HttpServletRequest request, String userToken, PageDTO pageDTO) {
         return memberCollectService.queryCollectGood(request, userToken, pageDTO);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse addMemberCollect(HttpServletRequest request,String userToken,String collectId,String collectType){
-        return memberCollectService.addMemberCollect(userToken, collectId,collectType);
+    public ServerResponse addMemberCollect(HttpServletRequest request, String userToken, String collectId, String collectType) {
+        return memberCollectService.addMemberCollect(userToken, collectId, collectType);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse isMemberCollect(HttpServletRequest request, String userToken, String collectId,String collectType){
-        return memberCollectService.isMemberCollect(request, userToken, collectId,collectType);
+    public ServerResponse isMemberCollect(HttpServletRequest request, String userToken, String collectId, String collectType) {
+        return memberCollectService.isMemberCollect(userToken, collectId, collectType);
     }
 
     @Override
     @ApiMethod
     public ServerResponse delMemberCollect(HttpServletRequest request, String userToken, String collectId, String collectType) {
-        return memberCollectService.delMemberCollect(userToken,collectId,collectType);
+        return memberCollectService.delMemberCollect(userToken, collectId, collectType);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse queryRelated(HttpServletRequest request, String userToken,String cityId) {
-        return memberCollectService.queryRelated(userToken,cityId);
+    public ServerResponse queryRelated(HttpServletRequest request, String userToken, String cityId) {
+        return memberCollectService.queryRelated(userToken, cityId);
     }
 }
 
