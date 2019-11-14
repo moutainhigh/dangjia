@@ -1,6 +1,7 @@
 package com.dangjia.acg.modle.product;
 
 import com.dangjia.acg.common.annotation.Desc;
+import com.dangjia.acg.common.model.BaseEntity;
 import com.dangjia.acg.modle.GoodsBaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -22,7 +23,7 @@ import javax.persistence.Table;
 @Table(name = "dj_basics_product_added_relation")
 @ApiModel(description = "货品")
 @FieldNameConstants(prefix = "")
-public class ProductAddedRelation extends GoodsBaseEntity {
+public class ProductAddedRelation extends BaseEntity {
 
 	@Column(name = "product_template_id")
     @Desc(value = "商品ID")

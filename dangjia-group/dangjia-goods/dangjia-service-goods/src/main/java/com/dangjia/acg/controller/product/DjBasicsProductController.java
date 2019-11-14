@@ -103,7 +103,7 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
             return djBasicsProductService.insertBatchProduct(productArr,cityId);
         }catch (Exception e){
             logger.error("新增商品信息失败：",e);
-            return ServerResponse.createBySuccessMessage("新增失败");
+            return ServerResponse.createByErrorMessage("新增失败");
         }
 
     }

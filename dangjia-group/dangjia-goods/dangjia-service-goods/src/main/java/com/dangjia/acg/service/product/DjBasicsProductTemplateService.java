@@ -169,8 +169,8 @@ public class DjBasicsProductTemplateService {
                     imgStr.append(img).append(",");
                 }
             }
-            if (!StringUtils.isNotBlank(imgStr.toString()))
-                return ServerResponse.createByErrorMessage("商品图片不能为空");
+           // if (!StringUtils.isNotBlank(imgStr.toString()))
+               // return ServerResponse.createByErrorMessage("商品图片不能为空");
             LOG.info("001----------添加商品主表 start:" + basicsProductDTO.getName());
             String productId = insertBasicsProductData(basicsProductDTO,imgStr,0,basicsGoods.getType());
             LOG.info("001----------添加商品主表 end productId:" + productId);
