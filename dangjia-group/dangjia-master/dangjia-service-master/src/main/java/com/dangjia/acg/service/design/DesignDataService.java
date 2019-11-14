@@ -10,7 +10,6 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.design.DesignListDTO;
 import com.dangjia.acg.dto.design.QuantityInfoDTO;
-import com.dangjia.acg.dto.design.QuantityMobileDTO;
 import com.dangjia.acg.dto.design.QuantityRoomDTO;
 import com.dangjia.acg.dto.house.DesignDTO;
 import com.dangjia.acg.dto.house.UserInfoDateDTO;
@@ -336,9 +335,7 @@ public class DesignDataService {
              flag= member.getWorkerType();
         }
 
-//        String cityKey = request.getParameter(Constants.CITY_ID);
-        String cityKey = "402881882ba8753a012ba93101120116";
-//        String cityKey = redisClient.getCache(Constants.CITY_KEY + userID, String.class);
+        String cityKey = request.getParameter(Constants.CITY_ID);
         if (CommonUtil.isEmpty(cityKey)) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
