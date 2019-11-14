@@ -20,7 +20,7 @@ public interface PayAPI {
 
 
     @PostMapping("app/pay/aliAsynchronous")
-    @ApiOperation(value = "支付宝异步回调", notes = "支付宝异步回调")
+    @ApiOperation(value = "支付宝异步回调", notes = "支付宝异步回调" , produces = "application/x-www-form-urlencoded;text/html;charset=utf-8" )
     void aliAsynchronous(@RequestParam("request")HttpServletRequest request,
                             @RequestParam("response") HttpServletResponse response,
                          @RequestParam("out_trade_no") String out_trade_no,
