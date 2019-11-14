@@ -303,6 +303,7 @@ public class PaymentService {
         try {
             Example examplePayOrder = new Example(PayOrder.class);
             examplePayOrder.createCriteria().andEqualTo(PayOrder.BUSINESS_ORDER_NUMBER, businessOrderNumber);
+            examplePayOrder.orderBy(PayOrder.CREATE_DATE).desc();
             List<PayOrder> payOrderList = payOrderMapper.selectByExample(examplePayOrder);
             if (payOrderList.size() == 0) {
                 return ServerResponse.createByErrorMessage("支付订单不存在");
