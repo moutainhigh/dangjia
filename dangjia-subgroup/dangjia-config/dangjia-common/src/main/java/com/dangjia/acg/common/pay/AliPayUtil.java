@@ -38,7 +38,7 @@ public class AliPayUtil {
             model.setBody("蜂匠科技");
             model.setSubject("当家装修app");
 
-            System.out.println("=================="+request.getTextParams());
+            System.out.println("=================="+ request);
             AlipayTradeAppPayResponse response = (AlipayTradeAppPayResponse) alipayClient.sdkExecute(request);
             Map<String,String> map = new HashMap<String, String>();
             map.put("sign",response.getBody());
