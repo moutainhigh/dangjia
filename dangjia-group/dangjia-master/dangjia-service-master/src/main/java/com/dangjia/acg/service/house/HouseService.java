@@ -70,6 +70,7 @@ import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseFlowService;
+import com.dangjia.acg.util.JdbcContextHolder;
 import com.dangjia.acg.util.StringTool;
 import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
@@ -198,6 +199,10 @@ public class HouseService {
     private IMasterAttributeValueMapper iMasterAttributeValueMapper;
     @Autowired
     private ForMasterAPI forMasterAPI;
+
+    public House selectHouseById(String  id) {
+        return iHouseMapper.selectByPrimaryKey(id);
+    }
 
     /**
      * 切换房产
@@ -2453,13 +2458,16 @@ public class HouseService {
         PageInfo pageResult = new PageInfo(hfaList);
         List<Map<String, Object>> listMap = new ArrayList<>();
         for (HouseConstructionRecord houseConstructionRecord : hfaList) {
-            listMap.add(getHouseConstructionRecordMap(houseConstructionRecord, address));
+            String sourceId = houseConstructionRecord.getSourceId();
+            listMap.add(getHouseConstructionRecordMap(houseConstructionRecord, address,sourceId));
         }
         pageResult.setList(listMap);
         return ServerResponse.createBySuccess("查询施工记录成功", pageResult);
     }
 
-    private Map<String, Object> getHouseConstructionRecordMap(HouseConstructionRecord hfa, String address) {
+    private Map<String, Object> getHouseConstructionRecordMap(HouseConstructionRecord hfa,
+                                                              String address,
+                                                              String sourceId) {
         // 0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，
         // 4：每日开工,5有效巡查,6无人巡查,7追加巡查,
         // 8补人工,9退人工,10补材料,11退材料,12业主退材料
@@ -2515,8 +2523,9 @@ public class HouseService {
         }
         map.put("applyType", applyTypeMap.get(hfa.getApplyType()));
         map.put("createDate", hfa.getCreateDate());
+        logger.info("++++++++++++++++++++++++++++++++++++sourceId:" + sourceId);
         example = new Example(TechnologyRecord.class);
-        example.createCriteria().andEqualTo(TechnologyRecord.HOUSE_FLOW_APPLY_ID, hfa.getSourceId());
+        example.createCriteria().andEqualTo(TechnologyRecord.HOUSE_FLOW_APPLY_ID, sourceId);
         example.orderBy(TechnologyRecord.CREATE_DATE).desc();
         //已验收节点
         List<TechnologyRecord> recordList = technologyRecordMapper.selectByExample(example);
@@ -2538,7 +2547,7 @@ public class HouseService {
         List<Evaluate> evaluates = houseFlowApplyMapper.getOwnerComment(hfa.getHouseId(),hfa.getWorkerId(),hfa.getApplyType(),hfa.getWorkerType());
         if(!evaluates.isEmpty()){
             map.put("star",evaluates.get(0).getStar());
-            map.put("content",evaluates.get(0).getContent());
+            map.put("ownerContent",evaluates.get(0).getContent());
         }
 
         Map<String,Object> mm = new HashMap<>();

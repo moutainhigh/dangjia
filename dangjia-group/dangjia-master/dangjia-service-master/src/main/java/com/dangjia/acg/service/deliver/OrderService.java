@@ -184,67 +184,7 @@ public class OrderService {
         }
     }
 
-    /**
-     * 查询订单详情
-     * @param orderId
-     * @return
-     */
-    public ServerResponse queryDeliverOrderItemDetail(String orderId,String orderStatus) {
-        Order order = orderMapper.selectByPrimaryKey(orderId);
-        if (order == null) {
-            return ServerResponse.createByErrorMessage("该订单不存在");
-        }
-        House house = houseMapper.selectByPrimaryKey(order.getHouseId());
-        if (house == null) {
-            return ServerResponse.createByErrorMessage("该房产不存在");
-        }
-        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-        OrderItemDTO orderItemDTO = new OrderItemDTO();
-        orderItemDTO.setOrderId(order.getId());
-        orderItemDTO.setTotalAmount(order.getTotalAmount());
-        List<ItemDTO> itemDTOList = new ArrayList<>();
-        switch (order.getWorkerTypeId()) {
-            case "1": {//设计
-                ItemDTO itemDTO = new ItemDTO();
-                itemDTO.setName(house.getStyle());
-                itemDTO.setImage(address + "icon/shejiF.png");
-                itemDTO.setPrice("¥" + String.format("%.2f", order.getStylePrice().doubleValue()) + "/㎡");
-                itemDTO.setShopCount(house.getSquare().doubleValue());
-                itemDTO.setProductType(3);
-                itemDTOList.add(itemDTO);
-                break;
-            }
-            case "2": {
-                ItemDTO itemDTO = new ItemDTO();
-                itemDTO.setName("当家精算");
-                itemDTO.setImage(address + "icon/jingsuanF.png");
-                itemDTO.setPrice("¥" + String.format("%.2f", order.getBudgetCost().doubleValue()) + "/㎡");
-                itemDTO.setShopCount(house.getSquare().doubleValue());
-                itemDTO.setProductType(3);
-                itemDTOList.add(itemDTO);
-                break;
-            }
-            default:
-                List<OrderItem> orderItemList = orderItemMapper.queryDeliverOrderItemDetail(orderId);//orderStatus
-                for (OrderItem orderItem : orderItemList) {
-                    ItemDTO itemDTO = new ItemDTO();
-                    itemDTO.setImage(address + orderItem.getImage());
-                    itemDTO.setPrice("¥" + String.format("%.2f", orderItem.getPrice()));
-                    itemDTO.setShopCount(orderItem.getShopCount());
-                    if (order.getType() == 1) {//人工
-                        itemDTO.setName(orderItem.getProductName());
-                        itemDTO.setProductType(2);//人工
-                    } else if (order.getType() == 2) {//材料
-                        itemDTO.setName(orderItem.getProductName());
-                        itemDTO.setProductType(orderItem.getProductType());
-                    }
-                    itemDTOList.add(itemDTO);
-                }
-                break;
-        }
-        orderItemDTO.setItemDTOList(itemDTOList);
-        return ServerResponse.createBySuccess("查询成功", orderItemDTO);
-    }
+
     /**
      * 订单详情
      */
@@ -340,51 +280,6 @@ public class OrderService {
         return ServerResponse.createBySuccess("查询成功", businessOrderDTO);
     }
 
-    /**
-     * 根据订单状态查询订单列表
-     *
-     * @param pageDTO
-     * @param userToken
-     * @param houseId
-     * @param cityId
-     * @param orderStatus
-     * @return
-     */
-    public ServerResponse queryDeliverOrderListByStatus(PageDTO pageDTO, String userToken, String houseId, String cityId, String orderStatus) {
-        try {
-            Object object = constructionService.getMember(userToken);
-            if (object instanceof ServerResponse) {
-                return (ServerResponse) object;
-            }
-            Member member = (Member) object;
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            if (StringUtils.isEmpty(member.getId())) {
-                return ServerResponse.createByErrorMessage("用户ID不能为空!");
-            }
-            if (StringUtils.isEmpty(cityId)) {
-                return ServerResponse.createByErrorMessage("城市ID不能为空!");
-            }
-            List<Map<String, Object>> mapArrayList = new ArrayList<Map<String, Object>>();
-
-            List<Order> list = orderMapper.selectDeliverOrderByHouse(cityId, houseId, orderStatus);
-            for (Order order : list) {
-                Map<String, Object> resMap = BeanUtils.beanToMap(order);
-                String orderId = order.getId();
-                List<OrderItem> OrderItemList = orderItemMapper.orderItemList(houseId, orderId, null, null);
-                if (OrderItemList != null) {
-                    resMap.put("OrderItemSize", OrderItemList.size());
-                    resMap.put("OrderItemList", OrderItemList);
-                }
-                mapArrayList.add(resMap);
-            }
-            PageInfo pageResult = new PageInfo(mapArrayList);
-            return ServerResponse.createBySuccess("查询所有订单", pageResult);
-        } catch (Exception e) {
-            logger.error("查询所有订单异常", e);
-            return ServerResponse.createByErrorMessage("查询所有订单异常" + e);
-        }
-
-    }
 
     /**
      * 业务订单列表

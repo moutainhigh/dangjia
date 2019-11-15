@@ -25,7 +25,7 @@ public interface StorefrontProductAPI {
 //    List<StorefrontDTO> queryStorefrontListByStorefrontId(@RequestParam("storefrontId") String storefrontId,
 //                                                          @RequestParam("searchKey") String searchKey);
     @PostMapping("/web/countStorefrontProduct")
-    @ApiOperation(value = "增加已选商品", notes = "供货设置-增加已选商品")
+    @ApiOperation(value = "统计上架数", notes = "供货设置-统计上架数")
     ServerResponse countStorefrontProduct(@RequestParam("userId") String userId,@RequestParam("cityId") String cityId);
 
     @PostMapping("/web/querySingleStorefrontProductById")

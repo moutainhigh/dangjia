@@ -21,6 +21,10 @@ import java.math.BigDecimal;
 @Api(value = "房产接口", description = "房产接口")
 public interface HouseAPI {
 
+
+    @PostMapping("app/house/house/selectHouseById")
+    @ApiOperation(value = "根据主键id查询房子", notes = "根据主键id查询房子")
+    House selectHouseById(@RequestParam("id") String id);
     /**
      * 切换房产
      */

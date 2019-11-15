@@ -27,8 +27,7 @@ public class WebWithdrawDepositController implements WebWithdrawDepositAPI {
     @Override
     @ApiMethod
     public ServerResponse getAllWithdraw(HttpServletRequest request, PageDTO pageDTO, String searchKey, Integer state, String beginDate, String endDate) {
-//        String cityId = request.getParameter(Constants.CITY_ID);
-        String cityId = "402881882ba8753a012ba93101120116";
+        String cityId = request.getParameter(Constants.CITY_ID);
         return webWithdrawDepositService.getAllWithdraw(pageDTO,  cityId,searchKey, state, beginDate, endDate);
     }
 

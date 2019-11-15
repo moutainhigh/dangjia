@@ -79,7 +79,7 @@ public interface HouseWorkerAPI {
      * @remark 更多返回错误代码请看首页的错误代码描述
      * @number 4
      * @Author: Ruking 18075121944
-     * @Date: 2019/6/24 12:03 PM
+     * @Date: 2019/11/14 12:03 PM
      */
     @PostMapping("app/core/houseWorker/getHouseWorker")
     @ApiOperation(value = "获取工匠详情", notes = "获取工匠详情")
@@ -116,8 +116,6 @@ public interface HouseWorkerAPI {
     /**
      * showdoc
      *
-     * @param pageNum   必选 int 页码
-     * @param pageSize  必选 int 记录数
      * @param userToken 必选/可选 string userToken
      * @return {"res": 1000,"msg": {"resultCode": 1000, "resultMsg": "ok", "resultObj": { "pageNum": 0,"pageSize": 10,"size": 1,"startRow": 1,"endRow": 1,"total": 1, "pages": 1,"list": [{返回参数说明}],"prePage": 0, "nextPage": 1,"isFirstPage": false,"isLastPage": false,"hasPreviousPage": false,"hasNextPage": true,"navigatePages": 8,"navigatepageNums": [1],"navigateFirstPage": 1,"navigateLastPage": 1}}}
      * @catalog 当家接口文档/房产任务模块
