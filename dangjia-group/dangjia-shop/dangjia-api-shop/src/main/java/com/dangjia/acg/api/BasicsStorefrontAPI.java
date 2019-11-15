@@ -94,30 +94,29 @@ public interface BasicsStorefrontAPI {
      */
     @PostMapping("/web/queryStorefrontReflect")
     @ApiOperation(value = "店铺-店铺体现", notes = "店铺-店铺体现")
-    ServerResponse operationStorefrontReflect(@RequestParam("request") HttpServletRequest request,
-                                         @RequestParam("pageDTO") PageDTO pageDTO,
-                                         @RequestParam("userId") String userId,
-                                         @RequestParam("cityId") String cityId);
-
-
-
+    ServerResponse operationStorefrontReflect(@RequestParam("userId") String userId,
+                                              @RequestParam("cityId") String cityId,
+                                              @RequestParam("bankCard") String bankCard,
+                                              @RequestParam("surplusMoney") Double surplusMoney,
+                                              @RequestParam("payPassword") String payPassword);
     /**
      * 充值
      */
     @PostMapping("/web/queryStorefrontRecharge")
     @ApiOperation(value = "店铺-店铺充值", notes = "店铺-店铺充值")
-    ServerResponse operationStorefrontRecharge(@RequestParam("request") HttpServletRequest request,
-                                          @RequestParam("pageDTO") PageDTO pageDTO,
-                                          @RequestParam("userId") String userId,
-                                          @RequestParam("cityId") String cityId);
+    ServerResponse operationStorefrontRecharge(
+            @RequestParam("userId") String userId,
+            @RequestParam("cityId") String cityId,
+            @RequestParam("payState") String payState,
+            @RequestParam("rechargeAmount") Double rechargeAmount,
+            @RequestParam("payPassword") String payPassword,
+            @RequestParam("businessOrderType") String businessOrderType,
+            @RequestParam("sourceType") Integer sourceType);
 
-    /**
-     * 缴纳滞留金
-     */
-    @PostMapping("/web/paymentRetentionMoney")
-    @ApiOperation(value = "店铺-缴纳滞留金", notes = "店铺-缴纳滞留金")
-    ServerResponse paymentRetentionMoney(@RequestParam("request") HttpServletRequest request,
-                                           @RequestParam("pageDTO") PageDTO pageDTO,
-                                           @RequestParam("userId") String userId,
-                                           @RequestParam("cityId") String cityId);
+
+    @PostMapping("/web/queryIncomeRecord")
+    @ApiOperation(value = "店铺-收入记录", notes = "店铺-收入记录")
+    ServerResponse queryIncomeRecord(@RequestParam("user_id") String userId,
+                                     @RequestParam("cityId") String cityId);
+
 }
