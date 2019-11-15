@@ -587,32 +587,33 @@ public class PaymentService {
         List<ShopGoodsDTO> queryShopGoods = queryShopGoods(order.getId());
         //如果存在多个订单则拆分子订单
         for (ShopGoodsDTO queryShopGood : queryShopGoods) {
-            Order orderNew = new Order();
             BigDecimal paymentPrice = new BigDecimal(0);//总共钱
             BigDecimal freightPrice = new BigDecimal(0);//总运费
             BigDecimal totalMoveDost = new BigDecimal(0);//搬运费
+
+            Order orderNew = orderMapper.getStorefontOrder(queryShopGood.getShopId(),order.getId());
             if(queryShopGoods.size()>1){
                 orderNew.setHouseId(order.getHouseId());
                 orderNew.setCityId(order.getCityId());
+                orderNew.setStorefontId(queryShopGood.getShopId());
                 orderNew.setMemberId(order.getMemberId());
                 orderNew.setBusinessOrderNumber(order.getBusinessOrderNumber());
                 orderNew.setType(order.getType());
                 orderNew.setOrderNumber(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
                 orderNew.setTotalDiscountPrice(new BigDecimal(0));
+                orderNew.setParentOrderId(order.getId());
                 orderNew.setTotalStevedorageCost(new BigDecimal(0));
                 orderNew.setTotalTransportationCost(new BigDecimal(0));
                 orderNew.setActualPaymentPrice(new BigDecimal(0));
-                orderNew.setOrderStatus(payState);
                 orderNew.setOrderGenerationTime(order.getOrderGenerationTime());
                 orderNew.setOrderSource(order.getOrderSource());//精算制作
                 orderNew.setWorkerId(order.getWorkerId());
                 orderNew.setAddressId(order.getAddressId());
                 orderNew.setCreateBy(order.getCreateBy());
-                orderNew.setParentOrderId(order.getId());
-                orderNew.setOrderPayTime(new Date());
                 orderMapper.insert(orderNew);
             }else {
-                orderNew = order;
+                orderNew.setStorefontId(queryShopGood.getShopId());
+                orderNew.setParentOrderId(order.getId());
             }
             if(order.getType()==0){
                 orderNew.setWorkerTypeName("自购订单");
@@ -636,27 +637,33 @@ public class PaymentService {
                     paymentPrice = paymentPrice.add(new BigDecimal(orderItem.getTotalPrice()));
                     freightPrice = freightPrice.add(new BigDecimal(orderItem.getTransportationCost()));
                     totalMoveDost = totalMoveDost.add(new BigDecimal(orderItem.getStevedorageCost()));
-                    orderItem.setOrderStatus(payState);
+                    if(!CommonUtil.isEmpty(payState)) {
+                        orderItem.setOrderStatus("2");
+                    }else{
+                        orderItem.setOrderStatus("1");
+                    }
                     orderItem.setOrderId(orderNew.getId());
                     orderItemMapper.updateByPrimaryKeySelective(orderItem);
 
-                    if(good.getProductType()<3) {
-                        if (houseFlowId != null) {
-                            Example example = new Example(BudgetMaterial.class);
-                            example.createCriteria()
-                                    .andEqualTo(BudgetMaterial.HOUSE_FLOW_ID, houseFlowId)
-                                    .andEqualTo(BudgetMaterial.PRODUCT_ID, good.getProductId())
-                                    .andEqualTo(BudgetMaterial.STETA, 1);
-                            List<BudgetMaterial> budgetMaterialList = iMasterBudgetMapper.selectByExample(example);
-                            for (BudgetMaterial budgetMaterial : budgetMaterialList) {
-                                budgetMaterial.setTotalPrice(budgetMaterial.getConvertCount() * budgetMaterial.getPrice());//已支付 记录总价
-                                budgetMaterial.setDeleteState(3);//已支付
-                                budgetMaterial.setModifyDate(new Date());
-                                iMasterBudgetMapper.updateByPrimaryKeySelective(budgetMaterial);
+                    if(!CommonUtil.isEmpty(payState)) {
+                        if (good.getProductType() < 3) {
+                            if (houseFlowId != null) {
+                                Example example = new Example(BudgetMaterial.class);
+                                example.createCriteria()
+                                        .andEqualTo(BudgetMaterial.HOUSE_FLOW_ID, houseFlowId)
+                                        .andEqualTo(BudgetMaterial.PRODUCT_ID, good.getProductId())
+                                        .andEqualTo(BudgetMaterial.STETA, 1);
+                                List<BudgetMaterial> budgetMaterialList = iMasterBudgetMapper.selectByExample(example);
+                                for (BudgetMaterial budgetMaterial : budgetMaterialList) {
+                                    budgetMaterial.setTotalPrice(budgetMaterial.getConvertCount() * budgetMaterial.getPrice());//已支付 记录总价
+                                    budgetMaterial.setDeleteState(3);//已支付
+                                    budgetMaterial.setModifyDate(new Date());
+                                    iMasterBudgetMapper.updateByPrimaryKeySelective(budgetMaterial);
+                                }
                             }
-                        }
-                        if (!CommonUtil.isEmpty(order.getHouseId())) {
-                            addWarehouse(orderItem, houseFlowId, order.getHouseId());
+                            if (!CommonUtil.isEmpty(order.getHouseId())) {
+                                addWarehouse(orderItem, houseFlowId, order.getHouseId());
+                            }
                         }
                     }
                 }
@@ -670,24 +677,38 @@ public class PaymentService {
                 payPrice = payPrice.add(orderNew.getTotalStevedorageCost());
                 payPrice = payPrice.add(orderNew.getTotalTransportationCost());
                 orderNew.setActualPaymentPrice(payPrice);
-                orderNew.setPayment(payState);// 支付方式
+                if(!CommonUtil.isEmpty(payState)) {
+                    orderNew.setOrderStatus("2");
+                    orderNew.setOrderPayTime(new Date());
+                    orderNew.setPayment(payState);// 支付方式
+                }else{
+                    orderNew.setOrderStatus("1");
+                }
                 orderMapper.updateByPrimaryKeySelective(orderNew);
+            }
+            if(!CommonUtil.isEmpty(payState)) {
+                /**
+                 * 订单钱存入店铺账号余额，记录对应的流水信息
+                 */
+                if (!CommonUtil.isEmpty(orderNew.getStorefontId())) {
+                    masterAccountFlowRecordService.updateStoreAccountMoney(orderNew.getStorefontId(), orderNew.getHouseId(), 0, orderNew.getId(), orderNew.getActualPaymentPrice().doubleValue(), orderNew.getWorkerTypeName(), "SYSTEM");
+                }
             }
         }
         BigDecimal payPrice = order.getTotalAmount().subtract(order.getTotalDiscountPrice());
         payPrice = payPrice.add(order.getTotalStevedorageCost());
         payPrice = payPrice.add(order.getTotalTransportationCost());
         order.setActualPaymentPrice(payPrice);
-        order.setOrderPayTime(new Date());
-        order.setPayment(payState);// 支付方式
+        if(!CommonUtil.isEmpty(payState)) {
+            order.setOrderStatus("2");
+            order.setOrderPayTime(new Date());
+            order.setPayment(payState);// 支付方式
+        }else{
+            order.setOrderStatus("1");
+        }
 
         orderMapper.updateByPrimaryKeySelective(order);
-        /**
-         * 订单钱存入店铺账号余额，记录对应的流水信息
-         */
-        if(!CommonUtil.isEmpty(order.getStorefontId())) {
-            masterAccountFlowRecordService.updateStoreAccountMoney(order.getStorefontId(),order.getHouseId(),0,order.getId(),order.getTotalAmount().doubleValue(),order.getWorkerTypeName(),"SYSTEM");
-        }
+
     }
 
     /**
@@ -1176,6 +1197,7 @@ public class PaymentService {
                 order.setTotalAmount(paymentPrice);// 订单总额(工钱)
                 orderMapper.updateByPrimaryKeySelective(order);
 
+                budgetCorrect(order,null,null);
                 example = new Example(ShoppingCart.class);
                 example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, member.getId())
                         .andIn(ShoppingCart.PRODUCT_ID,Arrays.asList(productIdlist));
@@ -1205,6 +1227,16 @@ public class PaymentService {
             Member member = (Member) object;
 
             HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(taskId);
+            Example exampleOrder = new Example(Order.class);
+            exampleOrder.createCriteria().andEqualTo(Order.HOUSE_ID, houseFlow.getHouseId())
+                    .andEqualTo(Order.WORKER_TYPE_ID, houseFlow.getWorkerTypeId())
+                    .andEqualTo(Order.ORDER_SOURCE,"1")
+                    .andEqualTo(Order.ORDER_STATUS, "1")
+                    .andEqualTo(Order.MEMBER_ID, member.getId());
+            List<Order> list=orderMapper.selectByExample(exampleOrder);
+            if(list.size()>0){
+                return ServerResponse.createBySuccess("提交成功", list.get(0).getId());
+            }
             //处理人工
             House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
             if(house!=null){
@@ -1323,6 +1355,7 @@ public class PaymentService {
                 order.setTotalAmount(paymentPrice);// 订单总额(工钱)
                 orderMapper.updateByPrimaryKeySelective(order);
 
+                budgetCorrect(order,null,null);
                 //该工钟所有保险
                 example = new Example(WorkerTypeSafe.class);
                 example.createCriteria().andEqualTo(WorkerTypeSafe.WORKER_TYPE_ID, wt.getId());
