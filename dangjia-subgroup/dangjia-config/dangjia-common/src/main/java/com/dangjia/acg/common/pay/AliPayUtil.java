@@ -1,5 +1,6 @@
 package com.dangjia.acg.common.pay;
 
+import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
 import com.alipay.api.domain.AlipayTradeAppPayModel;
@@ -37,6 +38,8 @@ public class AliPayUtil {
             request.setNotifyUrl(basePath + notify_url);
             model.setBody("蜂匠科技");
             model.setSubject("当家装修app");
+
+            System.out.println("=================="+ JSONObject.toJSONString(request));
             AlipayTradeAppPayResponse response = (AlipayTradeAppPayResponse) alipayClient.sdkExecute(request);
             Map<String,String> map = new HashMap<String, String>();
             map.put("sign",response.getBody());
