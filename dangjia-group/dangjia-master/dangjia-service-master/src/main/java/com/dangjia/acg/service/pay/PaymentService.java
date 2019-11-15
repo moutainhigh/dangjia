@@ -1072,6 +1072,8 @@ public class PaymentService {
             String[] productIdlist=null;
             if(!CommonUtil.isEmpty(productIds)){
                 productIdlist=productIds.split(",");
+            }else{
+                return ServerResponse.createByErrorMessage("提交失败：未选择提交的商品");
             }
             List<ShoppingCartDTO> shoppingCartDTOS=new ArrayList<>();
             BigDecimal paymentPrice = new BigDecimal(0);//总共钱
@@ -1169,14 +1171,11 @@ public class PaymentService {
 
                 // 生成支付业务单
                 Example example = new Example(BusinessOrder.class);
-                example.createCriteria().andEqualTo(BusinessOrder.TASK_ID, order.getId()).andNotEqualTo(BusinessOrder.STATE, 4);
+                example.createCriteria().andEqualTo(BusinessOrder.TASK_ID, order.getId()).andNotEqualTo(BusinessOrder.STATE, 4).andNotEqualTo(BusinessOrder.STATE, 3);
                 List<BusinessOrder> businessOrderList = businessOrderMapper.selectByExample(example);
                 BusinessOrder businessOrder = null;
                 if (businessOrderList.size() > 0) {
                     businessOrder = businessOrderList.get(0);
-                    if (businessOrder.getState() == 3) {
-                        return ServerResponse.createByErrorMessage("该订单已支付，请勿重复支付！");
-                    }
                 }
                 if (businessOrderList.size() == 0) {
                     businessOrder = new BusinessOrder();
@@ -1327,14 +1326,11 @@ public class PaymentService {
 
                 // 生成支付业务单
                 Example example = new Example(BusinessOrder.class);
-                example.createCriteria().andEqualTo(BusinessOrder.TASK_ID, order.getId()).andNotEqualTo(BusinessOrder.STATE, 4);
+                example.createCriteria().andEqualTo(BusinessOrder.TASK_ID, order.getId()).andNotEqualTo(BusinessOrder.STATE, 4).andNotEqualTo(BusinessOrder.STATE, 3);
                 List<BusinessOrder> businessOrderList = businessOrderMapper.selectByExample(example);
                 BusinessOrder businessOrder = null;
                 if (businessOrderList.size() > 0) {
                     businessOrder = businessOrderList.get(0);
-                    if (businessOrder.getState() == 3) {
-                        return ServerResponse.createByErrorMessage("该订单已支付，请勿重复支付！");
-                    }
                 }
                 if (businessOrderList.size() == 0) {
                     businessOrder = new BusinessOrder();
