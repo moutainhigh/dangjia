@@ -86,20 +86,23 @@ public class StorefrontController implements BasicsStorefrontAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse operationStorefrontReflect(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId) {
-        return storefrontService.operationStorefrontReflect(request,pageDTO,userId,cityId);
+    public ServerResponse operationStorefrontReflect(String userId, String cityId, String bankCard, Double surplusMoney, String payPassword) {
+        return storefrontService.operationStorefrontReflect( userId,  cityId,  bankCard,  surplusMoney,  payPassword) ;
     }
 
     @Override
     @ApiMethod
-    public ServerResponse operationStorefrontRecharge(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId) {
-        return storefrontService.operationStorefrontRecharge(request,pageDTO,userId,cityId);
+    public ServerResponse operationStorefrontRecharge(String userId, String cityId, String payState, Double rechargeAmount, String payPassword, String businessOrderType, Integer sourceType) {
+        return storefrontService. operationStorefrontRecharge( userId,  cityId,  payState,  rechargeAmount,  payPassword,  businessOrderType,  sourceType) ;
     }
+
+
+
 
     @Override
     @ApiMethod
-    public ServerResponse paymentRetentionMoney(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId) {
-        return storefrontService.paymentRetentionMoney(request,pageDTO,userId,cityId);
+    public ServerResponse queryIncomeRecord(String userId, String cityId) {
+        return storefrontService.queryIncomeRecord(userId,cityId);
     }
 
 
