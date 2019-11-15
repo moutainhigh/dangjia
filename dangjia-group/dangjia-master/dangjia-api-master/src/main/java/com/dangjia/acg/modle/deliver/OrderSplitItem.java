@@ -12,7 +12,10 @@ import org.apache.commons.lang.StringUtils;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 @Data
 @Entity
@@ -153,5 +156,7 @@ public class OrderSplitItem extends BaseEntity {
 	@ApiModelProperty("供应商id")
 	private String supplierId;
 
-
+	List<Map<String,Object>> supplierIdlist;
+	@Transient
+	private Integer isNonPlatformSupperlier;
 }

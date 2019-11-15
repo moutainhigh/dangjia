@@ -100,6 +100,6 @@ public interface IBillDjDeliverOrderMapper extends Mapper<Order> {
      */
     List<DecorationCostDTO> searchDecorationCategoryLabelList(@Param("houseId") String  houseId);
 
-    List<DjDeliverOrderDTO> selectDeliverOrderByHouse(String cityId, String houseId, String orderStatus);
+    List<DjDeliverOrderDTO> selectDeliverOrderByHouse(@Param("cityId") String cityId, @Param("houseId") String houseId, @Param("orderStatus") String orderStatus);
 
 }

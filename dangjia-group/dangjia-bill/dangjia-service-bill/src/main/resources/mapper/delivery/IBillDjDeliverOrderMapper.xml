@@ -417,4 +417,9 @@
             and  ddo.order_status = #{orderStatus}
         </if>
     </select>
+
+    <!--<select id="selectOrderDetailById" resultType="">-->
+        <!---->
+        <!---->
+    <!--</select>-->
 </mapper>

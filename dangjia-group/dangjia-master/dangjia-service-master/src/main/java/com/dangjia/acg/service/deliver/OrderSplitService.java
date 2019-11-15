@@ -514,7 +514,7 @@ public class OrderSplitService {
                         map.put(DjSupplier.IS_NON_PLATFORM_SUPPERLIER, djSupplier.getIsNonPlatformSupperlier());
                     }
 
-                    List<String> supplierIdlist = splitDeliverMapper.getSupplierGoodsId(v.getHouseId(), v.getProductId());
+                    List<Map<String,Object>> supplierIdlist = splitDeliverMapper.getSupplierGoodsId(v.getHouseId(), v.getProductId());
                     if(supplierIdlist==null)
                         map.put("supplierIdlist",null);
                     map.put("supplierIdlist",supplierIdlist);

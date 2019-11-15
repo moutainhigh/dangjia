@@ -46,7 +46,7 @@ public interface OrderAPI {
                                            @RequestParam("addressId") String addressId);
 
     @PostMapping("app/deliver/order/getOrderItemList")
-    @ApiOperation(value = "已添加要货单明细", notes = "已添加要货单明细")
+    @ApiOperation(value = "已添加", notes = "已添加要货单明细")
     ServerResponse getOrderItemList(@RequestParam("userToken") String userToken,
                                     @RequestParam("houseId") String houseId);
 

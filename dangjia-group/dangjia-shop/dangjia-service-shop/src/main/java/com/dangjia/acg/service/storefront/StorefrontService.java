@@ -27,7 +27,10 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class StorefrontService {
@@ -46,9 +49,9 @@ public class StorefrontService {
     @Autowired
     private ConfigUtil configUtil;
 
-    @Autowired
-    private RedisClient redisClient;
 
+    @Autowired
+    private StorefrontService storefrontService;
 //    @Autowired
 //    private DjRegisterApplicationAPI djRegisterApplicationAPI;
     /**
@@ -343,15 +346,16 @@ public class StorefrontService {
      */
     public ServerResponse queryStorefrontWallet(HttpServletRequest request, PageDTO pageDTO, String searchKey, String userId, String cityId) {
         try {
-            Example exampleStorefront=new Example(Storefront.class);
-            exampleStorefront.createCriteria().andEqualTo(Storefront.USER_ID,userId).andEqualTo(Storefront.CITY_ID, cityId);
-            List<Storefront> list =istorefrontMapper.selectByExample(exampleStorefront);
-            if(list==null)
-            {
-                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            Storefront storefront = storefrontService.queryStorefrontByUserID(userId, cityId);
+            if (storefront == null) {
+                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
-            //可体现余额(七天之内支付到款的订单)需要重新计算
-            return ServerResponse.createBySuccess(list);
+            Double withdrawalAmount = istorefrontMapper.myWallet(storefront.getId(),new Date());
+            Map<String, Double> map = new HashMap<>();
+            map.put("totalAccount", storefront.getTotalAccount());
+            map.put("withdrawalAmount", withdrawalAmount);
+            map.put("totalAccountAmount", storefront.getRetentionMoney());
+            return ServerResponse.createBySuccess("查询成功", map);
         } catch (Exception e) {
             logger.error("店铺-我的钱包异常：", e);
             return ServerResponse.createByErrorMessage("店铺-我的钱包异常");

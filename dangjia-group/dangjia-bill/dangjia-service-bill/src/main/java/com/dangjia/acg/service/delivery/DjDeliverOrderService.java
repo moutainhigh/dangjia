@@ -796,7 +796,7 @@ public class DjDeliverOrderService {
         return ServerResponse.createBySuccess("查询成功", collectDataDTO);
     }
 
-    public ServerResponse queryDeliverOrderListByStatus(PageDTO pageDTO, String userToken, String houseId, String queryId, String orderStatus) {
+    public ServerResponse queryDeliverOrderListByStatus(PageDTO pageDTO, String userToken, String houseId, String cityId, String orderStatus) {
         try {
             Object object = memberAPI.getMember(userToken);
             if (object instanceof ServerResponse) {
@@ -804,13 +804,15 @@ public class DjDeliverOrderService {
             }
             JSONObject job = (JSONObject)object;
             Member member = job.toJavaObject(Member.class);
+
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());//初始化分页插获取用户信息件
-            List<DjDeliverOrderDTO> list = iBillDjDeliverOrderMapper.selectDeliverOrderByHouse(member.getCityId(), houseId, orderStatus);
+            List<DjDeliverOrderDTO> list = iBillDjDeliverOrderMapper.selectDeliverOrderByHouse(cityId, houseId, orderStatus);
             for (DjDeliverOrderDTO jDeliverOrderDTO : list) {
                 String orderId = jDeliverOrderDTO.getId();
                 List<DjDeliverOrderItemDTO > djDeliverOrderItemDTOList = iBillDjDeliverOrderItemMapper.orderItemList(houseId, orderId);
                 if (djDeliverOrderItemDTOList == null) {
-
+                    jDeliverOrderDTO.setOrderItemlist(null);
+                    jDeliverOrderDTO.setTotalSize(0);
                 }
                 jDeliverOrderDTO.setOrderItemlist(djDeliverOrderItemDTOList);
                 jDeliverOrderDTO.setTotalSize(djDeliverOrderItemDTOList.size());
@@ -842,6 +844,12 @@ public class DjDeliverOrderService {
                 return ServerResponse.createByErrorMessage("该房产不存在");
             }
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class); //图片地址
+
+
+//            List<Order> orderList=iBillDjDeliverOrderMapper.selectOrderDetailById(orderId);
+//            for (Order order: orderList ) {
+//
+//            }
 
             return ServerResponse.createBySuccess("查询成功", null);
 
