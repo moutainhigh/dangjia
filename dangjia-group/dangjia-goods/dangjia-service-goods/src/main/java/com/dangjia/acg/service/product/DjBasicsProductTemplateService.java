@@ -369,30 +369,24 @@ public class DjBasicsProductTemplateService {
             int valueIdArrCount = 0;
             String valueIdArr = basicsProductDTO.getValueIdArr();
             String productSn = basicsProductDTO.getProductSn();
-            String id=basicsProductDTO.getId();
-            String name=basicsProductDTO.getName();
+            //String id=basicsProductDTO.getId();
+           // String name=basicsProductDTO.getName();
             //属性值判断
             if (StringUtils.isNoneBlank(valueIdArr)) {
 
                 List<DjBasicsProductTemplate> pValueList = iBasicsProductTemplateMapper.getPListByValueIdArr(valueIdArr);
                 if (pValueList.size() > 0) {
-                    String ret = checkProduct(name, productSn, id, jsonArr);
-                    if (!ret.equals("ok")) {
                         return "属性值已存在,请检查编号:" + productSn;
-                    }
                 }
 
                 //统计添加时是否存在同属性的
                 for (int j = 0; j < jsonArr.size(); j++) {
                     JSONObject objJ = jsonArr.getJSONObject(j);
-                    if (valueIdArr.equals(objJ.getString("valueIdArr"))) {
+                    BasicsProductDTO bp = JSONObject.toJavaObject(objJ, BasicsProductDTO.class);
+                    if (valueIdArr.equals(bp.getValueIdArr())) {
                         valueIdArrCount++;
                         if (valueIdArrCount > 1) {
-                            String ret = checkProduct(name, productSn, id, jsonArr);
-                            if (!ret.equals("ok")) {
-                                return "属性值不能重复,请检查编号:" + productSn;
-//                                        return ServerResponse.createByErrorMessage("无品牌无系列属性值不能重复,商品编号“" + objJ.getString("productSn") + "”");
-                            }
+                           return "属性值不能重复,请检查编号:" + productSn;
                         }
                     }
                 }
@@ -686,6 +680,7 @@ public class DjBasicsProductTemplateService {
                         if (type!=null&& !type.equals(p.getType()) && -1 != type) //不等于 type 的不返回给前端
                             continue;
                         Map<String, Object> map = BeanUtils.beanToMap(p);
+                        map.put("goodsType",goods.getType());
                         mapList.add(map);
                     }
                     gMap.put("productList", mapList);

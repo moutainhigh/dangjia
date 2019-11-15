@@ -364,6 +364,7 @@ public class DjBasicsGoodsService {
                             map.put("labelName", label.getName());
                     }
                     map.put("id",p.getId());
+                    map.put("goodsType",goods.getType());
                     mapList.add(map);
                 }
                 gMap.put("productList", mapList);
