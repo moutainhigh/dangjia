@@ -686,6 +686,7 @@ public class DjBasicsProductTemplateService {
                         if (type!=null&& !type.equals(p.getType()) && -1 != type) //不等于 type 的不返回给前端
                             continue;
                         Map<String, Object> map = BeanUtils.beanToMap(p);
+                        map.put("goodsType",goods.getType());
                         mapList.add(map);
                     }
                     gMap.put("productList", mapList);
