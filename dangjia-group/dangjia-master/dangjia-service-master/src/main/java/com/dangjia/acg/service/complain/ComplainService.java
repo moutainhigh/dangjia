@@ -982,7 +982,7 @@ public class ComplainService {
         workerDetail.setWorkerName(member1.getName());
         workerDetail.setHouseId(houseId);
         workerDetail.setMoney(subtract1);
-        workerDetail.setState(0);
+        workerDetail.setState(9);
         workerDetail.setHaveMoney(houseWorkerOrderList.get(0).getHaveMoney());
         workerDetail.setHouseWorkerOrderId(houseWorkerOrderList.get(0).getId());
         workerDetail.setApplyMoney(subtract1);
