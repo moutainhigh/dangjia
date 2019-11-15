@@ -119,7 +119,7 @@
     </select>
 
     <select id="getSupplierGoodsId" resultType="java.lang.String">
-        SELECT
+       <!-- SELECT
             d.supplier_id
         FROM
             `dj_deliver_order_split_item` si
@@ -128,9 +128,20 @@
             si.house_id = #{houseId}
         AND si.product_sn =  #{productSn}
         GROUP BY d.supplier_id
-        ORDER BY si.create_date DESC
+        ORDER BY si.create_date DESC-->
+
+        SELECT
+        d.sup_id as supplier_id
+        FROM
+        `dj_deliver_order_split_item` si
+        INNER JOIN dj_sup_application_product d ON si.product_id = d.product_id
+        WHERE si.house_id = #{houseId}
+        AND si.product_id =  #{productSn}
+        ORDER BY d.price asc
+
     </select>
-    
+
+
     <!--根据供应商id查询要货列表-->
     <select id="getOrderSplitList" resultType="com.dangjia.acg.dto.finance.WebSplitDeliverItemDTO">
         SELECT

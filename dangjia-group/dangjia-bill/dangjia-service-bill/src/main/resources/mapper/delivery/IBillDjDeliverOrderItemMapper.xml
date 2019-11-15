@@ -38,4 +38,40 @@
     </update>
 
 
+
+
+    <select id="orderItemList" parameterType="java.lang.String" resultType="com.dangjia.acg.dto.delivery.DjDeliverOrderItemDTO">
+        SELECT
+        id,
+        order_id as orderId,
+        house_id as houseId,
+        product_id as productId,
+        product_sn as productSn,
+        product_name as productName,
+        product_nick_name as productNickName,
+        price,
+        cost,
+        shop_count as shopCount,
+        ask_count as askCount,
+        unit_name as unitName,
+        total_price as totalPrice,
+        product_type as productType,
+        category_id as categoryId,
+        worker_goods_name as workerGoodsName,
+        worker_goods_sn as workerGoodsSn,
+        worker_goods_id as workerGoodsId,
+        image,
+        data_status as dataStatus,
+        create_date as createDate,
+        modify_date as modifyDate
+        FROM dj_deliver_order_item
+        where
+        house_id = #{houseId}
+        <if test = "orderId!=null and orderId!=''">
+            and
+            order_id = #{orderId}
+        </if>
+        ORDER BY create_date desc
+    </select>
+
 </mapper>

@@ -52,5 +52,5 @@ public interface IOrderMapper extends Mapper<Order> {
      */
     void updateOrderDetailStatusByHouseId(@Param("houseId") String houseId);
 
-    List<Order> selectDeliverOrderByHouse(@Param("cityId") String cityId,@Param("houseId") String houseId,@Param("orderStatus") String orderStatus);
+
 }

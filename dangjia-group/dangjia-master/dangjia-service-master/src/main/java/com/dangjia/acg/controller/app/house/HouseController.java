@@ -26,6 +26,11 @@ public class HouseController implements HouseAPI {
     @Autowired
     private HouseService houseService;
 
+    @Override
+    @ApiMethod
+    public House selectHouseById(String  id) {
+        return houseService.selectHouseById(id);
+    }
 
     /**
      * 切换房产

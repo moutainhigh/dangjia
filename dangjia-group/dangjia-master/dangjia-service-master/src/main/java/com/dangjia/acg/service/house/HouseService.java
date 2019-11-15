@@ -200,6 +200,10 @@ public class HouseService {
     @Autowired
     private ForMasterAPI forMasterAPI;
 
+    public House selectHouseById(String  id) {
+        return iHouseMapper.selectByPrimaryKey(id);
+    }
+
     /**
      * 切换房产
      */

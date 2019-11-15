@@ -495,6 +495,7 @@ public class OrderSplitService {
                     SplitDeliver deliver = splitDeliverMapper.selectByPrimaryKey(v.getSplitDeliverId());
                     if(deliver!=null)
                     {
+
                         if (deliver.getShippingState() == 6) {
                             isAdd=true;
                         }
@@ -506,15 +507,18 @@ public class OrderSplitService {
                 if(isAdd) {
                     v.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
                     Map map = BeanUtils.beanToMap(v);
-                    List<String> supplierId = splitDeliverMapper.getSupplierGoodsId(v.getHouseId(), v.getProductSn());
-                    if (supplierId.size() > 0) {
-                        map.put(SplitDeliver.SUPPLIER_ID, supplierId.get(0));
-                        DjSupplier djSupplier=   djSupplierAPI.queryDjSupplierById(supplierId.get(0));
-                        if(djSupplier!=null)
-                        {
-                            map.put(DjSupplier.IS_NON_PLATFORM_SUPPERLIER, djSupplier.getIsNonPlatformSupperlier());
-                        }
+
+                    DjSupplier djSupplier=   djSupplierAPI.queryDjSupplierById(v.getSupplierId());
+                    if(djSupplier!=null)
+                    {
+                        map.put(DjSupplier.IS_NON_PLATFORM_SUPPERLIER, djSupplier.getIsNonPlatformSupperlier());
                     }
+
+                    List<String> supplierIdlist = splitDeliverMapper.getSupplierGoodsId(v.getHouseId(), v.getProductId());
+                    if(supplierIdlist==null)
+                        map.put("supplierIdlist",null);
+                    map.put("supplierIdlist",supplierIdlist);
+
                     mapList.add(map);
                 }
             }

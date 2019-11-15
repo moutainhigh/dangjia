@@ -62,6 +62,8 @@ public interface WebOrderSplitAPI {
     @ApiOperation(value = "要货单看明细", notes = "要货单看明细")
     ServerResponse orderSplitItemList(@RequestParam("orderSplitId") String orderSplitId);
 
+
+
     @PostMapping("web/deliver/orderSplit/getHouseList")
     @ApiOperation(value = "材料员看房子列表", notes = "材料员看房子列表")
     ServerResponse getHouseList(@RequestParam("request") HttpServletRequest request,

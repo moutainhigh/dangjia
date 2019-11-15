@@ -45,4 +45,18 @@ public interface DjDeliverOrderAPI {
     ServerResponse getCollectInfo(@RequestParam("request") HttpServletRequest request,
                                   @RequestParam("houseId") String houseId);
 
+
+    @PostMapping("app/order/queryDeliverOrderListByStatus")
+    @ApiOperation(value = "根据订单状态查询订单详情列表", notes = "根据订单状态查询订单详情")
+    ServerResponse queryDeliverOrderListByStatus(@RequestParam("pageDTO") PageDTO pageDTO,
+                                                 @RequestParam("userToken") String userToken,
+                                                 @RequestParam("houseId") String houseId,
+                                                 @RequestParam("cityId") String queryId,
+                                                 @RequestParam("orderStatus") String orderStatus);
+
+    @PostMapping("app/deliverOrderItem/deliverOrderItemDetail")
+    @ApiOperation(value = "新版订单详情明细", notes = "新版订单详情明细")
+    ServerResponse deliverOrderItemDetail(@RequestParam("orderId") String orderId,@RequestParam("orderStatus")  String  orderStatus,@RequestParam("userToken")  String  userToken  );
+
+
 }

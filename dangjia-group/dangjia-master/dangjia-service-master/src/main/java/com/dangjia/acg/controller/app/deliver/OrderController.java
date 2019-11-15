@@ -44,17 +44,7 @@ public class OrderController implements OrderAPI {
         return orderService.businessOrderList(pageDTO, userToken, houseId, queryId);
     }
 
-    @Override
-    @ApiMethod
-    public ServerResponse queryDeliverOrderItemDetail(String orderId,String orderStatus) {
-        return orderService.queryDeliverOrderItemDetail(orderId, orderStatus);
-    }
 
-    @Override
-    @ApiMethod
-    public ServerResponse queryDeliverOrderListByStatus(PageDTO pageDTO, String userToken, String houseId, String cityId, String orderStatus) {
-        return orderService.queryDeliverOrderListByStatus(pageDTO, userToken, houseId, cityId, orderStatus);
-    }
 
     /**
      * 删除订单

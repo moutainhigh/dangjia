@@ -148,5 +148,10 @@ public class OrderSplitItem extends BaseEntity {
 	@ApiModelProperty("0:无 1：部分收获申诉")
 	private Integer shippingState;
 
+	@Column(name = "supplier_id")
+	@Desc(value = "供应商id")
+	@ApiModelProperty("供应商id")
+	private String supplierId;
+
 
 }

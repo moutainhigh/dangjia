@@ -2,11 +2,13 @@ package com.dangjia.acg.service.delivery;
 
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.UserAPI;
+import com.dangjia.acg.api.app.house.HouseAPI;
 import com.dangjia.acg.api.app.member.MemberAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
@@ -32,7 +34,6 @@ import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.design.QuantityRoom;
 import com.dangjia.acg.modle.design.QuantityRoomImages;
-import com.dangjia.acg.modle.group.GroupUserConfig;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.menu.MenuConfiguration;
@@ -43,20 +44,13 @@ import com.dangjia.acg.util.HouseUtil;
 import com.dangjia.acg.util.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.dangjia.acg.common.model.PageDTO;
-import com.dangjia.acg.common.response.ServerResponse;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import cn.jiguang.common.utils.StringUtils;
-import com.dangjia.acg.modle.delivery.DjDeliverOrder;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
-
 import java.util.*;
-
-
 import java.util.List;
 
 @Service
@@ -98,6 +92,8 @@ public class DjDeliverOrderService {
     @Autowired
     private IBillMenuConfigurationMapper iBillMenuConfigurationMapper;
 
+    @Autowired
+    private HouseAPI houseAPI;
 
     public Object getHouse(String memberId, HouseResult houseResult) {
         //该城市该用户所有开工房产
@@ -800,4 +796,59 @@ public class DjDeliverOrderService {
         return ServerResponse.createBySuccess("查询成功", collectDataDTO);
     }
 
+    public ServerResponse queryDeliverOrderListByStatus(PageDTO pageDTO, String userToken, String houseId, String queryId, String orderStatus) {
+        try {
+            Object object = memberAPI.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            JSONObject job = (JSONObject)object;
+            Member member = job.toJavaObject(Member.class);
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());//初始化分页插获取用户信息件
+            List<DjDeliverOrderDTO> list = iBillDjDeliverOrderMapper.selectDeliverOrderByHouse(member.getCityId(), houseId, orderStatus);
+            for (DjDeliverOrderDTO jDeliverOrderDTO : list) {
+                String orderId = jDeliverOrderDTO.getId();
+                List<DjDeliverOrderItemDTO > djDeliverOrderItemDTOList = iBillDjDeliverOrderItemMapper.orderItemList(houseId, orderId);
+                if (djDeliverOrderItemDTOList == null) {
+
+                }
+                jDeliverOrderDTO.setOrderItemlist(djDeliverOrderItemDTOList);
+                jDeliverOrderDTO.setTotalSize(djDeliverOrderItemDTOList.size());
+            }
+            PageInfo pageResult = new PageInfo(list);
+            return ServerResponse.createBySuccess("查询所有订单", pageResult);
+        } catch (Exception e) {
+            logger.error("查询所有订单异常", e);
+            return ServerResponse.createByErrorMessage("查询所有订单异常" + e);
+        }
+    }
+
+
+    /**
+     *@param orderId
+     * @param orderStatus
+     * @param userToken
+     * @return
+     */
+    public ServerResponse deliverOrderItemDetail(String orderId,String  orderStatus,String  userToken ) {
+        try {
+
+            Order order= iBillDjDeliverOrderMapper.selectByPrimaryKey(orderId);
+            if (order == null) {
+                return ServerResponse.createByErrorMessage("该订单不存在");
+            }
+            House house= houseAPI.selectHouseById(order.getHouseId());
+            if (house == null) {
+                return ServerResponse.createByErrorMessage("该房产不存在");
+            }
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class); //图片地址
+
+            return ServerResponse.createBySuccess("查询成功", null);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询订单明细异常");
+        }
+
+    }
 }

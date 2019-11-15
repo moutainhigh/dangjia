@@ -2,6 +2,7 @@ package com.dangjia.acg.mapper.delivery;
 
 
 import com.dangjia.acg.dto.delivery.AppointmentDTO;
+import com.dangjia.acg.dto.delivery.DjDeliverOrderDTO;
 import com.dangjia.acg.dto.delivery.HouseFlowDataDTO;
 import com.dangjia.acg.dto.delivery.OrderStorefrontDTO;
 import com.dangjia.acg.dto.member.WorkerTypeDTO;
@@ -98,4 +99,7 @@ public interface IBillDjDeliverOrderMapper extends Mapper<Order> {
      * @return
      */
     List<DecorationCostDTO> searchDecorationCategoryLabelList(@Param("houseId") String  houseId);
+
+    List<DjDeliverOrderDTO> selectDeliverOrderByHouse(String cityId, String houseId, String orderStatus);
+
 }
