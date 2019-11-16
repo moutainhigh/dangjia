@@ -17,6 +17,8 @@ import java.util.List;
 @Data
 public class DOrderArrFineInfoDTO {
 
+    @ApiModelProperty("业务订单id")
+    private String pboId;
     @ApiModelProperty("房子名称")
     private String houseName;
     @ApiModelProperty("实付总价")
@@ -25,6 +27,13 @@ public class DOrderArrFineInfoDTO {
     private String orderNumber;
     @ApiModelProperty("订单支付时间")
     private Date orderPayTime;
+
+    @ApiModelProperty("支付状态，0- 未支付 1-已支付")
+    private Integer state;
+
+    @ApiModelProperty("回执图片")
+    private List<String> imageList;
+
 
     @ApiModelProperty("订单详情")
     PageInfo list;

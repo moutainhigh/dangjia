@@ -9,6 +9,8 @@ package com.dangjia.acg.dto.order;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.util.Date;
+
 
 @Data
 public class DOrderFineInfoDTO {
@@ -31,4 +33,6 @@ public class DOrderFineInfoDTO {
     private Double remnantCount;
     @ApiModelProperty("小计")
     private Double remember;
+
+
 }
