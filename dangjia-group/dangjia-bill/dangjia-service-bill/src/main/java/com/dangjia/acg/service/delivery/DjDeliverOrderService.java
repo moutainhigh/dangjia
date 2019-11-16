@@ -862,6 +862,9 @@ public class DjDeliverOrderService {
                     appOrderItemDetailDTO.setBrandName(brandName);
                 }
                 appOrderDetailDTO.setList(list);
+                String houseName = house.getResidential() + house.getBuilding() + "栋" + house.getUnit() + "单元" + house.getNumber() + "号";
+                appOrderDetailDTO.setShipAddress(houseName);
+
             }
             return ServerResponse.createBySuccess("查询成功", orderList);
 

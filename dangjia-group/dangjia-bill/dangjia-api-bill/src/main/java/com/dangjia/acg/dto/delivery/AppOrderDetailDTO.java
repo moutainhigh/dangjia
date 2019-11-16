@@ -14,5 +14,6 @@ public class AppOrderDetailDTO {
     private String totalTransportationCost;//运费
     private String totalStevedorageCost;//搬运费
     private String totalDiscountPrice;//优惠价
+    private String shipAddress;//房子地址
     List<AppOrderItemDetailDTO> list;
 }
