@@ -860,10 +860,12 @@ public class DjDeliverOrderService {
                   //  String brandName=iBrandSeriesMapper.brandName(productId);
                     String brandName=forMasterAPI.brandName("",productId);  //通过商品id去关联，然后组合商品名称
                     appOrderItemDetailDTO.setBrandName(brandName);
+                    appOrderItemDetailDTO.setImageDetail(address+appOrderItemDetailDTO.getImage());
                 }
                 appOrderDetailDTO.setList(list);
                 String houseName = house.getResidential() + house.getBuilding() + "栋" + house.getUnit() + "单元" + house.getNumber() + "号";
                 appOrderDetailDTO.setShipAddress(houseName);
+
 
             }
             return ServerResponse.createBySuccess("查询成功", orderList);

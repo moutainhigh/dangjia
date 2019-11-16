@@ -11,4 +11,6 @@ public class AppOrderItemDetailDTO {
     private String brandName;//规格
     private String price ;//单位
     private String mobile;//电话
+    private String image;
+    private String imageDetail;
 }
