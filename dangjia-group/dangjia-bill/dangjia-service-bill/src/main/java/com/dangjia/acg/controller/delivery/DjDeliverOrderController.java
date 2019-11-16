@@ -6,6 +6,7 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.delivery.DjDeliverOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -56,6 +57,22 @@ public class DjDeliverOrderController implements DjDeliverOrderAPI {
         return djDeliverOrderService.getCollectInfo(houseId);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse queryOrderInfo(HttpServletRequest request,
+                                         PageDTO pageDTO,
+                                         String userId,String cityId,
+                                         String orderKey,int state) {
+        return djDeliverOrderService.queryOrderInfo(pageDTO,userId,cityId,orderKey,state);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryOrderFineInfo(HttpServletRequest request,
+                                            PageDTO pageDTO,
+                                             String orderId) {
+        return djDeliverOrderService.queryOrderFineInfo(pageDTO,orderId);
+    }
     @Override
     @ApiMethod
     public ServerResponse queryDeliverOrderListByStatus(PageDTO pageDTO, String userToken, String houseId, String cityId, String orderStatus) {

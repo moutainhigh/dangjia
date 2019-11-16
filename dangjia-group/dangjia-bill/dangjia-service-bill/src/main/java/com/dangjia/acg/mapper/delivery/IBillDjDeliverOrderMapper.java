@@ -6,6 +6,8 @@ import com.dangjia.acg.dto.delivery.DjDeliverOrderDTO;
 import com.dangjia.acg.dto.delivery.HouseFlowDataDTO;
 import com.dangjia.acg.dto.delivery.OrderStorefrontDTO;
 import com.dangjia.acg.dto.member.WorkerTypeDTO;
+import com.dangjia.acg.dto.order.DOrderFineInfoDTO;
+import com.dangjia.acg.dto.order.DOrderInfoDTO;
 import com.dangjia.acg.dto.order.DecorationCostDTO;
 import com.dangjia.acg.dto.order.DecorationCostItemDTO;
 import com.dangjia.acg.modle.deliver.Order;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -99,6 +102,13 @@ public interface IBillDjDeliverOrderMapper extends Mapper<Order> {
      * @return
      */
     List<DecorationCostDTO> searchDecorationCategoryLabelList(@Param("houseId") String  houseId);
+
+
+    List<DOrderInfoDTO> queryOrderInfo(Map<String,Object> map);
+
+
+    List<DOrderFineInfoDTO> queryOrderFineInfo(@Param("orderId") String  orderId);
+
 
     List<DjDeliverOrderDTO> selectDeliverOrderByHouse(@Param("cityId") String cityId, @Param("houseId") String houseId, @Param("orderStatus") String orderStatus);
 

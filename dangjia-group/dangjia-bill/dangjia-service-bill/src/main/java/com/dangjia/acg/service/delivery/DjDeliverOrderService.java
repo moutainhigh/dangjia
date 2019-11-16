@@ -7,6 +7,7 @@ import com.dangjia.acg.api.app.member.MemberAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.ServerCode;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
@@ -19,6 +20,10 @@ import com.dangjia.acg.dto.design.CollectDataDTO;
 import com.dangjia.acg.dto.design.QuantityRoomDTO;
 import com.dangjia.acg.dto.design.WorkChartListDTO;
 import com.dangjia.acg.dto.member.WorkerTypeDTO;
+import com.dangjia.acg.dto.order.DOrderArrFineInfoDTO;
+import com.dangjia.acg.dto.order.DOrderArrInfoDTO;
+import com.dangjia.acg.dto.order.DOrderFineInfoDTO;
+import com.dangjia.acg.dto.order.DOrderInfoDTO;
 import com.dangjia.acg.mapper.delivery.*;
 import com.dangjia.acg.mapper.order.IBillHouseMapper;
 import com.dangjia.acg.mapper.order.IBillQuantityRoomImagesMapper;
@@ -27,6 +32,7 @@ import com.dangjia.acg.mapper.refund.IBillMendOrderMapper;
 import com.dangjia.acg.mapper.sale.IBillDjAlreadyRobSingleMapper;
 import com.dangjia.acg.mapper.sale.IBillMemberMapper;
 import com.dangjia.acg.mapper.sale.IBillUserMapper;
+import com.dangjia.acg.mapper.storeFront.IBillStorefrontMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.HouseWorker;
@@ -39,6 +45,7 @@ import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.menu.MenuConfiguration;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.sale.royalty.DjAlreadyRobSingle;
+import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.util.HouseUtil;
 import com.dangjia.acg.util.Utils;
@@ -46,6 +53,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.dangjia.acg.common.model.PageDTO;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -70,8 +79,6 @@ public class DjDeliverOrderService {
     @Autowired
     private IBillHouseFlowMapper iBillHouseFlowMapper;
     @Autowired
-    private IBillTechnologyRecordMapper iBillTechnologyRecordMapper;
-    @Autowired
     private IBillDjDeliverOrderItemMapper iBillDjDeliverOrderItemMapper;
     @Autowired
     private IBillWorkerTypeMapper iBillWorkerTypeMapper;
@@ -94,6 +101,9 @@ public class DjDeliverOrderService {
 
     @Autowired
     private HouseAPI houseAPI;
+    @Autowired
+    private IBillStorefrontMapper iBillStorefrontMapper;
+
 
     public Object getHouse(String memberId, HouseResult houseResult) {
         //该城市该用户所有开工房产
@@ -859,4 +869,81 @@ public class DjDeliverOrderService {
         }
 
     }
+
+    /**
+     * 查询全部订单
+     * @param userId
+     * @param cityId
+     * @param orderKey
+     * @param state
+     * @return
+     */
+    public ServerResponse queryOrderInfo(PageDTO pageDTO, String userId, String cityId,
+                                         String orderKey, int state) {
+
+        Example example = new Example(Storefront.class);
+        example.createCriteria().andEqualTo(Storefront.USER_ID, userId).
+                andEqualTo(Storefront.CITY_ID, cityId);
+        List<Storefront> storefrontList = iBillStorefrontMapper.selectByExample(example);
+        if(storefrontList == null && storefrontList.size() == 0){
+            return ServerResponse.createByErrorMessage("门店不存在");
+        }
+
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        DOrderArrInfoDTO dOrderArrInfoDTO = new DOrderArrInfoDTO();
+        Map<String,Object> map = new HashMap<>();
+        map.put("orderKey",orderKey);
+        map.put("state",state);
+        map.put("storefontId",storefrontList.get(0).getId());
+        List<DOrderInfoDTO>  orderInfoDTOS = iBillDjDeliverOrderMapper.queryOrderInfo(map);
+        PageInfo  orderInfoDTOSs = new PageInfo(orderInfoDTOS);
+        map = new HashMap<>();
+        map.put("storefontId",storefrontList.get(0).getId());
+        List<DOrderInfoDTO>  arrOrderInfoDTOS = iBillDjDeliverOrderMapper.queryOrderInfo(map);
+        dOrderArrInfoDTO.setNoPaymentNumber((int)arrOrderInfoDTOS.stream().filter(x -> x.getState() == 2 || x.getState() == 1).count());
+        dOrderArrInfoDTO.setYesPaymentNumber((int)arrOrderInfoDTOS.stream().filter(x -> x.getState() == 3).count());
+        dOrderArrInfoDTO.setYesCancel((int)arrOrderInfoDTOS.stream().filter(x -> x.getState() == 4).count());
+        dOrderArrInfoDTO.setList(orderInfoDTOSs);
+
+      return ServerResponse.createBySuccess("查询成功",dOrderArrInfoDTO);
+    }
+
+
+    /**
+     * 查询订单详情
+     * @param orderId
+     * @return
+     */
+    public ServerResponse queryOrderFineInfo(PageDTO pageDTO, String orderId) {
+        if (CommonUtil.isEmpty(orderId)) {
+            return ServerResponse.createByErrorMessage("订单id不能为空");
+        }
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        DOrderArrFineInfoDTO dOrderArrFineInfoDTO = new DOrderArrFineInfoDTO();
+        List<DOrderFineInfoDTO> dOrderArrInfoDTO =  iBillDjDeliverOrderMapper.queryOrderFineInfo(orderId);
+
+        String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+        for (DOrderFineInfoDTO dOrderFineInfoDTO : dOrderArrInfoDTO) {
+            if(dOrderFineInfoDTO.getImage().contains(",")){
+                List<String> result = Arrays.asList(dOrderFineInfoDTO.getImage().split(","));
+                dOrderFineInfoDTO.setImage(imageAddress + result.get(0));
+            }else{
+                dOrderFineInfoDTO.setImage(imageAddress + dOrderFineInfoDTO.getImage());
+            }
+        }
+        PageInfo  orderInfoDTOSs = new PageInfo(dOrderArrInfoDTO);
+        Map<String,Object> map = new HashMap<>();
+        map.put("id",orderId);
+        List<DOrderInfoDTO>  orderInfoDTOS = iBillDjDeliverOrderMapper.queryOrderInfo(map);
+        if(orderInfoDTOS != null && orderInfoDTOS.size() > 0){
+            dOrderArrFineInfoDTO.setActualPaymentPrice(orderInfoDTOS.get(0).getActualPaymentPrice());
+            dOrderArrFineInfoDTO.setHouseName(orderInfoDTOS.get(0).getHouseName());
+            dOrderArrFineInfoDTO.setOrderNumber(orderInfoDTOS.get(0).getOrderNumber());
+            dOrderArrFineInfoDTO.setOrderPayTime(orderInfoDTOS.get(0).getOrderPayTime());
+        }
+        dOrderArrFineInfoDTO.setList(orderInfoDTOSs);
+        return ServerResponse.createBySuccess("查询成功", dOrderArrFineInfoDTO);
+    }
+
+
 }
