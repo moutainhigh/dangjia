@@ -1,10 +1,7 @@
 package com.dangjia.acg.mapper.delivery;
 
 
-import com.dangjia.acg.dto.delivery.AppointmentDTO;
-import com.dangjia.acg.dto.delivery.DjDeliverOrderDTO;
-import com.dangjia.acg.dto.delivery.HouseFlowDataDTO;
-import com.dangjia.acg.dto.delivery.OrderStorefrontDTO;
+import com.dangjia.acg.dto.delivery.*;
 import com.dangjia.acg.dto.member.WorkerTypeDTO;
 import com.dangjia.acg.dto.order.DecorationCostDTO;
 import com.dangjia.acg.dto.order.DecorationCostItemDTO;
@@ -102,4 +99,7 @@ public interface IBillDjDeliverOrderMapper extends Mapper<Order> {
 
     List<DjDeliverOrderDTO> selectDeliverOrderByHouse(@Param("cityId") String cityId, @Param("houseId") String houseId, @Param("orderStatus") String orderStatus);
 
+    List<AppOrderDetailDTO>  selectOrderDetailById(@Param("houseId") String  houseId, @Param("orderId") String  orderId);
+
+    List<AppOrderItemDetailDTO> selectOrderItemDetailById(@Param("orderId") String  orderId);
 }

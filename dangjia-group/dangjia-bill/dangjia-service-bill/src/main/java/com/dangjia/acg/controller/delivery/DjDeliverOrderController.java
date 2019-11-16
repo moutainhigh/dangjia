@@ -64,8 +64,8 @@ public class DjDeliverOrderController implements DjDeliverOrderAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse deliverOrderItemDetail(String orderId, String orderStatus,String  userToken ) {
-        return djDeliverOrderService.deliverOrderItemDetail(orderId,orderStatus,userToken);
+    public ServerResponse deliverOrderItemDetail(String orderId ) {
+        return djDeliverOrderService.deliverOrderItemDetail(orderId);
     }
 
 }

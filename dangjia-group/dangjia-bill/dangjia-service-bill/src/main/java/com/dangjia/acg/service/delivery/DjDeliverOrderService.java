@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.UserAPI;
 import com.dangjia.acg.api.app.house.HouseAPI;
 import com.dangjia.acg.api.app.member.MemberAPI;
+import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.ServerCode;
@@ -94,6 +95,8 @@ public class DjDeliverOrderService {
 
     @Autowired
     private HouseAPI houseAPI;
+    @Autowired
+    private ForMasterAPI forMasterAPI;
 
     public Object getHouse(String memberId, HouseResult houseResult) {
         //该城市该用户所有开工房产
@@ -816,6 +819,20 @@ public class DjDeliverOrderService {
                 }
                 jDeliverOrderDTO.setOrderItemlist(djDeliverOrderItemDTOList);
                 jDeliverOrderDTO.setTotalSize(djDeliverOrderItemDTOList.size());
+                //页面按钮展示: 1精算制作 2业主自购  3购物车
+                Integer orderSource=jDeliverOrderDTO.getOrderSource();
+                if(orderSource==1)
+                {
+                    jDeliverOrderDTO.setButtionStr("[{\"name\"\"取消\"，“type”：“1”:},{}]");
+                }
+                if(orderSource==2)
+                {
+//[{"name":"取消","type":"1":},{}]
+                }
+                if(orderSource==3)
+                {
+
+                }
             }
             PageInfo pageResult = new PageInfo(list);
             return ServerResponse.createBySuccess("查询所有订单", pageResult);
@@ -827,12 +844,11 @@ public class DjDeliverOrderService {
 
 
     /**
+     * 订单详情明细
      *@param orderId
-     * @param orderStatus
-     * @param userToken
      * @return
      */
-    public ServerResponse deliverOrderItemDetail(String orderId,String  orderStatus,String  userToken ) {
+    public ServerResponse deliverOrderItemDetail(String orderId ) {
         try {
 
             Order order= iBillDjDeliverOrderMapper.selectByPrimaryKey(orderId);
@@ -844,14 +860,18 @@ public class DjDeliverOrderService {
                 return ServerResponse.createByErrorMessage("该房产不存在");
             }
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class); //图片地址
-
-
-//            List<Order> orderList=iBillDjDeliverOrderMapper.selectOrderDetailById(orderId);
-//            for (Order order: orderList ) {
-//
-//            }
-
-            return ServerResponse.createBySuccess("查询成功", null);
+            List<AppOrderDetailDTO> orderList=iBillDjDeliverOrderMapper.selectOrderDetailById(order.getHouseId(),order.getId());
+            for (AppOrderDetailDTO appOrderDetailDTO: orderList ) {
+                List<AppOrderItemDetailDTO> list= iBillDjDeliverOrderMapper.selectOrderItemDetailById(appOrderDetailDTO.getOrderId());
+                for (AppOrderItemDetailDTO appOrderItemDetailDTO :list) {
+                    String productId= appOrderItemDetailDTO.getProductId();
+                  //  String brandName=iBrandSeriesMapper.brandName(productId);
+                    String brandName=forMasterAPI.brandName("",productId);  //通过商品id去关联，然后组合商品名称
+                    appOrderItemDetailDTO.setBrandName(brandName);
+                }
+                appOrderDetailDTO.setList(list);
+            }
+            return ServerResponse.createBySuccess("查询成功", orderList);
 
         } catch (Exception e) {
             e.printStackTrace();

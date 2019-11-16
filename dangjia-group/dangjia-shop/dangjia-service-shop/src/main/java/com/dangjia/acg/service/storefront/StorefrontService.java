@@ -417,7 +417,7 @@ public class StorefrontService {
                 return ServerResponse.createByErrorMessage("提现金额不正确");
             }
             MainUser mainUser = iStoreUserMapper.selectByPrimaryKey(storefront.getUserId());
-            if (!payPassword.equals(mainUser.getPayPassword())){
+            if (!Utils.md5(payPassword).equals(mainUser.getPayPassword())){
                 return ServerResponse.createByErrorMessage("密码错误");
             }
             WithdrawDeposit withdrawDeposit = new WithdrawDeposit();
@@ -477,13 +477,13 @@ public class StorefrontService {
                     djSupplierPayOrder.setSupplierId(storefront.getId());
                 }
                 if(mainUser==null) {
-                    return ServerResponse.createBySuccessMessage("用户不存在");
+                    return ServerResponse.createByErrorMessage("用户不存在");
                 }
                 if (rechargeAmount <= 0) {
-                    return ServerResponse.createBySuccessMessage("金额不正确");
+                    return ServerResponse.createByErrorMessage("金额不正确");
                 }
-                if (!payPassword.equals(mainUser.getPayPassword())) {
-                    return ServerResponse.createBySuccessMessage("密码错误");
+                if (!Utils.md5(payPassword).equals(mainUser.getPayPassword())) {
+                    return ServerResponse.createByErrorMessage("密码错误");
                 }
                 djSupplierPayOrder.setDataStatus(0);
                 djSupplierPayOrder.setBusinessOrderType(businessOrderType);

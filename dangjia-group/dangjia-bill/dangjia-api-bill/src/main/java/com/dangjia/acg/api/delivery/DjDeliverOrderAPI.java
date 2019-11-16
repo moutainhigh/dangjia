@@ -55,8 +55,8 @@ public interface DjDeliverOrderAPI {
                                                  @RequestParam("orderStatus") String orderStatus);
 
     @PostMapping("app/deliverOrderItem/deliverOrderItemDetail")
-    @ApiOperation(value = "新版订单详情明细", notes = "新版订单详情明细")
-    ServerResponse deliverOrderItemDetail(@RequestParam("orderId") String orderId,@RequestParam("orderStatus")  String  orderStatus,@RequestParam("userToken")  String  userToken  );
+    @ApiOperation(value = "订单详情明细", notes = "订单详情明细")
+    ServerResponse deliverOrderItemDetail(@RequestParam("orderId") String orderId  );
 
 
 }

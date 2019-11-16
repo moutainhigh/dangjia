@@ -102,4 +102,6 @@ public class DjDeliverOrderDTO {
     private Integer totalSize;
 
     private List<DjDeliverOrderItemDTO> orderItemlist;
+
+    private String buttionStr;
 }
