@@ -22,7 +22,8 @@
             t1.house_id houseId,
             t1.business_order_number businessOrderNumber,
             t1.order_number orderNumber,
-            t4.storefront_name storefrontName
+            t4.storefront_name storefrontName,
+            t4.storefront_logo storefrontLogo
         FROM
             dj_deliver_order t1,
             dj_pay_business_order t3,
@@ -59,20 +60,32 @@
             t.product_sn productSn,
             t.product_type productType,
             t.price price,
+            t.order_id as orderId,
             IFNULL(t.image,t1.image) image,
             t.shop_count shopCount,
             IFNULL(t.ask_count,0) askCount,
             IFNULL(t.return_count,0) returnCount,
             (t.shop_count - (IFNULL(t.ask_count, 0)+IFNULL(t.return_count,0))) surplusCount,
             t1.prod_template_id productTemplateId,
-            t.reservation_deliver_time as reservationDeliverTime
+            t.reservation_deliver_time as reservationDeliverTime,
+            IFNULL(t.total_price,0) as totalPrice,
+            t2.value_name_arr as valueNameArr,
+            t2.value_id_arr as valueIdArr
         FROM
             dj_deliver_order_item t,
-            dj_basics_storefront_product t1
+            dj_basics_storefront_product t1,
+            dj_basics_product_template t2
         WHERE t.product_id =t1.id
+        AND t1.prod_template_id=t2.id
         AND t.order_id =  #{orderId}
         AND t.shop_count > (IFNULL(t.ask_count, 0)+IFNULL(t.return_count,0))
         AND t.data_status = 0
+        AND t.is_reservation_deliver = 1
+        AND (
+            t.reservation_deliver_time IS NULL
+            OR t.reservation_deliver_time = ''
+        )
+        ORDER BY t.create_date
     </select>
 
 
@@ -83,7 +96,8 @@
             t1.address_id addressId,
             t1.house_id houseId,
             t4.storefront_name storefrontName,
-            t1.order_id orderId
+            t1.order_id orderId,
+            t1.id as orderSplitId
         FROM
             dj_deliver_order_split t1,
             dj_basics_storefront t4
@@ -118,14 +132,20 @@
             t1.prod_template_id productTemplateId,
             t.reservation_deliver_time AS reservationDeliverTime,
             t.unit_name as unitName,
-            t.order_split_id as orderSplitId
+            t.order_split_id as orderSplitId,
+            IFNULL(t.total_price,0) as totalPrice,
+            t2.value_name_arr as valueNameArr,
+            t2.value_id_arr as valueIdArr,
+            t.num as shopCount
         FROM
             dj_deliver_order_split_item t,
-            dj_basics_storefront_product t1
+            dj_basics_storefront_product t1,
+            dj_basics_product_template t2
         WHERE
             t.product_id = t1.id
+        AND t1.prod_template_id=t2.id
         AND t.data_status = 0
-        AND t.order_id =  #{orderId}
+        AND t.order_split_id =  #{orderSplitId}
     </select>
 
     <!--取消预约-->

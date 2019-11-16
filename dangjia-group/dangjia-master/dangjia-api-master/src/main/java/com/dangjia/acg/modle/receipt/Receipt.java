@@ -48,4 +48,9 @@ public class Receipt extends BaseEntity {
     @Desc(value = "合併結算单号")
     @ApiModelProperty("合併結算单号")
     private String number;
+
+    @Column(name = "source_type")
+    @Desc(value = "结算类型 1：余额支付  2：线下支付")
+    @ApiModelProperty("结算类型 1：余额支付  2：线下支付")
+    private String sourceType;
 }

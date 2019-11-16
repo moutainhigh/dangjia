@@ -117,6 +117,120 @@
         and a.`city_id`=#{cityId}
     </select>
 
+
+    <select id="queryStoreSupplierSettlement" resultType="com.dangjia.acg.dto.finance.WebSplitDeliverItemDTO">
+        SELECT
+            a.shipAddress,
+            a.supplierId,
+            a.supMobile,
+            a.supName,
+            SUM(a.sent) sent,
+            SUM(a.wait) wait
+        FROM
+            (
+                (
+                    SELECT
+                        m.ship_address AS shipAddress,
+                        m.supplier_id AS supplierId,
+                        m.supplier_telephone AS supMobile,
+                        m.supplier_name AS supName,
+                        (
+                            SELECT
+                                COUNT(d.id)
+                            FROM
+                                dj_repair_mend_deliver d
+                            WHERE
+                                d.supplier_id = m.supplier_id
+                            AND d.apply_state = 1
+                        ) sent,
+                        (
+                            SELECT
+                                COUNT(d.id)
+                            FROM
+                                dj_repair_mend_deliver d
+                            WHERE
+                                d.supplier_id = m.supplier_id
+                            AND d.apply_state = 0
+                        ) wait
+                    FROM
+                        dj_repair_mend_deliver m
+                    WHERE
+                        m.data_status = 0
+                    AND m.apply_state IS NOT NULL
+                    AND m.apply_state != 3
+                    <if test="searchKey!=null and searchKey!=''">
+                        and (m.supplier_name like CONCAT('%',#{searchKey},'%'))
+                    </if>
+                    AND EXISTS (
+                        SELECT
+                            1
+                        FROM
+                            dj_sup_application sa
+                        WHERE
+                            sa.sup_id = m.supplier_id
+                        AND sa.shop_id = #{storefrontId}
+                        AND application_status = 1
+                    )
+                    GROUP BY
+                        m.supplier_id
+                )
+                UNION ALL
+                    (
+                        SELECT
+                            s.ship_address AS shipAddress,
+                            s.supplier_id AS supplierId,
+                            s.supplier_telephone AS supMobile,
+                            s.supplier_name AS supName,
+                            (
+                                SELECT
+                                    COUNT(d.id)
+                                FROM
+                                    dj_deliver_split_deliver d
+                                WHERE
+                                    d.supplier_id = s.supplier_id
+                                AND (
+                                    d.apply_state = 1
+                                    OR d.apply_state = 2
+                                )
+                            ) sent,
+                            (
+                                SELECT
+                                    COUNT(d.id)
+                                FROM
+                                    dj_deliver_split_deliver d
+                                WHERE
+                                    d.supplier_id = s.supplier_id
+                                AND d.apply_state = 0
+                            ) wait
+                        FROM
+                            dj_deliver_split_deliver s
+                        WHERE
+                            s.data_status = 0
+                        AND s.apply_state IS NOT NULL
+                        AND s.apply_state != 3
+                        <if test="searchKey!=null and searchKey!=''">
+                            and (s.supplier_name like CONCAT('%',#{searchKey},'%'))
+                        </if>
+                        AND EXISTS (
+                            SELECT
+                                1
+                            FROM
+                                dj_sup_application sa
+                            WHERE
+                                sa.sup_id = s.supplier_id
+                            AND sa.shop_id = #{storefrontId}
+                            AND application_status = 1
+                        )
+                        GROUP BY
+                            s.supplier_id
+                    )
+            ) a
+        GROUP BY
+            a.supplierId
+        ORDER BY
+            a.wait DESC
+    </select>
+
     <select id="myWallet" resultType="java.lang.Double">
         SELECT
         sum(total_amount)

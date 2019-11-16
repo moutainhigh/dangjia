@@ -59,10 +59,10 @@ public interface IBillDjDeliverOrderMapper extends Mapper<Order> {
 
     /**
      * 已预约发货商品
-     * @param orderId
+     * @param orderSplitId
      * @return
      */
-    List<AppointmentDTO> queryReserved(@Param("orderId") String orderId);
+    List<AppointmentDTO> queryReserved(@Param("orderSplitId") String orderSplitId);
 
 
     /**

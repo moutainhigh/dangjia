@@ -105,5 +105,17 @@ public class StorefrontController implements BasicsStorefrontAPI {
         return storefrontService.queryIncomeRecord(userId,cityId);
     }
 
+    @Override
+    public ServerResponse paymentRetentionMoney(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId) {
+        return null;
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryStoreSupplierSettlement(HttpServletRequest request, PageDTO pageDTO,
+                                                       String userId, String cityId, String searchKey) {
+        return storefrontService.queryStoreSupplierSettlement(pageDTO, userId, cityId, searchKey);
+    }
+
 
 }

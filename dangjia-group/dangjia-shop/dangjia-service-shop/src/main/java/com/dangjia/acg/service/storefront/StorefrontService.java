@@ -8,6 +8,7 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.finance.WebSplitDeliverItemDTO;
 import com.dangjia.acg.dto.storefront.StorefrontDTO;
 import com.dangjia.acg.dto.storefront.StorefrontListDTO;
 import com.dangjia.acg.mapper.pay.IStoreBusinessOrderMapper;
@@ -72,11 +73,11 @@ public class StorefrontService {
     public Storefront queryStorefrontByUserID(String userId,String cityId) {
         try {
             Example example=new Example(Storefront.class);
-            example.createCriteria().andEqualTo(Storefront.USER_ID,userId).andEqualTo(Storefront.CITY_ID,cityId);
-            List<Storefront> list =istorefrontMapper.selectByExample(example);
-            if(list.size()<=0)
-                return null;
-            return list.get(0);
+            example.createCriteria().andEqualTo(Storefront.USER_ID,userId)
+                    .andEqualTo(Storefront.CITY_ID,cityId)
+                    .andEqualTo(Storefront.DATA_STATUS,0);
+            Storefront storefront = istorefrontMapper.selectOneByExample(example);
+            return storefront;
         } catch (Exception e) {
             logger.error("查询失败",e);
             return null;
@@ -523,6 +524,28 @@ public class StorefrontService {
         } catch (Exception e) {
             logger.error("店铺收支记录异常：", e);
             return ServerResponse.createByErrorMessage("店铺收支记录异常");
+        }
+    }
+
+
+    /**
+     * 店铺财务-供应商结算
+     * @param pageDTO
+     * @param userId
+     * @param cityId
+     * @return
+     */
+    public ServerResponse queryStoreSupplierSettlement(PageDTO pageDTO, String userId, String cityId, String searchKey) {
+        try {
+            Storefront storefront = this.queryStorefrontByUserID(userId, cityId);
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<WebSplitDeliverItemDTO> webSplitDeliverItemDTOS =
+                    istorefrontMapper.queryStoreSupplierSettlement(storefront.getId(),searchKey);
+            PageInfo pageResult = new PageInfo(webSplitDeliverItemDTOS);
+            return ServerResponse.createBySuccess("查询成功",pageResult);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
         }
     }
 

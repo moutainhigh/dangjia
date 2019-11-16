@@ -122,16 +122,31 @@
 
     <select id="myWallet" resultType="java.lang.Double">
         SELECT
-            sum(total_amount)
+            IFNULL(sum(total_amount),0)
         FROM
             dj_deliver_split_deliver
         WHERE
             supplier_id =#{supId}
         AND shipping_state IN (1, 2, 4, 5, 7, 8)
-        <if test="null!=date and ''!=date">
-            AND TIMESTAMPDIFF(DAY,send_time,SYSDATE())>=7
-        </if>
+        AND TIMESTAMPDIFF(DAY,send_time,SYSDATE())>=7
     </select>
+
+    <update id="setSurplusMoney">
+        UPDATE dj_supplier a
+        INNER JOIN (
+            SELECT
+                supplier_id,
+                IFNULL(sum(total_amount), 0) AS surplus_money
+            FROM
+                dj_deliver_split_deliver
+            WHERE
+                shipping_state IN (1, 2, 4, 5, 7, 8)
+            AND TIMESTAMPDIFF(DAY, send_time, SYSDATE()) >= 7
+            GROUP BY
+                supplier_id
+        ) b ON a.id = b.supplier_id
+        SET a.surplus_money = b.surplus_money
+    </update>
 
 
 

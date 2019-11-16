@@ -92,12 +92,12 @@ public interface DjSupplierAPI {
 
     @PostMapping("/sup/myWallet")
     @ApiOperation(value = "我的钱包", notes = "我的钱包")
-    ServerResponse myWallet(@RequestParam("user_id") String userId,
+    ServerResponse myWallet(@RequestParam("userId") String userId,
                             @RequestParam("cityId") String cityId);
 
     @PostMapping("/sup/supplierWithdrawal")
     @ApiOperation(value = "供应商提现", notes = "供应商提现")
-    ServerResponse supplierWithdrawal(@RequestParam("user_id") String userId,
+    ServerResponse supplierWithdrawal(@RequestParam("userId") String userId,
                                       @RequestParam("cityId") String cityId,
                                       @RequestParam("bankCard") String bankCard,
                                       @RequestParam("surplusMoney") Double surplusMoney,
@@ -105,7 +105,7 @@ public interface DjSupplierAPI {
 
     @PostMapping("/sup/supplierRecharge")
     @ApiOperation(value = "供应商充值", notes = "供应商充值")
-    ServerResponse supplierRecharge(@RequestParam("user_id") String userId,
+    ServerResponse supplierRecharge(@RequestParam("userId") String userId,
                                     @RequestParam("cityId") String cityId,
                                     @RequestParam("payState") String payState,
                                     @RequestParam("rechargeAmount") Double rechargeAmount,
@@ -115,22 +115,26 @@ public interface DjSupplierAPI {
 
     @PostMapping("/sup/queryIncomeRecord")
     @ApiOperation(value = "供应商收入记录", notes = "供应商收入记录")
-    ServerResponse queryIncomeRecord(@RequestParam("user_id") String userId,
+    ServerResponse queryIncomeRecord(@RequestParam("userId") String userId,
                                      @RequestParam("cityId") String cityId);
 
     @PostMapping("/sup/queryIncomeRecordDetail")
     @ApiOperation(value = "供应商收入记录详情", notes = "供应商收入记录详情")
-    ServerResponse queryIncomeRecordDetail(@RequestParam("user_id") String userId,
+    ServerResponse queryIncomeRecordDetail(@RequestParam("userId") String userId,
                                            @RequestParam("cityId") String cityId,
                                            @RequestParam("merge") String merge);
 
     @PostMapping("/sup/queryExpenditure")
     @ApiOperation(value = "供应商支出记录", notes = "供应商支出记录")
-    ServerResponse queryExpenditure(@RequestParam("user_id") String userId,
+    ServerResponse queryExpenditure(@RequestParam("userId") String userId,
                                     @RequestParam("cityId") String cityId);
 
     @PostMapping("/sup/queryLikeSupplier")
     @ApiOperation(value = "根据条件模糊查询供应商信息", notes = "根据条件模糊查询供应商信息")
     List<SupplierLikeDTO> queryLikeSupplier(@RequestParam("searchKey") String searchKey);
+
+    @PostMapping("/sup/setSurplusMoney")
+    @ApiOperation(value = "计算可提现金额", notes = "计算可提现金额")
+    void setSurplusMoney();
 
 }

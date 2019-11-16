@@ -1667,8 +1667,9 @@ public class PaymentService {
                 }
                 //生成流水
                 iMasterAccountFlowRecordMapper.insert(accountFlowRecord);
+                return ServerResponse.createBySuccessMessage("充值成功");
             }
-            return ServerResponse.createBySuccessMessage("充值成功");
+            return ServerResponse.createByErrorMessage("充值失败");
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("充值失败");

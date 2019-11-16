@@ -60,8 +60,8 @@ public class WebSplitDeliverController implements WebSplitDeliverAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse settlemen(String image, String merge, String supplierId) {
-        return webSplitDeliverService.settlemen(image, merge, supplierId);
+    public ServerResponse settlemen(String image, String merge, String supplierId, String userId, String cityId, Double settlementAmount, String sourceType) {
+        return webSplitDeliverService.settlemen(image, merge, supplierId, userId, cityId, settlementAmount, sourceType);
     }
 
     @Override
