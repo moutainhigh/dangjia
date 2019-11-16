@@ -156,5 +156,8 @@ public class OrderItem extends BaseEntity {
 	public void initPath(String address){
 		this.image = StringUtils.isEmpty(this.image)?null:address+this.image;
 	}
-
+	@Column(name = "cancellation_time")
+	@Desc(value = "订单取消时间")
+	@ApiModelProperty("订单取消时间")
+	private String CancellationTime;//修改人
 }
