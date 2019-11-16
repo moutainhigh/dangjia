@@ -117,4 +117,16 @@
         and a.`city_id`=#{cityId}
     </select>
 
+    <select id="myWallet" resultType="java.lang.Double">
+        SELECT
+        sum(total_amount)
+        FROM
+        dj_deliver_split_deliver
+        WHERE
+        storefront_id =#{storefrontId}
+        AND shipping_state IN (1, 2, 4, 5, 7, 8)
+        <if test="null!=date">
+            AND TIMESTAMPDIFF(DAY,send_time,SYSDATE())>=7
+        </if>
+    </select>
 </mapper>

@@ -118,7 +118,7 @@
         a.wait DESC
     </select>
 
-    <select id="getSupplierGoodsId" resultType="java.lang.String">
+    <select id="getSupplierGoodsId" resultType="java.util.Map">
        <!-- SELECT
             d.supplier_id
         FROM
@@ -131,10 +131,11 @@
         ORDER BY si.create_date DESC-->
 
         SELECT
-        d.sup_id as supplier_id
+        IFNULL(d.sup_id ,'' )  as supplierId,IFNULL(ds.name,'') as name
         FROM
         `dj_deliver_order_split_item` si
         INNER JOIN dj_sup_application_product d ON si.product_id = d.product_id
+        INNER join dj_supplier ds on ds.id=d.sup_id
         WHERE si.house_id = #{houseId}
         AND si.product_id =  #{productSn}
         ORDER BY d.price asc

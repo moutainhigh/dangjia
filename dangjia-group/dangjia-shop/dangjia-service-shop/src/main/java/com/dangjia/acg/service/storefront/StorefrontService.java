@@ -1,13 +1,8 @@
 package com.dangjia.acg.service.storefront;
 
 import cn.jiguang.common.utils.StringUtils;
-//import com.dangjia.acg.api.supplier.DjRegisterApplicationAPI;
-import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.supplier.DjSupplierAPI;
-import com.dangjia.acg.common.annotation.ApiMethod;
-import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
-import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 
 import com.dangjia.acg.common.response.ServerResponse;
@@ -15,9 +10,20 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.storefront.StorefrontDTO;
 import com.dangjia.acg.dto.storefront.StorefrontListDTO;
+import com.dangjia.acg.mapper.pay.IStoreBusinessOrderMapper;
+import com.dangjia.acg.mapper.storefront.IStoreStorefrontMapper;
 import com.dangjia.acg.mapper.storefront.IStorefrontMapper;
+import com.dangjia.acg.mapper.supplier.DjSupplierPayOrderMapper;
+import com.dangjia.acg.mapper.user.IStoreUserMapper;
+import com.dangjia.acg.mapper.worker.IStoreWithdrawDepositMapper;
+import com.dangjia.acg.modle.other.BankCard;
+import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.supplier.DjSupplier;
+import com.dangjia.acg.modle.supplier.DjSupplierPayOrder;
+import com.dangjia.acg.modle.user.MainUser;
+import com.dangjia.acg.modle.worker.WithdrawDeposit;
+import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -27,7 +33,11 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class StorefrontService {
@@ -37,20 +47,23 @@ public class StorefrontService {
      */
     private static Logger logger = LoggerFactory.getLogger(StorefrontService.class);
     @Autowired
+    private IStoreWithdrawDepositMapper iStoreWithdrawDepositMapper;
+    @Autowired
     private IStorefrontMapper istorefrontMapper;
-//    @Autowired
-//    private CraftsmanConstructionService constructionService;
     @Autowired
     private DjSupplierAPI djSupplierAPI;
-
     @Autowired
     private ConfigUtil configUtil;
-
     @Autowired
-    private RedisClient redisClient;
-
-//    @Autowired
-//    private DjRegisterApplicationAPI djRegisterApplicationAPI;
+    private StorefrontService storefrontService;
+    @Autowired
+    private IStoreUserMapper iStoreUserMapper;
+    @Autowired
+    private IStoreBusinessOrderMapper iStoreBusinessOrderMapper;
+    @Autowired
+    private IStoreStorefrontMapper iStoreStorefrontMapper;
+    @Autowired
+    private DjSupplierPayOrderMapper djSupplierPayOrderMapper;
     /**
      * 根据用户Id查询店铺信息
      * @param userId
@@ -343,69 +356,174 @@ public class StorefrontService {
      */
     public ServerResponse queryStorefrontWallet(HttpServletRequest request, PageDTO pageDTO, String searchKey, String userId, String cityId) {
         try {
-            Example exampleStorefront=new Example(Storefront.class);
-            exampleStorefront.createCriteria().andEqualTo(Storefront.USER_ID,userId).andEqualTo(Storefront.CITY_ID, cityId);
-            List<Storefront> list =istorefrontMapper.selectByExample(exampleStorefront);
-            if(list==null)
-            {
-                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            Storefront storefront = storefrontService.queryStorefrontByUserID(userId, cityId);
+            if (storefront == null) {
+                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
-            //可体现余额(七天之内支付到款的订单)需要重新计算
-            return ServerResponse.createBySuccess(list);
+            Double withdrawalAmount = istorefrontMapper.myWallet(storefront.getId(),new Date());
+            Map<String, Double> map = new HashMap<>();
+            map.put("totalAccount", storefront.getTotalAccount());
+            map.put("withdrawalAmount", withdrawalAmount);
+            map.put("totalAccountAmount", storefront.getRetentionMoney());
+            return ServerResponse.createBySuccess("查询成功", map);
         } catch (Exception e) {
             logger.error("店铺-我的钱包异常：", e);
             return ServerResponse.createByErrorMessage("店铺-我的钱包异常");
         }
     }
 
+
+
     /**
-     *店铺-店铺体现
-     * @param request
-     * @param pageDTO
+     * 店铺收支记录
      * @param userId
      * @param cityId
      * @return
      */
-    public ServerResponse operationStorefrontReflect(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId) {
+    public ServerResponse queryIncomeRecord(String userId, String cityId) {
         try {
-            return null;
+
+            Storefront storefront = storefrontService.queryStorefrontByUserID(userId, cityId);
+            if (storefront == null) {
+                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
+            }
+          return null;
         } catch (Exception e) {
-            logger.error("店铺-店铺体现异常：", e);
-            return ServerResponse.createByErrorMessage("店铺-店铺体现异常");
+            logger.error("店铺收支记录异常：", e);
+            return ServerResponse.createByErrorMessage("店铺收支记录异常");
         }
     }
 
     /**
-     *店铺-店铺充值
-     * @param request
-     * @param pageDTO
+     *店铺提现
      * @param userId
      * @param cityId
+     * @param bankCard
+     * @param surplusMoney
+     * @param payPassword
      * @return
      */
-    public ServerResponse operationStorefrontRecharge(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId) {
+    public ServerResponse operationStorefrontReflect(String userId, String cityId, String bankCard, Double surplusMoney, String payPassword) {
         try {
-            return null;
+
+            Storefront storefront = storefrontService.queryStorefrontByUserID(userId, cityId);
+            if (storefront == null) {
+                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
+            }
+            if (surplusMoney > storefront.getSurplusMoney()) {
+                return ServerResponse.createByErrorMessage("现金额超过提现金额");
+            }
+            if (surplusMoney <= 0) {
+                return ServerResponse.createByErrorMessage("提现金额不正确");
+            }
+            MainUser mainUser = iStoreUserMapper.selectByPrimaryKey(storefront.getUserId());
+            if (!payPassword.equals(mainUser.getPayPassword())){
+                return ServerResponse.createByErrorMessage("密码错误");
+            }
+            WithdrawDeposit withdrawDeposit = new WithdrawDeposit();
+            withdrawDeposit.setMoney(new BigDecimal(surplusMoney));
+            withdrawDeposit.setName(storefront.getStorekeeperName());
+            withdrawDeposit.setWorkerId(mainUser.getId());
+            withdrawDeposit.setState(0);
+            withdrawDeposit.setRoleType(4);
+            withdrawDeposit.setCardNumber(bankCard);
+            BankCard bankCard1 = iStoreWithdrawDepositMapper.queryBankCard(bankCard, mainUser.getId());
+            withdrawDeposit.setBankName(bankCard1.getBankName());
+            withdrawDeposit.setDataStatus(0);
+            withdrawDeposit.setSourceId(storefront.getId());
+            iStoreWithdrawDepositMapper.insert(withdrawDeposit);
+            //账号金额预扣
+            storefront.setTotalAccount(storefront.getTotalAccount()-surplusMoney);
+            storefront.setSurplusMoney(storefront.getSurplusMoney()-surplusMoney);
+            istorefrontMapper.updateByPrimaryKeySelective(storefront);
+            return ServerResponse.createBySuccessMessage("提交成功待审核中");
         } catch (Exception e) {
-            logger.error("店铺-店铺充值异常：", e);
-            return ServerResponse.createByErrorMessage("店铺-店铺充值异常");
+            logger.error("店铺收支记录异常：", e);
+            return ServerResponse.createByErrorMessage("店铺收支记录异常");
         }
     }
 
     /**
-     * 店铺-缴纳滞留金
-     * @param request
-     * @param pageDTO
+     *店铺充值
      * @param userId
      * @param cityId
+     * @param payState
+     * @param rechargeAmount
+     * @param payPassword
+     * @param businessOrderType
+     * @param sourceType
      * @return
      */
-    public ServerResponse paymentRetentionMoney(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId) {
+    public ServerResponse operationStorefrontRecharge(String userId, String cityId, String payState, Double rechargeAmount, String payPassword, String businessOrderType, Integer sourceType) {
         try {
-            return null;
+                MainUser mainUser=null;
+                DjSupplierPayOrder djSupplierPayOrder = new DjSupplierPayOrder();
+                if(sourceType==1) {
+
+                    Storefront storefront = storefrontService.queryStorefrontByUserID(userId, cityId);
+                    if (storefront == null) {
+                        return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
+                    }
+                    //DjSupplier djSupplier = this.querySingleDjSupplier(userId, cityId);
+                    mainUser = iStoreUserMapper.selectByPrimaryKey(storefront.getUserId());
+                    djSupplierPayOrder.setSupplierId(storefront.getId());
+                }else if(sourceType==2){
+                    Example example=new Example(Storefront.class);
+                    example.createCriteria().andEqualTo(Storefront.DATA_STATUS,0)
+                            .andEqualTo(Storefront.CITY_ID,cityId)
+                            .andEqualTo(Storefront.USER_ID,userId);
+                    Storefront storefront = iStoreStorefrontMapper.selectOneByExample(example);
+                    mainUser = iStoreUserMapper.selectByPrimaryKey(storefront.getUserId());
+                    djSupplierPayOrder.setSupplierId(storefront.getId());
+                }
+                if(mainUser==null) {
+                    return ServerResponse.createBySuccessMessage("用户不存在");
+                }
+                if (rechargeAmount <= 0) {
+                    return ServerResponse.createBySuccessMessage("金额不正确");
+                }
+                if (!payPassword.equals(mainUser.getPayPassword())) {
+                    return ServerResponse.createBySuccessMessage("密码错误");
+                }
+                djSupplierPayOrder.setDataStatus(0);
+                djSupplierPayOrder.setBusinessOrderType(businessOrderType);
+                djSupplierPayOrder.setPayState(payState);
+                djSupplierPayOrder.setPrice(rechargeAmount);
+                djSupplierPayOrder.setState(0);
+                djSupplierPayOrder.setUserId(userId);
+                djSupplierPayOrder.setSourceType(sourceType);
+                djSupplierPayOrderMapper.insert(djSupplierPayOrder);
+
+                // 生成支付业务单
+                Example example = new Example(BusinessOrder.class);
+                example.createCriteria().andEqualTo(BusinessOrder.TASK_ID, djSupplierPayOrder.getId()).andNotEqualTo(BusinessOrder.STATE, 4);
+                List<BusinessOrder> businessOrderList = iStoreBusinessOrderMapper.selectByExample(example);
+                BusinessOrder businessOrder = null;
+                if (businessOrderList.size() > 0) {
+                    businessOrder = businessOrderList.get(0);
+                    if (businessOrder.getState() == 3) {
+                        return ServerResponse.createByErrorMessage("该订单已支付，请勿重复支付！");
+                    }
+                }
+                if (businessOrderList.size() == 0) {
+                    businessOrder = new BusinessOrder();
+                    businessOrder.setMemberId(djSupplierPayOrder.getUserId());
+                    businessOrder.setNumber(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
+                    businessOrder.setState(1);//刚生成
+                    businessOrder.setTotalPrice(new BigDecimal(rechargeAmount));
+                    businessOrder.setDiscountsPrice(new BigDecimal(0));
+                    businessOrder.setPayPrice(new BigDecimal(rechargeAmount));
+                    businessOrder.setType(3);//记录支付类型任务类型
+                    businessOrder.setTaskId(djSupplierPayOrder.getId());//保存任务ID
+                    iStoreBusinessOrderMapper.insert(businessOrder);
+                }
+                djSupplierPayOrder.setBusinessOrderNumber(businessOrder.getNumber());
+                djSupplierPayOrderMapper.updateByPrimaryKeySelective(djSupplierPayOrder);
+                return ServerResponse.createBySuccess("提交成功",djSupplierPayOrder.getBusinessOrderNumber());
         } catch (Exception e) {
-            logger.error("店铺-缴纳滞留金异常：", e);
-            return ServerResponse.createByErrorMessage("店铺-缴纳滞留金异常");
+            logger.error("店铺收支记录异常：", e);
+            return ServerResponse.createByErrorMessage("店铺收支记录异常");
         }
     }
+
 }
