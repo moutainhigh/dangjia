@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.UserAPI;
 import com.dangjia.acg.api.app.house.HouseAPI;
 import com.dangjia.acg.api.app.member.MemberAPI;
+import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.ServerCode;
@@ -19,6 +20,10 @@ import com.dangjia.acg.dto.design.CollectDataDTO;
 import com.dangjia.acg.dto.design.QuantityRoomDTO;
 import com.dangjia.acg.dto.design.WorkChartListDTO;
 import com.dangjia.acg.dto.member.WorkerTypeDTO;
+import com.dangjia.acg.dto.order.DOrderArrFineInfoDTO;
+import com.dangjia.acg.dto.order.DOrderArrInfoDTO;
+import com.dangjia.acg.dto.order.DOrderFineInfoDTO;
+import com.dangjia.acg.dto.order.DOrderInfoDTO;
 import com.dangjia.acg.mapper.delivery.*;
 import com.dangjia.acg.mapper.order.IBillHouseMapper;
 import com.dangjia.acg.mapper.order.IBillQuantityRoomImagesMapper;
@@ -27,6 +32,7 @@ import com.dangjia.acg.mapper.refund.IBillMendOrderMapper;
 import com.dangjia.acg.mapper.sale.IBillDjAlreadyRobSingleMapper;
 import com.dangjia.acg.mapper.sale.IBillMemberMapper;
 import com.dangjia.acg.mapper.sale.IBillUserMapper;
+import com.dangjia.acg.mapper.storeFront.IBillStorefrontMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.HouseWorker;
@@ -39,6 +45,7 @@ import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.menu.MenuConfiguration;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.sale.royalty.DjAlreadyRobSingle;
+import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.util.HouseUtil;
 import com.dangjia.acg.util.Utils;
@@ -831,11 +838,9 @@ public class DjDeliverOrderService {
 
     /**
      *@param orderId
-     * @param orderStatus
-     * @param userToken
      * @return
      */
-    public ServerResponse deliverOrderItemDetail(String orderId,String  orderStatus,String  userToken ) {
+    public ServerResponse deliverOrderItemDetail(String orderId ) {
         try {
 
             Order order= iBillDjDeliverOrderMapper.selectByPrimaryKey(orderId);
