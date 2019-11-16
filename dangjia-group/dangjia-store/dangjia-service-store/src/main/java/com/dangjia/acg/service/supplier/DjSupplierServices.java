@@ -39,6 +39,7 @@ import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.modle.worker.WithdrawDeposit;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -448,7 +449,7 @@ public class DjSupplierServices {
             if (surplusMoney <= 0)
                 return ServerResponse.createByErrorMessage("提现金额不正确");
             MainUser mainUser = iStoreUserMapper.selectByPrimaryKey(djSupplier.getUserId());
-            if (!payPassword.equals(mainUser.getPayPassword()))
+            if (!payPassword.equals(DigestUtils.md5Hex(mainUser.getPayPassword())))
                 return ServerResponse.createByErrorMessage("密码错误");
             WithdrawDeposit withdrawDeposit = new WithdrawDeposit();
             withdrawDeposit.setMoney(new BigDecimal(surplusMoney));
@@ -510,7 +511,7 @@ public class DjSupplierServices {
             if (rechargeAmount <= 0) {
                 return ServerResponse.createByErrorMessage("金额不正确");
             }
-            if (!payPassword.equals(mainUser.getPayPassword())) {
+            if (!payPassword.equals(DigestUtils.md5Hex(mainUser.getPayPassword()))) {
                 return ServerResponse.createByErrorMessage("密码错误");
             }
             djSupplierPayOrder.setDataStatus(0);
