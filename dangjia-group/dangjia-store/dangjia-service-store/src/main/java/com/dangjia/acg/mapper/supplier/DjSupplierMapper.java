@@ -26,7 +26,9 @@ public interface DjSupplierMapper extends Mapper<DjSupplier> {
     DjSupplier queryDjSupplierByPass(@Param("supplierId") String supplierId);
     DjSupplier querySingleDjSupplier(@Param("userId") String userId, @Param("cityId") String cityId);
 
-    Double myWallet(@Param("supId") String supId, @Param("date") Date date);
+    Double myWallet(@Param("supId") String supId);
+
+    int setSurplusMoney();
 
     List<SupplierLikeDTO> queryLikeSupplier(@Param("searchKey") String searchKey);
 

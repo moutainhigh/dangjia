@@ -46,6 +46,22 @@ public interface DjDeliverOrderAPI {
                                   @RequestParam("houseId") String houseId);
 
 
+    @PostMapping("web/design/queryOrderInfo")
+    @ApiOperation(value = "查询订单列表", notes = "查询订单列表")
+    ServerResponse queryOrderInfo(@RequestParam("request") HttpServletRequest request,
+                                  @RequestParam("pageDTO") PageDTO pageDTO,
+                                  @RequestParam("userId") String userId,
+                                  @RequestParam("cityId") String cityId,
+                                  @RequestParam("orderKey") String orderKey,
+                                  @RequestParam("orderKey") int state);
+
+    @PostMapping("web/design/queryOrderFineInfo")
+    @ApiOperation(value = "查询订单详情", notes = "查询订单详情")
+    ServerResponse queryOrderFineInfo(@RequestParam("request") HttpServletRequest request,
+                                  @RequestParam("pageDTO") PageDTO pageDTO,
+                                  @RequestParam("orderId") String orderId);
+
+
     @PostMapping("app/order/queryDeliverOrderListByStatus")
     @ApiOperation(value = "根据订单状态查询订单详情列表", notes = "根据订单状态查询订单详情")
     ServerResponse queryDeliverOrderListByStatus(@RequestParam("pageDTO") PageDTO pageDTO,

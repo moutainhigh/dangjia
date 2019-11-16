@@ -3,9 +3,13 @@ package com.dangjia.acg.service.delivery;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.app.member.MemberAPI;
+import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.DateUtil;
+import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.delivery.AppointmentDTO;
 import com.dangjia.acg.dto.delivery.AppointmentListDTO;
 import com.dangjia.acg.dto.delivery.OrderStorefrontDTO;
@@ -23,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -55,7 +60,8 @@ public class BillAppointmentService {
 
     @Autowired
     private BillDjDeliverSplitDeliverMapper billDjDeliverSplitDeliverMapper;
-
+    @Autowired
+    private ConfigUtil configUtil;
 
     /**
      * 我的预约查询
@@ -66,50 +72,59 @@ public class BillAppointmentService {
      */
     public ServerResponse queryAppointment(PageDTO pageDTO, String houseId) {
         try {
+            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<OrderStorefrontDTO> orderStorefrontDTOS = djDeliverOrderMapper.queryDjDeliverOrderStorefront(houseId);
-            List<AppointmentListDTO> appointmentListDTOS = null;
+            List<AppointmentListDTO> appointmentListDTOS = new ArrayList<>();
             orderStorefrontDTOS.forEach(orderStorefrontDTO -> {
+                orderStorefrontDTO.setStorefrontLogo(imageAddress + orderStorefrontDTO.getStorefrontLogo());
                 AppointmentListDTO appointmentListDTO = new AppointmentListDTO();
                 List<AppointmentDTO> appointmentDTOS = djDeliverOrderMapper.queryAppointment(orderStorefrontDTO.getOrderId());
-                if(appointmentDTOS.size()>0) {
+                if (appointmentDTOS.size() > 0) {
+                    appointmentDTOS.forEach(appointmentDTO -> {
+                        appointmentDTO.setImage(imageAddress + appointmentDTO.getImage());
+                    });
                     appointmentListDTO.setAppointmentDTOS(appointmentDTOS);
                     appointmentListDTO.setOrderStorefrontDTO(orderStorefrontDTO);
                     appointmentListDTOS.add(appointmentListDTO);
                 }
             });
-            if(appointmentListDTOS.size()<=0)
-                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
+            if (appointmentListDTOS.size() <= 0)
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             PageInfo pageResult = new PageInfo(appointmentListDTOS);
-            return ServerResponse.createBySuccess("查询成功",pageResult);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
-            logger.info("查询失败",e);
-            return ServerResponse.createByErrorMessage("查询失败"+e);
+            logger.info("查询失败", e);
+            return ServerResponse.createByErrorMessage("查询失败" + e);
         }
     }
 
 
     /**
      * 预约发货
+     *
      * @param jsonStr
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse insertAppointment(String userToken,String jsonStr) {
+    public ServerResponse insertAppointment(String userToken, String jsonStr,String reservationDeliverTime) {
         try {
-            Object object = memberAPI.getMember(userToken);
-            if (object instanceof ServerResponse) {
-                return (ServerResponse) object;
-            }
-            JSONObject job = (JSONObject)object;
-            Member member = job.toJavaObject(Member.class);
-            JSONArray jsonArr = JSONArray.parseArray(jsonStr);
-            jsonArr.forEach(str ->{
+//            Object object = memberAPI.getMember(userToken);
+//            if (object instanceof ServerResponse) {
+//                return (ServerResponse) object;
+//            }
+//            JSONObject job = (JSONObject) object;
+//            Member member = job.toJavaObject(Member.class);
+            Member member=new Member();
+            JSONObject villageObj = JSONObject.parseObject(jsonStr);
+            String objList = villageObj.getString("objList");
+            JSONArray jsonArr = JSONArray.parseArray(objList);
+            jsonArr.forEach(str -> {
                 JSONObject obj = (JSONObject) str;
-                String orderId=obj.getString("orderId");
-                Date reservationDeliverTime=obj.getDate("reservationDeliverTime");
+                String orderId = obj.getString("orderId");
+                String[] orderItemsIds = obj.getString("orderItemId").split(",");
                 Order djDeliverOrder = djDeliverOrderMapper.selectByPrimaryKey(orderId);
-                OrderSplit orderSplit=new OrderSplit();
+                OrderSplit orderSplit = new OrderSplit();
                 Example example = new Example(OrderSplit.class);
                 orderSplit.setNumber("DJ" + 200000 + djDeliverOrderItemMapper.selectCountByExample(example));//要货单号
                 orderSplit.setHouseId(djDeliverOrder.getHouseId());
@@ -118,16 +133,15 @@ public class BillAppointmentService {
                 orderSplit.setMemberName(member.getName());
                 orderSplit.setMobile(member.getMobile());
                 orderSplit.setWorkerTypeId(member.getWorkerTypeId());
-                orderSplit.setStorefrontId(orderSplit.getStorefrontId());
+                orderSplit.setStorefrontId(djDeliverOrder.getStorefontId());
                 orderSplit.setCityId(djDeliverOrder.getCityId());
                 orderSplit.setOrderId(orderId);
                 orderSplit.setIsReservationDeliver("1");
-                orderSplit.setReservationDeliverTime(reservationDeliverTime);
+                orderSplit.setReservationDeliverTime(DateUtil.toDate(reservationDeliverTime));
                 billDjDeliverOrderSplitMapper.insert(orderSplit);
-                String[] orderItemsIds = obj.getString("orderItemsId").split(",");
                 for (String orderItemsId : orderItemsIds) {
                     OrderItem orderItem = djDeliverOrderItemMapper.selectByPrimaryKey(orderItemsId);
-                    OrderSplitItem orderSplitItem=new OrderSplitItem();
+                    OrderSplitItem orderSplitItem = new OrderSplitItem();
                     orderSplitItem.setOrderSplitId(orderSplit.getId());
                     orderSplitItem.setProductId(orderItem.getProductId());
                     orderSplitItem.setProductSn(orderItem.getProductSn());
@@ -145,20 +159,20 @@ public class BillAppointmentService {
                     orderSplitItem.setHouseId(orderItem.getHouseId());
                     orderSplitItem.setCityId(orderItem.getCityId());
                     orderSplitItem.setAddressId(djDeliverOrder.getAddressId());
-                    orderSplitItem.setStorefrontId(orderSplitItem.getStorefrontId());
+                    orderSplitItem.setStorefrontId(orderItem.getStorefontId());
                     StorefrontProduct storefrontProduct = billStoreFrontProductMapper.selectByPrimaryKey(orderItem.getProductId());
                     orderSplitItem.setIsDeliveryInstall(storefrontProduct.getIsDeliveryInstall());
                     orderSplitItem.setOrderItemId(orderItem.getId());
                     orderSplitItem.setIsReservationDeliver(1);//是否需要预约(1是，0否）
-                    orderSplitItem.setReservationDeliverTime(reservationDeliverTime);
+                    orderSplitItem.setReservationDeliverTime(DateUtil.toDate(reservationDeliverTime));
                     billDjDeliverOrderSplitItemMapper.insert(orderSplitItem);
-                    orderItem.setReservationDeliverTime(reservationDeliverTime);
+                    orderItem.setReservationDeliverTime(DateUtil.toDate(reservationDeliverTime));
                     djDeliverOrderItemMapper.updateByPrimaryKey(orderItem);
                 }
             });
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
-            logger.info("操作失败",e);
+            logger.info("操作失败", e);
             return ServerResponse.createByErrorMessage("操作失败");
         }
     }
@@ -166,60 +180,95 @@ public class BillAppointmentService {
 
     /**
      * 已预约
+     *
      * @param pageDTO
      * @param houseId
      * @return
      */
     public ServerResponse queryReserved(PageDTO pageDTO, String houseId) {
         try {
+            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<OrderStorefrontDTO> orderStorefrontDTOS = djDeliverOrderMapper.queryReservedStorefront(houseId);
-            List<AppointmentListDTO> appointmentListDTOS = null;
+            List<AppointmentListDTO> appointmentListDTOS = new ArrayList<>();
             orderStorefrontDTOS.forEach(orderStorefrontDTO -> {
+                orderStorefrontDTO.setStorefrontLogo(imageAddress + orderStorefrontDTO.getStorefrontLogo());
                 AppointmentListDTO appointmentListDTO = new AppointmentListDTO();
-                List<AppointmentDTO> appointmentDTOS = djDeliverOrderMapper.queryReserved(orderStorefrontDTO.getOrderId());
-                if(appointmentDTOS.size()>0) {
+                List<AppointmentDTO> appointmentDTOS = djDeliverOrderMapper.queryReserved(orderStorefrontDTO.getOrderSplitId());
+                if (appointmentDTOS.size() > 0) {
+                    appointmentDTOS.forEach(appointmentDTO -> {
+                        OrderSplit orderSplit = billDjDeliverOrderSplitMapper.selectByPrimaryKey(appointmentDTO.getOrderSplitId());
+                        Order order = djDeliverOrderMapper.selectByPrimaryKey(orderSplit.getOrderId());
+                        appointmentDTO.setOrderStatus(order.getOrderStatus());
+                        if(CommonUtil.isEmpty(order.getOrderStatus())){
+                            appointmentDTO.setOrderStatus("0");
+                        }
+                        appointmentDTO.setImage(imageAddress + appointmentDTO.getImage());
+                    });
                     appointmentListDTO.setAppointmentDTOS(appointmentDTOS);
                     appointmentListDTO.setOrderStorefrontDTO(orderStorefrontDTO);
                     appointmentListDTOS.add(appointmentListDTO);
                 }
             });
-            if(appointmentListDTOS.size()<=0)
-                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
+            if (appointmentListDTOS.size() <= 0)
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             PageInfo pageResult = new PageInfo(appointmentListDTOS);
-            return ServerResponse.createBySuccess("查询成功",pageResult);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
-            logger.info("查询失败",e);
-            return ServerResponse.createByErrorMessage("查询失败"+e);
+            logger.info("查询失败", e);
+            return ServerResponse.createByErrorMessage("查询失败" + e);
         }
     }
 
 
     /**
      * 取消预约
-     * @param orderSplitId
+     *
+     * @param orderSplitItemId
      * @return
      */
-    public ServerResponse updateReserved(String orderSplitId) {
+    public ServerResponse updateReserved(String orderSplitItemId,String productId) {
+        try {
+            Example example = new Example(OrderSplitItem.class);
+            example.createCriteria().andEqualTo(OrderSplitItem.ID, orderSplitItemId)
+                    .andIsNotNull(OrderSplitItem.SPLIT_DELIVER_ID);
+            List<OrderSplitItem> orderSplitItems = billDjDeliverOrderSplitItemMapper.selectByExample(example);
+            if (orderSplitItems.size() > 0)
+                return ServerResponse.createByErrorMessage("供应商已发货不能取消");
+            OrderSplitItem orderSplitItem = billDjDeliverOrderSplitItemMapper.selectByPrimaryKey(orderSplitItemId);
+            OrderSplit orderSplit = billDjDeliverOrderSplitMapper.selectByPrimaryKey(orderSplitItem.getOrderSplitId());
+            djDeliverOrderItemMapper.updateReserved(orderSplit.getOrderId(),productId);
+            billDjDeliverOrderSplitItemMapper.deleteByPrimaryKey(orderSplitItemId);
+            return ServerResponse.createBySuccessMessage("操作成功");
+        } catch (Exception e) {
+            logger.info("操作失败", e);
+            return ServerResponse.createByErrorMessage("操作失败" + e);
+        }
+    }
+
+
+    /**
+     * 修改预约时间
+     * @param orderSplitItemId
+     * @param reservationDeliverTime
+     * @return
+     */
+    public ServerResponse updateReservationDeliverTime(String orderSplitItemId,Date reservationDeliverTime) {
         try {
             Example example=new Example(OrderSplitItem.class);
-            example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID,orderSplitId)
+            example.createCriteria().andEqualTo(OrderSplitItem.ID,orderSplitItemId)
                     .andIsNotNull(OrderSplitItem.SPLIT_DELIVER_ID);
             List<OrderSplitItem> orderSplitItems = billDjDeliverOrderSplitItemMapper.selectByExample(example);
             if(orderSplitItems.size()>0)
-                return ServerResponse.createByErrorMessage("供应商已发货不能取消");
-            OrderSplit orderSplit = billDjDeliverOrderSplitMapper.selectByPrimaryKey(orderSplitId);
-            djDeliverOrderItemMapper.updateDjDeliverOrderItemByOrderId(orderSplit.getOrderId());
-            djDeliverOrderMapper.cancelBooking(orderSplitId);
+                return ServerResponse.createByErrorMessage("供应商已发货不能修改");
+            OrderSplitItem orderSplitItem=new OrderSplitItem();
+            orderSplitItem.setId(orderSplitItemId);
+            orderSplitItem.setReservationDeliverTime(reservationDeliverTime);
+            billDjDeliverOrderSplitItemMapper.updateByPrimaryKeySelective(orderSplitItem);
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             logger.info("操作失败",e);
             return ServerResponse.createByErrorMessage("操作失败"+e);
         }
     }
-
-
-
-
-
 }

@@ -119,4 +119,24 @@ public interface BasicsStorefrontAPI {
     ServerResponse queryIncomeRecord(@RequestParam("user_id") String userId,
                                      @RequestParam("cityId") String cityId);
 
+    /**
+     * 缴纳滞留金
+     */
+    @PostMapping("/web/paymentRetentionMoney")
+    @ApiOperation(value = "店铺-缴纳滞留金", notes = "店铺-缴纳滞留金")
+    ServerResponse paymentRetentionMoney(@RequestParam("request") HttpServletRequest request,
+                                           @RequestParam("pageDTO") PageDTO pageDTO,
+                                           @RequestParam("userId") String userId,
+                                           @RequestParam("cityId") String cityId);
+
+    /**
+     * 店铺财务-供应商结算
+     */
+    @PostMapping("/web/queryStoreSupplierSettlement")
+    @ApiOperation(value = "店铺财务-供应商结算", notes = "店铺财务-供应商结算")
+    ServerResponse queryStoreSupplierSettlement(@RequestParam("request") HttpServletRequest request,
+                                                @RequestParam("pageDTO") PageDTO pageDTO,
+                                                @RequestParam("userId") String userId,
+                                                @RequestParam("cityId") String cityId,
+                                                @RequestParam("searchKey") String searchKey);
 }

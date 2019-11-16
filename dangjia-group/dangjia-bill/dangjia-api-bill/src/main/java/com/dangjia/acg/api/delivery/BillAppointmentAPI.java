@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
 
 /**
  * Created with IntelliJ IDEA.
@@ -33,7 +34,8 @@ public interface BillAppointmentAPI {
     @ApiOperation(value = "预约发货", notes = "预约发货")
     ServerResponse insertAppointment(@RequestParam("request") HttpServletRequest request,
                                      @RequestParam("userToken") String userToken,
-                                     @RequestParam("jsonStr") String jsonStr);
+                                     @RequestParam("jsonStr") String jsonStr,
+                                     @RequestParam("reservationDeliverTime") String reservationDeliverTime);
 
     @PostMapping("/app/billAppointment/queryReserved")
     @ApiOperation(value = "已预约", notes = "已预约")
@@ -44,5 +46,12 @@ public interface BillAppointmentAPI {
     @PostMapping("/app/billAppointment/updateReserved")
     @ApiOperation(value = "取消预约", notes = "取消预约")
     ServerResponse updateReserved(@RequestParam("request") HttpServletRequest request,
-                                  @RequestParam("orderSplitId") String orderSplitId);
+                                  @RequestParam("orderSplitItemId") String orderSplitItemId,
+                                  @RequestParam("productId") String productId);
+
+    @PostMapping("/app/billAppointment/updateReservationDeliverTime")
+    @ApiOperation(value = "修改预约时间", notes = "修改预约时间")
+    ServerResponse updateReservationDeliverTime(@RequestParam("request") HttpServletRequest request,
+                                                @RequestParam("orderSplitItemId") String orderSplitItemId,
+                                                @RequestParam("reservationDeliverTime") Date reservationDeliverTime);
 }

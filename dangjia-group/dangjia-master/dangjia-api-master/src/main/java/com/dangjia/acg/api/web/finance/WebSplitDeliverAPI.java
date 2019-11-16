@@ -80,7 +80,11 @@ public interface WebSplitDeliverAPI {
     @ApiOperation(value = "结算", notes = "结算")
     ServerResponse settlemen(@RequestParam("image") String image,
                              @RequestParam("merge") String merge,
-                             @RequestParam("supplierId") String supplierId);
+                             @RequestParam("supplierId") String supplierId,
+                             @RequestParam("userId") String userId,
+                             @RequestParam("cityId") String cityId,
+                             @RequestParam("settlementAmount") Double settlementAmount,
+                             @RequestParam("sourceType") String sourceType);
 
     /**
      * 根据供应商id查看货单列表

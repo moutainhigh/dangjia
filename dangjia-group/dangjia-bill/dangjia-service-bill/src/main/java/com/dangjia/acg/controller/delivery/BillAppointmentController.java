@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
 
 /**
  * Created with IntelliJ IDEA.
@@ -30,8 +31,8 @@ public class BillAppointmentController implements BillAppointmentAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse insertAppointment(HttpServletRequest request,String userToken,String jsonStr) {
-        return billAppointmentService.insertAppointment(userToken,jsonStr);
+    public ServerResponse insertAppointment(HttpServletRequest request,String userToken,String jsonStr,String reservationDeliverTime) {
+        return billAppointmentService.insertAppointment(userToken,jsonStr,reservationDeliverTime);
     }
 
     @Override
@@ -42,7 +43,13 @@ public class BillAppointmentController implements BillAppointmentAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse updateReserved(HttpServletRequest request, String orderSplitId) {
-        return billAppointmentService.updateReserved(orderSplitId);
+    public ServerResponse updateReserved(HttpServletRequest request, String orderSplitItemId, String productId) {
+        return billAppointmentService.updateReserved(orderSplitItemId,productId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse updateReservationDeliverTime(HttpServletRequest request, String orderSplitItemId, Date reservationDeliverTime) {
+        return billAppointmentService.updateReservationDeliverTime(orderSplitItemId, reservationDeliverTime);
     }
 }

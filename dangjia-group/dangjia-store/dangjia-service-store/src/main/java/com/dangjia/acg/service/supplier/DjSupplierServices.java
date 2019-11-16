@@ -39,6 +39,7 @@ import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.modle.worker.WithdrawDeposit;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -330,10 +331,10 @@ public class DjSupplierServices {
     public ServerResponse setDjSupplierPass(String id, String applicationStatus, String cityId) {
         try {
             if (StringUtils.isEmpty(applicationStatus)) {
-                return ServerResponse.createBySuccessMessage("审核状态不能为空");
+                return ServerResponse.createByErrorMessage("审核状态不能为空");
             }
             if (StringUtils.isEmpty(id)) {
-                return ServerResponse.createBySuccessMessage("主键不能为空");
+                return ServerResponse.createByErrorMessage("主键不能为空");
             }
 
             String[] iditem = id.split(",");
@@ -404,15 +405,27 @@ public class DjSupplierServices {
     public ServerResponse myWallet(String userId, String cityId) {
         try {
             DjSupplier djSupplier = this.querySingleDjSupplier(userId, cityId);
-            Double withdrawalAmount = djSupplierMapper.myWallet(djSupplier.getId(), new Date());
             Map<String, Double> map = new HashMap<>();
-            map.put("totalAccount", djSupplier.getTotalAccount());
-            map.put("withdrawalAmount", withdrawalAmount);
-            map.put("totalAccountAmount", djSupplier.getRetentionMoney());
+            map.put("totalAccount", CommonUtil.isEmpty(djSupplier.getTotalAccount())?0:djSupplier.getTotalAccount());
+            map.put("withdrawalAmount", CommonUtil.isEmpty(djSupplier.getSurplusMoney())?0:djSupplier.getSurplusMoney());
+            map.put("totalAccountAmount", CommonUtil.isEmpty(djSupplier.getRetentionMoney())?0:djSupplier.getRetentionMoney());
             return ServerResponse.createBySuccess("查询成功", map);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    /**
+     * 计算供应商可提现金额
+     *
+     * @return
+     */
+    public void setSurplusMoney() {
+        try {
+            djSupplierMapper.setSurplusMoney();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -430,14 +443,14 @@ public class DjSupplierServices {
         try {
             DjSupplier djSupplier = this.querySingleDjSupplier(userId, cityId);
             if (null == djSupplier)
-                return ServerResponse.createBySuccessMessage("供应商不存在");
+                return ServerResponse.createByErrorMessage("供应商不存在");
             if (surplusMoney > djSupplier.getSurplusMoney())
-                return ServerResponse.createBySuccessMessage("现金额超过提现金额");
+                return ServerResponse.createByErrorMessage("提现金额超过可提现金额");
             if (surplusMoney <= 0)
-                return ServerResponse.createBySuccessMessage("提现金额不正确");
+                return ServerResponse.createByErrorMessage("提现金额不正确");
             MainUser mainUser = iStoreUserMapper.selectByPrimaryKey(djSupplier.getUserId());
-            if (!payPassword.equals(mainUser.getPayPassword()))
-                return ServerResponse.createBySuccessMessage("密码错误");
+            if (!payPassword.equals(DigestUtils.md5Hex(mainUser.getPayPassword())))
+                return ServerResponse.createByErrorMessage("密码错误");
             WithdrawDeposit withdrawDeposit = new WithdrawDeposit();
             withdrawDeposit.setMoney(new BigDecimal(surplusMoney));
             withdrawDeposit.setName(djSupplier.getCheckPeople());
@@ -477,6 +490,8 @@ public class DjSupplierServices {
             DjSupplierPayOrder djSupplierPayOrder = new DjSupplierPayOrder();
             if(sourceType==1) {
                 DjSupplier djSupplier = this.querySingleDjSupplier(userId, cityId);
+                if(djSupplier==null)
+                    return ServerResponse.createByErrorMessage("供应商不存在");
                 mainUser = iStoreUserMapper.selectByPrimaryKey(djSupplier.getUserId());
                 djSupplierPayOrder.setSupplierId(djSupplier.getId());
             }else if(sourceType==2){
@@ -485,17 +500,19 @@ public class DjSupplierServices {
                         .andEqualTo(Storefront.CITY_ID,cityId)
                         .andEqualTo(Storefront.USER_ID,userId);
                 Storefront storefront = iStoreStorefrontMapper.selectOneByExample(example);
+                if(storefront==null)
+                    return ServerResponse.createByErrorMessage("店铺不存在");
                 mainUser = iStoreUserMapper.selectByPrimaryKey(storefront.getUserId());
                 djSupplierPayOrder.setSupplierId(storefront.getId());
             }
             if(mainUser==null) {
-                return ServerResponse.createBySuccessMessage("用户不存在");
+                return ServerResponse.createByErrorMessage("用户不存在");
             }
             if (rechargeAmount <= 0) {
-                return ServerResponse.createBySuccessMessage("金额不正确");
+                return ServerResponse.createByErrorMessage("金额不正确");
             }
-            if (!payPassword.equals(mainUser.getPayPassword())) {
-                return ServerResponse.createBySuccessMessage("密码错误");
+            if (!payPassword.equals(DigestUtils.md5Hex(mainUser.getPayPassword()))) {
+                return ServerResponse.createByErrorMessage("密码错误");
             }
             djSupplierPayOrder.setDataStatus(0);
             djSupplierPayOrder.setBusinessOrderType(businessOrderType);
