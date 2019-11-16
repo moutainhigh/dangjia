@@ -24,7 +24,6 @@ import com.dangjia.acg.mapper.repair.IMendDeliverMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.mapper.supplier.IMasterSupplierMapper;
 import com.dangjia.acg.modle.account.AccountFlowRecord;
-import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.receipt.Receipt;
@@ -32,8 +31,6 @@ import com.dangjia.acg.modle.repair.MendDeliver;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.storefront.Storefront;
-import com.dangjia.acg.modle.storefront.Storefront;
-import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
 import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.github.pagehelper.PageHelper;
@@ -44,7 +41,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * ysl
@@ -218,16 +218,7 @@ public class WebSplitDeliverService {
             List<SupplierDeliverDTO> supplierDeliverDTOS = iSplitDeliverMapper.mendDeliverList(supplierId, shipAddress, beginDate, endDate, applyState);
             for (SupplierDeliverDTO supplierDeliverDTO : supplierDeliverDTOS) {
                 supplierDeliverDTO.setDeliverType(1);
-                Example example = new Example(OrderSplitItem.class);
-                example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID, supplierDeliverDTO.getId());
-                List<OrderSplitItem> orderSplitItems = iOrderSplitItemMapper.selectByExample(example);
-                Double totalAmount = 0d;
-//                Double applyMoney = 0d;
-                for (OrderSplitItem orderSplitItem : orderSplitItems) {
-//                    totalAmount += orderSplitItem.getTotalPrice();
-                    totalAmount += orderSplitItem.getPrice() * orderSplitItem.getReceive();
-//                    applyMoney += orderSplitItem.getSupCost() * orderSplitItem.getReceive();
-                }
+                Double totalAmount = iOrderSplitItemMapper.getSplitDeliverSellPrice(supplierDeliverDTO.getId());
                 supplierDeliverDTO.setTotalAmount(totalAmount);
             }
             List<SupplierDeliverDTO> supplierDeliverDTOS1 = iMendDeliverMapper.mendDeliverList(supplierId, shipAddress, beginDate, endDate, applyState);
@@ -366,10 +357,12 @@ public class WebSplitDeliverService {
                             supplierDeliverDTO.setId(splitDeliver.getId());
                             supplierDeliverDTO.setNumber(splitDeliver.getNumber());
                             supplierDeliverDTO.setShipAddress(splitDeliver.getShipAddress());
-                            supplierDeliverDTO.setTotalAmount(splitDeliver.getTotalAmount());
+                            Double totalAmount = iOrderSplitItemMapper.getSplitDeliverSellPrice(supplierDeliverDTO.getId());
+                            supplierDeliverDTO.setTotalAmount(totalAmount);
+//                            supplierDeliverDTO.setTotalAmount(splitDeliver.getTotalAmount());
                             supplierDeliverDTO.setApplyMoney(splitDeliver.getApplyMoney());
                             supplierDeliverDTO.setDeliverType(1);
-                            sd += splitDeliver.getTotalAmount();
+                            sd += splitDeliver.getApplyMoney();
                         }
                     } else if (deliverType == 2) {
                         MendDeliver mendDeliver = iMendDeliverMapper.selectClsd(id, shipAddress, beginDate, endDate);
@@ -381,7 +374,7 @@ public class WebSplitDeliverService {
                             supplierDeliverDTO.setApplyMoney(mendDeliver.getApplyMoney());
                             supplierDeliverDTO.setTotalAmount(mendDeliver.getTotalAmount());
                             supplierDeliverDTO.setDeliverType(2);
-                            md += mendDeliver.getTotalAmount();
+                            md += mendDeliver.getApplyMoney();
                         }
                     }
                     if (null != supplierDeliverDTO) {
