@@ -12,6 +12,11 @@ import java.util.Date;
 @Data
 public class DOrderInfoDTO {
 
+
+    @ApiModelProperty("业务订单id")
+    private String pboId;
+    @ApiModelProperty("用户id")
+    private String memberId;
     @ApiModelProperty("订单id")
     private String id;
     @ApiModelProperty("房子名称")
@@ -41,5 +46,10 @@ public class DOrderInfoDTO {
     @ApiModelProperty("支付类型  1工序支付任务,2补货补人工 , 3,充值，4待付款进来只付材料, 5验房分销, 6换货单,7:设计精算补单,9:工人保险")
     private Integer type; // 1工序支付任务,2补货补人工 ,4待付款进来只付材料, 5验房分销, 6换货单
 
+    @ApiModelProperty("支付回执单图片（多张，逗号分隔）")
+    private String pboImage;//
 
+
+    @ApiModelProperty("取消时间")
+    private Date cancellationTime;
 }

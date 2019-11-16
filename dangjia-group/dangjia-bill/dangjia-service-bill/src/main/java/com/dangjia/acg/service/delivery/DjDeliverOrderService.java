@@ -947,6 +947,25 @@ public class DjDeliverOrderService {
             dOrderArrFineInfoDTO.setHouseName(orderInfoDTOS.get(0).getHouseName());
             dOrderArrFineInfoDTO.setOrderNumber(orderInfoDTOS.get(0).getOrderNumber());
             dOrderArrFineInfoDTO.setOrderPayTime(orderInfoDTOS.get(0).getOrderPayTime());
+            dOrderArrFineInfoDTO.setPboId(orderInfoDTOS.get(0).getPboId());
+            if(orderInfoDTOS.get(0).getState() == 1 || orderInfoDTOS.get(0).getState() == 2){
+                dOrderArrFineInfoDTO.setState(0);
+            }else if(orderInfoDTOS.get(0).getState() == 3){
+                dOrderArrFineInfoDTO.setState(1);
+            }
+
+            if(orderInfoDTOS.get(0).getPboImage() != null && orderInfoDTOS.get(0).getPboImage() != ""){
+                List<String> result = Arrays.asList(orderInfoDTOS.get(0).getPboImage().split(","));
+                List<String> strList = new ArrayList<>();
+                for (int i = 0; i < result.size(); i++) {
+                    String a = result.get(i);
+                    String str = imageAddress + result.get(i);
+                    strList.add(str);
+                }
+                dOrderArrFineInfoDTO.setImageList(strList);
+            }
+
+                    
         }
         dOrderArrFineInfoDTO.setList(orderInfoDTOSs);
         return ServerResponse.createBySuccess("查询成功", dOrderArrFineInfoDTO);
