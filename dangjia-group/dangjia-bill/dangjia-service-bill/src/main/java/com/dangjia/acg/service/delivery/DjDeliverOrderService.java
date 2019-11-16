@@ -4,10 +4,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.UserAPI;
 import com.dangjia.acg.api.app.house.HouseAPI;
 import com.dangjia.acg.api.app.member.MemberAPI;
+import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.ServerCode;
-import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
@@ -53,8 +53,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.dangjia.acg.common.model.PageDTO;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -104,6 +102,8 @@ public class DjDeliverOrderService {
     @Autowired
     private IBillStorefrontMapper iBillStorefrontMapper;
 
+    @Autowired
+    private ForMasterAPI forMasterAPI;
 
     public Object getHouse(String memberId, HouseResult houseResult) {
         //该城市该用户所有开工房产
@@ -838,11 +838,9 @@ public class DjDeliverOrderService {
 
     /**
      *@param orderId
-     * @param orderStatus
-     * @param userToken
      * @return
      */
-    public ServerResponse deliverOrderItemDetail(String orderId,String  orderStatus,String  userToken ) {
+    public ServerResponse deliverOrderItemDetail(String orderId ) {
         try {
 
             Order order= iBillDjDeliverOrderMapper.selectByPrimaryKey(orderId);
@@ -854,14 +852,18 @@ public class DjDeliverOrderService {
                 return ServerResponse.createByErrorMessage("该房产不存在");
             }
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class); //图片地址
-
-
-//            List<Order> orderList=iBillDjDeliverOrderMapper.selectOrderDetailById(orderId);
-//            for (Order order: orderList ) {
-//
-//            }
-
-            return ServerResponse.createBySuccess("查询成功", null);
+            List<AppOrderDetailDTO> orderList=iBillDjDeliverOrderMapper.selectOrderDetailById(order.getHouseId(),order.getId());
+            for (AppOrderDetailDTO appOrderDetailDTO: orderList ) {
+                List<AppOrderItemDetailDTO> list= iBillDjDeliverOrderMapper.selectOrderItemDetailById(appOrderDetailDTO.getOrderId());
+                for (AppOrderItemDetailDTO appOrderItemDetailDTO :list) {
+                    String productId= appOrderItemDetailDTO.getProductId();
+                  //  String brandName=iBrandSeriesMapper.brandName(productId);
+                    String brandName=forMasterAPI.brandName("",productId);  //通过商品id去关联，然后组合商品名称
+                    appOrderItemDetailDTO.setBrandName(brandName);
+                }
+                appOrderDetailDTO.setList(list);
+            }
+            return ServerResponse.createBySuccess("查询成功", orderList);
 
         } catch (Exception e) {
             e.printStackTrace();

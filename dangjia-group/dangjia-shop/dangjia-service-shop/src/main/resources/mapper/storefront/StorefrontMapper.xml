@@ -233,7 +233,7 @@
 
     <select id="myWallet" resultType="java.lang.Double">
         SELECT
-        sum(total_amount)
+        IFNULL(sum(total_amount),0)
         FROM
         dj_deliver_split_deliver
         WHERE

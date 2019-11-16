@@ -363,16 +363,15 @@ public class StorefrontService {
             }
             Double withdrawalAmount = istorefrontMapper.myWallet(storefront.getId(),new Date());
             Map<String, Double> map = new HashMap<>();
-            map.put("totalAccount", storefront.getTotalAccount());
-            map.put("withdrawalAmount", withdrawalAmount);
-            map.put("totalAccountAmount", storefront.getRetentionMoney());
+            map.put("totalAccount", storefront.getTotalAccount()!=null?storefront.getTotalAccount():0d);//账户总额
+            map.put("withdrawalAmount", storefront.getSurplusMoney()!=null?storefront.getSurplusMoney():0d);//可提现余额
+            map.put("totalAccountAmount", storefront.getRetentionMoney()!=null?storefront.getRetentionMoney():0d);//滞留金
             return ServerResponse.createBySuccess("查询成功", map);
         } catch (Exception e) {
             logger.error("店铺-我的钱包异常：", e);
             return ServerResponse.createByErrorMessage("店铺-我的钱包异常");
         }
     }
-
 
 
     /**
@@ -418,9 +417,10 @@ public class StorefrontService {
                 return ServerResponse.createByErrorMessage("提现金额不正确");
             }
             MainUser mainUser = iStoreUserMapper.selectByPrimaryKey(storefront.getUserId());
-            if (!payPassword.equals(mainUser.getPayPassword())){
+            if (!Utils.md5(payPassword).equals(mainUser.getPayPassword())){
                 return ServerResponse.createByErrorMessage("密码错误");
             }
+            //提现申请
             WithdrawDeposit withdrawDeposit = new WithdrawDeposit();
             withdrawDeposit.setMoney(new BigDecimal(surplusMoney));
             withdrawDeposit.setName(storefront.getStorekeeperName());
@@ -460,12 +460,10 @@ public class StorefrontService {
                 MainUser mainUser=null;
                 DjSupplierPayOrder djSupplierPayOrder = new DjSupplierPayOrder();
                 if(sourceType==1) {
-
                     Storefront storefront = storefrontService.queryStorefrontByUserID(userId, cityId);
                     if (storefront == null) {
                         return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
                     }
-                    //DjSupplier djSupplier = this.querySingleDjSupplier(userId, cityId);
                     mainUser = iStoreUserMapper.selectByPrimaryKey(storefront.getUserId());
                     djSupplierPayOrder.setSupplierId(storefront.getId());
                 }else if(sourceType==2){
@@ -478,13 +476,13 @@ public class StorefrontService {
                     djSupplierPayOrder.setSupplierId(storefront.getId());
                 }
                 if(mainUser==null) {
-                    return ServerResponse.createBySuccessMessage("用户不存在");
+                    return ServerResponse.createByErrorMessage("用户不存在");
                 }
                 if (rechargeAmount <= 0) {
-                    return ServerResponse.createBySuccessMessage("金额不正确");
+                    return ServerResponse.createByErrorMessage("金额不正确");
                 }
-                if (!payPassword.equals(mainUser.getPayPassword())) {
-                    return ServerResponse.createBySuccessMessage("密码错误");
+                if (!Utils.md5(payPassword).equals(mainUser.getPayPassword())) {
+                    return ServerResponse.createByErrorMessage("密码错误");
                 }
                 djSupplierPayOrder.setDataStatus(0);
                 djSupplierPayOrder.setBusinessOrderType(businessOrderType);

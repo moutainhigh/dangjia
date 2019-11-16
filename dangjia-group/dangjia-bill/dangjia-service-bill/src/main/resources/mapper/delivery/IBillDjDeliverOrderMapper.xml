@@ -529,4 +529,32 @@
         <!---->
         <!---->
     <!--</select>-->
+    <select id="selectOrderDetailById" resultType="com.dangjia.acg.dto.delivery.AppOrderDetailDTO">
+        select
+        ddoi.house_id as houseId,-- 房子id
+        ddo.id as orderId,-- 订单编号
+        ddo.order_generation_time as orderGenerationTime,-- 创建时间
+        ddo.total_amount as totalAmount,-- 商品总额
+        ddo.total_transportation_cost as totalTransportationCost,-- 运费
+        ddo.total_stevedorage_cost as totalStevedorageCost,-- 搬运费
+        ddo.total_discount_price as totalDiscountPrice-- 优惠卷名称
+        from  dj_deliver_order ddo
+        INNER JOIN dj_deliver_order_item  ddoi  on ddo.id=ddoi.order_id
+        inner join dj_basics_storefront  dbs on  ddoi.storefont_id=dbs.id
+        where ddo.house_id=#{houseId} and ddo.id=#{orderId}
+    </select>
+
+    <select id="selectOrderItemDetailById" resultType="com.dangjia.acg.dto.delivery.AppOrderItemDetailDTO">
+        select
+        ddoi.product_id as productId,
+        dbs.storefront_name as storefrontName ,-- 店铺名称
+        ddoi.product_name as productName,-- 商品名称
+        ddoi.shop_count as shopCount,-- 购买数量
+        -- 规格
+        ddoi.price,-- 单位
+        dbs.mobile-- 电话
+        from dj_deliver_order_item ddoi inner join dj_basics_storefront dbs
+        on ddoi.storefont_id=dbs.id  inner join dj_basics_product_template dbpt
+        on dbpt.id=ddoi.product_id  where ddoi.order_id=#{orderId}
+    </select>
 </mapper>

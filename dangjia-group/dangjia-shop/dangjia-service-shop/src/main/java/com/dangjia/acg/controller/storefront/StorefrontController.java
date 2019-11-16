@@ -93,7 +93,7 @@ public class StorefrontController implements BasicsStorefrontAPI {
     @Override
     @ApiMethod
     public ServerResponse operationStorefrontRecharge(String userId, String cityId, String payState, Double rechargeAmount, String payPassword, String businessOrderType, Integer sourceType) {
-        return storefrontService. operationStorefrontRecharge( userId,  cityId,  payState,  rechargeAmount,  payPassword,  businessOrderType,  sourceType) ;
+        return storefrontService.operationStorefrontRecharge( userId,  cityId,  payState,  rechargeAmount,  payPassword,  businessOrderType,  sourceType) ;
     }
 
 
