@@ -28,4 +28,9 @@ public class AppointmentDTO {
     private String unitName;
     private String orderSplitItemId;
     private String orderSplitId;
+    private String orderId;
+    private Double totalPrice;
+    private String valueNameArr;
+    private String valueIdArr;
+    private String orderStatus;
 }

@@ -94,30 +94,124 @@ public interface BasicsStorefrontAPI {
      */
     @PostMapping("/web/queryStorefrontReflect")
     @ApiOperation(value = "店铺-店铺体现", notes = "店铺-店铺体现")
-    ServerResponse operationStorefrontReflect(@RequestParam("request") HttpServletRequest request,
-                                         @RequestParam("pageDTO") PageDTO pageDTO,
-                                         @RequestParam("userId") String userId,
-                                         @RequestParam("cityId") String cityId);
-
-
-
+    ServerResponse operationStorefrontReflect(@RequestParam("userId") String userId,
+                                              @RequestParam("cityId") String cityId,
+                                              @RequestParam("bankCard") String bankCard,
+                                              @RequestParam("surplusMoney") Double surplusMoney,
+                                              @RequestParam("payPassword") String payPassword);
     /**
-     * 充值
+     * 1.店铺充值
+     * 2.缴纳滞留金
      */
     @PostMapping("/web/queryStorefrontRecharge")
     @ApiOperation(value = "店铺-店铺充值", notes = "店铺-店铺充值")
-    ServerResponse operationStorefrontRecharge(@RequestParam("request") HttpServletRequest request,
-                                          @RequestParam("pageDTO") PageDTO pageDTO,
-                                          @RequestParam("userId") String userId,
-                                          @RequestParam("cityId") String cityId);
+    ServerResponse operationStorefrontRecharge(
+            @RequestParam("userId") String userId,
+            @RequestParam("cityId") String cityId,
+            @RequestParam("payState") String payState,
+            @RequestParam("rechargeAmount") Double rechargeAmount,
+            @RequestParam("payPassword") String payPassword,
+            @RequestParam("businessOrderType") String businessOrderType,
+            @RequestParam("sourceType") Integer sourceType);
+
+
 
     /**
-     * 缴纳滞留金
+     * 店铺财务-供应商结算
      */
-    @PostMapping("/web/paymentRetentionMoney")
-    @ApiOperation(value = "店铺-缴纳滞留金", notes = "店铺-缴纳滞留金")
-    ServerResponse paymentRetentionMoney(@RequestParam("request") HttpServletRequest request,
-                                           @RequestParam("pageDTO") PageDTO pageDTO,
-                                           @RequestParam("userId") String userId,
-                                           @RequestParam("cityId") String cityId);
+    @PostMapping("/web/queryStoreSupplierSettlement")
+    @ApiOperation(value = "店铺财务-供应商结算", notes = "店铺财务-供应商结算")
+    ServerResponse queryStoreSupplierSettlement(@RequestParam("request") HttpServletRequest request,
+                                                @RequestParam("pageDTO") PageDTO pageDTO,
+                                                @RequestParam("userId") String userId,
+                                                @RequestParam("cityId") String cityId,
+                                                @RequestParam("searchKey") String searchKey);
+
+
+    /**
+     * 店铺-收入记录
+     * @param request
+     * @param pageDTO
+     * @param userId
+     * @param cityId
+     * @param houseOrderId
+     * @return
+     */
+    @PostMapping("/web/storeExpenseRecord")
+    @ApiOperation(value = "店铺-收入记录", notes = "店铺-收入记录")
+    ServerResponse storeExpenseRecord(@RequestParam("request") HttpServletRequest request,
+                                                @RequestParam("pageDTO") PageDTO pageDTO,
+                                                @RequestParam("userId") String userId,
+                                                @RequestParam("cityId") String cityId,
+                                                @RequestParam("houseOrderId") String houseOrderId);
+
+    /**
+     * 店铺-收入记录-货单详情
+     * @param request
+     * @param pageDTO
+     * @param userId
+     * @param cityId
+     * @param houseOrderId
+     * @return
+     */
+    @PostMapping("/web/storeExpenseRecordOrderDetail")
+    @ApiOperation(value = "店铺-收入记录-货单详情", notes = "店铺-收入记录-货单详情")
+    ServerResponse storeExpenseRecordOrderDetail(@RequestParam("request") HttpServletRequest request,
+                                      @RequestParam("pageDTO") PageDTO pageDTO,
+                                      @RequestParam("userId") String userId,
+                                      @RequestParam("cityId") String cityId,
+                                      @RequestParam("houseOrderId") String houseOrderId);
+
+    /**
+     * 店铺-收入记录-查看清单
+     * @param request
+     * @param pageDTO
+     * @param userId
+     * @param cityId
+     * @param houseOrderId
+     * @return
+     */
+    @PostMapping("/web/storeExpenseRecordGoodDetail")
+    @ApiOperation(value = "店铺-收入记录-查看清单", notes = "店铺-收入记录-查看清单")
+    ServerResponse storeExpenseRecordGoodDetail(@RequestParam("request") HttpServletRequest request,
+                      @RequestParam("pageDTO") PageDTO pageDTO,
+                      @RequestParam("userId") String userId,
+                      @RequestParam("cityId") String cityId,
+                      @RequestParam("houseOrderId") String houseOrderId);
+
+
+    /**
+     * 店铺-支出记录
+     * @param request
+     * @param pageDTO
+     * @param userId
+     * @param cityId
+     * @param houseOrderId
+     * @return
+     */
+    @PostMapping("/web/storeRevenueRecord")
+    @ApiOperation(value = "店铺-支出记录", notes = "店铺-支出记录")
+    ServerResponse storeRevenueRecord(@RequestParam("request") HttpServletRequest request,
+                                      @RequestParam("pageDTO") PageDTO pageDTO,
+                                      @RequestParam("userId") String userId,
+                                      @RequestParam("cityId") String cityId,
+                                      @RequestParam("houseOrderId") String houseOrderId);
+
+    /**
+     * 店铺-支出记录-查看货单详情
+     * @param request
+     * @param pageDTO
+     * @param userId
+     * @param cityId
+     * @param houseOrderId
+     * @return
+     */
+    @PostMapping("/web/storeRevenueRecordOrderDetail")
+    @ApiOperation(value = "店铺-支出记录-查看货单详情", notes = "店铺-支出记录-查看货单详情")
+    ServerResponse storeRevenueRecordOrderDetail(@RequestParam("request") HttpServletRequest request,
+                                      @RequestParam("pageDTO") PageDTO pageDTO,
+                                      @RequestParam("userId") String userId,
+                                      @RequestParam("cityId") String cityId,
+                                      @RequestParam("houseOrderId") String houseOrderId);
+
 }

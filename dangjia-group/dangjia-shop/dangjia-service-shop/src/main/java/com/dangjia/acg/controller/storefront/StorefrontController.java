@@ -86,20 +86,52 @@ public class StorefrontController implements BasicsStorefrontAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse operationStorefrontReflect(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId) {
-        return storefrontService.operationStorefrontReflect(request,pageDTO,userId,cityId);
+    public ServerResponse operationStorefrontReflect(String userId, String cityId, String bankCard, Double surplusMoney, String payPassword) {
+        return storefrontService.operationStorefrontReflect( userId,  cityId,  bankCard,  surplusMoney,  payPassword) ;
     }
 
     @Override
     @ApiMethod
-    public ServerResponse operationStorefrontRecharge(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId) {
-        return storefrontService.operationStorefrontRecharge(request,pageDTO,userId,cityId);
+    public ServerResponse operationStorefrontRecharge(String userId, String cityId, String payState, Double rechargeAmount, String payPassword, String businessOrderType, Integer sourceType) {
+        return storefrontService.operationStorefrontRecharge( userId,  cityId,  payState,  rechargeAmount,  payPassword,  businessOrderType,  sourceType) ;
     }
 
     @Override
     @ApiMethod
-    public ServerResponse paymentRetentionMoney(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId) {
-        return storefrontService.paymentRetentionMoney(request,pageDTO,userId,cityId);
+    public ServerResponse queryStoreSupplierSettlement(HttpServletRequest request, PageDTO pageDTO,
+                                                       String userId, String cityId, String searchKey) {
+        return storefrontService.queryStoreSupplierSettlement(pageDTO, userId, cityId, searchKey);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse storeExpenseRecord(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String houseOrderId) {
+        return storefrontService.storeExpenseRecord(request,pageDTO,userId,cityId,houseOrderId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse storeExpenseRecordOrderDetail(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String houseOrderId) {
+        return storefrontService.storeExpenseRecordOrderDetail(request,pageDTO,userId,cityId,houseOrderId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse storeExpenseRecordGoodDetail(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String houseOrderId) {
+        return storefrontService.storeExpenseRecordGoodDetail(request,pageDTO,userId,cityId,houseOrderId);
+    }
+
+
+    @Override
+    @ApiMethod
+    public ServerResponse storeRevenueRecord(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String houseOrderId) {
+        return storefrontService.storeRevenueRecord(request,pageDTO,userId,cityId,houseOrderId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse storeRevenueRecordOrderDetail(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String houseOrderId) {
+        return storefrontService.storeRevenueRecordOrderDetail(request,pageDTO,userId,cityId,houseOrderId);
     }
 
 

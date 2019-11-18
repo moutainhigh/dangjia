@@ -299,16 +299,17 @@ public class MendMaterielService {
                     map.put(Warehouse.RECEIVE, warehouse.getShopCount() - (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()) - warehouse.getAskCount());
                 }
             }
-            List<String> supplierId = splitDeliverMapper.getSupplierGoodsId(mendOrder.getHouseId(), mendMateriel.getProductSn());
-            List<DjSupplier> djSuppliers = new ArrayList<DjSupplier>();
-            if (supplierId.size() > 0) {
-                for (int i = 0; i < supplierId.size(); i++) {
-                    //Supplier supplier = forMasterAPI.getSupplier(house.getCityId(), supplierId.get(i));
-                    DjSupplier djSupplier = djSupplierAPI.queryDjSupplierByPass(supplierId.get(i));
-                    djSuppliers.add(djSupplier);
-                }
-                map.put("suppliers", djSuppliers);
-            }
+            List<Map<String,Object>> supplierIdList = splitDeliverMapper.getSupplierGoodsId(mendOrder.getHouseId(), mendMateriel.getProductSn());
+//            List<DjSupplier> djSuppliers = new ArrayList<DjSupplier>();
+//            if (supplierId.size() > 0) {
+//                for (int i = 0; i < supplierId.size(); i++) {
+//                    //Supplier supplier = forMasterAPI.getSupplier(house.getCityId(), supplierId.get(i));
+//                    DjSupplier djSupplier = djSupplierAPI.queryDjSupplierByPass(supplierId.get(i));
+//                    djSuppliers.add(djSupplier);
+//                }
+            if (supplierIdList!=null)
+                map.put("suppliers", supplierIdList);
+//            }
             mendMaterielMaps.add(map);
         }
         return ServerResponse.createBySuccess("查询成功", mendMaterielMaps);

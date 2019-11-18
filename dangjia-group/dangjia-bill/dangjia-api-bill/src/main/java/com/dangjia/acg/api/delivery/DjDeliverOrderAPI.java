@@ -46,6 +46,22 @@ public interface DjDeliverOrderAPI {
                                   @RequestParam("houseId") String houseId);
 
 
+    @PostMapping("web/design/queryOrderInfo")
+    @ApiOperation(value = "查询订单列表", notes = "查询订单列表")
+    ServerResponse queryOrderInfo(@RequestParam("request") HttpServletRequest request,
+                                  @RequestParam("pageDTO") PageDTO pageDTO,
+                                  @RequestParam("userId") String userId,
+                                  @RequestParam("cityId") String cityId,
+                                  @RequestParam("orderKey") String orderKey,
+                                  @RequestParam("orderKey") int state);
+
+    @PostMapping("web/design/queryOrderFineInfo")
+    @ApiOperation(value = "查询订单详情", notes = "查询订单详情")
+    ServerResponse queryOrderFineInfo(@RequestParam("request") HttpServletRequest request,
+                                  @RequestParam("pageDTO") PageDTO pageDTO,
+                                  @RequestParam("orderId") String orderId);
+
+
     @PostMapping("app/order/queryDeliverOrderListByStatus")
     @ApiOperation(value = "根据订单状态查询订单详情列表", notes = "根据订单状态查询订单详情")
     ServerResponse queryDeliverOrderListByStatus(@RequestParam("pageDTO") PageDTO pageDTO,
@@ -55,8 +71,30 @@ public interface DjDeliverOrderAPI {
                                                  @RequestParam("orderStatus") String orderStatus);
 
     @PostMapping("app/deliverOrderItem/deliverOrderItemDetail")
-    @ApiOperation(value = "新版订单详情明细", notes = "新版订单详情明细")
-    ServerResponse deliverOrderItemDetail(@RequestParam("orderId") String orderId,@RequestParam("orderStatus")  String  orderStatus,@RequestParam("userToken")  String  userToken  );
+    @ApiOperation(value = "订单详情明细", notes = "订单详情明细")
+    ServerResponse deliverOrderItemDetail(@RequestParam("orderId") String orderId  );
 
+//    /**
+//     * 取消订单
+//     *
+//     * @param userToken
+//     * @param orderId
+//     * @return
+//     */
+//    @PostMapping("app/order/cancelBusinessOrderById")
+//    @ApiOperation(value = "取消订单", notes = "取消订单")
+//    ServerResponse cancelBusinessOrderById(@RequestParam("userToken") String userToken, @RequestParam("orderId") String orderId);
+//
+//
+//    /**
+//     * 删除已经购物的订单
+//     *
+//     * @param userToken
+//     * @param orderId
+//     * @return
+//     */
+//    @PostMapping("app/order/delBusinessOrderById")
+//    @ApiOperation(value = "删除订单", notes = "删除订单")
+//    ServerResponse delBusinessOrderById(@RequestParam("userToken") String userToken, @RequestParam("orderId") String orderId);
 
 }

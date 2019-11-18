@@ -1,11 +1,10 @@
 package com.dangjia.acg.mapper.delivery;
 
 
-import com.dangjia.acg.dto.delivery.AppointmentDTO;
-import com.dangjia.acg.dto.delivery.DjDeliverOrderDTO;
-import com.dangjia.acg.dto.delivery.HouseFlowDataDTO;
-import com.dangjia.acg.dto.delivery.OrderStorefrontDTO;
+import com.dangjia.acg.dto.delivery.*;
 import com.dangjia.acg.dto.member.WorkerTypeDTO;
+import com.dangjia.acg.dto.order.DOrderFineInfoDTO;
+import com.dangjia.acg.dto.order.DOrderInfoDTO;
 import com.dangjia.acg.dto.order.DecorationCostDTO;
 import com.dangjia.acg.dto.order.DecorationCostItemDTO;
 import com.dangjia.acg.modle.deliver.Order;
@@ -14,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -56,10 +56,10 @@ public interface IBillDjDeliverOrderMapper extends Mapper<Order> {
 
     /**
      * 已预约发货商品
-     * @param orderId
+     * @param orderSplitId
      * @return
      */
-    List<AppointmentDTO> queryReserved(@Param("orderId") String orderId);
+    List<AppointmentDTO> queryReserved(@Param("orderSplitId") String orderSplitId);
 
 
     /**
@@ -100,6 +100,16 @@ public interface IBillDjDeliverOrderMapper extends Mapper<Order> {
      */
     List<DecorationCostDTO> searchDecorationCategoryLabelList(@Param("houseId") String  houseId);
 
-    List<DjDeliverOrderDTO> selectDeliverOrderByHouse(String cityId, String houseId, String orderStatus);
 
+    List<DOrderInfoDTO> queryOrderInfo(Map<String,Object> map);
+
+
+    List<DOrderFineInfoDTO> queryOrderFineInfo(@Param("orderId") String  orderId);
+
+
+    List<DjDeliverOrderDTO> selectDeliverOrderByHouse(@Param("cityId") String cityId, @Param("houseId") String houseId, @Param("orderStatus") String orderStatus);
+
+    List<AppOrderDetailDTO>  selectOrderDetailById(@Param("houseId") String  houseId, @Param("orderId") String  orderId);
+
+    List<AppOrderItemDetailDTO> selectOrderItemDetailById(@Param("orderId") String  orderId);
 }

@@ -20,6 +20,7 @@ import com.dangjia.acg.mapper.delivery.ISplitDeliverMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.OrderItem;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
@@ -27,8 +28,7 @@ import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
-import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
-import com.dangjia.acg.modle.sup.Supplier;
+import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
@@ -76,6 +76,8 @@ public class SplitDeliverService {
 
     @Autowired
     private IOrderItemMapper orderItemMapper;
+    @Autowired
+    private IMasterStorefrontProductMapper iMasterStorefrontProductMapper;
     /**
      * 部分收货
      */
@@ -291,10 +293,11 @@ public class SplitDeliverService {
                 if (orderSplitItem.getReceive() == null) {
                     orderSplitItem.setReceive(0D);
                 }
-                DjBasicsProductTemplate product = forMasterAPI.getProduct(house.getCityId(), orderSplitItem.getProductId());
+//                DjBasicsProductTemplate product = forMasterAPI.getProduct(house.getCityId(), orderSplitItem.getProductId());
+                StorefrontProduct storefrontProduct = iMasterStorefrontProductMapper.selectByPrimaryKey(orderSplitItem.getProductId());
                 SplitDeliverItemDTO splitDeliverItemDTO = new SplitDeliverItemDTO();
-                splitDeliverItemDTO.setImage(address + product.getImage());
-                splitDeliverItemDTO.setProductName(product.getName());
+                splitDeliverItemDTO.setImage(address + storefrontProduct.getImage());
+                splitDeliverItemDTO.setProductName(storefrontProduct.getProductName());
                 if (splitDeliver.getShippingState() == 2 || splitDeliver.getShippingState() == 4 || splitDeliver.getShippingState() == 5) {
                     splitDeliverItemDTO.setTotalPrice(orderSplitItem.getPrice() * orderSplitItem.getReceive());
                     sumprice += orderSplitItem.getPrice() * orderSplitItem.getReceive();

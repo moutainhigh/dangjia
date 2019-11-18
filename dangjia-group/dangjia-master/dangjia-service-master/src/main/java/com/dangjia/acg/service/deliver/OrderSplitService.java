@@ -86,16 +86,13 @@ public class OrderSplitService {
     private IComplainMapper complainMapper;
     @Autowired
     private ConfigMessageService configMessageService;
-
     @Autowired
     private DjSupplierAPI djSupplierAPI ;
-
     @Autowired
     private BasicsStorefrontAPI basicsStorefrontAPI;
-
-
     @Autowired
     private DjSupApplicationProductAPI djSupApplicationProductAPI;
+
     /**
      * 修改 供应商结算状态
      * id 供应商结算id
@@ -290,6 +287,10 @@ public class OrderSplitService {
      */
     public ServerResponse sentSupplier(String orderSplitId, String splitItemList,String cityId,String userId,String installName,
                                        String installMobile, String deliveryName, String deliveryMobile) {
+
+
+
+
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
             OrderSplit orderSplit = orderSplitMapper.selectByPrimaryKey(orderSplitId);
@@ -302,118 +303,82 @@ public class OrderSplitService {
                 JSONObject obj = arr.getJSONObject(i);
                 String id = obj.getString("id");
                 String supplierId = obj.getString("supplierId");
-                //Supplier supplier = forMasterAPI.getSupplier(house.getCityId(), supplierId);
-                DjSupplier djSupplier =djSupplierAPI.queryDjSupplierByPass(supplierId);
-                JsmsUtil.sendSupplier(djSupplier.getTelephone(), address + "submitNumber?cityId="+house.getCityId());
-
-
-                OrderSplitItem orderSplitItem = orderSplitItemMapper.selectByPrimaryKey(id);
-                Example example = new Example(SplitDeliver.class);
-                example.createCriteria().andEqualTo(SplitDeliver.HOUSE_ID, orderSplit.getHouseId()).andEqualTo(SplitDeliver.SUPPLIER_ID, supplierId)
-                        .andEqualTo(SplitDeliver.SHIPPING_STATE, 0).andEqualTo(SplitDeliver.ORDER_SPLIT_ID, orderSplitId);
-                List<SplitDeliver> splitDeliverList = splitDeliverMapper.selectByExample(example);
-                SplitDeliver splitDeliver;
-                if (splitDeliverList.size() > 0) {
-                    splitDeliver = splitDeliverList.get(0);
-                    //2代表已收货,且是非平台
-                    if (splitDeliver.getShippingState() == 2 && djSupplier.getIsNonPlatformSupperlier()==1) {
-                        splitDeliver.setInstallMobile(installMobile);// 安装人号码
-                        splitDeliver.setInstallName(installName);//安装人姓名
-                    }
+                DjSupplier djSupplier = djSupplierAPI.queryDjSupplierByPass(supplierId);
+                if (djSupplier == null) {
+                    //非平台供应商
                 } else {
-                    Storefront storefront= basicsStorefrontAPI.queryStorefrontByUserID(userId,cityId);
-                    if(storefront==null)
-                    {
-                        return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
-                    }
-                    example = new Example(SplitDeliver.class);
-                    splitDeliver = new SplitDeliver();
-                    splitDeliver.setNumber(orderSplit.getNumber() + "00" + splitDeliverMapper.selectCountByExample(example));//发货单号
-                    splitDeliver.setHouseId(house.getId());
-                    splitDeliver.setOrderSplitId(orderSplitId);
-                    splitDeliver.setTotalAmount(0.0);
-                    splitDeliver.setDeliveryFee(0.0);
-                    splitDeliver.setApplyMoney(0.0);
-                    splitDeliver.setShipName(member.getNickName() == null ? member.getName() : member.getNickName());
-                    splitDeliver.setShipMobile(member.getMobile());
-                    splitDeliver.setShipAddress(house.getHouseName());
-                    splitDeliver.setSupplierId(supplierId);//供应商id
-                    splitDeliver.setSupplierTelephone(djSupplier.getTelephone());//供应商联系电话
-                    splitDeliver.setSupplierName(djSupplier.getName());//供应商供应商名称
-                    splitDeliver.setSupervisorId(supervisor.getId());//管家id
-                    splitDeliver.setSubmitTime(new Date());
-                    splitDeliver.setSupState(0);
-                    splitDeliver.setShippingState(0);//待发货状态
-                    splitDeliver.setApplyState(null);
-                    splitDeliver.setCityId(cityId);//城市id
-                    splitDeliver.setStorefrontId(storefront.getId());//店铺id
-                    //判断是非平台供应商
-
-                    if(djSupplier.getIsNonPlatformSupperlier()!=null)
-                    {
-                        if(djSupplier.getIsNonPlatformSupperlier()==1)
-                        {
-                            splitDeliver.setDeliveryName(deliveryName);//送货人姓名
-                            splitDeliver.setDeliveryMobile(deliveryMobile);//送货人号码
+                    //正常状况下供应商
+                    JsmsUtil.sendSupplier(djSupplier.getTelephone(), address + "submitNumber?cityId=" + house.getCityId());
+                    //配送状态（0待发货,1已发待收货,2已收货,3取消,4部分收,5已结算,6材料员撤回(只待发货才能撤回)）
+                    OrderSplitItem orderSplitItem = orderSplitItemMapper.selectByPrimaryKey(id);
+                    Example example = new Example(SplitDeliver.class);
+                    example.createCriteria().andEqualTo(SplitDeliver.HOUSE_ID, orderSplit.getHouseId())
+                            .andEqualTo(SplitDeliver.SUPPLIER_ID, supplierId)
+                            .andEqualTo(SplitDeliver.SHIPPING_STATE, 0)
+                            .andEqualTo(SplitDeliver.ORDER_SPLIT_ID, orderSplitId);
+                    List<SplitDeliver> splitDeliverList = splitDeliverMapper.selectByExample(example);
+                    SplitDeliver splitDeliver;
+                    if (splitDeliverList.size() > 0) {
+                        splitDeliver = splitDeliverList.get(0);
+                        //配送状态（0待发货,1已发待收货,2已收货,3取消,4部分收,5已结算,6材料员撤回(只待发货才能撤回)）
+                        // 是非平台
+                        if (splitDeliver.getShippingState() == 2 && djSupplier.getIsNonPlatformSupperlier() == 1) {
+                            splitDeliver.setInstallMobile(installMobile);// 安装人号码
+                            splitDeliver.setInstallName(installName);//安装人姓名
                         }
+                    } else {
+                        Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
+                        if (storefront == null) {
+                            return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
+                        }
+                        example = new Example(SplitDeliver.class);
+                        splitDeliver = new SplitDeliver();
+                        splitDeliver.setNumber(orderSplit.getNumber() + "00" + splitDeliverMapper.selectCountByExample(example));//发货单号
+                        splitDeliver.setHouseId(house.getId());
+                        splitDeliver.setOrderSplitId(orderSplitId);
+                        splitDeliver.setTotalAmount(0.0);
+                        splitDeliver.setDeliveryFee(0.0);
+                        splitDeliver.setApplyMoney(0.0);
+                        splitDeliver.setShipName(member.getNickName() == null ? member.getName() : member.getNickName());
+                        splitDeliver.setShipMobile(member.getMobile());
+                        splitDeliver.setShipAddress(house.getHouseName());
+                        splitDeliver.setSupplierId(supplierId);//供应商id
+                        splitDeliver.setSupplierTelephone(djSupplier.getTelephone());//供应商联系电话
+                        splitDeliver.setSupplierName(djSupplier.getName());//供应商供应商名称
+                        splitDeliver.setSupervisorId(supervisor.getId());//管家id
+                        splitDeliver.setSubmitTime(new Date());
+                        splitDeliver.setSupState(0);
+                        splitDeliver.setShippingState(0);//待发货状态
+                        splitDeliver.setApplyState(null);
+                        splitDeliver.setCityId(cityId);//城市id
+                        splitDeliver.setStorefrontId(storefront.getId());//店铺id
+                        //判断是非平台供应商
+                        if (djSupplier.getIsNonPlatformSupperlier() != null) {
+                            if (djSupplier.getIsNonPlatformSupperlier() == 1) {
+                                splitDeliver.setDeliveryName(deliveryName);//送货人姓名
+                                splitDeliver.setDeliveryMobile(deliveryMobile);//送货人号码
+                            }
+                        }
+                        splitDeliverMapper.insert(splitDeliver);
                     }
-                    splitDeliverMapper.insert(splitDeliver);
+                    DjSupApplicationProduct djSupApplicationProduct = djSupApplicationProductAPI.getDjSupApplicationProduct(house.getCityId(), supplierId, orderSplitItem.getProductId());
+                    orderSplitItem.setSupCost(djSupApplicationProduct.getPrice());//供应价
+                    orderSplitItem.setSplitDeliverId(splitDeliver.getId());
+                    orderSplitItemMapper.updateByPrimaryKeySelective(orderSplitItem);
+
+                    splitDeliver.setTotalAmount(djSupApplicationProduct.getPrice() * orderSplitItem.getNum() + splitDeliver.getTotalAmount());//累计供应商价总价
+                    splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
+
                 }
-
-                DjSupApplicationProduct djSupApplicationProduct = djSupApplicationProductAPI.getDjSupApplicationProduct(house.getCityId(), supplierId, orderSplitItem.getProductId());
-                orderSplitItem.setSupCost(djSupApplicationProduct.getPrice());//供应价
-                orderSplitItem.setSplitDeliverId(splitDeliver.getId());
-                orderSplitItemMapper.updateByPrimaryKeySelective(orderSplitItem);
-
-                splitDeliver.setTotalAmount(djSupApplicationProduct.getPrice() * orderSplitItem.getNum() + splitDeliver.getTotalAmount());//累计供应商价总价
-                splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
-//                orderSplitItemMapper.setSupplierId(id, splitDeliver.getId());
+                orderSplit.setApplyStatus(2);//发给供应商
+                orderSplitMapper.updateByPrimaryKeySelective(orderSplit);
+                return ServerResponse.createBySuccessMessage("操作成功");
             }
-            orderSplit.setApplyStatus(2);//发给供应商
-            orderSplitMapper.updateByPrimaryKeySelective(orderSplit);
-
-            /*
-             * 计算是否超过免费要货次数,收取工匠运费
-             */
-//            Example example = new Example(OrderSplit.class);
-//            example.createCriteria().andEqualTo(OrderSplit.HOUSE_ID, orderSplit.getHouseId()).andEqualTo(OrderSplit.WORKER_TYPE_ID, orderSplit.getWorkerTypeId());
-//            List<OrderSplit> orderSplitList = orderSplitMapper.selectByExample(example);
-//            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(orderSplit.getWorkerTypeId());
-//            if (orderSplitList.size() > workerType.getSafeState()) {//超过免费次数收工匠运费
-//                //TODO 计算运费 暂无准确计算公式
-//                BigDecimal yunFei = new BigDecimal(0.1);
-//                example = new Example(OrderSplitItem.class);
-//                example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, orderSplit.getId());
-//                List<OrderSplitItem> osiList = orderSplitItemMapper.selectByExample(example);
-//                for (OrderSplitItem osi : osiList) {
-//                    //Product product = forMasterAPI.getProduct(osi.getProductId());
-//                    //yunFei += osi.getTotalPrice() * 0.1;
-//                }
-//
-//                Member worker = memberMapper.selectByPrimaryKey(orderSplit.getSupervisorId());//要货人
-//                BigDecimal haveMoney = worker.getHaveMoney().subtract(yunFei);
-//                BigDecimal surplusMoneys = worker.getSurplusMoney().subtract(yunFei);
-//                WorkerDetail workerDetail = new WorkerDetail();
-//                workerDetail.setName(workerType.getName()+"要货运费");
-//                workerDetail.setWorkerId(worker.getId());
-//                workerDetail.setWorkerName(worker.getName());
-//                workerDetail.setHouseId(orderSplit.getHouseId());
-//                workerDetail.setMoney(yunFei);
-//                workerDetail.setState(7);//收取运费
-//                workerDetail.setWalletMoney(haveMoney);
-//                workerDetail.setApplyMoney(yunFei);
-//                workerDetailMapper.insert(workerDetail);
-//
-//                worker.setHaveMoney(haveMoney);
-//                worker.setSurplusMoney(surplusMoneys);
-//                memberMapper.updateByPrimaryKeySelective(worker);
-//            }
-
-            return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("操作失败");
         }
+return null;
     }
 
 
@@ -507,18 +472,15 @@ public class OrderSplitService {
                 if(isAdd) {
                     v.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
                     Map map = BeanUtils.beanToMap(v);
-
                     DjSupplier djSupplier=   djSupplierAPI.queryDjSupplierById(v.getSupplierId());
                     if(djSupplier!=null)
                     {
                         map.put(DjSupplier.IS_NON_PLATFORM_SUPPERLIER, djSupplier.getIsNonPlatformSupperlier());
                     }
-
-                    List<String> supplierIdlist = splitDeliverMapper.getSupplierGoodsId(v.getHouseId(), v.getProductId());
+                    List<Map<String,Object>> supplierIdlist = splitDeliverMapper.getSupplierGoodsId(v.getHouseId(), v.getProductId());
                     if(supplierIdlist==null)
                         map.put("supplierIdlist",null);
                     map.put("supplierIdlist",supplierIdlist);
-
                     mapList.add(map);
                 }
             }

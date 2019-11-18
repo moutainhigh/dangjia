@@ -22,7 +22,8 @@
             t1.house_id houseId,
             t1.business_order_number businessOrderNumber,
             t1.order_number orderNumber,
-            t4.storefront_name storefrontName
+            t4.storefront_name storefrontName,
+            t4.storefront_logo storefrontLogo
         FROM
             dj_deliver_order t1,
             dj_pay_business_order t3,
@@ -59,20 +60,32 @@
             t.product_sn productSn,
             t.product_type productType,
             t.price price,
+            t.order_id as orderId,
             IFNULL(t.image,t1.image) image,
             t.shop_count shopCount,
             IFNULL(t.ask_count,0) askCount,
             IFNULL(t.return_count,0) returnCount,
             (t.shop_count - (IFNULL(t.ask_count, 0)+IFNULL(t.return_count,0))) surplusCount,
             t1.prod_template_id productTemplateId,
-            t.reservation_deliver_time as reservationDeliverTime
+            t.reservation_deliver_time as reservationDeliverTime,
+            IFNULL(t.total_price,0) as totalPrice,
+            t2.value_name_arr as valueNameArr,
+            t2.value_id_arr as valueIdArr
         FROM
             dj_deliver_order_item t,
-            dj_basics_storefront_product t1
+            dj_basics_storefront_product t1,
+            dj_basics_product_template t2
         WHERE t.product_id =t1.id
+        AND t1.prod_template_id=t2.id
         AND t.order_id =  #{orderId}
         AND t.shop_count > (IFNULL(t.ask_count, 0)+IFNULL(t.return_count,0))
         AND t.data_status = 0
+        AND t.is_reservation_deliver = 1
+        AND (
+            t.reservation_deliver_time IS NULL
+            OR t.reservation_deliver_time = ''
+        )
+        ORDER BY t.create_date
     </select>
 
 
@@ -83,7 +96,8 @@
             t1.address_id addressId,
             t1.house_id houseId,
             t4.storefront_name storefrontName,
-            t1.order_id orderId
+            t1.order_id orderId,
+            t1.id as orderSplitId
         FROM
             dj_deliver_order_split t1,
             dj_basics_storefront t4
@@ -118,14 +132,20 @@
             t1.prod_template_id productTemplateId,
             t.reservation_deliver_time AS reservationDeliverTime,
             t.unit_name as unitName,
-            t.order_split_id as orderSplitId
+            t.order_split_id as orderSplitId,
+            IFNULL(t.total_price,0) as totalPrice,
+            t2.value_name_arr as valueNameArr,
+            t2.value_id_arr as valueIdArr,
+            t.num as shopCount
         FROM
             dj_deliver_order_split_item t,
-            dj_basics_storefront_product t1
+            dj_basics_storefront_product t1,
+            dj_basics_product_template t2
         WHERE
             t.product_id = t1.id
+        AND t1.prod_template_id=t2.id
         AND t.data_status = 0
-        AND t.order_id =  #{orderId}
+        AND t.order_split_id =  #{orderSplitId}
     </select>
 
     <!--取消预约-->
@@ -416,5 +436,124 @@
         <if test="orderStatus!=null and orderStatus!=''">
             and  ddo.order_status = #{orderStatus}
         </if>
+    </select>
+
+    <!-- 查询订单首页 -->
+    <select id="queryOrderInfo" resultType="com.dangjia.acg.dto.order.DOrderInfoDTO">
+        select
+        ddo.id as id,
+        CONCAT(
+        h.residential,
+        IFNULL(h.building, '*'),
+        '栋',
+        IFNULL(CONCAT(h.unit, '单元'),'' ),
+        IFNULL(h.number, '*'),
+        '号'
+        ) houseName,
+        m.mobile as mobile,
+        m.id as memberId,
+        bs.storefront_name as storefrontName,
+        IFNULL(ddo.total_amount,0) as totalAmount,
+        IFNULL(ddo.actual_payment_price,0) as actualPaymentPrice,
+        ddo.order_number AS orderNumber,
+        ddo.create_date as createDate,
+        ddo.payment AS payment,
+        ddo.order_generation_time as orderGenerationTime,
+        ddo.order_pay_time AS orderPayTime,
+        pbo.state as state,
+        pbo.pay_order_number AS payOrderNumber,
+        pbo.type AS type,
+        pbo.id as pboId,
+        pbo.image as pboImage,
+        ddo.cancellation_time as cancellationTime
+        from dj_deliver_order ddo
+        INNER JOIN dj_pay_business_order pbo on ddo.business_order_number = pbo.number
+        INNER JOIN dj_basics_storefront bs on bs.id = ddo.storefont_id
+        INNER JOIN dj_house h on ddo.house_id = h.id
+        INNER JOIN dj_member m on h.member_id = m.id
+        where 1=1
+        <if test="null != storefontId  and '' != storefontId">
+            and  ddo.storefont_id = #{storefontId}
+        </if>
+        <if test="null != state and state == 2">
+            and (pbo.state = 1 or pbo.state = 2)
+        </if>
+        <if test="null != state and state == 3">
+            and pbo.state = 3
+        </if>
+        <if test="null != state and state == 4">
+            and pbo.state = 4
+        </if>
+        <if test="null != id  and '' != id">
+            and ddo.id = #{id}
+        </if>
+        <if test="null != orderKey and '' != orderKey">
+            and (
+            m.mobile like CONCAT('%',#{orderKey},'%')
+            or
+            CONCAT(
+            h.residential,
+            IFNULL(h.building, '*'),
+            '栋',
+            IFNULL(CONCAT(h.unit, '单元'),'' ),
+            IFNULL(h.number, '*'),
+            '号'
+            ) LIKE CONCAT('%',#{orderKey},'%')
+            or
+            ddo.order_number LIKE CONCAT('%',#{orderKey},'%')
+            or
+            pbo.pay_order_number LIKE CONCAT('%',#{orderKey},'%')
+            )
+        </if>
+        order by  ddo.order_generation_time desc
+    </select>
+
+
+
+    <select id="queryOrderFineInfo" resultType="com.dangjia.acg.dto.order.DOrderFineInfoDTO">
+        select
+            bsp.image as image,
+            bpt.name as name,
+            bpt.product_sn as productSn,
+            doi.price as price,
+            doi.shop_count AS shopCount,
+            doi.ask_count as askCount,
+            doi.return_count as returnCount,
+            (IFNULL(doi.shop_count,0) - IFNULL(doi.ask_count,0) - IFNULL(doi.return_count,0)) AS remnantCount,
+            (IFNULL(doi.shop_count,0) * IFNULL(doi.price,0)) AS remember
+            from
+            dj_deliver_order_item doi
+            INNER JOIN dj_basics_storefront_product bsp on doi.product_id = bsp.id
+            INNER JOIN dj_basics_product_template bpt on bsp.prod_template_id = bpt.id
+            where doi.order_id = #{orderId}
+    </select>
+
+
+    <select id="selectOrderDetailById" resultType="com.dangjia.acg.dto.delivery.AppOrderDetailDTO">
+        select
+        ddo.house_id as houseId,-- 房子id
+        ddo.id as orderId,-- 订单编号
+        IFNULL(ddo.order_status,'') as orderStatus,
+        IFNULL(ddo.order_generation_time,'') as orderGenerationTime,-- 创建时间
+        IFNULL(ddo.total_amount,'') as totalAmount,-- 商品总额
+        IFNULL(ddo.total_transportation_cost,'') as totalTransportationCost,-- 运费
+        IFNULL(ddo.total_stevedorage_cost,'') as totalStevedorageCost,-- 搬运费
+        IFNULL(ddo.total_discount_price,'') as totalDiscountPrice-- 优惠卷名称
+        from  dj_deliver_order ddo where ddo.id=#{orderId}
+    </select>
+
+    <select id="selectOrderItemDetailById" resultType="com.dangjia.acg.dto.delivery.AppOrderItemDetailDTO">
+        select
+        IFNULL(ddoi.product_id,'') as productId,
+        IFNULL(dbs.storefront_name,'') as storefrontName ,-- 店铺名称
+        IFNULL(ddoi.product_name,'') as productName,-- 商品名称
+        IFNULL(ddoi.shop_count,'') as shopCount,-- 购买数量
+        -- 规格
+        IFNULL(ddoi.price,'') as price ,-- 价格
+        IFNULL(dbs.mobile,'') as mobile,-- 电话
+        ddoi.image as image
+        from dj_deliver_order_item ddoi inner join dj_basics_storefront dbs
+        on ddoi.storefont_id=dbs.id  inner join dj_basics_product_template dbpt
+        on dbpt.id=ddoi.product_id  where ddoi.order_id=#{orderId}
     </select>
 </mapper>

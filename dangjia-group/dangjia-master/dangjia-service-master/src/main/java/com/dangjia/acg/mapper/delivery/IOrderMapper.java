@@ -22,6 +22,8 @@ public interface IOrderMapper extends Mapper<Order> {
 
     /**查询人工订单*/
     Order getWorkerOrder(@Param("houseId")String houseId,@Param("workerTypeId")String workerTypeId);
+    /**查询人工订单*/
+    Order getStorefontOrder(@Param("storefontId")String storefontId,@Param("parentOrderId")String parentOrderId);
 
     /**查询所有订单*/
     List<Order> getAllOrders(@Param("houseId")String houseId,@Param("workerTypeId")String workerTypeId);
@@ -41,16 +43,6 @@ public interface IOrderMapper extends Mapper<Order> {
     //修改商品订单表是否可付款状态
     void updateOrder(@Param("orderId") String orderId);
 
-    /**
-     * 修改订单状态为已取消
-     * @param houseId
-     */
-    void updateOrderStatusByHouseId(@Param("houseId") String houseId);
-    /**
-     * 修改订单详情状态为已取消
-     * @param houseId
-     */
-    void updateOrderDetailStatusByHouseId(@Param("houseId") String houseId);
 
 
 }

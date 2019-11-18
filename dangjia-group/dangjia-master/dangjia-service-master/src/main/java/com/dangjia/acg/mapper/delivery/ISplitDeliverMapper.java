@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * author: Ronalcheng
@@ -28,7 +29,7 @@ public interface ISplitDeliverMapper extends Mapper<SplitDeliver> {
                                                         @Param("searchKey") String searchKey,
                                                         @Param("beginDate") String beginDate,
                                                         @Param("endDate") String endDate);
-    List<String> getSupplierGoodsId( @Param("houseId") String houseId, @Param("productSn") String productSn);
+    List<Map<String,Object>> getSupplierGoodsId(@Param("houseId") String houseId, @Param("productSn") String productSn);
 
     /*根据供应商id查询要货列表/模糊查询要货单列表*/
     List<WebSplitDeliverItemDTO> getOrderSplitList(@Param("supplierId") String supplierId,

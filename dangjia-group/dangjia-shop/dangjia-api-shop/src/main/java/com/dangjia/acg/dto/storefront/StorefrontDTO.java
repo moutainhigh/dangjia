@@ -10,6 +10,7 @@ import lombok.experimental.FieldNameConstants;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 @Data
 public class StorefrontDTO {
@@ -72,4 +73,7 @@ public class StorefrontDTO {
 
     private String  systemLogo;
 
+    private String freight;//收取运费
+
+    private String belowUnitPrice;//每单价格低于
 }

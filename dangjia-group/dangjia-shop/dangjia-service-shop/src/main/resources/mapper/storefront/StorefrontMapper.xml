@@ -117,4 +117,146 @@
         and a.`city_id`=#{cityId}
     </select>
 
+
+    <select id="queryStoreSupplierSettlement" resultType="com.dangjia.acg.dto.finance.WebSplitDeliverItemDTO">
+        SELECT
+            a.shipAddress,
+            a.supplierId,
+            a.supMobile,
+            a.supName,
+            SUM(a.sent) sent,
+            SUM(a.wait) wait
+        FROM
+            (
+                (
+                    SELECT
+                        m.ship_address AS shipAddress,
+                        m.supplier_id AS supplierId,
+                        m.supplier_telephone AS supMobile,
+                        m.supplier_name AS supName,
+                        (
+                            SELECT
+                                COUNT(d.id)
+                            FROM
+                                dj_repair_mend_deliver d
+                            WHERE
+                                d.supplier_id = m.supplier_id
+                            AND d.apply_state = 1
+                        ) sent,
+                        (
+                            SELECT
+                                COUNT(d.id)
+                            FROM
+                                dj_repair_mend_deliver d
+                            WHERE
+                                d.supplier_id = m.supplier_id
+                            AND d.apply_state = 0
+                        ) wait
+                    FROM
+                        dj_repair_mend_deliver m
+                    WHERE
+                        m.data_status = 0
+                    AND m.apply_state IS NOT NULL
+                    AND m.apply_state != 3
+                    <if test="searchKey!=null and searchKey!=''">
+                        and (m.supplier_name like CONCAT('%',#{searchKey},'%'))
+                    </if>
+                    AND EXISTS (
+                        SELECT
+                            1
+                        FROM
+                            dj_sup_application sa
+                        WHERE
+                            sa.sup_id = m.supplier_id
+                        AND sa.shop_id = #{storefrontId}
+                        AND application_status = 1
+                    )
+                    GROUP BY
+                        m.supplier_id
+                )
+                UNION ALL
+                    (
+                        SELECT
+                            s.ship_address AS shipAddress,
+                            s.supplier_id AS supplierId,
+                            s.supplier_telephone AS supMobile,
+                            s.supplier_name AS supName,
+                            (
+                                SELECT
+                                    COUNT(d.id)
+                                FROM
+                                    dj_deliver_split_deliver d
+                                WHERE
+                                    d.supplier_id = s.supplier_id
+                                AND (
+                                    d.apply_state = 1
+                                    OR d.apply_state = 2
+                                )
+                            ) sent,
+                            (
+                                SELECT
+                                    COUNT(d.id)
+                                FROM
+                                    dj_deliver_split_deliver d
+                                WHERE
+                                    d.supplier_id = s.supplier_id
+                                AND d.apply_state = 0
+                            ) wait
+                        FROM
+                            dj_deliver_split_deliver s
+                        WHERE
+                            s.data_status = 0
+                        AND s.apply_state IS NOT NULL
+                        AND s.apply_state != 3
+                        <if test="searchKey!=null and searchKey!=''">
+                            and (s.supplier_name like CONCAT('%',#{searchKey},'%'))
+                        </if>
+                        AND EXISTS (
+                            SELECT
+                                1
+                            FROM
+                                dj_sup_application sa
+                            WHERE
+                                sa.sup_id = s.supplier_id
+                            AND sa.shop_id = #{storefrontId}
+                            AND application_status = 1
+                        )
+                        GROUP BY
+                            s.supplier_id
+                    )
+            ) a
+        GROUP BY
+            a.supplierId
+        ORDER BY
+            a.wait DESC
+    </select>
+
+    <select id="myWallet" resultType="java.lang.Double">
+        SELECT
+        IFNULL(sum(total_amount),0)
+        FROM
+        dj_deliver_split_deliver
+        WHERE
+        storefront_id =#{storefrontId}
+        AND shipping_state IN (1, 2, 4, 5, 7, 8)
+        <if test="null!=date">
+            AND TIMESTAMPDIFF(DAY,send_time,SYSDATE())>=7
+        </if>
+    </select>
+
+    <select id="selectStoreExpenseRecord" resultType="com.dangjia.acg.dto.storefront.StoreExpenseRecordDTO">
+        select
+        IFNULL(dfr.house_order_id,'')  as houseOrderId,-- 要货单号
+        IFNULL(dfr.money,'')  as money,-- 实际收入金额
+        IFNULL(ddo.total_amount,'')  as totalAmount -- 订单金额
+        from dj_account_flow_record dfr
+        inner join dj_deliver_order  ddo on dfr.house_order_id=ddo.id
+        where 1=1 and flow_type=1 and state in (0,2)
+        <if test="houseOrderId!=null and houseOrderId!=''">
+            and dfr.house_order_id     LIKE CONCAT('%',#{houseOrderId},'%')
+        </if>
+        <if test="storefrontId!=null and storefrontId!=''">
+            and ddo.storefont_id=#{storefrontId}
+        </if>
+    </select>
 </mapper>
