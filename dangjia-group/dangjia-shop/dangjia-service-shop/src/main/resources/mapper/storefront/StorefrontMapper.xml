@@ -243,4 +243,20 @@
             AND TIMESTAMPDIFF(DAY,send_time,SYSDATE())>=7
         </if>
     </select>
+
+    <select id="selectStoreExpenseRecord" resultType="com.dangjia.acg.dto.storefront.StoreExpenseRecordDTO">
+        select
+        IFNULL(dfr.house_order_id,'')  as houseOrderId,-- 要货单号
+        IFNULL(dfr.money,'')  as money,-- 实际收入金额
+        IFNULL(ddo.total_amount,'')  as totalAmount -- 订单金额
+        from dj_account_flow_record dfr
+        inner join dj_deliver_order  ddo on dfr.house_order_id=ddo.id
+        where 1=1 and flow_type=1 and state in (0,2)
+        <if test="houseOrderId!=null and houseOrderId!=''">
+            and dfr.house_order_id     LIKE CONCAT('%',#{houseOrderId},'%')
+        </if>
+        <if test="storefrontId!=null and storefrontId!=''">
+            and ddo.storefont_id=#{storefrontId}
+        </if>
+    </select>
 </mapper>

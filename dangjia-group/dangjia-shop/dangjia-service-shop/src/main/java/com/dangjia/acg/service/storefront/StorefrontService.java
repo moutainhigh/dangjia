@@ -2,6 +2,7 @@ package com.dangjia.acg.service.storefront;
 
 import cn.jiguang.common.utils.StringUtils;
 import com.dangjia.acg.api.supplier.DjSupplierAPI;
+import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 
@@ -9,6 +10,7 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.finance.WebSplitDeliverItemDTO;
+import com.dangjia.acg.dto.storefront.StoreExpenseRecordDTO;
 import com.dangjia.acg.dto.storefront.StorefrontDTO;
 import com.dangjia.acg.dto.storefront.StorefrontListDTO;
 import com.dangjia.acg.mapper.pay.IStoreBusinessOrderMapper;
@@ -374,25 +376,6 @@ public class StorefrontService {
     }
 
 
-    /**
-     * 店铺收支记录
-     * @param userId
-     * @param cityId
-     * @return
-     */
-    public ServerResponse queryIncomeRecord(String userId, String cityId) {
-        try {
-
-            Storefront storefront = storefrontService.queryStorefrontByUserID(userId, cityId);
-            if (storefront == null) {
-                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
-            }
-          return null;
-        } catch (Exception e) {
-            logger.error("店铺收支记录异常：", e);
-            return ServerResponse.createByErrorMessage("店铺收支记录异常");
-        }
-    }
 
     /**
      *店铺提现
@@ -545,6 +528,95 @@ public class StorefrontService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
+    }
+
+    /**
+     *店铺-收入记录
+     * @param request
+     * @param pageDTO
+     * @param userId
+     * @param cityId
+     * @param houseOrderId
+     * @return
+     */
+    public ServerResponse storeExpenseRecord(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String houseOrderId) {
+        try {
+
+            Storefront storefront = this.queryStorefrontByUserID(userId, cityId);
+            if (storefront == null) {
+                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
+            }
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<StoreExpenseRecordDTO>  list=istorefrontMapper.selectStoreExpenseRecord(houseOrderId,storefront.getId());
+            PageInfo pageResult = new PageInfo(list);
+            return ServerResponse.createBySuccess("查询成功",pageResult);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    /**
+         *店铺-支出记录
+         * @param request
+         * @param pageDTO
+         * @param userId
+         * @param cityId
+         * @param houseOrderId
+         * @return
+         */
+        public ServerResponse storeRevenueRecord(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String houseOrderId) {
+            try {
+               return null;
+                //return ServerResponse.createBySuccess("查询成功",pageResult);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return ServerResponse.createByErrorMessage("查询失败");
+            }
+    }
+
+    /**
+     *店铺-收入记录-货单详情
+     * @param request
+     * @param pageDTO
+     * @param userId
+     * @param cityId
+     * @param houseOrderId
+     * @return
+     */
+    public ServerResponse storeExpenseRecordOrderDetail(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String houseOrderId) {
+        return null;
+    }
+
+    /**
+     *店铺铺-支出记录-查看货单详情
+     * @param request
+     * @param pageDTO
+     * @param userId
+     * @param cityId
+     * @param houseOrderId
+     * @return
+     */
+    public ServerResponse storeRevenueRecordOrderDetail(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String houseOrderId) {
+        return null ;
+    }
+
+
+
+
+
+    /**
+     *店铺-收入记录-查看清单
+     * @param request
+     * @param pageDTO
+     * @param userId
+     * @param cityId
+     * @param houseOrderId
+     * @return
+     */
+    public ServerResponse storeExpenseRecordGoodDetail(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String houseOrderId) {
+        return null;
     }
 
 }

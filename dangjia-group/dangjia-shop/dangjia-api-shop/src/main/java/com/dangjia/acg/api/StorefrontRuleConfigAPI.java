@@ -22,4 +22,5 @@ public interface StorefrontRuleConfigAPI {
     ServerResponse queryStorefrontRuleConfigByIdAndprice(@RequestParam("storefrontId") String storefrontId, @RequestParam("belowUnitPrice") String belowUnitPrice);
 
 
+
 }
