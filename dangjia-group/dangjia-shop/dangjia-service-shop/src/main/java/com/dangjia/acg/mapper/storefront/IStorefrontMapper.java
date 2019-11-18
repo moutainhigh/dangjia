@@ -1,5 +1,6 @@
 package com.dangjia.acg.mapper.storefront;
 
+import com.dangjia.acg.dto.finance.WebSplitDeliverItemDTO;
 import com.dangjia.acg.dto.storefront.StorefrontListDTO;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.supplier.DjSupplier;
@@ -28,4 +29,7 @@ public interface IStorefrontMapper extends Mapper<Storefront> {
                                                           @Param("cityId") String cityId);
 
     Double myWallet(@Param("storefrontId") String storefrontId, @Param("date") Date date);
+
+    List<WebSplitDeliverItemDTO> queryStoreSupplierSettlement(@Param("storefrontId") String storefrontId,
+                                                              @Param("searchKey") String searchKey);
 }

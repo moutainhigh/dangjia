@@ -103,6 +103,8 @@ public class ActuarialProductAppDTO {
     @ApiModelProperty("是否有优惠卷(1：有，0：否)")
     private Integer  isActivityRedPack=0;
 
+    private String unitId;
+
 
     @ApiModelProperty("是否勾选商品标识")
     private boolean flag;

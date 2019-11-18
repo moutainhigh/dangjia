@@ -28,6 +28,9 @@ public interface IBillDjDeliverOrderItemMapper extends Mapper<OrderItem> {
 
     int updateDjDeliverOrderItemByOrderId(@Param("orderId") String orderId);
 
+    int updateReserved(@Param("orderId") String orderId,
+                       @Param("productId") String productId);
+
     List<DjDeliverOrderItemDTO > orderItemList(@Param("houseId")String houseId, @Param("orderId")String orderId);
 
 }

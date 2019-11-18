@@ -14,13 +14,16 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.deliver.SupplierDeliverDTO;
 import com.dangjia.acg.dto.finance.WebSplitDeliverItemDTO;
 import com.dangjia.acg.dto.receipt.ReceiptDTO;
+import com.dangjia.acg.mapper.account.IMasterAccountFlowRecordMapper;
 import com.dangjia.acg.mapper.delivery.IOrderSplitItemMapper;
 import com.dangjia.acg.mapper.delivery.ISplitDeliverMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
+import com.dangjia.acg.mapper.product.IMasterStorefrontMapper;
 import com.dangjia.acg.mapper.receipt.IReceiptMapper;
 import com.dangjia.acg.mapper.repair.IMendDeliverMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
-import com.dangjia.acg.modle.deliver.OrderSplitItem;
+import com.dangjia.acg.mapper.supplier.IMasterSupplierMapper;
+import com.dangjia.acg.modle.account.AccountFlowRecord;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.receipt.Receipt;
@@ -29,6 +32,7 @@ import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.sup.SupplierProduct;
+import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -37,7 +41,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * ysl
@@ -63,6 +70,12 @@ public class WebSplitDeliverService {
     private ForMasterAPI forMasterAPI;
     @Autowired
     private ConfigUtil configUtil;
+    @Autowired
+    private IMasterStorefrontMapper iMasterStorefrontMapper;
+    @Autowired
+    private IMasterSupplierMapper iMasterSupplierMapper;
+    @Autowired
+    private IMasterAccountFlowRecordMapper iMasterAccountFlowRecordMapper;
 
     @Autowired
     private BasicsStorefrontAPI basicsStorefrontAPI;
@@ -205,16 +218,7 @@ public class WebSplitDeliverService {
             List<SupplierDeliverDTO> supplierDeliverDTOS = iSplitDeliverMapper.mendDeliverList(supplierId, shipAddress, beginDate, endDate, applyState);
             for (SupplierDeliverDTO supplierDeliverDTO : supplierDeliverDTOS) {
                 supplierDeliverDTO.setDeliverType(1);
-                Example example = new Example(OrderSplitItem.class);
-                example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID, supplierDeliverDTO.getId());
-                List<OrderSplitItem> orderSplitItems = iOrderSplitItemMapper.selectByExample(example);
-                Double totalAmount = 0d;
-//                Double applyMoney = 0d;
-                for (OrderSplitItem orderSplitItem : orderSplitItems) {
-//                    totalAmount += orderSplitItem.getTotalPrice();
-                    totalAmount += orderSplitItem.getPrice() * orderSplitItem.getReceive();
-//                    applyMoney += orderSplitItem.getSupCost() * orderSplitItem.getReceive();
-                }
+                Double totalAmount = iOrderSplitItemMapper.getSplitDeliverSellPrice(supplierDeliverDTO.getId());
                 supplierDeliverDTO.setTotalAmount(totalAmount);
             }
             List<SupplierDeliverDTO> supplierDeliverDTOS1 = iMendDeliverMapper.mendDeliverList(supplierId, shipAddress, beginDate, endDate, applyState);
@@ -238,8 +242,34 @@ public class WebSplitDeliverService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse settlemen(String image, String merge, String supplierId) throws RuntimeException {
+    public ServerResponse settlemen(String image, String merge, String supplierId, String userId, String cityId, Double settlementAmount, String sourceType) throws RuntimeException {
         try {
+            Example example=new Example(Storefront.class);
+            example.createCriteria().andEqualTo(Storefront.CITY_ID,cityId)
+                    .andEqualTo(Storefront.DATA_STATUS,0)
+                    .andEqualTo(Storefront.USER_ID,userId);
+            Storefront storefront = iMasterStorefrontMapper.selectOneByExample(example);
+            AccountFlowRecord accountFlowRecord=new AccountFlowRecord();
+            if(sourceType.equals("1")){
+                if(storefront.getSurplusMoney()<settlementAmount) {
+                    return ServerResponse.createByErrorMessage("余额不足");
+                }
+                storefront.setSurplusMoney(storefront.getSurplusMoney()-settlementAmount);
+                storefront.setTotalAccount(storefront.getTotalAccount()-settlementAmount);
+                iMasterStorefrontMapper.updateByPrimaryKeySelective(storefront);
+                DjSupplier djSupplier = iMasterSupplierMapper.selectByPrimaryKey(supplierId);
+                djSupplier.setSurplusMoney(djSupplier.getSurplusMoney()+settlementAmount);
+                djSupplier.setTotalAccount(djSupplier.getTotalAccount()+settlementAmount);
+                accountFlowRecord.setAmountAfterMoney(djSupplier.getTotalAccount());
+                iMasterSupplierMapper.updateByPrimaryKeySelective(djSupplier);
+                accountFlowRecord.setFlowType("2");
+                accountFlowRecord.setMoney(settlementAmount);
+                accountFlowRecord.setState(0);
+                accountFlowRecord.setAmountBeforeMoney(djSupplier.getTotalAccount());
+                accountFlowRecord.setDefinedAccountId(supplierId);
+                accountFlowRecord.setDefinedName("合并結算");
+                accountFlowRecord.setCreateBy(userId);
+            }
             if (StringUtils.isNotEmpty(merge)) {
                 JSONArray itemObjArr = JSON.parseArray(merge);
                 double splitDeliverPrice = 0d;
@@ -273,7 +303,12 @@ public class WebSplitDeliverService {
                 receipt.setCreateDate(new Date());
                 receipt.setSupplierId(supplierId);
                 receipt.setTotalAmount(splitDeliverPrice - mendDeliverPrice);
+                receipt.setSourceType(sourceType);
                 iReceiptMapper.insert(receipt);
+                if(sourceType.equals("1")){
+                    accountFlowRecord.setDefinedAccountId(receipt.getNumber());
+                    iMasterAccountFlowRecordMapper.insert(accountFlowRecord);
+                }
             }
             return ServerResponse.createBySuccess("结算成功");
         } catch (Exception e) {
@@ -322,10 +357,12 @@ public class WebSplitDeliverService {
                             supplierDeliverDTO.setId(splitDeliver.getId());
                             supplierDeliverDTO.setNumber(splitDeliver.getNumber());
                             supplierDeliverDTO.setShipAddress(splitDeliver.getShipAddress());
-                            supplierDeliverDTO.setTotalAmount(splitDeliver.getTotalAmount());
+                            Double totalAmount = iOrderSplitItemMapper.getSplitDeliverSellPrice(supplierDeliverDTO.getId());
+                            supplierDeliverDTO.setTotalAmount(totalAmount);
+//                            supplierDeliverDTO.setTotalAmount(splitDeliver.getTotalAmount());
                             supplierDeliverDTO.setApplyMoney(splitDeliver.getApplyMoney());
                             supplierDeliverDTO.setDeliverType(1);
-                            sd += splitDeliver.getTotalAmount();
+                            sd += splitDeliver.getApplyMoney();
                         }
                     } else if (deliverType == 2) {
                         MendDeliver mendDeliver = iMendDeliverMapper.selectClsd(id, shipAddress, beginDate, endDate);
@@ -337,7 +374,7 @@ public class WebSplitDeliverService {
                             supplierDeliverDTO.setApplyMoney(mendDeliver.getApplyMoney());
                             supplierDeliverDTO.setTotalAmount(mendDeliver.getTotalAmount());
                             supplierDeliverDTO.setDeliverType(2);
-                            md += mendDeliver.getTotalAmount();
+                            md += mendDeliver.getApplyMoney();
                         }
                     }
                     if (null != supplierDeliverDTO) {

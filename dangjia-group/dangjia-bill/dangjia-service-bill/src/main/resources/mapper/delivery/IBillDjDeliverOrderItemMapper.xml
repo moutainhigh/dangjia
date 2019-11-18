@@ -37,6 +37,14 @@
             order_id = #{orderId}
     </update>
 
+    <update id="updateReserved">
+        UPDATE dj_deliver_order_item
+        SET reservation_deliver_time=NULL
+        WHERE
+            order_id =#{orderId}
+        AND product_id=#{productId}
+    </update>
+
 
 
 

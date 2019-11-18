@@ -686,14 +686,14 @@ public class PaymentService {
                 }
                 orderMapper.updateByPrimaryKeySelective(orderNew);
             }
-            if(!CommonUtil.isEmpty(payState)) {
-                /**
-                 * 订单钱存入店铺账号余额，记录对应的流水信息
-                 */
-                if (!CommonUtil.isEmpty(orderNew.getStorefontId())) {
-                    masterAccountFlowRecordService.updateStoreAccountMoney(orderNew.getStorefontId(), orderNew.getHouseId(), 0, orderNew.getId(), orderNew.getActualPaymentPrice().doubleValue(), orderNew.getWorkerTypeName(), "SYSTEM");
-                }
-            }
+//            if(!CommonUtil.isEmpty(payState)) {
+//                /**
+//                 * 订单钱存入店铺账号余额，记录对应的流水信息
+//                 */
+//                if (!CommonUtil.isEmpty(orderNew.getStorefontId())) {
+//                    masterAccountFlowRecordService.updateStoreAccountMoney(orderNew.getStorefontId(), orderNew.getHouseId(), 0, orderNew.getId(), orderNew.getActualPaymentPrice().doubleValue(), orderNew.getWorkerTypeName(), "SYSTEM");
+//                }
+//            }
         }
         BigDecimal payPrice = order.getTotalAmount().subtract(order.getTotalDiscountPrice());
         payPrice = payPrice.add(order.getTotalStevedorageCost());
@@ -1667,8 +1667,9 @@ public class PaymentService {
                 }
                 //生成流水
                 iMasterAccountFlowRecordMapper.insert(accountFlowRecord);
+                return ServerResponse.createBySuccessMessage("充值成功");
             }
-            return ServerResponse.createBySuccessMessage("充值成功");
+            return ServerResponse.createByErrorMessage("充值失败");
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("充值失败");

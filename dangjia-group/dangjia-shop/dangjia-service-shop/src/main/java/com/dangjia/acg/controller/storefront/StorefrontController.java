@@ -93,7 +93,7 @@ public class StorefrontController implements BasicsStorefrontAPI {
     @Override
     @ApiMethod
     public ServerResponse operationStorefrontRecharge(String userId, String cityId, String payState, Double rechargeAmount, String payPassword, String businessOrderType, Integer sourceType) {
-        return storefrontService. operationStorefrontRecharge( userId,  cityId,  payState,  rechargeAmount,  payPassword,  businessOrderType,  sourceType) ;
+        return storefrontService.operationStorefrontRecharge( userId,  cityId,  payState,  rechargeAmount,  payPassword,  businessOrderType,  sourceType) ;
     }
 
 
@@ -103,6 +103,18 @@ public class StorefrontController implements BasicsStorefrontAPI {
     @ApiMethod
     public ServerResponse queryIncomeRecord(String userId, String cityId) {
         return storefrontService.queryIncomeRecord(userId,cityId);
+    }
+
+    @Override
+    public ServerResponse paymentRetentionMoney(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId) {
+        return null;
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryStoreSupplierSettlement(HttpServletRequest request, PageDTO pageDTO,
+                                                       String userId, String cityId, String searchKey) {
+        return storefrontService.queryStoreSupplierSettlement(pageDTO, userId, cityId, searchKey);
     }
 
 

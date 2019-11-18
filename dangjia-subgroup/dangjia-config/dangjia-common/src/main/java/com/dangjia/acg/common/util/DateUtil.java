@@ -199,6 +199,9 @@ public class DateUtil implements AutoCloseable, Serializable {
             case 19:
                 format = "yyyy-MM-dd HH:mm:ss";
                 break;
+            case 16:
+                format = "yyyy-MM-dd HH:mm";
+                break;
             default:
                 return null;
         }
