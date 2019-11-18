@@ -18,7 +18,7 @@ import java.util.List;
 @Repository
 public interface DjSimulationTemplateConfigMapper extends Mapper<DjSimulationTemplateConfig> {
 
-    List<SimulationTemplateConfigDTO> querySimulateionTemplateConfig(@Param("id") String id,@Param("addressUrl") String addressUrl,String cityId);
+    List<SimulationTemplateConfigDTO> querySimulateionTemplateConfig(@Param("id") String id,@Param("addressUrl") String addressUrl,@Param("cityId") String cityId);
 
     String  selectCurrentIndexByConfigType(@Param("configType") String configType);
     //删除符合条件的标题数据
