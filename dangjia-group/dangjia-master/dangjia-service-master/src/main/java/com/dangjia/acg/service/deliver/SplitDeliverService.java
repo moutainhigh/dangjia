@@ -30,6 +30,7 @@ import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.modle.supplier.DjSupplier;
+import com.dangjia.acg.service.account.MasterAccountFlowRecordService;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,6 +79,10 @@ public class SplitDeliverService {
     private IOrderItemMapper orderItemMapper;
     @Autowired
     private IMasterStorefrontProductMapper iMasterStorefrontProductMapper;
+
+    @Autowired
+    private MasterAccountFlowRecordService masterAccountFlowRecordService;
+
     /**
      * 部分收货
      */
@@ -220,6 +225,15 @@ public class SplitDeliverService {
             splitDeliver.setApplyMoney(applyMoney);
             splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
             House house = houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
+            /**
+             * 订单钱存入店铺账号余额，记录对应的流水信息
+             *
+             *  if (!CommonUtil.isEmpty(orderNew.getStorefontId())) {
+             *                 masterAccountFlowRecordService.updateStoreAccountMoney(orderNew.getStorefontId(), house.getId(),
+             *                         0, orderNew.getId(), orderNew.getActualPaymentPrice().doubleValue(), orderNew.getWorkerTypeName(), operator.getId());
+             *             }
+             */
+
             //业主
             configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "装修材料已收货", String.format
                     (DjConstants.PushMessage.YZ_S_001, house.getHouseName()), "");
