@@ -2,6 +2,7 @@ package com.dangjia.acg.service.repair;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.api.app.deliver.ProductChangeAPI;
 import com.dangjia.acg.api.app.member.MemberAPI;
 import com.dangjia.acg.api.data.GetForBudgetAPI;
 import com.dangjia.acg.api.data.TechnologyRecordAPI;
@@ -18,6 +19,7 @@ import com.dangjia.acg.mapper.basics.IProductMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
+import com.dangjia.acg.modle.deliver.ProductChange;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.MendMateriel;
@@ -58,6 +60,10 @@ public class FillMaterielService {
     private IGoodsMapper goodsMapper;
     @Autowired
     private MemberAPI memberAPI;
+    @Autowired
+    private ProductChangeAPI productChangeAPI;
+
+
 
     /**
      * 管家审核验收申请
@@ -141,22 +147,32 @@ public class FillMaterielService {
             List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.repairBudgetMaterial(worker.getWorkerTypeId(), houseId, categoryId, name, "0");
             //补材料的
             List<MendMateriel> mendMaterielList = getForBudgetAPI.askAndQuit(worker.getWorkerTypeId(), houseId, categoryId, name);
+
+            //更换的
+            List<ProductChange> productChanges = productChangeAPI.queryChangeDetail(houseId);
+
+
             List<WarehouseDTO> warehouseDTOS = new ArrayList<>();
 
             List<String> productIdList = new ArrayList<>();
 
-            Map map = new HashMap();
+            Map<String, String>  map = new HashMap();
             for (BudgetMaterial bm : budgetMaterialList) {
                 productIdList.add(bm.getProductId());
-                map.put(bm.getProductId(), "0");
             }
             for (MendMateriel mendMateriel : mendMaterielList) {
-                if (map.get(mendMateriel.getProductId()) == null) {
-                    productIdList.add(mendMateriel.getProductId());
-                    map.put(mendMateriel.getProductId(), "0");
+                productIdList.add(mendMateriel.getProductId());
+            }
+            for (String productId : productIdList) {
+                map.put(productId, "0");
+                for (ProductChange productChange : productChanges) {
+                    if(productChange.getSrcProductId().equals(productId)){
+                        map.put(productChange.getDestProductId(), "0");
+                    }
                 }
             }
-            for (String id : productIdList) {
+            for(Map.Entry<String, String> entry : map.entrySet()){
+                String id = entry.getKey();
                 ServerResponse response = technologyRecordAPI.getByProductId(id, houseId);
                 Object warehouseStr = response.getResultObj();
                 Warehouse warehouse = JSON.parseObject(JSON.toJSONString(warehouseStr), Warehouse.class);

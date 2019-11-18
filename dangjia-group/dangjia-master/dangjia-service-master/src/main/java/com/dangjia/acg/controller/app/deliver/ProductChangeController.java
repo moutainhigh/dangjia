@@ -3,11 +3,13 @@ package com.dangjia.acg.controller.app.deliver;
 import com.dangjia.acg.api.app.deliver.ProductChangeAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.deliver.ProductChange;
 import com.dangjia.acg.service.deliver.ProductChangeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * author: Yinjianbo
@@ -100,5 +102,10 @@ public class ProductChangeController implements ProductChangeAPI {
     @ApiMethod
     public ServerResponse orderBackFun(HttpServletRequest request, String id) {
         return productChangeService.orderBackFun(request, id);
+    }
+    @Override
+    @ApiMethod
+    public List<ProductChange> queryChangeDetail(String houseId){
+        return productChangeService.queryChangeDetail(houseId);
     }
 }

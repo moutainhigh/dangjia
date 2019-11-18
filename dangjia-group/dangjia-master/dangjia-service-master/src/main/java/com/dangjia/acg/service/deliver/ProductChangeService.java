@@ -817,4 +817,14 @@ public class ProductChangeService {
         return itemDTO;
     }
 
+
+    public List<ProductChange> queryChangeDetail(String houseId) {
+      // 查询商品更换订单表
+      Example productExample = new Example(ProductChange.class);
+      productExample.createCriteria()
+              .andEqualTo(ProductChange.HOUSE_ID, houseId)
+              .andEqualTo(ProductChange.TYPE, "1");
+      List<ProductChange> productChangeList = productChangeMapper.selectByExample(productExample);
+      return productChangeList;
+    }
 }

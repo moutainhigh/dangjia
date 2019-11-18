@@ -20,6 +20,8 @@ public interface IOrderSplitItemMapper extends Mapper<OrderSplitItem> {
 
     Double getOrderSplitPrice(@Param("orderSplitId")String orderSplitId);
 
+    Double getSplitDeliverSellPrice(@Param("splitDeliverId")String splitDeliverId);
+
     void setSupplierId(@Param("id") String id, @Param("splitDeliverId") String splitDeliverId);
 
     /**确认收货更新收货数量*/

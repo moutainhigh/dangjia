@@ -14,6 +14,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	        order_split_id = #{orderSplitId}
 	</select>
 
+    <select id="getSplitDeliverSellPrice" resultType="java.lang.Double">
+        select
+           IFNULL(sum(price*receive),0)
+       from dj_deliver_order_split_item
+       where
+            split_deliver_id = #{splitDeliverId}
+    </select>
+
     <update id="setSupplierId" >
         update dj_deliver_order_split_item
         set split_deliver_id = #{splitDeliverId}
