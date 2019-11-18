@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Arrays;
@@ -92,7 +93,8 @@ public class DjBasicsMaintainService {
         if (!djBasicsMaintain.getKeywordName().equals(keywordName)) {
             Example example = new Example(DjBasicsMaintain.class);
             example.createCriteria().andEqualTo(DjBasicsMaintain.KEYWORD_NAME, keywordName)
-                    .andEqualTo(DjBasicsMaintain.DATA_STATUS, 0).andEqualTo(DjBasicsMaintain.CITY_ID,cityId);
+                    .andEqualTo(DjBasicsMaintain.DATA_STATUS, 0)
+                    .andEqualTo(DjBasicsMaintain.CITY_ID,cityId);
             if (djBasicsMaintainMapper.selectByExample(example).size() > 0)
                 return ServerResponse.createByErrorMessage("该关键词名称已存在");
         }

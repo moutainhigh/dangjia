@@ -258,8 +258,8 @@ public class WebSplitDeliverService {
                 storefront.setTotalAccount(storefront.getTotalAccount()-settlementAmount);
                 iMasterStorefrontMapper.updateByPrimaryKeySelective(storefront);
                 DjSupplier djSupplier = iMasterSupplierMapper.selectByPrimaryKey(supplierId);
-                djSupplier.setSurplusMoney(djSupplier.getSurplusMoney()+settlementAmount);
-                djSupplier.setTotalAccount(djSupplier.getTotalAccount()+settlementAmount);
+                djSupplier.setSurplusMoney(CommonUtil.isEmpty(djSupplier.getSurplusMoney())?0:djSupplier.getSurplusMoney()+settlementAmount);
+                djSupplier.setTotalAccount(CommonUtil.isEmpty(djSupplier.getTotalAccount())?0:djSupplier.getTotalAccount()+settlementAmount);
                 accountFlowRecord.setAmountAfterMoney(djSupplier.getTotalAccount());
                 iMasterSupplierMapper.updateByPrimaryKeySelective(djSupplier);
                 accountFlowRecord.setFlowType("2");
