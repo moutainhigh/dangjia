@@ -1,12 +1,14 @@
 package com.dangjia.acg.api.app.deliver;
 
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.deliver.ProductChange;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * author: Yinjianbo
@@ -40,4 +42,8 @@ public interface ProductChangeAPI {
     @PostMapping("app/deliver/productChangeOrder/orderBackFun")
     @ApiOperation(value = "补退差价回调", notes = "补退差价回调")
     ServerResponse orderBackFun(HttpServletRequest request, String id);
+
+    @PostMapping("web/product/change/goods")
+    @ApiOperation(value = "补退差价回调", notes = "补退差价回调")
+    List<ProductChange> queryChangeDetail(String houseId);
 }
