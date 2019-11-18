@@ -16,5 +16,7 @@ import java.util.List;
 @Repository
 public interface DjBasicsMaintainMapper extends Mapper<DjBasicsMaintain> {
 
-    List<DjBasicsMaintain> duplicateRemoval(@Param("str") List<String> str,@Param("cityId") String cityId);
+    List<DjBasicsMaintain> duplicateRemoval(@Param("str") List<String> str,
+                                            @Param("cityId") String cityId,
+                                            @Param("searchItem") String searchItem);
 }

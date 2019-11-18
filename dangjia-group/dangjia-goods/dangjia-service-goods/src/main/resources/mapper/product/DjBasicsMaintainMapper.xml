@@ -17,9 +17,7 @@
         <include refid="all_columns"/>
         FROM dj_basics_maintain
         WHERE
-        <foreach collection="str" index="index" item="item" separator="and">
-            FIND_IN_SET(#{item},search_item)
-        </foreach>
+        search_item =#{searchItem}
         and city_id = #{cityId}
     </select>
 
