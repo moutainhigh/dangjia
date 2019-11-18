@@ -74,5 +74,27 @@ public interface DjDeliverOrderAPI {
     @ApiOperation(value = "订单详情明细", notes = "订单详情明细")
     ServerResponse deliverOrderItemDetail(@RequestParam("orderId") String orderId  );
 
+//    /**
+//     * 取消订单
+//     *
+//     * @param userToken
+//     * @param orderId
+//     * @return
+//     */
+//    @PostMapping("app/order/cancelBusinessOrderById")
+//    @ApiOperation(value = "取消订单", notes = "取消订单")
+//    ServerResponse cancelBusinessOrderById(@RequestParam("userToken") String userToken, @RequestParam("orderId") String orderId);
+//
+//
+//    /**
+//     * 删除已经购物的订单
+//     *
+//     * @param userToken
+//     * @param orderId
+//     * @return
+//     */
+//    @PostMapping("app/order/delBusinessOrderById")
+//    @ApiOperation(value = "删除订单", notes = "删除订单")
+//    ServerResponse delBusinessOrderById(@RequestParam("userToken") String userToken, @RequestParam("orderId") String orderId);
 
 }

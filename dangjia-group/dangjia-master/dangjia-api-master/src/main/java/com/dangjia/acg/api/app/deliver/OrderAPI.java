@@ -57,7 +57,7 @@ public interface OrderAPI {
                                   @RequestParam("userToken") String userToken);
 
 
-    /**
+      /**
      * 删除已经购物的订单
      *
      * @param userToken
@@ -70,12 +70,17 @@ public interface OrderAPI {
 
 
     /**
-     * 店铺-收入记录
+     * 删除已经购物的订单
+     *
+     * @param userToken
+     * @param orderId
+     * @return
      */
-    @PostMapping("app/order/queryStorefrontIncomeRecords")
-    @ApiOperation(value = "店铺-收入记录", notes = "店铺-收入记录")
-    ServerResponse queryStorefrontIncomeRecords(@RequestParam("userToken") String userToken,
-                                                @RequestParam("cityId") String cityId);
+    @PostMapping("app/order/cancleBusinessOrderById")
+    @ApiOperation(value = "取消订单", notes = "取消订单")
+    ServerResponse cancleBusinessOrderById(@RequestParam("userToken") String userToken, @RequestParam("orderId") String orderId);
+
+
 
 
 }

@@ -12,7 +12,11 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.delivery.*;
 import com.dangjia.acg.dto.supplier.SupplierLikeDTO;
-import com.dangjia.acg.mapper.delivery.DjDeliveryReturnSlipMapper;
+import com.dangjia.acg.mapper.delivery.*;
+import com.dangjia.acg.modle.deliver.Order;
+import com.dangjia.acg.modle.deliver.OrderItem;
+import com.dangjia.acg.modle.deliver.OrderSplitItem;
+import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.github.pagehelper.PageHelper;
@@ -21,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
@@ -53,7 +58,14 @@ public class DjDeliveryReturnSlipService {
 
     @Autowired
     private ConfigUtil configUtil;
-
+    @Autowired
+    private BillDjDeliverSplitDeliverMapper billDjDeliverSplitDeliverMapper;
+    @Autowired
+    private BillDjDeliverOrderSplitItemMapper billDjDeliverOrderSplitItemMapper;
+    @Autowired
+    private IBillDjDeliverOrderItemMapper ibillDjDeliverOrderItemMapper;
+    @Autowired
+    private IBillDjDeliverOrderMapper ibillDjDeliverOrderMapper;
 
     /**
      * 供货任务列表
@@ -128,6 +140,31 @@ public class DjDeliveryReturnSlipService {
      */
     public ServerResponse setDeliveryTask(String id, Integer invoiceType, Integer shippingState) {
         try {
+            if(shippingState==1){
+                SplitDeliver splitDeliver = billDjDeliverSplitDeliverMapper.selectByPrimaryKey(id);
+                Example example=new Example(OrderSplitItem.class);
+                example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID,splitDeliver.getOrderSplitId());
+                List<OrderSplitItem> orderSplitItems = billDjDeliverOrderSplitItemMapper.selectByExample(example);
+                for (OrderSplitItem orderSplitItem : orderSplitItems) {
+                    example=new Example(OrderItem.class);
+                    example.createCriteria().andEqualTo(OrderItem.PRODUCT_ID,orderSplitItem.getProductId())
+                            .andEqualTo(OrderItem.HOUSE_ID,splitDeliver.getHouseId())
+                            .andEqualTo(OrderItem.ORDER_STATUS,2);
+                    List<OrderItem> orderItems = ibillDjDeliverOrderItemMapper.selectByExample(example);
+                    for (OrderItem orderItem : orderItems) {
+                        if(orderItem.getShopCount()-orderItem.getAskCount()-orderItem.getReturnCount()>0){
+                            continue;
+                        }else {
+                            orderItem.setOrderStatus("3");
+                            ibillDjDeliverOrderItemMapper.updateByPrimaryKeySelective(orderItem);
+                            Order order=new Order();
+                            order.setId(orderItem.getId());
+                            order.setOrderStatus("3");
+                            ibillDjDeliverOrderMapper.updateByPrimaryKeySelective(order);
+                        }
+                    }
+                }
+            }
             if (djDeliveryReturnSlipMapper.setDeliveryTask(id, invoiceType,shippingState) > 0)
                 return ServerResponse.createBySuccessMessage("操作成功");
             return ServerResponse.createByErrorMessage("操作失败");

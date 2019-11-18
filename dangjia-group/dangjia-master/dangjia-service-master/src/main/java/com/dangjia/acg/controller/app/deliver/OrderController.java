@@ -60,17 +60,17 @@ public class OrderController implements OrderAPI {
     }
 
     /**
-     * 店铺-收支记录
-     *
+     * 取消订单
      * @param userToken
-     * @param cityId
+     * @param orderId
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse queryStorefrontIncomeRecords(String userToken, String cityId) {
-        return orderService.queryStorefrontIncomeRecords(userToken, cityId);
+    public ServerResponse cancleBusinessOrderById(String userToken, String orderId) {
+        return orderService.cancleBusinessOrderById(userToken,orderId);
     }
+
 
     /**
      * 管家确认要货

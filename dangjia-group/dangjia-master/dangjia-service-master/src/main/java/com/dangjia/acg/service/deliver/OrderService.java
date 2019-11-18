@@ -1005,24 +1005,66 @@ public class OrderService {
     }
 
     /**
-     * 店铺收支记录
-     *
-     * @param userId
-     * @param cityId
+     * 取消订单
+     * @param userToken
+     * @param orderId
      * @return
      */
-    public ServerResponse queryStorefrontIncomeRecords(String userId, String cityId) {
+    public ServerResponse cancleBusinessOrderById(String userToken, String orderId) {
         try {
-            Storefront storefront= basicsStorefrontAPI.queryStorefrontByUserID(userId,cityId);
-            if(storefront==null)
-            {
-                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
             }
+            Member member = (Member) object;
+            Order order = orderMapper.selectByPrimaryKey(orderId);
+            if (order == null) {
+                return ServerResponse.createByErrorMessage("该订单不存在");
+            }
+            House house = houseMapper.selectByPrimaryKey(order.getHouseId());
+            if (house == null) {
+                return ServerResponse.createByErrorMessage("该房产不存在");
+            }
+            //主订单取消
+            Example orderexample = new Example(Order.class);
+            orderexample.createCriteria().andEqualTo(Order.ID, orderId).andEqualTo(Order.MEMBER_ID, member.getId());
+            Order order1 = new Order();
+            order1.setOrderStatus("5");
+            order1.setCancellationTime(new Date());
+            orderMapper.updateByExampleSelective(order1, orderexample);
+            //订单详情取消
 
-            return null;
+            Example orderItemexample = new Example(OrderItem.class);
+            orderItemexample.createCriteria().andEqualTo(Order.ID, orderId);
+            OrderItem orderItem = new OrderItem();
+//            orderItem.setDataStatus(1);
+            orderItem.setOrderStatus("5");//取消订单
+            orderItem.setCancellationTime(new Date());
+            orderItemMapper.updateByExampleSelective(orderItem, orderItemexample);
+
+
+//            List<OrderItem> OrderItemList = orderItemMapper.selectByExample(orderItemexample);
+//            for (OrderItem OrderItem : OrderItemList) {
+//                //要货单以及要货单详情表取消 orderSplitMapper  orderSplitItemMapper
+//                String id = OrderItem.getId();
+//                Example OrderSplitItemexample = new Example(OrderSplitItem.class);
+//                OrderSplitItemexample.createCriteria().andEqualTo(OrderSplitItem.ORDER_ITEM_ID, id);
+//                OrderSplitItem orderSplitItem = new OrderSplitItem();
+//                orderSplitItem.setDataStatus(1);
+//                orderSplitItemMapper.updateByExampleSelective(orderSplitItem, OrderSplitItemexample);
+//                orderSplitItem = orderSplitItemMapper.selectByPrimaryKey(id);
+//                //发货单取消
+//                String splitItemId = orderSplitItem.getId();
+//                Example splitDeliverExample = new Example(SplitDeliver.class);
+//                splitDeliverExample.createCriteria().andEqualTo(SplitDeliver.NUMBER, splitItemId);
+//                SplitDeliver splitDeliver = new SplitDeliver();
+//                splitDeliver.setDataStatus(1);
+//                splitDeliverMapper.updateByExampleSelective(splitDeliver, splitDeliverExample);
+//            }
+            return ServerResponse.createBySuccess("删除成功");
         } catch (Exception e) {
             e.printStackTrace();
-            return ServerResponse.createByErrorMessage("查询店铺收支记录");
+            return ServerResponse.createByErrorMessage("删除订单异常");
         }
     }
 

@@ -188,6 +188,6 @@ public class Order extends BaseEntity {
 	@Column(name = "cancellation_time")
 	@Desc(value = "订单取消时间")
 	@ApiModelProperty("订单取消时间")
-	private String CancellationTime;//修改人
+	private Date CancellationTime;//修改人
 
 }
