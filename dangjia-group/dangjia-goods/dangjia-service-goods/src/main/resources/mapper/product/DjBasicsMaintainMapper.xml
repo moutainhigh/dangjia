@@ -19,6 +19,9 @@
         WHERE
         search_item =#{searchItem}
         and city_id = #{cityId}
+        <if test="null!=id and ''!=id">
+            and id!=#{id}
+        </if>
     </select>
 
 </mapper>
