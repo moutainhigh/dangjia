@@ -2,7 +2,6 @@ package com.dangjia.acg.service.storefront;
 
 import cn.jiguang.common.utils.StringUtils;
 import com.dangjia.acg.api.supplier.DjSupplierAPI;
-import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 
@@ -15,6 +14,7 @@ import com.dangjia.acg.dto.storefront.StorefrontDTO;
 import com.dangjia.acg.dto.storefront.StorefrontListDTO;
 import com.dangjia.acg.mapper.pay.IStoreBusinessOrderMapper;
 import com.dangjia.acg.mapper.storefront.IStoreStorefrontMapper;
+import com.dangjia.acg.mapper.storefront.IStorefrontConfigMapper;
 import com.dangjia.acg.mapper.storefront.IStorefrontMapper;
 import com.dangjia.acg.mapper.supplier.DjSupplierPayOrderMapper;
 import com.dangjia.acg.mapper.user.IStoreUserMapper;
@@ -22,6 +22,8 @@ import com.dangjia.acg.mapper.worker.IStoreWithdrawDepositMapper;
 import com.dangjia.acg.modle.other.BankCard;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.storefront.Storefront;
+import com.dangjia.acg.modle.storefront.StorefrontConfig;
+import com.dangjia.acg.modle.storefront.StorefrontRuleConfig;
 import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.dangjia.acg.modle.supplier.DjSupplierPayOrder;
 import com.dangjia.acg.modle.user.MainUser;
@@ -34,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
+import tk.mybatis.mapper.util.StringUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
@@ -67,6 +70,9 @@ public class StorefrontService {
     private IStoreStorefrontMapper iStoreStorefrontMapper;
     @Autowired
     private DjSupplierPayOrderMapper djSupplierPayOrderMapper;
+
+    @Autowired
+    private IStorefrontConfigMapper iStorefrontConfigMapper;
     /**
      * 根据用户Id查询店铺信息
      * @param userId
@@ -137,6 +143,18 @@ public class StorefrontService {
             storefrontDTO.setStorekeeperName(storefront.getStorekeeperName());
             storefrontDTO.setMobile(storefront.getMobile());
             storefrontDTO.setEmail(storefront.getEmail());
+
+            Example exampleFreight=new Example(StorefrontConfig.class);
+            exampleFreight.createCriteria().andEqualTo(StorefrontConfig.STOREFRONT_ID,storefront.getId()).andEqualTo(StorefrontConfig.PARAM_KEY,StorefrontConfig.FREIGHT);
+            List<StorefrontConfig> listFreight=iStorefrontConfigMapper.selectByExample(exampleFreight);
+            if(listFreight!=null)
+            storefrontDTO.setFreight(listFreight.get(0).getParamValue());
+
+            Example exampleFreightTems=new Example(StorefrontConfig.class);
+            exampleFreightTems.createCriteria().andEqualTo(StorefrontConfig.STOREFRONT_ID,storefront.getId()).andEqualTo(StorefrontConfig.PARAM_KEY,StorefrontConfig.FREIGHT_TERMS);
+            List<StorefrontConfig> listFreightTems=iStorefrontConfigMapper.selectByExample(exampleFreightTems);
+            if(listFreightTems!=null)
+            storefrontDTO.setBelowUnitPrice(listFreightTems.get(0).getParamValue());
             return ServerResponse.createBySuccess("检索到数据",storefrontDTO);
         } catch (Exception e) {
             logger.error("查询店铺信息异常：", e);
@@ -221,11 +239,6 @@ public class StorefrontService {
     public ServerResponse updateStorefront(StorefrontDTO storefrontDTO) {
 
         try {
-//            Object object = constructionService.getMember(userToken);
-//            if (object instanceof ServerResponse) {
-//                return (ServerResponse) object;
-//            }
-//            Member worker = (Member) object;
 
             if(storefrontDTO==null||StringUtils.isEmpty(storefrontDTO.getUserId()))
             {
@@ -235,7 +248,6 @@ public class StorefrontService {
             {
                 return ServerResponse.createByErrorMessage("城市编号不能为空");
             }
-
 
             Example exampleStorefront=new Example(Storefront.class);
             exampleStorefront.createCriteria().andEqualTo(Storefront.USER_ID,storefrontDTO.getUserId()).
@@ -256,13 +268,36 @@ public class StorefrontService {
                 String systemlogo = configUtil.getValue(SysConfig.ORDER_DIANPU_ICON, String.class);
                 storefront.setSystemLogo(systemlogo);
                 int i = istorefrontMapper.insert(storefront);
+
                 if (i <= 0) {
                     return ServerResponse.createByErrorMessage("修改失败!");
+                }
+
+                if (StringUtil.isNotEmpty(storefrontDTO.getFreight()))
+                {
+
+                    StorefrontConfig storefrontConfig=new StorefrontConfig();
+                    storefrontConfig.setStorefrontId(storefront.getId());
+                    storefrontConfig.setParamKey(StorefrontConfig.FREIGHT);
+                    storefrontConfig.setParamValue(storefrontDTO.getBelowUnitPrice());
+                    storefrontConfig.setCityId(storefrontDTO.getCityId());
+                    iStorefrontConfigMapper.insert(storefrontConfig);
+                }
+                if (StringUtil.isNotEmpty(storefrontDTO.getBelowUnitPrice()))
+                {
+                    StorefrontConfig storefrontConfig=new StorefrontConfig();
+                    storefrontConfig.setStorefrontId(storefront.getId());
+                    storefrontConfig.setParamKey(StorefrontConfig.FREIGHT_TERMS);
+                    storefrontConfig.setParamValue(storefrontDTO.getBelowUnitPrice());
+                    storefrontConfig.setCityId(storefrontDTO.getCityId());
+                    iStorefrontConfigMapper.insert(storefrontConfig);
+
                 }
                 return ServerResponse.createBySuccessMessage("修改成功!");
             }
             else
             {
+
                 Example example = new Example(Storefront.class);
                 example.createCriteria().andEqualTo(Storefront.USER_ID, storefrontDTO.getUserId()).andEqualTo(Storefront.CITY_ID, storefrontDTO.getCityId());
                 Storefront storefront=new Storefront();
@@ -275,11 +310,66 @@ public class StorefrontService {
                 storefront.setStorekeeperName(storefrontDTO.getStorekeeperName());
                 storefront.setMobile(storefrontDTO.getMobile());
                 storefront.setEmail(storefrontDTO.getEmail());
-                storefront.setCreateDate(null);
-                storefront.setId(null);
-                int i = istorefrontMapper.updateByExample(storefront,example);
+
+                int i = istorefrontMapper.updateByExampleSelective(storefront,example);
                 if (i <= 0) {
                     return ServerResponse.createByErrorMessage("修改失败!");
+                }
+                //收取运费
+                if (StringUtil.isNotEmpty(storefrontDTO.getFreight()))
+                {
+                    Storefront mystorefront =list.get(0);
+                    Example example1=new Example(StorefrontConfig.class);
+                    example1.createCriteria().andEqualTo(StorefrontConfig.STOREFRONT_ID,mystorefront.getId()).andEqualTo(StorefrontConfig.PARAM_KEY,StorefrontConfig.FREIGHT);
+                    List<StorefrontConfig> list1=iStorefrontConfigMapper.selectByExample(example1);
+                    if (list1!=null&&list1.size()>0)
+                    {
+                        StorefrontConfig storefrontConfig=new StorefrontConfig();
+                        storefrontConfig.setStorefrontId(mystorefront.getId());
+                        storefrontConfig.setParamKey(StorefrontConfig.FREIGHT);
+                        storefrontConfig.setParamValue(storefrontDTO.getFreight());
+                        Example exampleParamkey=new Example(StorefrontConfig.class);
+                        exampleParamkey.createCriteria().andEqualTo(StorefrontConfig.STOREFRONT_ID,mystorefront.getId())
+                                .andEqualTo(StorefrontConfig.CITY_ID,storefrontDTO.getCityId()).andEqualTo(StorefrontConfig.PARAM_KEY,StorefrontConfig.FREIGHT);
+                        iStorefrontConfigMapper.updateByExampleSelective(storefrontConfig,exampleParamkey);
+                    }
+                    else
+                    {
+                        StorefrontConfig storefrontConfig=new StorefrontConfig();
+                        storefrontConfig.setStorefrontId(mystorefront.getId());
+                        storefrontConfig.setParamKey(StorefrontConfig.FREIGHT);
+                        storefrontConfig.setParamValue(storefrontDTO.getFreight());
+                        storefrontConfig.setCityId(storefrontDTO.getCityId());
+                        iStorefrontConfigMapper.insert(storefrontConfig);
+                    }
+                }
+                //每单价格低于
+                if (StringUtil.isNotEmpty(storefrontDTO.getBelowUnitPrice()))
+                {
+                    Storefront mystorefront =list.get(0);
+                    Example example1=new Example(StorefrontConfig.class);
+                    example1.createCriteria().andEqualTo(StorefrontConfig.STOREFRONT_ID,mystorefront.getId()).andEqualTo(StorefrontConfig.PARAM_KEY,StorefrontConfig.FREIGHT_TERMS);
+                    List<StorefrontConfig> list1=iStorefrontConfigMapper.selectByExample(example1);
+                    if (list1!=null&&list1.size()>0) {
+                        StorefrontConfig storefrontConfig = new StorefrontConfig();
+                        storefrontConfig.setStorefrontId(mystorefront.getId());
+                        storefrontConfig.setParamKey(StorefrontConfig.FREIGHT_TERMS);
+                        storefrontConfig.setParamValue(storefrontDTO.getBelowUnitPrice());
+                        Example exampleFreightTerms = new Example(StorefrontConfig.class);
+                        exampleFreightTerms.createCriteria().andEqualTo(StorefrontConfig.STOREFRONT_ID, mystorefront.getId())
+                                .andEqualTo(StorefrontConfig.CITY_ID, storefrontDTO.getCityId()).andEqualTo(StorefrontConfig.PARAM_KEY, StorefrontConfig.FREIGHT_TERMS);
+                        iStorefrontConfigMapper.updateByExampleSelective(storefrontConfig, exampleFreightTerms);
+                    }
+                    else
+                    {
+                        StorefrontConfig storefrontConfig=new StorefrontConfig();
+                        storefrontConfig.setStorefrontId(mystorefront.getId());
+                        storefrontConfig.setParamKey(StorefrontConfig.FREIGHT_TERMS);
+                        storefrontConfig.setParamValue(storefrontDTO.getBelowUnitPrice());
+                        storefrontConfig.setCityId(storefrontDTO.getCityId());
+                        iStorefrontConfigMapper.insert(storefrontConfig);
+                    }
+
                 }
                 return ServerResponse.createBySuccessMessage("修改成功!");
             }
