@@ -105,8 +105,8 @@ public class StorefrontController implements BasicsStorefrontAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse storeExpenseRecord(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String houseOrderId) {
-        return storefrontService.storeExpenseRecord(request,pageDTO,userId,cityId,houseOrderId);
+    public ServerResponse storeExpenseRecord(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String orderNumber) {
+        return storefrontService.storeExpenseRecord(request,pageDTO,userId,cityId,orderNumber);
     }
 
     @Override

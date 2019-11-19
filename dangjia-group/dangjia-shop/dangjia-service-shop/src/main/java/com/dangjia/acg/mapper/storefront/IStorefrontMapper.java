@@ -32,5 +32,5 @@ public interface IStorefrontMapper extends Mapper<Storefront> {
     Double myWallet(@Param("storefrontId") String storefrontId, @Param("date") Date date);
 
     List<WebSplitDeliverItemDTO> queryStoreSupplierSettlement(@Param("storefrontId") String storefrontId,@Param("searchKey") String searchKey);
-    List<StoreExpenseRecordDTO> selectStoreExpenseRecord(@Param("houseOrderId") String houseOrderId,@Param("storefrontId") String storefrontId);
+    List<StoreExpenseRecordDTO> selectStoreExpenseRecord(@Param("orderNumber") String orderNumber,@Param("storefrontId") String storefrontId);
 }
