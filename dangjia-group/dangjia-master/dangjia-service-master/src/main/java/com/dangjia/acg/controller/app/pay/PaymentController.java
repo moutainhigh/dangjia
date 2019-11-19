@@ -44,6 +44,13 @@ public class PaymentController implements PaymentAPI {
 
     @Override
     @ApiMethod
+    public ServerResponse setWebPaySuccess(String businessOrderNumber) {
+        return paymentService.setWebPaySuccess(businessOrderNumber);
+    }
+
+
+    @Override
+    @ApiMethod
     public ServerResponse getWeiXinSign(String userToken, String businessOrderNumber, Integer userRole) {
         return payService.getWeiXinSign(businessOrderNumber, userRole);
     }
