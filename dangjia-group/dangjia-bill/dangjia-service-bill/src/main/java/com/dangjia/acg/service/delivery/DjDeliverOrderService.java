@@ -825,10 +825,17 @@ public class DjDeliverOrderService {
                     jDeliverOrderDTO.setOrderItemlist(null);
                     jDeliverOrderDTO.setTotalSize(0);
                 }
+
+                 Integer i=0;// 是否预约计数
                 for (DjDeliverOrderItemDTO djDeliverOrderItemDTO :djDeliverOrderItemDTOList)
                 {
                     String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
                     djDeliverOrderItemDTO.setImageDetail(address+djDeliverOrderItemDTO.getImage());
+                    String isReservationDeliver=djDeliverOrderItemDTO.getIsReservationDeliver();
+                    if(isReservationDeliver!=null&&isReservationDeliver.equals("1"))
+                    {
+                        i++;
+                    }
                 }
                 jDeliverOrderDTO.setOrderItemlist(djDeliverOrderItemDTOList);
                 jDeliverOrderDTO.setTotalSize(djDeliverOrderItemDTOList.size());
@@ -836,7 +843,7 @@ public class DjDeliverOrderService {
                 Integer orderSource=jDeliverOrderDTO.getOrderSource();//订单来源(1,精算制作，2业主自购，3购物车）
                 String dborderStatus=jDeliverOrderDTO.getOrderStatus();
 
-                if(dborderStatus!=null&&dborderStatus.equals("5"))
+                if(dborderStatus!=null&&dborderStatus.equals("5"))//已取消
                 {
                     List< Map<String, Object>> rows=new ArrayList<Map<String, Object>>();
                     Map<String, Object> resultMap = new HashMap<>();
@@ -850,10 +857,7 @@ public class DjDeliverOrderService {
                         resultMap2.put("type", 1);
                         rows.add(resultMap2);
                     }
-                    JSONArray jArray = new JSONArray();
-                    jArray.add(rows);
-                    String str = jArray.toString();
-                    jDeliverOrderDTO.setButtionStr(str);
+                    jDeliverOrderDTO.setButtonList(rows);
                 }
 
                 if(dborderStatus!=null&&dborderStatus.equals("3"))
@@ -870,10 +874,7 @@ public class DjDeliverOrderService {
                         resultMap2.put("type", 1);
                         rows.add(resultMap2);
                     }
-                    JSONArray jArray = new JSONArray();
-                    jArray.add(rows);
-                    String str = jArray.toString();
-                    jDeliverOrderDTO.setButtionStr(str);
+                    jDeliverOrderDTO.setButtonList(rows);
                 }
 
                 if(dborderStatus!=null&&dborderStatus.equals("1"))
@@ -889,12 +890,21 @@ public class DjDeliverOrderService {
                         resultMap2.put("name", "取消订单");
                         resultMap2.put("type", 1);
                     }
-                    JSONArray jArray = new JSONArray();
-                    jArray.add(rows);
-                    String str = jArray.toString();
-                    jDeliverOrderDTO.setButtionStr(str);
+                    jDeliverOrderDTO.setButtonList(rows);
                 }
-
+                //2已完成就是待发货
+                if(dborderStatus!=null&&dborderStatus.equals("2"))
+                {
+                    if(i>0)
+                    {
+                        List< Map<String, Object>> rows=new ArrayList<Map<String, Object>>();
+                        Map<String, Object> resultMap = new HashMap<>();
+                        resultMap.put("name", "预约发货");
+                        resultMap.put("type", 5);
+                        rows.add(resultMap);
+                        jDeliverOrderDTO.setButtonList(rows);
+                    }
+                }
             }
             PageInfo pageResult = new PageInfo(list);
             return ServerResponse.createBySuccess("查询所有订单", pageResult);

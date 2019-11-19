@@ -309,7 +309,6 @@ public class StorefrontProductService {
 
             //判断，如果是人工商品，提示不能上架
             Integer k=istorefrontProductMapper.selectProductByGoodsType(id);
-
             if(k>0)
             {
                 return ServerResponse.createByErrorMessage("温馨提示：人工商品提示不能上架");
