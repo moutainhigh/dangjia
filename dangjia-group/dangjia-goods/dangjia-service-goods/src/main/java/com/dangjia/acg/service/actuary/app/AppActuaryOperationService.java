@@ -380,8 +380,11 @@ public class AppActuaryOperationService {
             goodsDTO.setValueIdArr(productTemplate.getValueIdArr());
             goodsDTO.setValueNameArr(productTemplate.getValueNameArr());
             goodsDTO.setBrandId(goods.getBrandId());
-            Brand brand=iBrandMapper.selectByPrimaryKey(goods.getBrandId());
-            goodsDTO.setBrandName(brand.getName());
+            if(!CommonUtil.isEmpty(goods.getBrandId())){
+                Brand brand=iBrandMapper.selectByPrimaryKey(goods.getBrandId());
+                goodsDTO.setBrandName(brand.getName());
+            }
+
             goodsDTO.setConvertQuality(productTemplate.getConvertQuality());
             goodsDTO.setConvertUnit(productTemplate.getConvertUnit());
 
