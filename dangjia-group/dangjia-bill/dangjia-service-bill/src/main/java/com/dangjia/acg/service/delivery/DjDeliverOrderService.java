@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.delivery;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.UserAPI;
 import com.dangjia.acg.api.app.house.HouseAPI;
@@ -824,8 +825,76 @@ public class DjDeliverOrderService {
                     jDeliverOrderDTO.setOrderItemlist(null);
                     jDeliverOrderDTO.setTotalSize(0);
                 }
+                for (DjDeliverOrderItemDTO djDeliverOrderItemDTO :djDeliverOrderItemDTOList)
+                {
+                    String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+                    djDeliverOrderItemDTO.setImageDetail(address+djDeliverOrderItemDTO.getImage());
+                }
                 jDeliverOrderDTO.setOrderItemlist(djDeliverOrderItemDTOList);
                 jDeliverOrderDTO.setTotalSize(djDeliverOrderItemDTOList.size());
+                //订单状态（1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭 8待安装 ）
+                Integer orderSource=jDeliverOrderDTO.getOrderSource();//订单来源(1,精算制作，2业主自购，3购物车）
+                String dborderStatus=jDeliverOrderDTO.getOrderStatus();
+
+                if(dborderStatus!=null&&dborderStatus.equals("5"))
+                {
+                    List< Map<String, Object>> rows=new ArrayList<Map<String, Object>>();
+                    Map<String, Object> resultMap = new HashMap<>();
+                    resultMap.put("name", "再次购买");
+                    resultMap.put("type", 2);
+                    rows.add(resultMap);
+                    if(orderSource == 2 || orderSource == 3)
+                    {
+                        Map<String, Object> resultMap2 = new HashMap<>();
+                        resultMap2.put("name", "取消订单");
+                        resultMap2.put("type", 1);
+                        rows.add(resultMap2);
+                    }
+                    JSONArray jArray = new JSONArray();
+                    jArray.add(rows);
+                    String str = jArray.toString();
+                    jDeliverOrderDTO.setButtionStr(str);
+                }
+
+                if(dborderStatus!=null&&dborderStatus.equals("3"))
+                {
+                    List< Map<String, Object>> rows=new ArrayList<Map<String, Object>>();
+                    Map<String, Object> resultMap = new HashMap<>();
+                    resultMap.put("name", "确认收货");
+                    resultMap.put("type", 3);
+                    rows.add(resultMap);
+                    if(orderSource == 2 || orderSource == 3)
+                    {
+                        Map<String, Object> resultMap2 = new HashMap<>();
+                        resultMap2.put("name", "取消订单");
+                        resultMap2.put("type", 1);
+                        rows.add(resultMap2);
+                    }
+                    JSONArray jArray = new JSONArray();
+                    jArray.add(rows);
+                    String str = jArray.toString();
+                    jDeliverOrderDTO.setButtionStr(str);
+                }
+
+                if(dborderStatus!=null&&dborderStatus.equals("1"))
+                {
+                    List< Map<String, Object>> rows=new ArrayList<Map<String, Object>>();
+                    Map<String, Object> resultMap = new HashMap<>();
+                    resultMap.put("name", "付款");
+                    resultMap.put("type", 4);
+                    rows.add(resultMap);
+                    if(orderSource == 2 || orderSource == 3)
+                    {
+                        Map<String, Object> resultMap2 = new HashMap<>();
+                        resultMap2.put("name", "取消订单");
+                        resultMap2.put("type", 1);
+                    }
+                    JSONArray jArray = new JSONArray();
+                    jArray.add(rows);
+                    String str = jArray.toString();
+                    jDeliverOrderDTO.setButtionStr(str);
+                }
+
             }
             PageInfo pageResult = new PageInfo(list);
             return ServerResponse.createBySuccess("查询所有订单", pageResult);
