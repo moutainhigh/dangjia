@@ -106,6 +106,7 @@ public class DjBasicsGoodsService {
 
             BasicsGoods goods = getBasicsGoods(new BasicsGoods(),basicsGoodsDTO);
             goods.setCityId(cityId);
+            goods.setCreateDate(new Date());
             iBasicsGoodsMapper.insert(goods);
             return ServerResponse.createBySuccess("新增成功", goods.getId());
         } catch (Exception e) {
@@ -145,7 +146,6 @@ public class DjBasicsGoodsService {
         goods.setSales(basicsGoodsDTO.getSales());//退货性质
         goods.setUnitId(basicsGoodsDTO.getUnitId());//单位
         goods.setType(basicsGoodsDTO.getType());//goods性质
-        goods.setCreateDate(new Date());
         goods.setModifyDate(new Date());
         goods.setIsInflueDecorationProgress(basicsGoodsDTO.getIsInflueDecorationProgress());
         goods.setIrreversibleReasons(basicsGoodsDTO.getIrreversibleReasons());
