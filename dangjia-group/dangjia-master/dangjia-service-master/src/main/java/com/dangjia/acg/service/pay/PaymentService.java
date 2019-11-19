@@ -77,7 +77,6 @@ import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.design.HouseDesignPayService;
 import com.dangjia.acg.service.repair.MendOrderCheckService;
-import com.dangjia.acg.sql.config.DruidConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -306,7 +305,39 @@ public class PaymentService {
             return ServerResponse.createByErrorMessage("支付回调异常");
         }
     }
+    /**
+     * web支付成功回调
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse setWebPaySuccess( String businessOrderNumber) {
 
+        Map<String, Object> returnMap = new HashMap<>();
+        try {
+            Example examplePayOrder = new Example(PayOrder.class);
+            examplePayOrder.createCriteria().andEqualTo(PayOrder.BUSINESS_ORDER_NUMBER, businessOrderNumber);
+            List<PayOrder> payOrderList = payOrderMapper.selectByExample(examplePayOrder);
+            if (payOrderList.size() == 0) {
+                return ServerResponse.createByErrorMessage("支付订单不存在");
+            }
+            PayOrder payOrder = payOrderList.get(0);
+            if (payOrder.getState() == 2) {//已支付
+                returnMap.put("name", "当家装修担保平台");
+                returnMap.put("businessOrderNumber", businessOrderNumber);
+                returnMap.put("price", payOrder.getPrice());
+                return ServerResponse.createBySuccess("支付成功", returnMap);
+            }else{
+                returnMap.put("name", "当家装修担保平台");
+                returnMap.put("businessOrderNumber", businessOrderNumber);
+                returnMap.put("price", payOrder.getPrice());
+                return ServerResponse.createByErrorMessage("未支付成功");
+            }
+        } catch (Exception e) {
+            returnMap.put("name", "当家装修担保平台");
+            returnMap.put("businessOrderNumber", businessOrderNumber);
+            returnMap.put("price", 0);
+            return ServerResponse.createBySuccess("支付回调异常", returnMap);
+        }
+    }
     /**
      * 移动端支付成功回调
      */
