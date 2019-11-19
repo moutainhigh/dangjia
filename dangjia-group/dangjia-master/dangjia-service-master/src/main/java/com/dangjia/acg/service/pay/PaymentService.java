@@ -686,14 +686,14 @@ public class PaymentService {
                 }
                 orderMapper.updateByPrimaryKeySelective(orderNew);
             }
-            if(!CommonUtil.isEmpty(payState)) {
-                /**
-                 * 订单钱存入店铺账号余额，记录对应的流水信息
-                 */
-                if (!CommonUtil.isEmpty(orderNew.getStorefontId())) {
-                    masterAccountFlowRecordService.updateStoreAccountMoney(orderNew.getStorefontId(), orderNew.getHouseId(), 0, orderNew.getId(), orderNew.getActualPaymentPrice().doubleValue(), orderNew.getWorkerTypeName(), "SYSTEM");
-                }
-            }
+//            if(!CommonUtil.isEmpty(payState)) {
+//                /**
+//                 * 订单钱存入店铺账号余额，记录对应的流水信息
+//                 */
+//                if (!CommonUtil.isEmpty(orderNew.getStorefontId())) {
+//                    masterAccountFlowRecordService.updateStoreAccountMoney(orderNew.getStorefontId(), orderNew.getHouseId(), 0, orderNew.getId(), orderNew.getActualPaymentPrice().doubleValue(), orderNew.getWorkerTypeName(), "SYSTEM");
+//                }
+//            }
         }
         BigDecimal payPrice = order.getTotalAmount().subtract(order.getTotalDiscountPrice());
         payPrice = payPrice.add(order.getTotalStevedorageCost());

@@ -36,6 +36,7 @@ public class StorefrontProductController implements StorefrontProductAPI {
 //    }
 
     @Override
+    @ApiMethod
     public ServerResponse countStorefrontProduct(String userId, String cityId) {
         return storefrontProductService.countStorefrontProduct( userId,  cityId);
     }

@@ -30,6 +30,7 @@ import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.modle.supplier.DjSupplier;
+import com.dangjia.acg.service.account.MasterAccountFlowRecordService;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,9 +79,14 @@ public class SplitDeliverService {
     private IOrderItemMapper orderItemMapper;
     @Autowired
     private IMasterStorefrontProductMapper iMasterStorefrontProductMapper;
+
+    @Autowired
+    private MasterAccountFlowRecordService masterAccountFlowRecordService;
+
     /**
      * 部分收货
      */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse partSplitDeliver(String userToken, String splitDeliverId, String image, String splitItemList) {
         try {
             Object object = constructionService.getMember(userToken);
@@ -89,6 +95,9 @@ public class SplitDeliverService {
             }
             Member operator = (Member) object;
             SplitDeliver splitDeliver = splitDeliverMapper.selectByPrimaryKey(splitDeliverId);
+            if(splitDeliver.getShippingState()!=1)
+                return ServerResponse.createBySuccessMessage("该订单不能收货");
+
             splitDeliver.setOperatorId(operator.getId());
             splitDeliver.setShippingState(4);//部分收货
             splitDeliver.setImage(image);//收货图片
@@ -114,6 +123,7 @@ public class SplitDeliverService {
             }
             splitDeliver.setApplyMoney(applyMoney);
             splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
+
             House house = houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
             //业主
             configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "装修材料部分收货", String.format
@@ -172,7 +182,7 @@ public class SplitDeliverService {
                         for(String str:args)
                         {
                             OrderItem orderItem =orderItemMapper.selectByPrimaryKey(str);
-                            orderItem.setOrderStatus("4");//订单状态（1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭,8待安装
+                            orderItem.setOrderStatus("4");//订单状态（1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭,8待安装 9.确认安装  10.确认收货   11.再次购买
                             orderItemMapper.updateByPrimaryKeySelective(orderItem);
                         }
                     }
@@ -190,6 +200,7 @@ public class SplitDeliverService {
     /**
      * 确认收货
      */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse affirmSplitDeliver(String userToken, String splitDeliverId, String image) {
         try {
             Object object = constructionService.getMember(userToken);
@@ -197,7 +208,11 @@ public class SplitDeliverService {
                 return (ServerResponse) object;
             }
             Member operator = (Member) object;
+            //第一步：修改发货单状态
             SplitDeliver splitDeliver = splitDeliverMapper.selectByPrimaryKey(splitDeliverId);
+            if(splitDeliver.getShippingState()!=1)
+                return ServerResponse.createBySuccessMessage("该订单不能收货");
+
             splitDeliver.setShippingState(2);//收货
             splitDeliver.setApplyState(0);
             splitDeliver.setOperatorId(operator.getId());
@@ -206,7 +221,7 @@ public class SplitDeliverService {
             splitDeliver.setModifyDate(new Date());//收货时间
             orderSplitItemMapper.affirmSplitDeliver(splitDeliverId);
             double applyMoney = 0d;
-            /*统计收货数量*/
+            /*第二步：统计收货数量*/
             Example example = new Example(OrderSplitItem.class);
             example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID, splitDeliverId);
             List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
@@ -220,7 +235,27 @@ public class SplitDeliverService {
             splitDeliver.setApplyMoney(applyMoney);
             splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
             House house = houseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
-            //业主
+
+            //第三步:订单钱存入店铺账号余额，记录对应的流水信息
+           if (!CommonUtil.isEmpty(splitDeliver.getStorefrontId()))
+               {
+                   /**
+                    * 根据店铺ID,修改店铺的钱，记录对应的流水信息
+                    * @param storefrontId 店铺ID
+                    * @param orderId 订单ID
+                    * @param money 钱数，若为扣减，则为负数
+                    * @param state 0订单收入,1提现,2自定义增加金额,3自定义减少金额
+                    * @param orderId 订单ID
+                    * @param remark 流水记录说明（如：退货退款，自动扣减或店铺同意退货，扣减）
+                    * @param userId 当前操用人（若系统自动生成，则为SYSTEM);
+                    * @return
+                    */
+                    masterAccountFlowRecordService.updateStoreAccountMoney(splitDeliver.getStorefrontId(), house.getId(),
+                            0, splitDeliver.getNumber(), applyMoney,"确认收货流水记录", operator.getId());
+               }
+            //第四步：要货单对应的订单明细是否确认收货，以及主订单明细是否收货。 通过房子id+商品id关联
+
+            //第五步：给业主发送短信
             configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "装修材料已收货", String.format
                     (DjConstants.PushMessage.YZ_S_001, house.getHouseName()), "");
             return ServerResponse.createBySuccessMessage("操作成功");

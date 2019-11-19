@@ -243,4 +243,22 @@
             AND TIMESTAMPDIFF(DAY,send_time,SYSDATE())>=7
         </if>
     </select>
+
+    <select id="selectStoreExpenseRecord" resultType="com.dangjia.acg.dto.storefront.StoreExpenseRecordDTO">
+        select
+        CONCAT(IFNULL(dh.residential,'*'),IFNULL(CONCAT(dh.building,'栋'),'*栋'),IFNULL(CONCAT(dh.unit,'单元'),'*单元'),IFNULL(CONCAT(dh.number,'号'),'*号')) as shipAddress, -- 收货地址
+        IFNULL(ddo.order_generation_time,'') as orderGenerationTime, -- 时间
+        IFNULL(ddo.id,'')  as orderNumber,-- 订单号
+        IFNULL(ddo.actual_payment_price,'')  as actualPaymentPrice,-- 实际收入金额
+        IFNULL(ddo.total_amount,'')  as totalAmount -- 订单金额
+        from dj_deliver_order  ddo
+        inner join  dj_house  dh on dh.id=ddo.house_id
+        where 1=1
+        <if test="orderNumber!=null and orderNumber!=''">
+            and ddo.id     LIKE CONCAT('%',#{orderNumber},'%')
+        </if>
+        <if test="storefrontId!=null and storefrontId!=''">
+            and ddo.storefont_id=#{storefrontId}
+        </if>
+    </select>
 </mapper>

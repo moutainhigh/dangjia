@@ -96,25 +96,42 @@ public class StorefrontController implements BasicsStorefrontAPI {
         return storefrontService.operationStorefrontRecharge( userId,  cityId,  payState,  rechargeAmount,  payPassword,  businessOrderType,  sourceType) ;
     }
 
-
-
-
-    @Override
-    @ApiMethod
-    public ServerResponse queryIncomeRecord(String userId, String cityId) {
-        return storefrontService.queryIncomeRecord(userId,cityId);
-    }
-
-    @Override
-    public ServerResponse paymentRetentionMoney(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId) {
-        return null;
-    }
-
     @Override
     @ApiMethod
     public ServerResponse queryStoreSupplierSettlement(HttpServletRequest request, PageDTO pageDTO,
                                                        String userId, String cityId, String searchKey) {
         return storefrontService.queryStoreSupplierSettlement(pageDTO, userId, cityId, searchKey);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse storeExpenseRecord(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String orderNumber) {
+        return storefrontService.storeExpenseRecord(request,pageDTO,userId,cityId,orderNumber);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse storeExpenseRecordOrderDetail(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String houseOrderId) {
+        return storefrontService.storeExpenseRecordOrderDetail(request,pageDTO,userId,cityId,houseOrderId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse storeExpenseRecordGoodDetail(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String houseOrderId) {
+        return storefrontService.storeExpenseRecordGoodDetail(request,pageDTO,userId,cityId,houseOrderId);
+    }
+
+
+    @Override
+    @ApiMethod
+    public ServerResponse storeRevenueRecord(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String houseOrderId) {
+        return storefrontService.storeRevenueRecord(request,pageDTO,userId,cityId,houseOrderId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse storeRevenueRecordOrderDetail(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String houseOrderId) {
+        return storefrontService.storeRevenueRecordOrderDetail(request,pageDTO,userId,cityId,houseOrderId);
     }
 
 

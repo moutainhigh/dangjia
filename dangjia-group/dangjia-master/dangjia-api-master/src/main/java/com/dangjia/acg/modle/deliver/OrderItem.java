@@ -139,8 +139,8 @@ public class OrderItem extends BaseEntity {
 	private Date reservationDeliverTime;//预约发货时间
 
 	@Column(name = "order_status")
-	@Desc(value = "订单状态（1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭）")
-	@ApiModelProperty("订单状态（1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭）")
+	@Desc(value = "订单状态（1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭8待安装 9.确认安装  10.确认收货   11.再次购买）")
+	@ApiModelProperty("订单状态（1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭8待安装 9.确认安装  10.确认收货   11.再次购买）")
 	private String orderStatus;//订单状态（1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭）
 
 	@Column(name = "create_by")
@@ -159,5 +159,5 @@ public class OrderItem extends BaseEntity {
 	@Column(name = "cancellation_time")
 	@Desc(value = "订单取消时间")
 	@ApiModelProperty("订单取消时间")
-	private String CancellationTime;//修改人
+	private Date CancellationTime;//修改人
 }

@@ -30,4 +30,6 @@ public interface IStorefrontProductMapper  extends Mapper<StorefrontProduct> {
 
     StorefrontProduct queryStorefrontProductById(@Param("id") String id);
 
+    Integer  getStorefrontProductCount(@Param("storefrontId") String storefrontId);
+
 }
