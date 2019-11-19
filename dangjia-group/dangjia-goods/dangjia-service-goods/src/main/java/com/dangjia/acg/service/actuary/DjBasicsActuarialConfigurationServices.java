@@ -130,6 +130,9 @@ public class DjBasicsActuarialConfigurationServices {
             ActuarialProductDTO actuarialProductDTO = JSONObject.toJavaObject(obj, ActuarialProductDTO.class);
             String productId = actuarialProductDTO.getId();
             DjActuarialProductConfig actuarialProductConfig=new DjActuarialProductConfig();
+            if(StringUtils.isNotBlank(productId)){
+                actuarialProductConfig=djActuarialProductConfigMapper.selectByPrimaryKey(productId);
+            }
             actuarialProductConfig.setActuarialTemplateId(actuarialTemplateId);
             actuarialProductConfig.setProductId(actuarialProductDTO.getProductId());
             actuarialProductConfig.setGoodsId(actuarialProductDTO.getGoodsId());
@@ -260,6 +263,9 @@ public class DjBasicsActuarialConfigurationServices {
     private DjSimulationTemplateConfig editSimulateTemplateInfo(String userId,String configId,String configName,String configType,String cityId){
         //判断标题是新增还是修改
         DjSimulationTemplateConfig djSimulationTemplateConfig=new DjSimulationTemplateConfig();
+        if(configId!=null&&StringUtils.isNotBlank(configId)){
+            djSimulationTemplateConfig=djSimulationTemplateConfigMapper.selectByPrimaryKey(configId);
+        }
         djSimulationTemplateConfig.setConfigName(configName);
         djSimulationTemplateConfig.setModifyDate(new Date());
         djSimulationTemplateConfig.setUpdateBy(userId);
@@ -290,6 +296,9 @@ public class DjBasicsActuarialConfigurationServices {
             JSONObject obj = jsonArr.getJSONObject(i);
             String id=obj.getString("id");
             DjSimulationTemplateConfigDetail djSimulationTemplateConfigDetail=new DjSimulationTemplateConfigDetail();
+            if(id!=null&&StringUtils.isNotBlank(id)){
+                djSimulationTemplateConfigDetail=djSimulationTemplateConfigDetailMapper.selectByPrimaryKey(id);
+            }
             djSimulationTemplateConfigDetail.setImage(obj.getString("image"));
             djSimulationTemplateConfigDetail.setName(obj.getString("name"));
             djSimulationTemplateConfigDetail.setConfigStatus(0);
@@ -299,6 +308,7 @@ public class DjBasicsActuarialConfigurationServices {
             //判断是添加还是修改
             if(id!=null&&StringUtils.isNotBlank(id)){
                 djSimulationTemplateConfigDetail.setId(id);
+                djSimulationTemplateConfigDetail.setModifyDate(new Date());
                 djSimulationTemplateConfigDetailMapper.updateByPrimaryKeySelective(djSimulationTemplateConfigDetail);
             }else{
                 String templteDetailIndex = djSimulationTemplateConfigDetailMapper.selectCurrentIndexByTemplateId(djSimulationTemplateConfig.getId());
