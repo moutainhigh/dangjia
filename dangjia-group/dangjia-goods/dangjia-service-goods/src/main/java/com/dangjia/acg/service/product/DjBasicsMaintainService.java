@@ -56,27 +56,33 @@ public class DjBasicsMaintainService {
      * @return
      */
     public ServerResponse addKeywords(String keywordName, String searchItem,String cityId) {
-        Example example = new Example(DjBasicsMaintain.class);
-        example.createCriteria().andEqualTo(DjBasicsMaintain.KEYWORD_NAME, keywordName)
-                .andEqualTo(DjBasicsMaintain.DATA_STATUS, 0).andEqualTo(DjBasicsMaintain.CITY_ID,cityId);
-        List<DjBasicsMaintain> djBasicsMaintains = djBasicsMaintainMapper.selectByExample(example);
-        if (djBasicsMaintains.size() > 0)
-            return ServerResponse.createByErrorMessage("该关键词名称已存在");
-        List<String> strings = Arrays.asList(searchItem.split(","));
-        //判断集合是否有重复元素
-        long count = strings.stream().distinct().count();
-        if (count < strings.size())
-            return ServerResponse.createByErrorMessage("搜索词重复");
-        if (djBasicsMaintainMapper.duplicateRemoval(strings,cityId).size() > 0) {
-            return ServerResponse.createByErrorMessage("搜索词已存在");
+        try {
+            Example example = new Example(DjBasicsMaintain.class);
+            example.createCriteria().andEqualTo(DjBasicsMaintain.KEYWORD_NAME, keywordName)
+                    .andEqualTo(DjBasicsMaintain.DATA_STATUS, 0).andEqualTo(DjBasicsMaintain.CITY_ID,cityId);
+            List<DjBasicsMaintain> djBasicsMaintains = djBasicsMaintainMapper.selectByExample(example);
+            if (djBasicsMaintains.size() > 0)
+                return ServerResponse.createByErrorMessage("该关键词名称已存在");
+            List<String> strings = Arrays.asList(searchItem.split(","));
+            //判断集合是否有重复元素
+            long count = strings.stream().distinct().count();
+            if (count < strings.size())
+                return ServerResponse.createByErrorMessage("搜索词重复");
+            if (djBasicsMaintainMapper.duplicateRemoval(null,cityId,searchItem).size() > 0) {
+                return ServerResponse.createByErrorMessage("搜索词已存在");
+            }
+            DjBasicsMaintain djBasicsMaintain = new DjBasicsMaintain();
+            djBasicsMaintain.setKeywordName(keywordName);
+            djBasicsMaintain.setSearchItem(searchItem);
+            djBasicsMaintain.setDataStatus(0);
+            djBasicsMaintain.setCityId(cityId);
+            if (djBasicsMaintainMapper.insert(djBasicsMaintain) > 0)
+                return ServerResponse.createBySuccessMessage("添加成功");
+            return ServerResponse.createByErrorMessage("添加失败");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("添加失败");
         }
-        DjBasicsMaintain djBasicsMaintain = new DjBasicsMaintain();
-        djBasicsMaintain.setKeywordName(keywordName);
-        djBasicsMaintain.setSearchItem(searchItem);
-        djBasicsMaintain.setDataStatus(0);
-        if (djBasicsMaintainMapper.insert(djBasicsMaintain) > 0)
-            return ServerResponse.createBySuccessMessage("添加成功");
-        return ServerResponse.createByErrorMessage("添加失败");
     }
 
 
@@ -89,31 +95,36 @@ public class DjBasicsMaintainService {
      * @return
      */
     public ServerResponse updateKeywords(String id, String keywordName, String searchItem,String cityId) {
-        DjBasicsMaintain djBasicsMaintain = djBasicsMaintainMapper.selectByPrimaryKey(id);
-        if (!djBasicsMaintain.getKeywordName().equals(keywordName)) {
-            Example example = new Example(DjBasicsMaintain.class);
-            example.createCriteria().andEqualTo(DjBasicsMaintain.KEYWORD_NAME, keywordName)
-                    .andEqualTo(DjBasicsMaintain.DATA_STATUS, 0)
-                    .andEqualTo(DjBasicsMaintain.CITY_ID,cityId);
-            if (djBasicsMaintainMapper.selectByExample(example).size() > 0)
-                return ServerResponse.createByErrorMessage("该关键词名称已存在");
+        try {
+            DjBasicsMaintain djBasicsMaintain = djBasicsMaintainMapper.selectByPrimaryKey(id);
+            if (!djBasicsMaintain.getKeywordName().equals(keywordName)) {
+                Example example = new Example(DjBasicsMaintain.class);
+                example.createCriteria().andEqualTo(DjBasicsMaintain.KEYWORD_NAME, keywordName)
+                        .andEqualTo(DjBasicsMaintain.DATA_STATUS, 0)
+                        .andEqualTo(DjBasicsMaintain.CITY_ID,cityId);
+                if (djBasicsMaintainMapper.selectByExample(example).size() > 0)
+                    return ServerResponse.createByErrorMessage("该关键词名称已存在");
+            }
+            String[] searchItems = searchItem.split(",");
+            List<String> strings = Arrays.asList(searchItems);
+            //判断集合是否有重复元素
+            long count = strings.stream().distinct().count();
+            if (count < strings.size()) {
+                return ServerResponse.createByErrorMessage("搜索词重复");
+            }
+            if (djBasicsMaintainMapper.duplicateRemoval(id,cityId,searchItem).size() > 0) {
+                return ServerResponse.createByErrorMessage("搜索词已存在");
+            }
+            djBasicsMaintain.setKeywordName(keywordName);
+            djBasicsMaintain.setSearchItem(searchItem);
+            djBasicsMaintain.setDataStatus(0);
+            djBasicsMaintain.setCityId(cityId);
+            djBasicsMaintainMapper.updateByPrimaryKeySelective(djBasicsMaintain);
+            return ServerResponse.createBySuccessMessage("编辑成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("编辑失败");
         }
-        String[] searchItems = searchItem.split(",");
-        List<String> strings = Arrays.asList(searchItems);
-        //判断集合是否有重复元素
-        long count = strings.stream().distinct().count();
-        if (count < strings.size()) {
-            return ServerResponse.createByErrorMessage("搜索词重复");
-        }
-        if (djBasicsMaintainMapper.duplicateRemoval(strings,cityId).size() > 0) {
-            return ServerResponse.createByErrorMessage("搜索词已存在");
-        }
-        djBasicsMaintain.setKeywordName(keywordName);
-        djBasicsMaintain.setSearchItem(searchItem);
-        djBasicsMaintain.setDataStatus(0);
-        djBasicsMaintain.setCityId(cityId);
-        djBasicsMaintainMapper.updateByPrimaryKeySelective(djBasicsMaintain);
-        return ServerResponse.createBySuccessMessage("编辑成功");
     }
 
 
@@ -125,11 +136,16 @@ public class DjBasicsMaintainService {
      * @return
      */
     public ServerResponse addRelatedTags(String id, String labelIds) {
-        DjBasicsMaintain djBasicsMaintain = djBasicsMaintainMapper.selectByPrimaryKey(id);
-        djBasicsMaintain.setLabelIds(labelIds);
-        djBasicsMaintain.setModifyDate(new Date());
-        djBasicsMaintainMapper.updateByPrimaryKeySelective(djBasicsMaintain);
-        return ServerResponse.createBySuccessMessage("关联标签成功");
+        try {
+            DjBasicsMaintain djBasicsMaintain = djBasicsMaintainMapper.selectByPrimaryKey(id);
+            djBasicsMaintain.setLabelIds(labelIds);
+            djBasicsMaintain.setModifyDate(new Date());
+            djBasicsMaintainMapper.updateByPrimaryKeySelective(djBasicsMaintain);
+            return ServerResponse.createBySuccessMessage("关联标签成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("编辑失败");
+        }
     }
 
 
