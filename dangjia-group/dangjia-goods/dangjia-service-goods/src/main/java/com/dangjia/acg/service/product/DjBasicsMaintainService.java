@@ -74,7 +74,7 @@ public class DjBasicsMaintainService {
             long count = strings.stream().distinct().count();
             if (count < strings.size())
                 return ServerResponse.createByErrorMessage("搜索词重复");
-            if (djBasicsMaintainMapper.duplicateRemoval(null,cityId,searchItem).size() > 0) {
+            if (djBasicsMaintainMapper.duplicateRemoval(null,cityId,strings).size() > 0) {
                 return ServerResponse.createByErrorMessage("搜索词已存在");
             }
             DjBasicsMaintain djBasicsMaintain = new DjBasicsMaintain();
@@ -124,7 +124,7 @@ public class DjBasicsMaintainService {
             if (count < strings.size()) {
                 return ServerResponse.createByErrorMessage("搜索词重复");
             }
-            if (djBasicsMaintainMapper.duplicateRemoval(id,cityId,searchItem).size() > 0) {
+            if (djBasicsMaintainMapper.duplicateRemoval(id,cityId,strings).size() > 0) {
                 return ServerResponse.createByErrorMessage("搜索词已存在");
             }
             djBasicsMaintain.setKeywordName(keywordName);
