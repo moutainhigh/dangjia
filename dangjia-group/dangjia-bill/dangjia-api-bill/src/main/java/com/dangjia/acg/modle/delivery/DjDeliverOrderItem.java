@@ -135,7 +135,7 @@ public class DjDeliverOrderItem extends BaseEntity {
     private String reservationDeliverTime;//预约发货时间
 
     @Column(name = "order_status")
-    @Desc(value = "订单状态（1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭8待安装 9.确认安装  10.确认收货   11.再次购买）")
+    @Desc(value = "订单状态（1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭8待安装）")
     @ApiModelProperty("订单状态（1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭8待安装 9.确认安装  10.确认收货   11.再次购买）")
     private String orderStatus;//订单状态（1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭）
 

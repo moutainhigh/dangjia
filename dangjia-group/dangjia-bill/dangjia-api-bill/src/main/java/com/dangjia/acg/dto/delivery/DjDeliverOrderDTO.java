@@ -80,7 +80,7 @@ public class DjDeliverOrderDTO {
     private String isShowOrder;//是否可付款（1不可付款，2可付款）
 
 
-    private String orderStatus;//订单状态（1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭）
+    private String orderStatus;//订单状态（1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭8待安装）
 
 
     private Date orderGenerationTime;//订单生成时间
@@ -88,7 +88,7 @@ public class DjDeliverOrderDTO {
     private Date orderPayTime;//订单支付时间
 
 
-    private int orderSource;//订单来源(1,精算制作，2购物车，3补货单）
+    private int orderSource;//订单来源(1,精算制作，2业主自购，3购物车）
 
 
     private String createBy;//创建人

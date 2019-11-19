@@ -46,6 +46,8 @@ public class DjDeliverOrderItemDTO {
 
     private String image;//图片
 
+    private String imageDetail;
+
 
 
     private String storefontId;//店铺ID
