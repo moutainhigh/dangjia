@@ -246,14 +246,16 @@
 
     <select id="selectStoreExpenseRecord" resultType="com.dangjia.acg.dto.storefront.StoreExpenseRecordDTO">
         select
-        IFNULL(dfr.house_order_id,'')  as houseOrderId,-- 要货单号
-        IFNULL(dfr.money,'')  as money,-- 实际收入金额
+        CONCAT(IFNULL(dh.residential,'*'),IFNULL(CONCAT(dh.building,'栋'),'*栋'),IFNULL(CONCAT(dh.unit,'单元'),'*单元'),IFNULL(CONCAT(dh.number,'号'),'*号')) as shipAddress, -- 收货地址
+        IFNULL(ddo.order_generation_time,'') as orderGenerationTime, -- 时间
+        IFNULL(ddo.id,'')  as orderNumber,-- 订单号
+        IFNULL(ddo.actual_payment_price,'')  as actualPaymentPrice,-- 实际收入金额
         IFNULL(ddo.total_amount,'')  as totalAmount -- 订单金额
-        from dj_account_flow_record dfr
-        inner join dj_deliver_order  ddo on dfr.house_order_id=ddo.id
-        where 1=1 and flow_type=1 and state in (0,2)
-        <if test="houseOrderId!=null and houseOrderId!=''">
-            and dfr.house_order_id     LIKE CONCAT('%',#{houseOrderId},'%')
+        from dj_deliver_order  ddo
+        inner join  dj_house  dh on dh.id=ddo.house_id
+        where 1=1
+        <if test="orderNumber!=null and orderNumber!=''">
+            and ddo.id     LIKE CONCAT('%',#{orderNumber},'%')
         </if>
         <if test="storefrontId!=null and storefrontId!=''">
             and ddo.storefont_id=#{storefrontId}

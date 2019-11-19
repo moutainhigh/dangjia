@@ -134,7 +134,7 @@ public interface BasicsStorefrontAPI {
      * @param pageDTO
      * @param userId
      * @param cityId
-     * @param houseOrderId
+     * @param orderNumber
      * @return
      */
     @PostMapping("/web/storeExpenseRecord")
@@ -143,10 +143,10 @@ public interface BasicsStorefrontAPI {
                                                 @RequestParam("pageDTO") PageDTO pageDTO,
                                                 @RequestParam("userId") String userId,
                                                 @RequestParam("cityId") String cityId,
-                                                @RequestParam("houseOrderId") String houseOrderId);
+                                                @RequestParam("orderNumber") String orderNumber);
 
     /**
-     * 店铺-收入记录-货单详情
+     * 店铺-收入记录-订单详情
      * @param request
      * @param pageDTO
      * @param userId
@@ -155,7 +155,7 @@ public interface BasicsStorefrontAPI {
      * @return
      */
     @PostMapping("/web/storeExpenseRecordOrderDetail")
-    @ApiOperation(value = "店铺-收入记录-货单详情", notes = "店铺-收入记录-货单详情")
+    @ApiOperation(value = "店铺-收入记录-订单详情", notes = "店铺-收入记录-订单详情")
     ServerResponse storeExpenseRecordOrderDetail(@RequestParam("request") HttpServletRequest request,
                                       @RequestParam("pageDTO") PageDTO pageDTO,
                                       @RequestParam("userId") String userId,
