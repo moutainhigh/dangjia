@@ -172,6 +172,9 @@ public class DjSupplierServices {
                     return ServerResponse.createByErrorMessage("邮件不能为空");
                 if (CommonUtil.isEmpty(djSupplier.getCheckPeople()))
                     return ServerResponse.createByErrorMessage("联系人不能为空");
+                djSupplier.setSurplusMoney(0d);
+                djSupplier.setTotalAccount(0d);
+                djSupplier.setRetentionMoney(0d);
                 if (djSupplierMapper.insert(djSupplier) > 0)
                     return ServerResponse.createBySuccessMessage("编辑成功");
             }
@@ -513,6 +516,9 @@ public class DjSupplierServices {
             }
             if (!DigestUtils.md5Hex(payPassword).equals(mainUser.getPayPassword())) {
                 return ServerResponse.createByErrorMessage("密码错误");
+            }
+            if(businessOrderType.equals("2") && rechargeAmount<2000){
+                return ServerResponse.createByErrorMessage("滞留金交纳不小于2000");
             }
             djSupplierPayOrder.setDataStatus(0);
             djSupplierPayOrder.setBusinessOrderType(businessOrderType);

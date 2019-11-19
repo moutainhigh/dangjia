@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.pay;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.BasicsStorefrontAPI;
 import com.dangjia.acg.api.RedisClient;
@@ -76,6 +77,9 @@ import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.design.HouseDesignPayService;
 import com.dangjia.acg.service.repair.MendOrderCheckService;
+import com.dangjia.acg.sql.config.DruidConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -196,7 +200,7 @@ public class PaymentService {
     private IMasterStorefrontMapper iMasterStorefrontMapper;
     @Autowired
     private IMasterAccountFlowRecordMapper iMasterAccountFlowRecordMapper;
-
+    private Logger logger = LoggerFactory.getLogger(PaymentService.class);
 
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse setServersSuccess(String businessOrderId,BigDecimal money,String image ) {
@@ -284,15 +288,17 @@ public class PaymentService {
             } else if (businessOrder.getType() == 7) {
                 houseDesignPayService.setPaySuccess(businessOrder);
             }
-            HouseExpend houseExpend = houseExpendMapper.getByHouseId(businessOrder.getHouseId());
-            houseExpend.setTolMoney(houseExpend.getTolMoney() + businessOrder.getTotalPrice().doubleValue());//总金额
-            houseExpend.setPayMoney(houseExpend.getPayMoney() + businessOrder.getPayPrice().doubleValue());//总支付
-            houseExpend.setDisMoney(houseExpend.getDisMoney() + businessOrder.getDiscountsPrice().doubleValue());//总优惠
-            example = new Example(Warehouse.class);
-            example.createCriteria().andEqualTo(Warehouse.HOUSE_ID, businessOrder.getHouseId());
-            List<Warehouse> warehouseList = warehouseMapper.selectByExample(example);
-            houseExpend.setMaterialKind(warehouseList.size());//材料种类
-            houseExpendMapper.updateByPrimaryKeySelective(houseExpend);
+            if(!CommonUtil.isEmpty(businessOrder.getHouseId())) {
+                HouseExpend houseExpend = houseExpendMapper.getByHouseId(businessOrder.getHouseId());
+                houseExpend.setTolMoney(houseExpend.getTolMoney() + businessOrder.getTotalPrice().doubleValue());//总金额
+                houseExpend.setPayMoney(houseExpend.getPayMoney() + businessOrder.getPayPrice().doubleValue());//总支付
+                houseExpend.setDisMoney(houseExpend.getDisMoney() + businessOrder.getDiscountsPrice().doubleValue());//总优惠
+                example = new Example(Warehouse.class);
+                example.createCriteria().andEqualTo(Warehouse.HOUSE_ID, businessOrder.getHouseId());
+                List<Warehouse> warehouseList = warehouseMapper.selectByExample(example);
+                houseExpend.setMaterialKind(warehouseList.size());//材料种类
+                houseExpendMapper.updateByPrimaryKeySelective(houseExpend);
+            }
             return ServerResponse.createBySuccessMessage("支付成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -306,10 +312,7 @@ public class PaymentService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse setPaySuccess(String userToken, String businessOrderNumber) {
-        Object object = constructionService.getMember(userToken);
-        if (object instanceof ServerResponse) {
-            return (ServerResponse) object;
-        }
+
         Map<String, Object> returnMap = new HashMap<>();
         try {
             Example examplePayOrder = new Example(PayOrder.class);
@@ -1635,6 +1638,7 @@ public class PaymentService {
                 accountFlowRecord.setCreateBy(djSupplierPayOrder.getUserId());
                 if (djSupplierPayOrder.getState() == 1 && djSupplierPayOrder.getSourceType() == 1) {
                     DjSupplier djSupplier = iMaterSupplierMapper.selectByPrimaryKey(djSupplierPayOrder.getSupplierId());
+                    System.out.println("=============-------1----=============================="+JSON.toJSONString(djSupplier));
                     accountFlowRecord.setAmountBeforeMoney(djSupplier.getTotalAccount());//入账前金额
                     if (djSupplierPayOrder.getBusinessOrderType().equals("1")) {
                         djSupplier.setTotalAccount(djSupplier.getTotalAccount() + djSupplierPayOrder.getPrice());
@@ -1649,6 +1653,8 @@ public class PaymentService {
                     accountFlowRecord.setFlowType("2");
                     accountFlowRecord.setMoney(djSupplierPayOrder.getPrice());
                     accountFlowRecord.setAmountAfterMoney(djSupplier.getTotalAccount());//入账后金额
+
+                    System.out.println("=============-----2------=============================="+JSON.toJSONString(djSupplier));
                 } else if (djSupplierPayOrder.getState() == 1 && djSupplierPayOrder.getSourceType() == 2) {
                     Storefront storefront = iMasterStorefrontMapper.selectByPrimaryKey(djSupplierPayOrder.getSupplierId());
                     accountFlowRecord.setAmountBeforeMoney(storefront.getTotalAccount());//入账前金额
@@ -1672,6 +1678,7 @@ public class PaymentService {
             return ServerResponse.createByErrorMessage("充值失败");
         } catch (Exception e) {
             e.printStackTrace();
+            logger.info("充值失败",e);
             return ServerResponse.createByErrorMessage("充值失败");
         }
     }

@@ -61,6 +61,12 @@ public class DjBasicsMaintainService {
             example.createCriteria().andEqualTo(DjBasicsMaintain.KEYWORD_NAME, keywordName)
                     .andEqualTo(DjBasicsMaintain.DATA_STATUS, 0).andEqualTo(DjBasicsMaintain.CITY_ID,cityId);
             List<DjBasicsMaintain> djBasicsMaintains = djBasicsMaintainMapper.selectByExample(example);
+            if(CommonUtil.isEmpty(keywordName)){
+                return ServerResponse.createByErrorMessage("关键词名称不能为空");
+            }
+            if(CommonUtil.isEmpty(searchItem)){
+                return ServerResponse.createByErrorMessage("搜索词不能为空");
+            }
             if (djBasicsMaintains.size() > 0)
                 return ServerResponse.createByErrorMessage("该关键词名称已存在");
             List<String> strings = Arrays.asList(searchItem.split(","));
@@ -68,7 +74,7 @@ public class DjBasicsMaintainService {
             long count = strings.stream().distinct().count();
             if (count < strings.size())
                 return ServerResponse.createByErrorMessage("搜索词重复");
-            if (djBasicsMaintainMapper.duplicateRemoval(null,cityId,searchItem).size() > 0) {
+            if (djBasicsMaintainMapper.duplicateRemoval(null,cityId,strings).size() > 0) {
                 return ServerResponse.createByErrorMessage("搜索词已存在");
             }
             DjBasicsMaintain djBasicsMaintain = new DjBasicsMaintain();
@@ -105,6 +111,12 @@ public class DjBasicsMaintainService {
                 if (djBasicsMaintainMapper.selectByExample(example).size() > 0)
                     return ServerResponse.createByErrorMessage("该关键词名称已存在");
             }
+            if(CommonUtil.isEmpty(keywordName)){
+                return ServerResponse.createByErrorMessage("关键词名称不能为空");
+            }
+            if(CommonUtil.isEmpty(searchItem)){
+                return ServerResponse.createByErrorMessage("搜索词不能为空");
+            }
             String[] searchItems = searchItem.split(",");
             List<String> strings = Arrays.asList(searchItems);
             //判断集合是否有重复元素
@@ -112,7 +124,7 @@ public class DjBasicsMaintainService {
             if (count < strings.size()) {
                 return ServerResponse.createByErrorMessage("搜索词重复");
             }
-            if (djBasicsMaintainMapper.duplicateRemoval(id,cityId,searchItem).size() > 0) {
+            if (djBasicsMaintainMapper.duplicateRemoval(id,cityId,strings).size() > 0) {
                 return ServerResponse.createByErrorMessage("搜索词已存在");
             }
             djBasicsMaintain.setKeywordName(keywordName);
