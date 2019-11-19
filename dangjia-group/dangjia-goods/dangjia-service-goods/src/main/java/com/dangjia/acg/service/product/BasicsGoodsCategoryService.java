@@ -184,7 +184,7 @@ public class BasicsGoodsCategoryService {
                     return ServerResponse.createByErrorMessage("该类别已存在");
             }
 
-            BasicsGoodsCategory category = new BasicsGoodsCategory();
+            BasicsGoodsCategory category = oldCategory;
             category.setCityId(cityId);
             category.setId(id);
             category.setName(name);
