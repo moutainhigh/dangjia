@@ -32,6 +32,7 @@ import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -473,7 +474,7 @@ public class WorkerService {
             if(mainUser == null){
                 return ServerResponse.createByErrorMessage("用户不存在");
             }
-            if(!mainUser.getPayPassword().equals(payPassword)){
+            if(!mainUser.getPayPassword().equals(DigestUtils.md5Hex(payPassword))){
                 return ServerResponse.createByErrorMessage("解绑失败,支付密码错误");
             }
 
