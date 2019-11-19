@@ -284,15 +284,17 @@ public class PaymentService {
             } else if (businessOrder.getType() == 7) {
                 houseDesignPayService.setPaySuccess(businessOrder);
             }
-            HouseExpend houseExpend = houseExpendMapper.getByHouseId(businessOrder.getHouseId());
-            houseExpend.setTolMoney(houseExpend.getTolMoney() + businessOrder.getTotalPrice().doubleValue());//总金额
-            houseExpend.setPayMoney(houseExpend.getPayMoney() + businessOrder.getPayPrice().doubleValue());//总支付
-            houseExpend.setDisMoney(houseExpend.getDisMoney() + businessOrder.getDiscountsPrice().doubleValue());//总优惠
-            example = new Example(Warehouse.class);
-            example.createCriteria().andEqualTo(Warehouse.HOUSE_ID, businessOrder.getHouseId());
-            List<Warehouse> warehouseList = warehouseMapper.selectByExample(example);
-            houseExpend.setMaterialKind(warehouseList.size());//材料种类
-            houseExpendMapper.updateByPrimaryKeySelective(houseExpend);
+            if(!CommonUtil.isEmpty(businessOrder.getHouseId())) {
+                HouseExpend houseExpend = houseExpendMapper.getByHouseId(businessOrder.getHouseId());
+                houseExpend.setTolMoney(houseExpend.getTolMoney() + businessOrder.getTotalPrice().doubleValue());//总金额
+                houseExpend.setPayMoney(houseExpend.getPayMoney() + businessOrder.getPayPrice().doubleValue());//总支付
+                houseExpend.setDisMoney(houseExpend.getDisMoney() + businessOrder.getDiscountsPrice().doubleValue());//总优惠
+                example = new Example(Warehouse.class);
+                example.createCriteria().andEqualTo(Warehouse.HOUSE_ID, businessOrder.getHouseId());
+                List<Warehouse> warehouseList = warehouseMapper.selectByExample(example);
+                houseExpend.setMaterialKind(warehouseList.size());//材料种类
+                houseExpendMapper.updateByPrimaryKeySelective(houseExpend);
+            }
             return ServerResponse.createBySuccessMessage("支付成功");
         } catch (Exception e) {
             e.printStackTrace();
