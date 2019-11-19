@@ -23,7 +23,6 @@ import com.dangjia.acg.modle.other.BankCard;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.storefront.StorefrontConfig;
-import com.dangjia.acg.modle.storefront.StorefrontRuleConfig;
 import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.dangjia.acg.modle.supplier.DjSupplierPayOrder;
 import com.dangjia.acg.modle.user.MainUser;
@@ -626,10 +625,10 @@ public class StorefrontService {
      * @param pageDTO
      * @param userId
      * @param cityId
-     * @param houseOrderId
+     * @param orderNumber
      * @return
      */
-    public ServerResponse storeExpenseRecord(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String houseOrderId) {
+    public ServerResponse storeExpenseRecord(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String orderNumber) {
         try {
 
             Storefront storefront = this.queryStorefrontByUserID(userId, cityId);
@@ -637,7 +636,7 @@ public class StorefrontService {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<StoreExpenseRecordDTO>  list=istorefrontMapper.selectStoreExpenseRecord(houseOrderId,storefront.getId());
+            List<StoreExpenseRecordDTO>  list=istorefrontMapper.selectStoreExpenseRecord(orderNumber,storefront.getId());
             PageInfo pageResult = new PageInfo(list);
             return ServerResponse.createBySuccess("查询成功",pageResult);
 
