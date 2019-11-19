@@ -216,6 +216,10 @@ public class DjBasicsProductTemplateService {
     private String insertBasicsProductData(BasicsProductDTO basicsProductDTO,StringBuilder imgStr,int dataStatus,int productType){
         DjBasicsProductTemplate product = new DjBasicsProductTemplate();
         String productId = basicsProductDTO.getId();
+        if (productId !=null &&! "".equals(productId)) {
+            product=iBasicsProductTemplateMapper.selectByPrimaryKey(productId);
+        }
+
         product.setName(basicsProductDTO.getName());//product品名称
         product.setCategoryId(basicsProductDTO.getCategoryId());//分类id
         product.setGoodsId(basicsProductDTO.getGoodsId());//goodsid

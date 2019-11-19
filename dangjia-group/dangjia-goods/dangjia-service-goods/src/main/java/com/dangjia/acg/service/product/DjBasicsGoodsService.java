@@ -104,7 +104,7 @@ public class DjBasicsGoodsService {
             if (type < -1)
                 return ServerResponse.createByErrorMessage("性质不能为空");
 
-            BasicsGoods goods = getBasicsGoods(basicsGoodsDTO);
+            BasicsGoods goods = getBasicsGoods(new BasicsGoods(),basicsGoodsDTO);
             goods.setCityId(cityId);
             iBasicsGoodsMapper.insert(goods);
             return ServerResponse.createBySuccess("新增成功", goods.getId());
@@ -124,7 +124,7 @@ public class DjBasicsGoodsService {
             if (goodsList.size() > 0)
                 return ServerResponse.createByErrorMessage("该货品已存在");
         }
-        BasicsGoods goods = getBasicsGoods(basicsGoodsDTO);
+        BasicsGoods goods = getBasicsGoods(oldBasicsGoods,basicsGoodsDTO);
         goods.setId(basicsGoodsDTO.getId());
         iBasicsGoodsMapper.updateByPrimaryKeySelective(goods);
 
@@ -137,8 +137,7 @@ public class DjBasicsGoodsService {
      *
      * @return
      */
-    private BasicsGoods getBasicsGoods(BasicsGoodsDTO basicsGoodsDTO) {
-        BasicsGoods goods = new BasicsGoods();
+    private BasicsGoods getBasicsGoods(BasicsGoods goods,BasicsGoodsDTO basicsGoodsDTO) {
         goods.setName(basicsGoodsDTO.getName());
         goods.setOtherName(basicsGoodsDTO.getOtherName());//别名
         goods.setCategoryId(basicsGoodsDTO.getCategoryId());//分类
