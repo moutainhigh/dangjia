@@ -61,6 +61,12 @@ public class DjBasicsMaintainService {
             example.createCriteria().andEqualTo(DjBasicsMaintain.KEYWORD_NAME, keywordName)
                     .andEqualTo(DjBasicsMaintain.DATA_STATUS, 0).andEqualTo(DjBasicsMaintain.CITY_ID,cityId);
             List<DjBasicsMaintain> djBasicsMaintains = djBasicsMaintainMapper.selectByExample(example);
+            if(CommonUtil.isEmpty(keywordName)){
+                return ServerResponse.createByErrorMessage("关键词名称不能为空");
+            }
+            if(CommonUtil.isEmpty(searchItem)){
+                return ServerResponse.createByErrorMessage("搜索词不能为空");
+            }
             if (djBasicsMaintains.size() > 0)
                 return ServerResponse.createByErrorMessage("该关键词名称已存在");
             List<String> strings = Arrays.asList(searchItem.split(","));
@@ -104,6 +110,12 @@ public class DjBasicsMaintainService {
                         .andEqualTo(DjBasicsMaintain.CITY_ID,cityId);
                 if (djBasicsMaintainMapper.selectByExample(example).size() > 0)
                     return ServerResponse.createByErrorMessage("该关键词名称已存在");
+            }
+            if(CommonUtil.isEmpty(keywordName)){
+                return ServerResponse.createByErrorMessage("关键词名称不能为空");
+            }
+            if(CommonUtil.isEmpty(searchItem)){
+                return ServerResponse.createByErrorMessage("搜索词不能为空");
             }
             String[] searchItems = searchItem.split(",");
             List<String> strings = Arrays.asList(searchItems);

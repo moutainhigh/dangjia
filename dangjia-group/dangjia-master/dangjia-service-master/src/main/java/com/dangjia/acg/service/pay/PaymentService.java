@@ -77,6 +77,9 @@ import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.design.HouseDesignPayService;
 import com.dangjia.acg.service.repair.MendOrderCheckService;
+import com.dangjia.acg.sql.config.DruidConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -197,7 +200,7 @@ public class PaymentService {
     private IMasterStorefrontMapper iMasterStorefrontMapper;
     @Autowired
     private IMasterAccountFlowRecordMapper iMasterAccountFlowRecordMapper;
-
+    private Logger logger = LoggerFactory.getLogger(PaymentService.class);
 
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse setServersSuccess(String businessOrderId,BigDecimal money,String image ) {
@@ -1675,6 +1678,7 @@ public class PaymentService {
             return ServerResponse.createByErrorMessage("充值失败");
         } catch (Exception e) {
             e.printStackTrace();
+            logger.info("充值失败",e);
             return ServerResponse.createByErrorMessage("充值失败");
         }
     }
