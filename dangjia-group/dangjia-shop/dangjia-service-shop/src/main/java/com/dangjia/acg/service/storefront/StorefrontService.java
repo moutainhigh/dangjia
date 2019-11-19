@@ -647,22 +647,23 @@ public class StorefrontService {
     }
 
     /**
-         *店铺-支出记录
-         * @param request
-         * @param pageDTO
-         * @param userId
-         * @param cityId
-         * @param houseOrderId
-         * @return
-         */
-        public ServerResponse storeRevenueRecord(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String houseOrderId) {
-            try {
-               return null;
-                //return ServerResponse.createBySuccess("查询成功",pageResult);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return ServerResponse.createByErrorMessage("查询失败");
-            }
+     * 店铺-支出记录
+     *
+     * @param request
+     * @param pageDTO
+     * @param userId
+     * @param cityId
+     * @param houseOrderId
+     * @return
+     */
+    public ServerResponse storeRevenueRecord(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String houseOrderId) {
+        try {
+            return null;
+            //return ServerResponse.createBySuccess("查询成功",pageResult);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
     }
 
     /**
@@ -675,7 +676,13 @@ public class StorefrontService {
      * @return
      */
     public ServerResponse storeExpenseRecordOrderDetail(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String houseOrderId) {
-        return null;
+        try {
+            return null;
+            //return ServerResponse.createBySuccess("查询成功",pageResult);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
     }
 
     /**
@@ -688,7 +695,13 @@ public class StorefrontService {
      * @return
      */
     public ServerResponse storeRevenueRecordOrderDetail(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String houseOrderId) {
-        return null ;
+        try {
+            return null;
+            //return ServerResponse.createBySuccess("查询成功",pageResult);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
     }
 
 
@@ -705,7 +718,13 @@ public class StorefrontService {
      * @return
      */
     public ServerResponse storeExpenseRecordGoodDetail(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String houseOrderId) {
-        return null;
+        try {
+            return null;
+            //return ServerResponse.createBySuccess("查询成功",pageResult);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
     }
 
 }
