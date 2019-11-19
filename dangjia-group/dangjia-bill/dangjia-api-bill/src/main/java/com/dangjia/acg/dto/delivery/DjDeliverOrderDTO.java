@@ -5,6 +5,7 @@ import lombok.Data;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Data
 public class DjDeliverOrderDTO {
@@ -103,5 +104,12 @@ public class DjDeliverOrderDTO {
 
     private List<DjDeliverOrderItemDTO> orderItemlist;
 
-    private String buttionStr;
+    private List<Map<String, Object>> buttonList;
+
+    private Date createDate ;
+
+    private Date modifyDate ;
+
+    private String dataStatus;
+
 }
