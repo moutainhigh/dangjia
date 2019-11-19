@@ -33,6 +33,10 @@ public interface PaymentAPI {
     ServerResponse setPaySuccess(@RequestParam("userToken") String userToken,
                                  @RequestParam("businessOrderNumber") String businessOrderNumber);
 
+    @PostMapping("web/pay/payment/setPaySuccess")
+    @ApiOperation(value = "支付成功回调", notes = "支付成功回调")
+    ServerResponse setWebPaySuccess(@RequestParam("businessOrderNumber") String businessOrderNumber);
+
     @PostMapping("app/pay/payment/getWeiXinSign")
     @ApiOperation(value = "获取微信签名信息", notes = "获取微信签名信息")
     ServerResponse getWeiXinSign(@RequestParam("userToken") String userToken,
