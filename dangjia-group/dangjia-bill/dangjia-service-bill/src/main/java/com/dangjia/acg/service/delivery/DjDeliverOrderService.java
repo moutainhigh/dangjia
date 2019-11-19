@@ -233,23 +233,23 @@ public class DjDeliverOrderService {
                 .andEqualTo(Order.DATA_STATUS, 0)
                 .andEqualTo(Order.ORDER_STATUS,1);
         Map<String,Object> map = new HashMap<>();
-        map.put("one", iBillDjDeliverOrderMapper.selectCountByExample(example));
+        map.put("stayPayment", iBillDjDeliverOrderMapper.selectCountByExample(example));
 
         //已付款
         example = new Example(Order.class);
         example.createCriteria().andEqualTo(Order.HOUSE_ID,houseId)
                 .andEqualTo(Order.DATA_STATUS, 0)
                 .andEqualTo(Order.ORDER_STATUS,2);
-        map.put("two", iBillDjDeliverOrderMapper.selectCountByExample(example));
+        map.put("alreadyPayment", iBillDjDeliverOrderMapper.selectCountByExample(example));
 
         //待收货
         example = new Example(Order.class);
         example.createCriteria().andEqualTo(Order.HOUSE_ID,houseId)
                 .andEqualTo(Order.DATA_STATUS, 0)
                 .andEqualTo(Order.ORDER_STATUS,3);
-        map.put("three", iBillDjDeliverOrderMapper.selectCountByExample(example));
-        map.put("four", 0);
-        map.put("five", 0);
+        map.put("stayGoods", iBillDjDeliverOrderMapper.selectCountByExample(example));
+        map.put("complete", 0);
+        map.put("after", 0);
         workInFoDTO.setOrderMap(map);
 
         if(house != null) {
