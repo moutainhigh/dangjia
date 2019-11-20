@@ -1,5 +1,6 @@
 package com.dangjia.acg.mapper.account;
 
+import com.dangjia.acg.dto.supplier.AccountFlowRecordDTO;
 import com.dangjia.acg.dto.supplier.IStoreAccountFlowRecordDTO;
 import com.dangjia.acg.modle.account.AccountFlowRecord;
 import org.apache.ibatis.annotations.Param;
@@ -11,5 +12,6 @@ import java.util.List;
 @Repository
 public interface IStoreAccountFlowRecordMapper extends Mapper<AccountFlowRecord> {
 
-    List<IStoreAccountFlowRecordDTO> queryExpenditure(@Param("supId") String supId);
+    List<AccountFlowRecordDTO> accountFlowRecordDTOs(@Param("supId") String supId,
+                                                     @Param("houseOrderId") String houseOrderId);
 }

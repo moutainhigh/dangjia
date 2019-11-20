@@ -120,20 +120,20 @@ public class DjSupplierController implements DjSupplierAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryIncomeRecord(String userId, String cityId) {
-        return djSupplierServices.queryIncomeRecord(userId, cityId);
+    public ServerResponse queryIncomeRecord(PageDTO pageDTO,String userId, String cityId, String searchKey) {
+        return djSupplierServices.queryIncomeRecord(pageDTO,userId, cityId, searchKey);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse queryIncomeRecordDetail(String userId, String cityId,String merge) {
-        return djSupplierServices.queryIncomeRecordDetail(userId,cityId,merge);
+    public ServerResponse queryIncomeRecordDetail(String userId, String cityId,String receiptId) {
+        return djSupplierServices.queryIncomeRecordDetail(userId,cityId,receiptId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse queryExpenditure(String userId, String cityId) {
-        return djSupplierServices.queryExpenditure(userId,cityId);
+    public ServerResponse queryExpenditure(PageDTO pageDTO,String userId, String cityId, String searchKey) {
+        return djSupplierServices.queryExpenditure(pageDTO,userId,cityId,searchKey);
     }
 
     @Override

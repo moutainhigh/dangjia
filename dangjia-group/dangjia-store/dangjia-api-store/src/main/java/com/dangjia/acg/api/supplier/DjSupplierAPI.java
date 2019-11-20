@@ -115,8 +115,10 @@ public interface DjSupplierAPI {
 
     @PostMapping("/sup/queryIncomeRecord")
     @ApiOperation(value = "供应商收入记录", notes = "供应商收入记录")
-    ServerResponse queryIncomeRecord(@RequestParam("userId") String userId,
-                                     @RequestParam("cityId") String cityId);
+    ServerResponse queryIncomeRecord(@RequestParam("pageDTO") PageDTO pageDTO,
+                                     @RequestParam("userId") String userId,
+                                     @RequestParam("cityId") String cityId,
+                                     @RequestParam("searchKey") String searchKey);
 
     @PostMapping("/sup/queryIncomeRecordDetail")
     @ApiOperation(value = "供应商收入记录详情", notes = "供应商收入记录详情")
@@ -126,8 +128,10 @@ public interface DjSupplierAPI {
 
     @PostMapping("/sup/queryExpenditure")
     @ApiOperation(value = "供应商支出记录", notes = "供应商支出记录")
-    ServerResponse queryExpenditure(@RequestParam("userId") String userId,
-                                    @RequestParam("cityId") String cityId);
+    ServerResponse queryExpenditure(@RequestParam("pageDTO") PageDTO pageDTO,
+                                    @RequestParam("userId") String userId,
+                                    @RequestParam("cityId") String cityId,
+                                    @RequestParam("searchKey") String searchKey);
 
     @PostMapping("/sup/queryLikeSupplier")
     @ApiOperation(value = "根据条件模糊查询供应商信息", notes = "根据条件模糊查询供应商信息")

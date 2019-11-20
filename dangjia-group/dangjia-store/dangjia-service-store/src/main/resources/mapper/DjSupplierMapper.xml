@@ -140,12 +140,12 @@
             FROM
                 dj_deliver_split_deliver
             WHERE
-                shipping_state IN (1, 2, 4, 5, 7, 8)
-            AND TIMESTAMPDIFF(DAY, send_time, SYSDATE()) >= 7
+                apply_state =2
+            AND TIMESTAMPDIFF(DAY, send_time, SYSDATE())<![CDATA[<]]>7
             GROUP BY
                 supplier_id
         ) b ON a.id = b.supplier_id
-        SET a.surplus_money = b.surplus_money
+        SET a.surplus_money = (a.total_account-b.surplus_money-a.retention_money)
     </update>
 
 

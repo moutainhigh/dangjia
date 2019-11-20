@@ -10,6 +10,7 @@ import lombok.experimental.FieldNameConstants;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 /**
  * Created with IntelliJ IDEA.
@@ -40,8 +41,8 @@ public class Receipt extends BaseEntity {
     private String supplierId;
 
     @Column(name = "total_amount")
-    @Desc(value = "该订单总价")
-    @ApiModelProperty("该订单总价")
+    @Desc(value = "合併結算金额")
+    @ApiModelProperty("合併結算金额")
     private Double totalAmount;
 
     @Column(name = "number")
@@ -53,4 +54,10 @@ public class Receipt extends BaseEntity {
     @Desc(value = "结算类型 1：余额支付  2：线下支付")
     @ApiModelProperty("结算类型 1：余额支付  2：线下支付")
     private String sourceType;
+
+    @Transient
+    private String type;
+
+    @Transient
+    private Double orderAmount;
 }
