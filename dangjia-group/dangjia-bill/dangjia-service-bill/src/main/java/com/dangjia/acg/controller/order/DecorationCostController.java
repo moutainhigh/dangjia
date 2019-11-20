@@ -3,12 +3,15 @@ package com.dangjia.acg.controller.order;
 
 import com.dangjia.acg.api.order.DecorationCostAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.controller.refund.RefundAfterSalesController;
 import com.dangjia.acg.service.order.DecorationCostService;
+import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,8 +31,17 @@ public class DecorationCostController implements DecorationCostAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse searchDecorationCostList(String userToken, String cityId, String houseId, String labelValId) {
-        return decorationCostService.searchDecorationCostList(userToken,cityId,houseId,labelValId);
+    public ServerResponse searchDecorationCostList(PageDTO pageDTO,String userToken, String cityId, String houseId, String labelValId) {
+        return decorationCostService.searchDecorationCostList(pageDTO,userToken,cityId,houseId,labelValId);
+    }
+
+    /**
+     * 查询当前花费列表商品信息
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse searchDecorationCostProductList(String cityId,String houseId,String labelValId,String categoryId){
+        return decorationCostService.searchDecorationCostProductList(cityId,houseId,labelValId,categoryId);
     }
 
     /**
