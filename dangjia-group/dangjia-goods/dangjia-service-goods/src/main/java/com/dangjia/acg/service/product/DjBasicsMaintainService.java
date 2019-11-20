@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created with IntelliJ IDEA.
@@ -67,9 +69,18 @@ public class DjBasicsMaintainService {
             if(CommonUtil.isEmpty(searchItem)){
                 return ServerResponse.createByErrorMessage("搜索词不能为空");
             }
-            if (djBasicsMaintains.size() > 0)
+            String regEx = "[ _`~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]|\n|\r|\t";
+            Pattern p = Pattern.compile(regEx);
+            if(p.matcher(keywordName).find())
+                return ServerResponse.createByErrorMessage("关键词名称不能有特殊字符");
+            if (djBasicsMaintains.size() > 0) {
                 return ServerResponse.createByErrorMessage("该关键词名称已存在");
+            }
             List<String> strings = Arrays.asList(searchItem.split(","));
+            for (String string : strings) {
+                if(p.matcher(string).find())
+                    return ServerResponse.createByErrorMessage("搜索词不能有特殊字符");
+            }
             //判断集合是否有重复元素
             long count = strings.stream().distinct().count();
             if (count < strings.size())

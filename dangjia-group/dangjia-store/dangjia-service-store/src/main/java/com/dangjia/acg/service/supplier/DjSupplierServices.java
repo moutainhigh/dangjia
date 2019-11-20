@@ -1,18 +1,18 @@
 package com.dangjia.acg.service.supplier;
 
 import cn.jiguang.common.utils.StringUtils;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.BasicsStorefrontAPI;
+import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
-import com.dangjia.acg.dto.supplier.DjSupSupplierProductDTO;
-import com.dangjia.acg.dto.supplier.DjSupplierDTO;
-import com.dangjia.acg.dto.supplier.DjSupplierDeliverDTO;
-import com.dangjia.acg.dto.supplier.SupplierLikeDTO;
+import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.supplier.*;
 import com.dangjia.acg.mapper.account.IStoreAccountFlowRecordMapper;
 import com.dangjia.acg.mapper.delivery.IStoreSplitDeliverMapper;
 import com.dangjia.acg.mapper.pay.IStoreBusinessOrderMapper;
@@ -90,7 +90,8 @@ public class DjSupplierServices {
     private IStoreStorefrontMapper iStoreStorefrontMapper;
     @Autowired
     private IStoreAccountFlowRecordMapper iStoreAccountFlowRecordMapper;
-
+    @Autowired
+    private ConfigUtil configUtil;
     private static Logger logger = LoggerFactory.getLogger(DjSupplierServices.class);
 
     public DjSupplier queryDjSupplierByPass(String supplierId) {
@@ -569,16 +570,44 @@ public class DjSupplierServices {
      * @param cityId
      * @return
      */
-    public ServerResponse queryIncomeRecord(String userId, String cityId) {
+    public ServerResponse queryIncomeRecord(PageDTO pageDTO, String userId, String cityId, String searchKey) {
         try {
             DjSupplier djSupplier = this.querySingleDjSupplier(userId, cityId);
             Example example = new Example(Receipt.class);
             example.createCriteria().andEqualTo(Receipt.SUPPLIER_ID, djSupplier.getId())
                     .andEqualTo(Receipt.DATA_STATUS, 0);
+            if(!CommonUtil.isEmpty(searchKey)){
+                example.createCriteria().andLike(Receipt.NUMBER,"'%"+searchKey+"%'");
+            }
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<Receipt> receipts = iStoreReceiptMapper.selectByExample(example);
-            if (receipts.size() <= 0)
+            receipts.forEach(receipt -> {
+                receipt.setType("合併结算");
+                JSONArray itemObjArr = JSON.parseArray(receipt.getMerge());
+                Double orderAmount=0d;
+                for (int i = 0; i < itemObjArr.size(); i++) {
+                    JSONObject jsonObject = itemObjArr.getJSONObject(i);
+                    String id = jsonObject.getString("id");
+                    int deliverType = jsonObject.getInteger("deliverType");
+                    if (deliverType == 1) {
+                        SplitDeliver splitDeliver = iStoreSplitDeliverMapper.selectByPrimaryKey(id);
+                        if (null != splitDeliver) {
+                            orderAmount+=splitDeliver.getTotalAmount();
+                        }
+                    } else if (deliverType == 2) {
+                        MendDeliver mendDeliver = iStoreMendDeliverMapper.selectByPrimaryKey(id);
+                        if (null != mendDeliver) {
+                            orderAmount+=mendDeliver.getTotalAmount();
+                        }
+                    }
+                }
+                receipt.setOrderAmount(orderAmount);
+            });
+            if (receipts.size() <= 0) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
-            return ServerResponse.createBySuccess("查询成功", receipts);
+            }
+            PageInfo pageResult = new PageInfo(receipts);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
@@ -589,51 +618,58 @@ public class DjSupplierServices {
     /**
      * 供应商收入记录详情
      *
-     * @param merge
+     * @param receiptId
      * @return
      */
-    public ServerResponse queryIncomeRecordDetail(String userId, String cityId, String merge) {
+    public ServerResponse queryIncomeRecordDetail(String userId, String cityId, String receiptId) {
         try {
             DjSupplier djSupplier = this.querySingleDjSupplier(userId, cityId);
             if(djSupplier==null)
                 return ServerResponse.createByErrorMessage("供应商不存在");
-            JSONArray jsonArr = JSONArray.parseArray(merge);
+            Receipt receipt = iStoreReceiptMapper.selectByPrimaryKey(receiptId);
+            JSONArray jsonArr = JSONArray.parseArray(receipt.getMerge());
+            DjSupplierDeliverDTOList djSupplierDeliverDTOList=new DjSupplierDeliverDTOList();
+            djSupplierDeliverDTOList.setCreateDate(receipt.getCreateDate());
             List<DjSupplierDeliverDTO> djSupplierDeliverDTOS = new ArrayList<>();
-            jsonArr.forEach(str -> {
-                JSONObject obj = (JSONObject) str;
+            Double totalMoney=0d;
+            for (Object o : jsonArr){
+                JSONObject obj = (JSONObject) o;
                 String id = obj.getString("id");
                 Integer deliverType = obj.getInteger("deliverType");
                 DjSupplierDeliverDTO djSupplierDeliverDTO = new DjSupplierDeliverDTO();
-                djSupplierDeliverDTO.setName(djSupplier.getName());
+                djSupplierDeliverDTOList.setName(djSupplier.getName());
+                djSupplierDeliverDTOList.setImage(receipt.getImage());
                 //发货单
                 if (deliverType == 1) {
                     SplitDeliver splitDeliver = iStoreSplitDeliverMapper.selectByPrimaryKey(id);
                     if(splitDeliver!=null) {
                         djSupplierDeliverDTO.setId(splitDeliver.getId());
                         djSupplierDeliverDTO.setShipAddress(splitDeliver.getShipAddress());
-                        djSupplierDeliverDTO.setCreateDate(splitDeliver.getRecTime());
                         djSupplierDeliverDTO.setDeliverType(1);
                         djSupplierDeliverDTO.setApplyMoney(splitDeliver.getApplyMoney());
                         djSupplierDeliverDTO.setApplyState(splitDeliver.getApplyState());
                         djSupplierDeliverDTO.setTotalAmount(splitDeliver.getTotalAmount());
                         djSupplierDeliverDTO.setNumber(splitDeliver.getNumber());
+                        totalMoney+=splitDeliver.getTotalAmount();
                     }
                 } else if (deliverType == 2) {//退货单
                     MendDeliver mendDeliver = iStoreMendDeliverMapper.selectByPrimaryKey(id);
                     if(mendDeliver!=null) {
                         djSupplierDeliverDTO.setId(mendDeliver.getId());
                         djSupplierDeliverDTO.setShipAddress(mendDeliver.getShipAddress());
-                        djSupplierDeliverDTO.setCreateDate(mendDeliver.getBackTime());
                         djSupplierDeliverDTO.setDeliverType(2);
                         djSupplierDeliverDTO.setApplyMoney(mendDeliver.getApplyMoney());
                         djSupplierDeliverDTO.setApplyState(mendDeliver.getApplyState());
                         djSupplierDeliverDTO.setTotalAmount(mendDeliver.getTotalAmount());
                         djSupplierDeliverDTO.setNumber(mendDeliver.getNumber());
+                        totalMoney-=mendDeliver.getTotalAmount();
                     }
                 }
                 djSupplierDeliverDTOS.add(djSupplierDeliverDTO);
-            });
-            return ServerResponse.createBySuccess("查询成功", djSupplierDeliverDTOS);
+            }
+            djSupplierDeliverDTOList.setTotalMoney(totalMoney);
+            djSupplierDeliverDTOList.setDjSupplierDeliverDTOList(djSupplierDeliverDTOS);
+            return ServerResponse.createBySuccess("查询成功", djSupplierDeliverDTOList);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
@@ -647,18 +683,19 @@ public class DjSupplierServices {
      * @param cityId
      * @return
      */
-    public ServerResponse queryExpenditure(String userId, String cityId) {
+    public ServerResponse queryExpenditure(PageDTO pageDTO, String userId, String cityId, String searchKey) {
         try {
             DjSupplier djSupplier = this.querySingleDjSupplier(userId, cityId);
-            Example example=new Example(AccountFlowRecord.class);
-            example.createCriteria().andEqualTo(AccountFlowRecord.STATE,1)
-                    .andEqualTo(AccountFlowRecord.DATA_STATUS,0)
-                    .andEqualTo(AccountFlowRecord.FLOW_TYPE,2)
-                    .andEqualTo(AccountFlowRecord.DEFINED_ACCOUNT_ID,djSupplier.getId());
-            List<AccountFlowRecord> accountFlowRecords = iStoreAccountFlowRecordMapper.selectByExample(example);
-            if(accountFlowRecords.size()<=0)
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<AccountFlowRecordDTO> accountFlowRecordDTOS = iStoreAccountFlowRecordMapper.accountFlowRecordDTOs(djSupplier.getId(),searchKey);
+            if(accountFlowRecordDTOS.size()<=0)
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
-            return ServerResponse.createBySuccess("查询成功",accountFlowRecords);
+            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            accountFlowRecordDTOS.forEach(accountFlowRecordDTO -> {
+                accountFlowRecordDTO.setImage(imageAddress+accountFlowRecordDTO.getImage());
+            });
+            PageInfo pageResult = new PageInfo(accountFlowRecordDTOS);
+            return ServerResponse.createBySuccess("查询成功",pageResult);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");

@@ -3,6 +3,7 @@ package com.dangjia.acg.service.order;
 import com.ctc.wstx.sw.EncodingXmlWriter;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.MathUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.order.DecorationCostDTO;
 import com.dangjia.acg.dto.order.DecorationCostItemDTO;
@@ -23,7 +24,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class DecorationCostService {
@@ -56,6 +59,8 @@ public class DecorationCostService {
             logger.info("查询当前花费信息userToken={},cityId={},houseId={},labelValId={}",userToken,cityId,houseId,labelValId);
              //1.查询类别汇总数据
              List<DecorationCostDTO> decorationCostList=iBillDjDeliverOrderMapper.searchDecorationCostList(houseId,labelValId);
+             Double actualPaymentPrice=0.0;//当前总花费
+             Double purchaseTotalPrice=0.0;//自购商品花费
              if(decorationCostList!=null&&decorationCostList.size()>0){
                  String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
                  for(DecorationCostDTO dc:decorationCostList){
@@ -64,9 +69,15 @@ public class DecorationCostService {
                      List<DecorationCostItemDTO> decorationProductList = iBillDjDeliverOrderMapper.searchDecorationCostDetailList(categoryId,houseId,labelValId);
                      getProductList(decorationProductList,address);
                      dc.setDecorationCostItemList(decorationProductList);//设置详情商品
+                     actualPaymentPrice = MathUtil.add(actualPaymentPrice,dc.getActualPaymentPrice());
+                     purchaseTotalPrice = MathUtil.add(purchaseTotalPrice,dc.getPurchaseTotalPrice());
                  }
              }
-            return ServerResponse.createBySuccess("查询成功",decorationCostList);
+             Map<String,Object> decorationMap=new HashMap<>();
+             decorationMap.put("actualPaymentPrice",actualPaymentPrice);
+             decorationMap.put("purchaseTotalPrice",purchaseTotalPrice);
+             decorationMap.put("decorationCostList",decorationCostList);
+            return ServerResponse.createBySuccess("查询成功",decorationMap);
         }catch (Exception e){
             logger.error("查询异常",e);
             return  ServerResponse.createByErrorMessage("查询异常");
@@ -117,12 +128,14 @@ public class DecorationCostService {
             if (image == null) {
                 image=pt.getImage();
             }
-            //添加图片详情地址字段
-            String[] imgArr = image.split(",");
-            StringBuilder imgStr = new StringBuilder();
-            StringBuilder imgUrlStr = new StringBuilder();
-            StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
-            ap.setImageUrl(imgStr.toString());//图片详情地址设置
+            if(image!=null&&StringUtils.isNotBlank(image)){
+                //添加图片详情地址字段
+                String[] imgArr = image.split(",");
+                StringBuilder imgStr = new StringBuilder();
+                StringBuilder imgUrlStr = new StringBuilder();
+                StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
+                ap.setImageUrl(imgStr.toString());//图片详情地址设置
+            }
             //查询规格名称
             if (StringUtils.isNotBlank(pt.getValueIdArr())) {
                 ap.setValueIdArr(pt.getValueIdArr());
