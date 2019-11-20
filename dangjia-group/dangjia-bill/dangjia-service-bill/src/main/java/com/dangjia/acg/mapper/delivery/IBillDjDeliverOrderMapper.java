@@ -84,6 +84,12 @@ public interface IBillDjDeliverOrderMapper extends Mapper<Order> {
     List<DecorationCostDTO> searchDecorationCostList(@Param("houseId") String  houseId, @Param("labelValId") String  labelValId);
 
     /**
+     * 查询当前房子的总花费
+     * @param houseId
+     * @return
+     */
+    DecorationCostDTO searchDecorationTotalCost(@Param("houseId") String  houseId);
+    /**
      * 查询当前花费详细花费信息
      * @param categoryId 类别ID
      * @param houseId 房子ID

@@ -2,6 +2,7 @@ package com.dangjia.acg.service.order;
 
 import com.ctc.wstx.sw.EncodingXmlWriter;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.MathUtil;
 import com.dangjia.acg.dao.ConfigUtil;
@@ -17,6 +18,8 @@ import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.service.refund.RefundAfterSalesService;
 import com.dangjia.acg.util.StringTool;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,14 +57,13 @@ public class DecorationCostService {
      * @param labelValId 标签 ID
      * @return
      */
-    public ServerResponse searchDecorationCostList(String userToken, String cityId, String houseId, String labelValId){
+    public ServerResponse searchDecorationCostList(PageDTO pageDTO,String userToken, String cityId, String houseId, String labelValId){
         try{
             logger.info("查询当前花费信息userToken={},cityId={},houseId={},labelValId={}",userToken,cityId,houseId,labelValId);
              //1.查询类别汇总数据
+             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
              List<DecorationCostDTO> decorationCostList=iBillDjDeliverOrderMapper.searchDecorationCostList(houseId,labelValId);
-             Double actualPaymentPrice=0.0;//当前总花费
-             Double purchaseTotalPrice=0.0;//自购商品花费
-             if(decorationCostList!=null&&decorationCostList.size()>0){
+             /*if(decorationCostList!=null&&decorationCostList.size()>0){
                  String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
                  for(DecorationCostDTO dc:decorationCostList){
                      String categoryId=dc.getCategoryId();
@@ -69,20 +71,32 @@ public class DecorationCostService {
                      List<DecorationCostItemDTO> decorationProductList = iBillDjDeliverOrderMapper.searchDecorationCostDetailList(categoryId,houseId,labelValId);
                      getProductList(decorationProductList,address);
                      dc.setDecorationCostItemList(decorationProductList);//设置详情商品
-                     actualPaymentPrice = MathUtil.add(actualPaymentPrice,dc.getActualPaymentPrice());
-                     purchaseTotalPrice = MathUtil.add(purchaseTotalPrice,dc.getPurchaseTotalPrice());
                  }
-             }
-             Map<String,Object> decorationMap=new HashMap<>();
-             decorationMap.put("actualPaymentPrice",actualPaymentPrice);
-             decorationMap.put("purchaseTotalPrice",purchaseTotalPrice);
-             decorationMap.put("decorationCostList",decorationCostList);
-            return ServerResponse.createBySuccess("查询成功",decorationMap);
+             }*/
+
+             PageInfo pageResult = new PageInfo(decorationCostList);
+
+
+            return ServerResponse.createBySuccess("查询成功",pageResult);
         }catch (Exception e){
             logger.error("查询异常",e);
             return  ServerResponse.createByErrorMessage("查询异常");
         }
 
+    }
+    public ServerResponse searchDecorationCostProductList(String cityId,String houseId,String labelValId,String categoryId){
+        try{
+            logger.info("查询当前花费商品列表信息categoryId={},cityId={},houseId={},labelValId={}",categoryId,cityId,houseId,labelValId);
+            //2.查询对应的分类下的货品商品信息
+            List<DecorationCostItemDTO> decorationProductList = iBillDjDeliverOrderMapper.searchDecorationCostDetailList(categoryId,houseId,labelValId);
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            getProductList(decorationProductList,address);
+
+            return ServerResponse.createBySuccess("查询成功",decorationProductList);
+        }catch (Exception e){
+            logger.error("查询异常",e);
+            return  ServerResponse.createByErrorMessage("查询异常");
+        }
     }
 
     /**
@@ -95,8 +109,13 @@ public class DecorationCostService {
     public ServerResponse searchDecorationCategoryLabelList(String userToken,String cityId,String houseId){
         logger.info("查询分类汇总花费信息userToken={},cityId={},houseId={}",userToken,cityId,houseId);
         try{
-           List<DecorationCostDTO> categoryLabelList=iBillDjDeliverOrderMapper.searchDecorationCategoryLabelList(houseId);
-            return ServerResponse.createBySuccess("查询成功",categoryLabelList);
+            Map<String,Object> decorationMap=new HashMap<>();
+            List<DecorationCostDTO> categoryLabelList=iBillDjDeliverOrderMapper.searchDecorationCategoryLabelList(houseId);
+            DecorationCostDTO dcd=iBillDjDeliverOrderMapper.searchDecorationTotalCost(houseId);
+            decorationMap.put("actualPaymentPrice",dcd.getActualPaymentPrice());
+            decorationMap.put("purchaseTotalPrice",dcd.getPurchaseTotalPrice());
+            decorationMap.put("categoryLabelList",categoryLabelList);
+            return ServerResponse.createBySuccess("查询成功",decorationMap);
         }catch (Exception e){
             logger.error("查询异常",e);
             return  ServerResponse.createByErrorMessage("查询异常");

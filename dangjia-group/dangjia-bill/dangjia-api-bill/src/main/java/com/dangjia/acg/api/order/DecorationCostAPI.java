@@ -21,10 +21,19 @@ public interface DecorationCostAPI {
 
     @PostMapping("/app/decoration/searchDecorationCostList")
     @ApiOperation(value = "查询当前花费列表", notes = "查询当前花费列表")
-    ServerResponse searchDecorationCostList(@RequestParam("userToken") String userToken,
+    ServerResponse searchDecorationCostList(@RequestParam("pageDTO") PageDTO pageDTO,
+                                            @RequestParam("userToken") String userToken,
                                             @RequestParam("cityId") String cityId,
                                             @RequestParam("houseId") String houseId,
                                             @RequestParam("labelValId") String labelValId);
+
+    @PostMapping("/app/decoration/searchDecorationCostProductList")
+    @ApiOperation(value = "查询当前花费列表商品信息", notes = "查询当前花费列表商品信息")
+    ServerResponse searchDecorationCostProductList(@RequestParam("cityId") String cityId,
+                                            @RequestParam("houseId") String houseId,
+                                            @RequestParam("labelValId") String labelValId,
+                                            @RequestParam("categoryId") String categoryId);
+
     @PostMapping("/app/decoration/searchDecorationCategoryList")
     @ApiOperation(value = "查询分类标签汇总信息 ", notes = "查询分类标签汇总信息")
     ServerResponse searchDecorationCategoryLabelList(@RequestParam("userToken") String userToken,
