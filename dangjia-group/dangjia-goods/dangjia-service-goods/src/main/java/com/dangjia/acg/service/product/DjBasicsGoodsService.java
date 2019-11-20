@@ -14,7 +14,6 @@ import com.dangjia.acg.mapper.basics.ILabelMapper;
 import com.dangjia.acg.mapper.basics.IUnitMapper;
 import com.dangjia.acg.mapper.product.*;
 import com.dangjia.acg.modle.attribute.AttributeValue;
-import com.dangjia.acg.modle.basics.Label;
 import com.dangjia.acg.modle.product.*;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
@@ -333,25 +332,11 @@ public class DjBasicsGoodsService {
                     p.setImage(imgStr.toString());
                       Map<String, Object> map = BeanUtils.beanToMap(p);
                     map.put("imageUrl", imgUrlStr.toString());
-                    StringBuilder strNewValueNameArr = new StringBuilder();
                     if(StringUtils.isNoneBlank(p.getConvertUnit())){
                         map.put("convertUnitName", iUnitMapper.selectByPrimaryKey(p.getConvertUnit()).getName());
                     }
-                    if (StringUtils.isNotBlank(p.getValueIdArr())) {
-                        String[] newValueNameArr = p.getValueIdArr().split(",");
-                        for (int i = 0; i < newValueNameArr.length; i++) {
-                            String valueId = newValueNameArr[i];
-                            if (StringUtils.isNotBlank(valueId)) {
-                                AttributeValue attributeValue = iAttributeValueMapper.selectByPrimaryKey(valueId);
-                                if (i == 0) {
-                                    strNewValueNameArr = new StringBuilder(attributeValue.getName());
-                                } else {
-                                    strNewValueNameArr.append(",").append(attributeValue.getName());
-                                }
-                            }
-                        }
-                    }
-                    map.put("newValueNameArr", strNewValueNameArr.toString());
+
+                    map.put("newValueNameArr", getValueNameArr(p.getValueIdArr()));
 
                     if (!StringUtils.isNotBlank(p.getLabelId())) {
                         map.put("labelId", "");
@@ -377,7 +362,24 @@ public class DjBasicsGoodsService {
         }
     }
 
-
+    public String  getValueNameArr(String valueIdArr){
+        StringBuffer strNewValueNameArr=new StringBuffer();
+        if (StringUtils.isNotBlank(valueIdArr)) {
+            String[] newValueNameArr = valueIdArr.split(",");
+            for (int i = 0; i < newValueNameArr.length; i++) {
+              String valueId = newValueNameArr[i];
+              AttributeValue attributeValue = iAttributeValueMapper.selectByPrimaryKey(valueId);
+              if(attributeValue!= null&&StringUtils.isNotBlank(attributeValue.getName())){
+                  if (StringUtils.isNotBlank(strNewValueNameArr.toString())) {
+                      strNewValueNameArr.append(attributeValue.getName());
+                  } else {
+                      strNewValueNameArr.append(",").append(attributeValue.getName());
+                  }
+              }
+            }
+        }
+        return strNewValueNameArr.toString();
+    }
     /**
      * 查询货品标签
      * @param goodsId
