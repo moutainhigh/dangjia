@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -131,7 +132,9 @@ public interface DjSupplierAPI {
     ServerResponse queryExpenditure(@RequestParam("pageDTO") PageDTO pageDTO,
                                     @RequestParam("userId") String userId,
                                     @RequestParam("cityId") String cityId,
-                                    @RequestParam("searchKey") String searchKey);
+                                    @RequestParam("depositeState") String depositeState,
+                                    @RequestParam("beginDate") String beginDate,
+                                    @RequestParam("endDate") String endDate);
 
     @PostMapping("/sup/queryLikeSupplier")
     @ApiOperation(value = "根据条件模糊查询供应商信息", notes = "根据条件模糊查询供应商信息")

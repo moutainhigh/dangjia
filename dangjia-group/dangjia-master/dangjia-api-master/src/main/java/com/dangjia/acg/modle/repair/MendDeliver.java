@@ -124,5 +124,9 @@ public class MendDeliver extends BaseEntity {
 	@ApiModelProperty("店铺ID")
 	private String storefrontId;
 
+	@Column(name = "receipt_num")
+	@Desc(value = "供应商结算单号")
+	@ApiModelProperty("供应商结算单号")
+	private String receiptNum;
 
 }

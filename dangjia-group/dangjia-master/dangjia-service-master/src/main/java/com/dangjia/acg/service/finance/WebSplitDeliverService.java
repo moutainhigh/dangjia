@@ -270,6 +270,8 @@ public class WebSplitDeliverService {
                 accountFlowRecord.setDefinedName("合并結算");
                 accountFlowRecord.setCreateBy(userId);
             }
+            Receipt receipt = new Receipt();
+            receipt.setNumber(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
             if (StringUtils.isNotEmpty(merge)) {
                 JSONArray itemObjArr = JSON.parseArray(merge);
                 double splitDeliverPrice = 0d;
@@ -283,6 +285,7 @@ public class WebSplitDeliverService {
                         SplitDeliver splitDeliver = new SplitDeliver();
                         splitDeliver.setId(id);
                         splitDeliver.setApplyState(2);
+                        splitDeliver.setReceiptNum(receipt.getNumber());
                         this.setSplitDeliver(splitDeliver);
                         splitDeliverPrice += iSplitDeliverMapper.selectByPrimaryKey(id).getTotalAmount();
                     } else if (deliverType == 2) {
@@ -291,13 +294,12 @@ public class WebSplitDeliverService {
                         mendDeliver.setId(id);
                         mendDeliver.setApplyState(2);
                         mendDeliver.setShippingState(2);
+                        mendDeliver.setReceiptNum(receipt.getNumber());
                         iMendDeliverMapper.updateByPrimaryKeySelective(mendDeliver);
                         mendDeliverPrice += iMendDeliverMapper.selectByPrimaryKey(id).getTotalAmount();
                     }
                 }
                 //添加回执
-                Receipt receipt = new Receipt();
-                receipt.setNumber(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
                 receipt.setImage(image);
                 receipt.setMerge(merge);
                 receipt.setCreateDate(new Date());
