@@ -329,7 +329,7 @@
                 t2.name goodsName,
                 '' productId,
                 '' productTemplateId,
-                '' productName,
+                t2.name productName,
                 '' productSn,
                 '' image,
                 t1.price,
