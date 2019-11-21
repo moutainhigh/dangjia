@@ -31,7 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
-
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 /**
@@ -74,7 +74,12 @@ public class DjBasicsProductTemplateService {
 
 
 
-
+    public List<ProductAddedRelation> queryProductAddRelationByPid(HttpServletRequest request, String pid) {
+        Example example=new Example(ProductAddedRelation.class);
+        example.createCriteria().andEqualTo(ProductAddedRelation.PRODUCT_TEMPLATE_ID,pid);
+        List<ProductAddedRelation> list=   iProductAddedRelationMapper.selectByExample(example);
+        return list;
+    }
     /**
      * 查询商品信息
      *

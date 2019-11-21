@@ -8,6 +8,7 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.product.BasicsGoodsDTO;
 import com.dangjia.acg.dto.product.BasicsProductDTO;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
+import com.dangjia.acg.modle.product.ProductAddedRelation;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.service.product.DjBasicsGoodsService;
 import com.dangjia.acg.service.product.DjBasicsProductTemplateService;
@@ -350,6 +351,12 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
     @ApiMethod
     public ServerResponse queryAllWorkerProductList(HttpServletRequest request,String name,String cityId){
         return djBasicsProductService.queryAllWorkerProductList(name,cityId);
+    }
+
+    @Override
+    @ApiMethod
+    public List<ProductAddedRelation> queryProductAddRelationByPid(HttpServletRequest request, String pid) {
+        return djBasicsProductService.queryProductAddRelationByPid(request,pid);
     }
 
 }

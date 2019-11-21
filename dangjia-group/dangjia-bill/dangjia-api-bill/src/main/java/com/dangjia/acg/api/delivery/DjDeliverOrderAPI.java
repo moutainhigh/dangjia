@@ -72,7 +72,7 @@ public interface DjDeliverOrderAPI {
 
     @PostMapping("app/deliverOrderItem/deliverOrderItemDetail")
     @ApiOperation(value = "订单详情明细", notes = "订单详情明细")
-    ServerResponse deliverOrderItemDetail(@RequestParam("orderId") String orderId  );
+    ServerResponse deliverOrderItemDetail(@RequestParam("orderId") String orderId,@RequestParam("orderStatus")Integer orderStatus );
 
 //    /**
 //     * 取消订单

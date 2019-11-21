@@ -112,4 +112,6 @@ public class DjDeliverOrderDTO {
 
     private String dataStatus;
 
+    private String storefrontIcon ;
+
 }

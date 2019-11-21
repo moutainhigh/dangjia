@@ -15,10 +15,13 @@ import com.dangjia.acg.dto.storefront.StorefrontProductListDTO;
 import com.dangjia.acg.dto.storefront.BasicsStorefrontProductDTO;
 import com.dangjia.acg.dto.storefront.BasicsStorefrontProductViewDTO;
 import com.dangjia.acg.mapper.storefront.IStorefrontMapper;
+import com.dangjia.acg.mapper.storefront.IStorefrontProductAddedRelationMapper;
 import com.dangjia.acg.mapper.storefront.IStorefrontProductMapper;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
+import com.dangjia.acg.modle.product.ProductAddedRelation;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
+import com.dangjia.acg.modle.storefront.StorefrontProductAddedRelation;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -51,6 +54,9 @@ public class StorefrontProductService {
     private StorefrontService storefrontService;
     @Autowired
     private IStorefrontMapper iStorefrontMapper;
+
+    @Autowired
+    private IStorefrontProductAddedRelationMapper iStorefrontProductAddedRelationMapper ;
 
     public ServerResponse  countStorefrontProduct(String userId, String cityId)
     {
@@ -279,6 +285,10 @@ public class StorefrontProductService {
                     spdto.setDetailImage(dtimgUrlStr.toString());
                     spdto.setDetailImageUrl(dtimgStr.toString());
                     basicsStorefrontProductViewDTO.setStorefrontProduct(spdto);
+                    //*************************************新增功能店:初始化下拉框是否关联增值商品******************************************************
+                    String prodTemplateId=spdto.getProdTemplateId();
+                    List<ProductAddedRelation> productAddedRelationlist=djBasicsProductAPI.queryProductAddRelationByPid(null,prodTemplateId);
+                    basicsStorefrontProductViewDTO.setProductAddedRelationlist(productAddedRelationlist);
                 }
             }
             PageInfo pageResult = new PageInfo(list);
@@ -292,9 +302,9 @@ public class StorefrontProductService {
 
     /**
      * 设置商品上下架
-     *
-     * @param id
-     * @param isShelfStatus
+     *@param storefrontId  店铺id
+     * @param id 店铺商品表id
+     * @param isShelfStatus 上下架状态
      * @return
      */
     public ServerResponse setSpStatusById(String storefrontId,String id, String isShelfStatus) {
@@ -307,11 +317,13 @@ public class StorefrontProductService {
                 return ServerResponse.createByErrorMessage("商品上下架状态不能为空");
             }
 
-            //判断，如果是人工商品，提示不能上架
-            Integer k=istorefrontProductMapper.selectProductByGoodsType(id);
-            if(k>0)
-            {
-                return ServerResponse.createByErrorMessage("温馨提示：人工商品提示不能上架");
+            //判断:非当家自营店只能上架实物商品和服务商品 0:普通商家 1 ： 当家自营店
+            Storefront storefront=iStorefrontMapper.selectByPrimaryKey(storefrontId);
+            if (storefront.getIfDjselfManage() != null && storefront.getIfDjselfManage() == 0) {
+                Integer k = istorefrontProductMapper.selectProductByGoodsType(id);
+                if (k > 0) {
+                    return ServerResponse.createByErrorMessage("温馨提示:非当家自营店只能上架实物商品和服务商品");
+                }
             }
             StorefrontProduct storefrontProduct = new StorefrontProduct();
             storefrontProduct.setId(id);
@@ -321,8 +333,6 @@ public class StorefrontProductService {
                 return ServerResponse.createByErrorMessage("商品上下架失败");
             }
             return ServerResponse.createBySuccessMessage("商品上下架成功");
-
-
         } catch (Exception e) {
             logger.error("商品上下架失败：", e);
             return ServerResponse.createByErrorMessage("商品上下架失败");
@@ -420,7 +430,14 @@ public class StorefrontProductService {
             }
             storefrontProduct.setCreateDate(null);
             int i = istorefrontProductMapper.updateByPrimaryKeySelective(storefrontProduct);
+
             if (i > 0) {
+                //*************************************新增功能店:维护是否关联增值商品******************************************************
+                String productTemplateId=storefrontProduct.getProdTemplateId();
+                StorefrontProductAddedRelation storefrontProductAddedRelation=new StorefrontProductAddedRelation();
+                storefrontProductAddedRelation.setProductId(productTemplateId);
+                storefrontProductAddedRelation.setAddedProductId(storefrontProduct.getId());
+                iStorefrontProductAddedRelationMapper.insert(storefrontProductAddedRelation);
                 return ServerResponse.createBySuccessMessage("修改成功");
             } else {
                 return ServerResponse.createByErrorMessage("修改失败");

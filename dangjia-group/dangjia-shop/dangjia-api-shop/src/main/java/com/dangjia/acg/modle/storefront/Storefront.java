@@ -112,7 +112,7 @@ public class Storefront extends BaseEntity {
 
 
 
-    @Column(name = "ifDjselfManage")
+    @Column(name = "djself_manage")
     @Desc(value = "是否当家自营")
     @ApiModelProperty("是否当家自营")
     private Integer  ifDjselfManage;

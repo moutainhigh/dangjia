@@ -837,6 +837,8 @@ public class DjDeliverOrderService {
                         i++;
                     }
                 }
+                String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+                jDeliverOrderDTO.setStorefrontIcon(imageAddress+jDeliverOrderDTO.getStorefontId());
                 jDeliverOrderDTO.setOrderItemlist(djDeliverOrderItemDTOList);
                 jDeliverOrderDTO.setTotalSize(djDeliverOrderItemDTOList.size());
                 //订单状态（1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭 8待安装 ）
@@ -919,7 +921,7 @@ public class DjDeliverOrderService {
      *@param orderId
      * @return
      */
-    public ServerResponse deliverOrderItemDetail(String orderId ) {
+    public ServerResponse deliverOrderItemDetail(String orderId,Integer orderStatus ) {
         try {
 
             Order order= iBillDjDeliverOrderMapper.selectByPrimaryKey(orderId);
@@ -931,23 +933,233 @@ public class DjDeliverOrderService {
                 return ServerResponse.createByErrorMessage("该房产不存在");
             }
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class); //图片地址
-            List<AppOrderDetailDTO> orderList=iBillDjDeliverOrderMapper.selectOrderDetailById(order.getHouseId(),order.getId());
-            for (AppOrderDetailDTO appOrderDetailDTO: orderList ) {
-                List<AppOrderItemDetailDTO> list= iBillDjDeliverOrderMapper.selectOrderItemDetailById(appOrderDetailDTO.getOrderId());
+            AppOrderDetailDTO appOrderDetailDTO=iBillDjDeliverOrderMapper.selectOrderDetailById(order.getHouseId(),order.getId());
+            if(appOrderDetailDTO!=null)
+            {
+                List<AppOrderItemDetailDTO> list= iBillDjDeliverOrderMapper.selectOrderItemDetailById(appOrderDetailDTO.getOrderId(),orderStatus);
                 for (AppOrderItemDetailDTO appOrderItemDetailDTO :list) {
                     String productId= appOrderItemDetailDTO.getProductId();
-                  //  String brandName=iBrandSeriesMapper.brandName(productId);
                     String brandName=forMasterAPI.brandName("",productId);  //通过商品id去关联，然后组合商品名称
-                    appOrderItemDetailDTO.setBrandName(brandName);
-                    appOrderItemDetailDTO.setImageDetail(address+appOrderItemDetailDTO.getImage());
+                    appOrderItemDetailDTO.setBrandName(brandName);//组合后的商品名称
+                    appOrderItemDetailDTO.setImageDetail(address+appOrderItemDetailDTO.getImage());//商品图片详情
+                    //待发货：增加退款按钮
+                    if(orderStatus==2)
+                    {
+                        List< Map<String, Object>> rows=new ArrayList<Map<String, Object>>();
+                        Map<String, Object> resultMap = new HashMap<>();
+                        resultMap.put("name", "退款");
+                        resultMap.put("type", 1);
+                        rows.add(resultMap);
+                        appOrderItemDetailDTO.setDetailMaplist(rows);
+                    }
+                    //已经取消：增加加入购物车按钮
+                    if(orderStatus==5)
+                    {
+                        List< Map<String, Object>> rows=new ArrayList<Map<String, Object>>();
+                        Map<String, Object> resultMap = new HashMap<>();
+                        resultMap.put("name", "加入购物车");
+                        resultMap.put("type", 2);
+                        rows.add(resultMap);
+                        appOrderItemDetailDTO.setDetailMaplist(rows);
+                    }
+                    //已经完成：增加退款和加入购物车按钮
+                    if(orderStatus==4)
+                    {
+                        List< Map<String, Object>> rows=new ArrayList<Map<String, Object>>();
+                        Map<String, Object> resultMap = new HashMap<>();
+                        resultMap.put("name", "退款");
+                        resultMap.put("type", 1);
+                        rows.add(resultMap);
+                        Map<String, Object> resultMap2 = new HashMap<>();
+                        resultMap2.put("name", "加入购物车");
+                        resultMap2.put("type", 2);
+                        rows.add(resultMap2);
+                        appOrderItemDetailDTO.setDetailMaplist(rows);
+                    }
                 }
-                appOrderDetailDTO.setList(list);
+                appOrderDetailDTO.setDetaillist(list);
                 String houseName = house.getResidential() + house.getBuilding() + "栋" + house.getUnit() + "单元" + house.getNumber() + "号";
-                appOrderDetailDTO.setShipAddress(houseName);
-
-
+                appOrderDetailDTO.setShipAddress(houseName);//房子地址
             }
-            return ServerResponse.createBySuccess("查询成功", orderList);
+            //订单状态（1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭 8 待安装）
+            if(orderStatus==1)
+            {
+                List< Map<String, Object>> rows=new ArrayList<Map<String, Object>>();
+                Map<String, Object> resultMap = new HashMap<>();
+                resultMap.put("name", "商品总额");resultMap.put("value", appOrderDetailDTO.getTotalAmount()); resultMap.put("type", 1);//商品总额
+                rows.add(resultMap);
+
+                Map<String, Object> resultMap2 = new HashMap<>();
+                resultMap2.put("name", "运费");resultMap2.put("value", appOrderDetailDTO.getTotalTransportationCost());resultMap2.put("type", 2);//运费
+                rows.add(resultMap2);
+
+                Map<String, Object> resultMap3 = new HashMap<>();
+                resultMap3.put("name", "搬运费");resultMap3.put("value", appOrderDetailDTO.getTotalStevedorageCost());resultMap3.put("type", 3);//搬运费
+                rows.add(resultMap3);
+
+                Map<String, Object> resultMap4 = new HashMap<>();
+                resultMap4.put("name", "优惠价");resultMap4.put("value", appOrderDetailDTO.getTotalDiscountPrice());resultMap4.put("type", 4);//优惠价
+                rows.add(resultMap4);
+
+                appOrderDetailDTO.setPaymentAmount(String.valueOf(Integer.parseInt(appOrderDetailDTO.getTotalAmount())
+                        +Integer.parseInt(appOrderDetailDTO.getTotalTransportationCost())
+                        +Integer.parseInt(appOrderDetailDTO.getTotalStevedorageCost())
+                        - Integer.parseInt(appOrderDetailDTO.getTotalDiscountPrice())));     //待付款
+                Map<String, Object> resultMap5 = new HashMap<>();
+                resultMap5.put("name", "需付款");resultMap5.put("value", appOrderDetailDTO.getPaymentAmount());resultMap5.put("type", 5);
+                rows.add(resultMap5);
+
+                appOrderDetailDTO.setMapList(rows);
+            }
+            if(orderStatus==2)
+            {
+                //2已付款(待发货)
+                List< Map<String, Object>> rows=new ArrayList<Map<String, Object>>();
+                Map<String, Object> resultMap = new HashMap<>();
+                resultMap.put("name", "商品总额");resultMap.put("value", appOrderDetailDTO.getTotalAmount()); resultMap.put("type", 1);//商品总额
+                rows.add(resultMap);
+
+                Map<String, Object> resultMap2 = new HashMap<>();
+                resultMap2.put("name", "运费");resultMap2.put("value", appOrderDetailDTO.getTotalTransportationCost());resultMap2.put("type", 2);//运费
+                rows.add(resultMap2);
+
+                Map<String, Object> resultMap3 = new HashMap<>();
+                resultMap3.put("name", "搬运费");resultMap3.put("value", appOrderDetailDTO.getTotalStevedorageCost());resultMap3.put("type", 3);//搬运费
+                rows.add(resultMap3);
+
+                Map<String, Object> resultMap4 = new HashMap<>();
+                resultMap4.put("name", "优惠价");resultMap4.put("value", appOrderDetailDTO.getTotalDiscountPrice());resultMap4.put("type", 4);//优惠价
+                rows.add(resultMap4);
+
+                appOrderDetailDTO.setPaymentAmount(String.valueOf(Integer.parseInt(appOrderDetailDTO.getTotalAmount())
+                        +Integer.parseInt(appOrderDetailDTO.getTotalTransportationCost())
+                        +Integer.parseInt(appOrderDetailDTO.getTotalStevedorageCost())
+                        - Integer.parseInt(appOrderDetailDTO.getTotalDiscountPrice())));     //待付款
+                Map<String, Object> resultMap5 = new HashMap<>();
+                resultMap5.put("name", "实付款");resultMap5.put("value", appOrderDetailDTO.getPaymentAmount());resultMap5.put("type", 5);
+                rows.add(resultMap5);
+
+                appOrderDetailDTO.setMapList(rows);
+            }
+            if(orderStatus==3)
+            {
+                //3待收货
+                List< Map<String, Object>> rows=new ArrayList<Map<String, Object>>();
+                Map<String, Object> resultMap = new HashMap<>();
+                resultMap.put("name", "商品总额");resultMap.put("value", appOrderDetailDTO.getTotalAmount()); resultMap.put("type", 1);//商品总额
+                rows.add(resultMap);
+
+                Map<String, Object> resultMap2 = new HashMap<>();
+                resultMap2.put("name", "运费");resultMap2.put("value", appOrderDetailDTO.getTotalTransportationCost());resultMap2.put("type", 2);//运费
+                rows.add(resultMap2);
+
+//                Map<String, Object> resultMap3 = new HashMap<>();
+//                resultMap3.put("name", "搬运费");resultMap3.put("value", appOrderDetailDTO.getTotalStevedorageCost());resultMap3.put("type", 3);//搬运费
+//                rows.add(resultMap3);
+
+                Map<String, Object> resultMap4 = new HashMap<>();
+                resultMap4.put("name", "优惠价");resultMap4.put("value", appOrderDetailDTO.getTotalDiscountPrice());resultMap4.put("type", 4);//优惠价
+                rows.add(resultMap4);
+
+                appOrderDetailDTO.setPaymentAmount(String.valueOf(Integer.parseInt(appOrderDetailDTO.getTotalAmount())
+                        +Integer.parseInt(appOrderDetailDTO.getTotalTransportationCost())
+                        - Integer.parseInt(appOrderDetailDTO.getTotalDiscountPrice())));     //待付款
+                Map<String, Object> resultMap5 = new HashMap<>();
+                resultMap5.put("name", "实付款");resultMap5.put("value", appOrderDetailDTO.getPaymentAmount());resultMap5.put("type", 5);
+                rows.add(resultMap5);
+
+                appOrderDetailDTO.setMapList(rows);
+            }
+            if(orderStatus==4)
+            {
+                //已完成
+                List< Map<String, Object>> rows=new ArrayList<Map<String, Object>>();
+                Map<String, Object> resultMap = new HashMap<>();
+                resultMap.put("name", "商品总额");resultMap.put("value", appOrderDetailDTO.getTotalAmount()); resultMap.put("type", 1);//商品总额
+                rows.add(resultMap);
+
+                Map<String, Object> resultMap2 = new HashMap<>();
+                resultMap2.put("name", "运费");resultMap2.put("value", appOrderDetailDTO.getTotalTransportationCost());resultMap2.put("type", 2);//运费
+                rows.add(resultMap2);
+
+                Map<String, Object> resultMap3 = new HashMap<>();
+                resultMap3.put("name", "搬运费");resultMap3.put("value", appOrderDetailDTO.getTotalStevedorageCost());resultMap3.put("type", 3);//搬运费
+                rows.add(resultMap3);
+
+                Map<String, Object> resultMap4 = new HashMap<>();
+                resultMap4.put("name", "优惠价");resultMap4.put("value", appOrderDetailDTO.getTotalDiscountPrice());resultMap4.put("type", 4);//优惠价
+                rows.add(resultMap4);
+
+                appOrderDetailDTO.setPaymentAmount(String.valueOf(Integer.parseInt(appOrderDetailDTO.getTotalAmount())
+                        +Integer.parseInt(appOrderDetailDTO.getTotalTransportationCost())
+                        +Integer.parseInt(appOrderDetailDTO.getTotalStevedorageCost())
+                        - Integer.parseInt(appOrderDetailDTO.getTotalDiscountPrice())));     //待付款
+                Map<String, Object> resultMap5 = new HashMap<>();
+                resultMap5.put("name", "实付款");resultMap5.put("value", appOrderDetailDTO.getPaymentAmount());resultMap5.put("type", 5);
+                rows.add(resultMap5);
+
+                appOrderDetailDTO.setMapList(rows);
+            }
+            if(orderStatus==5)
+            {
+                //5已取消
+                List< Map<String, Object>> rows=new ArrayList<Map<String, Object>>();
+                Map<String, Object> resultMap = new HashMap<>();
+                resultMap.put("name", "商品总额");resultMap.put("value", appOrderDetailDTO.getTotalAmount()); resultMap.put("type", 1);//商品总额
+                rows.add(resultMap);
+
+                Map<String, Object> resultMap2 = new HashMap<>();
+                resultMap2.put("name", "运费");resultMap2.put("value", appOrderDetailDTO.getTotalTransportationCost());resultMap2.put("type", 2);//运费
+                rows.add(resultMap2);
+
+//                Map<String, Object> resultMap3 = new HashMap<>();
+//                resultMap3.put("name", "搬运费");resultMap3.put("value", appOrderDetailDTO.getTotalStevedorageCost());resultMap3.put("type", 3);//搬运费
+//                rows.add(resultMap3);
+
+                Map<String, Object> resultMap4 = new HashMap<>();
+                resultMap4.put("name", "优惠价");resultMap4.put("value", appOrderDetailDTO.getTotalDiscountPrice());resultMap4.put("type", 4);//优惠价
+                rows.add(resultMap4);
+
+                appOrderDetailDTO.setPaymentAmount(String.valueOf(Integer.parseInt(appOrderDetailDTO.getTotalAmount())
+                        +Integer.parseInt(appOrderDetailDTO.getTotalTransportationCost())
+                        - Integer.parseInt(appOrderDetailDTO.getTotalDiscountPrice())));     //待付款
+                Map<String, Object> resultMap5 = new HashMap<>();
+                resultMap5.put("name", "需付款");resultMap5.put("value", appOrderDetailDTO.getPaymentAmount());resultMap5.put("type", 5);
+                rows.add(resultMap5);
+
+                appOrderDetailDTO.setMapList(rows);
+            }
+            if(orderStatus==8)
+            {
+                //待安装
+                List< Map<String, Object>> rows=new ArrayList<Map<String, Object>>();
+                Map<String, Object> resultMap = new HashMap<>();
+                resultMap.put("name", "商品总额");resultMap.put("value", appOrderDetailDTO.getTotalAmount()); resultMap.put("type", 1);//商品总额
+                rows.add(resultMap);
+
+                Map<String, Object> resultMap2 = new HashMap<>();
+                resultMap2.put("name", "运费");resultMap2.put("value", appOrderDetailDTO.getTotalTransportationCost());resultMap2.put("type", 2);//运费
+                rows.add(resultMap2);
+
+                Map<String, Object> resultMap3 = new HashMap<>();
+                resultMap3.put("name", "搬运费");resultMap3.put("value", appOrderDetailDTO.getTotalStevedorageCost());resultMap3.put("type", 3);//搬运费
+                rows.add(resultMap3);
+
+                Map<String, Object> resultMap4 = new HashMap<>();
+                resultMap4.put("name", "优惠价");resultMap4.put("value", appOrderDetailDTO.getTotalDiscountPrice());resultMap4.put("type", 4);//优惠价
+                rows.add(resultMap4);
+
+                appOrderDetailDTO.setPaymentAmount(String.valueOf(Integer.parseInt(appOrderDetailDTO.getTotalAmount())
+                        +Integer.parseInt(appOrderDetailDTO.getTotalTransportationCost())
+                        +Integer.parseInt(appOrderDetailDTO.getTotalStevedorageCost())
+                        - Integer.parseInt(appOrderDetailDTO.getTotalDiscountPrice())));     //待付款
+                Map<String, Object> resultMap5 = new HashMap<>();
+                resultMap5.put("name", "实付款");resultMap5.put("value", appOrderDetailDTO.getPaymentAmount());resultMap5.put("type", 5);
+                rows.add(resultMap5);
+
+                appOrderDetailDTO.setMapList(rows);
+            }
+            return ServerResponse.createBySuccess("查询成功", appOrderDetailDTO);
 
         } catch (Exception e) {
             e.printStackTrace();

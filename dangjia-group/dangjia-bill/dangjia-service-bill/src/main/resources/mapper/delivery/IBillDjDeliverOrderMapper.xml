@@ -422,6 +422,7 @@
         IFNULL(ddo.budget_cost,'') as budgetCost,
         ddo.type,
         ddo.payment,
+        IFNULL(dbs.system_logo,'') as storefrontIcon,
         IFNULL(ddo.storefont_id,'') as storefrontId,
         IFNULL(ddo.city_id,'') as cityId,
         IFNULL(ddo.total_discount_price,'') as totalDiscountPrice,
@@ -565,6 +566,6 @@
         ddoi.image as image
         from dj_deliver_order_item ddoi inner join dj_basics_storefront dbs
         on ddoi.storefont_id=dbs.id  inner join dj_basics_product_template dbpt
-        on dbpt.id=ddoi.product_id  where ddoi.order_id=#{orderId}
+        on dbpt.id=ddoi.product_id  where ddoi.order_id=#{orderId} and ddoi.order_status=#{orderStatus}
     </select>
 </mapper>
