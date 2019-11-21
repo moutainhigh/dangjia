@@ -823,12 +823,15 @@ public class DjBasicsProductTemplateService {
                 StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
              djBasicsProduct.setDetailImage(imgStr.toString());
           }
+        Map<String, Object> map = BeanUtils.beanToMap(djBasicsProduct);
         //商品属性值信息
         String strNewValueNameArr = "";
         if (StringUtils.isNotBlank(djBasicsProduct.getValueIdArr())) {
             strNewValueNameArr = getNewValueNameArr(djBasicsProduct.getValueIdArr());
+            map.put("attributeValueList",getAttributeValueList(djBasicsProduct.getValueIdArr()));
+
         }
-        Map<String, Object> map = BeanUtils.beanToMap(djBasicsProduct);
+
         map.put("imageUrl", imgUrlStr.toString());
         map.put("newValueNameArr", strNewValueNameArr);
         map.put("tTechnologymMapList", tTechnologymMapList);
@@ -870,6 +873,27 @@ public class DjBasicsProductTemplateService {
             }
         }
         return strNewValueNameArr;
+    }
+
+    /**
+     * 获取对应的属性值信息
+     * @param valueIdArr
+     * @return
+     */
+    public List<AttributeValue> getAttributeValueList(String valueIdArr){
+        List<AttributeValue> list=new ArrayList<>();
+        String[] newValueNameArr = valueIdArr.split(",");
+        for (int i = 0; i < newValueNameArr.length; i++) {
+            String valueId = newValueNameArr[i];
+            if (StringUtils.isNotBlank(valueId)) {
+                AttributeValue attributeValue = iAttributeValueMapper.selectByPrimaryKey(valueId);
+                if(attributeValue!=null&&StringUtils.isNotBlank(attributeValue.getName())){
+                    list.add(attributeValue);
+                }
+
+            }
+        }
+        return list;
     }
 
     /**
