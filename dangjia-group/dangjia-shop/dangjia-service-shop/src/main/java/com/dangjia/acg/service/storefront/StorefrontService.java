@@ -756,6 +756,8 @@ public class StorefrontService {
             if (storefront == null) {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
+            DjSupplier djSupplier = djSupplierAPI.querySingleDjSupplier(userId,cityId);
+
             /*1:  业主仅退款2：业主退货退款 3：合并结算4：体现*/
             if (type==null)
             {
@@ -797,8 +799,12 @@ public class StorefrontService {
                      String id = obj.getString("id");
                      Integer deliverType = obj.getInteger("deliverType");
                      DjSupplierDeliverDTO djSupplierDeliverDTO = new DjSupplierDeliverDTO();
-                     djSupplierDeliverDTOList.setName(storefront.getStorefrontName());
-                     djSupplierDeliverDTOList.setImage(receipt.getImage());
+                     if(djSupplier!=null)
+                     {
+                         djSupplierDeliverDTOList.setName(djSupplier.getName()!=null?djSupplier.getName():"");//供应商名称
+                         djSupplierDeliverDTOList.setTelephone(djSupplier.getTelephone()!=null?djSupplier.getTelephone():"");//供应商电话
+                         djSupplierDeliverDTOList.setImage(receipt.getImage());
+                     }
                      //发货单
                      if (deliverType == 1) {
                          SplitDeliver splitDeliver = ishopSplitDeliverMapper.selectByPrimaryKey(id);
