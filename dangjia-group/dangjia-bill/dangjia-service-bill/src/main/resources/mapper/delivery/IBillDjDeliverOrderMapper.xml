@@ -401,8 +401,7 @@
                     FROM
                         dj_actuary_budget_material t1,
                         dj_basics_goods t2,
-                        dj_basics_goods_category t3,
-                        dj_basics_category_label t4
+                        dj_basics_goods_category t3
                     WHERE
                         t1.steta = 2
                     AND t1.goods_id = t2.id
@@ -410,6 +409,15 @@
                     AND t1.delete_state != 1
                     AND t1.product_id IS NULL
                     AND t1.house_id = #{houseId}
+                    AND EXISTS (
+                        SELECT
+                            1
+                        FROM
+                            dj_deliver_order t4
+                        WHERE
+                            t1.house_id = t4.house_id
+                        AND t1.worker_type_id = t4.worker_type_id
+                    )
             ) m,dj_basics_category_label m1 where FIND_IN_SET(m1.id,m.category_label_ids)
         GROUP BY
             m1.id,
