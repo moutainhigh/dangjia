@@ -206,6 +206,15 @@
                     AND t1.delete_state != 1
                     AND t1.product_id IS NULL
                     AND t1.house_id = #{houseId}
+                    AND EXISTS (
+                        SELECT
+                            1
+                        FROM
+                            dj_deliver_order t4
+                        WHERE
+                            t1.house_id = t4.house_id
+                        AND t1.worker_type_id = t4.worker_type_id
+                    )
             ) m
 
     </select>
@@ -320,7 +329,7 @@
                 t2.name goodsName,
                 '' productId,
                 '' productTemplateId,
-                '' productName,
+                t2.name productName,
                 '' productSn,
                 '' image,
                 t1.price,

@@ -165,7 +165,7 @@ public class DjDeliverOrder extends BaseEntity {
     @Column(name = "order_source")
     @Desc(value = "订单来源(1,精算制作，2业主自购，3购物车）")
     @ApiModelProperty("订单来源(1,精算制作，2业主自购，3购物车）")
-    private int orderSource;//订单来源(1,精算制作，2业主自购，3购物车）
+    private Integer orderSource;//订单来源(1,精算制作，2业主自购，3购物车）
 
     @Column(name = "create_by")
     @Desc(value = "创建人")
