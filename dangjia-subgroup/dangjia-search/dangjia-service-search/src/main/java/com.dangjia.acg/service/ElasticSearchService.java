@@ -9,6 +9,7 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.Validator;
 import com.dangjia.acg.config.ElasticsearchConfiguration;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
+import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -60,8 +61,9 @@ public class ElasticSearchService {
   public List<String> saveESJsonList(List<String> jsonStr,String tableTypeName) {
     List<String> esidlist=new ArrayList<String>();
     try {
+      IndexRequestBuilder indexRequestBuilder= client.prepareIndex(indexName,tableTypeName);
       for(int i = 0;i<jsonStr.size(); i++) {
-        IndexResponse indexResponse= client.prepareIndex(indexName,tableTypeName).setSource(JSONObject.parseObject(jsonStr.get(i))).get();
+        IndexResponse indexResponse= indexRequestBuilder.setSource(JSONObject.parseObject(jsonStr.get(i))).get();
         LOGGER.info("ES 插入完成");
         esidlist.add(indexResponse.getId());
       }
