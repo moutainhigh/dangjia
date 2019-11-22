@@ -182,7 +182,7 @@ public class ElasticSearchService {
   public String getSearchJsonId( String tableTypeName,String prepareId){
     List<String> strings = new ArrayList<String>();
     try {
-      SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName).setQuery(QueryBuilders.termsQuery("_id",prepareId)).setTypes(tableTypeName);
+      SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName).setQuery(QueryBuilders.termsQuery("id",prepareId)).setTypes(tableTypeName);
       strings = searchResponse(searchRequestBuilder,null);
     } catch (Exception e) {
       LOGGER.error(e.getMessage());
