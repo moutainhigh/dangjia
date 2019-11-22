@@ -95,6 +95,7 @@ public class ShopCartService {
                 Storefront storefront = basicsStorefrontAPI.querySingleStorefrontById(str);
                 shoppingCartDTO.setStorefrontName(storefront.getStorefrontName());
                 shoppingCartDTO.setStorefrontId(storefront.getId());
+                shoppingCartDTO.setStorefrontIcon(imageAddress+storefront.getSystemLogo());
                 List<ShoppingCartListDTO> shoppingCartListDTOS = iShoppingCartmapper.queryCartList(member.getId(), cityId, str,null);
                 shoppingCartListDTOS.forEach(shoppingCartListDTO -> {
                     shoppingCartListDTO.setImage(imageAddress+shoppingCartListDTO.getImage());
