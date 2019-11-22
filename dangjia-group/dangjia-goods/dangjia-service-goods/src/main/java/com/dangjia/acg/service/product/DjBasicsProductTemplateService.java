@@ -158,17 +158,20 @@ public class DjBasicsProductTemplateService {
             String goodsId=basicsProductDTO.getGoodsId();//货品ID
             DjBasicsGoods basicsGoods = djBasicsGoodsMapper.selectByPrimaryKey(goodsId);//查询货品表信息，判断是人工还是材料商品新增
             //2.1添加商品主表信息
-            String[] imgArr = basicsProductDTO.getImage().split(",");
-//                String[] technologyIds = obj.getString("technologyIds").split(",");//工艺节点
             StringBuilder imgStr = new StringBuilder();
-            for (int j = 0; j < imgArr.length; j++) {
-                String img = imgArr[j];
-                if (j == imgArr.length - 1) {
-                    imgStr.append(img);
-                } else {
-                    imgStr.append(img).append(",");
+            if(basicsProductDTO.getImage()!=null&&StringUtils.isNotBlank(basicsProductDTO.getImage())){
+                String[] imgArr = basicsProductDTO.getImage().split(",");
+//                String[] technologyIds = obj.getString("technologyIds").split(",");//工艺节点
+                for (int j = 0; j < imgArr.length; j++) {
+                    String img = imgArr[j];
+                    if (j == imgArr.length - 1) {
+                        imgStr.append(img);
+                    } else {
+                        imgStr.append(img).append(",");
+                    }
                 }
             }
+
            // if (!StringUtils.isNotBlank(imgStr.toString()))
                // return ServerResponse.createByErrorMessage("商品图片不能为空");
             LOG.info("001----------添加商品主表 start:" + basicsProductDTO.getName());
