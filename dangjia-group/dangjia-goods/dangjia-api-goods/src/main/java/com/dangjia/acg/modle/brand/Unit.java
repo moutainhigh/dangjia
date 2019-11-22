@@ -29,5 +29,5 @@ public class Unit extends GoodsBaseEntity {
     @Column(name = "type")
     @Desc(value = "单位数值类型 1=整数单位，2=小数单位")
     @ApiModelProperty("单位数值类型 1=整数单位，2=小数单位")
-    private int type;
+    private Integer type;
 }
