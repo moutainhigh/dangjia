@@ -5,6 +5,7 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.product.BasicsGoodsDTO;
 import com.dangjia.acg.dto.product.BasicsProductDTO;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
+import com.dangjia.acg.modle.product.ProductAddedRelation;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -232,4 +233,8 @@ public interface DjBasicsProductAPI {
                                     @RequestParam("name")String name,
                                     @RequestParam("cityId")String cityId);
 
+    @PostMapping("/app/product/djBasicsProduct/queryProductAddRelationByPid")
+    @ApiOperation(value = "根据货品id查询增值商品关联关系表", notes = "根据货品id查询增值商品关联关系表")
+    List<ProductAddedRelation> queryProductAddRelationByPid(@RequestParam("request")HttpServletRequest request,
+                                                      @RequestParam("pid")String pid);
 }

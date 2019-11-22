@@ -63,16 +63,43 @@ public interface DjDeliverOrderAPI {
 
 
     @PostMapping("app/order/queryDeliverOrderListByStatus")
-    @ApiOperation(value = "根据订单状态查询订单详情列表", notes = "根据订单状态查询订单详情")
+    @ApiOperation(value = "根据订单状态查询订单详情列表(待付款、待发货)", notes = "根据订单状态查询订单详情（待付款、待发货）")
     ServerResponse queryDeliverOrderListByStatus(@RequestParam("pageDTO") PageDTO pageDTO,
                                                  @RequestParam("userToken") String userToken,
                                                  @RequestParam("houseId") String houseId,
                                                  @RequestParam("cityId") String queryId,
                                                  @RequestParam("orderStatus") String orderStatus);
 
+    @PostMapping("app/order/queryDeliverOrderDsdListByStatus")
+    @ApiOperation(value = "根据订单状态查询订单详情列表(待收货、已完成)", notes = "根据订单状态查询订单详情（待收货、已完成）")
+    ServerResponse queryDeliverOrderDsdListByStatus(@RequestParam("pageDTO") PageDTO pageDTO,
+                                                 @RequestParam("userToken") String userToken,
+                                                 @RequestParam("houseId") String houseId,
+                                                 @RequestParam("cityId") String queryId,
+                                                 @RequestParam("orderStatus") String orderStatus);
+
+
     @PostMapping("app/deliverOrderItem/deliverOrderItemDetail")
     @ApiOperation(value = "订单详情明细", notes = "订单详情明细")
-    ServerResponse deliverOrderItemDetail(@RequestParam("orderId") String orderId  );
+    ServerResponse deliverOrderItemDetail(@RequestParam("orderId") String orderId,@RequestParam("orderStatus")Integer orderStatus );
+
+
+    @PostMapping("app/deliverOrderItem/orderSnapshop")
+    @ApiOperation(value = "订单快照", notes = "订单快照")
+    ServerResponse orderSnapshop(@RequestParam("orderId") String orderId,@RequestParam("orderStatus")Integer orderStatus );
+
+    @PostMapping("app/deliverOrderItem/shippingDetail")
+    @ApiOperation(value = "订单-发货详情", notes = "订单-发货详情")
+    ServerResponse shippingDetail(@RequestParam("orderId") String orderId,@RequestParam("orderStatus")Integer orderStatus );
+
+    @PostMapping("app/deliverOrderItem/stevedorageCostDetail")
+    @ApiOperation(value = "订单-搬运费详情", notes = "订单-搬运费详情")
+    ServerResponse stevedorageCostDetail(@RequestParam("pageDTO")PageDTO pageDTO,@RequestParam("orderId") String orderId,@RequestParam("orderStatus")Integer orderStatus );
+
+    @PostMapping("app/deliverOrderItem/transportationCostDetail")
+    @ApiOperation(value = "订单-运费详情", notes = "订单-运费详情")
+    ServerResponse transportationCostDetail(@RequestParam("pageDTO")PageDTO pageDTO,@RequestParam("orderId") String orderId,@RequestParam("orderStatus")Integer orderStatus );
+
 
 //    /**
 //     * 取消订单

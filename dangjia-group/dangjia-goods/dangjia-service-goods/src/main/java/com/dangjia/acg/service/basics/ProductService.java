@@ -117,7 +117,7 @@ public class ProductService {
     //查询单位
     public ServerResponse queryUnit(String cityId) {
         try {
-            List<Unit> unitList = iUnitMapper.getUnit(cityId);
+            List<Unit> unitList = iUnitMapper.getUnit();
             return ServerResponse.createBySuccess("查询成功", unitList);
         } catch (Exception e) {
             e.printStackTrace();

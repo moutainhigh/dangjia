@@ -14,6 +14,7 @@ import java.util.List;
 @Data
 public class DjSupplierDeliverDTOList {
     private String name;//供应商名称
+    private String telephone;//供应商电话
     private String image;//回执单
     private Date createDate;// 创建日期
     private Double totalMoney;// 总金额
