@@ -224,7 +224,7 @@
             and ship_address like CONCAT('%',#{shipAddress},'%')
         </if>
         ORDER BY
-        create_date DESC
+        rec_time DESC
     </select>
 
     <select id="selectClsd" resultType="com.dangjia.acg.modle.deliver.SplitDeliver">
