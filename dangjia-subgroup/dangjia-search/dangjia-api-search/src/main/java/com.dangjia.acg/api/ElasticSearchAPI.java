@@ -1,5 +1,6 @@
 package com.dangjia.acg.api;
 
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.model.PageBean;
 import com.dangjia.acg.dto.ElasticSearchDTO;
 import io.swagger.annotations.Api;
@@ -31,21 +32,21 @@ public interface ElasticSearchAPI {
 
    @RequestMapping(value = "searchESJson", method = RequestMethod.POST)
   @ApiOperation(value = "模糊搜索", notes = "模糊搜索")
-  List<String> searchESJson(@ApiParam(name ="elasticSearchDTO",value = "要查询的字段")@RequestBody ElasticSearchDTO elasticSearchDTO);
+  List<JSONObject> searchESJson(@ApiParam(name ="elasticSearchDTO",value = "要查询的字段")@RequestBody ElasticSearchDTO elasticSearchDTO);
 
 
   @RequestMapping(value = "searchESJsonPage", method = RequestMethod.POST)
   @ApiOperation(value = "模糊搜索（分页）", notes = "模糊搜索（分页）")
-  PageBean<String> searchESJsonPage(@ApiParam(name ="elasticSearchDTO",value = "要查询的字段")@RequestBody ElasticSearchDTO elasticSearchDTO);
+  PageBean<JSONObject> searchESJsonPage(@ApiParam(name ="elasticSearchDTO",value = "要查询的字段")@RequestBody ElasticSearchDTO elasticSearchDTO);
 
 
   @RequestMapping(value = "searchPreciseJsonPage", method = RequestMethod.POST)
   @ApiOperation(value = "精准搜索（分页）", notes = "精准搜索（分页）")
-  PageBean<String> searchPreciseJsonPage(@ApiParam(name ="elasticSearchDTO",value = "要查询的字段")@RequestBody ElasticSearchDTO elasticSearchDTO);
+  PageBean<JSONObject> searchPreciseJsonPage(@ApiParam(name ="elasticSearchDTO",value = "要查询的字段")@RequestBody ElasticSearchDTO elasticSearchDTO);
 
   @RequestMapping(value = "searchPupdateResponsereciseJson", method = RequestMethod.POST)
   @ApiOperation(value = "精准搜索单个字段多个value", notes = "精准搜索单个字段多个value")
-  List<String> searchPreciseJson(@ApiParam(name ="elasticSearchDTO",value = "要查询的字段")@RequestBody ElasticSearchDTO elasticSearchDTO);
+  List<JSONObject> searchPreciseJson(@ApiParam(name ="elasticSearchDTO",value = "要查询的字段")@RequestBody ElasticSearchDTO elasticSearchDTO);
 
   @RequestMapping(value = "deleteResponse", method = RequestMethod.POST)
   @ApiOperation(value = "根据ESID删除", notes = "根据ESID删除")
@@ -57,7 +58,7 @@ public interface ElasticSearchAPI {
 
   @RequestMapping(value = "getSearchJsonId", method = RequestMethod.POST)
   @ApiOperation(value = "根据ESID查询", notes = "根据ESID查询")
-  String getSearchJsonId(@RequestParam("tableTypeName")String tableTypeName,@RequestParam("prepareId")String prepareId);
+  JSONObject getSearchJsonId(@RequestParam("tableTypeName")String tableTypeName,@RequestParam("prepareId")String prepareId);
 
 
   }
