@@ -77,5 +77,8 @@ public abstract class SysConfig {
     public static final ConfigBean<String> ORDER_DIANPU_ICON = new ConfigBean<String>("ORDER_DIANPU_ICON",
             "/icon/order/dianpu.png", "店铺图标", APP_TYPE);
 
+    public static final ConfigBean<String> PRODUCT_PURCHASE_ICON = new ConfigBean<String>("PRODUCT_PURCHASE_ICON",
+            "/icon/img_zigou.png", "自购商品图标", APP_TYPE);
+
 
 }

@@ -806,6 +806,45 @@ public class DjDeliverOrderService {
         return ServerResponse.createBySuccess("查询成功", collectDataDTO);
     }
 
+    /**
+     * 订单列表（待收货、已经完成） --发货单
+     * @param pageDTO
+     * @param userToken
+     * @param houseId
+     * @param queryId
+     * @param orderStatus
+     * @return
+     */
+    public ServerResponse queryDeliverOrderDsdListByStatus(PageDTO pageDTO, String userToken, String houseId, String queryId, String orderStatus) {
+        try {
+            Object object = memberAPI.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            JSONObject job = (JSONObject)object;
+            Member member = job.toJavaObject(Member.class);
+
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());//初始化分页插获取用户信息件
+
+
+            //PageInfo pageResult = new PageInfo(list);
+          //  return ServerResponse.createBySuccess("查询所有订单", pageResult);
+            return null;
+        } catch (Exception e) {
+            logger.error("订单列表（待收货、已经完成）异常", e);
+            return ServerResponse.createByErrorMessage("订单列表（待收货、已经完成）异常" + e);
+        }
+    }
+
+    /**
+     * 订单列表（待付款、待发货） -- 订单列表
+     * @param pageDTO
+     * @param userToken
+     * @param houseId
+     * @param cityId
+     * @param orderStatus
+     * @return
+     */
     public ServerResponse queryDeliverOrderListByStatus(PageDTO pageDTO, String userToken, String houseId, String cityId, String orderStatus) {
         try {
             Object object = memberAPI.getMember(userToken);

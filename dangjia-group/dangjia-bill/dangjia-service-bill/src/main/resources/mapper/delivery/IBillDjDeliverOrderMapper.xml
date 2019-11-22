@@ -609,6 +609,7 @@
     <!--发货详情
     <select id="" resultType="">
 
-    </select>-->
+    </select>
+-->
 
 </mapper>

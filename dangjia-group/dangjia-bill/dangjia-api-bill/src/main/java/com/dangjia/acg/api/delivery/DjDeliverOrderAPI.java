@@ -63,12 +63,21 @@ public interface DjDeliverOrderAPI {
 
 
     @PostMapping("app/order/queryDeliverOrderListByStatus")
-    @ApiOperation(value = "根据订单状态查询订单详情列表", notes = "根据订单状态查询订单详情")
+    @ApiOperation(value = "根据订单状态查询订单详情列表(待付款、待发货)", notes = "根据订单状态查询订单详情（待付款、待发货）")
     ServerResponse queryDeliverOrderListByStatus(@RequestParam("pageDTO") PageDTO pageDTO,
                                                  @RequestParam("userToken") String userToken,
                                                  @RequestParam("houseId") String houseId,
                                                  @RequestParam("cityId") String queryId,
                                                  @RequestParam("orderStatus") String orderStatus);
+
+    @PostMapping("app/order/queryDeliverOrderDsdListByStatus")
+    @ApiOperation(value = "根据订单状态查询订单详情列表(待收货、已完成)", notes = "根据订单状态查询订单详情（待收货、已完成）")
+    ServerResponse queryDeliverOrderDsdListByStatus(@RequestParam("pageDTO") PageDTO pageDTO,
+                                                 @RequestParam("userToken") String userToken,
+                                                 @RequestParam("houseId") String houseId,
+                                                 @RequestParam("cityId") String queryId,
+                                                 @RequestParam("orderStatus") String orderStatus);
+
 
     @PostMapping("app/deliverOrderItem/deliverOrderItemDetail")
     @ApiOperation(value = "订单详情明细", notes = "订单详情明细")
