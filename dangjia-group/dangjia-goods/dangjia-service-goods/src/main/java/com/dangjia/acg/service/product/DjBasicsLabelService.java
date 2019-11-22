@@ -53,25 +53,25 @@ public class DjBasicsLabelService {
             long count = strings.stream().distinct().count();
             if (count < strings.size())
                 return ServerResponse.createByErrorMessage("标签值重复");
+            example=new Example(DjBasicsLabelValue.class);
+            example.createCriteria().andIn(DjBasicsLabelValue.NAME,strings)
+                    .andEqualTo(DjBasicsLabelValue.DATA_STATUS,0);
+            List<DjBasicsLabelValue> djBasicsLabelValues = djBasicsLabelValueMapper.selectByExample(example);
+            if(djBasicsLabelValues.size()>0)
+                return ServerResponse.createByErrorMessage("标签值已存在");
             DjBasicsLabel djBasicsLabel = new DjBasicsLabel();
             djBasicsLabel.setCityId(cityId);
             djBasicsLabel.setName(labelName);
             djBasicsLabel.setDataStatus(0);
             djBasicsLabelMapper.insert(djBasicsLabel);
-            for (String str : strings){
-                example=new Example(DjBasicsLabelValue.class);
-                example.createCriteria().andEqualTo(DjBasicsLabelValue.NAME,str)
-                        .andEqualTo(DjBasicsLabelValue.DATA_STATUS,0);
-                List<DjBasicsLabelValue> djBasicsLabelValues = djBasicsLabelValueMapper.selectByExample(example);
-                if(djBasicsLabelValues.size()>0)
-                    return ServerResponse.createByErrorMessage("标签值已存在");
+            strings.forEach(str->{
                 DjBasicsLabelValue djBasicsLabelValue = new DjBasicsLabelValue();
                 djBasicsLabelValue.setLabelId(djBasicsLabel.getId());
                 djBasicsLabelValue.setName(str);
                 djBasicsLabelValue.setDataStatus(0);
                 djBasicsLabelValue.setCityId(cityId);
                 djBasicsLabelValueMapper.insert(djBasicsLabelValue);
-            }
+            });
             return ServerResponse.createBySuccessMessage("添加成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -114,20 +114,20 @@ public class DjBasicsLabelService {
             Example example = new Example(DjBasicsLabelValue.class);
             example.createCriteria().andEqualTo(DjBasicsLabelValue.LABEL_ID, id);
             djBasicsLabelValueMapper.deleteByExample(example);
-            for (String str : strings){
-                example=new Example(DjBasicsLabelValue.class);
-                example.createCriteria().andEqualTo(DjBasicsLabelValue.NAME,str)
-                        .andEqualTo(DjBasicsLabelValue.DATA_STATUS,0);
-                List<DjBasicsLabelValue> djBasicsLabelValues = djBasicsLabelValueMapper.selectByExample(example);
-                if(djBasicsLabelValues.size()>0)
-                    return ServerResponse.createByErrorMessage("标签值已存在");
+            example=new Example(DjBasicsLabelValue.class);
+            example.createCriteria().andIn(DjBasicsLabelValue.NAME,strings)
+                    .andEqualTo(DjBasicsLabelValue.DATA_STATUS,0);
+            List<DjBasicsLabelValue> djBasicsLabelValues = djBasicsLabelValueMapper.selectByExample(example);
+            if(djBasicsLabelValues.size()>0)
+                return ServerResponse.createByErrorMessage("标签值已存在");
+            strings.forEach(str->{
                 DjBasicsLabelValue djBasicsLabelValue = new DjBasicsLabelValue();
                 djBasicsLabelValue.setLabelId(djBasicsLabel.getId());
                 djBasicsLabelValue.setName(str);
                 djBasicsLabelValue.setDataStatus(0);
                 djBasicsLabelValue.setCityId(cityId);
                 djBasicsLabelValueMapper.insert(djBasicsLabelValue);
-            };
+            });
             return ServerResponse.createBySuccessMessage("编辑成功");
         } catch (Exception e) {
             e.printStackTrace();

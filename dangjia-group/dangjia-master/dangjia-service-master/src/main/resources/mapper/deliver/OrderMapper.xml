@@ -4,39 +4,39 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.delivery.IOrderMapper">
     <sql id="all_columns">
-        id
-        create_date	as 	createDate
-        house_id	as 	houseId
-        business_order_number	as 	businessOrderNumber
-        total_amount	as 	totalAmount
-        style_price	as 	stylePrice
-        budget_cost	as 	budgetCost
-        worker_type_name	as 	workerTypeName
-        payment
-        worker_type_id	as 	workerTypeId
-        style_name	as 	styleName
-        type
-        modify_date	as 	modifyDate
-        data_status	as 	dataStatus
-        parent_order_id	as 	parentOrderId
-        order_number	as 	orderNumber
-        member_id	as 	memberId
-        worker_id	as 	workerId
-        address_id	as 	addressId
-        storefont_id	as 	storefontId
-        city_id	as 	cityId
-        total_discount_price	as 	totalDiscountPrice
-        total_stevedorage_cost	as 	totalStevedorageCost
-        total_transportation_cost	as 	totalTransportationCost
-        order_type	as 	orderType
-        actual_payment_price	as 	actualPaymentPrice
-        is_pay_money	as 	isPayMoney
-        is_show_order	as 	isShowOrder
-        order_status	as 	orderStatus
-        order_generation_time	as 	orderGenerationTime
-        order_pay_time	as 	orderPayTime
-        order_source	as 	orderSource
-        create_by	as 	createBy
+        id,
+        create_date	as 	createDate,
+        house_id	as 	houseId,
+        business_order_number	as 	businessOrderNumber,
+        total_amount	as 	totalAmount,
+        style_price	as 	stylePrice,
+        budget_cost	as 	budgetCost,
+        worker_type_name	as 	workerTypeName,
+        payment,
+        worker_type_id	as 	workerTypeId,
+        style_name	as 	styleName,
+        type,
+        modify_date	as 	modifyDate,
+        data_status	as 	dataStatus,
+        parent_order_id	as 	parentOrderId,
+        order_number	as 	orderNumber,
+        member_id	as 	memberId,
+        worker_id	as 	workerId,
+        address_id	as 	addressId,
+        storefont_id	as 	storefontId,
+        city_id	as 	cityId,
+        total_discount_price	as 	totalDiscountPrice,
+        total_stevedorage_cost	as 	totalStevedorageCost,
+        total_transportation_cost	as 	totalTransportationCost,
+        order_type	as 	orderType,
+        actual_payment_price	as 	actualPaymentPrice,
+        is_pay_money	as 	isPayMoney,
+        is_show_order	as 	isShowOrder,
+        order_status	as 	orderStatus,
+        order_generation_time	as 	orderGenerationTime,
+        order_pay_time	as 	orderPayTime,
+        order_source	as 	orderSource,
+        create_by	as 	createBy,
         update_by	as 	updateBy
     </sql>
 
