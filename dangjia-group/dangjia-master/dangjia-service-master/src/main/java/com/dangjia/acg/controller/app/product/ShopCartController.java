@@ -2,6 +2,7 @@ package com.dangjia.acg.controller.app.product;
 
 import com.dangjia.acg.api.app.product.ShopCartAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.product.ShoppingCart;
 import com.dangjia.acg.service.product.ShopCartService;
@@ -20,8 +21,8 @@ public class ShopCartController implements ShopCartAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryCartList(HttpServletRequest request,String userToken,String cityId) {
-        return shopCartservice.queryCartList(userToken,cityId);
+    public ServerResponse queryCartList(HttpServletRequest request, PageDTO pageDTO,String userToken, String cityId) {
+        return shopCartservice.queryCartList(pageDTO,userToken,cityId);
     }
 
     @Override
