@@ -253,12 +253,160 @@
         IFNULL(ddo.total_amount,'')  as totalAmount -- 订单金额
         from dj_deliver_order  ddo
         inner join  dj_house  dh on dh.id=ddo.house_id
-        where 1=1
+        where 1=1     and ddo.storefont_id=#{storefrontId}
         <if test="orderNumber!=null and orderNumber!=''">
             and ddo.id     LIKE CONCAT('%',#{orderNumber},'%')
         </if>
+    </select>
+
+
+
+    <select id="storeExpenseRecordOrderDetail" resultType="com.dangjia.acg.dto.storefront.ExpenseRecordOrderDetailDTO">
+
+            select
+            ddoi.order_id as orderId,
+            ddoi.product_name as productName,-- 商品名称
+            ddoi.product_sn as productSn,-- 商品编号
+            ddoi.image,-- 图片
+            IFNULL(ddosi.shop_count,'') as shopCount,-- 购买数量
+            IFNULL(ddosi.ask_count,'') as askCount,-- 要货数量
+            IFNULL(ddosi.num,'') as num ,-- 发货数量
+            IFNULL(ddosi.receive,'') as receive,-- 收货数量
+            IFNULL(ddosi.return_count,'') as returnCount,-- 退货数量
+            IFNULL(ddoi.cost,'') as cost,-- 供应单价
+            IFNULL((ddoi.cost*ddosi.shop_count),'') as totalCost,-- 供应总价
+            IFNULL(ddoi.price,'') as price,-- 销售单价
+            IFNULL(ddoi.price*ddosi.shop_count,'') as totalPrice,-- 销售总价
+            ddosi.product_id as productId,
+            ddosi.house_id as houseId
+		from dj_deliver_order_item ddoi
+		INNER JOIN dj_deliver_order_split_item  ddosi on
+		ddoi.house_id=ddosi.house_id and ddoi.product_id=ddosi.product_id
+        where  1=1     and ddoi.storefont_id=#{storefrontId} and ddoi.order_id=#{orderId}
+    </select>
+
+    <select id="queryStoreOrderSplitItem" resultType="com.dangjia.acg.dto.storefront.StoreOrderSplitItemDTO">
+	        select
+			ddosi.id,-- 要货单号
+			IFNULL(ddosi.create_date,'') as createDate,-- 要货时间
+			IFNULL(ddosi.ask_count,'') as askCount,-- 要货数
+			IFNULL(ddosi.num,'') as num,-- 发货数
+			IFNULL(ddosi.receive,'') as receive,-- 收货数
+			IFNULL(ddosi.return_count,'') as returnCount-- 退货数
+			from dj_deliver_order_split_item ddosi
+        where 1=1
+        <if test="houseId!=null and houseId!=''">
+            and ddosi.house_id=#{houseId}
+        </if>
+        <if test="productId!=null and productId!=''">
+            and ddosi.product_id=#{productId}
+        </if>
         <if test="storefrontId!=null and storefrontId!=''">
-            and ddo.storefont_id=#{storefrontId}
+            and ddosi.storefront_id=#{storefrontId}
         </if>
     </select>
+    <!--查看清单-->
+
+    <select id="queryStoreSplitDeliverDetail" resultType="com.dangjia.acg.dto.storefront.StoreSplitDeliverDTO">
+        select
+        CONCAT(IFNULL(dh.residential,'*'),IFNULL(CONCAT(dh.building,'栋'),'*栋'),IFNULL(CONCAT(dh.unit,'单元'),'*单元'),IFNULL(CONCAT(dh.number,'号'),'*号')) as shipAddress,
+        IFNULL(dm.name,'') as ownerName,
+        IFNULL(dm.mobile,'') as mobile,
+        IFNULL(ddsd.id,'') as id,
+        IFNULL(ddsd.send_time,'') as sendTime,
+        IFNULL(ddsd.rec_time,'') as recTime,
+        IFNULL(ds.name,'') as name ,
+        IFNULL(ddsd.supplier_telephone,'') as supplierTelephone,
+        IFNULL(ddsd.shipping_state,'') as shipplingState
+        from dj_deliver_split_deliver  ddsd
+        inner join dj_supplier ds on ddsd.supplier_id=ds.id
+        inner join dj_house dh  on  ddsd.house_id=dh.id
+        left  join dj_member dm on dh.member_id=dm.id
+        where  ddsd.order_split_id=#{orderSplitId}
+    </select>
+
+    <select id="queryStoreRevenueRecord" resultType="com.dangjia.acg.dto.storefront.StoreRevenueRecordDTO">
+        select
+        IFNULL(dafr.type,'') as type,-- 类型
+        IFNULL(dafr.house_order_id,'') as houseOrderId,-- 订单号
+        IFNULL(dafr.money,'') as money,-- 实际支出金额
+        IFNULL(drmo.actual_total_amount,'') as totalAmount,-- 订单金额
+        IFNULL(drmo.state,'') as orderStatus-- 状态
+        from
+        dj_account_flow_record  dafr
+        inner join  dj_repair_mend_order drmo on drmo.id=dafr.house_order_id
+        where dafr.defined_account_id=#{storefrontId} and dafr.flow_type=1
+        <if test="orderNumber!=null and orderNumber!=''">
+            and dafr.house_order_id=#{orderNumber}
+        </if>
+        union all
+        select
+        IFNULL(dafr.type,'') as type,-- 类型
+        IFNULL(dafr.house_order_id,'') as houseOrderId,-- 订单号
+        '' as money,-- 实际支出金额
+        '' as totalAmount, -- 订单金额
+        deposit_status-- 状态
+        from dj_account_flow_record dafr
+        inner  join dj_worker_withdraw_deposit dwwd  on dwwd.id=dafr.house_order_id
+        UNION ALL
+        select
+        IFNULL(dafr.type,'') as type,-- 类型
+        IFNULL(dafr.house_order_id,'') as houseOrderId,-- 订单号
+        IFNULL(dafr.money,'') as money,-- 实际支出金额
+        '' as totalAmount, -- 订单金额
+        '' as orderStatus -- 状态
+        from  dj_account_flow_record dafr
+        inner join dj_receipt dr on dafr.house_order_id=dr.id
+
+    </select>
+
+    <select id="storeAccountFlowRecordDTO" resultType="com.dangjia.acg.dto.supplier.AccountFlowRecordDTO">
+
+			SELECT
+            IFNULL(afr.state,'') as state,
+            IFNULL(afr.house_order_id,'') AS houseOrderId,
+            IFNULL(wwd.create_date,'') AS createDate,
+            IFNULL(afr.money,'') as money,
+            IFNULL(wwd.state,'') AS depositeState,
+            IFNULL(wwd.image,'') as image,
+            IFNULL(wwd.reason,'') as reason,
+            IFNULL(wwd.memo,'') as memo
+            FROM
+            dj_account_flow_record afr
+            INNER JOIN dj_worker_withdraw_deposit wwd ON afr.house_order_id = wwd.id
+            WHERE
+            afr.state = 1  -- 体现
+            AND afr.data_status = 0
+            AND afr.flow_type = 1 -- 店铺
+            AND afr.defined_account_id=#{storefrontId}
+            AND afr.house_order_id=#{houseOrderId}
+    </select>
+
+    <select id="queryMendOrder" resultType="com.dangjia.acg.dto.storefront.StoreRepairMendOrderDTO">
+         select
+         IFNULL(drmo.id,'') as mid,-- 退货单号
+         IFNULL(drmo.create_date,'') as createDate,-- 退款时间
+         CONCAT(IFNULL(dh.residential,'*'),IFNULL(CONCAT(dh.building,'栋'),'*栋'),IFNULL(CONCAT(dh.unit,'单元'),'*单元'),IFNULL(CONCAT(dh.number,'号'),'*号')) as shipAddress,  -- 业主地址
+         IFNULL(dm.name ,'') as ownerName , -- 业主名称
+         IFNULL(dm.mobile,'') as mobile  -- 业主电话
+         from  dj_repair_mend_order  drmo
+         inner join dj_house dh on drmo.house_id=dh.id
+         left join dj_member dm on dh.member_id=dm.id
+         where drmo.storefront_id=#{storefrontId}
+         and drmo.id=#{mendOrderId}
+    </select>
+
+    <select id="queryMendOrderDetail" resultType="com.dangjia.acg.dto.storefront.StoreRepairMendOrderDetailDTO">
+        select
+            IFNULL(drmm.product_name,'') as productName,-- 商品名称
+            IFNULL(drmm.product_sn,'') as productSn, -- 商品编号
+            IFNULL(drmm.image,'') as image ,-- 图片
+            IFNULL(drmm.price,'') as price ,-- 单价
+            IFNULL(drmm.total_price,'') as totalPrice,-- 小计
+            IFNULL(drmm.shop_count,'') as shopCount,-- 申请退货数
+            IFNULL(drmm.actual_count,'') as actualCount-- 实际退货数
+        from dj_repair_mend_materiel drmm
+        where mend_order_id=#{mendOrderId}
+    </select>
+
 </mapper>

@@ -111,27 +111,27 @@ public class StorefrontController implements BasicsStorefrontAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse storeExpenseRecordOrderDetail(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String houseOrderId) {
-        return storefrontService.storeExpenseRecordOrderDetail(request,pageDTO,userId,cityId,houseOrderId);
+    public ServerResponse storeExpenseRecordOrderDetail(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId,String orderId) {
+        return storefrontService.storeExpenseRecordOrderDetail(request,pageDTO,userId,cityId,orderId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse storeExpenseRecordGoodDetail(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String houseOrderId) {
-        return storefrontService.storeExpenseRecordGoodDetail(request,pageDTO,userId,cityId,houseOrderId);
+    public ServerResponse storeExpenseRecordGoodDetail(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String deliverId) {
+        return storefrontService.storeExpenseRecordGoodDetail(request,pageDTO,userId,cityId,deliverId);
     }
 
 
     @Override
     @ApiMethod
-    public ServerResponse storeRevenueRecord(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String houseOrderId) {
-        return storefrontService.storeRevenueRecord(request,pageDTO,userId,cityId,houseOrderId);
+    public ServerResponse storeRevenueRecord(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String orderNumber) {
+        return storefrontService.storeRevenueRecord(request,pageDTO,userId,cityId,orderNumber);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse storeRevenueRecordOrderDetail(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String houseOrderId) {
-        return storefrontService.storeRevenueRecordOrderDetail(request,pageDTO,userId,cityId,houseOrderId);
+    public ServerResponse storeRevenueRecordOrderDetail(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String orderNumber, Integer type) {
+        return storefrontService.storeRevenueRecordOrderDetail(request,pageDTO,userId,cityId,orderNumber,type);
     }
 
 

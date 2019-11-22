@@ -2,6 +2,9 @@ package com.dangjia.acg.dto.delivery;
 
 import lombok.Data;
 
+import java.util.List;
+import java.util.Map;
+
 @Data
 public class AppOrderItemDetailDTO {
     private String productId;//
@@ -13,4 +16,6 @@ public class AppOrderItemDetailDTO {
     private String mobile;//电话
     private String image;
     private String imageDetail;
+
+    List< Map<String, Object>> detailMaplist;
 }

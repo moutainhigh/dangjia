@@ -31,7 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
-
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 /**
@@ -74,7 +74,12 @@ public class DjBasicsProductTemplateService {
 
 
 
-
+    public List<ProductAddedRelation> queryProductAddRelationByPid(HttpServletRequest request, String pid) {
+        Example example=new Example(ProductAddedRelation.class);
+        example.createCriteria().andEqualTo(ProductAddedRelation.PRODUCT_TEMPLATE_ID,pid);
+        List<ProductAddedRelation> list=   iProductAddedRelationMapper.selectByExample(example);
+        return list;
+    }
     /**
      * 查询商品信息
      *
@@ -158,17 +163,20 @@ public class DjBasicsProductTemplateService {
             String goodsId=basicsProductDTO.getGoodsId();//货品ID
             DjBasicsGoods basicsGoods = djBasicsGoodsMapper.selectByPrimaryKey(goodsId);//查询货品表信息，判断是人工还是材料商品新增
             //2.1添加商品主表信息
-            String[] imgArr = basicsProductDTO.getImage().split(",");
-//                String[] technologyIds = obj.getString("technologyIds").split(",");//工艺节点
             StringBuilder imgStr = new StringBuilder();
-            for (int j = 0; j < imgArr.length; j++) {
-                String img = imgArr[j];
-                if (j == imgArr.length - 1) {
-                    imgStr.append(img);
-                } else {
-                    imgStr.append(img).append(",");
+            if(basicsProductDTO.getImage()!=null&&StringUtils.isNotBlank(basicsProductDTO.getImage())){
+                String[] imgArr = basicsProductDTO.getImage().split(",");
+//                String[] technologyIds = obj.getString("technologyIds").split(",");//工艺节点
+                for (int j = 0; j < imgArr.length; j++) {
+                    String img = imgArr[j];
+                    if (j == imgArr.length - 1) {
+                        imgStr.append(img);
+                    } else {
+                        imgStr.append(img).append(",");
+                    }
                 }
             }
+
            // if (!StringUtils.isNotBlank(imgStr.toString()))
                // return ServerResponse.createByErrorMessage("商品图片不能为空");
             LOG.info("001----------添加商品主表 start:" + basicsProductDTO.getName());
@@ -823,12 +831,15 @@ public class DjBasicsProductTemplateService {
                 StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
              djBasicsProduct.setDetailImage(imgStr.toString());
           }
+        Map<String, Object> map = BeanUtils.beanToMap(djBasicsProduct);
         //商品属性值信息
         String strNewValueNameArr = "";
         if (StringUtils.isNotBlank(djBasicsProduct.getValueIdArr())) {
             strNewValueNameArr = getNewValueNameArr(djBasicsProduct.getValueIdArr());
+            map.put("attributeValueList",getAttributeValueList(djBasicsProduct.getValueIdArr()));
+
         }
-        Map<String, Object> map = BeanUtils.beanToMap(djBasicsProduct);
+
         map.put("imageUrl", imgUrlStr.toString());
         map.put("newValueNameArr", strNewValueNameArr);
         map.put("tTechnologymMapList", tTechnologymMapList);
@@ -870,6 +881,27 @@ public class DjBasicsProductTemplateService {
             }
         }
         return strNewValueNameArr;
+    }
+
+    /**
+     * 获取对应的属性值信息
+     * @param valueIdArr
+     * @return
+     */
+    public List<AttributeValue> getAttributeValueList(String valueIdArr){
+        List<AttributeValue> list=new ArrayList<>();
+        String[] newValueNameArr = valueIdArr.split(",");
+        for (int i = 0; i < newValueNameArr.length; i++) {
+            String valueId = newValueNameArr[i];
+            if (StringUtils.isNotBlank(valueId)) {
+                AttributeValue attributeValue = iAttributeValueMapper.selectByPrimaryKey(valueId);
+                if(attributeValue!=null&&StringUtils.isNotBlank(attributeValue.getName())){
+                    list.add(attributeValue);
+                }
+
+            }
+        }
+        return list;
     }
 
     /**

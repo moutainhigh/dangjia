@@ -146,4 +146,7 @@ public class StorefrontProduct extends BaseEntity {
     @Transient
     private String detailImageUrl;
 
+    @Transient
+    private String  addedProductId;
+
 }

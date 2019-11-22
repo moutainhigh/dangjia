@@ -683,11 +683,12 @@ public class DjSupplierServices {
      * @param cityId
      * @return
      */
-    public ServerResponse queryExpenditure(PageDTO pageDTO, String userId, String cityId, String searchKey) {
+    public ServerResponse queryExpenditure(PageDTO pageDTO, String userId, String cityId, String depositeState,
+                                           String beginDate, String endDate) {
         try {
             DjSupplier djSupplier = this.querySingleDjSupplier(userId, cityId);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<AccountFlowRecordDTO> accountFlowRecordDTOS = iStoreAccountFlowRecordMapper.accountFlowRecordDTOs(djSupplier.getId(),searchKey);
+            List<AccountFlowRecordDTO> accountFlowRecordDTOS = iStoreAccountFlowRecordMapper.accountFlowRecordDTOs(djSupplier.getId(),depositeState,beginDate,endDate);
             if(accountFlowRecordDTOS.size()<=0)
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);

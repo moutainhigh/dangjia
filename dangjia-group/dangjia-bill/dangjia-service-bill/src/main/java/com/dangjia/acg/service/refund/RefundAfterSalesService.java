@@ -490,6 +490,8 @@ public class RefundAfterSalesService {
         mendMateriel.setMendOrderId(mendOrder.getId());
         mendMateriel.setProductId(productId);
         mendMateriel.setCategoryId(refundOrderItemDTO.getCategoryId());
+        mendMateriel.setActualCount(mendMateriel.getShopCount());
+        mendMateriel.setActualPrice(mendMateriel.getTotalPrice());
         iBillMendMaterialMapper.insertSelective(mendMateriel);
         return mendMateriel;
     }
@@ -792,6 +794,7 @@ public class RefundAfterSalesService {
                    orderSplitItem.setReturnCount(newReturnCount<0?0:newReturnCount);
                    billDjDeliverOrderSplitItemMapper.updateByPrimaryKeySelective(orderSplitItem);
                }
+
             }
         }
         MendOrder mendOrder=new MendOrder();

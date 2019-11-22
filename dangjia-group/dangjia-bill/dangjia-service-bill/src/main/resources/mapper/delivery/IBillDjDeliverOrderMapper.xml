@@ -206,6 +206,15 @@
                     AND t1.delete_state != 1
                     AND t1.product_id IS NULL
                     AND t1.house_id = #{houseId}
+                    AND EXISTS (
+                        SELECT
+                            1
+                        FROM
+                            dj_deliver_order t4
+                        WHERE
+                            t1.house_id = t4.house_id
+                        AND t1.worker_type_id = t4.worker_type_id
+                    )
             ) m
 
     </select>
@@ -320,7 +329,7 @@
                 t2.name goodsName,
                 '' productId,
                 '' productTemplateId,
-                '' productName,
+                t2.name productName,
                 '' productSn,
                 '' image,
                 t1.price,
@@ -422,6 +431,7 @@
         IFNULL(ddo.budget_cost,'') as budgetCost,
         ddo.type,
         ddo.payment,
+        IFNULL(dbs.system_logo,'') as storefrontIcon,
         IFNULL(ddo.storefont_id,'') as storefrontId,
         IFNULL(ddo.city_id,'') as cityId,
         IFNULL(ddo.total_discount_price,'') as totalDiscountPrice,
@@ -545,11 +555,13 @@
         ddo.house_id as houseId,-- 房子id
         ddo.id as orderId,-- 订单编号
         IFNULL(ddo.order_status,'') as orderStatus,
-        IFNULL(ddo.order_generation_time,'') as orderGenerationTime,-- 创建时间
+        ddo.create_date as createDate，
+        IFNULL(ddo.order_generation_time,'') as orderGenerationTime,-- 成交时间
         IFNULL(ddo.total_amount,'') as totalAmount,-- 商品总额
         IFNULL(ddo.total_transportation_cost,'') as totalTransportationCost,-- 运费
         IFNULL(ddo.total_stevedorage_cost,'') as totalStevedorageCost,-- 搬运费
-        IFNULL(ddo.total_discount_price,'') as totalDiscountPrice-- 优惠卷名称
+        IFNULL(ddo.total_discount_price,'') as totalDiscountPrice,-- 优惠卷名称
+        ddo.order_pay_time as orderPayTime
         from  dj_deliver_order ddo where ddo.id=#{orderId}
     </select>
 
@@ -565,6 +577,30 @@
         ddoi.image as image
         from dj_deliver_order_item ddoi inner join dj_basics_storefront dbs
         on ddoi.storefont_id=dbs.id  inner join dj_basics_product_template dbpt
-        on dbpt.id=ddoi.product_id  where ddoi.order_id=#{orderId}
+        on dbpt.id=ddoi.product_id  where ddoi.order_id=#{orderId} and ddoi.order_status=#{orderStatus}
     </select>
+    <!--搬运费详情-->
+    <select id="queryStevedorage" resultType="com.dangjia.acg.dto.delivery.CostDetailDTO">
+        select
+        IFNULL(ddoi.image,'') as iamge,
+        IFNULL(ddoi.stevedorage_cost,'') as stevedorageCost,
+        IFNULL(dbs.storefront_name,'') as storefrontName  from dj_deliver_order_item  ddoi
+        inner join dj_basics_storefront dbs  on ddoi.storefont_id=dbs.id
+        where ddoi.order_id=#{orderId}
+    </select>
+    <!--运费详情-->
+    <select id="queryTransportationCost" resultType="com.dangjia.acg.dto.delivery.CostDetailDTO">
+        select
+        IFNULL(ddoi.image,'') as image,
+        IFNULL(ddoi.transportation_cost,'') as transportationCost,
+        IFNULL(dbs.storefront_name,'') as  storefrontName   from dj_deliver_order_item  ddoi
+        inner join dj_basics_storefront dbs  on ddoi.storefont_id=dbs.id
+        where ddoi.order_id=#{orderId}
+    </select>
+
+    <!--发货详情
+    <select id="" resultType="">
+
+    </select>-->
+
 </mapper>

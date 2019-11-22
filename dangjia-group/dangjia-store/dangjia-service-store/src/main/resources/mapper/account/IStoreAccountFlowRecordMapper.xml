@@ -19,8 +19,9 @@
         AND afr.data_status = 0
         AND afr.flow_type = 2
         AND afr.defined_account_id = #{supId}
-        <if test="houseOrderId != null and houseOrderId != ''">
-            AND afr.house_order_id LIKE CONCAT('%',#{houseOrderId},'%')
+        AND wwd.state=#{depositeState}
+        <if test="null!=beginDate and ''!=beginDate and null!=endDate and ''!=endDate ">
+            AND wwd.create_date BETWEEN #{beginDate} AND #{endDate}
         </if>
     </select>
 

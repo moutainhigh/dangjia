@@ -72,7 +72,25 @@ public interface DjDeliverOrderAPI {
 
     @PostMapping("app/deliverOrderItem/deliverOrderItemDetail")
     @ApiOperation(value = "订单详情明细", notes = "订单详情明细")
-    ServerResponse deliverOrderItemDetail(@RequestParam("orderId") String orderId  );
+    ServerResponse deliverOrderItemDetail(@RequestParam("orderId") String orderId,@RequestParam("orderStatus")Integer orderStatus );
+
+
+    @PostMapping("app/deliverOrderItem/orderSnapshop")
+    @ApiOperation(value = "订单快照", notes = "订单快照")
+    ServerResponse orderSnapshop(@RequestParam("orderId") String orderId,@RequestParam("orderStatus")Integer orderStatus );
+
+    @PostMapping("app/deliverOrderItem/shippingDetail")
+    @ApiOperation(value = "订单-发货详情", notes = "订单-发货详情")
+    ServerResponse shippingDetail(@RequestParam("orderId") String orderId,@RequestParam("orderStatus")Integer orderStatus );
+
+    @PostMapping("app/deliverOrderItem/stevedorageCostDetail")
+    @ApiOperation(value = "订单-搬运费详情", notes = "订单-搬运费详情")
+    ServerResponse stevedorageCostDetail(@RequestParam("pageDTO")PageDTO pageDTO,@RequestParam("orderId") String orderId,@RequestParam("orderStatus")Integer orderStatus );
+
+    @PostMapping("app/deliverOrderItem/transportationCostDetail")
+    @ApiOperation(value = "订单-运费详情", notes = "订单-运费详情")
+    ServerResponse transportationCostDetail(@RequestParam("pageDTO")PageDTO pageDTO,@RequestParam("orderId") String orderId,@RequestParam("orderStatus")Integer orderStatus );
+
 
 //    /**
 //     * 取消订单
