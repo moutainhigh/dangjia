@@ -1,14 +1,18 @@
 package com.dangjia.acg.service.core;
 
+import com.alibaba.fastjson.JSON;
+import com.dangjia.acg.api.ElasticSearchAPI;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
+import com.dangjia.acg.dto.ElasticSearchDTO;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.modle.core.WorkerType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +28,8 @@ public class WorkerTypeService {
 
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
+    @Autowired
+    private ElasticSearchAPI elasticSearchAPI;
 
     public ServerResponse unfinishedFlow(String houseId) {
         try {
@@ -49,27 +55,39 @@ public class WorkerTypeService {
      * @return
      */
     public ServerResponse getWorkerTypeList(Integer type) {
-        Example example = new Example(WorkerType.class);
-        Example.Criteria criteria = example.createCriteria();
-        if (type != null && type == 0) {
-            criteria.andCondition("type not in (2,7) ");
-        } else if (type != null && type == 1) {
-            criteria.andCondition("type not in (1,2,7)");
-        } else if (type != null && type == 2) {
-            criteria.andCondition("type not in (7)");
+        ElasticSearchDTO elasticSearchDTO=new ElasticSearchDTO();
+        elasticSearchDTO.setTableTypeName(WorkerType.class.getSimpleName());
+        List<String> redata =elasticSearchAPI.searchESJson(elasticSearchDTO);
+        if(redata==null || redata.size()==0) {
+            Example example = new Example(WorkerType.class);
+            Example.Criteria criteria = example.createCriteria();
+            if (type != null && type == 0) {
+                criteria.andCondition("type not in (2,7) ");
+            } else if (type != null && type == 1) {
+                criteria.andCondition("type not in (1,2,7)");
+            } else if (type != null && type == 2) {
+                criteria.andCondition("type not in (7)");
+            }
+            criteria.andNotEqualTo(WorkerType.STATE, 2);
+            example.orderBy(WorkerType.SORT).asc();
+            List<WorkerType> workerTypeList = workerTypeMapper.selectByExample(example);
+            if (workerTypeList == null || workerTypeList.size() <= 0) {
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode()
+                        , "查无数据");
+            }
+            List<Map> maps = (List<Map>) BeanUtils.listToMap(workerTypeList);
+            for (Map map : maps) {
+                map.put("workerTypeId", map.get(WorkerType.ID));
+            }
+
+            List<String> listJson = new ArrayList<>();
+            for (Map map : maps) {
+                listJson.add(JSON.toJSONString(map));
+            }
+            elasticSearchAPI.saveESJsonList(listJson,  WorkerType.class.getSimpleName());
+            redata=listJson;
         }
-        criteria.andNotEqualTo(WorkerType.STATE, 2);
-        example.orderBy(WorkerType.SORT).asc();
-        List<WorkerType> workerTypeList = workerTypeMapper.selectByExample(example);
-        if (workerTypeList == null || workerTypeList.size() <= 0) {
-            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode()
-                    , "查无数据");
-        }
-        List<Map> maps = (List<Map>) BeanUtils.listToMap(workerTypeList);
-        for (Map map : maps) {
-            map.put("workerTypeId", map.get(WorkerType.ID));
-        }
-        return ServerResponse.createBySuccess("查询成功", maps);
+        return ServerResponse.createBySuccess("查询成功", redata);
     }
 
     /**
