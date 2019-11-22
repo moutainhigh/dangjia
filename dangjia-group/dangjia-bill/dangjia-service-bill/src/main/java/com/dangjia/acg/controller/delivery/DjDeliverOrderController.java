@@ -85,6 +85,29 @@ public class DjDeliverOrderController implements DjDeliverOrderAPI {
         return djDeliverOrderService.deliverOrderItemDetail(orderId,orderStatus);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse orderSnapshop(String orderId, Integer orderStatus) {
+        return djDeliverOrderService.orderSnapshop(orderId,orderStatus);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse shippingDetail(String orderId, Integer orderStatus) {
+        return djDeliverOrderService.shippingDetail(orderId,orderStatus);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse stevedorageCostDetail(PageDTO pageDTO,String orderId, Integer orderStatus) {
+        return djDeliverOrderService.stevedorageCostDetail(pageDTO,orderId,orderStatus);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse transportationCostDetail(PageDTO pageDTO,String orderId, Integer orderStatus) {
+        return djDeliverOrderService.transportationCostDetail(pageDTO,orderId,orderStatus);
+    }
 
 
 }

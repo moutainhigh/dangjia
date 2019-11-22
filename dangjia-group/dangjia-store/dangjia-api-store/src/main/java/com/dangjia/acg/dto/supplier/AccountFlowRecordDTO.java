@@ -19,4 +19,5 @@ public class AccountFlowRecordDTO {
     private String reason;
     private Integer depositeState;//0未处理,1同意 2不同意(驳回)
     private String image;
+    private String memo ;//附言
 }

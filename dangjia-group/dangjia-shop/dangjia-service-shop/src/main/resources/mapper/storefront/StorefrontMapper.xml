@@ -356,26 +356,28 @@
         '' as totalAmount, -- 订单金额
         '' as orderStatus -- 状态
         from  dj_account_flow_record dafr
-        inner join  dj_deliver_split_deliver ddsd on dafr.id=ddsd.number
+        inner join dj_receipt dr on dafr.house_order_id=dr.id
 
     </select>
 
     <select id="storeAccountFlowRecordDTO" resultType="com.dangjia.acg.dto.supplier.AccountFlowRecordDTO">
-            SELECT
-            afr.state,
-            afr.house_order_id AS houseOrderId,
-            wwd.create_date AS createDate,
-            afr.money,
-            wwd.memo,
-            wwd.state AS depositeState,
-            wwd.image
+
+			SELECT
+            IFNULL(afr.state,'') as state,
+            IFNULL(afr.house_order_id,'') AS houseOrderId,
+            IFNULL(wwd.create_date,'') AS createDate,
+            IFNULL(afr.money,'') as money,
+            IFNULL(wwd.state,'') AS depositeState,
+            IFNULL(wwd.image,'') as image,
+            IFNULL(wwd.reason,'') as reason,
+            IFNULL(wwd.memo,'') as memo
             FROM
             dj_account_flow_record afr
             INNER JOIN dj_worker_withdraw_deposit wwd ON afr.house_order_id = wwd.id
             WHERE
             afr.state = 1  -- 体现
             AND afr.data_status = 0
-            AND afr.flow_type = 1 -- 供应商
+            AND afr.flow_type = 1 -- 店铺
             AND afr.defined_account_id=#{storefrontId}
             AND afr.house_order_id=#{houseOrderId}
     </select>

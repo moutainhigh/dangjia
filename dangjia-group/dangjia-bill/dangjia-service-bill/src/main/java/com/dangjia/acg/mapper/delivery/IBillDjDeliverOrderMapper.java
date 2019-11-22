@@ -119,4 +119,6 @@ public interface IBillDjDeliverOrderMapper extends Mapper<Order> {
 
     List<AppOrderItemDetailDTO> selectOrderItemDetailById(@Param("orderId") String  orderId,@Param("orderStatus") Integer orderStatus);
 
+    List<CostDetailDTO> queryStevedorage(@Param("orderId") String  orderId);
+    List<CostDetailDTO> queryTransportationCost(@Param("orderId") String  orderId);
 }
