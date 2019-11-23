@@ -466,6 +466,28 @@
             and  ddo.order_status = #{orderStatus}
         </if>
     </select>
+    <!--发货详情-->
+    <!--订单快照-->
+    <!--订单列表（待收货、已经完成）发货单-->
+    <select id="querySplitDeliverByHouse" resultType="com.dangjia.acg.dto.delivery.DjSplitDeliverOrderDTO">
+        select
+        IFNULL(ddsd.id,'') as id,
+        IFNULL(dbs.storefront_name,'') as storefrontName,-- 店铺名称
+        IFNULL(ddsd.create_date,'') as createDate,-- 创建时间
+        IFNULL(ddsd.number,'') as number,-- 订单号
+        IFNULL(ddsd.shipping_state,'') as shippingState,-- 订单状态
+        IFNULL(ddsd.total_amount,'') as totalAmount,-- 总价格
+        '' as total-- 件数
+        from dj_deliver_split_deliver ddsd
+        inner join dj_basics_storefront dbs on dbs.id=ddsd.storefront_id
+        where ddsd.house_id=#{houseId}
+        <if test="cityId!=null and cityId!=''">
+            and  ddsd.city_id = #{cityId}
+        </if>
+        <if test="orderStatus!=null and orderStatus!=''">
+            and  ddsd.shipping_state = #{orderStatus}
+        </if>
+    </select>
 
     <!-- 查询订单首页 -->
     <select id="queryOrderInfo" resultType="com.dangjia.acg.dto.order.DOrderInfoDTO">
@@ -563,7 +585,7 @@
         ddo.house_id as houseId,-- 房子id
         ddo.id as orderId,-- 订单编号
         IFNULL(ddo.order_status,'') as orderStatus,
-        ddo.create_date as createDate，
+        IFNULL(ddo.create_date,'') as createDate,
         IFNULL(ddo.order_generation_time,'') as orderGenerationTime,-- 成交时间
         IFNULL(ddo.total_amount,'') as totalAmount,-- 商品总额
         IFNULL(ddo.total_transportation_cost,'') as totalTransportationCost,-- 运费
@@ -606,10 +628,5 @@
         where ddoi.order_id=#{orderId}
     </select>
 
-    <!--发货详情
-    <select id="" resultType="">
-
-    </select>
--->
 
 </mapper>

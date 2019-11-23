@@ -14,8 +14,8 @@ public class AppOrderItemDetailDTO {
     private String brandName;//规格
     private String price ;//单位
     private String mobile;//电话
-    private String image;
-    private String imageDetail;
+    private String image;//图片
+    private String imageDetail;//详细图片
 
     List< Map<String, Object>> detailMaplist;
 }
