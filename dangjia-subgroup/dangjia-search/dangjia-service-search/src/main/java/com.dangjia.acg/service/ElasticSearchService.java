@@ -10,6 +10,7 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.Validator;
 import com.dangjia.acg.config.ElasticsearchConfiguration;
 import com.dangjia.acg.dto.ElasticSearchDTO;
+import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -25,10 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -56,23 +54,6 @@ public class ElasticSearchService {
   }
 
 
-  /**
-   * 批量保存内容到ES
-   */
-  public List<String> saveESJsonList(List<String> jsonStr,String tableTypeName) {
-    List<String> esidlist=new ArrayList<String>();
-    try {
-      for(int i = 0;i<jsonStr.size(); i++) {
-        String eid =  saveESJson(jsonStr.get(i),tableTypeName);
-        esidlist.add(eid);
-      }
-    }catch (RuntimeException e){
-      throw new BaseException(ServerCode.JSON_TYPE_ERROR,"JSON格式不正确，请检查JSON");
-    }catch(Exception e){
-      throw new BaseException(ServerCode.ES_ERROR,"保存搜索引擎失败");
-    }
-    return esidlist;
-  }
 
   /**
    * 在ES中模糊搜索内容
@@ -83,7 +64,6 @@ public class ElasticSearchService {
     List<String> fieldList = elasticSearchDTO.getFieldList();
     String searchContent = elasticSearchDTO.getSearchContent();
     Map<String,Integer> sortMap = elasticSearchDTO.getSortMap();
-    Map<String,String> shouldMap = elasticSearchDTO.getShouldMap();
     String tableTypeName = elasticSearchDTO.getTableTypeName();
     String[] fields = new String[fieldList.size()];
     fieldList.toArray(fields);
@@ -110,7 +90,6 @@ public class ElasticSearchService {
     List<String> fieldList = elasticSearchDTO.getFieldList();
     String searchContent = elasticSearchDTO.getSearchContent();
     Map<String,Integer> sortMap = elasticSearchDTO.getSortMap();
-    Map<String,String> shouldMap = elasticSearchDTO.getShouldMap();
     String tableTypeName = elasticSearchDTO.getTableTypeName();
 
     LOGGER.info("searchContent",searchContent);
@@ -128,7 +107,7 @@ public class ElasticSearchService {
         //查询
       searchRequestBuilder.setQuery(subCodeQuery);
 
-      return searchResponse(searchRequestBuilder,sortMap,shouldMap,pageDTO);
+      return searchResponse(searchRequestBuilder,sortMap,pageDTO);
     } catch (Exception e) {
       LOGGER.error(e.getMessage());
       e.printStackTrace();
@@ -144,7 +123,6 @@ public class ElasticSearchService {
     PageDTO pageDTO = elasticSearchDTO.getPageDTO();
     Map<String,String> paramMap = elasticSearchDTO.getParamMap();
     Map<String,Integer> sortMap = elasticSearchDTO.getSortMap();
-    Map<String,String> shouldMap = elasticSearchDTO.getShouldMap();
     String tableTypeName = elasticSearchDTO.getTableTypeName();
 
     Validator.notNull(paramMap, "过滤字段不能为空");
@@ -155,7 +133,7 @@ public class ElasticSearchService {
       //查询
       searchRequestBuilder.setTypes(tableTypeName).setQuery(subCodeQuery);
 
-      return searchResponse(searchRequestBuilder,sortMap,shouldMap,pageDTO);
+      return searchResponse(searchRequestBuilder,sortMap,pageDTO);
     } catch (Exception e) {
       LOGGER.error(e.getMessage());
       e.printStackTrace();
@@ -257,7 +235,7 @@ public class ElasticSearchService {
    * @param pageDTO
    * @return
    */
-   public PageBean searchResponse(SearchRequestBuilder searchRequestBuilder,Map<String,Integer> sortMap,Map<String,String> shouldMap,PageDTO pageDTO){
+   public PageBean searchResponse(SearchRequestBuilder searchRequestBuilder,Map<String,Integer> sortMap,PageDTO pageDTO){
      //拼接排序规则
      setSortTerm(searchRequestBuilder,sortMap);
      //分页
@@ -316,7 +294,12 @@ public class ElasticSearchService {
         Map.Entry entry = (Map.Entry) it.next();
         Object key = entry.getKey();
         Object value = entry.getValue();
-        subCodeQuery.must(QueryBuilders.termQuery(key.toString(), value));
+        String[] values =  StringUtils.split(String.valueOf(value),",");
+        if(values.length>1){
+            subCodeQuery.must(QueryBuilders.termsQuery(key.toString(), Arrays.asList(values)));
+        }else {
+            subCodeQuery.must(QueryBuilders.termQuery(key.toString(), value));
+        }
       }
     }
   }

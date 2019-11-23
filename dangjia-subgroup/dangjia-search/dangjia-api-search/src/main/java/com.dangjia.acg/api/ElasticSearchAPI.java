@@ -26,11 +26,8 @@ public interface ElasticSearchAPI {
   @ApiOperation(value = "保存单条数据", notes = "保存单条数据")
   String saveESJson(@ApiParam(name ="jsonStr",value = "JSON数据")@RequestParam("jsonStr") String jsonStr,@ApiParam(name ="tableTypeName",value = "表")@RequestParam("tableTypeName") String tableTypeName);
 
-  @RequestMapping(value = "saveESJsonList", method = RequestMethod.POST)
-  @ApiOperation(value = "保存多条数据", notes = "保存多条数据")
-  List<String> saveESJsonList(@ApiParam(name ="jsonStrList",value = "JSONList数据")@RequestBody List<String> jsonStr,@ApiParam(name ="tableTypeName",value = "表")@RequestParam("tableTypeName") String tableTypeName);
 
-   @RequestMapping(value = "searchESJson", method = RequestMethod.POST)
+  @RequestMapping(value = "searchESJson", method = RequestMethod.POST)
   @ApiOperation(value = "模糊搜索", notes = "模糊搜索")
   List<JSONObject> searchESJson(@ApiParam(name ="elasticSearchDTO",value = "要查询的字段")@RequestBody ElasticSearchDTO elasticSearchDTO);
 
