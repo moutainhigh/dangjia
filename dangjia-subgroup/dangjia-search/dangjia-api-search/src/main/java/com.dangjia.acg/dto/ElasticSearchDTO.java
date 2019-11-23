@@ -32,11 +32,11 @@ public class ElasticSearchDTO {
   /**搜索字*/
   private String searchContent;
 
-  /**精准搜索多字段(and)*/
+  /**精准搜索多字段，值允许多个，以逗号分隔(=)*/
   private Map<String,String> paramMap;
 
-  /**精准搜索多字段(or)*/
-  private Map<String,String> shouldMap;
+  /**精准搜索多字段，值允许多个，以逗号分隔(!=)*/
+  private Map<String,String> notParamMap;
 
   /**精准搜索单字段*/
   private String fieldName;

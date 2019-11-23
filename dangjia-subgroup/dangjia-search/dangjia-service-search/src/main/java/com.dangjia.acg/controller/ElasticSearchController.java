@@ -42,17 +42,8 @@ public class ElasticSearchController implements ElasticSearchAPI {
         return elasticSearchService.searchESJsonPage(elasticSearchDTO);
     }
 
-    @Override
-    @ApiMethod
-    public PageBean<JSONObject> searchPreciseJsonPage(@RequestBody ElasticSearchDTO elasticSearchDTO) {
-        return elasticSearchService.searchPreciseJsonPage(elasticSearchDTO);
-    }
 
-    @Override
-    @ApiMethod
-    public List<JSONObject> searchPreciseJson(@RequestBody ElasticSearchDTO elasticSearchDTO) {
-        return elasticSearchService.searchPreciseJson(elasticSearchDTO);
-    }
+
 
     @Override
     @ApiMethod

@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -86,10 +85,6 @@ public class WorkerTypeService {
             List<Map> maps = (List<Map>) BeanUtils.listToMap(workerTypeList);
             for (Map map : maps) {
                 map.put("workerTypeId", map.get(WorkerType.ID));
-            }
-            List<String> listJson = new ArrayList<>();
-            for (Map map : maps) {
-                listJson.add(JSON.toJSONString(map));
                 elasticSearchAPI.saveESJson(JSON.toJSONString(map),  WorkerType.class.getSimpleName());
             }
             return ServerResponse.createBySuccess("查询成功", maps);
