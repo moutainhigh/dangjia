@@ -217,8 +217,10 @@ public class ElasticSearchService {
    */
    public void deleteResponse( String tableTypeName,String prepareId){
      String eid=getESId(tableTypeName,prepareId);
-     DeleteRequestBuilder deleteResponse = client.prepareDelete(indexName,tableTypeName,eid);
-     deleteResponse.execute().actionGet();
+     if(!CommonUtil.isEmpty(eid)) {
+       DeleteRequestBuilder deleteResponse = client.prepareDelete(indexName, tableTypeName, eid);
+       deleteResponse.execute().actionGet();
+     }
 
    }
 
@@ -230,8 +232,13 @@ public class ElasticSearchService {
    */
   public void updateResponse(String jsonStr, String tableTypeName,String prepareId){
     String eid=getESId(tableTypeName,prepareId);
-    UpdateRequestBuilder updateRequestBuilder = ElasticsearchConfiguration.client.prepareUpdate(indexName,tableTypeName,eid);
-    updateRequestBuilder.setDoc(jsonStr).get();
+    //未获取到则新增记录
+    if(CommonUtil.isEmpty(eid)) {
+      saveESJson(jsonStr, tableTypeName);
+    }else{
+      UpdateRequestBuilder updateRequestBuilder = ElasticsearchConfiguration.client.prepareUpdate(indexName,tableTypeName,eid);
+      updateRequestBuilder.setDoc(jsonStr).get();
+    }
   }
 
   private void setParamTerm(BoolQueryBuilder subCodeQuery,Map paramMap,Map notParamMap){
