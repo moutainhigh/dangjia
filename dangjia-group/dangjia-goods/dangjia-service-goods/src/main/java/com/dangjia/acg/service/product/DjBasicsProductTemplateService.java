@@ -851,6 +851,8 @@ public class DjBasicsProductTemplateService {
             strNewValueNameArr = getNewValueNameArr(djBasicsProduct.getValueIdArr());
             map.put("attributeValueList",getAttributeValueList(djBasicsProduct.getValueIdArr()));
 
+        }else{
+            map.put("attributeValueList",new ArrayList<>());
         }
 
         map.put("imageUrl", imgUrlStr.toString());
