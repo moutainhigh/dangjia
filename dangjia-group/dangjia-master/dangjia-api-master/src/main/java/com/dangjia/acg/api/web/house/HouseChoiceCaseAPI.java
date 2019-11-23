@@ -26,6 +26,7 @@ public interface HouseChoiceCaseAPI {
      * @param pageNum  必选 int 页码
      * @param pageSize 必选 int 记录数
      * @param from     必选 string 0：App首页，1：中台，2：App更多精选案例
+     * @param state     可选 int 展示方式 0: 展示 1：不展示 2: 定时展示
      * @param cityId   可选 string 城市ID
      * @return {"res": 1000,"msg": {"resultCode": 1000, "resultMsg": "ok", "resultObj": { "pageNum": 0,"pageSize": 10,"size": 1,"startRow": 1,"endRow": 1,"total": 1, "pages": 1,"list": [{返回参数说明}],"prePage": 0, "nextPage": 1,"isFirstPage": false,"isLastPage": false,"hasPreviousPage": false,"hasNextPage": true,"navigatePages": 8,"navigatepageNums": [1],"navigateFirstPage": 1,"navigateLastPage": 1}}}
      * @catalog 当家接口文档/精算案例模块
@@ -60,6 +61,7 @@ public interface HouseChoiceCaseAPI {
     ServerResponse getHouseChoiceCases(@RequestParam("request") HttpServletRequest request,
                                        @RequestParam("pageDTO") PageDTO pageDTO,
                                        @RequestParam("from") Integer from,
+                                       @RequestParam("state") Integer state,
                                        @RequestParam("cityId") String cityId);
 
     /**

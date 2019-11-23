@@ -45,12 +45,15 @@ public class HouseChoiceCaseService {
     @Autowired
     private ConfigUtil configUtil;
 
-    public ServerResponse getHouseChoiceCases(PageDTO pageDTO, Integer from, String cityId) {
+    public ServerResponse getHouseChoiceCases(PageDTO pageDTO, Integer from, Integer state,String cityId) {
         String jdAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         Example example = new Example(HouseChoiceCase.class);
         Example.Criteria criteria = example.createCriteria();
         if (!CommonUtil.isEmpty(cityId)) {
-            criteria.andEqualTo("cityId", cityId);
+            criteria.andEqualTo(HouseChoiceCase.CITY_ID, cityId);
+        }
+        if (!CommonUtil.isEmpty(state)) {
+            criteria.andEqualTo(HouseChoiceCase.IS_SHOW, state);
         }
         if (from == null || from != 1) {//非中台查询
             criteria.andCondition(" text_content is not null and ( is_show = 0 or ( is_show = 2 and '" +
