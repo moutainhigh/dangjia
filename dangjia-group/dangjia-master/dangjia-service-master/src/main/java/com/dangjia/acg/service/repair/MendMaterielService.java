@@ -4,31 +4,36 @@ import com.dangjia.acg.api.BasicsStorefrontAPI;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.api.supplier.DjSupplierAPI;
-import com.dangjia.acg.common.constants.Constants;
+import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.refund.OrderProgressDTO;
 import com.dangjia.acg.dto.repair.MendOrderDTO;
-import com.dangjia.acg.dto.storefront.StorefrontDTO;
+import com.dangjia.acg.dto.repair.ReturnMendMaterielDTO;
+import com.dangjia.acg.dto.repair.ReturnOrderProgressDTO;
 import com.dangjia.acg.mapper.delivery.ISplitDeliverMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.repair.IMendMaterialMapper;
+import com.dangjia.acg.mapper.repair.IMendOrderCheckMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
+import com.dangjia.acg.mapper.repair.IMendTypeRoleMapper;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.modle.repair.MendOrder;
+import com.dangjia.acg.modle.repair.MendOrderCheck;
+import com.dangjia.acg.modle.repair.MendTypeRole;
 import com.dangjia.acg.modle.storefront.Storefront;
-import com.dangjia.acg.modle.sup.Supplier;
-import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.netflix.discovery.converters.Auto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -66,6 +71,60 @@ public class MendMaterielService {
     private RedisClient redisClient;
     @Autowired
     private BasicsStorefrontAPI basicsStorefrontAPI;
+
+    @Autowired
+    private IMendTypeRoleMapper mendTypeRoleMapper;
+    @Autowired
+    private IMendOrderCheckMapper mendOrderCheckMapper;
+
+
+
+    /**
+     * 确认退货
+     * @param mendOrderId
+     * @param userId
+     * @param type
+     * @return
+     */
+    public ServerResponse confirmReturnMendMaterial(String mendOrderId, String userId, Integer type, String actualCountList,String returnReason) {
+        try {
+            if (type == 0) {
+                //全部退货
+                MendOrder mendOrder = new MendOrder();
+                mendOrder.setId(mendOrderId);
+                mendOrder.setState(3);
+                Integer i = mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
+                if (i <= 0)
+                    return ServerResponse.createBySuccessMessage("全部退货失败");
+                return ServerResponse.createBySuccessMessage("全部退货成功");
+            } else {
+                //部分退货
+                MendOrder mendOrder = new MendOrder();
+                mendOrder.setId(mendOrderId);
+                mendOrder.setState(8);//状态（0生成中,1处理中,2不通过取消,3已通过,4已全部结算,5已撤回,6已关闭7，已审核待处理 8，部分退货）
+                mendOrder.setReturnReason(returnReason);
+                Integer j = mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
+                if (j > 0) {
+                    MendOrder myMendOrder = mendOrderMapper.selectByPrimaryKey("");
+                    MendTypeRole mendTypeRole = mendTypeRoleMapper.getByType(myMendOrder.getType());
+                    String[] roleArr = mendTypeRole.getRoleArr().split(",");
+                    for (int i = 0; i < roleArr.length; i++) {
+                        MendOrderCheck mendOrderCheck = new MendOrderCheck();
+                        mendOrderCheck.setMendOrderId(myMendOrder.getId());
+                        mendOrderCheck.setRoleType(roleArr[i]);
+                        mendOrderCheck.setState(0);
+                        mendOrderCheck.setSort(i + 1);//顺序
+                        mendOrderCheckMapper.insert(mendOrderCheck);
+                    }
+                    return ServerResponse.createBySuccessMessage("部分退货成功");
+                }
+            }
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
 
     /**
      * 要货退货 查询补材料
@@ -268,6 +327,48 @@ public class MendMaterielService {
         }
     }
 
+    /**
+     * 新版查看补退单明细
+     * @param mendOrderId
+     * @param userId
+     * @return
+     */
+    public ServerResponse queryMendMaterialList(String mendOrderId, String userId) {
+        //合计付款
+        MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);//补退订单表
+        House house = houseMapper.selectByPrimaryKey(mendOrder.getHouseId());//房子信息
+        ReturnMendMaterielDTO returnMendMaterielDTO=new ReturnMendMaterielDTO();
+
+        List<ReturnOrderProgressDTO> mendMaterielProgressList= mendMaterialMapper.queryMendMaterielProgress(mendOrderId);
+        if(mendMaterielProgressList!=null&&mendMaterielProgressList.size()>0)
+        returnMendMaterielDTO.setMendMaterielProgressList(mendMaterielProgressList);
+
+        List<MendMateriel> mendMaterielList = mendMaterialMapper.byMendOrderId(mendOrderId);
+        Double  totalPrice=0d;
+        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+        for (MendMateriel mendMateriel : mendMaterielList) {
+            mendMateriel.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
+            Warehouse warehouse = warehouseMapper.getByProductId(mendMateriel.getProductId(), mendOrder.getHouseId());//材料仓库统计
+            if (warehouse == null) {
+                mendMateriel.setReceive(0d);//收货总数
+            } else {
+                //工匠退材料新增已收货数量字段
+                if (mendOrder.getType() == 2) {
+                    mendMateriel.setReceive(warehouse.getReceive() == null ? 0d : warehouse.getReceive());
+                }
+                //业主退材料增加未发货数量
+                if (mendOrder.getType() == 4) {
+                    //未发货数量=已要 - 已收
+                    mendMateriel.setReceive(warehouse.getShopCount() - (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()));
+                }
+            }
+            //合计退款
+            totalPrice+=mendMateriel.getTotalPrice();
+        }
+        returnMendMaterielDTO.setMendMaterielList(mendMaterielList);
+        returnMendMaterielDTO.setTotalPrice(totalPrice);
+        return ServerResponse.createBySuccess("查询成功", returnMendMaterielDTO);
+    }
 
     /**
      * 根据mendOrderId查明细
@@ -280,9 +381,9 @@ public class MendMaterielService {
         for (MendMateriel mendMateriel : mendMaterielList) {
             mendMateriel.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
             Map map = BeanUtils.beanToMap(mendMateriel);
-            Warehouse warehouse = warehouseMapper.getByProductId(mendMateriel.getProductId(), mendOrder.getHouseId());
+            Warehouse warehouse = warehouseMapper.getByProductId(mendMateriel.getProductId(), mendOrder.getHouseId());//材料仓库统计
             if (warehouse == null) {
-                map.put(Warehouse.RECEIVE, "0");
+                map.put(Warehouse.RECEIVE, "0");//收货总数
             } else {
                 //工匠退材料新增已收货数量字段
                 if (mendOrder.getType() == 2) {
@@ -294,17 +395,10 @@ public class MendMaterielService {
                     map.put(Warehouse.RECEIVE, warehouse.getShopCount() - (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()) - warehouse.getAskCount());
                 }
             }
+            //判断商品有哪些供应商供应
             List<Map<String,Object>> supplierIdList = splitDeliverMapper.getSupplierGoodsId(mendOrder.getHouseId(), mendMateriel.getProductSn());
-//            List<DjSupplier> djSuppliers = new ArrayList<DjSupplier>();
-//            if (supplierId.size() > 0) {
-//                for (int i = 0; i < supplierId.size(); i++) {
-//                    //Supplier supplier = forMasterAPI.getSupplier(house.getCityId(), supplierId.get(i));
-//                    DjSupplier djSupplier = djSupplierAPI.queryDjSupplierByPass(supplierId.get(i));
-//                    djSuppliers.add(djSupplier);
-//                }
             if (supplierIdList!=null)
                 map.put("suppliers", supplierIdList);
-//            }
             mendMaterielMaps.add(map);
         }
         return ServerResponse.createBySuccess("查询成功", mendMaterielMaps);

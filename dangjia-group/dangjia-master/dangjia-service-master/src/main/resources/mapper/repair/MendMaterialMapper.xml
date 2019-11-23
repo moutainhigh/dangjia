@@ -68,7 +68,26 @@
     <!-- 根据mendOrderId查询所有 -->
     <select id="byMendOrderId" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.repair.MendMateriel">
         SELECT
-        <include refid="all_columns"/>
+            id,
+            mend_order_id as mendOrderId,
+            product_id as productId,
+            product_sn as productSn,
+            product_name as productName,
+            product_nick_name as productNickName,
+            price,
+            cost,
+            unit_name as unitName,
+            IFNULL(shop_count,'') as shopCount,
+            total_price as totalPrice,
+            product_type as productType,
+            category_id as categoryId,
+            IFNULL(image,'') as image,
+            create_date as createDate,
+            supplier_id as supplierId,
+            supplier_telephone as supplierTelephone,
+            supplier_name as supplierName,
+            modify_date as modifyDate,
+            IFNULL(actual_count,'') as actualCount
         FROM dj_repair_mend_materiel
         where
         mend_order_id = #{mendOrderId}
@@ -155,5 +174,28 @@
         WHERE
             a.mend_order_id = #{mendOrderId}
     </update>
+
+
+    <select id="queryMendMaterielProgress" resultType="com.dangjia.acg.dto.repair.ReturnOrderProgressDTO">
+        SELECT
+          t1.id,
+          t1.create_date createDate,
+          t1.progress_order_id progressOrderId,
+          t1.progress_type progressType,
+          t2.`code` nodeCode,
+          t2.`name` nodeName,
+          t2.`describe` nodeDescribe,
+          t2.associated_operation associatedOperation,
+          t2.associated_operation_name  associatedOperationName
+        FROM
+            dj_deliver_order_progress t1,
+            dj_deliver_order_node t2
+        WHERE
+            t1.progress_order_id =#{progressOrderId}
+        AND t1.node_type = t2.type
+        AND t1.node_code = t2.`code`
+        and t1.data_status = 0
+        order by t1.create_date,t2.code
+    </select>
 </mapper>
 
