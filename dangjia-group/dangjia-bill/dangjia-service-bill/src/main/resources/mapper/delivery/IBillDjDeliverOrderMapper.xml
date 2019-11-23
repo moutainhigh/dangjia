@@ -23,7 +23,7 @@
             t1.business_order_number businessOrderNumber,
             t1.order_number orderNumber,
             t4.storefront_name storefrontName,
-            t4.storefront_logo storefrontLogo
+            t4.system_logo storefrontLogo
         FROM
             dj_deliver_order t1,
             dj_pay_business_order t3,
@@ -628,5 +628,144 @@
         where ddoi.order_id=#{orderId}
     </select>
 
+    <!--待发货店铺查询-->
+    <select id="queryDeliverOrderHump" resultType="com.dangjia.acg.dto.delivery.OrderStorefrontDTO">
+        SELECT
+            t1.storefont_id storefrontId,
+            t1.id orderId,
+            t1.address_id addressId,
+            t1.house_id houseId,
+            t1.business_order_number businessOrderNumber,
+            t1.order_number orderNumber,
+            t4.storefront_name storefrontName,
+            t4.system_logo storefrontLogo,
+            t1.create_date as createDate,
+            t1.actual_payment_price as actualPaymentPrice,
+            t1.total_amount totalAmount
+        FROM
+            dj_deliver_order t1,
+        <if test="0!=state">
+            dj_pay_business_order t3,
+        </if>
+            dj_basics_storefront t4
+        WHERE 1=1
+        <if test="0!=state">
+            t1.business_order_number = t3.number
+            AND t3.state = #{state}
+        </if>
+        AND t1.storefont_id = t4.id
+        AND t1.payment IS NOT NULL
+        AND t1.house_id = #{houseId}
+        <if test="state==0">
+            AND t1.order_status =5
+        </if>
+        <if test="state==3">
+            AND EXISTS (
+                SELECT
+                    1
+                FROM
+                    dj_deliver_order_item t2
+                WHERE
+                    t1.id = t2.order_id
+                AND t2.shop_count > (
+                    IFNULL(t2.ask_count, 0) + IFNULL(t2.return_count, 0)
+                )
+                AND t2.data_status = 0
+            )
+        </if>
+    </select>
+
+
+    <select id="queryAppointmentHump" resultType="com.dangjia.acg.dto.delivery.AppointmentDTO">
+        SELECT
+            t.product_id productId,
+            t.id orderItemId,
+            t.storefont_id storefrontId,
+            t.product_name productName,
+            t.product_sn productSn,
+            t.product_type productType,
+            t.price price,
+            t.order_id as orderId,
+            IFNULL(t.image,t1.image) image,
+            t.shop_count shopCount,
+            IFNULL(t.ask_count,0) askCount,
+            IFNULL(t.return_count,0) returnCount,
+            (t.shop_count - (IFNULL(t.ask_count, 0)+IFNULL(t.return_count,0))) surplusCount,
+            t1.prod_template_id productTemplateId,
+            t.reservation_deliver_time as reservationDeliverTime,
+            IFNULL(t.total_price,0) as totalPrice,
+            t2.value_name_arr as valueNameArr,
+            t2.value_id_arr as valueIdArr
+        FROM
+            dj_deliver_order_item t,
+            dj_basics_storefront_product t1,
+            dj_basics_product_template t2
+        WHERE t.product_id =t1.id
+        AND t1.prod_template_id=t2.id
+        AND t.order_id =  #{orderId}
+        <if test="state==3">
+            AND t.shop_count > (IFNULL(t.ask_count, 0)+IFNULL(t.return_count,0))
+        </if>
+        AND t.data_status = 0
+        ORDER BY t.create_date
+    </select>
+
+    <select id="queryDeliverOrderObligation" resultType="com.dangjia.acg.dto.delivery.OrderStorefrontDTO">
+        SELECT
+            t1.storefont_id storefrontId,
+            t1.id orderId,
+            t1.address_id addressId,
+            t1.house_id houseId,
+            t1.business_order_number businessOrderNumber,
+            t1.order_number orderNumber,
+            '当家店铺' storefrontName,
+            t1.create_date as createDate,
+            t1.actual_payment_price as actualPaymentPrice,
+            t1.total_amount totalAmount
+        FROM
+            dj_deliver_order t1,
+            dj_pay_business_order t2
+        WHERE
+            t1.business_order_number = t2.number
+            AND id = parent_order_id
+            AND t2.state=2
+    </select>
+
+    <select id="queryDeliverOrderItemObligation" resultType="com.dangjia.acg.dto.delivery.AppointmentDTO">
+        SELECT
+            t2.product_id productId,
+            t2.id orderItemId,
+            t2.storefont_id storefrontId,
+            t2.product_name productName,
+            t2.product_sn productSn,
+            t2.product_type productType,
+            t2.price price,
+            t2.order_id AS orderId,
+            IFNULL(t2.image, t3.image) image,
+            t2.shop_count shopCount,
+            IFNULL(t2.ask_count, 0) askCount,
+            IFNULL(t2.return_count, 0) returnCount,
+            (
+                t2.shop_count - (
+                    IFNULL(t2.ask_count, 0) + IFNULL(t2.return_count, 0)
+                )
+            ) surplusCount,
+            t3.prod_template_id productTemplateId,
+            t2.reservation_deliver_time AS reservationDeliverTime,
+            IFNULL(t2.total_price, 0) AS totalPrice,
+            t4.value_name_arr AS valueNameArr,
+            t4.value_id_arr AS valueIdArr
+        FROM
+            dj_deliver_order t1,
+            dj_deliver_order_item t2,
+            dj_basics_storefront_product t3,
+            dj_basics_product_template t4
+        WHERE
+            t1.id = t2.order_id
+        AND t2.product_id = t3.id
+        AND t3.prod_template_id = t4.id
+        AND t1.parent_order_id = #{orderId}
+        AND id!=parent_order_id
+    </select>
 
 </mapper>

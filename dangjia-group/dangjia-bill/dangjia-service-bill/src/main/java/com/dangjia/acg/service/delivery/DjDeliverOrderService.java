@@ -9,7 +9,6 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
@@ -50,6 +49,8 @@ import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.util.HouseUtil;
 import com.dangjia.acg.util.Utils;
+import org.apache.commons.lang3.StringUtils;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.dangjia.acg.common.model.PageDTO;
 import com.github.pagehelper.PageHelper;
@@ -60,6 +61,7 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class DjDeliverOrderService {
@@ -1134,7 +1136,7 @@ public class DjDeliverOrderService {
                 dOrderArrFineInfoDTO.setImageList(strList);
             }
 
-                    
+
         }
         dOrderArrFineInfoDTO.setList(orderInfoDTOSs);
         return ServerResponse.createBySuccess("查询成功", dOrderArrFineInfoDTO);
@@ -1207,4 +1209,79 @@ public class DjDeliverOrderService {
             return ServerResponse.createByErrorMessage("运费详情异常" + e);
         }
     }
+
+
+    /**
+     * 我的订单,待发货
+     * @param pageDTO
+     * @param houseId
+     * @return
+     */
+    public ServerResponse queryDeliverOrderHump(PageDTO pageDTO, String houseId, String state) {
+        try {
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            List<OrderStorefrontDTO> orderStorefrontDTOS=null;
+            if (state.equals("2")){
+                orderStorefrontDTOS = iBillDjDeliverOrderMapper.queryDeliverOrderObligation(houseId);
+                orderStorefrontDTOS.forEach(orderStorefrontDTO -> {
+                    List<AppointmentDTO> appointmentDTOS = iBillDjDeliverOrderMapper.queryDeliverOrderItemObligation(orderStorefrontDTO.getOrderId());
+                    orderStorefrontDTO.setProductCount(appointmentDTOS.size());
+                    orderStorefrontDTO.setProductImageArr(getStartTwoImage(appointmentDTOS,imageAddress));
+                    orderStorefrontDTO.setStorefrontLogo(imageAddress+orderStorefrontDTO.getStorefrontLogo());
+                    if(null!=appointmentDTOS && appointmentDTOS.size()>1){
+                        AppointmentDTO appointmentDTO = appointmentDTOS.get(0);
+                        orderStorefrontDTO.setProductName(appointmentDTO.getProductName());
+                    }
+                });
+            }else {
+                orderStorefrontDTOS = iBillDjDeliverOrderMapper.queryDeliverOrderHump(houseId,state);
+                orderStorefrontDTOS.forEach(orderStorefrontDTO -> {
+                    List<AppointmentDTO> appointmentDTOS = iBillDjDeliverOrderMapper.queryAppointmentHump(orderStorefrontDTO.getOrderId(), state);
+                    orderStorefrontDTO.setProductCount(appointmentDTOS.size());
+                    orderStorefrontDTO.setProductImageArr(getStartTwoImage(appointmentDTOS,imageAddress));
+                    orderStorefrontDTO.setStorefrontLogo(imageAddress+orderStorefrontDTO.getStorefrontLogo());
+                    if(null!=appointmentDTOS && appointmentDTOS.size()>1){
+                        AppointmentDTO appointmentDTO = appointmentDTOS.get(0);
+                        orderStorefrontDTO.setProductName(appointmentDTO.getProductName());
+                    }
+                });
+            }
+            if(orderStorefrontDTOS.size()<=0)
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
+            PageInfo pageResult = new PageInfo(orderStorefrontDTOS);
+            return  ServerResponse.createBySuccess("查询成功",pageResult);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("查询失败：",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+
+    /**
+     * 获取前两个商品的图片
+     * @return
+     */
+    String getStartTwoImage(List<AppointmentDTO> appointmentDTOS,String address){
+        String imageUrl="";
+        if(appointmentDTOS!=null&&appointmentDTOS.size()>0){
+            for(AppointmentDTO ap:appointmentDTOS){
+                String image=ap.getImage();
+                //添加图片详情地址字段
+                if(StringUtils.isNotBlank(image)){
+                    String[] imgArr = image.split(",");
+                    if(StringUtils.isBlank(imageUrl)){
+                        imageUrl=address+imgArr[0];
+                    }else{
+                        imageUrl=imageUrl+","+address+imgArr[0];
+                        break;
+                    }
+                }
+
+            }
+        }
+        return imageUrl;
+    }
+
 }

@@ -109,13 +109,12 @@ public class BillAppointmentService {
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse insertAppointment(String userToken, String jsonStr,String reservationDeliverTime) {
         try {
-//            Object object = memberAPI.getMember(userToken);
-//            if (object instanceof ServerResponse) {
-//                return (ServerResponse) object;
-//            }
-//            JSONObject job = (JSONObject) object;
-//            Member member = job.toJavaObject(Member.class);
-            Member member=new Member();
+            Object object = memberAPI.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            JSONObject job = (JSONObject) object;
+            Member member = job.toJavaObject(Member.class);
             JSONObject villageObj = JSONObject.parseObject(jsonStr);
             String objList = villageObj.getString("objList");
             JSONArray jsonArr = JSONArray.parseArray(objList);

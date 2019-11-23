@@ -115,5 +115,10 @@ public class DjDeliverOrderController implements DjDeliverOrderAPI {
         return djDeliverOrderService.transportationCostDetail(pageDTO,orderId,orderStatus);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse queryDeliverOrderHump(PageDTO pageDTO, String houseId, String state) {
+        return djDeliverOrderService.queryDeliverOrderHump(pageDTO,houseId,state);
+    }
 
 }
