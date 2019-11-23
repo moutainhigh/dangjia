@@ -7,9 +7,9 @@ import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageBean;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.util.CommonUtil;
-import com.dangjia.acg.common.util.Validator;
 import com.dangjia.acg.config.ElasticsearchConfiguration;
 import com.dangjia.acg.dto.ElasticSearchDTO;
+import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -25,10 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -56,23 +53,6 @@ public class ElasticSearchService {
   }
 
 
-  /**
-   * 批量保存内容到ES
-   */
-  public List<String> saveESJsonList(List<String> jsonStr,String tableTypeName) {
-    List<String> esidlist=new ArrayList<String>();
-    try {
-      for(int i = 0;i<jsonStr.size(); i++) {
-        String eid =  saveESJson(jsonStr.get(i),tableTypeName);
-        esidlist.add(eid);
-      }
-    }catch (RuntimeException e){
-      throw new BaseException(ServerCode.JSON_TYPE_ERROR,"JSON格式不正确，请检查JSON");
-    }catch(Exception e){
-      throw new BaseException(ServerCode.ES_ERROR,"保存搜索引擎失败");
-    }
-    return esidlist;
-  }
 
   /**
    * 在ES中模糊搜索内容
@@ -81,17 +61,20 @@ public class ElasticSearchService {
   public List<JSONObject> searchESJson( ElasticSearchDTO elasticSearchDTO){
 
     List<String> fieldList = elasticSearchDTO.getFieldList();
-    String searchContent = elasticSearchDTO.getSearchContent();
-    Map<String,Integer> sortMap = elasticSearchDTO.getSortMap();
-    Map<String,String> shouldMap = elasticSearchDTO.getShouldMap();
-    String tableTypeName = elasticSearchDTO.getTableTypeName();
     String[] fields = new String[fieldList.size()];
     fieldList.toArray(fields);
     try {
       //查询搜索对象
-      SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName);
-      searchRequestBuilder.setTypes(tableTypeName).setQuery(searchContent == null ?QueryBuilders.matchAllQuery() : QueryBuilders.multiMatchQuery(searchContent, fields).slop(1));
-      return searchResponse(searchRequestBuilder,sortMap);
+      SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName).setTypes(elasticSearchDTO.getTableTypeName());
+      BoolQueryBuilder subCodeQuery = QueryBuilders.boolQuery();
+      setParamTerm(subCodeQuery, elasticSearchDTO.getParamMap(),elasticSearchDTO.getNotParamMap());
+      if(CommonUtil.isEmpty(elasticSearchDTO.getSearchContent())) {
+        subCodeQuery.must(QueryBuilders.matchAllQuery());
+      }else{
+        subCodeQuery.must(QueryBuilders.multiMatchQuery(elasticSearchDTO.getSearchContent(), fields).slop(1));
+      }
+      searchRequestBuilder.setQuery(subCodeQuery);
+      return searchResponse(searchRequestBuilder,elasticSearchDTO.getSortMap());
     } catch (Exception e) {
       LOGGER.error(e.getMessage());
       e.printStackTrace();
@@ -105,57 +88,22 @@ public class ElasticSearchService {
   public PageBean<JSONObject> searchESJsonPage(ElasticSearchDTO elasticSearchDTO){
 
 
-    PageDTO pageDTO = elasticSearchDTO.getPageDTO();
-    Map<String,String> paramMap = elasticSearchDTO.getParamMap();
     List<String> fieldList = elasticSearchDTO.getFieldList();
-    String searchContent = elasticSearchDTO.getSearchContent();
-    Map<String,Integer> sortMap = elasticSearchDTO.getSortMap();
-    Map<String,String> shouldMap = elasticSearchDTO.getShouldMap();
-    String tableTypeName = elasticSearchDTO.getTableTypeName();
-
-    LOGGER.info("searchContent",searchContent);
     String[] fields = new String[fieldList.size()];
     fieldList.toArray(fields);
     try {
-      SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName).setTypes(tableTypeName);
+      SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName).setTypes(elasticSearchDTO.getTableTypeName());
       BoolQueryBuilder subCodeQuery = QueryBuilders.boolQuery();
-      setParamTerm(subCodeQuery, paramMap);
-      if(searchContent == null) {
+      setParamTerm(subCodeQuery,elasticSearchDTO.getParamMap(),elasticSearchDTO.getNotParamMap());
+      if(CommonUtil.isEmpty(elasticSearchDTO.getSearchContent())) {
         subCodeQuery.must(QueryBuilders.matchAllQuery());
       }else{
-        subCodeQuery.must(QueryBuilders.multiMatchQuery(searchContent, fields).slop(1));
+        subCodeQuery.must(QueryBuilders.multiMatchQuery(elasticSearchDTO.getSearchContent(), fields).slop(1));
       }
         //查询
       searchRequestBuilder.setQuery(subCodeQuery);
 
-      return searchResponse(searchRequestBuilder,sortMap,shouldMap,pageDTO);
-    } catch (Exception e) {
-      LOGGER.error(e.getMessage());
-      e.printStackTrace();
-    }
-    return null;
-  }
-
-  /**
-   * 在ES中精准搜索内容（分页）
-   * @return
-   */
-  public PageBean<JSONObject> searchPreciseJsonPage(ElasticSearchDTO elasticSearchDTO){
-    PageDTO pageDTO = elasticSearchDTO.getPageDTO();
-    Map<String,String> paramMap = elasticSearchDTO.getParamMap();
-    Map<String,Integer> sortMap = elasticSearchDTO.getSortMap();
-    Map<String,String> shouldMap = elasticSearchDTO.getShouldMap();
-    String tableTypeName = elasticSearchDTO.getTableTypeName();
-
-    Validator.notNull(paramMap, "过滤字段不能为空");
-    BoolQueryBuilder subCodeQuery = QueryBuilders.boolQuery();
-    setParamTerm(subCodeQuery, paramMap);
-    try {
-      SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName);
-      //查询
-      searchRequestBuilder.setTypes(tableTypeName).setQuery(subCodeQuery);
-
-      return searchResponse(searchRequestBuilder,sortMap,shouldMap,pageDTO);
+      return searchResponse(searchRequestBuilder,elasticSearchDTO.getSortMap(),elasticSearchDTO.getPageDTO());
     } catch (Exception e) {
       LOGGER.error(e.getMessage());
       e.printStackTrace();
@@ -164,31 +112,8 @@ public class ElasticSearchService {
   }
 
 
-  /**
-   * 根据单个字段查询数据
-   * @return
-   */
-  public List<JSONObject> searchPreciseJson(ElasticSearchDTO elasticSearchDTO){
-    try {
-      Map<String,String> paramMap = elasticSearchDTO.getParamMap();
-      List<String> objectList = elasticSearchDTO.getFieldNameValue();
-      String fildsName = elasticSearchDTO.getFieldName();
-      Map<String,Integer> sortMap = elasticSearchDTO.getSortMap();
-      String tableTypeName = elasticSearchDTO.getTableTypeName();
 
-      SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName);
-      BoolQueryBuilder subCodeQuery = QueryBuilders.boolQuery();
-      setParamTerm(subCodeQuery, paramMap);
-      subCodeQuery.must(QueryBuilders.termsQuery(fildsName,objectList));
-      //查询
-      searchRequestBuilder.setTypes(tableTypeName).setQuery(subCodeQuery).get();
-      return searchResponse(searchRequestBuilder,sortMap);
-    } catch (Exception e) {
-      LOGGER.error(e.getMessage());
-      e.printStackTrace();
-    }
-    return null;
-  }
+
 
 
   /**
@@ -257,7 +182,7 @@ public class ElasticSearchService {
    * @param pageDTO
    * @return
    */
-   public PageBean searchResponse(SearchRequestBuilder searchRequestBuilder,Map<String,Integer> sortMap,Map<String,String> shouldMap,PageDTO pageDTO){
+   public PageBean searchResponse(SearchRequestBuilder searchRequestBuilder,Map<String,Integer> sortMap,PageDTO pageDTO){
      //拼接排序规则
      setSortTerm(searchRequestBuilder,sortMap);
      //分页
@@ -292,8 +217,10 @@ public class ElasticSearchService {
    */
    public void deleteResponse( String tableTypeName,String prepareId){
      String eid=getESId(tableTypeName,prepareId);
-     DeleteRequestBuilder deleteResponse = client.prepareDelete(indexName,tableTypeName,eid);
-     deleteResponse.execute().actionGet();
+     if(!CommonUtil.isEmpty(eid)) {
+       DeleteRequestBuilder deleteResponse = client.prepareDelete(indexName, tableTypeName, eid);
+       deleteResponse.execute().actionGet();
+     }
 
    }
 
@@ -305,18 +232,43 @@ public class ElasticSearchService {
    */
   public void updateResponse(String jsonStr, String tableTypeName,String prepareId){
     String eid=getESId(tableTypeName,prepareId);
-    UpdateRequestBuilder updateRequestBuilder = ElasticsearchConfiguration.client.prepareUpdate(indexName,tableTypeName,eid);
-    updateRequestBuilder.setDoc(jsonStr).get();
+    //未获取到则新增记录
+    if(CommonUtil.isEmpty(eid)) {
+      saveESJson(jsonStr, tableTypeName);
+    }else{
+      UpdateRequestBuilder updateRequestBuilder = ElasticsearchConfiguration.client.prepareUpdate(indexName,tableTypeName,eid);
+      updateRequestBuilder.setDoc(jsonStr).get();
+    }
   }
 
-  private void setParamTerm(BoolQueryBuilder subCodeQuery,Map paramMap){
+  private void setParamTerm(BoolQueryBuilder subCodeQuery,Map paramMap,Map notParamMap){
     if(paramMap != null) {
       Iterator it = paramMap.entrySet().iterator();
       while (it.hasNext()) {
         Map.Entry entry = (Map.Entry) it.next();
         Object key = entry.getKey();
         Object value = entry.getValue();
-        subCodeQuery.must(QueryBuilders.termQuery(key.toString(), value));
+        String[] values =  StringUtils.split(String.valueOf(value),",");
+        if(values.length>1){
+            subCodeQuery.must(QueryBuilders.termsQuery(key.toString(), Arrays.asList(values)));
+        }else {
+            subCodeQuery.must(QueryBuilders.termQuery(key.toString(), value));
+        }
+      }
+    }
+
+    if(notParamMap != null) {
+      Iterator it = notParamMap.entrySet().iterator();
+      while (it.hasNext()) {
+        Map.Entry entry = (Map.Entry) it.next();
+        Object key = entry.getKey();
+        Object value = entry.getValue();
+        String[] values =  StringUtils.split(String.valueOf(value),",");
+        if(values.length>1){
+          subCodeQuery.mustNot(QueryBuilders.termsQuery(key.toString(), Arrays.asList(values)));
+        }else {
+          subCodeQuery.mustNot(QueryBuilders.termQuery(key.toString(), value));
+        }
       }
     }
   }

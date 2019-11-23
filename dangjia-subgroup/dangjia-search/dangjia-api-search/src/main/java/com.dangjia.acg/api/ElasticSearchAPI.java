@@ -22,15 +22,7 @@ import java.util.List;
 @Api(value = "搜索引擎管理接口", description = "搜索引擎管理接口")
 public interface ElasticSearchAPI {
 
-  @RequestMapping(value = "saveESJson", method = RequestMethod.POST)
-  @ApiOperation(value = "保存单条数据", notes = "保存单条数据")
-  String saveESJson(@ApiParam(name ="jsonStr",value = "JSON数据")@RequestParam("jsonStr") String jsonStr,@ApiParam(name ="tableTypeName",value = "表")@RequestParam("tableTypeName") String tableTypeName);
-
-  @RequestMapping(value = "saveESJsonList", method = RequestMethod.POST)
-  @ApiOperation(value = "保存多条数据", notes = "保存多条数据")
-  List<String> saveESJsonList(@ApiParam(name ="jsonStrList",value = "JSONList数据")@RequestBody List<String> jsonStr,@ApiParam(name ="tableTypeName",value = "表")@RequestParam("tableTypeName") String tableTypeName);
-
-   @RequestMapping(value = "searchESJson", method = RequestMethod.POST)
+  @RequestMapping(value = "searchESJson", method = RequestMethod.POST)
   @ApiOperation(value = "模糊搜索", notes = "模糊搜索")
   List<JSONObject> searchESJson(@ApiParam(name ="elasticSearchDTO",value = "要查询的字段")@RequestBody ElasticSearchDTO elasticSearchDTO);
 
@@ -39,14 +31,9 @@ public interface ElasticSearchAPI {
   @ApiOperation(value = "模糊搜索（分页）", notes = "模糊搜索（分页）")
   PageBean<JSONObject> searchESJsonPage(@ApiParam(name ="elasticSearchDTO",value = "要查询的字段")@RequestBody ElasticSearchDTO elasticSearchDTO);
 
-
-  @RequestMapping(value = "searchPreciseJsonPage", method = RequestMethod.POST)
-  @ApiOperation(value = "精准搜索（分页）", notes = "精准搜索（分页）")
-  PageBean<JSONObject> searchPreciseJsonPage(@ApiParam(name ="elasticSearchDTO",value = "要查询的字段")@RequestBody ElasticSearchDTO elasticSearchDTO);
-
-  @RequestMapping(value = "searchPupdateResponsereciseJson", method = RequestMethod.POST)
-  @ApiOperation(value = "精准搜索单个字段多个value", notes = "精准搜索单个字段多个value")
-  List<JSONObject> searchPreciseJson(@ApiParam(name ="elasticSearchDTO",value = "要查询的字段")@RequestBody ElasticSearchDTO elasticSearchDTO);
+  @RequestMapping(value = "saveESJson", method = RequestMethod.POST)
+  @ApiOperation(value = "保存单条数据", notes = "保存单条数据")
+  String saveESJson(@ApiParam(name ="jsonStr",value = "JSON数据")@RequestParam("jsonStr") String jsonStr,@ApiParam(name ="tableTypeName",value = "表")@RequestParam("tableTypeName") String tableTypeName);
 
   @RequestMapping(value = "deleteResponse", method = RequestMethod.POST)
   @ApiOperation(value = "根据ESID删除", notes = "根据ESID删除")

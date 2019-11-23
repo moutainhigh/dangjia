@@ -32,13 +32,6 @@ public class ElasticSearchController implements ElasticSearchAPI {
 
     @Override
     @ApiMethod
-    public List<String> saveESJsonList(List<String> jsonStr,  String tableTypeName) {
-        List<String> esidlist= elasticSearchService.saveESJsonList(jsonStr,tableTypeName);
-        return esidlist;
-    }
-
-    @Override
-    @ApiMethod
     public List<JSONObject> searchESJson(@RequestBody ElasticSearchDTO elasticSearchDTO) {
         return elasticSearchService.searchESJson(elasticSearchDTO);
     }
@@ -49,17 +42,8 @@ public class ElasticSearchController implements ElasticSearchAPI {
         return elasticSearchService.searchESJsonPage(elasticSearchDTO);
     }
 
-    @Override
-    @ApiMethod
-    public PageBean<JSONObject> searchPreciseJsonPage(@RequestBody ElasticSearchDTO elasticSearchDTO) {
-        return elasticSearchService.searchPreciseJsonPage(elasticSearchDTO);
-    }
 
-    @Override
-    @ApiMethod
-    public List<JSONObject> searchPreciseJson(@RequestBody ElasticSearchDTO elasticSearchDTO) {
-        return elasticSearchService.searchPreciseJson(elasticSearchDTO);
-    }
+
 
     @Override
     @ApiMethod
