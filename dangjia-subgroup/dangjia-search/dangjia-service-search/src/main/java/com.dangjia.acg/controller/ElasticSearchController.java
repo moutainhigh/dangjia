@@ -1,5 +1,6 @@
 package com.dangjia.acg.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.ElasticSearchAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.Constants;
@@ -38,26 +39,26 @@ public class ElasticSearchController implements ElasticSearchAPI {
 
     @Override
     @ApiMethod
-    public List<String> searchESJson(@RequestBody ElasticSearchDTO elasticSearchDTO) {
-        return elasticSearchService.searchESJson(elasticSearchDTO.getFieldList(), elasticSearchDTO.getSearchContent(), elasticSearchDTO.getSortMap(),  elasticSearchDTO.getTableTypeName());
+    public List<JSONObject> searchESJson(@RequestBody ElasticSearchDTO elasticSearchDTO) {
+        return elasticSearchService.searchESJson(elasticSearchDTO);
     }
 
     @Override
     @ApiMethod
-    public PageBean<String> searchESJsonPage(@RequestBody ElasticSearchDTO elasticSearchDTO) {
-        return elasticSearchService.searchESJsonPage(elasticSearchDTO.getPageDTO(), elasticSearchDTO.getParamMap(), elasticSearchDTO.getFieldList(), elasticSearchDTO.getSearchContent(), elasticSearchDTO.getSortMap(),  elasticSearchDTO.getTableTypeName());
+    public PageBean<JSONObject> searchESJsonPage(@RequestBody ElasticSearchDTO elasticSearchDTO) {
+        return elasticSearchService.searchESJsonPage(elasticSearchDTO);
     }
 
     @Override
     @ApiMethod
-    public PageBean<String> searchPreciseJsonPage(@RequestBody ElasticSearchDTO elasticSearchDTO) {
-        return elasticSearchService.searchPreciseJsonPage(elasticSearchDTO.getPageDTO(), elasticSearchDTO.getParamMap(), elasticSearchDTO.getSortMap(),  elasticSearchDTO.getTableTypeName());
+    public PageBean<JSONObject> searchPreciseJsonPage(@RequestBody ElasticSearchDTO elasticSearchDTO) {
+        return elasticSearchService.searchPreciseJsonPage(elasticSearchDTO);
     }
 
     @Override
     @ApiMethod
-    public List<String> searchPreciseJson(@RequestBody ElasticSearchDTO elasticSearchDTO) {
-        return elasticSearchService.searchPreciseJson(elasticSearchDTO.getFieldName(), elasticSearchDTO.getParamMap(), elasticSearchDTO.<String>getFieldNameValue(), elasticSearchDTO.getSortMap(),  elasticSearchDTO.getTableTypeName());
+    public List<JSONObject> searchPreciseJson(@RequestBody ElasticSearchDTO elasticSearchDTO) {
+        return elasticSearchService.searchPreciseJson(elasticSearchDTO);
     }
 
     @Override
@@ -69,7 +70,7 @@ public class ElasticSearchController implements ElasticSearchAPI {
 
     @Override
     @ApiMethod
-    public String getSearchJsonId( String tableTypeName, String prepareId) {
+    public JSONObject getSearchJsonId( String tableTypeName, String prepareId) {
         return elasticSearchService.getSearchJsonId( tableTypeName, prepareId);
     }
 

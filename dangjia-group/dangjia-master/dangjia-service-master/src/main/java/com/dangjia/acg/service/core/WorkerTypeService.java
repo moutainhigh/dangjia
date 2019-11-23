@@ -1,6 +1,7 @@
 package com.dangjia.acg.service.core;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.ElasticSearchAPI;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -56,8 +58,14 @@ public class WorkerTypeService {
      */
     public ServerResponse getWorkerTypeList(Integer type) {
         ElasticSearchDTO elasticSearchDTO=new ElasticSearchDTO();
+        //表名字
         elasticSearchDTO.setTableTypeName(WorkerType.class.getSimpleName());
-        List<String> redata =elasticSearchAPI.searchESJson(elasticSearchDTO);
+
+        //排序字段
+        Map<String, Integer> sortMap = new HashMap<>();
+        sortMap.put(WorkerType.SORT, 0);
+        elasticSearchDTO.setSortMap(sortMap);
+        List<JSONObject> redata =elasticSearchAPI.searchESJson(elasticSearchDTO);
         if(redata==null || redata.size()==0) {
             Example example = new Example(WorkerType.class);
             Example.Criteria criteria = example.createCriteria();
@@ -79,13 +87,12 @@ public class WorkerTypeService {
             for (Map map : maps) {
                 map.put("workerTypeId", map.get(WorkerType.ID));
             }
-
             List<String> listJson = new ArrayList<>();
             for (Map map : maps) {
                 listJson.add(JSON.toJSONString(map));
+                elasticSearchAPI.saveESJson(JSON.toJSONString(map),  WorkerType.class.getSimpleName());
             }
-            elasticSearchAPI.saveESJsonList(listJson,  WorkerType.class.getSimpleName());
-            redata=listJson;
+            return ServerResponse.createBySuccess("查询成功", maps);
         }
         return ServerResponse.createBySuccess("查询成功", redata);
     }

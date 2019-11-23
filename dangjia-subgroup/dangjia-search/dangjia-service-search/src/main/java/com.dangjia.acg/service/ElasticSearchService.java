@@ -1,5 +1,6 @@
 package com.dangjia.acg.service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
@@ -8,8 +9,8 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.Validator;
 import com.dangjia.acg.config.ElasticsearchConfiguration;
+import com.dangjia.acg.dto.ElasticSearchDTO;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
-import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -61,11 +62,9 @@ public class ElasticSearchService {
   public List<String> saveESJsonList(List<String> jsonStr,String tableTypeName) {
     List<String> esidlist=new ArrayList<String>();
     try {
-      IndexRequestBuilder indexRequestBuilder= client.prepareIndex(indexName,tableTypeName);
       for(int i = 0;i<jsonStr.size(); i++) {
-        IndexResponse indexResponse= indexRequestBuilder.setSource(JSONObject.parseObject(jsonStr.get(i))).get();
-        LOGGER.info("ES 插入完成");
-        esidlist.add(indexResponse.getId());
+        String eid =  saveESJson(jsonStr.get(i),tableTypeName);
+        esidlist.add(eid);
       }
     }catch (RuntimeException e){
       throw new BaseException(ServerCode.JSON_TYPE_ERROR,"JSON格式不正确，请检查JSON");
@@ -77,14 +76,15 @@ public class ElasticSearchService {
 
   /**
    * 在ES中模糊搜索内容
-   * @param fieldList
-   * @param searchContent
-   * @param sortMap
-   * @param tableTypeName
    * @return
    */
-  public List<String> searchESJson(List<String> fieldList, String searchContent,Map<String,Integer> sortMap, String tableTypeName){
+  public List<JSONObject> searchESJson( ElasticSearchDTO elasticSearchDTO){
 
+    List<String> fieldList = elasticSearchDTO.getFieldList();
+    String searchContent = elasticSearchDTO.getSearchContent();
+    Map<String,Integer> sortMap = elasticSearchDTO.getSortMap();
+    Map<String,String> shouldMap = elasticSearchDTO.getShouldMap();
+    String tableTypeName = elasticSearchDTO.getTableTypeName();
     String[] fields = new String[fieldList.size()];
     fieldList.toArray(fields);
     try {
@@ -102,7 +102,16 @@ public class ElasticSearchService {
   /**
    * 在ES中模糊搜索内容（分页）
    */
-  public PageBean<String> searchESJsonPage(PageDTO pageDTO,Map<String,String> paramMap, List<String> fieldList, String searchContent,Map<String,Integer> sortMap,  String tableTypeName){
+  public PageBean<JSONObject> searchESJsonPage(ElasticSearchDTO elasticSearchDTO){
+
+
+    PageDTO pageDTO = elasticSearchDTO.getPageDTO();
+    Map<String,String> paramMap = elasticSearchDTO.getParamMap();
+    List<String> fieldList = elasticSearchDTO.getFieldList();
+    String searchContent = elasticSearchDTO.getSearchContent();
+    Map<String,Integer> sortMap = elasticSearchDTO.getSortMap();
+    Map<String,String> shouldMap = elasticSearchDTO.getShouldMap();
+    String tableTypeName = elasticSearchDTO.getTableTypeName();
 
     LOGGER.info("searchContent",searchContent);
     String[] fields = new String[fieldList.size()];
@@ -119,7 +128,7 @@ public class ElasticSearchService {
         //查询
       searchRequestBuilder.setQuery(subCodeQuery);
 
-      return searchResponse(searchRequestBuilder,sortMap,pageDTO);
+      return searchResponse(searchRequestBuilder,sortMap,shouldMap,pageDTO);
     } catch (Exception e) {
       LOGGER.error(e.getMessage());
       e.printStackTrace();
@@ -129,12 +138,15 @@ public class ElasticSearchService {
 
   /**
    * 在ES中精准搜索内容（分页）
-   * @param pageDTO
-   * @param paramMap
-   * @param tableTypeName
    * @return
    */
-  public PageBean<String> searchPreciseJsonPage(PageDTO pageDTO, Map<String,String> paramMap,Map<String,Integer> sortMap,  String tableTypeName){
+  public PageBean<JSONObject> searchPreciseJsonPage(ElasticSearchDTO elasticSearchDTO){
+    PageDTO pageDTO = elasticSearchDTO.getPageDTO();
+    Map<String,String> paramMap = elasticSearchDTO.getParamMap();
+    Map<String,Integer> sortMap = elasticSearchDTO.getSortMap();
+    Map<String,String> shouldMap = elasticSearchDTO.getShouldMap();
+    String tableTypeName = elasticSearchDTO.getTableTypeName();
+
     Validator.notNull(paramMap, "过滤字段不能为空");
     BoolQueryBuilder subCodeQuery = QueryBuilders.boolQuery();
     setParamTerm(subCodeQuery, paramMap);
@@ -143,7 +155,7 @@ public class ElasticSearchService {
       //查询
       searchRequestBuilder.setTypes(tableTypeName).setQuery(subCodeQuery);
 
-      return searchResponse(searchRequestBuilder,sortMap,pageDTO);
+      return searchResponse(searchRequestBuilder,sortMap,shouldMap,pageDTO);
     } catch (Exception e) {
       LOGGER.error(e.getMessage());
       e.printStackTrace();
@@ -154,11 +166,15 @@ public class ElasticSearchService {
 
   /**
    * 根据单个字段查询数据
-   * @param tableTypeName
    * @return
    */
-  public List<String> searchPreciseJson(String fildsName,Map<String,String> paramMap,List<String> objectList,Map<String,Integer> sortMap,  String tableTypeName){
+  public List<JSONObject> searchPreciseJson(ElasticSearchDTO elasticSearchDTO){
     try {
+      Map<String,String> paramMap = elasticSearchDTO.getParamMap();
+      List<String> objectList = elasticSearchDTO.getFieldNameValue();
+      String fildsName = elasticSearchDTO.getFieldName();
+      Map<String,Integer> sortMap = elasticSearchDTO.getSortMap();
+      String tableTypeName = elasticSearchDTO.getTableTypeName();
 
       SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName);
       BoolQueryBuilder subCodeQuery = QueryBuilders.boolQuery();
@@ -181,8 +197,8 @@ public class ElasticSearchService {
    * @return
    */
 
-  public String getSearchJsonId( String tableTypeName,String prepareId){
-    List<String> strings = new ArrayList<String>();
+  public JSONObject getSearchJsonId( String tableTypeName,String prepareId){
+    List<JSONObject> strings = new ArrayList<JSONObject>();
     try {
       SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName).setQuery(QueryBuilders.termsQuery("id",prepareId)).setTypes(tableTypeName);
       strings = searchResponse(searchRequestBuilder,null);
@@ -197,7 +213,13 @@ public class ElasticSearchService {
     }
   }
 
-
+  public String getESId(String tableTypeName,String prepareId){
+    JSONObject strings = getSearchJsonId(tableTypeName,prepareId);
+    if(!CommonUtil.isEmpty(strings)&&strings.get("esId")!=null){
+      return (String)strings.get("esId");
+    }
+    return null;
+  }
 
 
 
@@ -206,18 +228,22 @@ public class ElasticSearchService {
    * @param searchRequestBuilder
    * @return
    */
-   public List<String> searchResponse(SearchRequestBuilder searchRequestBuilder,Map<String,Integer> sortMap){
+   public List<JSONObject> searchResponse(SearchRequestBuilder searchRequestBuilder,Map<String,Integer> sortMap){
      //拼接排序规则
      setSortTerm(searchRequestBuilder,sortMap);
      LOGGER.debug("searchRequestBuilder不分页:"+searchRequestBuilder);
+     //分页
+     searchRequestBuilder.setSize(1000);
      SearchResponse response = searchRequestBuilder.get();
 
-     List<String> arrList = new ArrayList<String>();
+     List<JSONObject> arrList = new ArrayList<JSONObject>();
      SearchHits hits = response.getHits();
      if (null != hits && hits.totalHits() > 0) {
        for (SearchHit hit : hits) {
          String json = hit.getSourceAsString();
-         arrList.add(json);
+         JSONObject jsonObject=JSON.parseObject(json);
+         jsonObject.put("esId",hit.getId());
+         arrList.add(jsonObject);
        }
      } else {
        LOGGER.info("没有查询到任何结果！");
@@ -231,19 +257,21 @@ public class ElasticSearchService {
    * @param pageDTO
    * @return
    */
-   public PageBean searchResponse(SearchRequestBuilder searchRequestBuilder,Map<String,Integer> sortMap,PageDTO pageDTO){
+   public PageBean searchResponse(SearchRequestBuilder searchRequestBuilder,Map<String,Integer> sortMap,Map<String,String> shouldMap,PageDTO pageDTO){
      //拼接排序规则
      setSortTerm(searchRequestBuilder,sortMap);
      //分页
      searchRequestBuilder.setFrom(pageDTO.getPageNum()*pageDTO.getPageSize()).setSize(pageDTO.getPageSize());
      LOGGER.debug("searchRequestBuilder分页:"+searchRequestBuilder);
      SearchResponse response = searchRequestBuilder.get();
-     List<String> arrList = new ArrayList<String>();
+     List<JSONObject> arrList = new ArrayList<JSONObject>();
      SearchHits hits = response.getHits();
      if (null != hits && hits.totalHits() > 0) {
        for (SearchHit hit : hits) {
          String json = hit.getSourceAsString();
-         arrList.add(json);
+         JSONObject jsonObject=JSON.parseObject(json);
+         jsonObject.put("esId",hit.getId());
+         arrList.add(jsonObject);
        }
      } else {
        LOGGER.info("没有查询到任何结果！");
@@ -263,7 +291,8 @@ public class ElasticSearchService {
    * @param prepareId
    */
    public void deleteResponse( String tableTypeName,String prepareId){
-     DeleteRequestBuilder deleteResponse = client.prepareDelete(indexName,tableTypeName,prepareId);
+     String eid=getESId(tableTypeName,prepareId);
+     DeleteRequestBuilder deleteResponse = client.prepareDelete(indexName,tableTypeName,eid);
      deleteResponse.execute().actionGet();
 
    }
@@ -275,7 +304,8 @@ public class ElasticSearchService {
    * @param prepareId
    */
   public void updateResponse(String jsonStr, String tableTypeName,String prepareId){
-    UpdateRequestBuilder updateRequestBuilder = ElasticsearchConfiguration.client.prepareUpdate(indexName,tableTypeName,prepareId);
+    String eid=getESId(tableTypeName,prepareId);
+    UpdateRequestBuilder updateRequestBuilder = ElasticsearchConfiguration.client.prepareUpdate(indexName,tableTypeName,eid);
     updateRequestBuilder.setDoc(jsonStr).get();
   }
 
@@ -297,7 +327,12 @@ public class ElasticSearchService {
       while (it.hasNext()) {
         Map.Entry entry = (Map.Entry) it.next();
         Object key = entry.getKey();
-        searchRequestBuilder.addSort(key.toString(), SortOrder.DESC);
+        Integer value = (Integer) entry.getValue();
+        if(value==0){
+          searchRequestBuilder.addSort(key.toString(), SortOrder.ASC);
+        }else{
+          searchRequestBuilder.addSort(key.toString(), SortOrder.DESC);
+        }
       }
     }
   }
