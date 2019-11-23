@@ -96,6 +96,18 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
         return mendMaterielService.ownerReturnHandle(request,cityId,userId,pageDTO,state,likeAddress);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse confirmReturnMendMaterial(String mendOrderId, String userId,Integer type,String actualCountList,String returnReason) {
+        return mendMaterielService.confirmReturnMendMaterial(mendOrderId,userId,type,actualCountList,returnReason);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryMendMaterialList(String mendOrderId, String userId) {
+        return mendMaterielService.queryMendMaterialList(mendOrderId,userId);
+    }
+
     /**
      * 根据mendOrderId查明细
      */

@@ -87,14 +87,16 @@ public interface DjBasicsProductAPI {
     ServerResponse saveProductTemporaryStorage(@RequestParam("request") HttpServletRequest request,
                                  BasicsProductDTO basicsProductDTO,
                                  @RequestParam("technologyList") String technologyList,
-                                 @RequestParam("deleteTechnologyIds") String  deleteTechnologyIds);
+                                 @RequestParam("deleteTechnologyIds") String  deleteTechnologyIds,
+                                 @RequestParam("cityId") String  cityId);
 
     @PostMapping("/product/djBasicsProduct/editSingleProduct")
     @ApiOperation(value = "单个新增修改货品下的商品", notes = "单个新增修改货品下的商品")
     ServerResponse editSingleProduct(@RequestParam("request") HttpServletRequest request,
                                  BasicsProductDTO basicsProductDTO,
                                  @RequestParam("technologyList") String technologyList,
-                                 @RequestParam("deleteTechnologyIds") String  deleteTechnologyIds);
+                                 @RequestParam("deleteTechnologyIds") String  deleteTechnologyIds,
+                                 @RequestParam("cityId") String  cityId);
 
     @PostMapping("/product/djBasicsProduct/deleteBasicsProductById")
     @ApiOperation(value = "根据货品id删除商品对象", notes = "根据货品id删除商品对象")

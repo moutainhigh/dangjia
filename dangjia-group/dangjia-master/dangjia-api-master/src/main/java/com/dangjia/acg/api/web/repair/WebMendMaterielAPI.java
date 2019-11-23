@@ -169,9 +169,39 @@ public interface WebMendMaterielAPI {
             @RequestParam("state") String state,
             @RequestParam("likeAddress") String likeAddress);
 
+    /**
+     * 确定退货
+     * @param mendOrderId
+     * @param userId
+     * @return
+     */
+    @PostMapping(value = "web/repair/webMendMateriel/confirmReturnMendMaterial")
+    @ApiOperation(value = "确定退货", notes = "确定退货")
+    ServerResponse confirmReturnMendMaterial(@RequestParam("mendOrderId") String mendOrderId,
+                                             @RequestParam("userId") String userId,
+                                             @RequestParam("type") Integer type,
+                                             @RequestParam("actualCountList") String actualCount,
+                                             @RequestParam("returnReason") String returnReason);
 
+    /**
+     *  date:2019.11.23
+     * author:chenyufeng
+     * 新版查看补退单明细
+     * @param mendOrderId
+     * @param userId
+     * @return
+     */
+    @PostMapping(value = "web/repair/webMendMateriel/queryMendMaterialList")
+    @ApiOperation(value = "售后管理-补退单查明细", notes = "售后管理-补退单查明细")
+    ServerResponse queryMendMaterialList(@RequestParam("mendOrderId") String mendOrderId,
+                                    @RequestParam("userId") String userId);
 
-
+    /**
+     * 查看补退单明细
+     * @param mendOrderId
+     * @param userId
+     * @return
+     */
     @PostMapping(value = "web/repair/webMendMateriel/mendMaterialList")
     @ApiOperation(value = "补退单查明细", notes = "补退单查明细")
     ServerResponse mendMaterialList(@RequestParam("mendOrderId") String mendOrderId,

@@ -21,6 +21,7 @@ import com.dangjia.acg.modle.basics.Label;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.product.*;
+import com.dangjia.acg.service.basics.TechnologyService;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -62,6 +63,9 @@ public class DjBasicsProductTemplateService {
 
     @Autowired
     private DjBasicsGoodsMapper djBasicsGoodsMapper;
+
+    @Autowired
+    private TechnologyService technologyService;
 
     @Autowired
     private IUnitMapper iUnitMapper;
@@ -186,6 +190,11 @@ public class DjBasicsProductTemplateService {
                 //添加关联商品信息
                 insertAddedValueProductRelation(productId,basicsProductDTO.getRelationProductIds());
             }
+
+            //添加工艺信息
+            String ret = technologyService.insertTechnologyList(obj.getString("technologyList"), "0", 0, productId,cityId);
+            if (!ret.equals("1"))  //如果不成功 ，弹出是错误提示
+                return ServerResponse.createByErrorMessage(ret);
 
             //3.删除对应需要删除的工艺信息
             String deleteTechnologyIds=obj.getString("deleteTechnologyIds");
@@ -495,7 +504,7 @@ public class DjBasicsProductTemplateService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse saveProductTemporaryStorage(BasicsProductDTO basicsProductDTO,String technologyList, String  deleteTechnologyIds,int dataStatus){
+    public ServerResponse saveProductTemporaryStorage(BasicsProductDTO basicsProductDTO,String technologyList, String  deleteTechnologyIds,int dataStatus,String cityId){
         if (!StringUtils.isNotBlank(basicsProductDTO.getCategoryId()))
             return ServerResponse.createByErrorMessage("商品分类不能为空");
 
@@ -531,6 +540,10 @@ public class DjBasicsProductTemplateService {
             //添加关联商品信息
             insertAddedValueProductRelation(productId,basicsProductDTO.getRelationProductIds());
         }
+        String ret = technologyService.insertTechnologyList(technologyList, "0", 0, productId,cityId);
+        if (!ret.equals("1"))  //如果不成功 ，弹出是错误提示
+            return ServerResponse.createByErrorMessage(ret);
+
         //3.删除对应需要删除的工艺信息
         String restr = deleteTechnologylist(deleteTechnologyIds);
         if (StringUtils.isNotBlank(restr)) {
@@ -838,6 +851,8 @@ public class DjBasicsProductTemplateService {
             strNewValueNameArr = getNewValueNameArr(djBasicsProduct.getValueIdArr());
             map.put("attributeValueList",getAttributeValueList(djBasicsProduct.getValueIdArr()));
 
+        }else{
+            map.put("attributeValueList",new ArrayList<>());
         }
 
         map.put("imageUrl", imgUrlStr.toString());

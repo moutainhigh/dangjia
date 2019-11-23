@@ -1,6 +1,8 @@
 package com.dangjia.acg.mapper.repair;
 
 import com.dangjia.acg.dto.house.WarehouseGoodsDTO;
+import com.dangjia.acg.dto.refund.OrderProgressDTO;
+import com.dangjia.acg.dto.repair.ReturnOrderProgressDTO;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -22,4 +24,7 @@ public interface IMendMaterialMapper extends Mapper<MendMateriel> {
     List<WarehouseGoodsDTO> getWarehouseWorker(@Param("productId") String productId,@Param("houseId") String houseId);
 
     int setStorefrontId(@Param("mendOrderId") String mendOrderId);
+
+
+    List<ReturnOrderProgressDTO> queryMendMaterielProgress(@Param("progressOrderId") String progressOrderId);
 }

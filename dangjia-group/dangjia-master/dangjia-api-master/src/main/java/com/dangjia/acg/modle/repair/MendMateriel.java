@@ -140,4 +140,8 @@ public class MendMateriel extends BaseEntity {
 	@Desc(value = "店铺ID")
 	@ApiModelProperty("店铺ID")
 	private Double transportationCost;//运费
+
+	@Transient
+	private Double receive;//收货总数
+
 }

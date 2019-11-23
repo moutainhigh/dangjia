@@ -112,6 +112,13 @@ public class MendOrder extends BaseEntity {
 
 	@Transient
 	private String deliverNumber;//退货单号
+
 	@Transient
 	private String supplierName;//供应商名称
+
+	@Column(name = "return_reason")
+	@Desc(value = "退货原因")
+	@ApiModelProperty("退货原因")
+	private String returnReason;//运费
+
 }
