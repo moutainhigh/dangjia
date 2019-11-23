@@ -81,8 +81,8 @@ public class DjDeliverOrderController implements DjDeliverOrderAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryDeliverOrderDsdListByStatus(PageDTO pageDTO, String userToken, String houseId, String queryId, String orderStatus) {
-        return djDeliverOrderService.queryDeliverOrderDsdListByStatus(pageDTO,userToken,houseId,queryId,orderStatus);
+    public ServerResponse queryDeliverOrderDsdListByStatus(PageDTO pageDTO, String userToken, String houseId, String cityId, String orderStatus) {
+        return djDeliverOrderService.queryDeliverOrderDsdListByStatus(pageDTO,userToken,houseId,cityId,orderStatus);
     }
 
     @Override

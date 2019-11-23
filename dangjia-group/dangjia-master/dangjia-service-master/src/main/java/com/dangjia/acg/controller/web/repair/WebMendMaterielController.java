@@ -51,14 +51,9 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse materialBackStateProcessing(HttpServletRequest request, String cityId, String houseId, PageDTO pageDTO, String state, String likeAddress) {
-        String userId = request.getParameter("userId");
-        return mendMaterielService.materialBackStateProcessing(userId,cityId,houseId, pageDTO, state,likeAddress);
+    public ServerResponse materialBackStateProcessing(HttpServletRequest request,String userId, String cityId, PageDTO pageDTO, String state, String likeAddress) {
+        return mendMaterielService.materialBackStateProcessing(userId,cityId, pageDTO, state,likeAddress);
     }
-
-
-
-
 
 
 
@@ -66,7 +61,6 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
      *
      * @param request
      * @param cityId
-     * @param houseId 房子id
      * @param pageDTO
      * @param state 状态：（0生成中,1处理中,2不通过取消,3已通过,4已全部结算,5已撤回,5已关闭）
      * @param likeAddress 模糊查询参数
@@ -74,8 +68,8 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse materialBackStateHandle(HttpServletRequest request, String cityId, String houseId, PageDTO pageDTO, String state, String likeAddress) {
-        return mendMaterielService.materialBackStateHandle(request,cityId,houseId,pageDTO,state,likeAddress);
+    public ServerResponse materialBackStateHandle(HttpServletRequest request,String userId, String cityId, PageDTO pageDTO, String state, String likeAddress) {
+        return mendMaterielService.materialBackStateHandle(request,userId,cityId,pageDTO,state,likeAddress);
     }
 
     @Override
@@ -86,20 +80,20 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse ownerReturnHandleIng(HttpServletRequest request, String cityId, String houseId, PageDTO pageDTO, String state, String likeAddress) {
-        return mendMaterielService.ownerReturnHandleIng(request,cityId,houseId,pageDTO,state,likeAddress);
+    public ServerResponse ownerReturnHandleIng(HttpServletRequest request, String cityId, String userId, PageDTO pageDTO, String state, String likeAddress) {
+        return mendMaterielService.ownerReturnHandleIng(request,cityId,userId,pageDTO,state,likeAddress);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse ownerReturnProssing(HttpServletRequest request, String cityId, String houseId, PageDTO pageDTO, String state, String likeAddress) {
-        return mendMaterielService.ownerReturnProssing(request,cityId,houseId,pageDTO,state,likeAddress);
+    public ServerResponse ownerReturnProssing(HttpServletRequest request, String cityId, String userId, PageDTO pageDTO, String state, String likeAddress) {
+        return mendMaterielService.ownerReturnProssing(request,cityId,userId,pageDTO,state,likeAddress);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse ownerReturnHandle(HttpServletRequest request, String cityId, String houseId, PageDTO pageDTO, String state, String likeAddress) {
-        return mendMaterielService.ownerReturnHandle(request,cityId,houseId,pageDTO,state,likeAddress);
+    public ServerResponse ownerReturnHandle(HttpServletRequest request, String cityId, String userId, PageDTO pageDTO, String state, String likeAddress) {
+        return mendMaterielService.ownerReturnHandle(request,cityId,userId,pageDTO,state,likeAddress);
     }
 
     /**
