@@ -33,7 +33,7 @@ public class UnitService {
     //查询所有的单位
     public ServerResponse<PageInfo> getAllUnit(PageDTO pageDTO,String cityId) {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        List<Unit> unitList = iUnitMapper.getUnit(cityId);
+        List<Unit> unitList = iUnitMapper.getUnit();
         if (unitList.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
@@ -62,7 +62,7 @@ public class UnitService {
 
     //新增商品单位
     public ServerResponse insert(String unitName, String linkUnitIdArr,String cityId) {
-        List<Unit> unitList = iUnitMapper.getUnitByName(unitName,cityId);
+        List<Unit> unitList = iUnitMapper.getUnitByName(unitName);
         if (unitList != null && unitList.size() > 0) {
             return ServerResponse.createByErrorMessage("单位名称重复");
         }
@@ -86,7 +86,7 @@ public class UnitService {
         if (unit == null)
             return ServerResponse.createByErrorMessage("该单位不存在");
         if (!unit.getName().equals(unitName)) {
-            if (iUnitMapper.getUnitByName(unitName,cityId).size() > 0)
+            if (iUnitMapper.getUnitByName(unitName).size() > 0)
                 return ServerResponse.createByErrorMessage("单位名称已存在");
         }
         unit.setName(unitName);

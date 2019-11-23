@@ -6,8 +6,11 @@ import com.dangjia.acg.api.BasicsStorefrontAPI;
 import com.dangjia.acg.api.StorefrontProductAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.api.product.DjBasicsProductAPI;
+import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.product.ShoppingCartDTO;
 import com.dangjia.acg.dto.product.ShoppingCartListDTO;
 import com.dangjia.acg.mapper.house.IHouseMapper;
@@ -19,6 +22,8 @@ import com.dangjia.acg.modle.member.MemberCollect;
 import com.dangjia.acg.modle.product.ShoppingCart;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +70,8 @@ public class ShopCartService {
 
     @Autowired
     private IHouseMapper iHouseMapper;
+    @Autowired
+    private ConfigUtil configUtil;
 
     /**
      * 获取购物车列表
@@ -72,13 +79,15 @@ public class ShopCartService {
      * @param userToken
      * @return
      */
-    public ServerResponse queryCartList(String userToken,String cityId) {
+    public ServerResponse queryCartList(PageDTO pageDTO,String userToken, String cityId) {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
             Member member = (Member) object;
+            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<String> strings = iShoppingCartmapper.queryStorefrontIds(member.getId(), cityId);
             List<ShoppingCartDTO> shoppingCartDTOS=new ArrayList<>();
             strings.forEach(str ->{
@@ -87,12 +96,16 @@ public class ShopCartService {
                 shoppingCartDTO.setStorefrontName(storefront.getStorefrontName());
                 shoppingCartDTO.setStorefrontId(storefront.getId());
                 List<ShoppingCartListDTO> shoppingCartListDTOS = iShoppingCartmapper.queryCartList(member.getId(), cityId, str,null);
+                shoppingCartListDTOS.forEach(shoppingCartListDTO -> {
+                    shoppingCartListDTO.setImage(imageAddress+shoppingCartListDTO.getImage());
+                });
                 shoppingCartDTO.setShoppingCartListDTOS(shoppingCartListDTOS);
                 shoppingCartDTOS.add(shoppingCartDTO);
             });
             if(shoppingCartDTOS.size()<=0)
                 return  ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
-            return ServerResponse.createBySuccess("获取购物车列表成功!",shoppingCartDTOS);
+            PageInfo pageResult = new PageInfo(shoppingCartDTOS);
+            return ServerResponse.createBySuccess("获取购物车列表成功!",pageResult);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("系统报错，获取购物车列表失败!");

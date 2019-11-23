@@ -8,7 +8,7 @@
     <select id="getUnit" resultType="com.dangjia.acg.modle.brand.Unit">
         SELECT
            id, name,link_unit_id_arr as linkUnitIdArr, create_date as createDate, modify_date as modifyDate
-        from dj_basics_unit where city_id = #{cityId}
+        from dj_basics_unit
         ORDER BY create_date desc
     </select>
 
@@ -16,7 +16,7 @@
     <select id="getUnitByName" parameterType="String" resultType="com.dangjia.acg.modle.brand.Unit">
 		SELECT
 			id, name,link_unit_id_arr as linkUnitIdArr, create_date as createDate, modify_date as modifyDate
-		FROM dj_basics_unit WHERE name=#{name} and city_id = #{cityId}
+		FROM dj_basics_unit WHERE name=#{name}
 		ORDER BY create_date desc
 	</select>
 

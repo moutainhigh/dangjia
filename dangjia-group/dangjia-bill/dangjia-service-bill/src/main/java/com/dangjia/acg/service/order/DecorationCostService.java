@@ -141,6 +141,7 @@ public class DecorationCostService {
      */
     private  void setProductInfo(DecorationCostItemDTO ap,String address){
         String productTemplateId=ap.getProductTemplateId();
+        String purchaseIcon = configUtil.getValue(SysConfig.PRODUCT_PURCHASE_ICON, String.class);//自购商品图片
         DjBasicsProductTemplate pt=iBillProductTemplateMapper.selectByPrimaryKey(productTemplateId);
         if(pt!=null&& StringUtils.isNotBlank(pt.getId())){
             String image=ap.getImage();
@@ -154,6 +155,10 @@ public class DecorationCostService {
                 StringBuilder imgUrlStr = new StringBuilder();
                 StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
                 ap.setImageUrl(imgStr.toString());//图片详情地址设置
+            }
+            if(ap.getSteta()==2){//自购商品
+                ap.setImage(purchaseIcon);
+                ap.setImageUrl(address+purchaseIcon);
             }
             //查询规格名称
             if (StringUtils.isNotBlank(pt.getValueIdArr())) {

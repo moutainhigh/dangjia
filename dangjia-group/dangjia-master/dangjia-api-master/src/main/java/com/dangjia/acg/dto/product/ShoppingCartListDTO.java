@@ -56,5 +56,7 @@ public class ShoppingCartListDTO {
 
     private Integer type;
 
+    private String valueNameArr;
+
 
 }
