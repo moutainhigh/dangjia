@@ -1,5 +1,7 @@
 package com.dangjia.acg.service.delivery;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.UserAPI;
 import com.dangjia.acg.api.app.house.HouseAPI;
@@ -38,6 +40,7 @@ import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
+import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.design.QuantityRoom;
 import com.dangjia.acg.modle.design.QuantityRoomImages;
 import com.dangjia.acg.modle.house.House;
@@ -45,11 +48,13 @@ import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.menu.MenuConfiguration;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.sale.royalty.DjAlreadyRobSingle;
+import com.dangjia.acg.modle.sale.royalty.DjRoyaltyDetailsSurface;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.user.MainUser;
+import com.dangjia.acg.service.product.BillProductTemplateService;
 import com.dangjia.acg.util.HouseUtil;
 import com.dangjia.acg.util.Utils;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.dangjia.acg.common.model.PageDTO;
@@ -58,6 +63,7 @@ import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 import java.util.*;
 import java.util.List;
@@ -109,7 +115,14 @@ public class DjDeliverOrderService {
     private ForMasterAPI forMasterAPI;
 
     @Autowired
-    private BillDjDeliverOrderSplitItemMapper billDjDeliverOrderSplitItemMapper ;
+    private BillDjDeliverOrderSplitItemMapper billDjDeliverOrderSplitItemMapper;
+
+    @Autowired
+    private BillDjDeliverSplitDeliverMapper billDjDeliverSplitDeliverMapper;
+
+    @Autowired
+    private BillProductTemplateService billProductTemplateService;
+
 
     public Object getHouse(String memberId, HouseResult houseResult) {
         //该城市该用户所有开工房产
@@ -849,18 +862,6 @@ public class DjDeliverOrderService {
                         djSplitDeliverOrderDTO.setItemListSize(orderSplitItemlist.size());//要货数大小
                     }
 
-                    //通过要货单号查询要货详情
-//                    String dborderStatus=djSplitDeliverOrderDTO.getShippingState();
-                   // 配送状态（0待发货,1已发待收货,2已收货,3取消,4部分收,5已结算,6材料员撤回(只待发货才能撤回),7待安装，8已完成））
-//                    if(dborderStatus!=null&&dborderStatus.equals("3"))
-//                    {//待收货
-//                        List< Map<String, Object>> rows=new ArrayList<Map<String, Object>>();
-//                        Map<String, Object> resultMap = new HashMap<>();
-//                        resultMap.put("name", "确认安装");
-//                        resultMap.put("type", 3);
-//                        rows.add(resultMap);
-//                        //djSplitDeliverOrderDTO.setButtonList(rows);
-//                    }
                 }
             }
 
@@ -1209,6 +1210,184 @@ public class DjDeliverOrderService {
             return ServerResponse.createByErrorMessage("运费详情异常" + e);
         }
     }
+
+
+
+
+    /**
+     * App订单列表（待收货、已经完成） --发货单
+     * @param pageDTO
+     * @param userToken
+     * @param houseId
+     * @param cityId
+     * @param orderStatus
+     * @return
+     */
+    public ServerResponse queryAppOrderList(PageDTO pageDTO, String userToken, String houseId, String cityId, String orderStatus) {
+        try {
+            Object object = memberAPI.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            JSONObject job = (JSONObject) object;
+            Member member = job.toJavaObject(Member.class);
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());//初始化分页插获取用户信息件
+            List<DjSplitDeliverOrderDTO> list = iBillDjDeliverOrderMapper.queryAppOrderList(cityId, houseId, orderStatus);
+            if (list != null && list.size() > 0)
+            {
+                for (DjSplitDeliverOrderDTO djSplitDeliverOrderDTO : list) {
+
+                    String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+                    djSplitDeliverOrderDTO.setStorefrontIcon(address + djSplitDeliverOrderDTO.getStorefrontIcon());
+                    Example example=new Example(OrderSplitItem.class);
+                    example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID,djSplitDeliverOrderDTO.getId());
+                    List<OrderSplitItem> orderSplitItemlist=billDjDeliverOrderSplitItemMapper.selectByExample(example);
+                    if(orderSplitItemlist!=null)
+                    {
+                        djSplitDeliverOrderDTO.setImage(getStartTwoImage1(orderSplitItemlist,address));
+                        djSplitDeliverOrderDTO.setItemListSize(orderSplitItemlist.size());//要货数大小
+                    }
+                }
+            }
+
+            PageInfo pageResult = new PageInfo(list);
+            return ServerResponse.createBySuccess("查询所有订单", pageResult);
+        } catch (Exception e) {
+            logger.error("订单列表（待收货、已经完成）异常", e);
+            return ServerResponse.createByErrorMessage("订单列表（待收货、已经完成）异常" + e);
+        }
+    }
+
+
+    /**
+     * 获取前两个商品的图片
+     * @return
+     */
+    String getStartTwoImage1(List<OrderSplitItem> os,String address){
+        String imageUrl="";
+        if(os!=null && os.size()>0){
+            for(OrderSplitItem ap : os){
+                String image = ap.getImage();
+                //添加图片详情地址字段
+                if(StringUtils.isNotBlank(image)){
+                    String[] imgArr = image.split(",");
+                    if(StringUtils.isBlank(imageUrl)){
+                        imageUrl=address+imgArr[0];
+                    }else{
+                        imageUrl=imageUrl+","+address+imgArr[0];
+                        break;
+                    }
+                }
+            }
+        }
+        return imageUrl;
+    }
+
+    /**
+     * App 确定收货
+     * @param
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse updateAppOrderStats(String lists,String id){
+
+        try {
+            if (CommonUtil.isEmpty(lists)) {
+                return ServerResponse.createByErrorMessage("lists不能为空");
+            }
+            if (CommonUtil.isEmpty(id)) {
+                return ServerResponse.createByErrorMessage("id不能为空");
+            }
+            SplitDeliver splitDeliver = new SplitDeliver();
+            splitDeliver.setId(id);
+            splitDeliver.setRecTime(new Date());
+            splitDeliver.setShippingState(2);
+            billDjDeliverSplitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
+
+            JSONArray list = JSON.parseArray(lists);
+            for (int i = 0; i < list.size(); i++) {
+                JSONObject JS = list.getJSONObject(i);
+                OrderSplitItem orderSplitItem = new OrderSplitItem();
+                orderSplitItem.setId(JS.getString("id"));
+                orderSplitItem.setReceive(JS.getDouble("receive"));
+                billDjDeliverOrderSplitItemMapper.updateByPrimaryKeySelective(orderSplitItem);
+            }
+            return ServerResponse.createBySuccessMessage("收货成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("收货失败");
+        }
+    }
+
+
+    /**
+     * app订单详情查询（待收货，待安装，已完成）
+     * @param id
+     * @return
+     */
+    public ServerResponse  queryAppOrderList(String id,Integer shippingState){
+        if (CommonUtil.isEmpty(id)) {
+            return ServerResponse.createByErrorMessage("id不能为空");
+        }
+        if(CommonUtil.isEmpty(shippingState)){
+            return ServerResponse.createByErrorMessage("shippingState不能为空");
+        }
+        Example example=new Example(SplitDeliver.class);
+        example.createCriteria().andEqualTo(SplitDeliver.SHIPPING_STATE,shippingState)
+                .andEqualTo(SplitDeliver.ID,id);
+        SplitDeliver splitDeliver = billDjDeliverSplitDeliverMapper.selectOneByExample(example);
+
+        if(splitDeliver == null){
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
+        }
+        Storefront storefront = iBillStorefrontMapper.selectByPrimaryKey(splitDeliver.getStorefrontId());
+        if(storefront == null){
+            return ServerResponse.createByErrorMessage("门店不存在");
+        }
+
+        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+        OrderCollectInFoDTO orderCollectInFoDTO = new OrderCollectInFoDTO();
+        House house= houseAPI.selectHouseById(splitDeliver.getHouseId());
+        String houseName = house.getResidential() + house.getBuilding() + "栋" + house.getUnit() + "单元" + house.getNumber() + "号";
+        orderCollectInFoDTO.setHouseName(houseName);
+        orderCollectInFoDTO.setCreateDate(splitDeliver.getCreateDate());
+        orderCollectInFoDTO.setRecTime(splitDeliver.getRecTime());
+        orderCollectInFoDTO.setSendTime(splitDeliver.getRecTime());
+        orderCollectInFoDTO.setNumber(splitDeliver.getNumber());
+        orderCollectInFoDTO.setTotalAmount(splitDeliver.getTotalAmount());
+        orderCollectInFoDTO.setInstallName(splitDeliver.getInstallName());//安装人姓名
+        orderCollectInFoDTO.setInstallMobile(splitDeliver.getInstallMobile());//安装人号码
+        orderCollectInFoDTO.setDeliveryMobile(splitDeliver.getDeliveryMobile());;//送货人号码
+        orderCollectInFoDTO.setDeliveryName(splitDeliver.getDeliveryName());//送货人姓名
+
+        orderCollectInFoDTO.setStorefrontIcon(address + storefront.getSystemLogo());//店铺图标
+        orderCollectInFoDTO.setStorefrontName(storefront.getStorefrontName());//店铺名称
+
+        example=new Example(OrderSplitItem.class);
+        example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID,splitDeliver.getId());
+        List<OrderSplitItem> orderSplitItem = billDjDeliverOrderSplitItemMapper.selectByExample(example);
+
+        Map<String,Object> map;
+        List<Map<String,Object>> list = new ArrayList<>();
+        if(orderSplitItem != null && orderSplitItem.size() >0){
+            for (OrderSplitItem splitItem : orderSplitItem) {
+                String str = iBillDjDeliverOrderMapper.queryValueIdArr(splitItem.getId());
+                String valueNameArr = billProductTemplateService.getNewValueNameArr(str);
+                map = new HashMap<>();
+                map.put("productName",splitItem.getProductName());
+                map.put("num",splitItem.getNum());
+                map.put("price", splitItem.getPrice() + "/" + splitItem.getUnitName());
+                map.put("valueNameArr",valueNameArr);
+                List<String> result = Arrays.asList(splitItem.getImage().split(","));
+                map.put("image",address + result.get(0));
+                list.add(map);
+            }
+        }
+        orderCollectInFoDTO.setList(list);
+
+        return ServerResponse.createBySuccess("查询成功", orderCollectInFoDTO);
+    }
+
 
 
     /**
