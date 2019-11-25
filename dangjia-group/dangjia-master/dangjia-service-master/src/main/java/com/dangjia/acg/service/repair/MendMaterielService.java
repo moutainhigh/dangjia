@@ -37,6 +37,7 @@ import com.github.pagehelper.PageInfo;
 import com.netflix.discovery.converters.Auto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
@@ -168,41 +169,44 @@ public class MendMaterielService {
      * @param type
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse confirmReturnMendMaterial(String mendOrderId, String userId, Integer type, String actualCountList,String returnReason) {
         try {
             if (type == 0) {
                 //String aa="[{\"mendOrderId\":\"865634841567998628778\",\"actualCount\":9}]";
                 List<Map<String,Object>> list= JSON.parseObject(actualCountList, List.class);
                 for (Map<String, Object> stringStringMap : list) {
-                    String code=stringStringMap.get("mendOrderId").toString();
+                    String id=stringStringMap.get("id").toString();
                     String actualCount=stringStringMap.get("actualCount").toString();
-                    System.out.println(code);
-                    System.out.print(actualCount);
                     //全部退货
                     MendOrder mendOrder = new MendOrder();
-                    mendOrder.setId(code);
-                    mendOrder.setState(3);
+                    mendOrder.setId(mendOrderId);
+                    mendOrder.setState(3);//（0生成中,1处理中,2不通过取消,3已通过,4已全部结算,5已撤回,6已关闭7，已审核待处理 8，部分退货）
                     Integer i = mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
                     if (i <= 0)
                         return ServerResponse.createBySuccessMessage("全部退货失败");
+
+                    MendMateriel mendMateriel=new MendMateriel();
+                    mendMateriel.setId(id);
+                    mendMateriel.setActualCount(Double.parseDouble(actualCount));
+                    mendMaterialMapper.updateByPrimaryKey(mendMateriel);
+
                     return ServerResponse.createBySuccessMessage("全部退货成功");
                 }
 
             } else {
                 List<Map<String,Object>> list= JSON.parseObject(actualCountList, List.class);
                 for (Map<String, Object> stringStringMap : list) {
-                    String code=stringStringMap.get("mendOrderId").toString();
+                    String id=stringStringMap.get("id").toString();
                     String actualCount=stringStringMap.get("actualCount").toString();
-                    System.out.println(code);
-                    System.out.print(actualCount);
                     //部分退货
                     MendOrder mendOrder = new MendOrder();
-                    mendOrder.setId(code);
+                    mendOrder.setId(mendOrderId);
                     mendOrder.setState(8);//状态（0生成中,1处理中,2不通过取消,3已通过,4已全部结算,5已撤回,6已关闭7，已审核待处理 8，部分退货）
                     mendOrder.setReturnReason(returnReason);
                     Integer j = mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
                     if (j > 0) {
-                        MendOrder myMendOrder = mendOrderMapper.selectByPrimaryKey("");
+                        MendOrder myMendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);
                         MendTypeRole mendTypeRole = mendTypeRoleMapper.getByType(myMendOrder.getType());
                         String[] roleArr = mendTypeRole.getRoleArr().split(",");
                         for (int i = 0; i < roleArr.length; i++) {
@@ -216,8 +220,6 @@ public class MendMaterielService {
                         return ServerResponse.createBySuccessMessage("部分退货成功");
                     }
                 }
-
-
             }
             return null;
         } catch (Exception e) {

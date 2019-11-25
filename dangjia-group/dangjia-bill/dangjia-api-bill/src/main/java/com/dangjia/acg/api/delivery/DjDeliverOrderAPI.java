@@ -129,4 +129,23 @@ public interface DjDeliverOrderAPI {
 //    @ApiOperation(value = "删除订单", notes = "删除订单")
 //    ServerResponse delBusinessOrderById(@RequestParam("userToken") String userToken, @RequestParam("orderId") String orderId);
 
+
+    @PostMapping("app/order/queryAppOrderList")
+    @ApiOperation(value = "根据订单状态查询订单详情列表(待收货、已完成)", notes = "根据订单状态查询订单详情（待收货、已完成）")
+    ServerResponse queryAppOrderList(@RequestParam("pageDTO") PageDTO pageDTO,
+                                                    @RequestParam("userToken") String userToken,
+                                                    @RequestParam("houseId") String houseId,
+                                                    @RequestParam("cityId") String queryId,
+                                                    @RequestParam("orderStatus") String orderStatus);
+    @PostMapping("app/order/updateAppOrderStats")
+    @ApiOperation(value = "根据订单状态查询订单详情列表(待收货、已完成)", notes = "根据订单状态查询订单详情（待收货、已完成）")
+    ServerResponse  updateAppOrderStats(@RequestParam("userToken")String userToken,
+                                        @RequestParam("lists") String lists,
+                                        @RequestParam("id")String id);
+
+    @PostMapping("app/order/queryAppOrderList")
+    @ApiOperation(value = "根据订单状态查询订单详情列表(待收货、已完成)", notes = "根据订单状态查询订单详情（待收货、已完成）")
+    ServerResponse  queryAppOrderList(@RequestParam("userToken")String userToken,
+                                        @RequestParam("id") String id,
+                                        @RequestParam("shippingState")Integer shippingState);
 }
