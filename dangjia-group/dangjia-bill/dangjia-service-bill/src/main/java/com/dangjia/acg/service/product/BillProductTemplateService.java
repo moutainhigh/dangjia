@@ -3,8 +3,6 @@ package com.dangjia.acg.service.product;
 
 import com.dangjia.acg.mapper.refund.IBillAttributeMapper;
 import com.dangjia.acg.mapper.refund.IBillAttributeValueMapper;
-import com.dangjia.acg.mapper.refund.IBillBasicsGoodsMapper;
-import com.dangjia.acg.mapper.refund.IBillBrandMapper;
 import com.dangjia.acg.modle.attribute.Attribute;
 import com.dangjia.acg.modle.attribute.AttributeValue;
 import org.apache.commons.lang3.StringUtils;
