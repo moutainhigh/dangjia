@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.storefront.IGoodsStorefrontMapper">
+    <sql id="all_column">
+          `id`,
+          `user_id` AS userId,
+          `city_id` AS cityId,
+          `storefront_name` AS storefrontName,
+          `storefront_address` AS storefrontAddress,
+          `storefront_desc` AS storefrontDesc,
+          `storefront_logo` AS storefrontLogo,
+          `storekeeper_name` AS storekeeperName,
+           djself_manage djselfManage,
+           storefront_type storefrontType,
+          `mobile`,
+          `email`,
+          `create_date` AS createDate,
+          `modify_date` AS modifyDate,
+          `data_status` AS dataStatus
+    </sql>
+    <select id="selectStoreByTypeCityId" resultType="com.dangjia.acg.modle.storefront.Storefront">
+        select
+        <include refid="all_column"/>
+        from dj_basics_storefront
+        where city_id=#{cityId}
+        and storefront_type=#{storefrontType}
+    </select>
+
+</mapper>

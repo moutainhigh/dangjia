@@ -5,23 +5,28 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
+import com.dangjia.acg.common.pay.domain.UserInfo;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.basics.ProductDTO;
 import com.dangjia.acg.dto.product.*;
-import com.dangjia.acg.mapper.basics.IAttributeValueMapper;
-import com.dangjia.acg.mapper.basics.ILabelMapper;
-import com.dangjia.acg.mapper.basics.ITechnologyMapper;
-import com.dangjia.acg.mapper.basics.IUnitMapper;
+import com.dangjia.acg.mapper.basics.*;
 import com.dangjia.acg.mapper.product.*;
+import com.dangjia.acg.mapper.storefront.*;
 import com.dangjia.acg.modle.attribute.AttributeValue;
 import com.dangjia.acg.modle.basics.Label;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.brand.Unit;
+import com.dangjia.acg.modle.other.City;
 import com.dangjia.acg.modle.product.*;
+import com.dangjia.acg.modle.storefront.Storefront;
+import com.dangjia.acg.modle.storefront.StorefrontProduct;
+import com.dangjia.acg.modle.storefront.StorefrontProductAddedRelation;
+import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.service.basics.TechnologyService;
+import com.dangjia.acg.service.storefront.GoodsStorefrontProductService;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -33,6 +38,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -76,6 +82,14 @@ public class DjBasicsProductTemplateService {
     @Autowired
     private ILabelMapper iLabelMapper;
 
+    @Autowired
+    private IGoodsStorefrontMapper iGoodsStorefrontMapper;
+    @Autowired
+    private IGoodsCityMapper iGoodsCityMapper;
+    @Autowired
+    private GoodsStorefrontProductService   goodsStorefrontProductService;
+    @Autowired
+    private IGoodsStorefrontProductAddedRelationMapper iGoodsStorefrontProductAddedRelationMapper;
 
 
     public List<ProductAddedRelation> queryProductAddRelationByPid(HttpServletRequest request, String pid) {
@@ -151,7 +165,7 @@ public class DjBasicsProductTemplateService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse insertBatchProduct(String productArr,String cityId) {
+    public ServerResponse insertBatchProduct(String productArr,String cityId,String userId) {
 
         JSONArray jsonArr = JSONArray.parseArray(productArr);
         //1.商品作校验，校验前端传过来的商品是否符合条件
@@ -184,12 +198,19 @@ public class DjBasicsProductTemplateService {
            // if (!StringUtils.isNotBlank(imgStr.toString()))
                // return ServerResponse.createByErrorMessage("商品图片不能为空");
             LOG.info("001----------添加商品主表 start:" + basicsProductDTO.getName());
-            String productId = insertBasicsProductData(basicsProductDTO,imgStr,0,basicsGoods.getType());
+            String productId = insertBasicsProductData(basicsProductDTO,imgStr,0,basicsGoods.getType(),cityId);
             LOG.info("001----------添加商品主表 end productId:" + productId);
-            if(basicsProductDTO.getIsRelateionProduct()!=null&&"1".equals(basicsProductDTO.getIsRelateionProduct())){
-                //添加关联商品信息
-                insertAddedValueProductRelation(productId,basicsProductDTO.getRelationProductIds());
+           //上架商品到店铺
+            if(basicsGoods!=null&&basicsGoods.getType()!=1&&basicsGoods.getType()!=2){//非实物商品直接上架
+                String storefrontId=getStorefrontId(cityId,userId);
+                //上架商品到店铺
+                String storefrontProductId=goodsStorefrontProductService.insertExitStorefrontProduct(storefrontId, productId, basicsProductDTO, cityId);
+                if(basicsProductDTO.getIsRelateionProduct()!=null&&"1".equals(basicsProductDTO.getIsRelateionProduct())){
+                    //添加关联商品信息
+                    insertAddedValueProductRelation(productId,basicsProductDTO.getRelationProductIds(),storefrontProductId,storefrontId);
+                }
             }
+
 
             //添加工艺信息
             String ret = technologyService.insertTechnologyList(obj.getString("technologyList"), "0", 0, productId,cityId);
@@ -205,6 +226,7 @@ public class DjBasicsProductTemplateService {
         }
         return ServerResponse.createBySuccessMessage("保存更新商品成功");
     }
+
 
     /**
      * 删除工艺信息
@@ -223,14 +245,44 @@ public class DjBasicsProductTemplateService {
         }
         return "";
     }
+    /**
+     * 增加增值关联商品信息(先删除再添加）
+     * @param productId
+     * @param relationProductIds
+     */
+    void insertAddedValueProductRelation(String productId,String relationProductIds,String storefrontProductId,String storefrontId){
 
+        //上传模板库商品关系
+        Example example=new Example(ProductAddedRelation.class);
+        example.createCriteria().andEqualTo(ProductAddedRelation.ADDED_PRODUCT_TEMPLATE_ID, productId);
+        iProductAddedRelationMapper.deleteByExample(example);
+
+        //添加店铺商品关系
+        example=new Example(StorefrontProductAddedRelation.class);
+        example.createCriteria().andEqualTo(StorefrontProductAddedRelation.ADDED_PRODUCT_ID, storefrontProductId);
+        iGoodsStorefrontProductAddedRelationMapper.deleteByExample(example);
+
+        if(relationProductIds!=null&& StringUtils.isNotBlank(relationProductIds)){
+            String[] rpds=relationProductIds.split(",");
+            for(int i=0;i<rpds.length;i++){
+                ProductAddedRelation par=new ProductAddedRelation();
+                par.setProductTemplateId(rpds[i]);//关联商品ID
+                par.setAddedProductTemplateId(productId);//增值商品ID
+                iProductAddedRelationMapper.insert(par);
+                goodsStorefrontProductService.insertAddReation(rpds[i], storefrontProductId, storefrontId);
+            }
+
+        }
+
+
+    }
     /**
      * 添加商品主表信息
      * @param basicsProductDTO
      * @param imgStr 图处地址
      * @returndataStatus  数据状态，0正常，1删除，2存草稿
      */
-    private String insertBasicsProductData(BasicsProductDTO basicsProductDTO,StringBuilder imgStr,int dataStatus,int productType){
+    private String insertBasicsProductData(BasicsProductDTO basicsProductDTO,StringBuilder imgStr,int dataStatus,int productType,String cityId){
         DjBasicsProductTemplate product = new DjBasicsProductTemplate();
         String productId = basicsProductDTO.getId();
         if (productId !=null &&! "".equals(productId)) {
@@ -288,7 +340,7 @@ public class DjBasicsProductTemplateService {
         product.setGuaranteedPolicy(basicsProductDTO.getGuaranteedPolicy());
         product.setRefundPolicy(basicsProductDTO.getRefundPolicy());
         product.setIsRelateionProduct(basicsProductDTO.getIsRelateionProduct());
-
+        product.setCityId(cityId);
         if (productId == null || "".equals(productId)) {//没有id则新增
             product.setCreateDate(new Date());
             product.setModifyDate(new Date());
@@ -310,8 +362,40 @@ public class DjBasicsProductTemplateService {
                 masterMendWorkerAPI.updateMendWorker(JSON.toJSONString(list));*/
             }
         }
+
         return product.getId();
     }
+
+    private String getStorefrontId(String cityId,String userId){
+        Storefront storefront=iGoodsStorefrontMapper.selectStoreByTypeCityId(cityId,"worker");
+        if(storefront==null||StringUtils.isBlank(storefront.getId())){
+            /**
+             * 当家装修{城市}店
+             * 当家{城市}总部地址
+             * 当家装修定义了统一的人工标准，由符合要求的工匠提供服务，请放心选购
+             */
+            //MainUser mainUser=iGoodsUserMapper.selectByPrimaryKey(userId);
+            City city=iGoodsCityMapper.selectByPrimaryKey(cityId);
+            String cityName="";
+            if(city!=null&&StringUtils.isNotBlank(city.getName())){
+                cityName=city.getName();
+            }
+            storefront=new Storefront();
+            storefront.setUserId(userId);
+            storefront.setCityId(cityId);
+            storefront.setStorefrontName("当家装修"+cityName+"店");
+            storefront.setStorefrontAddress("当家"+cityName+"总部地址");
+            storefront.setStorefrontDesc("当家装修定义了统一的人工标准，由符合要求的工匠提供服务，请放心选购");
+            storefront.setStorefrontLogo("");//店铺logo暂无
+            storefront.setIfDjselfManage(1);
+            storefront.setStorefrontType("worker");
+            String systemlogo = configUtil.getValue(SysConfig.ORDER_DIANPU_ICON, String.class);
+            storefront.setSystemLogo(systemlogo);
+            iGoodsStorefrontMapper.insertSelective(storefront);
+        }
+        return storefront.getId();
+    }
+
 
     /**
      * 校验需添加商品数据是否正确
@@ -504,7 +588,7 @@ public class DjBasicsProductTemplateService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse saveProductTemporaryStorage(BasicsProductDTO basicsProductDTO,String technologyList, String  deleteTechnologyIds,int dataStatus,String cityId){
+    public ServerResponse saveProductTemporaryStorage(BasicsProductDTO basicsProductDTO,String technologyList, String  deleteTechnologyIds,int dataStatus,String cityId,String userId){
         if (!StringUtils.isNotBlank(basicsProductDTO.getCategoryId()))
             return ServerResponse.createByErrorMessage("商品分类不能为空");
 
@@ -534,11 +618,17 @@ public class DjBasicsProductTemplateService {
             }
         }
         LOG.info("001----------添加商品主表 start:" +basicsProductDTO.getId()+"-----"+ basicsProductDTO.getName());
-        String productId = insertBasicsProductData(basicsProductDTO,imgStr,dataStatus,basicsGoods.getType());
+        String productId = insertBasicsProductData(basicsProductDTO,imgStr,dataStatus,basicsGoods.getType(),cityId);
         LOG.info("001----------添加商品主表 end productId:" + productId);
-        if(basicsProductDTO.getIsRelateionProduct()!=null&&"1".equals(basicsProductDTO.getIsRelateionProduct())){
-            //添加关联商品信息
-            insertAddedValueProductRelation(productId,basicsProductDTO.getRelationProductIds());
+        //上架商品到店铺
+        if(basicsGoods!=null&&basicsGoods.getType()!=1&&basicsGoods.getType()!=2){//非实物商品直接上架
+            String storefrontId=getStorefrontId(cityId,userId);
+            //上架商品到店铺
+            String storefrontProductId=goodsStorefrontProductService.insertExitStorefrontProduct(storefrontId, productId, basicsProductDTO, cityId);
+            if(basicsProductDTO.getIsRelateionProduct()!=null&&"1".equals(basicsProductDTO.getIsRelateionProduct())){
+                //添加关联商品信息
+                insertAddedValueProductRelation(productId,basicsProductDTO.getRelationProductIds(),storefrontProductId,storefrontId);
+            }
         }
         String ret = technologyService.insertTechnologyList(technologyList, "0", 0, productId,cityId);
         if (!ret.equals("1"))  //如果不成功 ，弹出是错误提示
@@ -552,27 +642,7 @@ public class DjBasicsProductTemplateService {
         return ServerResponse.createBySuccess("保存成功",productId);
     }
 
-    /**
-     * 增加增值关联商品信息(先删除再添加）
-     * @param productId
-     * @param relationProductIds
-     */
-    void insertAddedValueProductRelation(String productId,String relationProductIds){
 
-        Example example=new Example(ProductAddedRelation.class);
-        example.createCriteria().andEqualTo(ProductAddedRelation.ADDED_PRODUCT_TEMPLATE_ID, productId);
-        iProductAddedRelationMapper.deleteByExample(example);
-        if(relationProductIds!=null&&StringUtils.isNotBlank(relationProductIds)){
-            String[] rpds=relationProductIds.split(",");
-            for(int i=0;i<rpds.length;i++){
-                ProductAddedRelation par=new ProductAddedRelation();
-                par.setProductTemplateId(rpds[i]);//关联商品ID
-                par.setAddedProductTemplateId(productId);//增值商品ID
-                iProductAddedRelationMapper.insert(par);
-            }
-
-        }
-    }
     /**
      * 查询商品标签
      *
@@ -732,11 +802,11 @@ public class DjBasicsProductTemplateService {
      * @param categoryId
      * @return
      */
-    public ServerResponse<PageInfo> queryProduct(PageDTO pageDTO, String categoryId) {
+    public ServerResponse<PageInfo> queryProduct(PageDTO pageDTO, String categoryId,String cityId) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            List<DjBasicsProductTemplate> productList = iBasicsProductTemplateMapper.queryProductByCategoryId(categoryId);
+            List<DjBasicsProductTemplate> productList = iBasicsProductTemplateMapper.queryProductByCategoryId(categoryId,cityId);
             PageInfo pageResult = new PageInfo(productList);
             List<Map<String, Object>> mapList = new ArrayList<>();
             for (DjBasicsProductTemplate p : productList) {
@@ -970,9 +1040,9 @@ public class DjBasicsProductTemplateService {
 
 
     //根据类别Id查到所有所属货品goods
-    public ServerResponse getAllGoodsByCategoryId(String categoryId) {
+    public ServerResponse getAllGoodsByCategoryId(String categoryId,String cityId) {
         try {
-            List<BasicsGoods> mapList = iBasicsGoodsMapper.queryByCategoryId(categoryId);
+            List<BasicsGoods> mapList = iBasicsGoodsMapper.queryByCategoryId(categoryId,cityId);
             return ServerResponse.createBySuccess("查询成功", mapList);
         } catch (Exception e) {
             e.printStackTrace();
