@@ -15,11 +15,8 @@ import com.dangjia.acg.dto.storefront.*;
 import com.dangjia.acg.dto.supplier.AccountFlowRecordDTO;
 import com.dangjia.acg.dto.supplier.DjSupplierDeliverDTO;
 import com.dangjia.acg.dto.supplier.DjSupplierDeliverDTOList;
-import com.dangjia.acg.mapper.pay.IStoreBusinessOrderMapper;
 import com.dangjia.acg.mapper.storefront.*;
 import com.dangjia.acg.mapper.supplier.DjSupplierPayOrderMapper;
-import com.dangjia.acg.mapper.user.IStoreUserMapper;
-import com.dangjia.acg.mapper.worker.IStoreWithdrawDepositMapper;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.other.BankCard;
 import com.dangjia.acg.modle.pay.BusinessOrder;
@@ -53,7 +50,7 @@ public class StorefrontService {
      */
     private static Logger logger = LoggerFactory.getLogger(StorefrontService.class);
     @Autowired
-    private IStoreWithdrawDepositMapper iStoreWithdrawDepositMapper;
+    private IStorefrontWithdrawDepositMapper istorefrontWithdrawDepositMapper;
     @Autowired
     private IStorefrontMapper istorefrontMapper;
     @Autowired
@@ -63,9 +60,9 @@ public class StorefrontService {
     @Autowired
     private StorefrontService storefrontService;
     @Autowired
-    private IStoreUserMapper iStoreUserMapper;
+    private IStorefrontUserMapper istorefrontUserMapper;
     @Autowired
-    private IStoreBusinessOrderMapper iStoreBusinessOrderMapper;
+    private IStorefrontBusinessOrderMapper istorefrontBusinessOrderMapper;
     @Autowired
     private IStoreStorefrontMapper iStoreStorefrontMapper;
     @Autowired
@@ -496,7 +493,7 @@ public class StorefrontService {
             if (surplusMoney <= 0) {
                 return ServerResponse.createByErrorMessage("提现金额不正确");
             }
-            MainUser mainUser = iStoreUserMapper.selectByPrimaryKey(storefront.getUserId());
+            MainUser mainUser = istorefrontUserMapper.selectByPrimaryKey(storefront.getUserId());
             if (!Utils.md5(payPassword).equals(mainUser.getPayPassword())){
                 return ServerResponse.createByErrorMessage("密码错误");
             }
@@ -508,11 +505,11 @@ public class StorefrontService {
             withdrawDeposit.setState(0);
             withdrawDeposit.setRoleType(5);
             withdrawDeposit.setCardNumber(bankCard);
-            BankCard bankCard1 = iStoreWithdrawDepositMapper.queryBankCard(bankCard, mainUser.getId());
+            BankCard bankCard1 = istorefrontWithdrawDepositMapper.queryBankCard(bankCard, mainUser.getId());
             withdrawDeposit.setBankName(bankCard1.getBankName());
             withdrawDeposit.setDataStatus(0);
             withdrawDeposit.setSourceId(storefront.getId());
-            iStoreWithdrawDepositMapper.insert(withdrawDeposit);
+            istorefrontWithdrawDepositMapper.insert(withdrawDeposit);
             //账号金额预扣
             storefront.setTotalAccount(storefront.getTotalAccount()-surplusMoney);
             storefront.setSurplusMoney(storefront.getSurplusMoney()-surplusMoney);
@@ -544,7 +541,7 @@ public class StorefrontService {
                     if (storefront == null) {
                         return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
                     }
-                    mainUser = iStoreUserMapper.selectByPrimaryKey(storefront.getUserId());
+                    mainUser = istorefrontUserMapper.selectByPrimaryKey(storefront.getUserId());
                     djSupplierPayOrder.setSupplierId(storefront.getId());
                 }else if(sourceType==2){
                     Example example=new Example(Storefront.class);
@@ -552,7 +549,7 @@ public class StorefrontService {
                             .andEqualTo(Storefront.CITY_ID,cityId)
                             .andEqualTo(Storefront.USER_ID,userId);
                     Storefront storefront = iStoreStorefrontMapper.selectOneByExample(example);
-                    mainUser = iStoreUserMapper.selectByPrimaryKey(storefront.getUserId());
+                    mainUser = istorefrontUserMapper.selectByPrimaryKey(storefront.getUserId());
                     djSupplierPayOrder.setSupplierId(storefront.getId());
                 }
                 if(mainUser==null) {
@@ -576,7 +573,7 @@ public class StorefrontService {
                 // 生成支付业务单
                 Example example = new Example(BusinessOrder.class);
                 example.createCriteria().andEqualTo(BusinessOrder.TASK_ID, djSupplierPayOrder.getId()).andNotEqualTo(BusinessOrder.STATE, 4);
-                List<BusinessOrder> businessOrderList = iStoreBusinessOrderMapper.selectByExample(example);
+                List<BusinessOrder> businessOrderList = istorefrontBusinessOrderMapper.selectByExample(example);
                 BusinessOrder businessOrder = null;
                 if (businessOrderList.size() > 0) {
                     businessOrder = businessOrderList.get(0);
@@ -594,7 +591,7 @@ public class StorefrontService {
                     businessOrder.setPayPrice(new BigDecimal(rechargeAmount));
                     businessOrder.setType(3);//记录支付类型任务类型
                     businessOrder.setTaskId(djSupplierPayOrder.getId());//保存任务ID
-                    iStoreBusinessOrderMapper.insert(businessOrder);
+                    istorefrontBusinessOrderMapper.insert(businessOrder);
                 }
                 djSupplierPayOrder.setBusinessOrderNumber(businessOrder.getNumber());
                 djSupplierPayOrderMapper.updateByPrimaryKeySelective(djSupplierPayOrder);

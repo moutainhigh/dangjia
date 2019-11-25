@@ -41,6 +41,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -182,6 +183,7 @@ public class MendMaterielService {
                     MendOrder mendOrder = new MendOrder();
                     mendOrder.setId(mendOrderId);
                     mendOrder.setState(3);//（0生成中,1处理中,2不通过取消,3已通过,4已全部结算,5已撤回,6已关闭7，已审核待处理 8，部分退货）
+                    mendOrder.setModifyDate(new Date());//更新时间
                     Integer i = mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
                     if (i <= 0)
                         return ServerResponse.createBySuccessMessage("全部退货失败");
@@ -189,6 +191,7 @@ public class MendMaterielService {
                     MendMateriel mendMateriel=new MendMateriel();
                     mendMateriel.setId(id);
                     mendMateriel.setActualCount(Double.parseDouble(actualCount));
+
                     mendMaterialMapper.updateByPrimaryKey(mendMateriel);
 
                     return ServerResponse.createBySuccessMessage("全部退货成功");
@@ -204,7 +207,14 @@ public class MendMaterielService {
                     mendOrder.setId(mendOrderId);
                     mendOrder.setState(8);//状态（0生成中,1处理中,2不通过取消,3已通过,4已全部结算,5已撤回,6已关闭7，已审核待处理 8，部分退货）
                     mendOrder.setReturnReason(returnReason);
+                    mendOrder.setModifyDate(new Date());//更新时间
                     Integer j = mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
+                    if (j <= 0)
+                        return ServerResponse.createBySuccessMessage("全部退货失败");
+                    MendMateriel mendMateriel=new MendMateriel();
+                    mendMateriel.setId(id);
+                    mendMateriel.setActualCount(Double.parseDouble(actualCount));
+                    mendMaterialMapper.updateByPrimaryKey(mendMateriel);
                     if (j > 0) {
                         MendOrder myMendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);
                         MendTypeRole mendTypeRole = mendTypeRoleMapper.getByType(myMendOrder.getType());
