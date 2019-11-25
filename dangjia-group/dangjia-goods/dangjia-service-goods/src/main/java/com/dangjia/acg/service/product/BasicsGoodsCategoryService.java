@@ -241,7 +241,7 @@ public class BasicsGoodsCategoryService {
     public ServerResponse deleteGoodsCategory(String id) {
         try {
             List<BasicsGoodsCategory> goodsCategoryList = iBasicsGoodsCategoryMapper.queryCategoryByParentId(id, null);//根据id查询是否有下级类别
-            List<BasicsGoods> goodsList = iBasicsGoodsMapper.queryByCategoryId(id);//根据id查询是否有关联商品
+            List<BasicsGoods> goodsList = iBasicsGoodsMapper.queryByCategoryId(id,null);//根据id查询是否有关联商品
             List<DjBasicsAttribute> GoodsAList = djBasicsAttributeMapper.queryAttributeByCategoryId(id, null);//根据id查询是否有关联属性
             if (goodsCategoryList.size() > 0) {
                 return ServerResponse.createByErrorMessage("此类别有下级不能删除");

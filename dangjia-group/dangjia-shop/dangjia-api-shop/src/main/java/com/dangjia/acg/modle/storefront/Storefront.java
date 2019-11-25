@@ -123,4 +123,11 @@ public class Storefront extends BaseEntity {
     private String  systemLogo;
 
 
+    @Column(name = "storefront_type")
+    @Desc(value = "店铺类型（实物商品：product，人工商品：worker)")
+    @ApiModelProperty("店铺类型（实物商品：product，人工商品：worker)")
+    private String  storefrontType;
+
+
+
 }

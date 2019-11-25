@@ -70,7 +70,8 @@ public interface DjBasicsProductAPI {
     @ApiOperation(value = "批量新增修改货品下的商品", notes = "批量新增修改货品下的商品")
     ServerResponse insertBatchProduct(@RequestParam("request") HttpServletRequest request,
                                  @RequestParam("productArr") String productArr,
-                                      @RequestParam("cityId")String cityId);
+                                      @RequestParam("cityId")String cityId,
+                                      @RequestParam("user_id")String user_id);
 
     @PostMapping("/product/djBasicsProduct/queryGoodsListByCategoryLikeName")
     @ApiOperation(value = "按照name模糊查询商品及下属货品", notes = "按照name模糊查询商品及下属货品，type： 是否禁用  0：禁用；1不禁用 ;  -1全部默认")
@@ -88,7 +89,8 @@ public interface DjBasicsProductAPI {
                                  BasicsProductDTO basicsProductDTO,
                                  @RequestParam("technologyList") String technologyList,
                                  @RequestParam("deleteTechnologyIds") String  deleteTechnologyIds,
-                                 @RequestParam("cityId") String  cityId);
+                                 @RequestParam("cityId") String  cityId,
+                                 @RequestParam("user_id")String user_id);
 
     @PostMapping("/product/djBasicsProduct/editSingleProduct")
     @ApiOperation(value = "单个新增修改货品下的商品", notes = "单个新增修改货品下的商品")
@@ -96,7 +98,8 @@ public interface DjBasicsProductAPI {
                                  BasicsProductDTO basicsProductDTO,
                                  @RequestParam("technologyList") String technologyList,
                                  @RequestParam("deleteTechnologyIds") String  deleteTechnologyIds,
-                                 @RequestParam("cityId") String  cityId);
+                                 @RequestParam("cityId") String  cityId,
+                                 @RequestParam("user_id")String user_id);
 
     @PostMapping("/product/djBasicsProduct/deleteBasicsProductById")
     @ApiOperation(value = "根据货品id删除商品对象", notes = "根据货品id删除商品对象")
@@ -117,7 +120,8 @@ public interface DjBasicsProductAPI {
     @ApiOperation(value = "查询所有商品根据类别ID", notes = "查询所有商品根据类别ID")
     ServerResponse<PageInfo> queryProduct(@RequestParam("request") HttpServletRequest request,
                                           @RequestParam("pageDTO") PageDTO pageDTO,
-                                          @RequestParam("categoryId") String categoryId);
+                                          @RequestParam("categoryId") String categoryId,
+                                          @RequestParam("cityId") String cityId);
 
     @PostMapping("/product/djBasicsProduct/queryUnit")
     @ApiOperation(value = "查询所有单位", notes = "查询所有单位")
@@ -144,7 +148,8 @@ public interface DjBasicsProductAPI {
     @PostMapping("/product/djBasicsProduct/getAllGoodsByCategoryId")
     @ApiOperation(value = "根据类别Id查询所属货品", notes = "根据类别Id查询所属商品")
     ServerResponse getAllGoodsByCategoryId(@RequestParam("request") HttpServletRequest request,
-                                           @RequestParam("categoryId") String categoryId);
+                                           @RequestParam("categoryId") String categoryId,
+                                           @RequestParam("cityId") String cityId);
 
     /**
      * 根据类别Id查询所属货品
