@@ -16,7 +16,6 @@ import com.dangjia.acg.dto.supplier.AccountFlowRecordDTO;
 import com.dangjia.acg.dto.supplier.DjSupplierDeliverDTO;
 import com.dangjia.acg.dto.supplier.DjSupplierDeliverDTOList;
 import com.dangjia.acg.mapper.storefront.*;
-import com.dangjia.acg.mapper.supplier.DjSupplierPayOrderMapper;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.other.BankCard;
 import com.dangjia.acg.modle.pay.BusinessOrder;
@@ -63,10 +62,9 @@ public class StorefrontService {
     private IStorefrontUserMapper istorefrontUserMapper;
     @Autowired
     private IStorefrontBusinessOrderMapper istorefrontBusinessOrderMapper;
+
     @Autowired
-    private IStoreStorefrontMapper iStoreStorefrontMapper;
-    @Autowired
-    private DjSupplierPayOrderMapper djSupplierPayOrderMapper;
+    private DjShopSupplierPayOrderMapper djShopSupplierPayOrderMapper;
 
     @Autowired
     private IStorefrontConfigMapper iStorefrontConfigMapper;
@@ -548,7 +546,7 @@ public class StorefrontService {
                     example.createCriteria().andEqualTo(Storefront.DATA_STATUS,0)
                             .andEqualTo(Storefront.CITY_ID,cityId)
                             .andEqualTo(Storefront.USER_ID,userId);
-                    Storefront storefront = iStoreStorefrontMapper.selectOneByExample(example);
+                    Storefront storefront = istorefrontMapper.selectOneByExample(example);
                     mainUser = istorefrontUserMapper.selectByPrimaryKey(storefront.getUserId());
                     djSupplierPayOrder.setSupplierId(storefront.getId());
                 }
@@ -568,7 +566,7 @@ public class StorefrontService {
                 djSupplierPayOrder.setState(0);
                 djSupplierPayOrder.setUserId(userId);
                 djSupplierPayOrder.setSourceType(sourceType);
-                djSupplierPayOrderMapper.insert(djSupplierPayOrder);
+            djShopSupplierPayOrderMapper.insert(djSupplierPayOrder);
 
                 // 生成支付业务单
                 Example example = new Example(BusinessOrder.class);
@@ -594,7 +592,7 @@ public class StorefrontService {
                     istorefrontBusinessOrderMapper.insert(businessOrder);
                 }
                 djSupplierPayOrder.setBusinessOrderNumber(businessOrder.getNumber());
-                djSupplierPayOrderMapper.updateByPrimaryKeySelective(djSupplierPayOrder);
+            djShopSupplierPayOrderMapper.updateByPrimaryKeySelective(djSupplierPayOrder);
                 return ServerResponse.createBySuccess("提交成功",djSupplierPayOrder.getBusinessOrderNumber());
         } catch (Exception e) {
             logger.error("店铺收支记录异常：", e);
