@@ -42,6 +42,7 @@ import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.service.order.BillMendOrderCheckService;
+import com.dangjia.acg.service.product.BillProductTemplateService;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -71,8 +72,6 @@ public class RefundAfterSalesService {
     private IBillUnitMapper iBillUnitMapper;
     @Autowired
     private IBillBrandMapper iBillBrandMapper;
-    @Autowired
-    private IBillAttributeValueMapper iBillAttributeValueMapper;
     @Autowired
     private IBillProductTemplateMapper iBillProductTemplateMapper;
     @Autowired
@@ -109,6 +108,8 @@ public class RefundAfterSalesService {
     private MendRecordAPI mendRecordAPI;
     @Autowired
     private IBillMemberMapper iBillMemberMapper;
+    @Autowired
+    private BillProductTemplateService billProductTemplateService;
 
     /**
      * 查询可退款的商品
@@ -190,11 +191,7 @@ public class RefundAfterSalesService {
                 ap.setUnitName(unit!=null?unit.getName():"");
                 ap.setUnitType(unit!=null?unit.getType():2);
             }
-            //查询规格名称
-            if (StringUtils.isNotBlank(pt.getValueIdArr())) {
-                ap.setValueIdArr(pt.getValueIdArr());
-                ap.setValueNameArr(getNewValueNameArr(pt.getValueIdArr()));
-            }
+
             BasicsGoods goods=iBillBasicsGoodsMapper.selectByPrimaryKey(pt.getGoodsId());
             ap.setProductType(goods.getType().toString());
             if(StringUtils.isNotBlank(goods.getBrandId())){
@@ -202,33 +199,15 @@ public class RefundAfterSalesService {
                 ap.setBrandId(goods.getId());
                 ap.setBrandName(brand!=null?brand.getName():"");
             }
-        }
-
-    }
-    /**
-     * 获取对应的属性值信息
-     * @param valueIdArr
-     * @return
-     */
-    private String getNewValueNameArr(String valueIdArr){
-        String strNewValueNameArr = "";
-        String[] newValueNameArr = valueIdArr.split(",");
-        for (int i = 0; i < newValueNameArr.length; i++) {
-            String valueId = newValueNameArr[i];
-            if (StringUtils.isNotBlank(valueId)) {
-                AttributeValue attributeValue = iBillAttributeValueMapper.selectByPrimaryKey(valueId);
-                if(attributeValue!=null&&StringUtils.isNotBlank(attributeValue.getName())){
-                    if (i == 0) {
-                        strNewValueNameArr = attributeValue.getName();
-                    } else {
-                        strNewValueNameArr = strNewValueNameArr + "," + attributeValue.getName();
-                    }
-                }
-
+            //查询规格名称
+            if (StringUtils.isNotBlank(pt.getValueIdArr())) {
+                ap.setValueIdArr(pt.getValueIdArr());
+                ap.setValueNameArr(billProductTemplateService.getNewValueNameArr(pt.getValueIdArr()));
             }
         }
-        return strNewValueNameArr;
+
     }
+
     /**
      * 申请退款页面，列表展示
      * @param userToken        用户token
@@ -627,17 +606,17 @@ public class RefundAfterSalesService {
                 ap.setUnitName(unit!=null?unit.getName():"");
                 ap.setUnitType(unit!=null?unit.getType():2);
             }
-            //查询规格名称
-            if (StringUtils.isNotBlank(pt.getValueIdArr())) {
-                ap.setValueIdArr(pt.getValueIdArr());
-                ap.setValueNameArr(getNewValueNameArr(pt.getValueIdArr()));
-            }
             BasicsGoods goods=iBillBasicsGoodsMapper.selectByPrimaryKey(pt.getGoodsId());
             ap.setProductType(goods.getType().toString());
             if(StringUtils.isNotBlank(goods.getBrandId())){
                 Brand brand=iBillBrandMapper.selectByPrimaryKey(goods.getBrandId());
                 ap.setBrandId(goods.getId());
                 ap.setBrandName(brand!=null?brand.getName():"");
+            }
+            //查询规格名称
+            if (StringUtils.isNotBlank(pt.getValueIdArr())) {
+                ap.setValueIdArr(pt.getValueIdArr());
+                ap.setValueNameArr(billProductTemplateService.getNewValueNameArr(pt.getValueIdArr()));
             }
         }
 
