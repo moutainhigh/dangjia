@@ -138,14 +138,14 @@ public interface DjDeliverOrderAPI {
                                                     @RequestParam("cityId") String queryId,
                                                     @RequestParam("orderStatus") String orderStatus);
     @PostMapping("app/order/updateAppOrderStats")
-    @ApiOperation(value = "根据订单状态查询订单详情列表(待收货、已完成)", notes = "根据订单状态查询订单详情（待收货、已完成）")
+    @ApiOperation(value = "修改订单状态", notes = "修改订单状态")
     ServerResponse  updateAppOrderStats(@RequestParam("userToken")String userToken,
                                         @RequestParam("lists") String lists,
                                         @RequestParam("id")String id);
 
-    @PostMapping("app/order/queryAppOrderList")
-    @ApiOperation(value = "根据订单状态查询订单详情列表(待收货、已完成)", notes = "根据订单状态查询订单详情（待收货、已完成）")
-    ServerResponse  queryAppOrderList(@RequestParam("userToken")String userToken,
+    @PostMapping("app/order/queryAppOrderInFoList")
+    @ApiOperation(value = "查询订单详情", notes = "查询订单详情")
+    ServerResponse  queryAppOrderInFoList(@RequestParam("userToken")String userToken,
                                         @RequestParam("id") String id,
                                         @RequestParam("shippingState")Integer shippingState);
 }
