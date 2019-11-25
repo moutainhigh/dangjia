@@ -217,14 +217,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             and rmo.create_date between  #{beginDate}  and #{endDate}
         </if>
         <if test="likeAddress!=null and likeAddress!=''">
-            AND CONCAT(
+            AND (CONCAT(
             house.residential,
             IFNULL(house.building, '*'),
             '栋',
             IFNULL(CONCAT(house.unit, '单元'),'' ),
             IFNULL(house.number, '*'),
             '号'
-            )  LIKE CONCAT('%',#{likeAddress},'%')
+            )  LIKE CONCAT('%',#{likeAddress},'%') or rmo.number like CONCAT('%',#{likeAddress},'%'))
         </if>
         ORDER BY rmo.create_date desc
     </select>
@@ -267,21 +267,18 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <if test = "state!=null and state!=''">
             and  rmo.state = #{state}
         </if>
-        <if test = "houseId!=null and houseId!=''">
-            and  rmo.house_id = #{houseId}
-        </if>
         <if test = "type!=null and type!=''">
             and rmo.type = #{type}
         </if>
         <if test="likeAddress!=null and likeAddress!=''">
-            AND CONCAT(
+            AND (CONCAT(
             house.residential,
             IFNULL(house.building, '*'),
             '栋',
             IFNULL(CONCAT(house.unit, '单元'),'' ),
             IFNULL(house.number, '*'),
             '号'
-            )  LIKE CONCAT('%',#{likeAddress},'%')
+            )  LIKE CONCAT('%',#{likeAddress},'%') or rmo.number like CONCAT('%',#{likeAddress},'%'))
         </if>
         ORDER BY rmo.create_date desc
 
@@ -325,21 +322,18 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <if test = "state==2">
             and  rmo.state in (2,3,4,5,6)
         </if>
-        <if test = "houseId!=null and houseId!=''">
-            and  rmo.house_id = #{houseId}
-        </if>
         <if test = "type!=null and type!=''">
             and rmo.type = #{type}
         </if>
         <if test="likeAddress!=null and likeAddress!=''">
-            AND CONCAT(
+            AND (CONCAT(
             house.residential,
             IFNULL(house.building, '*'),
             '栋',
             IFNULL(CONCAT(house.unit, '单元'),'' ),
             IFNULL(house.number, '*'),
             '号'
-            )  LIKE CONCAT('%',#{likeAddress},'%')
+            )  LIKE CONCAT('%',#{likeAddress},'%') or rmo.number like CONCAT('%',#{likeAddress},'%'))
         </if>
         ORDER BY rmo.create_date desc
     </select>

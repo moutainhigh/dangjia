@@ -1,10 +1,12 @@
 package com.dangjia.acg.service.core;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.ElasticSearchAPI;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dto.ElasticSearchDTO;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.modle.core.WorkerType;
@@ -12,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -56,17 +58,33 @@ public class WorkerTypeService {
      */
     public ServerResponse getWorkerTypeList(Integer type) {
         ElasticSearchDTO elasticSearchDTO=new ElasticSearchDTO();
+        //表名字
         elasticSearchDTO.setTableTypeName(WorkerType.class.getSimpleName());
-        List<String> redata =elasticSearchAPI.searchESJson(elasticSearchDTO);
+
+        //排序字段
+        Map<String, Integer> sortMap = new HashMap<>();
+        sortMap.put(WorkerType.SORT, 0);
+        elasticSearchDTO.setSortMap(sortMap);
+
+        //不包含数据
+        Map<String, String> notParamMap = new HashMap<>();
+        if (type != null && type == 0) {
+            notParamMap.put(WorkerType.TYPE, "2,7");
+        } else if (type != null && type == 1) {
+            notParamMap.put(WorkerType.TYPE, "1,2,7");
+        } else if (type != null && type == 2) {
+            notParamMap.put(WorkerType.TYPE, "7");
+        }
+        notParamMap.put(WorkerType.STATE, "2");
+        if(!notParamMap.isEmpty()){
+            elasticSearchDTO.setNotParamMap(notParamMap);
+        }
+        List<JSONObject> redata =elasticSearchAPI.searchESJson(elasticSearchDTO);
         if(redata==null || redata.size()==0) {
             Example example = new Example(WorkerType.class);
             Example.Criteria criteria = example.createCriteria();
-            if (type != null && type == 0) {
-                criteria.andCondition("type not in (2,7) ");
-            } else if (type != null && type == 1) {
-                criteria.andCondition("type not in (1,2,7)");
-            } else if (type != null && type == 2) {
-                criteria.andCondition("type not in (7)");
+            if (notParamMap!=null&& !CommonUtil.isEmpty(notParamMap.get(WorkerType.TYPE))) {
+                criteria.andCondition("type not in ("+notParamMap.get(WorkerType.TYPE)+") ");
             }
             criteria.andNotEqualTo(WorkerType.STATE, 2);
             example.orderBy(WorkerType.SORT).asc();
@@ -78,14 +96,9 @@ public class WorkerTypeService {
             List<Map> maps = (List<Map>) BeanUtils.listToMap(workerTypeList);
             for (Map map : maps) {
                 map.put("workerTypeId", map.get(WorkerType.ID));
+                elasticSearchAPI.saveESJson(JSON.toJSONString(map),  WorkerType.class.getSimpleName());
             }
-
-            List<String> listJson = new ArrayList<>();
-            for (Map map : maps) {
-                listJson.add(JSON.toJSONString(map));
-            }
-            elasticSearchAPI.saveESJsonList(listJson,  WorkerType.class.getSimpleName());
-            redata=listJson;
+            return ServerResponse.createBySuccess("查询成功", maps);
         }
         return ServerResponse.createBySuccess("查询成功", redata);
     }
@@ -97,14 +110,12 @@ public class WorkerTypeService {
      * @return
      */
     public ServerResponse getWorkerType(String workerTypeId) {
-        WorkerType workerType = workerTypeMapper.selectByPrimaryKey(workerTypeId);
+        JSONObject workerType = elasticSearchAPI.getSearchJsonId(WorkerType.class.getSimpleName(),workerTypeId);
         if (workerType == null) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode()
                     , "查无工种");
         }
-        Map map = BeanUtils.beanToMap(workerType);
-        map.put("workerTypeId", map.get(WorkerType.ID));
-        return ServerResponse.createBySuccess("查询成功", map);
+        return ServerResponse.createBySuccess("查询成功", workerType);
     }
 
     /**
@@ -120,8 +131,7 @@ public class WorkerTypeService {
         if (workerTypeId == null) {
             return ServerResponse.createByErrorMessage("操作失败，请传入workerTypeId");
         }
-        WorkerType workerType = new WorkerType();
-        workerType.setId(workerTypeId);
+        WorkerType workerType = workerTypeMapper.selectByPrimaryKey(workerTypeId);
         if (methods != null) {
             workerType.setMethods(methods);
         }
@@ -132,6 +142,7 @@ public class WorkerTypeService {
             workerType.setSafeState(safeState);
         }
         workerTypeMapper.updateByPrimaryKeySelective(workerType);
+        elasticSearchAPI.updateResponse(JSON.toJSONString(workerType),WorkerType.class.getSimpleName(),workerTypeId);
         return ServerResponse.createBySuccessMessage("操作成功");
     }
 }

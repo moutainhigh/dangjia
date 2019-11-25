@@ -63,7 +63,7 @@ public interface DjDeliverOrderAPI {
 
 
     @PostMapping("app/order/queryDeliverOrderListByStatus")
-    @ApiOperation(value = "根据订单状态查询订单详情列表(待付款、待发货)", notes = "根据订单状态查询订单详情（待付款、待发货）")
+    @ApiOperation(value = "根据订单状态查询订单详情列表(全部订单、待付款、待发货)", notes = "根据订单状态查询订单详情（全部订单、待付款、待发货）")
     ServerResponse queryDeliverOrderListByStatus(@RequestParam("pageDTO") PageDTO pageDTO,
                                                  @RequestParam("userToken") String userToken,
                                                  @RequestParam("houseId") String houseId,
@@ -101,6 +101,11 @@ public interface DjDeliverOrderAPI {
     ServerResponse transportationCostDetail(@RequestParam("pageDTO")PageDTO pageDTO,@RequestParam("orderId") String orderId,@RequestParam("orderStatus")Integer orderStatus );
 
 
+    @PostMapping("app/order/queryDeliverOrderHump")
+    @ApiOperation(value = "我的订单,待付款,待发货,已取消", notes = "我的订单,待付款,待发货,已取消")
+    ServerResponse queryDeliverOrderHump(@RequestParam("pageDTO") PageDTO pageDTO,
+                                         @RequestParam("houseId") String houseId,
+                                         @RequestParam("state") String state);
 //    /**
 //     * 取消订单
 //     *

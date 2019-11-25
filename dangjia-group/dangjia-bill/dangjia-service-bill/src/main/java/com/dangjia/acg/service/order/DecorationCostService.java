@@ -1,10 +1,8 @@
 package com.dangjia.acg.service.order;
 
-import com.ctc.wstx.sw.EncodingXmlWriter;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.common.util.MathUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.order.DecorationCostDTO;
 import com.dangjia.acg.dto.order.DecorationCostItemDTO;
@@ -12,10 +10,10 @@ import com.dangjia.acg.mapper.actuary.IBillBudgetMapper;
 import com.dangjia.acg.mapper.delivery.IBillDjDeliverOrderMapper;
 import com.dangjia.acg.mapper.refund.*;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
-import com.dangjia.acg.modle.attribute.AttributeValue;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
+import com.dangjia.acg.service.product.BillProductTemplateService;
 import com.dangjia.acg.service.refund.RefundAfterSalesService;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
@@ -43,10 +41,10 @@ public class DecorationCostService {
     @Autowired
     private IBillBrandMapper iBillBrandMapper;
     @Autowired
-    private IBillAttributeValueMapper iBillAttributeValueMapper;
-    @Autowired
     private ConfigUtil configUtil;
 
+    @Autowired
+    private BillProductTemplateService billProductTemplateService;
     @Autowired
     private IBillBudgetMapper iBillBudgetMapper;
     /**
@@ -160,44 +158,22 @@ public class DecorationCostService {
                 ap.setImage(purchaseIcon);
                 ap.setImageUrl(address+purchaseIcon);
             }
-            //查询规格名称
-            if (StringUtils.isNotBlank(pt.getValueIdArr())) {
-                ap.setValueIdArr(pt.getValueIdArr());
-                ap.setValueNameArr(getNewValueNameArr(pt.getValueIdArr()));
-            }
+
             BasicsGoods goods=iBillBasicsGoodsMapper.selectByPrimaryKey(pt.getGoodsId());
             if(StringUtils.isNotBlank(goods.getBrandId())){
                 Brand brand=iBillBrandMapper.selectByPrimaryKey(goods.getBrandId());
                 ap.setBrandId(goods.getId());
                 ap.setBrandName(brand!=null?brand.getName():"");
             }
-        }
-
-    }
-    /**
-     * 获取对应的属性值信息
-     * @param valueIdArr
-     * @return
-     */
-    private String getNewValueNameArr(String valueIdArr){
-        String strNewValueNameArr = "";
-        String[] newValueNameArr = valueIdArr.split(",");
-        for (int i = 0; i < newValueNameArr.length; i++) {
-            String valueId = newValueNameArr[i];
-            if (StringUtils.isNotBlank(valueId)) {
-                AttributeValue attributeValue = iBillAttributeValueMapper.selectByPrimaryKey(valueId);
-                if(attributeValue!=null&&StringUtils.isNotBlank(attributeValue.getName())){
-                    if (i == 0) {
-                        strNewValueNameArr = attributeValue.getName();
-                    } else {
-                        strNewValueNameArr = strNewValueNameArr + "," + attributeValue.getName();
-                    }
-                }
-
+            //查询规格名称
+            if (StringUtils.isNotBlank(pt.getValueIdArr())) {
+                ap.setValueIdArr(pt.getValueIdArr());
+                ap.setValueNameArr(billProductTemplateService.getNewValueNameArr(pt.getValueIdArr()));
             }
         }
-        return strNewValueNameArr;
+
     }
+
     /**
      * 录入自购商品价格信息
      * @param userToken 用户TOKEN

@@ -70,6 +70,7 @@ import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseFlowService;
+import com.dangjia.acg.service.product.MasterProductTemplateService;
 import com.dangjia.acg.util.JdbcContextHolder;
 import com.dangjia.acg.util.StringTool;
 import com.dangjia.acg.util.Utils;
@@ -199,6 +200,9 @@ public class HouseService {
     private IMasterAttributeValueMapper iMasterAttributeValueMapper;
     @Autowired
     private ForMasterAPI forMasterAPI;
+
+    @Autowired
+    private MasterProductTemplateService masterProductTemplateService;
 
     public House selectHouseById(String  id) {
         return iHouseMapper.selectByPrimaryKey(id);
@@ -437,41 +441,19 @@ public class HouseService {
                     Unit unit= iMasterUnitMapper.selectByPrimaryKey(unitId);
                     ap.setUnitName(unit!=null?unit.getName():"");
                 }
-                //查询规格名称
-                if (StringUtils.isNotBlank(ap.getValueIdArr())) {
-                    ap.setValueNameArr(getNewValueNameArr(ap.getValueIdArr()));
-                }
+
                 if(StringUtils.isNotBlank(ap.getBrandId())){
                     Brand brand=iMasterBrandMapper.selectByPrimaryKey(ap.getBrandId());
                     ap.setBrandName(brand!=null?brand.getName():"");
                 }
-            }
-        }
-    }
-    /**
-     * 获取对应的属性值信息
-     * @param valueIdArr
-     * @return
-     */
-    public String getNewValueNameArr(String valueIdArr){
-        String strNewValueNameArr = "";
-        String[] newValueNameArr = valueIdArr.split(",");
-        for (int i = 0; i < newValueNameArr.length; i++) {
-            String valueId = newValueNameArr[i];
-            if (StringUtils.isNotBlank(valueId)) {
-                AttributeValue attributeValue = iMasterAttributeValueMapper.selectByPrimaryKey(valueId);
-                if(attributeValue!=null&&StringUtils.isNotBlank(attributeValue.getName())){
-                    if (i == 0) {
-                        strNewValueNameArr = attributeValue.getName();
-                    } else {
-                        strNewValueNameArr = strNewValueNameArr + "," + attributeValue.getName();
-                    }
+                //查询规格名称
+                if (StringUtils.isNotBlank(ap.getValueIdArr())) {
+                    ap.setValueNameArr(masterProductTemplateService.getNewValueNameArr(ap.getValueIdArr()));
                 }
-
             }
         }
-        return strNewValueNameArr;
     }
+
 
     /**
      * 修改房子工序顺序以及选配标签

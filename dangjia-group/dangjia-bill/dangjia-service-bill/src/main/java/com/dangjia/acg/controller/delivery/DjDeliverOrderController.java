@@ -81,8 +81,8 @@ public class DjDeliverOrderController implements DjDeliverOrderAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryDeliverOrderDsdListByStatus(PageDTO pageDTO, String userToken, String houseId, String queryId, String orderStatus) {
-        return djDeliverOrderService.queryDeliverOrderDsdListByStatus(pageDTO,userToken,houseId,queryId,orderStatus);
+    public ServerResponse queryDeliverOrderDsdListByStatus(PageDTO pageDTO, String userToken, String houseId, String cityId, String orderStatus) {
+        return djDeliverOrderService.queryDeliverOrderDsdListByStatus(pageDTO,userToken,houseId,cityId,orderStatus);
     }
 
     @Override
@@ -115,5 +115,10 @@ public class DjDeliverOrderController implements DjDeliverOrderAPI {
         return djDeliverOrderService.transportationCostDetail(pageDTO,orderId,orderStatus);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse queryDeliverOrderHump(PageDTO pageDTO, String houseId, String state) {
+        return djDeliverOrderService.queryDeliverOrderHump(pageDTO,houseId,state);
+    }
 
 }

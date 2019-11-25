@@ -17,6 +17,8 @@ public class ShoppingCartDTO{
 
     private BigDecimal totalMaterialPrice;//实物总价
 
+    private String storefrontIcon;//店铺图标
+
     private List<ShoppingCartListDTO> shoppingCartListDTOS;
 
 }

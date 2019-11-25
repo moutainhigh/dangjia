@@ -25,8 +25,8 @@ public class WebHouseChoiceCaseController implements HouseChoiceCaseAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getHouseChoiceCases(HttpServletRequest request, PageDTO pageDTO, Integer from, String cityId) {
-        return houseChoiceCaseService.getHouseChoiceCases(pageDTO, from, cityId);
+    public ServerResponse getHouseChoiceCases(HttpServletRequest request, PageDTO pageDTO, Integer from, Integer state,String cityId) {
+        return houseChoiceCaseService.getHouseChoiceCases(pageDTO, from, state,cityId);
     }
 
     /**

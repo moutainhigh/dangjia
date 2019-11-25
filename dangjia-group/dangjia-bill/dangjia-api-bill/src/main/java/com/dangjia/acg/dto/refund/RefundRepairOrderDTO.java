@@ -51,7 +51,7 @@ public class RefundRepairOrderDTO {
 
     private int repairProductCount;//退款商品总件数
 
-    private String repairProductImageArr;;//退款商品图片（前两件商品图片）
+    private String repairProductImageArr;//退款商品图片（前两件商品图片）
 
     private String repairProductName;//退款商品名称（一个商品时才有）
 
