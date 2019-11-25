@@ -346,7 +346,6 @@ public class AppActuaryOperationService {
             }
             List<AttributeDTO> attrList = getAllAttributes(product, productList,goods);
             goodsDTO.setAttrList(attrList);
-
             return goodsDTO;
         } catch (Exception e) {
             e.printStackTrace();
