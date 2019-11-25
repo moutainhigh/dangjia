@@ -12,6 +12,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 实体类 -补退材料表
@@ -143,5 +145,8 @@ public class MendMateriel extends BaseEntity {
 
 	@Transient
 	private Double receive;//收货总数
+
+	@Transient
+	List<Map<String,Object>> supplierIdList;//匹配那些供应商
 
 }

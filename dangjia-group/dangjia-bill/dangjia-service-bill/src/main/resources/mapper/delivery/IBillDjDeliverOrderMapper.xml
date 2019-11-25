@@ -768,4 +768,36 @@
         AND id!=parent_order_id
     </select>
 
+    <select id="queryAppOrderList" resultType="com.dangjia.acg.dto.delivery.DjSplitDeliverOrderDTO">
+        select
+        IFNULL(ddsd.id,'') as id,
+        IFNULL(dbs.storefront_name,'') as storefrontName,-- 店铺名称
+        dbs.storefront_logo as storefrontIcon,
+        ddsd.house_id as houseId,
+        IFNULL(ddsd.create_date,'') as createDate,-- 创建时间
+        IFNULL(ddsd.number,'') as number,-- 订单号
+        IFNULL(ddsd.shipping_state,'') as shippingState,-- 订单状态
+        IFNULL(ddsd.total_amount,'') as totalAmount,-- 总价格
+        '' as total -- 件数
+        from dj_deliver_split_deliver ddsd
+        inner join dj_basics_storefront dbs on dbs.id=ddsd.storefront_id
+        where ddsd.house_id = #{houseId}
+        <if test="cityId!=null and cityId!=''">
+            and  ddsd.city_id = #{cityId}
+        </if>
+        <if test="orderStatus!=null and orderStatus!=''">
+            and  ddsd.shipping_state = #{orderStatus}
+        </if>
+    </select>
+
+
+    <select id="queryValueIdArr" resultType="java.lang.String">
+        select bpt.value_id_arr as valueIdArr
+        from dj_deliver_order_split_item dosi
+        INNER JOIN dj_basics_storefront_product bsp on dosi.product_id = bsp.id
+        INNER JOIN  dj_basics_product_template bpt on bsp.prod_template_id = bpt.id
+        where dosi.id = #{id}
+    </select>
+
+
 </mapper>

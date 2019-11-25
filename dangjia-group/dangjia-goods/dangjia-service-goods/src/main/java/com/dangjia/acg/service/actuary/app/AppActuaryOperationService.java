@@ -492,6 +492,7 @@ public class AppActuaryOperationService {
                     } else {
                         avDTO.setState(0);//未选中
                     }
+                    avDTO.setType(0);
                     attributeValueDTOList.add(avDTO);//添加属性值
                 }
             }

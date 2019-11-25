@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.repair;
 
+import com.alibaba.fastjson.JSON;
 import com.dangjia.acg.api.BasicsStorefrontAPI;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.data.ForMasterAPI;
@@ -36,6 +37,7 @@ import com.github.pagehelper.PageInfo;
 import com.netflix.discovery.converters.Auto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
@@ -78,6 +80,87 @@ public class MendMaterielService {
     private IMendOrderCheckMapper mendOrderCheckMapper;
 
 
+    /**
+     * 店铺退货分发供应商列表
+     * @param request
+     * @param cityId
+     * @param userId
+     * @param pageDTO
+     * @param likeAddress
+     * @return
+     */
+    public ServerResponse storeReturnDistributionSupplier(HttpServletRequest request, String cityId, String userId, PageDTO pageDTO, String likeAddress) {
+        try{
+
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
+            if (storefront == null) {
+                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
+            }
+            List<MendOrder> mendOrderList = mendOrderMapper.storeReturnDistributionSupplier(storefront.getId(), likeAddress);
+            PageInfo pageResult = new PageInfo(mendOrderList);
+            List<MendOrderDTO> mendOrderDTOS = getMendOrderDTOList(mendOrderList);
+            pageResult.setList(mendOrderDTOS);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("店铺退货分发供应商异常");
+        }
+    }
+
+    /**
+     *業主審核部分退貨-申请平台介入
+     * @param request
+     * @param cityId
+     * @param houseId
+     * @param pageDTO
+     * @return
+     */
+    public ServerResponse applyPlatformAccess(HttpServletRequest request, String cityId, String houseId, PageDTO pageDTO) {
+        try{
+                return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("業主審核部分退貨-申请平台介入异常");
+        }
+    }
+
+    /**
+     *业主申请部分退货-接受
+     * @param request
+     * @param cityId
+     * @param houseId
+     * @param pageDTO
+     * @return
+     */
+    public ServerResponse acceptPartialReturn(HttpServletRequest request, String cityId, String houseId, PageDTO pageDTO) {
+        try{
+
+            return null;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("业主申请部分退货-接受异常");
+        }
+    }
+
+    /**
+     * 业主审核部分退货列表
+     * @param request
+     * @param cityId
+     * @param houseId
+     * @param pageDTO
+     * @return
+     */
+    public ServerResponse reviewReturnList(HttpServletRequest request, String cityId, String houseId, PageDTO pageDTO) {
+        try{
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("业主申请部分退货-接受异常");
+        }
+    }
+
 
     /**
      * 确认退货
@@ -86,37 +169,56 @@ public class MendMaterielService {
      * @param type
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse confirmReturnMendMaterial(String mendOrderId, String userId, Integer type, String actualCountList,String returnReason) {
         try {
             if (type == 0) {
-                //全部退货
-                MendOrder mendOrder = new MendOrder();
-                mendOrder.setId(mendOrderId);
-                mendOrder.setState(3);
-                Integer i = mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
-                if (i <= 0)
-                    return ServerResponse.createBySuccessMessage("全部退货失败");
-                return ServerResponse.createBySuccessMessage("全部退货成功");
+                //String aa="[{\"mendOrderId\":\"865634841567998628778\",\"actualCount\":9}]";
+                List<Map<String,Object>> list= JSON.parseObject(actualCountList, List.class);
+                for (Map<String, Object> stringStringMap : list) {
+                    String id=stringStringMap.get("id").toString();
+                    String actualCount=stringStringMap.get("actualCount").toString();
+                    //全部退货
+                    MendOrder mendOrder = new MendOrder();
+                    mendOrder.setId(mendOrderId);
+                    mendOrder.setState(3);//（0生成中,1处理中,2不通过取消,3已通过,4已全部结算,5已撤回,6已关闭7，已审核待处理 8，部分退货）
+                    Integer i = mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
+                    if (i <= 0)
+                        return ServerResponse.createBySuccessMessage("全部退货失败");
+
+                    MendMateriel mendMateriel=new MendMateriel();
+                    mendMateriel.setId(id);
+                    mendMateriel.setActualCount(Double.parseDouble(actualCount));
+                    mendMaterialMapper.updateByPrimaryKey(mendMateriel);
+
+                    return ServerResponse.createBySuccessMessage("全部退货成功");
+                }
+
             } else {
-                //部分退货
-                MendOrder mendOrder = new MendOrder();
-                mendOrder.setId(mendOrderId);
-                mendOrder.setState(8);//状态（0生成中,1处理中,2不通过取消,3已通过,4已全部结算,5已撤回,6已关闭7，已审核待处理 8，部分退货）
-                mendOrder.setReturnReason(returnReason);
-                Integer j = mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
-                if (j > 0) {
-                    MendOrder myMendOrder = mendOrderMapper.selectByPrimaryKey("");
-                    MendTypeRole mendTypeRole = mendTypeRoleMapper.getByType(myMendOrder.getType());
-                    String[] roleArr = mendTypeRole.getRoleArr().split(",");
-                    for (int i = 0; i < roleArr.length; i++) {
-                        MendOrderCheck mendOrderCheck = new MendOrderCheck();
-                        mendOrderCheck.setMendOrderId(myMendOrder.getId());
-                        mendOrderCheck.setRoleType(roleArr[i]);
-                        mendOrderCheck.setState(0);
-                        mendOrderCheck.setSort(i + 1);//顺序
-                        mendOrderCheckMapper.insert(mendOrderCheck);
+                List<Map<String,Object>> list= JSON.parseObject(actualCountList, List.class);
+                for (Map<String, Object> stringStringMap : list) {
+                    String id=stringStringMap.get("id").toString();
+                    String actualCount=stringStringMap.get("actualCount").toString();
+                    //部分退货
+                    MendOrder mendOrder = new MendOrder();
+                    mendOrder.setId(mendOrderId);
+                    mendOrder.setState(8);//状态（0生成中,1处理中,2不通过取消,3已通过,4已全部结算,5已撤回,6已关闭7，已审核待处理 8，部分退货）
+                    mendOrder.setReturnReason(returnReason);
+                    Integer j = mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
+                    if (j > 0) {
+                        MendOrder myMendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);
+                        MendTypeRole mendTypeRole = mendTypeRoleMapper.getByType(myMendOrder.getType());
+                        String[] roleArr = mendTypeRole.getRoleArr().split(",");
+                        for (int i = 0; i < roleArr.length; i++) {
+                            MendOrderCheck mendOrderCheck = new MendOrderCheck();
+                            mendOrderCheck.setMendOrderId(myMendOrder.getId());
+                            mendOrderCheck.setRoleType(roleArr[i]);
+                            mendOrderCheck.setState(0);
+                            mendOrderCheck.setSort(i + 1);//顺序
+                            mendOrderCheckMapper.insert(mendOrderCheck);
+                        }
+                        return ServerResponse.createBySuccessMessage("部分退货成功");
                     }
-                    return ServerResponse.createBySuccessMessage("部分退货成功");
                 }
             }
             return null;
@@ -139,7 +241,7 @@ public class MendMaterielService {
      * landlordState
      * 0生成中,1平台审核中,2不通过,3通过
      */
-    public ServerResponse landlordState(String userId, String cityId, String houseId, PageDTO pageDTO, String beginDate, String endDate, String state, String likeAddress) {
+    public ServerResponse landlordState(String userId, String cityId, PageDTO pageDTO, String state, String likeAddress) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
 //            List<MendOrder> mendOrderList = mendOrderMapper.landlordState(houseId);
@@ -147,7 +249,7 @@ public class MendMaterielService {
             if (storefront == null) {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
-            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(storefront.getId(), houseId, 4, beginDate, endDate, state, likeAddress);
+            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(storefront.getId(), 4, state, likeAddress);
             PageInfo pageResult = new PageInfo(mendOrderList);
             List<MendOrderDTO> mendOrderDTOS = getMendOrderDTOList(mendOrderList);
             pageResult.setList(mendOrderDTOS);
@@ -158,7 +260,7 @@ public class MendMaterielService {
         }
     }
     //业主仅退款(已经处理)
-    public ServerResponse landlordStateHandle(HttpServletRequest request, String cityId, String houseId, PageDTO pageDTO, String beginDate, String endDate, String state, String likeAddress) {
+    public ServerResponse landlordStateHandle(HttpServletRequest request, String cityId,  PageDTO pageDTO, String state, String likeAddress) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         //通过缓存查询店铺信息
@@ -307,7 +409,7 @@ public class MendMaterielService {
      * material_back_state
      * 0生成中,1平台审核中，2平台审核不通过，3审核通过，4管家取消
      */
-    public ServerResponse materialBackState(String userId, String cityId, String houseId, PageDTO pageDTO, String beginDate, String endDate, String state, String likeAddress) {
+    public ServerResponse materialBackState(String userId, String cityId, PageDTO pageDTO, String state, String likeAddress) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             //通过缓存查询店铺信息
@@ -315,8 +417,7 @@ public class MendMaterielService {
             if (storefront == null) {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
-//            List<MendOrder> mendOrderList = mendOrderMapper.materialBackState(houseId); 2
-            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(storefront.getId(), houseId, 2, beginDate, endDate, state, likeAddress);
+            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(storefront.getId(), 2,  state, likeAddress);
             PageInfo pageResult = new PageInfo(mendOrderList);
             List<MendOrderDTO> mendOrderDTOS = getMendOrderDTOList(mendOrderList);
             pageResult.setList(mendOrderDTOS);
@@ -343,9 +444,13 @@ public class MendMaterielService {
         if(mendMaterielProgressList!=null&&mendMaterielProgressList.size()>0)
         returnMendMaterielDTO.setMendMaterielProgressList(mendMaterielProgressList);
 
+
         List<MendMateriel> mendMaterielList = mendMaterialMapper.byMendOrderId(mendOrderId);
         Double  totalPrice=0d;
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+        returnMendMaterielDTO.setImageArr(mendOrder.getImageArr()!=""?address+mendOrder.getImageArr():"");//相关凭证
+        returnMendMaterielDTO.setReturnReason(mendOrder.getReturnReason()!=null?mendOrder.getReturnReason():"");//失败原因
+        returnMendMaterielDTO.setState(mendOrder.getState()!=null?mendOrder.getState()+"":"");
         for (MendMateriel mendMateriel : mendMaterielList) {
             mendMateriel.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
             Warehouse warehouse = warehouseMapper.getByProductId(mendMateriel.getProductId(), mendOrder.getHouseId());//材料仓库统计
@@ -361,9 +466,13 @@ public class MendMaterielService {
                     //未发货数量=已要 - 已收
                     mendMateriel.setReceive(warehouse.getShopCount() - (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()));
                 }
+
             }
             //合计退款
             totalPrice+=mendMateriel.getTotalPrice();
+            //判断商品有哪些供应商供应
+            List<Map<String,Object>> supplierIdList = splitDeliverMapper.getMendMaterialSupplierId(mendOrder.getHouseId(), mendMateriel.getProductId());
+            mendMateriel.setSupplierIdList(supplierIdList);//查看有那些供应商供应
         }
         returnMendMaterielDTO.setMendMaterielList(mendMaterielList);
         returnMendMaterielDTO.setTotalPrice(totalPrice);
@@ -409,8 +518,12 @@ public class MendMaterielService {
      * materialOrderState
      * 0生成中,1平台审核中，2平台审核不通过，3平台审核通过待业主支付,4业主已支付，5业主不同意，6管家取消
      */
-    public ServerResponse materialOrderState(String storefrontId, String houseId, PageDTO pageDTO, String beginDate, String endDate, String state, String likeAddress) {
+    public ServerResponse materialOrderState(String userId, String cityId,String houseId, PageDTO pageDTO, String beginDate, String endDate, String state, String likeAddress) {
         try {
+            Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
+            if (storefront == null) {
+                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
+            }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             if (!CommonUtil.isEmpty(beginDate) && !CommonUtil.isEmpty(endDate)) {
                 if (beginDate.equals(endDate)) {
@@ -419,7 +532,7 @@ public class MendMaterielService {
                 }
             }
 //            List<MendOrder> mendOrderList = mendOrderMapper.materialOrderState(houseId);
-            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(storefrontId, houseId, 0, beginDate, endDate, state, likeAddress);
+            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(storefront.getId(), 0, state, likeAddress);
             PageInfo pageResult = new PageInfo(mendOrderList);
             List<MendOrderDTO> mendOrderDTOS = getMendOrderDTOList(mendOrderList);
             pageResult.setList(mendOrderDTOS);

@@ -1,6 +1,7 @@
 package com.dangjia.acg.dto.delivery;
 
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.List;
 public class DjSplitDeliverOrderDTO {
     private String id;//订单id
     private String storefrontName;//店铺名称
+    private String storefrontIcon;//店铺图标
     private String createDate;//创建时间
     private String number;//订单号
     private String shippingState;//发货单订单状态
@@ -16,5 +18,7 @@ public class DjSplitDeliverOrderDTO {
     private String total;//件数
     List<OrderSplitItem> orderSplitItemlist;
     private Integer itemListSize;
+    private String image;
+    private String houseId;
 
 }

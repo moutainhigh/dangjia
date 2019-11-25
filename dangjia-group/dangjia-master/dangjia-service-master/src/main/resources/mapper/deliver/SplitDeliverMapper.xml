@@ -139,6 +139,21 @@
         WHERE si.house_id = #{houseId}
         AND si.product_id =  #{productSn}
         ORDER BY d.price asc
+    </select>
+
+    <select id="getMendMaterialSupplierId" resultType="java.util.Map">
+
+        select
+       DISTINCT IFNULL(d.sup_id ,'' )  as supplierId,IFNULL(ds.name,'') as name
+        from
+        dj_deliver_split_deliver  ddsd
+        inner join dj_deliver_order_split_item ddosi
+        on ddosi.split_deliver_id=ddsd.id
+        INNER JOIN dj_sup_application_product d ON ddosi.product_id = d.product_id
+        INNER join dj_supplier ds on ds.id=d.sup_id
+        WHERE ddsd.house_id = #{houseId}
+        AND ddosi.product_id =  #{productId}
+        ORDER BY d.price asc
 
     </select>
 
