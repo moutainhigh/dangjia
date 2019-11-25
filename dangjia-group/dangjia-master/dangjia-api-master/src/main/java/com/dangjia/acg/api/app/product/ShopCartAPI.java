@@ -45,6 +45,11 @@ public interface ShopCartAPI {
                                  @RequestParam("userToken") String userToken,
                                  @RequestParam("cityId") String cityId);
 
+    @PostMapping("app/product/shopCart/num")
+    @ApiOperation(value = "购物车-->查询购物车列表接口", notes = "购物车-->查询购物车商品数量")
+    ServerResponse getCartNum(@RequestParam("request") HttpServletRequest request,
+                              @RequestParam("userToken") String userToken);
+
     @PostMapping("app/product/shopCart/delCar")
     @ApiOperation(value = "购物车-->清空购物车", notes = "购物车-->清空删除购物车")
     ServerResponse delCar(@RequestParam("request") HttpServletRequest request,

@@ -12,6 +12,7 @@ import com.dangjia.acg.modle.actuary.DjActuarialSimulationRelation;
 import com.dangjia.acg.modle.attribute.AttributeValue;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.brand.Unit;
+import com.dangjia.acg.service.product.app.GoodsProductTemplateService;
 import com.dangjia.acg.util.StringTool;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -51,10 +52,11 @@ public class SearchActuarialConfigServices {
     @Autowired
     private IUnitMapper iUnitMapper;
     @Autowired
-    private IAttributeValueMapper iAttributeValueMapper;
+    private GoodsProductTemplateService goodsProductTemplateService;
 
     @Autowired
     private IBrandMapper iBrandMapper;
+
 
     //对排列结果进行存贮的list
     static List rangeList = new ArrayList();
@@ -103,41 +105,19 @@ public class SearchActuarialConfigServices {
                     Unit unit= iUnitMapper.selectByPrimaryKey(unitId);
                     ap.setUnitName(unit!=null?unit.getName():"");
                 }
-                //查询规格名称
-                if (StringUtils.isNotBlank(ap.getValueIdArr())) {
-                    ap.setValueNameArr(getNewValueNameArr(ap.getValueIdArr()));
-                }
+
                 if(StringUtils.isNotBlank(ap.getBrandId())){
                     Brand brand=iBrandMapper.selectByPrimaryKey(ap.getBrandId());
                     ap.setBrandName(brand!=null?brand.getName():"");
                 }
-            }
-        }
-    }
-    /**
-     * 获取对应的属性值信息
-     * @param valueIdArr
-     * @return
-     */
-    public String getNewValueNameArr(String valueIdArr){
-        String strNewValueNameArr = "";
-        String[] newValueNameArr = valueIdArr.split(",");
-        for (int i = 0; i < newValueNameArr.length; i++) {
-            String valueId = newValueNameArr[i];
-            if (StringUtils.isNotBlank(valueId)) {
-                AttributeValue attributeValue = iAttributeValueMapper.selectByPrimaryKey(valueId);
-                if(attributeValue!=null&&StringUtils.isNotBlank(attributeValue.getName())){
-                    if (i == 0) {
-                        strNewValueNameArr = attributeValue.getName();
-                    } else {
-                        strNewValueNameArr = strNewValueNameArr + "," + attributeValue.getName();
-                    }
+                //查询规格名称
+                if (StringUtils.isNotBlank(ap.getValueIdArr())) {
+                    ap.setValueNameArr(goodsProductTemplateService.getNewValueNameArr(ap.getValueIdArr()));
                 }
-
             }
         }
-        return strNewValueNameArr;
     }
+
 
     /**
      * 根据货品ID查询切换的商品

@@ -4,10 +4,8 @@ import com.dangjia.acg.api.app.product.ShopCartAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.modle.product.ShoppingCart;
 import com.dangjia.acg.service.product.ShopCartService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -23,6 +21,12 @@ public class ShopCartController implements ShopCartAPI {
     @ApiMethod
     public ServerResponse queryCartList(HttpServletRequest request, PageDTO pageDTO,String userToken, String cityId) {
         return shopCartservice.queryCartList(pageDTO,userToken,cityId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse getCartNum(HttpServletRequest request,String userToken) {
+        return shopCartservice.getCartNum(userToken);
     }
 
     @Override
