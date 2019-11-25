@@ -1325,7 +1325,7 @@ public class DjDeliverOrderService {
      * @param id
      * @return
      */
-    public ServerResponse  queryAppOrderList(String id,Integer shippingState){
+    public ServerResponse  queryAppOrderInFoList(String id,Integer shippingState){
         if (CommonUtil.isEmpty(id)) {
             return ServerResponse.createByErrorMessage("id不能为空");
         }
