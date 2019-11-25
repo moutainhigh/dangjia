@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface OrderAPI {
 
     @PostMapping("app/order/orderDetail")
-    @ApiOperation(value = "订单详情", notes = "子订单详情")
+    @ApiOperation(value = "", notes = "子订单详情")
     ServerResponse orderDetail(@RequestParam("orderId") String orderId);
 
     @PostMapping("app/order/orderList")

@@ -287,10 +287,6 @@ public class OrderSplitService {
      */
     public ServerResponse sentSupplier(String orderSplitId, String splitItemList,String cityId,String userId,String installName,
                                        String installMobile, String deliveryName, String deliveryMobile) {
-
-
-
-
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
             OrderSplit orderSplit = orderSplitMapper.selectByPrimaryKey(orderSplitId);

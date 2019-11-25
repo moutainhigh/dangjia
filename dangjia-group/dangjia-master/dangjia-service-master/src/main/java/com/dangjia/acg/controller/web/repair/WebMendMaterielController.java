@@ -3,11 +3,8 @@ package com.dangjia.acg.controller.web.repair;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.web.repair.WebMendMaterielAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
-import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.dto.storefront.StorefrontDTO;
-import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.service.repair.MendMaterielService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,22 +28,49 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse landlordState(HttpServletRequest request,String cityId,String houseId, PageDTO pageDTO, String beginDate, String endDate, String state,String likeAddress) {
-        String userId = request.getParameter("userId");
+    public ServerResponse landlordState(HttpServletRequest request,String userId,String cityId, PageDTO pageDTO, String state,String likeAddress) {
         //通过缓存查询店铺信息
-        return mendMaterielService.landlordState(userId,cityId,houseId, pageDTO, beginDate, endDate,state, likeAddress);
+        return mendMaterielService.landlordState(userId,cityId, pageDTO,state, likeAddress);
     }
 
-
+    @Override
+    @ApiMethod
+    public ServerResponse landlordStateHandle(HttpServletRequest request, String cityId,  PageDTO pageDTO, String state, String likeAddress) {
+        return mendMaterielService.landlordStateHandle(request,cityId,pageDTO,state,likeAddress);
+    }
 
     /**
      * 房子id查询退货单列表
      */
     @Override
     @ApiMethod
-    public ServerResponse materialBackState(HttpServletRequest request,String cityId,String houseId, PageDTO pageDTO, String beginDate, String endDate,String state, String likeAddress) {
-        String userId = request.getParameter("userId");
-        return mendMaterielService.materialBackState(userId,cityId,houseId, pageDTO, beginDate, endDate, state,likeAddress);
+    public ServerResponse materialBackState(HttpServletRequest request,String cityId,String userId, PageDTO pageDTO,String state, String likeAddress) {
+
+        return mendMaterielService.materialBackState(userId,cityId, pageDTO, state,likeAddress);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse applyPlatformAccess(HttpServletRequest request, String cityId, String houseId, PageDTO pageDTO) {
+        return mendMaterielService.applyPlatformAccess(request,cityId,houseId,pageDTO);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse acceptPartialReturn(HttpServletRequest request, String cityId, String houseId, PageDTO pageDTO) {
+        return mendMaterielService.acceptPartialReturn(request,cityId,houseId,pageDTO);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse reviewReturnList(HttpServletRequest request, String cityId, String houseId, PageDTO pageDTO) {
+        return mendMaterielService.reviewReturnList(request,cityId,houseId,pageDTO);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse storeReturnDistributionSupplier(HttpServletRequest request, String cityId, String userId, PageDTO pageDTO, String likeAddress) {
+        return mendMaterielService.storeReturnDistributionSupplier(request,cityId,userId,pageDTO,likeAddress);
     }
 
     @Override
@@ -72,11 +96,7 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
         return mendMaterielService.materialBackStateHandle(request,userId,cityId,pageDTO,state,likeAddress);
     }
 
-    @Override
-    @ApiMethod
-    public ServerResponse landlordStateHandle(HttpServletRequest request, String cityId, String houseId, PageDTO pageDTO, String beginDate, String endDate, String state, String likeAddress) {
-        return mendMaterielService.landlordStateHandle(request,cityId,houseId,pageDTO,state,beginDate,endDate,likeAddress);
-    }
+
 
     @Override
     @ApiMethod
@@ -122,22 +142,8 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse materialOrderState(HttpServletRequest request, String houseId, PageDTO pageDTO, String beginDate, String endDate, String state,String likeAddress) {
-        String userID = request.getParameter(Constants.USERID);
-        //通过缓存查询店铺信息
-        StorefrontDTO storefront =redisClient.getCache(Constants.FENGJIAN_STOREFRONT+userID, StorefrontDTO.class);
-        return mendMaterielService.materialOrderState(storefront.getId(),houseId, pageDTO, beginDate, endDate,state, likeAddress);
-    }
+    public ServerResponse materialOrderState(HttpServletRequest request, String houseId, String userId,String cityId,PageDTO pageDTO, String beginDate, String endDate, String state,String likeAddress) {
 
-    @Override
-    @ApiMethod
-    public ServerResponse landlordStateRefundList(HttpServletRequest request, String cityId, String houseId, PageDTO pageDTO, String beginDate, String endDate, String state, String likeAddress) {
-        return null;
-    }
-
-    @Override
-    @ApiMethod
-    public ServerResponse landlordStateRefundAudit(HttpServletRequest request, String cityId, String houseId, PageDTO pageDTO, String beginDate, String endDate, String state, String likeAddress) {
-        return null;
+        return mendMaterielService.materialOrderState(userId,cityId,houseId, pageDTO, beginDate, endDate,state, likeAddress);
     }
 }
