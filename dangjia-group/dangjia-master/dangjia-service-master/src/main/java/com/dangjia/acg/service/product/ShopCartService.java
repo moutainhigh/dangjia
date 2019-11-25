@@ -112,7 +112,28 @@ public class ShopCartService {
             return ServerResponse.createByErrorMessage("系统报错，获取购物车列表失败!");
         }
     }
-
+    /**
+     * 获取购物车数量
+     *
+     * @param userToken
+     * @return
+     */
+    public ServerResponse getCartNum(String userToken) {
+        try {
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;
+            Example example = new Example(ShoppingCart.class);
+            example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, member.getId());
+            Integer gnum = iShoppingCartmapper.selectCountByExample(example);
+            return ServerResponse.createBySuccess("获取购物车数量成功!",gnum);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("系统报错，获取购物车信息失败!");
+        }
+    }
     /**
      * 清空购物车
      *
