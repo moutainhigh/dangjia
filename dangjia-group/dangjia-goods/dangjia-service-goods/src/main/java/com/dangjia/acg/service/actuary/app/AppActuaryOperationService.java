@@ -475,25 +475,23 @@ public class AppActuaryOperationService {
                  brand = iBrandMapper.selectByPrimaryKey(goods.getBrandId());
             }
             for (DjBasicsProductTemplate atId : productList) {
-                if(atId.getType()==1) {
-                    StringBuilder strbuf = new StringBuilder();
-                    if (brand != null) {
-                        strbuf.append(brand.getName()).append(" ");
-                    }
-                    if (!CommonUtil.isEmpty(atId.getValueIdArr())) {
-                        strbuf.append(atId.getValueNameArr().replaceAll(",", " "));
-                    }
-                    AttributeValueDTO avDTO = new AttributeValueDTO();
-                    avDTO.setAttributeValueId(atId.getId());
-                    avDTO.setName(strbuf.toString().trim());
-                    if (atId.getId().equals(product.getId())) {//如果包含该属性
-                        avDTO.setState(1);//选中
-                    } else {
-                        avDTO.setState(0);//未选中
-                    }
-                    avDTO.setType(0);
-                    attributeValueDTOList.add(avDTO);//添加属性值
+                StringBuilder strbuf = new StringBuilder();
+                if (brand != null) {
+                    strbuf.append(brand.getName()).append(" ");
                 }
+                if (!CommonUtil.isEmpty(atId.getValueIdArr())) {
+                    strbuf.append(atId.getValueNameArr().replaceAll(",", " "));
+                }
+                AttributeValueDTO avDTO = new AttributeValueDTO();
+                avDTO.setAttributeValueId(atId.getId());
+                avDTO.setName(strbuf.toString().trim());
+                if (atId.getId().equals(product.getId())) {//如果包含该属性
+                    avDTO.setState(1);//选中
+                } else {
+                    avDTO.setState(0);//未选中
+                }
+                avDTO.setType(0);
+                attributeValueDTOList.add(avDTO);//添加属性值
             }
             attributeDTO.setValueDTOList(attributeValueDTOList);
             attributeDTOList.add(attributeDTO);
