@@ -44,7 +44,7 @@ public class MendWorkerService {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
 //            List<MendOrder> mendOrderList = mendOrderMapper.workerBackState(houseId); 3
-            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(storefrontId,houseId, 3, beginDate, endDate, state,likeAddress);
+            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(storefrontId, 3, state,likeAddress);
             PageInfo pageResult = new PageInfo(mendOrderList);
             List<MendOrderDTO> mendOrderDTOS = mendMaterielService.getMendOrderDTOList(mendOrderList);
             pageResult.setList(mendOrderDTOS);
@@ -77,7 +77,7 @@ public class MendWorkerService {
                     endDate = endDate + " " + "23:59:59";
             }
 //            List<MendOrder> mendOrderList = mendOrderMapper.workerOrderState(houseId);
-            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(storefrontId,houseId, 1, beginDate, endDate, state,likeAddress);
+            List<MendOrder> mendOrderList = mendOrderMapper.materialByStateAndLikeAddress(storefrontId, 1, state,likeAddress);
             PageInfo pageResult = new PageInfo(mendOrderList);
             List<MendOrderDTO> mendOrderDTOS = mendMaterielService.getMendOrderDTOList(mendOrderList);
             pageResult.setList(mendOrderDTOS);
