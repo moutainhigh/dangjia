@@ -567,7 +567,7 @@
             t.type,
             t1.sell_price price,
             t.value_id_arr valueIdArr,
-            t.value_id_arr value_name_arr
+            t.value_name_arr valueNameArr
 
         FROM
             dj_basics_product_template t,
