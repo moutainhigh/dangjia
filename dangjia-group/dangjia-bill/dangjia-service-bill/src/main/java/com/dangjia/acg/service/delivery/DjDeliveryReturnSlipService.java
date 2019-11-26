@@ -497,30 +497,6 @@ public class DjDeliveryReturnSlipService {
 
 
 
-    /**
-     *店铺利润统计-查看供应详情
-     * @param pageDTO
-     * @param userId
-     * @param houseId
-     * @param searchKey
-     * @param cityId
-     * @return
-     */
-    public ServerResponse supplyDetails(PageDTO pageDTO, String userId, String houseId, String searchKey, String cityId) {
-        try {
-
-            Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
-            if(storefront==null)
-            {
-                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
-            }
-
-            return null;
-        } catch (Exception e) {
-            logger.error("店铺利润统计-查看供应详情异常", e);
-            return ServerResponse.createByErrorMessage("店铺利润统计-查看供应详情异常: " + e);
-        }
-    }
 
     /**
      *店铺利润统计-查看买家详情

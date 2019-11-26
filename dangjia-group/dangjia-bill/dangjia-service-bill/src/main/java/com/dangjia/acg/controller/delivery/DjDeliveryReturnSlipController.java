@@ -114,11 +114,6 @@ public class DjDeliveryReturnSlipController implements DjDeliveryReturnSlipAPI {
         return djDeliveryReturnSlipService.sellerDimension(pageDTO,userId,cityId,searchKey);
     }
 
-    @Override
-    @ApiMethod
-    public ServerResponse supplyDetails(HttpServletRequest request, PageDTO pageDTO, String userId, String houseId, String searchKey, String cityId) {
-        return djDeliveryReturnSlipService.supplyDetails(pageDTO,userId,houseId,searchKey,cityId);
-    }
 
     @Override
     @ApiMethod
