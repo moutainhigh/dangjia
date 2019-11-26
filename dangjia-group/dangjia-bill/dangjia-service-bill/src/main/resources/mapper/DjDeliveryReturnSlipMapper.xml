@@ -621,11 +621,11 @@
         SELECT
         IFNULL(dsd.storefront_id ,'') as storefrontId, -- 店铺id
         IFNULL(dsd.ship_address ,'')AS shipAddress, -- 房子地址
-        m. NAME, -- 业主姓名
+        m.NAME, -- 业主姓名
         m.mobile,-- 电话号码
         IFNULL(sum(dsd.total_amount),'') AS income, -- 收入
         IFNULL(sum(dsd.apply_money),'') AS expenditure,-- 支出
-        sum(dsd.total_amount)- IFNULL(dsd.apply_money,'')AS profit, -- 利润
+        IFNULL(sum(dsd.total_amount)-sum(dsd.apply_money),'')AS profit, -- 利润
         h.id AS houseId -- 房子id
         FROM
         dj_deliver_split_deliver dsd  -- 后台生成发货单
@@ -649,9 +649,9 @@
             dsd.id AS orderSplitId,
             IFNULL(dsd.number,'') as number,
             IFNULL(dsd.send_time,'') AS createDate,
-            IFNULL(dosi.price, '') AS income,
-            IFNULL(dosi.cost, '') AS expenditure,
-            IFNULL(total_amount, '') - IFNULL(apply_money, '') AS profit
+            IFNULL(dosi.price*dosi.num, '') AS income,
+            IFNULL(dosi.cost*dosi.num, '') AS expenditure,
+            IFNULL(dosi.price*dosi.num, '') - IFNULL(dosi.cost*dosi.num, '') AS profit
         FROM
             dj_deliver_split_deliver dsd
         INNER JOIN dj_deliver_order_split_item dosi ON dsd.id = dosi.split_deliver_id
@@ -665,20 +665,20 @@
     <!--店铺利润统计-供应商商品详情-->
     <select id="supplierDimensionGoodsDetails" resultType="com.dangjia.acg.dto.delivery.SupplierDimensionGoodsDetailDTO">
         SELECT
-        bsp.image,-- 商品图片
-        bsp.product_name AS productName,-- 商品名称
-        bpt.product_sn AS productSn,-- 商品编号
+        IFNULL(bsp.image,'') as image,-- 商品图片
+        IFNULL(bsp.product_name,'') AS productName,-- 商品名称
+        IFNULL(bpt.product_sn,'') AS productSn,-- 商品编号
         IFNULL(dosi.num,'') as num,-- 发货数量
         IFNULL(dosi.receive,'') as receiveCount,-- 收货数量
         IFNULL(dosi.cost,'') as cost,-- 成本单价
-        dosi.cost*dosi.num as totalCost,-- 成本总价
+        IFNULL(dosi.cost*dosi.num,'') as totalCost,-- 成本总价
         IFNULL(dosi.price,'') as price,-- 销售价
-        dosi.num*dosi.price as totalPrice,-- 销售总价
+        IFNULL(dosi.num*dosi.price,'') as totalPrice,-- 销售总价
         IFNULL(dosi.product_id,'') AS productId -- 商品id
         FROM
         dj_deliver_order_split_item dosi  -- 店铺商品
         INNER JOIN dj_basics_product_template bpt ON dosi.product_id = bpt.id -- 商品模板
-        INNER JOIN dj_basics_storefront_product bsp ON dosi.storefront_id = bsp.storefront_id -- 订单详情
+        INNER JOIN dj_basics_storefront_product bsp ON dosi.product_id = bsp.prod_template_id -- 订单详情
         WHERE
         1 = 1
         AND bsp.data_status = 0

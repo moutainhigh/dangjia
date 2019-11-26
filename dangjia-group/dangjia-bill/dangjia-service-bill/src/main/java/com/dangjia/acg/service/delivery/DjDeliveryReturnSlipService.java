@@ -594,7 +594,6 @@ public class DjDeliveryReturnSlipService {
             {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
-
             List<SupplierDimensionOrderDetailDTO> list=djDeliveryReturnSlipMapper.supplierDimensionOrderDetails(houseId,storefront.getId(),cityId);
             PageInfo pageResult = new PageInfo(list);
             if (list.size() <= 0)
