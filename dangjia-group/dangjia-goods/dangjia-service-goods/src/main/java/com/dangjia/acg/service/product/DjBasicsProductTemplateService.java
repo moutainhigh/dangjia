@@ -662,8 +662,8 @@ public class DjBasicsProductTemplateService {
             djBasicsProductLabelDTO.setLabelValId(Arrays.asList(dbpl.getLabelValId().split(",")));
             djBasicsProductLabelDTOS.add(djBasicsProductLabelDTO);
         });
-        if (djBasicsProductLabelDTOS.size() <= 0)
-            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        //if (djBasicsProductLabelDTOS.size() <= 0)
+          //  return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         return ServerResponse.createBySuccess("查询成功", djBasicsProductLabelDTOS);
     }
 
@@ -1149,7 +1149,8 @@ public class DjBasicsProductTemplateService {
             });
             return ServerResponse.createBySuccess("查询成功",labelDTOS);
         }else{
-            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            return ServerResponse.createBySuccess("查询成功",new ArrayList<>());
+           // return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
     }
 
