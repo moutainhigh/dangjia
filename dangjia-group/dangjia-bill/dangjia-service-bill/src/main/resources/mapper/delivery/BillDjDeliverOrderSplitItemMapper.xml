@@ -83,5 +83,17 @@
          limit 1
     </select>
 
+    <select id="querySplitDeliverId" resultType="java.lang.String">
+        SELECT
+            b.split_deliver_id
+        FROM
+            dj_deliver_order_item a,
+            dj_deliver_order_split_item b
+        WHERE
+            FIND_IN_SET(a.id, b.order_item_id)
+        AND a.order_id = #{orderId}
+        GROUP BY b.split_deliver_id
+    </select>
+
 
 </mapper>
