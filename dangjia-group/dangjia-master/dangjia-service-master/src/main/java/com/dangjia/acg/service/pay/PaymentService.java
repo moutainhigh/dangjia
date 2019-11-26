@@ -316,9 +316,9 @@ public class PaymentService {
                 return ServerResponse.createBySuccess("支付成功", returnMap);
             }
             //临时支付宝代替回调
-//            if (payOrder.getState() == 0 && "2".equals(payOrder.getPayState())) {
-//                setServersSuccess(payOrder.getId());
-//            }
+            if (payOrder.getState() == 0 && "2".equals(payOrder.getPayState())) {
+                setServersSuccess(payOrder.getId());
+            }
             Example example = new Example(BusinessOrder.class);
             example.createCriteria().andEqualTo(BusinessOrder.NUMBER, businessOrderNumber);
             List<BusinessOrder> businessOrderList = businessOrderMapper.selectByExample(example);
