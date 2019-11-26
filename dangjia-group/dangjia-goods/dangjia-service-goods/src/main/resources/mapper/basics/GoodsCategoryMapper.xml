@@ -30,18 +30,7 @@
             modify_date as modifyDate
 		FROM dj_basics_goods_category
 	</select>
-    <!-- 批量插入数据 -->
-    <insert id="insertBatch" parameterType="java.util.List">
-        insert into dj_basics_goods_category
-        (<include refid="all_columns"/>)
-        values
-        <foreach collection="list" item="goods" index="index" separator=",">
-            (
-            #{goods.id}, #{goods.name},#{goods.parent_id}, #{goods.parent_top},
-            #{goods.image},SYSDATE(),SYSDATE()
-            )
-        </foreach>
-    </insert>
+
 
     <!-- 根据父id查询下属商品类别 -->
     <select id="queryCategoryByParentId" resultType="com.dangjia.acg.modle.attribute.GoodsCategory">
@@ -79,7 +68,7 @@
         AND p.maket = 1
         AND p.type = 1
         and p.maket = 1
-        AND p.type = 1
+        AND g.type &lt;4
         <if test="categoryId!=null and categoryId!=''">
             AND c.parent_top = #{categoryId}
         </if>

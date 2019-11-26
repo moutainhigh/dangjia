@@ -27,7 +27,9 @@ public interface ActuaryAPI {
             @RequestParam("name") String name,
             @RequestParam("budgetOk") String budgetOk,
             @RequestParam("workerKey") String workerKey,
-            @RequestParam("userId") String userId
+            @RequestParam("userId") String userId,
+            @RequestParam("budgetStatus") String budgetStatus,
+            @RequestParam("decorationType") String decorationType
     );
     @PostMapping("/data/actuary/getActuaryWaitPay")
     @ApiOperation(value = "返回待业主支付精算列表", notes = "返回待业主支付精算列表")
