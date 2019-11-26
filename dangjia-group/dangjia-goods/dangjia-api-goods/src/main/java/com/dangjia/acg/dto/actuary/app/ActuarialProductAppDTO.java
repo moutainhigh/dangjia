@@ -105,7 +105,7 @@ public class ActuarialProductAppDTO {
 
     private String unitId;
 
-
+    private Integer unitType;//单位数值类型 1=整数单位，2=小数单位
     @ApiModelProperty("是否勾选商品标识")
     private boolean flag;
 

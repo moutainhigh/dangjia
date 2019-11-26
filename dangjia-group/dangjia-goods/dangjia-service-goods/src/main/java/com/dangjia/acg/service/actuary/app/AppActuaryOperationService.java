@@ -432,6 +432,7 @@ public class AppActuaryOperationService {
             if(unitId!=null&& StringUtils.isNotBlank(unitId)){
                 Unit unit= iUnitMapper.selectByPrimaryKey(unitId);
                 goodsDTO.setUnitName(unit!=null?unit.getName():"");
+                goodsDTO.setUnitType(unit.getType());
             }
             //将工艺列表返回
             List<TechnologyDTO> technologies = new ArrayList<>();
