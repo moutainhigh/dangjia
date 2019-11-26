@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 @FeignClient("dangjia-service-bill")
 public interface DjDeliveryReturnSlipAPI {
 
+    /*************************************供应商利润统计*************************************************/
     @PostMapping("/delivery/djDeliveryReturnSlip/querySupplyTaskList")
     @ApiOperation(value = "供货任务列表", notes = "供货任务列表")
     ServerResponse querySupplyTaskList(@RequestParam("request") HttpServletRequest request,
@@ -94,7 +95,7 @@ public interface DjDeliveryReturnSlipAPI {
                                                          @RequestParam("shopId") String shopId,
                                                          @RequestParam("searchKey") String searchKey,
                                                          @RequestParam("cityId") String cityId);
-    /*************************************统计*************************************************/
+    /*************************************店铺利润统计*************************************************/
     @PostMapping("/delivery/djBasicsStorefrontProfit/supplierDimension")
     @ApiOperation(value = "店铺利润统计-供应商维度", notes = "店铺利润统计-供应商维度")
     ServerResponse supplierDimension(@RequestParam("request") HttpServletRequest request,
@@ -155,9 +156,9 @@ public interface DjDeliveryReturnSlipAPI {
 
     @PostMapping("/delivery/djBasicsStorefrontProfit/shippingDetails")
     @ApiOperation(value = "店铺利润统计-查看买家订单详情", notes = "店铺利润统计-查看买家订单详情")
-    ServerResponse shippingDetails(@RequestParam("request") HttpServletRequest request,
+    ServerResponse shippingDetails(
+                     @RequestParam("request") HttpServletRequest request,
                      @RequestParam("pageDTO") PageDTO pageDTO,
-                     @RequestParam("orderSplitId") String orderSplitId
-    );
+                     @RequestParam("orderSplitId") String orderSplitId);
 
 }
