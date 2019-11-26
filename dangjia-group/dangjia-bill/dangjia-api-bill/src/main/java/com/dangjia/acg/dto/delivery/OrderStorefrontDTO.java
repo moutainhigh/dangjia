@@ -28,4 +28,5 @@ public class OrderStorefrontDTO {
     private Date createDate;
     private Double actualPaymentPrice;//实付总价
     private Double totalAmount;//总价（不含运费）
+    private String mobile;//店铺联系电话
 }

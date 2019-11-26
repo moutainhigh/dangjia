@@ -130,11 +130,10 @@ public interface IBillDjDeliverOrderMapper extends Mapper<Order> {
      * @param houseId
      * @return
      */
-    List<OrderStorefrontDTO> queryDeliverOrderHump(@Param("houseId") String houseId,
-                                                   @Param("state") String state);
+    List<OrderStorefrontDTO> queryDeliverOrderHump(@Param("houseId") String houseId);
 
     /**
-     * 我的订单待付款订单
+     * 我的订单待付款订单店铺对象
      */
     List<OrderStorefrontDTO> queryDeliverOrderObligation(@Param("houseId") String houseId);
 
@@ -143,16 +142,19 @@ public interface IBillDjDeliverOrderMapper extends Mapper<Order> {
      * @param orderId
      * @return
      */
-    List<AppointmentDTO> queryAppointmentHump(@Param("orderId") String orderId,@Param("state") String state);
+    List<AppointmentDTO> queryAppointmentHump(@Param("orderId") String orderId);
 
     List<AppointmentDTO> queryDeliverOrderItemObligation(@Param("orderId") String orderId);
 
 
     List<DjSplitDeliverOrderDTO> querySplitDeliverByHouse(@Param("cityId") String cityId, @Param("houseId") String houseId, @Param("orderStatus") String orderStatus);
 
+    List<OrderStorefrontDTO> queryPaymentToBeMade(@Param("orderId") String orderId);
 
     List<DjSplitDeliverOrderDTO> queryAppOrderList(@Param("cityId") String cityId, @Param("houseId") String houseId, @Param("orderStatus") String orderStatus);
 
 
     String queryValueIdArr(@Param("id") String id);
+
+    List<OrderStorefrontDTO> queryHumpDetail(@Param("orderId") String orderId);
 }

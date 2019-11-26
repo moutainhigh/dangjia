@@ -55,7 +55,6 @@ import com.dangjia.acg.service.product.BillProductTemplateService;
 import com.dangjia.acg.util.HouseUtil;
 import com.dangjia.acg.util.Utils;
 import org.apache.commons.lang.StringUtils;
-import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.dangjia.acg.common.model.PageDTO;
 import com.github.pagehelper.PageHelper;
@@ -67,7 +66,6 @@ import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 import java.util.*;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class DjDeliverOrderService {
@@ -1401,7 +1399,7 @@ public class DjDeliverOrderService {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             List<OrderStorefrontDTO> orderStorefrontDTOS=null;
-            if (state.equals("2")){
+            if (state.equals("2")||state.equals("5")){
                 orderStorefrontDTOS = iBillDjDeliverOrderMapper.queryDeliverOrderObligation(houseId);
                 orderStorefrontDTOS.forEach(orderStorefrontDTO -> {
                     List<AppointmentDTO> appointmentDTOS = iBillDjDeliverOrderMapper.queryDeliverOrderItemObligation(orderStorefrontDTO.getOrderId());
@@ -1414,9 +1412,9 @@ public class DjDeliverOrderService {
                     }
                 });
             }else {
-                orderStorefrontDTOS = iBillDjDeliverOrderMapper.queryDeliverOrderHump(houseId,state);
+                orderStorefrontDTOS = iBillDjDeliverOrderMapper.queryDeliverOrderHump(houseId);
                 orderStorefrontDTOS.forEach(orderStorefrontDTO -> {
-                    List<AppointmentDTO> appointmentDTOS = iBillDjDeliverOrderMapper.queryAppointmentHump(orderStorefrontDTO.getOrderId(), state);
+                    List<AppointmentDTO> appointmentDTOS = iBillDjDeliverOrderMapper.queryAppointmentHump(orderStorefrontDTO.getOrderId());
                     orderStorefrontDTO.setProductCount(appointmentDTOS.size());
                     orderStorefrontDTO.setProductImageArr(getStartTwoImage(appointmentDTOS,imageAddress));
                     orderStorefrontDTO.setStorefrontLogo(imageAddress+orderStorefrontDTO.getStorefrontLogo());
