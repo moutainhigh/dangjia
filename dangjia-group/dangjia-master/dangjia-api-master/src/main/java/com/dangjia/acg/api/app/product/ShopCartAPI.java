@@ -28,15 +28,7 @@ public interface ShopCartAPI {
                            @RequestParam("userToken") String userToken,
                            @RequestParam("cityId") String cityId,
                            @RequestParam("productId") String productId,
-                           @RequestParam("productSn") String productSn,
-                           @RequestParam("productName") String productName,
-                           @RequestParam("price") String price,
-                           @RequestParam("shopCount") String shopCount,
-                           @RequestParam("unitName") String unitName,
-                           @RequestParam("categoryId") String categoryId,
-                           @RequestParam("productType") String productType,
-                           @RequestParam("storefrontId") String storefrontId,
-                           @RequestParam("image") String image);
+                           @RequestParam("shopCount") Integer shopCount);
 
     @PostMapping("app/product/shopCart/queryCartList")
     @ApiOperation(value = "购物车-->查询购物车列表接口", notes = "购物车-->查询购物车列表接口")
@@ -75,11 +67,7 @@ public interface ShopCartAPI {
     @ApiOperation(value = "更换购物车商品", notes = "更换购物车商品")
     ServerResponse replaceShoppingCart(@RequestParam("request") HttpServletRequest request,
                                        @RequestParam("shoppingCartId") String shoppingCartId,
-                                       @RequestParam("productId") String productId,
-                                       @RequestParam("productSn") String productSn,
-                                       @RequestParam("productName") String productName,
-                                       @RequestParam("image") String image,
-                                       @RequestParam("price") BigDecimal price);
+                                       @RequestParam("productId") String productId);
 
 
     @PostMapping("app/shopping/insertToCollect")
