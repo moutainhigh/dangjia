@@ -13,11 +13,6 @@ public class AlipayConfig
   public static final String FORMAT = "json";
   public static final String CHARSET = "utf-8";
   public static final String notify_url = "";
-  public static final String APPnotify = "http://....../alipay/APPnotify";
-  public static final String OWnotify_url = "http://....../alipay/OWnotify";
-  public static final String return_url = "https://www.xxx.com/";
-  public static final String OWreturn_url = "https://www.xxx.com/";
-  public static final String diamond_url = "http://www.xxx.com/GetRechergePrice";
   private static AlipayClient alipayClient = null;
   
   public static AlipayClient getAlipayClient()
@@ -26,7 +21,7 @@ public class AlipayConfig
       synchronized (AlipayConfig.class)
       {
         if (alipayClient == null) {
-          alipayClient = new DefaultAlipayClient("https://openapi.alipay.com/gateway.do", "2017100909210538", RSA_PRIVATE_KEY, "json", "utf-8", ALIPAY_PUBLIC_KEY, "RSA2");
+          alipayClient = new DefaultAlipayClient(URL, ALIPAY_APPID, RSA_PRIVATE_KEY, FORMAT, CHARSET, ALIPAY_PUBLIC_KEY, SIGNTYPE);
         }
       }
     }
