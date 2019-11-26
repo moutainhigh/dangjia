@@ -440,6 +440,7 @@ public class HouseService {
                 if(unitId!=null&& StringUtils.isNotBlank(unitId)){
                     Unit unit= iMasterUnitMapper.selectByPrimaryKey(unitId);
                     ap.setUnitName(unit!=null?unit.getName():"");
+                    ap.setUnitType(unit.getType());
                 }
 
                 if(StringUtils.isNotBlank(ap.getBrandId())){

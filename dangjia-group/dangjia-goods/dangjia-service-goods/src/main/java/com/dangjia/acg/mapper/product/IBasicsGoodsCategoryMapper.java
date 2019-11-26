@@ -49,6 +49,7 @@ public interface IBasicsGoodsCategoryMapper extends Mapper<BasicsGoodsCategory> 
 																  @Param("cityId") String cityId);
 
     List<CategoryGoodsProductDTO> queryCategoryListByCategoryLikeName(@Param("categoryId") String categoryId,
-																@Param("goodsName") String goodsName);
+																      @Param("goodsName") String goodsName,
+																	  @Param("cityId") String cityId);
 
 }

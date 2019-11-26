@@ -305,6 +305,6 @@ public class BasicsGoodsCategoryController implements BasicsGoodsCategoryAPI {
                                                         String categoryId,
                                                         String name,
                                                         String cityId){
-        return basicsGoodsCategoryService.queryCategoryListByCategoryLikeName(pageDTO, categoryId, name);
+        return basicsGoodsCategoryService.queryCategoryListByCategoryLikeName(pageDTO, categoryId, name,cityId);
     }
 }

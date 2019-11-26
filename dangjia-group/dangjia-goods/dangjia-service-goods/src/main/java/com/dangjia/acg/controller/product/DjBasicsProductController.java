@@ -99,9 +99,9 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse insertBatchProduct(HttpServletRequest request, String productArr,String cityId,String userId) {
+    public ServerResponse insertBatchProduct(HttpServletRequest request, String productArr,String cityId,String user_id) {
         try{
-            return djBasicsProductService.insertBatchProduct(productArr,cityId,userId);
+            return djBasicsProductService.insertBatchProduct(productArr,cityId,user_id);
         }catch (Exception e){
             logger.error("新增商品信息失败：",e);
             return ServerResponse.createByErrorMessage("新增失败");
@@ -124,9 +124,9 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse editSingleProduct( HttpServletRequest request,BasicsProductDTO basicsProductDTO,String technologyList, String  deleteTechnologyIds,String cityId,String userId){
+    public ServerResponse editSingleProduct( HttpServletRequest request,BasicsProductDTO basicsProductDTO,String technologyList, String  deleteTechnologyIds,String cityId,String user_id){
         try{
-            return djBasicsProductService.saveProductTemporaryStorage(basicsProductDTO, technologyList, deleteTechnologyIds,0,cityId,userId);
+            return djBasicsProductService.saveProductTemporaryStorage(basicsProductDTO, technologyList, deleteTechnologyIds,0,cityId,user_id);
         }catch (Exception e){
             logger.error("保存单个商品信息失败：",e);
             return ServerResponse.createBySuccessMessage("保存单个商品失败");

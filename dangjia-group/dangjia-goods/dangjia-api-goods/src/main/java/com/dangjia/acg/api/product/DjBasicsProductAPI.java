@@ -69,7 +69,7 @@ public interface DjBasicsProductAPI {
     @PostMapping("/product/djBasicsProduct/insertBatchProduct")
     @ApiOperation(value = "批量新增修改货品下的商品", notes = "批量新增修改货品下的商品")
     ServerResponse insertBatchProduct(@RequestParam("request") HttpServletRequest request,
-                                 @RequestParam("productArr") String productArr,
+                                     @RequestParam("productArr") String productArr,
                                       @RequestParam("cityId")String cityId,
                                       @RequestParam("user_id")String user_id);
 

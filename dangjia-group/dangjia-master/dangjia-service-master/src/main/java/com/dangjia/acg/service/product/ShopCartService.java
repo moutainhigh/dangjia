@@ -15,12 +15,18 @@ import com.dangjia.acg.dto.product.ShoppingCartDTO;
 import com.dangjia.acg.dto.product.ShoppingCartListDTO;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberCollectMapper;
+import com.dangjia.acg.mapper.product.IMasterGoodsMapper;
+import com.dangjia.acg.mapper.product.IMasterProductTemplateMapper;
+import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
 import com.dangjia.acg.mapper.product.IShoppingCartMapper;
+import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberCollect;
+import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.product.ShoppingCart;
 import com.dangjia.acg.modle.storefront.Storefront;
+import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -46,7 +52,7 @@ public class ShopCartService {
 
 
     @Autowired
-    private DjBasicsProductAPI djBasicsProductAPI;
+    private IMasterGoodsMapper iMasterGoodsMapper;
 
     @Autowired
     private CraftsmanConstructionService constructionService;
@@ -55,7 +61,7 @@ public class ShopCartService {
     private IShoppingCartMapper iShoppingCartmapper;
 
     @Autowired
-    private ForMasterAPI forMasterAPI;
+    private IMasterProductTemplateMapper iMasterProductTemplateMapper;
 
     @Autowired
     private BasicsStorefrontAPI basicsStorefrontAPI;
@@ -63,7 +69,7 @@ public class ShopCartService {
     private Logger logger = LoggerFactory.getLogger(ShopCartService.class);
 
     @Autowired
-    private StorefrontProductAPI storefrontProductAPI;
+    private IMasterStorefrontProductMapper iMasterStorefrontProductMapper;
 
     @Autowired
     private IMemberCollectMapper iMemberCollectMapper;
@@ -196,25 +202,19 @@ public class ShopCartService {
      * @param userToken
      * @param cityId
      * @param productId
-     * @param productSn
-     * @param productName
-     * @param price
      * @param shopCount
-     * @param unitName
-     * @param categoryId
-     * @param productType
-     * @param storefrontId
      * @return
      */
-    public ServerResponse addCart(String userToken, String cityId, String productId, String productSn,
-                                  String productName, String price, String shopCount, String unitName,
-                                  String categoryId, String productType, String storefrontId,String image) {
+    public ServerResponse addCart(String userToken, String cityId, String productId, Integer shopCount) {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
             Member member = (Member) object;
+            StorefrontProduct storefrontProduct = iMasterStorefrontProductMapper.selectByPrimaryKey(productId);
+            DjBasicsProductTemplate djBasicsProductTemplate = iMasterProductTemplateMapper.selectByPrimaryKey(storefrontProduct.getProdTemplateId());
+            Goods goods = iMasterGoodsMapper.selectByPrimaryKey(djBasicsProductTemplate.getGoodsId());
             //有房有精算  根据用户的member_id去区分
             //无房无精算  根据用户的member_id去区分
             //purchaseRestrictions:0自由购房；1有房无精算；2有房有精算
@@ -235,22 +235,22 @@ public class ShopCartService {
             example = new Example(ShoppingCart.class);
             example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, member.getId())
                     .andEqualTo(ShoppingCart.PRODUCT_ID, productId)
-                    .andEqualTo(ShoppingCart.STOREFRONT_ID,storefrontId);
+                    .andEqualTo(ShoppingCart.STOREFRONT_ID,storefrontProduct.getStorefrontId());
             List<ShoppingCart> list = iShoppingCartmapper.selectByExample(example);
             if (list.size() == 0) {
                 ShoppingCart shoppingCart = new ShoppingCart();
                 shoppingCart.setMemberId(member.getId());
                 shoppingCart.setProductId(productId);
-                shoppingCart.setProductSn(productSn);
-                shoppingCart.setProductName(productName);
-                shoppingCart.setPrice(new BigDecimal(price));
-                shoppingCart.setShopCount(Integer.parseInt(shopCount));
-                shoppingCart.setUnitName(unitName);
-                shoppingCart.setCategoryId(categoryId);
-                shoppingCart.setProductType(Integer.parseInt(productType));
-                shoppingCart.setStorefrontId(storefrontId);
+                shoppingCart.setProductSn(djBasicsProductTemplate.getProductSn());
+                shoppingCart.setProductName(storefrontProduct.getProductName());
+                shoppingCart.setPrice(new BigDecimal(storefrontProduct.getSellPrice()));
+                shoppingCart.setShopCount(shopCount);
+                shoppingCart.setUnitName(djBasicsProductTemplate.getUnitName());
+                shoppingCart.setCategoryId(djBasicsProductTemplate.getCategoryId());
+                shoppingCart.setProductType(goods.getType());
+                shoppingCart.setStorefrontId(storefrontProduct.getStorefrontId());
                 shoppingCart.setCityId(cityId);
-                shoppingCart.setImage(image);
+                shoppingCart.setImage(storefrontProduct.getImage());
                 if (iShoppingCartmapper.insert(shoppingCart) > 0)
                     return ServerResponse.createBySuccessMessage("加入购物车成功!");
                 return ServerResponse.createBySuccessMessage("加入购物车失败!");
@@ -311,21 +311,23 @@ public class ShopCartService {
      * 更换购物车商品
      * @param shoppingCartId
      * @param productId
-     * @param productSn
-     * @param productName
-     * @param image
-     * @param price
      * @return
      */
-    public ServerResponse replaceShoppingCart(String shoppingCartId, String productId, String productSn, String productName, String image, BigDecimal price) {
+    public ServerResponse replaceShoppingCart(String shoppingCartId, String productId) {
         try {
+            StorefrontProduct storefrontProduct = iMasterStorefrontProductMapper.selectByPrimaryKey(productId);
+            DjBasicsProductTemplate djBasicsProductTemplate = iMasterProductTemplateMapper.selectByPrimaryKey(storefrontProduct.getProdTemplateId());
+            Goods goods = iMasterGoodsMapper.selectByPrimaryKey(djBasicsProductTemplate.getGoodsId());
             ShoppingCart shoppingCart=new ShoppingCart();
             shoppingCart.setId(shoppingCartId);
             shoppingCart.setProductId(productId);
-            shoppingCart.setProductSn(productSn);
-            shoppingCart.setProductName(productName);
-            shoppingCart.setImage(image);
-            shoppingCart.setPrice(price);
+            shoppingCart.setProductSn(djBasicsProductTemplate.getProductSn());
+            shoppingCart.setProductName(storefrontProduct.getProductName());
+            shoppingCart.setImage(storefrontProduct.getImage());
+            shoppingCart.setPrice(new BigDecimal(storefrontProduct.getSellPrice()));
+            shoppingCart.setProductType(goods.getType());
+            shoppingCart.setUnitName(djBasicsProductTemplate.getUnitName());
+            shoppingCart.setStorefrontId(storefrontProduct.getStorefrontId());
             iShoppingCartmapper.updateByPrimaryKeySelective(shoppingCart);
             return ServerResponse.createBySuccessMessage("更换成功!");
         } catch (Exception e) {

@@ -5,11 +5,9 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.actuary.app.*;
 import com.dangjia.acg.mapper.actuary.*;
-import com.dangjia.acg.mapper.basics.IAttributeValueMapper;
 import com.dangjia.acg.mapper.basics.IBrandMapper;
 import com.dangjia.acg.mapper.basics.IUnitMapper;
 import com.dangjia.acg.modle.actuary.DjActuarialSimulationRelation;
-import com.dangjia.acg.modle.attribute.AttributeValue;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.service.product.app.GoodsProductTemplateService;
@@ -104,6 +102,7 @@ public class SearchActuarialConfigServices {
                 if(unitId!=null&& StringUtils.isNotBlank(unitId)){
                     Unit unit= iUnitMapper.selectByPrimaryKey(unitId);
                     ap.setUnitName(unit!=null?unit.getName():"");
+                    ap.setUnitType(unit.getType());
                 }
 
                 if(StringUtils.isNotBlank(ap.getBrandId())){
