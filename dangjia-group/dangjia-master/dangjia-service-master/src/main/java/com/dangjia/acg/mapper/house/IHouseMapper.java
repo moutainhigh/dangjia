@@ -61,7 +61,9 @@ public interface IHouseMapper extends Mapper<House> {
                                      @Param("searchKey") String searchKey,
                                      @Param("workerKey") String workerKey,
                                      @Param("dataStatus") String dataStatus,
-                                     @Param("userId") String userId);
+                                     @Param("userId") String userId,
+                                     @Param("budgetStatus") String budgetStatus,
+                                     @Param("decorationType") String  decorationType);
 
     List<HouseListDTO> getHouseList(@Param("cityKey")  String cityKey,@Param("userKey") String userKey,@Param("memberId") String memberId, @Param("visitState") Integer visitState, @Param("startDate") String startDate, @Param("endDate") String endDate, @Param("orderBy") String orderBy, @Param("searchKey") String searchKey);
 
