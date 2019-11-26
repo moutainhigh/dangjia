@@ -22,14 +22,12 @@ public interface DjBasicsGoodsMapper extends Mapper<DjBasicsGoods> {
                                                          @Param("name")String name,
                                                          @Param("cityId")String cityId);
 
-    List<DjBasicsGoods> queryGoodsListByCategoryId(@Param("categoryId") String categoryId);
-
     DjBasicsGoods queryById(String id);
 
     //根据商品Id查货品
     List<DjBasicsProductTemplate> queryByGoodsId(@Param("goodsId") String goodsId);
 
-    List<DjBasicsGoods> queryByCategoryId(@Param("categoryId")String categoryId);
+    List<DjBasicsGoods> queryByCategoryId(@Param("categoryId")String categoryId,@Param("cityId")String cityId);
 
     String queryGoodsLabels(@Param("goodsId") String goodsId);
 }

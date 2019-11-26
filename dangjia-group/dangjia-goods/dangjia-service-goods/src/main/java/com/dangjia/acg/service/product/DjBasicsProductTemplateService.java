@@ -201,7 +201,7 @@ public class DjBasicsProductTemplateService {
             String productId = insertBasicsProductData(basicsProductDTO,imgStr,0,basicsGoods.getType(),cityId);
             LOG.info("001----------添加商品主表 end productId:" + productId);
            //上架商品到店铺
-            if(basicsGoods!=null&&basicsGoods.getType()!=1&&basicsGoods.getType()!=2){//非实物商品直接上架
+            if(basicsGoods!=null&&basicsGoods.getType()!=0&&basicsGoods.getType()!=1){//非实物商品直接上架
                 String storefrontId=getStorefrontId(cityId,userId);
                 //上架商品到店铺
                 String storefrontProductId=goodsStorefrontProductService.insertExitStorefrontProduct(storefrontId, productId, basicsProductDTO, cityId);
@@ -389,7 +389,7 @@ public class DjBasicsProductTemplateService {
             storefront.setStorefrontLogo("");//店铺logo暂无
             storefront.setIfDjselfManage(1);
             storefront.setStorefrontType("worker");
-            String systemlogo = configUtil.getValue(SysConfig.ORDER_DIANPU_ICON, String.class);
+            String systemlogo = configUtil.getValue(SysConfig.ORDER_DANGJIA_ICON, String.class);
             storefront.setSystemLogo(systemlogo);
             iGoodsStorefrontMapper.insertSelective(storefront);
         }
@@ -423,10 +423,10 @@ public class DjBasicsProductTemplateService {
             //DjBasicsGoods basicsGoods = djBasicsGoodsMapper.selectByPrimaryKey(goodsId);
             //if("0".equals(basicsGoods.getType())||"1".equals(basicsGoods.getType())){
             //判断当前添加的属性值是否有相同的已存在的商品（材料商品才有）
-            checkStr = checkProductAttr(basicsProductDTO,jsonArr);
+           /* checkStr = checkProductAttr(basicsProductDTO,jsonArr);
             if(StringUtils.isNotBlank(checkStr)){
                 return checkStr;
-            }
+            }*/
             //  }
             //校验商品是否存在
             String ret = checkProduct(name, productSn, id, jsonArr);
@@ -564,13 +564,13 @@ public class DjBasicsProductTemplateService {
         String productSn = basicsProductDTO.getProductSn();//商品编码
         String categoryId=basicsProductDTO.getCategoryId();//商品类别Id
         DjBasicsGoods basicsGoods = djBasicsGoodsMapper.selectByPrimaryKey(categoryId);
-        if(type == 0 || type == 1){
+        /*if(type == 0 || type == 1){
             //判断当前添加的属性值是否有相同的已存在的商品（材料商品才有）
             checkStr = checkProductAttr(basicsProductDTO,jsonArr);
             if(StringUtils.isNotBlank(checkStr)){
                 return checkStr;
             }
-        }
+        }*/
         //校验商品是否存在
         String ret = checkProduct(name, productSn, id, jsonArr);
         if (!ret.equals("ok")) {
@@ -621,7 +621,7 @@ public class DjBasicsProductTemplateService {
         String productId = insertBasicsProductData(basicsProductDTO,imgStr,dataStatus,basicsGoods.getType(),cityId);
         LOG.info("001----------添加商品主表 end productId:" + productId);
         //上架商品到店铺
-        if(basicsGoods!=null&&basicsGoods.getType()!=1&&basicsGoods.getType()!=2){//非实物商品直接上架
+        if(basicsGoods!=null&&basicsGoods.getType()!=1&&basicsGoods.getType()!=0){//非实物商品直接上架
             String storefrontId=getStorefrontId(cityId,userId);
             //上架商品到店铺
             String storefrontProductId=goodsStorefrontProductService.insertExitStorefrontProduct(storefrontId, productId, basicsProductDTO, cityId);

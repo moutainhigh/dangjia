@@ -74,8 +74,8 @@ public class DjBasicsActuarialConfigurationController implements DjBasicsActuari
      */
     @Override
     @ApiMethod
-    public ServerResponse getActuarialGoodsListByCategoryId(HttpServletRequest request,String categoryId){
-        return djBasicsActuarialConfigurationServices.getActuarialGoodsListByCategoryId(categoryId);
+    public ServerResponse getActuarialGoodsListByCategoryId(HttpServletRequest request,String categoryId,String cityId){
+        return djBasicsActuarialConfigurationServices.getActuarialGoodsListByCategoryId(categoryId,cityId);
     }
 
     /**

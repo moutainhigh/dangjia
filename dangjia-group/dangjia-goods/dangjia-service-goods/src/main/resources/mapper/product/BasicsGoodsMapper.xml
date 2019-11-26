@@ -60,6 +60,7 @@
         <if test="category_id!=null">
             where
             category_id=#{categoryId}
+            and city_id=#{cityId}
         </if>
         ORDER BY create_date desc
     </select>
@@ -88,6 +89,7 @@
         AND t3.category_id = #{categoryId}
         and t1.is_shelf_status='1'
         and t1.data_status= 0
+        and city_id=#{cityId}
         GROUP BY
             t3.id,
             t3.NAME,
@@ -111,26 +113,12 @@
         <include refid="new_columns"/>
         FROM dj_basics_goods
         where category_id=#{categoryId}
-        <if test="categoryId!=null">
+        <if test="cityId!=null">
             and city_id=#{cityId}
         </if>
         ORDER BY create_date desc
     </select>
 
-    <!-- 根据条件查询商品集合 -->
-    <select id="queryGoodsList" resultType="com.dangjia.acg.modle.product.BasicsGoods">
-        SELECT
-        <include refid="new_columns"/>
-        FROM dj_basics_goods
-        where 1=1
-        <if test="categoryId!=null and categoryId!=''">
-            and category_id=#{categoryId}
-        </if>
-        <if test="name!=null and name!=''">
-            and name=#{name}
-        </if>
-        ORDER BY create_date desc
-    </select>
 
     <!-- 查询某个分类的商品 模糊name -->
     <select id="queryGoodsListByCategoryLikeName" resultType="com.dangjia.acg.modle.product.BasicsGoods">
@@ -155,7 +143,7 @@
         is_reservation_deliver as isReservationDeliver,
         attribute_id_arr attributeIdArr
         FROM dj_basics_goods bg
-        where 1=1
+        where 1=1 and city_id=#{cityId}
         <if test="categoryId!=null and categoryId!=''">
             and bg.category_id=#{categoryId}
         </if>
@@ -169,57 +157,5 @@
         GROUP BY bg.id
     </select>
 
-    <!-- 查询某个分类的商品 模糊name -->
-    <select id="queryGoodsGroupListByCategoryLikeName" resultType="com.dangjia.acg.modle.product.BasicsGoods">
-        SELECT
-        bg.id as id,
-        bg.`NAME` as name,
-        bg.category_id AS categoryId,
-        bg.type as type,
-        bg.buy as buy,
-        bg.sales as sales,
-        bg.unit_id AS unitId,
-        bg.other_name AS otherName,
-        bg.create_date AS createDate,
-        bg.modify_date AS modifyDate
-        FROM dj_basics_goods bg
-        where 1=1
-        <if test="categoryId!=null and categoryId!=''">
-            and bg.category_id=#{categoryId}
-        </if>
-        <if test="type!=null and type!=''">
-            and bg.type =#{type}
-        </if>
-        <if test="buy!=null and buy!=''">
-            and bg.buy !=#{buy}
-        </if>
-        <if test="buy!=null and buy!=''">
-            and (SELECT COUNT(*) > 0 as num FROM dj_basics_product_template p WHERE p.goods_id = bg.id and p.type =1)
-        </if>
-        <if test="name!=null and name!=''">
-            AND (
-            bp.`name` LIKE CONCAT('%',#{name}, '%' )
-            OR bg.`other_name` LIKE CONCAT( '%', #{name}, '%' )
-            or exists (select 1 from dj_basics_product_template t1 where t1.name like CONCAT('%',#{name}, '%'))
-            )
-        </if>
-        GROUP BY bg.id
-        ORDER BY bg.create_date desc
-    </select>
-    <!-- 补货查询商品库- -->
-    <select id="queryRepairGoods" resultType="com.dangjia.acg.modle.product.BasicsGoods">
-        SELECT
-        <include refid="new_columns"/>
-        FROM dj_basics_goods
-        WHERE
-        1=1
-        <if test="name!=null and name!=''">
-            AND
-            name LIKE CONCAT('%',#{name},'%')
-        </if>
-        <if test="categoryId!=null and categoryId!=''">
-            AND
-            category_id =#{categoryId}
-        </if>
-    </select>
+
 </mapper>

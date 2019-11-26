@@ -19,6 +19,7 @@ public class CategoryGoodsProductDTO {
     private String categoryId;//类别ID
     private String categoryName;//类别名称
     private String goodsName;//需查询的货品名称
+    private String cityId;//城市ID
     //返回对应的货品列表
     private List<CategoryGoodsDTO> goodsList;
 }

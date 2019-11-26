@@ -169,7 +169,7 @@ public class GoodsGroupService {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
 //            List<Goods> goodsList = iGoodsMapper.queryGoodsListByCategoryLikeName(categoryId, name);
             // 去除商品是 包工包料类型的 或者 是自购的
-            List<Goods> goodsList = iGoodsMapper.queryGoodsGroupListByCategoryLikeName(categoryId, name, "0", "2");
+            List<Goods> goodsList = iGoodsMapper.queryGoodsGroupListByCategoryLikeName(categoryId, name, "0", "2",cityId);
             List<Map<String, Object>> gMapList = new ArrayList<>();
             for (Goods goods : goodsList) {
                 List<Map<String, Object>> mapList = new ArrayList<>();

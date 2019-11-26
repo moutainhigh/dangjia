@@ -356,11 +356,11 @@ public class BasicsGoodsCategoryService {
      * @param goodsName 货品名称
      * @return
      */
-    public ServerResponse queryCategoryListByCategoryLikeName(PageDTO pageDTO, String categoryId, String goodsName) {
+    public ServerResponse queryCategoryListByCategoryLikeName(PageDTO pageDTO, String categoryId, String goodsName,String cityId) {
         try {
             logger.info("queryCategoryListByCategoryLikeName type :" + categoryId);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<CategoryGoodsProductDTO> categoryGoodsProductList  = iBasicsGoodsCategoryMapper.queryCategoryListByCategoryLikeName(categoryId,goodsName);
+            List<CategoryGoodsProductDTO> categoryGoodsProductList  = iBasicsGoodsCategoryMapper.queryCategoryListByCategoryLikeName(categoryId,goodsName,cityId);
             PageInfo pageResult = new PageInfo(categoryGoodsProductList);
             pageResult.setList(categoryGoodsProductList);
             return ServerResponse.createBySuccess("查询成功", pageResult);

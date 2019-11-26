@@ -286,7 +286,7 @@ public class DjBasicsAttributeServices {
     public ServerResponse deleteGoodsAttribute(String goodsAttributeId) {
         try {
             DjBasicsAttribute srcAttribute = djBasicsAttributeMapper.selectByPrimaryKey(goodsAttributeId);
-            List<DjBasicsGoods> goodsList = djBasicsGoodsMapper.queryByCategoryId(srcAttribute.getCategoryId());//根据分类id查询是否有关联商品
+            List<DjBasicsGoods> goodsList = djBasicsGoodsMapper.queryByCategoryId(srcAttribute.getCategoryId(),null);//根据分类id查询是否有关联商品
             if (goodsList.size() > 0)
                 return ServerResponse.createByErrorMessage("该商品属性有关联商品不能删除");
 

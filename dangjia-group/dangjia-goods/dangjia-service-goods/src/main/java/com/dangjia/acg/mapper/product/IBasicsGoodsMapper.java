@@ -21,30 +21,13 @@ import java.util.List;
 @Repository
 public interface IBasicsGoodsMapper extends Mapper<BasicsGoods> {
 	void deleteById(String id);
-	List<BasicsGoods> query(@Param("categoryId") String categoryId);
+	List<BasicsGoods> query(@Param("categoryId") String categoryId,@Param("cityId") String cityId);
 	BasicsGoods queryById(String id);
 	List<BasicsGoods> queryByName(@Param("name") String name,@Param("cityId") String cityId);
-
-	//根据商品id查询关联品牌
-	//List<Brand> queryBrandByGid(@Param("goodsId") String goodsId);
-	//根据商品id和品牌id查询关联品牌系列
-	//List<BrandSeries> queryBrandByGidAndBid(@Param("goodsId") String goodsId, @Param("brandId") String brandId);
 	List<BasicsGoods> queryByCategoryId(@Param("categoryId") String categoryId,@Param("cityId") String cityId);
-	//List<BasicsGoods> queryRepairGoods(@Param("name") String name, @Param("categoryId") String categoryId);
-	//List<BasicsGoods> queryGoodsList(@Param("categoryId") String categoryId, @Param("name") String name);
 
 	//查询某个分类的商品 模糊name（如果categoryId 为null，查询全部材料商品 ）
-	List<BasicsGoods> queryGoodsListByCategoryLikeName(@Param("categoryId") String categoryId, @Param("name") String name);
-
-	/**
-	 * 查询某个分类的商品 模糊name（如果categoryId 为null，查询全部材料商品 ）  // 去除：自购 包工包料 禁用 查询 product 为空
-	 * @param categoryId
-	 * @param name
-	 * @param type /0:材料；1：包工包料
-	 * @param buy 购买性质0：必买；1可选；2自购
-	 * @return
-	 */
-	List<BasicsGoods> queryGoodsGroupListByCategoryLikeName(@Param("categoryId") String categoryId, @Param("name") String name, @Param("type") String type, @Param("buy") String buy);
-    //根据类别查询所有店铺售卖的货品
-	List<BasicsGoods> getActuarialGoodsListByCategoryId(@Param("categoryId") String categoryId);
+	List<BasicsGoods> queryGoodsListByCategoryLikeName(@Param("categoryId") String categoryId, @Param("name") String name, @Param("cityId") String cityId);
+	 //根据类别查询所有店铺售卖的货品
+	List<BasicsGoods> getActuarialGoodsListByCategoryId(@Param("categoryId") String categoryId, @Param("cityId") String cityId);
 }

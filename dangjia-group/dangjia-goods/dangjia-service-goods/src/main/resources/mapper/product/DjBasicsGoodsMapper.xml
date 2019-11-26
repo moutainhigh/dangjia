@@ -50,7 +50,7 @@
         is_reservation_deliver as isReservationDeliver,
         attribute_id_arr attributeIdArr
         FROM dj_basics_goods bg
-        where 1=1
+        where 1=1 and city_id=#{cityId}
         <if test="categoryId!=null and categoryId!=''">
             and bg.category_id=#{categoryId}
         </if>
@@ -62,20 +62,6 @@
             )
         </if>
         GROUP BY bg.id
-    </select>
-
-    <select id="queryGoodsListByCategoryId" resultType="com.dangjia.acg.modle.product.DjBasicsGoods">
-        SELECT
-             CONCAT(b.`name`, g.`name`) AS NAME,
-             g.id as id,
-             g.type as type,
-             g.buy as buy
-        FROM
-            dj_basics_goods g,
-            dj_basics_brand b
-        WHERE
-            g.brand_id = b.id
-        AND g.category_id = #{categoryId}
     </select>
 
     <!-- 根据id查询属性对象 -->
@@ -105,7 +91,7 @@
         <include refid="all_columns"/>
         FROM dj_basics_goods
         where category_id=#{categoryId}
-        <if test="categoryId!=null">
+        <if test="cityId!=null">
             and city_id=#{cityId}
         </if>
         ORDER BY create_date desc
