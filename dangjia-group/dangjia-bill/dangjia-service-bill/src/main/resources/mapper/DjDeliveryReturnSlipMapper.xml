@@ -537,10 +537,10 @@
         SELECT
         IFNULL(dsd.storefront_id ,'') as storefrontId, -- 店铺id
         IFNULL(dsd.ship_address ,'')AS shipAddress, -- 房子地址
-        m. NAME, -- 业主姓名
+        m.NAME, -- 业主姓名
         IFNULL(sum(dsd.total_amount),'') AS income, -- 收入
         IFNULL(sum(dsd.apply_money),'') AS expenditure,-- 支出
-        sum(dsd.total_amount)- IFNULL(dsd.apply_money,'')AS profit, -- 利润
+        IFNULL(sum(dsd.total_amount)-sum(dsd.apply_money),'') AS profit, -- 利润
         h.id AS houseId -- 房子id
         FROM
         dj_deliver_split_deliver dsd  -- 后台生成发货单
@@ -557,7 +557,7 @@
         and dsd.city_id=#{cityId}
         GROUP BY h.id
     </select>
-
+    <!-- 店鋪利潤統計-賣家維度-列表-->
     <select id="sellerDimensionById" resultType="com.dangjia.acg.dto.delivery.StoreBuyersDimensionDTO">
         SELECT
         IFNULL(dsd.storefront_id ,'') as storefrontId, -- 店铺id
@@ -574,7 +574,7 @@
         INNER JOIN dj_deliver_order_split_item dosi ON dsd.id = dosi.split_deliver_id -- 要货单明细
         WHERE  1=1 and dsd.id=#{orderSplitId}
     </select>
-
+<!-- 店鋪利潤統計-賣家維度-訂單詳情-->
     <select id="sellerDimensionDetail" resultType="com.dangjia.acg.dto.delivery.StoreBuyersDimensionDetailDTO">
        SELECT
             dsd.id AS orderSplitId,
