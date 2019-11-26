@@ -39,18 +39,6 @@ public interface BasicsStorefrontAPI {
     @ApiOperation(value = "根据条件模糊查询店铺信息", notes = "根据条件模糊查询店铺信息")
     List<Storefront> queryLikeSingleStorefront(@RequestParam("searchKey") String searchKey);
 
-    @PostMapping("/web/addStorefront")
-    @ApiOperation(value = "注册店铺信息", notes = "注册店铺信息")
-    ServerResponse addStorefront(@RequestParam("userId") String userId,
-                                 @RequestParam("cityId") String cityId,
-                                 @RequestParam("storefrontName") String storefrontName,
-                                 @RequestParam("storefrontAddress") String storefrontAddress,
-                                 @RequestParam("storefrontDesc") String storefrontDesc,
-                                 @RequestParam("storefrontLogo") String storefrontLogo,
-                                 @RequestParam("storekeeperName") String storekeeperName,
-                                 @RequestParam("mobile") String mobile,
-                                 @RequestParam("email") String email
-                                 );
 
     @PostMapping("/web/updateStorefront")
     @ApiOperation(value = "修改店铺信息", notes = "修改店铺信息")

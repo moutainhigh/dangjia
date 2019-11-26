@@ -115,14 +115,6 @@ public class StorefrontService {
      */
     public ServerResponse queryStorefrontByUserId(String userId,String cityId) {
         try {
-
-            //判断是否审核通过，是否是店铺，如果是就显示
-            //String checkUserid= djRegisterApplicationAPI.getUserIdExamine(userId);
-            //判断是否注册
-//            if(StringUtils.isEmpty(checkUserid))
-//            {
-//                return ServerResponse.createBySuccessMessage("用户审核不通过");
-//            }
             Example example=new Example(Storefront.class);
             example.createCriteria().andEqualTo(Storefront.USER_ID,userId).
                     andEqualTo(Storefront.CITY_ID,cityId);
@@ -180,63 +172,6 @@ public class StorefrontService {
     }
 
 
-
-    public ServerResponse addStorefront(String userId, String cityId, String storefrontName,
-                                        String storefrontAddress, String storefrontDesc,
-                                        String storefrontLogo, String storekeeperName,
-                                        String mobile, String email) {
-        try {
-//            Object object = constructionService.getMember(userToken);
-//            if (object instanceof ServerResponse) {
-//                return (ServerResponse) object;
-//            }
-//            Member worker = (Member) object;
-
-            //店铺名称不能大于10个字
-            if (storefrontName.length() > 10) {
-                return ServerResponse.createByErrorMessage("店铺名称不能大于10个字!");
-            }
-            //店铺地址限制字数30个字，支持字母、数字、汉字
-            if (storefrontAddress.length() > 30) {
-                return ServerResponse.createByErrorMessage("店铺地址不能大于30个字!");
-            }
-            //店铺介绍限制字数20个字，支持字母、数字、汉字
-            if (storefrontDesc.length() > 20) {
-                return ServerResponse.createByErrorMessage("店铺介绍不能大于20个字!");
-            }
-            Storefront storefront = new Storefront();
-            storefront.setUserId(userId);
-            storefront.setCityId(cityId);
-            storefront.setStorefrontName(storefrontName);
-            storefront.setStorefrontAddress(storefrontAddress);
-            storefront.setStorefrontDesc(storefrontDesc);
-            storefront.setStorefrontLogo(storefrontLogo);
-            storefront.setStorekeeperName(storekeeperName);
-            storefront.setMobile(mobile);
-            storefront.setEmail(email);
-
-            //判断是否重复添加
-            Example example=new Example(Storefront.class);
-            example.createCriteria().andEqualTo(Storefront.CITY_ID,cityId).
-                    andEqualTo(Storefront.USER_ID,userId);
-            List<Storefront> list=istorefrontMapper.selectByExample(example);
-            if(list.size()>0)
-            {
-                return ServerResponse.createByErrorMessage("店铺已经添加，不能重复添加!");
-            }
-
-
-            int i = istorefrontMapper.insert(storefront);
-            if (i > 0) {
-                return ServerResponse.createBySuccessMessage("新增成功!");
-            } else {
-                return ServerResponse.createByErrorMessage("新增失败!");
-            }
-        } catch (Exception e) {
-            logger.error("新增失败：", e);
-            return ServerResponse.createByErrorMessage("新增失败");
-        }
-    }
 
     public ServerResponse updateStorefront(StorefrontDTO storefrontDTO) {
 
