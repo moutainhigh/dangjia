@@ -36,7 +36,7 @@ public class AliPayUtil {
             model.setTotalAmount(price);
             model.setProductCode("QUICK_MSECURITY_PAY");
             request.setBizModel(model);
-            request.setNotifyUrl("http://api_show.fengjiangit.com" + notify_url);
+            request.setNotifyUrl("http://api_show.fengjiangit.com/" + notify_url);
 
 
             System.out.println("=================="+ JSONObject.toJSONString(request));
