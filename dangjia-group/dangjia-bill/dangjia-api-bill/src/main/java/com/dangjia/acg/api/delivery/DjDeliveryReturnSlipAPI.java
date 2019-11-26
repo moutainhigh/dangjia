@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
 
 /**
  * Created with IntelliJ IDEA.
@@ -100,6 +101,8 @@ public interface DjDeliveryReturnSlipAPI {
     @ApiOperation(value = "店铺利润统计-供应商维度", notes = "店铺利润统计-供应商维度")
     ServerResponse supplierDimension(@RequestParam("request") HttpServletRequest request,
                                                    @RequestParam("pageDTO") PageDTO pageDTO,
+                                                   @RequestParam("startTime") Date startTime,
+                                                   @RequestParam("endTime")Date endTime,
                                                    @RequestParam("userId") String userId,
                                                    @RequestParam("cityId") String cityId,
                                                    @RequestParam("searchKey") String searchKey);

@@ -521,7 +521,7 @@
             dsd.storefront_id AS storefrontId,-- 店铺id
             IFNULL(sum(dsd.total_amount),'') AS income, -- 收入
             IFNULL(sum(dsd.apply_money),'') AS expenditure,-- 支出
-            sum(dsd.total_amount)- IFNULL(dsd.apply_money,'')AS profit, -- 利润
+            IFNULL(sum(dsd.total_amount)-sum(dsd.apply_money),'') AS profit, -- 利润
             dsd.supplier_id AS supId -- 供应商id
         FROM
             dj_deliver_split_deliver dsd
@@ -529,7 +529,7 @@
         WHERE
             dsd.supplier_id = #{supId} AND dsd.storefront_id = #{storefrontId} AND dsd.city_id = #{cityId}
         GROUP BY
-            dsd.storefront_id
+            dsd.supplier_id
     </select>
 
     <!--店铺利润-买家维度    -->
