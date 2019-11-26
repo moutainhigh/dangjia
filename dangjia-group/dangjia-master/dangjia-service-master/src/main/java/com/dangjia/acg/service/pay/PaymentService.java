@@ -1,6 +1,5 @@
 package com.dangjia.acg.service.pay;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.BasicsStorefrontAPI;
 import com.dangjia.acg.api.RedisClient;
@@ -1669,7 +1668,6 @@ public class PaymentService {
                 accountFlowRecord.setCreateBy(djSupplierPayOrder.getUserId());
                 if (djSupplierPayOrder.getState() == 1 && djSupplierPayOrder.getSourceType() == 1) {
                     DjSupplier djSupplier = iMaterSupplierMapper.selectByPrimaryKey(djSupplierPayOrder.getSupplierId());
-                    System.out.println("=============-------1----=============================="+JSON.toJSONString(djSupplier));
                     accountFlowRecord.setAmountBeforeMoney(djSupplier.getTotalAccount());//入账前金额
                     if (djSupplierPayOrder.getBusinessOrderType().equals("1")) {
                         djSupplier.setTotalAccount(djSupplier.getTotalAccount() + djSupplierPayOrder.getPrice());
@@ -1685,7 +1683,6 @@ public class PaymentService {
                     accountFlowRecord.setMoney(djSupplierPayOrder.getPrice());
                     accountFlowRecord.setAmountAfterMoney(djSupplier.getTotalAccount());//入账后金额
 
-                    System.out.println("=============-----2------=============================="+JSON.toJSONString(djSupplier));
                 } else if (djSupplierPayOrder.getState() == 1 && djSupplierPayOrder.getSourceType() == 2) {
                     Storefront storefront = iMasterStorefrontMapper.selectByPrimaryKey(djSupplierPayOrder.getSupplierId());
                     accountFlowRecord.setAmountBeforeMoney(storefront.getTotalAccount());//入账前金额

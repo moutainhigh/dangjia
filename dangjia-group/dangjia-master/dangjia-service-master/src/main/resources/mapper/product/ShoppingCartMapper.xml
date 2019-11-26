@@ -38,6 +38,7 @@
 			b.sell_price AS sellPrice,
 			d.is_reservation_deliver AS isReservationDeliver,
 			d.type,
+			d.type unitType,
 			c.value_name_arr as valueNameArr
 		FROM
 			dj_repair_shopping_cart a
@@ -47,6 +48,7 @@
 		WHERE a.member_id =#{memberId}
 		AND a.city_id =#{cityId}
 		AND a.storefront_id=#{storefrontId}
+		AND d.type &lt;4
 		<if test="null!=productIds and productIds.size>0">
 			AND a.product_id in
 			<foreach collection="productIds" index="index" item="item" open="(" separator="," close=")">

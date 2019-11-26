@@ -546,6 +546,7 @@
 
         </if>
         WHERE   p.data_status = 0
+        AND g.type &lt;4
 
         <!--<if test="productId==null or productId==''">-->
             <!--AND p.type = 1-->

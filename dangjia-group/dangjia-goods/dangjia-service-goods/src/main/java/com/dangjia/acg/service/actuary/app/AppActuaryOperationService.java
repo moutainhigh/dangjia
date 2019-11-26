@@ -363,7 +363,7 @@ public class AppActuaryOperationService {
             Shop shop = new Shop();
             BeanUtils.beanToBean(storefront,shop);
             shop.setStorefrontLogo(StringTool.getImage(shop.getStorefrontLogo(),imageAddress));
-            shop.setSystemLogo(StringTool.getImage(shop.getStorefrontLogo(),imageAddress));
+            shop.setSystemLogo(StringTool.getImage(shop.getSystemLogo(),imageAddress));
             goodsDTO.setShop(shop);
 
             goodsDTO.setGoodsId(goods.getId());
