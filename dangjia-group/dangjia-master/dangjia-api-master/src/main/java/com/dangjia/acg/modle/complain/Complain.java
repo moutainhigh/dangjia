@@ -95,4 +95,17 @@ public class Complain extends BaseEntity {
     @ApiModelProperty("发起人电话")
     private String userMobile;
 
+
+    @Column(name = "supplier_id")
+    @Desc(value = "供应商编号")
+    @ApiModelProperty("供应商编号")
+    private String supplierId;
+
+
+    @Column(name = "storefront_id")
+    @Desc(value = "店铺编号")
+    @ApiModelProperty("店铺编号")
+    private String storefrontId;
+
+
 }
