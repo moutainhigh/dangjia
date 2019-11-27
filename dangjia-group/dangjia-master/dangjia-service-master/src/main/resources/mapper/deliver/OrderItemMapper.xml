@@ -100,7 +100,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		INNER JOIN dj_basics_storefront_product sp ON sp.id = m.product_id
 		INNER JOIN dj_basics_product_template p ON sp.prod_template_id = p.id
 		WHERE ( o.id = #{orderId} OR o.parent_order_id =  #{orderId} )
-		  and m.storefont_id = #{storefontId}
+		<if test = "storefontId!=null and storefontId!=''">
+			and m.storefont_id = #{storefontId}
+		</if>
 	</select>
     <!-- 模糊查询 -->
     <select id="orderItemList" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.deliver.OrderItem">

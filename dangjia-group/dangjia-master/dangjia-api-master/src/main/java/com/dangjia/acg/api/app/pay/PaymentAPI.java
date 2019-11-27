@@ -51,20 +51,12 @@ public interface PaymentAPI {
     @PostMapping("app/pay/payment/getOrder")
     @ApiOperation(value = "支付页面接口", notes = "支付页面接口")
     ServerResponse getPaymentOrder(@RequestParam("userToken") String userToken,
-                                   @RequestParam("houseId") String houseId,
-                                   @RequestParam("taskId") String taskId,
-                                   @RequestParam("type") Integer type);
+                                   @RequestParam("taskId") String taskId);
 
-    @PostMapping("app/pay/payment/order")
-    @ApiOperation(value = "支付页面接口(通用)", notes = "支付页面接口(通用)")
-    ServerResponse getPaymentAllOrder(@RequestParam("userToken") String userToken,
-                                      @RequestParam("businessOrderNumber") String businessOrderNumber,
-                                      @RequestParam("type") Integer type);
 
     @PostMapping("app/pay/payment/getPage")
     @ApiOperation(value = "接口", notes = "购物车接口")
     ServerResponse getPaymentPage(@RequestParam("userToken") String userToken,
-                                  @RequestParam("houseId") String houseId,
                                   @RequestParam("taskId") String taskId,
                                   @RequestParam("cityId") String cityId,
                                   @RequestParam("type") Integer type);
@@ -73,18 +65,21 @@ public interface PaymentAPI {
     @ApiOperation(value = "购物车提交订单接口", notes = "购物车提交订单接口")
     ServerResponse generateOrder(@RequestParam("userToken") String userToken,
                                  @RequestParam("cityId") String cityId,
-                                 @RequestParam("houseId") String houseId,
-                                 @RequestParam("workerId") String workerId,
-                                 @RequestParam("addressId") String addressId,
                                  @RequestParam("productIds") String productIds);
 
+    @PostMapping("app/order/edit")
+    @ApiOperation(value = "订单更新接口", notes = "订单更新接口")
+    ServerResponse editOrder(@RequestParam("userToken")String userToken,
+                             @RequestParam("orderId")String orderId,
+                             @RequestParam("workerId")String workerId,
+                             @RequestParam("addressId")String addressId,
+                             @RequestParam("houseId")String houseId);
 
     @PostMapping("app/order/generate/budget")
     @ApiOperation(value = "精算提交订单接口", notes = "精算提交订单接口")
     ServerResponse generateBudgetOrder(@RequestParam("userToken") String userToken,
                                        @RequestParam("cityId") String cityId,
-                                       @RequestParam("houseFlowId") String houseFlowId,
-                                       @RequestParam("addressId") String addressId);
+                                       @RequestParam("houseFlowId") String houseFlowId);
 
     @PostMapping("app/pay/payment/queryInsuranceInfo")
     @ApiOperation(value = "查询保险信息", notes = "查询保险信息")

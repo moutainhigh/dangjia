@@ -79,8 +79,8 @@ public class Order extends BaseEntity {
 	private BigDecimal budgetCost;
 
 	@Column(name = "type")
-	@Desc(value = "1人工订单 2材料订单")
-	@ApiModelProperty("1人工订单 2材料订单")
+	@Desc(value = "1人工订单 2其他订单 3精算订单 4体验订单")
+	@ApiModelProperty("1人工订单 2其他订单 3精算订单 4体验订单")
 	private Integer type;
 
 	@Column(name = "payment")
