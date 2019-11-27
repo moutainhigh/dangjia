@@ -25,8 +25,8 @@ import com.dangjia.acg.mapper.product.IBasicsProductTemplateMapper;
 import com.dangjia.acg.modle.actuary.ActuarialTemplate;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.brand.Unit;
+import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.BasicsGoodsCategory;
-import com.dangjia.acg.modle.product.DjBasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.service.actuary.app.SearchActuarialConfigServices;
 import com.github.pagehelper.PageHelper;
@@ -113,7 +113,7 @@ public class DjActuaryBudgetMaterialService {
                     }
                     try {
                         BudgetMaterial budgetMaterial = new BudgetMaterial();
-                        DjBasicsGoods djBasicsGoods = djBasicsGoodsMapper.queryById(goodsId);
+                        BasicsGoods djBasicsGoods = djBasicsGoodsMapper.queryById(goodsId);
                         if (djBasicsGoods == null) {
                             continue;
                         }
@@ -255,9 +255,9 @@ public class DjActuaryBudgetMaterialService {
     public ServerResponse queryMakeBudgetsList(String bclId, String categoryId, String houseId,String cityId) {
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
         BasicsGoodArrDTO basicsGoodArrDTO = new BasicsGoodArrDTO();
-        Example example = new Example(DjBasicsGoods.class);
-        example.createCriteria().andEqualTo(DjBasicsGoods.CATEGORY_ID, categoryId).andEqualTo(DjBasicsGoods.CITY_ID,cityId);
-        List<DjBasicsGoods> list = djBasicsGoodsMapper.selectByExample(example);
+        Example example = new Example(BasicsGoods.class);
+        example.createCriteria().andEqualTo(BasicsGoods.CATEGORY_ID, categoryId).andEqualTo(BasicsGoods.CITY_ID,cityId);
+        List<BasicsGoods> list = djBasicsGoodsMapper.selectByExample(example);
         BasicsGoodsCategory djBasicsGoodsCategory = djBasicsGoodsCategoryMapper.selectByPrimaryKey(categoryId);
         if (list.size() > 0) {
                 //0：材料；1：服务   //2 人工
@@ -307,11 +307,11 @@ public class DjActuaryBudgetMaterialService {
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
 //        String imageAddress ="";
         BasicsGoodArrDTO basicsGoodArrDTO = new BasicsGoodArrDTO();
-        Example example = new Example(DjBasicsGoods.class);
+        Example example = new Example(BasicsGoods.class);
                 example.createCriteria()
-                .andEqualTo(DjBasicsGoods.CATEGORY_ID, categoryId)
-                .andEqualTo(DjBasicsGoods.CITY_ID,cityId);
-        List<DjBasicsGoods> list = djBasicsGoodsMapper.selectByExample(example);
+                .andEqualTo(BasicsGoods.CATEGORY_ID, categoryId)
+                .andEqualTo(BasicsGoods.CITY_ID,cityId);
+        List<BasicsGoods> list = djBasicsGoodsMapper.selectByExample(example);
 
         BasicsGoodsCategory djBasicsGoodsCategory = djBasicsGoodsCategoryMapper.selectByPrimaryKey(categoryId);
         if (list.size() > 0) {

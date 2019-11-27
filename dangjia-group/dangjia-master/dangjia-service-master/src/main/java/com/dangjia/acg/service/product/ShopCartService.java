@@ -3,9 +3,6 @@ package com.dangjia.acg.service.product;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.BasicsStorefrontAPI;
-import com.dangjia.acg.api.StorefrontProductAPI;
-import com.dangjia.acg.api.data.ForMasterAPI;
-import com.dangjia.acg.api.product.DjBasicsProductAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
@@ -19,10 +16,10 @@ import com.dangjia.acg.mapper.product.IMasterGoodsMapper;
 import com.dangjia.acg.mapper.product.IMasterProductTemplateMapper;
 import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
 import com.dangjia.acg.mapper.product.IShoppingCartMapper;
-import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberCollect;
+import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.product.ShoppingCart;
 import com.dangjia.acg.modle.storefront.Storefront;
@@ -214,7 +211,7 @@ public class ShopCartService {
             Member member = (Member) object;
             StorefrontProduct storefrontProduct = iMasterStorefrontProductMapper.selectByPrimaryKey(productId);
             DjBasicsProductTemplate djBasicsProductTemplate = iMasterProductTemplateMapper.selectByPrimaryKey(storefrontProduct.getProdTemplateId());
-            Goods goods = iMasterGoodsMapper.selectByPrimaryKey(djBasicsProductTemplate.getGoodsId());
+            BasicsGoods goods = iMasterGoodsMapper.selectByPrimaryKey(djBasicsProductTemplate.getGoodsId());
             //有房有精算  根据用户的member_id去区分
             //无房无精算  根据用户的member_id去区分
             //purchaseRestrictions:0自由购房；1有房无精算；2有房有精算
@@ -317,7 +314,7 @@ public class ShopCartService {
         try {
             StorefrontProduct storefrontProduct = iMasterStorefrontProductMapper.selectByPrimaryKey(productId);
             DjBasicsProductTemplate djBasicsProductTemplate = iMasterProductTemplateMapper.selectByPrimaryKey(storefrontProduct.getProdTemplateId());
-            Goods goods = iMasterGoodsMapper.selectByPrimaryKey(djBasicsProductTemplate.getGoodsId());
+            BasicsGoods goods = iMasterGoodsMapper.selectByPrimaryKey(djBasicsProductTemplate.getGoodsId());
             ShoppingCart shoppingCart=new ShoppingCart();
             shoppingCart.setId(shoppingCartId);
             shoppingCart.setProductId(productId);

@@ -65,7 +65,7 @@ public class DjBasicsGoodsService {
      * @return
      */
     public ServerResponse addLabels(String goodsId, String labels,String cityId) {
-        DjBasicsGoods djBasicsGoods = new DjBasicsGoods();
+        BasicsGoods djBasicsGoods = new BasicsGoods();
         djBasicsGoods.setCityId(cityId);
         djBasicsGoods.setId(goodsId);
         djBasicsGoods.setLabelIds(labels);
@@ -310,10 +310,10 @@ public class DjBasicsGoodsService {
             LOG.info("tqueryGoodsListByCategoryLikeName type :" + type);
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<DjBasicsGoods> goodsList = djBasicsGoodsMapper.queryGoodsListByCategoryLikeName(categoryId, name,cityId);
+            List<BasicsGoods> goodsList = djBasicsGoodsMapper.queryGoodsListByCategoryLikeName(categoryId, name,cityId);
             PageInfo pageResult = new PageInfo(goodsList);
             List<Map<String, Object>> gMapList = new ArrayList<>();
-            for (DjBasicsGoods goods : goodsList) {
+            for (BasicsGoods goods : goodsList) {
                 Map<String, Object> gMap = BeanUtils.beanToMap(goods);
                 List<Map<String, Object>> mapList = new ArrayList<>();
                 gMap.put("goodsUnitName", iUnitMapper.selectByPrimaryKey(goods.getUnitId()).getName());

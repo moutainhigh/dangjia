@@ -11,8 +11,8 @@ import com.dangjia.acg.mapper.basics.IGoodsMapper;
 import com.dangjia.acg.mapper.basics.IProductMapper;
 import com.dangjia.acg.mapper.sup.ISupplierMapper;
 import com.dangjia.acg.mapper.sup.ISupplierProductMapper;
-import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
+import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.sup.SupplierProduct;
 import com.github.pagehelper.PageHelper;
@@ -183,7 +183,7 @@ public class SupplierService {
                 for (Product product : pList) {
                     Map<String, Object> gmap = new HashMap<>();
                     gmap.put("pId", product.getId());//商品id
-                    Goods goods = goodsMapper.selectByPrimaryKey(product.getGoodsId());
+                    BasicsGoods goods = goodsMapper.selectByPrimaryKey(product.getGoodsId());
                     gmap.put("goodsName", goods == null ? "" : goods.getName());//商品名称
                     gmap.put("productName", product.getName());//货品名称
                     gmap.put("isSupply", 1);//是否供应；0停供，1供应
@@ -206,7 +206,7 @@ public class SupplierService {
                 for (Product product : pList) {
                     Map<String, Object> gmap = new HashMap<>();
                     gmap.put("pId", product.getId());//商品id
-                    Goods goods = goodsMapper.selectByPrimaryKey(product.getGoodsId());
+                    BasicsGoods goods = goodsMapper.selectByPrimaryKey(product.getGoodsId());
                     gmap.put("goodsName", goods == null ? "" : goods.getName());//商品名称
                     gmap.put("productName", product.getName());//商品名称
                     SupplierProduct supplierProduct = iSupplierMapper.querySupplierProductRelation(product.getId(), supplierId);

@@ -10,9 +10,9 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.basics.*;
 import com.dangjia.acg.modle.attribute.AttributeValue;
-import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Label;
 import com.dangjia.acg.modle.basics.Product;
+import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -73,7 +73,7 @@ public class GoodsService {
             if (!StringUtils.isNotBlank(name))
                 return ServerResponse.createByErrorMessage("名字不能为空");
 
-            List<Goods> goodsList = iGoodsMapper.queryByName(name);
+            List<BasicsGoods> goodsList = iGoodsMapper.queryByName(name);
             if (goodsList.size() > 0)
                 return ServerResponse.createByErrorMessage("名字不能重复");
 
@@ -86,7 +86,7 @@ public class GoodsService {
             if (type < -1)
                 return ServerResponse.createByErrorMessage("性质不能为空");
 
-            Goods goods = new Goods();
+            BasicsGoods goods = new BasicsGoods();
             goods.setCityId(cityId);
             goods.setName(name);
             goods.setOtherName(otherName);//别名
@@ -192,14 +192,14 @@ public class GoodsService {
     public ServerResponse updateGoods(String id, String name, String categoryId, Integer buy,
                                       Integer sales, String unitId, Integer type, String arrString,String otherName,String cityId)throws RuntimeException {
         try {
-            Goods oldGoods = iGoodsMapper.selectByPrimaryKey(id);
+            BasicsGoods oldGoods = iGoodsMapper.selectByPrimaryKey(id);
             if (!oldGoods.getName().equals(name)) {
-                List<Goods> goodsList = iGoodsMapper.queryByName(name);
+                List<BasicsGoods> goodsList = iGoodsMapper.queryByName(name);
                 if (goodsList.size() > 0)
                     return ServerResponse.createByErrorMessage("该货品已存在");
             }
 
-            Goods goods = new Goods();
+            BasicsGoods goods = new BasicsGoods();
             goods.setCityId(cityId);
             goods.setId(id);
             goods.setName(name);
@@ -254,10 +254,10 @@ public class GoodsService {
             LOG.info("tqueryGoodsListByCategoryLikeName type :" + type);
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<Goods> goodsList = iGoodsMapper.queryGoodsListByCategoryLikeName(categoryId, name,cityId);
+            List<BasicsGoods> goodsList = iGoodsMapper.queryGoodsListByCategoryLikeName(categoryId, name,cityId);
             PageInfo pageResult = new PageInfo(goodsList);
             List<Map<String, Object>> gMapList = new ArrayList<>();
-            for (Goods goods : goodsList) {
+            for (BasicsGoods goods : goodsList) {
                 Map<String, Object> gMap = BeanUtils.beanToMap(goods);
                 List<Map<String, Object>> mapList = new ArrayList<>();
                 gMap.put("goodsUnitName", iUnitMapper.selectByPrimaryKey(goods.getUnitId()).getName());
@@ -341,7 +341,7 @@ public class GoodsService {
                 if (!StringUtils.isNotBlank(srcGoodsId))
                     return ServerResponse.createByErrorMessage("货品id不能为空");
 //                LOG.info("for srcGoodsId:" + srcGoodsId);
-                Goods goods = iGoodsMapper.selectByPrimaryKey(srcGoodsId);
+                BasicsGoods goods = iGoodsMapper.selectByPrimaryKey(srcGoodsId);
                 if (goods == null)
                     return ServerResponse.createByErrorMessage("货品不存在");
 

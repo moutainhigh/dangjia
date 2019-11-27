@@ -97,7 +97,7 @@
     </select>
 
     <!-- 根据name查询属性对象 -->
-    <select id="queryByName" resultType="com.dangjia.acg.modle.product.DjBasicsGoods">
+    <select id="queryByName" resultType="com.dangjia.acg.modle.product.BasicsGoods">
         SELECT
         <include refid="new_columns"/>
         FROM dj_basics_goods

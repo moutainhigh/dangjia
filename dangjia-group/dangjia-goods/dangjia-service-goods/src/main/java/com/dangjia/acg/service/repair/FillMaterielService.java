@@ -17,9 +17,9 @@ import com.dangjia.acg.mapper.basics.IGoodsMapper;
 import com.dangjia.acg.mapper.product.IBasicsProductTemplateMapper;
 import com.dangjia.acg.mapper.storefront.IGoodsStorefrontProductMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
-import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
@@ -174,7 +174,7 @@ public class FillMaterielService {
                 if (storefrontProduct.getIsShelfStatus().equals("0") || product.getType() == 0) {
                     warehouseDTO.setMaket(0);
                 }
-                Goods goods = goodsMapper.selectByPrimaryKey(product.getGoodsId());
+                BasicsGoods goods = goodsMapper.selectByPrimaryKey(product.getGoodsId());
                 if (goods != null) {
                     warehouseDTO.setSales(goods.getSales());
                 }

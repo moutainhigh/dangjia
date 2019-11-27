@@ -60,7 +60,7 @@ import com.dangjia.acg.modle.member.CustomerRecord;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.pay.PayOrder;
-import com.dangjia.acg.modle.product.DjBasicsGoods;
+import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.ShoppingCart;
 import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.repair.MendOrder;
@@ -1062,7 +1062,7 @@ public class PaymentService {
                     }
                     if(!CommonUtil.isEmpty(budgetLabelGoodsDTO.getGoodsId())){
                         Brand brand =null;
-                        DjBasicsGoods goods=iMasterBasicsGoodsMapper.selectByPrimaryKey(budgetLabelGoodsDTO.getGoodsId());
+                        BasicsGoods goods=iMasterBasicsGoodsMapper.selectByPrimaryKey(budgetLabelGoodsDTO.getGoodsId());
                         budgetLabelGoodsDTO.setIsReservationDeliver(goods.getIsReservationDeliver());
                         if (!CommonUtil.isEmpty(goods.getBrandId())) {
                             brand = iMasterBrandMapper.selectByPrimaryKey(goods.getBrandId());

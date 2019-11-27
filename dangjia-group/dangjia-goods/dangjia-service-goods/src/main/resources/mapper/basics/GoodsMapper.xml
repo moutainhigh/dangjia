@@ -35,7 +35,7 @@
 		WHERE id=#{id}
 	</delete>
     <!-- 查询所有 -->
-	<select id="query" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.basics.Goods">
+	<select id="query" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.product.BasicsGoods">
 		SELECT
 		<include refid="new_columns"/>
 		FROM dj_basics_goods
@@ -46,7 +46,7 @@
 		ORDER BY create_date desc
 	</select>
 	 <!-- 根据id查询属性对象 -->
-	<select id="queryById" resultType="com.dangjia.acg.modle.basics.Goods">
+	<select id="queryById" resultType="com.dangjia.acg.modle.product.BasicsGoods">
 		SELECT
 		<include refid="new_columns"/>
 		FROM dj_basics_goods
@@ -56,7 +56,7 @@
 	</select>
 
 	<!-- 根据name查询属性对象 -->
-	<select id="queryByName" resultType="com.dangjia.acg.modle.basics.Goods">
+	<select id="queryByName" resultType="com.dangjia.acg.modle.product.BasicsGoods">
 		SELECT
 		<include refid="new_columns"/>
 		FROM dj_basics_goods
@@ -90,7 +90,7 @@
 	</sql>
 
 	 <!-- 根据类别id查询商品对象 -->
-	<select id="queryByCategoryId" resultType="com.dangjia.acg.modle.basics.Goods">
+	<select id="queryByCategoryId" resultType="com.dangjia.acg.modle.product.BasicsGoods">
 		SELECT
 		<include refid="new_columns"/>
 		FROM dj_basics_goods where 1=1
@@ -101,7 +101,7 @@
 	</select>
 
 	<!-- 根据条件查询商品集合 -->
-	<select id="queryGoodsList" resultType="com.dangjia.acg.modle.basics.Goods">
+	<select id="queryGoodsList" resultType="com.dangjia.acg.modle.product.BasicsGoods">
 		SELECT
 		<include refid="new_columns"/>
 		FROM dj_basics_goods
@@ -116,7 +116,7 @@
 	</select>
 
 	<!-- 查询某个分类的商品 模糊name -->
-	<select id="queryGoodsListByCategoryLikeName" resultType="com.dangjia.acg.modle.basics.Goods">
+	<select id="queryGoodsListByCategoryLikeName" resultType="com.dangjia.acg.modle.product.BasicsGoods">
 		SELECT
 			bg.id as id,
 			bg.`NAME` as name,
@@ -144,7 +144,7 @@
 	</select>
 
 	<!-- 查询某个分类的商品 模糊name -->
-	<select id="queryGoodsGroupListByCategoryLikeName" resultType="com.dangjia.acg.modle.basics.Goods">
+	<select id="queryGoodsGroupListByCategoryLikeName" resultType="com.dangjia.acg.modle.product.BasicsGoods">
 		SELECT
 		bg.id as id,
 		bg.`NAME` as name,
@@ -181,7 +181,7 @@
 		ORDER BY bg.create_date desc
 	</select>
 	<!-- 补货查询商品库- -->
-	<select id="queryRepairGoods" resultType="com.dangjia.acg.modle.basics.Goods">
+	<select id="queryRepairGoods" resultType="com.dangjia.acg.modle.product.BasicsGoods">
 		SELECT
 		<include refid="new_columns"/>
 		FROM dj_basics_goods

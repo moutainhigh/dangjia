@@ -175,7 +175,7 @@ public class DjBasicsProductTemplateService {
             JSONObject obj = jsonArr.getJSONObject(i);
             BasicsProductDTO basicsProductDTO = JSONObject.toJavaObject(obj, BasicsProductDTO.class);
             String goodsId=basicsProductDTO.getGoodsId();//货品ID
-            DjBasicsGoods basicsGoods = djBasicsGoodsMapper.selectByPrimaryKey(goodsId);//查询货品表信息，判断是人工还是材料商品新增
+            BasicsGoods basicsGoods = djBasicsGoodsMapper.selectByPrimaryKey(goodsId);//查询货品表信息，判断是人工还是材料商品新增
             //2.1添加商品主表信息
             StringBuilder imgStr = new StringBuilder();
             if(basicsProductDTO.getImage()!=null&&StringUtils.isNotBlank(basicsProductDTO.getImage())){
@@ -531,7 +531,7 @@ public class DjBasicsProductTemplateService {
         String name = basicsProductDTO.getName();//商品名称
         String productSn = basicsProductDTO.getProductSn();//商品编码
         String categoryId=basicsProductDTO.getCategoryId();//商品类别Id
-        DjBasicsGoods basicsGoods = djBasicsGoodsMapper.selectByPrimaryKey(categoryId);
+        BasicsGoods basicsGoods = djBasicsGoodsMapper.selectByPrimaryKey(categoryId);
         /*if(type == 0 || type == 1){
             //判断当前添加的属性值是否有相同的已存在的商品（材料商品才有）
             checkStr = checkProductAttr(basicsProductDTO,jsonArr);
@@ -563,7 +563,7 @@ public class DjBasicsProductTemplateService {
         if (!StringUtils.isNotBlank(basicsProductDTO.getGoodsId()))
             return ServerResponse.createByErrorMessage("货品id不能为空");
         String goodsId=basicsProductDTO.getGoodsId();//货品ID
-        DjBasicsGoods basicsGoods = djBasicsGoodsMapper.selectByPrimaryKey(goodsId);//查询货品表信息，判断是人工还是材料商品新增
+        BasicsGoods basicsGoods = djBasicsGoodsMapper.selectByPrimaryKey(goodsId);//查询货品表信息，判断是人工还是材料商品新增
         if(dataStatus == 0){
             //添加正式商品前的校验，商品名称和编码不能为空，且不能重复
             String restr = checkSingleProductCommon(basicsProductDTO,basicsGoods.getType(),new JSONArray());
@@ -727,7 +727,7 @@ public class DjBasicsProductTemplateService {
         try {
             LOG.info("tqueryGoodsListByCategoryLikeName type :" + type);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<DjBasicsGoods> djBasicsGoods = djBasicsGoodsMapper.queryGoodsListByCategoryLikeName(categoryId, name,cityId);
+            List<BasicsGoods> djBasicsGoods = djBasicsGoodsMapper.queryGoodsListByCategoryLikeName(categoryId, name,cityId);
             PageInfo pageResult = new PageInfo(djBasicsGoods);
             List<ActuarialGoodsDTO> actuarialGoodsDTOS=new ArrayList<>();
             List<Map<String, Object>> gMapList = new ArrayList<>();
@@ -1098,7 +1098,7 @@ public class DjBasicsProductTemplateService {
      */
     public ServerResponse queryProductLabelsByProductId(String productId) {
         DjBasicsProductTemplate djBasicsProduct = iBasicsProductTemplateMapper.selectByPrimaryKey(productId);
-        DjBasicsGoods djBasicsGoods = djBasicsGoodsMapper.selectByPrimaryKey(djBasicsProduct.getGoodsId());
+        BasicsGoods djBasicsGoods = djBasicsGoodsMapper.selectByPrimaryKey(djBasicsProduct.getGoodsId());
         String s = djBasicsGoods.getLabelIds();
         if(!CommonUtil.isEmpty(s)){
             List<String> strings = Arrays.asList(s.split(","));

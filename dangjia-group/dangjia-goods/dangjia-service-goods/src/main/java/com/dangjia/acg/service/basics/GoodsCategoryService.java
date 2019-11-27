@@ -8,7 +8,7 @@ import com.dangjia.acg.mapper.basics.IGoodsCategoryMapper;
 import com.dangjia.acg.mapper.basics.IGoodsMapper;
 import com.dangjia.acg.modle.attribute.Attribute;
 import com.dangjia.acg.modle.attribute.GoodsCategory;
-import com.dangjia.acg.modle.basics.Goods;
+import com.dangjia.acg.modle.product.BasicsGoods;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -100,7 +100,7 @@ public class GoodsCategoryService {
     public ServerResponse deleteGoodsCategory(String id,String cityId) {
         try {
             List<GoodsCategory> goodsCategoryList = iGoodsCategoryMapper.queryCategoryByParentId(id,cityId);//根据id查询是否有下级类别
-            List<Goods> goodsList = iGoodsMapper.queryByCategoryId(id);//根据id查询是否有关联商品
+            List<BasicsGoods> goodsList = iGoodsMapper.queryByCategoryId(id);//根据id查询是否有关联商品
             List<Attribute> GoodsAList = attributeMapper.queryAttributeByCategoryId(id, null,cityId);//根据id查询是否有关联属性
             if (goodsCategoryList.size() > 0) {
                 return ServerResponse.createByErrorMessage("此类别有下级不能删除");

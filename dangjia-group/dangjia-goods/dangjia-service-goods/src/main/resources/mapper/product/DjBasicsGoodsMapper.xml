@@ -27,7 +27,7 @@
 
 
     <!-- 查询某个分类的商品 模糊name -->
-    <select id="queryGoodsListByCategoryLikeName" resultType="com.dangjia.acg.modle.product.DjBasicsGoods">
+    <select id="queryGoodsListByCategoryLikeName" resultType="com.dangjia.acg.modle.product.BasicsGoods">
         SELECT
         `id`,
         `name`,
@@ -65,7 +65,7 @@
     </select>
 
     <!-- 根据id查询属性对象 -->
-    <select id="queryById" resultType="com.dangjia.acg.modle.product.DjBasicsGoods">
+    <select id="queryById" resultType="com.dangjia.acg.modle.product.BasicsGoods">
         SELECT
         <include refid="all_columns"/>
         FROM dj_basics_goods
@@ -86,7 +86,7 @@
     </select>
 
     <!-- 根据类别id查询商品对象 -->
-    <select id="queryByCategoryId" resultType="com.dangjia.acg.modle.product.DjBasicsGoods">
+    <select id="queryByCategoryId" resultType="com.dangjia.acg.modle.product.BasicsGoods">
         SELECT
         <include refid="all_columns"/>
         FROM dj_basics_goods
