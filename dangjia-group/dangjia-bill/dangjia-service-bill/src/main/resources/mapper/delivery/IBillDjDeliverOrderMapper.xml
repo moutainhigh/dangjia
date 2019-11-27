@@ -788,22 +788,32 @@
         select
         IFNULL(ddsd.id,'') as id,
         IFNULL(dbs.storefront_name,'') as storefrontName,-- 店铺名称
-        dbs.storefront_logo as storefrontIcon,
+        dbs.storefront_logo as StorefrontIcon,
         ddsd.house_id as houseId,
         IFNULL(ddsd.create_date,'') as createDate,-- 创建时间
-        IFNULL(ddsd.number,'') as number,-- 订单号
+        IFNULL(ddsd.number,'') as orderNumber,-- 订单号
         IFNULL(ddsd.shipping_state,'') as shippingState,-- 订单状态
         IFNULL(ddsd.total_amount,'') as totalAmount,-- 总价格
-        '' as total -- 件数
+        ddsd.city_id as cityId
         from dj_deliver_split_deliver ddsd
         inner join dj_basics_storefront dbs on dbs.id=ddsd.storefront_id
         where ddsd.house_id = #{houseId}
         <if test="cityId!=null and cityId!=''">
             and  ddsd.city_id = #{cityId}
         </if>
-        <if test="orderStatus!=null and orderStatus!=''">
-            and  ddsd.shipping_state = #{orderStatus}
+        <if test="orderStatus!=null and orderStatus == 1">
+            and   (ddsd.shipping_state = 1 or ddsd.shipping_state = 7)
         </if>
+        <if test="orderStatus!=null and orderStatus == 2">
+            and   (ddsd.shipping_state = 2 or ddsd.shipping_state = 8)
+        </if>
+        <if test="arr != null and arr != ''">
+            and ddsd.id in
+            <foreach collection="arr" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+
     </select>
 
 

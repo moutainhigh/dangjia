@@ -9,7 +9,7 @@ import java.util.Map;
 
 @Data
 public class OrderCollectInFoDTO {
-    private String id;//订单id
+    private String id;//发货订单id
 
     @ApiModelProperty("安装人姓名")
     private String installName;

@@ -123,8 +123,8 @@ public class DjDeliverOrderController implements DjDeliverOrderAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryAppOrderList(PageDTO pageDTO, String userToken, String houseId, String cityId, String orderStatus) {
-        return djDeliverOrderService.queryAppOrderList(pageDTO,userToken,houseId,cityId,orderStatus);
+    public ServerResponse queryAppOrderList(PageDTO pageDTO, String userToken, String houseId, String cityId, Integer orderStatus,String idList) {
+        return djDeliverOrderService.queryAppOrderList(pageDTO,houseId,cityId,orderStatus,idList);
     }
 
 
@@ -136,10 +136,19 @@ public class DjDeliverOrderController implements DjDeliverOrderAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryAppOrderInFoList(String userToken,String id,Integer shippingState) {
-        return djDeliverOrderService.queryAppOrderInFoList(id,shippingState);
+    public ServerResponse refuseAppOrderStats(String userToken,String lists,String id) {
+        return djDeliverOrderService.refuseAppOrderStats(lists,id);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse queryAppOrderInFoList(String userToken, PageDTO pageDTO,String id,Integer shippingState) {
+        return djDeliverOrderService.queryAppOrderInFoList(pageDTO,id,shippingState);
+    }
 
-
+    @Override
+    @ApiMethod
+    public ServerResponse deleteAppOrder(String userToken,String id) {
+        return djDeliverOrderService.deleteAppOrder(id);
+    }
 }

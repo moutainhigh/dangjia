@@ -151,7 +151,10 @@ public interface IBillDjDeliverOrderMapper extends Mapper<Order> {
 
     List<OrderStorefrontDTO> queryPaymentToBeMade(@Param("orderId") String orderId);
 
-    List<DjSplitDeliverOrderDTO> queryAppOrderList(@Param("cityId") String cityId, @Param("houseId") String houseId, @Param("orderStatus") String orderStatus);
+    List<DjSplitDeliverOrderDTO> queryAppOrderList(@Param("cityId") String cityId,
+                                                   @Param("houseId") String houseId,
+                                                   @Param("orderStatus") Integer orderStatus,
+                                                   @Param("arr") String[] arr);
 
 
     String queryValueIdArr(@Param("id") String id);

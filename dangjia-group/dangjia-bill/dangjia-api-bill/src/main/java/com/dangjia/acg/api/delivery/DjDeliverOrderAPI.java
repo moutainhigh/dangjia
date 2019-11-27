@@ -131,21 +131,35 @@ public interface DjDeliverOrderAPI {
 
 
     @PostMapping("app/order/queryAppOrderList")
-    @ApiOperation(value = "根据订单状态查询订单详情列表(待收货、已完成)", notes = "根据订单状态查询订单详情（待收货、已完成）")
+    @ApiOperation(value = "根据订单状态查询订单列表(待收货、已完成)", notes = "根据订单状态查询订单列表（待收货、已完成）")
     ServerResponse queryAppOrderList(@RequestParam("pageDTO") PageDTO pageDTO,
-                                                    @RequestParam("userToken") String userToken,
-                                                    @RequestParam("houseId") String houseId,
-                                                    @RequestParam("cityId") String queryId,
-                                                    @RequestParam("orderStatus") String orderStatus);
+                                    @RequestParam("userToken") String userToken,
+                                    @RequestParam("houseId") String houseId,
+                                    @RequestParam("cityId") String queryId,
+                                    @RequestParam("orderStatus") Integer orderStatus,
+                                     @RequestParam("idList") String idList);
+
     @PostMapping("app/order/updateAppOrderStats")
-    @ApiOperation(value = "修改订单状态", notes = "修改订单状态")
+    @ApiOperation(value = "待收货（材料）详情 确定收货", notes = "待收货（材料）详情确定收货")
     ServerResponse  updateAppOrderStats(@RequestParam("userToken")String userToken,
+                                        @RequestParam("lists") String lists,
+                                        @RequestParam("id")String id);
+
+    @PostMapping("app/order/refuseAppOrderStats")
+    @ApiOperation(value = "待收货（材料）详情 拒绝收货", notes = "待收货（材料）详情 拒绝收货")
+    ServerResponse  refuseAppOrderStats(@RequestParam("userToken")String userToken,
                                         @RequestParam("lists") String lists,
                                         @RequestParam("id")String id);
 
     @PostMapping("app/order/queryAppOrderInFoList")
     @ApiOperation(value = "查询订单详情", notes = "查询订单详情")
     ServerResponse  queryAppOrderInFoList(@RequestParam("userToken")String userToken,
+                                          @RequestParam("pageDTO") PageDTO pageDTO,
                                         @RequestParam("id") String id,
                                         @RequestParam("shippingState")Integer shippingState);
+
+    @PostMapping("app/order/deleteAppOrder")
+    @ApiOperation(value = "删除订单", notes = "删除订单")
+    ServerResponse deleteAppOrder(@RequestParam("userToken")String userToken,
+                                          @RequestParam("id") String id);
 }
