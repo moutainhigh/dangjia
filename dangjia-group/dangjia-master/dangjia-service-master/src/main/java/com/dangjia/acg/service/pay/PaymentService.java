@@ -1166,7 +1166,7 @@ public class PaymentService {
                         orderItem.setOrderId(order.getId());
                         orderItem.setHouseId(houseId);
                         orderItem.setPrice(good.getPrice().doubleValue());//销售价
-                        orderItem.setShopCount(good.getShopCount().doubleValue());//购买总数
+                        orderItem.setShopCount(good.getShopCount());//购买总数
                         orderItem.setUnitName(good.getUnitName());//单位
                         orderItem.setTotalPrice(good.getPrice()*good.getShopCount());//总价
                         orderItem.setProductName(good.getProductName());

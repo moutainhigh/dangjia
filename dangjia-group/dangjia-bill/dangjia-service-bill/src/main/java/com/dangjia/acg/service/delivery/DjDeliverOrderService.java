@@ -1581,17 +1581,18 @@ public class DjDeliverOrderService {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             List<OrderStorefrontDTO> orderStorefrontDTOS=null;
-            if (state.equals("2")||state.equals("5")){
-                orderStorefrontDTOS = iBillDjDeliverOrderMapper.queryDeliverOrderObligation(houseId);
+            if (state.equals("2")||state.equals("4")){
+                orderStorefrontDTOS = iBillDjDeliverOrderMapper.queryDeliverOrderObligation(houseId,state);
                 orderStorefrontDTOS.forEach(orderStorefrontDTO -> {
                     List<AppointmentDTO> appointmentDTOS = iBillDjDeliverOrderMapper.queryDeliverOrderItemObligation(orderStorefrontDTO.getOrderId());
                     orderStorefrontDTO.setProductCount(appointmentDTOS.size());
                     orderStorefrontDTO.setProductImageArr(getStartTwoImage(appointmentDTOS,imageAddress));
-                    orderStorefrontDTO.setStorefrontLogo(imageAddress+orderStorefrontDTO.getStorefrontLogo());
+                    orderStorefrontDTO.setStorefrontIcon(imageAddress+orderStorefrontDTO.getStorefrontIcon());
                     if(null!=appointmentDTOS && appointmentDTOS.size()>1){
                         AppointmentDTO appointmentDTO = appointmentDTOS.get(0);
                         orderStorefrontDTO.setProductName(appointmentDTO.getProductName());
                     }
+                    orderStorefrontDTO.setShippingType(state);
                 });
             }else {
                 orderStorefrontDTOS = iBillDjDeliverOrderMapper.queryDeliverOrderHump(houseId);
@@ -1599,11 +1600,20 @@ public class DjDeliverOrderService {
                     List<AppointmentDTO> appointmentDTOS = iBillDjDeliverOrderMapper.queryAppointmentHump(orderStorefrontDTO.getOrderId());
                     orderStorefrontDTO.setProductCount(appointmentDTOS.size());
                     orderStorefrontDTO.setProductImageArr(getStartTwoImage(appointmentDTOS,imageAddress));
-                    orderStorefrontDTO.setStorefrontLogo(imageAddress+orderStorefrontDTO.getStorefrontLogo());
+                    orderStorefrontDTO.setStorefrontIcon(imageAddress+orderStorefrontDTO.getStorefrontIcon());
                     if(null!=appointmentDTOS && appointmentDTOS.size()>1){
                         AppointmentDTO appointmentDTO = appointmentDTOS.get(0);
                         orderStorefrontDTO.setProductName(appointmentDTO.getProductName());
                     }
+                    for (AppointmentDTO appointmentDTO : appointmentDTOS) {
+                        if(appointmentDTO.getShippingState().equals("5")) {
+                            orderStorefrontDTO.setShippingState(appointmentDTO.getShippingState());
+                            break;
+                        }else {
+                            orderStorefrontDTO.setShippingState("1004");
+                        }
+                    }
+                    orderStorefrontDTO.setShippingType(state);
                 });
             }
             if(orderStorefrontDTOS.size()<=0)

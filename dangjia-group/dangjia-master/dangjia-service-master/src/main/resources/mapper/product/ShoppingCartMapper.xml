@@ -31,7 +31,7 @@
 			a.unit_name as unitName,
 			a.product_type as productType,
 			a.storefront_id as storefrontId ,
-			b.prod_template_id AS productId,
+			b.id AS productId,
 			b.product_name AS productName,
 			c.product_sn as productSn,
 			b.image,
@@ -39,12 +39,14 @@
 			d.is_reservation_deliver AS isReservationDeliver,
 			d.type,
 			d.type unitType,
-			c.value_name_arr as valueNameArr
+			c.value_name_arr as valueNameArr,
+			e.type as unitType
 		FROM
 			dj_repair_shopping_cart a
 		INNER JOIN dj_basics_storefront_product b ON a.product_id = b.id
 		INNER JOIN dj_basics_product_template c ON b.prod_template_id = c.id
 		INNER JOIN dj_basics_goods d ON b.goods_id = d.id
+		INNER JOIN dj_basics_unit e ON c.unit_id=e.id
 		WHERE a.member_id =#{memberId}
 		AND a.city_id =#{cityId}
 		AND a.storefront_id=#{storefrontId}

@@ -34,4 +34,8 @@ public class AppointmentDTO {
     private String valueIdArr;
     private String orderStatus;
     private Integer isReservationDeliver;
+    private String shippingState;//按钮状态 3:付款 4：取消订单 5：预约发货
+    private String shippingType;// 订单状态（1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭）
+    private Date createDate;
+    private String orderNumber;
 }

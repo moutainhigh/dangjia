@@ -28,7 +28,7 @@ public interface ShopCartAPI {
                            @RequestParam("userToken") String userToken,
                            @RequestParam("cityId") String cityId,
                            @RequestParam("productId") String productId,
-                           @RequestParam("shopCount") Integer shopCount);
+                           @RequestParam("shopCount") Double shopCount);
 
     @PostMapping("app/product/shopCart/queryCartList")
     @ApiOperation(value = "购物车-->查询购物车列表接口", notes = "购物车-->查询购物车列表接口")
@@ -51,7 +51,7 @@ public interface ShopCartAPI {
     @ApiOperation(value = "购物车-->设置购物车商品数量", notes = "购物车-->设置购物车商品数量")
     ServerResponse updateCar(@RequestParam("request") HttpServletRequest request,
                              @RequestParam("shopCartId") String shopCartId,
-                             @RequestParam("shopCount") Integer shopCount);
+                             @RequestParam("shopCount") Double shopCount);
 
     @PostMapping("app/shopping/delCheckCart")
     @ApiOperation(value = "购物车-->删除勾选商品", notes = "购物车-->删除勾选商品")
@@ -67,7 +67,8 @@ public interface ShopCartAPI {
     @ApiOperation(value = "更换购物车商品", notes = "更换购物车商品")
     ServerResponse replaceShoppingCart(@RequestParam("request") HttpServletRequest request,
                                        @RequestParam("shoppingCartId") String shoppingCartId,
-                                       @RequestParam("productId") String productId);
+                                       @RequestParam("productId") String productId,
+                                       @RequestParam("shopCount") Double shopCount);
 
 
     @PostMapping("app/shopping/insertToCollect")
@@ -75,4 +76,13 @@ public interface ShopCartAPI {
     ServerResponse insertToCollect(@RequestParam("request") HttpServletRequest request,
                                    @RequestParam("userToken") String userToken,
                                    @RequestParam("jsonStr") String jsonStr);
+
+    @PostMapping("app/product/shopCart/addCartBuyAgain")
+    @ApiOperation(value = "购物车-->再次购买", notes = "购物车-->再次购买")
+    ServerResponse addCartBuyAgain(@RequestParam("request") HttpServletRequest request,
+                                   @RequestParam("userToken") String userToken,
+                                   @RequestParam("cityId") String cityId,
+                                   @RequestParam("jsonStr") String jsonStr);
 }
+
+

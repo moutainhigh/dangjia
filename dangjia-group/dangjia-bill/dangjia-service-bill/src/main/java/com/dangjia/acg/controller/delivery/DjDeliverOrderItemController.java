@@ -32,4 +32,10 @@ public class DjDeliverOrderItemController implements DjDeliverOrderItemAPI {
     public ServerResponse deleteOrder(String orderId) {
         return djDeliverOrderItemService.deleteOrder(orderId);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryOrderSnapshot(String orderId) {
+        return djDeliverOrderItemService.queryOrderSnapshot(orderId);
+    }
 }
