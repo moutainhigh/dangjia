@@ -263,7 +263,6 @@ public class StorefrontProductService {
             //图片前缀路径
             String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             for (BasicsStorefrontProductViewDTO basicsStorefrontProductViewDTO : list) {
-
                 String id = basicsStorefrontProductViewDTO.getId();
                 StorefrontProduct spdto = istorefrontProductMapper.queryStorefrontProductById(id);
                 if (spdto == null) {
