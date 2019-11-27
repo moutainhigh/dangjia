@@ -29,18 +29,18 @@ public class AliPayUtil {
             AlipayClient alipayClient = AlipayConfig.getAlipayClient();
             AlipayTradeAppPayRequest request = new AlipayTradeAppPayRequest();
             AlipayTradeAppPayModel model = new AlipayTradeAppPayModel();
-
+            model.setBody("蜂匠科技");
+            model.setSubject("当家装修app");
             model.setOutTradeNo(out_trade_no);
-            model.setTimeoutExpress("1.5h");
+            model.setTimeoutExpress("30m");
             model.setTotalAmount(price);
             model.setProductCode("QUICK_MSECURITY_PAY");
             request.setBizModel(model);
             request.setNotifyUrl(basePath + notify_url);
-            model.setBody("蜂匠科技");
-            model.setSubject("当家装修app");
+
 
             System.out.println("=================="+ JSONObject.toJSONString(request));
-            AlipayTradeAppPayResponse response = (AlipayTradeAppPayResponse) alipayClient.sdkExecute(request);
+            AlipayTradeAppPayResponse response = alipayClient.sdkExecute(request);
             Map<String,String> map = new HashMap<String, String>();
             map.put("sign",response.getBody());
             return ServerResponse.createBySuccess("获取成功", map);
