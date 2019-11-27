@@ -154,7 +154,7 @@ public class DjBasicsGoodsService {
         goods.setIndicativePrice(basicsGoodsDTO.getIndicativePrice());
         goods.setLabelIds(basicsGoodsDTO.getLabelIds());
         goods.setIsReservationDeliver(basicsGoodsDTO.getIsReservationDeliver());
-        goods.setHousekeeperAcceptance(basicsGoodsDTO.getHousekeeperAcceptance());
+        goods.setHousekeeperAcceptance(basicsGoodsDTO.getHousekeeperAcceptance()==null?0:basicsGoodsDTO.getHousekeeperAcceptance());
         goods.setTechnologyIds(basicsGoodsDTO.getTechnologyIds());
         if (!StringUtils.isNoneBlank(basicsGoodsDTO.getAttributeIdArr())) {
             goods.setAttributeIdArr(null);

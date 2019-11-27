@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.product.IProductAddedRelationMapper">
+
+    <select id="getProdTemplateIdsByAddId" resultType="java.lang.String">
+        select  t.product_template_id productTemplateId
+          from dj_basics_product_added_relation t
+        where t.added_product_template_id=#{addedProductTemplateId}
+    </select>
+
+</mapper>

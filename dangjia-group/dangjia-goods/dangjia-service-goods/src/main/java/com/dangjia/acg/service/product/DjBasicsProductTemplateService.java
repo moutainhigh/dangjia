@@ -882,10 +882,9 @@ public class DjBasicsProductTemplateService {
 
         //只有增值类关联商品才会有此数据
         if(StringUtils.isNotBlank(djBasicsProduct.getIsRelateionProduct())&&"1".equals(djBasicsProduct.getIsRelateionProduct())){
-            Example example=new Example(ProductAddedRelation.class);
-            example.createCriteria().andEqualTo(ProductAddedRelation.ADDED_PRODUCT_TEMPLATE_ID, djBasicsProduct.getId());
-            List<ProductAddedRelation> productAddedRelations=iProductAddedRelationMapper.selectByExample(example);
-            map.put("relateionProductList",productAddedRelations);//关联商品列表
+
+            List<String> relationProductIds=iProductAddedRelationMapper.getProdTemplateIdsByAddId(djBasicsProduct.getId());
+            map.put("relationProductIds",relationProductIds);//关联商品IDs，用逗号分隔
         }
 
         return map;
