@@ -3,8 +3,8 @@ package com.dangjia.acg.pojo.product;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.brand.Unit;
+import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.BasicsGoodsCategory;
-import com.dangjia.acg.modle.product.DjBasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsLabel;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
@@ -30,7 +30,7 @@ public class DjBasicsProductPO extends Product {
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "goods_id")
-    private DjBasicsGoods djBasicsGoods;//商品对象
+    private BasicsGoods djBasicsGoods;//商品对象
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "unit_id")

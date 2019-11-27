@@ -175,7 +175,7 @@ public class DjBasicsProductTemplateService {
             JSONObject obj = jsonArr.getJSONObject(i);
             BasicsProductDTO basicsProductDTO = JSONObject.toJavaObject(obj, BasicsProductDTO.class);
             String goodsId=basicsProductDTO.getGoodsId();//货品ID
-            DjBasicsGoods basicsGoods = djBasicsGoodsMapper.selectByPrimaryKey(goodsId);//查询货品表信息，判断是人工还是材料商品新增
+            BasicsGoods basicsGoods = djBasicsGoodsMapper.selectByPrimaryKey(goodsId);//查询货品表信息，判断是人工还是材料商品新增
             //2.1添加商品主表信息
             StringBuilder imgStr = new StringBuilder();
             if(basicsProductDTO.getImage()!=null&&StringUtils.isNotBlank(basicsProductDTO.getImage())){
@@ -207,18 +207,6 @@ public class DjBasicsProductTemplateService {
                 }
             }
 
-
-            //添加工艺信息
-            String ret = technologyService.insertTechnologyList(obj.getString("technologyList"), "0", 0, productId,cityId);
-            if (!ret.equals("1"))  //如果不成功 ，弹出是错误提示
-                return ServerResponse.createByErrorMessage(ret);
-
-            //3.删除对应需要删除的工艺信息
-            String deleteTechnologyIds=obj.getString("deleteTechnologyIds");
-            String restr = deleteTechnologylist(deleteTechnologyIds);
-            if (StringUtils.isNotBlank(restr)) {
-                return ServerResponse.createByErrorMessage(restr);
-            }
         }
         return ServerResponse.createBySuccessMessage("保存更新商品成功");
     }
@@ -229,7 +217,7 @@ public class DjBasicsProductTemplateService {
      * @param deleteTechnologyIds
      * @return
      */
-    private String deleteTechnologylist(String deleteTechnologyIds){
+   /* private String deleteTechnologylist(String deleteTechnologyIds){
         if (!CommonUtil.isEmpty(deleteTechnologyIds)) {
             String[] deleteTechnologyIdArr = deleteTechnologyIds.split(",");
             for (String aDeleteTechnologyIdArr : deleteTechnologyIdArr) {
@@ -240,7 +228,7 @@ public class DjBasicsProductTemplateService {
             }
         }
         return "";
-    }
+    }*/
     /**
      * 增加增值关联商品信息(先删除再添加）
      * @param productId
@@ -531,7 +519,7 @@ public class DjBasicsProductTemplateService {
         String name = basicsProductDTO.getName();//商品名称
         String productSn = basicsProductDTO.getProductSn();//商品编码
         String categoryId=basicsProductDTO.getCategoryId();//商品类别Id
-        DjBasicsGoods basicsGoods = djBasicsGoodsMapper.selectByPrimaryKey(categoryId);
+        BasicsGoods basicsGoods = djBasicsGoodsMapper.selectByPrimaryKey(categoryId);
         /*if(type == 0 || type == 1){
             //判断当前添加的属性值是否有相同的已存在的商品（材料商品才有）
             checkStr = checkProductAttr(basicsProductDTO,jsonArr);
@@ -563,7 +551,7 @@ public class DjBasicsProductTemplateService {
         if (!StringUtils.isNotBlank(basicsProductDTO.getGoodsId()))
             return ServerResponse.createByErrorMessage("货品id不能为空");
         String goodsId=basicsProductDTO.getGoodsId();//货品ID
-        DjBasicsGoods basicsGoods = djBasicsGoodsMapper.selectByPrimaryKey(goodsId);//查询货品表信息，判断是人工还是材料商品新增
+        BasicsGoods basicsGoods = djBasicsGoodsMapper.selectByPrimaryKey(goodsId);//查询货品表信息，判断是人工还是材料商品新增
         if(dataStatus == 0){
             //添加正式商品前的校验，商品名称和编码不能为空，且不能重复
             String restr = checkSingleProductCommon(basicsProductDTO,basicsGoods.getType(),new JSONArray());
@@ -598,15 +586,7 @@ public class DjBasicsProductTemplateService {
                 insertAddedValueProductRelation(productId,basicsProductDTO.getRelationProductIds(),storefrontProductId,storefrontId);
             }
         }
-        String ret = technologyService.insertTechnologyList(technologyList, "0", 0, productId,cityId);
-        if (!ret.equals("1"))  //如果不成功 ，弹出是错误提示
-            return ServerResponse.createByErrorMessage(ret);
 
-        //3.删除对应需要删除的工艺信息
-        String restr = deleteTechnologylist(deleteTechnologyIds);
-        if (StringUtils.isNotBlank(restr)) {
-            return ServerResponse.createByErrorMessage(restr);
-        }
         return ServerResponse.createBySuccess("保存成功",productId);
     }
 
@@ -727,7 +707,7 @@ public class DjBasicsProductTemplateService {
         try {
             LOG.info("tqueryGoodsListByCategoryLikeName type :" + type);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<DjBasicsGoods> djBasicsGoods = djBasicsGoodsMapper.queryGoodsListByCategoryLikeName(categoryId, name,cityId);
+            List<BasicsGoods> djBasicsGoods = djBasicsGoodsMapper.queryGoodsListByCategoryLikeName(categoryId, name,cityId);
             PageInfo pageResult = new PageInfo(djBasicsGoods);
             List<ActuarialGoodsDTO> actuarialGoodsDTOS=new ArrayList<>();
             List<Map<String, Object>> gMapList = new ArrayList<>();
@@ -902,10 +882,9 @@ public class DjBasicsProductTemplateService {
 
         //只有增值类关联商品才会有此数据
         if(StringUtils.isNotBlank(djBasicsProduct.getIsRelateionProduct())&&"1".equals(djBasicsProduct.getIsRelateionProduct())){
-            Example example=new Example(ProductAddedRelation.class);
-            example.createCriteria().andEqualTo(ProductAddedRelation.ADDED_PRODUCT_TEMPLATE_ID, djBasicsProduct.getId());
-            List<ProductAddedRelation> productAddedRelations=iProductAddedRelationMapper.selectByExample(example);
-            map.put("relateionProductList",productAddedRelations);//关联商品列表
+
+            List<String> relationProductIds=iProductAddedRelationMapper.getProdTemplateIdsByAddId(djBasicsProduct.getId());
+            map.put("relationProductIds",relationProductIds);//关联商品IDs，用逗号分隔
         }
 
         return map;
@@ -1098,7 +1077,7 @@ public class DjBasicsProductTemplateService {
      */
     public ServerResponse queryProductLabelsByProductId(String productId) {
         DjBasicsProductTemplate djBasicsProduct = iBasicsProductTemplateMapper.selectByPrimaryKey(productId);
-        DjBasicsGoods djBasicsGoods = djBasicsGoodsMapper.selectByPrimaryKey(djBasicsProduct.getGoodsId());
+        BasicsGoods djBasicsGoods = djBasicsGoodsMapper.selectByPrimaryKey(djBasicsProduct.getGoodsId());
         String s = djBasicsGoods.getLabelIds();
         if(!CommonUtil.isEmpty(s)){
             List<String> strings = Arrays.asList(s.split(","));

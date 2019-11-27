@@ -16,13 +16,13 @@ import com.dangjia.acg.dto.basics.ProductDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.basics.*;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
-import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Label;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.brand.BrandSeries;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.house.MaterialRecord;
+import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -473,7 +473,7 @@ public class ProductService {
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             Product product =iProductMapper.selectByPrimaryKey(id);
-            Goods oldGoods = iGoodsMapper.selectByPrimaryKey(product.getGoodsId());
+            BasicsGoods oldGoods = iGoodsMapper.selectByPrimaryKey(product.getGoodsId());
             String[] imgArr = product.getImage().split(",");
             StringBuilder imgStr = new StringBuilder();
             StringBuilder imgUrlStr = new StringBuilder();
@@ -666,7 +666,7 @@ public class ProductService {
             productsDTO.setUnitName(product.getUnitName());
             productsDTO.setLabelId(product.getLabelId());
             productsDTO.setShopCount(shopCount);
-            Goods goods = goodsMapper.selectByPrimaryKey(product.getGoodsId());
+            BasicsGoods goods = goodsMapper.selectByPrimaryKey(product.getGoodsId());
             if (goods != null) {
                 productsDTO.setGoodsName(goods.getName());
                 productsDTO.setProductType(String.valueOf(goods.getType()));

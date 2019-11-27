@@ -56,7 +56,8 @@ public class DjBasicsGoodsService {
     private ILabelMapper iLabelMapper;
     @Autowired
     private DjBasicsLabelValueMapper djBasicsLabelValueMapper;
-
+    @Autowired
+    private IProductAddedRelationMapper iProductAddedRelationMapper;
     /**
      * 货品打标签
      *
@@ -65,7 +66,7 @@ public class DjBasicsGoodsService {
      * @return
      */
     public ServerResponse addLabels(String goodsId, String labels,String cityId) {
-        DjBasicsGoods djBasicsGoods = new DjBasicsGoods();
+        BasicsGoods djBasicsGoods = new BasicsGoods();
         djBasicsGoods.setCityId(cityId);
         djBasicsGoods.setId(goodsId);
         djBasicsGoods.setLabelIds(labels);
@@ -154,6 +155,8 @@ public class DjBasicsGoodsService {
         goods.setIndicativePrice(basicsGoodsDTO.getIndicativePrice());
         goods.setLabelIds(basicsGoodsDTO.getLabelIds());
         goods.setIsReservationDeliver(basicsGoodsDTO.getIsReservationDeliver());
+        goods.setHousekeeperAcceptance(basicsGoodsDTO.getHousekeeperAcceptance()==null?0:basicsGoodsDTO.getHousekeeperAcceptance());
+        goods.setTechnologyIds(basicsGoodsDTO.getTechnologyIds());
         if (!StringUtils.isNoneBlank(basicsGoodsDTO.getAttributeIdArr())) {
             goods.setAttributeIdArr(null);
         } else {
@@ -310,10 +313,10 @@ public class DjBasicsGoodsService {
             LOG.info("tqueryGoodsListByCategoryLikeName type :" + type);
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<DjBasicsGoods> goodsList = djBasicsGoodsMapper.queryGoodsListByCategoryLikeName(categoryId, name,cityId);
+            List<BasicsGoods> goodsList = djBasicsGoodsMapper.queryGoodsListByCategoryLikeName(categoryId, name,cityId);
             PageInfo pageResult = new PageInfo(goodsList);
             List<Map<String, Object>> gMapList = new ArrayList<>();
-            for (DjBasicsGoods goods : goodsList) {
+            for (BasicsGoods goods : goodsList) {
                 Map<String, Object> gMap = BeanUtils.beanToMap(goods);
                 List<Map<String, Object>> mapList = new ArrayList<>();
                 gMap.put("goodsUnitName", iUnitMapper.selectByPrimaryKey(goods.getUnitId()).getName());
@@ -347,6 +350,13 @@ public class DjBasicsGoodsService {
                         if (label!=null&&label.getName() != null)
                             map.put("labelName", label.getName());
                     }
+                    //只有增值类关联商品才会有此数据
+                    if(StringUtils.isNotBlank(p.getIsRelateionProduct())&&"1".equals(p.getIsRelateionProduct())){
+
+                        List<String> relationProductIds=iProductAddedRelationMapper.getProdTemplateIdsByAddId(p.getId());
+                        map.put("relationProductIds",relationProductIds);//关联商品IDs，用逗号分隔
+                    }
+
                     map.put("id",p.getId());
                     map.put("goodsType",goods.getType());
                     mapList.add(map);

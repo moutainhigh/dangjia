@@ -56,7 +56,7 @@ public class ShoppingCart extends BaseEntity {
     @Column(name = "shop_count")
     @Desc(value = "购买数量")
     @ApiModelProperty("购买数量")
-    private Integer shopCount;
+    private Double shopCount;
 
     @Column(name = "unit_name")
     @Desc(value = "单位(个、条、箱、桶、米)")

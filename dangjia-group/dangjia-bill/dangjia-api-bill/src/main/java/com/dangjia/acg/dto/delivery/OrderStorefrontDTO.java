@@ -21,7 +21,7 @@ public class OrderStorefrontDTO {
     private String orderNumber;
     private String storefrontName;
     private String orderSplitId;
-    private String storefrontLogo;
+    private String storefrontIcon;
     private Integer productCount;
     private String productImageArr;//商品图片（前两件商品图片）
     private String productName;//退款商品名称（一个商品时才有）
@@ -29,4 +29,6 @@ public class OrderStorefrontDTO {
     private Double actualPaymentPrice;//实付总价
     private Double totalAmount;//总价（不含运费）
     private String mobile;//店铺联系电话
+    private String shippingState;//按钮状态 3:付款 4：取消订单 5：预约发货
+    private String shippingType;// 订单状态（1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭）
 }

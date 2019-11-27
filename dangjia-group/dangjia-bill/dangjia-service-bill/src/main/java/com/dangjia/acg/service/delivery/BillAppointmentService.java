@@ -77,7 +77,7 @@ public class BillAppointmentService {
             List<OrderStorefrontDTO> orderStorefrontDTOS = djDeliverOrderMapper.queryDjDeliverOrderStorefront(houseId);
             List<AppointmentListDTO> appointmentListDTOS = new ArrayList<>();
             orderStorefrontDTOS.forEach(orderStorefrontDTO -> {
-                orderStorefrontDTO.setStorefrontLogo(imageAddress + orderStorefrontDTO.getStorefrontLogo());
+                orderStorefrontDTO.setStorefrontIcon(imageAddress+orderStorefrontDTO.getStorefrontIcon());
                 AppointmentListDTO appointmentListDTO = new AppointmentListDTO();
                 List<AppointmentDTO> appointmentDTOS = djDeliverOrderMapper.queryAppointment(orderStorefrontDTO.getOrderId());
                 if (appointmentDTOS.size() > 0) {
@@ -191,7 +191,7 @@ public class BillAppointmentService {
             List<OrderStorefrontDTO> orderStorefrontDTOS = djDeliverOrderMapper.queryReservedStorefront(houseId);
             List<AppointmentListDTO> appointmentListDTOS = new ArrayList<>();
             orderStorefrontDTOS.forEach(orderStorefrontDTO -> {
-                orderStorefrontDTO.setStorefrontLogo(imageAddress + orderStorefrontDTO.getStorefrontLogo());
+                orderStorefrontDTO.setStorefrontIcon(imageAddress+orderStorefrontDTO.getStorefrontIcon());
                 AppointmentListDTO appointmentListDTO = new AppointmentListDTO();
                 List<AppointmentDTO> appointmentDTOS = djDeliverOrderMapper.queryReserved(orderStorefrontDTO.getOrderSplitId());
                 if (appointmentDTOS.size() > 0) {

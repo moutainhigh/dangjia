@@ -46,4 +46,10 @@ public class BasicsGoodsDTO extends GoodsBaseEntity {
     private String attributeIdArr;//属性选中值Id集合
 
     private String cityId;//属性选中值Id集合
+
+    private Integer housekeeperAcceptance;//是否需要管家验收（1是，0否）
+
+    private String technologyIds;//关联的工艺ID，多个逗号分割
+
+
 }

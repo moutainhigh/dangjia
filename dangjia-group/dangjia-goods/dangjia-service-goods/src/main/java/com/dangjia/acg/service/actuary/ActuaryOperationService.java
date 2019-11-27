@@ -19,7 +19,6 @@ import com.dangjia.acg.mapper.basics.*;
 import com.dangjia.acg.mapper.product.IBasicsGoodsMapper;
 import com.dangjia.acg.mapper.product.IBasicsProductTemplateMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
-import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.GoodsGroup;
 import com.dangjia.acg.modle.basics.GroupLink;
 import com.dangjia.acg.modle.basics.Product;
@@ -213,7 +212,7 @@ public class ActuaryOperationService {
                             newBudgetMaterial.setCategoryId(targetProduct.getCategoryId());
                             newBudgetMaterial.setImage(targetProduct.getImage());
                             newBudgetMaterial.setUnitName(convertUnit.getName());
-                            Goods goods = goodsMapper.queryById( targetProduct.getGoodsId());
+                            BasicsGoods goods = goodsMapper.queryById( targetProduct.getGoodsId());
                             newBudgetMaterial.setProductType(goods.getType());//0：材料；1：包工包料
                             if(originalBudgetMaterial!=null){
                                 budgetMaterialMapper.updateByPrimaryKeySelective(newBudgetMaterial);
@@ -251,7 +250,7 @@ public class ActuaryOperationService {
                 newBudgetMaterial.setCategoryId(product.getCategoryId());
                 newBudgetMaterial.setImage(product.getImage());
                 newBudgetMaterial.setUnitName(convertUnit.getName());
-                Goods goods = goodsMapper.queryById( product.getGoodsId());
+                BasicsGoods goods = goodsMapper.queryById( product.getGoodsId());
                 newBudgetMaterial.setProductType(goods.getType());//0：材料；1：包工包料
                 if(originalBudgetMaterial!=null){
                     budgetMaterialMapper.updateByPrimaryKeySelective(newBudgetMaterial);
@@ -519,7 +518,7 @@ public class ActuaryOperationService {
                 }
                 if (budgetMaterialList != null)
                     for (BudgetMaterial bm : budgetMaterialList) {
-                        Goods goods = goodsMapper.selectByPrimaryKey(bm.getGoodsId());
+                        BasicsGoods goods = goodsMapper.selectByPrimaryKey(bm.getGoodsId());
                         DjBasicsProductTemplate product = iBasicsProductTemplateMapper.selectByPrimaryKey(bm.getProductId());
                         FlowActuaryDTO flowActuaryDTO = new FlowActuaryDTO();
                         flowActuaryDTO.setTypeName(typsValue);

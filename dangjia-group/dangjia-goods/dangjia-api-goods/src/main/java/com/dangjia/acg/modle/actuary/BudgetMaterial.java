@@ -109,4 +109,7 @@ public class BudgetMaterial extends GoodsBaseEntity{
 	@Column(name = "image")
 	private String image;//货品图片
 
+	@Column(name = "housekeeper_acceptance")
+	private Integer housekeeperAcceptance;//是否需要大管家验收（1是，0否）
+
 }

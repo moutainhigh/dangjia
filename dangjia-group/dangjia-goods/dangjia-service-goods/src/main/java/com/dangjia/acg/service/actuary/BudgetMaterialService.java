@@ -11,10 +11,10 @@ import com.dangjia.acg.mapper.basics.*;
 import com.dangjia.acg.mapper.product.IBasicsProductTemplateMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.attribute.AttributeValue;
-import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Label;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.brand.Unit;
+import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.util.StringTool;
 import org.apache.commons.lang3.StringUtils;
@@ -105,7 +105,7 @@ public class BudgetMaterialService {
             budgetWorkerService.setGoods(mapList);
             for (Map<String, Object> obj : mapList) {
                 String goodsId = obj.get("goodsId").toString();
-                Goods goods = iGoodsMapper.queryById(goodsId);
+                BasicsGoods goods = iGoodsMapper.queryById(goodsId);
                 if (goods != null) {
                     Unit unit = iUnitMapper.selectByPrimaryKey(goods.getUnitId());
                     if (unit != null)
@@ -147,7 +147,7 @@ public class BudgetMaterialService {
     //根据类别Id查到所有所属商品goods
     public ServerResponse getAllGoodsByCategoryId(String categoryId) {
         try {
-            List<Goods> mapList = iGoodsMapper.queryByCategoryId(categoryId);
+            List<BasicsGoods> mapList = iGoodsMapper.queryByCategoryId(categoryId);
             return ServerResponse.createBySuccess("查询成功", mapList);
         } catch (Exception e) {
             e.printStackTrace();
@@ -167,7 +167,7 @@ public class BudgetMaterialService {
                     continue;
                 }
 
-                List<Technology> pTechnologyList = iTechnologyMapper.queryTechnologyByWgId(p.getId());
+               /* List<Technology> pTechnologyList = iTechnologyMapper.queryTechnologyByWgId(p.getId());
                 List<Map<String, Object>> tTechnologymMapList = new ArrayList<>();
                 for (Technology t : pTechnologyList) {
                     if (t.getImage() == null) {
@@ -182,7 +182,7 @@ public class BudgetMaterialService {
                     map.put("imageUrl", imgStr.toString());
                     map.put("sampleImageUrl", address + t.getSampleImage());
                     tTechnologymMapList.add(map);
-                }
+                }*/
 
 
                 String[] imgArr = p.getImage().split(",");
@@ -220,7 +220,7 @@ public class BudgetMaterialService {
                 }
                 map.put("newValueNameArr", strNewValueNameArr);
 
-                map.put("tTechnologymMapList", tTechnologymMapList);
+              //  map.put("tTechnologymMapList", tTechnologymMapList);
                 mapList.add(map);
             }
             return ServerResponse.createBySuccess("查询成功", mapList);

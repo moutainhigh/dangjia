@@ -37,13 +37,13 @@ public class ShopCartController implements ShopCartAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse updateCar(HttpServletRequest request, String shopCartId, Integer shopCount) {
+    public ServerResponse updateCar(HttpServletRequest request, String shopCartId, Double shopCount) {
         return shopCartservice.updateCart(shopCartId,shopCount);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse addCart(HttpServletRequest request, String userToken, String cityId, String productId,Integer shopCount) {
+    public ServerResponse addCart(HttpServletRequest request, String userToken, String cityId, String productId,Double shopCount) {
         return shopCartservice.addCart(userToken, cityId,productId,shopCount);
     }
 
@@ -63,13 +63,19 @@ public class ShopCartController implements ShopCartAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse replaceShoppingCart(HttpServletRequest request, String shoppingCartId, String productId) {
-        return shopCartservice.replaceShoppingCart(shoppingCartId, productId);
+    public ServerResponse replaceShoppingCart(HttpServletRequest request, String shoppingCartId, String productId, Double shopCount) {
+        return shopCartservice.replaceShoppingCart(shoppingCartId, productId, shopCount);
     }
 
     @Override
     @ApiMethod
     public ServerResponse insertToCollect(HttpServletRequest request, String userToken, String jsonStr) {
         return shopCartservice.insertToCollect(userToken,jsonStr);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse addCartBuyAgain(HttpServletRequest request, String userToken, String cityId, String jsonStr) {
+        return shopCartservice.addCartBuyAgain(userToken,cityId,jsonStr);
     }
 }

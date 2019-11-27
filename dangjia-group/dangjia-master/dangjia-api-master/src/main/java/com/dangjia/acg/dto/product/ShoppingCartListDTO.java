@@ -37,7 +37,7 @@ public class ShoppingCartListDTO {
 
     @Desc(value = "购买数量")
     @ApiModelProperty("购买数量")
-    private Integer shopCount;
+    private Double shopCount;
 
     @Desc(value = "单位(个、条、箱、桶、米)")
     @ApiModelProperty("单位(个、条、箱、桶、米)")
@@ -58,6 +58,7 @@ public class ShoppingCartListDTO {
     private Integer unitType;//单位数值类型 1=整数单位，2=小数单位
 
     private String valueNameArr;
+    private String storefrontId;
 
 
 }

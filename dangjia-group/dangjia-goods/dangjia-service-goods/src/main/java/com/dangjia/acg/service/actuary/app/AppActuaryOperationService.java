@@ -24,8 +24,8 @@ import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.core.WorkerType;
+import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.BasicsGoodsCategory;
-import com.dangjia.acg.modle.product.DjBasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
@@ -97,7 +97,7 @@ public class AppActuaryOperationService {
                     .andCondition("  FIND_IN_SET(product_id,'" + productId + "') ");
             List<BudgetMaterial> budgetMaterials = budgetMaterialMapper.selectByExample(example);
             for (BudgetMaterial budgetMaterial : budgetMaterials) {
-                DjBasicsGoods goods = goodsMapper.selectByPrimaryKey(budgetMaterial.getGoodsId());
+                BasicsGoods goods = goodsMapper.selectByPrimaryKey(budgetMaterial.getGoodsId());
                 if(goods.getBuy()==1) {//可选商品取消
                     budgetMaterial.setDeleteState(2);//取消
                     budgetMaterialMapper.updateByPrimaryKeySelective(budgetMaterial);
@@ -201,7 +201,7 @@ public class AppActuaryOperationService {
                             newBudgetMaterial.setCategoryId(targetProduct.getCategoryId());
                             newBudgetMaterial.setImage(targetProduct.getImage());
                             newBudgetMaterial.setUnitName(convertUnit.getName());
-                            DjBasicsGoods goods = goodsMapper.selectByPrimaryKey( targetProduct.getGoodsId());
+                            BasicsGoods goods = goodsMapper.selectByPrimaryKey( targetProduct.getGoodsId());
                             newBudgetMaterial.setProductType(goods.getType());//0：材料；1：包工包料
                             budgetMaterialMapper.updateByPrimaryKeySelective(newBudgetMaterial);
                         }
@@ -231,7 +231,7 @@ public class AppActuaryOperationService {
                 newBudgetMaterial.setCategoryId(product.getCategoryId());
                 newBudgetMaterial.setImage(product.getImage());
                 newBudgetMaterial.setUnitName(convertUnit.getName());
-                DjBasicsGoods goods = goodsMapper.selectByPrimaryKey(product.getGoodsId());
+                BasicsGoods goods = goodsMapper.selectByPrimaryKey(product.getGoodsId());
                 newBudgetMaterial.setProductType(goods.getType());//0：材料；1：包工包料
                 budgetMaterialMapper.updateByPrimaryKeySelective(newBudgetMaterial);
                 return ServerResponse.createBySuccessMessage("更换成功" );
@@ -292,7 +292,7 @@ public class AppActuaryOperationService {
     public Object goodsDetail(StorefrontProduct product, String budgetMaterialId) {
         try {
 
-            DjBasicsGoods goods = goodsMapper.selectByPrimaryKey(product.getGoodsId());
+            BasicsGoods goods = goodsMapper.selectByPrimaryKey(product.getGoodsId());
             ActuarialProductAppDTO goodsDTO =assembleGoodsResult(product,goods);
             //如果商品为0：材料；1：服务
             GoodsGroup srcGoodsGroup = null;
@@ -352,7 +352,7 @@ public class AppActuaryOperationService {
             return null;
         }
     }
-    public ActuarialProductAppDTO assembleGoodsResult(StorefrontProduct product,DjBasicsGoods goods ) {
+    public ActuarialProductAppDTO assembleGoodsResult(StorefrontProduct product, BasicsGoods goods ) {
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
         try {
             ActuarialProductAppDTO goodsDTO = new ActuarialProductAppDTO();
@@ -463,7 +463,7 @@ public class AppActuaryOperationService {
     }
 
     //根据品牌系列找属性品牌
-    private List<AttributeDTO> getAllAttributes(StorefrontProduct product, List<DjBasicsProductTemplate> productList,DjBasicsGoods goods) {
+    private List<AttributeDTO> getAllAttributes(StorefrontProduct product, List<DjBasicsProductTemplate> productList,BasicsGoods goods) {
         List<AttributeDTO> attributeDTOList = new ArrayList<>();
         //品牌
         if (productList.size() > 0) {
@@ -506,7 +506,7 @@ public class AppActuaryOperationService {
         DjBasicsProductTemplate product = iBasicsProductTemplateMapper.selectByPrimaryKey(productId);//目标product 对象
         //品牌
         if (product!=null) {
-            DjBasicsGoods goods = goodsMapper.selectByPrimaryKey(product.getGoodsId());
+            BasicsGoods goods = goodsMapper.selectByPrimaryKey(product.getGoodsId());
             Brand brand =null;
             if (!CommonUtil.isEmpty(goods.getBrandId())) {
                 brand = iBrandMapper.selectByPrimaryKey(goods.getBrandId());

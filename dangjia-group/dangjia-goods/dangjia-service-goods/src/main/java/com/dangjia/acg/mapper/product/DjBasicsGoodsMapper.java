@@ -1,6 +1,6 @@
 package com.dangjia.acg.mapper.product;
 
-import com.dangjia.acg.modle.product.DjBasicsGoods;
+import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -15,19 +15,19 @@ import java.util.List;
  * Time: 9:54
  */
 @Repository
-public interface DjBasicsGoodsMapper extends Mapper<DjBasicsGoods> {
+public interface DjBasicsGoodsMapper extends Mapper<BasicsGoods> {
 
     //查询某个分类的商品 模糊name（如果categoryId 为null，查询全部材料商品 ）
-    List<DjBasicsGoods> queryGoodsListByCategoryLikeName(@Param("categoryId") String categoryId,
+    List<BasicsGoods> queryGoodsListByCategoryLikeName(@Param("categoryId") String categoryId,
                                                          @Param("name")String name,
                                                          @Param("cityId")String cityId);
 
-    DjBasicsGoods queryById(String id);
+    BasicsGoods queryById(String id);
 
     //根据商品Id查货品
     List<DjBasicsProductTemplate> queryByGoodsId(@Param("goodsId") String goodsId);
 
-    List<DjBasicsGoods> queryByCategoryId(@Param("categoryId")String categoryId,@Param("cityId")String cityId);
+    List<BasicsGoods> queryByCategoryId(@Param("categoryId")String categoryId,@Param("cityId")String cityId);
 
     String queryGoodsLabels(@Param("goodsId") String goodsId);
 }

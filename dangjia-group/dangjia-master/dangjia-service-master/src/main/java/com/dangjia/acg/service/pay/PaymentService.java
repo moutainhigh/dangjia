@@ -59,7 +59,7 @@ import com.dangjia.acg.modle.member.CustomerRecord;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.pay.PayOrder;
-import com.dangjia.acg.modle.product.DjBasicsGoods;
+import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.ShoppingCart;
 import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.repair.MendOrder;
@@ -958,7 +958,7 @@ public class PaymentService {
                     }
                     if(!CommonUtil.isEmpty(budgetLabelGoodsDTO.getGoodsId())){
                         Brand brand =null;
-                        DjBasicsGoods goods=iMasterBasicsGoodsMapper.selectByPrimaryKey(budgetLabelGoodsDTO.getGoodsId());
+                        BasicsGoods goods=iMasterBasicsGoodsMapper.selectByPrimaryKey(budgetLabelGoodsDTO.getGoodsId());
                         budgetLabelGoodsDTO.setIsReservationDeliver(goods.getIsReservationDeliver());
                         if (!CommonUtil.isEmpty(goods.getBrandId())) {
                             brand = iMasterBrandMapper.selectByPrimaryKey(goods.getBrandId());
@@ -1048,7 +1048,7 @@ public class PaymentService {
                         orderItem.setIsReservationDeliver(good.getIsReservationDeliver());
                         orderItem.setOrderId(order.getId());
                         orderItem.setPrice(good.getPrice().doubleValue());//销售价
-                        orderItem.setShopCount(good.getShopCount().doubleValue());//购买总数
+                        orderItem.setShopCount(good.getShopCount());//购买总数
                         orderItem.setUnitName(good.getUnitName());//单位
                         orderItem.setTotalPrice(good.getPrice()*good.getShopCount());//总价
                         orderItem.setProductName(good.getProductName());
