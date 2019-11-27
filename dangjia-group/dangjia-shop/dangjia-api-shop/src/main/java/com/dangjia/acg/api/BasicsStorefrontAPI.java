@@ -81,7 +81,7 @@ public interface BasicsStorefrontAPI {
      * 体现
      */
     @PostMapping("/web/queryStorefrontReflect")
-    @ApiOperation(value = "店铺-店铺体现", notes = "店铺-店铺体现")
+    @ApiOperation(value = "店铺-店铺提现", notes = "店铺-店铺提现")
     ServerResponse operationStorefrontReflect(@RequestParam("userId") String userId,
                                               @RequestParam("cityId") String cityId,
                                               @RequestParam("bankCard") String bankCard,

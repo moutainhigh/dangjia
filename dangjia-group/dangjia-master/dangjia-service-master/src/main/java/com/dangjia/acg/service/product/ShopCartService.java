@@ -125,7 +125,7 @@ public class ShopCartService {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
-                return (ServerResponse) object;
+                return ServerResponse.createBySuccess("获取购物车数量成功!",0);
             }
             Member member = (Member) object;
             Example example = new Example(ShoppingCart.class);

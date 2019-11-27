@@ -30,6 +30,7 @@ import com.dangjia.acg.modle.worker.WithdrawDeposit;
 import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -390,7 +391,6 @@ public class StorefrontService {
             if (storefront == null) {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
-            Double withdrawalAmount = istorefrontMapper.myWallet(storefront.getId(),new Date());
             Map<String, Double> map = new HashMap<>();
             map.put("totalAccount", storefront.getTotalAccount()!=null?storefront.getTotalAccount():0d);//账户总额
             map.put("withdrawalAmount", storefront.getSurplusMoney()!=null?storefront.getSurplusMoney():0d);//可提现余额
@@ -427,7 +427,7 @@ public class StorefrontService {
                 return ServerResponse.createByErrorMessage("提现金额不正确");
             }
             MainUser mainUser = istorefrontUserMapper.selectByPrimaryKey(storefront.getUserId());
-            if (!Utils.md5(payPassword).equals(mainUser.getPayPassword())){
+            if (!DigestUtils.md5Hex(payPassword).equals(mainUser.getPayPassword())){
                 return ServerResponse.createByErrorMessage("密码错误");
             }
             //提现申请
@@ -435,12 +435,12 @@ public class StorefrontService {
             withdrawDeposit.setMoney(new BigDecimal(surplusMoney));
             withdrawDeposit.setName(storefront.getStorekeeperName());
             withdrawDeposit.setWorkerId(mainUser.getId());
-            withdrawDeposit.setState(0);
-            withdrawDeposit.setRoleType(5);
+            withdrawDeposit.setState(0);//0未处理,1同意 2不同意(驳回)
+            withdrawDeposit.setRoleType(5);//1：业主端  2 大管家 3：工匠端 4：供应商 5：店铺
             withdrawDeposit.setCardNumber(bankCard);
             BankCard bankCard1 = istorefrontWithdrawDepositMapper.queryBankCard(bankCard, mainUser.getId());
             withdrawDeposit.setBankName(bankCard1.getBankName());
-            withdrawDeposit.setDataStatus(0);
+            withdrawDeposit.setDataStatus(0);//数据状态 0=正常，1=删除
             withdrawDeposit.setSourceId(storefront.getId());
             istorefrontWithdrawDepositMapper.insert(withdrawDeposit);
             //账号金额预扣
@@ -467,68 +467,73 @@ public class StorefrontService {
      */
     public ServerResponse operationStorefrontRecharge(String userId, String cityId, String payState, Double rechargeAmount, String payPassword, String businessOrderType, Integer sourceType) {
         try {
-                MainUser mainUser=null;
-                DjSupplierPayOrder djSupplierPayOrder = new DjSupplierPayOrder();
-                if(sourceType==1) {
-                    Storefront storefront = storefrontService.queryStorefrontByUserID(userId, cityId);
-                    if (storefront == null) {
-                        return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
-                    }
-                    mainUser = istorefrontUserMapper.selectByPrimaryKey(storefront.getUserId());
-                    djSupplierPayOrder.setSupplierId(storefront.getId());
-                }else if(sourceType==2){
-                    Example example=new Example(Storefront.class);
-                    example.createCriteria().andEqualTo(Storefront.DATA_STATUS,0)
-                            .andEqualTo(Storefront.CITY_ID,cityId)
-                            .andEqualTo(Storefront.USER_ID,userId);
-                    Storefront storefront = istorefrontMapper.selectOneByExample(example);
-                    mainUser = istorefrontUserMapper.selectByPrimaryKey(storefront.getUserId());
-                    djSupplierPayOrder.setSupplierId(storefront.getId());
+            //sourceType来源类型 1：供应商 2：店铺
+            MainUser mainUser = null;
+            DjSupplierPayOrder djSupplierPayOrder = new DjSupplierPayOrder();
+            if (sourceType == 1) {
+                Storefront storefront = storefrontService.queryStorefrontByUserID(userId, cityId);
+                if (storefront == null) {
+                    return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
                 }
-                if(mainUser==null) {
-                    return ServerResponse.createByErrorMessage("用户不存在");
-                }
-                if (rechargeAmount <= 0) {
-                    return ServerResponse.createByErrorMessage("金额不正确");
-                }
-                if (!Utils.md5(payPassword).equals(mainUser.getPayPassword())) {
-                    return ServerResponse.createByErrorMessage("密码错误");
-                }
-                djSupplierPayOrder.setDataStatus(0);
-                djSupplierPayOrder.setBusinessOrderType(businessOrderType);
-                djSupplierPayOrder.setPayState(payState);
-                djSupplierPayOrder.setPrice(rechargeAmount);
-                djSupplierPayOrder.setState(0);
-                djSupplierPayOrder.setUserId(userId);
-                djSupplierPayOrder.setSourceType(sourceType);
+                mainUser = istorefrontUserMapper.selectByPrimaryKey(storefront.getUserId());
+                djSupplierPayOrder.setSupplierId(storefront.getId());
+            } else if (sourceType == 2) {
+                Example example = new Example(Storefront.class);
+                example.createCriteria().andEqualTo(Storefront.DATA_STATUS, 0)
+                        .andEqualTo(Storefront.CITY_ID, cityId)
+                        .andEqualTo(Storefront.USER_ID, userId);
+                Storefront storefront = istorefrontMapper.selectOneByExample(example);
+                if(storefront==null)
+                    return ServerResponse.createByErrorMessage("店铺不存在");
+                mainUser = istorefrontUserMapper.selectByPrimaryKey(storefront.getUserId());
+                djSupplierPayOrder.setSupplierId(storefront.getId());
+            }
+            if (mainUser == null) {
+                return ServerResponse.createByErrorMessage("用户不存在");
+            }
+            if (rechargeAmount <= 0) {
+                return ServerResponse.createByErrorMessage("金额不正确");
+            }
+            if (!DigestUtils.md5Hex(payPassword).equals(mainUser.getPayPassword())) {
+                return ServerResponse.createByErrorMessage("密码错误");
+            }
+            if(businessOrderType.equals("2") && rechargeAmount<2000){
+                return ServerResponse.createByErrorMessage("滞留金交纳不小于2000");
+            }
+            djSupplierPayOrder.setDataStatus(0);
+            djSupplierPayOrder.setBusinessOrderType(businessOrderType);
+            djSupplierPayOrder.setPayState(payState);
+            djSupplierPayOrder.setPrice(rechargeAmount);
+            djSupplierPayOrder.setState(0);//支付状态：0申请中,1已支付,2支付失败
+            djSupplierPayOrder.setUserId(userId);
+            djSupplierPayOrder.setSourceType(sourceType);
             djShopSupplierPayOrderMapper.insert(djSupplierPayOrder);
-
-                // 生成支付业务单
-                Example example = new Example(BusinessOrder.class);
-                example.createCriteria().andEqualTo(BusinessOrder.TASK_ID, djSupplierPayOrder.getId()).andNotEqualTo(BusinessOrder.STATE, 4);
-                List<BusinessOrder> businessOrderList = istorefrontBusinessOrderMapper.selectByExample(example);
-                BusinessOrder businessOrder = null;
-                if (businessOrderList.size() > 0) {
-                    businessOrder = businessOrderList.get(0);
-                    if (businessOrder.getState() == 3) {
-                        return ServerResponse.createByErrorMessage("该订单已支付，请勿重复支付！");
-                    }
+            // 生成支付业务单
+            Example example = new Example(BusinessOrder.class);
+            example.createCriteria().andEqualTo(BusinessOrder.TASK_ID, djSupplierPayOrder.getId()).andNotEqualTo(BusinessOrder.STATE, 4);
+            List<BusinessOrder> businessOrderList = istorefrontBusinessOrderMapper.selectByExample(example);
+            BusinessOrder businessOrder = null;
+            if (businessOrderList.size() > 0) {
+                businessOrder = businessOrderList.get(0);
+                if (businessOrder.getState() == 3) {
+                    return ServerResponse.createByErrorMessage("该订单已支付，请勿重复支付！");
                 }
-                if (businessOrderList.size() == 0) {
-                    businessOrder = new BusinessOrder();
-                    businessOrder.setMemberId(djSupplierPayOrder.getUserId());
-                    businessOrder.setNumber(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
-                    businessOrder.setState(1);//刚生成
-                    businessOrder.setTotalPrice(new BigDecimal(rechargeAmount));
-                    businessOrder.setDiscountsPrice(new BigDecimal(0));
-                    businessOrder.setPayPrice(new BigDecimal(rechargeAmount));
-                    businessOrder.setType(3);//记录支付类型任务类型
-                    businessOrder.setTaskId(djSupplierPayOrder.getId());//保存任务ID
-                    istorefrontBusinessOrderMapper.insert(businessOrder);
-                }
-                djSupplierPayOrder.setBusinessOrderNumber(businessOrder.getNumber());
+            }
+            if (businessOrderList.size() == 0) {
+                businessOrder = new BusinessOrder();
+                businessOrder.setMemberId(djSupplierPayOrder.getUserId());
+                businessOrder.setNumber(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
+                businessOrder.setState(1);//刚生成
+                businessOrder.setTotalPrice(new BigDecimal(rechargeAmount));
+                businessOrder.setDiscountsPrice(new BigDecimal(0));
+                businessOrder.setPayPrice(new BigDecimal(rechargeAmount));
+                businessOrder.setType(3);//记录支付类型任务类型
+                businessOrder.setTaskId(djSupplierPayOrder.getId());//保存任务ID
+                istorefrontBusinessOrderMapper.insert(businessOrder);
+            }
+            djSupplierPayOrder.setBusinessOrderNumber(businessOrder.getNumber());
             djShopSupplierPayOrderMapper.updateByPrimaryKeySelective(djSupplierPayOrder);
-                return ServerResponse.createBySuccess("提交成功",djSupplierPayOrder.getBusinessOrderNumber());
+            return ServerResponse.createBySuccess("提交成功", djSupplierPayOrder.getBusinessOrderNumber());
         } catch (Exception e) {
             logger.error("店铺收支记录异常：", e);
             return ServerResponse.createByErrorMessage("店铺收支记录异常");
