@@ -131,7 +131,7 @@
         ORDER BY si.create_date DESC-->
 
         SELECT
-        IFNULL(d.sup_id ,'' )  as supplierId,IFNULL(ds.name,'') as name
+        distinct  IFNULL(d.sup_id ,'' )  as supplierId,IFNULL(ds.name,'') as name
         FROM
         `dj_deliver_order_split_item` si
         INNER JOIN dj_sup_application_product d ON si.product_id = d.product_id
