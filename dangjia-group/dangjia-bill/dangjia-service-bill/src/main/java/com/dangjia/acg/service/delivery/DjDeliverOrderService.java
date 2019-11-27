@@ -1605,12 +1605,11 @@ public class DjDeliverOrderService {
                         AppointmentDTO appointmentDTO = appointmentDTOS.get(0);
                         orderStorefrontDTO.setProductName(appointmentDTO.getProductName());
                     }
+                    orderStorefrontDTO.setShippingState("1004");
                     for (AppointmentDTO appointmentDTO : appointmentDTOS) {
                         if(appointmentDTO.getShippingState().equals("5")) {
                             orderStorefrontDTO.setShippingState(appointmentDTO.getShippingState());
                             break;
-                        }else {
-                            orderStorefrontDTO.setShippingState("1004");
                         }
                     }
                     orderStorefrontDTO.setShippingType(state);
