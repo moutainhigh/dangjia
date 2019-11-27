@@ -204,4 +204,10 @@ public interface BasicsStorefrontAPI {
                                       @RequestParam("orderNumber") String orderNumber,
                                       @RequestParam("type") Integer type);
 
+
+
+    @PostMapping("/sup/setStorefrontSurplusMoney")
+    @ApiOperation(value = "店铺-计算可提现金额", notes = "店铺-计算可提现金额")
+    Integer setStorefrontSurplusMoney();
+
 }

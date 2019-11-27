@@ -148,10 +148,6 @@
         SET a.surplus_money = (a.total_account-b.surplus_money-a.retention_money)
     </update>
 
-
-
-
-
     <select id="queryLikeSupplier" resultType="com.dangjia.acg.dto.supplier.SupplierLikeDTO">
         select
         ds.id,

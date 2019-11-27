@@ -785,10 +785,11 @@ public class StorefrontService {
         }
     }
 
-
-
-
-
-
+    /**
+     * 店铺-计算可提现金额
+     */
+    public Integer setStorefrontSurplusMoney() {
+       return  istorefrontMapper.setStorefrontSurplusMoney();
+    }
 
 }
