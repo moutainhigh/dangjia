@@ -181,7 +181,7 @@ public class DecorationCostService {
      * @param actuaryBudgetId 精算设置ID
      * @return
      */
-    public ServerResponse editPurchasePrice(String userToken,String cityId,String actuaryBudgetId,Double shopCount,Double totalPrice){
+    public ServerResponse editPurchasePrice(String userToken,String cityId,String actuaryBudgetId,Double shopCount,Double totalPrice,Integer housekeeperAcceptance){
         logger.info("查询分类汇总花费信息userToken={},cityId={},actuaryBudgetId={}",userToken,cityId,actuaryBudgetId);
         try{
             BudgetMaterial budgetMaterial=iBillBudgetMapper.selectByPrimaryKey(actuaryBudgetId);
@@ -191,7 +191,9 @@ public class DecorationCostService {
             budgetMaterial.setShopCount(shopCount);
             budgetMaterial.setTotalPrice(totalPrice);
             budgetMaterial.setModifyDate(new Date());
+            budgetMaterial.setHousekeeperAcceptance(housekeeperAcceptance);//是否需要大管家验收（1是，0否）
             iBillBudgetMapper.updateByPrimaryKeySelective(budgetMaterial);
+            //给大管家添加验收任务(后续和工匠端一起加）
             return  ServerResponse.createBySuccess("录入成功");
         }catch (Exception e){
             logger.error("查询异常",e);

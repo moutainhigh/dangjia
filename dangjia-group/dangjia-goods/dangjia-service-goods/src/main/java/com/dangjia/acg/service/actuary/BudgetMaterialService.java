@@ -167,7 +167,7 @@ public class BudgetMaterialService {
                     continue;
                 }
 
-                List<Technology> pTechnologyList = iTechnologyMapper.queryTechnologyByWgId(p.getId());
+               /* List<Technology> pTechnologyList = iTechnologyMapper.queryTechnologyByWgId(p.getId());
                 List<Map<String, Object>> tTechnologymMapList = new ArrayList<>();
                 for (Technology t : pTechnologyList) {
                     if (t.getImage() == null) {
@@ -182,7 +182,7 @@ public class BudgetMaterialService {
                     map.put("imageUrl", imgStr.toString());
                     map.put("sampleImageUrl", address + t.getSampleImage());
                     tTechnologymMapList.add(map);
-                }
+                }*/
 
 
                 String[] imgArr = p.getImage().split(",");
@@ -220,7 +220,7 @@ public class BudgetMaterialService {
                 }
                 map.put("newValueNameArr", strNewValueNameArr);
 
-                map.put("tTechnologymMapList", tTechnologymMapList);
+              //  map.put("tTechnologymMapList", tTechnologymMapList);
                 mapList.add(map);
             }
             return ServerResponse.createBySuccess("查询成功", mapList);

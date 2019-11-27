@@ -303,7 +303,8 @@
           t2.shop_count shopCount,
           IFNULL(t2.actual_payment_price,IFNULL(t2.total_price,t2.price*t2.shop_count)) actualPaymentPrice,
           1 steta,
-          '' actuaryBudgetId
+          '' actuaryBudgetId,
+          t5.housekeeper_acceptance showHousekeeperAcceptance
         FROM
             dj_deliver_order t1,
             dj_deliver_order_item t2,
@@ -336,7 +337,8 @@
                 t1.shop_count shopCount,
                 t1.total_price actualPaymentPrice,
                 2 steta,
-                t1.id actuaryBudgetId
+                t1.id actuaryBudgetId,
+                t2.housekeeper_acceptance showHousekeeperAcceptance
             FROM
                 dj_actuary_budget_material t1,
                 dj_basics_goods t2,

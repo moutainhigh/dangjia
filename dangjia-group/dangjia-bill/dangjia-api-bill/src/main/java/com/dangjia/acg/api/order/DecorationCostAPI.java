@@ -46,6 +46,7 @@ public interface DecorationCostAPI {
                                      @RequestParam("cityId") String cityId,
                                      @RequestParam("actuaryBudgetId") String actuaryBudgetId,
                                      @RequestParam("shopCount") Double shopCount,
-                                     @RequestParam("totalPrice") Double totalPrice);
+                                     @RequestParam("totalPrice") Double totalPrice,
+                                     @RequestParam("housekeeperAcceptance") Integer housekeeperAcceptance);
 
 }

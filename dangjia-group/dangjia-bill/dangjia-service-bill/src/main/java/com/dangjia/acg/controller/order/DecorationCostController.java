@@ -61,7 +61,7 @@ public class DecorationCostController implements DecorationCostAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse editPurchasePrice(String userToken, String cityId,String actuaryBudgetId,Double shopCount,Double totalPrice){
-        return decorationCostService.editPurchasePrice(userToken,cityId,actuaryBudgetId,shopCount,totalPrice);
+    public ServerResponse editPurchasePrice(String userToken, String cityId,String actuaryBudgetId,Double shopCount,Double totalPrice,Integer housekeeperAcceptance){
+        return decorationCostService.editPurchasePrice(userToken,cityId,actuaryBudgetId,shopCount,totalPrice,housekeeperAcceptance);
     }
 }

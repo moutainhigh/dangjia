@@ -207,18 +207,6 @@ public class DjBasicsProductTemplateService {
                 }
             }
 
-
-            //添加工艺信息
-            String ret = technologyService.insertTechnologyList(obj.getString("technologyList"), "0", 0, productId,cityId);
-            if (!ret.equals("1"))  //如果不成功 ，弹出是错误提示
-                return ServerResponse.createByErrorMessage(ret);
-
-            //3.删除对应需要删除的工艺信息
-            String deleteTechnologyIds=obj.getString("deleteTechnologyIds");
-            String restr = deleteTechnologylist(deleteTechnologyIds);
-            if (StringUtils.isNotBlank(restr)) {
-                return ServerResponse.createByErrorMessage(restr);
-            }
         }
         return ServerResponse.createBySuccessMessage("保存更新商品成功");
     }
@@ -229,7 +217,7 @@ public class DjBasicsProductTemplateService {
      * @param deleteTechnologyIds
      * @return
      */
-    private String deleteTechnologylist(String deleteTechnologyIds){
+   /* private String deleteTechnologylist(String deleteTechnologyIds){
         if (!CommonUtil.isEmpty(deleteTechnologyIds)) {
             String[] deleteTechnologyIdArr = deleteTechnologyIds.split(",");
             for (String aDeleteTechnologyIdArr : deleteTechnologyIdArr) {
@@ -240,7 +228,7 @@ public class DjBasicsProductTemplateService {
             }
         }
         return "";
-    }
+    }*/
     /**
      * 增加增值关联商品信息(先删除再添加）
      * @param productId
@@ -598,15 +586,7 @@ public class DjBasicsProductTemplateService {
                 insertAddedValueProductRelation(productId,basicsProductDTO.getRelationProductIds(),storefrontProductId,storefrontId);
             }
         }
-        String ret = technologyService.insertTechnologyList(technologyList, "0", 0, productId,cityId);
-        if (!ret.equals("1"))  //如果不成功 ，弹出是错误提示
-            return ServerResponse.createByErrorMessage(ret);
 
-        //3.删除对应需要删除的工艺信息
-        String restr = deleteTechnologylist(deleteTechnologyIds);
-        if (StringUtils.isNotBlank(restr)) {
-            return ServerResponse.createByErrorMessage(restr);
-        }
         return ServerResponse.createBySuccess("保存成功",productId);
     }
 

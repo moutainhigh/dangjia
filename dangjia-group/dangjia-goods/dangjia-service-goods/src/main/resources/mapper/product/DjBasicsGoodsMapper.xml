@@ -22,7 +22,9 @@
           `indicative_price` AS indicativePrice,
           `label_ids` AS labelIds,
           is_reservation_deliver as isReservationDeliver,
-          attribute_id_arr attributeIdArr
+          attribute_id_arr attributeIdArr,
+          housekeeper_acceptance housekeeperAcceptance,
+		  technology_ids technologyIds
 	</sql>
 
 

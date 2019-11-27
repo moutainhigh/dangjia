@@ -6,28 +6,50 @@
 
 	<sql id="all_columns">
 		id,
-		name,
-		category_id,
-		type,
-		buy,
-		sales,
-        other_name as otherName,
-		unit_id,
-		create_date,
-		modify_date
-	</sql>
-
-	<sql id="new_columns">
-		id,
-		name,
+		NAME,
 		category_id as categoryId,
 		type,
 		buy,
 		sales,
+		other_name AS otherName,
 		unit_id as unitId,
-		other_name as otherName,
-		create_date as createDate,
-		modify_date as modifyDate
+		create_date,
+		modify_date,
+		is_influe_decoration_progress as isInflueDecorationProgress,
+		irreversible_reasons as irreversibleReasons,
+		istop,
+		brand_id as brandId,
+		is_elevator_fee as isElevatorFee,
+		indicative_price as indicativePrice,
+		label_ids as  labelIds,
+		is_reservation_deliver as isReservationDeliver,
+		attribute_id_arr attributeIdArr,
+		housekeeper_acceptance housekeeperAcceptance,
+		technology_ids technologyIds
+	</sql>
+
+	<sql id="new_columns">
+		id,
+		NAME,
+		category_id as categoryId,
+		type,
+		buy,
+		sales,
+		other_name AS otherName,
+		unit_id as unitId,
+		create_date,
+		modify_date,
+		is_influe_decoration_progress as isInflueDecorationProgress,
+		irreversible_reasons as irreversibleReasons,
+		istop,
+		brand_id as brandId,
+		is_elevator_fee as isElevatorFee,
+		indicative_price as indicativePrice,
+		label_ids as  labelIds,
+		is_reservation_deliver as isReservationDeliver,
+		attribute_id_arr attributeIdArr,
+		housekeeper_acceptance housekeeperAcceptance,
+		technology_ids technologyIds
 	</sql>
 	<!-- 删除对象 -->
 	<delete id="deleteById" parameterType="java.lang.String">

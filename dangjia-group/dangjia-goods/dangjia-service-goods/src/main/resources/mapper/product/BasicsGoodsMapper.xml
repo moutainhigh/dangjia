@@ -23,7 +23,9 @@
 		indicative_price as indicativePrice,
 		label_ids as  labelIds,
 		is_reservation_deliver as isReservationDeliver,
-		attribute_id_arr attributeIdArr
+		attribute_id_arr attributeIdArr,
+		housekeeper_acceptance housekeeperAcceptance,
+		technology_ids technologyIds
 	</sql>
 
     <sql id="new_columns">
@@ -45,7 +47,9 @@
 		indicative_price as indicativePrice,
 		label_ids as  labelIds,
 		is_reservation_deliver as isReservationDeliver,
-		attribute_id_arr attributeIdArr
+		attribute_id_arr attributeIdArr,
+		housekeeper_acceptance housekeeperAcceptance,
+		technology_ids technologyIds
 	</sql>
     <!-- 删除对象 -->
     <delete id="deleteById" parameterType="java.lang.String">

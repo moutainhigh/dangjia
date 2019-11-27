@@ -107,7 +107,7 @@ public class BasicsGoods extends GoodsBaseEntity {
     @Column(name="housekeeper_acceptance")
     @Desc(value = "是否需要管家验收（1是，0否）")
     @ApiModelProperty("是否需要管家验收（1是，0否）")
-    private String housekeeperAcceptance;//是否需要管家验收（1是，0否）
+    private Integer housekeeperAcceptance;//是否需要管家验收（1是，0否）
 
     @Column(name="technology_ids")
     @Desc(value = "关联的工艺ID，多个逗号分割")
