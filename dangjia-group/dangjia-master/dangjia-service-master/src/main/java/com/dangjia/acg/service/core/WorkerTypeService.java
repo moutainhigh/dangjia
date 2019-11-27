@@ -96,7 +96,8 @@ public class WorkerTypeService {
             List<Map> maps = (List<Map>) BeanUtils.listToMap(workerTypeList);
             for (Map map : maps) {
                 map.put("workerTypeId", map.get(WorkerType.ID));
-                elasticSearchAPI.saveESJson(JSON.toJSONString(map),  WorkerType.class.getSimpleName());
+//                System.out.println(JSON.toJSONString(map));
+//                elasticSearchAPI.saveESJson(JSON.toJSONString(map),  WorkerType.class.getSimpleName());
             }
             return ServerResponse.createBySuccess("查询成功", maps);
         }
