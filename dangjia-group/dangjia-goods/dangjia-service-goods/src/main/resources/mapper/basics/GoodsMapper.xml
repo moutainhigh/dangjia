@@ -158,7 +158,7 @@
 		bg.modify_date AS modifyDate
 		FROM dj_basics_goods bg
 		INNER JOIN dj_basics_product_template bp ON bp.goods_id = bg.id
-		where 1=1
+		where 1=1 and bp.city_id=#{cityId}
 		<if test="categoryId!=null and categoryId!=''">
 			and bg.category_id=#{categoryId}
 		</if>

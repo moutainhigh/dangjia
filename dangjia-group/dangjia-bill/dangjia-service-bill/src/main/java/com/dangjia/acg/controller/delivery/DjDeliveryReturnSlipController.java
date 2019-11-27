@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
 
 /**
  * Created with IntelliJ IDEA.
@@ -78,9 +79,10 @@ public class DjDeliveryReturnSlipController implements DjDeliveryReturnSlipAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse supplierDimension(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId, String searchKey) {
-        return djDeliveryReturnSlipService.supplierDimension(pageDTO,userId,cityId,searchKey);
+    public ServerResponse supplierDimension(HttpServletRequest request, PageDTO pageDTO, Date startTime, Date endTime, String userId, String cityId, String searchKey) {
+        return djDeliveryReturnSlipService.supplierDimension(pageDTO,startTime,endTime,userId,cityId,searchKey);
     }
+
 
     @Override
     @ApiMethod
@@ -112,11 +114,6 @@ public class DjDeliveryReturnSlipController implements DjDeliveryReturnSlipAPI {
         return djDeliveryReturnSlipService.sellerDimension(pageDTO,userId,cityId,searchKey);
     }
 
-    @Override
-    @ApiMethod
-    public ServerResponse supplyDetails(HttpServletRequest request, PageDTO pageDTO, String userId, String houseId, String searchKey, String cityId) {
-        return djDeliveryReturnSlipService.supplyDetails(pageDTO,userId,houseId,searchKey,cityId);
-    }
 
     @Override
     @ApiMethod

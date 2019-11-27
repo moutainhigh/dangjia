@@ -29,6 +29,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -388,7 +389,7 @@ public class DjDeliveryReturnSlipService {
      * @param searchKey
      * @return
      */
-    public ServerResponse supplierDimension(PageDTO pageDTO, String userId, String cityId, String searchKey) {
+    public ServerResponse supplierDimension(PageDTO pageDTO, Date startTime, Date endTime, String userId, String cityId, String searchKey) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             Storefront storefront=basicsStorefrontAPI.queryStorefrontByUserID(userId,cityId);
@@ -398,7 +399,6 @@ public class DjDeliveryReturnSlipService {
             }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<SupplierLikeDTO > supplierList=djSupplierAPI.queryLikeSupplier(searchKey);
-
             List<StoreSupplierDimensionDTO> StoreSupplierDimensionDTOList=new  ArrayList<StoreSupplierDimensionDTO>();
             if(supplierList==null)
             {
@@ -406,10 +406,10 @@ public class DjDeliveryReturnSlipService {
             }
             for (SupplierLikeDTO supplierLikeDTO  : supplierList) {
                 List<StoreSupplierDimensionDTO> list=djDeliveryReturnSlipMapper.supplierDimension(supplierLikeDTO .getId(), storefront.getId(),cityId);
-                list.forEach(StoreSupplierDimensionDTO -> {
-                    StoreSupplierDimensionDTO.setName(supplierLikeDTO.getName()); //供应商名称
-                    StoreSupplierDimensionDTO.setCheckPeople(supplierLikeDTO.getCheckPeople());  //联系人
-                    StoreSupplierDimensionDTO.setTelephone(supplierLikeDTO.getTelephone());//联系号码
+                list.forEach(storeSupplierDimensionDTO -> {
+                    storeSupplierDimensionDTO.setName(supplierLikeDTO.getName()); //供应商名称
+                    storeSupplierDimensionDTO.setCheckPeople(supplierLikeDTO.getCheckPeople());  //联系人
+                    storeSupplierDimensionDTO.setTelephone(supplierLikeDTO.getTelephone());//联系号码
                 });
                 StoreSupplierDimensionDTOList.addAll(list);
             }
@@ -497,30 +497,6 @@ public class DjDeliveryReturnSlipService {
 
 
 
-    /**
-     *店铺利润统计-查看供应详情
-     * @param pageDTO
-     * @param userId
-     * @param houseId
-     * @param searchKey
-     * @param cityId
-     * @return
-     */
-    public ServerResponse supplyDetails(PageDTO pageDTO, String userId, String houseId, String searchKey, String cityId) {
-        try {
-
-            Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
-            if(storefront==null)
-            {
-                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
-            }
-
-            return null;
-        } catch (Exception e) {
-            logger.error("店铺利润统计-查看供应详情异常", e);
-            return ServerResponse.createByErrorMessage("店铺利润统计-查看供应详情异常: " + e);
-        }
-    }
 
     /**
      *店铺利润统计-查看买家详情
@@ -570,10 +546,8 @@ public class DjDeliveryReturnSlipService {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
             List<SupplierDimensionSupplyDTO> list  = djDeliveryReturnSlipMapper.supplierDimensionSupplyDetails(storefront.getId(),cityId,searchKey);
-
             PageInfo pageResult = new PageInfo(list);
             return ServerResponse.createBySuccess("查询成功", pageResult);
-
         } catch (Exception e) {
             logger.error("店铺利润统计-供应商供应详情异常", e);
             return ServerResponse.createByErrorMessage("店铺利润统计-供应商供应详情异常: " + e);
@@ -596,7 +570,6 @@ public class DjDeliveryReturnSlipService {
             {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
-
             List<SupplierDimensionOrderDetailDTO> list=djDeliveryReturnSlipMapper.supplierDimensionOrderDetails(houseId,storefront.getId(),cityId);
             PageInfo pageResult = new PageInfo(list);
             if (list.size() <= 0)

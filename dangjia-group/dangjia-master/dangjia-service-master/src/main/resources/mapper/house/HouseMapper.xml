@@ -497,7 +497,15 @@
         )
         WHERE
         (h.decoration_type = 2 or (h.decoration_type != 2 and h.designer_ok =3))
-
+        <if test="budgetStatus!=null and budgetStatus!=''">
+            and h.budget_ok = #{budgetStatus}
+        </if>
+        <if test="decorationType!=null and decorationType == 2">
+            and h.decoration_type = #{decorationType}
+        </if>
+        <if test="decorationType!=null and decorationType == 1">
+            and h.decoration_type != 2
+        </if>
         <if test="budgetOk != 0 and workerKey!=null and workerKey!=''">
             AND CONCAT(gr.name,gr.mobile) like CONCAT('%',#{workerKey},'%')
         </if>

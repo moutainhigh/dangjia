@@ -37,5 +37,5 @@ public interface IGoodsMapper extends Mapper<Goods> {
 	 * @param buy 购买性质0：必买；1可选；2自购
 	 * @return
 	 */
-	List<Goods> queryGoodsGroupListByCategoryLikeName(@Param("categoryId")String categoryId,@Param("name")String name,@Param("type")String type,@Param("buy")String buy);
+	List<Goods> queryGoodsGroupListByCategoryLikeName(@Param("categoryId")String categoryId,@Param("name")String name,@Param("type")String type,@Param("buy")String buy,@Param("cityId")String cityId);
 }

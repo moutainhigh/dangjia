@@ -50,7 +50,7 @@ public class ActuaryService {
      */
     public ServerResponse getActuaryAll(HttpServletRequest request, PageDTO pageDTO,
                                         String name, String budgetOk, String workerKey,
-                                        String userId) {
+                                        String userId,String budgetStatus,String decorationType) {
         String cityId = request.getParameter(Constants.CITY_ID);
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         String dataStatus = "0";//正常数据
@@ -59,7 +59,7 @@ public class ActuaryService {
             dataStatus = "1";
             budgetOk = "";
         }
-        List<HouseListDTO> houseList = houseMapper.getActuaryAll(cityId, budgetOk, name, workerKey, dataStatus,userId);
+        List<HouseListDTO> houseList = houseMapper.getActuaryAll(cityId, budgetOk, name, workerKey, dataStatus,userId,budgetStatus,decorationType);
         PageInfo pageResult = new PageInfo(houseList);
         for (HouseListDTO houseListDTO : houseList) {
             HouseWorker houseWorker = houseWorkerMapper.getByWorkerTypeId(houseListDTO.getHouseId(), "2", 6);

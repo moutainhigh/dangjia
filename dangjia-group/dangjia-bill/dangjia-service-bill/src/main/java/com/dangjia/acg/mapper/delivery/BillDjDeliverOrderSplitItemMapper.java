@@ -30,4 +30,6 @@ public interface BillDjDeliverOrderSplitItemMapper extends Mapper<OrderSplitItem
      * @return
      */
     RefundOrderItemDTO queryReturnRefundOrderItemInfo(@Param("orderSplitItemId") String orderSplitItemId);
+
+    List<String> querySplitDeliverId(@Param("orderId") String orderId);
 }

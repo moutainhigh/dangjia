@@ -33,4 +33,5 @@ public class AppointmentDTO {
     private String valueNameArr;
     private String valueIdArr;
     private String orderStatus;
+    private Integer isReservationDeliver;
 }

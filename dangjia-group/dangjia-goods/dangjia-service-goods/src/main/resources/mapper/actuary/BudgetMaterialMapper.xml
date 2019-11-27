@@ -463,6 +463,7 @@
 		and m.worker_type_id = #{workerTypeId}
 		and m.storefont_id = #{storefontId}
 		and m.delete_state in (0, 2, 4)
+        AND m.product_type &lt;4
 	</select>
 
 	<insert id="insertByBatch" parameterType="java.util.List">

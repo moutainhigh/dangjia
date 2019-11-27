@@ -644,35 +644,26 @@
             t1.total_amount totalAmount
         FROM
             dj_deliver_order t1,
-        <if test="0!=state">
             dj_pay_business_order t3,
-        </if>
             dj_basics_storefront t4
         WHERE 1=1
-        <if test="0!=state">
-            t1.business_order_number = t3.number
-            AND t3.state = #{state}
-        </if>
+        t1.business_order_number = t3.number
+        AND t3.state = 3
         AND t1.storefont_id = t4.id
         AND t1.payment IS NOT NULL
         AND t1.house_id = #{houseId}
-        <if test="state==0">
-            AND t1.order_status =5
-        </if>
-        <if test="state==3">
-            AND EXISTS (
-                SELECT
-                    1
-                FROM
-                    dj_deliver_order_item t2
-                WHERE
-                    t1.id = t2.order_id
-                AND t2.shop_count > (
-                    IFNULL(t2.ask_count, 0) + IFNULL(t2.return_count, 0)
-                )
-                AND t2.data_status = 0
+        AND EXISTS (
+            SELECT
+                1
+            FROM
+                dj_deliver_order_item t2
+            WHERE
+                t1.id = t2.order_id
+            AND t2.shop_count > (
+                IFNULL(t2.ask_count, 0) + IFNULL(t2.return_count, 0)
             )
-        </if>
+            AND t2.data_status = 0
+        )
     </select>
 
 
@@ -695,7 +686,8 @@
             t.reservation_deliver_time as reservationDeliverTime,
             IFNULL(t.total_price,0) as totalPrice,
             t2.value_name_arr as valueNameArr,
-            t2.value_id_arr as valueIdArr
+            t2.value_id_arr as valueIdArr,
+            t.is_reservation_deliver as isReservationDeliver
         FROM
             dj_deliver_order_item t,
             dj_basics_storefront_product t1,
@@ -703,9 +695,7 @@
         WHERE t.product_id =t1.id
         AND t1.prod_template_id=t2.id
         AND t.order_id =  #{orderId}
-        <if test="state==3">
-            AND t.shop_count > (IFNULL(t.ask_count, 0)+IFNULL(t.return_count,0))
-        </if>
+        AND t.shop_count > (IFNULL(t.ask_count, 0)+IFNULL(t.return_count,0))
         AND t.data_status = 0
         ORDER BY t.create_date
     </select>
@@ -768,6 +758,30 @@
         AND id!=parent_order_id
     </select>
 
+
+    <select id="queryPaymentToBeMade" resultType="com.dangjia.acg.dto.delivery.OrderStorefrontDTO">
+        SELECT
+            t1.storefont_id storefrontId,
+            t1.id orderId,
+            t1.address_id addressId,
+            t1.house_id houseId,
+            t1.business_order_number businessOrderNumber,
+            t1.order_number orderNumber,
+            t4.storefront_name storefrontName,
+            t4.system_logo storefrontLogo,
+            t1.create_date AS createDate,
+            t1.actual_payment_price AS actualPaymentPrice,
+            t1.total_amount totalAmount,
+            t4.mobile
+        FROM
+            dj_deliver_order t1,
+            dj_basics_storefront t4
+        WHERE
+            t1.parent_order_id = #{orderId}
+        AND t1.id!= t1.parent_order_id
+        AND t1.data_status=0
+    </select>
+
     <select id="queryAppOrderList" resultType="com.dangjia.acg.dto.delivery.DjSplitDeliverOrderDTO">
         select
         IFNULL(ddsd.id,'') as id,
@@ -797,6 +811,42 @@
         INNER JOIN dj_basics_storefront_product bsp on dosi.product_id = bsp.id
         INNER JOIN  dj_basics_product_template bpt on bsp.prod_template_id = bpt.id
         where dosi.id = #{id}
+    </select>
+
+
+    <select id="queryHumpDetail" resultType="com.dangjia.acg.dto.delivery.OrderStorefrontDTO">
+        SELECT
+            t1.storefont_id storefrontId,
+            t1.id orderId,
+            t1.address_id addressId,
+            t1.house_id houseId,
+            t1.business_order_number businessOrderNumber,
+            t1.order_number orderNumber,
+            t4.storefront_name storefrontName,
+            t4.system_logo storefrontLogo
+        FROM
+            dj_deliver_order t1,
+            dj_pay_business_order t3,
+            dj_basics_storefront t4
+        WHERE
+            t1.business_order_number = t3.number
+        AND t1.storefont_id = t4.id
+        AND t1.payment IS NOT NULL
+        AND t3.state = 3
+        AND t1.id = #{orderId}
+        AND t1.data_status=0
+        AND EXISTS (
+            SELECT
+                1
+            FROM
+                dj_deliver_order_item t2
+            WHERE
+                t1.id = t2.order_id
+            AND t2.shop_count > (
+                IFNULL(t2.ask_count, 0) + IFNULL(t2.return_count, 0)
+            )
+            AND t2.data_status = 0
+        )
     </select>
 
 

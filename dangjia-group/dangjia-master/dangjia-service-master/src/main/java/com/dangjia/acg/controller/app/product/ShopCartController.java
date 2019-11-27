@@ -43,10 +43,8 @@ public class ShopCartController implements ShopCartAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse addCart(HttpServletRequest request, String userToken, String cityId, String productId,
-                                  String productSn, String productName, String price,String shopCount, String unitName,
-                                  String categoryId, String productType,String storefrontId,String image) {
-        return shopCartservice.addCart(userToken, cityId,productId,productSn,productName,price,shopCount,unitName,categoryId,productType,storefrontId,image);
+    public ServerResponse addCart(HttpServletRequest request, String userToken, String cityId, String productId,Integer shopCount) {
+        return shopCartservice.addCart(userToken, cityId,productId,shopCount);
     }
 
 
@@ -65,8 +63,8 @@ public class ShopCartController implements ShopCartAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse replaceShoppingCart(HttpServletRequest request, String shoppingCartId, String productId, String productSn, String productName, String image, BigDecimal price) {
-        return shopCartservice.replaceShoppingCart(shoppingCartId, productId, productSn, productName, image, price);
+    public ServerResponse replaceShoppingCart(HttpServletRequest request, String shoppingCartId, String productId) {
+        return shopCartservice.replaceShoppingCart(shoppingCartId, productId);
     }
 
     @Override

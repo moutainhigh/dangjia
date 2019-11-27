@@ -94,7 +94,7 @@ public class DjBasicsActuarialConfigurationServices {
                         for(int i=0;i<actuarialTemplateConfigDTO.getProductList().size();i++){
                             Map productMap=(Map)actuarialTemplateConfigDTO.getProductList().get(i);
                             productMap.put("prodList", iBasicsProductTemplateMapper.getProductStoreListByGoodsId((String)productMap.get("goodsId")));//商品列表
-                            productMap.put("goodsList",iBasicsGoodsMapper.getActuarialGoodsListByCategoryId((String)productMap.get("categoryId")));//商品列表
+                            productMap.put("goodsList",iBasicsGoodsMapper.getActuarialGoodsListByCategoryId((String)productMap.get("categoryId"),cityId));//商品列表
                             productList.add(productMap);
                         }
                         actuarialTemplateConfigDTO.setProductList(productList);
@@ -193,11 +193,11 @@ public class DjBasicsActuarialConfigurationServices {
      * 查询设计精算的货品列表
      * @return
      */
-    public ServerResponse getActuarialGoodsListByCategoryId(String categoryId){
+    public ServerResponse getActuarialGoodsListByCategoryId(String categoryId,String cityId){
         try {
             logger.info("查询所有类型为人工的货品");
             //查询所有的人工货品
-            List<BasicsGoods> mapList = iBasicsGoodsMapper.getActuarialGoodsListByCategoryId(categoryId);
+            List<BasicsGoods> mapList = iBasicsGoodsMapper.getActuarialGoodsListByCategoryId(categoryId,cityId);
             return ServerResponse.createBySuccess("查询成功", mapList);
         } catch (Exception e) {
             logger.error("getActuarialGoodsList查询失败:",e);
@@ -503,7 +503,7 @@ public class DjBasicsActuarialConfigurationServices {
                     djMap.put("name",dj.getConfigName());
                     djMap.put("fileName",dj.getExcelFileName());
                     djMap.put("excelAddress",dj.getExcelAddress());
-                    djMap.put("excelAddressUrl",dj.getExcelAddress());
+                    djMap.put("excelAddressUrl",address+dj.getExcelAddress());
                     excelList.add(djMap);
                 }
             }
