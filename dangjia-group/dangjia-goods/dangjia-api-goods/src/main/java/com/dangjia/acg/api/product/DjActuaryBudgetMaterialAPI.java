@@ -50,4 +50,5 @@ public interface DjActuaryBudgetMaterialAPI {
                                       @RequestParam("attributeVal")String attributeVal,
                                       @RequestParam("brandVal")String brandVal,
                                       @RequestParam("orderKey")String orderKey);
+
 }
