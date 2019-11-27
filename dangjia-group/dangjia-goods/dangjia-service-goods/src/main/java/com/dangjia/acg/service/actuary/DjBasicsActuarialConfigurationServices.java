@@ -493,7 +493,7 @@ public class DjBasicsActuarialConfigurationServices {
                     djMap.put("name",dj.getConfigName());
                     djMap.put("fileName",dj.getExcelFileName());
                     djMap.put("excelAddress",dj.getExcelAddress());
-                    djMap.put("excelAddressUrl",dj.getExcelAddress());
+                    djMap.put("excelAddressUrl",address+dj.getExcelAddress());
                     excelList.add(djMap);
                 }
             }
