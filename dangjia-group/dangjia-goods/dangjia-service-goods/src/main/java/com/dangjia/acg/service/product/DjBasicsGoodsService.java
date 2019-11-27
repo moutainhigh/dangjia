@@ -56,7 +56,8 @@ public class DjBasicsGoodsService {
     private ILabelMapper iLabelMapper;
     @Autowired
     private DjBasicsLabelValueMapper djBasicsLabelValueMapper;
-
+    @Autowired
+    private IProductAddedRelationMapper iProductAddedRelationMapper;
     /**
      * 货品打标签
      *
@@ -349,6 +350,13 @@ public class DjBasicsGoodsService {
                         if (label!=null&&label.getName() != null)
                             map.put("labelName", label.getName());
                     }
+                    //只有增值类关联商品才会有此数据
+                    if(StringUtils.isNotBlank(p.getIsRelateionProduct())&&"1".equals(p.getIsRelateionProduct())){
+
+                        List<String> relationProductIds=iProductAddedRelationMapper.getProdTemplateIdsByAddId(p.getId());
+                        map.put("relationProductIds",relationProductIds);//关联商品IDs，用逗号分隔
+                    }
+
                     map.put("id",p.getId());
                     map.put("goodsType",goods.getType());
                     mapList.add(map);
