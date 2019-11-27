@@ -80,7 +80,7 @@ public class WorkerTypeService {
             elasticSearchDTO.setNotParamMap(notParamMap);
         }
         List<JSONObject> redata =elasticSearchAPI.searchESJson(elasticSearchDTO);
-        if(redata==null || redata.size()>0) {
+        if(redata==null || redata.size()==0) {
             Example example = new Example(WorkerType.class);
             Example.Criteria criteria = example.createCriteria();
             if (notParamMap!=null&& !CommonUtil.isEmpty(notParamMap.get(WorkerType.TYPE))) {
