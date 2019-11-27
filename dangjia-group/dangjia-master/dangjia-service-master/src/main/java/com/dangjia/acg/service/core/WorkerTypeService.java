@@ -94,11 +94,11 @@ public class WorkerTypeService {
                         , "查无数据");
             }
             List<Map> maps = (List<Map>) BeanUtils.listToMap(workerTypeList);
-//            for (Map map : maps) {
+            for (Map map : maps) {
                 map.put("workerTypeId", map.get(WorkerType.ID));
 //                System.out.println(JSON.toJSONString(map));
 //                elasticSearchAPI.saveESJson(JSON.toJSONString(map),  WorkerType.class.getSimpleName());
-//            }
+            }
             return ServerResponse.createBySuccess("查询成功", maps);
         }
         return ServerResponse.createBySuccess("查询成功", redata);
