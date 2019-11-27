@@ -83,10 +83,6 @@ public class DjBasicsProductTemplateService {
     private ILabelMapper iLabelMapper;
 
     @Autowired
-    private IGoodsStorefrontMapper iGoodsStorefrontMapper;
-    @Autowired
-    private IGoodsCityMapper iGoodsCityMapper;
-    @Autowired
     private GoodsStorefrontProductService   goodsStorefrontProductService;
     @Autowired
     private IGoodsStorefrontProductAddedRelationMapper iGoodsStorefrontProductAddedRelationMapper;
@@ -202,7 +198,7 @@ public class DjBasicsProductTemplateService {
             LOG.info("001----------添加商品主表 end productId:" + productId);
            //上架商品到店铺
             if(basicsGoods!=null&&basicsGoods.getType()!=0&&basicsGoods.getType()!=1){//非实物商品直接上架
-                String storefrontId=getStorefrontId(cityId,userId);
+                String storefrontId=goodsStorefrontProductService.getStorefrontId(cityId,userId);
                 //上架商品到店铺
                 String storefrontProductId=goodsStorefrontProductService.insertExitStorefrontProduct(storefrontId, productId, basicsProductDTO, cityId);
                 if(basicsProductDTO.getIsRelateionProduct()!=null&&"1".equals(basicsProductDTO.getIsRelateionProduct())){
@@ -366,35 +362,7 @@ public class DjBasicsProductTemplateService {
         return product.getId();
     }
 
-    private String getStorefrontId(String cityId,String userId){
-        Storefront storefront=iGoodsStorefrontMapper.selectStoreByTypeCityId(cityId,"worker");
-        if(storefront==null||StringUtils.isBlank(storefront.getId())){
-            /**
-             * 当家装修{城市}店
-             * 当家{城市}总部地址
-             * 当家装修定义了统一的人工标准，由符合要求的工匠提供服务，请放心选购
-             */
-            //MainUser mainUser=iGoodsUserMapper.selectByPrimaryKey(userId);
-            City city=iGoodsCityMapper.selectByPrimaryKey(cityId);
-            String cityName="";
-            if(city!=null&&StringUtils.isNotBlank(city.getName())){
-                cityName=city.getName();
-            }
-            storefront=new Storefront();
-            storefront.setUserId(userId);
-            storefront.setCityId(cityId);
-            storefront.setStorefrontName("当家装修"+cityName+"店");
-            storefront.setStorefrontAddress("当家"+cityName+"总部地址");
-            storefront.setStorefrontDesc("当家装修定义了统一的人工标准，由符合要求的工匠提供服务，请放心选购");
-            storefront.setStorefrontLogo("");//店铺logo暂无
-            storefront.setIfDjselfManage(1);
-            storefront.setStorefrontType("worker");
-            String systemlogo = configUtil.getValue(SysConfig.ORDER_DANGJIA_ICON, String.class);
-            storefront.setSystemLogo(systemlogo);
-            iGoodsStorefrontMapper.insertSelective(storefront);
-        }
-        return storefront.getId();
-    }
+
 
 
     /**
@@ -622,7 +590,7 @@ public class DjBasicsProductTemplateService {
         LOG.info("001----------添加商品主表 end productId:" + productId);
         //上架商品到店铺
         if(basicsGoods!=null&&basicsGoods.getType()!=1&&basicsGoods.getType()!=0){//非实物商品直接上架
-            String storefrontId=getStorefrontId(cityId,userId);
+            String storefrontId=goodsStorefrontProductService.getStorefrontId(cityId,userId);
             //上架商品到店铺
             String storefrontProductId=goodsStorefrontProductService.insertExitStorefrontProduct(storefrontId, productId, basicsProductDTO, cityId);
             if(basicsProductDTO.getIsRelateionProduct()!=null&&"1".equals(basicsProductDTO.getIsRelateionProduct())){
