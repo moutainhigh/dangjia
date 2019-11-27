@@ -1,8 +1,8 @@
 package com.dangjia.acg.api;
 
 import com.alibaba.fastjson.JSONObject;
-import com.dangjia.acg.common.model.PageBean;
 import com.dangjia.acg.dto.ElasticSearchDTO;
+import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -29,7 +29,7 @@ public interface ElasticSearchAPI {
 
   @RequestMapping(value = "searchESJsonPage", method = RequestMethod.POST)
   @ApiOperation(value = "模糊搜索（分页）", notes = "模糊搜索（分页）")
-  PageBean<JSONObject> searchESJsonPage(@ApiParam(name ="elasticSearchDTO",value = "要查询的字段")@RequestBody ElasticSearchDTO elasticSearchDTO);
+  PageInfo<JSONObject> searchESJsonPage(@ApiParam(name ="elasticSearchDTO",value = "要查询的字段")@RequestBody ElasticSearchDTO elasticSearchDTO);
 
   @RequestMapping(value = "saveESJson", method = RequestMethod.POST)
   @ApiOperation(value = "保存单条数据", notes = "保存单条数据")

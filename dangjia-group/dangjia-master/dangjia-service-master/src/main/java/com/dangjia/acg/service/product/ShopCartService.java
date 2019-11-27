@@ -3,9 +3,6 @@ package com.dangjia.acg.service.product;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.BasicsStorefrontAPI;
-import com.dangjia.acg.api.StorefrontProductAPI;
-import com.dangjia.acg.api.data.ForMasterAPI;
-import com.dangjia.acg.api.product.DjBasicsProductAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
@@ -128,7 +125,7 @@ public class ShopCartService {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
-                return (ServerResponse) object;
+                return ServerResponse.createBySuccess("获取购物车数量成功!",0);
             }
             Member member = (Member) object;
             Example example = new Example(ShoppingCart.class);
