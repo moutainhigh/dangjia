@@ -30,7 +30,7 @@ public interface DjActuaryBudgetMaterialAPI {
                                @RequestParam("cityId") String cityId);
 
     @PostMapping("/app/product/djActuaryBudgetMaterial/queryMakeBudgetsList")
-    @ApiOperation(value = "查询精算列表", notes = "查询精算列表")
+    @ApiOperation(value = "查询精算列表(修改版)", notes = "查询精算列表(修改版)")
     ServerResponse queryMakeBudgetsList(@RequestParam("request") HttpServletRequest request,
                                         @RequestParam("bclId") String bclId,
                                         @RequestParam("categoryId") String categoryId,
@@ -39,7 +39,7 @@ public interface DjActuaryBudgetMaterialAPI {
 
 
     @PostMapping("/app/product/djActuaryBudgetMaterial/queryBasicsProduct")
-    @ApiOperation(value = "查询精算详情列表", notes = "查询精算详情列表")
+    @ApiOperation(value = "查询精算详情列表(修改版)", notes = "查询精算详情列表(修改版)")
     ServerResponse queryBasicsProduct(@RequestParam("request") HttpServletRequest request,
                                       @RequestParam("productId") String productId,
                                       @RequestParam("pageDTO") PageDTO pageDTO,
