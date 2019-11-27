@@ -80,7 +80,7 @@ public class WorkerTypeService {
             elasticSearchDTO.setNotParamMap(notParamMap);
         }
         List<JSONObject> redata =elasticSearchAPI.searchESJson(elasticSearchDTO);
-        if(redata==null || redata.size()==0) {
+        if(redata==null || redata.size()>0) {
             Example example = new Example(WorkerType.class);
             Example.Criteria criteria = example.createCriteria();
             if (notParamMap!=null&& !CommonUtil.isEmpty(notParamMap.get(WorkerType.TYPE))) {
@@ -94,10 +94,11 @@ public class WorkerTypeService {
                         , "查无数据");
             }
             List<Map> maps = (List<Map>) BeanUtils.listToMap(workerTypeList);
-            for (Map map : maps) {
+//            for (Map map : maps) {
                 map.put("workerTypeId", map.get(WorkerType.ID));
-                elasticSearchAPI.saveESJson(JSON.toJSONString(map),  WorkerType.class.getSimpleName());
-            }
+//                System.out.println(JSON.toJSONString(map));
+//                elasticSearchAPI.saveESJson(JSON.toJSONString(map),  WorkerType.class.getSimpleName());
+//            }
             return ServerResponse.createBySuccess("查询成功", maps);
         }
         return ServerResponse.createBySuccess("查询成功", redata);
