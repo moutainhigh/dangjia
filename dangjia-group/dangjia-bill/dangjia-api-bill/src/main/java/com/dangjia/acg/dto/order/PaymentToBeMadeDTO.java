@@ -2,6 +2,7 @@ package com.dangjia.acg.dto.order;
 
 import com.dangjia.acg.common.model.BaseEntity;
 import com.dangjia.acg.dto.delivery.AppointmentListDTO;
+import com.dangjia.acg.dto.delivery.OrderStorefrontDTO;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -18,7 +19,7 @@ import java.util.List;
 public class PaymentToBeMadeDTO extends BaseEntity {
 
     private String houseName;
-    private List<AppointmentListDTO> appointmentListDTOS;
+    private List<OrderStorefrontDTO> orderStorefrontDTOS;
     private BigDecimal actualPaymentPrice;//实付总价
     private BigDecimal totalAmount;//总价（不含运费）
     private BigDecimal totalTransportationCost;//运费

@@ -2,7 +2,7 @@ package com.dangjia.acg.config;
 
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,7 +70,7 @@ public class ElasticsearchConfiguration implements FactoryBean<TransportClient>,
           String InetSocket [] = nodes.split(":");
           String  address = InetSocket[0];
           Integer  port = Integer.valueOf(InetSocket[1]);
-          preBuiltTransportClient.addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(address),port));
+          preBuiltTransportClient.addTransportAddress(new TransportAddress(InetAddress.getByName(address),port));
         }
         client = preBuiltTransportClient;
       }

@@ -3,6 +3,7 @@ package com.dangjia.acg.dto.delivery;
 import lombok.Data;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -31,4 +32,12 @@ public class OrderStorefrontDTO {
     private String mobile;//店铺联系电话
     private String shippingState;//按钮状态 3:付款 4：取消订单 5：预约发货
     private String shippingType;// 订单状态（1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭）
+    private List<AppointmentDTO> appointmentDTOS;
+    private Double totalStevedorageCost;//总搬运费
+    private Double totalTransportationCost;//总运费
+    private Double totalDiscountPrice;//优惠总价
+    private String storefrontType;//店铺类型（实物商品：product，人工商品：worker)
+    private String workerName;//工匠名称
+    private String workerId;//工人id
+    private String workerTypeId;
 }

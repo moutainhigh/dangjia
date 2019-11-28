@@ -53,6 +53,7 @@ public interface ITechnologyMapper extends Mapper<Technology> {
     //根据内容模糊搜索工艺
     List<Technology> queryByName(@Param("name") String name,
                                  @Param("workerTypeId") String workerTypeId,
-                                 @Param("cityId") String cityId);
+                                 @Param("cityId") String cityId,
+                                 @Param("materialOrWorker") Integer materialOrWorker);
 
 }
