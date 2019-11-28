@@ -917,6 +917,7 @@ public class PaymentService {
             paymentDTO.setTotalPrice(paymentPrice);
             paymentDTO.setDiscountsPrice(businessOrder.getDiscountsPrice());
             paymentDTO.setPayPrice(payPrice);//实付
+            paymentDTO.setType(order.getType());//1人工订单 2其他订单 3精算订单 4体验订单
             paymentDTO.setBusinessOrderNumber(businessOrder.getNumber());
             return ServerResponse.createBySuccess("查询成功", paymentDTO);
         } catch (Exception e) {
