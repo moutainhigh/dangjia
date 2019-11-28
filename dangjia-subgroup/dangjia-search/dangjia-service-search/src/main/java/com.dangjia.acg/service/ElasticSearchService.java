@@ -236,8 +236,9 @@ public class ElasticSearchService {
     if(CommonUtil.isEmpty(eid)) {
       saveESJson(jsonStr, tableTypeName);
     }else{
+      Map map =JSONObject.parseObject(jsonStr);
       UpdateRequestBuilder updateRequestBuilder = ElasticsearchConfiguration.client.prepareUpdate(indexName+"_"+tableTypeName.toLowerCase(),tableTypeName,eid);
-      updateRequestBuilder.setDoc(jsonStr).get();
+      updateRequestBuilder.setDoc(map).get();
     }
   }
 
