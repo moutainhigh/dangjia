@@ -74,8 +74,8 @@ public class ElasticsearchConfiguration implements FactoryBean<TransportClient>,
         }
         client = preBuiltTransportClient;
       }
-    } catch (UnknownHostException e) {
-      logger.error(e.getMessage());
+    } catch (Exception e) {
+      logger.error("链接异常：",e);
     }
   }
   /**
