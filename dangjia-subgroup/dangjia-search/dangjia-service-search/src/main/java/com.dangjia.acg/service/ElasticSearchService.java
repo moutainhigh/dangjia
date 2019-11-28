@@ -100,7 +100,7 @@ public class ElasticSearchService {
       }else{
         subCodeQuery.must(QueryBuilders.multiMatchQuery(elasticSearchDTO.getSearchContent(), fields).slop(1));
       }
-        //查询
+      //查询
       searchRequestBuilder.setQuery(subCodeQuery);
 
       return searchResponse(searchRequestBuilder,elasticSearchDTO.getSortMap(),elasticSearchDTO.getPageDTO());
@@ -153,28 +153,28 @@ public class ElasticSearchService {
    * @param searchRequestBuilder
    * @return
    */
-   public List<JSONObject> searchResponse(SearchRequestBuilder searchRequestBuilder,Map<String,Integer> sortMap){
-     //拼接排序规则
-     setSortTerm(searchRequestBuilder,sortMap);
-     LOGGER.debug("searchRequestBuilder不分页:"+searchRequestBuilder);
-     //分页
-     searchRequestBuilder.setSize(1000);
-     SearchResponse response = searchRequestBuilder.get();
+  public List<JSONObject> searchResponse(SearchRequestBuilder searchRequestBuilder,Map<String,Integer> sortMap){
+    //拼接排序规则
+    setSortTerm(searchRequestBuilder,sortMap);
+    LOGGER.debug("searchRequestBuilder不分页:"+searchRequestBuilder);
+    //分页
+    searchRequestBuilder.setSize(1000);
+    SearchResponse response = searchRequestBuilder.get();
 
-     List<JSONObject> arrList = new ArrayList<JSONObject>();
-     SearchHits hits = response.getHits();
-     if (null != hits && hits.getTotalHits() > 0) {
-       for (SearchHit hit : hits) {
-         String json = hit.getSourceAsString();
-         JSONObject jsonObject=JSON.parseObject(json);
-         jsonObject.put("esId",hit.getId());
-         arrList.add(jsonObject);
-       }
-     } else {
-       LOGGER.info("没有查询到任何结果！");
-     }
-     return arrList;
-   }
+    List<JSONObject> arrList = new ArrayList<JSONObject>();
+    SearchHits hits = response.getHits();
+    if (null != hits && hits.getTotalHits() > 0) {
+      for (SearchHit hit : hits) {
+        String json = hit.getSourceAsString();
+        JSONObject jsonObject=JSON.parseObject(json);
+        jsonObject.put("esId",hit.getId());
+        arrList.add(jsonObject);
+      }
+    } else {
+      LOGGER.info("没有查询到任何结果！");
+    }
+    return arrList;
+  }
 
   /**
    * 处理查询数据（分页）
@@ -182,47 +182,47 @@ public class ElasticSearchService {
    * @param pageDTO
    * @return
    */
-   public PageInfo searchResponse(SearchRequestBuilder searchRequestBuilder,Map<String,Integer> sortMap,PageDTO pageDTO){
-     //拼接排序规则
-     setSortTerm(searchRequestBuilder,sortMap);
-     //分页
-     searchRequestBuilder.setFrom(pageDTO.getPageNum()-1).setSize(pageDTO.getPageSize());
-     LOGGER.debug("searchRequestBuilder分页:"+searchRequestBuilder);
-     SearchResponse response = searchRequestBuilder.get();
-     List<JSONObject> arrList = new ArrayList<JSONObject>();
-     SearchHits hits = response.getHits();
-     if (null != hits && hits.getTotalHits() > 0) {
-       for (SearchHit hit : hits) {
-         String json = hit.getSourceAsString();
-         JSONObject jsonObject=JSON.parseObject(json);
-         jsonObject.put("esId",hit.getId());
-         arrList.add(jsonObject);
-       }
-     } else {
-       LOGGER.info("没有查询到任何结果！");
-     }
-     PageInfo pageBean = new PageInfo(arrList);
-     pageBean.setList(arrList);
-     pageBean.setTotal(hits.getTotalHits());
-     pageBean.setPages(Integer.valueOf((int) hits.getTotalHits())/pageDTO.getPageSize());
-     pageBean.setPageNum(pageDTO.getPageNum());
-     pageBean.setPageSize(pageDTO.getPageSize());
-     return pageBean;
-   }
+  public PageInfo searchResponse(SearchRequestBuilder searchRequestBuilder,Map<String,Integer> sortMap,PageDTO pageDTO){
+    //拼接排序规则
+    setSortTerm(searchRequestBuilder,sortMap);
+    //分页
+    searchRequestBuilder.setFrom(pageDTO.getPageNum()-1).setSize(pageDTO.getPageSize());
+    LOGGER.debug("searchRequestBuilder分页:"+searchRequestBuilder);
+    SearchResponse response = searchRequestBuilder.get();
+    List<JSONObject> arrList = new ArrayList<JSONObject>();
+    SearchHits hits = response.getHits();
+    if (null != hits && hits.getTotalHits() > 0) {
+      for (SearchHit hit : hits) {
+        String json = hit.getSourceAsString();
+        JSONObject jsonObject=JSON.parseObject(json);
+        jsonObject.put("esId",hit.getId());
+        arrList.add(jsonObject);
+      }
+    } else {
+      LOGGER.info("没有查询到任何结果！");
+    }
+    PageInfo pageBean = new PageInfo(arrList);
+    pageBean.setList(arrList);
+    pageBean.setTotal(hits.getTotalHits());
+    pageBean.setPages(Integer.valueOf((int) hits.getTotalHits())/pageDTO.getPageSize());
+    pageBean.setPageNum(pageDTO.getPageNum());
+    pageBean.setPageSize(pageDTO.getPageSize());
+    return pageBean;
+  }
 
   /**
    * 删除
    * @param tableTypeName
    * @param prepareId
    */
-   public void deleteResponse( String tableTypeName,String prepareId){
-     String eid=getESId(tableTypeName,prepareId);
-     if(!CommonUtil.isEmpty(eid)) {
-       DeleteRequestBuilder deleteResponse = ElasticsearchConfiguration.client.prepareDelete(indexName+"_"+tableTypeName.toLowerCase(), tableTypeName, eid);
-       deleteResponse.execute().actionGet();
-     }
+  public void deleteResponse( String tableTypeName,String prepareId){
+    String eid=getESId(tableTypeName,prepareId);
+    if(!CommonUtil.isEmpty(eid)) {
+      DeleteRequestBuilder deleteResponse = ElasticsearchConfiguration.client.prepareDelete(indexName+"_"+tableTypeName.toLowerCase(), tableTypeName, eid);
+      deleteResponse.execute().actionGet();
+    }
 
-   }
+  }
 
   /**
    * 修改
@@ -251,9 +251,9 @@ public class ElasticSearchService {
         Object value = entry.getValue();
         String[] values =  StringUtils.split(String.valueOf(value),",");
         if(values.length>1){
-            subCodeQuery.must(QueryBuilders.termsQuery(key.toString(), Arrays.asList(values)));
+          subCodeQuery.must(QueryBuilders.termsQuery(key.toString(), Arrays.asList(values)));
         }else {
-            subCodeQuery.must(QueryBuilders.termQuery(key.toString(), value));
+          subCodeQuery.must(QueryBuilders.termQuery(key.toString(), value));
         }
       }
     }

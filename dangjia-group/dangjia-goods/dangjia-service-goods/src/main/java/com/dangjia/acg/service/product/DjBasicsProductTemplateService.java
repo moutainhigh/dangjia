@@ -40,6 +40,7 @@ import tk.mybatis.mapper.entity.Example;
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 产品逻辑处理层
@@ -538,13 +539,11 @@ public class DjBasicsProductTemplateService {
      * 商品信息暂存
      *
      * @param basicsProductDTO
-     * @param technologyList
-     * @param deleteTechnologyIds
      * @param dataStatus 数据状态，0正常，1暂存
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse saveProductTemporaryStorage(BasicsProductDTO basicsProductDTO,String technologyList, String  deleteTechnologyIds,int dataStatus,String cityId,String userId){
+    public ServerResponse saveProductTemporaryStorage(BasicsProductDTO basicsProductDTO,int dataStatus,String cityId,String userId){
         if (!StringUtils.isNotBlank(basicsProductDTO.getCategoryId()))
             return ServerResponse.createByErrorMessage("商品分类不能为空");
 
@@ -853,7 +852,7 @@ public class DjBasicsProductTemplateService {
         //单位列表
         List<Unit> linkUnitList = getlinkUnitListByGoodsUnitId(djBasicsProduct.getGoodsId());
         //商品工艺信息
-        List<Map<String, Object>> tTechnologymMapList = getTechnologymMapList(id,address);
+       // List<Map<String, Object>> tTechnologymMapList = getTechnologymMapList(id,address);
         //材料商品信息
          if(StringUtils.isNotBlank(djBasicsProduct.getDetailImage())){
                 imgArr = djBasicsProduct.getDetailImage().split(",");
@@ -872,10 +871,14 @@ public class DjBasicsProductTemplateService {
         }else{
             map.put("attributeValueList",new ArrayList<>());
         }
+        if(djBasicsProduct.getTechnologyIds()!=null&&StringUtils.isNotBlank(djBasicsProduct.getTechnologyIds())){
+            List<String> technologyIds= Arrays.asList(djBasicsProduct.getTechnologyIds() .split(",")).stream().map(s -> (s.trim())).collect(Collectors.toList());
+            map.put("technologyIds", technologyIds);
+
+        }
 
         map.put("imageUrl", imgUrlStr.toString());
         map.put("newValueNameArr", strNewValueNameArr);
-        map.put("tTechnologymMapList", tTechnologymMapList);
         map.put("unitList",linkUnitList);
         map.put("imageUrl",imgUrlStr.toString());
         map.put("id",djBasicsProduct.getId());
@@ -962,10 +965,10 @@ public class DjBasicsProductTemplateService {
 
     /**
      * 查询对应工艺信息
-     * @param productId
+     * @param
      * @return
      */
-    private List<Map<String, Object>> getTechnologymMapList(String productId,String address){
+  /*  private List<Map<String, Object>> getTechnologymMapList(String productId,String address){
         List<Technology> pTechnologyList = iTechnologyMapper.queryTechnologyByWgId(productId);
         List<Map<String, Object>> tTechnologymMapList = new ArrayList<>();
         for (Technology t : pTechnologyList) {
@@ -984,7 +987,7 @@ public class DjBasicsProductTemplateService {
         }
         return tTechnologymMapList;
     }
-
+*/
 
     //根据类别Id查到所有所属货品goods
     public ServerResponse getAllGoodsByCategoryId(String categoryId,String cityId) {

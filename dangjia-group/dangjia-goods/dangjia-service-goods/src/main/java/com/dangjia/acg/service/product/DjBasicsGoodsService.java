@@ -27,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -356,12 +357,21 @@ public class DjBasicsGoodsService {
                         List<String> relationProductIds=iProductAddedRelationMapper.getProdTemplateIdsByAddId(p.getId());
                         map.put("relationProductIds",relationProductIds);//关联商品IDs，用逗号分隔
                     }
+                    if(p.getTechnologyIds()!=null&&StringUtils.isNotBlank(p.getTechnologyIds())){
+                        List<String> technologyIds= Arrays.asList(p.getTechnologyIds() .split(",")).stream().map(s -> (s.trim())).collect(Collectors.toList());
+                        map.put("technologyIds", technologyIds);
 
+                    }
                     map.put("id",p.getId());
                     map.put("goodsType",goods.getType());
                     mapList.add(map);
                 }
                 gMap.put("productList", mapList);
+                if(goods.getTechnologyIds()!=null&&StringUtils.isNotBlank(goods.getTechnologyIds())){
+                    List<String> technologyIds= Arrays.asList(goods.getTechnologyIds() .split(",")).stream().map(s -> (s.trim())).collect(Collectors.toList());
+                    gMap.put("technologyIds", technologyIds);
+                }
+
                 gMapList.add(gMap);
             }
             pageResult.setList(gMapList);

@@ -59,13 +59,17 @@ public interface PaymentAPI {
     ServerResponse getPaymentPage(@RequestParam("userToken") String userToken,
                                   @RequestParam("taskId") String taskId,
                                   @RequestParam("cityId") String cityId,
+                                  @RequestParam("houseId") String houseId,
+                                  @RequestParam("productIds") String productIds,
                                   @RequestParam("type") Integer type);
 
     @PostMapping("app/order/generate/shop")
     @ApiOperation(value = "购物车提交订单接口", notes = "购物车提交订单接口")
     ServerResponse generateOrder(@RequestParam("userToken") String userToken,
                                  @RequestParam("cityId") String cityId,
-                                 @RequestParam("productIds") String productIds);
+                                 @RequestParam("productIds") String productIds,
+                                 @RequestParam("workerId")String workerId,
+                                 @RequestParam("addressId")String addressId);
 
     @PostMapping("app/order/edit")
     @ApiOperation(value = "订单更新接口", notes = "订单更新接口")

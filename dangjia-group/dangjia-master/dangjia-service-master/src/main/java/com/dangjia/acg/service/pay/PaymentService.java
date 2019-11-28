@@ -1,7 +1,8 @@
 package com.dangjia.acg.service.pay;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.dangjia.acg.api.BasicsStorefrontAPI;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.StorefrontConfigAPI;
 import com.dangjia.acg.api.actuary.BudgetMaterialAPI;
@@ -11,6 +12,7 @@ import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
@@ -18,6 +20,7 @@ import com.dangjia.acg.dto.activity.ActivityRedPackRecordDTO;
 import com.dangjia.acg.dto.actuary.BudgetLabelDTO;
 import com.dangjia.acg.dto.actuary.BudgetLabelGoodsDTO;
 import com.dangjia.acg.dto.actuary.ShopGoodsDTO;
+import com.dangjia.acg.dto.basics.ProductDTO;
 import com.dangjia.acg.dto.pay.PaymentDTO;
 import com.dangjia.acg.dto.pay.SafeTypeDTO;
 import com.dangjia.acg.dto.pay.UpgradeSafeDTO;
@@ -109,8 +112,6 @@ public class PaymentService {
     @Autowired
     private IMemberMapper memberMapper;
     @Autowired
-    private BasicsStorefrontAPI basicsStorefrontAPI;
-    @Autowired
     private IHouseMapper houseMapper;
     @Autowired
     private IWorkerTypeSafeMapper workerTypeSafeMapper;
@@ -119,7 +120,6 @@ public class PaymentService {
 
     @Autowired
     private MasterAccountFlowRecordService masterAccountFlowRecordService;
-
 
     @Autowired
     private IMasterBasicsGoodsMapper iMasterBasicsGoodsMapper;
@@ -171,7 +171,6 @@ public class PaymentService {
     private MendOrderCheckService mendOrderCheckService;
     @Autowired
     private StorefrontConfigAPI storefrontConfigAPI;
-
     @Autowired
     private IShoppingCartMapper iShoppingCartMapper;
     @Autowired
@@ -984,45 +983,48 @@ public class PaymentService {
      * 提交订单
      * @return
      */
-    public ServerResponse generateOrder(String userToken,String cityId, String productIds) {
+    public ServerResponse generateOrder(String userToken,String cityId, String productJsons,String workerId, String addressId) {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
             Member member = (Member) object;
-            String[] productIdlist=null;
-            if(!CommonUtil.isEmpty(productIds)){
-                productIdlist=productIds.split(",");
-            }else{
-                return ServerResponse.createByErrorMessage("提交失败：未选择提交的商品");
+            String houseId="";
+            House house=getHouseId(member.getId());
+            if(house!= null) {
+                houseId=house.getId();
             }
-            List<ShoppingCartDTO> shoppingCartDTOS=new ArrayList<>();
+            JSONArray productArray= JSON.parseArray(productJsons);
+            if(productArray.size()==0){
+                return ServerResponse.createByErrorMessage("参数错误");
+            }
+            Map<String,ShoppingCartListDTO> productMap = new HashMap<>();
+            String[] productIds=new String[productArray.size()];
+            for (int i = 0; i < productArray.size(); i++) {
+                JSONObject productObj = productArray.getJSONObject(i);
+                productMap.put(productObj.getString(ProductDTO.PRODUCT_ID),BeanUtils.mapToBean(ShoppingCartListDTO.class,productObj));
+                productIds[i]=productObj.getString(ProductDTO.PRODUCT_ID);
+
+            }
+            List<ShoppingCartDTO> shoppingCartDTOS=iShoppingCartMapper.queryShoppingCartDTOS(productIds);
             BigDecimal paymentPrice = new BigDecimal(0);//总共钱
             BigDecimal freightPrice = new BigDecimal(0);//总运费
             BigDecimal totalMoveDost = new BigDecimal(0);//搬运费
-            List<String> strings = iShoppingCartMapper.queryStorefrontIds(member.getId(),cityId);
-            for (String str : strings) {
+            for (ShoppingCartDTO shoppingCartDTO : shoppingCartDTOS) {
                 BigDecimal totalSellPrice = new BigDecimal(0);//总价
                 BigDecimal totalMaterialPrice = new BigDecimal(0);//组总价
-                ShoppingCartDTO shoppingCartDTO=new ShoppingCartDTO();
-                shoppingCartDTO.setStorefrontId(str);
-                List<ShoppingCartListDTO> shoppingCartListDTOS = iShoppingCartMapper.queryCartList(member.getId(),cityId, str,productIdlist);
-                for (ShoppingCartListDTO shoppingCartListDTO : shoppingCartListDTOS) {
-                    BigDecimal totalPrice = new BigDecimal(shoppingCartListDTO.getPrice()*shoppingCartListDTO.getSellPrice());
+                for (ShoppingCartListDTO shoppingCartListDTO : shoppingCartDTO.getShoppingCartListDTOS()) {
+                    ShoppingCartListDTO parmDTO=productMap.get(shoppingCartListDTO.getProductId());
+                    BigDecimal totalPrice = new BigDecimal(shoppingCartListDTO.getPrice()*parmDTO.getShopCount());
                     if(shoppingCartListDTO.getProductType()==0) {
                         totalMaterialPrice = totalMaterialPrice.add(totalPrice);
                     }
-
                     totalSellPrice = totalSellPrice.add(totalPrice);
                     paymentPrice = paymentPrice.add(totalPrice);
                 }
                 shoppingCartDTO.setTotalMaterialPrice(totalMaterialPrice);
                 shoppingCartDTO.setTotalPrice(totalSellPrice);
-                shoppingCartDTO.setShoppingCartListDTOS(shoppingCartListDTOS);
-                if(shoppingCartListDTOS.size()>0) {
-                    shoppingCartDTOS.add(shoppingCartDTO);
-                }
             }
 
             if (shoppingCartDTOS!=null) {
@@ -1030,7 +1032,9 @@ public class PaymentService {
                 order.setWorkerTypeName("购物车订单");
                 order.setCityId(cityId);
                 order.setMemberId(member.getId());
-//                order.setBusinessOrderNumber(businessOrderNumber);
+                order.setWorkerId(workerId);
+                order.setAddressId(addressId);
+                order.setHouseId(houseId);
                 order.setOrderNumber(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
                 order.setTotalDiscountPrice(new BigDecimal(0));
                 order.setTotalStevedorageCost(new BigDecimal(0));
@@ -1065,6 +1069,15 @@ public class PaymentService {
                         orderItem.setActualPaymentPrice(0d);
                         orderItem.setStevedorageCost(0d);
                         orderItem.setTransportationCost(0d);
+                        if(!CommonUtil.isEmpty(order.getHouseId())) {
+                            //搬运费运算
+                            Double moveDost = masterCostAcquisitionService.getStevedorageCost(order.getHouseId(), orderItem.getProductId(), orderItem.getShopCount());
+                            totalMoveDost = totalMoveDost.add(new BigDecimal(moveDost));
+                            if (moveDost > 0) {
+                                //均摊运费
+                                orderItem.setStevedorageCost(moveDost);
+                            }
+                        }
                         if(good.getProductType()==0&&freight>0){
                             //均摊运费
                             Double transportationCost=(orderItem.getTotalPrice()/shoppingCartDTO.getTotalMaterialPrice().doubleValue())*freight;
@@ -1098,7 +1111,7 @@ public class PaymentService {
                 if (businessOrderList.size() == 0) {
                     businessOrder = new BusinessOrder();
                     businessOrder.setMemberId(member.getId());
-//                    businessOrder.setHouseId(houseId);
+                    businessOrder.setHouseId(houseId);
                     businessOrder.setNumber(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
                     businessOrder.setState(1);//刚生成
                     businessOrder.setTotalPrice(paymentPrice);
@@ -1116,9 +1129,11 @@ public class PaymentService {
                 orderMapper.updateByPrimaryKeySelective(order);
 
                 budgetCorrect(order,null,null);
+
+                //清空购物车指定商品
                 example = new Example(ShoppingCart.class);
                 example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, member.getId())
-                        .andIn(ShoppingCart.PRODUCT_ID,Arrays.asList(productIdlist));
+                        .andIn(ShoppingCart.PRODUCT_ID,Arrays.asList(productIds));
                 iShoppingCartMapper.deleteByExample(example);
                 return ServerResponse.createBySuccess("提交成功", order.getId());
             }
@@ -1321,7 +1336,7 @@ public class PaymentService {
             List<OrderItem> orderItems = orderItemMapper.selectByExample(example);//精算工钱
             for (OrderItem orderItem : orderItems) {
                 paymentPrice = paymentPrice.add(new BigDecimal(orderItem.getTotalPrice()));
-                if(CommonUtil.isEmpty(order.getHouseId())) {
+                if(!CommonUtil.isEmpty(order.getHouseId())) {
                     //搬运费运算
                     Double moveDost = masterCostAcquisitionService.getStevedorageCost(order.getHouseId(), orderItem.getProductId(), orderItem.getShopCount());
                     totalMoveDost = totalMoveDost.add(new BigDecimal(moveDost));
@@ -1464,9 +1479,9 @@ public class PaymentService {
      * 购物车
      *
      * @param taskId houseFlowId,mendOrderId,houseFlowApplyId
-     * @param type   1精算商品,2购物车商品
+     * @param type   1精算商品,2购物车商品,3立即购商品
      */
-    public ServerResponse getPaymentPage(String userToken,  String taskId, String cityId,int type) {
+    public ServerResponse getPaymentPage(String userToken,  String taskId, String cityId,String houseId,String productJsons,int type) {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
@@ -1475,7 +1490,10 @@ public class PaymentService {
             Member member = (Member) object;
 
             PaymentDTO paymentDTO = new PaymentDTO();
+            paymentDTO.setType(4);
             BigDecimal totalPrice = new BigDecimal(0);//总价
+            BigDecimal freightPrice = new BigDecimal(0);//总运费
+            BigDecimal totalMoveDost = new BigDecimal(0);//搬运费
             if (type == 1) {//精算商品
                 HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(taskId);
                 House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
@@ -1489,12 +1507,21 @@ public class PaymentService {
                 paymentDTO.setWorkerTypeName(workerType.getName());
                 List<ShopGoodsDTO> budgetLabelDTOS = forMasterAPI.queryShopGoods(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), house.getCityId());//精算工钱
                 for (ShopGoodsDTO budgetLabelDTO : budgetLabelDTOS) {
+                    Double freight=storefrontConfigAPI.getFreightPrice(budgetLabelDTO.getShopId(),budgetLabelDTO.getTotalMaterialPrice().doubleValue());
+                    freightPrice=freightPrice.add(new BigDecimal(freight));
                     for (BudgetLabelDTO labelDTO : budgetLabelDTO.getLabelDTOS()) {
                         totalPrice = totalPrice.add(labelDTO.getTotalPrice());
+                        if(!CommonUtil.isEmpty(houseFlow.getHouseId())) {
+                            for (BudgetLabelGoodsDTO good : labelDTO.getGoods()) {
+                                //搬运费运算
+                                Double moveDost = masterCostAcquisitionService.getStevedorageCost(houseFlow.getHouseId(), good.getProductId(), good.getShopCount());
+                                totalMoveDost = totalMoveDost.add(new BigDecimal(moveDost));
+                            }
+                        }
                     }
                 }
                 paymentDTO.setDatas(budgetLabelDTOS);
-
+                paymentDTO.setType(3);
                 //该工钟所有保险
                 Example example = new Example(WorkerTypeSafe.class);
                 example.createCriteria().andEqualTo(WorkerTypeSafe.WORKER_TYPE_ID, houseFlow.getWorkerTypeId());
@@ -1532,22 +1559,57 @@ public class PaymentService {
                     upgradeSafeDTO.setSafeTypeDTOList(safeTypeDTOList);
                     paymentDTO.setUpgradeSafeDTO(upgradeSafeDTO);//保险
                 }
-            } else if (type == 2) {//购物车商品
-                List<String> strings = iShoppingCartMapper.queryStorefrontIds(member.getId(),cityId);
-                List<ShoppingCartDTO> shoppingCartDTOS=new ArrayList<>();
-                for (String str : strings) {
-                    BigDecimal totalSellPrice = new BigDecimal(0);//总价
-                    ShoppingCartDTO shoppingCartDTO=new ShoppingCartDTO();
-                    Storefront storefront = basicsStorefrontAPI.querySingleStorefrontById(str);
-                    shoppingCartDTO.setStorefrontName(storefront.getStorefrontName());
-                    shoppingCartDTO.setStorefrontId(storefront.getId());
-                    List<ShoppingCartListDTO> shoppingCartListDTOS = iShoppingCartMapper.queryCartList(member.getId(),cityId, str,null);
-                    for (ShoppingCartListDTO shoppingCartListDTO : shoppingCartListDTOS) {
-                        totalSellPrice = totalSellPrice.add(new BigDecimal(shoppingCartListDTO.getPrice()*shoppingCartListDTO.getSellPrice()));
-                        totalPrice = totalPrice.add(new BigDecimal(shoppingCartListDTO.getPrice()*shoppingCartListDTO.getSellPrice()));
+            } else if (type == 2 || type == 3) {//购物车商品
+                JSONArray productArray= JSON.parseArray(productJsons);
+                if(productArray.size()==0){
+                    return ServerResponse.createByErrorMessage("参数错误");
+                }
+                Map<String,ShoppingCartListDTO> productMap = new HashMap<>();
+                String[] productIds=new String[productArray.size()];
+                for (int i = 0; i < productArray.size(); i++) {
+                    JSONObject productObj = productArray.getJSONObject(i);
+                    productMap.put(productObj.getString(ProductDTO.PRODUCT_ID),BeanUtils.mapToBean(ShoppingCartListDTO.class,productObj));
+                    productIds[i]=productObj.getString(ProductDTO.PRODUCT_ID);
+
+                    //更新购物车数量
+                    if(type==2){
+                        Example  example = new Example(ShoppingCart.class);
+                        example.createCriteria().andEqualTo(ShoppingCart.PRODUCT_ID, productObj.getString(ProductDTO.PRODUCT_ID))
+                                .andEqualTo(ShoppingCart.MEMBER_ID, member.getId());
+                        ShoppingCart shoppingCart = new ShoppingCart();
+                        shoppingCart.setId(null);
+                        shoppingCart.setShopCount(Double.parseDouble(productObj.getString(ProductDTO.SHOP_COUNT)));
+                        iShoppingCartMapper.updateByExampleSelective(shoppingCart,example);
                     }
+                }
+                if(CommonUtil.isEmpty(houseId)) {
+                    House house=getHouseId(member.getId());
+                    if(house!= null) {
+                        houseId=house.getId();
+                    }
+                }
+                List<ShoppingCartDTO> shoppingCartDTOS=iShoppingCartMapper.queryShoppingCartDTOS(productIds);
+                for (ShoppingCartDTO shoppingCartDTO : shoppingCartDTOS) {
+                    BigDecimal totalSellPrice = new BigDecimal(0);//总价
+                    for (ShoppingCartListDTO shoppingCartListDTO : shoppingCartDTO.getShoppingCartListDTOS()) {
+                        ShoppingCartListDTO parmDTO=productMap.get(shoppingCartListDTO.getProductId());
+                        totalSellPrice = totalSellPrice.add(new BigDecimal(shoppingCartListDTO.getPrice()*parmDTO.getShopCount()));
+                        totalPrice = totalPrice.add(new BigDecimal(shoppingCartListDTO.getPrice()*parmDTO.getShopCount()));
+                        if(!CommonUtil.isEmpty(houseId)) {
+                                //搬运费运算
+                                Double moveDost = masterCostAcquisitionService.getStevedorageCost(houseId, shoppingCartListDTO.getProductId(), parmDTO.getShopCount());
+                                totalMoveDost = totalMoveDost.add(new BigDecimal(moveDost));
+                        }
+                        if(paymentDTO.getType()!=1 && (shoppingCartListDTO.getProductType()==0||shoppingCartListDTO.getProductType()==1)){
+                            paymentDTO.setType(2);
+                        }
+                        if(shoppingCartListDTO.getProductType()==2){
+                            paymentDTO.setType(1);
+                        }
+                    }
+                    Double freight=storefrontConfigAPI.getFreightPrice(shoppingCartDTO.getStorefrontId(),totalSellPrice.doubleValue());
+                    freightPrice=freightPrice.add(new BigDecimal(freight));
                     shoppingCartDTO.setTotalPrice(totalSellPrice);
-                    shoppingCartDTO.setShoppingCartListDTOS(shoppingCartListDTOS);
                     shoppingCartDTOS.add(shoppingCartDTO);
                 }
                 paymentDTO.setDatas(shoppingCartDTOS);
@@ -1555,10 +1617,17 @@ public class PaymentService {
             } else {
                 return ServerResponse.createByErrorMessage("参数错误");
             }
-            paymentDTO.setTotalPrice(totalPrice);
             paymentDTO.setDiscounts(0);
+            BigDecimal payPrice = totalPrice.subtract(paymentDTO.getDiscountsPrice());
+            payPrice = payPrice.add(paymentDTO.getFreight());
+            payPrice = payPrice.add(paymentDTO.getMoveDost());
+            totalPrice = totalPrice.add(paymentDTO.getFreight());
+            totalPrice = totalPrice.add(paymentDTO.getMoveDost());
+            paymentDTO.setFreight(freightPrice);//运费
+            paymentDTO.setMoveDost(totalMoveDost);//搬运费
+            paymentDTO.setTotalPrice(totalPrice);
+            paymentDTO.setPayPrice(payPrice);
             paymentDTO.setTaskId(taskId);
-            paymentDTO.setType(type);
             return ServerResponse.createBySuccess("查询成功", paymentDTO);
         } catch (Exception e) {
             e.printStackTrace();
@@ -1668,18 +1737,6 @@ public class PaymentService {
      */
     public ServerResponse queryInsuranceInfo(String userToken, String workerId) {
 
-//        Object object = constructionService.getAccessToken(userToken);
-//        if (object instanceof ServerResponse) {
-//            return (ServerResponse) object;
-//        }
-//        AccessToken accessToken = (AccessToken) object;
-//        if (CommonUtil.isEmpty(accessToken.getUserId())) {
-//            return ServerResponse.createbyUserTokenError();
-//        }
-//
-//        if(CommonUtil.isEmpty(workerId)){
-//            workerId = accessToken.getUserId();
-//        }
 
         //获取图片url
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
@@ -1693,5 +1750,31 @@ public class PaymentService {
         }
 
         return ServerResponse.createBySuccess("查询成功", houseFlowList);
+    }
+
+    /**
+     * 获取业主当前默认选中的房子ID(不包含休眠，结束的房子)
+     */
+    public House getHouseId(String memberId) {
+        House houseId = null;
+        Example example = new Example(House.class);
+        example.createCriteria()
+                .andEqualTo(House.MEMBER_ID, memberId)
+                .andNotEqualTo(House.VISIT_STATE, 2)
+                .andNotEqualTo(House.VISIT_STATE, 3)
+                .andNotEqualTo(House.VISIT_STATE, 4);
+        List<House> houseList = houseMapper.selectByExample(example);
+        //业主待处理任务
+        if (houseList.size() > 0) {
+            for (House house : houseList) {
+                if (house.getIsSelect() == 1) {//当前选中且开工
+                    houseId = house;
+                }
+            }
+            if (houseId == null) {//有很多房子但是没有isSelect为1的
+                houseId = houseList.get(0);
+            }
+        }
+        return houseId;
     }
 }

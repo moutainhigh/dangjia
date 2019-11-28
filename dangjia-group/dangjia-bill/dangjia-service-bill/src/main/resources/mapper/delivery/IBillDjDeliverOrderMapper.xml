@@ -181,13 +181,25 @@
         FROM
             (
                 SELECT
-                    sum(IFNULL(
-                        t2.actual_payment_price,
+                    sum(
                         IFNULL(
-                            t2.total_price,
-                            t2.price * t2.shop_count
-                        )
-                    )) actualPaymentPrice,
+                            t2.actual_payment_price,
+                            IFNULL(
+                                t2.total_price,
+                                t2.price * t2.shop_count
+                            )
+                        ) + IFNULL(
+                            (
+                                SELECT
+                                    price
+                                FROM
+                                    dj_deliver_order_added_product tt
+                                WHERE
+                                    tt.any_order_id = t2.id
+                            ),
+                            0
+                        ) * t2.shop_count
+                    ) actualPaymentPrice,
                     0 purchaseTotalPrice
                 FROM
                     dj_deliver_order t1,
@@ -230,14 +242,26 @@
                 SELECT
                     t5.id categoryId,
                     t5. NAME categoryName,
-                    IFNULL(
+                    (
+                        IFNULL(
                         t2.actual_payment_price,
                         IFNULL(
-                            t2.total_price,
-                            t2.price * t2.shop_count
+                        t2.total_price,
+                        t2.price * t2.shop_count
                         )
+                        ) + IFNULL(
+                        (
+                        SELECT
+                        price
+                        FROM
+                        dj_deliver_order_added_product tt
+                        WHERE
+                        tt.any_order_id = t2.id
+                        ),
+                        0
+                        ) * t2.shop_count
                     ) actualPaymentPrice,
-              0 purchaseTotalPrice
+                   0 purchaseTotalPrice
                 FROM
                     dj_deliver_order t1,
                     dj_deliver_order_item t2,
@@ -292,6 +316,7 @@
 
         SELECT
           t5.category_id categoryId,
+          t2.id orderItemId,
           t4.goods_id goodsId,
           t5.name goodsName,
           t2.product_id productId,
@@ -301,7 +326,8 @@
           t4.image,
           t2.price price,
           t2.shop_count shopCount,
-          IFNULL(t2.actual_payment_price,IFNULL(t2.total_price,t2.price*t2.shop_count)) actualPaymentPrice,
+          (IFNULL(t2.actual_payment_price,IFNULL(t2.total_price,t2.price*t2.shop_count))+ IFNULL(
+           (SELECT price FROM dj_deliver_order_added_product tt WHERE tt.any_order_id = t2.id),0) * t2.shop_count) actualPaymentPrice,
           1 steta,
           '' actuaryBudgetId,
           t5.housekeeper_acceptance showHousekeeperAcceptance
@@ -326,6 +352,7 @@
         union all
         SELECT
                 t2.category_id categoryId,
+                '' orderItemId,
                 t2.id goodsId,
                 t2.name goodsName,
                 '' productId,

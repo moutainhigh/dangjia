@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.order.IBillDeliverOrderAddedProductMapper">
+
+    <!--根据任意订单号查询增值商品信息-->
+     <select id="queryOrderListByAnyOrderId" resultType="com.dangjia.acg.dto.refund.ReturnWorkOrderDTO">
+        SELECT
+            id,
+            any_order_id anyOrderId,
+            added_product_id addedProductId,
+            product_name productName,
+            price,
+            source,
+            create_date createDate,
+            modify_date modifyDate,
+            data_status dataStatus
+        FROM
+            dj_deliver_order_added_product
+        where any_order_id=#{anyOrderId}
+     </select>
+
+</mapper>

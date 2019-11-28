@@ -9,14 +9,12 @@ import com.dangjia.acg.mapper.storefront.IGoodsStorefrontMapper;
 import com.dangjia.acg.mapper.storefront.IGoodsStorefrontProductAddedRelationMapper;
 import com.dangjia.acg.mapper.storefront.IGoodsStorefrontProductMapper;
 import com.dangjia.acg.modle.other.City;
-import com.dangjia.acg.modle.product.ProductAddedRelation;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.modle.storefront.StorefrontProductAddedRelation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import sun.reflect.generics.tree.VoidDescriptor;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
