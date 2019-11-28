@@ -42,9 +42,10 @@ public class ElasticSearchService {
   public String saveESJson(String jsonStr,String tableTypeName) {
     IndexResponse indexResponse;
     try {
+        LOGGER.info("ES 开始插入"+jsonStr);
       Map map =JSONObject.parseObject(jsonStr);
       indexResponse = client.prepareIndex(indexName+"_"+tableTypeName.toLowerCase(), tableTypeName).setSource(map).get();
-      LOGGER.info("ES 插入完成");
+      LOGGER.info("ES 插入完成"+jsonStr);
     } catch (RuntimeException e) {
       e.printStackTrace();
       throw new BaseException(ServerCode.JSON_TYPE_ERROR, "JSON格式不正确，请检查JSON");
