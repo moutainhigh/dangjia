@@ -5,9 +5,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.embedded.ConfigurableEmbeddedServletContainer;
 import org.springframework.boot.context.embedded.EmbeddedServletContainerCustomizer;
 import org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainerFactory;
+import org.springframework.boot.web.servlet.MultipartConfigFactory;
 import org.springframework.cloud.client.SpringCloudApplication;
 import org.springframework.cloud.netflix.feign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
+
+import javax.servlet.MultipartConfigElement;
 
 /**
  * @author: QiYuXiang
@@ -21,6 +24,12 @@ public class SesameServiceUploadApplication {
 
   public static void main(String[] args) {
     SpringApplication.run(SesameServiceUploadApplication.class, args);
+  }
+  @Bean
+  MultipartConfigElement multipartConfigElement() {
+    MultipartConfigFactory factory = new MultipartConfigFactory();
+    factory.setLocation("/data/temporary/");
+    return factory.createMultipartConfig();
   }
   @Bean
   EmbeddedServletContainerCustomizer containerCustomizer() throws Exception {
