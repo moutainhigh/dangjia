@@ -15,7 +15,6 @@ import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.update.UpdateRequestBuilder;
-import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
@@ -36,15 +35,14 @@ import java.util.*;
 public class ElasticSearchService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ElasticSearchService.class);
-  private  TransportClient client = ElasticsearchConfiguration.client;
   private String indexName="dangjia";
 
   public String saveESJson(String jsonStr,String tableTypeName) {
     IndexResponse indexResponse;
     try {
-      LOGGER.info("ES 开始插入("+client+")"+jsonStr);
+      LOGGER.info("ES 开始插入"+jsonStr);
       Map map =JSONObject.parseObject(jsonStr);
-      indexResponse = client.prepareIndex(indexName+"_"+tableTypeName.toLowerCase(), tableTypeName).setSource(map).get();
+      indexResponse = ElasticsearchConfiguration.client.prepareIndex(indexName+"_"+tableTypeName.toLowerCase(), tableTypeName).setSource(map).get();
       LOGGER.info("ES 插入完成"+jsonStr);
     } catch (Exception e) {
       e.printStackTrace();
@@ -67,7 +65,7 @@ public class ElasticSearchService {
     fieldList.toArray(fields);
     try {
       //查询搜索对象
-      SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName+"_"+elasticSearchDTO.getTableTypeName().toLowerCase()).setTypes(elasticSearchDTO.getTableTypeName());
+      SearchRequestBuilder searchRequestBuilder = ElasticsearchConfiguration.client.prepareSearch(indexName+"_"+elasticSearchDTO.getTableTypeName().toLowerCase()).setTypes(elasticSearchDTO.getTableTypeName());
       BoolQueryBuilder subCodeQuery = QueryBuilders.boolQuery();
       setParamTerm(subCodeQuery, elasticSearchDTO.getParamMap(),elasticSearchDTO.getNotParamMap());
       if(CommonUtil.isEmpty(elasticSearchDTO.getSearchContent())) {
@@ -94,7 +92,7 @@ public class ElasticSearchService {
     String[] fields = new String[fieldList.size()];
     fieldList.toArray(fields);
     try {
-      SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName+"_"+elasticSearchDTO.getTableTypeName().toLowerCase()).setTypes(elasticSearchDTO.getTableTypeName());
+      SearchRequestBuilder searchRequestBuilder = ElasticsearchConfiguration.client.prepareSearch(indexName+"_"+elasticSearchDTO.getTableTypeName().toLowerCase()).setTypes(elasticSearchDTO.getTableTypeName());
       BoolQueryBuilder subCodeQuery = QueryBuilders.boolQuery();
       setParamTerm(subCodeQuery,elasticSearchDTO.getParamMap(),elasticSearchDTO.getNotParamMap());
       if(CommonUtil.isEmpty(elasticSearchDTO.getSearchContent())) {
@@ -127,7 +125,7 @@ public class ElasticSearchService {
   public JSONObject getSearchJsonId( String tableTypeName,String prepareId){
     List<JSONObject> strings = new ArrayList<JSONObject>();
     try {
-      SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName+"_"+tableTypeName.toLowerCase()).setQuery(QueryBuilders.termsQuery("id",prepareId)).setTypes(tableTypeName);
+      SearchRequestBuilder searchRequestBuilder = ElasticsearchConfiguration.client.prepareSearch(indexName+"_"+tableTypeName.toLowerCase()).setQuery(QueryBuilders.termsQuery("id",prepareId)).setTypes(tableTypeName);
       strings = searchResponse(searchRequestBuilder,null);
     } catch (Exception e) {
       LOGGER.error(e.getMessage());
@@ -220,7 +218,7 @@ public class ElasticSearchService {
    public void deleteResponse( String tableTypeName,String prepareId){
      String eid=getESId(tableTypeName,prepareId);
      if(!CommonUtil.isEmpty(eid)) {
-       DeleteRequestBuilder deleteResponse = client.prepareDelete(indexName+"_"+tableTypeName.toLowerCase(), tableTypeName, eid);
+       DeleteRequestBuilder deleteResponse = ElasticsearchConfiguration.client.prepareDelete(indexName+"_"+tableTypeName.toLowerCase(), tableTypeName, eid);
        deleteResponse.execute().actionGet();
      }
 
