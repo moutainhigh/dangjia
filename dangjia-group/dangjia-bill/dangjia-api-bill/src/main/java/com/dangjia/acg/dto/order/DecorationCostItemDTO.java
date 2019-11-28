@@ -1,5 +1,6 @@
 package com.dangjia.acg.dto.order;
 
+import com.dangjia.acg.dto.refund.DeliverOrderAddedProductDTO;
 import lombok.Data;
 
 import java.util.List;
@@ -49,6 +50,6 @@ public class DecorationCostItemDTO {
 
     private Integer  showHousekeeperAcceptance;//是否显示需要管家验收字段（1显示，0不显示）
 
-    private List addedProductList;//增加商品信息
+    private List<DeliverOrderAddedProductDTO> addedProductList;//增加商品信息
 
 }

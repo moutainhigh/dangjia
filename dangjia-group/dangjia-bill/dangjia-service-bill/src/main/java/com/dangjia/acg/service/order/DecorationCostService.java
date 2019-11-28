@@ -6,8 +6,10 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.order.DecorationCostDTO;
 import com.dangjia.acg.dto.order.DecorationCostItemDTO;
+import com.dangjia.acg.dto.refund.DeliverOrderAddedProductDTO;
 import com.dangjia.acg.mapper.actuary.IBillBudgetMapper;
 import com.dangjia.acg.mapper.delivery.IBillDjDeliverOrderMapper;
+import com.dangjia.acg.mapper.order.IBillDeliverOrderAddedProductMapper;
 import com.dangjia.acg.mapper.refund.*;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.brand.Brand;
@@ -47,6 +49,8 @@ public class DecorationCostService {
     private BillProductTemplateService billProductTemplateService;
     @Autowired
     private IBillBudgetMapper iBillBudgetMapper;
+    @Autowired
+    private IBillDeliverOrderAddedProductMapper iBillDeliverOrderAddedProductMapper;
     /**
      * 查询对应的当前花费信息
      * @param userToken 用户TOKEN
@@ -173,6 +177,8 @@ public class DecorationCostService {
             String orderItemId=ap.getOrderItemId();//订单详情ID
             if(StringUtils.isNotBlank(orderItemId)){
                 //查询增值类商品信息
+                List<DeliverOrderAddedProductDTO> orderAddedProductList = iBillDeliverOrderAddedProductMapper.queryOrderListByAnyOrderId(orderItemId);
+                ap.setAddedProductList(orderAddedProductList);
             }
         }
 
