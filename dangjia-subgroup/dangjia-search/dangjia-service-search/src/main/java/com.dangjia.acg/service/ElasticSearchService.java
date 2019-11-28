@@ -165,7 +165,7 @@ public class ElasticSearchService {
 
      List<JSONObject> arrList = new ArrayList<JSONObject>();
      SearchHits hits = response.getHits();
-     if (null != hits && hits.totalHits() > 0) {
+     if (null != hits && hits.getTotalHits() > 0) {
        for (SearchHit hit : hits) {
          String json = hit.getSourceAsString();
          JSONObject jsonObject=JSON.parseObject(json);
@@ -193,7 +193,7 @@ public class ElasticSearchService {
      SearchResponse response = searchRequestBuilder.get();
      List<JSONObject> arrList = new ArrayList<JSONObject>();
      SearchHits hits = response.getHits();
-     if (null != hits && hits.totalHits() > 0) {
+     if (null != hits && hits.getTotalHits() > 0) {
        for (SearchHit hit : hits) {
          String json = hit.getSourceAsString();
          JSONObject jsonObject=JSON.parseObject(json);
