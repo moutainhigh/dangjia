@@ -118,15 +118,13 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
      * 单个新增修改商品信息
      * @param request
      * @param basicsProductDTO
-     * @param technologyList  添加工艺列表
-     * @param deleteTechnologyIds 删除工艺列表的D
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse editSingleProduct( HttpServletRequest request,BasicsProductDTO basicsProductDTO,String technologyList, String  deleteTechnologyIds,String cityId,String user_id){
+    public ServerResponse editSingleProduct( HttpServletRequest request,BasicsProductDTO basicsProductDTO,String cityId,String user_id){
         try{
-            return djBasicsProductService.saveProductTemporaryStorage(basicsProductDTO, technologyList, deleteTechnologyIds,0,cityId,user_id);
+            return djBasicsProductService.saveProductTemporaryStorage(basicsProductDTO,0,cityId,user_id);
         }catch (Exception e){
             logger.error("保存单个商品信息失败：",e);
             return ServerResponse.createBySuccessMessage("保存单个商品失败");
@@ -137,16 +135,14 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
      * 暂存商品
      * @param request
      * @param basicsProductDTO
-     * @param technologyList  添加工艺列表
-     * @param deleteTechnologyIds 删除工艺列表的D
      * @return
      */
     @Override
     @ApiMethod
     public ServerResponse saveProductTemporaryStorage(HttpServletRequest request,
-                                                      BasicsProductDTO basicsProductDTO, String technologyList, String  deleteTechnologyIds,String  cityId,String userId){
+                                                      BasicsProductDTO basicsProductDTO, String  cityId,String userId){
         try{
-            return djBasicsProductService.saveProductTemporaryStorage(basicsProductDTO, technologyList, deleteTechnologyIds,2,cityId,userId);
+            return djBasicsProductService.saveProductTemporaryStorage(basicsProductDTO, 2,cityId,userId);
         }catch (Exception e){
             logger.error("保存商品信息失败：",e);
             return ServerResponse.createBySuccessMessage("保存商品失败");
