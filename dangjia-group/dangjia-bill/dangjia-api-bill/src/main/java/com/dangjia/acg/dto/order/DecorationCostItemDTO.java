@@ -2,10 +2,14 @@ package com.dangjia.acg.dto.order;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class DecorationCostItemDTO {
 
     private String categoryId;//类别ID
+
+    private String orderItemId;//订单详情ID
 
     private String goodsId;//货品ID
 
@@ -44,5 +48,7 @@ public class DecorationCostItemDTO {
     private String actuaryBudgetId;//精算商品ID（自购商品才有）
 
     private Integer  showHousekeeperAcceptance;//是否显示需要管家验收字段（1显示，0不显示）
+
+    private List addedProductList;//增加商品信息
 
 }

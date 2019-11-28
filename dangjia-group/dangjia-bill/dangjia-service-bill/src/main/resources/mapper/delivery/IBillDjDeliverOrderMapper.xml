@@ -292,6 +292,7 @@
 
         SELECT
           t5.category_id categoryId,
+          t2.id orderItemId,
           t4.goods_id goodsId,
           t5.name goodsName,
           t2.product_id productId,
@@ -326,6 +327,7 @@
         union all
         SELECT
                 t2.category_id categoryId,
+                '' orderItemId,
                 t2.id goodsId,
                 t2.name goodsName,
                 '' productId,

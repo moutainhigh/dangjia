@@ -170,6 +170,10 @@ public class DecorationCostService {
                 ap.setValueIdArr(pt.getValueIdArr());
                 ap.setValueNameArr(billProductTemplateService.getNewValueNameArr(pt.getValueIdArr()));
             }
+            String orderItemId=ap.getOrderItemId();//订单详情ID
+            if(StringUtils.isNotBlank(orderItemId)){
+                //查询增值类商品信息
+            }
         }
 
     }
