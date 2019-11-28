@@ -69,16 +69,21 @@ public class PaymentController implements PaymentAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getPaymentPage(String userToken,  String taskId,String cityId, Integer type) {
-        return paymentService.getPaymentPage(userToken,  taskId,cityId, type);
+    public ServerResponse getPaymentPage(String userToken,  String taskId,String cityId,String houseId, Integer type) {
+        return paymentService.getPaymentPage(userToken,  taskId,cityId,  houseId,type);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse generateOrder(String userToken,String cityId,String productIds){
-        return paymentService.generateOrder(userToken, cityId,productIds);
+    public ServerResponse generateOrder(String userToken,String cityId,String productIds,String workerId, String addressId){
+        return paymentService.generateOrder(userToken, cityId,productIds, workerId,  addressId);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse generateBudgetOrder(String userToken,String cityId,String houseFlowId){
+        return paymentService.generateBudgetOrder(userToken, cityId, houseFlowId);
+    }
     @Override
     @ApiMethod
     public ServerResponse editOrder(String userToken, String orderId, String workerId, String addressId, String houseId){
@@ -91,10 +96,6 @@ public class PaymentController implements PaymentAPI {
         return paymentService.queryInsuranceInfo(userToken,workerId);
     }
 
-    @Override
-    @ApiMethod
-    public ServerResponse generateBudgetOrder(String userToken,String cityId,String houseFlowId){
-        return paymentService.generateBudgetOrder(userToken, cityId, houseFlowId);
-    }
+
 
 }
