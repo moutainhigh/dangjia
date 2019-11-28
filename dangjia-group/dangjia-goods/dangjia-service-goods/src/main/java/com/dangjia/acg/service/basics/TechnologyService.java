@@ -304,9 +304,9 @@ public class TechnologyService {
         }
     }
     //根据名称查询所有工艺（名称去重）
-    public ServerResponse queryByName(String name,String workerTypeId,String cityId) {
+    public ServerResponse queryByName(String name,String workerTypeId,String cityId,Integer materialOrWorker) {
         try {
-            List<Technology> tList = iTechnologyMapper.queryByName(name, workerTypeId,cityId);
+            List<Technology> tList = iTechnologyMapper.queryByName(name, workerTypeId,cityId, materialOrWorker);
             return ServerResponse.createBySuccess("查询成功", tList);
         } catch (Exception e) {
             e.printStackTrace();

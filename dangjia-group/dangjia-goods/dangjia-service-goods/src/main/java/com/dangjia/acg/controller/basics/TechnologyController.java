@@ -119,7 +119,7 @@ public class TechnologyController implements TechnologyAPI {
     //根据名称查询所有工艺（名称去重）
     @Override
     @ApiMethod
-    public ServerResponse queryByName(HttpServletRequest request,String name,String workerTypeId,String cityId){
-        return technologyService.queryByName(name, workerTypeId,cityId);
+    public ServerResponse queryByName(HttpServletRequest request,String name,String workerTypeId,String cityId,Integer materialOrWorker){
+        return technologyService.queryByName(name, workerTypeId,cityId,materialOrWorker);
     }
 }
