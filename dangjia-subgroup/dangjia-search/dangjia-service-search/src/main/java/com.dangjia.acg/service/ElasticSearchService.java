@@ -46,12 +46,8 @@ public class ElasticSearchService {
       Map map =JSONObject.parseObject(jsonStr);
       indexResponse = client.prepareIndex(indexName+"_"+tableTypeName.toLowerCase(), tableTypeName).setSource(map).get();
       LOGGER.info("ES 插入完成"+jsonStr);
-    } catch (RuntimeException e) {
-
-      LOGGER.info("ES 插入异常::"+e.getMessage());
-      e.printStackTrace();
-      throw new BaseException(ServerCode.JSON_TYPE_ERROR, "JSON格式不正确，请检查JSON");
     } catch (Exception e) {
+      e.printStackTrace();
       throw new BaseException(ServerCode.ES_ERROR, "保存搜索引擎失败");
     }
     return indexResponse.getId();
