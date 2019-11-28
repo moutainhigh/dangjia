@@ -1613,6 +1613,13 @@ public class DjDeliverOrderService {
                         }
                     }
                     orderStorefrontDTO.setShippingType(state);
+                    if(orderStorefrontDTO.getStorefrontType().equals("worker")){
+                        Member member = this.queryWorker(orderStorefrontDTO.getHouseId(), orderStorefrontDTO.getWorkerTypeId());
+                        if(member!=null) {
+                            orderStorefrontDTO.setWorkerId(member.getId());
+                            orderStorefrontDTO.setWorkerName(member.getName());
+                        }
+                    }
                 });
             }
             if(orderStorefrontDTOS.size()<=0)
@@ -1623,6 +1630,29 @@ public class DjDeliverOrderService {
             e.printStackTrace();
             logger.error("查询失败：",e);
             return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+
+    /**
+     * 查询订单人工
+     * @param houseId
+     * @param workerTypeId
+     * @return
+     */
+    public Member queryWorker(String houseId,String workerTypeId){
+        try {
+            Example example=new Example(HouseFlow.class);
+            example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID)
+                    .andEqualTo(HouseFlow.WORKER_TYPE_ID)
+                    .andEqualTo(HouseFlow.DATA_STATUS,0);
+            HouseFlow houseFlow = iBillHouseFlowMapper.selectOneByExample(example);
+            Member member = iBillMemberMapper.selectByPrimaryKey(houseFlow.getWorkerId());
+            return member;
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("查询失败：",e);
+            return null;
         }
     }
 

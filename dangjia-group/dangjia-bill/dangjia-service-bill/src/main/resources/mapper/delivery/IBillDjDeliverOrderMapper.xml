@@ -644,7 +644,9 @@
             t1.create_date as createDate,
             t1.actual_payment_price as actualPaymentPrice,
             t1.total_amount totalAmount,
-            t1.order_status as shippingType
+            t1.order_status as shippingType,
+            t4.storefront_type as storefrontType,
+            t1.worker_type_id as workerTypeId
         FROM
             dj_deliver_order t1,
             dj_pay_business_order t3,
@@ -678,7 +680,7 @@
             t.product_name productName,
             t.product_sn productSn,
             t.product_type productType,
-            t.price price,
+            t2.price price,
             t.order_id as orderId,
             IFNULL(t.image,t1.image) image,
             t.shop_count shopCount,
@@ -694,7 +696,9 @@
             t.order_status as shippingType,
             IF(t.is_reservation_deliver='1','4','1004') as  shippingState,
             t.create_date as createDate,
-            t3.order_number orderNumber
+            t3.order_number orderNumber,
+            t2.unit_name as unitName,
+            CONCAT_WS("/",t2.price,t2.unit_name ) as priceUnitName
         FROM
             dj_deliver_order_item t,
             dj_basics_storefront_product t1,
@@ -788,7 +792,9 @@
             t1.create_date AS createDate,
             t1.actual_payment_price AS actualPaymentPrice,
             t1.total_amount totalAmount,
-            t4.mobile
+            t4.mobile,
+            t1.total_stevedorage_cost as totalStevedorageCost,
+            t1.
         FROM
             dj_deliver_order t1,
             dj_basics_storefront t4
@@ -796,6 +802,7 @@
             t1.parent_order_id = #{orderId}
         AND t1.id!= t1.parent_order_id
         AND t1.data_status=0
+        AND t1.storefont_id=t4.id
     </select>
 
     <select id="queryAppOrderList" resultType="com.dangjia.acg.dto.delivery.DjSplitDeliverOrderDTO">

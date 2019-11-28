@@ -14,6 +14,7 @@ import com.dangjia.acg.mapper.delivery.BillDjDeliverOrderSplitItemMapper;
 import com.dangjia.acg.mapper.delivery.IBillDjDeliverOrderMapper;
 import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.service.product.BillProductTemplateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +38,8 @@ public class DjDeliverOrderItemService {
     private BillDjDeliverOrderSplitItemMapper billDjDeliverOrderSplitItemMapper;
     @Autowired
     private BillProductTemplateService billProductTemplateService;
+    @Autowired
+    private DjDeliverOrderService djDeliverOrderService;
 
     /**
      * 待付款/已取消订单详情
@@ -59,7 +62,7 @@ public class DjDeliverOrderItemService {
             paymentToBeMadeDTO.setHouseName( house.getResidential() + house.getBuilding() + "栋" + house.getUnit() + "单元" + house.getNumber() + "号");
             String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             List<OrderStorefrontDTO> orderStorefrontDTOS = iBillDjDeliverOrderMapper.queryPaymentToBeMade(orderId);
-            List<AppointmentListDTO> appointmentListDTOS = new ArrayList<>();
+//            List<AppointmentListDTO> appointmentListDTOS = new ArrayList<>();
             orderStorefrontDTOS.forEach(orderStorefrontDTO -> {
                 orderStorefrontDTO.setStorefrontIcon(imageAddress+orderStorefrontDTO.getStorefrontIcon());
                 List<AppointmentDTO> appointmentDTOS = iBillDjDeliverOrderMapper.queryAppointmentHump(orderStorefrontDTO.getOrderId());
@@ -72,10 +75,10 @@ public class DjDeliverOrderItemService {
                 });
                 appointmentListDTO.setAppointmentDTOS(appointmentDTOS);
                 appointmentListDTO.setOrderStorefrontDTO(orderStorefrontDTO);
-                appointmentListDTOS.add(appointmentListDTO);
+                orderStorefrontDTO.setAppointmentDTOS(appointmentDTOS);
             });
-            paymentToBeMadeDTO.setAppointmentListDTOS(appointmentListDTOS);
-            if (appointmentListDTOS.size() <= 0)
+            paymentToBeMadeDTO.setOrderStorefrontDTOS(orderStorefrontDTOS);
+            if (orderStorefrontDTOS.size() <= 0)
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             return ServerResponse.createBySuccess("查询成功", paymentToBeMadeDTO);
         } catch (Exception e) {
@@ -110,7 +113,6 @@ public class DjDeliverOrderItemService {
             paymentToBeMadeDTO.setSplitDeliverCount(strings.size());
             paymentToBeMadeDTO.setSplitDeliverId(String.join(",",strings));
             List<OrderStorefrontDTO> orderStorefrontDTOS = iBillDjDeliverOrderMapper.queryHumpDetail(orderId);
-            List<AppointmentListDTO> appointmentListDTOS = new ArrayList<>();
             orderStorefrontDTOS.forEach(orderStorefrontDTO -> {
                 orderStorefrontDTO.setStorefrontIcon(imageAddress+orderStorefrontDTO.getStorefrontIcon());
                 List<AppointmentDTO> appointmentDTOS = iBillDjDeliverOrderMapper.queryAppointmentHump(orderStorefrontDTO.getOrderId());
@@ -121,12 +123,19 @@ public class DjDeliverOrderItemService {
                         appointmentDTO.setValueNameArr(billProductTemplateService.getNewValueNameArr(appointmentDTO.getValueIdArr()));
                     }
                 });
+                if(orderStorefrontDTO.getStorefrontType().equals("worker")){
+                    Member member = djDeliverOrderService.queryWorker(orderStorefrontDTO.getHouseId(), orderStorefrontDTO.getWorkerTypeId());
+                    if(member!=null) {
+                        orderStorefrontDTO.setWorkerId(member.getId());
+                        orderStorefrontDTO.setWorkerName(member.getName());
+                    }
+                }
                 appointmentListDTO.setAppointmentDTOS(appointmentDTOS);
                 appointmentListDTO.setOrderStorefrontDTO(orderStorefrontDTO);
-                appointmentListDTOS.add(appointmentListDTO);
+                orderStorefrontDTO.setAppointmentDTOS(appointmentDTOS);
             });
-            paymentToBeMadeDTO.setAppointmentListDTOS(appointmentListDTOS);
-            if (appointmentListDTOS.size() <= 0)
+            paymentToBeMadeDTO.setOrderStorefrontDTOS(orderStorefrontDTOS);
+            if (orderStorefrontDTOS.size() <= 0)
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             return ServerResponse.createBySuccess("查询成功", paymentToBeMadeDTO);
         } catch (Exception e) {
@@ -181,7 +190,6 @@ public class DjDeliverOrderItemService {
             paymentToBeMadeDTO.setSplitDeliverCount(strings.size());
             paymentToBeMadeDTO.setSplitDeliverId(String.join(",",strings));
             List<OrderStorefrontDTO> orderStorefrontDTOS = iBillDjDeliverOrderMapper.queryOrderSnapshot(orderId);
-            List<AppointmentListDTO> appointmentListDTOS = new ArrayList<>();
             orderStorefrontDTOS.forEach(orderStorefrontDTO -> {
                 orderStorefrontDTO.setStorefrontIcon(imageAddress+orderStorefrontDTO.getStorefrontIcon());
                 List<AppointmentDTO> appointmentDTOS = iBillDjDeliverOrderMapper.queryOrderSnapshotHump(orderStorefrontDTO.getOrderId());
@@ -194,10 +202,10 @@ public class DjDeliverOrderItemService {
                 });
                 appointmentListDTO.setAppointmentDTOS(appointmentDTOS);
                 appointmentListDTO.setOrderStorefrontDTO(orderStorefrontDTO);
-                appointmentListDTOS.add(appointmentListDTO);
+                orderStorefrontDTO.setAppointmentDTOS(appointmentDTOS);
             });
-            paymentToBeMadeDTO.setAppointmentListDTOS(appointmentListDTOS);
-            if (appointmentListDTOS.size() <= 0)
+            paymentToBeMadeDTO.setOrderStorefrontDTOS(orderStorefrontDTOS);
+            if (orderStorefrontDTOS.size() <= 0)
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             return ServerResponse.createBySuccess("查询成功", paymentToBeMadeDTO);
         } catch (Exception e) {
