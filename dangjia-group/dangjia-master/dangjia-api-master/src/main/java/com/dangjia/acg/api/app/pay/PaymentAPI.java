@@ -60,6 +60,7 @@ public interface PaymentAPI {
                                   @RequestParam("taskId") String taskId,
                                   @RequestParam("cityId") String cityId,
                                   @RequestParam("houseId") String houseId,
+                                  @RequestParam("productIds") String productIds,
                                   @RequestParam("type") Integer type);
 
     @PostMapping("app/order/generate/shop")

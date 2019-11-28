@@ -1,5 +1,7 @@
 package com.dangjia.acg.service.pay;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.BasicsStorefrontAPI;
 import com.dangjia.acg.api.RedisClient;
@@ -11,6 +13,7 @@ import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
@@ -18,6 +21,7 @@ import com.dangjia.acg.dto.activity.ActivityRedPackRecordDTO;
 import com.dangjia.acg.dto.actuary.BudgetLabelDTO;
 import com.dangjia.acg.dto.actuary.BudgetLabelGoodsDTO;
 import com.dangjia.acg.dto.actuary.ShopGoodsDTO;
+import com.dangjia.acg.dto.basics.ProductDTO;
 import com.dangjia.acg.dto.pay.PaymentDTO;
 import com.dangjia.acg.dto.pay.SafeTypeDTO;
 import com.dangjia.acg.dto.pay.UpgradeSafeDTO;
@@ -1133,6 +1137,8 @@ public class PaymentService {
                 orderMapper.updateByPrimaryKeySelective(order);
 
                 budgetCorrect(order,null,null);
+
+                //清空购物车指定商品
                 example = new Example(ShoppingCart.class);
                 example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, member.getId())
                         .andIn(ShoppingCart.PRODUCT_ID,Arrays.asList(productIdlist));
@@ -1481,9 +1487,9 @@ public class PaymentService {
      * 购物车
      *
      * @param taskId houseFlowId,mendOrderId,houseFlowApplyId
-     * @param type   1精算商品,2购物车商品
+     * @param type   1精算商品,2购物车商品,3立即购商品
      */
-    public ServerResponse getPaymentPage(String userToken,  String taskId, String cityId,String houseId,int type) {
+    public ServerResponse getPaymentPage(String userToken,  String taskId, String cityId,String houseId,String productJsons,int type) {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
@@ -1561,28 +1567,31 @@ public class PaymentService {
                     upgradeSafeDTO.setSafeTypeDTOList(safeTypeDTOList);
                     paymentDTO.setUpgradeSafeDTO(upgradeSafeDTO);//保险
                 }
-            } else if (type == 2) {//购物车商品
+            } else if (type == 2 || type == 3) {//购物车商品
+                JSONArray productArray= JSON.parseArray(productJsons);
+                Map<String,ShoppingCartListDTO> productMap = new HashMap<>();
+                String[] productIds=new String[productArray.size()];
+                for (int i = 0; i < productArray.size(); i++) {
+                    JSONObject productObj = productArray.getJSONObject(i);
+                    productMap.put(productObj.getString(ProductDTO.PRODUCT_ID),BeanUtils.mapToBean(ShoppingCartListDTO.class,productObj));
+                    productIds[i]=productObj.getString(ProductDTO.PRODUCT_ID);
+                }
                 if(CommonUtil.isEmpty(houseId)) {
                     House house=getHouseId(member.getId());
                     if(house!= null) {
                         houseId=house.getId();
                     }
                 }
-                List<String> strings = iShoppingCartMapper.queryStorefrontIds(member.getId(),cityId);
-                List<ShoppingCartDTO> shoppingCartDTOS=new ArrayList<>();
-                for (String str : strings) {
+                List<ShoppingCartDTO> shoppingCartDTOS=iShoppingCartMapper.queryShoppingCartDTOS(productIds);
+                for (ShoppingCartDTO shoppingCartDTO : shoppingCartDTOS) {
                     BigDecimal totalSellPrice = new BigDecimal(0);//总价
-                    ShoppingCartDTO shoppingCartDTO=new ShoppingCartDTO();
-                    Storefront storefront = basicsStorefrontAPI.querySingleStorefrontById(str);
-                    shoppingCartDTO.setStorefrontName(storefront.getStorefrontName());
-                    shoppingCartDTO.setStorefrontId(storefront.getId());
-                    List<ShoppingCartListDTO> shoppingCartListDTOS = iShoppingCartMapper.queryCartList(member.getId(),cityId, str,null);
-                    for (ShoppingCartListDTO shoppingCartListDTO : shoppingCartListDTOS) {
-                        totalSellPrice = totalSellPrice.add(new BigDecimal(shoppingCartListDTO.getPrice()*shoppingCartListDTO.getShopCount()));
-                        totalPrice = totalPrice.add(new BigDecimal(shoppingCartListDTO.getPrice()*shoppingCartListDTO.getShopCount()));
+                    for (ShoppingCartListDTO shoppingCartListDTO : shoppingCartDTO.getShoppingCartListDTOS()) {
+                        ShoppingCartListDTO parmDTO=productMap.get(shoppingCartListDTO.getProductId());
+                        totalSellPrice = totalSellPrice.add(new BigDecimal(shoppingCartListDTO.getPrice()*parmDTO.getShopCount()));
+                        totalPrice = totalPrice.add(new BigDecimal(shoppingCartListDTO.getPrice()*parmDTO.getShopCount()));
                         if(!CommonUtil.isEmpty(houseId)) {
                                 //搬运费运算
-                                Double moveDost = masterCostAcquisitionService.getStevedorageCost(houseId, shoppingCartListDTO.getProductId(), shoppingCartListDTO.getShopCount());
+                                Double moveDost = masterCostAcquisitionService.getStevedorageCost(houseId, shoppingCartListDTO.getProductId(), parmDTO.getShopCount());
                                 totalMoveDost = totalMoveDost.add(new BigDecimal(moveDost));
                         }
                         if(paymentDTO.getType()!=1 && (shoppingCartListDTO.getProductType()==0||shoppingCartListDTO.getProductType()==1)){
@@ -1592,10 +1601,9 @@ public class PaymentService {
                             paymentDTO.setType(1);
                         }
                     }
-                    Double freight=storefrontConfigAPI.getFreightPrice(storefront.getId(),totalSellPrice.doubleValue());
+                    Double freight=storefrontConfigAPI.getFreightPrice(shoppingCartDTO.getStorefrontId(),totalSellPrice.doubleValue());
                     freightPrice=freightPrice.add(new BigDecimal(freight));
                     shoppingCartDTO.setTotalPrice(totalSellPrice);
-                    shoppingCartDTO.setShoppingCartListDTOS(shoppingCartListDTOS);
                     shoppingCartDTOS.add(shoppingCartDTO);
                 }
                 paymentDTO.setDatas(shoppingCartDTOS);
