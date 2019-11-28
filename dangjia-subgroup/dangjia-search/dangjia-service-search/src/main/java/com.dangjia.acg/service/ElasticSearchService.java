@@ -42,7 +42,7 @@ public class ElasticSearchService {
   public String saveESJson(String jsonStr,String tableTypeName) {
     IndexResponse indexResponse;
     try {
-      LOGGER.info("ES 开始插入("+tableTypeName+")"+jsonStr);
+      LOGGER.info("ES 开始插入("+client+")"+jsonStr);
       Map map =JSONObject.parseObject(jsonStr);
       indexResponse = client.prepareIndex(indexName+"_"+tableTypeName.toLowerCase(), tableTypeName).setSource(map).get();
       LOGGER.info("ES 插入完成"+jsonStr);
