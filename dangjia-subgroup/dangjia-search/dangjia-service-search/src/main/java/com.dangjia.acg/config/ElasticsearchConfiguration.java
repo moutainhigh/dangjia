@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 /**
  * @author: QiYuXiang
@@ -65,14 +64,17 @@ public class ElasticsearchConfiguration implements FactoryBean<TransportClient>,
   protected void buildClient()  {
     try {
       PreBuiltTransportClient preBuiltTransportClient = new PreBuiltTransportClient(settings());
+      logger.info("ES 开始获取链接："+clusterNodes+"------------"+clusterName);
       if (!"".equals(clusterNodes)){
         for (String nodes:clusterNodes.split(",")) {
           String InetSocket [] = nodes.split(":");
           String  address = InetSocket[0];
           Integer  port = Integer.valueOf(InetSocket[1]);
+          logger.info("ES 开始创建链接："+clusterNodes+"------------"+clusterName);
           preBuiltTransportClient.addTransportAddress(new TransportAddress(InetAddress.getByName(address),port));
         }
         client = preBuiltTransportClient;
+        logger.info("ES 创建成功："+client);
       }
     } catch (Exception e) {
       logger.error("链接异常：",e);
