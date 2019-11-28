@@ -63,35 +63,27 @@ public class PaymentController implements PaymentAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getPaymentOrder(String userToken, String houseId, String taskId, Integer type) {
-        return paymentService.getPaymentOrder(userToken, houseId, taskId, type);
-    }
-
-    /**
-     * 支付页面(通用)
-     */
-
-    @Override
-    @ApiMethod
-    public ServerResponse getPaymentAllOrder(String userToken, String businessOrderNumber, Integer type) {
-        if (type == null) {
-            type = 0;
-        }
-        return paymentService.getPaymentAllOrder(userToken, businessOrderNumber, type);
+    public ServerResponse getPaymentOrder(String userToken, String taskId) {
+        return paymentService.getPaymentOrder(userToken,  taskId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse getPaymentPage(String userToken, String houseId, String taskId,String cityId, Integer type) {
-        return paymentService.getPaymentPage(userToken, houseId, taskId,cityId, type);
+    public ServerResponse getPaymentPage(String userToken,  String taskId,String cityId, Integer type) {
+        return paymentService.getPaymentPage(userToken,  taskId,cityId, type);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse generateOrder(String userToken,String cityId,String houseId, String workerId, String addressId,String productIds){
-        return paymentService.generateOrder(userToken, cityId, houseId,workerId, addressId,productIds);
+    public ServerResponse generateOrder(String userToken,String cityId,String productIds){
+        return paymentService.generateOrder(userToken, cityId,productIds);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse editOrder(String userToken, String orderId, String workerId, String addressId, String houseId){
+        return paymentService.editOrder(userToken,orderId,workerId,addressId,houseId);
+    }
 
     @Override
     @ApiMethod
@@ -99,12 +91,10 @@ public class PaymentController implements PaymentAPI {
         return paymentService.queryInsuranceInfo(userToken,workerId);
     }
 
-
-
     @Override
     @ApiMethod
-    public ServerResponse generateBudgetOrder(String userToken,String cityId,String houseFlowId, String addressId){
-        return paymentService.generateBudgetOrder(userToken, cityId, houseFlowId,addressId);
+    public ServerResponse generateBudgetOrder(String userToken,String cityId,String houseFlowId){
+        return paymentService.generateBudgetOrder(userToken, cityId, houseFlowId);
     }
 
 }

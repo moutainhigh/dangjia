@@ -1,12 +1,15 @@
 package com.dangjia.acg.service.config;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.api.ElasticSearchAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.common.util.BeanUtils;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.ElasticSearchDTO;
 import com.dangjia.acg.mapper.config.IServiceTypeMapper;
-import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.config.ServiceType;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -14,7 +17,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @类 名： ServiceTypeService.java
@@ -28,13 +35,22 @@ public class ServiceTypeService {
     @Autowired
     private IServiceTypeMapper iServiceTypeMapper;
 
+    @Autowired
+    private ElasticSearchAPI elasticSearchAPI;
     /**
      * 根据ID查询服务详情
      * @param id
      * @return
      */
     public ServiceType getServiceTypeById( String id) {
-         return iServiceTypeMapper.selectByPrimaryKey(id);
+        JSONObject json= elasticSearchAPI.getSearchJsonId(ServiceType.class.getSimpleName(),id);
+        ServiceType serviceType;
+        if(json!=null){
+            serviceType= json.toJavaObject(ServiceType.class);
+        }else {
+            serviceType=iServiceTypeMapper.selectByPrimaryKey(id);
+        }
+        return serviceType;
 
     }
 
@@ -46,11 +62,14 @@ public class ServiceTypeService {
     public ServerResponse selectServiceTypeById( String id) {
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            ServiceType serviceType=iServiceTypeMapper.selectByPrimaryKey(id);
-            Map<String, Object> map = BeanUtils.beanToMap(serviceType);
-            map.put("coverImageUrl",address+serviceType.getCoverImage());
-            map.put("imageUrl",address+serviceType.getImage());
-            return ServerResponse.createBySuccess("查询成功", map);
+            JSONObject json= elasticSearchAPI.getSearchJsonId(ServiceType.class.getSimpleName(),id);
+            if(json==null){
+                ServiceType  serviceType=iServiceTypeMapper.selectByPrimaryKey(id);
+                json=JSONObject.parseObject(JSON.toJSONString(serviceType));
+            }
+            json.put("coverImageUrl",address+json.get(ServiceType.COVER_IMAGE));
+            json.put("imageUrl",address+json.get(ServiceType.IMAGE));
+            return ServerResponse.createBySuccess("查询成功", json);
         } catch (Exception e) {
             logger.error("selectServiceTypeById查询失败",e);
             return ServerResponse.createByErrorMessage("查询失败");
@@ -64,17 +83,39 @@ public class ServiceTypeService {
      * @return
      */
     public ServerResponse<PageInfo> selectServiceTypeList( PageDTO pageDTO,String cityId) {
-        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        ElasticSearchDTO elasticSearchDTO=new ElasticSearchDTO();
+        //表名字
+        elasticSearchDTO.setTableTypeName(ServiceType.class.getSimpleName());
+        //排序字段
+        Map<String, Integer> sortMap = new HashMap<>();
+        sortMap.put(ServiceType.CREATE_DATE, 1);
+        elasticSearchDTO.setSortMap(sortMap);
+        //分页数据
+        elasticSearchDTO.setPageDTO(pageDTO);
+        //筛选数据
+        Map<String, String> paramMap = new HashMap<>();
+        if (!CommonUtil.isEmpty(cityId)) {
+            paramMap.put(ServiceType.CITY_ID, cityId);
+        }
+        if(!paramMap.isEmpty()){
+            elasticSearchDTO.setParamMap(paramMap);
+        }
+        PageInfo<JSONObject> redata =elasticSearchAPI.searchESJsonPage(elasticSearchDTO);
+        if(redata!=null && redata.getList()!=null && redata.getList().size()>0){
+            return ServerResponse.createBySuccess("查询成功", redata);
+        }
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<ServiceType> serviceTypeList = iServiceTypeMapper.getServiceTypeList(cityId);
-            List<Map<String, Object>> list = new ArrayList<>();
+            List list = new ArrayList<>();
             for (ServiceType serviceType : serviceTypeList) {
-                Map<String, Object> map = BeanUtils.beanToMap(serviceType);
-                map.put("coverImageUrl",address+serviceType.getCoverImage());
-                map.put("imageUrl",address+serviceType.getImage());
-                map.put("houseType",serviceType.getId());
-                list.add(map);
+                JSONObject json=JSONObject.parseObject(JSON.toJSONString(serviceType));
+                json.put("coverImageUrl",address+serviceType.getCoverImage());
+                json.put("imageUrl",address+serviceType.getImage());
+                json.put("houseType",serviceType.getId());
+                list.add(json);
+                elasticSearchAPI.saveESJson(json.toJSONString(),ServiceType.class.getSimpleName());
             }
             PageInfo pageResult = new PageInfo(serviceTypeList);
             pageResult.setList(list);
@@ -101,6 +142,13 @@ public class ServiceTypeService {
             serviceType.setImage(image);
             serviceType.setCityId(cityId);
             iServiceTypeMapper.updateByPrimaryKeySelective(serviceType);
+
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            JSONObject json=JSONObject.parseObject(JSON.toJSONString(serviceType));
+            json.put("coverImageUrl",address+serviceType.getCoverImage());
+            json.put("imageUrl",address+serviceType.getImage());
+            json.put("houseType",serviceType.getId());
+            elasticSearchAPI.updateResponse(json.toJSONString(),ServiceType.class.getSimpleName(),id);
             return ServerResponse.createBySuccess("修改成功", serviceType.getId());
         } catch (Exception e) {
             logger.error("修改失败",e);
@@ -123,6 +171,14 @@ public class ServiceTypeService {
             serviceType.setImage(image);
             serviceType.setCityId(cityId);
             iServiceTypeMapper.insert(serviceType);
+
+
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            JSONObject json=JSONObject.parseObject(JSON.toJSONString(serviceType));
+            json.put("coverImageUrl",address+serviceType.getCoverImage());
+            json.put("imageUrl",address+serviceType.getImage());
+            json.put("houseType",serviceType.getId());
+            elasticSearchAPI.saveESJson(json.toJSONString(),ServiceType.class.getSimpleName());
             return ServerResponse.createBySuccess("新增成功", serviceType.getId());
         } catch (Exception e) {
             logger.error("新增失败",e);
@@ -142,7 +198,7 @@ public class ServiceTypeService {
             serviceType.setDataStatus(1);
             serviceType.setId(id);
             iServiceTypeMapper.updateByPrimaryKeySelective(serviceType);
-            //iServiceTypeMapper.deleteById(id);
+            elasticSearchAPI.deleteResponse(ServiceType.class.getSimpleName(),id);
             return ServerResponse.createBySuccessMessage("删除成功");
         } catch (Exception e) {
             logger.error("删除成功",e);

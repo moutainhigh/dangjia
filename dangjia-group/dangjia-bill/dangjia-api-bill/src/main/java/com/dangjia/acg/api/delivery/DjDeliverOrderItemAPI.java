@@ -23,4 +23,9 @@ public interface DjDeliverOrderItemAPI {
     @PostMapping("app/order/deleteOrder")
     @ApiOperation(value = "删除订单", notes = "删除订单")
     ServerResponse deleteOrder(@RequestParam("orderId") String orderId);
+
+    @PostMapping("app/order/queryOrderSnapshot")
+    @ApiOperation(value = "订单快照", notes = "订单快照")
+    ServerResponse queryOrderSnapshot(@RequestParam("orderId") String orderId);
 }
+

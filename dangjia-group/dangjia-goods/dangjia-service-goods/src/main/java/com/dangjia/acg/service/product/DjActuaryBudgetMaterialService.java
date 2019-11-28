@@ -25,8 +25,8 @@ import com.dangjia.acg.mapper.product.IBasicsProductTemplateMapper;
 import com.dangjia.acg.modle.actuary.ActuarialTemplate;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.brand.Unit;
+import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.BasicsGoodsCategory;
-import com.dangjia.acg.modle.product.DjBasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.service.actuary.app.SearchActuarialConfigServices;
 import com.github.pagehelper.PageHelper;
@@ -113,7 +113,7 @@ public class DjActuaryBudgetMaterialService {
                     }
                     try {
                         BudgetMaterial budgetMaterial = new BudgetMaterial();
-                        DjBasicsGoods djBasicsGoods = djBasicsGoodsMapper.queryById(goodsId);
+                        BasicsGoods djBasicsGoods = djBasicsGoodsMapper.queryById(goodsId);
                         if (djBasicsGoods == null) {
                             continue;
                         }
@@ -253,66 +253,18 @@ public class DjActuaryBudgetMaterialService {
      * @return
      */
     public ServerResponse queryMakeBudgetsList(String bclId, String categoryId, String houseId,String cityId) {
-
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-//        String imageAddress ="";
         BasicsGoodArrDTO basicsGoodArrDTO = new BasicsGoodArrDTO();
-        Example example = new Example(DjBasicsGoods.class);
-        example.createCriteria().andEqualTo(DjBasicsGoods.CATEGORY_ID, categoryId).
-                andEqualTo(DjBasicsGoods.CITY_ID,cityId);
-        List<DjBasicsGoods> list = djBasicsGoodsMapper.selectByExample(example);
-
+        Example example = new Example(BasicsGoods.class);
+        example.createCriteria().andEqualTo(BasicsGoods.CATEGORY_ID, categoryId).andEqualTo(BasicsGoods.CITY_ID,cityId);
+        List<BasicsGoods> list = djBasicsGoodsMapper.selectByExample(example);
         BasicsGoodsCategory djBasicsGoodsCategory = djBasicsGoodsCategoryMapper.selectByPrimaryKey(categoryId);
         if (list.size() > 0) {
-            int i = list.get(0).getType();
-            if (i == 2) {
-                //2 人工
+                //0：材料；1：服务   //2 人工
                 List<BasicsGoodDTO> bgdList = new ArrayList<>();
                 if(!CommonUtil.isEmpty(djBasicsGoodsCategory)){
                     example = new Example(BasicsGoodsCategory.class);
-                    example.createCriteria().andEqualTo(BasicsGoodsCategory.PARENT_ID,
-                            djBasicsGoodsCategory.getParentId());
-                    List<BasicsGoodsCategory> li = djBasicsGoodsCategoryMapper.selectByExample(example);
-                    if (!li.isEmpty()) {
-                        for (BasicsGoodsCategory bgc : li) {
-                            BasicsGoodDTO basicsGoodDTO = new BasicsGoodDTO();
-                            List<BasicsgDTO> bList = iBudgetWorkerMapper.queryMakeBudgetsList(houseId, bgc.getId());
-                            for (BasicsgDTO basicsgDTO : bList) {
-                                basicsgDTO.setImage(imageAddress + basicsgDTO.getImage());
-                                if (basicsgDTO.getBuy() == 2) {
-                                    basicsgDTO.setBuyStr("自购商品需自行购买 ");
-                                } else {
-                                    basicsgDTO.setBuyStr("");
-                                }
-                            }
-
-                            Double priceArr = bList.stream().filter
-                                    (a -> a.getPrice()!=null).mapToDouble
-                                    (BasicsgDTO::getPrice).sum();
-
-                            basicsGoodDTO.setPriceArr(priceArr);
-                            basicsGoodDTO.setList(bList);
-                            basicsGoodDTO.setName(bgc.getName());
-                            bgdList.add(basicsGoodDTO);
-                        }
-                    }
-
-                    Double priceArr = bgdList.stream().filter
-                            (a -> a.getPriceArr()!=null).mapToDouble
-                            (BasicsGoodDTO::getPriceArr).sum();
-
-                    basicsGoodArrDTO.setPriceArr(priceArr);
-                    basicsGoodArrDTO.setList(bgdList);
-                }
-                return ServerResponse.createBySuccess("查询成功", basicsGoodArrDTO);
-            } else if (i == 0 || i == 1) {
-                //0：材料；1：服务
-
-                List<BasicsGoodDTO> bgdList = new ArrayList<>();
-                if(!CommonUtil.isEmpty(djBasicsGoodsCategory)){
-                    example = new Example(BasicsGoodsCategory.class);
-                    example.createCriteria().andEqualTo(BasicsGoodsCategory.PARENT_ID,
-                            djBasicsGoodsCategory.getParentId()).andEqualTo(BasicsGoodsCategory.CITY_ID,cityId);
+                    example.createCriteria().andEqualTo(BasicsGoodsCategory.PARENT_ID, djBasicsGoodsCategory.getParentId()).andEqualTo(BasicsGoodsCategory.CITY_ID,cityId);
                     List<BasicsGoodsCategory> li = djBasicsGoodsCategoryMapper.selectByExample(example);
                     if (!li.isEmpty()) {
                         for (BasicsGoodsCategory bgc : li) {
@@ -326,29 +278,18 @@ public class DjActuaryBudgetMaterialService {
                                     basicsgDTO.setBuyStr("");
                                 }
                             }
-
-                            Double priceArr = bList.stream().filter
-                                    (a -> a.getPrice()!=null).mapToDouble
-                                    (BasicsgDTO::getPrice).sum();
-
+                            Double priceArr = bList.stream().filter(a -> a.getPrice()!=null).mapToDouble(BasicsgDTO::getPrice).sum();
                             basicsGoodDTO.setPriceArr(priceArr);
                             basicsGoodDTO.setList(bList);
                             basicsGoodDTO.setName(bgc.getName());
                             bgdList.add(basicsGoodDTO);
                         }
                     }
-
-                    Double priceArr = bgdList.stream().filter
-                            (a -> a.getPriceArr()!=null).mapToDouble
-                            (BasicsGoodDTO::getPriceArr).sum();
-
+                    Double priceArr = bgdList.stream().filter(a -> a.getPriceArr()!=null).mapToDouble(BasicsGoodDTO::getPriceArr).sum();
                     basicsGoodArrDTO.setPriceArr(priceArr);
                     basicsGoodArrDTO.setList(bgdList);
                 }
                 return ServerResponse.createBySuccess("查询成功", basicsGoodArrDTO);
-            }else {
-                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
-            }
         }
         return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
     }
@@ -366,11 +307,11 @@ public class DjActuaryBudgetMaterialService {
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
 //        String imageAddress ="";
         BasicsGoodArrDTO basicsGoodArrDTO = new BasicsGoodArrDTO();
-        Example example = new Example(DjBasicsGoods.class);
+        Example example = new Example(BasicsGoods.class);
                 example.createCriteria()
-                .andEqualTo(DjBasicsGoods.CATEGORY_ID, categoryId)
-                .andEqualTo(DjBasicsGoods.CITY_ID,cityId);
-        List<DjBasicsGoods> list = djBasicsGoodsMapper.selectByExample(example);
+                .andEqualTo(BasicsGoods.CATEGORY_ID, categoryId)
+                .andEqualTo(BasicsGoods.CITY_ID,cityId);
+        List<BasicsGoods> list = djBasicsGoodsMapper.selectByExample(example);
 
         BasicsGoodsCategory djBasicsGoodsCategory = djBasicsGoodsCategoryMapper.selectByPrimaryKey(categoryId);
         if (list.size() > 0) {

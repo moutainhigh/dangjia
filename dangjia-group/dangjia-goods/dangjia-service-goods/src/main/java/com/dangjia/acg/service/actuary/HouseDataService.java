@@ -19,9 +19,9 @@ import com.dangjia.acg.mapper.basics.IGoodsMapper;
 import com.dangjia.acg.mapper.basics.IProductMapper;
 import com.dangjia.acg.mapper.basics.IUnitMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
-import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.core.WorkerType;
+import com.dangjia.acg.modle.product.BasicsGoods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -155,7 +155,7 @@ public class HouseDataService {
                     for (BudgetMaterial material : materialMapList) {
                         if (CommonUtil.isEmpty(material.getProductName()))
                             continue;
-                        Goods goods = iGoodsMapper.selectByPrimaryKey(material.getGoodsId());
+                        BasicsGoods goods = iGoodsMapper.selectByPrimaryKey(material.getGoodsId());
                         if (goods == null) continue;
                         TActuaryGoods tActuaryGoods = new TActuaryGoods();
                         tActuaryGoods.setName(workerType.getString(WorkerType.NAME));

@@ -286,7 +286,7 @@ public class DjBasicsAttributeServices {
     public ServerResponse deleteGoodsAttribute(String goodsAttributeId) {
         try {
             DjBasicsAttribute srcAttribute = djBasicsAttributeMapper.selectByPrimaryKey(goodsAttributeId);
-            List<DjBasicsGoods> goodsList = djBasicsGoodsMapper.queryByCategoryId(srcAttribute.getCategoryId(),null);//根据分类id查询是否有关联商品
+            List<BasicsGoods> goodsList = djBasicsGoodsMapper.queryByCategoryId(srcAttribute.getCategoryId(),null);//根据分类id查询是否有关联商品
             if (goodsList.size() > 0)
                 return ServerResponse.createByErrorMessage("该商品属性有关联商品不能删除");
 
@@ -296,7 +296,7 @@ public class DjBasicsAttributeServices {
 
 
             //检查该分类中的所有商品，是否有商品使用 该属性名和属性选项名
-            for (DjBasicsGoods gs : goodsList) {
+            for (BasicsGoods gs : goodsList) {
 //				LOG.info("gs name:"+ gs.getName());
                 //检查属性名已经存在   属性名是否有商品使用
               //  List<DjBasicsProductTemplate> productList = iBasicsProductTemplateMapper.queryByGoodsId(gs.getId());
@@ -324,10 +324,10 @@ public class DjBasicsAttributeServices {
         try {
             DjBasicsAttributeValue djBasicsAttributeValue = djBasicsAttributeValueMapper.selectByPrimaryKey(attributeValueId);
             DjBasicsAttribute djBasicsAttribute = djBasicsAttributeMapper.selectByPrimaryKey(djBasicsAttributeValue.getAttributeId());
-            Example example = new Example(DjBasicsGoods.class);
-            example.createCriteria().andEqualTo(DjBasicsGoods.CATEGORY_ID, djBasicsAttribute.getCategoryId());
-            example.orderBy(DjBasicsGoods.CREATE_DATE).desc();
-            List<DjBasicsGoods> djBasicsGoods = djBasicsGoodsMapper.selectByExample(example);
+            Example example = new Example(BasicsGoods.class);
+            example.createCriteria().andEqualTo(BasicsGoods.CATEGORY_ID, djBasicsAttribute.getCategoryId());
+            example.orderBy(BasicsGoods.CREATE_DATE).desc();
+            List<BasicsGoods> djBasicsGoods = djBasicsGoodsMapper.selectByExample(example);
             if (djBasicsGoods.size() > 0)
                 return ServerResponse.createByErrorMessage("该商品属性有关联商品不能删除");
             List<DjBasicsProductTemplate> pListByValueIdArrOrAttrId = iBasicsProductTemplateMapper.getPListByValueIdArrOrAttrId(null, attributeValueId);

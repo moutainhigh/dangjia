@@ -23,7 +23,7 @@
             t1.business_order_number businessOrderNumber,
             t1.order_number orderNumber,
             t4.storefront_name storefrontName,
-            t4.system_logo storefrontLogo
+            t4.system_logo storefrontIcon
         FROM
             dj_deliver_order t1,
             dj_pay_business_order t3,
@@ -303,7 +303,8 @@
           t2.shop_count shopCount,
           IFNULL(t2.actual_payment_price,IFNULL(t2.total_price,t2.price*t2.shop_count)) actualPaymentPrice,
           1 steta,
-          '' actuaryBudgetId
+          '' actuaryBudgetId,
+          t5.housekeeper_acceptance showHousekeeperAcceptance
         FROM
             dj_deliver_order t1,
             dj_deliver_order_item t2,
@@ -336,7 +337,8 @@
                 t1.shop_count shopCount,
                 t1.total_price actualPaymentPrice,
                 2 steta,
-                t1.id actuaryBudgetId
+                t1.id actuaryBudgetId,
+                t2.housekeeper_acceptance showHousekeeperAcceptance
             FROM
                 dj_actuary_budget_material t1,
                 dj_basics_goods t2,
@@ -638,16 +640,17 @@
             t1.business_order_number businessOrderNumber,
             t1.order_number orderNumber,
             t4.storefront_name storefrontName,
-            t4.system_logo storefrontLogo,
+            t4.system_logo storefrontIcon,
             t1.create_date as createDate,
             t1.actual_payment_price as actualPaymentPrice,
-            t1.total_amount totalAmount
+            t1.total_amount totalAmount,
+            t1.order_status as shippingType
         FROM
             dj_deliver_order t1,
             dj_pay_business_order t3,
             dj_basics_storefront t4
         WHERE 1=1
-        t1.business_order_number = t3.number
+        AND t1.business_order_number = t3.number
         AND t3.state = 3
         AND t1.storefont_id = t4.id
         AND t1.payment IS NOT NULL
@@ -687,12 +690,18 @@
             IFNULL(t.total_price,0) as totalPrice,
             t2.value_name_arr as valueNameArr,
             t2.value_id_arr as valueIdArr,
-            t.is_reservation_deliver as isReservationDeliver
+            t.is_reservation_deliver as isReservationDeliver,
+            t.order_status as shippingType,
+            IF(t.is_reservation_deliver='1','4','1004') as  shippingState,
+            t.create_date as createDate,
+            t3.order_number orderNumber
         FROM
             dj_deliver_order_item t,
             dj_basics_storefront_product t1,
-            dj_basics_product_template t2
+            dj_basics_product_template t2,
+            dj_deliver_order t3
         WHERE t.product_id =t1.id
+        AND t3.id = t.order_id
         AND t1.prod_template_id=t2.id
         AND t.order_id =  #{orderId}
         AND t.shop_count > (IFNULL(t.ask_count, 0)+IFNULL(t.return_count,0))
@@ -711,14 +720,17 @@
             '当家店铺' storefrontName,
             t1.create_date as createDate,
             t1.actual_payment_price as actualPaymentPrice,
-            t1.total_amount totalAmount
+            t1.total_amount totalAmount,
+            t1.order_status as shippingType,
+            IF(t1.order_source='1','3','3,4') as shippingState
         FROM
             dj_deliver_order t1,
             dj_pay_business_order t2
         WHERE
             t1.business_order_number = t2.number
-            AND id = parent_order_id
-            AND t2.state=2
+            AND t1.id = t1.parent_order_id
+            AND t2.state=#{state}
+            AND t1.house_id=#{houseId}
     </select>
 
     <select id="queryDeliverOrderItemObligation" resultType="com.dangjia.acg.dto.delivery.AppointmentDTO">
@@ -744,7 +756,11 @@
             t2.reservation_deliver_time AS reservationDeliverTime,
             IFNULL(t2.total_price, 0) AS totalPrice,
             t4.value_name_arr AS valueNameArr,
-            t4.value_id_arr AS valueIdArr
+            t4.value_id_arr AS valueIdArr,
+            t1.order_status as shippingType,
+            IF(t1.order_source='1','3','3,4') as shippingState,
+            t1.create_date as createDate,
+            t1.order_number orderNumber
         FROM
             dj_deliver_order t1,
             dj_deliver_order_item t2,
@@ -755,7 +771,7 @@
         AND t2.product_id = t3.id
         AND t3.prod_template_id = t4.id
         AND t1.parent_order_id = #{orderId}
-        AND id!=parent_order_id
+        AND t1.id!=t1.parent_order_id
     </select>
 
 
@@ -768,7 +784,7 @@
             t1.business_order_number businessOrderNumber,
             t1.order_number orderNumber,
             t4.storefront_name storefrontName,
-            t4.system_logo storefrontLogo,
+            t4.system_logo storefrontIcon,
             t1.create_date AS createDate,
             t1.actual_payment_price AS actualPaymentPrice,
             t1.total_amount totalAmount,
@@ -786,22 +802,32 @@
         select
         IFNULL(ddsd.id,'') as id,
         IFNULL(dbs.storefront_name,'') as storefrontName,-- 店铺名称
-        dbs.storefront_logo as storefrontIcon,
+        dbs.storefront_logo as StorefrontIcon,
         ddsd.house_id as houseId,
         IFNULL(ddsd.create_date,'') as createDate,-- 创建时间
-        IFNULL(ddsd.number,'') as number,-- 订单号
+        IFNULL(ddsd.number,'') as orderNumber,-- 订单号
         IFNULL(ddsd.shipping_state,'') as shippingState,-- 订单状态
         IFNULL(ddsd.total_amount,'') as totalAmount,-- 总价格
-        '' as total -- 件数
+        ddsd.city_id as cityId
         from dj_deliver_split_deliver ddsd
         inner join dj_basics_storefront dbs on dbs.id=ddsd.storefront_id
         where ddsd.house_id = #{houseId}
         <if test="cityId!=null and cityId!=''">
             and  ddsd.city_id = #{cityId}
         </if>
-        <if test="orderStatus!=null and orderStatus!=''">
-            and  ddsd.shipping_state = #{orderStatus}
+        <if test="orderStatus!=null and orderStatus == 1">
+            and   (ddsd.shipping_state = 1 or ddsd.shipping_state = 7)
         </if>
+        <if test="orderStatus!=null and orderStatus == 2">
+            and   (ddsd.shipping_state = 2 or ddsd.shipping_state = 8)
+        </if>
+        <if test="arr != null and arr != ''">
+            and ddsd.id in
+            <foreach collection="arr" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+
     </select>
 
 
@@ -823,7 +849,7 @@
             t1.business_order_number businessOrderNumber,
             t1.order_number orderNumber,
             t4.storefront_name storefrontName,
-            t4.system_logo storefrontLogo
+            t4.system_logo storefrontIcon
         FROM
             dj_deliver_order t1,
             dj_pay_business_order t3,
@@ -847,6 +873,58 @@
             )
             AND t2.data_status = 0
         )
+    </select>
+
+    <select id="queryOrderSnapshot" resultType="com.dangjia.acg.dto.delivery.OrderStorefrontDTO">
+        SELECT
+            t1.storefont_id storefrontId,
+            t1.id orderId,
+            t1.address_id addressId,
+            t1.house_id houseId,
+            t1.business_order_number businessOrderNumber,
+            t1.order_number orderNumber,
+            t4.storefront_name storefrontName,
+            t4.system_logo storefrontIcon
+        FROM
+            dj_deliver_order t1,
+            dj_basics_storefront t4
+        WHERE t1.storefont_id = t4.id
+        AND t1.id = #{orderId}
+        AND t1.data_status=0
+    </select>
+
+
+
+    <select id="queryOrderSnapshotHump" resultType="com.dangjia.acg.dto.delivery.AppointmentDTO">
+        SELECT
+            t.product_id productId,
+            t.id orderItemId,
+            t.storefont_id storefrontId,
+            t.product_name productName,
+            t.product_sn productSn,
+            t.product_type productType,
+            t.price price,
+            t.order_id as orderId,
+            IFNULL(t.image,t1.image) image,
+            t.shop_count shopCount,
+            IFNULL(t.ask_count,0) askCount,
+            IFNULL(t.return_count,0) returnCount,
+            (t.shop_count - (IFNULL(t.ask_count, 0)+IFNULL(t.return_count,0))) surplusCount,
+            t1.prod_template_id productTemplateId,
+            t.reservation_deliver_time as reservationDeliverTime,
+            IFNULL(t.total_price,0) as totalPrice,
+            t2.value_name_arr as valueNameArr,
+            t2.value_id_arr as valueIdArr,
+            t.is_reservation_deliver as isReservationDeliver
+        FROM
+            dj_deliver_order_item t,
+            dj_basics_storefront_product t1,
+            dj_basics_product_template t2
+        WHERE t.product_id =t1.id
+        AND t1.prod_template_id=t2.id
+        AND t.order_id =  #{orderId}
+        AND t.data_status = 0
+        ORDER BY t.create_date
     </select>
 
 

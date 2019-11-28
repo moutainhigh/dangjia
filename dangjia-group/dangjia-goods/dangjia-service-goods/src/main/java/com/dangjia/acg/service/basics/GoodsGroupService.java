@@ -12,6 +12,7 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.basics.*;
 import com.dangjia.acg.modle.basics.*;
+import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -169,9 +170,9 @@ public class GoodsGroupService {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
 //            List<Goods> goodsList = iGoodsMapper.queryGoodsListByCategoryLikeName(categoryId, name);
             // 去除商品是 包工包料类型的 或者 是自购的
-            List<Goods> goodsList = iGoodsMapper.queryGoodsGroupListByCategoryLikeName(categoryId, name, "0", "2",cityId);
+            List<BasicsGoods> goodsList = iGoodsMapper.queryGoodsGroupListByCategoryLikeName(categoryId, name, "0", "2",cityId);
             List<Map<String, Object>> gMapList = new ArrayList<>();
-            for (Goods goods : goodsList) {
+            for (BasicsGoods goods : goodsList) {
                 List<Map<String, Object>> mapList = new ArrayList<>();
                 List<Product> productList = iProductMapper.queryByGoodsId(goods.getId(),cityId);
                 for (Product p : productList) {

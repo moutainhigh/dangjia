@@ -1,6 +1,6 @@
 package com.dangjia.acg.mapper.basics;
 
-import com.dangjia.acg.modle.basics.Goods;
+import com.dangjia.acg.modle.product.BasicsGoods;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
@@ -15,17 +15,17 @@ import java.util.List;
  * @date: 2018-9-18上午9:49:19
  */
 @Repository
-public interface IGoodsMapper extends Mapper<Goods> {
+public interface IGoodsMapper extends Mapper<BasicsGoods> {
 	void deleteById(String id);
-	List<Goods> query(@Param("categoryId") String categoryId);
-	Goods queryById(String id);
-	List<Goods> queryByName(@Param("name")String name);
-	List<Goods> queryByCategoryId(@Param("categoryId")String categoryId);
-	List<Goods> queryRepairGoods(@Param("name")String name,@Param("categoryId")String categoryId);
-	List<Goods> queryGoodsList(@Param("categoryId")String categoryId,@Param("name")String name);
+	List<BasicsGoods> query(@Param("categoryId") String categoryId);
+	BasicsGoods queryById(String id);
+	List<BasicsGoods> queryByName(@Param("name")String name);
+	List<BasicsGoods> queryByCategoryId(@Param("categoryId")String categoryId);
+	List<BasicsGoods> queryRepairGoods(@Param("name")String name,@Param("categoryId")String categoryId);
+	List<BasicsGoods> queryGoodsList(@Param("categoryId")String categoryId,@Param("name")String name);
 
 	//查询某个分类的商品 模糊name（如果categoryId 为null，查询全部材料商品 ）
-	List<Goods> queryGoodsListByCategoryLikeName(@Param("categoryId")String categoryId,
+	List<BasicsGoods> queryGoodsListByCategoryLikeName(@Param("categoryId")String categoryId,
 												 @Param("name")String name,
 												 @Param("cityId")String cityId);
 
@@ -37,5 +37,5 @@ public interface IGoodsMapper extends Mapper<Goods> {
 	 * @param buy 购买性质0：必买；1可选；2自购
 	 * @return
 	 */
-	List<Goods> queryGoodsGroupListByCategoryLikeName(@Param("categoryId")String categoryId,@Param("name")String name,@Param("type")String type,@Param("buy")String buy,@Param("cityId")String cityId);
+	List<BasicsGoods> queryGoodsGroupListByCategoryLikeName(@Param("categoryId")String categoryId,@Param("name")String name,@Param("type")String type,@Param("buy")String buy,@Param("cityId")String cityId);
 }

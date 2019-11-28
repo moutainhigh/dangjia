@@ -43,4 +43,6 @@ public class DecorationCostItemDTO {
 
     private String actuaryBudgetId;//精算商品ID（自购商品才有）
 
+    private Integer  showHousekeeperAcceptance;//是否显示需要管家验收字段（1显示，0不显示）
+
 }

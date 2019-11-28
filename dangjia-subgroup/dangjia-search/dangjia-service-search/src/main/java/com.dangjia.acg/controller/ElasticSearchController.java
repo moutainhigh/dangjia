@@ -4,9 +4,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.ElasticSearchAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.Constants;
-import com.dangjia.acg.common.model.PageBean;
 import com.dangjia.acg.dto.ElasticSearchDTO;
 import com.dangjia.acg.service.ElasticSearchService;
+import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,7 +38,7 @@ public class ElasticSearchController implements ElasticSearchAPI {
 
     @Override
     @ApiMethod
-    public PageBean<JSONObject> searchESJsonPage(@RequestBody ElasticSearchDTO elasticSearchDTO) {
+    public PageInfo<JSONObject> searchESJsonPage(@RequestBody ElasticSearchDTO elasticSearchDTO) {
         return elasticSearchService.searchESJsonPage(elasticSearchDTO);
     }
 

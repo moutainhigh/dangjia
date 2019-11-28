@@ -1,8 +1,8 @@
 package com.dangjia.acg.pojo.basics;
 
 import com.dangjia.acg.modle.attribute.GoodsCategory;
-import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.brand.Unit;
+import com.dangjia.acg.modle.product.BasicsGoods;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
@@ -18,7 +18,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "dj_basics_goods")
 @ApiModel(description = "商品")
-public class GoodsPO extends Goods {
+public class GoodsPO extends BasicsGoods {
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "category_id")

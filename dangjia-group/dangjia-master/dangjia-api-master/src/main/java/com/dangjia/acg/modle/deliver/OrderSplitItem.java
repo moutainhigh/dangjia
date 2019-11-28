@@ -116,7 +116,7 @@ public class OrderSplitItem extends BaseEntity {
 
 	@Column(name = "is_delivery_install")
 	@Desc(value = "'是否送货与安装/施工分开'")
-	@ApiModelProperty("'是否送货与安装/施工分开 0-否 1-是'")
+	@ApiModelProperty("'是否送货与安装/施工分开 0-否 跟安装分开 1-是 跟安装不分开'")
 	private String isDeliveryInstall;
 
 

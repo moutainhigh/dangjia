@@ -15,8 +15,8 @@ import com.dangjia.acg.mapper.basics.IGoodsMapper;
 import com.dangjia.acg.mapper.basics.IProductMapper;
 import com.dangjia.acg.modle.attribute.Attribute;
 import com.dangjia.acg.modle.attribute.AttributeValue;
-import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
+import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.pojo.attribute.AttributeValuePO;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -312,7 +312,7 @@ public class AttributeService {
         try {
 
             Attribute srcAttribute = iAttributeMapper.queryById(goodsAttributeId);
-            List<Goods> goodsList = iGoodsMapper.queryByCategoryId(srcAttribute.getCategoryId());//根据分类id查询是否有关联商品
+            List<BasicsGoods> goodsList = iGoodsMapper.queryByCategoryId(srcAttribute.getCategoryId());//根据分类id查询是否有关联商品
             if (goodsList.size() > 0)
                 return ServerResponse.createByErrorMessage("该商品属性有关联商品不能删除");
 
@@ -322,7 +322,7 @@ public class AttributeService {
 
 
             //检查该分类中的所有商品，是否有商品使用 该属性名和属性选项名
-            for (Goods gs : goodsList) {
+            for (BasicsGoods gs : goodsList) {
 //				LOG.info("gs name:"+ gs.getName());
                 //检查属性名已经存在   属性名是否有商品使用
                 List<Product> productList = iProductMapper.queryByGoodsId(gs.getId(),cityId);
@@ -358,7 +358,7 @@ public class AttributeService {
         try {
             AttributeValue srcAttributeValue = iAttributeValueMapper.selectByPrimaryKey(attributeValueId);
             Attribute srcAe = iAttributeMapper.selectByPrimaryKey(srcAttributeValue.getAttributeId());
-            List<Goods> goodsList = iGoodsMapper.queryByCategoryId(srcAe.getCategoryId());//根据分类id查询是否有关联商品
+            List<BasicsGoods> goodsList = iGoodsMapper.queryByCategoryId(srcAe.getCategoryId());//根据分类id查询是否有关联商品
             if (goodsList.size() > 0)
                 return ServerResponse.createByErrorMessage("该商品属性有关联商品不能删除");
             List<Product> productLists = iProductMapper.getPListByValueIdArrOrAttrId(null, attributeValueId,cityId);

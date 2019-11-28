@@ -1,6 +1,6 @@
 package com.dangjia.acg.mapper.product;
 
-import com.dangjia.acg.modle.basics.Goods;
+import com.dangjia.acg.modle.product.BasicsGoods;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
@@ -11,5 +11,5 @@ import tk.mybatis.mapper.common.Mapper;
  * Time: 上午 10:37
  */
 @Repository
-public interface IMasterGoodsMapper extends Mapper<Goods> {
+public interface IMasterGoodsMapper extends Mapper<BasicsGoods> {
 }

@@ -127,5 +127,11 @@ public class StorefrontController implements BasicsStorefrontAPI {
         return storefrontService.storeRevenueRecordOrderDetail(request,pageDTO,userId,cityId,orderNumber,type);
     }
 
+    @Override
+    @ApiMethod
+    public Integer setStorefrontSurplusMoney() {
+        return storefrontService.setStorefrontSurplusMoney();
+    }
+
 
 }

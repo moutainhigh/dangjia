@@ -6,28 +6,50 @@
 
 	<sql id="all_columns">
 		id,
-		name,
-		category_id,
-		type,
-		buy,
-		sales,
-        other_name as otherName,
-		unit_id,
-		create_date,
-		modify_date
-	</sql>
-
-	<sql id="new_columns">
-		id,
-		name,
+		NAME,
 		category_id as categoryId,
 		type,
 		buy,
 		sales,
+		other_name AS otherName,
 		unit_id as unitId,
-		other_name as otherName,
-		create_date as createDate,
-		modify_date as modifyDate
+		create_date,
+		modify_date,
+		is_influe_decoration_progress as isInflueDecorationProgress,
+		irreversible_reasons as irreversibleReasons,
+		istop,
+		brand_id as brandId,
+		is_elevator_fee as isElevatorFee,
+		indicative_price as indicativePrice,
+		label_ids as  labelIds,
+		is_reservation_deliver as isReservationDeliver,
+		attribute_id_arr attributeIdArr,
+		housekeeper_acceptance housekeeperAcceptance,
+		technology_ids technologyIds
+	</sql>
+
+	<sql id="new_columns">
+		id,
+		NAME,
+		category_id as categoryId,
+		type,
+		buy,
+		sales,
+		other_name AS otherName,
+		unit_id as unitId,
+		create_date,
+		modify_date,
+		is_influe_decoration_progress as isInflueDecorationProgress,
+		irreversible_reasons as irreversibleReasons,
+		istop,
+		brand_id as brandId,
+		is_elevator_fee as isElevatorFee,
+		indicative_price as indicativePrice,
+		label_ids as  labelIds,
+		is_reservation_deliver as isReservationDeliver,
+		attribute_id_arr attributeIdArr,
+		housekeeper_acceptance housekeeperAcceptance,
+		technology_ids technologyIds
 	</sql>
 	<!-- 删除对象 -->
 	<delete id="deleteById" parameterType="java.lang.String">
@@ -35,7 +57,7 @@
 		WHERE id=#{id}
 	</delete>
     <!-- 查询所有 -->
-	<select id="query" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.basics.Goods">
+	<select id="query" parameterType="java.lang.String" resultType="com.dangjia.acg.modle.product.BasicsGoods">
 		SELECT
 		<include refid="new_columns"/>
 		FROM dj_basics_goods
@@ -46,7 +68,7 @@
 		ORDER BY create_date desc
 	</select>
 	 <!-- 根据id查询属性对象 -->
-	<select id="queryById" resultType="com.dangjia.acg.modle.basics.Goods">
+	<select id="queryById" resultType="com.dangjia.acg.modle.product.BasicsGoods">
 		SELECT
 		<include refid="new_columns"/>
 		FROM dj_basics_goods
@@ -56,7 +78,7 @@
 	</select>
 
 	<!-- 根据name查询属性对象 -->
-	<select id="queryByName" resultType="com.dangjia.acg.modle.basics.Goods">
+	<select id="queryByName" resultType="com.dangjia.acg.modle.product.BasicsGoods">
 		SELECT
 		<include refid="new_columns"/>
 		FROM dj_basics_goods
@@ -90,7 +112,7 @@
 	</sql>
 
 	 <!-- 根据类别id查询商品对象 -->
-	<select id="queryByCategoryId" resultType="com.dangjia.acg.modle.basics.Goods">
+	<select id="queryByCategoryId" resultType="com.dangjia.acg.modle.product.BasicsGoods">
 		SELECT
 		<include refid="new_columns"/>
 		FROM dj_basics_goods where 1=1
@@ -101,7 +123,7 @@
 	</select>
 
 	<!-- 根据条件查询商品集合 -->
-	<select id="queryGoodsList" resultType="com.dangjia.acg.modle.basics.Goods">
+	<select id="queryGoodsList" resultType="com.dangjia.acg.modle.product.BasicsGoods">
 		SELECT
 		<include refid="new_columns"/>
 		FROM dj_basics_goods
@@ -116,7 +138,7 @@
 	</select>
 
 	<!-- 查询某个分类的商品 模糊name -->
-	<select id="queryGoodsListByCategoryLikeName" resultType="com.dangjia.acg.modle.basics.Goods">
+	<select id="queryGoodsListByCategoryLikeName" resultType="com.dangjia.acg.modle.product.BasicsGoods">
 		SELECT
 			bg.id as id,
 			bg.`NAME` as name,
@@ -144,7 +166,7 @@
 	</select>
 
 	<!-- 查询某个分类的商品 模糊name -->
-	<select id="queryGoodsGroupListByCategoryLikeName" resultType="com.dangjia.acg.modle.basics.Goods">
+	<select id="queryGoodsGroupListByCategoryLikeName" resultType="com.dangjia.acg.modle.product.BasicsGoods">
 		SELECT
 		bg.id as id,
 		bg.`NAME` as name,
@@ -181,7 +203,7 @@
 		ORDER BY bg.create_date desc
 	</select>
 	<!-- 补货查询商品库- -->
-	<select id="queryRepairGoods" resultType="com.dangjia.acg.modle.basics.Goods">
+	<select id="queryRepairGoods" resultType="com.dangjia.acg.modle.product.BasicsGoods">
 		SELECT
 		<include refid="new_columns"/>
 		FROM dj_basics_goods

@@ -31,7 +31,6 @@ import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.product.BasicsGoods;
-import com.dangjia.acg.modle.product.DjBasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.modle.sup.Supplier;
@@ -298,7 +297,7 @@ public class ForMasterService {
                         totalZPrice = totalZPrice.add(budgetLabelGoodsDTO.getTotalPrice());
                     }
                     if(!CommonUtil.isEmpty(budgetLabelGoodsDTO.getGoodsId())){
-                        DjBasicsGoods goods = goodsMapper.selectByPrimaryKey(budgetLabelGoodsDTO.getGoodsId());
+                        BasicsGoods goods = goodsMapper.selectByPrimaryKey(budgetLabelGoodsDTO.getGoodsId());
                         budgetLabelGoodsDTO.setBuy(goods.getBuy());
                         budgetLabelGoodsDTO.setSales(goods.getSales());
                         budgetLabelGoodsDTO.setIsInflueDecorationProgress(goods.getIsInflueDecorationProgress());
