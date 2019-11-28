@@ -38,4 +38,5 @@ public class AppointmentDTO {
     private String shippingType;// 订单状态（1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭）
     private Date createDate;
     private String orderNumber;
+    private String priceUnitName;
 }

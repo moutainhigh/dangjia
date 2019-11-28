@@ -57,6 +57,7 @@ public interface TechnologyAPI {
     ServerResponse queryByName(@RequestParam("request") HttpServletRequest request,
                                @RequestParam("name") String name,
                                @RequestParam("workerTypeId") String workerTypeId,
-                               @RequestParam("cityId") String cityId);
+                               @RequestParam("cityId") String cityId,
+                               @RequestParam("materialOrWorker") Integer materialOrWorker);
 
 }
