@@ -2,6 +2,8 @@ package com.dangjia.acg.service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.common.exception.BaseException;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.config.ElasticsearchConfiguration;
@@ -44,11 +46,12 @@ public class ElasticSearchService {
       Map map =JSONObject.parseObject(jsonStr);
       indexResponse = client.prepareIndex(indexName+"_"+tableTypeName.toLowerCase(), tableTypeName).setSource(map).get();
       LOGGER.info("ES 插入完成"+jsonStr);
-      return indexResponse.getId();
     } catch (Exception e) {
       e.printStackTrace();
+      LOGGER.error("ES 插入异常",e);
+      throw new BaseException(ServerCode.ES_ERROR, "保存搜索引擎失败");
     }
-    return null;
+    return indexResponse.getId();
   }
 
 
