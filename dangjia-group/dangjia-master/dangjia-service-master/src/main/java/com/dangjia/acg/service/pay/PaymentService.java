@@ -998,6 +998,11 @@ public class PaymentService {
                 return ServerResponse.createByErrorMessage("提交失败：未选择提交的商品");
             }
             String houseId="";
+
+            House house=getHouseId(member.getId());
+            if(house!= null) {
+                houseId=house.getId();
+            }
             List<ShoppingCartDTO> shoppingCartDTOS=new ArrayList<>();
             BigDecimal paymentPrice = new BigDecimal(0);//总共钱
             BigDecimal freightPrice = new BigDecimal(0);//总运费
@@ -1559,7 +1564,9 @@ public class PaymentService {
             } else if (type == 2) {//购物车商品
                 if(CommonUtil.isEmpty(houseId)) {
                     House house=getHouseId(member.getId());
-                    houseId=house.getId();
+                    if(house!= null) {
+                        houseId=house.getId();
+                    }
                 }
                 List<String> strings = iShoppingCartMapper.queryStorefrontIds(member.getId(),cityId);
                 List<ShoppingCartDTO> shoppingCartDTOS=new ArrayList<>();
