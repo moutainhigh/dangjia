@@ -837,12 +837,14 @@
         IFNULL(ddsd.id,'') as id,
         IFNULL(dbs.storefront_name,'') as storefrontName,-- 店铺名称
         dbs.storefront_logo as StorefrontIcon,
+        dbs.storefront_type as storefrontType,
         ddsd.house_id as houseId,
         IFNULL(ddsd.create_date,'') as createDate,-- 创建时间
         IFNULL(ddsd.number,'') as orderNumber,-- 订单号
         IFNULL(ddsd.shipping_state,'') as shippingState,-- 订单状态
         IFNULL(ddsd.total_amount,'') as totalAmount,-- 总价格
-        ddsd.city_id as cityId
+        ddsd.city_id as cityId,
+        ddsd.order_split_id as orderSplitId
         from dj_deliver_split_deliver ddsd
         inner join dj_basics_storefront dbs on dbs.id=ddsd.storefront_id
         where ddsd.house_id = #{houseId}
@@ -873,6 +875,13 @@
         where dosi.id = #{id}
     </select>
 
+    <select id="queryTypeArr" resultType="java.lang.Integer">
+        select e.type from
+        dj_deliver_order_split_item a
+        INNER JOIN dj_basics_storefront_product b ON a.product_id = b.id
+        INNER JOIN dj_basics_product_template c ON b.prod_template_id = c.id
+        INNER JOIN dj_basics_unit e ON c.unit_id=e.id where a.id = #{id}
+    </select>
 
     <select id="queryHumpDetail" resultType="com.dangjia.acg.dto.delivery.OrderStorefrontDTO">
         SELECT

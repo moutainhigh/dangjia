@@ -134,7 +134,7 @@ public class ShopCartService {
             return ServerResponse.createBySuccess("获取购物车数量成功!",gnum);
         } catch (Exception e) {
             e.printStackTrace();
-            return ServerResponse.createByErrorMessage("系统报错，获取购物车信息失败!");
+            return ServerResponse.createBySuccess("获取购物车数量异常!",0);
         }
     }
     /**
