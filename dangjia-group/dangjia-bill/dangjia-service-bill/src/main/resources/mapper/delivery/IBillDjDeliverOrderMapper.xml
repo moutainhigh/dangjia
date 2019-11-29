@@ -847,7 +847,7 @@
         ddsd.order_split_id as orderSplitId
         from dj_deliver_split_deliver ddsd
         inner join dj_basics_storefront dbs on dbs.id=ddsd.storefront_id
-        where ddsd.house_id = #{houseId}
+        where ddsd.house_id = #{houseId} and ddsd.data_status = 0
         <if test="cityId!=null and cityId!=''">
             and  ddsd.city_id = #{cityId}
         </if>
