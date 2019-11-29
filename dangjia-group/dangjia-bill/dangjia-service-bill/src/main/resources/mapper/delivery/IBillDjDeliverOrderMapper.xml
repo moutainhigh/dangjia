@@ -855,7 +855,7 @@
             and   (ddsd.shipping_state = 1 or ddsd.shipping_state = 7)
         </if>
         <if test="orderStatus!=null and orderStatus == 2">
-            and   (ddsd.shipping_state = 2 or ddsd.shipping_state = 8)
+            and ddsd.shipping_state = 8
         </if>
         <if test="arr != null and arr != ''">
             and ddsd.id in
