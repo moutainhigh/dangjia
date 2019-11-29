@@ -470,24 +470,20 @@ public class DjDeliveryReturnSlipService {
      */
     public ServerResponse sellerDimension(PageDTO pageDTO, String userId, String cityId, String searchKey) {
         try {
-
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
             if(storefront==null)
             {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
-            List<Map> bListMap =new ArrayList<>();
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<StoreBuyersDimensionDTO> StoreBuyersDimensionDTOlist=djDeliveryReturnSlipMapper.sellerDimension(storefront.getId(),cityId,searchKey);
             if (StoreBuyersDimensionDTOlist.size() <= 0)
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             for (StoreBuyersDimensionDTO storeBuyersDimensionDTO :StoreBuyersDimensionDTOlist ) {
-                Map brandMap= BeanUtils.beanToMap(storeBuyersDimensionDTO);
                 List<StoreBuyersDimensionDetailDTO> detaillist= djDeliveryReturnSlipMapper.sellerDimensionDetail(storeBuyersDimensionDTO.getStorefrontId(),cityId,storeBuyersDimensionDTO.getHouseId());
-                bListMap.add(brandMap);
-                brandMap.put("detaillist",detaillist);
+                storeBuyersDimensionDTO.setDetaillist(detaillist);
             }
-            PageInfo pageResult = new PageInfo(bListMap);
+            PageInfo pageResult = new PageInfo(StoreBuyersDimensionDTOlist);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             logger.error("店铺利润统计-卖家维度异常", e);
@@ -499,32 +495,26 @@ public class DjDeliveryReturnSlipService {
 
 
     /**
-     *店铺利润统计-查看买家详情
+     *店铺利润统计-查看买家订单详情
      * @param pageDTO
      * @return
      */
     public ServerResponse shippingDetails(PageDTO pageDTO, String orderSplitId) {
         try {
             String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            StoreBuyersDimensionDTO storeBuyersDimensionDTO=djDeliveryReturnSlipMapper.sellerDimensionById(orderSplitId);
-            List<Map> bListMap =new ArrayList<>();
-            Map brandMap= BeanUtils.beanToMap(storeBuyersDimensionDTO);
-            bListMap.add(brandMap);
-
+            StoreBuyersOrderDimensionDTO storeBuyersOrderDimensionDTO=djDeliveryReturnSlipMapper.sellerDimensionById(orderSplitId);
+            if (storeBuyersOrderDimensionDTO==null)
+                return ServerResponse.createByErrorMessage("没有订单详情记录");
             List<StoreBuyersDimensionOrderDetailDTO> list=djDeliveryReturnSlipMapper.shippingDetails(orderSplitId);
             for(StoreBuyersDimensionOrderDetailDTO sbdod:list)
             {
                 sbdod.setImageDetail(address+sbdod.getImage());
             }
-
-            brandMap.put("StoreBuyersDimensionOrderDetailList",list);
-            PageInfo pageResult = new PageInfo(bListMap);
-
-            return ServerResponse.createBySuccess("查询成功", pageResult);
+            storeBuyersOrderDimensionDTO.setStoreBuyersDimensionOrderDetailList(list);
+            return ServerResponse.createBySuccess("查询成功", storeBuyersOrderDimensionDTO);
         } catch (Exception e) {
-            logger.error("店铺利润统计-查看货单详情异常", e);
-            return ServerResponse.createByErrorMessage("店铺利润统计-查看货单详情异常: " + e);
+            logger.error("店铺利润统计-查看买家订单详情异常", e);
+            return ServerResponse.createByErrorMessage("店铺利润统计-查看买家订单详情异常: " + e);
         }
     }
 

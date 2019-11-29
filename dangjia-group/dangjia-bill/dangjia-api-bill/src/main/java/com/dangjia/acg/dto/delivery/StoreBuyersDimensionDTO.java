@@ -2,6 +2,8 @@ package com.dangjia.acg.dto.delivery;
 
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * 店铺卖家维度实体
  */
@@ -15,4 +17,5 @@ public class StoreBuyersDimensionDTO {
     private String expenditure ;// 支出
     private String profit;// 利润
     private String houseId;//房子id
+    List<StoreBuyersDimensionDetailDTO> detaillist;
 }

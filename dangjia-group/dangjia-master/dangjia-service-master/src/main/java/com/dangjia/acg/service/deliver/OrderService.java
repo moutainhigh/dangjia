@@ -38,6 +38,7 @@ import com.dangjia.acg.modle.house.HouseDistribution;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.house.WarehouseDetail;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.order.DeliverOrderAddedProduct;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
@@ -123,7 +124,7 @@ public class OrderService {
     private static Logger logger = LoggerFactory.getLogger(OrderService.class);
 
     @Autowired
-    private BasicsStorefrontAPI basicsStorefrontAPI;
+    private IMasterDeliverOrderAddedProductMapper iMasterDeliverOrderAddedProductMapper;
 
 
     /**
@@ -751,6 +752,20 @@ public class OrderService {
                 orderSplitItem.setOrderItemId(orderItemIds.stream().collect(Collectors.joining(",")));
                 orderSplitItem.setOrderItemStr(stringBuilder.toString());
                 orderSplitItemMapper.updateByPrimaryKeySelective(orderSplitItem);
+                //添加增殖类商品
+                example1=new Example(DeliverOrderAddedProduct.class);
+                example1.createCriteria().andEqualTo(DeliverOrderAddedProduct.ANY_ORDER_ID,orderSplitItem.getId())
+                        .andEqualTo(DeliverOrderAddedProduct.DATA_STATUS,0);
+                List<DeliverOrderAddedProduct> deliverOrderAddedProducts = iMasterDeliverOrderAddedProductMapper.selectByExample(example1);
+                deliverOrderAddedProducts.forEach(deliverOrderAddedProduct -> {
+                    DeliverOrderAddedProduct deliverOrderAddedProduct1=new DeliverOrderAddedProduct();
+                    deliverOrderAddedProduct1.setAnyOrderId(orderSplitItem.getId());
+                    deliverOrderAddedProduct1.setAddedProductId(deliverOrderAddedProduct.getAddedProductId());
+                    deliverOrderAddedProduct1.setPrice(deliverOrderAddedProduct.getPrice());
+                    deliverOrderAddedProduct1.setProductName(deliverOrderAddedProduct.getProductName());
+                    deliverOrderAddedProduct1.setSource("2");
+                    iMasterDeliverOrderAddedProductMapper.insert(deliverOrderAddedProduct1);
+                });
             });
             return ServerResponse.createBySuccessMessage("提交成功");
         } catch (Exception e) {
