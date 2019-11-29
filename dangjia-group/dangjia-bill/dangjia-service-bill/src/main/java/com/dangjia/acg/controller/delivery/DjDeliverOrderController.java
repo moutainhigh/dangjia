@@ -136,13 +136,20 @@ public class DjDeliverOrderController implements DjDeliverOrderAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse refuseAppOrderStats(String userToken,String lists,String id) {
-        return djDeliverOrderService.refuseAppOrderStats(lists,id);
+    public ServerResponse refuseAppOrderStats(String userToken,String id) {
+        return djDeliverOrderService.refuseAppOrderStats(id);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse queryAppOrderInFoList(String userToken, PageDTO pageDTO,String id,Integer shippingState) {
+    public ServerResponse installAppOrderStats(String userToken,String id) {
+        return djDeliverOrderService.installAppOrderStats(id);
+    }
+
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryAppOrderInFoList(String userToken, PageDTO pageDTO,String id,String shippingState) {
         return djDeliverOrderService.queryAppOrderInFoList(pageDTO,id,shippingState);
     }
 
