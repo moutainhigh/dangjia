@@ -12,6 +12,7 @@ public class DjSplitDeliverOrderDTO {
     private String id;//订单id
     private String storefrontName;//店铺名称
     private String storefrontIcon;//店铺图标
+    private String storefrontType;
     private Date createDate;//创建时间
     private String orderNumber;//订单号
     private String shippingState;//按钮状态 1004 不展示按钮  1待收货   7 待安装
@@ -24,4 +25,7 @@ public class DjSplitDeliverOrderDTO {
     private String houseId;
     private String cityId;
     private String productName;
+    private String orderSplitId;
+    private String name;
+    private String workerId;
 }

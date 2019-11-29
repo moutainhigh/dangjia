@@ -159,6 +159,8 @@ public interface IBillDjDeliverOrderMapper extends Mapper<Order> {
 
     String queryValueIdArr(@Param("id") String id);
 
+    Integer queryTypeArr(@Param("id") String id);
+
     List<OrderStorefrontDTO> queryHumpDetail(@Param("orderId") String orderId);
 
     List<OrderStorefrontDTO> queryOrderSnapshot(@Param("orderId") String orderId);

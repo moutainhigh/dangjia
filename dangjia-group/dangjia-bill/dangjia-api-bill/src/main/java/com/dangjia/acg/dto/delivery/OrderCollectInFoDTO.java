@@ -41,10 +41,18 @@ public class OrderCollectInFoDTO {
 
     private Double totalAmount;//总价格
 
+    private Double actualPaymentPrice;//总价格
+
+
     private String storefrontName;//店铺名称
     private String storefrontIcon;//店铺图标
 
     private List<Map<String,Object>> list;//商品详情list
+
+    List<Map<String,Object>> orderStorefrontDTOS;////商品详情
+
+    private String name;
+    private String workerId;
 
     private String total;//件数
     private Integer itemListSize;
