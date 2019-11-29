@@ -362,6 +362,7 @@ public class OrderSplitService {
                     orderSplitItem.setSplitDeliverId(splitDeliver.getId());
                     orderSplitItemMapper.updateByPrimaryKeySelective(orderSplitItem);
 
+                    //发货单总额
                     splitDeliver.setTotalAmount(djSupApplicationProduct.getPrice() * orderSplitItem.getNum() + splitDeliver.getTotalAmount());//累计供应商价总价
                     splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
 
