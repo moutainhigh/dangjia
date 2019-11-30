@@ -1,7 +1,7 @@
 spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
-    url: jdbc:mysql://192.168.0.95:3306/dangjia_master?useUnicode=true
+    url: jdbc:mysql://192.168.1.95:3306/dangjia_master?useUnicode=true
     username: root
     password: root
     driverClassName: com.mysql.jdbc.Driver
@@ -21,20 +21,20 @@ spring:
     filters: stat,wall,log4j
     connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
     changsha:
-      url: jdbc:mysql://192.168.0.95:3306/dangjia_master?useUnicode=true
+      url: jdbc:mysql://192.168.1.95:3306/dangjia_master?useUnicode=true
       username: root
       password: root
     shenzhen:
-      url: jdbc:mysql://192.168.0.95:3306/dj_shenzhen?useUnicode=true
+      url: jdbc:mysql://192.168.1.95:3306/dj_shenzhen?useUnicode=true
       username: root
       password: root
     zhuzhou:
-      url: jdbc:mysql://192.168.0.95:3306/dj_zhuzhou?useUnicode=true
+      url: jdbc:mysql://192.168.1.95:3306/dj_zhuzhou?useUnicode=true
       username: root
       password: root
   elasticsearch:
     jest:
-      uris: http://192.168.0.95:9200
+      uris: http://192.168.1.95:9200
       read-timeout: 5000
 server:
   port: 8017
