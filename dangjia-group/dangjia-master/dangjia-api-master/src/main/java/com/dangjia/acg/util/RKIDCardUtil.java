@@ -34,6 +34,7 @@ public class RKIDCardUtil {
      * @return 有效：返回"" 无效：返回String信息
      */
     public static String getIDCardValidate(String IDStr) {
+        IDStr=IDStr.toLowerCase();
         String errorInfo;// 记录错误信息
         String[] ValCodeArr = {"1", "0", "x", "9", "8", "7", "6", "5", "4",
                 "3", "2"};
@@ -198,7 +199,7 @@ public class RKIDCardUtil {
     public static void main(String[] args) {
 //         String IDCardNum="210102820826411";
 //         String IDCardNum="210102198208264114";
-        String IDCardNum = "210181198807193116";
+        String IDCardNum = "43018119870902107X";
         RKIDCardUtil cc = new RKIDCardUtil();
         System.out.println(cc.getIDCardValidate(IDCardNum));
         // System.out.println(cc.isDate("1996-02-29"));
