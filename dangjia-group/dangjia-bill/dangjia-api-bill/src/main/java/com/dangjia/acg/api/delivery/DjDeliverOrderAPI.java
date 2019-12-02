@@ -148,7 +148,11 @@ public interface DjDeliverOrderAPI {
     @PostMapping("app/order/refuseAppOrderStats")
     @ApiOperation(value = "待收货（材料）详情 拒绝收货", notes = "待收货（材料）详情 拒绝收货")
     ServerResponse  refuseAppOrderStats(@RequestParam("userToken")String userToken,
-                                        @RequestParam("lists") String lists,
+                                        @RequestParam("id")String id);
+
+    @PostMapping("app/order/installAppOrderStats")
+    @ApiOperation(value = "确定安装", notes = "确定安装")
+    ServerResponse  installAppOrderStats(@RequestParam("userToken")String userToken,
                                         @RequestParam("id")String id);
 
     @PostMapping("app/order/queryAppOrderInFoList")
@@ -156,7 +160,7 @@ public interface DjDeliverOrderAPI {
     ServerResponse  queryAppOrderInFoList(@RequestParam("userToken")String userToken,
                                           @RequestParam("pageDTO") PageDTO pageDTO,
                                         @RequestParam("id") String id,
-                                        @RequestParam("shippingState")Integer shippingState);
+                                        @RequestParam("shippingState")String shippingState);
 
     @PostMapping("app/order/deleteAppOrder")
     @ApiOperation(value = "删除订单", notes = "删除订单")

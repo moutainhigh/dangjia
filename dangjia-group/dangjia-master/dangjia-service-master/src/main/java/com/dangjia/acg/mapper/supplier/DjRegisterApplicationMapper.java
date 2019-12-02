@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -23,6 +24,13 @@ public interface DjRegisterApplicationMapper extends Mapper<DjRegisterApplicatio
      */
     List<RegisterApplicationDTO> getAllRegistList(@Param("applicationStatus") String applicationStatus,
                                                   @Param("searchKey") String searchKey);
+
+    /**
+     * 查询重复申请
+     * @param map
+     * @return
+     */
+    List<DjRegisterApplication> queryDeWeight(Map<String,Object> map);
 
 
 }
