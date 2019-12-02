@@ -96,7 +96,6 @@
 			e.type,
 			e.type as unitType,
 			c.value_name_arr as valueNameArr,
-			e.type as unitType,
 			c.category_id as categoryId,
 			d.type as productType
 		FROM
