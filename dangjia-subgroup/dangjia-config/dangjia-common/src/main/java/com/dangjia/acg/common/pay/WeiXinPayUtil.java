@@ -131,7 +131,7 @@ public class WeiXinPayUtil {
         }
     }
     public static void main(String[] args) {
-        System.out.println("============="+getWeiXinSignURL("0.01", "555565413857", "http://172.16.30.95/",null));
+        System.out.println("============="+getWeiXinSignURL("0.01", "555565413857", "http://192.168.1.95/",null));
     }
     /**
      * 拼接XML请求路径，获取签名

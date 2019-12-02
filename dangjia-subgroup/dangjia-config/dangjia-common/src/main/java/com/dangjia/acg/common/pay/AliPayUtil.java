@@ -96,6 +96,6 @@ public class AliPayUtil {
     }
 
     public static void main(String[] args) {
-        System.out.println("============="+getAlipaySignUrl("123", "555565413854", "http://172.16.30.95/"));
+        System.out.println("============="+getAlipaySignUrl("123", "555565413854", "http://192.168.1.95/"));
     }
 }

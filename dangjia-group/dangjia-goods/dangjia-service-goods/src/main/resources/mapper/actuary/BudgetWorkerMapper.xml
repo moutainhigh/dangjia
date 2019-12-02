@@ -392,7 +392,7 @@ SELECT
         where abw.data_status = 0 and abw.house_id = #{houseId} and bgc.id = #{id}
     </select>
 
-    <!-- 根据房子id和工序id查询人工精算总价 -->
+    <!-- 根据房子id和工序id查询人工或者材料精算总价 -->
     <select id="queryMakeBudgetsBmList" resultType="com.dangjia.acg.dto.product.BasicsgDTO">
         select
             bg.id as bgId,

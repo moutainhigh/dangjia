@@ -112,7 +112,7 @@ public interface DjDeliveryReturnSlipMapper extends Mapper<DjDeliveryReturnSlip>
      * 店铺利润-买家维度
      * @return
      */
-    StoreBuyersDimensionDTO sellerDimensionById(@Param("orderSplitId") String orderSplitId);
+    StoreBuyersOrderDimensionDTO sellerDimensionById(@Param("orderSplitId") String orderSplitId);
 
     /**
      * 店铺利润-买家维度详情
