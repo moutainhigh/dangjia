@@ -569,7 +569,7 @@
         from  dj_deliver_split_deliver dsd
         inner join  dj_deliver_order_split_item dosi on dsd.id = dosi.split_deliver_id
         where dosi.order_split_id=#{orderSplitId}
-        GROUP BY dsd.id
+
     </select>
 
     <select id="supplierDimensionSupplyDetails" resultType="com.dangjia.acg.dto.delivery.SupplierDimensionSupplyDTO" >
