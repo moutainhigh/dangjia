@@ -187,13 +187,10 @@ public class MendMaterielService {
                     Integer i = mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
                     if (i <= 0)
                         return ServerResponse.createBySuccessMessage("全部退货失败");
-
                     MendMateriel mendMateriel=new MendMateriel();
                     mendMateriel.setId(id);
                     mendMateriel.setActualCount(Double.parseDouble(actualCount));
-
                     mendMaterialMapper.updateByPrimaryKey(mendMateriel);
-
                     return ServerResponse.createBySuccessMessage("全部退货成功");
                 }
 
@@ -234,7 +231,7 @@ public class MendMaterielService {
             return null;
         } catch (Exception e) {
             e.printStackTrace();
-            return ServerResponse.createByErrorMessage("查询失败");
+            return ServerResponse.createByErrorMessage("退货失败");
         }
     }
 
@@ -572,7 +569,7 @@ public class MendMaterielService {
                     mendOrderDTO.setMemberMobile(member.getMobile());
                 }
             }
-            Member worker = memberMapper.selectByPrimaryKey(mendOrder.getApplyMemberId());
+            Member worker = memberMapper.selectByPrimaryKey(mendOrder.getApplyMemberId());//申请人id
             if (worker != null) {
                 mendOrderDTO.setApplyMemberId(worker.getId());
                 mendOrderDTO.setApplyName(CommonUtil.isEmpty(worker.getName()) ? worker.getNickName() : worker.getName());
