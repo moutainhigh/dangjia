@@ -10,10 +10,8 @@ import java.util.Date;
 @Data
 public class StoreBuyersDimensionDetailDTO {
     private String orderSplitId;//要货单id
-    private String number; // 订单号
-    private Date createDate;//下单时间
-    private String cost;// 成本价
-    private String price ;// 销售价
-    private String  profit ;// 利润
+    private String orderNumber;//要货订单号
+    private String createDate;//要货下单时间
+    private String houseId; //房子id
 }
 

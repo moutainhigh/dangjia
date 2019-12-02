@@ -257,7 +257,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         WHERE
         1 = 1
         and  rmo.storefront_id = #{storefrontId}
-        and  rmo.state in (3)
+        and  rmo.state in (3,8) -- 部分退货
         and rmo.type in (2,5) -- 工匠申请退货、业主退货退款
         <if test="likeAddress!=null and likeAddress!=''">
             AND (CONCAT(

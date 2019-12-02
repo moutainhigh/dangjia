@@ -149,4 +149,7 @@ public class MendMateriel extends BaseEntity {
 	@Transient
 	List<Map<String,Object>> supplierIdList;//匹配那些供应商
 
+	@Transient
+	private String isNonPlatformSupplier;
+
 }

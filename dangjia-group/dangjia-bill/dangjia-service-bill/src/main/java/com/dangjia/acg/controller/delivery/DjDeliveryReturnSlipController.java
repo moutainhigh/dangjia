@@ -117,7 +117,13 @@ public class DjDeliveryReturnSlipController implements DjDeliveryReturnSlipAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse shippingDetails(HttpServletRequest request, PageDTO pageDTO, String orderSplitId) {
-        return djDeliveryReturnSlipService.shippingDetails(pageDTO,orderSplitId);
+    public ServerResponse shippingDetails(HttpServletRequest request, PageDTO pageDTO, String userId, String cityId,String orderSplitId) {
+        return djDeliveryReturnSlipService.shippingDetails(pageDTO,userId,cityId,orderSplitId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse sellerSplitDeliverDetails(HttpServletRequest request, PageDTO pageDTO,String userId, String cityId, String splitDeliverId) {
+        return djDeliveryReturnSlipService.sellerSplitDeliverDetails(request,pageDTO, userId,  cityId,splitDeliverId);
     }
 }

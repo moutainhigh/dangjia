@@ -108,19 +108,12 @@ public interface DjDeliveryReturnSlipMapper extends Mapper<DjDeliveryReturnSlip>
     List<SupplierDimensionOrderDetailDTO> supplierDimensionOrderDetails(@Param("houseId")  String houseId,@Param("storefrontId")  String storefrontId,@Param("cityId")  String cityId);
 
     List<SupplierDimensionGoodsDetailDTO> supplierDimensionGoodsDetails(@Param("orderSplitId")  String orderSplitId ,@Param("storefrontId")  String storefrontId );
-    /**
-     * 店铺利润-买家维度
-     * @return
-     */
-    StoreBuyersOrderDimensionDTO sellerDimensionById(@Param("orderSplitId") String orderSplitId);
 
     /**
      * 店铺利润-买家维度详情
-     * @param storefrontId
-     * @param cityId
      * @return
      */
-    List<StoreBuyersDimensionDetailDTO> sellerDimensionDetail(@Param("storefrontId") String storefrontId, @Param("cityId") String cityId,@Param("houseId") String houseId);
+    List<StoreBuyersDimensionDetailDTO> sellerDimensionDetail(@Param("houseId") String houseId);
 
 
     /**
@@ -156,6 +149,14 @@ public interface DjDeliveryReturnSlipMapper extends Mapper<DjDeliveryReturnSlip>
      * @return
      */
     List<StoreSupplyDimensionDetailDTO> storefrontProductDimensionDetail (@Param("storefrontId") String storefrontId, @Param("productId") String productId,@Param("cityId") String cityId);
+
+    /**
+     * 店铺利润统计-卖家维度-发货单详情
+     * @return
+     */
+
+    List<StoreSellerSplitDeliverDetailsDTO> sellerSplitDeliverDetails (@Param("splitDeliverId") String splitDeliverId,@Param("storefrontId") String storefrontId );
+
 }
 
 
