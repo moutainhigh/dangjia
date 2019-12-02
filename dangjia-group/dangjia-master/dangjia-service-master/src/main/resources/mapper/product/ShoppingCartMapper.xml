@@ -93,10 +93,12 @@
 			b.image,
 			b.sell_price AS sellPrice,
 			d.is_reservation_deliver AS isReservationDeliver,
-			d.type,
-			d.type unitType,
+			e.type,
+			e.type as unitType,
 			c.value_name_arr as valueNameArr,
-			e.type as unitType
+			e.type as unitType,
+			c.category_id as categoryId,
+			d.type as productType
 		FROM
 			dj_repair_shopping_cart a
 		INNER JOIN dj_basics_storefront_product b ON a.product_id = b.id

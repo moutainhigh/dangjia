@@ -1784,7 +1784,6 @@ public class DjDeliverOrderService {
                         AppointmentDTO appointmentDTO = appointmentDTOS.get(0);
                         orderStorefrontDTO.setProductName(appointmentDTO.getProductName());
                     }
-                    orderStorefrontDTO.setShippingType(state);
                 });
             }else {
                 orderStorefrontDTOS = iBillDjDeliverOrderMapper.queryDeliverOrderHump(houseId);
@@ -1804,7 +1803,6 @@ public class DjDeliverOrderService {
                             break;
                         }
                     }
-                    orderStorefrontDTO.setShippingType(state);
                     if(orderStorefrontDTO.getStorefrontType().equals("worker")){
                         Member member = this.queryWorker(orderStorefrontDTO.getHouseId(), orderStorefrontDTO.getWorkerTypeId());
                         if(member!=null) {

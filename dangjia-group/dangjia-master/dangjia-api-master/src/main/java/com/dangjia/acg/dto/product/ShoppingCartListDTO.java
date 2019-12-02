@@ -43,8 +43,8 @@ public class ShoppingCartListDTO {
     @ApiModelProperty("单位(个、条、箱、桶、米)")
     private String unitName;
 
-    @Desc(value = "分类编号")
-    @ApiModelProperty("分类编号")
+    @Desc(value = "分类id")
+    @ApiModelProperty("分类id")
     private String categoryId;
 
     @Desc(value = "产品类型:0：材料；1：包工包料 2:人工")
