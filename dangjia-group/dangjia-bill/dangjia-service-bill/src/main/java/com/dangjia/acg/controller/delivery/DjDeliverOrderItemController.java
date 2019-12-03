@@ -38,4 +38,10 @@ public class DjDeliverOrderItemController implements DjDeliverOrderItemAPI {
     public ServerResponse queryOrderSnapshot(String orderId) {
         return djDeliverOrderItemService.queryOrderSnapshot(orderId);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setCancellationOrder(String orderId) {
+        return djDeliverOrderItemService.setCancellationOrder(orderId);
+    }
 }
