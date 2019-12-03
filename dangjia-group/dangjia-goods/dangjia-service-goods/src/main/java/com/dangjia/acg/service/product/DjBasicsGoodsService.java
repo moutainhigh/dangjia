@@ -390,7 +390,7 @@ public class DjBasicsGoodsService {
               String valueId = newValueNameArr[i];
               AttributeValue attributeValue = iAttributeValueMapper.selectByPrimaryKey(valueId);
               if(attributeValue!= null&&StringUtils.isNotBlank(attributeValue.getName())){
-                  if (StringUtils.isNotBlank(strNewValueNameArr.toString())) {
+                  if (StringUtils.isBlank(strNewValueNameArr.toString())) {
                       strNewValueNameArr.append(attributeValue.getName());
                   } else {
                       strNewValueNameArr.append(",").append(attributeValue.getName());

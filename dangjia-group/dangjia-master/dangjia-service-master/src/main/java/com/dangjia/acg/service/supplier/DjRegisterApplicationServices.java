@@ -210,10 +210,10 @@ public class DjRegisterApplicationServices {
      * @param pageDTO
      * @return
      */
-    public ServerResponse<PageInfo> getRegisterList(PageDTO pageDTO, String applicationStatus, String searchKey) {
+    public ServerResponse<PageInfo> getRegisterList(PageDTO pageDTO, String applicationStatus, String searchKey,String cityId) {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         try {
-            List<RegisterApplicationDTO> registerList = djRegisterApplicationMapper.getAllRegistList(applicationStatus, searchKey);
+            List<RegisterApplicationDTO> registerList = djRegisterApplicationMapper.getAllRegistList(applicationStatus, searchKey,cityId);
             PageInfo pageResult = new PageInfo(registerList);
             pageResult.setList(registerList);
             return ServerResponse.createBySuccess("查询成功", pageResult);

@@ -44,7 +44,8 @@ public interface DjRegisterApplicationAPI {
     ServerResponse<PageInfo> getRegisterList(@RequestParam("request") HttpServletRequest request,
                                              @RequestParam("pageDTO") PageDTO pageDTO,
                                              @RequestParam("applicationStatus") String applicationStatus,
-                                             @RequestParam("searchKey")  String searchKey);
+                                             @RequestParam("searchKey")  String searchKey,
+                                             @RequestParam("cityId")  String cityId);
     @PostMapping("/sup/register/getRegisterInfoById")
     @ApiOperation(value = "查询申请ID查询对应的申请信息", notes = "查询申请ID查询对应的申请信息")
     ServerResponse getRegisterInfoById(@RequestParam("request") HttpServletRequest request,

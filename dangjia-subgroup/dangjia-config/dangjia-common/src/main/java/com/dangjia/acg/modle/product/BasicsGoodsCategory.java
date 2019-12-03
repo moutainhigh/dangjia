@@ -62,6 +62,10 @@ public class BasicsGoodsCategory extends GoodsBaseEntity {
     @ApiModelProperty("分类标签ID")
     private String categoryLabelId;//分类标签ID
 
+    @Column(name = "owner_display")
+    @Desc(value = "是否向业主展示（1是，0否）")
+    @ApiModelProperty("是否向业主展示（1是，0否）")
+    private String ownerDisplay;//分类标签ID
 
 
     //业主

@@ -23,7 +23,8 @@ public interface DjRegisterApplicationMapper extends Mapper<DjRegisterApplicatio
      * @return
      */
     List<RegisterApplicationDTO> getAllRegistList(@Param("applicationStatus") String applicationStatus,
-                                                  @Param("searchKey") String searchKey);
+                                                  @Param("searchKey") String searchKey,
+                                                  @Param("cityId") String cityId);
 
     /**
      * 查询重复申请

@@ -68,8 +68,8 @@ public class BasicsGoodsCategoryController implements BasicsGoodsCategoryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse insertBasicsGoodsCategory(HttpServletRequest request, String name, String parentId, String parentTop, Integer sort, String isLastCategory, String purchaseRestrictions, String brandIds, String coverImage, String categoryLabelId,String cityId) {
-        return basicsGoodsCategoryService.insertBasicsGoodsCategory(name, parentId, parentTop, sort, isLastCategory, purchaseRestrictions, brandIds, coverImage, categoryLabelId,cityId);
+    public ServerResponse insertBasicsGoodsCategory(HttpServletRequest request, String name, String parentId, String parentTop, Integer sort, String isLastCategory, String purchaseRestrictions, String brandIds, String coverImage, String categoryLabelId,String cityId,String ownerDisplay) {
+        return basicsGoodsCategoryService.insertBasicsGoodsCategory(name, parentId, parentTop, sort, isLastCategory, purchaseRestrictions, brandIds, coverImage, categoryLabelId,cityId,ownerDisplay);
     }
 
     /**
@@ -97,9 +97,10 @@ public class BasicsGoodsCategoryController implements BasicsGoodsCategoryAPI {
                                                       String purchaseRestrictions,
                                                       String brandIds, String coverImage,
                                                       String categoryLabelId,
-                                                      String cityId) {
+                                                      String cityId,
+                                                      String ownerDisplay) {
         return basicsGoodsCategoryService.doModifyBasicsGoodsCategory(id, name, parentId, parentTop,
-                sort, isLastCategory, purchaseRestrictions, brandIds, coverImage, categoryLabelId,cityId);
+                sort, isLastCategory, purchaseRestrictions, brandIds, coverImage, categoryLabelId,cityId,ownerDisplay);
     }
 
     /**
