@@ -26,7 +26,7 @@ spring:
       password: root
   elasticsearch:
     jest:
-      uris: http://192.168.1.95:9200
+      uris: http://192.168.0.229:9200
       read-timeout: 5000
 server:
   port: 8016
