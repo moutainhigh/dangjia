@@ -49,7 +49,7 @@
         <if test="categoryLabelId!=null and categoryLabelId!=''">
             and FIND_IN_SET(#{categoryLabelId},category_label_ids)
         </if>
-        ORDER BY create_date desc
+        ORDER BY sort,create_date asc
     </select>
 
     <!-- 根据父id查询下属商品类别 -->
@@ -57,7 +57,7 @@
         SELECT
         <include refid="all_columns"/>
         FROM dj_basics_goods_category where name =#{name}
-        ORDER BY create_date desc
+        ORDER BY sort,create_date asc
     </select>
     <select id="getProductList" resultType="com.dangjia.acg.modle.basics.HomeProductDTO">
         SELECT
@@ -223,8 +223,7 @@
         <if test="goodsName!=null and goodsName!=''">
             and exists (select 1 from dj_basics_goods t1 where t.id = t1.category_id and  t1.name like CONCAT('%',#{goodsName},'%'))
         </if>
-        ORDER BY
-            create_date DESC
+        ORDER BY sort,create_date asc
 
     </select>
 
@@ -279,6 +278,6 @@
         <if test="searchKey!=null and searchKey!=''">
             AND name LIKE CONCAT('%',#{searchKey},'%')
         </if>
-        ORDER BY create_date desc
+        ORDER BY sort,create_date asc
     </select>
 </mapper>
