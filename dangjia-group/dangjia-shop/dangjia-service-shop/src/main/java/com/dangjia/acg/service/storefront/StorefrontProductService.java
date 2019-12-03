@@ -431,7 +431,7 @@ public class StorefrontProductService {
             int i = istorefrontProductMapper.updateByPrimaryKeySelective(storefrontProduct);
 
             if (i > 0) {
-                //*************************************新增功能店:维护是否关联增值商品******************************************************
+                //*************************************新增功能点:维护是否关联增值商品******************************************************
                 String productTemplateId=storefrontProduct.getProdTemplateId();
                 StorefrontProductAddedRelation storefrontProductAddedRelation=new StorefrontProductAddedRelation();
                 storefrontProductAddedRelation.setProductId(productTemplateId);
