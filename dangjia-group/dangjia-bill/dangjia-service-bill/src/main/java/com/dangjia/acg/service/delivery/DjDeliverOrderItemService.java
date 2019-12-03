@@ -12,14 +12,17 @@ import com.dangjia.acg.dto.delivery.OrderStorefrontDTO;
 import com.dangjia.acg.dto.order.PaymentToBeMadeDTO;
 import com.dangjia.acg.mapper.delivery.BillDjDeliverOrderSplitItemMapper;
 import com.dangjia.acg.mapper.delivery.IBillDjDeliverOrderMapper;
+import com.dangjia.acg.mapper.pay.IBillBusinessOrderMapper;
 import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.service.product.BillProductTemplateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
 
@@ -39,6 +42,8 @@ public class DjDeliverOrderItemService {
     private BillProductTemplateService billProductTemplateService;
     @Autowired
     private DjDeliverOrderService djDeliverOrderService;
+    @Autowired
+    private IBillBusinessOrderMapper iBillBusinessOrderMapper;
 
     /**
      * 待付款/已取消订单详情
@@ -227,10 +232,31 @@ public class DjDeliverOrderItemService {
         } catch (Exception e) {
             e.printStackTrace();
             logger.info("查询失败", e);
-            return ServerResponse.createByErrorMessage("查询失败" + e);
+            return ServerResponse.createByErrorMessage("查询失败");
         }
     }
 
+
+    /**
+     * 取消订单
+     * @param orderId
+     * @return
+     */
+    public ServerResponse setCancellationOrder(String orderId) {
+        try {
+            Order order = iBillDjDeliverOrderMapper.selectByPrimaryKey(orderId);
+            Example example=new Example(BusinessOrder.class);
+            example.createCriteria().andEqualTo(BusinessOrder.NUMBER,order.getBusinessOrderNumber());
+            BusinessOrder businessOrder=new BusinessOrder();
+            businessOrder.setState(4);
+            iBillBusinessOrderMapper.updateByExample(businessOrder,example);
+            return ServerResponse.createBySuccessMessage("取消订单成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.info("取消订单失败", e);
+            return ServerResponse.createByErrorMessage("取消订单失败");
+        }
+    }
 
 
 

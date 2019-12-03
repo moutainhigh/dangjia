@@ -83,6 +83,7 @@
         city_id = #{cityId}
         AND data_status = 0
         AND mobile = #{mobile}
+        AND (application_status = 0 OR application_status = 1)
         <foreach collection="split" item="item" index="index" open="AND(" separator="OR" close=")">
              FIND_IN_SET(#{item},application_type)
         </foreach>

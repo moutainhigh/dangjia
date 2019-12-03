@@ -1,5 +1,7 @@
 package com.dangjia.acg.service.delivery;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.BasicsStorefrontAPI;
 import com.dangjia.acg.api.supplier.DjSupApplicationProductAPI;
 import com.dangjia.acg.api.supplier.DjSupplierAPI;
@@ -19,12 +21,14 @@ import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.supplier.DjSupplier;
+import com.dangjia.acg.service.repair.IBillMendDeliverMapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
@@ -67,6 +71,8 @@ public class DjDeliveryReturnSlipService {
     private IBillDjDeliverOrderItemMapper ibillDjDeliverOrderItemMapper;
     @Autowired
     private IBillDjDeliverOrderMapper ibillDjDeliverOrderMapper;
+    @Autowired
+    private IBillMendDeliverMapper iBillMendDeliverMapper;
 
     /**
      * 供货任务列表
@@ -139,7 +145,8 @@ public class DjDeliveryReturnSlipService {
      * @param id
      * @return
      */
-    public ServerResponse setDeliveryTask(String id, Integer invoiceType, Integer shippingState) {
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse setDeliveryTask(String id, Integer invoiceType, Integer shippingState, String jsonStr) {
         try {
             if(shippingState==1){
                 SplitDeliver splitDeliver = billDjDeliverSplitDeliverMapper.selectByPrimaryKey(id);
@@ -166,8 +173,16 @@ public class DjDeliveryReturnSlipService {
                     }
                 }
             }
-            if (djDeliveryReturnSlipMapper.setDeliveryTask(id, invoiceType,shippingState) > 0)
+            if (djDeliveryReturnSlipMapper.setDeliveryTask(id, invoiceType,shippingState) > 0) {
+                JSONArray jsonArr = JSONArray.parseArray(jsonStr);
+                jsonArr.forEach(o ->{
+                    JSONObject obj = (JSONObject) o;
+                    Double actualCount = obj.getDouble("actualCount");
+                    String productId = obj.getString("productId");
+//                    String
+                });
                 return ServerResponse.createBySuccessMessage("操作成功");
+            }
             return ServerResponse.createByErrorMessage("操作失败");
         } catch (Exception e) {
             logger.error("操作失败", e);

@@ -10,12 +10,14 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.product.ShoppingCartDTO;
 import com.dangjia.acg.dto.product.ShoppingCartListDTO;
+import com.dangjia.acg.mapper.delivery.IOrderItemMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberCollectMapper;
 import com.dangjia.acg.mapper.product.IMasterGoodsMapper;
 import com.dangjia.acg.mapper.product.IMasterProductTemplateMapper;
 import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
 import com.dangjia.acg.mapper.product.IShoppingCartMapper;
+import com.dangjia.acg.modle.deliver.OrderItem;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberCollect;
@@ -75,6 +77,8 @@ public class ShopCartService {
     private IHouseMapper iHouseMapper;
     @Autowired
     private ConfigUtil configUtil;
+    @Autowired
+    private IOrderItemMapper iOrderItemMapper;
 
     /**
      * 获取购物车列表
@@ -397,14 +401,15 @@ public class ShopCartService {
             for (Object o : jsonArr) {
                 JSONObject obj = (JSONObject) o;
                 Double shopCount=obj.getDouble("shopCount");
-                String productId=obj.getString("productId");
-                StorefrontProduct storefrontProduct = iMasterStorefrontProductMapper.selectByPrimaryKey(productId);
+                String orderItemId=obj.getString("orderItemId");
+                OrderItem orderItem = iOrderItemMapper.selectByPrimaryKey(orderItemId);
+                StorefrontProduct storefrontProduct = iMasterStorefrontProductMapper.selectByPrimaryKey(orderItem.getProductId());
                 DjBasicsProductTemplate djBasicsProductTemplate = iMasterProductTemplateMapper.selectByPrimaryKey(storefrontProduct.getProdTemplateId());
                 BasicsGoods goods = iMasterGoodsMapper.selectByPrimaryKey(djBasicsProductTemplate.getGoodsId());
                 //有房有精算  根据用户的member_id去区分
                 //无房无精算  根据用户的member_id去区分
                 //purchaseRestrictions:0自由购房；1有房无精算；2有房有精算
-                Integer purchaseRestrictions = iShoppingCartmapper.queryPurchaseRestrictions(productId);
+                Integer purchaseRestrictions = iShoppingCartmapper.queryPurchaseRestrictions(orderItem.getProductId());
                 Example example=new Example(House.class);
                 if(purchaseRestrictions==1){
                     example.createCriteria().andEqualTo(House.MEMBER_ID,member.getId())
@@ -420,13 +425,13 @@ public class ShopCartService {
                 //判断去重,如果有的话就购买数量加1
                 example = new Example(ShoppingCart.class);
                 example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, member.getId())
-                        .andEqualTo(ShoppingCart.PRODUCT_ID, productId)
+                        .andEqualTo(ShoppingCart.PRODUCT_ID, orderItem.getProductId())
                         .andEqualTo(ShoppingCart.STOREFRONT_ID,storefrontProduct.getStorefrontId());
                 List<ShoppingCart> list = iShoppingCartmapper.selectByExample(example);
                 if (list.size() == 0) {
                     ShoppingCart shoppingCart = new ShoppingCart();
                     shoppingCart.setMemberId(member.getId());
-                    shoppingCart.setProductId(productId);
+                    shoppingCart.setProductId(orderItem.getProductId());
                     shoppingCart.setProductSn(djBasicsProductTemplate.getProductSn());
                     shoppingCart.setProductName(storefrontProduct.getProductName());
                     shoppingCart.setPrice(new BigDecimal(storefrontProduct.getSellPrice()));

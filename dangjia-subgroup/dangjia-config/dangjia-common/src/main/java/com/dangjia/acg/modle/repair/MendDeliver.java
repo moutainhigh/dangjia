@@ -129,4 +129,9 @@ public class MendDeliver extends BaseEntity {
 	@ApiModelProperty("供应商结算单号")
 	private String receiptNum;
 
+	@Column(name = "sup_actual_count")
+	@Desc(value = "供应商实际退货数")
+	@ApiModelProperty("供应商实际退货数")
+	private Double supActualCount;
+
 }
