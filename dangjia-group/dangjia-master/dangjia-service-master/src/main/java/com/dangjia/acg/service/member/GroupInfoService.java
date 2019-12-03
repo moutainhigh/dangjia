@@ -5,6 +5,7 @@ import com.dangjia.acg.api.GroupAPI;
 import com.dangjia.acg.api.MessageAPI;
 import com.dangjia.acg.api.UserAPI;
 import com.dangjia.acg.common.constants.Constants;
+import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -12,6 +13,7 @@ import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.CreateGroupResultDTO;
+import com.dangjia.acg.dto.UserInfoResultDTO;
 import com.dangjia.acg.dto.group.GroupDTO;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.group.IGroupMapper;
@@ -27,6 +29,7 @@ import com.dangjia.acg.modle.group.GroupUserConfig;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.user.MainUser;
+import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -284,62 +287,66 @@ public class GroupInfoService {
     }
 
     public void registerJGUsers(String appType, String[] username, String[] prefixs) {
-//        if (username != null && username.length > 0) {
-//            for (int i = 0; i < username.length; i++) {
-//                UserInfoResultDTO userInfoResult = userAPI.getUserInfo(appType, username[i]);
-//                if (userInfoResult == null || CommonUtil.isEmpty(userInfoResult.getUsername())) {
-//                    String nickname;
-//                    String phone;
-//                    String avatar;
-//                    String signature = "";
-//                    String prefix = prefixs[i];
-//                    MainUser user = userMapper.selectByPrimaryKey(username[i]);
-//                    if (user == null) {
-//                        Member member = memberMapper.selectByPrimaryKey(username[i]);
-//                        if (member != null) {
-//                            if (!CommonUtil.isEmpty(member.getWorkerTypeId()) && CommonUtil.isEmpty(prefix)) {
-//                                WorkerType workerType = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
-//                                if (workerType != null) {
-//                                    prefix = workerType.getName();
-//                                    signature = String.valueOf(workerType.getType());
-//                                }
-//                            }
-//                            phone = member.getMobile();
-//                            nickname = member.getName();
-//                            avatar = StringUtils.isEmpty(member.getHead()) ? null :
-//                                    configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + member.getHead();
-//                        } else {
-//                            return;
-//                        }
-//                    } else {
-//                        Member member = memberMapper.selectByPrimaryKey(user.getMemberId());
-//                        if (member != null) {
-//                            if (!CommonUtil.isEmpty(member.getWorkerTypeId()) && CommonUtil.isEmpty(prefix)) {
-//                                WorkerType workerType = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
-//                                if (workerType != null) {
-//                                    signature = String.valueOf(workerType.getType());
-//                                    prefix = workerType.getName();
-//                                }
-//                            }
-//                            phone = member.getMobile();
-//                            nickname = member.getName();
-//                            avatar = StringUtils.isEmpty(member.getHead()) ? null :
-//                                    configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + member.getHead();
-//                        } else {
-//                            phone = "400-168-1231";
-//                            nickname = user.getUsername();
-//                            avatar = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + Utils.getHead();
-//                        }
-//                    }
-//                    if (!CommonUtil.isEmpty(prefix)) {
-//                        nickname = prefix + "-" + nickname;
-//                    }
-//                    userAPI.registerUsers(appType, new String[]{username[i]}, new String[]{username[i]});
-//                    userAPI.updateUserInfo(appType, username[i], nickname, null, signature, 0,
-//                            phone, null, avatar);
-//                }
-//            }
-//        }
+       try {
+           if (username != null && username.length > 0) {
+               for (int i = 0; i < username.length; i++) {
+                   UserInfoResultDTO userInfoResult = userAPI.getUserInfo(appType, username[i]);
+                   if (userInfoResult == null || CommonUtil.isEmpty(userInfoResult.getUsername())) {
+                       String nickname;
+                       String phone;
+                       String avatar;
+                       String signature = "";
+                       String prefix = prefixs[i];
+                       MainUser user = userMapper.selectByPrimaryKey(username[i]);
+                       if (user == null) {
+                           Member member = memberMapper.selectByPrimaryKey(username[i]);
+                           if (member != null) {
+                               if (!CommonUtil.isEmpty(member.getWorkerTypeId()) && CommonUtil.isEmpty(prefix)) {
+                                   WorkerType workerType = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
+                                   if (workerType != null) {
+                                       prefix = workerType.getName();
+                                       signature = String.valueOf(workerType.getType());
+                                   }
+                               }
+                               phone = member.getMobile();
+                               nickname = member.getName();
+                               avatar = StringUtils.isEmpty(member.getHead()) ? null :
+                                       configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + member.getHead();
+                           } else {
+                               return;
+                           }
+                       } else {
+                           Member member = memberMapper.selectByPrimaryKey(user.getMemberId());
+                           if (member != null) {
+                               if (!CommonUtil.isEmpty(member.getWorkerTypeId()) && CommonUtil.isEmpty(prefix)) {
+                                   WorkerType workerType = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
+                                   if (workerType != null) {
+                                       signature = String.valueOf(workerType.getType());
+                                       prefix = workerType.getName();
+                                   }
+                               }
+                               phone = member.getMobile();
+                               nickname = member.getName();
+                               avatar = StringUtils.isEmpty(member.getHead()) ? null :
+                                       configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + member.getHead();
+                           } else {
+                               phone = "400-168-1231";
+                               nickname = user.getUsername();
+                               avatar = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + Utils.getHead();
+                           }
+                       }
+                       if (!CommonUtil.isEmpty(prefix)) {
+                           nickname = prefix + "-" + nickname;
+                       }
+                       userAPI.registerUsers(appType, new String[]{username[i]}, new String[]{username[i]});
+                       userAPI.updateUserInfo(appType, username[i], nickname, null, signature, 0,
+                               phone, null, avatar);
+                   }
+               }
+           }
+       }catch (Exception e){
+           System.out.println(e);
+       }
     }
 
     /**
