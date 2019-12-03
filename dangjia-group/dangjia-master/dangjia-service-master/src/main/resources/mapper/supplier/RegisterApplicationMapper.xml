@@ -49,8 +49,8 @@
            and application_status = #{applicationStatus}
         </if>
         <if test="null!=searchKey and ''!=searchKey">
-            and (user_name like CONCAT('%',#{searchKey},'%')
-            or mobile like CONCAT('%',#{searchKey},'%'))
+            and (t.name like CONCAT('%',#{searchKey},'%')
+            or t.mobile like CONCAT('%',#{searchKey},'%'))
         </if>
         ORDER BY createDate DESC
 	</select>

@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -53,6 +52,7 @@ public class DjDeliverOrderItemService {
             paymentToBeMadeDTO.setTotalTransportationCost(order.getTotalTransportationCost());
             paymentToBeMadeDTO.setTotalStevedorageCost(order.getTotalStevedorageCost());
             paymentToBeMadeDTO.setTotalDiscountPrice(order.getTotalDiscountPrice());
+            paymentToBeMadeDTO.setActualPaymentPrice(order.getActualPaymentPrice());
             paymentToBeMadeDTO.setTotalAmount(order.getTotalAmount());
             paymentToBeMadeDTO.setOrderNumber(order.getOrderNumber());
             paymentToBeMadeDTO.setCreateDate(order.getCreateDate());
@@ -73,6 +73,13 @@ public class DjDeliverOrderItemService {
                         appointmentDTO.setValueNameArr(billProductTemplateService.getNewValueNameArr(appointmentDTO.getValueIdArr()));
                     }
                 });
+                if("worker".equals(orderStorefrontDTO.getStorefrontType())){
+                    Member member = djDeliverOrderService.queryWorker(orderStorefrontDTO.getHouseId(), orderStorefrontDTO.getWorkerTypeId());
+                    if(member!=null) {
+                        orderStorefrontDTO.setWorkerId(member.getId());
+                        orderStorefrontDTO.setWorkerName(member.getName());
+                    }
+                }
                 appointmentListDTO.setAppointmentDTOS(appointmentDTOS);
                 appointmentListDTO.setOrderStorefrontDTO(orderStorefrontDTO);
                 orderStorefrontDTO.setAppointmentDTOS(appointmentDTOS);
@@ -101,6 +108,7 @@ public class DjDeliverOrderItemService {
             paymentToBeMadeDTO.setTotalTransportationCost(order.getTotalTransportationCost());
             paymentToBeMadeDTO.setTotalStevedorageCost(order.getTotalStevedorageCost());
             paymentToBeMadeDTO.setTotalDiscountPrice(order.getTotalDiscountPrice());
+            paymentToBeMadeDTO.setActualPaymentPrice(order.getActualPaymentPrice());
             paymentToBeMadeDTO.setTotalAmount(order.getTotalAmount());
             paymentToBeMadeDTO.setOrderNumber(order.getOrderNumber());
             paymentToBeMadeDTO.setCreateDate(order.getCreateDate());
@@ -123,7 +131,7 @@ public class DjDeliverOrderItemService {
                         appointmentDTO.setValueNameArr(billProductTemplateService.getNewValueNameArr(appointmentDTO.getValueIdArr()));
                     }
                 });
-                if(orderStorefrontDTO.getStorefrontType().equals("worker")){
+                if("worker".equals(orderStorefrontDTO.getStorefrontType())){
                     Member member = djDeliverOrderService.queryWorker(orderStorefrontDTO.getHouseId(), orderStorefrontDTO.getWorkerTypeId());
                     if(member!=null) {
                         orderStorefrontDTO.setWorkerId(member.getId());
@@ -178,6 +186,7 @@ public class DjDeliverOrderItemService {
             paymentToBeMadeDTO.setTotalTransportationCost(order.getTotalTransportationCost());
             paymentToBeMadeDTO.setTotalStevedorageCost(order.getTotalStevedorageCost());
             paymentToBeMadeDTO.setTotalDiscountPrice(order.getTotalDiscountPrice());
+            paymentToBeMadeDTO.setActualPaymentPrice(order.getActualPaymentPrice());
             paymentToBeMadeDTO.setTotalAmount(order.getTotalAmount());
             paymentToBeMadeDTO.setOrderNumber(order.getOrderNumber());
             paymentToBeMadeDTO.setCreateDate(order.getCreateDate());
@@ -200,6 +209,13 @@ public class DjDeliverOrderItemService {
                         appointmentDTO.setValueNameArr(billProductTemplateService.getNewValueNameArr(appointmentDTO.getValueIdArr()));
                     }
                 });
+                if("worker".equals(orderStorefrontDTO.getStorefrontType())){
+                    Member member = djDeliverOrderService.queryWorker(orderStorefrontDTO.getHouseId(), orderStorefrontDTO.getWorkerTypeId());
+                    if(member!=null) {
+                        orderStorefrontDTO.setWorkerId(member.getId());
+                        orderStorefrontDTO.setWorkerName(member.getName());
+                    }
+                }
                 appointmentListDTO.setAppointmentDTOS(appointmentDTOS);
                 appointmentListDTO.setOrderStorefrontDTO(orderStorefrontDTO);
                 orderStorefrontDTO.setAppointmentDTOS(appointmentDTOS);

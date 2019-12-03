@@ -39,26 +39,31 @@ public class DjBasicsLabelService {
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse addCommodityLabels(String labelName, String labelValue,String cityId) {
         try {
-            if(CommonUtil.isEmpty(labelName))
+            if(CommonUtil.isEmpty(labelName)) {
                 return ServerResponse.createByErrorMessage("标签名不能为空");
-            if(CommonUtil.isEmpty(labelValue))
+            }
+            if(CommonUtil.isEmpty(labelValue)) {
                 return ServerResponse.createByErrorMessage("标签值不能为空");
+            }
             Example example = new Example(DjBasicsLabel.class);
             example.createCriteria().andEqualTo(DjBasicsLabel.NAME, labelName)
                     .andEqualTo(DjBasicsLabel.DATA_STATUS, 0).andEqualTo(DjBasicsLabel.CITY_ID,cityId);
-            if (djBasicsLabelMapper.selectByExample(example).size() > 0)
+            if (djBasicsLabelMapper.selectByExample(example).size() > 0) {
                 return ServerResponse.createByErrorMessage("该标签名称已存在");
+            }
             List<String> strings = Arrays.asList(labelValue.split(","));
             //判断集合是否有重复元素
             long count = strings.stream().distinct().count();
-            if (count < strings.size())
+            if (count < strings.size()) {
                 return ServerResponse.createByErrorMessage("标签值重复");
+            }
             example=new Example(DjBasicsLabelValue.class);
             example.createCriteria().andIn(DjBasicsLabelValue.NAME,strings)
                     .andEqualTo(DjBasicsLabelValue.DATA_STATUS,0);
             List<DjBasicsLabelValue> djBasicsLabelValues = djBasicsLabelValueMapper.selectByExample(example);
-            if(djBasicsLabelValues.size()>0)
+            if(djBasicsLabelValues.size()>0) {
                 return ServerResponse.createByErrorMessage("标签值已存在");
+            }
             DjBasicsLabel djBasicsLabel = new DjBasicsLabel();
             djBasicsLabel.setCityId(cityId);
             djBasicsLabel.setName(labelName);
@@ -91,17 +96,20 @@ public class DjBasicsLabelService {
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse updateCommodityLabels(String id, String labelName, String labelValue,String cityId) {
         try {
-            if(CommonUtil.isEmpty(labelName))
+            if(CommonUtil.isEmpty(labelName)) {
                 return ServerResponse.createByErrorMessage("标签名不能为空");
-            if(CommonUtil.isEmpty(labelValue))
+            }
+            if(CommonUtil.isEmpty(labelValue)) {
                 return ServerResponse.createByErrorMessage("标签值不能为空");
+            }
             DjBasicsLabel djBasicsLabel = djBasicsLabelMapper.selectByPrimaryKey(id);
             if (!djBasicsLabel.getName().equals(labelName)) {
                 Example example = new Example(DjBasicsLabel.class);
                 example.createCriteria().andEqualTo(DjBasicsLabel.NAME, labelName)
                         .andEqualTo(DjBasicsLabel.DATA_STATUS, 0).andEqualTo(DjBasicsLabel.CITY_ID,cityId);
-                if (djBasicsLabelMapper.selectByExample(example).size() > 0)
+                if (djBasicsLabelMapper.selectByExample(example).size() > 0) {
                     return ServerResponse.createByErrorMessage("该标签名称已存在");
+                }
                 djBasicsLabel.setName(labelName);
                 djBasicsLabel.setCityId(cityId);
                 djBasicsLabelMapper.updateByPrimaryKeySelective(djBasicsLabel);
@@ -109,8 +117,9 @@ public class DjBasicsLabelService {
             List<String> strings = Arrays.asList(labelValue.split(","));
             //判断集合是否有重复元素
             long count = strings.stream().distinct().count();
-            if (count < strings.size())
+            if (count < strings.size()) {
                 return ServerResponse.createByErrorMessage("标签值重复");
+            }
             Example example = new Example(DjBasicsLabelValue.class);
             example.createCriteria().andEqualTo(DjBasicsLabelValue.LABEL_ID, id);
             djBasicsLabelValueMapper.deleteByExample(example);
@@ -118,8 +127,9 @@ public class DjBasicsLabelService {
             example.createCriteria().andIn(DjBasicsLabelValue.NAME,strings)
                     .andEqualTo(DjBasicsLabelValue.DATA_STATUS,0);
             List<DjBasicsLabelValue> djBasicsLabelValues = djBasicsLabelValueMapper.selectByExample(example);
-            if(djBasicsLabelValues.size()>0)
+            if(djBasicsLabelValues.size()>0) {
                 return ServerResponse.createByErrorMessage("标签值已存在");
+            }
             strings.forEach(str->{
                 DjBasicsLabelValue djBasicsLabelValue = new DjBasicsLabelValue();
                 djBasicsLabelValue.setLabelId(djBasicsLabel.getId());
@@ -186,6 +196,7 @@ public class DjBasicsLabelService {
             Example example = new Example(DjBasicsLabelValue.class);
             example.createCriteria().andEqualTo(DjBasicsLabelValue.LABEL_ID, djBasicsLabel.getId())
                     .andEqualTo(DjBasicsLabelValue.DATA_STATUS, 0);
+            example.orderBy(DjBasicsLabelValue.DATA_STATUS).desc();
             djBasicsLabelDTO.setLabelValueList(djBasicsLabelValueMapper.selectByExample(example));
             labelDTOS.add(djBasicsLabelDTO);
         }

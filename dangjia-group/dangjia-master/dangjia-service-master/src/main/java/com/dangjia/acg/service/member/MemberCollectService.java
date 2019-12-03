@@ -263,8 +263,12 @@ public class MemberCollectService {
                 .andEqualTo(WebsiteVisit.DATA_STATUS, 0);
         example.orderBy(WebsiteVisit.COUNT).desc();
         List<WebsiteVisit> websiteVisits = iWebsiteVisitMapper.selectByExample(example);
+        String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
         if (websiteVisits.size() <= 0) {
             List<ActuarialProductAppDTO> djBasicsProductTemplates = iMemberCollectMapper.queryRandomProduct(12, cityId);
+            djBasicsProductTemplates.forEach(djBasicsProductTemplate -> {
+                djBasicsProductTemplate.setImage(imageAddress + djBasicsProductTemplate.getImage());
+            });
             return ServerResponse.createBySuccess("查询成功", djBasicsProductTemplates);
         } else {
             List<ActuarialProductAppDTO> djBasicsProductTemplates = new ArrayList<>();
@@ -282,7 +286,6 @@ public class MemberCollectService {
             if (djBasicsProductTemplates.size() < 12) {
                 djBasicsProductTemplates.addAll(iMemberCollectMapper.queryRandomProduct(12 - djBasicsProductTemplates.size(), cityId));
             }
-            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             djBasicsProductTemplates.forEach(djBasicsProductTemplate -> {
                 djBasicsProductTemplate.setImage(imageAddress + djBasicsProductTemplate.getImage());
             });
