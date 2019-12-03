@@ -432,11 +432,11 @@ public class StorefrontProductService {
 
             if (i > 0) {
                 //*************************************新增功能点:维护是否关联增值商品******************************************************
-                String productTemplateId=storefrontProduct.getProdTemplateId();
-                StorefrontProductAddedRelation storefrontProductAddedRelation=new StorefrontProductAddedRelation();
-                storefrontProductAddedRelation.setProductId(productTemplateId);
-                storefrontProductAddedRelation.setAddedProductId(storefrontProduct.getId());
-                iStorefrontProductAddedRelationMapper.insert(storefrontProductAddedRelation);
+//                String productTemplateId=storefrontProduct.getProdTemplateId();
+//                StorefrontProductAddedRelation storefrontProductAddedRelation=new StorefrontProductAddedRelation();
+//                storefrontProductAddedRelation.setProductId(productTemplateId);
+//                storefrontProductAddedRelation.setAddedProductId(storefrontProduct.getId());
+//                iStorefrontProductAddedRelationMapper.insert(storefrontProductAddedRelation);
                 return ServerResponse.createBySuccessMessage("修改成功");
             } else {
                 return ServerResponse.createByErrorMessage("修改失败");
