@@ -44,7 +44,7 @@
         FROM
             dj_register_application t
             LEFT JOIN dj_other_city t1 on t.city_id=t1.id
-        where 1=1
+        where t.city_id=#{cityId}
         <if test="null!=applicationStatus and ''!=applicationStatus">
            and application_status = #{applicationStatus}
         </if>
@@ -83,6 +83,7 @@
         city_id = #{cityId}
         AND data_status = 0
         AND mobile = #{mobile}
+        AND (application_status = 0 OR application_status = 1)
         <foreach collection="split" item="item" index="index" open="AND(" separator="OR" close=")">
              FIND_IN_SET(#{item},application_type)
         </foreach>

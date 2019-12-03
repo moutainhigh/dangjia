@@ -15,7 +15,8 @@
         is_last_category AS isLastCategory,
         purchase_restrictions AS purchaseRestrictions,
         cover_image AS coverImage,
-        category_label_ids categoryLabelId
+        category_label_ids categoryLabelId,
+        owner_display ownerDisplay
 	</sql>
     <!-- 删除对象 -->
     <delete id="deleteById" parameterType="java.lang.String">
@@ -35,7 +36,8 @@
             is_last_category AS isLastCategory,
             purchase_restrictions AS purchaseRestrictions,
             cover_image AS coverImage,
-            category_label_ids categoryLabelId
+            category_label_ids categoryLabelId,
+            owner_display ownerDisplay
 		FROM dj_basics_goods_category
 	</select>
 

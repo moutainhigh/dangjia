@@ -906,7 +906,7 @@ public class DjBasicsProductTemplateService {
             if (StringUtils.isNotBlank(valueId)) {
                 AttributeValue attributeValue = iAttributeValueMapper.selectByPrimaryKey(valueId);
                 if(attributeValue!=null&&StringUtils.isNotBlank(attributeValue.getName())){
-                    if (i == 0) {
+                    if (StringUtils.isBlank(strNewValueNameArr)) {
                         strNewValueNameArr = attributeValue.getName();
                     } else {
                         strNewValueNameArr = strNewValueNameArr + "," + attributeValue.getName();
