@@ -1,6 +1,5 @@
 package com.dangjia.acg.service.sale.store;
 
-import com.dangjia.acg.auth.config.RedisSessionDAO;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.ServerCode;
@@ -36,8 +35,6 @@ import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.collections.map.HashedMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -77,7 +74,6 @@ public class StoreManagementService {
     private ConfigMessageService configMessageService;
     @Autowired
     private UserMapper userMapper;
-    private static Logger logger = LoggerFactory.getLogger(RedisSessionDAO.class);
 
     @Autowired
     private DjAreaMatchMapper djAreaMatchMapper;

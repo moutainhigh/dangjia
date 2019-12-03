@@ -2,7 +2,6 @@ package com.dangjia.acg.service.core;
 
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.basics.WorkerGoodsAPI;
-import com.dangjia.acg.auth.config.RedisSessionDAO;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
@@ -49,8 +48,6 @@ import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -123,7 +120,6 @@ public class HouseFlowApplyService {
     @Autowired
     private UserMapper userMapper;
 
-    private static Logger logger = LoggerFactory.getLogger(RedisSessionDAO.class);
     /**
      * 工匠端工地记录
      */
