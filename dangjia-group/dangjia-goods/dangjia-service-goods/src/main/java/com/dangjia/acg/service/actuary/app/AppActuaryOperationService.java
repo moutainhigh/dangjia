@@ -387,7 +387,10 @@ public class AppActuaryOperationService {
 
             goodsDTO.setGoodsId(goods.getId());
             goodsDTO.setProductTemplateId(productTemplate.getId());
-            goodsDTO.setCategoryId(goodsCategory.getId());
+            if(goodsCategory!=null) {
+                goodsDTO.setCategoryId(goodsCategory.getId());
+                goodsDTO.setPurchaseRestrictions(goodsCategory.getPurchaseRestrictions());
+            }
             goodsDTO.setUnit(productTemplate.getUnitId());
             goodsDTO.setIsCalculatedArea("0");
             goodsDTO.setShopCount(0d);//购买总数 (精算的时候，用户手动填写的购买数量， 该单位是 product 的convertUnit换算单位 )
@@ -397,7 +400,6 @@ public class AppActuaryOperationService {
 
             goodsDTO.setGoodsId(goods.getId());
             goodsDTO.setProductTemplateId(productTemplate.getId());
-            goodsDTO.setCategoryId(goodsCategory.getId());
             goodsDTO.setUnit(productTemplate.getUnitId());
             goodsDTO.setIsCalculatedArea("0");
             goodsDTO.setShopCount(0d);//购买总数 (精算的时候，用户手动填写的购买数量， 该单位是 product 的convertUnit换算单位 )
@@ -408,12 +410,18 @@ public class AppActuaryOperationService {
             if(!CommonUtil.isEmpty(goods.getBrandId())){
                 Brand brand=iBrandMapper.selectByPrimaryKey(goods.getBrandId());
                 goodsDTO.setBrandName(brand.getName());
-                goodsDTO.setValueNameArr(goodsDTO.getBrandName()+" "+productTemplate.getValueNameArr());
+                if(!CommonUtil.isEmpty(goodsDTO.getValueNameArr())) {
+                    goodsDTO.setValueNameArr(goodsDTO.getBrandName()+" "+productTemplate.getValueNameArr());
+                }
             }
-            goodsDTO.setValueNameArr(goodsDTO.getValueNameArr().replaceAll(",", " "));
+
+            if(!CommonUtil.isEmpty(goodsDTO.getValueNameArr())) {
+                goodsDTO.setValueNameArr(goodsDTO.getValueNameArr().replaceAll(",", " "));
+            }else{
+                goodsDTO.setValueNameArr(productTemplate.getName());
+            }
             goodsDTO.setConvertQuality(productTemplate.getConvertQuality());
             goodsDTO.setConvertUnit(productTemplate.getConvertUnit());
-            goodsDTO.setPurchaseRestrictions(goodsCategory.getPurchaseRestrictions());
             goodsDTO.setSales(goods.getSales());
             goodsDTO.setIrreversibleReasons(goods.getIrreversibleReasons());
             goodsDTO.setIsShelfStatus(product.getIsShelfStatus());
@@ -538,8 +546,10 @@ public class AppActuaryOperationService {
                 if (brand != null) {
                     strbuf.append(brand.getName()).append(" ");
                 }
-                if (!CommonUtil.isEmpty(atId.getValueIdArr())) {
+                if (!CommonUtil.isEmpty(atId.getValueNameArr())) {
                     strbuf.append(atId.getValueNameArr().replaceAll(",", " "));
+                }else{
+                    strbuf.append(atId.getName());
                 }
                 AttributeValueDTO avDTO = new AttributeValueDTO();
                 avDTO.setAttributeValueId(atId.getId());
@@ -589,7 +599,7 @@ public class AppActuaryOperationService {
             if (brand!=null) {
                 strbuf.append(brand.getName()).append(" ");
             }
-            if (!CommonUtil.isEmpty(product.getValueIdArr())) {
+            if (!CommonUtil.isEmpty(product.getValueNameArr())) {
                 strbuf.append(product.getValueNameArr().replaceAll(",", " "));
             }
         }

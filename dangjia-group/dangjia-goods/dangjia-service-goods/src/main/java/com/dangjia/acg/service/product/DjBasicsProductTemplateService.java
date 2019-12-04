@@ -307,7 +307,7 @@ public class DjBasicsProductTemplateService {
         product.setPrice(basicsProductDTO.getPrice());//销售价
         product.setOtherName(basicsProductDTO.getOtherName());
         if (!StringUtils.isNoneBlank(basicsProductDTO.getValueNameArr())) {
-            product.setValueNameArr(null);
+            product.setValueNameArr(basicsProductDTO.getName());
         } else {
             product.setValueNameArr(basicsProductDTO.getValueNameArr().replaceAll(",", " "));
         }
