@@ -87,14 +87,29 @@ public class DjRegisterApplicationServices {
                 return ServerResponse.createByErrorMessage("支付密码不能为空");
             if (djRegisterApplication.getPayPassword().length() != 6)
                 return ServerResponse.createByErrorMessage("请设置6位数支付密码");
-            Example example = new Example(DjRegisterApplication.class);
-            example.createCriteria().andEqualTo(DjRegisterApplication.CITY_ID, djRegisterApplication.getCityId())
-                    .andEqualTo(DjRegisterApplication.DATA_STATUS, 0)
-                    .andEqualTo(DjRegisterApplication.MOBILE, djRegisterApplication.getMobile())
-                    .andNotEqualTo(DjRegisterApplication.APPLICATION_STATUS, 2)
-                    .andEqualTo(DjRegisterApplication.APPLICATION_TYPE, djRegisterApplication.getApplicationType());
-            if (djRegisterApplicationMapper.selectByExample(example).size() > 0)
-                return ServerResponse.createByErrorMessage("申请已存在");
+            Map<String,Object> map=new HashMap();
+            map.put("cityId",djRegisterApplication.getCityId());
+            map.put("mobile",djRegisterApplication.getMobile());
+            djRegisterApplication.getApplicationType().split(",");
+            map.put("split",djRegisterApplication.getApplicationType().split(","));
+            List<DjRegisterApplication> djRegisterApplications = djRegisterApplicationMapper.queryDeWeight(map);
+            if (djRegisterApplications.size() > 0){
+                return ServerResponse.createByErrorMessage("请勿重复申请");
+            }else {
+                Example example = new Example(DjRegisterApplication.class);
+                example.createCriteria().andEqualTo(DjRegisterApplication.CITY_ID, djRegisterApplication.getCityId())
+                        .andEqualTo(DjRegisterApplication.DATA_STATUS, 0)
+                        .andEqualTo(DjRegisterApplication.MOBILE, djRegisterApplication.getMobile())
+                        .andEqualTo(DjRegisterApplication.APPLICATION_TYPE, djRegisterApplication.getApplicationType())
+                        .andEqualTo(DjRegisterApplication.APPLICATION_STATUS,2);
+                DjRegisterApplication djRegisterApplication1 = djRegisterApplicationMapper.selectOneByExample(example);
+                if (null!=djRegisterApplication1){
+                    djRegisterApplication1.setApplicationStatus(0);
+                    djRegisterApplication1.setModifyDate(new Date());
+                    if (djRegisterApplicationMapper.updateByPrimaryKeySelective(djRegisterApplication1) > 0)
+                        return ServerResponse.createBySuccessMessage("申请成功");
+                }
+            }
             djRegisterApplication.setDataStatus(0);
             djRegisterApplication.setApplicationStatus(0);
             djRegisterApplication.setPassWord(DigestUtils.md5Hex(djRegisterApplication.getPassWord()));
@@ -210,10 +225,10 @@ public class DjRegisterApplicationServices {
      * @param pageDTO
      * @return
      */
-    public ServerResponse<PageInfo> getRegisterList(PageDTO pageDTO, String applicationStatus, String searchKey) {
+    public ServerResponse<PageInfo> getRegisterList(PageDTO pageDTO, String applicationStatus, String searchKey,String cityId) {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         try {
-            List<RegisterApplicationDTO> registerList = djRegisterApplicationMapper.getAllRegistList(applicationStatus, searchKey);
+            List<RegisterApplicationDTO> registerList = djRegisterApplicationMapper.getAllRegistList(applicationStatus, searchKey,cityId);
             PageInfo pageResult = new PageInfo(registerList);
             pageResult.setList(registerList);
             return ServerResponse.createBySuccess("查询成功", pageResult);
@@ -278,8 +293,23 @@ public class DjRegisterApplicationServices {
             djRegisterApplication.getApplicationType().split(",");
             map.put("split",djRegisterApplication.getApplicationType().split(","));
             List<DjRegisterApplication> djRegisterApplications = djRegisterApplicationMapper.queryDeWeight(map);
-            if (djRegisterApplications.size() > 0)
+            if (djRegisterApplications.size() > 0) {
                 return ServerResponse.createByErrorMessage("请勿重复申请");
+            }else {
+                Example example = new Example(DjRegisterApplication.class);
+                example.createCriteria().andEqualTo(DjRegisterApplication.CITY_ID, djRegisterApplication.getCityId())
+                        .andEqualTo(DjRegisterApplication.DATA_STATUS, 0)
+                        .andEqualTo(DjRegisterApplication.MOBILE, djRegisterApplication.getMobile())
+                        .andEqualTo(DjRegisterApplication.APPLICATION_TYPE, djRegisterApplication.getApplicationType())
+                        .andEqualTo(DjRegisterApplication.APPLICATION_STATUS,2);
+                DjRegisterApplication djRegisterApplication1 = djRegisterApplicationMapper.selectOneByExample(example);
+                if (null!=djRegisterApplication1){
+                    djRegisterApplication1.setApplicationStatus(0);
+                    djRegisterApplication1.setModifyDate(new Date());
+                    if (djRegisterApplicationMapper.updateByPrimaryKeySelective(djRegisterApplication1) > 0)
+                        return ServerResponse.createBySuccessMessage("申请成功");
+                }
+            }
             Example example = new Example(DjRegisterApplication.class);
             example.createCriteria().andEqualTo(DjRegisterApplication.CITY_ID, djRegisterApplication.getCityId())
                     .andEqualTo(DjRegisterApplication.DATA_STATUS, 0)
@@ -294,6 +324,7 @@ public class DjRegisterApplicationServices {
             djRegisterApplication.setMobile(djRegisterApplications.get(0).getMobile());
             djRegisterApplication.setCardNumber(djRegisterApplications.get(0).getCardNumber());
             djRegisterApplication.setCardImage(djRegisterApplications.get(0).getCardImage());
+            djRegisterApplication.setApplicationStatus(0);
             if (djRegisterApplicationMapper.insert(djRegisterApplication) > 0)
                 return ServerResponse.createBySuccessMessage("申请成功");
         } catch (Exception e) {

@@ -668,20 +668,32 @@
             t1.order_number orderNumber,
             t4.storefront_name storefrontName,
             t4.system_logo storefrontIcon,
-            t1.create_date as createDate,
-            t1.actual_payment_price as actualPaymentPrice,
+            t1.create_date AS createDate,
+            t1.actual_payment_price AS actualPaymentPrice,
             t1.total_amount totalAmount,
-            2 as shippingType,
-            t4.storefront_type as storefrontType,
-            t1.worker_type_id as workerTypeId
+            2 AS shippingType,
+            t4.storefront_type AS storefrontType,
+            t1.worker_type_id AS workerTypeId,
+            IF (
+                (
+                    SELECT
+                        count(1)
+                    FROM
+                        dj_deliver_order_item t2
+                    WHERE
+                        t2.is_reservation_deliver = '1'
+                    AND t1.id = t2.order_id
+                    AND (t2.reservation_deliver_time IS NULL OR t2.reservation_deliver_time='')
+                ) > 0,
+                '5',
+                '1004'
+            ) AS shippingState
         FROM
-            dj_deliver_order t1,
-            dj_pay_business_order t3,
-            dj_basics_storefront t4
-        WHERE 1=1
-        AND t1.business_order_number = t3.number
-        AND t3.state = 3
-        AND t1.storefont_id = t4.id
+            dj_deliver_order t1
+        INNER JOIN dj_pay_business_order t3 ON t1.business_order_number = t3.number
+        INNER JOIN dj_basics_storefront t4 ON t1.storefont_id = t4.id
+        WHERE
+            t3.state = 3
         AND t1.payment IS NOT NULL
         AND t1.house_id = #{houseId}
         AND EXISTS (
@@ -701,6 +713,7 @@
 
     <select id="queryAppointmentHump" resultType="com.dangjia.acg.dto.delivery.AppointmentDTO">
         SELECT
+            t.id as orderItemId,
             t.product_id productId,
             t.id orderItemId,
             t.storefont_id storefrontId,
@@ -719,7 +732,6 @@
             IFNULL(t.total_price,0) as totalPrice,
             t2.value_name_arr as valueNameArr,
             t2.value_id_arr as valueIdArr,
-
             t.is_reservation_deliver as isReservationDeliver,
             t.order_status as shippingType,
             IF(t.is_reservation_deliver='1','5','1004') as  shippingState,
@@ -755,11 +767,11 @@
             t1.total_amount totalAmount,
             <if test="state==2">
                 1 as shippingType,
+                '3,4' as shippingState
             </if>
             <if test="state==4">
-                5 as shippingType,
+                5 as shippingType
             </if>
-            IF(t1.order_source='1','3','3,4') as shippingState
         FROM
             dj_deliver_order t1,
             dj_pay_business_order t2
@@ -827,7 +839,8 @@
             t1.total_amount totalAmount,
             t4.mobile,
             t1.total_stevedorage_cost as totalStevedorageCost,
-            t4.storefront_type as storefrontType
+            t4.storefront_type as storefrontType,
+            t1.total_transportation_cost as totalTransportationCost
         FROM
             dj_deliver_order t1,
             dj_basics_storefront t4

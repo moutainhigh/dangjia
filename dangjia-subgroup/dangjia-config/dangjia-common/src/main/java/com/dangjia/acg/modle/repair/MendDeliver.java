@@ -129,4 +129,9 @@ public class MendDeliver extends BaseEntity {
 	@ApiModelProperty("供应商结算单号")
 	private String receiptNum;
 
+	@Column(name = "reasons")
+	@Desc(value = "部分退货原因")
+	@ApiModelProperty("部分退货原因")
+	private String reasons;
+
 }

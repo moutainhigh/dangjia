@@ -59,8 +59,6 @@ public class BillAppointmentService {
     private BillDjDeliverOrderSplitItemMapper billDjDeliverOrderSplitItemMapper;
 
     @Autowired
-    private BillDjDeliverSplitDeliverMapper billDjDeliverSplitDeliverMapper;
-    @Autowired
     private ConfigUtil configUtil;
 
     /**
@@ -107,7 +105,7 @@ public class BillAppointmentService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse insertAppointment(String userToken, String jsonStr,String reservationDeliverTime) {
+    public ServerResponse insertAppointment(String userToken, String jsonStr,String reservationDeliverTime, String orderIds) {
         try {
             Object object = memberAPI.getMember(userToken);
             if (object instanceof ServerResponse) {
@@ -115,31 +113,28 @@ public class BillAppointmentService {
             }
             JSONObject job = (JSONObject) object;
             Member member = job.toJavaObject(Member.class);
-            JSONObject villageObj = JSONObject.parseObject(jsonStr);
-            String objList = villageObj.getString("objList");
-            JSONArray jsonArr = JSONArray.parseArray(objList);
-            jsonArr.forEach(str -> {
-                JSONObject obj = (JSONObject) str;
-                String orderId = obj.getString("orderId");
-                String[] orderItemsIds = obj.getString("orderItemId").split(",");
-                Order djDeliverOrder = djDeliverOrderMapper.selectByPrimaryKey(orderId);
+            if(!CommonUtil.isEmpty(orderIds)) {//订单列表页面预约发货
+                Order order = djDeliverOrderMapper.selectByPrimaryKey(orderIds);
                 OrderSplit orderSplit = new OrderSplit();
                 Example example = new Example(OrderSplit.class);
                 orderSplit.setNumber("DJ" + 200000 + djDeliverOrderItemMapper.selectCountByExample(example));//要货单号
-                orderSplit.setHouseId(djDeliverOrder.getHouseId());
+                orderSplit.setHouseId(order.getHouseId());
                 orderSplit.setApplyStatus(0);//后台审核状态：0生成中, 1申请中, 2通过, 3不通过, 4业主待支付补货材料 后台(材料员)
                 orderSplit.setMemberId(member.getId());
                 orderSplit.setMemberName(member.getName());
                 orderSplit.setMobile(member.getMobile());
                 orderSplit.setWorkerTypeId(member.getWorkerTypeId());
-                orderSplit.setStorefrontId(djDeliverOrder.getStorefontId());
-                orderSplit.setCityId(djDeliverOrder.getCityId());
-                orderSplit.setOrderId(orderId);
+                orderSplit.setStorefrontId(order.getStorefontId());
+                orderSplit.setCityId(order.getCityId());
+                orderSplit.setOrderId(orderIds);
                 orderSplit.setIsReservationDeliver("1");
                 orderSplit.setReservationDeliverTime(DateUtil.toDate(reservationDeliverTime));
                 billDjDeliverOrderSplitMapper.insert(orderSplit);
-                for (String orderItemsId : orderItemsIds) {
-                    OrderItem orderItem = djDeliverOrderItemMapper.selectByPrimaryKey(orderItemsId);
+                example=new Example(OrderItem.class);
+                example.createCriteria().andEqualTo(OrderItem.ORDER_ID,orderIds)
+                        .andEqualTo(OrderItem.IS_RESERVATION_DELIVER,1);
+                List<OrderItem> orderItems = djDeliverOrderItemMapper.selectByExample(example);
+                orderItems.forEach(orderItem -> {
                     OrderSplitItem orderSplitItem = new OrderSplitItem();
                     orderSplitItem.setOrderSplitId(orderSplit.getId());
                     orderSplitItem.setProductId(orderItem.getProductId());
@@ -157,7 +152,7 @@ public class BillAppointmentService {
                     orderSplitItem.setImage(orderItem.getImage());//货品图片
                     orderSplitItem.setHouseId(orderItem.getHouseId());
                     orderSplitItem.setCityId(orderItem.getCityId());
-                    orderSplitItem.setAddressId(djDeliverOrder.getAddressId());
+                    orderSplitItem.setAddressId(order.getAddressId());
                     orderSplitItem.setStorefrontId(orderItem.getStorefontId());
                     StorefrontProduct storefrontProduct = billStoreFrontProductMapper.selectByPrimaryKey(orderItem.getProductId());
                     orderSplitItem.setIsDeliveryInstall(storefrontProduct.getIsDeliveryInstall());
@@ -167,8 +162,63 @@ public class BillAppointmentService {
                     billDjDeliverOrderSplitItemMapper.insert(orderSplitItem);
                     orderItem.setReservationDeliverTime(DateUtil.toDate(reservationDeliverTime));
                     djDeliverOrderItemMapper.updateByPrimaryKey(orderItem);
-                }
-            });
+                });
+            }else {//预约发货页面预约发货
+                JSONObject villageObj = JSONObject.parseObject(jsonStr);
+                String objList = villageObj.getString("objList");
+                JSONArray jsonArr = JSONArray.parseArray(objList);
+                jsonArr.forEach(str -> {
+                    JSONObject obj = (JSONObject) str;
+                    String orderId = obj.getString("orderId");
+                    String[] orderItemsIds = obj.getString("orderItemId").split(",");
+                    Order djDeliverOrder = djDeliverOrderMapper.selectByPrimaryKey(orderId);
+                    OrderSplit orderSplit = new OrderSplit();
+                    Example example = new Example(OrderSplit.class);
+                    orderSplit.setNumber("DJ" + 200000 + djDeliverOrderItemMapper.selectCountByExample(example));//要货单号
+                    orderSplit.setHouseId(djDeliverOrder.getHouseId());
+                    orderSplit.setApplyStatus(0);//后台审核状态：0生成中, 1申请中, 2通过, 3不通过, 4业主待支付补货材料 后台(材料员)
+                    orderSplit.setMemberId(member.getId());
+                    orderSplit.setMemberName(member.getName());
+                    orderSplit.setMobile(member.getMobile());
+                    orderSplit.setWorkerTypeId(member.getWorkerTypeId());
+                    orderSplit.setStorefrontId(djDeliverOrder.getStorefontId());
+                    orderSplit.setCityId(djDeliverOrder.getCityId());
+                    orderSplit.setOrderId(orderId);
+                    orderSplit.setIsReservationDeliver("1");
+                    orderSplit.setReservationDeliverTime(DateUtil.toDate(reservationDeliverTime));
+                    billDjDeliverOrderSplitMapper.insert(orderSplit);
+                    for (String orderItemsId : orderItemsIds) {
+                        OrderItem orderItem = djDeliverOrderItemMapper.selectByPrimaryKey(orderItemsId);
+                        OrderSplitItem orderSplitItem = new OrderSplitItem();
+                        orderSplitItem.setOrderSplitId(orderSplit.getId());
+                        orderSplitItem.setProductId(orderItem.getProductId());
+                        orderSplitItem.setProductSn(orderItem.getProductSn());
+                        orderSplitItem.setProductName(orderItem.getProductName());
+                        orderSplitItem.setPrice(orderItem.getPrice());
+                        orderSplitItem.setAskCount(orderItem.getAskCount());
+                        orderSplitItem.setCost(orderItem.getCost());
+                        orderSplitItem.setShopCount(orderItem.getShopCount());
+                        orderSplitItem.setNum(orderItem.getShopCount());
+                        orderSplitItem.setUnitName(orderItem.getUnitName());
+                        orderSplitItem.setTotalPrice(orderItem.getPrice() * orderItem.getShopCount());//单项总价 销售价
+                        orderSplitItem.setProductType(orderItem.getProductType());
+                        orderSplitItem.setCategoryId(orderItem.getCategoryId());
+                        orderSplitItem.setImage(orderItem.getImage());//货品图片
+                        orderSplitItem.setHouseId(orderItem.getHouseId());
+                        orderSplitItem.setCityId(orderItem.getCityId());
+                        orderSplitItem.setAddressId(djDeliverOrder.getAddressId());
+                        orderSplitItem.setStorefrontId(orderItem.getStorefontId());
+                        StorefrontProduct storefrontProduct = billStoreFrontProductMapper.selectByPrimaryKey(orderItem.getProductId());
+                        orderSplitItem.setIsDeliveryInstall(storefrontProduct.getIsDeliveryInstall());
+                        orderSplitItem.setOrderItemId(orderItem.getId());
+                        orderSplitItem.setIsReservationDeliver(1);//是否需要预约(1是，0否）
+                        orderSplitItem.setReservationDeliverTime(DateUtil.toDate(reservationDeliverTime));
+                        billDjDeliverOrderSplitItemMapper.insert(orderSplitItem);
+                        orderItem.setReservationDeliverTime(DateUtil.toDate(reservationDeliverTime));
+                        djDeliverOrderItemMapper.updateByPrimaryKey(orderItem);
+                    }
+                });
+            }
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             logger.info("操作失败", e);

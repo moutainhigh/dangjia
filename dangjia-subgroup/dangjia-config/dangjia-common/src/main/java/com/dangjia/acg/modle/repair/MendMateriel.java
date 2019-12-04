@@ -149,4 +149,9 @@ public class MendMateriel extends BaseEntity {
 	@Transient
 	List<Map<String,Object>> supplierIdList;//匹配那些供应商
 
+	@Column(name = "sup_actual_count")
+	@Desc(value = "供应商实际退货数")
+	@ApiModelProperty("供应商实际退货数")
+	private Double supActualCount;
+
 }

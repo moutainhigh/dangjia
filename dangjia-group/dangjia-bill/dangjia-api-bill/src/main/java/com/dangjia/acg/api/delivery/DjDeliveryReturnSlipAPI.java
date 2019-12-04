@@ -36,7 +36,9 @@ public interface DjDeliveryReturnSlipAPI {
     ServerResponse setDeliveryTask(@RequestParam("request") HttpServletRequest request,
                                    @RequestParam("id") String id,
                                    @RequestParam("invoiceType") Integer invoiceType,
-                                   @RequestParam("shippingState") Integer shippingState);
+                                   @RequestParam("shippingState") Integer shippingState,
+                                   @RequestParam("jsonStr") String jsonStr,
+                                   @RequestParam("reasons") String reasons);
 
     @PostMapping("/delivery/djDeliveryReturnSlip/querySupplierSettlementManagement")
     @ApiOperation(value = "供应商结算管理", notes = "供应商结算管理")

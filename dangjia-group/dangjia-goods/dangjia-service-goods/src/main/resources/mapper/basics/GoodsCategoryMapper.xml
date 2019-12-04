@@ -5,13 +5,18 @@
 <mapper namespace="com.dangjia.acg.mapper.basics.IGoodsCategoryMapper">
 
     <sql id="all_columns">
-        id,
-        name,
-        parent_id as parentId,
-        parent_top as parentTop,
+         id,
+        NAME,
+        parent_id AS parentId,
+        parent_top AS parentTop,
         image,
-        create_date as createDate,
-        modify_date as modifyDate
+        create_date AS createDate,
+        modify_date AS modifyDate,
+        is_last_category AS isLastCategory,
+        purchase_restrictions AS purchaseRestrictions,
+        cover_image AS coverImage,
+        category_label_ids categoryLabelId,
+        owner_display ownerDisplay
 	</sql>
     <!-- 删除对象 -->
     <delete id="deleteById" parameterType="java.lang.String">
@@ -19,33 +24,38 @@
 		WHERE id=#{id}
 	</delete>
     <!-- 查询所有 -->
-    <select id="query" resultType="com.dangjia.acg.modle.attribute.GoodsCategory">
+    <select id="query" resultType="com.dangjia.acg.modle.product.BasicsGoodsCategory">
 		SELECT
-            id,
-            name,
-            parent_id as parentId,
-            parent_top as parentTop,
+             id,
+            NAME,
+            parent_id AS parentId,
+            parent_top AS parentTop,
             image,
-            create_date as createDate,
-            modify_date as modifyDate
+            create_date AS createDate,
+            modify_date AS modifyDate,
+            is_last_category AS isLastCategory,
+            purchase_restrictions AS purchaseRestrictions,
+            cover_image AS coverImage,
+            category_label_ids categoryLabelId,
+            owner_display ownerDisplay
 		FROM dj_basics_goods_category
 	</select>
 
 
     <!-- 根据父id查询下属商品类别 -->
-    <select id="queryCategoryByParentId" resultType="com.dangjia.acg.modle.attribute.GoodsCategory">
+    <select id="queryCategoryByParentId" resultType="com.dangjia.acg.modle.product.BasicsGoodsCategory">
         SELECT
         <include refid="all_columns"/>
         FROM dj_basics_goods_category where parent_id =#{parentId}
-        ORDER BY create_date desc
+        ORDER BY sort,create_date asc
     </select>
 
     <!-- 根据父id查询下属商品类别 -->
-    <select id="queryCategoryByName" resultType="com.dangjia.acg.modle.attribute.GoodsCategory">
+    <select id="queryCategoryByName" resultType="com.dangjia.acg.modle.product.BasicsGoodsCategory">
         SELECT
         <include refid="all_columns"/>
         FROM dj_basics_goods_category where name =#{name}
-        ORDER BY create_date desc
+        ORDER BY sort,create_date asc
     </select>
     <select id="getProductList" resultType="com.dangjia.acg.modle.basics.HomeProductDTO">
         SELECT

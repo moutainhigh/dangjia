@@ -49,10 +49,7 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * author: Ronalcheng
@@ -302,6 +299,7 @@ public class OrderSplitService {
                 DjSupplier djSupplier = djSupplierAPI.queryDjSupplierByPass(supplierId);
                 if (djSupplier == null) {
                     //非平台供应商
+                    continue;
                 } else {
                     //正常状况下供应商
                     JsmsUtil.sendSupplier(djSupplier.getTelephone(), address + "submitNumber?cityId=" + house.getCityId());
@@ -452,21 +450,6 @@ return null;
             List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
             List<Map> mapList = new ArrayList<>();
             for (OrderSplitItem v : orderSplitItemList) {
-                boolean isAdd=false;
-                if (!CommonUtil.isEmpty(v.getSplitDeliverId())) {
-                    SplitDeliver deliver = splitDeliverMapper.selectByPrimaryKey(v.getSplitDeliverId());
-                    if(deliver!=null)
-                    {
-
-                        if (deliver.getShippingState() == 6) {
-                            isAdd=true;
-                        }
-                    }
-
-                }else {
-                    isAdd=true;
-                }
-                if(isAdd) {
                     v.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
                     Map map = BeanUtils.beanToMap(v);
                     DjSupplier djSupplier=   djSupplierAPI.queryDjSupplierById(v.getSupplierId());
@@ -475,11 +458,17 @@ return null;
                         map.put(DjSupplier.IS_NON_PLATFORM_SUPPERLIER, djSupplier.getIsNonPlatformSupperlier());
                     }
                     List<Map<String,Object>> supplierIdlist = splitDeliverMapper.getSupplierGoodsId(v.getHouseId(), v.getProductId());
-                    if(supplierIdlist==null)
-                        map.put("supplierIdlist",null);
-                    map.put("supplierIdlist",supplierIdlist);
+                    if(supplierIdlist.size()==0)
+                    {
+                        //非平台供應商
+                        supplierIdlist=splitDeliverMapper.queryNonPlatformSupplier();
+                        map.put("supplierIdlist",supplierIdlist);
+                    }
+                    else
+                    {
+                        map.put("supplierIdlist",supplierIdlist);//正常供應商
+                    }
                     mapList.add(map);
-                }
             }
             return ServerResponse.createBySuccess("查询成功", mapList);
         } catch (Exception e) {

@@ -51,8 +51,8 @@ public class DjRegisterApplicationController implements DjRegisterApplicationAPI
     @Override
     @ApiMethod
     public ServerResponse<PageInfo> getRegisterList(HttpServletRequest request,PageDTO pageDTO,
-                                                    String applicationStatus,String searchKey){
-        return djSupplierServices.getRegisterList(pageDTO,applicationStatus,searchKey);
+                                                    String applicationStatus,String searchKey,String cityId){
+        return djSupplierServices.getRegisterList(pageDTO,applicationStatus,searchKey,cityId);
     }
 
     /**

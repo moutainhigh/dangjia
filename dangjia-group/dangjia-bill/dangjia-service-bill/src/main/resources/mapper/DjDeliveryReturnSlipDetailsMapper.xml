@@ -57,7 +57,8 @@
             rmm.price,
             rmm.total_price as totalPrice,
             rmm.shop_count as shopCount,
-            rmm.actual_count as actualCount
+            rmm.actual_count as actualCount,
+            rmm.id as repairMendMaterielId
         FROM
             dj_repair_mend_deliver rmd
         INNER JOIN dj_repair_mend_materiel rmm ON rmm.repair_mend_deliver_id = rmd.id

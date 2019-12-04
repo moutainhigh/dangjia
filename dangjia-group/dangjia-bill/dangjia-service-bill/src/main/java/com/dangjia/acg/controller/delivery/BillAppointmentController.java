@@ -31,8 +31,8 @@ public class BillAppointmentController implements BillAppointmentAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse insertAppointment(HttpServletRequest request,String userToken,String jsonStr,String reservationDeliverTime) {
-        return billAppointmentService.insertAppointment(userToken,jsonStr,reservationDeliverTime);
+    public ServerResponse insertAppointment(HttpServletRequest request,String userToken,String jsonStr,String reservationDeliverTime,String orderIds) {
+        return billAppointmentService.insertAppointment(userToken,jsonStr,reservationDeliverTime,orderIds);
     }
 
     @Override

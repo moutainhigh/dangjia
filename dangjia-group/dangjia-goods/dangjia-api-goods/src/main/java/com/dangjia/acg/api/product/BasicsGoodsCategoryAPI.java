@@ -50,7 +50,8 @@ public interface BasicsGoodsCategoryAPI {
                                        @RequestParam("brandIds") String brandIds,
                                        @RequestParam("coverImage") String coverImage,
                                        @RequestParam("categoryLabelId") String categoryLabelId,
-                                             @RequestParam("cityId") String cityId);
+                                       @RequestParam("cityId") String cityId,
+                                       @RequestParam("ownerDisplay") String ownerDisplay);
 
     /**
      * 修改商品类别
@@ -70,7 +71,8 @@ public interface BasicsGoodsCategoryAPI {
                                          @RequestParam("brandIds") String brandIds,
                                          @RequestParam("coverImage") String coverImage,
                                          @RequestParam("categoryLabelId") String categoryLabelId,
-                                               @RequestParam("cityId") String cityId);
+                                         @RequestParam("cityId") String cityId,
+                                         @RequestParam("ownerDisplay") String ownerDisplay);
     /**
      * 查询商品类别列表
      *

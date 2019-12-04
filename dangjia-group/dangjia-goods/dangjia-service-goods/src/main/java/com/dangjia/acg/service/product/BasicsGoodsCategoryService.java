@@ -127,7 +127,8 @@ public class BasicsGoodsCategoryService {
                                                     String purchaseRestrictions,
                                                     String brandIds, String coverImage,
                                                     String categoryLabelId,
-                                                    String cityId) {
+                                                    String cityId,
+                                                    String ownerDisplay) {
         try {
             List<BasicsGoodsCategory> goodsCategoryList = iBasicsGoodsCategoryMapper.queryCategoryByName(name,cityId);//根据name查询商品对象
             if (goodsCategoryList.size() > 0)
@@ -146,6 +147,7 @@ public class BasicsGoodsCategoryService {
             category.setCoverImage(coverImage);
             category.setCategoryLabelId(categoryLabelId);
             category.setCityId(cityId);
+            category.setOwnerDisplay(ownerDisplay);
             iBasicsGoodsCategoryMapper.insert(category);
             //如果品牌不为空，则添加品牌信息
             if (StringUtils.isNoneBlank(brandIds)) {
@@ -175,7 +177,8 @@ public class BasicsGoodsCategoryService {
                                                       String purchaseRestrictions,
                                                       String brandIds, String coverImage,
                                                       String categoryLabelId,
-                                                      String cityId) {
+                                                      String cityId,
+                                                      String ownerDisplay) {
         try {
             BasicsGoodsCategory oldCategory = iBasicsGoodsCategoryMapper.selectByPrimaryKey(id);
             if (!oldCategory.getName().equals(name)) { //如果 是修改name
@@ -198,6 +201,7 @@ public class BasicsGoodsCategoryService {
             category.setPurchaseRestrictions(purchaseRestrictions);
             category.setCoverImage(coverImage);
             category.setCategoryLabelId(categoryLabelId);
+            category.setOwnerDisplay(ownerDisplay);
             iBasicsGoodsCategoryMapper.updateByPrimaryKeySelective(category);
             if (StringUtils.isNoneBlank(brandIds)) {
                 iBasicsGoodsCategoryMapper.deleteCategorysSeries(category.getId());
