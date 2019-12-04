@@ -299,6 +299,7 @@ public class OrderSplitService {
                 DjSupplier djSupplier = djSupplierAPI.queryDjSupplierByPass(supplierId);
                 if (djSupplier == null) {
                     //非平台供应商
+                    continue;
                 } else {
                     //正常状况下供应商
                     JsmsUtil.sendSupplier(djSupplier.getTelephone(), address + "submitNumber?cityId=" + house.getCityId());
