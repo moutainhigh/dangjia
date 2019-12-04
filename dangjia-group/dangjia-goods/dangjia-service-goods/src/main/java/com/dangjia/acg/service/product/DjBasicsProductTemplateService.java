@@ -607,11 +607,15 @@ public class DjBasicsProductTemplateService {
                 DjBasicsLabel djBasicsLabel = djBasicsLabelMapper.selectByPrimaryKey(dbpl.getLabelId());
                 DjBasicsProductLabelDTO djBasicsProductLabelDTO = new DjBasicsProductLabelDTO();
                 djBasicsProductLabelDTO.setLabelId(djBasicsLabel.getId());
-                djBasicsProductLabelDTO.setLabelValId(Arrays.asList(dbpl.getLabelValId().split(",")));
+                if(dbpl.getLabelValId()!=null&&StringUtils.isNotBlank(dbpl.getLabelValId())){
+                    djBasicsProductLabelDTO.setLabelValId(Arrays.asList(dbpl.getLabelValId().split(",")));
+                }else{
+                    djBasicsProductLabelDTO.setLabelValId(new ArrayList<>());
+                }
                 djBasicsProductLabelDTOS.add(djBasicsProductLabelDTO);
             });
-            if (djBasicsProductLabelDTOS.size() <= 0)
-                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            ///if (djBasicsProductLabelDTOS.size() <= 0)
+               // return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             return ServerResponse.createBySuccess("查询成功", djBasicsProductLabelDTOS);
         } catch (Exception e) {
             e.printStackTrace();
