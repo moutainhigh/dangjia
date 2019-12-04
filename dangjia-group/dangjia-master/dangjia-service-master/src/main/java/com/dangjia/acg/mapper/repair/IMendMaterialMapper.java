@@ -1,7 +1,6 @@
 package com.dangjia.acg.mapper.repair;
 
 import com.dangjia.acg.dto.house.WarehouseGoodsDTO;
-import com.dangjia.acg.dto.refund.OrderProgressDTO;
 import com.dangjia.acg.dto.repair.ReturnOrderProgressDTO;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import org.apache.ibatis.annotations.Param;

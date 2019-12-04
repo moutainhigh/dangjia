@@ -158,4 +158,10 @@ public class DjDeliverOrderController implements DjDeliverOrderAPI {
     public ServerResponse deleteAppOrder(String userToken,String id) {
         return djDeliverOrderService.deleteAppOrder(id);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setConfirmReceipt(String id) {
+        return djDeliverOrderService.setConfirmReceipt(id);
+    }
 }

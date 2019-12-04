@@ -1,4 +1,4 @@
-package com.dangjia.acg.service.repair;
+package com.dangjia.acg.mapper.repair;
 
 import com.dangjia.acg.modle.repair.MendDeliver;
 import org.springframework.stereotype.Repository;

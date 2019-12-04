@@ -42,7 +42,7 @@ public class RegisterApplicationDTO implements Serializable {
     private String applicationType;//申请类型 1:店铺 2:供应商
 
     @ApiModelProperty("审核状态 0:审核中 1:通过 2:不通过")
-    private Integer applicationStatus;//审核状态 0:审核中 1:通过 2:不通过
+    private String applicationStatus;//审核状态 0:审核中 1:通过 2:不通过
 
     @ApiModelProperty("失败原因")
     private String failReason;//失败原因

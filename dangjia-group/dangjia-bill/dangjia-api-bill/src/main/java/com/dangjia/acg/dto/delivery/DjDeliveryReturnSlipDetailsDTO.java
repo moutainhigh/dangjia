@@ -25,5 +25,6 @@ public class DjDeliveryReturnSlipDetailsDTO {
     private Integer actualCount;
     private Integer receive;
     private String orderSplitItemId;
+    private String repairMendMaterielId;
 
 }

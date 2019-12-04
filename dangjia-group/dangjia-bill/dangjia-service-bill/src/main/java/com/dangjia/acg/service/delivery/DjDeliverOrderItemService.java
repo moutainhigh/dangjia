@@ -249,7 +249,7 @@ public class DjDeliverOrderItemService {
             example.createCriteria().andEqualTo(BusinessOrder.NUMBER,order.getBusinessOrderNumber());
             BusinessOrder businessOrder=new BusinessOrder();
             businessOrder.setState(4);
-            iBillBusinessOrderMapper.updateByExample(businessOrder,example);
+            iBillBusinessOrderMapper.updateByExampleSelective(businessOrder,example);
             return ServerResponse.createBySuccessMessage("取消订单成功");
         } catch (Exception e) {
             e.printStackTrace();
