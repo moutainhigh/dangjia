@@ -16,7 +16,7 @@ import java.util.List;
  * Time: 下午 7:29
  */
 @Data
-public class PaymentToBeMadeDTO extends BaseEntity {
+public class PaymentToBeMadeDTO{
 
     private String houseName;
     private List<OrderStorefrontDTO> orderStorefrontDTOS;

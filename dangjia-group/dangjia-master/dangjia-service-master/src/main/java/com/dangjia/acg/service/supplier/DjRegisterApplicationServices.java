@@ -91,10 +91,25 @@ public class DjRegisterApplicationServices {
             example.createCriteria().andEqualTo(DjRegisterApplication.CITY_ID, djRegisterApplication.getCityId())
                     .andEqualTo(DjRegisterApplication.DATA_STATUS, 0)
                     .andEqualTo(DjRegisterApplication.MOBILE, djRegisterApplication.getMobile())
-                    .andNotEqualTo(DjRegisterApplication.APPLICATION_STATUS, 2)
-                    .andEqualTo(DjRegisterApplication.APPLICATION_TYPE, djRegisterApplication.getApplicationType());
-            if (djRegisterApplicationMapper.selectByExample(example).size() > 0)
+                    .andEqualTo(DjRegisterApplication.APPLICATION_TYPE, djRegisterApplication.getApplicationType())
+                    .andCondition("(application_status=0 OR application_status=1)");
+            if (djRegisterApplicationMapper.selectByExample(example).size() > 0) {
                 return ServerResponse.createByErrorMessage("申请已存在");
+            }else {
+                example = new Example(DjRegisterApplication.class);
+                example.createCriteria().andEqualTo(DjRegisterApplication.CITY_ID, djRegisterApplication.getCityId())
+                        .andEqualTo(DjRegisterApplication.DATA_STATUS, 0)
+                        .andEqualTo(DjRegisterApplication.MOBILE, djRegisterApplication.getMobile())
+                        .andEqualTo(DjRegisterApplication.APPLICATION_TYPE, djRegisterApplication.getApplicationType())
+                        .andEqualTo(DjRegisterApplication.APPLICATION_STATUS,2);
+                DjRegisterApplication djRegisterApplication1 = djRegisterApplicationMapper.selectOneByExample(example);
+                if (null!=djRegisterApplication1){
+                    djRegisterApplication1.setApplicationStatus(0);
+                    djRegisterApplication1.setModifyDate(new Date());
+                    if (djRegisterApplicationMapper.updateByPrimaryKeySelective(djRegisterApplication1) > 0)
+                        return ServerResponse.createBySuccessMessage("申请成功");
+                }
+            }
             djRegisterApplication.setDataStatus(0);
             djRegisterApplication.setApplicationStatus(0);
             djRegisterApplication.setPassWord(DigestUtils.md5Hex(djRegisterApplication.getPassWord()));

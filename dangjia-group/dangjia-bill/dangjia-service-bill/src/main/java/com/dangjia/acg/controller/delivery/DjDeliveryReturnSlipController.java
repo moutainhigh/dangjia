@@ -31,8 +31,8 @@ public class DjDeliveryReturnSlipController implements DjDeliveryReturnSlipAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse setDeliveryTask(HttpServletRequest request, String id, Integer invoiceType, Integer shippingState, String jsonStr) {
-        return djDeliveryReturnSlipService.setDeliveryTask(id, invoiceType, shippingState, jsonStr);
+    public ServerResponse setDeliveryTask(HttpServletRequest request, String id, Integer invoiceType, Integer shippingState, String jsonStr, String reasons) {
+        return djDeliveryReturnSlipService.setDeliveryTask(id, invoiceType, shippingState, jsonStr, reasons);
     }
 
     @Override

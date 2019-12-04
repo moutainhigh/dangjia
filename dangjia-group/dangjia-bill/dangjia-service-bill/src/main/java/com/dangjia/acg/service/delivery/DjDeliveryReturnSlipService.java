@@ -15,13 +15,16 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.delivery.*;
 import com.dangjia.acg.dto.supplier.SupplierLikeDTO;
 import com.dangjia.acg.mapper.delivery.*;
+import com.dangjia.acg.mapper.refund.IBillMendMaterialMapper;
 import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.deliver.OrderItem;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
+import com.dangjia.acg.modle.repair.MendDeliver;
+import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.supplier.DjSupplier;
-import com.dangjia.acg.service.repair.IBillMendDeliverMapper;
+import com.dangjia.acg.mapper.repair.IBillMendDeliverMapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -73,6 +76,8 @@ public class DjDeliveryReturnSlipService {
     private IBillDjDeliverOrderMapper ibillDjDeliverOrderMapper;
     @Autowired
     private IBillMendDeliverMapper iBillMendDeliverMapper;
+    @Autowired
+    private IBillMendMaterialMapper iBillMendMaterialMapper;
 
     /**
      * 供货任务列表
@@ -146,7 +151,7 @@ public class DjDeliveryReturnSlipService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse setDeliveryTask(String id, Integer invoiceType, Integer shippingState, String jsonStr) {
+    public ServerResponse setDeliveryTask(String id, Integer invoiceType, Integer shippingState, String jsonStr, String reasons) {
         try {
             if(shippingState==1){
                 SplitDeliver splitDeliver = billDjDeliverSplitDeliverMapper.selectByPrimaryKey(id);
@@ -177,10 +182,19 @@ public class DjDeliveryReturnSlipService {
                 JSONArray jsonArr = JSONArray.parseArray(jsonStr);
                 jsonArr.forEach(o ->{
                     JSONObject obj = (JSONObject) o;
-                    Double actualCount = obj.getDouble("actualCount");
-                    String productId = obj.getString("productId");
-//                    String
+                    Double supActualCount = obj.getDouble("supActualCount");
+                    String repairMendMaterielId = obj.getString("repairMendMaterielId");
+                    MendMateriel mendMateriel=new MendMateriel();
+                    mendMateriel.setId(repairMendMaterielId);
+                    mendMateriel.setSupActualCount(supActualCount);
+                    iBillMendMaterialMapper.updateByPrimaryKeySelective(mendMateriel);
                 });
+                if(!CommonUtil.isEmpty(reasons)){
+                    MendDeliver mendDeliver=new MendDeliver();
+                    mendDeliver.setId(id);
+                    mendDeliver.setReason(reasons);
+                    iBillMendDeliverMapper.updateByPrimaryKeySelective(mendDeliver);
+                }
                 return ServerResponse.createBySuccessMessage("操作成功");
             }
             return ServerResponse.createByErrorMessage("操作失败");

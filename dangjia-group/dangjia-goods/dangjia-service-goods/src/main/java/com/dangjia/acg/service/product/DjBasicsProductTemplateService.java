@@ -597,21 +597,26 @@ public class DjBasicsProductTemplateService {
      * @return
      */
     public ServerResponse queryProductLabels(String productId,String cityId) {
-        Example example=new Example(DjBasicsProductLabelVal.class);
-        example.createCriteria().andEqualTo(DjBasicsProductLabelVal.PRODUCT_ID,productId)
-        .andEqualTo(DjBasicsProductLabelVal.CITY_ID,cityId);
-        List<DjBasicsProductLabelVal> djBasicsProductLabelVals = djBasicsProductLabelValMapper.selectByExample(example);
-        List<DjBasicsProductLabelDTO> djBasicsProductLabelDTOS = new ArrayList<>();
-        djBasicsProductLabelVals.forEach(dbpl ->{
-            DjBasicsLabel djBasicsLabel = djBasicsLabelMapper.selectByPrimaryKey(dbpl.getLabelId());
-            DjBasicsProductLabelDTO djBasicsProductLabelDTO = new DjBasicsProductLabelDTO();
-            djBasicsProductLabelDTO.setLabelId(djBasicsLabel.getId());
-            djBasicsProductLabelDTO.setLabelValId(Arrays.asList(dbpl.getLabelValId().split(",")));
-            djBasicsProductLabelDTOS.add(djBasicsProductLabelDTO);
-        });
-        //if (djBasicsProductLabelDTOS.size() <= 0)
-          //  return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
-        return ServerResponse.createBySuccess("查询成功", djBasicsProductLabelDTOS);
+        try {
+            Example example=new Example(DjBasicsProductLabelVal.class);
+            example.createCriteria().andEqualTo(DjBasicsProductLabelVal.PRODUCT_ID,productId)
+            .andEqualTo(DjBasicsProductLabelVal.CITY_ID,cityId);
+            List<DjBasicsProductLabelVal> djBasicsProductLabelVals = djBasicsProductLabelValMapper.selectByExample(example);
+            List<DjBasicsProductLabelDTO> djBasicsProductLabelDTOS = new ArrayList<>();
+            djBasicsProductLabelVals.forEach(dbpl ->{
+                DjBasicsLabel djBasicsLabel = djBasicsLabelMapper.selectByPrimaryKey(dbpl.getLabelId());
+                DjBasicsProductLabelDTO djBasicsProductLabelDTO = new DjBasicsProductLabelDTO();
+                djBasicsProductLabelDTO.setLabelId(djBasicsLabel.getId());
+                djBasicsProductLabelDTO.setLabelValId(Arrays.asList(dbpl.getLabelValId().split(",")));
+                djBasicsProductLabelDTOS.add(djBasicsProductLabelDTO);
+            });
+            if (djBasicsProductLabelDTOS.size() <= 0)
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            return ServerResponse.createBySuccess("查询成功", djBasicsProductLabelDTOS);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
     }
 
 

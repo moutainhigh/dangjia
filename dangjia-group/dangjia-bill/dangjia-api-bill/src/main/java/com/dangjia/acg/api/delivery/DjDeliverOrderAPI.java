@@ -166,4 +166,7 @@ public interface DjDeliverOrderAPI {
     @ApiOperation(value = "删除订单", notes = "删除订单")
     ServerResponse deleteAppOrder(@RequestParam("userToken")String userToken,
                                           @RequestParam("id") String id);
+    @PostMapping("app/order/setConfirmReceipt")
+    @ApiOperation(value = "待收货列表-确认收货", notes = "收货列表-确认收货")
+    ServerResponse setConfirmReceipt(@RequestParam("id") String id);
 }

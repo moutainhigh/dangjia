@@ -123,7 +123,6 @@ public class DjDeliverOrderService {
     private BillProductTemplateService billProductTemplateService;
     @Autowired
     private IBillWarehouseMapper iBillWarehouseMapper;
-
     @Autowired
     private BillDjDeliverOrderSplitMapper billDjDeliverOrderSplitMapper;
 
@@ -1277,7 +1276,9 @@ public class DjDeliverOrderService {
                     }
                 }
             }
-
+            if(list.size()<=0){
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
+            }
             PageInfo pageResult = new PageInfo(list);
             return ServerResponse.createBySuccess("查询所有订单", pageResult);
         } catch (Exception e) {
@@ -1645,8 +1646,10 @@ public class DjDeliverOrderService {
         mapArr.put("appointmentDTOS", list);//商品详情
         List<Map<String, Object>> liatArr = new ArrayList<>();
         liatArr.add(mapArr);
+        if(liatArr.size()<=0){
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
+        }
         orderCollectInFoDTO.setOrderStorefrontDTOS(liatArr);
-
         return ServerResponse.createBySuccess("查询成功", orderCollectInFoDTO);
     }
 
@@ -1781,7 +1784,7 @@ public class DjDeliverOrderService {
                     orderStorefrontDTO.setProductCount(appointmentDTOS.size());
                     orderStorefrontDTO.setProductImageArr(getStartTwoImage(appointmentDTOS, imageAddress));
                     orderStorefrontDTO.setStorefrontIcon(imageAddress + orderStorefrontDTO.getStorefrontIcon());
-                    if (null != appointmentDTOS) {
+                    if (appointmentDTOS.size()>0) {
                         AppointmentDTO appointmentDTO = appointmentDTOS.get(0);
                         orderStorefrontDTO.setProductName(appointmentDTO.getProductName());
                     }
@@ -1793,7 +1796,7 @@ public class DjDeliverOrderService {
                     orderStorefrontDTO.setProductCount(appointmentDTOS.size());
                     orderStorefrontDTO.setProductImageArr(getStartTwoImage(appointmentDTOS, imageAddress));
                     orderStorefrontDTO.setStorefrontIcon(imageAddress + orderStorefrontDTO.getStorefrontIcon());
-                    if (null != appointmentDTOS) {
+                    if (appointmentDTOS.size()>0) {
                         AppointmentDTO appointmentDTO = appointmentDTOS.get(0);
                         orderStorefrontDTO.setProductName(appointmentDTO.getProductName());
                     }
@@ -1873,6 +1876,26 @@ public class DjDeliverOrderService {
             }
         }
         return imageUrl;
+    }
+
+
+    /**
+     * 待收货列表-确认收货
+     * @param id
+     * @return
+     */
+    public ServerResponse setConfirmReceipt(String id) {
+        try {
+            SplitDeliver splitDeliver=new SplitDeliver();
+            splitDeliver.setId(id);
+            splitDeliver.setShippingState(2);
+            billDjDeliverSplitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
+            return ServerResponse.createBySuccessMessage("操作成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("操作失败：", e);
+            return ServerResponse.createByErrorMessage("操作失败");
+        }
     }
 
 }
