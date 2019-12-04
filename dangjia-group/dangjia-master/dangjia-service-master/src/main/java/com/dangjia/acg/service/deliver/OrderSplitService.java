@@ -49,10 +49,7 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * author: Ronalcheng
@@ -302,6 +299,7 @@ public class OrderSplitService {
                 DjSupplier djSupplier = djSupplierAPI.queryDjSupplierByPass(supplierId);
                 if (djSupplier == null) {
                     //非平台供应商
+                    continue;
                 } else {
                     //正常状况下供应商
                     JsmsUtil.sendSupplier(djSupplier.getTelephone(), address + "submitNumber?cityId=" + house.getCityId());
@@ -460,9 +458,16 @@ return null;
                         map.put(DjSupplier.IS_NON_PLATFORM_SUPPERLIER, djSupplier.getIsNonPlatformSupperlier());
                     }
                     List<Map<String,Object>> supplierIdlist = splitDeliverMapper.getSupplierGoodsId(v.getHouseId(), v.getProductId());
-                    if(supplierIdlist==null)
-                        map.put("supplierIdlist",null);
-                    map.put("supplierIdlist",supplierIdlist);
+                    if(supplierIdlist.size()==0)
+                    {
+                        //非平台供應商
+                        supplierIdlist=splitDeliverMapper.queryNonPlatformSupplier();
+                        map.put("supplierIdlist",supplierIdlist);
+                    }
+                    else
+                    {
+                        map.put("supplierIdlist",supplierIdlist);//正常供應商
+                    }
                     mapList.add(map);
             }
             return ServerResponse.createBySuccess("查询成功", mapList);

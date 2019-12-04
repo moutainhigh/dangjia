@@ -118,18 +118,14 @@
         a.wait DESC
     </select>
 
-    <select id="getSupplierGoodsId" resultType="java.util.Map">
-       <!-- SELECT
-            d.supplier_id
-        FROM
-            `dj_deliver_order_split_item` si
-        INNER JOIN dj_deliver_split_deliver d ON si.split_deliver_id = d.id
-        WHERE
-            si.house_id = #{houseId}
-        AND si.product_sn =  #{productSn}
-        GROUP BY d.supplier_id
-        ORDER BY si.create_date DESC-->
+    <select id="queryNonPlatformSupplier" resultType="java.util.Map">
+        SELECT
+        distinct  IFNULL(ds.id ,'' )  as supplierId,IFNULL(ds.name,'') as name
+        FROM dj_supplier ds where ds.is_non_platform_supplier='1'
+    </select>
 
+
+    <select id="getSupplierGoodsId" resultType="java.util.Map">
         SELECT
         distinct  IFNULL(d.sup_id ,'' )  as supplierId,IFNULL(ds.name,'') as name
         FROM

@@ -3,8 +3,10 @@ package com.dangjia.acg.mapper.delivery;
 import com.dangjia.acg.dto.deliver.SupplierDeliverDTO;
 import com.dangjia.acg.dto.finance.WebSplitDeliverItemDTO;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
+import com.dangjia.acg.modle.supplier.DjSupplier;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.bind.annotation.RequestParam;
 import tk.mybatis.mapper.common.Mapper;
 
 import java.util.List;
@@ -30,6 +32,10 @@ public interface ISplitDeliverMapper extends Mapper<SplitDeliver> {
                                                         @Param("beginDate") String beginDate,
                                                         @Param("endDate") String endDate);
     List<Map<String,Object>> getSupplierGoodsId(@Param("houseId") String houseId, @Param("productSn") String productSn);
+
+    //查詢非平台供應商
+    List<Map<String,Object>> queryNonPlatformSupplier();
+
     List<Map<String,Object>> getMendMaterialSupplierId(@Param("houseId") String houseId, @Param("productId") String productId);
 
     /*根据供应商id查询要货列表/模糊查询要货单列表*/
