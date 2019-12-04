@@ -309,6 +309,7 @@ public class DjRegisterApplicationServices {
             djRegisterApplication.setMobile(djRegisterApplications.get(0).getMobile());
             djRegisterApplication.setCardNumber(djRegisterApplications.get(0).getCardNumber());
             djRegisterApplication.setCardImage(djRegisterApplications.get(0).getCardImage());
+            djRegisterApplication.setApplicationStatus(0);
             if (djRegisterApplicationMapper.insert(djRegisterApplication) > 0)
                 return ServerResponse.createBySuccessMessage("申请成功");
         } catch (Exception e) {
