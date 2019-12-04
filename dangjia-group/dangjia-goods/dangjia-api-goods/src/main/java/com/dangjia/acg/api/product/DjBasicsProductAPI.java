@@ -33,6 +33,21 @@ public interface DjBasicsProductAPI {
                                     @RequestParam("name")String name,
                                     @RequestParam("cityId")String cityId);
 
+    /**
+     *
+     * @param request
+     * @param name 商品名称
+     * @param productSn 商品编码
+     * @param cityId 城市ID
+     * @return
+     */
+    @PostMapping("/product/djBasicsProduct/checkProductSnOrNameExit")
+    @ApiOperation(value = "判断当前商品的名称和编码是否存在", notes = "判断当前商品的名称和编码是否存在")
+    ServerResponse checkProductSnOrNameExit(@RequestParam("request")HttpServletRequest request,
+                                    @RequestParam("name")String name,
+                                    @RequestParam("productSn")String productSn,
+                                    @RequestParam("cityId")String cityId);
+
 
     @PostMapping("/app/product/djBasicsProduct/getNewValueNameArr")
     @ApiOperation(value = "根据货品id查询规格", notes = "根据货品id查询规格")
