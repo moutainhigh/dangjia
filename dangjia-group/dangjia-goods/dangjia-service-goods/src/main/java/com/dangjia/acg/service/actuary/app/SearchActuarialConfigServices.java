@@ -108,7 +108,7 @@ public class SearchActuarialConfigServices {
                 }
                 //查询规格名称
                 if (StringUtils.isNotBlank(ap.getValueIdArr())) {
-                    ap.setValueNameArr(goodsProductTemplateService.getNewValueNameArr(ap.getValueIdArr()));
+                    ap.setValueNameArr(goodsProductTemplateService.getNewValueNameArr(ap.getValueIdArr()).replaceAll(",", " "));
                 }
             }
         }

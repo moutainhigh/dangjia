@@ -75,7 +75,7 @@ public class DjDeliverOrderItemService {
                 appointmentDTOS.forEach(appointmentDTO -> {
                     appointmentDTO.setImage(imageAddress+appointmentDTO.getImage());
                     if(!CommonUtil.isEmpty(appointmentDTO.getValueIdArr())) {
-                        appointmentDTO.setValueNameArr(billProductTemplateService.getNewValueNameArr(appointmentDTO.getValueIdArr()));
+                        appointmentDTO.setValueNameArr(billProductTemplateService.getNewValueNameArr(appointmentDTO.getValueIdArr()).replaceAll(",", " "));
                     }
                 });
                 if("worker".equals(orderStorefrontDTO.getStorefrontType())){
@@ -133,7 +133,7 @@ public class DjDeliverOrderItemService {
                 appointmentDTOS.forEach(appointmentDTO -> {
                     appointmentDTO.setImage(imageAddress+appointmentDTO.getImage());
                     if(!CommonUtil.isEmpty(appointmentDTO.getValueIdArr())) {
-                        appointmentDTO.setValueNameArr(billProductTemplateService.getNewValueNameArr(appointmentDTO.getValueIdArr()));
+                        appointmentDTO.setValueNameArr(billProductTemplateService.getNewValueNameArr(appointmentDTO.getValueIdArr()).replaceAll(",", " "));
                     }
                 });
                 if("worker".equals(orderStorefrontDTO.getStorefrontType())){
@@ -211,7 +211,7 @@ public class DjDeliverOrderItemService {
                 appointmentDTOS.forEach(appointmentDTO -> {
                     appointmentDTO.setImage(imageAddress+appointmentDTO.getImage());
                     if(!CommonUtil.isEmpty(appointmentDTO.getValueIdArr())) {
-                        appointmentDTO.setValueNameArr(billProductTemplateService.getNewValueNameArr(appointmentDTO.getValueIdArr()));
+                        appointmentDTO.setValueNameArr(billProductTemplateService.getNewValueNameArr(appointmentDTO.getValueIdArr()).replaceAll(",", " "));
                     }
                 });
                 if("worker".equals(orderStorefrontDTO.getStorefrontType())){

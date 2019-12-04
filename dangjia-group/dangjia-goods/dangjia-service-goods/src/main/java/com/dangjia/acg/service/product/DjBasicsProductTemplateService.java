@@ -5,26 +5,23 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
-import com.dangjia.acg.common.pay.domain.UserInfo;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.basics.ProductDTO;
 import com.dangjia.acg.dto.product.*;
-import com.dangjia.acg.mapper.basics.*;
+import com.dangjia.acg.mapper.basics.IAttributeValueMapper;
+import com.dangjia.acg.mapper.basics.ILabelMapper;
+import com.dangjia.acg.mapper.basics.ITechnologyMapper;
+import com.dangjia.acg.mapper.basics.IUnitMapper;
 import com.dangjia.acg.mapper.product.*;
-import com.dangjia.acg.mapper.storefront.*;
+import com.dangjia.acg.mapper.storefront.IGoodsStorefrontProductAddedRelationMapper;
 import com.dangjia.acg.modle.attribute.AttributeValue;
 import com.dangjia.acg.modle.basics.Label;
-import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.brand.Unit;
-import com.dangjia.acg.modle.other.City;
 import com.dangjia.acg.modle.product.*;
-import com.dangjia.acg.modle.storefront.Storefront;
-import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.modle.storefront.StorefrontProductAddedRelation;
-import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.service.basics.TechnologyService;
 import com.dangjia.acg.service.storefront.GoodsStorefrontProductService;
 import com.dangjia.acg.util.StringTool;
@@ -37,8 +34,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
+
 import javax.servlet.http.HttpServletRequest;
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -312,7 +309,7 @@ public class DjBasicsProductTemplateService {
         if (!StringUtils.isNoneBlank(basicsProductDTO.getValueNameArr())) {
             product.setValueNameArr(null);
         } else {
-            product.setValueNameArr(basicsProductDTO.getValueNameArr());
+            product.setValueNameArr(basicsProductDTO.getValueNameArr().replaceAll(",", " "));
         }
         if (!StringUtils.isNoneBlank(basicsProductDTO.getValueIdArr())) {
             product.setValueIdArr(null);

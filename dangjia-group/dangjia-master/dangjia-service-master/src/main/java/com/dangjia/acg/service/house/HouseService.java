@@ -449,7 +449,7 @@ public class HouseService {
                 }
                 //查询规格名称
                 if (StringUtils.isNotBlank(ap.getValueIdArr())) {
-                    ap.setValueNameArr(masterProductTemplateService.getNewValueNameArr(ap.getValueIdArr()));
+                    ap.setValueNameArr(masterProductTemplateService.getNewValueNameArr(ap.getValueIdArr()).replaceAll(",", " "));
                 }
             }
         }
