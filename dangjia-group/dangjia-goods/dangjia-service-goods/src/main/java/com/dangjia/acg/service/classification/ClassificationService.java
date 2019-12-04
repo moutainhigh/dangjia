@@ -9,6 +9,7 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.basics.IGoodsCategoryMapper;
 import com.dangjia.acg.modle.attribute.GoodsCategory;
 import com.dangjia.acg.modle.basics.HomeProductDTO;
+import com.dangjia.acg.modle.product.BasicsGoodsCategory;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,12 +41,12 @@ public class ClassificationService {
                 .andEqualTo(GoodsCategory.DATA_STATUS, 0)
                 .andEqualTo(GoodsCategory.CITY_ID,cityId);
         example.orderBy(GoodsCategory.SORT).asc();
-        List<GoodsCategory> goodsCategoryList = iGoodsCategoryMapper.selectByExample(example);
+        List<BasicsGoodsCategory> goodsCategoryList = iGoodsCategoryMapper.selectByExample(example);
         if (goodsCategoryList.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-        for (GoodsCategory goodsCategory : goodsCategoryList) {
+        for (BasicsGoodsCategory goodsCategory : goodsCategoryList) {
             String imageUrl = goodsCategory.getImage();
             goodsCategory.setImage(CommonUtil.isEmpty(imageUrl) ? null : (imageAddress + imageUrl));
         }
