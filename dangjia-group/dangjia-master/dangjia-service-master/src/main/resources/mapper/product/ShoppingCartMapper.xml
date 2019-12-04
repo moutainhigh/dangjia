@@ -140,16 +140,6 @@
 		AND bsp.id = #{storefrontProductId}
 	</select>
 
-	<select id="queryWhetherThereIsActuarial" resultType="com.dangjia.acg.modle.house.House">
-		SELECT
-			h.*
-		FROM
-			dj_house h,
-			dj_actuary_budget_material abm
-		WHERE
-			h.id = abm.house_id
-		AND h.member_id =
-	</select>
 
 
 
