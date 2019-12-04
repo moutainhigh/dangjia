@@ -403,12 +403,14 @@ public class AppActuaryOperationService {
             goodsDTO.setShopCount(0d);//购买总数 (精算的时候，用户手动填写的购买数量， 该单位是 product 的convertUnit换算单位 )
             goodsDTO.setConvertCount(0d);
             goodsDTO.setValueIdArr(productTemplate.getValueIdArr());
+            goodsDTO.setValueNameArr(productTemplate.getValueNameArr());
             goodsDTO.setBrandId(goods.getBrandId());
             if(!CommonUtil.isEmpty(goods.getBrandId())){
                 Brand brand=iBrandMapper.selectByPrimaryKey(goods.getBrandId());
                 goodsDTO.setBrandName(brand.getName());
+                goodsDTO.setValueNameArr(goodsDTO.getBrandName()+" "+productTemplate.getValueNameArr());
             }
-            goodsDTO.setValueNameArr(goodsDTO.getBrandName()+productTemplate.getValueNameArr());
+            goodsDTO.setValueNameArr(goodsDTO.getValueNameArr().replaceAll(",", " "));
             goodsDTO.setConvertQuality(productTemplate.getConvertQuality());
             goodsDTO.setConvertUnit(productTemplate.getConvertUnit());
             goodsDTO.setPurchaseRestrictions(goodsCategory.getPurchaseRestrictions());

@@ -87,11 +87,8 @@ public class SearchActuarialConfigServices {
                     continue;
                 }
                 //添加图片详情地址字段
-                String[] imgArr = image.split(",");
-                StringBuilder imgStr = new StringBuilder();
-                StringBuilder imgUrlStr = new StringBuilder();
-                StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
-                ap.setImageUrl(imgStr.toString());//图片详情地址设置
+                ap.setImageUrl(StringTool.getImage(ap.getImage(),address));//图多张
+                ap.setImageSingle(StringTool.getImageSingle(ap.getImage(),address));//图一张
                 //查询单位
                 String unitId=ap.getUnit();
                 //查询单位
