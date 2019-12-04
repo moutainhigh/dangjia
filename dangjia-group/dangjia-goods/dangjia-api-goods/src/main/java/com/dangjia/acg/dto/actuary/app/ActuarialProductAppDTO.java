@@ -47,6 +47,9 @@ public class ActuarialProductAppDTO {
     @ApiModelProperty("商品图片")
     private String image;
 
+    @ApiModelProperty("商品图片(单张)")
+    private String imageSingle;
+
     @ApiModelProperty("商品图片详细地址")
     private String imageUrl;
 
