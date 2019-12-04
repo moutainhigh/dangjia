@@ -423,7 +423,8 @@ public class AppActuaryOperationService {
             goodsDTO.setGuaranteedPolicy(productTemplate.getGuaranteedPolicy());//保修政策
             goodsDTO.setProductId(product.getId());
             goodsDTO.setGoodsId(goods.getId());
-            goodsDTO.setImage(StringTool.getImage(product.getImage(),imageAddress));//图多张
+            goodsDTO.setImage(product.getImage());//图多张
+            goodsDTO.setImageUrl(StringTool.getImage(product.getImage(),imageAddress));//图多张
             goodsDTO.setImageSingle(StringTool.getImageSingle(product.getImage(),imageAddress));//图一张
             goodsDTO.setPrice(new BigDecimal(product.getSellPrice()));
             goodsDTO.setProductSn(productTemplate.getProductSn());
