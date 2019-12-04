@@ -608,8 +608,6 @@
             t.id = t1.prod_template_id
         and t1.is_shelf_status = '1'
         and t1.data_status=0
-        and t.maket=1
-        and t.type=1
         and t.data_status = 0
         <if test="prodTemplateId!=null and prodTemplateId!=''">
             AND t.id = #{prodTemplateId}
