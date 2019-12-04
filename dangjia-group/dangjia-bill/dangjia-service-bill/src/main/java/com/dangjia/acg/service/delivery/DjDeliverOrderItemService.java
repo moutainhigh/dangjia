@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -54,11 +55,11 @@ public class DjDeliverOrderItemService {
         try {
             Order order = iBillDjDeliverOrderMapper.selectByPrimaryKey(orderId);
             PaymentToBeMadeDTO paymentToBeMadeDTO=new PaymentToBeMadeDTO();
-            paymentToBeMadeDTO.setTotalTransportationCost(order.getTotalTransportationCost());
-            paymentToBeMadeDTO.setTotalStevedorageCost(order.getTotalStevedorageCost());
-            paymentToBeMadeDTO.setTotalDiscountPrice(order.getTotalDiscountPrice());
-            paymentToBeMadeDTO.setActualPaymentPrice(order.getActualPaymentPrice());
-            paymentToBeMadeDTO.setTotalAmount(order.getTotalAmount());
+            paymentToBeMadeDTO.setTotalTransportationCost(order.getTotalTransportationCost()!=null?order.getTotalTransportationCost():new BigDecimal(0));
+            paymentToBeMadeDTO.setTotalStevedorageCost(order.getTotalStevedorageCost()!=null?order.getTotalTransportationCost():new BigDecimal(0));
+            paymentToBeMadeDTO.setTotalDiscountPrice(order.getTotalDiscountPrice()!=null?order.getTotalDiscountPrice():new BigDecimal(0));
+            paymentToBeMadeDTO.setActualPaymentPrice(order.getActualPaymentPrice()!=null?order.getActualPaymentPrice():new BigDecimal(0));
+            paymentToBeMadeDTO.setTotalAmount(order.getTotalAmount()!=null?order.getTotalAmount():new BigDecimal(0));
             paymentToBeMadeDTO.setOrderNumber(order.getOrderNumber());
             paymentToBeMadeDTO.setCreateDate(order.getCreateDate());
             paymentToBeMadeDTO.setModifyDate(order.getModifyDate());
@@ -110,11 +111,11 @@ public class DjDeliverOrderItemService {
         try {
             Order order = iBillDjDeliverOrderMapper.selectByPrimaryKey(orderId);
             PaymentToBeMadeDTO paymentToBeMadeDTO=new PaymentToBeMadeDTO();
-            paymentToBeMadeDTO.setTotalTransportationCost(order.getTotalTransportationCost());
-            paymentToBeMadeDTO.setTotalStevedorageCost(order.getTotalStevedorageCost());
-            paymentToBeMadeDTO.setTotalDiscountPrice(order.getTotalDiscountPrice());
-            paymentToBeMadeDTO.setActualPaymentPrice(order.getActualPaymentPrice());
-            paymentToBeMadeDTO.setTotalAmount(order.getTotalAmount());
+            paymentToBeMadeDTO.setTotalTransportationCost(order.getTotalTransportationCost()!=null?order.getTotalTransportationCost():new BigDecimal(0));
+            paymentToBeMadeDTO.setTotalStevedorageCost(order.getTotalStevedorageCost()!=null?order.getTotalTransportationCost():new BigDecimal(0));
+            paymentToBeMadeDTO.setTotalDiscountPrice(order.getTotalDiscountPrice()!=null?order.getTotalDiscountPrice():new BigDecimal(0));
+            paymentToBeMadeDTO.setActualPaymentPrice(order.getActualPaymentPrice()!=null?order.getActualPaymentPrice():new BigDecimal(0));
+            paymentToBeMadeDTO.setTotalAmount(order.getTotalAmount()!=null?order.getTotalAmount():new BigDecimal(0));
             paymentToBeMadeDTO.setOrderNumber(order.getOrderNumber());
             paymentToBeMadeDTO.setCreateDate(order.getCreateDate());
             paymentToBeMadeDTO.setModifyDate(order.getModifyDate());
@@ -124,7 +125,7 @@ public class DjDeliverOrderItemService {
             String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             List<String> strings = billDjDeliverOrderSplitItemMapper.querySplitDeliverId(orderId);
             paymentToBeMadeDTO.setSplitDeliverCount(strings.size());
-            paymentToBeMadeDTO.setSplitDeliverId(String.join(",",strings));
+            paymentToBeMadeDTO.setSplitDeliverId(CommonUtil.isEmpty(String.join(",",strings))?null:String.join(",",strings));
             List<OrderStorefrontDTO> orderStorefrontDTOS = iBillDjDeliverOrderMapper.queryHumpDetail(orderId);
             orderStorefrontDTOS.forEach(orderStorefrontDTO -> {
                 orderStorefrontDTO.setStorefrontIcon(imageAddress+orderStorefrontDTO.getStorefrontIcon());
@@ -188,10 +189,11 @@ public class DjDeliverOrderItemService {
         try {
             Order order = iBillDjDeliverOrderMapper.selectByPrimaryKey(orderId);
             PaymentToBeMadeDTO paymentToBeMadeDTO=new PaymentToBeMadeDTO();
-            paymentToBeMadeDTO.setTotalTransportationCost(order.getTotalTransportationCost());
-            paymentToBeMadeDTO.setTotalStevedorageCost(order.getTotalStevedorageCost());
-            paymentToBeMadeDTO.setTotalDiscountPrice(order.getTotalDiscountPrice());
-            paymentToBeMadeDTO.setActualPaymentPrice(order.getActualPaymentPrice());
+            paymentToBeMadeDTO.setTotalTransportationCost(order.getTotalTransportationCost()!=null?order.getTotalTransportationCost():new BigDecimal(0));
+            paymentToBeMadeDTO.setTotalStevedorageCost(order.getTotalStevedorageCost()!=null?order.getTotalTransportationCost():new BigDecimal(0));
+            paymentToBeMadeDTO.setTotalDiscountPrice(order.getTotalDiscountPrice()!=null?order.getTotalDiscountPrice():new BigDecimal(0));
+            paymentToBeMadeDTO.setActualPaymentPrice(order.getActualPaymentPrice()!=null?order.getActualPaymentPrice():new BigDecimal(0));
+            paymentToBeMadeDTO.setTotalAmount(order.getTotalAmount()!=null?order.getTotalAmount():new BigDecimal(0));
             paymentToBeMadeDTO.setTotalAmount(order.getTotalAmount());
             paymentToBeMadeDTO.setOrderNumber(order.getOrderNumber());
             paymentToBeMadeDTO.setCreateDate(order.getCreateDate());

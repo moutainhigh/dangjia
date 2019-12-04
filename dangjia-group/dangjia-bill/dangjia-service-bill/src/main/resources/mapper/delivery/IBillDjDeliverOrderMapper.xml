@@ -835,12 +835,12 @@
             t4.storefront_name storefrontName,
             t4.system_logo storefrontIcon,
             t1.create_date AS createDate,
-            t1.actual_payment_price AS actualPaymentPrice,
-            t1.total_amount totalAmount,
+            IFNULL(t1.actual_payment_price,0) AS actualPaymentPrice,
+            IFNULL(t1.total_amount,0) totalAmount,
             t4.mobile,
-            t1.total_stevedorage_cost as totalStevedorageCost,
-            t4.storefront_type as storefrontType,
-            t1.total_transportation_cost as totalTransportationCost
+            IFNULL(t1.total_stevedorage_cost,0) as totalStevedorageCost,
+            IFNULL(t4.storefront_type,0) as storefrontType,
+            IFNULL(t1.total_transportation_cost,0) as totalTransportationCost
         FROM
             dj_deliver_order t1,
             dj_basics_storefront t4
@@ -874,7 +874,7 @@
             and   (ddsd.shipping_state = 1 or ddsd.shipping_state = 7)
         </if>
         <if test="orderStatus!=null and orderStatus == 2">
-            and ddsd.shipping_state = 8
+            and (ddsd.shipping_state = 8 or ddsd.shipping_state = 2 or ddsd.shipping_state = 5)
         </if>
         <if test="arr != null and arr != ''">
             and ddsd.id in
