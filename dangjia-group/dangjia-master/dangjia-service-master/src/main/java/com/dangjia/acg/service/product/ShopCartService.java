@@ -204,9 +204,6 @@ public class ShopCartService {
     public ServerResponse checkCart(Member member,String productId) {
         try {
             StorefrontProduct product = iMasterStorefrontProductMapper.selectByPrimaryKey(productId);//目标product 对象
-            if(product == null){
-                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "该商品已禁用！");
-            }
             BasicsGoods goods = iMasterGoodsMapper.selectByPrimaryKey(product.getGoodsId());
             if(goods.getType() == 2){
                 return ServerResponse.createByErrorMessage("为确保您买到正确的人工类商品\n" +
