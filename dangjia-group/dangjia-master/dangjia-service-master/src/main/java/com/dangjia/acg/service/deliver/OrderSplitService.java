@@ -457,7 +457,7 @@ return null;
                         map.put(DjSupplier.IS_NON_PLATFORM_SUPPERLIER, djSupplier.getIsNonPlatformSupperlier());
                     }
                     List<Map<String,Object>> supplierIdlist = splitDeliverMapper.getSupplierGoodsId(v.getHouseId(), v.getProductId());
-                    if(supplierIdlist==null)
+                    if(supplierIdlist.size()==0)
                     {
                         //非平台供應商
                         supplierIdlist=splitDeliverMapper.queryNonPlatformSupplier();
