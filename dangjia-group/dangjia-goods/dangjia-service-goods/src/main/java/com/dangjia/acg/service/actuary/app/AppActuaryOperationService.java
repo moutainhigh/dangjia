@@ -15,6 +15,7 @@ import com.dangjia.acg.mapper.basics.*;
 import com.dangjia.acg.mapper.product.DjBasicsGoodsMapper;
 import com.dangjia.acg.mapper.product.IBasicsGoodsCategoryMapper;
 import com.dangjia.acg.mapper.product.IBasicsProductTemplateMapper;
+import com.dangjia.acg.mapper.product.IProductAddedRelationMapper;
 import com.dangjia.acg.mapper.sup.IShopMapper;
 import com.dangjia.acg.mapper.sup.IShopProductMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
@@ -29,6 +30,7 @@ import com.dangjia.acg.modle.product.BasicsGoodsCategory;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
+import com.dangjia.acg.modle.storefront.StorefrontProductAddedRelation;
 import com.dangjia.acg.modle.sup.Shop;
 import com.dangjia.acg.util.DateUtils;
 import com.dangjia.acg.util.StringTool;
@@ -79,6 +81,8 @@ public class AppActuaryOperationService {
     @Autowired
     private ITechnologyMapper iTechnologyMapper;
 
+    @Autowired
+    private IProductAddedRelationMapper iProductAddedRelationMapper;
     @Autowired
     private IBasicsGoodsCategoryMapper iBasicsGoodsCategoryMapper;
     protected static final Logger LOG = LoggerFactory.getLogger(AppActuaryOperationService.class);
@@ -352,6 +356,26 @@ public class AppActuaryOperationService {
             return null;
         }
     }
+
+    /**
+     * @param productId 商品ID，
+     * @return AttributeDTO
+     */
+    public ServerResponse getAttributeData(String productId) {
+        try {
+            StorefrontProduct product = iShopProductMapper.selectByPrimaryKey(productId);//目标product 对象
+            if(product == null){
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "该商品已禁用！");
+            }
+            BasicsGoods goods = goodsMapper.selectByPrimaryKey(product.getGoodsId());
+            List<DjBasicsProductTemplate>  productList= iBasicsProductTemplateMapper.getProductTempListByStorefontId(product.getStorefrontId(),goods.getId());
+            List<AttributeDTO> attrList = getAllAttributes(product, productList,goods);
+            return ServerResponse.createBySuccess("查询成功", attrList);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("获取规格异常"+e.getMessage());
+        }
+    }
     public ActuarialProductAppDTO assembleGoodsResult(StorefrontProduct product, BasicsGoods goods ) {
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
         try {
@@ -492,6 +516,23 @@ public class AppActuaryOperationService {
                     avDTO.setState(0);//未选中
                 }
                 avDTO.setType(0);
+                attributeValueDTOList.add(avDTO);//添加属性值
+            }
+            attributeDTO.setValueDTOList(attributeValueDTOList);
+            attributeDTOList.add(attributeDTO);
+        }
+        List<StorefrontProductAddedRelation> list =  iProductAddedRelationMapper.getAddedrelationGoodsData(product.getId());
+        if(list.size()>0){
+            AttributeDTO attributeDTO = new AttributeDTO();
+            attributeDTO.setId("1");
+            attributeDTO.setName("增值服务");
+            List<AttributeValueDTO> attributeValueDTOList = new ArrayList<>();
+            for (StorefrontProductAddedRelation atId : list) {
+                AttributeValueDTO avDTO = new AttributeValueDTO();
+                avDTO.setAttributeValueId(atId.getAddedProductId());
+                avDTO.setName(atId.getAddedProductName());
+                avDTO.setState(0);//未选中
+                avDTO.setType(1);
                 attributeValueDTOList.add(avDTO);//添加属性值
             }
             attributeDTO.setValueDTOList(attributeValueDTOList);
