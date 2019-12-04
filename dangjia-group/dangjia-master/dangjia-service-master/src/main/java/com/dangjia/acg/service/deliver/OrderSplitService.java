@@ -452,21 +452,6 @@ return null;
             List<OrderSplitItem> orderSplitItemList = orderSplitItemMapper.selectByExample(example);
             List<Map> mapList = new ArrayList<>();
             for (OrderSplitItem v : orderSplitItemList) {
-                boolean isAdd=false;
-                if (!CommonUtil.isEmpty(v.getSplitDeliverId())) {
-                    SplitDeliver deliver = splitDeliverMapper.selectByPrimaryKey(v.getSplitDeliverId());
-                    if(deliver!=null)
-                    {
-
-                        if (deliver.getShippingState() == 6) {
-                            isAdd=true;
-                        }
-                    }
-
-                }else {
-                    isAdd=true;
-                }
-                if(isAdd) {
                     v.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
                     Map map = BeanUtils.beanToMap(v);
                     DjSupplier djSupplier=   djSupplierAPI.queryDjSupplierById(v.getSupplierId());
@@ -479,7 +464,6 @@ return null;
                         map.put("supplierIdlist",null);
                     map.put("supplierIdlist",supplierIdlist);
                     mapList.add(map);
-                }
             }
             return ServerResponse.createBySuccess("查询成功", mapList);
         } catch (Exception e) {
