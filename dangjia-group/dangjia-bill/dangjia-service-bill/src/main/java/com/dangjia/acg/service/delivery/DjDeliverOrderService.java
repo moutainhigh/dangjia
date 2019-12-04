@@ -1800,13 +1800,6 @@ public class DjDeliverOrderService {
                         AppointmentDTO appointmentDTO = appointmentDTOS.get(0);
                         orderStorefrontDTO.setProductName(appointmentDTO.getProductName());
                     }
-                    orderStorefrontDTO.setShippingState("1004");
-                    for (AppointmentDTO appointmentDTO : appointmentDTOS) {
-                        if (appointmentDTO.getShippingState().equals("5")) {
-                            orderStorefrontDTO.setShippingState(appointmentDTO.getShippingState());
-                            break;
-                        }
-                    }
                     if (orderStorefrontDTO.getStorefrontType().equals("worker")) {
                         Member member = this.queryWorker(orderStorefrontDTO.getHouseId(), orderStorefrontDTO.getWorkerTypeId());
                         if (member != null) {

@@ -87,16 +87,16 @@ public class DjRegisterApplicationServices {
                 return ServerResponse.createByErrorMessage("支付密码不能为空");
             if (djRegisterApplication.getPayPassword().length() != 6)
                 return ServerResponse.createByErrorMessage("请设置6位数支付密码");
-            Example example = new Example(DjRegisterApplication.class);
-            example.createCriteria().andEqualTo(DjRegisterApplication.CITY_ID, djRegisterApplication.getCityId())
-                    .andEqualTo(DjRegisterApplication.DATA_STATUS, 0)
-                    .andEqualTo(DjRegisterApplication.MOBILE, djRegisterApplication.getMobile())
-                    .andEqualTo(DjRegisterApplication.APPLICATION_TYPE, djRegisterApplication.getApplicationType())
-                    .andCondition("(application_status=0 OR application_status=1)");
-            if (djRegisterApplicationMapper.selectByExample(example).size() > 0) {
-                return ServerResponse.createByErrorMessage("申请已存在");
+            Map<String,Object> map=new HashMap();
+            map.put("cityId",djRegisterApplication.getCityId());
+            map.put("mobile",djRegisterApplication.getMobile());
+            djRegisterApplication.getApplicationType().split(",");
+            map.put("split",djRegisterApplication.getApplicationType().split(","));
+            List<DjRegisterApplication> djRegisterApplications = djRegisterApplicationMapper.queryDeWeight(map);
+            if (djRegisterApplications.size() > 0){
+                return ServerResponse.createByErrorMessage("请勿重复申请");
             }else {
-                example = new Example(DjRegisterApplication.class);
+                Example example = new Example(DjRegisterApplication.class);
                 example.createCriteria().andEqualTo(DjRegisterApplication.CITY_ID, djRegisterApplication.getCityId())
                         .andEqualTo(DjRegisterApplication.DATA_STATUS, 0)
                         .andEqualTo(DjRegisterApplication.MOBILE, djRegisterApplication.getMobile())
@@ -293,8 +293,23 @@ public class DjRegisterApplicationServices {
             djRegisterApplication.getApplicationType().split(",");
             map.put("split",djRegisterApplication.getApplicationType().split(","));
             List<DjRegisterApplication> djRegisterApplications = djRegisterApplicationMapper.queryDeWeight(map);
-            if (djRegisterApplications.size() > 0)
+            if (djRegisterApplications.size() > 0) {
                 return ServerResponse.createByErrorMessage("请勿重复申请");
+            }else {
+                Example example = new Example(DjRegisterApplication.class);
+                example.createCriteria().andEqualTo(DjRegisterApplication.CITY_ID, djRegisterApplication.getCityId())
+                        .andEqualTo(DjRegisterApplication.DATA_STATUS, 0)
+                        .andEqualTo(DjRegisterApplication.MOBILE, djRegisterApplication.getMobile())
+                        .andEqualTo(DjRegisterApplication.APPLICATION_TYPE, djRegisterApplication.getApplicationType())
+                        .andEqualTo(DjRegisterApplication.APPLICATION_STATUS,2);
+                DjRegisterApplication djRegisterApplication1 = djRegisterApplicationMapper.selectOneByExample(example);
+                if (null!=djRegisterApplication1){
+                    djRegisterApplication1.setApplicationStatus(0);
+                    djRegisterApplication1.setModifyDate(new Date());
+                    if (djRegisterApplicationMapper.updateByPrimaryKeySelective(djRegisterApplication1) > 0)
+                        return ServerResponse.createBySuccessMessage("申请成功");
+                }
+            }
             Example example = new Example(DjRegisterApplication.class);
             example.createCriteria().andEqualTo(DjRegisterApplication.CITY_ID, djRegisterApplication.getCityId())
                     .andEqualTo(DjRegisterApplication.DATA_STATUS, 0)

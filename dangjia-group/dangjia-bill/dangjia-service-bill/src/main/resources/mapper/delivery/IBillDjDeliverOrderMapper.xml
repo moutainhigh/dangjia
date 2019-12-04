@@ -683,6 +683,7 @@
                     WHERE
                         t2.is_reservation_deliver = '1'
                     AND t1.id = t2.order_id
+                    AND (t2.reservation_deliver_time IS NULL OR t2.reservation_deliver_time='')
                 ) > 0,
                 '5',
                 '1004'
@@ -712,6 +713,7 @@
 
     <select id="queryAppointmentHump" resultType="com.dangjia.acg.dto.delivery.AppointmentDTO">
         SELECT
+            t.id as orderItemId,
             t.product_id productId,
             t.id orderItemId,
             t.storefont_id storefrontId,

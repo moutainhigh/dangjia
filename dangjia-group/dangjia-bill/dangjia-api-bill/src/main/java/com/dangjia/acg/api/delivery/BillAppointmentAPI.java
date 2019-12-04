@@ -35,7 +35,8 @@ public interface BillAppointmentAPI {
     ServerResponse insertAppointment(@RequestParam("request") HttpServletRequest request,
                                      @RequestParam("userToken") String userToken,
                                      @RequestParam("jsonStr") String jsonStr,
-                                     @RequestParam("reservationDeliverTime") String reservationDeliverTime);
+                                     @RequestParam("reservationDeliverTime") String reservationDeliverTime,
+                                     @RequestParam("orderIds") String orderIds);
 
     @PostMapping("/app/billAppointment/queryReserved")
     @ApiOperation(value = "已预约", notes = "已预约")
