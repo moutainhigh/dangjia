@@ -50,6 +50,11 @@ public class AppActuaryOperationController implements AppActuaryOperationAPI {
     }
 
     @Override
+    @ApiMethod
+    public ServerResponse getAttributeData(HttpServletRequest request, String productId) {
+        return actuaryOperationService.getAttributeData(productId);
+    }
+    @Override
     public String getAttributeName( String cityId, String productId){
         return actuaryOperationService.getAttributeName(productId);
     }

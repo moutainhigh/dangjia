@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
-import java.math.BigDecimal;
 
 @RestController
 public class ShopCartController implements ShopCartAPI {
@@ -48,7 +47,14 @@ public class ShopCartController implements ShopCartAPI {
     }
 
 
-
+    /**
+     * 审核加入购物车是否达到条件
+     * @param productId
+     * @return 0=直接通过,无提示； 1=有房无精算(业主无房时)   2=有房有精算(业主无房无精算时) 3=有房有精算(业主有房无精算时)   4=有房有精算(业主有房无精算时)  5=人工商品
+     */
+    public ServerResponse checkCart(String userToken, String productId){
+        return shopCartservice.checkCart(userToken,productId);
+    }
     @Override
     @ApiMethod
     public ServerResponse delCheckCart(HttpServletRequest request,String shopCartIds) {

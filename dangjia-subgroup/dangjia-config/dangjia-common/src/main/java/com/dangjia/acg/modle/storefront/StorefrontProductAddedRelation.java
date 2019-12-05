@@ -10,6 +10,7 @@ import lombok.experimental.FieldNameConstants;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 @Data
 @Entity
@@ -26,5 +27,11 @@ public class StorefrontProductAddedRelation extends BaseEntity {
     @Desc(value = " 增值商品ID")
     @ApiModelProperty(" 增值商品ID")
     private String addedProductId;
+
+    @Transient
+    private String addedProductName;//增值商品名称
+
+    @Transient
+    private Double sellPrice;//增值商品单价
 
 }

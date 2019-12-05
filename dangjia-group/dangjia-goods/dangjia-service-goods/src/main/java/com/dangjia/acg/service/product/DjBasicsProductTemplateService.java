@@ -5,26 +5,23 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
-import com.dangjia.acg.common.pay.domain.UserInfo;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.basics.ProductDTO;
 import com.dangjia.acg.dto.product.*;
-import com.dangjia.acg.mapper.basics.*;
+import com.dangjia.acg.mapper.basics.IAttributeValueMapper;
+import com.dangjia.acg.mapper.basics.ILabelMapper;
+import com.dangjia.acg.mapper.basics.ITechnologyMapper;
+import com.dangjia.acg.mapper.basics.IUnitMapper;
 import com.dangjia.acg.mapper.product.*;
-import com.dangjia.acg.mapper.storefront.*;
+import com.dangjia.acg.mapper.storefront.IGoodsStorefrontProductAddedRelationMapper;
 import com.dangjia.acg.modle.attribute.AttributeValue;
 import com.dangjia.acg.modle.basics.Label;
-import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.brand.Unit;
-import com.dangjia.acg.modle.other.City;
 import com.dangjia.acg.modle.product.*;
-import com.dangjia.acg.modle.storefront.Storefront;
-import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.modle.storefront.StorefrontProductAddedRelation;
-import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.service.basics.TechnologyService;
 import com.dangjia.acg.service.storefront.GoodsStorefrontProductService;
 import com.dangjia.acg.util.StringTool;
@@ -37,8 +34,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
+
 import javax.servlet.http.HttpServletRequest;
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -116,6 +113,29 @@ public class DjBasicsProductTemplateService {
     }
 
     /**
+     * 判断商品名称和编码是否存在
+     * @param name 商品名称
+     * @param productSn 商品编码
+     * @param cityId 城市ID
+     * @return
+     */
+    public ServerResponse checkProductSnOrNameExit(String name,String productSn,String cityId) {
+        if(name!=null&&StringUtils.isNotBlank(name)){
+            List<DjBasicsProductTemplate> nameList = iBasicsProductTemplateMapper.queryByName(name,cityId);
+            if (nameList.size() > 0)
+                return ServerResponse.createByErrorMessage("名字“" + nameList.get(0).getName() + "”已存在");
+        }
+        if(productSn!=null&&StringUtils.isNotBlank(productSn)){
+            List<DjBasicsProductTemplate> productSnList = iBasicsProductTemplateMapper.queryByProductSn(productSn);
+            if (productSnList.size() > 0)
+                return ServerResponse.createByErrorMessage("编号“:" + productSnList.get(0).getProductSn() + "”已存在");
+        }
+        return ServerResponse.createBySuccess("校验成功");
+
+
+    }
+
+    /**
      * 根据类型查询同级货品
      * @param categoryId
      * @return
@@ -166,7 +186,7 @@ public class DjBasicsProductTemplateService {
 
         JSONArray jsonArr = JSONArray.parseArray(productArr);
         //1.商品作校验，校验前端传过来的商品是否符合条件
-        String resCheckStr = checkProductData(jsonArr);
+        String resCheckStr = checkProductData(jsonArr,cityId);
         if(StringUtils.isNotBlank(resCheckStr)){
             return ServerResponse.createByErrorMessage(resCheckStr);
         }
@@ -287,9 +307,9 @@ public class DjBasicsProductTemplateService {
         product.setPrice(basicsProductDTO.getPrice());//销售价
         product.setOtherName(basicsProductDTO.getOtherName());
         if (!StringUtils.isNoneBlank(basicsProductDTO.getValueNameArr())) {
-            product.setValueNameArr(null);
+            product.setValueNameArr(basicsProductDTO.getName());
         } else {
-            product.setValueNameArr(basicsProductDTO.getValueNameArr());
+            product.setValueNameArr(basicsProductDTO.getValueNameArr().replaceAll(",", " "));
         }
         if (!StringUtils.isNoneBlank(basicsProductDTO.getValueIdArr())) {
             product.setValueIdArr(null);
@@ -362,7 +382,7 @@ public class DjBasicsProductTemplateService {
      * @param jsonArr
      * @return
      */
-    private String checkProductData(JSONArray jsonArr){
+    private String checkProductData(JSONArray jsonArr,String cityId){
         for (int i = 0; i < jsonArr.size(); i++) {
             JSONObject obj = jsonArr.getJSONObject(i);
             //JSON对象转换成Java对象
@@ -386,7 +406,7 @@ public class DjBasicsProductTemplateService {
             }*/
             //  }
             //校验商品是否存在
-            String ret = checkProduct(name, productSn, id, jsonArr);
+            String ret = checkProduct(name, productSn, id, jsonArr,cityId);
             if (!ret.equals("ok")) {
                 return ret;
             }
@@ -466,8 +486,8 @@ public class DjBasicsProductTemplateService {
      * @param jsonArr
      * @return
      */
-    public String checkProduct(String name, String productSn, String id, JSONArray jsonArr) {
-        List<DjBasicsProductTemplate> nameList = iBasicsProductTemplateMapper.queryByName(name);
+    public String checkProduct(String name, String productSn, String id, JSONArray jsonArr,String cityId) {
+        List<DjBasicsProductTemplate> nameList = iBasicsProductTemplateMapper.queryByName(name,cityId);
         List<DjBasicsProductTemplate> productSnList = iBasicsProductTemplateMapper.queryByProductSn(productSn);
         if (!StringUtils.isNotBlank(id)) {//没有id则新增
             if (nameList.size() > 0)
@@ -510,7 +530,7 @@ public class DjBasicsProductTemplateService {
      * @param type 0材料，1包工包料，2人工
      * @return
      */
-    public String checkSingleProductCommon(BasicsProductDTO basicsProductDTO,int type,JSONArray jsonArr){
+    public String checkSingleProductCommon(BasicsProductDTO basicsProductDTO,int type,JSONArray jsonArr,String cityId){
         //1.判断必填字段是否为空
         String checkStr = checkFielsNull(basicsProductDTO);
         if(StringUtils.isNotBlank(checkStr)){
@@ -529,7 +549,7 @@ public class DjBasicsProductTemplateService {
             }
         }*/
         //校验商品是否存在
-        String ret = checkProduct(name, productSn, id, jsonArr);
+        String ret = checkProduct(name, productSn, id, jsonArr,cityId);
         if (!ret.equals("ok")) {
             return ret;
         }
@@ -553,7 +573,7 @@ public class DjBasicsProductTemplateService {
         BasicsGoods basicsGoods = djBasicsGoodsMapper.selectByPrimaryKey(goodsId);//查询货品表信息，判断是人工还是材料商品新增
         if(dataStatus == 0){
             //添加正式商品前的校验，商品名称和编码不能为空，且不能重复
-            String restr = checkSingleProductCommon(basicsProductDTO,basicsGoods.getType(),new JSONArray());
+            String restr = checkSingleProductCommon(basicsProductDTO,basicsGoods.getType(),new JSONArray(),cityId);
             if(StringUtils.isNotBlank(restr)){
                 return ServerResponse.createByErrorMessage(restr);
             }

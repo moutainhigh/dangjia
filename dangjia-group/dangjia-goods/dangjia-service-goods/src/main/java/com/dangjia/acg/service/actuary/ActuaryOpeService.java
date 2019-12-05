@@ -20,6 +20,7 @@ import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.attribute.GoodsCategory;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.product.BasicsGoodsCategory;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.service.product.DjBasicsProductTemplateService;
 import com.dangjia.acg.util.JdbcContextHolder;
@@ -107,7 +108,7 @@ public class ActuaryOpeService {
             String[] categoryIdArr = idArr.split(",");
             for (String aCategoryIdArr : categoryIdArr) {
                 BudgetItemDTO budgetItemDTO = new BudgetItemDTO();
-                GoodsCategory goodsCategory = goodsCategoryMapper.selectByPrimaryKey(aCategoryIdArr);
+                BasicsGoodsCategory goodsCategory = goodsCategoryMapper.selectByPrimaryKey(aCategoryIdArr);
                 if (goodsCategory == null) {
                     continue;
                 }
@@ -164,7 +165,7 @@ public class ActuaryOpeService {
             } else {
                 List<String> categoryIdList = budgetMaterialMapper.categoryIdList(houseId);
                 for (String categoryId : categoryIdList) {
-                    GoodsCategory goodsCategory = goodsCategoryMapper.selectByPrimaryKey(categoryId);
+                    BasicsGoodsCategory goodsCategory = goodsCategoryMapper.selectByPrimaryKey(categoryId);
                     Map<String, Object> map = new HashMap<>();
                     map.put("id", goodsCategory.getId());
                     map.put("name", goodsCategory.getName());

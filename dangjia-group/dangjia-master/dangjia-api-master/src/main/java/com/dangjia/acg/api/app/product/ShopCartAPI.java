@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
-import java.math.BigDecimal;
 
 /**
  * @Author ChenYufeng
@@ -36,6 +35,12 @@ public interface ShopCartAPI {
                                  @RequestParam("pageDTO") PageDTO pageDTO,
                                  @RequestParam("userToken") String userToken,
                                  @RequestParam("cityId") String cityId);
+
+
+    @PostMapping("app/product/shopCart/check")
+    @ApiOperation(value = "购物车-->商品加入购物车商品检测", notes = "购物车-->商品加入购物车商品检测")
+    ServerResponse checkCart(@RequestParam("userToken") String userToken, @RequestParam("productId") String productId);
+
 
     @PostMapping("app/product/shopCart/num")
     @ApiOperation(value = "购物车-->查询购物车列表接口", notes = "购物车-->查询购物车商品数量")

@@ -3,6 +3,7 @@ package com.dangjia.acg.api.basics;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.attribute.GoodsCategory;
+import com.dangjia.acg.modle.product.BasicsGoodsCategory;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -24,7 +25,7 @@ public interface GoodsCategoryAPI {
 
     @PostMapping("/basics/goodsCategory/getGoodsCategory")
     @ApiOperation(value = "商品类别明细", notes = "商品类别明细")
-    GoodsCategory getGoodsCategory(@RequestParam("cityId") String cityId, @RequestParam("categoryId") String categoryId);
+    BasicsGoodsCategory getGoodsCategory(@RequestParam("cityId") String cityId, @RequestParam("categoryId") String categoryId);
 
     /**
      * 新增商品类别

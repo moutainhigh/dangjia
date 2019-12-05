@@ -683,6 +683,7 @@
                     WHERE
                         t2.is_reservation_deliver = '1'
                     AND t1.id = t2.order_id
+                    AND (t2.reservation_deliver_time IS NULL OR t2.reservation_deliver_time='')
                 ) > 0,
                 '5',
                 '1004'
@@ -712,6 +713,7 @@
 
     <select id="queryAppointmentHump" resultType="com.dangjia.acg.dto.delivery.AppointmentDTO">
         SELECT
+            t.id as orderItemId,
             t.product_id productId,
             t.id orderItemId,
             t.storefont_id storefrontId,
@@ -833,12 +835,12 @@
             t4.storefront_name storefrontName,
             t4.system_logo storefrontIcon,
             t1.create_date AS createDate,
-            t1.actual_payment_price AS actualPaymentPrice,
-            t1.total_amount totalAmount,
+            IFNULL(t1.actual_payment_price,0) AS actualPaymentPrice,
+            IFNULL(t1.total_amount,0) totalAmount,
             t4.mobile,
-            t1.total_stevedorage_cost as totalStevedorageCost,
-            t4.storefront_type as storefrontType,
-            t1.total_transportation_cost as totalTransportationCost
+            IFNULL(t1.total_stevedorage_cost,0) as totalStevedorageCost,
+            IFNULL(t4.storefront_type,0) as storefrontType,
+            IFNULL(t1.total_transportation_cost,0) as totalTransportationCost
         FROM
             dj_deliver_order t1,
             dj_basics_storefront t4
@@ -872,7 +874,7 @@
             and   (ddsd.shipping_state = 1 or ddsd.shipping_state = 7)
         </if>
         <if test="orderStatus!=null and orderStatus == 2">
-            and ddsd.shipping_state = 8
+            and (ddsd.shipping_state = 8 or ddsd.shipping_state = 2 or ddsd.shipping_state = 5)
         </if>
         <if test="arr != null and arr != ''">
             and ddsd.id in

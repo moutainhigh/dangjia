@@ -43,7 +43,7 @@ public interface IBasicsProductTemplateMapper extends Mapper<DjBasicsProductTemp
      * @param name
      * @return
      */
-    List<DjBasicsProductTemplate> queryByName(@Param("name") String name);
+    List<DjBasicsProductTemplate> queryByName(@Param("name") String name,@Param("cityId") String cityId);
 
     /**
      * 根据编号查询商品

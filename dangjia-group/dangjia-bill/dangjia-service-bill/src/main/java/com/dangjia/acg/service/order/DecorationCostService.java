@@ -172,7 +172,7 @@ public class DecorationCostService {
             //查询规格名称
             if (StringUtils.isNotBlank(pt.getValueIdArr())) {
                 ap.setValueIdArr(pt.getValueIdArr());
-                ap.setValueNameArr(billProductTemplateService.getNewValueNameArr(pt.getValueIdArr()));
+                ap.setValueNameArr(billProductTemplateService.getNewValueNameArr(pt.getValueIdArr()).replaceAll(",", " "));
             }
             String orderItemId=ap.getOrderItemId();//订单详情ID
             if(StringUtils.isNotBlank(orderItemId)){

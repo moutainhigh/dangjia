@@ -604,6 +604,8 @@ public class ActuaryOperationService {
 //                            }
 //                        }
 //                    }
+                }else{
+                    strbuf.append(atId.getName());
                 }
                 AttributeValueDTO avDTO = new AttributeValueDTO();
                 avDTO.setAttributeValueId(atId.getId());

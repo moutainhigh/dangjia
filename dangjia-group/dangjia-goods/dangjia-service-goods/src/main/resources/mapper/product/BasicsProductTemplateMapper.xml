@@ -107,6 +107,7 @@
         <include refid="new_columns"/>
         FROM dj_basics_product_template
         where data_status = 0
+        and city_id=#{cityId}
         <if test="name!=null and name!=''">
             and
             name=#{name}
@@ -564,7 +565,7 @@
     <select  id="getProductTempListByStorefontId" resultType="com.dangjia.acg.modle.product.DjBasicsProductTemplate">
         SELECT
             t1.id,
-            t.name,
+            t1.name,
             t.type,
             t1.sell_price price,
             t.value_id_arr valueIdArr,

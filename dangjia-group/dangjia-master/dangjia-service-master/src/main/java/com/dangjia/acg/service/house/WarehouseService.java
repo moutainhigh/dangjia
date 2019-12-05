@@ -34,6 +34,7 @@ import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.MaterialRecord;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.product.BasicsGoods;
+import com.dangjia.acg.modle.product.BasicsGoodsCategory;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
@@ -200,13 +201,13 @@ public class WarehouseService {
                 List<String> categoryIdList = warehouseMapper.categoryIdList(houseId);
                 for (String categoryId : categoryIdList) {
                     //获取低级类别
-                    GoodsCategory goodsCategoryNext = goodsCategoryAPI.getGoodsCategory(house.getCityId(), categoryId);
+                    BasicsGoodsCategory goodsCategoryNext = goodsCategoryAPI.getGoodsCategory(house.getCityId(), categoryId);
                     if (goodsCategoryNext == null) {
                         continue;
                     }
                     //获取顶级类别
-                    GoodsCategory goodsCategoryParentTop = goodsCategoryAPI.getGoodsCategory(house.getCityId(), goodsCategoryNext.getParentTop());
-                    GoodsCategory goodsCategory;
+                    BasicsGoodsCategory goodsCategoryParentTop = goodsCategoryAPI.getGoodsCategory(house.getCityId(), goodsCategoryNext.getParentTop());
+                    BasicsGoodsCategory goodsCategory;
                     if (goodsCategoryParentTop == null) {
                         goodsCategory = goodsCategoryNext;
                     } else {
