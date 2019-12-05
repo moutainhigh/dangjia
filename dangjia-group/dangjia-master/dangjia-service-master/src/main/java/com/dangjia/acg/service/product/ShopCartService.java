@@ -27,7 +27,6 @@ import com.dangjia.acg.modle.product.ShoppingCart;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
-import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,16 +93,14 @@ public class ShopCartService {
             }
             Member member = (Member) object;
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<String> strings = iShoppingCartmapper.queryStorefrontIds(member.getId(), cityId);
+            List<Storefront> strings = iShoppingCartmapper.queryStorefrontIds(member.getId(), cityId);
             List<ShoppingCartDTO> shoppingCartDTOS=new ArrayList<>();
-            strings.forEach(str ->{
+            strings.forEach(storefront ->{
                 ShoppingCartDTO shoppingCartDTO=new ShoppingCartDTO();
-                Storefront storefront = basicsStorefrontAPI.querySingleStorefrontById(str);
                 shoppingCartDTO.setStorefrontName(storefront.getStorefrontName());
                 shoppingCartDTO.setStorefrontId(storefront.getId());
                 shoppingCartDTO.setStorefrontIcon(imageAddress+storefront.getSystemLogo());
-                List<ShoppingCartListDTO> shoppingCartListDTOS = iShoppingCartmapper.queryCartList(member.getId(), cityId, str,null);
+                List<ShoppingCartListDTO> shoppingCartListDTOS = iShoppingCartmapper.queryCartList(member.getId(), cityId, storefront.getId(),null);
                 shoppingCartListDTOS.forEach(shoppingCartListDTO -> {
                     shoppingCartListDTO.setImage(imageAddress+shoppingCartListDTO.getImage());
                 });
@@ -112,8 +109,7 @@ public class ShopCartService {
             });
             if(shoppingCartDTOS.size()<=0)
                 return  ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
-            PageInfo pageResult = new PageInfo(shoppingCartDTOS);
-            return ServerResponse.createBySuccess("获取购物车列表成功!",pageResult);
+            return ServerResponse.createBySuccess("获取购物车列表成功!",shoppingCartDTOS);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("系统报错，获取购物车列表失败!");
