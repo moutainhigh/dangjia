@@ -420,7 +420,7 @@ public class BudgetWorkerService {
                         budgetMaterial.setHouseFlowId(houseFlowId);
                         budgetMaterial.setHouseId(houseId);
                         budgetMaterial.setConvertCount(1d);
-                        if (goods.getBuy() == 0 || goods.getBuy() == 1) {//0：必买；1可选；2自购
+                        if (goods.getBuy() != 2) {//0：必买；1可选；2自购
                             budgetMaterial.setSteta(1);//我们购
                             //查询店铺商品表中对应的商品信息，根据模板ID，按价格排序获取对应的符合条件的信息
                             StorefrontProductDTO pro=iBasicsProductTemplateMapper.getStorefrontInfoByprodTemplateId(productId,null);
@@ -436,13 +436,16 @@ public class BudgetWorkerService {
                             budgetMaterial.setImage(pro.getImage());//货品图片
                            /* double a = actuarialQuantity / pro.getConvertQuality();
                             double shopCount = Math.ceil(a);*/
-                            budgetMaterial.setShopCount(shopCount);
-                            Double converCount = (shopCount / pro.getConvertQuality());
                             Unit convertUnit = iUnitMapper.selectByPrimaryKey(pro.getConvertUnit());
-                            if (convertUnit.getType() == 1) {
-                                converCount = Math.ceil(converCount);
+                            budgetMaterial.setShopCount(shopCount);
+                            if(0 == productType || 1 == productType){
+                                Double converCount = (shopCount / pro.getConvertQuality());
+                                if (convertUnit!=null&&convertUnit.getType() == 1) {
+                                    converCount = Math.ceil(converCount);
+                                }
+                                budgetMaterial.setConvertCount(converCount);
                             }
-                            budgetMaterial.setConvertCount(converCount);
+                            budgetMaterial.setUnitName(convertUnit.getName());
                             BigDecimal b1 = new BigDecimal(budgetMaterial.getPrice());
 //                            BigDecimal b2 = new BigDecimal(Double.toString(shopCount));
 //                            BigDecimal b2 = new BigDecimal(Double.toString(budgetMaterial.getConvertCount()));
@@ -450,7 +453,6 @@ public class BudgetWorkerService {
                             Double totalPrice = b1.multiply(b2).doubleValue();
                             budgetMaterial.setTotalPrice(totalPrice);
 //                            budgetMaterial.setUnitName(pro.getUnitName());
-                            budgetMaterial.setUnitName(convertUnit.getName());
                             budgetMaterial.setHouseFlowId(houseFlowId);
                             budgetMaterial.setHouseId(houseId);
                             budgetMaterial.setWorkerTypeId(workerTypeId);
@@ -465,6 +467,7 @@ public class BudgetWorkerService {
                             budgetMaterial.setShopCount(shopCount);
                             budgetMaterial.setUnitName(pro.getUnitName());
                             budgetMaterial.setTotalPrice(totalPrice);
+                            budgetMaterial.setHousekeeperAcceptance(0);
                         } else {
                             budgetMaterial.setSteta(2);//自购
                             budgetMaterial.setProductId("");
@@ -476,6 +479,7 @@ public class BudgetWorkerService {
                             budgetMaterial.setShopCount(shopCount);
                             budgetMaterial.setTotalPrice(0.0);
                             budgetMaterial.setStorefontId("");
+                            budgetMaterial.setHousekeeperAcceptance(0);
                             Unit unit = iUnitMapper.selectByPrimaryKey(goods.getUnitId());
                             if (unit != null)
                                 budgetMaterial.setUnitName(unit.getName());
@@ -509,7 +513,7 @@ public class BudgetWorkerService {
             }
             return ServerResponse.createBySuccessMessage("生成精算成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("生成精算失败",e);
             return ServerResponse.createByErrorMessage("生成失败");
         }
     }

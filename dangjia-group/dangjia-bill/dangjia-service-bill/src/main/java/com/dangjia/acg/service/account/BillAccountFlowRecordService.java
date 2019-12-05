@@ -35,13 +35,13 @@ public class BillAccountFlowRecordService {
      */
     public ServerResponse updateStoreAccountMoney(String storefrontId,String houseId,Integer state,String orderId,Double money,String remark,String  userId){
         Storefront storefront=iBillStorefrontMapper.selectByPrimaryKey(storefrontId);
-        //1.修改店铺的账户总额
-        Double totalAccount = storefront.getTotalAccount();//账户当前总额
-        storefront.setTotalAccount(MathUtil.add(totalAccount,money));
+        //1.修改店铺的滞留金额
+        Double retentionMoney = storefront.getRetentionMoney();//账户滞留金额
+        storefront.setRetentionMoney(MathUtil.add(retentionMoney,money));
         storefront.setModifyDate(new Date());
         iBillStorefrontMapper.updateByPrimaryKeySelective(storefront);
         //2.记录账户流水
-        saveBillAccountFlowRecore(houseId,money,state,storefrontId,remark,orderId,totalAccount,storefront.getTotalAccount(),userId);
+        saveBillAccountFlowRecore(houseId,money,state,storefrontId,remark,orderId,retentionMoney,storefront.getTotalAccount(),userId);
         return ServerResponse.createBySuccess("更新成功");
     }
 
