@@ -71,7 +71,7 @@ public class GoodsStorefrontProductService {
     //添加店铺商品信息
     public String  insertExitStorefrontProduct(String storefrontId, String productId, BasicsProductDTO basicsProductDTO, String cityId){
         Example example=new Example(StorefrontProduct.class);
-        example.createCriteria().andEqualTo(StorefrontProduct.ID,storefrontId)
+        example.createCriteria().andEqualTo(StorefrontProduct.STOREFRONT_ID,storefrontId)
                 .andEqualTo(StorefrontProduct.PROD_TEMPLATE_ID,productId);
         List<StorefrontProduct> storefrontProductList=iGoodsStorefrontProductMapper.selectByExample(example);
         StorefrontProduct storefrontProduct;
@@ -96,6 +96,8 @@ public class GoodsStorefrontProductService {
         storefrontProduct.setGoodsId( basicsProductDTO.getGoodsId());// 货品ID
         storefrontProduct.setProductName(basicsProductDTO.getName());//模板名称
         storefrontProduct.setCityId(cityId);
+        storefrontProduct.setImage(basicsProductDTO.getImage());
+        storefrontProduct.setDetailImage(basicsProductDTO.getDetailImage());
         if(storefrontProductList!=null&&storefrontProductList.size()>0){
             //修改
             iGoodsStorefrontProductMapper.updateByPrimaryKeySelective(storefrontProduct);
