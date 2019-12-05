@@ -38,6 +38,7 @@ import tk.mybatis.mapper.entity.Example;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 
@@ -105,6 +106,11 @@ public class ShopCartService {
                 List<ShoppingCartListDTO> shoppingCartListDTOS = iShoppingCartmapper.queryCartList(member.getId(), cityId, storefront.getId(),null);
                 shoppingCartListDTOS.forEach(shoppingCartListDTO -> {
                     shoppingCartListDTO.setImage(imageAddress+shoppingCartListDTO.getImage());
+                    //当前时间小于调价的时间时则展示调价预告信息
+                    if(shoppingCartListDTO.getAdjustedPrice() == null || shoppingCartListDTO.getModityPriceTime().getTime()<(new Date()).getTime()) {
+                        shoppingCartListDTO.setAdjustedPrice(null);
+                        shoppingCartListDTO.setModityPriceTime(null);
+                    }
                 });
                 shoppingCartDTO.setShoppingCartListDTOS(shoppingCartListDTOS);
                 shoppingCartDTOS.add(shoppingCartDTO);

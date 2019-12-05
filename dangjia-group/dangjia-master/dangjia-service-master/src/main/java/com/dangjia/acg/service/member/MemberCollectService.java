@@ -28,10 +28,7 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 用户工地收藏记录处理类
@@ -86,6 +83,11 @@ public class MemberCollectService {
                 memberCollectDTOS.forEach(memberCollectDTO -> {
                     memberCollectDTO.setId(memberCollect.getId());
                     memberCollectDTO.setImage(imageAddress + memberCollectDTO.getImage());
+                    //当前时间小于调价的时间时则展示调价预告信息
+                    if(memberCollectDTO.getAdjustedPrice() == null || memberCollectDTO.getModityPriceTime().getTime()<(new Date()).getTime()) {
+                        memberCollectDTO.setAdjustedPrice(null);
+                        memberCollectDTO.setModityPriceTime(null);
+                    }
                 });
                 memberCollectDTOList.addAll(memberCollectDTOS);
             });
