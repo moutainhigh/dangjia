@@ -27,6 +27,7 @@ import com.dangjia.acg.modle.product.ShoppingCart;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,6 +94,7 @@ public class ShopCartService {
             }
             Member member = (Member) object;
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<Storefront> strings = iShoppingCartmapper.queryStorefrontIds(member.getId(), cityId);
             List<ShoppingCartDTO> shoppingCartDTOS=new ArrayList<>();
             strings.forEach(storefront ->{
@@ -109,7 +111,8 @@ public class ShopCartService {
             });
             if(shoppingCartDTOS.size()<=0)
                 return  ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
-            return ServerResponse.createBySuccess("获取购物车列表成功!",shoppingCartDTOS);
+            PageInfo pageResult = new PageInfo(shoppingCartDTOS);
+            return ServerResponse.createBySuccess("获取购物车列表成功!",pageResult);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("系统报错，获取购物车列表失败!");
