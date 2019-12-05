@@ -74,14 +74,32 @@ public class StorefrontProductController implements StorefrontProductAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse setSpStatusById(String storefrontId,String id, String isShelfStatus) {
-        return storefrontProductService.setSpStatusById(storefrontId,id, isShelfStatus);
+    public ServerResponse queryStorefrontProductGroundByKeyWord(String keyWord, String userId, PageDTO pageDTO, String cityId) {
+        return storefrontProductService.queryStorefrontProductGroundByKeyWord(keyWord,userId,pageDTO,cityId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse setAllStoreProductByIsShelfStatus(String storefrontId,String id, String isShelfStatus) {
-        return storefrontProductService.setAllStoreProductByIsShelfStatus(storefrontId,id, isShelfStatus);
+    public ServerResponse queryProductAdjustmentPriceListByKeyWord(String keyWord, String userId, PageDTO pageDTO, String cityId) {
+        return storefrontProductService.queryProductAdjustmentPriceListByKeyWord(keyWord,userId,pageDTO,cityId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse fixModityPrice(String keyWord, String userId, PageDTO pageDTO, String cityId) {
+        return storefrontProductService.fixModityPrice(keyWord,userId,pageDTO,cityId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setSpStatusById(String userId,String cityId,String id, String isShelfStatus) {
+        return storefrontProductService.setSpStatusById(userId,cityId,id, isShelfStatus);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setAllStoreProductByIsShelfStatus(String userId,String cityId,String id, String isShelfStatus) {
+        return storefrontProductService.setAllStoreProductByIsShelfStatus(userId,cityId,id, isShelfStatus);
     }
 
 

@@ -20,6 +20,11 @@ public interface IStorefrontProductMapper  extends Mapper<StorefrontProduct> {
 
     List<BasicsStorefrontProductViewDTO> queryStorefrontProductViewDTOList(@Param("keyWord") String keyWord,@Param("storefrontId") String storefrontId,@Param("cityId") String cityId);
 
+    List<BasicsStorefrontProductViewDTO> queryStorefrontProductGroundByKeyWord(@Param("keyWord") String keyWord,@Param("storefrontId") String storefrontId,@Param("cityId") String cityId);
+
+
+    List<BasicsStorefrontProductViewDTO> queryProductAdjustmentPriceListByKeyWord(@Param("keyWord") String keyWord,@Param("storefrontId") String storefrontId,@Param("cityId") String cityId);
+
     int selectProductByGoodsType(@Param("id") String id);
 
     List<ShoppingCartProductDTO> queryCartList(@Param("storefrontId") String storefrontId, @Param("productId") String productId);

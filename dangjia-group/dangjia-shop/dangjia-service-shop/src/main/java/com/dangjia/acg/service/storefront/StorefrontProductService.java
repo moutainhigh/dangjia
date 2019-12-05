@@ -29,7 +29,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
+import tk.mybatis.mapper.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -238,6 +240,102 @@ public class StorefrontProductService {
     }
 
     /**
+     *供货设置-上架商品-调价列表
+     * @param keyWord
+     * @param userId
+     * @param pageDTO
+     * @param cityId
+     * @return
+     */
+    public ServerResponse queryProductAdjustmentPriceListByKeyWord(String keyWord, String userId, PageDTO pageDTO, String cityId) {
+        try {
+            return null;
+        } catch (Exception e) {
+            logger.error("供货设置-上架商品-调价列表异常：", e);
+            return ServerResponse.createByErrorMessage("供货设置-上架商品-调价列表异常");
+        }
+    }
+
+    /**
+     * 确定调价
+     * @param keyWord
+     * @param userId
+     * @param pageDTO
+     * @param cityId
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse fixModityPrice(String keyWord, String userId, PageDTO pageDTO, String cityId) {
+        try {
+            return null;
+        } catch (Exception e) {
+            logger.error("供货设置-上架商品-调价列表-确定调价异常：", e);
+            return ServerResponse.createByErrorMessage("供货设置-上架商品-调价列表-确定调价异常");
+        }
+    }
+    /**
+     * 供货设置-上架商品-通过货品或者商品名称查询
+     * @param keyWord
+     * @param userId
+     * @param pageDTO
+     * @param cityId
+     * @return
+     */
+    public ServerResponse queryStorefrontProductGroundByKeyWord(String keyWord, String userId, PageDTO pageDTO, String cityId) {
+        try {
+            if (StringUtils.isEmpty(userId)) {
+                return ServerResponse.createByErrorMessage("用户ID不能为空!");
+            }
+            if (StringUtils.isEmpty(cityId)) {
+                return ServerResponse.createByErrorMessage("城市ID不能为空!");
+            }
+            Storefront storefront=storefrontService.queryStorefrontByUserID(userId,cityId);
+            if(storefront==null)
+            {
+                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息!");
+            }
+
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<BasicsStorefrontProductViewDTO> list = istorefrontProductMapper.queryStorefrontProductGroundByKeyWord(keyWord,storefront.getId(),cityId);
+            //图片前缀路径
+            String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            for (BasicsStorefrontProductViewDTO basicsStorefrontProductViewDTO : list) {
+                String id = basicsStorefrontProductViewDTO.getId();
+                StorefrontProduct spdto = istorefrontProductMapper.queryStorefrontProductById(id);
+                if (spdto == null) {
+                    basicsStorefrontProductViewDTO.setStorefrontProduct(null);
+                }
+                else
+                {
+                    String[] imgArr = spdto.getImage().split(",");
+                    StringBuilder imgStr = new StringBuilder();
+                    StringBuilder imgUrlStr = new StringBuilder();
+                    StringTool.getImages(address, imgArr, imgStr , imgUrlStr);
+                    spdto.setImage(imgUrlStr.toString());
+                    spdto.setImageUrl(imgStr.toString());
+
+                    String[] dtimgArr = spdto.getDetailImage().split(",");
+                    StringBuilder dtimgStr = new StringBuilder();
+                    StringBuilder dtimgUrlStr = new StringBuilder();
+                    StringTool.getImages(address, dtimgArr,dtimgStr  ,dtimgUrlStr );
+                    spdto.setDetailImage(dtimgUrlStr.toString());
+                    spdto.setDetailImageUrl(dtimgStr.toString());
+                    basicsStorefrontProductViewDTO.setStorefrontProduct(spdto);
+                    //*************************************新增功能点:初始化下拉框是否关联增值商品******************************************************
+                    String prodTemplateId=spdto.getProdTemplateId();
+                    List<ProductAddedRelation> productAddedRelationlist=djBasicsProductAPI.queryProductAddRelationByPid(null,prodTemplateId);
+                    basicsStorefrontProductViewDTO.setProductAddedRelationlist(productAddedRelationlist);
+                }
+            }
+            PageInfo pageResult = new PageInfo(list);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
+        } catch (Exception e) {
+            logger.error("供货设置-上架商品-通过货品或者商品名称查询异常：", e);
+            return ServerResponse.createByErrorMessage("供货设置-上架商品-通过货品或者商品名称查询异常");
+        }
+    }
+
+    /**
      * 供货设置-已选商品-通过货品或者商品名称查询
      *
      * @param keyWord
@@ -284,7 +382,7 @@ public class StorefrontProductService {
                     spdto.setDetailImage(dtimgUrlStr.toString());
                     spdto.setDetailImageUrl(dtimgStr.toString());
                     basicsStorefrontProductViewDTO.setStorefrontProduct(spdto);
-                    //*************************************新增功能店:初始化下拉框是否关联增值商品******************************************************
+                    //*************************************新增功能点:初始化下拉框是否关联增值商品******************************************************
                     String prodTemplateId=spdto.getProdTemplateId();
                     List<ProductAddedRelation> productAddedRelationlist=djBasicsProductAPI.queryProductAddRelationByPid(null,prodTemplateId);
                     basicsStorefrontProductViewDTO.setProductAddedRelationlist(productAddedRelationlist);
@@ -293,45 +391,58 @@ public class StorefrontProductService {
             PageInfo pageResult = new PageInfo(list);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
-            logger.error("查询失败：", e);
-            return ServerResponse.createByErrorMessage("查询失败");
+            logger.error("供货设置-已选商品-通过货品或者商品名称查询异常：", e);
+            return ServerResponse.createByErrorMessage("供货设置-已选商品-通过货品或者商品名称查询异常");
         }
     }
 
 
     /**
      * 设置商品上下架
-     *@param storefrontId  店铺id
      * @param id 店铺商品表id
      * @param isShelfStatus 上下架状态
      * @return
      */
-    public ServerResponse setSpStatusById(String storefrontId,String id, String isShelfStatus) {
+    public ServerResponse setSpStatusById(String userId,String cityId,String id, String isShelfStatus) {
         try {
-            if (StringUtils.isEmpty(id)) {
-                return ServerResponse.createByErrorMessage("店铺商品ID不能为空");
-            }
-
             if (StringUtils.isEmpty(isShelfStatus)) {
                 return ServerResponse.createByErrorMessage("商品上下架状态不能为空");
             }
-
+            Storefront storefront=storefrontService.queryStorefrontByUserID(userId,cityId);
+            if(storefront==null)
+            {
+                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息!");
+            }
             //判断:非当家自营店只能上架实物商品和服务商品 0:普通商家 1 ： 当家自营店
-            Storefront storefront=iStorefrontMapper.selectByPrimaryKey(storefrontId);
-            if (storefront.getIfDjselfManage() != null && storefront.getIfDjselfManage() == 0) {
+            if (storefront != null && storefront.getIfDjselfManage() == 0) {
                 Integer k = istorefrontProductMapper.selectProductByGoodsType(id);
                 if (k > 0) {
+                    StorefrontProduct storefrontProduct = new StorefrontProduct();
+                    storefrontProduct.setId(id);
+                    storefrontProduct.setIsShelfStatus(isShelfStatus);
+                    int i = istorefrontProductMapper.updateByPrimaryKeySelective(storefrontProduct);
+                    if (i <= 0) {
+                        return ServerResponse.createByErrorMessage("商品上下架失败");
+                    }
+                    return ServerResponse.createBySuccessMessage("商品上下架成功");
+                }
+                else
+                {
                     return ServerResponse.createByErrorMessage("温馨提示:非当家自营店只能上架实物商品和服务商品");
                 }
             }
-            StorefrontProduct storefrontProduct = new StorefrontProduct();
-            storefrontProduct.setId(id);
-            storefrontProduct.setIsShelfStatus(isShelfStatus);
-            int i = istorefrontProductMapper.updateByPrimaryKeySelective(storefrontProduct);
-            if (i <= 0) {
-                return ServerResponse.createByErrorMessage("商品上下架失败");
+            else
+            {
+                //1:当家自营店
+                StorefrontProduct storefrontProduct = new StorefrontProduct();
+                storefrontProduct.setId(id);
+                storefrontProduct.setIsShelfStatus(isShelfStatus);
+                int i = istorefrontProductMapper.updateByPrimaryKeySelective(storefrontProduct);
+                if (i <= 0) {
+                    return ServerResponse.createByErrorMessage("商品上下架失败");
+                }
+                return ServerResponse.createBySuccessMessage("商品上下架成功");
             }
-            return ServerResponse.createBySuccessMessage("商品上下架成功");
         } catch (Exception e) {
             logger.error("商品上下架失败：", e);
             return ServerResponse.createByErrorMessage("商品上下架失败");
@@ -344,7 +455,7 @@ public class StorefrontProductService {
      * @param isShelfStatus
      * @return
      */
-    public ServerResponse setAllStoreProductByIsShelfStatus(String storefrontId,String id, String isShelfStatus) {
+    public ServerResponse setAllStoreProductByIsShelfStatus(String userId,String cityId,String id, String isShelfStatus) {
         try {
             if (StringUtils.isEmpty(id)) {
                 return ServerResponse.createByErrorMessage("店铺商品ID集合不能为空");
@@ -352,11 +463,12 @@ public class StorefrontProductService {
             if (StringUtils.isEmpty(isShelfStatus)) {
                 return ServerResponse.createByErrorMessage("商品上下架状态不能为空");
             }
-            if (StringUtils.isEmpty(storefrontId)) {
-                return ServerResponse.createByErrorMessage("店铺id不能为空");
+            Storefront storefront=storefrontService.queryStorefrontByUserID(userId,cityId);
+            if(storefront==null)
+            {
+                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息!");
             }
-
-            Storefront storefront=iStorefrontMapper.selectByPrimaryKey(storefrontId);
+            //当家自营
             if(storefront.getIfDjselfManage()==1)
             {
                 String[] iditem = id.split(",");
@@ -375,13 +487,12 @@ public class StorefrontProductService {
             }
             else
             {
-                //非自营点
+                //正常店铺
                 String[] iditem = id.split(",");
-
-                StringBuffer zy=null;//当家自营店
-                StringBuffer fzy=null;//非当家自营店
+                StringBuffer zy=new StringBuffer();//当家自营店
+                StringBuffer fzy=new StringBuffer();//正常店铺
                 for (String str : iditem) {
-                    Integer k = istorefrontProductMapper.selectProductByGoodsType(str);//判断是否是实物和服务
+                    Integer k = istorefrontProductMapper.selectProductByGoodsType(str);//类型0：实物商品；1：服务商品；2：人工商品；3：体验；4：增值；5：维保
                     if (k>0) {
                         fzy.append(str+",");
                     }
@@ -390,7 +501,10 @@ public class StorefrontProductService {
                         zy.append(str+",");
                     }
                 }
-
+                if (StringUtil.isEmpty(fzy.toString()))
+                {
+                    return ServerResponse.createByErrorMessage("普通店铺没有可上架的商品");
+                }
                 Example example = new Example(StorefrontProduct.class);
                 example.createCriteria().andIn(StorefrontProduct.ID, Arrays.asList(fzy.toString().substring(0,fzy.length()-1).split(",")));
                 StorefrontProduct storefrontProduct = new StorefrontProduct();
@@ -401,7 +515,7 @@ public class StorefrontProductService {
                 if (j > 0) {
                     if(zy!=null)
                     {
-                        return ServerResponse.createBySuccess("部分商品上下架成功,如下商品属于当家自营商品，不能商家",zy.toString().substring(0,zy.length()-1));
+                        return ServerResponse.createBySuccess("部分商品上下架成功,如下商品属于当家自营商品，不能上架",zy.toString().substring(0,zy.length()-1));
                     }
                     return ServerResponse.createBySuccessMessage("设置商品上下架成功");
                 } else {
