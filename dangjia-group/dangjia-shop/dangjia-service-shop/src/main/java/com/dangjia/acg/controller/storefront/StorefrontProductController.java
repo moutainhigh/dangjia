@@ -86,8 +86,8 @@ public class StorefrontProductController implements StorefrontProductAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse fixModityPrice(String keyWord, String userId, PageDTO pageDTO, String cityId) {
-        return storefrontProductService.fixModityPrice(keyWord,userId,pageDTO,cityId);
+    public ServerResponse fixModityPrice(String storefrontProductList, String userId, PageDTO pageDTO, String cityId) {
+        return storefrontProductService.fixModityPrice(storefrontProductList,userId,pageDTO,cityId);
     }
 
     @Override

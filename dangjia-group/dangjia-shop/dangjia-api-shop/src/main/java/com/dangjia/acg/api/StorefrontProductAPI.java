@@ -68,7 +68,7 @@ public interface StorefrontProductAPI {
     @PostMapping("/web/fixModityPrice")
     @ApiOperation(value = "供货设置-上架商品-调价列表-确定调价", notes = "供货设置-上架商品-调价列表-确定调价")
     ServerResponse fixModityPrice(
-            @RequestParam("keyWord") String keyWord,@RequestParam("userId") String userId,
+            @RequestParam("storefrontProductList") String storefrontProductList,@RequestParam("userId") String userId,
             @RequestParam("pageDTO") PageDTO pageDTO,@RequestParam("cityId") String cityId);
 
     @PostMapping("/web/setSpStatusById")

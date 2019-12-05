@@ -2,15 +2,17 @@ package com.dangjia.acg.service.storefront;
 
 import cn.jiguang.common.utils.StringUtils;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.product.DjBasicsProductAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.product.MemberCollectDTO;
 import com.dangjia.acg.dto.product.ShoppingCartProductDTO;
 import com.dangjia.acg.dto.storefront.*;
+import com.dangjia.acg.mapper.storefront.IStorefrontDjAdjustRecordMapper;
 import com.dangjia.acg.mapper.storefront.IStorefrontMapper;
 import com.dangjia.acg.mapper.storefront.IStorefrontProductAddedRelationMapper;
 import com.dangjia.acg.mapper.storefront.IStorefrontProductMapper;
@@ -18,7 +20,7 @@ import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.product.ProductAddedRelation;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
-import com.dangjia.acg.modle.storefront.StorefrontProductAddedRelation;
+import com.dangjia.acg.modle.supplier.DjAdjustRecord;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -30,10 +32,9 @@ import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 import tk.mybatis.mapper.util.StringUtil;
 
-import java.util.ArrayList;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class StorefrontProductService {
@@ -56,6 +57,9 @@ public class StorefrontProductService {
 
     @Autowired
     private IStorefrontProductAddedRelationMapper iStorefrontProductAddedRelationMapper ;
+
+    @Autowired
+    private IStorefrontDjAdjustRecordMapper istorefrontDjAdjustRecordMapper ;
 
     public ServerResponse  countStorefrontProduct(String userId, String cityId)
     {
@@ -263,16 +267,40 @@ public class StorefrontProductService {
 
     /**
      * 确定调价
-     * @param keyWord
+     * @param storefrontProductList
      * @param userId
      * @param pageDTO
      * @param cityId
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse fixModityPrice(String keyWord, String userId, PageDTO pageDTO, String cityId) {
+    public ServerResponse fixModityPrice(String storefrontProductList, String userId, PageDTO pageDTO, String cityId) {
         try {
-            return null;
+            JSONArray arr = JSONArray.parseArray(storefrontProductList);
+            for (int i = 0; i < arr.size(); i++) {
+                //修改店铺商品价格
+                JSONObject obj = arr.getJSONObject(i);
+                String id = obj.getString("id");
+                String adjustedPrice = obj.getString("adjustedPrice");
+                String modityPriceTime = obj.getString("modityPriceTime");
+                String sellPrice = obj.getString("sellPrice");//销售原价
+                String prodTemplateId = obj.getString("prodTemplateId");//货品id
+                StorefrontProduct storefrontProduct=new StorefrontProduct();
+                storefrontProduct.setId(id);
+                storefrontProduct.setAdjustedPrice(Double.parseDouble(adjustedPrice));
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                storefrontProduct.setModityPriceTime(sdf.parse(modityPriceTime));
+                istorefrontProductMapper.updateByPrimaryKeySelective(storefrontProduct);
+                //增加调价流水
+                DjAdjustRecord djAdjustRecord = new DjAdjustRecord();
+                djAdjustRecord.setAdjustPrice(Double.parseDouble(adjustedPrice));
+                djAdjustRecord.setAdjustTime(sdf.parse(modityPriceTime));
+                djAdjustRecord.setApplicationProductId(prodTemplateId);
+                djAdjustRecord.setUserId(userId);
+                djAdjustRecord.setOriginalCost(Double.parseDouble(sellPrice));
+                istorefrontDjAdjustRecordMapper.insert(djAdjustRecord);
+            }
+            return ServerResponse.createBySuccessMessage("调价成功");
         } catch (Exception e) {
             logger.error("供货设置-上架商品-调价列表-确定调价异常：", e);
             return ServerResponse.createByErrorMessage("供货设置-上架商品-调价列表-确定调价异常");
