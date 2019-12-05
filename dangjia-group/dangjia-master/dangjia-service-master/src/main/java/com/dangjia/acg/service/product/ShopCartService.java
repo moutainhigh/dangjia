@@ -201,8 +201,13 @@ public class ShopCartService {
      * @param productId
      * @return 0=直接通过,无提示； 1=有房无精算(业主无房时)   2=有房有精算(业主无房无精算时) 3=有房有精算(业主有房无精算时)   4=有房有精算(业主有房无精算时)  5=人工商品
      */
-    public ServerResponse checkCart(Member member,String productId) {
+    public ServerResponse checkCart(String userToken,String productId) {
         try {
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;
             StorefrontProduct product = iMasterStorefrontProductMapper.selectByPrimaryKey(productId);//目标product 对象
             BasicsGoods goods = iMasterGoodsMapper.selectByPrimaryKey(product.getGoodsId());
             if(goods.getType() == 2){
@@ -276,7 +281,7 @@ public class ShopCartService {
             BasicsGoods goods = iMasterGoodsMapper.selectByPrimaryKey(djBasicsProductTemplate.getGoodsId());
             //有房有精算  根据用户的member_id去区分
             //无房无精算  根据用户的member_id去区分
-            ServerResponse ccart= checkCart(member,productId);
+            ServerResponse ccart= checkCart(userToken,productId);
             if(!ccart.isSuccess()){
                 return ccart;
             }
@@ -457,7 +462,7 @@ public class ShopCartService {
                 //有房有精算  根据用户的member_id去区分
                 //无房无精算  根据用户的member_id去区分
                 //purchaseRestrictions:0自由购房；1有房无精算；2有房有精算
-                ServerResponse ccart= checkCart(member,orderItem.getProductId());
+                ServerResponse ccart= checkCart(userToken,orderItem.getProductId());
                 if(!ccart.isSuccess()){
                     return ccart;
                 }
