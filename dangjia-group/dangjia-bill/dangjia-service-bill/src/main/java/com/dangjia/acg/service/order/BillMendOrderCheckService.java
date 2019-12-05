@@ -5,6 +5,7 @@ import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.MathUtil;
 import com.dangjia.acg.dto.refund.RefundRepairOrderMaterialDTO;
 import com.dangjia.acg.mapper.order.IBillHouseMapper;
 import com.dangjia.acg.mapper.order.IBillWarehouseDetailMapper;
@@ -108,7 +109,7 @@ public class BillMendOrderCheckService {
                   if(mendOrder.getType() == 5){//退货退款，才扣除店铺的钱
                       //修改店铺的金额(损扣减金额）
                       String storefrontId=mendOrder.getStorefrontId();
-                      billAccountFlowRecordService.updateStoreAccountMoney(storefrontId,mendOrder.getHouseId(),3,mendOrder.getId(),-mendOrder.getTotalAmount(),"业主退货退款，自动扣减","SYSTEM");
+                      billAccountFlowRecordService.updateStoreAccountMoney(storefrontId,mendOrder.getHouseId(),3,mendOrder.getId(), MathUtil.mul(mendOrder.getTotalAmount(),-1),"业主退货退款，自动扣减","SYSTEM");
 
                   }
 

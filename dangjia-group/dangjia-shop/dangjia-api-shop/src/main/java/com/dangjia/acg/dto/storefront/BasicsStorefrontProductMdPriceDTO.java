@@ -17,6 +17,4 @@ public class BasicsStorefrontProductMdPriceDTO {
     private String suppliedNum; // 供货数
     private String adjustedPrice;//调后价格
     private String modityPriceTime; //调价时间
-
-
 }
