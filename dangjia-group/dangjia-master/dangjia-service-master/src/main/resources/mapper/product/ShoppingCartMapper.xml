@@ -3,6 +3,21 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.product.IShoppingCartMapper">
+	<sql id="all_storefront_column">
+          s.id,
+          s.user_id AS userId,
+          s.city_id AS cityId,
+          s.storefront_name AS storefrontName,
+          s.storefront_address AS storefrontAddress,
+          s.storefront_desc AS storefrontDesc,
+          s.storefront_logo AS storefrontLogo,
+          s.storekeeper_name AS storekeeperName,
+          s.mobile,
+          s.email,
+          s.create_date AS createDate,
+          s.modify_date AS modifyDate,
+          s.data_status AS dataStatus
+    </sql>
 
     <sql id="all_columns">
 		id,
@@ -116,14 +131,15 @@
 		</if>
 	</select>
 
-	<select id="queryStorefrontIds" resultType="java.lang.String">
+	<select id="queryStorefrontIds" resultType="com.dangjia.acg.modle.storefront.Storefront">
 		SELECT
-		  	storefront_id
+		<include refid="all_storefront_column"/>
 		FROM
-			dj_repair_shopping_cart
+		dj_repair_shopping_cart c
+		INNER JOIN dj_basics_storefront  s on c.storefront_id=s.id
 		WHERE
-			member_id =#{memberId}
-			AND city_id =#{cityId}
+		c.member_id =#{memberId}
+			AND c.city_id =#{cityId}
 		group by storefront_id
 	</select>
 
@@ -140,16 +156,6 @@
 		AND bsp.id = #{storefrontProductId}
 	</select>
 
-	<select id="queryWhetherThereIsActuarial" resultType="com.dangjia.acg.modle.house.House">
-		SELECT
-			h.*
-		FROM
-			dj_house h,
-			dj_actuary_budget_material abm
-		WHERE
-			h.id = abm.house_id
-		AND h.member_id =
-	</select>
 
 
 

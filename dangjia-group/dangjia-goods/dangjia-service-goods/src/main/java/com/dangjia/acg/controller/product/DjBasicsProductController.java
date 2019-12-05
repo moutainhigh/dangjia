@@ -13,9 +13,12 @@ import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.service.product.DjBasicsGoodsService;
 import com.dangjia.acg.service.product.DjBasicsProductTemplateService;
 import com.github.pagehelper.PageInfo;
+import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -47,6 +50,14 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
         return djBasicsProductService.queryProductData(name,cityId);
 
     }
+    @Override
+    @ApiMethod
+    public ServerResponse checkProductSnOrNameExit(HttpServletRequest request,String name,
+                                            String productSn,String cityId){
+        return djBasicsProductService.checkProductSnOrNameExit(name,productSn,cityId);
+
+    }
+
 
     @Override
     @ApiMethod

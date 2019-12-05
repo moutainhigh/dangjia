@@ -95,15 +95,14 @@ public class ShopCartService {
             Member member = (Member) object;
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<String> strings = iShoppingCartmapper.queryStorefrontIds(member.getId(), cityId);
+            List<Storefront> strings = iShoppingCartmapper.queryStorefrontIds(member.getId(), cityId);
             List<ShoppingCartDTO> shoppingCartDTOS=new ArrayList<>();
-            strings.forEach(str ->{
+            strings.forEach(storefront ->{
                 ShoppingCartDTO shoppingCartDTO=new ShoppingCartDTO();
-                Storefront storefront = basicsStorefrontAPI.querySingleStorefrontById(str);
                 shoppingCartDTO.setStorefrontName(storefront.getStorefrontName());
                 shoppingCartDTO.setStorefrontId(storefront.getId());
                 shoppingCartDTO.setStorefrontIcon(imageAddress+storefront.getSystemLogo());
-                List<ShoppingCartListDTO> shoppingCartListDTOS = iShoppingCartmapper.queryCartList(member.getId(), cityId, str,null);
+                List<ShoppingCartListDTO> shoppingCartListDTOS = iShoppingCartmapper.queryCartList(member.getId(), cityId, storefront.getId(),null);
                 shoppingCartListDTOS.forEach(shoppingCartListDTO -> {
                     shoppingCartListDTO.setImage(imageAddress+shoppingCartListDTO.getImage());
                 });
@@ -196,6 +195,69 @@ public class ShopCartService {
         }
     }
 
+    /**
+     * 审核加入购物车是否达到条件
+     * @param productId
+     * @return 0=直接通过,无提示； 1=有房无精算(业主无房时)   2=有房有精算(业主无房无精算时) 3=有房有精算(业主有房无精算时)   4=有房有精算(业主有房无精算时)  5=人工商品
+     */
+    public ServerResponse checkCart(String userToken,String productId) {
+        try {
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;
+            StorefrontProduct product = iMasterStorefrontProductMapper.selectByPrimaryKey(productId);//目标product 对象
+            BasicsGoods goods = iMasterGoodsMapper.selectByPrimaryKey(product.getGoodsId());
+            if(goods.getType() == 2){
+                return ServerResponse.createByErrorMessage("为确保您买到正确的人工类商品\n" +
+                        "请联系服务您的工匠协助购买",5);
+            }
+            Integer purchaseRestrictions = iShoppingCartmapper.queryPurchaseRestrictions(productId);
+            Example example=new Example(House.class);
+            if(purchaseRestrictions==1){
+                example.createCriteria().andEqualTo(House.MEMBER_ID,member.getId())
+                        .andEqualTo(House.DATA_STATUS,0)
+                        .andNotEqualTo(House.VISIT_STATE,2)
+                        .andNotEqualTo(House.VISIT_STATE,3)
+                        .andNotEqualTo(House.VISIT_STATE,4);
+                Integer houses = iHouseMapper.selectCountByExample(example);
+                if(houses<=0)
+                    return ServerResponse.createByErrorMessage("该类商品需要在开始装修后才能购买\n" +
+                            "您可以先收藏起来\n" +
+                            "或者前往装修",1);
+            } else if(purchaseRestrictions==2){
+                example.createCriteria().andEqualTo(House.MEMBER_ID,member.getId())
+                        .andEqualTo(House.DATA_STATUS,0);
+                Integer houses = iHouseMapper.selectCountByExample(example);
+                if(houses<=0) {
+                    return ServerResponse.createByErrorMessage("该类商品需要在开始装修后才能购买\n" +
+                            "您可以先收藏起来\n" +
+                            "或者前往装修",2);
+                }
+                example.createCriteria().andEqualTo(House.MEMBER_ID,member.getId())
+                        .andEqualTo(House.DATA_STATUS,0)
+                        .andNotEqualTo(House.BUDGET_OK,1)
+                        .andNotEqualTo(House.BUDGET_OK,5);
+                houses = iHouseMapper.selectCountByExample(example);
+                if(houses<=0) {
+                    return ServerResponse.createByErrorMessage("该类商品建议根据精算指导购买\n" +
+                            "你可以先购买精算~", 3);
+                }
+                example.createCriteria().andEqualTo(House.MEMBER_ID,member.getId())
+                        .andEqualTo(House.DATA_STATUS,0)
+                        .andEqualTo(House.BUDGET_OK,0);
+                houses = iHouseMapper.selectCountByExample(example);
+                if(houses<=0) {
+                    return ServerResponse.createByErrorMessage("该类商品建议根据精算指导购买\n" +
+                            "你可以先购买精算~", 4);
+                }
+            }
+            return ServerResponse.createBySuccess("OK!",0);
+        } catch (Exception e) {
+            return ServerResponse.createByErrorMessage("加入购物车失败!");
+        }
+    }
 
     /**
      * 加入购物车
@@ -218,22 +280,12 @@ public class ShopCartService {
             BasicsGoods goods = iMasterGoodsMapper.selectByPrimaryKey(djBasicsProductTemplate.getGoodsId());
             //有房有精算  根据用户的member_id去区分
             //无房无精算  根据用户的member_id去区分
-            //purchaseRestrictions:0自由购房；1有房无精算；2有房有精算
-            Integer purchaseRestrictions = iShoppingCartmapper.queryPurchaseRestrictions(productId);
-            Example example=new Example(House.class);
-            if(purchaseRestrictions==1){
-                example.createCriteria().andEqualTo(House.MEMBER_ID,member.getId())
-                        .andEqualTo(House.DATA_STATUS,0);
-                List<House> houses = iHouseMapper.selectByExample(example);
-                if(houses.size()<=0)
-                    return ServerResponse.createByErrorMessage("加入购物车失败,该商品为有房才能购买!");
-            } else if(purchaseRestrictions==2){
-                List<House> houses = iShoppingCartmapper.queryWhetherThereIsActuarial(member.getId());
-                if(houses.size()<=0)
-                    return ServerResponse.createByErrorMessage("加入购物车失败,该商品为有房有精算才能购买!");
+            ServerResponse ccart= checkCart(userToken,productId);
+            if(!ccart.isSuccess()){
+                return ccart;
             }
             //判断去重,如果有的话就购买数量加1
-            example = new Example(ShoppingCart.class);
+            Example example = new Example(ShoppingCart.class);
             example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, member.getId())
                     .andEqualTo(ShoppingCart.PRODUCT_ID, productId)
                     .andEqualTo(ShoppingCart.STOREFRONT_ID,storefrontProduct.getStorefrontId());
@@ -409,21 +461,12 @@ public class ShopCartService {
                 //有房有精算  根据用户的member_id去区分
                 //无房无精算  根据用户的member_id去区分
                 //purchaseRestrictions:0自由购房；1有房无精算；2有房有精算
-                Integer purchaseRestrictions = iShoppingCartmapper.queryPurchaseRestrictions(orderItem.getProductId());
-                Example example=new Example(House.class);
-                if(purchaseRestrictions==1){
-                    example.createCriteria().andEqualTo(House.MEMBER_ID,member.getId())
-                            .andEqualTo(House.DATA_STATUS,0);
-                    List<House> houses = iHouseMapper.selectByExample(example);
-                    if(houses.size()<=0)
-                        return ServerResponse.createByErrorMessage("加入购物车失败,该商品为有房才能购买!");
-                } else if(purchaseRestrictions==2){
-                    List<House> houses = iShoppingCartmapper.queryWhetherThereIsActuarial(member.getId());
-                    if(houses.size()<=0)
-                        return ServerResponse.createByErrorMessage("加入购物车失败,该商品为有房有精算才能购买!");
+                ServerResponse ccart= checkCart(userToken,orderItem.getProductId());
+                if(!ccart.isSuccess()){
+                    return ccart;
                 }
                 //判断去重,如果有的话就购买数量加1
-                example = new Example(ShoppingCart.class);
+                Example example = new Example(ShoppingCart.class);
                 example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, member.getId())
                         .andEqualTo(ShoppingCart.PRODUCT_ID, orderItem.getProductId())
                         .andEqualTo(ShoppingCart.STOREFRONT_ID,storefrontProduct.getStorefrontId());
@@ -460,4 +503,6 @@ public class ShopCartService {
             return ServerResponse.createByErrorMessage("系统报错，移入失败!");
         }
     }
+
+
 }

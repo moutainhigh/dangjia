@@ -26,7 +26,6 @@ import com.dangjia.acg.mapper.order.IBillQuantityRoomMapper;
 import com.dangjia.acg.mapper.refund.*;
 import com.dangjia.acg.mapper.sale.IBillMemberMapper;
 import com.dangjia.acg.model.Config;
-import com.dangjia.acg.modle.attribute.AttributeValue;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.complain.Complain;
@@ -202,7 +201,7 @@ public class RefundAfterSalesService {
             //查询规格名称
             if (StringUtils.isNotBlank(pt.getValueIdArr())) {
                 ap.setValueIdArr(pt.getValueIdArr());
-                ap.setValueNameArr(billProductTemplateService.getNewValueNameArr(pt.getValueIdArr()));
+                ap.setValueNameArr(billProductTemplateService.getNewValueNameArr(pt.getValueIdArr()).replaceAll(",", " "));
             }
         }
 
@@ -616,7 +615,7 @@ public class RefundAfterSalesService {
             //查询规格名称
             if (StringUtils.isNotBlank(pt.getValueIdArr())) {
                 ap.setValueIdArr(pt.getValueIdArr());
-                ap.setValueNameArr(billProductTemplateService.getNewValueNameArr(pt.getValueIdArr()));
+                ap.setValueNameArr(billProductTemplateService.getNewValueNameArr(pt.getValueIdArr().replaceAll(",", " ")));
             }
         }
 

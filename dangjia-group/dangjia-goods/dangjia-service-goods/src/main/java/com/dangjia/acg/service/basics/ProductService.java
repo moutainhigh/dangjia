@@ -370,7 +370,7 @@ public class ProductService {
                 if (!StringUtils.isNoneBlank(obj.getString("valueNameArr"))) {
                     product.setValueNameArr(null);
                 } else {
-                    product.setValueNameArr(obj.getString("valueNameArr"));
+                    product.setValueNameArr(obj.getString("valueNameArr").replaceAll(",", " "));
                 }
 
                 if (!StringUtils.isNoneBlank(obj.getString("valueIdArr"))) {

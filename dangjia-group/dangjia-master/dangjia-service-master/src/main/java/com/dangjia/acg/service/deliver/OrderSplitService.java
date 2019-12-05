@@ -365,7 +365,7 @@ public class OrderSplitService {
                     splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
 
                 }
-                orderSplit.setApplyStatus(2);//发给供应商
+                orderSplit.setApplyStatus(2);//2通过(发给供应商)
                 orderSplitMapper.updateByPrimaryKeySelective(orderSplit);
                 return ServerResponse.createBySuccessMessage("操作成功");
             }

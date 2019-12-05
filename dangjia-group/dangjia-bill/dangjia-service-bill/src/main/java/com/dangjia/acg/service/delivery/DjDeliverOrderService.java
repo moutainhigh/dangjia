@@ -1248,7 +1248,8 @@ public class DjDeliverOrderService {
                     if (djSplitDeliverOrderDTO.getShippingState().equals("1") || djSplitDeliverOrderDTO.getShippingState().equals("7")) {
                         //shippingState 等于 1或者7   shippingType 收货订单 为待收货 待收货
                         djSplitDeliverOrderDTO.setShippingType("10");
-                    } else if (djSplitDeliverOrderDTO.getShippingState().equals("8")) {
+                    } else if (djSplitDeliverOrderDTO.getShippingState().equals("8")||
+                            djSplitDeliverOrderDTO.getShippingState().equals("2")||djSplitDeliverOrderDTO.getShippingState().equals("5")) {
                         //shippingState 为 8   shippingType 11 为已完成
                         djSplitDeliverOrderDTO.setShippingType("11");
                         djSplitDeliverOrderDTO.setShippingState("1004");
@@ -1602,7 +1603,7 @@ public class DjDeliverOrderService {
 
 
         example = new Example(OrderSplitItem.class);
-        example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, splitDeliver.getId())
+        example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID, splitDeliver.getId())
                 .andEqualTo(OrderSplitItem.DATA_STATUS, 0);
         List<OrderSplitItem> orderSplitItem = billDjDeliverOrderSplitItemMapper.selectByExample(example);
 
@@ -1883,6 +1884,14 @@ public class DjDeliverOrderService {
             splitDeliver.setId(id);
             splitDeliver.setShippingState(2);
             billDjDeliverSplitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
+            Example example=new Example(OrderSplitItem.class);
+            example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID,id);
+            List<OrderSplitItem> orderSplitItems = billDjDeliverOrderSplitItemMapper.selectByExample(example);
+            orderSplitItems.forEach(orderSplitItem -> {
+                orderSplitItem.setReceive(orderSplitItem.getNum());
+                orderSplitItem.setModifyDate(new Date());
+                billDjDeliverOrderSplitItemMapper.updateByPrimaryKeySelective(orderSplitItem);
+            });
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             e.printStackTrace();

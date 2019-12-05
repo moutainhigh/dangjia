@@ -12,6 +12,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import java.math.BigDecimal;
+import java.util.Date;
 
 @Data
 @Entity
@@ -134,7 +135,6 @@ public class StorefrontProduct extends BaseEntity {
     @ApiModelProperty("  城市ID")
     private String cityId;
 
-
     /**
      * 非必须字段
      */
@@ -148,5 +148,23 @@ public class StorefrontProduct extends BaseEntity {
 
     @Transient
     private String  addedProductId;
+
+    /**
+     * 调后价格
+     */
+    @Column(name = "adjusted_price")
+    @Desc(value = "  调后价格")
+    @ApiModelProperty("  调后价格")
+    private Double adjustedPrice;
+
+    /**
+     * 调价时间
+     */
+    @Column(name = "modity_price_time")
+    @Desc(value = "  调价时间")
+    @ApiModelProperty("  调价时间")
+    private Date modityPriceTime;
+
+
 
 }
