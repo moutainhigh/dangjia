@@ -10,10 +10,7 @@ import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.product.MemberCollectDTO;
 import com.dangjia.acg.dto.product.ShoppingCartProductDTO;
-import com.dangjia.acg.dto.storefront.StorefrontDTO;
-import com.dangjia.acg.dto.storefront.StorefrontProductListDTO;
-import com.dangjia.acg.dto.storefront.BasicsStorefrontProductDTO;
-import com.dangjia.acg.dto.storefront.BasicsStorefrontProductViewDTO;
+import com.dangjia.acg.dto.storefront.*;
 import com.dangjia.acg.mapper.storefront.IStorefrontMapper;
 import com.dangjia.acg.mapper.storefront.IStorefrontProductAddedRelationMapper;
 import com.dangjia.acg.mapper.storefront.IStorefrontProductMapper;
@@ -249,7 +246,15 @@ public class StorefrontProductService {
      */
     public ServerResponse queryProductAdjustmentPriceListByKeyWord(String keyWord, String userId, PageDTO pageDTO, String cityId) {
         try {
-            return null;
+            Storefront storefront=storefrontService.queryStorefrontByUserID(userId,cityId);
+            if(storefront==null)
+            {
+                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息!");
+            }
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<BasicsStorefrontProductMdPriceDTO> list=istorefrontProductMapper.queryProductAdjustmentPriceListByKeyWord(keyWord,storefront.getId(),cityId);
+            PageInfo pageResult = new PageInfo(list);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             logger.error("供货设置-上架商品-调价列表异常：", e);
             return ServerResponse.createByErrorMessage("供货设置-上架商品-调价列表异常");
@@ -444,8 +449,8 @@ public class StorefrontProductService {
                 return ServerResponse.createBySuccessMessage("商品上下架成功");
             }
         } catch (Exception e) {
-            logger.error("商品上下架失败：", e);
-            return ServerResponse.createByErrorMessage("商品上下架失败");
+            logger.error("商品上下架异常：", e);
+            return ServerResponse.createByErrorMessage("商品上下架异常");
         }
     }
 

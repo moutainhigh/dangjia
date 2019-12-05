@@ -2,10 +2,7 @@ package com.dangjia.acg.mapper.storefront;
 
 import com.dangjia.acg.dto.product.MemberCollectDTO;
 import com.dangjia.acg.dto.product.ShoppingCartProductDTO;
-import com.dangjia.acg.dto.storefront.BasicsStorefrontProductDTO;
-import com.dangjia.acg.dto.storefront.StorefrontDTO;
-import com.dangjia.acg.dto.storefront.StorefrontProductListDTO;
-import com.dangjia.acg.dto.storefront.BasicsStorefrontProductViewDTO;
+import com.dangjia.acg.dto.storefront.*;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -22,16 +19,13 @@ public interface IStorefrontProductMapper  extends Mapper<StorefrontProduct> {
 
     List<BasicsStorefrontProductViewDTO> queryStorefrontProductGroundByKeyWord(@Param("keyWord") String keyWord,@Param("storefrontId") String storefrontId,@Param("cityId") String cityId);
 
-
-    List<BasicsStorefrontProductViewDTO> queryProductAdjustmentPriceListByKeyWord(@Param("keyWord") String keyWord,@Param("storefrontId") String storefrontId,@Param("cityId") String cityId);
+    List<BasicsStorefrontProductMdPriceDTO> queryProductAdjustmentPriceListByKeyWord(@Param("keyWord") String keyWord,@Param("storefrontId") String storefrontId,@Param("cityId") String cityId);
 
     int selectProductByGoodsType(@Param("id") String id);
 
     List<ShoppingCartProductDTO> queryCartList(@Param("storefrontId") String storefrontId, @Param("productId") String productId);
 
     List<MemberCollectDTO> queryCollectGood(@Param("productId") String productId);
-
-   // List<StorefrontDTO> queryStorefrontListByStorefrontId(String storefrontId, String searchKey);
 
     StorefrontProduct queryStorefrontProductById(@Param("id") String id);
 
