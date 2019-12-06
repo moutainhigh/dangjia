@@ -37,6 +37,7 @@ import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
 import com.dangjia.acg.mapper.pay.IMasterSupplierPayOrderMapper;
 import com.dangjia.acg.mapper.pay.IPayOrderMapper;
 import com.dangjia.acg.mapper.product.IMasterStorefrontMapper;
+import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
 import com.dangjia.acg.mapper.product.IShoppingCartMapper;
 import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
 import com.dangjia.acg.mapper.repair.IMendMaterialMapper;
@@ -70,6 +71,7 @@ import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.safe.WorkerTypeSafe;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
 import com.dangjia.acg.modle.storefront.Storefront;
+import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.dangjia.acg.modle.supplier.DjSupplierPayOrder;
 import com.dangjia.acg.modle.worker.Insurance;
@@ -197,6 +199,9 @@ public class PaymentService {
     private IMasterSupplierMapper iMaterSupplierMapper;
     @Autowired
     private IMasterStorefrontMapper iMasterStorefrontMapper;
+
+    @Autowired
+    private IMasterStorefrontProductMapper iMasterStorefrontProductMapper;
     @Autowired
     private IMasterAccountFlowRecordMapper iMasterAccountFlowRecordMapper;
     private Logger logger = LoggerFactory.getLogger(PaymentService.class);
@@ -1099,6 +1104,11 @@ public class PaymentService {
                         orderItem.setOrderStatus("1");//1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭
                         orderItem.setCreateBy(member.getId());
                         orderItemMapper.insert(orderItem);
+
+                        ShoppingCartListDTO parmDTO=productMap.get(orderItem.getProductId());
+                        if(!CommonUtil.isEmpty(parmDTO.getAddedProductIds())) {
+                            setAddedProduct(orderItem.getId(), parmDTO.getAddedProductIds(), "2");
+                        }
                     }
                 }
 
@@ -1267,6 +1277,11 @@ public class PaymentService {
                             orderItem.setOrderStatus("1");//1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭
                             orderItem.setCreateBy(member.getId());
                             orderItemMapper.insert(orderItem);
+
+//                            ShoppingCartListDTO parmDTO=productMap.get(orderItem.getProductId());
+//                            if(!CommonUtil.isEmpty(parmDTO.getAddedProductIds())) {
+//                                setAddedProduct(orderItem.getId(), parmDTO.getAddedProductIds(), "2");
+//                            }
                         }
                     }
                 }
@@ -1790,5 +1805,30 @@ public class PaymentService {
             }
         }
         return houseId;
+    }
+
+    /**
+     *  更新/设置增值商品
+     * @param orderId 来源订单ID
+     * @param addedProductIds 增值商品 多个以逗号分隔
+     * @param source 来源类型
+     */
+    private void setAddedProduct(String orderId,String addedProductIds,String source){
+        if(!CommonUtil.isEmpty(addedProductIds)&&!CommonUtil.isEmpty(orderId)) {
+            String[] addedProductIdList=addedProductIds.split(",");
+            Example example=new Example(DeliverOrderAddedProduct.class);
+            example.createCriteria().andEqualTo(DeliverOrderAddedProduct.ANY_ORDER_ID,orderId).andEqualTo(DeliverOrderAddedProduct.SOURCE,source);
+            masterDeliverOrderAddedProductMapper.deleteByExample(example);
+            for (String addedProductId : addedProductIdList) {
+                StorefrontProduct product = iMasterStorefrontProductMapper.selectByPrimaryKey(addedProductId);
+                DeliverOrderAddedProduct deliverOrderAddedProduct1 = new DeliverOrderAddedProduct();
+                deliverOrderAddedProduct1.setAnyOrderId(orderId);
+                deliverOrderAddedProduct1.setAddedProductId(addedProductId);
+                deliverOrderAddedProduct1.setPrice(product.getSellPrice());
+                deliverOrderAddedProduct1.setProductName(product.getProductName());
+                deliverOrderAddedProduct1.setSource(source);
+                masterDeliverOrderAddedProductMapper.insert(deliverOrderAddedProduct1);
+            }
+        }
     }
 }
