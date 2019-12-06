@@ -1249,7 +1249,8 @@ public class DjDeliverOrderService {
                         //shippingState 等于 1或者7   shippingType 收货订单 为待收货 待收货
                         djSplitDeliverOrderDTO.setShippingType("10");
                     } else if (djSplitDeliverOrderDTO.getShippingState().equals("8")||
-                            djSplitDeliverOrderDTO.getShippingState().equals("2")||djSplitDeliverOrderDTO.getShippingState().equals("5")) {
+                            djSplitDeliverOrderDTO.getShippingState().equals("2")||djSplitDeliverOrderDTO.getShippingState().equals("5"
+                    )) {
                         //shippingState 为 8   shippingType 11 为已完成
                         djSplitDeliverOrderDTO.setShippingType("11");
                         djSplitDeliverOrderDTO.setShippingState("1004");
