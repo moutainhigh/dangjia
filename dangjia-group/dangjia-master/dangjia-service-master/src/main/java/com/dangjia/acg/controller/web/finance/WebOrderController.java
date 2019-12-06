@@ -24,9 +24,9 @@ public class WebOrderController implements WebOrderAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getAllOrders(HttpServletRequest request, PageDTO pageDTO, Integer state, String searchKey) {
+    public ServerResponse getAllOrders(HttpServletRequest request, PageDTO pageDTO, Integer state, String searchKey,String beginDate,String endDate) {
         String cityId = request.getParameter(Constants.CITY_ID);
-        return webOrderService.getAllOrders(pageDTO,cityId, state, searchKey);
+        return webOrderService.getAllOrders(pageDTO,cityId, state, searchKey, beginDate, endDate);
     }
 
     @Override

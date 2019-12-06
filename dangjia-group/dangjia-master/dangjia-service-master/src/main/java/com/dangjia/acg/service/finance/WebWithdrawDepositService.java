@@ -58,10 +58,8 @@ public class WebWithdrawDepositService {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             if (!CommonUtil.isEmpty(beginDate) && !CommonUtil.isEmpty(endDate)) {
-                if (beginDate.equals(endDate)) {
-                    beginDate = beginDate + " " + "00:00:00";
-                    endDate = endDate + " " + "23:59:59";
-                }
+                beginDate = beginDate + " " + "00:00:00";
+                endDate = endDate + " " + "23:59:59";
             }
             List<WebWithdrawDTO> withdrawDTOList = iWithdrawDepositMapper.getWebWithdrawList(state,cityId, searchKey, beginDate, endDate);
             PageInfo pageResult = new PageInfo(withdrawDTOList);
