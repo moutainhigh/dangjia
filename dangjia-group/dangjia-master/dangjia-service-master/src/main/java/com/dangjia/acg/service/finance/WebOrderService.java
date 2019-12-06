@@ -83,10 +83,8 @@ public class WebOrderService {
                 state = -1;
             }
             if (!CommonUtil.isEmpty(beginDate) && !CommonUtil.isEmpty(endDate)) {
-                if (beginDate.equals(endDate)) {
-                    beginDate = beginDate + " " + "00:00:00";
-                    endDate = endDate + " " + "23:59:59";
-                }
+                beginDate = beginDate + " " + "00:00:00";
+                endDate = endDate + " " + "23:59:59";
             }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<WebOrderDTO> orderList = iBusinessOrderMapper.getWebOrderList(cityId,state, searchKey,storefrontId,  beginDate, endDate);
