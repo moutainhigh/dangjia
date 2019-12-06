@@ -145,7 +145,7 @@
             GROUP BY
                 supplier_id
         ) b ON a.id = b.supplier_id
-        SET a.surplus_money = (a.total_account-b.surplus_money-a.retention_money)
+        SET a.surplus_money = (a.total_account-b.surplus_money)
     </update>
 
     <select id="queryLikeSupplier" resultType="com.dangjia.acg.dto.supplier.SupplierLikeDTO">

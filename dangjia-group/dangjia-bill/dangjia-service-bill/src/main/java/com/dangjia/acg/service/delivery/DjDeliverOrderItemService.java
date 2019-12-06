@@ -13,10 +13,12 @@ import com.dangjia.acg.dto.order.PaymentToBeMadeDTO;
 import com.dangjia.acg.mapper.delivery.BillDjDeliverOrderSplitItemMapper;
 import com.dangjia.acg.mapper.delivery.IBillDjDeliverOrderMapper;
 import com.dangjia.acg.mapper.pay.IBillBusinessOrderMapper;
+import com.dangjia.acg.mapper.shoppingCart.IBillShoppingCartMapper;
 import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.pay.BusinessOrder;
+import com.dangjia.acg.modle.product.ShoppingCart;
 import com.dangjia.acg.service.product.BillProductTemplateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +47,8 @@ public class DjDeliverOrderItemService {
     private DjDeliverOrderService djDeliverOrderService;
     @Autowired
     private IBillBusinessOrderMapper iBillBusinessOrderMapper;
+    @Autowired
+    private IBillShoppingCartMapper iBillShoppingCartMapper;
 
     /**
      * 待付款/已取消订单详情
@@ -64,6 +68,9 @@ public class DjDeliverOrderItemService {
             paymentToBeMadeDTO.setCreateDate(order.getCreateDate());
             paymentToBeMadeDTO.setModifyDate(order.getModifyDate());
             House house= houseAPI.selectHouseById(order.getHouseId());
+            Example example = new Example(ShoppingCart.class);
+            example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, house.getMemberId());
+            paymentToBeMadeDTO.setShoppingCartsCount(iBillShoppingCartMapper.selectCountByExample(example));
             paymentToBeMadeDTO.setHouseId(house.getHouseId());
             paymentToBeMadeDTO.setHouseName( house.getResidential() + house.getBuilding() + "栋" + house.getUnit() + "单元" + house.getNumber() + "号");
             String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);

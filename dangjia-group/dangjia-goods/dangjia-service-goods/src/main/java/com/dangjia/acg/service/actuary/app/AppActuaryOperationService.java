@@ -42,10 +42,7 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * author: qiyuxiang
@@ -441,8 +438,12 @@ public class AppActuaryOperationService {
             goodsDTO.setUnit(productTemplate.getConvertUnit());
             goodsDTO.setOtherName(productTemplate.getOtherName());
             goodsDTO.setWorkerTypeId(productTemplate.getWorkerTypeId());
-            goodsDTO.setLastPrice(productTemplate.getLastPrice());
-            goodsDTO.setLastTime(productTemplate.getLastTime());
+
+            //当前时间小于调价的时间时则展示调价预告信息
+            if(product.getAdjustedPrice()!=null&&product.getModityPriceTime().getTime()>(new Date()).getTime()) {
+                goodsDTO.setLastPrice(product.getAdjustedPrice());
+                goodsDTO.setLastTime(product.getModityPriceTime());
+            }
             //查询单位
             String unitId=goodsDTO.getUnit();
             //查询单位

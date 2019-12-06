@@ -122,5 +122,11 @@ public class StorefrontProductController implements StorefrontProductAPI {
         return storefrontProductService.queryCollectGood(productId);
     }
 
+    @Override
+    @ApiMethod
+    public void priceAdjustmentTask() {
+         storefrontProductService.priceAdjustmentTask();
+    }
+
 
 }

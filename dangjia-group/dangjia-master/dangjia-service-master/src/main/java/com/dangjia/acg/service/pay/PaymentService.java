@@ -1692,7 +1692,6 @@ public class PaymentService {
                         djSupplier.setSurplusMoney(djSupplier.getSurplusMoney() + djSupplierPayOrder.getPrice());
                         accountFlowRecord.setDefinedName("供应商充值：" + djSupplierPayOrder.getPrice());
                     } else if (djSupplierPayOrder.getBusinessOrderType().equals("2")) {
-                        djSupplier.setTotalAccount(djSupplier.getTotalAccount() + djSupplierPayOrder.getPrice());
                         djSupplier.setRetentionMoney(djSupplier.getRetentionMoney() + djSupplierPayOrder.getPrice());
                         accountFlowRecord.setDefinedName("供应商交纳滞留金：" + djSupplierPayOrder.getPrice());
                     }
@@ -1709,7 +1708,6 @@ public class PaymentService {
                         storefront.setSurplusMoney(storefront.getSurplusMoney()+ djSupplierPayOrder.getPrice());
                         accountFlowRecord.setDefinedName("店铺充值：" + djSupplierPayOrder.getPrice());
                     } else if (djSupplierPayOrder.getBusinessOrderType().equals("2")) {
-                        storefront.setTotalAccount(storefront.getTotalAccount() + djSupplierPayOrder.getPrice());
                         storefront.setRetentionMoney(storefront.getRetentionMoney() + djSupplierPayOrder.getPrice());
                         accountFlowRecord.setDefinedName("店铺交纳滞留金：" + djSupplierPayOrder.getPrice());
                     }

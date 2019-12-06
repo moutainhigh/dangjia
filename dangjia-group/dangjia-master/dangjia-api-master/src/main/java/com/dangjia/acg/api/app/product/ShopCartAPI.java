@@ -43,7 +43,7 @@ public interface ShopCartAPI {
 
 
     @PostMapping("app/product/shopCart/num")
-    @ApiOperation(value = "购物车-->查询购物车列表接口", notes = "购物车-->查询购物车商品数量")
+    @ApiOperation(value = "购物车-->查询购物车数量接口", notes = "购物车-->查询购物车数量接口")
     ServerResponse getCartNum(@RequestParam("request") HttpServletRequest request,
                               @RequestParam("userToken") String userToken);
 
