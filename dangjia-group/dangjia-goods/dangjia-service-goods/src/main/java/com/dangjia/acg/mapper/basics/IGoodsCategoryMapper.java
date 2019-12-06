@@ -1,6 +1,5 @@
 package com.dangjia.acg.mapper.basics;
 
-import com.dangjia.acg.modle.attribute.GoodsCategory;
 import com.dangjia.acg.modle.basics.HomeProductDTO;
 import com.dangjia.acg.modle.product.BasicsGoodsCategory;
 import org.apache.ibatis.annotations.Param;
@@ -19,7 +18,6 @@ import java.util.List;
 @Repository
 public interface IGoodsCategoryMapper extends Mapper<BasicsGoodsCategory> {
 	void deleteById(String id);
-	List<GoodsCategory> query();
 
 	//根据父id查询下属商品类型
 	List<BasicsGoodsCategory> queryCategoryByParentId(@Param("parentId") String parentId,@Param("cityId") String cityId);

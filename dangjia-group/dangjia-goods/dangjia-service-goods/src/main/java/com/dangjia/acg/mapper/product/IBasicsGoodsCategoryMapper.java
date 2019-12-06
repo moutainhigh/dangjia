@@ -23,7 +23,7 @@ public interface IBasicsGoodsCategoryMapper extends Mapper<BasicsGoodsCategory> 
 	List<BasicsGoodsCategory> query();
 
 	//根据父id查询下属商品类型
-	List<BasicsGoodsCategory> queryCategoryByParentId(@Param("parentId") String parentId,@Param("categoryLabelId") String categoryLabelId);
+	List<BasicsGoodsCategory> queryCategoryByParentId(@Param("parentId") String parentId,@Param("categoryLabelId") String categoryLabelId,@Param("ownerDisplay") String ownerDisplay);
 
 	//查询所有的末级分类的类别
 	List<BasicsGoodsCategory>  queryLastCategoryList(@Param("cityId") String cityId,@Param("searchKey") String  searchKey);

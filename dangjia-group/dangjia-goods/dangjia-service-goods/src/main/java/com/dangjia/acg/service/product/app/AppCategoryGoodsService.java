@@ -79,7 +79,7 @@ public class AppCategoryGoodsService {
      */
 
     public ServerResponse queryLeftCategoryByDatas(String categoryLabelId) {
-        List<BasicsGoodsCategory> goodsCategoryList = iBasicsGoodsCategoryMapper.queryCategoryByParentId("1",categoryLabelId);
+        List<BasicsGoodsCategory> goodsCategoryList = iBasicsGoodsCategoryMapper.queryCategoryByParentId("1",categoryLabelId,null);
         return ServerResponse.createBySuccess("查询成功", goodsCategoryList);
     }
 
@@ -109,7 +109,7 @@ public class AppCategoryGoodsService {
             mapBrand.put("nextList", mapTwoBrandList);
             mapList.add(mapBrand);
 
-            List<BasicsGoodsCategory> goodsCategoryList = iBasicsGoodsCategoryMapper.queryCategoryByParentId(parentId,null);
+            List<BasicsGoodsCategory> goodsCategoryList = iBasicsGoodsCategoryMapper.queryCategoryByParentId(parentId,null,null);
             for (BasicsGoodsCategory goodsCategory : goodsCategoryList) {
                 Map<String, Object> map = new HashMap<>();
                 map.put("id", goodsCategory.getId());
@@ -117,7 +117,7 @@ public class AppCategoryGoodsService {
                 map.put("image", address+goodsCategory.getImage());
                 map.put("type",0);//type: 0=分类ID  1=品牌ID
                 List<Map<String, Object>> mapTwoList = new ArrayList<>();
-                List<BasicsGoodsCategory> goodsCategoryList2 = iBasicsGoodsCategoryMapper.queryCategoryByParentId(goodsCategory.getId(),null);
+                List<BasicsGoodsCategory> goodsCategoryList2 = iBasicsGoodsCategoryMapper.queryCategoryByParentId(goodsCategory.getId(),null,"1");
                 for (BasicsGoodsCategory goodsCategory2 : goodsCategoryList2) {
                     Map<String, Object> mapTwo = new HashMap<>();
                     mapTwo.put("id", goodsCategory2.getId());

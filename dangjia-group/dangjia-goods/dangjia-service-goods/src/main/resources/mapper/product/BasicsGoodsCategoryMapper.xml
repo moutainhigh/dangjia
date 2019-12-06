@@ -49,6 +49,10 @@
         <if test="categoryLabelId!=null and categoryLabelId!=''">
             and FIND_IN_SET(#{categoryLabelId},category_label_ids)
         </if>
+        <if test="ownerDisplay!=null and ownerDisplay!=''">
+            and owner_display = #{ownerDisplay}
+        </if>
+
         ORDER BY sort,create_date asc
     </select>
 
