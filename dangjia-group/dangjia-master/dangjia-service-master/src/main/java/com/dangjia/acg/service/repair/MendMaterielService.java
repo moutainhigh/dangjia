@@ -479,7 +479,19 @@ public class MendMaterielService {
             totalPrice+=mendMateriel.getTotalPrice();
             //判断商品有哪些供应商供应
             List<Map<String,Object>> supplierIdList = splitDeliverMapper.getMendMaterialSupplierId(mendOrder.getHouseId(), mendMateriel.getProductId());
-            mendMateriel.setSupplierIdList(supplierIdList);//查看有那些供应商供应
+
+            if(supplierIdList.size()==0)
+            {
+                //非平台供應商
+                supplierIdList=splitDeliverMapper.queryNonPlatformSupplier();
+                mendMateriel.setSupplierIdList(supplierIdList);//查看有那些供应商供应
+            }
+            else
+            {
+                //map.put("supplierIdlist",supplierIdlist);//正常供應商
+                mendMateriel.setSupplierIdList(supplierIdList);//查看有那些供应商供应
+            }
+
         }
         returnMendMaterielDTO.setMendMaterielList(mendMaterielList);
         returnMendMaterielDTO.setTotalPrice(totalPrice);
