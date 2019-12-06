@@ -566,20 +566,22 @@ public class ShopCartService {
      * @param addedProductIds
      */
    private void setAddedProduct(String shoppingCartId,String addedProductIds){
-       if(!CommonUtil.isEmpty(addedProductIds)&&!CommonUtil.isEmpty(shoppingCartId)) {
-           String[] addedProductIdList=addedProductIds.split(",");
+       if(!CommonUtil.isEmpty(shoppingCartId)) {
            Example example=new Example(DeliverOrderAddedProduct.class);
            example.createCriteria().andEqualTo(DeliverOrderAddedProduct.ANY_ORDER_ID,shoppingCartId).andEqualTo(DeliverOrderAddedProduct.SOURCE,4);
            masterDeliverOrderAddedProductMapper.deleteByExample(example);
-           for (String addedProductId : addedProductIdList) {
-               StorefrontProduct product = iMasterStorefrontProductMapper.selectByPrimaryKey(addedProductId);
-               DeliverOrderAddedProduct deliverOrderAddedProduct1 = new DeliverOrderAddedProduct();
-               deliverOrderAddedProduct1.setAnyOrderId(shoppingCartId);
-               deliverOrderAddedProduct1.setAddedProductId(addedProductId);
-               deliverOrderAddedProduct1.setPrice(product.getSellPrice());
-               deliverOrderAddedProduct1.setProductName(product.getProductName());
-               deliverOrderAddedProduct1.setSource("4");
-               masterDeliverOrderAddedProductMapper.insert(deliverOrderAddedProduct1);
+           if(!CommonUtil.isEmpty(addedProductIds)) {
+               String[] addedProductIdList=addedProductIds.split(",");
+               for (String addedProductId : addedProductIdList) {
+                   StorefrontProduct product = iMasterStorefrontProductMapper.selectByPrimaryKey(addedProductId);
+                   DeliverOrderAddedProduct deliverOrderAddedProduct1 = new DeliverOrderAddedProduct();
+                   deliverOrderAddedProduct1.setAnyOrderId(shoppingCartId);
+                   deliverOrderAddedProduct1.setAddedProductId(addedProductId);
+                   deliverOrderAddedProduct1.setPrice(product.getSellPrice());
+                   deliverOrderAddedProduct1.setProductName(product.getProductName());
+                   deliverOrderAddedProduct1.setSource("4");
+                   masterDeliverOrderAddedProductMapper.insert(deliverOrderAddedProduct1);
+               }
            }
        }
    }

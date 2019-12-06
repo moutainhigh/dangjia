@@ -12,10 +12,7 @@ import com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO;
 import com.dangjia.acg.dto.basics.TechnologyDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.basics.*;
-import com.dangjia.acg.mapper.product.DjBasicsGoodsMapper;
-import com.dangjia.acg.mapper.product.IBasicsGoodsCategoryMapper;
-import com.dangjia.acg.mapper.product.IBasicsProductTemplateMapper;
-import com.dangjia.acg.mapper.product.IProductAddedRelationMapper;
+import com.dangjia.acg.mapper.product.*;
 import com.dangjia.acg.mapper.sup.IShopMapper;
 import com.dangjia.acg.mapper.sup.IShopProductMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
@@ -25,6 +22,7 @@ import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.core.WorkerType;
+import com.dangjia.acg.modle.order.DeliverOrderAddedProduct;
 import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.BasicsGoodsCategory;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
@@ -82,6 +80,10 @@ public class AppActuaryOperationService {
     private IProductAddedRelationMapper iProductAddedRelationMapper;
     @Autowired
     private IBasicsGoodsCategoryMapper iBasicsGoodsCategoryMapper;
+
+
+    @Autowired
+    private IGoodsDeliverOrderAddedProductMapper goodsDeliverOrderAddedProductMapper;
     protected static final Logger LOG = LoggerFactory.getLogger(AppActuaryOperationService.class);
 
     /**
@@ -98,6 +100,9 @@ public class AppActuaryOperationService {
                     .andCondition("  FIND_IN_SET(product_id,'" + productId + "') ");
             List<BudgetMaterial> budgetMaterials = budgetMaterialMapper.selectByExample(example);
             for (BudgetMaterial budgetMaterial : budgetMaterials) {
+                example=new Example(DeliverOrderAddedProduct.class);
+                example.createCriteria().andEqualTo(DeliverOrderAddedProduct.ANY_ORDER_ID,budgetMaterial.getId()).andEqualTo(DeliverOrderAddedProduct.SOURCE,"5");
+                goodsDeliverOrderAddedProductMapper.deleteByExample(example);
                 BasicsGoods goods = goodsMapper.selectByPrimaryKey(budgetMaterial.getGoodsId());
                 if(goods.getBuy()==1) {//可选商品取消
                     budgetMaterial.setDeleteState(2);//取消
@@ -127,7 +132,7 @@ public class AppActuaryOperationService {
                 budgetMaterialMapper.updateByPrimaryKey(budgetMaterial);
             }else {
                 if (!CommonUtil.isEmpty(budgetMaterial.getOriginalProductId())) {
-                    changeProduct(budgetMaterial.getOriginalProductId(), budgetMaterial.getId(), houseId, budgetMaterial.getWorkerTypeId());
+                    changeProduct(budgetMaterial.getOriginalProductId(), null,budgetMaterial.getId(), houseId, budgetMaterial.getWorkerTypeId());
                 }
             }
         }
@@ -137,7 +142,7 @@ public class AppActuaryOperationService {
     /**
      * 更换货品
      */
-    public ServerResponse changeProduct(String productId, String budgetMaterialId,
+    public ServerResponse changeProduct(String productId,String addedProductIds, String budgetMaterialId,
                                         String houseId, String workerTypeId) {
         try {
             BudgetMaterial budgetMaterial = budgetMaterialMapper.selectByPrimaryKey(budgetMaterialId);
@@ -178,13 +183,14 @@ public class AppActuaryOperationService {
                             }
                             //查到 老的关联组 的精算
                             BudgetMaterial newBudgetMaterial = budgetMaterialMapper.getBudgetCaiListByGoodsId(houseId, workerTypeId, srcGroupLink.getGoodsId());
-                            DjBasicsProductTemplate targetProduct = iBasicsProductTemplateMapper.selectByPrimaryKey(targetGroupLink.getProductId());//目标product 对象
+                            StorefrontProduct product = iShopProductMapper.selectByPrimaryKey(targetGroupLink.getProductId());
+                            DjBasicsProductTemplate targetProduct = iBasicsProductTemplateMapper.selectByPrimaryKey(product.getProdTemplateId());//目标product 对象
 
-                            newBudgetMaterial.setProductId(targetProduct.getId());
+                            newBudgetMaterial.setProductId(product.getId());
                             newBudgetMaterial.setProductSn(targetProduct.getProductSn());
-                            newBudgetMaterial.setProductName(targetProduct.getName());
-                            newBudgetMaterial.setImage(targetProduct.getImage());
-                            newBudgetMaterial.setPrice(targetProduct.getPrice());
+                            newBudgetMaterial.setProductName(product.getProductName());
+                            newBudgetMaterial.setImage(product.getImage());
+                            newBudgetMaterial.setPrice(product.getSellPrice());
                             newBudgetMaterial.setGoodsGroupId(targetGroup.get(0).getGroupId());
                             GoodsGroup goodsGroup = iGoodsGroupMapper.selectByPrimaryKey(targetGroup.get(0).getGroupId());
                             newBudgetMaterial.setGroupType(goodsGroup.getName());
@@ -197,14 +203,16 @@ public class AppActuaryOperationService {
                                 converCount = Math.ceil(converCount);
                             }
                             newBudgetMaterial.setConvertCount(converCount);
-                            newBudgetMaterial.setTotalPrice(targetProduct.getPrice() * newBudgetMaterial.getConvertCount());
+                            newBudgetMaterial.setTotalPrice(product.getSellPrice() * newBudgetMaterial.getConvertCount());
 
                             newBudgetMaterial.setCategoryId(targetProduct.getCategoryId());
-                            newBudgetMaterial.setImage(targetProduct.getImage());
+                            newBudgetMaterial.setImage(product.getImage());
                             newBudgetMaterial.setUnitName(convertUnit.getName());
                             BasicsGoods goods = goodsMapper.selectByPrimaryKey( targetProduct.getGoodsId());
                             newBudgetMaterial.setProductType(goods.getType());//0：材料；1：包工包料
                             budgetMaterialMapper.updateByPrimaryKeySelective(newBudgetMaterial);
+                            //添加增值商品
+                            setAddedProduct(newBudgetMaterial.getId(),addedProductIds,"5");
                         }
 
                     }
@@ -213,12 +221,13 @@ public class AppActuaryOperationService {
             } else {
 
                 BudgetMaterial newBudgetMaterial = budgetMaterialMapper.selectByPrimaryKey(budgetMaterialId);
-                DjBasicsProductTemplate product = iBasicsProductTemplateMapper.selectByPrimaryKey(productId);//目标product 对象
+                StorefrontProduct shopProduct = iShopProductMapper.selectByPrimaryKey(productId);
+                DjBasicsProductTemplate product = iBasicsProductTemplateMapper.selectByPrimaryKey(shopProduct.getProdTemplateId());//目标product 对象
 
                 newBudgetMaterial.setProductId(productId);
                 newBudgetMaterial.setProductSn(product.getProductSn());
-                newBudgetMaterial.setProductName(product.getName());
-                newBudgetMaterial.setPrice(product.getPrice());
+                newBudgetMaterial.setProductName(shopProduct.getProductName());
+                newBudgetMaterial.setPrice(shopProduct.getSellPrice());
                 newBudgetMaterial.setCost(product.getCost());
                 //这里会更新 为 新product的 换算后的购买数量
                 double converCount = (newBudgetMaterial.getShopCount() / product.getConvertQuality());
@@ -227,14 +236,17 @@ public class AppActuaryOperationService {
                     converCount = Math.ceil(converCount);
                 }
                 newBudgetMaterial.setConvertCount(converCount);
-                newBudgetMaterial.setTotalPrice(product.getPrice() * newBudgetMaterial.getConvertCount());
+                newBudgetMaterial.setTotalPrice(shopProduct.getSellPrice() * newBudgetMaterial.getConvertCount());
 
                 newBudgetMaterial.setCategoryId(product.getCategoryId());
-                newBudgetMaterial.setImage(product.getImage());
+                newBudgetMaterial.setImage(shopProduct.getImage());
                 newBudgetMaterial.setUnitName(convertUnit.getName());
                 BasicsGoods goods = goodsMapper.selectByPrimaryKey(product.getGoodsId());
                 newBudgetMaterial.setProductType(goods.getType());//0：材料；1：包工包料
                 budgetMaterialMapper.updateByPrimaryKeySelective(newBudgetMaterial);
+
+                //添加增值商品
+                setAddedProduct(newBudgetMaterial.getId(),addedProductIds,"5");
                 return ServerResponse.createBySuccessMessage("更换成功" );
             }
         } catch (Exception e) {
@@ -606,5 +618,30 @@ public class AppActuaryOperationService {
         }
         return strbuf.toString().trim();
     }
-
+    /**
+     *  更新/设置增值商品
+     * @param orderId 来源订单ID
+     * @param addedProductIds 增值商品 多个以逗号分隔
+     * @param source 来源类型
+     */
+    private void setAddedProduct(String orderId,String addedProductIds,String source){
+        if(!CommonUtil.isEmpty(orderId)) {
+            Example example=new Example(DeliverOrderAddedProduct.class);
+            example.createCriteria().andEqualTo(DeliverOrderAddedProduct.ANY_ORDER_ID,orderId).andEqualTo(DeliverOrderAddedProduct.SOURCE,source);
+            goodsDeliverOrderAddedProductMapper.deleteByExample(example);
+            if(!CommonUtil.isEmpty(addedProductIds)) {
+                String[] addedProductIdList = addedProductIds.split(",");
+                for (String addedProductId : addedProductIdList) {
+                    StorefrontProduct product = iShopProductMapper.selectByPrimaryKey(addedProductId);
+                    DeliverOrderAddedProduct deliverOrderAddedProduct1 = new DeliverOrderAddedProduct();
+                    deliverOrderAddedProduct1.setAnyOrderId(orderId);
+                    deliverOrderAddedProduct1.setAddedProductId(addedProductId);
+                    deliverOrderAddedProduct1.setPrice(product.getSellPrice());
+                    deliverOrderAddedProduct1.setProductName(product.getProductName());
+                    deliverOrderAddedProduct1.setSource(source);
+                    goodsDeliverOrderAddedProductMapper.insert(deliverOrderAddedProduct1);
+                }
+            }
+        }
+    }
 }

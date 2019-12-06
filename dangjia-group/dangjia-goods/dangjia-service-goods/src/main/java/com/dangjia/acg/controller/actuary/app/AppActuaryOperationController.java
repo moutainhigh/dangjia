@@ -28,8 +28,8 @@ public class AppActuaryOperationController implements AppActuaryOperationAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse changeProduct(HttpServletRequest request, String productId, String budgetMaterialId,  String houseId, String workerTypeId) {
-        return actuaryOperationService.changeProduct(productId, budgetMaterialId, houseId, workerTypeId);
+    public ServerResponse changeProduct(HttpServletRequest request, String productId,String addedProductIds, String budgetMaterialId,  String houseId, String workerTypeId) {
+        return actuaryOperationService.changeProduct(productId, addedProductIds, budgetMaterialId, houseId, workerTypeId);
     }
 
     @Override

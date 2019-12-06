@@ -32,6 +32,7 @@ public interface AppActuaryOperationAPI {
     @ApiOperation(value = "更换货品", notes = "更换货品")
     ServerResponse changeProduct(@RequestParam("request") HttpServletRequest request,
                                  @RequestParam("productId") String productId,
+                                 @RequestParam("addedProductIds") String addedProductIds,
                                  @RequestParam("budgetMaterialId") String budgetMaterialId,
                                  @RequestParam("houseId") String houseId,
                                  @RequestParam("workerTypeId") String workerTypeId);
