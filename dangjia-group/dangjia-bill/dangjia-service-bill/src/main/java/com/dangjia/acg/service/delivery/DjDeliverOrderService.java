@@ -34,6 +34,7 @@ import com.dangjia.acg.mapper.refund.IBillMendOrderMapper;
 import com.dangjia.acg.mapper.sale.IBillDjAlreadyRobSingleMapper;
 import com.dangjia.acg.mapper.sale.IBillMemberMapper;
 import com.dangjia.acg.mapper.sale.IBillUserMapper;
+import com.dangjia.acg.mapper.shoppingCart.IBillShoppingCartMapper;
 import com.dangjia.acg.mapper.storeFront.IBillStorefrontMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
@@ -46,6 +47,7 @@ import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.menu.MenuConfiguration;
+import com.dangjia.acg.modle.product.ShoppingCart;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.sale.royalty.DjAlreadyRobSingle;
 import com.dangjia.acg.modle.sale.royalty.DjRoyaltyDetailsSurface;
@@ -125,6 +127,9 @@ public class DjDeliverOrderService {
     private IBillWarehouseMapper iBillWarehouseMapper;
     @Autowired
     private BillDjDeliverOrderSplitMapper billDjDeliverOrderSplitMapper;
+
+    @Autowired
+    private IBillShoppingCartMapper iBillShoppingCartMapper;
 
     public Object getHouse(String memberId, HouseResult houseResult) {
         //该城市该用户所有开工房产
@@ -1646,6 +1651,12 @@ public class DjDeliverOrderService {
         if(listArr.size()<=0){
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
         }
+
+        //查询购物车数量
+        example = new Example(ShoppingCart.class);
+        example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, house.getMemberId());
+        orderCollectInFoDTO.setShoppingCartsCount(iBillShoppingCartMapper.selectCountByExample(example));
+
         orderCollectInFoDTO.setOrderStorefrontDTOS(listArr);
         return ServerResponse.createBySuccess("查询成功", orderCollectInFoDTO);
     }

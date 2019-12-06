@@ -59,4 +59,6 @@ public class OrderCollectInFoDTO {
     private String image;
     private String houseId;
 
+    private Integer shoppingCartsCount;//购物车数量
+
 }
