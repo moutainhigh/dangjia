@@ -34,6 +34,7 @@ import tk.mybatis.mapper.util.StringUtil;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -291,6 +292,16 @@ public class StorefrontProductService {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                 storefrontProduct.setModityPriceTime(sdf.parse(modityPriceTime));
                 istorefrontProductMapper.updateByPrimaryKeySelective(storefrontProduct);
+                //如果修改价格时间等当前日期，就及时修改是价格
+                SimpleDateFormat formatdate = new SimpleDateFormat("yyyy-MM-dd");//设置日期格式 2019-12-05 20:56:40
+                if(formatdate.format(formatdate.parse(modityPriceTime)).equals(formatdate.format(new Date())))//获取当前系统时间
+                {
+                    //修改调价
+                    StorefrontProduct sp=new StorefrontProduct();
+                    sp.setId(id);
+                    sp.setSellPrice(Double.parseDouble(adjustedPrice));
+                    istorefrontProductMapper.updateByPrimaryKeySelective(sp);
+                }
                 //增加调价流水
                 DjAdjustRecord djAdjustRecord = new DjAdjustRecord();
                 djAdjustRecord.setAdjustPrice(Double.parseDouble(adjustedPrice));
@@ -617,4 +628,32 @@ public class StorefrontProductService {
         return memberCollectDTOS;
     }
 
+    /**
+     * 店铺商品调价任务
+     *
+     * @return
+     */
+    public void priceAdjustmentTask() {
+        try {
+            SimpleDateFormat formatdate = new SimpleDateFormat("yyyy-MM-dd");//设置日期格式 2019-12-05 20:56:40
+            Example example=new Example(StorefrontProduct.class);
+            example.createCriteria().andIsNotNull(StorefrontProduct.MODITY_PRICE_TIME).andIsNotNull(StorefrontProduct.ADJUSTED_PRICE);
+            List<StorefrontProduct> list = istorefrontProductMapper.selectByExample(example);
+            list.forEach(storefrontProduct->{
+                Date modityPriceTime=storefrontProduct.getModityPriceTime();//获取修改调价时间
+                String id=storefrontProduct.getId();//商品id
+                Double adjustedPrice=storefrontProduct.getAdjustedPrice();//调后价格
+                if(formatdate.format(modityPriceTime).equals(formatdate.format(new Date())))//获取当前系统时间
+                {
+                    //修改调价
+                    StorefrontProduct sp=new StorefrontProduct();
+                    sp.setId(id);
+                    sp.setSellPrice(adjustedPrice);
+                    istorefrontProductMapper.updateByPrimaryKeySelective(sp);
+                }
+            });
+        } catch (Exception e) {
+            logger.error("店铺商品调价任务异常：", e);
+        }
+    }
 }

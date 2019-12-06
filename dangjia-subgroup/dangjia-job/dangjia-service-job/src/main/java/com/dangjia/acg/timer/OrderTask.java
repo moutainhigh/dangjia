@@ -1,6 +1,7 @@
 package com.dangjia.acg.timer;
 
 import com.dangjia.acg.api.BasicsStorefrontAPI;
+import com.dangjia.acg.api.StorefrontProductAPI;
 import com.dangjia.acg.api.supplier.DjSupplierAPI;
 import com.dangjia.acg.api.web.finance.WebOrderAPI;
 import org.slf4j.Logger;
@@ -33,6 +34,8 @@ public class OrderTask {
     @Autowired
     private BasicsStorefrontAPI basicsStorefrontAPI ;
 
+    @Autowired
+    private StorefrontProductAPI storefrontProductAPI ;
   /**
    * 订单超时检测任务
    */
@@ -49,5 +52,11 @@ public class OrderTask {
       log.info(format.format(new Date()) + "开始计算店铺可提现金额任务...");
       basicsStorefrontAPI.setStorefrontSurplusMoney();
       log.info(format.format(new Date()) + "结束计算店铺可提现金额任务...");
+
+      log.info(format.format(new Date()) + "开始计算店铺商品调价任务...");
+      storefrontProductAPI.priceAdjustmentTask();
+      log.info(format.format(new Date()) + "结束计算店铺商品调价任务...");
+
+
   }
 }

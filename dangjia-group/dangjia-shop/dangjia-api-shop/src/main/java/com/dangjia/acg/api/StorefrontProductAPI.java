@@ -94,4 +94,9 @@ public interface StorefrontProductAPI {
     @PostMapping("/web/queryCollectGood")
     @ApiOperation(value = "查询收藏商品", notes = "查询收藏商品")
     List<MemberCollectDTO> queryCollectGood(@RequestParam("productId") String productId);
+
+
+    @PostMapping("/sup/priceAdjustmentTask")
+    @ApiOperation(value = "店铺商品调价任务", notes = "店铺商品调价任务")
+    void priceAdjustmentTask();
 }
