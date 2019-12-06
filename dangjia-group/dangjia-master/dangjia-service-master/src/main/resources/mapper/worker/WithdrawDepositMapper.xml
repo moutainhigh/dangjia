@@ -33,7 +33,7 @@
             and w.state = #{state}
         </if>
         <if test="beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
-            and w.create_date between #{beginDate} and #{endDate}
+            and w.modify_date between #{beginDate} and #{endDate}
         </if>
         <if test="searchKey!=null and searchKey!=''">
             and ( w.name like CONCAT('%',#{searchKey},'%')
