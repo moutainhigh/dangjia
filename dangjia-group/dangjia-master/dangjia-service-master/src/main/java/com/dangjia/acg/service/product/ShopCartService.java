@@ -12,6 +12,7 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.product.ShoppingCartDTO;
 import com.dangjia.acg.dto.product.ShoppingCartListDTO;
 import com.dangjia.acg.mapper.core.IMasterUnitMapper;
+import com.dangjia.acg.mapper.delivery.IMasterDeliverOrderAddedProductMapper;
 import com.dangjia.acg.mapper.delivery.IOrderItemMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberCollectMapper;
@@ -559,6 +560,11 @@ public class ShopCartService {
         }
     }
 
+    /**
+     * 更新/设置购物车增值商品
+     * @param shoppingCartId
+     * @param addedProductIds
+     */
    private void setAddedProduct(String shoppingCartId,String addedProductIds){
        if(!CommonUtil.isEmpty(addedProductIds)&&!CommonUtil.isEmpty(shoppingCartId)) {
            String[] addedProductIdList=addedProductIds.split(",");
