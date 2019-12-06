@@ -42,8 +42,8 @@ public class ShopCartController implements ShopCartAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse addCart(HttpServletRequest request, String userToken, String cityId, String productId,Double shopCount) {
-        return shopCartservice.addCart(userToken, cityId,productId,shopCount);
+    public ServerResponse addCart(HttpServletRequest request, String userToken, String cityId, String productId,Double shopCount, String addedProductIds) {
+        return shopCartservice.addCart(userToken, cityId,productId,shopCount,  addedProductIds);
     }
 
 
@@ -52,6 +52,8 @@ public class ShopCartController implements ShopCartAPI {
      * @param productId
      * @return 0=直接通过,无提示； 1=有房无精算(业主无房时)   2=有房有精算(业主无房无精算时) 3=有房有精算(业主有房无精算时)   4=有房有精算(业主有房无精算时)  5=人工商品
      */
+    @Override
+    @ApiMethod
     public ServerResponse checkCart(String userToken, String productId){
         return shopCartservice.checkCart(userToken,productId);
     }
@@ -61,16 +63,11 @@ public class ShopCartController implements ShopCartAPI {
         return shopCartservice.delCheckCart(shopCartIds);
     }
 
-    @Override
-    @ApiMethod
-    public ServerResponse cartSettle(HttpServletRequest request,String userToken) {
-        return shopCartservice.cartSettle(userToken);
-    }
 
     @Override
     @ApiMethod
-    public ServerResponse replaceShoppingCart(HttpServletRequest request, String shoppingCartId, String productId, Double shopCount) {
-        return shopCartservice.replaceShoppingCart(shoppingCartId, productId, shopCount);
+    public ServerResponse replaceShoppingCart(HttpServletRequest request, String shoppingCartId, String productId, Double shopCount,String addedProductIds) {
+        return shopCartservice.replaceShoppingCart(shoppingCartId, productId, shopCount, addedProductIds);
     }
 
     @Override

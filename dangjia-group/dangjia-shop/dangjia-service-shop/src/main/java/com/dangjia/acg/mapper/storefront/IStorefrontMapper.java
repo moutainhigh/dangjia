@@ -43,4 +43,7 @@ public interface IStorefrontMapper extends Mapper<Storefront> {
     List<StoreRepairMendOrderDetailDTO> queryMendOrderDetail(@Param("mendOrderId") String mendOrderId);
 
     Integer setStorefrontSurplusMoney();
+
+    //根据店铺类型，查询店铺信息
+    public Storefront selectShopStoreByTypeCityId(@Param("cityId") String cityId, @Param("storefrontType") String storefrontType);
 }

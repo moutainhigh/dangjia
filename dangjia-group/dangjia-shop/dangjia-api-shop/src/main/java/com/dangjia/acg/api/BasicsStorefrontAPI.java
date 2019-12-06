@@ -210,4 +210,12 @@ public interface BasicsStorefrontAPI {
     @ApiOperation(value = "店铺-计算可提现金额", notes = "店铺-计算可提现金额")
     Integer setStorefrontSurplusMoney();
 
+
+    @PostMapping("/web/storefront/queryWorkerShopByCityId")
+    @ApiOperation(value = "根据城市Id查询当家虚拟店铺", notes = "根据城市Id查询当家虚拟店铺")
+    ServerResponse queryWorkerShopByCityId(@RequestParam("cityId") String cityId);
+
+    @PostMapping("/web/storefront/editWorkerShopInfo")
+    @ApiOperation(value = "修改当家虚拟店铺信息", notes = "修改当家虚拟店铺信息")
+    ServerResponse editWorkerShopInfo(StorefrontDTO storefrontDTO);
 }

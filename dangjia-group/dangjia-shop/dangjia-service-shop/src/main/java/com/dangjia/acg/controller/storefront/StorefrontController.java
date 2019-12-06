@@ -10,7 +10,10 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.storefront.StorefrontDTO;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.service.storefront.StorefrontService;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -131,6 +134,28 @@ public class StorefrontController implements BasicsStorefrontAPI {
     @ApiMethod
     public Integer setStorefrontSurplusMoney() {
         return storefrontService.setStorefrontSurplusMoney();
+    }
+
+    /**
+     * 根据城市Id查询当家虚拟店铺
+     * @param cityId 在市ID
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryWorkerShopByCityId(String cityId){
+        return storefrontService.queryWorkerShopByCityId(cityId);
+    }
+
+    /**
+     * 修改当家虚拟店铺信息
+     * @param storefrontDTO
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse editWorkerShopInfo(StorefrontDTO storefrontDTO){
+        return storefrontService.editWorkerShopInfo(storefrontDTO);
     }
 
 
