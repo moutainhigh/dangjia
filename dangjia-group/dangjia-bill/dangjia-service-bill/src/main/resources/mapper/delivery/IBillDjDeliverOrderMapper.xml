@@ -1004,4 +1004,13 @@
     </select>
 
 
+    <select id="querySales" resultType="java.lang.Integer">
+        select dg.sales from
+        dj_deliver_order_split_item dosi
+        INNER JOIN dj_basics_storefront_product bsp on dosi.product_id =  bsp.id
+        INNER JOIN dj_basics_product_template bpt on bsp.prod_template_id = bpt.id
+        INNER JOIN dj_basics_goods dg on bpt.goods_id = dg.id
+        where dosi.id = #{id}
+    </select>
+
 </mapper>
