@@ -89,15 +89,16 @@
 
     <select id="queryNewcategoryIdList" resultType="com.dangjia.acg.dto.budget.AllCategoryDTO">
         SELECT
-        DISTINCT
-         bcl.id,
-         bcl. NAME
+        bcl.id,
+        bcl. NAME,
+        sum(abm.price) as priceArr
         FROM
-         dj_actuary_budget_material abm
+        dj_actuary_budget_material abm
         INNER JOIN dj_basics_storefront_product dbg ON dbg.id = abm.product_id
         INNER JOIN dj_basics_product_template bpt on dbg.prod_template_id=bpt.id
         INNER JOIN dj_basics_goods_category bgc ON bpt.category_id = bgc.id
         INNER JOIN dj_basics_category_label bcl ON FIND_IN_SET(bcl.id,bgc.category_label_ids)
         where abm.house_id=#{houseId}
+        group by  bcl.id
     </select>
 </mapper>

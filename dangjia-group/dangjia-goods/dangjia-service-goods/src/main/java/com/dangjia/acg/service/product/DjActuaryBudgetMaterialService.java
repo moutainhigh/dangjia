@@ -90,6 +90,7 @@ public class DjActuaryBudgetMaterialService {
      */
     public ServerResponse newcategoryIdList(String houseId, String cityId) {
         try {
+
             List<Map<String, Object>> mapList = new ArrayList<>();
            List<AllCategoryDTO> list =goodsCategoryMapper.queryNewcategoryIdList(houseId);
             for(AllCategoryDTO allCategoryDTO:list)
@@ -100,7 +101,6 @@ public class DjActuaryBudgetMaterialService {
                     map.put("id", allCategoryDTO.getId());
                     map.put("name", allCategoryDTO.getName());
                     mapList.add(map);
-
                 }
             }
             return ServerResponse.createBySuccess("查询成功", mapList);
