@@ -91,8 +91,14 @@
         INNER JOIN ( SELECT c.member_id, GROUP_CONCAT( c.city_id ) city_id,c.city_name  FROM dj_member_city c GROUP BY c.member_id )
         mt ON mt.member_id = d.id AND FIND_IN_SET(#{cityId}, mt.city_id )
         LEFT JOIN dj_house AS c ON a.house_id = c.id
+        <if test="beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
+          LEFT JOIN dj_pay_pay_order pa AS pa ON pa.number = a.pay_order_number
+        </if>
         WHERE
         a.data_status = 0
+        <if test="beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
+            and pa.create_date between #{beginDate} and #{endDate}
+        </if>
         <if test="state != -1">
             and a.state = #{state}
         </if>

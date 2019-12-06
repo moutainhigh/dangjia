@@ -1,11 +1,9 @@
 package com.dangjia.acg.service.finance;
 
-import com.ctc.wstx.util.DataUtil;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
-import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.deliver.OrderItemByDTO;
 import com.dangjia.acg.dto.deliver.WebOrderDTO;
@@ -78,14 +76,20 @@ public class WebOrderService {
      * @param searchKey 模糊搜索：订单号,房屋信息,电话,支付单号(业务订单号)
      * @return
      */
-    public ServerResponse getAllOrders(PageDTO pageDTO,String cityId, Integer state, String searchKey) {
+    public ServerResponse getAllOrders(PageDTO pageDTO,String cityId, Integer state, String searchKey,String beginDate,String endDate) {
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             if (state == null) {
                 state = -1;
             }
+            if (!CommonUtil.isEmpty(beginDate) && !CommonUtil.isEmpty(endDate)) {
+                if (beginDate.equals(endDate)) {
+                    beginDate = beginDate + " " + "00:00:00";
+                    endDate = endDate + " " + "23:59:59";
+                }
+            }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<WebOrderDTO> orderList = iBusinessOrderMapper.getWebOrderList(cityId,state, searchKey);
+            List<WebOrderDTO> orderList = iBusinessOrderMapper.getWebOrderList(cityId,state, searchKey,  beginDate,  endDate);
             PageInfo pageResult = new PageInfo(orderList);
             for (WebOrderDTO webOrderDTO : orderList) {
                 if(!CommonUtil.isEmpty(webOrderDTO.getPayOrderNumber())) {
