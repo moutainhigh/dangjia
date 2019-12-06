@@ -207,6 +207,7 @@
                 WHERE
                     t1.id = t2.order_id
                 AND t1.house_id = #{houseId}
+                and EXISTS(select 1 from dj_basics_storefront_product t where t2.product_id=t.id)
                 UNION ALL
                     SELECT
                         sum(IFNULL(t1.total_price, 0)) actualPaymentPrice,
