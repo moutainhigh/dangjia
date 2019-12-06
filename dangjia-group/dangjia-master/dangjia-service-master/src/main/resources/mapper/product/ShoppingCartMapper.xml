@@ -112,7 +112,9 @@
 			e.type as unitType,
 			c.value_name_arr as valueNameArr,
 			c.category_id as categoryId,
-			d.type as productType
+			d.type as productType,
+			b.adjusted_price as adjustedPrice,
+			b.modity_price_time as modityPriceTime
 		FROM
 			dj_repair_shopping_cart a
 		INNER JOIN dj_basics_storefront_product b ON a.product_id = b.id

@@ -154,7 +154,9 @@
             bsp.prod_template_id AS productId,
             bsp.product_name AS productName,
             bsp.image,
-            bpt.unit_name AS unitName
+            bpt.unit_name AS unitName,
+			bsp.adjusted_price as adjustedPrice,
+			bsp.modity_price_time as modityPriceTime
         FROM
             dj_basics_storefront_product bsp
         INNER JOIN dj_basics_product_template bpt ON bsp.prod_template_id = bpt.id

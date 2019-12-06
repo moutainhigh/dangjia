@@ -156,11 +156,17 @@ public interface DjDeliverOrderAPI {
                                         @RequestParam("id")String id);
 
     @PostMapping("app/order/queryAppOrderInFoList")
-    @ApiOperation(value = "查询订单详情", notes = "查询订单详情")
+    @ApiOperation(value = "app订单详情查询（待收货，待安装，已完成）", notes = "app订单详情查询（待收货，待安装，已完成）")
     ServerResponse  queryAppOrderInFoList(@RequestParam("userToken")String userToken,
                                           @RequestParam("pageDTO") PageDTO pageDTO,
                                         @RequestParam("id") String id,
                                         @RequestParam("shippingState")String shippingState);
+
+    @PostMapping("app/order/queryAppOrderWorkerInFoList")
+    @ApiOperation(value = "订单详情查询（待收货- 人工）", notes = "订单详情查询（待收货- 人工）")
+    ServerResponse  queryAppOrderWorkerInFoList(@RequestParam("userToken")String userToken,
+                                          @RequestParam("id") String id,
+                                          @RequestParam("shippingState")String shippingState);
 
     @PostMapping("app/order/deleteAppOrder")
     @ApiOperation(value = "删除订单", notes = "删除订单")

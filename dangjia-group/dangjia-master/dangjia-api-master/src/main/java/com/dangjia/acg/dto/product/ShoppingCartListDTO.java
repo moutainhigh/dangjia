@@ -4,6 +4,8 @@ import com.dangjia.acg.common.annotation.Desc;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.util.Date;
+
 /**
  * Created with IntelliJ IDEA.
  * author: wk
@@ -59,6 +61,18 @@ public class ShoppingCartListDTO {
 
     private String valueNameArr;
     private String storefrontId;
+
+
+
+    /**
+     * 调后价格
+     */
+    private Double adjustedPrice;
+
+    /**
+     * 调价时间
+     */
+    private Date modityPriceTime;
 
 
 

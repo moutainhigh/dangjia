@@ -150,7 +150,13 @@ public class DjDeliverOrderController implements DjDeliverOrderAPI {
     @Override
     @ApiMethod
     public ServerResponse queryAppOrderInFoList(String userToken, PageDTO pageDTO,String id,String shippingState) {
-        return djDeliverOrderService.queryAppOrderInFoList(pageDTO,id,shippingState);
+        return djDeliverOrderService.queryAppOrderInFoList(id,shippingState);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryAppOrderWorkerInFoList(String userToken,String id,String shippingState) {
+        return djDeliverOrderService.queryAppOrderWorkerInFoList(id,shippingState);
     }
 
     @Override

@@ -1553,11 +1553,10 @@ public class DjDeliverOrderService {
 
     /**
      * app订单详情查询（待收货，待安装，已完成）
-     *
      * @param id
      * @return
      */
-    public ServerResponse queryAppOrderInFoList(PageDTO pageDTO, String id, String shippingState) {
+    public ServerResponse queryAppOrderInFoList(String id, String shippingState) {
         if (CommonUtil.isEmpty(id)) {
             return ServerResponse.createByErrorMessage("id不能为空");
         }
@@ -1611,11 +1610,7 @@ public class DjDeliverOrderService {
         List<Map<String, Object>> list = new ArrayList<>();
         if (orderSplitItem != null && orderSplitItem.size() > 0) {
             for (OrderSplitItem splitItem : orderSplitItem) {
-
-
                 Integer type = iBillDjDeliverOrderMapper.queryTypeArr(splitItem.getId());
-
-
                 String str = iBillDjDeliverOrderMapper.queryValueIdArr(splitItem.getId());
                 map = new HashMap<>();
                 if (!CommonUtil.isEmpty(str)) {
@@ -1645,23 +1640,22 @@ public class DjDeliverOrderService {
         mapArr.put("storefrontType", storefront.getStorefrontType());//店铺类型（实物商品：product，人工商品：worker)
         mapArr.put("mobile", storefront.getMobile());//店铺电话
         mapArr.put("appointmentDTOS", list);//商品详情
-        List<Map<String, Object>> liatArr = new ArrayList<>();
-        liatArr.add(mapArr);
-        if(liatArr.size()<=0){
+        List<Map<String, Object>> listArr = new ArrayList<>();
+        listArr.add(mapArr);
+        if(listArr.size()<=0){
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
         }
-        orderCollectInFoDTO.setOrderStorefrontDTOS(liatArr);
+        orderCollectInFoDTO.setOrderStorefrontDTOS(listArr);
         return ServerResponse.createBySuccess("查询成功", orderCollectInFoDTO);
     }
 
 
     /**
      * app订单详情查询（待收货- 人工）
-     *
      * @param id
      * @return
      */
-    public ServerResponse queryAppOrderWorkerInFoList(PageDTO pageDTO, String id, String shippingState) {
+    public ServerResponse queryAppOrderWorkerInFoList(String id, String shippingState) {
         if (CommonUtil.isEmpty(id)) {
             return ServerResponse.createByErrorMessage("id不能为空");
         }
@@ -1743,7 +1737,7 @@ public class DjDeliverOrderService {
 
 
     /**
-     * App 删除订单
+     * App 已完成 - 删除订单
      *
      * @param
      * @return
