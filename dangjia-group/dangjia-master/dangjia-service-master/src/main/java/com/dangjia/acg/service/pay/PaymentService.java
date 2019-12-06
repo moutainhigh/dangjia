@@ -60,6 +60,7 @@ import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.house.*;
 import com.dangjia.acg.modle.member.CustomerRecord;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.order.DeliverOrderAddedProduct;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.pay.PayOrder;
 import com.dangjia.acg.modle.product.BasicsGoods;
@@ -173,6 +174,8 @@ public class PaymentService {
     private StorefrontConfigAPI storefrontConfigAPI;
     @Autowired
     private IShoppingCartMapper iShoppingCartMapper;
+    @Autowired
+    private IMasterDeliverOrderAddedProductMapper masterDeliverOrderAddedProductMapper;
     @Autowired
     private IProductChangeOrderMapper productChangeOrderMapper;
     @Autowired
@@ -1129,6 +1132,19 @@ public class PaymentService {
                 orderMapper.updateByPrimaryKeySelective(order);
 
                 budgetCorrect(order,null,null);
+
+                //清空增值商品
+                example = new Example(ShoppingCart.class);
+                example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, member.getId())
+                        .andIn(ShoppingCart.PRODUCT_ID,Arrays.asList(productIds));
+                List<ShoppingCart> shoppingCarts = iShoppingCartMapper.selectByExample(example);
+                if(shoppingCarts.size()>0) {
+                    for (ShoppingCart shoppingCart : shoppingCarts) {
+                        Example example1 = new Example(DeliverOrderAddedProduct.class);
+                        example1.createCriteria().andEqualTo(DeliverOrderAddedProduct.ANY_ORDER_ID, shoppingCart.getId()).andEqualTo(DeliverOrderAddedProduct.SOURCE, 4);
+                        masterDeliverOrderAddedProductMapper.deleteByExample(example1);
+                    }
+                }
 
                 //清空购物车指定商品
                 example = new Example(ShoppingCart.class);
