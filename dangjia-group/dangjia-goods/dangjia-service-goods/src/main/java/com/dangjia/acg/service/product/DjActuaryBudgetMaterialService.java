@@ -100,6 +100,7 @@ public class DjActuaryBudgetMaterialService {
                     map.put("id", allCategoryDTO.getId());
                     map.put("name", allCategoryDTO.getName());
                     mapList.add(map);
+
                 }
             }
             return ServerResponse.createBySuccess("查询成功", mapList);
