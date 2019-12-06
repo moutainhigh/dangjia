@@ -427,4 +427,12 @@
         a.total_account - b.surplus_money - a.retention_money
         )
     </select>
+
+    <select id="selectShopStoreByTypeCityId" resultType="com.dangjia.acg.modle.storefront.Storefront">
+        select
+        <include refid="all_column"/>
+        from dj_basics_storefront
+        where city_id=#{cityId}
+        and storefront_type=#{storefrontType}
+    </select>
 </mapper>

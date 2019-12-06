@@ -1,9 +1,9 @@
 package com.dangjia.acg.service.storefront;
 
-import cn.jiguang.common.utils.StringUtils;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.supplier.DjSupplierAPI;
+import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
@@ -18,6 +18,7 @@ import com.dangjia.acg.dto.supplier.DjSupplierDeliverDTOList;
 import com.dangjia.acg.mapper.storefront.*;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.other.BankCard;
+import com.dangjia.acg.modle.other.City;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.receipt.Receipt;
 import com.dangjia.acg.modle.repair.MendDeliver;
@@ -31,6 +32,7 @@ import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -124,20 +126,8 @@ public class StorefrontService {
             {
                 return ServerResponse.createByErrorMessage("没有检索到店铺信息数据");
             }
-            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            StorefrontDTO storefrontDTO =new StorefrontDTO();
             Storefront storefront=list.get(0);
-            storefrontDTO.setId(storefront.getId());
-            storefrontDTO.setCityId(storefront.getCityId());
-            storefrontDTO.setUserId(storefront.getUserId());
-            storefrontDTO.setStorefrontName(storefront.getStorefrontName());
-            storefrontDTO.setStorefrontAddress(storefront.getStorefrontAddress());
-            storefrontDTO.setStorefrontDesc(storefront.getStorefrontDesc());
-            storefrontDTO.setStorefrontLogo(address+storefront.getStorefrontLogo());
-            storefrontDTO.setStorefrontSigleLogo(storefront.getStorefrontLogo());
-            storefrontDTO.setStorekeeperName(storefront.getStorekeeperName());
-            storefrontDTO.setMobile(storefront.getMobile());
-            storefrontDTO.setEmail(storefront.getEmail());
+            StorefrontDTO storefrontDTO = getStorefrontDTO(storefront);
 
             Example exampleFreight=new Example(StorefrontConfig.class);
             exampleFreight.createCriteria().andEqualTo(StorefrontConfig.STOREFRONT_ID,storefront.getId()).andEqualTo(StorefrontConfig.PARAM_KEY,StorefrontConfig.FREIGHT);
@@ -156,6 +146,28 @@ public class StorefrontService {
             return ServerResponse.createByErrorMessage("查询店铺信息异常");
         }
     }
+
+    private StorefrontDTO getStorefrontDTO(Storefront storefront){
+        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+
+        StorefrontDTO storefrontDTO =new StorefrontDTO();
+        storefrontDTO.setId(storefront.getId());
+        storefrontDTO.setCityId(storefront.getCityId());
+        storefrontDTO.setUserId(storefront.getUserId());
+        storefrontDTO.setStorefrontName(storefront.getStorefrontName());
+        storefrontDTO.setStorefrontAddress(storefront.getStorefrontAddress());
+        storefrontDTO.setStorefrontDesc(storefront.getStorefrontDesc());
+        storefrontDTO.setStorefrontLogo(storefront.getStorefrontLogo());
+        if(StringUtils.isNotEmpty(storefront.getStorefrontLogo())){
+            storefrontDTO.setStorefrontLogoUrl(address+storefront.getStorefrontLogo());
+        }
+        storefrontDTO.setStorefrontSigleLogo(storefront.getStorefrontLogo());
+        storefrontDTO.setStorekeeperName(storefront.getStorekeeperName());
+        storefrontDTO.setMobile(storefront.getMobile());
+        storefrontDTO.setEmail(storefront.getEmail());
+        return storefrontDTO;
+    }
+
 
     /**
      *  根据调件模糊查询店铺信息
@@ -178,11 +190,11 @@ public class StorefrontService {
 
         try {
 
-            if(storefrontDTO==null||StringUtils.isEmpty(storefrontDTO.getUserId()))
+            if(storefrontDTO==null|| StringUtils.isBlank(storefrontDTO.getUserId()))
             {
                 return ServerResponse.createByErrorMessage("用户编号不能为空");
             }
-            if(storefrontDTO==null||StringUtils.isEmpty(storefrontDTO.getCityId()))
+            if(storefrontDTO==null||StringUtils.isBlank(storefrontDTO.getCityId()))
             {
                 return ServerResponse.createByErrorMessage("城市编号不能为空");
             }
@@ -796,5 +808,63 @@ public class StorefrontService {
     public Integer setStorefrontSurplusMoney() {
        return  istorefrontMapper.setStorefrontSurplusMoney();
     }
+
+    /**
+     * 根据城市Id查询当家虚拟店铺
+     * @param cityId 在市ID
+     * @return
+     */
+    public ServerResponse queryWorkerShopByCityId(String cityId){
+        try{
+            Storefront storefront=istorefrontMapper.selectShopStoreByTypeCityId(cityId,"worker");
+            StorefrontDTO storefrontDTO = getStorefrontDTO(storefront);
+            return ServerResponse.createBySuccess("查询成功",storefrontDTO);
+        }catch (Exception e){
+            logger.error("根据城市Id查询当家虚拟店铺异常：",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    /**
+     * 修改当家虚拟店铺信息
+     * @param storefrontDTO
+     * @return
+     */
+    public ServerResponse editWorkerShopInfo(StorefrontDTO storefrontDTO){
+        try{
+            Example example=new Example(MainUser.class);
+            example.createCriteria().andEqualTo(MainUser.MOBILE,storefrontDTO.getMobile());
+            MainUser mainUser=istorefrontUserMapper.selectOneByExample(example);
+            if(mainUser==null){
+                return ServerResponse.createBySuccess("此电话用户在系统不存在，请核实!");
+            }
+            Storefront storefront=istorefrontMapper.selectShopStoreByTypeCityId(storefrontDTO.getCityId(),"worker");
+            if(storefront==null|| StringUtils.isBlank(storefront.getId())) {
+                storefront = new Storefront();
+            }
+            storefront.setUserId(mainUser.getId());
+            storefront.setCityId(storefrontDTO.getCityId());
+            storefront.setStorefrontName(storefrontDTO.getStorefrontName());
+            storefront.setStorefrontAddress(storefrontDTO.getStorefrontAddress());
+            storefront.setStorefrontDesc(storefrontDTO.getStorefrontDesc());
+            storefront.setStorefrontLogo(storefrontDTO.getStorefrontLogo());//店铺logo暂无
+            storefront.setIfDjselfManage(1);
+            storefront.setStorefrontType("worker");
+            String systemlogo = configUtil.getValue(SysConfig.ORDER_DANGJIA_ICON, String.class);
+            storefront.setSystemLogo(systemlogo);
+            if(storefront==null|| StringUtils.isBlank(storefront.getId())) {
+                istorefrontMapper.insertSelective(storefront);
+            }else{
+                istorefrontMapper.updateByPrimaryKeySelective(storefront);
+            }
+            return ServerResponse.createBySuccess("保存成功");
+        }catch (Exception e){
+
+            logger.error("修改当家虚拟店铺信息异常：",e);
+            return ServerResponse.createByErrorMessage("保存失败");
+        }
+
+    }
+
 
 }
