@@ -64,13 +64,13 @@ public class ShoppingCart extends BaseEntity {
     private String unitName;
 
     @Column(name = "category_id")
-    @Desc(value = "分类编号")
-    @ApiModelProperty("分类编号")
+    @Desc(value = "分类id")
+    @ApiModelProperty("分类id")
     private String categoryId;
 
     @Column(name = "product_type")
-    @Desc(value = "产品类型:0：材料；1：包工包料 2:人工")
-    @ApiModelProperty("产品类型:0：材料；1：包工包料 2:人工")
+    @Desc(value = "类型0：实物商品；1：服务商品；2：人工商品；3：体验；4：增值；5：维保")
+    @ApiModelProperty("类型0：实物商品；1：服务商品；2：人工商品；3：体验；4：增值；5：维保")
     private Integer productType;
 
 
@@ -78,4 +78,19 @@ public class ShoppingCart extends BaseEntity {
     @Desc(value = "店铺表ID")
     @ApiModelProperty("店铺表ID")
     private String storefrontId;
+
+    @Column(name = "is_reservation_deliver")
+    @Desc(value = "是否业主预约发货(1是，0否)")
+    @ApiModelProperty("是否业主预约发货(1是，0否)")
+    private String isReservationDeliver;
+
+    @Column(name = "unit_type")
+    @Desc(value = "单位数值类型 1=整数单位，2=小数单位")
+    @ApiModelProperty("单位数值类型 1=整数单位，2=小数单位")
+    private Integer unitType;
+
+    @Column(name = "value_id_arr")
+    @Desc(value = "属性选项选中值id集合")
+    @ApiModelProperty("属性选项选中值id集合")
+    private String valueIdArr;
 }

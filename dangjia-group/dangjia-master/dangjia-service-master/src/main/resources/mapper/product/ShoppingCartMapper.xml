@@ -102,29 +102,30 @@
 			a.unit_name as unitName,
 			a.product_type as productType,
 			a.storefront_id as storefrontId ,
+			a.product_type as productType,
 			b.id AS productId,
 			b.product_name AS productName,
-			c.product_sn as productSn,
+			a.product_sn as productSn,
 			b.image,
 			b.sell_price AS sellPrice,
-			d.is_reservation_deliver AS isReservationDeliver,
-			e.type,
-			e.type as unitType,
-			c.value_name_arr as valueNameArr,
-			c.category_id as categoryId,
-			d.type as productType,
+			a.is_reservation_deliver AS isReservationDeliver,
+			a.unit_type as unitType,
+			a.value_id_arr as valueIdArr,
+			a.category_id as categoryId,
+			a.is_reservation_deliver AS isReservationDeliver,
+			a.unit_type as unitType,
+			a.value_id_arr as valueIdArr,
+			a.category_id as categoryId,
+			a.product_type as productType,
 			b.adjusted_price as adjustedPrice,
 			b.modity_price_time as modityPriceTime
 		FROM
 			dj_repair_shopping_cart a
 		INNER JOIN dj_basics_storefront_product b ON a.product_id = b.id
-		INNER JOIN dj_basics_product_template c ON b.prod_template_id = c.id
-		INNER JOIN dj_basics_goods d ON b.goods_id = d.id
-		INNER JOIN dj_basics_unit e ON c.convert_unit=e.id
 		WHERE a.member_id =#{memberId}
 		AND a.city_id =#{cityId}
 		AND a.storefront_id=#{storefrontId}
-		AND d.type &lt; 4
+		AND a.product_type &lt; 4
 		<if test="null!=productIds and productIds.size>0">
 			AND a.product_id in
 			<foreach collection="productIds" index="index" item="item" open="(" separator="," close=")">

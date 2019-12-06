@@ -11,7 +11,7 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.product.ShoppingCartDTO;
 import com.dangjia.acg.dto.product.ShoppingCartListDTO;
-import com.dangjia.acg.mapper.delivery.IMasterDeliverOrderAddedProductMapper;
+import com.dangjia.acg.mapper.core.IMasterUnitMapper;
 import com.dangjia.acg.mapper.delivery.IOrderItemMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberCollectMapper;
@@ -19,6 +19,7 @@ import com.dangjia.acg.mapper.product.IMasterGoodsMapper;
 import com.dangjia.acg.mapper.product.IMasterProductTemplateMapper;
 import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
 import com.dangjia.acg.mapper.product.IShoppingCartMapper;
+import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.deliver.OrderItem;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
@@ -87,6 +88,8 @@ public class ShopCartService {
     private IMasterDeliverOrderAddedProductMapper masterDeliverOrderAddedProductMapper;
 
 
+    @Autowired
+    private IMasterUnitMapper iMasterUnitMapper;
 
     /**
      * 获取购物车列表
@@ -190,7 +193,6 @@ public class ShopCartService {
             //清空购物车商品
             int i = iShoppingCartmapper.deleteByExample(example);
             if (i >= 0) {
-
                 return ServerResponse.createBySuccessMessage("清空购物车成功!");
             } else {
                 return ServerResponse.createBySuccessMessage("清空购物车失败!");
@@ -312,6 +314,7 @@ public class ShopCartService {
             StorefrontProduct storefrontProduct = iMasterStorefrontProductMapper.selectByPrimaryKey(productId);
             DjBasicsProductTemplate djBasicsProductTemplate = iMasterProductTemplateMapper.selectByPrimaryKey(storefrontProduct.getProdTemplateId());
             BasicsGoods goods = iMasterGoodsMapper.selectByPrimaryKey(djBasicsProductTemplate.getGoodsId());
+            Unit unit = iMasterUnitMapper.selectByPrimaryKey(djBasicsProductTemplate.getUnitId());
             //有房有精算  根据用户的member_id去区分
             //无房无精算  根据用户的member_id去区分
             ServerResponse ccart= checkCart(userToken,productId);
@@ -329,16 +332,26 @@ public class ShopCartService {
                 ShoppingCart shoppingCart = new ShoppingCart();
                 shoppingCart.setMemberId(member.getId());
                 shoppingCart.setProductId(productId);
-                shoppingCart.setProductSn(djBasicsProductTemplate.getProductSn());
-                shoppingCart.setProductName(storefrontProduct.getProductName());
-                shoppingCart.setPrice(new BigDecimal(storefrontProduct.getSellPrice()));
+                if(null!=storefrontProduct) {
+                    shoppingCart.setPrice(new BigDecimal(storefrontProduct.getSellPrice()));
+                    shoppingCart.setStorefrontId(storefrontProduct.getStorefrontId());
+                    shoppingCart.setProductName(storefrontProduct.getProductName());
+                    shoppingCart.setImage(storefrontProduct.getImage());
+                }
                 shoppingCart.setShopCount(shopCount);
-                shoppingCart.setUnitName(djBasicsProductTemplate.getUnitName());
-                shoppingCart.setCategoryId(djBasicsProductTemplate.getCategoryId());
-                shoppingCart.setProductType(goods.getType());
-                shoppingCart.setStorefrontId(storefrontProduct.getStorefrontId());
+                if(null!=djBasicsProductTemplate) {
+                    shoppingCart.setProductSn(djBasicsProductTemplate.getProductSn());
+                    shoppingCart.setUnitName(djBasicsProductTemplate.getUnitName());
+                    shoppingCart.setCategoryId(djBasicsProductTemplate.getCategoryId());
+                }
+                if(null!=goods) {
+                    shoppingCart.setProductType(goods.getType());
+                    shoppingCart.setIsReservationDeliver(goods.getIsReservationDeliver());
+                }
                 shoppingCart.setCityId(cityId);
-                shoppingCart.setImage(storefrontProduct.getImage());
+                if(null!=unit) {
+                    shoppingCart.setUnitType(unit.getType());
+                }
                 iShoppingCartmapper.insert(shoppingCart);
                 shoppingCartid=shoppingCart.getId();
             } else {

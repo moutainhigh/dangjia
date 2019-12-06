@@ -2,6 +2,7 @@ package com.dangjia.acg.model;
 
 import com.dangjia.acg.common.annotation.Desc;
 import com.dangjia.acg.common.model.BaseEntity;
+import lombok.experimental.FieldNameConstants;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,6 +14,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "dj_config")
+@FieldNameConstants(prefix = "")
 public class Config extends BaseEntity {
 
   /****

@@ -207,6 +207,7 @@
                 WHERE
                     t1.id = t2.order_id
                 AND t1.house_id = #{houseId}
+                and EXISTS(select 1 from dj_basics_storefront_product t where t2.product_id=t.id)
                 UNION ALL
                     SELECT
                         sum(IFNULL(t1.total_price, 0)) actualPaymentPrice,
@@ -402,13 +403,24 @@
         FROM
             (
                 SELECT t5.category_label_ids,
-                    IFNULL(
+                    (IFNULL(
                         t2.actual_payment_price,
                         IFNULL(
                             t2.total_price,
                             t2.price * t2.shop_count
                         )
-                    ) actualPaymentPrice,
+                       )+ IFNULL(
+                        (
+                        SELECT
+                        price
+                        FROM
+                        dj_deliver_order_added_product tt
+                        WHERE
+                        tt.any_order_id = t2.id
+                        ),
+                        0
+                        ) * t2.shop_count
+                     )actualPaymentPrice,
                     0 purchaseTotalPrice
                 FROM
                     dj_deliver_order t1,
