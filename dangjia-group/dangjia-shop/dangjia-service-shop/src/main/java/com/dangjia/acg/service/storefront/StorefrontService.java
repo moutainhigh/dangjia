@@ -853,6 +853,7 @@ public class StorefrontService {
             storefront.setStorekeeperName(storefrontDTO.getStorekeeperName());
             storefront.setIfDjselfManage(1);
             storefront.setStorefrontType("worker");
+            storefront.setModifyDate(new Date());
             String systemlogo = configUtil.getValue(SysConfig.ORDER_DANGJIA_ICON, String.class);
             storefront.setSystemLogo(systemlogo);
             if(storefront==null|| StringUtils.isBlank(storefront.getId())) {
