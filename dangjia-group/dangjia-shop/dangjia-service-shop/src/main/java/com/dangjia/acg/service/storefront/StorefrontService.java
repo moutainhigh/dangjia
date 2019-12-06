@@ -836,7 +836,7 @@ public class StorefrontService {
             example.createCriteria().andEqualTo(MainUser.MOBILE,storefrontDTO.getMobile());
             MainUser mainUser=istorefrontUserMapper.selectOneByExample(example);
             if(mainUser==null){
-                return ServerResponse.createBySuccess("此电话用户在系统不存在，请核实!");
+                return ServerResponse.createByErrorMessage("此电话用户在系统不存在，请核实!");
             }
             Storefront storefront=istorefrontMapper.selectShopStoreByTypeCityId(storefrontDTO.getCityId(),"worker");
             if(storefront==null|| StringUtils.isBlank(storefront.getId())) {
@@ -848,6 +848,9 @@ public class StorefrontService {
             storefront.setStorefrontAddress(storefrontDTO.getStorefrontAddress());
             storefront.setStorefrontDesc(storefrontDTO.getStorefrontDesc());
             storefront.setStorefrontLogo(storefrontDTO.getStorefrontLogo());//店铺logo暂无
+            storefront.setMobile(storefrontDTO.getMobile());
+            storefront.setEmail(storefrontDTO.getEmail());
+            storefront.setStorekeeperName(storefrontDTO.getStorekeeperName());
             storefront.setIfDjselfManage(1);
             storefront.setStorefrontType("worker");
             String systemlogo = configUtil.getValue(SysConfig.ORDER_DANGJIA_ICON, String.class);
@@ -857,7 +860,7 @@ public class StorefrontService {
             }else{
                 istorefrontMapper.updateByPrimaryKeySelective(storefront);
             }
-            return ServerResponse.createBySuccess("保存成功");
+            return ServerResponse.createBySuccessMessage("保存成功");
         }catch (Exception e){
 
             logger.error("修改当家虚拟店铺信息异常：",e);
