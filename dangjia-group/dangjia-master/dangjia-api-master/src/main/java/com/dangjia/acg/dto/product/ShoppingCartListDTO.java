@@ -1,10 +1,12 @@
 package com.dangjia.acg.dto.product;
 
 import com.dangjia.acg.common.annotation.Desc;
+import com.dangjia.acg.modle.order.DeliverOrderAddedProduct;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -74,6 +76,7 @@ public class ShoppingCartListDTO {
      */
     private Date modityPriceTime;
 
-
+    //增值商品集合
+    List<DeliverOrderAddedProduct> addedProducts;
 
 }
