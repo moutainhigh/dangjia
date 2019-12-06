@@ -51,4 +51,9 @@ public interface DjActuaryBudgetMaterialAPI {
                                       @RequestParam("brandVal")String brandVal,
                                       @RequestParam("orderKey")String orderKey);
 
+
+    @PostMapping("/actuary/actuaryOpe/newcategoryIdList")
+    @ApiOperation(value = "新版所有分类", notes = "新版所有分类")
+    ServerResponse newcategoryIdList(@RequestParam("houseId")String houseId,@RequestParam("cityId")String cityId);
+
 }

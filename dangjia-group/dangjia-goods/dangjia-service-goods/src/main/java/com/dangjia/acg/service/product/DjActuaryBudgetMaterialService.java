@@ -12,12 +12,14 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO;
+import com.dangjia.acg.dto.budget.AllCategoryDTO;
 import com.dangjia.acg.dto.product.BasicsGoodArrDTO;
 import com.dangjia.acg.dto.product.BasicsGoodDTO;
 import com.dangjia.acg.dto.product.BasicsgDTO;
 import com.dangjia.acg.mapper.actuary.IActuarialTemplateMapper;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
+import com.dangjia.acg.mapper.basics.IGoodsCategoryMapper;
 import com.dangjia.acg.mapper.basics.IUnitMapper;
 import com.dangjia.acg.mapper.product.DjBasicsGoodsMapper;
 import com.dangjia.acg.mapper.product.IBasicsGoodsCategoryMapper;
@@ -38,9 +40,7 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -76,6 +76,39 @@ public class DjActuaryBudgetMaterialService {
 
     @Autowired
     private SearchActuarialConfigServices searchActuarialConfigServices;
+    @Autowired
+    private IGoodsCategoryMapper goodsCategoryMapper;
+
+    @Autowired
+    private IBudgetMaterialMapper budgetMaterialMapper;
+
+    /**
+     * 新版所有分类
+     * @param houseId
+     * @param cityId
+     * @return
+     */
+    public ServerResponse newcategoryIdList(String houseId, String cityId) {
+        try {
+            List<Map<String, Object>> mapList = new ArrayList<>();
+           List<AllCategoryDTO> list =goodsCategoryMapper.queryNewcategoryIdList(houseId);
+            for(AllCategoryDTO allCategoryDTO:list)
+            {
+                Map<String, Object> map = new HashMap<>();
+                if(allCategoryDTO!=null)
+                {
+                    map.put("id", allCategoryDTO.getId());
+                    map.put("name", allCategoryDTO.getName());
+                    mapList.add(map);
+                }
+            }
+            return ServerResponse.createBySuccess("查询成功", mapList);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("生成失败");
+        }
+    }
+
     /**
      * 生成精算
      */
@@ -257,12 +290,12 @@ public class DjActuaryBudgetMaterialService {
         BasicsGoodArrDTO basicsGoodArrDTO = new BasicsGoodArrDTO();
         Example example = new Example(BasicsGoods.class);
         example.createCriteria().andEqualTo(BasicsGoods.CATEGORY_ID, categoryId).andEqualTo(BasicsGoods.CITY_ID,cityId);
-        List<BasicsGoods> list = djBasicsGoodsMapper.selectByExample(example);
+        List<BasicsGoods> list = djBasicsGoodsMapper.selectByExample(example);//类别下所有的商品
         BasicsGoodsCategory djBasicsGoodsCategory = djBasicsGoodsCategoryMapper.selectByPrimaryKey(categoryId);
         if (list.size() > 0) {
                 //0：材料；1：服务   //2 人工
-                List<BasicsGoodDTO> bgdList = new ArrayList<>();
-                if(!CommonUtil.isEmpty(djBasicsGoodsCategory)){
+                    List<BasicsGoodDTO> bgdList = new ArrayList<>();
+                    if(!CommonUtil.isEmpty(djBasicsGoodsCategory)){
                     example = new Example(BasicsGoodsCategory.class);
                     example.createCriteria().andEqualTo(BasicsGoodsCategory.PARENT_ID, djBasicsGoodsCategory.getParentId());
                     List<BasicsGoodsCategory> li = djBasicsGoodsCategoryMapper.selectByExample(example);

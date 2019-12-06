@@ -56,4 +56,10 @@ public class DjActuaryBudgetMaterialController implements DjActuaryBudgetMateria
         return djActuaryBudgetMaterialService.queryBasicsProduct(productId, pageDTO, cityId, categoryId, goodsId, name, attributeVal, brandVal, orderKey);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse newcategoryIdList(String houseId, String cityId) {
+        return djActuaryBudgetMaterialService.newcategoryIdList(houseId,cityId);
+    }
+
 }

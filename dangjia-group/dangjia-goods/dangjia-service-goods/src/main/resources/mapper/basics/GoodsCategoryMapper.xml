@@ -87,4 +87,17 @@
     </select>
 
 
+    <select id="queryNewcategoryIdList" resultType="com.dangjia.acg.dto.budget.AllCategoryDTO">
+        SELECT
+        DISTINCT
+         bcl.id,
+         bcl. NAME
+        FROM
+         dj_actuary_budget_material abm
+        INNER JOIN dj_basics_storefront_product dbg ON dbg.id = abm.product_id
+        INNER JOIN dj_basics_product_template bpt on dbg.prod_template_id=bpt.id
+        INNER JOIN dj_basics_goods_category bgc ON bpt.category_id = bgc.id
+        INNER JOIN dj_basics_category_label bcl ON FIND_IN_SET(bcl.id,bgc.category_label_ids)
+        where abm.house_id='2c9080e26699cea30166a3e9bc6c118e'
+    </select>
 </mapper>
