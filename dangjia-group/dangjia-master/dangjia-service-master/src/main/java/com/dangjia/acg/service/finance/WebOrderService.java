@@ -78,14 +78,18 @@ public class WebOrderService {
      * @param searchKey 模糊搜索：订单号,房屋信息,电话,支付单号(业务订单号)
      * @return
      */
-    public ServerResponse getAllOrders(PageDTO pageDTO,String cityId, Integer state, String searchKey,String storefrontId) {
+    public ServerResponse getAllOrders(PageDTO pageDTO,String cityId, Integer state, String searchKey,String storefrontId, String beginDate,String endDate) {
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             if (state == null) {
                 state = -1;
             }
+            if (!CommonUtil.isEmpty(beginDate) && !CommonUtil.isEmpty(endDate)) {
+                beginDate = beginDate + " " + "00:00:00";
+                endDate = endDate + " " + "23:59:59";
+            }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<WebOrderDTO> orderList = iBusinessOrderMapper.getWebOrderList(cityId,state, searchKey,storefrontId);
+            List<WebOrderDTO> orderList = iBusinessOrderMapper.getWebOrderList(cityId,state, searchKey,storefrontId,  beginDate, endDate);
             PageInfo pageResult = new PageInfo(orderList);
             for (WebOrderDTO webOrderDTO : orderList) {
                 if(!CommonUtil.isEmpty(webOrderDTO.getPayOrderNumber())) {

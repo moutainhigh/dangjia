@@ -30,8 +30,6 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * author: ysl
@@ -71,10 +69,8 @@ public class WebWithdrawDepositService {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             if (!CommonUtil.isEmpty(beginDate) && !CommonUtil.isEmpty(endDate)) {
-                if (beginDate.equals(endDate)) {
-                    beginDate = beginDate + " " + "00:00:00";
-                    endDate = endDate + " " + "23:59:59";
-                }
+                beginDate = beginDate + " " + "00:00:00";
+                endDate = endDate + " " + "23:59:59";
             }
             List<WebWithdrawDTO> withdrawDTOList = iWithdrawDepositMapper.getWebWithdrawList(state,cityId, searchKey, beginDate, endDate);
             PageInfo pageResult = new PageInfo(withdrawDTOList);
