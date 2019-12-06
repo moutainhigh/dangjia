@@ -92,7 +92,7 @@
         mt ON mt.member_id = d.id AND FIND_IN_SET(#{cityId}, mt.city_id )
         LEFT JOIN dj_house AS c ON a.house_id = c.id
         <if test="beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
-            INNER JOIN dj_pay_pay_order pa AS pa ON pa.number = a.pay_order_number
+            INNER JOIN dj_pay_pay_order AS pa ON pa.number = a.pay_order_number
         </if>
         WHERE
         a.data_status = 0
