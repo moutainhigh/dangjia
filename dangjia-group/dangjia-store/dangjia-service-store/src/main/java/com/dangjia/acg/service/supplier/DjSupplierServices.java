@@ -13,6 +13,7 @@ import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.supplier.*;
+import com.dangjia.acg.mapper.IStoreConfigMapper;
 import com.dangjia.acg.mapper.account.IStoreAccountFlowRecordMapper;
 import com.dangjia.acg.mapper.delivery.IStoreSplitDeliverMapper;
 import com.dangjia.acg.mapper.pay.IStoreBusinessOrderMapper;
@@ -25,6 +26,7 @@ import com.dangjia.acg.mapper.supplier.DjSupplierMapper;
 import com.dangjia.acg.mapper.supplier.DjSupplierPayOrderMapper;
 import com.dangjia.acg.mapper.user.IStoreUserMapper;
 import com.dangjia.acg.mapper.worker.IStoreWithdrawDepositMapper;
+import com.dangjia.acg.model.Config;
 import com.dangjia.acg.modle.account.AccountFlowRecord;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.other.BankCard;
@@ -92,6 +94,8 @@ public class DjSupplierServices {
     private IStoreAccountFlowRecordMapper iStoreAccountFlowRecordMapper;
     @Autowired
     private ConfigUtil configUtil;
+    @Autowired
+    private IStoreConfigMapper iStoreConfigMapper;
     private static Logger logger = LoggerFactory.getLogger(DjSupplierServices.class);
 
     public DjSupplier queryDjSupplierByPass(String supplierId) {
@@ -453,6 +457,11 @@ public class DjSupplierServices {
             if (surplusMoney <= 0)
                 return ServerResponse.createByErrorMessage("提现金额不正确");
             MainUser mainUser = iStoreUserMapper.selectByPrimaryKey(djSupplier.getUserId());
+            Example example=new Example(Config.class);
+            example.createCriteria().andEqualTo(Config.PARAM_KEY,"RETENTION_MONEY");
+            Config config = iStoreConfigMapper.selectOneByExample(example);
+            if(djSupplier.getRetentionMoney()<Double.parseDouble(config.getParamValue()))
+                return ServerResponse.createByErrorMessage("滞留金不足,请先缴清滞留金");
             if (!DigestUtils.md5Hex(payPassword).equals(mainUser.getPayPassword()))
                 return ServerResponse.createByErrorMessage("密码错误");
             WithdrawDeposit withdrawDeposit = new WithdrawDeposit();

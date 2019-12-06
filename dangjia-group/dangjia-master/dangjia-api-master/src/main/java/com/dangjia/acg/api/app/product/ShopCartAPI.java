@@ -27,7 +27,8 @@ public interface ShopCartAPI {
                            @RequestParam("userToken") String userToken,
                            @RequestParam("cityId") String cityId,
                            @RequestParam("productId") String productId,
-                           @RequestParam("shopCount") Double shopCount);
+                           @RequestParam("shopCount") Double shopCount,
+                           @RequestParam("addedProductIds") String addedProductIds);
 
     @PostMapping("app/product/shopCart/queryCartList")
     @ApiOperation(value = "购物车-->查询购物车列表接口", notes = "购物车-->查询购物车列表接口")
@@ -43,7 +44,7 @@ public interface ShopCartAPI {
 
 
     @PostMapping("app/product/shopCart/num")
-    @ApiOperation(value = "购物车-->查询购物车列表接口", notes = "购物车-->查询购物车商品数量")
+    @ApiOperation(value = "购物车-->查询购物车数量接口", notes = "购物车-->查询购物车数量接口")
     ServerResponse getCartNum(@RequestParam("request") HttpServletRequest request,
                               @RequestParam("userToken") String userToken);
 
@@ -63,17 +64,14 @@ public interface ShopCartAPI {
     ServerResponse delCheckCart(@RequestParam("request") HttpServletRequest request,
                                 @RequestParam("shopCartIds") String shopCartIds);
 
-    @PostMapping("app/shopping/cartSettle")
-    @ApiOperation(value = "购物车-->结算", notes = "购物车-->结算")
-    ServerResponse cartSettle(@RequestParam("request") HttpServletRequest request,
-                              @RequestParam("userToken") String userToken);
 
     @PostMapping("app/shopping/replaceShoppingCart")
     @ApiOperation(value = "更换购物车商品", notes = "更换购物车商品")
     ServerResponse replaceShoppingCart(@RequestParam("request") HttpServletRequest request,
                                        @RequestParam("shoppingCartId") String shoppingCartId,
                                        @RequestParam("productId") String productId,
-                                       @RequestParam("shopCount") Double shopCount);
+                                       @RequestParam("shopCount") Double shopCount,
+                                       @RequestParam("addedProductIds") String addedProductIds);
 
 
     @PostMapping("app/shopping/insertToCollect")

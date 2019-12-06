@@ -1,7 +1,5 @@
 package com.dangjia.acg.dto.order;
 
-import com.dangjia.acg.common.model.BaseEntity;
-import com.dangjia.acg.dto.delivery.AppointmentListDTO;
 import com.dangjia.acg.dto.delivery.OrderStorefrontDTO;
 import lombok.Data;
 
@@ -31,5 +29,6 @@ public class PaymentToBeMadeDTO{
     private Integer splitDeliverCount;//关联发货单数量
     private String splitDeliverId;
     private String houseId;
+    private Integer shoppingCartsCount;//购物车数量
 
 }

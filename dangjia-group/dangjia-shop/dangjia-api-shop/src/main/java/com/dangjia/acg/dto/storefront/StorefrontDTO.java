@@ -48,6 +48,11 @@ public class StorefrontDTO {
      */
     private String storefrontLogo;
 
+    /**
+     * 店铺LOGO
+     */
+    private String storefrontLogoUrl;
+
 
     /**
      * 店铺联系人

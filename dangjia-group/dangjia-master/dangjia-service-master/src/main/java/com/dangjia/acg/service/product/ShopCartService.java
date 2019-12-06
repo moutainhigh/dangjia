@@ -7,9 +7,12 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.product.ShoppingCartDTO;
 import com.dangjia.acg.dto.product.ShoppingCartListDTO;
+import com.dangjia.acg.mapper.core.IMasterUnitMapper;
+import com.dangjia.acg.mapper.delivery.IMasterDeliverOrderAddedProductMapper;
 import com.dangjia.acg.mapper.delivery.IOrderItemMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberCollectMapper;
@@ -17,10 +20,12 @@ import com.dangjia.acg.mapper.product.IMasterGoodsMapper;
 import com.dangjia.acg.mapper.product.IMasterProductTemplateMapper;
 import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
 import com.dangjia.acg.mapper.product.IShoppingCartMapper;
+import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.deliver.OrderItem;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberCollect;
+import com.dangjia.acg.modle.order.DeliverOrderAddedProduct;
 import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.product.ShoppingCart;
@@ -80,6 +85,12 @@ public class ShopCartService {
     private ConfigUtil configUtil;
     @Autowired
     private IOrderItemMapper iOrderItemMapper;
+    @Autowired
+    private IMasterDeliverOrderAddedProductMapper masterDeliverOrderAddedProductMapper;
+
+
+    @Autowired
+    private IMasterUnitMapper iMasterUnitMapper;
 
     /**
      * 获取购物车列表
@@ -111,6 +122,14 @@ public class ShopCartService {
                         shoppingCartListDTO.setAdjustedPrice(null);
                         shoppingCartListDTO.setModityPriceTime(null);
                     }
+
+                    //获取购物车增值商品信息
+                    Example example1=new Example(DeliverOrderAddedProduct.class);
+                    example1.createCriteria().andEqualTo(DeliverOrderAddedProduct.ANY_ORDER_ID,shoppingCartListDTO.getId())
+                            .andEqualTo(DeliverOrderAddedProduct.SOURCE,4);
+                    List<DeliverOrderAddedProduct> deliverOrderAddedProducts = masterDeliverOrderAddedProductMapper.selectByExample(example1);
+                    shoppingCartListDTO.setAddedProducts(deliverOrderAddedProducts);
+
                 });
                 shoppingCartDTO.setShoppingCartListDTOS(shoppingCartListDTOS);
                 shoppingCartDTOS.add(shoppingCartDTO);
@@ -159,8 +178,20 @@ public class ShopCartService {
                 return (ServerResponse) object;
             }
             Member member = (Member) object;
+
+
+            //清空增值商品
             Example example = new Example(ShoppingCart.class);
             example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, member.getId());
+            List<ShoppingCart> shoppingCarts = iShoppingCartmapper.selectByExample(example);
+            if(shoppingCarts.size()>0) {
+                for (ShoppingCart shoppingCart : shoppingCarts) {
+                    Example example1 = new Example(DeliverOrderAddedProduct.class);
+                    example1.createCriteria().andEqualTo(DeliverOrderAddedProduct.ANY_ORDER_ID, shoppingCart.getId()).andEqualTo(DeliverOrderAddedProduct.SOURCE, 4);
+                    masterDeliverOrderAddedProductMapper.deleteByExample(example1);
+                }
+            }
+            //清空购物车商品
             int i = iShoppingCartmapper.deleteByExample(example);
             if (i >= 0) {
                 return ServerResponse.createBySuccessMessage("清空购物车成功!");
@@ -274,7 +305,7 @@ public class ShopCartService {
      * @param shopCount
      * @return
      */
-    public ServerResponse addCart(String userToken, String cityId, String productId, Double shopCount) {
+    public ServerResponse addCart(String userToken, String cityId, String productId, Double shopCount ,String addedProductIds) {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
@@ -284,12 +315,14 @@ public class ShopCartService {
             StorefrontProduct storefrontProduct = iMasterStorefrontProductMapper.selectByPrimaryKey(productId);
             DjBasicsProductTemplate djBasicsProductTemplate = iMasterProductTemplateMapper.selectByPrimaryKey(storefrontProduct.getProdTemplateId());
             BasicsGoods goods = iMasterGoodsMapper.selectByPrimaryKey(djBasicsProductTemplate.getGoodsId());
+            Unit unit = iMasterUnitMapper.selectByPrimaryKey(djBasicsProductTemplate.getUnitId());
             //有房有精算  根据用户的member_id去区分
             //无房无精算  根据用户的member_id去区分
             ServerResponse ccart= checkCart(userToken,productId);
             if(!ccart.isSuccess()){
                 return ccart;
             }
+            String shoppingCartid;
             //判断去重,如果有的话就购买数量加1
             Example example = new Example(ShoppingCart.class);
             example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, member.getId())
@@ -300,26 +333,38 @@ public class ShopCartService {
                 ShoppingCart shoppingCart = new ShoppingCart();
                 shoppingCart.setMemberId(member.getId());
                 shoppingCart.setProductId(productId);
-                shoppingCart.setProductSn(djBasicsProductTemplate.getProductSn());
-                shoppingCart.setProductName(storefrontProduct.getProductName());
-                shoppingCart.setPrice(new BigDecimal(storefrontProduct.getSellPrice()));
+                if(null!=storefrontProduct) {
+                    shoppingCart.setPrice(new BigDecimal(storefrontProduct.getSellPrice()));
+                    shoppingCart.setStorefrontId(storefrontProduct.getStorefrontId());
+                    shoppingCart.setProductName(storefrontProduct.getProductName());
+                    shoppingCart.setImage(storefrontProduct.getImage());
+                }
                 shoppingCart.setShopCount(shopCount);
-                shoppingCart.setUnitName(djBasicsProductTemplate.getUnitName());
-                shoppingCart.setCategoryId(djBasicsProductTemplate.getCategoryId());
-                shoppingCart.setProductType(goods.getType());
-                shoppingCart.setStorefrontId(storefrontProduct.getStorefrontId());
+                if(null!=djBasicsProductTemplate) {
+                    shoppingCart.setProductSn(djBasicsProductTemplate.getProductSn());
+                    shoppingCart.setUnitName(djBasicsProductTemplate.getUnitName());
+                    shoppingCart.setCategoryId(djBasicsProductTemplate.getCategoryId());
+                }
+                if(null!=goods) {
+                    shoppingCart.setProductType(goods.getType());
+                    shoppingCart.setIsReservationDeliver(goods.getIsReservationDeliver());
+                }
                 shoppingCart.setCityId(cityId);
-                shoppingCart.setImage(storefrontProduct.getImage());
-                if (iShoppingCartmapper.insert(shoppingCart) > 0)
-                    return ServerResponse.createBySuccessMessage("加入购物车成功!");
-                return ServerResponse.createBySuccessMessage("加入购物车失败!");
+                if(null!=unit) {
+                    shoppingCart.setUnitType(unit.getType());
+                }
+                iShoppingCartmapper.insert(shoppingCart);
+                shoppingCartid=shoppingCart.getId();
             } else {
                 ShoppingCart myCart = list.get(0);
                 myCart.setShopCount(myCart.getShopCount() + shopCount);
-                if (iShoppingCartmapper.updateByPrimaryKeySelective(myCart) > 0)
-                    return ServerResponse.createBySuccessMessage("加入购物车成功!");
-                return ServerResponse.createBySuccessMessage("加入购物车失败!");
+                iShoppingCartmapper.updateByPrimaryKeySelective(myCart);
+                shoppingCartid=myCart.getId();
             }
+
+            //更新或添加增值商品
+            setAddedProduct(shoppingCartid,addedProductIds);
+            return ServerResponse.createBySuccessMessage("加入购物车成功!");
         } catch (Exception e) {
             logger.info("添加失败",e);
             return ServerResponse.createByErrorMessage("系统报错，加入购物车失败!");
@@ -327,33 +372,23 @@ public class ShopCartService {
     }
 
 
-    public ServerResponse cartSettle(String userToken) {
-        try {
-
-            Object object = constructionService.getMember(userToken);
-            if (object instanceof ServerResponse) {
-                return (ServerResponse) object;
-            }
-            Member operator = (Member) object;
-            //第一步
-            //购物车结算：生成订单方法{获取购物车商品，插入订单}，并返回订单ID
-            /**
-             *    购物车有变动，重写
-             */
-
-            return null;
-        } catch (Exception e) {
-            return ServerResponse.createByErrorMessage("系统报错，删除已选商品失败!");
-        }
-    }
 
     /**
      * 删除已选购物车
      */
     public ServerResponse delCheckCart(String shopCartIds) {
         try {
+            List<String> stringList =Arrays.asList(shopCartIds.split(","));
+            if(stringList.size()>0) {
+                for (String shoppingCartId : stringList) {
+                    Example example1 = new Example(DeliverOrderAddedProduct.class);
+                    example1.createCriteria().andEqualTo(DeliverOrderAddedProduct.ANY_ORDER_ID, shoppingCartId).andEqualTo(DeliverOrderAddedProduct.SOURCE, 4);
+                    masterDeliverOrderAddedProductMapper.deleteByExample(example1);
+                }
+            }
+
             Example example = new Example(ShoppingCart.class);
-            example.createCriteria().andIn(ShoppingCart.ID, Arrays.asList(shopCartIds.split(",")));
+            example.createCriteria().andIn(ShoppingCart.ID, stringList);
             int i = iShoppingCartmapper.deleteByExample(example);
             if (i >= 0) {
                 return ServerResponse.createBySuccessMessage("删除已选商品成功!");
@@ -372,7 +407,7 @@ public class ShopCartService {
      * @param productId
      * @return
      */
-    public ServerResponse replaceShoppingCart(String shoppingCartId, String productId, Double shopCount) {
+    public ServerResponse replaceShoppingCart(String shoppingCartId, String productId, Double shopCount,String addedProductIds) {
         try {
             StorefrontProduct storefrontProduct = iMasterStorefrontProductMapper.selectByPrimaryKey(productId);
             DjBasicsProductTemplate djBasicsProductTemplate = iMasterProductTemplateMapper.selectByPrimaryKey(storefrontProduct.getProdTemplateId());
@@ -389,6 +424,9 @@ public class ShopCartService {
             shoppingCart.setStorefrontId(storefrontProduct.getStorefrontId());
             shoppingCart.setShopCount(shopCount);
             iShoppingCartmapper.updateByPrimaryKeySelective(shoppingCart);
+
+            //更新或添加增值商品
+            setAddedProduct(shoppingCartId,addedProductIds);
             return ServerResponse.createBySuccessMessage("更换成功!");
         } catch (Exception e) {
             logger.info("系统报错,更换失败!",e);
@@ -471,6 +509,7 @@ public class ShopCartService {
                 if(!ccart.isSuccess()){
                     return ccart;
                 }
+                String shoppingCartid;
                 //判断去重,如果有的话就购买数量加1
                 Example example = new Example(ShoppingCart.class);
                 example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, member.getId())
@@ -491,15 +530,26 @@ public class ShopCartService {
                     shoppingCart.setStorefrontId(storefrontProduct.getStorefrontId());
                     shoppingCart.setCityId(cityId);
                     shoppingCart.setImage(storefrontProduct.getImage());
-                    if (iShoppingCartmapper.insert(shoppingCart) > 0)
-                        return ServerResponse.createBySuccessMessage("加入购物车成功!");
-                    return ServerResponse.createBySuccessMessage("加入购物车失败!");
+                    iShoppingCartmapper.insert(shoppingCart);
+                    shoppingCartid=shoppingCart.getId();
                 } else {
                     ShoppingCart myCart = list.get(0);
                     myCart.setShopCount(myCart.getShopCount() + shopCount);
-                    if (iShoppingCartmapper.updateByPrimaryKeySelective(myCart) > 0)
-                        return ServerResponse.createBySuccessMessage("加入购物车成功!");
-                    return ServerResponse.createBySuccessMessage("加入购物车失败!");
+                    iShoppingCartmapper.updateByPrimaryKeySelective(myCart);
+                    shoppingCartid=myCart.getId();
+                }
+
+                //添加增殖类商品
+                example=new Example(DeliverOrderAddedProduct.class);
+                example.createCriteria().andEqualTo(DeliverOrderAddedProduct.ANY_ORDER_ID,orderItem.getId())
+                        .andEqualTo(DeliverOrderAddedProduct.DATA_STATUS,0);
+                List<DeliverOrderAddedProduct> deliverOrderAddedProducts = masterDeliverOrderAddedProductMapper.selectByExample(example);
+                List<String> addedProductIds=new ArrayList<>();
+                for (DeliverOrderAddedProduct deliverOrderAddedProduct : deliverOrderAddedProducts) {
+                    addedProductIds.add(deliverOrderAddedProduct.getAddedProductId());
+                }
+                if(addedProductIds.size()>0) {
+                    setAddedProduct(shoppingCartid,addedProductIds.toString());
                 }
 
             }
@@ -510,5 +560,27 @@ public class ShopCartService {
         }
     }
 
-
+    /**
+     * 更新/设置购物车增值商品
+     * @param shoppingCartId
+     * @param addedProductIds
+     */
+   private void setAddedProduct(String shoppingCartId,String addedProductIds){
+       if(!CommonUtil.isEmpty(addedProductIds)&&!CommonUtil.isEmpty(shoppingCartId)) {
+           String[] addedProductIdList=addedProductIds.split(",");
+           Example example=new Example(DeliverOrderAddedProduct.class);
+           example.createCriteria().andEqualTo(DeliverOrderAddedProduct.ANY_ORDER_ID,shoppingCartId).andEqualTo(DeliverOrderAddedProduct.SOURCE,4);
+           masterDeliverOrderAddedProductMapper.deleteByExample(example);
+           for (String addedProductId : addedProductIdList) {
+               StorefrontProduct product = iMasterStorefrontProductMapper.selectByPrimaryKey(addedProductId);
+               DeliverOrderAddedProduct deliverOrderAddedProduct1 = new DeliverOrderAddedProduct();
+               deliverOrderAddedProduct1.setAnyOrderId(shoppingCartId);
+               deliverOrderAddedProduct1.setAddedProductId(addedProductId);
+               deliverOrderAddedProduct1.setPrice(product.getSellPrice());
+               deliverOrderAddedProduct1.setProductName(product.getProductName());
+               deliverOrderAddedProduct1.setSource("4");
+               masterDeliverOrderAddedProductMapper.insert(deliverOrderAddedProduct1);
+           }
+       }
+   }
 }
