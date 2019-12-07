@@ -60,7 +60,7 @@ public class GoodsStorefrontProductService {
             storefront.setStorefrontAddress("当家"+cityName+"总部地址");
             storefront.setStorefrontDesc("当家装修定义了统一的人工标准，由符合要求的工匠提供服务，请放心选购");
             storefront.setStorefrontLogo("");//店铺logo暂无
-            storefront.setIfDjselfManage(1);
+            storefront.setIfDjselfManage("1");
             storefront.setStorefrontType("worker");
             String systemlogo = configUtil.getValue(SysConfig.ORDER_DANGJIA_ICON, String.class);
             storefront.setSystemLogo(systemlogo);
