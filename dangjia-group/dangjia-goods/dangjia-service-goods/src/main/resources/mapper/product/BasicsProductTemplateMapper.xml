@@ -40,7 +40,7 @@
         worker_dec as workerDec,
         worker_standard as workerStandard,
         worker_type_id as workerTypeId,
-        last_price as adjustedPrice,
+        adjusted_price as adjustedPrice,
         modity_price_time as modityPriceTime,
         technology_ids as technologyIds,
         considerations,
