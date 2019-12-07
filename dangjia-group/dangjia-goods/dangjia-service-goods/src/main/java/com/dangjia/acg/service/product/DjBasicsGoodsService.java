@@ -107,6 +107,7 @@ public class DjBasicsGoodsService {
 
             BasicsGoods goods = getBasicsGoods(new BasicsGoods(),basicsGoodsDTO);
             goods.setCityId(cityId);
+            goods.setCreateDate(new Date());
             iBasicsGoodsMapper.insert(goods);
             return ServerResponse.createBySuccess("新增成功", goods.getId());
         } catch (Exception e) {
