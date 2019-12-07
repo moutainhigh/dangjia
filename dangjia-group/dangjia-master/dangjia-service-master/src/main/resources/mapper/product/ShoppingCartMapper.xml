@@ -87,8 +87,8 @@
 		INNER JOIN dj_basics_unit e ON c.convert_unit = e.id
 		WHERE
 		d.type &lt; 4
-		<if test="null!=productIds and productIds.size>0">
-			AND b.product_id in
+		<if test="productIds!=null or productIds!=''">
+			AND b.id in
 			<foreach collection="productIds" index="index" item="item" open="(" separator="," close=")">
 				#{item}
 			</foreach>

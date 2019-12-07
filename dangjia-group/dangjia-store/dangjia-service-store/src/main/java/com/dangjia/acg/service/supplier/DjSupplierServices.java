@@ -141,7 +141,7 @@ public class DjSupplierServices {
         if(null==djSupplier){
             djSupplier=new DjSupplier();
             MainUser mainUser = iStoreUserMapper.selectByPrimaryKey(userId);
-            djSupplier.setName(mainUser.getUsername());
+            djSupplier.setCheckPeople(mainUser.getUsername());
             djSupplier.setTelephone(mainUser.getMobile());
         }
         return ServerResponse.createBySuccess("查询成功", djSupplier);
