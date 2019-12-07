@@ -633,6 +633,9 @@ public class PaymentService {
 
             Order orderNew = orderMapper.getStorefontOrder(queryShopGood.getShopId(),order.getId());
             if(queryShopGoods.size()>1){
+                if(orderNew==null) {
+                    orderNew = new Order();
+                }
                 orderNew.setHouseId(order.getHouseId());
                 orderNew.setCityId(order.getCityId());
                 orderNew.setStorefontId(queryShopGood.getShopId());
@@ -652,6 +655,7 @@ public class PaymentService {
                 orderNew.setCreateBy(order.getCreateBy());
                 orderMapper.insert(orderNew);
             }else {
+                orderNew=order;
                 orderNew.setStorefontId(queryShopGood.getShopId());
                 orderNew.setParentOrderId(order.getId());
             }
@@ -962,9 +966,7 @@ public class PaymentService {
             for (BudgetLabelGoodsDTO budgetLabelGoodsDTO : budgetLabelGoodsDTOS) {
                 boolean flag = Arrays.asList(array).contains(budgetLabelGoodsDTO.getCategoryId());
                 if(flag){
-                    if(budgetLabelGoodsDTO.getDeleteState()!=2) {
-                        totalZPrice = totalZPrice.add(budgetLabelGoodsDTO.getTotalPrice());
-                    }
+                    totalZPrice = totalZPrice.add(budgetLabelGoodsDTO.getTotalPrice());
                     if(!CommonUtil.isEmpty(budgetLabelGoodsDTO.getGoodsId())){
                         Brand brand =null;
                         BasicsGoods goods=iMasterBasicsGoodsMapper.selectByPrimaryKey(budgetLabelGoodsDTO.getGoodsId());
@@ -1025,6 +1027,7 @@ public class PaymentService {
                 BigDecimal totalMaterialPrice = new BigDecimal(0);//组总价
                 for (ShoppingCartListDTO shoppingCartListDTO : shoppingCartDTO.getShoppingCartListDTOS()) {
                     ShoppingCartListDTO parmDTO=productMap.get(shoppingCartListDTO.getProductId());
+                    shoppingCartListDTO.setShopCount(parmDTO.getShopCount());
                     BigDecimal totalPrice = new BigDecimal(shoppingCartListDTO.getPrice()*parmDTO.getShopCount());
                     if(shoppingCartListDTO.getProductType()==0) {
                         totalMaterialPrice = totalMaterialPrice.add(totalPrice);
@@ -1172,7 +1175,7 @@ public class PaymentService {
                 example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, member.getId())
                         .andIn(ShoppingCart.PRODUCT_ID,Arrays.asList(productIds));
                 iShoppingCartMapper.deleteByExample(example);
-                return ServerResponse.createBySuccess("提交成功", order.getId());
+                return ServerResponse.createBySuccess("提交成功", businessOrder.getNumber());
             }
             return ServerResponse.createBySuccess("提交成功");
         } catch (Exception e) {
@@ -1358,7 +1361,77 @@ public class PaymentService {
                         workerTypeSafeOrderMapper.insert(workerTypeSafeOrder);
                     }
                 }
-                return ServerResponse.createBySuccess("提交成功", order.getId());
+                if (order.getOrderSource() == 1) {//支付
+                    /*
+                     * 生成工匠订单
+                     */
+                    HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(house.getId(), order.getWorkerTypeId());
+                    if (hwo == null) {
+                        hwo = new HouseWorkerOrder(true);
+                        hwo.setHouseId(order.getHouseId());
+                        hwo.setWorkerTypeId(order.getWorkerTypeId());
+                        hwo.setWorkerType(wt.getType());
+                        hwo.setBusinessOrderNumber(businessOrder.getNumber());//业务订单号
+                        houseWorkerOrderMapper.insert(hwo);
+                    } else {
+                        hwo.setHouseId(order.getHouseId());
+                        hwo.setWorkerTypeId(order.getWorkerTypeId());
+                        hwo.setWorkerType(wt.getType());
+                        hwo.setBusinessOrderNumber(businessOrder.getNumber());//业务订单号
+                        houseWorkerOrderMapper.updateByPrimaryKey(hwo);
+                    }
+                    Double workerPrice = 0d;//精算工钱
+                    Double caiPrice =0d;//精算材料钱
+                    Double serPrice = 0d;//精算包工包料钱
+
+                    for (ShopGoodsDTO budgetLabelDTO : budgetLabelDTOS) {
+                        for (BudgetLabelDTO labelDTO : budgetLabelDTO.getLabelDTOS()) {
+                            for (BudgetLabelGoodsDTO good : labelDTO.getGoods()) {
+                                if(good.getProductType()==0){//材料
+                                    caiPrice+=good.getTotalPrice().doubleValue();
+                                }
+                                if(good.getProductType()==1){//包工包料
+                                    serPrice+=good.getTotalPrice().doubleValue();
+                                }
+                                if(good.getProductType()==2){//人工
+                                    workerPrice+=good.getTotalPrice().doubleValue();
+                                }
+                            }
+                        }
+                    }
+                    hwo.setWorkPrice(new BigDecimal(workerPrice));//工钱
+                    hwo.setMaterialPrice(new BigDecimal(caiPrice + serPrice));//材料钱
+                    hwo.setTotalPrice(paymentPrice);//工钱+拆料
+                    houseWorkerOrderMapper.updateByPrimaryKey(hwo);
+                    if (order.getOrderSource() == 1 && wt.getType() > 2) {//精算师和设计师不存在保险订单
+                        //查出有没有生成保险订单
+                        example = new Example(WorkerTypeSafeOrder.class);
+                        example.createCriteria().andEqualTo(WorkerTypeSafeOrder.HOUSE_ID, house.getId()).andEqualTo(WorkerTypeSafeOrder.WORKER_TYPE_ID, wt.getId()).andEqualTo(WorkerTypeSafeOrder.DATA_STATUS, 0);
+                        List<WorkerTypeSafeOrder> wtsoList = workerTypeSafeOrderMapper.selectByExample(example);
+                        if (wtsoList.size() == 1) {
+                            workerTypeSafeOrder = wtsoList.get(0);
+                            workerTypeSafeOrder.setBusinessOrderNumber(businessOrder.getNumber());
+                            //保存业务订单号
+                            workerTypeSafeOrderMapper.updateByPrimaryKey(workerTypeSafeOrder);
+                            UpgradeSafeDTO upgradeSafeDTO = new UpgradeSafeDTO();//保险服务
+                            upgradeSafeDTO.setTitle("保险服务");
+                            upgradeSafeDTO.setType(0);//单选
+                            WorkerTypeSafe wts = workerTypeSafeMapper.selectByPrimaryKey(workerTypeSafeOrder.getWorkerTypeSafeId());
+                            List<SafeTypeDTO> safeTypeDTOList = new ArrayList<>();
+                            SafeTypeDTO safeTypeDTO = new SafeTypeDTO();
+                            safeTypeDTO.setName(wts.getName());
+                            BigDecimal price = wts.getPrice().multiply(house.getSquare());
+                            safeTypeDTO.setPrice("¥" + String.format("%.2f", price.doubleValue()));
+                            safeTypeDTO.setSelected(1);//勾
+                            safeTypeDTOList.add(safeTypeDTO);
+                            upgradeSafeDTO.setSafeTypeDTOList(safeTypeDTOList);
+                            paymentPrice = paymentPrice.add(wts.getPrice().multiply(house.getSquare()));//钱加上
+                        } else if (wtsoList.size() > 1) {
+                            return ServerResponse.createByErrorMessage("保险订单错误,联系平台部");
+                        }
+                    }
+                }
+                return ServerResponse.createBySuccess("提交成功", businessOrder.getNumber());
             }
             return ServerResponse.createBySuccess("提交成功");
         } catch (Exception e) {
