@@ -104,7 +104,7 @@
         <result property="brandId" column="brandId"/>
         <result property="isCalculatedArea" column="isCalculatedArea"/>
         <result property="categoryId" column="categoryId"/>
-        <result property="goodsType" column="goodsType"/>
+        <result property="productType" column="productType"/>
         <result property="convertQuality" column="convertQuality"/>
         <result property="convertUnit" column="convertUnit"/>
         <result property="goodsBuy" column="goodsBuy"/>
@@ -141,7 +141,7 @@
             t4.brand_id brandId,
             t1.is_calculated_area isCalculatedArea,
             t4.category_id categoryId,
-            t4.type goodsType,
+            t4.type productType,
             t4.buy goodsBuy,
             t3.convert_quality convertQuality,
             t3.convert_unit convertUnit

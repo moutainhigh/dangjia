@@ -14,14 +14,13 @@ import com.dangjia.acg.mapper.core.IHouseFlowApplyImageMapper;
 import com.dangjia.acg.mapper.design.IQuantityRoomImagesMapper;
 import com.dangjia.acg.mapper.house.IWebsiteVisitMapper;
 import com.dangjia.acg.mapper.member.IMemberCollectMapper;
-import com.dangjia.acg.modle.design.QuantityRoom;
-import com.dangjia.acg.modle.design.QuantityRoomImages;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.WebsiteVisit;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberCollect;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.other.IndexPageService;
+import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -74,7 +73,8 @@ public class MemberCollectService {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());//初始化分页插获取用户信息件
             List<MemberCollectDTO> memberCollectDTOS = storefrontProductAPI.queryCollectGood(member.getId());
             memberCollectDTOS.forEach(memberCollectDTO -> {
-                memberCollectDTO.setImage(imageAddress + memberCollectDTO.getImage());
+                memberCollectDTO.setImageUrl(StringTool.getImage(memberCollectDTO.getImage(),imageAddress));//图多张
+                memberCollectDTO.setImageSingle(StringTool.getImageSingle(memberCollectDTO.getImage(),imageAddress));//图一张
                 //当前时间小于调价的时间时则展示调价预告信息
                 if (memberCollectDTO.getAdjustedPrice() == null
                         || memberCollectDTO.getModityPriceTime() == null
@@ -265,7 +265,8 @@ public class MemberCollectService {
         if (websiteVisits.size() <= 0) {
             List<ActuarialProductAppDTO> djBasicsProductTemplates = iMemberCollectMapper.queryRandomProduct(12, cityId);
             djBasicsProductTemplates.forEach(djBasicsProductTemplate -> {
-                djBasicsProductTemplate.setImage(imageAddress + djBasicsProductTemplate.getImage());
+                djBasicsProductTemplate.setImageUrl(StringTool.getImage(djBasicsProductTemplate.getImage(),imageAddress));//图多张
+                djBasicsProductTemplate.setImageSingle(StringTool.getImageSingle(djBasicsProductTemplate.getImage(),imageAddress));//图一张
             });
             return ServerResponse.createBySuccess("查询成功", djBasicsProductTemplates);
         } else {
@@ -273,7 +274,6 @@ public class MemberCollectService {
             for (int i = 0; i < websiteVisits.size(); i++) {
                 if (!CommonUtil.isEmpty(websiteVisits.get(i).getRoute())) {
                     String[] split = websiteVisits.get(i).getRoute().split(",");
-                    System.out.println(split[1] + (12 - djBasicsProductTemplates.size()));
                     List<ActuarialProductAppDTO> djBasicsProductTemplates1 = iMemberCollectMapper.queryRandomProductByCategoryId(split[1], 12 - djBasicsProductTemplates.size());
                     djBasicsProductTemplates.addAll(djBasicsProductTemplates1);
                     if (djBasicsProductTemplates.size() == 12) {
@@ -285,7 +285,8 @@ public class MemberCollectService {
                 djBasicsProductTemplates.addAll(iMemberCollectMapper.queryRandomProduct(12 - djBasicsProductTemplates.size(), cityId));
             }
             djBasicsProductTemplates.forEach(djBasicsProductTemplate -> {
-                djBasicsProductTemplate.setImage(imageAddress + djBasicsProductTemplate.getImage());
+                djBasicsProductTemplate.setImageUrl(StringTool.getImage(djBasicsProductTemplate.getImage(),imageAddress));//图多张
+                djBasicsProductTemplate.setImageSingle(StringTool.getImageSingle(djBasicsProductTemplate.getImage(),imageAddress));//图一张
             });
             return ServerResponse.createBySuccess("查询成功", djBasicsProductTemplates);
         }
