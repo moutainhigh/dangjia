@@ -85,4 +85,6 @@ public class StorefrontListDTO {
 
     private String  systemLogo;
 
+    private String storefrontLogoUrl;
+
 }
