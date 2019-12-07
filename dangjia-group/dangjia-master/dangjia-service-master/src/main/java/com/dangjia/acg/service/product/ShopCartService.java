@@ -45,7 +45,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 /**
@@ -545,13 +544,14 @@ public class ShopCartService {
                 example.createCriteria().andEqualTo(DeliverOrderAddedProduct.ANY_ORDER_ID,orderItem.getId())
                         .andEqualTo(DeliverOrderAddedProduct.DATA_STATUS,0);
                 List<DeliverOrderAddedProduct> deliverOrderAddedProducts = masterDeliverOrderAddedProductMapper.selectByExample(example);
-                List<String> addedProductIds=deliverOrderAddedProducts
-                        .stream()
-                        .map(DeliverOrderAddedProduct::getAddedProductId)
-                        .collect(Collectors.toList());
+                List<String> addedProductIds=new ArrayList<>();
+                for (DeliverOrderAddedProduct deliverOrderAddedProduct : deliverOrderAddedProducts) {
+                    addedProductIds.add(deliverOrderAddedProduct.getAddedProductId());
+                }
                 if(addedProductIds.size()>0) {
                     setAddedProduct(shoppingCartid,addedProductIds.toString());
                 }
+
             }
             return ServerResponse.createBySuccessMessage("加入购物车成功");
         } catch (Exception e) {

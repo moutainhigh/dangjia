@@ -291,16 +291,18 @@ public class StorefrontProductService {
                 storefrontProduct.setAdjustedPrice(Double.parseDouble(adjustedPrice));
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                 storefrontProduct.setModityPriceTime(sdf.parse(modityPriceTime));
+                storefrontProduct.setCreateDate(null);
                 istorefrontProductMapper.updateByPrimaryKeySelective(storefrontProduct);
                 //如果修改价格时间等当前日期，就及时修改是价格
                 SimpleDateFormat formatdate = new SimpleDateFormat("yyyy-MM-dd");//设置日期格式 2019-12-05 20:56:40
                 if(formatdate.format(formatdate.parse(modityPriceTime)).equals(formatdate.format(new Date())))//获取当前系统时间
                 {
+                    StorefrontProduct spt=istorefrontProductMapper.selectByPrimaryKey(id);
                     //修改调价
-                    StorefrontProduct sp=new StorefrontProduct();
-                    sp.setId(id);
-                    sp.setSellPrice(Double.parseDouble(adjustedPrice));
-                    istorefrontProductMapper.updateByPrimaryKeySelective(sp);
+                    spt.setSellPrice(Double.parseDouble(adjustedPrice));
+                    spt.setAdjustedPrice(0d);
+                    spt.setModityPriceTime(null);
+                    istorefrontProductMapper.updateByPrimaryKey(spt);
                 }
                 //增加调价流水
                 DjAdjustRecord djAdjustRecord = new DjAdjustRecord();
@@ -649,6 +651,9 @@ public class StorefrontProductService {
                     StorefrontProduct sp=new StorefrontProduct();
                     sp.setId(id);
                     sp.setSellPrice(adjustedPrice);
+                    sp.setAdjustedPrice(0d);
+                    sp.setModityPriceTime(null);
+                    sp.setCreateDate(null);
                     istorefrontProductMapper.updateByPrimaryKeySelective(sp);
                 }
             });

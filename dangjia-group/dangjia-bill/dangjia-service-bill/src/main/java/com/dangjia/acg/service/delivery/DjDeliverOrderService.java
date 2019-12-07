@@ -1636,18 +1636,6 @@ public class DjDeliverOrderService {
                 List<String> result = Arrays.asList(splitItem.getImage().split(","));
                 map.put("image", address + result.get(0));
                 map.put("isDeliveryInstall", splitItem.getIsDeliveryInstall());
-                map.put("storefrontId",splitItem.getStorefrontId());//店铺Id
-
-                Integer sales = iBillDjDeliverOrderMapper.querySales(splitItem.getId());
-                //该商品为 可退货 + 是预约发货 才能退货
-                if(sales != null && sales == 0 && splitItem.getIsReservationDeliver() == 0){
-                    //flag 等于 true  可退货
-                    map.put("flag","true");
-                }else{
-                    //flag 等于 false  不可退货
-                    map.put("flag","false");
-                }
-
                 list.add(map);
             }
         }
@@ -1656,9 +1644,7 @@ public class DjDeliverOrderService {
         mapArr.put("storefrontIcon", address + storefront.getSystemLogo());//店铺图标
         mapArr.put("storefrontName", storefront.getStorefrontName());//店铺名称
         mapArr.put("storefrontType", storefront.getStorefrontType());//店铺类型（实物商品：product，人工商品：worker)
-        mapArr.put("storefrontId", storefront.getId());//店铺Id
         mapArr.put("mobile", storefront.getMobile());//店铺电话
-        mapArr.put("id", splitDeliver.getId());//发货单id
         mapArr.put("appointmentDTOS", list);//商品详情
         List<Map<String, Object>> listArr = new ArrayList<>();
         listArr.add(mapArr);

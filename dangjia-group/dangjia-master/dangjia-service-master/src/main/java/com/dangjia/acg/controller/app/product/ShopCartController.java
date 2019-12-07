@@ -52,8 +52,6 @@ public class ShopCartController implements ShopCartAPI {
      * @param productId
      * @return 0=直接通过,无提示； 1=有房无精算(业主无房时)   2=有房有精算(业主无房无精算时) 3=有房有精算(业主有房无精算时)   4=有房有精算(业主有房无精算时)  5=人工商品
      */
-    @Override
-    @ApiMethod
     public ServerResponse checkCart(String userToken, String productId){
         return shopCartservice.checkCart(userToken,productId);
     }

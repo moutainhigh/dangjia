@@ -39,7 +39,9 @@
             a.`data_status` AS dataStatus,
             if(b.application_status is not null and b.application_status!="",b.application_status,-1) AS applicationStatus,
             b.fail_reason AS failReason,
-            b.contract
+            b.contract,
+            a.freight,
+            a.below_unit_price
         FROM
           dj_basics_storefront a
         LEFT JOIN (SELECT * FROM dj_sup_application WHERE sup_id = #{supId})b
@@ -96,7 +98,9 @@
             a.`data_status` AS dataStatus,
             b.application_status  AS applicationStatus,
             b.fail_reason AS failReason,
-            b.contract
+            b.contract,
+            a.freight,
+            a.below_unit_price
         FROM
             dj_basics_storefront a
         LEFT JOIN (SELECT * FROM dj_sup_application WHERE sup_id = #{supId}) b

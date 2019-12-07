@@ -46,8 +46,8 @@ public class DeliverOrderAddedProduct extends BaseEntity {
     private Double price;
 
     @Column(name = "source")
-    @Desc(value = "数据来源（1订单详情ID，2发货单详情ID，3退货单详情ID,4购物车ID，5精算ID，6其它）")
-    @ApiModelProperty("数据来源（1订单详情ID，2发货单详情ID，3退货单详情ID,4购物车ID，5精算ID，6其它）")
+    @Desc(value = "数据来源（1订单详情ID，2发货单详情ID，3退货单详情ID,4购物车ID，5其它）")
+    @ApiModelProperty("数据来源（1订单详情ID，2发货单详情ID，3退货单详情ID,4购物车ID，5其它）")
     private String source;
 
 }

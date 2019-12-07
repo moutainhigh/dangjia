@@ -732,7 +732,7 @@
             t.product_name productName,
             t.product_sn productSn,
             t.product_type productType,
-            t1.sell_price price,
+            t2.price price,
             t.order_id as orderId,
             IFNULL(t.image,t1.image) image,
             t.shop_count shopCount,
@@ -979,7 +979,7 @@
             t.product_name productName,
             t.product_sn productSn,
             t.product_type productType,
-            t1.sell_price price,
+            t.price price,
             t.order_id as orderId,
             IFNULL(t.image,t1.image) image,
             t.shop_count shopCount,
@@ -1003,14 +1003,5 @@
         ORDER BY t.create_date
     </select>
 
-
-    <select id="querySales" resultType="java.lang.Integer">
-        select dg.sales from
-        dj_deliver_order_split_item dosi
-        INNER JOIN dj_basics_storefront_product bsp on dosi.product_id =  bsp.id
-        INNER JOIN dj_basics_product_template bpt on bsp.prod_template_id = bpt.id
-        INNER JOIN dj_basics_goods dg on bpt.goods_id = dg.id
-        where dosi.id = #{id}
-    </select>
 
 </mapper>

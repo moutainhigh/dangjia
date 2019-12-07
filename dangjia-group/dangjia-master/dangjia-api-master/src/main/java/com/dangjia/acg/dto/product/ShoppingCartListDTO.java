@@ -76,9 +76,7 @@ public class ShoppingCartListDTO {
      */
     private Date modityPriceTime;
 
-    //增值商品集合(逗号分隔)
-    private String addedProductIds;
     //增值商品集合
-    private  List<DeliverOrderAddedProduct> addedProducts;
+    List<DeliverOrderAddedProduct> addedProducts;
 
 }
