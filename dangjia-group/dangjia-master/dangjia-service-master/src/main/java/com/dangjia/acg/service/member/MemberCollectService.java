@@ -77,14 +77,16 @@ public class MemberCollectService {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
             //组装新list
-            List<MemberCollectDTO> memberCollectDTOList = new ArrayList<MemberCollectDTO>();
+            List<MemberCollectDTO> memberCollectDTOList = new ArrayList<>();
             memberCollectList.forEach(memberCollect -> {
                 List<MemberCollectDTO> memberCollectDTOS = storefrontProductAPI.queryCollectGood(memberCollect.getCollectId());
                 memberCollectDTOS.forEach(memberCollectDTO -> {
                     memberCollectDTO.setId(memberCollect.getId());
                     memberCollectDTO.setImage(imageAddress + memberCollectDTO.getImage());
                     //当前时间小于调价的时间时则展示调价预告信息
-                    if(memberCollectDTO.getAdjustedPrice() == null || memberCollectDTO.getModityPriceTime().getTime()<(new Date()).getTime()) {
+                    if (memberCollectDTO.getAdjustedPrice() == null
+                            || memberCollectDTO.getModityPriceTime() == null
+                            || memberCollectDTO.getModityPriceTime().getTime() < (new Date()).getTime()) {
                         memberCollectDTO.setAdjustedPrice(null);
                         memberCollectDTO.setModityPriceTime(null);
                     }
