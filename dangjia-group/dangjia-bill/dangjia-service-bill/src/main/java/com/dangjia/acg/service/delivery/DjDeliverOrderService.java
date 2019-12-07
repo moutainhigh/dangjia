@@ -1253,8 +1253,8 @@ public class DjDeliverOrderService {
                     if (djSplitDeliverOrderDTO.getShippingState().equals("1") || djSplitDeliverOrderDTO.getShippingState().equals("7")) {
                         //shippingState 等于 1或者7   shippingType 收货订单 为待收货 待收货
                         djSplitDeliverOrderDTO.setShippingType("10");
-                    } else if (djSplitDeliverOrderDTO.getShippingState().equals("8")||
-                            djSplitDeliverOrderDTO.getShippingState().equals("2")||djSplitDeliverOrderDTO.getShippingState().equals("5"
+                    } else if (djSplitDeliverOrderDTO.getShippingState().equals("8") ||
+                            djSplitDeliverOrderDTO.getShippingState().equals("2") || djSplitDeliverOrderDTO.getShippingState().equals("5"
                     )) {
                         //shippingState 为 8   shippingType 11 为已完成
                         djSplitDeliverOrderDTO.setShippingType("11");
@@ -1283,8 +1283,8 @@ public class DjDeliverOrderService {
                     }
                 }
             }
-            if(list.size()<=0){
-                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
+            if (list.size() <= 0) {
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
             PageInfo pageResult = new PageInfo(list);
             return ServerResponse.createBySuccess("查询所有订单", pageResult);
@@ -1559,6 +1559,7 @@ public class DjDeliverOrderService {
 
     /**
      * app订单详情查询（待收货，待安装，已完成）
+     *
      * @param id
      * @return
      */
@@ -1636,6 +1637,18 @@ public class DjDeliverOrderService {
                 List<String> result = Arrays.asList(splitItem.getImage().split(","));
                 map.put("image", address + result.get(0));
                 map.put("isDeliveryInstall", splitItem.getIsDeliveryInstall());
+                map.put("storefrontId", splitItem.getStorefrontId());//店铺Id
+
+                Integer sales = iBillDjDeliverOrderMapper.querySales(splitItem.getId());
+                //该商品为 可退货 + 是预约发货 才能退货
+                if (sales != null && sales == 0 && splitItem.getIsReservationDeliver() == 0) {
+                    //flag 等于 true  可退货
+                    map.put("flag", "true");
+                } else {
+                    //flag 等于 false  不可退货
+                    map.put("flag", "false");
+                }
+
                 list.add(map);
             }
         }
@@ -1644,12 +1657,14 @@ public class DjDeliverOrderService {
         mapArr.put("storefrontIcon", address + storefront.getSystemLogo());//店铺图标
         mapArr.put("storefrontName", storefront.getStorefrontName());//店铺名称
         mapArr.put("storefrontType", storefront.getStorefrontType());//店铺类型（实物商品：product，人工商品：worker)
+        mapArr.put("storefrontId", storefront.getId());//店铺Id
         mapArr.put("mobile", storefront.getMobile());//店铺电话
+        mapArr.put("id", splitDeliver.getId());//发货单id
         mapArr.put("appointmentDTOS", list);//商品详情
         List<Map<String, Object>> listArr = new ArrayList<>();
         listArr.add(mapArr);
-        if(listArr.size()<=0){
-            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
+        if (listArr.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
 
         //查询购物车数量
@@ -1664,6 +1679,7 @@ public class DjDeliverOrderService {
 
     /**
      * app订单详情查询（待收货- 人工）
+     *
      * @param id
      * @return
      */
@@ -1791,7 +1807,7 @@ public class DjDeliverOrderService {
                     orderStorefrontDTO.setProductCount(appointmentDTOS.size());
                     orderStorefrontDTO.setProductImageArr(getStartTwoImage(appointmentDTOS, imageAddress));
                     orderStorefrontDTO.setStorefrontIcon(imageAddress + orderStorefrontDTO.getStorefrontIcon());
-                    if (appointmentDTOS.size()>0) {
+                    if (appointmentDTOS.size() > 0) {
                         AppointmentDTO appointmentDTO = appointmentDTOS.get(0);
                         orderStorefrontDTO.setProductName(appointmentDTO.getProductName());
                     }
@@ -1803,7 +1819,7 @@ public class DjDeliverOrderService {
                     orderStorefrontDTO.setProductCount(appointmentDTOS.size());
                     orderStorefrontDTO.setProductImageArr(getStartTwoImage(appointmentDTOS, imageAddress));
                     orderStorefrontDTO.setStorefrontIcon(imageAddress + orderStorefrontDTO.getStorefrontIcon());
-                    if (appointmentDTOS.size()>0) {
+                    if (appointmentDTOS.size() > 0) {
                         AppointmentDTO appointmentDTO = appointmentDTOS.get(0);
                         orderStorefrontDTO.setProductName(appointmentDTO.getProductName());
                     }
@@ -1881,17 +1897,18 @@ public class DjDeliverOrderService {
 
     /**
      * 待收货列表-确认收货
+     *
      * @param id
      * @return
      */
     public ServerResponse setConfirmReceipt(String id) {
         try {
-            SplitDeliver splitDeliver=new SplitDeliver();
+            SplitDeliver splitDeliver = new SplitDeliver();
             splitDeliver.setId(id);
             splitDeliver.setShippingState(2);
             billDjDeliverSplitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
-            Example example=new Example(OrderSplitItem.class);
-            example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID,id);
+            Example example = new Example(OrderSplitItem.class);
+            example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID, id);
             List<OrderSplitItem> orderSplitItems = billDjDeliverOrderSplitItemMapper.selectByExample(example);
             orderSplitItems.forEach(orderSplitItem -> {
                 orderSplitItem.setReceive(orderSplitItem.getNum());

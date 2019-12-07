@@ -62,6 +62,7 @@ public class ShoppingCartListDTO {
     private Integer unitType;//单位数值类型 1=整数单位，2=小数单位
 
     private String valueNameArr;
+    private String valueIdArr;
     private String storefrontId;
 
 
