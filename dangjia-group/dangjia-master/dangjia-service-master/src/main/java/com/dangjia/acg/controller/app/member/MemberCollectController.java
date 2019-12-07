@@ -30,7 +30,7 @@ public class MemberCollectController implements MemberCollectAPI {
     @Override
     @ApiMethod
     public ServerResponse queryCollectGood(HttpServletRequest request, String userToken, PageDTO pageDTO) {
-        return memberCollectService.queryCollectGood(request, userToken, pageDTO);
+        return memberCollectService.queryCollectGood(userToken, pageDTO);
     }
 
     @Override

@@ -68,8 +68,8 @@ public class WorkerGoodsDTO {
     @ApiModelProperty(" 是否置顶 0=正常  1=置顶")
     private String istop;
 
-    private Double lastPrice;
-    private Date lastTime;
+    private Double adjustedPrice;
+    private Date modityPriceTime;
     private String technologyIds;
     private String considerations;
     private String calculateContent;
