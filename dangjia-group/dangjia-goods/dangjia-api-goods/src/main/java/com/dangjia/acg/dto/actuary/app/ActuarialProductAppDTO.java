@@ -167,10 +167,10 @@ public class ActuarialProductAppDTO {
     private String otherName;
 
     @ApiModelProperty("调后单价")
-    private Double LastPrice;
+    private Double adjustedPrice;
 
     @ApiModelProperty("调价时间")
-    private Date LastTime;
+    private Date modityPriceTime;
 
     @ApiModelProperty("注意事项")
     private String considerations;

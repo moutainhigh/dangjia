@@ -458,8 +458,8 @@ public class AppActuaryOperationService {
             if (product.getAdjustedPrice() != null
                     && product.getModityPriceTime() != null
                     && product.getModityPriceTime().getTime() > (new Date()).getTime()) {
-                goodsDTO.setLastPrice(product.getAdjustedPrice());
-                goodsDTO.setLastTime(product.getModityPriceTime());
+                goodsDTO.setAdjustedPrice(product.getAdjustedPrice());
+                goodsDTO.setModityPriceTime(product.getModityPriceTime());
             }
             //查询单位
             String unitId = goodsDTO.getUnit();
@@ -481,8 +481,8 @@ public class AppActuaryOperationService {
             goodsDTO.setOtherName(productTemplate.getOtherName());
             goodsDTO.setWorkExplain(productTemplate.getWorkExplain());
             goodsDTO.setWorkerStandard(productTemplate.getWorkerStandard());
-            goodsDTO.setLastPrice(productTemplate.getLastPrice());
-            goodsDTO.setLastTime(productTemplate.getLastTime());
+            goodsDTO.setAdjustedPrice(productTemplate.getAdjustedPrice());
+            goodsDTO.setModityPriceTime(productTemplate.getModityPriceTime());
             goodsDTO.setTechnologyIds(productTemplate.getTechnologyIds());
             goodsDTO.setConsiderations(productTemplate.getConsiderations());
             goodsDTO.setCalculateContent(productTemplate.getCalculateContent());

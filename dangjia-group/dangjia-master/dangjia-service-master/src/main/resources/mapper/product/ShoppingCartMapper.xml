@@ -54,7 +54,6 @@
 			<result  column="image" property="image"/>
 			<result  column="sellPrice" property="sellPrice"/>
 			<result  column="isReservationDeliver" property="isReservationDeliver"/>
-			<result  column="type" property="type"/>
 			<result  column="valueNameArr" property="valueNameArr"/>
 			<result  column="unitType" property="unitType"/>
 		</collection>
@@ -76,7 +75,6 @@
 			b.image,
 			b.sell_price AS sellPrice,
 			d.is_reservation_deliver AS isReservationDeliver,
-			e.type,
 			c.value_name_arr AS valueNameArr,
 			e.type AS unitType
 		FROM

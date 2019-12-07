@@ -86,9 +86,9 @@ public class BasicsProductDTO extends GoodsBaseEntity {
     private String workerStandard;//工艺标准
 
 
-    private Double lastPrice; //调后单价
+    private Double adjustedPrice; //调后单价
 
-    private Date lastTime; //调价时间
+    private Date modityPriceTime; //调价时间
 
     private String technologyIds; //关联的工艺ID，多个逗号分割
 

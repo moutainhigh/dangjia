@@ -194,15 +194,15 @@ public class DjBasicsProductTemplate extends GoodsBaseEntity {
 
 
 
-    @Column(name = "last_price")
+    @Column(name = "adjusted_price")
     @Desc(value = "调后单价")
     @ApiModelProperty("调后单价")
-    private Double LastPrice;//调后单价
+    private Double adjustedPrice;//调后单价
 
-    @Column(name = "last_time")
+    @Column(name = "modity_price_time")
     @Desc(value = "调价时间")
     @ApiModelProperty("调价时间")
-    private Date LastTime;//调价时间
+    private Date modityPriceTime;//调价时间
 
     @Column(name = "technology_ids")
     @Desc(value = "关联的工艺ID")

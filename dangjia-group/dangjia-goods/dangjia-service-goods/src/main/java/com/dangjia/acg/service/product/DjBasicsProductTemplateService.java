@@ -322,8 +322,8 @@ public class DjBasicsProductTemplateService {
         product.setWorkerDec(basicsProductDTO.getWorkerDec());
         product.setWorkerStandard(basicsProductDTO.getWorkerStandard());
         product.setWorkerTypeId(basicsProductDTO.getWorkerTypeId());
-        product.setLastPrice(basicsProductDTO.getLastPrice());
-        product.setLastTime(basicsProductDTO.getLastTime());
+        product.setAdjustedPrice(basicsProductDTO.getAdjustedPrice());
+        product.setModityPriceTime(basicsProductDTO.getModityPriceTime());
         product.setTechnologyIds(basicsProductDTO.getTechnologyIds());
         product.setConsiderations(basicsProductDTO.getConsiderations());
         product.setCalculateContent(basicsProductDTO.getCalculateContent());
