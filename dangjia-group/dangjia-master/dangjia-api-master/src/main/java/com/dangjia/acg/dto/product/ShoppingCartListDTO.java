@@ -58,7 +58,6 @@ public class ShoppingCartListDTO {
     private String isReservationDeliver;//是否业主预约发货(1是，0否)
     private Double sellPrice;
 
-    private Integer type;//单位数值类型 1=整数单位，2=小数单位（后期取消用这个字段，先告知前端：qyx留）
     private Integer unitType;//单位数值类型 1=整数单位，2=小数单位
 
     private String valueNameArr;

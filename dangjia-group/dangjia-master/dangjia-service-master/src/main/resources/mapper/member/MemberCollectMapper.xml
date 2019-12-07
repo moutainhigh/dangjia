@@ -104,5 +104,26 @@
         ORDER BY RAND() LIMIT #{limit}
     </select>
 
+    <select id="queryCollectGood" resultType="com.dangjia.acg.dto.product.MemberCollectDTO">
+        SELECT
+            mc.id,
+            bsp.id as productId,
+            bsp.product_name as productName,
+            bsp.sell_price as sellPrice,
+            bsp.image as image,
+            bpt.unit_name,
+            bsp.adjusted_price as adjustedPrice,
+            bsp.modity_price_time as modityPriceTime
+        FROM
+            dj_member_collect mc,
+            dj_basics_storefront_product bsp,
+            dj_basics_product_template bpt
+        WHERE
+            mc.collect_id = bsp.id
+        AND bsp.prod_template_id = bpt.id
+        AND mc.condition_type = 1
+        AND mc.member_id=#{memberId}
+    </select>
+
 </mapper>
 

@@ -840,6 +840,13 @@ public class StorefrontService {
             if(mainUser==null){
                 return ServerResponse.createByErrorMessage("此电话用户在系统不存在，请核实!");
             }
+            example=new Example(Storefront.class);
+            example.createCriteria().andEqualTo(Storefront.USER_ID,mainUser.getId())
+            .andEqualTo(Storefront.CITY_ID,storefrontDTO.getCityId());
+            Storefront st= istorefrontMapper.selectOneByExample(example);
+            if(st!=null&&!"worker".equals(st.getStorefrontType())){
+                return ServerResponse.createByErrorMessage("此电话用户下已有其他店铺信息在维护，请核实!");
+            }
             Storefront storefront=istorefrontMapper.selectShopStoreByTypeCityId(storefrontDTO.getCityId(),"worker");
             if(storefront==null|| StringUtils.isBlank(storefront.getId())) {
                 storefront = new Storefront();
