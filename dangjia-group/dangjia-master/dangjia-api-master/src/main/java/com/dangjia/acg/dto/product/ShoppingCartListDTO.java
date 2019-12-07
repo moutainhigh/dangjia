@@ -62,7 +62,6 @@ public class ShoppingCartListDTO {
     private Integer unitType;//单位数值类型 1=整数单位，2=小数单位
 
     private String valueNameArr;
-    private String valueIdArr;
     private String storefrontId;
 
 
@@ -77,7 +76,9 @@ public class ShoppingCartListDTO {
      */
     private Date modityPriceTime;
 
+    //增值商品集合(逗号分隔)
+    private String addedProductIds;
     //增值商品集合
-    List<DeliverOrderAddedProduct> addedProducts;
+    private  List<DeliverOrderAddedProduct> addedProducts;
 
 }

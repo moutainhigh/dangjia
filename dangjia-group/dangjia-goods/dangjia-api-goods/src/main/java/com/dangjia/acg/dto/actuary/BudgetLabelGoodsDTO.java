@@ -1,9 +1,11 @@
 package com.dangjia.acg.dto.actuary;
 
+import com.dangjia.acg.modle.order.DeliverOrderAddedProduct;
 import lombok.Data;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 
 /**
@@ -42,5 +44,9 @@ public class BudgetLabelGoodsDTO {
     private String image;//商品图片
     private String originalProductId;//更换前最初始的商品ID
     private String goodsGroupId;//商品关联组ID
+
+
+    //增值商品集合
+    private List<DeliverOrderAddedProduct> addedProducts;
 
 }
