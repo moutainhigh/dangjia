@@ -13,6 +13,7 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO;
 import com.dangjia.acg.dto.budget.AllCategoryDTO;
+import com.dangjia.acg.dto.budget.AllCategoryTypeDTO;
 import com.dangjia.acg.dto.product.BasicsGoodArrDTO;
 import com.dangjia.acg.dto.product.BasicsGoodDTO;
 import com.dangjia.acg.dto.product.BasicsgDTO;
@@ -90,20 +91,19 @@ public class DjActuaryBudgetMaterialService {
      */
     public ServerResponse newcategoryIdList(String houseId, String cityId) {
         try {
-            List<Map<String, Object>> mapList = new ArrayList<>();
+            AllCategoryTypeDTO allCategoryTypeDTO =new AllCategoryTypeDTO();
            List<AllCategoryDTO> list =goodsCategoryMapper.queryNewcategoryIdList(houseId);
+           Double totalPrice=0d;
             for(AllCategoryDTO allCategoryDTO:list)
             {
-                Map<String, Object> map = new HashMap<>();
                 if(allCategoryDTO!=null)
                 {
-                    map.put("id", allCategoryDTO.getId());
-                    map.put("name", allCategoryDTO.getName());
-                    mapList.add(map);
-
+                    totalPrice+=allCategoryDTO.getPriceArr();
                 }
             }
-            return ServerResponse.createBySuccess("查询成功", mapList);
+            allCategoryTypeDTO.setList(list);
+            allCategoryTypeDTO.setTotalPrice(totalPrice);
+            return ServerResponse.createBySuccess("查询成功", allCategoryTypeDTO);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("生成失败");
