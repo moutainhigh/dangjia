@@ -2,6 +2,7 @@ package com.dangjia.acg.service.product;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.api.BasicsStorefrontAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
@@ -49,6 +50,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 /**
@@ -59,19 +61,30 @@ import java.util.List;
 @Service
 public class ShopCartService {
 
+
     @Autowired
     private IMasterGoodsMapper iMasterGoodsMapper;
+
     @Autowired
     private CraftsmanConstructionService constructionService;
+
     @Autowired
     private IShoppingCartMapper iShoppingCartmapper;
+
     @Autowired
     private IMasterProductTemplateMapper iMasterProductTemplateMapper;
+
+    @Autowired
+    private BasicsStorefrontAPI basicsStorefrontAPI;
+
     private Logger logger = LoggerFactory.getLogger(ShopCartService.class);
+
     @Autowired
     private IMasterStorefrontProductMapper iMasterStorefrontProductMapper;
+
     @Autowired
     private IMemberCollectMapper iMemberCollectMapper;
+
     @Autowired
     private IHouseMapper iHouseMapper;
     @Autowired
@@ -81,11 +94,11 @@ public class ShopCartService {
     @Autowired
     private IMasterDeliverOrderAddedProductMapper masterDeliverOrderAddedProductMapper;
     @Autowired
-    private IMasterUnitMapper iMasterUnitMapper;
-    @Autowired
     private IOrderSplitItemMapper iOrderSplitItemMapper;
     @Autowired
     private IMasterAttributeValueMapper iMasterAttributeValueMapper;
+    @Autowired
+    private IMasterUnitMapper iMasterUnitMapper;
 
     /**
      * 获取购物车列表
@@ -576,14 +589,13 @@ public class ShopCartService {
                 example.createCriteria().andEqualTo(DeliverOrderAddedProduct.ANY_ORDER_ID,orderItemId)
                         .andEqualTo(DeliverOrderAddedProduct.DATA_STATUS,0);
                 List<DeliverOrderAddedProduct> deliverOrderAddedProducts = masterDeliverOrderAddedProductMapper.selectByExample(example);
-                List<String> addedProductIds=new ArrayList<>();
-                for (DeliverOrderAddedProduct deliverOrderAddedProduct : deliverOrderAddedProducts) {
-                    addedProductIds.add(deliverOrderAddedProduct.getAddedProductId());
-                }
+                List<String> addedProductIds=deliverOrderAddedProducts
+                        .stream()
+                        .map(DeliverOrderAddedProduct::getAddedProductId)
+                        .collect(Collectors.toList());
                 if(addedProductIds.size()>0) {
                     setAddedProduct(shoppingCartid,addedProductIds.toString());
                 }
-
             }
             Example example=new Example(ShoppingCart.class);
             example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID,member.getId())
@@ -601,22 +613,24 @@ public class ShopCartService {
      * @param shoppingCartId
      * @param addedProductIds
      */
-   private void setAddedProduct(String shoppingCartId,String addedProductIds){
-       if(!CommonUtil.isEmpty(addedProductIds)&&!CommonUtil.isEmpty(shoppingCartId)) {
-           String[] addedProductIdList=addedProductIds.split(",");
-           Example example=new Example(DeliverOrderAddedProduct.class);
-           example.createCriteria().andEqualTo(DeliverOrderAddedProduct.ANY_ORDER_ID,shoppingCartId).andEqualTo(DeliverOrderAddedProduct.SOURCE,4);
-           masterDeliverOrderAddedProductMapper.deleteByExample(example);
-           for (String addedProductId : addedProductIdList) {
-               StorefrontProduct product = iMasterStorefrontProductMapper.selectByPrimaryKey(addedProductId);
-               DeliverOrderAddedProduct deliverOrderAddedProduct1 = new DeliverOrderAddedProduct();
-               deliverOrderAddedProduct1.setAnyOrderId(shoppingCartId);
-               deliverOrderAddedProduct1.setAddedProductId(addedProductId);
-               deliverOrderAddedProduct1.setPrice(product.getSellPrice());
-               deliverOrderAddedProduct1.setProductName(product.getProductName());
-               deliverOrderAddedProduct1.setSource("4");
-               masterDeliverOrderAddedProductMapper.insert(deliverOrderAddedProduct1);
-           }
-       }
-   }
+    private void setAddedProduct(String shoppingCartId,String addedProductIds){
+        if(!CommonUtil.isEmpty(shoppingCartId)) {
+            Example example=new Example(DeliverOrderAddedProduct.class);
+            example.createCriteria().andEqualTo(DeliverOrderAddedProduct.ANY_ORDER_ID,shoppingCartId).andEqualTo(DeliverOrderAddedProduct.SOURCE,4);
+            masterDeliverOrderAddedProductMapper.deleteByExample(example);
+            if(!CommonUtil.isEmpty(addedProductIds)) {
+                String[] addedProductIdList=addedProductIds.split(",");
+                for (String addedProductId : addedProductIdList) {
+                    StorefrontProduct product = iMasterStorefrontProductMapper.selectByPrimaryKey(addedProductId);
+                    DeliverOrderAddedProduct deliverOrderAddedProduct1 = new DeliverOrderAddedProduct();
+                    deliverOrderAddedProduct1.setAnyOrderId(shoppingCartId);
+                    deliverOrderAddedProduct1.setAddedProductId(addedProductId);
+                    deliverOrderAddedProduct1.setPrice(product.getSellPrice());
+                    deliverOrderAddedProduct1.setProductName(product.getProductName());
+                    deliverOrderAddedProduct1.setSource("4");
+                    masterDeliverOrderAddedProductMapper.insert(deliverOrderAddedProduct1);
+                }
+            }
+        }
+    }
 }

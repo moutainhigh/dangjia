@@ -37,6 +37,7 @@ import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
 import com.dangjia.acg.mapper.pay.IMasterSupplierPayOrderMapper;
 import com.dangjia.acg.mapper.pay.IPayOrderMapper;
 import com.dangjia.acg.mapper.product.IMasterStorefrontMapper;
+import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
 import com.dangjia.acg.mapper.product.IShoppingCartMapper;
 import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
 import com.dangjia.acg.mapper.repair.IMendMaterialMapper;
@@ -70,6 +71,7 @@ import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.safe.WorkerTypeSafe;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
 import com.dangjia.acg.modle.storefront.Storefront;
+import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.dangjia.acg.modle.supplier.DjSupplierPayOrder;
 import com.dangjia.acg.modle.worker.Insurance;
@@ -89,6 +91,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * author: Ronalcheng
@@ -197,6 +200,9 @@ public class PaymentService {
     private IMasterSupplierMapper iMaterSupplierMapper;
     @Autowired
     private IMasterStorefrontMapper iMasterStorefrontMapper;
+
+    @Autowired
+    private IMasterStorefrontProductMapper iMasterStorefrontProductMapper;
     @Autowired
     private IMasterAccountFlowRecordMapper iMasterAccountFlowRecordMapper;
     private Logger logger = LoggerFactory.getLogger(PaymentService.class);
@@ -1099,6 +1105,21 @@ public class PaymentService {
                         orderItem.setOrderStatus("1");//1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭
                         orderItem.setCreateBy(member.getId());
                         orderItemMapper.insert(orderItem);
+
+                        ShoppingCartListDTO parmDTO=productMap.get(orderItem.getProductId());
+                        if(!CommonUtil.isEmpty(parmDTO.getAddedProductIds())) {
+                            setAddedProduct(orderItem.getId(), parmDTO.getAddedProductIds(), "1");
+                        }
+
+                        //获取购物车增值商品信息
+                        Example example1=new Example(DeliverOrderAddedProduct.class);
+                        example1.createCriteria().andEqualTo(DeliverOrderAddedProduct.ANY_ORDER_ID,orderItem.getId())
+                                .andEqualTo(DeliverOrderAddedProduct.SOURCE,1);
+                        List<DeliverOrderAddedProduct> deliverOrderAddedProducts = masterDeliverOrderAddedProductMapper.selectByExample(example1);
+                        for (DeliverOrderAddedProduct deliverOrderAddedProduct : deliverOrderAddedProducts) {
+                            BigDecimal totalPrice = new BigDecimal(deliverOrderAddedProduct.getPrice()*parmDTO.getShopCount());
+                            paymentPrice = paymentPrice.add(totalPrice);
+                        }
                     }
                 }
 
@@ -1267,6 +1288,24 @@ public class PaymentService {
                             orderItem.setOrderStatus("1");//1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭
                             orderItem.setCreateBy(member.getId());
                             orderItemMapper.insert(orderItem);
+
+                            //添加增殖类商品
+                            Example example=new Example(DeliverOrderAddedProduct.class);
+                            example.createCriteria().andEqualTo(DeliverOrderAddedProduct.ANY_ORDER_ID,good.getId())
+                                    .andEqualTo(DeliverOrderAddedProduct.DATA_STATUS,0);
+                            List<DeliverOrderAddedProduct> deliverOrderAddedProducts = masterDeliverOrderAddedProductMapper.selectByExample(example);
+                            List<String> addedProductIds=deliverOrderAddedProducts
+                                    .stream()
+                                    .map(DeliverOrderAddedProduct::getAddedProductId)
+                                    .collect(Collectors.toList());
+                            if(addedProductIds.size()>0) {
+                                setAddedProduct(orderItem.getId(),addedProductIds.toString(),"1");
+                            }
+
+                            for (DeliverOrderAddedProduct deliverOrderAddedProduct : deliverOrderAddedProducts) {
+                                BigDecimal totalPrice = new BigDecimal(deliverOrderAddedProduct.getPrice()*orderItem.getShopCount());
+                                paymentPrice = paymentPrice.add(totalPrice);
+                            }
                         }
                     }
                 }
@@ -1532,6 +1571,18 @@ public class PaymentService {
                                 //搬运费运算
                                 Double moveDost = masterCostAcquisitionService.getStevedorageCost(houseFlow.getHouseId(), good.getProductId(), good.getShopCount());
                                 totalMoveDost = totalMoveDost.add(new BigDecimal(moveDost));
+
+                                //添加增殖类商品
+                                Example example=new Example(DeliverOrderAddedProduct.class);
+                                example.createCriteria().andEqualTo(DeliverOrderAddedProduct.ANY_ORDER_ID,good.getId())
+                                        .andEqualTo(DeliverOrderAddedProduct.DATA_STATUS,0);
+                                List<DeliverOrderAddedProduct> deliverOrderAddedProducts = masterDeliverOrderAddedProductMapper.selectByExample(example);
+                                good.setAddedProducts(deliverOrderAddedProducts);
+
+                                for (DeliverOrderAddedProduct deliverOrderAddedProduct : deliverOrderAddedProducts) {
+                                    BigDecimal totalAddedProduct = new BigDecimal(deliverOrderAddedProduct.getPrice()*good.getShopCount());
+                                    totalPrice = totalPrice.add(totalAddedProduct);
+                                }
                             }
                         }
                     }
@@ -1612,15 +1663,32 @@ public class PaymentService {
                         totalSellPrice = totalSellPrice.add(new BigDecimal(shoppingCartListDTO.getPrice()*parmDTO.getShopCount()));
                         totalPrice = totalPrice.add(new BigDecimal(shoppingCartListDTO.getPrice()*parmDTO.getShopCount()));
                         if(!CommonUtil.isEmpty(houseId)) {
-                                //搬运费运算
-                                Double moveDost = masterCostAcquisitionService.getStevedorageCost(houseId, shoppingCartListDTO.getProductId(), parmDTO.getShopCount());
-                                totalMoveDost = totalMoveDost.add(new BigDecimal(moveDost));
+                            //搬运费运算
+                            Double moveDost = masterCostAcquisitionService.getStevedorageCost(houseId, shoppingCartListDTO.getProductId(), parmDTO.getShopCount());
+                            totalMoveDost = totalMoveDost.add(new BigDecimal(moveDost));
                         }
                         if(paymentDTO.getType()!=1 && (shoppingCartListDTO.getProductType()==0||shoppingCartListDTO.getProductType()==1)){
                             paymentDTO.setType(2);
                         }
                         if(shoppingCartListDTO.getProductType()==2){
                             paymentDTO.setType(1);
+                        }
+                        if(!CommonUtil.isEmpty(parmDTO.getAddedProductIds())) {
+                            String[] addedProductIdList=parmDTO.getAddedProductIds().split(",");
+                            List<DeliverOrderAddedProduct> deliverOrderAddedProducts =new ArrayList<>();
+                            for (String addedProductId : addedProductIdList) {
+                                StorefrontProduct product = iMasterStorefrontProductMapper.selectByPrimaryKey(addedProductId);
+                                DeliverOrderAddedProduct deliverOrderAddedProduct1 = new DeliverOrderAddedProduct();
+                                deliverOrderAddedProduct1.setAnyOrderId(shoppingCartListDTO.getId());
+                                deliverOrderAddedProduct1.setAddedProductId(addedProductId);
+                                deliverOrderAddedProduct1.setPrice(product.getSellPrice());
+                                deliverOrderAddedProduct1.setProductName(product.getProductName());
+                                deliverOrderAddedProduct1.setSource("4");
+                                deliverOrderAddedProducts.add(deliverOrderAddedProduct1);
+                                totalPrice = totalPrice.add(new BigDecimal(product.getSellPrice()*parmDTO.getShopCount()));
+                            }
+                            //获取购物车增值商品信息
+                            shoppingCartListDTO.setAddedProducts(deliverOrderAddedProducts);
                         }
                     }
                     Double freight=storefrontConfigAPI.getFreightPrice(shoppingCartDTO.getStorefrontId(),totalSellPrice.doubleValue());
@@ -1790,5 +1858,32 @@ public class PaymentService {
             }
         }
         return houseId;
+    }
+
+    /**
+     *  更新/设置增值商品
+     * @param orderId 来源订单ID
+     * @param addedProductIds 增值商品 多个以逗号分隔
+     * @param source 来源类型
+     */
+    private void setAddedProduct(String orderId,String addedProductIds,String source){
+        if(!CommonUtil.isEmpty(orderId)) {
+            Example example=new Example(DeliverOrderAddedProduct.class);
+            example.createCriteria().andEqualTo(DeliverOrderAddedProduct.ANY_ORDER_ID,orderId).andEqualTo(DeliverOrderAddedProduct.SOURCE,source);
+            masterDeliverOrderAddedProductMapper.deleteByExample(example);
+            if(!CommonUtil.isEmpty(addedProductIds)) {
+                String[] addedProductIdList=addedProductIds.split(",");
+                for (String addedProductId : addedProductIdList) {
+                    StorefrontProduct product = iMasterStorefrontProductMapper.selectByPrimaryKey(addedProductId);
+                    DeliverOrderAddedProduct deliverOrderAddedProduct1 = new DeliverOrderAddedProduct();
+                    deliverOrderAddedProduct1.setAnyOrderId(orderId);
+                    deliverOrderAddedProduct1.setAddedProductId(addedProductId);
+                    deliverOrderAddedProduct1.setPrice(product.getSellPrice());
+                    deliverOrderAddedProduct1.setProductName(product.getProductName());
+                    deliverOrderAddedProduct1.setSource(source);
+                    masterDeliverOrderAddedProductMapper.insert(deliverOrderAddedProduct1);
+                }
+            }
+        }
     }
 }
