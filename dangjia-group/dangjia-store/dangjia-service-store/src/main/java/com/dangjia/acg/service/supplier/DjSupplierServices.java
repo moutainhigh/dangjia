@@ -138,6 +138,12 @@ public class DjSupplierServices {
      */
     public ServerResponse querySingleDjSupplierDetail(String userId, String cityId) {
         DjSupplier djSupplier = djSupplierMapper.querySingleDjSupplier(userId, cityId);
+        if(null==djSupplier){
+            djSupplier=new DjSupplier();
+            MainUser mainUser = iStoreUserMapper.selectByPrimaryKey(userId);
+            djSupplier.setName(mainUser.getUsername());
+            djSupplier.setTelephone(mainUser.getMobile());
+        }
         return ServerResponse.createBySuccess("查询成功", djSupplier);
     }
 

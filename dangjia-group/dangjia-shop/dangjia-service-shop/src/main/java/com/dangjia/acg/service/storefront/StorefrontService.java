@@ -349,7 +349,9 @@ public class StorefrontService {
                 if(CommonUtil.isEmpty(storefrontListDTO.getContract())){
                     storefrontListDTO.setContract("");
                 }
-                storefrontListDTO.setStorefrontLogo(imageaddress+storefrontListDTO.getStorefrontLogo());
+                if(!CommonUtil.isEmpty(storefrontListDTO.getStorefrontLogo())) {
+                    storefrontListDTO.setStorefrontLogoUrl(imageaddress + storefrontListDTO.getStorefrontLogo());
+                }
             });
             PageInfo pageResult = new PageInfo(storefrontListDTOS);
             return ServerResponse.createBySuccess("查询成功", pageResult);

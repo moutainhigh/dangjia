@@ -32,10 +32,10 @@ public interface BasicsStorefrontAPI {
 
     @PostMapping("/web/queryStorefrontByUserId")
     @ApiOperation(value = "根据userId查询店铺信息", notes = "根据userId查询店铺信息")
-    ServerResponse queryStorefrontByUserId(@RequestParam("userId") String userId,@RequestParam("cityId") String cityId
+    ServerResponse queryStorefrontByUserId(@RequestParam("userId") String userId, @RequestParam("cityId") String cityId
     );
 
-       @PostMapping("/web/queryLikeSingleStorefront")
+    @PostMapping("/web/queryLikeSingleStorefront")
     @ApiOperation(value = "根据条件模糊查询店铺信息", notes = "根据条件模糊查询店铺信息")
     List<Storefront> queryLikeSingleStorefront(@RequestParam("searchKey") String searchKey);
 
@@ -70,11 +70,10 @@ public interface BasicsStorefrontAPI {
     @PostMapping("/web/queryStorefrontWallet")
     @ApiOperation(value = "店铺-我的钱包", notes = "店铺-我的钱包")
     ServerResponse queryStorefrontWallet(@RequestParam("request") HttpServletRequest request,
-                                                @RequestParam("pageDTO") PageDTO pageDTO,
-                                                @RequestParam("searchKey") String searchKey,
-                                                @RequestParam("userId") String userId,
-                                                @RequestParam("cityId") String cityId);
-
+                                         @RequestParam("pageDTO") PageDTO pageDTO,
+                                         @RequestParam("searchKey") String searchKey,
+                                         @RequestParam("userId") String userId,
+                                         @RequestParam("cityId") String cityId);
 
 
     /**
@@ -87,6 +86,7 @@ public interface BasicsStorefrontAPI {
                                               @RequestParam("bankCard") String bankCard,
                                               @RequestParam("surplusMoney") Double surplusMoney,
                                               @RequestParam("payPassword") String payPassword);
+
     /**
      * 1.店铺充值
      * 2.缴纳滞留金
@@ -103,7 +103,6 @@ public interface BasicsStorefrontAPI {
             @RequestParam("sourceType") Integer sourceType);
 
 
-
     /**
      * 店铺财务-供应商结算
      */
@@ -118,6 +117,7 @@ public interface BasicsStorefrontAPI {
 
     /**
      * 店铺-收入记录
+     *
      * @param request
      * @param pageDTO
      * @param userId
@@ -128,13 +128,14 @@ public interface BasicsStorefrontAPI {
     @PostMapping("/web/storeExpenseRecord")
     @ApiOperation(value = "店铺-收入记录", notes = "店铺-收入记录")
     ServerResponse storeExpenseRecord(@RequestParam("request") HttpServletRequest request,
-                                                @RequestParam("pageDTO") PageDTO pageDTO,
-                                                @RequestParam("userId") String userId,
-                                                @RequestParam("cityId") String cityId,
-                                                @RequestParam("orderNumber") String orderNumber);
+                                      @RequestParam("pageDTO") PageDTO pageDTO,
+                                      @RequestParam("userId") String userId,
+                                      @RequestParam("cityId") String cityId,
+                                      @RequestParam("orderNumber") String orderNumber);
 
     /**
      * 店铺-收入记录-订单详情
+     *
      * @param request
      * @param pageDTO
      * @param userId
@@ -144,14 +145,15 @@ public interface BasicsStorefrontAPI {
     @PostMapping("/web/storeExpenseRecordOrderDetail")
     @ApiOperation(value = "店铺-收入记录-订单详情", notes = "店铺-收入记录-订单详情")
     ServerResponse storeExpenseRecordOrderDetail(@RequestParam("request") HttpServletRequest request,
-                                      @RequestParam("pageDTO") PageDTO pageDTO,
-                                      @RequestParam("userId") String userId,
-                                      @RequestParam("cityId") String cityId,
-                                       @RequestParam("orderId") String orderId
-                                     );
+                                                 @RequestParam("pageDTO") PageDTO pageDTO,
+                                                 @RequestParam("userId") String userId,
+                                                 @RequestParam("cityId") String cityId,
+                                                 @RequestParam("orderId") String orderId
+    );
 
     /**
      * 店铺-收入记录-查看清单
+     *
      * @param request
      * @param pageDTO
      * @param userId
@@ -162,14 +164,15 @@ public interface BasicsStorefrontAPI {
     @PostMapping("/web/storeExpenseRecordGoodDetail")
     @ApiOperation(value = "店铺-收入记录-查看清单", notes = "店铺-收入记录-查看清单")
     ServerResponse storeExpenseRecordGoodDetail(@RequestParam("request") HttpServletRequest request,
-                      @RequestParam("pageDTO") PageDTO pageDTO,
-                      @RequestParam("userId") String userId,
-                      @RequestParam("cityId") String cityId,
-                      @RequestParam("deliverId") String deliverId);
+                                                @RequestParam("pageDTO") PageDTO pageDTO,
+                                                @RequestParam("userId") String userId,
+                                                @RequestParam("cityId") String cityId,
+                                                @RequestParam("deliverId") String deliverId);
 
 
     /**
      * 店铺-支出记录
+     *
      * @param request
      * @param pageDTO
      * @param userId
@@ -187,6 +190,7 @@ public interface BasicsStorefrontAPI {
 
     /**
      * 店铺-支出记录-查看货单详情
+     *
      * @param request
      * @param pageDTO
      * @param userId
@@ -198,12 +202,11 @@ public interface BasicsStorefrontAPI {
     @PostMapping("/web/storeRevenueRecordOrderDetail")
     @ApiOperation(value = "店铺-支出记录-查看货单详情", notes = "店铺-支出记录-查看货单详情")
     ServerResponse storeRevenueRecordOrderDetail(@RequestParam("request") HttpServletRequest request,
-                                      @RequestParam("pageDTO") PageDTO pageDTO,
-                                      @RequestParam("userId") String userId,
-                                      @RequestParam("cityId") String cityId,
-                                      @RequestParam("orderNumber") String orderNumber,
-                                      @RequestParam("type") Integer type);
-
+                                                 @RequestParam("pageDTO") PageDTO pageDTO,
+                                                 @RequestParam("userId") String userId,
+                                                 @RequestParam("cityId") String cityId,
+                                                 @RequestParam("orderNumber") String orderNumber,
+                                                 @RequestParam("type") Integer type);
 
 
     @PostMapping("/sup/setStorefrontSurplusMoney")
