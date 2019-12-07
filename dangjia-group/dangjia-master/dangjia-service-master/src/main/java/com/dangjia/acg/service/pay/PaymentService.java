@@ -1546,6 +1546,7 @@ public class PaymentService {
 
             PaymentDTO paymentDTO = new PaymentDTO();
             paymentDTO.setType(4);
+            paymentDTO.setDiscountsPrice(new BigDecimal(0));
             BigDecimal totalPrice = new BigDecimal(0);//总价
             BigDecimal freightPrice = new BigDecimal(0);//总运费
             BigDecimal totalMoveDost = new BigDecimal(0);//搬运费
@@ -1562,7 +1563,9 @@ public class PaymentService {
                 paymentDTO.setWorkerTypeName(workerType.getName());
                 List<ShopGoodsDTO> budgetLabelDTOS = forMasterAPI.queryShopGoods(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), house.getCityId());//精算工钱
                 for (ShopGoodsDTO budgetLabelDTO : budgetLabelDTOS) {
+                    BigDecimal moveDostTotal=new BigDecimal(0);
                     Double freight=storefrontConfigAPI.getFreightPrice(budgetLabelDTO.getShopId(),budgetLabelDTO.getTotalMaterialPrice().doubleValue());
+                    budgetLabelDTO.setFreight(new BigDecimal(freight));
                     freightPrice=freightPrice.add(new BigDecimal(freight));
                     for (BudgetLabelDTO labelDTO : budgetLabelDTO.getLabelDTOS()) {
                         totalPrice = totalPrice.add(labelDTO.getTotalPrice());
@@ -1571,6 +1574,7 @@ public class PaymentService {
                                 //搬运费运算
                                 Double moveDost = masterCostAcquisitionService.getStevedorageCost(houseFlow.getHouseId(), good.getProductId(), good.getShopCount());
                                 totalMoveDost = totalMoveDost.add(new BigDecimal(moveDost));
+                                moveDostTotal = moveDostTotal.add(new BigDecimal(moveDost));
 
                                 //添加增殖类商品
                                 Example example=new Example(DeliverOrderAddedProduct.class);
@@ -1586,6 +1590,7 @@ public class PaymentService {
                             }
                         }
                     }
+                    budgetLabelDTO.setMoveDost(moveDostTotal);
                 }
                 paymentDTO.setDatas(budgetLabelDTOS);
                 paymentDTO.setType(3);
@@ -1694,7 +1699,6 @@ public class PaymentService {
                     Double freight=storefrontConfigAPI.getFreightPrice(shoppingCartDTO.getStorefrontId(),totalSellPrice.doubleValue());
                     freightPrice=freightPrice.add(new BigDecimal(freight));
                     shoppingCartDTO.setTotalPrice(totalSellPrice);
-                    shoppingCartDTOS.add(shoppingCartDTO);
                 }
                 paymentDTO.setDatas(shoppingCartDTOS);
 
@@ -1702,13 +1706,13 @@ public class PaymentService {
                 return ServerResponse.createByErrorMessage("参数错误");
             }
             paymentDTO.setDiscounts(0);
+            paymentDTO.setFreight(freightPrice);//运费
+            paymentDTO.setMoveDost(totalMoveDost);//搬运费
             BigDecimal payPrice = totalPrice.subtract(paymentDTO.getDiscountsPrice());
             payPrice = payPrice.add(paymentDTO.getFreight());
             payPrice = payPrice.add(paymentDTO.getMoveDost());
             totalPrice = totalPrice.add(paymentDTO.getFreight());
             totalPrice = totalPrice.add(paymentDTO.getMoveDost());
-            paymentDTO.setFreight(freightPrice);//运费
-            paymentDTO.setMoveDost(totalMoveDost);//搬运费
             paymentDTO.setTotalPrice(totalPrice);
             paymentDTO.setPayPrice(payPrice);
             paymentDTO.setTaskId(taskId);
