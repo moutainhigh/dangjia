@@ -84,7 +84,9 @@ public class MemberCollectService {
                     memberCollectDTO.setId(memberCollect.getId());
                     memberCollectDTO.setImage(imageAddress + memberCollectDTO.getImage());
                     //当前时间小于调价的时间时则展示调价预告信息
-                    if(memberCollectDTO.getAdjustedPrice() == null || memberCollectDTO.getModityPriceTime().getTime()<(new Date()).getTime()) {
+                    if (memberCollectDTO.getAdjustedPrice() == null
+                            || memberCollectDTO.getModityPriceTime() == null
+                            || memberCollectDTO.getModityPriceTime().getTime() < (new Date()).getTime()) {
                         memberCollectDTO.setAdjustedPrice(null);
                         memberCollectDTO.setModityPriceTime(null);
                     }
