@@ -227,7 +227,7 @@ public class BasicsGoodsCategoryService {
 
     //查询商品属性列表 queryGoodsCategory
     public ServerResponse queryBasicsGoodsCategory(String parentId) {
-        List<BasicsGoodsCategory> goodsCategoryList = iBasicsGoodsCategoryMapper.queryCategoryByParentId(parentId, null);
+        List<BasicsGoodsCategory> goodsCategoryList = iBasicsGoodsCategoryMapper.queryCategoryByParentId(parentId, null, null);
         if (goodsCategoryList.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
@@ -244,7 +244,7 @@ public class BasicsGoodsCategoryService {
     //删除商品类别
     public ServerResponse deleteGoodsCategory(String id) {
         try {
-            List<BasicsGoodsCategory> goodsCategoryList = iBasicsGoodsCategoryMapper.queryCategoryByParentId(id, null);//根据id查询是否有下级类别
+            List<BasicsGoodsCategory> goodsCategoryList = iBasicsGoodsCategoryMapper.queryCategoryByParentId(id, null, null);//根据id查询是否有下级类别
             List<BasicsGoods> goodsList = iBasicsGoodsMapper.queryByCategoryId(id,null);//根据id查询是否有关联商品
             List<DjBasicsAttribute> GoodsAList = djBasicsAttributeMapper.queryAttributeByCategoryId(id, null);//根据id查询是否有关联属性
             if (goodsCategoryList.size() > 0) {
@@ -292,13 +292,13 @@ public class BasicsGoodsCategoryService {
     public ServerResponse queryGoodsCategoryTwo() {
         try {
             List<Map<String, Object>> mapList = new ArrayList<>();
-            List<BasicsGoodsCategory> goodsCategoryList = iBasicsGoodsCategoryMapper.queryCategoryByParentId("1", null);
+            List<BasicsGoodsCategory> goodsCategoryList = iBasicsGoodsCategoryMapper.queryCategoryByParentId("1", null, null);
             for (BasicsGoodsCategory goodsCategory : goodsCategoryList) {
                 Map<String, Object> map = new HashMap<>();
                 map.put("id", goodsCategory.getId());
                 map.put("name", goodsCategory.getName());
                 List<Map<String, Object>> mapTwoList = new ArrayList<>();
-                List<BasicsGoodsCategory> goodsCategoryList2 = iBasicsGoodsCategoryMapper.queryCategoryByParentId(goodsCategory.getId(), null);
+                List<BasicsGoodsCategory> goodsCategoryList2 = iBasicsGoodsCategoryMapper.queryCategoryByParentId(goodsCategory.getId(), null, null);
                 for (BasicsGoodsCategory goodsCategory2 : goodsCategoryList2) {
                     Map<String, Object> mapTwo = new HashMap<>();
                     mapTwo.put("id", goodsCategory2.getId());

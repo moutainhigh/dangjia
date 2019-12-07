@@ -708,6 +708,7 @@
             t3.state = 3
         AND t1.payment IS NOT NULL
         AND t1.house_id = #{houseId}
+        AND t1.data_status=0
         AND EXISTS (
             SELECT
                 1
@@ -792,6 +793,7 @@
             AND t1.id = t1.parent_order_id
             AND t2.state=#{state}
             AND t1.house_id=#{houseId}
+            AND t1.data_status=0
     </select>
 
     <select id="queryDeliverOrderItemObligation" resultType="com.dangjia.acg.dto.delivery.AppointmentDTO">
@@ -833,6 +835,7 @@
         AND t3.prod_template_id = t4.id
         AND t1.parent_order_id = #{orderId}
         AND t1.id!=t1.parent_order_id
+        AND t2.data_status=0
     </select>
 
 
