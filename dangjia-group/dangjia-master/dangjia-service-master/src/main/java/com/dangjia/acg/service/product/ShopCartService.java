@@ -36,6 +36,7 @@ import com.dangjia.acg.modle.product.ShoppingCart;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -124,7 +125,9 @@ public class ShopCartService {
                 shoppingCartDTO.setStorefrontIcon(imageAddress + storefront.getSystemLogo());
                 List<ShoppingCartListDTO> shoppingCartListDTOS = iShoppingCartmapper.queryCartList(member.getId(), cityId, storefront.getId(), null);
                 shoppingCartListDTOS.forEach(shoppingCartListDTO -> {
-                    shoppingCartListDTO.setImage(imageAddress + shoppingCartListDTO.getImage());
+
+                    shoppingCartListDTO.setImageUrl(StringTool.getImage(shoppingCartListDTO.getImage(),imageAddress));//图多张
+                    shoppingCartListDTO.setImageSingle(StringTool.getImageSingle(shoppingCartListDTO.getImage(),imageAddress));//图一张
                     //当前时间小于调价的时间时则展示调价预告信息
                     if (shoppingCartListDTO.getAdjustedPrice() == null
                             || shoppingCartListDTO.getModityPriceTime() == null

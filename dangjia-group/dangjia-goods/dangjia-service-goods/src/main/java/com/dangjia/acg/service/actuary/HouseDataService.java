@@ -139,11 +139,11 @@ public class HouseDataService {
                         tActuaryGoodsTotal.setName(workerType.getString(WorkerType.NAME));
                         tActuaryGoodsTotal.setPriceTotal(0.0);
                         if (j == 0)
-                            tActuaryGoodsTotal.setGoodsType("材料");
+                            tActuaryGoodsTotal.setProductType("材料");
                         if (j == 1)
-                            tActuaryGoodsTotal.setGoodsType("包工包料");
+                            tActuaryGoodsTotal.setProductType("包工包料");
                         if (j == 2)
-                            tActuaryGoodsTotal.setGoodsType("人工");
+                            tActuaryGoodsTotal.setProductType("人工");
                         mapsTotal.put(workerType.getString(WorkerType.ID) + "-" + j, tActuaryGoodsTotal);
                     }
                     JSONObject workerType = (JSONObject) aJsonArray;  // 3: 大管家 ，4：拆除 ，5：  ，6：水电 ，7：泥工 ，8：木工 ，9：油漆
@@ -189,9 +189,9 @@ public class HouseDataService {
                                 break;
                         }
                         if (0 == goods.getType())//0:材料；1：包工包料
-                            tActuaryGoods.setGoodsType("材料");//商品类型 : 材料，包工包料，人工，
+                            tActuaryGoods.setProductType("材料");//商品类型 : 材料，包工包料，人工，
                         else if (1 == goods.getType())
-                            tActuaryGoods.setGoodsType("包工包料");//商品类型 : 材料，包工包料，人工，
+                            tActuaryGoods.setProductType("包工包料");//商品类型 : 材料，包工包料，人工，
                         TActuaryGoodsTotal total = mapsTotal.get(workerType.getString(WorkerType.ID) + "-" + goods.getType());
                         if (goods.getBuy() == 2) //自购
                         {
@@ -236,7 +236,7 @@ public class HouseDataService {
                                 break;
                         }
 
-                        tActuaryGoods.setGoodsType("人工");//商品类型 : 人工，材料，包工包料
+                        tActuaryGoods.setProductType("人工");//商品类型 : 人工，材料，包工包料
                         if (CommonUtil.isEmpty(worker.getProductName()))
                             continue;
                         tActuaryGoods.setProductName(worker.getProductName());

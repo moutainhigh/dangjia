@@ -26,7 +26,7 @@
         IFNULL(bsp.image,'') as image,-- 商品图片
         IFNULL(bpt.value_name_arr,'') AS valueNameArr,-- 属性
         IFNULL(bsp.sell_price,0) as sellPrice,-- 销售价格
-        IFNULL(prod_template_id,'') as prodTemplateId, -- 商品模板id
+        IFNULL(bsp.prod_template_id,'') as prodTemplateId, -- 商品模板id
         IFNULL(bsp.supplied_num,0)  as suppliedNum,-- 供货数
         IFNULL(bsp.adjusted_price,0) as adjustedPrice,-- 调后价格
         IFNULL(bsp.modity_price_time,'') as modityPriceTime -- 调价时间
@@ -70,7 +70,7 @@
         IFNULL(bpt.value_name_arr,'')  AS valueNameArr,
         -- 属性
         IFNULL(bsp.is_shelf_status,null )   AS isShelfStatus ,-- 是否上下架
-        IFNULL(prod_template_id,'')  as prodTemplateId -- 商品模板id
+        IFNULL(bsp.prod_template_id,'')  as prodTemplateId -- 商品模板id
         FROM
         dj_basics_storefront_product bsp
         INNER JOIN dj_basics_product_template bpt ON bsp.prod_template_id = bpt.id
@@ -104,7 +104,7 @@
         bpt.value_name_arr AS valueNameArr,
         -- 属性
         IFNULL(bsp.is_shelf_status,null )   AS isShelfStatus ,-- 是否上下架
-        prod_template_id as prodTemplateId -- 商品模板id
+        bsp.prod_template_id as prodTemplateId -- 商品模板id
         FROM
         dj_basics_storefront_product bsp
         INNER JOIN dj_basics_product_template bpt ON bsp.prod_template_id = bpt.id

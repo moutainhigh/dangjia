@@ -86,7 +86,7 @@
             p.image AS image,
             p.sell_price AS price,
             t.unit_name AS unitName,
-            g.type AS goodsType,
+            g.type AS productType,
             g.type AS type,
             p.product_name AS NAME
             FROM

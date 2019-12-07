@@ -116,9 +116,9 @@ public class MendRecordService {
                 Map<String, Object> map = BeanUtils.beanToMap(mendMateriel);
                 map.put("image", address + mendMateriel.getImage());
                 if (mendMateriel.getProductType() == 0) {
-                    map.put("goodsType", "材料");
+                    map.put("productType", "材料");
                 } else {
-                    map.put("goodsType", "包工包料");
+                    map.put("productType", "包工包料");
                 }
                 map.put("supplierTelephone", mendMateriel.getSupplierTelephone());
                 map.put("productId", mendMateriel.getProductId());
@@ -197,9 +197,9 @@ public class MendRecordService {
                     Map<String, Object> map = new HashMap<>();
                     map.put("image", address + orderSplitItem.getImage());
                     if (orderSplitItem.getProductType() == 0) {
-                        map.put("goodsType", "材料");
+                        map.put("productType", "材料");
                     } else {
-                        map.put("goodsType", "包工包料");
+                        map.put("productType", "包工包料");
                     }
                     map.put("name", orderSplitItem.getProductName());
                     map.put("productId", orderSplitItem.getProductId());
@@ -258,9 +258,9 @@ public class MendRecordService {
                         Map<String, Object> map = BeanUtils.beanToMap(mendMateriel);
                         map.put("image", address + mendMateriel.getImage());
                         if (mendMateriel.getProductType() == 0) {
-                            map.put("goodsType", "材料");
+                            map.put("productType", "材料");
                         } else {
-                            map.put("goodsType", "包工包料");
+                            map.put("productType", "包工包料");
                         }
                         map.put("productId", mendMateriel.getProductId());
                         map.put("name", mendMateriel.getProductName());
@@ -274,7 +274,7 @@ public class MendRecordService {
                     for (MendWorker mendWorker : mendWorkerList) {
                         Map<String, Object> map = new HashMap<>();
                         map.put("image", address + mendWorker.getImage());
-                        map.put("goodsType", "人工");
+                        map.put("productType", "人工");
                         map.put("name", mendWorker.getWorkerGoodsName());
                         map.put("price", "¥" + String.format("%.2f", mendWorker.getPrice()) + "/" + mendWorker.getUnitName());
                         map.put("shopCount", mendWorker.getShopCount());

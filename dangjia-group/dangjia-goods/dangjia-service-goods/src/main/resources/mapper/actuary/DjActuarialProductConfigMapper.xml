@@ -50,7 +50,7 @@
         <result property="brandId" column="brandId"/>
         <result property="isCalculatedArea" column="isCalculatedArea"/>
         <result property="categoryId" column="categoryId"/>
-        <result property="goodsType" column="goodsType"/>
+        <result property="productType" column="productType"/>
         <result property="convertQuality" column="convertQuality"/>
         <result property="convertUnit" column="convertUnit"/>
         <result property="goodsBuy" column="goodsBuy"/>
@@ -72,7 +72,7 @@
             t4.brand_id brandId,
             IFNULL(t1.is_calculated_area,'0') isCalculatedArea,
             t4.category_id categoryId,
-            t4.type goodsType,
+            t4.type productType,
             t4.buy goodsBuy,
             t3.convert_quality convertQuality,
             t3.convert_unit convertUnit
@@ -117,7 +117,7 @@
             t4.brand_id brandId,
             IFNULL(t1.purchase_quantity,1) shopCount,
             CEIL(IFNULL(t1.purchase_quantity,1)/IFNULL(t2.convert_quality,1))  convertCount,
-            t4.type goodsType,
+            t4.type productType,
             t4.buy goodsBuy,
             t4.category_id categoryId,
             t2.convert_quality convertQuality,
