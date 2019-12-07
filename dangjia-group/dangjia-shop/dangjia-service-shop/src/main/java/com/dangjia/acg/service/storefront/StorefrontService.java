@@ -217,7 +217,7 @@ public class StorefrontService {
                 storefront.setEmail(storefrontDTO.getEmail());
                 String systemlogo = configUtil.getValue(SysConfig.ORDER_DIANPU_ICON, String.class);
                 storefront.setSystemLogo(systemlogo);
-                int i = istorefrontMapper.insert(storefront);
+                int i = istorefrontMapper.insertSelective(storefront);
 
                 if (i <= 0) {
                     return ServerResponse.createByErrorMessage("修改失败!");
@@ -853,7 +853,7 @@ public class StorefrontService {
             storefront.setMobile(storefrontDTO.getMobile());
             storefront.setEmail(storefrontDTO.getEmail());
             storefront.setStorekeeperName(storefrontDTO.getStorekeeperName());
-            storefront.setIfDjselfManage(1);
+            storefront.setIfDjselfManage("1");
             storefront.setStorefrontType("worker");
             storefront.setModifyDate(new Date());
             String systemlogo = configUtil.getValue(SysConfig.ORDER_DANGJIA_ICON, String.class);

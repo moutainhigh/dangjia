@@ -115,7 +115,7 @@ public class Storefront extends BaseEntity {
     @Column(name = "djself_manage")
     @Desc(value = "是否当家自营")
     @ApiModelProperty("是否当家自营(0:正常店铺 1：当家自营店铺)")
-    private Integer  ifDjselfManage;
+    private String  ifDjselfManage;
 
     @Column(name = "system_logo")
     @Desc(value = "系统图标")

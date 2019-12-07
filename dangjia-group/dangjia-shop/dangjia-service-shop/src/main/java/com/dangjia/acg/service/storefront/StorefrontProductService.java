@@ -460,7 +460,8 @@ public class StorefrontProductService {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息!");
             }
             //判断:非当家自营店只能上架实物商品和服务商品 0:普通商家 1 ： 当家自营店
-            if (storefront != null && storefront.getIfDjselfManage() == 0) {
+            String ifDjselfManage=storefront.getIfDjselfManage();
+            if (StringUtil.isNotEmpty(ifDjselfManage)&&ifDjselfManage.equals("0")) {
                 Integer k = istorefrontProductMapper.selectProductByGoodsType(id);
                 if (k > 0) {
                     StorefrontProduct storefrontProduct = new StorefrontProduct();
@@ -468,13 +469,13 @@ public class StorefrontProductService {
                     storefrontProduct.setIsShelfStatus(isShelfStatus);
                     int i = istorefrontProductMapper.updateByPrimaryKeySelective(storefrontProduct);
                     if (i <= 0) {
-                        return ServerResponse.createByErrorMessage("该商品不能上下架！");
+                        return ServerResponse.createByErrorMessage("该商品不能上下架");
                     }
-                    return ServerResponse.createBySuccessMessage("商品上下架成功！");
+                    return ServerResponse.createBySuccessMessage("商品上下架成功");
                 }
                 else
                 {
-                    return ServerResponse.createByErrorMessage("温馨提示:非当家自营店只能上架实物商品和服务商品");
+                    return ServerResponse.createByErrorMessage("该商品不能上下架");
                 }
             }
             else
@@ -515,7 +516,7 @@ public class StorefrontProductService {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息!");
             }
             //当家自营
-            if(storefront.getIfDjselfManage()==1)
+            if(StringUtil.isNotEmpty(storefront.getIfDjselfManage())&&storefront.getIfDjselfManage().equals("1"))
             {
                 String[] iditem = id.split(",");
                 Example example = new Example(StorefrontProduct.class);
