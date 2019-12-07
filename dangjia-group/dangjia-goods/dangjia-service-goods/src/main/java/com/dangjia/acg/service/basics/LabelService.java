@@ -41,9 +41,6 @@ public class LabelService {
     //查询所有的标签
     public ServerResponse<PageInfo> getAllLabel(PageDTO pageDTO,String cityId) {
         try {
-            if (pageDTO == null) {
-                pageDTO = new PageDTO();
-            }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<Map<String, Object>> mapList = new ArrayList<>();
             List<Label> labelList = iLabelMapper.getLabel(cityId);
