@@ -77,7 +77,7 @@ public class MemberCollectService {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
             //组装新list
-            List<MemberCollectDTO> memberCollectDTOList = new ArrayList<MemberCollectDTO>();
+            List<MemberCollectDTO> memberCollectDTOList = new ArrayList<>();
             memberCollectList.forEach(memberCollect -> {
                 List<MemberCollectDTO> memberCollectDTOS = storefrontProductAPI.queryCollectGood(memberCollect.getCollectId());
                 memberCollectDTOS.forEach(memberCollectDTO -> {
