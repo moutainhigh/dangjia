@@ -313,8 +313,7 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse queryGoodsListStorefront(HttpServletRequest request, PageDTO pageDTO, String categoryId, String name, String cityId, Integer type) {
-        String userId=request.getParameter("userId");
+    public ServerResponse queryGoodsListStorefront(HttpServletRequest request, PageDTO pageDTO, String categoryId, String name,String userId, String cityId, Integer type) {
         Storefront storefront=basicsStorefrontAPI.queryStorefrontByUserID(userId,cityId);
         if(storefront==null)
         {

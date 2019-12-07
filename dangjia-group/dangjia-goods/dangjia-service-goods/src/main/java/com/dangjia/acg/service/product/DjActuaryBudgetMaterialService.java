@@ -111,6 +111,16 @@ public class DjActuaryBudgetMaterialService {
     }
 
     /**
+     *
+     * @param houseId
+     * @param cityId
+     * @return
+     */
+    public ServerResponse allGoodsCategoryList(String houseId, String cityId) {
+        return null;
+    }
+
+    /**
      * 生成精算
      */
     public ServerResponse makeBudgets(String actuarialTemplateId, String houseId,
