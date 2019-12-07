@@ -1172,7 +1172,7 @@ public class PaymentService {
                 example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, member.getId())
                         .andIn(ShoppingCart.PRODUCT_ID,Arrays.asList(productIds));
                 iShoppingCartMapper.deleteByExample(example);
-                return ServerResponse.createBySuccess("提交成功", order.getId());
+                return ServerResponse.createBySuccess("提交成功", businessOrder.getNumber());
             }
             return ServerResponse.createBySuccess("提交成功");
         } catch (Exception e) {
@@ -1358,7 +1358,7 @@ public class PaymentService {
                         workerTypeSafeOrderMapper.insert(workerTypeSafeOrder);
                     }
                 }
-                return ServerResponse.createBySuccess("提交成功", order.getId());
+                return ServerResponse.createBySuccess("提交成功", businessOrder.getNumber());
             }
             return ServerResponse.createBySuccess("提交成功");
         } catch (Exception e) {
