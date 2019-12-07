@@ -62,4 +62,10 @@ public class DjActuaryBudgetMaterialController implements DjActuaryBudgetMateria
         return djActuaryBudgetMaterialService.newcategoryIdList(houseId,cityId);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse allGoodsCategoryList(String houseId, String cityId) {
+        return djActuaryBudgetMaterialService.allGoodsCategoryList(houseId,cityId);
+    }
+
 }

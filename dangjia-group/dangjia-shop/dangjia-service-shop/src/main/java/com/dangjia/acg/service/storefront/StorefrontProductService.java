@@ -468,9 +468,9 @@ public class StorefrontProductService {
                     storefrontProduct.setIsShelfStatus(isShelfStatus);
                     int i = istorefrontProductMapper.updateByPrimaryKeySelective(storefrontProduct);
                     if (i <= 0) {
-                        return ServerResponse.createByErrorMessage("商品上下架失败");
+                        return ServerResponse.createByErrorMessage("该商品不能上下架！");
                     }
-                    return ServerResponse.createBySuccessMessage("商品上下架成功");
+                    return ServerResponse.createBySuccessMessage("商品上下架成功！");
                 }
                 else
                 {

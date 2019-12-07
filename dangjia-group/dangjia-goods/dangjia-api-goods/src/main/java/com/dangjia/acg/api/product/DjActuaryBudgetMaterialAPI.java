@@ -29,6 +29,15 @@ public interface DjActuaryBudgetMaterialAPI {
                                @RequestParam("listOfGoods") String listOfGoods,
                                @RequestParam("cityId") String cityId);
 
+    @PostMapping("/actuary/actuaryOpe/newcategoryIdList")
+    @ApiOperation(value = "精算-所有分类", notes = "精算-所有分类")
+    ServerResponse newcategoryIdList(@RequestParam("houseId")String houseId,@RequestParam("cityId")String cityId);
+
+    @PostMapping("/actuary/actuaryOpe/allGoodsCategoryList")
+    @ApiOperation(value = "精算-全部", notes = "精算-全部")
+    ServerResponse allGoodsCategoryList(@RequestParam("houseId")String houseId,@RequestParam("cityId")String cityId);
+
+
     @PostMapping("/app/product/djActuaryBudgetMaterial/queryMakeBudgetsList")
     @ApiOperation(value = "查询精算列表", notes = "查询精算列表")
     ServerResponse queryMakeBudgetsList(@RequestParam("request") HttpServletRequest request,
@@ -36,7 +45,6 @@ public interface DjActuaryBudgetMaterialAPI {
                                         @RequestParam("categoryId") String categoryId,
                                         @RequestParam("houseId") String houseId,
                                         @RequestParam("cityId") String cityId);
-
 
     @PostMapping("/app/product/djActuaryBudgetMaterial/queryBasicsProduct")
     @ApiOperation(value = "查询精算详情列表", notes = "查询精算详情列表")
@@ -50,10 +58,5 @@ public interface DjActuaryBudgetMaterialAPI {
                                       @RequestParam("attributeVal")String attributeVal,
                                       @RequestParam("brandVal")String brandVal,
                                       @RequestParam("orderKey")String orderKey);
-
-
-    @PostMapping("/actuary/actuaryOpe/newcategoryIdList")
-    @ApiOperation(value = "新版所有分类", notes = "新版所有分类")
-    ServerResponse newcategoryIdList(@RequestParam("houseId")String houseId,@RequestParam("cityId")String cityId);
 
 }
