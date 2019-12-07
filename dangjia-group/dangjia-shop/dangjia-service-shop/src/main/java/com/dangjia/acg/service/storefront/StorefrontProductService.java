@@ -373,9 +373,9 @@ public class StorefrontProductService {
                     spdto.setDetailImageUrl(dtimgStr.toString());
                     basicsStorefrontProductViewDTO.setStorefrontProduct(spdto);
                     //*************************************新增功能点:初始化下拉框是否关联增值商品******************************************************
-                    String prodTemplateId=spdto.getProdTemplateId();
-                    List<ProductAddedRelation> productAddedRelationlist=djBasicsProductAPI.queryProductAddRelationByPid(null,prodTemplateId);
-                    basicsStorefrontProductViewDTO.setProductAddedRelationlist(productAddedRelationlist);
+//                    String prodTemplateId=spdto.getProdTemplateId();
+//                    List<ProductAddedRelation> productAddedRelationlist=djBasicsProductAPI.queryProductAddRelationByPid(null,prodTemplateId);
+//                    basicsStorefrontProductViewDTO.setProductAddedRelationlist(productAddedRelationlist);
                 }
             }
             PageInfo pageResult = new PageInfo(list);
