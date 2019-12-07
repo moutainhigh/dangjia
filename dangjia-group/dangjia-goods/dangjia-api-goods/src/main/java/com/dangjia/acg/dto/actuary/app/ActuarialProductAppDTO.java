@@ -92,7 +92,7 @@ public class ActuarialProductAppDTO {
     private String brandName;
 
     @ApiModelProperty("商品类型（类型0：实物商品；1：服务商品；2：人工商品；3：体验；4：增值）")
-    private Integer goodsType;
+    private Integer productType;
 
     @ApiModelProperty("购买性质（购买性质0：必买；1：可选；2：自购；3：不可单独购买）")
     private Integer goodsBuy;

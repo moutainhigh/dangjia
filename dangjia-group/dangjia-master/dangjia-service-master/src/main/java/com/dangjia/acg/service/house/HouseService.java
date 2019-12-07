@@ -17,7 +17,6 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
-import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.common.util.MathUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO;
@@ -43,7 +42,6 @@ import com.dangjia.acg.mapper.store.IStoreMapper;
 import com.dangjia.acg.mapper.store.IStoreUserMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
-import com.dangjia.acg.modle.attribute.AttributeValue;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.clue.Clue;
@@ -71,7 +69,6 @@ import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseFlowService;
 import com.dangjia.acg.service.product.MasterProductTemplateService;
-import com.dangjia.acg.util.JdbcContextHolder;
 import com.dangjia.acg.util.StringTool;
 import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
@@ -425,11 +422,8 @@ public class HouseService {
                     continue;
                 }
                 //添加图片详情地址字段
-                String[] imgArr = image.split(",");
-                StringBuilder imgStr = new StringBuilder();
-                StringBuilder imgUrlStr = new StringBuilder();
-                StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
-                ap.setImageUrl(imgStr.toString());//图片详情地址设置
+                ap.setImageUrl(StringTool.getImage(ap.getImage(),address));//图多张
+                ap.setImageSingle(StringTool.getImageSingle(ap.getImage(),address));//图一张
                 //查询单位
                 String unitId=ap.getUnit();
                 //查询单位

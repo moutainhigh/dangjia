@@ -35,6 +35,11 @@ public class ShoppingCartListDTO {
     @ApiModelProperty("商品图片")
     private String image;
 
+    @ApiModelProperty("商品图片(单张)")
+    private String imageSingle;
+
+    @ApiModelProperty("商品图片详细地址")
+    private String imageUrl;
     @Desc(value = "销售单价")
     @ApiModelProperty("销售单价")
     private Double price;

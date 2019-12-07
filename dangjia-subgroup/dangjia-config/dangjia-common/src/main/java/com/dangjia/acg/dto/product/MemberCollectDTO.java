@@ -1,5 +1,6 @@
 package com.dangjia.acg.dto.product;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.util.Date;
@@ -11,6 +12,11 @@ public class MemberCollectDTO {
     private String productName;
     private double sellPrice;
     private String image;
+    @ApiModelProperty("商品图片(单张)")
+    private String imageSingle;
+
+    @ApiModelProperty("商品图片详细地址")
+    private String imageUrl;
     private String unitName;
     /**
      * 调后价格

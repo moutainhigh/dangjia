@@ -342,7 +342,7 @@
         bp.unit_name unitName,
         bp.value_id_arr valueIdArr,
         bp.value_name_arr valueNameArr,
-        bg.type goodsType,
+        bg.type productType,
         bg.buy goodsBuy,
         bp.convert_quality convertQuality,
         bp.convert_unit convertUnit,

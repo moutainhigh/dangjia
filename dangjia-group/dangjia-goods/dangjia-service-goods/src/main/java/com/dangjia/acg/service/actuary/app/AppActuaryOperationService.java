@@ -438,7 +438,7 @@ public class AppActuaryOperationService {
             goodsDTO.setIrreversibleReasons(goods.getIrreversibleReasons());
             goodsDTO.setIsShelfStatus(product.getIsShelfStatus());
             goodsDTO.setProductName(product.getProductName());
-            goodsDTO.setGoodsType(goods.getType());//材料类型
+            goodsDTO.setProductType(goods.getType());//材料类型
             goodsDTO.setMarketingName(product.getMarketName());//营销名称
             goodsDTO.setIsInflueWarrantyPeriod(productTemplate.getIsInflueWarrantyPeriod());//是否影响质保年限（1是，0否）
             goodsDTO.setRefundPolicy(productTemplate.getRefundPolicy());//退款政策
