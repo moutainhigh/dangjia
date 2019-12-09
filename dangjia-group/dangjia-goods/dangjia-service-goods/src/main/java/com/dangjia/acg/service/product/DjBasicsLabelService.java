@@ -11,6 +11,7 @@ import com.dangjia.acg.modle.product.DjBasicsLabel;
 import com.dangjia.acg.modle.product.DjBasicsLabelValue;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -200,17 +201,23 @@ public class DjBasicsLabelService {
      *
      * @return
      */
-    public ServerResponse queryCommodityLabels(PageDTO pageDTO) {
+    public ServerResponse queryCommodityLabels(String searchKey,PageDTO pageDTO) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<DjBasicsLabel> djBasicsLabels = djBasicsLabelMapper.selectAll();
+            Example example=new Example(DjBasicsLabel.class);
+            Example.Criteria criteria = example.createCriteria();
+            criteria.andEqualTo(DjBasicsLabel.DATA_STATUS,0);
+            if(StringUtils.isNotBlank(searchKey)) {
+                criteria.andLike(DjBasicsLabel.NAME, "%" + searchKey + "%");
+            }
+            List<DjBasicsLabel> djBasicsLabels = djBasicsLabelMapper.selectByExample(example);
             PageInfo pageResult = new PageInfo(djBasicsLabels);
             List<DjBasicsLabelDTO> labelDTOS = new ArrayList<>();
             for (DjBasicsLabel djBasicsLabel : djBasicsLabels) {
                 DjBasicsLabelDTO djBasicsLabelDTO = new DjBasicsLabelDTO();
                 djBasicsLabelDTO.setId(djBasicsLabel.getId());
                 djBasicsLabelDTO.setName(djBasicsLabel.getName());
-                Example example = new Example(DjBasicsLabelValue.class);
+                example = new Example(DjBasicsLabelValue.class);
                 example.createCriteria().andEqualTo(DjBasicsLabelValue.LABEL_ID, djBasicsLabel.getId())
                         .andEqualTo(DjBasicsLabelValue.DATA_STATUS, 0);
                 example.orderBy(DjBasicsLabelValue.DATA_STATUS).desc();

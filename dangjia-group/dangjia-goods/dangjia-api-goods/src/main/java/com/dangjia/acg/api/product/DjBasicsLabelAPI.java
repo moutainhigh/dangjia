@@ -49,6 +49,7 @@ public interface DjBasicsLabelAPI {
     @PostMapping("/product/djBasicsLabel/queryCommodityLabels")
     @ApiOperation(value = "查询标签", notes = "查询标签")
     ServerResponse queryCommodityLabels(@RequestParam("request") HttpServletRequest request,
+                                        @RequestParam("searchKey") String searchKey,
                                         @RequestParam("pageDTO") PageDTO pageDTO);
 
 }
