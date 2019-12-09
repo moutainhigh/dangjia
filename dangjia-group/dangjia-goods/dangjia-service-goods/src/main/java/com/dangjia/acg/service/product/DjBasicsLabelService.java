@@ -1,5 +1,7 @@
 package com.dangjia.acg.service.product;
 
+import com.dangjia.acg.common.exception.ServerCode;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dto.product.DjBasicsLabelDTO;
@@ -7,6 +9,8 @@ import com.dangjia.acg.mapper.product.DjBasicsLabelMapper;
 import com.dangjia.acg.mapper.product.DjBasicsLabelValueMapper;
 import com.dangjia.acg.modle.product.DjBasicsLabel;
 import com.dangjia.acg.modle.product.DjBasicsLabelValue;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -154,11 +158,16 @@ public class DjBasicsLabelService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse delCommodityLabels(String id) {
-        djBasicsLabelMapper.deleteByPrimaryKey(id);
-        Example example = new Example(DjBasicsLabelValue.class);
-        example.createCriteria().andEqualTo(DjBasicsLabelValue.LABEL_ID, id);
-        djBasicsLabelValueMapper.deleteByExample(example);
-        return ServerResponse.createBySuccessMessage("删除成功");
+        try {
+            djBasicsLabelMapper.deleteByPrimaryKey(id);
+            Example example = new Example(DjBasicsLabelValue.class);
+            example.createCriteria().andEqualTo(DjBasicsLabelValue.LABEL_ID, id);
+            djBasicsLabelValueMapper.deleteByExample(example);
+            return ServerResponse.createBySuccessMessage("删除成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("删除失败");
+        }
     }
 
 
@@ -169,15 +178,20 @@ public class DjBasicsLabelService {
      * @return
      */
     public ServerResponse queryCommodityLabelsById(String labelId) {
-        DjBasicsLabel djBasicsLabel = djBasicsLabelMapper.selectByPrimaryKey(labelId);
-        DjBasicsLabelDTO djBasicsLabelDTO = new DjBasicsLabelDTO();
-        djBasicsLabelDTO.setId(djBasicsLabel.getId());
-        djBasicsLabelDTO.setName(djBasicsLabel.getName());
-        Example example = new Example(DjBasicsLabelValue.class);
-        example.createCriteria().andEqualTo(DjBasicsLabelValue.LABEL_ID, labelId)
-                .andEqualTo(DjBasicsLabelValue.DATA_STATUS, 0);
-        djBasicsLabelDTO.setLabelValueList(djBasicsLabelValueMapper.selectByExample(example));
-        return ServerResponse.createBySuccess("查询成功", djBasicsLabelDTO);
+        try {
+            DjBasicsLabel djBasicsLabel = djBasicsLabelMapper.selectByPrimaryKey(labelId);
+            DjBasicsLabelDTO djBasicsLabelDTO = new DjBasicsLabelDTO();
+            djBasicsLabelDTO.setId(djBasicsLabel.getId());
+            djBasicsLabelDTO.setName(djBasicsLabel.getName());
+            Example example = new Example(DjBasicsLabelValue.class);
+            example.createCriteria().andEqualTo(DjBasicsLabelValue.LABEL_ID, labelId)
+                    .andEqualTo(DjBasicsLabelValue.DATA_STATUS, 0);
+            djBasicsLabelDTO.setLabelValueList(djBasicsLabelValueMapper.selectByExample(example));
+            return ServerResponse.createBySuccess("查询成功", djBasicsLabelDTO);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
     }
 
 
@@ -186,21 +200,30 @@ public class DjBasicsLabelService {
      *
      * @return
      */
-    public ServerResponse queryCommodityLabels() {
-        List<DjBasicsLabel> djBasicsLabels = djBasicsLabelMapper.selectAll();
-        List<DjBasicsLabelDTO> labelDTOS = new ArrayList<>();
-        for (DjBasicsLabel djBasicsLabel : djBasicsLabels) {
-            DjBasicsLabelDTO djBasicsLabelDTO = new DjBasicsLabelDTO();
-            djBasicsLabelDTO.setId(djBasicsLabel.getId());
-            djBasicsLabelDTO.setName(djBasicsLabel.getName());
-            Example example = new Example(DjBasicsLabelValue.class);
-            example.createCriteria().andEqualTo(DjBasicsLabelValue.LABEL_ID, djBasicsLabel.getId())
-                    .andEqualTo(DjBasicsLabelValue.DATA_STATUS, 0);
-            example.orderBy(DjBasicsLabelValue.DATA_STATUS).desc();
-            djBasicsLabelDTO.setLabelValueList(djBasicsLabelValueMapper.selectByExample(example));
-            labelDTOS.add(djBasicsLabelDTO);
+    public ServerResponse queryCommodityLabels(PageDTO pageDTO) {
+        try {
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<DjBasicsLabel> djBasicsLabels = djBasicsLabelMapper.selectAll();
+            List<DjBasicsLabelDTO> labelDTOS = new ArrayList<>();
+            for (DjBasicsLabel djBasicsLabel : djBasicsLabels) {
+                DjBasicsLabelDTO djBasicsLabelDTO = new DjBasicsLabelDTO();
+                djBasicsLabelDTO.setId(djBasicsLabel.getId());
+                djBasicsLabelDTO.setName(djBasicsLabel.getName());
+                Example example = new Example(DjBasicsLabelValue.class);
+                example.createCriteria().andEqualTo(DjBasicsLabelValue.LABEL_ID, djBasicsLabel.getId())
+                        .andEqualTo(DjBasicsLabelValue.DATA_STATUS, 0);
+                example.orderBy(DjBasicsLabelValue.DATA_STATUS).desc();
+                djBasicsLabelDTO.setLabelValueList(djBasicsLabelValueMapper.selectByExample(example));
+                labelDTOS.add(djBasicsLabelDTO);
+            }
+            if(labelDTOS.size()<=0)
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
+            PageInfo pageResult = new PageInfo(labelDTOS);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
         }
-        return ServerResponse.createBySuccess("查询成功", labelDTOS);
     }
 
 }
