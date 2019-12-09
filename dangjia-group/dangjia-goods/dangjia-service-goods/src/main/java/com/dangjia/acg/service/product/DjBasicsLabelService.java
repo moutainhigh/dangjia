@@ -204,6 +204,7 @@ public class DjBasicsLabelService {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<DjBasicsLabel> djBasicsLabels = djBasicsLabelMapper.selectAll();
+            PageInfo pageResult = new PageInfo(djBasicsLabels);
             List<DjBasicsLabelDTO> labelDTOS = new ArrayList<>();
             for (DjBasicsLabel djBasicsLabel : djBasicsLabels) {
                 DjBasicsLabelDTO djBasicsLabelDTO = new DjBasicsLabelDTO();
@@ -218,7 +219,7 @@ public class DjBasicsLabelService {
             }
             if(labelDTOS.size()<=0)
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
-            PageInfo pageResult = new PageInfo(labelDTOS);
+           pageResult.setList(labelDTOS);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();
