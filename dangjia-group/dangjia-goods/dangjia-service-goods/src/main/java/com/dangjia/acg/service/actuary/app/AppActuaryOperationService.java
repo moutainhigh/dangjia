@@ -383,7 +383,7 @@ public class AppActuaryOperationService {
             List<DjBasicsProductTemplate> productList = iBasicsProductTemplateMapper.getProductTempListByStorefontId(product.getStorefrontId(), goods.getId());
             List<AttributeDTO> attrList = getAllAttributes(product, productList, goods);
             goodsDTO.setAttrList(attrList);
-            return ServerResponse.createBySuccess("查询成功", attrList);
+            return ServerResponse.createBySuccess("查询成功", goodsDTO);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("获取规格异常" + e.getMessage());
