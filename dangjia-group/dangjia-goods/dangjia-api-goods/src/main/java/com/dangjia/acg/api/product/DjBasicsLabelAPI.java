@@ -1,5 +1,6 @@
 package com.dangjia.acg.api.product;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -47,6 +48,7 @@ public interface DjBasicsLabelAPI {
 
     @PostMapping("/product/djBasicsLabel/queryCommodityLabels")
     @ApiOperation(value = "查询标签", notes = "查询标签")
-    ServerResponse queryCommodityLabels(@RequestParam("request") HttpServletRequest request);
+    ServerResponse queryCommodityLabels(@RequestParam("request") HttpServletRequest request,
+                                        @RequestParam("pageDTO") PageDTO pageDTO);
 
 }

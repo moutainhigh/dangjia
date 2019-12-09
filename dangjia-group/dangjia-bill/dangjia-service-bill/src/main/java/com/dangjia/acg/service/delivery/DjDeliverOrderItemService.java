@@ -73,30 +73,8 @@ public class DjDeliverOrderItemService {
             paymentToBeMadeDTO.setShoppingCartsCount(iBillShoppingCartMapper.selectCountByExample(example));
             paymentToBeMadeDTO.setHouseId(house.getHouseId());
             paymentToBeMadeDTO.setHouseName( house.getResidential() + house.getBuilding() + "栋" + house.getUnit() + "单元" + house.getNumber() + "号");
-            String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             List<OrderStorefrontDTO> orderStorefrontDTOS = iBillDjDeliverOrderMapper.queryPaymentToBeMade(orderId);
-//            List<AppointmentListDTO> appointmentListDTOS = new ArrayList<>();
-            orderStorefrontDTOS.forEach(orderStorefrontDTO -> {
-                orderStorefrontDTO.setStorefrontIcon(imageAddress+orderStorefrontDTO.getStorefrontIcon());
-                List<AppointmentDTO> appointmentDTOS = iBillDjDeliverOrderMapper.queryAppointmentHump(orderStorefrontDTO.getOrderId());
-                AppointmentListDTO appointmentListDTO = new AppointmentListDTO();
-                appointmentDTOS.forEach(appointmentDTO -> {
-                    appointmentDTO.setImage(imageAddress+appointmentDTO.getImage());
-                    if(!CommonUtil.isEmpty(appointmentDTO.getValueIdArr())) {
-                        appointmentDTO.setValueNameArr(billProductTemplateService.getNewValueNameArr(appointmentDTO.getValueIdArr()).replaceAll(",", " "));
-                    }
-                });
-                if("worker".equals(orderStorefrontDTO.getStorefrontType())){
-                    Member member = djDeliverOrderService.queryWorker(orderStorefrontDTO.getHouseId(), orderStorefrontDTO.getWorkerTypeId());
-                    if(member!=null) {
-                        orderStorefrontDTO.setWorkerId(member.getId());
-                        orderStorefrontDTO.setWorkerName(member.getName());
-                    }
-                }
-                appointmentListDTO.setAppointmentDTOS(appointmentDTOS);
-                appointmentListDTO.setOrderStorefrontDTO(orderStorefrontDTO);
-                orderStorefrontDTO.setAppointmentDTOS(appointmentDTOS);
-            });
+            this.duplicatedCode(orderStorefrontDTOS);
             paymentToBeMadeDTO.setOrderStorefrontDTOS(orderStorefrontDTOS);
             if (orderStorefrontDTOS.size() <= 0)
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
@@ -129,32 +107,11 @@ public class DjDeliverOrderItemService {
             House house= houseAPI.selectHouseById(order.getHouseId());
             paymentToBeMadeDTO.setHouseId(house.getHouseId());
             paymentToBeMadeDTO.setHouseName( house.getResidential() + house.getBuilding() + "栋" + house.getUnit() + "单元" + house.getNumber() + "号");
-            String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             List<String> strings = billDjDeliverOrderSplitItemMapper.querySplitDeliverId(orderId);
             paymentToBeMadeDTO.setSplitDeliverCount(strings.size());
             paymentToBeMadeDTO.setSplitDeliverId(CommonUtil.isEmpty(String.join(",",strings))?null:String.join(",",strings));
             List<OrderStorefrontDTO> orderStorefrontDTOS = iBillDjDeliverOrderMapper.queryHumpDetail(orderId);
-            orderStorefrontDTOS.forEach(orderStorefrontDTO -> {
-                orderStorefrontDTO.setStorefrontIcon(imageAddress+orderStorefrontDTO.getStorefrontIcon());
-                List<AppointmentDTO> appointmentDTOS = iBillDjDeliverOrderMapper.queryAppointmentHump(orderStorefrontDTO.getOrderId());
-                AppointmentListDTO appointmentListDTO = new AppointmentListDTO();
-                appointmentDTOS.forEach(appointmentDTO -> {
-                    appointmentDTO.setImage(imageAddress+appointmentDTO.getImage());
-                    if(!CommonUtil.isEmpty(appointmentDTO.getValueIdArr())) {
-                        appointmentDTO.setValueNameArr(billProductTemplateService.getNewValueNameArr(appointmentDTO.getValueIdArr()).replaceAll(",", " "));
-                    }
-                });
-                if("worker".equals(orderStorefrontDTO.getStorefrontType())){
-                    Member member = djDeliverOrderService.queryWorker(orderStorefrontDTO.getHouseId(), orderStorefrontDTO.getWorkerTypeId());
-                    if(member!=null) {
-                        orderStorefrontDTO.setWorkerId(member.getId());
-                        orderStorefrontDTO.setWorkerName(member.getName());
-                    }
-                }
-                appointmentListDTO.setAppointmentDTOS(appointmentDTOS);
-                appointmentListDTO.setOrderStorefrontDTO(orderStorefrontDTO);
-                orderStorefrontDTO.setAppointmentDTOS(appointmentDTOS);
-            });
+            this.duplicatedCode(orderStorefrontDTOS);
             paymentToBeMadeDTO.setOrderStorefrontDTOS(orderStorefrontDTOS);
             if (orderStorefrontDTOS.size() <= 0)
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
@@ -164,6 +121,31 @@ public class DjDeliverOrderItemService {
             logger.info("查询失败", e);
             return ServerResponse.createByErrorMessage("查询失败" + e);
         }
+    }
+
+    private void duplicatedCode(List<OrderStorefrontDTO> orderStorefrontDTOS){
+        String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+        orderStorefrontDTOS.forEach(orderStorefrontDTO -> {
+            orderStorefrontDTO.setStorefrontIcon(imageAddress+orderStorefrontDTO.getStorefrontIcon());
+            List<AppointmentDTO> appointmentDTOS = iBillDjDeliverOrderMapper.queryAppointmentHump(orderStorefrontDTO.getOrderId());
+            AppointmentListDTO appointmentListDTO = new AppointmentListDTO();
+            appointmentDTOS.forEach(appointmentDTO -> {
+                appointmentDTO.setImage(imageAddress+appointmentDTO.getImage());
+                if(!CommonUtil.isEmpty(appointmentDTO.getValueIdArr())) {
+                    appointmentDTO.setValueNameArr(billProductTemplateService.getNewValueNameArr(appointmentDTO.getValueIdArr()).replaceAll(",", " "));
+                }
+            });
+            if("worker".equals(orderStorefrontDTO.getStorefrontType())){
+                Member member = djDeliverOrderService.queryWorker(orderStorefrontDTO.getHouseId(), orderStorefrontDTO.getWorkerTypeId());
+                if(member!=null) {
+                    orderStorefrontDTO.setWorkerId(member.getId());
+                    orderStorefrontDTO.setWorkerName(member.getName());
+                }
+            }
+            appointmentListDTO.setAppointmentDTOS(appointmentDTOS);
+            appointmentListDTO.setOrderStorefrontDTO(orderStorefrontDTO);
+            orderStorefrontDTO.setAppointmentDTOS(appointmentDTOS);
+        });
     }
 
 
