@@ -14,11 +14,13 @@ import com.dangjia.acg.dto.delivery.AppointmentListDTO;
 import com.dangjia.acg.dto.delivery.OrderStorefrontDTO;
 import com.dangjia.acg.dto.order.PaymentToBeMadeDTO;
 import com.dangjia.acg.mapper.delivery.BillDjDeliverOrderSplitItemMapper;
+import com.dangjia.acg.mapper.delivery.BillDjDeliverSplitDeliverMapper;
 import com.dangjia.acg.mapper.delivery.IBillDjDeliverOrderMapper;
 import com.dangjia.acg.mapper.order.IBillDjAcceptanceEvaluationMapper;
 import com.dangjia.acg.mapper.pay.IBillBusinessOrderMapper;
 import com.dangjia.acg.mapper.shoppingCart.IBillShoppingCartMapper;
 import com.dangjia.acg.modle.deliver.Order;
+import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.order.DjAcceptanceEvaluation;
@@ -58,6 +60,8 @@ public class DjDeliverOrderItemService {
     private MemberAPI memberAPI;
     @Autowired
     private IBillDjAcceptanceEvaluationMapper iBillDjAcceptanceEvaluationMapper;
+    @Autowired
+    private BillDjDeliverSplitDeliverMapper billDjDeliverSplitDeliverMapper;
 
     /**
      * 待付款/已取消订单详情
@@ -265,7 +269,7 @@ public class DjDeliverOrderItemService {
      * @param jsonStr
      * @return
      */
-    public ServerResponse setAcceptanceEvaluation(String userToken, String jsonStr) {
+    public ServerResponse setAcceptanceEvaluation(String userToken, String jsonStr, String splitDeliverId) {
         try {
             Object object = memberAPI.getMember(userToken);
             if (object instanceof ServerResponse) {
@@ -287,6 +291,10 @@ public class DjDeliverOrderItemService {
                 djAcceptanceEvaluation.setState(1);
                 iBillDjAcceptanceEvaluationMapper.insert(djAcceptanceEvaluation);
             });
+            SplitDeliver splitDeliver=new SplitDeliver();
+            splitDeliver.setId(splitDeliverId);
+            splitDeliver.setShippingState(8);
+            billDjDeliverSplitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
             return ServerResponse.createBySuccessMessage("评价成功");
         } catch (Exception e) {
             e.printStackTrace();
