@@ -269,7 +269,13 @@ public class ShopCartService {
      * 审核加入购物车是否达到条件
      *
      * @param productId
-     * @return 0=直接通过,无提示； 1=有房无精算(业主无房时)   2=有房有精算(业主无房无精算时) 3=有房有精算(业主有房无精算时)   4=有房有精算(业主有房无精算时)  5=人工商品
+     * @return
+     * 0=直接通过,无提示；
+     * 1=有房无精算(业主无房时[收藏+去装修])
+     * 2=有房有精算(业主无房无精算时[收藏+去装修])
+     * 3=有房有精算(业主有房有精算时[购买精算+加入购物车])
+     * 4=有房有精算(业主有房无精算时[购买该商品+去精算])
+     * 5=人工商品
      */
     public ServerResponse checkCart(String userToken, String productId) {
         try {
