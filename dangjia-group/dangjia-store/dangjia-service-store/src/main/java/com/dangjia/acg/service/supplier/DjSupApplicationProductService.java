@@ -324,7 +324,7 @@ public class DjSupApplicationProductService {
     public ServerResponse queryNotForTheGoods(String supId, String shopId, PageDTO pageDTO) {
         try {
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-            List<DjSupSupplierProductDTO> djSupSupplierProductDTOS = djSupSupplierProductMapper.queryHaveGoods(supId, shopId, "1,2");
+            List<DjSupSupplierProductDTO> djSupSupplierProductDTOS = djSupSupplierProductMapper.queryHaveGoods(supId, shopId, "0,1,2");
             //Stream表达式取出已选商品的id
             List<String> productIds = djSupSupplierProductDTOS.stream()
                     .map(DjSupSupplierProductDTO::getProductId)
