@@ -901,6 +901,7 @@ public class OrderService {
                 orderSplit.setMemberName(worker.getName());
                 orderSplit.setMobile(worker.getMobile());
                 orderSplit.setWorkerTypeId(worker.getWorkerTypeId());
+                orderSplit.setTotalAmount(new BigDecimal(0));
                 orderSplitMapper.updateByPrimaryKeySelective(orderSplit);
             } else {
                 example = new Example(OrderSplit.class);
@@ -912,12 +913,14 @@ public class OrderService {
                 orderSplit.setMemberName(worker.getName());
                 orderSplit.setMobile(worker.getMobile());
                 orderSplit.setWorkerTypeId(worker.getWorkerTypeId());
+                orderSplit.setTotalAmount(new BigDecimal(0));
                 orderSplitMapper.insert(orderSplit);
             }
 
             //获取要货购物车数据
             List<Cart> cartList = cartMapper.cartList(houseId, worker.getWorkerTypeId(), worker.getId());
             List<Map<String, Object>> productList = new ArrayList<>();
+            BigDecimal totalAmount=new BigDecimal(0);//总价
             for (Cart aCartList : cartList) {
                 Double num = aCartList.getShopCount();
                 String productId = aCartList.getProductId();
@@ -998,8 +1001,11 @@ public class OrderService {
                     map.put("productId", productId);
                     productList.add(map);
                 }
+                totalAmount=totalAmount.add(BigDecimal.valueOf(aCartList.getPrice()*aCartList.getShopCount()));
             }
-
+            //更新要货单总价
+            orderSplit.setTotalAmount(totalAmount);
+            orderSplitMapper.updateByPrimaryKeySelective(orderSplit);
             //补货材料列表
             String mendMaterialArr = JSON.toJSONString(productList);
             if (!CommonUtil.isEmpty(mendMaterialArr) && productList.size() > 0) {

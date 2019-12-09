@@ -3,7 +3,7 @@
 <mapper namespace="com.dangjia.acg.mapper.order.IBillDeliverOrderAddedProductMapper">
 
     <!--根据任意订单号查询增值商品信息-->
-     <select id="queryOrderListByAnyOrderId" resultType="com.dangjia.acg.dto.refund.ReturnWorkOrderDTO">
+     <select id="queryOrderListByAnyOrderId" resultType="com.dangjia.acg.dto.refund.DeliverOrderAddedProductDTO">
         SELECT
             id,
             any_order_id anyOrderId,

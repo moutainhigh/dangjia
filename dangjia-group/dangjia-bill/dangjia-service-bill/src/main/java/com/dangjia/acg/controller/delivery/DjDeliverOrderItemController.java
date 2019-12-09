@@ -44,4 +44,10 @@ public class DjDeliverOrderItemController implements DjDeliverOrderItemAPI {
     public ServerResponse setCancellationOrder(String orderId) {
         return djDeliverOrderItemService.setCancellationOrder(orderId);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setAcceptanceEvaluation(String userToken, String jsonStr) {
+        return djDeliverOrderItemService.setAcceptanceEvaluation(userToken,jsonStr);
+    }
 }
