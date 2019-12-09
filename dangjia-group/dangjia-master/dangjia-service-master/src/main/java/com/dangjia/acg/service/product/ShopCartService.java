@@ -126,8 +126,8 @@ public class ShopCartService {
                 List<ShoppingCartListDTO> shoppingCartListDTOS = iShoppingCartmapper.queryCartList(member.getId(), cityId, storefront.getId(), null);
                 shoppingCartListDTOS.forEach(shoppingCartListDTO -> {
 
-                    shoppingCartListDTO.setImageUrl(StringTool.getImage(shoppingCartListDTO.getImage(),imageAddress));//图多张
-                    shoppingCartListDTO.setImageSingle(StringTool.getImageSingle(shoppingCartListDTO.getImage(),imageAddress));//图一张
+                    shoppingCartListDTO.setImageUrl(StringTool.getImage(shoppingCartListDTO.getImage(), imageAddress));//图多张
+                    shoppingCartListDTO.setImageSingle(StringTool.getImageSingle(shoppingCartListDTO.getImage(), imageAddress));//图一张
                     //当前时间小于调价的时间时则展示调价预告信息
                     if (shoppingCartListDTO.getAdjustedPrice() == null
                             || shoppingCartListDTO.getModityPriceTime() == null
@@ -281,7 +281,7 @@ public class ShopCartService {
             StorefrontProduct product = iMasterStorefrontProductMapper.selectByPrimaryKey(productId);//目标product 对象
             BasicsGoods goods = iMasterGoodsMapper.selectByPrimaryKey(product.getGoodsId());
             if (goods.getType() == 2) {
-                return ServerResponse.createByErrorMessage("为确保您买到正确的人工类商品\n" +
+                return ServerResponse.createBySuccess("为确保您买到正确的人工类商品\n" +
                         "请联系服务您的工匠协助购买", 5);
             }
             Integer purchaseRestrictions = iShoppingCartmapper.queryPurchaseRestrictions(productId);
@@ -294,7 +294,7 @@ public class ShopCartService {
                         .andNotEqualTo(House.VISIT_STATE, 4);
                 Integer houses = iHouseMapper.selectCountByExample(example);
                 if (houses <= 0)
-                    return ServerResponse.createByErrorMessage("该类商品需要在开始装修后才能购买\n" +
+                    return ServerResponse.createBySuccess("该类商品需要在开始装修后才能购买\n" +
                             "您可以先收藏起来\n" +
                             "或者前往装修", 1);
             } else if (purchaseRestrictions == 2) {
@@ -302,7 +302,7 @@ public class ShopCartService {
                         .andEqualTo(House.DATA_STATUS, 0);
                 Integer houses = iHouseMapper.selectCountByExample(example);
                 if (houses <= 0) {
-                    return ServerResponse.createByErrorMessage("该类商品需要在开始装修后才能购买\n" +
+                    return ServerResponse.createBySuccess("该类商品需要在开始装修后才能购买\n" +
                             "您可以先收藏起来\n" +
                             "或者前往装修", 2);
                 }
@@ -312,7 +312,7 @@ public class ShopCartService {
                         .andNotEqualTo(House.BUDGET_OK, 5);
                 houses = iHouseMapper.selectCountByExample(example);
                 if (houses <= 0) {
-                    return ServerResponse.createByErrorMessage("该类商品建议根据精算指导购买\n" +
+                    return ServerResponse.createBySuccess("该类商品建议根据精算指导购买\n" +
                             "你可以先购买精算~", 3);
                 }
                 example.createCriteria().andEqualTo(House.MEMBER_ID, member.getId())
@@ -320,7 +320,7 @@ public class ShopCartService {
                         .andEqualTo(House.BUDGET_OK, 0);
                 houses = iHouseMapper.selectCountByExample(example);
                 if (houses <= 0) {
-                    return ServerResponse.createByErrorMessage("该类商品建议根据精算指导购买\n" +
+                    return ServerResponse.createBySuccess("该类商品建议根据精算指导购买\n" +
                             "你可以先购买精算~", 4);
                 }
             }
@@ -361,8 +361,8 @@ public class ShopCartService {
             //有房有精算  根据用户的member_id去区分
             //无房无精算  根据用户的member_id去区分
             ServerResponse ccart = checkCart(userToken, productId);
-            if (!ccart.isSuccess()) {
-                return ccart;
+            if (ccart.getResultObj() == null || ((Integer) ccart.getResultObj()) != 0) {
+                return ServerResponse.createByErrorMessage(ccart.getResultMsg());
             }
             String shoppingCartid;
             //判断去重,如果有的话就购买数量加1
@@ -559,8 +559,8 @@ public class ShopCartService {
                 //无房无精算  根据用户的member_id去区分
                 //purchaseRestrictions:0自由购房；1有房无精算；2有房有精算
                 ServerResponse ccart = checkCart(userToken, productId.toString());
-                if (!ccart.isSuccess()) {
-                    return ccart;
+                if (ccart.getResultObj() == null || ((Integer) ccart.getResultObj()) != 0) {
+                    return ServerResponse.createByErrorMessage(ccart.getResultMsg());
                 }
                 String shoppingCartid;
                 //判断去重,如果有的话就购买数量加1
