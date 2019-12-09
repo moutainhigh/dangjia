@@ -31,5 +31,10 @@ public interface DjDeliverOrderItemAPI {
     @PostMapping("app/order/setCancellationOrder")
     @ApiOperation(value = "取消订单", notes = "取消订单")
     ServerResponse setCancellationOrder(@RequestParam("orderId") String orderId);
+
+    @PostMapping("app/order/setAcceptanceEvaluation")
+    @ApiOperation(value = "验收评价", notes = "验收评价")
+    ServerResponse setAcceptanceEvaluation(@RequestParam("userToken")String userToken,
+                                           @RequestParam("jsonStr") String jsonStr);
 }
 

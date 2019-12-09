@@ -1738,6 +1738,7 @@ public class PaymentService {
                     BigDecimal totalSellPrice = new BigDecimal(0);//总价
                     for (ShoppingCartListDTO shoppingCartListDTO : shoppingCartDTO.getShoppingCartListDTOS()) {
                         ShoppingCartListDTO parmDTO=productMap.get(shoppingCartListDTO.getProductId());
+                        shoppingCartListDTO.setShopCount(parmDTO.getShopCount());
                         totalSellPrice = totalSellPrice.add(new BigDecimal(shoppingCartListDTO.getPrice()*parmDTO.getShopCount()));
                         totalPrice = totalPrice.add(new BigDecimal(shoppingCartListDTO.getPrice()*parmDTO.getShopCount()));
                         if(!CommonUtil.isEmpty(houseId)) {
@@ -1784,8 +1785,6 @@ public class PaymentService {
             BigDecimal payPrice = totalPrice.subtract(paymentDTO.getDiscountsPrice());
             payPrice = payPrice.add(paymentDTO.getFreight());
             payPrice = payPrice.add(paymentDTO.getMoveDost());
-            totalPrice = totalPrice.add(paymentDTO.getFreight());
-            totalPrice = totalPrice.add(paymentDTO.getMoveDost());
             paymentDTO.setTotalPrice(totalPrice);
             paymentDTO.setPayPrice(payPrice);
             paymentDTO.setTaskId(taskId);

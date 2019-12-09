@@ -269,7 +269,13 @@ public class ShopCartService {
      * 审核加入购物车是否达到条件
      *
      * @param productId
-     * @return 0=直接通过,无提示； 1=有房无精算(业主无房时)   2=有房有精算(业主无房无精算时) 3=有房有精算(业主有房无精算时)   4=有房有精算(业主有房无精算时)  5=人工商品
+     * @return
+     * 0=直接通过,无提示；
+     * 1=有房无精算(业主无房时[收藏+去装修])
+     * 2=有房有精算(业主无房无精算时[收藏+去装修])
+     * 3=有房有精算(业主有房有精算时[购买精算+加入购物车])
+     * 4=有房有精算(业主有房无精算时[购买该商品+去精算])
+     * 5=人工商品
      */
     public ServerResponse checkCart(String userToken, String productId) {
         try {
@@ -361,7 +367,10 @@ public class ShopCartService {
             //有房有精算  根据用户的member_id去区分
             //无房无精算  根据用户的member_id去区分
             ServerResponse ccart = checkCart(userToken, productId);
-            if (ccart.getResultObj() == null || ((Integer) ccart.getResultObj()) != 0) {
+            if (ccart.getResultObj() == null
+                    || ((Integer) ccart.getResultObj()) != 0
+                    || ((Integer) ccart.getResultObj()) != 3
+                    || ((Integer) ccart.getResultObj()) != 4) {
                 return ServerResponse.createByErrorMessage(ccart.getResultMsg());
             }
             String shoppingCartid;
@@ -559,7 +568,10 @@ public class ShopCartService {
                 //无房无精算  根据用户的member_id去区分
                 //purchaseRestrictions:0自由购房；1有房无精算；2有房有精算
                 ServerResponse ccart = checkCart(userToken, productId.toString());
-                if (ccart.getResultObj() == null || ((Integer) ccart.getResultObj()) != 0) {
+                if (ccart.getResultObj() == null
+                        || ((Integer) ccart.getResultObj()) != 0
+                        || ((Integer) ccart.getResultObj()) != 3
+                        || ((Integer) ccart.getResultObj()) != 4) {
                     return ServerResponse.createByErrorMessage(ccart.getResultMsg());
                 }
                 String shoppingCartid;

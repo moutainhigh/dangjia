@@ -1,6 +1,9 @@
 package com.dangjia.acg.service.delivery;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.app.house.HouseAPI;
+import com.dangjia.acg.api.app.member.MemberAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -11,12 +14,16 @@ import com.dangjia.acg.dto.delivery.AppointmentListDTO;
 import com.dangjia.acg.dto.delivery.OrderStorefrontDTO;
 import com.dangjia.acg.dto.order.PaymentToBeMadeDTO;
 import com.dangjia.acg.mapper.delivery.BillDjDeliverOrderSplitItemMapper;
+import com.dangjia.acg.mapper.delivery.BillDjDeliverSplitDeliverMapper;
 import com.dangjia.acg.mapper.delivery.IBillDjDeliverOrderMapper;
+import com.dangjia.acg.mapper.order.IBillDjAcceptanceEvaluationMapper;
 import com.dangjia.acg.mapper.pay.IBillBusinessOrderMapper;
 import com.dangjia.acg.mapper.shoppingCart.IBillShoppingCartMapper;
 import com.dangjia.acg.modle.deliver.Order;
+import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.order.DjAcceptanceEvaluation;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.product.ShoppingCart;
 import com.dangjia.acg.service.product.BillProductTemplateService;
@@ -49,6 +56,12 @@ public class DjDeliverOrderItemService {
     private IBillBusinessOrderMapper iBillBusinessOrderMapper;
     @Autowired
     private IBillShoppingCartMapper iBillShoppingCartMapper;
+    @Autowired
+    private MemberAPI memberAPI;
+    @Autowired
+    private IBillDjAcceptanceEvaluationMapper iBillDjAcceptanceEvaluationMapper;
+    @Autowired
+    private BillDjDeliverSplitDeliverMapper billDjDeliverSplitDeliverMapper;
 
     /**
      * 待付款/已取消订单详情
@@ -246,6 +259,46 @@ public class DjDeliverOrderItemService {
             e.printStackTrace();
             logger.info("取消订单失败", e);
             return ServerResponse.createByErrorMessage("取消订单失败");
+        }
+    }
+
+
+    /**
+     * 验收评价
+     * @param userToken
+     * @param jsonStr
+     * @return
+     */
+    public ServerResponse setAcceptanceEvaluation(String userToken, String jsonStr, String splitDeliverId) {
+        try {
+            Object object = memberAPI.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            JSONObject job = (JSONObject)object;
+            Member member = job.toJavaObject(Member.class);
+            JSONArray jsonArr = JSONArray.parseArray(jsonStr);
+            jsonArr.forEach(str -> {
+                JSONObject obj = (JSONObject) str;
+                DjAcceptanceEvaluation djAcceptanceEvaluation=new DjAcceptanceEvaluation();
+                djAcceptanceEvaluation.setSplitItemId(obj.getString("splitItemId"));
+                djAcceptanceEvaluation.setDataStatus(0);
+                djAcceptanceEvaluation.setContent(obj.getString("content"));
+                djAcceptanceEvaluation.setImage(obj.getString("image"));
+                djAcceptanceEvaluation.setMemberId(member.getId());
+                djAcceptanceEvaluation.setProductId(obj.getString("productId"));
+                djAcceptanceEvaluation.setStar(obj.getInteger("star"));
+                djAcceptanceEvaluation.setState(1);
+                iBillDjAcceptanceEvaluationMapper.insert(djAcceptanceEvaluation);
+            });
+            SplitDeliver splitDeliver=new SplitDeliver();
+            splitDeliver.setId(splitDeliverId);
+            splitDeliver.setShippingState(8);
+            billDjDeliverSplitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
+            return ServerResponse.createBySuccessMessage("评价成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("评价失败");
         }
     }
 

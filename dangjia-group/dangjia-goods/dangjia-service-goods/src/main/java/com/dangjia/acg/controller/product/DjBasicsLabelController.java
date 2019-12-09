@@ -49,7 +49,7 @@ public class DjBasicsLabelController implements DjBasicsLabelAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryCommodityLabels(HttpServletRequest request, PageDTO pageDTO) {
-        return djBasicsLabelService.queryCommodityLabels(pageDTO);
+    public ServerResponse queryCommodityLabels(HttpServletRequest request,String searchKey, PageDTO pageDTO) {
+        return djBasicsLabelService.queryCommodityLabels(searchKey,pageDTO);
     }
 }
