@@ -73,8 +73,8 @@ public class MemberCollectService {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());//初始化分页插获取用户信息件
             List<MemberCollectDTO> memberCollectDTOS = storefrontProductAPI.queryCollectGood(member.getId());
             memberCollectDTOS.forEach(memberCollectDTO -> {
-                memberCollectDTO.setImageUrl(StringTool.getImage(memberCollectDTO.getImage(),imageAddress));//图多张
-                memberCollectDTO.setImageSingle(StringTool.getImageSingle(memberCollectDTO.getImage(),imageAddress));//图一张
+                memberCollectDTO.setImageUrl(StringTool.getImage(memberCollectDTO.getImage(), imageAddress));//图多张
+                memberCollectDTO.setImageSingle(StringTool.getImageSingle(memberCollectDTO.getImage(), imageAddress));//图一张
                 //当前时间小于调价的时间时则展示调价预告信息
                 if (memberCollectDTO.getAdjustedPrice() == null
                         || memberCollectDTO.getModityPriceTime() == null
@@ -104,49 +104,43 @@ public class MemberCollectService {
      * @return
      */
     public ServerResponse queryCollectHouse(HttpServletRequest request, String userToken, PageDTO pageDTO) {
-        try {
-            Object object = constructionService.getMember(userToken);
-            if (object instanceof ServerResponse) {
-                return (ServerResponse) object;
-            }
-            Member member = (Member) object;
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<House> houseList = iMemberCollectMapper.queryCollectHouse(member.getId());
-            if (houseList.size() <= 0) {
-                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
-            }
-            PageInfo pageResult = new PageInfo(houseList);
-            List<Map> houseMap = new ArrayList<>();
-            for (House house : houseList) {
-                house = indexPageService.setHouseTotalPrice(request, house);
-                Map map = BeanUtils.beanToMap(house);
-                String[] liangArr = {};
-                if (house.getLiangDian() != null) {
-                    liangArr = house.getLiangDian().split(",");
-                }
-                List<String> dianList = new ArrayList<>();
-                if (!CommonUtil.isEmpty(house.getStyle())) {
-                    dianList.add(house.getStyle());
-                }
-                if (!CommonUtil.isEmpty(house.getLiangDian())) {
-                    Collections.addAll(dianList, liangArr);
-                }
-                if (!CommonUtil.isEmpty(house.getBuildSquare())) {
-                    dianList.add(house.getBuildSquare() + "㎡");
-                }
-                map.put("dianList", dianList);
-                map.put("houseName", house.getHouseName());
-                String billQuantityRoom = iQuantityRoomImagesMapper.getBillQuantityRoom(house.getHouseId());
-//                map.put("imageUrl", configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(), null));
-                map.put("imageUrl", configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + billQuantityRoom);
-                houseMap.add(map);
-            }
-            pageResult.setList(houseMap);
-            return ServerResponse.createBySuccess("查询成功", pageResult);
-        } catch (Exception e) {
-            logger.info("系统出错,添加收藏失败", e);
-            return ServerResponse.createByErrorMessage("系统出错,添加收藏失败");
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
         }
+        Member member = (Member) object;
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        List<House> houseList = iMemberCollectMapper.queryCollectHouse(member.getId());
+        if (houseList.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+        PageInfo pageResult = new PageInfo(houseList);
+        List<Map> houseMap = new ArrayList<>();
+        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+        for (House house : houseList) {
+            house = indexPageService.setHouseTotalPrice(request, house);
+            Map map = BeanUtils.beanToMap(house);
+            String[] liangArr = {};
+            if (house.getLiangDian() != null) {
+                liangArr = house.getLiangDian().split(",");
+            }
+            List<String> dianList = new ArrayList<>();
+            if (!CommonUtil.isEmpty(house.getStyle())) {
+                dianList.add(house.getStyle());
+            }
+            if (!CommonUtil.isEmpty(house.getLiangDian())) {
+                Collections.addAll(dianList, liangArr);
+            }
+            if (!CommonUtil.isEmpty(house.getBuildSquare())) {
+                dianList.add(house.getBuildSquare() + "㎡");
+            }
+            map.put("dianList", dianList);
+            map.put("houseName", house.getHouseName());
+            map.put("imageUrl", address + house.getImage());
+            houseMap.add(map);
+        }
+        pageResult.setList(houseMap);
+        return ServerResponse.createBySuccess("查询成功", pageResult);
     }
 
 
@@ -265,8 +259,8 @@ public class MemberCollectService {
         if (websiteVisits.size() <= 0) {
             List<ActuarialProductAppDTO> djBasicsProductTemplates = iMemberCollectMapper.queryRandomProduct(12, cityId);
             djBasicsProductTemplates.forEach(djBasicsProductTemplate -> {
-                djBasicsProductTemplate.setImageUrl(StringTool.getImage(djBasicsProductTemplate.getImage(),imageAddress));//图多张
-                djBasicsProductTemplate.setImageSingle(StringTool.getImageSingle(djBasicsProductTemplate.getImage(),imageAddress));//图一张
+                djBasicsProductTemplate.setImageUrl(StringTool.getImage(djBasicsProductTemplate.getImage(), imageAddress));//图多张
+                djBasicsProductTemplate.setImageSingle(StringTool.getImageSingle(djBasicsProductTemplate.getImage(), imageAddress));//图一张
             });
             return ServerResponse.createBySuccess("查询成功", djBasicsProductTemplates);
         } else {
@@ -285,8 +279,8 @@ public class MemberCollectService {
                 djBasicsProductTemplates.addAll(iMemberCollectMapper.queryRandomProduct(12 - djBasicsProductTemplates.size(), cityId));
             }
             djBasicsProductTemplates.forEach(djBasicsProductTemplate -> {
-                djBasicsProductTemplate.setImageUrl(StringTool.getImage(djBasicsProductTemplate.getImage(),imageAddress));//图多张
-                djBasicsProductTemplate.setImageSingle(StringTool.getImageSingle(djBasicsProductTemplate.getImage(),imageAddress));//图一张
+                djBasicsProductTemplate.setImageUrl(StringTool.getImage(djBasicsProductTemplate.getImage(), imageAddress));//图多张
+                djBasicsProductTemplate.setImageSingle(StringTool.getImageSingle(djBasicsProductTemplate.getImage(), imageAddress));//图一张
             });
             return ServerResponse.createBySuccess("查询成功", djBasicsProductTemplates);
         }
