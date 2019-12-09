@@ -43,10 +43,7 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * author: Ronalcheng
@@ -280,15 +277,14 @@ public class OrderSplitService {
             House house = houseMapper.selectByPrimaryKey(orderSplit.getHouseId());
             Member supervisor = memberMapper.getSupervisor(house.getId());//管家
             Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
-
+            Map<String,String> list=new HashMap();
             JSONArray arr = JSONArray.parseArray(splitItemList);
             for (int i = 0; i < arr.size(); i++) {
                 JSONObject obj = arr.getJSONObject(i);
                 String id = obj.getString("id");
                 String supplierId = obj.getString("supplierId");
                 Supplier supplier = forMasterAPI.getSupplier(house.getCityId(), supplierId);
-                JsmsUtil.sendSupplier(supplier.getTelephone(), address + "submitNumber?cityId="+house.getCityId());
-
+                list.put(supplier.getTelephone(),"1");
 
                 OrderSplitItem orderSplitItem = orderSplitItemMapper.selectByPrimaryKey(id);
                 Example example = new Example(SplitDeliver.class);
@@ -332,7 +328,10 @@ public class OrderSplitService {
             }
             orderSplit.setApplyStatus(2);//发给供应商
             orderSplitMapper.updateByPrimaryKeySelective(orderSplit);
-
+            for (String key : list.keySet()) {
+                //正常状况下供应商
+                JsmsUtil.sendSupplier(key, address + "submitNumber?cityId=" + house.getCityId());
+            }
             /*
              * 计算是否超过免费要货次数,收取工匠运费
              */
