@@ -367,7 +367,10 @@ public class ShopCartService {
             //有房有精算  根据用户的member_id去区分
             //无房无精算  根据用户的member_id去区分
             ServerResponse ccart = checkCart(userToken, productId);
-            if (ccart.getResultObj() == null || ((Integer) ccart.getResultObj()) != 0) {
+            if (ccart.getResultObj() == null
+                    || ((Integer) ccart.getResultObj()) != 0
+                    || ((Integer) ccart.getResultObj()) != 3
+                    || ((Integer) ccart.getResultObj()) != 4) {
                 return ServerResponse.createByErrorMessage(ccart.getResultMsg());
             }
             String shoppingCartid;
@@ -565,7 +568,10 @@ public class ShopCartService {
                 //无房无精算  根据用户的member_id去区分
                 //purchaseRestrictions:0自由购房；1有房无精算；2有房有精算
                 ServerResponse ccart = checkCart(userToken, productId.toString());
-                if (ccart.getResultObj() == null || ((Integer) ccart.getResultObj()) != 0) {
+                if (ccart.getResultObj() == null
+                        || ((Integer) ccart.getResultObj()) != 0
+                        || ((Integer) ccart.getResultObj()) != 3
+                        || ((Integer) ccart.getResultObj()) != 4) {
                     return ServerResponse.createByErrorMessage(ccart.getResultMsg());
                 }
                 String shoppingCartid;
