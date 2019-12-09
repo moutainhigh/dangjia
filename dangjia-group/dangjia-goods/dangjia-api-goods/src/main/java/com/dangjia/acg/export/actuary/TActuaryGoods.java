@@ -14,7 +14,7 @@ public class TActuaryGoods {
     private String name;
 
     @ExcelField(titile = "商品类型", offset = 2)//材料，包工包料，人工
-    private String goodsType;
+    private String productType;
 
     @ExcelField(titile = "货号编号", offset = 3)
     private String productSn;// 货号编号

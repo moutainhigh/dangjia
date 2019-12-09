@@ -117,7 +117,25 @@ public class DjActuaryBudgetMaterialService {
      * @return
      */
     public ServerResponse allGoodsCategoryList(String houseId, String cityId) {
-        return null;
+        try {
+            AllCategoryTypeDTO allCategoryTypeDTO =new AllCategoryTypeDTO();
+            List<AllCategoryDTO> list =goodsCategoryMapper.queryNewcategoryIdList(houseId);
+            Double totalPrice=0d;
+            for(AllCategoryDTO allCategoryDTO:list)
+            {
+                if(allCategoryDTO!=null)
+                {
+                    totalPrice+=allCategoryDTO.getPriceArr();
+                }
+            }
+            allCategoryTypeDTO.setList(list);
+            allCategoryTypeDTO.setTotalPrice(totalPrice);
+
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("生成失败");
+        }
     }
 
     /**

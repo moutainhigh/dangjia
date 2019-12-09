@@ -46,7 +46,7 @@
         p.image AS image,
         p.price AS price,
         u. NAME AS unitName,
-        g.type AS goodsType,
+        g.type AS productType,
         0 AS type,
         p. NAME AS NAME
         FROM

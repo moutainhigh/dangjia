@@ -363,7 +363,7 @@ public class DjBasicsGoodsService {
 
                     }
                     map.put("id",p.getId());
-                    map.put("goodsType",goods.getType());
+                    map.put("productType",goods.getType());
                     mapList.add(map);
                 }
                 gMap.put("productList", mapList);

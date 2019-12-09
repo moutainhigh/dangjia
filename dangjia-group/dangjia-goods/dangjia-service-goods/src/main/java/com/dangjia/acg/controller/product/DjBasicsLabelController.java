@@ -2,6 +2,7 @@ package com.dangjia.acg.controller.product;
 
 import com.dangjia.acg.api.product.DjBasicsLabelAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.product.DjBasicsLabelService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +49,7 @@ public class DjBasicsLabelController implements DjBasicsLabelAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryCommodityLabels(HttpServletRequest request) {
-        return djBasicsLabelService.queryCommodityLabels();
+    public ServerResponse queryCommodityLabels(HttpServletRequest request, PageDTO pageDTO) {
+        return djBasicsLabelService.queryCommodityLabels(pageDTO);
     }
 }

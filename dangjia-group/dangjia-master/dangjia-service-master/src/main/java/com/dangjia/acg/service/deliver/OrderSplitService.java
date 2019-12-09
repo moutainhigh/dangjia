@@ -36,8 +36,6 @@ import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.storefront.Storefront;
-import com.dangjia.acg.modle.sup.Supplier;
-import com.dangjia.acg.modle.sup.SupplierProduct;
 import com.dangjia.acg.modle.supplier.DjSupApplicationProduct;
 import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.dangjia.acg.service.config.ConfigMessageService;
@@ -290,7 +288,7 @@ public class OrderSplitService {
             House house = houseMapper.selectByPrimaryKey(orderSplit.getHouseId());
             Member supervisor = memberMapper.getSupervisor(house.getId());//管家
             Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
-
+            Map<String,String > list=new HashMap();
             JSONArray arr = JSONArray.parseArray(splitItemList);
             for (int i = 0; i < arr.size(); i++) {
                 JSONObject obj = arr.getJSONObject(i);
@@ -301,8 +299,7 @@ public class OrderSplitService {
                     //非平台供应商
                     continue;
                 } else {
-                    //正常状况下供应商
-                    JsmsUtil.sendSupplier(djSupplier.getTelephone(), address + "submitNumber?cityId=" + house.getCityId());
+                    list.put(djSupplier.getTelephone(),"1");
                     //配送状态（0待发货,1已发待收货,2已收货,3取消,4部分收,5已结算,6材料员撤回(只待发货才能撤回)）
                     OrderSplitItem orderSplitItem = orderSplitItemMapper.selectByPrimaryKey(id);
                     Example example = new Example(SplitDeliver.class);
@@ -367,6 +364,11 @@ public class OrderSplitService {
                 }
                 orderSplit.setApplyStatus(2);//2通过(发给供应商)
                 orderSplitMapper.updateByPrimaryKeySelective(orderSplit);
+
+                for (String key : list.keySet()) {
+                    //正常状况下供应商
+                    JsmsUtil.sendSupplier(key, address + "submitNumber?cityId=" + house.getCityId());
+                }
                 return ServerResponse.createBySuccessMessage("操作成功");
             }
         } catch (Exception e) {
