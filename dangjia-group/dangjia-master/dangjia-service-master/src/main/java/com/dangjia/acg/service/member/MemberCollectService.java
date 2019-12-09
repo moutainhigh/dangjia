@@ -246,16 +246,18 @@ public class MemberCollectService {
      */
     public ServerResponse queryRelated(String userToken, String cityId) {
         Object object = constructionService.getMember(userToken);
-        if (object instanceof ServerResponse) {
-            return (ServerResponse) object;
-        }
-        Member member = (Member) object;
-        Example example = new Example(WebsiteVisit.class);
-        example.createCriteria().andLike(WebsiteVisit.ROUTE, "%" + member.getId() + ",%")
-                .andEqualTo(WebsiteVisit.DATA_STATUS, 0);
-        example.orderBy(WebsiteVisit.COUNT).desc();
-        List<WebsiteVisit> websiteVisits = iWebsiteVisitMapper.selectByExample(example);
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+        List<WebsiteVisit> websiteVisits;
+        if (object instanceof ServerResponse) {
+            websiteVisits = new ArrayList<>();
+        } else {
+            Member member = (Member) object;
+            Example example = new Example(WebsiteVisit.class);
+            example.createCriteria().andLike(WebsiteVisit.ROUTE, "%" + member.getId() + ",%")
+                    .andEqualTo(WebsiteVisit.DATA_STATUS, 0);
+            example.orderBy(WebsiteVisit.COUNT).desc();
+            websiteVisits = iWebsiteVisitMapper.selectByExample(example);
+        }
         if (websiteVisits.size() <= 0) {
             List<ActuarialProductAppDTO> djBasicsProductTemplates = iMemberCollectMapper.queryRandomProduct(12, cityId);
             djBasicsProductTemplates.forEach(djBasicsProductTemplate -> {
