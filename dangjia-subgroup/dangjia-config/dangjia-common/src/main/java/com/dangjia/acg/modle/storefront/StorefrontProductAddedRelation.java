@@ -14,7 +14,7 @@ import javax.persistence.Transient;
 
 @Data
 @Entity
-@Table(name = "dj_basics_storefront_product_addedRelation")
+@Table(name = "dj_basics_storefront_product_addedrelation")
 @ApiModel(description = "店铺上架增值商品关联关系表")
 @FieldNameConstants(prefix = "")
 public class StorefrontProductAddedRelation extends BaseEntity {

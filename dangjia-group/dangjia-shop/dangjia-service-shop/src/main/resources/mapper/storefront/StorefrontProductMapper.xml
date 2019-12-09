@@ -75,11 +75,12 @@
         dj_basics_storefront_product bsp
         INNER JOIN dj_basics_product_template bpt ON bsp.prod_template_id = bpt.id
         INNER JOIN dj_basics_goods bg ON bsp.goods_id = bg.id
-        where 1=1 and bsp.storefront_id=#{storefrontId}  and   bsp.data_status=0  and (
-        bsp.image='' or
-        bsp.detail_image='' or
-        bsp.product_name='' or
-        bsp.sell_price=''
+        where 1=1 and bsp.storefront_id=#{storefrontId}  and   bsp.data_status=0  and
+        (
+        bsp.detail_image is null  or
+        bsp.image is null   or
+        bsp.product_name is null or
+        bsp.sell_price is null
         )
 
         <if test="null!=cityId and ''!=cityId">
@@ -110,10 +111,10 @@
         INNER JOIN dj_basics_product_template bpt ON bsp.prod_template_id = bpt.id
         INNER JOIN dj_basics_goods bg ON bsp.goods_id = bg.id
         where 1=1 and bsp.storefront_id=#{storefrontId} and   bsp.data_status=0 and (
-         <![CDATA[ bsp.image <> '' ]]> and
-         <![CDATA[ bsp.detail_image <> '' ]]> and
-         <![CDATA[ bsp.product_name <> '' ]]> and
-         <![CDATA[ bsp.sell_price <> '' ]]>
+        bsp.detail_image is not null  or
+        bsp.image is not null   or
+        bsp.product_name is not null or
+        bsp.sell_price is not null
         )
         <if test="null!=cityId and ''!=cityId">
             and  bsp.city_id=#{cityId}
