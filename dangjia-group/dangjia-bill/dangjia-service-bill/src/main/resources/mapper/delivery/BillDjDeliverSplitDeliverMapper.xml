@@ -3,4 +3,23 @@
 <mapper namespace="com.dangjia.acg.mapper.delivery.BillDjDeliverSplitDeliverMapper">
 
 
+    <select id="queryAcceptanceEvaluationList"
+            resultType="com.dangjia.acg.dto.order.AcceptanceEvaluationListDTO">
+        SELECT
+            dosi.product_id productId,
+            bsp.image,
+            dosi.split_deliver_id splitDeliverId,
+            dosi.id splitItemId,
+            dosi.shop_count shopCount,
+            bpt.value_id_arr valueIdArr,
+            bpt.value_name_arr valueNameArr
+        FROM
+            dj_basics_storefront_product bsp,
+            dj_deliver_order_split_item dosi,
+            dj_basics_product_template bpt
+        WHERE
+            bsp.id = dosi.product_id
+        AND bsp.prod_template_id = bpt.id
+        AND dosi.split_deliver_id = #{splitDeliverId}
+    </select>
 </mapper>

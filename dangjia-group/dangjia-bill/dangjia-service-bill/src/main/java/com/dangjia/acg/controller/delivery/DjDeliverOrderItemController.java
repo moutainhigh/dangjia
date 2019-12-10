@@ -2,6 +2,7 @@ package com.dangjia.acg.controller.delivery;
 
 import com.dangjia.acg.api.delivery.DjDeliverOrderItemAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.delivery.DjDeliverOrderItemService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,12 @@ public class DjDeliverOrderItemController implements DjDeliverOrderItemAPI {
     @ApiMethod
     public ServerResponse setCancellationOrder(String orderId) {
         return djDeliverOrderItemService.setCancellationOrder(orderId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryAcceptanceEvaluationList(String splitDeliverId, PageDTO pageDTO) {
+        return djDeliverOrderItemService.queryAcceptanceEvaluationList(splitDeliverId, pageDTO);
     }
 
     @Override
