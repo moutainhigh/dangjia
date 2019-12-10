@@ -23,7 +23,10 @@ import java.util.List;
  */
 @Api(description = "供应商管理接口")
 @FeignClient("dangjia-service-store")
-public interface DjSupplierAPI {
+public interface
+
+
+DjSupplierAPI {
 
     @PostMapping("/supplier/djSupplier/queryDjSupplierById")
     @ApiOperation(value = "根据主键ID查询供应商信息", notes = "根据主键ID查询供应商信息")
