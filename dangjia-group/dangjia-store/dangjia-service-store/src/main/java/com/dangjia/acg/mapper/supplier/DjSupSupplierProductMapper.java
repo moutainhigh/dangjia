@@ -33,3 +33,4 @@ public interface DjSupSupplierProductMapper extends Mapper<DjSupSupplierProduct>
                                                       @Param("productIds") List<String> productIds);
 
 }
+

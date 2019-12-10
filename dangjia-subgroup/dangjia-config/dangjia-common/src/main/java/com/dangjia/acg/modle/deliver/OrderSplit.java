@@ -10,6 +10,7 @@ import lombok.experimental.FieldNameConstants;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -93,6 +94,11 @@ public class OrderSplit extends BaseEntity {
 	@Desc(value = "预约发货时间")
 	@ApiModelProperty("预约发货时间")
 	private Date reservationDeliverTime;
+
+	@Column(name = "total_amount")
+	@Desc(value = "总价")
+	@ApiModelProperty("总价")
+	private BigDecimal totalAmount;
 }
 
 

@@ -35,6 +35,7 @@ public interface DjDeliverOrderItemAPI {
     @PostMapping("app/order/setAcceptanceEvaluation")
     @ApiOperation(value = "验收评价", notes = "验收评价")
     ServerResponse setAcceptanceEvaluation(@RequestParam("userToken")String userToken,
-                                           @RequestParam("jsonStr") String jsonStr);
+                                           @RequestParam("jsonStr") String jsonStr,
+                                           @RequestParam("splitDeliverId") String splitDeliverId);
 }
 

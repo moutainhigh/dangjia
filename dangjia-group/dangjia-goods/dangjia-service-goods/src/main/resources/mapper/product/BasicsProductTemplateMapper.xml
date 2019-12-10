@@ -570,16 +570,15 @@
             t1.sell_price price,
             t.value_id_arr valueIdArr,
             t.value_name_arr valueNameArr
-
-        FROM
-            dj_basics_product_template t,
+       FROM
             dj_basics_storefront_product t1
+        INNER JOIN dj_basics_product_template t on t.id=t1.prod_template_id
         WHERE
             t.id = t1.prod_template_id
         and t1.is_shelf_status = '1'
         AND t1.storefront_id = #{storefontId}
-        and t.goods_id = #{goodsId}
-        group by t.name
+        and t1.goods_id = #{goodsId}
+        group by t1.product_name
     </select>
 
     <!--根据商品模板ID查询对应店铺商品信息-->

@@ -98,38 +98,19 @@ public class DjDeliveryReturnSlipService {
                 PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
                 djDeliveryReturnSlipDTOS = djDeliveryReturnSlipMapper.querySupplyTaskList(djSupplier.getId(), searchKey, cityId);
                 pageResult = new PageInfo(djDeliveryReturnSlipDTOS);
-                djDeliveryReturnSlipDTOS.forEach(djDeliveryReturnSlipDTO -> {
-                    Storefront storefront = basicsStorefrontAPI.querySingleStorefrontById(djDeliveryReturnSlipDTO.getShopId());
-                    if(null!=storefront) {
-                        djDeliveryReturnSlipDTO.setShopName(storefront.getStorefrontName());
-                        djDeliveryReturnSlipDTO.setStorekeeperName(storefront.getStorekeeperName());
-                    }
-                });
+                this.duplicatedCode(djDeliveryReturnSlipDTOS);
             }else if(!CommonUtil.isEmpty(invoiceStatus)){
                 String[] split = invoiceStatus.split(",");
                 if(split[0].equals("0")){
                     PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
                     djDeliveryReturnSlipDTOS = djDeliveryReturnSlipMapper.querySupplyDeliverTaskList(djSupplier.getId(), searchKey, split[1], cityId);
                     pageResult = new PageInfo(djDeliveryReturnSlipDTOS);
-                    djDeliveryReturnSlipDTOS.forEach(djDeliveryReturnSlipDTO -> {
-                        Storefront storefront = basicsStorefrontAPI.querySingleStorefrontById(djDeliveryReturnSlipDTO.getShopId());
-                        if(null!=storefront) {
-                            djDeliveryReturnSlipDTO.setShopName(storefront.getStorefrontName());
-                            djDeliveryReturnSlipDTO.setStorekeeperName(storefront.getStorekeeperName());
-                        }
-
-                    });
+                    this.duplicatedCode(djDeliveryReturnSlipDTOS);
                 }else if(split[0].equals("1")){
                     PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
                     djDeliveryReturnSlipDTOS = djDeliveryReturnSlipMapper.querySupplyRepairTaskList(djSupplier.getId(), searchKey, split[1], cityId);
                     pageResult = new PageInfo(djDeliveryReturnSlipDTOS);
-                    djDeliveryReturnSlipDTOS.forEach(djDeliveryReturnSlipDTO -> {
-                        Storefront storefront = basicsStorefrontAPI.querySingleStorefrontById(djDeliveryReturnSlipDTO.getShopId());
-                        if(storefront!=null) {
-                            djDeliveryReturnSlipDTO.setShopName(storefront.getStorefrontName());
-                            djDeliveryReturnSlipDTO.setStorekeeperName(storefront.getStorekeeperName());
-                        }
-                    });
+                    this.duplicatedCode(djDeliveryReturnSlipDTOS);
                 }
             }else{
                 return ServerResponse.createByErrorMessage("查询失败: invoiceStatus不能为空");
@@ -141,6 +122,15 @@ public class DjDeliveryReturnSlipService {
             logger.error("查询失败", e);
             return ServerResponse.createByErrorMessage("查询失败: " + e);
         }
+    }
+    private void duplicatedCode(List<DjDeliveryReturnSlipDTO> djDeliveryReturnSlipDTOS){
+        djDeliveryReturnSlipDTOS.forEach(djDeliveryReturnSlipDTO -> {
+            Storefront storefront = basicsStorefrontAPI.querySingleStorefrontById(djDeliveryReturnSlipDTO.getShopId());
+            if(storefront!=null) {
+                djDeliveryReturnSlipDTO.setShopName(storefront.getStorefrontName());
+                djDeliveryReturnSlipDTO.setStorekeeperName(storefront.getStorekeeperName());
+            }
+        });
     }
 
 

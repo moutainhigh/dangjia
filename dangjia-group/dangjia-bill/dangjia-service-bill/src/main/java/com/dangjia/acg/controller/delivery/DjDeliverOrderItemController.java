@@ -47,7 +47,7 @@ public class DjDeliverOrderItemController implements DjDeliverOrderItemAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse setAcceptanceEvaluation(String userToken, String jsonStr) {
-        return djDeliverOrderItemService.setAcceptanceEvaluation(userToken,jsonStr);
+    public ServerResponse setAcceptanceEvaluation(String userToken, String jsonStr, String splitDeliverId) {
+        return djDeliverOrderItemService.setAcceptanceEvaluation(userToken,jsonStr,splitDeliverId);
     }
 }
