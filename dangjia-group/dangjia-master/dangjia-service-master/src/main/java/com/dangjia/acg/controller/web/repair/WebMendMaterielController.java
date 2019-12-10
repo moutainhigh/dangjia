@@ -61,11 +61,7 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
         return mendMaterielService.acceptPartialReturn(request,cityId,houseId,pageDTO);
     }
 
-    @Override
-    @ApiMethod
-    public ServerResponse reviewReturnList(HttpServletRequest request, String cityId, String houseId, PageDTO pageDTO) {
-        return mendMaterielService.reviewReturnList(request,cityId,houseId,pageDTO);
-    }
+
 
     @Override
     @ApiMethod
@@ -118,8 +114,14 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse confirmReturnMendMaterial(String mendOrderId, String userId,Integer type,String actualCountList,String returnReason) {
-        return mendMaterielService.confirmReturnMendMaterial(mendOrderId,userId,type,actualCountList,returnReason);
+    public ServerResponse confirmReturnMendMaterial(String mendOrderId, String userId,Integer type,String actualCountList,String returnReason,String supplierId) {
+        return mendMaterielService.confirmReturnMendMaterial(mendOrderId,userId,type,actualCountList,returnReason,supplierId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse returnProductDistributionSupplier(String mendOrderId, String userId, String actualCountList) {
+        return mendMaterielService.returnProductDistributionSupplier(mendOrderId,userId,actualCountList);
     }
 
     @Override

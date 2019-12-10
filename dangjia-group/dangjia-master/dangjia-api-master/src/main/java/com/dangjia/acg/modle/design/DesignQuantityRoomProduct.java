@@ -1,0 +1,39 @@
+package com.dangjia.acg.modle.design;
+
+import com.dangjia.acg.common.annotation.Desc;
+import com.dangjia.acg.common.model.BaseEntity;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+import lombok.experimental.FieldNameConstants;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+
+/**
+ * @author Ruking.Cheng
+ * @descrilbe 上传设计图推荐的商品记录表
+ * @email 495095492@qq.com
+ * @tel 18075121944
+ * @date on 2019/12/10 6:49 PM
+ */
+@Data
+@Entity
+@Table(name = "dj_design_quantity_room_product")
+@ApiModel(description = "上传设计图推荐的商品记录表")
+@FieldNameConstants(prefix = "")
+public class DesignQuantityRoomProduct extends BaseEntity {
+
+
+    @Column(name = "quantity_room_id")
+    @Desc(value = "操作ID")
+    @ApiModelProperty("操作ID")
+    private String quantityRoomId;
+
+
+    @Column(name = "product_id")
+    @Desc(value = "商品ID")
+    @ApiModelProperty("商品ID")
+    private String productId;
+}

@@ -70,7 +70,10 @@ public class ShoppingCartListDTO {
     private String storefrontId;
 
 
-
+    /**
+     * 订单类型（1设计,2精算，2其它）
+     */
+    private String orderType;
     /**
      * 调后价格
      */

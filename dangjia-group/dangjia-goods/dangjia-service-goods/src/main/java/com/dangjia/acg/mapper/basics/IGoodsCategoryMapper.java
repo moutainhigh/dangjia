@@ -1,6 +1,7 @@
 package com.dangjia.acg.mapper.basics;
 
 import com.dangjia.acg.dto.budget.AllCategoryDTO;
+import com.dangjia.acg.dto.product.CategoryListDTO;
 import com.dangjia.acg.modle.basics.HomeProductDTO;
 import com.dangjia.acg.modle.product.BasicsGoodsCategory;
 import org.apache.ibatis.annotations.Param;
@@ -30,4 +31,8 @@ public interface IGoodsCategoryMapper extends Mapper<BasicsGoodsCategory> {
 	List<HomeProductDTO> getProductList(@Param("categoryId") String categoryId,@Param("cityId") String cityId);
 
 	List<AllCategoryDTO> queryNewcategoryIdList(@Param("houseId") String houseId);
+
+	List<CategoryListDTO>  queryCategoryListDTO(@Param("categoryLabelId") String categoryLabelId );
+
+
 }

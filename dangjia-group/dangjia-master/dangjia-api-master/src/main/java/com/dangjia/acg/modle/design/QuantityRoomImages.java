@@ -14,7 +14,7 @@ import javax.persistence.Table;
 
 /**
  * @author Ruking.Cheng
- * @descrilbe 设计相关操作记录图片储存表（目前就只有量房）
+ * @descrilbe 设计相关操作记录图片储存表
  * @email 495095492@qq.com
  * @tel 18075121944
  * @date on 2019/4/27 11:56 AM
@@ -23,7 +23,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "dj_design_quantity_room_images")
 @FieldNameConstants(prefix = "")
-@ApiModel(description = "设计相关操作记录图片储存表（目前就只有量房）")
+@ApiModel(description = "设计相关操作记录图片储存表")
 public class QuantityRoomImages extends BaseEntity {
 
     @Column(name = "house_id")

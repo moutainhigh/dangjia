@@ -108,6 +108,28 @@ public interface HouseAPI {
                                  @RequestParam("square") BigDecimal square,
                                  @RequestParam("actuarialDesignAttr") String actuarialDesignAttr);
 
+    /**
+     * 我要装修，APP开始装修(申请房子装修新）
+     * @param userToken 用户token
+     * @param cityId 城市ID
+     * @param houseType 房屋类型
+     * @param addressId 地址ID
+     * @param actuarialDesignAttr 设计精算列表 商品列表(
+     * id	String	设计精算模板ID
+     * configName	String	设计精算名称
+     * configType	String	配置类型1：设计阶段 2：精算阶段
+     * productList	List	商品列表
+     * productList.productId	String	商品ID
+     * @return
+     */
+    @PostMapping("app/house/house/applicationDecorationHouse")
+    @ApiOperation(value = "app开始装修", notes = "app开始装修")
+    ServerResponse applicationDecorationHouse(@RequestParam("userToken") String userToken,
+                                 @RequestParam("cityId") String cityId,
+                                 @RequestParam("houseType") String houseType,
+                                 @RequestParam("addressId") String addressId,
+                                 @RequestParam("actuarialDesignAttr") String actuarialDesignAttr);
+
     @PostMapping("app/house/house/revokeHouse")
     @ApiOperation(value = "撤销房子装修", notes = "撤销房子装修")
     ServerResponse revokeHouse(@RequestParam("userToken") String userToken);

@@ -534,7 +534,7 @@ public class StorefrontProductService {
                 if (k > 0) {
                     return ServerResponse.createBySuccessMessage("设置商品上下架成功");
                 } else {
-                    return ServerResponse.createByErrorMessage("设置商品上下架失败");
+                    return ServerResponse.createByErrorMessage("温馨提示:不能重复上架");
                 }
             }
             else
@@ -571,13 +571,13 @@ public class StorefrontProductService {
                     }
                     return ServerResponse.createBySuccessMessage("设置商品上下架成功");
                 } else {
-                    return ServerResponse.createByErrorMessage("设置商品上下架失败");
+                    return ServerResponse.createByErrorMessage("温馨提示:不能重复上架");
                 }
             }
 
         } catch (Exception e) {
-            logger.error("设置商品批量上架失败：", e);
-            return ServerResponse.createByErrorMessage("设置商品批量上架失败");
+            logger.error("设置商品批量上架异常：", e);
+            return ServerResponse.createByErrorMessage("设置商品批量上架异常");
         }
     }
 

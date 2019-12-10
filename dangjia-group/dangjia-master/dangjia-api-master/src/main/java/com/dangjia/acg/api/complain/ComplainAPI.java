@@ -17,6 +17,17 @@ import javax.servlet.http.HttpServletRequest;
 @Api(value = "申诉接口", description = "申诉接口")
 public interface ComplainAPI {
 
+    @PostMapping("/complain/insertComplain")
+    @ApiOperation(value = "添加申诉(新版)", notes = "添加申诉(新版)")
+    ServerResponse insertComplain(@RequestParam("request") HttpServletRequest request,
+                                  @RequestParam("userId") String userId,
+                                  @RequestParam("cityId") String cityId,
+                                  @RequestParam("complainType") Integer complainType,
+                                  @RequestParam("mendOrderId") String mendOrderId,
+                                  @RequestParam("content") String content);
+
+
+
     @PostMapping("/complain/addComplain")
     @ApiOperation(value = "添加申诉", notes = "添加申诉")
     ServerResponse addComplain(@RequestParam("request") HttpServletRequest request,
