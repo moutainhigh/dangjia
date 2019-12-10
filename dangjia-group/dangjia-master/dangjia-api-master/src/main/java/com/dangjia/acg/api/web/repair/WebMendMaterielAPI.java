@@ -166,7 +166,10 @@ public interface WebMendMaterielAPI {
                                              @RequestParam("userId") String userId,
                                              @RequestParam("type") Integer type,
                                              @RequestParam("actualCountList") String actualCountList,
-                                             @RequestParam("returnReason") String returnReason);
+                                             @RequestParam("returnReason") String returnReason,
+                                             @RequestParam("supplierId") String supplierId);
+
+
 
     /**
      *  date:2019.11.23
@@ -255,16 +258,7 @@ public interface WebMendMaterielAPI {
             @RequestParam("houseId") String houseId,
             @RequestParam("pageDTO") PageDTO pageDTO);
 
-    /**
-     * 业主审核部分退货列表
-     */
-    @PostMapping(value = "web/repair/webMendMateriel/reviewReturnList")
-    @ApiOperation(value = "业主审核部分退货列表", notes = "业主审核部分退货列表")
-    ServerResponse reviewReturnList(
-            @RequestParam("request") HttpServletRequest request,
-            @RequestParam("cityId") String cityId,
-            @RequestParam("houseId") String houseId,
-            @RequestParam("pageDTO") PageDTO pageDTO);
+
 
 
     @PostMapping(value = "web/repair/webMendMateriel/storeReturnDistributionSupplier")
@@ -275,5 +269,18 @@ public interface WebMendMaterielAPI {
             @RequestParam("userId") String userId,
             @RequestParam("pageDTO") PageDTO pageDTO,
             @RequestParam("likeAddress") String likeAddress);
+
+    /**
+     * 店铺退货分发供应商
+     * @param mendOrderId
+     * @param userId
+     * @return
+     */
+    @PostMapping(value = "web/repair/webMendMateriel/returnProductDistributionSupplier")
+    @ApiOperation(value = "店铺退货分发供应商", notes = "店铺退货分发供应商")
+    ServerResponse returnProductDistributionSupplier(@RequestParam("mendOrderId") String mendOrderId,
+                                                     @RequestParam("userId") String userId,
+                                                     @RequestParam("actualCountList") String actualCountList);
+
 
 }

@@ -18,6 +18,12 @@ public class ComplainController implements ComplainAPI {
     ComplainService complainService;
 
 
+    @Override
+    @ApiMethod
+    public ServerResponse insertComplain(HttpServletRequest request, String userId, String cityId,Integer complainType, String mendOrderId, String content) {
+        return complainService.insertComplain(request,userId,cityId,complainType,mendOrderId,content);
+    }
+
     //添加申诉
     @Override
     @ApiMethod

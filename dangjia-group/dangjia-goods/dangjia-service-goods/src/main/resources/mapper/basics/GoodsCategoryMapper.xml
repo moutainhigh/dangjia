@@ -71,17 +71,53 @@
 
 
     <select id="queryNewcategoryIdList" resultType="com.dangjia.acg.dto.budget.AllCategoryDTO">
+             SELECT
+                bcl.id AS id,
+                bcl. NAME AS NAME,
+                sum(abm.price) AS priceArr,
+                '' AS sfpriceArr
+                FROM
+                    dj_actuary_budget_material abm
+                INNER JOIN dj_basics_storefront_product dbg ON dbg.id = abm.product_id
+                INNER JOIN dj_basics_product_template bpt ON dbg.prod_template_id = bpt.id
+                INNER JOIN dj_basics_goods_category bgc ON bpt.category_id = bgc.id
+                INNER JOIN dj_basics_category_label bcl ON FIND_IN_SET(
+                    bcl.id,
+                    bgc.category_label_ids
+                )
+                WHERE
+                    abm.house_id = #{houseId}
+                GROUP BY
+                    bcl.id
+            UNION ALL
+                SELECT
+                    bcl.id AS id,
+                    bcl. NAME AS NAME,
+                    '' AS priceArr,
+                    IFNULL(sum(abm.price), '') AS sfpriceArr
+                FROM
+                    dj_actuary_budget_material abm
+                INNER JOIN dj_basics_storefront_product dbg ON dbg.id = abm.product_id
+                INNER JOIN dj_basics_product_template bpt ON dbg.prod_template_id = bpt.id
+                INNER JOIN dj_basics_goods_category bgc ON bpt.category_id = bgc.id
+                INNER JOIN dj_basics_category_label bcl ON FIND_IN_SET(
+                    bcl.id,
+                    bgc.category_label_ids
+                )
+                WHERE
+                    abm.house_id =#{houseId}
+                AND steta = 2
+                GROUP BY
+                    bcl.id
+    </select>
+
+    <select id="queryCategoryListDTO" resultType="com.dangjia.acg.dto.product.CategoryListDTO">
         SELECT
-        bcl.id,
-        bcl. NAME,
-        sum(abm.price) as priceArr
+            a.id,a.name
         FROM
-        dj_actuary_budget_material abm
-        INNER JOIN dj_basics_storefront_product dbg ON dbg.id = abm.product_id
-        INNER JOIN dj_basics_product_template bpt on dbg.prod_template_id=bpt.id
-        INNER JOIN dj_basics_goods_category bgc ON bpt.category_id = bgc.id
-        INNER JOIN dj_basics_category_label bcl ON FIND_IN_SET(bcl.id,bgc.category_label_ids)
-        where abm.house_id=#{houseId}
-        group by  bcl.id
+            dj_basics_goods_category a
+        INNER JOIN dj_basics_category_label b ON b.id = a.category_label_ids
+        WHERE
+            b.id =#{categoryLabelId}
     </select>
 </mapper>
