@@ -76,7 +76,7 @@ public class PaymentController implements PaymentAPI {
     @Override
     @ApiMethod
     public ServerResponse generateOrder(String userToken,String cityId,String productIds,String workerId, String addressId){
-        return paymentService.generateOrder(userToken, cityId,productIds, workerId,  addressId,2);
+        return paymentService.generateOrder(userToken, cityId,productIds, workerId,  addressId);
     }
 
     @Override

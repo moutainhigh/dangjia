@@ -204,7 +204,9 @@ public class HouseService {
     @Autowired
     private MasterProductTemplateService masterProductTemplateService;
 
+    @Autowired
     private PaymentService paymentService;
+    @Autowired
     private IMasterActuarialProductConfigMapper iMasterActuarialProductConfigMapper;
 
     public House selectHouseById(String  id) {
@@ -1840,6 +1842,10 @@ public class HouseService {
         House house = insertHouseInfo(member,cityId, houseType,memberAddress.getLatitude(), memberAddress.getLongitude(), memberAddress.getCityName()+memberAddress.getAddress(),  memberAddress.getAddress(),memberAddress.getInputArea(),again,0, workDeposits);
         //6.默认切换至新提交的房子信息
         setSelectHouse(userToken, house.getId());
+        //更新地址信息
+        memberAddress.setHouseId(house.getId());//更新房子ID
+        memberAddress.setRenovationType(1);//更新为装修地址
+        iMasterMemberAddressMapper.updateByPrimaryKeySelective(memberAddress);
         //7.生成订单抢单信息
         //判断是否有图纸(循环订单信息）drawings 有无图纸0：无图纸；1：有图纸
         int drawings=1;
@@ -1856,7 +1862,7 @@ public class HouseService {
         editHouseFlowWorker(house,drawings);
         //8.提交订单信息,生成待支付订单,生成待抢单信息
         String productJsons=getProductJsons(actuarialDesignAttr,memberAddress.getInputArea());
-        return paymentService.generateOrder(userToken,cityId,productJsons,null,addressId,1);
+        return paymentService.generateOrderCommon(userToken,cityId,productJsons,null,addressId,1);
     }
 
     /**
@@ -1950,15 +1956,17 @@ public class HouseService {
             for(int i=0;i<actuarialDesignList.size();i++){
                 JSONObject obj=(JSONObject)actuarialDesignList.get(i);
                 String configType=(String)obj.get("configType");
-                String configId=(String)obj.get("configId");
+                String configId=(String)obj.get("id");
                 JSONArray productList=obj.getJSONArray("productList");
                 for(int j=0;j<productList.size();j++) {
                     JSONObject productObj = productList.getJSONObject(j);
                     JSONObject jsonObject = new JSONObject();
                     String productId = productObj.getString("productId");
+                    if(productId==null||StringUtils.isBlank(productId)){
+                        continue;
+                    }
                     String productTemplateId=productObj.getString("productTemplateId");
                     String addedProductIds=productObj.getString("addedProductIds");
-
                     Example example=new Example(DjActuarialProductConfig.class);
                     example.createCriteria().andEqualTo(DjActuarialProductConfig.ACTUARIAL_TEMPLATE_ID,configId)
                             .andEqualTo(DjActuarialProductConfig.PRODUCT_ID,productTemplateId);

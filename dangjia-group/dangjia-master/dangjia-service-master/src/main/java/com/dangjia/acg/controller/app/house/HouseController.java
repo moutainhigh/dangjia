@@ -113,6 +113,8 @@ public class HouseController implements HouseAPI {
      * productList.productId	String	商品ID
      * @return
      */
+    @Override
+    @ApiMethod
     public ServerResponse applicationDecorationHouse(String userToken,String cityId,String houseType,String addressId,String actuarialDesignAttr){
         try{
             return houseService.applicationDecorationHouse(userToken, cityId, houseType, addressId,actuarialDesignAttr);
