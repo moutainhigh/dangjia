@@ -13,7 +13,7 @@ import javax.persistence.Table;
 
 /**
  * @author Ruking.Cheng
- * @descrilbe 设计相关操作记录表（目前就只有量房）
+ * @descrilbe 设计相关操作记录表
  * @email 495095492@qq.com
  * @tel 18075121944
  * @date on 2019/4/27 11:55 AM
@@ -22,7 +22,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "dj_design_quantity_room")
 @FieldNameConstants(prefix = "")
-@ApiModel(description = "设计相关操作记录表（目前就只有量房）")
+@ApiModel(description = "设计相关操作记录表")
 public class QuantityRoom extends BaseEntity {
 
     @Column(name = "house_id")
