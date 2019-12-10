@@ -994,8 +994,9 @@ public class PaymentService {
      * 提交订单
      * @return
      */
-    public ServerResponse generateOrder(String userToken,String cityId, String productJsons,String workerId, String addressId) {
+    public ServerResponse generateOrder(String userToken,String cityId, String productJsons,String workerId, String addressId,Integer orderSource) {
         try {
+            String orderId="";
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
@@ -1028,6 +1029,7 @@ public class PaymentService {
                 for (ShoppingCartListDTO shoppingCartListDTO : shoppingCartDTO.getShoppingCartListDTOS()) {
                     ShoppingCartListDTO parmDTO=productMap.get(shoppingCartListDTO.getProductId());
                     shoppingCartListDTO.setShopCount(parmDTO.getShopCount());
+                    shoppingCartListDTO.setOrderType(parmDTO.getOrderType());//订单类型（1设计,2精算，2其它）
                     BigDecimal totalPrice = new BigDecimal(shoppingCartListDTO.getPrice()*parmDTO.getShopCount());
                     if(shoppingCartListDTO.getProductType()==0) {
                         totalMaterialPrice = totalMaterialPrice.add(totalPrice);
@@ -1041,7 +1043,7 @@ public class PaymentService {
 
             if (shoppingCartDTOS!=null) {
                 Order order = new Order();
-                order.setWorkerTypeName("购物车订单");
+                order.setWorkerTypeName(orderSource==1?"设计、精算订单":"购物车订单");
                 order.setCityId(cityId);
                 order.setMemberId(member.getId());
                 order.setWorkerId(workerId);
@@ -1054,7 +1056,7 @@ public class PaymentService {
                 order.setActualPaymentPrice(new BigDecimal(0));
                 order.setOrderStatus("1");
                 order.setOrderGenerationTime(new Date());
-                order.setOrderSource(2);//来源购物车
+                order.setOrderSource(orderSource);//来源购物车
                 order.setCreateBy(member.getId());
                 orderMapper.insert(order);
                 for (ShoppingCartDTO shoppingCartDTO : shoppingCartDTOS) {
@@ -1073,6 +1075,7 @@ public class PaymentService {
                         orderItem.setCategoryId(good.getCategoryId());
                         orderItem.setProductId(good.getProductId());
                         orderItem.setImage(good.getImage());
+                        orderItem.setOrderType(good.getOrderType());//订单所属类型（1设计师，2精算师，3其它）
                         orderItem.setCityId(cityId);
                         orderItem.setProductType(good.getProductType());
                         orderItem.setStorefontId(shoppingCartDTO.getStorefrontId());
@@ -1175,6 +1178,9 @@ public class PaymentService {
                 example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, member.getId())
                         .andIn(ShoppingCart.PRODUCT_ID,Arrays.asList(productIds));
                 iShoppingCartMapper.deleteByExample(example);
+                if(orderSource==1){//设计精算提交过来的商品，返回订单ID
+                    return ServerResponse.createBySuccess("提交成功", order.getId());
+                }
                 return ServerResponse.createBySuccess("提交成功", businessOrder.getNumber());
             }
             return ServerResponse.createBySuccess("提交成功");
