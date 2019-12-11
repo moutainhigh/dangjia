@@ -2,6 +2,7 @@ package com.dangjia.acg.mapper.repair;
 
 import com.dangjia.acg.dto.house.WarehouseGoodsDTO;
 import com.dangjia.acg.modle.repair.MendMateriel;
+import com.dangjia.acg.modle.repair.MendWorker;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
@@ -20,4 +21,6 @@ public interface IMendMaterialMapper extends Mapper<MendMateriel> {
 
     List<WarehouseGoodsDTO> getWarehouseGoods(@Param("productId") String productId,@Param("houseId") String houseId);
     List<WarehouseGoodsDTO> getWarehouseWorker(@Param("productId") String productId,@Param("houseId") String houseId);
+
+    MendWorker getMendWorker(@Param("productId") String productId,@Param("houseId") String houseId);
 }

@@ -147,5 +147,27 @@
         GROUP BY
                 o.id
     </select>
+    <select id="getMendWorker" parameterType="java.lang.String"  resultType="com.dangjia.acg.modle.repair.MendWorker">
+        SELECT
+            m.id,
+            m.mend_order_id AS mendOrderId,
+            m.worker_goods_id AS workerGoodsId,
+            m.worker_goods_sn AS workerGoodsSn,
+            m.worker_goods_name AS workerGoodsName,
+            m.price,
+            m.unit_name AS unitName,
+            SUM(m.shop_count) AS shopCount,
+            SUM(m.total_price) AS totalPrice,
+            m.image,
+            m.create_date AS createDate,
+            m.modify_date AS modifyDate
+        FROM
+            dj_repair_mend_order o
+        INNER JOIN dj_repair_mend_worker m ON o.id = m.mend_order_id
+        WHERE
+             m.worker_goods_id =#{productId} and  o.house_id= #{houseId}
+        GROUP BY
+            m.worker_goods_id
+    </select>
 </mapper>
 
