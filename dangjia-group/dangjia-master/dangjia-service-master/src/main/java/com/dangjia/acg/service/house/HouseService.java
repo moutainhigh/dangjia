@@ -2135,6 +2135,8 @@ public class HouseService {
         example.createCriteria().andEqualTo(Customer.MEMBER_ID, memberId);
         Customer customer = new Customer();
         customer.setId(null);
+        customer.setCreateDate(null);
+        customer.setDataStatus(null);
         customer.setStage(5);
         iCustomerMapper.updateByExampleSelective(customer, example);
     }
