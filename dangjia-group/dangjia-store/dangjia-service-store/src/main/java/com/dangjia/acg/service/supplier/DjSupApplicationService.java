@@ -79,6 +79,17 @@ public class DjSupApplicationService {
                     .andEqualTo(DjSupApplication.DATA_STATUS,0);
             if(djSupApplicationMapper.selectByExample(example).size()>0)
                 return ServerResponse.createByErrorMessage("请勿重复申请");
+            example=new Example(DjSupApplication.class);
+            example.createCriteria().andEqualTo(DjSupApplication.SUP_ID,djSupplier.getId())
+                    .andEqualTo(DjSupApplication.SHOP_ID,shopId)
+                    .andEqualTo(DjSupApplication.APPLICATION_STATUS,2)
+                    .andEqualTo(DjSupApplication.DATA_STATUS,0);
+            DjSupApplication djSupApplication1 = djSupApplicationMapper.selectOneByExample(example);
+            if(null!=djSupApplication1){
+                djSupApplication1.setApplicationStatus("0");
+                djSupApplicationMapper.updateByPrimaryKeySelective(djSupApplication1);
+                return ServerResponse.createBySuccessMessage("申请成功");
+            }
             DjSupApplication djSupApplication=new DjSupApplication();
             djSupApplication.setShopId(shopId);
             djSupApplication.setSupId(djSupplier.getId());
