@@ -26,7 +26,7 @@ public class ArtisanDTO {
     private String superior;//邀请人
 
     private Integer surDay;//保险剩余天数
-    private Integer realNameState;
+    private Integer realNameState;//实名认证状态
     private String realNameDescribe;
     private String checkDescribe;
     private String styles;//'设计师装修风格,ID'

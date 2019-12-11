@@ -120,6 +120,10 @@ public interface MemberAddressAPI {
      * @description 查找用户地址
      * @method POST
      * @url master/member/address/selectAddress
+     * @return_param id string id
+     * @return_param createDate string 创建时间
+     * @return_param modifyDate string 修改时间
+     * @return_param dataStatus int 数据状态:0=正常，1=删除
      * @return_param memberId string 会员编号
      * @return_param houseId string 房子ID
      * @return_param renovationType Integer 是否是装修地址:0：否，1：是
@@ -154,6 +158,10 @@ public interface MemberAddressAPI {
      * @description 查找用户地址列表
      * @method POST
      * @url master/member/address/selectAddressList
+     * @return_param id string id
+     * @return_param createDate string 创建时间
+     * @return_param modifyDate string 修改时间
+     * @return_param dataStatus int 数据状态:0=正常，1=删除
      * @return_param memberId string 会员编号
      * @return_param houseId string 房子ID
      * @return_param renovationType Integer 是否是装修地址:0：否，1：是

@@ -36,4 +36,16 @@ public class DesignQuantityRoomProduct extends BaseEntity {
     @Desc(value = "商品ID")
     @ApiModelProperty("商品ID")
     private String productId;
+
+
+    @Column(name = "house_id")
+    @Desc(value = "房子ID")
+    @ApiModelProperty("房子ID")
+    private String houseId ;
+
+
+    @Column(name = "type")
+    @Desc(value = "推荐商品类型：0:纯推荐，1:推荐商品支付")
+    @ApiModelProperty("推荐商品类型：0:纯推荐，1:推荐商品支付")
+    private Integer type ;
 }

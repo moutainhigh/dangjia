@@ -62,5 +62,19 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             AND r.state=#{state}
         </if>
     </select>
+
+    <select id="queryCorrelationList" resultType="java.util.Map">
+        SELECT
+            id,
+            NAME
+        FROM
+            dj_worker_reward_punish_correlation
+        WHERE 1=1
+        <if test="type!=null and type!=''">
+            and type = #{type}
+        </if>
+        order by create_date desc
+
+    </select>
 </mapper>
 

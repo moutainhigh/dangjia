@@ -59,6 +59,7 @@ public class RewardPunishService {
     @Autowired
     private IMemberMapper memberMapper;
 
+
     /**
      * 保存奖罚条件及条件明细
      *
@@ -401,6 +402,37 @@ public class RewardPunishService {
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("根据userToken查询奖罚记录失败");
+        }
+    }
+
+    /**
+     *奖罚-选择奖罚原因
+     * @param pageDTO
+     * @param type
+     * @return
+     */
+    public ServerResponse queryCorrelationList(PageDTO pageDTO, String type) {
+        try {
+            List<Map<String, Object>> list=rewardPunishCorrelationMapper.queryCorrelationList(type);
+            return ServerResponse.createBySuccess("查询成功", list);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("奖罚-选择奖罚原因异常");
+        }
+    }
+
+    /**
+     * 奖罚-选择工匠列表
+     * @param pageDTO
+     * @param houseId
+     * @return
+     */
+    public ServerResponse queryCraftsmenList(PageDTO pageDTO, String houseId) {
+        try {
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("奖罚-选择奖罚原因异常");
         }
     }
 }
