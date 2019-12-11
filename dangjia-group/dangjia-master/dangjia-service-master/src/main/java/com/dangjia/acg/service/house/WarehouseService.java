@@ -199,23 +199,25 @@ public class WarehouseService {
 
                     for (MendWorker budgetWorker : budgetWorkerList) {
                         if(!ids.contains(budgetWorker.getWorkerGoodsId())){
+                            MendWorker mendWorker=mendMaterielMapper.getMendWorker(budgetWorker.getWorkerGoodsId(),houseId);
                             GoodsItemDTO goodsItemDTO = goodsItemDTOMap.get(budgetWorker.getWorkerGoodsId());
                             if(goodsItemDTO==null){
                                 goodsItemDTO = new GoodsItemDTO();
                             }
-                            goodsItemDTO.setGoodsImage(address + budgetWorker.getImage());
-                            goodsItemDTO.setGoodsName(budgetWorker.getWorkerGoodsName());
-                            goodsItemDTO.setConvertCount(budgetWorker.getShopCount());
-                            goodsItemDTO.setPrice(budgetWorker.getPrice());
-                            goodsItemDTO.setUnitName(budgetWorker.getUnitName());
-                            goodsItemDTO.setId(budgetWorker.getWorkerGoodsId());//人工商品id
+                            goodsItemDTO.setGoodsImage(address + mendWorker.getImage());
+                            goodsItemDTO.setGoodsName(mendWorker.getWorkerGoodsName());
+                            goodsItemDTO.setConvertCount(mendWorker.getShopCount());
+                            goodsItemDTO.setPrice(mendWorker.getPrice());
+                            goodsItemDTO.setUnitName(mendWorker.getUnitName());
+                            goodsItemDTO.setId(mendWorker.getWorkerGoodsId());//人工商品id
                             goodsItemDTO.setShopCount(0d);
                             goodsItemDTO.setBackCount(0d);
-                            goodsItemDTO.setRepairCount(goodsItemDTO.getRepairCount()+budgetWorker.getShopCount());
-                            goodsItemDTO.setSurCount(goodsItemDTO.getSurCount()+budgetWorker.getShopCount());
+                            goodsItemDTO.setRepairCount(mendWorker.getShopCount());
+                            goodsItemDTO.setSurCount(mendWorker.getShopCount());
                             goodsItemDTO.setTolPrice(goodsItemDTO.getSurCount()*goodsItemDTO.getPrice());
                             rowPrice+=goodsItemDTO.getTolPrice();
                             goodsItemDTOMap.put(goodsItemDTO.getId(),goodsItemDTO);
+                            goodsItemDTOList.add(goodsItemDTO);
                         }
                     }
                     budgetItemDTO.setGoodsItemDTOList(goodsItemDTOList);
