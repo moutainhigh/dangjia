@@ -190,11 +190,19 @@ public class WarehouseService {
                     Double rowPrice =0d;
                     List<MendWorker> budgetWorkerList =mendWorkerMapper.mendWorkerList(houseId,budgetItemDTO.getWorkerTypeId());
                     List<GoodsItemDTO> goodsItemDTOList = budgetItemDTO.getGoodsItemDTOList();
+                    Map<String,GoodsItemDTO> goodsItemDTOMap=new HashMap<>();
+                    for (GoodsItemDTO goodsItemDTO : goodsItemDTOList) {
+                        goodsItemDTOMap.put(goodsItemDTO.getId(),goodsItemDTO);
+                    }
                     //从list集合中，取出字段name的列表
                     List<String> ids = goodsItemDTOList.stream().map(p -> p.getId()).collect(Collectors.toList());
+
                     for (MendWorker budgetWorker : budgetWorkerList) {
                         if(!ids.contains(budgetWorker.getWorkerGoodsId())){
-                            GoodsItemDTO goodsItemDTO = new GoodsItemDTO();
+                            GoodsItemDTO goodsItemDTO = goodsItemDTOMap.get(budgetWorker.getWorkerGoodsId());
+                            if(goodsItemDTO==null){
+                                goodsItemDTO = new GoodsItemDTO();
+                            }
                             goodsItemDTO.setGoodsImage(address + budgetWorker.getImage());
                             goodsItemDTO.setGoodsName(budgetWorker.getWorkerGoodsName());
                             goodsItemDTO.setConvertCount(budgetWorker.getShopCount());
@@ -203,11 +211,11 @@ public class WarehouseService {
                             goodsItemDTO.setId(budgetWorker.getWorkerGoodsId());//人工商品id
                             goodsItemDTO.setShopCount(0d);
                             goodsItemDTO.setBackCount(0d);
-                            goodsItemDTO.setRepairCount(budgetWorker.getShopCount());
-                            goodsItemDTO.setSurCount(budgetWorker.getShopCount());
+                            goodsItemDTO.setRepairCount(goodsItemDTO.getRepairCount()+budgetWorker.getShopCount());
+                            goodsItemDTO.setSurCount(goodsItemDTO.getSurCount()+budgetWorker.getShopCount());
                             goodsItemDTO.setTolPrice(goodsItemDTO.getSurCount()*goodsItemDTO.getPrice());
                             rowPrice+=goodsItemDTO.getTolPrice();
-                            goodsItemDTOList.add(goodsItemDTO);
+                            goodsItemDTOMap.put(goodsItemDTO.getId(),goodsItemDTO);
                         }
                     }
                     budgetItemDTO.setGoodsItemDTOList(goodsItemDTOList);
@@ -400,7 +408,6 @@ public class WarehouseService {
                     warehouseDTO.put("image", address+warehouse.getImage());//图片地址
 
                     warehouseDTO.put("repairCount", warehouse.getRepairCount());//补货数
-                    warehouseDTO.put("repairCount", warehouse.getRepairCount());//补货数
                     warehouseDTO.put("shopCount", warehouse.getShopCount());//购买数
                     warehouseDTO.put("receive", warehouse.getReceive() - (warehouse.getWorkBack() == null ? 0D : warehouse.getWorkBack()));//收货数
                     warehouseDTO.put("workBack", (warehouse.getWorkBack() == null ? 0D : warehouse.getWorkBack()));//工匠退货数
@@ -422,9 +429,23 @@ public class WarehouseService {
                 warehouseDTO.put("image", address+budgetWorker.getImage());//图片地址
                 warehouseDTO.put("type", type);
                 warehouseDTO.put("repairCount", budgetWorker.getRepairCount());//补人工数
-                warehouseDTO.put("shopCount", budgetWorker.getShopCount() + budgetWorker.getRepairCount());//购买数
+                warehouseDTO.put("shopCount", budgetWorker.getShopCount());//购买数
                 warehouseDTO.put("workBack", budgetWorker.getBackCount());//退人工数
                 warehouseDTO.put("tolPrice", (budgetWorker.getShopCount() + budgetWorker.getRepairCount()) * budgetWorker.getPrice());//实际花费
+                List<WarehouseGoodsDTO> goodsDTOS=mendMaterielMapper.getWarehouseWorker(gid,houseId);
+                warehouseDTO.put("list",goodsDTOS);
+                return ServerResponse.createBySuccess("查询成功", warehouseDTO);
+            }
+
+            MendWorker mendWorker=mendMaterielMapper.getMendWorker(gid,houseId);
+            if(mendWorker!=null) {
+                warehouseDTO.put("name", mendWorker.getWorkerGoodsName());//商品名字
+                warehouseDTO.put("image", address+mendWorker.getImage());//图片地址
+                warehouseDTO.put("type", type);
+                warehouseDTO.put("repairCount", mendWorker.getShopCount());//补人工数
+                warehouseDTO.put("shopCount", 0);//购买数
+                warehouseDTO.put("workBack", 0);//退人工数
+                warehouseDTO.put("tolPrice", mendWorker.getShopCount()  * budgetWorker.getPrice());//实际花费
                 List<WarehouseGoodsDTO> goodsDTOS=mendMaterielMapper.getWarehouseWorker(gid,houseId);
                 warehouseDTO.put("list",goodsDTOS);
                 return ServerResponse.createBySuccess("查询成功", warehouseDTO);
