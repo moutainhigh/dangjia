@@ -64,8 +64,8 @@ public class DjActuaryBudgetMaterialController implements DjActuaryBudgetMateria
 
     @Override
     @ApiMethod
-    public ServerResponse allGoodsCategoryList(String houseId, String cityId) {
-        return djActuaryBudgetMaterialService.allGoodsCategoryList(houseId,cityId);
+    public ServerResponse allGoodsCategoryList(String houseId, String cityId,String bclId) {
+        return djActuaryBudgetMaterialService.allGoodsCategoryList(houseId,cityId,bclId);
     }
 
 }

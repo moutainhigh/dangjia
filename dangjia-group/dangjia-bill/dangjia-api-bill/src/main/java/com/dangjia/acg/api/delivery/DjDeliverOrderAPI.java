@@ -102,7 +102,7 @@ public interface DjDeliverOrderAPI {
 
 
     @PostMapping("app/order/queryDeliverOrderHump")
-    @ApiOperation(value = "我的订单,待付款,待发货,已取消", notes = "我的订单,待付款,待发货,已取消")
+    @ApiOperation(value = "我的订单,待付款,库存,已取消", notes = "我的订单,待付款,库存,已取消")
     ServerResponse queryDeliverOrderHump(@RequestParam("pageDTO") PageDTO pageDTO,
                                          @RequestParam("houseId") String houseId,
                                          @RequestParam("state") String state);

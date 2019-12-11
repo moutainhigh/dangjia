@@ -93,7 +93,7 @@
         AND t3.category_id = #{categoryId}
         and t1.is_shelf_status='1'
         and t1.data_status= 0
-        and city_id=#{cityId}
+        and t2.city_id=#{cityId}
         GROUP BY
             t3.id,
             t3.NAME,

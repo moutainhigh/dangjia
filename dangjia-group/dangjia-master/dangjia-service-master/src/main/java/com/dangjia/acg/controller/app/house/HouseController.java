@@ -100,6 +100,32 @@ public class HouseController implements HouseAPI {
     }
 
     /**
+     *
+     * @param userToken 用户token
+     * @param cityId 城市ID
+     * @param houseType 房屋类型
+     * @param addressId 地址ID
+     * @param actuarialDesignAttr 设计精算列表 商品列表(
+     * id	String	设计精算模板ID
+     * configName	String	设计精算名称
+     * configType	String	配置类型1：设计阶段 2：精算阶段
+     * productList	List	商品列表
+     * productList.productId	String	商品ID
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse applicationDecorationHouse(String userToken,String cityId,String houseType,String addressId,String actuarialDesignAttr){
+        try{
+            return houseService.applicationDecorationHouse(userToken, cityId, houseType, addressId,actuarialDesignAttr);
+
+        }catch (Exception e){
+            logger.error("提交失败",e);
+            return ServerResponse.createByErrorMessage("提交失败");
+        }
+    }
+
+    /**
      * 撤销房子装修
      *
      * @param userToken

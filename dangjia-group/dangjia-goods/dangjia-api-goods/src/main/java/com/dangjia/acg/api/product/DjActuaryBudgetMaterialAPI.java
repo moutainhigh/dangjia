@@ -34,8 +34,9 @@ public interface DjActuaryBudgetMaterialAPI {
     ServerResponse newcategoryIdList(@RequestParam("houseId")String houseId,@RequestParam("cityId")String cityId);
 
     @PostMapping("/actuary/actuaryOpe/allGoodsCategoryList")
-    @ApiOperation(value = "精算-全部列表", notes = "精算-全部列表")
-    ServerResponse allGoodsCategoryList(@RequestParam("houseId")String houseId,@RequestParam("cityId")String cityId);
+    @ApiOperation(value = "精算-全部列表或者单个列表", notes = "精算-全部列表或者单个列表")
+    ServerResponse allGoodsCategoryList(@RequestParam("houseId")String houseId,@RequestParam("cityId")String cityId,
+                                        @RequestParam("bclId")String bclId);
 
 
     @PostMapping("/app/product/djActuaryBudgetMaterial/queryMakeBudgetsList")

@@ -5,6 +5,7 @@ import lombok.Data;
 import java.util.List;
 @Data
 public class AllCategoryTypeDTO {
-    private Double totalPrice;
+    private Double totalpriceArr;
     List<AllCategoryDTO> list;
+    private Double sfpriceArr;
 }

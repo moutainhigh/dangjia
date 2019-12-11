@@ -17,6 +17,7 @@ import com.dangjia.acg.dto.budget.AllCategoryTypeDTO;
 import com.dangjia.acg.dto.product.BasicsGoodArrDTO;
 import com.dangjia.acg.dto.product.BasicsGoodDTO;
 import com.dangjia.acg.dto.product.BasicsgDTO;
+import com.dangjia.acg.dto.product.CategoryListDTO;
 import com.dangjia.acg.mapper.actuary.IActuarialTemplateMapper;
 import com.dangjia.acg.mapper.actuary.IBudgetMaterialMapper;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
@@ -39,6 +40,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
+import tk.mybatis.mapper.util.StringUtil;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -92,17 +94,20 @@ public class DjActuaryBudgetMaterialService {
     public ServerResponse newcategoryIdList(String houseId, String cityId) {
         try {
             AllCategoryTypeDTO allCategoryTypeDTO =new AllCategoryTypeDTO();
-           List<AllCategoryDTO> list =goodsCategoryMapper.queryNewcategoryIdList(houseId);
-           Double totalPrice=0d;
+            List<AllCategoryDTO> list =goodsCategoryMapper.queryNewcategoryIdList(houseId);
+            Double totalPrice=0d;
+            Double sftotalPrice=0d;
             for(AllCategoryDTO allCategoryDTO:list)
             {
                 if(allCategoryDTO!=null)
                 {
-                    totalPrice+=allCategoryDTO.getPriceArr();
+                    totalPrice+=allCategoryDTO.getPriceArr()!=null?allCategoryDTO.getPriceArr():0d;
+                    sftotalPrice+=allCategoryDTO.getSfpriceArr()!=null?allCategoryDTO.getSfpriceArr():0d;
                 }
             }
             allCategoryTypeDTO.setList(list);
-            allCategoryTypeDTO.setTotalPrice(totalPrice);
+            allCategoryTypeDTO.setTotalpriceArr(totalPrice);
+            allCategoryTypeDTO.setSfpriceArr(sftotalPrice);
             return ServerResponse.createBySuccess("查询成功", allCategoryTypeDTO);
         } catch (Exception e) {
             e.printStackTrace();
@@ -111,26 +116,84 @@ public class DjActuaryBudgetMaterialService {
     }
 
     /**
-     *
+     *精算-全部列表(或者单个列表)
      * @param houseId
      * @param cityId
      * @return
      */
-    public ServerResponse allGoodsCategoryList(String houseId, String cityId) {
+    public ServerResponse allGoodsCategoryList(String houseId, String cityId,String bclId) {
         try {
+            //查询单个标签
+            if(StringUtil.isNotEmpty(bclId)&&bclId!="")
+            {
+                List<CategoryListDTO> listitem=goodsCategoryMapper.queryCategoryListDTO(bclId);
+                for (CategoryListDTO categoryListDTO: listitem) {
+                    if(categoryListDTO==null){
+                        return ServerResponse.createByErrorMessage("没有查询到数据");
+                    }
+                    String categoryId = categoryListDTO.getId()!=null?categoryListDTO.getId():null;
+                    String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+                    BasicsGoodArrDTO basicsGoodArrDTO = new BasicsGoodArrDTO();
+                    Example example = new Example(BasicsGoods.class);
+                    example.createCriteria().andEqualTo(BasicsGoods.CATEGORY_ID, categoryId).andEqualTo(BasicsGoods.CITY_ID,cityId);
+                    List<BasicsGoods> list = djBasicsGoodsMapper.selectByExample(example);//类别下所有的商品
+                    BasicsGoodsCategory djBasicsGoodsCategory = djBasicsGoodsCategoryMapper.selectByPrimaryKey(categoryId);//商品类别
+                    if (list.size() > 0) {
+                        //0：材料；1：服务   //2 人工
+                        List<BasicsGoodDTO> bgdList = new ArrayList<>();
+                        if(!CommonUtil.isEmpty(djBasicsGoodsCategory))
+                        {
+                            example = new Example(BasicsGoodsCategory.class);
+                            example.createCriteria().andEqualTo(BasicsGoodsCategory.PARENT_ID, djBasicsGoodsCategory.getParentId());
+                            List<BasicsGoodsCategory> li = djBasicsGoodsCategoryMapper.selectByExample(example);//上级目录下的类别
+                            if (!li.isEmpty())
+                            {
+                                for (BasicsGoodsCategory bgc : li) {
+                                    BasicsGoodDTO basicsGoodDTO = new BasicsGoodDTO();
+                                    List<BasicsgDTO> bList = iBudgetWorkerMapper.queryMakeBudgetsBmList(houseId, bgc.getId());
+                                    for (BasicsgDTO basicsgDTO : bList) {
+                                        basicsgDTO.setImage(imageAddress + basicsgDTO.getImage());
+                                        if (basicsgDTO.getBuy() == 2) {
+                                            basicsgDTO.setBuyStr("自购商品需自行购买");
+                                        } else {
+                                            basicsgDTO.setBuyStr("");
+                                        }
+                                    }
+                                    Double priceArr = bList.stream().filter(a -> a.getPrice()!=null).mapToDouble(BasicsgDTO::getPrice).sum();
+                                    basicsGoodDTO.setPriceArr(priceArr);
+                                    basicsGoodDTO.setList(bList);
+                                    basicsGoodDTO.setName(bgc.getName());
+                                    bgdList.add(basicsGoodDTO);
+                                }
+                            }
+                            Double priceArr = bgdList.stream().filter(a -> a.getPriceArr()!=null).mapToDouble(BasicsGoodDTO::getPriceArr).sum();
+                            basicsGoodArrDTO.setPriceArr(priceArr);
+                            basicsGoodArrDTO.setList(bgdList);
+                        }
+                        categoryListDTO.setPriceArr(basicsGoodArrDTO.getPriceArr()!=null?basicsGoodArrDTO.getPriceArr():0d);
+                    }
+                }
+                return ServerResponse.createBySuccess("查询成功", listitem);
+            }
+            //查询所有标签
             AllCategoryTypeDTO allCategoryTypeDTO =new AllCategoryTypeDTO();
-            List<AllCategoryDTO> list =goodsCategoryMapper.queryNewcategoryIdList(houseId);
-            Double totalPrice=0d;
+            List<AllCategoryDTO> list =goodsCategoryMapper.queryNewcategoryIdList(houseId);//查询所有标签
+            Double totalPrice=0d;//总价
+            List<CategoryListDTO> listDTOS=null;//全部标签
             for(AllCategoryDTO allCategoryDTO:list)
             {
                 if(allCategoryDTO!=null)
                 {
-                    totalPrice+=allCategoryDTO.getPriceArr();
+                    totalPrice+=allCategoryDTO.getPriceArr()!=null?allCategoryDTO.getPriceArr():0d;
                 }
+                String categoryLabelId=allCategoryDTO.getId();//列表标签id
+                //通过标签id查询类别（类别id，类别名称，总价格）
+                List<CategoryListDTO> listitem=goodsCategoryMapper.queryCategoryListDTO(categoryLabelId);
+                listitem.forEach(categoryListDTO->{
+                    listDTOS.add(categoryListDTO);
+                });
             }
             allCategoryTypeDTO.setList(list);
-            allCategoryTypeDTO.setTotalPrice(totalPrice);
-
             return null;
         } catch (Exception e) {
             e.printStackTrace();
@@ -324,33 +387,35 @@ public class DjActuaryBudgetMaterialService {
         if (list.size() > 0) {
                 //0：材料；1：服务   //2 人工
                     List<BasicsGoodDTO> bgdList = new ArrayList<>();
-                    if(!CommonUtil.isEmpty(djBasicsGoodsCategory)){
-                    example = new Example(BasicsGoodsCategory.class);
-                    example.createCriteria().andEqualTo(BasicsGoodsCategory.PARENT_ID, djBasicsGoodsCategory.getParentId());
-                    List<BasicsGoodsCategory> li = djBasicsGoodsCategoryMapper.selectByExample(example);
-                    if (!li.isEmpty()) {
-                        for (BasicsGoodsCategory bgc : li) {
-                            BasicsGoodDTO basicsGoodDTO = new BasicsGoodDTO();
-                            List<BasicsgDTO> bList = iBudgetWorkerMapper.queryMakeBudgetsBmList(houseId, bgc.getId());
-                            for (BasicsgDTO basicsgDTO : bList) {
-                                basicsgDTO.setImage(imageAddress + basicsgDTO.getImage());
-                                if (basicsgDTO.getBuy() == 2) {
-                                    basicsgDTO.setBuyStr("自购商品需自行购买");
-                                } else {
-                                    basicsgDTO.setBuyStr("");
+                    if(!CommonUtil.isEmpty(djBasicsGoodsCategory))
+                    {
+                        example = new Example(BasicsGoodsCategory.class);
+                        example.createCriteria().andEqualTo(BasicsGoodsCategory.PARENT_ID, djBasicsGoodsCategory.getParentId());
+                        List<BasicsGoodsCategory> li = djBasicsGoodsCategoryMapper.selectByExample(example);
+                        if (!li.isEmpty())
+                        {
+                            for (BasicsGoodsCategory bgc : li) {
+                                BasicsGoodDTO basicsGoodDTO = new BasicsGoodDTO();
+                                List<BasicsgDTO> bList = iBudgetWorkerMapper.queryMakeBudgetsBmList(houseId, bgc.getId());
+                                for (BasicsgDTO basicsgDTO : bList) {
+                                    basicsgDTO.setImage(imageAddress + basicsgDTO.getImage());
+                                    if (basicsgDTO.getBuy() == 2) {
+                                        basicsgDTO.setBuyStr("自购商品需自行购买");
+                                    } else {
+                                        basicsgDTO.setBuyStr("");
+                                    }
                                 }
+                                Double priceArr = bList.stream().filter(a -> a.getPrice()!=null).mapToDouble(BasicsgDTO::getPrice).sum();
+                                basicsGoodDTO.setPriceArr(priceArr);
+                                basicsGoodDTO.setList(bList);
+                                basicsGoodDTO.setName(bgc.getName());
+                                bgdList.add(basicsGoodDTO);
                             }
-                            Double priceArr = bList.stream().filter(a -> a.getPrice()!=null).mapToDouble(BasicsgDTO::getPrice).sum();
-                            basicsGoodDTO.setPriceArr(priceArr);
-                            basicsGoodDTO.setList(bList);
-                            basicsGoodDTO.setName(bgc.getName());
-                            bgdList.add(basicsGoodDTO);
                         }
+                        Double priceArr = bgdList.stream().filter(a -> a.getPriceArr()!=null).mapToDouble(BasicsGoodDTO::getPriceArr).sum();
+                        basicsGoodArrDTO.setPriceArr(priceArr);
+                        basicsGoodArrDTO.setList(bgdList);
                     }
-                    Double priceArr = bgdList.stream().filter(a -> a.getPriceArr()!=null).mapToDouble(BasicsGoodDTO::getPriceArr).sum();
-                    basicsGoodArrDTO.setPriceArr(priceArr);
-                    basicsGoodArrDTO.setList(bgdList);
-                }
                 return ServerResponse.createBySuccess("查询成功", basicsGoodArrDTO);
         }
         return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());

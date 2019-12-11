@@ -2,6 +2,7 @@ package com.dangjia.acg.service.complain;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.api.BasicsStorefrontAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.api.refund.RefundAfterSalesAPI;
 import com.dangjia.acg.api.sup.SupplierProductAPI;
@@ -27,6 +28,7 @@ import com.dangjia.acg.mapper.delivery.ISplitDeliverMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.mapper.worker.IRewardPunishConditionMapper;
@@ -43,7 +45,9 @@ import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
+import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
+import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.modle.worker.RewardPunishCondition;
@@ -60,6 +64,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
+import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -114,6 +119,47 @@ public class ComplainService {
 
     @Autowired
     private DjSupplierAPI djSupplierAPI;
+    @Autowired
+    private BasicsStorefrontAPI basicsStorefrontAPI;
+    @Autowired
+    private IMendOrderMapper mendOrderMapper;
+
+    /**
+     * 添加申诉
+     * @param request
+     * @param userId
+     * @param complainType
+     * @param mendOrderId
+     * @param content
+     * @return
+     */
+    public ServerResponse insertComplain(HttpServletRequest request, String userId,String cityId, Integer complainType, String mendOrderId, String content) {
+
+        try {
+            Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
+            if (storefront == null) {
+                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
+            }
+            MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);//补退订单表
+            Complain complain = new Complain();
+            complain.setMemberId(userId);
+            complain.setComplainType(complainType);
+            complain.setStatus(0);
+            complain.setBusinessId(null);
+            complain.setHouseId(mendOrder.getHouseId());
+            complain.setBusinessId(mendOrder.getBusinessOrderNumber());
+            complain.setContent(content);
+            complain.setUserName(storefront.getStorekeeperName());
+            complain.setUserMobile(storefront.getMobile());
+            int i = complainMapper.insertSelective(complain);
+            if(i<=0)
+                return ServerResponse.createByErrorMessage("提交申诉失败");
+            return ServerResponse.createBySuccessMessage("提交申诉成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
     /**
      * 添加申诉
      *

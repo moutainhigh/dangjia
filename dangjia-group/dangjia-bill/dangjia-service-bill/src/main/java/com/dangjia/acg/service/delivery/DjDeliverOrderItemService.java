@@ -6,12 +6,14 @@ import com.dangjia.acg.api.app.house.HouseAPI;
 import com.dangjia.acg.api.app.member.MemberAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.delivery.AppointmentDTO;
 import com.dangjia.acg.dto.delivery.AppointmentListDTO;
 import com.dangjia.acg.dto.delivery.OrderStorefrontDTO;
+import com.dangjia.acg.dto.order.AcceptanceEvaluationListDTO;
 import com.dangjia.acg.dto.order.PaymentToBeMadeDTO;
 import com.dangjia.acg.mapper.delivery.BillDjDeliverOrderSplitItemMapper;
 import com.dangjia.acg.mapper.delivery.BillDjDeliverSplitDeliverMapper;
@@ -27,6 +29,9 @@ import com.dangjia.acg.modle.order.DjAcceptanceEvaluation;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.product.ShoppingCart;
 import com.dangjia.acg.service.product.BillProductTemplateService;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,7 +106,7 @@ public class DjDeliverOrderItemService {
 
 
     /**
-     * 待发货详情
+     * 库存详情
      * @param orderId
      * @return
      */
@@ -259,6 +264,31 @@ public class DjDeliverOrderItemService {
             e.printStackTrace();
             logger.info("取消订单失败", e);
             return ServerResponse.createByErrorMessage("取消订单失败");
+        }
+    }
+
+
+    /**
+     * 验收评价列表
+     * @param splitDeliverId
+     * @return
+     */
+    public ServerResponse queryAcceptanceEvaluationList(String splitDeliverId, PageDTO pageDTO) {
+        try {
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<AcceptanceEvaluationListDTO> acceptanceEvaluationListDTOS = billDjDeliverSplitDeliverMapper.queryAcceptanceEvaluationList(splitDeliverId);
+            acceptanceEvaluationListDTOS.forEach(acceptanceEvaluationListDTO -> {
+                if(StringUtils.isNotBlank(acceptanceEvaluationListDTO.getValueIdArr())){
+                    acceptanceEvaluationListDTO.setValueNameArr(billProductTemplateService.getNewValueNameArr(acceptanceEvaluationListDTO.getValueIdArr()).replaceAll(",", " "));
+                }
+            });
+            if(acceptanceEvaluationListDTOS.size()<=0)
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
+            PageInfo pageResult = new PageInfo(acceptanceEvaluationListDTOS);
+            return ServerResponse.createBySuccess("查询成功",pageResult);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
         }
     }
 

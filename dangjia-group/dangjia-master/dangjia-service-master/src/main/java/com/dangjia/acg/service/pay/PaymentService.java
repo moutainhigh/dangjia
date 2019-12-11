@@ -996,193 +996,202 @@ public class PaymentService {
      */
     public ServerResponse generateOrder(String userToken,String cityId, String productJsons,String workerId, String addressId) {
         try {
-            Object object = constructionService.getMember(userToken);
-            if (object instanceof ServerResponse) {
-                return (ServerResponse) object;
-            }
-            Member member = (Member) object;
-            String houseId="";
-            House house=getHouseId(member.getId());
-            if(house!= null) {
-                houseId=house.getId();
-            }
-            JSONArray productArray= JSON.parseArray(productJsons);
-            if(productArray.size()==0){
-                return ServerResponse.createByErrorMessage("参数错误");
-            }
-            Map<String,ShoppingCartListDTO> productMap = new HashMap<>();
-            String[] productIds=new String[productArray.size()];
-            for (int i = 0; i < productArray.size(); i++) {
-                JSONObject productObj = productArray.getJSONObject(i);
-                productMap.put(productObj.getString(ProductDTO.PRODUCT_ID),BeanUtils.mapToBean(ShoppingCartListDTO.class,productObj));
-                productIds[i]=productObj.getString(ProductDTO.PRODUCT_ID);
-
-            }
-            List<ShoppingCartDTO> shoppingCartDTOS=iShoppingCartMapper.queryShoppingCartDTOS(productIds);
-            BigDecimal paymentPrice = new BigDecimal(0);//总共钱
-            BigDecimal freightPrice = new BigDecimal(0);//总运费
-            BigDecimal totalMoveDost = new BigDecimal(0);//搬运费
-            for (ShoppingCartDTO shoppingCartDTO : shoppingCartDTOS) {
-                BigDecimal totalSellPrice = new BigDecimal(0);//总价
-                BigDecimal totalMaterialPrice = new BigDecimal(0);//组总价
-                for (ShoppingCartListDTO shoppingCartListDTO : shoppingCartDTO.getShoppingCartListDTOS()) {
-                    ShoppingCartListDTO parmDTO=productMap.get(shoppingCartListDTO.getProductId());
-                    shoppingCartListDTO.setShopCount(parmDTO.getShopCount());
-                    BigDecimal totalPrice = new BigDecimal(shoppingCartListDTO.getPrice()*parmDTO.getShopCount());
-                    if(shoppingCartListDTO.getProductType()==0) {
-                        totalMaterialPrice = totalMaterialPrice.add(totalPrice);
-                    }
-                    totalSellPrice = totalSellPrice.add(totalPrice);
-                    paymentPrice = paymentPrice.add(totalPrice);
-                }
-                shoppingCartDTO.setTotalMaterialPrice(totalMaterialPrice);
-                shoppingCartDTO.setTotalPrice(totalSellPrice);
-            }
-
-            if (shoppingCartDTOS!=null) {
-                Order order = new Order();
-                order.setWorkerTypeName("购物车订单");
-                order.setCityId(cityId);
-                order.setMemberId(member.getId());
-                order.setWorkerId(workerId);
-                order.setAddressId(addressId);
-                order.setHouseId(houseId);
-                order.setOrderNumber(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
-                order.setTotalDiscountPrice(new BigDecimal(0));
-                order.setTotalStevedorageCost(new BigDecimal(0));
-                order.setTotalTransportationCost(new BigDecimal(0));
-                order.setActualPaymentPrice(new BigDecimal(0));
-                order.setOrderStatus("1");
-                order.setOrderGenerationTime(new Date());
-                order.setOrderSource(2);//来源购物车
-                order.setCreateBy(member.getId());
-                orderMapper.insert(order);
-                for (ShoppingCartDTO shoppingCartDTO : shoppingCartDTOS) {
-                    Double freight=storefrontConfigAPI.getFreightPrice(shoppingCartDTO.getStorefrontId(),shoppingCartDTO.getTotalMaterialPrice().doubleValue());
-                    freightPrice=freightPrice.add(new BigDecimal(freight));
-                    for (ShoppingCartListDTO good : shoppingCartDTO.getShoppingCartListDTOS()) {
-                        OrderItem orderItem = new OrderItem();
-                        orderItem.setIsReservationDeliver(good.getIsReservationDeliver());
-                        orderItem.setOrderId(order.getId());
-                        orderItem.setPrice(good.getPrice().doubleValue());//销售价
-                        orderItem.setShopCount(good.getShopCount());//购买总数
-                        orderItem.setUnitName(good.getUnitName());//单位
-                        orderItem.setTotalPrice(good.getPrice()*good.getShopCount());//总价
-                        orderItem.setProductName(good.getProductName());
-                        orderItem.setProductSn(good.getProductSn());
-                        orderItem.setCategoryId(good.getCategoryId());
-                        orderItem.setProductId(good.getProductId());
-                        orderItem.setImage(good.getImage());
-                        orderItem.setCityId(cityId);
-                        orderItem.setProductType(good.getProductType());
-                        orderItem.setStorefontId(shoppingCartDTO.getStorefrontId());
-                        orderItem.setAskCount(0d);
-                        orderItem.setDiscountPrice(0d);
-                        orderItem.setActualPaymentPrice(0d);
-                        orderItem.setStevedorageCost(0d);
-                        orderItem.setTransportationCost(0d);
-                        if(!CommonUtil.isEmpty(order.getHouseId())) {
-                            //搬运费运算
-                            Double moveDost = masterCostAcquisitionService.getStevedorageCost(order.getHouseId(), orderItem.getProductId(), orderItem.getShopCount());
-                            totalMoveDost = totalMoveDost.add(new BigDecimal(moveDost));
-                            if (moveDost > 0) {
-                                //均摊运费
-                                orderItem.setStevedorageCost(moveDost);
-                            }
-                        }
-                        if(good.getProductType()==0&&freight>0){
-                            //均摊运费
-                            Double transportationCost=(orderItem.getTotalPrice()/shoppingCartDTO.getTotalMaterialPrice().doubleValue())*freight;
-                            orderItem.setTransportationCost(transportationCost);
-                        }
-                        if(good.getProductType()==0||good.getProductType()==1){
-                            order.setWorkerTypeName("实物订单");
-                            order.setType(2);
-                        }else if(good.getProductType()==2){
-                            order.setWorkerTypeName("人工订单");
-                            order.setType(1);
-                        }else {
-                            order.setWorkerTypeName("体验订单");
-                            order.setType(4);
-                        }
-                        orderItem.setOrderStatus("1");//1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭
-                        orderItem.setCreateBy(member.getId());
-                        orderItemMapper.insert(orderItem);
-
-                        ShoppingCartListDTO parmDTO=productMap.get(orderItem.getProductId());
-                        if(!CommonUtil.isEmpty(parmDTO.getAddedProductIds())) {
-                            setAddedProduct(orderItem.getId(), parmDTO.getAddedProductIds(), "1");
-                        }
-
-                        //获取购物车增值商品信息
-                        Example example1=new Example(DeliverOrderAddedProduct.class);
-                        example1.createCriteria().andEqualTo(DeliverOrderAddedProduct.ANY_ORDER_ID,orderItem.getId())
-                                .andEqualTo(DeliverOrderAddedProduct.SOURCE,1);
-                        List<DeliverOrderAddedProduct> deliverOrderAddedProducts = masterDeliverOrderAddedProductMapper.selectByExample(example1);
-                        for (DeliverOrderAddedProduct deliverOrderAddedProduct : deliverOrderAddedProducts) {
-                            BigDecimal totalPrice = new BigDecimal(deliverOrderAddedProduct.getPrice()*parmDTO.getShopCount());
-                            paymentPrice = paymentPrice.add(totalPrice);
-                        }
-                    }
-                }
-
-
-                // 生成支付业务单
-                Example example = new Example(BusinessOrder.class);
-                example.createCriteria().andEqualTo(BusinessOrder.TASK_ID, order.getId()).andNotEqualTo(BusinessOrder.STATE, 4).andNotEqualTo(BusinessOrder.STATE, 3);
-                List<BusinessOrder> businessOrderList = businessOrderMapper.selectByExample(example);
-                BusinessOrder businessOrder = null;
-                if (businessOrderList.size() > 0) {
-                    businessOrder = businessOrderList.get(0);
-                }
-                if (businessOrderList.size() == 0) {
-                    businessOrder = new BusinessOrder();
-                    businessOrder.setMemberId(member.getId());
-                    businessOrder.setHouseId(houseId);
-                    businessOrder.setNumber(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
-                    businessOrder.setState(1);//刚生成
-                    businessOrder.setTotalPrice(paymentPrice);
-                    businessOrder.setDiscountsPrice(new BigDecimal(0));
-                    businessOrder.setPayPrice(paymentPrice);
-                    businessOrder.setType(2);//记录支付类型任务类型
-                    businessOrder.setTaskId(order.getId());//保存任务ID
-                    businessOrderMapper.insert(businessOrder);
-                }
-
-                order.setTotalTransportationCost(freightPrice);//总运费
-                order.setTotalStevedorageCost(totalMoveDost);//总搬运费
-                order.setBusinessOrderNumber(businessOrder.getNumber());
-                order.setTotalAmount(paymentPrice);// 订单总额(工钱)
-                orderMapper.updateByPrimaryKeySelective(order);
-
-                budgetCorrect(order,null,null);
-
-                //清空增值商品
-                example = new Example(ShoppingCart.class);
-                example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, member.getId())
-                        .andIn(ShoppingCart.PRODUCT_ID,Arrays.asList(productIds));
-                List<ShoppingCart> shoppingCarts = iShoppingCartMapper.selectByExample(example);
-                if(shoppingCarts.size()>0) {
-                    for (ShoppingCart shoppingCart : shoppingCarts) {
-                        Example example1 = new Example(DeliverOrderAddedProduct.class);
-                        example1.createCriteria().andEqualTo(DeliverOrderAddedProduct.ANY_ORDER_ID, shoppingCart.getId()).andEqualTo(DeliverOrderAddedProduct.SOURCE, 4);
-                        masterDeliverOrderAddedProductMapper.deleteByExample(example1);
-                    }
-                }
-
-                //清空购物车指定商品
-                example = new Example(ShoppingCart.class);
-                example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, member.getId())
-                        .andIn(ShoppingCart.PRODUCT_ID,Arrays.asList(productIds));
-                iShoppingCartMapper.deleteByExample(example);
-                return ServerResponse.createBySuccess("提交成功", businessOrder.getNumber());
-            }
-            return ServerResponse.createBySuccess("提交成功");
+            return generateOrderCommon(userToken, cityId, productJsons, workerId,  addressId,2);
         } catch (Exception e) {
             e.printStackTrace();
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return ServerResponse.createByErrorMessage("提交失败：原因："+e.getMessage());
         }
+    }
+    public ServerResponse generateOrderCommon(String userToken,String cityId, String productJsons,String workerId, String addressId,Integer orderSource){
+        String orderId="";
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member member = (Member) object;
+        String houseId="";
+        House house=getHouseId(member.getId());
+        if(house!= null) {
+            houseId=house.getId();
+        }
+        JSONArray productArray= JSON.parseArray(productJsons);
+        if(productArray.size()==0){
+            return ServerResponse.createByErrorMessage("参数错误");
+        }
+        Map<String,ShoppingCartListDTO> productMap = new HashMap<>();
+        String[] productIds=new String[productArray.size()];
+        for (int i = 0; i < productArray.size(); i++) {
+            JSONObject productObj = productArray.getJSONObject(i);
+            productMap.put(productObj.getString(ProductDTO.PRODUCT_ID),BeanUtils.mapToBean(ShoppingCartListDTO.class,productObj));
+            productIds[i]=productObj.getString(ProductDTO.PRODUCT_ID);
+
+        }
+        List<ShoppingCartDTO> shoppingCartDTOS=iShoppingCartMapper.queryShoppingCartDTOS(productIds);
+        BigDecimal paymentPrice = new BigDecimal(0);//总共钱
+        BigDecimal freightPrice = new BigDecimal(0);//总运费
+        BigDecimal totalMoveDost = new BigDecimal(0);//搬运费
+        for (ShoppingCartDTO shoppingCartDTO : shoppingCartDTOS) {
+            BigDecimal totalSellPrice = new BigDecimal(0);//总价
+            BigDecimal totalMaterialPrice = new BigDecimal(0);//组总价
+            for (ShoppingCartListDTO shoppingCartListDTO : shoppingCartDTO.getShoppingCartListDTOS()) {
+                ShoppingCartListDTO parmDTO=productMap.get(shoppingCartListDTO.getProductId());
+                shoppingCartListDTO.setShopCount(parmDTO.getShopCount());
+                shoppingCartListDTO.setOrderType(parmDTO.getOrderType());//订单类型（1设计,2精算，2其它）
+                BigDecimal totalPrice = new BigDecimal(shoppingCartListDTO.getPrice()*parmDTO.getShopCount());
+                if(shoppingCartListDTO.getProductType()==0) {
+                    totalMaterialPrice = totalMaterialPrice.add(totalPrice);
+                }
+                totalSellPrice = totalSellPrice.add(totalPrice);
+                paymentPrice = paymentPrice.add(totalPrice);
+            }
+            shoppingCartDTO.setTotalMaterialPrice(totalMaterialPrice);
+            shoppingCartDTO.setTotalPrice(totalSellPrice);
+        }
+
+        if (shoppingCartDTOS!=null) {
+            Order order = new Order();
+            order.setWorkerTypeName(orderSource==1?"设计、精算订单":"购物车订单");
+            order.setCityId(cityId);
+            order.setMemberId(member.getId());
+            order.setWorkerId(workerId);
+            order.setAddressId(addressId);
+            order.setHouseId(houseId);
+            order.setOrderNumber(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
+            order.setTotalDiscountPrice(new BigDecimal(0));
+            order.setTotalStevedorageCost(new BigDecimal(0));
+            order.setTotalTransportationCost(new BigDecimal(0));
+            order.setActualPaymentPrice(new BigDecimal(0));
+            order.setOrderStatus("1");
+            order.setOrderGenerationTime(new Date());
+            order.setOrderSource(orderSource);//来源购物车
+            order.setCreateBy(member.getId());
+            orderMapper.insert(order);
+            for (ShoppingCartDTO shoppingCartDTO : shoppingCartDTOS) {
+                Double freight=storefrontConfigAPI.getFreightPrice(shoppingCartDTO.getStorefrontId(),shoppingCartDTO.getTotalMaterialPrice().doubleValue());
+                freightPrice=freightPrice.add(new BigDecimal(freight));
+                for (ShoppingCartListDTO good : shoppingCartDTO.getShoppingCartListDTOS()) {
+                    OrderItem orderItem = new OrderItem();
+                    orderItem.setIsReservationDeliver(good.getIsReservationDeliver());
+                    orderItem.setOrderId(order.getId());
+                    orderItem.setPrice(good.getPrice().doubleValue());//销售价
+                    orderItem.setShopCount(good.getShopCount());//购买总数
+                    orderItem.setUnitName(good.getUnitName());//单位
+                    orderItem.setTotalPrice(good.getPrice()*good.getShopCount());//总价
+                    orderItem.setProductName(good.getProductName());
+                    orderItem.setProductSn(good.getProductSn());
+                    orderItem.setCategoryId(good.getCategoryId());
+                    orderItem.setProductId(good.getProductId());
+                    orderItem.setImage(good.getImage());
+                    orderItem.setOrderType(good.getOrderType());//订单所属类型（1设计师，2精算师，3其它）
+                    orderItem.setCityId(cityId);
+                    orderItem.setProductType(good.getProductType());
+                    orderItem.setStorefontId(shoppingCartDTO.getStorefrontId());
+                    orderItem.setAskCount(0d);
+                    orderItem.setDiscountPrice(0d);
+                    orderItem.setActualPaymentPrice(0d);
+                    orderItem.setStevedorageCost(0d);
+                    orderItem.setTransportationCost(0d);
+                    if(!CommonUtil.isEmpty(order.getHouseId())) {
+                        //搬运费运算
+                        Double moveDost = masterCostAcquisitionService.getStevedorageCost(order.getHouseId(), orderItem.getProductId(), orderItem.getShopCount());
+                        totalMoveDost = totalMoveDost.add(new BigDecimal(moveDost));
+                        if (moveDost > 0) {
+                            //均摊运费
+                            orderItem.setStevedorageCost(moveDost);
+                        }
+                    }
+                    if(good.getProductType()==0&&freight>0){
+                        //均摊运费
+                        Double transportationCost=(orderItem.getTotalPrice()/shoppingCartDTO.getTotalMaterialPrice().doubleValue())*freight;
+                        orderItem.setTransportationCost(transportationCost);
+                    }
+                    if(good.getProductType()==0||good.getProductType()==1){
+                        order.setWorkerTypeName("实物订单");
+                        order.setType(2);
+                    }else if(good.getProductType()==2){
+                        order.setWorkerTypeName("人工订单");
+                        order.setType(1);
+                    }else {
+                        order.setWorkerTypeName("体验订单");
+                        order.setType(4);
+                    }
+                    orderItem.setOrderStatus("1");//1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭
+                    orderItem.setCreateBy(member.getId());
+                    orderItemMapper.insert(orderItem);
+
+                    ShoppingCartListDTO parmDTO=productMap.get(orderItem.getProductId());
+                    if(!CommonUtil.isEmpty(parmDTO.getAddedProductIds())) {
+                        setAddedProduct(orderItem.getId(), parmDTO.getAddedProductIds(), "1");
+                    }
+
+                    //获取购物车增值商品信息
+                    Example example1=new Example(DeliverOrderAddedProduct.class);
+                    example1.createCriteria().andEqualTo(DeliverOrderAddedProduct.ANY_ORDER_ID,orderItem.getId())
+                            .andEqualTo(DeliverOrderAddedProduct.SOURCE,1);
+                    List<DeliverOrderAddedProduct> deliverOrderAddedProducts = masterDeliverOrderAddedProductMapper.selectByExample(example1);
+                    for (DeliverOrderAddedProduct deliverOrderAddedProduct : deliverOrderAddedProducts) {
+                        BigDecimal totalPrice = new BigDecimal(deliverOrderAddedProduct.getPrice()*parmDTO.getShopCount());
+                        paymentPrice = paymentPrice.add(totalPrice);
+                    }
+                }
+            }
+
+
+            // 生成支付业务单
+            Example example = new Example(BusinessOrder.class);
+            example.createCriteria().andEqualTo(BusinessOrder.TASK_ID, order.getId()).andNotEqualTo(BusinessOrder.STATE, 4).andNotEqualTo(BusinessOrder.STATE, 3);
+            List<BusinessOrder> businessOrderList = businessOrderMapper.selectByExample(example);
+            BusinessOrder businessOrder = null;
+            if (businessOrderList.size() > 0) {
+                businessOrder = businessOrderList.get(0);
+            }
+            if (businessOrderList.size() == 0) {
+                businessOrder = new BusinessOrder();
+                businessOrder.setMemberId(member.getId());
+                businessOrder.setHouseId(houseId);
+                businessOrder.setNumber(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
+                businessOrder.setState(1);//刚生成
+                businessOrder.setTotalPrice(paymentPrice);
+                businessOrder.setDiscountsPrice(new BigDecimal(0));
+                businessOrder.setPayPrice(paymentPrice);
+                businessOrder.setType(2);//记录支付类型任务类型
+                businessOrder.setTaskId(order.getId());//保存任务ID
+                businessOrderMapper.insert(businessOrder);
+            }
+
+            order.setTotalTransportationCost(freightPrice);//总运费
+            order.setTotalStevedorageCost(totalMoveDost);//总搬运费
+            order.setBusinessOrderNumber(businessOrder.getNumber());
+            order.setTotalAmount(paymentPrice);// 订单总额(工钱)
+            orderMapper.updateByPrimaryKeySelective(order);
+
+            budgetCorrect(order,null,null);
+
+            //清空增值商品
+            example = new Example(ShoppingCart.class);
+            example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, member.getId())
+                    .andIn(ShoppingCart.PRODUCT_ID,Arrays.asList(productIds));
+            List<ShoppingCart> shoppingCarts = iShoppingCartMapper.selectByExample(example);
+            if(shoppingCarts.size()>0) {
+                for (ShoppingCart shoppingCart : shoppingCarts) {
+                    Example example1 = new Example(DeliverOrderAddedProduct.class);
+                    example1.createCriteria().andEqualTo(DeliverOrderAddedProduct.ANY_ORDER_ID, shoppingCart.getId()).andEqualTo(DeliverOrderAddedProduct.SOURCE, 4);
+                    masterDeliverOrderAddedProductMapper.deleteByExample(example1);
+                }
+            }
+
+            //清空购物车指定商品
+            example = new Example(ShoppingCart.class);
+            example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, member.getId())
+                    .andIn(ShoppingCart.PRODUCT_ID,Arrays.asList(productIds));
+            iShoppingCartMapper.deleteByExample(example);
+            if(orderSource==1){//设计精算提交过来的商品，返回订单ID
+                return ServerResponse.createBySuccess("提交成功", order.getId());
+            }
+            return ServerResponse.createBySuccess("提交成功", businessOrder.getNumber());
+        }
+        return ServerResponse.createBySuccess("提交成功");
     }
 
     /**

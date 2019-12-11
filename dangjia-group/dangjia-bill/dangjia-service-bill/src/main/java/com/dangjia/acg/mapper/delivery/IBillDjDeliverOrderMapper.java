@@ -77,7 +77,7 @@ public interface IBillDjDeliverOrderMapper extends Mapper<Order> {
     List<WorkerTypeDTO> queryType(@Param("houseId") String houseId);
 
     /**
-     * 查询当前花费汇总信息(根据类别汇总)
+     * 查询汇总信息(根据类别汇总)
      * @param houseId 房子ID
      * @param labelValId 标签ID
      * @return

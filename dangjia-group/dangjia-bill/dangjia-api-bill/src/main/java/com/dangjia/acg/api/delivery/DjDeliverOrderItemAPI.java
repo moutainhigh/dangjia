@@ -1,5 +1,6 @@
 package com.dangjia.acg.api.delivery;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -17,7 +18,7 @@ public interface DjDeliverOrderItemAPI {
     ServerResponse queryPaymentToBeMade(@RequestParam("orderId") String orderId);
 
     @PostMapping("app/order/queryHumpDetail")
-    @ApiOperation(value = "待发货详情", notes = "待发货详情")
+    @ApiOperation(value = "库存详情", notes = "库存详情")
     ServerResponse queryHumpDetail(@RequestParam("orderId") String orderId);
 
     @PostMapping("app/order/deleteOrder")
@@ -31,6 +32,11 @@ public interface DjDeliverOrderItemAPI {
     @PostMapping("app/order/setCancellationOrder")
     @ApiOperation(value = "取消订单", notes = "取消订单")
     ServerResponse setCancellationOrder(@RequestParam("orderId") String orderId);
+
+    @PostMapping("app/order/queryAcceptanceEvaluationList")
+    @ApiOperation(value = "验收评价列表", notes = "验收评价列表")
+    ServerResponse queryAcceptanceEvaluationList(@RequestParam("splitDeliverId")String splitDeliverId,
+                                                 @RequestParam("pageDTO") PageDTO pageDTO);
 
     @PostMapping("app/order/setAcceptanceEvaluation")
     @ApiOperation(value = "验收评价", notes = "验收评价")
