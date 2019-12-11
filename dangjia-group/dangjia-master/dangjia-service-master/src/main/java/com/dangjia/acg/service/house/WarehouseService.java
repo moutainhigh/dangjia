@@ -447,7 +447,7 @@ public class WarehouseService {
                 warehouseDTO.put("repairCount", mendWorker.getShopCount());//补人工数
                 warehouseDTO.put("shopCount", 0);//购买数
                 warehouseDTO.put("workBack", 0);//退人工数
-                warehouseDTO.put("tolPrice", mendWorker.getShopCount()  * budgetWorker.getPrice());//实际花费
+                warehouseDTO.put("tolPrice", mendWorker.getShopCount()  * mendWorker.getPrice());//实际花费
                 List<WarehouseGoodsDTO> goodsDTOS=mendMaterielMapper.getWarehouseWorker(gid,houseId);
                 warehouseDTO.put("list",goodsDTOS);
                 return ServerResponse.createBySuccess("查询成功", warehouseDTO);
