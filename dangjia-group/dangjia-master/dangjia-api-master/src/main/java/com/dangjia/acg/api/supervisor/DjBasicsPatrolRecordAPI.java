@@ -32,5 +32,10 @@ public interface DjBasicsPatrolRecordAPI {
     @ApiOperation(value = "查询巡检记录", notes = "查询巡检记录")
     ServerResponse queryDjBasicsPatrolRecord(@RequestParam("request") HttpServletRequest request,@RequestParam("userToken") String userToken );
 
-
+    //奖罚-选择工匠
+    //奖罚-选择原因
+    //增加奖励、惩罚
+    //首页-督导
+    //工地列表
+    //工地详情
 }
