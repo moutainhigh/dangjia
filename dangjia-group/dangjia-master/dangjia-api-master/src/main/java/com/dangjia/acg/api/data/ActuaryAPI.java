@@ -2,6 +2,7 @@ package com.dangjia.acg.api.data;
 
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.dto.house.HouseListDTO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * author: Ronalcheng
@@ -31,6 +33,18 @@ public interface ActuaryAPI {
             @RequestParam("budgetStatus") String budgetStatus,
             @RequestParam("decorationType") String decorationType
     );
+
+    /**
+     * 查询精算的订单详情
+     * @param cityId 城市ID
+     * @param houseId 房子ID
+     * @return
+     */
+    @PostMapping("/data/actuary/getBudgetOrderDetail")
+    @ApiOperation(value = "查询精算的订单详情", notes = "查询精算的订单详情")
+    ServerResponse getBudgetOrderDetail(@RequestParam("cityId") String cityId,
+                                        @RequestParam("houseId") String houseId);
+
     @PostMapping("/data/actuary/getActuaryWaitPay")
     @ApiOperation(value = "返回待业主支付精算列表", notes = "返回待业主支付精算列表")
     ServerResponse getActuaryWaitPay(
