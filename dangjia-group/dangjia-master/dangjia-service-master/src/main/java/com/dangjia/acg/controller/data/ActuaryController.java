@@ -5,7 +5,9 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.data.ActuaryService;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -38,6 +40,18 @@ public class ActuaryController implements ActuaryAPI {
                                             String decorationType){
         return actuaryService.getActuaryAll(request,pageDTO,name,budgetOk,  workerKey,userId,budgetStatus,decorationType);
 
+    }
+
+    /**
+     * 查询精算的订单详情
+     * @param cityId 城市ID
+     * @param houseId 房子ID
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getBudgetOrderDetail(String cityId,String houseId){
+        return actuaryService.getBudgetOrderDetail(cityId,houseId);
     }
     /**
      * 返回待业主支付精算列表

@@ -1,21 +1,35 @@
 package com.dangjia.acg.service.data;
 
 import com.dangjia.acg.common.constants.Constants;
+import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.DateUtil;
+import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.house.HouseDTO;
 import com.dangjia.acg.dto.house.HouseListDTO;
+import com.dangjia.acg.dto.house.HouseOrderDetailDTO;
 import com.dangjia.acg.dto.house.UserInfoDateDTO;
+import com.dangjia.acg.dto.refund.RefundOrderItemDTO;
 import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
+import com.dangjia.acg.mapper.core.IMasterUnitMapper;
 import com.dangjia.acg.mapper.design.IDesignBusinessOrderMapper;
 import com.dangjia.acg.mapper.house.HouseRemarkMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
+import com.dangjia.acg.mapper.product.IMasterProductTemplateMapper;
+import com.dangjia.acg.modle.brand.Brand;
+import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.design.DesignBusinessOrder;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.HouseRemark;
+import com.dangjia.acg.modle.product.BasicsGoods;
+import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
+import com.dangjia.acg.service.product.MasterProductTemplateService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -34,15 +48,23 @@ import java.util.Map;
 @Service
 public class ActuaryService {
 
+    private static Logger logger = Logger.getLogger(ActuaryService.class);
     @Autowired
     private IHouseWorkerMapper houseWorkerMapper;
     @Autowired
     private IHouseMapper houseMapper;
     @Autowired
     private IDesignBusinessOrderMapper designBusinessOrderMapper;
-
+    @Autowired
+    private ConfigUtil configUtil;
     @Autowired
     private HouseRemarkMapper houseRemarkMapper;
+    @Autowired
+    private IMasterProductTemplateMapper iMasterProductTemplateMapper;
+    @Autowired
+    private IMasterUnitMapper iMasterUnitMapper;
+    @Autowired
+    private MasterProductTemplateService masterProductTemplateService;
     /**
      * 查询房子精算数据
      *
@@ -109,7 +131,75 @@ public class ActuaryService {
         pageResult.setList(houseList);
         return ServerResponse.createBySuccess("查询成功", pageResult);
     }
+    /**
+     * 查询精算的订单详情
+     * @param cityId 城市ID
+     * @param houseId 房子ID
+     * @return
+     */
+    public ServerResponse getBudgetOrderDetail(String cityId,String houseId){
+        try{
+            logger.info("查询精算详情cityId={"+cityId+"},houseId={"+houseId+"}");
+            HouseDTO houseDTO=houseMapper.getHouseDetailByHouseId(houseId);
+            if(houseDTO!=null&&houseDTO.getHouseId()!=null){
+                List<HouseOrderDetailDTO> houseOrderDetailDTOList=houseMapper.getBudgetOrderDetailByHouseId(houseId,"2");
+                getProductList(houseOrderDetailDTOList);
+                houseDTO.setOrderDetailList(houseOrderDetailDTOList);
+            }
+            return ServerResponse.createBySuccess("查询成功",houseDTO);
+        }catch (Exception e){
+            logger.error("getBudgetOrderDetail获取精算详情查询异常：",e);
+            return ServerResponse.createByErrorMessage("查询异常！");
+        }
+    }
+    /**
+     * 查询商品对应的规格详情，单位信息
+     * @param productList
+     */
+    private  void getProductList(List<HouseOrderDetailDTO> productList){
+        if(productList!=null&&productList.size()>0){
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            for(HouseOrderDetailDTO ap:productList){
+                setProductInfo(ap,address);
+            }
+        }
+    }
+    /**
+     * 替换对应的信息
+     * @param ap
+     * @param address
+     */
+    private  void setProductInfo(HouseOrderDetailDTO ap,String address){
+        String productTemplateId=ap.getProductTemplateId();
+        DjBasicsProductTemplate pt= iMasterProductTemplateMapper.selectByPrimaryKey(productTemplateId);
+        if(pt!=null&& StringUtils.isNotBlank(pt.getId())){
+            String image=ap.getImage();
+            if (image == null) {
+                image=pt.getImage();
+            }
+            //添加图片详情地址字段
+            String[] imgArr = image.split(",");
+            if(imgArr!=null&&imgArr.length>0){
+                ap.setImageUrl(address+imgArr[0]);//图片详情地址设置
+            }
+            String unitId=pt.getUnitId();
+            //查询单位
+            if(pt.getConvertQuality()!=null&&pt.getConvertQuality()>0){
+                unitId=pt.getConvertUnit();
+            }
+            if(unitId!=null&& StringUtils.isNotBlank(unitId)){
+                Unit unit= iMasterUnitMapper.selectByPrimaryKey(unitId);
+                ap.setUnitId(unitId);
+                ap.setUnitName(unit!=null?unit.getName():"");
+            }
+            //查询规格名称
+            if (StringUtils.isNotBlank(pt.getValueIdArr())) {
+                ap.setValueIdArr(pt.getValueIdArr());
+                ap.setValueNameArr(masterProductTemplateService.getNewValueNameArr(pt.getValueIdArr()).replaceAll(",", " "));
+            }
+        }
 
+    }
     /**
      * 统计精算数据
      */
