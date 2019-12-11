@@ -49,17 +49,7 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
         return mendMaterielService.materialBackState(userId,cityId, pageDTO, state,likeAddress);
     }
 
-    @Override
-    @ApiMethod
-    public ServerResponse applyPlatformAccess(HttpServletRequest request, String cityId, String houseId, PageDTO pageDTO) {
-        return mendMaterielService.applyPlatformAccess(request,cityId,houseId,pageDTO);
-    }
 
-    @Override
-    @ApiMethod
-    public ServerResponse acceptPartialReturn(HttpServletRequest request, String cityId, String houseId, PageDTO pageDTO) {
-        return mendMaterielService.acceptPartialReturn(request,cityId,houseId,pageDTO);
-    }
 
 
 
@@ -120,8 +110,8 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse returnProductDistributionSupplier(String mendOrderId, String userId, String actualCountList) {
-        return mendMaterielService.returnProductDistributionSupplier(mendOrderId,userId,actualCountList);
+    public ServerResponse returnProductDistributionSupplier(String mendOrderId, String userId,String cityId, String actualCountList) {
+        return mendMaterielService.returnProductDistributionSupplier(mendOrderId,userId,cityId,actualCountList);
     }
 
     @Override

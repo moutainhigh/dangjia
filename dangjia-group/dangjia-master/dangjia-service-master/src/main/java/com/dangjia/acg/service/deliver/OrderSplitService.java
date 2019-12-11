@@ -44,6 +44,7 @@ import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
@@ -280,6 +281,7 @@ public class OrderSplitService {
      * 发送供应商
      * 分发不同供应商
      */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse sentSupplier(String orderSplitId, String splitItemList,String cityId,String userId,String installName,
                                        String installMobile, String deliveryName, String deliveryMobile) {
         try {
@@ -295,18 +297,15 @@ public class OrderSplitService {
                 String id = obj.getString("id");
                 String supplierId = obj.getString("supplierId");
                 DjSupplier djSupplier = djSupplierAPI.queryDjSupplierByPass(supplierId);
-                if (djSupplier == null) {
-                    //非平台供应商
-                    continue;
+                if (djSupplier.getIsNonPlatformSupperlier() == 1) {
+                    continue;  //非平台供应商
                 } else {
                     list.put(djSupplier.getTelephone(),"1");
                     //配送状态（0待发货,1已发待收货,2已收货,3取消,4部分收,5已结算,6材料员撤回(只待发货才能撤回)）
                     OrderSplitItem orderSplitItem = orderSplitItemMapper.selectByPrimaryKey(id);
                     Example example = new Example(SplitDeliver.class);
-                    example.createCriteria().andEqualTo(SplitDeliver.HOUSE_ID, orderSplit.getHouseId())
-                            .andEqualTo(SplitDeliver.SUPPLIER_ID, supplierId)
-                            .andEqualTo(SplitDeliver.SHIPPING_STATE, 0)
-                            .andEqualTo(SplitDeliver.ORDER_SPLIT_ID, orderSplitId);
+                    example.createCriteria().andEqualTo(SplitDeliver.HOUSE_ID, orderSplit.getHouseId()).andEqualTo(SplitDeliver.SUPPLIER_ID, supplierId)
+                            .andEqualTo(SplitDeliver.SHIPPING_STATE, 0).andEqualTo(SplitDeliver.ORDER_SPLIT_ID, orderSplitId);
                     List<SplitDeliver> splitDeliverList = splitDeliverMapper.selectByExample(example);
                     SplitDeliver splitDeliver;
                     if (splitDeliverList.size() > 0) {
@@ -354,20 +353,17 @@ public class OrderSplitService {
                     }
                     DjSupApplicationProduct djSupApplicationProduct = djSupApplicationProductAPI.getDjSupApplicationProduct(house.getCityId(), supplierId, orderSplitItem.getProductId());
                     orderSplitItem.setSupCost(djSupApplicationProduct.getPrice());//供应价
-                    orderSplitItem.setSplitDeliverId(splitDeliver.getId());
+                    orderSplitItem.setSplitDeliverId(splitDeliver.getId());//发货单id
                     orderSplitItemMapper.updateByPrimaryKeySelective(orderSplitItem);
-
                     //发货单总额
                     splitDeliver.setTotalAmount(djSupApplicationProduct.getPrice() * orderSplitItem.getNum() + splitDeliver.getTotalAmount());//累计供应商价总价
                     splitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
-
                 }
                 orderSplit.setApplyStatus(2);//2通过(发给供应商)
-                orderSplitMapper.updateByPrimaryKeySelective(orderSplit);
+                orderSplitMapper.updateByPrimaryKeySelective(orderSplit);//修改要货单信息
 
                 for (String key : list.keySet()) {
-                    //正常状况下供应商
-                    JsmsUtil.sendSupplier(key, address + "submitNumber?cityId=" + house.getCityId());
+                    JsmsUtil.sendSupplier(key, address + "submitNumber?cityId=" + house.getCityId());//给供应商发送短信
                 }
                 return ServerResponse.createBySuccessMessage("操作成功");
             }
@@ -375,7 +371,7 @@ public class OrderSplitService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("操作失败");
         }
-return null;
+        return null;
     }
 
 
