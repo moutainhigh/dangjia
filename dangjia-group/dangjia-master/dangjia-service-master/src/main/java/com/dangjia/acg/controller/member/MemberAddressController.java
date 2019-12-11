@@ -1,6 +1,7 @@
 package com.dangjia.acg.controller.member;
 
 import com.dangjia.acg.api.member.MemberAddressAPI;
+import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.member.MemberAddressService;
@@ -24,6 +25,7 @@ public class MemberAddressController implements MemberAddressAPI {
     private MemberAddressService memberAddressService;
 
     @Override
+    @ApiMethod
     public ServerResponse insertAddress(HttpServletRequest request, String userToken, int renovationType,
                                         int defaultType, String name, String mobile, String cityName,
                                         String address, BigDecimal inputArea, String longitude, String latitude) {
@@ -32,21 +34,25 @@ public class MemberAddressController implements MemberAddressAPI {
     }
 
     @Override
+    @ApiMethod
     public ServerResponse updataAddress(HttpServletRequest request, String userToken, String addressId, int defaultType, String name, String mobile) {
         return memberAddressService.updataAddress(userToken, addressId, defaultType, name, mobile);
     }
 
     @Override
+    @ApiMethod
     public ServerResponse deleteAddress(HttpServletRequest request, String userToken, String addressId) {
         return memberAddressService.deleteAddress(userToken, addressId);
     }
 
     @Override
+    @ApiMethod
     public ServerResponse selectAddress(HttpServletRequest request, String addressId) {
         return memberAddressService.selectAddress(addressId);
     }
 
     @Override
+    @ApiMethod
     public ServerResponse selectAddressList(HttpServletRequest request, PageDTO pageDTO, String userToken, Integer renovationType) {
         return memberAddressService.selectAddressList(pageDTO, userToken, renovationType);
     }
