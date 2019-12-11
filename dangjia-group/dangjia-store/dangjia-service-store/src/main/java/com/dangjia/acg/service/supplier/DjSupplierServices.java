@@ -183,6 +183,8 @@ public class DjSupplierServices {
                     return ServerResponse.createByErrorMessage("邮件不能为空");
                 if (CommonUtil.isEmpty(djSupplier.getCheckPeople()))
                     return ServerResponse.createByErrorMessage("联系人不能为空");
+                DjSupplier djSupplier1=new DjSupplier();
+                djSupplier.setId(djSupplier1.getId());
                 djSupplier.setSurplusMoney(0d);
                 djSupplier.setTotalAccount(0d);
                 djSupplier.setRetentionMoney(0d);

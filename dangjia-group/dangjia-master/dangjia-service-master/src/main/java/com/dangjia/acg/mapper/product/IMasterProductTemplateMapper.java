@@ -1,8 +1,11 @@
 package com.dangjia.acg.mapper.product;
 
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
+
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -12,4 +15,9 @@ import tk.mybatis.mapper.common.Mapper;
  */
 @Repository
 public interface IMasterProductTemplateMapper extends Mapper<DjBasicsProductTemplate> {
+
+    List<DjBasicsProductTemplate> querySkillsCertificationWaitingList(@Param("workerTypeId") Integer workerTypeId,
+                                                                      @Param("workerId") String workerId,
+                                                                      @Param("searchKey") String searchKey);
+
 }
