@@ -85,6 +85,7 @@ public class DjSupApplicationService {
                     .andEqualTo(DjSupApplication.APPLICATION_STATUS,2)
                     .andEqualTo(DjSupApplication.DATA_STATUS,0);
             DjSupApplication djSupApplication1 = djSupApplicationMapper.selectOneByExample(example);
+            System.out.println(djSupApplication1+"===========");
             if(null!=djSupApplication1){
                 djSupApplication1.setApplicationStatus("0");
                 djSupApplicationMapper.updateByPrimaryKeySelective(djSupApplication1);
