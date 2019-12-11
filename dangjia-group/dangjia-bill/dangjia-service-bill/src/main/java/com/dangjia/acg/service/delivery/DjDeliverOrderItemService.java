@@ -257,6 +257,9 @@ public class DjDeliverOrderItemService {
             Example example=new Example(BusinessOrder.class);
             example.createCriteria().andEqualTo(BusinessOrder.NUMBER,order.getBusinessOrderNumber());
             BusinessOrder businessOrder=new BusinessOrder();
+            businessOrder.setId(null);
+            businessOrder.setCreateDate(null);
+            businessOrder.setDataStatus(null);
             businessOrder.setState(4);
             iBillBusinessOrderMapper.updateByExampleSelective(businessOrder,example);
             return ServerResponse.createBySuccessMessage("取消订单成功");
