@@ -20,24 +20,20 @@ import com.dangjia.acg.mapper.delivery.ISplitDeliverMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
-import com.dangjia.acg.mapper.repair.IMendMaterialMapper;
-import com.dangjia.acg.mapper.repair.IMendOrderCheckMapper;
-import com.dangjia.acg.mapper.repair.IMendOrderMapper;
-import com.dangjia.acg.mapper.repair.IMendTypeRoleMapper;
+import com.dangjia.acg.mapper.repair.*;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
-import com.dangjia.acg.modle.repair.MendMateriel;
-import com.dangjia.acg.modle.repair.MendOrder;
-import com.dangjia.acg.modle.repair.MendOrderCheck;
-import com.dangjia.acg.modle.repair.MendTypeRole;
+import com.dangjia.acg.modle.repair.*;
 import com.dangjia.acg.modle.storefront.Storefront;
+import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.netflix.discovery.converters.Auto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
@@ -80,6 +76,8 @@ public class MendMaterielService {
     @Autowired
     private IMendOrderCheckMapper mendOrderCheckMapper;
 
+    @Autowired
+    private IMendDeliverMapper mendDeliverMapper ;
 
     /**
      * 店铺退货分发供应商列表
@@ -109,41 +107,9 @@ public class MendMaterielService {
         }
     }
 
-    /**
-     *業主審核部分退貨-申请平台介入
-     * @param request
-     * @param cityId
-     * @param houseId
-     * @param pageDTO
-     * @return
-     */
-    public ServerResponse applyPlatformAccess(HttpServletRequest request, String cityId, String houseId, PageDTO pageDTO) {
-        try{
-                return null;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("業主審核部分退貨-申请平台介入异常");
-        }
-    }
 
-    /**
-     *业主申请部分退货-接受
-     * @param request
-     * @param cityId
-     * @param houseId
-     * @param pageDTO
-     * @return
-     */
-    public ServerResponse acceptPartialReturn(HttpServletRequest request, String cityId, String houseId, PageDTO pageDTO) {
-        try{
 
-            return null;
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorMessage("业主申请部分退货-接受异常");
-        }
-    }
 
 
 
@@ -154,40 +120,56 @@ public class MendMaterielService {
      * @param actualCountList
      * @return
      */
-    public ServerResponse returnProductDistributionSupplier(String mendOrderId, String userId, String actualCountList) {
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse returnProductDistributionSupplier(String mendOrderId, String userId,String cityId, String actualCountList) {
         try {
-            MendOrder parammendOrder=mendOrderMapper.selectByPrimaryKey(mendOrderId);
-            if(parammendOrder==null)
-                  return ServerResponse.createByErrorMessage("不存在退货单");
-            Integer state=parammendOrder.getState();
-            //全部退货
-            if (state == 3) {
-                //String aa="[{\"mendOrderId\":\"865634841567998628778\",\"actualCount\":9}]";
-                List<Map<String,Object>> list= JSON.parseObject(actualCountList, List.class);
-                for (Map<String, Object> stringStringMap : list) {
-                    String id=stringStringMap.get("id").toString();
-                    String actualCount=stringStringMap.get("actualCount").toString();
-                    //全部退货
-                    MendOrder mendOrder = new MendOrder();
-                    mendOrder.setId(mendOrderId);
-                    mendOrder.setState(3);//（0生成中,1处理中,2不通过取消,3已通过,4已全部结算,5已撤回,6已关闭7，已审核待处理 8，部分退货）
-                    mendOrder.setModifyDate(new Date());//更新时间
-                    Integer i = mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
-                    if (i <= 0)
-                        return ServerResponse.createBySuccessMessage("全部退货失败");
-                    MendMateriel mendMateriel=new MendMateriel();
-                    mendMateriel.setId(id);
-                    mendMateriel.setActualCount(Double.parseDouble(actualCount));
-                    mendMaterialMapper.updateByPrimaryKey(mendMateriel);
-                    return ServerResponse.createBySuccessMessage("全部退货成功");
-                }
-
+            Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
+            if (storefront == null) {
+                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
+            MendOrder mendOrder=mendOrderMapper.selectByPrimaryKey(mendOrderId);//补退订单表
+            if(mendOrder==null)
+                  return ServerResponse.createByErrorMessage("不存在退货单");
+            //String aa="[{\"mendOrderId\":\"865634841567998628778\",\"actualCount\":9,supplierId:\"xxxxx"\}]";
+            List<Map<String,Object>> list= JSON.parseObject(actualCountList, List.class);
+            for (Map<String, Object> stringStringMap : list) {
+                String id=stringStringMap.get("id").toString();
+                String actualCount=stringStringMap.get("actualCount").toString();
+                String supplierId=stringStringMap.get("supplierId").toString();
+                DjSupplier djSupplier = djSupplierAPI.queryDjSupplierByPass(supplierId);//供应商信息
 
-            return null;
+                mendOrder.setState(3);//（0生成中,1处理中,2不通过取消,3已通过,4已全部结算,5已撤回,6已关闭7，已审核待处理 8，部分退货）
+                mendOrder.setModifyDate(new Date());//更新时间
+                Integer i = mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
+
+                if (i <= 0)
+                    return ServerResponse.createBySuccessMessage("全部退货失败");
+                MendMateriel mendMateriel=mendMaterialMapper.selectByPrimaryKey(id);
+                mendMateriel.setActualCount(Double.parseDouble(actualCount));
+                mendMaterialMapper.updateByPrimaryKey(mendMateriel);
+
+                Example example = new Example(MendDeliver.class);
+                MendDeliver mendDeliver=new MendDeliver();//供应商退货单
+                mendDeliver.setNumber(mendOrder.getNumber() + "00" + mendDeliverMapper.selectCountByExample(example));//发货单号
+                mendDeliver.setHouseId(mendOrder.getHouseId());//房子id
+                mendDeliver.setMendOrderId(mendOrderId);//退货订单号
+                mendDeliver.setTotalAmount(mendMateriel.getPrice()*Double.parseDouble(actualCount));//退货单总额
+                mendDeliver.setDeliveryFee(0d);//运费
+                //mendDeliver.setApplyMoney();//供应商申请结算的价格
+                //mendDeliver.setApplyState();//供应商申请结算的状态
+                //mendDeliver.setReason();//不同意理由
+                //mendDeliver.setShipName();//退货人姓名
+                //mendDeliver.setShipMobile();//退货人手机
+                mendDeliver.setSupplierTelephone(djSupplier.getTelephone());//供应商联系电话
+                mendDeliver.setSupplierName(djSupplier.getCheckPeople());//供应商姓名
+                mendDeliver.setSupplierId(supplierId);//供应商id
+                mendDeliver.setStorefrontId(storefront.getId());//店铺id
+                mendDeliverMapper.insertSelective(mendDeliver);
+            }
+            return ServerResponse.createBySuccessMessage("店铺退货分发供应商成功");
         } catch (Exception e) {
             e.printStackTrace();
-            return ServerResponse.createByErrorMessage("退货失败");
+            return ServerResponse.createByErrorMessage("店铺退货分发供应商异常");
         }
     }
 

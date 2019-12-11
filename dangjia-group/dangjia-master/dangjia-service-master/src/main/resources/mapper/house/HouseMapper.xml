@@ -199,6 +199,52 @@
           AND id = #{houseId}
     </select>
 
+    <!-- 根据房子ID查询对应的房子信息-->
+    <select id="getHouseDetailByHouseId"  resultType="com.dangjia.acg.dto.house.HouseDTO">
+        SELECT
+            h.id houseId,
+            m.id AS memberId,
+            m. NAME AS memberName,
+            m.mobile AS mobile,
+            IFNULL(
+                ma.address,
+                CONCAT(
+                    h.residential,
+                    IFNULL(h.building, '*'),
+                    '栋',
+                    IFNULL(CONCAT(h.unit, '单元'), ''),
+                    IFNULL(h.number, '*'),
+                    '号'
+                )
+            ) address,
+            IFNULL(ma.input_area, H.square) inputArea
+        FROM
+            dj_house h
+        INNER JOIN dj_member m ON h.member_id = m.id
+        LEFT JOIN dj_member_address ma ON h.id = ma.house_id
+        WHERE house_id=#{houseId}
+    </select>
+
+    <!-- 查询当前房子的订单详情-->
+    <select id="getBudgetOrderDetailByHouseId" resultType="com.dangjia.acg.dto.house.HouseOrderDetailDTO">
+        SELECT
+            t1.id orderId,
+            IFNULL(t1.image, t2.image) image,
+            t1.product_name productName,
+            t1.price,
+            t1.total_price totalPrice,
+            t1.shop_count shopCount,
+            t2.prod_template_id productTemplateId
+        FROM
+            dj_deliver_order t,
+            dj_deliver_order_item t1,
+            dj_basics_storefront_product t2
+        WHERE
+            t.id = t1.order_id
+        AND t1.product_id = t2.id
+        AND t.house_id = #{houseId}
+        AND t1.order_type =#{orderType}
+    </select>
     <!--查询所有的房子 指定房子 装修状态-->
     <select id="getAllHouseByVisitState" resultType="com.dangjia.acg.modle.house.House">
         SELECT

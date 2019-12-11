@@ -32,10 +32,15 @@ public class HouseDTO {
     private int drawings;//有无图纸
     private int decorationType;//装修类型:1远程设计，2自带设计
 
+    private String memberId;//业主ID
+    private String memberName;//业主姓名
+    private String mobile;//业主电话
+    private Double inputArea;//业主录入面积
+
     /**
      * 设计精算对应的商品信息
      */
-    private List actuarialDesignList;
+    private List<HouseOrderDetailDTO> orderDetailList;
     /**
      * 设计精算，商品信息
      */

@@ -368,13 +368,13 @@ public class HouseService {
             houseDTO.setAddress(houseAddressList.get(0).getAddress());
         }
 
-        List productList=new ArrayList();
+       /* List productList=new ArrayList();
         //查询对应用户选择的设计精算商品
         Map<String,Object> map1 = getAllBudgetMaterialWorkerList(houseId,"1");//设计商品
         Map<String,Object> map2 = getAllBudgetMaterialWorkerList(houseId,"2");//精算商品
         productList.add(map1);
         productList.add(map2);
-        houseDTO.setActuarialDesignList(productList);
+        houseDTO.setActuarialDesignList(productList);*/
         return ServerResponse.createBySuccess("查询成功", houseDTO);
     }
 
@@ -2135,6 +2135,8 @@ public class HouseService {
         example.createCriteria().andEqualTo(Customer.MEMBER_ID, memberId);
         Customer customer = new Customer();
         customer.setId(null);
+        customer.setCreateDate(null);
+        customer.setDataStatus(null);
         customer.setStage(5);
         iCustomerMapper.updateByExampleSelective(customer, example);
     }

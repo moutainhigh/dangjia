@@ -1,9 +1,6 @@
 package com.dangjia.acg.mapper.house;
 
-import com.dangjia.acg.dto.house.DesignDTO;
-import com.dangjia.acg.dto.house.HouseDTO;
-import com.dangjia.acg.dto.house.HouseListDTO;
-import com.dangjia.acg.dto.house.UserInfoDateDTO;
+import com.dangjia.acg.dto.house.*;
 import com.dangjia.acg.dto.repair.HouseProfitSummaryDTO;
 import com.dangjia.acg.dto.repair.RepairMendDTO;
 import com.dangjia.acg.modle.deliver.Order;
@@ -28,6 +25,21 @@ public interface IHouseMapper extends Mapper<House> {
     List<House> getStatisticsByDate(@Param("start") Date start, @Param("end") Date end);
 
     HouseDTO startWorkPage(@Param("houseId") String houseId);
+
+    /**
+     * 查询房子信息
+     * @param houseId
+     * @return
+     */
+    HouseDTO getHouseDetailByHouseId(@Param("houseId") String houseId);
+
+    /**
+     * 查询房子订单信息
+     * @param houseId 房子信息
+     * @param orderType 订单类型（1设计，2精算）
+     * @return
+     */
+    List<HouseOrderDetailDTO> getBudgetOrderDetailByHouseId(@Param("houseId") String houseId,@Param("orderType") String orderType);
 
     /***
      * 根据房子装修状态查询所有的房子

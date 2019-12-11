@@ -567,7 +567,7 @@ public class StorefrontProductService {
                 if (j > 0) {
                     if(zy!=null)
                     {
-                        return ServerResponse.createBySuccess("部分商品上下架成功,如下商品属于当家自营商品，不能上架",zy.toString().substring(0,zy.length()-1));
+                        return ServerResponse.createBySuccess("部分商品上下架成功,如下商品属于当家自营商品，不能上架",zy.toString());
                     }
                     return ServerResponse.createBySuccessMessage("设置商品上下架成功");
                 } else {

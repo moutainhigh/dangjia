@@ -225,40 +225,6 @@ public interface WebMendMaterielAPI {
             @RequestParam("likeAddress") String likeAddress);
 
 
-    /**
-     * 業主審核部分退貨-申请平台介入
-     * @param request
-     * @param cityId
-     * @param houseId
-     * @param pageDTO
-     * @return
-     */
-    @PostMapping(value = "web/repair/webMendMateriel/applyPlatformAccess")
-    @ApiOperation(value = "業主審核部分退貨-申请平台介入", notes = "業主審核部分退貨-申请平台介入")
-    ServerResponse applyPlatformAccess(
-            @RequestParam("request") HttpServletRequest request,
-            @RequestParam("cityId") String cityId,
-            @RequestParam("houseId") String houseId,
-            @RequestParam("pageDTO") PageDTO pageDTO);
-
-
-    /**
-     * 业主申请部分退货-接受
-     * @param request
-     * @param cityId
-     * @param houseId
-     * @param pageDTO
-     * @return
-     */
-    @PostMapping(value = "web/repair/webMendMateriel/acceptPartialReturn")
-    @ApiOperation(value = "业主申请部分退货-接受", notes = "业主申请部分退货-接受")
-    ServerResponse acceptPartialReturn(
-            @RequestParam("request") HttpServletRequest request,
-            @RequestParam("cityId") String cityId,
-            @RequestParam("houseId") String houseId,
-            @RequestParam("pageDTO") PageDTO pageDTO);
-
-
 
 
     @PostMapping(value = "web/repair/webMendMateriel/storeReturnDistributionSupplier")
@@ -280,6 +246,7 @@ public interface WebMendMaterielAPI {
     @ApiOperation(value = "店铺退货分发供应商", notes = "店铺退货分发供应商")
     ServerResponse returnProductDistributionSupplier(@RequestParam("mendOrderId") String mendOrderId,
                                                      @RequestParam("userId") String userId,
+                                                     @RequestParam("cityId") String cityId,
                                                      @RequestParam("actualCountList") String actualCountList);
 
 

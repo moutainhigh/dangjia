@@ -2,6 +2,7 @@ package com.dangjia.acg.modle.worker;
 
 import com.dangjia.acg.common.annotation.Desc;
 import com.dangjia.acg.common.model.BaseEntity;
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
@@ -17,6 +18,7 @@ import javax.persistence.Table;
 @Data
 @Entity
 @Table(name = "dj_worker_reward_punish_record")
+@ApiModel(description = "工人奖罚记录")
 @FieldNameConstants(prefix = "")
 public class RewardPunishRecord extends BaseEntity {
 

@@ -63,4 +63,14 @@ public class MemberAddress extends BaseEntity {
     @Desc(value = "纬度")
     @ApiModelProperty("纬度")
     private String latitude;// 纬度
+
+    @Column(name = "name")
+    @Desc(value = "业主姓名")
+    @ApiModelProperty("业主姓名")
+    private String name;
+
+    @Column(name = "mobile")
+    @Desc(value = "业主手机")
+    @ApiModelProperty("业主手机")
+    private String mobile;
 }
