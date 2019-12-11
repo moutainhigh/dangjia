@@ -49,4 +49,16 @@ public interface RewardPunishAPI {
     ServerResponse addRewardPunishRecord(@RequestParam("userToken") String userToken,
                                          @RequestParam("userId") String userId,
                                          @RequestParam("rewardPunishRecord") RewardPunishRecord rewardPunishRecord);
+
+
+    @PostMapping("/app/rewardPunish/queryCraftsmenList")
+    @ApiOperation(value = "奖罚-工匠列表", notes = "奖罚-工匠列表")
+    ServerResponse queryCraftsmenList(@RequestParam("pageDTO") PageDTO pageDTO,
+                                      @RequestParam("houseId") String houseId);
+
+    @PostMapping("/app/rewardPunish/queryCorrelationList")
+    @ApiOperation(value = "奖罚-奖罚原因列表", notes = "奖罚-奖罚原因列表")
+    ServerResponse queryCorrelationList(@RequestParam("pageDTO") PageDTO pageDTO,
+                                        @RequestParam("type") String type);
+
 }
