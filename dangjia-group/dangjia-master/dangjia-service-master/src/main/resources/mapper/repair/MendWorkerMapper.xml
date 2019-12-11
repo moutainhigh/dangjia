@@ -32,8 +32,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <!--查询所有工种已支付补人工-->
     <select id="mendWorkerList" resultType="com.dangjia.acg.modle.repair.MendWorker">
         select
-        mw.worker_goods_id as workerGoodsId,
-        mw.worker_goods_name as workerGoodsName
+         <include refid="all_columns"/>
         from
         dj_repair_mend_order mo,dj_repair_mend_worker mw
         where mo.type = 1

@@ -81,8 +81,10 @@ public class ForMasterService {
      */
     public void repairCount(String houseId,String workerGoodsId,Double num){
         BudgetWorker budgetWorker = budgetWorkerMapper.byWorkerGoodsId(houseId,workerGoodsId);
-        budgetWorker.setRepairCount(budgetWorker.getRepairCount() + num);
-        budgetWorkerMapper.updateByPrimaryKeySelective(budgetWorker);
+        if(budgetWorker!=null) {
+            budgetWorker.setRepairCount(budgetWorker.getRepairCount() + num);
+            budgetWorkerMapper.updateByPrimaryKeySelective(budgetWorker);
+        }
     }
 
     public Technology byTechnologyId(String technologyId){

@@ -14,6 +14,7 @@ import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.budget.BudgetItemDTO;
+import com.dangjia.acg.dto.budget.GoodsItemDTO;
 import com.dangjia.acg.dto.house.WarehouseDTO;
 import com.dangjia.acg.dto.house.WarehouseGoodsDTO;
 import com.dangjia.acg.mapper.deliver.IOrderItemMapper;
@@ -23,6 +24,7 @@ import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IMaterialRecordMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.repair.IMendMaterialMapper;
+import com.dangjia.acg.mapper.repair.IMendWorkerMapper;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.modle.attribute.GoodsCategory;
 import com.dangjia.acg.modle.basics.Goods;
@@ -33,6 +35,7 @@ import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.MaterialRecord;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.repair.MendMateriel;
+import com.dangjia.acg.modle.repair.MendWorker;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -44,6 +47,7 @@ import tk.mybatis.mapper.entity.Example;
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class WarehouseService {
@@ -66,7 +70,8 @@ public class WarehouseService {
     @Autowired
     private IProductChangeMapper productChangeMapper;
 
-
+    @Autowired
+    private IMendWorkerMapper mendWorkerMapper;
 
     @Autowired
     private IMaterialRecordMapper materialRecordMapper;
@@ -181,6 +186,34 @@ public class WarehouseService {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             if (!CommonUtil.isEmpty(type) && "2".equals(type)) {
                 List<BudgetItemDTO> budgetItemDTOS = actuaryOpeAPI.getHouseWorkerInfo(house.getCityId(), "3", houseId, address);
+                for (BudgetItemDTO budgetItemDTO : budgetItemDTOS) {
+                    Double rowPrice =0d;
+                    List<MendWorker> budgetWorkerList =mendWorkerMapper.mendWorkerList(houseId,budgetItemDTO.getWorkerTypeId());
+                    List<GoodsItemDTO> goodsItemDTOList = budgetItemDTO.getGoodsItemDTOList();
+                    //从list集合中，取出字段name的列表
+                    List<String> ids = goodsItemDTOList.stream().map(p -> p.getId()).collect(Collectors.toList());
+                    for (MendWorker budgetWorker : budgetWorkerList) {
+                        if(!ids.contains(budgetWorker.getWorkerGoodsId())){
+                            GoodsItemDTO goodsItemDTO = new GoodsItemDTO();
+                            goodsItemDTO.setGoodsImage(address + budgetWorker.getImage());
+                            goodsItemDTO.setGoodsName(budgetWorker.getWorkerGoodsName());
+                            goodsItemDTO.setConvertCount(budgetWorker.getShopCount());
+                            goodsItemDTO.setPrice(budgetWorker.getPrice());
+                            goodsItemDTO.setUnitName(budgetWorker.getUnitName());
+                            goodsItemDTO.setId(budgetWorker.getWorkerGoodsId());//人工商品id
+                            goodsItemDTO.setShopCount(0d);
+                            goodsItemDTO.setBackCount(0d);
+                            goodsItemDTO.setRepairCount(budgetWorker.getShopCount());
+                            goodsItemDTO.setSurCount(budgetWorker.getShopCount());
+                            goodsItemDTO.setTolPrice(goodsItemDTO.getSurCount()*goodsItemDTO.getPrice());
+                            rowPrice+=goodsItemDTO.getTolPrice();
+                            goodsItemDTOList.add(goodsItemDTO);
+                        }
+                    }
+                    budgetItemDTO.setGoodsItemDTOList(goodsItemDTOList);
+                    budgetItemDTO.setRowPrice(budgetItemDTO.getRowPrice()+rowPrice);
+                }
+                
                 map.put("goodsItemDTOList", budgetItemDTOS);
             } else {
                 Example example = new Example(Warehouse.class);

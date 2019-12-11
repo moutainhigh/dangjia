@@ -183,6 +183,7 @@ public class ActuaryOpeService {
             WorkerType workerType = getWorkerTypeId(jsonArray,workerTypeId);
             budgetItemDTO.setRowImage(address + workerType.getImage());
             budgetItemDTO.setRowName(workerType.getName());
+            budgetItemDTO.setWorkerTypeId(workerTypeId);
             Double rowPrice = budgetWorkerMapper.getTypeAllPrice(houseId, deleteState, workerTypeId);
             if (rowPrice <= 0) {
                 continue;

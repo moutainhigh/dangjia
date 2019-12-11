@@ -50,7 +50,7 @@
 	<!--精算工种人工总价(支付和未支付)-->
 	<select id="getTypeAllPrice" resultType="java.lang.Double">
 		SELECT
-			IFNULL(sum(bw.price * bw.shop_count),0) workerPrice
+			IFNULL(sum(bw.price * (bw.shop_count+bw.repair_count)),0) workerPrice
 		FROM
 		dj_actuary_budget_worker bw
 		WHERE  bw.house_id = #{houseId}
