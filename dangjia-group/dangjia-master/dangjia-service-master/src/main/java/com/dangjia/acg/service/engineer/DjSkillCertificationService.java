@@ -47,7 +47,7 @@ public class DjSkillCertificationService {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<DjBasicsProductTemplate> djBasicsProductTemplates =
-                    iMasterProductTemplateMapper.querySkillsCertificationWaitingList(workerTypeId, searchKey, workerId);
+                    iMasterProductTemplateMapper.querySkillsCertificationWaitingList(workerTypeId, workerId, searchKey);
             if(djBasicsProductTemplates.size()<=0)
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
             PageInfo pageInfo=new PageInfo(djBasicsProductTemplates);
