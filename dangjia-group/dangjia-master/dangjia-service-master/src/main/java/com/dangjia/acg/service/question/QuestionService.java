@@ -48,7 +48,7 @@ public class QuestionService {
      * @param questionId   可选 string 试题ID：为空时则新增否则为编辑
      * @param question     必选 string 试题题目名
      * @param questionType 必选 int 试题类型0:排雷（单选）
-     * @param optionJson   必选 string 试题选项。格式未"[{"optionId":"选项ID：为空时则新增否则为编辑","content":"选项内容"},{"optionId":"","content":""}]"
+     * @param optionJson   必选 string 试题选项。格式为"[{"optionId":"选项ID：为空时则新增否则为编辑","content":"选项内容"},{"optionId":"","content":""}]"
      * @return ServerResponse
      */
     public ServerResponse setQuestion(String questionId, String question, int questionType, String optionJson) {
