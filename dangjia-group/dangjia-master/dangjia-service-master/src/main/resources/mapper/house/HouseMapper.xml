@@ -246,7 +246,7 @@
         AND t1.order_type =#{orderType}
     </select>
     <!-- 可以默认配置的设计商品，精算师选择-->
-    <select id="selectDesignProductList" resultType="com.dangjia.acg.dto.actuary.app.HouseOrderDetailDTO">
+    <select id="selectDesignProductList" resultType="com.dangjia.acg.dto.house.HouseOrderDetailDTO">
          SELECT
           t1.product_id productTemplateId,
           t3.name productName,
