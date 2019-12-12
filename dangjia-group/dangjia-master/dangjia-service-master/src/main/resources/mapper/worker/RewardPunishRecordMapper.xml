@@ -35,7 +35,43 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             </collection>
         </association >
     </resultMap>
+    <select id="queryRewardPunishRecordBykeyWord" resultType="com.dangjia.acg.dto.supervisor.WorkerRewardPunishRecordDTO">
+        select
+        IFNULL(dm.name,'') as name ,
+        IFNULL(dm.mobile,'') as mobile,
+        IFNULL(CONCAT(IFNULL(dh.residential,'*'),IFNULL(CONCAT(dh.building,'栋'),'*栋'),IFNULL(CONCAT(dh.unit,'单元'),'*单元'),IFNULL(CONCAT(dh.number,'号'),'*号')) ,'') as shipAddress,
+        IFNULL(rpr.type,'') as type,
+        IFNULL(rpr.id,'') as id,
+        rpr.reward_punish_correlation_id as rewordPunishCorrelationId
+        from dj_worker_reward_punish_record rpr left join dj_member dm
+        on rpr.operator_id=dm.id left join dj_house dh on rpr.house_id=dh.id
+        where 1=1
+        <if test="null!=keyWord and ''!=keyWord">
+            AND (
+            dm.name LIKE CONCAT('%',#{keyWord},'%') or
+            dm.mobile LIKE CONCAT('%',#{keyWord},'%') or
+            dm.nick_name LIKE CONCAT('%',#{keyWord},'%')
+            )
+        </if>
+    </select>
 
+    <select id="queryRewardPunishRecordDetail" resultType="com.dangjia.acg.dto.supervisor.JFRewardPunishRecordDTO">
+        select
+        IFNULL(rpr.type,'')  as type,
+        IFNULL(rpr.create_date,'')  as createDate,
+        IFNULL(dm.`name`,'')  as name ,
+        IFNULL(dm.worker_type,'')  as workerType,
+        IFNULL(dm.mobile,'')  as mobile,
+        IFNULL(CONCAT(IFNULL(dh.residential,'*'),IFNULL(CONCAT(dh.building,'栋'),'*栋'),IFNULL(CONCAT(dh.unit,'单元'),'*单元'),IFNULL(CONCAT(dh.number,'号'),'*号')) ,'') as address,
+        IFNULL(rpc.name,'')  as rpcName,
+        IFNULL(rpc.content,'') as content,
+        '' as images
+        from
+        dj_worker_reward_punish_record rpr inner join dj_member dm on rpr.member_id=dm.id
+        inner join dj_house dh on rpr.house_id=dh.id  inner join dj_worker_reward_punish_correlation rpc
+        on rpr.reward_punish_correlation_id=rpc.id
+        where rpr.id=#{id}
+    </select>
     <select id="queryRewardPunishRecord" resultMap="findRewardPerms">
 		SELECT
             r.id,
