@@ -11,6 +11,7 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.mapper.question.IQuantityQuestionMapper;
 import com.dangjia.acg.mapper.question.IQuestionMapper;
 import com.dangjia.acg.mapper.question.IQuestionOptionMapper;
+import com.dangjia.acg.modle.question.QuantityQuestion;
 import com.dangjia.acg.modle.question.Question;
 import com.dangjia.acg.modle.question.QuestionOption;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
@@ -20,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -76,7 +78,8 @@ public class QuestionService {
         JSONArray optionList = JSONArray.parseArray(optionJson);
         if (optionList != null && optionList.size() > 1) {
             Example example = new Example(QuestionOption.class);
-            example.createCriteria().andEqualTo(QuestionOption.QUESTION_ID, question1.getId());
+            example.createCriteria().andEqualTo(QuestionOption.QUESTION_ID, question1.getId())
+                    .andEqualTo(QuestionOption.DATA_STATUS, 0);
             QuestionOption questionOption = new QuestionOption();
             questionOption.setId(null);
             questionOption.setCreateDate(null);
@@ -101,6 +104,7 @@ public class QuestionService {
                 }
                 option.setQuestionId(question1.getId());
                 option.setContent(content);
+                option.setDataStatus(0);
                 if (isUpdataOption) {
                     iQuestionOptionMapper.updateByPrimaryKeySelective(option);
                 } else {
@@ -127,7 +131,8 @@ public class QuestionService {
      * @return ServerResponse
      */
     public ServerResponse getQuestionList(int questionType, PageDTO pageDTO) {
-        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        if (pageDTO.getPageNum() != -1)
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         Example example = new Example(Question.class);
         Example.Criteria criteria = example.createCriteria();
         if (questionType != -1)
@@ -170,4 +175,58 @@ public class QuestionService {
         return ServerResponse.createBySuccessMessage("删除成功");
     }
 
+    public ServerResponse setQuantityQuestion(String houseId, String questionJson) {
+        if (CommonUtil.isEmpty(houseId)) {
+            return ServerResponse.createByErrorMessage("未选择房子");
+        }
+        if (CommonUtil.isEmpty(questionJson)) {
+            return ServerResponse.createByErrorMessage("试题不能为空");
+        }
+        JSONArray questionList = JSONArray.parseArray(questionJson);
+        if (questionList != null && questionList.size() > 1) {
+            Example example = new Example(QuantityQuestion.class);
+            example.createCriteria().andEqualTo(QuantityQuestion.HOUSE_ID, houseId)
+                    .andEqualTo(QuantityQuestion.DATA_STATUS, 0);
+            QuantityQuestion quantityQuestion = new QuantityQuestion();
+            quantityQuestion.setId(null);
+            quantityQuestion.setCreateDate(null);
+            quantityQuestion.setDataStatus(1);
+            iQuantityQuestionMapper.updateByExampleSelective(quantityQuestion, example);
+            for (Object o : questionList) {
+                JSONObject obj = (JSONObject) o;
+                String questionId = obj.getString("questionId");
+                String questionOptionId = obj.getString("questionOptionId");
+                QuantityQuestion question = new QuantityQuestion();
+                question.setHouseId(houseId);
+                question.setQuestionId(questionId);
+                question.setQuestionOptionId(questionOptionId);
+                iQuantityQuestionMapper.insertSelective(question);
+            }
+        } else {
+            return ServerResponse.createByErrorMessage("试题不能为空");
+        }
+        return ServerResponse.createBySuccessMessage("设置成功");
+    }
+
+    public ServerResponse getQuantityQuestion(String houseId) {
+        Example example = new Example(QuantityQuestion.class);
+        example.createCriteria().andEqualTo(QuantityQuestion.HOUSE_ID, houseId)
+                .andEqualTo(QuantityQuestion.DATA_STATUS, 0);
+        List<QuantityQuestion> questions = iQuantityQuestionMapper.selectByExample(example);
+        if (questions.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "暂无数据");
+        }
+        List<Map> maps = (List<Map>) BeanUtils.listToMap(questions);
+        for (Map map : maps) {
+            Question question = iQuestionMapper.selectByPrimaryKey(map.get(QuantityQuestion.QUESTION_ID));
+            if (question != null) {
+                map.put("question", question.getQuestion());
+            }
+            QuestionOption questionOption = iQuestionOptionMapper.selectByPrimaryKey(map.get(QuantityQuestion.QUESTION_OPTION_ID));
+            if (questionOption != null) {
+                map.put("content", questionOption.getContent());
+            }
+        }
+        return ServerResponse.createBySuccess("查询成功", maps);
+    }
 }

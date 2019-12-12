@@ -49,7 +49,7 @@ public interface QuestionAPI {
     /**
      * showdoc
      *
-     * @param pageNum      必选 int 页码
+     * @param pageNum      必选 int 页码-1:全部
      * @param pageSize     必选 int 记录数
      * @param questionType 必选 int 试题类型0:排雷（单选）
      * @return {"res": 1000,"msg": {"resultCode": 1000, "resultMsg": "ok", "resultObj": { "pageNum": 0,"pageSize": 10,"size": 1,"startRow": 1,"endRow": 1,"total": 1, "pages": 1,"list": [{返回参数说明}],"prePage": 0, "nextPage": 1,"isFirstPage": false,"isLastPage": false,"hasPreviousPage": false,"hasNextPage": true,"navigatePages": 8,"navigatepageNums": [1],"navigateFirstPage": 1,"navigateLastPage": 1}}}
@@ -106,7 +106,7 @@ public interface QuestionAPI {
      * showdoc
      *
      * @param houseId    必选 string 房子ID
-     * @param optionJson 必选 string 试题和选项集合，格式为"[{"questionId":"试题ID","questionOptionId","选项ID"}]"
+     * @param questionJson 必选 string 试题和选项集合，格式为"[{"questionId":"试题ID","questionOptionId","选项ID"}]"
      * @return {"res":1000,"msg":{"resultCode":1000,"resultMsg":"成功"} }
      * @catalog 商品3.0---app端/排雷模块
      * @title 设置房子排雷
@@ -122,8 +122,27 @@ public interface QuestionAPI {
     @ApiOperation(value = "设置房子排雷", notes = "设置房子排雷")
     ServerResponse setQuantityQuestion(@RequestParam("request") HttpServletRequest request,
                                        @RequestParam("houseId") String houseId,
-                                       @RequestParam("questionJson") String optionJson);
+                                       @RequestParam("questionJson") String questionJson);
 
+    /**
+     * showdoc
+     *
+     * @param houseId 必选 string 房子ID
+     * @return {"res":1000,"msg":{"resultObj":[{返回参数说明},{返回参数说明}],"resultCode":1000,"resultMsg":"成功"} }
+     * @catalog 商品3.0---app端/排雷模块
+     * @title 获取房子排雷
+     * @description 获取房子排雷
+     * @method POST
+     * @url master/member/question/getQuantityQuestion
+     * @return_param questionId string 试题ID
+     * @return_param question string 题目
+     * @return_param questionOptionId string 选项ID
+     * @return_param content string 选项内容
+     * @remark 更多返回错误代码请看首页的错误代码描述
+     * @number 5
+     * @Author: Ruking 18075121944
+     * @Date: 2019/12/12 3:15 PM
+     */
     @PostMapping("member/question/getQuantityQuestion")
     @ApiOperation(value = "获取房子排雷", notes = "获取房子排雷")
     ServerResponse getQuantityQuestion(@RequestParam("request") HttpServletRequest request,

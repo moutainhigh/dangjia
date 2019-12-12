@@ -42,13 +42,13 @@ public class QuestionController implements QuestionAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse setQuantityQuestion(HttpServletRequest request, String houseId, String optionJson) {
-        return null;
+    public ServerResponse setQuantityQuestion(HttpServletRequest request, String houseId, String questionJson) {
+        return questionService.setQuantityQuestion(houseId, questionJson);
     }
 
     @Override
     @ApiMethod
     public ServerResponse getQuantityQuestion(HttpServletRequest request, String houseId) {
-        return null;
+        return questionService.getQuantityQuestion(houseId);
     }
 }
