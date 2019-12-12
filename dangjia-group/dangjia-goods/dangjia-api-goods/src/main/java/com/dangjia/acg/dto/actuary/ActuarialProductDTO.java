@@ -51,10 +51,10 @@ public class ActuarialProductDTO  {
     private String isCalculatedArea;
 
     @ApiModelProperty("是否默认推荐(1是，0否)")
-    private String defaultRecommend = "0";
+    private String defaultRecommend;
 
     @ApiModelProperty("是否隐藏(1是，0否)")
-    private String isHide = "0";
+    private String isHide;
 
 
 
