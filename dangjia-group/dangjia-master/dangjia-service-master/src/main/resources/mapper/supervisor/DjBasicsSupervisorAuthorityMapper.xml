@@ -7,30 +7,31 @@
 <select id="searchAuthority" resultType="com.dangjia.acg.modle.supervisor.DjBasicsSupervisorAuthority">
 
     SELECT
-        bsa.id as id,
-        bsa.house_id AS houseId,
-        bsa.address as address,
-        bsa.member_id AS memberId,
-        bsa.NAME as name,
-        bsa.mobile as mobile ,
-        bsa.visitState as visitState,
-        bsa.constructionDate as constructionDate ,
-        bsa.create_date as createDate,
-        bsa.modify_date as modifyDate,
-        bsa.data_status as dataStatus
+    IFNULL(bsa.id,'') as id,
+    IFNULL(bsa.house_id,'') AS houseId,
+    IFNULL(CONCAT(IFNULL(dh.residential,'*'),IFNULL(CONCAT(dh.building,'栋'),'*栋'),IFNULL(CONCAT(dh.unit,'单元'),'*单元'),IFNULL(CONCAT(dh.number,'号'),'*号')) ,'') as address,
+    IFNULL(bsa.member_id,'') AS memberId,
+    IFNULL(dm.name,'') as name,
+    IFNULL(dm.mobile,'') as mobile ,
+    IFNULL(dh.visit_state,'') as visitState,
+    IFNULL(dh.construction_date,'') as constructionDate ,
+    IFNULL(bsa.create_date,'') as createDate,
+    IFNULL(bsa.modify_date,'') as modifyDate,
+    IFNULL(bsa.data_status,'') as dataStatus
     FROM
-        dj_basics_supervisor_authority bsa
-        where 1=1
+    dj_basics_supervisor_authority bsa  left join dj_house dh on bsa.house_id=dh.id
+    left join dj_member dm on dm.id=bsa.member_id
+    where 1=1
     <if test="visitState!=null and visitState!=''">
-        and bsa.visitState = #{visitState}
+        and dh.visit_state = #{visitState}
     </if>
     <if test="keyWord!=null and keyWord!=''">
         AND (
         bsa.address LIKE CONCAT('%',#{keyWord},'%')
         or
-        bsa.name LIKE CONCAT('%',#{keyWord},'%')
+        dm.name  LIKE CONCAT('%',#{keyWord},'%')
         or
-        bsa.mobile LIKE CONCAT('%',#{keyWord},'%')
+        dm.mobile  LIKE CONCAT('%',#{keyWord},'%')
         )
     </if>
 </select>

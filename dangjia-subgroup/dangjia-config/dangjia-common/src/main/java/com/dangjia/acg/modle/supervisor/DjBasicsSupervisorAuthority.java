@@ -10,6 +10,7 @@ import lombok.experimental.FieldNameConstants;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 @Data
 @Entity
@@ -23,40 +24,28 @@ public class DjBasicsSupervisorAuthority  extends BaseEntity {
     @ApiModelProperty("房子id")
     private String houseId ;
 
-    @Column(name = "address")
-    @Desc(value = "工地地址")
-    @ApiModelProperty("工地地址")
-    private String address ;
-
     @Column(name = "member_id")
     @Desc(value = "用户id")
     @ApiModelProperty("用户id")
     private String memberId ;
 
-    @Column(name = "name")
-    @Desc(value = "业主名称")
-    @ApiModelProperty("业主名称")
-    private String name ;
-
-    @Column(name = "mobile")
-    @Desc(value = "业主手机")
-    @ApiModelProperty("业主手机")
-    private String mobile ;
-
-    @Column(name = "visitState")
-    @Desc(value = "施工状态")
-    @ApiModelProperty("施工状态")
-    private String visitState ;
-
-    @Column(name = "constructionDate")
-    @Desc(value = "开工时间")
-    @ApiModelProperty("开工时间")
-    private String constructionDate ;
-
     @Column(name = "operateId")
     @Desc(value = "操作人id")
     @ApiModelProperty("操作人id")
     private String operateId ;
+
+    @Transient
+    private String address;
+    @Transient
+    private String name;
+    @Transient
+    private String mobile;
+    @Transient
+    private Integer visitState;
+    @Transient
+    private String constructionDate;
+
+
 
 
 }

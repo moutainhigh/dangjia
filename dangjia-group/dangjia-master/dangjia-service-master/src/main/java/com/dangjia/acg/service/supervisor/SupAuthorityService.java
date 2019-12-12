@@ -1,5 +1,7 @@
 package com.dangjia.acg.service.supervisor;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.supervisor.DjBasicsSupervisorAuthorityDTO;
@@ -78,4 +80,25 @@ public class SupAuthorityService {
             return ServerResponse.createByErrorMessage("增加已选异常");
         }
     }
+
+    public ServerResponse addAllAuthority(HttpServletRequest request, String strAuthority,String operateId ) {
+        try {
+            JSONArray arr = JSONArray.parseArray(strAuthority);
+            for (int i = 0; i < arr.size(); i++) {
+                JSONObject obj = arr.getJSONObject(i);
+                String houseId = obj.getString("houseId");
+                String memberId = obj.getString("memberId");
+                DjBasicsSupervisorAuthority djBasicsSupervisorAuthority = new DjBasicsSupervisorAuthority();
+                djBasicsSupervisorAuthority.setMemberId(memberId);
+                djBasicsSupervisorAuthority.setHouseId(houseId);
+                djBasicsSupervisorAuthority.setOperateId(operateId);
+                djBasicsSupervisorAuthorityMapper.insert(djBasicsSupervisorAuthority);
+            }
+            return ServerResponse.createBySuccessMessage("增加成功");
+        } catch (Exception e) {
+            logger.error("增加已选异常", e);
+            return ServerResponse.createByErrorMessage("增加已选异常");
+        }
+    }
+
 }

@@ -34,4 +34,10 @@ public class DjBasicsSupAuthorityController implements DjBasicsSupervisorAuthori
     public ServerResponse addAuthority(HttpServletRequest request, DjBasicsSupervisorAuthority djBasicsSupervisorAuthority) {
         return supAuthorityService.addAuthority(request,djBasicsSupervisorAuthority);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse addAllAuthority(HttpServletRequest request, String strAuthority,String operateId) {
+        return supAuthorityService.addAllAuthority(request,strAuthority, operateId);
+    }
 }

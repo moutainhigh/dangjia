@@ -1,5 +1,7 @@
 package com.dangjia.acg.api.supervisor;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.supervisor.DjBasicsSupervisorAuthorityDTO;
@@ -32,4 +34,11 @@ public interface DjBasicsSupervisorAuthorityAPI {
     @ApiOperation(value = "增加已选", notes = "增加已选")
     ServerResponse addAuthority(@RequestParam("request") HttpServletRequest request,
                                 @RequestParam("DjBasicsSupervisorAuthority") DjBasicsSupervisorAuthority djBasicsSupervisorAuthority);
+
+    @PostMapping("web/supervisor/addAllAuthority")
+    @ApiOperation(value = "批量增加已选", notes = "批量增加已选")
+    ServerResponse addAllAuthority(@RequestParam("request") HttpServletRequest request,
+                                @RequestParam("strAuthority") String strAuthority,   @RequestParam("operateId") String operateId);
+
+
 }
