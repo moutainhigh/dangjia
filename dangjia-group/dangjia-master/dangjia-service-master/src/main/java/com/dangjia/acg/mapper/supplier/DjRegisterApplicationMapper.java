@@ -34,4 +34,5 @@ public interface DjRegisterApplicationMapper extends Mapper<DjRegisterApplicatio
     List<DjRegisterApplication> queryDeWeight(Map<String,Object> map);
 
 
+    List<DjRegisterApplication> queryBack(Map<String,Object> map);
 }

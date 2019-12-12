@@ -96,18 +96,14 @@ public class DjRegisterApplicationServices {
             if (djRegisterApplications.size() > 0){
                 return ServerResponse.createByErrorMessage("请勿重复申请");
             }else {
-                Example example = new Example(DjRegisterApplication.class);
-                example.createCriteria().andEqualTo(DjRegisterApplication.CITY_ID, djRegisterApplication.getCityId())
-                        .andEqualTo(DjRegisterApplication.DATA_STATUS, 0)
-                        .andEqualTo(DjRegisterApplication.MOBILE, djRegisterApplication.getMobile())
-                        .andEqualTo(DjRegisterApplication.APPLICATION_TYPE, djRegisterApplication.getApplicationType())
-                        .andEqualTo(DjRegisterApplication.APPLICATION_STATUS,2);
-                DjRegisterApplication djRegisterApplication1 = djRegisterApplicationMapper.selectOneByExample(example);
-                if (null!=djRegisterApplication1){
-                    djRegisterApplication1.setApplicationStatus(0);
-                    djRegisterApplication1.setModifyDate(new Date());
-                    if (djRegisterApplicationMapper.updateByPrimaryKeySelective(djRegisterApplication1) > 0)
-                        return ServerResponse.createBySuccessMessage("申请成功");
+                List<DjRegisterApplication> djRegisterApplications1 = djRegisterApplicationMapper.queryBack(map);
+                if(djRegisterApplications1.size()>0){
+                    djRegisterApplications1.forEach(djRegisterApplication1 -> {
+                        djRegisterApplication1.setApplicationStatus(0);
+                        djRegisterApplication1.setModifyDate(new Date());
+                        djRegisterApplicationMapper.updateByPrimaryKeySelective(djRegisterApplication1);
+                    });
+                    return ServerResponse.createBySuccessMessage("申请成功 ");
                 }
             }
             djRegisterApplication.setDataStatus(0);
@@ -296,18 +292,14 @@ public class DjRegisterApplicationServices {
             if (djRegisterApplications.size() > 0) {
                 return ServerResponse.createByErrorMessage("请勿重复申请");
             }else {
-                Example example = new Example(DjRegisterApplication.class);
-                example.createCriteria().andEqualTo(DjRegisterApplication.CITY_ID, djRegisterApplication.getCityId())
-                        .andEqualTo(DjRegisterApplication.DATA_STATUS, 0)
-                        .andEqualTo(DjRegisterApplication.MOBILE, djRegisterApplication.getMobile())
-                        .andEqualTo(DjRegisterApplication.APPLICATION_TYPE, djRegisterApplication.getApplicationType())
-                        .andEqualTo(DjRegisterApplication.APPLICATION_STATUS,2);
-                DjRegisterApplication djRegisterApplication1 = djRegisterApplicationMapper.selectOneByExample(example);
-                if (null!=djRegisterApplication1){
-                    djRegisterApplication1.setApplicationStatus(0);
-                    djRegisterApplication1.setModifyDate(new Date());
-                    if (djRegisterApplicationMapper.updateByPrimaryKeySelective(djRegisterApplication1) > 0)
-                        return ServerResponse.createBySuccessMessage("申请成功");
+                List<DjRegisterApplication> djRegisterApplications1 = djRegisterApplicationMapper.queryBack(map);
+                if(djRegisterApplications1.size()>0){
+                    djRegisterApplications1.forEach(djRegisterApplication1 -> {
+                        djRegisterApplication1.setApplicationStatus(0);
+                        djRegisterApplication1.setModifyDate(new Date());
+                        djRegisterApplicationMapper.updateByPrimaryKeySelective(djRegisterApplication1);
+                    });
+                    return ServerResponse.createBySuccessMessage("申请成功");
                 }
             }
             Example example = new Example(DjRegisterApplication.class);
