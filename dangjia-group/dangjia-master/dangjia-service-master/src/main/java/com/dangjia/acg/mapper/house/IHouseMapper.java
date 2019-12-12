@@ -3,8 +3,6 @@ package com.dangjia.acg.mapper.house;
 import com.dangjia.acg.dto.house.*;
 import com.dangjia.acg.dto.repair.HouseProfitSummaryDTO;
 import com.dangjia.acg.dto.repair.RepairMendDTO;
-import com.dangjia.acg.modle.deliver.Order;
-import com.dangjia.acg.modle.deliver.OrderItem;
 import com.dangjia.acg.modle.house.House;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -41,6 +39,7 @@ public interface IHouseMapper extends Mapper<House> {
      */
     List<HouseOrderDetailDTO> getBudgetOrderDetailByHouseId(@Param("houseId") String houseId,@Param("orderType") String orderType);
 
+    List<HouseOrderDetailDTO> selectDesignProductList(@Param("cityId") String cityId, @Param("workerTypeId") String workerTypeId);
     /***
      * 根据房子装修状态查询所有的房子
      * @param visitState 0待确认开工,1装修中,2休眠中,3已完工
