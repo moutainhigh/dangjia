@@ -33,7 +33,23 @@ public interface DjBasicsPatrolRecordAPI {
     ServerResponse queryDjBasicsPatrolRecord(@RequestParam("request") HttpServletRequest request,@RequestParam("userToken") String userToken );
 
 
-    //首页-督导
+    //首页督导
     //工地列表
     //工地详情
+
+    @PostMapping("web/supervisor/queryWorkerRewardPunishRecord")
+    @ApiOperation(value = "查询督导工作记录", notes = "查询督导工作记录")
+    ServerResponse queryWorkerRewardPunishRecord(@RequestParam("request") HttpServletRequest request,@RequestParam("keyWord") String keyWord );
+
+
+    @PostMapping("web/supervisor/queryPatrolRecordDetail")
+    @ApiOperation(value = "巡检详情", notes = "巡检详情")
+    ServerResponse queryPatrolRecordDetail(@RequestParam("request") HttpServletRequest request,@RequestParam("rewordPunishCorrelationId") String rewordPunishCorrelationId );
+
+
+    @PostMapping("web/supervisor/queryRewardPunishRecordDetail")
+    @ApiOperation(value = "奖励/惩罚详情", notes = "奖励/惩罚详情")
+    ServerResponse queryRewardPunishRecordDetail(@RequestParam("request") HttpServletRequest request,@RequestParam("id") String id );
+
+
 }

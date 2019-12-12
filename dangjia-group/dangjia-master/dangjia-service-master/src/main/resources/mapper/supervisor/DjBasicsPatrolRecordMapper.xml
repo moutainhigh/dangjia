@@ -4,4 +4,17 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.dangjia.acg.mapper.supervisor.DjBasicsPatrolRecordMapper">
 
+    <select id="queryPatrolRecordDetail" resultType="com.dangjia.acg.dto.supervisor.PatrolRecordDTO">
+        select
+        IFNULL(bpr.id,'') as id,
+        IFNULL(rpr.type,'') as type ,
+        IFNULL(bpr.create_date,'') as createDate,
+        IFNULL(CONCAT(IFNULL(dh.residential,'*'),IFNULL(CONCAT(dh.building,'栋'),'*栋'),IFNULL(CONCAT(dh.unit,'单元'),'*单元'),IFNULL(CONCAT(dh.number,'号'),'*号')) ,'') as address,
+        IFNULL(bpr.content,'') as content,
+        IFNULL(bpr.images,'') as images
+        from
+        dj_basics_patrol_record  bpr inner join dj_house dh on bpr.house_id=dh.id
+        inner join dj_worker_reward_punish_record rpr on bpr.id=rpr.reward_punish_correlation_id
+        where bpr.id=#{rewordPunishCorrelationId}
+    </select>
 </mapper>

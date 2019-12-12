@@ -28,4 +28,22 @@ public class DjBasicsPatrolRecordController implements DjBasicsPatrolRecordAPI {
     public ServerResponse queryDjBasicsPatrolRecord(HttpServletRequest request, String userToken) {
         return patrolRecordServices.queryDjBasicsPatrolRecord(request,userToken);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryWorkerRewardPunishRecord(HttpServletRequest request, String keyWord) {
+        return patrolRecordServices.queryWorkerRewardPunishRecord(request,keyWord);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryPatrolRecordDetail(HttpServletRequest request,@RequestParam("rewordPunishCorrelationId") String rewordPunishCorrelationId) {
+        return patrolRecordServices.queryPatrolRecordDetail(request,rewordPunishCorrelationId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryRewardPunishRecordDetail(HttpServletRequest request, String id) {
+        return patrolRecordServices.queryRewardPunishRecordDetail(request,id);
+    }
 }

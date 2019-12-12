@@ -10,6 +10,7 @@ import lombok.experimental.FieldNameConstants;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 @Data
 @Entity
@@ -37,4 +38,5 @@ public class DjBasicsPatrolRecord extends BaseEntity {
     @Desc(value = "巡查工作及处置情况")
     @ApiModelProperty("巡查工作及处置情况")
     private String content ;
+
 }

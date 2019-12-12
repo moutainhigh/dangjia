@@ -522,7 +522,7 @@ public class DjSupplierServices {
                         .andEqualTo(Storefront.USER_ID,userId);
                 Storefront storefront = iStoreStorefrontMapper.selectOneByExample(example);
                 if(storefront==null)
-                    return ServerResponse.createByErrorMessage("店铺不存在");
+                    return ServerResponse.createByErrorMessage("店铺不存在 ");
                 mainUser = iStoreUserMapper.selectByPrimaryKey(storefront.getUserId());
                 djSupplierPayOrder.setSupplierId(storefront.getId());
             }
