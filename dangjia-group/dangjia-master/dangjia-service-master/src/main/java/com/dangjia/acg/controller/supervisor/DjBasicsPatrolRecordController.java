@@ -2,6 +2,7 @@ package com.dangjia.acg.controller.supervisor;
 
 import com.dangjia.acg.api.supervisor.DjBasicsPatrolRecordAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.supervisor.PatrolRecordServices;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,8 +32,8 @@ public class DjBasicsPatrolRecordController implements DjBasicsPatrolRecordAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryWorkerRewardPunishRecord(HttpServletRequest request, String keyWord) {
-        return patrolRecordServices.queryWorkerRewardPunishRecord(request,keyWord);
+    public ServerResponse queryWorkerRewardPunishRecord(HttpServletRequest request, PageDTO pageDTO, String type, String keyWord) {
+        return patrolRecordServices.queryWorkerRewardPunishRecord(request,pageDTO ,type,keyWord);
     }
 
     @Override

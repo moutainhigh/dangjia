@@ -47,6 +47,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         on rpr.operator_id=dm.id left join dj_house dh on rpr.house_id=dh.id
         where 1=1
         <if test="null!=keyWord and ''!=keyWord">
+           and  rpr.type=#{type}
+        </if>
+        <if test="null!=keyWord and ''!=keyWord">
             AND (
             dm.name LIKE CONCAT('%',#{keyWord},'%') or
             dm.mobile LIKE CONCAT('%',#{keyWord},'%') or
