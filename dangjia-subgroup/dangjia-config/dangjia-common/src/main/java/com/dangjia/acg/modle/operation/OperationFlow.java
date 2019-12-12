@@ -43,6 +43,10 @@ public class OperationFlow extends BaseEntity {
     @ApiModelProperty("操作类型（自定义）")
     private Integer operationType;
 
+    @Column(name = "operation_id")
+    @Desc(value = "操作类型对应业务ID")
+    @ApiModelProperty("操作类型对应业务ID")
+    private String operationId ;
 
     @Column(name = "name")
     @Desc(value = "操作名称")
