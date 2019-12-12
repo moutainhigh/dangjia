@@ -245,6 +245,20 @@
         AND t.house_id = #{houseId}
         AND t1.order_type =#{orderType}
     </select>
+    <!-- 可以默认配置的设计商品，精算师选择-->
+    <select id="selectDesignProductList" resultType="com.dangjia.acg.dto.house.HouseOrderDetailDTO">
+         SELECT
+          t1.product_id productTemplateId,
+          t3.name productName,
+          t3.image,
+          t3.price
+        FROM
+            dj_actuarial_product_config t1,
+            dj_basics_product_template t3
+        WHERE t1.product_id = t3.id
+        and t1.city_id=#{cityId}
+        and t1.worker_type_id=#{workerTypeId}
+    </select>
     <!--查询所有的房子 指定房子 装修状态-->
     <select id="getAllHouseByVisitState" resultType="com.dangjia.acg.modle.house.House">
         SELECT

@@ -452,7 +452,7 @@ public class TaskService {
                 }
             }
         }
-        if (isDesigner || house.getDesignerState() == 5 || house.getDesignerState() == 2) {
+        /*if (isDesigner || house.getDesignerState() == 5 || house.getDesignerState() == 2) {
             Task task = new Task();
             task.setDate(DateUtil.dateToString(house.getModifyDate(), DateUtil.FORMAT11));
             task.setName(house.getDesignerState() == 5 ? "平面图审核" : "施工图审核");
@@ -474,7 +474,7 @@ public class TaskService {
             task.setType(3);
             task.setTaskId("");
             taskList.add(task);
-        }
+        }*/
         //验收任务
         List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getMemberCheckList(houseId);
         for (HouseFlowApply houseFlowApply : houseFlowApplyList) {

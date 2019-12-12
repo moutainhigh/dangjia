@@ -79,6 +79,10 @@ public class SearchActuarialConfigServices {
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
+
+
+
+
     public  void getProductList(List<ActuarialProductAppDTO> productList,String address){
         if(productList!=null&&productList.size()>0){
             for(ActuarialProductAppDTO ap:productList){

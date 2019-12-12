@@ -2,9 +2,7 @@ package com.dangjia.acg.mapper.actuary;
 
 
 import com.dangjia.acg.dto.actuary.ActuarialTemplateConfigDTO;
-import com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO;
 import com.dangjia.acg.dto.actuary.app.ActuarialTemplateConfigAppDTO;
-import com.dangjia.acg.modle.actuary.DjActuarialProductConfig;
 import com.dangjia.acg.modle.actuary.DjActuarialTemplateConfig;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -27,6 +25,7 @@ public interface DjActuarialTemplateConfigMapper extends Mapper<DjActuarialTempl
      * @return
      */
     List<ActuarialTemplateConfigAppDTO> searchAppActuarialList(@Param("cityId") String cityId);
+
 
 
 }

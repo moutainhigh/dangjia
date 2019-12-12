@@ -10,20 +10,17 @@ import com.dangjia.acg.dto.house.HouseDTO;
 import com.dangjia.acg.dto.house.HouseListDTO;
 import com.dangjia.acg.dto.house.HouseOrderDetailDTO;
 import com.dangjia.acg.dto.house.UserInfoDateDTO;
-import com.dangjia.acg.dto.refund.RefundOrderItemDTO;
 import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
 import com.dangjia.acg.mapper.core.IMasterUnitMapper;
 import com.dangjia.acg.mapper.design.IDesignBusinessOrderMapper;
 import com.dangjia.acg.mapper.house.HouseRemarkMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.product.IMasterProductTemplateMapper;
-import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.design.DesignBusinessOrder;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.HouseRemark;
-import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.service.product.MasterProductTemplateService;
 import com.github.pagehelper.PageHelper;
@@ -152,6 +149,23 @@ public class ActuaryService {
             return ServerResponse.createByErrorMessage("查询异常！");
         }
     }
+
+    /**
+     * 精算设计--查询配置的设计商品
+     * @param cityId
+     * @return
+     */
+    public ServerResponse searchActuarialProductList(String cityId) {
+        try {
+            List<HouseOrderDetailDTO> actuarialProductAppDTOList = houseMapper.selectDesignProductList(cityId,"1");
+            getProductList(actuarialProductAppDTOList);
+            return ServerResponse.createBySuccess("查询成功", actuarialProductAppDTOList);
+        } catch (Exception e) {
+            logger.error("searchActuarialProductList查询失败:",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
     /**
      * 查询商品对应的规格详情，单位信息
      * @param productList

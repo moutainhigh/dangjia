@@ -68,5 +68,15 @@ public class DjActuarialProductConfig extends GoodsBaseEntity {
     @ApiModelProperty("否按面积计算参考价格(1是，0否)")
     private String isCalculatedArea;
 
+    @Column(name = "default_recommend")
+    @Desc(value = "是否默认推荐(1是，0否)")
+    @ApiModelProperty("是否默认推荐(1是，0否)")
+    private String defaultRecommend;
+
+    @Column(name = "is_hide")
+    @Desc(value = "是否隐藏(1是，0否)")
+    @ApiModelProperty("是否隐藏(1是，0否)")
+    private String isHide;
+
 
 }

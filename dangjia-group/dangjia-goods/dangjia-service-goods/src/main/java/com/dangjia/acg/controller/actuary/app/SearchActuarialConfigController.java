@@ -8,9 +8,11 @@ import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.actuary.DjBasicsActuarialConfigurationServices;
 import com.dangjia.acg.service.actuary.app.SearchActuarialConfigServices;
+import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -37,6 +39,7 @@ public class SearchActuarialConfigController implements SearchActuarialConfigAPI
     public ServerResponse searchActuarialList(HttpServletRequest request,String cityId) {
         return searchActuarialConfigServices.searchActuarialList(cityId);
     }
+
 
     /**
      * 可切换商品列表

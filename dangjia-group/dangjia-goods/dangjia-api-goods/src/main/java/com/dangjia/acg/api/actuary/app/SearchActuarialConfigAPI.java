@@ -24,6 +24,7 @@ public interface SearchActuarialConfigAPI {
     ServerResponse searchActuarialList(@RequestParam("request") HttpServletRequest request,
                                        @RequestParam("cityId") String cityId);
 
+
     @PostMapping("app/search/actuarialConfig/searchChangeProductList")
     @ApiOperation(value = "我要装修--查询设计精算可切换商品列表", notes = "查询设计精算可切换商品列表")
     ServerResponse searchChangeProductList(@RequestParam("request") HttpServletRequest request,
