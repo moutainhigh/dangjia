@@ -27,10 +27,10 @@ public class TaskStack extends BaseEntity {
 
 
 
-    @Column(name = "worker_type")
-    @Desc(value = "工种类别0业主，1设计师，2精算师，3大管家,4拆除，6水电工，7防水，8泥工,9木工，10油漆工")
-    @ApiModelProperty("工种类别0业主，1设计师，2精算师，3大管家,4拆除，6水电工，7防水，8泥工,9木工，10油漆工")
-    private Integer workerType ;
+    @Column(name = "member_id")
+    @Desc(value = "用户ID")
+    @ApiModelProperty("用户ID")
+    private String memberId ;
 
 
     @Column(name = "house_id")
