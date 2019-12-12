@@ -2,7 +2,6 @@ package com.dangjia.acg.service.question;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -14,14 +13,12 @@ import com.dangjia.acg.mapper.question.IQuestionOptionMapper;
 import com.dangjia.acg.modle.question.QuantityQuestion;
 import com.dangjia.acg.modle.question.Question;
 import com.dangjia.acg.modle.question.QuestionOption;
-import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -35,8 +32,6 @@ import java.util.Map;
  */
 @Service
 public class QuestionService {
-    @Autowired
-    private CraftsmanConstructionService constructionService;
     @Autowired
     private IQuantityQuestionMapper iQuantityQuestionMapper;
     @Autowired
