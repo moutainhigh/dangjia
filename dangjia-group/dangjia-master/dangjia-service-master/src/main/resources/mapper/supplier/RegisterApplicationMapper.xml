@@ -89,4 +89,19 @@
         </foreach>
     </select>
 
+    <select id="queryBack" resultType="com.dangjia.acg.modle.supplier.DjRegisterApplication">
+        SELECT
+          <include refid="all_columns"/>
+        FROM
+          dj_register_application
+        WHERE
+        city_id = #{cityId}
+        AND data_status = 0
+        AND mobile = #{mobile}
+        AND application_status = 2
+        <foreach collection="split" item="item" index="index" open="AND(" separator="OR" close=")">
+            FIND_IN_SET(#{item},application_type)
+        </foreach>
+    </select>
+
 </mapper>

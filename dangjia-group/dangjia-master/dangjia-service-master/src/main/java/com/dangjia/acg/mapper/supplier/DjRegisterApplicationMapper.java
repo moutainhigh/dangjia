@@ -34,4 +34,12 @@ public interface DjRegisterApplicationMapper extends Mapper<DjRegisterApplicatio
     List<DjRegisterApplication> queryDeWeight(Map<String,Object> map);
 
 
+    /**
+     * 查询重复申请
+     * @param map
+     * @return
+     */
+    List<DjRegisterApplication> queryBack(Map<String,Object> map);
+
+
 }
