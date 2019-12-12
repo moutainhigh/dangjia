@@ -128,6 +128,7 @@ public class PatrolRecordServices {
                 {
                     String imageAddress=StringTool.getImage(djBasicsPatrolRecord.getImages(),address);
                     djBasicsPatrolRecord.setImages(imageAddress);
+                    djBasicsPatrolRecord.setImagesDetail(imageAddress.split(","));
                 }
             }
             return ServerResponse.createBySuccess("查询成功", djBasicsPatrolRecord);
@@ -154,6 +155,7 @@ public class PatrolRecordServices {
                 {
                     String imageAddress=StringTool.getImage(jFRewardPunishRecordDTO.getImages(),address);
                     jFRewardPunishRecordDTO.setImages(imageAddress);
+                    jFRewardPunishRecordDTO.setImagesDetail(imageAddress.split(","));
                 }
             }
             return ServerResponse.createBySuccess("查询成功", jFRewardPunishRecordDTO);

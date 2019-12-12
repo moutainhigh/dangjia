@@ -15,5 +15,6 @@ public class JFRewardPunishRecordDTO {
     private String  rpcName;//奖励|惩罚原因
     private String  content;// 奖励|惩罚说明
     private String images;
+    private String [] imagesDetail;
 
 }

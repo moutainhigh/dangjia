@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.supervisor.DjBasicsSupervisorAuthorityMapper">
+
+<select id="searchAuthority" resultType="com.dangjia.acg.modle.supervisor.DjBasicsSupervisorAuthority">
+
+    SELECT
+        bsa.id as id,
+        bsa.house_id AS houseId,
+        bsa.address as address,
+        bsa.member_id AS memberId,
+        bsa.NAME as name,
+        bsa.mobile as mobile ,
+        bsa.visitState as visitState,
+        bsa.constructionDate as constructionDate ,
+        bsa.create_date as createDate,
+        bsa.modify_date as modifyDate,
+        bsa.data_status as dataStatus
+    FROM
+        dj_basics_supervisor_authority bsa
+        where 1=1
+    <if test="visitState!=null and visitState!=''">
+        and bsa.visitState = #{visitState}
+    </if>
+    <if test="keyWord!=null and keyWord!=''">
+        AND (
+        bsa.address LIKE CONCAT('%',#{keyWord},'%')
+        or
+        bsa.name LIKE CONCAT('%',#{keyWord},'%')
+        or
+        bsa.mobile LIKE CONCAT('%',#{keyWord},'%')
+        )
+    </if>
+</select>
+</mapper>

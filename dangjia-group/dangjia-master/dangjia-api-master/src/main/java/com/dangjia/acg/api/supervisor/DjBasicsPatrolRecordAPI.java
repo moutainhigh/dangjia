@@ -34,7 +34,7 @@ public interface DjBasicsPatrolRecordAPI {
     ServerResponse queryDjBasicsPatrolRecord(@RequestParam("request") HttpServletRequest request,@RequestParam("userToken") String userToken );
 
 
-    //首页督导
+    //首页督导 DjBasicsSupervisorAuthority
     //工地列表
     //工地详情
 
