@@ -41,5 +41,4 @@ public interface DjRegisterApplicationMapper extends Mapper<DjRegisterApplicatio
      */
     List<DjRegisterApplication> queryBack(Map<String,Object> map);
 
-
 }
