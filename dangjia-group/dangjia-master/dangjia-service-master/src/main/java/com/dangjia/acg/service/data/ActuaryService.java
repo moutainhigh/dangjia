@@ -27,6 +27,7 @@ import com.dangjia.acg.modle.design.DesignQuantityRoomProduct;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.HouseRemark;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
+import com.dangjia.acg.service.core.TaskStackService;
 import com.dangjia.acg.service.product.MasterProductTemplateService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -69,6 +70,8 @@ public class ActuaryService {
     private MasterProductTemplateService masterProductTemplateService;
     @Autowired
     private IMasterQuantityRoomProductMapper iMasterQuantityRoomProductMapper;
+    @Autowired
+    private TaskStackService taskStackService;
     /**
      * 查询房子精算数据
      *
@@ -198,7 +201,10 @@ public class ActuaryService {
                 designQuantityRoomProduct.setType(1);//推荐商品
                 iMasterQuantityRoomProductMapper.insert(designQuantityRoomProduct);//添加推荐商品
             }
-
+            //查询对应的业主ID
+            House house=houseMapper.selectByPrimaryKey(houseId);
+            //增加设计图纸不合格的任务
+            taskStackService.inserTaskStackInfo(houseId,house.getMemberId(),"设计图纸不合格","icon/sheji.png",6,houseId);
             return ServerResponse.createBySuccess("推荐保存成功");
         }catch (Exception e){
             logger.error("推荐保存失败:",e);

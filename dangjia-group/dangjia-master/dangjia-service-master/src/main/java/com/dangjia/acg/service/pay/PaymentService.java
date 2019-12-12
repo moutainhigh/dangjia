@@ -1003,6 +1003,17 @@ public class PaymentService {
             return ServerResponse.createByErrorMessage("提交失败：原因："+e.getMessage());
         }
     }
+
+    /**
+     *
+     * @param userToken
+     * @param cityId
+     * @param productJsons
+     * @param workerId
+     * @param addressId
+     * @param orderSource (1设计精算订单提交，2购物车提交，4设计精算补差价订单提交）
+     * @return
+     */
     public ServerResponse generateOrderCommon(String userToken,String cityId, String productJsons,String workerId, String addressId,Integer orderSource){
         String orderId="";
         Object object = constructionService.getMember(userToken);
@@ -1037,7 +1048,7 @@ public class PaymentService {
             for (ShoppingCartListDTO shoppingCartListDTO : shoppingCartDTO.getShoppingCartListDTOS()) {
                 ShoppingCartListDTO parmDTO=productMap.get(shoppingCartListDTO.getProductId());
                 shoppingCartListDTO.setShopCount(parmDTO.getShopCount());
-                shoppingCartListDTO.setOrderType(parmDTO.getOrderType());//订单类型（1设计,2精算，2其它）
+                shoppingCartListDTO.setWorkerTypeId(parmDTO.getWorkerTypeId());//工种类型 （1设计,2精算，3其它）
                 BigDecimal totalPrice = new BigDecimal(shoppingCartListDTO.getPrice()*parmDTO.getShopCount());
                 if(shoppingCartListDTO.getProductType()==0) {
                     totalMaterialPrice = totalMaterialPrice.add(totalPrice);
@@ -1051,7 +1062,11 @@ public class PaymentService {
 
         if (shoppingCartDTOS!=null) {
             Order order = new Order();
-            order.setWorkerTypeName(orderSource==1?"设计、精算订单":"购物车订单");
+            String workerTypeName="购物车订单";
+            if(orderSource==1||orderSource==4){
+                workerTypeName="设计、精算订单";
+            }
+            order.setWorkerTypeName(workerTypeName);
             order.setCityId(cityId);
             order.setMemberId(member.getId());
             order.setWorkerId(workerId);
@@ -1083,7 +1098,6 @@ public class PaymentService {
                     orderItem.setCategoryId(good.getCategoryId());
                     orderItem.setProductId(good.getProductId());
                     orderItem.setImage(good.getImage());
-                    orderItem.setOrderType(good.getOrderType());//订单所属类型（1设计师，2精算师，3其它）
                     orderItem.setCityId(cityId);
                     orderItem.setProductType(good.getProductType());
                     orderItem.setStorefontId(shoppingCartDTO.getStorefrontId());
@@ -1092,6 +1106,9 @@ public class PaymentService {
                     orderItem.setActualPaymentPrice(0d);
                     orderItem.setStevedorageCost(0d);
                     orderItem.setTransportationCost(0d);
+                    if(orderSource==1||orderSource==4){
+                        orderItem.setWorkerTypeId(good.getWorkerTypeId());
+                    }
                     if(!CommonUtil.isEmpty(order.getHouseId())) {
                         //搬运费运算
                         Double moveDost = masterCostAcquisitionService.getStevedorageCost(order.getHouseId(), orderItem.getProductId(), orderItem.getShopCount());

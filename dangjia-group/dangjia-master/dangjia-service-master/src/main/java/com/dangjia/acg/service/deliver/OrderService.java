@@ -543,7 +543,6 @@ public class OrderService {
             order.setTotalStevedorageCost(new BigDecimal(0));
             order.setTotalTransportationCost(new BigDecimal(0));
             order.setActualPaymentPrice(new BigDecimal(0));
-            order.setOrderType("2");
             order.setOrderStatus("1");
             order.setOrderGenerationTime(new Date());
             order.setOrderSource(2);//来源补货

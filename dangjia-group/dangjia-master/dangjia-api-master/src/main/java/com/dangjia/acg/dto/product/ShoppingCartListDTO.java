@@ -71,9 +71,9 @@ public class ShoppingCartListDTO {
 
 
     /**
-     * 订单类型（1设计,2精算，2其它）
+     * 工种ID（1设计,2精算，3其它）
      */
-    private String orderType;
+    private String workerTypeId;
     /**
      * 调后价格
      */
