@@ -1,11 +1,14 @@
 package com.dangjia.acg.service.data;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.actuary.ActuarialProductDTO;
 import com.dangjia.acg.dto.house.HouseDTO;
 import com.dangjia.acg.dto.house.HouseListDTO;
 import com.dangjia.acg.dto.house.HouseOrderDetailDTO;
@@ -13,12 +16,14 @@ import com.dangjia.acg.dto.house.UserInfoDateDTO;
 import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
 import com.dangjia.acg.mapper.core.IMasterUnitMapper;
 import com.dangjia.acg.mapper.design.IDesignBusinessOrderMapper;
+import com.dangjia.acg.mapper.design.IMasterQuantityRoomProductMapper;
 import com.dangjia.acg.mapper.house.HouseRemarkMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.product.IMasterProductTemplateMapper;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.design.DesignBusinessOrder;
+import com.dangjia.acg.modle.design.DesignQuantityRoomProduct;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.HouseRemark;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
@@ -62,6 +67,8 @@ public class ActuaryService {
     private IMasterUnitMapper iMasterUnitMapper;
     @Autowired
     private MasterProductTemplateService masterProductTemplateService;
+    @Autowired
+    private IMasterQuantityRoomProductMapper iMasterQuantityRoomProductMapper;
     /**
      * 查询房子精算数据
      *
@@ -167,6 +174,39 @@ public class ActuaryService {
     }
 
     /**
+     * 精算设计--保存推荐的设计商品
+     * @param cityId
+     * @param productStr
+     * @return
+     */
+    public ServerResponse saveRecommendedGoods(String cityId, String houseId, String productStr){
+        try{
+            logger.info("批量编辑设计精算阶段的货品商品---------start----houseId={"+houseId+"}");
+            JSONArray jsonArr = JSONArray.parseArray(productStr);
+            //删除旧推荐商品
+            Example example=new Example(DesignQuantityRoomProduct.class);
+            example.createCriteria().andEqualTo(DesignQuantityRoomProduct.HOUSE_ID,houseId)
+                    .andEqualTo(DesignQuantityRoomProduct.TYPE,1);
+            iMasterQuantityRoomProductMapper.deleteByExample(example);
+            //添加商品到对应的模板商品库中去
+            for (int i = 0; i < jsonArr.size(); i++) {
+                JSONObject obj = jsonArr.getJSONObject(i);
+                String productTemplateId = (String)obj.get("productTemplateId");
+                DesignQuantityRoomProduct designQuantityRoomProduct=new DesignQuantityRoomProduct();
+                designQuantityRoomProduct.setHouseId(houseId);
+                designQuantityRoomProduct.setProductId(productTemplateId);//模板商品ID
+                designQuantityRoomProduct.setType(1);//推荐商品
+                iMasterQuantityRoomProductMapper.insert(designQuantityRoomProduct);//添加推荐商品
+            }
+
+            return ServerResponse.createBySuccess("推荐保存成功");
+        }catch (Exception e){
+            logger.error("推荐保存失败:",e);
+            return ServerResponse.createByErrorMessage("推荐保存失败");
+        }
+    }
+
+    /**
      * 查询商品对应的规格详情，单位信息
      * @param productList
      */
@@ -188,14 +228,14 @@ public class ActuaryService {
         DjBasicsProductTemplate pt= iMasterProductTemplateMapper.selectByPrimaryKey(productTemplateId);
         if(pt!=null&& StringUtils.isNotBlank(pt.getId())){
             String image=ap.getImage();
-            if (image == null) {
-                image=pt.getImage();
+            if (image != null) {
+                //添加图片详情地址字段
+                String[] imgArr = image.split(",");
+                if(imgArr!=null&&imgArr.length>0){
+                    ap.setImageUrl(address+imgArr[0]);//图片详情地址设置
+                }
             }
-            //添加图片详情地址字段
-            String[] imgArr = image.split(",");
-            if(imgArr!=null&&imgArr.length>0){
-                ap.setImageUrl(address+imgArr[0]);//图片详情地址设置
-            }
+
             String unitId=pt.getUnitId();
             //查询单位
             if(pt.getConvertQuality()!=null&&pt.getConvertQuality()>0){

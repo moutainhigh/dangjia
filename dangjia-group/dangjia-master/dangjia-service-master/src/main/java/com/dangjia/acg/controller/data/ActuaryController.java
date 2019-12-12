@@ -50,6 +50,14 @@ public class ActuaryController implements ActuaryAPI {
     public ServerResponse searchActuarialProductList(HttpServletRequest request,String cityId){
         return actuaryService.searchActuarialProductList(cityId);
     }
+    /**
+     * 精算接口--保存推荐的设计商品
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse saveRecommendedGoods(HttpServletRequest request,String cityId, String houseId,String productStr){
+        return actuaryService.saveRecommendedGoods(cityId,houseId,productStr);
+    }
 
     /**
      * 查询精算的订单详情
