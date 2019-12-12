@@ -45,10 +45,18 @@ public interface ActuaryAPI {
     ServerResponse getBudgetOrderDetail(@RequestParam("cityId") String cityId,
                                         @RequestParam("houseId") String houseId);
 
-    @PostMapping("web/search/actuarialConfig/searchActuarialProductList")
-    @ApiOperation(value = "精算设计--查询默认配置的设计商品", notes = "查询设计精算阶段配置列表")
+    @PostMapping("/data/actuary/searchActuarialProductList")
+    @ApiOperation(value = "精算接口--查询默认配置的设计商品", notes = "查询设计精算阶段配置列表")
     ServerResponse searchActuarialProductList(@RequestParam("request") HttpServletRequest request,
                                               @RequestParam("cityId") String cityId);
+
+    @PostMapping("/data/actuary/saveRecommendedGoods")
+    @ApiOperation(value = "精算接口--保存推荐的设计商品", notes = "精算接口--保存推荐的设计商品")
+    ServerResponse saveRecommendedGoods(@RequestParam("request") HttpServletRequest request,
+                                        @RequestParam("cityId") String cityId,
+                                        @RequestParam("houseId") String houseId,
+                                        @RequestParam("productStr") String productStr);
+
 
     @PostMapping("/data/actuary/getActuaryWaitPay")
     @ApiOperation(value = "返回待业主支付精算列表", notes = "返回待业主支付精算列表")
