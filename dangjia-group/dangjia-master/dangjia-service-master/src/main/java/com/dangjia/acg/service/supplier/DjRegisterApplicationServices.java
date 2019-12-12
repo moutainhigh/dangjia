@@ -93,6 +93,7 @@ public class DjRegisterApplicationServices {
             djRegisterApplication.getApplicationType().split(",");
             map.put("split",djRegisterApplication.getApplicationType().split(","));
             List<DjRegisterApplication> djRegisterApplications = djRegisterApplicationMapper.queryDeWeight(map);
+            System.out.println(djRegisterApplication+"!!!!!!!!!!!!!!!!!!");
             logger.info(djRegisterApplication+"1111111111111");
             if (djRegisterApplications.size() > 0){
                 return ServerResponse.createByErrorMessage("请勿重复申请 ");
