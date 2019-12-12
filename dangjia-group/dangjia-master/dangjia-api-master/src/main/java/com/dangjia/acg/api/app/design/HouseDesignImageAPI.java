@@ -135,13 +135,6 @@ public interface HouseDesignImageAPI {
     @ApiOperation(value = "房子作废", notes = "房子作废")
     ServerResponse invalidHouse(@RequestParam("houseId") String houseId);
 
-    @PostMapping("app/design/houseDesignImage/upgradeDesign")
-    @ApiOperation(value = "升级设计", notes = "升级设计")
-    ServerResponse upgradeDesign(@RequestParam("userToken") String userToken,
-                                 @RequestParam("houseId") String houseId,
-                                 @RequestParam("designImageTypeId") String designImageTypeId,
-                                 @RequestParam("selected") int selected);
-
     /**
      * showdoc
      *

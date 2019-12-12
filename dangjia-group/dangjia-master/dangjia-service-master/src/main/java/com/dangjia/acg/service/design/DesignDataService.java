@@ -621,8 +621,6 @@ public class DesignDataService {
             Lists.add(map);
         }
         quantityInfoDTO.setListFour(Lists);
-
-
         //获取量房信息
         PageInfo oneList = getInfo(houseId,0);
         //获取平面图信息
@@ -632,8 +630,6 @@ public class DesignDataService {
         quantityInfoDTO.setTypeOneList(oneList);
         quantityInfoDTO.setTypeTwoList(twoList);
         quantityInfoDTO.setTypeThreeList(threeList);
-
-
         quantityInfoDTO.setNumberType(0);
         if(oneList.getSize()>0){
             quantityInfoDTO.setNumberType(2);
@@ -644,14 +640,13 @@ public class DesignDataService {
         if(threeList.getSize() > 0){
             quantityInfoDTO.setNumberType(4);
         }
-
         List<QuantityRoomDTO> ddd = threeList.getList();
         for (QuantityRoomDTO aa:ddd) {
             if(aa.getFlag() == 0){
                 quantityInfoDTO.setNumberType(5);
+                break;
             }
         }
-
         return ServerResponse.createBySuccess("查询成功", quantityInfoDTO);
     }
 
@@ -765,10 +760,9 @@ public class DesignDataService {
         example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, houseId)
                 .andEqualTo(HouseFlow.WORKER_TYPE_ID, 2);
         List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example);
-        Date dd =null;
         if(houseFlows.size() > 0 ){
             map = new HashMap();
-            dd = houseMapper.getModifyDate(houseFlows.get(0).getId());
+            Date dd = houseMapper.getModifyDate(houseFlows.get(0).getId());
             map.put("createDate",dd);
             map.put("type","支付");
             map.put("name",storeList.getOperatorName());

@@ -51,11 +51,6 @@ public class HouseDesignImageController implements HouseDesignImageAPI {
         return designerOperationService.invalidHouse(houseId);
     }
 
-    @Override
-    @ApiMethod
-    public ServerResponse upgradeDesign(String userToken, String houseId, String designImageTypeId, int selected) {
-        return designerOperationService.upgradeDesign(userToken, houseId, designImageTypeId, selected);
-    }
 
     @Override
     @ApiMethod

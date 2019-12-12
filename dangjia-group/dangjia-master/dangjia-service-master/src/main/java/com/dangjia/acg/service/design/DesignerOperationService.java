@@ -606,12 +606,4 @@ public class DesignerOperationService {
         quantityRoomMapper.insert(quantityRoom);
         return ServerResponse.createBySuccessMessage("操作成功");
     }
-
-    /**
-     * 升级设计
-     */
-    public ServerResponse upgradeDesign(String userToken, String houseId, String designImageTypeId, int selected) {
-        //TODO 设计师升级服务暂时取消
-        return ServerResponse.createByErrorMessage("操作失败");
-    }
 }

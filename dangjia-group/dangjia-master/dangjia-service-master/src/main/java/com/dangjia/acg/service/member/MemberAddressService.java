@@ -169,7 +169,7 @@ public class MemberAddressService {
         memberAddress.setModifyDate(new Date());
         memberAddress.setDataStatus(1);
         iMasterMemberAddressMapper.updateByPrimaryKeySelective(memberAddress);
-        return ServerResponse.createBySuccessMessage("修改成功");
+        return ServerResponse.createBySuccessMessage("删除成功");
     }
 
     /**
