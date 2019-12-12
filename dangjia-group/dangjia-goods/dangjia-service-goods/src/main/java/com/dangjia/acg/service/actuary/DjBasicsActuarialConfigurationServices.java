@@ -136,6 +136,8 @@ public class DjBasicsActuarialConfigurationServices {
             actuarialProductConfig.setActuarialTemplateId(actuarialTemplateId);
             actuarialProductConfig.setProductId(actuarialProductDTO.getProductId());
             actuarialProductConfig.setGoodsId(actuarialProductDTO.getGoodsId());
+            actuarialProductConfig.setDefaultRecommend(actuarialProductDTO.getDefaultRecommend());
+            actuarialProductConfig.setIsHide(actuarialProductDTO.getIsHide());
             actuarialProductConfig.setWorkerTypeId(workTypeId);
             actuarialProductConfig.setUpdateBy(userId);
             actuarialProductConfig.setModifyDate(new Date());
@@ -143,11 +145,12 @@ public class DjBasicsActuarialConfigurationServices {
             actuarialProductConfig.setIsCalculatedArea(actuarialProductDTO.getIsCalculatedArea());
             //判断是添加还是更新
             if(StringUtils.isNotBlank(productId)){
-                actuarialProductConfig.setCreateBy(userId);
-                actuarialProductConfig.setCreateDate(new Date());
+                actuarialProductConfig.setCreateDate(null);
                 actuarialProductConfig.setId(productId);
                 djActuarialProductConfigMapper.updateByPrimaryKeySelective(actuarialProductConfig);
             }else{
+                actuarialProductConfig.setCreateBy(userId);
+                actuarialProductConfig.setCreateDate(new Date());
                 djActuarialProductConfigMapper.insert(actuarialProductConfig);
             }
 

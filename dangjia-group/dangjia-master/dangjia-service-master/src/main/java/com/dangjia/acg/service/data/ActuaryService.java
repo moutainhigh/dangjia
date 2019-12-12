@@ -6,6 +6,7 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO;
 import com.dangjia.acg.dto.house.HouseDTO;
 import com.dangjia.acg.dto.house.HouseListDTO;
 import com.dangjia.acg.dto.house.HouseOrderDetailDTO;
@@ -152,6 +153,23 @@ public class ActuaryService {
             return ServerResponse.createByErrorMessage("查询异常！");
         }
     }
+
+    /**
+     * 精算设计--查询配置的设计商品
+     * @param cityId
+     * @return
+     */
+    public ServerResponse searchActuarialProductList(String cityId) {
+        try {
+            List<HouseOrderDetailDTO> actuarialProductAppDTOList = houseMapper.selectDesignProductList(cityId,"1");
+            getProductList(actuarialProductAppDTOList);
+            return ServerResponse.createBySuccess("查询成功", actuarialProductAppDTOList);
+        } catch (Exception e) {
+            logger.error("searchActuarialProductList查询失败:",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
     /**
      * 查询商品对应的规格详情，单位信息
      * @param productList

@@ -43,6 +43,15 @@ public class ActuaryController implements ActuaryAPI {
     }
 
     /**
+     * 精算设计--查询默认配置的设计商品
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse searchActuarialProductList(HttpServletRequest request,String cityId){
+        return actuaryService.searchActuarialProductList(cityId);
+    }
+
+    /**
      * 查询精算的订单详情
      * @param cityId 城市ID
      * @param houseId 房子ID

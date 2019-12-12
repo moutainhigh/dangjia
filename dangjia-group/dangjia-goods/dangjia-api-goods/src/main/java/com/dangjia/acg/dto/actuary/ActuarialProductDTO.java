@@ -47,10 +47,14 @@ public class ActuarialProductDTO  {
     @ApiModelProperty("工种类型（1设计师，2精算师，3大管家,4拆除，6水电，8泥工,9木工，10油漆工）")
     private String workerTypeId;
 
-    @Column(name = "is_calculated_area")
-    @Desc(value = "是否按面积计算参考价格(1是，0否)")
     @ApiModelProperty("是否按面积计算参考价格(1是，0否)")
     private String isCalculatedArea;
+
+    @ApiModelProperty("是否默认推荐(1是，0否)")
+    private String defaultRecommend = "0";
+
+    @ApiModelProperty("是否隐藏(1是，0否)")
+    private String isHide = "0";
 
 
 
