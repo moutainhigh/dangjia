@@ -34,10 +34,10 @@ public interface IHouseMapper extends Mapper<House> {
     /**
      * 查询房子订单信息
      * @param houseId 房子信息
-     * @param orderType 订单类型（1设计，2精算）
+     * @param workerTypeId 订单类型（1设计，2精算）
      * @return
      */
-    List<HouseOrderDetailDTO> getBudgetOrderDetailByHouseId(@Param("houseId") String houseId,@Param("orderType") String orderType);
+    List<HouseOrderDetailDTO> getBudgetOrderDetailByHouseId(@Param("houseId") String houseId,@Param("workerTypeId") String workerTypeId);
 
     List<HouseOrderDetailDTO> selectDesignProductList(@Param("cityId") String cityId, @Param("workerTypeId") String workerTypeId);
     /***

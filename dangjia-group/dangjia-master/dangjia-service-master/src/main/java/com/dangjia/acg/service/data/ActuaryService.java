@@ -144,12 +144,12 @@ public class ActuaryService {
      * @param houseId 房子ID
      * @return
      */
-    public ServerResponse getBudgetOrderDetail(String cityId,String houseId,String orderType){
+    public ServerResponse getBudgetOrderDetail(String cityId,String houseId,String workerTypeId){
         try{
             logger.info("查询精算详情cityId={"+cityId+"},houseId={"+houseId+"}");
             HouseDTO houseDTO=houseMapper.getHouseDetailByHouseId(houseId);
             if(houseDTO!=null&&houseDTO.getHouseId()!=null){
-                List<HouseOrderDetailDTO> houseOrderDetailDTOList=houseMapper.getBudgetOrderDetailByHouseId(houseId,orderType);
+                List<HouseOrderDetailDTO> houseOrderDetailDTOList=houseMapper.getBudgetOrderDetailByHouseId(houseId,workerTypeId);
                 getProductList(houseOrderDetailDTOList);
                 houseDTO.setOrderDetailList(houseOrderDetailDTOList);
             }

@@ -996,7 +996,17 @@ public class PaymentService {
      */
     public ServerResponse generateOrder(String userToken,String cityId, String productJsons,String workerId, String addressId) {
         try {
-            return generateOrderCommon(userToken, cityId, productJsons, workerId,  addressId,2);
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;
+            String houseId="";
+            House house=getHouseId(member.getId());
+            if(house!= null) {
+                houseId=house.getId();
+            }
+            return generateOrderCommon(member,houseId, cityId, productJsons, workerId,  addressId,2);
         } catch (Exception e) {
             e.printStackTrace();
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
@@ -1006,7 +1016,8 @@ public class PaymentService {
 
     /**
      *
-     * @param userToken
+     * @param member
+     * @param houseId
      * @param cityId
      * @param productJsons
      * @param workerId
@@ -1014,18 +1025,7 @@ public class PaymentService {
      * @param orderSource (1设计精算订单提交，2购物车提交，4设计精算补差价订单提交）
      * @return
      */
-    public ServerResponse generateOrderCommon(String userToken,String cityId, String productJsons,String workerId, String addressId,Integer orderSource){
-        String orderId="";
-        Object object = constructionService.getMember(userToken);
-        if (object instanceof ServerResponse) {
-            return (ServerResponse) object;
-        }
-        Member member = (Member) object;
-        String houseId="";
-        House house=getHouseId(member.getId());
-        if(house!= null) {
-            houseId=house.getId();
-        }
+    public ServerResponse generateOrderCommon(Member member,String houseId,String cityId, String productJsons,String workerId, String addressId,Integer orderSource){
         JSONArray productArray= JSON.parseArray(productJsons);
         if(productArray.size()==0){
             return ServerResponse.createByErrorMessage("参数错误");
