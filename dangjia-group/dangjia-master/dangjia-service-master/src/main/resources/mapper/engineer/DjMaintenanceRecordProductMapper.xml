@@ -11,7 +11,8 @@
             mrp.shop_count shopCount,
             (
                 mrp.shop_count * bsp.sell_price
-            ) totalPrice
+            ) totalPrice,
+            bsp.image
         FROM
             dj_maintenance_record_product mrp,
             dj_basics_storefront_product bsp

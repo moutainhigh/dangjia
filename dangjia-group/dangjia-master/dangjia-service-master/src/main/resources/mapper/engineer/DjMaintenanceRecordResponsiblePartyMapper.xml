@@ -13,7 +13,7 @@
                 bs.storefront_name responsiblePartyName,
                 bs.storefront_logo image
             </if>
-            <if test="responsiblePartyType==2">
+            <if test="responsiblePartyType==3">
                 IF(m.name IS NULL OR m.name="",m.nick_name,m.name) responsiblePartyName,
                 m.head image
             </if>
