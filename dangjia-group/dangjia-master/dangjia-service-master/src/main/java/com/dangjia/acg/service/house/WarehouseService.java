@@ -223,7 +223,6 @@ public class WarehouseService {
                     budgetItemDTO.setGoodsItemDTOList(goodsItemDTOList);
                     budgetItemDTO.setRowPrice(budgetItemDTO.getRowPrice()+rowPrice);
                 }
-                
                 map.put("goodsItemDTOList", budgetItemDTOS);
             } else {
                 Example example = new Example(Warehouse.class);
@@ -299,7 +298,9 @@ public class WarehouseService {
                 }
                 map.put("goodsItemDTOList", budgetItemDTOList);
             }
+
             Double workerPrice = actuaryOpeAPI.getHouseWorkerPrice(house.getCityId(), "3", houseId);
+            workerPrice+=mendWorkerMapper.getMendWorkerPrice(houseId);
             Double caiPrice = warehouseMapper.getHouseGoodsPrice(houseId, name);
             Double totalPrice = workerPrice + caiPrice;
             map.put("workerPrice", workerPrice);

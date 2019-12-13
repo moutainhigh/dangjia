@@ -17,6 +17,7 @@ public interface IMendWorkerMapper extends Mapper<MendWorker>{
 
     List<MendWorker> houseMendWorkerList(@Param("houseId") String houseId);
 
+    Double getMendWorkerPrice(@Param("houseId")String houseId);
     /*更新人工商品*/
     void updateMendWorkerById(@Param("lists") JSONArray lists);
 }
