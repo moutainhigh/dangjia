@@ -68,6 +68,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         and mw.mend_order_id = mo.id
     </select>
 
+    <select id="getMendWorkerPrice" parameterType="java.lang.String"  resultType="java.lang.Double">
+        SELECT
+            SUM(m.total_price) AS totalPrice
+        FROM
+            dj_repair_mend_order o
+        INNER JOIN dj_repair_mend_worker m ON o.id = m.mend_order_id
+        WHERE
+              o.house_id= #{houseId} and o.type = 1 and o.state = 4
+        GROUP BY
+            m.worker_goods_id
+    </select>
     <!--更新人工商品名称及属性-->
     <update id="updateMendWorkerById">
         UPDATE dj_repair_mend_worker p1
