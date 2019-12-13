@@ -12,6 +12,7 @@ import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.design.IDesignBusinessOrderMapper;
+import com.dangjia.acg.mapper.design.IMasterQuantityRoomProductMapper;
 import com.dangjia.acg.mapper.design.IQuantityRoomImagesMapper;
 import com.dangjia.acg.mapper.design.IQuantityRoomMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
@@ -23,6 +24,7 @@ import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.design.DesignBusinessOrder;
+import com.dangjia.acg.modle.design.DesignQuantityRoomProduct;
 import com.dangjia.acg.modle.design.QuantityRoom;
 import com.dangjia.acg.modle.design.QuantityRoomImages;
 import com.dangjia.acg.modle.house.House;
@@ -34,6 +36,7 @@ import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.house.HouseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
@@ -83,6 +86,8 @@ public class DesignerOperationService {
     private IWorkerDetailMapper workerDetailMapper;
     @Autowired
     private IDesignBusinessOrderMapper designBusinessOrderMapper;
+    @Autowired
+    private IMasterQuantityRoomProductMapper iMasterQuantityRoomProductMapper;
 
     /**
      * 设计师将设计图或施工图发送给业主
@@ -404,7 +409,7 @@ public class DesignerOperationService {
      * @return ServerResponse
      */
     public ServerResponse setPlaneMap(String userToken, String houseId, String userId, String image) {
-        return setQuantityRoom(userToken, houseId, userId, image, 1, null, null);
+        return setQuantityRoom(userToken, houseId, userId, image, 1, "");
     }
 
     /**
@@ -418,22 +423,9 @@ public class DesignerOperationService {
      *                  ,sort为优先级，数字越小越靠前
      * @return ServerResponse
      */
-    public ServerResponse setConstructionPlans(String userToken, String houseId, String userId, String imageJson) {
-        return setQuantityRoom(userToken, houseId, userId, imageJson, 2, null, null);
+    public ServerResponse setConstructionPlans(String userToken, String houseId, String userId, String imageJson, String productIds) {
+        return setQuantityRoom(userToken, houseId, userId, imageJson, 2, productIds);
     }
-
-    /*
-     * 添加量房
-     *
-     * @param userToken 可以为空
-     * @param houseId   房子ID
-     * @param userId    可以为空
-     * @param images    图片","号分割
-     * @return ServerResponse
-     */
-//    public ServerResponse setQuantityRoom(String userToken, String houseId, String userId, String images, Integer elevator, String floor) {
-//        return setQuantityRoom(userToken, houseId, userId, images, 0, elevator, floor);
-//    }
 
     /**
      * 添加记录图片
@@ -445,7 +437,8 @@ public class DesignerOperationService {
      * @param type        事务类型：0:量房，1平面图，2施工图
      * @return ServerResponse
      */
-    private ServerResponse setQuantityRoom(String userToken, String houseId, String userId, String imageString, int type, Integer elevator, String floor) {
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse setQuantityRoom(String userToken, String houseId, String userId, String imageString, int type, String productIds) {
         House house = houseMapper.selectByPrimaryKey(houseId);
         if (house == null) {
             return ServerResponse.createByErrorMessage("没有查询到相关房子");
@@ -465,20 +458,6 @@ public class DesignerOperationService {
             return ServerResponse.createByErrorMessage("请上传图片");
         }
         switch (type) {
-            case 0:
-                if (house.getDecorationType() == 2) {
-                    return ServerResponse.createByErrorMessage("自带设计无需量房");
-                }
-                if (house.getDesignerState() != 1) {
-                    return ServerResponse.createByErrorMessage("该阶段无法上传量房信息");
-                }
-                if (CommonUtil.isEmpty(elevator)) {
-                    return ServerResponse.createByErrorMessage("请选择是否为电梯房");
-                }
-                if (elevator == 0 && CommonUtil.isEmpty(floor)) {
-                    return ServerResponse.createByErrorMessage("请输入楼层");
-                }
-                break;
             case 1:
                 if (house.getDecorationType() == 2) {
                     if (house.getDesignerState() != 1 && house.getDesignerState() != 6) {
@@ -523,35 +502,11 @@ public class DesignerOperationService {
             quantityRoom.setUserId(userId);
         }
         quantityRoom.setHouseId(houseId);
-        quantityRoom.setElevator(elevator);
-        quantityRoom.setFloor(floor);
         quantityRoom.setType(type);
         quantityRoom.setOperationType(0);
         quantityRoom.setRoomType(0);
         quantityRoom.setFlag(3);
         switch (type) {
-            case 0:
-                String[] image = imageString.split(",");
-                for (int i = 0; i < image.length; i++) {
-                    String s = image[i];
-                    if (!CommonUtil.isEmpty(s.trim())) {
-                        QuantityRoomImages quantityRoomImages = new QuantityRoomImages();
-                        quantityRoomImages.setHouseId(houseId);
-                        quantityRoomImages.setQuantityRoomId(quantityRoom.getId());
-                        quantityRoomImages.setName("量房");
-                        quantityRoomImages.setImage(s);
-                        quantityRoomImages.setSort(i);
-                        quantityRoomImagesMapper.insert(quantityRoomImages);
-                    }
-                }
-                house.setDesignerOk(9);
-                house.setDataStatus(0);
-                houseMapper.updateByPrimaryKeySelective(house);
-                //推送消息给业主已完成量房
-                configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(),
-                        "0", "设计师完成量房", String.format(DjConstants.PushMessage.LIANGFANGWANCHENG,
-                                house.getHouseName()), "");
-                break;
             case 1:
                 QuantityRoomImages quantityRoomImages = new QuantityRoomImages();
                 quantityRoomImages.setHouseId(houseId);
@@ -560,49 +515,67 @@ public class DesignerOperationService {
                 quantityRoomImages.setImage(imageString);
                 quantityRoomImages.setSort(0);
                 house.setImage(imageString);
-                houseMapper.updateByPrimaryKeySelective(house);
                 quantityRoomImagesMapper.insert(quantityRoomImages);
                 break;
             case 2:
-                try {
-                    JSONArray jsonArray = JSON.parseArray(imageString);
-                    if (jsonArray == null || jsonArray.size() <= 0) {
-                        return ServerResponse.createByErrorMessage("图片传入格式有误");
-                    }
-                    List<QuantityRoomImages> quantityRoomImagesList = new ArrayList<>();
-                    for (int i = 0; i < jsonArray.size(); i++) {
-                        JSONObject object = jsonArray.getJSONObject(i);
-                        if (!CommonUtil.isEmpty(object.getString("image"))
-                                && !CommonUtil.isEmpty(object.getString("name"))) {
-                            QuantityRoomImages images = new QuantityRoomImages();
-                            images.setHouseId(houseId);
-                            images.setQuantityRoomId(quantityRoom.getId());
-                            images.setName(object.getString("name"));
-                            images.setImage(object.getString("image"));
-                            images.setSort(object.getInteger("sort"));
-                            quantityRoomImagesList.add(images);
-                            if (i == 1) {
-                                if (CommonUtil.isEmpty(house.getImage())) {
-                                    house.setImage(object.getString("image"));
-                                    houseMapper.updateByPrimaryKeySelective(house);
-                                }
+                JSONArray jsonArray = JSON.parseArray(imageString);
+                if (jsonArray == null || jsonArray.size() <= 0) {
+                    return ServerResponse.createByErrorMessage("图片传入格式有误");
+                }
+                List<QuantityRoomImages> quantityRoomImagesList = new ArrayList<>();
+                for (int i = 0; i < jsonArray.size(); i++) {
+                    JSONObject object = jsonArray.getJSONObject(i);
+                    if (!CommonUtil.isEmpty(object.getString("image"))
+                            && !CommonUtil.isEmpty(object.getString("name"))) {
+                        QuantityRoomImages images = new QuantityRoomImages();
+                        images.setHouseId(houseId);
+                        images.setQuantityRoomId(quantityRoom.getId());
+                        images.setName(object.getString("name"));
+                        images.setImage(object.getString("image"));
+                        images.setSort(object.getInteger("sort"));
+                        quantityRoomImagesList.add(images);
+                        if (i == 1) {
+                            if (CommonUtil.isEmpty(house.getImage())) {
+                                house.setImage(object.getString("image"));
                             }
-                        } else {
-                            return ServerResponse.createByErrorMessage("图片传入参数有误，请确认图片名和地址无误");
-                        }
-                    }
-                    if (quantityRoomImagesList.size() > 0) {
-                        for (QuantityRoomImages images : quantityRoomImagesList) {
-                            quantityRoomImagesMapper.insert(images);
                         }
                     } else {
-                        return ServerResponse.createByErrorMessage("请传入图片");
+                        return ServerResponse.createByErrorMessage("图片传入参数有误，请确认图片名和地址无误");
                     }
-                } catch (Exception e) {
-                    return ServerResponse.createByErrorMessage("图片传入格式有误");
+                }
+                if (quantityRoomImagesList.size() > 0) {
+                    for (QuantityRoomImages images : quantityRoomImagesList) {
+                        quantityRoomImagesMapper.insert(images);
+                    }
+                } else {
+                    return ServerResponse.createByErrorMessage("请传入图片");
+                }
+                if (!CommonUtil.isEmpty(productIds)) {
+                    //删除之前提交的
+                    Example example = new Example(DesignQuantityRoomProduct.class);
+                    example.createCriteria()
+                            .andEqualTo(DesignQuantityRoomProduct.HOUSE_ID, houseId)
+                            .andEqualTo(DesignQuantityRoomProduct.TYPE, 0)
+                            .andEqualTo(DesignQuantityRoomProduct.DATA_STATUS, 0);
+                    DesignQuantityRoomProduct product = new DesignQuantityRoomProduct();
+                    product.setId(null);
+                    product.setCreateDate(null);
+                    product.setDataStatus(1);
+                    iMasterQuantityRoomProductMapper.updateByExampleSelective(product, example);
+                    String[] productIdList = productIds.split(",");
+                    for (String productId : productIdList) {
+                        if (!CommonUtil.isEmpty(productId)) {
+                            DesignQuantityRoomProduct designQuantityRoomProduct = new DesignQuantityRoomProduct();
+                            designQuantityRoomProduct.setHouseId(houseId);
+                            designQuantityRoomProduct.setProductId(productId);//商品ID
+                            designQuantityRoomProduct.setType(0);//推荐商品
+                            iMasterQuantityRoomProductMapper.insertSelective(designQuantityRoomProduct);
+                        }
+                    }
                 }
                 break;
         }
+        houseMapper.updateByPrimaryKeySelective(house);
         quantityRoomMapper.insert(quantityRoom);
         return ServerResponse.createBySuccessMessage("操作成功");
     }

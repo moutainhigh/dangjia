@@ -17,6 +17,7 @@ import com.dangjia.acg.dto.house.WareDTO;
 import com.dangjia.acg.dto.repair.RepairMendDTO;
 import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.design.IHouseStyleTypeMapper;
+import com.dangjia.acg.mapper.engineer.DjSkillCertificationMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.matter.IWorkerDisclosureMapper;
@@ -27,6 +28,7 @@ import com.dangjia.acg.mapper.worker.IRewardPunishConditionMapper;
 import com.dangjia.acg.mapper.worker.IRewardPunishRecordMapper;
 import com.dangjia.acg.modle.core.*;
 import com.dangjia.acg.modle.design.HouseStyleType;
+import com.dangjia.acg.modle.engineer.DjSkillCertification;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.matter.WorkerDisclosure;
@@ -100,6 +102,9 @@ public class EngineerService {
 
     @Autowired
     private BasicsStorefrontAPI basicsStorefrontAPI;
+
+    @Autowired
+    private DjSkillCertificationMapper djSkillCertificationMapper;
 
     /**
      * 已支付换工匠
@@ -594,6 +599,11 @@ public class EngineerService {
         map.put("idnumber", worker.getIdnumber());//身份证号码
         map.put("praiseRate", worker.getPraiseRate());//好评率
         map.put("volume", worker.getVolume());//成交量
+        Example example=new Example(DjSkillCertification.class);
+        example.createCriteria().andEqualTo(DjSkillCertification.WORKER_ID,workerId)
+                .andEqualTo(DjSkillCertification.DATA_STATUS,0);
+        Integer skillCertification = djSkillCertificationMapper.selectCountByExample(example);
+        map.put("skillCertification",skillCertification>0?1:0);//是否技能认证
         return ServerResponse.createBySuccess("查询成功", map);
     }
 

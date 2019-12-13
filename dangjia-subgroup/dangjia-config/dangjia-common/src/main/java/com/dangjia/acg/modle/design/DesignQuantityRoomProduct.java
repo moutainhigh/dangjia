@@ -26,12 +26,6 @@ import javax.persistence.Table;
 public class DesignQuantityRoomProduct extends BaseEntity {
 
 
-    @Column(name = "quantity_room_id")
-    @Desc(value = "操作ID")
-    @ApiModelProperty("操作ID")
-    private String quantityRoomId;
-
-
     @Column(name = "product_id")
     @Desc(value = "商品ID")
     @ApiModelProperty("商品ID")
@@ -41,11 +35,11 @@ public class DesignQuantityRoomProduct extends BaseEntity {
     @Column(name = "house_id")
     @Desc(value = "房子ID")
     @ApiModelProperty("房子ID")
-    private String houseId ;
+    private String houseId;
 
 
     @Column(name = "type")
     @Desc(value = "推荐商品类型：0:纯推荐，1:推荐商品支付")
     @ApiModelProperty("推荐商品类型：0:纯推荐，1:推荐商品支付")
-    private Integer type ;
+    private Integer type;
 }
