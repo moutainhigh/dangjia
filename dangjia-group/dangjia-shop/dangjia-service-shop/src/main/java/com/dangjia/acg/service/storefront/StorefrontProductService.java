@@ -464,37 +464,13 @@ public class StorefrontProductService {
             {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息!");
             }
-            //判断:非当家自营店只能上架实物商品和服务商品 0:普通商家 1 ： 当家自营店
-            String ifDjselfManage=storefront.getIfDjselfManage();
-            if (StringUtil.isNotEmpty(ifDjselfManage)&&ifDjselfManage.equals("0")) {
-                Integer k = istorefrontProductMapper.selectProductByGoodsType(id);
-                if (k > 0) {
-                    StorefrontProduct storefrontProduct = new StorefrontProduct();
-                    storefrontProduct.setId(id);
-                    storefrontProduct.setIsShelfStatus(isShelfStatus);
-                    int i = istorefrontProductMapper.updateByPrimaryKeySelective(storefrontProduct);
-                    if (i <= 0) {
-                        return ServerResponse.createByErrorMessage("该商品不能上下架");
-                    }
-                    return ServerResponse.createBySuccessMessage("商品上下架成功");
-                }
-                else
-                {
-                    return ServerResponse.createByErrorMessage("该商品不能上下架");
-                }
-            }
-            else
-            {
-                //1:当家自营店
-                StorefrontProduct storefrontProduct = new StorefrontProduct();
-                storefrontProduct.setId(id);
-                storefrontProduct.setIsShelfStatus(isShelfStatus);
-                int i = istorefrontProductMapper.updateByPrimaryKeySelective(storefrontProduct);
-                if (i <= 0) {
-                    return ServerResponse.createByErrorMessage("商品上下架失败");
-                }
-                return ServerResponse.createBySuccessMessage("商品上下架成功");
-            }
+            StorefrontProduct storefrontProduct = new StorefrontProduct();
+            storefrontProduct.setId(id);
+            storefrontProduct.setIsShelfStatus(isShelfStatus);
+            int i = istorefrontProductMapper.updateByPrimaryKeySelective(storefrontProduct);
+            if (i <= 0)
+                return ServerResponse.createByErrorMessage("商品上下架失败");
+            return ServerResponse.createBySuccessMessage("商品上下架成功");
         } catch (Exception e) {
             logger.error("商品上下架异常：", e);
             return ServerResponse.createByErrorMessage("商品上下架异常");
@@ -520,61 +496,16 @@ public class StorefrontProductService {
             {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息!");
             }
-            //当家自营
-            if(StringUtil.isNotEmpty(storefront.getIfDjselfManage())&&storefront.getIfDjselfManage().equals("1"))
-            {
-                String[] iditem = id.split(",");
-                Example example = new Example(StorefrontProduct.class);
-                example.createCriteria().andIn(StorefrontProduct.ID, Arrays.asList(iditem));
-                StorefrontProduct storefrontProduct = new StorefrontProduct();
-                storefrontProduct.setIsShelfStatus(isShelfStatus);
-                storefrontProduct.setId(null);
-                storefrontProduct.setCreateDate(null);
-                int k = istorefrontProductMapper.updateByExampleSelective(storefrontProduct, example);
-                if (k > 0) {
-                    return ServerResponse.createBySuccessMessage("设置商品上下架成功");
-                } else {
-                    return ServerResponse.createByErrorMessage("温馨提示:不能重复上架");
-                }
-            }
-            else
-            {
-                //正常店铺
-                String[] iditem = id.split(",");
-                StringBuffer zy=new StringBuffer();//当家自营店
-                StringBuffer fzy=new StringBuffer();//正常店铺
-                for (String str : iditem) {
-                    Integer k = istorefrontProductMapper.selectProductByGoodsType(str);//类型0：实物商品；1：服务商品；2：人工商品；3：体验；4：增值；5：维保
-                    if (k>0) {
-                        fzy.append(str+",");
-                    }
-                    else
-                    {
-                        zy.append(str+",");
-                    }
-                }
-                if (StringUtil.isEmpty(fzy.toString()))
-                {
-                    return ServerResponse.createByErrorMessage("普通店铺没有可上架的商品");
-                }
-                Example example = new Example(StorefrontProduct.class);
-                example.createCriteria().andIn(StorefrontProduct.ID, Arrays.asList(fzy.toString().substring(0,fzy.length()-1).split(",")));
-                StorefrontProduct storefrontProduct = new StorefrontProduct();
-                storefrontProduct.setIsShelfStatus(isShelfStatus);
-                storefrontProduct.setId(null);
-                storefrontProduct.setCreateDate(null);
-                int j = istorefrontProductMapper.updateByExampleSelective(storefrontProduct, example);
-                if (j > 0) {
-                    if(zy!=null)
-                    {
-                        return ServerResponse.createBySuccess("部分商品上下架成功,如下商品属于当家自营商品，不能上架",zy.toString());
-                    }
-                    return ServerResponse.createBySuccessMessage("设置商品上下架成功");
-                } else {
-                    return ServerResponse.createByErrorMessage("温馨提示:不能重复上架");
-                }
-            }
-
+            //批量上架，逗号拆分商品
+            String[] iditem = id.split(",");
+            Example example = new Example(StorefrontProduct.class);
+            example.createCriteria().andIn(StorefrontProduct.ID, Arrays.asList(iditem));
+            StorefrontProduct storefrontProduct = new StorefrontProduct();
+            storefrontProduct.setIsShelfStatus(isShelfStatus);
+            storefrontProduct.setId(null);
+            storefrontProduct.setCreateDate(null);
+            istorefrontProductMapper.updateByExampleSelective(storefrontProduct, example);
+            return ServerResponse.createBySuccessMessage("设置商品上下架成功");
         } catch (Exception e) {
             logger.error("设置商品批量上架异常：", e);
             return ServerResponse.createByErrorMessage("设置商品批量上架异常");

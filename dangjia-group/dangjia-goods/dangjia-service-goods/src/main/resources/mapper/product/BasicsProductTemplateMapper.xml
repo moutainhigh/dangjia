@@ -249,6 +249,9 @@
         LEFT JOIN (select * from  dj_basics_storefront_product t where t.storefront_id=#{storefontId})dsap  ON dsap.prod_template_id=bpt.id
         WHERE
         1=1
+        <if test="bgtype!=null and bgtype!=''">
+            and FIND_IN_SET(dbg.type,#{bgtype})
+        </if>
         <if test="categoryId!=null and categoryId!=''">
            and  bpt.category_id=#{categoryId}
         </if>
