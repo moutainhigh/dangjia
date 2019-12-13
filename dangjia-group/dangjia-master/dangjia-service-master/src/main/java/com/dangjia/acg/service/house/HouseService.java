@@ -2017,7 +2017,7 @@ public class HouseService {
      * 偏小：生成补差价订单（将按面积计算的商品生成补差价订单）生成补货单，生成总订单，用业务订单号关联
      * @param houseId
      */
-    public String checkHouseSquare(String houseId){
+    public ServerResponse checkHouseSquare(String houseId){
         //1.查询房子信息
         House house=iHouseMapper.selectByPrimaryKey(houseId);
         if(house!=null&&StringUtils.isNotBlank(house.getId())){
@@ -2025,7 +2025,7 @@ public class HouseService {
             example.createCriteria().andEqualTo(MemberAddress.HOUSE_ID,houseId);
             MemberAddress memberAddress=iMasterMemberAddressMapper.selectOneByExample(example);
             if(memberAddress==null||StringUtils.isBlank(memberAddress.getId())){
-                return "未找到对应业主所填信息，请核实！";
+                return ServerResponse.createByErrorMessage("未找到对应业主所填信息，请核实！");
             }
             //2.判断设计、精算所测面积和业主所填面积是否相等
             BigDecimal square=house.getSquare();//外框面积
@@ -2035,10 +2035,8 @@ public class HouseService {
                 List<HouseOrderDetailDTO> houseOrderDetailDTOList=iHouseMapper.getBudgetOrderDetailByHouseId(houseId,null);
                 editOrderInfo(houseOrderDetailDTOList,square,inputArea,house,memberAddress);//通过成对应的订单信息
             }
-
-
         }
-        return "";
+        return ServerResponse.createBySuccess();
     }
     private void editOrderInfo(List<HouseOrderDetailDTO> houseOrderDetailDTOList,BigDecimal square,BigDecimal inputArea,House house,MemberAddress memberAddress){
 

@@ -422,7 +422,7 @@ public class DesignerOperationService {
         return setQuantityRoom(userToken, houseId, userId, imageJson, 2, null, null);
     }
 
-    /**
+    /*
      * 添加量房
      *
      * @param userToken 可以为空
@@ -431,9 +431,9 @@ public class DesignerOperationService {
      * @param images    图片","号分割
      * @return ServerResponse
      */
-    public ServerResponse setQuantityRoom(String userToken, String houseId, String userId, String images, Integer elevator, String floor) {
-        return setQuantityRoom(userToken, houseId, userId, images, 0, elevator, floor);
-    }
+//    public ServerResponse setQuantityRoom(String userToken, String houseId, String userId, String images, Integer elevator, String floor) {
+//        return setQuantityRoom(userToken, houseId, userId, images, 0, elevator, floor);
+//    }
 
     /**
      * 添加记录图片

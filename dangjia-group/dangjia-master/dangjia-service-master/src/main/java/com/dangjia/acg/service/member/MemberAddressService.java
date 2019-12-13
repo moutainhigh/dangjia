@@ -144,7 +144,19 @@ public class MemberAddressService {
     }
 
     public ServerResponse updataAddress(House house) {
-        return null;
+        Example example = new Example(MemberAddress.class);
+        example.createCriteria().andEqualTo(MemberAddress.MEMBER_ID, house.getMemberId())
+                .andEqualTo(MemberAddress.HOUSE_ID, house.getId());
+        List<MemberAddress> memberAddressList = iMasterMemberAddressMapper.selectByExample(example);
+        if (memberAddressList.size() <= 0) {
+            return ServerResponse.createByErrorMessage("未找房子地址");
+        }
+        MemberAddress memberAddress = memberAddressList.get(0);
+        memberAddress.setCityName(house.getCityName());
+        memberAddress.setAddress(house.getHouseName());
+        memberAddress.setModifyDate(new Date());
+        iMasterMemberAddressMapper.updateByPrimaryKeySelective(memberAddress);
+        return ServerResponse.createBySuccessMessage("更新成功");
     }
 
     /**
