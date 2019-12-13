@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Api(value = "维保接口", description = "维保接口")
 public interface DjMaintenanceRecordAPI {
 
-    @PostMapping(value = "web/engineer/querySkillsCertificationWaitingList")
+    @PostMapping(value = "web/engineer/queryDjMaintenanceRecordList")
     @ApiOperation(value = "查询质保审核列表", notes = "查询质保审核列表")
     ServerResponse queryDjMaintenanceRecordList(@RequestParam("pageDTO") PageDTO pageDTO,
                                                 @RequestParam("searchKey") String searchKey);
