@@ -180,6 +180,8 @@ public class WarehouseService {
             if (house == null) {
                 return ServerResponse.createByErrorMessage("未找到该房产");
             }
+            Double workerPrice = actuaryOpeAPI.getHouseWorkerPrice(house.getCityId(), "3", houseId);
+            Double caiPrice = warehouseMapper.getHouseGoodsPrice(houseId, name);
             request.setAttribute(Constants.CITY_ID,house.getCityId());
             Map<String, Map> maps = new HashMap<>();
             Map map = new HashMap();
@@ -216,6 +218,7 @@ public class WarehouseService {
                             goodsItemDTO.setSurCount(mendWorker.getShopCount());
                             goodsItemDTO.setTolPrice(goodsItemDTO.getSurCount()*goodsItemDTO.getPrice());
                             rowPrice+=goodsItemDTO.getTolPrice();
+                            workerPrice+=goodsItemDTO.getTolPrice();
                             goodsItemDTOMap.put(goodsItemDTO.getId(),goodsItemDTO);
                             goodsItemDTOList.add(goodsItemDTO);
                         }
@@ -299,8 +302,8 @@ public class WarehouseService {
                 }
                 map.put("goodsItemDTOList", budgetItemDTOList);
             }
-            Double workerPrice = actuaryOpeAPI.getHouseWorkerPrice(house.getCityId(), "3", houseId);
-            Double caiPrice = warehouseMapper.getHouseGoodsPrice(houseId, name);
+
+
             Double totalPrice = workerPrice + caiPrice;
             map.put("workerPrice", workerPrice);
             map.put("caiPrice", caiPrice);
