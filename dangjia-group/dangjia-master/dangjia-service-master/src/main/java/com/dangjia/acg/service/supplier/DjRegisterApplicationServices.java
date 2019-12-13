@@ -93,24 +93,23 @@ public class DjRegisterApplicationServices {
             djRegisterApplication.getApplicationType().split(",");
             map.put("split",djRegisterApplication.getApplicationType().split(","));
             List<DjRegisterApplication> djRegisterApplications = djRegisterApplicationMapper.queryDeWeight(map);
-            System.out.println(djRegisterApplication+"!!!!!!!!!!!!!!!!!!");
-            logger.info(djRegisterApplication+"1111111111111");
             if (djRegisterApplications.size() > 0){
                 return ServerResponse.createByErrorMessage("请勿重复申请 ");
             }else {
-                logger.info(djRegisterApplication+"222222222222222");
                 List<DjRegisterApplication> djRegisterApplications1 = djRegisterApplicationMapper.queryBack(map);
                 if(djRegisterApplications1.size()>0){
                     djRegisterApplications1.forEach(djRegisterApplication1 -> {
                         djRegisterApplication.setId(djRegisterApplication1.getId());
                         djRegisterApplication.setApplicationStatus(0);
+                        djRegisterApplication.setDataStatus(0);
                         djRegisterApplication.setModifyDate(new Date());
+                        djRegisterApplication.setPassWord(DigestUtils.md5Hex(djRegisterApplication.getPassWord()));
+                        djRegisterApplication.setPayPassword(DigestUtils.md5Hex(djRegisterApplication.getPayPassword()));
                         djRegisterApplicationMapper.updateByPrimaryKeySelective(djRegisterApplication);
                     });
                     return ServerResponse.createBySuccessMessage("申请成功 ");
                 }
             }
-            logger.info(djRegisterApplication+"333333333333333333");
             djRegisterApplication.setDataStatus(0);
             djRegisterApplication.setApplicationStatus(0);
             djRegisterApplication.setPassWord(DigestUtils.md5Hex(djRegisterApplication.getPassWord()));
@@ -302,7 +301,9 @@ public class DjRegisterApplicationServices {
                     djRegisterApplications1.forEach(djRegisterApplication1 -> {
                         djRegisterApplication.setId(djRegisterApplication1.getId());
                         djRegisterApplication.setApplicationStatus(0);
-                        djRegisterApplication.setModifyDate(new Date());
+                        djRegisterApplication.setDataStatus(0);
+                        djRegisterApplication.setPassWord(DigestUtils.md5Hex(djRegisterApplication.getPassWord()));
+                        djRegisterApplication.setPayPassword(DigestUtils.md5Hex(djRegisterApplication.getPayPassword()));
                         djRegisterApplicationMapper.updateByPrimaryKeySelective(djRegisterApplication);
                     });
                     return ServerResponse.createBySuccessMessage("申请成功");

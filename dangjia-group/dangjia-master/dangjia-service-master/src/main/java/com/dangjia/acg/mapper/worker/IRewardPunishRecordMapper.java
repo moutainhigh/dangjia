@@ -16,7 +16,7 @@ public interface IRewardPunishRecordMapper extends Mapper<RewardPunishRecord> {
 
     RewardPunishRecordDTO getRewardPunishRecord(@Param("rewardPunishRecordId") String rewardPunishRecordId);
 
-    List<WorkerRewardPunishRecordDTO>  queryRewardPunishRecordBykeyWord(@Param("keyWord") String keyWord);
+    List<WorkerRewardPunishRecordDTO>  queryRewardPunishRecordBykeyWord(@Param("keyWord") String keyWord,@Param("type") String type);
 
     JFRewardPunishRecordDTO  queryRewardPunishRecordDetail(@Param("id") String id);
 }

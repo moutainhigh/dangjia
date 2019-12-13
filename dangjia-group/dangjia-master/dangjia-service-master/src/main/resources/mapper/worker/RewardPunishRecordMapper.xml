@@ -46,6 +46,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         from dj_worker_reward_punish_record rpr left join dj_member dm
         on rpr.operator_id=dm.id left join dj_house dh on rpr.house_id=dh.id
         where 1=1
+        <if test="null!=type and ''!=type">
+           and  rpr.type=#{type}
+        </if>
         <if test="null!=keyWord and ''!=keyWord">
             AND (
             dm.name LIKE CONCAT('%',#{keyWord},'%') or

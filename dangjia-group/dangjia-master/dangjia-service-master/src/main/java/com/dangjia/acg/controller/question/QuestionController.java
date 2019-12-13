@@ -39,4 +39,16 @@ public class QuestionController implements QuestionAPI {
     public ServerResponse deleteQuestion(HttpServletRequest request, String questionId) {
         return questionService.deleteQuestion(questionId);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setQuantityQuestion(HttpServletRequest request, String houseId, String questionJson) {
+        return questionService.setQuantityQuestion(houseId, questionJson);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse getQuantityQuestion(HttpServletRequest request, String houseId) {
+        return questionService.getQuantityQuestion(houseId);
+    }
 }

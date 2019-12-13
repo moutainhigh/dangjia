@@ -10,10 +10,14 @@ import lombok.Data;
  */
 @Data
 public class Task {
+
+    private String taskStackId;//任务表ID
+    private String memberId;//用户ID
     private String date;
     private String htmlUrl;//审核验收页面
     private String name;
     private String image;//图标地址
     private int type;//1支付任务,2补货补人工,3审核验收任务,4大管家审核退,5审核工匠
     private String taskId;//houseFlowId,mendOrderId,houseFlowApplyId
+
 }

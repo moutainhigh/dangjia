@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.supervisor.DjBasicsSupervisorAuthorityMapper">
+
+<select id="searchAuthority" resultType="com.dangjia.acg.modle.supervisor.DjBasicsSupervisorAuthority">
+
+    SELECT
+    IFNULL(bsa.id,'') as id,
+    IFNULL(bsa.house_id,'') AS houseId,
+    IFNULL(CONCAT(IFNULL(dh.residential,'*'),IFNULL(CONCAT(dh.building,'栋'),'*栋'),IFNULL(CONCAT(dh.unit,'单元'),'*单元'),IFNULL(CONCAT(dh.number,'号'),'*号')) ,'') as address,
+    IFNULL(bsa.member_id,'') AS memberId,
+    IFNULL(dm.name,'') as name,
+    IFNULL(dm.mobile,'') as mobile ,
+    IFNULL(dh.visit_state,'') as visitState,
+    IFNULL(dh.construction_date,'') as constructionDate ,
+    IFNULL(bsa.create_date,'') as createDate,
+    IFNULL(bsa.modify_date,'') as modifyDate,
+    IFNULL(bsa.data_status,'') as dataStatus
+    FROM
+    dj_basics_supervisor_authority bsa  left join dj_house dh on bsa.house_id=dh.id
+    left join dj_member dm on dm.id=bsa.member_id
+    where 1=1
+    <if test="visitState!=null and visitState!=''">
+        and dh.visit_state = #{visitState}
+    </if>
+    <if test="keyWord!=null and keyWord!=''">
+        AND (
+        bsa.address LIKE CONCAT('%',#{keyWord},'%')
+        or
+        dm.name  LIKE CONCAT('%',#{keyWord},'%')
+        or
+        dm.mobile  LIKE CONCAT('%',#{keyWord},'%')
+        )
+    </if>
+</select>
+</mapper>

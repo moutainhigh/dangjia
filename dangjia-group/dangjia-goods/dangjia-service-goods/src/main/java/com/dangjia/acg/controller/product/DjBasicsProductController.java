@@ -319,7 +319,7 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
         {
             return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
         }
-        return djBasicsGoodsService.queryGoodsListStorefront(storefront.getId(),pageDTO, categoryId, name, type);
+        return djBasicsGoodsService.queryGoodsListStorefront(storefront.getId(),storefront.getIfDjselfManage(),pageDTO, categoryId, name, type);
     }
 
 

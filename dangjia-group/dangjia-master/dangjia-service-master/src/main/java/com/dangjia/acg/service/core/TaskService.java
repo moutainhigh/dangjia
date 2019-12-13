@@ -77,6 +77,8 @@ public class TaskService {
     @Autowired
     private IHouseWorkerMapper houseWorkerMapper;
 
+    @Autowired
+    private TaskStackService taskStackService;
     /**
      * 任务列表
      */
@@ -204,6 +206,8 @@ public class TaskService {
         if (worker.getWorkerType() == null || worker.getWorkerType() < 3) {
             return taskList;
         }
+        //查询需工匠处理的任务表
+        taskList = taskStackService.selectTaskStackInfo(houseId,worker.getId());
         if (worker.getWorkerType() == 3) {
             //退材料退包工包料
             Example example = new Example(MendDeliver.class);
@@ -323,7 +327,8 @@ public class TaskService {
         if (house.getVisitState() == 4) {
             return taskList;
         }
-
+        //查询需业主处理的任务表
+        taskList = taskStackService.selectTaskStackInfo(houseId,house.getMemberId());
         //查询待支付工序
         Example example = new Example(HouseFlow.class);
         example.createCriteria().andEqualTo(HouseFlow.WORK_TYPE, 5).andEqualTo(HouseFlow.HOUSE_ID, houseId)
@@ -452,7 +457,7 @@ public class TaskService {
                 }
             }
         }
-        /*if (isDesigner || house.getDesignerState() == 5 || house.getDesignerState() == 2) {
+        if (isDesigner || house.getDesignerState() == 5 || house.getDesignerState() == 2) {
             Task task = new Task();
             task.setDate(DateUtil.dateToString(house.getModifyDate(), DateUtil.FORMAT11));
             task.setName(house.getDesignerState() == 5 ? "平面图审核" : "施工图审核");
@@ -474,7 +479,7 @@ public class TaskService {
             task.setType(3);
             task.setTaskId("");
             taskList.add(task);
-        }*/
+        }
         //验收任务
         List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.getMemberCheckList(houseId);
         for (HouseFlowApply houseFlowApply : houseFlowApplyList) {

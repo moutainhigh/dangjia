@@ -1,6 +1,7 @@
 package com.dangjia.acg.service.supervisor;
 
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.supervisor.JFRewardPunishRecordDTO;
@@ -13,6 +14,8 @@ import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.supervisor.DjBasicsPatrolRecord;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.util.StringTool;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,10 +100,12 @@ public class PatrolRecordServices {
      * @param keyWord
      * @return
      */
-    public ServerResponse queryWorkerRewardPunishRecord(HttpServletRequest request, String keyWord) {
+    public ServerResponse queryWorkerRewardPunishRecord(HttpServletRequest request, PageDTO pageDTO , String type , String keyWord) {
         try {
-            List<WorkerRewardPunishRecordDTO> list = rewardPunishRecordMapper.queryRewardPunishRecordBykeyWord(keyWord);
-            return ServerResponse.createBySuccess("查询成功", list);
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<WorkerRewardPunishRecordDTO> list = rewardPunishRecordMapper.queryRewardPunishRecordBykeyWord(keyWord,type);
+            PageInfo pageResult = new PageInfo(list);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             logger.error("查询督导工作记录异常", e);
             return ServerResponse.createByErrorMessage("查询督导工作记录异常");
@@ -123,6 +128,7 @@ public class PatrolRecordServices {
                 {
                     String imageAddress=StringTool.getImage(djBasicsPatrolRecord.getImages(),address);
                     djBasicsPatrolRecord.setImages(imageAddress);
+                    djBasicsPatrolRecord.setImagesDetail(imageAddress.split(","));
                 }
             }
             return ServerResponse.createBySuccess("查询成功", djBasicsPatrolRecord);
@@ -149,6 +155,7 @@ public class PatrolRecordServices {
                 {
                     String imageAddress=StringTool.getImage(jFRewardPunishRecordDTO.getImages(),address);
                     jFRewardPunishRecordDTO.setImages(imageAddress);
+                    jFRewardPunishRecordDTO.setImagesDetail(imageAddress.split(","));
                 }
             }
             return ServerResponse.createBySuccess("查询成功", jFRewardPunishRecordDTO);

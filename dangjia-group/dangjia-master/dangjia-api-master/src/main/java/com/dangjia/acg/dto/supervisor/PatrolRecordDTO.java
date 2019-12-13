@@ -14,6 +14,8 @@ public class PatrolRecordDTO {
 
     private String images;
 
+    private String[] imagesDetail;
+
     private String createDate;
 
 }

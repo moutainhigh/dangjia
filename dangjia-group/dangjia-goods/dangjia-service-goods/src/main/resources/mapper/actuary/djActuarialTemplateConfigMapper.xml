@@ -67,7 +67,7 @@
           t2.`name` goodsName,
           t1.is_calculated_area isCalculatedArea,
           t1.default_recommend defaultRecommend,
-          t1.is_calculated_area isHide,
+          t1.is_hide isHide,
           t4.id categoryId,
           t4.name categoryName
         FROM

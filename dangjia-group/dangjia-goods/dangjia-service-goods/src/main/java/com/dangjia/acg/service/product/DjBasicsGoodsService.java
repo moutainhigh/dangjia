@@ -228,7 +228,7 @@ public class DjBasicsGoodsService {
      * @param type       是否禁用  0：禁用；1不禁用 ;  -1全部默认
      * @return
      */
-    public ServerResponse queryGoodsListStorefront(String storefontId,PageDTO pageDTO, String categoryId, String name, Integer type) {
+    public ServerResponse queryGoodsListStorefront(String storefontId,String ifDjselfManage ,PageDTO pageDTO, String categoryId, String name, Integer type) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
@@ -239,9 +239,13 @@ public class DjBasicsGoodsService {
                 pageResult.setList(productList);
                 return ServerResponse.createBySuccess("查询成功", pageResult);
             }
+            String bgtype=null;
+            if (ifDjselfManage.equals("0"))
+            {
+                bgtype="0,1";//删选0：实物商品；1：服务商品
+            }
 
-
-            List<DjBasicsProductTemplateDTO> productList = iBasicsProductTemplateMapper.queryProductTemplateByGoodsId(categoryId,storefontId);
+            List<DjBasicsProductTemplateDTO> productList = iBasicsProductTemplateMapper.queryProductTemplateByGoodsId(categoryId,storefontId,bgtype);
             PageInfo pageResult = new PageInfo(productList);
             for (DjBasicsProductTemplateDTO p : productList) {
                 //type表示： 是否禁用  0：禁用；1不禁用 ;  -1全部默认
@@ -255,13 +259,10 @@ public class DjBasicsGoodsService {
                     StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
                 }
                 p.setImage(imgStr.toString());
-
                 p.setImageUrl(imgUrlStr.toString());
-
                 if (StringUtils.isNoneBlank(p.getConvertUnit())) {
                     p.setConvertUnitName(iUnitMapper.selectByPrimaryKey(p.getConvertUnit()).getName());
                 }
-
                 StringBuilder strNewValueNameArr = new StringBuilder();
                 if (StringUtils.isNotBlank(p.getValueIdArr())) {
                     String[] newValueNameArr = p.getValueIdArr().split(",");
@@ -278,8 +279,6 @@ public class DjBasicsGoodsService {
                     }
                 }
                 p.setNewValueNameArr(strNewValueNameArr.toString());
-
-
                 if (!StringUtils.isNotBlank(p.getLabelId())) {
                     p.setLabelId("");
                     p.setLabelName("");
@@ -290,8 +289,6 @@ public class DjBasicsGoodsService {
                 }
 
             }
-
-
             pageResult.setList(productList);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {

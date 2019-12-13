@@ -1,5 +1,6 @@
 package com.dangjia.acg.api.supervisor;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -33,13 +34,9 @@ public interface DjBasicsPatrolRecordAPI {
     ServerResponse queryDjBasicsPatrolRecord(@RequestParam("request") HttpServletRequest request,@RequestParam("userToken") String userToken );
 
 
-    //首页督导
-    //工地列表
-    //工地详情
-
     @PostMapping("web/supervisor/queryWorkerRewardPunishRecord")
     @ApiOperation(value = "查询督导工作记录", notes = "查询督导工作记录")
-    ServerResponse queryWorkerRewardPunishRecord(@RequestParam("request") HttpServletRequest request,@RequestParam("keyWord") String keyWord );
+    ServerResponse queryWorkerRewardPunishRecord(@RequestParam("request") HttpServletRequest request, @RequestParam("pageDTO") PageDTO pageDTO,@RequestParam("type") String type, @RequestParam("keyWord") String keyWord );
 
 
     @PostMapping("web/supervisor/queryPatrolRecordDetail")
@@ -51,5 +48,9 @@ public interface DjBasicsPatrolRecordAPI {
     @ApiOperation(value = "奖励/惩罚详情", notes = "奖励/惩罚详情")
     ServerResponse queryRewardPunishRecordDetail(@RequestParam("request") HttpServletRequest request,@RequestParam("id") String id );
 
+
+    //首页督导 DjBasicsSupervisorAuthority
+    //工地列表
+    //工地详情
 
 }

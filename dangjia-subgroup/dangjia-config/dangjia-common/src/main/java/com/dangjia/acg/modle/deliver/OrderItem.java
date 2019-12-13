@@ -143,10 +143,10 @@ public class OrderItem extends BaseEntity {
 	@ApiModelProperty("订单状态（1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭8待安装 ）")
 	private String orderStatus;//订单状态（1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭）
 
-	@Column(name = "order_type")
-	@Desc(value = "订单类型（1设计,2精算，2其它）")
-	@ApiModelProperty("订单类型（1设计,2精算，2其它）")
-	private String orderType;
+	@Column(name = "worker_type_id")
+	@Desc(value = "工种ID（1设计,2精算，3其它）")
+	@ApiModelProperty("工种ID（1设计,2精算，3其它）")
+	private String workerTypeId;
 
 	@Column(name = "create_by")
 	@Desc(value = "创建人")

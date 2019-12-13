@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.delivery.IMasterDeliverOrderAddedProductMapper">
+
+    <!--根据任意订单号查询增值商品信息-->
+     <select id="getAddedPrdouctStr" resultType="java.lang.String">
+        SELECT
+            GROUP_CONCAT(added_product_id) addedProductId
+        FROM
+            dj_deliver_order_added_product
+        where any_order_id=#{anyOrderId}
+     </select>
+
+</mapper>

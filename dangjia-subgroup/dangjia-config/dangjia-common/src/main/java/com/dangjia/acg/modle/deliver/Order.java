@@ -129,11 +129,6 @@ public class Order extends BaseEntity {
 	@ApiModelProperty("总运费")
 	private BigDecimal totalTransportationCost;//总运费
 
-	@Column(name = "order_type")
-	@Desc(value = "订单类型（1设计，精算，2其它）")
-	@ApiModelProperty("订单类型（1设计，精算，2其它）")
-	private String orderType;//订单类型（1设计，精算，2其它）
-
 	@Column(name = "actual_payment_price")
 	@Desc(value = "实付总价")
 	@ApiModelProperty("实付总价")
@@ -167,9 +162,9 @@ public class Order extends BaseEntity {
 	private Date orderPayTime;//订单支付时间
 
 	@Column(name = "order_source")
-	@Desc(value = "订单来源(1,精算制作，2购物车，3补货单）")
-	@ApiModelProperty("订单来源(1,精算制作，2购物车，3补货单）")
-	private Integer orderSource;//订单来源(1,精算制作，2购物车，3补货单）
+	@Desc(value = "订单来源(1,工序订单，2购物车，3补货单，4补差价订单）")
+	@ApiModelProperty("订单来源(1,工序订单，2购物车，3补货单，4补差价订单）")
+	private Integer orderSource;//订单来源(1,精算制作，2购物车，3补货单，4补差价订单）
 
 	@Column(name = "create_by")
 	@Desc(value = "创建人")

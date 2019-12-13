@@ -28,6 +28,7 @@ import com.dangjia.acg.dto.sale.store.OrderStoreDTO;
 import com.dangjia.acg.mapper.clue.ClueMapper;
 import com.dangjia.acg.mapper.config.IMasterActuarialProductConfigMapper;
 import com.dangjia.acg.mapper.core.*;
+import com.dangjia.acg.mapper.delivery.IMasterDeliverOrderAddedProductMapper;
 import com.dangjia.acg.mapper.house.*;
 import com.dangjia.acg.mapper.matter.IRenovationManualMapper;
 import com.dangjia.acg.mapper.matter.IRenovationManualMemberMapper;
@@ -69,6 +70,8 @@ import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseFlowService;
+import com.dangjia.acg.service.core.TaskStackService;
+import com.dangjia.acg.service.deliver.RepairMendOrderService;
 import com.dangjia.acg.service.pay.PaymentService;
 import com.dangjia.acg.service.product.MasterProductTemplateService;
 import com.dangjia.acg.util.StringTool;
@@ -77,6 +80,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.formula.functions.T;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -208,6 +212,13 @@ public class HouseService {
     private PaymentService paymentService;
     @Autowired
     private IMasterActuarialProductConfigMapper iMasterActuarialProductConfigMapper;
+    @Autowired
+    private RepairMendOrderService repairMendOrderService;
+
+    @Autowired
+    private TaskStackService taskStackService;
+    @Autowired
+    private IMasterDeliverOrderAddedProductMapper iMasterDeliverOrderAddedProductMapper;
 
     public House selectHouseById(String  id) {
         return iHouseMapper.selectByPrimaryKey(id);
@@ -1839,6 +1850,7 @@ public class HouseService {
         //5.添加房产信息表
         int again=1;
         checkHouseStatus(again,userToken,member.getId());//查询是第几套房产
+
         House house = insertHouseInfo(member,cityId, houseType,memberAddress.getLatitude(), memberAddress.getLongitude(), memberAddress.getCityName()+memberAddress.getAddress(),  memberAddress.getAddress(),memberAddress.getInputArea(),again,0, workDeposits);
         //6.默认切换至新提交的房子信息
         setSelectHouse(userToken, house.getId());
@@ -1848,32 +1860,41 @@ public class HouseService {
         iMasterMemberAddressMapper.updateByPrimaryKeySelective(memberAddress);
         //7.生成订单抢单信息
         //判断是否有图纸(循环订单信息）drawings 有无图纸0：无图纸；1：有图纸
-        int drawings=1;
+        boolean desginInfo=false;//是否有设计师订单
+        boolean actuaialInfo=false;//是否有精算师订单
         JSONArray actuarialDesignList=JSONArray.parseArray(actuarialDesignAttr);
         if(actuarialDesignList!=null&&actuarialDesignList.size()>0){
             for(int i=0;i<actuarialDesignList.size();i++){
                 JSONObject obj=(JSONObject)actuarialDesignList.get(i);
                 String configType=(String)obj.get("configType");
-                if(configType!=null&&"1".equals(configType)){
-                    drawings=0;
+                JSONArray productList=obj.getJSONArray("productList");
+                if(productList!=null&&productList.size()>0){
+                    if(configType!=null&&"1".equals(configType)){
+                        desginInfo=true;
+                    }
+                    if(configType!=null&&"2".equals(configType)){
+                        actuaialInfo=true;
+                    }
                 }
+
             }
         }
-        editHouseFlowWorker(house,drawings);
+        editHouseFlowWorker(house,desginInfo,actuaialInfo);
         //8.提交订单信息,生成待支付订单,生成待抢单信息
         String productJsons=getProductJsons(actuarialDesignAttr,memberAddress.getInputArea());
-        return paymentService.generateOrderCommon(userToken,cityId,productJsons,null,addressId,1);
+        return paymentService.generateOrderCommon(member,house.getId(),cityId,productJsons,null,addressId,1);
     }
 
     /**
      * 设置设计师，精算师抢单
-     * @param drawings //判断设计还是精算抢单
+     * @param desginInfo //设计支付
+     * @param actuaialInfo //精算支付
      * @param house
      */
-    public void editHouseFlowWorker(House house, Integer drawings) {
+    public void editHouseFlowWorker(House house, boolean desginInfo,boolean actuaialInfo) {
         HouseFlow houseFlow;
         //修改-自带设计和远程设计都需要进行抢单
-        if (drawings == 1) {//精算师抢单
+        if (actuaialInfo) {//精算师抢单
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey("2");
             Example example = new Example(HouseFlow.class);
             example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, house.getId()).andEqualTo(HouseFlow.WORKER_TYPE_ID, workerType.getId());
@@ -1886,13 +1907,15 @@ public class HouseService {
                 houseFlow.setHouseId(house.getId());
                 houseFlow.setState(workerType.getState());
                 houseFlow.setSort(workerType.getSort());
-                houseFlow.setWorkType(5);//设置待业主支付
+                houseFlow.setWorkType(1);//设置待业主支付
                 houseFlow.setModifyDate(new Date());
+                houseFlow.setPayStatus(0);
                 houseFlowMapper.insert(houseFlow);
             }
-            house.setDesignerOk(1);
+            house.setDesignerOk(0);
             house.setDataStatus(0);
-        } else {//设计师抢单
+        }
+        if(desginInfo){//设计师抢单
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey("1");
             Example example = new Example(HouseFlow.class);
             example.createCriteria()
@@ -1903,8 +1926,9 @@ public class HouseService {
                 houseFlow = houseFlowList.get(0);
                 houseFlow.setState(workerType.getState());
                 houseFlow.setSort(workerType.getSort());
-                houseFlow.setWorkType(5);//开始设计等待业主支付
+                houseFlow.setWorkType(1);//开始设计等待业主支付
                 houseFlow.setModifyDate(new Date());
+                houseFlow.setPayStatus(0);
                 houseFlow.setCityId(house.getCityId());
                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
             } else {
@@ -1915,9 +1939,10 @@ public class HouseService {
                 houseFlow.setHouseId(house.getId());
                 houseFlow.setState(workerType.getState());
                 houseFlow.setSort(workerType.getSort());
-                houseFlow.setWorkType(5);//开始设计等待业主支付
+                houseFlow.setWorkType(1);//开始设计等待业主支付
                 houseFlow.setModifyDate(new Date());
                 houseFlow.setCityId(house.getCityId());
+                houseFlow.setPayStatus(0);
                 houseFlowMapper.insert(houseFlow);
             }
         }
@@ -1976,7 +2001,7 @@ public class HouseService {
                         jsonObject.put("shopCount",inputArea);
                     }
                     jsonObject.put("productId",productId);
-                    jsonObject.put("orderType",configType);
+                    jsonObject.put("workerTypeId",configType);
                     jsonObject.put("addedProductIds",addedProductIds); //增值订单ID，多个用逗号分隔
                     listOfGoods.add(jsonObject);
                 }
@@ -1984,6 +2009,116 @@ public class HouseService {
             }
         }
         return listOfGoods.toJSONString();
+    }
+
+    /**
+     * 检查房子面积和业主所填面积是否一致，若不一致，则判断是偏大还是偏小
+     * 偏大:退差价给业主（将按面积计算的商品退差价给业主）
+     * 偏小：生成补差价订单（将按面积计算的商品生成补差价订单）生成补货单，生成总订单，用业务订单号关联
+     * @param houseId
+     */
+    public String checkHouseSquare(String houseId){
+        //1.查询房子信息
+        House house=iHouseMapper.selectByPrimaryKey(houseId);
+        if(house!=null&&StringUtils.isNotBlank(house.getId())){
+            Example example=new Example(MemberAddress.class);
+            example.createCriteria().andEqualTo(MemberAddress.HOUSE_ID,houseId);
+            MemberAddress memberAddress=iMasterMemberAddressMapper.selectOneByExample(example);
+            if(memberAddress==null||StringUtils.isBlank(memberAddress.getId())){
+                return "未找到对应业主所填信息，请核实！";
+            }
+            //2.判断设计、精算所测面积和业主所填面积是否相等
+            BigDecimal square=house.getSquare();//外框面积
+            BigDecimal inputArea=memberAddress.getInputArea();//业主所填面积
+            if(square.compareTo(inputArea)!=1){//如果面积不相等，则查询需要处理的订单
+                //1.查询符合条件的需要处理的订单
+                List<HouseOrderDetailDTO> houseOrderDetailDTOList=iHouseMapper.getBudgetOrderDetailByHouseId(houseId,null);
+                editOrderInfo(houseOrderDetailDTOList,square,inputArea,house,memberAddress);//通过成对应的订单信息
+            }
+
+
+        }
+        return "";
+    }
+    private void editOrderInfo(List<HouseOrderDetailDTO> houseOrderDetailDTOList,BigDecimal square,BigDecimal inputArea,House house,MemberAddress memberAddress){
+
+        if(square.compareTo(inputArea)==1){//偏大
+            //补单，生成补差价单
+            String productStr=getEligibleProduct(houseOrderDetailDTOList,1,square,inputArea);
+            if(productStr!=null&&StringUtils.isNotBlank(productStr)){
+                Member member=memberMapper.selectByPrimaryKey(house.getMemberId());
+                paymentService.generateOrderCommon(member,house.getId(),house.getCityId(),productStr,null,memberAddress.getId(),4);//补差价订单
+                //增加任务(补差价订单）
+                taskStackService.inserTaskStackInfo(house.getHouseId(),house.getMemberId(),"是否提交补差价订单","icon/sheji.png",7,house.getHouseId());
+            }
+
+        }else if(square.compareTo(inputArea)==-1){//偏小
+            //退款，生成退款单
+            String productStr=getEligibleProduct(houseOrderDetailDTOList,2,square,inputArea);
+            if(productStr!=null&&StringUtils.isNotBlank(productStr)){
+                HouseOrderDetailDTO houseOrderDetailDTO=houseOrderDetailDTOList.get(0);
+                String orderId=houseOrderDetailDTO.getOrderId();
+                //自动生成退款单，且退款同意
+                repairMendOrderService.saveRefundInfoRecord(house.getCityId(),house.getHouseId(),orderId,productStr);
+
+
+            }
+
+        }
+
+    }
+    /**
+     * 获取符合条件的商品数据
+     * @param houseOrderDetailDTOList
+     * @param orderType (orderType=1补货单,orderType=2退货单)
+     * @return
+     */
+    private String getEligibleProduct(List<HouseOrderDetailDTO> houseOrderDetailDTOList,Integer orderType,BigDecimal square,BigDecimal inputArea){
+
+        JSONArray listOfGoods=new JSONArray();
+        if(houseOrderDetailDTOList!=null&&houseOrderDetailDTOList.size()>0){
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            for(HouseOrderDetailDTO product:houseOrderDetailDTOList){
+                    JSONObject jsonObject = new JSONObject();
+                    String productId = product.getProductId();
+                    if(productId==null||StringUtils.isBlank(productId)){
+                        continue;
+                    }
+                    String productTemplateId=product.getProductTemplateId();
+                    String orderItemId=product.getOrderItemId();
+                    //查询增值商品信息
+                    String addedProductIds=iMasterDeliverOrderAddedProductMapper.getAddedPrdouctStr(orderItemId);
+                    String workerTypeId=product.getWorkerTypeId();
+                    Example example=new Example(DjActuarialProductConfig.class);
+                    example.createCriteria().andEqualTo(DjActuarialProductConfig.ACTUARIAL_TEMPLATE_ID,workerTypeId)
+                            .andEqualTo(DjActuarialProductConfig.PRODUCT_ID,productTemplateId);
+                    DjActuarialProductConfig djActuarialProductConfig=iMasterActuarialProductConfigMapper.selectOneByExample(example);
+                    if(djActuarialProductConfig!=null&&"1".equals(djActuarialProductConfig.getIsCalculatedArea())){
+                        if(orderType==1){//补差价订单
+                            jsonObject.put("shopCount",square.subtract(inputArea));//补差价的面积
+                            jsonObject.put("productId",productId);
+                            jsonObject.put("workerTypeId",workerTypeId);
+                            jsonObject.put("addedProductIds",addedProductIds); //增值订单ID，多个用逗号分隔
+                            listOfGoods.add(jsonObject);
+
+                        }else if(orderType==2){
+                            //退差价订单
+                            jsonObject.put("returnCount",inputArea.subtract(square));//退差价的面积
+                            jsonObject.put("productId",productId);
+                            jsonObject.put("orderItemId",orderItemId);
+                            jsonObject.put("addedProductIds",addedProductIds); //增值订单ID，多个用逗号分隔
+                            listOfGoods.add(jsonObject);
+                        }
+                    }
+
+
+
+            }
+        }
+        if(listOfGoods!=null&&listOfGoods.size()>0){
+            return listOfGoods.toJSONString();
+        }
+        return "";
     }
 
     /**

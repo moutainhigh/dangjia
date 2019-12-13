@@ -67,8 +67,8 @@ public class ActuaryController implements ActuaryAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getBudgetOrderDetail(String cityId,String houseId){
-        return actuaryService.getBudgetOrderDetail(cityId,houseId);
+    public ServerResponse getBudgetOrderDetail(String cityId,String houseId,String workerTypeId){
+        return actuaryService.getBudgetOrderDetail(cityId,houseId,workerTypeId);
     }
     /**
      * 返回待业主支付精算列表

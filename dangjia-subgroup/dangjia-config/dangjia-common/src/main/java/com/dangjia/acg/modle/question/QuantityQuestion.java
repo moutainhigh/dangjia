@@ -25,10 +25,10 @@ import javax.persistence.Table;
 @FieldNameConstants(prefix = "")
 public class QuantityQuestion extends BaseEntity {
 
-    @Column(name = "quantity_room_id")
-    @Desc(value = "操作ID")
-    @ApiModelProperty("操作ID")
-    private String quantityRoomId;
+    @Column(name = "house_id")
+    @Desc(value = "房子ID")
+    @ApiModelProperty("房子ID")
+    private String houseId;
 
 
     @Column(name = "question_id")

@@ -133,9 +133,9 @@ public class MendMaterielService {
             //String aa="[{\"mendOrderId\":\"865634841567998628778\",\"actualCount\":9,supplierId:\"xxxxx"\}]";
             List<Map<String,Object>> list= JSON.parseObject(actualCountList, List.class);
             for (Map<String, Object> stringStringMap : list) {
-                String id=stringStringMap.get("id").toString();
-                String actualCount=stringStringMap.get("actualCount").toString();
-                String supplierId=stringStringMap.get("supplierId").toString();
+                String id=stringStringMap.get("id").toString();//商品id
+                String actualCount=stringStringMap.get("actualCount").toString();//实际退货数
+                String supplierId=stringStringMap.get("supplierId").toString();//供应商id
                 DjSupplier djSupplier = djSupplierAPI.queryDjSupplierByPass(supplierId);//供应商信息
 
                 mendOrder.setState(3);//（0生成中,1处理中,2不通过取消,3已通过,4已全部结算,5已撤回,6已关闭7，已审核待处理 8，部分退货）
