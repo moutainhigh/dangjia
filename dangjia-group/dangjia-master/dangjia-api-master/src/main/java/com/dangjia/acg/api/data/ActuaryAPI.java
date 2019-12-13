@@ -38,12 +38,14 @@ public interface ActuaryAPI {
      * 查询精算的订单详情
      * @param cityId 城市ID
      * @param houseId 房子ID
+     * @param  orderType 查询类型：1设计，2精算
      * @return
      */
     @PostMapping("/data/actuary/getBudgetOrderDetail")
     @ApiOperation(value = "查询精算的订单详情", notes = "查询精算的订单详情")
     ServerResponse getBudgetOrderDetail(@RequestParam("cityId") String cityId,
-                                        @RequestParam("houseId") String houseId);
+                                        @RequestParam("houseId") String houseId,
+                                        @RequestParam("orderType") String orderType);
 
     @PostMapping("/data/actuary/searchActuarialProductList")
     @ApiOperation(value = "精算接口--查询默认配置的设计商品", notes = "查询设计精算阶段配置列表")
