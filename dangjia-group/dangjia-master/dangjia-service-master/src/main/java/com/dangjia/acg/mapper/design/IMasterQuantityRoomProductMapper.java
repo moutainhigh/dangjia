@@ -16,6 +16,6 @@ import java.util.List;
 @Repository
 public interface IMasterQuantityRoomProductMapper extends Mapper<DesignQuantityRoomProduct> {
 
-    List<ActuarialProductAppDTO> getRoomProductList(@Param("houseId") String houseId, @Param("type")  int type);
+    List<ActuarialProductAppDTO> getRoomProductList(@Param("houseId") String houseId, @Param("type") int type);
 
 }

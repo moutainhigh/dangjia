@@ -76,6 +76,18 @@ public class HouseDesignImageController implements HouseDesignImageAPI {
 
     @Override
     @ApiMethod
+    public ServerResponse addRecommendProduct(HttpServletRequest request, String houseId, int type, String productIds) {
+        return quantityRoomService.addRecommendProduct(houseId, type, productIds);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse deleteRecommendProduct(HttpServletRequest request, String rpId) {
+        return quantityRoomService.deleteRecommendProduct(rpId);
+    }
+
+    @Override
+    @ApiMethod
     public ServerResponse setQuantityRoom(HttpServletRequest request, String userToken, String userId, String houseId,
                                           String villageId, String houseType,
                                           String building, String unit, String number, BigDecimal square,

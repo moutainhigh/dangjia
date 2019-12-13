@@ -4,10 +4,12 @@ import com.dangjia.acg.api.config.ServiceTypeAPI;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO;
 import com.dangjia.acg.mapper.design.IMasterQuantityRoomProductMapper;
 import com.dangjia.acg.mapper.design.IQuantityRoomImagesMapper;
 import com.dangjia.acg.mapper.design.IQuantityRoomMapper;
@@ -15,16 +17,21 @@ import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IModelingVillageMapper;
 import com.dangjia.acg.mapper.other.ICityMapper;
 import com.dangjia.acg.modle.config.ServiceType;
+import com.dangjia.acg.modle.design.DesignQuantityRoomProduct;
 import com.dangjia.acg.modle.design.QuantityRoom;
 import com.dangjia.acg.modle.design.QuantityRoomImages;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.ModelingVillage;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.member.MemberAddress;
 import com.dangjia.acg.modle.other.City;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.house.HouseService;
 import com.dangjia.acg.service.member.MemberAddressService;
+import com.dangjia.acg.util.StringTool;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -290,10 +297,62 @@ public class QuantityRoomService {
         return ServerResponse.createBySuccess("提交成功", map);
     }
 
-
+    /**
+     * 获取推荐商品
+     */
     public ServerResponse getRecommendProduct(PageDTO pageDTO, String houseId, int type) {
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        List<ActuarialProductAppDTO> appDTOS = iMasterQuantityRoomProductMapper.getRoomProductList(houseId, type);
+        if (appDTOS.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+        PageInfo pageResult = new PageInfo(appDTOS);
+        String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+        for (ActuarialProductAppDTO appDTO : appDTOS) {
+            appDTO.setStorefrontIcon(imageAddress + appDTO.getStorefrontIcon());
+            appDTO.setImageUrl(StringTool.getImage(appDTO.getImage(), imageAddress));//图多张
+            appDTO.setImageSingle(StringTool.getImageSingle(appDTO.getImage(), imageAddress));//图一张
+        }
+        pageResult.setList(appDTOS);
+        return ServerResponse.createBySuccess("查询成功", pageResult);
+    }
 
+    /**
+     * 添加推荐的商品
+     */
+    public ServerResponse addRecommendProduct(String houseId, int type, String productIds) {
+        House house = iHouseMapper.selectByPrimaryKey(houseId);
+        if (house == null) {
+            return ServerResponse.createByErrorMessage("该房产不存在");
+        }
+        if (CommonUtil.isEmpty(productIds)) {
+            return ServerResponse.createByErrorMessage("推荐商品ID不能为空");
+        }
+        //删除之前提交的
+        String[] productIdList = productIds.split(",");
+        for (String productId : productIdList) {
+            if (!CommonUtil.isEmpty(productId)) {
+                DesignQuantityRoomProduct designQuantityRoomProduct = new DesignQuantityRoomProduct();
+                designQuantityRoomProduct.setHouseId(houseId);
+                designQuantityRoomProduct.setProductId(productId);//商品ID
+                designQuantityRoomProduct.setType(type);//推荐商品
+                iMasterQuantityRoomProductMapper.insertSelective(designQuantityRoomProduct);
+            }
+        }
+        return ServerResponse.createBySuccessMessage("提交成功");
+    }
 
-        return null;
+    /**
+     * 删除推荐的商品
+     */
+    public ServerResponse deleteRecommendProduct(String rpId) {
+        DesignQuantityRoomProduct quantityRoomProduct = iMasterQuantityRoomProductMapper.selectByPrimaryKey(rpId);
+        if (quantityRoomProduct == null) {
+            return ServerResponse.createByErrorMessage("未找到该推荐商品");
+        }
+        quantityRoomProduct.setModifyDate(new Date());
+        quantityRoomProduct.setDataStatus(1);
+        iMasterQuantityRoomProductMapper.updateByPrimaryKeySelective(quantityRoomProduct);
+        return ServerResponse.createBySuccessMessage("删除成功");
     }
 }
