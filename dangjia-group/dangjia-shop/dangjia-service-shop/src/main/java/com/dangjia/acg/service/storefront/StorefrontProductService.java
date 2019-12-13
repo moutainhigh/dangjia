@@ -483,6 +483,7 @@ public class StorefrontProductService {
      * @param isShelfStatus
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse setAllStoreProductByIsShelfStatus(String userId,String cityId,String id, String isShelfStatus) {
         try {
             if (StringUtils.isEmpty(id)) {
@@ -498,16 +499,16 @@ public class StorefrontProductService {
             }
             //批量上架，逗号拆分商品
             String[] iditem = id.split(",");
-            Example example = new Example(StorefrontProduct.class);
-            example.createCriteria().andIn(StorefrontProduct.ID, Arrays.asList(iditem));
-            StorefrontProduct storefrontProduct = new StorefrontProduct();
-            storefrontProduct.setIsShelfStatus(isShelfStatus);
-            storefrontProduct.setId(null);
-            storefrontProduct.setCreateDate(null);
-            int i=istorefrontProductMapper.updateByExampleSelective(storefrontProduct, example);
-            if (i<=0)
-                return ServerResponse.createBySuccessMessage("设置商品批量上架失败");
-            return ServerResponse.createBySuccessMessage("设置商品批量上架成功");
+            for (String str:iditem) {
+                Example example = new Example(StorefrontProduct.class);
+                example.createCriteria().andEqualTo(StorefrontProduct.ID,str);
+                StorefrontProduct storefrontProduct = new StorefrontProduct();
+                storefrontProduct.setIsShelfStatus(isShelfStatus);
+                storefrontProduct.setId(null);
+                storefrontProduct.setCreateDate(null);
+                istorefrontProductMapper.updateByExampleSelective(storefrontProduct, example);
+            }
+            return ServerResponse.createBySuccessMessage("批量设置成功");
         } catch (Exception e) {
             logger.error("设置商品批量上架异常：", e);
             return ServerResponse.createByErrorMessage("设置商品批量上架异常");

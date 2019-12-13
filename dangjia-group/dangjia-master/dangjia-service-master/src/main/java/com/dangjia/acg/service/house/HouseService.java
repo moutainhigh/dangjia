@@ -58,7 +58,6 @@ import com.dangjia.acg.modle.matter.TechnologyRecord;
 import com.dangjia.acg.modle.member.*;
 import com.dangjia.acg.modle.other.City;
 import com.dangjia.acg.modle.other.WorkDeposit;
-import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.sale.residential.ResidentialBuilding;
@@ -80,7 +79,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.formula.functions.T;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,7 +89,7 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import tk.mybatis.mapper.entity.Example;
 import tk.mybatis.mapper.util.StringUtil;
 
-import javax.jnlp.IntegrationService;
+
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.*;
@@ -2017,7 +2016,7 @@ public class HouseService {
      * 偏小：生成补差价订单（将按面积计算的商品生成补差价订单）生成补货单，生成总订单，用业务订单号关联
      * @param houseId
      */
-    public String checkHouseSquare(String houseId){
+    public ServerResponse checkHouseSquare(String houseId){
         //1.查询房子信息
         House house=iHouseMapper.selectByPrimaryKey(houseId);
         if(house!=null&&StringUtils.isNotBlank(house.getId())){
@@ -2025,7 +2024,7 @@ public class HouseService {
             example.createCriteria().andEqualTo(MemberAddress.HOUSE_ID,houseId);
             MemberAddress memberAddress=iMasterMemberAddressMapper.selectOneByExample(example);
             if(memberAddress==null||StringUtils.isBlank(memberAddress.getId())){
-                return "未找到对应业主所填信息，请核实！";
+                return ServerResponse.createByErrorMessage("未找到对应业主所填信息，请核实！");
             }
             //2.判断设计、精算所测面积和业主所填面积是否相等
             BigDecimal square=house.getSquare();//外框面积
@@ -2035,10 +2034,8 @@ public class HouseService {
                 List<HouseOrderDetailDTO> houseOrderDetailDTOList=iHouseMapper.getBudgetOrderDetailByHouseId(houseId,null);
                 editOrderInfo(houseOrderDetailDTOList,square,inputArea,house,memberAddress);//通过成对应的订单信息
             }
-
-
         }
-        return "";
+        return ServerResponse.createBySuccess();
     }
     private void editOrderInfo(List<HouseOrderDetailDTO> houseOrderDetailDTOList,BigDecimal square,BigDecimal inputArea,House house,MemberAddress memberAddress){
 
