@@ -15,5 +15,7 @@ import tk.mybatis.mapper.common.Mapper;
  */
 @Repository
 public interface IMasterDeliverOrderAddedProductMapper extends Mapper<DeliverOrderAddedProduct> {
+    //根据任意订单号查询对应的增值商吕信息
+    String getAddedPrdouctStr(@Param("anyOrderId") String anyOrderId);
 
 }

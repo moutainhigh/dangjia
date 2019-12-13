@@ -178,7 +178,7 @@ public class ConfigMessageService {
      * @param targetType 消息类型 0=个人推送  1=全推
      * @param title      推送标题
      * @param alert      推送内容
-     * @param type       动作类型（0:直接跳转URL，1:跳转支付，2:只显示，3:登录，4:工匠端抢单界面/销售抢单页，5:工匠端施工界面/销售首页，6：销售业绩页）
+     * @param type       动作类型（0:直接跳转URL，1:跳转支付，2:只显示，3:登录，4:工匠端抢单界面/销售抢单页，5:工匠端施工界面/销售首页，6：销售业绩页，7查看钱包，8查看订单详情）
      * @param data       跳转地址
      * @return
      */
@@ -195,7 +195,7 @@ public class ConfigMessageService {
      * @param targetType 消息类型 0=个人推送  1=全推
      * @param title      推送标题
      * @param alert      推送内容
-     * @param type       动作类型（0:直接跳转URL，1:跳转支付，2:只显示，3:登录，4:工匠端抢单界面/销售抢单页，5:工匠端施工界面/销售首页，6：销售业绩页）
+     * @param type       动作类型（0:直接跳转URL，1:跳转支付，2:只显示，3:登录，4:工匠端抢单界面/销售抢单页，5:工匠端施工界面/销售首页，6：销售业绩页，7查看钱包，8查看订单详情）
      * @param data       跳转地址
      * @param speak      语音提示内容
      * @return
