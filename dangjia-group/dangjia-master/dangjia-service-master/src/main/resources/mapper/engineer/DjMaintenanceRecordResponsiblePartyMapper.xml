@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.engineer.DjMaintenanceRecordResponsiblePartyMapper">
+
+    <select id="queryDjMaintenanceRecordResponsibleParty"
+            resultType="com.dangjia.acg.dto.engineer.DjMaintenanceRecordResponsiblePartyDTO">
+        SELECT
+            mrrp.responsible_party_id responsiblePartyId,
+            mrrp.maintenance_record_id maintenanceRecordId,
+            mrrp.proportion,
+            mrrp.responsible_party_type responsiblePartyType,
+            <if test="responsiblePartyType==1">
+                bs.storefront_name responsiblePartyName,
+                bs.storefront_logo image
+            </if>
+            <if test="responsiblePartyType==2">
+                IF(m.name IS NULL OR m.name="",m.nick_name,m.name) responsiblePartyName,
+                m.head image
+            </if>
+        FROM
+            dj_maintenance_record_responsible_party mrrp
+            <if test="responsiblePartyType==1">
+                ,dj_basics_storefront bs
+            </if>
+            <if test="responsiblePartyType==3">
+                ,dj_member m
+            </if>
+        WHERE
+            1=1
+            <if test="responsiblePartyType==1">
+                AND mrrp.responsible_party_id = bs.id
+            </if>
+            <if test="responsiblePartyType==3">
+                AND mrrp.responsible_party_id = m.id
+            </if>
+            AND mrrp.id=#{id}
+    </select>
+
+
+    <update id="setAmountDeducted">
+        UPDATE dj_maintenance_record_responsible_party mrrp
+        INNER JOIN dj_basics_storefront bs ON mrrp.responsible_party_id = bs.id
+        INNER JOIN dj_maintenance_record mr ON mrrp.maintenance_record_id = mr.id
+        SET bs.retention_money = retention_money - ((mrrp.proportion / 100)*mr.since_purchase_amount),
+         mr.state =2
+        WHERE
+	      mr.id =#{id}
+	      AND mrrp.responsible_party_type=2
+    </update>
+</mapper>

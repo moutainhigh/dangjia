@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.engineer.DjMaintenanceRecordMapper">
+
+    <select id="queryDjMaintenanceRecordList" resultType="com.dangjia.acg.dto.engineer.DjMaintenanceRecordDTO">
+        SELECT
+            mr.id,
+            CONCAT(IFNULL(h.residential,'*'),IFNULL(CONCAT(h.building,'栋'),'*栋'),
+            IFNULL(CONCAT(h.unit,'单元'),'*单元'),
+            IFNULL(CONCAT(h.number,'号'),'*号')) as houseAddress,
+            mr.owner_name ownerName,
+            mr.owner_mobile ownerMobile,
+            mr.state
+        FROM
+            dj_maintenance_record mr,
+            dj_house_address h
+        WHERE
+            mr.house_id = h.id
+        <if test="null!=searchKey and ''!=searchKey">
+            AND CONCAT(CONCAT_WS(IFNULL(h.residential, '*'),IFNULL(CONCAT(h.building, '栋'),'*栋'),IFNULL(CONCAT(h.unit,
+            '单元'),'*单元'),IFNULL(CONCAT(h.number, '号'),'*号')),mr.owner_name,mr.owner_mobile) LIKE CONCAT('%',#{searchKey},'%')
+        </if>
+    </select>
+
+
+    <select id="queryDjMaintenanceRecordDetail"
+            resultType="com.dangjia.acg.dto.engineer.DjMaintenanceRecordDTO">
+        SELECT
+            mr.id,
+            mr.house_id houseId,
+            mr.owner_name ownerName,
+            mr.owner_mobile ownerMobile,
+            mr.state,
+            mr.create_date createDate,
+            mr.steward_state stewardState,
+            mr.owner_image ownerImage,
+            mr.owner_remark ownerRemark,
+            (
+                SELECT
+
+                IF (
+                    m. NAME IS NULL
+                    OR m. NAME = '',
+                    m.nick_name,
+                    m. NAME
+                )
+                FROM
+                    dj_member m
+                WHERE
+                    m.id = mr.supervisor_id
+            ) supervisorName,
+            mr.service_remark serviceRemark,
+            mr.steward_id stewardId,
+            (
+                SELECT
+
+                IF (
+                    m. NAME IS NULL
+                    OR m. NAME = '',
+                    m.nick_name,
+                    m. NAME
+                )
+                FROM
+                    dj_member m
+                WHERE
+                    m.id = mr.steward_id
+            ) stewardName,
+            (
+                SELECT
+                    m.mobile
+                FROM
+                    dj_member m
+                WHERE
+                    m.id = mr.steward_id
+            ) stewardMobile,
+            mr.since_purchase_amount sincePurchaseAmount,
+            mr.owner_state ownerState,
+            mr.steward_image stewardImage,
+            mr.steward_remark stewardRemark,
+            mr.remark,
+            mr.steward_order_time stewardOrderTime
+        FROM
+            dj_maintenance_record mr
+        WHERE mr.id=#{id}
+    </select>
+</mapper>
