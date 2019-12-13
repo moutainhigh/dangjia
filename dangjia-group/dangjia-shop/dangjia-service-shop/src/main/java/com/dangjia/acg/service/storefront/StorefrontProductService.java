@@ -504,8 +504,10 @@ public class StorefrontProductService {
             storefrontProduct.setIsShelfStatus(isShelfStatus);
             storefrontProduct.setId(null);
             storefrontProduct.setCreateDate(null);
-            istorefrontProductMapper.updateByExampleSelective(storefrontProduct, example);
-            return ServerResponse.createBySuccessMessage("设置商品上下架成功");
+            int i=istorefrontProductMapper.updateByExampleSelective(storefrontProduct, example);
+            if (i<=0)
+                return ServerResponse.createBySuccessMessage("设置商品批量上架失败");
+            return ServerResponse.createBySuccessMessage("设置商品批量上架成功");
         } catch (Exception e) {
             logger.error("设置商品批量上架异常：", e);
             return ServerResponse.createByErrorMessage("设置商品批量上架异常");
