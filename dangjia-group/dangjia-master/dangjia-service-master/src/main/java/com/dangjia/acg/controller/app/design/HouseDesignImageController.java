@@ -7,11 +7,13 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.house.HouseRemark;
 import com.dangjia.acg.service.design.DesignDataService;
 import com.dangjia.acg.service.design.DesignerOperationService;
+import com.dangjia.acg.service.design.QuantityRoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
 
 /**
  * author: Ronalcheng
@@ -25,6 +27,8 @@ public class HouseDesignImageController implements HouseDesignImageAPI {
     private DesignDataService designDataService;
     @Autowired
     private DesignerOperationService designerOperationService;
+    @Autowired
+    private QuantityRoomService quantityRoomService;
 
     @Override
     @ApiMethod
@@ -35,8 +39,8 @@ public class HouseDesignImageController implements HouseDesignImageAPI {
     @Override
     @ApiMethod
     public ServerResponse getDesignList(HttpServletRequest request, PageDTO pageDTO, int designerType,
-                                        String searchKey,String workerKey,String userId) {
-        return designDataService.getDesignList(request, pageDTO, designerType, searchKey, workerKey,userId);
+                                        String searchKey, String workerKey, String userId) {
+        return designDataService.getDesignList(request, pageDTO, designerType, searchKey, workerKey, userId);
     }
 
     @Override
@@ -66,8 +70,24 @@ public class HouseDesignImageController implements HouseDesignImageAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse setQuantityRoom(HttpServletRequest request, String userToken, String houseId, String userId, String images, Integer elevator, String floor) {
-        return designerOperationService.setQuantityRoom(userToken, houseId, userId, images, elevator, floor);
+    public ServerResponse setQuantityRoom(HttpServletRequest request, String userToken, String userId, String houseId,
+                                          String villageId, String houseType,
+                                          String building, String unit, String number, BigDecimal square,
+                                          BigDecimal buildSquare, String images, Integer elevator, String floor) {
+        return quantityRoomService.setQuantityRoom(userToken, userId, houseId, villageId, houseType, building, unit,
+                number, square, buildSquare, images, elevator, floor);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse isConfirmAddress(HttpServletRequest request, String houseId) {
+        return quantityRoomService.isConfirmAddress(houseId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse getConfirmAddress(HttpServletRequest request, String houseId) {
+        return quantityRoomService.getConfirmAddress(houseId);
     }
 
     @Override
@@ -105,16 +125,17 @@ public class HouseDesignImageController implements HouseDesignImageAPI {
     public ServerResponse getIdQuantityRoom(HttpServletRequest request, String quantityRoomId) {
         return designDataService.getIdQuantityRoom(quantityRoomId);
     }
+
     @Override
     @ApiMethod
-    public ServerResponse getHouseStatistics(String cityId,String workerTypeId,PageDTO pageDTO,String startDate, String endDate){
-        return designDataService.getHouseStatistics(cityId,workerTypeId,pageDTO,startDate,endDate);
+    public ServerResponse getHouseStatistics(String cityId, String workerTypeId, PageDTO pageDTO, String startDate, String endDate) {
+        return designDataService.getHouseStatistics(cityId, workerTypeId, pageDTO, startDate, endDate);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse addHouseRemark(HttpServletRequest request, HouseRemark houseRemark,String userId){
-        return designDataService.addHouseRemark(houseRemark,userId);
+    public ServerResponse addHouseRemark(HttpServletRequest request, HouseRemark houseRemark, String userId) {
+        return designDataService.addHouseRemark(houseRemark, userId);
     }
 
 
@@ -123,19 +144,19 @@ public class HouseDesignImageController implements HouseDesignImageAPI {
     public ServerResponse queryHouseRemark(HttpServletRequest request,
                                            PageDTO pageDTO,
                                            String remarkType,
-                                           String houseId){
-        return designDataService.queryHouseRemark(pageDTO,remarkType,houseId);
+                                           String houseId) {
+        return designDataService.queryHouseRemark(pageDTO, remarkType, houseId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse getArrOdlQuantityRoomList(HttpServletRequest request,String houseId){
+    public ServerResponse getArrOdlQuantityRoomList(HttpServletRequest request, String houseId) {
         return designDataService.getArrOdlQuantityRoomList(houseId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse getArrCountList(HttpServletRequest request,String houseId){
+    public ServerResponse getArrCountList(HttpServletRequest request, String houseId) {
         return designDataService.getArrCountList(houseId);
     }
 

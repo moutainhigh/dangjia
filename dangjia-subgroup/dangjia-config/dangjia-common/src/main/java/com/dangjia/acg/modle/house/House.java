@@ -271,7 +271,6 @@ public class House extends BaseEntity {
     private Integer isType;
 
 
-
     @Transient
     private String houseId;
     @Transient
@@ -333,6 +332,12 @@ public class House extends BaseEntity {
     public String getHouseName() {
         return (CommonUtil.isEmpty(getResidential()) ? "*" : getResidential())
                 + (CommonUtil.isEmpty(getBuilding()) ? "*" : getBuilding()) + "栋"
+                + (CommonUtil.isEmpty(getUnit()) ? "*" : getUnit()) + "单元"
+                + (CommonUtil.isEmpty(getNumber()) ? "*" : getNumber()) + "号";
+    }
+
+    public String getHouseUnit() {
+        return (CommonUtil.isEmpty(getBuilding()) ? "*" : getBuilding()) + "栋"
                 + (CommonUtil.isEmpty(getUnit()) ? "*" : getUnit()) + "单元"
                 + (CommonUtil.isEmpty(getNumber()) ? "*" : getNumber()) + "号";
     }
