@@ -13,7 +13,7 @@
             mr.state
         FROM
             dj_maintenance_record mr,
-            dj_house_address h
+            dj_house h
         WHERE
             mr.house_id = h.id
         <if test="null!=searchKey and ''!=searchKey">
