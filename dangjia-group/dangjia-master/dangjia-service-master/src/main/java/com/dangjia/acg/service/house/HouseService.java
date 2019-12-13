@@ -58,7 +58,6 @@ import com.dangjia.acg.modle.matter.TechnologyRecord;
 import com.dangjia.acg.modle.member.*;
 import com.dangjia.acg.modle.other.City;
 import com.dangjia.acg.modle.other.WorkDeposit;
-import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.sale.residential.ResidentialBuilding;
