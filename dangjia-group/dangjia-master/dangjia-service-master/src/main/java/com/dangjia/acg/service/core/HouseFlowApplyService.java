@@ -262,11 +262,13 @@ public class HouseFlowApplyService {
                 stewardMoney(hfa);
                 Map<String, String> temp_para = new HashMap();
                 WorkerType workerType = workerTypeMapper.selectByPrimaryKey(hfa.getWorkerTypeId());
-                House house = houseMapper.selectByPrimaryKey(hfa.getHouseId());
-                temp_para.put("house_name", house.getHouseName());
-                temp_para.put("worker_name", workerType.getName() + "阶段完工");
-                //给售中陶娇发短信
-                JsmsUtil.sendSMS("15675101794", "164425", temp_para);
+                if(workerType.getType()==9) {
+                    House house = houseMapper.selectByPrimaryKey(hfa.getHouseId());
+                    temp_para.put("house_name", house.getHouseName());
+                    temp_para.put("worker_name", workerType.getName() + "阶段完工");
+                    //给售中陶娇发短信
+                    JsmsUtil.sendSMS("15675101794", "164425", temp_para);
+                }
             } else if (hfa.getApplyType() == 0) { //每日完工,处理钱
                 //算每日积分
                 updateDayIntegral(hfa);
