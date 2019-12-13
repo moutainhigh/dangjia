@@ -1946,6 +1946,11 @@ public class HouseService {
                 houseFlowMapper.insert(houseFlow);
             }
         }
+        if(desginInfo){
+            house.setDecorationType(1);//如果购买了设计，则为远程设计，否则为自带设计
+        }else{
+            house.setDecorationType(2);//自带设计字段
+        }
         house.setVisitState(1);//开工成单
         house.setIsRobStats(1);
         iHouseMapper.updateByPrimaryKeySelective(house);
