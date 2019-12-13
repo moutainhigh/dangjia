@@ -165,18 +165,19 @@ public interface HouseDesignImageAPI {
     /**
      * showdoc
      *
-     * @param userToken 可选 string 可以为空
-     * @param houseId   必选 string 房子ID
-     * @param userId    可选 string 可以为空
-     * @param imageJson 必选 string 图片Json串[{"name":"图片名称","image":"图片地址","sort":1},{"name":"图片名称","image":"图片地址","sort":1}],sort为优先级，数字越小越靠前
+     * @param userToken  可选 string 可以为空
+     * @param houseId    必选 string 房子ID
+     * @param userId     可选 string 可以为空
+     * @param imageJson  必选 string 图片Json串[{"name":"图片名称","image":"图片地址","sort":1},{"name":"图片名称","image":"图片地址","sort":1}],sort为优先级，数字越小越靠前
+     * @param productIds 可选 string 推荐商品ID集合以","分割
      * @return {"res":1000,"msg":{"resultCode":1000,"resultMsg":"成功"} }
-     * @catalog 当家接口文档/设计模块
+     * @catalog 商品3.0---app端/新版设计
      * @title 添加施工图
      * @description 添加施工图
      * @method POST
      * @url master/app/design/setConstructionPlans
      * @remark 更多返回错误代码请看首页的错误代码描述
-     * @number 6
+     * @number 5
      * @Author: Ruking 18075121944
      * @Date: 2019/5/7 2:14 PM
      */
@@ -186,7 +187,35 @@ public interface HouseDesignImageAPI {
                                         @RequestParam("userToken") String userToken,
                                         @RequestParam("houseId") String houseId,
                                         @RequestParam("userId") String userId,
-                                        @RequestParam("imageJson") String imageJson);
+                                        @RequestParam("imageJson") String imageJson,
+                                        @RequestParam("productIds") String productIds);
+
+    /**
+     * showdoc
+     *
+     * @param pageNum  必选 int 页码
+     * @param pageSize 必选 int 记录数
+     * @param houseId  必选 string 房子ID
+     * @param type     可选 string 推荐商品类型：0:纯推荐，1:推荐商品支付,设计图这里传0
+     * @return {"res": 1000,"msg": {"resultCode": 1000, "resultMsg": "ok", "resultObj": { "pageNum": 0,"pageSize": 10,"size": 1,"startRow": 1,"endRow": 1,"total": 1, "pages": 1,"list": [{返回参数说明}],"prePage": 0, "nextPage": 1,"isFirstPage": false,"isLastPage": false,"hasPreviousPage": false,"hasNextPage": true,"navigatePages": 8,"navigatepageNums": [1],"navigateFirstPage": 1,"navigateLastPage": 1}}}
+     * @catalog 商品3.0---app端/新版设计
+     * @title 获取推荐的商品
+     * @description 获取推荐的商品
+     * @method POST
+     * @url master/app/design/getRecommendProduct
+     * @return_param groupid int 用户组id
+     * @return_param name string 用户昵称
+     * @remark 更多返回错误代码请看首页的错误代码描述
+     * @number 6
+     * @Author: Ruking 18075121944
+     * @Date: 2019/12/13 5:30 PM
+     */
+    @PostMapping("app/design/getRecommendProduct")
+    @ApiOperation(value = "获取推荐的商品", notes = "获取推荐的商品")
+    ServerResponse getRecommendProduct(@RequestParam("request") HttpServletRequest request,
+                                       @RequestParam("pageDTO") PageDTO pageDTO,
+                                       @RequestParam("houseId") String houseId,
+                                       @RequestParam("type") int type);
 
 
     /**

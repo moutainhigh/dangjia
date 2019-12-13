@@ -4,6 +4,7 @@ import com.dangjia.acg.api.config.ServiceTypeAPI;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
@@ -29,6 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
+import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -285,4 +287,8 @@ public class QuantityRoomService {
         return ServerResponse.createBySuccess("提交成功", map);
     }
 
+
+    public ServerResponse getRecommendProduct(PageDTO pageDTO, String houseId, int type) {
+        return null;
+    }
 }
