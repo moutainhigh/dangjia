@@ -405,7 +405,6 @@ public class ShopCartService {
                 iShoppingCartmapper.updateByPrimaryKeySelective(myCart);
                 shoppingCartid = myCart.getId();
             }
-
             //更新或添加增值商品
             setAddedProduct(shoppingCartid, addedProductIds);
             return ServerResponse.createBySuccessMessage("加入购物车成功!");

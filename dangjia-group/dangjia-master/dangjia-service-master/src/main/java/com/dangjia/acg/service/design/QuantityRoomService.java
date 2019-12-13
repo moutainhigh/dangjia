@@ -8,6 +8,7 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.mapper.design.IMasterQuantityRoomProductMapper;
 import com.dangjia.acg.mapper.design.IQuantityRoomImagesMapper;
 import com.dangjia.acg.mapper.design.IQuantityRoomMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
@@ -65,6 +66,8 @@ public class QuantityRoomService {
     private ServiceTypeAPI serviceTypeAPI;
     @Autowired
     private HouseService houseService;
+    @Autowired
+    private IMasterQuantityRoomProductMapper iMasterQuantityRoomProductMapper;
 
     /**
      * 是否确认地址
@@ -289,6 +292,8 @@ public class QuantityRoomService {
 
 
     public ServerResponse getRecommendProduct(PageDTO pageDTO, String houseId, int type) {
+
+
         return null;
     }
 }
