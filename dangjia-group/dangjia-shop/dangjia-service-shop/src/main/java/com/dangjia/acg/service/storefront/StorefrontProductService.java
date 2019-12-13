@@ -291,6 +291,10 @@ public class StorefrontProductService {
                 String modityPriceTime = obj.getString("modityPriceTime");
                 String sellPrice = obj.getString("sellPrice");//销售原价
                 String prodTemplateId = obj.getString("prodTemplateId");//货品id
+                if (StringUtil.isEmpty(modityPriceTime))
+                {
+                    continue;//如果时间为空，就不执行调价，跳出本次执行操作
+                }
                 StorefrontProduct storefrontProduct=new StorefrontProduct();
                 storefrontProduct.setId(id);
                 storefrontProduct.setAdjustedPrice(Double.parseDouble(adjustedPrice));
@@ -303,7 +307,7 @@ public class StorefrontProductService {
                 if(formatdate.format(formatdate.parse(modityPriceTime)).equals(formatdate.format(new Date())))//获取当前系统时间
                 {
                     StorefrontProduct spt=istorefrontProductMapper.selectByPrimaryKey(id);
-                    //修改调价
+                    //修改调价(销售价)
                     spt.setSellPrice(Double.parseDouble(adjustedPrice));
                     spt.setAdjustedPrice(0d);
                     spt.setModityPriceTime(null);
