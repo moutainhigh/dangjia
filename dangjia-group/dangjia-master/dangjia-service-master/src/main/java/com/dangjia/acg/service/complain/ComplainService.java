@@ -293,7 +293,6 @@ public class ComplainService {
 
     /**
      * 根据用户ID获取对象名称
-     *
      * @param memberId
      * @return
      */
@@ -327,37 +326,50 @@ public class ComplainService {
      * 查询申诉
      *
      * @param pageDTO      分页实体
-     * @param complainType 申述类型 1: 被处罚申诉.2：要求整改.3：要求换人.4:部分收货申诉.5:提前结束装修.6业主要求换人.7:业主申诉退货 8 工匠申请部分退货
+     * @param complainType 申述类型 1: 被处罚申诉.2：要求整改.3：要求换人.4:部分收货申诉.
+     *                     5:提前结束装修.6业主要求换人.7:业主申诉退货 8 工匠申请部分退货
+     *                     9:客户申诉列表
      * @param state        处理状态:0:待处理。1.驳回。2.接受。
      * @param searchKey    用户关键字查询，包含名称、手机号、昵称
      * @return
      */
-    public ServerResponse getComplainList(PageDTO pageDTO, Integer complainType, Integer state, String searchKey) {
+    public ServerResponse getComplainList(PageDTO pageDTO, Integer complainType,
+                                          Integer state, String searchKey) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            if (state != null && state == -1) state = null;
-            List<ComplainDTO> complainDTOList = complainMapper.getComplainList(complainType, state, searchKey);
-            if (complainDTOList.size() == 0) {
-                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无数据");
+            PageInfo pageResult;
+
+            if(complainType == 9){
+                //客户申诉列表
+                List<ComplainDTO> complainDTOList = complainMapper.getMaintenanceRecordList(complainType, state, searchKey);
+                pageResult = new PageInfo(complainDTOList);
+                pageResult.setList(complainDTOList);
+            }else{
+                if (state != null && state == -1) state = null;
+                List<ComplainDTO> complainDTOList = complainMapper.getComplainList(complainType, state, searchKey);
+                if (complainDTOList.size() == 0) {
+                    return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无数据");
+                }
+                pageResult = new PageInfo(complainDTOList);
+                String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+                for (ComplainDTO complainDTO : complainDTOList) {
+                    String files = complainDTO.getFiles();
+                    if (CommonUtil.isEmpty(files)) {
+                        complainDTO.setFileList(null);
+                        continue;
+                    }
+                    List<String> filesList = new ArrayList<>();
+                    String[] fs = files.split(",");
+                    for (String f : fs) {
+                        filesList.add(address + f);
+                    }
+                    if (filesList.size() > 0) {
+                        complainDTO.setFileList(filesList);
+                    }
+                }
+                pageResult.setList(complainDTOList);
             }
-            PageInfo pageResult = new PageInfo(complainDTOList);
-            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            for (ComplainDTO complainDTO : complainDTOList) {
-                String files = complainDTO.getFiles();
-                if (CommonUtil.isEmpty(files)) {
-                    complainDTO.setFileList(null);
-                    continue;
-                }
-                List<String> filesList = new ArrayList<>();
-                String[] fs = files.split(",");
-                for (String f : fs) {
-                    filesList.add(address + f);
-                }
-                if (filesList.size() > 0) {
-                    complainDTO.setFileList(filesList);
-                }
-            }
-            pageResult.setList(complainDTOList);
+
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();

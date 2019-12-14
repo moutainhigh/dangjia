@@ -31,4 +31,10 @@ public interface DjMaintenanceRecordAPI {
     @ApiOperation(value = "处理质保审核", notes = "处理质保审核")
     ServerResponse setDjMaintenanceRecord(@RequestParam("id") String id,
                                           @RequestParam("state") Integer state);
+
+    @PostMapping(value = "web/engineer/queryMemberList")
+    @ApiOperation(value = "查询督导列表", notes = "查询督导列表")
+    ServerResponse queryMemberList(@RequestParam("pageDTO") PageDTO pageDTO,
+                                   @RequestParam("name") String name);
+
 }

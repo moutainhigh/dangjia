@@ -1474,7 +1474,7 @@ public class DjDeliverOrderService {
             if (!isFlag) {
                 //正常收货
                 Example example = new Example(OrderSplitItem.class);
-                example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, id);
+                example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID, id);
                 List<OrderSplitItem> orderSplitItem = billDjDeliverOrderSplitItemMapper.selectByExample(example);
                 for (OrderSplitItem splitItem : orderSplitItem) {
                     if (CommonUtil.isEmpty(splitItem.getIsDeliveryInstall()) || splitItem.getIsDeliveryInstall().equals("0")) {
@@ -1525,9 +1525,16 @@ public class DjDeliverOrderService {
             }
 
             Example example = new Example(OrderSplitItem.class);
-            example.createCriteria().andEqualTo(OrderSplitItem.ORDER_SPLIT_ID, id)
+            example.createCriteria().andEqualTo(OrderSplitItem.SPLIT_DELIVER_ID, id)
                     .andEqualTo(OrderSplitItem.DATA_STATUS, 0);
             List<OrderSplitItem> orderSplitItem = billDjDeliverOrderSplitItemMapper.selectByExample(example);
+
+
+            SplitDeliver splitDeliver;
+            splitDeliver = billDjDeliverSplitDeliverMapper.selectByPrimaryKey(id);
+            if(DateUtil.daysofTwo(new Date(),splitDeliver.getRecTime()) > 7){
+                return ServerResponse.createByErrorMessage("发货已超过7天不能拒绝收货");
+            }
 
             if (orderSplitItem != null && orderSplitItem.size() > 0) {
                 for (OrderSplitItem splitItem : orderSplitItem) {
@@ -1585,17 +1592,17 @@ public class DjDeliverOrderService {
                 }
             }
 
-            SplitDeliver splitDeliver = new SplitDeliver();
+            splitDeliver = new SplitDeliver();
             //9-拒绝收货
             splitDeliver.setShippingState(9);
             splitDeliver.setId(id);
             splitDeliver.setRecTime(new Date());
             //修改发货单状态
             billDjDeliverSplitDeliverMapper.updateByPrimaryKeySelective(splitDeliver);
-            return ServerResponse.createBySuccessMessage("收货成功");
+            return ServerResponse.createBySuccessMessage("拒绝成功");
         } catch (Exception e) {
             e.printStackTrace();
-            return ServerResponse.createByErrorMessage("收货失败");
+            return ServerResponse.createByErrorMessage("拒绝失败");
         }
     }
 

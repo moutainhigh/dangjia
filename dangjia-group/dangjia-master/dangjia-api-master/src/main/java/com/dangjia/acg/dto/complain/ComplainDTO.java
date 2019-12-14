@@ -37,5 +37,7 @@ public class ComplainDTO {
     private String changeReason;//更换原因
     private String rejectReason;//驳回原因
     List<String> images;//图片list
+    private String handleType;//处理状态0-待处理 1-已处理
+
 
 }
