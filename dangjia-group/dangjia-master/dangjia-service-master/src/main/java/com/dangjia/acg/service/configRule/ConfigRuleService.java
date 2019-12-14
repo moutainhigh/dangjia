@@ -22,7 +22,10 @@ import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
-
+/**
+ * author: qiyuxiang
+ * Date: 2019-12-11
+ */
 @Service
 public class ConfigRuleService {
 
@@ -71,6 +74,7 @@ public class ConfigRuleService {
      * 更新等级明细列表
      * @return
      */
+
     public ServerResponse editConfigRuleRank(String rankIds,String scoreStarts,String scoreEnds) {
         try {
             if(!CommonUtil.isEmpty(rankIds)){
@@ -101,6 +105,7 @@ public class ConfigRuleService {
      * @param  type 规则模块类型： 1=积分规则 2=拿钱规则  3=抢单规则 4=其他规则
      * @return
      */
+
     public ServerResponse searchConfigRuleModule(String type) {
         try {
             Example example=new Example(DjConfigRuleModule.class);
@@ -390,6 +395,7 @@ public class ConfigRuleService {
      * 新增规则配置明细
      * @return
      */
+
     public Map<String,String> setConfigRuleItemField(DjConfigRuleModule configRuleModule,String typeId) {
         Map<String,String> field= new HashMap();
         if(configRuleModule.getItemType()==1){
