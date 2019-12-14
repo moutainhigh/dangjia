@@ -48,4 +48,9 @@ public class TaskStackService {
         return iMasterTaskStackMapper.selectTaskStackInfo(houseId,memberId);
     }
 
+    public List<Task> selectTaskStackInfoByType(String houseId,String type){
+        return iMasterTaskStackMapper.selectTaskStackInfoByType(houseId,type);
+    }
+
+
 }

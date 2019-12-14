@@ -2,7 +2,6 @@ package com.dangjia.acg.api.data;
 
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.dto.house.HouseListDTO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
@@ -20,6 +19,7 @@ import java.util.List;
 @FeignClient("dangjia-service-master")
 @Api(value = "提供精算数据接口", description = "提供精算数据接口")
 public interface ActuaryAPI {
+
 
     @PostMapping("/data/actuary/getActuaryBudgetOk")
     @ApiOperation(value = "返回精算列表", notes = "返回精算列表")
@@ -59,6 +59,20 @@ public interface ActuaryAPI {
                                         @RequestParam("houseId") String houseId,
                                         @RequestParam("productStr") String productStr);
 
+    /**
+     * 审核结果
+     * @param request
+     * @param cityId 城市ID
+     * @param houseId 房子ID
+     * @param auditResultType 审核结果（1审核通过，2审核不通过）
+     * @return
+     */
+    @PostMapping("/data/actuary/checkDesignPicture")
+    @ApiOperation(value = "精算接口--审核设计图纸接口", notes = "精算接口--审核设计图纸接口")
+    ServerResponse checkDesignPicture(@RequestParam("request") HttpServletRequest request,
+                                      @RequestParam("cityId") String cityId,
+                                      @RequestParam("houseId") String houseId,
+                                      @RequestParam("auditResultType") String auditResultType);
 
     @PostMapping("/data/actuary/getActuaryWaitPay")
     @ApiOperation(value = "返回待业主支付精算列表", notes = "返回待业主支付精算列表")
