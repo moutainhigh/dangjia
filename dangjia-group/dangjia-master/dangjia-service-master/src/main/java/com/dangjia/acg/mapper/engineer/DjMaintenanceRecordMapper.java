@@ -1,6 +1,7 @@
 package com.dangjia.acg.mapper.engineer;
 
 import com.dangjia.acg.dto.engineer.DjMaintenanceRecordDTO;
+import com.dangjia.acg.dto.supervisor.MaintenanceRecordDTO;
 import com.dangjia.acg.modle.engineer.DjMaintenanceRecord;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -21,4 +22,8 @@ public interface DjMaintenanceRecordMapper extends Mapper<DjMaintenanceRecord> {
 
 
     DjMaintenanceRecordDTO queryDjMaintenanceRecordDetail(@Param("id") String id);
+
+    List<MaintenanceRecordDTO > queryApplicationInfo(@Param("houseId") String houseId);
+
+
 }

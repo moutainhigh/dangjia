@@ -27,7 +27,6 @@ public interface ComplainAPI {
                                   @RequestParam("content") String content);
 
 
-
     @PostMapping("/complain/addComplain")
     @ApiOperation(value = "添加申诉", notes = "添加申诉")
     ServerResponse addComplain(@RequestParam("request") HttpServletRequest request,
@@ -57,7 +56,15 @@ public interface ComplainAPI {
                                   @RequestParam("description") String description,
                                   @RequestParam("operateId") String operateId,  //操作人id
                                   @RequestParam("operateName") String operateName,  //操作人姓名
-                                  @RequestParam("files") String files);
+                                  @RequestParam("files") String files,
+                                  @RequestParam("rejectReason")  String rejectReason);
+
+
+    @PostMapping("/complain/queryMemberRecord")
+    @ApiOperation(value = "查询更换工匠历史记录", notes = "查询更换工匠历史记录")
+    ServerResponse queryMemberRecord(@RequestParam("request") HttpServletRequest request,
+                               @RequestParam("memberId") String memberId);
+
 
     @PostMapping("/complain/getComplain")
     @ApiOperation(value = "获取申诉详情", notes = "获取申诉详情")

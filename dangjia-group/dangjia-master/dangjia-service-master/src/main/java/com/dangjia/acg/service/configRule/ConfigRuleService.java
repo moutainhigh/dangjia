@@ -22,7 +22,10 @@ import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
-
+/**
+ * author: qiyuxiang
+ * Date: 2019-12-11
+ */
 @Service
 public class ConfigRuleService {
 
@@ -71,7 +74,8 @@ public class ConfigRuleService {
      * 更新等级明细列表
      * @return
      */
-    public ServerResponse editConfigRuleRank(String rankIds,String scoreStarts,String scoreEnds) {
+
+    public ServerResponse editConfigRuleRank(HttpServletRequest request,String rankIds,String scoreStarts,String scoreEnds) {
         try {
             if(!CommonUtil.isEmpty(rankIds)){
                 String[] rankIdlist=rankIds.split(",");
@@ -89,6 +93,16 @@ public class ConfigRuleService {
                     configRuleRankMapper.updateByExampleSelective(configRuleRank,example);
                 }
             }
+            //新增操作流水
+            String userID = request.getParameter(Constants.USERID);
+            OperationFlow operationFlow=new OperationFlow();
+            operationFlow.setName("等级配置变更");
+            operationFlow.setOperationId(rankIds);
+            operationFlow.setOperationType("configRule_RuleRank");
+            operationFlow.setRemarks("等级配置-更新");
+            operationFlow.setUserId(userID);
+            operationFlow.setUserType(0);
+            operationFlowMapper.insert(operationFlow);
             return ServerResponse.createBySuccess("更新成功");
         } catch (Exception e) {
             logger.error("editConfigRuleRank:",e);
@@ -101,6 +115,7 @@ public class ConfigRuleService {
      * @param  type 规则模块类型： 1=积分规则 2=拿钱规则  3=抢单规则 4=其他规则
      * @return
      */
+
     public ServerResponse searchConfigRuleModule(String type) {
         try {
             Example example=new Example(DjConfigRuleModule.class);
@@ -390,6 +405,7 @@ public class ConfigRuleService {
      * 新增规则配置明细
      * @return
      */
+
     public Map<String,String> setConfigRuleItemField(DjConfigRuleModule configRuleModule,String typeId) {
         Map<String,String> field= new HashMap();
         if(configRuleModule.getItemType()==1){
@@ -397,10 +413,10 @@ public class ConfigRuleService {
                 field.put("integral","配置积分(分)");
             }
             if(MK003.equals(configRuleModule.getTypeId())||MK004.equals(configRuleModule.getTypeId())){//大管家获取积分/工匠获取积分
-                if(SG001.equals(typeId)||SG002.equals(typeId)||SG005.equals(typeId)){//周计划/巡查
+                if(SG001.equals(typeId)||SG002.equals(typeId)||SG005.equals(typeId)){//周计划/巡查/每日完工
                     field.put("integral","配置积分");
                 }
-                if(SG003.equals(typeId)||SG004.equals(typeId)||SG006.equals(typeId)){//竣工/验收
+                if(SG003.equals(typeId)||SG004.equals(typeId)||SG006.equals(typeId)){//竣工/验收/被评价
                     field.put("starOne","1星");
                     field.put("starTwo","2星");
                     field.put("starThree","3星");

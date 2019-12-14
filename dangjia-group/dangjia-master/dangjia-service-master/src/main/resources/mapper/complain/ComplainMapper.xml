@@ -66,7 +66,10 @@
         c.files as files,
         c.create_date as createDate,
         c.modify_date as modifyDate,
-        c.content as content
+        c.content as content,
+        c.change_reason as changeReason,
+        c.reject_reason as rejectReason,
+        c.image as image
         FROM dj_complain c
         LEFT JOIN dj_house h ON c.house_id = h.id
         WHERE c.data_status = 0
@@ -74,6 +77,21 @@
             and c.id = #{complainId}
         </if>
     </select>
+
+    <select id="queryMemberRecord" resultType="com.dangjia.acg.dto.complain.ReplaceMemberRecordDTO">
+        SELECT
+            rmr.create_date AS createDate,
+            m.mobile AS mobile,
+            m.name AS name
+        FROM
+         dj_replace_member_record rmr
+        INNER JOIN dj_member m ON rmr.member_id = m.id
+        WHERE rmr.member_id = #{memberId}
+    </select>
+
+
+
+
 </mapper>
 
 

@@ -15,10 +15,12 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.complain.ComPlainStopDTO;
 import com.dangjia.acg.dto.complain.ComplainDTO;
+import com.dangjia.acg.dto.complain.ReplaceMemberRecordDTO;
 import com.dangjia.acg.dto.deliver.SplitDeliverDTO;
 import com.dangjia.acg.dto.deliver.SplitDeliverItemDTO;
 import com.dangjia.acg.dto.worker.RewardPunishRecordDTO;
 import com.dangjia.acg.mapper.complain.IComplainMapper;
+import com.dangjia.acg.mapper.complain.MemberRecordMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
@@ -44,6 +46,7 @@ import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.member.ReplaceMemberRecord;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
@@ -124,6 +127,8 @@ public class ComplainService {
     @Autowired
     private IMendOrderMapper mendOrderMapper;
 
+    @Autowired
+    private MemberRecordMapper memberRecordMapper;
     /**
      * 添加申诉
      * @param request
@@ -157,7 +162,7 @@ public class ComplainService {
             return ServerResponse.createBySuccessMessage("提交申诉成功");
         } catch (Exception e) {
             e.printStackTrace();
-            return ServerResponse.createByErrorMessage("查询失败");
+            return ServerResponse.createByErrorMessage("提交失败");
         }
     }
     /**
@@ -371,7 +376,8 @@ public class ComplainService {
      * @return
      */
     public ServerResponse updataComplain(String userId, String complainId, Integer state, String description,
-                                         String files, String operateId, String operateName) {
+                                         String files, String operateId, String operateName,
+                                         String rejectReason) {
         if (CommonUtil.isEmpty(complainId)) {
             return ServerResponse.createByErrorMessage("参数不正确");
         }
@@ -383,6 +389,8 @@ public class ComplainService {
         complain.setUserId(userId);
         complain.setDescription(description);
         complain.setFiles(files);
+        //添加驳回
+        complain.setRejectReason(rejectReason);
         if (!CommonUtil.isEmpty(operateId)) {
             complain.setOperateId(operateId);
             complain.setOperateName(userMapper.selectByPrimaryKey(operateId).getUsername());
@@ -562,6 +570,12 @@ public class ComplainService {
                         break;
                 }
             }
+
+            //增加工替换历史记录
+            ReplaceMemberRecord replaceMemberRecord = new ReplaceMemberRecord();
+            replaceMemberRecord.setMemberId(complain.getMemberId());
+            memberRecordMapper.insert(replaceMemberRecord);
+
         } else {
             if (complain.getComplainType() != null && complain.getComplainType() == 2) {
                 //将申请进程打回待审核。。
@@ -586,6 +600,21 @@ public class ComplainService {
         return ServerResponse.createBySuccessMessage("提交成功");
     }
 
+
+    /**
+     * 查询更换工匠历史记录
+     * @param memberId
+     * @return
+     */
+    public ServerResponse queryMemberRecord(String memberId) {
+        List<ReplaceMemberRecordDTO> queryMemberRecord = complainMapper.queryMemberRecord(memberId);
+        if (queryMemberRecord.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+        return ServerResponse.createBySuccess("查询成功", queryMemberRecord);
+    }
+
+
     /**
      * 获取申诉详情
      *
@@ -594,7 +623,8 @@ public class ComplainService {
      */
     public ServerResponse getComplain(String complainId) {
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-        if (CommonUtil.isEmpty(complainId)) {
+
+         if (CommonUtil.isEmpty(complainId)) {
             return ServerResponse.createByErrorMessage("参数不正确");
         }
         ComplainDTO complain = complainMapper.getComplain(complainId);
@@ -665,6 +695,17 @@ public class ComplainService {
                 Object date = getDate(complain.getHouseId());
                 complain.setData(date);
             }
+        }
+
+        String images = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+        List<String> strList = new ArrayList<>();
+        if (!CommonUtil.isEmpty(complain.getImage())) {
+            List<String> result = Arrays.asList(complain.getImage().split(","));
+            for (int i = 0; i < result.size(); i++) {
+                String str = images + result.get(i);
+                strList.add(str);
+            }
+            complain.setImages(strList);
         }
         return ServerResponse.createBySuccess("查询成功", complain);
     }

@@ -20,11 +20,6 @@ import javax.persistence.Table;
 @ApiModel(description = "用户反馈详情")
 @FieldNameConstants(prefix = "")
 public class UserFeedbackItem extends BaseEntity {
-    @Column(name = "feedback_id")
-    @Desc(value = "反馈id")
-    @ApiModelProperty("反馈id")
-    private String feedbackId;
-
     @Column(name = "user_id")
     @Desc(value = "用户id")
     @ApiModelProperty("用户id")
@@ -33,12 +28,12 @@ public class UserFeedbackItem extends BaseEntity {
     @Column(name = "remark")
     @Desc(value = "备注")
     @ApiModelProperty("备注")
-    private Integer remark;
+    private String remark;
 
     @Column(name = "image")
     @Desc(value = "图片")
     @ApiModelProperty("图片")
-    private Integer image;
+    private String image;
 
 
 }

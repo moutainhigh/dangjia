@@ -24,8 +24,8 @@ public class DjConfigRuleType extends BaseEntity {
     private String name;
 
     @Column(name = "source")
-    @Desc(value = "类型对象：1=模块类型    2=参数类型  3=施工类型")
-    @ApiModelProperty("类型对象：1=模块类型    2=参数类型  3=施工类型")
+    @Desc(value = "类型对象：1=模块类型    2=参数类型  3=施工类型  4=施工排期类型")
+    @ApiModelProperty("类型对象：1=模块类型    2=参数类型  3=施工类型 4=施工排期类型")
     private Double source;
 
 }

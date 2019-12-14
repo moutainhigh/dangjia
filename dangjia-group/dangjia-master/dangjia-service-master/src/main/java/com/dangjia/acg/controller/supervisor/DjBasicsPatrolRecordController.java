@@ -47,4 +47,10 @@ public class DjBasicsPatrolRecordController implements DjBasicsPatrolRecordAPI {
     public ServerResponse queryRewardPunishRecordDetail(HttpServletRequest request, String id) {
         return patrolRecordServices.queryRewardPunishRecordDetail(request,id);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse getSupHomePage(HttpServletRequest request) {
+        return patrolRecordServices.getSupHomePage(request);
+    }
 }
