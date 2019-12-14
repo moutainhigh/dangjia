@@ -27,8 +27,8 @@ public class ConfigRuleController  implements ConfigRuleAPI {
     }
     @Override
     @ApiMethod
-    public ServerResponse editConfigRuleRank(String rankIds,String scoreStarts,String scoreEnds) {
-         return configRuleService.editConfigRuleRank(rankIds,scoreStarts,scoreEnds);
+    public ServerResponse editConfigRuleRank(HttpServletRequest request,String rankIds,String scoreStarts,String scoreEnds) {
+         return configRuleService.editConfigRuleRank(request,rankIds,scoreStarts,scoreEnds);
     }
     @Override
     @ApiMethod

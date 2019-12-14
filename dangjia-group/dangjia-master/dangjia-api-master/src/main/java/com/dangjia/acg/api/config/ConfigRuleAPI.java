@@ -24,7 +24,7 @@ public interface ConfigRuleAPI {
 
     @PostMapping("/config/rule/rank/edit")
     @ApiOperation(value = "等级配置修改", notes = "等级配置修改")
-    ServerResponse editConfigRuleRank(@RequestParam("request") String rankIds,@RequestParam("scoreStarts") String scoreStarts,@RequestParam("scoreEnds") String scoreEnds);
+    ServerResponse editConfigRuleRank(@RequestParam("request") HttpServletRequest request,@RequestParam("rankIds") String rankIds,@RequestParam("scoreStarts") String scoreStarts,@RequestParam("scoreEnds") String scoreEnds);
 
     @PostMapping("/config/rule/module/search")
     @ApiOperation(value = "规则配置列表", notes = "规则配置列表")
