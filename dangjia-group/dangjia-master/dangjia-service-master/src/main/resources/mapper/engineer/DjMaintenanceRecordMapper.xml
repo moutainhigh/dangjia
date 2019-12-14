@@ -83,4 +83,16 @@
             dj_maintenance_record mr
         WHERE mr.id=#{id}
     </select>
+
+
+    <select id="queryApplicationInfo" resultType="com.dangjia.acg.dto.supervisor.MaintenanceRecordDTO">
+            select
+            owner_name as ownerName,
+            create_date as createDate,
+            owner_image as ownerImage,
+            owner_remark as ownerRemark
+            From  dj_maintenance_record where house_id=#{houseId}
+
+    </select>
+
 </mapper>

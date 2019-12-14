@@ -49,8 +49,10 @@ public interface DjBasicsPatrolRecordAPI {
     ServerResponse queryRewardPunishRecordDetail(@RequestParam("request") HttpServletRequest request,@RequestParam("id") String id );
 
 
-    //首页督导 DjBasicsSupervisorAuthority
-    //工地列表
-    //工地详情
+    @PostMapping("web/supervisor/getSupHomePage")
+    @ApiOperation(value = "督导首页", notes = "督导首页")
+    ServerResponse getSupHomePage(@RequestParam("request") HttpServletRequest request);
+
+
 
 }
