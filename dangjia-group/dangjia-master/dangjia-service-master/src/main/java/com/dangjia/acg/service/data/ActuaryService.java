@@ -4,31 +4,48 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
-import com.dangjia.acg.dto.actuary.ActuarialProductDTO;
+import com.dangjia.acg.dto.core.ButtonListBean;
+import com.dangjia.acg.dto.core.ConstructionByWorkerIdBean;
+import com.dangjia.acg.dto.core.Task;
 import com.dangjia.acg.dto.house.HouseDTO;
 import com.dangjia.acg.dto.house.HouseListDTO;
 import com.dangjia.acg.dto.house.HouseOrderDetailDTO;
 import com.dangjia.acg.dto.house.UserInfoDateDTO;
+import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerMapper;
 import com.dangjia.acg.mapper.core.IMasterUnitMapper;
+import com.dangjia.acg.mapper.delivery.IOrderMapper;
 import com.dangjia.acg.mapper.design.IDesignBusinessOrderMapper;
 import com.dangjia.acg.mapper.design.IMasterQuantityRoomProductMapper;
 import com.dangjia.acg.mapper.house.HouseRemarkMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
+import com.dangjia.acg.mapper.member.IMasterMemberAddressMapper;
+import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
 import com.dangjia.acg.mapper.product.IMasterProductTemplateMapper;
 import com.dangjia.acg.modle.brand.Unit;
+import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseWorker;
+import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.design.DesignBusinessOrder;
 import com.dangjia.acg.modle.design.DesignQuantityRoomProduct;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.HouseRemark;
+import com.dangjia.acg.modle.house.TaskStack;
+import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.member.MemberAddress;
+import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
+import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.TaskStackService;
+import com.dangjia.acg.service.design.QuantityRoomService;
 import com.dangjia.acg.service.product.MasterProductTemplateService;
+import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -38,10 +55,7 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * author: Ronalcheng
@@ -56,6 +70,8 @@ public class ActuaryService {
     private IHouseWorkerMapper houseWorkerMapper;
     @Autowired
     private IHouseMapper houseMapper;
+    @Autowired
+    private IHouseFlowMapper houseFlowMapper;
     @Autowired
     private IDesignBusinessOrderMapper designBusinessOrderMapper;
     @Autowired
@@ -72,6 +88,17 @@ public class ActuaryService {
     private IMasterQuantityRoomProductMapper iMasterQuantityRoomProductMapper;
     @Autowired
     private TaskStackService taskStackService;
+    @Autowired
+    private IMemberMapper memberMapper;
+    @Autowired
+    private ConfigMessageService configMessageService;
+    @Autowired
+    private IMasterMemberAddressMapper iMasterMemberAddressMapper;
+
+
+
+
+
     /**
      * 查询房子精算数据
      *
@@ -211,6 +238,49 @@ public class ActuaryService {
             return ServerResponse.createByErrorMessage("推荐保存失败");
         }
     }
+
+    /**
+     *
+     * @param cityId 城市ID
+     * @param houseId 房子ID
+     * @param auditResultType 审核结果审核结果（1审核通过，2审核不通过）
+     * @return
+     */
+    public ServerResponse checkDesignPicture(String cityId,String houseId,String auditResultType){
+        //审核通过，需修改当前设计师图纸状态为审核通过
+        House house=houseMapper.selectByPrimaryKey(houseId);
+        if(house==null||StringUtils.isBlank(house.getId())){
+            return ServerResponse.createByErrorMessage("未找到对应的房子信息，请核实");
+        }
+        if(auditResultType!=null&&"1".equals(auditResultType)){
+            house.setBudgetOk(6);//修改精算师的审核状态为“审核图纸通过”
+            house.setModifyDate(new Date());
+            houseMapper.updateByPrimaryKeySelective(house);
+            return ServerResponse.createBySuccessMessage("审核通过保存成功");
+        }else{
+            //审核不通过，判断是当家平台的设计师，还是其它平台的设计师
+            if(house.getDesignerOk()==0){//不是当家平台的设计师
+                //返回可推荐的设计商品列表
+                return searchActuarialProductList(cityId);
+            }else if(house.getDesignerOk()==3){//当家平台设计已完成，打回重新修改,
+                house.setDesignerOk(7);//打回图纸，当家平台设计师图纸状态为7
+                house.setModifyDate(new Date());
+                houseMapper.updateByPrimaryKeySelective(house);
+                //推送任务给当家平台设计师
+                HouseFlow houseFlow=houseFlowMapper.getByWorkerTypeId(houseId,"1");
+                String desginWorkerId=houseFlow.getWorkerId();//设计师ID
+                houseFlow=houseFlowMapper.getByWorkerTypeId(houseId,"2");//精算师信息
+                Member member=memberMapper.selectByPrimaryKey(houseFlow.getWorkerId());
+                Example example=new Example(MemberAddress.class);
+                example.createCriteria().andEqualTo(MemberAddress.HOUSE_ID,houseId);
+                MemberAddress memberAddress=iMasterMemberAddressMapper.selectOneByExample(example);
+                configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlow.getWorkerId(), "0", "", String.format("精算师【%s】审核图纸不合格，房子地址为【%s】，请注意查看。", member.getName(),memberAddress.getAddress()), "");
+            }
+            return ServerResponse.createBySuccessMessage("审核不通过保存成功");
+        }
+
+    }
+
 
     /**
      * 查询商品对应的规格详情，单位信息

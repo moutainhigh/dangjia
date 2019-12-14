@@ -6,6 +6,8 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.data.ActuaryService;
 import io.swagger.annotations.ApiOperation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,8 +23,10 @@ import javax.servlet.http.HttpServletRequest;
 @RestController
 public class ActuaryController implements ActuaryAPI {
 
+    protected static final Logger logger = LoggerFactory.getLogger(ActuaryController.class);
     @Autowired
     private ActuaryService actuaryService;
+
     /**
      * 返回作废的精算列表
      *   budgetOk:
@@ -57,6 +61,26 @@ public class ActuaryController implements ActuaryAPI {
     @ApiMethod
     public ServerResponse saveRecommendedGoods(HttpServletRequest request,String cityId, String houseId,String productStr){
         return actuaryService.saveRecommendedGoods(cityId,houseId,productStr);
+    }
+
+    /**
+     * 精算接口，审核结果类型
+     * @param request
+     * @param cityId 城市ID
+     * @param houseId 房子ID
+     * @param auditResultType 审核结果审核结果（1审核通过，2审核不通过）
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse checkDesignPicture(HttpServletRequest request,String cityId,String houseId,String auditResultType){
+        try{
+            return actuaryService.checkDesignPicture(cityId,houseId,auditResultType);
+        }catch (Exception e){
+            logger.error("审核保存失败",e);
+            return ServerResponse.createByErrorMessage("审核保存失败");
+        }
+
     }
 
     /**

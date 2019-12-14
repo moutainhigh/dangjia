@@ -39,7 +39,29 @@ public interface IHouseMapper extends Mapper<House> {
      */
     List<HouseOrderDetailDTO> getBudgetOrderDetailByHouseId(@Param("houseId") String houseId,@Param("workerTypeId") String workerTypeId);
 
+    /**
+     * 判断当前订单是否为已退款状态
+     * @param houseId
+     * @param workerTypeId
+     * @return
+     */
+    List<HouseOrderDetailDTO> getBudgetOrderNewInfo(@Param("houseId") String houseId,@Param("workerTypeId") String workerTypeId);
+
+    /**
+     * 查询订单是否退货退款
+     * @param cityId
+     * @param workerTypeId
+     * @return
+     */
     List<HouseOrderDetailDTO> selectDesignProductList(@Param("cityId") String cityId, @Param("workerTypeId") String workerTypeId);
+
+    /**
+     * 查询是否有待处理的补差价订单
+     * @param houseId
+     * @param workerTypeId
+     * @return
+     */
+    List<HouseOrderDetailDTO> getBudgetDifferenceOrder(@Param("houseId") String houseId, @Param("workerTypeId") String workerTypeId);
     /***
      * 根据房子装修状态查询所有的房子
      * @param visitState 0待确认开工,1装修中,2休眠中,3已完工
