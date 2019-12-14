@@ -95,4 +95,74 @@
 
     </select>
 
+    <select id="queryAcceptanceTrend" resultType="com.dangjia.acg.dto.supervisor.AcceptanceTrendDTO">
+        select
+        dmr.id as id,
+        CASE state
+                WHEN 2 THEN
+                    '质保验收-通过'
+                WHEN 3 THEN
+                    '质保验收-不通过'
+                ELSE
+                    '无'
+            END state
+         ,
+        IFNULL(create_date,'') as createDate
+        from dj_maintenance_record dmr where dmr.state in (2,3)
+        and dmr.house_id=#{houseId}
+    </select>
+
+    <select id="queryAcceptanceTrendDetail" resultType="com.dangjia.acg.dto.supervisor.AcceptanceTrendDetailDTO">
+       select
+        IFNULL(dm.worker_type,'') as workerType,
+        IFNULL(dm.name,'') as name,
+        IFNULL(dmr.steward_image,'') as stewardImage,
+        IFNULL(dmr.steward_remark ,'')as stewardRemark,
+        IFNULL(dwe.star,'') as star,
+        IFNULL(dwe.content,'') as content
+        From  dj_maintenance_record_responsible_party rrp
+        inner join dj_maintenance_record dmr on dmr.id=rrp.maintenance_record_id inner join
+        dj_worker_evaluate dwe on rrp.responsible_party_type=3 and dmr.house_id=dwe.house_id  and dwe.state=1
+        inner join dj_member dm on dm.id=rrp.responsible_party_id
+        where 1=1 and rrp.maintenance_record_id=#{id}
+    </select>
+
+    <select id="queryDvResponsibility" resultType="com.dangjia.acg.dto.supervisor.DjResponsiblePartyDTO">
+        select
+        rrp.responsible_party_id as responsiblePartyId,
+        rrp.responsible_party_type as responsiblePartyType,
+        CASE rrp.responsible_party_type
+                WHEN 1 THEN
+                    '店铺'
+                WHEN 3 THEN
+                    '工匠'
+                ELSE
+                    '供应商'
+            END responsiblePartyTypeName
+        from dj_maintenance_record_responsible_party rrp
+        inner join dj_maintenance_record dmr on dmr.id=rrp.maintenance_record_id and dmr.house_id=#{houseId}
+    </select>
+
+
+    <select id="queryStoreMaintenance" resultType="com.dangjia.acg.dto.supervisor.StoreMaintenanceDTO">
+        select
+        IFNULL(dm.head,'') as head,
+        IFNULL(dm.name,'') as name,
+        IFNULL(dm.worker_type_id,'') as workerTypeId,
+        CONCAT(IFNULL(rrp.proportion,''),'%') as proportion
+        from dj_maintenance_record_responsible_party rrp
+        inner join dj_member dm  on dm.id=rrp.responsible_party_id
+        where 1=1 and rrp.responsible_party_type=#{responsiblePartyType} and rrp.responsible_party_id=#{responsiblePartyId}
+    </select>
+
+    <select id="queryMemberMaintenance" resultType="com.dangjia.acg.dto.supervisor.MemberMaintenanceDTO">
+        select
+        IFNULL(dbs.system_logo,'') as systemLogo,
+        IFNULL(dbs.storefront_name,'') as storefrontName,
+        IFNULL(dbs.storefront_desc,'') as storefrontDesc,
+        CONCAT(IFNULL(rrp.proportion,''),'%') as proportion
+        from dj_maintenance_record_responsible_party rrp
+        inner join dj_basics_storefront dbs  on dbs.id=rrp.responsible_party_id
+        where 1=1 and rrp.responsible_party_type=#{responsiblePartyType} and rrp.responsible_party_id=#{responsiblePartyId}
+    </select>
 </mapper>

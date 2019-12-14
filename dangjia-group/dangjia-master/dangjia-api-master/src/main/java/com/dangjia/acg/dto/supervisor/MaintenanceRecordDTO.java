@@ -3,6 +3,7 @@ package com.dangjia.acg.dto.supervisor;
 import lombok.Data;
 
 @Data
+
 public class MaintenanceRecordDTO {
 
     private String stewardId;//接单管家id

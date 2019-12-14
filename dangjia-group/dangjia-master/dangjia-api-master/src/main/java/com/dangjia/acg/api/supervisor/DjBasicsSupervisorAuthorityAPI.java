@@ -11,6 +11,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 
+/**
+ * 督导权限配置接口
+ * author:chenyufeng
+ * time:2019.12.11
+ */
+
 @Api(description = "督导权限配置接口")
 @FeignClient("dangjia-service-master")
 public interface DjBasicsSupervisorAuthorityAPI {
@@ -47,13 +53,14 @@ public interface DjBasicsSupervisorAuthorityAPI {
     @PostMapping("web/supervisor/queryDvResponsibility")
     @ApiOperation(value = "查看责任划分", notes = "查看责任划分")
     ServerResponse queryDvResponsibility(@RequestParam("request") HttpServletRequest request,
-                                         @RequestParam("houseId") String houseId);
+                                         @RequestParam("houseId") String houseId, @RequestParam("pageDTO") PageDTO pageDTO);
 
 
     @PostMapping("web/supervisor/queryAcceptanceTrend")
     @ApiOperation(value = "查看验收动态", notes = "查看验收动态")
     ServerResponse queryAcceptanceTrend(@RequestParam("request") HttpServletRequest request,
-                                        @RequestParam("houseId") String houseId);
+                                        @RequestParam("houseId") String houseId,
+                                        @RequestParam("pageDTO") PageDTO pageDTO);
     //工地列表
 
     //工地详情
