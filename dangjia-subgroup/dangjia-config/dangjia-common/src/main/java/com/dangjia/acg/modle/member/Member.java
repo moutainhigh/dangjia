@@ -110,7 +110,7 @@ public class Member extends BaseEntity {
     @Column(name = "worker_type")
     @Desc(value = "工种类型")
     @ApiModelProperty("工种类型：【1设计师，2精算师，3大管家,4拆除，5打孔，6水电工，7防水，8泥工,9木工，10油漆工，11安装 ,12督导】")
-    private Integer workerType;//工种类型1设计师，2精算师，3大管家,4拆除，5打孔，6水电工，7防水，8泥工,9木工，10油漆工，11安装
+    private Integer workerType;//工种类型1设计师，2精算师，3大管家,4拆除，5打孔，6水电工，7防水，8泥工,9木工，10油漆工，11安装 ，12督导
 
 
     @Column(name = "idnumber")
