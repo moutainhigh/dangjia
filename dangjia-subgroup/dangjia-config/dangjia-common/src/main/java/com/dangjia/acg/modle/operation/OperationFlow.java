@@ -10,6 +10,7 @@ import lombok.experimental.FieldNameConstants;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 /**
  * @author Ruking.Cheng
@@ -41,7 +42,7 @@ public class OperationFlow extends BaseEntity {
     @Column(name = "operation_type")
     @Desc(value = "操作类型（自定义）")
     @ApiModelProperty("操作类型（自定义）")
-    private Integer operationType;
+    private String operationType ;
 
     @Column(name = "operation_id")
     @Desc(value = "操作类型对应业务ID")
@@ -70,4 +71,8 @@ public class OperationFlow extends BaseEntity {
     @Desc(value = "操作用户ID")
     @ApiModelProperty("操作用户ID")
     private String userId;
+
+
+    @Transient
+    private String userName;
 }

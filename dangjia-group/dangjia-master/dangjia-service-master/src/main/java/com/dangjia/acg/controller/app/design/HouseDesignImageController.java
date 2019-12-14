@@ -64,8 +64,26 @@ public class HouseDesignImageController implements HouseDesignImageAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse setConstructionPlans(HttpServletRequest request, String userToken, String houseId, String userId, String imageJson) {
-        return designerOperationService.setConstructionPlans(userToken, houseId, userId, imageJson);
+    public ServerResponse setConstructionPlans(HttpServletRequest request, String userToken, String houseId, String userId, String imageJson, String productIds) {
+        return designerOperationService.setConstructionPlans(userToken, houseId, userId, imageJson, productIds);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse getRecommendProduct(HttpServletRequest request, PageDTO pageDTO, String houseId, int type) {
+        return quantityRoomService.getRecommendProduct(pageDTO, houseId, type);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse addRecommendProduct(HttpServletRequest request, String houseId, int type, String productIds) {
+        return quantityRoomService.addRecommendProduct(houseId, type, productIds);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse deleteRecommendProduct(HttpServletRequest request, String rpId) {
+        return quantityRoomService.deleteRecommendProduct(rpId);
     }
 
     @Override
@@ -141,10 +159,8 @@ public class HouseDesignImageController implements HouseDesignImageAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryHouseRemark(HttpServletRequest request,
-                                           PageDTO pageDTO,
-                                           String remarkType,
-                                           String houseId) {
+    public ServerResponse queryHouseRemark(HttpServletRequest request, PageDTO pageDTO,
+                                           String remarkType, String houseId) {
         return designDataService.queryHouseRemark(pageDTO, remarkType, houseId);
     }
 

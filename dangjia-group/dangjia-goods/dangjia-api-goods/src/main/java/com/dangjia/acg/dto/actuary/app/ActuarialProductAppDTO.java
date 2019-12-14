@@ -19,6 +19,8 @@ import java.util.List;
 public class ActuarialProductAppDTO {
 
 
+    @ApiModelProperty("业务ID")
+    private String id;
 
     @ApiModelProperty("货品ID")
     private String goodsId;
@@ -101,10 +103,10 @@ public class ActuarialProductAppDTO {
     private Double convertQuality;
 
     @ApiModelProperty("换算单位")
-    private String  convertUnit;
+    private String convertUnit;
 
     @ApiModelProperty("是否有优惠卷(1：有，0：否)")
-    private Integer  isActivityRedPack=0;
+    private Integer isActivityRedPack = 0;
 
     private String unitId;
 
@@ -113,8 +115,6 @@ public class ActuarialProductAppDTO {
     private boolean flag;
 
     /***********************商品明细相关内容**************************/
-
-
 
 
     @ApiModelProperty("购买限制（0自由购房；1有房无精算；2有房有精算")

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.design.IMasterQuantityRoomProductMapper">
+
+    <select id="getRoomProductList" resultType="com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO">
+        SELECT
+            q.id AS id,
+            p.id AS productId,
+            p.product_name AS productName,
+            pt.id AS productTemplateId,
+            p.image,
+            p.sell_price AS price,
+            p.storefront_id AS storefrontId,
+            s.storefront_name AS storefrontName,
+            s.system_logo AS storefrontIcon,
+            pt.unit_id AS unitId,
+            pt.unit_name AS unitName
+        FROM
+            dj_design_quantity_room_product q
+            INNER JOIN dj_basics_storefront_product p ON q.product_id = p.id
+            INNER JOIN dj_basics_product_template pt ON  p.prod_template_id = pt.id
+            INNER JOIN dj_basics_storefront s ON  p.storefront_id = s.id
+        WHERE
+            q.house_id = #{houseId}
+            AND q.type = #{type}
+            AND q.data_status = 0
+		ORDER BY q.create_date desc
+    </select>
+</mapper>
+
