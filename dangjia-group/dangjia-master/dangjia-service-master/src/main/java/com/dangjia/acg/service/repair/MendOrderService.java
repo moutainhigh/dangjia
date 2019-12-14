@@ -1143,7 +1143,15 @@ public class MendOrderService {
     }
 
     public ServerResponse mendChecking(String houseId, String workerTypeId, Integer type) {
-
+        if (type == 4) {
+            Example example = new Example(MendOrder.class);
+                example.createCriteria().andEqualTo(MendOrder.HOUSE_ID, houseId).andEqualTo(MendOrder.TYPE, 0)
+                        .andEqualTo(MendOrder.STATE, 1);
+            List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
+            if (mendOrderList.size() > 0) {
+                return ServerResponse.createByErrorMessage("存在未支付的补材料，无法退材料" );
+            }
+        }
         if ((type == 1 || type == 3) && !CommonUtil.isEmpty(workerTypeId)) {
             boolean isCheck = false;
             List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.unCheckByWorkerTypeId(houseId, workerTypeId);
