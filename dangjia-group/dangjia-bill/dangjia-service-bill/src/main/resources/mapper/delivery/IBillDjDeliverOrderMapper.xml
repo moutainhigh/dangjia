@@ -890,15 +890,73 @@
         <if test="orderStatus!=null and orderStatus == 2">
             and (ddsd.shipping_state = 8 or ddsd.shipping_state = 2 or ddsd.shipping_state = 5)
         </if>
+        <if test="orderStatus!=null and orderStatus == 3">
+            and ddsd.shipping_state = 10
+        </if>
         <if test="arr != null and arr != ''">
             and ddsd.id in
             <foreach collection="arr" index="index" item="item" open="(" separator="," close=")">
                 #{item}
             </foreach>
         </if>
-
     </select>
 
+
+    <select id="queryAppHairOrderList" resultType="com.dangjia.acg.dto.delivery.DjSplitDeliverOrderDTO">
+        select  IFNULL(dos.id,'') as id,
+        IFNULL(dbs.storefront_name,'') as storefrontName,-- 店铺名称
+        dbs.storefront_logo as StorefrontIcon,
+        dbs.storefront_type as storefrontType,
+        dos.house_id as houseId,
+        IFNULL(dos.create_date,'') as createDate,-- 创建时间
+        IFNULL(dos.number,'') as orderNumber,-- 订单号
+        IFNULL(dos.total_amount,'') as totalAmount,-- 总价格
+        dos.city_id as cityId,
+        dosi.order_split_id as orderSplitId,
+        dosi.image as image,
+        dosi.product_name as productName,
+        dosi.price as price,
+        dosi.num as num
+        from dj_deliver_order_split dos
+        LEFT JOIN dj_deliver_order_split_item dosi on dos.id = dosi.order_split_id
+        LEFT JOIN dj_deliver_split_deliver ddsd on dosi.split_deliver_id = ddsd.id
+        inner join dj_basics_storefront dbs on dbs.id=ddsd.storefront_id
+        where dos.house_id = #{houseId} and dos.data_status = 0 and dos.apply_status = 2
+        <if test="cityId!=null and cityId!=''">
+            and  dos.city_id = #{cityId}
+        </if>
+        and (
+         (dosi.split_deliver_id is null or dosi.split_deliver_id = '')
+         or
+         (dosi.split_deliver_id is not null and ddsd.shipping_state = 0)
+            )
+    </select>
+
+
+    <select id="queryAppHairOrderInFo" resultType="com.dangjia.acg.dto.delivery.DjSplitDeliverOrderDTO">
+        select  IFNULL(dos.id,'') as id,
+        IFNULL(dbs.storefront_name,'') as storefrontName,-- 店铺名称
+        dbs.storefront_logo as StorefrontIcon,
+        dbs.storefront_type as storefrontType,
+        dos.house_id as houseId,
+        IFNULL(dos.create_date,'') as createDate,-- 创建时间
+        IFNULL(dos.number,'') as orderNumber,-- 订单号
+        IFNULL(dos.total_amount,'') as totalAmount,-- 总价格
+        dos.city_id as cityId,
+        dosi.id as dosiId,
+        dosi.order_split_id as orderSplitId,
+        dosi.image as image,
+        dosi.num as num,
+        dosi.is_reservation_deliver as isReservationDeliver,
+        dosi.reservation_deliver_time as reservationDeliverTime,
+        dosi.product_name as productName,
+        dosi.price as price
+        from dj_deliver_order_split dos
+        LEFT JOIN dj_deliver_order_split_item dosi on dos.id = dosi.order_split_id
+        LEFT JOIN dj_deliver_split_deliver ddsd on dosi.split_deliver_id = ddsd.id
+        inner join dj_basics_storefront dbs on dbs.id=ddsd.storefront_id
+        where dosi.order_split_id = #{id}
+    </select>
 
     <select id="queryValueIdArr" resultType="java.lang.String">
         select bpt.value_id_arr as valueIdArr

@@ -37,5 +37,8 @@ public class UserFeedback extends BaseEntity {
     @ApiModelProperty("来源应用（1:业主端，2:工匠端）")
     private Integer appType;
 
-
+    @Column(name = "feedback_id")
+    @Desc(value = "反馈id")
+    @ApiModelProperty("反馈id")
+    private String feedbackId;
 }

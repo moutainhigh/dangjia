@@ -1,4 +1,4 @@
-package com.dangjia.acg.modle.feedback;
+package com.dangjia.acg.modle.reason;
 
 import com.dangjia.acg.common.annotation.Desc;
 import com.dangjia.acg.common.model.BaseEntity;
@@ -16,24 +16,14 @@ import javax.persistence.Table;
  */
 @Data
 @Entity
-@Table(name = "dj_user_feedback_item")
-@ApiModel(description = "用户反馈详情")
+@Table(name = "dj_reason_match_surface")
+@ApiModel(description = "工匠更换原因")
 @FieldNameConstants(prefix = "")
-public class UserFeedbackItem extends BaseEntity {
-    @Column(name = "user_id")
-    @Desc(value = "用户id")
-    @ApiModelProperty("用户id")
-    private String userId;
+public class ReasonMatchSurface extends BaseEntity {
 
     @Column(name = "remark")
     @Desc(value = "备注")
     @ApiModelProperty("备注")
     private String remark;
-
-    @Column(name = "image")
-    @Desc(value = "图片")
-    @ApiModelProperty("图片")
-    private String image;
-
 
 }

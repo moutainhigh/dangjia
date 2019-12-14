@@ -139,6 +139,19 @@ public interface DjDeliverOrderAPI {
                                     @RequestParam("orderStatus") Integer orderStatus,
                                      @RequestParam("idList") String idList);
 
+    @PostMapping("app/order/queryAppHairOrderList")
+    @ApiOperation(value = "查询订单列表（待发货）", notes = "查询订单列表（待发货")
+    ServerResponse queryAppHairOrderList(@RequestParam("userToken") String userToken,
+                                     @RequestParam("pageDTO") PageDTO pageDTO,
+                                     @RequestParam("houseId") String houseId,
+                                     @RequestParam("cityId") String cityId);
+
+    @PostMapping("app/order/queryAppHairOrderInFo")
+    @ApiOperation(value = "查询订单详情（待发货）", notes = "查询订单详情（待发货")
+    ServerResponse queryAppHairOrderInFo(@RequestParam("userToken") String userToken,
+                                         @RequestParam("id") String id);
+
+
     @PostMapping("app/order/updateAppOrderStats")
     @ApiOperation(value = "待收货（材料）详情 确定收货", notes = "待收货（材料）详情确定收货")
     ServerResponse  updateAppOrderStats(@RequestParam("userToken")String userToken,

@@ -15,8 +15,8 @@ public class DjSplitDeliverOrderDTO {
     private String storefrontType;
     private Date createDate;//创建时间
     private String orderNumber;//订单号
-    private String shippingState;//按钮状态 1004 不展示按钮  1待收货   7 待安装
-    private String shippingType;// 发货单订单状态   10-待收货  11-已完成
+    private String shippingState;//按钮状态 1004 不展示按钮  1待收货   7 待安装 10
+    private String shippingType;// 发货单订单状态   10-待收货  11-已完成 12-待发货  13-待评价
     private String totalAmount;//总价格
     private String total;//件数
     List<OrderSplitItem> orderSplitItemlist;
@@ -28,4 +28,12 @@ public class DjSplitDeliverOrderDTO {
     private String orderSplitId;
     private String name;
     private String workerId;
+    private String image;
+    private Double num;
+    private String dosiId;
+    private Integer isReservationDeliver;//是否预约发货(1是，0否）
+    private Date reservationDeliverTime;//预约发货时间
+    private Double price;//商品单价
+    private String valueNameArr;//商品规格
+
 }

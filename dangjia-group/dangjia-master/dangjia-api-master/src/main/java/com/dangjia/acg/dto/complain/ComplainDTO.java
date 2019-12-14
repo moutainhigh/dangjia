@@ -1,5 +1,6 @@
 package com.dangjia.acg.dto.complain;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.util.Date;
@@ -32,4 +33,9 @@ public class ComplainDTO {
     private Object data;//公用产生体
     private String content;//描述
     private String workerId;//描述
+    private String image;//图片
+    private String changeReason;//更换原因
+    private String rejectReason;//驳回原因
+    List<String> images;//图片list
+
 }

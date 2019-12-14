@@ -263,6 +263,7 @@ public class HouseWorkerService {
                 map.put("houseFlowId", houseFlow.getId());
                 map.put("houseWorkerId", worker.getId());
                 map.put("isSubstitution", 2);
+                map.put("houseId", worker.getId());
                 historyWorkerList.add(map);
             }
         }
