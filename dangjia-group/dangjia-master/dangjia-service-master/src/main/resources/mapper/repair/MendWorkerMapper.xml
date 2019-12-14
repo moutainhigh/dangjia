@@ -70,7 +70,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <select id="getMendWorkerPrice" parameterType="java.lang.String"  resultType="java.lang.Double">
         SELECT
-            SUM(m.total_price) AS totalPrice
+            IFNULL(SUM(m.total_price),0) AS totalPrice
         FROM
             dj_repair_mend_order o
         INNER JOIN dj_repair_mend_worker m ON o.id = m.mend_order_id

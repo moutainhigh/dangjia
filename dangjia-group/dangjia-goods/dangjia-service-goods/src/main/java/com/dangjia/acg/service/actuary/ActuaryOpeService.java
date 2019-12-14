@@ -246,7 +246,6 @@ public class ActuaryOpeService {
         try {
             //切换数据源
             House house = houseAPI.getHouseById(houseId);
-            JdbcContextHolder.putDataSource(house.getCityId());
 
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             BudgetDTO budgetDTO = new BudgetDTO();
