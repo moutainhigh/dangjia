@@ -3,6 +3,7 @@ package com.dangjia.acg.service.repair;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.app.deliver.ProductChangeAPI;
+import com.dangjia.acg.api.app.house.HouseAPI;
 import com.dangjia.acg.api.app.member.MemberAPI;
 import com.dangjia.acg.api.data.GetForBudgetAPI;
 import com.dangjia.acg.api.data.TechnologyRecordAPI;
@@ -20,11 +21,13 @@ import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.basics.Goods;
 import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.deliver.ProductChange;
+import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.service.actuary.ActuaryOperationService;
 import com.dangjia.acg.service.data.ForMasterService;
+import com.dangjia.acg.util.JdbcContextHolder;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,6 +66,8 @@ public class FillMaterielService {
     @Autowired
     private ProductChangeAPI productChangeAPI;
 
+    @Autowired
+    private HouseAPI houseAPI;
 
 
     /**
@@ -317,6 +322,9 @@ public class FillMaterielService {
     public ServerResponse repairBudgetMaterial(String workerTypeId, String categoryId, String houseId, String productName, String productType,
                                                PageDTO pageDTO) {
         try {
+            House house = houseAPI.getHouseById(houseId);
+            //跟着工地的 城市切换数据源
+            JdbcContextHolder.putDataSource(house.getCityId());
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             List<BudgetMaterial> budgetMaterialList = budgetMaterialMapper.repairBudgetMaterial(workerTypeId, houseId, categoryId, productName, productType);
