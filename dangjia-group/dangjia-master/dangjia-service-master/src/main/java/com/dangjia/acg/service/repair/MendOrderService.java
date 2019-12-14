@@ -1149,7 +1149,7 @@ public class MendOrderService {
                         .andEqualTo(MendOrder.STATE, 1);
             List<MendOrder> mendOrderList = mendOrderMapper.selectByExample(example);
             if (mendOrderList.size() > 0) {
-                return ServerResponse.createByErrorMessage("存在未支付的补材料，无法退材料" );
+                return ServerResponse.createByErrorMessage("存在未处理的补货单，无法退货" );
             }
         }
         if ((type == 1 || type == 3) && !CommonUtil.isEmpty(workerTypeId)) {
