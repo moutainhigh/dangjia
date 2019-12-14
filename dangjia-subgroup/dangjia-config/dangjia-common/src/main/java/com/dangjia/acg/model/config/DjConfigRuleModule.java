@@ -22,15 +22,12 @@ import java.util.Map;
 public class DjConfigRuleModule extends BaseEntity {
 
     @Column(name = "type")
-    @Desc(value = "规则模块类型： 1=积分规则 2=拿钱规则  3=抢单规则 4=其他规则")
-    @ApiModelProperty("规则模块类型：1=积分规则 2=拿钱规则   3=抢单规则 4=其他规则")
+    @Desc(value = "规则模块类型： 1=积分规则 2=拿钱规则  3=抢单规则 4=其他规则 5=排期配置")
+    @ApiModelProperty("规则模块类型：1=积分规则 2=拿钱规则   3=抢单规则 4=其他规则 5=排期配置")
     private Integer type;
 
     @Column(name = "type_id")
-    @Desc(value = "1=旷工扣积分  2=延期完工扣积分  3=大管家获取积分  4=工匠获取积分   5=放弃（派）单扣分" +
-            "6=月提现次数上限   7=滞留金每单比例   8=滞留金上限  9=工匠拿钱规则  10 = 大管家拿钱规则" +
-            "11=持单上限  12=抢单排队时间  13=新手保护单 " +
-            " 14=积分转化当家贝 15=精算匹配店铺商品  16=搜索结果排序算法  17=管家派单算法")
+    @Desc(value = "种类类型ID(dj_config_rule_type)")
     @ApiModelProperty("种类类型ID")
     private String typeId;
 
