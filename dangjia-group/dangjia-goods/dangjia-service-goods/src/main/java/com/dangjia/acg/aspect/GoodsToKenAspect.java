@@ -1,10 +1,12 @@
 package com.dangjia.acg.aspect;
 
 import com.dangjia.acg.api.RedisClient;
+import com.dangjia.acg.api.app.house.HouseAPI;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.util.JdbcContextHolder;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -30,6 +32,8 @@ public class GoodsToKenAspect {
     @Autowired
     private RedisClient redisClient;
 
+    @Autowired
+    private HouseAPI houseAPI;
     // 配置切入点,该方法无方法体,主要为方便同类中其他方法使用此处配置的切入点
     @Pointcut("execution(* com.*.acg.controller..*(..))")
     public void aspect() {
@@ -49,6 +53,15 @@ public class GoodsToKenAspect {
         }
 
         String cityId = request.getParameter(Constants.CITY_ID);
+
+        //如果获取到了工地ID,则切换至工地所在的城市
+        String houseId = request.getParameter("houseId");
+        if(!CommonUtil.isEmpty(houseId)) {
+            House house = houseAPI.getHouseById(houseId);
+            cityId=house.getCityId();
+        }
+        //跟着工地的 城市切换数据源
+        JdbcContextHolder.putDataSource(cityId);
         //拦截切换数据源，当未传输城市ID时，则默认数据源
         if(!CommonUtil.isEmpty(cityId)){
             JdbcContextHolder.putDataSource(cityId);
