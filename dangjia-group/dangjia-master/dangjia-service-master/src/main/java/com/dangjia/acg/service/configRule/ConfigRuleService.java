@@ -205,7 +205,7 @@ public class ConfigRuleService {
                         map.put(DjConfigRuleItemOne.RANK_ID, configRuleRank.getId());
                         map.put(DjConfigRuleItemOne.RANK_NAME, configRuleRank.getName());
                         map.put(DjConfigRuleItemOne.TYPE_ID, typeId);
-                        map.put(DjConfigRuleItemOne.BATCH_CODE, batchCode);
+                        map.put(DjConfigRuleItemOne.BATCH_CODE, batchCodeTow);
                         map.put(DjConfigRuleItemOne.MODULE_ID, moduleId);
                         for (DjConfigRuleItemOne ruleItemOneDatum : ruleItemOneData) {
                             if (ruleItemOneDatum.getRankId().equals(configRuleRank.getId())) {
@@ -229,7 +229,7 @@ public class ConfigRuleService {
                     }
                     for (WorkerType workerType : workerTypeList) {
                         Map mapworker = new HashMap();
-                        mapworker.put(DjConfigRuleItemOne.BATCH_CODE, batchCode);
+                        mapworker.put(DjConfigRuleItemOne.BATCH_CODE, batchCodeTow);
                         mapworker.put(DjConfigRuleItemOne.MODULE_ID, moduleId);
                         mapworker.put(DjConfigRuleItemOne.RANK_NAME, workerType.getName());
                         mapworker.put(DjConfigRuleItemOne.RANK_ID, workerType.getId());
@@ -256,7 +256,7 @@ public class ConfigRuleService {
                 configRuleItemTwos=new ArrayList<>();
                 for (String key : field.keySet()) {
                     DjConfigRuleItemTwo configRuleItemTwo=new DjConfigRuleItemTwo();
-                    configRuleItemTwo.setBatchCode(batchCode);
+                    configRuleItemTwo.setBatchCode(batchCodeTow);
                     configRuleItemTwo.setFieldCode(key);
                     configRuleItemTwo.setFieldName(field.get(key));
                     configRuleItemTwo.setFieldValue("0");
