@@ -165,7 +165,8 @@ public class WebWithdrawDepositService {
                             "0", "提现结果",
                             DjConstants.PushMessage.WITHDRAW_CASH_SUCCESS, "");
 
-                    if(withdrawDeposit.getRoleType()==4 || 5 == withdrawDeposit.getRoleType()){
+                    logger.info("RoleType==========="+withdrawDeposit.getRoleType());
+                    if(withdrawDeposit.getRoleType()==4 ||withdrawDeposit.getRoleType() ==5 ){
                         //同意供应商/店铺提现
                         setAgreeWithdraw(withdrawDeposit.getRoleType(),
                                 withdrawDeposit.getSourceId(),
