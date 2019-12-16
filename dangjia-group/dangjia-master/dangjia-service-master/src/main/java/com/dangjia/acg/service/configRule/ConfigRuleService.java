@@ -135,7 +135,7 @@ public class ConfigRuleService {
                             paramtype = new String[]{SG005, SG006};
                         }
                         example = new Example(DjConfigRuleType.class);
-                        example.createCriteria().andEqualTo(DjConfigRuleType.SOURCE, 2).andIn(DjConfigRuleType.ID, Arrays.asList(paramtype));
+                        example.createCriteria().andEqualTo(DjConfigRuleType.SOURCE, 3).andIn(DjConfigRuleType.ID, Arrays.asList(paramtype));
                         List<DjConfigRuleType> configRuleTypes = configRuleTypeMapper.selectByExample(example);
                         for (DjConfigRuleType configRuleType : configRuleTypes) {
                             Map map =new HashMap();
