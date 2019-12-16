@@ -198,6 +198,10 @@ public class SupAuthorityService {
     public ServerResponse querySupervisorHostDetailList(HttpServletRequest request, String houseId) {
         try {
             WorkerSiteDetailsDTO workerSiteDetailsDTO = djMaintenanceRecordMapper.querySupervisorHostDetailList(houseId);
+            if(workerSiteDetailsDTO!=null)
+            {
+            //此处需要续写
+            }
             return ServerResponse.createBySuccess("查询成功", workerSiteDetailsDTO);
         } catch (Exception e) {
             logger.error("工地详情异常", e);
