@@ -10,7 +10,8 @@
             IFNULL(CONCAT(h.number,'号'),'*号')) as houseAddress,
             mr.owner_name ownerName,
             mr.owner_mobile ownerMobile,
-            mr.state
+            mr.state,
+            h.id houseId
         FROM
             dj_maintenance_record mr,
             dj_house h
@@ -19,6 +20,9 @@
         <if test="null!=searchKey and ''!=searchKey">
             AND CONCAT(CONCAT_WS(IFNULL(h.residential, '*'),IFNULL(CONCAT(h.building, '栋'),'*栋'),IFNULL(CONCAT(h.unit,
             '单元'),'*单元'),IFNULL(CONCAT(h.number, '号'),'*号')),mr.owner_name,mr.owner_mobile) LIKE CONCAT('%',#{searchKey},'%')
+        </if>
+        <if test="null!=state and ''!=state">
+            AND mr.state=#{state}
         </if>
     </select>
 

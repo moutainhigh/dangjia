@@ -18,7 +18,8 @@ import java.util.List;
 @Repository
 public interface DjMaintenanceRecordMapper extends Mapper<DjMaintenanceRecord> {
 
-    List<DjMaintenanceRecordDTO> queryDjMaintenanceRecordList(@Param("searchKey") String searchKey);
+    List<DjMaintenanceRecordDTO> queryDjMaintenanceRecordList(@Param("searchKey") String searchKey,
+                                                              @Param("state") Integer state);
 
 
     DjMaintenanceRecordDTO queryDjMaintenanceRecordDetail(@Param("id") String id);

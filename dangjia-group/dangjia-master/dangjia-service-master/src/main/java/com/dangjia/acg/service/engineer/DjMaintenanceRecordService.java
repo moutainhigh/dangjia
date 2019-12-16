@@ -54,11 +54,11 @@ public class DjMaintenanceRecordService {
      * @param searchKey
      * @return
      */
-    public ServerResponse queryDjMaintenanceRecordList(PageDTO pageDTO, String searchKey) {
+    public ServerResponse queryDjMaintenanceRecordList(PageDTO pageDTO, String searchKey, Integer state) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<DjMaintenanceRecordDTO> djMaintenanceRecordDTOS =
-                    djMaintenanceRecordMapper.queryDjMaintenanceRecordList(searchKey);
+                    djMaintenanceRecordMapper.queryDjMaintenanceRecordList(searchKey,state);
             djMaintenanceRecordDTOS.forEach(djMaintenanceRecordDTO -> {
                 if (!CommonUtil.isEmpty(djMaintenanceRecordDTO.getOwnerImage())) {
                     djMaintenanceRecordDTO.setOwnerImages(this.getImage(djMaintenanceRecordDTO.getOwnerImage()));
