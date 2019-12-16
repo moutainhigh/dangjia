@@ -45,4 +45,17 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
     }
 
 
+    @Override
+    @ApiMethod
+    public ServerResponse upDateMaintenanceInFo(String supervisorId,
+                                                  Integer stewardSubsidy,
+                                                  String serviceRemark,
+                                                  String userId,
+                                                  String id,
+                                                  Integer handleType) {
+        return djMaintenanceRecordService.upDateMaintenanceInFo(supervisorId,stewardSubsidy
+                ,serviceRemark,userId,id,handleType);
+    }
+
+
 }

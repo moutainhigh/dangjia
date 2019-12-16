@@ -68,7 +68,7 @@ public class DjMaintenanceRecord extends BaseEntity {
     @Column(name = "supervisor_id")
     @Desc(value = "督导id")
     @ApiModelProperty("督导id")
-    private String supervisor_id;
+    private String supervisorId;
 
     @Column(name = "steward_subsidy")
     @Desc(value = "是否需要补贴管家 1:是 2:否")
@@ -134,5 +134,21 @@ public class DjMaintenanceRecord extends BaseEntity {
     @Desc(value = "处理人id")
     @ApiModelProperty("处理人id")
     private String userId;
+
+    @Column(name = "worker_member_id")
+    @Desc(value = "工匠id")
+    @ApiModelProperty("工匠id")
+    private String workerMemberId;
+
+    @Column(name = "worker_create_date")
+    @Desc(value = "工匠接单时间")
+    @ApiModelProperty("工匠接单时间")
+    private String workerCreateDate;
+
+    @Column(name = "worker_image")
+    @Desc(value = "工匠上传图片")
+    @ApiModelProperty("工匠上传图片")
+    private String workerImage;
+
 
 }
