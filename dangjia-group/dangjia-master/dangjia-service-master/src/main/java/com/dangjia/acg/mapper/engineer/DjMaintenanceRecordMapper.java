@@ -36,8 +36,12 @@ public interface DjMaintenanceRecordMapper extends Mapper<DjMaintenanceRecord> {
 
     List<MemberMaintenanceDTO> queryMemberMaintenance(@Param("responsiblePartyType")String responsiblePartyType ,@Param("responsiblePartyId") String responsiblePartyId);
 
-    List<SupSitelistDTO> querySupervisorHostList();
+    List<SupSitelistDTO> querySupervisorHostList(@Param("memberId")String memberId,@Param("keyWord")String keyWord);
 
     WorkerSiteDetailsDTO  querySupervisorHostDetailList(@Param("houseId") String houseId);
+
+    List<RepairHouseListDTO>  queryMaintenanceHostList(@Param("memberId")String memberId,@Param("keyWord")String keyWord);
+
+    MtHostListDetailDTO queryMtHostListDetail(@Param("houseId") String houseId);
 
 }

@@ -2,6 +2,7 @@ package com.dangjia.acg.service.supervisor;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.api.app.member.MemberAPI;
 import com.dangjia.acg.api.data.WorkerTypeAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
@@ -9,9 +10,12 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.supervisor.*;
 import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordMapper;
+import com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper;
 import com.dangjia.acg.mapper.supervisor.DjBasicsSupervisorAuthorityMapper;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.engineer.DjMaintenanceRecord;
+import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
 import com.dangjia.acg.modle.supervisor.DjBasicsSupervisorAuthority;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
@@ -30,12 +34,21 @@ public class SupAuthorityService {
     private static Logger logger = LoggerFactory.getLogger(SupAuthorityService.class);
     @Autowired
     private DjBasicsSupervisorAuthorityMapper djBasicsSupervisorAuthorityMapper ;
+
     @Autowired
     private DjMaintenanceRecordMapper djMaintenanceRecordMapper ;
+
     @Autowired
     private ConfigUtil configUtil;
+
     @Autowired
     private WorkerTypeAPI workerTypeAPI;
+
+    @Autowired
+    private MemberAPI memberAPI;
+
+    @Autowired
+    private IWorkerTypeSafeOrderMapper workerTypeSafeOrderMapper;
     /**
      * 删除已选
      * @param request
@@ -174,10 +187,16 @@ public class SupAuthorityService {
      * @param sortNum
      * @return
      */
-    public ServerResponse querySupervisorHostList(HttpServletRequest request, String sortNum,PageDTO pageDTO) {
+    public ServerResponse querySupervisorHostList(HttpServletRequest request, String sortNum,PageDTO pageDTO, String userToken,String keyWord) {
         try {
+            Object object = memberAPI.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            JSONObject job = (JSONObject)object;
+            Member worker = job.toJavaObject(Member.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<SupSitelistDTO> list= djMaintenanceRecordMapper.querySupervisorHostList();
+            List<SupSitelistDTO> list= djMaintenanceRecordMapper.querySupervisorHostList(worker.getId(),keyWord);
             list.forEach(supSitelistDTO->{
                 String houseId=supSitelistDTO.getHouseId();
             });
@@ -247,14 +266,27 @@ public class SupAuthorityService {
     /**
      *（维修)工地列表
      * @param request
-     * @param houseId
+     * @param pageDTO
+     * @param userToken
+     * @param keyWord
      * @return
      */
-    public ServerResponse queryMaintenanceHostList(HttpServletRequest request, String houseId) {
+    public ServerResponse queryMaintenanceHostList(HttpServletRequest request,PageDTO pageDTO ,String userToken,String keyWord) {
         try {
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            Object object = memberAPI.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            JSONObject job = (JSONObject)object;
+            Member worker = job.toJavaObject(Member.class);
+            List<RepairHouseListDTO> list=djMaintenanceRecordMapper.queryMaintenanceHostList(worker.getId(),keyWord);
+            list.forEach(repairHouseListDTO->{
+                    String houseId=repairHouseListDTO.getHouseId();
 
-
-            return null;
+            });
+            PageInfo pageResult = new PageInfo(list);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             logger.error("增加已选异常", e);
             return ServerResponse.createByErrorMessage("增加已选异常");
@@ -267,9 +299,27 @@ public class SupAuthorityService {
      * @param houseId
      * @return
      */
-    public ServerResponse queryMtHostListDetail(HttpServletRequest request, String houseId) {
+    public ServerResponse queryMtHostListDetail(HttpServletRequest request, String houseId,String userToken) {
         try {
-            return null;
+
+            Object object = memberAPI.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            JSONObject job = (JSONObject)object;
+            Member worker = job.toJavaObject(Member.class);
+            MtHostListDetailDTO  mtHostListDetailDTO =djMaintenanceRecordMapper.queryMtHostListDetail(houseId);
+
+            Example example = new Example(WorkerTypeSafeOrder.class);
+            example.createCriteria()
+                    .andEqualTo(WorkerTypeSafeOrder.HOUSE_ID, houseId)
+                    .andIsNotNull(WorkerTypeSafeOrder.FORCE_TIME)
+                    .andEqualTo(WorkerTypeSafeOrder.DATA_STATUS, 0);
+            List<WorkerTypeSafeOrder> list = workerTypeSafeOrderMapper.selectByExample(example);
+            if (list.size()<=0)
+            mtHostListDetailDTO.setList(null);
+            mtHostListDetailDTO.setList(list);
+            return ServerResponse.createBySuccess("查询成功", mtHostListDetailDTO);
         } catch (Exception e) {
             logger.error("（维保）工地详情异常", e);
             return ServerResponse.createByErrorMessage("（维保）工地详情异常");
