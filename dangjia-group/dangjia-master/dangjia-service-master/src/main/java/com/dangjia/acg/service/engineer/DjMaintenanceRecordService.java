@@ -59,14 +59,6 @@ public class DjMaintenanceRecordService {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<DjMaintenanceRecordDTO> djMaintenanceRecordDTOS =
                     djMaintenanceRecordMapper.queryDjMaintenanceRecordList(searchKey,state);
-            djMaintenanceRecordDTOS.forEach(djMaintenanceRecordDTO -> {
-                if (!CommonUtil.isEmpty(djMaintenanceRecordDTO.getOwnerImage())) {
-                    djMaintenanceRecordDTO.setOwnerImages(this.getImage(djMaintenanceRecordDTO.getOwnerImage()));
-                }
-                if (!CommonUtil.isEmpty(djMaintenanceRecordDTO.getStewardImage())) {
-                    djMaintenanceRecordDTO.setStewardImages(this.getImage(djMaintenanceRecordDTO.getStewardImage()));
-                }
-            });
             if (djMaintenanceRecordDTOS.size() <= 0)
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             PageInfo pageInfo = new PageInfo(djMaintenanceRecordDTOS);
@@ -122,6 +114,8 @@ public class DjMaintenanceRecordService {
                 djMaintenanceRecordResponsiblePartyDTOS.add(djMaintenanceRecordResponsiblePartyDTO);
             });
             djMaintenanceRecordDTOS.setDjMaintenanceRecordResponsiblePartyDTOS(djMaintenanceRecordResponsiblePartyDTOS);
+            djMaintenanceRecordDTOS.setOwnerImages(this.getImage(djMaintenanceRecordDTOS.getOwnerImage()));
+            djMaintenanceRecordDTOS.setStewardImages(this.getImage(djMaintenanceRecordDTOS.getStewardImage()));
             return ServerResponse.createBySuccess("查询成功",djMaintenanceRecordDTOS);
         } catch (Exception e) {
             e.printStackTrace();

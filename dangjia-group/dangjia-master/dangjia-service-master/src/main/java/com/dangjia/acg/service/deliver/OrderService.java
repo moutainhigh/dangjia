@@ -206,7 +206,8 @@ public class OrderService {
         switch (order.getWorkerTypeId()) {
             case "1": {//设计
                 ItemDTO itemDTO = new ItemDTO();
-                itemDTO.setName(house.getStyle());
+//                itemDTO.setName(house.getStyle());
+                itemDTO.setName("当家设计");
                 itemDTO.setImage(address + "icon/shejiF.png");
                 itemDTO.setPrice("¥" + String.format("%.2f", order.getStylePrice().doubleValue()) + "/㎡");
                 itemDTO.setShopCount(house.getSquare().doubleValue());
@@ -260,7 +261,7 @@ public class OrderService {
             House house = houseMapper.selectByPrimaryKey(businessOrder.getHouseId());
             if (house != null) {
                 businessOrderDTO.setHouseName(house.getHouseName());
-                List<OrderDTO> orderDTOList = this.orderDTOList(businessOrder.getNumber(), house.getStyle());
+                List<OrderDTO> orderDTOList = this.orderDTOList(businessOrder.getNumber(), ""/*house.getStyle()*/);
                 businessOrderDTO.setOrderDTOList(orderDTOList);
             }
         }
@@ -329,7 +330,9 @@ public class OrderService {
                 businessOrderDTO.setHouseName(house == null ? "" : house.getHouseName());
             }
             businessOrderDTO.setHouseName(businessOrderDTO.getHouseName() + info);
-            List<OrderDTO> orderDTOList = this.orderDTOList(businessOrder.getNumber(), house == null ? "" : house.getStyle());
+            List<OrderDTO> orderDTOList = this.orderDTOList(businessOrder.getNumber(), ""
+//                    house == null ? "" : house.getStyle()
+            );
             if (orderDTOList.size() > 0) {
                 BigDecimal payPrice = new BigDecimal(0);
                 for (OrderDTO orderDTO : orderDTOList) {
@@ -752,12 +755,12 @@ public class OrderService {
                 orderSplitItem.setOrderItemStr(stringBuilder.toString());
                 orderSplitItemMapper.updateByPrimaryKeySelective(orderSplitItem);
                 //添加增殖类商品
-                example1=new Example(DeliverOrderAddedProduct.class);
-                example1.createCriteria().andEqualTo(DeliverOrderAddedProduct.ANY_ORDER_ID,orderSplitItem.getId())
-                        .andEqualTo(DeliverOrderAddedProduct.DATA_STATUS,0);
+                example1 = new Example(DeliverOrderAddedProduct.class);
+                example1.createCriteria().andEqualTo(DeliverOrderAddedProduct.ANY_ORDER_ID, orderSplitItem.getId())
+                        .andEqualTo(DeliverOrderAddedProduct.DATA_STATUS, 0);
                 List<DeliverOrderAddedProduct> deliverOrderAddedProducts = iMasterDeliverOrderAddedProductMapper.selectByExample(example1);
                 deliverOrderAddedProducts.forEach(deliverOrderAddedProduct -> {
-                    DeliverOrderAddedProduct deliverOrderAddedProduct1=new DeliverOrderAddedProduct();
+                    DeliverOrderAddedProduct deliverOrderAddedProduct1 = new DeliverOrderAddedProduct();
                     deliverOrderAddedProduct1.setAnyOrderId(orderSplitItem.getId());
                     deliverOrderAddedProduct1.setAddedProductId(deliverOrderAddedProduct.getAddedProductId());
                     deliverOrderAddedProduct1.setPrice(deliverOrderAddedProduct.getPrice());
@@ -919,7 +922,7 @@ public class OrderService {
             //获取要货购物车数据
             List<Cart> cartList = cartMapper.cartList(houseId, worker.getWorkerTypeId(), worker.getId());
             List<Map<String, Object>> productList = new ArrayList<>();
-            BigDecimal totalAmount=new BigDecimal(0);//总价
+            BigDecimal totalAmount = new BigDecimal(0);//总价
             for (Cart aCartList : cartList) {
                 Double num = aCartList.getShopCount();
                 String productId = aCartList.getProductId();
@@ -1000,7 +1003,7 @@ public class OrderService {
                     map.put("productId", productId);
                     productList.add(map);
                 }
-                totalAmount=totalAmount.add(BigDecimal.valueOf(aCartList.getPrice()*aCartList.getShopCount()));
+                totalAmount = totalAmount.add(BigDecimal.valueOf(aCartList.getPrice() * aCartList.getShopCount()));
             }
             //更新要货单总价
             orderSplit.setTotalAmount(totalAmount);
@@ -1026,6 +1029,7 @@ public class OrderService {
 
     /**
      * 取消订单
+     *
      * @param userToken
      * @param orderId
      * @return

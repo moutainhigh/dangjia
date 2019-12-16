@@ -30,8 +30,8 @@ public class HouseFlowController implements HouseFlowAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getGrabList( HttpServletRequest request,String userToken, String cityId) {
-        return houseFlowService.getGrabList(  request,userToken, cityId);
+    public ServerResponse getGrabList(HttpServletRequest request, String userToken, String cityId) {
+        return houseFlowService.getGrabList(request, userToken, cityId);
     }
 
     /**
@@ -62,8 +62,8 @@ public class HouseFlowController implements HouseFlowAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse setConfirm(HttpServletRequest request,String userToken, String houseFlowId) {
-        return houseFlowService.setConfirm(request,userToken, houseFlowId);
+    public ServerResponse setConfirm(HttpServletRequest request, String userToken, String houseFlowId) {
+        return houseFlowService.setConfirm(request, userToken, houseFlowId);
     }
 
     @Override
@@ -74,6 +74,7 @@ public class HouseFlowController implements HouseFlowAPI {
 
     /**
      * 工人30分钟自动放弃抢单任务，工人未购买保险或者保险服务剩余天数小于等于60天则自动放弃订单
+     *
      * @return
      */
     @Override
@@ -84,6 +85,7 @@ public class HouseFlowController implements HouseFlowAPI {
 
     /**
      * 工匠自动续保
+     *
      * @return
      */
     @Override
@@ -91,6 +93,7 @@ public class HouseFlowController implements HouseFlowAPI {
     public ServerResponse autoRenewOrder() {
         return houseFlowService.autoRenewOrder();
     }
+
     /**
      * 拒单
      *
@@ -113,8 +116,8 @@ public class HouseFlowController implements HouseFlowAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse setConfirmStart(HttpServletRequest request,String userToken, String houseFlowId) {
-        return houseFlowService.setConfirmStart(request,userToken, houseFlowId);
+    public ServerResponse setConfirmStart(HttpServletRequest request, String userToken, String houseFlowId) {
+        return houseFlowService.setConfirmStart(request, userToken, houseFlowId);
     }
 
     /**

@@ -183,9 +183,7 @@ public class ConfigRuleService {
             if(configRuleModule==null){
                 return ServerResponse.createByErrorMessage("获取配置错误，请检查初始化参数！");
             }
-            if(CommonUtil.isEmpty(batchCode)) {
-                batchCode = CommonUtil.getUniqueId();
-            }
+            String batchCodeTow = CommonUtil.getUniqueId();
             Map<String,String> field= setConfigRuleItemField(configRuleModule,typeId);
             if(configRuleModule.getItemType()==1){
                 List<DjConfigRuleItemOne> ruleItemOneData =new ArrayList<>();
@@ -197,7 +195,7 @@ public class ConfigRuleService {
                         return ServerResponse.createByErrorMessage("获取配置错误，配置参数字段错误！");
                     }
                     for (String key : field.keySet()) {
-                        ruleItemOneData.addAll(configRuleItemOneMapper.getRuleItemOneData(moduleId, typeId, batchCode, field.get(key), key, configRuleRanks.size()));
+                        ruleItemOneData.addAll(configRuleItemOneMapper.getRuleItemOneData(moduleId, typeId, batchCode,batchCodeTow, field.get(key), key, configRuleRanks.size()));
                     }
                     if (ruleItemOneData.size() <= 0) {
                         return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
@@ -224,7 +222,7 @@ public class ConfigRuleService {
                         return ServerResponse.createByErrorMessage("获取配置错误，配置参数字段错误！");
                     }
                     for (String key : field.keySet()) {
-                        ruleItemOneData.addAll(configRuleItemOneMapper.getRuleItemOneWorkerData(moduleId,  batchCode, field.get(key), key, workerTypeList.size()));
+                        ruleItemOneData.addAll(configRuleItemOneMapper.getRuleItemOneWorkerData(moduleId,  batchCode,batchCodeTow, field.get(key), key, workerTypeList.size()));
                     }
                     if (ruleItemOneData.size() <= 0) {
                         return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
@@ -249,7 +247,7 @@ public class ConfigRuleService {
                 Example example=new Example(DjConfigRuleItemTwo.class);
                 example.createCriteria().andEqualTo(DjConfigRuleItemTwo.MODULE_ID,moduleId);
                 example.orderBy(DjConfigRuleItemTwo.CREATE_DATE).desc();
-                PageHelper.startPage(field.size(), 1);
+                PageHelper.startPage(1, field.size());
                 List<DjConfigRuleItemTwo> configRuleItemTwos=configRuleItemTwoMapper.selectByExample(example);
                 if (configRuleItemTwos.size() > 0) {
                     return ServerResponse.createBySuccess("查询成功",configRuleItemTwos);
@@ -281,7 +279,7 @@ public class ConfigRuleService {
                 Example example=new Example(DjConfigRuleItemThree.class);
                 example.createCriteria().andEqualTo(DjConfigRuleItemTwo.MODULE_ID,moduleId);
                 example.orderBy(DjConfigRuleItemThree.CREATE_DATE).desc();
-                PageHelper.startPage(paramtype.length, 1);
+                PageHelper.startPage(1, paramtype.length);
                 List<DjConfigRuleItemThree> configRuleItemThrees=configRuleItemThreeMapper.selectByExample(example);
                 if (configRuleItemThrees.size() ==0) {
 
