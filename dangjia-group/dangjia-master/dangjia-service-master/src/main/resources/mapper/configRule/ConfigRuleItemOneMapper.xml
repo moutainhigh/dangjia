@@ -20,7 +20,7 @@
         FROM
         dj_config_rule_rank r
         LEFT JOIN dj_config_rule_item_one o ON r.id = o.rank_id
-        AND o.module_id=#{moduleId}
+        AND o.module_id=#{moduleId} and o.rule_field_code = #{fieldKey}
         <if test="null!=typeId and ''!=typeId">
             AND o.type_id=#{typeId}
         </if>
@@ -46,7 +46,7 @@
         o.data_status dataStatus
         FROM
         dj_core_worker_type r
-        LEFT JOIN dj_config_rule_item_one o ON r.id = o.rank_id AND o.module_id=#{moduleId}
+        LEFT JOIN dj_config_rule_item_one o ON r.id = o.rank_id AND o.module_id=#{moduleId}  and o.rule_field_code = #{fieldKey}
         <if test="null!=batchCode and ''!=batchCode">
             AND o.batch_code=#{batchCode}
         </if>
