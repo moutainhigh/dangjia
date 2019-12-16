@@ -259,7 +259,12 @@ public class ConfigRuleService {
                     configRuleItemTwo.setBatchCode(batchCodeTow);
                     configRuleItemTwo.setFieldCode(key);
                     configRuleItemTwo.setFieldName(field.get(key));
-                    configRuleItemTwo.setFieldValue("0");
+                    if(PQ101.equals(configRuleModule.getTypeId())||MK005.equals(configRuleModule.getTypeId())){
+                        configRuleItemTwo.setFieldValue("0,0");
+                    }else{
+                        configRuleItemTwo.setFieldValue("0");
+                    }
+
                     configRuleItemTwo.setModuleId(moduleId);
                     configRuleItemTwos.add(configRuleItemTwo);
                 }
