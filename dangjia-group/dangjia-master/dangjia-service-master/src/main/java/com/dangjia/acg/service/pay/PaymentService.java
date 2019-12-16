@@ -575,6 +575,13 @@ public class PaymentService {
 
                 }
             }else{
+                if("1".equals(workerTypeId)){//如果工序ID为设计师，支付完成后，将房子表 的设计类型字段改为远程设计
+                    House house=houseMapper.selectByPrimaryKey(order.getHouseId());
+                    house.setDesignerOk(1);
+                    house.setModifyDate(new Date());
+                    houseMapper.updateByPrimaryKeySelective(house);
+
+                }
                 setHouseFlowInfo(order,workerTypeId,payState,1,new BigDecimal(0),2);
             }
         } catch (Exception e) {
