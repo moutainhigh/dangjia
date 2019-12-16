@@ -13,15 +13,17 @@ public interface IConfigRuleItemOneMapper extends Mapper<DjConfigRuleItemOne> {
     List<DjConfigRuleItemOne> getRuleItemOneData(@Param("moduleId") String moduleId,
                                                  @Param("typeId") String typeId,
                                                  @Param("batchCode") String batchCode,
+                                                 @Param("batchCodeTow") String batchCodeTow,
                                                  @Param("fieldName") String fieldName,
                                                  @Param("fieldKey") String fieldKey,
                                                  @Param("limit") Integer limit);
 
     List<DjConfigRuleItemOne> getRuleItemOneWorkerData(@Param("moduleId") String moduleId,
-                                                 @Param("batchCode") String batchCode,
-                                                 @Param("fieldName") String fieldName,
-                                                 @Param("fieldKey") String fieldKey,
-                                                 @Param("limit") Integer limit);
+                                                       @Param("batchCode") String batchCode,
+                                                       @Param("batchCodeTow") String batchCodeTow,
+                                                       @Param("fieldName") String fieldName,
+                                                       @Param("fieldKey") String fieldKey,
+                                                       @Param("limit") Integer limit);
 
 
 
