@@ -36,15 +36,4 @@
             AND mrrp.id=#{id}
     </select>
 
-
-    <update id="setAmountDeducted">
-        UPDATE dj_maintenance_record_responsible_party mrrp
-        INNER JOIN dj_basics_storefront bs ON mrrp.responsible_party_id = bs.id
-        INNER JOIN dj_maintenance_record mr ON mrrp.maintenance_record_id = mr.id
-        SET bs.retention_money = retention_money - ((mrrp.proportion/100)*mr.since_purchase_amount),
-         mr.state =2
-        WHERE
-	      mr.id =#{id}
-	      AND mrrp.responsible_party_type=2
-    </update>
 </mapper>

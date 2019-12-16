@@ -17,7 +17,4 @@ public interface DjMaintenanceRecordResponsiblePartyMapper extends Mapper<DjMain
 
     DjMaintenanceRecordResponsiblePartyDTO queryDjMaintenanceRecordResponsibleParty(@Param("id") String id,
                                                                                     @Param("responsiblePartyType") Integer responsiblePartyType);
-
-    int setAmountDeducted(@Param("id") String id);
-
 }
