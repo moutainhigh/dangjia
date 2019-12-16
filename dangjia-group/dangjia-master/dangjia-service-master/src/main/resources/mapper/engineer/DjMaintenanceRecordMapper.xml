@@ -17,6 +17,7 @@
             dj_house h
         WHERE
             mr.house_id = h.id
+        AND mr.handle_type=3
         <if test="null!=searchKey and ''!=searchKey">
             AND CONCAT(CONCAT_WS(IFNULL(h.residential, '*'),IFNULL(CONCAT(h.building, '栋'),'*栋'),IFNULL(CONCAT(h.unit,
             '单元'),'*单元'),IFNULL(CONCAT(h.number, '号'),'*号')),mr.owner_name,mr.owner_mobile) LIKE CONCAT('%',#{searchKey},'%')
