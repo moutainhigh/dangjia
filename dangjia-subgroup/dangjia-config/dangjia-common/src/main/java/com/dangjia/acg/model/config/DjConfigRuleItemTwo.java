@@ -10,6 +10,8 @@ import lombok.experimental.FieldNameConstants;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+
 @Data
 @Entity
 @Table(name = "dj_config_rule_item_two")
@@ -31,6 +33,9 @@ public class DjConfigRuleItemTwo extends BaseEntity {
     @Desc(value = "字段值,多个逗号分隔")
     @ApiModelProperty("字段值,多个逗号分隔")
     private String fieldValue;
+
+    @Transient
+    private String[] fieldValues;
 
     @Column(name = "field_code")
     @Desc(value = "字段编号")

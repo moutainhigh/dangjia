@@ -14,6 +14,7 @@ import com.dangjia.acg.model.config.*;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.operation.OperationFlow;
 import com.github.pagehelper.PageHelper;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -250,6 +251,11 @@ public class ConfigRuleService {
                 PageHelper.startPage(1, field.size());
                 List<DjConfigRuleItemTwo> configRuleItemTwos=configRuleItemTwoMapper.selectByExample(example);
                 if (configRuleItemTwos.size() > 0) {
+                    for (DjConfigRuleItemTwo configRuleItemTwo : configRuleItemTwos) {
+                        if(CommonUtil.isEmpty(configRuleItemTwo.getFieldValue())){
+                            configRuleItemTwo.setFieldValues(configRuleItemTwo.getFieldValue().split(","));
+                        }
+                    }
                     return ServerResponse.createBySuccess("查询成功",configRuleItemTwos);
                 }
 
@@ -261,6 +267,7 @@ public class ConfigRuleService {
                     configRuleItemTwo.setFieldName(field.get(key));
                     if(PQ101.equals(configRuleModule.getTypeId())||MK005.equals(configRuleModule.getTypeId())){
                         configRuleItemTwo.setFieldValue("0,0");
+                        configRuleItemTwo.setFieldValues("0,0".split(","));
                     }else{
                         configRuleItemTwo.setFieldValue("0");
                     }
@@ -331,24 +338,51 @@ public class ConfigRuleService {
             String batchCode="";
             if(configRuleModule.getItemType()==1){
                 List<Map> returnData=productArray.toJavaList(Map.class);
-                Example example=new Example(DjConfigRuleRank.class);
-                List<DjConfigRuleRank> configRuleRanks = configRuleRankMapper.selectByExample(example);
-                for (DjConfigRuleRank configRuleRank : configRuleRanks) {
-                    for (Map<String,String> field : returnData) {
-                        if (configRuleRank.getId().equals(field.get(DjConfigRuleItemOne.RANK_ID))) {
-                            Map<String, String> fieldName = setConfigRuleItemField(configRuleModule, field.get(DjConfigRuleItemOne.TYPE_ID));
-                            for (String key : field.keySet()) {
-                                if (!CommonUtil.isEmpty(fieldName.get(key))) {
-                                    DjConfigRuleItemOne configRuleItemOne = new DjConfigRuleItemOne();
-                                    configRuleItemOne.setBatchCode(field.get(DjConfigRuleItemOne.BATCH_CODE));
-                                    configRuleItemOne.setModuleId(CommonUtil.isEmpty(moduleId) ? field.get(DjConfigRuleItemOne.MODULE_ID) : moduleId);
-                                    configRuleItemOne.setRankId(configRuleRank.getId());
-                                    configRuleItemOne.setTypeId(field.get(DjConfigRuleItemOne.TYPE_ID));
-                                    configRuleItemOne.setRuleFieldCode(key);
-                                    configRuleItemOne.setRuleFieldName(fieldName.get(key));
-                                    configRuleItemOne.setRuleFieldValue(field.get(key));
-                                    configRuleItemOneMapper.insert(configRuleItemOne);
-                                    batchCode=configRuleItemOne.getBatchCode();
+                if(configRuleModule.getType()!=5) {
+                    Example example = new Example(DjConfigRuleRank.class);
+                    List<DjConfigRuleRank> configRuleRanks = configRuleRankMapper.selectByExample(example);
+                    for (DjConfigRuleRank configRuleRank : configRuleRanks) {
+                        for (Map<String, String> field : returnData) {
+                            if (configRuleRank.getId().equals(field.get(DjConfigRuleItemOne.RANK_ID))) {
+                                Map<String, String> fieldName = setConfigRuleItemField(configRuleModule, field.get(DjConfigRuleItemOne.TYPE_ID));
+                                for (String key : field.keySet()) {
+                                    if (!CommonUtil.isEmpty(fieldName.get(key))) {
+                                        DjConfigRuleItemOne configRuleItemOne = new DjConfigRuleItemOne();
+                                        configRuleItemOne.setBatchCode(field.get(DjConfigRuleItemOne.BATCH_CODE));
+                                        configRuleItemOne.setModuleId(CommonUtil.isEmpty(moduleId) ? field.get(DjConfigRuleItemOne.MODULE_ID) : moduleId);
+                                        configRuleItemOne.setRankId(configRuleRank.getId());
+                                        configRuleItemOne.setTypeId(field.get(DjConfigRuleItemOne.TYPE_ID));
+                                        configRuleItemOne.setRuleFieldCode(key);
+                                        configRuleItemOne.setRuleFieldName(fieldName.get(key));
+                                        configRuleItemOne.setRuleFieldValue(field.get(key));
+                                        configRuleItemOneMapper.insert(configRuleItemOne);
+                                        batchCode = configRuleItemOne.getBatchCode();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }else{
+                    Example example = new Example(WorkerType.class);
+                    example.createCriteria().andGreaterThan(WorkerType.TYPE ,3).andNotEqualTo(WorkerType.TYPE ,7);
+                    List<WorkerType> workerTypeList = workerTypeMapper.selectByExample(example);
+                    for (WorkerType workerType : workerTypeList) {
+                        for (Map<String, String> field : returnData) {
+                            if (workerType.getId().equals(field.get(DjConfigRuleItemOne.RANK_ID))) {
+                                Map<String, String> fieldName = setConfigRuleItemField(configRuleModule, field.get(DjConfigRuleItemOne.TYPE_ID));
+                                for (String key : field.keySet()) {
+                                    if (!CommonUtil.isEmpty(fieldName.get(key))) {
+                                        DjConfigRuleItemOne configRuleItemOne = new DjConfigRuleItemOne();
+                                        configRuleItemOne.setBatchCode(field.get(DjConfigRuleItemOne.BATCH_CODE));
+                                        configRuleItemOne.setModuleId(CommonUtil.isEmpty(moduleId) ? field.get(DjConfigRuleItemOne.MODULE_ID) : moduleId);
+                                        configRuleItemOne.setRankId(workerType.getId());
+                                        configRuleItemOne.setTypeId(field.get(DjConfigRuleItemOne.TYPE_ID));
+                                        configRuleItemOne.setRuleFieldCode(key);
+                                        configRuleItemOne.setRuleFieldName(fieldName.get(key));
+                                        configRuleItemOne.setRuleFieldValue(field.get(key));
+                                        configRuleItemOneMapper.insert(configRuleItemOne);
+                                        batchCode = configRuleItemOne.getBatchCode();
+                                    }
                                 }
                             }
                         }
@@ -357,13 +391,17 @@ public class ConfigRuleService {
             }
             if(configRuleModule.getItemType()==2){
                 List<Map> returnData=productArray.toJavaList(Map.class);
-                for (Map<String,String> field : returnData) {
+                for (Map<String,Object> field : returnData) {
                     DjConfigRuleItemTwo configRuleItemTwo = new DjConfigRuleItemTwo();
-                    configRuleItemTwo.setBatchCode(field.get(DjConfigRuleItemTwo.BATCH_CODE));
-                    configRuleItemTwo.setFieldCode(field.get(DjConfigRuleItemTwo.FIELD_CODE));
-                    configRuleItemTwo.setFieldName(field.get(DjConfigRuleItemTwo.FIELD_NAME));
-                    configRuleItemTwo.setFieldValue(field.get(DjConfigRuleItemTwo.FIELD_VALUE));
-                    configRuleItemTwo.setModuleId(CommonUtil.isEmpty(moduleId) ? field.get(DjConfigRuleItemTwo.MODULE_ID) : moduleId);
+                    configRuleItemTwo.setBatchCode((String)field.get(DjConfigRuleItemTwo.BATCH_CODE));
+                    configRuleItemTwo.setFieldCode((String)field.get(DjConfigRuleItemTwo.FIELD_CODE));
+                    configRuleItemTwo.setFieldName((String)field.get(DjConfigRuleItemTwo.FIELD_NAME));
+                    String fieldValue=(String)field.get(DjConfigRuleItemTwo.FIELD_VALUE);
+                    if(CommonUtil.isEmpty(fieldValue)){
+                        fieldValue= StringUtils.join((String[])field.get(DjConfigRuleItemTwo.FIELD_VALUES),',');
+                    }
+                    configRuleItemTwo.setFieldValue(fieldValue);
+                    configRuleItemTwo.setModuleId(CommonUtil.isEmpty(moduleId) ? (String)field.get(DjConfigRuleItemTwo.MODULE_ID) : moduleId);
                     configRuleItemTwoMapper.insert(configRuleItemTwo);
                     batchCode=configRuleItemTwo.getBatchCode();
                 }
