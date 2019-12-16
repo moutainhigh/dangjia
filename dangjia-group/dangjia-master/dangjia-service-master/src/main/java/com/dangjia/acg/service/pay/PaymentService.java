@@ -1868,6 +1868,7 @@ public class PaymentService {
                 accountFlowRecord.setState(2);
                 accountFlowRecord.setDefinedAccountId(djSupplierPayOrder.getSupplierId());
                 accountFlowRecord.setCreateBy(djSupplierPayOrder.getUserId());
+                accountFlowRecord.setHouseOrderId(djSupplierPayOrder.getId());
                 if (djSupplierPayOrder.getState() == 1 && djSupplierPayOrder.getSourceType() == 1) {
                     DjSupplier djSupplier = iMaterSupplierMapper.selectByPrimaryKey(djSupplierPayOrder.getSupplierId());
                     accountFlowRecord.setAmountBeforeMoney(djSupplier.getTotalAccount());//入账前金额

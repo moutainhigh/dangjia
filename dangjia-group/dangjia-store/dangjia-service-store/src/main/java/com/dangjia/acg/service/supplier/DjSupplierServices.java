@@ -497,6 +497,7 @@ public class DjSupplierServices {
             djSupplierMapper.updateByPrimaryKeySelective(djSupplier);
             //生成流水
             accountFlowRecord.setState(1);
+            accountFlowRecord.setHouseOrderId(withdrawDeposit.getId());
             accountFlowRecord.setDefinedAccountId(djSupplier.getId());
             accountFlowRecord.setCreateBy(userId);
             accountFlowRecord.setFlowType("2");
