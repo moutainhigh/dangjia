@@ -32,7 +32,7 @@ public class DjMaintenanceRecordDTO {
     private String stewardId;//接单管家id
     private String stewardName;//接单管家名称
     private Date stewardProcessingTime;//管家处理时间
-    private String stewardOrderTime;//管家接单时间
+    private Date stewardOrderTime;//管家接单时间
     private String stewardMobile;//管家电话
     private List<DjMaintenanceRecordResponsiblePartyDTO> djMaintenanceRecordResponsiblePartyDTOS;//维保责任方
     private List<DjMaintenanceRecordProductDTO> djMaintenanceRecordProductDTOS;//维保商品列表

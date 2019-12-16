@@ -34,8 +34,8 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse setDjMaintenanceRecord(String id,Integer state) {
-        return djMaintenanceRecordService.setDjMaintenanceRecord(id,state);
+    public ServerResponse setDjMaintenanceRecord(String id,Integer state,String userId) {
+        return djMaintenanceRecordService.setDjMaintenanceRecord(id,state,userId);
     }
 
     @Override

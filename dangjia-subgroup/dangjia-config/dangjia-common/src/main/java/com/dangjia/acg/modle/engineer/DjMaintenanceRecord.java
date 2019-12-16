@@ -116,8 +116,8 @@ public class DjMaintenanceRecord extends BaseEntity {
     private String stewardRemark;
 
     @Column(name = "state")
-    @Desc(value = "状态 1:待审核 2:已审核")
-    @ApiModelProperty("状态 1:待审核 2:已审核")
+    @Desc(value = "状态 1:待审核 2:已通过 3:已拒绝")
+    @ApiModelProperty("状态 1:待审核 2:已通过 3:已拒绝")
     private Integer state;
 
     @Column(name = "complain_type")
