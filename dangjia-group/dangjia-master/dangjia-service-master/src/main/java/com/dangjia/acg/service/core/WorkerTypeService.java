@@ -30,7 +30,7 @@ public class WorkerTypeService {
     public ServerResponse unfinishedFlow(String houseId) {
         try {
             List<WorkerType> workerTypeList = workerTypeMapper.unfinishedFlow(houseId);
-            if(workerTypeList.size()==0){
+            if (workerTypeList.size() == 0) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "无相关记录");
             }
             return ServerResponse.createBySuccess("查询成功", workerTypeList);
@@ -53,17 +53,18 @@ public class WorkerTypeService {
     public ServerResponse getWorkerTypeList(Integer type) {
         Example example = new Example(WorkerType.class);
         Example.Criteria criteria = example.createCriteria();
-        //不包含数据
-        Map<String, String> notParamMap = new HashMap<>();
-        if (type != null && type == 0) {
-            notParamMap.put(WorkerType.TYPE, "2,7");
-        } else if (type != null && type == 1) {
-            notParamMap.put(WorkerType.TYPE, "1,2,7");
-        } else if (type != null && type == 2) {
-            notParamMap.put(WorkerType.TYPE, "7");
-        }
-        if (type!=null&& !CommonUtil.isEmpty(type)) {
-            criteria.andCondition("type not in ("+notParamMap.get(WorkerType.TYPE)+") ");
+        if (type != null) {
+            switch (type) {
+                case 0:
+                    criteria.andCondition("type not in (2,7) ");
+                    break;
+                case 1:
+                    criteria.andCondition("type not in (1,2,7)");
+                    break;
+                case 2:
+                    criteria.andCondition("type not in (7)");
+                    break;
+            }
         }
         criteria.andNotEqualTo(WorkerType.STATE, 2);
         example.orderBy(WorkerType.SORT).asc();
