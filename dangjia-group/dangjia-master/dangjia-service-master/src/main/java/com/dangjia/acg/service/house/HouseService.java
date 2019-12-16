@@ -547,7 +547,7 @@ public class HouseService {
                     houseChoiceCase.setHouseId(srcHouse.getId());
                     houseChoiceCase.setMoney(srcHouse.getMoney());
                     houseChoiceCase.setTitle(srcHouse.getNoNumberHouseName());
-                    houseChoiceCase.setLabel(srcHouse.getStyle());
+//                    houseChoiceCase.setLabel(srcHouse.getStyle());
                     houseChoiceCase.setSource("房源来自当家装修精选推荐");
                     houseChoiceCaseService.addHouseChoiceCase(houseChoiceCase);
                 } else {
@@ -610,8 +610,8 @@ public class HouseService {
         house.setNumber(houseDTO.getNumber());
         house.setSquare(new BigDecimal(houseDTO.getSquare()));
         house.setReferHouseId(houseDTO.getReferHouseId());
-        house.setStyle(houseDTO.getStyle());
-        house.setStyleId(houseDTO.getStyleId());
+//        house.setStyle(houseDTO.getStyle());
+//        house.setStyleId(houseDTO.getStyleId());
         house.setHouseType(houseDTO.getHouseType());
         house.setDrawings(houseDTO.getDrawings());
         house.setDecorationType(houseDTO.getDecorationType());

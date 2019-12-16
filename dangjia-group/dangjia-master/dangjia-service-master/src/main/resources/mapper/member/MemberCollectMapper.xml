@@ -14,7 +14,6 @@
         h.task_number as taskNumber,
         h.square,
         h.number,
-        h.style,
         h.designer_ok as designerOk,
         h.budget_ok as budgetOk,
         h.image,

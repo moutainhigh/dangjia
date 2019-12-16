@@ -689,15 +689,13 @@ public class BudgetWorkerService {
                 blr.setListCost(new BigDecimal(clf));
                 cailist.add(blr);
             }
-
             List<BudgetListResult> expectList = new ArrayList<>();//固定预计费list
             BudgetListResult blr1 = new BudgetListResult();//固定预计费
             BudgetListResult blr2 = new BudgetListResult();
             BudgetListResult blr3 = new BudgetListResult();
-
-            HouseStyleType houseStyleType = getForBudgetAPI.getStyleById(house.getStyleId());
-            if (houseStyleType != null && houseStyleType.getPrice() != null) {
-                blr1.setListCost(house.getSquare().multiply(houseStyleType.getPrice()));
+            HouseFlow houseFlow1 = houseFlowAPI.getHouseFlowByHidAndWty(houseId, 2);
+            if (houseFlow1 != null && houseFlow1.getWorkPrice() != null) {
+                blr1.setListCost(houseFlow1.getWorkPrice());
             } else {
                 blr1.setListCost(new BigDecimal(0));
             }
@@ -724,7 +722,7 @@ public class BudgetWorkerService {
             budgetResult.setExpectList(expectList);//固定预计费
             budgetResult.setBigList(biglist);//人工list
             budgetResult.setCaiList(cailist);//材料list
-            /****************************总项***************************/
+            /* ***************************总项***************************/
             budgetResult.setCost(budgetResult.getMaterialBudget() + budgetResult.getWorkerBudget());//总价
             return ServerResponse.createBySuccess("查询估价成功", budgetResult);
 

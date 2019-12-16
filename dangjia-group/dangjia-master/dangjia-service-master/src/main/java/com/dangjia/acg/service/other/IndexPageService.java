@@ -349,10 +349,10 @@ public class IndexPageService {
                 liangArr = house.getLiangDian().split(",");
             }
             List<String> dianList = new ArrayList<>();
-            if (!CommonUtil.isEmpty(house.getStyle())) {
-                dianList.add(house.getStyle());
-
-            }
+//            if (!CommonUtil.isEmpty(house.getStyle())) {
+//                dianList.add(house.getStyle());
+//
+//            }
             if (!CommonUtil.isEmpty(house.getLiangDian())) {
                 Collections.addAll(dianList, liangArr);
             }
@@ -397,10 +397,9 @@ public class IndexPageService {
                 liangArr = house.getLiangDian().split(",");
             }
             List<String> dianList = new ArrayList<>();
-            if (!CommonUtil.isEmpty(house.getStyle())) {
-                dianList.add(house.getStyle());
-
-            }
+//            if (!CommonUtil.isEmpty(house.getStyle())) {
+//                dianList.add(house.getStyle());
+//            }
             if (!CommonUtil.isEmpty(house.getLiangDian())) {
                 Collections.addAll(dianList, liangArr);
             }

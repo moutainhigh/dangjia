@@ -121,38 +121,37 @@ public class WebWithdrawDepositService {
                     if (StringUtils.isNoneBlank(withdrawDeposit.getMemo()))
                         srcWithdrawDeposit.setMemo(withdrawDeposit.getMemo());
                     Member worker = iMemberMapper.selectByPrimaryKey(srcWithdrawDeposit.getWorkerId());
-                    BigDecimal money = srcWithdrawDeposit.getMoney();
-                    BigDecimal haveMoney = worker.getHaveMoney().add(money);
-                    BigDecimal surplusMoney = worker.getSurplusMoney().add(money);
-                    //记录流水
-                    WorkerDetail workerDetail = new WorkerDetail();
-                    workerDetail.setName("提现驳回");
-                    workerDetail.setWorkerId(worker.getId());
-                    workerDetail.setWorkerName(worker.getName());
-                    workerDetail.setMoney(money);
-                    workerDetail.setDefinedName("提现驳回到余额");
-                    workerDetail.setState(8);//8提现驳回到余额
-                    workerDetail.setWalletMoney(surplusMoney);
-                    iWorkerDetailMapper.insert(workerDetail);
-                    //把钱 转到 余额上面
-                    worker.setHaveMoney(haveMoney);//更新已有钱
-                    worker.setSurplusMoney(surplusMoney);
-                    worker.setModifyDate(new Date());
-                    iMemberMapper.updateByPrimaryKeySelective(worker);
-                    //提现失败推送
-                    configMessageService.addConfigMessage(null, appType,
-                            withdrawDeposit.getWorkerId(),
-                            "0", "提现结果",
-                            DjConstants.PushMessage.WITHDRAW_CASH_ERROR, "");
-
+                    if(worker!=null) {
+                        BigDecimal money = srcWithdrawDeposit.getMoney();
+                        BigDecimal haveMoney = worker.getHaveMoney().add(money);
+                        BigDecimal surplusMoney = worker.getSurplusMoney().add(money);
+                        //记录流水
+                        WorkerDetail workerDetail = new WorkerDetail();
+                        workerDetail.setName("提现驳回");
+                        workerDetail.setWorkerId(worker.getId());
+                        workerDetail.setWorkerName(worker.getName());
+                        workerDetail.setMoney(money);
+                        workerDetail.setDefinedName("提现驳回到余额");
+                        workerDetail.setState(8);//8提现驳回到余额
+                        workerDetail.setWalletMoney(surplusMoney);
+                        iWorkerDetailMapper.insert(workerDetail);
+                        //把钱 转到 余额上面
+                        worker.setHaveMoney(haveMoney);//更新已有钱
+                        worker.setSurplusMoney(surplusMoney);
+                        worker.setModifyDate(new Date());
+                        iMemberMapper.updateByPrimaryKeySelective(worker);
+                        //提现失败推送
+                        configMessageService.addConfigMessage(null, appType,
+                                withdrawDeposit.getWorkerId(),
+                                "0", "提现结果",
+                                DjConstants.PushMessage.WITHDRAW_CASH_ERROR, "");
+                    }
                     if(srcWithdrawDeposit.getRoleType()==4 || srcWithdrawDeposit.getRoleType()==5){
                         //拒绝供应商/店铺提现
                         setRefusedWithdraw(srcWithdrawDeposit.getRoleType(),
                                 srcWithdrawDeposit.getSourceId(),
                                 srcWithdrawDeposit.getMoney());
                     }
-
-
                 }
                 if (withdrawDeposit.getState() == 1) {//1同意
                     srcWithdrawDeposit.setState(1);
