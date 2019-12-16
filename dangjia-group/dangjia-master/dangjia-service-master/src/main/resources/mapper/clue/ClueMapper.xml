@@ -464,7 +464,6 @@
             h.city_name as cityName,
             h.residential as villageName,
             h.build_square as buildSquare,
-            h.style as style,
             h.square as square,
             h.decoration_type as decorationType,
             h.residential as residential,

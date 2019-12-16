@@ -227,10 +227,12 @@ public class HouseFlowService {
                     allgrabBean.setHouseMember("业主 " + (mem.getNickName() == null ? mem.getName() : mem.getNickName()));//业主名称
                     allgrabBean.setWorkertotal("¥0");//工钱
                     double totalPrice = 0;
-                    if (houseFlow.getWorkerType() == 1 && !CommonUtil.isEmpty(house.getStyleId())) {//设计师
-                        HouseStyleType houseStyleType = houseStyleTypeMapper.selectByPrimaryKey(house.getStyleId());
-                        BigDecimal workPrice = house.getSquare().multiply(houseStyleType.getPrice());//设计工钱
-                        allgrabBean.setWorkertotal("¥" + String.format("%.2f", workPrice.doubleValue()));//工钱
+                    if (houseFlow.getWorkerType() == 1
+//                            && !CommonUtil.isEmpty(house.getStyleId())
+                    ) {//设计师
+//                        HouseStyleType houseStyleType = houseStyleTypeMapper.selectByPrimaryKey(house.getStyleId());
+//                        BigDecimal workPrice = house.getSquare().multiply(houseStyleType.getPrice());//设计工钱
+                        allgrabBean.setWorkertotal("¥" + String.format("%.2f", houseFlow.getWorkPrice().doubleValue()));//工钱
                     } else if (houseFlow.getWorkerType() == 2) {
                         allgrabBean.setWorkertotal("¥" + String.format("%.2f", houseFlow.getWorkPrice().doubleValue()));
                     } else {
