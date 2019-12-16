@@ -26,7 +26,20 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		image,
 		data_status as dataStatus,
 		create_date as createDate,
-		modify_date as modifyDate
+		modify_date as modifyDate,
+		storefont_id as storefontId,
+		activity_red_pack_id as activityRedPackId,
+		discount_price as discountPrice,
+		actual_payment_price as actualPaymentPrice,
+		stevedorage_cost as stevedorageCost,
+		transportation_cost as transportationCost,
+		return_count as returnCount,
+		receive_count as receiveCount,
+		is_reservation_deliver as isReservationDeliver,
+		reservation_deliver_time as reservationDeliverTime,
+		order_status as orderStatus,
+		worker_type_id as workerTypeId,
+		cancellation_time as cancellationTime
 	</sql>
 	<select id="queryShopGoods" resultType="com.dangjia.acg.dto.actuary.ShopGoodsDTO">
 	SELECT

@@ -255,7 +255,7 @@ public class CraftsmanConstructionService {
         //Map<String, Object> dataMap = HouseUtil.getBudgetDatas(house);
         // bean.setDataList((List<Map<String, Object>>) dataMap.get("dataList"));
         //查询精算师的订单数据
-        List<HouseOrderDetailDTO> houseOrderDetailDTOList = houseMapper.getBudgetOrderNewInfo(house.getId(), "2");
+        List<HouseOrderDetailDTO> houseOrderDetailDTOList = houseMapper.getBudgetOrderDetailByHouseId(house.getId(), "2");
         bean.setDataList(getBudgetDataList(houseOrderDetailDTOList, house, 2));//查询已购买的精算师的商品
         List<ButtonListBean> buttonList = showActuaryButton(house.getId());//按钮显示
 //        if (house.getVisitState() == 1 && house.getBudgetOk() != 0 && house.getBudgetOk() != 5 && house.getBudgetOk() != 3) {

@@ -164,5 +164,5 @@ public class OrderItem extends BaseEntity {
 	@Column(name = "cancellation_time")
 	@Desc(value = "订单取消时间")
 	@ApiModelProperty("订单取消时间")
-	private Date CancellationTime;//修改人
+	private Date cancellationTime;//修改人
 }

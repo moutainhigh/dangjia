@@ -225,7 +225,7 @@
         WHERE house_id=#{houseId}
     </select>
 
-    <!-- 查询当前房子的订单详情-->
+    <!-- 查询当前房子的订单详情(包含增值商品信息的查询)-->
     <select id="getBudgetOrderDetailByHouseId" resultType="com.dangjia.acg.dto.house.HouseOrderDetailDTO">
         SELECT
             t.id orderId,
@@ -242,14 +242,48 @@
             dj_deliver_order t,
             dj_deliver_order_item t1,
             dj_basics_storefront_product t2
+            <if test="workerTypeId!=null and workerTypeId!=''">
+                ,dj_pay_business_order t3
+            </if>
         WHERE
             t.id = t1.order_id
         AND t1.product_id = t2.id
         AND t.house_id = #{houseId}
         <if test="workerTypeId!=null and workerTypeId!=''">
             AND t1.worker_type_id =#{workerTypeId}
+            and t.business_order_number=t3.number
+            and t3.state = 3
         </if>
-
+        UNION ALL
+        SELECT
+        t.id orderId,
+        t1.id orderItemId,
+        t2.image image,
+        t3.product_name productName,
+        t3.price,
+        IFNULL(t3.price*t1.shop_count,0) totalPrice,
+        t1.shop_count shopCount,
+        t2.prod_template_id productTemplateId,
+        t3.added_product_id productId,
+        t1.worker_type_id workerTypeId
+        FROM
+        dj_deliver_order t,
+        dj_deliver_order_item t1,
+        dj_basics_storefront_product t2,
+        dj_deliver_order_added_product t3
+        <if test="workerTypeId!=null and workerTypeId!=''">
+            ,dj_pay_business_order t4
+        </if>
+        WHERE
+        t.id = t1.order_id
+        AND t3.added_product_id= t2.id
+        and t1.id=t3.any_order_id
+        AND t.house_id = #{houseId}
+        <if test="workerTypeId!=null and workerTypeId!=''">
+            AND t1.worker_type_id =#{workerTypeId}
+            and t.business_order_number=t4.number
+            and t4.state = 3
+        </if>
     </select>
 
     <select id="getBudgetOrderNewInfo" resultType="com.dangjia.acg.dto.house.HouseOrderDetailDTO">
