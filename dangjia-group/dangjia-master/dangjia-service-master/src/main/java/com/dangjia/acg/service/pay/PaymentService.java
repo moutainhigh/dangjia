@@ -87,6 +87,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
@@ -208,6 +209,11 @@ public class PaymentService {
     private IMasterStorefrontProductMapper iMasterStorefrontProductMapper;
     @Autowired
     private IMasterAccountFlowRecordMapper iMasterAccountFlowRecordMapper;
+
+
+    @Value("${spring.profiles.active}")
+    private String active;
+
     private Logger logger = LoggerFactory.getLogger(PaymentService.class);
 
     @Transactional(rollbackFor = Exception.class)
@@ -329,6 +335,10 @@ public class PaymentService {
                 return ServerResponse.createByErrorMessage("支付订单不存在");
             }
             PayOrder payOrder = payOrderList.get(0);
+            if(active!=null&&(active.equals("dev"))) {
+                //开发回调
+                setServersSuccess(payOrder.getId());
+            }
             if (payOrder.getState() == 2) {//已支付
                 returnMap.put("name", "当家装修担保平台");
                 returnMap.put("businessOrderNumber", businessOrderNumber);
@@ -362,8 +372,10 @@ public class PaymentService {
                 return ServerResponse.createByErrorMessage("支付订单不存在");
             }
             PayOrder payOrder = payOrderList.get(0);
-            //开发回调
-            setServersSuccess(payOrder.getId());
+            if(active!=null&&(active.equals("dev"))) {
+                //开发回调
+                setServersSuccess(payOrder.getId());
+            }
             if (payOrder.getState() == 2) {//已支付
                 returnMap.put("name", "当家装修担保平台");
                 returnMap.put("businessOrderNumber", businessOrderNumber);
