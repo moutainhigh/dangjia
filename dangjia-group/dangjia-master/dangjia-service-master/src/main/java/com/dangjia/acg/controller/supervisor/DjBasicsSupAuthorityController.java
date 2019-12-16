@@ -61,6 +61,18 @@ public class DjBasicsSupAuthorityController implements DjBasicsSupervisorAuthori
 
     @Override
     @ApiMethod
+    public ServerResponse querySupervisorHostList(HttpServletRequest request, String sortNum,PageDTO pageDTO) {
+        return supAuthorityService.querySupervisorHostList(request,sortNum,pageDTO);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse querySupervisorHostDetailList(HttpServletRequest request, String houseId) {
+        return supAuthorityService.querySupervisorHostDetailList(request,houseId);
+    }
+
+    @Override
+    @ApiMethod
     public ServerResponse queryMaintenanceHostList(HttpServletRequest request, String houseId) {
         return supAuthorityService.queryMaintenanceHostList(request,houseId);
     }
