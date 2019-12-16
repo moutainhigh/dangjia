@@ -15,12 +15,14 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
+import com.dangjia.acg.common.util.MathUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.activity.ActivityRedPackRecordDTO;
 import com.dangjia.acg.dto.actuary.BudgetLabelDTO;
 import com.dangjia.acg.dto.actuary.BudgetLabelGoodsDTO;
 import com.dangjia.acg.dto.actuary.ShopGoodsDTO;
 import com.dangjia.acg.dto.basics.ProductDTO;
+import com.dangjia.acg.dto.house.HouseOrderDetailDTO;
 import com.dangjia.acg.dto.pay.PaymentDTO;
 import com.dangjia.acg.dto.pay.SafeTypeDTO;
 import com.dangjia.acg.dto.pay.UpgradeSafeDTO;
@@ -81,13 +83,16 @@ import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.design.HouseDesignPayService;
 import com.dangjia.acg.service.repair.MendOrderCheckService;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
+import sun.swing.StringUIClientPropertyKey;
 import tk.mybatis.mapper.entity.Example;
+import tk.mybatis.mapper.util.StringUtil;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -532,56 +537,124 @@ public class PaymentService {
         }
     }
 
+
     /**
      * 支付工序
      */
     private void payWorkerType(BusinessOrder businessOrder, String payState) {
         try {
             Order order= orderMapper.selectByPrimaryKey(businessOrder.getTaskId());
-            HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(order.getHouseId(),order.getWorkerTypeId());
-            House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
-            if (house.getMoney() == null) {
-                house.setMoney(new BigDecimal(0));
-            }
-            HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId());
-            HouseWorkerOrder houseWorkerOrdernew = new HouseWorkerOrder();
-            houseWorkerOrdernew.setId(hwo.getId());
-            houseWorkerOrdernew.setPayState(1);
-            houseWorkerOrderMapper.updateByPrimaryKeySelective(houseWorkerOrdernew);
-            //为兼容老数据，工序到了已被抢单的，说明已经支付完成，无需在做下一步操作
-            if(houseFlow.getWorkType()!=3){
-                houseFlow.setWorkType(2);
-                houseFlow.setReleaseTime(new Date());//set发布时间
-            }
-            houseFlow.setMaterialPrice(hwo.getMaterialPrice());
-            houseFlow.setWorkPrice(hwo.getWorkPrice());
-            houseFlow.setTotalPrice(hwo.getTotalPrice());
-            houseFlow.setModifyDate(new Date());
-            houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
+            String workerTypeId=order.getWorkerTypeId();
 
-            if(houseFlow.getWorkType()>2) {
-                /*不统计设计精算人工*/
-                HouseExpend houseExpend = houseExpendMapper.getByHouseId(hwo.getHouseId());
-                houseExpend.setMaterialMoney(houseExpend.getMaterialMoney() + hwo.getMaterialPrice().doubleValue());//材料
-                houseExpend.setWorkerMoney(houseExpend.getWorkerMoney() + hwo.getWorkPrice().doubleValue());//人工
-                houseExpendMapper.updateByPrimaryKeySelective(houseExpend);
+            //判断是否为工序订单( 设计、精算订单)
+            if((workerTypeId==null|| StringUtils.isBlank(workerTypeId))){
+                boolean desginStatus=false;
+                //1.如果是工序订单，但总单上没有工序ID，则需要查子单上的工序ID
+                List<HouseOrderDetailDTO> orderDetailList=houseMapper.getBudgetOrderDetailByHouseId(order.getHouseId(),"1");//设计订单
+                if(orderDetailList!=null&&orderDetailList.size()>0){
+                    BigDecimal diffMoney=new BigDecimal(0);
+                    if(order.getOrderSource()==4){//补差价订单(设计师）
+                        diffMoney=getDiffTotalPrice(orderDetailList);
+                    }
+                    desginStatus=true;
+                    setHouseFlowInfo(order,"1",payState,1,diffMoney,2);
+                }
+                //精算师的判断
+                orderDetailList=houseMapper.getBudgetOrderDetailByHouseId(order.getHouseId(),"2");//精算订单
+                if(orderDetailList!=null&&orderDetailList.size()>0){
+                    BigDecimal diffMoney=new BigDecimal(0);
+                    if(order.getOrderSource()==4){//补差价订单（精算师）
+                        diffMoney=getDiffTotalPrice(orderDetailList);
+                    }
+                    //判断精算师是否可抢单
+                    if(desginStatus){
+                        setHouseFlowInfo(order,"2",payState,1,diffMoney,2);
+                    }else{
+                        setHouseFlowInfo(order,"2",payState,1,diffMoney,1);
+                    }
+
+                }
+            }else{
+                setHouseFlowInfo(order,workerTypeId,payState,1,new BigDecimal(0),2);
             }
-
-            WarehouseDetail warehouseDetail = new WarehouseDetail();
-            warehouseDetail.setHouseId(order.getHouseId());
-            warehouseDetail.setRecordType(0);//支付精算
-            warehouseDetail.setRelationId(order.getId());
-            warehouseDetailMapper.insert(warehouseDetail);
-            /*处理人工和取消的材料改到自购精算*/
-            budgetCorrect(order, payState, houseFlow.getId());
-
-            /*处理保险订单*/
-            this.insurance(hwo, payState);
         } catch (Exception e) {
             e.printStackTrace();
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
         }
     }
+
+    /**
+     * 获取差价金钱
+     * @param orderDetailList
+     * @return
+     */
+    private BigDecimal getDiffTotalPrice(List<HouseOrderDetailDTO> orderDetailList){
+        Double totalPrice=0d;
+        if(orderDetailList!=null&&orderDetailList.size()>0){
+            for(HouseOrderDetailDTO orderDetailDTO:orderDetailList){
+                totalPrice= MathUtil.add(totalPrice,orderDetailDTO.getPrice());
+            }
+        }
+        return  BigDecimal.valueOf(totalPrice);
+    }
+
+    /**
+     * 订单支付后工钱的处理，
+     * @param order
+     * @param workerTypeId
+     * @param orderSource 数据来源（1工序订单，4补差价订单）
+     * @param diffTotalPrice 差价金额
+     */
+    private  void setHouseFlowInfo(Order order,String workerTypeId,String payState,Integer orderSource,BigDecimal diffTotalPrice,Integer workType){
+        HouseFlow houseFlow = houseFlowMapper.getByWorkerTypeId(order.getHouseId(),workerTypeId);
+        House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
+        if (house.getMoney() == null) {
+            house.setMoney(new BigDecimal(0));
+        }
+        HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId());
+       // HouseWorkerOrder houseWorkerOrdernew = new HouseWorkerOrder();
+        hwo.setId(hwo.getId());
+        hwo.setPayState(1);
+        if(orderSource==4){//如果是补差价订单，则需要在当前工序上把钱补上去
+            hwo.setWorkPrice(hwo.getWorkPrice().add(diffTotalPrice));//人工金钱
+            hwo.setTotalPrice(hwo.getTotalPrice().add(diffTotalPrice));//总金钱
+        }
+        houseWorkerOrderMapper.updateByPrimaryKeySelective(hwo);
+        //为兼容老数据，工序到了已被抢单的，说明已经支付完成，无需在做下一步操作
+        if(houseFlow.getWorkType()!=3){
+            houseFlow.setWorkType(workType);
+            houseFlow.setReleaseTime(new Date());//set发布时间
+        }
+        houseFlow.setPayStatus(1);//已支付
+        houseFlow.setMaterialPrice(hwo.getMaterialPrice());
+        houseFlow.setWorkPrice(hwo.getWorkPrice());
+        houseFlow.setTotalPrice(hwo.getTotalPrice());
+        houseFlow.setModifyDate(new Date());
+        houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
+
+        if(houseFlow.getWorkType()>2) {
+            /*不统计设计精算人工*/
+            HouseExpend houseExpend = houseExpendMapper.getByHouseId(hwo.getHouseId());
+            houseExpend.setMaterialMoney(houseExpend.getMaterialMoney() + hwo.getMaterialPrice().doubleValue());//材料
+            houseExpend.setWorkerMoney(houseExpend.getWorkerMoney() + hwo.getWorkPrice().doubleValue());//人工
+            houseExpendMapper.updateByPrimaryKeySelective(houseExpend);
+        }
+
+        WarehouseDetail warehouseDetail = new WarehouseDetail();
+        warehouseDetail.setHouseId(order.getHouseId());
+        warehouseDetail.setRecordType(0);//支付精算
+        warehouseDetail.setRelationId(order.getId());
+        warehouseDetailMapper.insert(warehouseDetail);
+        /*处理人工和取消的材料改到自购精算*/
+        budgetCorrect(order, payState, houseFlow.getId());
+
+        /*处理保险订单*/
+        this.insurance(hwo, payState);
+    }
+
+
+
+
     /**
      * 保险订单
      */
@@ -1185,6 +1258,13 @@ public class PaymentService {
             order.setTotalAmount(paymentPrice);// 订单总额(工钱)
             orderMapper.updateByPrimaryKeySelective(order);
 
+            if(orderSource==1){//若为支付类型的订单，需增加订单支付工序阶段（设计，精算类的订单)
+                List<HouseOrderDetailDTO> orderDetailList=houseMapper.getBudgetOrderDetailByHouseId(houseId,"1");//设计订单
+                setTotalPrice(orderDetailList,houseId,"1",order,businessOrder);
+                orderDetailList=houseMapper.getBudgetOrderDetailByHouseId(houseId,"2");//精算订单
+                setTotalPrice(orderDetailList,houseId,"2",order,businessOrder);//
+            }
+
             budgetCorrect(order,null,null);
 
             //清空增值商品
@@ -1208,6 +1288,74 @@ public class PaymentService {
             return ServerResponse.createBySuccess("提交成功", businessOrder.getNumber());
         }
         return ServerResponse.createBySuccess("提交成功");
+    }
+
+    /**
+     * 获取设计，精算订单的总价钱
+     * @param orderDetailList
+     * @return
+     */
+    private void setTotalPrice(List<HouseOrderDetailDTO> orderDetailList,String houseId,String workerTypeId,Order order,BusinessOrder businessOrder){
+        Double totalPrice=0d;
+        if(orderDetailList!=null&&orderDetailList.size()>0){
+            for(HouseOrderDetailDTO orderDetailDTO:orderDetailList){
+                totalPrice= MathUtil.add(totalPrice,orderDetailDTO.getPrice());
+            }
+            House house=houseMapper.selectByPrimaryKey(houseId);
+            setHouseWorkerOrderInfo(house,workerTypeId,order,businessOrder,new BigDecimal(totalPrice));
+        }
+    }
+
+    /***
+     * 设计、精算生成工匠订单
+     * @param house
+     * @param workerTypeId
+     * @param order
+     */
+    public void setHouseWorkerOrderInfo(House house,String workerTypeId,Order order,BusinessOrder businessOrder,BigDecimal paymentPrice){
+        WorkerType wt = workerTypeMapper.selectByPrimaryKey(workerTypeId);
+        /*
+         * 生成工匠订单
+         */
+        HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(house.getId(),workerTypeId);
+        if (hwo == null) {
+            hwo = new HouseWorkerOrder(true);
+            hwo.setHouseId(order.getHouseId());
+            hwo.setWorkerTypeId(order.getWorkerTypeId());
+            hwo.setWorkerType(wt.getType());
+            hwo.setBusinessOrderNumber(businessOrder.getNumber());//业务订单号
+            houseWorkerOrderMapper.insert(hwo);
+        } else {
+            hwo.setHouseId(order.getHouseId());
+            hwo.setWorkerTypeId(order.getWorkerTypeId());
+            hwo.setWorkerType(wt.getType());
+            hwo.setBusinessOrderNumber(businessOrder.getNumber());//业务订单号
+            houseWorkerOrderMapper.updateByPrimaryKey(hwo);
+        }
+        /*Double workerPrice = 0d;//精算工钱
+        Double caiPrice =0d;//精算材料钱
+        Double serPrice = 0d;//精算包工包料钱
+
+        for (ShopGoodsDTO budgetLabelDTO : budgetLabelDTOS) {
+            for (BudgetLabelDTO labelDTO : budgetLabelDTO.getLabelDTOS()) {
+                for (BudgetLabelGoodsDTO good : labelDTO.getGoods()) {
+                    if(good.getProductType()==0){//材料
+                        caiPrice+=good.getTotalPrice().doubleValue();
+                    }
+                    if(good.getProductType()==1){//包工包料
+                        serPrice+=good.getTotalPrice().doubleValue();
+                    }
+                    if(good.getProductType()==2){//人工
+                        workerPrice+=good.getTotalPrice().doubleValue();
+                    }
+                }
+            }
+        }*/
+        hwo.setWorkPrice(paymentPrice);//工钱
+        hwo.setMaterialPrice(new BigDecimal(0d));//材料钱
+        hwo.setTotalPrice(paymentPrice);//工钱+拆料
+        houseWorkerOrderMapper.updateByPrimaryKey(hwo);
+
     }
 
     /**
