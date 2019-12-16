@@ -49,14 +49,14 @@ public class DjBasicsSupAuthorityController implements DjBasicsSupervisorAuthori
 
     @Override
     @ApiMethod
-    public ServerResponse queryDvResponsibility(HttpServletRequest request,String houseId) {
-        return supAuthorityService.queryDvResponsibility(request,houseId);
+    public ServerResponse queryDvResponsibility(HttpServletRequest request,String houseId,PageDTO pageDTO) {
+        return supAuthorityService.queryDvResponsibility(request,houseId,pageDTO);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse queryAcceptanceTrend(HttpServletRequest request,String houseId) {
-        return supAuthorityService.queryAcceptanceTrend(request,houseId);
+    public ServerResponse queryAcceptanceTrend(HttpServletRequest request,String houseId,PageDTO pageDTO) {
+        return supAuthorityService.queryAcceptanceTrend(request,houseId,pageDTO);
     }
 
     @Override

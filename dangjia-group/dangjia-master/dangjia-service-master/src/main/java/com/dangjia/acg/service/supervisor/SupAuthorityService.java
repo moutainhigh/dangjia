@@ -2,13 +2,15 @@ package com.dangjia.acg.service.supervisor;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.api.data.WorkerTypeAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
-import com.dangjia.acg.dto.supervisor.MaintenanceRecordDTO;
+import com.dangjia.acg.dto.supervisor.*;
 import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordMapper;
 import com.dangjia.acg.mapper.supervisor.DjBasicsSupervisorAuthorityMapper;
+import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.engineer.DjMaintenanceRecord;
 import com.dangjia.acg.modle.supervisor.DjBasicsSupervisorAuthority;
 import com.dangjia.acg.util.StringTool;
@@ -32,6 +34,8 @@ public class SupAuthorityService {
     private DjMaintenanceRecordMapper djMaintenanceRecordMapper ;
     @Autowired
     private ConfigUtil configUtil;
+    @Autowired
+    private WorkerTypeAPI workerTypeAPI;
     /**
      * 删除已选
      * @param request
@@ -137,9 +141,27 @@ public class SupAuthorityService {
      * @param request
      * @return
      */
-    public ServerResponse queryDvResponsibility(HttpServletRequest request,String houseId) {
+    public ServerResponse queryDvResponsibility(HttpServletRequest request,String houseId,PageDTO pageDTO) {
         try {
-            return null;
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<DjResponsiblePartyDTO> list=djMaintenanceRecordMapper.queryDvResponsibility(houseId);
+            list.forEach(djResponsiblePartyDTO->{
+                String responsiblePartyType=djResponsiblePartyDTO.getResponsiblePartyType();
+               String responsiblePartyId= djResponsiblePartyDTO.getResponsiblePartyId();
+               //维保责任方类型 1:店铺  3：工匠
+                if (responsiblePartyType.equals("1"))
+                {
+                    List<StoreMaintenanceDTO> listStoreMaintenance=djMaintenanceRecordMapper.queryStoreMaintenance(responsiblePartyType,responsiblePartyId);
+                    djResponsiblePartyDTO.setListStoreMaintenance(listStoreMaintenance);
+                }
+                if(responsiblePartyType.equals("3"))
+                {
+                    List<MemberMaintenanceDTO> listMemberMaintenance=djMaintenanceRecordMapper.queryMemberMaintenance(responsiblePartyType,responsiblePartyId);
+                    djResponsiblePartyDTO.setListMemberMaintenance(listMemberMaintenance);
+                }
+            });
+            PageInfo pageResult = new PageInfo(list);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             logger.error("增加已选异常", e);
             return ServerResponse.createByErrorMessage("增加已选异常");
@@ -152,14 +174,33 @@ public class SupAuthorityService {
      * @param request
      * @return
      */
-    public ServerResponse queryAcceptanceTrend(HttpServletRequest request,String houseId) {
+    public ServerResponse queryAcceptanceTrend(HttpServletRequest request,String houseId,PageDTO pageDTO) {
         try {
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<AcceptanceTrendDTO> list= djMaintenanceRecordMapper.queryAcceptanceTrend(houseId);
+            list.forEach(acceptanceTrendDTO->{
+                String id= acceptanceTrendDTO.getId();
+                List<AcceptanceTrendDetailDTO> listDetail= djMaintenanceRecordMapper.queryAcceptanceTrendDetail(id);
+                acceptanceTrendDTO.setListDetail(listDetail);
+                listDetail.forEach(acceptanceTrendDetailDTO->{
+                    String workerTypeId=acceptanceTrendDetailDTO.getWorkerType();
+                    String workerTypeName=null;
+                    ServerResponse response = workerTypeAPI.getWorkerType(workerTypeId);
+                    if (response.isSuccess()) {
+                        workerTypeName = (((JSONObject) response.getResultObj()).getString(WorkerType.NAME));
+                    }
+                    acceptanceTrendDetailDTO.setWorkerTypeName(workerTypeName);
+                    acceptanceTrendDetailDTO.setStewardImage(StringTool.getImage(acceptanceTrendDetailDTO.getStewardRemark(),address));
+                    acceptanceTrendDetailDTO.setStewardImageDetail(StringTool.getImage(acceptanceTrendDetailDTO.getStewardRemark(),address).split(","));
+                });
 
-
-            return null;
+            });
+            PageInfo pageResult = new PageInfo(list);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
-            logger.error("增加已选异常", e);
-            return ServerResponse.createByErrorMessage("增加已选异常");
+            logger.error("验收动态异常", e);
+            return ServerResponse.createByErrorMessage("验收动态异常");
         }
     }
 

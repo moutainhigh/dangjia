@@ -22,8 +22,8 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryDjMaintenanceRecordList(PageDTO pageDTO, String searchKey) {
-        return djMaintenanceRecordService.queryDjMaintenanceRecordList(pageDTO,searchKey);
+    public ServerResponse queryDjMaintenanceRecordList(PageDTO pageDTO, String searchKey, Integer state) {
+        return djMaintenanceRecordService.queryDjMaintenanceRecordList(pageDTO,searchKey,state);
     }
 
     @Override

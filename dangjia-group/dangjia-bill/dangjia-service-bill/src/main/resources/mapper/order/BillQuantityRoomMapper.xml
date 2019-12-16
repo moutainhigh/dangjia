@@ -20,6 +20,8 @@
             house_id = #{houseId}
             AND type =  #{type}
             AND data_status = 0
+        ORDER BY
+            create_date DESC
             LIMIT 1
     </select>
 
