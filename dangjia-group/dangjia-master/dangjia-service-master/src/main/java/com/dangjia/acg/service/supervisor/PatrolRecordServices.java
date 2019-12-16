@@ -7,6 +7,7 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.supervisor.JFRewardPunishRecordDTO;
 import com.dangjia.acg.dto.supervisor.PatrolRecordDTO;
+import com.dangjia.acg.dto.supervisor.PatrolRecordIndexDTO;
 import com.dangjia.acg.dto.supervisor.WorkerRewardPunishRecordDTO;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.supervisor.DjBasicsPatrolRecordMapper;
@@ -47,11 +48,12 @@ public class PatrolRecordServices {
      * @param request
      * @return
      */
-    public ServerResponse getSupHomePage(HttpServletRequest request) {
+    public ServerResponse getSupHomePage(HttpServletRequest request,PageDTO pageDTO,String userToken) {
         try {
-
-
-            return null;
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<PatrolRecordIndexDTO> list = rewardPunishRecordMapper.getSupHomePage();
+            PageInfo pageResult = new PageInfo(list);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             logger.error("获取督导首页异常", e);
             return ServerResponse.createByErrorMessage("获取督导首页异常");
