@@ -147,14 +147,14 @@ public class WebWithdrawDepositService {
 
                     if(srcWithdrawDeposit.getRoleType()==4 || srcWithdrawDeposit.getRoleType()==5){
                         //拒绝供应商/店铺提现
-                        setRefusedWithdraw(withdrawDeposit.getRoleType(),
-                                withdrawDeposit.getSourceId(),
-                                withdrawDeposit.getMoney());
+                        setRefusedWithdraw(srcWithdrawDeposit.getRoleType(),
+                                srcWithdrawDeposit.getSourceId(),
+                                srcWithdrawDeposit.getMoney());
                     }
 
 
                 }
-                if (srcWithdrawDeposit.getState() == 1) {//1同意
+                if (withdrawDeposit.getState() == 1) {//1同意
                     srcWithdrawDeposit.setState(1);
                     srcWithdrawDeposit.setImage(withdrawDeposit.getImage());//回执单
                     if (StringUtils.isNoneBlank(withdrawDeposit.getMemo()))
