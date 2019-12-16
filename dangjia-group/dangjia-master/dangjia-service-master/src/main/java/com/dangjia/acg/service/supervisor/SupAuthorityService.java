@@ -169,6 +169,42 @@ public class SupAuthorityService {
     }
 
     /**
+     * 工地列表
+     * @param request
+     * @param sortNum
+     * @return
+     */
+    public ServerResponse querySupervisorHostList(HttpServletRequest request, String sortNum,PageDTO pageDTO) {
+        try {
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<SupSitelistDTO> list= djMaintenanceRecordMapper.querySupervisorHostList();
+            list.forEach(supSitelistDTO->{
+                String houseId=supSitelistDTO.getHouseId();
+            });
+            PageInfo pageResult = new PageInfo(list);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
+        } catch (Exception e) {
+            logger.error("工地列表异常", e);
+            return ServerResponse.createByErrorMessage("工地列表异常");
+        }
+    }
+
+    /**
+     * 工地详情
+     * @param request
+     * @param houseId
+     * @return
+     */
+    public ServerResponse querySupervisorHostDetailList(HttpServletRequest request, String houseId) {
+        try {
+            WorkerSiteDetailsDTO workerSiteDetailsDTO = djMaintenanceRecordMapper.querySupervisorHostDetailList(houseId);
+            return ServerResponse.createBySuccess("查询成功", workerSiteDetailsDTO);
+        } catch (Exception e) {
+            logger.error("工地详情异常", e);
+            return ServerResponse.createByErrorMessage("工地详情异常");
+        }
+    }
+    /**
      * 验收动态
      *
      * @param request
