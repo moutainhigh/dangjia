@@ -39,4 +39,13 @@ public interface DjMaintenanceRecordAPI {
     ServerResponse queryMemberList(@RequestParam("pageDTO") PageDTO pageDTO,
                                    @RequestParam("name") String name);
 
+    @PostMapping(value = "web/engineer/upDateMaintenanceInFo")
+    @ApiOperation(value = "处理申诉", notes = "处理申诉")
+    ServerResponse upDateMaintenanceInFo(@RequestParam("supervisorId") String supervisorId,
+                                         @RequestParam("stewardSubsidy") Integer stewardSubsidy,
+                                         @RequestParam("serviceRemark")  String serviceRemark,
+                                         @RequestParam("userId")  String userId,
+                                         @RequestParam("id") String id,
+                                         @RequestParam("handleType")  Integer handleType);
+
 }

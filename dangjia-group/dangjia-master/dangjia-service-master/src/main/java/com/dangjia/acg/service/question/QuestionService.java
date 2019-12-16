@@ -75,11 +75,12 @@ public class QuestionService {
             Example example = new Example(QuestionOption.class);
             example.createCriteria().andEqualTo(QuestionOption.QUESTION_ID, question1.getId())
                     .andEqualTo(QuestionOption.DATA_STATUS, 0);
-            QuestionOption questionOption = new QuestionOption();
-            questionOption.setId(null);
-            questionOption.setCreateDate(null);
-            questionOption.setDataStatus(1);
-            iQuestionOptionMapper.updateByExampleSelective(questionOption, example);
+//            QuestionOption questionOption = new QuestionOption();
+//            questionOption.setId(null);
+//            questionOption.setCreateDate(null);
+//            questionOption.setDataStatus(1);
+//            iQuestionOptionMapper.updateByExampleSelective(questionOption, example);
+            iQuestionOptionMapper.deleteByExample(example);
             for (Object anOptionList : optionList) {
                 JSONObject obj = (JSONObject) anOptionList;
                 String optionId = obj.getString("optionId");
@@ -164,9 +165,10 @@ public class QuestionService {
         if (question == null) {
             return ServerResponse.createByErrorMessage("未找到该试题");
         }
-        question.setModifyDate(new Date());
-        question.setDataStatus(1);
-        iQuestionMapper.updateByPrimaryKeySelective(question);
+//        question.setModifyDate(new Date());
+//        question.setDataStatus(1);
+//        iQuestionMapper.updateByPrimaryKeySelective(question);
+        iQuestionMapper.delete(question);
         return ServerResponse.createBySuccessMessage("删除成功");
     }
 
@@ -182,11 +184,12 @@ public class QuestionService {
             Example example = new Example(QuantityQuestion.class);
             example.createCriteria().andEqualTo(QuantityQuestion.HOUSE_ID, houseId)
                     .andEqualTo(QuantityQuestion.DATA_STATUS, 0);
-            QuantityQuestion quantityQuestion = new QuantityQuestion();
-            quantityQuestion.setId(null);
-            quantityQuestion.setCreateDate(null);
-            quantityQuestion.setDataStatus(1);
-            iQuantityQuestionMapper.updateByExampleSelective(quantityQuestion, example);
+//            QuantityQuestion quantityQuestion = new QuantityQuestion();
+//            quantityQuestion.setId(null);
+//            quantityQuestion.setCreateDate(null);
+//            quantityQuestion.setDataStatus(1);
+//            iQuantityQuestionMapper.updateByExampleSelective(quantityQuestion, example);
+            iQuantityQuestionMapper.deleteByExample(example);
             for (Object o : questionList) {
                 JSONObject obj = (JSONObject) o;
                 String questionId = obj.getString("questionId");

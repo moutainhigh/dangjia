@@ -4,19 +4,19 @@
 
     <select id="queryDjMaintenanceRecordList" resultType="com.dangjia.acg.dto.engineer.DjMaintenanceRecordDTO">
         SELECT
-            mr.id,
-            CONCAT(IFNULL(h.residential,'*'),IFNULL(CONCAT(h.building,'栋'),'*栋'),
-            IFNULL(CONCAT(h.unit,'单元'),'*单元'),
-            IFNULL(CONCAT(h.number,'号'),'*号')) as houseAddress,
-            mr.owner_name ownerName,
-            mr.owner_mobile ownerMobile,
-            mr.state,
-            h.id houseId
+        mr.id,
+        CONCAT(IFNULL(h.residential,'*'),IFNULL(CONCAT(h.building,'栋'),'*栋'),
+        IFNULL(CONCAT(h.unit,'单元'),'*单元'),
+        IFNULL(CONCAT(h.number,'号'),'*号')) as houseAddress,
+        mr.owner_name ownerName,
+        mr.owner_mobile ownerMobile,
+        mr.state,
+        h.id houseId
         FROM
-            dj_maintenance_record mr,
-            dj_house h
+        dj_maintenance_record mr,
+        dj_house h
         WHERE
-            mr.house_id = h.id
+        mr.house_id = h.id
         AND mr.handle_type=3
         <if test="null!=searchKey and ''!=searchKey">
             AND CONCAT(CONCAT_WS(IFNULL(h.residential, '*'),IFNULL(CONCAT(h.building, '栋'),'*栋'),IFNULL(CONCAT(h.unit,
@@ -83,12 +83,39 @@
             mr.steward_image stewardImage,
             mr.steward_remark stewardRemark,
             mr.remark,
-            mr.steward_order_time stewardOrderTime
+            mr.steward_order_time stewardOrderTime,
+            mr.complain_type as complainType,
+            mr.handle_type as handleType,
+             (
+                SELECT
+
+                IF (
+                    m. NAME IS NULL
+                    OR m. NAME = '',
+                    m.nick_name,
+                    m. NAME
+                )
+                FROM
+                    dj_member m
+                WHERE
+                    m.id = mr.worker_member_id
+            ) workerMemberName,
+            (
+                SELECT
+                    m.mobile
+                FROM
+                    dj_member m
+                WHERE
+                    m.id = mr.worker_member_id
+            ) workerMobile,
+            mr.user_id AS userId,
+            mr.worker_member_id AS workerMemberId,
+            mr.worker_create_date AS workerCreateDate,
+            mr.worker_image AS workerImage
         FROM
             dj_maintenance_record mr
         WHERE mr.id=#{id}
     </select>
-
 
     <select id="queryApplicationInfo" resultType="com.dangjia.acg.dto.supervisor.MaintenanceRecordDTO">
             select

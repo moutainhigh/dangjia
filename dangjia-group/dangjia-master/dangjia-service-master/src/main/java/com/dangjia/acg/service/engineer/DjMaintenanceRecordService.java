@@ -105,6 +105,8 @@ public class DjMaintenanceRecordService {
         try {
             DjMaintenanceRecordDTO djMaintenanceRecordDTOS =
                     djMaintenanceRecordMapper.queryDjMaintenanceRecordDetail(id);
+
+            //维保商品列表
             List<DjMaintenanceRecordProductDTO> djMaintenanceRecordProductDTOS =
                     djMaintenanceRecordProductMapper.queryDjMaintenanceRecordProductList(id);
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
@@ -112,6 +114,8 @@ public class DjMaintenanceRecordService {
                 djMaintenanceRecordProductDTO.setImage(imageAddress + djMaintenanceRecordProductDTO.getImage());
             });
             djMaintenanceRecordDTOS.setDjMaintenanceRecordProductDTOS(djMaintenanceRecordProductDTOS);
+
+            ///维保责任方
             Example example = new Example(DjMaintenanceRecordResponsibleParty.class);
             example.createCriteria().andEqualTo(DjMaintenanceRecordResponsibleParty.MAINTENANCE_RECORD_ID, id)
                     .andEqualTo(DjMaintenanceRecordResponsibleParty.DATA_STATUS, 0);
@@ -127,8 +131,22 @@ public class DjMaintenanceRecordService {
                 djMaintenanceRecordResponsiblePartyDTOS.add(djMaintenanceRecordResponsiblePartyDTO);
             });
             djMaintenanceRecordDTOS.setDjMaintenanceRecordResponsiblePartyDTOS(djMaintenanceRecordResponsiblePartyDTOS);
-            djMaintenanceRecordDTOS.setOwnerImages(this.getImage(djMaintenanceRecordDTOS.getOwnerImage()));
-            djMaintenanceRecordDTOS.setStewardImages(this.getImage(djMaintenanceRecordDTOS.getStewardImage()));
+
+            if (!CommonUtil.isEmpty(djMaintenanceRecordDTOS.getWorkerImage())) {
+                //工匠上传图片
+                djMaintenanceRecordDTOS.setWorkerImages(this.getImage(djMaintenanceRecordDTOS.getWorkerImage()));
+            }
+
+            if (!CommonUtil.isEmpty(djMaintenanceRecordDTOS.getStewardImage())) {
+                //业主上传图片
+                djMaintenanceRecordDTOS.setOwnerImages(this.getImage(djMaintenanceRecordDTOS.getOwnerImage()));
+            }
+
+            if (!CommonUtil.isEmpty(djMaintenanceRecordDTOS.getStewardImage())) {
+                //管家上传图片
+                djMaintenanceRecordDTOS.setStewardImages(this.getImage(djMaintenanceRecordDTOS.getStewardImage()));
+            }
+
             return ServerResponse.createBySuccess("查询成功",djMaintenanceRecordDTOS);
         } catch (Exception e) {
             e.printStackTrace();
@@ -236,4 +254,45 @@ public class DjMaintenanceRecordService {
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
+
+
+    /**
+     * 处理申诉
+     * @param supervisorId
+     * @return
+     */
+    public ServerResponse upDateMaintenanceInFo(String supervisorId,
+                                                Integer stewardSubsidy,
+                                                String serviceRemark,
+                                                String userId,
+                                                String id,
+                                                Integer handleType) {
+        try {
+            DjMaintenanceRecord djMaintenanceRecord = new DjMaintenanceRecord();
+            if(handleType != null && handleType == 3){
+                //确定处理
+                djMaintenanceRecord.setUserId(userId);
+                djMaintenanceRecord.setSupervisorId(supervisorId);
+                djMaintenanceRecord.setStewardSubsidy(stewardSubsidy);
+                djMaintenanceRecord.setServiceRemark(serviceRemark);
+                djMaintenanceRecord.setId(id);
+                djMaintenanceRecord.setCreateDate(null);
+                djMaintenanceRecord.setHandleType(handleType);
+            }else if(handleType != null && handleType == 4){
+                //结束流程
+                djMaintenanceRecord.setUserId(userId);
+                djMaintenanceRecord.setServiceRemark(serviceRemark);
+                djMaintenanceRecord.setId(id);
+                djMaintenanceRecord.setCreateDate(null);
+                djMaintenanceRecord.setHandleType(handleType);
+            }
+            djMaintenanceRecordMapper.updateByPrimaryKeySelective(djMaintenanceRecord);
+            return ServerResponse.createBySuccess("提交成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("提交失败");
+        }
+    }
+
+
 }
