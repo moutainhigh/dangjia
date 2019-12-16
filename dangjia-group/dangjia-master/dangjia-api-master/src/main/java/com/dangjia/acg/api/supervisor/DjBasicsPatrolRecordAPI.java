@@ -51,7 +51,7 @@ public interface DjBasicsPatrolRecordAPI {
 
     @PostMapping("web/supervisor/getSupHomePage")
     @ApiOperation(value = "督导首页", notes = "督导首页")
-    ServerResponse getSupHomePage(@RequestParam("request") HttpServletRequest request);
+    ServerResponse getSupHomePage(@RequestParam("request") HttpServletRequest request,@RequestParam("pageDTO")  PageDTO pageDTO,@RequestParam("userToken") String userToken);
 
 
 
