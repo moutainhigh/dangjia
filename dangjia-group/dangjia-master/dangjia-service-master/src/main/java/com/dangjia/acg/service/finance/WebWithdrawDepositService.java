@@ -145,7 +145,7 @@ public class WebWithdrawDepositService {
                             "0", "提现结果",
                             DjConstants.PushMessage.WITHDRAW_CASH_ERROR, "");
 
-                    if(withdrawDeposit.getRoleType()==4 || 5 == withdrawDeposit.getRoleType()){
+                    if(srcWithdrawDeposit.getRoleType()==4 || srcWithdrawDeposit.getRoleType()==5){
                         //拒绝供应商/店铺提现
                         setRefusedWithdraw(withdrawDeposit.getRoleType(),
                                 withdrawDeposit.getSourceId(),
@@ -154,7 +154,7 @@ public class WebWithdrawDepositService {
 
 
                 }
-                if (withdrawDeposit.getState() == 1) {//1同意
+                if (srcWithdrawDeposit.getState() == 1) {//1同意
                     srcWithdrawDeposit.setState(1);
                     srcWithdrawDeposit.setImage(withdrawDeposit.getImage());//回执单
                     if (StringUtils.isNoneBlank(withdrawDeposit.getMemo()))
@@ -165,14 +165,13 @@ public class WebWithdrawDepositService {
                             "0", "提现结果",
                             DjConstants.PushMessage.WITHDRAW_CASH_SUCCESS, "");
 
-                    logger.info("RoleType==========="+withdrawDeposit.getRoleType());
-                    if(withdrawDeposit.getRoleType()==4 ||withdrawDeposit.getRoleType() ==5 ){
+                    if(srcWithdrawDeposit.getRoleType()==4 ||srcWithdrawDeposit.getRoleType() ==5 ){
                         //同意供应商/店铺提现
-                        setAgreeWithdraw(withdrawDeposit.getRoleType(),
-                                withdrawDeposit.getSourceId(),
-                                withdrawDeposit.getWorkerId(),
-                                withdrawDeposit.getMoney(),
-                                withdrawDeposit.getId());
+                        setAgreeWithdraw(srcWithdrawDeposit.getRoleType(),
+                                srcWithdrawDeposit.getSourceId(),
+                                srcWithdrawDeposit.getWorkerId(),
+                                srcWithdrawDeposit.getMoney(),
+                                srcWithdrawDeposit.getId());
 
                     }
                 }
