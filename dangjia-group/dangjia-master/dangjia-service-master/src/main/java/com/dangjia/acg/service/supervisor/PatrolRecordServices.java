@@ -1,5 +1,7 @@
 package com.dangjia.acg.service.supervisor;
 
+import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.api.app.member.MemberAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
@@ -41,17 +43,23 @@ public class PatrolRecordServices {
     private IRewardPunishRecordMapper rewardPunishRecordMapper ;
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
-
-
+    @Autowired
+    private MemberAPI memberAPI;
     /**
      * 督导首页
      * @param request
      * @return
      */
-    public ServerResponse getSupHomePage(HttpServletRequest request,PageDTO pageDTO,String userToken) {
+    public ServerResponse getSupHomePage(HttpServletRequest request,PageDTO pageDTO,String userToken,String keyWord) {
         try {
+            Object object = memberAPI.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            JSONObject job = (JSONObject)object;
+            Member worker = job.toJavaObject(Member.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<PatrolRecordIndexDTO> list = rewardPunishRecordMapper.getSupHomePage();
+            List<PatrolRecordIndexDTO> list = rewardPunishRecordMapper.getSupHomePage(worker.getId(),keyWord);
             PageInfo pageResult = new PageInfo(list);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {

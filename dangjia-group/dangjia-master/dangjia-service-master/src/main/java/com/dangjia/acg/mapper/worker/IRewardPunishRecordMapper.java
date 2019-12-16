@@ -22,5 +22,5 @@ public interface IRewardPunishRecordMapper extends Mapper<RewardPunishRecord> {
 
     JFRewardPunishRecordDTO  queryRewardPunishRecordDetail(@Param("id") String id);
 
-    List<PatrolRecordIndexDTO>  getSupHomePage();
+    List<PatrolRecordIndexDTO>  getSupHomePage(@Param("memberId")String memberId,@Param("keyWord")String keyWord);
 }
