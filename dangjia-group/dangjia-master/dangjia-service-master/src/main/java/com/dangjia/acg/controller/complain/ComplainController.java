@@ -43,8 +43,16 @@ public class ComplainController implements ComplainAPI {
     @Override
     @ApiMethod
     public ServerResponse updataComplain(HttpServletRequest request, String userId, String complainId, Integer state, String description,
-                                         String files, String operateId, String operateName) {
-        return complainService.updataComplain(userId, complainId, state, description, files, operateId, operateName);
+                                         String files, String operateId, String operateName,String rejectReason) {
+        return complainService.updataComplain(userId, complainId, state, description, files,
+                operateId, operateName,rejectReason);
+    }
+
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryMemberRecord(HttpServletRequest request, String memberId) {
+        return complainService.queryMemberRecord(memberId);
     }
 
     @Override

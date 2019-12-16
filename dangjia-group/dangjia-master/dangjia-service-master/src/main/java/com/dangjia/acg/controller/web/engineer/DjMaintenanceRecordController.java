@@ -22,8 +22,8 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryDjMaintenanceRecordList(PageDTO pageDTO, String searchKey) {
-        return djMaintenanceRecordService.queryDjMaintenanceRecordList(pageDTO,searchKey);
+    public ServerResponse queryDjMaintenanceRecordList(PageDTO pageDTO, String searchKey, Integer state) {
+        return djMaintenanceRecordService.queryDjMaintenanceRecordList(pageDTO,searchKey,state);
     }
 
     @Override
@@ -37,4 +37,12 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
     public ServerResponse setDjMaintenanceRecord(String id,Integer state) {
         return djMaintenanceRecordService.setDjMaintenanceRecord(id,state);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryMemberList(PageDTO pageDTO,String name) {
+        return djMaintenanceRecordService.queryMemberList(pageDTO,name);
+    }
+
+
 }

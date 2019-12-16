@@ -359,6 +359,8 @@ public class PaymentService {
                 return ServerResponse.createByErrorMessage("支付订单不存在");
             }
             PayOrder payOrder = payOrderList.get(0);
+            //开发回调
+            setServersSuccess(payOrder.getId());
             if (payOrder.getState() == 2) {//已支付
                 returnMap.put("name", "当家装修担保平台");
                 returnMap.put("businessOrderNumber", businessOrderNumber);

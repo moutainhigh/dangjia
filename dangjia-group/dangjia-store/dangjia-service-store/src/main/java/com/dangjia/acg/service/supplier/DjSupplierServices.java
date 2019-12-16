@@ -490,6 +490,7 @@ public class DjSupplierServices {
             djSupplierMapper.updateByPrimaryKeySelective(djSupplier);
             return ServerResponse.createBySuccessMessage("提交成功待审核中");
         } catch (Exception e) {
+            logger.info("提交失败",e);
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("提交失败");
         }

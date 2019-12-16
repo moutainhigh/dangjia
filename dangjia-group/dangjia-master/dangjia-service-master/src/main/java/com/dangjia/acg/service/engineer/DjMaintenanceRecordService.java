@@ -12,8 +12,10 @@ import com.dangjia.acg.dto.engineer.DjMaintenanceRecordResponsiblePartyDTO;
 import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordMapper;
 import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordProductMapper;
 import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordResponsiblePartyMapper;
+import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.modle.engineer.DjMaintenanceRecord;
 import com.dangjia.acg.modle.engineer.DjMaintenanceRecordResponsibleParty;
+import com.dangjia.acg.modle.member.Member;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +44,8 @@ public class DjMaintenanceRecordService {
     private DjMaintenanceRecordProductMapper djMaintenanceRecordProductMapper;
     @Autowired
     private ConfigUtil configUtil;
-
+    @Autowired
+    private IMemberMapper iMemberMapper;
 
     /**
      * 查询质保审核列表
@@ -51,11 +54,11 @@ public class DjMaintenanceRecordService {
      * @param searchKey
      * @return
      */
-    public ServerResponse queryDjMaintenanceRecordList(PageDTO pageDTO, String searchKey) {
+    public ServerResponse queryDjMaintenanceRecordList(PageDTO pageDTO, String searchKey, Integer state) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<DjMaintenanceRecordDTO> djMaintenanceRecordDTOS =
-                    djMaintenanceRecordMapper.queryDjMaintenanceRecordList(searchKey);
+                    djMaintenanceRecordMapper.queryDjMaintenanceRecordList(searchKey,state);
             djMaintenanceRecordDTOS.forEach(djMaintenanceRecordDTO -> {
                 if (!CommonUtil.isEmpty(djMaintenanceRecordDTO.getOwnerImage())) {
                     djMaintenanceRecordDTO.setOwnerImages(this.getImage(djMaintenanceRecordDTO.getOwnerImage()));
@@ -149,6 +152,34 @@ public class DjMaintenanceRecordService {
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("处理失败");
+        }
+    }
+
+    /**
+     * 查询督导列表列表
+     * @param pageDTO
+     * @param name
+     * @return
+     */
+    public ServerResponse queryMemberList(PageDTO pageDTO, String name) {
+        try {
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            Example example = new Example(Member.class);
+            Example.Criteria criteria = example.createCriteria();
+            criteria.andEqualTo(Member.WORKER_TYPE, 12)
+                    .andEqualTo(Member.DATA_STATUS, 0);
+            if (!CommonUtil.isEmpty(name)) {
+                criteria.andLike(Member.NAME,"%"+ name +"%");
+            }
+            List<Member> members = iMemberMapper.selectByExample(example);
+
+            if (members.size() <= 0)
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            PageInfo pageInfo = new PageInfo(members);
+            return ServerResponse.createBySuccess("查询成功", pageInfo);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
         }
     }
 }

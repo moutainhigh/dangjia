@@ -1,10 +1,7 @@
 package com.dangjia.acg.api.supervisor;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.dto.supervisor.DjBasicsSupervisorAuthorityDTO;
 import com.dangjia.acg.modle.supervisor.DjBasicsSupervisorAuthority;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -14,7 +11,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 
-@Api(description = "督导权限配置表")
+/**
+ * 督导权限配置接口
+ * author:chenyufeng
+ * time:2019.12.11
+ */
+
+@Api(description = "督导权限配置接口")
 @FeignClient("dangjia-service-master")
 public interface DjBasicsSupervisorAuthorityAPI {
 
@@ -39,6 +42,38 @@ public interface DjBasicsSupervisorAuthorityAPI {
     @ApiOperation(value = "批量增加已选", notes = "批量增加已选")
     ServerResponse addAllAuthority(@RequestParam("request") HttpServletRequest request,
                                 @RequestParam("strAuthority") String strAuthority,   @RequestParam("operateId") String operateId);
+
+
+    @PostMapping("web/supervisor/queryApplicationInfo")
+    @ApiOperation(value = "查看申请信息", notes = "查看申请信息")
+    ServerResponse queryApplicationInfo(@RequestParam("request") HttpServletRequest request,
+                                        @RequestParam("houseId") String houseId,@RequestParam("pageDTO") PageDTO pageDTO);
+
+
+    @PostMapping("web/supervisor/queryDvResponsibility")
+    @ApiOperation(value = "查看责任划分", notes = "查看责任划分")
+    ServerResponse queryDvResponsibility(@RequestParam("request") HttpServletRequest request,
+                                         @RequestParam("houseId") String houseId, @RequestParam("pageDTO") PageDTO pageDTO);
+
+
+    @PostMapping("web/supervisor/queryAcceptanceTrend")
+    @ApiOperation(value = "查看验收动态", notes = "查看验收动态")
+    ServerResponse queryAcceptanceTrend(@RequestParam("request") HttpServletRequest request,
+                                        @RequestParam("houseId") String houseId,
+                                        @RequestParam("pageDTO") PageDTO pageDTO);
+    //工地列表
+
+    //工地详情
+
+    @PostMapping("web/supervisor/queryMtHostList")
+    @ApiOperation(value = "（维修)工地列表", notes = "（维修)工地列表")
+    ServerResponse queryMaintenanceHostList(@RequestParam("request") HttpServletRequest request,
+                                        @RequestParam("houseId") String houseId);
+
+    @PostMapping("web/supervisor/queryMtHostListDetail")
+    @ApiOperation(value = "（维保）工地详情", notes = "（维保）工地详情")
+    ServerResponse queryMtHostListDetail(@RequestParam("request") HttpServletRequest request,
+                                        @RequestParam("houseId") String houseId);
 
 
 }

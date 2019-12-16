@@ -95,4 +95,20 @@ public class Complain extends BaseEntity {
     @ApiModelProperty("发起人电话")
     private String userMobile;
 
+
+    @Column(name = "change_reason")
+    @Desc(value = "更换原因")
+    @ApiModelProperty("更换原因")
+    private String changeReason;
+
+    @Column(name = "reject_reason")
+    @Desc(value = " 驳回原因")
+    @ApiModelProperty(" 驳回原因")
+    private String rejectReason;
+
+    @Column(name = "image")
+    @Desc(value = "图片")
+    @ApiModelProperty("图片")
+    private String image;
+
 }

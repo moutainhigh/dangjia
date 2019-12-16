@@ -233,11 +233,11 @@
             IFNULL(t1.image, t2.image) image,
             t1.product_name productName,
             t1.price,
-            t1.total_price totalPrice,
+            IFNULL(t1.total_price,t1.price*t1.shop_count) totalPrice,
             t1.shop_count shopCount,
             t2.prod_template_id productTemplateId,
             t1.product_id productId,
-            t1.workder_type_id workerTypeId
+            t1.worker_type_id workerTypeId
         FROM
             dj_deliver_order t,
             dj_deliver_order_item t1,
@@ -251,6 +251,58 @@
         </if>
 
     </select>
+
+    <select id="getBudgetOrderNewInfo" resultType="com.dangjia.acg.dto.house.HouseOrderDetailDTO">
+        SELECT
+        t.id orderId,
+        t1.id orderItemId,
+        IFNULL(t1.image, t2.image) image,
+        t1.product_name productName,
+        t1.price,
+        IFNULL(t1.total_price,t1.price*t1.shop_count) totalPrice,
+        t1.shop_count shopCount,
+        t2.prod_template_id productTemplateId,
+        t1.product_id productId,
+        t1.worker_type_id workerTypeId
+        FROM
+        dj_deliver_order t,
+        dj_deliver_order_item t1,
+        dj_basics_storefront_product t2,
+        dj_pay_business_order t3
+        WHERE
+        t.id = t1.order_id
+        AND t1.product_id = t2.id
+        and t.business_order_number=t3.number
+        and t3.state = 3
+        AND t.house_id = #{houseId}
+        AND t1.worker_type_id =#{workerTypeId}
+        and t1.shop_count>IFNULL(t1.return_count,0)+IFNULL(t1.ask_count,0)
+    </select>
+    <!--查询是否有待处理的补差价单-->
+    <select id="getBudgetDifferenceOrder" resultType="com.dangjia.acg.dto.house.HouseOrderDetailDTO">
+
+       SELECT
+        t.id orderId,
+        t1.id orderItemId,
+        IFNULL(t1.image, t2.image) image,
+        t1.product_name productName,
+        t1.price,
+        IFNULL(t1.total_price,t1.price*t1.shop_count) totalPrice,
+        t1.shop_count shopCount,
+        t1.product_id productId,
+        t1.worker_type_id workerTypeId
+        FROM
+        dj_deliver_order t,
+        dj_deliver_order_item t1,
+        dj_pay_business_order t2
+        WHERE
+        t.id = t1.order_id
+        AND t.business_order_number = t2.number
+        AND t.house_id = #{houseId}
+        AND t1.worker_type_id =#{workerTypeId}
+        and t2.state in(1,2)
+    </select>
+
     <!-- 可以默认配置的设计商品，精算师选择-->
     <select id="selectDesignProductList" resultType="com.dangjia.acg.dto.house.HouseOrderDetailDTO">
          SELECT

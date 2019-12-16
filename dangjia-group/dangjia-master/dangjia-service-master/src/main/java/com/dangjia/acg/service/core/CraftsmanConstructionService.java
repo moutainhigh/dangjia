@@ -1,33 +1,50 @@
 package com.dangjia.acg.service.core;
 
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.ButtonListBean;
 import com.dangjia.acg.dto.core.ConstructionByWorkerIdBean;
+import com.dangjia.acg.dto.core.Task;
+import com.dangjia.acg.dto.house.HouseOrderDetailDTO;
 import com.dangjia.acg.mapper.core.*;
+import com.dangjia.acg.mapper.delivery.IOrderMapper;
 import com.dangjia.acg.mapper.design.IDesignBusinessOrderMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.matter.IWorkerEverydayMapper;
+import com.dangjia.acg.mapper.member.IMasterMemberAddressMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.menu.IMenuConfigurationMapper;
+import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
+import com.dangjia.acg.mapper.product.IMasterProductTemplateMapper;
 import com.dangjia.acg.mapper.worker.IInsuranceMapper;
+import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.core.*;
+import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.design.DesignBusinessOrder;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.matter.WorkerEveryday;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.member.MemberAddress;
 import com.dangjia.acg.modle.menu.MenuConfiguration;
+import com.dangjia.acg.modle.pay.BusinessOrder;
+import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.worker.Insurance;
+import com.dangjia.acg.service.design.QuantityRoomService;
+import com.dangjia.acg.service.product.MasterProductTemplateService;
 import com.dangjia.acg.util.HouseUtil;
 import com.dangjia.acg.util.Utils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -49,6 +66,7 @@ import java.util.Map;
  */
 @Service
 public class CraftsmanConstructionService {
+    private static Logger logger = Logger.getLogger(CraftsmanConstructionService.class);
     @Autowired
     private IMenuConfigurationMapper iMenuConfigurationMapper;
     @Autowired
@@ -76,6 +94,22 @@ public class CraftsmanConstructionService {
 
     @Autowired
     private IInsuranceMapper insuranceMapper;
+    @Autowired
+    private QuantityRoomService quantityRoomService;
+    @Autowired
+    private IOrderMapper iOrderMapper;
+    @Autowired
+    private IBusinessOrderMapper iBusinessOrderMapper;
+    @Autowired
+    private TaskStackService taskStackService;
+    @Autowired
+    private IMasterProductTemplateMapper iMasterProductTemplateMapper;
+    @Autowired
+    private IMasterUnitMapper iMasterUnitMapper;
+    @Autowired
+    private MasterProductTemplateService masterProductTemplateService;
+    @Autowired
+    private IMasterMemberAddressMapper iMasterMemberAddressMapper;
 
     @Value("${spring.profiles.active}")
     private String active;
@@ -111,6 +145,13 @@ public class CraftsmanConstructionService {
         }
         bean.setHouseId(house.getId());
         bean.setHouseName(house.getHouseName());
+        Example example = new Example(MemberAddress.class);
+        example.createCriteria().andEqualTo(MemberAddress.HOUSE_ID, house.getId());
+        MemberAddress memberAddress = iMasterMemberAddressMapper.selectOneByExample(example);
+        if (memberAddress != null && StringUtils.isNotBlank(memberAddress.getAddress())) {
+            bean.setHouseName(memberAddress.getAddress());
+        }
+
         switch (worker.getWorkerType()) {
             case 1://设计师
                 return getDesignerBean(request, bean, hw, house, hf);
@@ -140,8 +181,11 @@ public class CraftsmanConstructionService {
             bean.setUserId(houseMember.getId());//
         }
         setMenus(bean, house, hf);
-        Map<String, Object> dataMap = HouseUtil.getDesignDatas(house);
-        bean.setDataList((List<Map<String, Object>>) dataMap.get("dataList"));
+//        Map<String, Object> dataMap = HouseUtil.getDesignDatas(house);
+//        bean.setDataList((List<Map<String, Object>>) dataMap.get("dataList"));
+        //查询设计师的订单数据
+        List<HouseOrderDetailDTO> houseOrderDetailDTOList = houseMapper.getBudgetOrderNewInfo(house.getId(), "1");
+        bean.setDataList(getBudgetDataList(houseOrderDetailDTOList, house, 1));//查询已购买的设计师的商品
         List<ButtonListBean> buttonList = new ArrayList<>();
 //        if (house.getVisitState() == 1 && house.getDesignerState() != 0 && house.getDesignerState() != 4 && house.getDesignerState() != 3) {
 //            String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
@@ -208,15 +252,18 @@ public class CraftsmanConstructionService {
             bean.setUserId(houseMember.getId());//
         }
         setMenus(bean, house, hf);
-        Map<String, Object> dataMap = HouseUtil.getBudgetDatas(house);
-        bean.setDataList((List<Map<String, Object>>) dataMap.get("dataList"));
-        List<ButtonListBean> buttonList = new ArrayList<>();
+        //Map<String, Object> dataMap = HouseUtil.getBudgetDatas(house);
+        // bean.setDataList((List<Map<String, Object>>) dataMap.get("dataList"));
+        //查询精算师的订单数据
+        List<HouseOrderDetailDTO> houseOrderDetailDTOList = houseMapper.getBudgetOrderNewInfo(house.getId(), "2");
+        bean.setDataList(getBudgetDataList(houseOrderDetailDTOList, house, 2));//查询已购买的精算师的商品
+        List<ButtonListBean> buttonList = showActuaryButton(house.getId());//按钮显示
 //        if (house.getVisitState() == 1 && house.getBudgetOk() != 0 && house.getBudgetOk() != 5 && house.getBudgetOk() != 3) {
 //            String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
 //            String data = "&houseId=" + house.getId() + "&houseFlowId=" + hf.getId();
 //            buttonList.add(Utils.getButton("提前结束", webAddress + "construction?title=填写原因" + data, 0));
 //        }
-        if (house.getVisitState() == 1 && house.getDecorationType() == 2) {
+       /* if (house.getVisitState() == 1 && house.getDecorationType() == 2) {
             if (house.getBudgetState() == 1 && house.getDesignerState() != 3) {
                 buttonList.add(Utils.getButton("上传设计图", 4));
             } else if (house.getDesignerState() == 3) {
@@ -236,9 +283,146 @@ public class CraftsmanConstructionService {
                     }
                 }
             }
-        }
+        }*/
         bean.setButtonList(buttonList);
         return ServerResponse.createBySuccess("获取施工列表成功！", bean);
+    }
+
+    /**
+     * 转换成符合条件的订单数据
+     *
+     * @param houseOrderDetailDTOList
+     * @param house
+     * @return
+     */
+    List<Map<String, Object>> getBudgetDataList(List<HouseOrderDetailDTO> houseOrderDetailDTOList, House house, int workertype) {
+        List<Map<String, Object>> mapDataList = new ArrayList<>();
+        if (houseOrderDetailDTOList != null && houseOrderDetailDTOList.size() > 0) {
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            for (HouseOrderDetailDTO houseOrderDetailDTO : houseOrderDetailDTOList) {
+                setProductInfo(houseOrderDetailDTO, address);
+                Map<String, Object> dataMap = BeanUtils.beanToMap(houseOrderDetailDTO);
+                dataMap.put("totalNodeNumber", 2);//总节点数
+                if (workertype == 1 ? house.getDesignerOk() == 3 : house.getBudgetOk() == 3) {
+                    dataMap.put("completedNodeNumber", 2);//已完成节点数(已完成)
+                } else {
+                    dataMap.put("completedNodeNumber", 1);//已完成节点数(进行中）
+                }
+                mapDataList.add(dataMap);
+            }
+        }
+        return mapDataList;
+    }
+
+    /**
+     * 替换对应的信息
+     *
+     * @param ap
+     * @param address
+     */
+    private void setProductInfo(HouseOrderDetailDTO ap, String address) {
+        String productTemplateId = ap.getProductTemplateId();
+        DjBasicsProductTemplate pt = iMasterProductTemplateMapper.selectByPrimaryKey(productTemplateId);
+        if (pt != null && StringUtils.isNotBlank(pt.getId())) {
+            String image = ap.getImage();
+            if (image != null) {
+                //添加图片详情地址字段
+                String[] imgArr = image.split(",");
+                if (imgArr != null && imgArr.length > 0) {
+                    ap.setImageUrl(address + imgArr[0]);//图片详情地址设置
+                }
+            }
+
+            String unitId = pt.getUnitId();
+            //查询单位
+            if (pt.getConvertQuality() != null && pt.getConvertQuality() > 0) {
+                unitId = pt.getConvertUnit();
+            }
+            if (unitId != null && StringUtils.isNotBlank(unitId)) {
+                Unit unit = iMasterUnitMapper.selectByPrimaryKey(unitId);
+                ap.setUnitId(unitId);
+                ap.setUnitName(unit != null ? unit.getName() : "");
+            }
+            //查询规格名称
+            if (StringUtils.isNotBlank(pt.getValueIdArr())) {
+                ap.setValueIdArr(pt.getValueIdArr());
+                ap.setValueNameArr(masterProductTemplateService.getNewValueNameArr(pt.getValueIdArr()).replaceAll(",", " "));
+            }
+        }
+
+    }
+
+    /**
+     * 判断移动端精算当前需显示的按钮
+     *
+     * @param houseId
+     * @return showButtonType(2001显示装修信息按钮 2002审核图纸 2003请等待业主选择 2004请等待设计师制作完毕 2005已结束 2006上传图纸 ）
+     */
+    public List<ButtonListBean> showActuaryButton(String houseId) {
+
+        List<ButtonListBean> buttonList = new ArrayList<>();
+        try {
+            //1.判断业主购买的精算单是否为已退款状态
+            List<HouseOrderDetailDTO> orderInfo = houseMapper.getBudgetOrderNewInfo(houseId, "2");
+            List<HouseOrderDetailDTO> houseOrderDetailDTOList = houseMapper.getBudgetOrderDetailByHouseId(houseId, "2");//判断是否有精算订单
+            if ((orderInfo == null || orderInfo.size() == 0) && (houseOrderDetailDTOList != null && houseOrderDetailDTOList.size() > 0)) {
+                buttonList.add(Utils.getButton("已结束", 2005));
+                return buttonList;
+            }
+            //2.判断是否有待付款的补差价订单
+            orderInfo = houseMapper.getBudgetDifferenceOrder(houseId, "2");
+            if (orderInfo != null && orderInfo.size() > 0) {
+                buttonList.add(Utils.getButton("请等待业主选择", 2003));
+                return buttonList;
+            }
+            //3.判断是否显示确认装修信息按钮
+            ServerResponse serverResponse = quantityRoomService.isConfirmAddress(houseId);
+            if (serverResponse.getResultObj() != null) {
+                String obj = serverResponse.getResultObj().toString();//0:未确认地址，1：已经确认地址
+                if ("0".equals(obj)) {//如果未确认过地址，则显示确认地址按钮，精算师上传地址
+                    buttonList.add(Utils.getButton("确认装修信息", 2001));
+                    return buttonList;
+                }
+            }
+            //4.判断是否显示审核图纸按钮
+            House house = houseMapper.selectByPrimaryKey(houseId);
+            if (house.getBudgetOk() == 1 && house.getDesignerOk() == 0) {//如果图纸未审核通过，且未有设计师
+                //4.1判断业主是否购买了当家平台设计，以及对应的支付状态
+                houseOrderDetailDTOList = houseMapper.getBudgetOrderDetailByHouseId(houseId, "1");
+                if (houseOrderDetailDTOList != null && houseOrderDetailDTOList.size() > 0) {//购买了当家平台设计
+                    //判断当前设计单的状态
+                    HouseOrderDetailDTO houseOrderDetailDTO = houseOrderDetailDTOList.get(0);
+                    Order order = iOrderMapper.selectByPrimaryKey(houseOrderDetailDTO.getOrderId());
+                    Example example = new Example(BusinessOrder.class);
+                    example.createCriteria().andEqualTo(BusinessOrder.NUMBER, order.getBusinessOrderNumber());
+                    BusinessOrder businessOrder = iBusinessOrderMapper.selectOneByExample(example);
+                    if (businessOrder.getState() == 3) {
+                        buttonList.add(Utils.getButton("请等待设计师制作完毕", 2004));
+                    } else {
+                        buttonList.add(Utils.getButton("请等待业主选择", 2003));
+                    }
+                } else {//未购买当家平台设计
+                    //判断业主是否已做了选择
+                    List<Task> list = taskStackService.selectTaskStackInfoByType(houseId, "6");//是否有待审核图纸的任务
+                    if (list != null && list.size() > 0) {
+                        buttonList.add(Utils.getButton("请等待设计师制作完毕", 2004));
+                    } else {
+                        buttonList.add(Utils.getButton("审核图纸", 2002));
+                    }
+                }
+
+            } else if (house.getBudgetOk() == 1 && house.getDesignerOk() == 3) {//如果精算师是已抢单，且设计师为已完成，则显示审核图纸按钮
+                buttonList.add(Utils.getButton("审核图纸", 2002));
+            } else if (house.getBudgetOk() == 1 && house.getDesignerOk() != 0 && house.getDesignerOk() != 3) {//若精算师为已他单，设计师为已抢单未完成状态
+                buttonList.add(Utils.getButton("请等待设计师制作完毕", 2004));
+            } else if (house.getBudgetOk() == 6 && house.getDesignerOk() != 3) {//精算师为已审核完成，设计师为未审核
+                buttonList.add(Utils.getButton("上传图纸", 2006));
+            }
+
+        } catch (Exception e) {
+            logger.error("查询失败", e);
+        }
+        return buttonList;
     }
 
     /**
@@ -634,8 +818,16 @@ public class CraftsmanConstructionService {
             if (hf.getWorkType() != 4) {//未支付屏蔽未支付禁止显示的
                 criteria.andEqualTo(MenuConfiguration.SHOW_PAYMENT, 1);
             }
-            if (house.getDecorationType() == 2) {//如果是自带设计不查询量房
+           /* if (house.getDecorationType() == 2) {//如果是自带设计不查询量房
                 criteria.andNotEqualTo(MenuConfiguration.TYPE, 2);
+            }*/
+            //如果已确认过装修信息，则显示量房按钮update fzh 2019/12/14
+            ServerResponse serverResponse = quantityRoomService.isConfirmAddress(house.getId());
+            if (serverResponse.getResultObj() != null) {
+                String obj = serverResponse.getResultObj().toString();//0:未确认地址，1：已经确认地址
+                if ("1".equals(obj)) {//如果未确认过地址，则显示确认地址按钮，精算师上传地址
+                    criteria.andNotEqualTo(MenuConfiguration.TYPE, 2);
+                }
             }
             menuCondition(bean, criteria);
             example.orderBy(MenuConfiguration.SORT).asc();

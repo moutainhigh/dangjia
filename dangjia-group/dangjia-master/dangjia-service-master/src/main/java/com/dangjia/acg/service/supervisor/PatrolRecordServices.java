@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.supervisor;
 
+import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -39,6 +40,24 @@ public class PatrolRecordServices {
     private IRewardPunishRecordMapper rewardPunishRecordMapper ;
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
+
+
+    /**
+     * 督导首页
+     * @param request
+     * @return
+     */
+    public ServerResponse getSupHomePage(HttpServletRequest request) {
+        try {
+
+
+            return null;
+        } catch (Exception e) {
+            logger.error("获取督导首页异常", e);
+            return ServerResponse.createByErrorMessage("获取督导首页异常");
+        }
+    }
+
     /**
      *新建巡检
      * @param request

@@ -22,7 +22,10 @@ import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
-
+/**
+ * author: qiyuxiang
+ * Date: 2019-12-11
+ */
 @Service
 public class ConfigRuleService {
 
@@ -71,7 +74,8 @@ public class ConfigRuleService {
      * 更新等级明细列表
      * @return
      */
-    public ServerResponse editConfigRuleRank(String rankIds,String scoreStarts,String scoreEnds) {
+
+    public ServerResponse editConfigRuleRank(HttpServletRequest request,String rankIds,String scoreStarts,String scoreEnds) {
         try {
             if(!CommonUtil.isEmpty(rankIds)){
                 String[] rankIdlist=rankIds.split(",");
@@ -89,6 +93,16 @@ public class ConfigRuleService {
                     configRuleRankMapper.updateByExampleSelective(configRuleRank,example);
                 }
             }
+            //新增操作流水
+            String userID = request.getParameter(Constants.USERID);
+            OperationFlow operationFlow=new OperationFlow();
+            operationFlow.setName("等级配置变更");
+            operationFlow.setOperationId(rankIds);
+            operationFlow.setOperationType("configRule_RuleRank");
+            operationFlow.setRemarks("等级配置-更新");
+            operationFlow.setUserId(userID);
+            operationFlow.setUserType(0);
+            operationFlowMapper.insert(operationFlow);
             return ServerResponse.createBySuccess("更新成功");
         } catch (Exception e) {
             logger.error("editConfigRuleRank:",e);
@@ -98,9 +112,10 @@ public class ConfigRuleService {
 
     /**
      * 查询模块配置列表
-     * @param  type 规则模块类型： 1=积分规则 2=拿钱规则  3=抢单规则 4=其他规则
+     * @param  type 规则模块类型： 1=积分规则 2=拿钱规则  3=抢单规则 4=其他规则 5=排期规则
      * @return
      */
+
     public ServerResponse searchConfigRuleModule(String type) {
         try {
             Example example=new Example(DjConfigRuleModule.class);
@@ -133,10 +148,10 @@ public class ConfigRuleService {
                     if(MK008.equals(configRuleModule.getTypeId())||MK009.equals(configRuleModule.getTypeId())) {
                         example = new Example(WorkerType.class);
                         if(MK008.equals(configRuleModule.getTypeId())){//工匠拿钱规则
-                            example.createCriteria().andGreaterThan(WorkerType.TYPE ,3);
+                            example.createCriteria().andGreaterThan(WorkerType.TYPE ,3).andNotEqualTo(WorkerType.TYPE ,7);
                         }
                         if(MK009.equals(configRuleModule.getTypeId())){//滞留金上限
-                            example.createCriteria().andGreaterThan(WorkerType.TYPE ,2);
+                            example.createCriteria().andGreaterThan(WorkerType.TYPE ,2).andNotEqualTo(WorkerType.TYPE ,7);
                         }
                         List<WorkerType> workerTypeList = workerTypeMapper.selectByExample(example);
                         for (WorkerType configRuleType : workerTypeList) {
@@ -174,31 +189,59 @@ public class ConfigRuleService {
             Map<String,String> field= setConfigRuleItemField(configRuleModule,typeId);
             if(configRuleModule.getItemType()==1){
                 List<DjConfigRuleItemOne> ruleItemOneData =new ArrayList<>();
-                Example example=new Example(DjConfigRuleRank.class);
-                List<DjConfigRuleRank> configRuleRanks = configRuleRankMapper.selectByExample(example);
-                if(field.isEmpty()){
-                    return ServerResponse.createByErrorMessage("获取配置错误，配置参数字段错误！");
-                }
-                for (String key : field.keySet()) {
-                    ruleItemOneData.addAll(configRuleItemOneMapper.getRuleItemOneData(moduleId,typeId,batchCode,field.get(key),key,configRuleRanks.size()));
-                }
-                if (ruleItemOneData.size() <= 0) {
-                    return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
-                }
-                List<Map> returnData=new ArrayList<>();
-                for (DjConfigRuleRank configRuleRank : configRuleRanks) {
-                    Map map =new HashMap();
-                    map.put(DjConfigRuleItemOne.RANK_ID,configRuleRank.getId());
-                    map.put(DjConfigRuleItemOne.RANK_NAME,configRuleRank.getName());
-                    map.put(DjConfigRuleItemOne.TYPE_ID,typeId);
-                    map.put(DjConfigRuleItemOne.BATCH_CODE,batchCode);
-                    map.put(DjConfigRuleItemOne.MODULE_ID,moduleId);
-                    for (DjConfigRuleItemOne ruleItemOneDatum : ruleItemOneData) {
-                        if(ruleItemOneDatum.getRankId().equals(configRuleRank.getId())){
-                            map.put(ruleItemOneDatum.getRuleFieldCode(),ruleItemOneDatum.getRuleFieldValue());
-                        }
+                List<Map> returnData = new ArrayList<>();
+                if(configRuleModule.getType()!=5) {
+                    Example example = new Example(DjConfigRuleRank.class);
+                    List<DjConfigRuleRank> configRuleRanks = configRuleRankMapper.selectByExample(example);
+                    if (field.isEmpty()) {
+                        return ServerResponse.createByErrorMessage("获取配置错误，配置参数字段错误！");
                     }
-                    returnData.add(map);
+                    for (String key : field.keySet()) {
+                        ruleItemOneData.addAll(configRuleItemOneMapper.getRuleItemOneData(moduleId, typeId, batchCode, field.get(key), key, configRuleRanks.size()));
+                    }
+                    if (ruleItemOneData.size() <= 0) {
+                        return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+                    }
+                    for (DjConfigRuleRank configRuleRank : configRuleRanks) {
+                        Map map = new HashMap();
+                        map.put(DjConfigRuleItemOne.RANK_ID, configRuleRank.getId());
+                        map.put(DjConfigRuleItemOne.RANK_NAME, configRuleRank.getName());
+                        map.put(DjConfigRuleItemOne.TYPE_ID, typeId);
+                        map.put(DjConfigRuleItemOne.BATCH_CODE, batchCode);
+                        map.put(DjConfigRuleItemOne.MODULE_ID, moduleId);
+                        for (DjConfigRuleItemOne ruleItemOneDatum : ruleItemOneData) {
+                            if (ruleItemOneDatum.getRankId().equals(configRuleRank.getId())) {
+                                map.put(ruleItemOneDatum.getRuleFieldCode(), ruleItemOneDatum.getRuleFieldValue());
+                            }
+                        }
+                        returnData.add(map);
+                    }
+                }else{
+                    Example example = new Example(WorkerType.class);
+                    example.createCriteria().andGreaterThan(WorkerType.TYPE ,3).andNotEqualTo(WorkerType.TYPE ,7);
+                    List<WorkerType> workerTypeList = workerTypeMapper.selectByExample(example);
+                    if (field.isEmpty()) {
+                        return ServerResponse.createByErrorMessage("获取配置错误，配置参数字段错误！");
+                    }
+                    for (String key : field.keySet()) {
+                        ruleItemOneData.addAll(configRuleItemOneMapper.getRuleItemOneWorkerData(moduleId,  batchCode, field.get(key), key, workerTypeList.size()));
+                    }
+                    if (ruleItemOneData.size() <= 0) {
+                        return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+                    }
+                    for (WorkerType workerType : workerTypeList) {
+                        Map mapworker = new HashMap();
+                        mapworker.put(DjConfigRuleItemOne.BATCH_CODE, batchCode);
+                        mapworker.put(DjConfigRuleItemOne.MODULE_ID, moduleId);
+                        mapworker.put(DjConfigRuleItemOne.RANK_NAME, workerType.getName());
+                        mapworker.put(DjConfigRuleItemOne.RANK_ID, workerType.getId());
+                        for (DjConfigRuleItemOne ruleItemOneDatum : ruleItemOneData) {
+                            if (ruleItemOneDatum.getRankId().equals(workerType.getId())) {
+                                mapworker.put(ruleItemOneDatum.getRuleFieldCode(), ruleItemOneDatum.getRuleFieldValue());
+                            }
+                        }
+                        returnData.add(mapworker);
+                    }
                 }
                 return ServerResponse.createBySuccess("查询成功",returnData);
             }
@@ -390,17 +433,29 @@ public class ConfigRuleService {
      * 新增规则配置明细
      * @return
      */
+
     public Map<String,String> setConfigRuleItemField(DjConfigRuleModule configRuleModule,String typeId) {
         Map<String,String> field= new HashMap();
         if(configRuleModule.getItemType()==1){
+            if(PQ102.equals(configRuleModule.getTypeId())){
+                field.put("minApartment","小户型");
+                field.put("bigApartment","大户型");
+                field.put("maxApartment","超大户型");
+            }
+            if(PQ103.equals(configRuleModule.getTypeId())){
+                field.put("number","默认人数(人)");
+            }
+            if(PQ104.equals(configRuleModule.getTypeId())){
+                field.put("number","工序安装天数");
+            }
             if(MK001.equals(configRuleModule.getTypeId())){//旷工扣积分
                 field.put("integral","配置积分(分)");
             }
             if(MK003.equals(configRuleModule.getTypeId())||MK004.equals(configRuleModule.getTypeId())){//大管家获取积分/工匠获取积分
-                if(SG001.equals(typeId)||SG002.equals(typeId)||SG005.equals(typeId)){//周计划/巡查
+                if(SG001.equals(typeId)||SG002.equals(typeId)||SG005.equals(typeId)){//周计划/巡查/每日完工
                     field.put("integral","配置积分");
                 }
-                if(SG003.equals(typeId)||SG004.equals(typeId)||SG006.equals(typeId)){//竣工/验收
+                if(SG003.equals(typeId)||SG004.equals(typeId)||SG006.equals(typeId)){//竣工/验收/被评价
                     field.put("starOne","1星");
                     field.put("starTwo","2星");
                     field.put("starThree","3星");
@@ -440,6 +495,11 @@ public class ConfigRuleService {
             }
         }
         if(configRuleModule.getItemType()==2){
+            if(PQ101.equals(configRuleModule.getTypeId())){
+                field.put("minApartment","小户型");
+                field.put("bigApartment","大户型");
+                field.put("maxApartment","超大户型");
+            }
             if(MK002.equals(configRuleModule.getTypeId())){//延期完工扣积分
                 field.put("workerDelay","工匠延期扣分(每天)");
                 field.put("stewardDelay","大管家延期扣分(每天)");
@@ -480,6 +540,11 @@ public class ConfigRuleService {
     public static String   MK016 = "MK016";//搜索结果排序算法
     public static String   MK017 = "MK017";//管家派单算法
     public static String   MK014 = "MK014";//积分转化当家贝
+
+    public static String   PQ101 = "PQ101";//户型设置
+    public static String   PQ102 = "PQ102";//平均工价
+    public static String   PQ103 = "PQ103";//默认人数
+    public static String   PQ104 = "PQ104";//配置工序安装期
 
     public static String   SG001 = "SG001";//周计划
     public static String   SG002 = "SG002";//巡查

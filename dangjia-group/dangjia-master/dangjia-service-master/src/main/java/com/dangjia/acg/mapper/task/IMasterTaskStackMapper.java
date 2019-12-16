@@ -22,4 +22,12 @@ public interface IMasterTaskStackMapper extends Mapper<TaskStack> {
    * @return
    */
   List<Task> selectTaskStackInfo(@Param("houseId") String houseId, @Param("memberId") String memberId);
+
+  /**
+   * 查询当前类型是否有待处理的任务
+   * @param houseId
+   * @param type
+   * @return
+   */
+  List<Task> selectTaskStackInfoByType(@Param("houseId") String houseId,@Param("type") String type);
 }

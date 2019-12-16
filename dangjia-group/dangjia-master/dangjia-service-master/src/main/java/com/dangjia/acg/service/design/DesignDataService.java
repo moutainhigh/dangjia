@@ -125,19 +125,12 @@ public class DesignDataService {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "设计师还在设计中");
             }
             if (house.getDesignerState() != 5 && house.getDesignerState() != 2) {
-//                if (house.getDesignerState() != 0 && house.getDesignerState() != 4 && house.getVisitState() == 1) {
-//                    designDTO.setHistoryRecord(0);
-//                    String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
-//                    designDTO.addButton(Utils.getButton("申请提前结束", webAddress + "ownerEnd?title=填写原因&houseId=" + houseId, 0));
-//                    return ServerResponse.createBySuccess("设计师还在设计中", designDTO);
-//                } else {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "设计师还在设计中");
-//                }
             }
             Example example = new Example(PayConfiguration.class);
             Example.Criteria criteria = example.createCriteria()
                     .andEqualTo(PayConfiguration.DATA_STATUS, 0);
-            String message="";
+            String message;
             if(house.getVisitState() != 3) {
                 designDTO.addButton(Utils.getButton("需要修改设计", 1));
                 if (house.getDesignerState() == 5) {
@@ -239,7 +232,6 @@ public class DesignDataService {
             quantityRoomDTO.setUserType(-1);
             getUserName(quantityRoomDTO);
         }
-
         pageResult.setList(quantityRoomDTOS);
         return ServerResponse.createBySuccess("查询历史记录成功", pageResult);
 

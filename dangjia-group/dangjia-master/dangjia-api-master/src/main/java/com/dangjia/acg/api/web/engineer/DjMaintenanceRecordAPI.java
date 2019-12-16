@@ -21,7 +21,8 @@ public interface DjMaintenanceRecordAPI {
     @PostMapping(value = "web/engineer/queryDjMaintenanceRecordList")
     @ApiOperation(value = "查询质保审核列表", notes = "查询质保审核列表")
     ServerResponse queryDjMaintenanceRecordList(@RequestParam("pageDTO") PageDTO pageDTO,
-                                                @RequestParam("searchKey") String searchKey);
+                                                @RequestParam("searchKey") String searchKey,
+                                                @RequestParam("state") Integer state);
 
     @PostMapping(value = "web/engineer/queryDjMaintenanceRecordDetail")
     @ApiOperation(value = "查询质保审核详情", notes = "查询质保审核详情")
@@ -31,4 +32,10 @@ public interface DjMaintenanceRecordAPI {
     @ApiOperation(value = "处理质保审核", notes = "处理质保审核")
     ServerResponse setDjMaintenanceRecord(@RequestParam("id") String id,
                                           @RequestParam("state") Integer state);
+
+    @PostMapping(value = "web/engineer/queryMemberList")
+    @ApiOperation(value = "查询督导列表", notes = "查询督导列表")
+    ServerResponse queryMemberList(@RequestParam("pageDTO") PageDTO pageDTO,
+                                   @RequestParam("name") String name);
+
 }
