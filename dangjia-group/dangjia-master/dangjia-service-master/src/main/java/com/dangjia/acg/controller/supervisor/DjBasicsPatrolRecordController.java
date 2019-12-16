@@ -50,7 +50,7 @@ public class DjBasicsPatrolRecordController implements DjBasicsPatrolRecordAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getSupHomePage(HttpServletRequest request) {
-        return patrolRecordServices.getSupHomePage(request);
+    public ServerResponse getSupHomePage(HttpServletRequest request,PageDTO pageDTO,String userToken) {
+        return patrolRecordServices.getSupHomePage(request,pageDTO,userToken);
     }
 }

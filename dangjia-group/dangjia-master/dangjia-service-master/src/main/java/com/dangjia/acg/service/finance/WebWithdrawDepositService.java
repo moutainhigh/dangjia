@@ -21,9 +21,12 @@ import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.dangjia.acg.modle.worker.WithdrawDeposit;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.sql.config.DruidConfig;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -54,7 +57,7 @@ public class WebWithdrawDepositService {
     private IMasterStorefrontMapper iMasterStorefrontMapper;
     @Autowired
     private IMasterAccountFlowRecordMapper iMasterAccountFlowRecordMapper;
-
+    private Logger logger = LoggerFactory.getLogger(WebWithdrawDepositService.class);
     /**
      * 查询所有提现申请
      *
@@ -162,7 +165,8 @@ public class WebWithdrawDepositService {
                             "0", "提现结果",
                             DjConstants.PushMessage.WITHDRAW_CASH_SUCCESS, "");
 
-                    if(withdrawDeposit.getRoleType()==4 || 5 == withdrawDeposit.getRoleType()){
+                    logger.info("RoleType==========="+withdrawDeposit.getRoleType());
+                    if(withdrawDeposit.getRoleType()==4 ||withdrawDeposit.getRoleType() ==5 ){
                         //同意供应商/店铺提现
                         setAgreeWithdraw(withdrawDeposit.getRoleType(),
                                 withdrawDeposit.getSourceId(),
@@ -180,6 +184,7 @@ public class WebWithdrawDepositService {
 
             return ServerResponse.createBySuccessMessage("保存成功");
         } catch (Exception e) {
+            logger.info("查询失败",e);
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }

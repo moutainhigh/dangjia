@@ -15,8 +15,7 @@
             dj_account_flow_record afr
         INNER JOIN dj_worker_withdraw_deposit wwd ON afr.house_order_id = wwd.id
         WHERE
-            afr.state = 1
-        AND afr.data_status = 0
+            afr.data_status = 0
         AND afr.flow_type = 2
         AND afr.defined_account_id = #{supId}
         AND wwd.state=#{depositeState}

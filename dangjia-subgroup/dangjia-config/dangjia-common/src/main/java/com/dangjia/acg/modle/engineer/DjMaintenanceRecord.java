@@ -120,8 +120,19 @@ public class DjMaintenanceRecord extends BaseEntity {
     @ApiModelProperty("状态 1:待审核 2:已审核")
     private Integer state;
 
+    @Column(name = "complain_type")
+    @Desc(value = "申诉类型：9-业主申请质保")
+    @ApiModelProperty("申诉类型：9-业主申请质保")
+    private Integer complainType;
 
+    @Column(name = "handle_type")
+    @Desc(value = "客服处理状态0-待处理 1-驳回 2-接受 3-已处理 4-已结束")
+    @ApiModelProperty("客服处理状态0-待处理 1-驳回 2-接受 3-已处理 4-已结束")
+    private Integer handleType;
 
-
+    @Column(name = "user_id")
+    @Desc(value = "处理人id")
+    @ApiModelProperty("处理人id")
+    private String userId;
 
 }

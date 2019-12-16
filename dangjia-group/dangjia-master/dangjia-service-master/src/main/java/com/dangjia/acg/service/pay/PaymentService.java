@@ -2015,8 +2015,8 @@ public class PaymentService {
                 AccountFlowRecord accountFlowRecord = new AccountFlowRecord();
                 accountFlowRecord.setState(2);
                 accountFlowRecord.setDefinedAccountId(djSupplierPayOrder.getSupplierId());
-                accountFlowRecord.setHouseOrderId(accountFlowRecord.getId());
                 accountFlowRecord.setCreateBy(djSupplierPayOrder.getUserId());
+                accountFlowRecord.setHouseOrderId(djSupplierPayOrder.getId());
                 if (djSupplierPayOrder.getState() == 1 && djSupplierPayOrder.getSourceType() == 1) {
                     DjSupplier djSupplier = iMaterSupplierMapper.selectByPrimaryKey(djSupplierPayOrder.getSupplierId());
                     accountFlowRecord.setAmountBeforeMoney(djSupplier.getTotalAccount());//入账前金额
@@ -2047,6 +2047,7 @@ public class PaymentService {
                     iMasterStorefrontMapper.updateByPrimaryKeySelective(storefront);
                     accountFlowRecord.setFlowType("1");
                     accountFlowRecord.setMoney(storefront.getTotalAccount());//入账后金额
+                    accountFlowRecord.setAmountAfterMoney(storefront.getTotalAccount());//入账后金额
                 }
                 //生成流水
                 iMasterAccountFlowRecordMapper.insert(accountFlowRecord);
