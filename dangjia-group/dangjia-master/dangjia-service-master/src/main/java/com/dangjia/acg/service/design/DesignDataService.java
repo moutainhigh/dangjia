@@ -328,11 +328,13 @@ public class DesignDataService {
                                         String searchKey,String workerKey,String userId) {
         String userID = request.getParameter(Constants.USERID);
 
-        Member member = memberMapper.selectByPrimaryKey(userId);
         int  flag= 0;
-        if(member != null){
-             //设计师
-             flag= member.getWorkerType();
+        if(!CommonUtil.isEmpty(userId)){
+            Member member = memberMapper.selectByPrimaryKey(userId);
+            if(member != null){
+                 //设计师
+                 flag= member.getWorkerType();
+            }
         }
 
         String cityKey = request.getParameter(Constants.CITY_ID);

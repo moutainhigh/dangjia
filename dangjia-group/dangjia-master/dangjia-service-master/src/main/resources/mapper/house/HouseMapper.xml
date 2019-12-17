@@ -123,10 +123,10 @@
         s.villages
         )
         WHERE 1=1
-        <if test="designerType > 0 and workerKey!=null and workerKey!=''">
+        <if test="workerKey!=null and workerKey!=''">
             AND CONCAT(gr.operatorName,gr.operatorMobile) like CONCAT('%',#{workerKey},'%')
         </if>
-        <if test="designerType > 0 and userId!=null and userId!=''">
+        <if test="userId!=null and userId!=''">
             AND gr.operatorId = #{userId}
         </if>
         <if test="dataStatus == 1">
