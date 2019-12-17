@@ -218,6 +218,7 @@ public class ConfigRuleService {
                 }else{
                     Example example = new Example(WorkerType.class);
                     example.createCriteria().andGreaterThan(WorkerType.TYPE ,3).andNotEqualTo(WorkerType.TYPE ,7);
+                    example.orderBy(WorkerType.SORT).asc();
                     List<WorkerType> workerTypeList = workerTypeMapper.selectByExample(example);
                     if (field.isEmpty()) {
                         return ServerResponse.createByErrorMessage("获取配置错误，配置参数字段错误！");

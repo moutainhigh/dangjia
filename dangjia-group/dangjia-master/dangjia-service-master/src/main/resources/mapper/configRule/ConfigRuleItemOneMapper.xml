@@ -34,7 +34,7 @@
         SELECT
         o.id,
         IFNULL(o.module_id, #{moduleId}) moduleId,
-        IFNULL(o.batch_code, #{batchCode}) batchCode,
+        IFNULL(o.batch_code, #{batchCodeTow}) batchCode,
         o.type_id,
         r.id rankId,
         r.name rankName,
@@ -46,14 +46,15 @@
         o.data_status dataStatus
         FROM
         dj_core_worker_type r
-        LEFT JOIN dj_config_rule_item_one o ON r.id = o.rank_id AND o.module_id=#{moduleId}  and o.rule_field_code = #{fieldKey}
+        LEFT JOIN dj_config_rule_item_one o ON r.id = o.rank_id
+        AND o.module_id=#{moduleId}  and o.rule_field_code = #{fieldKey}
         <if test="null!=batchCode and ''!=batchCode">
             AND o.batch_code=#{batchCode}
         </if>
         WHERE
             r.type != 7
         AND r.type > 3
-        ORDER BY r.sort DESC LIMIT #{limit}
+        ORDER BY o.create_date DESC LIMIT #{limit}
     </select>
 </mapper>
 
