@@ -52,6 +52,7 @@ public class PatrolRecordServices {
      */
     public ServerResponse getSupHomePage(HttpServletRequest request,PageDTO pageDTO,String userToken,String keyWord) {
         try {
+            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             Object object = memberAPI.getMember(userToken);
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
@@ -60,6 +61,9 @@ public class PatrolRecordServices {
             Member worker = job.toJavaObject(Member.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<PatrolRecordIndexDTO> list = rewardPunishRecordMapper.getSupHomePage(worker.getId(),keyWord);
+            list.forEach(patrolRecordIndexDTO->{
+                patrolRecordIndexDTO.setImage(imageAddress+patrolRecordIndexDTO.getImage());
+            });
             PageInfo pageResult = new PageInfo(list);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {

@@ -7,4 +7,5 @@ public class PatrolRecordIndexDTO {
     private String num;
     private String name;
     private String sortNum;
+    private String image;
 }

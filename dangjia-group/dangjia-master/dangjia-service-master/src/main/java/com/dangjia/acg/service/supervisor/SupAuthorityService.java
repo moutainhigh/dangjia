@@ -9,11 +9,13 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.supervisor.*;
+import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper;
 import com.dangjia.acg.mapper.supervisor.DjBasicsSupervisorAuthorityMapper;
+import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.engineer.DjMaintenanceRecord;
 import com.dangjia.acg.modle.member.Member;
@@ -30,6 +32,7 @@ import tk.mybatis.mapper.entity.Example;
 import tk.mybatis.mapper.util.StringUtil;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -58,6 +61,9 @@ public class SupAuthorityService {
 
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
+
+    @Autowired
+    private IHouseFlowMapper houseFlowMapper;
     /**
      * 删除已选
      * @param request
@@ -208,7 +214,7 @@ public class SupAuthorityService {
             List<SupSitelistDTO> list= djMaintenanceRecordMapper.querySupervisorHostList(worker.getId(),keyWord);
             list.forEach(supSitelistDTO->{
                 String houseId=supSitelistDTO.getHouseId();
-
+                supSitelistDTO.setTodayConstruction("油漆");
             });
             PageInfo pageResult = new PageInfo(list);
             return ServerResponse.createBySuccess("查询成功", pageResult);
@@ -227,9 +233,37 @@ public class SupAuthorityService {
     public ServerResponse querySupervisorHostDetailList(HttpServletRequest request, String houseId) {
         try {
             WorkerSiteDetailsDTO workerSiteDetailsDTO = djMaintenanceRecordMapper.querySupervisorHostDetailList(houseId);
-            if(workerSiteDetailsDTO!=null)
-            {
-            //此处需要续写
+            if (workerSiteDetailsDTO != null) {
+                String detailhouseId = workerSiteDetailsDTO.getHouseId();
+                //循环便利工种
+                List<CraftsManDTO> craftsManDTOList=new ArrayList<CraftsManDTO>();
+                List<HouseFlow> list = houseFlowMapper.getAllFlowByHouseId(detailhouseId);
+                HouseKeeperDTO houseKeeperDTO=new HouseKeeperDTO();
+                list.forEach(houseFlow->{
+                    //3是大管家
+                    String workerTypeId=houseFlow.getWorkerTypeId();
+                    if(workerTypeId.equals("3"))
+                    {
+                        houseKeeperDTO.setWorkerTypeName("泥工");//工种名称
+                        houseKeeperDTO.setName("刘晓庆");//姓名
+                        houseKeeperDTO.setProjectTime("5/12");//工期
+                        houseKeeperDTO.setPatrol("3/12");//巡查
+                        houseKeeperDTO.setCheckTimes("7/12");//验收
+                    }
+                    else
+                    {
+                        //其它类型是工匠
+                        CraftsManDTO craftsManDTO=new CraftsManDTO();
+                        craftsManDTO.setWorkerTypeName("水电");//工种名称
+                        craftsManDTO.setName("李哈哈");//姓名
+                        craftsManDTO.setWorkSteta("1");//施工状态，0未开始 ，1阶段完工通过，2整体完工通过，3待交底，4施工中，5收尾施工
+                        craftsManDTO.setProjectTime("5/25");//工期
+                        craftsManDTO.setNode("16/42");//节点
+                        craftsManDTOList.add(craftsManDTO);
+                    }
+                });
+                workerSiteDetailsDTO.setHouseKeeperDTO(houseKeeperDTO);
+                workerSiteDetailsDTO.setCraftsManDTOList(craftsManDTOList);
             }
             return ServerResponse.createBySuccess("查询成功", workerSiteDetailsDTO);
         } catch (Exception e) {

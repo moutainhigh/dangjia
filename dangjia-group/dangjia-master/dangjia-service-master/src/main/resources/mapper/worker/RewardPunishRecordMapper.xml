@@ -181,7 +181,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <select id="getSupHomePage" resultType="com.dangjia.acg.dto.supervisor.PatrolRecordIndexDTO">
-        select count(1)as  num , '全部' as name    ,  1 as sortNum  from dj_house dh inner join dj_basics_supervisor_authority dbs on dbs.house_id=dh.id and dbs.member_id=#{memberId} <if test="keyWord!=null and keyWord!=''">
+        select count(1)as  num , '全部' as name    ,  1 as sortNum ,'iconWork/home_icon_quanbu.png' as image  from dj_house dh inner join dj_basics_supervisor_authority dbs on dbs.house_id=dh.id and dbs.member_id=#{memberId} <if test="keyWord!=null and keyWord!=''">
         and
         CONCAT(IFNULL(dh.building, '*'),
         '栋',
@@ -191,7 +191,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         )  LIKE CONCAT('%',#{keyWord},'%')
     </if>
      union all
-        select count(1)as  num , '在施工地' as name ,  2 as sortNum from dj_house  dh inner join dj_basics_supervisor_authority dbs on dbs.house_id=dh.id and dbs.member_id=#{memberId} and dh.visit_state=1 <if test="keyWord!=null and keyWord!=''">
+        select count(1)as  num , '在施工地' as name ,  2 as sortNum ,'iconWork/home_icon_zaishigong.png' as image from dj_house  dh inner join dj_basics_supervisor_authority dbs on dbs.house_id=dh.id and dbs.member_id=#{memberId} and dh.visit_state=1 <if test="keyWord!=null and keyWord!=''">
         and
         CONCAT(IFNULL(dh.building, '*'),
         '栋',
@@ -201,7 +201,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         )  LIKE CONCAT('%',#{keyWord},'%')
     </if>
         union all
-        select count(1)as  num , '本周新开' as name,   3 as sortNum from dj_house  dh inner join dj_basics_supervisor_authority dbs on dbs.house_id=dh.id and dbs.member_id=#{memberId} and YEARWEEK(date_format(dh.construction_date, '%Y-%m-%d')) = YEARWEEK(now()) and  dh.visit_state=1 <if test="keyWord!=null and keyWord!=''">
+        select count(1)as  num , '本周新开' as name,   3 as sortNum ,'iconWork/home_icon_week.png' as image from dj_house  dh inner join dj_basics_supervisor_authority dbs on dbs.house_id=dh.id and dbs.member_id=#{memberId} and YEARWEEK(date_format(dh.construction_date, '%Y-%m-%d')) = YEARWEEK(now()) and  dh.visit_state=1 <if test="keyWord!=null and keyWord!=''">
         and
         CONCAT(IFNULL(dh.building, '*'),
         '栋',
@@ -211,7 +211,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         )  LIKE CONCAT('%',#{keyWord},'%')
     </if>
         union all
-        select count(1)as  num , '本月竣工' as name ,  4 as sortNum from dj_house  dh inner join dj_basics_supervisor_authority dbs on dbs.house_id=dh.id and dbs.member_id=#{memberId} and dh.visit_state=3 <if test="keyWord!=null and keyWord!=''">
+        select count(1)as  num , '本月竣工' as name ,  4 as sortNum ,'iconWork/home_icon_month.png' as image from dj_house  dh inner join dj_basics_supervisor_authority dbs on dbs.house_id=dh.id and dbs.member_id=#{memberId} and dh.visit_state=3 <if test="keyWord!=null and keyWord!=''">
         and
         CONCAT(IFNULL(dh.building, '*'),
         '栋',
@@ -221,7 +221,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         )  LIKE CONCAT('%',#{keyWord},'%')
     </if>
         union all
-        select count(1)as  num , '今日开工' as name ,  5 as sortNum from dj_house  dh inner join dj_basics_supervisor_authority dbs on dbs.house_id=dh.id and dbs.member_id=#{memberId} and to_days(dh.construction_date) = to_days(now()) and  dh.visit_state=1
+        select count(1)as  num , '今日开工' as name ,  5 as sortNum ,'iconWork/home_icon_tadyFinish.png' as image from dj_house  dh inner join dj_basics_supervisor_authority dbs on dbs.house_id=dh.id and dbs.member_id=#{memberId} and to_days(dh.construction_date) = to_days(now()) and  dh.visit_state=1
         <if test="keyWord!=null and keyWord!=''">
             and
             CONCAT(IFNULL(dh.building, '*'),
@@ -232,7 +232,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             )  LIKE CONCAT('%',#{keyWord},'%')
         </if>
         union all
-        select count(1)as  num , '连续三天未开工' as name , 6 as sortNum from  dj_house dh inner join dj_basics_supervisor_authority dbs on DATE_SUB(CURDATE(), INTERVAL 3 DAY) &lt;= date(dh.construction_date) and dbs.member_id=#{memberId}and dh.visit_state=0
+        select count(1)as  num , '连续三天未开工' as name , 6 as sortNum ,'iconWork/home_icon_threeday.png' as image from  dj_house dh inner join dj_basics_supervisor_authority dbs on DATE_SUB(CURDATE(), INTERVAL 3 DAY) &lt;= date(dh.construction_date) and dbs.member_id=#{memberId}and dh.visit_state=0
         <if test="keyWord!=null and keyWord!=''">
             and
             CONCAT(IFNULL(dh.building, '*'),
@@ -243,7 +243,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             )  LIKE CONCAT('%',#{keyWord},'%')
         </if>
         union all
-        select count(1)as  num , '超期施工' as name,  7 as sortNum  from dj_house  dh inner join dj_basics_supervisor_authority dbs on dh.id=dbs.house_id and dbs.member_id=#{memberId}
+        select count(1)as  num , '超期施工' as name,  7 as sortNum ,'iconWork/home_icon_overdue.png' as image  from dj_house  dh inner join dj_basics_supervisor_authority dbs on dh.id=dbs.house_id and dbs.member_id=#{memberId}
         <if test="keyWord!=null and keyWord!=''">
             and
             CONCAT(IFNULL(dh.building, '*'),
@@ -254,7 +254,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             )  LIKE CONCAT('%',#{keyWord},'%')
         </if>
         union all
-        select count(1)as  num , '维保工地' as name , 8 as sortNum  from dj_house  dh inner join dj_maintenance_record dmr on dmr.house_id=dh.id
+        select count(1)as  num , '维保工地' as name , 8 as sortNum  ,'iconWork/home_icon_tadyFinish.png' as image from dj_house  dh inner join dj_maintenance_record dmr on dmr.house_id=dh.id
         <if test="keyWord!=null and keyWord!=''">
             and
             CONCAT(IFNULL(dh.building, '*'),
