@@ -146,7 +146,7 @@ public class Member extends BaseEntity {
 
     @Column(name = "check_type")//type
     @Desc(value = "审核状态")
-    @ApiModelProperty("审核状态:  0审核中，1审核未通过不能抢单不能发申请,  2审核已通过 可抢单可发申请, 3账户已禁用 不能抢单不能发申请, 5未提交资料")
+    @ApiModelProperty("审核状态:0审核中，1审核未通过不能抢单不能发申请，2审核已通过 可抢单可发申请，3账户已禁用不能抢单不能发申请，4冻结，5未提交资料")
     private Integer checkType;
 
     @Column(name = "praise_rate")//favorable
