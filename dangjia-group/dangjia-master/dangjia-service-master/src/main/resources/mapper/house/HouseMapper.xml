@@ -503,7 +503,7 @@
             ORDER BY
                 wk.house_id,
                 wk.create_date DESC
-        ) gr on gr.house_id=house.id
+        ) gr on gr.house_id=h.id
         LEFT JOIN dj_store s ON FIND_IN_SET(
         h.village_id,
         s.villages
