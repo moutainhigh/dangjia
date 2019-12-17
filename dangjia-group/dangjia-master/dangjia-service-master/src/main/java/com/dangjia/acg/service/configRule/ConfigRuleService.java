@@ -148,10 +148,10 @@ public class ConfigRuleService {
                     //工种分类获取
                     if(MK008.equals(configRuleModule.getTypeId())||MK009.equals(configRuleModule.getTypeId())) {
                         example = new Example(WorkerType.class);
-                        if(MK008.equals(configRuleModule.getTypeId())){//工匠拿钱规则
+                        if(MK009.equals(configRuleModule.getTypeId())){//工匠拿钱规则
                             example.createCriteria().andGreaterThan(WorkerType.TYPE ,3).andNotEqualTo(WorkerType.TYPE ,7).andNotEqualTo(WorkerType.TYPE ,5);
                         }
-                        if(MK009.equals(configRuleModule.getTypeId())){//滞留金上限
+                        if(MK008.equals(configRuleModule.getTypeId())){//滞留金上限
                             example.createCriteria().andGreaterThan(WorkerType.TYPE ,2).andNotEqualTo(WorkerType.TYPE ,7).andNotEqualTo(WorkerType.TYPE ,5);
                         }
                         List<WorkerType> workerTypeList = workerTypeMapper.selectByExample(example);
