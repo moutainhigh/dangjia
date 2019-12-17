@@ -92,26 +92,30 @@ public class WebSplitDeliverService {
                 Integer sent=0;
 
                 Example example = new Example(SplitDeliver.class);
-                example.createCriteria().andEqualTo(SplitDeliver.SUPPLIER_ID, webSplitDeliverItemDTOList.getSupplierId());
+                example.createCriteria().andEqualTo(SplitDeliver.SUPPLIER_ID, webSplitDeliverItemDTOList.getSupplierId()).andIn(SplitDeliver.APPLY_STATE,Arrays.asList(0,1,2));
                 List<SplitDeliver> splitDelivers=iSplitDeliverMapper.selectByExample(example);
                 for (SplitDeliver splitDeliver : splitDelivers) {
-                    if(splitDeliver.getApplyState()==0){
-                        wait++;
-                    }
-                    if(splitDeliver.getApplyState()==1&&splitDeliver.getApplyState()==2){
-                        sent++;
+                    if(splitDeliver.getApplyState()!=null) {
+                        if (splitDeliver.getApplyState() == 0) {
+                            wait++;
+                        }
+                        if (splitDeliver.getApplyState() == 1 || splitDeliver.getApplyState() == 2) {
+                            sent++;
+                        }
                     }
                 }
 
                 example = new Example(MendDeliver.class);
-                example.createCriteria().andEqualTo(MendDeliver.SUPPLIER_ID, webSplitDeliverItemDTOList.getSupplierId());
+                example.createCriteria().andEqualTo(MendDeliver.SUPPLIER_ID, webSplitDeliverItemDTOList.getSupplierId()).andIn(SplitDeliver.APPLY_STATE,Arrays.asList(0,1));
                 List<MendDeliver> mendDelivers=iMendDeliverMapper.selectByExample(example);
                 for (MendDeliver mendDeliver : mendDelivers) {
-                    if(mendDeliver.getApplyState()==0){
-                        wait++;
-                    }
-                    if(mendDeliver.getApplyState()==1){
-                        sent++;
+                    if(mendDeliver.getApplyState()!=null) {
+                        if (mendDeliver.getApplyState() == 0) {
+                            wait++;
+                        }
+                        if (mendDeliver.getApplyState() == 1) {
+                            sent++;
+                        }
                     }
                 }
 
