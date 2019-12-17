@@ -88,8 +88,6 @@
         FROM
         dj_pay_business_order AS a
         INNER JOIN dj_member AS d ON d.id = a.member_id
-        INNER JOIN ( SELECT c.member_id, GROUP_CONCAT( c.city_id ) city_id,c.city_name  FROM dj_member_city c GROUP BY c.member_id )
-        mt ON mt.member_id = d.id AND FIND_IN_SET(#{cityId}, mt.city_id )
         LEFT JOIN dj_house AS c ON a.house_id = c.id
         <if test="beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
             INNER JOIN dj_pay_pay_order AS pa ON pa.number = a.pay_order_number
