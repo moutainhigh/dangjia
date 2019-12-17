@@ -208,6 +208,7 @@ public class SupAuthorityService {
             List<SupSitelistDTO> list= djMaintenanceRecordMapper.querySupervisorHostList(worker.getId(),keyWord);
             list.forEach(supSitelistDTO->{
                 String houseId=supSitelistDTO.getHouseId();
+
             });
             PageInfo pageResult = new PageInfo(list);
             return ServerResponse.createBySuccess("查询成功", pageResult);
