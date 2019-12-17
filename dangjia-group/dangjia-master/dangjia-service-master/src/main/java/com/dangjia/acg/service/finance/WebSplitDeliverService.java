@@ -34,10 +34,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * ysl
@@ -90,6 +87,38 @@ public class WebSplitDeliverService {
             }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<WebSplitDeliverItemDTO> webSplitDeliverItemDTOLists = iSplitDeliverMapper.getWebSplitDeliverList(cityId,applyState, searchKey, beginDate, endDate);
+            for (WebSplitDeliverItemDTO webSplitDeliverItemDTOList : webSplitDeliverItemDTOLists) {
+                Integer wait=0;
+                Integer sent=0;
+
+                Example example = new Example(SplitDeliver.class);
+                example.createCriteria().andEqualTo(SplitDeliver.SUPPLIER_ID, webSplitDeliverItemDTOList.getSupplierId());
+                List<SplitDeliver> splitDelivers=iSplitDeliverMapper.selectByExample(example);
+                for (SplitDeliver splitDeliver : splitDelivers) {
+                    if(splitDeliver.getApplyState()==0){
+                        wait++;
+                    }
+                    if(splitDeliver.getApplyState()==1&&splitDeliver.getApplyState()==2){
+                        sent++;
+                    }
+                }
+
+                example = new Example(MendDeliver.class);
+                example.createCriteria().andEqualTo(MendDeliver.SUPPLIER_ID, webSplitDeliverItemDTOList.getSupplierId());
+                List<MendDeliver> mendDelivers=iMendDeliverMapper.selectByExample(example);
+                for (MendDeliver mendDeliver : mendDelivers) {
+                    if(mendDeliver.getApplyState()==0){
+                        wait++;
+                    }
+                    if(mendDeliver.getApplyState()==1){
+                        sent++;
+                    }
+                }
+
+                webSplitDeliverItemDTOList.setSent(sent);
+                webSplitDeliverItemDTOList.setWait(wait);
+
+            }
             PageInfo pageResult = new PageInfo(webSplitDeliverItemDTOLists);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {

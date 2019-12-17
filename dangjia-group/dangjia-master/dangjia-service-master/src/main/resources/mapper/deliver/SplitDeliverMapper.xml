@@ -16,9 +16,7 @@
         a.shipAddress,
         a.supplierId,
         a.supMobile,
-        a.supName,
-        SUM(a.sent) sent,
-        SUM(a.wait) wait
+        a.supName
         FROM
         (
         (
@@ -26,25 +24,7 @@
         m.ship_address AS shipAddress,
         m.supplier_id AS supplierId,
         m.supplier_telephone AS supMobile,
-        m.supplier_name AS supName,
-        (
-        SELECT
-        COUNT(d.id)
-        FROM
-        dj_repair_mend_deliver d
-        WHERE
-        d.supplier_id = m.supplier_id
-        AND d.apply_state = 1
-        ) sent,
-        (
-        SELECT
-        COUNT(d.id)
-        FROM
-        dj_repair_mend_deliver d
-        WHERE
-        d.supplier_id = m.supplier_id
-        AND d.apply_state = 0
-        ) wait
+        m.supplier_name AS supName
         FROM
         dj_repair_mend_deliver m
         inner join dj_house h on h.id = m.house_id and h.city_id = #{cityId}
@@ -70,28 +50,7 @@
         s.ship_address AS shipAddress,
         s.supplier_id AS supplierId,
         s.supplier_telephone AS supMobile,
-        s.supplier_name AS supName,
-        (
-        SELECT
-        COUNT(d.id)
-        FROM
-        dj_deliver_split_deliver d
-        WHERE
-        d.supplier_id = s.supplier_id
-        AND (
-        d.apply_state = 1
-        OR d.apply_state = 2
-        )
-        ) sent,
-        (
-        SELECT
-        COUNT(d.id)
-        FROM
-        dj_deliver_split_deliver d
-        WHERE
-        d.supplier_id = s.supplier_id
-        AND d.apply_state = 0
-        ) wait
+        s.supplier_name AS supName
         FROM
         dj_deliver_split_deliver s
         inner join dj_house h on h.id = s.house_id and h.city_id = #{cityId}
@@ -114,8 +73,6 @@
         ) a
         GROUP BY
         a.supplierId
-        ORDER BY
-        a.wait DESC
     </select>
 
     <select id="getSupplierGoodsId" resultType="java.lang.String">
