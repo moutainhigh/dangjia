@@ -71,8 +71,8 @@
         s.supplier_id
         )
         ) a
-        GROUP BY
-        a.supplierId
+        GROUP BY a.supplierId
+        ORDER BY s.supplier_name
     </select>
 
     <select id="getSupplierGoodsId" resultType="java.lang.String">
