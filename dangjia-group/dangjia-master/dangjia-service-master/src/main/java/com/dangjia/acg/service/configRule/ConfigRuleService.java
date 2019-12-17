@@ -302,7 +302,7 @@ public class ConfigRuleService {
                     configRuleItemThrees=new ArrayList<>();
                     for (DjConfigRuleType configRuleType : configRuleTypes) {
                         DjConfigRuleItemThree configRuleItemThree=new DjConfigRuleItemThree();
-                        configRuleItemThree.setBatchCode(batchCode);
+                        configRuleItemThree.setBatchCode(batchCodeTow);
                         configRuleItemThree.setParamType(configRuleType.getId());
                         configRuleItemThree.setParamWeight(0d);
                         configRuleItemThree.setParamName(configRuleType.getName());
@@ -311,6 +311,8 @@ public class ConfigRuleService {
                     }
                 }
                 for (DjConfigRuleItemThree configRuleItemThree : configRuleItemThrees) {
+                    configRuleItemThree.setBatchCode(batchCodeTow);
+                    configRuleItemThree.setParamName(configRuleTypeMapper.selectByPrimaryKey(configRuleItemThree.getParamType()).getName());
                     example=new Example(DjConfigRuleItemLadder.class);
                     example.createCriteria().andEqualTo(DjConfigRuleItemLadder.ITEM_THREE_ID,configRuleItemThree.getId());
                     List<DjConfigRuleItemLadder> configRuleItemLadders = configRuleItemLadderMapper.selectByExample(example);
