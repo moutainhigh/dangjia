@@ -39,6 +39,32 @@ public interface WalletAPI {
      * showdoc
      *
      * @param userToken 必选 string userToken
+     * @param money     必选 string 提现金额
+     * @return {"res":1000,"msg":{"resultObj":{返回参数说明},"resultCode":1000,"resultMsg":"成功"} }
+     * @catalog 当家接口文档/提现模块
+     * @title 验证金额
+     * @description 验证金额
+     * @method POST
+     * @url master/app/member/wallet/verificationAmount
+     * @return_param type int 0:通过，1：弹框提示
+     * @return_param depositMoney double 实际提现金额
+     * @return_param rateMoney double 手续费
+     * @return_param ruleMessage string 费率描述
+     * @return_param message string 到账时间描述
+     * @remark 更多返回错误代码请看首页的错误代码描述
+     * @number 3
+     * @Author: Ruking 18075121944
+     * @Date: 2019/12/17 7:51 PM
+     */
+    @PostMapping("app/member/wallet/verificationAmount")
+    @ApiOperation(value = "验证金额", notes = "验证金额")
+    ServerResponse verificationAmount(@RequestParam("userToken") String userToken,
+                                      @RequestParam("money") Double money);
+
+    /**
+     * showdoc
+     *
+     * @param userToken 必选 string userToken
      * @return {"res":1000,"msg":{"resultObj":{返回参数说明},"resultCode":1000,"resultMsg":"成功"} }
      * @catalog 当家接口文档/提现模块
      * @title 获取提现信息
@@ -49,14 +75,7 @@ public interface WalletAPI {
      * @return_param surplusMoney double 可取余额
      * @return_param message string 头部提示信息(返回值则显示）
      * @return_param messageUrl string 头部提示信息跳转地址
-     * @return_param ruleList List<RuleDTO> 提现规则（返回值则使用规则）
      * @return_param brandCardDTOList List<BrandCardDTO> 用户银行卡
-     * @return_param -- -- --
-     * @return_param ruleList——maxMoney double 最大金额（不包含，-1为无穷大）
-     * @return_param ruleList——minMoney double 最小金额（包含）
-     * @return_param ruleList——rate int 费率，千分值
-     * @return_param ruleList——extraMoney double 额外收取金额
-     * @return_param ruleList——ruleMessage string 收费规则描述
      * @return_param -- -- --
      * @return_param brandCardDTOList——brandName string 银行名
      * @return_param brandCardDTOList——workerBankCardId string 银行关联工人

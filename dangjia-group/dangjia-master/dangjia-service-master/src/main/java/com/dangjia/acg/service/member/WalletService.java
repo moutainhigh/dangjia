@@ -195,6 +195,65 @@ public class WalletService {
         return ServerResponse.createBySuccessMessage("验证码已发送！");
     }
 
+
+    public ServerResponse verificationAmount(String userToken, Double money) {
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member member = memberMapper.selectByPrimaryKey(((Member) object).getId());
+        if (member == null) {
+            return ServerResponse.createbyUserTokenError();
+        }
+        if (member.getCheckType() == 4) {
+            //冻结的帐户不能提现
+            return ServerResponse.createByErrorMessage("账户冻结，无法提现");
+        }
+        if (money == null || money <= 0) {
+            return ServerResponse.createByErrorMessage("金额错误，提现失败");
+        }
+        Double surplusMoney = member.getSurplusMoney().doubleValue();//可取
+        if (surplusMoney - money < 0) {
+            return ServerResponse.createByErrorMessage("余额不足，提现失败");
+        }
+        boolean isOwner = isOwner(member);
+        double depositMoney = money;//实际提现的钱
+        double rateMoney = 0;//手续费
+        Map<String, Object> map = new HashMap<>();
+        map.put("type", 0);
+        if (!isOwner) {
+            try {
+                Date date = DateUtil.parseDate(ruleDate);
+                if (date.getTime() < new Date().getTime()) {
+                    if (money < 1000) {
+                        rateMoney = money * 6.0 / 1000.0 + 1.0;
+                        map.put("ruleMessage", "(6‰)+1元");
+                    } else if (money < 6000) {
+                        rateMoney = money * 7.0 / 1000.0;
+                        map.put("ruleMessage", "7‰");
+                    } else if (money < 10000) {
+                        rateMoney = money * 4.0 / 1000.0;
+                        map.put("ruleMessage", "4‰");
+                    }
+                    if (surplusMoney - (money + rateMoney) < 0) {
+                        depositMoney = money - rateMoney;
+                    } else {
+                        depositMoney = money;
+                    }
+                    if (rateMoney > 0) {
+                        map.put("type", 1);
+                        map.put("depositMoney", depositMoney);
+                        map.put("rateMoney", rateMoney);
+                        map.put("message", "三个工作日内");
+                    }
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+        return ServerResponse.createBySuccess("验证", map);
+    }
+
     /**
      * 获取提现信息
      */
@@ -259,47 +318,6 @@ public class WalletService {
         if (!isOwner) {
             withdrawDTO.setMessage("当家装修将在银行转账手续费补贴上做细微调整，于" + ruleDate + "起实行。");
             withdrawDTO.setMessageUrl(configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + "activityPage?title=提现手续费规则");
-            try {
-                Date date = DateUtil.parseDate(ruleDate);
-                if (date.getTime() < new Date().getTime()) {
-                    List<WithdrawDTO.RuleDTO> ruleDTOList = new ArrayList<>();
-                    //0---1000
-                    WithdrawDTO.RuleDTO ruleDTO = new WithdrawDTO.RuleDTO();
-                    ruleDTO.setMaxMoney(1000);
-                    ruleDTO.setMinMoney(0);
-                    ruleDTO.setRate(6);
-                    ruleDTO.setExtraMoney(1);
-                    ruleDTO.setRuleMessage("(6‰)+1元");
-                    ruleDTOList.add(ruleDTO);
-                    //1000---6000
-                    ruleDTO = new WithdrawDTO.RuleDTO();
-                    ruleDTO.setMaxMoney(6000);
-                    ruleDTO.setMinMoney(1000);
-                    ruleDTO.setRate(7);
-                    ruleDTO.setExtraMoney(0);
-                    ruleDTO.setRuleMessage("7‰");
-                    ruleDTOList.add(ruleDTO);
-                    //6000---10000
-                    ruleDTO = new WithdrawDTO.RuleDTO();
-                    ruleDTO.setMaxMoney(10000);
-                    ruleDTO.setMinMoney(6000);
-                    ruleDTO.setRate(4);
-                    ruleDTO.setExtraMoney(0);
-                    ruleDTO.setRuleMessage("4‰");
-                    ruleDTOList.add(ruleDTO);
-                    //10000--- -1
-                    ruleDTO = new WithdrawDTO.RuleDTO();
-                    ruleDTO.setMaxMoney(-1);
-                    ruleDTO.setMinMoney(10000);
-                    ruleDTO.setRate(0);
-                    ruleDTO.setExtraMoney(0);
-                    ruleDTO.setRuleMessage("");
-                    ruleDTOList.add(ruleDTO);
-                    withdrawDTO.setRuleList(ruleDTOList);
-                }
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
         }
         withdrawDTO.setBrandCardDTOList(brandCardDTOList);
         return ServerResponse.createBySuccess("获取成功", withdrawDTO);
