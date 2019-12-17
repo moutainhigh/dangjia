@@ -149,10 +149,10 @@ public class ConfigRuleService {
                     if(MK008.equals(configRuleModule.getTypeId())||MK009.equals(configRuleModule.getTypeId())) {
                         example = new Example(WorkerType.class);
                         if(MK008.equals(configRuleModule.getTypeId())){//工匠拿钱规则
-                            example.createCriteria().andGreaterThan(WorkerType.TYPE ,3).andNotEqualTo(WorkerType.TYPE ,7);
+                            example.createCriteria().andGreaterThan(WorkerType.TYPE ,3).andNotEqualTo(WorkerType.TYPE ,7).andNotEqualTo(WorkerType.TYPE ,5);
                         }
                         if(MK009.equals(configRuleModule.getTypeId())){//滞留金上限
-                            example.createCriteria().andGreaterThan(WorkerType.TYPE ,2).andNotEqualTo(WorkerType.TYPE ,7);
+                            example.createCriteria().andGreaterThan(WorkerType.TYPE ,2).andNotEqualTo(WorkerType.TYPE ,7).andNotEqualTo(WorkerType.TYPE ,5);
                         }
                         List<WorkerType> workerTypeList = workerTypeMapper.selectByExample(example);
                         for (WorkerType configRuleType : workerTypeList) {
@@ -217,7 +217,7 @@ public class ConfigRuleService {
                     }
                 }else{
                     Example example = new Example(WorkerType.class);
-                    example.createCriteria().andGreaterThan(WorkerType.TYPE ,3).andNotEqualTo(WorkerType.TYPE ,7);
+                    example.createCriteria().andGreaterThan(WorkerType.TYPE ,3).andNotEqualTo(WorkerType.TYPE ,7).andNotEqualTo(WorkerType.TYPE ,5);
                     example.orderBy(WorkerType.SORT).asc();
                     List<WorkerType> workerTypeList = workerTypeMapper.selectByExample(example);
                     if (field.isEmpty()) {
@@ -365,7 +365,7 @@ public class ConfigRuleService {
                     }
                 }else{
                     Example example = new Example(WorkerType.class);
-                    example.createCriteria().andGreaterThan(WorkerType.TYPE ,3).andNotEqualTo(WorkerType.TYPE ,7);
+                    example.createCriteria().andGreaterThan(WorkerType.TYPE ,3).andNotEqualTo(WorkerType.TYPE ,7).andNotEqualTo(WorkerType.TYPE ,5);
                     List<WorkerType> workerTypeList = workerTypeMapper.selectByExample(example);
                     for (WorkerType workerType : workerTypeList) {
                         for (Map<String, String> field : returnData) {

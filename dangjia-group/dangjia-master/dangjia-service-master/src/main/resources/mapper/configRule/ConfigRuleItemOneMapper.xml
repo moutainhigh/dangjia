@@ -52,7 +52,7 @@
             AND o.batch_code=#{batchCode}
         </if>
         WHERE
-            r.type != 7
+        r.type != 7 and r.type != 5
         AND r.type > 3
         ORDER BY o.create_date DESC LIMIT #{limit}
     </select>
