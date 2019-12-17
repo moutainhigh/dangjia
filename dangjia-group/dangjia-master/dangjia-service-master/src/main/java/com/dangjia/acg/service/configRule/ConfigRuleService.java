@@ -146,12 +146,12 @@ public class ConfigRuleService {
                         }
                     }
                     //工种分类获取
-                    if(MK008.equals(configRuleModule.getTypeId())||MK009.equals(configRuleModule.getTypeId())) {
+                    if(MK008.equals(configRuleModule.getTypeId())||MK009.equals(configRuleModule.getTypeId())||MK011.equals(configRuleModule.getTypeId())) {
                         example = new Example(WorkerType.class);
                         if(MK009.equals(configRuleModule.getTypeId())){//工匠拿钱规则
                             example.createCriteria().andGreaterThan(WorkerType.TYPE ,3).andNotEqualTo(WorkerType.TYPE ,7).andNotEqualTo(WorkerType.TYPE ,5);
                         }
-                        if(MK008.equals(configRuleModule.getTypeId())){//滞留金上限
+                        if(MK008.equals(configRuleModule.getTypeId())||MK011.equals(configRuleModule.getTypeId())){//滞留金上限
                             example.createCriteria().andGreaterThan(WorkerType.TYPE ,2).andNotEqualTo(WorkerType.TYPE ,7).andNotEqualTo(WorkerType.TYPE ,5);
                         }
                         List<WorkerType> workerTypeList = workerTypeMapper.selectByExample(example);
@@ -253,7 +253,7 @@ public class ConfigRuleService {
                 List<DjConfigRuleItemTwo> configRuleItemTwos=configRuleItemTwoMapper.selectByExample(example);
                 if (configRuleItemTwos.size() > 0) {
                     for (DjConfigRuleItemTwo configRuleItemTwo : configRuleItemTwos) {
-                        if(CommonUtil.isEmpty(configRuleItemTwo.getFieldValue())){
+                        if(!CommonUtil.isEmpty(configRuleItemTwo.getFieldValue())){
                             configRuleItemTwo.setFieldValues(configRuleItemTwo.getFieldValue().split(","));
                         }
                     }
@@ -314,6 +314,15 @@ public class ConfigRuleService {
                     example=new Example(DjConfigRuleItemLadder.class);
                     example.createCriteria().andEqualTo(DjConfigRuleItemLadder.ITEM_THREE_ID,configRuleItemThree.getId());
                     List<DjConfigRuleItemLadder> configRuleItemLadders = configRuleItemLadderMapper.selectByExample(example);
+                    if(configRuleItemLadders==null ||configRuleItemLadders.size()==0){
+                        configRuleItemLadders =new ArrayList<>();
+                        DjConfigRuleItemLadder configRuleItemLadderNew=new DjConfigRuleItemLadder();
+                        configRuleItemLadderNew.setFraction(0d);
+                        configRuleItemLadderNew.setItemThreeId(configRuleItemThree.getId());
+                        configRuleItemLadderNew.setPhaseEnd(0d);
+                        configRuleItemLadderNew.setPhaseStart(0d);
+                        configRuleItemLadders.add(configRuleItemLadderNew);
+                    }
                     configRuleItemThree.setConfigRuleItemLadders(configRuleItemLadders);
                 }
                 return ServerResponse.createBySuccess("查询成功",configRuleItemThrees);
