@@ -63,5 +63,10 @@ public class RewardPunishRecord extends BaseEntity {
     @ApiModelProperty("申诉ID")
     private String complainId;
 
+    @Column(name = "images")
+    @Desc(value = "图片")
+    @ApiModelProperty("图片")
+    private String images;
+
 
 }
