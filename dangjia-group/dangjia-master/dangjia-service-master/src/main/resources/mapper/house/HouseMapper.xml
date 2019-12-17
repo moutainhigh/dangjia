@@ -499,7 +499,7 @@
               dj_core_house_worker wk
             LEFT JOIN dj_member gr ON gr.id = wk.worker_id
             WHERE
-              wk.worker_type = 1
+              wk.worker_type = 2
             ORDER BY
                 wk.house_id,
                 wk.create_date DESC
