@@ -75,7 +75,7 @@ public interface DjBasicsSupervisorAuthorityAPI {
     ServerResponse querySupervisorHostDetailList(@RequestParam("request") HttpServletRequest request,
                                            @RequestParam("houseId") String houseId);
 
-    @PostMapping("web/supervisor/queryMtHostList")
+    @PostMapping("web/supervisor/queryMaintenanceHostList")
     @ApiOperation(value = "（维修)工地列表", notes = "（维修)工地列表")
     ServerResponse queryMaintenanceHostList(@RequestParam("request") HttpServletRequest request,
                                             @RequestParam("pageDTO") PageDTO pageDTO,

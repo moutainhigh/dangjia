@@ -44,4 +44,6 @@ public interface DjMaintenanceRecordMapper extends Mapper<DjMaintenanceRecord> {
 
     MtHostListDetailDTO queryMtHostListDetail(@Param("houseId") String houseId);
 
+    List<DjMaintenanceRecord> queryMaintenanceRecord(@Param("memberId") String memberId,@Param("houseId") String houseId);
+
 }

@@ -11,5 +11,5 @@ public class RepairHouseListDTO {
     private String sincePurchaseAmount;//维保金额
     private String address;//房子地址
     private  String  houseId;// 房子id
-    //今日施工
+    private String todayConstruction;//今日施工
 }

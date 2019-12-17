@@ -9,7 +9,9 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.supervisor.*;
+import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordMapper;
+import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper;
 import com.dangjia.acg.mapper.supervisor.DjBasicsSupervisorAuthorityMapper;
 import com.dangjia.acg.modle.core.WorkerType;
@@ -25,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
+import tk.mybatis.mapper.util.StringUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -48,7 +51,13 @@ public class SupAuthorityService {
     private MemberAPI memberAPI;
 
     @Autowired
+    private IMemberMapper memberMapper;
+
+    @Autowired
     private IWorkerTypeSafeOrderMapper workerTypeSafeOrderMapper;
+
+    @Autowired
+    private IWorkerTypeMapper workerTypeMapper;
     /**
      * 删除已选
      * @param request
@@ -283,13 +292,27 @@ public class SupAuthorityService {
             List<RepairHouseListDTO> list=djMaintenanceRecordMapper.queryMaintenanceHostList(worker.getId(),keyWord);
             list.forEach(repairHouseListDTO->{
                     String houseId=repairHouseListDTO.getHouseId();
-
+                    List<DjMaintenanceRecord> maintenanceRecordList= djMaintenanceRecordMapper.queryMaintenanceRecord(worker.getId(),houseId);
+                    StringBuffer sb=new StringBuffer();
+                    maintenanceRecordList.forEach(djMaintenanceRecord->{
+                        String workerMemberId=djMaintenanceRecord.getWorkerMemberId();
+                        if(workerMemberId!=null){
+                            Member member = memberMapper.selectByPrimaryKey(workerMemberId);//工匠信息
+                            String workerTypeName = "";
+                            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());//查询工种
+                            workerTypeName=workerType!=null?workerType.getName():"";
+                            if(StringUtil.isNotEmpty(workerTypeName)){
+                                sb.append(workerTypeName).append("、");
+                            }
+                        }
+                    });
+                    repairHouseListDTO.setTodayConstruction(sb!=null&&sb.length()>0?sb.toString().substring(0,sb.toString().length()-1):"");
             });
             PageInfo pageResult = new PageInfo(list);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
-            logger.error("增加已选异常", e);
-            return ServerResponse.createByErrorMessage("增加已选异常");
+            logger.error("（维修)工地列表异常", e);
+            return ServerResponse.createByErrorMessage("（维修)工地列表异常");
         }
     }
 
