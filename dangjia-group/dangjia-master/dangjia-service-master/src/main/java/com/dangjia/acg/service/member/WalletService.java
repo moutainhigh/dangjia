@@ -342,6 +342,26 @@ public class WalletService {
     }
 
     /**
+     * 0工钱收入,1提现,2自定义增加金额,3自定义减少金额,4退材料退款,5剩余材料退款,6退人工退款,7运费,8提现驳回到余额，9:提前结束装修退款
+     */
+    private String getIcon(Integer state) {
+        if (state == null) return "icon/rmb.png";
+        switch (state) {
+            case 0:
+                return "icon/mywallet_icon_rg.png";
+            case 1:
+            case 8:
+                return "icon/mywallet_icon-yhk.png";
+            case 4:
+            case 5:
+            case 6:
+            case 9:
+                return "icon/mywallet_icon_tk.png";
+        }
+        return "icon/mywallet_icon_sj.png";
+    }
+
+    /**
      * 流水详情
      */
     public ServerResponse getExtractDetail(String workerDetailId) {
@@ -349,7 +369,7 @@ public class WalletService {
         Map<String, Object> returnMap = new HashMap<>();
         returnMap.put("id", workerDetail.getId());//id
         returnMap.put("typeName", workerDetail.getName());//流水详情描述
-        returnMap.put("image", configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + "icon/rmb.png");
+        returnMap.put("image", configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class) + getIcon(workerDetail.getState()));
         House house = houseMapper.selectByPrimaryKey(workerDetail.getHouseId());
         String houseName = "自定义流水";
         if (house != null) {
@@ -410,7 +430,7 @@ public class WalletService {
         for (WorkerDetail workerDetail : outDetailList) {
             DetailDTO detailDTO = new DetailDTO();
             detailDTO.setWorkerDetailId(workerDetail.getId());
-            detailDTO.setImage(imageAddress + "icon/rmb.png");//图标
+            detailDTO.setImage(imageAddress + getIcon(workerDetail.getState()));//图标
             detailDTO.setName(workerDetail.getName());
             detailDTO.setCreateDate(workerDetail.getCreateDate());
             detailDTO.setMoney((type == 0 ? "-" : "+") + workerDetail.getMoney());
