@@ -364,7 +364,7 @@ public class WalletService {
         returnMap.put("createDate", DateUtil.dateToString(workerDetail.getCreateDate(), "yyyy-MM-dd HH:mm"));//流水时间
         returnMap.put("rateMoney", workerDetail.getRateMoney());//手续费为空或为0不显示
         returnMap.put("depositMoney", workerDetail.getDepositMoney());//实际提现的钱为空或为0不显示
-        returnMap.put("depositState", -1);//-1不显示，0未处理,1同意 2不同意(驳回)
+        returnMap.put("depositState", workerDetail.getState() == 8 ? 2 : -1);//-1不显示，0未处理,1同意 2不同意(驳回)
         if (workerDetail.getState() == 1) {//提现状态
             WithdrawDeposit wd = withdrawDepositMapper.selectByPrimaryKey(workerDetail.getDepositId());
             if (wd != null) {
