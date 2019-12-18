@@ -246,7 +246,7 @@ public class DjBasicsGoodsService {
                 bgtype="0,1";//删选0：实物商品；1：服务商品
             }
 
-            List<DjBasicsProductTemplateDTO> productList = iBasicsProductTemplateMapper.queryProductTemplateByGoodsId(categoryId,storefontId,bgtype);
+            List<DjBasicsProductTemplateDTO> productList = iBasicsProductTemplateMapper.queryProductTemplateByGoodsId(categoryId,storefontId,bgtype,name);
             PageInfo pageResult = new PageInfo(productList);
             for (DjBasicsProductTemplateDTO p : productList) {
                 //type表示： 是否禁用  0：禁用；1不禁用 ;  -1全部默认

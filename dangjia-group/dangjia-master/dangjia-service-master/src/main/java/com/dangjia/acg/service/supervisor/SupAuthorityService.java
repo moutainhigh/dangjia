@@ -214,7 +214,10 @@ public class SupAuthorityService {
             List<SupSitelistDTO> list= djMaintenanceRecordMapper.querySupervisorHostList(worker.getId(),keyWord);
             list.forEach(supSitelistDTO->{
                 String houseId=supSitelistDTO.getHouseId();
-                supSitelistDTO.setTodayConstruction("油漆");
+                supSitelistDTO.setTodayConstruction("油漆");//通过房子id，当前时间进行查询
+                //通过房子id查询已经开工的记录，就是开工的天数
+                supSitelistDTO.setRealworkerDate("5");
+
             });
             PageInfo pageResult = new PageInfo(list);
             return ServerResponse.createBySuccess("查询成功", pageResult);
@@ -370,12 +373,13 @@ public class SupAuthorityService {
 
             Example example = new Example(WorkerTypeSafeOrder.class);
             example.createCriteria()
-                    .andEqualTo(WorkerTypeSafeOrder.HOUSE_ID, houseId)
-                    .andIsNotNull(WorkerTypeSafeOrder.FORCE_TIME)
-                    .andEqualTo(WorkerTypeSafeOrder.DATA_STATUS, 0);
+                    .andEqualTo(WorkerTypeSafeOrder.HOUSE_ID, houseId).
+                    andIsNotNull(WorkerTypeSafeOrder.FORCE_TIME).
+                    andEqualTo(WorkerTypeSafeOrder.DATA_STATUS, 0);
             List<WorkerTypeSafeOrder> list = workerTypeSafeOrderMapper.selectByExample(example);
-            if (list.size()<=0)
-            mtHostListDetailDTO.setList(null);
+            if (list.size()<=0) {
+                mtHostListDetailDTO.setList(null);
+            }
             mtHostListDetailDTO.setList(list);
             return ServerResponse.createBySuccess("查询成功", mtHostListDetailDTO);
         } catch (Exception e) {
