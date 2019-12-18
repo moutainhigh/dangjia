@@ -251,7 +251,9 @@ public class DjBasicsGoodsService {
             for (DjBasicsProductTemplateDTO p : productList) {
                 //type表示： 是否禁用  0：禁用；1不禁用 ;  -1全部默认
                 if (type != null && !type.equals(p.getType()) && -1 != type) //不等于 type 的不返回给前端
+                {
                     continue;
+                }
                 //图片路径+前缀
                 StringBuilder imgUrlStr = new StringBuilder();
                 StringBuilder imgStr = new StringBuilder();
@@ -261,10 +263,13 @@ public class DjBasicsGoodsService {
                 }
                 p.setImage(imgStr.toString());
                 p.setImageUrl(imgUrlStr.toString());
+                //初始化单元名称
                 if (StringUtils.isNoneBlank(p.getConvertUnit())) {
                     p.setConvertUnitName(iUnitMapper.selectByPrimaryKey(p.getConvertUnit()).getName());
                 }
                 StringBuilder strNewValueNameArr = new StringBuilder();
+
+                //初始化商品属性
                 if (StringUtils.isNotBlank(p.getValueIdArr())) {
                     String[] newValueNameArr = p.getValueIdArr().split(",");
                     for (int i = 0; i < newValueNameArr.length; i++) {
@@ -280,6 +285,9 @@ public class DjBasicsGoodsService {
                     }
                 }
                 p.setNewValueNameArr(strNewValueNameArr.toString());
+
+
+                //初始化标签名称
                 if (!StringUtils.isNotBlank(p.getLabelId())) {
                     p.setLabelId("");
                     p.setLabelName("");
