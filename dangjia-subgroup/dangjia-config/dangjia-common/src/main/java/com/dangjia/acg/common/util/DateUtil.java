@@ -165,6 +165,30 @@ public class DateUtil implements AutoCloseable, Serializable {
 
     }
 
+    public static Date parseDate(String dateString) throws ParseException {
+        if (CommonUtil.isEmpty(dateString)) {
+            throw new ParseException("时间参数错误", -1);
+        }
+        String[] pattern = new String[]{"yyyy年MM月dd日", "yyyy年MM月dd",
+                "yyyy-MM", "yyyy年MM月dd日", "yyyyMM", "yyyy/MM", "yyyyMMdd",
+                "yyyy-MM-dd", "yyyy/MM/dd", "yyyyMMddHHmmss",
+                "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm",
+                "yyyy/MM/dd HH:mm:ss",
+                "MM月dd日", "MM月dd",
+                "MM", "MM月dd日", "MM", "MMdd",
+                "MM-dd", "/MM/dd", "MMddHHmmss",
+                "MM-dd HH:mm:ss", "MM-dd HH:mm",
+                "MM/dd HH:mm:ss",
+        };
+        for (String s : pattern) {
+            try {
+                DateFormat format = new SimpleDateFormat(s);
+                return format.parse(dateString);
+            } catch (ParseException ignored) {
+            }
+        }
+        throw new ParseException("时间参数错误", -1);
+    }
 
     /***
      * 转换为日期

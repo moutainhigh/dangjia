@@ -75,6 +75,16 @@ public class WithdrawDeposit extends BaseEntity {
     @ApiModelProperty("来源id(供应商/店铺id)")
     private String sourceId;//sourceId
 
+    @Column(name = "rate_money")
+    @Desc(value = "手续费")
+    @ApiModelProperty("手续费")
+    private BigDecimal rateMoney;
+
+
+    @Column(name = "apply_money")
+    @Desc(value = "申请金额")
+    @ApiModelProperty("申请金额")
+    private BigDecimal applyMoney;
 }
 
 
