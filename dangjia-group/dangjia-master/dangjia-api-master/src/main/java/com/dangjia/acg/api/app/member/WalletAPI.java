@@ -48,8 +48,8 @@ public interface WalletAPI {
      * @url master/app/member/wallet/verificationAmount
      * @return_param type int 0:通过，1：弹框提示
      * @return_param depositMoney double 实际提现金额
-     * @return_param rateMoney double 手续费
-     * @return_param ruleMessage string 费率描述
+     * @return_param rateMoney double 手续费（为0不显示）
+     * @return_param ruleMessage string 费率描述（为空不显示）
      * @return_param message string 到账时间描述
      * @remark 更多返回错误代码请看首页的错误代码描述
      * @number 3

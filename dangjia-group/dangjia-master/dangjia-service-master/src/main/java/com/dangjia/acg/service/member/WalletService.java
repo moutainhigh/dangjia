@@ -218,10 +218,13 @@ public class WalletService {
             return ServerResponse.createByErrorMessage("余额不足，提现失败");
         }
         boolean isOwner = isOwner(member);
-        double depositMoney = money;//实际提现的钱
+        double depositMoney;//实际提现的钱
         double rateMoney = 0;//手续费
         Map<String, Object> map = new HashMap<>();
-        map.put("type", 0);
+        map.put("type", 1);
+        map.put("depositMoney", money);
+        map.put("rateMoney", rateMoney);
+        map.put("message", "三个工作日内");
         if (!isOwner) {
             try {
                 Date date = DateUtil.parseDate(ruleDate);
@@ -242,10 +245,8 @@ public class WalletService {
                         depositMoney = money;
                     }
                     if (rateMoney > 0) {
-                        map.put("type", 1);
                         map.put("depositMoney", depositMoney);
                         map.put("rateMoney", rateMoney);
-                        map.put("message", "三个工作日内");
                     }
                 }
             } catch (ParseException e) {
