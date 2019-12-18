@@ -339,7 +339,7 @@ public class ComplainService {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             PageInfo pageResult;
 
-            if(complainType == 9){
+            if(complainType != null && complainType == 9){
                 //客户申诉列表
                 List<ComplainDTO> complainDTOList = complainMapper.getMaintenanceRecordList(complainType, state, searchKey);
                 pageResult = new PageInfo(complainDTOList);
