@@ -104,7 +104,7 @@ public class ConfigRuleService {
             operationFlow.setUserId(userID);
             operationFlow.setUserType(0);
             operationFlowMapper.insert(operationFlow);
-            return ServerResponse.createBySuccess("更新成功");
+            return ServerResponse.createBySuccessMessage("更新成功");
         } catch (Exception e) {
             logger.error("editConfigRuleRank:",e);
             return ServerResponse.createByErrorMessage("更新失败");
