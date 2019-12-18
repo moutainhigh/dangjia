@@ -598,7 +598,7 @@ public class HouseFlowApplyService {
                 workerDetail.setHaveMoney(surplusMoney);
                 workerDetail.setDefinedWorkerId(hfa.getId());
                 workerDetail.setWalletMoney(surplusMoney);
-                workerDetail.setState(0);//进钱
+                workerDetail.setState(3);//进钱
                 workerDetailMapper.insert(workerDetail);
                 worker.setDeposit(worker.getDeposit());//实际1500元
                 worker.setSurplusMoney(surplusMoney);

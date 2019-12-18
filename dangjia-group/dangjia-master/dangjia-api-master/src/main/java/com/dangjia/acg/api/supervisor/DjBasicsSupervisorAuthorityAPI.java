@@ -65,22 +65,28 @@ public interface DjBasicsSupervisorAuthorityAPI {
     @PostMapping("web/supervisor/querySupervisorHostList")
     @ApiOperation(value = "督导-工地列表", notes = "督导-工地列表")
     ServerResponse querySupervisorHostList(@RequestParam("request") HttpServletRequest request,
-                                            @RequestParam("sortNum") String sortNum,@RequestParam("pageDTO") PageDTO pageDTO);
+                                            @RequestParam("sortNum") String sortNum,
+                                           @RequestParam("pageDTO") PageDTO pageDTO,
+                                           @RequestParam("userToken") String userToken,
+                                           @RequestParam("keyWord") String keyWord);
     //工地详情
     @PostMapping("web/supervisor/querySupervisorHostDetailList")
     @ApiOperation(value = "督导-工地详情", notes = "督导-工地详情")
     ServerResponse querySupervisorHostDetailList(@RequestParam("request") HttpServletRequest request,
                                            @RequestParam("houseId") String houseId);
 
-    @PostMapping("web/supervisor/queryMtHostList")
-    @ApiOperation(value = "（维修)工地列表", notes = "（维修)工地列表")
+    @PostMapping("web/supervisor/queryMaintenanceHostList")
+    @ApiOperation(value = "督导-（维修)工地列表", notes = "督导-（维修)工地列表")
     ServerResponse queryMaintenanceHostList(@RequestParam("request") HttpServletRequest request,
-                                        @RequestParam("houseId") String houseId);
+                                            @RequestParam("pageDTO") PageDTO pageDTO,
+                                            @RequestParam("userToken") String userToken,
+                                            @RequestParam("keyWord") String keyWord);
 
     @PostMapping("web/supervisor/queryMtHostListDetail")
-    @ApiOperation(value = "（维保）工地详情", notes = "（维保）工地详情")
+    @ApiOperation(value = "督导-（维保）工地详情", notes = "督导-（维保）工地详情")
     ServerResponse queryMtHostListDetail(@RequestParam("request") HttpServletRequest request,
-                                        @RequestParam("houseId") String houseId);
+                                         @RequestParam("userToken") String userToken,
+                                         @RequestParam("houseId") String houseId);
 
 
 }

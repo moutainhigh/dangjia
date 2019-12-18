@@ -56,5 +56,10 @@ public class WorkerTypeSafe extends BaseEntity {
 	@Desc(value = "保险时长,按月计算")
 	@ApiModelProperty("保险时长,按月计算")
 	private Integer month;
+
+	@Column(name = "images")
+	@Desc(value = "图片")
+	@ApiModelProperty("图片")
+	private String images;
 	
 }

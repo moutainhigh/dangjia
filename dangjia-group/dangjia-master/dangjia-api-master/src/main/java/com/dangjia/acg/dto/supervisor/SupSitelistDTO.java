@@ -8,5 +8,6 @@ public class SupSitelistDTO {
     private String area;//区域
     private String workerDate;//总工期
     private String houseId;//房子id
-    SupSitelistDetailDTO SupSitelistDetailDTO;
+    private String todayConstruction;//今日施工
+    private String realworkerDate;//实际工期
 }

@@ -13,6 +13,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import java.math.BigDecimal;
+import java.util.Date;
 
 @Data
 @Entity
@@ -206,6 +207,17 @@ public class Member extends BaseEntity {
     @ApiModelProperty("实名认证状态:0:未提交，1:认证中，2:认证被驳回，3:认证通过")
     private Integer realNameState;
 
+    @Column(name = "real_name_time")
+    @Desc(value = "实名认证申请时间")
+    @ApiModelProperty("实名认证申请时间")
+    private Date realNameTime;
+
+    @Column(name = "real_name_check_time")
+    @Desc(value = "实名认证审核时间")
+    @ApiModelProperty("实名认证审核时间")
+    private Date realNameCheckTime;
+
+    
     @Column(name = "real_name_describe")
     @Desc(value = "实名认证描述")
     @ApiModelProperty("实名认证描述")

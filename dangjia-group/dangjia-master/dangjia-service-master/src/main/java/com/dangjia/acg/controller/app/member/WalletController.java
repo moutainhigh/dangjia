@@ -23,7 +23,7 @@ public class WalletController implements WalletAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse checkFinish(String userToken, Integer paycode, Double money, String workerBankCardId, Integer roleType) {
+    public ServerResponse checkFinish(String userToken, String paycode, Double money, String workerBankCardId, Integer roleType) {
         return walletService.checkFinish(userToken, paycode, money, workerBankCardId, roleType);
     }
 
@@ -34,6 +34,12 @@ public class WalletController implements WalletAPI {
     @ApiMethod
     public ServerResponse getPaycode(String userToken) {
         return walletService.getPaycode(userToken);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse verificationAmount(String userToken, Double money) {
+        return walletService.verificationAmount(userToken, money);
     }
 
     /**

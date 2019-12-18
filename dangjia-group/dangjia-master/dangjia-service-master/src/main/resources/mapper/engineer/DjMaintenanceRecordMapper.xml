@@ -221,4 +221,62 @@
         inner join dj_member dm on dm.id=dh.member_id
         where dh.id=#{houseId}
     </select>
+
+    <select id="queryMaintenanceHostList" resultType="com.dangjia.acg.dto.supervisor.RepairHouseListDTO" >
+        select
+        IFNULL(CONCAT(IFNULL(dh.residential,'*'),IFNULL(CONCAT(dh.building,'栋'),'*栋'),IFNULL(CONCAT(dh.unit,'单元'),'*单元'),IFNULL(CONCAT(dh.number,'号'),'*号')) ,'') as address,
+        dmr.since_purchase_amount as sincePurchaseAmount, -- 维保金额
+        -- 参与人员
+        substring(dha.address,7,3)as area,-- 地区
+        dmr.house_id as houseId
+        from dj_maintenance_record dmr
+        inner join dj_house dh  on dmr.house_id=dh.id
+        inner join dj_house_address dha
+    </select>
+
+    <select id="queryMtHostListDetail" resultType="com.dangjia.acg.dto.supervisor.MtHostListDetailDTO">
+      select
+        dh.id as houseId,
+        IFNULL(CONCAT(IFNULL(dh.residential,'*'),IFNULL(CONCAT(dh.building,'栋'),'*栋'),IFNULL(CONCAT(dh.unit,'单元'),'*单元'),IFNULL(CONCAT(dh.number,'号'),'*号')) ,'') as address,
+        dha.latitude,
+        dha.longitude,
+        dmr.since_purchase_amount as sincePurchaseAmount,
+        dmr.remark
+        from dj_house  dh
+        inner join  dj_house_address dha on dh.id=dha.house_id
+        inner join dj_member dm on dm.id=dh.member_id
+        inner join dj_maintenance_record dmr on dh.id=dmr.house_id
+        where dh.id=#{houseId}
+
+    </select>
+
+    <select id="queryMaintenanceRecord" resultType="com.dangjia.acg.modle.engineer.DjMaintenanceRecord">
+        select
+            steward_processing_time as stewardProcessingTime,
+            steward_order_time as stewardOrderTime,
+            member_id as memberId,
+            house_id as houseId ,
+            owner_name as ownerName,
+            owner_mobile as ownerMobile ,
+            owner_image as  ownerImage ,
+            owner_remark as ownerRemark,
+            supervisor_id as supervisorId ,
+            steward_subsidy as stewardSubsidy,
+            service_remark as serviceRemark,
+            steward_id as stewardId,
+            steward_state as stewardState,
+            since_purchase_amount as sincePurchaseAmount,
+            remark,
+            owner_state as ownerState,
+            steward_image as stewardImage ,
+            steward_remark as stewardRemark ,
+            state,
+            complain_type as complainType,
+            handle_type as handleType,
+            user_id as userId,
+            worker_member_id as workerMemberId,
+            worker_create_date as workerCreateDate ,
+            worker_image as workerImage
+        From dj_maintenance_record where house_id=#{houseId} and member_id=#{memberId}
+    </select>
 </mapper>
