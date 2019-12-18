@@ -110,7 +110,7 @@ public interface WalletAPI {
      * @return_param createDate string 流水时间yyyy-MM-dd HH:mm
      * @return_param rateMoney double 手续费为空或为0不显示
      * @return_param depositMoney double 实际提现的钱为空或为0不显示
-     * @return_param depositState int -1不显示，0未处理,1同意 2不同意(驳回)
+     * @return_param depositState int -1不显示，0未处理,1同意,2不同意(驳回)
      * @return_param memo string 提现备注
      * @return_param depositImage string 提现回执单图片
      * @return_param reason string 提现不同意理由

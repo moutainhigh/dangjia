@@ -4,6 +4,7 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.common.util.JsmsUtil;
 import com.dangjia.acg.dao.ConfigUtil;
@@ -227,13 +228,13 @@ public class WalletService {
                 if (date.getTime() < new Date().getTime()) {
                     if (money < 1000) {
                         rateMoney = money * 6.0 / 1000.0 + 1.0;
-                        map.put("ruleMessage", "(6‰)+1元");
+                        map.put("ruleMessage", "6‰+1元(<1000元)");
                     } else if (money < 6000) {
                         rateMoney = money * 7.0 / 1000.0;
-                        map.put("ruleMessage", "7‰");
+                        map.put("ruleMessage", "7‰(1000元≤提现＜6000元)");
                     } else if (money < 10000) {
                         rateMoney = money * 4.0 / 1000.0;
-                        map.put("ruleMessage", "4‰");
+                        map.put("ruleMessage", "4‰(6000元≤提现＜10000元)");
                     }
                     if (surplusMoney - (money + rateMoney) < 0) {
                         depositMoney = money - rateMoney;
@@ -369,7 +370,7 @@ public class WalletService {
                 returnMap.put("depositState", wd.getState());//0未处理,1同意 2不同意(驳回)
                 returnMap.put("memo", wd.getMemo());//备注
                 String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-                returnMap.put("depositImage", imageAddress + wd.getImage());//回执单图片
+                returnMap.put("depositImage", CommonUtil.isEmpty(wd.getImage()) ? null : imageAddress + wd.getImage());//回执单图片
                 returnMap.put("reason", wd.getReason());//不同意理由
             }
         }
