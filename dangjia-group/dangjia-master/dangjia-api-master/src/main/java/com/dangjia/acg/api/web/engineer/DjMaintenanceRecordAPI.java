@@ -31,11 +31,21 @@ public interface DjMaintenanceRecordAPI {
     @PostMapping(value = "web/engineer/setDjMaintenanceRecord")
     @ApiOperation(value = "处理质保审核", notes = "处理质保审核")
     ServerResponse setDjMaintenanceRecord(@RequestParam("id") String id,
-                                          @RequestParam("state") Integer state);
+                                          @RequestParam("state") Integer state,
+                                          @RequestParam("userId") String userId);
 
     @PostMapping(value = "web/engineer/queryMemberList")
     @ApiOperation(value = "查询督导列表", notes = "查询督导列表")
     ServerResponse queryMemberList(@RequestParam("pageDTO") PageDTO pageDTO,
                                    @RequestParam("name") String name);
+
+    @PostMapping(value = "web/engineer/upDateMaintenanceInFo")
+    @ApiOperation(value = "处理申诉", notes = "处理申诉")
+    ServerResponse upDateMaintenanceInFo(@RequestParam("supervisorId") String supervisorId,
+                                         @RequestParam("stewardSubsidy") Integer stewardSubsidy,
+                                         @RequestParam("serviceRemark")  String serviceRemark,
+                                         @RequestParam("userId")  String userId,
+                                         @RequestParam("id") String id,
+                                         @RequestParam("handleType")  Integer handleType);
 
 }

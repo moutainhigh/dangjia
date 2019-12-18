@@ -579,6 +579,7 @@ public class MemberService {
         if (!CommonUtil.isEmpty(idnumber))
             user.setIdnumber(idnumber);
         user.setRealNameState(1);
+        user.setRealNameTime(new Date());
         memberMapper.updateByPrimaryKeySelective(user);
         updataMember(user, userToken);
         return ServerResponse.createBySuccessMessage("提交资料成功");
@@ -978,6 +979,9 @@ public class MemberService {
             return ServerResponse.createByErrorMessage("请通知用户提交相关资料");
         }
         user.setRealNameState(realNameState);
+
+        user.setRealNameTime(new Date());
+        user.setRealNameCheckTime(new Date());
         if (realNameState == 3) {
             user.setRealNameDescribe("审核通过");
         } else {

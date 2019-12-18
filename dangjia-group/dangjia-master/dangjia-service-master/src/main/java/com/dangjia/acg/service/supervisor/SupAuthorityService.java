@@ -2,16 +2,24 @@ package com.dangjia.acg.service.supervisor;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.api.app.member.MemberAPI;
 import com.dangjia.acg.api.data.WorkerTypeAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.supervisor.*;
+import com.dangjia.acg.mapper.core.IHouseFlowMapper;
+import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordMapper;
+import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper;
 import com.dangjia.acg.mapper.supervisor.DjBasicsSupervisorAuthorityMapper;
+import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.engineer.DjMaintenanceRecord;
+import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
 import com.dangjia.acg.modle.supervisor.DjBasicsSupervisorAuthority;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
@@ -21,8 +29,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
+import tk.mybatis.mapper.util.StringUtil;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -30,12 +40,30 @@ public class SupAuthorityService {
     private static Logger logger = LoggerFactory.getLogger(SupAuthorityService.class);
     @Autowired
     private DjBasicsSupervisorAuthorityMapper djBasicsSupervisorAuthorityMapper ;
+
     @Autowired
     private DjMaintenanceRecordMapper djMaintenanceRecordMapper ;
+
     @Autowired
     private ConfigUtil configUtil;
+
     @Autowired
     private WorkerTypeAPI workerTypeAPI;
+
+    @Autowired
+    private MemberAPI memberAPI;
+
+    @Autowired
+    private IMemberMapper memberMapper;
+
+    @Autowired
+    private IWorkerTypeSafeOrderMapper workerTypeSafeOrderMapper;
+
+    @Autowired
+    private IWorkerTypeMapper workerTypeMapper;
+
+    @Autowired
+    private IHouseFlowMapper houseFlowMapper;
     /**
      * 删除已选
      * @param request
@@ -169,6 +197,84 @@ public class SupAuthorityService {
     }
 
     /**
+     * 工地列表
+     * @param request
+     * @param sortNum
+     * @return
+     */
+    public ServerResponse querySupervisorHostList(HttpServletRequest request, String sortNum,PageDTO pageDTO, String userToken,String keyWord) {
+        try {
+            Object object = memberAPI.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            JSONObject job = (JSONObject)object;
+            Member worker = job.toJavaObject(Member.class);
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<SupSitelistDTO> list= djMaintenanceRecordMapper.querySupervisorHostList(worker.getId(),keyWord);
+            list.forEach(supSitelistDTO->{
+                String houseId=supSitelistDTO.getHouseId();
+                supSitelistDTO.setTodayConstruction("油漆");//通过房子id，当前时间进行查询
+                //通过房子id查询已经开工的记录，就是开工的天数
+                supSitelistDTO.setRealworkerDate("5");
+
+            });
+            PageInfo pageResult = new PageInfo(list);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
+        } catch (Exception e) {
+            logger.error("工地列表异常", e);
+            return ServerResponse.createByErrorMessage("工地列表异常");
+        }
+    }
+
+    /**
+     * 工地详情
+     * @param request
+     * @param houseId
+     * @return
+     */
+    public ServerResponse querySupervisorHostDetailList(HttpServletRequest request, String houseId) {
+        try {
+            WorkerSiteDetailsDTO workerSiteDetailsDTO = djMaintenanceRecordMapper.querySupervisorHostDetailList(houseId);
+            if (workerSiteDetailsDTO != null) {
+                String detailhouseId = workerSiteDetailsDTO.getHouseId();
+                //循环便利工种
+                List<CraftsManDTO> craftsManDTOList=new ArrayList<CraftsManDTO>();
+                List<HouseFlow> list = houseFlowMapper.getAllFlowByHouseId(detailhouseId);
+                HouseKeeperDTO houseKeeperDTO=new HouseKeeperDTO();
+                list.forEach(houseFlow->{
+                    //3是大管家
+                    String workerTypeId=houseFlow.getWorkerTypeId();
+                    if(workerTypeId.equals("3"))
+                    {
+                        houseKeeperDTO.setWorkerTypeName("泥工");//工种名称
+                        houseKeeperDTO.setName("刘晓庆");//姓名
+                        houseKeeperDTO.setProjectTime("5/12");//工期
+                        houseKeeperDTO.setPatrol("3/12");//巡查
+                        houseKeeperDTO.setCheckTimes("7/12");//验收
+                    }
+                    else
+                    {
+                        //其它类型是工匠
+                        CraftsManDTO craftsManDTO=new CraftsManDTO();
+                        craftsManDTO.setWorkerTypeName("水电");//工种名称
+                        craftsManDTO.setName("李哈哈");//姓名
+                        craftsManDTO.setWorkSteta("1");//施工状态，0未开始 ，1阶段完工通过，2整体完工通过，3待交底，4施工中，5收尾施工
+                        craftsManDTO.setProjectTime("5/25");//工期
+                        craftsManDTO.setNode("16/42");//节点
+                        craftsManDTOList.add(craftsManDTO);
+                    }
+                });
+                workerSiteDetailsDTO.setHouseKeeperDTO(houseKeeperDTO);
+                workerSiteDetailsDTO.setCraftsManDTOList(craftsManDTOList);
+            }
+            return ServerResponse.createBySuccess("查询成功", workerSiteDetailsDTO);
+        } catch (Exception e) {
+            logger.error("工地详情异常", e);
+            return ServerResponse.createByErrorMessage("工地详情异常");
+        }
+    }
+    /**
      * 验收动态
      *
      * @param request
@@ -207,17 +313,44 @@ public class SupAuthorityService {
     /**
      *（维修)工地列表
      * @param request
-     * @param houseId
+     * @param pageDTO
+     * @param userToken
+     * @param keyWord
      * @return
      */
-    public ServerResponse queryMaintenanceHostList(HttpServletRequest request, String houseId) {
+    public ServerResponse queryMaintenanceHostList(HttpServletRequest request,PageDTO pageDTO ,String userToken,String keyWord) {
         try {
-
-
-            return null;
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            Object object = memberAPI.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            JSONObject job = (JSONObject)object;
+            Member worker = job.toJavaObject(Member.class);
+            List<RepairHouseListDTO> list=djMaintenanceRecordMapper.queryMaintenanceHostList(worker.getId(),keyWord);
+            list.forEach(repairHouseListDTO->{
+                    String houseId=repairHouseListDTO.getHouseId();
+                    List<DjMaintenanceRecord> maintenanceRecordList= djMaintenanceRecordMapper.queryMaintenanceRecord(worker.getId(),houseId);
+                    StringBuffer sb=new StringBuffer();
+                    maintenanceRecordList.forEach(djMaintenanceRecord->{
+                        String workerMemberId=djMaintenanceRecord.getWorkerMemberId();
+                        if(workerMemberId!=null){
+                            Member member = memberMapper.selectByPrimaryKey(workerMemberId);//工匠信息
+                            String workerTypeName = "";
+                            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());//查询工种
+                            workerTypeName=workerType!=null?workerType.getName():"";
+                            if(StringUtil.isNotEmpty(workerTypeName)){
+                                sb.append(workerTypeName).append("、");
+                            }
+                        }
+                    });
+                    repairHouseListDTO.setTodayConstruction(sb!=null&&sb.length()>0?sb.toString().substring(0,sb.toString().length()-1):"");
+            });
+            PageInfo pageResult = new PageInfo(list);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
-            logger.error("增加已选异常", e);
-            return ServerResponse.createByErrorMessage("增加已选异常");
+            logger.error("（维修)工地列表异常", e);
+            return ServerResponse.createByErrorMessage("（维修)工地列表异常");
         }
     }
 
@@ -227,9 +360,28 @@ public class SupAuthorityService {
      * @param houseId
      * @return
      */
-    public ServerResponse queryMtHostListDetail(HttpServletRequest request, String houseId) {
+    public ServerResponse queryMtHostListDetail(HttpServletRequest request, String houseId,String userToken) {
         try {
-            return null;
+
+            Object object = memberAPI.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            JSONObject job = (JSONObject)object;
+            Member worker = job.toJavaObject(Member.class);
+            MtHostListDetailDTO  mtHostListDetailDTO =djMaintenanceRecordMapper.queryMtHostListDetail(houseId);
+
+            Example example = new Example(WorkerTypeSafeOrder.class);
+            example.createCriteria()
+                    .andEqualTo(WorkerTypeSafeOrder.HOUSE_ID, houseId).
+                    andIsNotNull(WorkerTypeSafeOrder.FORCE_TIME).
+                    andEqualTo(WorkerTypeSafeOrder.DATA_STATUS, 0);
+            List<WorkerTypeSafeOrder> list = workerTypeSafeOrderMapper.selectByExample(example);
+            if (list.size()<=0) {
+                mtHostListDetailDTO.setList(null);
+            }
+            mtHostListDetailDTO.setList(list);
+            return ServerResponse.createBySuccess("查询成功", mtHostListDetailDTO);
         } catch (Exception e) {
             logger.error("（维保）工地详情异常", e);
             return ServerResponse.createByErrorMessage("（维保）工地详情异常");

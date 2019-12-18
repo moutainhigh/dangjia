@@ -1,5 +1,6 @@
 package com.dangjia.acg.dto.engineer;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.util.Date;
@@ -32,7 +33,7 @@ public class DjMaintenanceRecordDTO {
     private String stewardId;//接单管家id
     private String stewardName;//接单管家名称
     private Date stewardProcessingTime;//管家处理时间
-    private String stewardOrderTime;//管家接单时间
+    private Date stewardOrderTime;//管家接单时间
     private String stewardMobile;//管家电话
     private List<DjMaintenanceRecordResponsiblePartyDTO> djMaintenanceRecordResponsiblePartyDTOS;//维保责任方
     private List<DjMaintenanceRecordProductDTO> djMaintenanceRecordProductDTOS;//维保商品列表
@@ -42,4 +43,15 @@ public class DjMaintenanceRecordDTO {
     private String stewardImage;//管家上传图片
     private List<String> stewardImages;
     private String stewardRemark;//管家备注
+
+    private Integer complainType;//申诉类型：9-业主申请质保
+    private Integer handleType;//客服处理状态0-待处理 1-驳回 2-接受 3-已处理 4-已结束
+    private String userId;//处理人id
+    private String workerMemberId;//工匠id
+    private String workerMemberName;//工匠名称
+    private String workerMobile;//工匠手机号码
+    private String workerCreateDate;//工匠接单时间
+    private String workerImage;//工匠上传图片
+    private List<String> workerImages;//工匠上传图片list
+
 }

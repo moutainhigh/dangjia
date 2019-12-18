@@ -252,6 +252,9 @@
         <if test="bgtype!=null and bgtype!=''">
             and FIND_IN_SET(dbg.type,#{bgtype})
         </if>
+        <if test="name!=null and name!=''">
+            and  dbg.name   LIKE CONCAT('%',#{name},'%')
+        </if>
         <if test="categoryId!=null and categoryId!=''">
            and  bpt.category_id=#{categoryId}
         </if>

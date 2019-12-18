@@ -633,7 +633,15 @@ public class EngineerService {
             }
             map.put("designerOk", house.getDesignerOk());
             map.put("budgetOk", house.getBudgetOk());
-            map.put("createDate", houseFlow.getCreateDate());
+            example = new Example(HouseWorker.class);
+            example.createCriteria().andEqualTo(HouseWorker.HOUSE_ID, houseFlow.getHouseId())
+                    .andEqualTo(HouseWorker.WORKER_TYPE_ID, houseFlow.getWorkerTypeId())
+                    .andEqualTo(HouseWorker.WORKER_ID, workerId);
+            example.orderBy(HouseWorker.CREATE_DATE).desc();
+            List<HouseWorker> houseWorkerList = houseWorkerMapper.selectByExample(example);
+            if(houseWorkerList.size()>0){
+                map.put("createDate", houseWorkerList.get(0).getCreateDate());
+            }
             map.put("workerTypeId", houseFlow.getWorkerTypeId());
             map.put("workerType", houseFlow.getWorkerType());
             map.put("workSteta", houseFlow.getWorkSteta()); //0待确认开工,1装修中,2休眠中,3已完工,4提前结束装修 5提前结束装修申请中

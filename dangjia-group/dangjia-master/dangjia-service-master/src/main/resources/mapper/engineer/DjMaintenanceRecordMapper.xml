@@ -4,19 +4,19 @@
 
     <select id="queryDjMaintenanceRecordList" resultType="com.dangjia.acg.dto.engineer.DjMaintenanceRecordDTO">
         SELECT
-            mr.id,
-            CONCAT(IFNULL(h.residential,'*'),IFNULL(CONCAT(h.building,'栋'),'*栋'),
-            IFNULL(CONCAT(h.unit,'单元'),'*单元'),
-            IFNULL(CONCAT(h.number,'号'),'*号')) as houseAddress,
-            mr.owner_name ownerName,
-            mr.owner_mobile ownerMobile,
-            mr.state,
-            h.id houseId
+        mr.id,
+        CONCAT(IFNULL(h.residential,'*'),IFNULL(CONCAT(h.building,'栋'),'*栋'),
+        IFNULL(CONCAT(h.unit,'单元'),'*单元'),
+        IFNULL(CONCAT(h.number,'号'),'*号')) as houseAddress,
+        mr.owner_name ownerName,
+        mr.owner_mobile ownerMobile,
+        mr.state,
+        h.id houseId
         FROM
-            dj_maintenance_record mr,
-            dj_house h
+        dj_maintenance_record mr,
+        dj_house h
         WHERE
-            mr.house_id = h.id
+        mr.house_id = h.id
         AND mr.handle_type=3
         <if test="null!=searchKey and ''!=searchKey">
             AND CONCAT(CONCAT_WS(IFNULL(h.residential, '*'),IFNULL(CONCAT(h.building, '栋'),'*栋'),IFNULL(CONCAT(h.unit,
@@ -83,12 +83,39 @@
             mr.steward_image stewardImage,
             mr.steward_remark stewardRemark,
             mr.remark,
-            mr.steward_order_time stewardOrderTime
+            mr.steward_order_time stewardOrderTime,
+            mr.complain_type as complainType,
+            mr.handle_type as handleType,
+             (
+                SELECT
+
+                IF (
+                    m. NAME IS NULL
+                    OR m. NAME = '',
+                    m.nick_name,
+                    m. NAME
+                )
+                FROM
+                    dj_member m
+                WHERE
+                    m.id = mr.worker_member_id
+            ) workerMemberName,
+            (
+                SELECT
+                    m.mobile
+                FROM
+                    dj_member m
+                WHERE
+                    m.id = mr.worker_member_id
+            ) workerMobile,
+            mr.user_id AS userId,
+            mr.worker_member_id AS workerMemberId,
+            mr.worker_create_date AS workerCreateDate,
+            mr.worker_image AS workerImage
         FROM
             dj_maintenance_record mr
         WHERE mr.id=#{id}
     </select>
-
 
     <select id="queryApplicationInfo" resultType="com.dangjia.acg.dto.supervisor.MaintenanceRecordDTO">
             select
@@ -169,5 +196,87 @@
         from dj_maintenance_record_responsible_party rrp
         inner join dj_basics_storefront dbs  on dbs.id=rrp.responsible_party_id
         where 1=1 and rrp.responsible_party_type=#{responsiblePartyType} and rrp.responsible_party_id=#{responsiblePartyId}
+    </select>
+
+    <select id="querySupervisorHostList" resultType="com.dangjia.acg.dto.supervisor.SupSitelistDTO">
+        select
+        IFNULL(CONCAT(IFNULL(dh.residential,'*'),IFNULL(CONCAT(dh.building,'栋'),'*栋'),IFNULL(CONCAT(dh.unit,'单元'),'*单元'),IFNULL(CONCAT(dh.number,'号'),'*号')) ,'') as address,
+        substring(dha.address,7,3)as area,
+        SUM(TIMESTAMPDIFF(DAY,dh.construction_date,dh.completed_date)) as workerDate,
+        dbs.house_id as houseId
+        from dj_basics_supervisor_authority dbs
+        inner join dj_house  dh  on dbs.house_id=dh.id
+        inner join dj_house_address dha on dha.house_id=dh.id
+    </select>
+
+
+    <select id="querySupervisorHostDetailList" resultType="com.dangjia.acg.dto.supervisor.WorkerSiteDetailsDTO">
+        select
+        IFNULL(CONCAT(IFNULL(dh.residential,'*'),IFNULL(CONCAT(dh.building,'栋'),'*栋'),IFNULL(CONCAT(dh.unit,'单元'),'*单元'),IFNULL(CONCAT(dh.number,'号'),'*号')) ,'') as address,
+        dha.latitude,
+        dha.longitude,
+        dh.id as houseId
+        from dj_house  dh
+        inner join  dj_house_address dha on dh.id=dha.house_id
+        inner join dj_member dm on dm.id=dh.member_id
+        where dh.id=#{houseId}
+    </select>
+
+    <select id="queryMaintenanceHostList" resultType="com.dangjia.acg.dto.supervisor.RepairHouseListDTO" >
+        select
+        IFNULL(CONCAT(IFNULL(dh.residential,'*'),IFNULL(CONCAT(dh.building,'栋'),'*栋'),IFNULL(CONCAT(dh.unit,'单元'),'*单元'),IFNULL(CONCAT(dh.number,'号'),'*号')) ,'') as address,
+        dmr.since_purchase_amount as sincePurchaseAmount, -- 维保金额
+        -- 参与人员
+        substring(dha.address,7,3)as area,-- 地区
+        dmr.house_id as houseId
+        from dj_maintenance_record dmr
+        inner join dj_house dh  on dmr.house_id=dh.id
+        inner join dj_house_address dha
+    </select>
+
+    <select id="queryMtHostListDetail" resultType="com.dangjia.acg.dto.supervisor.MtHostListDetailDTO">
+      select
+        dh.id as houseId,
+        IFNULL(CONCAT(IFNULL(dh.residential,'*'),IFNULL(CONCAT(dh.building,'栋'),'*栋'),IFNULL(CONCAT(dh.unit,'单元'),'*单元'),IFNULL(CONCAT(dh.number,'号'),'*号')) ,'') as address,
+        dha.latitude,
+        dha.longitude,
+        dmr.since_purchase_amount as sincePurchaseAmount,
+        dmr.remark
+        from dj_house  dh
+        inner join  dj_house_address dha on dh.id=dha.house_id
+        inner join dj_member dm on dm.id=dh.member_id
+        inner join dj_maintenance_record dmr on dh.id=dmr.house_id
+        where dh.id=#{houseId}
+
+    </select>
+
+    <select id="queryMaintenanceRecord" resultType="com.dangjia.acg.modle.engineer.DjMaintenanceRecord">
+        select
+            steward_processing_time as stewardProcessingTime,
+            steward_order_time as stewardOrderTime,
+            member_id as memberId,
+            house_id as houseId ,
+            owner_name as ownerName,
+            owner_mobile as ownerMobile ,
+            owner_image as  ownerImage ,
+            owner_remark as ownerRemark,
+            supervisor_id as supervisorId ,
+            steward_subsidy as stewardSubsidy,
+            service_remark as serviceRemark,
+            steward_id as stewardId,
+            steward_state as stewardState,
+            since_purchase_amount as sincePurchaseAmount,
+            remark,
+            owner_state as ownerState,
+            steward_image as stewardImage ,
+            steward_remark as stewardRemark ,
+            state,
+            complain_type as complainType,
+            handle_type as handleType,
+            user_id as userId,
+            worker_member_id as workerMemberId,
+            worker_create_date as workerCreateDate ,
+            worker_image as workerImage
+        From dj_maintenance_record where house_id=#{houseId} and member_id=#{memberId}
     </select>
 </mapper>

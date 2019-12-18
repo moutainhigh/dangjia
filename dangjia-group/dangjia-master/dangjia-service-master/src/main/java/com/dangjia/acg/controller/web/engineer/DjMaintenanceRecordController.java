@@ -34,14 +34,27 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse setDjMaintenanceRecord(String id,Integer state) {
-        return djMaintenanceRecordService.setDjMaintenanceRecord(id,state);
+    public ServerResponse setDjMaintenanceRecord(String id,Integer state,String userId) {
+        return djMaintenanceRecordService.setDjMaintenanceRecord(id,state,userId);
     }
 
     @Override
     @ApiMethod
     public ServerResponse queryMemberList(PageDTO pageDTO,String name) {
         return djMaintenanceRecordService.queryMemberList(pageDTO,name);
+    }
+
+
+    @Override
+    @ApiMethod
+    public ServerResponse upDateMaintenanceInFo(String supervisorId,
+                                                  Integer stewardSubsidy,
+                                                  String serviceRemark,
+                                                  String userId,
+                                                  String id,
+                                                  Integer handleType) {
+        return djMaintenanceRecordService.upDateMaintenanceInFo(supervisorId,stewardSubsidy
+                ,serviceRemark,userId,id,handleType);
     }
 
 
