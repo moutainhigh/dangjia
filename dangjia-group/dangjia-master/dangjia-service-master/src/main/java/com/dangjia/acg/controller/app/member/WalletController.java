@@ -36,6 +36,12 @@ public class WalletController implements WalletAPI {
         return walletService.getPaycode(userToken);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse verificationAmount(String userToken, Double money) {
+        return walletService.verificationAmount(userToken, money);
+    }
+
     /**
      * 获取提现信息
      */
