@@ -75,7 +75,7 @@ public class WalletService {
      * 完成验证提现
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse checkFinish(String userToken, Integer paycode, Double money, String workerBankCardId, Integer roleType) {
+    public ServerResponse checkFinish(String userToken, String paycode, Double money, String workerBankCardId, Integer roleType) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -88,7 +88,16 @@ public class WalletService {
             //冻结的帐户不能提现
             return ServerResponse.createByErrorMessage("账户冻结，无法提现");
         }
-        if (!paycode.equals(member.getPaycode())) {
+        if (paycode == null) {
+            return ServerResponse.createByErrorMessage("验证码错误");
+        }
+        Integer code;
+        try {
+            code = Integer.valueOf(paycode);
+        } catch (Exception e) {
+            return ServerResponse.createByErrorMessage("验证码错误");
+        }
+        if (!code.equals(member.getPaycode())) {
             return ServerResponse.createByErrorMessage("验证码错误");
         }
         if (money == null || money <= 0) {
