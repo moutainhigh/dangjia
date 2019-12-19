@@ -602,7 +602,7 @@
             t1.product_name productName,
             t.goods_id goodsId,
             t.cost,
-            t1.sell_price sellPrice,
+            IFNULL(ifnull(t1.sell_price,t.price),0) sellPrice,
             t1.image,
             t.convert_quality convertQuality,
             t.convert_unit convertUnit,
