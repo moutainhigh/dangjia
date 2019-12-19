@@ -235,6 +235,7 @@ public class SupAuthorityService {
      */
     public ServerResponse querySupervisorHostDetailList(HttpServletRequest request, String houseId) {
         try {
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             WorkerSiteDetailsDTO workerSiteDetailsDTO = djMaintenanceRecordMapper.querySupervisorHostDetailList(houseId);
             if (workerSiteDetailsDTO != null) {
                 String detailhouseId = workerSiteDetailsDTO.getHouseId();
@@ -245,13 +246,15 @@ public class SupAuthorityService {
                 list.forEach(houseFlow->{
                     //3是大管家
                     String workerTypeId=houseFlow.getWorkerTypeId();
+                    Integer workState=houseFlow.getWorkSteta();
                     if(workerTypeId.equals("3"))
                     {
-                        houseKeeperDTO.setWorkerTypeName("泥工");//工种名称
+                        houseKeeperDTO.setWorkerTypeName("大管家");//工种名称
                         houseKeeperDTO.setName("刘晓庆");//姓名
                         houseKeeperDTO.setProjectTime("5/12");//工期
                         houseKeeperDTO.setPatrol("3/12");//巡查
                         houseKeeperDTO.setCheckTimes("7/12");//验收
+                        houseKeeperDTO.setIamge(address+"iconWork/icon_dgj.png");
                     }
                     else
                     {
@@ -259,9 +262,35 @@ public class SupAuthorityService {
                         CraftsManDTO craftsManDTO=new CraftsManDTO();
                         craftsManDTO.setWorkerTypeName("水电");//工种名称
                         craftsManDTO.setName("李哈哈");//姓名
-                        craftsManDTO.setWorkSteta("1");//施工状态，0未开始 ，1阶段完工通过，2整体完工通过，3待交底，4施工中，5收尾施工
+                        //施工状态，0未开始 ，1阶段完工通过，2整体完工通过，3待交底，4施工中，5收尾施工
+                        if (workState==0)
+                        {
+                            craftsManDTO.setWorkSteta("未开始");
+                        }
+                        if (workState==1)
+                        {
+                            craftsManDTO.setWorkSteta("阶段完工通过");
+                        }
+                        if (workState==2)
+                        {
+                            craftsManDTO.setWorkSteta("整体完工通过");
+                        }
+                        if (workState==3)
+                        {
+                            craftsManDTO.setWorkSteta("待交底");
+                        }
+                        if (workState==4)
+                        {
+                            craftsManDTO.setWorkSteta("施工中");
+                        }
+                        if (workState==5)
+                        {
+                            craftsManDTO.setWorkSteta("收尾施工");
+                        }
+
                         craftsManDTO.setProjectTime("5/25");//工期
                         craftsManDTO.setNode("16/42");//节点
+                        craftsManDTO.setIamge(address+"iconWork/icon_ptgj.png");
                         craftsManDTOList.add(craftsManDTO);
                     }
                 });

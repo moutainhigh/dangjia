@@ -233,13 +233,6 @@ public class DjBasicsGoodsService {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            if(StringUtils.isEmpty(categoryId))
-            {
-                List<DjBasicsProductTemplateDTO> productList=null;
-                PageInfo pageResult = new PageInfo(productList);
-                pageResult.setList(productList);
-                return ServerResponse.createBySuccess("查询成功", pageResult);
-            }
             String bgtype=null;
             if (ifDjselfManage.equals("0"))
             {
