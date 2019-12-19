@@ -76,5 +76,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         order by create_date desc
 
     </select>
+
+    <select id="queryCraftsmenList" resultType="com.dangjia.acg.dto.worker.CraftsmenListDTO">
+        select
+        IFNULL(chfa.worker_id,'') as workerId,
+        IFNULL(dm.head ,'')as head,
+        IFNULL(chfa.worker_type_id,'') as workerTypeId,
+        IFNULL(dm.name,'') as name,
+        IFNULL(dm.mobile,'') as mobile
+        From dj_core_house_flow_apply chfa inner join dj_member dm on dm.id=chfa.worker_id
+        where house_id=#{houseId} group by chfa.worker_id
+    </select>
 </mapper>
 

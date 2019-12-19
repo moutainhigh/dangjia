@@ -1,5 +1,8 @@
 package com.dangjia.acg.mapper.delivery;
 
+import com.dangjia.acg.dto.deliver.BudgetOrderDTO;
+import com.dangjia.acg.dto.deliver.BudgetOrderItemDTO;
+import com.dangjia.acg.dto.house.HouseOrderDetailDTO;
 import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.deliver.OrderItem;
 import org.apache.ibatis.annotations.Param;
@@ -7,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * author: zmj
@@ -25,23 +29,22 @@ public interface IOrderMapper extends Mapper<Order> {
     /**查询人工订单*/
     Order getStorefontOrder(@Param("storefontId")String storefontId,@Param("parentOrderId")String parentOrderId);
 
-    /**查询所有订单*/
-    List<Order> getAllOrders(@Param("houseId")String houseId,@Param("workerTypeId")String workerTypeId);
 
     /**
-     * 根据房屋ID查对应的精算订单信息
+     * 查询房子设计、精算的订单信息
+     * @param houseId 房子信息
+     * @param orderSource 1工序订单，4补差价订单
+     * @param state 处理状态  1刚生成(可编辑),2去支付(不修改),3已支付,4已取消"
      * @return
      */
-    Order getOrderInfo(@Param("houseId") String houseId);
+    BudgetOrderDTO getOrderInfoByHouseId(@Param("houseId") String houseId, @Param("orderSource") String orderSource,@Param("state") String state);
 
-    //根据房子ID查询对应的订单详情
-    List<OrderItem> getOrderDetailInfoList(@Param("houseId") String houseId);
-
-    //修改商品订单对应的信息
-    void updateOrderDetail(OrderItem orderDetail);
-
-    //修改商品订单表是否可付款状态
-    void updateOrder(@Param("orderId") String orderId);
+    /**
+     * 查询房子设计、精算的订单信息
+     * @param orderId 房子信息
+     * @return
+     */
+    List<BudgetOrderItemDTO> getOrderInfoItemList(@Param("orderId") String orderId);
 
 
 

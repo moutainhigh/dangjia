@@ -30,7 +30,7 @@ public interface EnclosureAPI {
      * @param enclosureType 必选 string 附件类型0:设计上传的设计图，1:扩展(默认为0）
      * @param remarks       可选 string 操作描述
      * @return {"res":1000,"msg":{"resultCode":1000,"resultMsg":"成功"} }
-     * @catalog 商品3.0---app端/新版设计
+     * @catalog 工匠端升级/设计模块/新版设计
      * @title 添加附件
      * @description 添加附件
      * @method POST
@@ -56,7 +56,7 @@ public interface EnclosureAPI {
      *
      * @param enclosureId 必选 string 附件ID
      * @return {"res":1000,"msg":{"resultCode":1000,"resultMsg":"成功"} }
-     * @catalog 商品3.0---app端/新版设计
+     * @catalog 工匠端升级/设计模块/新版设计
      * @title 删除附件
      * @description 删除附件
      * @method POST
@@ -77,7 +77,7 @@ public interface EnclosureAPI {
      * @param houseId       必选 string 房子ID
      * @param enclosureType 必选 string 附件类型0:设计上传的设计图，1:扩展(默认为0）
      * @return {"res":1000,"msg":{"resultObj":[{返回参数说明},{返回参数说明}],"resultCode":1000,"resultMsg":"成功"} }
-     * @catalog 商品3.0---app端/新版设计
+     * @catalog 工匠端升级/设计模块/新版设计
      * @title 查询附件
      * @description 查询附件
      * @method POST

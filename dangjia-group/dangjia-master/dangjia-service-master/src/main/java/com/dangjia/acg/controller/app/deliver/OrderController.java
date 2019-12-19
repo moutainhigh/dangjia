@@ -5,7 +5,10 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.deliver.OrderService;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -109,4 +112,29 @@ public class OrderController implements OrderAPI {
     public ServerResponse saveOrderSplit(String productArr, String houseId, String userToken) {
         return orderService.saveOrderSplit(productArr, houseId, userToken);
     }
+
+    /**
+     * 补差价订单（补差价订单详情）
+     * @param userToken
+     * @param houseId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getDiffOrderById(String userToken,String houseId){
+        return orderService.getDiffOrderById(userToken, houseId);
+    }
+    /**
+     * 设计精算--原订单详情
+     * @param userToken
+     * @param houseId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getBudgetOrderById(String userToken,
+                                       String houseId){
+        return orderService.getBudgetOrderById(userToken, houseId);
+    }
+
 }

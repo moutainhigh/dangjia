@@ -27,7 +27,7 @@ public interface DataCacheAPI {
      * @param type      必选 int 类型：0:确认地址保留，1扩展
      * @param dataJson  必选 string 缓存JSON
      * @return {"res":1000,"msg":{"resultCode":1000,"resultMsg":"成功"} }
-     * @catalog 商品3.0---app端/数据缓存
+     * @catalog 工匠端升级/设计模块/数据缓存
      * @title 新增缓存
      * @description 新增缓存
      * @method POST
@@ -50,7 +50,7 @@ public interface DataCacheAPI {
      * @param publicKey 必选 string 缓存公用key：type为0时为houseId
      * @param type      必选 int 类型：0:确认地址保留，1扩展
      * @return {"res":1000,"msg":{"resultObj":{返回参数说明},"resultCode":1000,"resultMsg":"成功"} }
-     * @catalog 商品3.0---app端/数据缓存
+     * @catalog 工匠端升级/设计模块/数据缓存
      * @title 查询缓存
      * @description 查询缓存
      * @method POST

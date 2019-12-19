@@ -144,6 +144,7 @@ public class HouseDesignImageController implements HouseDesignImageAPI {
         return designDataService.getIdQuantityRoom(quantityRoomId);
     }
 
+
     @Override
     @ApiMethod
     public ServerResponse getHouseStatistics(String cityId, String workerTypeId, PageDTO pageDTO, String startDate, String endDate) {

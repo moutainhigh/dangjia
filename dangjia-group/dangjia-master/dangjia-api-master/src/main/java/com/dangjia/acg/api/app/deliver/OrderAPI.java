@@ -80,6 +80,16 @@ public interface OrderAPI {
     @ApiOperation(value = "取消订单", notes = "取消订单")
     ServerResponse cancleBusinessOrderById(@RequestParam("userToken") String userToken, @RequestParam("orderId") String orderId);
 
+    @PostMapping("app/order/getDiffOrderById")
+    @ApiOperation(value = "设计精算--补差价订单详情", notes = "设计精算--补差价订单详情")
+    ServerResponse getDiffOrderById(@RequestParam("userToken") String userToken,
+                                    @RequestParam("houseId") String houseId);
+
+    @PostMapping("app/order/getBudgetOrderById")
+    @ApiOperation(value = "设计精算--原订单查询", notes = "设计精算--原订单查询")
+    ServerResponse getBudgetOrderById(@RequestParam("userToken") String userToken,
+                                    @RequestParam("houseId") String houseId);
+
 
 
 

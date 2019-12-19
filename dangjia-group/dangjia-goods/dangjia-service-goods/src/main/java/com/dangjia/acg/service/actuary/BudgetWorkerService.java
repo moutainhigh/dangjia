@@ -444,14 +444,19 @@ public class BudgetWorkerService {
                                     converCount = Math.ceil(converCount);
                                 }
                                 budgetMaterial.setConvertCount(converCount);
-                            }
-                            budgetMaterial.setUnitName(convertUnit.getName());
-                            BigDecimal b1 = new BigDecimal(budgetMaterial.getPrice());
+                                budgetMaterial.setUnitName(convertUnit.getName());
+                                BigDecimal b1 = new BigDecimal(budgetMaterial.getPrice());
 //                            BigDecimal b2 = new BigDecimal(Double.toString(shopCount));
 //                            BigDecimal b2 = new BigDecimal(Double.toString(budgetMaterial.getConvertCount()));
-                            BigDecimal b2 = new BigDecimal(budgetMaterial.getConvertCount());
-                            Double totalPrice = b1.multiply(b2).doubleValue();
-                            budgetMaterial.setTotalPrice(totalPrice);
+                                BigDecimal b2 = new BigDecimal(budgetMaterial.getConvertCount());
+                                Double totalPrice = b1.multiply(b2).doubleValue();
+                                budgetMaterial.setTotalPrice(totalPrice);
+                            }else{//人工商品没有换算量，只有购买量，故按购买量算价格
+                                BigDecimal b1 = new BigDecimal(Double.toString(budgetMaterial.getPrice()));
+                                BigDecimal b2 = new BigDecimal(Double.toString(shopCount));
+                                Double totalPrice = b1.multiply(b2).doubleValue();
+                                budgetMaterial.setTotalPrice(totalPrice);
+                            }
 //                            budgetMaterial.setUnitName(pro.getUnitName());
                             budgetMaterial.setHouseFlowId(houseFlowId);
                             budgetMaterial.setHouseId(houseId);
@@ -466,7 +471,6 @@ public class BudgetWorkerService {
                             budgetMaterial.setImage(pro.getImage());
                             budgetMaterial.setShopCount(shopCount);
                             budgetMaterial.setUnitName(pro.getUnitName());
-                            budgetMaterial.setTotalPrice(totalPrice);
                             budgetMaterial.setHousekeeperAcceptance(0);
                         } else {
                             budgetMaterial.setSteta(2);//自购
