@@ -422,8 +422,10 @@ public class RewardPunishService {
      */
     public ServerResponse queryCorrelationList(PageDTO pageDTO, String type) {
         try {
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<Map<String, Object>> list=rewardPunishCorrelationMapper.queryCorrelationList(type);
-            return ServerResponse.createBySuccess("查询成功", list);
+            PageInfo pageResult = new PageInfo(list);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("奖罚-选择奖罚原因异常");
