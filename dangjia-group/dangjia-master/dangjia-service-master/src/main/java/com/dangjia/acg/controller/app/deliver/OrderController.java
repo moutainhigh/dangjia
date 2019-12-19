@@ -124,4 +124,17 @@ public class OrderController implements OrderAPI {
     public ServerResponse getDiffOrderById(String userToken,String houseId){
         return orderService.getDiffOrderById(userToken, houseId);
     }
+    /**
+     * 设计精算--原订单详情
+     * @param userToken
+     * @param houseId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getBudgetOrderById(String userToken,
+                                       String houseId){
+        return orderService.getBudgetOrderById(userToken, houseId);
+    }
+
 }

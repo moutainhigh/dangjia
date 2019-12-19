@@ -1203,4 +1203,30 @@ public class OrderService {
 
     }
 
+    /***
+     * 设计精算原订单
+     * @param userToken
+     * @param houseId
+     * @return
+     */
+    public ServerResponse getBudgetOrderById(String userToken,String houseId){
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Map returnMap=new HashMap();
+        House house=houseMapper.selectByPrimaryKey(houseId);
+        BudgetOrderDTO orderInfo=orderMapper.getOrderInfoByHouseId(houseId,"1","3");//查询待补差价的订单
+        if(orderInfo!=null&&StringUtils.isNotEmpty(orderInfo.getOrderId())){
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            //查询商品信息
+            List<BudgetOrderItemDTO> orderItemDTOList=orderMapper.getOrderInfoItemList(orderInfo.getOrderId());
+            getProductList(orderItemDTOList,address);
+            returnMap.putAll(BeanUtils.beanToMap(orderItemDTOList));
+        }
+        return ServerResponse.createBySuccess("查询成功",returnMap);
+
+    }
+
+
 }

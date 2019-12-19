@@ -451,7 +451,7 @@ public class BudgetWorkerService {
                                 BigDecimal b2 = new BigDecimal(budgetMaterial.getConvertCount());
                                 Double totalPrice = b1.multiply(b2).doubleValue();
                                 budgetMaterial.setTotalPrice(totalPrice);
-                            }else{
+                            }else{//人工商品没有换算量，只有购买量，故按购买量算价格
                                 BigDecimal b1 = new BigDecimal(Double.toString(budgetMaterial.getPrice()));
                                 BigDecimal b2 = new BigDecimal(Double.toString(shopCount));
                                 Double totalPrice = b1.multiply(b2).doubleValue();
