@@ -20,7 +20,7 @@ public interface HouseDesignPayAPI {
      * @param userToken 必选 string userToken
      * @param houseId   必选 string houseId
      * @return {"res":1000,"msg":{"resultCode":1000,"resultObj":{resultCode=1009时，返回参数说明},"resultMsg":"成功"} }
-     * @catalog 当家接口文档/设计模块
+     * @catalog 工匠端升级/设计模块
      * @title 业主发起修改设计图
      * @description 业主发起修改设计图
      * @method POST
@@ -49,7 +49,7 @@ public interface HouseDesignPayAPI {
      * @param houseId   必选 string houseId
      * @param type      必选 int 0:不通过,1:通过
      * @return {"res":1000,"msg":{"resultCode":1000,"resultObj":{resultCode=1009时，返回参数说明},"resultMsg":"成功"} }
-     * @catalog 当家接口文档/设计模块
+     * @catalog 工匠端升级/设计模块
      * @title 修改后确认设计图
      * @description 修改后确认设计图
      * @method POST

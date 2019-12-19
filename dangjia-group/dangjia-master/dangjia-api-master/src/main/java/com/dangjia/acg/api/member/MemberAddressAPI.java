@@ -36,7 +36,7 @@ public interface MemberAddressAPI {
      * @param longitude      必选 string 经度
      * @param latitude       必选 string 纬度
      * @return {"res":1000,"msg":{"resultCode":1000,"resultMsg":"成功"} }
-     * @catalog 商品3.0---app端/我的地址
+     * @catalog 工匠端升级/我的地址
      * @title 新增地址
      * @description 新增地址
      * @method POST
@@ -69,7 +69,7 @@ public interface MemberAddressAPI {
      * @param name        必选 string 业主姓名
      * @param mobile      必选 string 业主手机
      * @return {"res":1000,"msg":{"resultCode":1000,"resultMsg":"成功"} }
-     * @catalog 商品3.0---app端/我的地址
+     * @catalog 工匠端升级/我的地址
      * @title 业主修改地址
      * @description 业主修改地址
      * @method POST
@@ -94,7 +94,7 @@ public interface MemberAddressAPI {
      * @param userToken 必选 string userToken
      * @param addressId 必选 string 地址ID
      * @return {"res":1000,"msg":{"resultCode":1000,"resultMsg":"成功"} }
-     * @catalog 商品3.0---app端/我的地址
+     * @catalog 工匠端升级/我的地址
      * @title 删除地址
      * @description 删除地址
      * @method POST
@@ -115,7 +115,7 @@ public interface MemberAddressAPI {
      *
      * @param addressId 必选 string 地址ID
      * @return {"res":1000,"msg":{"resultObj":{返回参数说明},"resultCode":1000,"resultMsg":"成功"} }
-     * @catalog 商品3.0---app端/我的地址
+     * @catalog 工匠端升级/我的地址
      * @title 查找用户地址
      * @description 查找用户地址
      * @method POST
@@ -153,7 +153,7 @@ public interface MemberAddressAPI {
      * @param userToken      必选 string userToken
      * @param renovationType 必选 int -1:全部，0：非装修地址，1：装修地址
      * @return {"res": 1000,"msg": {"resultCode": 1000, "resultMsg": "ok", "resultObj": { "pageNum": 0,"pageSize": 10,"size": 1,"startRow": 1,"endRow": 1,"total": 1, "pages": 1,"list": [{返回参数说明}],"prePage": 0, "nextPage": 1,"isFirstPage": false,"isLastPage": false,"hasPreviousPage": false,"hasNextPage": true,"navigatePages": 8,"navigatepageNums": [1],"navigateFirstPage": 1,"navigateLastPage": 1}}}
-     * @catalog 商品3.0---app端/我的地址
+     * @catalog 工匠端升级/我的地址
      * @title 查找用户地址列表
      * @description 查找用户地址列表
      * @method POST

@@ -23,7 +23,6 @@ import com.dangjia.acg.modle.design.QuantityRoomImages;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.ModelingVillage;
 import com.dangjia.acg.modle.member.Member;
-import com.dangjia.acg.modle.member.MemberAddress;
 import com.dangjia.acg.modle.other.City;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
@@ -354,4 +353,5 @@ public class QuantityRoomService {
         iMasterQuantityRoomProductMapper.updateByPrimaryKeySelective(quantityRoomProduct);
         return ServerResponse.createBySuccessMessage("删除成功");
     }
+
 }

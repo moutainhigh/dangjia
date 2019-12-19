@@ -28,7 +28,7 @@ public interface QuestionAPI {
      * @param questionType 必选 int 试题类型0:排雷（单选）
      * @param optionJson   必选 string 试题选项。格式为"[{"optionId":"选项ID：为空时则新增否则为编辑","content":"选项内容"},{"optionId":"","content":""}]"
      * @return {"res":1000,"msg":{"resultCode":1000,"resultMsg":"成功"} }
-     * @catalog 商品3.0---app端/排雷模块
+     * @catalog 工匠端升级/设计模块/排雷模块
      * @title 新增/编辑试题
      * @description 新增/编辑试题
      * @method POST
@@ -53,7 +53,7 @@ public interface QuestionAPI {
      * @param pageSize     必选 int 记录数
      * @param questionType 必选 int 试题类型0:排雷（单选）
      * @return {"res": 1000,"msg": {"resultCode": 1000, "resultMsg": "ok", "resultObj": { "pageNum": 0,"pageSize": 10,"size": 1,"startRow": 1,"endRow": 1,"total": 1, "pages": 1,"list": [{返回参数说明}],"prePage": 0, "nextPage": 1,"isFirstPage": false,"isLastPage": false,"hasPreviousPage": false,"hasNextPage": true,"navigatePages": 8,"navigatepageNums": [1],"navigateFirstPage": 1,"navigateLastPage": 1}}}
-     * @catalog 商品3.0---app端/排雷模块
+     * @catalog 工匠端升级/设计模块/排雷模块
      * @title 获取试题列表
      * @description 获取试题列表
      * @method POST
@@ -87,7 +87,7 @@ public interface QuestionAPI {
      *
      * @param questionId 可选 string 试题ID
      * @return {"res":1000,"msg":{"resultCode":1000,"resultMsg":"成功"} }
-     * @catalog 商品3.0---app端/排雷模块
+     * @catalog 工匠端升级/设计模块/排雷模块
      * @title 删除试题
      * @description 删除试题
      * @method POST
@@ -108,7 +108,7 @@ public interface QuestionAPI {
      * @param houseId    必选 string 房子ID
      * @param questionJson 必选 string 试题和选项集合，格式为"[{"questionId":"试题ID","questionOptionId","选项ID"}]"
      * @return {"res":1000,"msg":{"resultCode":1000,"resultMsg":"成功"} }
-     * @catalog 商品3.0---app端/排雷模块
+     * @catalog 工匠端升级/设计模块/排雷模块
      * @title 设置房子排雷
      * @description 设置房子排雷
      * @method POST
@@ -129,7 +129,7 @@ public interface QuestionAPI {
      *
      * @param houseId 必选 string 房子ID
      * @return {"res":1000,"msg":{"resultObj":[{返回参数说明},{返回参数说明}],"resultCode":1000,"resultMsg":"成功"} }
-     * @catalog 商品3.0---app端/排雷模块
+     * @catalog 工匠端升级/设计模块/排雷模块
      * @title 获取房子排雷
      * @description 获取房子排雷
      * @method POST
