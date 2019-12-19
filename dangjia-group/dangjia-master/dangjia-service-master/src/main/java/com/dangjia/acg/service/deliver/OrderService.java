@@ -14,22 +14,25 @@ import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.MathUtil;
 import com.dangjia.acg.dao.ConfigUtil;
-import com.dangjia.acg.dto.deliver.BusinessOrderDTO;
-import com.dangjia.acg.dto.deliver.ItemDTO;
-import com.dangjia.acg.dto.deliver.OrderDTO;
-import com.dangjia.acg.dto.deliver.OrderItemDTO;
+import com.dangjia.acg.dto.deliver.*;
+import com.dangjia.acg.dto.refund.RefundOrderItemDTO;
 import com.dangjia.acg.dto.supplier.DjSupSupplierProductDTO;
+import com.dangjia.acg.mapper.core.IMasterUnitMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.delivery.*;
 import com.dangjia.acg.mapper.house.IHouseDistributionMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseDetailMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
+import com.dangjia.acg.mapper.member.IMasterMemberAddressMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
+import com.dangjia.acg.mapper.product.IMasterProductTemplateMapper;
 import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
 import com.dangjia.acg.mapper.repair.IMendMaterialMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
+import com.dangjia.acg.modle.brand.Brand;
+import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.*;
 import com.dangjia.acg.modle.delivery.DjDeliverOrder;
@@ -38,6 +41,7 @@ import com.dangjia.acg.modle.house.HouseDistribution;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.house.WarehouseDetail;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.member.MemberAddress;
 import com.dangjia.acg.modle.order.DeliverOrderAddedProduct;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.product.BasicsGoods;
@@ -49,6 +53,7 @@ import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.service.acquisition.MasterCostAcquisitionService;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.dangjia.acg.service.product.MasterProductTemplateService;
 import com.dangjia.acg.service.repair.MendOrderService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -120,6 +125,15 @@ public class OrderService {
     private IMemberMapper iMemberMapper;
     @Autowired
     private IWarehouseMapper iWarehouseMapper;
+    @Autowired
+    private IMasterMemberAddressMapper iMasterMemberAddressMapper;
+    @Autowired
+    private IMasterProductTemplateMapper iMasterProductTemplateMapper;
+
+    @Autowired
+    private IMasterUnitMapper iMasterUnitMapper;
+    @Autowired
+    private MasterProductTemplateService masterProductTemplateService;
 
     private static Logger logger = LoggerFactory.getLogger(OrderService.class);
 
@@ -1090,6 +1104,103 @@ public class OrderService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("删除订单异常");
         }
+
+    }
+
+    /**
+     *查询差价订单
+     * @param userToken
+     * @param houseId
+     * @return
+     */
+    public ServerResponse getDiffOrderById(String userToken,String houseId){
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Map returnMap=new HashMap();
+        House house=houseMapper.selectByPrimaryKey(houseId);
+        Example example = new Example(MemberAddress.class);
+        example.createCriteria().andEqualTo(MemberAddress.HOUSE_ID, house.getId());
+        MemberAddress memberAddress=iMasterMemberAddressMapper.selectOneByExample(example);
+        if(memberAddress==null||StringUtils.isEmpty(memberAddress.getId())){
+            return ServerResponse.createByErrorMessage("未找到对应的录入信息！");
+        }
+        returnMap.put("square",house.getSquare());//总面积
+        returnMap.put("inputArea",memberAddress.getInputArea());//支付面积
+        returnMap.put("NeedPayArea",house.getSquare().subtract(memberAddress.getInputArea()));//需支付面积
+
+        BudgetOrderDTO orderInfo=orderMapper.getOrderInfoByHouseId(houseId,"4","2");//查询待补差价的订单
+        if(orderInfo!=null&&StringUtils.isNotEmpty(orderInfo.getOrderId())){
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            //查询商品信息
+            List<BudgetOrderItemDTO> orderItemDTOList=orderMapper.getOrderInfoItemList(orderInfo.getOrderId());
+            getProductList(orderItemDTOList,address);
+            returnMap.putAll(BeanUtils.beanToMap(orderItemDTOList));
+        }
+        return ServerResponse.createBySuccess("查询成功",returnMap);
+
+    }
+    /**
+     * 查询商品对应的规格详情，品牌，单位信息
+     * @param productList
+     * @param address
+     */
+    private  void getProductList(List<BudgetOrderItemDTO> productList, String address){
+        if(productList!=null&&productList.size()>0){
+            for(BudgetOrderItemDTO ap:productList){
+                setProductInfo(ap,address);
+            }
+        }
+    }
+    /**
+     * 替换对应的信息
+     * @param ap
+     * @param address
+     */
+    private  void setProductInfo(BudgetOrderItemDTO ap,String address){
+        String productTemplateId=ap.getProductTemplateId();
+        DjBasicsProductTemplate pt=iMasterProductTemplateMapper.selectByPrimaryKey(productTemplateId);
+        if(pt!=null&& org.apache.commons.lang3.StringUtils.isNotBlank(pt.getId())){
+            String image=ap.getImage();
+            if (image == null) {
+                image=pt.getImage();
+            }
+            ap.setConvertUnit(pt.getConvertUnit());
+            ap.setCost(pt.getCost());
+            ap.setCategoryId(pt.getCategoryId());
+            if(ap.getStorefrontIcon()!=null&& org.apache.commons.lang3.StringUtils.isNotBlank(ap.getStorefrontIcon())){
+                ap.setStorefrontIcon(address+ap.getStorefrontIcon());
+            }
+            //添加图片详情地址字段
+            String[] imgArr = image.split(",");
+            //StringBuilder imgStr = new StringBuilder();
+            // StringBuilder imgUrlStr = new StringBuilder();
+            // StringTool.get.getImages(address, imgArr, imgStr, imgUrlStr);
+            if(imgArr!=null&&imgArr.length>0){
+                ap.setImageUrl(address+imgArr[0]);//图片详情地址设置
+            }
+
+            String unitId=pt.getUnitId();
+            //查询单位
+            if(pt.getConvertQuality()!=null&&pt.getConvertQuality()>0){
+                unitId=pt.getConvertUnit();
+            }
+            if(unitId!=null&& org.apache.commons.lang3.StringUtils.isNotBlank(unitId)){
+                Unit unit= iMasterUnitMapper.selectByPrimaryKey(unitId);
+                ap.setUnitId(unitId);
+                ap.setUnitName(unit!=null?unit.getName():"");
+                ap.setUnitType(unit!=null?unit.getType():2);
+            }
+
+
+            //查询规格名称
+            if (org.apache.commons.lang3.StringUtils.isNotBlank(pt.getValueIdArr())) {
+                ap.setValueIdArr(pt.getValueIdArr());
+                ap.setValueNameArr(masterProductTemplateService.getNewValueNameArr(pt.getValueIdArr()).replaceAll(",", " "));
+            }
+        }
+
     }
 
 }

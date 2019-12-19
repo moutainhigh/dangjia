@@ -39,6 +39,8 @@ public interface IHouseMapper extends Mapper<House> {
      */
     List<HouseOrderDetailDTO> getBudgetOrderDetailByHouseId(@Param("houseId") String houseId,@Param("workerTypeId") String workerTypeId);
 
+
+
     /**
      * 判断当前订单是否为已退款状态
      * @param houseId
