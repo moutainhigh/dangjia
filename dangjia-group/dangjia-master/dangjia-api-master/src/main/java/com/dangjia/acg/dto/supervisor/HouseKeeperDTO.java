@@ -13,4 +13,5 @@ public class HouseKeeperDTO {
     private String projectTime;//工期
     private String patrol;//巡查
     private String checkTimes; //验收
+    private String iamge;//头像
 }

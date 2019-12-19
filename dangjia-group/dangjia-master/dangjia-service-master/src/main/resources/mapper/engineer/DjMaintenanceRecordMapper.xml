@@ -247,7 +247,8 @@
         inner join dj_member dm on dm.id=dh.member_id
         inner join dj_maintenance_record dmr on dh.id=dmr.house_id
         where dh.id=#{houseId}
-
+        and dmr.owner_state=2
+		and dmr.state=2
     </select>
 
     <select id="queryMaintenanceRecord" resultType="com.dangjia.acg.modle.engineer.DjMaintenanceRecord">

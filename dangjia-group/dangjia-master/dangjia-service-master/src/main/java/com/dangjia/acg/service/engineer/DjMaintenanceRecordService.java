@@ -278,6 +278,8 @@ public class DjMaintenanceRecordService {
                 djMaintenanceRecord.setId(id);
                 djMaintenanceRecord.setCreateDate(null);
                 djMaintenanceRecord.setHandleType(handleType);
+                djMaintenanceRecordMapper.updateByPrimaryKeySelective(djMaintenanceRecord);
+                return ServerResponse.createBySuccess("提交成功");
             }else if(handleType != null && handleType == 4){
                 //结束流程
                 djMaintenanceRecord.setUserId(userId);
@@ -285,9 +287,10 @@ public class DjMaintenanceRecordService {
                 djMaintenanceRecord.setId(id);
                 djMaintenanceRecord.setCreateDate(null);
                 djMaintenanceRecord.setHandleType(handleType);
+                djMaintenanceRecordMapper.updateByPrimaryKeySelective(djMaintenanceRecord);
+                return ServerResponse.createBySuccess("提交成功");
             }
-            djMaintenanceRecordMapper.updateByPrimaryKeySelective(djMaintenanceRecord);
-            return ServerResponse.createBySuccess("提交成功");
+            return ServerResponse.createByErrorMessage("提交失败");
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("提交失败");

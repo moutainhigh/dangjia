@@ -46,6 +46,7 @@
 
 
     <select id="getMaintenanceRecordList" resultType="com.dangjia.acg.dto.complain.ComplainDTO">
+        select
         m.name as memberName,
         m.nick_name as memberNickName,
         m.mobile as memberMobile,
@@ -70,14 +71,14 @@
         LEFT JOIN dj_member m on mr.member_id = m.id
         LEFT JOIN dj_user  u on mr.user_id = u.id
         LEFT JOIN dj_house h ON mr.house_id = h.id
-        mr.data_status = 0
-        <if test="complainType!=null">
+        where mr.data_status = 0
+        <if test="complainType != null">
             and mr.complain_type = #{complainType}
         </if>
-        <if test="state!=null">
+        <if test="state != null">
             and mr.handle_type = #{state}
         </if>
-        <if test="searchKey!=null and searchKey!=''">
+        <if test=" searchKey!=null and searchKey != ''">
             and CONCAT(m.mobile,m.name,m.nick_name)  like CONCAT('%',#{searchKey},'%')
         </if>
         ORDER by mr.modify_date desc
@@ -85,7 +86,8 @@
 
 
     <select id="getComplain" resultType="com.dangjia.acg.dto.complain.ComplainDTO">
-        SELECT c.id as id,
+        SELECT
+        c.id as id,
         c.member_id as memberId,
         c.user_name as memberName,
         c.user_nick_name as memberNickName,
