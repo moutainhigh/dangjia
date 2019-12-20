@@ -1226,6 +1226,7 @@ public class OrderService {
         BudgetOrderDTO orderDiffInfo=orderMapper.getOrderInfoByHouseId(houseId,"4","2");//查询待补差价的订单
         if(orderDiffInfo==null||StringUtils.isEmpty(orderDiffInfo.getOrderId())){
             diffOrder=false;
+            returnMap.put("diffOrderId",orderDiffInfo.getOrderId());//补差价订单ID
         }
         BudgetOrderDTO orderInfo=orderMapper.getOrderInfoByHouseId(houseId,"1","3");//查询原订单信息
         if(orderInfo!=null&&StringUtils.isNotEmpty(orderInfo.getOrderId())){
