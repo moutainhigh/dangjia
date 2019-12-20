@@ -2,6 +2,7 @@ package com.dangjia.acg.mapper;
 
 import com.dangjia.acg.model.Config;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
 import java.util.List;
@@ -9,7 +10,7 @@ import java.util.List;
 /**
  * Created by QiYuXiang on 2017/8/3.
  */
-@org.apache.ibatis.annotations.Mapper
+@Repository
 public interface IConfigMapper extends Mapper<Config> {
 
   public List<Config> queryBasicConfig(Config config);
