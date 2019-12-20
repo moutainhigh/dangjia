@@ -26,8 +26,8 @@ public class DjBasicsPatrolRecordController implements DjBasicsPatrolRecordAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryDjBasicsPatrolRecord(HttpServletRequest request, String userToken) {
-        return patrolRecordServices.queryDjBasicsPatrolRecord(request,userToken);
+    public ServerResponse queryDjBasicsPatrolRecord(HttpServletRequest request, String userToken,PageDTO pageDTO) {
+        return patrolRecordServices.queryDjBasicsPatrolRecord(request,userToken,pageDTO);
     }
 
     @Override
