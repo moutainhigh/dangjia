@@ -369,7 +369,7 @@ public class SupAuthorityService {
                             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());//查询工种
                             workerTypeName=workerType!=null?workerType.getName():"";
                             if(StringUtil.isNotEmpty(workerTypeName)){
-                                sb.append(workerTypeName).append("、");
+                                sb.append(workerTypeName).append("、");//工种名称
                             }
                         }
                     });
@@ -399,17 +399,6 @@ public class SupAuthorityService {
             JSONObject job = (JSONObject)object;
             Member worker = job.toJavaObject(Member.class);
             MtHostListDetailDTO  mtHostListDetailDTO =djMaintenanceRecordMapper.queryMtHostListDetail(houseId);
-
-            Example example = new Example(WorkerTypeSafeOrder.class);
-            example.createCriteria()
-                    .andEqualTo(WorkerTypeSafeOrder.HOUSE_ID, houseId).
-                    andIsNotNull(WorkerTypeSafeOrder.FORCE_TIME).
-                    andEqualTo(WorkerTypeSafeOrder.DATA_STATUS, 0);
-            List<WorkerTypeSafeOrder> list = workerTypeSafeOrderMapper.selectByExample(example);
-            if (list.size()<=0) {
-                mtHostListDetailDTO.setList(null);
-            }
-            mtHostListDetailDTO.setList(list);
             return ServerResponse.createBySuccess("查询成功", mtHostListDetailDTO);
         } catch (Exception e) {
             logger.error("（维保）工地详情异常", e);
