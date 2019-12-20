@@ -2074,7 +2074,7 @@ public class HouseService {
                 HouseOrderDetailDTO houseOrderDetailDTO=houseOrderDetailDTOList.get(0);
                 String orderId=houseOrderDetailDTO.getOrderId();
                 //自动生成退款单，且退款同意
-                repairMendOrderService.saveRefundInfoRecord(house.getCityId(),house.getHouseId(),orderId,productStr);
+                repairMendOrderService.saveRefundInfoRecord(house.getCityId(),house.getHouseId(),orderId,productStr,new BigDecimal(0));
 
 
             }
@@ -2106,7 +2106,7 @@ public class HouseService {
                     String addedProductIds=iMasterDeliverOrderAddedProductMapper.getAddedPrdouctStr(orderItemId);
                     String workerTypeId=product.getWorkerTypeId();
                     Example example=new Example(DjActuarialProductConfig.class);
-                    example.createCriteria().andEqualTo(DjActuarialProductConfig.ACTUARIAL_TEMPLATE_ID,workerTypeId)
+                    example.createCriteria().andEqualTo(DjActuarialProductConfig.WORKER_TYPE_ID,workerTypeId)
                             .andEqualTo(DjActuarialProductConfig.PRODUCT_ID,productTemplateId);
                     DjActuarialProductConfig djActuarialProductConfig=iMasterActuarialProductConfigMapper.selectOneByExample(example);
                     if(djActuarialProductConfig!=null&&"1".equals(djActuarialProductConfig.getIsCalculatedArea())){

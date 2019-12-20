@@ -97,7 +97,7 @@
         gr.operatorName,
         gr.operatorMobile,
         gr.operatorId,
-        IFNULL(ma.adderss,CONCAT(
+        IFNULL(ma.address,CONCAT(
         house.residential,
         IFNULL(hhouse.building, '*'),
         '栋',
@@ -614,7 +614,7 @@
     <select id="getActuaryAll" resultType="com.dangjia.acg.dto.house.HouseListDTO">
         SELECT
         h.id as houseId,
-        IFNULL(ma.adderss,CONCAT(
+        IFNULL(ma.address,CONCAT(
         h.residential,
         IFNULL(h.building, '*'),
         '栋',
@@ -650,7 +650,7 @@
         s.store_name storeName,
         gr.operatorName,
         gr.operatorMobile,
-        gr.operatorId
+        gr.operatorId,
         ma.input_area inputArea
         FROM
         dj_house h

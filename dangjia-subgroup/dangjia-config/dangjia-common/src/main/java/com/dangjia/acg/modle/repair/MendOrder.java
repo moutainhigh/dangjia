@@ -94,6 +94,10 @@ public class MendOrder extends BaseEntity {
 	@ApiModelProperty("实际总价（不含运费）")
 	private Double actualTotalAmount;
 
+	@Column(name = "room_charge")
+	@Desc(value = "量房费用")
+	@ApiModelProperty("量房费用")
+	private Double roomCharge;
 
 	@Column(name = "storefront_id")
 	@Desc(value = "店铺ID")
