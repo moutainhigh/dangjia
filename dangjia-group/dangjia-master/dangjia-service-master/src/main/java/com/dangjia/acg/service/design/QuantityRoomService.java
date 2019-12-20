@@ -175,8 +175,12 @@ public class QuantityRoomService {
             house.setConstructionDate(new Date());//开工时间
             //更新地址信息
             ServerResponse serverResponse = memberAddressService.updataAddress(house);
-            if (!serverResponse.isSuccess()) {
-                return serverResponse;
+            //生成补单
+            if (serverResponse.isSuccess()) {
+                serverResponse = houseService.checkHouseSquare(houseId);
+                if (!serverResponse.isSuccess()) {
+                    return serverResponse;
+                }
             }
             //创建量房信息
             quantityRoom = new QuantityRoom();
@@ -192,11 +196,6 @@ public class QuantityRoomService {
             quantityRoom.setOperationType(0);
             quantityRoom.setRoomType(0);
             quantityRoom.setFlag(3);
-            //生成补单
-            serverResponse = houseService.checkHouseSquare(houseId);
-            if (!serverResponse.isSuccess()) {
-                return serverResponse;
-            }
             iQuantityRoomMapper.insert(quantityRoom);
             house.setDecorationType(2);
         } else {
