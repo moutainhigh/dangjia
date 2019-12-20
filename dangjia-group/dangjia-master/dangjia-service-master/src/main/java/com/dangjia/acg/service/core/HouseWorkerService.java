@@ -547,11 +547,11 @@ public class HouseWorkerService {
      */
     public void grabSheet(Member worker, House house, HouseFlow houseFlow, IHouseMapper houseMapper) {
         if (worker.getWorkerType() == 1) {//设计师
-            house.setDesignerOk(house.getDecorationType() == 2 ? 1 : 4);//有设计抢单待业主支付
-            houseFlow.setWorkType(house.getDecorationType() == 2 ? 4 : 3);
+            house.setDesignerOk(1);//有设计抢单待业主支付
+            houseFlow.setWorkType(3);
             houseMapper.updateByPrimaryKeySelective(house);
         } else if (worker.getWorkerType() == 2) {
-            house.setBudgetOk(5);//有精算抢单待业主支付
+            house.setBudgetOk(1);//有精算抢单待业主支付
             houseMapper.updateByPrimaryKeySelective(house);
         }
     }

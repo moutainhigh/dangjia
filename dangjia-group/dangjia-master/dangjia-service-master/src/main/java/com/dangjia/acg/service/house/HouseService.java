@@ -2771,6 +2771,9 @@ public class HouseService {
         }
         //展示动态类别为： 每日开工，每日完工，管家巡查，阶段完工，管家验收阶段完工，整体完工，管家整体完工验收，工艺节点展示；
         String applyType = "0,1,2,4,5,6,7";
+        if(type==1){
+            applyType ="1,2";
+        }
         String[] applyTypes = applyType.split(",");
         criteria.andIn(HouseConstructionRecord.APPLY_TYPE, Arrays.asList(applyTypes));
         example.orderBy(HouseConstructionRecord.CREATE_DATE).desc();
@@ -2811,44 +2814,42 @@ public class HouseService {
         }
         map.put("content", hfa.getContent());
         map.put("sourceType", hfa.getApplyType());
-        Example example = new Example(HouseFlowApplyImage.class);
-        if (hfa.getSourceType() == 0) {
-            HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(hfa.getSourceId());
-            example.createCriteria().andEqualTo(HouseFlowApplyImage.HOUSE_FLOW_APPLY_ID, hfa.getSourceId());
-            List<HouseFlowApplyImage> hfaiList = houseFlowApplyImageMapper.selectByExample(example);
-            String[] imgArr = new String[hfaiList.size()];
-            for (int i = 0; i < hfaiList.size(); i++) {
-                HouseFlowApplyImage hfai = hfaiList.get(i);
-                String string = hfai.getImageUrl();
-                imgArr[i] = address + string;
-            }
-            map.put("imgArr", imgArr);
-            if (houseFlowApply != null) {
-                map.put("startDate", houseFlowApply.getStartDate());
-                map.put("endDate", houseFlowApply.getEndDate());
-            }
-        }
-        if (hfa.getSourceType() == 1) {
-            MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(hfa.getSourceId());
-            if (null != mendOrder) {
-                map.put("type", mendOrder.getType());
-                map.put("number", mendOrder.getNumber());
-                if (mendOrder.getType() == 2 && StringUtil.isNotEmpty(mendOrder.getImageArr())) {
-                    String[] imageArr = mendOrder.getImageArr().split(",");
-                    if (imageArr.length > 0) {
-                        List<String> imageList = new ArrayList<>();
-                        for (String anImageArr : imageArr) {
-                            imageList.add(address + anImageArr);
-                        }
-                        map.put("imgArr", imageList);
-                    }
-                }
-            }
-        }
+        map.put("applyType",hfa.getApplyType());
         map.put("applyType", applyTypeMap.get(hfa.getApplyType()));
         map.put("createDate", hfa.getCreateDate());
+        this.getSourceImage(hfa,address,"",map);
+        //获取业主评论
+        List<Evaluate> evaluates = houseFlowApplyMapper.getOwnerComment(hfa.getHouseId(),hfa.getWorkerId(),hfa.getApplyType(),hfa.getWorkerType());
+        if(!evaluates.isEmpty()){
+            map.put("star",evaluates.get(0).getStar());
+            map.put("ownerContent",evaluates.get(0).getContent());
+        }
+        //查询工匠对应的审核的大管家
+        HouseConstructionRecord houseConstructionRecord =
+                houseConstructionRecordMapper.queryHouseConstructionRecord(hfa.getHouseId(), hfa.getWorkerId());
+        Member member1 = memberMapper.selectByPrimaryKey(houseConstructionRecord.getWorkerId());
+        if (member1 != null) {
+            member1.initPath(address);
+            map.put("stewardHead", member1.getHead());//大管家头像
+            if (member1.getWorkerType() != null && member1.getWorkerType() >= 1) {
+                map.put("stewardTypeName", workerTypeMapper.selectByPrimaryKey(member1.getWorkerTypeId()).getName());//工匠类型
+            }
+            map.put("stewardName", member1.getName());//大管家名称
+        }
+        map.put("stewardContent", houseConstructionRecord.getContent());
+        map.put("stewardSourceType", houseConstructionRecord.getApplyType());
+        map.put("stewardApplyType",houseConstructionRecord.getApplyType());
+        map.put("stewardSourceId", houseConstructionRecord.getSourceId());
+        map.put("stewardCreateDate", houseConstructionRecord.getCreateDate());
+        this.getSourceImage(houseConstructionRecord,address,"steward",map);
+        //获取业主评论
+        evaluates = houseFlowApplyMapper.getOwnerComment(hfa.getHouseId(),hfa.getWorkerId(),hfa.getApplyType(),hfa.getWorkerType());
+        if(!evaluates.isEmpty()){
+            map.put("stewardStar",evaluates.get(0).getStar());
+            map.put("stewardOwnerContent",evaluates.get(0).getContent());
+        }
         logger.info("++++++++++++++++++++++++++++++++++++sourceId:" + sourceId);
-        example = new Example(TechnologyRecord.class);
+        Example example = new Example(TechnologyRecord.class);
         example.createCriteria().andEqualTo(TechnologyRecord.HOUSE_FLOW_APPLY_ID, sourceId);
         example.orderBy(TechnologyRecord.CREATE_DATE).desc();
         //已验收节点
@@ -2866,18 +2867,47 @@ public class HouseService {
             nodeMap.add(map1);
         }
         map.put("recordList", nodeMap);
-
-        //获取业主评论
-        List<Evaluate> evaluates = houseFlowApplyMapper.getOwnerComment(hfa.getHouseId(),hfa.getWorkerId(),hfa.getApplyType(),hfa.getWorkerType());
-        if(!evaluates.isEmpty()){
-            map.put("star",evaluates.get(0).getStar());
-            map.put("ownerContent",evaluates.get(0).getContent());
-        }
-
         Map<String,Object> mm = new HashMap<>();
         mm.put("houseId",hfa.getHouseId());
         houseFlowApplyMapper.updateIsReadType(null);
         return map;
+    }
+
+    private void getSourceImage(HouseConstructionRecord hfa, String address, String type, Map map){
+        Example example = new Example(HouseFlowApplyImage.class);
+        if (hfa.getSourceType() == 0) {
+            HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(hfa.getSourceId());
+            example.createCriteria().andEqualTo(HouseFlowApplyImage.HOUSE_FLOW_APPLY_ID, hfa.getSourceId());
+            List<HouseFlowApplyImage> hfaiList = houseFlowApplyImageMapper.selectByExample(example);
+            String[] imgArr = new String[hfaiList.size()];
+            for (int i = 0; i < hfaiList.size(); i++) {
+                HouseFlowApplyImage hfai = hfaiList.get(i);
+                String string = hfai.getImageUrl();
+                imgArr[i] = address + string;
+            }
+            map.put(type+"imgArr", imgArr);
+            if (houseFlowApply != null) {
+                map.put(type+"startDate", houseFlowApply.getStartDate());
+                map.put(type+"endDate", houseFlowApply.getEndDate());
+            }
+        }
+        if (hfa.getSourceType() == 1) {
+            MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(hfa.getSourceId());
+            if (null != mendOrder) {
+                map.put(type+"type", mendOrder.getType());
+                map.put(type+"number", mendOrder.getNumber());
+                if (mendOrder.getType() == 2 && StringUtil.isNotEmpty(mendOrder.getImageArr())) {
+                    String[] imageArr = mendOrder.getImageArr().split(",");
+                    if (imageArr.length > 0) {
+                        List<String> imageList = new ArrayList<>();
+                        for (String anImageArr : imageArr) {
+                            imageList.add(address + anImageArr);
+                        }
+                        map.put(type+"imgArr", imageList);
+                    }
+                }
+            }
+        }
     }
 
     /**
