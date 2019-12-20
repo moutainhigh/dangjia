@@ -68,7 +68,7 @@ public class WalletService {
     private CraftsmanConstructionService constructionService;
     @Autowired
     private EngineerService engineerService;
-    private String ruleDate = "2019年12月19日";//TODO  时间
+    private String ruleDate = "2019年12月20日";//时间
 
 
     /**
