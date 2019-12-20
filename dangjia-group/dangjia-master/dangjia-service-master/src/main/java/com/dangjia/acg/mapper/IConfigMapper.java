@@ -1,6 +1,7 @@
 package com.dangjia.acg.mapper;
 
 import com.dangjia.acg.model.Config;
+import org.apache.ibatis.annotations.Param;
 import tk.mybatis.mapper.common.Mapper;
 
 import java.util.List;
@@ -12,4 +13,6 @@ import java.util.List;
 public interface IConfigMapper extends Mapper<Config> {
 
   public List<Config> queryBasicConfig(Config config);
+
+  Config selectConfigInfoByParamKey(@Param("paramKey") String paramKey);
 }

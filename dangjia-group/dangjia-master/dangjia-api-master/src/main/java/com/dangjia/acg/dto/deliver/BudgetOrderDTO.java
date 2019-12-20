@@ -2,6 +2,7 @@ package com.dangjia.acg.dto.deliver;
 
 import lombok.Data;
 
+import java.util.Date;
 import java.util.List;
 
 @Data
@@ -18,6 +19,12 @@ public class BudgetOrderDTO {
     private String storefrontName;//店铺名称
 
     private String storefrontIcon;//店铺图标
+
+    private String orderSource;//订单来源(1,精算制作，2购物车，3补货单，4补差价订单）
+
+    private Date createDate;//订单创建时间
+
+    private Date orderPayTime;//订单创建时间
 
     private String orderNumber;//订单编号
 

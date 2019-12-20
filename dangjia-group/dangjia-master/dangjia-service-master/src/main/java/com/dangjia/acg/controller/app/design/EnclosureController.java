@@ -23,9 +23,8 @@ public class EnclosureController implements EnclosureAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse addEnclosure(HttpServletRequest request, String userToken, String userId, String houseId,
-                                       String name, String enclosure, int enclosureType, String remarks) {
-        return enclosureService.addEnclosure(userToken, userId, houseId, name, enclosure, enclosureType, remarks);
+    public ServerResponse addEnclosure(HttpServletRequest request, String userToken, String userId, String houseId, String enclosureJson) {
+        return enclosureService.addEnclosure(userToken, userId, houseId, enclosureJson);
     }
 
     @Override

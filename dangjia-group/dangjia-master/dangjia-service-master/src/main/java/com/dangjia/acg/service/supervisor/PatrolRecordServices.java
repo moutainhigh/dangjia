@@ -105,8 +105,9 @@ public class PatrolRecordServices {
      * @param request
      * @return
      */
-    public ServerResponse queryDjBasicsPatrolRecord(HttpServletRequest request, String userToken) {
+    public ServerResponse queryDjBasicsPatrolRecord(HttpServletRequest request, String userToken,PageDTO pageDTO) {
         try {
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
@@ -120,7 +121,8 @@ public class PatrolRecordServices {
                 String imageAddress=StringTool.getImage(djBasicsPatrolRecord.getImages(),address);
                 djBasicsPatrolRecord.setImages(imageAddress);
             });
-            return ServerResponse.createBySuccess("查询成功", list);
+            PageInfo pageResult = new PageInfo(list);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             logger.error("查询巡检记录异常", e);
             return ServerResponse.createByErrorMessage("查询巡检记录异常");

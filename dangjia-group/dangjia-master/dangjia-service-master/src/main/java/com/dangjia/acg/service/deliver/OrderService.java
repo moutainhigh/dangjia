@@ -2,7 +2,6 @@ package com.dangjia.acg.service.deliver;
 
 import cn.jiguang.common.utils.StringUtils;
 import com.alibaba.fastjson.JSON;
-import com.dangjia.acg.api.BasicsStorefrontAPI;
 import com.dangjia.acg.api.StorefrontConfigAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.DjConstants;
@@ -15,8 +14,7 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.MathUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.deliver.*;
-import com.dangjia.acg.dto.refund.RefundOrderItemDTO;
-import com.dangjia.acg.dto.supplier.DjSupSupplierProductDTO;
+import com.dangjia.acg.mapper.IConfigMapper;
 import com.dangjia.acg.mapper.core.IMasterUnitMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.delivery.*;
@@ -31,11 +29,10 @@ import com.dangjia.acg.mapper.product.IMasterProductTemplateMapper;
 import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
 import com.dangjia.acg.mapper.repair.IMendMaterialMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
-import com.dangjia.acg.modle.brand.Brand;
+import com.dangjia.acg.model.Config;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.*;
-import com.dangjia.acg.modle.delivery.DjDeliverOrder;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.HouseDistribution;
 import com.dangjia.acg.modle.house.Warehouse;
@@ -48,7 +45,6 @@ import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.modle.repair.MendOrder;
-import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.service.acquisition.MasterCostAcquisitionService;
 import com.dangjia.acg.service.config.ConfigMessageService;
@@ -140,7 +136,8 @@ public class OrderService {
     @Autowired
     private IMasterDeliverOrderAddedProductMapper iMasterDeliverOrderAddedProductMapper;
 
-
+    @Autowired
+    private IConfigMapper iConfigMapper;
     /**
      * 删除订单
      */
@@ -1128,7 +1125,7 @@ public class OrderService {
         }
         returnMap.put("square",house.getSquare());//总面积
         returnMap.put("inputArea",memberAddress.getInputArea());//支付面积
-        returnMap.put("NeedPayArea",house.getSquare().subtract(memberAddress.getInputArea()));//需支付面积
+        returnMap.put("needPayArea",house.getSquare().subtract(memberAddress.getInputArea()));//需支付面积
 
         BudgetOrderDTO orderInfo=orderMapper.getOrderInfoByHouseId(houseId,"4","2");//查询待补差价的订单
         if(orderInfo!=null&&StringUtils.isNotEmpty(orderInfo.getOrderId())){
@@ -1136,7 +1133,9 @@ public class OrderService {
             //查询商品信息
             List<BudgetOrderItemDTO> orderItemDTOList=orderMapper.getOrderInfoItemList(orderInfo.getOrderId());
             getProductList(orderItemDTOList,address);
-            returnMap.putAll(BeanUtils.beanToMap(orderItemDTOList));
+            orderInfo.setOrderDetailList(orderItemDTOList);
+            orderInfo.setStorefrontIcon(address+orderInfo.getStorefrontIcon());
+            returnMap.putAll(BeanUtils.beanToMap(orderInfo));
         }
         return ServerResponse.createBySuccess("查询成功",returnMap);
 
@@ -1216,14 +1215,43 @@ public class OrderService {
         }
         Map returnMap=new HashMap();
         House house=houseMapper.selectByPrimaryKey(houseId);
-        BudgetOrderDTO orderInfo=orderMapper.getOrderInfoByHouseId(houseId,"1","3");//查询待补差价的订单
+        Example example = new Example(MemberAddress.class);
+        example.createCriteria().andEqualTo(MemberAddress.HOUSE_ID, houseId);
+        MemberAddress memberAddress=iMasterMemberAddressMapper.selectOneByExample(example);
+        if(memberAddress!=null&&StringUtils.isNotEmpty(memberAddress.getId())){
+            returnMap.put("address",memberAddress.getAddress());
+        }
+        //判断是否有需要补差价的单
+        boolean diffOrder=true;
+        BudgetOrderDTO orderDiffInfo=orderMapper.getOrderInfoByHouseId(houseId,"4","2");//查询待补差价的订单
+        if(orderDiffInfo==null||StringUtils.isEmpty(orderDiffInfo.getOrderId())){
+            diffOrder=false;
+        }
+        BudgetOrderDTO orderInfo=orderMapper.getOrderInfoByHouseId(houseId,"1","3");//查询原订单信息
         if(orderInfo!=null&&StringUtils.isNotEmpty(orderInfo.getOrderId())){
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             //查询商品信息
             List<BudgetOrderItemDTO> orderItemDTOList=orderMapper.getOrderInfoItemList(orderInfo.getOrderId());
             getProductList(orderItemDTOList,address);
-            returnMap.putAll(BeanUtils.beanToMap(orderItemDTOList));
+            orderInfo.setOrderDetailList(orderItemDTOList);
+            orderInfo.setStorefrontIcon(address+orderInfo.getStorefrontIcon());
+            returnMap.putAll(BeanUtils.beanToMap(orderInfo));
         }
+        returnMap.put("diffOrder",diffOrder);//是否有补差价订单，ture有，false无
+        //查询设计师的总费用
+        Double totalDesigenMoney=orderMapper.getDesgionTotalMoney(orderInfo.getOrderId());//查询所有的设计费用
+        //查询计算量房费用，查询量房费率
+        if(totalDesigenMoney!=null&&totalDesigenMoney>0L){
+            Config config=iConfigMapper.selectConfigInfoByParamKey("ROOM_RATE_RATIO");//获取对应阶段需处理剩余时间
+            BigDecimal roomRateRatio=new BigDecimal(20);//最低面积
+            if(config!=null&& org.apache.commons.lang3.StringUtils.isNotBlank(config.getId())){
+                roomRateRatio=new BigDecimal(config.getParamValue());
+            }
+            returnMap.put("roomRateRatio",roomRateRatio);//量房费率
+            returnMap.put("roomCharge",new BigDecimal(totalDesigenMoney).multiply(roomRateRatio).divideToIntegralValue(new BigDecimal(100)));//量房费用
+        }
+
+
         return ServerResponse.createBySuccess("查询成功",returnMap);
 
     }

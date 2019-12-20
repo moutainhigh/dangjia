@@ -42,6 +42,8 @@ public class DesignDTO {
 
     private String storeName;// 归属分店
 
+    private Double inputArea;// 业主录入面积
+
     protected Date startDate;//创建时间
     private String username;// 销售名称
     private String userMobile;// 销售手机号码
