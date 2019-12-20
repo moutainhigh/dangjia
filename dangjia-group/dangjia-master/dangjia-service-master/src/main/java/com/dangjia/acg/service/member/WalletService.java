@@ -478,16 +478,25 @@ public class WalletService {
         PageInfo pageResult = new PageInfo(outDetailList);
         List<DetailDTO> detailDTOList = new ArrayList<>();
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+        Map<String , DetailDTO> map =new HashMap<>();
         for (WorkerDetail workerDetail : outDetailList) {
             String timeYear=DateUtil.dateToString(workerDetail.getCreateDate(), DateUtil.FORMAT);
             String dqYear=DateUtil.dateToString(new Date(), DateUtil.FORMAT);
             DetailDTO detailDTO = new DetailDTO();
-            Date dVal = DateUtil.toDate(timeYear);
-            String timeVal = DateUtil.getDateString(DateUtil.getMonthLast(dVal).getTime());
-            Double income = workerDetailMapper.incomeMoney(member.getId(),timeVal,state);
-            Double outMoney = workerDetailMapper.outMoney(member.getId(),timeVal,state);
-            detailDTO.setOutMoneyTotal(outMoney);
-            detailDTO.setInMoneyTotal(income);
+            if(map.get(timeYear)==null){
+                Date dVal = DateUtil.toDate(timeYear);
+                String timeVal = DateUtil.getDateString(DateUtil.getMonthLast(dVal).getTime());
+                Double income = workerDetailMapper.incomeMoney(member.getId(),timeVal,state);
+                Double outMoney = workerDetailMapper.outMoney(member.getId(),timeVal,state);
+                detailDTO.setOutMoneyTotal(outMoney);
+                detailDTO.setInMoneyTotal(income);
+                map.put(timeYear,detailDTO);
+            }else{
+                DetailDTO detailDTOTime = map.get(timeYear);
+                detailDTO.setOutMoneyTotal(detailDTOTime.getOutMoneyTotal());
+                detailDTO.setInMoneyTotal(detailDTOTime.getInMoneyTotal());
+            }
+
             detailDTO.setTime(timeYear);
             if(timeYear.equals(dqYear)){
                 detailDTO.setTime("本月");
