@@ -74,6 +74,9 @@ public class MemberAddressService {
         if (CommonUtil.isEmpty(longitude) || CommonUtil.isEmpty(latitude)) {
             return ServerResponse.createByErrorMessage("业主地址信息未录入");
         }
+        if (inputArea.doubleValue() < 70) {
+            inputArea = new BigDecimal(70);
+        }
         Member member = (Member) object;
         MemberAddress memberAddress = new MemberAddress();
         memberAddress.setMemberId(member.getId());
