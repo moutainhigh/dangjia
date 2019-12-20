@@ -27,7 +27,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         select sum(money)
         from dj_worker_worker_detail
         where worker_id=#{workerId}
-        and (state=0 or state=2 or state=4 or state=5 or state=6 or state=8 or state=9)
+        <if test="states!=null or states!=''">
+        AND state IN
+            <foreach collection="states" item="item" index="index"
+                     separator="," open="(" close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="time!=null and time!=''">
+            AND create_date &lt;= #{time}
+        </if>
+        AND  state not in (1,3,7,11,13)
     </select>
 
     <!--收入 -->
@@ -36,8 +46,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <include refid="new_columns" />
         from dj_worker_worker_detail
         where worker_id=#{workerId}
-        and (state=0 or state=2 or state=4 or state=5 or state=6 or state=8 or state=9)
-        ORDER BY create_date DESC
+        and  state not in (1,3,7,11,13)
+
     </select>
 
     <!--&lt;!&ndash;所有订单流水 &ndash;&gt;-->
@@ -119,7 +129,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         select sum(money)
         from dj_worker_worker_detail
         where worker_id=#{workerId}
-        and (state=1 or state=3 or state=7)
+        <if test="states!=null or states!=''">
+          AND state IN
+            <foreach collection="states" item="item" index="index"
+                     separator="," open="(" close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="time!=null and time!=''">
+            AND create_date &lt;= #{time}
+        </if>
+        and  state in (1,3,7,11,13)
     </select>
     <!--支出 -->
     <select id="outDetail" resultType="com.dangjia.acg.modle.worker.WorkerDetail">
@@ -127,18 +147,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <include refid="new_columns" />
         from dj_worker_worker_detail
         where worker_id=#{workerId}
-        and (state=1 or state=3 or state=7)
+        and  state in (1,3,7,11,13)
         ORDER BY create_date DESC
     </select>
 
 
-    <!--统计工人所有流水 -->
-    <select id="getCountWorkerDetailByWid" resultType="java.lang.Double">
-        select sum(wd.money)
-        from dj_worker_worker_detail as wd
-        where (wd.state=0 or wd.state=2)
-        and wd.worker_id=#{workerId}
-    </select>
     <!--查询有记录的历史月 -->
     <select id="getHistoryMonth" resultType="java.lang.String">
         select

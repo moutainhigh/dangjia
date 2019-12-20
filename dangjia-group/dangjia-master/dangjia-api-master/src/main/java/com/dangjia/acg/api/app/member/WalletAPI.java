@@ -125,11 +125,12 @@ public interface WalletAPI {
                                     @RequestParam("workerDetailId") String workerDetailId);
 
     /**
-     * 支出 收入
+     * 资产流水
      */
     @PostMapping("app/member/wallet/workerDetail")
-    @ApiOperation(value = "支出 收入", notes = "支出 收入")
+    @ApiOperation(value = "资产流水", notes = "资产流水")
     ServerResponse workerDetail(@RequestParam("userToken") String userToken,
+                                @RequestParam("time") String time,
                                 @RequestParam("type") int type,
                                 @RequestParam("pageDTO") PageDTO pageDTO);
 

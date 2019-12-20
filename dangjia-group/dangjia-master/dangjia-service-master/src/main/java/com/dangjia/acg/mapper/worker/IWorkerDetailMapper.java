@@ -17,18 +17,17 @@ public interface IWorkerDetailMapper extends Mapper<WorkerDetail> {
     /**
      * 总收入
      */
-    Double incomeMoney(@Param("workerId") String workerId);
+    Double incomeMoney(@Param("workerId") String workerId, @Param("time") String time,@Param("states") String[] states);
 
     /**
      * 总支出
      */
-    Double outMoney(@Param("workerId") String workerId);
+    Double outMoney(@Param("workerId") String workerId, @Param("time") String time,@Param("states") String[] states);
 
-    List<WorkerDetail> incomeDetail(@Param("workerId") String workerId);
+    List<WorkerDetail> incomeDetail(@Param("workerId") String workerId, @Param("time") String time);
 
-    List<WorkerDetail> outDetail(@Param("workerId") String workerId);
+    List<WorkerDetail> outDetail(@Param("workerId") String workerId, @Param("time") String time);
 
-    Double getCountWorkerDetailByWid(@Param("workerId") String workerId);
 
     List<String> getHistoryMonth(@Param("workerId") String workerId);
 

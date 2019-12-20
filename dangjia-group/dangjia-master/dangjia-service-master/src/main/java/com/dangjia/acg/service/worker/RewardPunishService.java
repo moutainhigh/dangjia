@@ -10,7 +10,6 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
-import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.worker.CraftsmenListDTO;
 import com.dangjia.acg.dto.worker.RewardPunishCorrelationDTO;
@@ -314,7 +313,7 @@ public class RewardPunishService {
                     workerDetail.setHaveMoney(haveMoney);
                     //加流水记录
                     workerDetail.setMoney(bigDecimal);
-                    workerDetail.setState(2);
+                    workerDetail.setState(12);
                     iWorkerDetailMapper.insert(workerDetail);
                 }
 
@@ -339,7 +338,7 @@ public class RewardPunishService {
                     workerDetail.setHaveMoney(haveMoney);
                     //加流水记录
                     workerDetail.setMoney(bigDecimal);
-                    workerDetail.setState(3);
+                    workerDetail.setState(13);
                     iWorkerDetailMapper.insert(workerDetail);
                 }
             }
