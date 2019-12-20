@@ -7,6 +7,7 @@ import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.request.ParameterRequestWrapper;
 import com.dangjia.acg.common.util.BeanUtils;
+import com.dangjia.acg.common.util.CommonUtil;
 import org.apache.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -66,7 +67,7 @@ public class ReturnAspect {
 
     }
 
-    public void setRequestParameter(String[] argNames ,Object[] args){
+    public Object[] setRequestParameter(String[] argNames ,Object[] args){
         try {
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
                     .getRequest();
@@ -75,7 +76,13 @@ public class ReturnAspect {
             for (Map.Entry<String, String[]> param : parameterMap.entrySet()) {
                 paramStr.append(param.getKey());
             }
+            if(CommonUtil.isEmpty(paramStr.toString())){
+                return null;
+            }
             byte[] dec = decrypt(Hex.decode(paramStr.toString()), Constants.DANGJIA_SESSION_KEY.getBytes(), Constants.DANGJIA_IV.getBytes());
+            if(CommonUtil.isEmpty(dec)){
+                return null;
+            }
             JSONObject json = JSON.parseObject(new String(dec));
             for (int i = 0; i < args.length; i++) {
                 if(args[i] instanceof HttpServletRequest){
@@ -90,10 +97,9 @@ public class ReturnAspect {
                     args[i]= BeanUtils.mapToBean(args[i].getClass(),json);
                 }
             }
-
+            return args;
         } catch (Exception e) {
-//            e.printStackTrace();
-//            throw new BaseException(ServerCode.ERROR, "系统繁忙，请稍后再试! "+ServerCode.SERVER_UNKNOWN_ERROR.getCode());
+            return null;
         }
     }
     // 配置后置通知,使用在方法aspect()上注册的切入点
@@ -111,12 +117,17 @@ public class ReturnAspect {
         String name = joinPoint.getSignature().getName();// 获得目标方法名
         Object[] args = joinPoint.getArgs();
         String[] argNames = ((MethodSignature)joinPoint.getSignature()).getParameterNames(); // 参数名
-        setRequestParameter(argNames,args);
+        args= setRequestParameter(argNames,args);
         log.info("<=============" + name + "方法--AOP 环绕通知=============>");
         long start = System.currentTimeMillis();
         Object result = null;
         try {
-            result = joinPoint.proceed(args);
+            if(args!=null){
+                result = joinPoint.proceed(args);
+            }else{
+                result = joinPoint.proceed();
+            }
+
             long end = System.currentTimeMillis();
             if (log.isInfoEnabled()) {
                 log.info("around " + joinPoint + "\tUse time : "
