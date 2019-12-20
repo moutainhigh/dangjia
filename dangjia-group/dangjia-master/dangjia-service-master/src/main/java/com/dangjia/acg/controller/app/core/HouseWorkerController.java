@@ -57,6 +57,20 @@ public class HouseWorkerController implements HouseWorkerAPI {
         return houseWorkerService.getHouseWorker(userToken, houseFlowId);
     }
 
+
+    @Override
+    @ApiMethod
+    public ServerResponse getWorkerInFo(String userToken, String houseFlowId) {
+        return houseWorkerService.getWorkerInFo(userToken, houseFlowId);
+    }
+
+    @Override
+    @ApiMethod
+    public  ServerResponse getWorkerComplainInFo(String userToken, Integer isSubstitution,
+                                         String complainId){
+        return houseWorkerService.getWorkerComplainInFo( isSubstitution,complainId);
+    }
+
     /**
      * 根据工人id查询自己的施工界面
      */

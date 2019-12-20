@@ -208,7 +208,7 @@ public class QuantityRoomService {
             iQuantityRoomMapper.updateByPrimaryKeySelective(quantityRoom);
         }
         //是否为量房通过图片传入确定
-        if (CommonUtil.isEmpty(images)) {
+        if (!CommonUtil.isEmpty(images)) {
             house.setDecorationType(1);
             //删除之前提交的
             Example example = new Example(QuantityRoomImages.class);

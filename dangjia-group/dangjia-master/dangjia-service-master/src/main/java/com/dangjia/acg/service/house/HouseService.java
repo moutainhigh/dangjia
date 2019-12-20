@@ -25,6 +25,7 @@ import com.dangjia.acg.dto.house.*;
 import com.dangjia.acg.dto.repair.HouseProfitSummaryDTO;
 import com.dangjia.acg.dto.sale.royalty.DjAreaMatchDTO;
 import com.dangjia.acg.dto.sale.store.OrderStoreDTO;
+import com.dangjia.acg.mapper.IConfigMapper;
 import com.dangjia.acg.mapper.clue.ClueMapper;
 import com.dangjia.acg.mapper.config.IMasterActuarialProductConfigMapper;
 import com.dangjia.acg.mapper.core.*;
@@ -45,6 +46,7 @@ import com.dangjia.acg.mapper.store.IStoreMapper;
 import com.dangjia.acg.mapper.store.IStoreUserMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
+import com.dangjia.acg.model.Config;
 import com.dangjia.acg.modle.actuary.DjActuarialProductConfig;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.brand.Unit;
@@ -216,6 +218,8 @@ public class HouseService {
 
     @Autowired
     private TaskStackService taskStackService;
+    @Autowired
+    private IConfigMapper iConfigMapper;
     @Autowired
     private IMasterDeliverOrderAddedProductMapper iMasterDeliverOrderAddedProductMapper;
 
@@ -2055,6 +2059,15 @@ public class HouseService {
             }
 
         }else if(square.compareTo(inputArea)==-1){//偏小
+            //判断房子实际面积是否大于70，若不大于70，则按70计算
+            Config config=iConfigMapper.selectConfigInfoByParamKey("MIN_AREA");//获取对应阶段需处理剩余时间
+            BigDecimal lowSquare=new BigDecimal(70);//最低面积
+            if(config!=null&&StringUtils.isNotBlank(config.getId())){
+                lowSquare=new BigDecimal(config.getParamValue());
+            }
+            if(square.compareTo(lowSquare)==-1&&lowSquare.compareTo(inputArea)==-1){
+               square=lowSquare;//将最小支付面积70附值给用户
+            }
             //退款，生成退款单
             String productStr=getEligibleProduct(houseOrderDetailDTOList,2,square,inputArea);
             if(productStr!=null&&StringUtils.isNotBlank(productStr)){
@@ -2065,6 +2078,7 @@ public class HouseService {
 
 
             }
+
 
         }
 

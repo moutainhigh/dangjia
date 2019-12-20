@@ -30,5 +30,6 @@ public class PaymentToBeMadeDTO{
     private String splitDeliverId;
     private String houseId;
     private Integer shoppingCartsCount;//购物车数量
+    private Integer orderSource;//订单来源(1,精算制作，2购物车，3补货单，4补差价订单）
 
 }

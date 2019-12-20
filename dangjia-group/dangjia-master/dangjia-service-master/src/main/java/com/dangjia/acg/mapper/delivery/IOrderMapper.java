@@ -46,6 +46,13 @@ public interface IOrderMapper extends Mapper<Order> {
      */
     List<BudgetOrderItemDTO> getOrderInfoItemList(@Param("orderId") String orderId);
 
+    /**
+     * 查询所有的设计费用
+     * @param orderId
+     * @return
+     */
+    Double getDesgionTotalMoney(@Param("orderId") String orderId);
+
 
 
 }
