@@ -1,10 +1,7 @@
 package com.dangjia.acg.dto.house;
 
-import com.dangjia.acg.dto.repair.HouseProfitSummaryDTO;
 import lombok.Data;
 
-import java.util.Date;
-import java.util.List;
 
 /**
  * author: fzh
@@ -25,7 +22,7 @@ public class HouseOrderDetailDTO {
     private Double shopCount;// 购买数量
     private String productTemplateId;// 商品模板ID
     private String productId;//商品编码
-    private  String valueIdArr;//商品规格ID
+    private String valueIdArr;//商品规格ID
     private String valueNameArr;//商品规格名称
     private String unitId;//单位ID
     private String unitName;//单位名称
