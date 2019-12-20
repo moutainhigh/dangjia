@@ -36,6 +36,8 @@ public class HouseDTO {
     private String memberName;//业主姓名
     private String mobile;//业主电话
     private Double inputArea;//业主录入面积
+    private String orderNumber;//订单号
+    private String orderStatus;//订单状态
 
     /**
      * 设计精算对应的商品信息

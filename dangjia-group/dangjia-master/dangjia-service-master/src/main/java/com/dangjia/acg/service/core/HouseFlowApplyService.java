@@ -1027,6 +1027,8 @@ public class HouseFlowApplyService {
                 houseFlowApplyDTO.setNameA(worker.getName());
                 houseFlowApplyDTO.setMobileA(worker.getMobile());
                 houseFlowApplyDTO.setWorkerTypeName(workerTypeMapper.selectByPrimaryKey(worker.getWorkerTypeId()).getName());
+                houseFlowApplyDTO.setMemberCheck(houseFlowApply.getMemberCheck());
+                houseFlowApplyDTO.setSupervisorCheck(houseFlowApply.getSupervisorCheck());
                 Example example = new Example(HouseFlowApplyImage.class);
                 example.createCriteria().andEqualTo(HouseFlowApplyImage.HOUSE_FLOW_APPLY_ID, houseFlowApplyId);
                 List<HouseFlowApplyImage> houseFlowApplyImageList = houseFlowApplyImageMapper.selectByExample(example);
@@ -1058,6 +1060,8 @@ public class HouseFlowApplyService {
             houseFlowApplyDTO.setHeadB(address + steward.getHead());
             houseFlowApplyDTO.setNameB(steward.getName());
             houseFlowApplyDTO.setMobileB(steward.getMobile());
+            houseFlowApplyDTO.setMemberCheck(houseFlowApply.getMemberCheck());
+            houseFlowApplyDTO.setSupervisorCheck(houseFlowApply.getSupervisorCheck());
             if (houseFlowApply.getEndDate() != null) {
                 houseFlowApplyDTO.setEndDate(houseFlowApply.getEndDate().getTime() - new Date().getTime()); //业主自动审核时间
             }

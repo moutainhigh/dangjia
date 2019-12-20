@@ -244,7 +244,9 @@
             t1.shop_count shopCount,
             t2.prod_template_id productTemplateId,
             t1.product_id productId,
-            t1.worker_type_id workerTypeId
+            t1.worker_type_id workerTypeId,
+            t.order_number as orderNumber,
+            t.order_status as orderStatus
         FROM
             dj_deliver_order t,
             dj_deliver_order_item t1,
@@ -272,7 +274,9 @@
         t1.shop_count shopCount,
         t2.prod_template_id productTemplateId,
         t3.added_product_id productId,
-        t1.worker_type_id workerTypeId
+        t1.worker_type_id workerTypeId,
+        t.order_number as orderNumber,
+        t.order_status as orderStatus
         FROM
         dj_deliver_order t,
         dj_deliver_order_item t1,

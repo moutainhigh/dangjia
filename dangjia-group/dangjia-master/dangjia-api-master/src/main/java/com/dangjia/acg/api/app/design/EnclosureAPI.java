@@ -25,10 +25,7 @@ public interface EnclosureAPI {
      * @param userToken     可选 string userToken
      * @param userId        可选 string userId
      * @param houseId       必选 string 房子ID
-     * @param name          必选 string 文件名称
-     * @param enclosure     必选 string 文件地址
-     * @param enclosureType 必选 string 附件类型0:设计上传的设计图，1:扩展(默认为0）
-     * @param remarks       可选 string 操作描述
+     * @param enclosureJson 必选 string 数据Json，格式为{"name":"文件名称","enclosure":"文件地址(半路径)","enclosureType":"int附件类型0:设计上传的设计图，1:扩展(默认为0）","remarks":"操作描述"}
      * @return {"res":1000,"msg":{"resultCode":1000,"resultMsg":"成功"} }
      * @catalog 工匠端升级/设计模块/新版设计
      * @title 添加附件
@@ -46,10 +43,7 @@ public interface EnclosureAPI {
                                 @RequestParam("userToken") String userToken,
                                 @RequestParam("userId") String userId,
                                 @RequestParam("houseId") String houseId,
-                                @RequestParam("name") String name,
-                                @RequestParam("enclosure") String enclosure,
-                                @RequestParam("enclosureType") int enclosureType,
-                                @RequestParam("remarks") String remarks);
+                                @RequestParam("enclosureJson") String enclosureJson);
 
     /**
      * showdoc
