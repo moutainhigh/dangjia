@@ -74,7 +74,7 @@
         IFNULL(c.number, '*'),
         '号'
         ) AS houseName,
-        c.member_id AS memberId,
+        d.id AS memberId,
         d.mobile AS mobile,
         a.pay_order_number AS payOrderNumber,
         a.total_price AS totalAmount,
