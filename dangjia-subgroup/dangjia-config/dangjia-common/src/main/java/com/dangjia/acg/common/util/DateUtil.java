@@ -165,6 +165,31 @@ public class DateUtil implements AutoCloseable, Serializable {
 
     }
 
+    public static Date parseDate(String dateString) throws ParseException {
+        if (CommonUtil.isEmpty(dateString)) {
+            throw new ParseException("时间参数错误", -1);
+        }
+        String[] pattern = new String[]{"yyyy年MM月dd日", "yyyy年MM月dd",
+                "yyyy-MM", "yyyy年MM月dd日", "yyyyMM", "yyyy/MM", "yyyyMMdd",
+                "yyyy-MM-dd", "yyyy/MM/dd", "yyyyMMddHHmmss",
+                "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm",
+                "yyyy/MM/dd HH:mm:ss",
+                "MM月dd日", "MM月dd",
+                "MM", "MM月dd日", "MM", "MMdd",
+                "MM-dd", "/MM/dd", "MMddHHmmss",
+                "MM-dd HH:mm:ss", "MM-dd HH:mm",
+                "MM/dd HH:mm:ss",
+        };
+        for (String s : pattern) {
+            try {
+                DateFormat format = new SimpleDateFormat(s);
+                return format.parse(dateString);
+            } catch (ParseException ignored) {
+            }
+        }
+        throw new ParseException("时间参数错误", -1);
+    }
+
     /***
      * 转换为日期
      *
@@ -617,6 +642,7 @@ public class DateUtil implements AutoCloseable, Serializable {
 
     /**
      * 两个时间相差多少天多少秒多少小时
+     *
      * @param first
      * @param second
      * @return
@@ -1237,6 +1263,7 @@ public class DateUtil implements AutoCloseable, Serializable {
         date.add(paramMap);
         return date;
     }
+
     /**
      * 根据月份获取当前月份日期
      *
@@ -1265,6 +1292,7 @@ public class DateUtil implements AutoCloseable, Serializable {
         }
         return date;
     }
+
     /**
      * 获取当天开始时间戳
      *
@@ -1371,14 +1399,19 @@ public class DateUtil implements AutoCloseable, Serializable {
         long hour = (l / (60 * 60 * 1000) - day * 24);
         long min = ((l / (60 * 1000)) - day * 24 * 60 - hour * 60);
         long sec = (l / 1000 - day * 24 * 60 * 60 - hour * 60 * 60 - min * 60);
-        return min + "分" + sec+"秒";
+        return min + "分" + sec + "秒";
     }
 
     public static void main(String[] args) {
-        Date d = toDate("2019-08-15 17:00:00");
-        Date d2 = new Date();
-
-        System.out.println(getDiffTime2(d.getTime() , d2.getTime()));
+        try {
+            Date date = parseDate("2019-12-18");
+            System.out.println(dateToString(date, "yyyy-MM-dd"));
+            Date d2 = new Date();
+            System.out.println(getDiffTime(date.getTime(), d2.getTime()));
+            System.out.println(date.getTime()>d2.getTime());
+        } catch (ParseException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
 }

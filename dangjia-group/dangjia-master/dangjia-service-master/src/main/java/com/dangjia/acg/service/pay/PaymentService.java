@@ -1027,6 +1027,11 @@ public class PaymentService {
                     businessOrder.setType(9);//记录支付类型任务类型
                     businessOrder.setTaskId(houseDistributionId);//保存任务ID
                     businessOrderMapper.insert(businessOrder);
+                }else{
+                    businessOrder.setTotalPrice(insurance.getMoney());
+                    businessOrder.setDiscountsPrice(new BigDecimal(0));
+                    businessOrder.setPayPrice(insurance.getMoney());
+                    businessOrderMapper.updateByPrimaryKeySelective(businessOrder);
                 }
                 paymentDTO.setTotalPrice(insurance.getMoney());
                 paymentDTO.setBusinessOrderNumber(businessOrder.getNumber());
@@ -1055,6 +1060,11 @@ public class PaymentService {
                     businessOrder.setType(5);//记录支付类型任务类型
                     businessOrder.setTaskId(houseDistributionId);//保存任务ID
                     businessOrderMapper.insert(businessOrder);
+                }else{
+                    businessOrder.setTotalPrice(new BigDecimal(houseDistribution.getPrice()));
+                    businessOrder.setDiscountsPrice(new BigDecimal(0));
+                    businessOrder.setPayPrice(new BigDecimal(houseDistribution.getPrice()));
+                    businessOrderMapper.updateByPrimaryKeySelective(businessOrder);
                 }
                 paymentDTO.setTotalPrice(new BigDecimal(houseDistribution.getPrice()));
                 paymentDTO.setBusinessOrderNumber(businessOrder.getNumber());
@@ -1085,6 +1095,11 @@ public class PaymentService {
                     businessOrder.setType(6);//记录支付类型任务类型
                     businessOrder.setTaskId(houseDistributionId);//保存任务ID
                     businessOrderMapper.insert(businessOrder);
+                }else{
+                    businessOrder.setTotalPrice(productChangeOrder.getDifferencePrice());
+                    businessOrder.setDiscountsPrice(new BigDecimal(0));
+                    businessOrder.setPayPrice(productChangeOrder.getDifferencePrice());
+                    businessOrderMapper.updateByPrimaryKeySelective(businessOrder);
                 }
                 paymentDTO.setTotalPrice(productChangeOrder.getDifferencePrice());
                 paymentDTO.setBusinessOrderNumber(businessOrder.getNumber());
@@ -1116,6 +1131,11 @@ public class PaymentService {
                     businessOrder.setType(8);//记录支付类型任务类型
                     businessOrder.setTaskId(houseDistributionId);//保存任务ID
                     businessOrderMapper.insert(businessOrder);
+                }else{
+                    businessOrder.setTotalPrice(new BigDecimal(purchaseOrder.getPrice()));
+                    businessOrder.setDiscountsPrice(new BigDecimal(0));
+                    businessOrder.setPayPrice(new BigDecimal(purchaseOrder.getPrice()));
+                    businessOrderMapper.updateByPrimaryKeySelective(businessOrder);
                 }
                 paymentDTO.setTotalPrice(new BigDecimal(purchaseOrder.getPrice()));
                 paymentDTO.setBusinessOrderNumber(businessOrder.getNumber());
@@ -1140,6 +1160,11 @@ public class PaymentService {
                     businessOrder.setType(2);//记录支付类型任务类型
                     businessOrder.setTaskId(houseDistributionId);//保存任务ID
                     businessOrderMapper.insert(businessOrder);
+                }else{
+                    businessOrder.setTotalPrice(new BigDecimal(mendOrder.getTotalAmount()));
+                    businessOrder.setDiscountsPrice(new BigDecimal(0));
+                    businessOrder.setPayPrice(new BigDecimal(mendOrder.getTotalAmount()));
+                    businessOrderMapper.updateByPrimaryKeySelective(businessOrder);
                 }
                 paymentDTO.setTotalPrice(new BigDecimal(mendOrder.getTotalAmount()));
                 paymentDTO.setBusinessOrderNumber(businessOrder.getNumber());

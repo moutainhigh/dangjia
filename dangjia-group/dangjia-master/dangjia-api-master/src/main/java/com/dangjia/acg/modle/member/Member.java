@@ -11,8 +11,8 @@ import org.apache.commons.lang.StringUtils;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import java.math.BigDecimal;
+import java.util.Date;
 
 @Data
 @Entity
@@ -146,7 +146,7 @@ public class Member extends BaseEntity {
 
     @Column(name = "check_type")//type
     @Desc(value = "审核状态")
-    @ApiModelProperty("审核状态:  0审核中，1审核未通过不能抢单不能发申请,  2审核已通过 可抢单可发申请, 3账户已禁用 不能抢单不能发申请, 5未提交资料")
+    @ApiModelProperty("审核状态:0审核中，1审核未通过不能抢单不能发申请，2审核已通过 可抢单可发申请，3账户已禁用不能抢单不能发申请，4冻结，5未提交资料")
     private Integer checkType;
 
     @Column(name = "praise_rate")//favorable
@@ -205,6 +205,16 @@ public class Member extends BaseEntity {
     @Desc(value = "实名认证状态")
     @ApiModelProperty("实名认证状态:0:未提交，1:认证中，2:认证被驳回，3:认证通过")
     private Integer realNameState;
+
+    @Column(name = "real_name_time")
+    @Desc(value = "实名认证申请时间")
+    @ApiModelProperty("实名认证申请时间")
+    private Date realNameTime;
+
+    @Column(name = "real_name_check_time")
+    @Desc(value = "实名认证审核时间")
+    @ApiModelProperty("实名认证审核时间")
+    private Date realNameCheckTime;
 
     @Column(name = "real_name_describe")
     @Desc(value = "实名认证描述")

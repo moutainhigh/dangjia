@@ -16,5 +16,6 @@ public class WithdrawDTO {
     private List<BrandCardDTO> brandCardDTOList;
     private String mobile;//电话
     private BigDecimal surplusMoney;//可取余额
-
+    private String message;//头部提示信息
+    private String messageUrl;//头部提示信息跳转地址
 }
