@@ -92,8 +92,8 @@ public class ReturnAspect {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new BaseException(ServerCode.ERROR, "系统繁忙，请稍后再试! "+ServerCode.SERVER_UNKNOWN_ERROR.getCode());
+//            e.printStackTrace();
+//            throw new BaseException(ServerCode.ERROR, "系统繁忙，请稍后再试! "+ServerCode.SERVER_UNKNOWN_ERROR.getCode());
         }
     }
     // 配置后置通知,使用在方法aspect()上注册的切入点
