@@ -6,7 +6,6 @@ import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.request.ParameterRequestWrapper;
-import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import org.apache.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
@@ -94,7 +93,9 @@ public class ReturnAspect {
                         args[i]=json.get(argNames[i]);
                     }
                 }else{
-                    args[i]= BeanUtils.mapToBean(args[i].getClass(),json);
+                    if(args[i]!=null) {
+                        args[i] = json.toJavaObject(args[i].getClass());
+                    }
                 }
             }
             return args;
