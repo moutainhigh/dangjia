@@ -33,5 +33,7 @@ public class HouseFlowApplyDTO {
     private List<Map> list;
     private Long startDate;
     private Long endDate; //自动审核时间
+    private Integer memberCheck;//用户审核结果,0未审核，1审核通过，2审核不通过，3自动审核
+    private Integer supervisorCheck;//大管家审核结果,0未审核，1审核通过，2审核不通过
 
 }

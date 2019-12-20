@@ -29,5 +29,7 @@ public class HouseOrderDetailDTO {
     private String valueNameArr;//商品规格名称
     private String unitId;//单位ID
     private String unitName;//单位名称
+    private String orderNumber;//订单编号
+    private String orderStatus;//订单状态
 
 }

@@ -179,6 +179,10 @@ public class ActuaryService {
                 List<HouseOrderDetailDTO> houseOrderDetailDTOList=houseMapper.getBudgetOrderDetailByHouseId(houseId,workerTypeId);
                 getProductList(houseOrderDetailDTOList);
                 houseDTO.setOrderDetailList(houseOrderDetailDTOList);
+                if(houseOrderDetailDTOList.size()>0) {
+                    houseDTO.setOrderNumber(houseOrderDetailDTOList.get(0).getOrderNumber());
+                    houseDTO.setOrderStatus(houseOrderDetailDTOList.get(0).getOrderStatus());
+                }
             }
             return ServerResponse.createBySuccess("查询成功",houseDTO);
         }catch (Exception e){
