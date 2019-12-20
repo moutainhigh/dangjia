@@ -1,5 +1,7 @@
 package com.dangjia.acg.service.design;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -14,6 +16,7 @@ import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.Date;
@@ -38,8 +41,8 @@ public class EnclosureService {
     @Autowired
     private ConfigUtil configUtil;
 
-    public ServerResponse addEnclosure(String userToken, String userId, String houseId,
-                                       String name, String enclosure, int enclosureType, String remarks) {
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse addEnclosure(String userToken, String userId, String houseId, String enclosureJson) {
         House house = iHouseMapper.selectByPrimaryKey(houseId);
         if (house == null) {
             return ServerResponse.createByErrorMessage("没有查询到相关房子");
@@ -52,22 +55,29 @@ public class EnclosureService {
         if (member == null && CommonUtil.isEmpty(userId)) {
             return ServerResponse.createbyUserTokenError();
         }
-        if (CommonUtil.isEmpty(name) || CommonUtil.isEmpty(enclosure)) {
+        if (CommonUtil.isEmpty(enclosureJson)) {
             return ServerResponse.createByErrorMessage("附件信息有缺损，请补全");
         }
-        Enclosure e = new Enclosure();
-        e.setName(name);
-        e.setEnclosure(enclosure);
-        e.setEnclosureType(enclosureType);
-        e.setRemarks(remarks);
-        if (member != null) {
-            e.setUserId(member.getId());
-            e.setUserType(1);
-        } else {
-            e.setUserId(userId);
-            e.setUserType(0);
+        JSONArray jsonArray = JSONArray.parseArray(enclosureJson);
+        if (jsonArray == null) {
+            return ServerResponse.createByErrorMessage("附件信息有缺损，请补全");
         }
-        iEnclosureMapper.insertSelective(e);
+        for (Object o : jsonArray) {
+            JSONObject object = (JSONObject) o;
+            Enclosure e = new Enclosure();
+            e.setName(object.getString("name"));
+            e.setEnclosure(object.getString("enclosure"));
+            e.setEnclosureType(object.getInteger("enclosureType"));
+            e.setRemarks(object.getString("remarks"));
+            if (member != null) {
+                e.setUserId(member.getId());
+                e.setUserType(1);
+            } else {
+                e.setUserId(userId);
+                e.setUserType(0);
+            }
+            iEnclosureMapper.insertSelective(e);
+        }
         return ServerResponse.createBySuccessMessage("提交成功");
     }
 
