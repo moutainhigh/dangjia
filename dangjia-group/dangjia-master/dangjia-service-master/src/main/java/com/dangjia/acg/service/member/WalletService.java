@@ -539,4 +539,17 @@ public class WalletService {
         return ServerResponse.createBySuccess("获取成功", walletDTO);
     }
 
+    /**
+     * 指定某年的收入趋势
+     */
+    public ServerResponse getIncomeTrend(String userToken, String time) {
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member member = (Member) object;
+        List income = workerDetailMapper.getHistoryMonth(member.getId(),time);
+        return ServerResponse.createBySuccess("获取成功", income);
+    }
+
 }

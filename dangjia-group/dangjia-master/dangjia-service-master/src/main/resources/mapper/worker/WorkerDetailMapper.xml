@@ -153,17 +153,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
 
     <!--查询有记录的历史月 -->
-    <select id="getHistoryMonth" resultType="java.lang.String">
+    <select id="getHistoryMonth" resultType="java.util.Map">
         select
-            DATE_FORMAT(d.create_date, '%Y-%m') month
+            DATE_FORMAT(d.create_date, '%Y-%m') month,
+           sum(money) money
         from
 			dj_worker_worker_detail as d
-		where
-		    d.worker_id=#{workerId}
-		and
-			DATE_FORMAT(d.create_date, '%Y-%m') &gt; DATE_FORMAT( date_sub(curdate(), INTERVAL 12 month),'%Y-%m')
+		where d.worker_id=#{workerId}
+        and  d.state not in (1,3,7,11,13)
+		and  DATE_FORMAT(d.create_date, '%Y') =#{time}
 		GROUP BY month
-		ORDER BY d.create_date DESC
+		ORDER BY d.create_date
     </select>
     <!--根据年月查询对应历史月流水 -->
     <select id="getHistoryMonthByWorkerId" resultType="com.dangjia.acg.modle.worker.WorkerDetail">

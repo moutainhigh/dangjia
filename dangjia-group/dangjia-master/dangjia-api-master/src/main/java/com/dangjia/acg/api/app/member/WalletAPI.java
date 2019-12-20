@@ -140,4 +140,12 @@ public interface WalletAPI {
     @PostMapping("app/member/wallet/walletInformation")
     @ApiOperation(value = "钱包信息, 查询余额", notes = "钱包信息, 查询余额")
     ServerResponse walletInformation(@RequestParam("userToken") String userToken);
+
+
+    /**
+     * 指定某年的收入趋势
+     */
+    @PostMapping("app/member/wallet/getIncomeTrend")
+    @ApiOperation(value = "指定某年的收入趋势", notes = "指定某年的收入趋势")
+    ServerResponse getIncomeTrend(@RequestParam("userToken") String userToken,@RequestParam("time") String time);
 }

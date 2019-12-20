@@ -77,4 +77,13 @@ public class WalletController implements WalletAPI {
     public ServerResponse walletInformation(String userToken) {
         return walletService.walletInformation(userToken);
     }
+
+    /**
+     * 指定某年的收入趋势
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getIncomeTrend(String userToken, String time){
+        return walletService.getIncomeTrend(userToken,time);
+    }
 }
