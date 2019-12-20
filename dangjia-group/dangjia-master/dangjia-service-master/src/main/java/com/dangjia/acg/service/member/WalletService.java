@@ -342,16 +342,18 @@ public class WalletService {
     }
 
     /**
-     * 0工钱收入,1提现,2自定义增加金额,3自定义减少金额,4退材料退款,5剩余材料退款,6退人工退款,7运费,8提现驳回到余额，9:提前结束装修退款
+     * 0工钱收入,1提现,2自定义增加金额,3自定义减少金额,4退材料退款,5剩余材料退款,6退人工退款,7运费,8提现驳回到余额，9:提前结束装修退款,10滞留金收入，11:滞留金转出,12奖励，13:处罚"
      */
     private String getIcon(Integer state) {
         if (state == null) return "icon/rmb.png";
         switch (state) {
-            case 0:
-                return "icon/mywallet_icon_rg.png";
             case 1:
-            case 8:
                 return "icon/mywallet_icon-yhk.png";
+            case 0:
+            case 8:
+            case 10:
+            case 11:
+                return "icon/mywallet_icon_rg.png";
             case 4:
             case 5:
             case 6:
@@ -360,7 +362,25 @@ public class WalletService {
         }
         return "icon/mywallet_icon_sj.png";
     }
-
+    /**
+     * 1提现,3自定义减少金额,,7运费,11:滞留金转出,13:处罚"
+     */
+    private String getPlusMinus(Integer state) {
+        if (state == null) return "-";
+        switch (state) {
+            case 0:
+            case 2:
+            case 4:
+            case 5:
+            case 6:
+            case 8:
+            case 9:
+            case 10:
+            case 12:
+                return "+";
+        }
+        return "-";
+    }
     /**
      * 流水详情
      */
@@ -408,32 +428,89 @@ public class WalletService {
     }
 
     /**
-     * 支出 收入
+     *  资产流水
+     * @param userToken 用户ToKen
+     * @param time  截止的年月（未来一年内） 默认当前年月
+     * @param type 0=全部  1=收益  2=提现  3=奖罚  4=滞留
+     * @param pageDTO
+     * @return
      */
-    public ServerResponse workerDetail(String userToken, int type, PageDTO pageDTO) {
-        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+    public ServerResponse workerDetail(String userToken, String time,int type, PageDTO pageDTO) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
         }
-        Member member = (Member) object;
-        PageInfo pageResult;
-        List<WorkerDetail> outDetailList;
-        if (type == 0) {//总支出
-            outDetailList = workerDetailMapper.outDetail(member.getId());
-        } else {
-            outDetailList = workerDetailMapper.incomeDetail(member.getId());
+        if(CommonUtil.isEmpty(time)){
+            time = DateUtil.dateToString(new Date(), DateUtil.FORMAT);
         }
-        pageResult = new PageInfo(outDetailList);
+        Date d = DateUtil.toDate(time);
+        //取得月份最后的时间
+        time=DateUtil.getDateString(DateUtil.getMonthLast(d).getTime());
+
+        Member member = (Member) object;
+        PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+        String[] state=null;
+        if (type == 1) {//收益
+            state=new String[]{"0"};
+        }
+        if (type == 2) {//提现
+            state=new String[]{"1","8"};
+
+        }
+        if (type == 3) {//奖罚
+            state=new String[]{"12","13"};
+
+        }
+        if (type == 4) {//滞留
+            state=new String[]{"10","11"};
+
+        }
+        Example example = new Example(WorkerDetail.class);
+        Example.Criteria criteria= example.createCriteria();
+        criteria.andLessThanOrEqualTo(WorkerDetail.CREATE_DATE,time);
+        criteria.andGreaterThanOrEqualTo(WorkerDetail.CREATE_DATE,DateUtil.getDateString(DateUtil.getMonthFirst(DateUtil.toDate(time),-12).getTime()));
+        criteria.andEqualTo(WorkerDetail.WORKER_ID,member.getId());
+        if(state!=null){
+            criteria.andIn(WorkerDetail.STATE,Arrays.asList(state));
+        }
+        example.orderBy(WorkerDetail.CREATE_DATE).desc();
+        List<WorkerDetail> outDetailList = workerDetailMapper.selectByExample(example);
+        PageInfo pageResult = new PageInfo(outDetailList);
         List<DetailDTO> detailDTOList = new ArrayList<>();
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+        Map<String , DetailDTO> map =new HashMap<>();
         for (WorkerDetail workerDetail : outDetailList) {
+            String timeYear=DateUtil.dateToString(workerDetail.getCreateDate(), DateUtil.FORMAT);
+            String dqYear=DateUtil.dateToString(new Date(), DateUtil.FORMAT);
             DetailDTO detailDTO = new DetailDTO();
+            if(map.get(timeYear)==null){
+                Date dVal = DateUtil.toDate(timeYear);
+                String timeVal = DateUtil.getDateString(DateUtil.getMonthLast(dVal).getTime());
+                Double income = workerDetailMapper.incomeMoney(member.getId(),timeVal,state);
+                Double outMoney = workerDetailMapper.outMoney(member.getId(),timeVal,state);
+                detailDTO.setOutMoneyTotal(outMoney);
+                detailDTO.setInMoneyTotal(income);
+                map.put(timeYear,detailDTO);
+            }else{
+                DetailDTO detailDTOTime = map.get(timeYear);
+                detailDTO.setOutMoneyTotal(detailDTOTime.getOutMoneyTotal());
+                detailDTO.setInMoneyTotal(detailDTOTime.getInMoneyTotal());
+            }
+
+            detailDTO.setTime(timeYear);
+            if(timeYear.equals(dqYear)){
+                detailDTO.setTime("本月");
+            }
             detailDTO.setWorkerDetailId(workerDetail.getId());
             detailDTO.setImage(imageAddress + getIcon(workerDetail.getState()));//图标
             detailDTO.setName(workerDetail.getName());
             detailDTO.setCreateDate(workerDetail.getCreateDate());
-            detailDTO.setMoney((type == 0 ? "-" : "+") + workerDetail.getMoney());
+            detailDTO.setState(0);
+            if(workerDetail.getState()==11||workerDetail.getState()==10){
+                detailDTO.setState(1);
+            }
+            detailDTO.setType(1);
+            detailDTO.setMoney(getPlusMinus(workerDetail.getState()) + workerDetail.getMoney());
             detailDTOList.add(detailDTO);
         }
         pageResult.setList(detailDTOList);
@@ -451,23 +528,28 @@ public class WalletService {
         Member member = (Member) object;
         member = memberMapper.selectByPrimaryKey(member.getId());
         WalletDTO walletDTO = new WalletDTO();
-        Double workerPrice = workerDetailMapper.getCountWorkerDetailByWid(member.getId());
-        Double out = workerDetailMapper.outMoney(member.getId());
-        Double income = workerDetailMapper.incomeMoney(member.getId());
-        walletDTO.setWorkerPrice(workerPrice == null ? 0 : workerPrice);//总赚到
+        Double income = workerDetailMapper.incomeMoney(member.getId(),null,null);
+        walletDTO.setWorkerPrice(income == null ? 0 : income);//总赚到
         walletDTO.setSurplusMoney(member.getSurplusMoney() == null ? new BigDecimal(0) : member.getSurplusMoney());//可取
         walletDTO.setRetentionMoney(member.getRetentionMoney() == null ? new BigDecimal(0) : member.getRetentionMoney());//滞留金
-        walletDTO.setOutAll(out == null ? 0 : out);//总支出
-        walletDTO.setIncome(income == null ? 0 : income);//总收入
-//            Example example = new Example(HouseWorker.class);
-//            List<HouseWorker> houseWorkerList = houseWorkerMapper.selectByExample(example);
-//            walletDTO.setHouseOrder(houseWorkerList.size());//接单量
-//            walletDTO.setHouseOrder(member.getVolume().intValue());//接单量
         walletDTO.setHouseOrder(0);
         if (member.getWorkerType() != null) {
             walletDTO.setHouseOrder(engineerService.alternative(member.getId(), member.getWorkerType()));
         }
         return ServerResponse.createBySuccess("获取成功", walletDTO);
+    }
+
+    /**
+     * 指定某年的收入趋势
+     */
+    public ServerResponse getIncomeTrend(String userToken, String time) {
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member member = (Member) object;
+        List income = workerDetailMapper.getHistoryMonth(member.getId(),time);
+        return ServerResponse.createBySuccess("获取成功", income);
     }
 
 }

@@ -52,5 +52,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             a.WEEK
     </select>
 
+    <select id="queryHouseConstructionRecord" resultType="com.dangjia.acg.modle.house.HouseConstructionRecord">
+        SELECT
+            hcr.*
+        FROM
+            dj_core_house_flow chf
+        INNER JOIN dj_core_house_flow_apply chfa ON chf.id = chfa.house_flow_id
+        INNER JOIN dj_house_construction_record hcr ON hcr.source_id = chfa.id
+        AND chf.house_id = #{houseId}
+        AND chf.worker_id = #{workerId}
+        AND chfa.worker_type = 3
+    </select>
+
 </mapper>
 

@@ -25,6 +25,7 @@ import com.dangjia.acg.dto.house.*;
 import com.dangjia.acg.dto.repair.HouseProfitSummaryDTO;
 import com.dangjia.acg.dto.sale.royalty.DjAreaMatchDTO;
 import com.dangjia.acg.dto.sale.store.OrderStoreDTO;
+import com.dangjia.acg.mapper.IConfigMapper;
 import com.dangjia.acg.mapper.clue.ClueMapper;
 import com.dangjia.acg.mapper.config.IMasterActuarialProductConfigMapper;
 import com.dangjia.acg.mapper.core.*;
@@ -45,6 +46,7 @@ import com.dangjia.acg.mapper.store.IStoreMapper;
 import com.dangjia.acg.mapper.store.IStoreUserMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
+import com.dangjia.acg.model.Config;
 import com.dangjia.acg.modle.actuary.DjActuarialProductConfig;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.brand.Unit;
@@ -216,6 +218,8 @@ public class HouseService {
 
     @Autowired
     private TaskStackService taskStackService;
+    @Autowired
+    private IConfigMapper iConfigMapper;
     @Autowired
     private IMasterDeliverOrderAddedProductMapper iMasterDeliverOrderAddedProductMapper;
 
@@ -1840,12 +1844,12 @@ public class HouseService {
         //3.修改销售相关的基础信息表
         editHouseReationTable(member.getId());
         //4.根据地址ID查询对应的地址相关信息
-       MemberAddress memberAddress = iMasterMemberAddressMapper.selectByPrimaryKey(addressId);
-       if(memberAddress==null){
-           return ServerResponse.createByErrorMessage("地址不存在，请重新选择");
-       }else if(StringUtils.isNotBlank(memberAddress.getHouseId())){
-           return ServerResponse.createByErrorMessage("地址已有装修的房子，请重新选择");
-       }
+        MemberAddress memberAddress = iMasterMemberAddressMapper.selectByPrimaryKey(addressId);
+        if(memberAddress==null){
+            return ServerResponse.createByErrorMessage("地址不存在，请重新选择");
+        }else if(StringUtils.isNotBlank(memberAddress.getHouseId())){
+            return ServerResponse.createByErrorMessage("地址已有装修的房子，请重新选择");
+        }
         //5.添加房产信息表
         int again=1;
         checkHouseStatus(again,userToken,member.getId());//查询是第几套房产
@@ -2055,16 +2059,26 @@ public class HouseService {
             }
 
         }else if(square.compareTo(inputArea)==-1){//偏小
+            //判断房子实际面积是否大于70，若不大于70，则按70计算
+            Config config=iConfigMapper.selectConfigInfoByParamKey("MIN_AREA");//获取对应阶段需处理剩余时间
+            BigDecimal lowSquare=new BigDecimal(70);//最低面积
+            if(config!=null&&StringUtils.isNotBlank(config.getId())){
+                lowSquare=new BigDecimal(config.getParamValue());
+            }
+            if(square.compareTo(lowSquare)==-1&&lowSquare.compareTo(inputArea)==-1){
+                square=lowSquare;//将最小支付面积70附值给用户
+            }
             //退款，生成退款单
             String productStr=getEligibleProduct(houseOrderDetailDTOList,2,square,inputArea);
             if(productStr!=null&&StringUtils.isNotBlank(productStr)){
                 HouseOrderDetailDTO houseOrderDetailDTO=houseOrderDetailDTOList.get(0);
                 String orderId=houseOrderDetailDTO.getOrderId();
                 //自动生成退款单，且退款同意
-                repairMendOrderService.saveRefundInfoRecord(house.getCityId(),house.getHouseId(),orderId,productStr);
+                repairMendOrderService.saveRefundInfoRecord(house.getCityId(),house.getHouseId(),orderId,productStr,new BigDecimal(0));
 
 
             }
+
 
         }
 
@@ -2081,37 +2095,37 @@ public class HouseService {
         if(houseOrderDetailDTOList!=null&&houseOrderDetailDTOList.size()>0){
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             for(HouseOrderDetailDTO product:houseOrderDetailDTOList){
-                    JSONObject jsonObject = new JSONObject();
-                    String productId = product.getProductId();
-                    if(productId==null||StringUtils.isBlank(productId)){
-                        continue;
-                    }
-                    String productTemplateId=product.getProductTemplateId();
-                    String orderItemId=product.getOrderItemId();
-                    //查询增值商品信息
-                    String addedProductIds=iMasterDeliverOrderAddedProductMapper.getAddedPrdouctStr(orderItemId);
-                    String workerTypeId=product.getWorkerTypeId();
-                    Example example=new Example(DjActuarialProductConfig.class);
-                    example.createCriteria().andEqualTo(DjActuarialProductConfig.ACTUARIAL_TEMPLATE_ID,workerTypeId)
-                            .andEqualTo(DjActuarialProductConfig.PRODUCT_ID,productTemplateId);
-                    DjActuarialProductConfig djActuarialProductConfig=iMasterActuarialProductConfigMapper.selectOneByExample(example);
-                    if(djActuarialProductConfig!=null&&"1".equals(djActuarialProductConfig.getIsCalculatedArea())){
-                        if(orderType==1){//补差价订单
-                            jsonObject.put("shopCount",square.subtract(inputArea));//补差价的面积
-                            jsonObject.put("productId",productId);
-                            jsonObject.put("workerTypeId",workerTypeId);
-                            jsonObject.put("addedProductIds",addedProductIds); //增值订单ID，多个用逗号分隔
-                            listOfGoods.add(jsonObject);
+                JSONObject jsonObject = new JSONObject();
+                String productId = product.getProductId();
+                if(productId==null||StringUtils.isBlank(productId)){
+                    continue;
+                }
+                String productTemplateId=product.getProductTemplateId();
+                String orderItemId=product.getOrderItemId();
+                //查询增值商品信息
+                String addedProductIds=iMasterDeliverOrderAddedProductMapper.getAddedPrdouctStr(orderItemId);
+                String workerTypeId=product.getWorkerTypeId();
+                Example example=new Example(DjActuarialProductConfig.class);
+                example.createCriteria().andEqualTo(DjActuarialProductConfig.ACTUARIAL_TEMPLATE_ID,workerTypeId)
+                        .andEqualTo(DjActuarialProductConfig.PRODUCT_ID,productTemplateId);
+                DjActuarialProductConfig djActuarialProductConfig=iMasterActuarialProductConfigMapper.selectOneByExample(example);
+                if(djActuarialProductConfig!=null&&"1".equals(djActuarialProductConfig.getIsCalculatedArea())){
+                    if(orderType==1){//补差价订单
+                        jsonObject.put("shopCount",square.subtract(inputArea));//补差价的面积
+                        jsonObject.put("productId",productId);
+                        jsonObject.put("workerTypeId",workerTypeId);
+                        jsonObject.put("addedProductIds",addedProductIds); //增值订单ID，多个用逗号分隔
+                        listOfGoods.add(jsonObject);
 
-                        }else if(orderType==2){
-                            //退差价订单
-                            jsonObject.put("returnCount",inputArea.subtract(square));//退差价的面积
-                            jsonObject.put("productId",productId);
-                            jsonObject.put("orderItemId",orderItemId);
-                            jsonObject.put("addedProductIds",addedProductIds); //增值订单ID，多个用逗号分隔
-                            listOfGoods.add(jsonObject);
-                        }
+                    }else if(orderType==2){
+                        //退差价订单
+                        jsonObject.put("returnCount",inputArea.subtract(square));//退差价的面积
+                        jsonObject.put("productId",productId);
+                        jsonObject.put("orderItemId",orderItemId);
+                        jsonObject.put("addedProductIds",addedProductIds); //增值订单ID，多个用逗号分隔
+                        listOfGoods.add(jsonObject);
                     }
+                }
 
 
 
@@ -2865,6 +2879,7 @@ public class HouseService {
         houseFlowApplyMapper.updateIsReadType(null);
         return map;
     }
+
 
     /**
      * 工序记录

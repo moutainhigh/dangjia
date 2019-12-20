@@ -236,7 +236,7 @@ public class ActuaryService {
             House house=houseMapper.selectByPrimaryKey(houseId);
             //增加设计图纸不合格的任务
             taskStackService.inserTaskStackInfo(houseId,house.getMemberId(),"设计图纸不合格","icon/sheji.png",6,houseId);
-            return ServerResponse.createBySuccess("推荐保存成功");
+            return ServerResponse.createBySuccessMessage("推荐保存成功");
         }catch (Exception e){
             logger.error("推荐保存失败:",e);
             return ServerResponse.createByErrorMessage("推荐保存失败");

@@ -590,7 +590,7 @@ public class HouseFlowApplyService {
                 BigDecimal surplusMoney = worker.getSurplusMoney().add(bd);
                 BigDecimal retentionMoney = worker.getRetentionMoney().subtract(bd);
                 WorkerDetail workerDetail = new WorkerDetail();
-                workerDetail.setName("涨积分退滞留金");
+                workerDetail.setName("涨积分转出滞留金");
                 workerDetail.setWorkerId(worker.getId());
                 workerDetail.setWorkerName(worker.getName());
                 workerDetail.setHouseId(hfa.getHouseId());
@@ -598,8 +598,21 @@ public class HouseFlowApplyService {
                 workerDetail.setHaveMoney(surplusMoney);
                 workerDetail.setDefinedWorkerId(hfa.getId());
                 workerDetail.setWalletMoney(surplusMoney);
-                workerDetail.setState(3);//进钱
+                workerDetail.setState(11);//出钱
                 workerDetailMapper.insert(workerDetail);
+
+                workerDetail = new WorkerDetail();
+                workerDetail.setName("滞留金转入余额");
+                workerDetail.setWorkerId(worker.getId());
+                workerDetail.setWorkerName(worker.getName());
+                workerDetail.setHouseId(hfa.getHouseId());
+                workerDetail.setMoney(bd);
+                workerDetail.setHaveMoney(surplusMoney);
+                workerDetail.setDefinedWorkerId(hfa.getId());
+                workerDetail.setWalletMoney(surplusMoney);
+                workerDetail.setState(0);//进钱
+                workerDetailMapper.insert(workerDetail);
+
                 worker.setDeposit(worker.getDeposit());//实际1500元
                 worker.setSurplusMoney(surplusMoney);
                 worker.setRetentionMoney(retentionMoney);
@@ -631,7 +644,7 @@ public class HouseFlowApplyService {
                 workerDetail.setApplyMoney(retentionMoney);
                 workerDetail.setHaveMoney(haveMoney);
                 workerDetail.setWalletMoney(retentionMoney);
-                workerDetail.setState(2);//进钱
+                workerDetail.setState(10);//进钱
                 workerDetailMapper.insert(workerDetail);
                 //实际滞留金
                 hwo.setRetentionMoney(mid);

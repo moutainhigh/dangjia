@@ -873,23 +873,11 @@ public class DjBasicsProductTemplateService {
     private Map<String, Object> getProductDetailByProductId(DjBasicsProductTemplate djBasicsProduct){
         String id=djBasicsProduct.getId();
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-        String[] imgArr = djBasicsProduct.getImage().split(",");
-        StringBuilder imgStr = new StringBuilder();
-        StringBuilder imgUrlStr = new StringBuilder();
-        StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
-        djBasicsProduct.setImage(imgStr.toString());
         //单位列表
         List<Unit> linkUnitList = getlinkUnitListByGoodsUnitId(djBasicsProduct.getGoodsId());
         //商品工艺信息
        // List<Map<String, Object>> tTechnologymMapList = getTechnologymMapList(id,address);
         //材料商品信息
-         if(StringUtils.isNotBlank(djBasicsProduct.getDetailImage())){
-                imgArr = djBasicsProduct.getDetailImage().split(",");
-                imgStr = new StringBuilder();
-                imgUrlStr = new StringBuilder();
-                StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
-             djBasicsProduct.setDetailImage(imgStr.toString());
-          }
         Map<String, Object> map = BeanUtils.beanToMap(djBasicsProduct);
         //商品属性值信息
         String strNewValueNameArr = "";
@@ -906,10 +894,10 @@ public class DjBasicsProductTemplateService {
 
         }
 
-        map.put("imageUrl", imgUrlStr.toString());
+        map.put("imageUrl", StringTool.getImage(djBasicsProduct.getImage(),address));
         map.put("newValueNameArr", strNewValueNameArr);
         map.put("unitList",linkUnitList);
-        map.put("imageUrl",imgUrlStr.toString());
+        map.put("detailImageUrl",StringTool.getImage(djBasicsProduct.getDetailImage(),address));
         map.put("id",djBasicsProduct.getId());
 
         //只有增值类关联商品才会有此数据
@@ -922,7 +910,7 @@ public class DjBasicsProductTemplateService {
         return map;
     }
 
-    /**
+    /**queryGoodsList
      * 获取对应的属性值信息
      * @param valueIdArr
      * @return

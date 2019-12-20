@@ -96,10 +96,20 @@
         s.store_name storeName,
         gr.operatorName,
         gr.operatorMobile,
-        gr.operatorId
+        gr.operatorId,
+        IFNULL(ma.address,CONCAT(
+        house.residential,
+        IFNULL(hhouse.building, '*'),
+        '栋',
+        IFNULL(CONCAT(house.unit, '单元'),'' ),
+        IFNULL(house.number, '*'),
+        '号'
+        )) houseName,
+        ma.input_area inputArea
         FROM
         dj_house house
         INNER JOIN dj_member member ON member.id = house.member_id
+        LEFT JOIN dj_member_address ma on house.id=ma.houseId
         LEFT JOIN (
         SELECT
         wk.house_id,
@@ -604,14 +614,14 @@
     <select id="getActuaryAll" resultType="com.dangjia.acg.dto.house.HouseListDTO">
         SELECT
         h.id as houseId,
-        CONCAT(
+        IFNULL(ma.address,CONCAT(
         h.residential,
         IFNULL(h.building, '*'),
         '栋',
         IFNULL(CONCAT(h.unit, '单元'),'' ),
         IFNULL(h.number, '*'),
         '号'
-        ) houseName,
+        )) houseName,
         h.city_name as cityName,
         h.budget_ok as budgetOk,
         h.designer_ok as designerOk,
@@ -640,10 +650,12 @@
         s.store_name storeName,
         gr.operatorName,
         gr.operatorMobile,
-        gr.operatorId
+        gr.operatorId,
+        ma.input_area inputArea
         FROM
         dj_house h
         INNER JOIN dj_member m ON h.member_id = m.id
+        INNER JOIN dj_member_address ma on h.id=ma.house_id
         LEFT JOIN (
         SELECT
         wk.house_id,
