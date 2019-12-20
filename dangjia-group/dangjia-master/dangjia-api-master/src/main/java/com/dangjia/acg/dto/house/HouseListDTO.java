@@ -68,6 +68,8 @@ public class HouseListDTO {
     private String remarkInfo;//备注详情
     private Date remarkDate;//备注时间
 
+    private Double inputArea;//业主录入面积
+
 
 
     public String getHouseName() {
