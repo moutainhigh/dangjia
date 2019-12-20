@@ -68,7 +68,7 @@ public class WalletService {
     private CraftsmanConstructionService constructionService;
     @Autowired
     private EngineerService engineerService;
-    private String ruleDate = "2010年1月1日";//TODO  时间
+    private String ruleDate = "2019年12月19日";//TODO  时间
 
 
     /**
@@ -399,8 +399,8 @@ public class WalletService {
             if (wd != null) {
                 returnMap.put("depositState", wd.getState());//0未处理,1同意 2不同意(驳回)
                 returnMap.put("memo", wd.getMemo());//备注
-                String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-                returnMap.put("depositImage", CommonUtil.isEmpty(wd.getImage()) ? null : imageAddress + wd.getImage());//回执单图片
+//                String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+//                returnMap.put("depositImage", CommonUtil.isEmpty(wd.getImage()) ? null : imageAddress + wd.getImage());//回执单图片
                 returnMap.put("reason", wd.getReason());//不同意理由
             }
         }
