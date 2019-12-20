@@ -79,6 +79,8 @@ public class ComplainService {
     @Autowired
     private IComplainMapper complainMapper;
     @Autowired
+    private MemberRecordMapper memberRecordMapper;
+    @Autowired
     private ConfigUtil configUtil;
     @Autowired
     private IRewardPunishRecordMapper rewardPunishRecordMapper;
@@ -127,8 +129,6 @@ public class ComplainService {
     @Autowired
     private IMendOrderMapper mendOrderMapper;
 
-    @Autowired
-    private MemberRecordMapper memberRecordMapper;
     /**
      * 添加申诉
      * @param request
@@ -181,7 +181,8 @@ public class ComplainService {
      */
 
     public ServerResponse addComplain(String userToken, String memberId, Integer complainType,
-                                      String businessId, String houseId, String files, String orderSplitItemId) {
+                                      String businessId, String houseId, String files,
+                                      String orderSplitItemId,String changeReason,String image) {
         if (CommonUtil.isEmpty(complainType) || CommonUtil.isEmpty(businessId)) {
             return ServerResponse.createByErrorMessage("参数错误");
         }
@@ -214,6 +215,8 @@ public class ComplainService {
         complain.setUserId(getUserID(complainType, businessId, houseId));
         complain.setHouseId(houseId);
         complain.setFiles(files);
+        complain.setChangeReason(changeReason);
+        complain.setImage(image);
 //        1:工匠被处罚后不服.2：业主要求整改.3：要求换人.4:部分收货申诉.
         if (complainType == 4) {
             DjSupplier djSupplier = djSupplierAPI.queryDjSupplierByPass(complain.getUserId());
@@ -387,6 +390,7 @@ public class ComplainService {
      * @param files       附件 以，分割 如：data/f.dow,data/f2.dow
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse updataComplain(String userId, String complainId, Integer state, String description,
                                          String files, String operateId, String operateName,
                                          String rejectReason) {
@@ -609,6 +613,10 @@ public class ComplainService {
 
         }
         complainMapper.updateByPrimaryKeySelective(complain);
+        //新增更换工匠历史记录
+        ReplaceMemberRecord replaceMemberRecord = new ReplaceMemberRecord();
+        replaceMemberRecord.setMemberId(complain.getMemberId());
+        memberRecordMapper.insert(replaceMemberRecord);
         return ServerResponse.createBySuccessMessage("提交成功");
     }
 

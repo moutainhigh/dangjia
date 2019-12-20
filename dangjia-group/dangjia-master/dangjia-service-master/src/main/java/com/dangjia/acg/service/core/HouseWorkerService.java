@@ -16,15 +16,18 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.complain.ComplainInfoDTO;
 import com.dangjia.acg.dto.house.HouseChatDTO;
 import com.dangjia.acg.dto.house.MyHouseFlowDTO;
 import com.dangjia.acg.mapper.complain.IComplainMapper;
 import com.dangjia.acg.mapper.core.*;
+import com.dangjia.acg.mapper.engineer.DjSkillCertificationMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberCityMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.other.IWorkDepositMapper;
+import com.dangjia.acg.mapper.reason.ReasonMatchMapper;
 import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
 import com.dangjia.acg.mapper.sale.DjRoyaltyMatchMapper;
 import com.dangjia.acg.mapper.worker.IInsuranceMapper;
@@ -32,11 +35,13 @@ import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.complain.Complain;
 import com.dangjia.acg.modle.core.*;
+import com.dangjia.acg.modle.engineer.DjSkillCertification;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.matter.TechnologyRecord;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberCity;
 import com.dangjia.acg.modle.other.WorkDeposit;
+import com.dangjia.acg.modle.reason.ReasonMatchSurface;
 import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.sale.royalty.DjRoyaltyMatch;
 import com.dangjia.acg.modle.worker.Insurance;
@@ -125,6 +130,14 @@ public class HouseWorkerService {
     @Autowired
     private DjRoyaltyMatchMapper djRoyaltyMatchMapper;
 
+    @Autowired
+    private IInsuranceMapper iInsuranceMapper;
+
+    @Autowired
+    private DjSkillCertificationMapper djSkillCertificationMapper;
+
+    @Autowired
+    private ReasonMatchMapper reasonMatchMapper;
     /**
      * 根据工人id查询所有房子任务
      */
@@ -270,6 +283,158 @@ public class HouseWorkerService {
         mapData.put("historyWorkerList", historyWorkerList);
         return ServerResponse.createBySuccess("查询成功", mapData);
     }
+
+
+    /**
+     * 新获取工匠详情
+     * @param userToken
+     * @param houseFlowId
+     * @return
+     */
+    public ServerResponse getWorkerInFo(String userToken, String houseFlowId) {
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
+        if (houseFlow == null) {
+            return ServerResponse.createByErrorMessage("该工序不存在");
+        }
+        WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
+        HouseWorker houseWorker = null;
+        if (houseFlow.getWorkType() == 3) {//待支付
+            houseWorker = houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), 1);
+        } else if (houseFlow.getWorkType() == 4) {//已支付
+            houseWorker = houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), 6);
+        }
+        Map<String, Object> mapData = new HashMap<>();
+        String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+        if (houseWorker == null) {
+            mapData.put("houseWorker", null);
+        } else {
+            Member member1 = memberMapper.selectByPrimaryKey(houseWorker.getWorkerId());
+            member1.setPassword(null);
+            member1.initPath(address);
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", member1.getId());
+            map.put("targetId", member1.getId());
+            map.put("targetAppKey", messageAPI.getAppKey(AppType.GONGJIANG.getDesc()));
+            map.put("nickName", member1.getNickName());
+            map.put("name", member1.getName());
+            map.put("mobile", member1.getMobile());
+            map.put("head", member1.getHead());
+            map.put("workerTypeId", member1.getWorkerTypeId());
+            map.put("workerName", workerType.getName());
+            map.put("houseFlowId", houseFlow.getId());
+            map.put("houseId", houseFlow.getHouseId());
+            map.put("houseWorkerId", houseWorker.getId());
+            if (workerType.getType() == 1 || workerType.getType() == 2) {//设计精算不展示换人按钮
+                map.put("isSubstitution", 2);//0:审核中 1：申请换人 2：不显示
+            } else {
+                Example example = new Example(Complain.class);
+                example.createCriteria().andEqualTo(Complain.MEMBER_ID, houseFlow.getWorkerId())
+                        .andEqualTo(Complain.HOUSE_ID, houseFlow.getHouseId())
+                        .andEqualTo(Complain.STATUS, 0)
+                        .andEqualTo(Complain.COMPLAIN_TYPE, 6);
+                example.orderBy(Complain.CREATE_DATE).desc();
+                List<Complain> complains = complainMapper.selectByExample(example);
+                if(complains !=null && complains.size()> 0){
+                    map.put("complainId",complains.get(0).getId());
+                }
+                if (houseWorker.getWorkType() == 6) {
+                    map.put("isSubstitution", complains.size() > 0 ? 0 : 1);//判断换人申请状态
+                } else {
+                    map.put("isSubstitution", 2);
+                }
+            }
+            mapData.put("houseWorker", map);
+        }
+
+        //查询保险徽章
+        Example example = new Example(Insurance.class);
+        example.createCriteria().andEqualTo(Insurance.WORKER_ID, houseFlow.getWorkerId())
+                .andEqualTo(Insurance.DATA_STATUS, 0);
+        example.orderBy(Insurance.CREATE_DATE).desc();
+        List<Insurance> insurance = iInsuranceMapper.selectByExample(example);
+        List<Map<String, Object>> list = new ArrayList<>();
+        Map<String, Object> map = new HashMap<>();
+        if(insurance != null && insurance.size() >0){
+            if (new Date().getTime() <= insurance.get(0).getEndDate().getTime()) {
+                map.put("type",0);//保险期内
+            }else{
+                map.put("type",1);//保险期外
+            }
+            map.put("name","保险详情");
+            map.put("head", address + "iconWork/shqd_icon_bx@3x.png");
+            map.put("id",insurance.get(0).getId());
+            list.add(map);
+        }
+
+        //查询技能徽章
+        example = new Example(Insurance.class);
+        example.createCriteria().andEqualTo(DjSkillCertification.WORKER_ID, houseFlow.getWorkerId())
+                .andEqualTo(DjSkillCertification.DATA_STATUS, 0);
+        List<DjSkillCertification> djSkillCertifications = djSkillCertificationMapper.selectByExample(example);
+        if(djSkillCertifications != null && djSkillCertifications.size() >0){
+            map = new HashMap<>();
+            map.put("name","技能培训");
+            map.put("head", address + "iconWork/shqd_icon_jn@3x.png");
+            map.put("id",houseFlow.getWorkerId());
+            list.add(map);
+        }
+        //他的徽章
+        mapData.put("lists",list);
+        return ServerResponse.createBySuccess("查询成功", mapData);
+    }
+
+
+    /**
+     * 查询申换工匠详情
+     * @param isSubstitution
+     * @return
+     */
+    public ServerResponse getWorkerComplainInFo(Integer isSubstitution,
+                                        String complainId) {
+        if (CommonUtil.isEmpty(isSubstitution)) {
+            return ServerResponse.createByErrorMessage("isSubstitution不能为空");
+        }
+        //0:审核中 1：申请换人
+        ComplainInfoDTO complainInfoDTO = new ComplainInfoDTO();
+        if(isSubstitution == 0){
+            Complain complains = complainMapper.selectByPrimaryKey(complainId);
+            if(complains != null){
+                List<String> list = Arrays.asList(complains.getChangeReason().split(","));
+                complainInfoDTO.setChangeList(list);
+                complainInfoDTO.setImageList(getImage(complains.getImage()));
+                complainInfoDTO.setRejectReason(complains.getRejectReason());
+            }
+            return ServerResponse.createBySuccess("查询成功", complainInfoDTO);
+        }else if(isSubstitution == 1){
+            //查询更换原因
+            Example example = new Example(ReasonMatchSurface.class);
+            example.orderBy(ReasonMatchSurface.CREATE_DATE);
+            List<ReasonMatchSurface> reasonMatchSurface =  reasonMatchMapper.selectByExample(example);
+            List<String> list = new ArrayList<>();
+            reasonMatchSurface.forEach(a ->{
+                list.add(a.getRemark());
+            });
+            complainInfoDTO.setChangeList(list);
+            return ServerResponse.createBySuccess("查询成功", complainInfoDTO);
+        }
+        return ServerResponse.createByErrorMessage("查询失败");
+    }
+
+    private List<String> getImage(String image){
+        List<String> strList = new ArrayList<>();
+        String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+        List<String> result = Arrays.asList(image.split(","));
+        for (int i = 0; i < result.size(); i++) {
+            String str = imageAddress + result.get(i);
+            strList.add(str);
+        }
+        return strList;
+    }
+
 
     /**
      * 抢单
