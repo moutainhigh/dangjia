@@ -11,12 +11,12 @@ public class MtHostListDetailDTO {
     private String  address; //房子地址
     private String  latitude;   //维度
     private String  longitude;  //经度
-    //维修进度
-    //维修参与人员
-    //维修参与人员电话
     private String  sincePurchaseAmount; //维修金额
     private String  remark;  //维修备注
-
-    List<WorkerTypeSafeOrder> list;//我的质保单
+    //维修进度（待优化）
+    //维修参与人员
+    //维修参与人员电话
+    //维保参与人员
+    //维保商品列表
 
 }

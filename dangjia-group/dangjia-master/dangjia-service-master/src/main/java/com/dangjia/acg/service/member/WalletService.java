@@ -68,7 +68,7 @@ public class WalletService {
     private CraftsmanConstructionService constructionService;
     @Autowired
     private EngineerService engineerService;
-    private String ruleDate = "2020年1月1日";//时间
+    private String ruleDate = "2019年12月20日";//收费规则生效时间
 
 
     /**

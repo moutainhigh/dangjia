@@ -216,6 +216,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         and t.data_status = '0'
         and t.order_id=t2.id
         and t.worker_type_id in('1','2')
+        and t.shop_count > (IFNULL(t.ask_count, 0)+IFNULL(t.return_count,0))
     </select>
    <select id="getDesgionTotalMoney" resultType="java.lang.Double">
        SELECT

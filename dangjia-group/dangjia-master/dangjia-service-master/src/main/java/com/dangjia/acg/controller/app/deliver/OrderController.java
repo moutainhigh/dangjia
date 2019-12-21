@@ -5,10 +5,9 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.deliver.OrderService;
-import io.swagger.annotations.ApiOperation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -19,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class OrderController implements OrderAPI {
 
+    private static Logger logger = LoggerFactory.getLogger(OrderController.class);
     @Autowired
     private OrderService orderService;
 
@@ -137,4 +137,23 @@ public class OrderController implements OrderAPI {
         return orderService.getBudgetOrderById(userToken, houseId);
     }
 
+    /**
+     * 设计精算，退原订单ID,取消补差价订单ID
+     * @param userToken 用户TOKEN
+     * @param houseId 房子ID
+     * @param orderId 订单ID
+     * @param diffOrderId 补差价订单ID
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse refundBudgetOrderInfo(String userToken,String houseId,String orderId,String diffOrderId){
+        try{
+            return orderService.refundBudgetOrderInfo(userToken, houseId, orderId, diffOrderId);
+        }catch (Exception e){
+            logger.error("退款异常",e);
+            return ServerResponse.createByErrorMessage("退款异常");
+        }
+
+    }
 }

@@ -61,4 +61,10 @@ public interface RewardPunishAPI {
     ServerResponse queryCorrelationList(@RequestParam("pageDTO") PageDTO pageDTO,
                                         @RequestParam("type") String type);
 
+
+    @PostMapping("/app/rewardPunish/queryPunishRecordList")
+    @ApiOperation(value = "奖惩记录列表", notes = "奖惩记录列表")
+    ServerResponse queryPunishRecordList(@RequestParam("pageDTO") PageDTO pageDTO,
+                                         @RequestParam("houseId") String houseId);
+
 }

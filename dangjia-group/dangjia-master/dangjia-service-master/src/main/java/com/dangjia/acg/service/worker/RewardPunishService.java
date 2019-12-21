@@ -11,9 +11,7 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
-import com.dangjia.acg.dto.worker.CraftsmenListDTO;
-import com.dangjia.acg.dto.worker.RewardPunishCorrelationDTO;
-import com.dangjia.acg.dto.worker.RewardPunishRecordDTO;
+import com.dangjia.acg.dto.worker.*;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
@@ -24,6 +22,7 @@ import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.worker.*;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -422,14 +421,59 @@ public class RewardPunishService {
     public ServerResponse queryCorrelationList(PageDTO pageDTO, String type) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<Map<String, Object>> list=rewardPunishCorrelationMapper.queryCorrelationList(type);
-            PageInfo pageResult = new PageInfo(list);
+            PageInfo pageResult = new PageInfo(null);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("奖罚-选择奖罚原因异常");
         }
     }
+
+    /**
+     * 奖罚记录列表
+     * @param pageDTO
+     * @param houseId
+     * @return
+     */
+    public ServerResponse queryPunishRecordList(PageDTO pageDTO, String houseId) {
+        try {
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<RewardPunishRecordListDTO> list=rewardPunishCorrelationMapper.queryPunishRecordList(houseId);
+            list.forEach(rewardPunishRecordListDTO->{
+                rewardPunishRecordListDTO.setWorkerTypeName(rewardPunishRecordListDTO.getWorkerTypeId()!=null?workerTypeMapper.selectByPrimaryKey(rewardPunishRecordListDTO.getWorkerTypeId()).getName():"");
+                rewardPunishRecordListDTO.setImagesUrl(StringTool.getImage(rewardPunishRecordListDTO.getImages(),address).split(","));//图片数组
+                String type=rewardPunishRecordListDTO.getType();
+                String name=null;
+                if(type.equals("0"))
+                    name="奖励";
+                if(type.equals("1"))
+                    name="处罚";
+                rewardPunishRecordListDTO.setName(name);
+
+                String id=rewardPunishRecordListDTO.getId();
+                RewardPunishRecordDetailDTO rewardPunishRecordDetailDTO= rewardPunishCorrelationMapper.queryPunishRecordDetailList(id);
+                if(rewardPunishRecordDetailDTO!=null)
+                {
+                    rewardPunishRecordDetailDTO.setWorkerTypeName(rewardPunishRecordDetailDTO.getWorkerTypeId()!=null?workerTypeMapper.selectByPrimaryKey(rewardPunishRecordDetailDTO.getWorkerTypeId()).getName():"");
+                    if(rewardPunishRecordDetailDTO.getHead()!=null&&rewardPunishRecordDetailDTO.getHead().length()>0)
+                    {
+                        rewardPunishRecordDetailDTO.setHead(address+rewardPunishRecordDetailDTO.getHead());
+                    }
+                    rewardPunishRecordDetailDTO.setImagesUrl(StringTool.getImage(rewardPunishRecordDetailDTO.getImages(),address).split(","));//图片数组
+
+                    rewardPunishRecordListDTO.setRewardPunishRecordDetailDTO(rewardPunishRecordDetailDTO);
+                }
+
+            });
+            PageInfo pageResult = new PageInfo(list);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("奖罚记录列表异常");
+        }
+    }
+
 
     /**
      * 奖罚-选择工匠列表
@@ -456,7 +500,7 @@ public class RewardPunishService {
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();
-            return ServerResponse.createByErrorMessage("奖罚-选择奖罚原因异常");
+            return ServerResponse.createByErrorMessage("奖罚-选择工匠列表异常");
         }
     }
 }

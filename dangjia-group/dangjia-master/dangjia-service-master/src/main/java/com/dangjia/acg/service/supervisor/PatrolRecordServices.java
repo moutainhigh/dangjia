@@ -12,6 +12,7 @@ import com.dangjia.acg.dto.supervisor.PatrolRecordDTO;
 import com.dangjia.acg.dto.supervisor.PatrolRecordIndexDTO;
 import com.dangjia.acg.dto.supervisor.WorkerRewardPunishRecordDTO;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
+import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.supervisor.DjBasicsPatrolRecordMapper;
 import com.dangjia.acg.mapper.worker.IRewardPunishRecordMapper;
 import com.dangjia.acg.modle.member.Member;
@@ -45,6 +46,9 @@ public class PatrolRecordServices {
     private IWorkerTypeMapper workerTypeMapper;
     @Autowired
     private MemberAPI memberAPI;
+
+    @Autowired
+    private IMemberMapper memberMapper;
     /**
      * 督导首页
      * @param request
@@ -120,6 +124,8 @@ public class PatrolRecordServices {
             list.forEach(djBasicsPatrolRecord->{
                 String imageAddress=StringTool.getImage(djBasicsPatrolRecord.getImages(),address);
                 djBasicsPatrolRecord.setImages(imageAddress);
+                Member member = memberMapper.selectByPrimaryKey(djBasicsPatrolRecord.getMemberId());
+                djBasicsPatrolRecord.setName(member.getName());
             });
             PageInfo pageResult = new PageInfo(list);
             return ServerResponse.createBySuccess("查询成功", pageResult);

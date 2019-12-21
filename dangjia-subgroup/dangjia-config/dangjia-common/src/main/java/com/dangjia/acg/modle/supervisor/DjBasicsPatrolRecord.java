@@ -39,4 +39,7 @@ public class DjBasicsPatrolRecord extends BaseEntity {
     @ApiModelProperty("巡查工作及处置情况")
     private String content ;
 
+    @Transient
+    private String name;
+
 }
