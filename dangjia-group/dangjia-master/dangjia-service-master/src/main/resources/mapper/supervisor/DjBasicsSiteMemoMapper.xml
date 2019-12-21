@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.supervisor.DjBasicsSiteMemoMapper">
+
+    <select id="querySiteMemo" resultType="com.dangjia.acg.dto.supervisor.DjBasicsSiteMemoDTO">
+        select
+        IFNULL(bsm.id,'') as id,
+        IFNULL(bsm.remark,'')  as remark ,
+        IFNULL(bsm.create_date,'')  as createDate,
+        IFNULL(bsm.worker_type_id,'') as workerTypeId,
+        IFNULL(dm.name,'') as name
+        from dj_basics_site_memo  bsm
+        inner join dj_member dm on bsm.member_id=dm.id
+        where bsm.member_id=#{memberId}
+    </select>
+
+    <select id="querySiteMemoDetail" resultType="com.dangjia.acg.dto.supervisor.DjBasicsSiteMemoDTO">
+        select
+        IFNULL(bsm.id,'') as id,
+        IFNULL(bsm.remark,'')  as remark ,
+        IFNULL(bsm.create_date,'')  as createDate,
+        IFNULL(bsm.worker_type_id,'') as workerTypeId,
+        IFNULL(dm.name,'') as name
+        from dj_basics_site_memo  bsm
+        inner join dj_member dm on bsm.member_id=dm.id
+        where dm.id=#{id}
+    </select>
+
+</mapper>
