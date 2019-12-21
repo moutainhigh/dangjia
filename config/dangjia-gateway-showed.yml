@@ -39,6 +39,9 @@ zuul:
     store:
       path: /store/**
       service-id: dangjia-service-store
+  host:
+    maxTotalConnections: 20000
+    maxPerRouteConnections: 20000
 hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds: 20000
 hystrix.threadpool.default.coreSize: 500
 ribbon:
