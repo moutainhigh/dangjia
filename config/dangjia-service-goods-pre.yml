@@ -44,8 +44,18 @@ eureka:
       defaultZone: http://192.168.0.229:8888/eureka/    # 指定注册中心的地址
   instance:
     preferIpAddress: true
-hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds: 20000
-hystrix.threadpool.default.coreSize: 500
+hystrix:
+  command:
+    default:
+      circuitBreaker:
+        sleepWindowInMilliseconds: 100000
+        forceClosed: true
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 60000
+  shareSecurityContext: true
+hystrix.threadpool.default.coreSize: 1000
 ribbon:
   ConnectTimeout: 10000
   ReadTimeout: 20000
