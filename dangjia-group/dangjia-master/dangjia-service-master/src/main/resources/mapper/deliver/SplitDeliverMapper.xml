@@ -72,7 +72,7 @@
         )
         ) a
         GROUP BY a.supplierId
-        ORDER BY s.supplier_name
+        ORDER BY a.supName
     </select>
 
     <select id="getSupplierGoodsId" resultType="java.lang.String">
