@@ -85,6 +85,7 @@ public class DjDeliverOrderItemService {
             paymentToBeMadeDTO.setOrderNumber(order.getOrderNumber());
             paymentToBeMadeDTO.setCreateDate(order.getCreateDate());
             paymentToBeMadeDTO.setModifyDate(order.getModifyDate());
+            paymentToBeMadeDTO.setOrderSource(order.getOrderSource());
             House house= houseAPI.selectHouseById(order.getHouseId());
             Example example = new Example(ShoppingCart.class);
             example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, house.getMemberId());

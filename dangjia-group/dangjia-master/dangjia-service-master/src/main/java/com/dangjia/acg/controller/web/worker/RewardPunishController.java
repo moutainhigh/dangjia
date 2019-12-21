@@ -102,4 +102,10 @@ public class RewardPunishController implements RewardPunishAPI {
         return rewardPunishService.queryCorrelationList(pageDTO,type);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse queryPunishRecordList(PageDTO pageDTO, String houseId) {
+        return rewardPunishService.queryPunishRecordList(pageDTO,houseId);
+    }
+
 }

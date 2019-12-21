@@ -325,7 +325,9 @@ public class PaymentService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse setWebPaySuccess( String businessOrderNumber) {
-
+        if(CommonUtil.isEmpty(businessOrderNumber)){
+            return ServerResponse.createByErrorMessage("支付订单不存在");
+        }
         Map<String, Object> returnMap = new HashMap<>();
         try {
             Example examplePayOrder = new Example(PayOrder.class);

@@ -91,6 +91,19 @@ public interface OrderAPI {
                                     @RequestParam("houseId") String houseId);
 
 
-
+    /**
+     * 设计、精算原订单退款
+     * @param userToken 用户TOKEN
+     * @param houseId 房子ID
+     * @param orderId 订单ID
+     * @param diffOrderId 补差价订单ID
+     * @return
+     */
+    @PostMapping("app/order/refundBudgetOrderInfo")
+    @ApiOperation(value = "设计精算--批量退款原订单，修改补差价订单", notes = "设计精算--批量退款原订单，修改补差价订单")
+    ServerResponse refundBudgetOrderInfo(@RequestParam("userToken") String userToken,
+                                         @RequestParam("houseId") String houseId,
+                                         @RequestParam("orderId") String orderId,
+                                         @RequestParam("diffOrderId") String diffOrderId);
 
 }

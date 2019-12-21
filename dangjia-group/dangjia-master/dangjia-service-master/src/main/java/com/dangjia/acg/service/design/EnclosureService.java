@@ -66,6 +66,7 @@ public class EnclosureService {
             JSONObject object = (JSONObject) o;
             Enclosure e = new Enclosure();
             e.setName(object.getString("name"));
+            e.setHouseId(house.getId());
             e.setEnclosure(object.getString("enclosure"));
             e.setEnclosureType(object.getInteger("enclosureType"));
             e.setRemarks(object.getString("remarks"));

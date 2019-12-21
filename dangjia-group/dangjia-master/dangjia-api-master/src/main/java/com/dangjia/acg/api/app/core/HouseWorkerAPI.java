@@ -86,6 +86,20 @@ public interface HouseWorkerAPI {
     ServerResponse getHouseWorker(@RequestParam("userToken") String userToken,
                                   @RequestParam("houseFlowId") String houseFlowId);
 
+
+    @PostMapping("app/core/houseWorker/getWorkerInFo")
+    @ApiOperation(value = "新获取工匠详情", notes = "新获取工匠详情")
+    ServerResponse getWorkerInFo(@RequestParam("userToken") String userToken,
+                                  @RequestParam("houseFlowId") String houseFlowId);
+
+
+    @PostMapping("app/core/houseWorker/getWorkerComplainInFo")
+    @ApiOperation(value = "申请更换工匠详情", notes = "申请更换工匠详情")
+    ServerResponse getWorkerComplainInFo(@RequestParam("userToken") String userToken,
+                                         @RequestParam("isSubstitution") Integer isSubstitution,
+                                         @RequestParam("complainId") String complainId);
+
+
     @PostMapping("app/core/houseWorker/getConstructionByWorkerId")
     @ApiOperation(value = "根据工人查询自己的施工界面", notes = "根据工人查询自己的施工界面")
     ServerResponse getConstructionByWorkerId(@RequestParam("request") HttpServletRequest request,

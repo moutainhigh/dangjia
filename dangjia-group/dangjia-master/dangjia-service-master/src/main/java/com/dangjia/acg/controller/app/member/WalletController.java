@@ -61,12 +61,12 @@ public class WalletController implements WalletAPI {
     }
 
     /**
-     * 支出 收入
+     * 资产流水
      */
     @Override
     @ApiMethod
-    public ServerResponse workerDetail(String userToken, int type, PageDTO pageDTO) {
-        return walletService.workerDetail(userToken, type, pageDTO);
+    public ServerResponse workerDetail(String userToken,String time, int type, PageDTO pageDTO) {
+        return walletService.workerDetail(userToken,time, type, pageDTO);
     }
 
     /**
@@ -76,5 +76,14 @@ public class WalletController implements WalletAPI {
     @ApiMethod
     public ServerResponse walletInformation(String userToken) {
         return walletService.walletInformation(userToken);
+    }
+
+    /**
+     * 指定某年的收入趋势
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getIncomeTrend(String userToken, String time){
+        return walletService.getIncomeTrend(userToken,time);
     }
 }

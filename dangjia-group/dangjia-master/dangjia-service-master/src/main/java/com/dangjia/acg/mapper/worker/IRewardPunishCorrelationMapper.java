@@ -2,6 +2,8 @@ package com.dangjia.acg.mapper.worker;
 
 import com.dangjia.acg.dto.worker.CraftsmenListDTO;
 import com.dangjia.acg.dto.worker.RewardPunishCorrelationDTO;
+import com.dangjia.acg.dto.worker.RewardPunishRecordDetailDTO;
+import com.dangjia.acg.dto.worker.RewardPunishRecordListDTO;
 import com.dangjia.acg.modle.worker.RewardPunishCorrelation;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -15,4 +17,6 @@ public interface IRewardPunishCorrelationMapper extends Mapper<RewardPunishCorre
     List<RewardPunishCorrelationDTO> queryCorrelation(@Param("name") String name, @Param("state") Integer state);
     List<Map<String, Object>> queryCorrelationList(@Param("type") String type);
     List<CraftsmenListDTO> queryCraftsmenList(@Param("houseId") String houseId);
+    List<RewardPunishRecordListDTO> queryPunishRecordList(@Param("houseId") String houseId);
+    RewardPunishRecordDetailDTO queryPunishRecordDetailList(@Param("id") String id);
 }

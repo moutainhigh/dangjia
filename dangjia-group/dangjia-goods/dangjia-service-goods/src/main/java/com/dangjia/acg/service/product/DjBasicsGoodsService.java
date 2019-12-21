@@ -325,15 +325,15 @@ public class DjBasicsGoodsService {
                     //type表示： 是否禁用  0：禁用；1不禁用 ;  -1全部默认
                     if (type != null && !type.equals(p.getType()) && -1 != type) //不等于 type 的不返回给前端
                         continue;
-                    StringBuilder imgUrlStr = new StringBuilder();
+                   /* StringBuilder imgUrlStr = new StringBuilder();
                     StringBuilder imgStr = new StringBuilder();
                     if (!CommonUtil.isEmpty(p.getImage())) {
                         String[] imgArr = p.getImage().split(",");
                         StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
-                    }
-                    p.setImage(imgStr.toString());
+                    }*/
                       Map<String, Object> map = BeanUtils.beanToMap(p);
-                    map.put("imageUrl", imgUrlStr.toString());
+                    map.put("imageUrl", StringTool.getImage(p.getImage(),address));
+                    map.put("detailImageUrl", StringTool.getImage(p.getDetailImage(),address));
                     if(StringUtils.isNoneBlank(p.getConvertUnit())){
                         map.put("convertUnitName", iUnitMapper.selectByPrimaryKey(p.getConvertUnit()).getName());
                     }

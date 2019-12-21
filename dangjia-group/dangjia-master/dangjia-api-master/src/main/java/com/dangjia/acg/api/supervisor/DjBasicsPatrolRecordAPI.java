@@ -31,7 +31,7 @@ public interface DjBasicsPatrolRecordAPI {
 
     @PostMapping("app/supervisor/queryDjBasicsPatrolRecord")
     @ApiOperation(value = "查询巡检记录", notes = "查询巡检记录")
-    ServerResponse queryDjBasicsPatrolRecord(@RequestParam("request") HttpServletRequest request,@RequestParam("userToken") String userToken , @RequestParam("pageDTO") PageDTO pageDTO);
+    ServerResponse queryDjBasicsPatrolRecord(@RequestParam("request") HttpServletRequest request,@RequestParam("userToken") String userToken  ,@RequestParam("pageDTO") PageDTO pageDTO);
 
 
     @PostMapping("web/supervisor/queryWorkerRewardPunishRecord")

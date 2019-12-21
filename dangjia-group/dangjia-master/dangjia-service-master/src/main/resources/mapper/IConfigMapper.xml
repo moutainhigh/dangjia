@@ -16,4 +16,20 @@
             AND param_desc LIKE concat(concat("%",#{paramDesc}),"%")
         </if>
     </select>
+
+    <!--查询退款历史记录-->
+    <select id="selectConfigInfoByParamKey" resultType="com.dangjia.acg.model.Config">
+         SELECT
+            id,
+            param_key paramKey,
+            param_value paramValue,
+            param_desc paramDesc,
+            app_type appType,
+            create_date createDate,
+            modify_date modifyDate
+        from dj_config
+        where param_key=#{paramKey}
+        and data_status=0
+        LIMIT 1
+     </select>
 </mapper>
