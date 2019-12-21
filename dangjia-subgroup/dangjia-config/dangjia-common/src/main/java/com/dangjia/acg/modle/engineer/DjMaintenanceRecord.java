@@ -30,6 +30,11 @@ public class DjMaintenanceRecord extends BaseEntity {
     @ApiModelProperty("管家处理时间")
     private Date stewardProcessingTime;
 
+    @Column(name = " payment_date")
+    @Desc(value = "支付时间")
+    @ApiModelProperty("支付时间")
+    private Date paymentDate;
+
     @Column(name = "steward_order_time")
     @Desc(value = "管家接单时间")
     @ApiModelProperty("管家接单时间")
@@ -91,9 +96,14 @@ public class DjMaintenanceRecord extends BaseEntity {
     private Integer stewardState;
 
     @Column(name = "since_purchase_amount")
+    @Desc(value = "维保金额")
+    @ApiModelProperty("维保金额")
+    private Double sincePurchaseAmount;
+
+    @Column(name = "enough_amount")
     @Desc(value = "自购金额")
     @ApiModelProperty("自购金额")
-    private Double sincePurchaseAmount;
+    private Double enoughAmount;
 
     @Column(name = "remark")
     @Desc(value = "自购商品备注")

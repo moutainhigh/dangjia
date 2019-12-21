@@ -48,4 +48,8 @@ public interface DjMaintenanceRecordAPI {
                                          @RequestParam("id") String id,
                                          @RequestParam("handleType")  Integer handleType);
 
+
+    @PostMapping(value = "app/engineer/queryDimensionRecord")
+    @ApiOperation(value = "查询维保责任记录", notes = "查询维保责任记录")
+    ServerResponse queryDimensionRecord(@RequestParam("responsiblePartyId") String responsiblePartyId);
 }

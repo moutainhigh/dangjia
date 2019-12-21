@@ -57,5 +57,10 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
                 ,serviceRemark,userId,id,handleType);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse queryDimensionRecord(String responsiblePartyId) {
+        return djMaintenanceRecordService.queryDimensionRecord(responsiblePartyId);
+    }
 
 }
