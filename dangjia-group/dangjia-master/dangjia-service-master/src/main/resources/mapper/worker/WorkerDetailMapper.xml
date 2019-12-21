@@ -155,7 +155,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <!--查询有记录的历史月 -->
     <select id="getHistoryMonth" resultType="java.util.Map">
         select
-            DATE_FORMAT(d.create_date, '%Y-%m') month,
+           DATE_FORMAT(d.create_date, '%m月') month,
            sum(money) money
         from
 			dj_worker_worker_detail as d
