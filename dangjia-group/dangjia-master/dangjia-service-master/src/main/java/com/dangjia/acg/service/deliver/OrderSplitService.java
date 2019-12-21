@@ -3,6 +3,7 @@ package com.dangjia.acg.service.deliver;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.data.ForMasterAPI;
+import com.dangjia.acg.api.sup.SupplierProductAPI;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
@@ -77,6 +78,10 @@ public class OrderSplitService {
     private IComplainMapper complainMapper;
     @Autowired
     private ConfigMessageService configMessageService;
+    @Autowired
+    private SupplierProductAPI supplierProductAPI;
+
+
 
     /**
      * 修改 供应商结算状态
@@ -461,6 +466,10 @@ public class OrderSplitService {
                 if(isAdd) {
                     v.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
                     Map map = BeanUtils.beanToMap(v);
+                    ServerResponse serverResponse = supplierProductAPI.supplierList(v.getCityId(),v.getProductId());
+                    if(serverResponse.isSuccess()){
+                        map.put("supplierList",serverResponse.getResultObj());
+                    }
                     List<String> supplierId = splitDeliverMapper.getSupplierGoodsId(v.getHouseId(), v.getProductSn());
                     if (supplierId.size() > 0) {
                         map.put(SplitDeliver.SUPPLIER_ID, supplierId.get(0));
