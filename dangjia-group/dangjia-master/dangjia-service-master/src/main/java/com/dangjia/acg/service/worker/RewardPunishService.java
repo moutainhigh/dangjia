@@ -460,6 +460,8 @@ public class RewardPunishService {
                     {
                         rewardPunishRecordDetailDTO.setHead(address+rewardPunishRecordDetailDTO.getHead());
                     }
+                    rewardPunishRecordDetailDTO.setImagesUrl(StringTool.getImage(rewardPunishRecordDetailDTO.getImages(),address).split(","));//图片数组
+
                     rewardPunishRecordListDTO.setRewardPunishRecordDetailDTO(rewardPunishRecordDetailDTO);
                 }
 

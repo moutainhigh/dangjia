@@ -13,4 +13,6 @@ public class RewardPunishRecordDetailDTO {
     private String content;//奖罚说明
     private String createDate;//奖罚创建时间
     private String operatorName;//督导名称
+    private String images;
+    private String[] imagesUrl;
 }

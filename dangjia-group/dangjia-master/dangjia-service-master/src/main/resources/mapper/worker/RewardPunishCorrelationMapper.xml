@@ -114,7 +114,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         IFNULL(rpc.name,'') as punishName,
         IFNULL(rpc.content,'') as content,
         IFNULL(rpr.create_date,'') as createDate,
-        IFNULL(dmr.name,'') as operatorName
+        IFNULL(dmr.name,'') as operatorName,
+        IFNULL(rpr.images,'') as images
         from
         dj_worker_reward_punish_correlation   rpc inner join dj_worker_reward_punish_record rpr
         on rpr.reward_punish_correlation_id=rpc.id inner join dj_member dm on dm.id=rpr.member_id
