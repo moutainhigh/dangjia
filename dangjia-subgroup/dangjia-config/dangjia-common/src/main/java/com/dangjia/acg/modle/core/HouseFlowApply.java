@@ -10,6 +10,7 @@ import lombok.experimental.FieldNameConstants;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -112,5 +113,10 @@ public class HouseFlowApply extends BaseEntity {
 	@Desc(value = "0-未读  1-已读")
 	@ApiModelProperty("0-未读  1-已读")
 	private Integer isReadType;
+
+	@Transient
+	@Desc(value = "处理状态.0:待处理。1.驳回。2.接受。")
+	@ApiModelProperty("处理状态.0:待处理。1.驳回。2.接受。")
+	private Integer status;
 
 }

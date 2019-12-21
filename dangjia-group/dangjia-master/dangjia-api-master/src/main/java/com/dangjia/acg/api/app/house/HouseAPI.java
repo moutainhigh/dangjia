@@ -294,4 +294,24 @@ public interface HouseAPI {
     ServerResponse getHouseChoiceCases(@RequestParam("id") String id);
 
 
+    /**
+     * 获取验收动态
+     *
+     * @param houseId
+     * @return
+     */
+    @PostMapping("app/house/house/queryAcceptanceDynamic")
+    @ApiOperation(value = "获取验收动态", notes = "获取验收动态")
+    ServerResponse queryAcceptanceDynamic(@RequestParam("pageDTO") PageDTO pageDTO,
+                                          @RequestParam("houseId") String houseId);
+
+    /**
+     * 查询申请投诉中
+     *
+     * @param houseFlowApplyId
+     * @return
+     */
+    @PostMapping("app/house/house/queryApplyComplaints")
+    @ApiOperation(value = "查询申请投诉", notes = "查询申请投诉")
+    ServerResponse queryApplyComplaints(@RequestParam("houseFlowApplyId") String houseFlowApplyId);
 }

@@ -175,7 +175,7 @@ public class DjMaintenanceRecordService {
                         djMaintenanceRecordResponsiblePartyMapper.selectByExample(example);
                 djMaintenanceRecordResponsibleParties.forEach(djMaintenanceRecordResponsibleParty -> {
                     //扣除金额
-                    Double amountDeducted=(djMaintenanceRecordResponsibleParty.getProportion()/100)*djMaintenanceRecord1.getSincePurchaseAmount();
+                    Double amountDeducted=(djMaintenanceRecordResponsibleParty.getProportion()/100)*(djMaintenanceRecord1.getSincePurchaseAmount()+djMaintenanceRecord1.getEnoughAmount());
                     if(djMaintenanceRecordResponsibleParty.getResponsiblePartyType()==2){
                         AccountFlowRecord accountFlowRecord=new AccountFlowRecord();
                         accountFlowRecord.setState(3);

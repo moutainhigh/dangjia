@@ -1,5 +1,6 @@
 package com.dangjia.acg.mapper.core;
 
+import com.dangjia.acg.dto.core.AcceptanceDynamicDTO;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.worker.Evaluate;
 import org.apache.ibatis.annotations.Param;
@@ -98,5 +99,11 @@ public interface IHouseFlowApplyMapper extends Mapper<HouseFlowApply> {
                                    @Param("workerType") Integer workerType);
 
     void updateIsReadType(Map<String,Object> map);
+
+    List<HouseFlowApply> queryAcceptanceDynamic(@Param("houseId") String houseId);
+
+    HouseFlowApply querySupervisorAcceptanceDynamic(@Param("houseFlowId") String houseFlowId);
+
+    HouseFlowApply queryApplyComplaints(@Param("houseFlowApplyId") String houseFlowApplyId);
 
 }
