@@ -1238,6 +1238,8 @@ public class OrderService {
             BudgetOrderDTO orderDiffInfo=orderMapper.getOrderInfoByHouseId(houseId,"4","2");//查询待补差价的订单
             if(orderDiffInfo==null||StringUtils.isEmpty(orderDiffInfo.getOrderId())){
                 diffOrder=false;
+
+            }else{
                 returnMap.put("diffOrderId",orderDiffInfo.getOrderId());//补差价订单ID
             }
             BudgetOrderDTO orderInfo=orderMapper.getOrderInfoByHouseId(houseId,"1","3");//查询原订单信息
@@ -1302,27 +1304,33 @@ public class OrderService {
         }
         //转换成符合条件的退款单
         String productStr=getAccordWithProduct(orderItemDTOList);
+        String repairMendOrderId="";
         if(productStr!=null&& org.apache.commons.lang3.StringUtils.isNotBlank(productStr)){
             //自动生成退款单，且退款同意
-            repairMendOrderService.saveRefundInfoRecord(house.getCityId(),house.getHouseId(),orderId,productStr,roomCharge);
+            repairMendOrderId=  repairMendOrderService.saveRefundInfoRecord(house.getCityId(),houseId,orderId,productStr,roomCharge);
+            //3.将量房费用给到设计师
+            if(roomCharge.doubleValue()>0){//如果有量房费用，则需给设计师增加对应的量房工钱
+                repairMendOrderService.settleMemberMoney(houseId,roomCharge);
+            }
+            //4.修改补差价订单状态为已取消
+            Order order=orderMapper.selectByPrimaryKey(diffOrderId);
+            if(order.getOrderSource()==4){
+                order.setOrderStatus("5");
+                order.setModifyDate(new Date());
+                orderMapper.updateByPrimaryKeySelective(order);
+                //5.查询支付差价的订单，将其状态改为已取消
+                Example example=new Example(BusinessOrder.class);
+                example.createCriteria().andEqualTo(BusinessOrder.NUMBER,order.getBusinessOrderNumber());
+                BusinessOrder businessOrder=businessOrderMapper.selectOneByExample(example);
+                businessOrder.setState(4);//已取消
+                businessOrder.setModifyDate(new Date());
+                businessOrderMapper.updateByPrimaryKeySelective(businessOrder);
+            }
+        }else{
+            return ServerResponse.createByErrorMessage("未找到符合条件的退款信息");
         }
-        //3.将量房费用给到设计师
-        if(roomCharge.doubleValue()>0){//如果有量房费用，则需给设计师增加对应的量房工钱
-            repairMendOrderService.settleMemberMoney(houseId,roomCharge);
-        }
-        //4.修改补差价订单状态为已取消
-        Order order=orderMapper.selectByPrimaryKey(diffOrderId);
-        order.setOrderStatus("5");
-        order.setModifyDate(new Date());
-        orderMapper.updateByPrimaryKeySelective(order);
-        //5.查询支付差价的订单，将其状态改为已取消
-        Example example=new Example(BusinessOrder.class);
-        example.createCriteria().andEqualTo(BusinessOrder.NUMBER,order.getBusinessOrderNumber());
-        BusinessOrder businessOrder=businessOrderMapper.selectOneByExample(example);
-        businessOrder.setState(5);//已取消
-        businessOrder.setModifyDate(new Date());
-        businessOrderMapper.updateByPrimaryKeySelective(businessOrder);
-        return ServerResponse.createBySuccessMessage("退款成功");
+
+        return ServerResponse.createBySuccess("退款成功",repairMendOrderId);
     }
 
     private String getAccordWithProduct(List<BudgetOrderItemDTO> orderItemDTOList){
@@ -1340,7 +1348,7 @@ public class OrderService {
                 //查询增值商品信息
                 String addedProductIds=iMasterDeliverOrderAddedProductMapper.getAddedPrdouctStr(orderItemId);
                 //退款订单信息
-                jsonObject.put("returnCount",product.getShopCount());//退订单的面积
+                jsonObject.put("returnCount",product.getSurplusCount());//退订单的可退面积
                 jsonObject.put("productId",productId);
                 jsonObject.put("orderItemId",orderItemId);
                 jsonObject.put("addedProductIds",addedProductIds); //增值订单ID，多个用逗号分隔

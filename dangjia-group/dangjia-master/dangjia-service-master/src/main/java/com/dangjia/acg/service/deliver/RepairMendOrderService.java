@@ -91,7 +91,7 @@ public class RepairMendOrderService {
     private IHouseFlowMapper iHouseFlowMapper;
 
     //生成退款的流水记录(直接退款的）
-    public ServerResponse saveRefundInfoRecord(String cityId,String houseId,String orderId,String orderProductAttr,BigDecimal roomCharge){
+    public String saveRefundInfoRecord(String cityId,String houseId,String orderId,String orderProductAttr,BigDecimal roomCharge){
 
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         //查询房子信息，获取房子对应的楼层
@@ -104,13 +104,12 @@ public class RepairMendOrderService {
         }
         House house=iHouseMapper.selectByPrimaryKey(houseId);
         String memberId=house.getMemberId();
-        MendOrder mendOrder;
+        MendOrder mendOrder = new MendOrder();;
         Example example;
         if(orderId!=null&&StringUtils.isNotBlank(orderId)) {
                 Order order=iOrderMapper.selectByPrimaryKey(orderId);
                 String storefrontId = order.getStorefontId();
                 example = new Example(MendOrder.class);
-                mendOrder = new MendOrder();
                 mendOrder.setNumber("DJZX" + 40000 + iMendOrderMapper.selectCountByExample(example));//订单号
                 mendOrder.setHouseId(houseId);
                 mendOrder.setApplyMemberId(memberId);
@@ -135,8 +134,11 @@ public class RepairMendOrderService {
                     String addedProductIds=(String)productObj.get("addedProductIds");//增值商品ID，多个用逗号分隔
                     //修改订单中的退货量为当前退货的量
                     OrderItem orderItem=iOrderItemMapper.selectByPrimaryKey(orderItemId);
+                    if(orderItem.getReturnCount()==null){
+                        orderItem.setReturnCount(Double.valueOf(0L));
+                    }
                     if(MathUtil.sub(MathUtil.sub(orderItem.getShopCount(),orderItem.getReturnCount()),returnCount)<0){
-                        return ServerResponse.createByErrorMessage("退货量大于可退货量，不能退。");
+                         returnCount=MathUtil.sub(orderItem.getShopCount(),orderItem.getReturnCount());
                     }
                     orderItem.setReturnCount(MathUtil.add(orderItem.getReturnCount(),returnCount));
                     iOrderItemMapper.updateByPrimaryKeySelective(orderItem);
@@ -195,7 +197,7 @@ public class RepairMendOrderService {
 
                 agreeRepairApplication(mendOrder.getId(),order.getOrderSource(),memberId);//自动同意退款申诉
         }
-        return  ServerResponse.createBySuccessMessage("提交成功");
+        return  mendOrder.getId();
     }
     /**
      * //添加进度信息
@@ -283,9 +285,6 @@ public class RepairMendOrderService {
      */
     public ServerResponse agreeRepairApplication(String repairMendOrderId,Integer orderSource,String memberId){
         MendOrder mendOrder=iMendOrderMapper.selectByPrimaryKey(repairMendOrderId);//退款订单详情查询
-        if(!("1".equals(mendOrder.getState())||"2".equals(mendOrder.getState()))){
-            return ServerResponse.createByErrorMessage("此单已处理完成，请勿重复操作");
-        }
         //修改退款申诉的状态
         mendOrder.setId(repairMendOrderId);
         mendOrder.setState(3);
@@ -295,6 +294,7 @@ public class RepairMendOrderService {
         if(orderSource==1){
             //增加退款单流水(退原订单)
             updateOrderProgressInfo(mendOrder.getId(),"2","REFUND_AFTER_SALES","RA_006",memberId);//平台同意退款
+            updateOrderProgressInfo(mendOrder.getId(),"2","REFUND_AFTER_SALES","RA_008",memberId);//平台同意退款
         }
 
         settleMendOrder(repairMendOrderId,orderSource);//退钱给业主
@@ -320,10 +320,13 @@ public class RepairMendOrderService {
                             .andEqualTo(Warehouse.PRODUCT_ID, mendMateriel.getProductId())
                             .andEqualTo(Warehouse.HOUSE_ID, mendOrder.getHouseId());
                     Warehouse warehouse = iWarehouseMapper.selectOneByExample(example);
-                    warehouse.setBackCount(warehouse.getBackCount() + mendMateriel.getShopCount());//更新退数量
-                    warehouse.setBackTime(warehouse.getBackTime() + 1);//更新退次数
-                    warehouse.setOwnerBack(warehouse.getOwnerBack() == null ? mendMateriel.getShopCount() : (warehouse.getOwnerBack() + mendMateriel.getShopCount())); //购买数量+业主退数量
-                    iWarehouseMapper.updateByPrimaryKeySelective(warehouse);
+                    if(warehouse!=null&&StringUtils.isNotBlank(warehouse.getId())){
+                        warehouse.setBackCount(warehouse.getBackCount() + mendMateriel.getShopCount());//更新退数量
+                        warehouse.setBackTime(warehouse.getBackTime() + 1);//更新退次数
+                        warehouse.setOwnerBack(warehouse.getOwnerBack() == null ? mendMateriel.getShopCount() : (warehouse.getOwnerBack() + mendMateriel.getShopCount())); //购买数量+业主退数量
+                        iWarehouseMapper.updateByPrimaryKeySelective(warehouse);
+                    }
+
                 }
 
                 WarehouseDetail warehouseDetail = new WarehouseDetail();
@@ -378,7 +381,11 @@ public class RepairMendOrderService {
 
            //查询设计师的信息
             HouseFlow houseFlow=iHouseFlowMapper.getByWorkerTypeId(houseId,"1");
-            /*退钱给业主*/
+            if(houseFlow==null||StringUtils.isBlank(houseFlow.getId())){
+                logger.info("未找到对应的工匠信息:"+houseId);
+                return ServerResponse.createByErrorMessage("未找到对应的工匠信息");
+            }
+            /*退钱给工匠,设计师*/
             Member member = iMemberMapper.selectByPrimaryKey(houseFlow.getWorkerId());
             BigDecimal haveMoney = member.getHaveMoney().add(roomCharge);
             BigDecimal surplusMoney = member.getSurplusMoney().add(roomCharge);

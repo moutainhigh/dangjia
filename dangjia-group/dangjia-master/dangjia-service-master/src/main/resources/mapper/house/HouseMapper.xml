@@ -99,7 +99,7 @@
         gr.operatorId,
         IFNULL(ma.address,CONCAT(
         house.residential,
-        IFNULL(hhouse.building, '*'),
+        IFNULL(house.building, '*'),
         '栋',
         IFNULL(CONCAT(house.unit, '单元'),'' ),
         IFNULL(house.number, '*'),
@@ -109,7 +109,7 @@
         FROM
         dj_house house
         INNER JOIN dj_member member ON member.id = house.member_id
-        LEFT JOIN dj_member_address ma on house.id=ma.houseId
+        LEFT JOIN dj_member_address ma on house.id=ma.house_id
         LEFT JOIN (
         SELECT
         wk.house_id,
@@ -655,7 +655,7 @@
         FROM
         dj_house h
         INNER JOIN dj_member m ON h.member_id = m.id
-        INNER JOIN dj_member_address ma on h.id=ma.house_id
+        LEFT JOIN dj_member_address ma on h.id=ma.house_id
         LEFT JOIN (
         SELECT
         wk.house_id,
