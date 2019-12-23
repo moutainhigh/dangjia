@@ -1,5 +1,6 @@
 package com.dangjia.acg.mapper.delivery;
 
+import com.dangjia.acg.dto.deliver.OrderSplitItemDTO;
 import com.dangjia.acg.dto.deliver.SplitReportDeliverOrderDTO;
 import com.dangjia.acg.dto.deliver.SplitReportDeliverOrderItemDTO;
 import com.dangjia.acg.dto.deliver.SplitReportSupplierDTO;
@@ -45,5 +46,13 @@ public interface IOrderSplitItemMapper extends Mapper<OrderSplitItem> {
     List<SplitReportDeliverOrderItemDTO> getSplitReportGoodsOrderItems(@Param("houseId")String houseId);
     List<SplitReportSupplierDTO> getSplitReportGoodsSuppliers(@Param("houseId")String houseId,@Param("productSn")String productSn);
     /********************查看统计 结束**********************/
+
+    /**
+     * 查当前房子下对应工匠的要货记录
+     * @param houseId
+     * @param workerId
+     * @return
+     */
+    List<OrderSplitItemDTO> getOrderItemListByhouseMemberId(@Param("houseId")String houseId,@Param("workerId") String workerId,@Param("searchKey") String searchKey);
 
 }

@@ -5,12 +5,15 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.actuary.BudgetWorkerAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.deliver.OrderSplitItemDTO;
 import com.dangjia.acg.dto.matter.TechnologyRecordDTO;
 import com.dangjia.acg.dto.matter.WorkNodeDTO;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
+import com.dangjia.acg.mapper.delivery.IOrderSplitItemMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
@@ -24,6 +27,10 @@ import com.dangjia.acg.modle.matter.TechnologyRecord;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.MendWorker;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.dangjia.acg.service.deliver.OrderSplitItemService;
+import com.github.pagehelper.PageInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.util.StringUtil;
@@ -39,6 +46,8 @@ import java.util.Map;
  */
 @Service
 public class TechnologyRecordService {
+
+    protected static final Logger logger = LoggerFactory.getLogger(TechnologyRecordService.class);
     @Autowired
     private ITechnologyRecordMapper technologyRecordMapper;
     @Autowired
@@ -59,6 +68,8 @@ public class TechnologyRecordService {
     private IMendWorkerMapper mendWorkerMapper;
     @Autowired
     private ConfigUtil configUtil;
+    @Autowired
+    private OrderSplitItemService orderSplitItemService;
 
 
     /**
@@ -166,6 +177,8 @@ public class TechnologyRecordService {
             }
         } else {//工匠提交的验收节点
             //含工艺人工商品
+
+
             jsonArray = budgetWorkerAPI.getWorkerGoodsList(house.getCityId(), houseFlow.getHouseId(), houseFlowId);
             /* 补人工的节点也加入进来 */
             List<MendWorker> mendWorkerList = mendWorkerMapper.mendWorkerList(house.getId(), worker.getWorkerTypeId());
@@ -257,8 +270,8 @@ public class TechnologyRecordService {
     /**
      * 查询验收节点
      * 供管家选择验收
-     *
-     * @see workNodeList(String userToken, String houseFlowId, Integer applyType)} constraint instead
+     *workNodeList( userToken,  houseFlowId, Integer applyType)} constraint instead
+     * @see
      * @deprecated use the standard {@link com.dangjia.acg.service.matter.TechnologyRecordService
      */
     @Deprecated
@@ -314,5 +327,20 @@ public class TechnologyRecordService {
         Warehouse warehouse = warehouseMapper.getByProductId(productId, houseId);
         return ServerResponse.createBySuccess("查询成功", warehouse);
     }
+    /**
+     * 查询当前工匠在当前房子上的所有已购买材料
+     * @param houseId 房子ID
+     * @param workerId 工匠ID
+     * @return
+     */
+    public ServerResponse getAllProductListByhouseMemberId(PageDTO pageDTO, String houseId, String workerId, String searchKey){
+        try{
+            PageInfo orderItemList=orderSplitItemService.getOrderItemListByhouseMemberId(pageDTO,houseId,workerId,searchKey);//查询当前工匠已购买的所有材料
+            return ServerResponse.createBySuccess("查询成功",orderItemList);
+        }catch (Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
 
+    }
 }
