@@ -18,8 +18,6 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
-import java.math.BigDecimal;
-import java.util.Date;
 import java.util.Map;
 
 import static com.dangjia.acg.common.util.AES.decrypt;
@@ -44,7 +42,7 @@ public class ReturnAspect {
      */
     @Before("aspect()")
     public void before(JoinPoint joinPoint) {
-//        Object[] args = joinPoint.getArgs();// 获得目标方法的参数
+        Object[] args = joinPoint.getArgs();// 获得目标方法的参数
 //        String name = joinPoint.getSignature().getName();// 获得目标方法名
 //        log.info("<=============" + name + "方法--AOP 前置通知=============>");
 //        if (args != null && args.length > 0
@@ -87,11 +85,8 @@ public class ReturnAspect {
                 if(args[i] instanceof HttpServletRequest){
                     ParameterRequestWrapper wrapper = new ParameterRequestWrapper(request, json);
                     args[i]=wrapper;
-                }else if (args[i] instanceof BigDecimal ||args[i] instanceof String || args[i] instanceof Date || args[i] instanceof Boolean || args[i] instanceof Byte || args[i] instanceof Short || args[i] instanceof Integer || args[i] instanceof Long || args[i] instanceof Float
-                        || args[i] instanceof Double || args[i] instanceof Enum) {
-                    if(json.get(argNames[i])!=null){
-                        args[i]=json.get(argNames[i]);
-                    }
+                }else if(json.get(argNames[i])!=null){
+                    args[i]=json.get(argNames[i]);
                 }else{
                     if(args[i]!=null) {
                         args[i] = json.toJavaObject(args[i].getClass());
@@ -100,6 +95,7 @@ public class ReturnAspect {
             }
             return args;
         } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
     }

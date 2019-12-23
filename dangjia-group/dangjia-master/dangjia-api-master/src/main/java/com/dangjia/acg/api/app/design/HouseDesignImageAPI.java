@@ -81,7 +81,7 @@ public interface HouseDesignImageAPI {
     @ApiOperation(value = "设计师任务列表", notes = "设计师任务列表")
     ServerResponse getDesignList(@RequestParam("request") HttpServletRequest request,
                                  @RequestParam("pageDTO") PageDTO pageDTO,
-                                 @RequestParam("designerType") int designerType,
+                                 @RequestParam("designerType") Integer designerType,
                                  @RequestParam("searchKey") String searchKey,
                                  @RequestParam("workerKey") String workerKey,
                                  @RequestParam("userId") String userId);

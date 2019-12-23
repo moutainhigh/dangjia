@@ -9,7 +9,6 @@ import com.dangjia.acg.service.design.DesignDataService;
 import com.dangjia.acg.service.design.DesignerOperationService;
 import com.dangjia.acg.service.design.QuantityRoomService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -38,7 +37,7 @@ public class HouseDesignImageController implements HouseDesignImageAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getDesignList(HttpServletRequest request, PageDTO pageDTO, int designerType,
+    public ServerResponse getDesignList(HttpServletRequest request, PageDTO pageDTO, Integer designerType,
                                         String searchKey, String workerKey, String userId) {
         return designDataService.getDesignList(request, pageDTO, designerType, searchKey, workerKey, userId);
     }
