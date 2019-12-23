@@ -731,8 +731,8 @@ public class DjSupplierServices {
             List<AccountFlowRecordDTO> accountFlowRecordDTOS = iStoreAccountFlowRecordMapper.accountFlowRecordDTOs(djSupplier.getId(),depositeState,beginDate,endDate);
             if(accountFlowRecordDTOS.size()<=0)
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
-            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-            accountFlowRecordDTOS.forEach(accountFlowRecordDTO -> {
+                String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+                accountFlowRecordDTOS.forEach(accountFlowRecordDTO -> {
                 accountFlowRecordDTO.setImage(imageAddress+accountFlowRecordDTO.getImage());
             });
             PageInfo pageResult = new PageInfo(accountFlowRecordDTOS);

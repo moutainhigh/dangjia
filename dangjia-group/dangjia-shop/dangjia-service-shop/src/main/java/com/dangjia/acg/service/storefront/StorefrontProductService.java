@@ -17,7 +17,6 @@ import com.dangjia.acg.mapper.storefront.IStorefrontMapper;
 import com.dangjia.acg.mapper.storefront.IStorefrontProductAddedRelationMapper;
 import com.dangjia.acg.mapper.storefront.IStorefrontProductMapper;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
-import com.dangjia.acg.modle.product.ProductAddedRelation;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.modle.supplier.DjAdjustRecord;
@@ -33,7 +32,6 @@ import tk.mybatis.mapper.entity.Example;
 import tk.mybatis.mapper.util.StringUtil;
 
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
