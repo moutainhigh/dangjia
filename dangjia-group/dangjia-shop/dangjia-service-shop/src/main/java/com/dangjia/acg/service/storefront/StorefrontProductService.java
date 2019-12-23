@@ -510,7 +510,7 @@ public class StorefrontProductService {
                 storefrontProduct.setCreateDate(null);
                 istorefrontProductMapper.updateByExampleSelective(storefrontProduct, example);
             }
-            return ServerResponse.createBySuccessMessage("批量设置成功");
+            return ServerResponse.createBySuccessMessage("上架成功");
         } catch (Exception e) {
             logger.error("设置商品批量上架异常：", e);
             return ServerResponse.createByErrorMessage("设置商品批量上架异常");
