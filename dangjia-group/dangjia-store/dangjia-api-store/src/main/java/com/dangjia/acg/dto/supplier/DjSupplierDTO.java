@@ -62,4 +62,6 @@ public class DjSupplierDTO  {
     private String cityId;
 
     private String contractState;
+
+    private Integer listSize;
 }

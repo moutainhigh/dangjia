@@ -262,34 +262,30 @@ public class DjSupplierServices {
 
     public ServerResponse queryDjSupplierByShopIdPage(PageDTO pageDTO, String keyWord, String applicationStatus, String userId, String cityId) {
         try {
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+
             if (StringUtils.isEmpty(userId)) {
                 return ServerResponse.createByErrorMessage("用户ID不能为空!");
             }
-
             Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
             if (storefront == null) {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
-
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<DjSupplierDTO> list = djSupplierMapper.queryDjSupplierByShopID(keyWord, applicationStatus, storefront.getId());
             if (list.size() <= 0) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
-            List<Map<String, Object>> djSupplierDTOList = new ArrayList<Map<String, Object>>();
             for (DjSupplierDTO djSupplierDTO : list) {
                 String contract = djSupplierDTO.getContract();
-                if (StringUtil.isEmpty(contract))
+                if (StringUtil.isEmpty(contract)) {
                     djSupplierDTO.setContractState("0");
-                else
+                } else {
                     djSupplierDTO.setContractState("1");
-
-                Map<String, Object> resMap = BeanUtils.beanToMap(djSupplierDTO);
+                }
                 Integer i = djSupApplicationProductService.queryHaveGoodsSize(djSupplierDTO.getSupId(), djSupplierDTO.getShopId(), "0");
-                resMap.put("listSize", i);//是否有供应商的供应商品
-                djSupplierDTOList.add(resMap);
+                djSupplierDTO.setListSize(i);//是否有供应商的供应商品
             }
-            PageInfo pageResult = new PageInfo(djSupplierDTOList);
+            PageInfo pageResult = new PageInfo(list);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();
