@@ -28,7 +28,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         total_discount_price	as 	totalDiscountPrice,
         total_stevedorage_cost	as 	totalStevedorageCost,
         total_transportation_cost	as 	totalTransportationCost,
-        order_type	as 	orderType,
         actual_payment_price	as 	actualPaymentPrice,
         is_pay_money	as 	isPayMoney,
         is_show_order	as 	isShowOrder,
