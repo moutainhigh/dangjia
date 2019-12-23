@@ -231,7 +231,7 @@ public interface HouseDesignImageAPI {
      * showdoc
      *
      * @param houseId    必选 string 房子ID
-     * @param type       必选 string 推荐商品类型：0:纯推荐，1:推荐商品支付,设计图这里传0
+     * @param type       必选 int 推荐商品类型：0:纯推荐，1:推荐商品支付,设计图这里传0
      * @param productIds 必选 string  推荐商品ID集合以","分割
      * @return {"res":1000,"msg":{"resultCode":1000,"resultMsg":"成功"} }
      * @catalog 工匠端升级/设计模块/新版设计
@@ -283,10 +283,10 @@ public interface HouseDesignImageAPI {
      * @param building    确认地址必选 string 楼栋
      * @param unit        确认地址必选 string 单元号
      * @param number      确认地址必选 string 房间号
-     * @param square      确认地址必选 string 外框面积
-     * @param buildSquare 确认地址必选 string 建筑面积
+     * @param square      确认地址必选 double 外框面积
+     * @param buildSquare 确认地址必选 double 建筑面积
      * @param images      添加量房必选 string 量房图片","号分割
-     * @param elevator    确认地址必选 string 是否电梯房：0:否，1：是
+     * @param elevator    确认地址必选 int 是否电梯房：0:否，1：是
      * @param floor       确认地址必选 string 楼层
      * @return {"res":1000,"msg":{"resultCode":1000,"resultMsg":"成功"} }
      * @catalog 工匠端升级/设计模块/新版设计

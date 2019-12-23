@@ -822,13 +822,13 @@ public class CraftsmanConstructionService {
                 criteria.andNotEqualTo(MenuConfiguration.TYPE, 2);
             }*/
             //如果已确认过装修信息，则显示量房按钮update fzh 2019/12/14
-            ServerResponse serverResponse = quantityRoomService.isConfirmAddress(house.getId());
+            /*ServerResponse serverResponse = quantityRoomService.isConfirmAddress(house.getId());
             if (serverResponse.getResultObj() != null) {
                 String obj = serverResponse.getResultObj().toString();//0:未确认地址，1：已经确认地址
                 if ("1".equals(obj)) {//如果未确认过地址，则显示确认地址按钮，精算师上传地址
                     criteria.andNotEqualTo(MenuConfiguration.TYPE, 2);
                 }
-            }
+            }*/
             menuCondition(bean, criteria);
             example.orderBy(MenuConfiguration.SORT).asc();
             List<MenuConfiguration> menuConfigurations2 = iMenuConfigurationMapper.selectByExample(example);
