@@ -316,7 +316,7 @@ public class DesignDataService {
      * @param designerType 0：未支付和设计师未抢单，1：带量房，2：平面图，3：施工图，4：完工
      * @param searchKey    业主手机号/房子名称
      */
-    public ServerResponse getDesignList(HttpServletRequest request, PageDTO pageDTO, int designerType,
+    public ServerResponse getDesignList(HttpServletRequest request, PageDTO pageDTO, Integer designerType,
                                         String searchKey,String workerKey,String userId) {
         String userID = request.getParameter(Constants.USERID);
 

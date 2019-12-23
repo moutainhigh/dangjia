@@ -121,7 +121,7 @@
         dj_core_house_worker wk
         LEFT JOIN dj_member gr ON gr.id = wk.worker_id
         WHERE
-        wk.worker_type = 1
+        wk.worker_type = 1 and  wk.work_type in (1,6)
         ORDER BY
         wk.house_id,
         wk.create_date DESC
@@ -154,14 +154,12 @@
             AND house.designer_ok =1
         </if>
         <if test="designerType == 2">
-            AND house.visit_state=1
-            AND ((house.decoration_type !=2
-            AND house.designer_ok in (9,5,6))
-            or (house.decoration_type =2
-            AND house.designer_ok in (1,5,6)))
+            AND house.decoration_type=1
+            AND house.designer_ok in (1,9,5,6)
         </if>
         <if test="designerType == 3">
             AND house.visit_state=1
+            AND house.decoration_type=1
             AND house.designer_ok in (2,7,8)
         </if>
         <if test="designerType == 4">
@@ -667,7 +665,7 @@
         dj_core_house_worker wk
         LEFT JOIN dj_member gr ON gr.id = wk.worker_id
         WHERE
-        wk.worker_type = 2
+        wk.worker_type = 2 and  wk.work_type in (1,6)
         ORDER BY
         wk.house_id,
         wk.create_date DESC
