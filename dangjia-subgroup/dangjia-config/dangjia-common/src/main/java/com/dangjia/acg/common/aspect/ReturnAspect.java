@@ -19,6 +19,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
 
@@ -102,6 +103,7 @@ public class ReturnAspect {
                     }
                 }
             }
+            log.info("<=============解密后：" + Arrays.toString(args) +"=============>");
             return args;
         } catch (Exception e) {
             return null;
