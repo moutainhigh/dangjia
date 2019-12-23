@@ -75,6 +75,8 @@ public class ReturnAspect {
             for (Map.Entry<String, String[]> param : parameterMap.entrySet()) {
                 paramStr.append(param.getKey());
             }
+            log.info("<=============" + request.getMethod() + "方法--AOP 参数通知=============>");
+            log.info("<=============解密前：" + paramStr.toString()+"=============>");
             if(CommonUtil.isEmpty(paramStr.toString())){
                 return null;
             }
@@ -82,6 +84,8 @@ public class ReturnAspect {
             if(CommonUtil.isEmpty(dec)){
                 return null;
             }
+
+            log.info("<=============解密后：" + new String(dec) +"=============>");
             JSONObject json = JSON.parseObject(new String(dec));
             for (int i = 0; i < args.length; i++) {
                 if(args[i] instanceof HttpServletRequest){
