@@ -1,6 +1,5 @@
 package com.dangjia.acg.service.worker;
 
-import com.dangjia.acg.api.MessageAPI;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
@@ -396,11 +395,12 @@ public class WorkerService {
             registerCode = (int) (Math.random() * 9000 + 1000);
         }
         redisClient.put(Constants.SMS_CODE + phone, registerCode);
-        JsmsUtil.SMS(registerCode, phone);
+        String result = JsmsUtil.SMS(registerCode, phone);
         //记录短信发送
         Sms sms = new Sms();
         sms.setCode(String.valueOf(registerCode));
         sms.setMobile(phone);
+        sms.setContent(result);
         smsMapper.insert(sms);
         return ServerResponse.createBySuccessMessage("验证码已发送");
     }

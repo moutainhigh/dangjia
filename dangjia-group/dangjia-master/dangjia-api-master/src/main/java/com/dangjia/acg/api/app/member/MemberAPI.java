@@ -126,8 +126,9 @@ public interface MemberAPI {
      * showdoc
      *
      * @param phone    必选 string 用户名
-     * @param password 必选 string 密码
+     * @param password 必选 string 密码/验证码
      * @param userRole 必选 string 1为业主应用，2为工匠应用，3为销售应用
+     * @param loginMode 必选 string 登陆方式，  1=密码登陆  2=验证码登陆
      * @return {"res":1000,"msg":{"resultObj":{返回参数说明},"resultCode":1000,"resultMsg":"成功"} }
      * @catalog 当家接口文档/用户模块/用户信息
      * @title 用户登录
@@ -193,12 +194,14 @@ public interface MemberAPI {
     @ApiOperation(value = "用户登录", notes = "用户登录")
     ServerResponse login(@RequestParam("phone") String phone,
                          @RequestParam("password") String password,
+                         @RequestParam("loginMode") String loginMode,
                          @RequestParam("userRole") Integer userRole);
 
     /**
      * showdoc
      *
      * @param phone 必选 string 手机号
+     * @param codeType 必选 string 验证码类型，1=登陆   2=注册
      * @return {"res":1000,"msg":{"resultCode":1000,"resultMsg":"成功"} }
      * @catalog 当家接口文档/用户模块/用户信息
      * @title 注册获取验证码
@@ -212,7 +215,9 @@ public interface MemberAPI {
      */
     @RequestMapping(value = "member/registerCode", method = RequestMethod.POST)
     @ApiOperation(value = "注册获取验证码", notes = "注册获取验证码")
-    ServerResponse registerCode(@RequestParam("phone") String phone);
+    ServerResponse registerCode(@RequestParam("phone") String phone,@RequestParam("codeType") String codeType);
+
+
 
     /**
      * showdoc
@@ -222,6 +227,9 @@ public interface MemberAPI {
      * @param smscode        必选 string 验证码Code
      * @param invitationCode 必选 string 邀请码
      * @param userRole       必选 string 1为业主应用，2为工匠应用，3为销售应用
+     * @param workerTypeId       必选 string 选择的注册工种
+     *
+     *
      * @return {"res":1000,"msg":{"resultObj":{返回参数说明},"resultCode":1000,"resultMsg":"成功"} }
      * @catalog 当家接口文档/用户模块/用户信息
      * @title 用户注册

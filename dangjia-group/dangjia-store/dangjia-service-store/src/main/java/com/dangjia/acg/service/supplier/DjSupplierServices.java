@@ -255,7 +255,8 @@ public class DjSupplierServices {
      * @param pageDTO
      * @param keyWord
      * @param applicationStatus
-     * @param userId            *@param cityId
+     * @param userId
+     * @param cityId
      * @return
      */
 
@@ -365,9 +366,9 @@ public class DjSupplierServices {
             int i = djSupApplicationMapper.updateByExampleSelective(djSupApplication, example);
 
             if (i <= 0) {
-                ServerResponse.createByErrorMessage("供应商申请失败");
+                ServerResponse.createByErrorMessage("审核失败");
             }
-            return ServerResponse.createBySuccessMessage("供应商申请成功");
+            return ServerResponse.createBySuccessMessage("审核成功");
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("供应商申请异常");
@@ -401,10 +402,9 @@ public class DjSupplierServices {
             djSupApplication.setCreateDate(null);
             int i = djSupApplicationMapper.updateByExampleSelective(djSupApplication, example);
             if (i <= 0) {
-                return ServerResponse.createByErrorMessage("驳回供应商申请失败");
-
+                return ServerResponse.createByErrorMessage("驳回失败");
             }
-            return ServerResponse.createBySuccessMessage("驳回供应商申请成功");
+            return ServerResponse.createBySuccessMessage("驳回成功");
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("驳回供应商申请异常");
@@ -507,7 +507,7 @@ public class DjSupplierServices {
             accountFlowRecord.setAmountAfterMoney(djSupplier.getTotalAccount());//入账后金额
             accountFlowRecord.setDefinedName("供应商提现：" + surplusMoney);
             iStoreAccountFlowRecordMapper.insert(accountFlowRecord);
-            return ServerResponse.createBySuccessMessage("提交成功待审核中");
+            return ServerResponse.createBySuccessMessage("提现成功待处理");
         } catch (Exception e) {
             logger.info("提交失败",e);
             e.printStackTrace();
@@ -731,8 +731,8 @@ public class DjSupplierServices {
             List<AccountFlowRecordDTO> accountFlowRecordDTOS = iStoreAccountFlowRecordMapper.accountFlowRecordDTOs(djSupplier.getId(),depositeState,beginDate,endDate);
             if(accountFlowRecordDTOS.size()<=0)
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
-            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-            accountFlowRecordDTOS.forEach(accountFlowRecordDTO -> {
+                String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+                accountFlowRecordDTOS.forEach(accountFlowRecordDTO -> {
                 accountFlowRecordDTO.setImage(imageAddress+accountFlowRecordDTO.getImage());
             });
             PageInfo pageResult = new PageInfo(accountFlowRecordDTOS);

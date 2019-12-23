@@ -2,7 +2,6 @@ package com.dangjia.acg.api.supplier;
 
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.dto.supplier.DjSupplierDTO;
 import com.dangjia.acg.dto.supplier.SupplierLikeDTO;
 import com.dangjia.acg.modle.supplier.DjSupplier;
 import io.swagger.annotations.Api;
@@ -12,7 +11,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
 import java.util.List;
 
 /**

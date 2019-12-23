@@ -194,11 +194,12 @@ public class WalletService {
             return ServerResponse.createByErrorMessage("账户冻结，无法提现");
         }
         int paycode = (int) (Math.random() * 9000 + 1000);
-        JsmsUtil.SMS(paycode, member.getMobile());
+        String result =  JsmsUtil.SMS(paycode, member.getMobile());
         //记录短信发送
         Sms sms = new Sms();
         sms.setCode(String.valueOf(paycode));
         sms.setMobile(member.getMobile());
+        sms.setContent(result);
         smsMapper.insert(sms);
         member.setPaycode(paycode);//提现验证码
         memberMapper.updateByPrimaryKeySelective(member);

@@ -3,7 +3,6 @@ package com.dangjia.acg.service.storefront;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.supplier.DjSupplierAPI;
-import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
@@ -19,7 +18,6 @@ import com.dangjia.acg.mapper.storefront.*;
 import com.dangjia.acg.modle.account.AccountFlowRecord;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.other.BankCard;
-import com.dangjia.acg.modle.other.City;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.receipt.Receipt;
 import com.dangjia.acg.modle.repair.MendDeliver;
@@ -29,7 +27,6 @@ import com.dangjia.acg.modle.supplier.DjSupplier;
 import com.dangjia.acg.modle.supplier.DjSupplierPayOrder;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.modle.worker.WithdrawDeposit;
-import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -474,7 +471,7 @@ public class StorefrontService {
             accountFlowRecord.setAmountAfterMoney(storefront.getTotalAccount());//入账后金额
             accountFlowRecord.setDefinedName("店铺提现：" + surplusMoney);//自定义流水说明
             storefrontAccountFlowRecordMapper.insert(accountFlowRecord);
-            return ServerResponse.createBySuccessMessage("提交成功待审核中");
+            return ServerResponse.createBySuccessMessage("提现成功待处理");
         } catch (Exception e) {
             logger.error("店铺提现异常：", e);
             return ServerResponse.createByErrorMessage("店铺提现异常");
