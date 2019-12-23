@@ -42,12 +42,12 @@ public interface HouseFlowApplyAPI {
     void absenteeism();
 
     @PostMapping("app/core/houseFlowApply/checkDetail")
-    @ApiOperation(value = "验收详情", notes = "验收详情")
+    @ApiOperation(value = "业主验收详情", notes = "业主验收详情")
     ServerResponse checkDetail(@RequestParam("userToken") String userToken,
                                @RequestParam("houseFlowApplyId") String houseFlowApplyId);
 
     @PostMapping("app/core/houseFlowApply/stewardCheckDetail")
-    @ApiOperation(value = "管家端验收详情", notes = "管家端验收详情")
+    @ApiOperation(value = "大管家端验收详情", notes = "大管家端验收详情")
     ServerResponse stewardCheckDetail(@RequestParam("userToken") String userToken,
                                       @RequestParam("houseFlowApplyId") String houseFlowApplyId);
 }

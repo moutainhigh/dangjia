@@ -122,7 +122,13 @@ public class WebWithdrawDepositService {
                     rateMoney = srcWithdrawDeposit.getRateMoney();
                 }
                 applyMoney = applyMoney.add(rateMoney);
+                if(worker.getHaveMoney()==null){
+                    worker.setHaveMoney(new BigDecimal(0));
+                }
                 BigDecimal haveMoney = worker.getHaveMoney().add(applyMoney);
+                if(worker.getSurplusMoney()==null){
+                    worker.setSurplusMoney(new BigDecimal(0));
+                }
                 BigDecimal surplusMoney = worker.getSurplusMoney().add(applyMoney);
                 //记录流水
                 WorkerDetail workerDetail = new WorkerDetail();

@@ -1020,8 +1020,8 @@ public class HouseFlowApplyService {
 
 
     /**
-     * 验收详情
-     * 1.30 1.31 共用
+     * 业主验收详情
+     *
      */
     public ServerResponse checkDetail(String houseFlowApplyId) {
         try {
@@ -1112,7 +1112,7 @@ public class HouseFlowApplyService {
     }
 
     /**
-     * 管家端验收详情
+     * 大管家端验收详情
      */
     public ServerResponse stewardCheckDetail(String houseFlowApplyId) {
         try {
@@ -1131,6 +1131,8 @@ public class HouseFlowApplyService {
             houseFlowApplyDTO.setHouseFlowApplyId(houseFlowApplyId);
             houseFlowApplyDTO.setApplyType(houseFlowApply.getApplyType());
             houseFlowApplyDTO.setWorkerTypeId(houseFlowApply.getWorkerTypeId());
+            houseFlowApplyDTO.setMemberCheck(houseFlowApply.getMemberCheck());
+            houseFlowApplyDTO.setSupervisorCheck(houseFlowApply.getSupervisorCheck());
             houseFlowApplyDTO.setWorkerTypeName(workerTypeMapper.selectByPrimaryKey(worker.getWorkerTypeId()).getName());
             Example example = new Example(HouseFlowApplyImage.class);
             example.createCriteria().andEqualTo(HouseFlowApplyImage.HOUSE_FLOW_APPLY_ID, houseFlowApplyId);
