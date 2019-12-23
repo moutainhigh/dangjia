@@ -7,6 +7,7 @@ import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.request.ParameterRequestWrapper;
 import com.dangjia.acg.common.util.CommonUtil;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -93,11 +94,13 @@ public class ReturnAspect {
                 if(args[i] instanceof HttpServletRequest){
                     ParameterRequestWrapper wrapper = new ParameterRequestWrapper(request, json);
                     args[i]=wrapper;
-                }else if(json.get(argNames[i])!=null){
+                }else if(json.get(argNames[i])!=null && !CommonUtil.isEmpty(String.valueOf(json.get(argNames[i])))){
                         args[i]=json.get(argNames[i]);
                 }else{
                     if(args[i]!=null) {
                         args[i] = json.toJavaObject(args[i].getClass());
+                    }else{
+                        args[i]=null;
                     }
                 }
             }
