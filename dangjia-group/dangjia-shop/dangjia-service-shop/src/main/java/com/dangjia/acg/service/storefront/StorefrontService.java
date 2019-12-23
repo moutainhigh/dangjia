@@ -16,6 +16,7 @@ import com.dangjia.acg.dto.supplier.AccountFlowRecordDTO;
 import com.dangjia.acg.dto.supplier.DjSupplierDeliverDTO;
 import com.dangjia.acg.dto.supplier.DjSupplierDeliverDTOList;
 import com.dangjia.acg.mapper.storefront.*;
+import com.dangjia.acg.modle.account.AccountFlowRecord;
 import com.dangjia.acg.modle.deliver.SplitDeliver;
 import com.dangjia.acg.modle.other.BankCard;
 import com.dangjia.acg.modle.other.City;
@@ -37,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 import tk.mybatis.mapper.util.StringUtil;
 
@@ -65,19 +67,19 @@ public class StorefrontService {
     private IStorefrontUserMapper istorefrontUserMapper;
     @Autowired
     private IStorefrontBusinessOrderMapper istorefrontBusinessOrderMapper;
-
     @Autowired
     private DjShopSupplierPayOrderMapper djShopSupplierPayOrderMapper;
-
     @Autowired
     private IStorefrontConfigMapper iStorefrontConfigMapper;
-
     @Autowired
     private IShopReceiptMapper iShopReceiptMapper;
     @Autowired
     private IShopSplitDeliverMapper ishopSplitDeliverMapper;
     @Autowired
     private IShopMendDeliverMapper ishopMendDeliverMapper;
+    @Autowired
+    private IStorefrontAccountFlowRecordMapper storefrontAccountFlowRecordMapper ;
+
     /**
      * 根据用户Id查询店铺信息
      * @param userId
@@ -427,9 +429,10 @@ public class StorefrontService {
      * @param payPassword
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse operationStorefrontReflect(String userId, String cityId, String bankCard, Double surplusMoney, String payPassword) {
         try {
-
+            AccountFlowRecord accountFlowRecord = new AccountFlowRecord();
             Storefront storefront = storefrontService.queryStorefrontByUserID(userId, cityId);
             if (storefront == null) {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
@@ -455,16 +458,26 @@ public class StorefrontService {
             BankCard bankCard1 = istorefrontWithdrawDepositMapper.queryBankCard(bankCard, mainUser.getId());
             withdrawDeposit.setBankName(bankCard1.getBankName());
             withdrawDeposit.setDataStatus(0);//数据状态 0=正常，1=删除
-            withdrawDeposit.setSourceId(storefront.getId());
+            withdrawDeposit.setSourceId(storefront.getId());//来源id(供应商/店铺id)
             istorefrontWithdrawDepositMapper.insert(withdrawDeposit);
             //账号金额预扣
             storefront.setTotalAccount(storefront.getTotalAccount()-surplusMoney);
             storefront.setSurplusMoney(storefront.getSurplusMoney()-surplusMoney);
             istorefrontMapper.updateByPrimaryKeySelective(storefront);
+            //生成流水
+            accountFlowRecord.setState(1);//0订单收入,1提现,2自定义增加金额,3自定义减少金额
+            accountFlowRecord.setHouseOrderId(withdrawDeposit.getId());
+            accountFlowRecord.setDefinedAccountId(storefront.getId());//自定义账户流水id
+            accountFlowRecord.setCreateBy(userId);
+            accountFlowRecord.setFlowType("1");//类型:（1店铺，2供应商）
+            accountFlowRecord.setMoney(surplusMoney);//本次金额
+            accountFlowRecord.setAmountAfterMoney(storefront.getTotalAccount());//入账后金额
+            accountFlowRecord.setDefinedName("店铺提现：" + surplusMoney);//自定义流水说明
+            storefrontAccountFlowRecordMapper.insert(accountFlowRecord);
             return ServerResponse.createBySuccessMessage("提交成功待审核中");
         } catch (Exception e) {
-            logger.error("店铺收支记录异常：", e);
-            return ServerResponse.createByErrorMessage("店铺收支记录异常");
+            logger.error("店铺提现异常：", e);
+            return ServerResponse.createByErrorMessage("店铺提现异常");
         }
     }
 
@@ -479,6 +492,7 @@ public class StorefrontService {
      * @param sourceType
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse operationStorefrontRecharge(String userId, String cityId, String payState, Double rechargeAmount, String payPassword, String businessOrderType, Integer sourceType) {
         try {
             //sourceType来源类型 1：供应商 2：店铺
