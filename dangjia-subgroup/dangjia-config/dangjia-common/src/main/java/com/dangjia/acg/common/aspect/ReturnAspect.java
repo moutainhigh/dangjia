@@ -79,6 +79,7 @@ public class ReturnAspect {
             }
             log.info("<=============" + request.getMethod() + "方法--AOP 参数通知=============>");
             log.info("<=============解密前的参数名：" + Arrays.toString(argNames) +"=============>");
+            log.info("<=============解密前的参数类型名：" + Arrays.toString(argClasss) +"=============>");
             log.info("<=============解密前：" + paramStr.toString()+"=============>");
             if(CommonUtil.isEmpty(paramStr.toString())){
                 return null;
@@ -94,7 +95,7 @@ public class ReturnAspect {
                 if(args[i] instanceof HttpServletRequest){
                     ParameterRequestWrapper wrapper = new ParameterRequestWrapper(request, json);
                     args[i]=wrapper;
-                }else if(json.get(argNames[i])!=null && !CommonUtil.isEmpty(String.valueOf(json.get(argNames[i])))){
+                }else if(json.getObject(argNames[i],argClasss[i].getClass())!=null&&!"".equals(json.getObject(argNames[i],argClasss[i].getClass()))){
                         args[i]=json.getObject(argNames[i],argClasss[i].getClass());
                 }else{
                     if(args[i]!=null) {
@@ -107,6 +108,7 @@ public class ReturnAspect {
             log.info("<=============重新设置方法参数后：" + Arrays.toString(args) +"=============>");
             return args;
         } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
     }
