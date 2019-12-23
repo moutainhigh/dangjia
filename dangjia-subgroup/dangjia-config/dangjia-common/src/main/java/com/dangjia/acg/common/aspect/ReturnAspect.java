@@ -68,7 +68,7 @@ public class ReturnAspect {
 
     }
 
-    public Object[] setRequestParameter(String[] argNames ,Object[] args){
+    public Object[] setRequestParameter(Class[] argClasss,String[] argNames ,Object[] args){
         try {
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
                     .getRequest();
@@ -95,10 +95,10 @@ public class ReturnAspect {
                     ParameterRequestWrapper wrapper = new ParameterRequestWrapper(request, json);
                     args[i]=wrapper;
                 }else if(json.get(argNames[i])!=null && !CommonUtil.isEmpty(String.valueOf(json.get(argNames[i])))){
-                        args[i]=json.getObject(argNames[i],args[i].getClass());
+                        args[i]=json.getObject(argNames[i],argClasss[i].getClass());
                 }else{
                     if(args[i]!=null) {
-                        args[i] = json.toJavaObject(args[i].getClass());
+                        args[i] = json.toJavaObject(argClasss[i].getClass());
                     }else{
                         args[i]=null;
                     }
@@ -125,7 +125,8 @@ public class ReturnAspect {
         String name = joinPoint.getSignature().getName();// 获得目标方法名
         Object[] args = joinPoint.getArgs();
         String[] argNames = ((MethodSignature)joinPoint.getSignature()).getParameterNames(); // 参数名
-        args= setRequestParameter(argNames,args);
+        Class[] argClasss = ((MethodSignature)joinPoint.getSignature()).getParameterTypes(); // 参数类型名
+        args= setRequestParameter(argClasss,argNames,args);
         log.info("<=============" + name + "方法--AOP 环绕通知=============>");
         long start = System.currentTimeMillis();
         Object result = null;
