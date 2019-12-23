@@ -95,7 +95,7 @@ public class ReturnAspect {
                 if(args[i] instanceof HttpServletRequest){
                     ParameterRequestWrapper wrapper = new ParameterRequestWrapper(request, json);
                     args[i]=wrapper;
-                }else if(json.getObject(argNames[i],argClasss[i].getClass())!=null&&!"".equals(json.getObject(argNames[i],argClasss[i].getClass()))){
+                }else if(json.get(argNames[i])!=null&&!"".equals(json.getObject(argNames[i],argClasss[i].getClass()))){
                         args[i]=json.getObject(argNames[i],argClasss[i].getClass());
                 }else{
                     if(args[i]!=null) {
@@ -125,19 +125,19 @@ public class ReturnAspect {
     @Around("aspect()")
     public Object around(ProceedingJoinPoint joinPoint) {
         String name = joinPoint.getSignature().getName();// 获得目标方法名
-        Object[] args = joinPoint.getArgs();
-        String[] argNames = ((MethodSignature)joinPoint.getSignature()).getParameterNames(); // 参数名
-        Class[] argClasss = ((MethodSignature)joinPoint.getSignature()).getParameterTypes(); // 参数类型名
-        args= setRequestParameter(argClasss,argNames,args);
+//        Object[] args = joinPoint.getArgs();
+//        String[] argNames = ((MethodSignature)joinPoint.getSignature()).getParameterNames(); // 参数名
+//        Class[] argClasss = ((MethodSignature)joinPoint.getSignature()).getParameterTypes(); // 参数类型名
+//        args= setRequestParameter(argClasss,argNames,args);
         log.info("<=============" + name + "方法--AOP 环绕通知=============>");
         long start = System.currentTimeMillis();
         Object result = null;
         try {
-            if(args!=null){
-                result = joinPoint.proceed(args);
-            }else{
+//            if(args!=null){
+//                result = joinPoint.proceed(args);
+//            }else{
                 result = joinPoint.proceed();
-            }
+//            }
 
             long end = System.currentTimeMillis();
             if (log.isInfoEnabled()) {
