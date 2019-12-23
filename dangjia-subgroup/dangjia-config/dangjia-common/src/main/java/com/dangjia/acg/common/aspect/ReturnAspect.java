@@ -95,7 +95,7 @@ public class ReturnAspect {
                     ParameterRequestWrapper wrapper = new ParameterRequestWrapper(request, json);
                     args[i]=wrapper;
                 }else if(json.get(argNames[i])!=null && !CommonUtil.isEmpty(String.valueOf(json.get(argNames[i])))){
-                        args[i]=json.get(argNames[i]);
+                        args[i]=json.getObject(argNames[i],args[i].getClass());
                 }else{
                     if(args[i]!=null) {
                         args[i] = json.toJavaObject(args[i].getClass());
