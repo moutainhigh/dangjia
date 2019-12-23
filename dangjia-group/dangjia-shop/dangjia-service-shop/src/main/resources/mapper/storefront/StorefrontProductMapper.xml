@@ -190,7 +190,8 @@
         dj_basics_storefront_product bsp
         INNER JOIN dj_basics_product_template bpt ON bsp.prod_template_id = bpt.id
         INNER JOIN dj_basics_goods bg ON bsp.goods_id = bg.id
-        where 1=1 and   bsp.data_status=0 and bsp.storefront_id=#{storefrontId}
+        where 1=1 and bsp.is_shelf_status=1 and   bsp.data_status=0 and bsp.storefront_id=#{storefrontId}
+
     </select>
     <select id="queryStorefrontProductById" resultType="com.dangjia.acg.modle.storefront.StorefrontProduct">
         select
