@@ -73,6 +73,18 @@ public class JsmsUtil {
 		String result =sendSMS(phone,"157269",temp_para);
 		return result;
 	}
+	/**
+	 * 验证码短信(登陆)
+	 * @param code 验证码COde
+	 * @param phone 接收手机号
+	 * @return
+	 */
+	public static String loginSMS(int code, String phone) {
+		Map<String,String> temp_para=new HashMap();
+		temp_para.put("code",String.valueOf(code));
+		String result =sendSMS(phone,"157269",temp_para);
+		return result;
+	}
 
 	public static String sendTempSMS(String phone,String mid,String residential,String building,String unit,String number) {
 		Map<String,String> temp_para=new HashMap();

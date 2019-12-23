@@ -29,4 +29,10 @@ public class Sms extends BaseEntity {
     @ApiModelProperty("验证码")
     private String code;
 
+
+    @Column(name = "content")
+    @Desc(value = "短信内容")
+    @ApiModelProperty("短信内容")
+    private String content;
+
 }
