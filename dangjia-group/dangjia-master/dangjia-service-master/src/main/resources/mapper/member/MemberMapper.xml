@@ -231,7 +231,7 @@
     <select id="getByPhone" parameterType="String" resultType="com.dangjia.acg.modle.member.Member">
         select *
         from dj_member
-        where mobile = #{mobile}
+        where mobile = #{mobile}  ORDER by create_date desc LIMIT 1
     </select>
 
     <select id="getBudgetStatisticsNum" resultType="int">

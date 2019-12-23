@@ -212,18 +212,30 @@ public class MemberService {
     }
 
     // 登录 接口
-    public ServerResponse login(String phone, String password, Integer userRole) {
-        //指定角色查询用户
-        Member user = new Member();
-        user.setMobile(phone);
-        user.setPassword(DigestUtils.md5Hex(password));
-//		user.setUserRole(userRole);
-        user = memberMapper.getUser(user);
-        if (user == null) {
-            return ServerResponse.createByErrorMessage("电话号码或者密码错误");
-        } else {
-            return getUser(user, userRole);
+    public ServerResponse login(String phone, String password,String loginMode, Integer userRole) {
+        Member user = null;
+        //密码登陆
+        if("1".equals(loginMode)) {
+            //指定角色查询用户
+            user.setMobile(phone);
+            user.setPassword(DigestUtils.md5Hex(password));
+            user = memberMapper.getUser(user);
         }
+        //验证码登陆
+        if("2".equals(loginMode)) {
+            Integer registerCode = redisClient.getCache(Constants.SMS_LOGIN_CODE + phone, Integer.class);
+            if (registerCode == null || !password.equals(registerCode)) {
+                return ServerResponse.createByErrorMessage("验证码错误");
+            }
+            user = memberMapper.getByPhone(phone);
+        }
+        if (user == null) {
+            String msg="手机号或密码错误";
+            if("2".equals(loginMode)) {msg="手机号或验证码错误";}
+            return ServerResponse.createByErrorMessage(msg);
+        }
+        return getUser(user, userRole);
+
     }
 
     ServerResponse getUser(Member user, Integer userRole) {
@@ -333,10 +345,13 @@ public class MemberService {
         return ServerResponse.createBySuccess(accessToken);
     }
 
-    /*
+    /**
      * 接口注册获取验证码
+     * @param phone 手机号
+     * @param codeType 验证码类型，1=登陆   2=注册
+     * @return
      */
-    public ServerResponse registerCode(String phone) {
+    public ServerResponse registerCode(String phone,String codeType ) {
         if (!Validator.isMobileNo(phone)) {
             return ServerResponse.createByErrorMessage("手机号不正确");
         }
@@ -346,16 +361,21 @@ public class MemberService {
         if (user != null) {
             return ServerResponse.createByErrorMessage("手机号已被注册");
         } else {
-            Integer registerCode = redisClient.getCache(Constants.SMS_CODE + phone, Integer.class);
-            if (registerCode == null || registerCode == 0) {
-                registerCode = (int) (Math.random() * 9000 + 1000);
+//            Integer registerCode = redisClient.getCache(Constants.SMS_CODE + phone, Integer.class);
+            Integer registerCode =  (int) (Math.random() * 9000 + 1000);
+
+            if("1".equals(codeType)) {
+                redisClient.put(Constants.SMS_LOGIN_CODE + phone, registerCode);
+            }else{
+                redisClient.put(Constants.SMS_CODE + phone, registerCode);
             }
-            redisClient.put(Constants.SMS_CODE + phone, registerCode);
-            JsmsUtil.SMS(registerCode, phone);
+
+            String result = JsmsUtil.SMS(registerCode, phone);
             //记录短信发送
             Sms sms = new Sms();
             sms.setCode(String.valueOf(registerCode));
             sms.setMobile(phone);
+            sms.setContent(result);
             smsMapper.insert(sms);
             return ServerResponse.createBySuccessMessage("验证码已发送");
         }
@@ -415,6 +435,14 @@ public class MemberService {
             if (!CommonUtil.isEmpty(user.getCityId())) {
                 City city = iCityMapper.selectByPrimaryKey(user.getCityId());
                 user.setCityName(city.getName());
+            }
+
+            if(!CommonUtil.isEmpty(request.getParameter(Member.WORKER_TYPE_ID))){
+                WorkerType wt = workerTypeMapper.selectByPrimaryKey(request.getParameter(Member.WORKER_TYPE_ID));
+                if (wt != null) {
+                    user.setWorkerTypeId(wt.getId());
+                    user.setWorkerType(wt.getType());
+                }
             }
             memberMapper.insertSelective(user);
             updateOrInsertInfo(user.getId(), String.valueOf(userRole), user.getPassword());
@@ -631,11 +659,12 @@ public class MemberService {
             int registerCode = (int) (Math.random() * 9000 + 1000);
             user.setSmscode(registerCode);
             memberMapper.updateByPrimaryKeySelective(user);
-            JsmsUtil.SMS(registerCode, phone);
+            String result = JsmsUtil.SMS(registerCode, phone);
             //记录短信发送
             Sms sms = new Sms();
             sms.setCode(String.valueOf(registerCode));
             sms.setMobile(phone);
+            sms.setContent(result);
             smsMapper.insert(sms);
             return ServerResponse.createBySuccessMessage("验证码已发送");
         }

@@ -40,15 +40,16 @@ public class MemberController implements MemberAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse login(String phone, String password, Integer userRole) {
-        return memberService.login(phone, password, userRole);
+    public ServerResponse login(String phone, String password,String loginMode, Integer userRole) {
+        return memberService.login(phone, password,loginMode, userRole);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse registerCode(String phone) {
-        return memberService.registerCode(phone);
+    public ServerResponse registerCode(String phone,String codeType) {
+        return memberService.registerCode(phone,codeType);
     }
+
 
     @Override
     @ApiMethod
