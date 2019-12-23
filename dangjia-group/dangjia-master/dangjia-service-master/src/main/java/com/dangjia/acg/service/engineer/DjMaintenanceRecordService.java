@@ -6,6 +6,7 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.engineer.DimensionRecordDTO;
 import com.dangjia.acg.dto.engineer.DjMaintenanceRecordDTO;
 import com.dangjia.acg.dto.engineer.DjMaintenanceRecordProductDTO;
 import com.dangjia.acg.dto.engineer.DjMaintenanceRecordResponsiblePartyDTO;
@@ -32,6 +33,7 @@ import tk.mybatis.mapper.entity.Example;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -173,7 +175,7 @@ public class DjMaintenanceRecordService {
                         djMaintenanceRecordResponsiblePartyMapper.selectByExample(example);
                 djMaintenanceRecordResponsibleParties.forEach(djMaintenanceRecordResponsibleParty -> {
                     //扣除金额
-                    Double amountDeducted=(djMaintenanceRecordResponsibleParty.getProportion()/100)*djMaintenanceRecord1.getSincePurchaseAmount();
+                    Double amountDeducted=(djMaintenanceRecordResponsibleParty.getProportion()/100)*(djMaintenanceRecord1.getSincePurchaseAmount()+djMaintenanceRecord1.getEnoughAmount());
                     if(djMaintenanceRecordResponsibleParty.getResponsiblePartyType()==2){
                         AccountFlowRecord accountFlowRecord=new AccountFlowRecord();
                         accountFlowRecord.setState(3);
@@ -212,6 +214,7 @@ public class DjMaintenanceRecordService {
                 djMaintenanceRecord=new DjMaintenanceRecord();
                 djMaintenanceRecord.setId(id);
                 djMaintenanceRecord.setState(2);
+                djMaintenanceRecord.setPaymentDate(new Date());
                 djMaintenanceRecordMapper.updateByPrimaryKeySelective(djMaintenanceRecord);
             }else if(state==3){//拒绝
                 djMaintenanceRecord=new DjMaintenanceRecord();
@@ -297,5 +300,23 @@ public class DjMaintenanceRecordService {
         }
     }
 
+
+    /**
+     * 查询维保责任记录
+     * @param responsiblePartyId
+     * @return
+     */
+    public ServerResponse queryDimensionRecord(String responsiblePartyId){
+        try {
+            List<DimensionRecordDTO> dimensionRecordDTOS =  djMaintenanceRecordResponsiblePartyMapper.queryDimensionRecord(responsiblePartyId);
+            return ServerResponse.createBySuccess("查询成功", dimensionRecordDTOS);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+
+
+
+    }
 
 }

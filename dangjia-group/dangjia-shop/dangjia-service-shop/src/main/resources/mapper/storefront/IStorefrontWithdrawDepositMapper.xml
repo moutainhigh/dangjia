@@ -4,7 +4,15 @@
 
     <select id="queryBankCard" resultType="com.dangjia.acg.modle.other.BankCard">
         SELECT
-            obc.*
+          obc.id,
+          obc.create_date as createDate,
+          obc.modify_date as createDate,
+          obc.bank_name as bankName,
+          obc.bank_card_image as bankCardImage,
+          obc.bk_max_amt as bkMaxAmt,
+          obc.bk_min_amt as bkMinAmt,
+          obc.sign,
+          obc.data_status as dataStatus
         FROM
             dj_worker_worker_bank_card wwbc,
             dj_other_bank_card obc

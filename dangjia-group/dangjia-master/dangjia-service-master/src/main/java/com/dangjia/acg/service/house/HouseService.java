@@ -20,6 +20,7 @@ import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.common.util.MathUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO;
+import com.dangjia.acg.dto.core.AcceptanceDynamicDTO;
 import com.dangjia.acg.dto.core.HouseFlowDTO;
 import com.dangjia.acg.dto.house.*;
 import com.dangjia.acg.dto.repair.HouseProfitSummaryDTO;
@@ -3474,6 +3475,172 @@ public class HouseService {
         }
         dataMap.put("stageData", mapList);
         return ServerResponse.createBySuccess("查询成功", dataMap);
+    }
+
+
+    /**
+     * 获取验收动态
+     * @param houseId
+     * @return
+     */
+    public ServerResponse queryAcceptanceDynamic(PageDTO pageDTO,String houseId) {
+        try {
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<HouseFlowApply> houseFlowApplies = houseFlowApplyMapper.queryAcceptanceDynamic(houseId);
+            if (houseFlowApplies.size() <= 0)
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "无相关施工记录");
+            PageInfo pageResult = new PageInfo(houseFlowApplies);
+            String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            List<AcceptanceDynamicDTO> acceptanceDynamicDTOS=new ArrayList<>();
+            houseFlowApplies.forEach(houseFlowApply -> {
+                AcceptanceDynamicDTO acceptanceDynamicDTO=new AcceptanceDynamicDTO();
+                //工匠验收动态
+                Member member = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
+                member.initPath(address);
+                acceptanceDynamicDTO.setWorkerHead(member.getHead());
+                if (member.getWorkerType() != null && member.getWorkerType() >= 1)
+                    acceptanceDynamicDTO.setWorkerTypeName(workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId()).getName());//工匠类型
+                acceptanceDynamicDTO.setWorkerName(member.getName());
+                acceptanceDynamicDTO.setWorkerContent(houseFlowApply.getApplyDec());
+                acceptanceDynamicDTO.setWorkerApplyType(houseFlowApply.getApplyType());
+                Example example=new Example(HouseFlowApplyImage.class);
+                example.createCriteria().andEqualTo(HouseFlowApplyImage.HOUSE_FLOW_APPLY_ID, houseFlowApply.getId());
+                List<HouseFlowApplyImage> hfaiList = houseFlowApplyImageMapper.selectByExample(example);
+                String[] workerImgArr = new String[hfaiList.size()];
+                for (int i = 0; i < hfaiList.size(); i++) {
+                    HouseFlowApplyImage hfai = hfaiList.get(i);
+                    String string = hfai.getImageUrl();
+                    workerImgArr[i] = address + string;
+                }
+                acceptanceDynamicDTO.setWorkerImgArr(workerImgArr);
+                acceptanceDynamicDTO.setHouseId(houseFlowApply.getHouseId());
+                acceptanceDynamicDTO.setWorkerHouseFlowApplyId(houseFlowApply.getId());
+                acceptanceDynamicDTO.setMemberCheck(houseFlowApply.getMemberCheck());
+                acceptanceDynamicDTO.setSupervisorCheck(houseFlowApply.getSupervisorCheck());
+                if(houseFlowApply.getStatus()!=null) {
+                    acceptanceDynamicDTO.setStatus(houseFlowApply.getStatus());
+                    acceptanceDynamicDTO.setHouseFlowApplyId(houseFlowApply.getId());
+                }
+
+                //获取业主评论
+                List<Evaluate> evaluates = houseFlowApplyMapper.getOwnerComment(houseFlowApply.getHouseId(),houseFlowApply.getWorkerId(),houseFlowApply.getApplyType(),houseFlowApply.getWorkerType());
+                if(!evaluates.isEmpty()){
+                    acceptanceDynamicDTO.setWorkerStar(evaluates.get(0).getStar());
+                    acceptanceDynamicDTO.setWorkerOwnerContent(evaluates.get(0).getContent());
+                }
+                //大管家验收动态
+                HouseFlowApply houseFlowApply1 = houseFlowApplyMapper.querySupervisorAcceptanceDynamic(houseFlowApply.getHouseFlowId());
+                if(houseFlowApply1!=null) {
+                    acceptanceDynamicDTO.setSupervisorHouseFlowApplyId(houseFlowApply1.getId());
+                    if (houseFlowApply1.getStatus() != null) {
+                        acceptanceDynamicDTO.setStatus(houseFlowApply1.getStatus());
+                        acceptanceDynamicDTO.setHouseFlowApplyId(houseFlowApply1.getId());
+                    }
+                    member = memberMapper.selectByPrimaryKey(houseFlowApply1.getWorkerId());
+                    member.initPath(address);
+                    acceptanceDynamicDTO.setSupervisorHead(member.getHead());
+                    if (member.getWorkerType() != null && member.getWorkerType() >= 1)
+                        acceptanceDynamicDTO.setWorkerTypeName(workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId()).getName());//工匠类型
+                    acceptanceDynamicDTO.setSupervisorName(member.getName());
+                    acceptanceDynamicDTO.setSupervisorContent(houseFlowApply1.getApplyDec());
+                    example = new Example(HouseFlowApplyImage.class);
+                    example.createCriteria().andEqualTo(HouseFlowApplyImage.HOUSE_FLOW_APPLY_ID, houseFlowApply1.getId());
+                    hfaiList = houseFlowApplyImageMapper.selectByExample(example);
+                    String[] supervisorImgArr = new String[hfaiList.size()];
+                    for (int i = 0; i < hfaiList.size(); i++) {
+                        HouseFlowApplyImage hfai = hfaiList.get(i);
+                        String string = hfai.getImageUrl();
+                        supervisorImgArr[i] = address + string;
+                    }
+                    acceptanceDynamicDTO.setSupervisorImgArr(workerImgArr);
+                    //获取业主评论
+                    evaluates = houseFlowApplyMapper.getOwnerComment(houseFlowApply1.getHouseId(), houseFlowApply1.getWorkerId(), houseFlowApply1.getApplyType(), houseFlowApply1.getWorkerType());
+                    if (!evaluates.isEmpty()) {
+                        acceptanceDynamicDTO.setSupervisorStar(evaluates.get(0).getStar());
+                        acceptanceDynamicDTO.setSupervisorOwnerContent(evaluates.get(0).getContent());
+                    }
+                }
+                acceptanceDynamicDTOS.add(acceptanceDynamicDTO);
+            });
+            if (acceptanceDynamicDTOS.size() <= 0)
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "无相关施工记录");
+            pageResult.setList(acceptanceDynamicDTOS);
+            return ServerResponse.createBySuccess("查询成功",pageResult);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.info("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+
+    /**
+     * 查询申请投诉中
+     * @param houseFlowApplyId
+     * @return
+     */
+    public ServerResponse queryApplyComplaints(String houseFlowApplyId) {
+        try {
+            HouseFlowApply houseFlowApply = houseFlowApplyMapper.queryApplyComplaints(houseFlowApplyId);
+            if(houseFlowApply==null)
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            AcceptanceDynamicDTO acceptanceDynamicDTO=new AcceptanceDynamicDTO();
+            //工匠验收动态
+            Member member = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
+            member.initPath(address);
+            acceptanceDynamicDTO.setWorkerHead(member.getHead());
+            if (member.getWorkerType() != null && member.getWorkerType() >= 1)
+                acceptanceDynamicDTO.setWorkerTypeName(workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId()).getName());//工匠类型
+            acceptanceDynamicDTO.setWorkerName(member.getName());
+            acceptanceDynamicDTO.setWorkerContent(houseFlowApply.getApplyDec());
+            acceptanceDynamicDTO.setWorkerApplyType(houseFlowApply.getApplyType());
+            acceptanceDynamicDTO.setMemberCheck(houseFlowApply.getMemberCheck());
+            acceptanceDynamicDTO.setSupervisorCheck(houseFlowApply.getSupervisorCheck());
+            Example example=new Example(HouseFlowApplyImage.class);
+            example.createCriteria().andEqualTo(HouseFlowApplyImage.HOUSE_FLOW_APPLY_ID, houseFlowApply.getId());
+            List<HouseFlowApplyImage> hfaiList = houseFlowApplyImageMapper.selectByExample(example);
+            String[] workerImgArr = new String[hfaiList.size()];
+            for (int i = 0; i < hfaiList.size(); i++) {
+                HouseFlowApplyImage hfai = hfaiList.get(i);
+                String string = hfai.getImageUrl();
+                workerImgArr[i] = address + string;
+            }
+            acceptanceDynamicDTO.setWorkerImgArr(workerImgArr);
+            acceptanceDynamicDTO.setHouseId(houseFlowApply.getHouseId());
+            acceptanceDynamicDTO.setWorkerHouseFlowApplyId(houseFlowApply.getId());
+            if(houseFlowApply.getStatus()!=null) {
+                acceptanceDynamicDTO.setStatus(houseFlowApply.getStatus());
+                acceptanceDynamicDTO.setHouseFlowApplyId(houseFlowApply.getId());
+            }
+
+            //大管家验收动态
+            houseFlowApply = houseFlowApplyMapper.querySupervisorAcceptanceDynamic(houseFlowApply.getHouseFlowId());
+            if(houseFlowApply!=null) {
+                member = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
+                member.initPath(address);
+                acceptanceDynamicDTO.setSupervisorHead(member.getHead());
+                if (member.getWorkerType() != null && member.getWorkerType() >= 1)
+                    acceptanceDynamicDTO.setWorkerTypeName(workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId()).getName());//工匠类型
+                acceptanceDynamicDTO.setSupervisorName(member.getName());
+                acceptanceDynamicDTO.setSupervisorContent(houseFlowApply.getApplyDec());
+                example = new Example(HouseFlowApplyImage.class);
+                example.createCriteria().andEqualTo(HouseFlowApplyImage.HOUSE_FLOW_APPLY_ID, houseFlowApply.getId());
+                hfaiList = houseFlowApplyImageMapper.selectByExample(example);
+                String[] supervisorImgArr = new String[hfaiList.size()];
+                for (int i = 0; i < hfaiList.size(); i++) {
+                    HouseFlowApplyImage hfai = hfaiList.get(i);
+                    String string = hfai.getImageUrl();
+                    supervisorImgArr[i] = address + string;
+                }
+                acceptanceDynamicDTO.setSupervisorImgArr(workerImgArr);
+            }
+            return ServerResponse.createBySuccess("查询成功",acceptanceDynamicDTO);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.info("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
     }
 }
 

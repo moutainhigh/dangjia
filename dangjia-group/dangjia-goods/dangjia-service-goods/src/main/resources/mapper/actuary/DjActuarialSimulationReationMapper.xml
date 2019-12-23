@@ -13,7 +13,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         create_by,
         create_date,
         modify_date,
-        update_by
+        update_by,
+        city_id
         )
         VALUES
         <foreach collection="list" item="item" index="index" separator=",">
@@ -25,7 +26,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{item.createBy},
             #{item.createDate},
             #{item.modifyDate},
-            #{item.updateBy}
+            #{item.updateBy},
+            #{item.cityId}
             )
         </foreach>
 

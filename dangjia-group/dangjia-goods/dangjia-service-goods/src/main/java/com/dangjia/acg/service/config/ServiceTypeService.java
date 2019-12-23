@@ -100,10 +100,10 @@ public class ServiceTypeService {
         if(!paramMap.isEmpty()){
             elasticSearchDTO.setParamMap(paramMap);
         }
-        PageInfo<JSONObject> redata =elasticSearchAPI.searchESJsonPage(elasticSearchDTO);
+       /* PageInfo<JSONObject> redata =elasticSearchAPI.searchESJsonPage(elasticSearchDTO);
         if(redata!=null && redata.getList()!=null && redata.getList().size()>0){
             return ServerResponse.createBySuccess("查询成功", redata);
-        }
+        }*/
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
@@ -115,7 +115,7 @@ public class ServiceTypeService {
                 json.put("imageUrl",address+serviceType.getImage());
                 json.put("houseType",serviceType.getId());
                 list.add(json);
-                elasticSearchAPI.saveESJson(JSON.toJSONString(serviceType),ServiceType.class.getSimpleName());
+               // elasticSearchAPI.saveESJson(JSON.toJSONString(serviceType),ServiceType.class.getSimpleName());
             }
             PageInfo pageResult = new PageInfo(serviceTypeList);
             pageResult.setList(list);

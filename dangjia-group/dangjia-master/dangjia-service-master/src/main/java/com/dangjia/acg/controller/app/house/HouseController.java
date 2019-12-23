@@ -302,5 +302,17 @@ public class HouseController implements HouseAPI {
         return houseService.getHouseChoiceCases(id);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse queryAcceptanceDynamic(PageDTO pageDTO,String houseId) {
+        return houseService.queryAcceptanceDynamic(pageDTO,houseId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryApplyComplaints(String houseFlowApplyId) {
+        return houseService.queryApplyComplaints(houseFlowApplyId);
+    }
+
 }
 

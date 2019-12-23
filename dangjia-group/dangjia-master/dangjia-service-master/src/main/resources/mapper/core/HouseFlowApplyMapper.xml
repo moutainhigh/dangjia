@@ -412,5 +412,101 @@
         where house_id = #{houseId}
     </update>
 
+    <select id="queryAcceptanceDynamic" resultType="com.dangjia.acg.modle.core.HouseFlowApply">
+        SELECT
+            chfa.id,
+            chfa.create_date AS createDate,
+            chfa.modify_date AS modifyDate,
+            chfa.start_date AS startDate,
+            chfa.end_date AS endDate,
+            chfa.apply_dec AS applyDec,
+            chfa.apply_type AS applyType,
+            chfa.house_flow_id AS houseFlowId,
+            chfa.house_id AS houseId,
+            chfa.member_check AS member_check,
+            chfa.supervisor_check AS supervisorCheck,
+            chfa.worker_type_id AS workerTypeId,
+            chfa.worker_type AS workerType,
+            chfa.worker_id AS workerId,
+            chfa.suspend_day AS suspendDay,
+            chfa.apply_money AS applyMoney,
+            chfa.pay_state AS payState,
+            chfa.other_money AS otherMoney,
+            chfa.supervisor_money AS supervisorMoney,
+            chfa.data_status AS dataStatus,
+            chfa.operator,
+            c.status
+        FROM
+            dj_core_house_flow_apply chfa
+        LEFT JOIN dj_complain c ON chfa.id = c.business_id
+        WHERE
+            chfa.apply_type BETWEEN 1 AND 2
+        AND chfa.worker_type != 3
+        AND chfa.supervisor_check BETWEEN 1 AND 2
+        AND chfa.house_id = #{houseId}
+    </select>
+
+    <select id="querySupervisorAcceptanceDynamic" resultType="com.dangjia.acg.modle.core.HouseFlowApply">
+        SELECT
+            chfa.id,
+            chfa.create_date AS createDate,
+            chfa.modify_date AS modifyDate,
+            chfa.start_date AS startDate,
+            chfa.end_date AS endDate,
+            chfa.apply_dec AS applyDec,
+            chfa.apply_type AS applyType,
+            chfa.house_flow_id AS houseFlowId,
+            chfa.house_id AS houseId,
+            chfa.member_check AS member_check,
+            chfa.supervisor_check AS supervisorCheck,
+            chfa.worker_type_id AS workerTypeId,
+            chfa.worker_type AS workerType,
+            chfa.worker_id AS workerId,
+            chfa.suspend_day AS suspendDay,
+            chfa.apply_money AS applyMoney,
+            chfa.pay_state AS payState,
+            chfa.other_money AS otherMoney,
+            chfa.supervisor_money AS supervisorMoney,
+            chfa.data_status AS dataStatus,
+            chfa.operator,
+            c.status
+        FROM
+            dj_core_house_flow_apply chfa
+        LEFT JOIN dj_complain c ON chfa.id = c.business_id
+        WHERE
+            chfa.house_flow_id = #{houseFlowId}
+        AND chfa.worker_type = 3
+    </select>
+
+
+    <select id="queryApplyComplaints" resultType="com.dangjia.acg.modle.core.HouseFlowApply">
+        SELECT
+            chfa.id,
+            chfa.create_date AS createDate,
+            chfa.modify_date AS modifyDate,
+            chfa.start_date AS startDate,
+            chfa.end_date AS endDate,
+            chfa.apply_dec AS applyDec,
+            chfa.apply_type AS applyType,
+            chfa.house_flow_id AS houseFlowId,
+            chfa.house_id AS houseId,
+            chfa.member_check AS member_check,
+            chfa.supervisor_check AS supervisorCheck,
+            chfa.worker_type_id AS workerTypeId,
+            chfa.worker_type AS workerType,
+            chfa.worker_id AS workerId,
+            chfa.suspend_day AS suspendDay,
+            chfa.apply_money AS applyMoney,
+            chfa.pay_state AS payState,
+            chfa.other_money AS otherMoney,
+            chfa.supervisor_money AS supervisorMoney,
+            chfa.data_status AS dataStatus,
+            chfa.operator,
+            c. STATUS
+        FROM
+            dj_core_house_flow_apply chfa
+        INNER JOIN dj_complain c ON chfa.id = c.business_id
+        WHERE id=#{houseFlowApplyId}
+    </select>
 </mapper>
 
