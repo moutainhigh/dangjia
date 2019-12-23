@@ -46,6 +46,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 import tk.mybatis.mapper.util.StringUtil;
 
@@ -455,6 +456,7 @@ public class DjSupplierServices {
      * @param payPassword
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse supplierWithdrawal(String userId, String cityId, String bankCard, Double surplusMoney, String payPassword) {
         try {
             AccountFlowRecord accountFlowRecord = new AccountFlowRecord();
@@ -522,6 +524,7 @@ public class DjSupplierServices {
      * @param payPassword
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse supplierRecharge(String userId, String cityId, String payState, Double rechargeAmount,
                                            String payPassword, String businessOrderType, Integer sourceType) {
         try {
