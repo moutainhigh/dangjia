@@ -109,7 +109,7 @@ public class DjSupApplicationProductService {
      */
     public Integer queryHaveGoodsSize(String supId, String shopId, String applicationStatus) {
         try {
-            List<DjSupSupplierProductDTO> list = djSupSupplierProductMapper.queryHaveGoods(supId, shopId, applicationStatus);
+            List<DjSupSupplierProductDTO> list = djSupSupplierProductMapper.queryHaveGoods(supId, shopId, applicationStatus,null);
             if (list != null) {
                 return list.size();
             } else {
@@ -130,11 +130,16 @@ public class DjSupApplicationProductService {
      * @param shopId
      * @return
      */
-    public ServerResponse queryHaveGoods(String supId, String shopId, String applicationStatus, PageDTO pageDTO) {
+    public ServerResponse queryHaveGoods(String supId, String shopId, String applicationStatus, PageDTO pageDTO,String keyWord,String userId,String cityId) {
         try {
+            Storefront storefront= basicsStorefrontAPI.queryStorefrontByUserID(userId,cityId);
+            if(storefront==null)
+            {
+                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
+            }
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<DjSupSupplierProductDTO> djSupSupplierProductDTOS = djSupSupplierProductMapper.queryHaveGoods(supId, shopId, applicationStatus);
+            List<DjSupSupplierProductDTO> djSupSupplierProductDTOS = djSupSupplierProductMapper.queryHaveGoods(supId, shopId, applicationStatus,keyWord);
             djSupSupplierProductDTOS.forEach(djSupSupplierProductDTO -> {
                 djSupSupplierProductDTO.setImage(imageAddress + djSupSupplierProductDTO.getImage());
             });
@@ -222,9 +227,9 @@ public class DjSupApplicationProductService {
      * @param applicationStatus
      * @return
      */
-    public ServerResponse getSuppliedProduct(String supId, String shopId, String applicationStatus) {
+    public ServerResponse getSuppliedProduct(String supId, String shopId, String applicationStatus,String keyWord) {
         try {
-            List<DjSupSupplierProductDTO> djSupSupplierProductList = djSupSupplierProductMapper.queryHaveGoods(supId, shopId, applicationStatus);
+            List<DjSupSupplierProductDTO> djSupSupplierProductList = djSupSupplierProductMapper.queryHaveGoods(supId, shopId, applicationStatus,keyWord);
             if (djSupSupplierProductList.size() <= 0) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
@@ -321,10 +326,10 @@ public class DjSupApplicationProductService {
      * @param shopId
      * @return
      */
-    public ServerResponse queryNotForTheGoods(String supId, String shopId, PageDTO pageDTO) {
+    public ServerResponse queryNotForTheGoods(String supId, String shopId, PageDTO pageDTO,String keyWord) {
         try {
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-            List<DjSupSupplierProductDTO> djSupSupplierProductDTOS = djSupSupplierProductMapper.queryHaveGoods(supId, shopId, "0,1,2");
+            List<DjSupSupplierProductDTO> djSupSupplierProductDTOS = djSupSupplierProductMapper.queryHaveGoods(supId, shopId, "0,1,2",keyWord);
             //Stream表达式取出已选商品的id
             List<String> productIds = djSupSupplierProductDTOS.stream()
                     .map(DjSupSupplierProductDTO::getProductId)

@@ -29,8 +29,8 @@ public class DjSupApplicationProductController implements DjSupApplicationProduc
 
     @Override
     @ApiMethod
-    public ServerResponse queryHaveGoods(HttpServletRequest request, String supId, String shopId,String applicationStatus , PageDTO pageDTO) {
-        return djSupApplicationProductService.queryHaveGoods(supId, shopId,applicationStatus, pageDTO);
+    public ServerResponse queryHaveGoods(HttpServletRequest request, String supId, String shopId,String applicationStatus , PageDTO pageDTO,String keyWord,String userId,String cityId) {
+        return djSupApplicationProductService.queryHaveGoods(supId, shopId,applicationStatus, pageDTO,keyWord,userId,cityId);
     }
 
     @Override
@@ -79,8 +79,8 @@ public class DjSupApplicationProductController implements DjSupApplicationProduc
 
     @Override
     @ApiMethod
-    public ServerResponse getSuppliedProduct(HttpServletRequest request, String supId, String shopId,String applicationStatus ) {
-        return djSupApplicationProductService.getSuppliedProduct(supId, shopId,applicationStatus);
+    public ServerResponse getSuppliedProduct(HttpServletRequest request, String supId, String shopId,String applicationStatus,String keyWord) {
+        return djSupApplicationProductService.getSuppliedProduct(supId, shopId,applicationStatus,keyWord);
     }
 
     @Override
@@ -97,7 +97,7 @@ public class DjSupApplicationProductController implements DjSupApplicationProduc
 
     @Override
     @ApiMethod
-    public ServerResponse queryNotForTheGoods(HttpServletRequest request, String supId, String shopId,PageDTO pageDTO) {
-        return djSupApplicationProductService.queryNotForTheGoods(supId,shopId,pageDTO);
+    public ServerResponse queryNotForTheGoods(HttpServletRequest request, String supId, String shopId,PageDTO pageDTO,  String keyWord) {
+        return djSupApplicationProductService.queryNotForTheGoods(supId,shopId,pageDTO,keyWord);
     }
 }
