@@ -36,4 +36,27 @@
             AND mrrp.id=#{id}
     </select>
 
+
+
+    <select id="queryDimensionRecord" resultType="com.dangjia.acg.dto.engineer.DimensionRecordDTO">
+        select
+        mr.payment_date as paymentDate,
+        mr.since_purchase_amount as sincePurchaseAmount,
+        mr.id as mrId,
+        mrrp.proportion AS proportion,
+        mrrp.id as mrrpId,
+        (mr.since_purchase_amount * mrrp.proportion) as paymentAmount,
+        CONCAT(
+        h.residential,
+        IFNULL(h.building, '*'),
+        '栋',
+        IFNULL(CONCAT(h.unit, '单元'),'' ),
+        IFNULL(h.number, '*'),
+        '号'
+        ) houseName
+        from dj_maintenance_record_responsible_party mrrp
+        INNER JOIN dj_maintenance_record mr on mrrp.maintenance_record_id = mr.id
+        INNER JOIN dj_house h on mr.house_id = h.id
+        where mrrp.responsible_party_type=3 and mrrp.responsible_party_id = #{responsiblePartyId}
+    </select>
 </mapper>

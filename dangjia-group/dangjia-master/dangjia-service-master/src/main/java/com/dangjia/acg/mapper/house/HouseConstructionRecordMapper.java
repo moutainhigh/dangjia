@@ -13,7 +13,4 @@ public interface HouseConstructionRecordMapper extends Mapper<HouseConstructionR
 
     List<HouseConstructionRecordTypeDTO> getHouseConstructionRecordTypeDTO(@Param("houseId") String houseId);
 
-    HouseConstructionRecord queryHouseConstructionRecord(@Param("houseId") String houseId,
-                                                         @Param("workerId") String workerId);
-
 }

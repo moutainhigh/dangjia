@@ -115,8 +115,8 @@ public class ServiceTypeService {
                 json.put("imageUrl",address+serviceType.getImage());
                 json.put("houseType",serviceType.getId());
                 list.add(json);
-                elasticSearchAPI.saveESJson(json.toJSONString(),ServiceType.class.getSimpleName());
-            }
+                // elasticSearchAPI.saveESJson(json.toJSONString(),ServiceType.class.getSimpleName());
+                 }
             PageInfo pageResult = new PageInfo(serviceTypeList);
             pageResult.setList(list);
             return ServerResponse.createBySuccess("查询成功", pageResult);
