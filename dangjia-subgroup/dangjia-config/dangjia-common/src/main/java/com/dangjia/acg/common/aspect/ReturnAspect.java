@@ -77,6 +77,7 @@ public class ReturnAspect {
                 paramStr.append(param.getKey());
             }
             log.info("<=============" + request.getMethod() + "方法--AOP 参数通知=============>");
+            log.info("<=============解密前的参数名：" + Arrays.toString(argNames) +"=============>");
             log.info("<=============解密前：" + paramStr.toString()+"=============>");
             if(CommonUtil.isEmpty(paramStr.toString())){
                 return null;
@@ -103,7 +104,7 @@ public class ReturnAspect {
                     }
                 }
             }
-            log.info("<=============解密后：" + Arrays.toString(args) +"=============>");
+            log.info("<=============重新设置方法参数后：" + Arrays.toString(args) +"=============>");
             return args;
         } catch (Exception e) {
             return null;
