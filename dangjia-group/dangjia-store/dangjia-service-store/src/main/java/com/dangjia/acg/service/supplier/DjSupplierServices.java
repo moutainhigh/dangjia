@@ -507,7 +507,7 @@ public class DjSupplierServices {
             accountFlowRecord.setAmountAfterMoney(djSupplier.getTotalAccount());//入账后金额
             accountFlowRecord.setDefinedName("供应商提现：" + surplusMoney);
             iStoreAccountFlowRecordMapper.insert(accountFlowRecord);
-            return ServerResponse.createBySuccessMessage("提交成功待审核中");
+            return ServerResponse.createBySuccessMessage("提现成功待处理");
         } catch (Exception e) {
             logger.info("提交失败",e);
             e.printStackTrace();

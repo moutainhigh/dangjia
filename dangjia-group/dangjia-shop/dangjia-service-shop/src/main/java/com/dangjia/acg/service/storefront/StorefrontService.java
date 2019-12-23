@@ -474,7 +474,7 @@ public class StorefrontService {
             accountFlowRecord.setAmountAfterMoney(storefront.getTotalAccount());//入账后金额
             accountFlowRecord.setDefinedName("店铺提现：" + surplusMoney);//自定义流水说明
             storefrontAccountFlowRecordMapper.insert(accountFlowRecord);
-            return ServerResponse.createBySuccessMessage("提交成功待审核中");
+            return ServerResponse.createBySuccessMessage("提现成功待处理");
         } catch (Exception e) {
             logger.error("店铺提现异常：", e);
             return ServerResponse.createByErrorMessage("店铺提现异常");
