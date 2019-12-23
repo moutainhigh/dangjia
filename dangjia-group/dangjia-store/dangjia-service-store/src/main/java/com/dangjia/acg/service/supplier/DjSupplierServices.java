@@ -255,7 +255,8 @@ public class DjSupplierServices {
      * @param pageDTO
      * @param keyWord
      * @param applicationStatus
-     * @param userId            *@param cityId
+     * @param userId
+     * @param cityId
      * @return
      */
 
@@ -365,9 +366,9 @@ public class DjSupplierServices {
             int i = djSupApplicationMapper.updateByExampleSelective(djSupApplication, example);
 
             if (i <= 0) {
-                ServerResponse.createByErrorMessage("供应商申请失败");
+                ServerResponse.createByErrorMessage("审核失败");
             }
-            return ServerResponse.createBySuccessMessage("供应商申请成功");
+            return ServerResponse.createBySuccessMessage("审核成功");
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("供应商申请异常");
@@ -401,10 +402,9 @@ public class DjSupplierServices {
             djSupApplication.setCreateDate(null);
             int i = djSupApplicationMapper.updateByExampleSelective(djSupApplication, example);
             if (i <= 0) {
-                return ServerResponse.createByErrorMessage("驳回供应商申请失败");
-
+                return ServerResponse.createByErrorMessage("驳回失败");
             }
-            return ServerResponse.createBySuccessMessage("驳回供应商申请成功");
+            return ServerResponse.createBySuccessMessage("驳回成功");
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("驳回供应商申请异常");
