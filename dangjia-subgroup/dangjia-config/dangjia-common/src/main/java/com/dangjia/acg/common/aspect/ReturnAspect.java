@@ -93,11 +93,8 @@ public class ReturnAspect {
                 if(args[i] instanceof HttpServletRequest){
                     ParameterRequestWrapper wrapper = new ParameterRequestWrapper(request, json);
                     args[i]=wrapper;
-                }else if (args[i] instanceof BigDecimal ||args[i] instanceof String || args[i] instanceof Date || args[i] instanceof Boolean || args[i] instanceof Byte || args[i] instanceof Short || args[i] instanceof Integer || args[i] instanceof Long || args[i] instanceof Float
-                        || args[i] instanceof Double || args[i] instanceof Enum) {
-                    if(json.get(argNames[i])!=null){
+                }else if(json.get(argNames[i])!=null){
                         args[i]=json.get(argNames[i]);
-                    }
                 }else{
                     if(args[i]!=null) {
                         args[i] = json.toJavaObject(args[i].getClass());
