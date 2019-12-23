@@ -22,19 +22,14 @@ public interface DjBasicsSiteMemoAPI {
 
     @PostMapping("app/supervisor/addSiteMemo")
     @ApiOperation(value = "新增备忘录", notes = "新增备忘录")
-    ServerResponse addSiteMemo(@RequestParam("request") HttpServletRequest request,
-                               @RequestParam("djBaicsSiteMemo") DjBaicsSiteMemo djBaicsSiteMemo);
+    ServerResponse addSiteMemo(@RequestParam("request") HttpServletRequest request, @RequestParam("djBaicsSiteMemo") DjBaicsSiteMemo djBaicsSiteMemo);
 
     @PostMapping("app/supervisor/querySiteMemo")
     @ApiOperation(value = "查询备忘录列表", notes = "查询备忘录列表")
-    ServerResponse querySiteMemo(@RequestParam("request") HttpServletRequest request,
-                                 @RequestParam("memberId") String memberId,
-                                 @RequestParam("pageDTO") PageDTO pageDTO
-                                );
+    ServerResponse querySiteMemo(@RequestParam("request") HttpServletRequest request, @RequestParam("memberId") String memberId, @RequestParam("pageDTO") PageDTO pageDTO);
 
     @PostMapping("app/supervisor/querySiteMemoDetail")
     @ApiOperation(value = "查询备忘录详情", notes = "查询备忘录详情")
-    ServerResponse querySiteMemoDetail(@RequestParam("request") HttpServletRequest request,
-                                 @RequestParam("id") String id
-    );
+    ServerResponse querySiteMemoDetail(@RequestParam("request") HttpServletRequest request, @RequestParam("id") String id);
+
 }

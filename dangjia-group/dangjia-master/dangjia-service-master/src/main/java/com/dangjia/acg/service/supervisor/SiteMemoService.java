@@ -68,7 +68,8 @@ public class SiteMemoService {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<DjBasicsSiteMemoDTO> list = djBasicsSiteMemoMapper.querySiteMemo(memberId);
             list.forEach(djBasicsSiteMemoDTO -> {
-                djBasicsSiteMemoDTO.setWorkerTypeName(djBasicsSiteMemoDTO.getWorkerTypeId() != null ? workerTypeMapper.selectByPrimaryKey(djBasicsSiteMemoDTO.getWorkerTypeId()).getName() : "");
+                if (djBasicsSiteMemoDTO!=null)
+                djBasicsSiteMemoDTO.setWorkerTypeName(djBasicsSiteMemoDTO.getWorkerTypeId()!=null && djBasicsSiteMemoDTO.getWorkerTypeId().length()>0? workerTypeMapper.selectByPrimaryKey(djBasicsSiteMemoDTO.getWorkerTypeId()).getName() : "");
             });
             PageInfo pageResult = new PageInfo(list);
             return ServerResponse.createBySuccess("查询成功", pageResult);

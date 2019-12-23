@@ -25,7 +25,7 @@
         IFNULL(dm.name,'') as name
         from dj_basics_site_memo  bsm
         inner join dj_member dm on bsm.member_id=dm.id
-        where dm.id=#{id}
+        where bsm.id=#{id}
     </select>
 
 </mapper>
