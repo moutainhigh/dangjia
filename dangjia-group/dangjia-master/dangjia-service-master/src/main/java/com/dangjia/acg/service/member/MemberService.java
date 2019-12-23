@@ -126,9 +126,8 @@ public class MemberService {
     private IStoreUserMapper iStoreUserMapper;
 
 
-
     @Autowired
-    private BasicsStorefrontAPI basicsStorefrontAPI ;
+    private BasicsStorefrontAPI basicsStorefrontAPI;
 
     /**
      * 获取用户手机号
@@ -212,26 +211,27 @@ public class MemberService {
     }
 
     // 登录 接口
-    public ServerResponse login(String phone, String password,String loginMode, Integer userRole) {
-        Member user = null;
-        //密码登陆
-        if("1".equals(loginMode)) {
-            //指定角色查询用户
-            user.setMobile(phone);
-            user.setPassword(DigestUtils.md5Hex(password));
-            user = memberMapper.getUser(user);
-        }
+    public ServerResponse login(String phone, String password, String loginMode, Integer userRole) {
+        Member user;
         //验证码登陆
-        if("2".equals(loginMode)) {
+        if ("2".equals(loginMode)) {
             Integer registerCode = redisClient.getCache(Constants.SMS_LOGIN_CODE + phone, Integer.class);
             if (registerCode == null || !password.equals(registerCode)) {
                 return ServerResponse.createByErrorMessage("验证码错误");
             }
             user = memberMapper.getByPhone(phone);
+        } else {
+            //指定角色查询用户
+            user = new Member();
+            user.setMobile(phone);
+            user.setPassword(DigestUtils.md5Hex(password));
+            user = memberMapper.getUser(user);
         }
         if (user == null) {
-            String msg="手机号或密码错误";
-            if("2".equals(loginMode)) {msg="手机号或验证码错误";}
+            String msg = "手机号或密码错误";
+            if ("2".equals(loginMode)) {
+                msg = "手机号或验证码错误";
+            }
             return ServerResponse.createByErrorMessage(msg);
         }
         return getUser(user, userRole);
@@ -347,11 +347,12 @@ public class MemberService {
 
     /**
      * 接口注册获取验证码
-     * @param phone 手机号
+     *
+     * @param phone    手机号
      * @param codeType 验证码类型，1=登陆   2=注册
      * @return
      */
-    public ServerResponse registerCode(String phone,String codeType ) {
+    public ServerResponse registerCode(String phone, String codeType) {
         if (!Validator.isMobileNo(phone)) {
             return ServerResponse.createByErrorMessage("手机号不正确");
         }
@@ -362,11 +363,11 @@ public class MemberService {
             return ServerResponse.createByErrorMessage("手机号已被注册");
         } else {
 //            Integer registerCode = redisClient.getCache(Constants.SMS_CODE + phone, Integer.class);
-            Integer registerCode =  (int) (Math.random() * 9000 + 1000);
+            Integer registerCode = (int) (Math.random() * 9000 + 1000);
 
-            if("1".equals(codeType)) {
+            if ("1".equals(codeType)) {
                 redisClient.put(Constants.SMS_LOGIN_CODE + phone, registerCode);
-            }else{
+            } else {
                 redisClient.put(Constants.SMS_CODE + phone, registerCode);
             }
 
@@ -430,14 +431,14 @@ public class MemberService {
             user.setIsCrowned(0);
             user.setHead(Utils.getHead());
             user.setPassword(DigestUtils.md5Hex(password));//验证码正确设置密码
-            user.setCityId(CommonUtil.isEmpty(request.getParameter(Constants.CITY_ID))?"402881882ba8753a012ba93101120116":request.getParameter(Constants.CITY_ID));
+            user.setCityId(CommonUtil.isEmpty(request.getParameter(Constants.CITY_ID)) ? "402881882ba8753a012ba93101120116" : request.getParameter(Constants.CITY_ID));
             user.setPolicyId(String.valueOf(userRole));
             if (!CommonUtil.isEmpty(user.getCityId())) {
                 City city = iCityMapper.selectByPrimaryKey(user.getCityId());
                 user.setCityName(city.getName());
             }
 
-            if(!CommonUtil.isEmpty(request.getParameter(Member.WORKER_TYPE_ID))){
+            if (!CommonUtil.isEmpty(request.getParameter(Member.WORKER_TYPE_ID))) {
                 WorkerType wt = workerTypeMapper.selectByPrimaryKey(request.getParameter(Member.WORKER_TYPE_ID));
                 if (wt != null) {
                     user.setWorkerTypeId(wt.getId());
@@ -733,6 +734,7 @@ public class MemberService {
         memberMapper.updateByPrimaryKeySelective(user);
         return ServerResponse.createBySuccessMessage("持单量设置成功");
     }
+
     /**
      * 业主列表
      */
@@ -1284,6 +1286,7 @@ public class MemberService {
         insuranceMapper.updateByPrimaryKeySelective(insurance);
         return ServerResponse.createBySuccess("保存成功", insurance.getId());
     }
+
     /**
      * 新增工匠保险信息
      *
@@ -1354,7 +1357,7 @@ public class MemberService {
         if (infos != null && infos.size() > 0) {
             for (Insurance info : infos) {
                 Map<String, Object> map = BeanUtils.beanToMap(info);
-                map.put(Insurance.HEAD, Utils.getImageAddress(imageAddress,info.getHead()));
+                map.put(Insurance.HEAD, Utils.getImageAddress(imageAddress, info.getHead()));
                 map.put("surDay", 0);
                 if (info.getEndDate() != null) {
                     Integer daynum = DateUtil.daysofTwo(new Date(), info.getEndDate());
@@ -1417,6 +1420,7 @@ public class MemberService {
 
     /**
      * 推广列表
+     *
      * @param userToken
      * @param pageDTO
      * @return
