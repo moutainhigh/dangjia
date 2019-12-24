@@ -123,6 +123,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         from dj_core_house_flow
         where  house_id=#{houseId}
         and worker_type_id =#{workerTypeId}
+        limit 1
     </select>
 
     <!--根据houseId查询已进场未完工工序-->

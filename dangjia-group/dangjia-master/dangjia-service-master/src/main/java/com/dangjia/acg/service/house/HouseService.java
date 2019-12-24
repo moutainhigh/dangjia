@@ -2040,7 +2040,7 @@ public class HouseService {
             //2.判断设计、精算所测面积和业主所填面积是否相等
             BigDecimal square=house.getSquare();//外框面积
             BigDecimal inputArea=memberAddress.getInputArea();//业主所填面积
-            if(square.compareTo(inputArea)!=1){//如果面积不相等，则查询需要处理的订单
+            if(square.compareTo(inputArea)!=0){//如果面积不相等，则查询需要处理的订单
                 //1.查询符合条件的需要处理的订单
                 List<HouseOrderDetailDTO> houseOrderDetailDTOList=iHouseMapper.getBudgetOrderDetailByHouseId(houseId,null);
                 editOrderInfo(houseOrderDetailDTOList,square,inputArea,house,memberAddress);//通过成对应的订单信息
@@ -2057,7 +2057,7 @@ public class HouseService {
                 Member member=memberMapper.selectByPrimaryKey(house.getMemberId());
                 paymentService.generateOrderCommon(member,house.getId(),house.getCityId(),productStr,null,memberAddress.getId(),4);//补差价订单
                 //增加任务(补差价订单）
-                taskStackService.inserTaskStackInfo(house.getHouseId(),house.getMemberId(),"是否提交补差价订单","icon/sheji.png",7,house.getHouseId());
+                taskStackService.inserTaskStackInfo(house.getId(),house.getMemberId(),"是否提交补差价订单","icon/sheji.png",7,house.getId());
             }
 
         }else if(square.compareTo(inputArea)==-1){//偏小
@@ -2108,7 +2108,7 @@ public class HouseService {
                 String addedProductIds=iMasterDeliverOrderAddedProductMapper.getAddedPrdouctStr(orderItemId);
                 String workerTypeId=product.getWorkerTypeId();
                 Example example=new Example(DjActuarialProductConfig.class);
-                example.createCriteria().andEqualTo(DjActuarialProductConfig.ACTUARIAL_TEMPLATE_ID,workerTypeId)
+                example.createCriteria().andEqualTo(DjActuarialProductConfig.WORKER_TYPE_ID,workerTypeId)
                         .andEqualTo(DjActuarialProductConfig.PRODUCT_ID,productTemplateId);
                 DjActuarialProductConfig djActuarialProductConfig=iMasterActuarialProductConfigMapper.selectOneByExample(example);
                 if(djActuarialProductConfig!=null&&"1".equals(djActuarialProductConfig.getIsCalculatedArea())){
