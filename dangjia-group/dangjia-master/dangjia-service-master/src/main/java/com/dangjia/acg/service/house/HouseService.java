@@ -81,6 +81,7 @@ import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.collections.map.HashedMap;
+import org.apache.commons.lang.time.DateUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import org.slf4j.Logger;
@@ -3540,7 +3541,7 @@ public class HouseService {
                     member.initPath(address);
                     acceptanceDynamicDTO.setSupervisorHead(member.getHead());
                     if (member.getWorkerType() != null && member.getWorkerType() >= 1)
-                        acceptanceDynamicDTO.setWorkerTypeName(workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId()).getName());//工匠类型
+                        acceptanceDynamicDTO.setSupervisorTypeName(workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId()).getName());//工匠类型
                     acceptanceDynamicDTO.setSupervisorName(member.getName());
                     acceptanceDynamicDTO.setSupervisorContent(houseFlowApply1.getApplyDec());
                     example = new Example(HouseFlowApplyImage.class);
@@ -3621,7 +3622,7 @@ public class HouseService {
                 member.initPath(address);
                 acceptanceDynamicDTO.setSupervisorHead(member.getHead());
                 if (member.getWorkerType() != null && member.getWorkerType() >= 1)
-                    acceptanceDynamicDTO.setWorkerTypeName(workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId()).getName());//工匠类型
+                    acceptanceDynamicDTO.setSupervisorTypeName(workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId()).getName());//工匠类型
                 acceptanceDynamicDTO.setSupervisorName(member.getName());
                 acceptanceDynamicDTO.setSupervisorContent(houseFlowApply.getApplyDec());
                 example = new Example(HouseFlowApplyImage.class);
@@ -3640,6 +3641,25 @@ public class HouseService {
             e.printStackTrace();
             logger.info("查询失败",e);
             return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+
+    /**
+     * 业主提醒大管家验收
+     * @param houseFlowApplyId
+     * @return
+     */
+    public ServerResponse setRemindButlerCheck(String houseFlowApplyId) {
+        try {
+            HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
+            if(DateUtils.isSameDay(new Date(), houseFlowApply.getWithdrawalTime()))
+                return ServerResponse.createByErrorMessage("今日已提醒");
+            houseFlowApply.setWithdrawalTime(new Date());
+            return ServerResponse.createBySuccessMessage("操作成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("操作失败");
         }
     }
 }
