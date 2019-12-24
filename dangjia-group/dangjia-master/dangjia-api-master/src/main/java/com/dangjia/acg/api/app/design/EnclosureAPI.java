@@ -95,5 +95,5 @@ public interface EnclosureAPI {
     @ApiOperation(value = "查询附件", notes = "查询附件")
     ServerResponse selectEnclosureList(@RequestParam("request") HttpServletRequest request,
                                        @RequestParam("houseId") String houseId,
-                                       @RequestParam("enclosureType") int enclosureType);
+                                       @RequestParam("enclosureType") Integer enclosureType);
 }

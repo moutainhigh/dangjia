@@ -119,7 +119,7 @@ public interface WebEngineerAPI {
 
     @PostMapping(value = "web/engineer/freeze")
     @ApiOperation(value = "冻结账户", notes = "冻结账户")
-    ServerResponse freeze(@RequestParam("memberId") String  memberId,@RequestParam("type") boolean type);
+    ServerResponse freeze(@RequestParam("memberId") String  memberId,@RequestParam("type") Boolean type);
 
     @PostMapping(value = "web/engineer/getSureList")
     @ApiOperation(value = "获取工地交底/帮助事项", notes = "获取工地交底/帮助事项")

@@ -47,7 +47,7 @@ public class ActuaryOperationController implements ActuaryOperationAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse confirmActuaryDetail(HttpServletRequest request, String userToken, String houseId, String workerTypeId, int type, String cityId) {
+    public ServerResponse confirmActuaryDetail(HttpServletRequest request, String userToken, String houseId, String workerTypeId, Integer type, String cityId) {
         return actuaryOperationService.confirmActuaryDetail(userToken, houseId, workerTypeId, type, cityId);
     }
 

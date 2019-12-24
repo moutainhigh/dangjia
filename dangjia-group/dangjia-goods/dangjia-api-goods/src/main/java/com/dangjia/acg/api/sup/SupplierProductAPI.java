@@ -70,7 +70,7 @@ public interface SupplierProductAPI {
     @PostMapping("/sup/supplierProduct/querySupplierProduct")
     @ApiOperation(value = "查询所有货品供应关系", notes = "查询所有货品供应关系")
     ServerResponse querySupplierProduct(@RequestParam("cityId") String cityId,
-                                        @RequestParam("type") int type,
+                                        @RequestParam("type") Integer type,
                                         @RequestParam("supplierId") String supplierId,
                                         @RequestParam("likeProductName") String likeProductName,
                                         @RequestParam("pageDTO") PageDTO pageDTO);

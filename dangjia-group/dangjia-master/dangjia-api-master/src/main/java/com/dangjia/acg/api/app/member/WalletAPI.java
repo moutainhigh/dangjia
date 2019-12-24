@@ -131,7 +131,7 @@ public interface WalletAPI {
     @ApiOperation(value = "资产流水", notes = "资产流水")
     ServerResponse workerDetail(@RequestParam("userToken") String userToken,
                                 @RequestParam("time") String time,
-                                @RequestParam("type") int type,
+                                @RequestParam("type") Integer type,
                                 @RequestParam("pageDTO") PageDTO pageDTO);
 
     /**

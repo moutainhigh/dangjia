@@ -26,7 +26,7 @@ public class ServerPortController implements ServerPortAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getSearchBox(HttpServletRequest request, PageDTO pageDTO, String content, String cityId, int type) {
+    public ServerResponse getSearchBox(HttpServletRequest request, PageDTO pageDTO, String content, String cityId, Integer type) {
         return technologyService.queryByName(content, pageDTO, cityId, type);
     }
 

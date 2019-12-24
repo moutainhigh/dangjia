@@ -46,7 +46,7 @@ public class WebClueController implements WebClueAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getByStage(int stage, PageDTO pageDTO) {
+    public ServerResponse getByStage(Integer stage, PageDTO pageDTO) {
         return clueService.getByStage(stage, pageDTO);
     }
 
@@ -70,7 +70,7 @@ public class WebClueController implements WebClueAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse giveUp(String id, int type) {
+    public ServerResponse giveUp(String id, Integer type) {
         return clueService.giveUp(id, type);
     }
 

@@ -68,7 +68,7 @@ public class SupplierProductController implements SupplierProductAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse querySupplierProduct(String cityId, int type, String supplierId,
+    public ServerResponse querySupplierProduct(String cityId, Integer type, String supplierId,
                                                String likeProductName, PageDTO pageDTO) {
         return supplierService.querySupplierProduct(type, supplierId, likeProductName, pageDTO);
     }

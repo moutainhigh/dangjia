@@ -67,7 +67,7 @@ public interface ActuaryOperationAPI {
     ServerResponse getCommo(@RequestParam("request") HttpServletRequest request,
                             @RequestParam("gId") String gId,
                             @RequestParam("cityId") String cityId,
-                            @RequestParam("type") int type);*/
+                            @RequestParam("type") Integer type);*/
 
 
     /**
@@ -80,7 +80,7 @@ public interface ActuaryOperationAPI {
                                         @RequestParam("userToken") String userToken,
                                         @RequestParam("houseId") String houseId,
                                         @RequestParam("workerTypeId") String workerTypeId,
-                                        @RequestParam("type") int type,
+                                        @RequestParam("type") Integer type,
                                         @RequestParam("cityId") String cityId);
 
     /**

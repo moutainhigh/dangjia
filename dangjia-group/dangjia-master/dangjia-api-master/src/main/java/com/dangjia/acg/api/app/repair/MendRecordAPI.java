@@ -30,7 +30,7 @@ public interface MendRecordAPI {
     @PostMapping(value = "app/repair/mendRecord/recordList")
     @ApiOperation(value = "记录列表", notes = "记录列表")
     ServerResponse recordList(@RequestParam("userToken") String userToken,
-                              @RequestParam("roleType") int roleType,
+                              @RequestParam("roleType") Integer roleType,
                               @RequestParam("houseId") String houseId,
                               @RequestParam("queryId") String queryId,
                               @RequestParam("type") Integer type);
@@ -39,7 +39,7 @@ public interface MendRecordAPI {
     @ApiOperation(value = "要补退记录", notes = "要补退记录")
     ServerResponse mendList(@RequestParam("userToken") String userToken,
                             @RequestParam("houseId") String houseId,
-                            @RequestParam("roleType") int roleType);
+                            @RequestParam("roleType") Integer roleType);
 
     @PostMapping(value = "app/repair/mendRecord/backOrder")
     @ApiOperation(value = "撤回补货要货订单", notes = "撤回补货要货订单")

@@ -58,7 +58,7 @@ public interface MainAuthAPI {
     @PostMapping("/auth/setPerm")
     @ApiOperation(value = "添加权限", notes = "添加权限")
     ServerResponse setPerm(@RequestParam("request") HttpServletRequest request,
-                           @RequestParam("type") int type,
+                           @RequestParam("type") Integer type,
                            @RequestParam("permission") Permission permission);
 
     /**

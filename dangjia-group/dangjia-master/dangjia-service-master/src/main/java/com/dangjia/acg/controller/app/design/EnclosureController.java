@@ -35,7 +35,7 @@ public class EnclosureController implements EnclosureAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse selectEnclosureList(HttpServletRequest request, String houseId, int enclosureType) {
+    public ServerResponse selectEnclosureList(HttpServletRequest request, String houseId, Integer enclosureType) {
         return enclosureService.selectEnclosureList(houseId, enclosureType);
     }
 }

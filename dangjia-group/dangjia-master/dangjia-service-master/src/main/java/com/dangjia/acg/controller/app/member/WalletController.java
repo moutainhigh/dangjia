@@ -65,7 +65,7 @@ public class WalletController implements WalletAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse workerDetail(String userToken,String time, int type, PageDTO pageDTO) {
+    public ServerResponse workerDetail(String userToken,String time, Integer type, PageDTO pageDTO) {
         return walletService.workerDetail(userToken,time, type, pageDTO);
     }
 

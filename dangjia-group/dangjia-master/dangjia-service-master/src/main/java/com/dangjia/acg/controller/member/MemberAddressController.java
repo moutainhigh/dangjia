@@ -26,8 +26,8 @@ public class MemberAddressController implements MemberAddressAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse insertAddress(HttpServletRequest request, String userToken, int renovationType,
-                                        int defaultType, String name, String mobile, String cityName,
+    public ServerResponse insertAddress(HttpServletRequest request, String userToken, Integer renovationType,
+                                        Integer defaultType, String name, String mobile, String cityName,
                                         String address, BigDecimal inputArea, String longitude, String latitude) {
         return memberAddressService.insertAddress(userToken, renovationType,
                 defaultType, name, mobile, cityName, address, inputArea, longitude, latitude);
@@ -35,7 +35,7 @@ public class MemberAddressController implements MemberAddressAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse updataAddress(HttpServletRequest request, String userToken, String addressId, int defaultType, String name, String mobile) {
+    public ServerResponse updataAddress(HttpServletRequest request, String userToken, String addressId, Integer defaultType, String name, String mobile) {
         return memberAddressService.updataAddress(userToken, addressId, defaultType, name, mobile);
     }
 

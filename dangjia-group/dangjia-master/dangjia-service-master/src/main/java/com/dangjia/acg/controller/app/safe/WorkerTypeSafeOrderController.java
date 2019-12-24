@@ -20,7 +20,7 @@ public class WorkerTypeSafeOrderController implements WorkerTypeSafeOrderAPI {
     private WorkerTypeSafeOrderService workerTypeSafeOrderService;
     @Override
     @ApiMethod
-    public  ServerResponse changeSafeType(String userToken,String houseFlowId, String workerTypeSafeId, int selected){
+    public  ServerResponse changeSafeType(String userToken,String houseFlowId, String workerTypeSafeId, Integer selected){
         return workerTypeSafeOrderService.changeSafeType(userToken,houseFlowId,workerTypeSafeId,selected);
     }
     /*

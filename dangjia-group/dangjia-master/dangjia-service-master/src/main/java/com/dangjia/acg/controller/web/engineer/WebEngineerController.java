@@ -198,7 +198,7 @@ public class WebEngineerController implements WebEngineerAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse freeze(String memberId, boolean type) {
+    public ServerResponse freeze(String memberId, Boolean type) {
         return engineerService.freeze(memberId, type);
     }
 
