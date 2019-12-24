@@ -482,7 +482,12 @@ public class DjMaintenanceRecordService {
      * @return
      */
     public ServerResponse applicationAcceptance(String houseId) {
-        return null;
+        try {
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
     }
 
 
