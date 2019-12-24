@@ -1,6 +1,5 @@
 package com.dangjia.acg.service.design;
 
-import com.dangjia.acg.api.config.ServiceTypeAPI;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
