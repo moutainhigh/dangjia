@@ -7,7 +7,6 @@ import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.request.ParameterRequestWrapper;
 import com.dangjia.acg.common.util.CommonUtil;
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -19,9 +18,6 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
-import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.Map;
 
 import static com.dangjia.acg.common.util.AES.decrypt;
@@ -68,19 +64,22 @@ public class ReturnAspect {
 
     }
 
-    public Object[] setRequestParameter(Class[] argClasss,String[] argNames ,Object[] args){
+    public Object[] setRequestParameter(ProceedingJoinPoint joinPoint){
         try {
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
                     .getRequest();
+
+            Object[] args = joinPoint.getArgs();
+            String[] argNames = ((MethodSignature)joinPoint.getSignature()).getParameterNames(); // 参数名
+            Class[] argClasss = ((MethodSignature)joinPoint.getSignature()).getParameterTypes(); // 参数名
+
             Map<String, String[]> parameterMap = request.getParameterMap();
             StringBuilder paramStr = new StringBuilder();
             for (Map.Entry<String, String[]> param : parameterMap.entrySet()) {
-                paramStr.append(param.getKey());
+                if("uuidKey".equals(param.getKey())){
+                    paramStr.append(param.getValue()[0]);
+                }
             }
-            log.info("<=============" + request.getMethod() + "方法--AOP 参数通知=============>");
-            log.info("<=============解密前的参数名：" + Arrays.toString(argNames) +"=============>");
-            log.info("<=============解密前的参数类型名：" + Arrays.toString(argClasss) +"=============>");
-            log.info("<=============解密前：" + paramStr.toString()+"=============>");
             if(CommonUtil.isEmpty(paramStr.toString())){
                 return null;
             }
@@ -88,24 +87,24 @@ public class ReturnAspect {
             if(CommonUtil.isEmpty(dec)){
                 return null;
             }
-
-            log.info("<=============解密后：" + new String(dec) +"=============>");
             JSONObject json = JSON.parseObject(new String(dec));
             for (int i = 0; i < args.length; i++) {
                 if(args[i] instanceof HttpServletRequest){
                     ParameterRequestWrapper wrapper = new ParameterRequestWrapper(request, json);
                     args[i]=wrapper;
-                }else if(json.get(argNames[i])!=null&&!"".equals(json.getObject(argNames[i],argClasss[i].getClass()))){
-                        args[i]=json.getObject(argNames[i],argClasss[i].getClass());
+                }else if (CommonUtil.isBaseType(argClasss[i]))  {
+                    if(args[i]==null) {
+                        args[i] = json.getObject(argNames[i],argClasss[i]);
+                    }
+                    if("".equals(args[i])){
+                        args[i]=null;
+                    }
                 }else{
                     if(args[i]!=null) {
-                        args[i] = json.toJavaObject(argClasss[i].getClass());
-                    }else{
-                        args[i]=null;
+                        args[i] = json.toJavaObject(args[i].getClass());
                     }
                 }
             }
-            log.info("<=============重新设置方法参数后：" + Arrays.toString(args) +"=============>");
             return args;
         } catch (Exception e) {
             e.printStackTrace();
@@ -125,19 +124,17 @@ public class ReturnAspect {
     @Around("aspect()")
     public Object around(ProceedingJoinPoint joinPoint) {
         String name = joinPoint.getSignature().getName();// 获得目标方法名
-//        Object[] args = joinPoint.getArgs();
-//        String[] argNames = ((MethodSignature)joinPoint.getSignature()).getParameterNames(); // 参数名
-//        Class[] argClasss = ((MethodSignature)joinPoint.getSignature()).getParameterTypes(); // 参数类型名
-//        args= setRequestParameter(argClasss,argNames,args);
+
+        Object[]  args= setRequestParameter(joinPoint);
         log.info("<=============" + name + "方法--AOP 环绕通知=============>");
         long start = System.currentTimeMillis();
         Object result = null;
         try {
-//            if(args!=null){
-//                result = joinPoint.proceed(args);
-//            }else{
+            if(args!=null){
+                result = joinPoint.proceed(args);
+            }else{
                 result = joinPoint.proceed();
-//            }
+            }
 
             long end = System.currentTimeMillis();
             if (log.isInfoEnabled()) {
