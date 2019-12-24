@@ -36,7 +36,7 @@ public interface StewardAPI {
     ServerResponse passShutWork(@RequestParam("userToken") String userToken,
                                 @RequestParam("houseFlowApplyId") String houseFlowApplyId,
                                 @RequestParam("content") String content,
-                                @RequestParam("state") int state);
+                                @RequestParam("state") Integer state);
 
     @PostMapping("app/worker/steward/readProjectInfo")
     @ApiOperation(value = "成功返回交底内容", notes = "成功返回交底内容")

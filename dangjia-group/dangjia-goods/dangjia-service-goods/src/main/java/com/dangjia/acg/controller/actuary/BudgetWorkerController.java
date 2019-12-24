@@ -216,7 +216,7 @@ public class BudgetWorkerController implements BudgetWorkerAPI {
      * 查询精算工序所有工艺
      */
     public JSONArray getTecList(String cityId,
-                                int workerType,String workerGoodsId) {
+                                Integer workerType,String workerGoodsId) {
         return budgetWorkerService.getTecList(workerType,workerGoodsId);
     }
 

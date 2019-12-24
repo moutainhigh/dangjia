@@ -115,7 +115,7 @@ public class GroupInfoService {
             if (!CommonUtil.isEmpty(g.getGroupId())) {
                 GroupDTO dto = new GroupDTO();
                 BeanUtils.beanToBean(g, dto);
-                List<Map> members = crossAppAPI.getCrossGroupMembers(AppType.GONGJIANG.getDesc(), Integer.parseInt(g.getGroupId()));
+                List<Map> members = crossAppAPI.getCrossGroupMembers(AppType.GONGJIANG.getDesc(), Long.parseLong(g.getGroupId()));
                 if (members != null) {
                     dto.setMembers(members);
                 }
@@ -197,7 +197,7 @@ public class GroupInfoService {
             registerJGUsers(AppType.SALE.getDesc(), adds, new String[adds.length]);
         }
         //夸应用添加删除
-        crossAppAPI.addOrRemoveMembersFromCrossGroup(AppType.GONGJIANG.getDesc(), AppType.SALE.getDesc(), groupId, adds, removes);
+        crossAppAPI.addOrRemoveMembersFromCrossGroup(AppType.GONGJIANG.getDesc(), AppType.SALE.getDesc(), Long.parseLong(groupId+""), adds, removes);
         if (CommonUtil.isEmpty(addList)) {
             return ServerResponse.createBySuccessMessage("ok");
         }

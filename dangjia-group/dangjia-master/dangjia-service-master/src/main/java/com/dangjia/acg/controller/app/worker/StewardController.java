@@ -33,7 +33,7 @@ public class StewardController implements StewardAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse passShutWork(String userToken,String houseFlowApplyId,String content,int state){
+    public ServerResponse passShutWork(String userToken,String houseFlowApplyId,String content,Integer state){
         return stewardService.passShutWork(houseFlowApplyId,content,state);
     }
 

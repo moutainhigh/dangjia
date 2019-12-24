@@ -46,19 +46,19 @@ public class ActuaryOperationController implements ActuaryOperationAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getCommo(HttpServletRequest request, String gId, String cityId, int type) {
+    public ServerResponse getCommo(HttpServletRequest request, String gId, String cityId, Integer type) {
         return actuaryOperationService.getCommo(gId, type);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse getGoodsDetail(HttpServletRequest request, String gId,int type) {
+    public ServerResponse getGoodsDetail(HttpServletRequest request, String gId,Integer type) {
         return actuaryOperationService.getGoodsDetail(gId,type);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse confirmActuaryDetail(HttpServletRequest request, String userToken, String houseId, String workerTypeId, int type, String cityId) {
+    public ServerResponse confirmActuaryDetail(HttpServletRequest request, String userToken, String houseId, String workerTypeId, Integer type, String cityId) {
         return actuaryOperationService.confirmActuaryDetail(userToken, houseId, workerTypeId, type, cityId);
     }
 

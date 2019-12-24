@@ -19,6 +19,6 @@ public interface IWorkerTypeMapper extends Mapper<WorkerType> {
 
     List<WorkerType> unfinishedFlow(@Param("houseId") String houseId);
 
-    String getName(@Param("type") int type);
+    String getName(@Param("type") Integer type);
 }
 

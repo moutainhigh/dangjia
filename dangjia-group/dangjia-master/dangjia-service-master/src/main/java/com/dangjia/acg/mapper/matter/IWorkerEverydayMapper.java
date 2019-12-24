@@ -13,7 +13,7 @@ import java.util.List;
  */
 @Repository
 public interface IWorkerEverydayMapper extends Mapper<WorkerEveryday> {
-    List<WorkerEveryday> getWorkerEverydayList(@Param("type") int type);
+    List<WorkerEveryday> getWorkerEverydayList(@Param("type") Integer type);
 
 }
 

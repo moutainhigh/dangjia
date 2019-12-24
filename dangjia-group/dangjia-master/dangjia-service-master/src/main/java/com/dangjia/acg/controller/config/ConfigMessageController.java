@@ -61,7 +61,7 @@ public class ConfigMessageController implements ConfigMessageAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse addConfigMessage(String memberId, String title, String alert, int type, String data) {
+    public ServerResponse addConfigMessage(String memberId, String title, String alert, Integer type, String data) {
         return configMessageService.addConfigMessage(AppType.SALE,memberId,title,alert,type,data);
     }
 }
