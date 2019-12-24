@@ -96,14 +96,14 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryGuaranteeMoneyList() {
-        return  djMaintenanceRecordService.queryGuaranteeMoneyList();
+    public ServerResponse queryGuaranteeMoneyList(PageDTO pageDTO,String userId,String cityId) {
+        return  djMaintenanceRecordService.queryGuaranteeMoneyList(pageDTO,userId,cityId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse queryGuaranteeMoneyDetail() {
-       return djMaintenanceRecordService.queryGuaranteeMoneyDetail();
+    public ServerResponse queryGuaranteeMoneyDetail(String userId,String cityId,String id) {
+       return djMaintenanceRecordService.queryGuaranteeMoneyDetail( userId, cityId,id);
     }
 
 }

@@ -1,6 +1,7 @@
 package com.dangjia.acg.service.engineer;
 
 import com.dangjia.acg.api.product.DjBasicsProductAPI;
+import com.dangjia.acg.api.BasicsStorefrontAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
@@ -82,7 +83,8 @@ public class DjMaintenanceRecordService {
 
     @Autowired
     private DjBasicsProductAPI djBasicsProductAPI;
-
+    @Autowired
+    private BasicsStorefrontAPI basicsStorefrontAPI;
     /**
      * 查询质保审核列表
      *
@@ -524,29 +526,69 @@ public class DjMaintenanceRecordService {
 
     /**
      * 缴纳质保金列表
+     * @param pageDTO
+     * @param userId
+     * @param cityId
+     * @return
      */
-    public ServerResponse queryGuaranteeMoneyList() {
+    public ServerResponse queryGuaranteeMoneyList(PageDTO pageDTO,String userId,String cityId) {
         try {
-            return null;
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            Storefront storefront=basicsStorefrontAPI.queryStorefrontByUserID(userId,cityId);
+            if(storefront==null)
+            {
+                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息!");
+            }
+            List<ResponsiblePartyDTO> list=djMaintenanceRecordResponsiblePartyMapper.queryGuaranteeMoneyList(storefront.getId());
+            PageInfo pageResult = new PageInfo(list);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();
-            //logger.error("缴纳质保金列表异常：", e);
+            return ServerResponse.createByErrorMessage("查询失败");
         }
-        return null;
     }
 
     /**
      * 缴纳质保金详情
      */
-    public ServerResponse queryGuaranteeMoneyDetail() {
+    public ServerResponse queryGuaranteeMoneyDetail(String userId,String cityId,String id) {
         try {
-            return null;
+            Storefront storefront=basicsStorefrontAPI.queryStorefrontByUserID(userId,cityId);
+            if(storefront==null)
+            {
+                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息!");
+            }
+            ResponsiblePartyDetailDTO responsiblePartyDetailDTO=djMaintenanceRecordResponsiblePartyMapper.queryGuaranteeMoneyDetail(id);
+            if (responsiblePartyDetailDTO!=null)
+            {
+                responsiblePartyDetailDTO.setRetentionMoney(storefront.getRetentionMoney());//现有滞留金
+
+                responsiblePartyDetailDTO.setPaidRetentionMoney((responsiblePartyDetailDTO.getTotalAmount() *
+                        Double.parseDouble(responsiblePartyDetailDTO.getProportion())) / 100 - storefront.getRetentionMoney());//需交滞留金
+
+                String workerTypeId = responsiblePartyDetailDTO.getWorkerTypeId();
+                String workerTypeName = null;
+                if (workerTypeId != null) {
+                    WorkerType workerType = workerTypeMapper.selectByPrimaryKey(workerTypeId);//查询工种
+                    workerTypeName = workerType != null ? workerType.getName() : "";
+                    responsiblePartyDetailDTO.setWorkerTypeName(workerTypeName);//工种名称
+                }
+                StringBuffer str = new StringBuffer();
+                str.append(responsiblePartyDetailDTO.getAddress() + "于").
+                        append(responsiblePartyDetailDTO.getCreateDate() + "申请了水电质保，经大管家实地勘察后，确认你责任占比")
+                        .append(responsiblePartyDetailDTO.getProportion() + "%，您需要缴纳质保金后才能进行店铺的其他操作，有任何疑问请及时联系当家客服。");
+                responsiblePartyDetailDTO.setContent(str.toString());//缴纳详情
+
+                responsiblePartyDetailDTO.setProportion(responsiblePartyDetailDTO.getProportion()+"%");//责任占比
+
+                responsiblePartyDetailDTO.setNeedRetentionMoney((responsiblePartyDetailDTO.getTotalAmount() *
+                        Double.parseDouble(responsiblePartyDetailDTO.getProportion())) / 100);
+            }
+            return ServerResponse.createBySuccess("查询成功", responsiblePartyDetailDTO);//所需质保金
         } catch (Exception e) {
             e.printStackTrace();
-            //logger.error("缴纳质保金详情异常：", e);
+            return ServerResponse.createByErrorMessage("查询失败");
         }
-        return null;
     }
-
 
 }

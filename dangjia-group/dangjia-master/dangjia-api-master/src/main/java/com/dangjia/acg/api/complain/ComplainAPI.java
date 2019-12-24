@@ -24,7 +24,8 @@ public interface ComplainAPI {
                                   @RequestParam("cityId") String cityId,
                                   @RequestParam("complainType") Integer complainType,
                                   @RequestParam("mendOrderId") String mendOrderId,
-                                  @RequestParam("content") String content);
+                                  @RequestParam("content") String content,
+                                  @RequestParam("images") String images);
 
 
     @PostMapping("/complain/addComplain")

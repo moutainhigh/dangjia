@@ -138,7 +138,7 @@ public class ComplainService {
      * @param content
      * @return
      */
-    public ServerResponse insertComplain(HttpServletRequest request, String userId,String cityId, Integer complainType, String mendOrderId, String content) {
+    public ServerResponse insertComplain(HttpServletRequest request, String userId,String cityId, Integer complainType, String mendOrderId, String content,String images) {
 
         try {
             Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
@@ -156,6 +156,7 @@ public class ComplainService {
             complain.setContent(content);
             complain.setUserName(storefront.getStorekeeperName());
             complain.setUserMobile(storefront.getMobile());
+            complain.setImage(images);
             int i = complainMapper.insertSelective(complain);
             if(i<=0)
                 return ServerResponse.createByErrorMessage("提交申诉失败");
