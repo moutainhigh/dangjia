@@ -81,6 +81,12 @@ public interface DjMaintenanceRecordAPI {
     ServerResponse applicationAcceptance( @RequestParam("houseId") String houseId);
 
 
+    @PostMapping("/web/queryGuaranteeMoneyList")
+    @ApiOperation(value = "店铺-缴纳质保金列表", notes = "质保金缴纳列表")
+    ServerResponse queryGuaranteeMoneyList();
 
+    @PostMapping("/web/queryGuaranteeMoneyDetail")
+    @ApiOperation(value = "店铺-缴纳质保金详情", notes = "缴纳质保金详情")
+    ServerResponse queryGuaranteeMoneyDetail();
 
 }

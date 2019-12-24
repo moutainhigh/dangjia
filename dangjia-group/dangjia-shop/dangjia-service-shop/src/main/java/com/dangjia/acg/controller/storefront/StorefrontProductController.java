@@ -127,17 +127,7 @@ public class StorefrontProductController implements StorefrontProductAPI {
          storefrontProductService.priceAdjustmentTask();
     }
 
-    @Override
-    @ApiMethod
-    public void queryGuaranteeMoneyList() {
-        storefrontProductService.queryGuaranteeMoneyList();
-    }
 
-    @Override
-    @ApiMethod
-    public void queryGuaranteeMoneyDetail() {
-        storefrontProductService.queryGuaranteeMoneyDetail();
-    }
 
 
 }

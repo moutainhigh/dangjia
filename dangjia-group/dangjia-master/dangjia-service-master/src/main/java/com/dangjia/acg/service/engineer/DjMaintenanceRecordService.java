@@ -490,6 +490,31 @@ public class DjMaintenanceRecordService {
         }
     }
 
+    /**
+     * 缴纳质保金列表
+     */
+    public ServerResponse queryGuaranteeMoneyList() {
+        try {
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            //logger.error("缴纳质保金列表异常：", e);
+        }
+        return null;
+    }
+
+    /**
+     * 缴纳质保金详情
+     */
+    public ServerResponse queryGuaranteeMoneyDetail() {
+        try {
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            //logger.error("缴纳质保金详情异常：", e);
+        }
+        return null;
+    }
 
 
 }

@@ -606,27 +606,7 @@ public class StorefrontProductService {
         }
     }
 
-    /**
-     * 缴纳质保金列表
-     */
-    public void queryGuaranteeMoneyList() {
-        try {
 
-        } catch (Exception e) {
-            logger.error("缴纳质保金列表异常：", e);
-        }
-    }
-
-    /**
-     * 缴纳质保金详情
-     */
-    public void queryGuaranteeMoneyDetail() {
-        try {
-
-        } catch (Exception e) {
-            logger.error("缴纳质保金详情异常：", e);
-        }
-    }
 
 
 }
