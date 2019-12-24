@@ -374,10 +374,6 @@ public class StorefrontProductService {
                     spdto.setDetailImage(dtimgUrlStr.toString());
                     spdto.setDetailImageUrl(dtimgStr.toString());
                     basicsStorefrontProductViewDTO.setStorefrontProduct(spdto);
-                    //*************************************新增功能点:初始化下拉框是否关联增值商品******************************************************
-//                    String prodTemplateId=spdto.getProdTemplateId();
-//                    List<ProductAddedRelation> productAddedRelationlist=djBasicsProductAPI.queryProductAddRelationByPid(null,prodTemplateId);
-//                    basicsStorefrontProductViewDTO.setProductAddedRelationlist(productAddedRelationlist);
                 }
             }
             PageInfo pageResult = new PageInfo(list);
@@ -435,10 +431,6 @@ public class StorefrontProductService {
                     spdto.setDetailImage(dtimgUrlStr.toString());
                     spdto.setDetailImageUrl(dtimgStr.toString());
                     basicsStorefrontProductViewDTO.setStorefrontProduct(spdto);
-                    //*************************************新增功能点:初始化下拉框是否关联增值商品******************************************************
-//                    String prodTemplateId=spdto.getProdTemplateId();
-//                    List<ProductAddedRelation> productAddedRelationlist=djBasicsProductAPI.queryProductAddRelationByPid(null,prodTemplateId);
-//                    basicsStorefrontProductViewDTO.setProductAddedRelationlist(productAddedRelationlist);
                 }
             }
             PageInfo pageResult = new PageInfo(list);
@@ -458,6 +450,7 @@ public class StorefrontProductService {
      */
     public ServerResponse setSpStatusById(String userId,String cityId,String id, String isShelfStatus) {
         try {
+
             if (StringUtils.isEmpty(isShelfStatus)) {
                 return ServerResponse.createByErrorMessage("商品上下架状态不能为空");
             }
@@ -466,6 +459,8 @@ public class StorefrontProductService {
             {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息!");
             }
+            //判断是否交了滞留金
+
             StorefrontProduct storefrontProduct = new StorefrontProduct();
             storefrontProduct.setId(id);
             storefrontProduct.setIsShelfStatus(isShelfStatus);
@@ -494,11 +489,18 @@ public class StorefrontProductService {
             if (StringUtils.isEmpty(isShelfStatus)) {
                 return ServerResponse.createByErrorMessage("商品上下架状态不能为空");
             }
-            Storefront storefront=storefrontService.queryStorefrontByUserID(userId,cityId);
+            Storefront storefront =storefrontService.queryStorefrontByUserID(userId,cityId);
             if(storefront==null)
             {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息!");
             }
+            //判断是否交了滞留金
+            Double retentionMoney=storefront.getRetentionMoney();
+            if (retentionMoney==0)
+            {
+
+            }
+
             //批量上架，逗号拆分商品
             String[] iditem = id.split(",");
             for (String str:iditem) {
@@ -603,4 +605,28 @@ public class StorefrontProductService {
             logger.error("店铺商品调价任务异常：", e);
         }
     }
+
+    /**
+     * 缴纳质保金列表
+     */
+    public void queryGuaranteeMoneyList() {
+        try {
+
+        } catch (Exception e) {
+            logger.error("缴纳质保金列表异常：", e);
+        }
+    }
+
+    /**
+     * 缴纳质保金详情
+     */
+    public void queryGuaranteeMoneyDetail() {
+        try {
+
+        } catch (Exception e) {
+            logger.error("缴纳质保金详情异常：", e);
+        }
+    }
+
+
 }

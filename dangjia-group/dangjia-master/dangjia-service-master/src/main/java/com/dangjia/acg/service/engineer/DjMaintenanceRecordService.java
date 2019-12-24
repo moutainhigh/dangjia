@@ -476,6 +476,15 @@ public class DjMaintenanceRecordService {
         }
     }
 
+    /**
+     * 确认申请验收
+     * @param houseId
+     * @return
+     */
+    public ServerResponse applicationAcceptance(String houseId) {
+        return null;
+    }
+
 
 
 }

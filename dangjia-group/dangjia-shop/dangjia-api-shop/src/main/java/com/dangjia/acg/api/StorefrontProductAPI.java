@@ -98,4 +98,13 @@ public interface StorefrontProductAPI {
     @PostMapping("/sup/priceAdjustmentTask")
     @ApiOperation(value = "店铺商品调价任务", notes = "店铺商品调价任务")
     void priceAdjustmentTask();
+
+    @PostMapping("/web/queryGuaranteeMoneyList")
+    @ApiOperation(value = "缴纳质保金列表", notes = "质保金缴纳列表")
+    void queryGuaranteeMoneyList();
+
+    @PostMapping("/web/queryGuaranteeMoneyDetail")
+    @ApiOperation(value = "缴纳质保金详情", notes = "缴纳质保金详情")
+    void queryGuaranteeMoneyDetail();
+
 }
