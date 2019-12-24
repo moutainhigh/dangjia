@@ -45,7 +45,8 @@
         mr.id as mrId,
         mrrp.proportion AS proportion,
         mrrp.id as mrrpId,
-        (mr.since_purchase_amount * mrrp.proportion) as paymentAmount,
+        mr.enough_amount as enoughAmount,
+        (((mr.since_purchase_amount + IFNULL(mr.enough_amount,0)) * mrrp.proportion) / 100) as paymentAmount,
         CONCAT(
         h.residential,
         IFNULL(h.building, '*'),
@@ -57,6 +58,75 @@
         from dj_maintenance_record_responsible_party mrrp
         INNER JOIN dj_maintenance_record mr on mrrp.maintenance_record_id = mr.id
         INNER JOIN dj_house h on mr.house_id = h.id
-        where mrrp.responsible_party_type=3 and mrrp.responsible_party_id = #{responsiblePartyId}
+        where mrrp.responsible_party_type=3 and
+        mrrp.responsible_party_id = #{memberId}
     </select>
+
+    <select id="queryDimensionRecordInFo" resultType="com.dangjia.acg.dto.engineer.DimensionRecordDTO">
+        select
+        mr.payment_date as paymentDate,
+        mr.house_id as houseId,
+        mr.since_purchase_amount as sincePurchaseAmount,
+        mr.id as mrId,
+        mrrp.proportion AS proportion,
+        mrrp.id as mrrpId,
+        mrrp.responsible_party_id AS responsiblePartyId,
+        mr.enough_amount as enoughAmount,
+        mr.steward_remark as stewardRemark,
+       (((mr.since_purchase_amount + IFNULL(mr.enough_amount,0)) * mrrp.proportion) / 100) as paymentAmount,
+        CONCAT(
+        h.residential,
+        IFNULL(h.building, '*'),
+        '栋',
+        IFNULL(CONCAT(h.unit, '单元'),'' ),
+        IFNULL(h.number, '*'),
+        '号'
+        ) houseName
+        from dj_maintenance_record mr
+        INNER JOIN  dj_maintenance_record_responsible_party mrrp on mrrp.maintenance_record_id = mr.id
+        INNER JOIN dj_house h on mr.house_id = h.id
+        where mrrp.responsible_party_type = 3  and mr.id = #{mrId}
+    </select>
+
+    <select id="queryResponsibleParty" resultType="com.dangjia.acg.dto.engineer.ComplainDataDTO">
+        SELECT
+            c. status,
+            c.create_date AS createDate,
+            c.description,
+            c.image,
+            c.handle_date AS handleDate,
+            m. NAME AS name,
+            m.mobile AS mobile,
+            m.head AS head
+        FROM
+            dj_complain c
+        INNER JOIN dj_member m ON c.member_id = m.id
+        WHERE
+            c.complain_type = 10
+        AND c.data_status = 0
+        AND c.member_id = #{responsiblePartyId}
+        AND c.house_id = #{houseId}
+    </select>
+
+    <select id="toQualityMoney" resultType="com.dangjia.acg.dto.engineer.ToQualityMoneyDTO">
+       SELECT
+            mr.payment_date AS paymentDate,
+            mr.house_id AS houseId,
+            mr.since_purchase_amount AS sincePurchaseAmount,
+            mr.id AS mrId,
+            mrrp.proportion AS proportion,
+            mrrp.id AS mrrpId,
+            mrrp.responsible_party_id AS responsiblePartyId,
+            mr.enough_amount AS enoughAmount,
+            mr.steward_remark AS stewardRemark,
+            m.retention_money AS retentionMoney
+        FROM
+            dj_maintenance_record_responsible_party mrrp
+        INNER JOIN dj_maintenance_record mr ON mrrp.maintenance_record_id = mr.id
+        INNER JOIN dj_member m ON mrrp.responsible_party_id = m.id
+        WHERE
+            mrrp.id = #{data}
+    </select>
+
+
 </mapper>
