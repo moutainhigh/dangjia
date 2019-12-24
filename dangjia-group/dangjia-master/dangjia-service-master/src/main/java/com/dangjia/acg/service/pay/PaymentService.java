@@ -1266,7 +1266,12 @@ public class PaymentService {
                 businessOrder.setTotalPrice(paymentPrice);
                 businessOrder.setDiscountsPrice(new BigDecimal(0));
                 businessOrder.setPayPrice(paymentPrice);
-                businessOrder.setType(2);//记录支付类型任务类型
+                if(orderSource==1||orderSource==4){
+                    businessOrder.setType(1);//记录支付类型任务类型(精算支付任务，走工序的）
+                }else{
+                    businessOrder.setType(2);//记录支付类型任务类型
+                }
+
                 businessOrder.setTaskId(order.getId());//保存任务ID
                 businessOrderMapper.insert(businessOrder);
             }

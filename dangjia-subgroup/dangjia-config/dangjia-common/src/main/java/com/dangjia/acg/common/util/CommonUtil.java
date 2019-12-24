@@ -1,7 +1,6 @@
 package com.dangjia.acg.common.util;
 
 import com.alibaba.fastjson.JSON;
-import com.google.common.math.DoubleMath;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.shiro.web.session.HttpServletSession;
@@ -11,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.*;
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.*;
@@ -646,4 +646,31 @@ public class CommonUtil {
     return stateName;
   }
 
+  /**
+   * 判断对象属性是否是基本数据类型,包括是否包括string
+   * @param className
+   * @return
+   */
+  public static boolean isBaseType(Class className) {
+    return className.equals(Integer.class) ||
+            className.equals(BigDecimal.class) ||
+            className.equals(Date.class) ||
+            className.equals(int.class) ||
+            className.equals(String.class) ||
+            className.equals(Enum.class) ||
+            className.equals(Byte.class) ||
+            className.equals(byte.class) ||
+            className.equals(Long.class) ||
+            className.equals(long.class) ||
+            className.equals(Double.class) ||
+            className.equals(double.class) ||
+            className.equals(Float.class) ||
+            className.equals(float.class) ||
+            className.equals(Character.class) ||
+            className.equals(char.class) ||
+            className.equals(Short.class) ||
+            className.equals(short.class) ||
+            className.equals(Boolean.class) ||
+            className.equals(boolean.class);
+  }
 }

@@ -29,10 +29,10 @@ public class DjSkillCertification extends BaseEntity {
     @ApiModelProperty("工匠id")
     private String workerId;
 
-    @Column(name = "product_id")
+    @Column(name = "prod_template_id")
     @Desc(value = "人工商品id")
     @ApiModelProperty("人工商品id")
-    private String productId;
+    private String prodTemplateId;
 
     @Column(name = "product_sn")
     @Desc(value = "商品编号")

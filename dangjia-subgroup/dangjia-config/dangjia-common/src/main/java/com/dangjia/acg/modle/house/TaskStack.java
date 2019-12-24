@@ -52,8 +52,8 @@ public class TaskStack extends BaseEntity {
 
 
     @Column(name = "type")
-    @Desc(value = "任务类型0跳转网页，1支付任务,2补货补人工,3审核验收任务,4大管家审核退,5审核工匠,6图纸不合格")
-    @ApiModelProperty("任务类型0跳转网页，1支付任务,2补货补人工,3审核验收任务,4大管家审核退,5审核工匠,6图纸不合格")
+    @Desc(value = "任务类型0跳转网页，1支付任务,2补货补人工,3审核验收任务,4大管家审核退,5审核工匠,6图纸不合格,7工匠缴纳质保金")
+    @ApiModelProperty("任务类型0跳转网页，1支付任务,2补货补人工,3审核验收任务,4大管家审核退,5审核工匠,6图纸不合格7,工匠缴纳质保金")
     private Integer type ;
 
 

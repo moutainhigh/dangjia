@@ -314,5 +314,11 @@ public class HouseController implements HouseAPI {
         return houseService.queryApplyComplaints(houseFlowApplyId);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse setRemindButlerCheck(String houseFlowApplyId) {
+        return houseService.setRemindButlerCheck(houseFlowApplyId);
+    }
+
 }
 

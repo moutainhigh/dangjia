@@ -8,7 +8,6 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.delivery.SupplyDimensionDTO;
 import com.dangjia.acg.dto.sup.SupplierDTO;
@@ -19,7 +18,6 @@ import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.supplier.DjAdjustRecord;
 import com.dangjia.acg.modle.supplier.DjSupApplicationProduct;
 import com.dangjia.acg.modle.supplier.DjSupplier;
-import com.dangjia.acg.sql.config.DruidConfig;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -61,7 +59,7 @@ public class DjSupApplicationProductService {
     private DjSupplierMapper djSupplierMapper;
 
     @Autowired
-    private BasicsStorefrontAPI basicsStorefrontAPI ;
+    private BasicsStorefrontAPI basicsStorefrontAPI;
     /**
      * 供应商申请供应商品
      *
@@ -71,9 +69,9 @@ public class DjSupApplicationProductService {
     public ServerResponse insertDjSupApplicationProduct(String jsonStr, String cityId, String supId, String shopId) {
         try {
             DjSupplier djSupplier = djSupplierMapper.selectByPrimaryKey(supId);
-            if(null==djSupplier)
+            if (null == djSupplier)
                 return ServerResponse.createByErrorMessage("供应商不存在");
-            if(null==djSupplier.getRetentionMoney()||!(djSupplier.getRetentionMoney()>0))
+            if (null == djSupplier.getRetentionMoney() || !(djSupplier.getRetentionMoney() > 0))
                 return ServerResponse.createByErrorMessage("请先交纳滞留金");
             JSONArray jsonArr = JSONArray.parseArray(jsonStr);
             jsonArr.forEach(str -> {
@@ -109,7 +107,7 @@ public class DjSupApplicationProductService {
      */
     public Integer queryHaveGoodsSize(String supId, String shopId, String applicationStatus) {
         try {
-            List<DjSupSupplierProductDTO> list = djSupSupplierProductMapper.queryHaveGoods(supId, shopId, applicationStatus,null);
+            List<DjSupSupplierProductDTO> list = djSupSupplierProductMapper.queryHaveGoods(supId, shopId, applicationStatus, null);
             if (list != null) {
                 return list.size();
             } else {
@@ -130,16 +128,15 @@ public class DjSupApplicationProductService {
      * @param shopId
      * @return
      */
-    public ServerResponse queryHaveGoods(String supId, String shopId, String applicationStatus, PageDTO pageDTO,String keyWord,String userId,String cityId) {
+    public ServerResponse queryHaveGoods(String supId, String shopId, String applicationStatus, PageDTO pageDTO, String keyWord, String userId, String cityId) {
         try {
-            Storefront storefront= basicsStorefrontAPI.queryStorefrontByUserID(userId,cityId);
-            if(storefront==null)
-            {
+            Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
+            if (storefront == null) {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<DjSupSupplierProductDTO> djSupSupplierProductDTOS = djSupSupplierProductMapper.queryHaveGoods(supId, shopId, applicationStatus,keyWord);
+            List<DjSupSupplierProductDTO> djSupSupplierProductDTOS = djSupSupplierProductMapper.queryHaveGoods(supId, shopId, applicationStatus, keyWord);
             djSupSupplierProductDTOS.forEach(djSupSupplierProductDTO -> {
                 djSupSupplierProductDTO.setImage(imageAddress + djSupSupplierProductDTO.getImage());
             });
@@ -161,7 +158,7 @@ public class DjSupApplicationProductService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse updateHaveGoods(String jsonStr,String userId) {
+    public ServerResponse updateHaveGoods(String jsonStr, String userId) {
         try {
             JSONArray jsonArr = JSONArray.parseArray(jsonStr);
             jsonArr.forEach(str -> {
@@ -227,9 +224,9 @@ public class DjSupApplicationProductService {
      * @param applicationStatus
      * @return
      */
-    public ServerResponse getSuppliedProduct(String supId, String shopId, String applicationStatus,String keyWord) {
+    public ServerResponse getSuppliedProduct(String supId, String shopId, String applicationStatus, String keyWord) {
         try {
-            List<DjSupSupplierProductDTO> djSupSupplierProductList = djSupSupplierProductMapper.queryHaveGoods(supId, shopId, applicationStatus,keyWord);
+            List<DjSupSupplierProductDTO> djSupSupplierProductList = djSupSupplierProductMapper.queryHaveGoods(supId, shopId, applicationStatus, keyWord);
             if (djSupSupplierProductList.size() <= 0) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
@@ -250,7 +247,7 @@ public class DjSupApplicationProductService {
     public ServerResponse rejectAllProduct(String id) {
         try {
             if (StringUtils.isEmpty(id)) {
-            return ServerResponse.createByErrorMessage("该用户没有选择商品");
+                return ServerResponse.createByErrorMessage("该用户没有选择商品");
             }
             String[] iditem = id.split(",");
             Example example = new Example(DjSupApplicationProduct.class);
@@ -326,10 +323,10 @@ public class DjSupApplicationProductService {
      * @param shopId
      * @return
      */
-    public ServerResponse queryNotForTheGoods(String supId, String shopId, PageDTO pageDTO,String keyWord) {
+    public ServerResponse queryNotForTheGoods(String supId, String shopId, PageDTO pageDTO, String keyWord) {
         try {
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-            List<DjSupSupplierProductDTO> djSupSupplierProductDTOS = djSupSupplierProductMapper.queryHaveGoods(supId, shopId, "0,1,2",keyWord);
+            List<DjSupSupplierProductDTO> djSupSupplierProductDTOS = djSupSupplierProductMapper.queryHaveGoods(supId, shopId, "0,1,2", keyWord);
             //Stream表达式取出已选商品的id
             List<String> productIds = djSupSupplierProductDTOS.stream()
                     .map(DjSupSupplierProductDTO::getProductId)
@@ -380,6 +377,7 @@ public class DjSupApplicationProductService {
 
     /**
      * 商品调价定时任务
+     *
      * @return
      */
     public void setCommodityPricing() {
@@ -388,19 +386,19 @@ public class DjSupApplicationProductService {
 
     /**
      * 发货任务-新版查询供应商
+     *
      * @param cityId
      * @param productId
      * @return
      */
-    public ServerResponse supplierList(String cityId, String userId,String productId) {
+    public ServerResponse supplierList(String cityId, String userId, String productId) {
         try {
-            Storefront storefront= basicsStorefrontAPI.queryStorefrontByUserID(userId,cityId);
-            if(storefront==null)
-            {
+            Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
+            if (storefront == null) {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
             }
 
-             List<DjSupApplicationProduct> djSupApplicationProductList = djSupApplicationProductMapper.querySupplierProduct(storefront.getId(), productId);
+            List<DjSupApplicationProduct> djSupApplicationProductList = djSupApplicationProductMapper.querySupplierProduct(storefront.getId(), productId);
             if (djSupApplicationProductList.size() <= 0) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
@@ -424,6 +422,7 @@ public class DjSupApplicationProductService {
 
     /**
      * 查询供应商商品
+     *
      * @param cityId
      * @param supplierId
      * @param productId
