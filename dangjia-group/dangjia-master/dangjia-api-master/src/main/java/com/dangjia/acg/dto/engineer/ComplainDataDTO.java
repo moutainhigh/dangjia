@@ -21,6 +21,6 @@ public class ComplainDataDTO {
     private String name;//工匠名称
     private String mobile;//工匠电话
     private String head;//工匠头像
-
+    private Integer workerTypeId;//工种id
     private Integer type;//1-投诉中 2-已完成
 }

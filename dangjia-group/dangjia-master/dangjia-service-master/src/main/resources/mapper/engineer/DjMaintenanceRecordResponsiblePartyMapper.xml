@@ -114,16 +114,28 @@
             mr.house_id AS houseId,
             mr.since_purchase_amount AS sincePurchaseAmount,
             mr.id AS mrId,
+            mr.create_date as createDate,
             mrrp.proportion AS proportion,
             mrrp.id AS mrrpId,
+            (((mr.since_purchase_amount + IFNULL(mr.enough_amount,0)) * mrrp.proportion) / 100) as paymentAmount,
             mrrp.responsible_party_id AS responsiblePartyId,
             mr.enough_amount AS enoughAmount,
             mr.steward_remark AS stewardRemark,
-            m.retention_money AS retentionMoney
+            m.retention_money AS retentionMoney,
+            m.worker_type_id as workerTypeId,
+            CONCAT(
+            h.residential,
+            IFNULL(h.building, '*'),
+            '栋',
+            IFNULL(CONCAT(h.unit, '单元'),'' ),
+            IFNULL(h.number, '*'),
+            '号'
+            ) houseName
         FROM
             dj_maintenance_record_responsible_party mrrp
         INNER JOIN dj_maintenance_record mr ON mrrp.maintenance_record_id = mr.id
         INNER JOIN dj_member m ON mrrp.responsible_party_id = m.id
+        INNER JOIN dj_house h on mr.house_id = h.id
         WHERE
             mrrp.id = #{data}
     </select>

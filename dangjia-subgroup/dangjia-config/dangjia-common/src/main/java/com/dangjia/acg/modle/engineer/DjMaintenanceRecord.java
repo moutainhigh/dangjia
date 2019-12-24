@@ -160,5 +160,4 @@ public class DjMaintenanceRecord extends BaseEntity {
     @ApiModelProperty("工匠上传图片")
     private String workerImage;
 
-
 }

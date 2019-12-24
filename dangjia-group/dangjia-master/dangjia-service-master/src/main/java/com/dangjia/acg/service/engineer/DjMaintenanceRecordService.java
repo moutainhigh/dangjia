@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.engineer;
 
+import com.dangjia.acg.api.product.DjBasicsProductAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
@@ -78,6 +79,10 @@ public class DjMaintenanceRecordService {
 
     @Autowired
     private IMasterTaskStackMapper iMasterTaskStackMapper;
+
+    @Autowired
+    private DjBasicsProductAPI djBasicsProductAPI;
+
     /**
      * 查询质保审核列表
      *
@@ -380,10 +385,15 @@ public class DjMaintenanceRecordService {
                     djMaintenanceRecordProductMapper.queryDjMaintenanceRecordProductList(dimensionRecordDTOS.getMrId());
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             djMaintenanceRecordProductDTOS.forEach(djMaintenanceRecordProductDTO -> {
+                djMaintenanceRecordProductDTO.setValueNameArr(djBasicsProductAPI.getNewValueNameArr(djMaintenanceRecordProductDTO.getValueIdArr()));
                 djMaintenanceRecordProductDTO.setImage(imageAddress + djMaintenanceRecordProductDTO.getImage());
             });
             dimensionRecordDTOS.setDjMaintenanceRecordProductDTOS(djMaintenanceRecordProductDTOS);
 
+
+
+
+            //查询申诉状态
             example = new Example(Complain.class);
             example.createCriteria().andEqualTo(Complain.MEMBER_ID, dimensionRecordDTOS.getResponsiblePartyId())
                     .andEqualTo(Complain.DATA_STATUS, 0)
@@ -466,7 +476,14 @@ public class DjMaintenanceRecordService {
         try {
             ToQualityMoneyDTO toQualityMoneyDTO = djMaintenanceRecordResponsiblePartyMapper.toQualityMoney(data);
             if(toQualityMoneyDTO != null){
+                String dateStr =  DateUtil.dateToString(toQualityMoneyDTO.getCreateDate(),"yyyy-MM-dd");
+                String workerName = workerTypeMapper.selectByPrimaryKey(toQualityMoneyDTO.getWorkerTypeId()).getName();
+                toQualityMoneyDTO.setStr("“" + toQualityMoneyDTO.getHouseName() + "”于" +dateStr+
+                "申请了"+workerName+"质保,经大管家实地勘察后,确定你责任占比"+toQualityMoneyDTO.getProportion() +
+                        "%,因您质保不足则需支付质保金。");
+
                 toQualityMoneyDTO.setToQualityAmount(toQualityMoneyDTO.getSincePurchaseAmount() + toQualityMoneyDTO.getEnoughAmount());
+                toQualityMoneyDTO.setNeedAmount(toQualityMoneyDTO.getPaymentAmount() - toQualityMoneyDTO.getRetentionMoney());
             }
 
             return ServerResponse.createBySuccess("查询成功", toQualityMoneyDTO);
@@ -476,6 +493,21 @@ public class DjMaintenanceRecordService {
         }
     }
 
+    /**
+     * 查询工匠质保金是否弹框
+     * type 0- 不弹框 1-弹框
+     * @param memberId
+     * @return
+     */
+    public Integer queryRetentionMoney(String memberId){
+        Member member = iMemberMapper.selectByPrimaryKey(memberId);
+        Integer type = 0; //0- 不弹框 1-弹框
+        if(member != null && member.getRetentionMoney().intValue() < 0){
+            type = 1;
+            return type;
+        }
+        return type;
+    }
     /**
      * 确认申请验收
      * @param houseId

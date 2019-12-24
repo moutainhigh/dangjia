@@ -14,8 +14,8 @@ import java.util.List;
 public class ToQualityMoneyDTO {
 
     private Date paymentDate;//支付时间
-
-    private Double paymentAmount;//付款金额
+    private Integer workerTypeId;
+    private Date createDate;
     private Double proportion;//维保责任方占比
     private String mrId;//
     private String mrrpId;
@@ -25,7 +25,9 @@ public class ToQualityMoneyDTO {
     private Double enoughAmount; //自购金额
     private String responsiblePartyId;//工匠id
     private String stewardRemark;//管家备注
-
     private Double ToQualityAmount;//质保发花费
-    private Double retentionMoney;//实际滞留金
+    private Double paymentAmount;//所需质保金
+    private Double retentionMoney;//现有滞保金
+    private Double needAmount;//需支付
+    private String str;//台头
 }
