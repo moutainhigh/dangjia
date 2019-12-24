@@ -423,7 +423,7 @@
             chfa.apply_type AS applyType,
             chfa.house_flow_id AS houseFlowId,
             chfa.house_id AS houseId,
-            chfa.member_check AS member_check,
+            chfa.member_check AS memberCheck,
             chfa.supervisor_check AS supervisorCheck,
             chfa.worker_type_id AS workerTypeId,
             chfa.worker_type AS workerType,
@@ -506,7 +506,7 @@
         FROM
             dj_core_house_flow_apply chfa
         INNER JOIN dj_complain c ON chfa.id = c.business_id
-        WHERE id=#{houseFlowApplyId}
+        WHERE chfa.id=#{houseFlowApplyId}
     </select>
 </mapper>
 

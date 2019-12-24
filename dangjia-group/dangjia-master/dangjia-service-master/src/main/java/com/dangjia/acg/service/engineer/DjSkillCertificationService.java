@@ -101,7 +101,7 @@ public class DjSkillCertificationService {
                     JSONObject obj = (JSONObject) str;
                     DjSkillCertification djSkillCertification=new DjSkillCertification();
                     djSkillCertification.setWorkerId(workerId);
-                    djSkillCertification.setProductId(obj.getString("id"));
+                    djSkillCertification.setProdTemplateId(obj.getString("id"));
                     djSkillCertification.setProductName(obj.getString("name"));
                     djSkillCertification.setProductSn(obj.getString("productSn"));
                     djSkillCertificationMapper.insert(djSkillCertification);
