@@ -1,7 +1,9 @@
 package com.dangjia.acg.mapper.engineer;
 
+import com.dangjia.acg.dto.engineer.ComplainDataDTO;
 import com.dangjia.acg.dto.engineer.DimensionRecordDTO;
 import com.dangjia.acg.dto.engineer.DjMaintenanceRecordResponsiblePartyDTO;
+import com.dangjia.acg.dto.engineer.ToQualityMoneyDTO;
 import com.dangjia.acg.modle.engineer.DjMaintenanceRecordResponsibleParty;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -21,7 +23,12 @@ public interface DjMaintenanceRecordResponsiblePartyMapper extends Mapper<DjMain
     DjMaintenanceRecordResponsiblePartyDTO queryDjMaintenanceRecordResponsibleParty(@Param("id") String id,
                                                                                     @Param("responsiblePartyType") Integer responsiblePartyType);
 
+    DimensionRecordDTO queryDimensionRecordInFo(@Param("mrId") String mrId);
 
+    List<DimensionRecordDTO> queryDimensionRecord(@Param("memberId") String memberId);
 
-    List<DimensionRecordDTO> queryDimensionRecord(@Param("responsiblePartyId") String responsiblePartyId);
+    ComplainDataDTO queryResponsibleParty(@Param("responsiblePartyId") String responsiblePartyId,
+                                          @Param("houseId") String houseId);
+
+    ToQualityMoneyDTO toQualityMoney(@Param("data") String data);
 }

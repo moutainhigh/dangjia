@@ -10,6 +10,7 @@ import lombok.experimental.FieldNameConstants;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import java.util.Date;
 
 @Data
 @Entity
@@ -24,8 +25,8 @@ public class Complain extends BaseEntity {
     private String memberId;
 
     @Column(name = "complain_type")
-    @Desc(value = "申述类型 1: 被处罚申诉.2：要求整改.3：要求换人.4:部分收货申诉.5:提前结束装修.6业主要求换人.7:业主申诉退货")
-    @ApiModelProperty("申述类型 1: 被处罚申诉.2：要求整改.3：要求换人.4:部分收货申诉.5:提前结束装修.6业主要求换人.7:业主申诉退货")
+    @Desc(value = "申述类型 1: 被处罚申诉.2：要求整改.3：要求换人.4:部分收货申诉.5:提前结束装修.6业主要求换人.7:业主申诉退货.8工匠申请部分退货.9业主申请质保.10工匠申维保定责")
+    @ApiModelProperty("申述类型 1: 被处罚申诉.2：要求整改.3：要求换人.4:部分收货申诉.5:提前结束装修.6业主要求换人.7:业主申诉退货.8工匠申请部分退货.9业主申请质保.10工匠申维保定责")
     private Integer complainType;
 
     @Column(name = "user_id")
@@ -110,5 +111,10 @@ public class Complain extends BaseEntity {
     @Desc(value = "图片")
     @ApiModelProperty("图片")
     private String image;
+
+    @Column(name = "handle_date")
+    @Desc(value = "平台处理时间")
+    @ApiModelProperty("平台处理时间")
+    private Date handleDate;
 
 }
