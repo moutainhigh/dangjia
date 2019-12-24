@@ -49,7 +49,7 @@ public interface WebClueAPI {
      */
     @PostMapping("web/clue/clueMessage/viewByStage")
     @ApiOperation(value = "通过状态查找线索", notes = "通过状态查找线索")
-    ServerResponse getByStage(@RequestParam("stage") int stage,
+    ServerResponse getByStage(@RequestParam("stage") Integer stage,
                               @RequestParam("pageDTO") PageDTO pageDTO);
 
     /**
@@ -80,7 +80,7 @@ public interface WebClueAPI {
      */
     @PostMapping("web/clue/giveUp")
     @ApiOperation(value = "放弃跟进/加入黑名单", notes = "放弃跟进/加入黑名单")
-    ServerResponse giveUp(@RequestParam("id") String id, @RequestParam("type") int type);
+    ServerResponse giveUp(@RequestParam("id") String id, @RequestParam("type") Integer type);
 
     /**
      * 转客户

@@ -43,7 +43,7 @@ public interface QuestionAPI {
     ServerResponse setQuestion(@RequestParam("request") HttpServletRequest request,
                                @RequestParam("questionId") String questionId,
                                @RequestParam("question") String question,
-                               @RequestParam("questionType") int questionType,
+                               @RequestParam("questionType") Integer questionType,
                                @RequestParam("optionJson") String optionJson);
 
     /**
@@ -79,7 +79,7 @@ public interface QuestionAPI {
     @PostMapping("member/question/getQuestionList")
     @ApiOperation(value = "获取试题列表", notes = "获取试题列表")
     ServerResponse getQuestionList(@RequestParam("request") HttpServletRequest request,
-                                   @RequestParam("questionType") int questionType,
+                                   @RequestParam("questionType") Integer questionType,
                                    @RequestParam("pageDTO") PageDTO pageDTO);
 
     /**

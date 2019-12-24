@@ -92,7 +92,7 @@ public class WorkerController implements WorkerAPI {
     @Override
     @ApiMethod
     public ServerResponse addMyBankCard(HttpServletRequest request, String userToken,WorkerBankCard bankCard,
-                                        String userId,String phone,int smscode){
+                                        String userId,String phone,Integer smscode){
         return  workerService.addMyBankCard(request,userToken,bankCard,userId,phone,smscode);
     }
 

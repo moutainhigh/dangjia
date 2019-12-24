@@ -53,7 +53,7 @@ public class MemberController implements MemberAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse checkRegister(HttpServletRequest request, String phone, String password, int smscode, String invitationCode, Integer userRole, String longitude, String latitude) {
+    public ServerResponse checkRegister(HttpServletRequest request, String phone, String password, Integer smscode, String invitationCode, Integer userRole, String longitude, String latitude) {
         return memberService.checkRegister(request, phone, smscode, password, invitationCode, userRole, longitude, latitude);
     }
 
@@ -83,7 +83,7 @@ public class MemberController implements MemberAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse checkForgotPasswordCode(String phone, int smscode) {
+    public ServerResponse checkForgotPasswordCode(String phone, Integer smscode) {
         return memberService.checkForgotPasswordCode(phone, smscode);
     }
 

@@ -50,8 +50,8 @@ public interface MemberAddressAPI {
     @ApiOperation(value = "新增地址", notes = "新增地址")
     ServerResponse insertAddress(@RequestParam("request") HttpServletRequest request,
                                  @RequestParam("userToken") String userToken,
-                                 @RequestParam("renovationType") int renovationType,
-                                 @RequestParam("defaultType") int defaultType,
+                                 @RequestParam("renovationType") Integer renovationType,
+                                 @RequestParam("defaultType") Integer defaultType,
                                  @RequestParam("name") String name,
                                  @RequestParam("mobile") String mobile,
                                  @RequestParam("cityName") String cityName,
@@ -84,7 +84,7 @@ public interface MemberAddressAPI {
     ServerResponse updataAddress(@RequestParam("request") HttpServletRequest request,
                                  @RequestParam("userToken") String userToken,
                                  @RequestParam("addressId") String addressId,
-                                 @RequestParam("defaultType") int defaultType,
+                                 @RequestParam("defaultType") Integer defaultType,
                                  @RequestParam("name") String name,
                                  @RequestParam("mobile") String mobile);
 

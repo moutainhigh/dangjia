@@ -23,7 +23,7 @@ public class HouseDesignPayController implements HouseDesignPayAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse confirmDesign(HttpServletRequest request, String userToken, String houseId, int type) {
+    public ServerResponse confirmDesign(HttpServletRequest request, String userToken, String houseId, Integer type) {
         return houseDesignPayService.confirmDesign(userToken, houseId, type);
     }
 }

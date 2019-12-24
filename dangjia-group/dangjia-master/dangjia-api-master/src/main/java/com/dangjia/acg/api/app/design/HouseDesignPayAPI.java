@@ -70,6 +70,6 @@ public interface HouseDesignPayAPI {
     ServerResponse confirmDesign(@RequestParam("request") HttpServletRequest request,
                                  @RequestParam("userToken") String userToken,
                                  @RequestParam("houseId") String houseId,
-                                 @RequestParam("type") int type);
+                                 @RequestParam("type") Integer type);
 
 }

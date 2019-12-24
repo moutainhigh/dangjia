@@ -34,7 +34,7 @@ public class MemberAuthController implements MemberAuthAPI {
     @Override
     @ApiMethod
     public ServerResponse newUserBinding(HttpServletRequest request, String phone, String password,
-                                         int smscode, String invitationCode, MemberAuth memberAuth,String longitude, String latitude) {
+                                         Integer smscode, String invitationCode, MemberAuth memberAuth,String longitude, String latitude) {
         return memberAuthService.newUserBinding(request, phone, password, smscode, invitationCode, memberAuth,longitude,latitude);
     }
 

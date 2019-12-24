@@ -114,7 +114,7 @@ public interface HouseDesignImageAPI {
     @ApiOperation(value = "设计通过", notes = "设计通过")
     ServerResponse checkPass(@RequestParam("userToken") String userToken,
                              @RequestParam("houseId") String houseId,
-                             @RequestParam("type") int type);
+                             @RequestParam("type") Integer type);
 
 
     /**
@@ -225,7 +225,7 @@ public interface HouseDesignImageAPI {
     ServerResponse getRecommendProduct(@RequestParam("request") HttpServletRequest request,
                                        @RequestParam("pageDTO") PageDTO pageDTO,
                                        @RequestParam("houseId") String houseId,
-                                       @RequestParam("type") int type);
+                                       @RequestParam("type") Integer type);
 
     /**
      * showdoc
@@ -248,7 +248,7 @@ public interface HouseDesignImageAPI {
     @ApiOperation(value = "添加推荐的商品", notes = "添加推荐的商品")
     ServerResponse addRecommendProduct(@RequestParam("request") HttpServletRequest request,
                                        @RequestParam("houseId") String houseId,
-                                       @RequestParam("type") int type,
+                                       @RequestParam("type") Integer type,
                                        @RequestParam("productIds") String productIds);
 
     /**
@@ -564,7 +564,7 @@ public interface HouseDesignImageAPI {
     ServerResponse getOdlQuantityRoomList(@RequestParam("request") HttpServletRequest request,
                                           @RequestParam("pageDTO") PageDTO pageDTO,
                                           @RequestParam("houseId") String houseId,
-                                          @RequestParam("type") int type);
+                                          @RequestParam("type") Integer type);
 
     /**
      * showdoc

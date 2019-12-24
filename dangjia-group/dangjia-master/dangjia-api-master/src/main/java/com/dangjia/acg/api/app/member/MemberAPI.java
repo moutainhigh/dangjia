@@ -296,7 +296,7 @@ public interface MemberAPI {
     ServerResponse checkRegister(@RequestParam("request") HttpServletRequest request,
                                  @RequestParam("phone") String phone,
                                  @RequestParam("password") String password,
-                                 @RequestParam("smscode") int smscode,
+                                 @RequestParam("smscode") Integer smscode,
                                  @RequestParam("invitationCode") String invitationCode,
                                  @RequestParam("userRole") Integer userRole,
                                  @RequestParam("longitude") String longitude,
@@ -428,7 +428,7 @@ public interface MemberAPI {
     @RequestMapping(value = "member/checkForgotPasswordCode", method = RequestMethod.POST)
     @ApiOperation(value = "找回密码校验验证码", notes = "找回密码校验验证码")
     ServerResponse checkForgotPasswordCode(@RequestParam("phone") String phone,
-                                           @RequestParam("smscode") int smscode);
+                                           @RequestParam("smscode") Integer smscode);
 
     /**
      * showdoc

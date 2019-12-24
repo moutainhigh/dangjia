@@ -24,13 +24,13 @@ public class QuestionController implements QuestionAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse setQuestion(HttpServletRequest request, String questionId, String question, int questionType, String optionJson) {
+    public ServerResponse setQuestion(HttpServletRequest request, String questionId, String question, Integer questionType, String optionJson) {
         return questionService.setQuestion(questionId, question, questionType, optionJson);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse getQuestionList(HttpServletRequest request, int questionType, PageDTO pageDTO) {
+    public ServerResponse getQuestionList(HttpServletRequest request, Integer questionType, PageDTO pageDTO) {
         return questionService.getQuestionList(questionType, pageDTO);
     }
 

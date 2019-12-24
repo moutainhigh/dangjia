@@ -23,7 +23,7 @@ public class MendWorkerController implements MendWorkerAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse repairBudgetWorker(HttpServletRequest request, int type, String workerTypeId, String houseId, String name,
+    public ServerResponse repairBudgetWorker(HttpServletRequest request, Integer type, String workerTypeId, String houseId, String name,
                                              PageDTO pageDTO,String cityId) {
         return mendWorkerService.repairBudgetWorker(type, workerTypeId, houseId, name, pageDTO,cityId);
     }

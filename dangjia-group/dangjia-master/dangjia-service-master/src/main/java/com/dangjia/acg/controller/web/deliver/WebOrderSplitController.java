@@ -52,7 +52,7 @@ public class WebOrderSplitController implements WebOrderSplitAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse splitDeliverList(String supplierId, int shipState) {
+    public ServerResponse splitDeliverList(String supplierId, Integer shipState) {
         return orderSplitService.splitDeliverList(supplierId, shipState);
     }
 
