@@ -187,7 +187,7 @@ public class RepairMendOrderService {
                 mendOrder.setTotalAmount(MathUtil.add(MathUtil.add(actualTotalAmount,totalRransportationCost),totalStevedorageCost));//实退款，含运费
                 if(order.getOrderSource()==1){
                     //增加退款单流水(退原订单)
-                    updateOrderProgressInfo(mendOrder.getId(),"2","REFUND_AFTER_SALES","RA_001",memberId);//您的退款申请已提交
+                   // updateOrderProgressInfo(mendOrder.getId(),"2","REFUND_AFTER_SALES","RA_001",memberId);//您的退款申请已提交
                     //减除扣减的量房费用
                     mendOrder.setTotalAmount(MathUtil.sub(mendOrder.getTotalAmount(),roomCharge.doubleValue()));//扣减量房后的费用
                     mendOrder.setRoomCharge(roomCharge.doubleValue());//量房收费
@@ -291,11 +291,11 @@ public class RepairMendOrderService {
         mendOrder.setModifyDate(new Date());
         iMendOrderMapper.updateByPrimaryKeySelective(mendOrder);//修改退款申请单的状态同意
         //增加退款流水记录
-        if(orderSource==1){
+        /*if(orderSource==1){
             //增加退款单流水(退原订单)
             updateOrderProgressInfo(mendOrder.getId(),"2","REFUND_AFTER_SALES","RA_006",memberId);//平台同意退款
             updateOrderProgressInfo(mendOrder.getId(),"2","REFUND_AFTER_SALES","RA_008",memberId);//平台同意退款
-        }
+        }*/
 
         settleMendOrder(repairMendOrderId,orderSource);//退钱给业主
         return ServerResponse.createBySuccess("操作成功");

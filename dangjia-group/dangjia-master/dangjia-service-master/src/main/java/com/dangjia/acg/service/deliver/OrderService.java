@@ -38,10 +38,7 @@ import com.dangjia.acg.modle.actuary.DjActuarialProductConfig;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.*;
-import com.dangjia.acg.modle.house.House;
-import com.dangjia.acg.modle.house.HouseDistribution;
-import com.dangjia.acg.modle.house.Warehouse;
-import com.dangjia.acg.modle.house.WarehouseDetail;
+import com.dangjia.acg.modle.house.*;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberAddress;
 import com.dangjia.acg.modle.order.DeliverOrderAddedProduct;
@@ -54,6 +51,7 @@ import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.service.acquisition.MasterCostAcquisitionService;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.dangjia.acg.service.core.TaskStackService;
 import com.dangjia.acg.service.product.MasterProductTemplateService;
 import com.dangjia.acg.service.repair.MendOrderService;
 import com.github.pagehelper.PageHelper;
@@ -144,6 +142,8 @@ public class OrderService {
     private RepairMendOrderService repairMendOrderService;
     @Autowired
     private IConfigMapper iConfigMapper;
+    @Autowired
+    private TaskStackService taskStackService;
     /**
      * 删除订单
      */
@@ -1325,6 +1325,13 @@ public class OrderService {
                 businessOrder.setState(4);//已取消
                 businessOrder.setModifyDate(new Date());
                 businessOrderMapper.updateByPrimaryKeySelective(businessOrder);
+                //修改补差价任务为已处理（查贸易符合条件补差价订单信息
+                TaskStack taskStack=taskStackService.selectTaskStackByData(houseId,7,order.getBusinessOrderNumber());
+                if(taskStack!=null&&StringUtils.isNotEmpty(taskStack.getId())){
+                    taskStack.setState(1);
+                    taskStack.setModifyDate(new Date());
+                    taskStackService.updateTaskStackInfo(taskStack);
+                }
             }
         }else{
             return ServerResponse.createByErrorMessage("未找到符合条件的退款信息");

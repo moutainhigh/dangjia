@@ -16,11 +16,15 @@ import java.util.List;
 public class HomePageBean {
 
     private BigDecimal evaluation;//积分
+    private BigDecimal overall;//综合分
     private String favorable;//好评率
     private String gradeName;//工匠等级别称
     private String ioflow;//工匠头像
     private String workerId;//工匠ID
     private String workerName;//工匠名称
+    private Integer orderTakingNum;//接单数量
+
+
     private List<ListBean> list;
 
     @Data
