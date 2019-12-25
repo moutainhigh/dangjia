@@ -13,6 +13,8 @@ public class BudgetOrderDTO {
 
     private String storefrontId;//店铺ID
 
+    private String businessOrderNumber;//支付订单号
+
     private String houseId;//房子ID
 
     private String addressId;//地址ID

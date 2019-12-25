@@ -54,7 +54,7 @@ public interface MendOrderAPI {
                                      @RequestParam("dateNum") Integer dateNum);
 
    /* @PostMapping(value = "app/repair/mendOrder/saveConfirmWorker")
-    @ApiOperation(value = "补人工提交", notes = "确认补人工")
+    @ApiOperation(value = "工匠补人工提交(新流程)", notes = "工匠补人工提交(新流程)")
     ServerResponse saveConfirmWorker(@RequestParam("houseId") String houseId,
                                      @RequestParam("workerId") String workerId,
                                      @RequestParam("dateNum") Integer dateNum);*/

@@ -81,6 +81,7 @@ import com.dangjia.acg.service.account.MasterAccountFlowRecordService;
 import com.dangjia.acg.service.acquisition.MasterCostAcquisitionService;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.dangjia.acg.service.core.TaskStackService;
 import com.dangjia.acg.service.design.HouseDesignPayService;
 import com.dangjia.acg.service.repair.MendOrderCheckService;
 import org.apache.commons.lang3.StringUtils;
@@ -209,6 +210,8 @@ public class PaymentService {
     private IMasterStorefrontProductMapper iMasterStorefrontProductMapper;
     @Autowired
     private IMasterAccountFlowRecordMapper iMasterAccountFlowRecordMapper;
+    @Autowired
+    private TaskStackService taskStackService;
 
 
     @Value("${spring.profiles.active}")
@@ -559,7 +562,8 @@ public class PaymentService {
             String workerTypeId=order.getWorkerTypeId();
 
             //判断是否为工序订单( 设计、精算订单)
-            if((workerTypeId==null|| StringUtils.isBlank(workerTypeId))){
+            if(order.getOrderSource()==4&&(workerTypeId==null|| StringUtils.isBlank(workerTypeId))){
+
                 boolean desginStatus=false;
                 //1.如果是工序订单，但总单上没有工序ID，则需要查子单上的工序ID
                 List<HouseOrderDetailDTO> orderDetailList=houseMapper.getBudgetOrderDetailByHouseId(order.getHouseId(),"1");//设计订单
@@ -585,6 +589,13 @@ public class PaymentService {
                         setHouseFlowInfo(order,"2",payState,1,diffMoney,1);
                     }
 
+                }
+                //修改补差价任务为已处理（查贸易符合条件补差价订单信息)
+                TaskStack taskStack=taskStackService.selectTaskStackByData(order.getHouseId(),7,order.getBusinessOrderNumber());
+                if(taskStack!=null&& cn.jiguang.common.utils.StringUtils.isNotEmpty(taskStack.getId())){
+                    taskStack.setState(1);
+                    taskStack.setModifyDate(new Date());
+                    taskStackService.updateTaskStackInfo(taskStack);
                 }
             }else{
                 if("1".equals(workerTypeId)){//如果工序ID为设计师，支付完成后，将房子表 的设计类型字段改为远程设计

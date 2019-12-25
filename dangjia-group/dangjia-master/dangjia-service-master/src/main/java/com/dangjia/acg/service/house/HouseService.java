@@ -80,6 +80,7 @@ import com.dangjia.acg.util.StringTool;
 import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.google.gson.JsonObject;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -2055,9 +2056,15 @@ public class HouseService {
             String productStr=getEligibleProduct(houseOrderDetailDTOList,1,square,inputArea);
             if(productStr!=null&&StringUtils.isNotBlank(productStr)){
                 Member member=memberMapper.selectByPrimaryKey(house.getMemberId());
-                paymentService.generateOrderCommon(member,house.getId(),house.getCityId(),productStr,null,memberAddress.getId(),4);//补差价订单
-                //增加任务(补差价订单）
-                taskStackService.inserTaskStackInfo(house.getId(),house.getMemberId(),"是否提交补差价订单","icon/sheji.png",7,house.getId());
+               ServerResponse serverResponse = paymentService.generateOrderCommon(member,house.getId(),house.getCityId(),productStr,null,memberAddress.getId(),4);//补差价订单
+                if (serverResponse.getResultObj() != null) {
+                    String obj = serverResponse.getResultObj().toString();//获取对应的支付单号码
+                    //增加任务(补差价订单）
+                    taskStackService.inserTaskStackInfo(house.getId(),house.getMemberId(),"是否提交补差价订单","icon/sheji.png",7,obj);
+                }
+
+
+
             }
 
         }else if(square.compareTo(inputArea)==-1){//偏小
