@@ -38,5 +38,5 @@ public class MendTypeRole extends BaseEntity {
     @Column(name = "role_arr")
     @Desc(value = "角色集合")
     @ApiModelProperty("角色集合")
-    private String roleArr; //1业主,2管家,3工匠,4材料员,5供应商
+    private String roleArr; //1业主,2管家,3工匠,4材料员,5供应商,6店铺
 }
