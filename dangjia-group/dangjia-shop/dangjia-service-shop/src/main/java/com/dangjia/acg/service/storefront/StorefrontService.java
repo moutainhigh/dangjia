@@ -522,9 +522,9 @@ public class StorefrontService {
             if (!DigestUtils.md5Hex(payPassword).equals(mainUser.getPayPassword())) {
                 return ServerResponse.createByErrorMessage("密码错误");
             }
-            if(businessOrderType.equals("2") && rechargeAmount<2000){
-                return ServerResponse.createByErrorMessage("滞留金交纳不小于2000");
-            }
+//            if(businessOrderType.equals("2") && rechargeAmount<2000){
+//                return ServerResponse.createByErrorMessage("滞留金交纳不小于2000");
+//            }
             djSupplierPayOrder.setDataStatus(0);
             djSupplierPayOrder.setBusinessOrderType(businessOrderType);
             djSupplierPayOrder.setPayState(payState);

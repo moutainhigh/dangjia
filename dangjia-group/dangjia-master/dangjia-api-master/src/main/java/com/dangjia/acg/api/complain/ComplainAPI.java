@@ -25,7 +25,19 @@ public interface ComplainAPI {
                                   @RequestParam("complainType") Integer complainType,
                                   @RequestParam("mendOrderId") String mendOrderId,
                                   @RequestParam("content") String content,
+                                  @RequestParam("images") String images
+                                  );
+
+    @PostMapping("/complain/insertGroundComplain")
+    @ApiOperation(value = "添加申诉(上架商品)", notes = "添加申诉(上架商品)")
+    ServerResponse insertGroundComplain(@RequestParam("request") HttpServletRequest request,
+                                  @RequestParam("userId") String userId,
+                                  @RequestParam("cityId") String cityId,
+                                  @RequestParam("complainType") Integer complainType,
+                                  @RequestParam("houseId") String houseId,
+                                  @RequestParam("content") String content,
                                   @RequestParam("images") String images);
+
 
 
     @PostMapping("/complain/addComplain")

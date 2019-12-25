@@ -14,4 +14,5 @@ public class ResponsiblePartyDetailDTO {
     private Double needRetentionMoney;//所需质保金
     private Double retentionMoney;//现有质保金
     private Double paidRetentionMoney;//需要缴纳质保金额
+    private String houseId;//房子id
 }
