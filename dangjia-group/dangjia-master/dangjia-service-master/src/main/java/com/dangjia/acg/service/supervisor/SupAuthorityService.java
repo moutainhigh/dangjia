@@ -3,12 +3,15 @@ package com.dangjia.acg.service.supervisor;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.app.member.MemberAPI;
-import com.dangjia.acg.api.data.WorkerTypeAPI;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.core.AcceptanceDynamicDTO;
 import com.dangjia.acg.dto.supervisor.*;
+import com.dangjia.acg.mapper.core.IHouseFlowApplyImageMapper;
+import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordMapper;
@@ -16,11 +19,14 @@ import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper;
 import com.dangjia.acg.mapper.supervisor.DjBasicsSupervisorAuthorityMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
+import com.dangjia.acg.modle.core.HouseFlowApply;
+import com.dangjia.acg.modle.core.HouseFlowApplyImage;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.engineer.DjMaintenanceRecord;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
 import com.dangjia.acg.modle.supervisor.DjBasicsSupervisorAuthority;
+import com.dangjia.acg.modle.worker.Evaluate;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -48,9 +54,6 @@ public class SupAuthorityService {
     private ConfigUtil configUtil;
 
     @Autowired
-    private WorkerTypeAPI workerTypeAPI;
-
-    @Autowired
     private MemberAPI memberAPI;
 
     @Autowired
@@ -64,6 +67,11 @@ public class SupAuthorityService {
 
     @Autowired
     private IHouseFlowMapper houseFlowMapper;
+
+    @Autowired
+    private IHouseFlowApplyImageMapper houseFlowApplyImageMapper;
+    @Autowired
+    private IHouseFlowApplyMapper houseFlowApplyMapper;
     /**
      * 删除已选
      * @param request
@@ -311,28 +319,87 @@ public class SupAuthorityService {
      */
     public ServerResponse queryAcceptanceTrend(HttpServletRequest request,String houseId,PageDTO pageDTO) {
         try {
-            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<AcceptanceTrendDTO> list= djMaintenanceRecordMapper.queryAcceptanceTrend(houseId);
-            list.forEach(acceptanceTrendDTO->{
-                String id= acceptanceTrendDTO.getId();
-                List<AcceptanceTrendDetailDTO> listDetail= djMaintenanceRecordMapper.queryAcceptanceTrendDetail(id);
-                acceptanceTrendDTO.setListDetail(listDetail);
-                listDetail.forEach(acceptanceTrendDetailDTO->{
-                    String workerTypeId=acceptanceTrendDetailDTO.getWorkerType();
-                    String workerTypeName=null;
-                    ServerResponse response = workerTypeAPI.getWorkerType(workerTypeId);
-                    if (response.isSuccess()) {
-                        workerTypeName = (((JSONObject) response.getResultObj()).getString(WorkerType.NAME));
-                    }
-                    acceptanceTrendDetailDTO.setWorkerTypeName(workerTypeName);
-                    acceptanceTrendDetailDTO.setStewardImage(StringTool.getImage(acceptanceTrendDetailDTO.getStewardRemark(),address));
-                    acceptanceTrendDetailDTO.setStewardImageDetail(StringTool.getImage(acceptanceTrendDetailDTO.getStewardRemark(),address).split(","));
-                });
+            List<HouseFlowApply> houseFlowApplies = houseFlowApplyMapper.queryAcceptanceDynamic(houseId);
+            if (houseFlowApplies.size() <= 0)
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "无相关施工记录");
+            PageInfo pageResult = new PageInfo(houseFlowApplies);
+            String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            List<AcceptanceDynamicDTO> acceptanceDynamicDTOS=new ArrayList<>();
+            houseFlowApplies.forEach(houseFlowApply -> {
+                AcceptanceDynamicDTO acceptanceDynamicDTO=new AcceptanceDynamicDTO();
+                //工匠验收动态
+                Member member = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
+                member.initPath(address);
+                acceptanceDynamicDTO.setWorkerHead(member.getHead());
+                if (member.getWorkerType() != null && member.getWorkerType() >= 1)
+                    acceptanceDynamicDTO.setWorkerTypeName(workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId()).getName());//工匠类型
+                acceptanceDynamicDTO.setWorkerName(member.getName());
+                acceptanceDynamicDTO.setWorkerContent(houseFlowApply.getApplyDec());
+                acceptanceDynamicDTO.setWorkerApplyType(houseFlowApply.getApplyType());
+                Example example=new Example(HouseFlowApplyImage.class);
+                example.createCriteria().andEqualTo(HouseFlowApplyImage.HOUSE_FLOW_APPLY_ID, houseFlowApply.getId());
+                List<HouseFlowApplyImage> hfaiList = houseFlowApplyImageMapper.selectByExample(example);
+                String[] workerImgArr = new String[hfaiList.size()];
+                for (int i = 0; i < hfaiList.size(); i++) {
+                    HouseFlowApplyImage hfai = hfaiList.get(i);
+                    String string = hfai.getImageUrl();
+                    workerImgArr[i] = address + string;
+                }
+                acceptanceDynamicDTO.setWorkerImgArr(workerImgArr);
+                acceptanceDynamicDTO.setHouseId(houseFlowApply.getHouseId());
+                acceptanceDynamicDTO.setWorkerHouseFlowApplyId(houseFlowApply.getId());
+                acceptanceDynamicDTO.setMemberCheck(houseFlowApply.getMemberCheck());
+                acceptanceDynamicDTO.setSupervisorCheck(houseFlowApply.getSupervisorCheck());
+                if(houseFlowApply.getStatus()!=null) {
+                    acceptanceDynamicDTO.setStatus(houseFlowApply.getStatus());
+                    acceptanceDynamicDTO.setHouseFlowApplyId(houseFlowApply.getId());
+                }
 
+                //获取业主评论
+                List<Evaluate> evaluates = houseFlowApplyMapper.getOwnerComment(houseFlowApply.getHouseId(),houseFlowApply.getWorkerId(),houseFlowApply.getApplyType(),houseFlowApply.getWorkerType());
+                if(!evaluates.isEmpty()){
+                    acceptanceDynamicDTO.setWorkerStar(evaluates.get(0).getStar());
+                    acceptanceDynamicDTO.setWorkerOwnerContent(evaluates.get(0).getContent());
+                }
+                //大管家验收动态
+                HouseFlowApply houseFlowApply1 = houseFlowApplyMapper.querySupervisorAcceptanceDynamic(houseFlowApply.getHouseFlowId());
+                if(houseFlowApply1!=null) {
+                    acceptanceDynamicDTO.setSupervisorHouseFlowApplyId(houseFlowApply1.getId());
+                    if (houseFlowApply1.getStatus() != null) {
+                        acceptanceDynamicDTO.setStatus(houseFlowApply1.getStatus());
+                        acceptanceDynamicDTO.setHouseFlowApplyId(houseFlowApply1.getId());
+                    }
+                    member = memberMapper.selectByPrimaryKey(houseFlowApply1.getWorkerId());
+                    member.initPath(address);
+                    acceptanceDynamicDTO.setSupervisorHead(member.getHead());
+                    if (member.getWorkerType() != null && member.getWorkerType() >= 1)
+                        acceptanceDynamicDTO.setSupervisorTypeName(workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId()).getName());//工匠类型
+                    acceptanceDynamicDTO.setSupervisorName(member.getName());
+                    acceptanceDynamicDTO.setSupervisorContent(houseFlowApply1.getApplyDec());
+                    example = new Example(HouseFlowApplyImage.class);
+                    example.createCriteria().andEqualTo(HouseFlowApplyImage.HOUSE_FLOW_APPLY_ID, houseFlowApply1.getId());
+                    hfaiList = houseFlowApplyImageMapper.selectByExample(example);
+                    String[] supervisorImgArr = new String[hfaiList.size()];
+                    for (int i = 0; i < hfaiList.size(); i++) {
+                        HouseFlowApplyImage hfai = hfaiList.get(i);
+                        String string = hfai.getImageUrl();
+                        supervisorImgArr[i] = address + string;
+                    }
+                    acceptanceDynamicDTO.setSupervisorImgArr(workerImgArr);
+                    //获取业主评论
+                    evaluates = houseFlowApplyMapper.getOwnerComment(houseFlowApply1.getHouseId(), houseFlowApply1.getWorkerId(), houseFlowApply1.getApplyType(), houseFlowApply1.getWorkerType());
+                    if (!evaluates.isEmpty()) {
+                        acceptanceDynamicDTO.setSupervisorStar(evaluates.get(0).getStar());
+                        acceptanceDynamicDTO.setSupervisorOwnerContent(evaluates.get(0).getContent());
+                    }
+                }
+                acceptanceDynamicDTOS.add(acceptanceDynamicDTO);
             });
-            PageInfo pageResult = new PageInfo(list);
-            return ServerResponse.createBySuccess("查询成功", pageResult);
+            if (acceptanceDynamicDTOS.size() <= 0)
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "无相关施工记录");
+            pageResult.setList(acceptanceDynamicDTOS);
+            return ServerResponse.createBySuccess("查询成功",pageResult);
         } catch (Exception e) {
             logger.error("验收动态异常", e);
             return ServerResponse.createByErrorMessage("验收动态异常");
