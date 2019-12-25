@@ -1,16 +1,19 @@
 package com.dangjia.acg.service.repair;
 
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.model.PageBean;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.product.ProductAppDTO;
 import com.dangjia.acg.dto.product.ProductWorkerDTO;
 import com.dangjia.acg.dto.repair.BudgetWorkerDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
 import com.dangjia.acg.mapper.basics.IProductWorkerMapper;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
+import com.dangjia.acg.service.product.app.GoodsProductTemplateService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -31,11 +34,14 @@ import java.util.List;
 @Service
 public class FillWorkerService {
 
+    private static Logger logger = LoggerFactory.getLogger(FillWorkerService.class);
     @Autowired
     private IBudgetWorkerMapper budgetWorkerMapper;
     @Autowired
     private IProductWorkerMapper workerGoodsMapper;
 
+    @Autowired
+    private GoodsProductTemplateService goodsProductTemplateService;
     @Autowired
     private ConfigUtil configUtil;
     protected static final Logger LOG = LoggerFactory.getLogger(FillWorkerService.class);
@@ -112,4 +118,45 @@ public class FillWorkerService {
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
+
+
+    /**
+     *  查询符合条件的人工商品大类
+     *
+     * @param workerId
+     * @param cityId
+     * @return
+     */
+   /* public ServerResponse getWorkerProductCategoryList( String workerId, String cityId){
+        logger.info("查询符合条件的人工商品大类,cityId={},workerId={}",cityId,workerId);
+         workerGoodsMapper.getWorkerProductCategoryList(workerId,cityId);
+        return null;
+    }*/
+
+
+    /**
+     * 查询符合条件的人工商品
+     * @param workerId
+     * @param searchKey
+     * @param pageDTO
+     * @param cityId
+     * @return
+     */
+    public ServerResponse getWorkerProductList(String workerId,String houseId,String searchKey,PageDTO pageDTO,String cityId){
+        try{
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<ProductAppDTO> workerProductList=workerGoodsMapper.getWorkerProductList(workerId,houseId,searchKey,cityId);
+            if (workerProductList == null || workerProductList.size() <= 0) {
+                return ServerResponse.createByErrorMessage("查无数据！");
+            }
+            goodsProductTemplateService.getProductList(workerProductList);
+            PageInfo pageResult = new PageInfo(workerProductList);
+            pageResult.setList(workerProductList);
+            return ServerResponse.createBySuccess("查询成功",pageResult);
+        }catch (Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
 }

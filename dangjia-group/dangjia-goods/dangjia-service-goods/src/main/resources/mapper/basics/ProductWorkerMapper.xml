@@ -102,4 +102,40 @@
                 rand( )
                 LIMIT 6
     </select>
+
+    <select id="getWorkerProductList" resultType="com.dangjia.acg.dto.product.ProductAppDTO">
+        SELECT
+            t2.id productId,
+            t2.storefront_id storefrontId,
+            t3.id productTemplateId,
+            t3.product_sn productSn,
+            t2.product_name productName,
+            t3.goods_id goodsId,
+            t2.sell_price price,
+            t3.image,
+            t3.unit_id unit,
+            t3.unit_name unitName,
+            t3.value_id_arr valueIdArr,
+            t3.value_name_arr valueNameArr,
+            t4.brand_id brandId,
+            t4.category_id categoryId,
+            t4.type productType,
+            t4.buy goodsBuy,
+            t3.convert_quality convertQuality,
+            t3.convert_unit convertUnit,
+            tt.shop_count shopCount
+        FROM
+        dj_skill_certification t1
+        INNER JOIN dj_basics_storefront_product t2 ON t1.prod_template_id=t2.prod_template_id
+        INNER JOIN dj_basics_product_template t3 ON t1.prod_template_id=t3.id
+        INNER JOIN dj_basics_goods t4 on t3.goods_id=t4.id
+        LEFT JOIN (select t5.* from dj_deliver_cart t5 where t5.member_id=#{workerId} and t5.house_id=#{houseId} and t5.product_type=2) tt on t2.id=tt.product_id
+        WHERE  t1.worker_id = #{workerId}
+        and t4.type=2
+        and t2.is_shelf_status=1
+        <if test="searchKey!=null and searchKey!=''">
+            AND t2.`product_name` LIKE CONCAT('%', #{searchKey}, '%')
+        </if>
+    </select>
+
 </mapper>

@@ -5,7 +5,10 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.repair.FillWorkerService;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -27,4 +30,34 @@ public class MendWorkerController implements MendWorkerAPI {
                                              PageDTO pageDTO,String cityId) {
         return mendWorkerService.repairBudgetWorker(type, workerTypeId, houseId, name, pageDTO,cityId);
     }
+
+    /**
+     *  查询符合条件的人工商品大类
+     * @param request
+     * @param workerId
+     * @param cityId
+     * @return
+     */
+   /* @Override
+    @ApiMethod
+    public ServerResponse getWorkerProductCategoryList(HttpServletRequest request, String workerId,String cityId){
+        return mendWorkerService.getWorkerProductCategoryList(workerId,cityId);
+    }*/
+
+
+    /**
+     * 查询符合条件的人工商品
+     * @param request
+     * @param workerId
+     * @param searchKey
+     * @param pageDTO
+     * @param cityId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse getWorkerProductList(HttpServletRequest request,String workerId,String houseId,String searchKey,PageDTO pageDTO,String cityId){
+        return mendWorkerService.getWorkerProductList(workerId,houseId,searchKey,pageDTO,cityId);
+    }
+
 }

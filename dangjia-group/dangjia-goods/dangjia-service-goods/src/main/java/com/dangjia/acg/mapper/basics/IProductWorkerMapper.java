@@ -1,5 +1,6 @@
 package com.dangjia.acg.mapper.basics;
 
+import com.dangjia.acg.dto.product.ProductAppDTO;
 import com.dangjia.acg.dto.product.ProductWorkerDTO;
 import com.dangjia.acg.modle.basics.HomeProductDTO;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
@@ -32,4 +33,7 @@ public interface IProductWorkerMapper extends Mapper<DjBasicsProductTemplate> {
      * @return
      */
     List<ProductWorkerDTO> getProductWorker(@Param("workerTypeId") String workerTypeId,@Param("name") String name,@Param("cityId") String cityId );
+
+    List<ProductAppDTO> getWorkerProductList(@Param("workerId") String workerId,@Param("houseId") String houseId, @Param("searchKey") String searchKey, @Param("cityId") String cityId);
+
 }

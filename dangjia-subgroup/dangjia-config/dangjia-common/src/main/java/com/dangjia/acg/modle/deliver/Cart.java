@@ -76,15 +76,15 @@ public class Cart extends BaseEntity {
 	@ApiModelProperty("单位")
 	private String unitName;//单位
 
-	@Column(name = "unit_name")
+	@Column(name = "category_id")
 	@Desc(value = "分类id")
 	@ApiModelProperty("分类id")
 	private String categoryId;//分类id
 
 	@Column(name = "product_type")
-	@Desc(value = "0：材料；1：包工包料")
-	@ApiModelProperty("0：材料；1：包工包料")
-	private Integer productType; //0：材料；1：包工包料
+	@Desc(value = "0：材料；1：包工包料；2：人工")
+	@ApiModelProperty("0：材料；1：包工包料；2：人工")
+	private Integer productType; //0：材料；1：包工包料；2：人工
 
 	@Column(name = "storefront_id")
 	@Desc(value = "店铺ID")
