@@ -32,6 +32,7 @@ import com.dangjia.acg.modle.house.TaskStack;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.worker.WorkerDetail;
+import com.dangjia.acg.util.DateUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -575,14 +576,16 @@ public class DjMaintenanceRecordService {
                 }
                 StringBuffer str = new StringBuffer();
                 str.append(responsiblePartyDetailDTO.getAddress() + "于").
-                        append(responsiblePartyDetailDTO.getCreateDate() + "申请了水电质保，经大管家实地勘察后，确认你责任占比")
+                        append(responsiblePartyDetailDTO.getCreateDate()+ "申请了"+workerTypeName+"质保，经大管家实地勘察后，确认你责任占比")
                         .append(responsiblePartyDetailDTO.getProportion() + "%，您需要缴纳质保金后才能进行店铺的其他操作，有任何疑问请及时联系当家客服。");
                 responsiblePartyDetailDTO.setContent(str.toString());//缴纳详情
 
+
+                responsiblePartyDetailDTO.setNeedRetentionMoney(responsiblePartyDetailDTO.getTotalAmount() * Double.parseDouble(responsiblePartyDetailDTO.getProportion())/100);
+
                 responsiblePartyDetailDTO.setProportion(responsiblePartyDetailDTO.getProportion()+"%");//责任占比
 
-                responsiblePartyDetailDTO.setNeedRetentionMoney((responsiblePartyDetailDTO.getTotalAmount() *
-                        Double.parseDouble(responsiblePartyDetailDTO.getProportion())) / 100);
+
             }
             return ServerResponse.createBySuccess("查询成功", responsiblePartyDetailDTO);//所需质保金
         } catch (Exception e) {
@@ -590,5 +593,4 @@ public class DjMaintenanceRecordService {
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
-
 }
