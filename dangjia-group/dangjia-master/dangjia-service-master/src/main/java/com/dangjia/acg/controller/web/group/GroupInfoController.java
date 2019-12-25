@@ -50,7 +50,7 @@ public class GroupInfoController implements GroupInfoAPI {
      */
     @Override
     @ApiMethod
-    public  ServerResponse editManageGroup(int groupId, String addList,String removeList){
+    public  ServerResponse editManageGroup(Integer groupId, String addList,String removeList){
         return groupInfoService.editManageGroup(groupId,addList,removeList);
     }
     /**

@@ -114,6 +114,11 @@ public class HouseFlowApply extends BaseEntity {
 	@ApiModelProperty("0-未读  1-已读")
 	private Integer isReadType;
 
+	@Column(name = "withdrawal_time")
+	@Desc(value = "业主提醒大管家验收时间")
+	@ApiModelProperty("业主提醒大管家验收时间")
+	private Date withdrawalTime;
+
 	@Transient
 	@Desc(value = "处理状态.0:待处理。1.驳回。2.接受。")
 	@ApiModelProperty("处理状态.0:待处理。1.驳回。2.接受。")

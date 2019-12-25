@@ -19,4 +19,7 @@ public class DjMaintenanceRecordProductDTO {
     private String productName;//商品名称
     private Double totalPrice;//销售价格
     private String image;//商品图片
+
+    private String valueIdArr;//属性选项选中值id集合
+    private String valueNameArr;//商品规格
 }

@@ -42,7 +42,7 @@ public class ReturnAspect {
      */
     @Before("aspect()")
     public void before(JoinPoint joinPoint) {
-        Object[] args = joinPoint.getArgs();// 获得目标方法的参数
+//        Object[] args = joinPoint.getArgs();// 获得目标方法的参数
 //        String name = joinPoint.getSignature().getName();// 获得目标方法名
 //        log.info("<=============" + name + "方法--AOP 前置通知=============>");
 //        if (args != null && args.length > 0
@@ -64,14 +64,21 @@ public class ReturnAspect {
 
     }
 
-    public Object[] setRequestParameter(String[] argNames ,Object[] args){
+    public Object[] setRequestParameter(ProceedingJoinPoint joinPoint){
         try {
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
                     .getRequest();
+
+            Object[] args = joinPoint.getArgs();
+            String[] argNames = ((MethodSignature)joinPoint.getSignature()).getParameterNames(); // 参数名
+            Class[] argClasss = ((MethodSignature)joinPoint.getSignature()).getParameterTypes(); // 参数名
+
             Map<String, String[]> parameterMap = request.getParameterMap();
             StringBuilder paramStr = new StringBuilder();
             for (Map.Entry<String, String[]> param : parameterMap.entrySet()) {
-                paramStr.append(param.getKey());
+                if("uuidKey".equals(param.getKey())){
+                    paramStr.append(param.getValue()[0]);
+                }
             }
             if(CommonUtil.isEmpty(paramStr.toString())){
                 return null;
@@ -85,8 +92,13 @@ public class ReturnAspect {
                 if(args[i] instanceof HttpServletRequest){
                     ParameterRequestWrapper wrapper = new ParameterRequestWrapper(request, json);
                     args[i]=wrapper;
-                }else if(json.get(argNames[i])!=null){
-                    args[i]=json.get(argNames[i]);
+                }else if (CommonUtil.isBaseType(argClasss[i]))  {
+                    if(args[i]==null) {
+                        args[i] = json.getObject(argNames[i],argClasss[i]);
+                    }
+                    if("".equals(args[i])&&!argClasss[i].equals(String.class)){
+                        args[i]=null;
+                    }
                 }else{
                     if(args[i]!=null) {
                         args[i] = json.toJavaObject(args[i].getClass());
@@ -112,9 +124,8 @@ public class ReturnAspect {
     @Around("aspect()")
     public Object around(ProceedingJoinPoint joinPoint) {
         String name = joinPoint.getSignature().getName();// 获得目标方法名
-        Object[] args = joinPoint.getArgs();
-        String[] argNames = ((MethodSignature)joinPoint.getSignature()).getParameterNames(); // 参数名
-        args= setRequestParameter(argNames,args);
+
+        Object[]  args= setRequestParameter(joinPoint);
         log.info("<=============" + name + "方法--AOP 环绕通知=============>");
         long start = System.currentTimeMillis();
         Object result = null;

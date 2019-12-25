@@ -98,4 +98,7 @@ public interface StorefrontProductAPI {
     @PostMapping("/sup/priceAdjustmentTask")
     @ApiOperation(value = "店铺商品调价任务", notes = "店铺商品调价任务")
     void priceAdjustmentTask();
+
+
+
 }

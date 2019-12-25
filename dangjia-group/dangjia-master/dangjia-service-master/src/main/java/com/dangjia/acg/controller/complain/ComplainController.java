@@ -20,9 +20,10 @@ public class ComplainController implements ComplainAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse insertComplain(HttpServletRequest request, String userId, String cityId,Integer complainType, String mendOrderId, String content) {
-        return complainService.insertComplain(request,userId,cityId,complainType,mendOrderId,content);
+    public ServerResponse insertComplain(HttpServletRequest request, String userId, String cityId,Integer complainType, String mendOrderId, String content, String images) {
+        return complainService.insertComplain(request,userId,cityId,complainType,mendOrderId,content,images);
     }
+
 
     //添加申诉
     @Override

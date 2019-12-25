@@ -815,9 +815,9 @@ public class CraftsmanConstructionService {
             if (hf.getWorkSteta() == 2) {//完工了屏蔽完工禁止显示的
                 criteria.andEqualTo(MenuConfiguration.SHOW_TYPE, 1);
             }
-            if (hf.getWorkType() != 4) {//未支付屏蔽未支付禁止显示的
-                criteria.andEqualTo(MenuConfiguration.SHOW_PAYMENT, 1);
-            }
+//            if (hf.getWorkType() != 4) {//未支付屏蔽未支付禁止显示的
+//                criteria.andEqualTo(MenuConfiguration.SHOW_PAYMENT, 1);
+//            }
            /* if (house.getDecorationType() == 2) {//如果是自带设计不查询量房
                 criteria.andNotEqualTo(MenuConfiguration.TYPE, 2);
             }*/

@@ -22,10 +22,41 @@ public interface MendWorkerAPI {
     @PostMapping("/repair/mendWorker/repairBudgetWorker")
     @ApiOperation(value = "补人工查询", notes = "补人工查询")
     ServerResponse repairBudgetWorker(@RequestParam("request") HttpServletRequest request,
-                                      @RequestParam("type") int type,
+                                      @RequestParam("type") Integer type,
                                       @RequestParam("workerTypeId") String workerTypeId,
                                       @RequestParam("houseId") String houseId,
                                       @RequestParam("name") String name,
+                                      @RequestParam("pageDTO") PageDTO pageDTO,
+                                      @RequestParam("cityId") String cityId);
+
+    /**
+     *  查询符合条件的人工商品大类
+     * @param request
+     * @param workerId
+     * @param cityId
+     * @return
+     */
+   /* @PostMapping("/repair/mendWorker/getWorkerProductList")
+    @ApiOperation(value = "查询当前工匠认证的所有人工商品大类", notes = "查询当前工匠认证的所有人工商品")
+    ServerResponse getWorkerProductCategoryList(@RequestParam("request") HttpServletRequest request,
+                                        @RequestParam("workerId") String workerId,
+                                        @RequestParam("cityId") String cityId);
+*/
+    /**
+     * 查询符合条件的人工商品
+     * @param request
+     * @param workerId
+     * @param searchKey
+     * @param pageDTO
+     * @param cityId
+     * @return
+     */
+    @PostMapping("/repair/mendWorker/getWorkerProductList")
+    @ApiOperation(value = "查询当前工匠认证的所有人工商品", notes = "查询当前工匠认证的所有人工商品")
+    ServerResponse getWorkerProductList(@RequestParam("request") HttpServletRequest request,
+                                      @RequestParam("workerId") String workerId,
+                                      @RequestParam("houseId") String houseId,
+                                      @RequestParam("searchKey") String searchKey,
                                       @RequestParam("pageDTO") PageDTO pageDTO,
                                       @RequestParam("cityId") String cityId);
 

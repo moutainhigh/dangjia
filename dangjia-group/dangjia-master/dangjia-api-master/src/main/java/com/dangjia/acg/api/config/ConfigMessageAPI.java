@@ -60,7 +60,7 @@ public interface ConfigMessageAPI {
     ServerResponse addConfigMessage(@RequestParam("memberId") String memberId,
                                     @RequestParam("title") String title,
                                     @RequestParam("alert") String alert,
-                                    @RequestParam("type") int type,
+                                    @RequestParam("type") Integer type,
                                     @RequestParam("data")String data);
 
 

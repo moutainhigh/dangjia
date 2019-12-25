@@ -51,5 +51,42 @@ public interface DjMaintenanceRecordAPI {
 
     @PostMapping(value = "app/engineer/queryDimensionRecord")
     @ApiOperation(value = "查询维保责任记录", notes = "查询维保责任记录")
-    ServerResponse queryDimensionRecord(@RequestParam("responsiblePartyId") String responsiblePartyId);
+    ServerResponse queryDimensionRecord(@RequestParam("memberId") String memberId);
+
+    @PostMapping(value = "app/engineer/queryDimensionRecordInFo")
+    @ApiOperation(value = "查询维保详情", notes = "查询维保详情")
+    ServerResponse queryDimensionRecordInFo(@RequestParam("mrId") String mrId);
+
+
+    @PostMapping(value = "app/engineer/insertResponsibleParty")
+    @ApiOperation(value = "新增工匠申诉", notes = "新增工匠申诉")
+    ServerResponse insertResponsibleParty(@RequestParam("responsiblePartyId") String responsiblePartyId,
+                                          @RequestParam("houseId") String houseId,
+                                          @RequestParam("description") String description,
+                                          @RequestParam("image") String image);
+
+    @PostMapping(value = "app/engineer/queryResponsibleParty")
+    @ApiOperation(value = "查询工匠申诉", notes = "查询工匠申诉")
+    ServerResponse queryResponsibleParty(@RequestParam("responsiblePartyId") String responsiblePartyId,
+                                         @RequestParam("houseId") String houseId);
+
+    @PostMapping(value = "app/engineer/toQualityMoney")
+    @ApiOperation(value = "查询工匠缴纳质保金", notes = "查询工匠缴纳质保金")
+    ServerResponse toQualityMoney(@RequestParam("data") String data);
+
+
+
+    @PostMapping(value = "app/engineer/applicationAcceptance")
+    @ApiOperation(value = "确认申请验收", notes = "确认申请验收")
+    ServerResponse applicationAcceptance( @RequestParam("houseId") String houseId);
+
+
+    @PostMapping("/web/queryGuaranteeMoneyList")
+    @ApiOperation(value = "店铺-缴纳质保金列表", notes = "质保金缴纳列表")
+    ServerResponse queryGuaranteeMoneyList( @RequestParam("pageDTO") PageDTO pageDTO,@RequestParam("userId") String userId,@RequestParam("cityId") String cityId);
+
+    @PostMapping("/web/queryGuaranteeMoneyDetail")
+    @ApiOperation(value = "店铺-缴纳质保金详情", notes = "缴纳质保金详情")
+    ServerResponse queryGuaranteeMoneyDetail(@RequestParam("userId") String userId,@RequestParam("cityId") String cityId,@RequestParam("id") String id);
+
 }

@@ -45,26 +45,26 @@ public class EvaluateController implements EvaluateAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse materialRecord(String userToken,String houseFlowApplyId,String content,int star, String productArr,String imageList,String latitude,String longitude){
+    public ServerResponse materialRecord(String userToken,String houseFlowApplyId,String content,Integer star, String productArr,String imageList,String latitude,String longitude){
         return evaluateService.materialRecord(houseFlowApplyId,content,star,productArr,  imageList,latitude, longitude);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse checkOk(String userToken,String houseFlowApplyId,String content,int star,String imageList,String latitude,String longitude){
+    public ServerResponse checkOk(String userToken,String houseFlowApplyId,String content,Integer star,String imageList,String latitude,String longitude){
         return evaluateService.checkOk(houseFlowApplyId,content,star, imageList, latitude, longitude);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse saveEvaluateSupervisor(String userToken, String houseFlowApplyId,String content,int star,String onekey){
+    public ServerResponse saveEvaluateSupervisor(String userToken, String houseFlowApplyId,String content,Integer star,String onekey){
         return evaluateService.saveEvaluateSupervisor( userToken,houseFlowApplyId,content,star,false, onekey);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse saveEvaluate(String userToken,String houseFlowApplyId,String wContent,int wStar
-            ,String sContent, int sStar){
+    public ServerResponse saveEvaluate(String userToken,String houseFlowApplyId,String wContent,Integer wStar
+            ,String sContent, Integer sStar){
         return evaluateService.saveEvaluate(houseFlowApplyId,wContent,wStar,sContent,sStar,false);
     }
 }

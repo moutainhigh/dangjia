@@ -94,7 +94,7 @@ public class MainAuthController implements MainAuthAPI {
 	 */
 	@Override
 	@ApiMethod
-	public ServerResponse setPerm(HttpServletRequest request,int type, Permission permission) {
+	public ServerResponse setPerm(HttpServletRequest request,Integer type, Permission permission) {
 		logger.debug("设置权限--区分type-" + type + "【0：编辑；1：新增子节点权限】，权限--permission-"
 				+ permission);
 		try {

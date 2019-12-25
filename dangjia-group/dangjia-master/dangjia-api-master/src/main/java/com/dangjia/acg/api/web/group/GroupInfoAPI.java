@@ -54,7 +54,7 @@ public interface GroupInfoAPI {
      */
     @RequestMapping(value = "/group/member/edit", method = RequestMethod.POST)
     @ApiOperation(value = "批量更新群组成员", notes = "批量更新群组成员,addList和removeList  多个以逗号分割,两者至少要有一个")
-    ServerResponse editManageGroup(@RequestParam("groupId") int groupId,
+    ServerResponse editManageGroup(@RequestParam("groupId") Integer groupId,
                                    @RequestParam("addList") String addList,
                                    @RequestParam("removeList") String removeList);
 

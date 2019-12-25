@@ -368,7 +368,7 @@ public class DesignerOperationService {
                     example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, house.getId()).andEqualTo(HouseFlow.WORKER_TYPE_ID, workerType.getId());
                     List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
                     if (houseFlowList.size() > 0) {
-                        return ServerResponse.createByErrorMessage("设计通过生成精算houseFlow异常");
+                       // return ServerResponse.createByErrorMessage("设计通过生成精算houseFlow异常");
                     } else {
                         HouseFlow houseFlow = new HouseFlow(true);
                         houseFlow.setCityId(house.getCityId());

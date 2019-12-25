@@ -113,7 +113,7 @@ public class CategoryLabelController implements CatetgoryLabelAPI {
     @Override
     @ApiMethod
     public ServerResponse getAllCategoryLabel(HttpServletRequest request,String beforeLabelId,
-                                       int beforeSort,String afterLabelId,int afterSort){
+                                       Integer beforeSort,String afterLabelId,Integer afterSort){
         try{
             return categoryLabelService.getAllCategoryLabel(beforeLabelId,beforeSort,afterLabelId,afterSort);
         }catch(Exception e){

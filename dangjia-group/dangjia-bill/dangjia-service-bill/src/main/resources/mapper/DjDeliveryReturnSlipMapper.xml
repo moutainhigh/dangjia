@@ -168,9 +168,9 @@
     <select id="querySupplierSettlementManagement"
             resultType="com.dangjia.acg.dto.delivery.SupplierSettlementManagementDTO">
         SELECT
-        storefront_id as shopId,
-        sum(count) as count,
-        supplier_id as supId
+        IFNULL(storefront_id,'') as shopId,
+        IFNULL(sum(count),'0') as count,
+        IFNULL(supplier_id,'') as supId
         FROM
         (
         SELECT

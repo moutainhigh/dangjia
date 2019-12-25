@@ -252,7 +252,7 @@ public interface MemberAuthAPI {
     ServerResponse newUserBinding(@RequestParam("request") HttpServletRequest request,
                                   @RequestParam("phone") String phone,
                                   @RequestParam("password") String password,
-                                  @RequestParam("smscode") int smscode,
+                                  @RequestParam("smscode") Integer smscode,
                                   @RequestParam("invitationCode") String invitationCode,
                                   @RequestParam("memberAuth") MemberAuth memberAuth,
                                   @RequestParam("longitude") String longitude,

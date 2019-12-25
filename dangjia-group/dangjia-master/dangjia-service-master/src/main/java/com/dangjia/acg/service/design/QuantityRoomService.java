@@ -1,6 +1,5 @@
 package com.dangjia.acg.service.design;
 
-import com.dangjia.acg.api.config.ServiceTypeAPI;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
@@ -10,6 +9,7 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO;
+import com.dangjia.acg.mapper.config.IMasterServiceTypeMapper;
 import com.dangjia.acg.mapper.design.IMasterQuantityRoomProductMapper;
 import com.dangjia.acg.mapper.design.IQuantityRoomImagesMapper;
 import com.dangjia.acg.mapper.design.IQuantityRoomMapper;
@@ -68,11 +68,11 @@ public class QuantityRoomService {
     @Autowired
     private ConfigUtil configUtil;
     @Autowired
-    private ServiceTypeAPI serviceTypeAPI;
-    @Autowired
     private HouseService houseService;
     @Autowired
     private IMasterQuantityRoomProductMapper iMasterQuantityRoomProductMapper;
+    @Autowired
+    private IMasterServiceTypeMapper iServiceTypeMapper;
 
     /**
      * 是否确认地址
@@ -268,7 +268,7 @@ public class QuantityRoomService {
         map.put("square", house.getSquare());//外框面积
         map.put("buildSquare", house.getBudgetState());//建筑面积
         map.put("houseType", house.getHouseType());//装修的房子类型
-        ServiceType serviceType = serviceTypeAPI.getServiceTypeById(house.getCityId(), house.getHouseType());
+        ServiceType serviceType = iServiceTypeMapper.selectByPrimaryKey(house.getHouseType());
         if (serviceType != null && StringUtils.isNotBlank(serviceType.getName())) {
             map.put("houseTypeName", serviceType.getName());//装修的房子类型名称
         } else {

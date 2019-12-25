@@ -57,7 +57,7 @@ public interface WorkerAPI {
                                  @RequestParam("bankCard") WorkerBankCard bankCard,
                                  @RequestParam("userId")  String userId,
                                  @RequestParam("phone") String phone,
-                                 @RequestParam("smscode") int smscode);
+                                 @RequestParam("smscode") Integer smscode);
 
     @PostMapping("web/worker/registerCode")
     @ApiOperation(value = "绑定银行卡验证码", notes = "绑定银行卡验证码")

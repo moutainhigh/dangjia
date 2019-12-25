@@ -76,7 +76,7 @@ public class SplitDeliverController implements SplitDeliverAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse splitDeliverList(String houseId, int shipState) {
+    public ServerResponse splitDeliverList(String houseId, Integer shipState) {
         return splitDeliverService.splitDeliverList(houseId, shipState);
     }
 

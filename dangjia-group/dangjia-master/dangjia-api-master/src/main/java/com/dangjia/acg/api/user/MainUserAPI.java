@@ -54,7 +54,7 @@ public interface MainUserAPI {
     @ApiOperation(value = "设置用户是否离职", notes = "设置用户是否离职")
     ServerResponse setJobUser(@RequestParam("request") HttpServletRequest request,
                               @RequestParam("id") String id,
-                              @RequestParam("isJob") boolean isJob);
+                              @RequestParam("isJob") Boolean isJob);
 
     /**
      * 指定某个用户为坐席
@@ -133,7 +133,7 @@ public interface MainUserAPI {
     @ApiOperation(value = "登录", notes = "登录")
     ServerResponse login(@RequestParam("request") HttpServletRequest request,
                          @RequestParam("member") UserDTO user,
-                         @RequestParam(value = "rememberMe", required = false) boolean rememberMe);
+                         @RequestParam(value = "rememberMe", required = false) Boolean rememberMe);
 
 
     @RequestMapping(value = "/user/checkAuth", method = RequestMethod.POST)

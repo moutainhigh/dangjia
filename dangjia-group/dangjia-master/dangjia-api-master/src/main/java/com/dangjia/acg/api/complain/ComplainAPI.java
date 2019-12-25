@@ -18,13 +18,14 @@ import javax.servlet.http.HttpServletRequest;
 public interface ComplainAPI {
 
     @PostMapping("/complain/insertComplain")
-    @ApiOperation(value = "添加申诉(新版)", notes = "添加申诉(新版)")
+    @ApiOperation(value = "添加申诉(店铺)", notes = "添加申诉(店铺)")
     ServerResponse insertComplain(@RequestParam("request") HttpServletRequest request,
                                   @RequestParam("userId") String userId,
                                   @RequestParam("cityId") String cityId,
                                   @RequestParam("complainType") Integer complainType,
                                   @RequestParam("mendOrderId") String mendOrderId,
-                                  @RequestParam("content") String content);
+                                  @RequestParam("content") String content,
+                                  @RequestParam("images") String images);
 
 
     @PostMapping("/complain/addComplain")

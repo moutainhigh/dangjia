@@ -59,8 +59,51 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryDimensionRecord(String responsiblePartyId) {
-        return djMaintenanceRecordService.queryDimensionRecord(responsiblePartyId);
+    public ServerResponse queryDimensionRecord(String memberId) {
+        return djMaintenanceRecordService.queryDimensionRecord(memberId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryDimensionRecordInFo(String mrId) {
+        return djMaintenanceRecordService.queryDimensionRecordInFo(mrId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse insertResponsibleParty(String responsiblePartyId,String houseId,
+                                                 String description, String image) {
+        return djMaintenanceRecordService.insertResponsibleParty(responsiblePartyId,houseId,description,image);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryResponsibleParty(String responsiblePartyId,String houseId) {
+        return djMaintenanceRecordService.queryResponsibleParty(responsiblePartyId,houseId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse toQualityMoney(String data) {
+        return djMaintenanceRecordService.toQualityMoney(data);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse applicationAcceptance(String houseId) {
+        return djMaintenanceRecordService.applicationAcceptance(houseId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryGuaranteeMoneyList(PageDTO pageDTO,String userId,String cityId) {
+        return  djMaintenanceRecordService.queryGuaranteeMoneyList(pageDTO,userId,cityId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryGuaranteeMoneyDetail(String userId,String cityId,String id) {
+       return djMaintenanceRecordService.queryGuaranteeMoneyDetail( userId, cityId,id);
     }
 
 }

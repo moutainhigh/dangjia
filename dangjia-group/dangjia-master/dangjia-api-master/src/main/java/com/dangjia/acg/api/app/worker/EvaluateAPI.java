@@ -45,7 +45,7 @@ public interface EvaluateAPI {
     ServerResponse materialRecord(@RequestParam("userToken") String userToken,
                                   @RequestParam("houseFlowApplyId") String houseFlowApplyId,
                                   @RequestParam("content") String content,
-                                  @RequestParam("star") int star,
+                                  @RequestParam("star") Integer star,
                                   @RequestParam("productArr") String productArr,
                                   @RequestParam("imageList") String imageList,
                                   @RequestParam("latitude") String latitude,
@@ -56,7 +56,7 @@ public interface EvaluateAPI {
     ServerResponse checkOk(@RequestParam("userToken") String userToken,
                            @RequestParam("houseFlowApplyId") String houseFlowApplyId,
                            @RequestParam("content") String content,
-                           @RequestParam("star") int star,
+                           @RequestParam("star") Integer star,
                            @RequestParam("imageList") String imageList,
                            @RequestParam("latitude") String latitude,
                            @RequestParam("longitude") String longitude);
@@ -66,7 +66,7 @@ public interface EvaluateAPI {
     ServerResponse saveEvaluateSupervisor(@RequestParam("userToken") String userToken,
                                           @RequestParam("houseFlowApplyId") String houseFlowApplyId,
                                           @RequestParam("content") String content,
-                                          @RequestParam("star") int star,
+                                          @RequestParam("star") Integer star,
                                           @RequestParam("onekey") String onekey);
 
     @PostMapping("app/worker/evaluate/saveEvaluate")
@@ -74,7 +74,7 @@ public interface EvaluateAPI {
     ServerResponse saveEvaluate(@RequestParam("userToken") String userToken,
                                 @RequestParam("houseFlowApplyId") String houseFlowApplyId,
                                 @RequestParam("wContent") String wContent,
-                                @RequestParam("wStar") int wStar,
+                                @RequestParam("wStar") Integer wStar,
                                 @RequestParam("sContent") String sContent,
-                                @RequestParam("sStar") int sStar);
+                                @RequestParam("sStar") Integer sStar);
 }

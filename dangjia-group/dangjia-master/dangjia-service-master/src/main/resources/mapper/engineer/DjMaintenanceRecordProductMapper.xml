@@ -12,12 +12,14 @@
             (
                 mrp.shop_count * bsp.sell_price
             ) totalPrice,
-            bsp.image
+            bsp.image,
+            bpt.value_id_arr as valueIdArr
         FROM
             dj_maintenance_record_product mrp,
-            dj_basics_storefront_product bsp
+            dj_basics_storefront_product bsp,
+            dj_basics_product_template bpt
         WHERE
-            mrp.product_id = bsp.id
+            mrp.product_id = bsp.id and bsp.prod_template_id = bpt.id
             AND mrp.maintenance_record_id=#{maintenanceRecordId}
     </select>
 </mapper>

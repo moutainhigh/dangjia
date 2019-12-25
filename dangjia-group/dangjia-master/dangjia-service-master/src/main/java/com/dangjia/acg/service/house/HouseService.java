@@ -80,7 +80,9 @@ import com.dangjia.acg.util.StringTool;
 import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.google.gson.JsonObject;
 import org.apache.commons.collections.map.HashedMap;
+import org.apache.commons.lang.time.DateUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import org.slf4j.Logger;
@@ -2039,7 +2041,7 @@ public class HouseService {
             //2.判断设计、精算所测面积和业主所填面积是否相等
             BigDecimal square=house.getSquare();//外框面积
             BigDecimal inputArea=memberAddress.getInputArea();//业主所填面积
-            if(square.compareTo(inputArea)!=1){//如果面积不相等，则查询需要处理的订单
+            if(square.compareTo(inputArea)!=0){//如果面积不相等，则查询需要处理的订单
                 //1.查询符合条件的需要处理的订单
                 List<HouseOrderDetailDTO> houseOrderDetailDTOList=iHouseMapper.getBudgetOrderDetailByHouseId(houseId,null);
                 editOrderInfo(houseOrderDetailDTOList,square,inputArea,house,memberAddress);//通过成对应的订单信息
@@ -2054,9 +2056,15 @@ public class HouseService {
             String productStr=getEligibleProduct(houseOrderDetailDTOList,1,square,inputArea);
             if(productStr!=null&&StringUtils.isNotBlank(productStr)){
                 Member member=memberMapper.selectByPrimaryKey(house.getMemberId());
-                paymentService.generateOrderCommon(member,house.getId(),house.getCityId(),productStr,null,memberAddress.getId(),4);//补差价订单
-                //增加任务(补差价订单）
-                taskStackService.inserTaskStackInfo(house.getHouseId(),house.getMemberId(),"是否提交补差价订单","icon/sheji.png",7,house.getHouseId());
+               ServerResponse serverResponse = paymentService.generateOrderCommon(member,house.getId(),house.getCityId(),productStr,null,memberAddress.getId(),4);//补差价订单
+                if (serverResponse.getResultObj() != null) {
+                    String obj = serverResponse.getResultObj().toString();//获取对应的支付单号码
+                    //增加任务(补差价订单）
+                    taskStackService.inserTaskStackInfo(house.getId(),house.getMemberId(),"是否提交补差价订单","icon/sheji.png",7,obj);
+                }
+
+
+
             }
 
         }else if(square.compareTo(inputArea)==-1){//偏小
@@ -2107,7 +2115,7 @@ public class HouseService {
                 String addedProductIds=iMasterDeliverOrderAddedProductMapper.getAddedPrdouctStr(orderItemId);
                 String workerTypeId=product.getWorkerTypeId();
                 Example example=new Example(DjActuarialProductConfig.class);
-                example.createCriteria().andEqualTo(DjActuarialProductConfig.ACTUARIAL_TEMPLATE_ID,workerTypeId)
+                example.createCriteria().andEqualTo(DjActuarialProductConfig.WORKER_TYPE_ID,workerTypeId)
                         .andEqualTo(DjActuarialProductConfig.PRODUCT_ID,productTemplateId);
                 DjActuarialProductConfig djActuarialProductConfig=iMasterActuarialProductConfigMapper.selectOneByExample(example);
                 if(djActuarialProductConfig!=null&&"1".equals(djActuarialProductConfig.getIsCalculatedArea())){
@@ -3540,7 +3548,7 @@ public class HouseService {
                     member.initPath(address);
                     acceptanceDynamicDTO.setSupervisorHead(member.getHead());
                     if (member.getWorkerType() != null && member.getWorkerType() >= 1)
-                        acceptanceDynamicDTO.setWorkerTypeName(workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId()).getName());//工匠类型
+                        acceptanceDynamicDTO.setSupervisorTypeName(workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId()).getName());//工匠类型
                     acceptanceDynamicDTO.setSupervisorName(member.getName());
                     acceptanceDynamicDTO.setSupervisorContent(houseFlowApply1.getApplyDec());
                     example = new Example(HouseFlowApplyImage.class);
@@ -3621,7 +3629,7 @@ public class HouseService {
                 member.initPath(address);
                 acceptanceDynamicDTO.setSupervisorHead(member.getHead());
                 if (member.getWorkerType() != null && member.getWorkerType() >= 1)
-                    acceptanceDynamicDTO.setWorkerTypeName(workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId()).getName());//工匠类型
+                    acceptanceDynamicDTO.setSupervisorTypeName(workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId()).getName());//工匠类型
                 acceptanceDynamicDTO.setSupervisorName(member.getName());
                 acceptanceDynamicDTO.setSupervisorContent(houseFlowApply.getApplyDec());
                 example = new Example(HouseFlowApplyImage.class);
@@ -3640,6 +3648,25 @@ public class HouseService {
             e.printStackTrace();
             logger.info("查询失败",e);
             return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+
+    /**
+     * 业主提醒大管家验收
+     * @param houseFlowApplyId
+     * @return
+     */
+    public ServerResponse setRemindButlerCheck(String houseFlowApplyId) {
+        try {
+            HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
+            if(DateUtils.isSameDay(new Date(), houseFlowApply.getWithdrawalTime()))
+                return ServerResponse.createByErrorMessage("今日已提醒");
+            houseFlowApply.setWithdrawalTime(new Date());
+            return ServerResponse.createBySuccessMessage("操作成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("操作失败");
         }
     }
 }

@@ -96,8 +96,8 @@ public interface CatetgoryLabelAPI {
     @ApiOperation(value = "修改标签排序", notes = "修改标签排序")
     ServerResponse getAllCategoryLabel(@RequestParam("request") HttpServletRequest request,
                                        @RequestParam("beforeLabelId") String beforeLabelId,
-                                       @RequestParam("beforeSort") int beforeSort,
+                                       @RequestParam("beforeSort") Integer beforeSort,
                                        @RequestParam("afterLabelId") String afterLabelId,
-                                       @RequestParam("afterSort") int afterSort);
+                                       @RequestParam("afterSort") Integer afterSort);
 
 }

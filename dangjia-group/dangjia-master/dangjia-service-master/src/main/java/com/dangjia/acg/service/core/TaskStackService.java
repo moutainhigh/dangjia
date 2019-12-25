@@ -6,6 +6,7 @@ import com.dangjia.acg.modle.house.TaskStack;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import sun.rmi.log.LogInputStream;
+import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
 
@@ -50,6 +51,31 @@ public class TaskStackService {
 
     public List<Task> selectTaskStackInfoByType(String houseId,String type){
         return iMasterTaskStackMapper.selectTaskStackInfoByType(houseId,type);
+    }
+
+    /**
+     * 查询符合条件的数据
+     * @param houseId
+     * @param type
+     * @param data
+     * @return
+     */
+    public TaskStack selectTaskStackByData(String houseId,Integer type,String data){
+        Example example=new Example(TaskStack.class);
+        example.createCriteria().andEqualTo(TaskStack.HOUSE_ID,houseId)
+                .andEqualTo(TaskStack.TYPE,type)
+                .andEqualTo(TaskStack.DATA,data)
+                .andEqualTo(TaskStack.STATE,0);
+        TaskStack taskStack=iMasterTaskStackMapper.selectOneByExample(example);
+        return taskStack;
+    }
+
+    /**
+     * 修改对应的数据
+     * @param taskStack
+     */
+    public void updateTaskStackInfo(TaskStack taskStack){
+        iMasterTaskStackMapper.updateByPrimaryKeySelective(taskStack);
     }
 
 

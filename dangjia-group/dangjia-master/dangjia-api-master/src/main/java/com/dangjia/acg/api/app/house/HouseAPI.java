@@ -314,4 +314,14 @@ public interface HouseAPI {
     @PostMapping("app/house/house/queryApplyComplaints")
     @ApiOperation(value = "查询申请投诉", notes = "查询申请投诉")
     ServerResponse queryApplyComplaints(@RequestParam("houseFlowApplyId") String houseFlowApplyId);
+
+    /**
+     * 业主提醒大管家验收
+     *
+     * @param houseFlowApplyId
+     * @return
+     */
+    @PostMapping("app/house/house/setRemindButlerCheck")
+    @ApiOperation(value = "业主提醒大管家验收", notes = "业主提醒大管家验收")
+    ServerResponse setRemindButlerCheck(@RequestParam("houseFlowApplyId") String houseFlowApplyId);
 }

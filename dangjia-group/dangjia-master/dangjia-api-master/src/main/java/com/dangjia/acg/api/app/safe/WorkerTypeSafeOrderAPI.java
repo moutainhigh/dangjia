@@ -22,7 +22,7 @@ public interface WorkerTypeSafeOrderAPI {
     ServerResponse changeSafeType(@RequestParam("userToken") String userToken,
                                   @RequestParam("houseFlowId") String houseFlowId,
                                   @RequestParam("workerTypeSafeId") String workerTypeSafeId,
-                                  @RequestParam("selected") int selected);
+                                  @RequestParam("selected") Integer selected);
 
     @PostMapping("app/safe/order/list")
     @ApiOperation(value = "我的质保卡", notes = "我的质保卡")

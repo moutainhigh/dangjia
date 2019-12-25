@@ -41,7 +41,7 @@ public class MendRecordController implements MendRecordAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse recordList(String userToken, int roleType, String houseId, String queryId, Integer type) {
+    public ServerResponse recordList(String userToken, Integer roleType, String houseId, String queryId, Integer type) {
         return mendRecordService.recordList(userToken, roleType, houseId, queryId, type);
     }
 
@@ -50,7 +50,7 @@ public class MendRecordController implements MendRecordAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse mendList(String userToken, String houseId, int roleType) {
+    public ServerResponse mendList(String userToken, String houseId, Integer roleType) {
         return mendRecordService.mendList(userToken, houseId, roleType);
     }
 

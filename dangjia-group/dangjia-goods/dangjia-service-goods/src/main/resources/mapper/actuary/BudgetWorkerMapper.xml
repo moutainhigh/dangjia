@@ -236,9 +236,10 @@ SELECT
 			dj_basics_goods t4
 		WHERE
 			t1.product_id = t2.id
-		and t1.product_type='2'
+		and t1.product_type= 2
 		AND t2.prod_template_id = t3.id
 		AND t3.goods_id = t4.id
+		and t4.type = 2
 		and t1.house_id=#{houseId}
 		and t1.worker_type_id =#{workerTypeId}
 		and t1.delete_state!=1

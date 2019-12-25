@@ -500,7 +500,7 @@ public class RefundAfterSalesService {
      * @param cityId 城市ID
      * @param houseId 房子ID
      * @param searchKey
-     * @param type (0:补材料;1:补人工;2:退材料(剩余材料登记);3:退人工,4:业主退材料;5业主退货退款)
+     * @param type (0:补材料;1:补人工;2:退材料(剩余材料登记);3:退人工,4:业主退材料;5业主退货退款,6系统自动退款)
      * @return
      */
     public ServerResponse<PageInfo> queryRefundOnlyHistoryOrderList(PageDTO pageDTO,String cityId,String houseId,String searchKey,Integer type){
@@ -508,6 +508,7 @@ public class RefundAfterSalesService {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             logger.info("queryRefundOrderList查询可退款的商品：city={},houseId={}",cityId,houseId);
             List<RefundRepairOrderDTO> repairOrderDTOList=refundAfterSalesMapper.queryRefundOnlyHistoryOrderList(houseId,type);
+
             if(repairOrderDTOList!=null&&repairOrderDTOList.size()>0){
                 String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
                 for(RefundRepairOrderDTO refundRepairOrderDTO:repairOrderDTOList){
@@ -649,6 +650,9 @@ public class RefundAfterSalesService {
                if("RA_008".equals(orderProgressDTO.getNodeCode())||"RA_008".equals(orderProgressDTO.getNodeCode())||"RA_010".equals(orderProgressDTO.getNodeCode())){
                    refundRepairOrderDTO.setShowRepairDateType(2);
                }
+           }
+           if(refundRepairOrderDTO.getType()==6){
+               refundRepairOrderDTO.setRepairNewNode("退款成功");
            }
             refundRepairOrderDTO.setMobile(refundRepairOrderDTO.getStorefrontMobile());//拨打电话
             refundRepairOrderDTO.setStorefrontIcon(address+refundRepairOrderDTO.getStorefrontIcon());
