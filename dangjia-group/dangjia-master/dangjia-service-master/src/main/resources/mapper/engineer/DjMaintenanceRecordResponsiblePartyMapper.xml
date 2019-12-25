@@ -155,8 +155,9 @@
 
     <select id="queryGuaranteeMoneyDetail" resultType="com.dangjia.acg.dto.engineer.ResponsiblePartyDetailDTO">
         select
-           IFNULL(dmr.create_date,'') as createDate, -- 时间
-         IFNULL(CONCAT(IFNULL(dh.residential,'*'),IFNULL(CONCAT(dh.building,'栋'),'*栋'),IFNULL(CONCAT(dh.unit,'单元'),'*单元'),IFNULL(CONCAT(dh.number,'号'),'*号')) ,'') as address,
+        dmr.house_id as houseId,
+        IFNULL(dmr.create_date,'') as createDate, -- 时间
+        IFNULL(CONCAT(IFNULL(dh.residential,'*'),IFNULL(CONCAT(dh.building,'栋'),'*栋'),IFNULL(CONCAT(dh.unit,'单元'),'*单元'),IFNULL(CONCAT(dh.number,'号'),'*号')) ,'') as address,
         dmr.since_purchase_amount+dmr.enough_amount as totalAmount,-- 维保总金额
         rrp.proportion as proportion,-- 维保责任方占比
         dm.worker_type_id as workerTypeId -- 工匠类型
