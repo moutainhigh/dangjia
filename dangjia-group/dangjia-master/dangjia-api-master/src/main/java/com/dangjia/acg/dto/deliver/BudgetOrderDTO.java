@@ -2,6 +2,7 @@ package com.dangjia.acg.dto.deliver;
 
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -35,6 +36,10 @@ public class BudgetOrderDTO {
     private String totalRransportationCostRemark;//可退运费描述
 
     private String totalStevedorageCostRemark;//可退搬运费描述
+
+    private int discounts;//1有优惠  0没有
+
+    private BigDecimal discountsPrice=new BigDecimal(0);//优惠总价
 
     private List<BudgetOrderItemDTO> orderDetailList;
 }

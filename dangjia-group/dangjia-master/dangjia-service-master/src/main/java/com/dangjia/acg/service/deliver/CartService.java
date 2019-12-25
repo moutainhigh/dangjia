@@ -13,11 +13,16 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.house.WarehouseDTO;
+import com.dangjia.acg.mapper.core.IMasterBasicsGoodsCategoryMapper;
+import com.dangjia.acg.mapper.core.IMasterBasicsGoodsMapper;
+import com.dangjia.acg.mapper.core.IMasterBrandMapper;
 import com.dangjia.acg.mapper.delivery.ICartMapper;
 import com.dangjia.acg.mapper.delivery.IOrderSplitMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
+import com.dangjia.acg.mapper.product.IMasterProductTemplateMapper;
 import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
+import com.dangjia.acg.modle.basics.Product;
 import com.dangjia.acg.modle.deliver.Cart;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
@@ -27,7 +32,9 @@ import com.dangjia.acg.modle.product.BasicsGoodsCategory;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -64,6 +71,12 @@ public class CartService {
     private CraftsmanConstructionService constructionService;
     @Autowired
     private IMasterStorefrontProductMapper iMasterStorefrontProductMapper;
+    @Autowired
+    private IMasterProductTemplateMapper iMasterProductTemplateMapper;
+    @Autowired
+    private IMasterBasicsGoodsMapper iMasterBasicsGoodsMapper;
+    @Autowired
+    private IMasterBasicsGoodsCategoryMapper iMasterBasicsGoodsCategoryMapper;
 
     /**
      * 设置购物车商品数量
@@ -96,20 +109,34 @@ public class CartService {
             cartMapper.updateByPrimaryKeySelective(cart1);
         } else {
             if (cart.getShopCount() > 0) {
-//                ServerResponse serverResponse = djBasicsProductAPI.getProductById(house.getCityId(), cart.getProductId());
-//                if (serverResponse != null && serverResponse.getResultObj() != null) {
-//                    Product product = JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), Product.class);
-//                    BasicsGoods goods = forMasterAPI.getGoods(house.getCityId(), product.getGoodsId());
-//                    cart.setProductSn(product.getProductSn());
-//                    cart.setProductName(product.getName());
-//                    cart.setMemberId(operator.getId());
-//                    cart.setPrice(product.getPrice());
-//                    cart.setWorkerTypeId(operator.getWorkerTypeId());
-//                    cart.setProductType(goods.getType());
-//                    cart.setUnitName(product.getUnitName());
-//                    cart.setCategoryId(product.getCategoryId());
-//                    cart.setCityId(house.getCityId());
-//                }
+                //查询对应的符合条件的商品信息
+                StorefrontProduct storefrontProduct=iMasterStorefrontProductMapper.selectByPrimaryKey(cart.getProductId());
+                if(storefrontProduct!=null&& StringUtils.isNotBlank(storefrontProduct.getId())) {//店铺商品(补人工为店铺商品)
+                    DjBasicsProductTemplate djBasicsProductTemplate=iMasterProductTemplateMapper.selectByPrimaryKey(storefrontProduct.getProdTemplateId());
+                    BasicsGoods basicsGoods=iMasterBasicsGoodsMapper.selectByPrimaryKey(djBasicsProductTemplate.getGoodsId());
+                    cart.setProductSn(djBasicsProductTemplate.getProductSn());
+                    cart.setProductName(storefrontProduct.getProductName());
+                    cart.setMemberId(operator.getId());
+                    cart.setPrice(storefrontProduct.getSellPrice());
+                    cart.setWorkerTypeId(operator.getWorkerTypeId());
+                    cart.setProductType(basicsGoods.getType());
+                    cart.setUnitName(djBasicsProductTemplate.getUnitName());
+                    cart.setCategoryId(djBasicsProductTemplate.getCategoryId());
+                    cart.setCityId(house.getCityId());
+                }else {//商品库商品
+                    DjBasicsProductTemplate djBasicsProductTemplate=iMasterProductTemplateMapper.selectByPrimaryKey(cart.getProductId());
+                    BasicsGoods basicsGoods=iMasterBasicsGoodsMapper.selectByPrimaryKey(djBasicsProductTemplate.getGoodsId());
+                    cart.setProductSn(djBasicsProductTemplate.getProductSn());
+                    cart.setProductName(djBasicsProductTemplate.getName());
+                    cart.setMemberId(operator.getId());
+                    cart.setPrice(djBasicsProductTemplate.getPrice());
+                    cart.setWorkerTypeId(operator.getWorkerTypeId());
+                    cart.setProductType(basicsGoods.getType());
+                    cart.setUnitName(djBasicsProductTemplate.getUnitName());
+                    cart.setCategoryId(djBasicsProductTemplate.getCategoryId());
+                    cart.setCityId(house.getCityId());
+
+                }
                 cartMapper.insert(cart);
             }
         }
@@ -213,6 +240,9 @@ public class CartService {
                 .andEqualTo(Cart.HOUSE_ID, cart.getHouseId())
                 .andEqualTo(Cart.WORKER_TYPE_ID, operator.getWorkerTypeId())
                 .andEqualTo(Cart.MEMBER_ID, operator.getId());
+        if(cart.getProductType()!=null){
+            example.createCriteria().andEqualTo(Cart.PRODUCT_TYPE,cart.getProductType());//如果是人工商品，此字段不能为空
+        }
         example.setOrderByClause(" category_id");
         List<Cart> list = cartMapper.selectByExample(example);
         if (list.size() <= 0) {
@@ -225,9 +255,13 @@ public class CartService {
         for (Cart cart1 : list) {
 
             Map map = BeanUtils.beanToMap(cart1);
-            ServerResponse serverResponse = djBasicsProductAPI.getProductById(request.getParameter(Constants.CITY_ID), cart1.getProductId());
-            if (serverResponse != null && serverResponse.getResultObj() != null) {
-                DjBasicsProductTemplate product = JSON.parseObject(JSON.toJSONString(serverResponse.getResultObj()), DjBasicsProductTemplate.class);
+            //ServerResponse serverResponse = djBasicsProductAPI.getProductById(request.getParameter(Constants.CITY_ID), cart1.getProductId());
+           // if (serverResponse != null && serverResponse.getResultObj() != null) {
+                StorefrontProduct storefrontProduct=iMasterStorefrontProductMapper.selectByPrimaryKey(cart1.getProductId());
+                DjBasicsProductTemplate product = iMasterProductTemplateMapper.selectByPrimaryKey(cart1.getProductId());
+                if(product==null||StringUtils.isNotBlank(product.getId())){
+                    product = iMasterProductTemplateMapper.selectByPrimaryKey(storefrontProduct.getProdTemplateId());
+                }
                 map.put("shopCount",0D);//购买量
                 map.put("surCount",0D);//剩余量
                 if (product.getType() == 0 || product.getMaket() == 0) {
@@ -243,9 +277,84 @@ public class CartService {
 
                 }
                 map.put("image",address + product.getImage());
-            }
+           // }
             if(!containsKeyMap.containsKey(cart1.getCategoryId())){//判断是否有已有的大类
-                BasicsGoodsCategory goodsCategory = basicsGoodsCategoryAPI.getGoodsCategory(request.getParameter(Constants.CITY_ID), cart1.getCategoryId());
+                BasicsGoodsCategory goodsCategory =iMasterBasicsGoodsCategoryMapper.selectByPrimaryKey(cart1.getCategoryId());
+                        //basicsGoodsCategoryAPI.getGoodsCategory(request.getParameter(Constants.CITY_ID), cart1.getCategoryId());
+                if (goodsCategory != null) {
+                    BasicsGoodsCategory goodsCategorytop = basicsGoodsCategoryAPI.getGoodsCategory(request.getParameter(Constants.CITY_ID), goodsCategory.getParentTop());
+                    if (goodsCategorytop != null) {
+                        goodsCategory = goodsCategorytop;
+                    }
+                    categoryMap=new HashMap();
+                    categoryMap.put("categoryId",cart1.getCategoryId());
+                    categoryMap.put("parentTopCategoryId",goodsCategory.getId());
+                    categoryMap.put("parentTopCategoryName",goodsCategory.getName());
+                    cartCategroyList = new ArrayList<>();
+                    cartCategroyList.add(map);
+                    categoryMap.put("cartList",cartCategroyList);
+                    containsKeyMap.put(cart1.getCategoryId(),categoryMap);
+                }
+
+            }else{
+                categoryMap= (Map) containsKeyMap.get(cart1.getCategoryId());
+                cartCategroyList = (List)categoryMap.get("cartList");
+                cartCategroyList.add(map);
+                categoryMap.put("cartList",cartCategroyList);
+                containsKeyMap.put(cart1.getCategoryId(),categoryMap);
+            }
+
+        }
+        List<Object> resCartList = new ArrayList<>(containsKeyMap.values());//map转换成List
+        return ServerResponse.createBySuccess("操作成功", resCartList);
+    }
+
+    /**
+     * 查询人工购物车商品（补人工时）
+     * @param userToken
+     * @param cart
+     * @return
+     */
+    public ServerResponse queryWorkerCategoryCart(String userToken, Cart cart){
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
+                .getRequest();
+        House house = iHouseMapper.selectByPrimaryKey(cart.getHouseId());
+        request.setAttribute(Constants.CITY_ID, house.getCityId());
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+        Member operator = (Member) object;
+        Example example = new Example(Cart.class);
+        example.createCriteria()
+                .andEqualTo(Cart.HOUSE_ID, cart.getHouseId())
+                .andEqualTo(Cart.WORKER_TYPE_ID, operator.getWorkerTypeId())
+                .andEqualTo(Cart.MEMBER_ID, operator.getId())
+                .andEqualTo(Cart.PRODUCT_TYPE,cart.getProductType());//如果是人工商品，此字段不能为空、
+        example.setOrderByClause(" category_id");
+        List<Cart> list = cartMapper.selectByExample(example);
+        if (list.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+        //保存分类的大类
+        Map categoryMap = new HashMap();
+        Map<String,Object> containsKeyMap = new HashMap<String,Object>();
+        List<Map<String,Object>> cartCategroyList;
+        for (Cart cart1 : list) {
+
+            Map map = BeanUtils.beanToMap(cart1);
+            StorefrontProduct storefrontProduct=iMasterStorefrontProductMapper.selectByPrimaryKey(cart1.getProductId());
+            DjBasicsProductTemplate product = iMasterProductTemplateMapper.selectByPrimaryKey(cart1.getProductId());
+            if(product==null||StringUtils.isNotBlank(product.getId())){
+                product = iMasterProductTemplateMapper.selectByPrimaryKey(storefrontProduct.getProdTemplateId());
+            }
+            map.put("shopCount",cart1.getShopCount());//购买量
+            map.put("image",StringTool.getImage(product.getImage(),address));
+            // }
+            if(!containsKeyMap.containsKey(cart1.getCategoryId())){//判断是否有已有的大类
+                BasicsGoodsCategory goodsCategory =iMasterBasicsGoodsCategoryMapper.selectByPrimaryKey(cart1.getCategoryId());
+                //basicsGoodsCategoryAPI.getGoodsCategory(request.getParameter(Constants.CITY_ID), cart1.getCategoryId());
                 if (goodsCategory != null) {
                     BasicsGoodsCategory goodsCategorytop = basicsGoodsCategoryAPI.getGoodsCategory(request.getParameter(Constants.CITY_ID), goodsCategory.getParentTop());
                     if (goodsCategorytop != null) {

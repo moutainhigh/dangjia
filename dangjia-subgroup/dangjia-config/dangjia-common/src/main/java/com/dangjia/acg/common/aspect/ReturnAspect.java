@@ -96,7 +96,7 @@ public class ReturnAspect {
                     if(args[i]==null) {
                         args[i] = json.getObject(argNames[i],argClasss[i]);
                     }
-                    if("".equals(args[i])){
+                    if("".equals(args[i])&&!argClasss[i].equals(String.class)){
                         args[i]=null;
                     }
                 }else{

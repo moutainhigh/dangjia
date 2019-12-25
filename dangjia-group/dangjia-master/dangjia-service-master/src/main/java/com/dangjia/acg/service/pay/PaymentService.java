@@ -1268,6 +1268,7 @@ public class PaymentService {
                 businessOrder.setPayPrice(paymentPrice);
                 if(orderSource==1||orderSource==4){
                     businessOrder.setType(1);//记录支付类型任务类型(精算支付任务，走工序的）
+                    businessOrder.setState(2);//待支付
                 }else{
                     businessOrder.setType(2);//记录支付类型任务类型
                 }
