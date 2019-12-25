@@ -52,6 +52,7 @@ import com.dangjia.acg.mapper.worker.IInsuranceMapper;
 import com.dangjia.acg.modle.account.AccountFlowRecord;
 import com.dangjia.acg.modle.activity.ActivityRedPackRecord;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
+import com.dangjia.acg.modle.attribute.AttributeValue;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseWorkerOrder;
@@ -81,6 +82,7 @@ import com.dangjia.acg.service.account.MasterAccountFlowRecordService;
 import com.dangjia.acg.service.acquisition.MasterCostAcquisitionService;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.dangjia.acg.service.core.TaskStackService;
 import com.dangjia.acg.service.design.HouseDesignPayService;
 import com.dangjia.acg.service.repair.MendOrderCheckService;
 import org.apache.commons.lang3.StringUtils;
@@ -209,6 +211,10 @@ public class PaymentService {
     private IMasterStorefrontProductMapper iMasterStorefrontProductMapper;
     @Autowired
     private IMasterAccountFlowRecordMapper iMasterAccountFlowRecordMapper;
+    @Autowired
+    private IMasterAttributeValueMapper iMasterAttributeValueMapper;
+    @Autowired
+    private TaskStackService taskStackService;
 
 
     @Value("${spring.profiles.active}")
@@ -585,6 +591,13 @@ public class PaymentService {
                         setHouseFlowInfo(order,"2",payState,1,diffMoney,1);
                     }
 
+                }
+                //修改补差价任务为已处理（查贸易符合条件补差价订单信息)
+                TaskStack taskStack=taskStackService.selectTaskStackByData(order.getHouseId(),7,order.getBusinessOrderNumber());
+                if(taskStack!=null&& cn.jiguang.common.utils.StringUtils.isNotEmpty(taskStack.getId())){
+                    taskStack.setState(1);
+                    taskStack.setModifyDate(new Date());
+                    taskStackService.updateTaskStackInfo(taskStack);
                 }
             }else{
                 if("1".equals(workerTypeId)){//如果工序ID为设计师，支付完成后，将房子表 的设计类型字段改为远程设计
@@ -1965,6 +1978,25 @@ public class PaymentService {
                             }
                             //获取购物车增值商品信息
                             shoppingCartListDTO.setAddedProducts(deliverOrderAddedProducts);
+
+                            if (!CommonUtil.isEmpty(shoppingCartListDTO.getValueIdArr())) {
+                                String strNewValueNameArr = " ";
+                                String[] ValueNameArrs = shoppingCartListDTO.getValueIdArr().split(",");
+                                for (int i = 0; i < ValueNameArrs.length; i++) {
+                                    String valueId = ValueNameArrs[i];
+                                    if (StringUtils.isNotBlank(valueId)) {
+                                        AttributeValue attributeValue = iMasterAttributeValueMapper.selectByPrimaryKey(valueId);
+                                        if (attributeValue != null && StringUtils.isNotBlank(attributeValue.getName())) {
+                                            if (StringUtils.isBlank(strNewValueNameArr)) {
+                                                strNewValueNameArr = attributeValue.getName();
+                                            } else {
+                                                strNewValueNameArr = strNewValueNameArr + ", " + attributeValue.getName();
+                                            }
+                                        }
+                                    }
+                                }
+                                shoppingCartListDTO.setValueNameArr(strNewValueNameArr);
+                            }
                         }
                     }
                     Double freight=storefrontConfigAPI.getFreightPrice(shoppingCartDTO.getStorefrontId(),totalSellPrice.doubleValue());

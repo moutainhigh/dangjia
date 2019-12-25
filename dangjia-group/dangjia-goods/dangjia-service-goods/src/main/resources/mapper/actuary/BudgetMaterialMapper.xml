@@ -324,6 +324,7 @@
 			t1.product_id = t2.id
 		and t1.house_id=#{houseId}
 		and t1.worker_type_id =#{workerTypeId}
+		and t1.product_type !=2
 		and t1.delete_state!=1 and delete_state!=5
 		ORDER BY t1.category_id,t1.product_sn,t1.goods_name desc
 	</select>

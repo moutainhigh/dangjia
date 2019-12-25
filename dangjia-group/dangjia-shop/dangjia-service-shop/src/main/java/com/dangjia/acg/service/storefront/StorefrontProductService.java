@@ -460,6 +460,11 @@ public class StorefrontProductService {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息!");
             }
             //判断是否交了滞留金
+            Double retentionMoney=storefront.getRetentionMoney();
+            if (retentionMoney==0||retentionMoney<0)
+            {
+                return  ServerResponse.createByErrorMessage("请先缴纳滞留金",retentionMoney);
+            }
 
             StorefrontProduct storefrontProduct = new StorefrontProduct();
             storefrontProduct.setId(id);
@@ -496,9 +501,9 @@ public class StorefrontProductService {
             }
             //判断是否交了滞留金
             Double retentionMoney=storefront.getRetentionMoney();
-            if (retentionMoney==0)
+            if (retentionMoney==0||retentionMoney<0)
             {
-
+                return  ServerResponse.createByErrorMessage("请先缴纳滞留金",retentionMoney);
             }
 
             //批量上架，逗号拆分商品

@@ -577,18 +577,31 @@ public class MendRecordService {
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlowApply.getWorkerTypeId());
             Map<String, Object> map = new HashMap<>();
             map.put("mendOrderId", houseFlowApply.getId());
-            if (houseFlowApply.getApplyType() == 0) {
-                map.put("number", workerType.getName() + "每日完工审核");
-                map.put("name", workerType.getName() + "每日完工审核");
+            if(roleType ==3){
+                if (houseFlowApply.getApplyType() == 1) {
+                    map.put("number","阶段完工审核");
+                    map.put("name","阶段完工审核");
+                }
+                if (houseFlowApply.getApplyType() == 2) {
+                    String name = workerType.getType() == 3 ? "竣工审核" : "整体完工审核";
+                    map.put("number", name);
+                    map.put("name", name);
+                }
             }
-            if (houseFlowApply.getApplyType() == 1) {
-                map.put("number", workerType.getName() + "阶段完工审核");
-                map.put("name", workerType.getName() + "阶段完工审核");
-            }
-            if (houseFlowApply.getApplyType() == 2) {
-                String name = workerType.getType() == 3 ? "竣工审核" : "整体完工审核";
-                map.put("number", workerType.getName() + name);
-                map.put("name", workerType.getName() + name);
+            else {
+                if (houseFlowApply.getApplyType() == 0) {
+                    map.put("number", workerType.getName() + "每日完工审核");
+                    map.put("name", workerType.getName() + "每日完工审核");
+                }
+                if (houseFlowApply.getApplyType() == 1) {
+                    map.put("number", workerType.getName() + "阶段完工审核");
+                    map.put("name", workerType.getName() + "阶段完工审核");
+                }
+                if (houseFlowApply.getApplyType() == 2) {
+                    String name = workerType.getType() == 3 ? "竣工审核" : "整体完工审核";
+                    map.put("number", workerType.getName() + name);
+                    map.put("name", workerType.getName() + name);
+                }
             }
             map.put("state", houseFlowApply.getApplyType());
             map.put("createDate", houseFlowApply.getCreateDate());

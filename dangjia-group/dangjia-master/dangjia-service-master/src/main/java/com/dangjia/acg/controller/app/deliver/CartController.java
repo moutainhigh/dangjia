@@ -72,6 +72,19 @@ public class CartController implements CartAPI {
     }
 
     /**
+     * 查询人工购物车商品
+     * @param userToken
+     * @param cart
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryWorkerCategoryCart(String userToken, Cart cart){
+        return cartService.queryWorkerCategoryCart(userToken,cart);
+    }
+
+
+    /**
      * 要退查询仓库
      * 结合 精算记录+补记录
      */

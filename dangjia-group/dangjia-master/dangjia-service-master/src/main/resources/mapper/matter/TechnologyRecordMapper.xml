@@ -69,5 +69,23 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</update>
 
 
+	<select id="selectWorkerProductInfo" resultType="com.dangjia.acg.dto.product.ProductAppDTO">
+		SELECT
+			t2.id productId,
+		    t2.product_name productName
+		FROM
+			dj_house_warehouse t1,
+			dj_basics_storefront_product t2,
+			dj_basics_product_template t3,
+			dj_basics_technology t4
+		WHERE
+			t1.product_type = 2
+		and t1.house_id=#{houseId}
+		AND t1.product_id = t2.id
+		AND t2.prod_template_id = t3.id
+		and t4.worker_type_id=#{workerTypeId}
+		AND FIND_IN_SET(t4.id, t3.technology_ids)
+		group by t2.id,t2.product_name
+	</select>
 </mapper>
 
