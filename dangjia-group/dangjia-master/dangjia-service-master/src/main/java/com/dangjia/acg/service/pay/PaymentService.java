@@ -52,6 +52,7 @@ import com.dangjia.acg.mapper.worker.IInsuranceMapper;
 import com.dangjia.acg.modle.account.AccountFlowRecord;
 import com.dangjia.acg.modle.activity.ActivityRedPackRecord;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
+import com.dangjia.acg.modle.attribute.AttributeValue;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseWorkerOrder;
@@ -210,6 +211,8 @@ public class PaymentService {
     private IMasterStorefrontProductMapper iMasterStorefrontProductMapper;
     @Autowired
     private IMasterAccountFlowRecordMapper iMasterAccountFlowRecordMapper;
+    @Autowired
+    private IMasterAttributeValueMapper iMasterAttributeValueMapper;
     @Autowired
     private TaskStackService taskStackService;
 
@@ -562,8 +565,7 @@ public class PaymentService {
             String workerTypeId=order.getWorkerTypeId();
 
             //判断是否为工序订单( 设计、精算订单)
-            if(order.getOrderSource()==4&&(workerTypeId==null|| StringUtils.isBlank(workerTypeId))){
-
+            if((workerTypeId==null|| StringUtils.isBlank(workerTypeId))){
                 boolean desginStatus=false;
                 //1.如果是工序订单，但总单上没有工序ID，则需要查子单上的工序ID
                 List<HouseOrderDetailDTO> orderDetailList=houseMapper.getBudgetOrderDetailByHouseId(order.getHouseId(),"1");//设计订单
@@ -1279,7 +1281,6 @@ public class PaymentService {
                 businessOrder.setPayPrice(paymentPrice);
                 if(orderSource==1||orderSource==4){
                     businessOrder.setType(1);//记录支付类型任务类型(精算支付任务，走工序的）
-                    businessOrder.setState(2);//待支付
                 }else{
                     businessOrder.setType(2);//记录支付类型任务类型
                 }
@@ -1977,6 +1978,25 @@ public class PaymentService {
                             }
                             //获取购物车增值商品信息
                             shoppingCartListDTO.setAddedProducts(deliverOrderAddedProducts);
+
+                            if (!CommonUtil.isEmpty(shoppingCartListDTO.getValueIdArr())) {
+                                String strNewValueNameArr = " ";
+                                String[] ValueNameArrs = shoppingCartListDTO.getValueIdArr().split(",");
+                                for (int i = 0; i < ValueNameArrs.length; i++) {
+                                    String valueId = ValueNameArrs[i];
+                                    if (StringUtils.isNotBlank(valueId)) {
+                                        AttributeValue attributeValue = iMasterAttributeValueMapper.selectByPrimaryKey(valueId);
+                                        if (attributeValue != null && StringUtils.isNotBlank(attributeValue.getName())) {
+                                            if (StringUtils.isBlank(strNewValueNameArr)) {
+                                                strNewValueNameArr = attributeValue.getName();
+                                            } else {
+                                                strNewValueNameArr = strNewValueNameArr + ", " + attributeValue.getName();
+                                            }
+                                        }
+                                    }
+                                }
+                                shoppingCartListDTO.setValueNameArr(strNewValueNameArr);
+                            }
                         }
                     }
                     Double freight=storefrontConfigAPI.getFreightPrice(shoppingCartDTO.getStorefrontId(),totalSellPrice.doubleValue());

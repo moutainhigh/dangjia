@@ -143,7 +143,7 @@ public class ShopCartService {
                     List<DeliverOrderAddedProduct> deliverOrderAddedProducts = masterDeliverOrderAddedProductMapper.selectByExample(example1);
                     shoppingCartListDTO.setAddedProducts(deliverOrderAddedProducts);
                     if (!CommonUtil.isEmpty(shoppingCartListDTO.getValueIdArr())) {
-                        String strNewValueNameArr = "";
+                        String strNewValueNameArr = "  ";
                         String[] newValueNameArr = shoppingCartListDTO.getValueIdArr().split(",");
                         for (int i = 0; i < newValueNameArr.length; i++) {
                             String valueId = newValueNameArr[i];
@@ -153,7 +153,7 @@ public class ShopCartService {
                                     if (StringUtils.isBlank(strNewValueNameArr)) {
                                         strNewValueNameArr = attributeValue.getName();
                                     } else {
-                                        strNewValueNameArr = strNewValueNameArr + "," + attributeValue.getName();
+                                        strNewValueNameArr = strNewValueNameArr + " ," + attributeValue.getName();
                                     }
                                 }
                             }
