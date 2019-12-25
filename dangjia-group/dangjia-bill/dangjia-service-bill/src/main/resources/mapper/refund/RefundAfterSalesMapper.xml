@@ -143,7 +143,13 @@
         where t.storefront_id=t1.id
         and t.apply_member_id=t2.id
         and t.house_id=#{houseId}
-        and t.type=#{type}
+        <if test="type ==4 ">
+            and t.type in(4,6)
+        </if>
+        <if test="type !=4">
+            and t.type=#{type}
+        </if>
+
         and t.state<![CDATA[<>]]>0
         order by t.create_date desc
     </select>
