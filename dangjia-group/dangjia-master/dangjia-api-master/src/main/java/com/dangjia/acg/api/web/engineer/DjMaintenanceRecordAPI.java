@@ -110,11 +110,15 @@ public interface DjMaintenanceRecordAPI {
 
     @PostMapping(value = "app/engineer/resolved")
     @ApiOperation(value = "已解决", notes = "已解决")
-    ServerResponse resolved( @RequestParam("houseId") String houseId);
+    ServerResponse resolved();
 
     @PostMapping(value = "app/engineer/sendingOwners")
     @ApiOperation(value = "(自购金额确认)发送给业主", notes = "(自购金额确认)发送给业主")
-    ServerResponse sendingOwners( @RequestParam("houseId") String houseId);
+    ServerResponse sendingOwners( @RequestParam("userToken") String userToken,
+                                  @RequestParam("houseId") String houseId,
+                                  @RequestParam("remark") String remark,
+                                  @RequestParam("enoughAmount") String enoughAmount
+                                  );
 
     //确定维保工序
     //选择责任方

@@ -36,6 +36,7 @@ import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.dangjia.acg.service.core.TaskStackService;
 import com.dangjia.acg.service.product.MasterProductTemplateService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -94,6 +95,10 @@ public class DjMaintenanceRecordService {
     private IWorkerTypeSafeOrderMapper workerTypeSafeOrderMapper;
     @Autowired
     private MasterProductTemplateService imasterProductTemplateService;
+
+
+    @Autowired
+    private TaskStackService taskStackService;
 
     @Autowired
     private BasicsStorefrontAPI basicsStorefrontAPI;
@@ -641,20 +646,38 @@ public class DjMaintenanceRecordService {
     }
 
     /**
+     * 已解决
      *
-     * @param houseId
      * @return
      */
-    public ServerResponse resolved(String houseId) {
-        return null;
+    public ServerResponse resolved() {
+        try {
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
     }
 
     /**
+     * (自购金额确认)发送给业主
      *
-     * @param houseId
      * @return
      */
-    public ServerResponse sendingOwners(String houseId) {
-        return null;
+    public ServerResponse sendingOwners(String userToken,String houseId,String remark,String enoughAmount) {
+        try {
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;//业主信息
+            StringBuffer sb=new StringBuffer();
+            sb.append(enoughAmount).append(",").append(remark);
+            taskStackService.inserTaskStackInfo(houseId,member.getId(),"(自购金额确认)发送给业主",null,10,sb.toString());
+            return ServerResponse.createBySuccessMessage("发送成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("(自购金额确认)发送给业主异常");
+        }
     }
 }

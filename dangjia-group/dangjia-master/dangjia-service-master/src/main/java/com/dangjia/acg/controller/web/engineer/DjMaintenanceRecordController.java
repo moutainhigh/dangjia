@@ -134,14 +134,14 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse resolved(String houseId) {
-        return djMaintenanceRecordService.resolved(houseId);
+    public ServerResponse resolved() {
+        return djMaintenanceRecordService.resolved();
     }
 
     @Override
     @ApiMethod
-    public ServerResponse sendingOwners(String houseId) {
-        return djMaintenanceRecordService.sendingOwners(houseId);
+    public ServerResponse sendingOwners(String userToken,String houseId,String remark ,String enoughAmount) {
+        return djMaintenanceRecordService.sendingOwners(userToken,houseId,remark,enoughAmount);
     }
 
 }
