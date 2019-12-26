@@ -517,14 +517,14 @@ public class DjMaintenanceRecordService {
      * @param houseId
      * @return
      */
-    public ServerResponse applicationAcceptance(String houseId) {
-        try {
-            return null;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
-        }
-    }
+//    public ServerResponse applicationAcceptance(String houseId) {
+//        try {
+//            return null;
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+//        }
+//    }
 
     /**
      * 缴纳质保金列表

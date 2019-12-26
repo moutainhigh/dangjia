@@ -76,9 +76,9 @@ public interface DjMaintenanceRecordAPI {
 
 
 
-    @PostMapping(value = "app/engineer/applicationAcceptance")
-    @ApiOperation(value = "确认申请验收", notes = "确认申请验收")
-    ServerResponse applicationAcceptance( @RequestParam("houseId") String houseId);
+//    @PostMapping(value = "app/engineer/applicationAcceptance")
+//    @ApiOperation(value = "确认申请验收", notes = "确认申请验收")
+//    ServerResponse applicationAcceptance( @RequestParam("houseId") String houseId);
 
 
     @PostMapping("/web/queryGuaranteeMoneyList")

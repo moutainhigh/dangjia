@@ -88,11 +88,11 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
         return djMaintenanceRecordService.toQualityMoney(data);
     }
 
-    @Override
-    @ApiMethod
-    public ServerResponse applicationAcceptance(String houseId) {
-        return djMaintenanceRecordService.applicationAcceptance(houseId);
-    }
+//    @Override
+//    @ApiMethod
+//    public ServerResponse applicationAcceptance(String houseId) {
+//        return djMaintenanceRecordService.applicationAcceptance(houseId);
+//    }
 
     @Override
     @ApiMethod
