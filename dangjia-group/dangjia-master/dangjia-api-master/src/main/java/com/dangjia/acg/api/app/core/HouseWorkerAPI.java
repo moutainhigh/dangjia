@@ -110,6 +110,20 @@ public interface HouseWorkerAPI {
     @ApiOperation(value = "获取申请单明细", notes = "获取申请单明细")
     ServerResponse getHouseFlowApply(@RequestParam("userToken") String userToken, @RequestParam("houseFlowApplyId") String houseFlowApplyId);
 
+    /**
+     *
+     * @param userToken
+     * @param applyType
+     * @param houseFlowId
+     * @param applyDec
+     * @param imageList
+     * @param houseFlowId2
+     * @param latitude
+     * @param longitude
+     * @param returnableMaterial 是否有可退材料（1是，0否）
+     * @param materialProductArr 可退材料列表
+     * @return
+     */
     @PostMapping("app/core/houseWorker/setHouseFlowApply")
     @ApiOperation(value = "提交审核、停工", notes = "提交审核、停工")
     ServerResponse setHouseFlowApply(@RequestParam("userToken") String userToken,
@@ -119,7 +133,9 @@ public interface HouseWorkerAPI {
                                      @RequestParam("imageList") String imageList,
                                      @RequestParam("houseFlowId2") String houseFlowId2,
                                      @RequestParam("latitude") String latitude,
-                                     @RequestParam("longitude") String longitude);
+                                     @RequestParam("longitude") String longitude,
+                                     @RequestParam("returnableMaterial") String returnableMaterial,
+                                     @RequestParam("materialProductArr") String materialProductArr);
 
     @PostMapping("app/core/houseWorker/getAdvanceInAdvance")
     @ApiOperation(value = "提前进场", notes = "提前进场")

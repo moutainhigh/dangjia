@@ -72,7 +72,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	<select id="selectWorkerProductInfo" resultType="com.dangjia.acg.dto.product.ProductAppDTO">
 		SELECT
 			t2.id productId,
-		    t2.product_name productName
+		    t2.product_name productName,
+		    t3.id productTemplateId
 		FROM
 			dj_house_warehouse t1,
 			dj_basics_storefront_product t2,

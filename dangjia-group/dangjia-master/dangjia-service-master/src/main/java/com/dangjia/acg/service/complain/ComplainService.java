@@ -208,7 +208,8 @@ public class ComplainService {
      * 添加申诉
      *
      * @param userToken    用户Token
-     * @param complainType 申诉类型 1:工匠被处罚后不服.2：业主要求整改.3：大管家（开工后）要求换人.4:部分收货申诉.5.提前结束装修，6.业主申请换人
+     * @param complainType 申诉类型 1:工匠被处罚后不服.2：业主要求整改.3：大管家（开工后）要求换人.4:部分收货申诉.5.提前结束装修，6.业主申请换人,
+     *                      7.业主投诉验收, 8.管家投诉验收, 9.工匠投诉验收
      * @param businessId   对应业务ID
      *                     complain_type==1:对应处罚的rewardPunishRecordId,
      *                     complain_type==2:对应房子任务进程/申请表的houseFlowApplyId,

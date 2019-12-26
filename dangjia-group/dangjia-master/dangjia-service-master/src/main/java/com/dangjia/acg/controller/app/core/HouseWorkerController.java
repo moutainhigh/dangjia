@@ -7,6 +7,7 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseWorkerService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -97,9 +98,10 @@ public class HouseWorkerController implements HouseWorkerAPI {
     @ApiMethod
     public ServerResponse setHouseFlowApply(String userToken, Integer applyType, String houseFlowId,
                                             String applyDec, String imageList, String houseFlowId2,
-                                            String latitude, String longitude) {
+                                            String latitude, String longitude,String returnableMaterial,
+                                            String materialProductArr) {
         return houseWorkerService.setHouseFlowApply(userToken, applyType, houseFlowId, applyDec,
-                imageList, houseFlowId2, latitude, longitude);
+                imageList, houseFlowId2, latitude, longitude,returnableMaterial,materialProductArr);
     }
 
     /**

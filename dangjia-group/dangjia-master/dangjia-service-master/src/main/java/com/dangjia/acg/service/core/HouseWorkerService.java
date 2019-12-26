@@ -23,6 +23,7 @@ import com.dangjia.acg.mapper.complain.IComplainMapper;
 import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.engineer.DjSkillCertificationMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
+import com.dangjia.acg.mapper.matter.IMasterTechnologyMapper;
 import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberCityMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
@@ -47,14 +48,17 @@ import com.dangjia.acg.modle.sale.royalty.DjRoyaltyMatch;
 import com.dangjia.acg.modle.worker.Insurance;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.service.deliver.RepairMendOrderService;
 import com.dangjia.acg.service.house.HouseService;
 import com.dangjia.acg.service.worker.EvaluateService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.google.gson.JsonArray;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import tk.mybatis.mapper.entity.Example;
@@ -137,7 +141,13 @@ public class HouseWorkerService {
     private DjSkillCertificationMapper djSkillCertificationMapper;
 
     @Autowired
+    private RepairMendOrderService repairMendOrderService;
+    @Autowired
     private ReasonMatchMapper reasonMatchMapper;
+    @Autowired
+    private TaskStackService taskStackService;
+    @Autowired
+    private IMasterTechnologyMapper iMasterTechnologyMapper;
     /**
      * 根据工人id查询所有房子任务
      */
@@ -567,10 +577,13 @@ public class HouseWorkerService {
     /**
      * 提交审核、停工
      * applyType   0每日完工申请，1阶段完工申请，2整体完工申请，4：每日开工,5有效巡查,6无人巡查,7追加巡查
+     * returnableMaterial是否有可退材料（1是，0否）
+     * materialProductArr 可退材料列表
      */
     public ServerResponse setHouseFlowApply(String userToken, Integer applyType, String houseFlowId,
                                             String applyDec, String imageList, String houseFlowId2,
-                                            String latitude, String longitude) {
+                                            String latitude, String longitude,String returnableMaterial,
+                                            String materialProductArr) {
         if (CommonUtil.isEmpty(applyType)) {
             return ServerResponse.createByErrorMessage("请选择提交审核类别");
         }
@@ -594,7 +607,7 @@ public class HouseWorkerService {
             case 0:
                 return setCompletedToday(worker, hf, house, applyDec, imageList);
             case 1:
-                return setPhaseCompletion(worker, hf, house, imageList);
+                return setPhaseCompletion(worker, hf, house, imageList,returnableMaterial,materialProductArr);
             case 2:
                 return setWholeCompletion(worker, hf, house, imageList);
             case 4:
@@ -688,7 +701,8 @@ public class HouseWorkerService {
     /**
      * 阶段完工
      */
-    private ServerResponse setPhaseCompletion(Member worker, HouseFlow hf, House house, String imageList) {
+    private ServerResponse setPhaseCompletion(Member worker, HouseFlow hf, House house, String imageList,String returnableMaterial,
+                                              String materialProductArr) {
         WorkerType workerType = workerTypeMapper.selectByPrimaryKey(worker.getWorkerTypeId());
         if (hf.getPause() == 1) {
             return ServerResponse.createByErrorMessage("该工序（" + workerType.getName() + "）已暂停施工,请勿提交申请！");
@@ -744,6 +758,18 @@ public class HouseWorkerService {
         configMessageService.addConfigMessage(null, AppType.GONGJIANG, supervisorHF.getWorkerId(), "0", "阶段完工申请",
                 String.format(DjConstants.PushMessage.STEWARD_APPLY_FINISHED, house.getHouseName(), workerType.getName()), "5");
         setHouseFlowApplyImage(hfa, house, imageList);
+        /**
+         * 2019/12/26 FZH 增加可退材料到业主审核
+         */
+        if(returnableMaterial!=null&&"1".equals(returnableMaterial)){
+            JSONArray jsonArray=JSONObject.parseArray(materialProductArr);
+            if(jsonArray!=null&&jsonArray.size()>0){
+               String mendOrderId = repairMendOrderService.workerApplyReturnMaterial( worker,house.getCityId(), house.getId(), materialProductArr);
+                //生成工匠退材料任务
+                taskStackService.inserTaskStackInfo(house.getId(),house.getMemberId(),workerType.getName()+"发起退材料", workerType.getImage(),11,mendOrderId);
+
+            }
+        }
         return ServerResponse.createBySuccessMessage("工序（" + workerType.getName() + "）阶段完工申请成功");
 
     }
@@ -1084,7 +1110,8 @@ public class HouseWorkerService {
                 String imageUrl = imageObj.getString("imageUrl"); //图片,拼接
                 if (imageType == 3) {//节点图
                     String imageTypeId = imageObj.getString("imageTypeId");
-                    Technology technology = forMasterAPI.byTechnologyId(house.getCityId(), imageTypeId);
+                    Technology technology = iMasterTechnologyMapper.selectByPrimaryKey(imageTypeId);
+                   // forMasterAPI.byTechnologyId(house.getCityId(), imageTypeId);
                     if (technology == null) continue;
                     TechnologyRecord technologyRecord = new TechnologyRecord();
                     technologyRecord.setHouseId(house.getId());
