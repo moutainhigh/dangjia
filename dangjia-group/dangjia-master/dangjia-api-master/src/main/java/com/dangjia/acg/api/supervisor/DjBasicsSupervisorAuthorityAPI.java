@@ -56,11 +56,7 @@ public interface DjBasicsSupervisorAuthorityAPI {
                                          @RequestParam("houseId") String houseId, @RequestParam("pageDTO") PageDTO pageDTO);
 
 
-    @PostMapping("web/supervisor/queryAcceptanceTrend")
-    @ApiOperation(value = "查看验收动态", notes = "查看验收动态")
-    ServerResponse queryAcceptanceTrend(@RequestParam("request") HttpServletRequest request,
-                                        @RequestParam("houseId") String houseId,
-                                        @RequestParam("pageDTO") PageDTO pageDTO);
+
     //工地列表
     @PostMapping("web/supervisor/querySupervisorHostList")
     @ApiOperation(value = "督导-工地列表", notes = "督导-工地列表")
