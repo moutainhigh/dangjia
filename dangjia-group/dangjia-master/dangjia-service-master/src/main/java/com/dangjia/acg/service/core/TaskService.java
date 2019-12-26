@@ -351,7 +351,7 @@ public class TaskService {
                     // 否则提示剩余保险天数为XX天，请购买保险再继续工作；
                     //
                     // 工匠有30分钟时间购买保险，30分钟内购买成功按正常流程走，未购买成功则自动放弃。30分钟内业主看不到工序支付任务
-                   continue;
+                    return taskList;
                 }
             }
             Task task = new Task();
