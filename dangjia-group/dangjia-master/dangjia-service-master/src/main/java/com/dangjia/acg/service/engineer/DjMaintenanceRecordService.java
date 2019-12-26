@@ -32,6 +32,7 @@ import com.dangjia.acg.modle.house.TaskStack;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.worker.WorkerDetail;
+import com.dangjia.acg.service.product.MasterProductTemplateService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,7 +83,8 @@ public class DjMaintenanceRecordService {
     private IMasterTaskStackMapper iMasterTaskStackMapper;
 
     @Autowired
-    private DjBasicsProductAPI djBasicsProductAPI;
+    private MasterProductTemplateService imasterProductTemplateService;
+
     @Autowired
     private BasicsStorefrontAPI basicsStorefrontAPI;
     /**
@@ -387,7 +389,7 @@ public class DjMaintenanceRecordService {
                     djMaintenanceRecordProductMapper.queryDjMaintenanceRecordProductList(dimensionRecordDTOS.getMrId());
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             djMaintenanceRecordProductDTOS.forEach(djMaintenanceRecordProductDTO -> {
-                djMaintenanceRecordProductDTO.setValueNameArr(djBasicsProductAPI.getNewValueNameArr(djMaintenanceRecordProductDTO.getValueIdArr()));
+                djMaintenanceRecordProductDTO.setValueNameArr(imasterProductTemplateService.getNewValueNameArr(djMaintenanceRecordProductDTO.getValueIdArr()));
                 djMaintenanceRecordProductDTO.setImage(imageAddress + djMaintenanceRecordProductDTO.getImage());
             });
             dimensionRecordDTOS.setDjMaintenanceRecordProductDTOS(djMaintenanceRecordProductDTOS);

@@ -89,4 +89,20 @@ public interface DjMaintenanceRecordAPI {
     @ApiOperation(value = "店铺-缴纳质保金详情", notes = "缴纳质保金详情")
     ServerResponse queryGuaranteeMoneyDetail(@RequestParam("userId") String userId,@RequestParam("cityId") String cityId,@RequestParam("id") String id);
 
+
+//    @PostMapping(value = "app/engineer/applicationAcceptance")
+//    @ApiOperation(value = "已解决", notes = "已解决")
+//    ServerResponse applicationAcceptance( @RequestParam("houseId") String houseId);
+//
+//    @PostMapping(value = "app/engineer/applicationAcceptance")
+//    @ApiOperation(value = "发送给业主", notes = "发送给业主")
+//    ServerResponse applicationAcceptance( @RequestParam("houseId") String houseId);
+
+    //确定维保工序
+    //选择责任方
+    //确定责任占比
+
+    //管家审核维修
+
+
 }
