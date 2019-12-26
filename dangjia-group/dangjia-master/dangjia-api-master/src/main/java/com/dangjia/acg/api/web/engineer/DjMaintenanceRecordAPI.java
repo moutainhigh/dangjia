@@ -113,7 +113,7 @@ public interface DjMaintenanceRecordAPI {
     ServerResponse resolved( @RequestParam("houseId") String houseId);
 
     @PostMapping(value = "app/engineer/sendingOwners")
-    @ApiOperation(value = "发送给业主", notes = "发送给业主")
+    @ApiOperation(value = "(自购金额确认)发送给业主", notes = "(自购金额确认)发送给业主")
     ServerResponse sendingOwners( @RequestParam("houseId") String houseId);
 
     //确定维保工序
