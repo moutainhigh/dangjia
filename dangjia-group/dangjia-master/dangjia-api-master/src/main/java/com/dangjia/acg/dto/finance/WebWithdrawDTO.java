@@ -1,5 +1,6 @@
 package com.dangjia.acg.dto.finance;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -19,6 +20,8 @@ public class WebWithdrawDTO {
     private String workerId;//工人id
     private Integer state;//0未处理,1同意（成功） 2不同意(驳回)
     private BigDecimal money;//本次提现金额
+    private BigDecimal rateMoney;//手续费
+    private BigDecimal applyMoney;//申请金额
     private String bankName;//银行名字
     private String cardNumber;//卡号
     private Date processingDate;//处理时间
