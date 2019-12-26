@@ -206,36 +206,39 @@ public class TechnologyRecordService {
        if(productList!=null&&productList.size()>0){
            for (ProductAppDTO pt:productList) {
                //JSONObject object = jsonArray.getJSONObject(i);
-               String workerGoodsId =pt.getProductId();// object.getString("workerGoodsId");
+               //String workerGoodsId =pt.getProductId();// object.getString("workerGoodsId");
                String workerGoodsName =pt.getProductName();// object.getString("workerGoodsName");
-
+               String prodTemplateId=pt.getProductTemplateId();
                WorkNodeDTO workNodeDTOA = new WorkNodeDTO();
                workNodeDTOA.setTecName(workerGoodsName);//商品名
               // JSONArray tecArray = budgetWorkerAPI.getTecList(house.getCityId(), worker.getWorkerType(), workerGoodsId);
-               JSONArray tecArray = getTecList(worker.getWorkerType(), workerGoodsId);
+               JSONArray tecArray = getTecList(worker.getWorkerType(), prodTemplateId);
                List<TechnologyRecordDTO> trList = new ArrayList<>();
-               for (int j = 0; j < tecArray.size(); j++) {
-                   JSONObject tecObject = tecArray.getJSONObject(j);
-                   String technologyId = tecObject.getString("technologyId");
-                   String technologyName = tecObject.getString("technologyName");
-                   TechnologyRecordDTO trd = new TechnologyRecordDTO();
-                   trd.setId(technologyId);
-                   trd.setName(technologyName);
-                   List<TechnologyRecord> technologyRecordList = technologyRecordMapper.checkByTechnologyId(houseFlow.getHouseId(), technologyId, worker.getWorkerTypeId());
-                   if (technologyRecordList.size() == 0) { //没有验收
-                       trd.setState(0);
-                   } else {
-                       TechnologyRecord technologyRecord = technologyRecordList.get(0);
-                       if (technologyRecord.getState() == 2) {//不通过
+               if(tecArray!=null&&tecArray.size()>0){
+                   for (int j = 0; j < tecArray.size(); j++) {
+                       JSONObject tecObject = tecArray.getJSONObject(j);
+                       String technologyId = tecObject.getString("technologyId");
+                       String technologyName = tecObject.getString("technologyName");
+                       TechnologyRecordDTO trd = new TechnologyRecordDTO();
+                       trd.setId(technologyId);
+                       trd.setName(technologyName);
+                       List<TechnologyRecord> technologyRecordList = technologyRecordMapper.checkByTechnologyId(houseFlow.getHouseId(), technologyId, worker.getWorkerTypeId());
+                       if (technologyRecordList.size() == 0) { //没有验收
                            trd.setState(0);
-                       } else if (technologyRecord.getState() == 0) {
-                           trd.setState(0);//未验收
                        } else {
-                           trd.setState(1);//已验收
+                           TechnologyRecord technologyRecord = technologyRecordList.get(0);
+                           if (technologyRecord.getState() == 2) {//不通过
+                               trd.setState(0);
+                           } else if (technologyRecord.getState() == 0) {
+                               trd.setState(0);//未验收
+                           } else {
+                               trd.setState(1);//已验收
+                           }
                        }
+                       trList.add(trd);
                    }
-                   trList.add(trd);
                }
+
                workNodeDTOA.setTrList(trList);
                workNodeDTOList.add(workNodeDTOA);
            }

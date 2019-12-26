@@ -196,7 +196,8 @@
             t.total_amount totalAmount,
             t.state,
             t.type,
-            t.image_arr imageArr
+            t.image_arr imageArr,
+            t.room_charge roomCharge
         FROM
             dj_repair_mend_order t,
             dj_basics_storefront t1,

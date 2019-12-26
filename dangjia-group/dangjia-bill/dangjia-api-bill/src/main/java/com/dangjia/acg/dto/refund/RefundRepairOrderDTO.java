@@ -63,6 +63,8 @@ public class RefundRepairOrderDTO {
 
     private long reparirRemainingTime;//订单剩余处理时间
 
+    private  Double roomCharge;//量房费用
+
     @ApiModelProperty("可操作编码")
     private String associatedOperation;
 
