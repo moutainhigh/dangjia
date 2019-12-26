@@ -172,4 +172,25 @@ public class ImageUtil {
         String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
         return extension;
     }
+    /**
+     * 给图片赋上全路径（多张）
+     * @param address
+     * @param image
+     * @return
+     */
+    public static String getImageAddress(String address, String image) {
+        StringBuilder imgStr = new StringBuilder();
+        if (!CommonUtil.isEmpty(image)) {
+            String[] imgArr = image.split(",");
+            for (int i = 0; i < imgArr.length; i++) {
+                if (i == imgArr.length - 1) {
+                    imgStr.append(address).append(imgArr[i]);
+                } else {
+                    imgStr.append(address).append(imgArr[i]).append(",");
+                }
+            }
+        }
+        return imgStr.toString();
+    }
+
 }
