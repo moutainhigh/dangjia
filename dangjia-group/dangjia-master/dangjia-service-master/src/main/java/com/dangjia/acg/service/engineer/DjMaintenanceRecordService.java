@@ -1,6 +1,5 @@
 package com.dangjia.acg.service.engineer;
 
-import com.dangjia.acg.api.product.DjBasicsProductAPI;
 import com.dangjia.acg.api.BasicsStorefrontAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.BaseException;
@@ -15,11 +14,13 @@ import com.dangjia.acg.mapper.account.IMasterAccountFlowRecordMapper;
 import com.dangjia.acg.mapper.complain.IComplainMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
+import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordContentMapper;
 import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordMapper;
 import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordProductMapper;
 import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordResponsiblePartyMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.product.IMasterStorefrontMapper;
+import com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper;
 import com.dangjia.acg.mapper.task.IMasterTaskStackMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.account.AccountFlowRecord;
@@ -27,11 +28,14 @@ import com.dangjia.acg.modle.complain.Complain;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.engineer.DjMaintenanceRecord;
+import com.dangjia.acg.modle.engineer.DjMaintenanceRecordContent;
 import com.dangjia.acg.modle.engineer.DjMaintenanceRecordResponsibleParty;
 import com.dangjia.acg.modle.house.TaskStack;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.worker.WorkerDetail;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.product.MasterProductTemplateService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -81,12 +85,52 @@ public class DjMaintenanceRecordService {
 
     @Autowired
     private IMasterTaskStackMapper iMasterTaskStackMapper;
+    @Autowired
+    private DjMaintenanceRecordContentMapper djMaintenanceRecordContentMapper;
+    @Autowired
+    private CraftsmanConstructionService constructionService;
 
+    @Autowired
+    private IWorkerTypeSafeOrderMapper workerTypeSafeOrderMapper;
     @Autowired
     private MasterProductTemplateService imasterProductTemplateService;
 
     @Autowired
     private BasicsStorefrontAPI basicsStorefrontAPI;
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse saveMaintenanceRecord(String userToken,String houseId, String workerTypeSafeOrderId,
+                                                String remark,String images){
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        //判断当前房子下是否有正在处理中的质保
+        List<DjMaintenanceRecord>  maintenanceRecordList=djMaintenanceRecordMapper.selectMaintenanceRecoredByHouseId(houseId);
+        if(maintenanceRecordList!=null&&maintenanceRecordList.size()>0){
+            return ServerResponse.createByErrorMessage("已有质保流程在处理中！");
+        }
+        Member member = (Member) object;//业主信息
+        //添加质保信息
+        DjMaintenanceRecord djMaintenanceRecord=new DjMaintenanceRecord();
+        djMaintenanceRecord.setHouseId(houseId);
+        djMaintenanceRecord.setMemberId(member.getId());
+        djMaintenanceRecord.setOwnerName(member.getName());
+        djMaintenanceRecord.setOwnerMobile(member.getMobile());
+        djMaintenanceRecord.setWorkerTypeSafeOrderId(workerTypeSafeOrderId);
+        //查询保险订单对应的工种
+        WorkerTypeSafeOrder workerTypeSafeOrder=workerTypeSafeOrderMapper.selectByPrimaryKey(workerTypeSafeOrderId);
+        djMaintenanceRecord.setWorkerTypeId(workerTypeSafeOrder.getWorkerTypeId());
+        djMaintenanceRecordMapper.insert(djMaintenanceRecord);
+        //添加质保对应的图片、备注信息
+        DjMaintenanceRecordContent djMaintenanceRecordContent=new DjMaintenanceRecordContent();
+        djMaintenanceRecordContent.setMaintenanceRecordId(djMaintenanceRecord.getId());
+        djMaintenanceRecordContent.setRemark(remark);
+        djMaintenanceRecordContent.setImage(images);
+        djMaintenanceRecordContent.setMemberId(member.getId());
+        djMaintenanceRecordContent.setType(3);
+        djMaintenanceRecordContentMapper.insert(djMaintenanceRecordContent);
+        return ServerResponse.createBySuccess("申请成功","");
+    }
     /**
      * 查询质保审核列表
      *
@@ -94,6 +138,7 @@ public class DjMaintenanceRecordService {
      * @param searchKey
      * @return
      */
+
     public ServerResponse queryDjMaintenanceRecordList(PageDTO pageDTO, String searchKey, Integer state) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());

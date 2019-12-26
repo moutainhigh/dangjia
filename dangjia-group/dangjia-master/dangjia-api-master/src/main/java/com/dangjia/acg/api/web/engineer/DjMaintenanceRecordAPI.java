@@ -18,6 +18,24 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Api(value = "维保接口", description = "维保接口")
 public interface DjMaintenanceRecordAPI {
 
+
+    /**
+     * 保存质保记录（申请质保）
+     * @param userToken 用户token
+     * @param houseId 房子ID
+     * @param workerTypeSafeOrderId 保险订单ID
+     * @param remark 备注
+     * @param images 图片，多张用逗号分隔
+     * @return
+     */
+    @PostMapping(value = "app/engineer/saveMaintenanceRecord")
+    @ApiOperation(value = "保存质保记录（申请质保）", notes = "保存质保记录（申请质保）")
+    ServerResponse saveMaintenanceRecord(@RequestParam("userToken") String userToken,
+                                         @RequestParam("houseId") String houseId,
+                                         @RequestParam("workerTypeSafeOrderId") String workerTypeSafeOrderId,
+                                         @RequestParam("remark") String remark,
+                                         @RequestParam("images") String images);
+
     @PostMapping(value = "web/engineer/queryDjMaintenanceRecordList")
     @ApiOperation(value = "查询质保审核列表", notes = "查询质保审核列表")
     ServerResponse queryDjMaintenanceRecordList(@RequestParam("pageDTO") PageDTO pageDTO,

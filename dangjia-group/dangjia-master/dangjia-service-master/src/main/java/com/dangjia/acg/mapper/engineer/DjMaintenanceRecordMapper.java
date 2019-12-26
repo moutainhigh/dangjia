@@ -46,4 +46,7 @@ public interface DjMaintenanceRecordMapper extends Mapper<DjMaintenanceRecord> {
 
     List<DjMaintenanceRecord> queryMaintenanceRecord(@Param("memberId") String memberId,@Param("houseId") String houseId);
 
+    //判断是否有正在处理中的质保
+    List<DjMaintenanceRecord> selectMaintenanceRecoredByHouseId(@Param("houseId") String houseId);
+
 }

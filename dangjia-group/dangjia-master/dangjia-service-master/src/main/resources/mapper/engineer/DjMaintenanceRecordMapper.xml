@@ -2,6 +2,30 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.dangjia.acg.mapper.engineer.DjMaintenanceRecordMapper">
 
+    <sql id="basic_columns">
+            id,
+            steward_processing_time AS stewardProcessingTime,
+            steward_order_time AS stewardOrderTime,
+            member_id AS memberId,
+            house_id AS houseId,
+            owner_name AS ownerName,
+            owner_mobile AS ownerMobile,
+            supervisor_id AS supervisorId,
+            steward_subsidy AS stewardSubsidy,
+            service_remark AS serviceRemark,
+            steward_id AS stewardId,
+            steward_state AS stewardState,
+            since_purchase_amount AS sincePurchaseAmount,
+            remark,
+            owner_state AS ownerState,
+            state,
+            complain_type AS complainType,
+            handle_type AS handleType,
+            user_id AS userId,
+            worker_member_id AS workerMemberId,
+            worker_create_date AS workerCreateDate,
+           worker_type_safe_order_id workerTypeSafeOrderId
+    </sql>
     <select id="queryDjMaintenanceRecordList" resultType="com.dangjia.acg.dto.engineer.DjMaintenanceRecordDTO">
         SELECT
         mr.id,
@@ -280,4 +304,15 @@
             worker_image as workerImage
         From dj_maintenance_record where house_id=#{houseId} and member_id=#{memberId}
     </select>
+
+    <select id="selectMaintenanceRecoredByHouseId" resultType="com.dangjia.acg.modle.engineer.DjMaintenanceRecord">
+        SELECT
+           <include refid="basic_columns"/>
+        FROM
+            dj_maintenance_record
+        WHERE
+            house_id = #{houseId}
+        AND state NOT IN (2, 3)
+    </select>
+
 </mapper>
