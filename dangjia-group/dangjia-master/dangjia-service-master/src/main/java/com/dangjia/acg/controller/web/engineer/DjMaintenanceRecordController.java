@@ -134,14 +134,20 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse resolved() {
-        return djMaintenanceRecordService.resolved();
+    public ServerResponse resolved(String userToken, String remark,String houseId,String image,String id,String workerTypeSafeOrderId ) {
+        return djMaintenanceRecordService.resolved(userToken, remark,houseId,image, id, workerTypeSafeOrderId);
     }
 
     @Override
     @ApiMethod
     public ServerResponse sendingOwners(String userToken,String houseId,String remark ,String enoughAmount) {
         return djMaintenanceRecordService.sendingOwners(userToken,houseId,remark,enoughAmount);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse auditMaintenance(String userToken, String remark, String houseId, String image, String id, Integer state, String workerTypeSafeOrderId) {
+        return djMaintenanceRecordService.auditMaintenance(userToken,remark,houseId,image,id,state,workerTypeSafeOrderId);
     }
 
 }

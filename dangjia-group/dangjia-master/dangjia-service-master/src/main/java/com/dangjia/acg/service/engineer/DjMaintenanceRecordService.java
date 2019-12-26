@@ -2,6 +2,7 @@ package com.dangjia.acg.service.engineer;
 
 import com.dangjia.acg.api.BasicsStorefrontAPI;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
@@ -18,6 +19,7 @@ import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordContentMapper;
 import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordMapper;
 import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordProductMapper;
 import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordResponsiblePartyMapper;
+import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.product.IMasterStorefrontMapper;
 import com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper;
@@ -30,14 +32,17 @@ import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.engineer.DjMaintenanceRecord;
 import com.dangjia.acg.modle.engineer.DjMaintenanceRecordContent;
 import com.dangjia.acg.modle.engineer.DjMaintenanceRecordResponsibleParty;
+import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.TaskStack;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.worker.WorkerDetail;
+import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.TaskStackService;
 import com.dangjia.acg.service.product.MasterProductTemplateService;
+import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,6 +107,14 @@ public class DjMaintenanceRecordService {
 
     @Autowired
     private BasicsStorefrontAPI basicsStorefrontAPI;
+
+    @Autowired
+    private IHouseMapper houseMapper;
+    @Autowired
+    private ConfigMessageService configMessageService ;
+
+
+
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse saveMaintenanceRecord(String userToken,String houseId, String workerTypeSafeOrderId,
                                                 String remark,String images){
@@ -650,9 +663,31 @@ public class DjMaintenanceRecordService {
      *
      * @return
      */
-    public ServerResponse resolved() {
+    public ServerResponse resolved(String userToken, String remark,String houseId,String image,String id,String workerTypeSafeOrderId) {
         try {
-            return null;
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;//业主信息
+            String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+            House house = houseMapper.selectByPrimaryKey(houseId);
+
+            DjMaintenanceRecordContent record =new DjMaintenanceRecordContent();
+            record.setMaintenanceRecordId(id);
+            record.setRemark(remark);
+            record.setImage(image);
+            record.setMemberId(member.getId());
+            record.setType(1);
+
+            //            configMessageService.addConfigMessage(AppType.SALE, member.getId(), "开工提醒",
+//                    "您申请的维修已经解决【" + house.getHouseName() + "】", 0, url
+//                            + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle1.get(0).getId(), 1, "4"));
+
+
+            djMaintenanceRecordContentMapper.insertSelective(record);
+
+            return ServerResponse.createBySuccessMessage("已解决");
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
@@ -675,6 +710,42 @@ public class DjMaintenanceRecordService {
             sb.append(enoughAmount).append(",").append(remark);
             taskStackService.inserTaskStackInfo(houseId,member.getId(),"(自购金额确认)发送给业主",null,10,sb.toString());
             return ServerResponse.createBySuccessMessage("发送成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("(自购金额确认)发送给业主异常");
+        }
+    }
+
+    /**
+     *
+     * @param userToken
+     * @param remark
+     * @param houseId
+     * @param image
+     * @param id
+     * @param state
+     * @param workerTypeSafeOrderId
+     * @return
+     */
+    public ServerResponse auditMaintenance(String userToken, String remark, String houseId, String image, String id, Integer state, String workerTypeSafeOrderId) {
+        try {
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;//业主信息
+            DjMaintenanceRecord djMaintenanceRecord=djMaintenanceRecordMapper.selectByPrimaryKey(id);
+            djMaintenanceRecord.setRemark(remark);
+            djMaintenanceRecord.setHouseId(houseId);
+            djMaintenanceRecord.setState(state);
+            djMaintenanceRecord.setWorkerTypeSafeOrderId(workerTypeSafeOrderId);
+            djMaintenanceRecord.setMemberId(member.getId());
+            djMaintenanceRecord.setStewardState(2);//管家处理状态 1：待处理 2：已处理
+            djMaintenanceRecord.setWorkerTypeId(null);
+            int i=djMaintenanceRecordMapper.updateByPrimaryKey(djMaintenanceRecord);
+            if(i<=0)
+                return ServerResponse.createByErrorMessage("审核失败");
+            return ServerResponse.createBySuccessMessage("审核成功");
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("(自购金额确认)发送给业主异常");

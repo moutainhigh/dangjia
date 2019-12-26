@@ -110,7 +110,13 @@ public interface DjMaintenanceRecordAPI {
 
     @PostMapping(value = "app/engineer/resolved")
     @ApiOperation(value = "已解决", notes = "已解决")
-    ServerResponse resolved();
+    ServerResponse resolved(@RequestParam("userToken") String userToken,
+                            @RequestParam("remark") String remark,
+                            @RequestParam("houseId") String houseId,
+                            @RequestParam("image") String image,
+                            @RequestParam("id") String id,
+                            @RequestParam("workerTypeSafeOrderId") String workerTypeSafeOrderId
+    );
 
     @PostMapping(value = "app/engineer/sendingOwners")
     @ApiOperation(value = "(自购金额确认)发送给业主", notes = "(自购金额确认)发送给业主")
@@ -120,10 +126,18 @@ public interface DjMaintenanceRecordAPI {
                                   @RequestParam("enoughAmount") String enoughAmount
                                   );
 
-    //确定维保工序
-    //选择责任方
+    //确定维保工序（已有）
+    //选择责任方（已有）
     //确定责任占比
-    //管家审核维修
-
+    @PostMapping(value = "app/auditMaintenance")
+    @ApiOperation(value = "管家审核维修", notes = "管家审核维修")
+    ServerResponse auditMaintenance(@RequestParam("userToken") String userToken,
+                            @RequestParam("remark") String remark,
+                            @RequestParam("houseId") String houseId,
+                            @RequestParam("image") String image,
+                            @RequestParam("id") String id,
+                            @RequestParam("state") Integer state,
+                            @RequestParam("workerTypeSafeOrderId") String workerTypeSafeOrderId
+    );
 
 }
