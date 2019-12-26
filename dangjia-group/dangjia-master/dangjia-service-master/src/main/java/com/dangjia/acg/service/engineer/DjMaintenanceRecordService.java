@@ -594,4 +594,22 @@ public class DjMaintenanceRecordService {
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
+
+    /**
+     *
+     * @param houseId
+     * @return
+     */
+    public ServerResponse resolved(String houseId) {
+        return null;
+    }
+
+    /**
+     *
+     * @param houseId
+     * @return
+     */
+    public ServerResponse sendingOwners(String houseId) {
+        return null;
+    }
 }
