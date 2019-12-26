@@ -11,6 +11,7 @@
         w.worker_id AS workerId,
         w.state AS state,
         w.money AS money,
+        w.rate_money AS rateMoney,
         w.bank_name AS bankName,
         w.card_number AS cardNumber,
         w.processing_date AS processingDate,
