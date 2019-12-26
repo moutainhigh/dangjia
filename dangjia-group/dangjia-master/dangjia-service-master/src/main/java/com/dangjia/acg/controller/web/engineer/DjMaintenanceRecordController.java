@@ -88,11 +88,11 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
         return djMaintenanceRecordService.toQualityMoney(data);
     }
 
-    @Override
-    @ApiMethod
-    public ServerResponse applicationAcceptance(String houseId) {
-        return djMaintenanceRecordService.applicationAcceptance(houseId);
-    }
+//    @Override
+//    @ApiMethod
+//    public ServerResponse applicationAcceptance(String houseId) {
+//        return djMaintenanceRecordService.applicationAcceptance(houseId);
+//    }
 
     @Override
     @ApiMethod
@@ -104,6 +104,18 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
     @ApiMethod
     public ServerResponse queryGuaranteeMoneyDetail(String userId,String cityId,String id) {
        return djMaintenanceRecordService.queryGuaranteeMoneyDetail( userId, cityId,id);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse resolved(String houseId) {
+        return djMaintenanceRecordService.resolved(houseId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse sendingOwners(String houseId) {
+        return djMaintenanceRecordService.sendingOwners(houseId);
     }
 
 }

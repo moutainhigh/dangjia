@@ -76,9 +76,9 @@ public interface DjMaintenanceRecordAPI {
 
 
 
-    @PostMapping(value = "app/engineer/applicationAcceptance")
-    @ApiOperation(value = "确认申请验收", notes = "确认申请验收")
-    ServerResponse applicationAcceptance( @RequestParam("houseId") String houseId);
+//    @PostMapping(value = "app/engineer/applicationAcceptance")
+//    @ApiOperation(value = "确认申请验收", notes = "确认申请验收")
+//    ServerResponse applicationAcceptance( @RequestParam("houseId") String houseId);
 
 
     @PostMapping("/web/queryGuaranteeMoneyList")
@@ -88,5 +88,20 @@ public interface DjMaintenanceRecordAPI {
     @PostMapping("/web/queryGuaranteeMoneyDetail")
     @ApiOperation(value = "店铺-缴纳质保金详情", notes = "缴纳质保金详情")
     ServerResponse queryGuaranteeMoneyDetail(@RequestParam("userId") String userId,@RequestParam("cityId") String cityId,@RequestParam("id") String id);
+
+
+    @PostMapping(value = "app/engineer/resolved")
+    @ApiOperation(value = "已解决", notes = "已解决")
+    ServerResponse resolved( @RequestParam("houseId") String houseId);
+
+    @PostMapping(value = "app/engineer/sendingOwners")
+    @ApiOperation(value = "发送给业主", notes = "发送给业主")
+    ServerResponse sendingOwners( @RequestParam("houseId") String houseId);
+
+    //确定维保工序
+    //选择责任方
+    //确定责任占比
+    //管家审核维修
+
 
 }

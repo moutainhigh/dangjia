@@ -133,6 +133,12 @@ public class DjMaintenanceRecord extends BaseEntity {
     @Column(name = "worker_create_date")
     @Desc(value = "工匠接单时间")
     @ApiModelProperty("工匠接单时间")
-    private String workerCreateDate;
+    private Date workerCreateDate;
+
+
+    @Column(name = "worker_type_id")
+    @Desc(value = "工种id")
+    @ApiModelProperty("工种id")
+    private String workerTypeId;
 
 }

@@ -32,6 +32,7 @@ import com.dangjia.acg.modle.house.TaskStack;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.worker.WorkerDetail;
+import com.dangjia.acg.service.product.MasterProductTemplateService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,7 +83,8 @@ public class DjMaintenanceRecordService {
     private IMasterTaskStackMapper iMasterTaskStackMapper;
 
     @Autowired
-    private DjBasicsProductAPI djBasicsProductAPI;
+    private MasterProductTemplateService imasterProductTemplateService;
+
     @Autowired
     private BasicsStorefrontAPI basicsStorefrontAPI;
     /**
@@ -387,7 +389,7 @@ public class DjMaintenanceRecordService {
                     djMaintenanceRecordProductMapper.queryDjMaintenanceRecordProductList(dimensionRecordDTOS.getMrId());
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             djMaintenanceRecordProductDTOS.forEach(djMaintenanceRecordProductDTO -> {
-                djMaintenanceRecordProductDTO.setValueNameArr(djBasicsProductAPI.getNewValueNameArr(djMaintenanceRecordProductDTO.getValueIdArr()));
+                djMaintenanceRecordProductDTO.setValueNameArr(imasterProductTemplateService.getNewValueNameArr(djMaintenanceRecordProductDTO.getValueIdArr()));
                 djMaintenanceRecordProductDTO.setImage(imageAddress + djMaintenanceRecordProductDTO.getImage());
             });
             dimensionRecordDTOS.setDjMaintenanceRecordProductDTOS(djMaintenanceRecordProductDTOS);
@@ -515,14 +517,14 @@ public class DjMaintenanceRecordService {
      * @param houseId
      * @return
      */
-    public ServerResponse applicationAcceptance(String houseId) {
-        try {
-            return null;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
-        }
-    }
+//    public ServerResponse applicationAcceptance(String houseId) {
+//        try {
+//            return null;
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+//        }
+//    }
 
     /**
      * 缴纳质保金列表
@@ -591,5 +593,23 @@ public class DjMaintenanceRecordService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
         }
+    }
+
+    /**
+     *
+     * @param houseId
+     * @return
+     */
+    public ServerResponse resolved(String houseId) {
+        return null;
+    }
+
+    /**
+     *
+     * @param houseId
+     * @return
+     */
+    public ServerResponse sendingOwners(String houseId) {
+        return null;
     }
 }
