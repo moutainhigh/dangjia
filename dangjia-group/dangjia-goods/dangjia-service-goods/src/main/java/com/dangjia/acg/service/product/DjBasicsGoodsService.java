@@ -240,7 +240,7 @@ public class DjBasicsGoodsService {
             }
 
             List<DjBasicsProductTemplateDTO> productList = iBasicsProductTemplateMapper.queryProductTemplateByGoodsId(categoryId,storefontId,bgtype,name);
-            if(productList!=null&&productList.size()>0) {
+            if(!productList.isEmpty()&&productList.size()>0) {
                 for (DjBasicsProductTemplateDTO p : productList) {
                     //type表示： 是否禁用  0：禁用；1不禁用 ;  -1全部默认
                     if (type != null && !type.equals(p.getType()) && -1 != type) //不等于 type 的不返回给前端
