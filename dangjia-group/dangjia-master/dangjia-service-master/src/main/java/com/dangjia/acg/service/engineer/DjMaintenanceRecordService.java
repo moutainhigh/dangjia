@@ -717,7 +717,7 @@ public class DjMaintenanceRecordService {
     }
 
     /**
-     *
+     *管家审核维修
      * @param userToken
      * @param remark
      * @param houseId
@@ -746,6 +746,28 @@ public class DjMaintenanceRecordService {
             if(i<=0)
                 return ServerResponse.createByErrorMessage("审核失败");
             return ServerResponse.createBySuccessMessage("审核成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("(自购金额确认)发送给业主异常");
+        }
+    }
+
+
+    /**
+     *提交质保处理
+     * @param userToken
+     * @param remark
+     * @param houseId
+     * @param image
+     * @param id
+     * @param state
+     * @param workerTypeSafeOrderId
+     * @return
+     */
+    public ServerResponse submitQualityAssurance(String userToken, String remark, String houseId, String image, String id, Integer state, String workerTypeSafeOrderId) {
+        try {
+            //保存维保记录、维保内容、定则
+            return null;
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("(自购金额确认)发送给业主异常");

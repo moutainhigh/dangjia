@@ -140,4 +140,14 @@ public interface DjMaintenanceRecordAPI {
                             @RequestParam("workerTypeSafeOrderId") String workerTypeSafeOrderId
     );
 
+    @PostMapping(value = "app/submitQualityAssurance")
+    @ApiOperation(value = "提交质保处理", notes = "提交质保处理")
+    ServerResponse submitQualityAssurance(@RequestParam("userToken") String userToken,
+                                    @RequestParam("remark") String remark,
+                                    @RequestParam("houseId") String houseId,
+                                    @RequestParam("image") String image,
+                                    @RequestParam("id") String id,
+                                    @RequestParam("state") Integer state,
+                                    @RequestParam("workerTypeSafeOrderId") String workerTypeSafeOrderId
+    );
 }
