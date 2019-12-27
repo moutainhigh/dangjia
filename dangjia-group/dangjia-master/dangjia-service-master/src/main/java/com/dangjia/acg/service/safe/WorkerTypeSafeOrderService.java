@@ -144,7 +144,7 @@ public class WorkerTypeSafeOrderService {
        //判断是否过保
         if(wtso.getExpirationDate()!=null&& DateUtil.compareDate(new Date(),wtso.getExpirationDate())){
             wtso.setServiceState(2);//已过保
-        }else{
+        }else if(wtso.getForceTime()!=null){
             wtso.setServiceState(1);//未过保
         }
 
