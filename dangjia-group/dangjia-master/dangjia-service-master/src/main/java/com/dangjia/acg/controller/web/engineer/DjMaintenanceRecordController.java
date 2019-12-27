@@ -5,6 +5,8 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.engineer.DjMaintenanceRecordService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,8 +19,32 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
 
+    private static Logger logger = LoggerFactory.getLogger(DjMaintenanceRecordController.class);
+
     @Autowired
     private DjMaintenanceRecordService djMaintenanceRecordService;
+
+    /**
+     * 申请质保记录
+     * @param userToken 用户token
+     * @param houseId 房子ID
+     * @param workerTypeSafeOrderId 保险订单ID
+     * @param remark 备注
+     * @param images 图片，多张用逗号分隔
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse saveMaintenanceRecord(String userToken,String houseId, String workerTypeSafeOrderId,
+                                         String remark,String images){
+        try{
+            return djMaintenanceRecordService.saveMaintenanceRecord(userToken,houseId,workerTypeSafeOrderId,remark,images);
+        }catch (Exception e){
+            logger.error("申请异常",e);
+            return ServerResponse.createByErrorMessage("申请异常");
+        }
+
+    }
 
     @Override
     @ApiMethod
@@ -108,14 +134,26 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse resolved(String houseId) {
-        return djMaintenanceRecordService.resolved(houseId);
+    public ServerResponse resolved(String userToken, String remark,String houseId,String image,String id,String workerTypeSafeOrderId ) {
+        return djMaintenanceRecordService.resolved(userToken, remark,houseId,image, id, workerTypeSafeOrderId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse sendingOwners(String houseId) {
-        return djMaintenanceRecordService.sendingOwners(houseId);
+    public ServerResponse sendingOwners(String userToken,String houseId,String remark ,String enoughAmount) {
+        return djMaintenanceRecordService.sendingOwners(userToken,houseId,remark,enoughAmount);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse auditMaintenance(String userToken, String remark, String houseId, String image, String id, Integer state, String workerTypeSafeOrderId) {
+        return djMaintenanceRecordService.auditMaintenance(userToken,remark,houseId,image,id,state,workerTypeSafeOrderId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse submitQualityAssurance(String userToken, String remark, String houseId, String image, String id, Integer state, String workerTypeSafeOrderId) {
+        return djMaintenanceRecordService.submitQualityAssurance(userToken,remark,houseId,image,id,state,workerTypeSafeOrderId);
     }
 
 }
