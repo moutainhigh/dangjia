@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dangjia.acg.mapper.actuary.IBillBudgetMapper">
+
+    <!--查询精算总价-->
+     <select id="selectTotalPriceByHouseId" resultType="java.lang.Double">
+        SELECT
+            sum(tt.total_price) totalPrice
+        FROM
+            (
+               SELECT
+                    bm.id,
+                    bm.product_id,
+                    pt.category_id,
+                    bm.price,
+                    bm.shop_count,
+                    bm.total_price
+                FROM
+                    dj_actuary_budget_material bm,
+                    dj_basics_storefront_product sp,
+                    dj_basics_product_template pt,
+                    dj_pay_business_order t,
+                    dj_deliver_order t1
+                WHERE
+                    t.house_id = #{houseId}
+                and bm.product_id=sp.id
+                and sp.prod_template_id=pt.id
+                AND bm.house_id = t.house_id
+                AND t.number = t1.business_order_number
+                AND t.state = 3
+             <if test = "workerTypeId!=null and workerTypeId!=''">
+                 and bm.worker_type_id = #{workerTypeId}
+             </if>
+             <if test = "categoryTopId!=null and categoryTopId!=''">
+                 and pt.category_id in(select id from dj_basics_goods_category bgc where bgc.parent_top=#{categoryTopId})
+             </if>
+                GROUP BY
+                    bm.id,
+                    bm.product_id,
+                    bm.shop_count,
+                    bm.total_price
+            ) tt
+     </select>
+    <!--按工序查询订单-->
+    <select id="selectBudgetWorkerInfoList" resultType="com.dangjia.acg.dto.order.DecorationCostDTO">
+
+            SELECT
+                wt.id workerTypeId,
+                wt.`name` workerTypeName,
+                sum(tt.total_price) totalPrice
+            FROM
+                (
+                     SELECT
+                            bm.id,
+                            bm.product_id,
+                            pt.category_id,
+                            bm.worker_type_id,
+                            bm.price,
+                            bm.shop_count,
+                            bm.total_price
+                        FROM
+                            dj_actuary_budget_material bm,
+                           dj_basics_storefront_product sp,
+                           dj_basics_product_template pt,
+                            dj_pay_business_order t,
+                            dj_deliver_order t1
+                        WHERE
+                            t.house_id = #{houseId}
+                    and bm.product_id=sp.id
+                    and sp.prod_template_id=pt.id
+                        AND bm.house_id = t.house_id
+                        AND t.number = t1.business_order_number
+                        AND t.state = 3
+                        GROUP BY
+                            bm.id,
+                            bm.product_id,
+                            bm.shop_count,
+                            bm.total_price
+                ) tt,
+                dj_core_worker_type wt
+            WHERE
+                tt.worker_type_id = wt.id
+            GROUP BY
+                wt.id,
+                wt. NAME
+            order by sum(tt.total_price) desc
+     </select>
+
+    <!-- 按类别查询精算信息(顶级分类)-->
+    <select id="selectBudgetCategoryInfoList" resultType="com.dangjia.acg.dto.order.DecorationCostDTO">
+
+       SELECT
+            bcp.id categoryId,
+            bcp. NAME categoryName,
+            sum(tt.total_price) totalPrice
+        FROM
+            (
+                SELECT
+                    bm.id,
+                    bm.product_id,
+                    pt.category_id,
+                    bm.price,
+                    bm.shop_count,
+                    bm.total_price
+                FROM
+                    dj_actuary_budget_material bm,
+                    dj_basics_storefront_product sp,
+                    dj_basics_product_template pt
+                WHERE
+                    bm.house_id = #{houseId}
+                and bm.product_id=sp.id
+                and sp.prod_template_id=pt.id
+                GROUP BY
+                    bm.id,
+                    bm.product_id,
+                    bm.shop_count,
+                    bm.total_price
+            ) tt,
+            dj_basics_goods_category bc,
+            dj_basics_goods_category bcp
+        WHERE
+            tt.category_id = bc.id
+        AND bc.parent_top = bcp.id
+        GROUP BY
+            bcp.id,bcp.NAME
+        ORDER BY
+            sum(tt.total_price) DESC
+    </select>
+
+    <!-- 精算，按类别标签汇总分类信息 -->
+    <select id="searchBudgetCategoryLabelList" resultType="com.dangjia.acg.dto.order.DecorationCostDTO">
+        SELECT
+            bcl.id labelId,
+            bcl. NAME labelName,
+            sum(tt.total_price) totalPrice
+        FROM
+            (
+                SELECT
+                    bm.id,
+                    bm.product_id,
+                    pt.category_id,
+                    bm.price,
+                    bm.shop_count,
+                    bm.total_price
+                FROM
+                    dj_actuary_budget_material bm,
+                    dj_basics_storefront_product sp,
+                    dj_basics_product_template pt
+                WHERE
+                    bm.house_id = #{houseId}
+                AND bm.product_id = sp.id
+                AND sp.prod_template_id = pt.id
+                <if test = "workerTypeId!=null and workerTypeId!=''">
+                    and bm.worker_type_id = #{workerTypeId}
+                </if>
+                <if test = "categoryTopId!=null and categoryTopId!=''">
+                    and pt.category_id in(select id from dj_basics_goods_category bgc where bgc.parent_top=#{categoryTopId})
+                </if>
+                GROUP BY
+                    bm.id,
+                    bm.product_id,
+                    bm.shop_count,
+                    bm.total_price
+            ) tt,
+            dj_basics_goods_category bgc,
+            dj_basics_category_label bcl
+        WHERE
+            tt.category_id = bgc.id
+        AND FIND_IN_SET(
+            bcl.id,
+            bgc.category_label_ids
+        )
+        GROUP BY
+            bcl.id,
+            bcl. NAME
+
+    </select>
+
+    <!-- 精算，按类别汇总，末级分类 -->
+    <select id="searchBudgetLastCategoryList" resultType="com.dangjia.acg.dto.order.DecorationCostDTO">
+
+        SELECT
+            bgc.id categoryId,
+            bgc. NAME categoryName,
+            sum(tt.total_price) totalPrice
+        FROM
+            (
+                SELECT
+                    bm.id,
+                    bm.product_id,
+                    pt.category_id,
+                    bm.price,
+                    bm.shop_count,
+                    bm.total_price
+                FROM
+                    dj_actuary_budget_material bm,
+                    dj_basics_storefront_product sp,
+                    dj_basics_product_template pt
+                WHERE
+                    bm.house_id = #{houseId}
+                AND bm.product_id = sp.id
+                AND sp.prod_template_id = pt.id
+                <if test = "workerTypeId!=null and workerTypeId!=''">
+                    and bm.worker_type_id = #{workerTypeId}
+                </if>
+                <if test = "categoryTopId!=null and categoryTopId!=''">
+                    and pt.category_id in(select id from dj_basics_goods_category bgc where bgc.parent_top=#{categoryTopId})
+                </if>
+                GROUP BY
+                    bm.id,
+                    bm.product_id,
+                    bm.shop_count,
+                    bm.total_price
+            ) tt,
+            dj_basics_goods_category bgc
+        WHERE
+            tt.category_id = bgc.id
+        <if test = "labelId!=null and labelId!=''">
+            and FIND_IN_SET(#{labelId},bgc.category_label_ids)
+        </if>
+        GROUP BY
+            bgc.id,
+            bgc. NAME
+
+    </select>
+
+
+    <!-- 精算，查询商品信息-->
+    <select id="searchBudgetProductList" resultType="com.dangjia.acg.dto.order.DecorationCostItemDTO">
+
+        SELECT
+            bgc.id categoryId,
+            pt.goods_id goodsId,
+            bm.product_id productId,
+            pt.id productTemplateId,
+            bm.product_name productName,
+            pt.product_sn productSn,
+            sp.image image,
+            bm.price,
+            bm.shop_count shopCount,
+            bm.total_price actualPaymentPrice,
+            bm.id actuaryBudgetId
+        FROM
+            dj_actuary_budget_material bm,
+            dj_basics_storefront_product sp,
+            dj_basics_product_template pt,
+            dj_basics_goods_category bgc
+        WHERE
+            bm.house_id = '2c9080e26699cea30166a3e9bc6c118e'
+        AND bm.product_id = sp.id
+        AND sp.prod_template_id = pt.id
+        AND pt.category_id = bgc.id
+        <if test = "workerTypeId!=null and workerTypeId!=''">
+            and bm.worker_type_id = #{workerTypeId}
+        </if>
+        <if test = "categoryTopId!=null and categoryTopId!=''">
+            and pt.category_id in(select id from dj_basics_goods_category bgc where bgc.parent_top=#{categoryTopId})
+        </if>
+        <if test = "labelId!=null and labelId!=''">
+            and FIND_IN_SET(#{labelId},bgc.category_label_ids)
+        </if>
+    </select>
+
+</mapper>

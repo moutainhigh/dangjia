@@ -6,9 +6,12 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.order.DecorationCostService;
+import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -63,5 +66,81 @@ public class DecorationCostController implements DecorationCostAPI {
     @ApiMethod
     public ServerResponse editPurchasePrice(String userToken, String cityId,String actuaryBudgetId,Double shopCount,Double totalPrice,Integer housekeeperAcceptance){
         return decorationCostService.editPurchasePrice(userToken,cityId,actuaryBudgetId,shopCount,totalPrice,housekeeperAcceptance);
+    }
+
+    /**
+     * 精算--按工序查询精算(已支付精算）
+     * @param userToken
+     * @param cityId
+     * @param houseId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse searchBudgetWorkerList(String userToken,String cityId,String houseId){
+        return decorationCostService.searchBudgetWorkerList(userToken,cityId,houseId);
+    }
+
+    /**
+     * 精算--按类别查询精算(已支付精算）
+     * @param userToken
+     * @param cityId
+     * @param houseId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse searchBudgetCategoryList(String userToken,String cityId,String houseId){
+        return decorationCostService.searchBudgetCategoryList(userToken,cityId,houseId);
+    }
+
+    /**
+     * 精算--分类标签汇总信息查询
+     * @param userToken 用户TOKEN
+     * @param cityId 城市ID
+     * @param houseId 房子ID
+     * @param workerTypeId 工种ID
+     * @param categoryTopId 顶级分类ID
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse searchBudgetCategoryLabelList(String userToken,String cityId,String houseId,
+                                                 String workerTypeId,String categoryTopId){
+        return decorationCostService.searchBudgetCategoryLabelList(userToken,cityId,houseId,workerTypeId,categoryTopId);
+    }
+
+    /**
+     * 精算--分类汇总信息查询(末级分类)
+     * @param userToken 用户TOKEN
+     * @param cityId 城市ID
+     * @param houseId 房子ID
+     * @param workerTypeId 工种ID
+     * @param categoryTopId 顶级分类ID
+     * @param labelId 类别标签 ID
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse searchBudgetLastCategoryList(String userToken,String cityId,String houseId,
+                                                        String workerTypeId,String categoryTopId,String labelId){
+        return decorationCostService.searchBudgetLastCategoryList(userToken,cityId,houseId,workerTypeId,categoryTopId,labelId);
+    }
+
+    /**
+     * 精算--商品
+     * @param userToken 用户TOKEN
+     * @param cityId 城市ID
+     * @param houseId 房子ID
+     * @param workerTypeId 工种ID
+     * @param categoryTopId 顶级分类ID
+     * @param labelId 类别标签 ID
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse searchBudgetProductList(String userToken,String cityId,String houseId,
+                                                   String workerTypeId,String categoryTopId,String labelId){
+        return decorationCostService.searchBudgetProductList(userToken,cityId,houseId,workerTypeId,categoryTopId,labelId);
     }
 }

@@ -186,7 +186,7 @@
           t1.progress_type progressType,
           t2.`code` nodeCode,
           t2.`name` nodeName,
-          t2.`describe` nodeDescribe,
+          t2.node_describe nodeDescribe,
           t2.associated_operation associatedOperation,
           t2.associated_operation_name  associatedOperationName
         FROM

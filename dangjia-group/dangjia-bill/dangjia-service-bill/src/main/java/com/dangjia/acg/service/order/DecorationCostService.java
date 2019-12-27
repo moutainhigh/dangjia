@@ -1,8 +1,10 @@
 package com.dangjia.acg.service.order;
 
+import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.MathUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.order.DecorationCostDTO;
 import com.dangjia.acg.dto.order.DecorationCostItemDTO;
@@ -10,9 +12,11 @@ import com.dangjia.acg.dto.refund.DeliverOrderAddedProductDTO;
 import com.dangjia.acg.mapper.actuary.IBillBudgetMapper;
 import com.dangjia.acg.mapper.delivery.IBillDjDeliverOrderMapper;
 import com.dangjia.acg.mapper.order.IBillDeliverOrderAddedProductMapper;
+import com.dangjia.acg.mapper.order.IBillOrderNodeMapper;
 import com.dangjia.acg.mapper.refund.*;
 import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.brand.Brand;
+import com.dangjia.acg.modle.order.OrderNode;
 import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.service.product.BillProductTemplateService;
@@ -20,16 +24,15 @@ import com.dangjia.acg.service.refund.RefundAfterSalesService;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class DecorationCostService {
@@ -51,6 +54,10 @@ public class DecorationCostService {
     private IBillBudgetMapper iBillBudgetMapper;
     @Autowired
     private IBillDeliverOrderAddedProductMapper iBillDeliverOrderAddedProductMapper;
+    @Autowired
+    private RefundAfterSalesService refundAfterSalesService;
+    @Autowired
+    private IBillOrderNodeMapper iBillOrderNodeMapper;
     /**
      * 查询对应的当前花费信息
      * @param userToken 用户TOKEN
@@ -210,4 +217,169 @@ public class DecorationCostService {
             return  ServerResponse.createByErrorMessage("查询异常");
         }
     }
+
+    /**
+     * 精算--按工序查询精算(已支付精算）
+     * @param userToken
+     * @param cityId
+     * @param houseId
+     * @return
+     */
+    public ServerResponse searchBudgetWorkerList(String userToken,String cityId,String houseId){
+        try{
+            Map<String,Object> map=new HashMap<>();
+            //1.查询对应已支付精算的总金额
+            Double totalPrice=iBillBudgetMapper.selectTotalPriceByHouseId(houseId,null,null);//查询已支付精算的所有金额
+            //2.按工序查询已支付定单的汇总
+            List<DecorationCostDTO> budgetList=iBillBudgetMapper.selectBudgetWorkerInfoList(houseId);
+            //4.获取符合条件的据数返回给前端
+            List<Map<String,Object>> list=getCommonList(budgetList,totalPrice);
+            map.put("totalPrice",totalPrice);//总金额
+            map.put("workerTypeList",list);
+            return ServerResponse.createBySuccess("查询成功",map);
+        }catch (Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    /**
+     * 精算--按类别查询精算(已支付精算）
+     * @param userToken
+     * @param cityId
+     * @param houseId
+     * @return
+     */
+    public ServerResponse searchBudgetCategoryList(String userToken,String cityId,String houseId){
+        try{
+
+            Map<String,Object> map=new HashMap<>();
+            //1.查询对应已支付精算的总金额
+            Double totalPrice=iBillBudgetMapper.selectTotalPriceByHouseId(houseId,null,null);//查询已支付精算的所有金额
+            //2.按类别查询已支付定单的汇总
+            List<DecorationCostDTO> budgetList=iBillBudgetMapper.selectBudgetCategoryInfoList(houseId);
+            //4.获取符合条件的据数返回给前端
+            List<Map<String,Object>> list=getCommonList(budgetList,totalPrice);
+            map.put("totalPrice",totalPrice);//总金额
+            map.put("categoryList",list);
+
+            return ServerResponse.createBySuccess("查询成功",map);
+        }catch (Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    List<Map<String,Object>> getCommonList(List<DecorationCostDTO> budgetList,Double totalPrice){
+        List<Map<String,Object>> list=new ArrayList<>();
+        if(budgetList!=null&&budgetList.size()>0){
+            Map<String,Object> map;
+            //3.查询对应颜色的显示表
+            Example example=new Example(OrderNode.class);
+            example.createCriteria().andEqualTo(OrderNode.TYPE,"COLOR_PROFIL");
+            example.orderBy( OrderNode.SORT);
+            List<OrderNode> colorList=iBillOrderNodeMapper.selectByExample(example);
+            Double totalDul=0d;
+            for(int i=0;i<budgetList.size();i++){
+                map=new HashMap<>();
+               DecorationCostDTO dc=budgetList.get(i);
+               map.put("workerTypeId",dc.getWorkerTypeId());
+               map.put("workerTypeName",dc.getWorkerTypeName());
+               map.put("categoryId",dc.getCategoryId());
+               map.put("categoryName",dc.getCategoryName());
+                map.put("totalPrice",dc.getTotalPrice());
+                Double dul=MathUtil.round(MathUtil.div(dc.getTotalPrice(),totalPrice)*100);
+                if(i==budgetList.size()-1){
+                    map.put("percentageValue", MathUtil.sub(100,totalDul));//百分比计算
+                }else{
+                    map.put("percentageValue", dul);//百分比计算
+                    totalDul=MathUtil.add(totalDul,dul);
+                }
+                int index=i;
+                if(i>=colorList.size()){
+                    index=i%colorList.size();
+                }
+                OrderNode orderNode=colorList.get(index);
+                map.put("colorVlue", orderNode.getName());//颜色设置
+                list.add(map);
+            }
+        }
+        return list;
+    }
+    /**
+     * 精算--分类标签汇总信息查询
+     * @param userToken 用户TOKEN
+     * @param cityId 城市ID
+     * @param houseId 房子ID
+     * @param workerTypeId 工种ID
+     * @param categoryTopId 顶级分类ID
+     * @return
+     */
+    public ServerResponse searchBudgetCategoryLabelList(String userToken,String cityId,String houseId,
+                                                        String workerTypeId,String categoryTopId){
+        logger.info("查询分类汇总花费信息userToken={},cityId={},houseId={}",userToken,cityId,houseId);
+       try{
+
+           Map<String,Object> decorationMap=new HashMap<>();
+           List<DecorationCostDTO> categoryLabelList=iBillBudgetMapper.searchBudgetCategoryLabelList(houseId,workerTypeId,categoryTopId);
+           Double totalPrice=iBillBudgetMapper.selectTotalPriceByHouseId(houseId,workerTypeId,categoryTopId);
+           decorationMap.put("actualPaymentPrice",totalPrice);
+           decorationMap.put("categoryLabelList",categoryLabelList);
+           return ServerResponse.createBySuccess("查询成功",decorationMap);
+       }catch (Exception e){
+           logger.error("查询失败",e);
+           return ServerResponse.createByErrorMessage("查询失败");
+       }
+    }
+    /**
+     * 精算--分类汇总信息查询(末级分类)
+     * @param userToken 用户TOKEN
+     * @param cityId 城市ID
+     * @param houseId 房子ID
+     * @param workerTypeId 工种ID
+     * @param categoryTopId 顶级分类ID
+     * @param labelId 类别标签 ID
+     * @return
+     */
+    public ServerResponse searchBudgetLastCategoryList(String userToken,String cityId,String houseId,
+                                                   String workerTypeId,String categoryTopId,String labelId){
+        logger.info("查询分类汇总信息userToken={},cityId={},houseId={}",userToken,cityId,houseId);
+        try{
+
+            Map<String,Object> decorationMap=new HashMap<>();
+            List<DecorationCostDTO> categoryList=iBillBudgetMapper.searchBudgetLastCategoryList(houseId,workerTypeId,categoryTopId,labelId);
+            decorationMap.put("categoryList",categoryList);
+            return ServerResponse.createBySuccess("查询成功",decorationMap);
+        }catch (Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    /**
+     * 精算--商品信息
+     * @param userToken 用户TOKEN
+     * @param cityId 城市ID
+     * @param houseId 房子ID
+     * @param workerTypeId 工种ID
+     * @param categoryTopId 顶级分类ID
+     * @param labelId 类别标签 ID
+     * @return
+     */
+    public ServerResponse searchBudgetProductList(String userToken,String cityId,String houseId,
+                                                   String workerTypeId,String categoryTopId,String labelId){
+        logger.info("查询商品信息userToken={},cityId={},houseId={}",userToken,cityId,houseId);
+        try{
+
+            //2.查询对应的分类下的货品商品信息
+            List<DecorationCostItemDTO> decorationProductList = iBillBudgetMapper.searchBudgetProductList(houseId,workerTypeId,categoryTopId,labelId);
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            getProductList(decorationProductList,address);
+            return ServerResponse.createBySuccess("查询成功",decorationProductList);
+        }catch (Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
 }

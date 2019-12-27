@@ -24,6 +24,13 @@ public class DecorationCostDTO {
     @ApiModelProperty("类别名称")
     private String categoryName;
 
+    @ApiModelProperty("工种ID")
+    private String workerTypeId;
+
+
+    @ApiModelProperty("工种名称")
+    private String workerTypeName;
+
     @ApiModelProperty("类别标签ID")
     private String labelValId;
 
@@ -32,7 +39,8 @@ public class DecorationCostDTO {
     private String labelValName;
 
 
-
+    @ApiModelProperty("精算总价")
+    private Double totalPrice;
 
 
     @ApiModelProperty("当前装修花费")
