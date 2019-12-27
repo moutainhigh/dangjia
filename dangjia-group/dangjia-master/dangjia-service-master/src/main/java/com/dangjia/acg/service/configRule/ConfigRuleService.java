@@ -329,7 +329,7 @@ public class ConfigRuleService {
                 }
                 return ServerResponse.createBySuccess("查询成功",configRuleItemThrees);
             }
-            return ServerResponse.createBySuccess("查询成功");
+            return ServerResponse.createBySuccessMessage("查询成功");
         } catch (Exception e) {
             logger.error("searchConfigRuleModule:",e);
             return ServerResponse.createByErrorMessage("查询失败");
@@ -453,7 +453,7 @@ public class ConfigRuleService {
             operationFlow.setUserId(userID);
             operationFlow.setUserType(0);
             operationFlowMapper.insert(operationFlow);
-            return ServerResponse.createBySuccess("更新成功");
+            return ServerResponse.createBySuccessMessage("更新成功");
         } catch (Exception e) {
             logger.error("setConfigRuleItem:",e);
             return ServerResponse.createByErrorMessage("更新失败");
