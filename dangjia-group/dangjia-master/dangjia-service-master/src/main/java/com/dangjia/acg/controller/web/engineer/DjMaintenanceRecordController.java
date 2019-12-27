@@ -152,8 +152,15 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse submitQualityAssurance(String userToken, String remark, String houseId, String image, String id, Integer state, String workerTypeSafeOrderId) {
-        return djMaintenanceRecordService.submitQualityAssurance(userToken,remark,houseId,image,id,state,workerTypeSafeOrderId);
+    public ServerResponse submitQualityAssurance(String userToken, String remark,
+                                                 String houseId, String image,
+                                                 String id, Integer state,
+                                                     String productId,
+                                                  Double price,
+                                                    Double shopCount,
+                                                 String workerTypeSafeOrderId) {
+        return djMaintenanceRecordService.submitQualityAssurance(userToken,remark,houseId,image,id,state,productId,price,
+                shopCount,workerTypeSafeOrderId);
     }
 
 }

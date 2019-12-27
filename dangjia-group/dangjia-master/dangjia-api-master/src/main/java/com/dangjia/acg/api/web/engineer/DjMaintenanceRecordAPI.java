@@ -148,6 +148,9 @@ public interface DjMaintenanceRecordAPI {
                                     @RequestParam("image") String image,
                                     @RequestParam("id") String id,
                                     @RequestParam("state") Integer state,
+                                    @RequestParam("productId")     String productId,
+                                    @RequestParam("price")     Double price,
+                                    @RequestParam("shopCount")     Double shopCount,
                                     @RequestParam("workerTypeSafeOrderId") String workerTypeSafeOrderId
     );
 }

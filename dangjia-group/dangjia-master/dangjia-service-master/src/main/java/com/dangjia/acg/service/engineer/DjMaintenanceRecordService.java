@@ -31,6 +31,7 @@ import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.engineer.DjMaintenanceRecord;
 import com.dangjia.acg.modle.engineer.DjMaintenanceRecordContent;
+import com.dangjia.acg.modle.engineer.DjMaintenanceRecordProduct;
 import com.dangjia.acg.modle.engineer.DjMaintenanceRecordResponsibleParty;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.TaskStack;
@@ -51,6 +52,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -748,7 +750,7 @@ public class DjMaintenanceRecordService {
             return ServerResponse.createBySuccessMessage("审核成功");
         } catch (Exception e) {
             e.printStackTrace();
-            return ServerResponse.createByErrorMessage("(自购金额确认)发送给业主异常");
+            return ServerResponse.createByErrorMessage("管家审核维修异常");
         }
     }
 
@@ -764,13 +766,42 @@ public class DjMaintenanceRecordService {
      * @param workerTypeSafeOrderId
      * @return
      */
-    public ServerResponse submitQualityAssurance(String userToken, String remark, String houseId, String image, String id, Integer state, String workerTypeSafeOrderId) {
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse submitQualityAssurance(String userToken, String remark,
+                                                 String houseId, String image,
+                                                 String id, Integer state,
+                                                 String productId,Double price,Double shopCount,
+                                                 String workerTypeSafeOrderId) {
         try {
-            //保存维保记录、维保内容、定则
-            return null;
+            //获取业主信息
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;//业主信息
+
+            SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
+            WorkerTypeSafeOrder workerTypeSafeOrder=workerTypeSafeOrderMapper.selectByPrimaryKey(id);
+            Date createDate = workerTypeSafeOrder.getCreateDate();//人工保险订单的创建时间
+            Date today = new Date(); // new Date()为获取当前系统时间//获取当前时间
+            if(today.getTime()>createDate.getTime())
+            {
+                   //质保过期
+                return ServerResponse.createByErrorMessage("质保过期");
+            }
+
+            //维保商品
+            DjMaintenanceRecordProduct djMaintenanceRecordProduct=new DjMaintenanceRecordProduct();
+            djMaintenanceRecordProduct.setProductId(productId);
+            djMaintenanceRecordProduct.setMaintenanceRecordId(id);
+            djMaintenanceRecordProduct.setShopCount(shopCount);
+            djMaintenanceRecordProduct.setPrice(price);
+            djMaintenanceRecordProductMapper.insertSelective(djMaintenanceRecordProduct);
+            // 定则
+            return ServerResponse.createBySuccessMessage("提交成功");
         } catch (Exception e) {
             e.printStackTrace();
-            return ServerResponse.createByErrorMessage("(自购金额确认)发送给业主异常");
+            return ServerResponse.createByErrorMessage("提交质保处理异常");
         }
     }
 }
