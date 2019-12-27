@@ -1,6 +1,7 @@
 package com.dangjia.acg.mapper.worker;
 
 import com.dangjia.acg.dto.worker.WorkIntegralDTO;
+import com.dangjia.acg.dto.worker.WorkerRunkDTO;
 import com.dangjia.acg.modle.worker.WorkIntegral;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -17,4 +18,12 @@ import java.util.List;
 public interface IWorkIntegralMapper extends Mapper<WorkIntegral> {
 
     List<WorkIntegralDTO> queryWorkIntegral(@Param("workerId")String workerId);
+
+
+    List<WorkerRunkDTO> querySoaringWorker(@Param("workerType") Integer workerType,@Param("startTime") String startTime, @Param("endTime")String endTime);
+
+
+    List<WorkerRunkDTO> queryRankingWorker(@Param("workerType") Integer workerType);
+
+
 }
