@@ -4,6 +4,7 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
+import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.common.util.MathUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
@@ -28,15 +29,13 @@ import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.lang.time.DateUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * author: Ronalcheng
@@ -134,7 +133,7 @@ public class WorkerTypeSafeOrderService {
     public ServerResponse getMySafeTypeOrderDetail(String id) {
         //1.查询质保明细
         WorkerTypeSafeOrder wtso = workerTypeSafeOrderMapper.selectByPrimaryKey(id);
-        Map map = BeanUtils.beanToMap(wtso);
+
        /* WorkerTypeSafe wts = workerTypeSafeMapper.selectByPrimaryKey(wtso.getWorkerTypeSafeId());//获得类型算出时间
         map.put("workerTypeSafe",wts);
         List<HouseFlowApplyImage> imglist=houseFlowApplyImageMapper.getHouseFlowApplyImageList(wtso.getWorkerTypeId(), String.valueOf(wtso.getWorkerType()), wtso.getHouseId(), wtso.getHouseFlowId(), "0");
@@ -142,8 +141,16 @@ public class WorkerTypeSafeOrderService {
             msg.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
         }
         map.put("imglist",imglist);*/
-       List maintenanceRecordList=new ArrayList();
-       Map recordMap;
+       //判断是否过保
+        if(wtso.getExpirationDate()!=null&& DateUtil.compareDate(new Date(),wtso.getExpirationDate())){
+            wtso.setServiceState(2);//已过保
+        }else{
+            wtso.setServiceState(1);//未过保
+        }
+
+        Map map = BeanUtils.beanToMap(wtso);
+        List maintenanceRecordList=new ArrayList();
+        Map recordMap;
        //2.查询历史质保记录
         Example example=new Example(DjMaintenanceRecord.class);
         example.createCriteria().andEqualTo(DjMaintenanceRecord.WORKER_TYPE_SAFE_ORDER_ID,id);
