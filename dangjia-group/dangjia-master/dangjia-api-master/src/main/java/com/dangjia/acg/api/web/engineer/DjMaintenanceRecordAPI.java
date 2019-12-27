@@ -140,7 +140,7 @@ public interface DjMaintenanceRecordAPI {
 
     //确定维保工序（已有）
     //选择责任方（已有）
-    //确定责任占比
+    //确定责任占比（已有）
     @PostMapping(value = "app/auditMaintenance")
     @ApiOperation(value = "管家审核维修", notes = "管家审核维修")
     ServerResponse auditMaintenance(@RequestParam("userToken") String userToken,
@@ -155,14 +155,14 @@ public interface DjMaintenanceRecordAPI {
     @PostMapping(value = "app/submitQualityAssurance")
     @ApiOperation(value = "提交质保处理", notes = "提交质保处理")
     ServerResponse submitQualityAssurance(@RequestParam("userToken") String userToken,
-                                    @RequestParam("remark") String remark,
-                                    @RequestParam("houseId") String houseId,
-                                    @RequestParam("image") String image,
-                                    @RequestParam("id") String id,
-                                    @RequestParam("state") Integer state,
-                                    @RequestParam("productId")     String productId,
-                                    @RequestParam("price")     Double price,
-                                    @RequestParam("shopCount")     Double shopCount,
-                                    @RequestParam("workerTypeSafeOrderId") String workerTypeSafeOrderId
-    );
+                                          @RequestParam("houseId") String houseId,
+                                          @RequestParam("remark") String remark,
+                                          @RequestParam("image") String image,
+                                          @RequestParam("id") String id,
+                                          @RequestParam("state") Integer state,
+                                          @RequestParam("productId")     String productId,
+                                          @RequestParam("price")     Double price,
+                                          @RequestParam("shopCount")     Double shopCount,
+                                          @RequestParam("workerTypeSafeOrderId") String workerTypeSafeOrderId
+            );
 }

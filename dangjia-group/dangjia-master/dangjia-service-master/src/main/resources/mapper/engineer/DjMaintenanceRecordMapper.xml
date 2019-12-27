@@ -142,13 +142,14 @@
     </select>
 
     <select id="queryApplicationInfo" resultType="com.dangjia.acg.dto.supervisor.MaintenanceRecordDTO">
-            select
-            owner_name as ownerName,
-            create_date as createDate,
-            owner_image as ownerImage,
-            owner_remark as ownerRemark
-            From  dj_maintenance_record where house_id=#{houseId}
-
+           select
+				dmr.owner_name as ownerName,
+				dmr.create_date as createDate,
+				mrc.image as ownerImage,
+				mrc.remark as ownerRemark
+				From  dj_maintenance_record  dmr inner join
+				dj_maintenance_record_content mrc on mrc.maintenance_record_id=dmr.id
+            where dmr.house_id=#{houseId}
     </select>
 
     <select id="queryAcceptanceTrend" resultType="com.dangjia.acg.dto.supervisor.AcceptanceTrendDTO">

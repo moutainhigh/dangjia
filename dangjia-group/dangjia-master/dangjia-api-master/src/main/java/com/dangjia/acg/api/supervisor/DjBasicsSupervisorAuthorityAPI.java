@@ -45,13 +45,13 @@ public interface DjBasicsSupervisorAuthorityAPI {
 
 
     @PostMapping("web/supervisor/queryApplicationInfo")
-    @ApiOperation(value = "查看申请信息", notes = "查看申请信息")
+    @ApiOperation(value = "督导-查看业主申请信息", notes = "查看业主申请信息")
     ServerResponse queryApplicationInfo(@RequestParam("request") HttpServletRequest request,
                                         @RequestParam("houseId") String houseId,@RequestParam("pageDTO") PageDTO pageDTO);
 
 
     @PostMapping("web/supervisor/queryDvResponsibility")
-    @ApiOperation(value = "查看责任划分", notes = "查看责任划分")
+    @ApiOperation(value = "督导-查看责任划分", notes = "查看责任划分")
     ServerResponse queryDvResponsibility(@RequestParam("request") HttpServletRequest request,
                                          @RequestParam("houseId") String houseId, @RequestParam("pageDTO") PageDTO pageDTO);
 

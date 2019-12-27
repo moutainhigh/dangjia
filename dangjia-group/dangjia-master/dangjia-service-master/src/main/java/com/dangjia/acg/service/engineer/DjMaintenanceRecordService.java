@@ -821,7 +821,6 @@ public class DjMaintenanceRecordService {
 
 
             djMaintenanceRecordContentMapper.insertSelective(record);
-
             return ServerResponse.createBySuccessMessage("已解决");
         } catch (Exception e) {
             e.printStackTrace();
@@ -900,10 +899,10 @@ public class DjMaintenanceRecordService {
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse submitQualityAssurance(String userToken, String remark,
-                                                 String houseId, String image,
+    public ServerResponse submitQualityAssurance(String userToken, String houseId,
+                                                 String remark,String image,
                                                  String id, Integer state,
-                                                 String productId,Double price,Double shopCount,
+                                                 String productId, Double price, Double shopCount,
                                                  String workerTypeSafeOrderId) {
         try {
             //获取业主信息
@@ -914,12 +913,13 @@ public class DjMaintenanceRecordService {
             Member member = (Member) object;//业主信息
 
             SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
-            WorkerTypeSafeOrder workerTypeSafeOrder=workerTypeSafeOrderMapper.selectByPrimaryKey(id);
+            WorkerTypeSafeOrder workerTypeSafeOrder=workerTypeSafeOrderMapper.selectByPrimaryKey(workerTypeSafeOrderId);//查询保险订单
             Date createDate = workerTypeSafeOrder.getCreateDate();//人工保险订单的创建时间
             Date today = new Date(); // new Date()为获取当前系统时间//获取当前时间
+            //质保过期
             if(today.getTime()>createDate.getTime())
             {
-                   //质保过期
+                  //生成订单
                 return ServerResponse.createByErrorMessage("质保过期");
             }
 
@@ -931,6 +931,8 @@ public class DjMaintenanceRecordService {
             djMaintenanceRecordProduct.setPrice(price);
             djMaintenanceRecordProductMapper.insertSelective(djMaintenanceRecordProduct);
             // 定则
+            DjMaintenanceRecordResponsibleParty djMaintenanceRecordResponsibleParty =new DjMaintenanceRecordResponsibleParty();
+            djMaintenanceRecordResponsiblePartyMapper.insertSelective(djMaintenanceRecordResponsibleParty);
             return ServerResponse.createBySuccessMessage("提交成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -938,3 +940,4 @@ public class DjMaintenanceRecordService {
         }
     }
 }
+
