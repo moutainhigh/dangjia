@@ -35,5 +35,78 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         hi.worker_id = #{workerId}
         ORDER BY hi.create_date DESC
     </select>
+
+
+    <!--飙升榜 -->
+    <select id="querySoaringWorker" resultType="com.dangjia.acg.dto.worker.WorkerRunkDTO">
+        SELECT
+            a.workerId,
+            a.workerHead,
+            a.workerName,
+            a.integral ,@rank :=@rank + 1 AS rankNo
+        FROM
+            (
+                SELECT
+                    m.id workerId,
+                    m.head workerHead,
+                    m.`name` workerName,
+                    SUM(IFNULL(hi.integral, 0)) integral
+                FROM
+                    dj_member m
+                LEFT JOIN `dj_worker_work_integral` hi ON m.id = hi.worker_id
+                WHERE
+                    (
+                        hi.create_date BETWEEN  #{startTime}
+                        AND   #{endTime}
+                    )
+                <if test="workerType!=null and workerType > 3 ">
+                    m.worker_type > 3
+                </if>
+                <if test="workerType!=null and workerType = 3 ">
+                    m.worker_type = 3
+                </if>
+                GROUP BY
+                    m.id
+                ORDER BY
+                    integral DESC,
+                    m.create_date
+            ) a,
+            (SELECT @rank := 0) b
+    </select>
+
+    <!--排行榜 -->
+    <select id="queryRankingWorker" resultType="com.dangjia.acg.dto.worker.WorkerRunkDTO">
+        SELECT
+            a.workerId,
+            a.workerHead,
+            a.workerName,
+            a.integral ,@rank :=@rank + 1 AS rankNo
+        FROM
+            (
+                SELECT
+                    m.id workerId,
+                    m.head workerHead,
+                    m.`name` workerName,
+                    SUM(
+                        IFNULL(m.evaluation_score, 0)
+                    ) integral
+                FROM
+                    dj_member m
+                WHERE
+                    <if test="workerType!=null and workerType > 3 ">
+                        m.worker_type > 3
+                    </if>
+                    <if test="workerType!=null and workerType = 3 ">
+                        m.worker_type = 3
+                    </if>
+                GROUP BY
+                    m.id
+                ORDER BY
+                    integral DESC,
+                    m.create_date
+                LIMIT 20
+            ) a,
+            (SELECT @rank := 0) b
+    </select>
 </mapper>
 

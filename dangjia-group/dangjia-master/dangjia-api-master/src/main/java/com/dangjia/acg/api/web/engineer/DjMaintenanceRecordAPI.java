@@ -8,7 +8,7 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-/**
+/**maintenanceRecordId
  * Created with IntelliJ IDEA.
  * author: wk
  * Date: 13/12/2019
@@ -67,6 +67,11 @@ public interface DjMaintenanceRecordAPI {
                                          @RequestParam("handleType")  Integer handleType);
 
 
+    @PostMapping(value = "app/engineer/updateTaskStackData")
+    @ApiOperation(value = "修改消息状态", notes = "修改消息状态")
+    ServerResponse updateTaskStackData(@RequestParam("id") String id);
+
+
     @PostMapping(value = "app/engineer/queryDimensionRecord")
     @ApiOperation(value = "查询维保责任记录", notes = "查询维保责任记录")
     ServerResponse queryDimensionRecord(@RequestParam("memberId") String memberId);
@@ -91,6 +96,13 @@ public interface DjMaintenanceRecordAPI {
     @PostMapping(value = "app/engineer/toQualityMoney")
     @ApiOperation(value = "查询工匠缴纳质保金", notes = "查询工匠缴纳质保金")
     ServerResponse toQualityMoney(@RequestParam("data") String data);
+
+    @PostMapping(value = "app/engineer/queryRobOrderInFo")
+    @ApiOperation(value = "查询工匠抢单详情", notes = "查询工匠抢单详情")
+    ServerResponse queryRobOrderInFo(@RequestParam("userToken") String userToken,
+                                     @RequestParam("workerId") String workerId,
+                                     @RequestParam("houseId") String houseId,
+                                     @RequestParam("data") String data);
 
 
 

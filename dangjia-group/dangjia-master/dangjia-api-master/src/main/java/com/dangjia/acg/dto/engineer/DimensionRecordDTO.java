@@ -4,6 +4,7 @@ import lombok.Data;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -12,6 +13,7 @@ import java.util.List;
 @Data
 public class DimensionRecordDTO {
 
+    private Date createDate;// 创建日期
     private Date paymentDate;//支付时间
     private Double sincePurchaseAmount;//维保金额
     private Double paymentAmount;//付款金额
@@ -22,13 +24,19 @@ public class DimensionRecordDTO {
     private String houseId;//房子名称
     private Double enoughAmount; //自购金额
     private String responsiblePartyId;//工匠id
-    private String stewardRemark;//管家备注
-    private int type;//0-申诉 1-申诉中  2-已完成
+    private String stewardRemark;//自购备注
+    private Integer type;//0-申诉 1-申诉中  2-已完成
     private String finishDate;//完工时间
     private List<DjMaintenanceRecordProductDTO> djMaintenanceRecordProductDTOS;//维保商品列表
 
     private String str;//备注
+    private String ownerName;//业主名称;
+    private Double square;//房子面积
+    private String serviceRemark;//客服备注
 
+    private List<Map<String,Object>> list;//详情
 
-
+    private String workerTypeId;//工种id
+    private Integer pageType;//1-工匠先进场,2管家先进场
+    private Integer primaryType;//1-原工匠,2 非原工匠
 }
