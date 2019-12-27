@@ -1,24 +1,40 @@
 package com.dangjia.acg.service.safe;
 
+import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
+import com.dangjia.acg.common.util.MathUtil;
+import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
+import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
+import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordMapper;
+import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordProductMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
+import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
 import com.dangjia.acg.mapper.safe.IWorkerTypeSafeMapper;
 import com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
+import com.dangjia.acg.modle.core.WorkerType;
+import com.dangjia.acg.modle.engineer.DjMaintenanceRecord;
+import com.dangjia.acg.modle.engineer.DjMaintenanceRecordProduct;
 import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.safe.WorkerTypeSafe;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
+import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -40,6 +56,18 @@ public class WorkerTypeSafeOrderService {
     @Autowired
     private CraftsmanConstructionService constructionService;
 
+    @Autowired
+    private DjMaintenanceRecordMapper djMaintenanceRecordMapper;
+    @Autowired
+    private DjMaintenanceRecordProductMapper djMaintenanceRecordProductMapper;
+    @Autowired
+    private IMasterStorefrontProductMapper iMasterStorefrontProductMapper;
+    @Autowired
+    private ConfigUtil configUtil;
+    @Autowired
+    private IMemberMapper iMemberMapper;
+    @Autowired
+    private IWorkerTypeMapper iWorkerTypeMapper;
     /**
      * 切换保险
      */
@@ -104,6 +132,7 @@ public class WorkerTypeSafeOrderService {
      *我的质保卡明细
      */
     public ServerResponse getMySafeTypeOrderDetail(String id) {
+        //1.查询质保明细
         WorkerTypeSafeOrder wtso = workerTypeSafeOrderMapper.selectByPrimaryKey(id);
         Map map = BeanUtils.beanToMap(wtso);
        /* WorkerTypeSafe wts = workerTypeSafeMapper.selectByPrimaryKey(wtso.getWorkerTypeSafeId());//获得类型算出时间
@@ -113,7 +142,95 @@ public class WorkerTypeSafeOrderService {
             msg.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
         }
         map.put("imglist",imglist);*/
-        return ServerResponse.createBySuccess("ok", map);
+       List maintenanceRecordList=new ArrayList();
+       Map recordMap;
+       //2.查询历史质保记录
+        Example example=new Example(DjMaintenanceRecord.class);
+        example.createCriteria().andEqualTo(DjMaintenanceRecord.WORKER_TYPE_SAFE_ORDER_ID,id);
+        List<DjMaintenanceRecord> recordList=djMaintenanceRecordMapper.selectByExample(example);
+        if(recordList!=null&&recordList.size()>0){
+            for(DjMaintenanceRecord mr:recordList){
+                recordMap=new HashMap();
+                recordMap.put("applicationDate",mr.getCreateDate());//质保申请时间
+                //2.1查询维保商品记录
+                example=new Example(DjMaintenanceRecordProduct.class);
+                example.createCriteria().andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_RECORD_ID,mr.getId());
+                List<DjMaintenanceRecordProduct> mrProductList=djMaintenanceRecordProductMapper.selectByExample(example);
+                List productList=getRecordProductList(mrProductList);
+                recordMap.put("productList",productList);//商品列表
+                //2.2查询人工信息
+                recordMap.put("workerList",getWorkerList(mr));
+                maintenanceRecordList.add(recordMap);
+            }
+        }
+        map.put("historyRecordList",maintenanceRecordList);
+        return ServerResponse.createBySuccess("查询成功", map);
+    }
+
+    /**
+     * 获取对应处理人大管家和工匠
+     * @param mr
+     * @return
+     */
+    public List<Map<String,Object>> getWorkerList(DjMaintenanceRecord mr){
+        List<Map<String,Object>> list=new ArrayList();
+        if(mr.getStewardId()!=null&& StringUtils.isNotBlank(mr.getStewardId())){// 大管家信息
+            list.add(getWokerMemberInfo(mr.getStewardId(),"大管家"));
+        }
+        if(mr.getWorkerMemberId()!=null&&StringUtils.isNotBlank(mr.getWorkerMemberId())){//工匠信息
+            WorkerType workerType=iWorkerTypeMapper.selectByPrimaryKey(mr.getWorkerTypeId());
+            list.add(getWokerMemberInfo(mr.getStewardId(),workerType.getName()));
+        }
+        return list;
+    }
+
+    /**
+     * 获取对应的工匠信息
+     * @param workerId
+     * @return
+     */
+    Map<String,Object> getWokerMemberInfo(String workerId,String labelName){
+        Map<String,Object> map=new HashMap<>();
+        Member member=iMemberMapper.selectByPrimaryKey(workerId);
+        if(member!=null&&StringUtils.isNotBlank(member.getId())){
+            map.put("workerId",workerId);
+            map.put("workerName",member.getName());
+            map.put("labelName",labelName);
+            map.put("headImage",member.getHead());
+        }
+        return map;
+    }
+
+
+
+    /**
+     * 获取对应的图片和总价
+     * @param mrProductList
+     * @return
+     */
+    public List<Map<String,Object>> getRecordProductList(List<DjMaintenanceRecordProduct> mrProductList){
+        List<Map<String,Object>> list=new ArrayList<>();
+        if(mrProductList!=null&&mrProductList.size()>0){
+            String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            for(DjMaintenanceRecordProduct mrp:mrProductList){
+                StorefrontProduct storefrontProduct= iMasterStorefrontProductMapper.selectByPrimaryKey(mrp.getProductId());
+                Map map=BeanUtils.beanToMap(mrp);
+                if(mrp.getPrice()==null){
+                    mrp.setPrice(0d);
+                }
+                if(mrp.getShopCount()==null){
+                    mrp.setShopCount(0d);
+                }
+                map.put("totalPrice", MathUtil.mul(mrp.getPrice(),mrp.getShopCount()));
+                if(storefrontProduct!=null){
+                    map.put("productName",storefrontProduct.getProductName());
+                    map.put("image",storefrontProduct.getImage());
+                    map.put("imageUrl", StringTool.getImage(storefrontProduct.getImage(),address));
+                }
+                list.add(map);
+            }
+        }
+        return list;
     }
 
 }
