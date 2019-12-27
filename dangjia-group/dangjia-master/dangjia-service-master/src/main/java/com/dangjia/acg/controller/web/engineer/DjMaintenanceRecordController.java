@@ -85,6 +85,12 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
 
     @Override
     @ApiMethod
+    public ServerResponse updateTaskStackData(String id) {
+        return djMaintenanceRecordService.updateTaskStackData(id);
+    }
+
+    @Override
+    @ApiMethod
     public ServerResponse queryDimensionRecord(String memberId) {
         return djMaintenanceRecordService.queryDimensionRecord(memberId);
     }
@@ -113,6 +119,13 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
     public ServerResponse toQualityMoney(String data) {
         return djMaintenanceRecordService.toQualityMoney(data);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryRobOrderInFo(String userToken,String workerId,String houseId,String data) {
+        return djMaintenanceRecordService.queryRobOrderInFo(userToken,workerId,houseId,data);
+    }
+
 
 //    @Override
 //    @ApiMethod
