@@ -1,6 +1,7 @@
 package com.dangjia.acg.mapper.worker;
 
 import com.dangjia.acg.dto.worker.WorkIntegralDTO;
+import com.dangjia.acg.dto.worker.WorkerComprehensiveDTO;
 import com.dangjia.acg.dto.worker.WorkerRunkDTO;
 import com.dangjia.acg.modle.worker.WorkIntegral;
 import org.apache.ibatis.annotations.Param;
@@ -24,6 +25,9 @@ public interface IWorkIntegralMapper extends Mapper<WorkIntegral> {
 
 
     List<WorkerRunkDTO> queryRankingWorker(@Param("workerType") Integer workerType);
+
+
+    WorkerComprehensiveDTO getComprehensiveWorker(@Param("workerId")String workerId);
 
 
 }

@@ -4,6 +4,7 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.worker.WorkerComprehensiveDTO;
 import com.dangjia.acg.dto.worker.WorkerRunkDTO;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.worker.IWorkIntegralMapper;
@@ -104,4 +105,21 @@ public class WorkerIntegraService {
         map.put("time",DateUtil.getDateString1(lastQuarter.getStart().getTime())+" - "+DateUtil.getDateString1(lastQuarter.getEnd().getTime()));
         return ServerResponse.createBySuccess("ok", map);
     }
+    /**
+     * 获取综合评分
+     * @param userToken
+     * @return
+     */
+    public ServerResponse getComprehensiveWorker(String userToken) {
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member member = (Member) object;
+        WorkerComprehensiveDTO workerComprehensive =workIntegralMapper.getComprehensiveWorker(member.getId());
+        workerComprehensive.setOverall(workerComprehensive.getOverall());
+        return ServerResponse.createBySuccess("ok",workerComprehensive);
+
+    }
+
 }

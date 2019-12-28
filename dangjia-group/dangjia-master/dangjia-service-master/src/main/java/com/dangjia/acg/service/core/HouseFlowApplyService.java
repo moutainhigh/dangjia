@@ -262,7 +262,7 @@ public class HouseFlowApplyService {
                 stewardMoney(hfa);
                 Map<String, String> temp_para = new HashMap();
                 WorkerType workerType = workerTypeMapper.selectByPrimaryKey(hfa.getWorkerTypeId());
-                if(workerType.getType()==9) {
+                if(workerType.getType()==9||workerType.getType()==3) {
                     House house = houseMapper.selectByPrimaryKey(hfa.getHouseId());
                     temp_para.put("house_name", house.getHouseName());
                     temp_para.put("worker_name", workerType.getName() + "阶段完工");

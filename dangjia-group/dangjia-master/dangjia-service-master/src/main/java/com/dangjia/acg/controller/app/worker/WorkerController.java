@@ -37,6 +37,11 @@ public class WorkerController implements WorkerAPI {
         return workerIntegraService.queryRankingIntegral(type, userToken);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse getComprehensiveWorker(String userToken){
+        return workerIntegraService.getComprehensiveWorker(userToken);
+    }
     /**
      * 查询通讯录
      */
