@@ -1115,17 +1115,23 @@ public class RefundAfterSalesService {
         return  ServerResponse.createBySuccessMessage("提交成功");
     }
     /**
-     * 查询退人工历史记录列表
+     * 查询补退人工历史记录列表
      * @param pageDTO
      * @param cityId
      * @param houseId
+     * @param searchType 1.工匠补人工，2业主退人工
      * @return
      */
-    public ServerResponse<PageInfo> queryRetrunWorkerHistoryList(PageDTO pageDTO,String cityId,String houseId){
+    public ServerResponse<PageInfo> queryRetrunWorkerHistoryList(PageDTO pageDTO,String userToken,String cityId,String houseId,String searchType){
         try{
+            Object object = getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;//对应的工匠或业主信息
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             logger.info("queryRetrunWorkerHistoryList查询退人工历史记录列表：city={},houseId={}",cityId,houseId);
-            List<ReturnWorkOrderDTO> reuturnWokerList=iBillChangeOrderMapper.queryReturnWorkerList(houseId,"2");
+            List<ReturnWorkOrderDTO> reuturnWokerList=iBillChangeOrderMapper.queryReturnWorkerList(houseId,member.getId(),searchType);
             if(reuturnWokerList!=null&&reuturnWokerList.size()>0){
                 for(ReturnWorkOrderDTO returnWorkOrderDTO:reuturnWokerList){
                     String  repairWorkOrderId=returnWorkOrderDTO.getRepairWorkOrderId();

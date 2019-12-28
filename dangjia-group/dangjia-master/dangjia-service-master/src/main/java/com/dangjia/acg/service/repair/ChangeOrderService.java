@@ -13,6 +13,7 @@ import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderCheckMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
+import com.dangjia.acg.mapper.task.IMasterTaskStackMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.HouseWorkerOrder;
@@ -25,9 +26,12 @@ import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.repair.MendOrderCheck;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.dangjia.acg.service.core.TaskStackService;
+import com.dangjia.acg.service.deliver.RepairMendOrderService;
 import com.dangjia.acg.service.sale.royalty.RoyaltyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
@@ -66,6 +70,12 @@ public class ChangeOrderService {
     private IHouseWorkerOrderMapper houseWorkerOrderMapper;
     @Autowired
     private IMasterOrderProgressMapper iMasterOrderProgressMapper;
+
+    @Autowired
+    private RepairMendOrderService repairMendOrderService;
+
+    @Autowired
+    private TaskStackService taskStackService;
 
     /**
      * 管家审核变更单
@@ -169,8 +179,9 @@ public class ChangeOrderService {
 
     /**
      * 提交变更单
-     * type 1工匠补  2业主退
+     * type 1工匠补人工,2业主退人工,3业主补人工
      */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse workerSubmit(String userToken, String houseId, Integer type, String contentA, String contentB, String workerTypeId) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
@@ -182,13 +193,14 @@ public class ChangeOrderService {
         if (type == 1) {
             changeOrder.setWorkerId(member.getId());
             changeOrder.setWorkerTypeId(member.getWorkerTypeId());
+            workerTypeId=member.getWorkerTypeId();
         } else if (type == 2) {
             changeOrder.setWorkerTypeId(workerTypeId);
         }
 
         List<ChangeOrder> changeOrderList = changeOrderMapper.unCheckOrder(houseId, changeOrder.getWorkerTypeId());
         if (changeOrderList.size() > 0) {
-            return ServerResponse.createByErrorMessage("该工种有未处理变更单,通知管家处理");
+            return ServerResponse.createByErrorMessage("该工种有未处理变更单,通知业主处理");
         }
 
         boolean isCheck = false;
@@ -208,17 +220,29 @@ public class ChangeOrderService {
         if (houseFlow != null && houseFlow.getWorkSteta() == 2) {
             return ServerResponse.createByErrorMessage("该工种已整体完工，不能发起补/退人工申请");
         }
-
+        WorkerType workerType=workerTypeMapper.selectByPrimaryKey(workerTypeId);
         changeOrder.setMemberId(member.getId());
         changeOrder.setType(type);
+        if(type==1){
+            changeOrder.setTitleName(workerType.getName()+"申请补人工");
+        }else if(type==2){
+            changeOrder.setTitleName("申请退"+workerType.getName());
+        }
         changeOrder.setContentA(contentA);
         changeOrder.setContentB(contentB);
-        changeOrder.setState(0);
+        changeOrder.setState(2);//业主审核中、工匠审核中
         changeOrderMapper.insert(changeOrder);
         //增加节点（退人工流水记录状态)
         if (type == 2) {
             updateOrderProgressInfo(changeOrder.getId(),"2","REFUND_AFTER_SALES","RA_012",member.getId());//您的退人工申请已提交
             updateOrderProgressInfo(changeOrder.getId(),"2","REFUND_AFTER_SALES","RA_013",member.getId());//大管家审核中
+        }else if(type==1){//工匠补人工
+            //生成补人工订单
+           String businessNumber = repairMendOrderService.insertSupplementLaborOrder(houseId,member.getId(),member.getWorkerTypeId(),changeOrder.getId());
+           //生成补人工审核任务给到业主
+            taskStackService.inserTaskStackInfo(houseId,member.getId(),workerType.getName()+"申请补人工","",2,changeOrder.getId());//存变更申请单ID
+           updateOrderProgressInfo(changeOrder.getId(),"3","REFUND_AFTER_SALES","RA_020",member.getId());//您的补人工申请已提交
+           updateOrderProgressInfo(changeOrder.getId(),"3","REFUND_AFTER_SALES","RA_021",member.getId());//业主审核中
         }
         return ServerResponse.createBySuccessMessage("操作成功");
     }

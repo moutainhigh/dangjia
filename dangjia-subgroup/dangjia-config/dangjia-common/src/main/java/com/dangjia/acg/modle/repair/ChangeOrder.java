@@ -50,7 +50,7 @@ public class ChangeOrder extends BaseEntity {
     private String supId;
 
     @Column(name = "type")
-    @Desc(value = "类型,1补人工,2退人工")
+    @Desc(value = "类型,1工匠补人工,2业主退人工,3业主补人工")
     @ApiModelProperty("类型")
     private Integer type;
 
@@ -58,6 +58,12 @@ public class ChangeOrder extends BaseEntity {
     @Desc(value = "延长/提前多少天：补-延长工期/退-提前工期")
     @ApiModelProperty("延长/提前多少天")
     private Integer scheduleDay;//
+
+    @Column(name = "title_name")
+    @Desc(value = "申请标题")
+    @ApiModelProperty("申请标题")
+    private String titleName;
+
 
     @Column(name = "content_a")
     @Desc(value = "描叙")

@@ -172,9 +172,10 @@ public interface RefundAfterSalesAPI {
     @PostMapping("/app/refund/refundOrder/queryRetrunWorkerHistoryList")
     @ApiOperation(value = "查询退人工历史记录列表", notes = "查询退人工历史记录列表")
     ServerResponse<PageInfo> queryRetrunWorkerHistoryList(@RequestParam("pageDTO") PageDTO pageDTO,
-                                                             @RequestParam("userToken") String userToken,
-                                                             @RequestParam("cityId") String cityId,
-                                                             @RequestParam("houseId") String houseId);
+                                                          @RequestParam("userToken") String userToken,
+                                                          @RequestParam("cityId") String cityId,
+                                                          @RequestParam("houseId") String houseId,
+                                                          @RequestParam("searchType") String searchType);
 
     @PostMapping("/app/refund/refundOrder/queryRetrunWorkerHistoryDetail")
     @ApiOperation(value = "查询退人工历史记录详情", notes = "查询退人工历史记录列表")

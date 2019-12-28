@@ -6,7 +6,7 @@
      <select id="queryReturnWorkerList" resultType="com.dangjia.acg.dto.refund.ReturnWorkOrderDTO">
          SELECT
             t1.id repairWorkOrderId,
-            CONCAT('申请退',t2.name) repairWorkOrderName,
+            t.title_name repairWorkOrderName,
             t1.create_date applyDate,
             t1.house_id houseId,
             CONCAT(t1.content_a,t1.content_b) content,
@@ -28,6 +28,14 @@
         and t3.worker_id = t4.id
         and t1.house_id=#{houseId}
         and t1.data_status = '0'
+        and t1.type=#{type}
+        <if test="type==1">
+            and t1.worker_id=#{memberId}
+        </if>
+         <if test="type==2">
+             and t1.member_id=#{memberId}
+         </if>
+
         order by t1.create_date desc
      </select>
 

@@ -234,12 +234,13 @@ public class RefundAfterSalesController implements RefundAfterSalesAPI {
      * @param userToken
      * @param cityId
      * @param houseId
+     * @param searchType 查询类型 ：1工匠补人工历史记录查询，2业主补退人工历史记录查询
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse<PageInfo> queryRetrunWorkerHistoryList(PageDTO pageDTO,String userToken,String cityId,String houseId){
-        return refundAfterSalesService.queryRetrunWorkerHistoryList(pageDTO,cityId,houseId);
+    public ServerResponse<PageInfo> queryRetrunWorkerHistoryList(PageDTO pageDTO,String userToken,String cityId,String houseId,String searchType){
+        return refundAfterSalesService.queryRetrunWorkerHistoryList(pageDTO,userToken,cityId,houseId,searchType);
     }
 
     /**

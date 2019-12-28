@@ -19,10 +19,11 @@ public interface IBillChangeOrderMapper extends Mapper<ChangeOrder> {
     /**
      * 查询申请退人工单
      * @param houseId
+     * @param memberId type=1为工匠ID，type=2为业主ID
      * @param type
      * @return
      */
-    List<ReturnWorkOrderDTO> queryReturnWorkerList(@Param("houseId") String houseId,@Param("type") String type);
+    List<ReturnWorkOrderDTO> queryReturnWorkerList(@Param("houseId") String houseId,@Param("memberId") String memberId,@Param("type") String type);
 
     /**
      * 退人工详情页面
