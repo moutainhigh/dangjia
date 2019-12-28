@@ -435,15 +435,19 @@
             chfa.supervisor_money AS supervisorMoney,
             chfa.data_status AS dataStatus,
             chfa.operator,
-            c.status
+            c. STATUS,
+            chfa.acceptance_number AS acceptanceNumber,
+            chfa.type,
+            chfa.acceptance_task_id AS acceptanceTaskId
         FROM
             dj_core_house_flow_apply chfa
         LEFT JOIN dj_complain c ON chfa.id = c.business_id
         WHERE
-            chfa.apply_type BETWEEN 1 AND 2
-        AND chfa.worker_type != 3
+            chfa.apply_type IN (1, 2, 10)
+        AND (chfa.worker_type NOT IN (1,2,3) OR (chfa.worker_type = 3 AND chfa.type = 1))
         AND chfa.supervisor_check BETWEEN 1 AND 2
-        AND chfa.house_id = #{houseId}
+        AND chfa.house_id=#{houseId}
+        ORDER BY chfa.create_date DESC
     </select>
 
     <select id="querySupervisorAcceptanceDynamic" resultType="com.dangjia.acg.modle.core.HouseFlowApply">

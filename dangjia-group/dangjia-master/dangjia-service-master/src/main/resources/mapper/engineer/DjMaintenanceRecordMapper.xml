@@ -62,8 +62,24 @@
             mr.state,
             mr.create_date createDate,
             mr.steward_state stewardState,
-            mr.owner_image ownerImage,
-            mr.owner_remark ownerRemark,
+            (
+                SELECT
+                    mrc.image
+                FROM
+                    dj_maintenance_record_content mrc
+                WHERE
+                    mr.id = mrc.maintenance_record_id
+                AND mrc.type = 3
+            ) ownerImage,
+            (
+                SELECT
+                    mrc.remark
+                FROM
+                    dj_maintenance_record_content mrc
+                WHERE
+                    mr.id = mrc.maintenance_record_id
+                AND mrc.type = 3
+            ) ownerRemark,
             (
                 SELECT
 
@@ -104,13 +120,29 @@
             ) stewardMobile,
             mr.since_purchase_amount sincePurchaseAmount,
             mr.owner_state ownerState,
-            mr.steward_image stewardImage,
-            mr.steward_remark stewardRemark,
+            (
+                SELECT
+                    mrc.image
+                FROM
+                    dj_maintenance_record_content mrc
+                WHERE
+                    mr.id = mrc.maintenance_record_id
+                AND mrc.type = 2
+            ) stewardImage,
+            (
+                SELECT
+                    mrc.remark
+                FROM
+                    dj_maintenance_record_content mrc
+                WHERE
+                    mr.id = mrc.maintenance_record_id
+                AND mrc.type = 2
+            ) stewardRemark,
             mr.remark,
             mr.steward_order_time stewardOrderTime,
-            mr.complain_type as complainType,
-            mr.handle_type as handleType,
-             (
+            mr.complain_type AS complainType,
+            mr.handle_type AS handleType,
+            (
                 SELECT
 
                 IF (
@@ -135,10 +167,19 @@
             mr.user_id AS userId,
             mr.worker_member_id AS workerMemberId,
             mr.worker_create_date AS workerCreateDate,
-            mr.worker_image AS workerImage
+            (
+                SELECT
+                    mrc.image
+                FROM
+                    dj_maintenance_record_content mrc
+                WHERE
+                    mr.id = mrc.maintenance_record_id
+                AND mrc.type = 1
+            ) AS workerImage
         FROM
             dj_maintenance_record mr
-        WHERE mr.id=#{id}
+        WHERE
+            mr.id = #{id}
     </select>
 
     <select id="queryApplicationInfo" resultType="com.dangjia.acg.dto.supervisor.MaintenanceRecordDTO">

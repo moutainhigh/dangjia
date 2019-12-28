@@ -324,4 +324,38 @@ public interface HouseAPI {
     @PostMapping("app/house/house/setRemindButlerCheck")
     @ApiOperation(value = "业主提醒大管家验收", notes = "业主提醒大管家验收")
     ServerResponse setRemindButlerCheck(@RequestParam("houseFlowApplyId") String houseFlowApplyId);
+
+    /**
+     * 大管家发起验收(主动验收)
+     *
+     * @param houseFlowApplyId
+     * @return
+     */
+    @PostMapping("app/house/house/setHousekeeperInitiatedAcceptance")
+    @ApiOperation(value = "管家发起验收(主动验收)", notes = "管家发起验收(主动验收)")
+    ServerResponse setHousekeeperInitiatedAcceptance(@RequestParam("houseFlowApplyId") String houseFlowApplyId,
+                                                     @RequestParam("supervisorCheck") Integer supervisorCheck,
+                                                     @RequestParam("image") String image,
+                                                     @RequestParam("applyDec") String applyDec);
+//
+//    /**
+//     * 大管通过-业主(主动验收)
+//     *
+//     * @param houseFlowApplyId
+//     * @return
+//     */
+//    @PostMapping("app/house/house/queryActiveAcceptance")
+//    @ApiOperation(value = "大管通过-业主(主动验收)", notes = "大管通过-业主(主动验收)")
+//    ServerResponse queryActiveAcceptance(@RequestParam("houseFlowApplyId") String houseFlowApplyId);
+
+    /**
+     * 业主通过(主动验收)
+     *
+     * @param houseFlowApplyId
+     * @return
+     */
+    @PostMapping("app/house/house/setOwnerBy")
+    @ApiOperation(value = "业主通过(主动验收)", notes = "业主通过(主动验收)")
+    ServerResponse setOwnerBy(@RequestParam("houseFlowApplyId") String houseFlowApplyId,
+                              @RequestParam("memberCheck") Integer memberCheck);
 }

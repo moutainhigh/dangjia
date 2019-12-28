@@ -50,8 +50,8 @@ public class HouseFlowApply extends BaseEntity {
 	private String houseId;//houseid
 
 	@Column(name = "apply_type")
-	@Desc(value = "0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4：每日开工,5有效巡查,6无人巡查,7追加巡查,8提前结束装修,9提前结束装修申请")
-	@ApiModelProperty("0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4：每日开工,5有效巡查,6无人巡查,7追加巡查,8提前结束装修,9提前结束装修申请")
+	@Desc(value = "0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4：每日开工,5有效巡查,6无人巡查,7追加巡查,8提前结束装修,9提前结束装修申请，10:主动验收申请")
+	@ApiModelProperty("0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4：每日开工,5有效巡查,6无人巡查,7追加巡查,8提前结束装修,9提前结束装修申请,10:主动验收申请")
 	private Integer applyType;//applytype
 
 	@Column(name = "suspend_day")
@@ -124,4 +124,18 @@ public class HouseFlowApply extends BaseEntity {
 	@ApiModelProperty("处理状态.0:待处理。1.驳回。2.接受。")
 	private Integer status;
 
+	@Column(name = "acceptance_number")
+	@Desc(value = "业主验收次数")
+	@ApiModelProperty("业主验收次数")
+	private Integer acceptanceNumber;
+
+	@Column(name = "type")
+	@Desc(value = "类型 1：主动验收 2：被动验收")
+	@ApiModelProperty("类型 1：主动验收 2：被动验收")
+	private Integer type;//type
+
+	@Column(name = "acceptance_task_id")
+	@Desc(value = "验收任务表id")
+	@ApiModelProperty("验收任务表id")
+	private String acceptanceTaskId;//acceptance_task_id
 }
