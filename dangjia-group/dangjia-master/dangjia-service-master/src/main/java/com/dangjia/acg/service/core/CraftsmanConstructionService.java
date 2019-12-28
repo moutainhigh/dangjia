@@ -532,6 +532,7 @@ public class CraftsmanConstructionService {
             buttonList.add(Utils.getButton("查看拿钱明细", url, 0));
         } else if (hf.getWorkType() == 4) {
             if(!isBX) {
+                promptList.add("未缴纳保险费用，无法施工！");
                 buttonList.add(Utils.getButton("购买保险", 9));
             }else
             if (hf.getWorkSteta() == 3) {//待交底
