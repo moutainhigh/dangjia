@@ -42,6 +42,7 @@ public class MemberAddressService {
      * @param defaultType    是否是默认地址:0：否，1：是
      * @param name           业主姓名
      * @param mobile         业主手机
+     * @param cityId         cityId
      * @param cityName       省/市/区
      * @param address        详细地址
      * @param inputArea      录入面积
@@ -50,7 +51,7 @@ public class MemberAddressService {
      * @return ServerResponse
      */
     public ServerResponse insertAddress(String userToken, int renovationType,
-                                        int defaultType, String name, String mobile, String cityName,
+                                        int defaultType, String name, String mobile, String cityId, String cityName,
                                         String address, BigDecimal inputArea, String longitude, String latitude) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
@@ -82,6 +83,7 @@ public class MemberAddressService {
         memberAddress.setMemberId(member.getId());
         memberAddress.setName(name);
         memberAddress.setMobile(mobile);
+        memberAddress.setCityId(cityId);
         memberAddress.setCityName(cityName);
         memberAddress.setAddress(address);
         memberAddress.setInputArea(inputArea);
@@ -155,6 +157,7 @@ public class MemberAddressService {
             return ServerResponse.createByErrorMessage("未找房子地址");
         }
         MemberAddress memberAddress = memberAddressList.get(0);
+        memberAddress.setCityId(house.getCityId());
         memberAddress.setCityName(house.getCityName());
         memberAddress.setAddress(house.getHouseName());
         memberAddress.setModifyDate(new Date());

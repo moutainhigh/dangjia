@@ -30,6 +30,7 @@ public interface MemberAddressAPI {
      * @param defaultType    必选 int 是否是默认地址:0：否，1：是
      * @param name           必选 string 业主姓名
      * @param mobile         必选 string 业主手机
+     * @param cityId         必选 string 城市ID
      * @param cityName       必选 string 省/市/区
      * @param address        必选 string 详细地址
      * @param inputArea      必选 BigDecimal 录入面积
@@ -54,6 +55,7 @@ public interface MemberAddressAPI {
                                  @RequestParam("defaultType") Integer defaultType,
                                  @RequestParam("name") String name,
                                  @RequestParam("mobile") String mobile,
+                                 @RequestParam("cityId") String cityId,
                                  @RequestParam("cityName") String cityName,
                                  @RequestParam("address") String address,
                                  @RequestParam("inputArea") BigDecimal inputArea,
