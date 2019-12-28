@@ -87,7 +87,7 @@ public interface DecorationCostAPI {
      * @param houseId 房子ID
      * @param workerTypeId 工种ID
      * @param categoryTopId 顶级分类ID
-     * @param labelId 类别标签 ID
+     * @param labelValId 类别标签 ID
      * @return
      */
     @PostMapping("/app/decoration/searchBudgetLastCategoryList")
@@ -97,7 +97,7 @@ public interface DecorationCostAPI {
                                              @RequestParam("houseId") String houseId,
                                              @RequestParam("workerTypeId") String workerTypeId,
                                              @RequestParam("categoryTopId") String categoryTopId,
-                                            @RequestParam("labelId") String labelId);
+                                            @RequestParam("labelValId") String labelValId);
 
     @PostMapping("/app/decoration/searchBudgetProductList")
     @ApiOperation(value = "精算--查询商品信息 ", notes = "精算--查询商品信息")
@@ -106,6 +106,7 @@ public interface DecorationCostAPI {
                                             @RequestParam("houseId") String houseId,
                                             @RequestParam("workerTypeId") String workerTypeId,
                                             @RequestParam("categoryTopId") String categoryTopId,
-                                            @RequestParam("labelId") String labelId);
+                                            @RequestParam("labelValId") String labelValId,
+                                            @RequestParam("categoryId") String categoryId);
 
 }

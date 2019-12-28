@@ -165,7 +165,7 @@ public class DecorationCostService {
                 StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
                 ap.setImageUrl(imgStr.toString());//图片详情地址设置
             }
-            if(ap.getSteta()==2){//自购商品
+            if(ap.getSteta()!=null&&ap.getSteta()==2){//自购商品
                 ap.setImage(purchaseIcon);
                 ap.setImageUrl(address+purchaseIcon);
             }
@@ -338,16 +338,16 @@ public class DecorationCostService {
      * @param houseId 房子ID
      * @param workerTypeId 工种ID
      * @param categoryTopId 顶级分类ID
-     * @param labelId 类别标签 ID
+     * @param labelValId 类别标签 ID
      * @return
      */
     public ServerResponse searchBudgetLastCategoryList(String userToken,String cityId,String houseId,
-                                                   String workerTypeId,String categoryTopId,String labelId){
+                                                   String workerTypeId,String categoryTopId,String labelValId){
         logger.info("查询分类汇总信息userToken={},cityId={},houseId={}",userToken,cityId,houseId);
         try{
 
             Map<String,Object> decorationMap=new HashMap<>();
-            List<DecorationCostDTO> categoryList=iBillBudgetMapper.searchBudgetLastCategoryList(houseId,workerTypeId,categoryTopId,labelId);
+            List<DecorationCostDTO> categoryList=iBillBudgetMapper.searchBudgetLastCategoryList(houseId,workerTypeId,categoryTopId,labelValId);
             decorationMap.put("categoryList",categoryList);
             return ServerResponse.createBySuccess("查询成功",decorationMap);
         }catch (Exception e){
@@ -363,16 +363,17 @@ public class DecorationCostService {
      * @param houseId 房子ID
      * @param workerTypeId 工种ID
      * @param categoryTopId 顶级分类ID
-     * @param labelId 类别标签 ID
+     * @param labelValId 类别标签 ID
      * @return
      */
     public ServerResponse searchBudgetProductList(String userToken,String cityId,String houseId,
-                                                   String workerTypeId,String categoryTopId,String labelId){
+                                                   String workerTypeId,String categoryTopId,String labelValId,
+                                                  String categoryId){
         logger.info("查询商品信息userToken={},cityId={},houseId={}",userToken,cityId,houseId);
         try{
 
             //2.查询对应的分类下的货品商品信息
-            List<DecorationCostItemDTO> decorationProductList = iBillBudgetMapper.searchBudgetProductList(houseId,workerTypeId,categoryTopId,labelId);
+            List<DecorationCostItemDTO> decorationProductList = iBillBudgetMapper.searchBudgetProductList(houseId,workerTypeId,categoryTopId,labelValId,categoryId);
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             getProductList(decorationProductList,address);
             return ServerResponse.createBySuccess("查询成功",decorationProductList);

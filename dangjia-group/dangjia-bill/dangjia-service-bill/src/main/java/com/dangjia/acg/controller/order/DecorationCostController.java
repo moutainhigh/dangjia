@@ -117,14 +117,14 @@ public class DecorationCostController implements DecorationCostAPI {
      * @param houseId 房子ID
      * @param workerTypeId 工种ID
      * @param categoryTopId 顶级分类ID
-     * @param labelId 类别标签 ID
+     * @param labelValId 类别标签 ID
      * @return
      */
     @Override
     @ApiMethod
     public ServerResponse searchBudgetLastCategoryList(String userToken,String cityId,String houseId,
-                                                        String workerTypeId,String categoryTopId,String labelId){
-        return decorationCostService.searchBudgetLastCategoryList(userToken,cityId,houseId,workerTypeId,categoryTopId,labelId);
+                                                        String workerTypeId,String categoryTopId,String labelValId){
+        return decorationCostService.searchBudgetLastCategoryList(userToken,cityId,houseId,workerTypeId,categoryTopId,labelValId);
     }
 
     /**
@@ -134,13 +134,14 @@ public class DecorationCostController implements DecorationCostAPI {
      * @param houseId 房子ID
      * @param workerTypeId 工种ID
      * @param categoryTopId 顶级分类ID
-     * @param labelId 类别标签 ID
+     * @param labelValId 类别标签 ID
+     * @param categoryId 末级分类ID
      * @return
      */
     @Override
     @ApiMethod
     public ServerResponse searchBudgetProductList(String userToken,String cityId,String houseId,
-                                                   String workerTypeId,String categoryTopId,String labelId){
-        return decorationCostService.searchBudgetProductList(userToken,cityId,houseId,workerTypeId,categoryTopId,labelId);
+                                                   String workerTypeId,String categoryTopId,String labelValId,String categoryId){
+        return decorationCostService.searchBudgetProductList(userToken,cityId,houseId,workerTypeId,categoryTopId,labelValId,categoryId);
     }
 }
