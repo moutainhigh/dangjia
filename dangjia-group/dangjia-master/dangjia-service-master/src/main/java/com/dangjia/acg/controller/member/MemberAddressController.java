@@ -27,10 +27,10 @@ public class MemberAddressController implements MemberAddressAPI {
     @Override
     @ApiMethod
     public ServerResponse insertAddress(HttpServletRequest request, String userToken, Integer renovationType,
-                                        Integer defaultType, String name, String mobile, String cityName,
+                                        Integer defaultType, String name, String mobile, String cityId, String cityName,
                                         String address, BigDecimal inputArea, String longitude, String latitude) {
         return memberAddressService.insertAddress(userToken, renovationType,
-                defaultType, name, mobile, cityName, address, inputArea, longitude, latitude);
+                defaultType, name, mobile, cityId, cityName, address, inputArea, longitude, latitude);
     }
 
     @Override

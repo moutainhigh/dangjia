@@ -73,4 +73,9 @@ public class MemberAddress extends BaseEntity {
     @Desc(value = "业主手机")
     @ApiModelProperty("业主手机")
     private String mobile;
+
+    @Column(name = "city_id")
+    @Desc(value = "城市ID")
+    @ApiModelProperty("城市ID")
+    private String cityId;
 }

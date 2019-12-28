@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.product.DjBasicsProductAPI;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
@@ -376,6 +377,8 @@ public class StorefrontProductService {
                     basicsStorefrontProductViewDTO.setStorefrontProduct(spdto);
                 }
             }
+            if(list.size()<=0)
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             PageInfo pageResult = new PageInfo(list);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
@@ -433,6 +436,8 @@ public class StorefrontProductService {
                     basicsStorefrontProductViewDTO.setStorefrontProduct(spdto);
                 }
             }
+            if(list.size()<=0)
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             PageInfo pageResult = new PageInfo(list);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
