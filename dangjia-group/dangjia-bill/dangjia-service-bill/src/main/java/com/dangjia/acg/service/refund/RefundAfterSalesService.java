@@ -1178,14 +1178,6 @@ public class RefundAfterSalesService {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             logger.info("退人工详情页面：repairWorkOrderId={}",repairWorkOrderId);
             ReturnWorkOrderDTO returnWorkOrderDTO=iBillChangeOrderMapper.queryReturnWorkerInfo(repairWorkOrderId);
-            /*String supId=returnWorkOrderDTO.getSupId();
-            //查询大管家电话
-            Member member=iBillMemberMapper.selectByPrimaryKey(supId);
-
-            if(member!=null&&StringUtils.isNotBlank(member.getMobile())){
-                returnWorkOrderDTO.setSupMobile(member.getMobile());
-
-            }*/
 
             List<OrderProgressDTO> orderProgressDTOList=iBillOrderProgressMapper.queryOrderProgressListByOrderId(repairWorkOrderId);//退款历史记录
             if(orderProgressDTOList!=null&&orderProgressDTOList.size()>0){//判断最后节点，及剩余处理时间
