@@ -76,7 +76,7 @@ public class HouseDataService {
                 //自购
                 Example example = new Example(BudgetMaterial.class);
                 example.createCriteria().andEqualTo(BudgetMaterial.WORKER_TYPE_ID, workerTypeId).andEqualTo(BudgetMaterial.HOUSE_ID, houseId)
-                        .andEqualTo(BudgetMaterial.STETA, 2).andNotEqualTo(BudgetMaterial.DELETE_STATE, 1);
+                        .andEqualTo(BudgetMaterial.STETA, 2).andNotEqualTo(BudgetMaterial.DELETE_STATE, 1).andNotEqualTo(BudgetMaterial.DELETE_STATE, 5);
                 List<BudgetMaterial> budgetMaterialList = iBudgetMaterialMapper.selectByExample(example);
 
                 if (budgetMaterialList.size() > 0) {

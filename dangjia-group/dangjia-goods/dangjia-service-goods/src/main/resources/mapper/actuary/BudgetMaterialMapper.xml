@@ -44,7 +44,7 @@
 		FROM
 		`dj_actuary_budget_material`
 		WHERE
-		delete_state != 1
+		delete_state != 1 and delete_state != 5
 		<if test = "workerTypeId!=null and workerTypeId!=''">
 			AND `worker_type_id` = #{workerTypeId}
 		</if>
@@ -63,7 +63,7 @@
 		FROM
 		`dj_actuary_budget_worker`
 		WHERE
-		delete_state != 1
+		delete_state != 1  and delete_state != 5
 		<if test = "workerTypeId!=null and workerTypeId!=''">
 			AND `worker_type_id` = #{workerTypeId}
 		</if>
@@ -79,9 +79,9 @@
 			SUM(a.totalAmount) totalAmount
 		FROM
 		(
-			( SELECT SUM( total_price ) totalAmount FROM `dj_actuary_budget_material` WHERE delete_state != 1 AND `house_id` = #{houseId})
+			( SELECT SUM( total_price ) totalAmount FROM `dj_actuary_budget_material` WHERE delete_state != 1 AND delete_state != 5 AND `house_id` = #{houseId})
 				UNION ALL
-			( SELECT SUM( total_price ) totalAmount FROM `dj_actuary_budget_worker` WHERE delete_state != 1 AND `house_id` = #{houseId})
+			( SELECT SUM( total_price ) totalAmount FROM `dj_actuary_budget_worker` WHERE delete_state != 1 AND delete_state != 5 AND `house_id` = #{houseId})
 		) a
 	</select>
 	<!--精算分类(支付和未支付)-->
@@ -155,6 +155,7 @@
 		where
 		steta in (1,2)
 		and delete_state != 1
+		and delete_state != 5
 		and house_id = #{houseId}
 		<if test = "productName!=null and productName!=''">
 			and
@@ -321,6 +322,7 @@
 		where house_id=#{houseId}
 		and worker_type_id =#{workerTypeId}
 		and delete_state!=1
+		and delete_state!=5
 		ORDER BY category_id,product_sn,goods_name desc
 	</select>
 
@@ -332,6 +334,7 @@
 		where house_id=#{houseId}
 		and worker_type_id =#{workerTypeId}
 		and delete_state!=1
+		and delete_state!=5
 		ORDER BY category_id,product_sn,goods_name desc
 	</select>
 
@@ -366,6 +369,7 @@
 		select sum(abm.price * abm.shop_count)
 		from dj_actuary_budget_material abm
 		WHERE abm.delete_state!=1
+		and  abm.delete_state!=5
 		and abm.steta=1
         and abm.house_flow_id=#{houseFlowId}
 	</select>
@@ -375,6 +379,7 @@
 		select sum(abm.price * abm.shop_count)
 		from dj_actuary_budget_material abm
 		WHERE  abm.delete_state!=1
+		and  abm.delete_state!=5
 		and abm.steta=1
         and abm.house_flow_id=#{houseFlowId}
 	</select>

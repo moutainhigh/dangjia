@@ -89,6 +89,7 @@
         and abw.house_id=#{houseId}
         and abw.delete_state!=1
         and abw.delete_state!=2
+        and abw.delete_state!=5
         and abw.house_flow_id=#{houseFlowId}
     </select>
     <!--从精算表查每工种已支付工钱-->
@@ -249,6 +250,7 @@
         from dj_actuary_budget_worker abw ,dj_basics_worker_goods w
         WHERE abw.worker_goods_id =w.id
         and abw.delete_state!=1
+        and abw.delete_state!=5
         and abw.steta=1
         and abw.house_id =#{houseId}
         <if test="name!=null and name!=''">
