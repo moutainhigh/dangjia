@@ -1260,21 +1260,46 @@ public class RefundAfterSalesService {
      * @return
      */
     public ServerResponse cancelWorkerApplication(String cityId,String repairWorkOrderId){
+
+        //1.撤回变更申请单即可
+        ChangeOrder changeOrder = iBillChangeOrderMapper.selectByPrimaryKey(repairWorkOrderId);
+        if(changeOrder==null){
+            return ServerResponse.createBySuccessMessage("未找到可撤销的变更单");
+        }
+        if(changeOrder!=null&&"7".equals(changeOrder.getState())){
+            return ServerResponse.createBySuccess("变更申请单已撤销，请勿重复申请。");
+        }
+        changeOrder.setState(7);
+        changeOrder.setModifyDate(new Date());
+        iBillChangeOrderMapper.updateByPrimaryKeySelective(changeOrder);
+        //2.查询商品申请单(改为撤回状态)
         Example example = new Example(MendOrder.class);
         example.createCriteria()
                 .andEqualTo(MendOrder.CHANGE_ORDER_ID, repairWorkOrderId)
                 .andEqualTo(MendOrder.DATA_STATUS, 0);
         MendOrder mendOrder=iBillMendOrderMapper.selectOneByExample(example);
         if(mendOrder!=null&&StringUtils.isNotBlank(mendOrder.getId())){
-            mendRecordAPI.backOrder(mendOrder.getId(),2);//有变更订单的撤销
+           // mendRecordAPI.backOrder(mendOrder.getId(),2);//有变更订单的撤销
+            mendOrder.setState(5);//已撤回
+            mendOrder.setModifyDate(new Date());
+            iBillMendOrderMapper.updateByPrimaryKeySelective(mendOrder);
+        }
+        //3.判断是否有需要撤回的任务,修改状态为已处理
+        example=new Example(TaskStack.class);
+        example.createCriteria().andEqualTo(TaskStack.HOUSE_ID,changeOrder.getHouseId())
+                .andEqualTo(TaskStack.STATE,0)
+                .andEqualTo(TaskStack.DATA,repairWorkOrderId);
+        TaskStack taskStack=iBillTaskStackMapper.selectOneByExample(example);
+        if(taskStack!=null&&StringUtils.isNotBlank(taskStack.getId())){
+            taskStack.setState(1);
+            taskStack.setModifyDate(new Date());
+            iBillTaskStackMapper.updateByPrimaryKeySelective(taskStack);
+        }
+        if(changeOrder.getType()==1){
+            //补人工后，记录流水
+            updateOrderProgressInfo(changeOrder.getId(),"3","REFUND_AFTER_SALES","RA_019",changeOrder.getMemberId());//撤销退人工申请
+
         }else{
-            //只撤回变更申请单即可
-            ChangeOrder changeOrder = iBillChangeOrderMapper.selectByPrimaryKey(repairWorkOrderId);
-            if(changeOrder.getState()!=null&&"7".equals(changeOrder.getState())){
-               return ServerResponse.createBySuccess("退人工申请已撤销，请勿重复申请。");
-            }
-            changeOrder.setState(7);
-            iBillChangeOrderMapper.updateByPrimaryKeySelective(changeOrder);
             //退人工后，记录流水
             updateOrderProgressInfo(changeOrder.getId(),"2","REFUND_AFTER_SALES","RA_019",changeOrder.getMemberId());//撤销退人工申请
 
