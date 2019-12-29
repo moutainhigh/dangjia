@@ -78,5 +78,15 @@ public class TaskStackService {
         iMasterTaskStackMapper.updateByPrimaryKeySelective(taskStack);
     }
 
+    /**
+     * 根据任务ID查询任务
+     * @param taskId
+     * @return
+     */
+    public TaskStack selectTaskStackById(String taskId){
+
+        return  iMasterTaskStackMapper.selectByPrimaryKey(taskId);
+    }
+
 
 }

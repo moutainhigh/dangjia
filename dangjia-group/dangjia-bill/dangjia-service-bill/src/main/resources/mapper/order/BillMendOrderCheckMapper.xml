@@ -6,7 +6,7 @@
      <select id="queryReturnWorkerList" resultType="com.dangjia.acg.dto.refund.ReturnWorkOrderDTO">
          SELECT
             t1.id repairWorkOrderId,
-            t.title_name repairWorkOrderName,
+            t1.title_name repairWorkOrderName,
             t1.create_date applyDate,
             t1.house_id houseId,
             CONCAT(t1.content_a,t1.content_b) content,
@@ -42,17 +42,19 @@
     <select id="queryReturnWorkerInfo" resultType="com.dangjia.acg.dto.refund.ReturnWorkOrderDTO">
          SELECT
             t1.id repairWorkOrderId,
-            CONCAT('申请退',t2.name) repairWorkOrderName,
+            t1.title_name repairWorkOrderName,
             t1.create_date applyDate,
             t1.house_id houseId,
             CONCAT(t1.content_a,t1.content_b) content,
             t1.worker_type_id workTypeId,
+            t1.member_id memberId,
             t1.state,
             t2.`name` workTypeName,
             t3.worker_id workerId ,
             t4.`name` workerName,
             t4.mobile workerMobile,
-            t1.sup_id supId
+            t1.sup_id supId,
+            t1.type
         FROM
             dj_repair_change_order t1,
             dj_core_worker_type t2,

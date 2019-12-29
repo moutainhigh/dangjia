@@ -186,4 +186,21 @@ public interface RefundAfterSalesAPI {
     @ApiOperation(value = "撤销退人工申请", notes = "撤销退人工申请")
     ServerResponse cancelWorkerApplication(@RequestParam("cityId") String cityId,
                                            @RequestParam("repairWorkOrderId") String repairWorkOrderId);
+
+    @PostMapping("/app/refund/ownerAudit/searchAuditInfoByTaskId")
+    @ApiOperation(value = "查询待审核的补人工订单", notes = "查询待审核的补人工订单")
+    ServerResponse searchAuditInfoByTaskId(@RequestParam("cityId") String cityId,
+                                           @RequestParam("taskId") String taskId);
+
+    @PostMapping("/app/refund/ownerAudit/passAuditInfoByTaskId")
+    @ApiOperation(value = "待审核的订单--审核通过", notes = "待审核的订单--审核通过")
+    ServerResponse passAuditInfoByTaskId(@RequestParam("cityId") String cityId,
+                                         @RequestParam("taskId") String taskId);
+
+    @PostMapping("/app/refund/ownerAudit/failAuditInfoByTaskId")
+    @ApiOperation(value = "待审核的订单--审核不通过", notes = "待审核的订单--审核不通过")
+    ServerResponse failAuditInfoByTaskId(@RequestParam("cityId") String cityId,
+                                         @RequestParam("taskId") String taskId);
+
+
 }

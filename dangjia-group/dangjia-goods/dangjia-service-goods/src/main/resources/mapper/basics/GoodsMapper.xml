@@ -189,10 +189,11 @@
 		</if>
 		<if test="buy!=null and buy!=''">
 			and bg.buy !=#{buy}
+			and bp.type=1
 		</if>
-		<if test="buy!=null and buy!=''">
+		<!--<if test="buy!=null and buy!=''">
 			and (SELECT COUNT(*) > 0 as num FROM dj_basics_product_template p WHERE p.goods_id = bg.id and p.type =1)
-		</if>
+		</if>-->
 		<if test="name!=null and name!=''">
 			AND (
 			bp.`name` LIKE CONCAT('%',#{name}, '%' )
