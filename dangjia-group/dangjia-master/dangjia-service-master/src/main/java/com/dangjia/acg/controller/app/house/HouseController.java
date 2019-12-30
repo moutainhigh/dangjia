@@ -320,5 +320,28 @@ public class HouseController implements HouseAPI {
         return houseService.setRemindButlerCheck(houseFlowApplyId);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse setHousekeeperInitiatedAcceptance(String houseFlowApplyId, Integer supervisorCheck, String image, String applyDec) {
+        try {
+            return houseService.setHousekeeperInitiatedAcceptance(houseFlowApplyId,supervisorCheck,image,applyDec);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createBySuccessMessage("操作失败");
+        }
+    }
+
+
+    @Override
+    @ApiMethod
+    public ServerResponse setOwnerBy(String houseFlowApplyId,Integer memberCheck) {
+        try {
+            return houseService.setOwnerBy(houseFlowApplyId,memberCheck);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("操作失败");
+        }
+    }
+
 }
 

@@ -63,7 +63,8 @@
 		state,
 		is_switch,
 		create_date,
-		modify_date
+		modify_date,
+		city_id
 		)
 		VALUES (
 		#{id},
@@ -76,7 +77,8 @@
 		#{state},
 		#{isSwitch},
 		SYSDATE(),
-		SYSDATE()
+		SYSDATE(),
+		#{cityId}
 		)
 	</insert>
 	<!-- 根据关联组id删除货品关联关系 -->

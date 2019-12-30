@@ -68,12 +68,16 @@
         mr.house_id as houseId,
         mr.since_purchase_amount as sincePurchaseAmount,
         mr.id as mrId,
+        mr.owner_name as ownerName,
+        mr.worker_type_id as workerTypeId,
+        mr.service_remark as serviceRemark,
         mrrp.proportion AS proportion,
         mrrp.id as mrrpId,
+        mr.remark as stewardRemark,
         mrrp.responsible_party_id AS responsiblePartyId,
         mr.enough_amount as enoughAmount,
-        mr.steward_remark as stewardRemark,
        (((mr.since_purchase_amount + IFNULL(mr.enough_amount,0)) * mrrp.proportion) / 100) as paymentAmount,
+       h.square as square,
         CONCAT(
         h.residential,
         IFNULL(h.building, '*'),
@@ -85,7 +89,13 @@
         from dj_maintenance_record mr
         INNER JOIN  dj_maintenance_record_responsible_party mrrp on mrrp.maintenance_record_id = mr.id
         INNER JOIN dj_house h on mr.house_id = h.id
-        where mrrp.responsible_party_type = 3  and mr.id = #{mrId}
+        where  1=1
+        <if test="mrId != null and mrId == ''">
+            and mr.id = #{mrId}
+        </if>
+        <if test="type == 3">
+            and mrrp.responsible_party_type = #{type}
+        </if>
     </select>
 
     <select id="queryResponsibleParty" resultType="com.dangjia.acg.dto.engineer.ComplainDataDTO">
@@ -120,7 +130,6 @@
             (((mr.since_purchase_amount + IFNULL(mr.enough_amount,0)) * mrrp.proportion) / 100) as paymentAmount,
             mrrp.responsible_party_id AS responsiblePartyId,
             mr.enough_amount AS enoughAmount,
-            mr.steward_remark AS stewardRemark,
             m.retention_money AS retentionMoney,
             m.worker_type_id as workerTypeId,
             CONCAT(
@@ -155,8 +164,9 @@
 
     <select id="queryGuaranteeMoneyDetail" resultType="com.dangjia.acg.dto.engineer.ResponsiblePartyDetailDTO">
         select
-           IFNULL(dmr.create_date,'') as createDate, -- 时间
-         IFNULL(CONCAT(IFNULL(dh.residential,'*'),IFNULL(CONCAT(dh.building,'栋'),'*栋'),IFNULL(CONCAT(dh.unit,'单元'),'*单元'),IFNULL(CONCAT(dh.number,'号'),'*号')) ,'') as address,
+        dmr.house_id as houseId,
+        IFNULL(dmr.create_date,'') as createDate, -- 时间
+        IFNULL(CONCAT(IFNULL(dh.residential,'*'),IFNULL(CONCAT(dh.building,'栋'),'*栋'),IFNULL(CONCAT(dh.unit,'单元'),'*单元'),IFNULL(CONCAT(dh.number,'号'),'*号')) ,'') as address,
         dmr.since_purchase_amount+dmr.enough_amount as totalAmount,-- 维保总金额
         rrp.proportion as proportion,-- 维保责任方占比
         dm.worker_type_id as workerTypeId -- 工匠类型

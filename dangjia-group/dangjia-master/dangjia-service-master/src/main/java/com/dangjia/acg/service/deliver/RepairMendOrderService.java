@@ -9,33 +9,37 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.MathUtil;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.product.ProductWorkerDTO;
+import com.dangjia.acg.dto.refund.RefundOrderItemDTO;
 import com.dangjia.acg.dto.refund.RefundRepairOrderDTO;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
-import com.dangjia.acg.mapper.delivery.IMasterDeliverOrderAddedProductMapper;
-import com.dangjia.acg.mapper.delivery.IMasterOrderProgressMapper;
-import com.dangjia.acg.mapper.delivery.IOrderItemMapper;
-import com.dangjia.acg.mapper.delivery.IOrderMapper;
+import com.dangjia.acg.mapper.delivery.*;
 import com.dangjia.acg.mapper.design.IQuantityRoomMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseDetailMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
+import com.dangjia.acg.mapper.member.IMasterMemberAddressMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
+import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
 import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
 import com.dangjia.acg.mapper.repair.IMendMaterialMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
+import com.dangjia.acg.mapper.repair.IMendWorkerMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
-import com.dangjia.acg.modle.deliver.Order;
-import com.dangjia.acg.modle.deliver.OrderItem;
+import com.dangjia.acg.modle.deliver.*;
 import com.dangjia.acg.modle.design.QuantityRoom;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.house.WarehouseDetail;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.member.MemberAddress;
 import com.dangjia.acg.modle.order.DeliverOrderAddedProduct;
 import com.dangjia.acg.modle.order.OrderProgress;
+import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.repair.MendMateriel;
 import com.dangjia.acg.modle.repair.MendOrder;
+import com.dangjia.acg.modle.repair.MendWorker;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
@@ -44,6 +48,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
@@ -70,6 +75,8 @@ public class RepairMendOrderService {
     @Autowired
     private IMendMaterialMapper iMendMaterialMapper;
     @Autowired
+    private IMendWorkerMapper iMendWorkerMapper;
+    @Autowired
     private IOrderMapper iOrderMapper;
     @Autowired
     private ConfigMessageService configMessageService;
@@ -89,6 +96,14 @@ public class RepairMendOrderService {
     private IMasterOrderProgressMapper iMasterOrderProgressMapper;
     @Autowired
     private IHouseFlowMapper iHouseFlowMapper;
+    @Autowired
+    private IOrderSplitItemMapper iOrderSplitItemMapper;
+    @Autowired
+    private IBusinessOrderMapper iBusinessOrderMapper;
+    @Autowired
+    private ICartMapper iCartMapper;
+    @Autowired
+    private IMasterMemberAddressMapper iMasterMemberAddressMapper;
 
     //生成退款的流水记录(直接退款的）
     public String saveRefundInfoRecord(String cityId,String houseId,String orderId,String orderProductAttr,BigDecimal roomCharge){
@@ -162,6 +177,7 @@ public class RepairMendOrderService {
                         returnStevedorageCost= CommonUtil.getReturnStevedorageCost(elevator,floor,isUpstairsCost,moveCost,returnCount);
                         totalStevedorageCost=MathUtil.add(totalStevedorageCost,returnStevedorageCost);
                     }
+                    orderItem.setStorefontId(order.getStorefontId());
                     //添回退款申请明细信息
                     MendMateriel mendMateriel=saveMasterMendMaterial(mendOrder,cityId,orderItem,returnStevedorageCost,returnRransportationCost,productId,returnCount);
                     setAddedProduct(mendMateriel.getId(), addedProductIds, "3");
@@ -407,5 +423,211 @@ public class RepairMendOrderService {
 
         return ServerResponse.createBySuccessMessage("流程全部通过");
     }
+
+
+    /**
+     * 工匠申请退货退款提交
+     * @param worker
+     * @param cityId
+     * @param houseId
+     * @param orderProductAttr
+     * @return
+     */
+    public String workerApplyReturnMaterial(Member worker,String cityId,String houseId,String orderProductAttr){
+
+        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+        //查询房子信息，获取房子对应的楼层
+        QuantityRoom quantityRoom=iQuantityRoomMapper.getQuantityRoom(houseId,0);
+        Integer elevator= 1;//是否电梯房
+        String floor="1";
+        if(quantityRoom!=null&&StringUtils.isNotBlank(quantityRoom.getId())){
+            elevator=quantityRoom.getElevator();//是否电梯房
+            floor=quantityRoom.getFloor();//楼层
+        }
+        MendOrder mendOrder;
+        Example example;
+        example = new Example(MendOrder.class);
+        mendOrder = new MendOrder();
+        mendOrder.setNumber("DJZX" + 40000 + iMendOrderMapper.selectCountByExample(example));//订单号
+        mendOrder.setHouseId(houseId);
+        mendOrder.setApplyMemberId(worker.getId());
+        mendOrder.setType(2);//工匠退材料
+        mendOrder.setOrderName("工匠退材料申请");
+        mendOrder.setState(0);//生成中
+        Double totalRransportationCost = 0.0;//可退运费
+        Double totalStevedorageCost = 0.0;//可退搬运费
+        Double actualTotalAmount=0.0;//退货总额
+        //获取商品信息
+        JSONArray orderItemProductList=JSONObject.parseArray(orderProductAttr);
+        for (int j = 0; j < orderItemProductList.size(); j++) {
+            JSONObject productObj = (JSONObject) orderItemProductList.get(j);
+            String orderSplitItemId=(String)productObj.get("orderSplitItemId");//要货单详情Id
+            String productId=(String)productObj.get("productId");//产品ID
+            Double returnCount=productObj.getDouble("returnCount");//退货量
+            logger.info("退货量{}",returnCount);
+            OrderSplitItem orderSplitItem=iOrderSplitItemMapper.selectByPrimaryKey(orderSplitItemId);
+           // RefundOrderItemDTO refundOrderItemDTO=iOrderSplitItemMapper.queryReturnRefundOrderItemInfo(orderSplitItemId);
+            if(orderSplitItem==null){
+                continue;
+            }
+            if(orderSplitItem.getReturnCount()==null){
+                orderSplitItem.setReturnCount(Double.valueOf(0L));
+            }
+            if(MathUtil.sub(MathUtil.sub(orderSplitItem.getReceive(),orderSplitItem.getReturnCount()),returnCount)<0){
+                returnCount=MathUtil.sub(orderSplitItem.getReceive(),orderSplitItem.getReturnCount());
+            }
+           // setProductInfo(refundOrderItemDTO,address);
+            logger.info("可货量{}",returnCount);
+            //orderSplitItem.setReturnCount(returnCount);
+            //修改要货订单中的退货量为最新的退货量
+            //OrderSplitItem orderSplitItem=billDjDeliverOrderSplitItemMapper.selectByPrimaryKey(refundOrderItemDTO.getOrderSplitItemId());
+            //orderSplitItem.setId(refundOrderItemDTO.getOrderSplitItemId());
+            Double price = orderSplitItem.getPrice();//购买单价
+            Double shopCount=orderSplitItem.getShopCount();//购买数据
+            OrderItem orderItem=iOrderItemMapper.selectByPrimaryKey(orderSplitItem.getOrderItemId());//原订单信息
+            Double transportationCost=orderItem.getTransportationCost();//运费
+            Double stevedorageCost=orderItem.getStevedorageCost();//搬运费
+            //计算可退运费
+            if(transportationCost>0.0) {
+                Double returnRransportationCost = CommonUtil.getReturnRransportationCost(price, shopCount, returnCount,transportationCost);
+                totalRransportationCost=MathUtil.add(totalRransportationCost,returnRransportationCost);
+                //refundOrderItemDTO.setTransportationCost(returnRransportationCost);
+            }
+            //计算可退搬费
+            if(stevedorageCost>0.0){
+                StorefrontProduct storefrontProduct=iMasterStorefrontProductMapper.selectByPrimaryKey(productId);
+                String isUpstairsCost=storefrontProduct.getIsUpstairsCost();//是否按1层收取上楼费
+                Double moveCost=storefrontProduct.getMoveCost().doubleValue();//每层搬运费
+                Double returnStevedorageCost=CommonUtil.getReturnStevedorageCost(elevator,floor,isUpstairsCost,moveCost,returnCount);
+                totalStevedorageCost=MathUtil.add(totalStevedorageCost,returnStevedorageCost);
+                //refundOrderItemDTO.setStevedorageCost(totalStevedorageCost);
+            }
+           // refundOrderItemDTO.setOrderItemId(refundOrderItemDTO.getOrderSplitItemId());//退货单详情ID
+            //添回退款申请明细信息
+            MendMateriel mendMateriel = saveMasterMendSplitMaterial(mendOrder,  cityId, orderSplitItem, stevedorageCost, transportationCost, productId, returnCount) ;
+            actualTotalAmount=MathUtil.add(actualTotalAmount,MathUtil.mul(price,returnCount));
+
+        }
+        mendOrder.setModifyDate(new Date());
+        mendOrder.setState(0);//状态为生成中，需要业主审核后，重新生成单
+        mendOrder.setCarriage(totalRransportationCost);//运费
+        mendOrder.setTotalStevedorageCost(totalStevedorageCost);//搬运费
+        mendOrder.setActualTotalAmount(actualTotalAmount);//退货总额
+        mendOrder.setTotalAmount(MathUtil.sub(MathUtil.sub(actualTotalAmount,totalRransportationCost),totalStevedorageCost));//实退款，含运费(去掉运费搬运费后的可得钱)
+        //添加对应的申请退货单信息
+        iMendOrderMapper.insert(mendOrder);
+        return  mendOrder.getId();
+    }
+
+    /**
+     * 添加退货退款信息
+     * @param mendOrder
+     * @param cityId
+     * @param productId
+     * @param returnCount
+     * @return
+     */
+    public MendMateriel saveMasterMendSplitMaterial(MendOrder mendOrder, String cityId,OrderSplitItem orderSplitItem,Double stevedorageCost,Double transportationCost, String productId, Double returnCount) {
+        MendMateriel mendMateriel = new MendMateriel();//退材料明细
+        mendMateriel.setCityId(cityId);
+        mendMateriel.setProductSn(orderSplitItem.getProductSn());
+        mendMateriel.setProductName(orderSplitItem.getProductName());
+        mendMateriel.setPrice(orderSplitItem.getPrice());
+        mendMateriel.setCost(orderSplitItem.getCost());
+        mendMateriel.setUnitName(orderSplitItem.getUnitName());
+        mendMateriel.setTotalPrice(MathUtil.mul(returnCount.doubleValue() ,orderSplitItem.getPrice()));
+        mendMateriel.setProductType(orderSplitItem.getProductType());//0：材料；1：包工包料
+        mendMateriel.setCategoryId(orderSplitItem.getCategoryId());
+        mendMateriel.setImage(orderSplitItem.getImage());
+        mendMateriel.setOrderItemId(orderSplitItem.getId());
+        mendMateriel.setShopCount(returnCount.doubleValue());
+        mendMateriel.setStevedorageCost(stevedorageCost);
+        mendMateriel.setTransportationCost(transportationCost);
+        mendMateriel.setMendOrderId(mendOrder.getId());
+        mendMateriel.setProductId(productId);
+        mendMateriel.setActualCount(mendMateriel.getShopCount());
+        mendMateriel.setActualPrice(mendMateriel.getTotalPrice());
+        iMendMaterialMapper.insertSelective(mendMateriel);
+        return mendMateriel;
+    }
+
+
+    /**
+     * 生成补人工订单
+     * @param houseId  房子ID
+     * @param workerId 工匠ID
+     * @param workerTypeId 工种ID
+     * @param changeOrderId 变更申请单ID
+     * @return
+     */
+    public String insertSupplementLaborOrder(String houseId,String workerId,String workerTypeId,String changeOrderId){
+        /**
+         * 查询选中的人工商品
+         */
+        House house=iHouseMapper.selectByPrimaryKey(houseId);
+        Example example=new Example(MemberAddress.class);
+        example.createCriteria().andEqualTo(MemberAddress.HOUSE_ID,houseId);
+        MemberAddress memberAddress=iMasterMemberAddressMapper.selectOneByExample(example);
+        String addressId="";
+        if(memberAddress!=null&&StringUtils.isNotBlank(memberAddress.getId())){
+            addressId=memberAddress.getId();
+        }
+        String memberId=house.getId();//业主信息
+
+        example=new Example(Cart.class);
+        example.createCriteria().andEqualTo(Cart.HOUSE_ID,houseId)
+                .andEqualTo(Cart.MEMBER_ID,workerId);
+        List<Cart> cartList=iCartMapper.selectByExample(example);
+        if(cartList!=null&&cartList.size()>0){
+            Cart cart=cartList.get(0);
+            StorefrontProduct storefrontProduct=iMasterStorefrontProductMapper.selectByPrimaryKey(cart.getProductId());//获取商品信息
+            //生成补货单
+            MendOrder mendOrder;
+            example = new Example(MendOrder.class);
+            mendOrder = new MendOrder();
+            mendOrder.setChangeOrderId(changeOrderId);
+            mendOrder.setNumber("DJZX" + 20000 + iMendOrderMapper.selectCountByExample(example));//订单号
+            mendOrder.setHouseId(houseId);
+            mendOrder.setApplyMemberId(workerId);
+            mendOrder.setType(1);//补人工
+            mendOrder.setOrderName("工匠补人工");
+            mendOrder.setWorkerTypeId(workerTypeId);
+            mendOrder.setState(0);
+            mendOrder.setStorefrontId(storefrontProduct.getStorefrontId());
+            mendOrder.setAddressId(addressId);
+            Double totalAmount=0d;
+            //补货单明细
+            for(Cart ct:cartList){
+                storefrontProduct=iMasterStorefrontProductMapper.selectByPrimaryKey(ct.getProductId());//获取商品信息
+                MendWorker mendWorker = new MendWorker();//补退人工
+                mendWorker.setMendOrderId(mendOrder.getId());
+                mendWorker.setWorkerGoodsId(ct.getProductId());
+                mendWorker.setWorkerGoodsName(ct.getProductName());
+                mendWorker.setWorkerGoodsSn(ct.getProductSn());
+                mendWorker.setUnitName(ct.getUnitName());
+                mendWorker.setPrice(ct.getPrice());
+                mendWorker.setImage(storefrontProduct.getImage());
+                mendWorker.setShopCount(ct.getShopCount());
+                Double totalPrice=MathUtil.mul(ct.getPrice(),ct.getShopCount());
+                totalAmount=MathUtil.add(totalAmount,totalPrice);
+                mendWorker.setTotalPrice(totalPrice);
+                iMendWorkerMapper.insertSelective(mendWorker);
+            }
+            mendOrder.setTotalAmount(totalAmount);
+            iMendOrderMapper.insert(mendOrder);//添加补人工单
+
+
+            //删除已生成补货单的购物车
+            example=new Example(Cart.class);
+            example.createCriteria().andEqualTo(Cart.HOUSE_ID,houseId)
+                    .andEqualTo(Cart.MEMBER_ID,workerId);
+            iCartMapper.deleteByExample(example);
+            return mendOrder.getId();//申请补货单号
+        }
+        return "";
+    }
+
+
+
 
 }

@@ -23,8 +23,8 @@ import javax.persistence.Table;
 public class HouseFlowApplyImage extends BaseEntity {
 
 	@Column(name = "house_flow_apply_id")
-	@Desc(value = "进程申请表id")
-	@ApiModelProperty("进程申请表id")
+	@Desc(value = "关联申请id 1：关联主动验收进程表 2：关联房屋进程表")
+	@ApiModelProperty("关联申请id 1：关联主动验收进程表 2：关联房屋进程表")
 	private String houseFlowApplyId;//houseflowapplyid
 
 	@Column(name = "image_url")
@@ -46,6 +46,11 @@ public class HouseFlowApplyImage extends BaseEntity {
 	@Desc(value = "房子id")
 	@ApiModelProperty("房子id")
 	private String houseId;
+
+	@Column(name = "type")
+	@Desc(value = "类型 1：主动验收 2：被动验收")
+	@ApiModelProperty("类型 1：主动验收 2：被动验收")
+	private String type;
 
 	//所有图片字段加入域名和端口，形成全路径
 	public void initPath(String address){

@@ -48,6 +48,7 @@ import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseFlowApplyService;
 import com.dangjia.acg.service.core.HouseWorkerService;
+import com.dangjia.acg.service.core.TaskStackService;
 import com.dangjia.acg.service.house.HouseService;
 import com.dangjia.acg.service.repair.MendOrderService;
 import com.dangjia.acg.service.sale.royalty.RoyaltyService;
@@ -128,6 +129,8 @@ public class EvaluateService {
     private ClueMapper clueMapper;
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private TaskStackService taskStackService;
 
     /**
      * 获取积分记录
@@ -416,6 +419,8 @@ public class EvaluateService {
                 hf.setPause(1);
                 houseFlowMapper.updateByPrimaryKeySelective(hf);
             }
+            //生成任务
+            taskStackService.inserTaskStackInfo(house.getId(),house.getMemberId(),"大管家主动验收","icon/sheji.png",3,houseFlowApply.getId());
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();

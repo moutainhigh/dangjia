@@ -35,5 +35,243 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         hi.worker_id = #{workerId}
         ORDER BY hi.create_date DESC
     </select>
+
+
+    <!--飙升榜 -->
+    <select id="querySoaringWorker" resultType="com.dangjia.acg.dto.worker.WorkerRunkDTO">
+        SELECT
+            a.workerId,
+            a.workerHead,
+            a.workerName,
+            a.integral ,@rank :=@rank + 1 AS rankNo
+        FROM
+            (
+                SELECT
+                    m.id workerId,
+                    m.head workerHead,
+                    m.`name` workerName,
+                    SUM(IFNULL(hi.integral, 0)) integral
+                FROM
+                    dj_member m
+                LEFT JOIN `dj_worker_work_integral` hi ON m.id = hi.worker_id
+                WHERE
+                    (
+                        hi.create_date BETWEEN  #{startTime}
+                        AND   #{endTime}
+                    )
+                <if test="workerType!=null and workerType > 3 ">
+                    m.worker_type > 3
+                </if>
+                <if test="workerType!=null and workerType = 3 ">
+                    m.worker_type = 3
+                </if>
+                GROUP BY
+                    m.id
+                ORDER BY
+                    integral DESC,
+                    m.create_date
+            ) a,
+            (SELECT @rank := 0) b
+    </select>
+
+    <!--排行榜 -->
+    <select id="queryRankingWorker" resultType="com.dangjia.acg.dto.worker.WorkerRunkDTO">
+        SELECT
+            a.workerId,
+            a.workerHead,
+            a.workerName,
+            a.integral ,@rank :=@rank + 1 AS rankNo
+        FROM
+            (
+                SELECT
+                    m.id workerId,
+                    m.head workerHead,
+                    m.`name` workerName,
+                    SUM(
+                        IFNULL(m.evaluation_score, 0)
+                    ) integral
+                FROM
+                    dj_member m
+                WHERE
+                    <if test="workerType!=null and workerType > 3 ">
+                        m.worker_type > 3
+                    </if>
+                    <if test="workerType!=null and workerType = 3 ">
+                        m.worker_type = 3
+                    </if>
+                GROUP BY
+                    m.id
+                ORDER BY
+                    integral DESC,
+                    m.create_date
+                LIMIT 20
+            ) a,
+            (SELECT @rank := 0) b
+    </select>
+
+
+    <select id="getComprehensiveWorker" resultType="com.dangjia.acg.dto.worker.WorkerComprehensiveDTO">
+		SELECT
+			(
+				SELECT
+					IFNULL(ROUND((b / a) * 100, 2), 0) praiseRate
+				FROM
+					(
+						SELECT
+							(
+								SELECT
+									COUNT(e1.id) num
+								FROM
+									`dj_worker_evaluate` e1
+								WHERE
+									e1.`worker_id` =  #{workerId}
+							) a,
+							(
+								SELECT
+									COUNT(e2.id) num
+								FROM
+									`dj_worker_evaluate` e2
+								WHERE
+									e2.`worker_id` =  #{workerId}
+								AND e2.star = 5
+							) b
+					) c
+			) praiseRate,
+			(
+				SELECT
+					IFNULL(ROUND((b / a) * 100, 2), 0) approved
+				FROM
+					(
+						SELECT
+							(
+								SELECT
+									COUNT(e1.id) num
+								FROM
+									`dj_core_house_flow_apply` e1
+								WHERE
+									e1.`worker_id` =  #{workerId}
+								AND e1.apply_type IN (1, 2)
+							) a,
+							(
+								SELECT
+									COUNT(e2.id) num
+								FROM
+									`dj_core_house_flow_apply` e2
+								WHERE
+									e2.`worker_id` =  #{workerId}
+								AND e2.apply_type IN (1, 2)
+								AND e2.member_check IN (1, 3)
+							) b
+					) c
+			) approved,
+			(
+				SELECT
+					IFNULL(ROUND((b / a) * 100, 2), 0) attendance
+				FROM
+					(
+						SELECT
+							(
+								SELECT
+									SUM(
+										IFNULL(
+											DATEDIFF(f.end_date, f.start_date),
+											0
+										)
+									)
+								FROM
+									dj_core_house_flow f
+								WHERE
+									f.worker_id =#{workerId}
+								AND f.start_date IS NOT NULL
+							) a,
+							(
+								SELECT
+									COUNT(e1.id) num
+								FROM
+									`dj_core_house_flow_apply` e1
+								INNER JOIN dj_core_house_flow f ON f.id = e1.house_flow_id
+								AND f.start_date IS NOT NULL
+								WHERE
+									e1.`worker_id` =#{workerId}
+								AND e1.apply_type = 4
+							) b
+					) c
+			) attendance,
+			(
+				SELECT
+					IFNULL(ROUND((b / a) * 100, 2), 0) finish
+				FROM
+					(
+						SELECT
+							(
+								SELECT
+									COUNT(y.id) num
+								FROM
+									dj_core_house_flow f
+								INNER JOIN dj_actuary_budget_material r ON r.product_type = '2'
+								AND r.delete_state = '3'
+								AND r.house_id = f.house_id
+								AND r.house_flow_id = f.id
+								INNER JOIN dj_basics_storefront_product g ON r.product_id = g.id
+								INNER JOIN dj_basics_product_template t1 ON g.prod_template_id = t1.id
+								INNER JOIN dj_basics_technology y ON FIND_IN_SET(y.id, t1.technology_ids)
+								WHERE
+									f.worker_id =#{workerId}
+								AND (
+									r.shop_count + r.repair_count
+								) > 0
+								AND y.type IN (2, 3)
+								GROUP BY
+									y.id
+							) a,
+							(
+								SELECT
+									COUNT(f.id) num
+								FROM
+									dj_core_house_flow f
+								INNER JOIN dj_matter_technology_record r ON r.house_id = f.house_id
+								AND r.worker_type_id = f.worker_type_id
+								WHERE
+									f.worker_id =#{workerId}
+								AND r.state = 1
+							) b
+					) c
+			) finish,
+			(
+				SELECT
+					IFNULL(ROUND((b / a) * 100, 2), 0) punctual
+				FROM
+					(
+						SELECT
+							(
+								SELECT
+									COUNT(f.id) num
+								FROM
+									dj_core_house_flow f
+								INNER JOIN dj_core_house_flow_apply a ON a.house_flow_id = f.id
+								AND a.apply_type = 2
+								AND a.create_date &lt;= f.end_date
+								WHERE
+									f.worker_id =#{workerId}
+								AND f.start_date IS NOT NULL
+							) a,
+							(
+								SELECT
+									COUNT(f.id) num
+								FROM
+									dj_core_house_flow f
+								INNER JOIN dj_house h ON h.id = f.house_id
+								WHERE
+									f.worker_id =#{workerId}
+								AND (
+									f.work_steta = 2
+									OR h.visit_state IN (3, 4)
+								)
+							) b
+					) c
+			) punctual
+
+	</select>
+
 </mapper>
 

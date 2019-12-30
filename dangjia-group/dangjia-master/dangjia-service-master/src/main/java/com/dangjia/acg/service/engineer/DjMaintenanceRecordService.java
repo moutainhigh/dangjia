@@ -1,8 +1,8 @@
 package com.dangjia.acg.service.engineer;
 
-import com.dangjia.acg.api.product.DjBasicsProductAPI;
 import com.dangjia.acg.api.BasicsStorefrontAPI;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
@@ -14,24 +14,38 @@ import com.dangjia.acg.dto.engineer.*;
 import com.dangjia.acg.mapper.account.IMasterAccountFlowRecordMapper;
 import com.dangjia.acg.mapper.complain.IComplainMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
+import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
+import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordContentMapper;
 import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordMapper;
 import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordProductMapper;
 import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordResponsiblePartyMapper;
+import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.product.IMasterStorefrontMapper;
+import com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper;
 import com.dangjia.acg.mapper.task.IMasterTaskStackMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.account.AccountFlowRecord;
 import com.dangjia.acg.modle.complain.Complain;
+import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.engineer.DjMaintenanceRecord;
+import com.dangjia.acg.modle.engineer.DjMaintenanceRecordContent;
+import com.dangjia.acg.modle.engineer.DjMaintenanceRecordProduct;
 import com.dangjia.acg.modle.engineer.DjMaintenanceRecordResponsibleParty;
+import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.TaskStack;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.worker.WorkerDetail;
+import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.dangjia.acg.service.core.TaskStackService;
+import com.dangjia.acg.service.product.MasterProductTemplateService;
+import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,10 +54,12 @@ import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -80,11 +96,69 @@ public class DjMaintenanceRecordService {
 
     @Autowired
     private IMasterTaskStackMapper iMasterTaskStackMapper;
+    @Autowired
+    private DjMaintenanceRecordContentMapper djMaintenanceRecordContentMapper;
+    @Autowired
+    private CraftsmanConstructionService constructionService;
 
     @Autowired
-    private DjBasicsProductAPI djBasicsProductAPI;
+    private IWorkerTypeSafeOrderMapper workerTypeSafeOrderMapper;
+    @Autowired
+    private MasterProductTemplateService imasterProductTemplateService;
+
+    @Autowired
+    private IHouseFlowMapper iHouseFlowMapper;
+
+    @Autowired
+    private TaskStackService taskStackService;
+
     @Autowired
     private BasicsStorefrontAPI basicsStorefrontAPI;
+
+    @Autowired
+    private IHouseMapper houseMapper;
+    @Autowired
+    private ConfigMessageService configMessageService ;
+
+
+
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse saveMaintenanceRecord(String userToken,String houseId, String workerTypeSafeOrderId,
+                                                String remark,String images){
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        //判断当前房子下是否有正在处理中的质保
+        List<DjMaintenanceRecord>  maintenanceRecordList=djMaintenanceRecordMapper.selectMaintenanceRecoredByHouseId(houseId);
+        if(maintenanceRecordList!=null&&maintenanceRecordList.size()>0){
+            return ServerResponse.createByErrorMessage("已有质保流程在处理中！");
+        }
+        Member member = (Member) object;//业主信息
+        //添加质保信息
+        DjMaintenanceRecord djMaintenanceRecord=new DjMaintenanceRecord();
+        djMaintenanceRecord.setHouseId(houseId);
+        djMaintenanceRecord.setMemberId(member.getId());
+        djMaintenanceRecord.setOwnerName(member.getName());
+        djMaintenanceRecord.setOwnerMobile(member.getMobile());
+        djMaintenanceRecord.setWorkerTypeSafeOrderId(workerTypeSafeOrderId);
+        //查询保险订单对应的工种
+        WorkerTypeSafeOrder workerTypeSafeOrder=workerTypeSafeOrderMapper.selectByPrimaryKey(workerTypeSafeOrderId);
+        djMaintenanceRecord.setWorkerTypeId(workerTypeSafeOrder.getWorkerTypeId());
+        djMaintenanceRecordMapper.insert(djMaintenanceRecord);
+        //添加质保对应的图片、备注信息
+        DjMaintenanceRecordContent djMaintenanceRecordContent=new DjMaintenanceRecordContent();
+        djMaintenanceRecordContent.setMaintenanceRecordId(djMaintenanceRecord.getId());
+        djMaintenanceRecordContent.setRemark(remark);
+        djMaintenanceRecordContent.setImage(images);
+        djMaintenanceRecordContent.setMemberId(member.getId());
+        djMaintenanceRecordContent.setType(3);
+        djMaintenanceRecordContentMapper.insert(djMaintenanceRecordContent);
+        return ServerResponse.createBySuccess("申请成功","");
+    }
+
+
+
     /**
      * 查询质保审核列表
      *
@@ -92,6 +166,7 @@ public class DjMaintenanceRecordService {
      * @param searchKey
      * @return
      */
+
     public ServerResponse queryDjMaintenanceRecordList(PageDTO pageDTO, String searchKey, Integer state) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
@@ -199,7 +274,7 @@ public class DjMaintenanceRecordService {
                 djMaintenanceRecordResponsibleParties.forEach(djMaintenanceRecordResponsibleParty -> {
                     //扣除金额
                     Double amountDeducted=(djMaintenanceRecordResponsibleParty.getProportion()/100)*(djMaintenanceRecord1.getSincePurchaseAmount()+djMaintenanceRecord1.getEnoughAmount());
-                    if(djMaintenanceRecordResponsibleParty.getResponsiblePartyType()==2){
+                    if(djMaintenanceRecordResponsibleParty.getResponsiblePartyType()==1){
                         AccountFlowRecord accountFlowRecord=new AccountFlowRecord();
                         accountFlowRecord.setState(3);
                         accountFlowRecord.setDefinedAccountId(djMaintenanceRecordResponsibleParty.getResponsiblePartyId());
@@ -217,6 +292,8 @@ public class DjMaintenanceRecordService {
                         accountFlowRecord.setDefinedName("店铺维保占比,扣除滞留金：" + amountDeducted);
                         //记录流水
                         iMasterAccountFlowRecordMapper.insert(accountFlowRecord);
+
+
                     }else if(djMaintenanceRecordResponsibleParty.getResponsiblePartyType()==3){
                         WorkerDetail workerDetail=new WorkerDetail();
                         workerDetail.setName("维保占比,扣除滞留金：" + amountDeducted);
@@ -232,22 +309,24 @@ public class DjMaintenanceRecordService {
                         workerDetail.setDefinedWorkerId(djMaintenanceRecordResponsibleParty.getId());
                         //记录流水
                         iWorkerDetailMapper.insert(workerDetail);
-
-                        //滞留金小于0
+                        //消息推送
                         if(member.getRetentionMoney().intValue() < 0){
-                            //新增任务
-                            TaskStack taskStack =new TaskStack();
-                            taskStack.setMemberId(djMaintenanceRecordResponsibleParty.getResponsiblePartyId());
-                            taskStack.setHouseId(djMaintenanceRecord1.getHouseId());
-                            WorkerType w = workerTypeMapper.selectByPrimaryKey(member.getWorkerType());
-                            if(w !=null){
-                                taskStack.setName(w.getName() + "缴纳质保金");
-                            }
-                            taskStack.setImage("icon/sheji.png");
-                            taskStack.setType(7);
-                            taskStack.setData(djMaintenanceRecordResponsibleParty.getId());
-                            taskStack.setState(0);
-                            iMasterTaskStackMapper.insert(taskStack);
+                            //工匠缴纳质保金通知
+                            pushNews(8,member,djMaintenanceRecordResponsibleParty,djMaintenanceRecord1);
+                        }
+
+                        //责任人通知
+                        pushNews(9,member,djMaintenanceRecordResponsibleParty,djMaintenanceRecord1);
+
+                        //查询管家是否定损
+                        Example example1 = new Example(HouseFlowApply.class);
+                        example1.createCriteria().andEqualTo(DjMaintenanceRecordContent.MAINTENANCE_RECORD_ID, djMaintenanceRecord1.getId())
+                                .andEqualTo(DjMaintenanceRecordContent.DATA_STATUS, 0)
+                                .andEqualTo(DjMaintenanceRecordContent.TYPE,2);
+                        List<DjMaintenanceRecordContent> dmrc = djMaintenanceRecordContentMapper.selectByExample(example1);
+                        if(dmrc != null && dmrc.size() > 0){
+                            //管家定损后通知
+                            pushNews(10,member,djMaintenanceRecordResponsibleParty,djMaintenanceRecord1);
                         }
                     }
                 });
@@ -268,6 +347,35 @@ public class DjMaintenanceRecordService {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("处理失败");
         }
+    }
+
+
+    private void pushNews(Integer type,
+                          Member member,
+                          DjMaintenanceRecordResponsibleParty djMaintenanceRecordResponsibleParty,
+                          DjMaintenanceRecord djMaintenanceRecord1){
+        TaskStack taskStack =new TaskStack();
+        if(type == 8){
+            WorkerType w = workerTypeMapper.selectByPrimaryKey(member.getWorkerType());
+            taskStack.setName(w.getName() + "缴纳质保金");
+            taskStack.setType(type);
+            taskStack.setData(djMaintenanceRecordResponsibleParty.getId());
+        }else if(type == 9){
+            taskStack.setName("维保责任划分通知");
+            taskStack.setType(type);
+            taskStack.setData(djMaintenanceRecordResponsibleParty.getMaintenanceRecordId());
+        }else if(type == 10){
+            taskStack.setName("管家定损后通知");
+            taskStack.setType(type);
+            taskStack.setData(djMaintenanceRecordResponsibleParty.getMaintenanceRecordId());
+        }
+        taskStack.setMemberId(djMaintenanceRecordResponsibleParty.getResponsiblePartyId());
+        taskStack.setHouseId(djMaintenanceRecord1.getHouseId());
+        taskStack.setImage("icon/sheji.png");
+        taskStack.setState(0);
+        iMasterTaskStackMapper.insert(taskStack);
+
+
     }
 
     /**
@@ -319,6 +427,7 @@ public class DjMaintenanceRecordService {
                 djMaintenanceRecord.setStewardSubsidy(stewardSubsidy);
                 djMaintenanceRecord.setServiceRemark(serviceRemark);
                 djMaintenanceRecord.setId(id);
+                djMaintenanceRecord.setState(1);
                 djMaintenanceRecord.setCreateDate(null);
                 djMaintenanceRecord.setHandleType(handleType);
                 djMaintenanceRecordMapper.updateByPrimaryKeySelective(djMaintenanceRecord);
@@ -328,6 +437,7 @@ public class DjMaintenanceRecordService {
                 djMaintenanceRecord.setUserId(userId);
                 djMaintenanceRecord.setServiceRemark(serviceRemark);
                 djMaintenanceRecord.setId(id);
+                djMaintenanceRecord.setState(2);
                 djMaintenanceRecord.setCreateDate(null);
                 djMaintenanceRecord.setHandleType(handleType);
                 djMaintenanceRecordMapper.updateByPrimaryKeySelective(djMaintenanceRecord);
@@ -340,6 +450,23 @@ public class DjMaintenanceRecordService {
         }
     }
 
+    /**
+     * 修改消息状态
+     * @param id
+     */
+    public ServerResponse updateTaskStackData(String id){
+        try {
+            TaskStack taskStack = new TaskStack();
+            taskStack.setCreateDate(null);
+            taskStack.setId(id);
+            taskStack.setState(1);
+            iMasterTaskStackMapper.updateByPrimaryKeySelective(taskStack);
+            return ServerResponse.createByErrorMessage("提交失败");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("提交失败");
+        }
+    }
 
     /**
      * 查询维保责任记录
@@ -364,7 +491,8 @@ public class DjMaintenanceRecordService {
      */
     public ServerResponse queryDimensionRecordInFo(String mrId){
         try {
-            DimensionRecordDTO dimensionRecordDTOS =  djMaintenanceRecordResponsiblePartyMapper.queryDimensionRecordInFo(mrId);
+
+            DimensionRecordDTO dimensionRecordDTOS =  djMaintenanceRecordResponsiblePartyMapper.queryDimensionRecordInFo(mrId,3);
 
             //查询房子信息
             Example example = new Example(HouseFlowApply.class);
@@ -387,7 +515,7 @@ public class DjMaintenanceRecordService {
                     djMaintenanceRecordProductMapper.queryDjMaintenanceRecordProductList(dimensionRecordDTOS.getMrId());
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             djMaintenanceRecordProductDTOS.forEach(djMaintenanceRecordProductDTO -> {
-                djMaintenanceRecordProductDTO.setValueNameArr(djBasicsProductAPI.getNewValueNameArr(djMaintenanceRecordProductDTO.getValueIdArr()));
+                djMaintenanceRecordProductDTO.setValueNameArr(imasterProductTemplateService.getNewValueNameArr(djMaintenanceRecordProductDTO.getValueIdArr()));
                 djMaintenanceRecordProductDTO.setImage(imageAddress + djMaintenanceRecordProductDTO.getImage());
             });
             dimensionRecordDTOS.setDjMaintenanceRecordProductDTOS(djMaintenanceRecordProductDTOS);
@@ -409,6 +537,7 @@ public class DjMaintenanceRecordService {
             }else{
                 dimensionRecordDTOS.setType(0);
             }
+
 
             return ServerResponse.createBySuccess("查询成功", dimensionRecordDTOS);
         } catch (Exception e) {
@@ -496,6 +625,82 @@ public class DjMaintenanceRecordService {
     }
 
     /**
+     * 查询工匠抢单详情
+     * @param data
+     * @return
+     */
+        public ServerResponse queryRobOrderInFo(String userToken,String workerId,String houseId,String data){
+        try {
+
+            DimensionRecordDTO dimensionRecordDTOS =  djMaintenanceRecordResponsiblePartyMapper.queryDimensionRecordInFo(data,3);
+
+            //维保记录内容
+            Example example = new Example(DjMaintenanceRecordContent.class);
+            example.createCriteria().andEqualTo(DjMaintenanceRecordContent.MAINTENANCE_RECORD_ID, dimensionRecordDTOS.getMrId())
+                    .andEqualTo(DjMaintenanceRecordContent.DATA_STATUS, 0);
+            example.orderBy(DjMaintenanceRecordContent.CREATE_DATE).desc();
+            List<DjMaintenanceRecordContent> dmrc = djMaintenanceRecordContentMapper.selectByExample(example);
+            List<Map<String,Object>> list = new ArrayList<>();
+            Map<String,Object> map = null;
+            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            for (DjMaintenanceRecordContent d: dmrc) {
+                Member member = iMemberMapper.selectByPrimaryKey(d.getMemberId());
+                if(d.getType() == 3){
+                    dimensionRecordDTOS.setCreateDate(d.getCreateDate());
+                    dimensionRecordDTOS.setOwnerName(member.getName());
+                }
+                map = new HashMap<>();
+
+                map.put("name",member.getName());
+                map.put("head",imageAddress + member.getHead());
+                map.put("createDate",d.getCreateDate());
+                map.put("memberType",d.getType());//类型 1:工匠 2:大管家 3：业主
+                map.put("remark",d.getRemark());
+                map.put("images",getImage(d.getImage()));
+                if(d.getType() == 2){
+                    //工匠先进场
+                    dimensionRecordDTOS.setPageType(2);
+                    //维保商品列表
+                    List<DjMaintenanceRecordProductDTO> djMaintenanceRecordProductDTOS =
+                            djMaintenanceRecordProductMapper.queryDjMaintenanceRecordProductList(dimensionRecordDTOS.getMrId());
+                    djMaintenanceRecordProductDTOS.forEach(djMaintenanceRecordProductDTO -> {
+                        djMaintenanceRecordProductDTO.setValueNameArr(imasterProductTemplateService.getNewValueNameArr(djMaintenanceRecordProductDTO.getValueIdArr()));
+                        djMaintenanceRecordProductDTO.setImage(imageAddress + djMaintenanceRecordProductDTO.getImage());
+                    });
+                    map.put("djMaintenanceRecordProductDTOS",djMaintenanceRecordProductDTOS);
+                }else{
+                    dimensionRecordDTOS.setPageType(1);//工匠先进场
+                }
+                list.add(map);
+            }
+
+            example = new Example(HouseFlowApply.class);
+            example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, dimensionRecordDTOS.getHouseId())
+                    .andEqualTo(HouseFlow.DATA_STATUS, 0)
+                    .andEqualTo(HouseFlow.WORKER_TYPE_ID,dimensionRecordDTOS.getWorkerTypeId());
+            example.orderBy(HouseFlow.CREATE_DATE).desc();
+            List<HouseFlow> houseFlows = iHouseFlowMapper.selectByExample(example);
+            if(houseFlows.get(0).getWorkerId().equals(workerId)){
+                dimensionRecordDTOS.setPrimaryType(1);//原工匠
+            }else{
+                dimensionRecordDTOS.setPrimaryType(2);//非原工匠
+            }
+
+
+            dimensionRecordDTOS.setList(list);
+            return ServerResponse.createBySuccess("查询成功",dimensionRecordDTOS);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+    }
+
+
+
+
+
+
+    /**
      * 查询工匠质保金是否弹框
      * type 0- 不弹框 1-弹框
      * @param memberId
@@ -515,14 +720,14 @@ public class DjMaintenanceRecordService {
      * @param houseId
      * @return
      */
-    public ServerResponse applicationAcceptance(String houseId) {
-        try {
-            return null;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
-        }
-    }
+//    public ServerResponse applicationAcceptance(String houseId) {
+//        try {
+//            return null;
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+//        }
+//    }
 
     /**
      * 缴纳质保金列表
@@ -578,13 +783,8 @@ public class DjMaintenanceRecordService {
                         append(responsiblePartyDetailDTO.getCreateDate()+ "申请了"+workerTypeName+"质保，经大管家实地勘察后，确认你责任占比")
                         .append(responsiblePartyDetailDTO.getProportion() + "%，您需要缴纳质保金后才能进行店铺的其他操作，有任何疑问请及时联系当家客服。");
                 responsiblePartyDetailDTO.setContent(str.toString());//缴纳详情
-
-
                 responsiblePartyDetailDTO.setNeedRetentionMoney(responsiblePartyDetailDTO.getTotalAmount() * Double.parseDouble(responsiblePartyDetailDTO.getProportion())/100);
-
                 responsiblePartyDetailDTO.setProportion(responsiblePartyDetailDTO.getProportion()+"%");//责任占比
-
-
             }
             return ServerResponse.createBySuccess("查询成功", responsiblePartyDetailDTO);//所需质保金
         } catch (Exception e) {
@@ -592,4 +792,152 @@ public class DjMaintenanceRecordService {
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
+
+    /**
+     * 已解决
+     *
+     * @return
+     */
+    public ServerResponse resolved(String userToken, String remark,String houseId,String image,String id,String workerTypeSafeOrderId) {
+        try {
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;//业主信息
+            String url = configUtil.getValue(SysConfig.PUBLIC_SALE_APP_ADDRESS, String.class);
+            House house = houseMapper.selectByPrimaryKey(houseId);
+
+            DjMaintenanceRecordContent record =new DjMaintenanceRecordContent();
+            record.setMaintenanceRecordId(id);
+            record.setRemark(remark);
+            record.setImage(image);
+            record.setMemberId(member.getId());
+            record.setType(1);
+
+            //            configMessageService.addConfigMessage(AppType.SALE, member.getId(), "开工提醒",
+//                    "您申请的维修已经解决【" + house.getHouseName() + "】", 0, url
+//                            + Utils.getCustomerDetails(customer.getMemberId(), djAlreadyRobSingle1.get(0).getId(), 1, "4"));
+
+
+            djMaintenanceRecordContentMapper.insertSelective(record);
+            return ServerResponse.createBySuccessMessage("已解决");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    /**
+     * (自购金额确认)发送给业主
+     *
+     * @return
+     */
+    public ServerResponse sendingOwners(String userToken,String houseId,String remark,String enoughAmount) {
+        try {
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;//业主信息
+            StringBuffer sb=new StringBuffer();
+            sb.append(enoughAmount).append(",").append(remark);
+            taskStackService.inserTaskStackInfo(houseId,member.getId(),"(自购金额确认)发送给业主",null,10,sb.toString());
+            return ServerResponse.createBySuccessMessage("发送成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("(自购金额确认)发送给业主异常");
+        }
+    }
+
+    /**
+     *管家审核维修
+     * @param userToken
+     * @param remark
+     * @param houseId
+     * @param image
+     * @param id
+     * @param state
+     * @param workerTypeSafeOrderId
+     * @return
+     */
+    public ServerResponse auditMaintenance(String userToken, String remark, String houseId, String image, String id, Integer state, String workerTypeSafeOrderId) {
+        try {
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;//业主信息
+            DjMaintenanceRecord djMaintenanceRecord=djMaintenanceRecordMapper.selectByPrimaryKey(id);
+            djMaintenanceRecord.setRemark(remark);
+            djMaintenanceRecord.setHouseId(houseId);
+            djMaintenanceRecord.setState(state);
+            djMaintenanceRecord.setWorkerTypeSafeOrderId(workerTypeSafeOrderId);
+            djMaintenanceRecord.setMemberId(member.getId());
+            djMaintenanceRecord.setStewardState(2);//管家处理状态 1：待处理 2：已处理
+            djMaintenanceRecord.setWorkerTypeId(null);
+            int i=djMaintenanceRecordMapper.updateByPrimaryKey(djMaintenanceRecord);
+            if(i<=0)
+                return ServerResponse.createByErrorMessage("审核失败");
+            return ServerResponse.createBySuccessMessage("审核成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("管家审核维修异常");
+        }
+    }
+
+
+    /**
+     *提交质保处理
+     * @param userToken
+     * @param remark
+     * @param houseId
+     * @param image
+     * @param id
+     * @param state
+     * @param workerTypeSafeOrderId
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse submitQualityAssurance(String userToken, String houseId,
+                                                 String remark,String image,
+                                                 String id, Integer state,
+                                                 String productId, Double price, Double shopCount,
+                                                 String workerTypeSafeOrderId) {
+        try {
+            //获取业主信息
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;//业主信息
+
+            SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
+            WorkerTypeSafeOrder workerTypeSafeOrder=workerTypeSafeOrderMapper.selectByPrimaryKey(workerTypeSafeOrderId);//查询保险订单
+            Date createDate = workerTypeSafeOrder.getCreateDate();//人工保险订单的创建时间
+            Date today = new Date(); // new Date()为获取当前系统时间//获取当前时间
+            //质保过期
+            if(today.getTime()>createDate.getTime())
+            {
+                  //生成订单
+                return ServerResponse.createByErrorMessage("质保过期");
+            }
+
+            //维保商品
+            DjMaintenanceRecordProduct djMaintenanceRecordProduct=new DjMaintenanceRecordProduct();
+            djMaintenanceRecordProduct.setProductId(productId);
+            djMaintenanceRecordProduct.setMaintenanceRecordId(id);
+            djMaintenanceRecordProduct.setShopCount(shopCount);
+            djMaintenanceRecordProduct.setPrice(price);
+            djMaintenanceRecordProductMapper.insertSelective(djMaintenanceRecordProduct);
+            // 定则
+            DjMaintenanceRecordResponsibleParty djMaintenanceRecordResponsibleParty =new DjMaintenanceRecordResponsibleParty();
+            djMaintenanceRecordResponsiblePartyMapper.insertSelective(djMaintenanceRecordResponsibleParty);
+            return ServerResponse.createBySuccessMessage("提交成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("提交质保处理异常");
+        }
+    }
 }
+

@@ -130,6 +130,44 @@ public class ComplainService {
     private IMendOrderMapper mendOrderMapper;
 
     /**
+     *
+     * @param request
+     * @param userId
+     * @param cityId
+     * @param complainType
+     * @param houseId
+     * @param content
+     * @param images
+     * @return
+     */
+    public ServerResponse insertGroundComplain(HttpServletRequest request, String userId, String cityId, Integer complainType, String houseId, String content, String images ) {
+        try {
+            Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
+            if (storefront == null) {
+                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
+            }
+            Complain complain = new Complain();
+            complain.setMemberId(userId);
+            complain.setComplainType(complainType);
+            complain.setStatus(0);
+            complain.setBusinessId(null);
+            complain.setHouseId(houseId);
+            //complain.setBusinessId(mendOrder.getBusinessOrderNumber());
+            complain.setContent(content);
+            complain.setUserName(storefront.getStorekeeperName());
+            complain.setUserMobile(storefront.getMobile());
+            complain.setImage(images);
+            int i = complainMapper.insertSelective(complain);
+            if(i<=0)
+                return ServerResponse.createByErrorMessage("提交申诉失败");
+            return ServerResponse.createBySuccessMessage("提交申诉成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("提交失败");
+        }
+    }
+
+    /**
      * 添加申诉
      * @param request
      * @param userId
@@ -170,7 +208,8 @@ public class ComplainService {
      * 添加申诉
      *
      * @param userToken    用户Token
-     * @param complainType 申诉类型 1:工匠被处罚后不服.2：业主要求整改.3：大管家（开工后）要求换人.4:部分收货申诉.5.提前结束装修，6.业主申请换人
+     * @param complainType 申诉类型 1:工匠被处罚后不服.2：业主要求整改.3：大管家（开工后）要求换人.4:部分收货申诉.5.提前结束装修，6.业主申请换人,
+     *                      7.业主投诉验收, 8.管家投诉验收, 9.工匠投诉验收
      * @param businessId   对应业务ID
      *                     complain_type==1:对应处罚的rewardPunishRecordId,
      *                     complain_type==2:对应房子任务进程/申请表的houseFlowApplyId,

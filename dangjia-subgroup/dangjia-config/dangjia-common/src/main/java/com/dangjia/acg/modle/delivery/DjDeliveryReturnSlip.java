@@ -25,7 +25,7 @@ import java.util.Date;
 @FieldNameConstants(prefix = "")
 public class DjDeliveryReturnSlip extends BaseEntity {
 
-    @Column(name = "houseId")
+    @Column(name = "house_id")
     @Desc(value = "房子id")
     @ApiModelProperty("房子id")
     private String houseId;//房子id

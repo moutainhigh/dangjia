@@ -3,12 +3,15 @@ package com.dangjia.acg.service.supervisor;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.app.member.MemberAPI;
-import com.dangjia.acg.api.data.WorkerTypeAPI;
 import com.dangjia.acg.common.constants.SysConfig;
+import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
+import com.dangjia.acg.dto.core.AcceptanceDynamicDTO;
 import com.dangjia.acg.dto.supervisor.*;
+import com.dangjia.acg.mapper.core.IHouseFlowApplyImageMapper;
+import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordMapper;
@@ -16,11 +19,14 @@ import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper;
 import com.dangjia.acg.mapper.supervisor.DjBasicsSupervisorAuthorityMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
+import com.dangjia.acg.modle.core.HouseFlowApply;
+import com.dangjia.acg.modle.core.HouseFlowApplyImage;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.engineer.DjMaintenanceRecord;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
 import com.dangjia.acg.modle.supervisor.DjBasicsSupervisorAuthority;
+import com.dangjia.acg.modle.worker.Evaluate;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -48,9 +54,6 @@ public class SupAuthorityService {
     private ConfigUtil configUtil;
 
     @Autowired
-    private WorkerTypeAPI workerTypeAPI;
-
-    @Autowired
     private MemberAPI memberAPI;
 
     @Autowired
@@ -64,6 +67,11 @@ public class SupAuthorityService {
 
     @Autowired
     private IHouseFlowMapper houseFlowMapper;
+
+    @Autowired
+    private IHouseFlowApplyImageMapper houseFlowApplyImageMapper;
+    @Autowired
+    private IHouseFlowApplyMapper houseFlowApplyMapper;
     /**
      * 删除已选
      * @param request
@@ -303,41 +311,7 @@ public class SupAuthorityService {
             return ServerResponse.createByErrorMessage("工地详情异常");
         }
     }
-    /**
-     * 验收动态
-     *
-     * @param request
-     * @return
-     */
-    public ServerResponse queryAcceptanceTrend(HttpServletRequest request,String houseId,PageDTO pageDTO) {
-        try {
-            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<AcceptanceTrendDTO> list= djMaintenanceRecordMapper.queryAcceptanceTrend(houseId);
-            list.forEach(acceptanceTrendDTO->{
-                String id= acceptanceTrendDTO.getId();
-                List<AcceptanceTrendDetailDTO> listDetail= djMaintenanceRecordMapper.queryAcceptanceTrendDetail(id);
-                acceptanceTrendDTO.setListDetail(listDetail);
-                listDetail.forEach(acceptanceTrendDetailDTO->{
-                    String workerTypeId=acceptanceTrendDetailDTO.getWorkerType();
-                    String workerTypeName=null;
-                    ServerResponse response = workerTypeAPI.getWorkerType(workerTypeId);
-                    if (response.isSuccess()) {
-                        workerTypeName = (((JSONObject) response.getResultObj()).getString(WorkerType.NAME));
-                    }
-                    acceptanceTrendDetailDTO.setWorkerTypeName(workerTypeName);
-                    acceptanceTrendDetailDTO.setStewardImage(StringTool.getImage(acceptanceTrendDetailDTO.getStewardRemark(),address));
-                    acceptanceTrendDetailDTO.setStewardImageDetail(StringTool.getImage(acceptanceTrendDetailDTO.getStewardRemark(),address).split(","));
-                });
 
-            });
-            PageInfo pageResult = new PageInfo(list);
-            return ServerResponse.createBySuccess("查询成功", pageResult);
-        } catch (Exception e) {
-            logger.error("验收动态异常", e);
-            return ServerResponse.createByErrorMessage("验收动态异常");
-        }
-    }
 
     /**
      *（维修)工地列表

@@ -14,7 +14,9 @@ import com.dangjia.acg.common.util.*;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.HomePageBean;
 import com.dangjia.acg.dto.member.MemberCustomerDTO;
+import com.dangjia.acg.dto.worker.WorkerComprehensiveDTO;
 import com.dangjia.acg.mapper.config.ISmsMapper;
+import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseDistributionMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
@@ -25,7 +27,9 @@ import com.dangjia.acg.mapper.store.IStoreMapper;
 import com.dangjia.acg.mapper.store.IStoreUserMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.mapper.worker.IInsuranceMapper;
+import com.dangjia.acg.mapper.worker.IWorkIntegralMapper;
 import com.dangjia.acg.modle.config.Sms;
+import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.HouseDistribution;
@@ -41,6 +45,7 @@ import com.dangjia.acg.modle.worker.Insurance;
 import com.dangjia.acg.service.activity.RedPackPayService;
 import com.dangjia.acg.service.clue.ClueService;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.service.configRule.ConfigRuleUtilService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.util.RKIDCardUtil;
 import com.dangjia.acg.util.TokenUtil;
@@ -76,6 +81,11 @@ public class MemberService {
     private IInsuranceMapper insuranceMapper;
     @Autowired
     private IMemberMapper memberMapper;
+
+    @Autowired
+    private IWorkIntegralMapper workIntegralMapper;
+    @Autowired
+    private IHouseWorkerOrderMapper houseWorkerOrderMapper;
     @Autowired
     private ICityMapper iCityMapper;
     @Autowired
@@ -124,6 +134,10 @@ public class MemberService {
     private IStoreMapper iStoreMapper;
     @Autowired
     private IStoreUserMapper iStoreUserMapper;
+
+
+    @Autowired
+    private ConfigRuleUtilService configRuleUtilService;
 
 
     @Autowired
@@ -1203,30 +1217,27 @@ public class MemberService {
             if (worker == null) {
                 return ServerResponse.createbyUserTokenError();
             }
+            WorkerComprehensiveDTO workerComprehensive =workIntegralMapper.getComprehensiveWorker(worker.getId());
             HomePageBean homePageBean = new HomePageBean();
             homePageBean.setWorkerId(worker.getId());
             homePageBean.setIoflow(CommonUtil.isEmpty(worker.getHead()) ? null : imageAddress + worker.getHead());
             homePageBean.setWorkerName(CommonUtil.isEmpty(worker.getName()) ? worker.getNickName() : worker.getName());
             homePageBean.setEvaluation(worker.getEvaluationScore() == null ? new BigDecimal(60) : worker.getEvaluationScore());
+            homePageBean.setOverall(workerComprehensive.getOverall());
             homePageBean.setFavorable(worker.getPraiseRate() == null ? "0.00%" : worker.getPraiseRate().multiply(new BigDecimal(100)) + "%");
             StringBuilder stringBuffer = new StringBuilder();
-            if (worker.getIsCrowned() == null || worker.getIsCrowned() != 1) {
-                if (worker.getEvaluationScore() == null) {
-                    stringBuffer.append("普通");
-                } else if (Double.parseDouble(worker.getEvaluationScore().toString()) > 90) {
-                    stringBuffer.append("金牌");
-                } else if (Double.parseDouble(worker.getEvaluationScore().toString()) > 80) {
-                    stringBuffer.append("银牌");
-                } else if (Double.parseDouble(worker.getEvaluationScore().toString()) > 70) {
-                    stringBuffer.append("铜牌");
-                } else {
-                    stringBuffer.append("普通");
-                }
-            } else {
-                stringBuffer.append("皇冠");
+            stringBuffer.append(configRuleUtilService.getMemberRank(worker.getId()));
+            if(worker.getWorkerType()>3){
+                stringBuffer.append("工匠");
+            }else{
+                stringBuffer.append( workerTypeMapper.getName(worker.getWorkerType()));
             }
-            stringBuffer.append(worker.getWorkerType() != null && worker.getWorkerType() == 3 ? "大管家" : "工匠");
+
             homePageBean.setGradeName(stringBuffer.toString());
+            Example example1 = new Example(HouseWorkerOrder.class);
+            example1.createCriteria().andEqualTo(HouseWorkerOrder.WORKER_ID, worker.getId());
+            Integer orderTakingNum=houseWorkerOrderMapper.selectCountByExample(example1);
+            homePageBean.setOrderTakingNum(orderTakingNum);
             homePageBean.setList(getMyMenuList(userRole, worker.getWorkerType()));
             return ServerResponse.createBySuccess("获取我的界面成功！", homePageBean);
         }

@@ -6,6 +6,7 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.worker.WorkerBankCard;
 import com.dangjia.acg.service.worker.RewardPunishService;
+import com.dangjia.acg.service.worker.WorkerIntegraService;
 import com.dangjia.acg.service.worker.WorkerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,6 +25,23 @@ public class WorkerController implements WorkerAPI {
     private RewardPunishService rewardPunishService;
 
 
+    @Autowired
+    private WorkerIntegraService workerIntegraService;
+    /**
+     * 获取积分排行记录
+     * @param type   0=排行榜 1=飙升榜
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryRankingIntegral(Integer type, String userToken){
+        return workerIntegraService.queryRankingIntegral(type, userToken);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse getComprehensiveWorker(String userToken){
+        return workerIntegraService.getComprehensiveWorker(userToken);
+    }
     /**
      * 查询通讯录
      */

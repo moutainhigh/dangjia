@@ -60,16 +60,6 @@ public class DjMaintenanceRecord extends BaseEntity {
     @ApiModelProperty("业主电话号码")
     private String ownerMobile;
 
-    @Column(name = "owner_image")
-    @Desc(value = "业主上传图片(逗号分隔)")
-    @ApiModelProperty("业主上传图片(逗号分隔)")
-    private String ownerImage;
-
-    @Column(name = "owner_remark")
-    @Desc(value = "业主备注")
-    @ApiModelProperty("业主备注")
-    private String ownerRemark;
-
     @Column(name = "supervisor_id")
     @Desc(value = "督导id")
     @ApiModelProperty("督导id")
@@ -115,16 +105,6 @@ public class DjMaintenanceRecord extends BaseEntity {
     @ApiModelProperty("状态 1:待业主确认 2:业主已确认 3:业主已拒绝")
     private Integer ownerState;
 
-    @Column(name = "steward_image")
-    @Desc(value = "管家上传图片(逗号分隔)")
-    @ApiModelProperty("管家上传图片(逗号分隔)")
-    private String stewardImage;
-
-    @Column(name = "steward_remark")
-    @Desc(value = "管家备注")
-    @ApiModelProperty("管家备注")
-    private String stewardRemark;
-
     @Column(name = "state")
     @Desc(value = "状态 1:待审核 2:已通过 3:已拒绝")
     @ApiModelProperty("状态 1:待审核 2:已通过 3:已拒绝")
@@ -153,11 +133,18 @@ public class DjMaintenanceRecord extends BaseEntity {
     @Column(name = "worker_create_date")
     @Desc(value = "工匠接单时间")
     @ApiModelProperty("工匠接单时间")
-    private String workerCreateDate;
+    private Date workerCreateDate;
 
-    @Column(name = "worker_image")
-    @Desc(value = "工匠上传图片")
-    @ApiModelProperty("工匠上传图片")
-    private String workerImage;
+
+    @Column(name = "worker_type_id")
+    @Desc(value = "工种id")
+    @ApiModelProperty("工种id")
+    private String workerTypeId;
+
+    @Column(name = "worker_type_safe_order_id")
+    @Desc(value = "保险订单ID")
+    @ApiModelProperty("保险订单ID")
+    private String workerTypeSafeOrderId;
+
 
 }

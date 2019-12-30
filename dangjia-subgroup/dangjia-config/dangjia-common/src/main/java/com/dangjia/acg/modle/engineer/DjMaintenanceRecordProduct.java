@@ -34,9 +34,14 @@ public class DjMaintenanceRecordProduct extends BaseEntity {
     @ApiModelProperty("维保记录表id")
     private String maintenanceRecordId;
 
-    @Column(name = "shopCount")
+    @Column(name = "shop_count")
     @Desc(value = "数量")
     @ApiModelProperty("数量")
     private Double shopCount;
+
+    @Column(name = "price")
+    @Desc(value = "单价")
+    @ApiModelProperty("单价")
+    private Double price;
 
 }

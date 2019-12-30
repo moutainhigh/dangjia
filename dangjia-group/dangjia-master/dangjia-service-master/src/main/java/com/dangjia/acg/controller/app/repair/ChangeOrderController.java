@@ -66,4 +66,5 @@ public class ChangeOrderController implements ChangeOrderAPI {
     public ServerResponse checkHouseFlowApply(String userToken,String houseId,Integer type,String workerTypeId){
         return changeOrderService.checkHouseFlowApply(userToken,houseId,type,workerTypeId);
     }
+
 }

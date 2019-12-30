@@ -17,6 +17,7 @@ import javax.persistence.Table;
 @ApiModel(description = "工地备忘录表")
 @FieldNameConstants(prefix = "")
 public class DjBaicsSiteMemo extends BaseEntity {
+
     @Column(name = "remark")
     @Desc(value = "备注")
     @ApiModelProperty("备注")
@@ -28,8 +29,8 @@ public class DjBaicsSiteMemo extends BaseEntity {
     private String houseId;
 
     @Column(name = "member_id")
-    @Desc(value = "创建人")
-    @ApiModelProperty("创建人")
+    @Desc(value = "备忘录创建人")
+    @ApiModelProperty("备忘录创建人")
     private String memberId;
 
     @Column(name = "worker_type_id")
@@ -37,14 +38,9 @@ public class DjBaicsSiteMemo extends BaseEntity {
     @ApiModelProperty("工种类别0业主,1设计师,2精算师,3大管家,4拆除,6水电工,7防水,8泥工,9木工,10油漆工")
     private String workerTypeId;
 
-    @Column(name = "specify_reminder")
-    @Desc(value = "指定提醒人(单人或者多人)member_id以逗号分割")
-    @ApiModelProperty("指定提醒人(单人或者多人)member_id以逗号分割")
-    private String specifyReminder;
-
     @Column(name = "reminder_time")
-    @Desc(value = "指定提醒时间")
-    @ApiModelProperty("指定提醒时间")
+    @Desc(value = "指定时间提醒我")
+    @ApiModelProperty("指定时间提醒我")
     private String reminderTime;
 
 }

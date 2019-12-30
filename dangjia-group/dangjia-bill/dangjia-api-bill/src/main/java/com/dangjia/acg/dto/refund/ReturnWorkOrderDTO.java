@@ -27,6 +27,8 @@ public class ReturnWorkOrderDTO {
 
     private String workerMobile;//工匠电话
 
+    private String memberId;//业主ID
+
     private String supId;//管家ID
 
     private String supMobile;//管家电话
@@ -44,6 +46,8 @@ public class ReturnWorkOrderDTO {
     private Double totalAmount;//实退款
 
     private String state;
+
+    private String type;//1工匠补人工，2业主退人工
 
     private String repairNewNode;//最新处理节点
 

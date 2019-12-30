@@ -2,6 +2,30 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.dangjia.acg.mapper.engineer.DjMaintenanceRecordMapper">
 
+    <sql id="basic_columns">
+            id,
+            steward_processing_time AS stewardProcessingTime,
+            steward_order_time AS stewardOrderTime,
+            member_id AS memberId,
+            house_id AS houseId,
+            owner_name AS ownerName,
+            owner_mobile AS ownerMobile,
+            supervisor_id AS supervisorId,
+            steward_subsidy AS stewardSubsidy,
+            service_remark AS serviceRemark,
+            steward_id AS stewardId,
+            steward_state AS stewardState,
+            since_purchase_amount AS sincePurchaseAmount,
+            remark,
+            owner_state AS ownerState,
+            state,
+            complain_type AS complainType,
+            handle_type AS handleType,
+            user_id AS userId,
+            worker_member_id AS workerMemberId,
+            worker_create_date AS workerCreateDate,
+           worker_type_safe_order_id workerTypeSafeOrderId
+    </sql>
     <select id="queryDjMaintenanceRecordList" resultType="com.dangjia.acg.dto.engineer.DjMaintenanceRecordDTO">
         SELECT
         mr.id,
@@ -38,8 +62,24 @@
             mr.state,
             mr.create_date createDate,
             mr.steward_state stewardState,
-            mr.owner_image ownerImage,
-            mr.owner_remark ownerRemark,
+            (
+                SELECT
+                    mrc.image
+                FROM
+                    dj_maintenance_record_content mrc
+                WHERE
+                    mr.id = mrc.maintenance_record_id
+                AND mrc.type = 3
+            ) ownerImage,
+            (
+                SELECT
+                    mrc.remark
+                FROM
+                    dj_maintenance_record_content mrc
+                WHERE
+                    mr.id = mrc.maintenance_record_id
+                AND mrc.type = 3
+            ) ownerRemark,
             (
                 SELECT
 
@@ -80,13 +120,29 @@
             ) stewardMobile,
             mr.since_purchase_amount sincePurchaseAmount,
             mr.owner_state ownerState,
-            mr.steward_image stewardImage,
-            mr.steward_remark stewardRemark,
+            (
+                SELECT
+                    mrc.image
+                FROM
+                    dj_maintenance_record_content mrc
+                WHERE
+                    mr.id = mrc.maintenance_record_id
+                AND mrc.type = 2
+            ) stewardImage,
+            (
+                SELECT
+                    mrc.remark
+                FROM
+                    dj_maintenance_record_content mrc
+                WHERE
+                    mr.id = mrc.maintenance_record_id
+                AND mrc.type = 2
+            ) stewardRemark,
             mr.remark,
             mr.steward_order_time stewardOrderTime,
-            mr.complain_type as complainType,
-            mr.handle_type as handleType,
-             (
+            mr.complain_type AS complainType,
+            mr.handle_type AS handleType,
+            (
                 SELECT
 
                 IF (
@@ -111,20 +167,30 @@
             mr.user_id AS userId,
             mr.worker_member_id AS workerMemberId,
             mr.worker_create_date AS workerCreateDate,
-            mr.worker_image AS workerImage
+            (
+                SELECT
+                    mrc.image
+                FROM
+                    dj_maintenance_record_content mrc
+                WHERE
+                    mr.id = mrc.maintenance_record_id
+                AND mrc.type = 1
+            ) AS workerImage
         FROM
             dj_maintenance_record mr
-        WHERE mr.id=#{id}
+        WHERE
+            mr.id = #{id}
     </select>
 
     <select id="queryApplicationInfo" resultType="com.dangjia.acg.dto.supervisor.MaintenanceRecordDTO">
-            select
-            owner_name as ownerName,
-            create_date as createDate,
-            owner_image as ownerImage,
-            owner_remark as ownerRemark
-            From  dj_maintenance_record where house_id=#{houseId}
-
+           select
+				dmr.owner_name as ownerName,
+				dmr.create_date as createDate,
+				mrc.image as ownerImage,
+				mrc.remark as ownerRemark
+				From  dj_maintenance_record  dmr inner join
+				dj_maintenance_record_content mrc on mrc.maintenance_record_id=dmr.id
+            where dmr.house_id=#{houseId}
     </select>
 
     <select id="queryAcceptanceTrend" resultType="com.dangjia.acg.dto.supervisor.AcceptanceTrendDTO">
@@ -280,4 +346,15 @@
             worker_image as workerImage
         From dj_maintenance_record where house_id=#{houseId} and member_id=#{memberId}
     </select>
+
+    <select id="selectMaintenanceRecoredByHouseId" resultType="com.dangjia.acg.modle.engineer.DjMaintenanceRecord">
+        SELECT
+           <include refid="basic_columns"/>
+        FROM
+            dj_maintenance_record
+        WHERE
+            house_id = #{houseId}
+        AND state NOT IN (2, 3)
+    </select>
+
 </mapper>

@@ -5,15 +5,31 @@
 <mapper namespace="com.dangjia.acg.mapper.supervisor.DjBasicsSiteMemoMapper">
 
     <select id="querySiteMemo" resultType="com.dangjia.acg.dto.supervisor.DjBasicsSiteMemoDTO">
-        select
-        IFNULL(bsm.id,'') as id,
-        IFNULL(bsm.remark,'')  as remark ,
-        IFNULL(bsm.create_date,'')  as createDate,
-        IFNULL(bsm.worker_type_id,'') as workerTypeId,
-        IFNULL(dm.name,'') as name
-        from dj_basics_site_memo  bsm
-        inner join dj_member dm on bsm.member_id=dm.id
+        select * from
+        (
+            select
+            IFNULL(bsm.id,'') as id,
+            IFNULL(bsm.remark,'')  as remark ,
+            IFNULL(bsm.create_date,'')  as createDate,
+            IFNULL(bsm.worker_type_id,'') as workerTypeId,
+            IFNULL(dm.name,'') as name,
+            '1' as isSelfCreate
+            from dj_basics_site_memo  bsm
+            inner join dj_member dm on bsm.member_id=dm.id
         where bsm.member_id=#{memberId}
+            union all
+            select
+            IFNULL(bsm.id,'') as id,
+            IFNULL(bsm.remark,'')  as remark ,
+            IFNULL(bsm.create_date,'')  as createDate,
+            IFNULL(bsm.worker_type_id,'') as workerTypeId,
+            IFNULL(dm.name,'') as name,
+            '0' as isSelfCreate
+            from dj_basics_site_memo_reminder smr
+            inner join  dj_basics_site_memo  bsm on smr.dj_basics_site_memo_id=bsm.id
+            inner join dj_member dm on bsm.member_id=dm.id
+            where smr.specify_reminder=#{memberId}
+        ) bwl order by createDate DESC
     </select>
 
     <select id="querySiteMemoDetail" resultType="com.dangjia.acg.dto.supervisor.DjBasicsSiteMemoDTO">
@@ -28,4 +44,37 @@
         where bsm.id=#{id}
     </select>
 
+    <select id="queryRemindSiteMemo" resultType="com.dangjia.acg.dto.supervisor.DjBasicsSiteMemoDTO">
+            select
+            IFNULL(bsm.id,'') as id,
+            IFNULL(bsm.remark,'')  as remark ,
+            IFNULL(bsm.create_date,'')  as createDate,
+            IFNULL(bsm.worker_type_id,'') as workerTypeId,
+            IFNULL(dm.name,'') as name,
+            IFNULL(dm.head) as head,
+            '0' as isSelfCreate
+            from dj_basics_site_memo_reminder smr
+            inner join  dj_basics_site_memo  bsm on smr.dj_basics_site_memo_id=bsm.id
+            inner join dj_member dm on bsm.member_id=dm.id
+            where smr.specify_reminder=#{memberId} and smr.state=0
+    </select>
+
+    <select id="queryRemindSiteMemoDetail" resultType="com.dangjia.acg.dto.supervisor.DjBasicsSiteMemoDTO">
+            select
+            IFNULL(bsm.id,'') as id,
+            IFNULL(bsm.remark,'')  as remark ,
+            IFNULL(bsm.create_date,'')  as createDate,
+            IFNULL(bsm.worker_type_id,'') as workerTypeId,
+            IFNULL(dm.name,'') as name,
+            IFNULL(dm.head) as head,
+            '0' as isSelfCreate
+            from dj_basics_site_memo_reminder smr
+            inner join  dj_basics_site_memo  bsm on smr.dj_basics_site_memo_id=bsm.id
+            inner join dj_member dm on bsm.member_id=dm.id
+            where smr.specify_reminder=#{memberId} and smr.state=0 and smr.id=#{id}
+    </select>
+
+    <select id="querySiteMemoByMemberId" resultType="com.dangjia.acg.modle.supervisor.DjBaicsSiteMemo">
+        select * from dj_basics_site_memo where member_id=#{memberId} order by create_date  desc limit 0,1
+    </select>
 </mapper>

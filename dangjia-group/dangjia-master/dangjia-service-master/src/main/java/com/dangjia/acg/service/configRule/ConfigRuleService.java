@@ -329,7 +329,7 @@ public class ConfigRuleService {
                 }
                 return ServerResponse.createBySuccess("查询成功",configRuleItemThrees);
             }
-            return ServerResponse.createBySuccess("查询成功");
+            return ServerResponse.createBySuccessMessage("查询成功");
         } catch (Exception e) {
             logger.error("searchConfigRuleModule:",e);
             return ServerResponse.createByErrorMessage("查询失败");
@@ -453,7 +453,7 @@ public class ConfigRuleService {
             operationFlow.setUserId(userID);
             operationFlow.setUserType(0);
             operationFlowMapper.insert(operationFlow);
-            return ServerResponse.createBySuccess("更新成功");
+            return ServerResponse.createBySuccessMessage("更新成功");
         } catch (Exception e) {
             logger.error("setConfigRuleItem:",e);
             return ServerResponse.createByErrorMessage("更新失败");
@@ -567,6 +567,9 @@ public class ConfigRuleService {
             if(MK018.equals(configRuleModule.getTypeId())){//抢单限制
                 field.put("protect","抢单限制");
             }
+            if(MK019.equals(configRuleModule.getTypeId())){//质保抢单时间配置
+                field.put("protect","质保抢单时间配置");
+            }
             if(MK014.equals(configRuleModule.getTypeId())){//积分转化当家贝
                 field.put("integral","积分");
                 field.put("mark","比例分");
@@ -586,6 +589,7 @@ public class ConfigRuleService {
     public static String   MK007 = "MK007";//滞留金每单比例
     public static String   MK006 = "MK006";//月提现次数上限
     public static String   MK018 = "MK018";//抢单限制
+    public static String   MK019 = "MK019";//质保抢单时间
     public static String   MK013 = "MK013";//新手保护单
     public static String   MK012 = "MK012";//抢单排队时间
     public static String   MK011 = "MK011";//持单上限

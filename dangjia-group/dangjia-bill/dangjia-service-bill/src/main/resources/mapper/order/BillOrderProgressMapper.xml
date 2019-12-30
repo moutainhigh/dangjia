@@ -11,7 +11,7 @@
           t1.progress_type progressType,
           t2.`code` nodeCode,
           t2.`name` nodeName,
-          t2.`describe` nodeDescribe,
+          t2.node_describe nodeDescribe,
           t2.associated_operation associatedOperation,
           t2.associated_operation_name  associatedOperationName
         FROM
@@ -21,7 +21,6 @@
             t1.progress_order_id = #{repairMendOrderId}
         AND t1.node_type = t2.type
         AND t1.node_code = t2.`code`
-        and t1.progress_type=#{progresType}
         and t1.data_status = 0
         order by t1.create_date,t2.code
      </select>

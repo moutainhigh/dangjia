@@ -3,7 +3,7 @@
 <mapper namespace="com.dangjia.acg.mapper.task.IMasterTaskStackMapper">
 
 
-    <select id="selectTaskStackInfo" resultType="com.dangjia.acg.modle.house.TaskStack">
+    <select id="selectTaskStackInfo" resultType="com.dangjia.acg.dto.core.Task">
         SELECT
             t.id taskStackId,
             t.create_date date,
@@ -20,7 +20,7 @@
         and t.house_id=#{houseId}
         and t.member_id=#{memberId}
 	</select>
-    <select id="selectTaskStackInfoByType" resultType="com.dangjia.acg.modle.house.TaskStack">
+    <select id="selectTaskStackInfoByType" resultType="com.dangjia.acg.dto.core.Task">
         SELECT
             t.id taskStackId,
             t.create_date date,

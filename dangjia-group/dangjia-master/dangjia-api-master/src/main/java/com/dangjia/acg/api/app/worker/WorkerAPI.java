@@ -20,6 +20,15 @@ import javax.servlet.http.HttpServletRequest;
 @Api(value = "工匠管理接口", description = "工匠管理关联接口")
 public interface WorkerAPI {
 
+    @PostMapping("app/worker/integral/ranking")
+    @ApiOperation(value = "获取积分排行记录", notes = "获取积分排行记录")
+    ServerResponse queryRankingIntegral(Integer type, String userToken);
+
+
+    @PostMapping("app/worker/comprehensive")
+    @ApiOperation(value = "获取综合评分", notes = "获取综合评分")
+    ServerResponse getComprehensiveWorker(String userToken);
+
     @PostMapping("app/worker/getMailList")
     @ApiOperation(value = "通讯录", notes = "通讯录")
     ServerResponse getMailList(@RequestParam("userToken") String userToken,

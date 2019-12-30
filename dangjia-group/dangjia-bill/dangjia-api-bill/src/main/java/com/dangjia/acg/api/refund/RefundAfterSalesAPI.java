@@ -172,9 +172,10 @@ public interface RefundAfterSalesAPI {
     @PostMapping("/app/refund/refundOrder/queryRetrunWorkerHistoryList")
     @ApiOperation(value = "查询退人工历史记录列表", notes = "查询退人工历史记录列表")
     ServerResponse<PageInfo> queryRetrunWorkerHistoryList(@RequestParam("pageDTO") PageDTO pageDTO,
-                                                             @RequestParam("userToken") String userToken,
-                                                             @RequestParam("cityId") String cityId,
-                                                             @RequestParam("houseId") String houseId);
+                                                          @RequestParam("userToken") String userToken,
+                                                          @RequestParam("cityId") String cityId,
+                                                          @RequestParam("houseId") String houseId,
+                                                          @RequestParam("searchType") String searchType);
 
     @PostMapping("/app/refund/refundOrder/queryRetrunWorkerHistoryDetail")
     @ApiOperation(value = "查询退人工历史记录详情", notes = "查询退人工历史记录列表")
@@ -185,4 +186,21 @@ public interface RefundAfterSalesAPI {
     @ApiOperation(value = "撤销退人工申请", notes = "撤销退人工申请")
     ServerResponse cancelWorkerApplication(@RequestParam("cityId") String cityId,
                                            @RequestParam("repairWorkOrderId") String repairWorkOrderId);
+
+    @PostMapping("/app/refund/ownerAudit/searchAuditInfoByTaskId")
+    @ApiOperation(value = "查询待审核的补人工订单", notes = "查询待审核的补人工订单")
+    ServerResponse searchAuditInfoByTaskId(@RequestParam("cityId") String cityId,
+                                           @RequestParam("taskId") String taskId);
+
+    @PostMapping("/app/refund/ownerAudit/passAuditInfoByTaskId")
+    @ApiOperation(value = "待审核的订单--审核通过", notes = "待审核的订单--审核通过")
+    ServerResponse passAuditInfoByTaskId(@RequestParam("cityId") String cityId,
+                                         @RequestParam("taskId") String taskId);
+
+    @PostMapping("/app/refund/ownerAudit/failAuditInfoByTaskId")
+    @ApiOperation(value = "待审核的订单--审核不通过", notes = "待审核的订单--审核不通过")
+    ServerResponse failAuditInfoByTaskId(@RequestParam("cityId") String cityId,
+                                         @RequestParam("taskId") String taskId);
+
+
 }
