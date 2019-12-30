@@ -629,7 +629,7 @@ public class BudgetWorkerService {
                 Double rgf = 0.00;//二级费用统计
                 Example example = new Example(BudgetWorker.class);
                 example.createCriteria().andEqualTo(BudgetWorker.HOUSE_FLOW_ID, aHflist1.getId()).andEqualTo(BudgetWorker.STETA, 1)
-                        .andCondition("delete_state!=1");
+                        .andCondition(" delete_state!=1 and delete_state!=5 ");
                 List<BudgetWorker> bwList = iBudgetWorkerMapper.selectByExample(example);
                 for (BudgetWorker abw : bwList) {//增加一层循环遍历存储下级子项目
                     WorkerGoods wg = iWorkerGoodsMapper.selectByPrimaryKey(abw.getWorkerGoodsId());
@@ -662,7 +662,7 @@ public class BudgetWorkerService {
                 }
                 Example example = new Example(BudgetMaterial.class);
                 example.createCriteria().andEqualTo(BudgetMaterial.HOUSE_FLOW_ID, aHflist.getId()).andEqualTo(BudgetMaterial.STETA, 1)
-                        .andCondition("delete_state!=1");
+                        .andCondition(" delete_state!=1 and delete_state!=5 ");
                 List<BudgetMaterial> abmList = iBudgetMaterialMapper.selectByExample(example);//获取每个工序对应的材料表
                 for (BudgetMaterial abm : abmList) {//每个商品
                     Product product = iProductMapper.selectByPrimaryKey(abm.getProductId());

@@ -30,7 +30,7 @@ public interface WebOrderSplitAPI {
     @PostMapping("web/deliver/orderSplit/splitDeliverList")
     @ApiOperation(value = "供应商发货单列表", notes = "供应商发货单列表")
     ServerResponse splitDeliverList(@RequestParam("supplierId") String supplierId,
-                                    @RequestParam("shipState") int shipState);
+                                    @RequestParam("shipState") Integer shipState);
 
     @PostMapping("web/deliver/orderSplit/withdrawSupplier")
     @ApiOperation(value = "从供应商撤回发货单", notes = "从供应商撤回发货单")

@@ -53,7 +53,7 @@ public interface PaymentAPI {
     ServerResponse getPaymentOrder(@RequestParam("userToken") String userToken,
                                    @RequestParam("houseId") String houseId,
                                    @RequestParam("taskId") String taskId,
-                                   @RequestParam("type") int type);
+                                   @RequestParam("type") Integer type);
 
     @PostMapping("app/pay/payment/order")
     @ApiOperation(value = "支付页面接口(通用)", notes = "支付页面接口(通用)")
@@ -66,7 +66,7 @@ public interface PaymentAPI {
     ServerResponse getPaymentPage(@RequestParam("userToken") String userToken,
                                   @RequestParam("houseId") String houseId,
                                   @RequestParam("taskId") String taskId,
-                                  @RequestParam("type") int type);
+                                  @RequestParam("type") Integer type);
 
     @PostMapping("app/pay/payment/queryInsuranceInfo")
     @ApiOperation(value = "查询保险信息", notes = "查询保险信息")

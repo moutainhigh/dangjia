@@ -61,7 +61,7 @@ public class PaymentController implements PaymentAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getPaymentOrder(String userToken, String houseId, String taskId, int type) {
+    public ServerResponse getPaymentOrder(String userToken, String houseId, String taskId, Integer type) {
         return paymentService.getPaymentOrder(userToken, houseId, taskId, type);
     }
 
@@ -80,7 +80,7 @@ public class PaymentController implements PaymentAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getPaymentPage(String userToken, String houseId, String taskId, int type) {
+    public ServerResponse getPaymentPage(String userToken, String houseId, String taskId, Integer type) {
         return paymentService.getPaymentPage(userToken, houseId, taskId, type);
     }
 

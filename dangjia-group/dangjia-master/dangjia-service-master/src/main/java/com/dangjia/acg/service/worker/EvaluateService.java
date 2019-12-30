@@ -514,7 +514,7 @@ public class EvaluateService {
             //短信通知业务本门
             Map<String, String> temp_para = new HashMap();
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlowApply.getWorkerTypeId());
-            if(workerType.getType()==9) {
+            if(workerType.getType()==9||workerType.getType()==3) {
                 temp_para.put("house_name", house.getHouseName());
                 temp_para.put("worker_name", workerType.getName());
                 JsmsUtil.sendSMS("15675101794", "164425", temp_para);

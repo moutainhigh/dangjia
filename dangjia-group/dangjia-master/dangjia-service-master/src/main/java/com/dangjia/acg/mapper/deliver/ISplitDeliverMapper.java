@@ -43,7 +43,7 @@ public interface ISplitDeliverMapper extends Mapper<SplitDeliver> {
                                              @Param("shipAddress")String shipAddress,
                                              @Param("beginDate") String beginDate,
                                              @Param("endDate") String endDate,
-                                             @Param("applyState") int applyState);
+                                             @Param("applyState") Integer applyState);
     /*合併結算已结算*/
     SplitDeliver selectClsd(@Param("id") String id,
                             @Param("shipAddress")String shipAddress,

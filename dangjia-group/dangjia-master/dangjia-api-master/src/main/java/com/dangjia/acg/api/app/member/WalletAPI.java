@@ -130,7 +130,7 @@ public interface WalletAPI {
     @PostMapping("app/member/wallet/workerDetail")
     @ApiOperation(value = "支出 收入", notes = "支出 收入")
     ServerResponse workerDetail(@RequestParam("userToken") String userToken,
-                                @RequestParam("type") int type,
+                                @RequestParam("type") Integer type,
                                 @RequestParam("pageDTO") PageDTO pageDTO);
 
     /**

@@ -102,7 +102,7 @@ public class MainUserController implements MainUserAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse setJobUser(HttpServletRequest request, String id, boolean isJob) {
+    public ServerResponse setJobUser(HttpServletRequest request, String id, Boolean isJob) {
         return userService.setJobUser(request, id, isJob);
     }
 
@@ -289,7 +289,7 @@ public class MainUserController implements MainUserAPI {
     @Override
     @ApiMethod
     public ServerResponse login(HttpServletRequest request,
-                                UserDTO user, boolean rememberMe) {
+                                UserDTO user, Boolean rememberMe) {
         logger.debug("用户登录，请求参数=member:" + user + "，是否记住我：" + rememberMe);
         ServerResponse msg;
         if (null == user) {

@@ -61,5 +61,5 @@ public interface SplitDeliverAPI {
     @PostMapping("app/deliver/splitDeliver/splitDeliverList")
     @ApiOperation(value = "收货列表", notes = "收货列表")
     ServerResponse splitDeliverList(@RequestParam("houseId") String houseId,
-                                    @RequestParam("shipState") int shipState);
+                                    @RequestParam("shipState") Integer shipState);
 }

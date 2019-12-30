@@ -80,7 +80,7 @@ public interface HouseDesignImageAPI {
     @ApiOperation(value = "设计师任务列表", notes = "设计师任务列表")
     ServerResponse getDesignList(@RequestParam("request") HttpServletRequest request,
                                  @RequestParam("pageDTO") PageDTO pageDTO,
-                                 @RequestParam("designerType") int designerType,
+                                 @RequestParam("designerType") Integer designerType,
                                  @RequestParam("searchKey") String searchKey,
                                  @RequestParam("workerKey") String workerKey,
                                  @RequestParam("userId") String userId);
@@ -113,7 +113,7 @@ public interface HouseDesignImageAPI {
     @ApiOperation(value = "设计通过", notes = "设计通过")
     ServerResponse checkPass(@RequestParam("userToken") String userToken,
                              @RequestParam("houseId") String houseId,
-                             @RequestParam("type") int type);
+                             @RequestParam("type") Integer type);
 
 
     /**
@@ -140,7 +140,7 @@ public interface HouseDesignImageAPI {
     ServerResponse upgradeDesign(@RequestParam("userToken") String userToken,
                                  @RequestParam("houseId") String houseId,
                                  @RequestParam("designImageTypeId") String designImageTypeId,
-                                 @RequestParam("selected") int selected);
+                                 @RequestParam("selected") Integer selected);
 
     /**
      * showdoc
@@ -415,7 +415,7 @@ public interface HouseDesignImageAPI {
     ServerResponse getOdlQuantityRoomList(@RequestParam("request") HttpServletRequest request,
                                           @RequestParam("pageDTO") PageDTO pageDTO,
                                           @RequestParam("houseId") String houseId,
-                                          @RequestParam("type") int type);
+                                          @RequestParam("type") Integer type);
 
     /**
      * showdoc

@@ -219,6 +219,7 @@
 		WHERE
 			abw.house_id = #{houseId}
 		AND abw.delete_state != 1
+		AND abw.delete_state != 5
 		AND abw.worker_type_id = #{workerTypeId}
     </select>
 

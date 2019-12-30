@@ -8,6 +8,7 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.repair.BudgetWorkerDTO;
 import com.dangjia.acg.mapper.actuary.IBudgetWorkerMapper;
 import com.dangjia.acg.mapper.basics.IWorkerGoodsMapper;
+import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.actuary.BudgetWorker;
 import com.dangjia.acg.modle.basics.WorkerGoods;
 import com.github.pagehelper.PageHelper;
@@ -58,7 +59,7 @@ public class FillWorkerService {
                 Example.Criteria criteria = example.createCriteria();
                 criteria.andEqualTo(BudgetWorker.WORKER_TYPE_ID, workerTypeId);
                 criteria.andEqualTo(BudgetWorker.HOUSE_ID, houseId);
-                criteria.andNotEqualTo(BudgetWorker.DELETE_STATE, "1");
+                criteria.andNotEqualTo(BudgetWorker.DELETE_STATE, "1").andNotEqualTo(BudgetWorker.DELETE_STATE, 5);
                 criteria.andCondition(" ( `name` IS NOT NULL OR `name` <> '' ) ");
                 if (!CommonUtil.isEmpty(name)) {
                     criteria.andLike(BudgetWorker.NAME, "%" + name + "%");

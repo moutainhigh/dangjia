@@ -532,6 +532,7 @@
         from dj_actuary_budget_material abm ,dj_basics_product p
         WHERE abm.product_id =p.id
         and abm.delete_state!=1
+        and abm.delete_state!=5
         and abm.steta=1
         and abm.house_id =#{houseId}
         <if test="name!=null and name!=''">

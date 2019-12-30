@@ -15,10 +15,10 @@ public interface IEvaluateMapper extends Mapper<Evaluate> {
 
     /**查工匠被管家的评价*/
     Evaluate getForCountMoneySup(@Param("houseFlowId") String houseFlowId,
-                                 @Param("applyType") int applyType ,@Param("workerId") String workerId);
+                                 @Param("applyType") Integer applyType ,@Param("workerId") String workerId);
 
     /**查工匠被业主的评价*/
     Evaluate getForCountMoney(@Param("houseFlowId") String houseFlowId,
-                              @Param("applyType") int applyType ,@Param("workerId") String workerId);
+                              @Param("applyType") Integer applyType ,@Param("workerId") String workerId);
 
 }

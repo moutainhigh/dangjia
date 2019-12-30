@@ -30,7 +30,7 @@ public interface ServerPortAPI {
                                 @RequestParam("pageDTO") PageDTO pageDTO,
                                 @RequestParam("content") String content,
                                 @RequestParam("cityId") String cityId,
-                                @RequestParam("type") int type);
+                                @RequestParam("type") Integer type);
 
     //查询热门搜索
     @PostMapping("/actuary/serverPort/getHeatSearchBox")
