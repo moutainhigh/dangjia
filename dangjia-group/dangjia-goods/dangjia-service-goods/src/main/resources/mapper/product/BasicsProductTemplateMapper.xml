@@ -527,7 +527,6 @@
         AND p.maket = 1
         AND t1.is_shelf_status = '1'
          and p.product_sn=#{productSn}
-         and p.worker_type_id=#{workerTypeId}
         ORDER BY
             t1.sell_price DESC
         LIMIT 1
