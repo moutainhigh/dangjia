@@ -30,6 +30,8 @@ public class WorkerGoodsDTO {
     @ApiModelProperty("productId")
     private String productId;
 
+    private String goodsName;
+
     private String productTemplateId;
 
     @ApiModelProperty("storefrontId")
