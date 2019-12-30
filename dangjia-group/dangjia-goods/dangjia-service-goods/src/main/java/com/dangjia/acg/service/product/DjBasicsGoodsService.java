@@ -277,13 +277,9 @@ public class DjBasicsGoodsService {
                     for (int i = 0; i < newValueNameArr.length; i++) {
                         String valueId = newValueNameArr[i];
                         if (StringUtils.isNotBlank(valueId)) {
-                            LOG.debug("*****************判断attributeValue是否为空 start *************************");
                             AttributeValue attributeValue = iAttributeValueMapper.selectByPrimaryKey(valueId);
-                            LOG.debug("*****************判断attributeValue是否为空 end *************************");
                             if (attributeValue != null && StringUtils.isNotBlank(attributeValue.getName())) {
-                                LOG.debug("*****************判断attribute是否为空 start *************************");
                                 Attribute attribute = iAttributeMapper.selectByPrimaryKey(attributeValue.getAttributeId());
-                                LOG.debug("*****************判断attribute是否为空 end *************************");
                                 if (attribute != null && attribute.getType() == 2 && StringUtils.isNotBlank(strNewValueNameArr)) {
                                     strNewValueNameArr = attributeValue.getName();
                                 } else if (attribute != null && attribute.getType() == 2) {
@@ -295,7 +291,6 @@ public class DjBasicsGoodsService {
                     }
                 }
                 p.setNewValueNameArr(strNewValueNameArr);
-                LOG.debug("*****************strNewValueNameArr赋值end *************************");
                 //初始化标签名称
                 if (!StringUtils.isNotBlank(p.getLabelId())) {
                     p.setLabelId("");
