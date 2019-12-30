@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
+import tk.mybatis.mapper.util.StringUtil;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -248,29 +249,30 @@ public class DjBasicsGoodsService {
                 return ServerResponse.createByErrorMessage("查无数据！");
             }
             LOG.debug("*****************判断productList是否为空 end *************************");
-            if(!productList.isEmpty()&&productList.size()>0) {
-                for (DjBasicsProductTemplateDTO p : productList) {
-                    //type表示： 是否禁用  0：禁用；1不禁用 ;  -1全部默认
-                    if (type != null && !type.equals(p.getType()) && -1 != type) //不等于 type 的不返回给前端
-                    {
-                        continue;
-                    }
-                    //图片路径+前缀
-                    StringBuilder imgUrlStr = new StringBuilder();
-                    StringBuilder imgStr = new StringBuilder();
-                    if (!CommonUtil.isEmpty(p.getImage())) {
-                        String[] imgArr = p.getImage().split(",");
-                        StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
-                    }
-                    p.setImage(imgStr.toString());
-                    p.setImageUrl(imgUrlStr.toString());
-                    //初始化单元名称
-                    if (StringUtils.isNoneBlank(p.getConvertUnit())) {
-                        p.setConvertUnitName(iUnitMapper.selectByPrimaryKey(p.getConvertUnit()).getName());
-                    }
 
-                    String valueIdArr=p.getValueIdArr();
-                    String strNewValueNameArr = "";
+            for (DjBasicsProductTemplateDTO p : productList) {
+                //type表示： 是否禁用  0：禁用；1不禁用 ;  -1全部默认
+                if (type != null && !type.equals(p.getType()) && -1 != type) //不等于 type 的不返回给前端
+                {
+                    continue;
+                }
+                //图片路径+前缀
+                StringBuilder imgUrlStr = new StringBuilder();
+                StringBuilder imgStr = new StringBuilder();
+                if (!CommonUtil.isEmpty(p.getImage())) {
+                    String[] imgArr = p.getImage().split(",");
+                    StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
+                }
+                p.setImage(imgStr.toString());
+                p.setImageUrl(imgUrlStr.toString());
+                //初始化单元名称
+                if (StringUtils.isNoneBlank(p.getConvertUnit())) {
+                    p.setConvertUnitName(iUnitMapper.selectByPrimaryKey(p.getConvertUnit()).getName());
+                }
+
+                String valueIdArr=p.getValueIdArr();
+                String strNewValueNameArr = "";
+                if (StringUtil.isNotEmpty(valueIdArr)) {
                     String[] newValueNameArr = valueIdArr.split(",");
                     for (int i = 0; i < newValueNameArr.length; i++) {
                         String valueId = newValueNameArr[i];
@@ -278,33 +280,34 @@ public class DjBasicsGoodsService {
                             LOG.debug("*****************判断attributeValue是否为空 start *************************");
                             AttributeValue attributeValue = iAttributeValueMapper.selectByPrimaryKey(valueId);
                             LOG.debug("*****************判断attributeValue是否为空 end *************************");
-                            if(attributeValue!=null&&StringUtils.isNotBlank(attributeValue.getName())){
+                            if (attributeValue != null && StringUtils.isNotBlank(attributeValue.getName())) {
                                 LOG.debug("*****************判断attribute是否为空 start *************************");
-                                Attribute attribute=iAttributeMapper.selectByPrimaryKey(attributeValue.getAttributeId());
+                                Attribute attribute = iAttributeMapper.selectByPrimaryKey(attributeValue.getAttributeId());
                                 LOG.debug("*****************判断attribute是否为空 end *************************");
-                                if (attribute!=null&&attribute.getType()==2&&StringUtils.isNotBlank(strNewValueNameArr)) {
+                                if (attribute != null && attribute.getType() == 2 && StringUtils.isNotBlank(strNewValueNameArr)) {
                                     strNewValueNameArr = attributeValue.getName();
-                                } else if (attribute!=null&&attribute.getType()==2){
+                                } else if (attribute != null && attribute.getType() == 2) {
                                     strNewValueNameArr = strNewValueNameArr + "," + attributeValue.getName();
                                 }
                             }
 
                         }
                     }
-                    p.setNewValueNameArr(strNewValueNameArr);
-                    LOG.debug("*****************strNewValueNameArr赋值end *************************");
-                    //初始化标签名称
-                    if (!StringUtils.isNotBlank(p.getLabelId())) {
-                        p.setLabelId("");
-                        p.setLabelName("");
-                    } else {
-                        DjBasicsLabelValue label = djBasicsLabelValueMapper.selectByPrimaryKey(p.getLabelId());
-                        if (label != null && label.getName() != null)
-                            p.setLabelName(label.getName());
-                    }
-
                 }
+                p.setNewValueNameArr(strNewValueNameArr);
+                LOG.debug("*****************strNewValueNameArr赋值end *************************");
+                //初始化标签名称
+                if (!StringUtils.isNotBlank(p.getLabelId())) {
+                    p.setLabelId("");
+                    p.setLabelName("");
+                } else {
+                    DjBasicsLabelValue label = djBasicsLabelValueMapper.selectByPrimaryKey(p.getLabelId());
+                    if (label != null && label.getName() != null)
+                        p.setLabelName(label.getName());
+                }
+
             }
+
             PageInfo pageResult = new PageInfo(productList);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
