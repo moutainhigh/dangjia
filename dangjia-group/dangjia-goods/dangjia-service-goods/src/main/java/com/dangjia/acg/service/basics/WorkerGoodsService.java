@@ -114,6 +114,7 @@ public class WorkerGoodsService {
             workerGoodsDTO.setWorkerTypeName(workerTypeName);
             workerGoodsDTO.setProductName(workerGoodsDTOS.getName());
             workerGoodsDTO.setProductId(workerGoodsDTOS.getId());
+            workerGoodsDTO.setProductTemplateId(workerGoodsDTOS.getId());
             workerGoodsDTO.setShopCount(shopCount);
             workerGoodsDTO.setName(workerGoodsDTOS.getName());
             workerGoodsDTO.setId(workerGoodsDTOS.getId());
