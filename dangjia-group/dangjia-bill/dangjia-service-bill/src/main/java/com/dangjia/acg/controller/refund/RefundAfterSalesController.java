@@ -320,4 +320,20 @@ public class RefundAfterSalesController implements RefundAfterSalesAPI {
         }
 
     }
+
+    /**
+     * 退人工--查询符合条件的可退人工商品
+     * @param userToken 用户token
+     * @param cityId  城市ID
+     * @param houseId 房子ID
+     * @param workerTypeId 工种ID
+     * @param searchKey 商品名称
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryWorkerProductList(String userToken,String cityId,String houseId,
+                                          String workerTypeId,String searchKey){
+        return refundAfterSalesService.queryWorkerProductList(userToken,cityId,houseId,workerTypeId,searchKey);
+    }
 }

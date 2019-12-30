@@ -77,5 +77,12 @@ public interface RefundAfterSalesMapper extends Mapper<Order> {
      */
     List<Map<String,Object>> queryRefundJobList(@Param("nodeCode") String nodeType,@Param("paramNodeKey") String paramNodeKey);
 
-
+    /**
+     * 查询可退人工商品
+     * @param houseId
+     * @param workerTypeId
+     * @param searchKey
+     * @return
+     */
+    List<RefundOrderItemDTO>  queryWorkerProductList(@Param("houseId") String houseId,@Param("workerTypeId") String workerTypeId,@Param("searchKey") String searchKey);
 }
