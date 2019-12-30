@@ -1136,7 +1136,7 @@ public class DjBasicsProductTemplateService {
                 .andEqualTo(DjBasicsProductTemplate.MAKET, "1")*/
 //                .andEqualTo(Product.WORKER_TYPE_ID,workerTypeId)
         ;
-        StorefrontProductDTO storefrontProductDTO=iBasicsProductTemplateMapper.getStorefrontInfoByprodTemplateId(null,DjBasicsProductTemplate.PRODUCT_SN);//查询店铺是否有售卖此商品
+        StorefrontProductDTO storefrontProductDTO=iBasicsProductTemplateMapper.getStorefrontInfoByprodTemplateId(null,productSn);//查询店铺是否有售卖此商品
        // List<DjBasicsProductTemplate> products = iBasicsProductTemplateMapper.selectByExample(example);
         ProductDTO productsDTO = new ProductDTO();
         if (storefrontProductDTO != null && StringUtils.isNotBlank(storefrontProductDTO.getStorefrontId())) {
