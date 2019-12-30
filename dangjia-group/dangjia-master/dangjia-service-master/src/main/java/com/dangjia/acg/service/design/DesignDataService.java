@@ -173,12 +173,18 @@ public class DesignDataService {
             designDTO.setHistoryRecord(0);
         } else {
             List<QuantityRoomImages> quantityRoomImages = new ArrayList<>();
-            ServerResponse serverResponse = getConstructionPlans(houseId);
-            if (serverResponse.isSuccess()) {
-                QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
-                quantityRoomImages.addAll(quantityRoomDTO.getImages());
+            ServerResponse serverResponse;
+            if (house.getDesignerState() == 3) {
+                serverResponse = getConstructionPlans(houseId);
+                if (serverResponse.isSuccess()) {
+                    QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
+                    quantityRoomImages.addAll(quantityRoomDTO.getImages());
+                }
             }
-            if (quantityRoomImages.size() <= 0) {
+            if (quantityRoomImages.size() <= 0 && (
+                    house.getDesignerState() == 7
+                            || house.getDesignerState() == 2
+                            || house.getDesignerState() == 3)) {
                 serverResponse = getPlaneMap(houseId);
                 if (serverResponse.isSuccess()) {
                     QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
