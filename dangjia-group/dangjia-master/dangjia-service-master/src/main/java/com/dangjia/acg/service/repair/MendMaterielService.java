@@ -461,7 +461,9 @@ public class MendMaterielService {
         ReturnMendMaterielDTO returnMendMaterielDTO=new ReturnMendMaterielDTO();
 
         List<ReturnOrderProgressDTO> mendMaterielProgressList= mendMaterialMapper.queryMendMaterielProgress(mendOrderId);
-        if(mendMaterielProgressList!=null&&mendMaterielProgressList.size()>0)
+        if (mendMaterielProgressList == null || mendMaterielProgressList.size() <= 0) {
+            return ServerResponse.createByErrorMessage("查无数据！");
+        }
         returnMendMaterielDTO.setMendMaterielProgressList(mendMaterielProgressList);
 
 
