@@ -9,10 +9,12 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.product.BasicsGoodsDTO;
 import com.dangjia.acg.dto.product.DjBasicsProductTemplateDTO;
+import com.dangjia.acg.mapper.basics.IAttributeMapper;
 import com.dangjia.acg.mapper.basics.IAttributeValueMapper;
 import com.dangjia.acg.mapper.basics.ILabelMapper;
 import com.dangjia.acg.mapper.basics.IUnitMapper;
 import com.dangjia.acg.mapper.product.*;
+import com.dangjia.acg.modle.attribute.Attribute;
 import com.dangjia.acg.modle.attribute.AttributeValue;
 import com.dangjia.acg.modle.product.*;
 import com.dangjia.acg.util.StringTool;
@@ -53,6 +55,8 @@ public class DjBasicsGoodsService {
     private IUnitMapper iUnitMapper;
     @Autowired
     private IAttributeValueMapper iAttributeValueMapper;
+    @Autowired
+    private IAttributeMapper iAttributeMapper ;
     @Autowired
     private ILabelMapper iLabelMapper;
     @Autowired
@@ -263,23 +267,27 @@ public class DjBasicsGoodsService {
                     if (StringUtils.isNoneBlank(p.getConvertUnit())) {
                         p.setConvertUnitName(iUnitMapper.selectByPrimaryKey(p.getConvertUnit()).getName());
                     }
-                    StringBuilder strNewValueNameArr = new StringBuilder();
-                    //初始化商品属性
-                    if (StringUtils.isNotBlank(p.getValueIdArr())) {
-                        String[] newValueNameArr = p.getValueIdArr().split(",");
-                        for (int i = 0; i < newValueNameArr.length; i++) {
-                            String valueId = newValueNameArr[i];
-                            if (StringUtils.isNotBlank(valueId)) {
-                                AttributeValue attributeValue = iAttributeValueMapper.selectByPrimaryKey(valueId);
-                                if (i == 0) {
-                                    strNewValueNameArr = new StringBuilder(attributeValue.getName());
-                                } else {
-                                    strNewValueNameArr.append(",").append(attributeValue.getName());
+
+                    String valueIdArr=p.getValueIdArr();
+                    String strNewValueNameArr = "";
+                    String[] newValueNameArr = valueIdArr.split(",");
+                    for (int i = 0; i < newValueNameArr.length; i++) {
+                        String valueId = newValueNameArr[i];
+                        if (StringUtils.isNotBlank(valueId)) {
+                            AttributeValue attributeValue = iAttributeValueMapper.selectByPrimaryKey(valueId);
+                            if(attributeValue!=null&&StringUtils.isNotBlank(attributeValue.getName())){
+                                Attribute attribute=iAttributeMapper.selectByPrimaryKey(attributeValue.getAttributeId());
+                                if (attribute!=null&&attribute.getType()==2&&StringUtils.isNotBlank(strNewValueNameArr)) {
+                                    strNewValueNameArr = attributeValue.getName();
+                                } else if (attribute!=null&&attribute.getType()==2){
+                                    strNewValueNameArr = strNewValueNameArr + "," + attributeValue.getName();
                                 }
                             }
+
                         }
                     }
-                    p.setNewValueNameArr(strNewValueNameArr.toString());
+                    p.setNewValueNameArr(strNewValueNameArr);
+
                     //初始化标签名称
                     if (!StringUtils.isNotBlank(p.getLabelId())) {
                         p.setLabelId("");
