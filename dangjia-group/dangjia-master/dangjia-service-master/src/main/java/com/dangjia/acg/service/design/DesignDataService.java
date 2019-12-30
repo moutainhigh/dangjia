@@ -120,7 +120,8 @@ public class DesignDataService {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "已经提前结束装修");
         }
         DesignListDTO designDTO = new DesignListDTO();
-        if (worker != null && house.getDesignerState() != 3 && worker.getId().equals(house.getMemberId())) {//是业主而且没有设计完工将走审核逻辑
+        if (worker != null && house.getDesignerState() != 3 && house.getDesignerState() != 7
+                && worker.getId().equals(house.getMemberId())) {//是业主而且没有设计完工将走审核逻辑
             if (!CommonUtil.isEmpty(type) && type == 0) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "设计师还在设计中");
             }
@@ -138,7 +139,7 @@ public class DesignDataService {
             Example.Criteria criteria = example.createCriteria()
                     .andEqualTo(PayConfiguration.DATA_STATUS, 0);
             String message;
-            if(house.getVisitState() != 3) {
+            if (house.getVisitState() != 3) {
                 designDTO.addButton(Utils.getButton("需要修改设计", 1));
                 if (house.getDesignerState() == 5) {
                     ServerResponse serverResponse = getPlaneMap(houseId);
@@ -172,12 +173,18 @@ public class DesignDataService {
             designDTO.setHistoryRecord(0);
         } else {
             List<QuantityRoomImages> quantityRoomImages = new ArrayList<>();
-            ServerResponse serverResponse = getConstructionPlans(houseId);
-            if (serverResponse.isSuccess()) {
-                QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
-                quantityRoomImages.addAll(quantityRoomDTO.getImages());
+            ServerResponse serverResponse;
+            if (house.getDesignerState() == 3) {
+                serverResponse = getConstructionPlans(houseId);
+                if (serverResponse.isSuccess()) {
+                    QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
+                    quantityRoomImages.addAll(quantityRoomDTO.getImages());
+                }
             }
-            if (quantityRoomImages.size() <= 0) {
+            if (quantityRoomImages.size() <= 0 && (
+                    house.getDesignerState() == 7
+                            || house.getDesignerState() == 2
+                            || house.getDesignerState() == 3)) {
                 serverResponse = getPlaneMap(houseId);
                 if (serverResponse.isSuccess()) {
                     QuantityRoomDTO quantityRoomDTO = (QuantityRoomDTO) serverResponse.getResultObj();
@@ -193,7 +200,8 @@ public class DesignDataService {
                     && ((house.getDecorationType() == 2 && worker.getWorkerType() == 2)
                     || (house.getDecorationType() != 2 && worker.getWorkerType() == 1))) ? 1 : 0;
             designDTO.setHistoryRecord(historyRecord);
-            if (house.getVisitState() != 3 && worker != null && worker.getId().equals(house.getMemberId())) {
+            if (house.getVisitState() != 3 && worker != null && house.getDesignerState() != 7
+                    && worker.getId().equals(house.getMemberId())) {
                 Example example = new Example(DesignBusinessOrder.class);
                 Example.Criteria criteria = example.createCriteria()
                         .andEqualTo(DesignBusinessOrder.DATA_STATUS, 0)
@@ -325,15 +333,15 @@ public class DesignDataService {
      * @param searchKey    业主手机号/房子名称
      */
     public ServerResponse getDesignList(HttpServletRequest request, PageDTO pageDTO, int designerType,
-                                        String searchKey,String workerKey,String userId) {
+                                        String searchKey, String workerKey, String userId) {
         String userID = request.getParameter(Constants.USERID);
 
-        int  flag= 0;
-        if(!CommonUtil.isEmpty(userId)){
+        int flag = 0;
+        if (!CommonUtil.isEmpty(userId)) {
             Member member = memberMapper.selectByPrimaryKey(userId);
-            if(member != null){
-                 //设计师
-                 flag= member.getWorkerType();
+            if (member != null) {
+                //设计师
+                flag = member.getWorkerType();
             }
         }
 
@@ -347,14 +355,14 @@ public class DesignDataService {
             //当类型小于0时，则查询移除的数据
             dataStatus = "1";
         }
-        List<DesignDTO> designDTOList = houseMapper.getDesignList(designerType, cityKey, searchKey,workerKey, dataStatus,flag,userId);
+        List<DesignDTO> designDTOList = houseMapper.getDesignList(designerType, cityKey, searchKey, workerKey, dataStatus, flag, userId);
         PageInfo pageResult = new PageInfo(designDTOList);
         for (DesignDTO designDTO : designDTOList) {
             HouseWorker houseWorker = houseWorkerMapper.getByWorkerTypeId(designDTO.getHouseId(), "1", 6);
-            designDTO.setHouseWorkerId(houseWorker==null?"":houseWorker.getId());
+            designDTO.setHouseWorkerId(houseWorker == null ? "" : houseWorker.getId());
             //查询销售名称跟手机号码
-            UserInfoDateDTO userInfoDTO =houseMapper.getUserList(designDTO.getMemberId());
-            if(userInfoDTO != null){
+            UserInfoDateDTO userInfoDTO = houseMapper.getUserList(designDTO.getMemberId());
+            if (userInfoDTO != null) {
                 designDTO.setUserMobile(userInfoDTO.getUserMobile());
                 designDTO.setUsername(userInfoDTO.getUsername());
             }
@@ -365,7 +373,7 @@ public class DesignDataService {
                     .andEqualTo(HouseRemark.HOUSE_ID, designDTO.getHouseId());
             example1.orderBy(HouseRemark.CREATE_DATE).desc();
             List<HouseRemark> storeList = houseRemarkMapper.selectByExample(example1);
-            if(storeList.size() > 0){
+            if (storeList.size() > 0) {
                 designDTO.setRemarkInfo(storeList.get(0).getRemarkInfo());
                 designDTO.setRemarkDate(storeList.get(0).getCreateDate());
             }
@@ -470,32 +478,32 @@ public class DesignDataService {
         return ServerResponse.createBySuccess("查询成功", pageResult);
     }
 
-    public ServerResponse getHouseStatistics(String cityId,String workerTypeId,PageDTO pageDTO,String startDate, String endDate) {
+    public ServerResponse getHouseStatistics(String cityId, String workerTypeId, PageDTO pageDTO, String startDate, String endDate) {
         if (!CommonUtil.isEmpty(startDate) && !CommonUtil.isEmpty(endDate)) {
             startDate = startDate + " " + "00:00:00";
             endDate = endDate + " " + "23:59:59";
         }
         //"抢单数","业主支付数","已上传精算数","确认精算数","进入施工数","提前结束数"
-        String[] fieldBudgetNames=new String[]{"grabOrders", "payment", "uploadActuarial", "confirmActuarial", "construction", "end"};
+        String[] fieldBudgetNames = new String[]{"grabOrders", "payment", "uploadActuarial", "confirmActuarial", "construction", "end"};
         //"抢单数","业主支付数","量房数","已上传平面图数","确认平面图数","已上传施工图数","确认施工图数","进入精算数","提前结束数"
-        String[] fieldDesignNames=new String[]{
+        String[] fieldDesignNames = new String[]{
                 "grabOrders", "payment", "measuringRoom", "uploadPlan", "confirmPlan", "uploadConstruction", "confirmConstruction", "sctuarialFigure", "end"};
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<Member> memberList = memberMapper.artisanList(cityId, null, workerTypeId, null, "2");
-        List<Map> memberMapList =new ArrayList<>();
+        List<Map> memberMapList = new ArrayList<>();
         PageInfo pageResult = new PageInfo(memberList);
         for (Member member : memberList) {
-            Map map= BeanUtils.beanToMap(member);
+            Map map = BeanUtils.beanToMap(member);
             //设计统计字段
-            if(!CommonUtil.isEmpty(workerTypeId)&&"1".equals(workerTypeId)){
+            if (!CommonUtil.isEmpty(workerTypeId) && "1".equals(workerTypeId)) {
                 for (int i = 0; i < fieldDesignNames.length; i++) {
-                    map.put(fieldDesignNames[i], memberMapper.getDesignStatisticsNum(member.getId(),startDate,endDate,(i+1)));
+                    map.put(fieldDesignNames[i], memberMapper.getDesignStatisticsNum(member.getId(), startDate, endDate, (i + 1)));
                 }
             }
             //精算统计字段
-            if(!CommonUtil.isEmpty(workerTypeId)&&"2".equals(workerTypeId)){
+            if (!CommonUtil.isEmpty(workerTypeId) && "2".equals(workerTypeId)) {
                 for (int i = 0; i < fieldBudgetNames.length; i++) {
-                    map.put(fieldBudgetNames[i], memberMapper.getBudgetStatisticsNum(member.getId(),startDate,endDate,(i+1)));
+                    map.put(fieldBudgetNames[i], memberMapper.getBudgetStatisticsNum(member.getId(), startDate, endDate, (i + 1)));
                 }
             }
             memberMapList.add(map);
@@ -506,23 +514,24 @@ public class DesignDataService {
 
     /**
      * 新增房子备注信息
+     *
      * @param houseRemark
      * @return
      */
-    public ServerResponse addHouseRemark(HouseRemark houseRemark,String userId){
+    public ServerResponse addHouseRemark(HouseRemark houseRemark, String userId) {
         try {
 
-            if(!CommonUtil.isEmpty(userId)){
-                if(!CommonUtil.isEmpty(houseRemark.getClient())){
+            if (!CommonUtil.isEmpty(userId)) {
+                if (!CommonUtil.isEmpty(houseRemark.getClient())) {
                     //查询中台操作人
                     MainUser mainUser = userMapper.selectByPrimaryKey(userId);
-                    if(mainUser != null){
+                    if (mainUser != null) {
                         houseRemark.setRemarkName(mainUser.getUsername());
                     }
-                }else{
+                } else {
                     //查询app操作人
                     Member member = memberMapper.selectByPrimaryKey(userId);
-                    if(member != null){
+                    if (member != null) {
                         houseRemark.setRemarkName(member.getNickName());
                     }
                 }
@@ -541,11 +550,12 @@ public class DesignDataService {
 
     /**
      * 查询房子备注信息
+     *
      * @param remarkType
      * @param houseId
      * @return
      */
-    public ServerResponse queryHouseRemark(PageDTO pageDTO,String remarkType, String houseId){
+    public ServerResponse queryHouseRemark(PageDTO pageDTO, String remarkType, String houseId) {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         Example example = new Example(HouseRemark.class);
         example.createCriteria().andEqualTo(HouseRemark.REMARK_TYPE, remarkType)
@@ -561,6 +571,7 @@ public class DesignDataService {
 
     /**
      * 一次获取所有设计阶段历史记录
+     *
      * @param houseId houseId
      * @return ServerResponse
      */
@@ -572,7 +583,7 @@ public class DesignDataService {
         //房子信息list
         quantityInfoDTO.setRowList(storeList);
 
-        if(storeList != null){
+        if (storeList != null) {
             String str = storeList.getResidential() + storeList.getBuilding() + "栋" +
                     storeList.getUnit() + "单元" + storeList.getNumber() + "号";
             quantityInfoDTO.setArrHouseName(str);
@@ -580,8 +591,8 @@ public class DesignDataService {
             quantityInfoDTO.setMobile(storeList.getMobile());
 
             //查询销售名称跟手机号码
-            UserInfoDateDTO userInfoDTO =houseMapper.getUserList(storeList.getMemberId());
-            if(userInfoDTO != null){
+            UserInfoDateDTO userInfoDTO = houseMapper.getUserList(storeList.getMemberId());
+            if (userInfoDTO != null) {
                 quantityInfoDTO.setUserMobile(userInfoDTO.getMobile());
                 quantityInfoDTO.setUsername(userInfoDTO.getUsername());
             }
@@ -595,13 +606,13 @@ public class DesignDataService {
         //查询抢单时间
         List<HouseWorker> houseWorkers = houseWorkerMapper.selectByExample(example);
 
-        List<Map<String,Object>> Lists = new ArrayList<>();
+        List<Map<String, Object>> Lists = new ArrayList<>();
 
-        Map<String,Object> map = new HashMap();
-        if(houseWorkers.size() > 0){
-            map.put("createDate",houseWorkers.get(0).getCreateDate());
-            map.put("type","抢单");
-            map.put("name",storeList.getName());
+        Map<String, Object> map = new HashMap();
+        if (houseWorkers.size() > 0) {
+            map.put("createDate", houseWorkers.get(0).getCreateDate());
+            map.put("type", "抢单");
+            map.put("name", storeList.getName());
             Lists.add(map);
         }
 
@@ -610,43 +621,43 @@ public class DesignDataService {
         example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, houseId)
                 .andEqualTo(HouseFlow.WORKER_TYPE_ID, 1);
         List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example);
-        Date dd =null;
-        if(houseFlows.size() > 0 ){
+        Date dd = null;
+        if (houseFlows.size() > 0) {
             map = new HashMap();
             dd = houseMapper.getModifyDate(houseFlows.get(0).getId());
-            map.put("createDate",dd);
-            map.put("type","支付");
-            map.put("name",storeList.getOperatorName());
+            map.put("createDate", dd);
+            map.put("type", "支付");
+            map.put("name", storeList.getOperatorName());
             Lists.add(map);
         }
         quantityInfoDTO.setListFour(Lists);
 
 
         //获取量房信息
-        PageInfo oneList = getInfo(houseId,0);
+        PageInfo oneList = getInfo(houseId, 0);
         //获取平面图信息
-        PageInfo twoList = getInfo(houseId,1);
+        PageInfo twoList = getInfo(houseId, 1);
         //获取施工图信息
-        PageInfo threeList = getInfo(houseId,2);
+        PageInfo threeList = getInfo(houseId, 2);
         quantityInfoDTO.setTypeOneList(oneList);
         quantityInfoDTO.setTypeTwoList(twoList);
         quantityInfoDTO.setTypeThreeList(threeList);
 
 
         quantityInfoDTO.setNumberType(0);
-        if(oneList.getSize()>0){
+        if (oneList.getSize() > 0) {
             quantityInfoDTO.setNumberType(2);
         }
-        if(twoList.getSize()>0){
+        if (twoList.getSize() > 0) {
             quantityInfoDTO.setNumberType(3);
         }
-        if(threeList.getSize() > 0){
+        if (threeList.getSize() > 0) {
             quantityInfoDTO.setNumberType(4);
         }
 
         List<QuantityRoomDTO> ddd = threeList.getList();
-        for (QuantityRoomDTO aa:ddd) {
-            if(aa.getFlag() == 0){
+        for (QuantityRoomDTO aa : ddd) {
+            if (aa.getFlag() == 0) {
                 quantityInfoDTO.setNumberType(5);
             }
         }
@@ -654,23 +665,23 @@ public class DesignDataService {
         return ServerResponse.createBySuccess("查询成功", quantityInfoDTO);
     }
 
-    public PageInfo getInfo(String houseId, int type){
+    public PageInfo getInfo(String houseId, int type) {
         List<QuantityRoomDTO> quantityRoomDTOS = quantityRoomMapper.getQuantityRoomList(houseId, type);
-        if(type == 0){
-            for (QuantityRoomDTO ddd:quantityRoomDTOS) {
+        if (type == 0) {
+            for (QuantityRoomDTO ddd : quantityRoomDTOS) {
                 ddd.setUpOName("上传量房");
             }
-        }else if(type == 1){
-            for (QuantityRoomDTO ddd:quantityRoomDTOS) {
-                if(ddd.getFlag() == 0){
+        } else if (type == 1) {
+            for (QuantityRoomDTO ddd : quantityRoomDTOS) {
+                if (ddd.getFlag() == 0) {
                     ddd.setUpTName("审核通过");
-                }else if(ddd.getFlag() == 1){
+                } else if (ddd.getFlag() == 1) {
                     ddd.setUpTName("审核未通过");
-                }else{
+                } else {
                     ddd.setUpTName("上传平面图");
                 }
             }
-        }else if(type == 2) {
+        } else if (type == 2) {
             for (QuantityRoomDTO ddd : quantityRoomDTOS) {
                 if (ddd.getFlag() == 0) {
                     ddd.setUpFName("审核通过");
@@ -680,7 +691,7 @@ public class DesignDataService {
                     ddd.setUpFName("上传施工图");
                 }
             }
-        }else if(type == 3){
+        } else if (type == 3) {
             for (QuantityRoomDTO ddd : quantityRoomDTOS) {
                 if (ddd.getFlag() == 0) {
                     ddd.setUpFaName("精算通过");
@@ -719,6 +730,7 @@ public class DesignDataService {
 
     /**
      * 一次获取所有 精算阶段 历史记录
+     *
      * @param houseId houseId
      * @return ServerResponse
      */
@@ -729,7 +741,7 @@ public class DesignDataService {
         //房子信息list
         quantityInfoDTO.setRowList(storeList);
 
-        if(storeList != null){
+        if (storeList != null) {
             String str = storeList.getResidential() + storeList.getBuilding() + "栋" +
                     storeList.getUnit() + "单元" + storeList.getNumber() + "号";
             quantityInfoDTO.setArrHouseName(str);
@@ -737,8 +749,8 @@ public class DesignDataService {
             quantityInfoDTO.setMobile(storeList.getMobile());
 
             //查询销售名称跟手机号码
-            UserInfoDateDTO userInfoDTO =houseMapper.getUserList(storeList.getMemberId());
-            if(userInfoDTO != null){
+            UserInfoDateDTO userInfoDTO = houseMapper.getUserList(storeList.getMemberId());
+            if (userInfoDTO != null) {
                 quantityInfoDTO.setUserMobile(userInfoDTO.getMobile());
                 quantityInfoDTO.setUsername(userInfoDTO.getUsername());
             }
@@ -750,12 +762,12 @@ public class DesignDataService {
         example.orderBy(HouseWorker.CREATE_DATE).desc();
         //查询精算抢单信息
         List<HouseWorker> houseWorkers = houseWorkerMapper.selectByExample(example);
-        List<Map<String,Object>> Lists = new ArrayList<>();
-        Map<String,Object> map = new HashMap();
-        if(houseWorkers.size() > 0){
-            map.put("createDate",houseWorkers.get(0).getCreateDate());
-            map.put("type","抢单");
-            map.put("name",storeList.getName());
+        List<Map<String, Object>> Lists = new ArrayList<>();
+        Map<String, Object> map = new HashMap();
+        if (houseWorkers.size() > 0) {
+            map.put("createDate", houseWorkers.get(0).getCreateDate());
+            map.put("type", "抢单");
+            map.put("name", storeList.getName());
             Lists.add(map);
         }
 
@@ -764,36 +776,36 @@ public class DesignDataService {
         example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, houseId)
                 .andEqualTo(HouseFlow.WORKER_TYPE_ID, 2);
         List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example);
-        Date dd =null;
-        if(houseFlows.size() > 0 ){
+        Date dd = null;
+        if (houseFlows.size() > 0) {
             map = new HashMap();
             dd = houseMapper.getModifyDate(houseFlows.get(0).getId());
-            map.put("createDate",dd);
-            map.put("type","支付");
-            map.put("name",storeList.getOperatorName());
+            map.put("createDate", dd);
+            map.put("type", "支付");
+            map.put("name", storeList.getOperatorName());
             Lists.add(map);
         }
 
         quantityInfoDTO.setListFour(Lists);
 
         //获取精算信息
-        PageInfo oneList = getJInfo(houseId,2);
+        PageInfo oneList = getJInfo(houseId, 2);
         quantityInfoDTO.setJinList(oneList);
 
         quantityInfoDTO.setNumberType(0);
-        if(Lists.size() > 0){
+        if (Lists.size() > 0) {
             quantityInfoDTO.setNumberType(2);
         }
-        if(oneList.getSize()>0){
+        if (oneList.getSize() > 0) {
             quantityInfoDTO.setNumberType(3);
         }
 
         return ServerResponse.createBySuccess("查询成功", quantityInfoDTO);
     }
 
-    public PageInfo getJInfo(String houseId, int type){
+    public PageInfo getJInfo(String houseId, int type) {
         List<QuantityRoomDTO> quantityRoomDTOS = quantityRoomMapper.getQuantityRoomList(houseId, type);
-        if(type == 2){
+        if (type == 2) {
             for (QuantityRoomDTO ddd : quantityRoomDTOS) {
                 if (ddd.getFlag() == 0) {
                     ddd.setUpFaName("精算通过");
