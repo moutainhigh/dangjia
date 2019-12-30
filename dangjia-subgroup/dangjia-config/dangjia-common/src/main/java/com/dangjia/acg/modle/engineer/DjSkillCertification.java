@@ -24,14 +24,14 @@ import javax.persistence.Table;
 @ApiModel(description = "技能认证")
 public class DjSkillCertification extends BaseEntity {
 
-    @Column(name = "worker_id")
-    @Desc(value = "工匠id")
-    @ApiModelProperty("工匠id")
-    private String workerId;
+    @Column(name = "skill_certification_id")
+    @Desc(value = "工匠id/工种id")
+    @ApiModelProperty("工匠id/工种id")
+    private String skillCertificationId;
 
     @Column(name = "prod_template_id")
-    @Desc(value = "人工商品id")
-    @ApiModelProperty("人工商品id")
+    @Desc(value = "商品id")
+    @ApiModelProperty("商品id")
     private String prodTemplateId;
 
     @Column(name = "product_sn")
@@ -43,4 +43,14 @@ public class DjSkillCertification extends BaseEntity {
     @Desc(value = "商品名称")
     @ApiModelProperty("商品名称")
     private String productName;
+
+    @Column(name = "type")
+    @Desc(value = "类型 1:工匠 2：工种")
+    @ApiModelProperty("类型 1:工匠 2：工种")
+    private Integer type;
+
+    @Column(name = "product_type")
+    @Desc(value = "商品类型 类型0：实物商品；1：服务商品；2：人工商品；3：体验；4：增值；5：维保")
+    @ApiModelProperty("商品类型 类型0：实物商品；1：服务商品；2：人工商品；3：体验；4：增值；5：维保")
+    private Integer productType;
 }

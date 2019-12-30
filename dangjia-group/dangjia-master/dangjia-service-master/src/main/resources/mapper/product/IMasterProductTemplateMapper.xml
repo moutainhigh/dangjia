@@ -7,11 +7,13 @@
         SELECT
             a.product_sn productSn,
             a.name,
-            a.id
+            a.id,
+            c.type
         FROM
-            dj_basics_product_template a
-        WHERE
-            1 = 1
+            dj_basics_product_template a,
+            dj_basics_goods c
+        WHERE a.goods_id=c.id
+        AND c.type IN(2,3,5)
         <if test="null!=workerTypeId and ''!=workerTypeId">
             AND a.worker_type_id=#{workerTypeId}
         </if>
@@ -27,8 +29,8 @@
             FROM
                 dj_skill_certification b
             WHERE
-                a.id = b.product_id
-            AND b.worker_id=#{workerId}
+                a.id = b.prod_template_id
+            AND b.skill_certification_id=#{skillCertificationId}
         )
     </select>
 </mapper>

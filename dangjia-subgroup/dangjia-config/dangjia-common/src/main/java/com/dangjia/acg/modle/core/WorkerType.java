@@ -65,4 +65,9 @@ public class WorkerType extends BaseEntity {
 	@Desc(value = "颜色")
 	@ApiModelProperty("颜色")
 	private String color;
+
+	@Column(name = "skill_pack_name")
+	@Desc(value = "技能包名称")
+	@ApiModelProperty("技能包名称")
+	private String skillPackName;
 }

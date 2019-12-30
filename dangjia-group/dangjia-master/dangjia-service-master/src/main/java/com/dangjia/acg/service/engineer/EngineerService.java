@@ -600,8 +600,9 @@ public class EngineerService {
         map.put("praiseRate", worker.getPraiseRate());//好评率
         map.put("volume", worker.getVolume());//成交量
         Example example=new Example(DjSkillCertification.class);
-        example.createCriteria().andEqualTo(DjSkillCertification.WORKER_ID,workerId)
-                .andEqualTo(DjSkillCertification.DATA_STATUS,0);
+        example.createCriteria().andEqualTo(DjSkillCertification.SKILL_CERTIFICATION_ID,workerId)
+                .andEqualTo(DjSkillCertification.DATA_STATUS,0)
+                .andEqualTo(DjSkillCertification.TYPE,1);
         Integer skillCertification = djSkillCertificationMapper.selectCountByExample(example);
         map.put("skillCertification",skillCertification>0?1:0);//是否技能认证
         return ServerResponse.createBySuccess("查询成功", map);

@@ -2,8 +2,10 @@ package com.dangjia.acg.api.web.engineer;
 
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.core.WorkerType;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,17 +25,31 @@ public interface DjSkillCertificationAPI {
     ServerResponse querySkillsCertificationWaitingList(@RequestParam("pageDTO") PageDTO pageDTO,
                                                        @RequestParam("workerTypeId") Integer workerTypeId,
                                                        @RequestParam("searchKey") String searchKey,
-                                                       @RequestParam("workerId") String workerId);
+                                                       @RequestParam("skillCertificationId") String skillCertificationId);
 
     @PostMapping(value = "web/engineer/querySkillCertificationSelectedList")
     @ApiOperation(value = "技能认证已选列表", notes = "技能认证已选列表")
     ServerResponse querySkillCertificationSelectedList(@RequestParam("pageDTO") PageDTO pageDTO,
                                                        @RequestParam("searchKey") String searchKey,
-                                                       @RequestParam("workerId") String workerId);
+                                                       @RequestParam("skillCertificationId") String skillCertificationId,
+                                                       @RequestParam("type") Integer type);
 
     @PostMapping(value = "web/engineer/insertSkillCertification")
-    @ApiOperation(value = "技能认证", notes = "技能认证")
+    @ApiOperation(value = "工匠技能认证", notes = "技能认证")
     ServerResponse insertSkillCertification(@RequestParam("jsonStr") String jsonStr,
                                             @RequestParam("workerId") String workerId);
+
+    @PostMapping(value = "web/engineer/queryWorkerTypeSkillPackConfigurationList")
+    @ApiOperation(value = "工种技能包配置列表", notes = "工种技能包配置列表")
+    ServerResponse queryWorkerTypeSkillPackConfigurationList();
+
+    @PostMapping(value = "web/engineer/queryWorkerTypeSkillPackConfigurationDetail")
+    @ApiOperation(value = "工种技能包配置详情", notes = "工种技能包配置详情")
+    ServerResponse queryWorkerTypeSkillPackConfigurationDetail(@RequestParam("workerTypeId") Integer workerTypeId);
+
+    @PostMapping(value = "web/engineer/insertWorkerTypeSkillPackConfiguration")
+    @ApiOperation(value = "工种技能包配置", notes = "工种技能包配置")
+    ServerResponse insertWorkerTypeSkillPackConfiguration(@RequestParam("jsonStr") String jsonStr,
+                                                          @RequestParam("workerType") WorkerType workerType);
 
 }

@@ -17,7 +17,7 @@ import java.util.List;
 public interface IMasterProductTemplateMapper extends Mapper<DjBasicsProductTemplate> {
 
     List<DjBasicsProductTemplate> querySkillsCertificationWaitingList(@Param("workerTypeId") Integer workerTypeId,
-                                                                      @Param("workerId") String workerId,
+                                                                      @Param("skillCertificationId") String skillCertificationId,
                                                                       @Param("searchKey") String searchKey);
 
 }
