@@ -177,13 +177,18 @@ public class DjSkillCertificationService {
     public ServerResponse insertWorkerTypeSkillPackConfiguration(String jsonStr, WorkerType workerType) {
         try {
             WorkerType oldWorkerType = iWorkerTypeMapper.selectByPrimaryKey(workerType.getId());
-            if(!workerType.getName().equals(oldWorkerType.getName())){
-                Example example = new Example(WorkerType.class);
-                example.createCriteria().andEqualTo(WorkerType.NAME, workerType.getName())
-                        .andEqualTo(WorkerType.DATA_STATUS,0);
-                if (iWorkerTypeMapper.selectByExample(example).size() > 0) {
-                    return ServerResponse.createByErrorMessage("工种已存在");
+            if(oldWorkerType!=null) {
+                if (!workerType.getName().equals(oldWorkerType.getName())) {
+                    Example example = new Example(WorkerType.class);
+                    example.createCriteria().andEqualTo(WorkerType.NAME, workerType.getName())
+                            .andEqualTo(WorkerType.DATA_STATUS, 0);
+                    if (iWorkerTypeMapper.selectByExample(example).size() > 0) {
+                        return ServerResponse.createByErrorMessage("工种已存在");
+                    }
                 }
+                iWorkerTypeMapper.updateByPrimaryKeySelective(workerType);
+            }else{
+                iWorkerTypeMapper.insert(workerType);
             }
             JSONArray jsonArray = JSONArray.parseArray(jsonStr);
             jsonArray.forEach(str ->{

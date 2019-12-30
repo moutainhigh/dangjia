@@ -425,6 +425,7 @@ public class DjSupplierServices {
             return ServerResponse.createBySuccess("查询成功", map);
         } catch (Exception e) {
             e.printStackTrace();
+            logger.info("查询失败",e);
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
