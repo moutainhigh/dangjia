@@ -11,8 +11,10 @@ import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.basics.*;
+import com.dangjia.acg.mapper.product.IBasicsProductTemplateMapper;
 import com.dangjia.acg.modle.basics.*;
 import com.dangjia.acg.modle.product.BasicsGoods;
+import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -36,7 +38,7 @@ public class GoodsGroupService {
     @Autowired
     private IGroupLinkMapper iGroupLinkMapper;
     @Autowired
-    private IProductMapper iProductMapper;
+    private IBasicsProductTemplateMapper iProductMapper;
     @Autowired
     private IGoodsMapper iGoodsMapper;
     @Autowired
@@ -62,7 +64,7 @@ public class GoodsGroupService {
                 groupLink.setCityId(goodsGroup.getCityId());
                 groupLink.setGroupId(goodsGroupId);//关联组id
                 groupLink.setGroupName(goodsGroup.getName());//关联组名称
-                Product product = iProductMapper.getById(obj.getString("productId"));//查询货品
+                DjBasicsProductTemplate product = iProductMapper.getById(obj.getString("productId"));//查询货品
                 if (product == null) {
                     continue;
                 }
@@ -174,8 +176,8 @@ public class GoodsGroupService {
             List<Map<String, Object>> gMapList = new ArrayList<>();
             for (BasicsGoods goods : goodsList) {
                 List<Map<String, Object>> mapList = new ArrayList<>();
-                List<Product> productList = iProductMapper.queryByGoodsId(goods.getId(),cityId);
-                for (Product p : productList) {
+                List<DjBasicsProductTemplate> productList = iProductMapper.queryByGoodsId(goods.getId());
+                for (DjBasicsProductTemplate p : productList) {
 //                    LOG.info("p :" + p);
                     if (p.getType() == 0)//去除禁用的
                         continue;
@@ -269,7 +271,7 @@ public class GoodsGroupService {
             if (StringUtils.isNotBlank(addProductIds)) {
                 addProductIdsArr = addProductIds.split(",");
                 for (String productId : addProductIdsArr) {
-                    Product product = iProductMapper.selectByPrimaryKey(productId);//根据商品id查询商品对象
+                    DjBasicsProductTemplate product = iProductMapper.selectByPrimaryKey(productId);//根据商品id查询商品对象
                     if (product == null)
                         return ServerResponse.createByErrorMessage("该货品不存在");
                     GroupLink groupLink = new GroupLink();
