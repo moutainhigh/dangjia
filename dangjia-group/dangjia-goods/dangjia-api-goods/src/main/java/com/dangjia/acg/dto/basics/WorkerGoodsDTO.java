@@ -25,6 +25,10 @@ public class WorkerGoodsDTO {
     private String id;
     @ApiModelProperty("name")
     private String name;
+    @ApiModelProperty("productName")
+    private String productName;
+    @ApiModelProperty("productId")
+    private String productId;
 
     @ApiModelProperty("storefrontId")
     private String storefrontId;//
