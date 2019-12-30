@@ -296,7 +296,7 @@ public class DjBasicsGoodsService {
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();
-            return ServerResponse.createByErrorMessage("查询失败");
+            return ServerResponse.createByErrorMessage("查询异常");
         }
     }
 
