@@ -112,6 +112,8 @@ public class WorkerGoodsService {
             workerGoodsDTO.setCreateDate(DateUtils.timedate(String.valueOf(workerGoodsDTO.getCreateDate())));
             workerGoodsDTO.setModifyDate(DateUtils.timedate(String.valueOf(workerGoodsDTO.getModifyDate())));
             workerGoodsDTO.setWorkerTypeName(workerTypeName);
+            workerGoodsDTO.setProductName(workerGoodsDTO.getName());
+            workerGoodsDTO.setProductId(workerGoodsDTO.getId());
             workerGoodsDTO.setShopCount(shopCount);
         } else {
             workerGoodsDTO.setWorkerGoodsSn(workerGoodsSn);
