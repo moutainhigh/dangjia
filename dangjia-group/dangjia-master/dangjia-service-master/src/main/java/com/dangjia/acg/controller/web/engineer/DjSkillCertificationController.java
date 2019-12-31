@@ -24,20 +24,20 @@ public class DjSkillCertificationController implements DjSkillCertificationAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse querySkillsCertificationWaitingList(PageDTO pageDTO,Integer workerTypeId, String searchKey, String skillCertificationId) {
-        return djSkillCertificationService.querySkillsCertificationWaitingList(pageDTO,workerTypeId,searchKey,skillCertificationId);
+    public ServerResponse querySkillsCertificationWaitingList(PageDTO pageDTO,Integer workerTypeId, String searchKey, String skillCertificationId, String cityId) {
+        return djSkillCertificationService.querySkillsCertificationWaitingList(pageDTO,workerTypeId,searchKey,skillCertificationId,cityId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse querySkillCertificationSelectedList(PageDTO pageDTO, String searchKey, String skillCertificationId, Integer type) {
-        return djSkillCertificationService.querySkillCertificationSelectedList(pageDTO,searchKey,skillCertificationId,type);
+    public ServerResponse querySkillCertificationSelectedList(PageDTO pageDTO, String searchKey, String skillCertificationId, Integer type, String cityId) {
+        return djSkillCertificationService.querySkillCertificationSelectedList(pageDTO,searchKey,skillCertificationId,type,cityId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse insertSkillCertification(String jsonStr, String skillCertificationId) {
-        return djSkillCertificationService.insertSkillCertification(jsonStr,skillCertificationId);
+    public ServerResponse insertSkillCertification(String jsonStr, String skillCertificationId, String cityId) {
+        return djSkillCertificationService.insertSkillCertification(jsonStr,skillCertificationId,cityId);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class DjSkillCertificationController implements DjSkillCertificationAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse insertWorkerTypeSkillPackConfiguration(String jsonStr, WorkerType workerType) {
-        return djSkillCertificationService.insertWorkerTypeSkillPackConfiguration(jsonStr, workerType);
+    public ServerResponse insertWorkerTypeSkillPackConfiguration(String jsonStr, WorkerType workerType, String cityId) {
+        return djSkillCertificationService.insertWorkerTypeSkillPackConfiguration(jsonStr, workerType, cityId);
     }
 }

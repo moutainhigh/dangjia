@@ -123,20 +123,21 @@ public class CartService {
                     cart.setUnitName(djBasicsProductTemplate.getUnitName());
                     cart.setCategoryId(djBasicsProductTemplate.getCategoryId());
                     cart.setCityId(house.getCityId());
-                }else {//商品库商品
-                    DjBasicsProductTemplate djBasicsProductTemplate=iMasterProductTemplateMapper.selectByPrimaryKey(cart.getProductId());
-                    BasicsGoods basicsGoods=iMasterBasicsGoodsMapper.selectByPrimaryKey(djBasicsProductTemplate.getGoodsId());
-                    cart.setProductSn(djBasicsProductTemplate.getProductSn());
-                    cart.setProductName(djBasicsProductTemplate.getName());
-                    cart.setMemberId(operator.getId());
-                    cart.setPrice(djBasicsProductTemplate.getPrice());
-                    cart.setWorkerTypeId(operator.getWorkerTypeId());
-                    cart.setProductType(basicsGoods.getType());
-                    cart.setUnitName(djBasicsProductTemplate.getUnitName());
-                    cart.setCategoryId(djBasicsProductTemplate.getCategoryId());
-                    cart.setCityId(house.getCityId());
-
                 }
+//                  else {//商品库商品
+//                    DjBasicsProductTemplate djBasicsProductTemplate=iMasterProductTemplateMapper.selectByPrimaryKey(cart.getProductId());
+//                    BasicsGoods basicsGoods=iMasterBasicsGoodsMapper.selectByPrimaryKey(djBasicsProductTemplate.getGoodsId());
+//                    cart.setProductSn(djBasicsProductTemplate.getProductSn());
+//                    cart.setProductName(djBasicsProductTemplate.getName());
+//                    cart.setMemberId(operator.getId());
+//                    cart.setPrice(djBasicsProductTemplate.getPrice());
+//                    cart.setWorkerTypeId(operator.getWorkerTypeId());
+//                    cart.setProductType(basicsGoods.getType());
+//                    cart.setUnitName(djBasicsProductTemplate.getUnitName());
+//                    cart.setCategoryId(djBasicsProductTemplate.getCategoryId());
+//                    cart.setCityId(house.getCityId());
+//
+//                }
                 cartMapper.insert(cart);
             }
         }

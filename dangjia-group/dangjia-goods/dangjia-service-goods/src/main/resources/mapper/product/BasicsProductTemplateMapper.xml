@@ -442,7 +442,7 @@
         dj_basics_product_template p
     INNER JOIN dj_basics_goods g ON p.goods_id = g.id
     INNER JOIN dj_basics_goods_category ca ON ca.id = p.category_id
-    INNER JOIN dj_dj_basics_storefront_product sp ON p.id=sp.prod_template_id
+    INNER JOIN dj_basics_storefront_product sp ON p.id=sp.prod_template_id
     <if test="name!=null and name!=''">
         INNER JOIN dj_basics_goods_category tca ON tca.id = ca.parent_top
     </if>

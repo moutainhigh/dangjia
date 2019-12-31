@@ -59,7 +59,7 @@
             and (m.supplier_name like CONCAT('%',#{searchKey},'%'))
         </if>
         <if test="storefrontId!=null and storefrontId!=''">
-            and (m.storefront_id like CONCAT('%',#{storefrontId},'%'))
+            and m.storefront_id = #{storefrontId}
         </if>
         GROUP BY
         m.supplier_id
@@ -106,7 +106,7 @@
             and (s.supplier_name like CONCAT('%',#{searchKey},'%'))
         </if>
         <if test="storefrontId!=null and storefrontId!=''">
-            and (m.storefront_id like CONCAT('%',#{storefrontId},'%'))
+            and s.storefront_id = #{storefrontId}
         </if>
         GROUP BY
         s.supplier_id
