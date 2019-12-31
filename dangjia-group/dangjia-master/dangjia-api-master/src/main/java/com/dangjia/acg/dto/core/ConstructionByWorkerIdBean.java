@@ -48,6 +48,13 @@ public class ConstructionByWorkerIdBean {
     private String houseId;
     private Integer designerOk;
 
+    private Integer totalNodeNumber;//总结点数
+    private Integer completedNodeNumber;//已完成节点
+
+    private Integer trialNumber;//审核次数
+    private Integer node;//工序申请节点  0-工匠审核 1-大管家审核通过 2-业主审核通过
+    private Integer retentionType;//0-需缴纳质保金 1-不缴纳质保金
+
     @Data
     public static class BigListBean {
         private String name;

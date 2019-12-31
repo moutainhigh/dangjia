@@ -288,7 +288,7 @@ public class DjBasicsGoodsService {
                         }
                     }
                 }
-                p.setNewValueNameArr(strNewValueNameArr);
+                p.setNewValueNameArr(strNewValueNameArr.replaceAll(",", " "));
                 //初始化标签名称
                 if (!StringUtils.isNotBlank(p.getLabelId())) {
                     p.setLabelId("");

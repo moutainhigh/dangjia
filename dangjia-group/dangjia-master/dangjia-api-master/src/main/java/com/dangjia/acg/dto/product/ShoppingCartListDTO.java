@@ -56,8 +56,8 @@ public class ShoppingCartListDTO {
     @ApiModelProperty("分类id")
     private String categoryId;
 
-    @Desc(value = "产品类型:0：材料；1：包工包料 2:人工")
-    @ApiModelProperty("产品类型:0：材料；1：包工包料 2:人工")
+    @Desc(value = "产品类型:0：材料；1：服务；2：人工；3：体验；4：增值；5：维保")
+    @ApiModelProperty("产品类型:0：材料；1：服务；2：人工；3：体验；4：增值；5：维保")
     private Integer productType;
 
     private String isReservationDeliver;//是否业主预约发货(1是，0否)

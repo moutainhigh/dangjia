@@ -193,12 +193,12 @@ public interface RefundAfterSalesAPI {
                                            @RequestParam("taskId") String taskId);
 
     @PostMapping("/app/refund/ownerAudit/passAuditInfoByTaskId")
-    @ApiOperation(value = "待审核的订单--审核通过", notes = "待审核的订单--审核通过")
+    @ApiOperation(value = "待业主审核的补人人订单--审核通过", notes = "待业主审核的补人人订单--审核通过")
     ServerResponse passAuditInfoByTaskId(@RequestParam("cityId") String cityId,
                                          @RequestParam("taskId") String taskId);
 
     @PostMapping("/app/refund/ownerAudit/failAuditInfoByTaskId")
-    @ApiOperation(value = "待审核的订单--审核不通过", notes = "待审核的订单--审核不通过")
+    @ApiOperation(value = "待业主审核的补人人订单--审核不通过", notes = "待业主审核的补人人订单--审核不通过")
     ServerResponse failAuditInfoByTaskId(@RequestParam("cityId") String cityId,
                                          @RequestParam("taskId") String taskId);
 

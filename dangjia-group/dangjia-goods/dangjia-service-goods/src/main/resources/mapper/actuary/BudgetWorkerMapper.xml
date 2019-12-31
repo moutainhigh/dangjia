@@ -123,7 +123,7 @@
 		    <include refid="new_columns"/>
 		FROM dj_actuary_budget_material
 		WHERE product_type='2'
-		and worker_goods_id=#{workerGoodsId}
+		and product_id=#{workerGoodsId}
 		and
 			house_id=#{houseId}
 	</select>

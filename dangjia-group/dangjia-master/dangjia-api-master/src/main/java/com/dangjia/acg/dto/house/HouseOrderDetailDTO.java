@@ -28,5 +28,7 @@ public class HouseOrderDetailDTO {
     private String unitName;//单位名称
     private String orderNumber;//订单编号
     private String orderStatus;//订单状态
+    private Integer totalNodeNumber;//总结点数
+    private Integer completedNodeNumber;//已完成节点
 
 }

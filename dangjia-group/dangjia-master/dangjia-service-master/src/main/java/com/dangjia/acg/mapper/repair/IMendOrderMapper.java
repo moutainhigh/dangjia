@@ -1,5 +1,6 @@
 package com.dangjia.acg.mapper.repair;
 
+import com.dangjia.acg.dto.repair.SurplusMaterialDTO;
 import com.dangjia.acg.modle.repair.MendOrder;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -80,6 +81,8 @@ public interface IMendOrderMapper extends Mapper<MendOrder>{
             @Param("likeAddress") String likeAddress);
 
 
+    List<SurplusMaterialDTO> querySurplusMaterial(@Param("data") String data);
 
+    List<SurplusMaterialDTO> queryTrialRetreatMaterial(@Param("data") String data);
 
 }

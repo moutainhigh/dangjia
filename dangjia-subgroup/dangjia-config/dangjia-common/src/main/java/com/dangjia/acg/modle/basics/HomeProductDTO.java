@@ -16,6 +16,6 @@ public class HomeProductDTO {
     private Double price;//销售价
     private String unitName;//单位
     private Integer type;//0:货品，1：人工商品
-    private Integer productType;//0:材料；1：包工包料
+    private Integer productType;//0：材料；1：服务；2：人工；3：体验；4：增值；5：维保
     private String name;//名称
 }

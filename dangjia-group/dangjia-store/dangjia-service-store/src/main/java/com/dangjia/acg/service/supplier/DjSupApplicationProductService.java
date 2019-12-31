@@ -130,6 +130,7 @@ public class DjSupApplicationProductService {
      */
     public ServerResponse queryHaveGoods(String supId, String shopId, String applicationStatus, PageDTO pageDTO, String keyWord, String userId, String cityId) {
         try {
+            logger.info("userid==========="+userId);
             Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
             if (storefront == null) {
                 return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");

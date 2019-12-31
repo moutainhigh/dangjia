@@ -51,7 +51,7 @@
             IFNULL(bsm.create_date,'')  as createDate,
             IFNULL(bsm.worker_type_id,'') as workerTypeId,
             IFNULL(dm.name,'') as name,
-            IFNULL(dm.head) as head,
+             IFNULL(dm.head,'') as head,
             '0' as isSelfCreate
             from dj_basics_site_memo_reminder smr
             inner join  dj_basics_site_memo  bsm on smr.dj_basics_site_memo_id=bsm.id
