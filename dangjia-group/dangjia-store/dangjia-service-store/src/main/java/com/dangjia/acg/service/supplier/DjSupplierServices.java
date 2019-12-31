@@ -418,6 +418,9 @@ public class DjSupplierServices {
     public ServerResponse myWallet(String userId, String cityId) {
         try {
             DjSupplier djSupplier = this.querySingleDjSupplier(userId, cityId);
+            if(djSupplier==null){
+                return ServerResponse.createByErrorMessage("请先添加供应商信息");
+            }
             Map<String, Double> map = new HashMap<>();
             map.put("totalAccount", CommonUtil.isEmpty(djSupplier.getTotalAccount())?0:djSupplier.getTotalAccount());
             map.put("withdrawalAmount", CommonUtil.isEmpty(djSupplier.getSurplusMoney())?0:djSupplier.getSurplusMoney());
@@ -425,6 +428,7 @@ public class DjSupplierServices {
             return ServerResponse.createBySuccess("查询成功", map);
         } catch (Exception e) {
             e.printStackTrace();
+            logger.info("查询失败",e);
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }

@@ -607,12 +607,21 @@ public class CommonUtil {
       case "RA_019":
         stateName="退人工关闭";
         break;
+      case "RA_022":
+        stateName="补人工关闭";
+        break;
       case "RA_015":
       case "RA_016":
         stateName="工匠审核中";
         break;
+      case "RA_021":
+        stateName="业主审核中";
+        break;
       case "RA_018":
         stateName="退人工成功";
+        break;
+      case "RA_023":
+        stateName="补人工成功";
         break;
       default:
         break;
@@ -620,9 +629,13 @@ public class CommonUtil {
     return stateName;
   }
 
-  public static String getChangeStateName(String state){
-    //状态：0管家处理中,1管家取消,2管家通过(补:业主审核中,退:工匠审核中),3管家重新提交数量,4补人工支付完成,5待业主支付,6退人工完成,7已撤回
+  public static String getChangeStateName(String state,String type){
+    //状态：0管家处理中,1管家取消,2管家通过(补:业主审核中,退:工匠审核中),3管家重新提交数量,4补人工支付完成,5待业主支付,6退人工完成,7已撤回,8
     String stateName="大管家审核中";
+    String workerName="工匠";
+    if("1".equals(type)){
+      workerName="业主";
+    }
     switch (state){
       case "0" :
         stateName="大管家审核中";
@@ -631,8 +644,11 @@ public class CommonUtil {
       case "7":
         stateName="退人工关闭";
         break;
+      case "8":
+        stateName="补人工关闭";
+        break;
       case "2":
-        stateName="工匠审核中";
+        stateName=workerName+"审核中";
         break;
       case "3":
       case "4":

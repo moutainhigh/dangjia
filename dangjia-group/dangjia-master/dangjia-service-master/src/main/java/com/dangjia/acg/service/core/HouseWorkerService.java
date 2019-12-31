@@ -53,12 +53,10 @@ import com.dangjia.acg.service.house.HouseService;
 import com.dangjia.acg.service.worker.EvaluateService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.google.gson.JsonArray;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import tk.mybatis.mapper.entity.Example;
@@ -382,7 +380,7 @@ public class HouseWorkerService {
 
         //查询技能徽章
         example = new Example(Insurance.class);
-        example.createCriteria().andEqualTo(DjSkillCertification.WORKER_ID, houseFlow.getWorkerId())
+        example.createCriteria().andEqualTo(DjSkillCertification.SKILL_CERTIFICATION_ID, houseFlow.getWorkerId())
                 .andEqualTo(DjSkillCertification.DATA_STATUS, 0);
         List<DjSkillCertification> djSkillCertifications = djSkillCertificationMapper.selectByExample(example);
         if(djSkillCertifications != null && djSkillCertifications.size() >0){

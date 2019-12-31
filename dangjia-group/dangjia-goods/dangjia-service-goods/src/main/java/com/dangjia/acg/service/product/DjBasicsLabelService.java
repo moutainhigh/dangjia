@@ -210,6 +210,7 @@ public class DjBasicsLabelService {
             if(StringUtils.isNotBlank(searchKey)) {
                 criteria.andLike(DjBasicsLabel.NAME, "%" + searchKey + "%");
             }
+            example.orderBy(DjBasicsLabel.CREATE_DATE).desc();
             List<DjBasicsLabel> djBasicsLabels = djBasicsLabelMapper.selectByExample(example);
             PageInfo pageResult = new PageInfo(djBasicsLabels);
             List<DjBasicsLabelDTO> labelDTOS = new ArrayList<>();

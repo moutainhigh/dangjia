@@ -109,10 +109,15 @@ public class WorkerGoodsService {
                 technologies.add(technologyResult);
             }
             workerGoodsDTO.setTechnologies(technologies);
-            workerGoodsDTO.setCreateDate(DateUtils.timedate(String.valueOf(workerGoodsDTO.getCreateDate())));
-            workerGoodsDTO.setModifyDate(DateUtils.timedate(String.valueOf(workerGoodsDTO.getModifyDate())));
+            workerGoodsDTO.setCreateDate(DateUtils.timedate(String.valueOf(workerGoodsDTOS.getCreateDate())));
+            workerGoodsDTO.setModifyDate(DateUtils.timedate(String.valueOf(workerGoodsDTOS.getModifyDate())));
             workerGoodsDTO.setWorkerTypeName(workerTypeName);
+            workerGoodsDTO.setProductName(workerGoodsDTOS.getName());
+            workerGoodsDTO.setProductId(workerGoodsDTOS.getId());
+            workerGoodsDTO.setProductTemplateId(workerGoodsDTOS.getId());
             workerGoodsDTO.setShopCount(shopCount);
+            workerGoodsDTO.setName(workerGoodsDTOS.getName());
+            workerGoodsDTO.setId(workerGoodsDTOS.getId());
         } else {
             workerGoodsDTO.setWorkerGoodsSn(workerGoodsSn);
             workerGoodsDTO.setWorkerTypeId(workerTypeId);

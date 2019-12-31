@@ -51,6 +51,7 @@ public interface WebMendMaterielAPI {
     ServerResponse landlordStateHandle(@RequestParam("request") HttpServletRequest request,
                                  @RequestParam("cityId") String cityId,
                                  @RequestParam("pageDTO") PageDTO pageDTO,
+
                                  @RequestParam("state") String state,
                                  @RequestParam("likeAddress") String likeAddress);
 

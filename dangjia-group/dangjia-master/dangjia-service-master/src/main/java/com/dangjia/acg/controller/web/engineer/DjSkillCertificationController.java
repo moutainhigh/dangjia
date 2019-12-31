@@ -4,6 +4,7 @@ import com.dangjia.acg.api.web.engineer.DjSkillCertificationAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.service.engineer.DjSkillCertificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,19 +24,37 @@ public class DjSkillCertificationController implements DjSkillCertificationAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse querySkillsCertificationWaitingList(PageDTO pageDTO, Integer workerTypeId, String searchKey, String workerId) {
-        return djSkillCertificationService.querySkillsCertificationWaitingList(pageDTO,workerTypeId,searchKey,workerId);
+    public ServerResponse querySkillsCertificationWaitingList(PageDTO pageDTO,Integer workerTypeId, String searchKey, String skillCertificationId) {
+        return djSkillCertificationService.querySkillsCertificationWaitingList(pageDTO,workerTypeId,searchKey,skillCertificationId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse querySkillCertificationSelectedList(PageDTO pageDTO, String searchKey, String workerId) {
-        return djSkillCertificationService.querySkillCertificationSelectedList(pageDTO,searchKey,workerId);
+    public ServerResponse querySkillCertificationSelectedList(PageDTO pageDTO, String searchKey, String skillCertificationId, Integer type) {
+        return djSkillCertificationService.querySkillCertificationSelectedList(pageDTO,searchKey,skillCertificationId,type);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse insertSkillCertification(String jsonStr, String workerId) {
-        return djSkillCertificationService.insertSkillCertification(jsonStr,workerId);
+    public ServerResponse insertSkillCertification(String jsonStr, String skillCertificationId) {
+        return djSkillCertificationService.insertSkillCertification(jsonStr,skillCertificationId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryWorkerTypeSkillPackConfigurationList() {
+        return djSkillCertificationService.queryWorkerTypeSkillPackConfigurationList();
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryWorkerTypeSkillPackConfigurationDetail(Integer workerTypeId) {
+        return djSkillCertificationService.queryWorkerTypeSkillPackConfigurationDetail(workerTypeId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse insertWorkerTypeSkillPackConfiguration(String jsonStr, WorkerType workerType) {
+        return djSkillCertificationService.insertWorkerTypeSkillPackConfiguration(jsonStr, workerType);
     }
 }

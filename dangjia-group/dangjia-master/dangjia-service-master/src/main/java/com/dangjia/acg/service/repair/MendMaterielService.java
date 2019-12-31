@@ -459,11 +459,16 @@ public class MendMaterielService {
     public ServerResponse queryMendMaterialList(String mendOrderId, String userId) {
         //合计付款
         MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);//补退订单表
+        if (mendOrder == null) {
+            return ServerResponse.createByErrorMessage("不存在当前补退订单");
+        }
         House house = houseMapper.selectByPrimaryKey(mendOrder.getHouseId());//房子信息
         ReturnMendMaterielDTO returnMendMaterielDTO=new ReturnMendMaterielDTO();
 
         List<ReturnOrderProgressDTO> mendMaterielProgressList= mendMaterialMapper.queryMendMaterielProgress(mendOrderId);
-        if(mendMaterielProgressList!=null&&mendMaterielProgressList.size()>0)
+        if (mendMaterielProgressList == null || mendMaterielProgressList.size() <= 0) {
+            return ServerResponse.createByErrorMessage("查无数据！");
+        }
         returnMendMaterielDTO.setMendMaterielProgressList(mendMaterielProgressList);
 
 

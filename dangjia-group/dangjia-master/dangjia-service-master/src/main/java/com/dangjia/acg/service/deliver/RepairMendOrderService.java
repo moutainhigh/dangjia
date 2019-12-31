@@ -567,7 +567,7 @@ public class RepairMendOrderService {
         House house=iHouseMapper.selectByPrimaryKey(houseId);
         Example example=new Example(MemberAddress.class);
         example.createCriteria().andEqualTo(MemberAddress.HOUSE_ID,houseId);
-        MemberAddress memberAddress=iMasterMemberAddressMapper.selectOneByExample(houseId);
+        MemberAddress memberAddress=iMasterMemberAddressMapper.selectOneByExample(example);
         String addressId="";
         if(memberAddress!=null&&StringUtils.isNotBlank(memberAddress.getId())){
             addressId=memberAddress.getId();
@@ -596,28 +596,6 @@ public class RepairMendOrderService {
             mendOrder.setStorefrontId(storefrontProduct.getStorefrontId());
             mendOrder.setAddressId(addressId);
             Double totalAmount=0d;
-            //生成订单(待支付订单)
-            Order order=new Order();
-            String workerTypeName="补货单";
-           // order.setWorkerTypeName("人工订单");
-            order.setWorkerTypeName(workerTypeName);
-            order.setCityId(storefrontProduct.getCityId());
-            order.setMemberId(memberId);
-            order.setWorkerId(workerId);
-            order.setAddressId(addressId);
-            order.setHouseId(houseId);
-            order.setOrderNumber(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
-            order.setTotalDiscountPrice(new BigDecimal(0));
-            order.setTotalStevedorageCost(new BigDecimal(0));
-            order.setTotalTransportationCost(new BigDecimal(0));
-            order.setActualPaymentPrice(new BigDecimal(0));
-            order.setOrderStatus("1");
-            order.setOrderGenerationTime(new Date());
-            order.setOrderSource(3);//补货单
-            order.setType(1);
-            order.setCreateBy(memberId);
-            order.setStorefontId(storefrontProduct.getStorefrontId());
-
             //补货单明细
             for(Cart ct:cartList){
                 storefrontProduct=iMasterStorefrontProductMapper.selectByPrimaryKey(ct.getProductId());//获取商品信息
@@ -634,68 +612,22 @@ public class RepairMendOrderService {
                 totalAmount=MathUtil.add(totalAmount,totalPrice);
                 mendWorker.setTotalPrice(totalPrice);
                 iMendWorkerMapper.insertSelective(mendWorker);
-
-                OrderItem orderItem = new OrderItem();
-                orderItem.setIsReservationDeliver("0");
-                orderItem.setOrderId(order.getId());
-                orderItem.setPrice(ct.getPrice());//销售价
-                orderItem.setShopCount(ct.getShopCount());//购买总数
-                orderItem.setUnitName(ct.getUnitName());//单位
-                orderItem.setTotalPrice(totalPrice);//总价
-                orderItem.setProductName(ct.getProductName());
-                orderItem.setProductSn(ct.getProductSn());
-                orderItem.setCategoryId(ct.getCategoryId());
-                orderItem.setProductId(ct.getProductId());
-                orderItem.setImage(storefrontProduct.getImage());
-                orderItem.setCityId(storefrontProduct.getCityId());
-                orderItem.setProductType(2);//人工
-                orderItem.setStorefontId(storefrontProduct.getStorefrontId());
-                orderItem.setAskCount(0d);
-                orderItem.setDiscountPrice(0d);
-                orderItem.setActualPaymentPrice(0d);
-                orderItem.setStevedorageCost(0d);
-                orderItem.setTransportationCost(0d);
-                orderItem.setWorkerTypeId(workerTypeId);
-                orderItem.setOrderStatus("1");//1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭
-                orderItem.setCreateBy(memberId);
-                iOrderItemMapper.insert(orderItem);//生成补订单明细
             }
             mendOrder.setTotalAmount(totalAmount);
-            String businessNumber=createBusinessOrderNumber(houseId,memberId,totalAmount,mendOrder.getOrderId());
-            mendOrder.setBusinessOrderNumber(businessNumber);
             iMendOrderMapper.insert(mendOrder);//添加补人工单
 
-            order.setBusinessOrderNumber(businessNumber);
-            order.setTotalAmount(BigDecimal.valueOf(totalAmount));// 订单总额(工钱)
-            iOrderMapper.insert(order);//添加补人工订单
+
             //删除已生成补货单的购物车
             example=new Example(Cart.class);
             example.createCriteria().andEqualTo(Cart.HOUSE_ID,houseId)
                     .andEqualTo(Cart.MEMBER_ID,workerId);
             iCartMapper.deleteByExample(example);
-            return businessNumber;//申请补货单号
+            return mendOrder.getId();//申请补货单号
         }
         return "";
     }
 
-    /**
-     * 生成业务定单号
-     * @return
-     */
-    public String createBusinessOrderNumber(String houseId,String memberId,Double totalAmount,String repairMendOrderId){
-        String number=System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000);
-        BusinessOrder businessOrder = new BusinessOrder();
-        businessOrder.setHouseId(houseId);
-        businessOrder.setMemberId(memberId);
-        businessOrder.setNumber(number);
-        businessOrder.setState(1);//刚生成
-        businessOrder.setTotalPrice(BigDecimal.valueOf(totalAmount));
-        businessOrder.setDiscountsPrice(new BigDecimal(0));
-        businessOrder.setType(2);//补人工
-        businessOrder.setTaskId(repairMendOrderId);//保存任务ID
-        iBusinessOrderMapper.insert(businessOrder);
-        return number;
-    }
+
 
 
 }
