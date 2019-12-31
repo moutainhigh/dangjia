@@ -255,7 +255,7 @@ public class CraftsmanConstructionService {
         //Map<String, Object> dataMap = HouseUtil.getBudgetDatas(house);
         // bean.setDataList((List<Map<String, Object>>) dataMap.get("dataList"));
         //查询精算师的订单数据
-        List<HouseOrderDetailDTO> houseOrderDetailDTOList = houseMapper.getBudgetOrderDetailByHouseId(house.getId(), "2");
+        List<HouseOrderDetailDTO> houseOrderDetailDTOList = houseMapper.getBudgetOrderDetailByInFo(house.getId(), "2",null);
         bean.setDataList(getBudgetDataList(houseOrderDetailDTOList, house, 2));//查询已购买的精算师的商品
         List<ButtonListBean> buttonList = showActuaryButton(house.getId());//按钮显示
 //        if (house.getVisitState() == 1 && house.getBudgetOk() != 0 && house.getBudgetOk() != 5 && house.getBudgetOk() != 3) {
@@ -364,7 +364,7 @@ public class CraftsmanConstructionService {
         try {
             //1.判断业主购买的精算单是否为已退款状态
             List<HouseOrderDetailDTO> orderInfo = houseMapper.getBudgetOrderNewInfo(houseId, "2");
-            List<HouseOrderDetailDTO> houseOrderDetailDTOList = houseMapper.getBudgetOrderDetailByHouseId(houseId, "2");//判断是否有精算订单
+            List<HouseOrderDetailDTO> houseOrderDetailDTOList = houseMapper.getBudgetOrderDetailByInFo(houseId, "2",null);//判断是否有精算订单
             if ((orderInfo == null || orderInfo.size() == 0) && (houseOrderDetailDTOList != null && houseOrderDetailDTOList.size() > 0)) {
                 buttonList.add(Utils.getButton("已结束", 2005));
                 return buttonList;
@@ -388,7 +388,7 @@ public class CraftsmanConstructionService {
             House house = houseMapper.selectByPrimaryKey(houseId);
             if (house.getBudgetOk() == 1 && house.getDesignerOk() == 0) {//如果图纸未审核通过，且未有设计师
                 //4.1判断业主是否购买了当家平台设计，以及对应的支付状态
-                houseOrderDetailDTOList = houseMapper.getBudgetOrderDetailByHouseId(houseId, "1");
+                houseOrderDetailDTOList = houseMapper.getBudgetOrderDetailByInFo(houseId, "1",null);
                 if (houseOrderDetailDTOList != null && houseOrderDetailDTOList.size() > 0) {//购买了当家平台设计
                     //判断当前设计单的状态
                     HouseOrderDetailDTO houseOrderDetailDTO = houseOrderDetailDTOList.get(0);
@@ -630,24 +630,65 @@ public class CraftsmanConstructionService {
         if (hw.getWorkerType() > 2 && (insurances.size() == 0 || daynum <= 60)) {
             isBX = false;
         }
+
+        //查询我的单
+        List<HouseOrderDetailDTO> houseOrderDetailDTOList = houseMapper.getBudgetOrderDetailByInFo(house.getId(), hw.getWorkerTypeId(),1);
+        List<Map<String, Object>> mapDataList = new ArrayList<>();
+        if(houseOrderDetailDTOList != null && houseOrderDetailDTOList.size() >0){
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            for (HouseOrderDetailDTO houseOrderDetailDTO : houseOrderDetailDTOList) {
+                setProductInfo(houseOrderDetailDTO, address);
+                Map<String, Object> dataMap = BeanUtils.beanToMap(houseOrderDetailDTO);
+                dataMap.put("totalNodeNumber", houseMapper.queryArrNumber(houseOrderDetailDTO.getProductTemplateId()));//总节点数
+                dataMap.put("completedNodeNumber", houseMapper.queryTestNumber(houseOrderDetailDTO.getProductTemplateId(),house.getId(),hw.getWorkerId()));//已完成节点数(已完成)
+                mapDataList.add(dataMap);
+            }
+        }
+
+        bean.setDataList(mapDataList);
+
+        //查询工序节点
+        example = new Example(HouseFlowApply.class);
+        example.createCriteria().andEqualTo(HouseFlowApply.HOUSE_FLOW_ID, hf.getId());
+        example.orderBy(HouseFlowApply.CREATE_DATE).desc();
+        List<HouseFlowApply> houseFlowApplies = houseFlowApplyMapper.selectByExample(example);
+        if(houseFlowApplies != null && houseFlowApplies.size() > 0){
+            bean.setTrialNumber(houseFlowApplies.size());
+            //node 0-工匠审核 1-大管家审核通过 2-业主审核通过
+            bean.setNode(0);
+            if(houseFlowApplies.get(0).getSupervisorCheck() == 1){
+                bean.setNode(1);
+            }else if(houseFlowApplies.get(0).getMemberCheck() == 1){
+                bean.setNode(2);
+            }
+        }
+
+        //查询质保金是否为负数
+        Member member = memberMapper.selectByPrimaryKey(hf.getWorkerId());
+        if(member.getRetentionMoney().intValue() < 0){
+            bean.setRetentionType(0);
+        }else{
+            bean.setRetentionType(1);
+        }
+
         bean.setWorkerType(1);//0:大管家；1：工匠；2：设计师；3：精算师
         bean.setHouseFlowId(hf.getId());
         setMoney(bean, hw);
         //房产信息
-        HouseWorker supervisorWorker = houseWorkerMapper.getHwByHidAndWtype(hf.getHouseId(), 3);//查询大管家的
-        if (supervisorWorker != null) {
-            Member workerSup = memberMapper.selectByPrimaryKey(supervisorWorker.getWorkerId());//查询大管家
-            if (workerSup != null) {
-                bean.setSupervisorName(workerSup.getName());//大管家名字
-                bean.setSupervisorPhone(workerSup.getMobile());
-                bean.setUserId(workerSup.getId());
-                bean.setSupervisorEvation("积分:" + workerSup.getEvaluationScore());//大管家积分
-                Long supervisorCountOrder = houseWorkerMapper.getCountOrderByWorkerId(workerSup.getId());
-                if (supervisorCountOrder != null)
-                    bean.setSupervisorCountOrder("总单数:" + supervisorCountOrder);//大管家总单数
-                bean.setSupervisorPraiseRate("好评率:" + workerSup.getPraiseRate().multiply(new BigDecimal(100)) + "%");//大管家好评率
-            }
-        }
+//        HouseWorker supervisorWorker = houseWorkerMapper.getHwByHidAndWtype(hf.getHouseId(), 3);//查询大管家的
+//        if (supervisorWorker != null) {
+//            Member workerSup = memberMapper.selectByPrimaryKey(supervisorWorker.getWorkerId());//查询大管家
+//            if (workerSup != null) {
+//                bean.setSupervisorName(workerSup.getName());//大管家名字
+//                bean.setSupervisorPhone(workerSup.getMobile());
+//                bean.setUserId(workerSup.getId());
+//                bean.setSupervisorEvation("积分:" + workerSup.getEvaluationScore());//大管家积分
+//                Long supervisorCountOrder = houseWorkerMapper.getCountOrderByWorkerId(workerSup.getId());
+//                if (supervisorCountOrder != null)
+//                    bean.setSupervisorCountOrder("总单数:" + supervisorCountOrder);//大管家总单数
+//                bean.setSupervisorPraiseRate("好评率:" + workerSup.getPraiseRate().multiply(new BigDecimal(100)) + "%");//大管家好评率
+//            }
+//        }
         if (hf.getPause() == 1) {//已暂停  停工有两种情况需要处理
             bean.setIfBackOut(2);
         } else {
@@ -677,28 +718,28 @@ public class CraftsmanConstructionService {
         bean.setTotalDay("总开工天数" + totalDay);
         bean.setEveryDay("每日完工天数" + (everyEndDay == null ? "0" : everyEndDay));
         bean.setSuspendDay("暂停天数" + (suspendDay == null ? "0" : suspendDay));
-        if (hw.getWorkType() == 1) {
-            bean.setIfDisclose(0);
-        } else if (hf.getWorkSteta() == 3) {
-            bean.setIfDisclose(1);
-        } else {
-            bean.setIfDisclose(2);
-        }
-        if (hf.getWorkType() == 3) {//如果是已抢单待支付。则提醒业主支付
-            if (isBX) {
-                promptList.add("请联系业主支付您的工匠费用");
-            } else {
-                Date d = DateUtil.addDateMinutes(hw.getCreateDate(), 30);
-                Date d2 = new Date();
-                promptList.add("剩余支付保险时间：" + DateUtil.getDiffTime2(d.getTime(), d2.getTime()) + ",超过时间则自动放弃");
-                buttonList.add(Utils.getButton("购买保险", 9));
-            }
-            bean.setIfBackOut(0);//0可放弃；1：申请停工；2：已停工 3 审核中
-        } else if (hf.getPause() == 1) {
-            promptList.add("您已停工");
-        } else if (hf.getWorkSteta() == 1) {
-            promptList.add("您已阶段完工");
-        }
+//        if (hw.getWorkType() == 1) {
+//            bean.setIfDisclose(0);
+//        } else if (hf.getWorkSteta() == 3) {
+//            bean.setIfDisclose(1);
+//        } else {
+//            bean.setIfDisclose(2);
+//        }
+//        if (hf.getWorkType() == 3) {//如果是已抢单待支付。则提醒业主支付
+//            if (isBX) {
+//                promptList.add("请联系业主支付您的工匠费用");
+//            } else {
+//                Date d = DateUtil.addDateMinutes(hw.getCreateDate(), 30);
+//                Date d2 = new Date();
+//                promptList.add("剩余支付保险时间：" + DateUtil.getDiffTime2(d.getTime(), d2.getTime()) + ",超过时间则自动放弃");
+//                buttonList.add(Utils.getButton("购买保险", 9));
+//            }
+//            bean.setIfBackOut(0);//0可放弃；1：申请停工；2：已停工 3 审核中
+//        } else if (hf.getPause() == 1) {
+//            promptList.add("您已停工");
+//        } else if (hf.getWorkSteta() == 1) {
+//            promptList.add("您已阶段完工");
+//        }
         if (hf.getWorkSteta() == 2 || hf.getWorkSteta() == 6) {
             if (hf.getWorkSteta() == 2) {
                 promptList.add("您已整体完工");
@@ -782,6 +823,7 @@ public class CraftsmanConstructionService {
                 bean.setWorkerEverydayList(workerEverydayList);//每日完工事项
             }
         }
+
         bean.setPromptList(promptList);
         bean.setButtonList(buttonList);
         return ServerResponse.createBySuccess("获取施工列表成功", bean);
