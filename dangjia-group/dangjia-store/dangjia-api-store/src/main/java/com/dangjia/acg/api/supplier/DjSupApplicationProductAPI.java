@@ -76,13 +76,13 @@ public interface DjSupApplicationProductAPI {
                                   @RequestParam("pageDTO") PageDTO pageDTO,
                                   @RequestParam("keyWord") String keyWord,
                                   @RequestParam("cityId") String cityId,
-                                  @RequestParam("user_id") String userId);
+                                  @RequestParam("user_id") String user_id);
 
     @PostMapping("/supplier/djSupApplicationProduct/updateHaveGoods")
     @ApiOperation(value = "编辑已供商品", notes = "编辑已供商品")
     ServerResponse updateHaveGoods(@RequestParam("request") HttpServletRequest request,
                                    @RequestParam("jsonStr") String jsonStr,
-                                   @RequestParam("user_id") String userId);
+                                   @RequestParam("user_id") String user_id);
 
     @PostMapping("/supplier/djSupApplicationProduct/updateReapply")
     @ApiOperation(value = "被打回商品申请", notes = "被打回商品申请")
