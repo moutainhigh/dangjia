@@ -12,6 +12,7 @@ import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.MathUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.product.ProductWorkerDTO;
 import com.dangjia.acg.dto.repair.MendOrderInfoDTO;
@@ -19,28 +20,35 @@ import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
+import com.dangjia.acg.mapper.delivery.IMasterOrderProgressMapper;
+import com.dangjia.acg.mapper.delivery.IOrderItemMapper;
 import com.dangjia.acg.mapper.delivery.IOrderSplitMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.ISurplusWareHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberInfoMapper;
 import com.dangjia.acg.mapper.repair.*;
+import com.dangjia.acg.mapper.task.IMasterTaskStackMapper;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.core.WorkerType;
+import com.dangjia.acg.modle.deliver.OrderItem;
 import com.dangjia.acg.modle.deliver.OrderSplit;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.SurplusWareHouse;
+import com.dangjia.acg.modle.house.TaskStack;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.order.OrderProgress;
 import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.repair.*;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.house.HouseService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -108,7 +116,13 @@ public class MendOrderService {
     private UnitAPI unitAPI;
     @Autowired
     private IMemberInfoMapper memberInfoMapper;
+    @Autowired
+    private IMasterTaskStackMapper iMasterTaskStackMapper;
 
+    @Autowired
+    private IOrderItemMapper iOrderItemMapper;
+    @Autowired
+    private IMasterOrderProgressMapper iMasterOrderProgressMapper;
 
     /**
      * 补材料明细
@@ -1212,5 +1226,121 @@ public class MendOrderService {
         }
         return ServerResponse.createBySuccess("认证成功");
     }
+
+
+    /**
+     * 待工匠审核的退人工订单--审核通过
+     * @param cityId 城市ID
+     * @param taskId 任务ID
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse passRefundWorkerByTaskId(String cityId,String taskId){
+        TaskStack taskStack=iMasterTaskStackMapper.selectByPrimaryKey(taskId);
+        if(taskStack!=null&&taskStack.getState()==0){
+            //1.修改变申请单状态为已通过
+            ChangeOrder changeOrder=changeOrderMapper.selectByPrimaryKey(taskStack.getData());
+            changeOrder.setState(5);//审核通过，待业主支付
+            changeOrder.setModifyDate(new Date());
+            changeOrderMapper.updateByPrimaryKeySelective(changeOrder);//修改变更单为审核不通过
+            //2.修改补人工单状态为已通过，生成待支付单
+            Example example = new Example(MendOrder.class);
+            example.createCriteria()
+                    .andEqualTo(MendOrder.CHANGE_ORDER_ID, taskStack.getData())
+                    .andEqualTo(MendOrder.DATA_STATUS, 0);
+            MendOrder mendOrder=mendOrderMapper.selectOneByExample(example);
+            mendOrder.setState(3);//状态为已通过
+            mendOrder.setModifyDate(new Date());
+            mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
+            //3.修改任务状态，为已处理
+            taskStack.setState(1);
+            taskStack.setModifyDate(new Date());
+            iMasterTaskStackMapper.updateByPrimaryKeySelective(taskStack);
+            //更新业主审核中的为已关闭
+            iMasterOrderProgressMapper.updateOrderStatusByNodeCode(changeOrder.getId(),"REFUND_AFTER_SALES","RA_016");
+            //添加审核通过节点
+            updateOrderProgressInfo(changeOrder.getId(),"2","REFUND_AFTER_SALES","RA_018",changeOrder.getMemberId());
+            //退款给业主，将当前工匠还可笑得余钱减去需退款给业主的钱
+            mendOrderCheckService.settleMendOrder(mendOrder);//退钱给业主(业主申请退人工，工匠审核通过)
+
+            return ServerResponse.createBySuccess("审核通过成功","");
+        }
+        return ServerResponse.createByErrorMessage("审核失败","未找到符合条件的订单");
+    }
+
+
+
+    /**
+     * 待工匠审核的退人工订单--审核不通过（拒绝）
+     * @param cityId 城市ID
+     * @param taskId 任务ID
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse failRefundWorkerByTaskId(String cityId, String taskId){
+        TaskStack taskStack=iMasterTaskStackMapper.selectByPrimaryKey(taskId);
+        if(taskStack!=null&&taskStack.getState()==0){
+            //1.修改变更单状态为不通过
+            ChangeOrder changeOrder=changeOrderMapper.selectByPrimaryKey(taskStack.getData());
+            changeOrder.setState(8);//审核不通过
+            changeOrder.setModifyDate(new Date());
+            changeOrderMapper.updateByPrimaryKeySelective(changeOrder);//修改变更单为审核不通过
+            //2.修改退人工单状态为不通过
+            Example example = new Example(MendOrder.class);
+            example.createCriteria()
+                    .andEqualTo(MendOrder.CHANGE_ORDER_ID, taskStack.getData())
+                    .andEqualTo(MendOrder.DATA_STATUS, 0);
+            MendOrder mendOrder=mendOrderMapper.selectOneByExample(example);
+            if(mendOrder!=null&& StringUtils.isNotBlank(mendOrder.getId())){
+                mendOrder.setState(2);//审核不通过取消
+                mendOrder.setModifyDate(new Date());
+                mendOrderMapper.updateByPrimaryKeySelective(mendOrder);
+                //还原退人工数据
+                example=new Example(MendMateriel.class);
+                example.createCriteria().andEqualTo(MendMateriel.MEND_ORDER_ID,mendOrder.getId());
+                List<MendMateriel> repairWorkerList=mendMaterialMapper.selectByExample(example);//退款商品列表查询
+                for(MendMateriel mm:repairWorkerList){
+                    OrderItem orderItem=iOrderItemMapper.selectByPrimaryKey(mm.getOrderItemId());
+                    if(orderItem!=null&&StringUtils.isNotBlank(orderItem.getId())){
+                        orderItem.setReturnCount(MathUtil.sub(orderItem.getReturnCount(),mm.getShopCount()));
+                        orderItem.setModifyDate(new Date());
+                        iOrderItemMapper.updateByPrimaryKeySelective(orderItem);
+                    }
+                }
+            }
+            //3.修改任务状态为已完成
+            taskStack.setState(1);
+            taskStack.setModifyDate(new Date());
+            iMasterTaskStackMapper.updateByPrimaryKeySelective(taskStack);
+            //更新业主审核中的为已关闭
+            iMasterOrderProgressMapper.updateOrderStatusByNodeCode(changeOrder.getId(),"REFUND_AFTER_SALES","RA_016");
+            //添加审核不通过节点
+            updateOrderProgressInfo(changeOrder.getId(),"2","REFUND_AFTER_SALES","RA_017",changeOrder.getWorkerId());
+
+            return ServerResponse.createBySuccessMessage("审核成功");
+        }
+        return ServerResponse.createByErrorMessage("审核失败","未找到符合条件的订单");
+    }
+    /**
+     * //添加进度信息
+     * @param orderId 订单ID
+     * @param progressType 订单类型
+     * @param nodeType 节点类型
+     * @param nodeCode 节点编码
+     * @param userId 用户id
+     */
+    private void updateOrderProgressInfo(String orderId,String progressType,String nodeType,String nodeCode,String userId){
+        OrderProgress orderProgress=new OrderProgress();
+        orderProgress.setProgressOrderId(orderId);
+        orderProgress.setProgressType(progressType);
+        orderProgress.setNodeType(nodeType);
+        orderProgress.setNodeCode(nodeCode);
+        orderProgress.setCreateBy(userId);
+        orderProgress.setUpdateBy(userId);
+        orderProgress.setCreateDate(new Date());
+        orderProgress.setModifyDate(new Date());
+        iMasterOrderProgressMapper.insert(orderProgress);
+    }
+
 
 }

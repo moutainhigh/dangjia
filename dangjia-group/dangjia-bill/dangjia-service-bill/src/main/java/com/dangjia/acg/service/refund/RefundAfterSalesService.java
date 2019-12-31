@@ -1329,6 +1329,15 @@ public class RefundAfterSalesService {
                 if(mendOrder!=null&&StringUtils.isNotBlank(mendOrder.getId())){
                     returnWorkOrderDTO.setRepairWorkOrderNumber(mendOrder.getNumber());//设置申请单号
                     returnWorkOrderDTO.setTotalAmount(mendOrder.getTotalAmount());
+                    returnWorkOrderDTO.setApplyMemberId(mendOrder.getApplyMemberId());//申请人ID
+                    Member member=iBillMemberMapper.selectByPrimaryKey(mendOrder.getApplyMemberId());
+                    returnWorkOrderDTO.setApplyMemberName(member.getName());//
+                    if("2".equals(returnWorkOrderDTO.getType())){//业主退人工
+                        returnWorkOrderDTO.setApplyMemberTypeName("业主");//申请人类型名称
+                    }else{
+                        returnWorkOrderDTO.setApplyMemberTypeName(returnWorkOrderDTO.getWorkTypeName());//申请人类型名称
+                    }
+
                 }
                 String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
                 List<RefundRepairOrderMaterialDTO> repairWorkerList=iBillMendWorkerMapper.queryBillMendOrderId(mendOrder.getId());//退款商品列表查询
@@ -1431,6 +1440,8 @@ public class RefundAfterSalesService {
             taskStack.setState(1);
             taskStack.setModifyDate(new Date());
             iBillTaskStackMapper.updateByPrimaryKeySelective(taskStack);
+            //更新业主审核中的为已关闭
+            iBillOrderProgressMapper.updateOrderStatusByNodeCode(changeOrder.getId(),"REFUND_AFTER_SALES","RA_021");
             //添加审核通过节点
             updateOrderProgressInfo(changeOrder.getId(),"3","REFUND_AFTER_SALES","RA_023",changeOrder.getMemberId());
 
@@ -1524,6 +1535,7 @@ public class RefundAfterSalesService {
             return ServerResponse.createByErrorMessage("查询可退人工商品失败");
         }
     }
+
 
 
 }

@@ -15,6 +15,12 @@ public class ReturnWorkOrderDTO {
 
     private String repairWorkOrderNumber;//退人工申请单编号
 
+    private String applyMemberId;//申请人ID
+
+    private String applyMemberName;//申请人名称
+
+    private String applyMemberTypeName;//申请人类型名称
+
     private String houseId;//房子ID
 
     private String workTypeId;//工种ID
