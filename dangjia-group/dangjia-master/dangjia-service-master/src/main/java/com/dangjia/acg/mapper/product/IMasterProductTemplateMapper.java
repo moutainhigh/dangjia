@@ -18,6 +18,7 @@ public interface IMasterProductTemplateMapper extends Mapper<DjBasicsProductTemp
 
     List<DjBasicsProductTemplate> querySkillsCertificationWaitingList(@Param("workerTypeId") Integer workerTypeId,
                                                                       @Param("skillCertificationId") String skillCertificationId,
-                                                                      @Param("searchKey") String searchKey);
+                                                                      @Param("searchKey") String searchKey,
+                                                                      @Param("cityId") String cityId);
 
 }

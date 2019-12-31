@@ -52,11 +52,11 @@ public class DjSkillCertificationService {
      * @param skillCertificationId
      * @return
      */
-    public ServerResponse querySkillsCertificationWaitingList(PageDTO pageDTO, Integer workerTypeId, String searchKey, String skillCertificationId) {
+    public ServerResponse querySkillsCertificationWaitingList(PageDTO pageDTO, Integer workerTypeId, String searchKey, String skillCertificationId, String cityId) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<DjBasicsProductTemplate> djBasicsProductTemplates =
-                    iMasterProductTemplateMapper.querySkillsCertificationWaitingList(workerTypeId, skillCertificationId, searchKey);
+                    iMasterProductTemplateMapper.querySkillsCertificationWaitingList(workerTypeId, skillCertificationId, searchKey, cityId);
             if(djBasicsProductTemplates.size()<=0)
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
             PageInfo pageInfo=new PageInfo(djBasicsProductTemplates);
@@ -75,12 +75,13 @@ public class DjSkillCertificationService {
      * @param skillCertificationId
      * @return
      */
-    public ServerResponse querySkillCertificationSelectedList(PageDTO pageDTO, String searchKey, String skillCertificationId, Integer type) {
+    public ServerResponse querySkillCertificationSelectedList(PageDTO pageDTO, String searchKey, String skillCertificationId, Integer type, String cityId) {
         try {
             Example example=new Example(DjSkillCertification.class);
             Example.Criteria criteria = example.createCriteria();
             criteria.andEqualTo(DjSkillCertification.SKILL_CERTIFICATION_ID,skillCertificationId)
-                    .andEqualTo(DjSkillCertification.TYPE,type);
+                    .andEqualTo(DjSkillCertification.TYPE,type)
+                    .andEqualTo(DjSkillCertification.CITY_ID,cityId);
             if(StringUtils.isNotBlank(searchKey))
                 criteria.andCondition("CONCAT(product_name,product_sn) like CONCAT('%','" + searchKey + "','%')");
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
@@ -102,7 +103,7 @@ public class DjSkillCertificationService {
      * @param workerId
      * @return
      */
-    public ServerResponse insertSkillCertification(String jsonStr, String workerId) {
+    public ServerResponse insertSkillCertification(String jsonStr, String workerId, String cityId) {
         try {
             Member member = iMemberMapper.selectByPrimaryKey(workerId);
             if(member.getRealNameState()==3){
@@ -116,6 +117,7 @@ public class DjSkillCertificationService {
                     djSkillCertification.setProdTemplateId(obj.getString("id"));
                     djSkillCertification.setProductName(obj.getString("name"));
                     djSkillCertification.setProductSn(obj.getString("productSn"));
+                    djSkillCertification.setCityId(cityId);
                     djSkillCertificationMapper.insert(djSkillCertification);
                 });
             }else {
@@ -174,7 +176,7 @@ public class DjSkillCertificationService {
      * @param workerType
      * @return
      */
-    public ServerResponse insertWorkerTypeSkillPackConfiguration(String jsonStr, WorkerType workerType) {
+    public ServerResponse insertWorkerTypeSkillPackConfiguration(String jsonStr, WorkerType workerType, String cityId) {
         try {
             WorkerType oldWorkerType = iWorkerTypeMapper.selectByPrimaryKey(workerType.getId());
             if(oldWorkerType!=null) {
@@ -200,6 +202,7 @@ public class DjSkillCertificationService {
                 djSkillCertification.setProdTemplateId(obj.getString("id"));
                 djSkillCertification.setProductName(obj.getString("name"));
                 djSkillCertification.setProductSn(obj.getString("productSn"));
+                djSkillCertification.setCityId(cityId);
                 djSkillCertificationMapper.insert(djSkillCertification);
             });
             iWorkerTypeMapper.updateByPrimaryKeySelective(workerType);

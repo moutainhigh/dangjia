@@ -23,6 +23,7 @@
                 a.product_sn LIKE CONCAT('%',#{searchKey},'%')
             )
         </if>
+        AND a.city_id=#{cityId}
         AND NOT EXISTS (
             SELECT
                 1

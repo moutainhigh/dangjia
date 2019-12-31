@@ -244,32 +244,6 @@ public class WebSplitDeliverService {
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse settlemen(String image, String merge, String supplierId, String userId, String cityId, Double settlementAmount, String sourceType) throws RuntimeException {
         try {
-            Example example=new Example(Storefront.class);
-            example.createCriteria().andEqualTo(Storefront.CITY_ID,cityId)
-                    .andEqualTo(Storefront.DATA_STATUS,0)
-                    .andEqualTo(Storefront.USER_ID,userId);
-            Storefront storefront = iMasterStorefrontMapper.selectOneByExample(example);
-            AccountFlowRecord accountFlowRecord=new AccountFlowRecord();
-            if(sourceType.equals("1")){
-                if(storefront.getSurplusMoney()<settlementAmount) {
-                    return ServerResponse.createByErrorMessage("余额不足");
-                }
-                storefront.setSurplusMoney(storefront.getSurplusMoney()-settlementAmount);
-                storefront.setTotalAccount(storefront.getTotalAccount()-settlementAmount);
-                iMasterStorefrontMapper.updateByPrimaryKeySelective(storefront);
-                DjSupplier djSupplier = iMasterSupplierMapper.selectByPrimaryKey(supplierId);
-                djSupplier.setSurplusMoney(CommonUtil.isEmpty(djSupplier.getSurplusMoney())?0:djSupplier.getSurplusMoney()+settlementAmount);
-                djSupplier.setTotalAccount(CommonUtil.isEmpty(djSupplier.getTotalAccount())?0:djSupplier.getTotalAccount()+settlementAmount);
-                accountFlowRecord.setAmountAfterMoney(djSupplier.getTotalAccount());
-                iMasterSupplierMapper.updateByPrimaryKeySelective(djSupplier);
-                accountFlowRecord.setFlowType("2");
-                accountFlowRecord.setMoney(settlementAmount);
-                accountFlowRecord.setState(0);
-                accountFlowRecord.setAmountBeforeMoney(djSupplier.getTotalAccount());
-                accountFlowRecord.setDefinedAccountId(supplierId);
-                accountFlowRecord.setDefinedName("合并結算");
-                accountFlowRecord.setCreateBy(userId);
-            }
             Receipt receipt = new Receipt();
             receipt.setNumber(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
             if (StringUtils.isNotEmpty(merge)) {
@@ -307,9 +281,56 @@ public class WebSplitDeliverService {
                 receipt.setTotalAmount(splitDeliverPrice - mendDeliverPrice);
                 receipt.setSourceType(sourceType);
                 iReceiptMapper.insert(receipt);
+                //店铺信息
+                Example example=new Example(Storefront.class);
+                example.createCriteria().andEqualTo(Storefront.CITY_ID,cityId)
+                        .andEqualTo(Storefront.DATA_STATUS,0)
+                        .andEqualTo(Storefront.USER_ID,userId);
+                Storefront storefront = iMasterStorefrontMapper.selectOneByExample(example);
+
+                AccountFlowRecord accountFlowRecord=new AccountFlowRecord();
+                AccountFlowRecord accountFlowRecord2=new AccountFlowRecord();
                 if(sourceType.equals("1")){
-                    accountFlowRecord.setDefinedAccountId(receipt.getNumber());
+                    if(storefront.getSurplusMoney()<settlementAmount) {
+                        return ServerResponse.createByErrorMessage("余额不足");
+                    }
+                    //扣除店铺余额
+                    //入账前金额
+                    accountFlowRecord2.setAmountBeforeMoney(storefront.getTotalAccount());
+                    storefront.setSurplusMoney(storefront.getSurplusMoney()-settlementAmount);
+                    storefront.setTotalAccount(storefront.getTotalAccount()-settlementAmount);
+                    //入账后金额
+                    accountFlowRecord.setAmountAfterMoney(storefront.getTotalAccount());
+                    iMasterStorefrontMapper.updateByPrimaryKeySelective(storefront);
+                    accountFlowRecord2.setFlowType("1");
+                    accountFlowRecord2.setMoney(settlementAmount);
+                    accountFlowRecord2.setState(0);
+                    accountFlowRecord2.setDefinedAccountId(storefront.getId());
+                    accountFlowRecord2.setDefinedName("合并結算");
+                    accountFlowRecord2.setCreateBy(userId);
+                    //供应商加余额
+                    DjSupplier djSupplier = iMasterSupplierMapper.selectByPrimaryKey(supplierId);
+                    //入账前金额
+                    accountFlowRecord.setAmountBeforeMoney(djSupplier.getTotalAccount());
+                    djSupplier.setSurplusMoney(CommonUtil.isEmpty(djSupplier.getSurplusMoney())?0:djSupplier.getSurplusMoney()+settlementAmount);
+                    djSupplier.setTotalAccount(CommonUtil.isEmpty(djSupplier.getTotalAccount())?0:djSupplier.getTotalAccount()+settlementAmount);
+                    //入账后金额
+                    accountFlowRecord.setAmountAfterMoney(djSupplier.getTotalAccount());
+                    iMasterSupplierMapper.updateByPrimaryKeySelective(djSupplier);
+                    accountFlowRecord.setFlowType("2");
+                    accountFlowRecord.setMoney(settlementAmount);
+                    accountFlowRecord.setState(0);
+                    accountFlowRecord.setDefinedAccountId(supplierId);
+                    accountFlowRecord.setDefinedName("合并結算");
+                    accountFlowRecord.setCreateBy(userId);
+                }
+                if(sourceType.equals("1")){
+                    //供应商流水
+                    accountFlowRecord.setHouseOrderId(receipt.getId());
                     iMasterAccountFlowRecordMapper.insert(accountFlowRecord);
+                    //店铺流水
+                    accountFlowRecord2.setHouseOrderId(receipt.getId());
+                    iMasterAccountFlowRecordMapper.insert(accountFlowRecord2);
                 }
             }
             return ServerResponse.createBySuccess("结算成功");
