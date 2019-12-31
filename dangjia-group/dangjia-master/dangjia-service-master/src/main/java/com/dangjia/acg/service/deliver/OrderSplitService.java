@@ -362,8 +362,9 @@ public class OrderSplitService {
                 orderSplit.setApplyStatus(2);//2通过(发给供应商)
                 orderSplitMapper.updateByPrimaryKeySelective(orderSplit);//修改要货单信息
 
+                //给供应商发送短信
                 for (String key : list.keySet()) {
-                    JsmsUtil.sendSupplier(key, address + "submitNumber?cityId=" + house.getCityId());//给供应商发送短信
+                    JsmsUtil.sendSupplier(key, address + "submitNumber?cityId=" + house.getCityId());
                 }
                 return ServerResponse.createBySuccessMessage("操作成功");
             }
