@@ -1,5 +1,6 @@
 package com.dangjia.acg.service.storefront;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.supplier.DjSupplierAPI;
@@ -76,6 +77,12 @@ public class StorefrontService {
     private IShopMendDeliverMapper ishopMendDeliverMapper;
     @Autowired
     private IStorefrontAccountFlowRecordMapper storefrontAccountFlowRecordMapper ;
+
+    @Autowired
+    private IStorefrontSplitDeliverMapper iStorefrontSplitDeliverMapper;
+
+    @Autowired
+    private IStorefrontMendDeliverMapper iStorefrontMendDeliverMapper;
 
     /**
      * 根据用户Id查询店铺信息
@@ -632,6 +639,35 @@ public class StorefrontService {
             }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<StoreRevenueRecordDTO> list=istorefrontMapper.queryStoreRevenueRecord(storefront.getId(),orderNumber);
+
+            list.forEach(storeRevenueRecordDTO->{
+             String type=  storeRevenueRecordDTO.getType();
+             if (type.equals("3"))
+             {
+                 Double totalAmount=0d;
+                 //合并结算，计算价钱
+                  String merge= storeRevenueRecordDTO.getMerge();
+                 JSONArray itemObjArr = JSON.parseArray(merge);
+                 for (int i = 0; i < itemObjArr.size(); i++) {
+                     JSONObject jsonObject = itemObjArr.getJSONObject(i);
+                     String id = jsonObject.getString("id");
+                     int deliverType = jsonObject.getInteger("deliverType");
+                     if (deliverType == 1) {
+                         SplitDeliver splitDeliver = iStorefrontSplitDeliverMapper.selectByPrimaryKey(id);
+                         if (null != splitDeliver) {
+                             totalAmount+=splitDeliver.getTotalAmount();
+                         }
+                     } else if (deliverType == 2) {
+                         MendDeliver mendDeliver = iStorefrontMendDeliverMapper.selectByPrimaryKey(id);
+                         if (null != mendDeliver) {
+                             totalAmount+=mendDeliver.getTotalAmount();
+                         }
+                     }
+                 }
+                 storeRevenueRecordDTO.setTotalAmount(totalAmount+"");
+             }
+            });
+
             PageInfo pageResult = new PageInfo(list);
             return ServerResponse.createBySuccess("查询成功",pageResult);
         } catch (Exception e) {

@@ -324,10 +324,11 @@
     <select id="queryStoreRevenueRecord" resultType="com.dangjia.acg.dto.storefront.StoreRevenueRecordDTO">
         select
         IFNULL(dafr.type,'') as type,-- 类型
-        IFNULL(dafr.house_order_id,'') as houseOrderId,-- 订单号
+        IFNULL(dafr.house_order_id,'') as houseOrderId,-- 货单号
         IFNULL(dafr.money,'') as money,-- 实际支出金额
         IFNULL(drmo.actual_total_amount,'') as totalAmount,-- 订单金额
-        IFNULL(drmo.state,'') as orderStatus-- 状态
+        IFNULL(drmo.state,'') as orderStatus, -- 状态
+        '' as merge
         from
         dj_account_flow_record  dafr
         inner join  dj_repair_mend_order drmo on drmo.id=dafr.house_order_id
@@ -337,22 +338,27 @@
         </if>
         union all
         select
-        IFNULL(dafr.type,'') as type,-- 类型
-        IFNULL(dafr.house_order_id,'') as houseOrderId,-- 订单号
-        '' as money,-- 实际支出金额
+        '3' as type,-- 类型
+        IFNULL(dr.number,'') as houseOrderId,-- 货单号
+        IFNULL(dr.total_Amount,'') as money,-- 实际支出金额
         '' as totalAmount, -- 订单金额
-        deposit_status-- 状态
-        from dj_account_flow_record dafr
-        inner  join dj_worker_withdraw_deposit dwwd  on dwwd.id=dafr.house_order_id
+        '' as orderStatus, -- 状态
+        dr.merge
+        from dj_receipt dr
+        inner join dj_sup_application dsa on dsa.sup_id=dr.supplier_id
+        where dr.data_status=0 and dsa.application_status=1 and dsa.data_status=0 and dsa.shop_id=#{storefrontId}
         UNION ALL
         select
-        IFNULL(dafr.type,'') as type,-- 类型
-        IFNULL(dafr.house_order_id,'') as houseOrderId,-- 订单号
-        IFNULL(dafr.money,'') as money,-- 实际支出金额
+        '4' as type,-- 类型
+        '' as houseOrderId,-- 货单号
+        '' as money,-- 实际支出金额
         '' as totalAmount, -- 订单金额
-        '' as orderStatus -- 状态
-        from  dj_account_flow_record dafr
-        inner join dj_receipt dr on dafr.house_order_id=dr.id
+        dwwd.deposit_status,  -- 状态
+        '' as merge
+        from dj_account_flow_record dafr
+        inner  join dj_worker_withdraw_deposit dwwd  on dafr.house_order_id = dwwd.id
+        where dafr.data_status = 0 AND dafr.flow_type = 1 and dafr.defined_account_id=#{storefrontId}
+
 
     </select>
 
