@@ -1233,12 +1233,18 @@ public class PaymentService {
                     if(good.getProductType()==0||good.getProductType()==1){
                         order.setWorkerTypeName("实物订单");
                         order.setType(2);
-                    }else if(good.getProductType()==2){
+                    }
+                    if(good.getProductType()==2){
                         order.setWorkerTypeName("人工订单");
                         order.setType(1);
-                    }else {
+                    }
+                    if(good.getProductType()==3){
                         order.setWorkerTypeName("体验订单");
                         order.setType(4);
+                    }
+                    if(good.getProductType()==5){
+                        order.setWorkerTypeName("维保订单");
+                        order.setType(5);
                     }
                     orderItem.setOrderStatus("1");//1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭
                     orderItem.setCreateBy(member.getId());
