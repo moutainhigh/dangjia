@@ -250,4 +250,18 @@ public interface WebMendMaterielAPI {
                                                      @RequestParam("actualCountList") String actualCountList);
 
 
+    @PostMapping(value = "app/repair/webMendMateriel/querySurplusMaterial")
+    @ApiOperation(value = "业主清点剩余材料", notes = "业主清点剩余材料")
+    ServerResponse querySurplusMaterial(@RequestParam("data") String data);
+
+    @PostMapping(value = "app/repair/webMendMateriel/queryTrialRetreatMaterial")
+    @ApiOperation(value = "业主审核部分退货", notes = "业主审核部分退货")
+    ServerResponse queryTrialRetreatMaterial(@RequestParam("data") String data);
+
+    @PostMapping(value = "app/repair/webMendMateriel/addPlatformComplain")
+    @ApiOperation(value = "业主申请平台介入", notes = "业主申请平台介入")
+    ServerResponse addPlatformComplain(@RequestParam("userToken") String userToken,
+                                       @RequestParam("mendOrderId") String mendOrderId,
+                                       @RequestParam("description") String description);
+
 }

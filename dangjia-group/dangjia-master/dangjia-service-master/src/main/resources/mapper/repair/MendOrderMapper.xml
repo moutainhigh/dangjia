@@ -382,7 +382,61 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         ORDER BY rmo.create_date desc
     </select>
 
+    <select id="querySurplusMaterial" resultType="com.dangjia.acg.dto.repair.SurplusMaterialDTO">
+         SELECT
+            m. NAME AS NAME,
+            m.mobile AS mobile,
+            ts.create_date AS createDate,
+            rmm.image AS image,
+            rmm.product_name AS productName,
+            rmm.product_id AS productId,
+            rmm.price AS price,
+            rmm.unit_name AS unitName,
+            dosi.receive AS receive,
+            dosi.shop_count AS shopCount,
+            rmo.apply_member_id as workerId,
+            rmo.house_id as houseId,
+            ts.id AS taskStackId,
+            rmo.id AS mendOrderId,
+            rmm.id AS mendMaterielId,
+            dosi.id AS orderSplitItemId,
+            dos.id  as orderSplitId,
+            dos.storefront_id as storefrontId
+        FROM
+            dj_task_stack ts
+        INNER JOIN dj_repair_mend_order rmo ON rmo.id = ts.data
+        INNER JOIN dj_repair_mend_materiel rmm ON rmo.id = rmm.mend_order_id
+        INNER JOIN dj_deliver_order_split_item dosi ON dosi.id = rmm.order_item_id
+        INNER JOIN dj_deliver_order_split dos ON dos.id = dosi.order_split_id
+        INNER JOIN dj_member m ON rmo.apply_member_id = m.id
+        WHERE
+            rmo.id = #{data}
+    </select>
 
+    <select id="queryTrialRetreatMaterial" resultType="com.dangjia.acg.dto.repair.SurplusMaterialDTO">
+         SELECT
+            bs.storefront_name AS storefrontName,
+            bs.mobile AS mobile,
+            rmo.business_order_number AS businessOrderNumber,
+            rmo.return_reason AS returnReason,
+            rmo.id AS mendOrderId,
+            rmo.state as state,
+            rmo.type as type,
+            rmm.product_name AS productName,
+            rmm.image AS image,
+            rmm.price AS price,
+            rmm.unit_name AS unitName,
+            rmm.shop_count AS shopCount,
+            rmm.actual_count AS actualCount,
+            rmm.product_id AS productId,
+            rmm.id AS mendMaterielId
+        FROM
+            dj_repair_mend_order rmo
+        INNER JOIN dj_repair_mend_materiel rmm ON rmo.id = rmm.mend_order_id
+        INNER JOIN dj_basics_storefront bs ON bs.id = rmo.storefront_id
+        WHERE
+            rmo.id = #{data}
+    </select>
 
 </mapper>
 

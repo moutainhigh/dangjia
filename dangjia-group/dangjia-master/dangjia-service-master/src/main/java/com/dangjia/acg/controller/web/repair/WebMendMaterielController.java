@@ -138,4 +138,23 @@ public class WebMendMaterielController implements WebMendMaterielAPI {
 
         return mendMaterielService.materialOrderState(userId,cityId,houseId, pageDTO, beginDate, endDate,state, likeAddress);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse querySurplusMaterial(String data) {
+        return mendMaterielService.querySurplusMaterial(data);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryTrialRetreatMaterial(String data) {
+        return mendMaterielService.queryTrialRetreatMaterial(data);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse addPlatformComplain(String userToken,String mendOrderId,String description) {
+        return mendMaterielService.addPlatformComplain(userToken,mendOrderId,description);
+    }
+
 }
