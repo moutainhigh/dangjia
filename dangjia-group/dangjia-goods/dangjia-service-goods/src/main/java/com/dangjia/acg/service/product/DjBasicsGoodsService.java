@@ -244,11 +244,9 @@ public class DjBasicsGoodsService {
             }
 
             List<DjBasicsProductTemplateDTO> productList = iBasicsProductTemplateMapper.queryProductTemplateByGoodsId(categoryId,storefontId,bgtype,name);
-            LOG.debug("*****************判断productList是否为空 start*************************");
             if (productList == null || productList.size() <= 0) {
                 return ServerResponse.createByErrorMessage("查无数据！");
             }
-            LOG.debug("*****************判断productList是否为空 end *************************");
 
             for (DjBasicsProductTemplateDTO p : productList) {
                 //type表示： 是否禁用  0：禁用；1不禁用 ;  -1全部默认

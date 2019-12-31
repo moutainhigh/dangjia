@@ -1499,6 +1499,31 @@ public class RefundAfterSalesService {
 
     }
 
+    /**
+     * 退人工--查询符合条件的可退人工商品
+     * @param userToken 用户token
+     * @param cityId  城市ID
+     * @param houseId 房子ID
+     * @param workerTypeId 工种ID
+     * @param searchKey 商品名称
+     * @return
+     */
+    public ServerResponse queryWorkerProductList(String userToken,String cityId,String houseId,
+                                                 String workerTypeId,String searchKey){
+        try{
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            logger.info("退人工商品查询：userToken={}，cityId={},houseId={},workerTypeId={},searchKey={}",userToken,cityId,houseId,workerTypeId,searchKey);
+            //PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<RefundOrderItemDTO> orderItemList=refundAfterSalesMapper.queryWorkerProductList(houseId,workerTypeId,searchKey);
+            getProductList(orderItemList,address);
+
+            //PageInfo pageResult = new PageInfo(orderItemList);
+            return ServerResponse.createBySuccess("查询成功",orderItemList);
+        }catch (Exception e){
+            logger.error("查询可退人工商品异常：",e);
+            return ServerResponse.createByErrorMessage("查询可退人工商品失败");
+        }
+    }
 
 
 }
