@@ -565,19 +565,19 @@ public class BudgetWorkerService {
 
             ImportExcel renGong = new ImportExcel(file, 0, 0);//人工
             List<WorkerGoodsDTO> workerGoodsDTOList = renGong.getDataList(WorkerGoodsDTO.class, 0);
-            List<WorkerGoodsDTO> workerGoodsDTOS = new ArrayList<>();
+            List<ProductDTO> productDTOS = new ArrayList<>();
             for (int i = 0; i < workerGoodsDTOList.size(); i++) {
                 WorkerGoodsDTO workerGoodsDTO = workerGoodsDTOList.get(i);
                 if (CommonUtil.isEmpty(workerGoodsDTO.getWorkerGoodsSn())) {
                     break;
                 }
-                workerGoodsDTO = workerGoodsService.getWorkerGoodsDTO(workerGoodsDTO.getWorkerGoodsSn(), workerTypeId, workerGoodsDTO.getShopCount());
+                ProductDTO  productDTO= djBasicsProductTemplateService.getProductDTO(workerGoodsDTO.getWorkerGoodsSn(), workerGoodsDTO.getShopCount());
                 if (CommonUtil.isEmpty(workerGoodsDTO.getShopCount())) {
                     continue;
                 }
-                workerGoodsDTOS.add(workerGoodsDTO);
+                productDTOS.add(productDTO);
             }
-            map.put("workerGoods", workerGoodsDTOS);
+            map.put("workerGoods", productDTOS);
             return ServerResponse.createBySuccess("生成精算成功", map);
         } catch (Exception e) {
             logger.error("生成失败",e);
