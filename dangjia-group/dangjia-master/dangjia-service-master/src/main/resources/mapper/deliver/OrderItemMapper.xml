@@ -42,26 +42,19 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		cancellation_time as cancellationTime
 	</sql>
 	<select id="queryShopGoods" resultType="com.dangjia.acg.dto.actuary.ShopGoodsDTO">
-	SELECT
-		l.id shopId,
-		l.storefront_name shopName
-	FROM
-		dj_basics_storefront l
-	WHERE
-		l.id IN (
-			SELECT
-				m.storefont_id
-			FROM
-				dj_deliver_order_item m
-			WHERE
-				m.order_id = #{orderId}
-			GROUP BY
-				m.storefont_id
-		)
-	GROUP BY
-		l.id
-	ORDER BY
-		l.id DESC
+		SELECT
+			l.id shopId,
+			l.storefront_name shopName,
+			oi.product_type productType
+		FROM
+			dj_basics_storefront l
+		INNER JOIN dj_deliver_order_item oi on oi.storefont_id = l.id
+		WHERE
+				oi.order_id = #{orderId}
+		GROUP BY
+			l.id,oi.product_type
+		ORDER BY
+			l.id DESC
 	</select>
 	<!--查询工种材料未支付所有商品的标签-->
 	<select id="queryBudgetLabel" resultType="com.dangjia.acg.dto.actuary.BudgetLabelDTO">
@@ -81,6 +74,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 				WHERE
 					m.order_id =  #{orderId}
 					and m.storefont_id = #{storefontId}
+					<if test = "productType!=null and productType!=''">
+						and m.product_type = #{productType}
+					</if>
 				GROUP BY
 					m.category_id
 			  )
@@ -115,6 +111,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		WHERE ( o.id = #{orderId} OR o.parent_order_id =  #{orderId} )
 		<if test = "storefontId!=null and storefontId!=''">
 			and m.storefont_id = #{storefontId}
+		</if>
+		<if test = "productType!=null and productType!=''">
+			and m.product_type = #{productType}
 		</if>
 	</select>
     <!-- 模糊查询 -->

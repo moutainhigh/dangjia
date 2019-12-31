@@ -39,7 +39,7 @@ public class BudgetLabelGoodsDTO {
     private String isReservationDeliver;//是否业主预约发货(1是，0否)
     private Date createDate;//新建时间
     private Date modifyDate;//修改时间
-    private Integer productType;// 0：材料；1：包工包料；2：人工
+    private Integer productType;// 0：材料；1：服务；2：人工；3：体验；4：增值；5：维保
     private String categoryId;//分类ID
     private String image;//商品图片
     private String originalProductId;//更换前最初始的商品ID

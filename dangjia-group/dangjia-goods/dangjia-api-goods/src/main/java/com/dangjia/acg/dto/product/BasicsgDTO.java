@@ -42,7 +42,7 @@ public class BasicsgDTO {
     private Double shopCount;//购买总数 (精算的时候，用户手动填写的购买数量， 该单位是 product 的convertUnit换算单位 )
     private Double convertCount;
     private String groupType; //null：单品；有值：关联组合  （如果 null 并且 goods_group_id 不为null， 说明是关联组的单品则不参与关联组切换）
-    private Integer productType; //0：材料；1：包工包料
+    private Integer productType; //0：材料；1：服务；2：人工；3：体验；4：增值；5：维保
     private String goodsGroupId; //所属关联组
     private String categoryId;//分类id
 

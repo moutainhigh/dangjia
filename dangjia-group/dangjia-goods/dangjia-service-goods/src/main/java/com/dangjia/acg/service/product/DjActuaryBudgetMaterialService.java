@@ -225,7 +225,7 @@ public class DjActuaryBudgetMaterialService {
                 JSONObject job = goodsList.getJSONObject(i);
                 String goodsId = job.getString("goodsId");//商品id
                 String productId = job.getString("productId");//货品id
-                Integer productType = Integer.parseInt(job.getString("productType"));//0:材料；1：包工包料；2:人工
+                Integer productType = Integer.parseInt(job.getString("productType"));//0：材料；1：服务；2：人工；3：体验；4：增值；5：维保
                 String groupType = job.getString("groupType");//null：单品；有值：关联组合
                 String goodsGroupId = job.getString("goodsGroupId");//所属关联组
                 Double shopCount = Double.parseDouble(job.getString("shopCount"));//数量

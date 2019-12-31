@@ -105,7 +105,7 @@ public class Warehouse extends BaseEntity {
 	@Column(name = "product_type")
 	@Desc(value = "0：材料；1：包工包料")
 	@ApiModelProperty("0：材料；1：包工包料")
-	private Integer productType; //0：材料；1：包工包料
+	private Integer productType; //0：材料；1：服务；2：人工；3：体验；4：增值；5：维保
 
 	@Column(name = "category_id")
 	@Desc(value = "分类id")

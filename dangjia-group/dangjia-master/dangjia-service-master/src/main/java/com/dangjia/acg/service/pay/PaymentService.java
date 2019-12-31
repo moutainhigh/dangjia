@@ -738,7 +738,7 @@ public class PaymentService {
             BigDecimal freightPrice = new BigDecimal(0);//总运费
             BigDecimal totalMoveDost = new BigDecimal(0);//搬运费
 
-            Order orderNew = orderMapper.getStorefontOrder(queryShopGood.getShopId(),order.getId());
+            Order orderNew = orderMapper.getStorefontOrder(queryShopGood.getShopId(),order.getId(),queryShopGood.getProductType());
             if(queryShopGoods.size()>1){
                 if(orderNew==null) {
                     orderNew = new Order();
@@ -1049,7 +1049,7 @@ public class PaymentService {
         List<ShopGoodsDTO> budgetLabelDTOS =  orderItemMapper.queryShopGoods(orderId);
         for (ShopGoodsDTO budgetLabelDTO : budgetLabelDTOS) {
             BigDecimal totalMaterialPrice = new BigDecimal(0);//组总价
-            budgetLabelDTO.setLabelDTOS(queryBudgetLabel(orderId,budgetLabelDTO.getShopId()));
+            budgetLabelDTO.setLabelDTOS(queryBudgetLabel(orderId,budgetLabelDTO.getShopId(),budgetLabelDTO.getProductType()));
             for (BudgetLabelDTO labelDTO : budgetLabelDTO.getLabelDTOS()) {
                 for (BudgetLabelGoodsDTO good : labelDTO.getGoods()) {
                     if(good.getProductType()==0) {
@@ -1061,11 +1061,11 @@ public class PaymentService {
         }
         return budgetLabelDTOS;
     }
-    public List<BudgetLabelDTO> queryBudgetLabel(String orderId,String storefontId){
+    public List<BudgetLabelDTO> queryBudgetLabel(String orderId,String storefontId,Integer productType){
         String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-        List<BudgetLabelDTO> budgetLabelDTOS =  orderItemMapper.queryBudgetLabel(orderId,storefontId);//精算工钱
+        List<BudgetLabelDTO> budgetLabelDTOS =  orderItemMapper.queryBudgetLabel(orderId,storefontId,productType);//精算工钱
 
-        List<BudgetLabelGoodsDTO> budgetLabelGoodsDTOS = orderItemMapper.queryBudgetLabelGoods(orderId,storefontId);//精算工钱
+        List<BudgetLabelGoodsDTO> budgetLabelGoodsDTOS = orderItemMapper.queryBudgetLabelGoods(orderId,storefontId,productType);//精算工钱
         for (BudgetLabelDTO budgetLabelDTO : budgetLabelDTOS) {
             BigDecimal totalZPrice = new BigDecimal(0);//组总价
             String[] array = budgetLabelDTO.getCategoryIds().split(",");

@@ -84,7 +84,7 @@ public class Cart extends BaseEntity {
 	@Column(name = "product_type")
 	@Desc(value = "0：材料；1：包工包料；2：人工")
 	@ApiModelProperty("0：材料；1：包工包料；2：人工")
-	private Integer productType; //0：材料；1：包工包料；2：人工
+	private Integer productType; //0：实物商品；1：服务商品；2：人工商品；3：体验；5：维保
 
 	@Column(name = "storefront_id")
 	@Desc(value = "店铺ID")
