@@ -305,6 +305,115 @@
         </if>
     </select>
 
+
+    <!-- 查询当前房子的订单详情(包含增值商品信息的查询)-->
+    <select id="getBudgetOrderDetailByInFo" resultType="com.dangjia.acg.dto.house.HouseOrderDetailDTO">
+        SELECT
+        t.id orderId,
+        t1.id orderItemId,
+        IFNULL(t1.image, t2.image) image,
+        t1.product_name productName,
+        t1.price,
+        IFNULL(t1.total_price,t1.price*t1.shop_count) totalPrice,
+        t1.shop_count shopCount,
+        t2.prod_template_id productTemplateId,
+        t1.product_id productId,
+        t1.worker_type_id workerTypeId,
+        t.order_number as orderNumber,
+        t.order_status as orderStatus
+        FROM
+        dj_core_house_worker ho,
+        dj_deliver_order t,
+        dj_deliver_order_item t1,
+        dj_basics_storefront_product t2
+        <if test="workerTypeId!=null and workerTypeId!=''">
+            ,dj_pay_business_order t3
+        </if>
+        WHERE
+        t.id = t1.order_id
+        AND ho.order_id = t.id
+        AND t1.product_id = t2.id
+        AND t.house_id = #{houseId}
+        and t1.shop_count > t1.return_count
+        <if test="workerTypeId!=null and workerTypeId!=''">
+            <if test="type != null">
+                AND ho.worker_type_id =#{workerTypeId}
+                AND ho.type = #{type}
+            </if>
+            <if test="type == null">
+                AND t1.worker_type_id =#{workerTypeId}
+            </if>
+            and t.business_order_number=t3.number
+            and t3.state = 3
+        </if>
+        UNION ALL
+        SELECT
+        t.id orderId,
+        t1.id orderItemId,
+        t2.image image,
+        t3.product_name productName,
+        t3.price,
+        IFNULL(t3.price*t1.shop_count,0) totalPrice,
+        t1.shop_count shopCount,
+        t2.prod_template_id productTemplateId,
+        t3.added_product_id productId,
+        t1.worker_type_id workerTypeId,
+        t.order_number as orderNumber,
+        t.order_status as orderStatus
+        FROM
+        dj_core_house_worker ho,
+        dj_deliver_order t,
+        dj_deliver_order_item t1,
+        dj_basics_storefront_product t2,
+        dj_deliver_order_added_product t3
+        <if test="workerTypeId!=null and workerTypeId!=''">
+            ,dj_pay_business_order t4
+        </if>
+        WHERE
+        t.id = t1.order_id
+        AND ho.order_id = t.id
+        AND t3.added_product_id= t2.id
+        and t1.id=t3.any_order_id
+        AND t.house_id = #{houseId}
+        and t1.shop_count > t1.return_count
+        <if test="workerTypeId!=null and workerTypeId!=''">
+            <if test="type != null">
+                AND ho.worker_type_id =#{workerTypeId}
+                AND ho.type = #{type}
+            </if>
+            <if test="type == null">
+                AND t1.worker_type_id =#{workerTypeId}
+            </if>
+            and t.business_order_number=t4.number
+            and t4.state = 3
+        </if>
+    </select>
+
+    <select id="queryTestNumber" resultType="java.lang.Integer">
+       select count(*) from
+            dj_basics_product_template t,
+            dj_basics_technology t1,
+            dj_matter_technology_record t2,
+            dj_core_house_flow_apply t3
+        where
+            FIND_IN_SET(t1.id,t.technology_ids)
+        and t2.technology_Id = t1.id
+        and t2.house_flow_apply_id = t3.id
+        and t3.worker_id = #{workerId}
+        and t2.house_id= #{houseId}
+        and t.id = #{id}
+        and t1.type in(2,3)
+    </select>
+
+    <select id="queryArrNumber" resultType="java.lang.Integer">
+        select count(*) from
+            dj_basics_product_template t,
+            dj_basics_technology t1
+        where
+            FIND_IN_SET(t1.id,t.technology_ids)
+        and t.id = #{id}
+    </select>
+
     <select id="getBudgetOrderNewInfo" resultType="com.dangjia.acg.dto.house.HouseOrderDetailDTO">
         SELECT
         t.id orderId,

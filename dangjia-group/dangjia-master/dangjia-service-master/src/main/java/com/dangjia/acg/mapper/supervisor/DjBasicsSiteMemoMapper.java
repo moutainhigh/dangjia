@@ -15,4 +15,10 @@ public interface DjBasicsSiteMemoMapper extends Mapper<DjBaicsSiteMemo> {
 
     DjBasicsSiteMemoDTO querySiteMemoDetail(@Param("id") String id);
 
+    List<DjBasicsSiteMemoDTO> queryRemindSiteMemo( @Param("memberId") String memberId);
+
+    List<DjBasicsSiteMemoDTO> queryRemindSiteMemoDetail( @Param("memberId") String memberId,@Param("id")  String id);
+
+    List<DjBaicsSiteMemo> querySiteMemoByMemberId(@Param("memberId") String memberId);
+
 }

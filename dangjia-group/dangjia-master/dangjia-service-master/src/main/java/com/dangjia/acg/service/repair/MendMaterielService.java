@@ -13,20 +13,22 @@ import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.refund.OrderProgressDTO;
-import com.dangjia.acg.dto.repair.MendOrderDTO;
-import com.dangjia.acg.dto.repair.ReturnMendMaterielDTO;
-import com.dangjia.acg.dto.repair.ReturnOrderProgressDTO;
+import com.dangjia.acg.dto.repair.*;
+import com.dangjia.acg.mapper.complain.IComplainMapper;
 import com.dangjia.acg.mapper.delivery.ISplitDeliverMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.repair.*;
+import com.dangjia.acg.modle.complain.Complain;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
+import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.repair.*;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.supplier.DjSupplier;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.netflix.discovery.converters.Auto;
@@ -75,10 +77,13 @@ public class MendMaterielService {
     private IMendTypeRoleMapper mendTypeRoleMapper;
     @Autowired
     private IMendOrderCheckMapper mendOrderCheckMapper;
-
+    @Autowired
+    private CraftsmanConstructionService constructionService;
     @Autowired
     private IMendDeliverMapper mendDeliverMapper ;
 
+    @Autowired
+    private IComplainMapper iComplainMapper;
     /**
      * 店铺退货分发供应商列表
      * @param request
@@ -454,11 +459,16 @@ public class MendMaterielService {
     public ServerResponse queryMendMaterialList(String mendOrderId, String userId) {
         //合计付款
         MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);//补退订单表
+        if (mendOrder == null) {
+            return ServerResponse.createByErrorMessage("不存在当前补退订单");
+        }
         House house = houseMapper.selectByPrimaryKey(mendOrder.getHouseId());//房子信息
         ReturnMendMaterielDTO returnMendMaterielDTO=new ReturnMendMaterielDTO();
 
         List<ReturnOrderProgressDTO> mendMaterielProgressList= mendMaterialMapper.queryMendMaterielProgress(mendOrderId);
-        if(mendMaterielProgressList!=null&&mendMaterielProgressList.size()>0)
+        if (mendMaterielProgressList == null || mendMaterielProgressList.size() <= 0) {
+            return ServerResponse.createByErrorMessage("查无数据！");
+        }
         returnMendMaterielDTO.setMendMaterielProgressList(mendMaterielProgressList);
 
 
@@ -609,5 +619,102 @@ public class MendMaterielService {
         return mendOrderDTOS;
     }
 
+
+    /**
+     * 业主清点剩余材料
+     * @param data
+     * @return
+     */
+    public ServerResponse querySurplusMaterial(String data) {
+        try {
+            ArrSurplusMaterialDTO arrSurplusMaterialDTO = new ArrSurplusMaterialDTO();
+            List<SurplusMaterialDTO> surplusMaterialDTOS = mendOrderMapper.querySurplusMaterial(data);
+            if(surplusMaterialDTOS != null && surplusMaterialDTOS.size() >0){
+                String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+                for (SurplusMaterialDTO surplusMaterialDTO : surplusMaterialDTOS) {
+                    surplusMaterialDTO.setImage(imageAddress + surplusMaterialDTO.getImage());
+                }
+                arrSurplusMaterialDTO.setList(surplusMaterialDTOS);
+                arrSurplusMaterialDTO.setCreateDate(surplusMaterialDTOS.get(0).getCreateDate());
+                arrSurplusMaterialDTO.setMobile(surplusMaterialDTOS.get(0).getMobile());
+                arrSurplusMaterialDTO.setName(surplusMaterialDTOS.get(0).getName());
+                arrSurplusMaterialDTO.setHouseId(surplusMaterialDTOS.get(0).getHouseId());
+                arrSurplusMaterialDTO.setWorkerId(surplusMaterialDTOS.get(0).getWorkerId());
+            }
+            return ServerResponse.createBySuccess("查询成功", arrSurplusMaterialDTO);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+
+    /**
+     * 业主审核部分退货
+     * @param data
+     * @return
+     */
+    public ServerResponse queryTrialRetreatMaterial(String data) {
+        try {
+            ArrSurplusMaterialDTO arrSurplusMaterialDTO = new ArrSurplusMaterialDTO();
+            List<SurplusMaterialDTO> surplusMaterialDTOS = mendOrderMapper.queryTrialRetreatMaterial(data);
+            if(surplusMaterialDTOS != null && surplusMaterialDTOS.size() >0){
+                String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+                for (SurplusMaterialDTO surplusMaterialDTO : surplusMaterialDTOS) {
+                    surplusMaterialDTO.setImage(imageAddress + surplusMaterialDTO.getImage());
+                }
+                arrSurplusMaterialDTO.setList(surplusMaterialDTOS);
+                arrSurplusMaterialDTO.setMendOrderId(surplusMaterialDTOS.get(0).getMendOrderId());
+                arrSurplusMaterialDTO.setStorefrontName(surplusMaterialDTOS.get(0).getStorefrontName());
+                arrSurplusMaterialDTO.setStorefrontMobile(surplusMaterialDTOS.get(0).getStorefrontMobile());
+                arrSurplusMaterialDTO.setReturnReason(surplusMaterialDTOS.get(0).getReturnReason());
+                arrSurplusMaterialDTO.setBusinessOrderNumber(surplusMaterialDTOS.get(0).getBusinessOrderNumber());
+                arrSurplusMaterialDTO.setType(surplusMaterialDTOS.get(0).getType());
+            }
+            return ServerResponse.createBySuccess("查询成功", arrSurplusMaterialDTO);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+
+
+    /**
+     * 申请平台介入
+     * @param mendOrderId
+     * @return
+     */
+    public ServerResponse addPlatformComplain(String userToken,String mendOrderId,String description){
+        Object object = constructionService.getAccessToken(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        AccessToken accessToken = (AccessToken) object;
+        if (CommonUtil.isEmpty(accessToken.getUserId())) {
+            return ServerResponse.createbyUserTokenError();
+        }
+
+        MendOrder mendOrder = mendOrderMapper.selectByPrimaryKey(mendOrderId);
+        if(mendOrder ==null){
+            return ServerResponse.createByErrorMessage("该订单不存在");
+        }
+        Member member = memberMapper.selectByPrimaryKey(accessToken.getUserId());
+        if(member ==null){
+            return ServerResponse.createByErrorMessage("该用户不存在");
+        }
+        Complain complain = new Complain();
+        complain.setMemberId(accessToken.getUserId());
+        complain.setComplainType(7);
+        complain.setStatus(0);
+        complain.setDescription(description);
+        complain.setBusinessId(mendOrderId);
+        complain.setUserName(member.getName());
+        complain.setUserNickName(member.getNickName());
+        complain.setUserMobile(member.getMobile());
+        complain.setHouseId(mendOrder.getHouseId());
+        iComplainMapper.insert(complain);
+        return ServerResponse.createByErrorMessage("新增成功");
+    }
 
 }

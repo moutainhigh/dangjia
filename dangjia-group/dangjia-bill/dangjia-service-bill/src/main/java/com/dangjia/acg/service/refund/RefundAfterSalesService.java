@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.app.repair.MendRecordAPI;
+import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
@@ -19,22 +20,28 @@ import com.dangjia.acg.mapper.config.IBillConfigMapper;
 import com.dangjia.acg.mapper.delivery.BillDjDeliverOrderSplitItemMapper;
 import com.dangjia.acg.mapper.delivery.BillDjDeliverOrderSplitMapper;
 import com.dangjia.acg.mapper.delivery.IBillDjDeliverOrderItemMapper;
+import com.dangjia.acg.mapper.delivery.IBillDjDeliverOrderMapper;
 import com.dangjia.acg.mapper.order.IBillChangeOrderMapper;
 import com.dangjia.acg.mapper.order.IBillMendWorkerMapper;
 import com.dangjia.acg.mapper.order.IBillOrderProgressMapper;
 import com.dangjia.acg.mapper.order.IBillQuantityRoomMapper;
+import com.dangjia.acg.mapper.pay.IBillBusinessOrderMapper;
 import com.dangjia.acg.mapper.refund.*;
 import com.dangjia.acg.mapper.sale.IBillMemberMapper;
+import com.dangjia.acg.mapper.task.IBillTaskStackMapper;
 import com.dangjia.acg.model.Config;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.complain.Complain;
+import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.deliver.OrderItem;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
 import com.dangjia.acg.modle.design.QuantityRoom;
+import com.dangjia.acg.modle.house.TaskStack;
 import com.dangjia.acg.modle.member.AccessToken;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.order.OrderProgress;
+import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.repair.ChangeOrder;
@@ -53,7 +60,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
+import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -90,6 +99,8 @@ public class RefundAfterSalesService {
     @Autowired
     private IBillDjDeliverOrderItemMapper iBillDjDeliverOrderItemMapper;
     @Autowired
+    private IBillDjDeliverOrderMapper iBillDjDeliverOrderMapper;
+    @Autowired
     private IBillOrderProgressMapper iBillOrderProgressMapper;
     @Autowired
     private IBillConfigMapper iBillConfigMapper;
@@ -109,6 +120,10 @@ public class RefundAfterSalesService {
     private IBillMemberMapper iBillMemberMapper;
     @Autowired
     private BillProductTemplateService billProductTemplateService;
+    @Autowired
+    private IBillTaskStackMapper iBillTaskStackMapper;
+    @Autowired
+    private IBillBusinessOrderMapper iBillBusinessOrderMapper;
 
     /**
      * 查询可退款的商品
@@ -636,7 +651,7 @@ public class RefundAfterSalesService {
             getRepairOrderProductList(repairMaterialList,address);
             refundRepairOrderDTO.setOrderMaterialList(repairMaterialList);//将退款材料明细放入对象中
             //查询对应的流水节点信息(根据订单ID）
-            List<OrderProgressDTO> orderProgressDTOList=iBillOrderProgressMapper.queryOrderProgressListByOrderId(repairMendOrderId,"2");//仅退款
+            List<OrderProgressDTO> orderProgressDTOList=iBillOrderProgressMapper.queryOrderProgressListByOrderId(repairMendOrderId);//仅退款
             refundRepairOrderDTO.setShowRepairDateType(1);//显示时间判断（1订单剩余时间，2最新处理时间）
            if(orderProgressDTOList!=null&&orderProgressDTOList.size()>0){//判断最后节点，及剩余处理时间
                OrderProgressDTO orderProgressDTO=orderProgressDTOList.get(orderProgressDTOList.size()-1);
@@ -1014,6 +1029,7 @@ public class RefundAfterSalesService {
      * @param orderProductAttr
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse saveReturnRefundInfo(String userToken,String cityId,String houseId,String orderProductAttr){
         Object object = getMember(userToken);
         if (object instanceof ServerResponse) {
@@ -1114,6 +1130,133 @@ public class RefundAfterSalesService {
         }
         return  ServerResponse.createBySuccessMessage("提交成功");
     }
+
+
+
+    /**
+     * 退货退款提交
+     * @param userToken
+     * @param cityId
+     * @param houseId
+     * @param orderProductAttr
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse clearSurplusGoods(String userToken,String cityId,String houseId,String orderProductAttr){
+
+        Object object = getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+        Member member = (Member) object;
+
+
+        //查询房子信息，获取房子对应的楼层
+        QuantityRoom quantityRoom=iBillQuantityRoomMapper.getBillQuantityRoom(houseId,0);
+        Integer elevator= 1;//是否电梯房
+        String floor="1";
+        if(quantityRoom!=null&&StringUtils.isNotBlank(quantityRoom.getId())){
+            elevator=quantityRoom.getElevator();//是否电梯房
+            floor=quantityRoom.getFloor();//楼层
+        }
+        MendOrder mendOrder;
+        Example example;
+
+        //去重 orderProductAttr
+        JSONArray orderArrayList=JSONArray.parseArray(orderProductAttr);
+        Set set = new HashSet();
+        if(orderArrayList!=null && orderArrayList.size() > 0) {
+            for (int i = 0; i < orderArrayList.size(); i++) {
+                set.add(orderArrayList.get(i));
+            }
+        }
+        System.out.println(set.size());
+        orderArrayList = JSONArray.parseArray(set.toString());
+        if(orderArrayList!=null&&orderArrayList.size()>0) {
+            for (int i = 0; i < orderArrayList.size(); i++) {
+                JSONObject obj = (JSONObject) orderArrayList.get(i);
+                String orderSplitId = (String) obj.get("orderSplitId");
+                String storefrontId = (String) obj.get("storefrontId");
+                String imageArr = (String)obj.get("imageArr");
+                example = new Example(MendOrder.class);
+                mendOrder = new MendOrder();
+                mendOrder.setNumber("DJZX" + 40000 + iBillMendOrderMapper.selectCountByExample(example));//订单号
+                mendOrder.setHouseId(houseId);
+                mendOrder.setApplyMemberId(member.getId());
+                mendOrder.setType(2);//2:退材料
+                mendOrder.setOrderName("业主退材料退货退款");
+                mendOrder.setState(0);//生成中
+                mendOrder.setStorefrontId(storefrontId);
+                mendOrder.setImageArr(imageArr);//相关凭证
+                mendOrder.setOrderId(orderSplitId);//订单申请ID(要货表中的订单ID）
+                Double totalRransportationCost = 0.0;//可退运费
+                Double totalStevedorageCost = 0.0;//可退搬运费
+                Double actualTotalAmount=0.0;//退货总额
+                //获取商品信息
+                JSONArray orderItemProductList = obj.getJSONArray("orderItemProductList");
+                for (int j = 0; j < orderItemProductList.size(); j++) {
+                    JSONObject productObj = (JSONObject) orderItemProductList.get(j);
+                    String orderSplitItemId=(String)productObj.get("orderSplitItemId");//要货单详情Id
+                    String productId=(String)productObj.get("productId");//产品ID
+                    Double returnCount=productObj.getDouble("returnCount");//退货量
+                    RefundOrderItemDTO refundOrderItemDTO=billDjDeliverOrderSplitItemMapper.queryReturnRefundOrderItemInfo(orderSplitItemId);
+                    if(refundOrderItemDTO==null){
+                        return ServerResponse.createByErrorMessage("未找到对应的退货单信息");
+                    }
+                    setProductInfo(refundOrderItemDTO,address);
+                    Double surplusCount=refundOrderItemDTO.getSurplusCount();
+                    logger.info("退货量{}，可退量{}",returnCount,surplusCount);
+                    if(MathUtil.sub(surplusCount,returnCount)<0){
+                        return ServerResponse.createByErrorMessage("退货量大于可退货量，不能退。");
+                    }
+                    refundOrderItemDTO.setReturnCount(returnCount);
+                    //修改要货订单中的退货量为最新的退货量
+                    OrderSplitItem orderSplitItem=billDjDeliverOrderSplitItemMapper.selectByPrimaryKey(refundOrderItemDTO.getOrderSplitItemId());
+                    orderSplitItem.setId(refundOrderItemDTO.getOrderSplitItemId());
+                    orderSplitItem.setReturnCount(MathUtil.add(orderSplitItem.getReturnCount(),returnCount));
+                    billDjDeliverOrderSplitItemMapper.updateByPrimaryKeySelective(orderSplitItem);
+                    Double price = refundOrderItemDTO.getPrice();//购买单价
+                    Double shopCount=refundOrderItemDTO.getShopCount();//购买数据
+                    Double transportationCost=refundOrderItemDTO.getTransportationCost();//运费
+                    Double stevedorageCost=refundOrderItemDTO.getStevedorageCost();//搬运费
+                    //计算可退运费
+                    if(transportationCost>0.0) {
+                        Double returnRransportationCost = CommonUtil.getReturnRransportationCost(price, shopCount, returnCount,transportationCost);
+                        totalRransportationCost=MathUtil.add(totalRransportationCost,returnRransportationCost);
+                        refundOrderItemDTO.setTransportationCost(returnRransportationCost);
+                    }
+                    //计算可退搬费
+                    if(stevedorageCost>0.0){
+                        String isUpstairsCost=refundOrderItemDTO.getIsUpstairsCost();//是否按1层收取上楼费
+                        Double moveCost=refundOrderItemDTO.getMoveCost();//每层搬超级赛亚人费
+                        Double returnStevedorageCost=CommonUtil.getReturnStevedorageCost(elevator,floor,isUpstairsCost,moveCost,returnCount);
+                        totalStevedorageCost=MathUtil.add(totalStevedorageCost,returnStevedorageCost);
+                        refundOrderItemDTO.setStevedorageCost(totalStevedorageCost);
+                    }
+                    refundOrderItemDTO.setOrderItemId(refundOrderItemDTO.getOrderSplitItemId());//传退货单详情ID
+                    //添回退款申请明细信息
+                    MendMateriel mendMateriel = saveBillMendMaterial(mendOrder,cityId,refundOrderItemDTO,productId,returnCount);
+                    actualTotalAmount=MathUtil.add(actualTotalAmount,MathUtil.mul(price,returnCount));
+
+                }
+                mendOrder.setModifyDate(new Date());
+                mendOrder.setState(1);
+                mendOrder.setCarriage(totalRransportationCost);//运费
+                mendOrder.setTotalStevedorageCost(totalStevedorageCost);//搬运费
+                mendOrder.setActualTotalAmount(actualTotalAmount);//退货总额
+                mendOrder.setTotalAmount(MathUtil.sub(MathUtil.sub(actualTotalAmount,totalRransportationCost),totalStevedorageCost));//实退款，含运费(去掉运费搬运费后的可得钱)
+                //添加对应的申请退货单信息
+                iBillMendOrderMapper.insert(mendOrder);
+                //添加对应的流水记录节点信息
+                updateOrderProgressInfo(mendOrder.getId(),"2","REFUND_AFTER_SALES","RA_001",member.getId());
+                updateOrderProgressInfo(mendOrder.getId(),"2","REFUND_AFTER_SALES","RA_002",member.getId());
+            }
+        }
+        return  ServerResponse.createBySuccessMessage("提交成功");
+    }
+
+
     /**
      * 查询补退人工历史记录列表
      * @param pageDTO
@@ -1136,12 +1279,12 @@ public class RefundAfterSalesService {
                 for(ReturnWorkOrderDTO returnWorkOrderDTO:reuturnWokerList){
                     String  repairWorkOrderId=returnWorkOrderDTO.getRepairWorkOrderId();
                     //查询对应的流水节点信息(根据订单ID）
-                    List<OrderProgressDTO> orderProgressDTOList=iBillOrderProgressMapper.queryOrderProgressListByOrderId(repairWorkOrderId,"2");//退款历史记录
+                    List<OrderProgressDTO> orderProgressDTOList=iBillOrderProgressMapper.queryOrderProgressListByOrderId(repairWorkOrderId);//退款历史记录
                     if(orderProgressDTOList!=null&&orderProgressDTOList.size()>0){//判断最后节点，及剩余处理时间
                         OrderProgressDTO orderProgressDTO=orderProgressDTOList.get(orderProgressDTOList.size()-1);
                         returnWorkOrderDTO.setStateName(CommonUtil.getStateWorkerName(orderProgressDTO.getNodeCode()));
                     }else{
-                        returnWorkOrderDTO.setStateName(CommonUtil.getChangeStateName(returnWorkOrderDTO.getState()));
+                        returnWorkOrderDTO.setStateName(CommonUtil.getChangeStateName(returnWorkOrderDTO.getState(),searchType));
                     }
                 }
             }
@@ -1164,28 +1307,27 @@ public class RefundAfterSalesService {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             logger.info("退人工详情页面：repairWorkOrderId={}",repairWorkOrderId);
             ReturnWorkOrderDTO returnWorkOrderDTO=iBillChangeOrderMapper.queryReturnWorkerInfo(repairWorkOrderId);
-            String supId=returnWorkOrderDTO.getSupId();
-            //查询大管家电话
-            Member member=iBillMemberMapper.selectByPrimaryKey(supId);
 
-            if(member!=null&&StringUtils.isNotBlank(member.getMobile())){
-                returnWorkOrderDTO.setSupMobile(member.getMobile());
-
-            }
-
-            List<OrderProgressDTO> orderProgressDTOList=iBillOrderProgressMapper.queryOrderProgressListByOrderId(repairWorkOrderId,"2");//退款历史记录
+            List<OrderProgressDTO> orderProgressDTOList=iBillOrderProgressMapper.queryOrderProgressListByOrderId(repairWorkOrderId);//退款历史记录
             if(orderProgressDTOList!=null&&orderProgressDTOList.size()>0){//判断最后节点，及剩余处理时间
                 OrderProgressDTO orderProgressDTO=orderProgressDTOList.get(orderProgressDTOList.size()-1);
                 returnWorkOrderDTO.setStateName(CommonUtil.getStateWorkerName(orderProgressDTO.getNodeCode()));
                 returnWorkOrderDTO.setRepairNewNode(orderProgressDTO.getNodeName());
                 returnWorkOrderDTO.setAssociatedOperation(orderProgressDTO.getAssociatedOperation());
                 returnWorkOrderDTO.setAssociatedOperationName(orderProgressDTO.getAssociatedOperationName());
+
+                //查询业主的电话
+                String mobile="";
+                Member member=iBillMemberMapper.selectByPrimaryKey(returnWorkOrderDTO.getMemberId());
+                if(member!=null&&StringUtils.isNotBlank(member.getMobile())){
+                    mobile=member.getMobile();
+                }
                 //流水节点放入
-                returnWorkOrderDTO.setOrderProgressList(setOrderWorkerProgressList(orderProgressDTOList,orderProgressDTO,returnWorkOrderDTO.getSupMobile()));
+                returnWorkOrderDTO.setOrderProgressList(setOrderWorkerProgressList(orderProgressDTOList,orderProgressDTO,mobile));
 
             }else{
                 //状态优化
-                returnWorkOrderDTO.setStateName(CommonUtil.getChangeStateName(returnWorkOrderDTO.getState()));
+                returnWorkOrderDTO.setStateName(CommonUtil.getChangeStateName(returnWorkOrderDTO.getState(),returnWorkOrderDTO.getType()));
             }
 
             returnWorkOrderDTO.setMobile(returnWorkOrderDTO.getWorkerMobile());//拨打电话
@@ -1201,7 +1343,7 @@ public class RefundAfterSalesService {
                 returnWorkOrderDTO.setActualTotalAmount(mendOrder.getActualTotalAmount());
                 returnWorkOrderDTO.setTotalAmount(mendOrder.getTotalAmount());
             }
-            List<RefundRepairOrderMaterialDTO> repairWorkerList=iBillMendWorkerMapper.queryBillMendOrderId(repairWorkOrderId);//退款商品列表查询
+            List<RefundRepairOrderMaterialDTO> repairWorkerList=iBillMendWorkerMapper.queryBillMendOrderId(mendOrder.getId());//退款商品列表查询
             getRepairOrderProductList(repairWorkerList,address);
             returnWorkOrderDTO.setOrderWorkerList(repairWorkerList);//设置人工商品信息
             return  ServerResponse.createBySuccess("查询成功",returnWorkOrderDTO);
@@ -1217,28 +1359,25 @@ public class RefundAfterSalesService {
         for(int i=0;i<orderProgressDTOList.size();i++){
             OrderProgressDTO op=orderProgressDTOList.get(i);
             op.setNodeStatus(1);//先打勾
-            //大管家审核未能过
-            if("RA_014".equals(op.getNodeCode())){
-                op.setNodeStatus(3);//打黑叉
+            //业主已拒绝
+            if("RA_022".equals(op.getNodeCode())){
+                op.setNodeStatus(3);//打红叉
                 op.setMobile(mobile);//拨打电话，大管家审核 不通过
             }
-            //如果最新节点为RA_012，RA_013您的退人工申请已提交 状态，或为RA_015，RA_016工匠审核 中，且当前显示节点为RA_012的话，则显示“撤销按钮”,否则，则不显示
-            if(!(("RA_012".equals(orderProgressDTO.getNodeCode())||"RA_013".equals(orderProgressDTO.getNodeCode())
-            ||"RA_015".equals(orderProgressDTO.getNodeCode())||"RA_016".equals(orderProgressDTO.getNodeCode())))
-                    &&"RA_012".equals(op.getNodeCode())){
+            if("RA_017".equals(op.getNodeCode())){
+                op.setNodeStatus(3);//工匠已拒绝，打红叉
+            }
+            //如果最新节点为RA_012，RA_016您的退人工申请已提交 ,为RA_020，RA_021您的补人人工申请已提交状态，，且当前显示节点为RA_012,RA_020的话，则显示“撤销按钮”,否则，则不显示
+            if(!(("RA_012".equals(orderProgressDTO.getNodeCode())||"RA_016".equals(orderProgressDTO.getNodeCode())
+                    ||"RA_020".equals(orderProgressDTO.getNodeCode())||"RA_021".equals(orderProgressDTO.getNodeCode())))
+                    &&("RA_012".equals(op.getNodeCode())||"RA_020".equals(op.getNodeCode()))){
                 op.setAssociatedOperation("");//清空按钮数据
                 op.setAssociatedOperationName("");//清空按钮数据
             }
 
             list.add(op);
         }
-        if("RA_013".equals(orderProgressDTO.getNodeCode())){//如果最新节点为退人工申请已提交
-            OrderProgressDTO lastOrder=new OrderProgressDTO();
-            lastOrder.setNodeCode("RA_016");
-            lastOrder.setNodeName("工匠审核");
-            lastOrder.setNodeStatus(4);
-            list.add(lastOrder);
-        }
+
 
         return list;
     }
@@ -1250,27 +1389,282 @@ public class RefundAfterSalesService {
      * @return
      */
     public ServerResponse cancelWorkerApplication(String cityId,String repairWorkOrderId){
+
+        //1.撤回变更申请单即可
+        ChangeOrder changeOrder = iBillChangeOrderMapper.selectByPrimaryKey(repairWorkOrderId);
+        if(changeOrder==null){
+            return ServerResponse.createBySuccessMessage("未找到可撤销的变更单");
+        }
+        if(changeOrder!=null&&"7".equals(changeOrder.getState())){
+            return ServerResponse.createBySuccess("变更申请单已撤销，请勿重复申请。");
+        }
+        changeOrder.setState(7);
+        changeOrder.setModifyDate(new Date());
+        iBillChangeOrderMapper.updateByPrimaryKeySelective(changeOrder);
+        //2.查询商品申请单(改为撤回状态)
         Example example = new Example(MendOrder.class);
         example.createCriteria()
                 .andEqualTo(MendOrder.CHANGE_ORDER_ID, repairWorkOrderId)
                 .andEqualTo(MendOrder.DATA_STATUS, 0);
         MendOrder mendOrder=iBillMendOrderMapper.selectOneByExample(example);
         if(mendOrder!=null&&StringUtils.isNotBlank(mendOrder.getId())){
-            mendRecordAPI.backOrder(mendOrder.getId(),2);//有变更订单的撤销
+           // mendRecordAPI.backOrder(mendOrder.getId(),2);//有变更订单的撤销
+            mendOrder.setState(5);//已撤回
+            mendOrder.setModifyDate(new Date());
+            iBillMendOrderMapper.updateByPrimaryKeySelective(mendOrder);
+        }
+        //3.判断是否有需要撤回的任务,修改状态为已处理
+        example=new Example(TaskStack.class);
+        example.createCriteria().andEqualTo(TaskStack.HOUSE_ID,changeOrder.getHouseId())
+                .andEqualTo(TaskStack.STATE,0)
+                .andEqualTo(TaskStack.DATA,repairWorkOrderId);
+        TaskStack taskStack=iBillTaskStackMapper.selectOneByExample(example);
+        if(taskStack!=null&&StringUtils.isNotBlank(taskStack.getId())){
+            taskStack.setState(1);
+            taskStack.setModifyDate(new Date());
+            iBillTaskStackMapper.updateByPrimaryKeySelective(taskStack);
+        }
+        if(changeOrder.getType()==1){
+            //补人工后，记录流水
+            updateOrderProgressInfo(changeOrder.getId(),"3","REFUND_AFTER_SALES","RA_019",changeOrder.getMemberId());//撤销退人工申请
+
         }else{
-            //只撤回变更申请单即可
-            ChangeOrder changeOrder = iBillChangeOrderMapper.selectByPrimaryKey(repairWorkOrderId);
-            if(changeOrder.getState()!=null&&"7".equals(changeOrder.getState())){
-               return ServerResponse.createBySuccess("退人工申请已撤销，请勿重复申请。");
-            }
-            changeOrder.setState(7);
-            iBillChangeOrderMapper.updateByPrimaryKeySelective(changeOrder);
             //退人工后，记录流水
             updateOrderProgressInfo(changeOrder.getId(),"2","REFUND_AFTER_SALES","RA_019",changeOrder.getMemberId());//撤销退人工申请
 
         }
         return ServerResponse.createBySuccess("撤销成功");
     }
+
+
+    /**
+     * 查询待审核的补人工订单ID
+     * @param cityId
+     * @param taskId
+     * @return
+     */
+    public ServerResponse searchAuditInfoByTaskId(String cityId,String taskId){
+        try{
+            ReturnWorkOrderDTO returnWorkOrderDTO;
+            TaskStack taskStack=iBillTaskStackMapper.selectByPrimaryKey(taskId);
+            if(taskStack!=null&&taskStack.getState()==0){
+                 returnWorkOrderDTO=iBillChangeOrderMapper.queryReturnWorkerInfo(taskStack.getData());
+                //查询对应的需审核的商品信息(根据变列申请单ID）
+                Example example = new Example(MendOrder.class);
+                example.createCriteria()
+                        .andEqualTo(MendOrder.CHANGE_ORDER_ID, taskStack.getData())
+                        .andEqualTo(MendOrder.DATA_STATUS, 0);
+                MendOrder mendOrder=iBillMendOrderMapper.selectOneByExample(example);
+                if(mendOrder!=null&&StringUtils.isNotBlank(mendOrder.getId())){
+                    returnWorkOrderDTO.setRepairWorkOrderNumber(mendOrder.getNumber());//设置申请单号
+                    returnWorkOrderDTO.setTotalAmount(mendOrder.getTotalAmount());
+                    returnWorkOrderDTO.setApplyMemberId(mendOrder.getApplyMemberId());//申请人ID
+                    Member member=iBillMemberMapper.selectByPrimaryKey(mendOrder.getApplyMemberId());
+                    returnWorkOrderDTO.setApplyMemberName(member.getName());//
+                    if("2".equals(returnWorkOrderDTO.getType())){//业主退人工
+                        returnWorkOrderDTO.setApplyMemberTypeName("业主");//申请人类型名称
+                    }else{
+                        returnWorkOrderDTO.setApplyMemberTypeName(returnWorkOrderDTO.getWorkTypeName());//申请人类型名称
+                    }
+
+                }
+                String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+                List<RefundRepairOrderMaterialDTO> repairWorkerList=iBillMendWorkerMapper.queryBillMendOrderId(mendOrder.getId());//退款商品列表查询
+                getRepairOrderProductList(repairWorkerList,address);
+                returnWorkOrderDTO.setOrderWorkerList(repairWorkerList);//设置人工商品信息
+                return ServerResponse.createBySuccess("查询成功",returnWorkOrderDTO);
+            }
+
+            return ServerResponse.createByErrorMessage("查询失败","未找到符合条件的订单");
+        }catch (Exception e){
+            logger.error("查询异常：",e);
+            return ServerResponse.createByErrorMessage("要询失败");
+        }
+
+    }
+
+    /**
+     * 待审核的订单--审核通过
+     * @param cityId
+     * @param taskId
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse passAuditInfoByTaskId(String cityId,String taskId){
+        TaskStack taskStack=iBillTaskStackMapper.selectByPrimaryKey(taskId);
+        if(taskStack!=null&&taskStack.getState()==0){
+            //1.修改变申请单状态为已通过
+            ChangeOrder changeOrder=iBillChangeOrderMapper.selectByPrimaryKey(taskStack.getData());
+            changeOrder.setState(5);//审核通过，待业主支付
+            changeOrder.setModifyDate(new Date());
+            iBillChangeOrderMapper.updateByPrimaryKeySelective(changeOrder);//修改变更单为审核不通过
+            //2.修改补人工单状态为已通过，生成待支付单
+            Example example = new Example(MendOrder.class);
+            example.createCriteria()
+                    .andEqualTo(MendOrder.CHANGE_ORDER_ID, taskStack.getData())
+                    .andEqualTo(MendOrder.DATA_STATUS, 0);
+            MendOrder mendOrder=iBillMendOrderMapper.selectOneByExample(example);
+            mendOrder.setState(3);//状态为已通过
+            mendOrder.setModifyDate(new Date());
+            //获取待支付业务订单号
+            String businessNumber=createBusinessOrderNumber(taskStack.getHouseId(),changeOrder.getMemberId(),mendOrder.getTotalAmount(),mendOrder.getOrderId());
+            mendOrder.setBusinessOrderNumber(businessNumber);
+            iBillMendOrderMapper.updateByPrimaryKeySelective(mendOrder);
+            //3.生成订单(待支付订单)
+            Order order=new Order();
+            String workerTypeName="补货单";
+            // order.setWorkerTypeName("人工订单");
+            order.setWorkerTypeName(workerTypeName);
+            order.setCityId(cityId);
+            order.setMemberId(changeOrder.getMemberId());
+            order.setWorkerId(mendOrder.getApplyMemberId());
+            order.setAddressId(mendOrder.getAddressId());
+            order.setHouseId(mendOrder.getHouseId());
+            order.setOrderNumber(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
+            order.setTotalDiscountPrice(new BigDecimal(0));
+            order.setTotalStevedorageCost(new BigDecimal(0));
+            order.setTotalTransportationCost(new BigDecimal(0));
+            order.setActualPaymentPrice(new BigDecimal(0));
+            order.setOrderStatus("1");
+            order.setOrderGenerationTime(new Date());
+            order.setOrderSource(3);//补货单
+            order.setType(1);
+            order.setCreateBy(changeOrder.getMemberId());
+            order.setStorefontId(mendOrder.getStorefrontId());
+            order.setBusinessOrderNumber(businessNumber);
+            order.setTotalAmount(BigDecimal.valueOf(mendOrder.getTotalAmount()));// 订单总额(工钱)
+            order.setActualPaymentPrice(BigDecimal.valueOf(mendOrder.getTotalAmount()));
+            iBillDjDeliverOrderMapper.insert(order);//添加补人工订单
+            //添加补人工订单详情
+            example=new Example(MendMateriel.class);
+            example.createCriteria().andEqualTo(MendMateriel.MEND_ORDER_ID,mendOrder.getId());
+            List<MendMateriel> repairWorkerList=iBillMendMaterialMapper.selectByExample(example);//退款商品列表查询
+            for(MendMateriel mm:repairWorkerList){
+                OrderItem orderItem = new OrderItem();
+                orderItem.setIsReservationDeliver("0");
+                orderItem.setOrderId(order.getId());
+                orderItem.setPrice(mm.getPrice());//销售价
+                orderItem.setShopCount(mm.getShopCount());//购买总数
+                orderItem.setUnitName(mm.getUnitName());//单位
+                orderItem.setTotalPrice(mm.getTotalPrice());//总价
+                orderItem.setProductName(mm.getProductName());
+                orderItem.setProductSn(mm.getProductSn());
+                orderItem.setCategoryId(mm.getCategoryId());
+                orderItem.setProductId(mm.getProductId());
+                orderItem.setImage(mm.getImage());
+                orderItem.setCityId(mm.getCityId());
+                orderItem.setProductType(2);//人工
+                orderItem.setStorefontId(mm.getStorefrontId());
+                orderItem.setAskCount(0d);
+                orderItem.setDiscountPrice(0d);
+                orderItem.setActualPaymentPrice(0d);
+                orderItem.setStevedorageCost(0d);
+                orderItem.setTransportationCost(0d);
+                orderItem.setWorkerTypeId(mendOrder.getWorkerTypeId());
+                orderItem.setOrderStatus("1");//1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭
+                orderItem.setCreateBy(order.getCreateBy());
+                iBillDjDeliverOrderItemMapper.insert(orderItem);//生成补订单明细
+            }
+            //3.修改任务状态，为已处理
+            taskStack.setState(1);
+            taskStack.setModifyDate(new Date());
+            iBillTaskStackMapper.updateByPrimaryKeySelective(taskStack);
+            //更新业主审核中的为已关闭
+            iBillOrderProgressMapper.updateOrderStatusByNodeCode(changeOrder.getId(),"REFUND_AFTER_SALES","RA_021");
+            //添加审核通过节点
+            updateOrderProgressInfo(changeOrder.getId(),"3","REFUND_AFTER_SALES","RA_023",changeOrder.getMemberId());
+
+            return ServerResponse.createBySuccess("审核通过成功",businessNumber);//生成支付单号给到前端
+        }
+
+        return ServerResponse.createByErrorMessage("审核失败","未找到符合条件的订单");
+
+
+    }
+    /**
+     * 生成业务订单号
+     * @return
+     */
+    public String createBusinessOrderNumber(String houseId,String memberId,Double totalAmount,String repairMendOrderId){
+        String number=System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000);
+        BusinessOrder businessOrder = new BusinessOrder();
+        businessOrder.setHouseId(houseId);
+        businessOrder.setMemberId(memberId);
+        businessOrder.setNumber(number);
+        businessOrder.setState(1);//刚生成
+        businessOrder.setTotalPrice(BigDecimal.valueOf(totalAmount));
+        businessOrder.setDiscountsPrice(new BigDecimal(0));
+        businessOrder.setType(2);//补人工
+        businessOrder.setTaskId(repairMendOrderId);//保存任务ID
+        iBillBusinessOrderMapper.insert(businessOrder);
+        return number;
+    }
+    /**
+     * 待审核的订单--审核不通过
+     * @param cityId
+     * @param taskId
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse failAuditInfoByTaskId(String cityId,String taskId){
+        TaskStack taskStack=iBillTaskStackMapper.selectByPrimaryKey(taskId);
+        if(taskStack!=null&&taskStack.getState()==0){
+            //1.修改变更单状态为不通过
+            ChangeOrder changeOrder=iBillChangeOrderMapper.selectByPrimaryKey(taskStack.getData());
+            changeOrder.setState(8);//审核不通过
+            changeOrder.setModifyDate(new Date());
+            iBillChangeOrderMapper.updateByPrimaryKeySelective(changeOrder);//修改变更单为审核不通过
+            //2.修改补人工单状态为不通过
+            Example example = new Example(MendOrder.class);
+            example.createCriteria()
+                    .andEqualTo(MendOrder.CHANGE_ORDER_ID, taskStack.getData())
+                    .andEqualTo(MendOrder.DATA_STATUS, 0);
+            MendOrder mendOrder=iBillMendOrderMapper.selectOneByExample(example);
+            if(mendOrder!=null&&StringUtils.isNotBlank(mendOrder.getId())){
+                mendOrder.setState(2);//审核不通过取消
+                mendOrder.setModifyDate(new Date());
+                iBillMendOrderMapper.updateByPrimaryKeySelective(mendOrder);
+            }
+            //3.修改任务状态为已完成
+            taskStack.setState(1);
+            taskStack.setModifyDate(new Date());
+            iBillTaskStackMapper.updateByPrimaryKeySelective(taskStack);
+            //更新业主审核中的为已关闭
+            iBillOrderProgressMapper.updateOrderStatusByNodeCode(changeOrder.getId(),"REFUND_AFTER_SALES","RA_021");
+            //添加审核不通过节点
+            updateOrderProgressInfo(changeOrder.getId(),"3","REFUND_AFTER_SALES","RA_022",changeOrder.getMemberId());
+            return ServerResponse.createBySuccessMessage("审核成功");
+        }
+        return ServerResponse.createByErrorMessage("审核失败","未找到符合条件的订单");
+
+    }
+
+    /**
+     * 退人工--查询符合条件的可退人工商品
+     * @param userToken 用户token
+     * @param cityId  城市ID
+     * @param houseId 房子ID
+     * @param workerTypeId 工种ID
+     * @param searchKey 商品名称
+     * @return
+     */
+    public ServerResponse queryWorkerProductList(String userToken,String cityId,String houseId,
+                                                 String workerTypeId,String searchKey){
+        try{
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            logger.info("退人工商品查询：userToken={}，cityId={},houseId={},workerTypeId={},searchKey={}",userToken,cityId,houseId,workerTypeId,searchKey);
+            //PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<RefundOrderItemDTO> orderItemList=refundAfterSalesMapper.queryWorkerProductList(houseId,workerTypeId,searchKey);
+            getProductList(orderItemList,address);
+
+            //PageInfo pageResult = new PageInfo(orderItemList);
+            return ServerResponse.createBySuccess("查询成功",orderItemList);
+        }catch (Exception e){
+            logger.error("查询可退人工商品异常：",e);
+            return ServerResponse.createByErrorMessage("查询可退人工商品失败");
+        }
+    }
+
 
 
 }

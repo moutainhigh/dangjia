@@ -5,6 +5,8 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.repair.MendOrderInfoDTO;
 import com.dangjia.acg.service.repair.MendOrderService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -15,6 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class MendOrderController implements MendOrderAPI {
+
+    protected static final Logger logger = LoggerFactory.getLogger(MendOrderController.class);
 
     @Autowired
     private MendOrderService mendOrderService;
@@ -151,4 +155,37 @@ public class MendOrderController implements MendOrderAPI {
         return mendOrderService.saveMendMaterial(userToken,houseId,productArr);
     }
 
+    /**
+     * 待工匠审核的退人工订单--审核通过
+     * @param cityId 城市ID
+     * @param taskId 任务ID
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse passRefundWorkerByTaskId(String cityId,String taskId){
+        try{
+            return mendOrderService.passRefundWorkerByTaskId(cityId,taskId);
+        }catch (Exception e){
+            logger.error("审核通过异常：",e);
+            return ServerResponse.createByErrorMessage("审核通过失败");
+        }
+    }
+
+    /**
+     * 待工匠审核的退人工订单--审核不通过（拒绝）
+     * @param cityId 城市ID
+     * @param taskId 任务ID
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse failRefundWorkerByTaskId(String cityId, String taskId){
+        try{
+            return mendOrderService.failRefundWorkerByTaskId(cityId,taskId);
+        }catch (Exception e){
+            logger.error("审核不通过异常：",e);
+            return ServerResponse.createByErrorMessage("审核不通过失败");
+        }
+    }
 }

@@ -67,6 +67,11 @@ public class MendWorker extends BaseEntity {
 	@ApiModelProperty("图片")
 	private String image;
 
+	@Column(name = "order_item_id")
+	@Desc(value = "订单明细ID")
+	@ApiModelProperty("订单明细ID")
+	private String orderItemId;
+
 	public void initPath(String address){
 		this.image = StringUtils.isEmpty(this.image)?null:address+this.image;
 	}

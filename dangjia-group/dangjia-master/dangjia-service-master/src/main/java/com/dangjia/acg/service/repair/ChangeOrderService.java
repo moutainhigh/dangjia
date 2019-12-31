@@ -1,24 +1,29 @@
 package com.dangjia.acg.service.repair;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
+import com.dangjia.acg.common.util.MathUtil;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.delivery.IMasterOrderProgressMapper;
+import com.dangjia.acg.mapper.delivery.IOrderItemMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderCheckMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
-import com.dangjia.acg.mapper.task.IMasterTaskStackMapper;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.core.WorkerType;
+import com.dangjia.acg.modle.deliver.OrderItem;
 import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.house.TaskStack;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.order.OrderProgress;
 import com.dangjia.acg.modle.repair.ChangeOrder;
@@ -28,7 +33,9 @@ import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.TaskStackService;
 import com.dangjia.acg.service.deliver.RepairMendOrderService;
-import com.dangjia.acg.service.sale.royalty.RoyaltyService;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,6 +54,8 @@ import java.util.Map;
  */
 @Service
 public class ChangeOrderService {
+
+    protected static final Logger logger = LoggerFactory.getLogger(ChangeOrderService.class);
     @Autowired
     private IChangeOrderMapper changeOrderMapper;
     @Autowired
@@ -76,6 +85,8 @@ public class ChangeOrderService {
 
     @Autowired
     private TaskStackService taskStackService;
+    @Autowired
+    private IOrderItemMapper iOrderItemMapper;
 
     /**
      * 管家审核变更单
@@ -180,13 +191,21 @@ public class ChangeOrderService {
     /**
      * 提交变更单
      * type 1工匠补人工,2业主退人工,3业主补人工
+     * @param  productArr 退人工商品列表
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse workerSubmit(String userToken, String houseId, Integer type, String contentA, String contentB, String workerTypeId) {
+    public ServerResponse workerSubmit(String userToken, String houseId, Integer type, String contentA, String contentB, String workerTypeId,String productArr) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
         }
+        //判断是否可退款
+       /* HouseWorkerOrder houseWorkerOrder = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(houseId, workerTypeId);
+        String str=checkRefundMoney(houseWorkerOrder,productArr);
+        if(StringUtils.isNotBlank(str)){
+            return ServerResponse.createByErrorMessage(str);
+        }*/
+
         Member member = (Member) object;
         ChangeOrder changeOrder = new ChangeOrder();
         changeOrder.setHouseId(houseId);
@@ -221,7 +240,8 @@ public class ChangeOrderService {
             return ServerResponse.createByErrorMessage("该工种已整体完工，不能发起补/退人工申请");
         }
         WorkerType workerType=workerTypeMapper.selectByPrimaryKey(workerTypeId);
-        changeOrder.setMemberId(member.getId());
+        House house=houseMapper.selectByPrimaryKey(houseId);
+        changeOrder.setMemberId(house.getMemberId());//业主ID
         changeOrder.setType(type);
         if(type==1){
             changeOrder.setTitleName(workerType.getName()+"申请补人工");
@@ -233,14 +253,19 @@ public class ChangeOrderService {
         changeOrder.setState(2);//业主审核中、工匠审核中
         changeOrderMapper.insert(changeOrder);
         //增加节点（退人工流水记录状态)
-        if (type == 2) {
+        if (type == 2) {//业主退人工
+            changeOrder.setWorkerTypeId(houseFlow.getWorkerId());
+            //生成退人工订单
+            repairMendOrderService.insertRefundOrder(houseId,member.getId(),workerTypeId,changeOrder.getId(),productArr);
+            //生成退人工审核任务给到业主
+            taskStackService.inserTaskStackInfo(houseId,houseFlow.getWorkerId(),"退人工审核",workerType.getImage(),12,changeOrder.getId());//存变更申请单ID
             updateOrderProgressInfo(changeOrder.getId(),"2","REFUND_AFTER_SALES","RA_012",member.getId());//您的退人工申请已提交
-            updateOrderProgressInfo(changeOrder.getId(),"2","REFUND_AFTER_SALES","RA_013",member.getId());//大管家审核中
+            updateOrderProgressInfo(changeOrder.getId(),"2","REFUND_AFTER_SALES","RA_016",member.getId());// 工匠审核中
         }else if(type==1){//工匠补人工
             //生成补人工订单
-           String businessNumber = repairMendOrderService.insertSupplementLaborOrder(houseId,member.getId(),member.getWorkerTypeId(),changeOrder.getId());
+            repairMendOrderService.insertSupplementLaborOrder(houseId,member.getId(),member.getWorkerTypeId(),changeOrder.getId());
            //生成补人工审核任务给到业主
-            taskStackService.inserTaskStackInfo(houseId,member.getId(),workerType.getName()+"申请补人工","",2,changeOrder.getId());//存变更申请单ID
+            taskStackService.inserTaskStackInfo(houseId,house.getMemberId(),workerType.getName()+"申请补人工",workerType.getImage(),2,changeOrder.getId());//存变更申请单ID
            updateOrderProgressInfo(changeOrder.getId(),"3","REFUND_AFTER_SALES","RA_020",member.getId());//您的补人工申请已提交
            updateOrderProgressInfo(changeOrder.getId(),"3","REFUND_AFTER_SALES","RA_021",member.getId());//业主审核中
         }
@@ -278,7 +303,7 @@ public class ChangeOrderService {
      *
      * return 状态正常则不弹出提示，异常则弹出并且待确认继续确认
      */
-    public ServerResponse checkHouseFlowApply(String userToken, String houseId, Integer type, String workerTypeId) {
+    public ServerResponse checkHouseFlowApply(String userToken, String houseId, Integer type, String workerTypeId,String productArr) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -300,15 +325,12 @@ public class ChangeOrderService {
                 }
             }
             if (type == 2) {
-                if (houseWorkerOrder.getDeductPrice() == null) {
-                    houseWorkerOrder.setDeductPrice(new BigDecimal(0));
+
+                String str=checkRefundMoney(houseWorkerOrder,productArr);
+                if(StringUtils.isNotBlank(str)){
+                    return ServerResponse.createByErrorMessage(str);
                 }
-                BigDecimal alsoMoney = new BigDecimal(houseWorkerOrder.getWorkPrice().doubleValue() - houseWorkerOrder.getHaveMoney().doubleValue() + houseWorkerOrder.getRepairPrice().doubleValue() - houseWorkerOrder.getRetentionMoney().doubleValue() - houseWorkerOrder.getDeductPrice().doubleValue());
-                if (alsoMoney.doubleValue() < 0) {
-                    alsoMoney = new BigDecimal(0);
-                }
-                alsoMoney = alsoMoney.setScale(2, BigDecimal.ROUND_HALF_UP);
-                List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.unCheckByWorkerTypeId(houseId, workerTypeId);
+                /*List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.unCheckByWorkerTypeId(houseId, workerTypeId);
                 if (houseFlowApplyList.size() > 0) {
                     return ServerResponse.createByErrorMessage("当前" + workerType.getName() + "阶段完工正在申请中，可退人工金额上限为" + alsoMoney + "元，确定申请退人工吗？");
                 }
@@ -316,9 +338,62 @@ public class ChangeOrderService {
                 if (houseFlow.getWorkSteta() == 1) {
                     return ServerResponse.createByErrorMessage("当前" + workerType.getName() + "已阶段完工，可退人工金额上限为" + alsoMoney + "元，确定申请退人工吗？");
 
-                }
+                }*/
+            }
+        }else{
+            if (type == 2) {
+                Double totalAllPrice=getTotalAllPrice(productArr);
+                return ServerResponse.createByErrorMessage("申请退款金额为"+totalAllPrice+"，可退金额上限为0，不能申请退人工。");
             }
         }
         return ServerResponse.createBySuccessMessage("检测通过");
     }
+
+    /**
+     * 判断是否可退款
+     * @param houseWorkerOrder
+     * @param productArr
+     * @return
+     */
+    public String checkRefundMoney(HouseWorkerOrder houseWorkerOrder,String productArr){
+        if (houseWorkerOrder.getDeductPrice() == null) {
+            houseWorkerOrder.setDeductPrice(new BigDecimal(0));
+        }
+        BigDecimal alsoMoney = new BigDecimal(houseWorkerOrder.getWorkPrice().doubleValue() - houseWorkerOrder.getHaveMoney().doubleValue() + houseWorkerOrder.getRepairPrice().doubleValue() - houseWorkerOrder.getRetentionMoney().doubleValue() - houseWorkerOrder.getDeductPrice().doubleValue());
+        if (alsoMoney.doubleValue() < 0) {
+            alsoMoney = new BigDecimal(0);
+        }
+        alsoMoney = alsoMoney.setScale(2, BigDecimal.ROUND_HALF_UP);
+        //查询业主选择的可退商品
+        Double totalAllPrice=getTotalAllPrice(productArr);
+
+        if(new BigDecimal(totalAllPrice).compareTo(alsoMoney)<0){
+            return "申请退款金额为"+totalAllPrice+"，可退金额上限为"+alsoMoney+"，不能申请退人工。";
+        }
+        return "";
+    }
+
+
+    /**
+     * 获取申请退款总额
+     * @param productArr
+     * @return
+     */
+    Double getTotalAllPrice(String productArr){
+        Double totalAllPrice=0d;
+        JSONArray orderItemProductList= JSONArray.parseArray(productArr);
+        if(orderItemProductList!=null&&orderItemProductList.size()>0) {
+            for (int i = 0; i < orderItemProductList.size(); i++) {
+                JSONObject productObj = (JSONObject) orderItemProductList.get(i);
+                String orderItemId = (String) productObj.get("orderItemId");//订单详情号
+               // String productId = (String) productObj.get("productId");//产品ID
+                Double returnCount = productObj.getDouble("returnCount");//退货量
+                OrderItem orderItem=iOrderItemMapper.selectByPrimaryKey(orderItemId);
+                Double totalPrice= MathUtil.mul(orderItem.getPrice(),returnCount);
+                totalAllPrice=MathUtil.add(totalAllPrice,totalPrice);//汇总总退款金额
+            }
+        }
+        return totalAllPrice;
+    }
+
 }
