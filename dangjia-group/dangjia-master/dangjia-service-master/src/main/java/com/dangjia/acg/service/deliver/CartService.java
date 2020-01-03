@@ -13,6 +13,7 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.house.WarehouseDTO;
+import com.dangjia.acg.dto.product.DjBasicsProductTemplateDTO;
 import com.dangjia.acg.mapper.core.IMasterBasicsGoodsCategoryMapper;
 import com.dangjia.acg.mapper.core.IMasterBasicsGoodsMapper;
 import com.dangjia.acg.mapper.core.IMasterBrandMapper;
@@ -20,6 +21,7 @@ import com.dangjia.acg.mapper.delivery.ICartMapper;
 import com.dangjia.acg.mapper.delivery.IOrderSplitMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
+import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.product.IMasterProductTemplateMapper;
 import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
 import com.dangjia.acg.modle.basics.Product;
@@ -33,6 +35,7 @@ import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.util.StringTool;
+import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,6 +80,8 @@ public class CartService {
     private IMasterBasicsGoodsMapper iMasterBasicsGoodsMapper;
     @Autowired
     private IMasterBasicsGoodsCategoryMapper iMasterBasicsGoodsCategoryMapper;
+    @Autowired
+    private IMemberMapper iMemberMapper;
 
     /**
      * 设置购物车商品数量
@@ -399,77 +404,48 @@ public class CartService {
             if (worker.getWorkerType() == 3) {
                 productType = "1";
             }
-            Example example = new Example(Warehouse.class);
-            example.createCriteria()
-                    .andEqualTo(Warehouse.HOUSE_ID, houseId)
-                    .andEqualTo(Warehouse.PRODUCT_TYPE, productType);
-            List<Warehouse> warehouseList = warehouseMapper.selectByExample(example);
-            if (warehouseList.size() <= 0) {
-                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
-            }
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            List<WarehouseDTO> warehouseDTOS = new ArrayList<>();
-            Map<String, Warehouse> warehouseMap = new HashMap<>();
-            String[] productIdArr = new String[warehouseList.size()];
-            for (int i = 0; i < warehouseList.size(); i++) {
-                productIdArr[i] = warehouseList.get(i).getProductId();
-                warehouseMap.put(warehouseList.get(i).getProductId(), warehouseList.get(i));
-            }
            // PageInfo pageResult = productAPI.queryProductData(cityId, pageDTO.getPageNum(), pageDTO.getPageSize(), name, categoryId, productType, productIdArr);
-            PageInfo pageResult = djBasicsProductAPI.queryBasicsProductData(house.getCityId(), pageDTO.getPageNum(), pageDTO.getPageSize(), name, categoryId, productType, productIdArr);
-            List<JSONObject> djBasicsProductTemplates = pageResult.getList();
-            for (JSONObject djBasicsProductTemplate : djBasicsProductTemplates) {
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            List<DjBasicsProductTemplateDTO> djBasicsProductTemplateDTOS = iMasterProductTemplateMapper.queryProductData(houseId,name, categoryId, productType);
+            if(djBasicsProductTemplateDTOS.size()<=0){
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(),ServerCode.NO_DATA.getDesc());
+            }
+            List<WarehouseDTO> warehouseDTOS=new ArrayList<>();
+            for (DjBasicsProductTemplateDTO djBasicsProductTemplateDTO : djBasicsProductTemplateDTOS) {
                 WarehouseDTO warehouseDTO = new WarehouseDTO();
-                warehouseDTO.setProductId(String.valueOf(djBasicsProductTemplate.get(DjBasicsProductTemplate.STOREFRONT_PRODUCT_ID)));
+                warehouseDTO.setProductId(djBasicsProductTemplateDTO.getStorefrontProductId());
                 warehouseDTO.setMaket(1);
-                if ((djBasicsProductTemplate.get(DjBasicsProductTemplate.MAKET)!=null&&"0".equals(djBasicsProductTemplate.get(DjBasicsProductTemplate.MAKET).toString()))
-                        ||(djBasicsProductTemplate.get(DjBasicsProductTemplate.TYPE)!=null&& "0".equals(djBasicsProductTemplate.get(DjBasicsProductTemplate.TYPE).toString()))) {
+                if ((djBasicsProductTemplateDTO.getMaket()!=null&&"0".equals(djBasicsProductTemplateDTO.getMaket()))
+                        ||(djBasicsProductTemplateDTO.getType()!=null&& "0".equals(djBasicsProductTemplateDTO.getType()))) {
                     warehouseDTO.setMaket(0);
                 }
-                warehouseDTO.setPrice(Double.parseDouble(String.valueOf(djBasicsProductTemplate.get(DjBasicsProductTemplate.PRICE))));
+                warehouseDTO.setPrice(Double.parseDouble(String.valueOf(djBasicsProductTemplateDTO.getPrice())));
                 warehouseDTO.setProductType(Integer.parseInt(productType));
-                warehouseDTO.setImage(address + djBasicsProductTemplate.get(DjBasicsProductTemplate.IMAGE));
-                Warehouse warehouse = warehouseMap.get(warehouseDTO.getProductId());
-                if (warehouse != null) {
-                    BasicsGoods goods = forMasterAPI.getGoods(house.getCityId(), String.valueOf(djBasicsProductTemplate.get(DjBasicsProductTemplate.GOODS_ID)));
-                    if (goods != null) {
-                        warehouseDTO.setSales(goods.getSales());
-                    }
-                    warehouseDTO.setUnitName(warehouse.getUnitName());
-                    warehouseDTO.setImage(address + warehouse.getImage());
-                    warehouseDTO.setShopCount(warehouse.getShopCount());
-                    warehouseDTO.setAskCount(warehouse.getAskCount());
-                    warehouseDTO.setBackCount((warehouse.getWorkBack() == null ? 0D : warehouse.getWorkBack()));
-                    warehouseDTO.setRealCount(warehouse.getShopCount() - warehouse.getBackCount());
-                    warehouseDTO.setSurCount(warehouse.getShopCount() - (warehouse.getOwnerBack() == null ? 0D : warehouse.getOwnerBack()) - warehouse.getAskCount());//所有买的数量 - 退货 - 收的=仓库剩余
-                    warehouseDTO.setPrice(warehouse.getPrice());
-                    warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * warehouse.getPrice());
-                    warehouseDTO.setReceive(warehouse.getReceive() - (warehouse.getWorkBack() == null ? 0D : warehouse.getWorkBack()));
-                    warehouseDTO.setAskTime(warehouse.getAskTime());
-                    warehouseDTO.setRepTime(warehouse.getRepTime());
-                    warehouseDTO.setBackTime(warehouse.getBackTime());
-                    warehouseDTO.setStorefrontId(warehouse.getStorefrontId());
-                    warehouseDTO.setProductName(warehouse.getProductName());
-                    warehouseDTO.setProductSn(warehouse.getProductSn());
-                    warehouseDTOS.add(warehouseDTO);
-                } else {
-                    String unit = forMasterAPI.getUnitName(house.getCityId(), String.valueOf(djBasicsProductTemplate.get(DjBasicsProductTemplate.CONVERT_UNIT)));
-                    warehouseDTO.setUnitName(unit);
-                    warehouseDTO.setShopCount(0.0);
-                    warehouseDTO.setRepairCount(0.0);
-                    warehouseDTO.setRealCount(0.0);
-                    warehouseDTO.setAskCount(0.0);//已要数量
-                    warehouseDTO.setSurCount(0.0);
-                    warehouseDTO.setBackCount(0.0);//退总数
-                    warehouseDTO.setReceive(0.0);
-                    warehouseDTO.setTolPrice(0.0);
-                    warehouseDTO.setAskTime(0);
-                    warehouseDTO.setRepTime(0);
-                    warehouseDTO.setBackTime(0);
-                    warehouseDTOS.add(warehouseDTO);
+                warehouseDTO.setImage(address + djBasicsProductTemplateDTO.getImage());
+                BasicsGoods basicsGoods = iMasterBasicsGoodsMapper.selectByPrimaryKey(djBasicsProductTemplateDTO.getGoodsId());
+                if (basicsGoods != null) {
+                    warehouseDTO.setSales(basicsGoods.getSales());
                 }
+                warehouseDTO.setUnitName(djBasicsProductTemplateDTO.getUnitName());
+                warehouseDTO.setImage(address + djBasicsProductTemplateDTO.getImage());
+                warehouseDTO.setShopCount(djBasicsProductTemplateDTO.getShopCount());
+                warehouseDTO.setAskCount(djBasicsProductTemplateDTO.getAskCount());
+                warehouseDTO.setBackCount((djBasicsProductTemplateDTO.getWorkBack() == null ? 0D : djBasicsProductTemplateDTO.getWorkBack()));
+                warehouseDTO.setRealCount(djBasicsProductTemplateDTO.getShopCount() - djBasicsProductTemplateDTO.getBackCount());
+                warehouseDTO.setSurCount(djBasicsProductTemplateDTO.getShopCount() - (djBasicsProductTemplateDTO.getOwnerBack() == null ? 0D : djBasicsProductTemplateDTO.getOwnerBack()) - djBasicsProductTemplateDTO.getAskCount());//所有买的数量 - 退货 - 收的=仓库剩余
+                warehouseDTO.setPrice(djBasicsProductTemplateDTO.getPrice());
+                warehouseDTO.setTolPrice(warehouseDTO.getRealCount() * djBasicsProductTemplateDTO.getPrice());
+                warehouseDTO.setReceive(djBasicsProductTemplateDTO.getReceive() - (djBasicsProductTemplateDTO.getWorkBack() == null ? 0D : djBasicsProductTemplateDTO.getWorkBack()));
+                warehouseDTO.setAskTime(djBasicsProductTemplateDTO.getAskTime());
+                warehouseDTO.setRepTime(djBasicsProductTemplateDTO.getRepTime());
+                warehouseDTO.setBackTime(djBasicsProductTemplateDTO.getBackTime());
+                warehouseDTO.setStorefrontId(djBasicsProductTemplateDTO.getStorefrontId());
+                warehouseDTO.setProductName(djBasicsProductTemplateDTO.getProductName());
+                warehouseDTO.setProductSn(djBasicsProductTemplateDTO.getProductSn());
+                warehouseDTOS.add(warehouseDTO);
             }
-            pageResult.setList(warehouseDTOS);
+            PageInfo pageResult=new PageInfo(warehouseDTOS);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();

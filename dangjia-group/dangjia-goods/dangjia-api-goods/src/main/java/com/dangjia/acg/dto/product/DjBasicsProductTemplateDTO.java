@@ -143,8 +143,6 @@ public class DjBasicsProductTemplateDTO {
     private Double backCount;//退总数
     private Double workBack;//工人退
     private Double receive;//收货总数
-    private Double realCount;//实用 = shopCount - backCount
-    private Double surCount;//仓库剩余 = shopCount - askCount - backCount
     private String productName;
     private Integer askTime; //要货次数
     private Integer repTime; //补次数
