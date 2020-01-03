@@ -388,6 +388,7 @@ public class SupAuthorityService {
      */
     public ServerResponse queryInvestigationDetail(HttpServletRequest request, String houseId, PageDTO pageDTO) {
         try {
+
             return null;
         } catch (Exception e) {
             logger.error("督导-（维修）勘察详情异常", e);
