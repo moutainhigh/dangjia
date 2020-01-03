@@ -729,7 +729,6 @@ public class RepairMendOrderService {
         example.createCriteria().andEqualTo(OrderItem.ORDER_ID,order.getId());
         List<OrderItem> orderItemList=iOrderItemMapper.selectByExample(example);
         if(orderItemList!=null&&orderItemList.size()>0){
-
             for(OrderItem orderItem:orderItemList){
                 MendWorker mendWorker = new MendWorker();//补退人工
                 mendWorker.setMendOrderId(mendOrder.getId());
@@ -743,6 +742,9 @@ public class RepairMendOrderService {
                 mendWorker.setTotalPrice(orderItem.getTotalPrice());
                 mendWorker.setOrderItemId(orderItem.getId());
                 iMendWorkerMapper.insertSelective(mendWorker);
+                orderItem.setReturnCount(orderItem.getShopCount());
+                orderItem.setModifyDate(new Date());
+                iOrderItemMapper.updateByPrimaryKeySelective(orderItem);
             }
         }
         return mendOrder;
