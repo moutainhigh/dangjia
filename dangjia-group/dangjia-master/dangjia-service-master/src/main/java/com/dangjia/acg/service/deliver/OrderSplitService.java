@@ -285,11 +285,17 @@ public class OrderSplitService {
     public ServerResponse sentSupplier(String orderSplitId, String splitItemList,String cityId,String userId,String installName,
                                        String installMobile, String deliveryName, String deliveryMobile) {
         try {
+            //判断店铺是否存在
+            Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
+            if (storefront == null) {
+                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
+            }
+
             String address = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
             OrderSplit orderSplit = orderSplitMapper.selectByPrimaryKey(orderSplitId);
             House house = houseMapper.selectByPrimaryKey(orderSplit.getHouseId());
             Member supervisor = memberMapper.getSupervisor(house.getId());//管家
-            Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
+            Member member = memberMapper.selectByPrimaryKey(house.getMemberId());//工匠
             Map<String,String > list=new HashMap();
             JSONArray arr = JSONArray.parseArray(splitItemList);
             for (int i = 0; i < arr.size(); i++) {
@@ -317,10 +323,6 @@ public class OrderSplitService {
                             splitDeliver.setInstallName(installName);//安装人姓名
                         }
                     } else {
-                        Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
-                        if (storefront == null) {
-                            return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
-                        }
                         example = new Example(SplitDeliver.class);
                         splitDeliver = new SplitDeliver();
                         splitDeliver.setNumber(orderSplit.getNumber() + "00" + splitDeliverMapper.selectCountByExample(example));//发货单号
