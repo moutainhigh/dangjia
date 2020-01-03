@@ -358,7 +358,7 @@ public class SupAuthorityService {
     }
 
     /**
-     *（维保）工地详情
+     *（维修）工地详情
      * @param request
      * @param houseId
      * @return
@@ -374,8 +374,8 @@ public class SupAuthorityService {
             MtHostListDetailDTO  mtHostListDetailDTO =djMaintenanceRecordMapper.queryMtHostListDetail(houseId);
             return ServerResponse.createBySuccess("查询成功", mtHostListDetailDTO);
         } catch (Exception e) {
-            logger.error("（维保）工地详情异常", e);
-            return ServerResponse.createByErrorMessage("（维保）工地详情异常");
+            logger.error("（维修）工地详情异常", e);
+            return ServerResponse.createByErrorMessage("（维修）工地详情异常");
         }
     }
 
@@ -390,8 +390,8 @@ public class SupAuthorityService {
         try {
             return null;
         } catch (Exception e) {
-            logger.error("督导-（维保）勘察详情异常", e);
-            return ServerResponse.createByErrorMessage("督导-（维保）勘察详情异常");
+            logger.error("督导-（维修）勘察详情异常", e);
+            return ServerResponse.createByErrorMessage("督导-（维修）勘察详情异常");
         }
     }
 }
