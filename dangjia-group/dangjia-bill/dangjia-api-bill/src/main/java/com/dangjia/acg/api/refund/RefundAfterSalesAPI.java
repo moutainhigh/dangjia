@@ -190,17 +190,8 @@ public interface RefundAfterSalesAPI {
     @PostMapping("/app/refund/ownerAudit/searchAuditInfoByTaskId")
     @ApiOperation(value = "查询待审核的补人工订单", notes = "查询待审核的补人工订单")
     ServerResponse searchAuditInfoByTaskId(@RequestParam("cityId") String cityId,
-                                           @RequestParam("taskId") String taskId);
+                                           @RequestParam("mendOrderId") String mendOrderId);
 
-    @PostMapping("/app/refund/ownerAudit/passAuditInfoByTaskId")
-    @ApiOperation(value = "待业主审核的补人人订单--审核通过", notes = "待业主审核的补人人订单--审核通过")
-    ServerResponse passAuditInfoByTaskId(@RequestParam("cityId") String cityId,
-                                         @RequestParam("taskId") String taskId);
-
-    @PostMapping("/app/refund/ownerAudit/failAuditInfoByTaskId")
-    @ApiOperation(value = "待业主审核的补人人订单--审核不通过", notes = "待业主审核的补人人订单--审核不通过")
-    ServerResponse failAuditInfoByTaskId(@RequestParam("cityId") String cityId,
-                                         @RequestParam("taskId") String taskId);
 
     /**
      * 查询符合条件的可退人工商品

@@ -560,7 +560,7 @@ public class RepairMendOrderService {
      * @param changeOrderId 变更申请单ID
      * @return
      */
-    public String insertSupplementLaborOrder(String houseId,String workerId,String workerTypeId,String changeOrderId){
+    public MendOrder insertSupplementLaborOrder(String houseId,String workerId,String workerTypeId,String changeOrderId){
         /**
          * 查询选中的人工商品
          */
@@ -622,15 +622,15 @@ public class RepairMendOrderService {
             example.createCriteria().andEqualTo(Cart.HOUSE_ID,houseId)
                     .andEqualTo(Cart.MEMBER_ID,workerId);
             iCartMapper.deleteByExample(example);
-            return mendOrder.getId();//申请补货单号
+            return mendOrder;//申请补货单号
         }
-        return "";
+        return null;
     }
 
     /**
      * 生成退人工订单
      */
-    public void insertRefundOrder(String houseId,String memberId,String workerTypeId,String changeOrderId,String productArr){
+    public MendOrder insertRefundOrder(String houseId,String memberId,String workerTypeId,String changeOrderId,String productArr){
 
         JSONArray orderItemProductList= JSONArray.parseArray(productArr);
         Example example;
@@ -695,11 +695,57 @@ public class RepairMendOrderService {
             mendOrder.setAddressId(addressId);
             mendOrder.setTotalAmount(totalAmount);
             iMendOrderMapper.insert(mendOrder);//添加退人工单
+            return mendOrder;
         }
+        return null;
 
     }
 
 
+    /**
+     * 业主补人工，不通过，生成退人工单，并退钱给业主
+     * @return
+     */
+    public MendOrder refundWorkerInfo(Order order){
+        //生成退货单（退人工）
+        MendOrder mendOrder;
+        Example example = new Example(MendOrder.class);
+        mendOrder = new MendOrder();
+        //mendOrder.setChangeOrderId(changeOrderId);
+        mendOrder.setNumber("DJZX" + 20000 + iMendOrderMapper.selectCountByExample(example));//订单号
+        mendOrder.setHouseId(order.getHouseId());
+        mendOrder.setApplyMemberId(order.getMemberId());
+        mendOrder.setType(6);//工匠不同意，系统自动退货退款
+        mendOrder.setOrderName("系统自动退人工退款");
+        mendOrder.setWorkerTypeId(order.getWorkerTypeId());
+        mendOrder.setState(4);
+        mendOrder.setStorefrontId(order.getStorefontId());
+        mendOrder.setAddressId(order.getAddressId());
+        mendOrder.setTotalAmount(order.getTotalAmount().doubleValue());
+        mendOrder.setOrderId(order.getId());
+        iMendOrderMapper.insert(mendOrder);//添加系统退人工单
 
+        example =new Example(OrderItem.class);
+        example.createCriteria().andEqualTo(OrderItem.ORDER_ID,order.getId());
+        List<OrderItem> orderItemList=iOrderItemMapper.selectByExample(example);
+        if(orderItemList!=null&&orderItemList.size()>0){
+
+            for(OrderItem orderItem:orderItemList){
+                MendWorker mendWorker = new MendWorker();//补退人工
+                mendWorker.setMendOrderId(mendOrder.getId());
+                mendWorker.setWorkerGoodsId(orderItem.getProductId());
+                mendWorker.setWorkerGoodsName(orderItem.getProductName());
+                mendWorker.setWorkerGoodsSn(orderItem.getProductSn());
+                mendWorker.setUnitName(orderItem.getUnitName());
+                mendWorker.setPrice(orderItem.getPrice());
+                mendWorker.setImage(orderItem.getImage());
+                mendWorker.setShopCount(orderItem.getShopCount());
+                mendWorker.setTotalPrice(orderItem.getTotalPrice());
+                mendWorker.setOrderItemId(orderItem.getId());
+                iMendWorkerMapper.insertSelective(mendWorker);
+            }
+        }
+        return mendOrder;
+    }
 
 }
