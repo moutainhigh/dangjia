@@ -29,8 +29,8 @@ public class DjSupApplicationProductController implements DjSupApplicationProduc
 
     @Override
     @ApiMethod
-    public ServerResponse queryHaveGoods(HttpServletRequest request, String supId, String shopId,String applicationStatus , PageDTO pageDTO,String keyWord,String userId,String cityId) {
-        return djSupApplicationProductService.queryHaveGoods(supId, shopId,applicationStatus, pageDTO,keyWord,userId,cityId);
+    public ServerResponse queryHaveGoods(HttpServletRequest request, String supId, String shopId,String applicationStatus , PageDTO pageDTO,String keyWord) {
+        return djSupApplicationProductService.queryHaveGoods(supId, shopId,applicationStatus, pageDTO,keyWord);
     }
 
     @Override

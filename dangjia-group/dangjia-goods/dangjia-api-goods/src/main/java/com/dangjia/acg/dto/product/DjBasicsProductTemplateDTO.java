@@ -136,4 +136,20 @@ public class DjBasicsProductTemplateDTO {
      * 属性名称
      */
     private String newValueNameArr;
+
+
+    private Double shopCount;//买总数
+    private Double askCount;//要总数
+    private Double backCount;//退总数
+    private Double workBack;//工人退
+    private Double receive;//收货总数
+    private Double realCount;//实用 = shopCount - backCount
+    private Double surCount;//仓库剩余 = shopCount - askCount - backCount
+    private String productName;
+    private Integer askTime; //要货次数
+    private Integer repTime; //补次数
+    private Integer backTime; //退次数
+    private String storefrontId;
+    private String storefrontProductId;
+    private Double ownerBack;//业主退
 }

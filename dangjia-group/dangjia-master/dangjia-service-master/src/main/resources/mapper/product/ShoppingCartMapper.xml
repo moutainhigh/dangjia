@@ -112,7 +112,6 @@
 			a.value_id_arr as valueIdArr,
 			a.category_id as categoryId,
 			a.unit_type as unitType,
-			a.value_name_arr as valueNameArr,
 			a.category_id as categoryId,
 			b.adjusted_price as adjustedPrice,
 			b.modity_price_time as modityPriceTime
