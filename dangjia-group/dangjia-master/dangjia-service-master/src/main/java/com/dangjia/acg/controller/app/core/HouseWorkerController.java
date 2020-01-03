@@ -77,8 +77,8 @@ public class HouseWorkerController implements HouseWorkerAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getConstructionByWorkerId(HttpServletRequest request, String userToken, String cityId) {
-        return constructionService.getConstructionView(request, userToken);
+    public ServerResponse getConstructionByWorkerId(HttpServletRequest request, String userToken, String cityId,Integer type) {
+        return constructionService.getConstructionView(request, userToken,type);
     }
 
     /**

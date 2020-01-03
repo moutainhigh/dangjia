@@ -3,10 +3,12 @@ package com.dangjia.acg.service.repair;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.constants.DjConstants;
+import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.MathUtil;
+import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
@@ -84,9 +86,11 @@ public class ChangeOrderService {
     private RepairMendOrderService repairMendOrderService;
 
     @Autowired
-    private TaskStackService taskStackService;
+    private MendOrderService mendOrderService;
     @Autowired
     private IOrderItemMapper iOrderItemMapper;
+    @Autowired
+    private ConfigUtil configUtil;
 
     /**
      * 管家审核变更单
@@ -256,16 +260,33 @@ public class ChangeOrderService {
         if (type == 2) {//业主退人工
             changeOrder.setWorkerTypeId(houseFlow.getWorkerId());
             //生成退人工订单
-            repairMendOrderService.insertRefundOrder(houseId,member.getId(),workerTypeId,changeOrder.getId(),productArr);
+            MendOrder mendOrder=repairMendOrderService.insertRefundOrder(houseId,member.getId(),workerTypeId,changeOrder.getId(),productArr);
+            //生成审核任务
+            if (!mendOrderService.createMendCheck(mendOrder)) {
+                return ServerResponse.createByErrorMessage("添加审核流程失败");
+            }
+            //通知消息给工匠
+            String url = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class) + "changeArtificial?userToken=" + userToken + "&cityId=" + house.getCityId() + "&title=人工变更&houseId=" + houseId + "&houseFlowId=" + houseFlow.getId() + "&roleType=3";
+            configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlow.getWorkerId(), "0", "退人工", String.format
+                    (DjConstants.PushMessage.GJ_T_003, house.getHouseName()), url);
+
             //生成退人工审核任务给到业主
-            taskStackService.inserTaskStackInfo(houseId,houseFlow.getWorkerId(),"退人工审核",workerType.getImage(),12,changeOrder.getId());//存变更申请单ID
+            //taskStackService.inserTaskStackInfo(houseId,houseFlow.getWorkerId(),"退人工审核",workerType.getImage(),12,changeOrder.getId());//存变更申请单ID
             updateOrderProgressInfo(changeOrder.getId(),"2","REFUND_AFTER_SALES","RA_012",member.getId());//您的退人工申请已提交
             updateOrderProgressInfo(changeOrder.getId(),"2","REFUND_AFTER_SALES","RA_016",member.getId());// 工匠审核中
         }else if(type==1){//工匠补人工
             //生成补人工订单
-            repairMendOrderService.insertSupplementLaborOrder(houseId,member.getId(),member.getWorkerTypeId(),changeOrder.getId());
-           //生成补人工审核任务给到业主
-            taskStackService.inserTaskStackInfo(houseId,house.getMemberId(),workerType.getName()+"申请补人工",workerType.getImage(),2,changeOrder.getId());//存变更申请单ID
+            MendOrder mendOrder=repairMendOrderService.insertSupplementLaborOrder(houseId,member.getId(),member.getWorkerTypeId(),changeOrder.getId());
+            //生成审核任务
+            if (!mendOrderService.createMendCheck(mendOrder)) {
+                return ServerResponse.createByErrorMessage("添加审核流程失败");
+            }
+            //通知消息给业主
+            configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "补人工", String.format
+                    (DjConstants.PushMessage.YZ_Y_001, house.getHouseName(), workerType.getName()), "");
+
+            //生成补人工审核任务给到业主
+           // taskStackService.inserTaskStackInfo(houseId,house.getMemberId(),workerType.getName()+"申请补人工",workerType.getImage(),2,changeOrder.getId());//存变更申请单ID
            updateOrderProgressInfo(changeOrder.getId(),"3","REFUND_AFTER_SALES","RA_020",member.getId());//您的补人工申请已提交
            updateOrderProgressInfo(changeOrder.getId(),"3","REFUND_AFTER_SALES","RA_021",member.getId());//业主审核中
         }

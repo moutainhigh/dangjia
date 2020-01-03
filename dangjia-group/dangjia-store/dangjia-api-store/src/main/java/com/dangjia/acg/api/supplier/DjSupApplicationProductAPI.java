@@ -74,9 +74,7 @@ public interface DjSupApplicationProductAPI {
                                   @RequestParam("shopId") String shopId,
                                   @RequestParam("applicationStatus")String applicationStatus ,
                                   @RequestParam("pageDTO") PageDTO pageDTO,
-                                  @RequestParam("keyWord") String keyWord,
-                                  @RequestParam("cityId") String cityId,
-                                  @RequestParam("user_id") String userId);
+                                  @RequestParam("keyWord") String keyWord);
 
     @PostMapping("/supplier/djSupApplicationProduct/updateHaveGoods")
     @ApiOperation(value = "编辑已供商品", notes = "编辑已供商品")

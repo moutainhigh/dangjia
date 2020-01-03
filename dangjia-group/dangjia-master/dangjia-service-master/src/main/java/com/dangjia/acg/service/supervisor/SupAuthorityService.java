@@ -358,14 +358,13 @@ public class SupAuthorityService {
     }
 
     /**
-     *（维保）工地详情
+     *（维修）工地详情
      * @param request
      * @param houseId
      * @return
      */
     public ServerResponse queryMtHostListDetail(HttpServletRequest request, String houseId,String userToken) {
         try {
-
             Object object = memberAPI.getMember(userToken);
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
@@ -375,8 +374,25 @@ public class SupAuthorityService {
             MtHostListDetailDTO  mtHostListDetailDTO =djMaintenanceRecordMapper.queryMtHostListDetail(houseId);
             return ServerResponse.createBySuccess("查询成功", mtHostListDetailDTO);
         } catch (Exception e) {
-            logger.error("（维保）工地详情异常", e);
-            return ServerResponse.createByErrorMessage("（维保）工地详情异常");
+            logger.error("（维修）工地详情异常", e);
+            return ServerResponse.createByErrorMessage("（维修）工地详情异常");
+        }
+    }
+
+    /**
+     * 督导-（维保）勘察详情
+     * @param request
+     * @param houseId
+     * @param pageDTO
+     * @return
+     */
+    public ServerResponse queryInvestigationDetail(HttpServletRequest request, String houseId, PageDTO pageDTO) {
+        try {
+
+            return null;
+        } catch (Exception e) {
+            logger.error("督导-（维修）勘察详情异常", e);
+            return ServerResponse.createByErrorMessage("督导-（维修）勘察详情异常");
         }
     }
 }

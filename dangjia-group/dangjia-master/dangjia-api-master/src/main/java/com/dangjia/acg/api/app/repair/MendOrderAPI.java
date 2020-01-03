@@ -119,15 +119,7 @@ public interface MendOrderAPI {
                                     @RequestParam("houseId") String houseId,
                                     @RequestParam("productArr") String productArr);
 
-    @PostMapping("/app/refund/ownerAudit/passRefundWorkerByTaskId")
-    @ApiOperation(value = "待工匠审核的退人工订单--审核通过", notes = "待审核的订单--审核通过")
-    ServerResponse passRefundWorkerByTaskId(@RequestParam("cityId") String cityId,
-                                            @RequestParam("taskId") String taskId);
 
-    @PostMapping("/app/refund/ownerAudit/failRefundWorkerByTaskId")
-    @ApiOperation(value = "待工匠审核的退人工订单--审核不通过", notes = "待审核的订单--审核不通过")
-    ServerResponse failRefundWorkerByTaskId(@RequestParam("cityId") String cityId,
-                                            @RequestParam("taskId") String taskId);
 
 }
 
