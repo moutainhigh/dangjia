@@ -94,8 +94,9 @@ public class SiteMemoService {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无数据");
             }
             list.forEach(djBasicsSiteMemoDTO -> {
-                if (djBasicsSiteMemoDTO!=null)
-                djBasicsSiteMemoDTO.setWorkerTypeName(djBasicsSiteMemoDTO.getWorkerTypeId()!=null && djBasicsSiteMemoDTO.getWorkerTypeId().length()>0? workerTypeMapper.selectByPrimaryKey(djBasicsSiteMemoDTO.getWorkerTypeId()).getName() : "");
+                if (djBasicsSiteMemoDTO != null&&djBasicsSiteMemoDTO.getWorkerTypeId().length()>0) {
+                    djBasicsSiteMemoDTO.setWorkerTypeName(workerTypeMapper.selectByPrimaryKey(djBasicsSiteMemoDTO.getWorkerTypeId())!=null?workerTypeMapper.selectByPrimaryKey(djBasicsSiteMemoDTO.getWorkerTypeId()).getName():"");
+                }
             });
             PageInfo pageResult = new PageInfo(list);
             return ServerResponse.createBySuccess("查询成功", pageResult);
@@ -153,8 +154,9 @@ public class SiteMemoService {
         try {
             DjBaicsSiteMemoReminder djBaicsSiteMemoReminder=new DjBaicsSiteMemoReminder();
             djBaicsSiteMemoReminder.setState("1");//已看
-            djBaicsSiteMemoReminder.setSpecifyReminder(memberId);
-            djBasicsSiteMemoReminderMapper.updateByPrimaryKeySelective(djBaicsSiteMemoReminder);
+            Example example=new Example(DjBaicsSiteMemoReminder.class);
+            example.createCriteria().andEqualTo(DjBaicsSiteMemoReminder.SPECIFY_REMINDER,memberId);
+            djBasicsSiteMemoReminderMapper.updateByExampleSelective(djBaicsSiteMemoReminder,example);
             return ServerResponse.createBySuccessMessage("清空备忘录成功");
         } catch (Exception e) {
             return ServerResponse.createByErrorMessage("清空备忘录信息异常");
@@ -176,9 +178,9 @@ public class SiteMemoService {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "查无数据");
             }
             list.forEach(djBasicsSiteMemoDTO -> {
-                if (djBasicsSiteMemoDTO!=null) {
+                if (djBasicsSiteMemoDTO!=null&& djBasicsSiteMemoDTO.getWorkerTypeId().length() > 0) {
                     djBasicsSiteMemoDTO.setHead(imageAddress + djBasicsSiteMemoDTO.getHead());
-                    djBasicsSiteMemoDTO.setWorkerTypeName(djBasicsSiteMemoDTO.getWorkerTypeId() != null && djBasicsSiteMemoDTO.getWorkerTypeId().length() > 0 ? workerTypeMapper.selectByPrimaryKey(djBasicsSiteMemoDTO.getWorkerTypeId()).getName() : "");
+                    djBasicsSiteMemoDTO.setWorkerTypeName(workerTypeMapper.selectByPrimaryKey(djBasicsSiteMemoDTO.getWorkerTypeId())!=null?workerTypeMapper.selectByPrimaryKey(djBasicsSiteMemoDTO.getWorkerTypeId()).getName() : "");
                 }
             });
             PageInfo pageResult = new PageInfo(list);

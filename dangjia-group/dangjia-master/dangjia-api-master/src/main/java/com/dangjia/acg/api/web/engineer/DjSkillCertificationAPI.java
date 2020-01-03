@@ -25,19 +25,22 @@ public interface DjSkillCertificationAPI {
     ServerResponse querySkillsCertificationWaitingList(@RequestParam("pageDTO") PageDTO pageDTO,
                                                        @RequestParam("workerTypeId") Integer workerTypeId,
                                                        @RequestParam("searchKey") String searchKey,
-                                                       @RequestParam("skillCertificationId") String skillCertificationId);
+                                                       @RequestParam("skillCertificationId") String skillCertificationId,
+                                                       @RequestParam("cityId") String cityId);
 
     @PostMapping(value = "web/engineer/querySkillCertificationSelectedList")
     @ApiOperation(value = "技能认证已选列表", notes = "技能认证已选列表")
     ServerResponse querySkillCertificationSelectedList(@RequestParam("pageDTO") PageDTO pageDTO,
                                                        @RequestParam("searchKey") String searchKey,
                                                        @RequestParam("skillCertificationId") String skillCertificationId,
-                                                       @RequestParam("type") Integer type);
+                                                       @RequestParam("type") Integer type,
+                                                       @RequestParam("cityId") String cityId);
 
     @PostMapping(value = "web/engineer/insertSkillCertification")
     @ApiOperation(value = "工匠技能认证", notes = "技能认证")
     ServerResponse insertSkillCertification(@RequestParam("jsonStr") String jsonStr,
-                                            @RequestParam("workerId") String workerId);
+                                            @RequestParam("workerId") String workerId,
+                                            @RequestParam("cityId") String cityId);
 
     @PostMapping(value = "web/engineer/queryWorkerTypeSkillPackConfigurationList")
     @ApiOperation(value = "工种技能包配置列表", notes = "工种技能包配置列表")
@@ -50,6 +53,7 @@ public interface DjSkillCertificationAPI {
     @PostMapping(value = "web/engineer/insertWorkerTypeSkillPackConfiguration")
     @ApiOperation(value = "工种技能包配置", notes = "工种技能包配置")
     ServerResponse insertWorkerTypeSkillPackConfiguration(@RequestParam("jsonStr") String jsonStr,
-                                                          @RequestParam("workerType") WorkerType workerType);
+                                                          @RequestParam("workerType") WorkerType workerType,
+                                                          @RequestParam("cityId") String cityId);
 
 }

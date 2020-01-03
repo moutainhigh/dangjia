@@ -14,6 +14,7 @@ import com.dangjia.acg.mapper.core.IHouseFlowApplyImageMapper;
 import com.dangjia.acg.mapper.design.IQuantityRoomImagesMapper;
 import com.dangjia.acg.mapper.house.IWebsiteVisitMapper;
 import com.dangjia.acg.mapper.member.IMemberCollectMapper;
+import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.WebsiteVisit;
 import com.dangjia.acg.modle.member.Member;
@@ -46,12 +47,10 @@ public class MemberCollectService {
     @Autowired
     private IndexPageService indexPageService;
     @Autowired
-    private IHouseFlowApplyImageMapper houseFlowApplyImageMapper;
+    private IMasterStorefrontProductMapper iMasterStorefrontProductMapper;
     @Autowired
     private IWebsiteVisitMapper iWebsiteVisitMapper;
     private Logger logger = LoggerFactory.getLogger(MemberCollectService.class);
-    @Autowired
-    private StorefrontProductAPI storefrontProductAPI;
     @Autowired
     private IQuantityRoomImagesMapper iQuantityRoomImagesMapper;
 
@@ -71,22 +70,36 @@ public class MemberCollectService {
             Member member = (Member) object;
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());//初始化分页插获取用户信息件
-            List<MemberCollectDTO> memberCollectDTOS = storefrontProductAPI.queryCollectGood(member.getId());
-            memberCollectDTOS.forEach(memberCollectDTO -> {
-                memberCollectDTO.setImageUrl(StringTool.getImage(memberCollectDTO.getImage(), imageAddress));//图多张
-                memberCollectDTO.setImageSingle(StringTool.getImageSingle(memberCollectDTO.getImage(), imageAddress));//图一张
-                //当前时间小于调价的时间时则展示调价预告信息
-                if (memberCollectDTO.getAdjustedPrice() == null
-                        || memberCollectDTO.getModityPriceTime() == null
-                        || memberCollectDTO.getModityPriceTime().getTime() < (new Date()).getTime()) {
-                    memberCollectDTO.setAdjustedPrice(null);
-                    memberCollectDTO.setModityPriceTime(null);
-                }
-            });
-            if (memberCollectDTOS.size() <= 0) {
+            //根据商品用户编号查询收藏记录
+            Example example = new Example(MemberCollect.class);
+            example.createCriteria().andEqualTo(MemberCollect.MEMBER_ID, member.getId())
+                    .andEqualTo(MemberCollect.CONDITION_TYPE, 1);
+            List<MemberCollect> memberCollectList = iMemberCollectMapper.selectByExample(example);
+            if (memberCollectList.size() <= 0) {
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             }
-            PageInfo pageResult = new PageInfo(memberCollectDTOS);
+            //组装新list
+            List<MemberCollectDTO> memberCollectDTOList = new ArrayList<>();
+            memberCollectList.forEach(memberCollect -> {
+                List<MemberCollectDTO> memberCollectDTOS = iMasterStorefrontProductMapper.queryCollectGood(memberCollect.getCollectId());
+                memberCollectDTOS.forEach(memberCollectDTO -> {
+                    memberCollectDTO.setId(memberCollect.getId());
+                    memberCollectDTO.setImage(imageAddress + memberCollectDTO.getImage());
+                    //当前时间小于调价的时间时则展示调价预告信息
+                    if (memberCollectDTO.getAdjustedPrice() == null
+                            || memberCollectDTO.getModityPriceTime() == null
+                            || memberCollectDTO.getModityPriceTime().getTime() < (new Date()).getTime()) {
+                        memberCollectDTO.setAdjustedPrice(null);
+                        memberCollectDTO.setModityPriceTime(null);
+                    }
+                });
+                memberCollectDTOList.addAll(memberCollectDTOS);
+            });
+            if (memberCollectDTOList.size() <= 0) {
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            }
+            PageInfo pageResult = new PageInfo(memberCollectDTOList);
+            pageResult.setList(memberCollectDTOList);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();
@@ -137,6 +150,9 @@ public class MemberCollectService {
             map.put("dianList", dianList);
             map.put("houseName", house.getHouseName());
             map.put("imageUrl", address + house.getImage());
+            String billQuantityRoom = iQuantityRoomImagesMapper.getBillQuantityRoom(house.getHouseId());
+//                map.put("imageUrl", configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + houseFlowApplyImageMapper.getHouseFlowApplyImage(house.getId(), null));
+            map.put("imageUrl", configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class) + billQuantityRoom);
             houseMap.add(map);
         }
         pageResult.setList(houseMap);

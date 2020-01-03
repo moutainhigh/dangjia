@@ -53,4 +53,9 @@ public class DjSkillCertification extends BaseEntity {
     @Desc(value = "商品类型 类型0：实物商品；1：服务商品；2：人工商品；3：体验；4：增值；5：维保")
     @ApiModelProperty("商品类型 类型0：实物商品；1：服务商品；2：人工商品；3：体验；4：增值；5：维保")
     private Integer productType;
+
+    @Column(name = "city_id")
+    @Desc(value = "商品类型 类型0：实物商品；1：服务商品；2：人工商品；3：体验；4：增值；5：维保")
+    @ApiModelProperty("商品类型 类型0：实物商品；1：服务商品；2：人工商品；3：体验；4：增值；5：维保")
+    private String cityId;
 }

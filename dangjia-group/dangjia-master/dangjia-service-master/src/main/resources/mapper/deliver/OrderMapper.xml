@@ -46,8 +46,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         from dj_deliver_order
         where
             storefont_id = #{storefontId}
-        and
-          parent_order_id = #{parentOrderId}
+        and parent_order_id = #{parentOrderId}
+        and product_type = #{productType}
+
         and
           parent_order_id!=id
         LIMIT 1

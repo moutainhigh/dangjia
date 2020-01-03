@@ -13,6 +13,7 @@ import com.dangjia.acg.dto.delivery.SupplyDimensionDTO;
 import com.dangjia.acg.dto.sup.SupplierDTO;
 import com.dangjia.acg.dto.supplier.DjSupSupplierProductDTO;
 import com.dangjia.acg.dto.supplier.DjSupplierDTO;
+import com.dangjia.acg.mapper.storefront.IStoreStorefrontMapper;
 import com.dangjia.acg.mapper.supplier.*;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.supplier.DjAdjustRecord;
@@ -60,6 +61,8 @@ public class DjSupApplicationProductService {
 
     @Autowired
     private BasicsStorefrontAPI basicsStorefrontAPI;
+    @Autowired
+    private IStoreStorefrontMapper iStoreStorefrontMapper;
     /**
      * 供应商申请供应商品
      *
@@ -128,12 +131,8 @@ public class DjSupApplicationProductService {
      * @param shopId
      * @return
      */
-    public ServerResponse queryHaveGoods(String supId, String shopId, String applicationStatus, PageDTO pageDTO, String keyWord, String userId, String cityId) {
+    public ServerResponse queryHaveGoods(String supId, String shopId, String applicationStatus, PageDTO pageDTO, String keyWord) {
         try {
-            Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
-            if (storefront == null) {
-                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
-            }
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<DjSupSupplierProductDTO> djSupSupplierProductDTOS = djSupSupplierProductMapper.queryHaveGoods(supId, shopId, applicationStatus, keyWord);

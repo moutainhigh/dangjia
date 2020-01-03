@@ -27,7 +27,7 @@ public interface IOrderMapper extends Mapper<Order> {
     /**查询人工订单*/
     Order getWorkerOrder(@Param("houseId")String houseId,@Param("workerTypeId")String workerTypeId);
     /**查询人工订单*/
-    Order getStorefontOrder(@Param("storefontId")String storefontId,@Param("parentOrderId")String parentOrderId);
+    Order getStorefontOrder(@Param("storefontId")String storefontId,@Param("parentOrderId")String parentOrderId,@Param("productType")Integer productType);
 
 
     /**

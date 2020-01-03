@@ -123,7 +123,7 @@
 		    <include refid="new_columns"/>
 		FROM dj_actuary_budget_material
 		WHERE product_type='2'
-		and worker_goods_id=#{workerGoodsId}
+		and product_id=#{workerGoodsId}
 		and
 			house_id=#{houseId}
 	</select>
@@ -290,12 +290,15 @@ SELECT
 		SELECT
 			 IFNULL(sum(abw.price * abw.shop_count),0) AS totalPrice
 		FROM
-			dj_actuary_budget_material abw
+			dj_deliver_order_item abw
+		INNER JOIN dj_deliver_order o on o.id=abw.city_id
 		WHERE
 			abw.house_id = #{houseId}
 		and abw.product_type='2'
-		AND abw.delete_state != 1
+		AND o.payment != 0
+		AND o.type = 3
 		AND abw.worker_type_id = #{workerTypeId}
+
     </select>
 
 	<!--<insert id="insertByBatch" parameterType="java.util.List">

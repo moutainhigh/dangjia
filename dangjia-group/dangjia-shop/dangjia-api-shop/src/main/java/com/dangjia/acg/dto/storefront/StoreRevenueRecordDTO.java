@@ -9,4 +9,5 @@ public class StoreRevenueRecordDTO {
     private String money;//实际支出金额
     private String totalAmount;//订单金额
     private String orderStatus;//状态
+    private String merge;//合并结算的发货退货表id、类型的json
 }

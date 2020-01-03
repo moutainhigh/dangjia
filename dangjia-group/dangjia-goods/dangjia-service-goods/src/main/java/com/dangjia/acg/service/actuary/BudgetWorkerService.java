@@ -381,10 +381,7 @@ public class BudgetWorkerService {
             String houseFlowId="";
 
             if (!serverResponse.isSuccess()){
-                if(!("1".equals(workerTypeId)||"2".equals(workerTypeId))){//设计精算，没有流程也先向下走
-                    return ServerResponse.createByErrorMessage("新增人工精算失败。原因:查询houseFlow失败！");
-                }
-
+                return ServerResponse.createByErrorMessage("新增人工精算失败。原因:查询houseFlow失败！");
             }else{
                 JSONObject obj = JSONObject.parseObject(serverResponse.getResultObj().toString());
                 houseFlowId = obj.getString("houseFlowId");
@@ -399,7 +396,7 @@ public class BudgetWorkerService {
                 JSONObject job = goodsList.getJSONObject(i);
                 String goodsId = job.getString("goodsId");//货品Id
                 String productId = job.getString("productId");//商品模板ID
-                Integer productType = Integer.parseInt(job.getString("productType"));//0:材料；1：包工包料；2:人工
+                Integer productType = Integer.parseInt(job.getString("productType"));//0：材料；1：服务；2：人工；3：体验；4：增值；5：维保
                 String groupType = job.getString("groupType");//null：单品；有值：关联组合
                 String goodsGroupId = job.getString("goodsGroupId");//所属关联组
                 Double shopCount = Double.parseDouble(job.getString("shopCount"));//数量
@@ -512,9 +509,7 @@ public class BudgetWorkerService {
                 actuarialTemplate.setNumberOfUse(actuarialTemplate.getNumberOfUse() + 1);
                 iActuarialTemplateMapper.updateByPrimaryKeySelective(actuarialTemplate);
             }
-            if(!("1".equals(workerTypeId)||"2".equals(workerTypeId))){//设计和精算入口不是一个地方，故不走此工序修改
-                houseAPI.updateCustomEdit(houseId);//1和2不需要修改此工序
-            }
+            houseAPI.updateCustomEdit(houseId);//1和2不需要修改此工序
             return ServerResponse.createBySuccessMessage("生成精算成功");
         } catch (Exception e) {
             logger.error("生成精算失败",e);
@@ -572,7 +567,7 @@ public class BudgetWorkerService {
                     break;
                 }
                 ProductDTO  productDTO= djBasicsProductTemplateService.getProductDTO(workerGoodsDTO.getWorkerGoodsSn(), workerGoodsDTO.getShopCount());
-                if (CommonUtil.isEmpty(workerGoodsDTO.getShopCount())) {
+                if (productDTO==null||CommonUtil.isEmpty(workerGoodsDTO.getShopCount())) {
                     continue;
                 }
                 productDTOS.add(productDTO);

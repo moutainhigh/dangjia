@@ -5,6 +5,8 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dto.repair.MendOrderInfoDTO;
 import com.dangjia.acg.service.repair.MendOrderService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -15,6 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class MendOrderController implements MendOrderAPI {
+
+    protected static final Logger logger = LoggerFactory.getLogger(MendOrderController.class);
 
     @Autowired
     private MendOrderService mendOrderService;
@@ -150,5 +154,6 @@ public class MendOrderController implements MendOrderAPI {
     public ServerResponse saveMendMaterial(String userToken,String houseId,String productArr){
         return mendOrderService.saveMendMaterial(userToken,houseId,productArr);
     }
+
 
 }

@@ -43,20 +43,10 @@ public interface DjBasicsSupervisorAuthorityAPI {
     ServerResponse addAllAuthority(@RequestParam("request") HttpServletRequest request,
                                 @RequestParam("strAuthority") String strAuthority,   @RequestParam("operateId") String operateId);
 
-
-    @PostMapping("web/supervisor/queryApplicationInfo")
-    @ApiOperation(value = "督导-查看业主申请信息", notes = "查看业主申请信息")
-    ServerResponse queryApplicationInfo(@RequestParam("request") HttpServletRequest request,
-                                        @RequestParam("houseId") String houseId,@RequestParam("pageDTO") PageDTO pageDTO);
-
-
     @PostMapping("web/supervisor/queryDvResponsibility")
     @ApiOperation(value = "督导-查看责任划分", notes = "查看责任划分")
     ServerResponse queryDvResponsibility(@RequestParam("request") HttpServletRequest request,
                                          @RequestParam("houseId") String houseId, @RequestParam("pageDTO") PageDTO pageDTO);
-
-
-
 
     @PostMapping("web/supervisor/querySupervisorHostList")
     @ApiOperation(value = "督导-工地列表", notes = "督导-工地列表")
@@ -79,10 +69,22 @@ public interface DjBasicsSupervisorAuthorityAPI {
                                             @RequestParam("keyWord") String keyWord);
 
     @PostMapping("web/supervisor/queryMtHostListDetail")
-    @ApiOperation(value = "督导-（维保）工地详情", notes = "督导-（维保）工地详情")
+    @ApiOperation(value = "督导-（维修）工地详情", notes = "督导-（维修）工地详情")
     ServerResponse queryMtHostListDetail(@RequestParam("request") HttpServletRequest request,
                                          @RequestParam("userToken") String userToken,
                                          @RequestParam("houseId") String houseId);
+
+
+    @PostMapping("web/supervisor/queryInvestigationDetail")
+    @ApiOperation(value = "督导-（维修）勘察详情", notes = "督导-（维修）勘察详情")
+    ServerResponse queryInvestigationDetail(@RequestParam("request") HttpServletRequest request,
+                                        @RequestParam("houseId") String houseId,@RequestParam("pageDTO") PageDTO pageDTO);
+
+
+    @PostMapping("web/supervisor/queryApplicationInfo")
+    @ApiOperation(value = "督导-（维修）申请信息", notes = "督导-（维修）申请信息")
+    ServerResponse queryApplicationInfo(@RequestParam("request") HttpServletRequest request,
+                                        @RequestParam("houseId") String houseId,@RequestParam("pageDTO") PageDTO pageDTO);
 
 
 }

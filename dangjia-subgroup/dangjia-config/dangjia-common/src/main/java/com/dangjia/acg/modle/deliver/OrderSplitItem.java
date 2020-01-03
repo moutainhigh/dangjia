@@ -86,7 +86,7 @@ public class OrderSplitItem extends BaseEntity {
 	private Double totalPrice; //总价
 
 	@Column(name = "product_type")
-	private Integer productType; //0：材料；1：包工包料
+	private Integer productType; //0：材料；1：服务；2：人工；3：体验；4：增值；5：维保
 
 	@Column(name = "category_id")
 	private String categoryId;//分类id

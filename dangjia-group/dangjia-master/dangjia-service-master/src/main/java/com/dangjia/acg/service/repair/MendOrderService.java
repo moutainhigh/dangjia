@@ -12,6 +12,7 @@ import com.dangjia.acg.common.enums.AppType;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
+import com.dangjia.acg.common.util.MathUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.product.ProductWorkerDTO;
 import com.dangjia.acg.dto.repair.MendOrderInfoDTO;
@@ -19,28 +20,35 @@ import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
+import com.dangjia.acg.mapper.delivery.IMasterOrderProgressMapper;
+import com.dangjia.acg.mapper.delivery.IOrderItemMapper;
 import com.dangjia.acg.mapper.delivery.IOrderSplitMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.ISurplusWareHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.member.IMemberInfoMapper;
 import com.dangjia.acg.mapper.repair.*;
+import com.dangjia.acg.mapper.task.IMasterTaskStackMapper;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.core.WorkerType;
+import com.dangjia.acg.modle.deliver.OrderItem;
 import com.dangjia.acg.modle.deliver.OrderSplit;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.SurplusWareHouse;
+import com.dangjia.acg.modle.house.TaskStack;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.order.OrderProgress;
 import com.dangjia.acg.modle.product.BasicsGoods;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.repair.*;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.house.HouseService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -108,7 +116,13 @@ public class MendOrderService {
     private UnitAPI unitAPI;
     @Autowired
     private IMemberInfoMapper memberInfoMapper;
+    @Autowired
+    private IMasterTaskStackMapper iMasterTaskStackMapper;
 
+    @Autowired
+    private IOrderItemMapper iOrderItemMapper;
+    @Autowired
+    private IMasterOrderProgressMapper iMasterOrderProgressMapper;
 
     /**
      * 补材料明细
@@ -1126,7 +1140,7 @@ public class MendOrderService {
     /**
      * 生成审核流程
      */
-    private boolean createMendCheck(MendOrder mendOrder) {
+    public boolean createMendCheck(MendOrder mendOrder) {
         try {
             MendTypeRole mendTypeRole = mendTypeRoleMapper.getByType(mendOrder.getType());
             String[] roleArr = mendTypeRole.getRoleArr().split(",");
@@ -1212,5 +1226,9 @@ public class MendOrderService {
         }
         return ServerResponse.createBySuccess("认证成功");
     }
+
+
+
+
 
 }

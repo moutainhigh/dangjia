@@ -276,50 +276,16 @@ public class RefundAfterSalesController implements RefundAfterSalesAPI {
     /**
      * 查询待审核的补人工订单
      * @param cityId
-     * @param taskId
+     * @param mendOrderId
      * @return
      */
     @Override
     @ApiMethod
-    public ServerResponse searchAuditInfoByTaskId(String cityId,String taskId){
-        return refundAfterSalesService.searchAuditInfoByTaskId(cityId,taskId);
+    public ServerResponse searchAuditInfoByTaskId(String cityId,String mendOrderId){
+        return refundAfterSalesService.searchAuditInfoByTaskId(cityId,mendOrderId);
     }
 
-    /**
-     * 待审核的订单--审核通过
-     * @param cityId
-     * @param taskId
-     * @return
-     */
-    @Override
-    @ApiMethod
-    public ServerResponse passAuditInfoByTaskId(String cityId,String taskId){
-        try{
-            return refundAfterSalesService.passAuditInfoByTaskId(cityId,taskId);
-        }catch (Exception e){
-            logger.error("审核通过异常：",e);
-            return ServerResponse.createByErrorMessage("审核通过失败");
-        }
 
-    }
-
-    /**
-     * 待审核的订单--审核不通过
-     * @param cityId
-     * @param taskId
-     * @return
-     */
-    @Override
-    @ApiMethod
-    public ServerResponse failAuditInfoByTaskId(String cityId,String taskId){
-        try{
-            return refundAfterSalesService.failAuditInfoByTaskId(cityId,taskId);
-        }catch (Exception e){
-            logger.error("审核不通过异常：",e);
-            return ServerResponse.createByErrorMessage("审核不通过失败");
-        }
-
-    }
 
     /**
      * 退人工--查询符合条件的可退人工商品
@@ -336,4 +302,6 @@ public class RefundAfterSalesController implements RefundAfterSalesAPI {
                                           String workerTypeId,String searchKey){
         return refundAfterSalesService.queryWorkerProductList(userToken,cityId,houseId,workerTypeId,searchKey);
     }
+
+
 }

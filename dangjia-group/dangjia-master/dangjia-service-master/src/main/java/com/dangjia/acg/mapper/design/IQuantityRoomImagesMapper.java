@@ -1,6 +1,7 @@
 package com.dangjia.acg.mapper.design;
 
 import com.dangjia.acg.modle.design.QuantityRoomImages;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
@@ -13,5 +14,9 @@ import tk.mybatis.mapper.common.Mapper;
  */
 @Repository
 public interface IQuantityRoomImagesMapper extends Mapper<QuantityRoomImages> {
+
+    //查询平面图
+    String getBillQuantityRoom(@Param("houseId") String houseId);
+
 
 }
