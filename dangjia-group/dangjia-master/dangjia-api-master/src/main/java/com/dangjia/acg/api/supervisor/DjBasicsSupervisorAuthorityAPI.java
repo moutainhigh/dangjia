@@ -44,10 +44,6 @@ public interface DjBasicsSupervisorAuthorityAPI {
                                 @RequestParam("strAuthority") String strAuthority,   @RequestParam("operateId") String operateId);
 
 
-    @PostMapping("web/supervisor/queryApplicationInfo")
-    @ApiOperation(value = "督导-查看业主申请信息", notes = "查看业主申请信息")
-    ServerResponse queryApplicationInfo(@RequestParam("request") HttpServletRequest request,
-                                        @RequestParam("houseId") String houseId,@RequestParam("pageDTO") PageDTO pageDTO);
 
 
     @PostMapping("web/supervisor/queryDvResponsibility")
@@ -83,6 +79,18 @@ public interface DjBasicsSupervisorAuthorityAPI {
     ServerResponse queryMtHostListDetail(@RequestParam("request") HttpServletRequest request,
                                          @RequestParam("userToken") String userToken,
                                          @RequestParam("houseId") String houseId);
+
+
+    @PostMapping("web/supervisor/queryInvestigationDetail")
+    @ApiOperation(value = "督导-（维保）勘察详情", notes = "督导-（维保）勘察详情")
+    ServerResponse queryInvestigationDetail(@RequestParam("request") HttpServletRequest request,
+                                        @RequestParam("houseId") String houseId,@RequestParam("pageDTO") PageDTO pageDTO);
+
+
+    @PostMapping("web/supervisor/queryApplicationInfo")
+    @ApiOperation(value = "督导-（维保）申请信息", notes = "督导-（维保）申请信息")
+    ServerResponse queryApplicationInfo(@RequestParam("request") HttpServletRequest request,
+                                        @RequestParam("houseId") String houseId,@RequestParam("pageDTO") PageDTO pageDTO);
 
 
 }

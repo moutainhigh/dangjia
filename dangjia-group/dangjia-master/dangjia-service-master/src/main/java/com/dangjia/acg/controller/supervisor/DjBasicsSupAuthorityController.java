@@ -77,4 +77,10 @@ public class DjBasicsSupAuthorityController implements DjBasicsSupervisorAuthori
     public ServerResponse queryMtHostListDetail(HttpServletRequest request, String houseId,String userToken) {
         return supAuthorityService.queryMtHostListDetail(request,houseId,userToken);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryInvestigationDetail(HttpServletRequest request, String houseId, PageDTO pageDTO) {
+        return supAuthorityService.queryInvestigationDetail(request,houseId,pageDTO);
+    }
 }

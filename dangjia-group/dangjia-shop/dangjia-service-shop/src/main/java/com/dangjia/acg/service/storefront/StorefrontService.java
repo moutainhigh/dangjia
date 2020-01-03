@@ -567,7 +567,7 @@ public class StorefrontService {
             djShopSupplierPayOrderMapper.updateByPrimaryKeySelective(djSupplierPayOrder);
             return ServerResponse.createBySuccess("提交成功", djSupplierPayOrder.getBusinessOrderNumber());
         } catch (Exception e) {
-            logger.error("店铺收支记录异常：", e);
+            logger.error("店铺异常：", e);
             return ServerResponse.createByErrorMessage("店铺收支记录异常");
         }
     }

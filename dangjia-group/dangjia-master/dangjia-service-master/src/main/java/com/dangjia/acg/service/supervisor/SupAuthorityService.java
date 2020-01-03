@@ -365,7 +365,6 @@ public class SupAuthorityService {
      */
     public ServerResponse queryMtHostListDetail(HttpServletRequest request, String houseId,String userToken) {
         try {
-
             Object object = memberAPI.getMember(userToken);
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
@@ -377,6 +376,22 @@ public class SupAuthorityService {
         } catch (Exception e) {
             logger.error("（维保）工地详情异常", e);
             return ServerResponse.createByErrorMessage("（维保）工地详情异常");
+        }
+    }
+
+    /**
+     * 督导-（维保）勘察详情
+     * @param request
+     * @param houseId
+     * @param pageDTO
+     * @return
+     */
+    public ServerResponse queryInvestigationDetail(HttpServletRequest request, String houseId, PageDTO pageDTO) {
+        try {
+            return null;
+        } catch (Exception e) {
+            logger.error("督导-（维保）勘察详情异常", e);
+            return ServerResponse.createByErrorMessage("督导-（维保）勘察详情异常");
         }
     }
 }

@@ -381,7 +381,9 @@
             AND afr.data_status = 0
             AND afr.flow_type = 1 -- 店铺
             AND afr.defined_account_id=#{storefrontId}
-            AND afr.house_order_id=#{houseOrderId}
+            <if test="houseOrderId!=null and houseOrderId!=''">
+                AND afr.house_order_id=#{houseOrderId}
+            </if>
     </select>
 
     <select id="queryMendOrder" resultType="com.dangjia.acg.dto.storefront.StoreRepairMendOrderDTO">
