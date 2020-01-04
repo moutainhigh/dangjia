@@ -146,6 +146,7 @@ public class CraftsmanConstructionService {
         }
         bean.setHouseId(house.getId());
         bean.setHouseName(house.getHouseName());
+        bean.setHouseSquare(house.getSquare().doubleValue());
         Example example = new Example(MemberAddress.class);
         example.createCriteria().andEqualTo(MemberAddress.HOUSE_ID, house.getId());
         MemberAddress memberAddress = iMasterMemberAddressMapper.selectOneByExample(example);

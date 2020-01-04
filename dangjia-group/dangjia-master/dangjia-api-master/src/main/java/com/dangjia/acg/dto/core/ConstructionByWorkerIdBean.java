@@ -25,6 +25,7 @@ public class ConstructionByWorkerIdBean {
     private String houseMemberName = "";//业主名称
     private String houseMemberPhone = "";//业主电话
     private String houseName = "";//房子名称
+    private Double houseSquare;//房子面积
     private int ifBackOut = 1;//0可放弃；1：申请停工；2：已停工 3 审核中
     private List<String> promptList;//消息提示
     private int workerType;//0:大管家；1：工匠；2：设计师；3：精算师
