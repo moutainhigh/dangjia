@@ -1,8 +1,11 @@
 package com.dangjia.acg.service.member;
 
 
+import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.exception.ServerCode;
+import com.dangjia.acg.common.net.MininProgramUtil;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.mapper.member.IMemberAuthMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
@@ -15,7 +18,9 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 当家用户第三方认证
@@ -114,13 +119,13 @@ public class MemberAuthService {
      */
     public ServerResponse newUserBinding(HttpServletRequest request, String phone, String password,
                                          int smscode, String invitationCode,
-                                         MemberAuth memberAuth ,String longitude, String latitude) {
+                                         MemberAuth memberAuth, String longitude, String latitude) {
         if (memberAuth.getUserRole() == null || memberAuth.getUserRole() == 0
                 || memberAuth.getOpenType() == null || memberAuth.getOpenType() == 0
                 || memberAuth.getUnionid() == null) {
             return ServerResponse.createByErrorMessage("传入参数有误");
         }
-        ServerResponse response = memberService.checkRegister(request, phone, smscode, password, invitationCode, memberAuth.getUserRole(),longitude,latitude);
+        ServerResponse response = memberService.checkRegister(request, phone, smscode, password, invitationCode, memberAuth.getUserRole(), longitude, latitude);
         if (!response.isSuccess()) {
             return response;
         }
@@ -228,5 +233,52 @@ public class MemberAuthService {
             return ServerResponse.createBySuccess("查询成功", 0);
         }
         return ServerResponse.createBySuccess("查询成功", 1);
+    }
+
+    /**
+     * 微信小程序登录
+     *
+     * @param code 登录时获取的 code
+     * @return 登录信息
+     */
+    public ServerResponse miniProgramLogin(String code) {
+        try {
+            JSONObject object = MininProgramUtil.jscode2session(code);
+            Integer errcode = object.getInteger("errcode");
+            if (errcode != null && errcode != 0) {
+                switch (errcode) {
+                    case -1:
+                        return ServerResponse.createByErrorMessage("系统繁忙,请稍候再试");
+                    case 45011:
+                        return ServerResponse.createByErrorMessage("频率限制，每个用户每分钟100次");
+                    default:
+                        return ServerResponse.createByErrorMessage("code 无效");
+                }
+            } else {
+                String openid = object.getString("openid");
+                String sessionKey = object.getString("session_key");
+                String unionid = object.getString("unionid");
+                ServerResponse serverResponse = authLogin(1, unionid, 1);
+                if (serverResponse.isSuccess()) {
+                    Map map = BeanUtils.beanToMap(serverResponse.getResultObj());
+                    map.put("openid", openid);
+                    map.put("sessionKey", sessionKey);
+                    map.put("unionid", unionid);
+                    return ServerResponse.createBySuccess("登录成功，正在跳转", map);
+                } else {
+                    if (serverResponse.getResultCode() == ServerCode.NO_DATA.getCode()) {
+                        Map map = new HashMap();
+                        map.put("openid", openid);
+                        map.put("sessionKey", sessionKey);
+                        map.put("unionid", unionid);
+                        return ServerResponse.createByErrorCodeResultObj(ServerCode.NO_DATA.getCode(), map);
+                    } else {
+                        return serverResponse;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            return ServerResponse.createByErrorMessage("系统繁忙,请稍候再试");
+        }
     }
 }
