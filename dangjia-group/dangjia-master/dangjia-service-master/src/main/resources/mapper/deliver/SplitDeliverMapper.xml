@@ -17,6 +17,7 @@
         a.supplierId,
         a.supMobile,
         a.supName,
+        a.storefrontId,
         SUM(a.sent) sent,
         SUM(a.wait) wait
         FROM
@@ -27,6 +28,7 @@
         m.supplier_id AS supplierId,
         m.supplier_telephone AS supMobile,
         m.supplier_name AS supName,
+        m.storefront_id AS storefrontId,
         (
         SELECT
         COUNT(d.id)
@@ -47,9 +49,9 @@
         ) wait
         FROM
         dj_repair_mend_deliver m
-        inner join dj_house h on h.id = m.house_id and h.city_id = #{cityId}
         WHERE
         m.data_status = 0
+        AND m.city_id = #{cityId}
         AND m.apply_state IS NOT NULL
         AND m.apply_state != 3
         <if test="beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
@@ -71,6 +73,7 @@
         s.supplier_id AS supplierId,
         s.supplier_telephone AS supMobile,
         s.supplier_name AS supName,
+        s.storefront_id AS storefrontId,
         (
         SELECT
         COUNT(d.id)
@@ -94,9 +97,9 @@
         ) wait
         FROM
         dj_deliver_split_deliver s
-        inner join dj_house h on h.id = s.house_id and h.city_id = #{cityId}
         WHERE
         s.data_status = 0
+        AND s.city_id = #{cityId}
         AND s.apply_state IS NOT NULL
         AND s.apply_state != 3
         <if test="beginDate!=null and beginDate!='' and endDate!=null and endDate!=''">
