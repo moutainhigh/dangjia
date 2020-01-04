@@ -1,22 +1,14 @@
 package com.dangjia.acg.common.net;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.http.HttpUtil;
-import netscape.javascript.JSException;
 import org.springframework.util.Base64Utils;
 
-import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.UnsupportedEncodingException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
+import java.nio.charset.StandardCharsets;
 import java.security.spec.AlgorithmParameterSpec;
 
 /**
@@ -32,7 +24,7 @@ public class MininProgramUtil {
     private static final String SECRET = "d0827c2694273dd4835582457d9b17a4";//小程序 appSecret
     private static final String GRANT_TYPE = "authorization_code";//授权类型，此处只需填写 authorization_code
 
-    public static JSONObject jscode2session(String code) throws Exception {
+    public static JSONObject jscode2session(String code){
         String param = "appid=" + APP_ID + "&secret=" + SECRET + "&js_code=" + code + "&grant_type=" + GRANT_TYPE;
         //发起服务器请求
         String result = HttpUtil.httpRequest(SESSION_URL, "GET", param);
@@ -49,7 +41,7 @@ public class MininProgramUtil {
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
             SecretKeySpec keySpec = new SecretKeySpec(sessionKey, "AES");
             cipher.init(Cipher.DECRYPT_MODE, keySpec, ivSpec);
-            String resultString = new String(cipher.doFinal(encrypData), "UTF-8");
+            String resultString = new String(cipher.doFinal(encrypData), StandardCharsets.UTF_8);
             JSONObject object = JSONObject.parseObject(resultString);
             // 拿到手机号码
             return object.getString("phoneNumber");
