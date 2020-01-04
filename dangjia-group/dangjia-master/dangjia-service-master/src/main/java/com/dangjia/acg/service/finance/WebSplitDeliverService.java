@@ -91,12 +91,15 @@ public class WebSplitDeliverService {
      */
     public ServerResponse getAllSplitDeliver(PageDTO pageDTO, String cityId,String userId,Integer applyState, String searchKey, String beginDate, String endDate) {
         try {
-            Storefront storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
-            if (storefront == null) {
-                return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
-            }
             if (applyState == null) {
                 applyState = -1;
+            }
+            Storefront storefront=null;
+            if(applyState !=-1) {
+                storefront = basicsStorefrontAPI.queryStorefrontByUserID(userId, cityId);
+                if (storefront == null) {
+                    return ServerResponse.createByErrorMessage("不存在店铺信息，请先维护店铺信息");
+                }
             }
             if (!CommonUtil.isEmpty(beginDate) && !CommonUtil.isEmpty(endDate) && (applyState == 0 || applyState == -1)) {
                 applyState = -2;
@@ -108,7 +111,7 @@ public class WebSplitDeliverService {
                 }
             }
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<WebSplitDeliverItemDTO> webSplitDeliverItemDTOLists = iSplitDeliverMapper.getWebSplitDeliverList(storefront.getId(),cityId,applyState, searchKey, beginDate, endDate);
+            List<WebSplitDeliverItemDTO> webSplitDeliverItemDTOLists = iSplitDeliverMapper.getWebSplitDeliverList(storefront==null?null:storefront.getId(),cityId,applyState, searchKey, beginDate, endDate);
             PageInfo pageResult = new PageInfo(webSplitDeliverItemDTOLists);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {

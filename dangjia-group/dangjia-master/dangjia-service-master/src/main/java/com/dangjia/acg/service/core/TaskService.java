@@ -373,7 +373,7 @@ public class TaskService {
         houseFlowList = houseFlowMapper.selectByExample(example);
         for (HouseFlow houseFlow : houseFlowList) {
             WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
-            HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(house.getHouseId(), houseFlow.getWorkerTypeId());
+            HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(house.getId(), houseFlow.getWorkerTypeId());
             //检查是否该工序订单已经被业主支付，才能审核
             if(hwo!=null&&hwo.getPayState()==1){
                 Task task = new Task();

@@ -35,8 +35,8 @@ public class BasicsGoods extends GoodsBaseEntity {
     private String categoryId;
 
     @Column(name = "type")
-    @Desc(value = "类型0：材料；1：服务；2：人工；3：体验；4：增值")
-    @ApiModelProperty("类型0：材料；1：服务；2：人工；3：体验；4：增值")
+    @Desc(value = "类型0：材料；1：服务；2：人工；3：体验；4：增值；5：维保")
+    @ApiModelProperty("类型0：材料；1：服务；2：人工；3：体验；4：增值；5：维保")
     private Integer type;
 
     @Column(name = "buy")
