@@ -33,6 +33,7 @@ public class DjSupSupplierProductDTO extends BaseEntity {
     private Double porterage;//搬运费
     private String supId;
     private String shopId;
+    private String prodTemplateId;
     /**
      * 城市ID
      */
