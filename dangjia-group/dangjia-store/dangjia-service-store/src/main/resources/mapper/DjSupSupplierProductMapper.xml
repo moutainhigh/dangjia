@@ -129,7 +129,7 @@
             and bsp.storefront_id = #{shopId}
         </if>
         <if test="null!=productIds and productIds.size>0">
-            and bsp.prod_template_id not in
+            and bsp.id not in
             <foreach collection="productIds" index="index" item="item" open="(" separator="," close=")">
                 #{item}
             </foreach>
