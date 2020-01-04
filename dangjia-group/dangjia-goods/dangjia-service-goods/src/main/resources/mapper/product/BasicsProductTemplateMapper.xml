@@ -47,7 +47,8 @@
         calculate_content calculateContent,
         build_content buildContent,
         is_agency_purchase isAgencyPurchase,
-        is_relateion_product isRelateionProduct
+        is_relateion_product isRelateionProduct,
+        steward_exploration stewardExploration
     </sql>
 
     <!-- 查询当前添加商品的属性值是否已被用(存在相关属性值的商品) -->
