@@ -5,6 +5,19 @@ import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.common.http.HttpUtil;
 import netscape.javascript.JSException;
+import org.springframework.util.Base64Utils;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+import java.io.UnsupportedEncodingException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.AlgorithmParameterSpec;
 
 /**
  * @author Ruking.Cheng
@@ -24,6 +37,25 @@ public class MininProgramUtil {
         //发起服务器请求
         String result = HttpUtil.httpRequest(SESSION_URL, "GET", param);
         return JSON.parseObject(result);
+    }
+
+    public static String getPhone(String encrypted, String iv, String sessionkey) {
+        try {
+            // 解密
+            byte[] encrypData = Base64Utils.decodeFromString(encrypted);
+            byte[] ivData = Base64Utils.decodeFromString(iv);
+            byte[] sessionKey = Base64Utils.decodeFromString(sessionkey);
+            AlgorithmParameterSpec ivSpec = new IvParameterSpec(ivData);
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            SecretKeySpec keySpec = new SecretKeySpec(sessionKey, "AES");
+            cipher.init(Cipher.DECRYPT_MODE, keySpec, ivSpec);
+            String resultString = new String(cipher.doFinal(encrypData), "UTF-8");
+            JSONObject object = JSONObject.parseObject(resultString);
+            // 拿到手机号码
+            return object.getString("phoneNumber");
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public static void main(String[] args) {

@@ -281,4 +281,32 @@ public class MemberAuthService {
             return ServerResponse.createByErrorMessage("系统繁忙,请稍候再试");
         }
     }
+
+    public ServerResponse decodeWxAppPhone(HttpServletRequest request, String encrypted, String iv, String code) {
+        request.setAttribute("isShow", "true");
+        try {
+            JSONObject object = MininProgramUtil.jscode2session(code);
+            Integer errcode = object.getInteger("errcode");
+            if (errcode != null && errcode != 0) {
+                switch (errcode) {
+                    case 45011:
+                        return ServerResponse.createByErrorMessage("频率限制，每个用户每分钟100次");
+                    case -1:
+                        return ServerResponse.createByErrorMessage("系统繁忙,请稍候再试");
+                    default:
+                        return ServerResponse.createByErrorMessage("code 无效");
+                }
+            } else {
+                String sessionKey = object.getString("session_key");
+                String phone = MininProgramUtil.getPhone(encrypted, iv, sessionKey);
+                if (phone == null) {
+                    return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "未找到手机号");
+                } else {
+                    return ServerResponse.createBySuccess("获取成功", phone);
+                }
+            }
+        } catch (Exception e) {
+            return ServerResponse.createByErrorMessage("系统繁忙,请稍候再试");
+        }
+    }
 }

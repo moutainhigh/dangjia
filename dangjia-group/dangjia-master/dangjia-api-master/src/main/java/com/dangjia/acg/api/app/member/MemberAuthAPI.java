@@ -341,7 +341,7 @@ public interface MemberAuthAPI {
     /**
      * showdoc
      *
-     * @param code    必选 string 登录时获取的code
+     * @param code 必选 string 登录时获取的code
      * @return {"res":1000,"msg":{"resultObj":{返回参数说明},"resultCode":1000,"resultMsg":"成功"} }
      * @catalog 当家接口文档/用户模块/第三方认证
      * @title 小程序登录
@@ -414,6 +414,31 @@ public interface MemberAuthAPI {
     @RequestMapping(value = "memberAuth/miniProgramLogin", method = RequestMethod.POST)
     @ApiOperation(value = "小程序登录", notes = "小程序登录")
     ServerResponse miniProgramLogin(@RequestParam("request") HttpServletRequest request,
+                                    @RequestParam("code") String code);
+
+    /**
+     * showdoc
+     *
+     * @param encrypted 必选 string encryptedData
+     * @param iv        必选 string vi
+     * @param code      必选 string 获取微信的code
+     * @return {"res":1000,"msg":{"resultObj":"手机号","resultCode":1000,"resultMsg":"成功"} }
+     * @catalog 当家接口文档/用户模块/第三方认证
+     * @title 获取微信用户手机号码
+     * @description 获取微信用户手机号码
+     * @method POST
+     * @url master/memberAuth/decodeWxAppPhone
+     * @return_param resultObj string 手机号
+     * @remark 更多返回错误代码请看首页的错误代码描述
+     * @number 8
+     * @Author: Ruking 18075121944
+     * @Date: 2020/1/4 5:12 PM
+     */
+    @RequestMapping(value = "memberAuth/decodeWxAppPhone", method = RequestMethod.POST)
+    @ApiOperation(value = "获取微信用户手机号码", notes = "获取微信用户手机号码")
+    ServerResponse decodeWxAppPhone(@RequestParam("request") HttpServletRequest request,
+                                    @RequestParam("encrypted") String encrypted,
+                                    @RequestParam("iv") String iv,
                                     @RequestParam("code") String code);
 }
 

@@ -60,5 +60,10 @@ public class MemberAuthController implements MemberAuthAPI {
     public ServerResponse miniProgramLogin(HttpServletRequest request, String code) {
         return memberAuthService.miniProgramLogin(code);
     }
+
+    @Override
+    public ServerResponse decodeWxAppPhone(HttpServletRequest request, String encrypted, String iv, String code) {
+        return memberAuthService.decodeWxAppPhone(request, encrypted, iv, code);
+    }
 }
 
