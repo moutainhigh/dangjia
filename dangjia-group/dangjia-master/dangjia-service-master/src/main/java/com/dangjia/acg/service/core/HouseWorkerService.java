@@ -478,6 +478,9 @@ public class HouseWorkerService {
             houseWorker.setWorkerType(houseFlow.getWorkerType());
             houseWorker.setWorkType(1);//已抢单
             houseWorker.setIsSelect(1);
+            houseWorker.setPrice(houseFlow.getWorkPrice());
+            houseWorker.setType(0);
+            houseWorker.setBusinessId(houseFlow.getId());
             houseWorkerMapper.insert(houseWorker);
 
             Example example = new Example(MemberCity.class);

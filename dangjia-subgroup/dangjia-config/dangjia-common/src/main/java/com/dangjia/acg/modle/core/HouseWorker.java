@@ -10,6 +10,7 @@ import lombok.experimental.FieldNameConstants;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import java.math.BigDecimal;
 
 /**
  * 实体类 - 把工人和工序关联起来，工人订单表
@@ -42,12 +43,41 @@ public class HouseWorker extends BaseEntity {
 	private Integer workerType;//workertype
 
 	@Column(name = "work_type")
-	@Desc(value = "抢单状态:1已抢单等待被采纳,2被业主换,3被平台换,4已支付被平台换,5拒单(工匠主动拒绝)，6被采纳支付,7抢单后放弃")
-	@ApiModelProperty("抢单状态:1已抢单等待被采纳,2被业主换,3被平台换,4已支付被平台换,5拒单(工匠主动拒绝)，6被采纳支付,7抢单后放弃")
+	@Desc(value = "抢单状态:1已抢单等待被采纳,2被业主换,3被平台换,4已支付被平台换,5拒单(工匠主动拒绝)，6被采纳支付,7抢单后放弃,8已完成")
+	@ApiModelProperty("抢单状态:1已抢单等待被采纳,2被业主换,3被平台换,4已支付被平台换,5拒单(工匠主动拒绝)，6被采纳支付,7抢单后放弃,8已完成")
 	private Integer workType; //worktype
 
 	@Column(name = "is_select")
 	@Desc(value = "是否选中当前任务(0:未选中；1：选中)")
 	@ApiModelProperty("是否选中当前任务(0:未选中；1：选中)")
 	private Integer isSelect;
+
+
+	@Column(name = "patrol")
+	@Desc(value = "总巡查次数，大管家时使用")
+	@ApiModelProperty("总巡查次数，大管家时使用")
+	private Integer patrol;
+
+
+
+	@Column(name = "business_id")
+	@Desc(value = "业务ID（houseFlowId或验房ID或维修ID等等）")
+	@ApiModelProperty("业务ID（houseFlowId或验房ID或维修ID等等）")
+	private String businessId;
+
+	@Column(name = "type")
+	@Desc(value = "0:装修单，1:体验单，2，维修单")
+	@ApiModelProperty("0:装修单，1:体验单，2，维修单")
+	private Integer type;
+
+	@Column(name = "order_id")
+	@Desc(value = "对应业主支付订单ID")
+	@ApiModelProperty("对应业主支付订单ID")
+	private String orderId;
+
+	@Column(name = "price")
+	@Desc(value = "工钱")
+	@ApiModelProperty("工钱")
+	private BigDecimal price;
+
 }
