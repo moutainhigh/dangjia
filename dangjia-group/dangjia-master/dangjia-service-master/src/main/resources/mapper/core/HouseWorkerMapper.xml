@@ -150,6 +150,11 @@
         SELECT
         <include refid="all_w_columns"/>
         from dj_core_house_worker w
+        <if test="nameKey!=null and nameKey=='1'">
+            LEFT JOIN dj_house h ON w.house_id = h.id
+            LEFT JOIN dj_deliver_order o ON o.id = w.business_id
+            LEFT JOIN dj_member_address ma on ma.id=o.address_id
+        </if>
         <if test="houseType!=null and houseType=='1'">
             INNER JOIN (
             SELECT house_id, MAX(end_date) end_date  FROM
@@ -206,6 +211,19 @@
         </if>
         where w.worker_id = #{workerId}
         and w.work_type in(1,6)
+        <if test="nameKey!=null and nameKey=='1'">
+            AND (
+                CONCAT(
+                h.residential,
+                IFNULL(h.building, '*'),
+                '栋',
+                IFNULL(CONCAT(h.unit, '单元'), ''),
+                IFNULL(h.number, '*'),
+                '号'
+               ) LIKE CONCAT('%', #{nameKey}, '%')
+               OR ma.address LIKE CONCAT('%', #{nameKey}, '%')
+            )
+        </if>
         <if test="type!=null and type!=''">
             AND w.type =  #{type}
         </if>
