@@ -354,5 +354,8 @@ public class DjConstants {
         public final static String YZ_B_200 = "工匠您好！业主已主动购买人工请您施工，请确认是否接受。";
         public final static String YZ_B_201 = "业主您好！【%s】工匠已接受您安排的施工项目，请查看。";
         public final static String YZ_B_202 = "业主您好！【%s】工匠没有接受您安排的施工项目，请查看。";
+
+
+        public final static String GZ_T_WORK = "工匠您好！【%s】图纸已设计完成，请查看";
     }
 }

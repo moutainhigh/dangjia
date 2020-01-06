@@ -1543,4 +1543,35 @@ public class OrderService {
         return "";
     }
 
+    /**
+     *  获取符合条件的精算师订单
+     * @param house
+     * @return
+     */
+    public String getBudgetProductJsons(House house){
+
+        //查询推荐商品列表
+        Example example = new Example(DjActuarialProductConfig.class);
+        example.createCriteria().andEqualTo(DjActuarialProductConfig.WORKER_TYPE_ID, 2)
+                .andEqualTo(DjActuarialProductConfig.DEFAULT_RECOMMEND, "1");//查询默认推荐的精算商品
+        List<DjActuarialProductConfig> productConfigList=iMasterActuarialProductConfigMapper.selectByExample(example);
+        if(productConfigList!=null&&productConfigList.size()>0){
+            JSONArray listOfGoods = new JSONArray();
+            for(DjActuarialProductConfig product:productConfigList){
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("shopCount", 1);
+                //查询是否按面积计算价格
+                if ("1".equals(product.getIsCalculatedArea())) {
+                    jsonObject.put("shopCount", house.getSquare());//按房子面积计算
+                }
+                //查询对应的商品信息，按价格取最低价的商品
+                StorefrontProductDTO storefrontProductDTO=masterProductTemplateService.getStorefrontProductByTemplateId(product.getProductId());
+                jsonObject.put("productId", storefrontProductDTO.getStorefrontId());
+                jsonObject.put("workerTypeId", 1);
+                listOfGoods.add(jsonObject);
+            }
+            return listOfGoods.toJSONString();
+        }
+        return "";
+    }
 }
