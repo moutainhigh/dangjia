@@ -24,7 +24,7 @@ public interface DjActuarialTemplateConfigMapper extends Mapper<DjActuarialTempl
      * app端查询设计精算显示列表及对应的货品
      * @return
      */
-    List<ActuarialTemplateConfigAppDTO> searchAppActuarialList(@Param("cityId") String cityId,@Param("serviceTypeId") String serviceTypeId);
+    List<ActuarialTemplateConfigAppDTO> searchAppActuarialList(@Param("cityId") String cityId,@Param("serviceTypeId") String serviceTypeId,@Param("configType") String configType);
 
 
 

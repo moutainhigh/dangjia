@@ -25,11 +25,18 @@ public interface SearchActuarialConfigAPI {
                                        @RequestParam("cityId") String cityId,
                                        @RequestParam("serviceTypeId") String serviceTypeId);
 
+    @PostMapping("app/search/actuarialConfig/searchDesginActuarialList")
+    @ApiOperation(value = "设计图纸--查询设计阶段配置的商品", notes = "查询设计阶段配置的商品")
+    ServerResponse searchDesginActuarialList(@RequestParam("request") HttpServletRequest request,
+                                       @RequestParam("cityId") String cityId,
+                                       @RequestParam("houseId") String houseId);
+
 
     @PostMapping("app/search/actuarialConfig/searchChangeProductList")
     @ApiOperation(value = "我要装修--查询设计精算可切换商品列表", notes = "查询设计精算可切换商品列表")
     ServerResponse searchChangeProductList(@RequestParam("request") HttpServletRequest request,
-                                           @RequestParam("goodsId") String goodsId);
+                                           @RequestParam("goodsId") String goodsId,
+                                           @RequestParam("houseId") String houseId);
 
     @PostMapping("app/search/actuarialConfig/searchSimulationTitleList")
     @ApiOperation(value = "我要装修--模拟花费标题查询", notes = "模拟花费标题查询")

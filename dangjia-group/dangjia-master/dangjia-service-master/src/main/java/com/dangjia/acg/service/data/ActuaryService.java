@@ -212,12 +212,10 @@ public class ActuaryService {
     }
 
     /**
-     * 精算设计--保存推荐的设计商品
-     * @param cityId
-     * @param productStr
+     * 精算设计--发送图纸不合格任务给设计师
      * @return
      */
-    public ServerResponse saveRecommendedGoods(String cityId, String houseId, String productStr){
+    public ServerResponse saveRecommendedGoods( String houseId){
         try{
             //查询对应的业主ID
             House house=houseMapper.selectByPrimaryKey(houseId);
@@ -231,7 +229,7 @@ public class ActuaryService {
                 return ServerResponse.createByErrorMessage("有正在处理中的设计图审核任务，请勿重复提交！");
             }
             logger.info("批量编辑设计精算阶段的货品商品---------start----houseId={"+houseId+"}");
-            JSONArray jsonArr = JSONArray.parseArray(productStr);
+           /* JSONArray jsonArr = JSONArray.parseArray(productStr);
             //删除旧推荐商品
              example=new Example(DesignQuantityRoomProduct.class);
             example.createCriteria().andEqualTo(DesignQuantityRoomProduct.HOUSE_ID,houseId)
@@ -246,14 +244,14 @@ public class ActuaryService {
                 designQuantityRoomProduct.setProductId(productTemplateId);//模板商品ID
                 designQuantityRoomProduct.setType(1);//推荐商品
                 iMasterQuantityRoomProductMapper.insert(designQuantityRoomProduct);//添加推荐商品
-            }
+            }*/
 
             //增加设计图纸不合格的任务
             taskStackService.inserTaskStackInfo(houseId,house.getMemberId(),"设计图纸不合格","icon/sheji.png",6,houseId);
-            return ServerResponse.createBySuccessMessage("推荐保存成功");
+            return ServerResponse.createBySuccessMessage(" 提交成功");
         }catch (Exception e){
-            logger.error("推荐保存失败:",e);
-            return ServerResponse.createByErrorMessage("推荐保存失败");
+            logger.error("提交失败:",e);
+            return ServerResponse.createByErrorMessage("提交失败");
         }
     }
 
@@ -279,7 +277,8 @@ public class ActuaryService {
             //审核不通过，判断是当家平台的设计师，还是其它平台的设计师
             if(house.getDesignerOk()==0){//不是当家平台的设计师
                 //返回可推荐的设计商品列表
-                return searchActuarialProductList(cityId, house);
+                //return searchActuarialProductList(cityId, house);
+               return saveRecommendedGoods(houseId);
             }else if(house.getDesignerOk()==3){//当家平台设计已完成，打回重新修改,
                 house.setDesignerOk(7);//打回图纸，当家平台设计师图纸状态为7
                 house.setModifyDate(new Date());

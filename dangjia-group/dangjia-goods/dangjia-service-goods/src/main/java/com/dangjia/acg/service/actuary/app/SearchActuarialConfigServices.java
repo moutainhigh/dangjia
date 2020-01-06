@@ -7,9 +7,11 @@ import com.dangjia.acg.dto.actuary.app.*;
 import com.dangjia.acg.mapper.actuary.*;
 import com.dangjia.acg.mapper.basics.IBrandMapper;
 import com.dangjia.acg.mapper.basics.IUnitMapper;
+import com.dangjia.acg.mapper.config.IGoodsHouseMapper;
 import com.dangjia.acg.modle.actuary.DjActuarialSimulationRelation;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.brand.Unit;
+import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.service.product.app.GoodsProductTemplateService;
 import com.dangjia.acg.util.StringTool;
 import org.apache.commons.lang3.StringUtils;
@@ -18,6 +20,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,6 +58,8 @@ public class SearchActuarialConfigServices {
 
     @Autowired
     private IBrandMapper iBrandMapper;
+    @Autowired
+    private IGoodsHouseMapper iGoodsHouseMapper;
 
 
     //对排列结果进行存贮的list
@@ -66,10 +72,10 @@ public class SearchActuarialConfigServices {
     public ServerResponse searchActuarialList(String cityId,String serviceTypeId) {
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            List<ActuarialTemplateConfigAppDTO> actuarialTemplateConfigAppDTOS = djActuarialTemplateConfigMapper.searchAppActuarialList(cityId,serviceTypeId);
+            List<ActuarialTemplateConfigAppDTO> actuarialTemplateConfigAppDTOS = djActuarialTemplateConfigMapper.searchAppActuarialList(cityId,serviceTypeId,null);
             if(actuarialTemplateConfigAppDTOS!=null&&actuarialTemplateConfigAppDTOS.size()>0){
                 for(ActuarialTemplateConfigAppDTO atc:actuarialTemplateConfigAppDTOS){
-                    getProductList(atc.getProductList(),address);
+                    getProductList(atc.getProductList(),address,new BigDecimal(0));
                 }
             }
 
@@ -80,10 +86,40 @@ public class SearchActuarialConfigServices {
         }
     }
 
+    /**
+     * 查询默认配置的设计商品
+     * @param cityId
+     * @param houseId
+     * @return
+     */
+    public ServerResponse searchDesginActuarialList(String cityId, String houseId){
+        try{
+            House house=iGoodsHouseMapper.selectByPrimaryKey(houseId);
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            List<ActuarialProductAppDTO> productList=null;
+            List<ActuarialTemplateConfigAppDTO> actuarialTemplateConfigAppDTOS = djActuarialTemplateConfigMapper.searchAppActuarialList(cityId,house.getHouseType(),"1");
+            if(actuarialTemplateConfigAppDTOS!=null&&actuarialTemplateConfigAppDTOS.size()>0){
+                for(ActuarialTemplateConfigAppDTO atc:actuarialTemplateConfigAppDTOS){
+                    getProductList(atc.getProductList(),address,house.getSquare());
+                    productList=atc.getProductList();
+                }
+            }
+             return ServerResponse.createBySuccess("查询成功", productList);
+        }catch (Exception e){
+            logger.error("searchDesginActuarialList查询失败:",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
 
 
+    /**
+     *
+     * @param productList
+     * @param address
+     * @param square 面积
+     */
 
-    public  void getProductList(List<ActuarialProductAppDTO> productList,String address){
+    public  void getProductList(List<ActuarialProductAppDTO> productList, String address, BigDecimal square){
         if(productList!=null&&productList.size()>0){
             for(ActuarialProductAppDTO ap:productList){
                 String image=ap.getImage();
@@ -98,6 +134,14 @@ public class SearchActuarialConfigServices {
                 //查询单位
                 if(ap.getConvertQuality()!=null&&ap.getConvertQuality()>0){
                     unitId=ap.getConvertUnit();
+                }
+
+                if(square.compareTo(new BigDecimal(0))>0){
+                    if("1".equals(ap.getIsCalculatedArea())){
+                        ap.setShopCount(square.doubleValue());
+                    }else{
+                        ap.setShopCount(1d);
+                    }
                 }
 
                 if(unitId!=null&& StringUtils.isNotBlank(unitId)){
@@ -124,11 +168,19 @@ public class SearchActuarialConfigServices {
      * @param goodsId
      * @return
      */
-    public ServerResponse searchChangeProductList(String goodsId){
+    public ServerResponse searchChangeProductList(String goodsId,String houseId){
         try{
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             List<ActuarialProductAppDTO> productAppDTOList=djActuarialProductConfigMapper.searchChangeProductList(goodsId);
-            getProductList(productAppDTOList,address);
+            BigDecimal square=new BigDecimal(0);
+            if(StringUtils.isNotBlank(houseId)){
+                House house=iGoodsHouseMapper.selectByPrimaryKey(houseId);
+                if(house!=null&&StringUtils.isNotBlank(house.getId())){
+                    square=house.getSquare();
+                }
+            }
+
+            getProductList(productAppDTOList,address,square);
             return ServerResponse.createBySuccess("查询成功", productAppDTOList);
         } catch (Exception e) {
             logger.error("searchChangeProductList查询失败:",e);
@@ -192,7 +244,7 @@ public class SearchActuarialConfigServices {
                 if(simulationCostCategoryDTOList!=null&&simulationCostCategoryDTOList.size()>0){
                     for(SimulationCostCategoryDTO scc:simulationCostCategoryDTOList){
                         List<ActuarialProductAppDTO> actuarialProductAppDTOList= djActuarialProductConfigMapper.querySimulationCostInfoList( djActuarialSimulationRelation.getActuarialTemplateId(), scc.getCategoryId());
-                        getProductList(actuarialProductAppDTOList,address);
+                        getProductList(actuarialProductAppDTOList,address,new BigDecimal(0));
                         scc.setProductList(actuarialProductAppDTOList);
                     }
                 }

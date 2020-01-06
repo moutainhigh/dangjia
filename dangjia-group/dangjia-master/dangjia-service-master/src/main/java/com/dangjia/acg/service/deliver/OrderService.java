@@ -1410,66 +1410,7 @@ public class OrderService {
             return ServerResponse.createByErrorMessage("此任务已审核完成，请勿重复提交。");
         }
         House house=houseMapper.selectByPrimaryKey(houseId);
-        if(type==1){//当家平台设计
-            //创建需支付的设计师的订单
-            if(StringUtils.isNotEmpty(taskStack.getData())&&!houseId.equals(taskStack.getData())){
-                return ServerResponse.createBySuccess("提交成功",taskStack.getData());
-            }
-            Example example=new Example(MemberAddress.class);
-            example.createCriteria().andEqualTo(MemberAddress.HOUSE_ID,houseId);
-            MemberAddress memberAddress=iMasterMemberAddressMapper.selectOneByExample(example);
-            String addressId="";
-            if(memberAddress!=null&&StringUtils.isNotEmpty(memberAddress.getId())){
-                addressId=memberAddress.getId();
-            }
-            //1.获取符合条件商品信息
-            String productJsons = getNewProductJsons(houseId,house);
-            if(StringUtils.isNotEmpty(productJsons)){
-                //2.生成订单信息
-                ServerResponse serverResponse = paymentService.generateOrderCommon(member, house.getId(), house.getCityId(), productJsons, null, addressId, 1,"1");
-                if (serverResponse.getResultObj() != null) {
-                    String obj = serverResponse.getResultObj().toString();//获取对应的支付单号码
-                    //3.生成houseflow待抢单的流程(设计师的待创单流程)
-                    WorkerType workerType = workerTypeMapper.selectByPrimaryKey("1");
-                    example = new Example(HouseFlow.class);
-                    example.createCriteria()
-                            .andEqualTo(HouseFlow.HOUSE_ID, house.getHouseId())
-                            .andEqualTo(HouseFlow.WORKER_TYPE_ID, workerType.getId());
-                    List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
-                    HouseFlow houseFlow;
-                    if (houseFlowList.size() == 1) {
-                        houseFlow = houseFlowList.get(0);
-                        houseFlow.setState(workerType.getState());
-                        houseFlow.setSort(workerType.getSort());
-                        houseFlow.setWorkType(1);//开始设计等待业主支付
-                        houseFlow.setModifyDate(new Date());
-                        houseFlow.setPayStatus(0);
-                        houseFlow.setCityId(house.getCityId());
-                        houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
-                    } else {
-                        houseFlow = new HouseFlow(true);
-                        houseFlow.setCityId(house.getCityId());
-                        houseFlow.setWorkerTypeId(workerType.getId());
-                        houseFlow.setWorkerType(workerType.getType());
-                        houseFlow.setHouseId(house.getId());
-                        houseFlow.setState(workerType.getState());
-                        houseFlow.setSort(workerType.getSort());
-                        houseFlow.setWorkType(1);//开始设计等待业主支付
-                        houseFlow.setModifyDate(new Date());
-                        houseFlow.setCityId(house.getCityId());
-                        houseFlow.setPayStatus(0);
-                        houseFlowMapper.insert(houseFlow);
-                    }
-                    //4.修改任务的data字段为订单字段
-                    taskStack.setData(obj);
-                    taskStack.setModifyDate(new Date());
-                    taskStackService.updateTaskStackInfo(taskStack);
-                    return ServerResponse.createBySuccess("提交成功",taskStack.getData());
-                }
-            }
-            return ServerResponse.createByErrorMessage("提交失败,未找到符合条件的商品信息");
-
-        }else if(type==2){//平台外设计
+        if(type==2){//平台外设计
             //1.修改精算师的审核状态为待审核
             house.setBudgetOk(1);
             house.setModifyDate(new Date());
@@ -1513,23 +1454,117 @@ public class OrderService {
         taskStackService.updateTaskStackInfo(taskStack);
         return ServerResponse.createBySuccessMessage("提交成功");
     }
+
+    /**
+     * 提交设计师订单
+     * @param userToken
+     * @param houseId 房子ID
+     * @param taskId 任务ID
+     * @param productArr 商品列表
+     * @return
+     */
+    public ServerResponse saveDesignOrderInfo(String userToken,String houseId,String taskId,String productArr){
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member member = (Member) object;
+        //判断当前任务是否已完成
+        TaskStack taskStack=taskStackService.selectTaskStackById(taskId);
+        if(taskStack!=null&&taskStack.getState()==1){
+            return ServerResponse.createByErrorMessage("此任务已审核完成，请勿重复提交。");
+        }
+        House house=houseMapper.selectByPrimaryKey(houseId);
+
+        Example example=new Example(MemberAddress.class);
+        example.createCriteria().andEqualTo(MemberAddress.HOUSE_ID,houseId);
+        MemberAddress memberAddress=iMasterMemberAddressMapper.selectOneByExample(example);
+        String addressId="";
+        if(memberAddress!=null&&StringUtils.isNotEmpty(memberAddress.getId())){
+            addressId=memberAddress.getId();
+        }
+        String productJsons = getNewProductJsons(house,productArr);
+        if(StringUtils.isNotEmpty(productJsons)){
+            //2.生成订单信息
+            ServerResponse serverResponse = paymentService.generateOrderCommon(member, house.getId(), house.getCityId(), productJsons, null, addressId, 1,"1");
+            if (serverResponse.getResultObj() != null) {
+                String obj = serverResponse.getResultObj().toString();//获取对应的支付单号码
+                //3.生成houseflow待抢单的流程(设计师的待创单流程)
+                WorkerType workerType = workerTypeMapper.selectByPrimaryKey("1");
+                example = new Example(HouseFlow.class);
+                example.createCriteria()
+                        .andEqualTo(HouseFlow.HOUSE_ID, house.getHouseId())
+                        .andEqualTo(HouseFlow.WORKER_TYPE_ID, workerType.getId());
+                List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
+                HouseFlow houseFlow;
+                if (houseFlowList.size() == 1) {
+                    houseFlow = houseFlowList.get(0);
+                    houseFlow.setState(workerType.getState());
+                    houseFlow.setSort(workerType.getSort());
+                    houseFlow.setWorkType(1);//开始设计等待业主支付
+                    houseFlow.setModifyDate(new Date());
+                    houseFlow.setPayStatus(0);
+                    houseFlow.setCityId(house.getCityId());
+                    houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
+                } else {
+                    houseFlow = new HouseFlow(true);
+                    houseFlow.setCityId(house.getCityId());
+                    houseFlow.setWorkerTypeId(workerType.getId());
+                    houseFlow.setWorkerType(workerType.getType());
+                    houseFlow.setHouseId(house.getId());
+                    houseFlow.setState(workerType.getState());
+                    houseFlow.setSort(workerType.getSort());
+                    houseFlow.setWorkType(1);//开始设计等待业主支付
+                    houseFlow.setModifyDate(new Date());
+                    houseFlow.setCityId(house.getCityId());
+                    houseFlow.setPayStatus(0);
+                    houseFlowMapper.insert(houseFlow);
+                }
+                //取消旧的待提交订单信息
+                if(StringUtils.isNotEmpty(taskStack.getData())&&!houseId.equals(taskStack.getData())){
+                    //取消订单
+                    example=new Example(Order.class);
+                    example.createCriteria().andEqualTo(Order.BUSINESS_ORDER_NUMBER,taskStack.getData());
+                    Order order=new Order();
+                    order.setCreateDate(null);
+                    order.setId(null);
+                    order.setOrderStatus("5");
+                    orderMapper.updateByExampleSelective(order,example);
+                    //取消待支付业务订单
+                    example=new Example(BusinessOrder.class);
+                    example.createCriteria().andEqualTo(BusinessOrder.NUMBER,taskStack.getData());
+                    BusinessOrder businessOrder=businessOrderMapper.selectOneByExample(example);
+                    businessOrder.setState(4);
+                    businessOrder.setModifyDate(new Date());
+                    businessOrderMapper.updateByPrimaryKeySelective(businessOrder);
+                }
+                //4.修改任务的data字段为订单字段
+                taskStack.setData(obj);
+                taskStack.setModifyDate(new Date());
+                taskStackService.updateTaskStackInfo(taskStack);
+                return ServerResponse.createBySuccess("提交成功",obj);
+            }
+        }
+        return ServerResponse.createByErrorMessage("提交失败,未找到符合条件的商品信息");
+    }
     //生成设计师订单
-    public String getNewProductJsons(String houseId,House house){
-
+    public String getNewProductJsons(House house,String productArr){
         //查询推荐商品列表
-        Example example=new Example(DesignQuantityRoomProduct.class);
-        example.createCriteria().andEqualTo(DesignQuantityRoomProduct.HOUSE_ID,houseId)
-                .andEqualTo(DesignQuantityRoomProduct.TYPE,1);
-        List<DesignQuantityRoomProduct> roomProductList=iMasterQuantityRoomProductMapper.selectByExample(example);
-        if(roomProductList!=null&&roomProductList.size()>0){
-
+        JSONArray actuarialDesignList = JSONArray.parseArray(productArr);
+        if(actuarialDesignList!=null&&actuarialDesignList.size()>0){
             //生成设计师订单,获取符合条件的商品
             JSONArray listOfGoods = new JSONArray();
-            for(DesignQuantityRoomProduct roomProduct:roomProductList){
+            for (int i = 0; i < actuarialDesignList.size(); i++) {
+                JSONObject productObj = (JSONObject) actuarialDesignList.get(i);
                 JSONObject jsonObject = new JSONObject();
+                String productId = productObj.getString("productId");
+                if (productId == null || org.apache.commons.lang3.StringUtils.isBlank(productId)) {
+                    continue;
+                }
+                String productTemplateId = productObj.getString("productTemplateId");
                 jsonObject.put("shopCount", 1);
                 //查询是否按面积计算价格
-                 example=new Example(DjActuarialTemplateConfig.class);
+                Example example=new Example(DjActuarialTemplateConfig.class);
                 example.createCriteria().andEqualTo(DjActuarialTemplateConfig.SERVICE_TYPE_ID,house.getHouseType())
                         .andEqualTo(DjActuarialTemplateConfig.CONFIG_TYPE,1);
                 DjActuarialTemplateConfig djActuarialTemplateConfig=iMasterActuarialTemplateConfigMapper.selectOneByExample(example);
@@ -1537,13 +1572,13 @@ public class OrderService {
                 example = new Example(DjActuarialProductConfig.class);
                 example.createCriteria().andEqualTo(DjActuarialProductConfig.WORKER_TYPE_ID, 1)
                         .andEqualTo(DjActuarialProductConfig.ACTUARIAL_TEMPLATE_ID,djActuarialTemplateConfig.getId())
-                        .andEqualTo(DjActuarialProductConfig.PRODUCT_ID, roomProduct.getProductId());
+                        .andEqualTo(DjActuarialProductConfig.PRODUCT_ID, productId);
                 DjActuarialProductConfig djActuarialProductConfig = iMasterActuarialProductConfigMapper.selectOneByExample(example);
                 if (djActuarialProductConfig != null && "1".equals(djActuarialProductConfig.getIsCalculatedArea())) {
                     jsonObject.put("shopCount", house.getSquare());//按房子面积计算
                 }
                 //查询对应的商品信息，按价格取最低价的商品
-                StorefrontProductDTO storefrontProductDTO=masterProductTemplateService.getStorefrontProductByTemplateId(roomProduct.getProductId());
+                StorefrontProductDTO storefrontProductDTO=masterProductTemplateService.getStorefrontProductByTemplateId(productTemplateId);
                 jsonObject.put("productId", storefrontProductDTO.getStorefrontId());
                 jsonObject.put("workerTypeId", 1);
                 listOfGoods.add(jsonObject);
@@ -1583,7 +1618,7 @@ public class OrderService {
                     //查询对应的商品信息，按价格取最低价的商品
                     StorefrontProductDTO storefrontProductDTO=masterProductTemplateService.getStorefrontProductByTemplateId(product.getProductId());
                     jsonObject.put("productId", storefrontProductDTO.getStorefrontId());
-                    jsonObject.put("workerTypeId", 1);
+                    jsonObject.put("workerTypeId", 2);
                     listOfGoods.add(jsonObject);
                 }
                 return listOfGoods.toJSONString();

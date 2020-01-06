@@ -40,6 +40,19 @@ public class SearchActuarialConfigController implements SearchActuarialConfigAPI
         return searchActuarialConfigServices.searchActuarialList(cityId,serviceTypeId);
     }
 
+    /**
+     * 查询默认配置的设计商品
+     * @param request
+     * @param cityId
+     * @param houseId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse searchDesginActuarialList(HttpServletRequest request,String cityId,String houseId){
+        return searchActuarialConfigServices.searchDesginActuarialList(cityId,houseId);
+    }
+
 
     /**
      * 可切换商品列表
@@ -49,8 +62,8 @@ public class SearchActuarialConfigController implements SearchActuarialConfigAPI
      */
     @Override
     @ApiMethod
-    public ServerResponse searchChangeProductList(HttpServletRequest request,String goodsId){
-        return searchActuarialConfigServices.searchChangeProductList(goodsId);
+    public ServerResponse searchChangeProductList(HttpServletRequest request,String goodsId,String houseId){
+        return searchActuarialConfigServices.searchChangeProductList(goodsId,houseId);
     }
 
     /**

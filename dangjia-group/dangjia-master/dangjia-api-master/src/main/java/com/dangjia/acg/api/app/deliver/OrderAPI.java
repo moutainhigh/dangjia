@@ -122,4 +122,11 @@ public interface OrderAPI {
                                          @RequestParam("taskId") String taskId,
                                          @RequestParam("type") Integer type);
 
+    @PostMapping("app/order/saveDesignOrderInfo")
+    @ApiOperation(value = "设计图纸不合格--提交设计师订单", notes = "设计图纸不合格--提交设计师订单")
+    ServerResponse saveDesignOrderInfo(@RequestParam("userToken") String userToken,
+                                           @RequestParam("houseId") String houseId,
+                                           @RequestParam("taskId") String taskId,
+                                           @RequestParam("productArr") String productArr);
+
 }
