@@ -45,9 +45,6 @@ public class PatrolRecordServices {
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
     @Autowired
-    private MemberAPI memberAPI;
-
-    @Autowired
     private IMemberMapper memberMapper;
     /**
      * 督导首页
@@ -57,7 +54,7 @@ public class PatrolRecordServices {
     public ServerResponse getSupHomePage(HttpServletRequest request,PageDTO pageDTO,String userToken,String keyWord) {
         try {
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-            Object object = memberAPI.getMember(userToken);
+            Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
