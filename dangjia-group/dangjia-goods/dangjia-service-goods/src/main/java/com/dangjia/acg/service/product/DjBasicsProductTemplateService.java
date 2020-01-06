@@ -374,7 +374,7 @@ public class DjBasicsProductTemplateService {
         } else {//修改
             product.setId(productId);
             product.setModifyDate(new Date());
-            int  index=iBasicsProductTemplateMapper.updateByPrimaryKeySelective(product);
+            int  index=iBasicsProductTemplateMapper.updateByPrimaryKey(product);
 
             if (index < 0) {
                 return "更新商品失败";

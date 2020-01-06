@@ -71,6 +71,21 @@ public class TaskStackService {
     }
 
     /**
+     * 查询符合条件的数据
+     * @param houseId
+     * @param data
+     * @return
+     */
+    public TaskStack selectTaskStackByHouseIdData(String houseId,String data){
+        Example example=new Example(TaskStack.class);
+        example.createCriteria().andEqualTo(TaskStack.HOUSE_ID,houseId)
+                .andEqualTo(TaskStack.DATA,data)
+                .andEqualTo(TaskStack.STATE,0);
+        TaskStack taskStack=iMasterTaskStackMapper.selectOneByExample(example);
+        return taskStack;
+    }
+
+    /**
      * 修改对应的数据
      * @param taskStack
      */

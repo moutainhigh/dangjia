@@ -1895,10 +1895,16 @@ public class HouseService {
 
             }
         }
+        String workerTypeId=null;
+        if(desginInfo&&!actuaialInfo){
+            workerTypeId="1";
+        }else if(!desginInfo&&actuaialInfo){
+            workerTypeId="2";
+        }
         editHouseFlowWorker(house, desginInfo, actuaialInfo);
         //8.提交订单信息,生成待支付订单,生成待抢单信息
         String productJsons = getProductJsons(actuarialDesignAttr, memberAddress.getInputArea());
-        return paymentService.generateOrderCommon(member, house.getId(), cityId, productJsons, null, addressId, 1);
+        return paymentService.generateOrderCommon(member, house.getId(), cityId, productJsons, null, addressId, 1,workerTypeId);
     }
 
     /**
@@ -2071,7 +2077,7 @@ public class HouseService {
             String productStr = getEligibleProduct(houseOrderDetailDTOList, 1, square, inputArea);
             if (productStr != null && StringUtils.isNotBlank(productStr)) {
                 Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
-                ServerResponse serverResponse = paymentService.generateOrderCommon(member, house.getId(), house.getCityId(), productStr, null, memberAddress.getId(), 4);//补差价订单
+                ServerResponse serverResponse = paymentService.generateOrderCommon(member, house.getId(), house.getCityId(), productStr, null, memberAddress.getId(), 4,null);//补差价订单
                 if (serverResponse.getResultObj() != null) {
                     String obj = serverResponse.getResultObj().toString();//获取对应的支付单号码
                     //增加任务(补差价订单）

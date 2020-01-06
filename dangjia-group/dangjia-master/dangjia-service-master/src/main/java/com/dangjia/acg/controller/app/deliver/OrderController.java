@@ -8,6 +8,7 @@ import com.dangjia.acg.service.deliver.OrderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -155,5 +156,24 @@ public class OrderController implements OrderAPI {
             return ServerResponse.createByErrorMessage("退款异常");
         }
 
+    }
+
+    /**
+     * 设计图纸不合格--审核设计图提交
+     * @param userToken 用户token
+     * @param houseId 房子ID
+     * @param taskId 任务ID
+     * @param type 类型：1当家平台设计，2平台外设计，3结束精算
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse saveDesignDrawingReview(String userToken,String houseId,String taskId,Integer type){
+        try{
+            return orderService.saveDesignDrawingReview(userToken, houseId, taskId, type);
+        }catch (Exception e){
+            logger.error("提交异常",e);
+            return ServerResponse.createByErrorMessage("提交失败");
+        }
     }
 }

@@ -106,7 +106,7 @@ public interface IBasicsProductTemplateMapper extends Mapper<DjBasicsProductTemp
                                                                   @Param("goodsId") String goodsId);
 
     //根据模板ID查询对应符合条件的商品信息
-    StorefrontProductDTO getStorefrontInfoByprodTemplateId(@Param("prodTemplateId") String prodTemplateId,@Param("prodTemplateSn") String prodTemplateSn);
+    StorefrontProductDTO getStorefrontInfoByprodTemplateId(@Param("prodTemplateId") String prodTemplateId, @Param("prodTemplateSn") String prodTemplateSn);
 
 
 

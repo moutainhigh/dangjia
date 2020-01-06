@@ -608,6 +608,14 @@ public class PaymentService {
 
                 }
                 setHouseFlowInfo(order,workerTypeId,payState,1,new BigDecimal(0),2);
+
+                //修改待处理的任务为已处理
+                TaskStack taskStack=taskStackService.selectTaskStackByHouseIdData(order.getHouseId(),order.getBusinessOrderNumber());
+                if(taskStack!=null&& cn.jiguang.common.utils.StringUtils.isNotEmpty(taskStack.getId())){
+                    taskStack.setState(1);
+                    taskStack.setModifyDate(new Date());
+                    taskStackService.updateTaskStackInfo(taskStack);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -1113,7 +1121,7 @@ public class PaymentService {
             if(house!= null) {
                 houseId=house.getId();
             }
-            return generateOrderCommon(member,houseId, cityId, productJsons, workerId,  addressId,2);
+            return generateOrderCommon(member,houseId, cityId, productJsons, workerId,  addressId,2,null);
         } catch (Exception e) {
             e.printStackTrace();
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
@@ -1132,7 +1140,7 @@ public class PaymentService {
      * @param orderSource (1设计精算订单提交，2购物车提交，4设计精算补差价订单提交）
      * @return
      */
-    public ServerResponse generateOrderCommon(Member member,String houseId,String cityId, String productJsons,String workerId, String addressId,Integer orderSource){
+    public ServerResponse generateOrderCommon(Member member,String houseId,String cityId, String productJsons,String workerId, String addressId,Integer orderSource,String workerTypeId){
         JSONArray productArray= JSON.parseArray(productJsons);
         if(productArray.size()==0){
             return ServerResponse.createByErrorMessage("参数错误");
@@ -1188,6 +1196,7 @@ public class PaymentService {
             order.setOrderGenerationTime(new Date());
             order.setOrderSource(orderSource);//来源购物车
             order.setCreateBy(member.getId());
+            order.setWorkerTypeId(workerTypeId);
             orderMapper.insert(order);
             for (ShoppingCartDTO shoppingCartDTO : shoppingCartDTOS) {
                 Double freight=storefrontConfigAPI.getFreightPrice(shoppingCartDTO.getStorefrontId(),shoppingCartDTO.getTotalMaterialPrice().doubleValue());
@@ -1299,13 +1308,24 @@ public class PaymentService {
             order.setTotalStevedorageCost(totalMoveDost);//总搬运费
             order.setBusinessOrderNumber(businessOrder.getNumber());
             order.setTotalAmount(paymentPrice);// 订单总额(工钱)
+            if(orderSource==4){
+                order.setWorkerTypeName(" 补差价订单");
+            }
+            if(workerTypeId!=null&&"1".equals(workerTypeId)){
+                order.setWorkerTypeName("设计师人工订单");
+            }
             orderMapper.updateByPrimaryKeySelective(order);
 
-            if(orderSource==1){//若为支付类型的订单，需增加订单支付工序阶段（设计，精算类的订单)
+            if(orderSource==1&&StringUtils.isBlank(workerTypeId)){//若为支付类型的订单，需增加订单支付工序阶段（设计，精算类的订单)
                 List<HouseOrderDetailDTO> orderDetailList=houseMapper.getBudgetOrderDetailByHouseId(houseId,"1");//设计订单
                 setTotalPrice(orderDetailList,houseId,"1",order,businessOrder);
                 orderDetailList=houseMapper.getBudgetOrderDetailByHouseId(houseId,"2");//精算订单
                 setTotalPrice(orderDetailList,houseId,"2",order,businessOrder);//
+            }
+            //如果工序不为空，则添加工序对应的信息
+            if(StringUtils.isNotBlank(workerTypeId)){
+                House house=houseMapper.selectByPrimaryKey(houseId);
+                setHouseWorkerOrderInfo(house,workerTypeId,order,businessOrder,paymentPrice);
             }
 
             budgetCorrect(order,null,null);

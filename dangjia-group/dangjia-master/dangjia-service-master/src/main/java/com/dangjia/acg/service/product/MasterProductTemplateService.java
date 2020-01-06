@@ -1,8 +1,10 @@
 package com.dangjia.acg.service.product;
 
 
+import com.dangjia.acg.dto.product.StorefrontProductDTO;
 import com.dangjia.acg.mapper.core.IMasterAttributeMapper;
 import com.dangjia.acg.mapper.core.IMasterAttributeValueMapper;
+import com.dangjia.acg.mapper.product.IMasterProductTemplateMapper;
 import com.dangjia.acg.modle.attribute.Attribute;
 import com.dangjia.acg.modle.attribute.AttributeValue;
 import org.apache.commons.lang3.StringUtils;
@@ -16,6 +18,8 @@ public class MasterProductTemplateService {
     private IMasterAttributeMapper iMasterAttributeMapper;
     @Autowired
     private IMasterAttributeValueMapper iMasterAttributeValueMapper;
+    @Autowired
+    private IMasterProductTemplateMapper iMasterProductTemplateMapper;
     /**
      * 获取对应的属性值信息(查询APP端显示的规格属性，属性值）
      * @param valueIdArr
@@ -41,4 +45,15 @@ public class MasterProductTemplateService {
         }
         return strNewValueNameArr;
     }
+
+    /**
+     * 根据模板ID查询符合条件的商品信息
+     * @param productTemplateId
+     * @return
+     */
+    public StorefrontProductDTO getStorefrontProductByTemplateId(String productTemplateId){
+
+        return iMasterProductTemplateMapper.getStorefrontProductByTemplateId(productTemplateId);
+    }
+
 }
