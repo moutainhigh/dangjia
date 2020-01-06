@@ -33,6 +33,7 @@
         delete from dj_actuarial_product_config
         where exists(select 1 from dj_actuarial_template_config t where t.data_status=1 and t.id=actuarial_template_id)
         and city_id=#{cityId}
+        and service_type_id = #{serviceTypeId}
     </delete>
 
 

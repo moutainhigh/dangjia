@@ -36,8 +36,8 @@ public class SearchActuarialConfigController implements SearchActuarialConfigAPI
      */
     @Override
     @ApiMethod
-    public ServerResponse searchActuarialList(HttpServletRequest request,String cityId) {
-        return searchActuarialConfigServices.searchActuarialList(cityId);
+    public ServerResponse searchActuarialList(HttpServletRequest request,String cityId,String serviceTypeId) {
+        return searchActuarialConfigServices.searchActuarialList(cityId,serviceTypeId);
     }
 
 
@@ -60,8 +60,8 @@ public class SearchActuarialConfigController implements SearchActuarialConfigAPI
      */
     @Override
     @ApiMethod
-    public ServerResponse searchSimulationTitleList(HttpServletRequest request,String cityId){
-        return searchActuarialConfigServices.searchSimulationTitleList(cityId);
+    public ServerResponse searchSimulationTitleList(HttpServletRequest request,String cityId,String serviceTypeId){
+        return searchActuarialConfigServices.searchSimulationTitleList(cityId,serviceTypeId);
     }
 
     /**
@@ -84,7 +84,7 @@ public class SearchActuarialConfigController implements SearchActuarialConfigAPI
      */
     @Override
     @ApiMethod
-    public ServerResponse searchSimulateCostInfoList(HttpServletRequest request,String groupCode,String cityId){
-        return searchActuarialConfigServices.searchSimulateCostInfoList(groupCode,cityId);
+    public ServerResponse searchSimulateCostInfoList(HttpServletRequest request,String groupCode,String cityId,String serviceTypeId){
+        return searchActuarialConfigServices.searchSimulateCostInfoList(groupCode,cityId,serviceTypeId);
     }
 }

@@ -43,6 +43,11 @@ public class DjSimulationTemplateConfigDetail extends GoodsBaseEntity {
     @ApiModelProperty("图片")
     private String image;
 
+    @Column(name = "service_type_id")
+    @Desc(value = "服务类型ID")
+    @ApiModelProperty("服务类型ID")
+    private String serviceTypeId;
+
     @Column(name = "label_name")
     @Desc(value = "标签名称，多个用逗号分隔")
     @ApiModelProperty("标签名称，多个用逗号分隔")

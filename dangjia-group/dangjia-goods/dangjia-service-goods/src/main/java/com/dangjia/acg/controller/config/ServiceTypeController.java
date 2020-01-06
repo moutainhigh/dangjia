@@ -80,8 +80,8 @@ public class ServiceTypeController implements ServiceTypeAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse insertServiceType(HttpServletRequest request, String name,String coverImage, String image,String cityId) {
-        return serviceTypeService.insertServiceType(name,coverImage,image,cityId);
+    public ServerResponse insertServiceType(HttpServletRequest request, String name,String coverImage, String image,String cityId,String user_id) {
+        return serviceTypeService.insertServiceType(name,coverImage,image,cityId,user_id);
     }
 
     /**

@@ -63,10 +63,10 @@ public class SearchActuarialConfigServices {
      *
      * @return
      */
-    public ServerResponse searchActuarialList(String cityId) {
+    public ServerResponse searchActuarialList(String cityId,String serviceTypeId) {
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            List<ActuarialTemplateConfigAppDTO> actuarialTemplateConfigAppDTOS = djActuarialTemplateConfigMapper.searchAppActuarialList(cityId);
+            List<ActuarialTemplateConfigAppDTO> actuarialTemplateConfigAppDTOS = djActuarialTemplateConfigMapper.searchAppActuarialList(cityId,serviceTypeId);
             if(actuarialTemplateConfigAppDTOS!=null&&actuarialTemplateConfigAppDTOS.size()>0){
                 for(ActuarialTemplateConfigAppDTO atc:actuarialTemplateConfigAppDTOS){
                     getProductList(atc.getProductList(),address);
@@ -142,10 +142,10 @@ public class SearchActuarialConfigServices {
      * 我要装修--模拟花费标题查询
      * @return
      */
-    public ServerResponse searchSimulationTitleList(String cityId){
+    public ServerResponse searchSimulationTitleList(String cityId,String serviceTypeId){
         try{
 
-            List<SimulationTemplateAppConfigDTO>  simulationTemplateConfigDTOList=djSimulationTemplateConfigMapper.searchSimulationTitleList(cityId);
+            List<SimulationTemplateAppConfigDTO>  simulationTemplateConfigDTOList=djSimulationTemplateConfigMapper.searchSimulationTitleList(cityId,serviceTypeId);
             return ServerResponse.createBySuccess("查询成功", simulationTemplateConfigDTOList);
         } catch (Exception e) {
             logger.error("searchSimulationTitleList查询失败:",e);
@@ -172,9 +172,10 @@ public class SearchActuarialConfigServices {
     /**
      * 根据组合编码查询对应花费详情
      * @param groupCode 组合编码 如：'A-1-2,B-1-1,C-1-3'
+     * @param  serviceTypeId 服务类型ID
      * @return
      */
-    public ServerResponse searchSimulateCostInfoList(String groupCode,String cityId){
+    public ServerResponse searchSimulateCostInfoList(String groupCode,String cityId,String serviceTypeId){
         try{
             logger.info("组合编码groupCode{}",groupCode);
             if(groupCode!=null&&StringUtils.isBlank(groupCode)) {
@@ -182,7 +183,7 @@ public class SearchActuarialConfigServices {
             }
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             //查询组合对应的精算模板ID
-            DjActuarialSimulationRelation djActuarialSimulationRelation = djActuarialSimulationRelationMapper.querySimulateAssemblyRelateionInfo(getCodeList(groupCode),cityId);
+            DjActuarialSimulationRelation djActuarialSimulationRelation = djActuarialSimulationRelationMapper.querySimulateAssemblyRelateionInfo(getCodeList(groupCode),cityId,serviceTypeId);
             if(djActuarialSimulationRelation!=null&&StringUtils.isNotBlank(djActuarialSimulationRelation.getActuarialTemplateId())){
                 //根据精算模板查询对应的商品信息
                 //1.1查询分类汇总信息

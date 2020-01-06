@@ -18,13 +18,13 @@ import java.util.List;
 @Repository
 public interface DjActuarialTemplateConfigMapper extends Mapper<DjActuarialTemplateConfig> {
 
-    List<ActuarialTemplateConfigDTO> queryActuarialTemplateConfig(@Param("id") String id,@Param("cityId")  String cityId);
+    List<ActuarialTemplateConfigDTO> queryActuarialTemplateConfig(@Param("id") String id,@Param("cityId")  String cityId,@Param("serviceTypeId") String  serviceTypeId);
 
     /**
      * app端查询设计精算显示列表及对应的货品
      * @return
      */
-    List<ActuarialTemplateConfigAppDTO> searchAppActuarialList(@Param("cityId") String cityId);
+    List<ActuarialTemplateConfigAppDTO> searchAppActuarialList(@Param("cityId") String cityId,@Param("serviceTypeId") String serviceTypeId);
 
 
 

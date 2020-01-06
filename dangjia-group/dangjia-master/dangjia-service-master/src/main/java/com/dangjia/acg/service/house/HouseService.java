@@ -29,6 +29,7 @@ import com.dangjia.acg.dto.sale.store.OrderStoreDTO;
 import com.dangjia.acg.mapper.IConfigMapper;
 import com.dangjia.acg.mapper.clue.ClueMapper;
 import com.dangjia.acg.mapper.config.IMasterActuarialProductConfigMapper;
+import com.dangjia.acg.mapper.config.IMasterActuarialTemplateConfigMapper;
 import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.delivery.IMasterDeliverOrderAddedProductMapper;
 import com.dangjia.acg.mapper.house.*;
@@ -49,6 +50,7 @@ import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.model.Config;
 import com.dangjia.acg.modle.actuary.DjActuarialProductConfig;
+import com.dangjia.acg.modle.actuary.DjActuarialTemplateConfig;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.clue.Clue;
@@ -215,6 +217,10 @@ public class HouseService {
     private PaymentService paymentService;
     @Autowired
     private IMasterActuarialProductConfigMapper iMasterActuarialProductConfigMapper;
+
+    @Autowired
+    private IMasterActuarialTemplateConfigMapper iMasterActuarialTemplateConfigMapper;
+
     @Autowired
     private RepairMendOrderService repairMendOrderService;
 
@@ -1903,7 +1909,7 @@ public class HouseService {
         }
         editHouseFlowWorker(house, desginInfo, actuaialInfo);
         //8.提交订单信息,生成待支付订单,生成待抢单信息
-        String productJsons = getProductJsons(actuarialDesignAttr, memberAddress.getInputArea());
+        String productJsons = getProductJsons(actuarialDesignAttr, memberAddress.getInputArea(),house);
         return paymentService.generateOrderCommon(member, house.getId(), cityId, productJsons, null, addressId, 1,workerTypeId);
     }
 
@@ -2004,7 +2010,7 @@ public class HouseService {
      * @param inputArea
      * @return
      */
-    private String getProductJsons(String actuarialDesignAttr, BigDecimal inputArea) {
+    private String getProductJsons(String actuarialDesignAttr, BigDecimal inputArea,House house) {
         JSONArray actuarialDesignList = JSONArray.parseArray(actuarialDesignAttr);
         JSONArray listOfGoods = new JSONArray();
         if (actuarialDesignList != null && actuarialDesignList.size() > 0) {
@@ -2022,8 +2028,16 @@ public class HouseService {
                     }
                     String productTemplateId = productObj.getString("productTemplateId");
                     String addedProductIds = productObj.getString("addedProductIds");
-                    Example example = new Example(DjActuarialProductConfig.class);
+
+                    Example example=new Example(DjActuarialTemplateConfig.class);
+                    example.createCriteria().andEqualTo(DjActuarialTemplateConfig.SERVICE_TYPE_ID,house.getHouseType())
+                            .andEqualTo(DjActuarialTemplateConfig.CONFIG_TYPE,1);
+                    DjActuarialTemplateConfig djActuarialTemplateConfig=iMasterActuarialTemplateConfigMapper.selectOneByExample(example);
+
+
+                    example = new Example(DjActuarialProductConfig.class);
                     example.createCriteria().andEqualTo(DjActuarialProductConfig.ACTUARIAL_TEMPLATE_ID, configId)
+                            .andEqualTo(DjActuarialProductConfig.ACTUARIAL_TEMPLATE_ID,djActuarialTemplateConfig.getId())
                             .andEqualTo(DjActuarialProductConfig.PRODUCT_ID, productTemplateId);
                     DjActuarialProductConfig djActuarialProductConfig = iMasterActuarialProductConfigMapper.selectOneByExample(example);
                     jsonObject.put("shopCount", 1);
@@ -2074,7 +2088,7 @@ public class HouseService {
 
         if (square.compareTo(inputArea) == 1) {//偏大
             //补单，生成补差价单
-            String productStr = getEligibleProduct(houseOrderDetailDTOList, 1, square, inputArea);
+            String productStr = getEligibleProduct(houseOrderDetailDTOList, 1, square, inputArea,house);
             if (productStr != null && StringUtils.isNotBlank(productStr)) {
                 Member member = memberMapper.selectByPrimaryKey(house.getMemberId());
                 ServerResponse serverResponse = paymentService.generateOrderCommon(member, house.getId(), house.getCityId(), productStr, null, memberAddress.getId(), 4,null);//补差价订单
@@ -2098,7 +2112,7 @@ public class HouseService {
                 square = lowSquare;//将最小支付面积70附值给用户
             }
             //退款，生成退款单
-            String productStr = getEligibleProduct(houseOrderDetailDTOList, 2, square, inputArea);
+            String productStr = getEligibleProduct(houseOrderDetailDTOList, 2, square, inputArea,house);
             if (productStr != null && StringUtils.isNotBlank(productStr)) {
                 HouseOrderDetailDTO houseOrderDetailDTO = houseOrderDetailDTOList.get(0);
                 String orderId = houseOrderDetailDTO.getOrderId();
@@ -2120,7 +2134,7 @@ public class HouseService {
      * @param orderType               (orderType=1补货单,orderType=2退货单)
      * @return
      */
-    private String getEligibleProduct(List<HouseOrderDetailDTO> houseOrderDetailDTOList, Integer orderType, BigDecimal square, BigDecimal inputArea) {
+    private String getEligibleProduct(List<HouseOrderDetailDTO> houseOrderDetailDTOList, Integer orderType, BigDecimal square, BigDecimal inputArea,House house) {
 
         JSONArray listOfGoods = new JSONArray();
         if (houseOrderDetailDTOList != null && houseOrderDetailDTOList.size() > 0) {
@@ -2136,8 +2150,15 @@ public class HouseService {
                 //查询增值商品信息
                 String addedProductIds = iMasterDeliverOrderAddedProductMapper.getAddedPrdouctStr(orderItemId);
                 String workerTypeId = product.getWorkerTypeId();
-                Example example = new Example(DjActuarialProductConfig.class);
+
+                Example example=new Example(DjActuarialTemplateConfig.class);
+                example.createCriteria().andEqualTo(DjActuarialTemplateConfig.SERVICE_TYPE_ID,house.getHouseType())
+                        .andEqualTo(DjActuarialTemplateConfig.CONFIG_TYPE,workerTypeId);
+                DjActuarialTemplateConfig djActuarialTemplateConfig=iMasterActuarialTemplateConfigMapper.selectOneByExample(example);
+
+                 example = new Example(DjActuarialProductConfig.class);
                 example.createCriteria().andEqualTo(DjActuarialProductConfig.WORKER_TYPE_ID, workerTypeId)
+                        .andEqualTo(DjActuarialProductConfig.ACTUARIAL_TEMPLATE_ID,djActuarialTemplateConfig.getId())
                         .andEqualTo(DjActuarialProductConfig.PRODUCT_ID, productTemplateId);
                 DjActuarialProductConfig djActuarialProductConfig = iMasterActuarialProductConfigMapper.selectOneByExample(example);
                 if (djActuarialProductConfig != null && "1".equals(djActuarialProductConfig.getIsCalculatedArea())) {

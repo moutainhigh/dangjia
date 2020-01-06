@@ -14,7 +14,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         create_date,
         modify_date,
         update_by,
-        city_id
+        city_id,
+        service_type_id
         )
         VALUES
         <foreach collection="list" item="item" index="index" separator=",">
@@ -27,7 +28,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{item.createDate},
             #{item.modifyDate},
             #{item.updateBy},
-            #{item.cityId}
+            #{item.cityId},
+            #{item.serviceTypeId}
             )
         </foreach>
 
@@ -47,6 +49,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         WHERE
             t1.actuarial_template_id = t2.id
         and t1.city_id=#{cityId}
+        and t1.service_type_id=#{serviceTypeId}
     </select>
 
     <!--根据组合编码查询对应的精算模板-->
@@ -59,6 +62,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         from dj_actuarial_simulation_relation
         WHERE data_status= '0'
         and city_id=#{cityId}
+        and service_type_id = #{serviceTypeId}
         <foreach collection="codeList" item="item" index="index" >
             and FIND_IN_SET(#{item},simulation_code_group)
         </foreach>

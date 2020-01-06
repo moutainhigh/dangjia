@@ -19,7 +19,7 @@ public class TaskStackService {
     private IMasterTaskStackMapper iMasterTaskStackMapper;
 
     /**
-     * 添加任务人息
+     * 添加任务信息
      * @param houseId 房子ID
      * @param memeberId 用户ID
      * @param name 任务名称

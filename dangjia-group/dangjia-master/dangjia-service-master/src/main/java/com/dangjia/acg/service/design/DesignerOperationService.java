@@ -16,6 +16,7 @@ import com.dangjia.acg.mapper.design.IMasterQuantityRoomProductMapper;
 import com.dangjia.acg.mapper.design.IQuantityRoomImagesMapper;
 import com.dangjia.acg.mapper.design.IQuantityRoomMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
+import com.dangjia.acg.mapper.member.IMasterMemberAddressMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.other.IWorkDepositMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
@@ -28,12 +29,18 @@ import com.dangjia.acg.modle.design.DesignQuantityRoomProduct;
 import com.dangjia.acg.modle.design.QuantityRoom;
 import com.dangjia.acg.modle.design.QuantityRoomImages;
 import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.house.TaskStack;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.member.MemberAddress;
 import com.dangjia.acg.modle.other.WorkDeposit;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.dangjia.acg.service.core.TaskStackService;
+import com.dangjia.acg.service.deliver.OrderService;
 import com.dangjia.acg.service.house.HouseService;
+import com.dangjia.acg.service.pay.PaymentService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,7 +64,8 @@ public class DesignerOperationService {
     private ConfigMessageService configMessageService;
     @Autowired
     private IHouseMapper houseMapper;
-
+    @Autowired
+    private OrderService orderService;
     @Autowired
     private HouseService houseService;
     @Autowired
@@ -88,6 +96,12 @@ public class DesignerOperationService {
     private IDesignBusinessOrderMapper designBusinessOrderMapper;
     @Autowired
     private IMasterQuantityRoomProductMapper iMasterQuantityRoomProductMapper;
+    @Autowired
+    private PaymentService paymentService;
+    @Autowired
+    private IMasterMemberAddressMapper iMasterMemberAddressMapper;
+    @Autowired
+    private TaskStackService taskStackService;
 
     /**
      * 设计师将设计图或施工图发送给业主
@@ -363,27 +377,8 @@ public class DesignerOperationService {
                             workerDetailMapper.insert(workerDetail);
                         }
                     }
-                    WorkerType workerType = workerTypeMapper.selectByPrimaryKey("2");
-                    Example example = new Example(HouseFlow.class);
-                    example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, house.getId()).andEqualTo(HouseFlow.WORKER_TYPE_ID, workerType.getId());
-                    List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
-                    if (houseFlowList.size() > 0) {
-                       // return ServerResponse.createByErrorMessage("设计通过生成精算houseFlow异常");
-                    } else {
-                        HouseFlow houseFlow = new HouseFlow(true);
-                        houseFlow.setCityId(house.getCityId());
-                        houseFlow.setWorkerTypeId(workerType.getId());
-                        houseFlow.setWorkerType(workerType.getType());
-                        houseFlow.setHouseId(house.getId());
-                        houseFlow.setState(workerType.getState());
-                        houseFlow.setSort(workerType.getSort());
-                        houseFlow.setWorkType(5);//设置可业主支付
-                        houseFlow.setModifyDate(new Date());
-                        //这里算出精算费
-                        WorkDeposit workDeposit = workDepositMapper.selectByPrimaryKey(house.getWorkDepositId());//结算比例表
-                        houseFlow.setWorkPrice(house.getSquare().multiply(workDeposit.getBudgetCost()));
-                        houseFlowMapper.insert(houseFlow);
-                    }
+                    //生成精算订单，及精算师抢单流程
+                    manageBudgetInfo(house);
                     if (hwo != null) {
                         configMessageService.addConfigMessage(null, AppType.GONGJIANG, hwo.getWorkerId(), "0", "施工图已通过", String.format(DjConstants.PushMessage.CONSTRUCTION_OK, house.getHouseName()), "");
                     }
@@ -396,6 +391,61 @@ public class DesignerOperationService {
                 return ServerResponse.createByErrorMessage("请选择是否通过");
             default:
                 return ServerResponse.createByErrorMessage("该房子暂未到需要审核这个环节");
+        }
+    }
+
+    /**
+     * 设计师完工后，精算师扭转环节
+     * @param house
+     */
+    private void manageBudgetInfo(House house){
+        WorkerType workerType = workerTypeMapper.selectByPrimaryKey("2");
+        Example example = new Example(HouseFlow.class);
+        example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID, house.getId()).andEqualTo(HouseFlow.WORKER_TYPE_ID, workerType.getId());
+        List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
+        if (houseFlowList.size() > 0) {
+            // return ServerResponse.createByErrorMessage("设计通过生成精算houseFlow异常");
+            HouseFlow houseFlow=houseFlowList.get(0);
+            if(StringUtils.isNotBlank(houseFlow.getWorkerId())){//若已有工匠，则通知精算工匠继续进行精算
+                configMessageService.addConfigMessage(null,AppType.GONGJIANG,houseFlow.getWorkerId(),"0","设计图纸已完成",String.format(DjConstants.PushMessage.GZ_T_WORK, house.getHouseName()),"");
+            }else{//若没有工匠，但有流程，则将其流程改为抢单状态，让对应的工匠抢单
+                houseFlow.setState(2);//已支付待工匠抢单
+                houseFlow.setModifyDate(new Date());
+                houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
+            }
+
+        } else {//若未有精算流程，则生成精算流程，及对应的待支付的精算订单
+            HouseFlow houseFlow = new HouseFlow(true);
+            houseFlow.setCityId(house.getCityId());
+            houseFlow.setWorkerTypeId(workerType.getId());
+            houseFlow.setWorkerType(workerType.getType());
+            houseFlow.setHouseId(house.getId());
+            houseFlow.setState(workerType.getState());
+            houseFlow.setSort(workerType.getSort());
+            houseFlow.setWorkType(5);//设置待业主支付
+            houseFlow.setModifyDate(new Date());
+            //这里算出精算费
+            // WorkDeposit workDeposit = workDepositMapper.selectByPrimaryKey(house.getWorkDepositId());//结算比例表
+            //houseFlow.setWorkPrice(house.getSquare().multiply(workDeposit.getBudgetCost()));
+            houseFlowMapper.insert(houseFlow);
+            //生成精算订单
+            Member member=memberMapper.selectByPrimaryKey(house.getMemberId());
+            example=new Example(MemberAddress.class);
+            example.createCriteria().andEqualTo(MemberAddress.HOUSE_ID,house.getId());
+            MemberAddress memberAddress=iMasterMemberAddressMapper.selectOneByExample(example);
+            String addressId="";
+            if(memberAddress!=null&& cn.jiguang.common.utils.StringUtils.isNotEmpty(memberAddress.getId())){
+                addressId=memberAddress.getId();
+            }
+            String productJsons = orderService.getBudgetProductJsons(house);
+            if(productJsons!=null&&StringUtils.isNotBlank(productJsons)){
+                //2.生成订单信息
+                ServerResponse serverResponse = paymentService.generateOrderCommon(member, house.getId(), house.getCityId(), productJsons, null, addressId, 1,"2");
+                if (serverResponse.getResultObj() != null) {
+                    String obj = serverResponse.getResultObj().toString();//获取对应的支付单号码
+                    taskStackService.inserTaskStackInfo(house.getId(),member.getId(),"待支付精算费",workerType.getImage(),1,obj);//支付精算的任务
+                }
+            }
         }
     }
 
