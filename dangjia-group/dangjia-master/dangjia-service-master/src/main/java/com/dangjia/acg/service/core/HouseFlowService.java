@@ -17,7 +17,7 @@ import com.dangjia.acg.dto.core.AllgrabBean;
 import com.dangjia.acg.dto.group.GroupDTO;
 import com.dangjia.acg.dto.pay.WorkerDTO;
 import com.dangjia.acg.mapper.core.*;
-import com.dangjia.acg.mapper.design.IHouseStyleTypeMapper;
+import com.dangjia.acg.mapper.house.IHouseAddressMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
@@ -28,6 +28,7 @@ import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.core.*;
 import com.dangjia.acg.modle.group.Group;
 import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.house.HouseAddress;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.worker.Insurance;
@@ -37,6 +38,7 @@ import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.configRule.ConfigRuleUtilService;
 import com.dangjia.acg.service.member.GroupInfoService;
+import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -90,8 +92,6 @@ public class HouseFlowService {
     private IRewardPunishRecordMapper rewardPunishRecordMapper;
     @Autowired
     private IRewardPunishConditionMapper rewardPunishConditionMapper;
-    @Autowired
-    private IHouseStyleTypeMapper houseStyleTypeMapper;
     @Value("${spring.profiles.active}")
     private String active;
     @Autowired
@@ -104,6 +104,8 @@ public class HouseFlowService {
     @Autowired
     private GroupInfoService groupInfoService;
 
+    @Autowired
+    private IHouseAddressMapper iHouseAddressMapper;
     @Autowired
     private ConfigRuleUtilService configRuleUtilService;
 
@@ -130,7 +132,7 @@ public class HouseFlowService {
     /**
      * 抢单列表
      */
-    public ServerResponse getGrabList(HttpServletRequest request, String userToken, String cityId) {
+    public ServerResponse getGrabList(HttpServletRequest request, PageDTO pageDTO, String userToken, String cityId) {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
@@ -150,8 +152,9 @@ public class HouseFlowService {
             Example example = new Example(HouseFlow.class);
             example.createCriteria().andEqualTo(HouseFlow.WORK_TYPE, 2).andEqualTo(HouseFlow.WORKER_TYPE_ID, workerTypeId)
                     .andEqualTo(HouseFlow.CITY_ID, cityId).andNotEqualTo(HouseFlow.STATE, 2);
-
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             List<HouseFlow> hfList = houseFlowMapper.selectByExample(example);
+            PageInfo pageResult = new PageInfo(hfList);
             if (hfList != null)
                 for (HouseFlow houseFlow : hfList) {
                     example = new Example(HouseWorker.class);
@@ -171,38 +174,6 @@ public class HouseFlowService {
                     }
                     AllgrabBean allgrabBean = new AllgrabBean();
 
-                    //新手保护数量
-                    Integer protectMethodsCount= configRuleUtilService.getProtectMethodsCount();
-                    example = new Example(HouseWorker.class);
-                    example.createCriteria().andEqualTo(HouseWorker.WORKER_ID, member.getId());
-                    HouseFlowCountDownTime houseFlowCountDownTime = new HouseFlowCountDownTime();
-                    if(protectMethodsCount<hwList.size()) {
-                        //非新手，检测需要的排队的时间
-                        example = new Example(HouseFlowCountDownTime.class);
-                        example.createCriteria().andEqualTo(HouseFlowCountDownTime.WORKER_ID, member.getId()).andEqualTo(HouseFlowCountDownTime.HOUSE_FLOW_ID, houseFlow.getId());
-                        List<HouseFlowCountDownTime> houseFlowDownTimeList = houseFlowCountDownTimeMapper.selectByExample(example);
-                        if (houseFlowDownTimeList != null && houseFlowDownTimeList.size() > 0) {
-                            houseFlowCountDownTime = houseFlowDownTimeList.get(0);
-                        } else {
-                            //如果这个单没有存在倒计时，说明是新单没有被该工匠刷到过
-                            houseFlowCountDownTime.setWorkerId(member.getId());//工匠id
-                            houseFlowCountDownTime.setHouseFlowId(houseFlow.getId());//houseFlowId
-                            BigDecimal evaluation = member.getEvaluationScore();
-                            if (evaluation == null) {
-                                member.setEvaluationScore(new BigDecimal(60));
-                                memberMapper.updateByPrimaryKeySelective(member);
-                            }
-                            //抢单列表根据积分设置排队时间
-                            Date date = configRuleUtilService.getCountDownTime(member.getEvaluationScore());
-                            houseFlowCountDownTime.setCountDownTime(date);//可抢单时间
-                            List<HouseFlowCountDownTime> houseFlowCountDownTimes = houseFlowCountDownTimeMapper.selectByExample(example);
-                            if (houseFlowCountDownTimes == null || houseFlowCountDownTimes.size() == 0) {//新增此数据前查询是否已存在，避免重复插入
-                                houseFlowCountDownTimeMapper.insert(houseFlowCountDownTime);
-                            }
-                        }
-                    }else{
-                        houseFlowCountDownTime.setCountDownTime(new Date());//可抢单时间
-                    }
                     Member mem = memberMapper.selectByPrimaryKey(house.getMemberId());
                     if (mem == null) {
                         continue;
@@ -214,9 +185,9 @@ public class HouseFlowService {
                     example = new Example(HouseWorker.class);
                     example.createCriteria().andEqualTo(HouseWorker.HOUSE_ID, houseFlow.getHouseId());
 
-
                     allgrabBean.setWorkerTypeId(workerTypeId);
                     allgrabBean.setHouseFlowId(houseFlow.getId());
+                    allgrabBean.setCreateDate(houseFlow.getCreateDate());
                     allgrabBean.setHouseName(house.getHouseName());
                     allgrabBean.setType(1);
                     allgrabBean.setOrderType(0);
@@ -242,22 +213,124 @@ public class HouseFlowService {
                         }
                     }
                     allgrabBean.setWorkertotal("¥" + String.format("%.2f", totalPrice));//工钱
-
-                    allgrabBean.setReleaseTime("时间 " + (houseFlow.getReleaseTime() == null ? "" :
-                            DateUtil.getDateString(houseFlow.getReleaseTime().getTime())));//发布时间
-                    long countDownTime = houseFlowCountDownTime.getCountDownTime().getTime() - new Date().getTime();//获取倒计时
-                    allgrabBean.setCountDownTime(countDownTime);//可接单时间
                     grabList.add(allgrabBean);
                 }
             if (grabList.size() <= 0)
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
-            return ServerResponse.createBySuccess("查询成功", grabList);
+
+            pageResult.setList(grabList);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("系统出错,查询失败");
         }
     }
+    /**
+     * 抢单详情
+     */
+    public ServerResponse getGrabInfo(HttpServletRequest request,String userToken, String houseFlowId) {
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member member = memberMapper.selectByPrimaryKey(((Member) object).getId());
+        if (member == null) {
+            return ServerResponse.createbyUserTokenError();
+        }
 
+        HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
+        Example  example = new Example(HouseWorker.class);
+        example.createCriteria().andEqualTo(HouseWorker.WORKER_ID, member.getId())
+                .andEqualTo(HouseWorker.HOUSE_ID, houseFlow.getHouseId());
+        List<HouseWorker> hwList = houseWorkerMapper.selectByExample(example);//查出自己的所有已抢单
+        House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
+        AllgrabBean allgrabBean = new AllgrabBean();
+
+        //新手保护数量
+        Integer protectMethodsCount= configRuleUtilService.getProtectMethodsCount();
+        example = new Example(HouseWorker.class);
+        example.createCriteria().andEqualTo(HouseWorker.WORKER_ID, member.getId());
+        HouseFlowCountDownTime houseFlowCountDownTime = new HouseFlowCountDownTime();
+        if(protectMethodsCount<hwList.size()) {
+            //非新手，检测需要的排队的时间
+            example = new Example(HouseFlowCountDownTime.class);
+            example.createCriteria().andEqualTo(HouseFlowCountDownTime.WORKER_ID, member.getId()).andEqualTo(HouseFlowCountDownTime.HOUSE_FLOW_ID, houseFlow.getId());
+            List<HouseFlowCountDownTime> houseFlowDownTimeList = houseFlowCountDownTimeMapper.selectByExample(example);
+            if (houseFlowDownTimeList != null && houseFlowDownTimeList.size() > 0) {
+                houseFlowCountDownTime = houseFlowDownTimeList.get(0);
+            } else {
+                //如果这个单没有存在倒计时，说明是新单没有被该工匠刷到过
+                houseFlowCountDownTime.setWorkerId(member.getId());//工匠id
+                houseFlowCountDownTime.setHouseFlowId(houseFlow.getId());//houseFlowId
+                BigDecimal evaluation = member.getEvaluationScore();
+                if (evaluation == null) {
+                    member.setEvaluationScore(new BigDecimal(60));
+                    memberMapper.updateByPrimaryKeySelective(member);
+                }
+                //抢单列表根据积分设置排队时间
+                Date date = configRuleUtilService.getCountDownTime(member.getEvaluationScore());
+                houseFlowCountDownTime.setCountDownTime(date);//可抢单时间
+                List<HouseFlowCountDownTime> houseFlowCountDownTimes = houseFlowCountDownTimeMapper.selectByExample(example);
+                if (houseFlowCountDownTimes == null || houseFlowCountDownTimes.size() == 0) {//新增此数据前查询是否已存在，避免重复插入
+                    houseFlowCountDownTimeMapper.insert(houseFlowCountDownTime);
+                }
+            }
+        }else{
+            houseFlowCountDownTime.setCountDownTime(new Date());//可抢单时间
+        }
+        Member mem = memberMapper.selectByPrimaryKey(house.getMemberId());
+        allgrabBean.setButType("0");
+        if (houseFlow.getWorkType() == 3) {
+            allgrabBean.setButType("1");
+        }
+        example = new Example(HouseWorker.class);
+        example.createCriteria().andEqualTo(HouseWorker.HOUSE_ID, houseFlow.getHouseId());
+
+        allgrabBean.setWorkerTypeId(houseFlow.getWorkerTypeId());
+        allgrabBean.setHouseFlowId(houseFlow.getId());
+        allgrabBean.setCreateDate(houseFlow.getCreateDate());
+        allgrabBean.setHouseName(house.getHouseName());
+        allgrabBean.setType(1);
+        allgrabBean.setOrderType(0);
+        allgrabBean.setSquare("面积 " + (house.getSquare() == null ? "***" : house.getSquare()) + "m²");//面积
+        allgrabBean.setHouseMember("业主 " + (mem.getNickName() == null ? mem.getName() : mem.getNickName()));//业主名称
+        allgrabBean.setWorkertotal("¥0");//工钱
+        double totalPrice = 0;
+        ServerResponse serverResponse = budgetWorkerAPI.getWorkerTotalPrice(house.getCityId(), houseFlow.getHouseId(), houseFlow.getWorkerTypeId());
+        if (serverResponse.isSuccess()) {
+            if (serverResponse.getResultObj() != null) {
+                JSONObject obj = JSONObject.parseObject(serverResponse.getResultObj().toString());
+                totalPrice = Double.parseDouble(obj.getString("totalPrice"));
+            }
+        }
+        allgrabBean.setWorkertotal("¥" + String.format("%.2f", totalPrice));//工钱
+
+        allgrabBean.setReleaseTime("时间 " + (houseFlow.getReleaseTime() == null ? "" :
+                DateUtil.getDateString(houseFlow.getReleaseTime().getTime())));//发布时间
+        long countDownTime = houseFlowCountDownTime.getCountDownTime().getTime() - new Date().getTime();//获取倒计时
+        allgrabBean.setCountDownTime(countDownTime);//可接单时间
+
+        allgrabBean.setStartDate(houseFlow.getStartDate());
+        allgrabBean.setEndDate(houseFlow.getEndDate());
+        allgrabBean.setSchedulingDay(0);
+        if(houseFlow.getStartDate()!=null) {
+            int num = 1 + DateUtil.daysofTwo(houseFlow.getStartDate(), houseFlow.getEndDate());//逾期工期天数
+            allgrabBean.setSchedulingDay(num);
+        }
+        //查询销售人员输入的房子类型
+        Example example1 = new Example(HouseAddress.class);
+        example1.createCriteria()
+                .andEqualTo(HouseAddress.HOUSE_ID, house.getId())
+                .andEqualTo(HouseAddress.DATA_STATUS, 0);
+        //查询房子类型
+        List<HouseAddress> houseAddress = iHouseAddressMapper.selectByExample(example1);
+        if (houseAddress.size() > 0) {
+            HouseAddress houseAddressInfo=houseAddress.get(0);
+            allgrabBean.setLatitude(houseAddressInfo.getLatitude());
+            allgrabBean.setLongitude(houseAddressInfo.getLongitude());
+        }
+        return ServerResponse.createBySuccess("查询成功", allgrabBean);
+    }
     /**
      * 精算生成houseFlow
      */

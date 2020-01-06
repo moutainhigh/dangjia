@@ -48,6 +48,7 @@ import com.dangjia.acg.modle.sale.royalty.DjRoyaltyMatch;
 import com.dangjia.acg.modle.worker.Insurance;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
+import com.dangjia.acg.service.configRule.ConfigRuleUtilService;
 import com.dangjia.acg.service.deliver.RepairMendOrderService;
 import com.dangjia.acg.service.house.HouseService;
 import com.dangjia.acg.service.worker.EvaluateService;
@@ -125,6 +126,8 @@ public class HouseWorkerService {
     @Autowired
     private EvaluateService evaluateService;
 
+    @Autowired
+    private ConfigRuleUtilService configRuleUtilService;
     @Autowired
     private IInsuranceMapper insuranceMapper;
     @Autowired
@@ -571,6 +574,33 @@ public class HouseWorkerService {
         HouseFlowApply houseFlowApply = houseFlowApplyMapper.selectByPrimaryKey(houseFlowApplyId);
         return ServerResponse.createBySuccess(houseFlowApply);
     }
+
+    /**
+     * 是否超过期限没有施工，则需要重新培训
+     */
+    public ServerResponse getHouseDetectionTimeout(String userToken) {
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member worker = (Member) object;
+        Example example =new Example(HouseFlowApply.class);
+        example.createCriteria().andEqualTo(HouseFlowApply.WORKER_ID,worker.getId());
+        example.orderBy(HouseFlowApply.CREATE_DATE).desc();
+        PageHelper.startPage(1, 1);
+        List<HouseFlowApply> houseFlowApplys = houseFlowApplyMapper.selectByExample(example);
+        if(houseFlowApplys.size()>0){
+            HouseFlowApply houseFlowApply=houseFlowApplys.get(0);
+            Integer day = configRuleUtilService.getGrabLimitDay();
+            Date maxtime=DateUtil.addDateDays(houseFlowApply.getCreateDate(),day);
+            if(maxtime.getTime()<new Date().getTime()){
+                ServerResponse.createByErrorMessage("已超过"+day+"天未接单");
+            }
+        }
+        return ServerResponse.createBySuccess("OK");
+    }
+
+
 
     /**
      * 提交审核、停工

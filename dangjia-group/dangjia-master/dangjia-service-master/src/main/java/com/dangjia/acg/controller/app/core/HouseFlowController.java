@@ -2,6 +2,7 @@ package com.dangjia.acg.controller.app.core;
 
 import com.dangjia.acg.api.app.core.HouseFlowAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.service.core.HouseFlowService;
@@ -30,10 +31,16 @@ public class HouseFlowController implements HouseFlowAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getGrabList(HttpServletRequest request, String userToken, String cityId) {
-        return houseFlowService.getGrabList(request, userToken, cityId);
+    public ServerResponse getGrabList(HttpServletRequest request, PageDTO pageDTO, String userToken, String cityId) {
+        return houseFlowService.getGrabList(request,  pageDTO, userToken, cityId);
     }
 
+
+    @Override
+    @ApiMethod
+    public ServerResponse getGrabInfo(HttpServletRequest request,String userToken, String houseFlowId){
+        return houseFlowService.getGrabInfo(request,  userToken, houseFlowId);
+    }
     /**
      * 抢单验证
      *
