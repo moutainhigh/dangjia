@@ -7,6 +7,7 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.basics.IGoodsCategoryMapper;
+import com.dangjia.acg.mapper.product.IBasicsGoodsCategoryMapper;
 import com.dangjia.acg.modle.attribute.GoodsCategory;
 import com.dangjia.acg.modle.basics.HomeProductDTO;
 import com.dangjia.acg.modle.product.BasicsGoodsCategory;
@@ -28,20 +29,20 @@ import java.util.List;
 @Service
 public class ClassificationService {
     @Autowired
-    private IGoodsCategoryMapper iGoodsCategoryMapper;
+    private IBasicsGoodsCategoryMapper iBasicsGoodsCategoryMapper;
    // @Autowired
     //private IWorkerGoodsMapper iWorkerGoodsMapper;
     @Autowired
     private ConfigUtil configUtil;
 
     public ServerResponse getGoodsCategoryList(String cityId) {
-        Example example = new Example(GoodsCategory.class);
+        Example example = new Example(BasicsGoodsCategory.class);
         example.createCriteria()
-                .andEqualTo(GoodsCategory.PARENT_TOP, "1")
-                .andEqualTo(GoodsCategory.DATA_STATUS, 0)
-                .andEqualTo(GoodsCategory.CITY_ID,cityId);
-        example.orderBy(GoodsCategory.SORT).asc();
-        List<BasicsGoodsCategory> goodsCategoryList = iGoodsCategoryMapper.selectByExample(example);
+                .andEqualTo(BasicsGoodsCategory.PARENT_TOP, "1")
+                .andEqualTo(BasicsGoodsCategory.DATA_STATUS, 0)
+                .andEqualTo(BasicsGoodsCategory.CITY_ID,cityId);
+        example.orderBy(BasicsGoodsCategory.SORT).asc();
+        List<BasicsGoodsCategory> goodsCategoryList = iBasicsGoodsCategoryMapper.selectByExample(example);
         if (goodsCategoryList.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
@@ -55,7 +56,7 @@ public class ClassificationService {
 
     public ServerResponse getProductList(PageDTO pageDTO, String categoryId,String cityId) {
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-        List<HomeProductDTO> homeProductDTOS = iGoodsCategoryMapper.getProductList(categoryId,cityId);
+        List<HomeProductDTO> homeProductDTOS = iBasicsGoodsCategoryMapper.getProductList(categoryId);
         if (homeProductDTOS.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }

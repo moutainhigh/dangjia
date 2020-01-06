@@ -64,6 +64,9 @@ public class DjBasicsGoodsService {
     private DjBasicsLabelValueMapper djBasicsLabelValueMapper;
     @Autowired
     private IProductAddedRelationMapper iProductAddedRelationMapper;
+    @Autowired
+    private IProductTemplateRatioMapper iProductTemplateRatioMapper;
+
     /**
      * 货品打标签
      *
@@ -372,6 +375,14 @@ public class DjBasicsGoodsService {
                         map.put("technologyIds", technologyIds);
 
                     }
+                    /**
+                     * 查询维保商品对应的责任占比
+                     */
+                    Example example=new Example(BasicsProductTemplateRatio.class);
+                    example.createCriteria().andEqualTo(BasicsProductTemplateRatio.PRODUCT_TEMPLATE_ID,p.getId());
+                    List<BasicsProductTemplateRatio> productTemplateRatioList=iProductTemplateRatioMapper.selectByExample(example);
+                    map.put("productTemplateRatioList",productTemplateRatioList);//维保商品对应的责任占比列表
+
                     map.put("id",p.getId());
                     map.put("productType",goods.getType());
                     mapList.add(map);

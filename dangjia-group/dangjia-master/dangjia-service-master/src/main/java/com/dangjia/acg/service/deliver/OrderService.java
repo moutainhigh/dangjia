@@ -18,10 +18,14 @@ import com.dangjia.acg.common.util.MathUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.deliver.*;
 import com.dangjia.acg.dto.house.HouseOrderDetailDTO;
+import com.dangjia.acg.dto.product.StorefrontProductDTO;
 import com.dangjia.acg.mapper.IConfigMapper;
+import com.dangjia.acg.mapper.config.IMasterActuarialProductConfigMapper;
+import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IMasterUnitMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.delivery.*;
+import com.dangjia.acg.mapper.design.IMasterQuantityRoomProductMapper;
 import com.dangjia.acg.mapper.house.IHouseDistributionMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseDetailMapper;
@@ -36,8 +40,10 @@ import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.model.Config;
 import com.dangjia.acg.modle.actuary.DjActuarialProductConfig;
 import com.dangjia.acg.modle.brand.Unit;
+import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.*;
+import com.dangjia.acg.modle.design.DesignQuantityRoomProduct;
 import com.dangjia.acg.modle.house.*;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberAddress;
@@ -52,10 +58,12 @@ import com.dangjia.acg.service.acquisition.MasterCostAcquisitionService;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.TaskStackService;
+import com.dangjia.acg.service.pay.PaymentService;
 import com.dangjia.acg.service.product.MasterProductTemplateService;
 import com.dangjia.acg.service.repair.MendOrderService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.aspectj.weaver.ast.Or;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,6 +104,8 @@ public class OrderService {
     private IOrderItemMapper orderItemMapper;
     @Autowired
     private IHouseMapper houseMapper;
+    @Autowired
+    private IHouseFlowMapper houseFlowMapper;
     @Autowired
     private IBusinessOrderMapper businessOrderMapper;
     @Autowired
@@ -144,6 +154,12 @@ public class OrderService {
     private IConfigMapper iConfigMapper;
     @Autowired
     private TaskStackService taskStackService;
+    @Autowired
+    private IMasterQuantityRoomProductMapper iMasterQuantityRoomProductMapper;
+    @Autowired
+    private IMasterActuarialProductConfigMapper iMasterActuarialProductConfigMapper;
+    @Autowired
+    private PaymentService paymentService;
     /**
      * 删除订单
      */
@@ -1367,4 +1383,164 @@ public class OrderService {
         }
         return "";
     }
+
+    /**
+     * 设计图纸不合格--审核设计图提交
+     * @param userToken 用户token
+     * @param houseId 房子ID
+     * @param taskId 任务ID
+     * @param type 类型：1当家平台设计，2平台外设计，3结束精算
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse saveDesignDrawingReview(String userToken,String houseId,String taskId,Integer type){
+        logger.info("审核设计图提交，taskId={},type={},houseId={}",taskId,type,houseId);
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member member = (Member) object;
+        //判断当前任务是否已完成
+        TaskStack taskStack=taskStackService.selectTaskStackById(taskId);
+        if(taskStack!=null&&taskStack.getState()==1){
+            return ServerResponse.createByErrorMessage("此任务已审核完成，请勿重复提交。");
+        }
+        House house=houseMapper.selectByPrimaryKey(houseId);
+        if(type==1){//当家平台设计
+            //创建需支付的设计师的订单
+            if(StringUtils.isNotEmpty(taskStack.getData())&&!houseId.equals(taskStack.getData())){
+                return ServerResponse.createBySuccess("提交成功",taskStack.getData());
+            }
+            Example example=new Example(MemberAddress.class);
+            example.createCriteria().andEqualTo(MemberAddress.HOUSE_ID,houseId);
+            MemberAddress memberAddress=iMasterMemberAddressMapper.selectOneByExample(example);
+            String addressId="";
+            if(memberAddress!=null&&StringUtils.isNotEmpty(memberAddress.getId())){
+                addressId=memberAddress.getId();
+            }
+            //1.获取符合条件商品信息
+            String productJsons = getNewProductJsons(houseId,house);
+            if(StringUtils.isNotEmpty(productJsons)){
+                //2.生成订单信息
+                ServerResponse serverResponse = paymentService.generateOrderCommon(member, house.getId(), house.getCityId(), productJsons, null, addressId, 1,"1");
+                if (serverResponse.getResultObj() != null) {
+                    String obj = serverResponse.getResultObj().toString();//获取对应的支付单号码
+                    //3.生成houseflow待抢单的流程(设计师的待创单流程)
+                    WorkerType workerType = workerTypeMapper.selectByPrimaryKey("1");
+                    example = new Example(HouseFlow.class);
+                    example.createCriteria()
+                            .andEqualTo(HouseFlow.HOUSE_ID, house.getHouseId())
+                            .andEqualTo(HouseFlow.WORKER_TYPE_ID, workerType.getId());
+                    List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(example);
+                    HouseFlow houseFlow;
+                    if (houseFlowList.size() == 1) {
+                        houseFlow = houseFlowList.get(0);
+                        houseFlow.setState(workerType.getState());
+                        houseFlow.setSort(workerType.getSort());
+                        houseFlow.setWorkType(1);//开始设计等待业主支付
+                        houseFlow.setModifyDate(new Date());
+                        houseFlow.setPayStatus(0);
+                        houseFlow.setCityId(house.getCityId());
+                        houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
+                    } else {
+                        houseFlow = new HouseFlow(true);
+                        houseFlow.setCityId(house.getCityId());
+                        houseFlow.setWorkerTypeId(workerType.getId());
+                        houseFlow.setWorkerType(workerType.getType());
+                        houseFlow.setHouseId(house.getId());
+                        houseFlow.setState(workerType.getState());
+                        houseFlow.setSort(workerType.getSort());
+                        houseFlow.setWorkType(1);//开始设计等待业主支付
+                        houseFlow.setModifyDate(new Date());
+                        houseFlow.setCityId(house.getCityId());
+                        houseFlow.setPayStatus(0);
+                        houseFlowMapper.insert(houseFlow);
+                    }
+                    //4.修改任务的data字段为订单字段
+                    taskStack.setData(obj);
+                    taskStack.setModifyDate(new Date());
+                    taskStackService.updateTaskStackInfo(taskStack);
+                    return ServerResponse.createBySuccess("提交成功",taskStack.getData());
+                }
+            }
+            return ServerResponse.createByErrorMessage("提交失败,未找到符合条件的商品信息");
+
+        }else if(type==2){//平台外设计
+            //1.修改精算师的审核状态为待审核
+            house.setBudgetOk(1);
+            house.setModifyDate(new Date());
+            houseMapper.updateByPrimaryKeySelective(house);
+
+        }else if(type==3){//结束精算
+             //1.将当前精算订单结束掉，生成退货单
+            Example example=new Example(Order.class);
+            example.createCriteria().andEqualTo(Order.BUSINESS_ORDER_NUMBER,taskStack.getData());
+            Order order=orderMapper.selectOneByExample(example);
+            //查询原订单的商品信息
+            List<BudgetOrderItemDTO> orderItemDTOList=orderMapper.getOrderInfoItemList(order.getId());
+            //转换成符合条件的退款单
+            String productStr=getAccordWithProduct(orderItemDTOList);
+            if(productStr!=null&& org.apache.commons.lang3.StringUtils.isNotBlank(productStr)) {
+                //自动生成退款单，且退款同意
+                 repairMendOrderService.saveRefundInfoRecord(house.getCityId(), houseId, order.getId(), productStr, new BigDecimal(0));
+            }
+         }
+        //2.判断是否有已待支付的订单，若有，则改为取消状态
+        if(StringUtils.isNotEmpty(taskStack.getData())&&!houseId.equals(taskStack.getData())){
+            //取消订单
+            Example example=new Example(Order.class);
+            example.createCriteria().andEqualTo(Order.BUSINESS_ORDER_NUMBER,taskStack.getData());
+            Order order=new Order();
+            order.setCreateDate(null);
+            order.setId(null);
+            order.setOrderStatus("5");
+            orderMapper.updateByExampleSelective(order,example);
+            //取消待支付业务订单
+            example=new Example(BusinessOrder.class);
+            example.createCriteria().andEqualTo(BusinessOrder.NUMBER,taskStack.getData());
+            BusinessOrder businessOrder=businessOrderMapper.selectOneByExample(example);
+            businessOrder.setState(4);
+            businessOrder.setModifyDate(new Date());
+            businessOrderMapper.updateByPrimaryKeySelective(businessOrder);
+        }
+        //3.修改任务的状态为已完成
+        taskStack.setState(1);
+        taskStack.setModifyDate(new Date());
+        taskStackService.updateTaskStackInfo(taskStack);
+        return ServerResponse.createBySuccessMessage("提交成功");
+    }
+    //生成设计师订单
+    public String getNewProductJsons(String houseId,House house){
+
+        //查询推荐商品列表
+        Example example=new Example(DesignQuantityRoomProduct.class);
+        example.createCriteria().andEqualTo(DesignQuantityRoomProduct.HOUSE_ID,houseId)
+                .andEqualTo(DesignQuantityRoomProduct.TYPE,1);
+        List<DesignQuantityRoomProduct> roomProductList=iMasterQuantityRoomProductMapper.selectByExample(example);
+        if(roomProductList!=null&&roomProductList.size()>0){
+
+            //生成设计师订单,获取符合条件的商品
+            JSONArray listOfGoods = new JSONArray();
+            for(DesignQuantityRoomProduct roomProduct:roomProductList){
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("shopCount", 1);
+                //查询是否按面积计算价格
+                example = new Example(DjActuarialProductConfig.class);
+                example.createCriteria().andEqualTo(DjActuarialProductConfig.WORKER_TYPE_ID, 1)
+                        .andEqualTo(DjActuarialProductConfig.PRODUCT_ID, roomProduct.getProductId());
+                DjActuarialProductConfig djActuarialProductConfig = iMasterActuarialProductConfigMapper.selectOneByExample(example);
+                if (djActuarialProductConfig != null && "1".equals(djActuarialProductConfig.getIsCalculatedArea())) {
+                    jsonObject.put("shopCount", house.getSquare());//按房子面积计算
+                }
+                //查询对应的商品信息，按价格取最低价的商品
+                StorefrontProductDTO storefrontProductDTO=masterProductTemplateService.getStorefrontProductByTemplateId(roomProduct.getProductId());
+                jsonObject.put("productId", storefrontProductDTO.getStorefrontId());
+                jsonObject.put("workerTypeId", 1);
+                listOfGoods.add(jsonObject);
+            }
+            return listOfGoods.toJSONString();
+        }
+        return "";
+    }
+
 }

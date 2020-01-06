@@ -34,8 +34,8 @@ public class MemberAuthController implements MemberAuthAPI {
     @Override
     @ApiMethod
     public ServerResponse newUserBinding(HttpServletRequest request, String phone, String password,
-                                         Integer smscode, String invitationCode, MemberAuth memberAuth,String longitude, String latitude) {
-        return memberAuthService.newUserBinding(request, phone, password, smscode, invitationCode, memberAuth,longitude,latitude);
+                                         Integer smscode, String invitationCode, MemberAuth memberAuth, String longitude, String latitude) {
+        return memberAuthService.newUserBinding(request, phone, password, smscode, invitationCode, memberAuth, longitude, latitude);
     }
 
     @Override
@@ -54,6 +54,16 @@ public class MemberAuthController implements MemberAuthAPI {
     @ApiMethod
     public ServerResponse isBindingThirdParties(HttpServletRequest request, String userToken, Integer openType, Integer userRole) {
         return memberAuthService.isBindingThirdParties(userToken, openType, userRole);
+    }
+
+    @Override
+    public ServerResponse miniProgramLogin(HttpServletRequest request, String code) {
+        return memberAuthService.miniProgramLogin(code);
+    }
+
+    @Override
+    public ServerResponse decodeWxAppPhone(HttpServletRequest request, String encrypted, String iv, String code) {
+        return memberAuthService.decodeWxAppPhone(request, encrypted, iv, code);
     }
 }
 

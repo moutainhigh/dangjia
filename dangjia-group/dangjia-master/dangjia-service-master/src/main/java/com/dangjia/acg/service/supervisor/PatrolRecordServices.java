@@ -37,36 +37,34 @@ public class PatrolRecordServices {
     @Autowired
     private CraftsmanConstructionService constructionService;
     @Autowired
-    private DjBasicsPatrolRecordMapper djBasicsPatrolRecordMapper ;
+    private DjBasicsPatrolRecordMapper djBasicsPatrolRecordMapper;
     @Autowired
     private ConfigUtil configUtil;
     @Autowired
-    private IRewardPunishRecordMapper rewardPunishRecordMapper ;
+    private IRewardPunishRecordMapper rewardPunishRecordMapper;
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
     @Autowired
-    private MemberAPI memberAPI;
-
-    @Autowired
     private IMemberMapper memberMapper;
+
     /**
      * 督导首页
+     *
      * @param request
      * @return
      */
-    public ServerResponse getSupHomePage(HttpServletRequest request,PageDTO pageDTO,String userToken,String keyWord) {
+    public ServerResponse getSupHomePage(HttpServletRequest request, PageDTO pageDTO, String userToken, String keyWord) {
         try {
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-            Object object = memberAPI.getMember(userToken);
+            Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
-            JSONObject job = (JSONObject)object;
-            Member worker = job.toJavaObject(Member.class);
+            Member worker = (Member) object;
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<PatrolRecordIndexDTO> list = rewardPunishRecordMapper.getSupHomePage(worker.getId(),keyWord);
-            list.forEach(patrolRecordIndexDTO->{
-                patrolRecordIndexDTO.setImage(imageAddress+patrolRecordIndexDTO.getImage());
+            List<PatrolRecordIndexDTO> list = rewardPunishRecordMapper.getSupHomePage(worker.getId(), keyWord);
+            list.forEach(patrolRecordIndexDTO -> {
+                patrolRecordIndexDTO.setImage(imageAddress + patrolRecordIndexDTO.getImage());
             });
             PageInfo pageResult = new PageInfo(list);
             return ServerResponse.createBySuccess("查询成功", pageResult);
@@ -77,7 +75,8 @@ public class PatrolRecordServices {
     }
 
     /**
-     *新建巡检
+     * 新建巡检
+     *
      * @param request
      * @return
      */
@@ -93,8 +92,8 @@ public class PatrolRecordServices {
             djBasicsPatrolRecord.setHouseId(houseId);
             djBasicsPatrolRecord.setImages(images);
             djBasicsPatrolRecord.setMemberId(worker.getId());
-            int i=djBasicsPatrolRecordMapper.insertSelective(djBasicsPatrolRecord);
-            if(i<=0)
+            int i = djBasicsPatrolRecordMapper.insertSelective(djBasicsPatrolRecord);
+            if (i <= 0)
                 return ServerResponse.createByErrorMessage("新建巡检失败");
             return ServerResponse.createBySuccessMessage("新建巡检成功");
         } catch (Exception e) {
@@ -105,11 +104,12 @@ public class PatrolRecordServices {
 
 
     /**
-     *查询巡检记录
+     * 查询巡检记录
+     *
      * @param request
      * @return
      */
-    public ServerResponse queryDjBasicsPatrolRecord(HttpServletRequest request, String userToken,PageDTO pageDTO) {
+    public ServerResponse queryDjBasicsPatrolRecord(HttpServletRequest request, String userToken, PageDTO pageDTO) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
@@ -118,11 +118,11 @@ public class PatrolRecordServices {
                 return (ServerResponse) object;
             }
             Member worker = (Member) object;
-            Example example=new Example(DjBasicsPatrolRecord.class);
-            example.createCriteria().andEqualTo(DjBasicsPatrolRecord.MEMBER_ID,worker.getId());
-            List<DjBasicsPatrolRecord> list=djBasicsPatrolRecordMapper.selectByExample(example);
-            list.forEach(djBasicsPatrolRecord->{
-                String imageAddress=StringTool.getImage(djBasicsPatrolRecord.getImages(),address);
+            Example example = new Example(DjBasicsPatrolRecord.class);
+            example.createCriteria().andEqualTo(DjBasicsPatrolRecord.MEMBER_ID, worker.getId());
+            List<DjBasicsPatrolRecord> list = djBasicsPatrolRecordMapper.selectByExample(example);
+            list.forEach(djBasicsPatrolRecord -> {
+                String imageAddress = StringTool.getImage(djBasicsPatrolRecord.getImages(), address);
                 djBasicsPatrolRecord.setImages(imageAddress);
                 Member member = memberMapper.selectByPrimaryKey(djBasicsPatrolRecord.getMemberId());
                 djBasicsPatrolRecord.setName(member.getName());
@@ -137,14 +137,15 @@ public class PatrolRecordServices {
 
     /**
      * 查询督导工作记录
+     *
      * @param request
      * @param keyWord
      * @return
      */
-    public ServerResponse queryWorkerRewardPunishRecord(HttpServletRequest request, PageDTO pageDTO , String type , String keyWord) {
+    public ServerResponse queryWorkerRewardPunishRecord(HttpServletRequest request, PageDTO pageDTO, String type, String keyWord) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<WorkerRewardPunishRecordDTO> list = rewardPunishRecordMapper.queryRewardPunishRecordBykeyWord(keyWord,type);
+            List<WorkerRewardPunishRecordDTO> list = rewardPunishRecordMapper.queryRewardPunishRecordBykeyWord(keyWord, type);
             PageInfo pageResult = new PageInfo(list);
             return ServerResponse.createBySuccess("查询成功", pageResult);
         } catch (Exception e) {
@@ -154,7 +155,8 @@ public class PatrolRecordServices {
     }
 
     /**
-     *巡检详情
+     * 巡检详情
+     *
      * @param request
      * @param rewordPunishCorrelationId
      * @return
@@ -163,11 +165,9 @@ public class PatrolRecordServices {
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             PatrolRecordDTO djBasicsPatrolRecord = djBasicsPatrolRecordMapper.queryPatrolRecordDetail(rewordPunishCorrelationId);
-            if (djBasicsPatrolRecord!=null)
-            {
-                if(djBasicsPatrolRecord.getImages()!=null)
-                {
-                    String imageAddress=StringTool.getImage(djBasicsPatrolRecord.getImages(),address);
+            if (djBasicsPatrolRecord != null) {
+                if (djBasicsPatrolRecord.getImages() != null) {
+                    String imageAddress = StringTool.getImage(djBasicsPatrolRecord.getImages(), address);
                     djBasicsPatrolRecord.setImages(imageAddress);
                     djBasicsPatrolRecord.setImagesDetail(imageAddress.split(","));
                 }
@@ -180,7 +180,8 @@ public class PatrolRecordServices {
     }
 
     /**
-     *奖励/惩罚详情
+     * 奖励/惩罚详情
+     *
      * @param request
      * @param id
      * @return
@@ -188,13 +189,11 @@ public class PatrolRecordServices {
     public ServerResponse queryRewardPunishRecordDetail(HttpServletRequest request, String id) {
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            JFRewardPunishRecordDTO jFRewardPunishRecordDTO=  rewardPunishRecordMapper.queryRewardPunishRecordDetail(id);
-            if (jFRewardPunishRecordDTO!=null)
-            {
-                jFRewardPunishRecordDTO.setWorkerTypeName(jFRewardPunishRecordDTO.getWorkerType()!=null?workerTypeMapper.selectByPrimaryKey(jFRewardPunishRecordDTO.getWorkerType()).getName():"");
-                if(jFRewardPunishRecordDTO.getImages()!=null)
-                {
-                    String imageAddress=StringTool.getImage(jFRewardPunishRecordDTO.getImages(),address);
+            JFRewardPunishRecordDTO jFRewardPunishRecordDTO = rewardPunishRecordMapper.queryRewardPunishRecordDetail(id);
+            if (jFRewardPunishRecordDTO != null) {
+                jFRewardPunishRecordDTO.setWorkerTypeName(jFRewardPunishRecordDTO.getWorkerType() != null ? workerTypeMapper.selectByPrimaryKey(jFRewardPunishRecordDTO.getWorkerType()).getName() : "");
+                if (jFRewardPunishRecordDTO.getImages() != null) {
+                    String imageAddress = StringTool.getImage(jFRewardPunishRecordDTO.getImages(), address);
                     jFRewardPunishRecordDTO.setImages(imageAddress);
                     jFRewardPunishRecordDTO.setImagesDetail(imageAddress.split(","));
                 }

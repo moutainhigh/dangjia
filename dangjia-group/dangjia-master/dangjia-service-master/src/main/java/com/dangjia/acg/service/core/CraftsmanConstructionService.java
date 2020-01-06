@@ -43,6 +43,7 @@ import com.dangjia.acg.service.design.QuantityRoomService;
 import com.dangjia.acg.service.product.MasterProductTemplateService;
 import com.dangjia.acg.util.HouseUtil;
 import com.dangjia.acg.util.Utils;
+import io.swagger.models.auth.In;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -120,7 +121,7 @@ public class CraftsmanConstructionService {
      * @param userToken userToken
      * @return 施工页面信息
      */
-    public ServerResponse getConstructionView(HttpServletRequest request, String userToken) {
+    public ServerResponse getConstructionView(HttpServletRequest request, String userToken,Integer type) {
         ConstructionByWorkerIdBean bean = new ConstructionByWorkerIdBean();//公用返回体
         Object object = getMember(userToken);
         if (object instanceof ServerResponse) {
@@ -145,6 +146,7 @@ public class CraftsmanConstructionService {
         }
         bean.setHouseId(house.getId());
         bean.setHouseName(house.getHouseName());
+        bean.setHouseSquare(house.getSquare().doubleValue());
         Example example = new Example(MemberAddress.class);
         example.createCriteria().andEqualTo(MemberAddress.HOUSE_ID, house.getId());
         MemberAddress memberAddress = iMasterMemberAddressMapper.selectOneByExample(example);
@@ -160,7 +162,7 @@ public class CraftsmanConstructionService {
             case 3://大管家
                 return getHousekeeperBean(request, bean, hw, worker, house, hf);
             default://工匠
-                return getCraftsmanBean(request, bean, hw, worker, house, hf);
+                return getCraftsmanBean(request, bean, hw, worker, house, hf,type);
         }
 
     }
@@ -615,7 +617,8 @@ public class CraftsmanConstructionService {
     /**
      * 工匠
      */
-    private ServerResponse getCraftsmanBean(HttpServletRequest request, ConstructionByWorkerIdBean bean, HouseWorker hw, Member worker, House house, HouseFlow hf) {
+    private ServerResponse getCraftsmanBean(HttpServletRequest request, ConstructionByWorkerIdBean bean, HouseWorker hw,
+                                            Member worker, House house, HouseFlow hf, Integer type) {
         Example example = new Example(Insurance.class);
         example.createCriteria().andEqualTo(Insurance.WORKER_ID, hw.getWorkerId()).andIsNotNull(Insurance.END_DATE);
         example.orderBy(Insurance.END_DATE).desc();
@@ -632,7 +635,7 @@ public class CraftsmanConstructionService {
         }
 
         //查询我的单
-        List<HouseOrderDetailDTO> houseOrderDetailDTOList = houseMapper.getBudgetOrderDetailByInFo(house.getId(), hw.getWorkerTypeId(),1);
+        List<HouseOrderDetailDTO> houseOrderDetailDTOList = houseMapper.getBudgetOrderDetailByInFo(house.getId(), hw.getWorkerTypeId(),type);
         List<Map<String, Object>> mapDataList = new ArrayList<>();
         if(houseOrderDetailDTOList != null && houseOrderDetailDTOList.size() >0){
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
@@ -644,7 +647,6 @@ public class CraftsmanConstructionService {
                 mapDataList.add(dataMap);
             }
         }
-
         bean.setDataList(mapDataList);
 
         //查询工序节点

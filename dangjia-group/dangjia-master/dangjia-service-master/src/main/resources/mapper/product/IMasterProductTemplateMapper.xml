@@ -34,4 +34,103 @@
             AND b.skill_certification_id=#{skillCertificationId}
         )
     </select>
+
+
+
+    <!--补货查询商品库服务-->
+    <select id="queryProductData" resultType="com.dangjia.acg.dto.product.DjBasicsProductTemplateDTO">
+        select
+        sp.id as storefrontProductId,
+        p.id as id,
+        IFNULL(sp.market_name,p.name) as name,
+        p.goods_id as goodsId,
+        p.category_id as categoryId,
+        p.product_sn as productSn,
+        sp.image as image,
+        p.unit_id as unitId,
+        p.label_id as labelId,
+        p.unit_name as unitName,
+        p.type as type,
+        sp.sell_price as price,
+        p.istop,
+        p.value_id_arr AS valueIdArr,
+        p.value_name_arr AS valueNameArr,
+        hw.shop_count AS shopCount,
+        hw.ask_count AS askCount,
+        hw.back_count AS backCount,
+        hw.work_back AS workBack,
+        hw.receive,
+        hw.repair_count AS repairCount,
+        hw.ask_count AS askCount,
+        hw.rep_time AS repTime,
+        hw.back_time AS backTime,
+        hw.storefront_id AS storefrontId,
+        hw.owner_back AS ownerBack
+        FROM
+        dj_basics_product_template p
+        INNER JOIN dj_basics_goods g ON p.goods_id = g.id
+        <if test="(categoryId!=null and categoryId!='') or (name!=null and name!='')">
+            INNER JOIN dj_basics_goods_category ca ON ca.id = p.category_id
+        </if>
+        INNER JOIN dj_basics_storefront_product sp ON p.id=sp.prod_template_id
+        <if test="name!=null and name!=''">
+            INNER JOIN dj_basics_goods_category tca ON tca.id = ca.parent_top
+        </if>
+        INNER JOIN dj_house_warehouse hw ON hw.product_id=sp.id
+        WHERE p.data_status = 0
+        AND hw.house_id= #{houseId}
+        AND hw.product_type= #{productType}
+        AND g.type = #{productType}
+        <if test="name!=null and name!=''">
+            AND (
+            CONCAT(
+            IFNULL(g.other_name,''),
+            ca.`name`,
+            IFNULL(tca.`name`,''),
+            p.`name`,
+            IFNULL(p.value_name_arr,'')
+            )
+            LIKE CONCAT('%',#{name},'%')
+            )
+        </if>
+        <if test="categoryId!=null and categoryId!=''">
+            AND (ca.parent_top=#{categoryId} OR ca.id=#{categoryId})
+        </if>
+        ORDER BY p.istop DESC,p.`name` DESC
+    </select>
+
+    <!--根据商品模板ID查询对应店铺商品信息-->
+    <select id="getStorefrontProductByTemplateId" resultType="com.dangjia.acg.dto.product.StorefrontProductDTO">
+        SELECT
+        t1.storefront_id storefrontId,
+        t1.id storefrontProductId,
+        t.id productTemplateId,
+        t.category_id categoryId,
+        t.product_sn productSn,
+        t1.product_name productName,
+        t.goods_id goodsId,
+        t.cost,
+        IFNULL(ifnull(t1.sell_price,t.price),0) sellPrice,
+        t1.image,
+        t.convert_quality convertQuality,
+        t.convert_unit convertUnit,
+        t.unit_id unitId,
+        t.unit_name unitName,
+        t.unit_id,
+        t.unit_name,
+        t.label_id
+        FROM
+        dj_basics_product_template t,
+        dj_basics_storefront_product t1
+        WHERE
+        t.id = t1.prod_template_id
+        and t1.is_shelf_status = '1'
+        and t1.data_status=0
+        and t.data_status = 0
+        AND t.id = #{prodTemplateId}
+        GROUP BY
+        t1.sell_price ASC
+        limit 1
+    </select>
+
 </mapper>

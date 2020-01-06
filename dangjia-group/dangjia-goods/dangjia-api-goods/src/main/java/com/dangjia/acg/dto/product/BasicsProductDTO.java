@@ -1,10 +1,12 @@
 package com.dangjia.acg.dto.product;
 
 import com.dangjia.acg.modle.GoodsBaseEntity;
+import com.dangjia.acg.modle.product.BasicsProductTemplateRatio;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * 产品实体类
@@ -104,8 +106,10 @@ public class BasicsProductDTO extends GoodsBaseEntity {
 
     private String relationProductIds;//关联商品编码（多个用逗号分隔）
 
-
     private String cityId;//
 
+    private List<BasicsProductTemplateRatioDTO> productTemplateRatioList;//责任占比列表
+
+    private Integer stewardExploration;//是否需要管家勘查（1是，0否）
 
 }

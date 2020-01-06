@@ -27,6 +27,7 @@ import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
 import com.dangjia.acg.modle.supervisor.DjBasicsSupervisorAuthority;
 import com.dangjia.acg.modle.worker.Evaluate;
+import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -52,9 +53,8 @@ public class SupAuthorityService {
 
     @Autowired
     private ConfigUtil configUtil;
-
     @Autowired
-    private MemberAPI memberAPI;
+    private CraftsmanConstructionService constructionService;
 
     @Autowired
     private IMemberMapper memberMapper;
@@ -212,7 +212,7 @@ public class SupAuthorityService {
      */
     public ServerResponse querySupervisorHostList(HttpServletRequest request, String sortNum,PageDTO pageDTO, String userToken,String keyWord) {
         try {
-            Object object = memberAPI.getMember(userToken);
+            Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
@@ -324,12 +324,11 @@ public class SupAuthorityService {
     public ServerResponse queryMaintenanceHostList(HttpServletRequest request,PageDTO pageDTO ,String userToken,String keyWord) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            Object object = memberAPI.getMember(userToken);
+            Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
-            JSONObject job = (JSONObject)object;
-            Member worker = job.toJavaObject(Member.class);
+            Member worker = (Member)object;
             List<RepairHouseListDTO> list=djMaintenanceRecordMapper.queryMaintenanceHostList(worker.getId(),keyWord);
             list.forEach(repairHouseListDTO->{
                     String houseId=repairHouseListDTO.getHouseId();
@@ -365,12 +364,11 @@ public class SupAuthorityService {
      */
     public ServerResponse queryMtHostListDetail(HttpServletRequest request, String houseId,String userToken) {
         try {
-            Object object = memberAPI.getMember(userToken);
+            Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
             }
-            JSONObject job = (JSONObject)object;
-            Member worker = job.toJavaObject(Member.class);
+            Member worker = (Member)object;
             MtHostListDetailDTO  mtHostListDetailDTO =djMaintenanceRecordMapper.queryMtHostListDetail(houseId);
             return ServerResponse.createBySuccess("查询成功", mtHostListDetailDTO);
         } catch (Exception e) {

@@ -1,5 +1,7 @@
 package com.dangjia.acg.mapper.product;
 
+import com.dangjia.acg.dto.product.DjBasicsProductTemplateDTO;
+import com.dangjia.acg.dto.product.StorefrontProductDTO;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -20,5 +22,13 @@ public interface IMasterProductTemplateMapper extends Mapper<DjBasicsProductTemp
                                                                       @Param("skillCertificationId") String skillCertificationId,
                                                                       @Param("searchKey") String searchKey,
                                                                       @Param("cityId") String cityId);
+
+    List<DjBasicsProductTemplateDTO> queryProductData(@Param("houseId") String houseId,
+                                                      @Param("name") String name,
+                                                      @Param("categoryId") String categoryId,
+                                                      @Param("productType") String productType);
+    //根据模板ID查询对应符合条件的商品信息
+    StorefrontProductDTO getStorefrontProductByTemplateId(@Param("prodTemplateId") String prodTemplateId);
+
 
 }

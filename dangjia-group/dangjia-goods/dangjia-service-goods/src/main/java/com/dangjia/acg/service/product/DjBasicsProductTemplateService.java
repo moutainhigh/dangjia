@@ -61,16 +61,11 @@ public class DjBasicsProductTemplateService {
     private IBasicsGoodsMapper iBasicsGoodsMapper;
     @Autowired
     private IProductAddedRelationMapper iProductAddedRelationMapper;
-
-    @Autowired
-    private ITechnologyMapper iTechnologyMapper;
-
     @Autowired
     private DjBasicsGoodsMapper djBasicsGoodsMapper;
 
     @Autowired
-    private TechnologyService technologyService;
-
+    private IProductTemplateRatioMapper iProductTemplateRatioMapper;
     @Autowired
     private IUnitMapper iUnitMapper;
     @Autowired
@@ -227,9 +222,33 @@ public class DjBasicsProductTemplateService {
                     insertAddedValueProductRelation(productId,basicsProductDTO.getRelationProductIds(),storefrontProductId,storefrontId);
                 }
             }
+            if(basicsGoods.getType()==5){//如果是维保商品，则增加责任占比划分信息
+              insertProuductTemplateRatio(basicsProductDTO.getProductTemplateRatioList(),productId);
+            }
 
         }
         return ServerResponse.createBySuccessMessage("保存更新商品成功");
+    }
+
+    /**
+     * 添加维保商品的责任占比信息
+     * @param productTemplateRatioList
+     */
+    private void insertProuductTemplateRatio(List<BasicsProductTemplateRatioDTO>  productTemplateRatioList,String productTemplateId){
+
+        if(productTemplateRatioList!=null&&productTemplateRatioList.size()>0){
+            Example example=new Example(BasicsProductTemplateRatio.class);
+            example.createCriteria().andEqualTo(BasicsProductTemplateRatio.PRODUCT_TEMPLATE_ID,productTemplateId);
+            iProductTemplateRatioMapper.deleteByExample(example);
+            //添加新的关系
+            for(BasicsProductTemplateRatioDTO ptr:productTemplateRatioList){
+                 BasicsProductTemplateRatio bptr=new BasicsProductTemplateRatio();
+                 bptr.setProductRatio(ptr.getProductRatio());
+                 bptr.setProductTemplateId(productTemplateId);
+                 bptr.setProductResponsibleId(ptr.getProductResponsibleId());
+                iProductTemplateRatioMapper.insert(bptr);//添加对应的责任占比信息
+            }
+        }
     }
 
 
@@ -345,6 +364,7 @@ public class DjBasicsProductTemplateService {
         product.setGuaranteedPolicy(basicsProductDTO.getGuaranteedPolicy());
         product.setRefundPolicy(basicsProductDTO.getRefundPolicy());
         product.setIsRelateionProduct(basicsProductDTO.getIsRelateionProduct());
+        product.setStewardExploration(basicsProductDTO.getStewardExploration());//是否需要管家勘查
         product.setCityId(cityId);
         if (productId == null || "".equals(productId)) {//没有id则新增
             product.setCreateDate(new Date());
@@ -354,7 +374,7 @@ public class DjBasicsProductTemplateService {
         } else {//修改
             product.setId(productId);
             product.setModifyDate(new Date());
-            int  index=iBasicsProductTemplateMapper.updateByPrimaryKeySelective(product);
+            int  index=iBasicsProductTemplateMapper.updateByPrimaryKey(product);
 
             if (index < 0) {
                 return "更新商品失败";
@@ -604,6 +624,9 @@ public class DjBasicsProductTemplateService {
                 //添加关联商品信息
                 insertAddedValueProductRelation(productId,basicsProductDTO.getRelationProductIds(),storefrontProductId,storefrontId);
             }
+        }
+        if(basicsGoods.getType()==5){//如果是维保商品，则增加责任占比划分信息
+            insertProuductTemplateRatio(basicsProductDTO.getProductTemplateRatioList(),productId);
         }
 
         return ServerResponse.createBySuccess("保存成功",productId);
@@ -900,6 +923,10 @@ public class DjBasicsProductTemplateService {
         map.put("detailImageUrl",StringTool.getImage(djBasicsProduct.getDetailImage(),address));
         map.put("id",djBasicsProduct.getId());
 
+        Example example=new Example(BasicsProductTemplateRatio.class);
+        example.createCriteria().andEqualTo(BasicsProductTemplateRatio.PRODUCT_TEMPLATE_ID,djBasicsProduct.getId());
+        List<BasicsProductTemplateRatio> productTemplateRatioList=iProductTemplateRatioMapper.selectByExample(example);
+        map.put("productTemplateRatioList",productTemplateRatioList);//维保商品对应的责任占比列表
         //只有增值类关联商品才会有此数据
         if(StringUtils.isNotBlank(djBasicsProduct.getIsRelateionProduct())&&"1".equals(djBasicsProduct.getIsRelateionProduct())){
 

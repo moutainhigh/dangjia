@@ -104,9 +104,9 @@
 
     <select id="queryNotForTheGoods" resultType="com.dangjia.acg.dto.supplier.DjSupSupplierProductDTO">
         SELECT
-            bsp.id,
+            bsp.id AS productId,
             bsp.goods_id AS goodsId,
-            bsp.prod_template_id AS productId,
+            bsp.prod_template_id AS prodTemplateId,
             bg.NAME AS goodsName,
             bsp.product_name AS productName,
             bsp.image,
@@ -129,7 +129,7 @@
             and bsp.storefront_id = #{shopId}
         </if>
         <if test="null!=productIds and productIds.size>0">
-            and bsp.prod_template_id not in
+            and bsp.id not in
             <foreach collection="productIds" index="index" item="item" open="(" separator="," close=")">
                 #{item}
             </foreach>

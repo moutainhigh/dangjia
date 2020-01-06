@@ -234,6 +234,12 @@ public class DjBasicsProductTemplate extends GoodsBaseEntity {
     @ApiModelProperty(" 是否关联商品（1是，0否）")
     private String isRelateionProduct;
 
+
+    @Column(name = "steward_exploration")
+    @Desc(value = " 是否需要管家勘查（1是，0否）")
+    @ApiModelProperty(" 是否需要管家勘查（1是，0否）")
+    private Integer stewardExploration;
+
     @Transient
     private String storefrontName;
 

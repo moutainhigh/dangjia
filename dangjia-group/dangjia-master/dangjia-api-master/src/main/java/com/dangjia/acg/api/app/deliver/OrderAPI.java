@@ -106,4 +106,20 @@ public interface OrderAPI {
                                          @RequestParam("orderId") String orderId,
                                          @RequestParam("diffOrderId") String diffOrderId);
 
+
+    /**
+     * 设计图纸不合格--审核设计图提交
+     * @param userToken 用户token
+     * @param houseId 房子ID
+     * @param taskId 任务ID
+     * @param type 类型：1当家平台设计，2平台外设计，3结束精算
+     * @return
+     */
+    @PostMapping("app/order/saveDesignDrawingReview")
+    @ApiOperation(value = "设计图纸不合格--审核设计图提交", notes = "设计图纸不合格--审核设计图提交")
+    ServerResponse saveDesignDrawingReview(@RequestParam("userToken") String userToken,
+                                         @RequestParam("houseId") String houseId,
+                                         @RequestParam("taskId") String taskId,
+                                         @RequestParam("type") Integer type);
+
 }
