@@ -96,6 +96,7 @@ public class HouseWorkerSupService {
      * @return
      */
     public ServerResponse getHouseOrderList(HttpServletRequest request, PageDTO pageDTO, String userToken,
+                                            String nameKey,
                                             Integer type,
                                             Integer houseType,
                                             Integer startTime,
@@ -114,7 +115,7 @@ public class HouseWorkerSupService {
             String workerTypeId = member.getWorkerTypeId();
             /*大管家所有订单*/
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<HouseWorker>  houseWorkers = houseWorkerMapper.getDetailHouseWorker(member.getId(),type,houseType,startTime,isPlanWeek,isPatrol);
+            List<HouseWorker>  houseWorkers = houseWorkerMapper.getDetailHouseWorker(member.getId(),nameKey,type,houseType,startTime,isPlanWeek,isPatrol);
             PageInfo pageResult = new PageInfo(houseWorkers);
             if (houseWorkers != null)
                 for (HouseWorker houseWorker : houseWorkers) {

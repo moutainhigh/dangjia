@@ -28,7 +28,7 @@ public interface IHouseWorkerMapper extends Mapper<HouseWorker> {
 
     int doModifyAllByWorkerId(@Param("workerId") String workerId);
 
-    List<HouseWorker> getDetailHouseWorker(@Param("workerId") String workerId,
+    List<HouseWorker> getDetailHouseWorker(@Param("workerId") String workerId,@Param("nameKey") String nameKey,
                                            @Param("type") Integer type,
                                            @Param("houseType") Integer houseType,
                                            @Param("startTime") Integer startTime,

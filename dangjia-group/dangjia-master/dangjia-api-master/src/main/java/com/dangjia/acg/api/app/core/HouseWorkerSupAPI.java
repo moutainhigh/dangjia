@@ -25,6 +25,7 @@ public interface HouseWorkerSupAPI {
      * @param request
      * @param pageDTO
      * @param userToken 大管家TOKEN
+     * @param nameKey 搜索地址
      * @param type 订单分类：0:装修单，1:体验单，2，维修单
      * @param houseType 工地状态：1=超期施工
      * @param startTime 开工：1:今日开工，2，本周新开工
@@ -35,6 +36,7 @@ public interface HouseWorkerSupAPI {
     ServerResponse getHouseOrderList(@RequestParam("request")HttpServletRequest request,
                                      @RequestParam("pageDTO")PageDTO pageDTO,
                                      @RequestParam("userToken")String userToken,
+                                     @RequestParam("nameKey")String nameKey,
                                      @RequestParam("type")Integer type,
                                      @RequestParam("houseType")Integer houseType,
                                      @RequestParam("startTime")Integer startTime,
