@@ -264,6 +264,7 @@ public class MemberAuthService {
                     map.put("openid", openid);
                     map.put("sessionKey", sessionKey);
                     map.put("unionid", unionid);
+                    map.put("loginType", 0);
                     return ServerResponse.createBySuccess("登录成功，正在跳转", map);
                 } else {
                     if (serverResponse.getResultCode() == ServerCode.NO_DATA.getCode()) {
@@ -271,7 +272,8 @@ public class MemberAuthService {
                         map.put("openid", openid);
                         map.put("sessionKey", sessionKey);
                         map.put("unionid", unionid);
-                        return ServerResponse.createByErrorCodeResultObj(ServerCode.NO_DATA.getCode(), map);
+                        map.put("loginType", 1);
+                        return ServerResponse.createBySuccess("登录失败", map);
                     } else {
                         return serverResponse;
                     }

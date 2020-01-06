@@ -348,11 +348,7 @@ public interface MemberAuthAPI {
      * @description 小程序登录
      * @method POST
      * @url master/memberAuth/miniProgramLogin
-     * @return_param --- 状态为1004 ----
-     * @return_param openid string 用户唯一标识
-     * @return_param sessionKey string 会话密钥
-     * @return_param unionid string 用户在开放平台的唯一标识符
-     * @return_param --- 状态为1000 ----
+     * @return_param loginType int 0登录成功，1登录失败（无用户）
      * @return_param openid string 用户唯一标识
      * @return_param sessionKey string 会话密钥
      * @return_param unionid string 用户在开放平台的唯一标识符

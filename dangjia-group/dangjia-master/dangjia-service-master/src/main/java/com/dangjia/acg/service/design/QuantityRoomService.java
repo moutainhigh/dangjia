@@ -317,6 +317,7 @@ public class QuantityRoomService {
     /**
      * 添加推荐的商品
      */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse addRecommendProduct(String houseId, int type, String productIds) {
         House house = iHouseMapper.selectByPrimaryKey(houseId);
         if (house == null) {
@@ -327,6 +328,7 @@ public class QuantityRoomService {
         }
         //删除之前提交的
         String[] productIdList = productIds.split(",");
+        List<Map<String, String>> ids = new ArrayList<>();
         for (String productId : productIdList) {
             if (!CommonUtil.isEmpty(productId)) {
                 DesignQuantityRoomProduct designQuantityRoomProduct = new DesignQuantityRoomProduct();
@@ -334,9 +336,13 @@ public class QuantityRoomService {
                 designQuantityRoomProduct.setProductId(productId);//商品ID
                 designQuantityRoomProduct.setType(type);//推荐商品
                 iMasterQuantityRoomProductMapper.insertSelective(designQuantityRoomProduct);
+                Map<String, String> map = new HashMap<>();
+                map.put("rpId", designQuantityRoomProduct.getId());
+                map.put("productId", productId);
+                ids.add(map);
             }
         }
-        return ServerResponse.createBySuccessMessage("提交成功");
+        return ServerResponse.createBySuccess("提交成功", ids);
     }
 
     /**
