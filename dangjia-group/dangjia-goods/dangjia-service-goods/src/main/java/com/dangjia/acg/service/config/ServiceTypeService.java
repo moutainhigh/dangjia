@@ -10,7 +10,10 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.ElasticSearchDTO;
 import com.dangjia.acg.mapper.config.IServiceTypeMapper;
+import com.dangjia.acg.modle.actuary.ActuarialTemplate;
 import com.dangjia.acg.modle.config.ServiceType;
+import com.dangjia.acg.service.actuary.ActuarialTemplateService;
+import com.dangjia.acg.service.actuary.DjBasicsActuarialConfigurationServices;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -37,6 +40,8 @@ public class ServiceTypeService {
 
     @Autowired
     private ElasticSearchAPI elasticSearchAPI;
+    @Autowired
+    private DjBasicsActuarialConfigurationServices actuarialConfigurationServices;
     /**
      * 根据ID查询服务详情
      * @param id
@@ -163,7 +168,7 @@ public class ServiceTypeService {
      * @param image
      * @return
      */
-    public ServerResponse insertServiceType(String name,String coverImage, String image,String cityId) {
+    public ServerResponse insertServiceType(String name,String coverImage, String image,String cityId,String userId) {
         try{
             ServiceType serviceType=new ServiceType();
             serviceType.setName(name);
@@ -171,7 +176,9 @@ public class ServiceTypeService {
             serviceType.setImage(image);
             serviceType.setCityId(cityId);
             iServiceTypeMapper.insert(serviceType);
-
+            //添加对应的设计，精算阶段
+            actuarialConfigurationServices.insertActuarialConfig(serviceType.getId(),"设计阶段","1",userId,cityId,"设计图是装修必备的资料，请确认您已有可指导装修施工的设计图；如果不确定的话，我们推荐您恢复勾选，提交订单后由工作人员协助判断。");
+            actuarialConfigurationServices.insertActuarialConfig(serviceType.getId(),"精算阶段","2",userId,cityId,"精算是将您的设计图内容转化为商品或服务消费的过程，是当家装修平台的特色服务；您也可以单独体验设计服务，之后再选择是否继续体验精算以及施工服务。");
 
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             JSONObject json=JSONObject.parseObject(JSON.toJSONString(serviceType));
@@ -186,6 +193,7 @@ public class ServiceTypeService {
         }
 
     }
+
 
     /**
      * 删除服务类型

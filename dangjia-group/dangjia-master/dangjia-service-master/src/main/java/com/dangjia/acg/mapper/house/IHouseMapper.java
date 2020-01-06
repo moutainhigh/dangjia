@@ -73,7 +73,8 @@ public interface IHouseMapper extends Mapper<House> {
      * @param workerTypeId
      * @return
      */
-    List<HouseOrderDetailDTO> selectDesignProductList(@Param("cityId") String cityId, @Param("workerTypeId") String workerTypeId);
+    List<HouseOrderDetailDTO> selectDesignProductList(@Param("cityId") String cityId, @Param("workerTypeId") String workerTypeId,
+                                                      @Param("serviceTypeId") String serviceTypeId);
 
     /**
      * 查询是否有待处理的补差价订单

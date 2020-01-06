@@ -18,22 +18,23 @@ import java.util.List;
 @Repository
 public interface DjSimulationTemplateConfigMapper extends Mapper<DjSimulationTemplateConfig> {
 
-    List<SimulationTemplateConfigDTO> querySimulateionTemplateConfig(@Param("id") String id,@Param("addressUrl") String addressUrl,@Param("cityId") String cityId);
+    List<SimulationTemplateConfigDTO> querySimulateionTemplateConfig(@Param("id") String id,@Param("addressUrl") String addressUrl
+            ,@Param("cityId") String cityId,@Param("serviceTypeId") String serviceTypeId);
 
     String  selectCurrentIndexByConfigType(@Param("configType") String configType);
     //删除符合条件的标题数据
-    void deleteSimulationTemplate(@Param("cityId") String cityId);
+    void deleteSimulationTemplate(@Param("cityId") String cityId,@Param("serviceTypeId") String serviceTypeId);
 
     /**
      * 查询组合返回列表
      * @return
      */
-    List queryTemplateListByType(@Param("cityId") String cityId);
+    List queryTemplateListByType(@Param("cityId") String cityId,@Param("serviceTypeId") String serviceTypeId);
 
     /**
      * 我要装修--模拟花费标题查询
      * @return
      */
-    List<SimulationTemplateAppConfigDTO> searchSimulationTitleList(@Param("cityId") String cityId);
+    List<SimulationTemplateAppConfigDTO> searchSimulationTitleList(@Param("cityId") String cityId,@Param("serviceTypeId") String serviceTypeId);
 
 }

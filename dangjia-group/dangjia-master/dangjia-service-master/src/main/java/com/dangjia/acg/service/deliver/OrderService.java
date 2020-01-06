@@ -21,6 +21,7 @@ import com.dangjia.acg.dto.house.HouseOrderDetailDTO;
 import com.dangjia.acg.dto.product.StorefrontProductDTO;
 import com.dangjia.acg.mapper.IConfigMapper;
 import com.dangjia.acg.mapper.config.IMasterActuarialProductConfigMapper;
+import com.dangjia.acg.mapper.config.IMasterActuarialTemplateConfigMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IMasterUnitMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
@@ -39,6 +40,7 @@ import com.dangjia.acg.mapper.repair.IMendMaterialMapper;
 import com.dangjia.acg.mapper.repair.IMendOrderMapper;
 import com.dangjia.acg.model.Config;
 import com.dangjia.acg.modle.actuary.DjActuarialProductConfig;
+import com.dangjia.acg.modle.actuary.DjActuarialTemplateConfig;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.WorkerType;
@@ -158,6 +160,8 @@ public class OrderService {
     private IMasterQuantityRoomProductMapper iMasterQuantityRoomProductMapper;
     @Autowired
     private IMasterActuarialProductConfigMapper iMasterActuarialProductConfigMapper;
+    @Autowired
+    private IMasterActuarialTemplateConfigMapper iMasterActuarialTemplateConfigMapper;
     @Autowired
     private PaymentService paymentService;
     /**
@@ -1525,8 +1529,14 @@ public class OrderService {
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put("shopCount", 1);
                 //查询是否按面积计算价格
+                 example=new Example(DjActuarialTemplateConfig.class);
+                example.createCriteria().andEqualTo(DjActuarialTemplateConfig.SERVICE_TYPE_ID,house.getHouseType())
+                        .andEqualTo(DjActuarialTemplateConfig.CONFIG_TYPE,1);
+                DjActuarialTemplateConfig djActuarialTemplateConfig=iMasterActuarialTemplateConfigMapper.selectOneByExample(example);
+
                 example = new Example(DjActuarialProductConfig.class);
                 example.createCriteria().andEqualTo(DjActuarialProductConfig.WORKER_TYPE_ID, 1)
+                        .andEqualTo(DjActuarialProductConfig.ACTUARIAL_TEMPLATE_ID,djActuarialTemplateConfig.getId())
                         .andEqualTo(DjActuarialProductConfig.PRODUCT_ID, roomProduct.getProductId());
                 DjActuarialProductConfig djActuarialProductConfig = iMasterActuarialProductConfigMapper.selectOneByExample(example);
                 if (djActuarialProductConfig != null && "1".equals(djActuarialProductConfig.getIsCalculatedArea())) {
@@ -1549,29 +1559,39 @@ public class OrderService {
      * @return
      */
     public String getBudgetProductJsons(House house){
+        try{
+            //查询推荐商品列表
+            Example example=new Example(DjActuarialTemplateConfig.class);
+            example.createCriteria().andEqualTo(DjActuarialTemplateConfig.SERVICE_TYPE_ID,house.getHouseType())
+                    .andEqualTo(DjActuarialTemplateConfig.CONFIG_TYPE,2);
+            DjActuarialTemplateConfig djActuarialTemplateConfig=iMasterActuarialTemplateConfigMapper.selectOneByExample(example);
 
-        //查询推荐商品列表
-        Example example = new Example(DjActuarialProductConfig.class);
-        example.createCriteria().andEqualTo(DjActuarialProductConfig.WORKER_TYPE_ID, 2)
-                .andEqualTo(DjActuarialProductConfig.DEFAULT_RECOMMEND, "1");//查询默认推荐的精算商品
-        List<DjActuarialProductConfig> productConfigList=iMasterActuarialProductConfigMapper.selectByExample(example);
-        if(productConfigList!=null&&productConfigList.size()>0){
-            JSONArray listOfGoods = new JSONArray();
-            for(DjActuarialProductConfig product:productConfigList){
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put("shopCount", 1);
-                //查询是否按面积计算价格
-                if ("1".equals(product.getIsCalculatedArea())) {
-                    jsonObject.put("shopCount", house.getSquare());//按房子面积计算
+            example = new Example(DjActuarialProductConfig.class);
+            example.createCriteria().andEqualTo(DjActuarialProductConfig.WORKER_TYPE_ID, 2)
+                    .andEqualTo(DjActuarialProductConfig.ACTUARIAL_TEMPLATE_ID,djActuarialTemplateConfig.getId())
+                    .andEqualTo(DjActuarialProductConfig.DEFAULT_RECOMMEND, "1");//查询默认推荐的精算商品
+            List<DjActuarialProductConfig> productConfigList=iMasterActuarialProductConfigMapper.selectByExample(example);
+            if(productConfigList!=null&&productConfigList.size()>0){
+                JSONArray listOfGoods = new JSONArray();
+                for(DjActuarialProductConfig product:productConfigList){
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("shopCount", 1);
+                    //查询是否按面积计算价格
+                    if ("1".equals(product.getIsCalculatedArea())) {
+                        jsonObject.put("shopCount", house.getSquare());//按房子面积计算
+                    }
+                    //查询对应的商品信息，按价格取最低价的商品
+                    StorefrontProductDTO storefrontProductDTO=masterProductTemplateService.getStorefrontProductByTemplateId(product.getProductId());
+                    jsonObject.put("productId", storefrontProductDTO.getStorefrontId());
+                    jsonObject.put("workerTypeId", 1);
+                    listOfGoods.add(jsonObject);
                 }
-                //查询对应的商品信息，按价格取最低价的商品
-                StorefrontProductDTO storefrontProductDTO=masterProductTemplateService.getStorefrontProductByTemplateId(product.getProductId());
-                jsonObject.put("productId", storefrontProductDTO.getStorefrontId());
-                jsonObject.put("workerTypeId", 1);
-                listOfGoods.add(jsonObject);
+                return listOfGoods.toJSONString();
             }
-            return listOfGoods.toJSONString();
+        }catch (Exception e){
+            logger.error("查询精算商品失败：",e);
         }
+
         return "";
     }
 }

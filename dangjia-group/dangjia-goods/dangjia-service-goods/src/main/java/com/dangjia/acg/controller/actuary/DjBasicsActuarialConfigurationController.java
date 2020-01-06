@@ -30,8 +30,8 @@ public class DjBasicsActuarialConfigurationController implements DjBasicsActuari
 
     @Override
     @ApiMethod
-    public ServerResponse queryActuarialTemplateConfig(HttpServletRequest request,String cityId) {
-        return djBasicsActuarialConfigurationServices.queryActuarialTemplateConfig(cityId);
+    public ServerResponse queryActuarialTemplateConfig(HttpServletRequest request,String cityId,String serviceTypeId) {
+        return djBasicsActuarialConfigurationServices.queryActuarialTemplateConfig(cityId,serviceTypeId);
     }
 
     @Override
@@ -102,10 +102,10 @@ public class DjBasicsActuarialConfigurationController implements DjBasicsActuari
     @Override
     @ApiMethod
     public ServerResponse editSimulateionTemplateConfig(HttpServletRequest request,String configDetailArr,
-                                                 String configId, String configName,String configType,String cityId){
+                                                 String configId, String configName,String configType,String cityId,String serviceTypeId){
         try{
             String userId = request.getParameter(Constants.USERID);
-            return djBasicsActuarialConfigurationServices.editSimulateionTemplateConfig(userId,configId,configName,configType,configDetailArr,cityId);
+            return djBasicsActuarialConfigurationServices.editSimulateionTemplateConfig(userId,configId,configName,configType,configDetailArr,cityId, serviceTypeId);
         }catch (Exception e){
             logger.error("editSimulateionTemplateConfig批量编辑异常：",e);
             return ServerResponse.createByErrorMessage("保存失败！");
@@ -119,8 +119,8 @@ public class DjBasicsActuarialConfigurationController implements DjBasicsActuari
      */
     @Override
     @ApiMethod
-    public ServerResponse querySimulateionTemplateConfig(HttpServletRequest request,String cityId){
-        return djBasicsActuarialConfigurationServices.querySimulateionTemplateConfig(cityId);
+    public ServerResponse querySimulateionTemplateConfig(HttpServletRequest request,String cityId,String serviceTypeId){
+        return djBasicsActuarialConfigurationServices.querySimulateionTemplateConfig(cityId,serviceTypeId);
     }
 
     /**
@@ -169,10 +169,10 @@ public class DjBasicsActuarialConfigurationController implements DjBasicsActuari
      */
     @Override
     @ApiMethod
-    public ServerResponse importSimulateExcelBudgets(HttpServletRequest request,String name,String fileName,String address,String cityId){
+    public ServerResponse importSimulateExcelBudgets(HttpServletRequest request,String name,String fileName,String address,String cityId,String serviceTypeId){
 
         try{
-            return djBasicsActuarialConfigurationServices.importSimulateExcelBudgets(name,fileName,address,request.getParameter(Constants.USERID),cityId);
+            return djBasicsActuarialConfigurationServices.importSimulateExcelBudgets(name,fileName,address,request.getParameter(Constants.USERID),cityId, serviceTypeId);
         } catch (Exception e) {
         logger.error("读取excel失败",e);
         return ServerResponse.createByErrorMessage("保存excel失败");
@@ -186,11 +186,11 @@ public class DjBasicsActuarialConfigurationController implements DjBasicsActuari
      */
     @Override
     @ApiMethod
-    public ServerResponse querySimulateExcelList(HttpServletRequest request,String cityId){
-        return djBasicsActuarialConfigurationServices.querySimulateExcelList(cityId);
+    public ServerResponse querySimulateExcelList(HttpServletRequest request,String cityId,String serviceTypeId){
+        return djBasicsActuarialConfigurationServices.querySimulateExcelList(cityId,serviceTypeId);
     }
 
-    /**
+    /**querySimulateAssemblyList
      * 根据excel表ID删除对应的excel数据
      * @param request
      * @param id
@@ -209,8 +209,8 @@ public class DjBasicsActuarialConfigurationController implements DjBasicsActuari
      */
     @Override
     @ApiMethod
-    public ServerResponse querySimulateAssemblyList(HttpServletRequest request,String cityId){
-        return djBasicsActuarialConfigurationServices.querySimulateAssemblyList(cityId);
+    public ServerResponse querySimulateAssemblyList(HttpServletRequest request,String cityId,String serviceTypeId){
+        return djBasicsActuarialConfigurationServices.querySimulateAssemblyList(cityId,serviceTypeId);
     }
 
     /**
@@ -221,9 +221,9 @@ public class DjBasicsActuarialConfigurationController implements DjBasicsActuari
      */
     @Override
     @ApiMethod
-    public ServerResponse saveSimulateAssemblyInfo(HttpServletRequest request,String  assemblyInfoAttr,String cityId){
+    public ServerResponse saveSimulateAssemblyInfo(HttpServletRequest request,String  assemblyInfoAttr,String cityId,String serviceTypeId){
         try{
-            return djBasicsActuarialConfigurationServices.saveSimulateAssemblyInfo(assemblyInfoAttr,request.getParameter(Constants.USERID),cityId);
+            return djBasicsActuarialConfigurationServices.saveSimulateAssemblyInfo(assemblyInfoAttr,request.getParameter(Constants.USERID),cityId,serviceTypeId);
         }catch (Exception e){
             logger.error("保存组合精算信息失败",e);
             return ServerResponse.createByErrorMessage("保存组合精算信息失败");
@@ -238,8 +238,8 @@ public class DjBasicsActuarialConfigurationController implements DjBasicsActuari
      */
     @Override
     @ApiMethod
-    public ServerResponse querySimulateAssemblyRelateionList(HttpServletRequest request,String cityId){
-        return djBasicsActuarialConfigurationServices.querySimulateAssemblyRelateionList(cityId);
+    public ServerResponse querySimulateAssemblyRelateionList(HttpServletRequest request,String cityId,String serviceTypeId){
+        return djBasicsActuarialConfigurationServices.querySimulateAssemblyRelateionList(cityId,serviceTypeId);
     }
 
 

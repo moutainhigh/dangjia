@@ -74,7 +74,8 @@ public interface ServiceTypeAPI {
                                @RequestParam("name") String name,
                                @RequestParam("coverImage") String coverImage,
                                @RequestParam("image") String image,
-                                @RequestParam("cityId") String cityId);
+                               @RequestParam("cityId") String cityId,
+                               @RequestParam("user_id") String user_id);
 
     /**
      * 删除服务类型

@@ -200,9 +200,9 @@ public class ActuaryService {
      * @param cityId
      * @return
      */
-    public ServerResponse searchActuarialProductList(String cityId) {
+    public ServerResponse searchActuarialProductList(String cityId,House house) {
         try {
-            List<HouseOrderDetailDTO> actuarialProductAppDTOList = houseMapper.selectDesignProductList(cityId,"1");
+            List<HouseOrderDetailDTO> actuarialProductAppDTOList = houseMapper.selectDesignProductList(cityId,"1",house.getHouseType());
             getProductList(actuarialProductAppDTOList);
             return ServerResponse.createBySuccess("查询成功", actuarialProductAppDTOList);
         } catch (Exception e) {
@@ -279,7 +279,7 @@ public class ActuaryService {
             //审核不通过，判断是当家平台的设计师，还是其它平台的设计师
             if(house.getDesignerOk()==0){//不是当家平台的设计师
                 //返回可推荐的设计商品列表
-                return searchActuarialProductList(cityId);
+                return searchActuarialProductList(cityId, house);
             }else if(house.getDesignerOk()==3){//当家平台设计已完成，打回重新修改,
                 house.setDesignerOk(7);//打回图纸，当家平台设计师图纸状态为7
                 house.setModifyDate(new Date());

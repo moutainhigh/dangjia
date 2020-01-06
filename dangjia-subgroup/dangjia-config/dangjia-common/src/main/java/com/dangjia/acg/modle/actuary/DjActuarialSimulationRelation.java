@@ -34,9 +34,14 @@ public class DjActuarialSimulationRelation extends GoodsBaseEntity {
     private String simulationCodeGroup;
 
     @Column(name = "simulation_name_group")
-    @Desc(value = "花费模板编码组合")
-    @ApiModelProperty("花费模板编码组合")
+    @Desc(value = "花费模板名称组合")
+    @ApiModelProperty("花费模板名称组合")
     private String simulationNameGroup;
+
+    @Column(name = "service_type_id")
+    @Desc(value = "服务类型ID")
+    @ApiModelProperty("服务类型ID")
+    private String serviceTypeId;
 
 
     @Column(name = "create_by")
