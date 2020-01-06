@@ -103,15 +103,15 @@ public class DjSkillCertificationService {
      * @param workerId
      * @return
      */
-    public ServerResponse insertSkillCertification(String jsonStr, String workerId, String cityId) {
+    public ServerResponse insertSkillCertification(String jsonStr, String skillCertificationId, String cityId) {
         try {
-            Member member = iMemberMapper.selectByPrimaryKey(workerId);
+            Member member = iMemberMapper.selectByPrimaryKey(skillCertificationId);
             if(member.getRealNameState()==3){
                 JSONArray jsonArray = JSONArray.parseArray(jsonStr);
                 jsonArray.forEach(str ->{
                     JSONObject obj = (JSONObject) str;
                     DjSkillCertification djSkillCertification=new DjSkillCertification();
-                    djSkillCertification.setSkillCertificationId(workerId);
+                    djSkillCertification.setSkillCertificationId(skillCertificationId);
                     djSkillCertification.setType(1);
                     djSkillCertification.setProductType(obj.getInteger("type"));
                     djSkillCertification.setProdTemplateId(obj.getString("id"));
