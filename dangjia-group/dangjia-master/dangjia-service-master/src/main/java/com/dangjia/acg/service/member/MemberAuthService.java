@@ -2,6 +2,8 @@ package com.dangjia.acg.service.member;
 
 
 import com.alibaba.fastjson.JSONObject;
+import com.dangjia.acg.api.RedisClient;
+import com.dangjia.acg.common.constants.Constants;
 import com.dangjia.acg.common.exception.ServerCode;
 import com.dangjia.acg.common.net.MininProgramUtil;
 import com.dangjia.acg.common.response.ServerResponse;
@@ -15,6 +17,7 @@ import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
@@ -35,6 +38,8 @@ public class MemberAuthService {
     private MemberService memberService;
     @Autowired
     private CraftsmanConstructionService constructionService;
+    @Autowired
+    private RedisClient redisClient;
 
     /**
      * 当家用户第三方认证登录
@@ -117,6 +122,7 @@ public class MemberAuthService {
      * @param memberAuth     当家用户第三方认证表
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse newUserBinding(HttpServletRequest request, String phone, String password,
                                          int smscode, String invitationCode,
                                          MemberAuth memberAuth, String longitude, String latitude) {
@@ -139,6 +145,7 @@ public class MemberAuthService {
      * @param memberAuth 当家用户第三方认证表
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse bindingThirdParties(String userToken, MemberAuth memberAuth) {
         if (memberAuth.getUserRole() == null || memberAuth.getUserRole() == 0
                 || memberAuth.getOpenType() == null || memberAuth.getOpenType() == 0
@@ -291,8 +298,80 @@ public class MemberAuthService {
         }
     }
 
-    public ServerResponse miniProgramLoginRegister(String encrypted, String iv, String code) {
-        return null;
+    /**
+     * 小程序通过Code注册登录账号
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse miniProgramCodeRegister(HttpServletRequest request, String encrypted, String iv,
+                                                  String code, String openid, String unionid,
+                                                  String name, String iconurl) {
+        Object jscode2session = jscode2session(code);
+        if (jscode2session instanceof ServerResponse) {
+            return (ServerResponse) jscode2session;
+        }
+        JSONObject object = (JSONObject) jscode2session;
+        String sessionKey = object.getString("session_key");
+        String phone = MininProgramUtil.getPhone(encrypted, iv, sessionKey);
+        if (phone == null) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "未找到手机号");
+        } else {
+            return miniProgramRegister(request, phone, openid, unionid, name, iconurl);
+        }
+    }
+
+    /**
+     * 小程序通过手机号注册登录账号
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse miniProgramPhoneRegister(HttpServletRequest request, String phone, String smscode, String openid, String unionid,
+                                                   String name, String iconurl) {
+        Integer registerCode = redisClient.getCache(Constants.SMS_CODE + phone, Integer.class);
+        Integer smscodeInt;
+        try {
+            smscodeInt = Integer.valueOf(smscode);
+        } catch (Exception e) {
+            return ServerResponse.createByErrorMessage("验证码错误");
+        }
+        if (registerCode == null || smscodeInt.equals(registerCode)) {
+            return ServerResponse.createByErrorMessage("验证码错误");
+        } else {
+            return miniProgramRegister(request, phone, openid, unionid, name, iconurl);
+        }
+    }
+
+    private ServerResponse miniProgramRegister(HttpServletRequest request, String phone, String openid, String unionid, String name, String iconurl) {
+        if (CommonUtil.isEmpty(phone) || phone.length() != 11) {
+            return ServerResponse.createByErrorMessage("手机号不正确");
+        }
+        Member member = memberMapper.getByPhone(phone);
+        if (member == null) {
+            ServerResponse response = memberService.register(request, phone, null,
+                    null, 1, null, null);
+            if (!response.isSuccess()) {
+                return response;
+            }
+            member = memberMapper.getByPhone(phone);
+        }
+        Example example = new Example(MemberAuth.class);
+        example.createCriteria()
+                .andEqualTo(MemberAuth.OPEN_TYPE, 1)
+                .andEqualTo(MemberAuth.MEMBER_ID, member.getId())
+                .andEqualTo(MemberAuth.DATA_STATUS, 0);
+        List<MemberAuth> memberAuthList = memberAuthMapper.selectByExample(example);
+        if (memberAuthList != null && memberAuthList.size() > 0) {
+            return ServerResponse.createByErrorMessage("此账号已绑定过,请勿重复绑定");
+        }
+        MemberAuth memberAuth = new MemberAuth();
+        memberAuth.setIconurl(iconurl);
+        memberAuth.setOpenType(1);
+        memberAuth.setOpenid(openid);
+        memberAuth.setAccessToken("");
+        memberAuth.setUnionid(unionid);
+        memberAuth.setName(name);
+        memberAuth.setUserRole(1);
+        memberAuth.setMemberId(member.getId());
+        memberAuthMapper.insertSelective(memberAuth);
+        return memberService.getUser(member, 1);
     }
 
     private Object jscode2session(String code) {

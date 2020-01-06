@@ -413,6 +413,74 @@ public class MemberService {
         return ServerResponse.createBySuccess("验证码获取成功", sms.get(0).getCode());
     }
 
+    public ServerResponse register(HttpServletRequest request, String phone, String password,
+                                   String invitationCode, Integer userRole,
+                                   String longitude, String latitude) {
+        Member user = new Member();
+        user.setMobile(phone);
+        user.setPraiseRate(new BigDecimal(1));//好评率
+        user.setEvaluationScore(new BigDecimal(60));//积分
+        user.setCheckType(5);//未提交资料
+        user.setWorkerPrice(new BigDecimal(0));
+        user.setHaveMoney(new BigDecimal(0));
+        user.setSurplusMoney(new BigDecimal(0));
+        user.setRetentionMoney(new BigDecimal(0));
+        user.setVisitState(0);
+        user.setUserName(user.getMobile());
+        user.setName("");
+        user.setSmscode(0);
+        user.setOthersInvitationCode(invitationCode);
+        user.setInvitationCode(CommonUtil.randomString(6));
+        user.setNickName("当家-" + CommonUtil.randomString(6));
+        user.setInviteNum(0);
+        user.setIsCrowned(0);
+        user.setHead(Utils.getHead());
+        if (!CommonUtil.isEmpty(password))
+            user.setPassword(DigestUtils.md5Hex(password));//验证码正确设置密码
+        user.setCityId(CommonUtil.isEmpty(request.getParameter(Constants.CITY_ID)) ? "402881882ba8753a012ba93101120116" : request.getParameter(Constants.CITY_ID));
+        user.setPolicyId(String.valueOf(userRole));
+        if (!CommonUtil.isEmpty(user.getCityId())) {
+            City city = iCityMapper.selectByPrimaryKey(user.getCityId());
+            user.setCityName(city.getName());
+        }
+
+        if (!CommonUtil.isEmpty(request.getParameter(Member.WORKER_TYPE_ID))) {
+            WorkerType wt = workerTypeMapper.selectByPrimaryKey(request.getParameter(Member.WORKER_TYPE_ID));
+            if (wt != null) {
+                user.setWorkerTypeId(wt.getId());
+                user.setWorkerType(wt.getType());
+            }
+        }
+        memberMapper.insertSelective(user);
+        updateOrInsertInfo(user.getId(), String.valueOf(userRole), user.getPassword());
+        ServerResponse serverResponse = setAccessToken(user, userRole);
+        if (!serverResponse.isSuccess()) {
+            return serverResponse;
+        }
+        MemberCity userCity = new MemberCity();
+        userCity.setMemberId(user.getId());
+        if (!CommonUtil.isEmpty(user.getCityId())) {
+            userCity.setCityId(user.getCityId());
+            userCity.setCityName(user.getName());
+            memberCityMapper.insert(userCity);
+        }
+//            userRole", value = "app应用角色  1为业主角色，2为工匠角色，0为业主和工匠双重身份角色
+        if (userRole == 1) {
+            clueService.sendUser(user.getId(), user.getMobile(), longitude, latitude);
+        }
+        redisClient.deleteCache(Constants.SMS_CODE + phone);
+        if (userRole == 1) {
+            try {
+                //检查是否有注册送优惠券活动，并给新注册的用户发放优惠券
+                redPackPayService.checkUpActivity(request, user.getMobile(), "1");
+                configMessageService.addConfigMessage(request, AppType.ZHUANGXIU, user.getId(), "0", "注册通知", "业主您好！等候多时啦，有任何装修问题，请联系我们，谢谢。", null);
+            } catch (Exception e) {
+                logger.error("注册送优惠券活动异常-zhuce：原因：" + e.getMessage(), e);
+            }
+        }
+        return ServerResponse.createBySuccess("注册成功", serverResponse.getResultObj());
+    }
+
     /**
      * 校验验证码并保存密码
      */
@@ -425,68 +493,7 @@ public class MemberService {
             if (CommonUtil.isEmpty(password) || password.length() < 6) {
                 return ServerResponse.createByErrorMessage("密码不得小于六位数");
             }
-            Member user = new Member();
-            user.setMobile(phone);
-            user.setPraiseRate(new BigDecimal(1));//好评率
-            user.setEvaluationScore(new BigDecimal(60));//积分
-            user.setCheckType(5);//未提交资料
-            user.setWorkerPrice(new BigDecimal(0));
-            user.setHaveMoney(new BigDecimal(0));
-            user.setSurplusMoney(new BigDecimal(0));
-            user.setRetentionMoney(new BigDecimal(0));
-            user.setVisitState(0);
-            user.setUserName(user.getMobile());
-            user.setName("");
-            user.setSmscode(0);
-            user.setOthersInvitationCode(invitationCode);
-            user.setInvitationCode(CommonUtil.randomString(6));
-            user.setNickName("当家-" + CommonUtil.randomString(6));
-            user.setInviteNum(0);
-            user.setIsCrowned(0);
-            user.setHead(Utils.getHead());
-            user.setPassword(DigestUtils.md5Hex(password));//验证码正确设置密码
-            user.setCityId(CommonUtil.isEmpty(request.getParameter(Constants.CITY_ID)) ? "402881882ba8753a012ba93101120116" : request.getParameter(Constants.CITY_ID));
-            user.setPolicyId(String.valueOf(userRole));
-            if (!CommonUtil.isEmpty(user.getCityId())) {
-                City city = iCityMapper.selectByPrimaryKey(user.getCityId());
-                user.setCityName(city.getName());
-            }
-
-            if (!CommonUtil.isEmpty(request.getParameter(Member.WORKER_TYPE_ID))) {
-                WorkerType wt = workerTypeMapper.selectByPrimaryKey(request.getParameter(Member.WORKER_TYPE_ID));
-                if (wt != null) {
-                    user.setWorkerTypeId(wt.getId());
-                    user.setWorkerType(wt.getType());
-                }
-            }
-            memberMapper.insertSelective(user);
-            updateOrInsertInfo(user.getId(), String.valueOf(userRole), user.getPassword());
-            ServerResponse serverResponse = setAccessToken(user, userRole);
-            if (!serverResponse.isSuccess()) {
-                return serverResponse;
-            }
-            MemberCity userCity = new MemberCity();
-            userCity.setMemberId(user.getId());
-            if (!CommonUtil.isEmpty(user.getCityId())) {
-                userCity.setCityId(user.getCityId());
-                userCity.setCityName(user.getName());
-                memberCityMapper.insert(userCity);
-            }
-//            userRole", value = "app应用角色  1为业主角色，2为工匠角色，0为业主和工匠双重身份角色
-            if (userRole == 1) {
-                clueService.sendUser(user.getId(), user.getMobile(), longitude, latitude);
-            }
-            redisClient.deleteCache(Constants.SMS_CODE + phone);
-            if (userRole == 1) {
-                try {
-                    //检查是否有注册送优惠券活动，并给新注册的用户发放优惠券
-                    redPackPayService.checkUpActivity(request, user.getMobile(), "1");
-                    configMessageService.addConfigMessage(request, AppType.ZHUANGXIU, user.getId(), "0", "注册通知", "业主您好！等候多时啦，有任何装修问题，请联系我们，谢谢。", null);
-                } catch (Exception e) {
-                    logger.error("注册送优惠券活动异常-zhuce：原因：" + e.getMessage(), e);
-                }
-            }
-            return ServerResponse.createBySuccess("注册成功", serverResponse.getResultObj());
+            return register(request, phone, password, invitationCode, userRole, longitude, latitude);
         }
     }
 
@@ -1217,7 +1224,7 @@ public class MemberService {
             if (worker == null) {
                 return ServerResponse.createbyUserTokenError();
             }
-            WorkerComprehensiveDTO workerComprehensive =workIntegralMapper.getComprehensiveWorker(worker.getId());
+            WorkerComprehensiveDTO workerComprehensive = workIntegralMapper.getComprehensiveWorker(worker.getId());
             HomePageBean homePageBean = new HomePageBean();
             homePageBean.setWorkerId(worker.getId());
             homePageBean.setIoflow(CommonUtil.isEmpty(worker.getHead()) ? null : imageAddress + worker.getHead());
@@ -1227,16 +1234,16 @@ public class MemberService {
             homePageBean.setFavorable(worker.getPraiseRate() == null ? "0.00%" : worker.getPraiseRate().multiply(new BigDecimal(100)) + "%");
             StringBuilder stringBuffer = new StringBuilder();
             stringBuffer.append(configRuleUtilService.getMemberRank(worker.getId()));
-            if(worker.getWorkerType()>3){
+            if (worker.getWorkerType() > 3) {
                 stringBuffer.append("工匠");
-            }else{
-                stringBuffer.append( workerTypeMapper.getName(worker.getWorkerType()));
+            } else {
+                stringBuffer.append(workerTypeMapper.getName(worker.getWorkerType()));
             }
 
             homePageBean.setGradeName(stringBuffer.toString());
             Example example1 = new Example(HouseWorkerOrder.class);
             example1.createCriteria().andEqualTo(HouseWorkerOrder.WORKER_ID, worker.getId());
-            Integer orderTakingNum=houseWorkerOrderMapper.selectCountByExample(example1);
+            Integer orderTakingNum = houseWorkerOrderMapper.selectCountByExample(example1);
             homePageBean.setOrderTakingNum(orderTakingNum);
             homePageBean.setList(getMyMenuList(userRole, worker.getWorkerType()));
             return ServerResponse.createBySuccess("获取我的界面成功！", homePageBean);

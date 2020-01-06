@@ -9,6 +9,7 @@ import com.dangjia.acg.modle.worker.Insurance;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.member.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -53,6 +54,7 @@ public class MemberController implements MemberAPI {
 
     @Override
     @ApiMethod
+    @Transactional(rollbackFor = Exception.class)
     public ServerResponse checkRegister(HttpServletRequest request, String phone, String password, Integer smscode, String invitationCode, Integer userRole, String longitude, String latitude) {
         return memberService.checkRegister(request, phone, smscode, password, invitationCode, userRole, longitude, latitude);
     }
