@@ -242,50 +242,60 @@ public class MemberAuthService {
      * @return 登录信息
      */
     public ServerResponse miniProgramLogin(String code) {
-        try {
-            JSONObject object = MininProgramUtil.jscode2session(code);
-            Integer errcode = object.getInteger("errcode");
-            if (errcode != null && errcode != 0) {
-                switch (errcode) {
-                    case -1:
-                        return ServerResponse.createByErrorMessage("系统繁忙,请稍候再试");
-                    case 45011:
-                        return ServerResponse.createByErrorMessage("频率限制，每个用户每分钟100次");
-                    default:
-                        return ServerResponse.createByErrorMessage("code 无效");
-                }
+        Object jscode2session = jscode2session(code);
+        if (jscode2session instanceof ServerResponse) {
+            return (ServerResponse) jscode2session;
+        }
+        JSONObject object = (JSONObject) jscode2session;
+        String openid = object.getString("openid");
+        String sessionKey = object.getString("session_key");
+        String unionid = object.getString("unionid");
+        ServerResponse serverResponse = authLogin(1, unionid, 1);
+        if (serverResponse.isSuccess()) {
+            Map map = BeanUtils.beanToMap(serverResponse.getResultObj());
+            map.put("openid", openid);
+            map.put("sessionKey", sessionKey);
+            map.put("unionid", unionid);
+            map.put("loginType", 0);
+            return ServerResponse.createBySuccess("登录成功，正在跳转", map);
+        } else {
+            if (serverResponse.getResultCode() == ServerCode.NO_DATA.getCode()) {
+                Map map = new HashMap();
+                map.put("openid", openid);
+                map.put("sessionKey", sessionKey);
+                map.put("unionid", unionid);
+                map.put("loginType", 1);
+                return ServerResponse.createBySuccess("登录失败", map);
             } else {
-                String openid = object.getString("openid");
-                String sessionKey = object.getString("session_key");
-                String unionid = object.getString("unionid");
-                ServerResponse serverResponse = authLogin(1, unionid, 1);
-                if (serverResponse.isSuccess()) {
-                    Map map = BeanUtils.beanToMap(serverResponse.getResultObj());
-                    map.put("openid", openid);
-                    map.put("sessionKey", sessionKey);
-                    map.put("unionid", unionid);
-                    map.put("loginType", 0);
-                    return ServerResponse.createBySuccess("登录成功，正在跳转", map);
-                } else {
-                    if (serverResponse.getResultCode() == ServerCode.NO_DATA.getCode()) {
-                        Map map = new HashMap();
-                        map.put("openid", openid);
-                        map.put("sessionKey", sessionKey);
-                        map.put("unionid", unionid);
-                        map.put("loginType", 1);
-                        return ServerResponse.createBySuccess("登录失败", map);
-                    } else {
-                        return serverResponse;
-                    }
-                }
+                return serverResponse;
             }
-        } catch (Exception e) {
-            return ServerResponse.createByErrorMessage("系统繁忙,请稍候再试");
         }
     }
 
+    /**
+     * 小程序获取手机号
+     */
     public ServerResponse decodeWxAppPhone(HttpServletRequest request, String encrypted, String iv, String code) {
         request.setAttribute("isShow", "true");
+        Object jscode2session = jscode2session(code);
+        if (jscode2session instanceof ServerResponse) {
+            return (ServerResponse) jscode2session;
+        }
+        JSONObject object = (JSONObject) jscode2session;
+        String sessionKey = object.getString("session_key");
+        String phone = MininProgramUtil.getPhone(encrypted, iv, sessionKey);
+        if (phone == null) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "未找到手机号");
+        } else {
+            return ServerResponse.createBySuccess("获取成功", phone);
+        }
+    }
+
+    public ServerResponse miniProgramLoginRegister(String encrypted, String iv, String code) {
+        return null;
+    }
+
+    private Object jscode2session(String code) {
         try {
             JSONObject object = MininProgramUtil.jscode2session(code);
             Integer errcode = object.getInteger("errcode");
@@ -299,13 +309,7 @@ public class MemberAuthService {
                         return ServerResponse.createByErrorMessage("code 无效");
                 }
             } else {
-                String sessionKey = object.getString("session_key");
-                String phone = MininProgramUtil.getPhone(encrypted, iv, sessionKey);
-                if (phone == null) {
-                    return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "未找到手机号");
-                } else {
-                    return ServerResponse.createBySuccess("获取成功", phone);
-                }
+                return object;
             }
         } catch (Exception e) {
             return ServerResponse.createByErrorMessage("系统繁忙,请稍候再试");
