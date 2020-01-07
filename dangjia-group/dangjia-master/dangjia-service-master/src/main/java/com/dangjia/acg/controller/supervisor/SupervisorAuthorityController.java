@@ -37,13 +37,13 @@ public class SupervisorAuthorityController implements SupervisorAuthorityAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse addAuthority(HttpServletRequest request, String memberId, String houseId, String userId) {
-        return supervisorWebService.addAuthority(memberId, houseId, userId);
+    public ServerResponse addAuthority(HttpServletRequest request, String memberId, String houseIds, String userId) {
+        return supervisorWebService.addAuthority(memberId, houseIds, userId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse deleteAuthority(HttpServletRequest request, String memberId, String houseId) {
-        return supervisorWebService.deleteAuthority(memberId, houseId);
+    public ServerResponse deleteAuthority(HttpServletRequest request, String memberId, String houseIds) {
+        return supervisorWebService.deleteAuthority(memberId, houseIds);
     }
 }
