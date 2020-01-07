@@ -232,7 +232,7 @@
                     '号'
                 )
             ) address,
-            IFNULL(ma.input_area, H.square) inputArea
+            IFNULL(ma.input_area, h.square) inputArea
         FROM
             dj_house h
         INNER JOIN dj_member m ON h.member_id = m.id
