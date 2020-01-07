@@ -532,26 +532,26 @@ public class DjDeliverOrderService {
      * @param houseId
      * @return
      */
-    public ServerResponse getDesignImag(String houseId) {
+    public ServerResponse getDesignImag(String houseId, Integer type) {
         //0:量房，，
-        List<Object> list = new ArrayList<>();
-        WorkChartListDTO workChartListDTO;
-
-        QuantityRoom quantityRoom = iBillQuantityRoomMapper.getBillQuantityRoom(houseId, 0);
-        List<QuantityRoomImages> quantityRoomImages = getQuantityRoom(quantityRoom);
-        if (quantityRoomImages != null && !quantityRoomImages.isEmpty()) {
-            workChartListDTO = new WorkChartListDTO();
-            workChartListDTO.setDate(quantityRoomImages.get(0).getCreateDate());
-            workChartListDTO.setName("量房");
-            workChartListDTO.setList(quantityRoomImages);
-            workChartListDTO.setType(0);
-            list.add(workChartListDTO);
+        List<WorkChartListDTO> list = new ArrayList<>();
+        if (type == null || type == 0) {
+            QuantityRoom quantityRoom = iBillQuantityRoomMapper.getBillQuantityRoom(houseId, 0);
+            List<QuantityRoomImages> quantityRoomImages = getQuantityRoom(quantityRoom);
+            if (quantityRoomImages != null && !quantityRoomImages.isEmpty()) {
+                WorkChartListDTO workChartListDTO = new WorkChartListDTO();
+                workChartListDTO.setDate(quantityRoomImages.get(0).getCreateDate());
+                workChartListDTO.setName("量房");
+                workChartListDTO.setList(quantityRoomImages);
+                workChartListDTO.setType(0);
+                list.add(workChartListDTO);
+            }
         }
         //1平面图
         QuantityRoom quantityRoom1 = iBillQuantityRoomMapper.getBillQuantityRoom(houseId, 1);
         List<QuantityRoomImages> quantityRoomImages1 = getQuantityRoom(quantityRoom1);
         if (quantityRoomImages1 != null && !quantityRoomImages1.isEmpty()) {
-            workChartListDTO = new WorkChartListDTO();
+            WorkChartListDTO workChartListDTO = new WorkChartListDTO();
             workChartListDTO.setDate(quantityRoomImages1.get(0).getCreateDate());
             workChartListDTO.setName("平面图");
             workChartListDTO.setList(quantityRoomImages1);
@@ -561,13 +561,15 @@ public class DjDeliverOrderService {
         QuantityRoom quantityRoom2 = iBillQuantityRoomMapper.getBillQuantityRoom(houseId, 2);
         List<QuantityRoomImages> quantityRoomImages2 = getQuantityRoom(quantityRoom2);
         if (quantityRoomImages2 != null && !quantityRoomImages2.isEmpty()) {
-            workChartListDTO = new WorkChartListDTO();
+            WorkChartListDTO workChartListDTO = new WorkChartListDTO();
             workChartListDTO.setDate(quantityRoomImages2.get(0).getCreateDate());
             workChartListDTO.setName("施工图");
             workChartListDTO.setList(quantityRoomImages2);
             list.add(workChartListDTO);
         }
-
+        if (list.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
         return ServerResponse.createBySuccess("查询成功", list);
     }
 
@@ -1258,7 +1260,7 @@ public class DjDeliverOrderService {
                         // 已完成
                         djSplitDeliverOrderDTO.setShippingType("11");
                         djSplitDeliverOrderDTO.setShippingState("1004");
-                    }else if(djSplitDeliverOrderDTO.getShippingState().equals("10")){
+                    } else if (djSplitDeliverOrderDTO.getShippingState().equals("10")) {
                         //待评价
                         djSplitDeliverOrderDTO.setShippingType("13");
                         djSplitDeliverOrderDTO.setShippingState("10");
@@ -1307,8 +1309,8 @@ public class DjDeliverOrderService {
      * @return
      */
     public ServerResponse queryAppHairOrderList(PageDTO pageDTO,
-                                            String houseId,
-                                            String cityId) {
+                                                String houseId,
+                                                String cityId) {
         try {
 
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());//初始化分页插获取用户信息件
@@ -1329,11 +1331,11 @@ public class DjDeliverOrderService {
                         String str = address + result.get(i);
                         strList.add(str);
                     }
-                    if(strList.size() > 2){
-                        String join = String.join(",", strList.subList(0,2));
+                    if (strList.size() > 2) {
+                        String join = String.join(",", strList.subList(0, 2));
                         djSplitDeliverOrderDTO.setProductImageArr(join);
-                    }else{
-                        String join = String.join(",", strList.subList(0,1));
+                    } else {
+                        String join = String.join(",", strList.subList(0, 1));
                         djSplitDeliverOrderDTO.setProductImageArr(join);
                     }
                     djSplitDeliverOrderDTO.setProductCount(list.size());//要货数大小
@@ -1359,9 +1361,6 @@ public class DjDeliverOrderService {
             return ServerResponse.createByErrorMessage("查询异常" + e);
         }
     }
-
-
-
 
 
     /**
@@ -1532,7 +1531,7 @@ public class DjDeliverOrderService {
 
             SplitDeliver splitDeliver;
             splitDeliver = billDjDeliverSplitDeliverMapper.selectByPrimaryKey(id);
-            if(DateUtil.daysofTwo(new Date(),splitDeliver.getRecTime()) > 7){
+            if (DateUtil.daysofTwo(new Date(), splitDeliver.getRecTime()) > 7) {
                 return ServerResponse.createByErrorMessage("发货已超过7天不能拒绝收货");
             }
 
@@ -1755,6 +1754,7 @@ public class DjDeliverOrderService {
 
     /**
      * App订单详情（待发货）
+     *
      * @param id
      * @return
      */
