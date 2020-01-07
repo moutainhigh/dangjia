@@ -1,5 +1,6 @@
 package com.dangjia.acg.common.pay;
 
+import com.dangjia.acg.common.http.HttpUtil;
 import com.dangjia.acg.common.response.ServerResponse;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.jdom.Document;
@@ -64,7 +65,7 @@ public class WeiXinPayUtil {
             //打包要发送的xml
             String respXml = WeiXinPayUtil.getRequestXML(m);
             //发起服务器请求
-            String result = WeiXinPayUtil.httpRequest(WeiXinPayUtil.url, "POST", respXml);
+            String result = HttpUtil.httpRequest(WeiXinPayUtil.url, "POST", respXml);
             Map<?, ?> map = WeiXinPayUtil.doXMLParse(result);
             //返回状态码
             String return_code = (String) map.get("return_code");
@@ -120,7 +121,7 @@ public class WeiXinPayUtil {
             //打包要发送的xml
             String respXml = WeiXinPayUtil.getRequestXML(m);
             //发起服务器请求
-            String result = WeiXinPayUtil.httpRequest(WeiXinPayUtil.url, "POST", respXml);
+            String result = HttpUtil.httpRequest(WeiXinPayUtil.url, "POST", respXml);
             Map<?, ?> map = WeiXinPayUtil.doXMLParse(result);
             //返回状态码
             String codeUrl = (String) map.get("code_url");
@@ -130,9 +131,11 @@ public class WeiXinPayUtil {
             return ServerResponse.createByErrorMessage("微信app支付下单出错");
         }
     }
+
     public static void main(String[] args) {
-        System.out.println("============="+getWeiXinSignURL("0.01", "555565413857", "http://192.168.1.95/",null));
+        System.out.println("=============" + getWeiXinSignURL("0.01", "555565413857", "http://192.168.1.95/", null));
     }
+
     /**
      * 拼接XML请求路径，获取签名
      *
@@ -247,43 +250,6 @@ public class WeiXinPayUtil {
         return prestr.toString();
     }
 
-    /**
-     * 通过微信地址请求获取返回值
-     *
-     * @param requestUrl    请求地址
-     * @param requestMethod 请求方法
-     * @param outputStr     参数
-     */
-    private static String httpRequest(String requestUrl, String requestMethod, String outputStr) {
-        // 创建SSLContext
-        StringBuffer buffer = null;
-        try {
-            URL url = new URL(requestUrl);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod(requestMethod);
-            conn.setDoOutput(true);
-            conn.setDoInput(true);
-            conn.connect();
-            //往服务器端写内容
-            if (null != outputStr) {
-                OutputStream os = conn.getOutputStream();
-                os.write(outputStr.getBytes("utf-8"));
-                os.close();
-            }
-            // 读取服务器端返回的内容
-            InputStream is = conn.getInputStream();
-            InputStreamReader isr = new InputStreamReader(is, "utf-8");
-            BufferedReader br = new BufferedReader(isr);
-            buffer = new StringBuffer();
-            String line = null;
-            while ((line = br.readLine()) != null) {
-                buffer.append(line);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return buffer.toString();
-    }
 
     /**
      * 解析xml,返回第一级元素键值对。如果第一级元素有子节点，则此节点的值是子节点的xml数据。

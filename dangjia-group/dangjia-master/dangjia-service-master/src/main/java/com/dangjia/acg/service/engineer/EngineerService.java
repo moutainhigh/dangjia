@@ -139,6 +139,9 @@ public class EngineerService {
             hw.setWorkerType(houseWorker.getWorkerType());
             hw.setWorkType(4);//4已支付被平台换
             hw.setIsSelect(0);
+            hw.setPrice(houseWorker.getPrice());
+            hw.setType(houseWorker.getType());
+            hw.setBusinessId(houseWorker.getBusinessId());
             houseWorkerMapper.insert(hw);
 
             HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(houseWorker.getHouseId(), houseWorker.getWorkerTypeId());
@@ -245,6 +248,9 @@ public class EngineerService {
                 houseWorker.setWorkerType(houseFlow.getWorkerType());
                 houseWorker.setWorkType(1);//已抢单
                 houseWorker.setIsSelect(1);
+                houseWorker.setPrice(houseFlow.getWorkPrice());
+                houseWorker.setType(0);
+                houseWorker.setBusinessId(houseFlow.getId());
                 houseWorkerMapper.insert(houseWorker);
             }
             houseFlowMapper.updateByPrimaryKeySelective(houseFlow);

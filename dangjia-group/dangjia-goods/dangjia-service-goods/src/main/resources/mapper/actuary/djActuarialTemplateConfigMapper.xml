@@ -52,6 +52,9 @@
             dj_actuarial_template_config ac
         where ac.config_type in(1,2)
         and city_id=#{cityId}
+        <if test="serviceTypeId!=null and serviceTypeId!=''">
+            and ac.service_type_id=#{serviceTypeId}
+        </if>
         <if test="id!=null and id!=''">
             and ac.id=#{id}
         </if>
@@ -128,6 +131,10 @@
         dj_actuarial_template_config ac
         where ac.config_type in(1,2)
         and ac.city_id=#{cityId}
+        and service_type_id = #{serviceTypeId}
+        <if test = "configType!=null and configType!=''">
+            ac.config_type =#{configType}
+        </if>
         order by configType
     </select>
 

@@ -240,6 +240,11 @@ public class DjBasicsProductTemplate extends GoodsBaseEntity {
     @ApiModelProperty(" 是否需要管家勘查（1是，0否）")
     private Integer stewardExploration;
 
+
+    @Column(name = "maintenance_investigation")
+    @Desc(value = " 是否为维保勘查商品（1是，0否）")
+    @ApiModelProperty(" 是否为维保勘查商品（1是，0否）")
+    private Integer maintenanceInvestigation;
     @Transient
     private String storefrontName;
 

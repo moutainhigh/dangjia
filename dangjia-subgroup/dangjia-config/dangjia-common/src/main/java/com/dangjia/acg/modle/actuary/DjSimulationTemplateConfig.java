@@ -38,6 +38,11 @@ public class DjSimulationTemplateConfig extends GoodsBaseEntity {
     @ApiModelProperty("模板序号")
     private Integer configTypeIndex;
 
+    @Column(name = "service_type_id")
+    @Desc(value = "服务类型ID")
+    @ApiModelProperty("服务类型ID")
+    private String serviceTypeId;
+
     @Column(name = "create_by")
     @Desc(value = "创建人")
     @ApiModelProperty("创建人")

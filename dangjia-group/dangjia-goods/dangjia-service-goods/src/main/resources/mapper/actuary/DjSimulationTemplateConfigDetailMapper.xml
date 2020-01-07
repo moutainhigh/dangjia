@@ -24,7 +24,7 @@
 
     <!--将临时数据改为正式数据 -->
     <update id="updateTemplateDetailConfig">
-       update dj_simulation_template_config_detail set config_status = 1 where config_status=0 and city_id=#{cityId}
+       update dj_simulation_template_config_detail set config_status = 1 where config_status=0 and city_id=#{cityId} and service_type_id = #{serviceTypeId}
     </update>
 
     <insert id="batchInsertTempateDetail">
@@ -41,7 +41,8 @@
             modify_date,
             create_by,
             update_by,
-            city_id
+            city_id,
+            service_type_id
         ) SELECT
             CONCAT(
                 DATE_FORMAT(now(), '%Y%m%d%k%i%s'),
@@ -59,12 +60,14 @@
             modify_date,
             create_by,
             update_by,
-            city_id
+            city_id,
+            service_type_id
         FROM
             dj_simulation_template_config_detail
         WHERE
             config_status = 1
         and city_id=#{cityId}
+        and service_type_id = #{serviceTypeId}
     </insert>
 
     <!--我要装修：根据标题 ID查询标题 详情列表信息-->

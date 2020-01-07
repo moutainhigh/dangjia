@@ -245,6 +245,7 @@ public class DjBasicsProductTemplateService {
                  BasicsProductTemplateRatio bptr=new BasicsProductTemplateRatio();
                  bptr.setProductRatio(ptr.getProductRatio());
                  bptr.setProductTemplateId(productTemplateId);
+                 bptr.setProductResponsibleType(ptr.getProductResponsibleType());
                  bptr.setProductResponsibleId(ptr.getProductResponsibleId());
                 iProductTemplateRatioMapper.insert(bptr);//添加对应的责任占比信息
             }
@@ -364,7 +365,17 @@ public class DjBasicsProductTemplateService {
         product.setGuaranteedPolicy(basicsProductDTO.getGuaranteedPolicy());
         product.setRefundPolicy(basicsProductDTO.getRefundPolicy());
         product.setIsRelateionProduct(basicsProductDTO.getIsRelateionProduct());
-        product.setStewardExploration(basicsProductDTO.getStewardExploration());//是否需要管家勘查
+        if(basicsProductDTO.getStewardExploration()!=null){
+            product.setStewardExploration(basicsProductDTO.getStewardExploration());//是否需要管家勘查
+        }
+        if(basicsProductDTO.getMaintenanceInvestigation()!=null){
+            if(basicsProductDTO.getMaintenanceInvestigation()==1){
+                //修改其它维保勘查商品为否0
+                iBasicsProductTemplateMapper.updateProductByMaintenaceInvestigation();
+            }
+            product.setMaintenanceInvestigation(basicsProductDTO.getMaintenanceInvestigation());//是否为维保勘查商品
+        }
+
         product.setCityId(cityId);
         if (productId == null || "".equals(productId)) {//没有id则新增
             product.setCreateDate(new Date());
@@ -374,7 +385,7 @@ public class DjBasicsProductTemplateService {
         } else {//修改
             product.setId(productId);
             product.setModifyDate(new Date());
-            int  index=iBasicsProductTemplateMapper.updateByPrimaryKeySelective(product);
+            int  index=iBasicsProductTemplateMapper.updateByPrimaryKey(product);
 
             if (index < 0) {
                 return "更新商品失败";
@@ -923,9 +934,9 @@ public class DjBasicsProductTemplateService {
         map.put("detailImageUrl",StringTool.getImage(djBasicsProduct.getDetailImage(),address));
         map.put("id",djBasicsProduct.getId());
 
-        Example example=new Example(BasicsProductTemplateRatio.class);
-        example.createCriteria().andEqualTo(BasicsProductTemplateRatio.PRODUCT_TEMPLATE_ID,djBasicsProduct.getId());
-        List<BasicsProductTemplateRatio> productTemplateRatioList=iProductTemplateRatioMapper.selectByExample(example);
+       // Example example=new Example(BasicsProductTemplateRatio.class);
+       // example.createCriteria().andEqualTo(BasicsProductTemplateRatio.PRODUCT_TEMPLATE_ID,djBasicsProduct.getId());
+        List<BasicsProductTemplateRatioDTO> productTemplateRatioList=iProductTemplateRatioMapper.selectProductTemplateRatioList(djBasicsProduct.getId());
         map.put("productTemplateRatioList",productTemplateRatioList);//维保商品对应的责任占比列表
         //只有增值类关联商品才会有此数据
         if(StringUtils.isNotBlank(djBasicsProduct.getIsRelateionProduct())&&"1".equals(djBasicsProduct.getIsRelateionProduct())){

@@ -19,7 +19,7 @@ public class TaskStackService {
     private IMasterTaskStackMapper iMasterTaskStackMapper;
 
     /**
-     * 添加任务人息
+     * 添加任务信息
      * @param houseId 房子ID
      * @param memeberId 用户ID
      * @param name 任务名称
@@ -64,6 +64,21 @@ public class TaskStackService {
         Example example=new Example(TaskStack.class);
         example.createCriteria().andEqualTo(TaskStack.HOUSE_ID,houseId)
                 .andEqualTo(TaskStack.TYPE,type)
+                .andEqualTo(TaskStack.DATA,data)
+                .andEqualTo(TaskStack.STATE,0);
+        TaskStack taskStack=iMasterTaskStackMapper.selectOneByExample(example);
+        return taskStack;
+    }
+
+    /**
+     * 查询符合条件的数据
+     * @param houseId
+     * @param data
+     * @return
+     */
+    public TaskStack selectTaskStackByHouseIdData(String houseId,String data){
+        Example example=new Example(TaskStack.class);
+        example.createCriteria().andEqualTo(TaskStack.HOUSE_ID,houseId)
                 .andEqualTo(TaskStack.DATA,data)
                 .andEqualTo(TaskStack.STATE,0);
         TaskStack taskStack=iMasterTaskStackMapper.selectOneByExample(example);

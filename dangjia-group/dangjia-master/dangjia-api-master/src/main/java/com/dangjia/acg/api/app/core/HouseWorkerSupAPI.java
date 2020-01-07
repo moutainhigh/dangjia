@@ -1,11 +1,14 @@
 package com.dangjia.acg.api.app.core;
 
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * author: Ronalcheng
@@ -15,6 +18,30 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient("dangjia-service-master")
 @Api(value = "施工业务补充", description = "施工业务补充")
 public interface HouseWorkerSupAPI {
+
+
+    /**
+     * 大管家-首页
+     * @param request
+     * @param pageDTO
+     * @param userToken 大管家TOKEN
+     * @param nameKey 搜索地址
+     * @param type 订单分类：0:装修单，1:体验单，2，维修单
+     * @param houseType 工地状态：1=超期施工
+     * @param startTime 开工：1:今日开工，2，本周新开工
+     * @param isPlanWeek 周计划：1=未做周计划 暂无其他
+     * @param isPatrol 巡查：1=巡查未完成  暂无其他
+     * @return
+     */
+    ServerResponse getHouseOrderList(@RequestParam("request")HttpServletRequest request,
+                                     @RequestParam("pageDTO")PageDTO pageDTO,
+                                     @RequestParam("userToken")String userToken,
+                                     @RequestParam("nameKey")String nameKey,
+                                     @RequestParam("type")Integer type,
+                                     @RequestParam("houseType")Integer houseType,
+                                     @RequestParam("startTime")Integer startTime,
+                                     @RequestParam("isPlanWeek")Integer isPlanWeek,
+                                     @RequestParam("isPatrol")Integer isPatrol);
 
     @PostMapping("app/core/houseWorkerSup/surplusList")
     @ApiOperation(value = "材料列表", notes = "材料列表")

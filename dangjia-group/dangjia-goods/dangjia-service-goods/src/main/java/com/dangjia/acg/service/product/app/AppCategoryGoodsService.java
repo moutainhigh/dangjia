@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -171,7 +172,7 @@ public class AppCategoryGoodsService {
             }
             List<ActuarialProductAppDTO> pList = iBasicsProductTemplateMapper.serchCategoryProduct(categoryId,goodsId,names,brandVals,attributeVals,orderKey);
             pageResult = new PageInfo<>(pList);
-            searchActuarialConfigServices.getProductList(pList,address);
+            searchActuarialConfigServices.getProductList(pList,address,new BigDecimal(0));
             pageResult.setList(pList);
         } catch (Exception e) {
             e.printStackTrace();

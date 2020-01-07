@@ -112,4 +112,5 @@ public class BasicsProductDTO extends GoodsBaseEntity {
 
     private Integer stewardExploration;//是否需要管家勘查（1是，0否）
 
+    private Integer maintenanceInvestigation;//是否为维保勘查商品（1是，0否）
 }

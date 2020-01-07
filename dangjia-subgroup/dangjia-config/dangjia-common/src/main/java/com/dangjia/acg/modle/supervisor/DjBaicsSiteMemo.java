@@ -28,6 +28,12 @@ public class DjBaicsSiteMemo extends BaseEntity {
     @ApiModelProperty("房子id")
     private String houseId;
 
+
+    @Column(name = "type")
+    @Desc(value = "0=普通  1=周计划")
+    @ApiModelProperty("0=普通  1=周计划")
+    private Integer type;
+
     @Column(name = "member_id")
     @Desc(value = "备忘录创建人")
     @ApiModelProperty("备忘录创建人")

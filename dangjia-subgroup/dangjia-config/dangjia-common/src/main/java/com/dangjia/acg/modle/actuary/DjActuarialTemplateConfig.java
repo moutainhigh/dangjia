@@ -44,6 +44,10 @@ public class DjActuarialTemplateConfig extends GoodsBaseEntity {
     private String excelFileName;
 
 
+    @Column(name = "service_type_id")
+    @Desc(value = "服务类型ID")
+    @ApiModelProperty("服务类型ID")
+    private String serviceTypeId;
 
     @Column(name = "config_detail")
     @Desc(value = "描述")

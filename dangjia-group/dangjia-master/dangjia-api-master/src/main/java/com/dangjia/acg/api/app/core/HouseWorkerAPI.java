@@ -111,6 +111,10 @@ public interface HouseWorkerAPI {
     @ApiOperation(value = "获取申请单明细", notes = "获取申请单明细")
     ServerResponse getHouseFlowApply(@RequestParam("userToken") String userToken, @RequestParam("houseFlowApplyId") String houseFlowApplyId);
 
+
+    @PostMapping("app/core/worker/detection/timeout")
+    @ApiOperation(value = "是否超过期限没有施工，则需要重新培训", notes = "是否超过期限没有施工，则需要重新培训")
+    ServerResponse getHouseDetectionTimeout(@RequestParam("userToken")String userToken);
     /**
      *
      * @param userToken

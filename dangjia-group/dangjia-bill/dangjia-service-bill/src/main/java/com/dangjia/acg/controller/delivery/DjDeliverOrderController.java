@@ -25,35 +25,34 @@ public class DjDeliverOrderController implements DjDeliverOrderAPI {
     private DjDeliverOrderService djDeliverOrderService;
 
 
-
     @Override
     @ApiMethod
-    public ServerResponse queryOrderNumber(HttpServletRequest request,String userToken,String houseId) {
-        return djDeliverOrderService.queryOrderNumber(userToken,houseId);
+    public ServerResponse queryOrderNumber(HttpServletRequest request, String userToken, String houseId) {
+        return djDeliverOrderService.queryOrderNumber(userToken, houseId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse getDesignImag(HttpServletRequest request,String houseId) {
-        return djDeliverOrderService.getDesignImag(houseId);
+    public ServerResponse getDesignImag(HttpServletRequest request, String houseId, Integer type) {
+        return djDeliverOrderService.getDesignImag(houseId, type);
     }
 
 
     @Override
     @ApiMethod
-    public ServerResponse getDesignInfo(HttpServletRequest request,String houseId) {
+    public ServerResponse getDesignInfo(HttpServletRequest request, String houseId) {
         return djDeliverOrderService.getDesignInfo(houseId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse getActuaryInfo(HttpServletRequest request,String houseId) {
+    public ServerResponse getActuaryInfo(HttpServletRequest request, String houseId) {
         return djDeliverOrderService.getActuaryInfo(houseId);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse getCollectInfo(HttpServletRequest request,String houseId) {
+    public ServerResponse getCollectInfo(HttpServletRequest request, String houseId) {
         return djDeliverOrderService.getCollectInfo(houseId);
     }
 
@@ -61,77 +60,78 @@ public class DjDeliverOrderController implements DjDeliverOrderAPI {
     @ApiMethod
     public ServerResponse queryOrderInfo(HttpServletRequest request,
                                          PageDTO pageDTO,
-                                         String userId,String cityId,
-                                         String orderKey,int state) {
-        return djDeliverOrderService.queryOrderInfo(pageDTO,userId,cityId,orderKey,state);
+                                         String userId, String cityId,
+                                         String orderKey, int state) {
+        return djDeliverOrderService.queryOrderInfo(pageDTO, userId, cityId, orderKey, state);
     }
 
     @Override
     @ApiMethod
     public ServerResponse queryOrderFineInfo(HttpServletRequest request,
-                                            PageDTO pageDTO,
+                                             PageDTO pageDTO,
                                              String orderId) {
-        return djDeliverOrderService.queryOrderFineInfo(pageDTO,orderId);
+        return djDeliverOrderService.queryOrderFineInfo(pageDTO, orderId);
     }
+
     @Override
     @ApiMethod
     public ServerResponse queryDeliverOrderListByStatus(PageDTO pageDTO, String userToken, String houseId, String cityId, String orderStatus) {
-        return djDeliverOrderService.queryDeliverOrderListByStatus(pageDTO,userToken,houseId,cityId,orderStatus);
+        return djDeliverOrderService.queryDeliverOrderListByStatus(pageDTO, userToken, houseId, cityId, orderStatus);
     }
 
     @Override
     @ApiMethod
     public ServerResponse queryDeliverOrderDsdListByStatus(PageDTO pageDTO, String userToken, String houseId, String cityId, String orderStatus) {
-        return djDeliverOrderService.queryDeliverOrderDsdListByStatus(pageDTO,userToken,houseId,cityId,orderStatus);
+        return djDeliverOrderService.queryDeliverOrderDsdListByStatus(pageDTO, userToken, houseId, cityId, orderStatus);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse deliverOrderItemDetail(String orderId ,Integer orderStatus) {
-        return djDeliverOrderService.deliverOrderItemDetail(orderId,orderStatus);
+    public ServerResponse deliverOrderItemDetail(String orderId, Integer orderStatus) {
+        return djDeliverOrderService.deliverOrderItemDetail(orderId, orderStatus);
     }
 
     @Override
     @ApiMethod
     public ServerResponse orderSnapshop(String orderId, Integer orderStatus) {
-        return djDeliverOrderService.orderSnapshop(orderId,orderStatus);
+        return djDeliverOrderService.orderSnapshop(orderId, orderStatus);
     }
 
     @Override
     @ApiMethod
     public ServerResponse shippingDetail(String orderId, Integer orderStatus) {
-        return djDeliverOrderService.shippingDetail(orderId,orderStatus);
+        return djDeliverOrderService.shippingDetail(orderId, orderStatus);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse stevedorageCostDetail(PageDTO pageDTO,String orderId, Integer orderStatus) {
-        return djDeliverOrderService.stevedorageCostDetail(pageDTO,orderId,orderStatus);
+    public ServerResponse stevedorageCostDetail(PageDTO pageDTO, String orderId, Integer orderStatus) {
+        return djDeliverOrderService.stevedorageCostDetail(pageDTO, orderId, orderStatus);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse transportationCostDetail(PageDTO pageDTO,String orderId, Integer orderStatus) {
-        return djDeliverOrderService.transportationCostDetail(pageDTO,orderId,orderStatus);
+    public ServerResponse transportationCostDetail(PageDTO pageDTO, String orderId, Integer orderStatus) {
+        return djDeliverOrderService.transportationCostDetail(pageDTO, orderId, orderStatus);
     }
 
     @Override
     @ApiMethod
     public ServerResponse queryDeliverOrderHump(PageDTO pageDTO, String houseId, String state) {
-        return djDeliverOrderService.queryDeliverOrderHump(pageDTO,houseId,state);
+        return djDeliverOrderService.queryDeliverOrderHump(pageDTO, houseId, state);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse queryAppOrderList(PageDTO pageDTO, String userToken, String houseId, String cityId, Integer orderStatus,String idList) {
-        return djDeliverOrderService.queryAppOrderList(pageDTO,houseId,cityId,orderStatus,idList);
+    public ServerResponse queryAppOrderList(PageDTO pageDTO, String userToken, String houseId, String cityId, Integer orderStatus, String idList) {
+        return djDeliverOrderService.queryAppOrderList(pageDTO, houseId, cityId, orderStatus, idList);
     }
 
 
     @Override
     @ApiMethod
     public ServerResponse queryAppHairOrderList(String userToken, PageDTO pageDTO, String houseId, String cityId) {
-        return djDeliverOrderService.queryAppHairOrderList(pageDTO,houseId,cityId);
+        return djDeliverOrderService.queryAppHairOrderList(pageDTO, houseId, cityId);
     }
 
     @Override
@@ -143,38 +143,38 @@ public class DjDeliverOrderController implements DjDeliverOrderAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse updateAppOrderStats(String userToken,String lists,String id) {
-        return djDeliverOrderService.updateAppOrderStats(lists,id);
+    public ServerResponse updateAppOrderStats(String userToken, String lists, String id) {
+        return djDeliverOrderService.updateAppOrderStats(lists, id);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse refuseAppOrderStats(String userToken,String id) {
+    public ServerResponse refuseAppOrderStats(String userToken, String id) {
         return djDeliverOrderService.refuseAppOrderStats(id);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse installAppOrderStats(String userToken,String id) {
+    public ServerResponse installAppOrderStats(String userToken, String id) {
         return djDeliverOrderService.installAppOrderStats(id);
     }
 
 
     @Override
     @ApiMethod
-    public ServerResponse queryAppOrderInFoList(String userToken, PageDTO pageDTO,String id,String shippingState) {
-        return djDeliverOrderService.queryAppOrderInFoList(id,shippingState);
+    public ServerResponse queryAppOrderInFoList(String userToken, PageDTO pageDTO, String id, String shippingState) {
+        return djDeliverOrderService.queryAppOrderInFoList(id, shippingState);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse queryAppOrderWorkerInFoList(String userToken,String id,String shippingState) {
-        return djDeliverOrderService.queryAppOrderWorkerInFoList(id,shippingState);
+    public ServerResponse queryAppOrderWorkerInFoList(String userToken, String id, String shippingState) {
+        return djDeliverOrderService.queryAppOrderWorkerInFoList(id, shippingState);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse deleteAppOrder(String userToken,String id) {
+    public ServerResponse deleteAppOrder(String userToken, String id) {
         return djDeliverOrderService.deleteAppOrder(id);
     }
 

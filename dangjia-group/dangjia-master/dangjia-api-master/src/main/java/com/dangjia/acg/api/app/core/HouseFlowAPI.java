@@ -1,6 +1,6 @@
 package com.dangjia.acg.api.app.core;
 
-import com.dangjia.acg.common.annotation.ApiMethod;
+import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.core.HouseFlow;
 import io.swagger.annotations.Api;
@@ -24,8 +24,16 @@ public interface HouseFlowAPI {
     @PostMapping("app/core/houseFlow/getGrabList")
     @ApiOperation(value = "抢单列表", notes = "抢单列表")
     ServerResponse getGrabList(@RequestParam("request")  HttpServletRequest request,
-                                @RequestParam("userToken") String userToken,
+                               @RequestParam("pageDTO") PageDTO pageDTO,
+                               @RequestParam("userToken") String userToken,
                                @RequestParam("cityId") String cityId);
+
+    @PostMapping("app/core/houseFlow/getGrabInfo")
+    @ApiOperation(value = "抢单详细(装修+维修)", notes = "抢单详细(装修+维修)")
+    ServerResponse getGrabInfo(@RequestParam("request")  HttpServletRequest request,
+                               @RequestParam("userToken") String userToken,
+                               @RequestParam("houseFlowId") String houseFlowId);
+
 
     @PostMapping("app/core/houseFlow/setGrabVerification")
     @ApiOperation(value = "抢单验证", notes = "抢单验证")

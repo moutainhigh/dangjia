@@ -36,8 +36,21 @@ public class SearchActuarialConfigController implements SearchActuarialConfigAPI
      */
     @Override
     @ApiMethod
-    public ServerResponse searchActuarialList(HttpServletRequest request,String cityId) {
-        return searchActuarialConfigServices.searchActuarialList(cityId);
+    public ServerResponse searchActuarialList(HttpServletRequest request,String cityId,String serviceTypeId) {
+        return searchActuarialConfigServices.searchActuarialList(cityId,serviceTypeId);
+    }
+
+    /**
+     * 查询默认配置的设计商品
+     * @param request
+     * @param cityId
+     * @param houseId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse searchDesginActuarialList(HttpServletRequest request,String cityId,String houseId){
+        return searchActuarialConfigServices.searchDesginActuarialList(cityId,houseId);
     }
 
 
@@ -49,8 +62,8 @@ public class SearchActuarialConfigController implements SearchActuarialConfigAPI
      */
     @Override
     @ApiMethod
-    public ServerResponse searchChangeProductList(HttpServletRequest request,String goodsId){
-        return searchActuarialConfigServices.searchChangeProductList(goodsId);
+    public ServerResponse searchChangeProductList(HttpServletRequest request,String goodsId,String houseId){
+        return searchActuarialConfigServices.searchChangeProductList(goodsId,houseId);
     }
 
     /**
@@ -60,8 +73,8 @@ public class SearchActuarialConfigController implements SearchActuarialConfigAPI
      */
     @Override
     @ApiMethod
-    public ServerResponse searchSimulationTitleList(HttpServletRequest request,String cityId){
-        return searchActuarialConfigServices.searchSimulationTitleList(cityId);
+    public ServerResponse searchSimulationTitleList(HttpServletRequest request,String cityId,String serviceTypeId){
+        return searchActuarialConfigServices.searchSimulationTitleList(cityId,serviceTypeId);
     }
 
     /**
@@ -84,7 +97,7 @@ public class SearchActuarialConfigController implements SearchActuarialConfigAPI
      */
     @Override
     @ApiMethod
-    public ServerResponse searchSimulateCostInfoList(HttpServletRequest request,String groupCode,String cityId){
-        return searchActuarialConfigServices.searchSimulateCostInfoList(groupCode,cityId);
+    public ServerResponse searchSimulateCostInfoList(HttpServletRequest request,String groupCode,String cityId,String serviceTypeId){
+        return searchActuarialConfigServices.searchSimulateCostInfoList(groupCode,cityId,serviceTypeId);
     }
 }

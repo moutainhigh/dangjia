@@ -48,7 +48,8 @@
         build_content buildContent,
         is_agency_purchase isAgencyPurchase,
         is_relateion_product isRelateionProduct,
-        steward_exploration stewardExploration
+        steward_exploration stewardExploration,
+        maintenance_investigation maintenanceInvestigation
     </sql>
 
     <!-- 查询当前添加商品的属性值是否已被用(存在相关属性值的商品) -->
@@ -680,4 +681,8 @@
         </if>
 
     </select>
+
+    <update id="updateProductByMaintenaceInvestigation">
+        update dj_basics_product_template set maintenance_investigation=0 where maintenance_investigation=1
+    </update>
 </mapper>

@@ -7,7 +7,6 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.HouseWorkerService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -91,6 +90,11 @@ public class HouseWorkerController implements HouseWorkerAPI {
         return houseWorkerService.getHouseFlowApply(houseFlowApplyId);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse getHouseDetectionTimeout(String userToken) {
+        return houseWorkerService.getHouseDetectionTimeout(userToken);
+    }
     /**
      * 提交审核、停工
      */

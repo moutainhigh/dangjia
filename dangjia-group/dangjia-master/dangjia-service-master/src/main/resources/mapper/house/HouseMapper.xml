@@ -232,7 +232,7 @@
                     '号'
                 )
             ) address,
-            IFNULL(ma.input_area, H.square) inputArea
+            IFNULL(ma.input_area, h.square) inputArea
         FROM
             dj_house h
         INNER JOIN dj_member m ON h.member_id = m.id
@@ -478,6 +478,7 @@
         WHERE t1.product_id = t3.id
         and t1.city_id=#{cityId}
         and t1.worker_type_id=#{workerTypeId}
+        and t1.service_type_id=#{serviceTypeId}
     </select>
     <!--查询所有的房子 指定房子 装修状态-->
     <select id="getAllHouseByVisitState" resultType="com.dangjia.acg.modle.house.House">

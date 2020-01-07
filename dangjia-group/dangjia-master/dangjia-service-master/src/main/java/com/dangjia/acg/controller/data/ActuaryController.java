@@ -52,7 +52,7 @@ public class ActuaryController implements ActuaryAPI {
     @Override
     @ApiMethod
     public ServerResponse searchActuarialProductList(HttpServletRequest request,String cityId){
-        return actuaryService.searchActuarialProductList(cityId);
+        return actuaryService.searchActuarialProductList(cityId,null);
     }
     /**
      * 精算接口--保存推荐的设计商品
@@ -60,7 +60,7 @@ public class ActuaryController implements ActuaryAPI {
     @Override
     @ApiMethod
     public ServerResponse saveRecommendedGoods(HttpServletRequest request,String cityId, String houseId,String productStr){
-        return actuaryService.saveRecommendedGoods(cityId,houseId,productStr);
+        return actuaryService.saveRecommendedGoods(houseId);
     }
 
     /**

@@ -98,4 +98,39 @@
         </if>
         ORDER BY p.istop DESC,p.`name` DESC
     </select>
+
+    <!--根据商品模板ID查询对应店铺商品信息-->
+    <select id="getStorefrontProductByTemplateId" resultType="com.dangjia.acg.dto.product.StorefrontProductDTO">
+        SELECT
+        t1.storefront_id storefrontId,
+        t1.id storefrontProductId,
+        t.id productTemplateId,
+        t.category_id categoryId,
+        t.product_sn productSn,
+        t1.product_name productName,
+        t.goods_id goodsId,
+        t.cost,
+        IFNULL(ifnull(t1.sell_price,t.price),0) sellPrice,
+        t1.image,
+        t.convert_quality convertQuality,
+        t.convert_unit convertUnit,
+        t.unit_id unitId,
+        t.unit_name unitName,
+        t.unit_id,
+        t.unit_name,
+        t.label_id
+        FROM
+        dj_basics_product_template t,
+        dj_basics_storefront_product t1
+        WHERE
+        t.id = t1.prod_template_id
+        and t1.is_shelf_status = '1'
+        and t1.data_status=0
+        and t.data_status = 0
+        AND t.id = #{prodTemplateId}
+        GROUP BY
+        t1.sell_price ASC
+        limit 1
+    </select>
+
 </mapper>

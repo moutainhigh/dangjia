@@ -233,12 +233,14 @@ public interface HouseDesignImageAPI {
      * @param houseId    必选 string 房子ID
      * @param type       必选 int 推荐商品类型：0:纯推荐，1:推荐商品支付,设计图这里传0
      * @param productIds 必选 string  推荐商品ID集合以","分割
-     * @return {"res":1000,"msg":{"resultCode":1000,"resultMsg":"成功"} }
+     * @return {"res":1000,"msg":{"resultCode":1000,"resultObj":[{返回参数说明}],"resultMsg":"成功"} }
      * @catalog 工匠端升级/设计模块/新版设计
      * @title 添加推荐的商品
      * @description 添加推荐的商品
      * @method POST
      * @url master/app/design/addRecommendProduct
+     * @return_param rpId String rpId推荐ID
+     * @return_param productId String productId
      * @remark 更多返回错误代码请看首页的错误代码描述
      * @number 7
      * @Author: Ruking 18075121944

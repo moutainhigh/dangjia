@@ -8,6 +8,7 @@ import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.product.BasicsGoodsDTO;
+import com.dangjia.acg.dto.product.BasicsProductTemplateRatioDTO;
 import com.dangjia.acg.dto.product.DjBasicsProductTemplateDTO;
 import com.dangjia.acg.mapper.basics.IAttributeMapper;
 import com.dangjia.acg.mapper.basics.IAttributeValueMapper;
@@ -377,9 +378,7 @@ public class DjBasicsGoodsService {
                     /**
                      * 查询维保商品对应的责任占比
                      */
-                    Example example=new Example(BasicsProductTemplateRatio.class);
-                    example.createCriteria().andEqualTo(BasicsProductTemplateRatio.PRODUCT_TEMPLATE_ID,p.getId());
-                    List<BasicsProductTemplateRatio> productTemplateRatioList=iProductTemplateRatioMapper.selectByExample(example);
+                    List<BasicsProductTemplateRatioDTO> productTemplateRatioList=iProductTemplateRatioMapper.selectProductTemplateRatioList(p.getId());
                     map.put("productTemplateRatioList",productTemplateRatioList);//维保商品对应的责任占比列表
 
                     map.put("id",p.getId());

@@ -106,7 +106,7 @@ public interface IBasicsProductTemplateMapper extends Mapper<DjBasicsProductTemp
                                                                   @Param("goodsId") String goodsId);
 
     //根据模板ID查询对应符合条件的商品信息
-    StorefrontProductDTO getStorefrontInfoByprodTemplateId(@Param("prodTemplateId") String prodTemplateId,@Param("prodTemplateSn") String prodTemplateSn);
+    StorefrontProductDTO getStorefrontInfoByprodTemplateId(@Param("prodTemplateId") String prodTemplateId, @Param("prodTemplateSn") String prodTemplateSn);
 
 
 
@@ -123,5 +123,10 @@ public interface IBasicsProductTemplateMapper extends Mapper<DjBasicsProductTemp
      * @return
      */
     List<Map<String,Object>> queryAllWorkerProductList(@Param("name") String name);
+
+    /**
+     * 修改其它维保勘查高品为否（保证只有一个维保商品存在）
+     */
+    void updateProductByMaintenaceInvestigation();
 
 }

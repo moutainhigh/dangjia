@@ -545,7 +545,7 @@ public class DjActuaryBudgetMaterialService {
             List<ActuarialProductAppDTO> pList = iBasicsProductTemplateMapper.serchCategoryProduct(categoryId, goodsId,names, brandVals, attributeVals, orderKey);
             pageResult = new PageInfo<>(pList);
             if (!pList.isEmpty()) {
-                searchActuarialConfigServices.getProductList(pList, imageAddress);
+                searchActuarialConfigServices.getProductList(pList, imageAddress,new BigDecimal(0));
                 for (ActuarialProductAppDTO product : pList) {
                     if (productId.equals(product.getProductId())) {
                         //勾选商品标识
