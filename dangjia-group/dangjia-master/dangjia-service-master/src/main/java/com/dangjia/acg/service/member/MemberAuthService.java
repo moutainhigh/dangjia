@@ -320,7 +320,7 @@ public class MemberAuthService {
         } catch (Exception e) {
             return ServerResponse.createByErrorMessage("验证码错误");
         }
-        if (registerCode == null || smscodeInt.equals(registerCode)) {
+        if (!smscodeInt.equals(registerCode)) {
             return ServerResponse.createByErrorMessage("验证码错误");
         } else {
             return miniProgramRegister(request, phone, openid, unionid, name, iconurl);
