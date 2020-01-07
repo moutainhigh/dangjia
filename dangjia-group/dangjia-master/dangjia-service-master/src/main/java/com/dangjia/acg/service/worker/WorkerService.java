@@ -67,18 +67,15 @@ public class WorkerService {
     private IHouseMapper houseMapper;
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
-
-    @Autowired
-    private IHouseFlowApplyMapper houseFlowApplyMapper;
     @Autowired
     private IHouseFlowMapper houseFlowMapper;
-
     @Autowired
     private UserMapper userMapper;
     @Autowired
     private RedisClient redisClient;
     @Autowired
     private ISmsMapper smsMapper;
+
     /**
      * 查询通讯录
      */
@@ -133,13 +130,17 @@ public class WorkerService {
                 }
             } else {//普通工匠
                 HouseWorker houseWorker = houseWorkerMapper.getHwByHidAndWtype(houseId, 3);
-                Map<String, Object> map = new HashMap<String, Object>();
-                Member worker2 = memberMapper.selectByPrimaryKey(houseWorker.getWorkerId());//根据工匠id查询工匠信息详情
-                map.put("workerTypeName", "大管家");
-                map.put("workerName", worker2.getName());//大管家
-                map.put("workerPhone", worker2.getMobile());
-                map.put("workerId", worker2.getId());
-                listMap.add(map);
+                if (houseWorker != null) {
+                    Member worker2 = memberMapper.selectByPrimaryKey(houseWorker.getWorkerId());//根据工匠id查询工匠信息详情
+                    if (worker2 != null) {
+                        Map<String, Object> map = new HashMap<>();
+                        map.put("workerTypeName", "大管家");
+                        map.put("workerName", worker2.getName());//大管家
+                        map.put("workerPhone", worker2.getMobile());
+                        map.put("workerId", worker2.getId());
+                        listMap.add(map);
+                    }
+                }
             }
 
 
@@ -291,7 +292,7 @@ public class WorkerService {
      * @param userToken
      * @return
      */
-    public ServerResponse getMyBankCard(String userToken,String userId) {
+    public ServerResponse getMyBankCard(String userToken, String userId) {
 
         String id = null;
         //如果 userToken 为空，代表中台登录 供应商，店铺 添加银行卡 2019/11/7 添加
@@ -300,7 +301,7 @@ public class WorkerService {
                 return ServerResponse.createByErrorMessage("userId不能为空");
             }
             id = userId;
-        }else{
+        } else {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
                 return (ServerResponse) object;
@@ -333,7 +334,7 @@ public class WorkerService {
      * @param bankCard
      * @return
      */
-    public ServerResponse addMyBankCard(HttpServletRequest request, String userToken, WorkerBankCard bankCard,String userId,String phone,int smscode) {
+    public ServerResponse addMyBankCard(HttpServletRequest request, String userToken, WorkerBankCard bankCard, String userId, String phone, int smscode) {
         try {
             if (CommonUtil.isEmpty(bankCard.getBankCardNumber())) {
                 return ServerResponse.createByErrorMessage("请输入银行卡卡号");
@@ -357,7 +358,7 @@ public class WorkerService {
                     return ServerResponse.createByErrorMessage("userId不能为空");
                 }
                 id = userId;
-            }else{
+            } else {
                 Object object = constructionService.getMember(userToken);
                 if (object instanceof ServerResponse) {
                     return (ServerResponse) object;
@@ -406,23 +407,6 @@ public class WorkerService {
         return ServerResponse.createBySuccessMessage("验证码已发送");
     }
 
-    /*
-     * 查询验证码
-     */
-    public ServerResponse getSmsCode(String phone) {
-        if (!Validator.isMobileNo(phone)) {
-            return ServerResponse.createBySuccessMessage("手机号不正确");
-        }
-        Example example = new Example(Sms.class);
-        example.createCriteria().andEqualTo("mobile", phone);
-        example.orderBy(Sms.CREATE_DATE).desc();
-        List<Sms> sms = smsMapper.selectByExample(example);
-        if (sms == null || sms.size() == 0) {
-            return ServerResponse.createBySuccessMessage("无效验证码");
-        }
-        return ServerResponse.createBySuccess("验证码获取成功", sms.get(0).getCode());
-    }
-
 
     /**
      * 删除银行卡
@@ -456,11 +440,12 @@ public class WorkerService {
 
     /**
      * 解绑银行卡
+     *
      * @param userId
      * @param workerBankCardId 银行卡ID
      * @return
      */
-    public ServerResponse untyingBankCard(String userId, String workerBankCardId,String payPassword) {
+    public ServerResponse untyingBankCard(String userId, String workerBankCardId, String payPassword) {
         try {
             if (CommonUtil.isEmpty(userId)) {
                 return ServerResponse.createByErrorMessage("userId不能为空");
@@ -472,10 +457,10 @@ public class WorkerService {
             //查询用户信息
             MainUser mainUser = userMapper.selectByPrimaryKey(userId);
 
-            if(mainUser == null){
+            if (mainUser == null) {
                 return ServerResponse.createByErrorMessage("用户不存在");
             }
-            if(!mainUser.getPayPassword().equals(DigestUtils.md5Hex(payPassword))){
+            if (!mainUser.getPayPassword().equals(DigestUtils.md5Hex(payPassword))) {
                 return ServerResponse.createByErrorMessage("解绑失败,支付密码错误");
             }
 
