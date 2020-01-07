@@ -143,6 +143,7 @@ public interface HouseDesignImageAPI {
      * @param houseId   必选 string 房子ID
      * @param userId    可选 string 可以为空
      * @param image     必选 string 图片只上传一张
+     * @param type 1设计师上传，2精算师上传
      * @return {"res":1000,"msg":{"resultCode":1000,"resultMsg":"成功"} }
      * @catalog 工匠端升级/设计模块
      * @title 添加平面图
@@ -160,7 +161,8 @@ public interface HouseDesignImageAPI {
                                @RequestParam("userToken") String userToken,
                                @RequestParam("houseId") String houseId,
                                @RequestParam("userId") String userId,
-                               @RequestParam("image") String image);
+                               @RequestParam("image") String image,
+                               @RequestParam("type") String type);
 
     /**
      * showdoc
@@ -188,7 +190,8 @@ public interface HouseDesignImageAPI {
                                         @RequestParam("houseId") String houseId,
                                         @RequestParam("userId") String userId,
                                         @RequestParam("imageJson") String imageJson,
-                                        @RequestParam("productIds") String productIds);
+                                        @RequestParam("productIds") String productIds,
+                                        @RequestParam("type") String type);
 
     /**
      * showdoc

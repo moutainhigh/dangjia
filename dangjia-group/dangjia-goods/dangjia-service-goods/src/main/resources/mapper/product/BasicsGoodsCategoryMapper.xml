@@ -265,4 +265,34 @@
         </if>
         ORDER BY sort,create_date asc
     </select>
+
+    <select id="queryMaintenanceRecordTopCategory" resultType="com.dangjia.acg.modle.product.BasicsGoodsCategory">
+        SELECT
+         <include refid="all_columns"/>
+        FROM
+            dj_basics_goods_category gc
+        WHERE
+            gc.parent_id = '1'
+        AND EXISTS (
+            SELECT
+               1
+            FROM
+                dj_basics_goods g,
+                dj_basics_goods_category gcp
+                <if test="workerTypeId!=null and workerTypeId!=''">
+                    ,dj_basics_product_template pt
+                </if>
+            WHERE
+                g.category_id = gcp.id
+                AND gcp.parent_top = gc.id
+                and g.type=5
+                and g.city_id=#{cityId}
+                <if test="workerTypeId!=null and workerTypeId!=''">
+                    and g.id=pt.goods_id
+                    and pt.worker_type_id=#{workerTypeId}
+                    and gcp.id=pt.category_id
+                </if>
+
+        )
+    </select>
 </mapper>
