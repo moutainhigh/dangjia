@@ -50,4 +50,10 @@ public class DjMaintenanceRecordContent extends BaseEntity {
     @ApiModelProperty("类型 1:工匠 2:大管家 3：业主")
     private Integer type;
 
+
+    @Column(name = "worker_type_id")
+    @Desc(value = "工种id")
+    @ApiModelProperty("工种id")
+    private String workerTypeId;
+
 }

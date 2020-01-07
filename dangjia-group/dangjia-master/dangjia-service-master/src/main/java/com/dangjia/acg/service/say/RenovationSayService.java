@@ -119,6 +119,7 @@ public class RenovationSayService {
     }
 
 
+
     /**
      *根据id查询装修说信息
      * @param id
@@ -134,8 +135,8 @@ public class RenovationSayService {
                 renovationSayDTO.setFabulous(renovationSays.getFabulous());
                 renovationSayDTO.setShare(renovationSays.getShare());
                 renovationSayDTO.setCreateDate(renovationSays.getCreateDate());
-                renovationSayDTO.setId(renovationSayDTO.getId());
-                renovationSayDTO.setContent(renovationSayDTO.getContent());
+                renovationSayDTO.setId(renovationSays.getId());
+                renovationSayDTO.setContent(renovationSays.getContent());
                 renovationSayDTO.setContentImage(renovationSays.getContentImage());
                 renovationSayDTO.setContentImages(getImage(renovationSays.getContentImage()));
                 renovationSayDTO.setCoverImage(renovationSays.getCoverImage());

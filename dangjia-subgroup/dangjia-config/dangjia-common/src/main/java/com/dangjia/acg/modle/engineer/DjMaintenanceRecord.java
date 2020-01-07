@@ -125,16 +125,6 @@ public class DjMaintenanceRecord extends BaseEntity {
     @ApiModelProperty("处理人id")
     private String userId;
 
-    @Column(name = "worker_member_id")
-    @Desc(value = "工匠id")
-    @ApiModelProperty("工匠id")
-    private String workerMemberId;
-
-    @Column(name = "worker_create_date")
-    @Desc(value = "工匠接单时间")
-    @ApiModelProperty("工匠接单时间")
-    private Date workerCreateDate;
-
 
     @Column(name = "worker_type_id")
     @Desc(value = "工种id")
