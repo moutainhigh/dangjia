@@ -66,6 +66,7 @@ public class HouseWorkerSupService {
     private MendMaterielAPI mendMaterielAPI;
     @Autowired
     private IHouseMapper houseMapper;
+
     @Autowired
     private ConfigMessageService configMessageService;
 
@@ -75,13 +76,14 @@ public class HouseWorkerSupService {
     private HouseService houseService;
     @Autowired
     private HouseFlowScheduleService houseFlowScheduleService;
-
     @Autowired
     private DjMaintenanceRecordMapper djMaintenanceRecordMapper;
     @Autowired
     private IMasterMemberAddressMapper iMasterMemberAddressMapper;
     @Autowired
     private IOrderMapper orderMapper;
+
+
 
     /**
      * 大管家-首页
@@ -196,6 +198,9 @@ public class HouseWorkerSupService {
             return ServerResponse.createByErrorMessage("系统出错,查询失败");
         }
     }
+
+
+
     /**
      * 管家审核验收申请h
      * 材料审查

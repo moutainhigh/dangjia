@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.MessageAPI;
+import com.dangjia.acg.api.RedisClient;
 import com.dangjia.acg.api.basics.WorkerGoodsAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.Constants;
@@ -23,6 +24,7 @@ import com.dangjia.acg.mapper.complain.IComplainMapper;
 import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.engineer.DjSkillCertificationMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
+import com.dangjia.acg.mapper.house.IModelingVillageMapper;
 import com.dangjia.acg.mapper.matter.IMasterTechnologyMapper;
 import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberCityMapper;
@@ -38,6 +40,7 @@ import com.dangjia.acg.modle.complain.Complain;
 import com.dangjia.acg.modle.core.*;
 import com.dangjia.acg.modle.engineer.DjSkillCertification;
 import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.house.ModelingVillage;
 import com.dangjia.acg.modle.matter.TechnologyRecord;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberCity;
@@ -79,6 +82,10 @@ public class HouseWorkerService {
     private IHouseWorkerMapper houseWorkerMapper;
     @Autowired
     private IHouseFlowMapper houseFlowMapper;
+    @Autowired
+    private RedisClient redisClient;
+    @Autowired
+    private IModelingVillageMapper modelingVillageMapper;//小区
     @Autowired
     private IHouseMapper houseMapper;
     @Autowired
@@ -450,7 +457,7 @@ public class HouseWorkerService {
     /**
      * 抢单
      */
-    public ServerResponse setWorkerGrab(HttpServletRequest request, String userToken, String cityId, String houseFlowId) {
+    public ServerResponse setWorkerGrab(String userToken, String cityId, String houseFlowId) {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
@@ -1395,4 +1402,53 @@ public class HouseWorkerService {
             return ServerResponse.createByErrorMessage("系统出错，申请验收失败");
         }
     }
+
+
+    /**
+     * 管家自动派单分值计算
+     * @param houseFlowId
+     * @return
+     */
+    public ServerResponse autoDistributeHandle(String houseFlowId) {
+        /*大管家所有待抢单*/
+        Example example = new Example(HouseFlow.class);
+        example.createCriteria()
+                .andEqualTo(HouseFlow.WORK_TYPE, 2)
+                .andEqualTo(HouseFlow.WORKER_TYPE_ID, 3)
+                .andNotEqualTo(HouseFlow.STATE, 2);
+        HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
+        if(houseFlow.getWorkType()!=2){
+            return ServerResponse.createByErrorMessage("状态错误，无法自动派单！");
+        }
+        if(houseFlow.getWorkerType()!=3){
+            return ServerResponse.createByErrorMessage("非大管家，无法自动派单！");
+        }
+        House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());//查询房子
+        ModelingVillage modelingVillage =modelingVillageMapper.selectByPrimaryKey(house.getVillageId());
+        List<Map<String, Object>> list = houseWorkerMapper.getSupWorkerConfInfo(modelingVillage.getLocationx(),modelingVillage.getLocationy());
+        for (Map<String, Object> stringObjectMap : list) {
+            Double  score = configRuleUtilService.getautoDistributeHandleConfig((Double) stringObjectMap.get("juli"),(Double) stringObjectMap.get(Member.EVALUATION_SCORE),(Integer) stringObjectMap.get(Member.METHODS));
+            stringObjectMap.put("score",score);
+        }
+        //重新排序
+        Collections.sort(list, new Comparator<Map<String, Object>>(){
+            public int compare(Map<String, Object> o1, Map<String, Object> o2)
+            {
+                Double score1 = (Double)o1.get("score");
+                Double score2 = (Double)o2.get("score");
+                return score2.compareTo(score1);
+            }
+        });
+        for (Map<String, Object> stringObjectMap : list) {
+            String userRoleText = "role2:" + stringObjectMap.get(HouseWorker.WORKER_ID);
+            String userToken = redisClient.getCache(userRoleText, String.class);
+            ServerResponse serverResponse = setWorkerGrab( userToken,  houseFlow.getCityId(),  houseFlowId);
+            //如果已指派则无需继续遍历
+            if(serverResponse.isSuccess()){
+                break;
+            }
+        }
+        return ServerResponse.createBySuccess("派单成功");
+    }
+
 }

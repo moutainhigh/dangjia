@@ -1,8 +1,10 @@
 package com.dangjia.acg.dto.core;
 
 import lombok.Data;
+import org.apache.poi.ss.formula.functions.T;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author Ruking.Cheng
@@ -34,4 +36,6 @@ public class AllgrabBean {
 
     private String latitude;//纬度
     private String longitude;//经度
+
+    private List<T> goodsData;//经度
 }

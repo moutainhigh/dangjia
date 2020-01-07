@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import tk.mybatis.mapper.common.Mapper;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * author: Ronalcheng
@@ -49,4 +50,7 @@ public interface IHouseWorkerMapper extends Mapper<HouseWorker> {
     List<HouseWorkerDTO> queryWorkerHouse(@Param("workerId") String workerId);
 
     int changeWorkerByHouseIdWorkerId(@Param("houseId") String houseId, @Param("workerId") String workerId);
+
+    List<Map<String, Object>>  getSupWorkerConfInfo( @Param("locationx") String locationx, @Param("locationy") String locationy);
+
 }
