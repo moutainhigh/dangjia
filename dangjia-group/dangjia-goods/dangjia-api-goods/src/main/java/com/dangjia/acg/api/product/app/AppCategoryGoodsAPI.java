@@ -51,4 +51,28 @@ public interface AppCategoryGoodsAPI {
     @ApiOperation(value = " 第四部分：二级商品规格筛选数据", notes = " 第四部分：二级商品规格筛选数据")
     ServerResponse queryAttributeDatas(@RequestParam("cityId") String cityId,@RequestParam("categoryId") String categoryId,@RequestParam("wordKey") String wordKey);
 
+
+    /**
+     * 查询有维保商品的顶级分类
+     * @param cityId
+     * @return
+     */
+    @PostMapping("/app/category/queryMaintenanceRecordTopCategory")
+    @ApiOperation(value = "第一部分：查询维保商品的顶级分类", notes = "第一部分：查询维保商品的顶级")
+    ServerResponse queryMaintenanceRecordTopCategory(@RequestParam("cityId") String cityId,@RequestParam("workerTypeId") String workerTypeId);
+
+    /**
+     * 查询有当前顶级分类下的所有维保商品
+     * @param cityId
+     * @param searchKey 商品名称
+     * @param workerTypeId 工种ID
+     * @param topCategoryId 顶级分类ID
+     * @return
+     */
+    @PostMapping("/app/category/queryMaintenanceRecordProduct")
+    @ApiOperation(value = "第二部分：查询有当前顶级分类下的所有维保商品", notes = "第二部分：查询有当前顶级分类下的所有维保商品")
+    ServerResponse queryMaintenanceRecordProduct(@RequestParam("pageDTO") PageDTO pageDTO,@RequestParam("cityId") String cityId
+            ,@RequestParam("workerTypeId") String workerTypeId,@RequestParam("topCategoryId") String topCategoryId,
+                                                 @RequestParam("searchKey") String searchKey);
+
 }

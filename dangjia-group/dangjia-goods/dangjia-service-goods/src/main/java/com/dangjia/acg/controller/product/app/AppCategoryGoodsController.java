@@ -5,7 +5,10 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.product.app.AppCategoryGoodsService;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -69,4 +72,31 @@ public class AppCategoryGoodsController implements AppCategoryGoodsAPI {
     public ServerResponse queryAttributeDatas(String cityId,String categoryId,String wordKey) {
         return appCategoryGoodsService.queryAttributeDatas(categoryId, wordKey);
     }
+
+    /**
+     * 查询维保商品的顶级分类
+     * @param cityId 城市ID
+     * @param workerTypeId 工种ID
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryMaintenanceRecordTopCategory(String cityId,String workerTypeId){
+        return appCategoryGoodsService.queryMaintenanceRecordTopCategory(cityId, workerTypeId);
+    }
+
+    /**
+     * 查询所有的符合条件的维保商品
+     * @param cityId 城市ID
+     * @param workerTypeId 工种ID
+     * @param topCategoryId 类别ID
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse queryMaintenanceRecordProduct(PageDTO pageDTO,String cityId,String workerTypeId,String topCategoryId,String searchKey){
+        return appCategoryGoodsService.queryMaintenanceRecordProduct(pageDTO,cityId, workerTypeId,topCategoryId,searchKey);
+    }
+
+
 }

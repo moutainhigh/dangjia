@@ -129,4 +129,14 @@ public interface IBasicsProductTemplateMapper extends Mapper<DjBasicsProductTemp
      */
     void updateProductByMaintenaceInvestigation();
 
+    /**
+     * 查询所有符合条件的维保商品
+     * @param cityId 城市ID
+     * @param workerTypeId 工种ID
+     * @param topCategoryId 顶级分类ID
+     * @param searchKey 商品名称
+     * @return
+     */
+    List<ActuarialProductAppDTO>  queryMaintenanceRecordProduct(@Param("cityId") String cityId,@Param("workerTypeId") String workerTypeId
+            ,@Param("topCategoryId") String topCategoryId,@Param("searchKey") String searchKey);
 }

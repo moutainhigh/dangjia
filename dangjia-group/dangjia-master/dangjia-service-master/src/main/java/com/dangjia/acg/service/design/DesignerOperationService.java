@@ -458,8 +458,8 @@ public class DesignerOperationService {
      * @param image     图片只上传一张
      * @return ServerResponse
      */
-    public ServerResponse setPlaneMap(String userToken, String houseId, String userId, String image) {
-        return setQuantityRoom(userToken, houseId, userId, image, 1, "");
+    public ServerResponse setPlaneMap(String userToken, String houseId, String userId, String image,String type) {
+        return setQuantityRoom(userToken, houseId, userId, image, 1, "",type);
     }
 
     /**
@@ -473,8 +473,8 @@ public class DesignerOperationService {
      *                  ,sort为优先级，数字越小越靠前
      * @return ServerResponse
      */
-    public ServerResponse setConstructionPlans(String userToken, String houseId, String userId, String imageJson, String productIds) {
-        return setQuantityRoom(userToken, houseId, userId, imageJson, 2, productIds);
+    public ServerResponse setConstructionPlans(String userToken, String houseId, String userId, String imageJson, String productIds,String type) {
+        return setQuantityRoom(userToken, houseId, userId, imageJson, 2, productIds,type);
     }
 
     /**
@@ -488,7 +488,7 @@ public class DesignerOperationService {
      * @return ServerResponse
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse setQuantityRoom(String userToken, String houseId, String userId, String imageString, int type, String productIds) {
+    public ServerResponse setQuantityRoom(String userToken, String houseId, String userId, String imageString, int type, String productIds,String workerType) {
         House house = houseMapper.selectByPrimaryKey(houseId);
         if (house == null) {
             return ServerResponse.createByErrorMessage("没有查询到相关房子");
@@ -509,15 +509,18 @@ public class DesignerOperationService {
         }
         switch (type) {
             case 1:
-                if (house.getDecorationType() == 2) {
-                    if (house.getDesignerState() != 1 && house.getDesignerState() != 6) {
-                        return ServerResponse.createByErrorMessage("该阶段无法上传平面图");
-                    }
-                } else {
-                    if (house.getDesignerState() != 9 && house.getDesignerState() != 6) {
-                        return ServerResponse.createByErrorMessage("该阶段无法上传平面图");
+                if(workerType==null||!"2".equals(workerType)){//若是精算师上传，则不走此判断
+                    if (house.getDecorationType() == 2) {
+                        if (house.getDesignerState() != 1 && house.getDesignerState() != 6) {
+                            return ServerResponse.createByErrorMessage("该阶段无法上传平面图");
+                        }
+                    } else {
+                        if (house.getDesignerState() != 9 && house.getDesignerState() != 6) {
+                            return ServerResponse.createByErrorMessage("该阶段无法上传平面图");
+                        }
                     }
                 }
+
                 break;
             case 2:
                 Example example = new Example(DesignBusinessOrder.class);
@@ -566,6 +569,11 @@ public class DesignerOperationService {
                 quantityRoomImages.setSort(0);
                 house.setImage(imageString);
                 quantityRoomImagesMapper.insert(quantityRoomImages);
+                if(workerType!=null&&"2".equals(workerType)) {
+                    house.setDesignerOk(7);//若为精算师上传，则上传完成后，修改状态为待上传施工图
+                    house.setModifyDate(new Date());
+                    houseMapper.updateByPrimaryKeySelective(house);
+                 }
                 break;
             case 2:
                 JSONArray jsonArray = JSON.parseArray(imageString);
@@ -597,6 +605,13 @@ public class DesignerOperationService {
                     for (QuantityRoomImages images : quantityRoomImagesList) {
                         quantityRoomImagesMapper.insert(images);
                     }
+                    //精算师上传后处理
+                    if(workerType!=null&&"2".equals(workerType)) {
+                        house.setDesignerOk(3);//若为精算师上传，则上传完成后，修改状态为已完成
+                        house.setModifyDate(new Date());
+                        houseMapper.updateByPrimaryKeySelective(house);
+                    }
+
                 } else {
                     return ServerResponse.createByErrorMessage("请传入图片");
                 }
