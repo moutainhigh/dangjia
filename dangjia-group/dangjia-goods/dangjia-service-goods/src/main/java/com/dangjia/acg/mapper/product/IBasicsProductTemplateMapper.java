@@ -124,4 +124,9 @@ public interface IBasicsProductTemplateMapper extends Mapper<DjBasicsProductTemp
      */
     List<Map<String,Object>> queryAllWorkerProductList(@Param("name") String name);
 
+    /**
+     * 修改其它维保勘查高品为否（保证只有一个维保商品存在）
+     */
+    void updateProductByMaintenaceInvestigation();
+
 }
