@@ -232,7 +232,7 @@
                     '号'
                 )
             ) address,
-            IFNULL(ma.input_area, H.square) inputArea
+            IFNULL(ma.input_area, h.square) inputArea
         FROM
             dj_house h
         INNER JOIN dj_member m ON h.member_id = m.id
@@ -334,6 +334,7 @@
         AND ho.order_id = t.id
         AND t1.product_id = t2.id
         AND t.house_id = #{houseId}
+        and ho.house_id=t.house_id
         and t1.shop_count > t1.return_count
         <if test="workerTypeId!=null and workerTypeId!=''">
             <if test="type != null">
@@ -375,6 +376,7 @@
         AND t3.added_product_id= t2.id
         and t1.id=t3.any_order_id
         AND t.house_id = #{houseId}
+        and ho.house_id=t.house_id
         and t1.shop_count > t1.return_count
         <if test="workerTypeId!=null and workerTypeId!=''">
             <if test="type != null">

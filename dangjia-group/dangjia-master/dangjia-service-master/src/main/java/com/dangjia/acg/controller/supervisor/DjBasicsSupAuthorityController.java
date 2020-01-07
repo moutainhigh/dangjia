@@ -17,29 +17,6 @@ public class DjBasicsSupAuthorityController implements DjBasicsSupervisorAuthori
 
     @Autowired
     private SupAuthorityService supAuthorityService ;
-    @Override
-    @ApiMethod
-    public ServerResponse delAuthority(HttpServletRequest request, String id) {
-        return supAuthorityService.delAuthority(request,id);
-    }
-
-    @Override
-    @ApiMethod
-    public ServerResponse searchAuthority(HttpServletRequest request, String visitState, String keyWord, PageDTO pageDTO) {
-        return supAuthorityService.searchAuthority(request,visitState,keyWord,pageDTO);
-    }
-
-    @Override
-    @ApiMethod
-    public ServerResponse addAuthority(HttpServletRequest request, DjBasicsSupervisorAuthority djBasicsSupervisorAuthority) {
-        return supAuthorityService.addAuthority(request,djBasicsSupervisorAuthority);
-    }
-
-    @Override
-    @ApiMethod
-    public ServerResponse addAllAuthority(HttpServletRequest request, String strAuthority,String operateId) {
-        return supAuthorityService.addAllAuthority(request,strAuthority, operateId);
-    }
 
     @Override
     @ApiMethod
@@ -78,9 +55,4 @@ public class DjBasicsSupAuthorityController implements DjBasicsSupervisorAuthori
         return supAuthorityService.queryMtHostListDetail(request,houseId,userToken);
     }
 
-    @Override
-    @ApiMethod
-    public ServerResponse queryInvestigationDetail(HttpServletRequest request, String houseId, PageDTO pageDTO) {
-        return supAuthorityService.queryInvestigationDetail(request,houseId,pageDTO);
-    }
 }

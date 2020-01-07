@@ -96,7 +96,8 @@ public interface WebEngineerAPI {
     ServerResponse artisanList(@RequestParam("request") HttpServletRequest request,
                                @RequestParam("name") String name,
                                @RequestParam("workerTypeId") String workerTypeId,
-                               @RequestParam("type") String type, @RequestParam("checkType") String checkType ,
+                               @RequestParam("type") String type,
+                               @RequestParam("checkType") String checkType ,
                                @RequestParam("pageDTO") PageDTO pageDTO);
 
     @PostMapping(value = "web/engineer/setMemberStyle")

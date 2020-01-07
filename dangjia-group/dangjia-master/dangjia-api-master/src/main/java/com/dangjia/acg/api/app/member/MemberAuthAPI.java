@@ -415,9 +415,9 @@ public interface MemberAuthAPI {
     /**
      * showdoc
      *
-     * @param encrypted 必选 string encryptedData
-     * @param iv        必选 string vi
-     * @param code      必选 string 获取微信的code
+     * @param encrypted  必选 string encryptedData
+     * @param iv         必选 string vi
+     * @param sessionKey 必选 string 会话密钥
      * @return {"res":1000,"msg":{"resultObj":"手机号","resultCode":1000,"resultMsg":"成功"} }
      * @catalog 当家接口文档/用户模块/第三方认证
      * @title 获取微信用户手机号码
@@ -435,18 +435,18 @@ public interface MemberAuthAPI {
     ServerResponse decodeWxAppPhone(@RequestParam("request") HttpServletRequest request,
                                     @RequestParam("encrypted") String encrypted,
                                     @RequestParam("iv") String iv,
-                                    @RequestParam("code") String code);
+                                    @RequestParam("sessionKey") String sessionKey);
 
     /**
      * showdoc
      *
-     * @param encrypted 必选 string encryptedData
-     * @param iv        必选 string vi
-     * @param code      必选 string 获取微信的code
-     * @param openid    必选 string 第三方认证ID
-     * @param unionid   必选 string 只有微信在用户将公众号绑定到微信开放平台帐号后，才会出现该字段
-     * @param name      必选 string 第三方所用的昵称
-     * @param iconurl   必选 string 第三方所使用的头像
+     * @param encrypted  必选 string encryptedData
+     * @param iv         必选 string vi
+     * @param sessionKey 必选 string 会话密钥
+     * @param openid     必选 string 第三方认证ID
+     * @param unionid    必选 string 只有微信在用户将公众号绑定到微信开放平台帐号后，才会出现该字段
+     * @param name       必选 string 第三方所用的昵称
+     * @param iconurl    必选 string 第三方所使用的头像
      * @return {"res":1000,"msg":{"resultObj":{返回参数说明},"resultCode":1000,"resultMsg":"成功"} }
      * @catalog 当家接口文档/用户模块/第三方认证
      * @title 小程序通过Code注册登录账号
@@ -513,7 +513,7 @@ public interface MemberAuthAPI {
     ServerResponse miniProgramCodeRegister(@RequestParam("request") HttpServletRequest request,
                                            @RequestParam("encrypted") String encrypted,
                                            @RequestParam("iv") String iv,
-                                           @RequestParam("code") String code,
+                                           @RequestParam("sessionKey") String sessionKey,
                                            @RequestParam("openid") String openid,
                                            @RequestParam("unionid") String unionid,
                                            @RequestParam("name") String name,

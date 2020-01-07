@@ -44,4 +44,14 @@ public class DjMaintenanceRecordResponsibleParty extends BaseEntity {
     @ApiModelProperty("维保责任方类型 1:店铺 2:供应商 3：工匠")
     private Integer responsiblePartyType;
 
+    @Column(name = "product_id")
+    @Desc(value = "商品ID")
+    @ApiModelProperty("商品ID")
+    private String productId;
+
+    @Column(name = "responsible_party_type")
+    @Desc(value = "维保分摊总额")
+    @ApiModelProperty("维保分摊总额")
+    private Double maintenanceTotalPrice;
+
 }

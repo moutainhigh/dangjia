@@ -66,14 +66,14 @@ public class MemberAuthController implements MemberAuthAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse decodeWxAppPhone(HttpServletRequest request, String encrypted, String iv, String code) {
-        return memberAuthService.decodeWxAppPhone(request, encrypted, iv, code);
+    public ServerResponse decodeWxAppPhone(HttpServletRequest request, String encrypted, String iv, String sessionKey) {
+        return memberAuthService.decodeWxAppPhone(request, encrypted, iv, sessionKey);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse miniProgramCodeRegister(HttpServletRequest request, String encrypted, String iv, String code, String openid, String unionid, String name, String iconurl) {
-        return memberAuthService.miniProgramCodeRegister(request, encrypted, iv, code, openid, unionid, name, iconurl);
+    public ServerResponse miniProgramCodeRegister(HttpServletRequest request, String encrypted, String iv, String sessionKey, String openid, String unionid, String name, String iconurl) {
+        return memberAuthService.miniProgramCodeRegister(request, encrypted, iv, sessionKey, openid, unionid, name, iconurl);
     }
 
     @Override

@@ -21,27 +21,6 @@ import javax.servlet.http.HttpServletRequest;
 @FeignClient("dangjia-service-master")
 public interface DjBasicsSupervisorAuthorityAPI {
 
-    @PostMapping("web/supervisor/delAuthority")
-    @ApiOperation(value = "删除已选", notes = "删除已选")
-    ServerResponse delAuthority(@RequestParam("request") HttpServletRequest request,
-                                @RequestParam("id") String id);
-
-    @PostMapping("web/supervisor/searchAuthority")
-    @ApiOperation(value = "搜索已选", notes = "搜索已选")
-    ServerResponse searchAuthority(@RequestParam("request") HttpServletRequest request,
-                                   @RequestParam("visitState") String visitState,
-                                   @RequestParam("keyWord") String keyWord,
-                                   @RequestParam("pageDTO")  PageDTO pageDTO);
-
-    @PostMapping("web/supervisor/addAuthority")
-    @ApiOperation(value = "增加已选", notes = "增加已选")
-    ServerResponse addAuthority(@RequestParam("request") HttpServletRequest request,
-                                @RequestParam("DjBasicsSupervisorAuthority") DjBasicsSupervisorAuthority djBasicsSupervisorAuthority);
-
-    @PostMapping("web/supervisor/addAllAuthority")
-    @ApiOperation(value = "批量增加已选", notes = "批量增加已选")
-    ServerResponse addAllAuthority(@RequestParam("request") HttpServletRequest request,
-                                @RequestParam("strAuthority") String strAuthority,   @RequestParam("operateId") String operateId);
 
     @PostMapping("web/supervisor/queryDvResponsibility")
     @ApiOperation(value = "督导-查看责任划分", notes = "查看责任划分")
@@ -51,7 +30,7 @@ public interface DjBasicsSupervisorAuthorityAPI {
     @PostMapping("web/supervisor/querySupervisorHostList")
     @ApiOperation(value = "督导-工地列表", notes = "督导-工地列表")
     ServerResponse querySupervisorHostList(@RequestParam("request") HttpServletRequest request,
-                                            @RequestParam("sortNum") String sortNum,
+                                           @RequestParam("sortNum") String sortNum,
                                            @RequestParam("pageDTO") PageDTO pageDTO,
                                            @RequestParam("userToken") String userToken,
                                            @RequestParam("keyWord") String keyWord);
@@ -59,7 +38,7 @@ public interface DjBasicsSupervisorAuthorityAPI {
     @PostMapping("web/supervisor/querySupervisorHostDetailList")
     @ApiOperation(value = "督导-工地详情", notes = "督导-工地详情")
     ServerResponse querySupervisorHostDetailList(@RequestParam("request") HttpServletRequest request,
-                                           @RequestParam("houseId") String houseId);
+                                                 @RequestParam("houseId") String houseId);
 
     @PostMapping("web/supervisor/queryMaintenanceHostList")
     @ApiOperation(value = "督导-（维修)工地列表", notes = "督导-（维修)工地列表")
@@ -75,16 +54,10 @@ public interface DjBasicsSupervisorAuthorityAPI {
                                          @RequestParam("houseId") String houseId);
 
 
-    @PostMapping("web/supervisor/queryInvestigationDetail")
-    @ApiOperation(value = "督导-（维修）勘察详情", notes = "督导-（维修）勘察详情")
-    ServerResponse queryInvestigationDetail(@RequestParam("request") HttpServletRequest request,
-                                        @RequestParam("houseId") String houseId,@RequestParam("pageDTO") PageDTO pageDTO);
-
-
     @PostMapping("web/supervisor/queryApplicationInfo")
     @ApiOperation(value = "督导-（维修）申请信息", notes = "督导-（维修）申请信息")
     ServerResponse queryApplicationInfo(@RequestParam("request") HttpServletRequest request,
-                                        @RequestParam("houseId") String houseId,@RequestParam("pageDTO") PageDTO pageDTO);
+                                        @RequestParam("houseId") String houseId, @RequestParam("pageDTO") PageDTO pageDTO);
 
 
 }

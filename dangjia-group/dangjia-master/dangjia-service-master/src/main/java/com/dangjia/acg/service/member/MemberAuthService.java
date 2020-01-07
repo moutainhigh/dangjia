@@ -282,14 +282,8 @@ public class MemberAuthService {
     /**
      * 小程序获取手机号
      */
-    public ServerResponse decodeWxAppPhone(HttpServletRequest request, String encrypted, String iv, String code) {
+    public ServerResponse decodeWxAppPhone(HttpServletRequest request, String encrypted, String iv, String sessionKey) {
         request.setAttribute("isShow", "true");
-        Object jscode2session = jscode2session(code);
-        if (jscode2session instanceof ServerResponse) {
-            return (ServerResponse) jscode2session;
-        }
-        JSONObject object = (JSONObject) jscode2session;
-        String sessionKey = object.getString("session_key");
         String phone = MininProgramUtil.getPhone(encrypted, iv, sessionKey);
         if (phone == null) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "未找到手机号");
@@ -303,14 +297,8 @@ public class MemberAuthService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse miniProgramCodeRegister(HttpServletRequest request, String encrypted, String iv,
-                                                  String code, String openid, String unionid,
+                                                  String sessionKey, String openid, String unionid,
                                                   String name, String iconurl) {
-        Object jscode2session = jscode2session(code);
-        if (jscode2session instanceof ServerResponse) {
-            return (ServerResponse) jscode2session;
-        }
-        JSONObject object = (JSONObject) jscode2session;
-        String sessionKey = object.getString("session_key");
         String phone = MininProgramUtil.getPhone(encrypted, iv, sessionKey);
         if (phone == null) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "未找到手机号");
@@ -332,7 +320,7 @@ public class MemberAuthService {
         } catch (Exception e) {
             return ServerResponse.createByErrorMessage("验证码错误");
         }
-        if (registerCode == null || smscodeInt.equals(registerCode)) {
+        if (!smscodeInt.equals(registerCode)) {
             return ServerResponse.createByErrorMessage("验证码错误");
         } else {
             return miniProgramRegister(request, phone, openid, unionid, name, iconurl);

@@ -75,7 +75,7 @@ public class DjSupApplicationProductService {
             if (null == djSupplier)
                 return ServerResponse.createByErrorMessage("供应商不存在");
             if (null == djSupplier.getRetentionMoney() || !(djSupplier.getRetentionMoney() > 0))
-                return ServerResponse.createByErrorMessage("请先交纳滞留金");
+                return ServerResponse.createByErrorMessage("请先交纳滞留金",djSupplier.getRetentionMoney());
             JSONArray jsonArr = JSONArray.parseArray(jsonStr);
             jsonArr.forEach(str -> {
                 JSONObject obj = (JSONObject) str;
