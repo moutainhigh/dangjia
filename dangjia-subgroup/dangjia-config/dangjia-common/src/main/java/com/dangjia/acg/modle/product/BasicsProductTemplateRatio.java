@@ -24,10 +24,16 @@ public class BasicsProductTemplateRatio extends BaseEntity {
     @ApiModelProperty("商品ID")
     private String productTemplateId;//商品ID
 
+
+    @Column(name = "product_responsible_type")
+    @Desc(value = "责任方类型（1商家，2工种）")
+    @ApiModelProperty("责任方类型（1商家，2工种）")
+    private Integer productResponsibleType;//责任方类型（1商家，2工种）
+
     @Column(name = "product_responsible_id")
-    @Desc(value = "商品责任方ID(0店铺，其它为工种ID)")
-    @ApiModelProperty("商品责任方ID(0店铺，其它为工种ID)")
-    private String productResponsibleId;//商品责任方ID(0店铺，其它为工种ID)
+    @Desc(value = "商品责任方ID(末级分类ID或工种ID)")
+    @ApiModelProperty("商品责任方ID(末级分类ID或工种ID)")
+    private String productResponsibleId;//商品责任方ID(末级分类ID或工种ID)
 
     @Column(name = "product_ratio")
     @Desc(value = "商品责任方占比（%）")

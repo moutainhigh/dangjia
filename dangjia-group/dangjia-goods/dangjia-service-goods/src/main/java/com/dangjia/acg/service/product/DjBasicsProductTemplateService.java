@@ -245,6 +245,7 @@ public class DjBasicsProductTemplateService {
                  BasicsProductTemplateRatio bptr=new BasicsProductTemplateRatio();
                  bptr.setProductRatio(ptr.getProductRatio());
                  bptr.setProductTemplateId(productTemplateId);
+                 bptr.setProductResponsibleType(ptr.getProductResponsibleType());
                  bptr.setProductResponsibleId(ptr.getProductResponsibleId());
                 iProductTemplateRatioMapper.insert(bptr);//添加对应的责任占比信息
             }
@@ -923,9 +924,9 @@ public class DjBasicsProductTemplateService {
         map.put("detailImageUrl",StringTool.getImage(djBasicsProduct.getDetailImage(),address));
         map.put("id",djBasicsProduct.getId());
 
-        Example example=new Example(BasicsProductTemplateRatio.class);
-        example.createCriteria().andEqualTo(BasicsProductTemplateRatio.PRODUCT_TEMPLATE_ID,djBasicsProduct.getId());
-        List<BasicsProductTemplateRatio> productTemplateRatioList=iProductTemplateRatioMapper.selectByExample(example);
+       // Example example=new Example(BasicsProductTemplateRatio.class);
+       // example.createCriteria().andEqualTo(BasicsProductTemplateRatio.PRODUCT_TEMPLATE_ID,djBasicsProduct.getId());
+        List<BasicsProductTemplateRatioDTO> productTemplateRatioList=iProductTemplateRatioMapper.selectProductTemplateRatioList(djBasicsProduct.getId());
         map.put("productTemplateRatioList",productTemplateRatioList);//维保商品对应的责任占比列表
         //只有增值类关联商品才会有此数据
         if(StringUtils.isNotBlank(djBasicsProduct.getIsRelateionProduct())&&"1".equals(djBasicsProduct.getIsRelateionProduct())){
