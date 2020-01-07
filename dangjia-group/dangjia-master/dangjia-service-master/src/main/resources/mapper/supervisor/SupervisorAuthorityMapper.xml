@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dangjia.acg.mapper.supervisor.ISupervisorAuthorityMapper">
+
+    <select id="getStayAuthorityList" resultType="com.dangjia.acg.dto.supervisor.AuthorityDTO">
+        SELECT
+        IFNULL(
+        ma.address,
+        CONCAT(
+        h.residential,
+        IFNULL( h.building, '*' ),
+        '栋',
+        IFNULL( CONCAT( h.unit, '单元' ), '' ),
+        IFNULL( h.number, '*' ),
+        '号'
+        )
+        ) houseName,
+        h.id AS houseId,
+        m.nick_name AS memberName,
+        m.mobile AS memberPhone,
+        m.id AS memberId,
+        h.construction_date constructionDate,
+        (
+        CASE
+        WHEN ( f.supervisor_start = 1 OR f.supervisor_start = 0 )
+        AND h.visit_state != 2
+        AND h.visit_state != 3
+        AND h.visit_state != 4
+        AND h.visit_state != 5
+        AND h.pause = 0 THEN
+        f.supervisor_start
+        WHEN h.visit_state = 3 THEN
+        3
+        WHEN h.visit_state = 4 THEN
+        4
+        WHEN h.visit_state = 5 THEN
+        5
+        WHEN ( h.visit_state = 2 OR h.pause = 1 ) THEN
+        2
+        END
+        ) AS visitState
+        FROM
+        dj_house h
+        INNER JOIN (
+        SELECT
+        f.house_id,
+        f.supervisor_start
+        FROM
+        dj_core_house_flow f
+        LEFT JOIN dj_member m ON f.worker_id = m.id
+        WHERE
+        f.worker_type = 3
+        AND f.work_type > 1
+        ) f ON h.id = f.house_id
+        INNER JOIN dj_member m ON h.member_id = m.id
+        LEFT JOIN dj_member_address ma ON h.id = ma.house_id
+        WHERE
+        h.data_status = 0
+        <if test="cityId!=null and cityId!=''">
+            AND FIND_IN_SET(h.city_id,#{cityId})
+        </if>
+        <if test="visitState==0 || visitState==1">
+            and f.supervisor_start = #{visitState} and h.visit_state !=2 and h.visit_state !=3 and h.visit_state !=4 and
+            h.visit_state !=5 and h.pause=0
+        </if>
+        <if test="visitState>=2">
+            and h.visit_state = #{visitState}
+        </if>
+        <if test="searchKey!=null and searchKey!=''">
+            and ( m.mobile like CONCAT('%',#{searchKey},'%')
+            or CONCAT(
+            h.residential,
+            IFNULL(h.building, '*'),
+            '栋',
+            IFNULL(CONCAT(h.unit, '单元'),'' ),
+            IFNULL(h.number, '*'),
+            '号'
+            ) LIKE CONCAT('%',#{searchKey},'%')
+            or m.nick_name like CONCAT('%',#{searchKey},'%')
+            or m.name like CONCAT('%',#{searchKey},'%')
+            or ma.address like CONCAT('%',#{searchKey},'%')
+            )
+        </if>
+        ORDER BY
+        h.modify_date DESC
+    </select>
+
+
+    <select id="getAuthorityList" resultType="com.dangjia.acg.dto.supervisor.AuthorityDTO">
+        SELECT
+        IFNULL(
+        ma.address,
+        CONCAT(
+        h.residential,
+        IFNULL( h.building, '*' ),
+        '栋',
+        IFNULL( CONCAT( h.unit, '单元' ), '' ),
+        IFNULL( h.number, '*' ),
+        '号'
+        )
+        ) houseName,
+        h.id AS houseId,
+        m.nick_name AS memberName,
+        m.mobile AS memberPhone,
+        m.id AS memberId,
+        h.construction_date constructionDate,
+        (
+        CASE
+        WHEN ( f.supervisor_start = 1 OR f.supervisor_start = 0 )
+        AND h.visit_state != 2
+        AND h.visit_state != 3
+        AND h.visit_state != 4
+        AND h.visit_state != 5
+        AND h.pause = 0 THEN
+        f.supervisor_start
+        WHEN h.visit_state = 3 THEN
+        3
+        WHEN h.visit_state = 4 THEN
+        4
+        WHEN h.visit_state = 5 THEN
+        5
+        WHEN ( h.visit_state = 2 OR h.pause = 1 ) THEN
+        2
+        END
+        ) AS visitState
+        FROM
+        dj_basics_supervisor_authority sa
+        INNER JOIN dj_house h on sa.house_id = h.id
+        INNER JOIN (
+        SELECT
+        f.house_id,
+        f.supervisor_start
+        FROM
+        dj_core_house_flow f
+        LEFT JOIN dj_member m ON f.worker_id = m.id
+        WHERE
+        f.worker_type = 3
+        AND f.work_type > 1
+        ) f ON h.id = f.house_id
+        INNER JOIN dj_member m ON h.member_id = m.id
+        LEFT JOIN dj_member_address ma ON h.id = ma.house_id
+        WHERE
+        h.data_status = 0
+        and sa.data_status =0
+        <if test="cityId!=null and cityId!=''">
+            AND FIND_IN_SET(h.city_id,#{cityId})
+        </if>
+        <if test="memberId!=null and memberId!=''">
+            AND sa.member_id = #{memberId}
+        </if>
+        <if test="visitState==0 || visitState==1">
+            and f.supervisor_start = #{visitState} and h.visit_state !=2 and h.visit_state !=3 and h.visit_state !=4 and
+            h.visit_state !=5 and h.pause=0
+        </if>
+        <if test="visitState>=2">
+            and h.visit_state = #{visitState}
+        </if>
+        <if test="searchKey!=null and searchKey!=''">
+            and ( m.mobile like CONCAT('%',#{searchKey},'%')
+            or CONCAT(
+            h.residential,
+            IFNULL(h.building, '*'),
+            '栋',
+            IFNULL(CONCAT(h.unit, '单元'),'' ),
+            IFNULL(h.number, '*'),
+            '号'
+            ) LIKE CONCAT('%',#{searchKey},'%')
+            or m.nick_name like CONCAT('%',#{searchKey},'%')
+            or m.name like CONCAT('%',#{searchKey},'%')
+            or ma.address like CONCAT('%',#{searchKey},'%')
+            )
+        </if>
+        ORDER BY
+        h.modify_date DESC
+    </select>
+</mapper>
