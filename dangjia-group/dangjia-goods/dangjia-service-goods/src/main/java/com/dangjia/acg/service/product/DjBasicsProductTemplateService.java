@@ -365,7 +365,17 @@ public class DjBasicsProductTemplateService {
         product.setGuaranteedPolicy(basicsProductDTO.getGuaranteedPolicy());
         product.setRefundPolicy(basicsProductDTO.getRefundPolicy());
         product.setIsRelateionProduct(basicsProductDTO.getIsRelateionProduct());
-        product.setStewardExploration(basicsProductDTO.getStewardExploration());//是否需要管家勘查
+        if(basicsProductDTO.getStewardExploration()!=null){
+            product.setStewardExploration(basicsProductDTO.getStewardExploration());//是否需要管家勘查
+        }
+        if(basicsProductDTO.getMaintenanceInvestigation()!=null){
+            if(basicsProductDTO.getMaintenanceInvestigation()==1){
+                //修改其它维保勘查商品为否0
+                iBasicsProductTemplateMapper.updateProductByMaintenaceInvestigation();
+            }
+            product.setMaintenanceInvestigation(basicsProductDTO.getMaintenanceInvestigation());//是否为维保勘查商品
+        }
+
         product.setCityId(cityId);
         if (productId == null || "".equals(productId)) {//没有id则新增
             product.setCreateDate(new Date());
