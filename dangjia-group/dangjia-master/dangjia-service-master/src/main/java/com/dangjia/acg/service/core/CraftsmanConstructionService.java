@@ -254,38 +254,10 @@ public class CraftsmanConstructionService {
             bean.setUserId(houseMember.getId());//
         }
         setMenus(bean, house, hf);
-        //Map<String, Object> dataMap = HouseUtil.getBudgetDatas(house);
-        // bean.setDataList((List<Map<String, Object>>) dataMap.get("dataList"));
         //查询精算师的订单数据
         List<HouseOrderDetailDTO> houseOrderDetailDTOList = houseMapper.getBudgetOrderDetailByInFo(house.getId(), "2",null);
         bean.setDataList(getBudgetDataList(houseOrderDetailDTOList, house, 2));//查询已购买的精算师的商品
         List<ButtonListBean> buttonList = showActuaryButton(house.getId());//按钮显示
-//        if (house.getVisitState() == 1 && house.getBudgetOk() != 0 && house.getBudgetOk() != 5 && house.getBudgetOk() != 3) {
-//            String webAddress = configUtil.getValue(SysConfig.PUBLIC_APP_ADDRESS, String.class);
-//            String data = "&houseId=" + house.getId() + "&houseFlowId=" + hf.getId();
-//            buttonList.add(Utils.getButton("提前结束", webAddress + "construction?title=填写原因" + data, 0));
-//        }
-       /* if (house.getVisitState() == 1 && house.getDecorationType() == 2) {
-            if (house.getBudgetState() == 1 && house.getDesignerState() != 3) {
-                buttonList.add(Utils.getButton("上传设计图", 4));
-            } else if (house.getDesignerState() == 3) {
-                //3设计图完成后有需要改设计的
-                Example example = new Example(DesignBusinessOrder.class);
-                Example.Criteria criteria = example.createCriteria()
-                        .andEqualTo(DesignBusinessOrder.DATA_STATUS, 0)
-                        .andEqualTo(DesignBusinessOrder.HOUSE_ID, house.getId())
-                        .andEqualTo(DesignBusinessOrder.STATUS, 1)
-                        .andNotEqualTo(DesignBusinessOrder.OPERATION_STATE, 2);
-                criteria.andEqualTo(DesignBusinessOrder.TYPE, 3);
-                List<DesignBusinessOrder> designBusinessOrders = designBusinessOrderMapper.selectByExample(example);
-                if (designBusinessOrders != null && designBusinessOrders.size() > 0) {
-                    DesignBusinessOrder order = designBusinessOrders.get(0);
-                    if (order.getOperationState() == 0) {
-                        buttonList.add(Utils.getButton("上传设计图", 4));
-                    }
-                }
-            }
-        }*/
         bean.setButtonList(buttonList);
         return ServerResponse.createBySuccess("获取施工列表成功！", bean);
     }
