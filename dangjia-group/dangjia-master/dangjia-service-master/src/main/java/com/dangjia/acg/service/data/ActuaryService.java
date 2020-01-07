@@ -247,7 +247,7 @@ public class ActuaryService {
             }*/
 
             //增加设计图纸不合格的任务
-            taskStackService.inserTaskStackInfo(houseId,house.getMemberId(),"设计图纸不合格","icon/sheji.png",6,houseId);
+            taskStackService.insertTaskStackInfo(houseId,house.getMemberId(),"设计图纸不合格","icon/sheji.png",6,houseId);
             return ServerResponse.createBySuccessMessage(" 提交成功");
         }catch (Exception e){
             logger.error("提交失败:",e);

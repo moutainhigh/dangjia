@@ -29,10 +29,8 @@ import com.dangjia.acg.modle.design.DesignQuantityRoomProduct;
 import com.dangjia.acg.modle.design.QuantityRoom;
 import com.dangjia.acg.modle.design.QuantityRoomImages;
 import com.dangjia.acg.modle.house.House;
-import com.dangjia.acg.modle.house.TaskStack;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberAddress;
-import com.dangjia.acg.modle.other.WorkDeposit;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
@@ -434,7 +432,7 @@ public class DesignerOperationService {
             example.createCriteria().andEqualTo(MemberAddress.HOUSE_ID,house.getId());
             MemberAddress memberAddress=iMasterMemberAddressMapper.selectOneByExample(example);
             String addressId="";
-            if(memberAddress!=null&& cn.jiguang.common.utils.StringUtils.isNotEmpty(memberAddress.getId())){
+            if(memberAddress!=null&& !CommonUtil.isEmpty(memberAddress.getId())){
                 addressId=memberAddress.getId();
             }
             String productJsons = orderService.getBudgetProductJsons(house);
@@ -443,7 +441,7 @@ public class DesignerOperationService {
                 ServerResponse serverResponse = paymentService.generateOrderCommon(member, house.getId(), house.getCityId(), productJsons, null, addressId, 1,"2");
                 if (serverResponse.getResultObj() != null) {
                     String obj = serverResponse.getResultObj().toString();//获取对应的支付单号码
-                    taskStackService.inserTaskStackInfo(house.getId(),member.getId(),"待支付精算费",workerType.getImage(),1,obj);//支付精算的任务
+                    taskStackService.insertTaskStackInfo(house.getId(),member.getId(),"待支付精算费",workerType.getImage(),1,obj);//支付精算的任务
                 }
             }
         }

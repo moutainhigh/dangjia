@@ -842,7 +842,7 @@ public class DjMaintenanceRecordService {
             Member member = (Member) object;//业主信息
             StringBuffer sb=new StringBuffer();
             sb.append(enoughAmount).append(",").append(remark);
-            taskStackService.inserTaskStackInfo(houseId,member.getId(),"(自购金额确认)发送给业主",null,10,sb.toString());
+            taskStackService.insertTaskStackInfo(houseId,member.getId(),"(自购金额确认)发送给业主",null,10,sb.toString());
             return ServerResponse.createBySuccessMessage("发送成功");
         } catch (Exception e) {
             e.printStackTrace();

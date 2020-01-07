@@ -804,7 +804,7 @@ public class HouseWorkerService {
             if(jsonArray!=null&&jsonArray.size()>0){
                String mendOrderId = repairMendOrderService.workerApplyReturnMaterial( worker,house.getCityId(), house.getId(), materialProductArr);
                 //生成工匠退材料任务
-                taskStackService.inserTaskStackInfo(house.getId(),house.getMemberId(),workerType.getName()+"发起退材料", workerType.getImage(),11,mendOrderId);
+                taskStackService.insertTaskStackInfo(house.getId(),house.getMemberId(),workerType.getName()+"发起退材料", workerType.getImage(),11,mendOrderId);
 
             }
         }

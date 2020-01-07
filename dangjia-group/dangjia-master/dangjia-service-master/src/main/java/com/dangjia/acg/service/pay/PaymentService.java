@@ -598,7 +598,7 @@ public class PaymentService {
                 }
                 //修改补差价任务为已处理（查贸易符合条件补差价订单信息)
                 TaskStack taskStack=taskStackService.selectTaskStackByData(order.getHouseId(),7,order.getBusinessOrderNumber());
-                if(taskStack!=null&& cn.jiguang.common.utils.StringUtils.isNotEmpty(taskStack.getId())){
+                if(taskStack!=null&& !CommonUtil.isEmpty(taskStack.getId())){
                     taskStack.setState(1);
                     taskStack.setModifyDate(new Date());
                     taskStackService.updateTaskStackInfo(taskStack);
@@ -615,7 +615,7 @@ public class PaymentService {
 
                 //修改待处理的任务为已处理
                 TaskStack taskStack=taskStackService.selectTaskStackByHouseIdData(order.getHouseId(),order.getBusinessOrderNumber());
-                if(taskStack!=null&& cn.jiguang.common.utils.StringUtils.isNotEmpty(taskStack.getId())){
+                if(taskStack!=null&& !CommonUtil.isEmpty(taskStack.getId())){
                     taskStack.setState(1);
                     taskStack.setModifyDate(new Date());
                     taskStackService.updateTaskStackInfo(taskStack);

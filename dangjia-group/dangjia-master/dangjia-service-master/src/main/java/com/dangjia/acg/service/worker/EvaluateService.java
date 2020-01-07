@@ -420,7 +420,7 @@ public class EvaluateService {
                 houseFlowMapper.updateByPrimaryKeySelective(hf);
             }
             //生成任务
-            taskStackService.inserTaskStackInfo(house.getId(),house.getMemberId(),"大管家主动验收","icon/sheji.png",3,houseFlowApply.getId());
+            taskStackService.insertTaskStackInfo(house.getId(),house.getMemberId(),"大管家主动验收","icon/sheji.png",3,houseFlowApply.getId());
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
