@@ -149,5 +149,11 @@ public class MemberController implements MemberAPI {
     public ServerResponse promotionList(HttpServletRequest request, String userToken, PageDTO pageDTO) {
         return memberService.promotionList(userToken,pageDTO);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryMember(HttpServletRequest request, String userToken) {
+        return memberService.queryMember(userToken);
+    }
 }
 

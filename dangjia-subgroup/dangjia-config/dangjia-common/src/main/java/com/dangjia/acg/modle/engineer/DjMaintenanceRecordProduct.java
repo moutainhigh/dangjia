@@ -79,5 +79,10 @@ public class DjMaintenanceRecordProduct extends BaseEntity {
     @ApiModelProperty("是否已付费（1未支付，2已支付）")
     private Integer payState;
 
+    @Column(name = "house_id")
+    @Desc(value = "是否已付费（1未支付，2已支付）")
+    @ApiModelProperty("是否已付费（1未支付，2已支付）")
+    private String houseId;
+
 
 }

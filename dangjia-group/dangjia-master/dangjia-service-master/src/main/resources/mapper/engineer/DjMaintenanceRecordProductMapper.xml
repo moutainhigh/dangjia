@@ -22,4 +22,48 @@
             mrp.product_id = bsp.id and bsp.prod_template_id = bpt.id
             AND mrp.maintenance_record_id=#{maintenanceRecordId}
     </select>
+
+    <select id="queryGroupByGoodsCategory" resultType="com.dangjia.acg.modle.product.BasicsGoodsCategory">
+        SELECT
+            bgc1.id,
+            bgc1.name
+        FROM
+            dj_maintenance_record_product mrp
+        INNER JOIN dj_basics_storefront_product bsp ON mrp.product_id = bsp.id
+        INNER JOIN dj_basics_product_template bpt ON bsp.prod_template_id = bpt.id
+        INNER JOIN dj_basics_goods_category bgc ON bgc.id = bpt.category_id
+        INNER JOIN dj_basics_goods_category bgc1 ON bgc1.id = bgc.parent_top
+        WHERE 1=1
+        <if test="null!=maintenanceMemberId and ''!=maintenanceMemberId">
+            mrp.maintenance_member_id =#{maintenanceMemberId}
+        </if>
+        <if test="null!=maintenanceMemberType and ''!=maintenanceMemberType">
+            AND mrp.maintenance_member_type =#{maintenanceMemberType}
+        </if>
+        <if test="null!=maintenanceRecordId and ''!=maintenanceRecordId">
+            AND mrp.maintenance_record_id =#{maintenanceRecordId}
+        </if>
+        <if test="null!=houseId and ''!=houseId">
+            AND mrp.house_id =#{houseId}
+        </if>
+        AND mrp.data_status = 0
+        GROUP BY bgc1.name,bgc1.id
+    </select>
+
+    <select id="queryMaintenanceShoppingBasket" resultType="com.dangjia.acg.dto.engineer.DjMaintenanceRecordProductDTO">
+        SELECT
+            mrp.id,
+            bsp.product_name productName,
+            bsp.image,
+            bsp.sell_price sellPrice,
+            bsp.prod_template_id prodTemplateId,
+            bsp.id storefrontProductId
+        FROM
+            dj_maintenance_record_product mrp
+        INNER JOIN dj_basics_storefront_product bsp ON mrp.product_id = bsp.id
+        INNER JOIN dj_basics_product_template bpt ON bsp.prod_template_id = bpt.id
+        INNER JOIN dj_basics_goods_category bgc ON bgc.id = bpt.category_id
+        WHERE
+            bgc.parent_top =#{parentTop}
+    </select>
 </mapper>

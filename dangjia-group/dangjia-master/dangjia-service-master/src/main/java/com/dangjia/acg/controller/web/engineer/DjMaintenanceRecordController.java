@@ -176,5 +176,23 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
                 shopCount, workerTypeSafeOrderId);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse insertMaintenanceRecordProduct(String userToken, String houseId, String maintenanceRecordId,String productId) {
+        return djMaintenanceRecordService.insertMaintenanceRecordProduct(userToken,houseId,maintenanceRecordId,productId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setMaintenanceRecordProduct(String userToken, String houseId, String maintenanceRecordId) {
+        return djMaintenanceRecordService.setMaintenanceRecordProduct(userToken,houseId,maintenanceRecordId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryMaintenanceShoppingBasket(String userToken, String houseId, String maintenanceRecordId) {
+        return djMaintenanceRecordService.queryMaintenanceShoppingBasket(userToken,houseId, maintenanceRecordId);
+    }
+
 }
 
