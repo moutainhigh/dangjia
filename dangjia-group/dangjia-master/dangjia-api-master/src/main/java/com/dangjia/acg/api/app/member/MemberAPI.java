@@ -21,7 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 @FeignClient("dangjia-service-master")
 @Api(value = "用户信息接口", description = "用户信息接口")
 public interface MemberAPI {
-
+    String getUserToKenStr(@RequestParam("userRole") String userRole,@RequestParam("memberId") String memberId);
     /**
      * showdoc
      *
