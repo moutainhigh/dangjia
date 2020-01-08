@@ -94,6 +94,9 @@ public class SupervisorWebService {
         }
         String[] houseIdList = houseIds.split(",");
         for (String houseId : houseIdList) {
+            if(CommonUtil.isEmpty(houseId)){
+                continue;
+            }
             Example example = new Example(DjBasicsSupervisorAuthority.class);
             example.createCriteria()
                     .andEqualTo(DjBasicsSupervisorAuthority.MEMBER_ID, memberId)
@@ -101,11 +104,14 @@ public class SupervisorWebService {
             if (iSupervisorAuthorityMapper.selectCountByExample(example) > 0) {
                 continue;
             }
-            DjBasicsSupervisorAuthority authority = new DjBasicsSupervisorAuthority();
-            authority.setMemberId(memberId);
-            authority.setHouseId(houseId);
-            authority.setOperateId(userId);
-            iSupervisorAuthorityMapper.insertSelective(authority);
+            try {
+                DjBasicsSupervisorAuthority authority = new DjBasicsSupervisorAuthority();
+                authority.setMemberId(memberId);
+                authority.setHouseId(houseId);
+                authority.setOperateId(userId);
+                iSupervisorAuthorityMapper.insertSelective(authority);
+            } catch (Exception ignored) {
+            }
         }
         return ServerResponse.createBySuccessMessage("增加成功");
     }
