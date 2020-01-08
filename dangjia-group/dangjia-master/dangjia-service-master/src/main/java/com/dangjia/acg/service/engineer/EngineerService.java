@@ -637,6 +637,7 @@ public class EngineerService {
             if (supervisor != null) {
                 map.put("supName", supervisor.getName());
                 map.put("supMobile", supervisor.getMobile());
+                map.put("supWorkerId", supervisor.getId());
             }
             map.put("designerOk", house.getDesignerOk());
             map.put("budgetOk", house.getBudgetOk());
