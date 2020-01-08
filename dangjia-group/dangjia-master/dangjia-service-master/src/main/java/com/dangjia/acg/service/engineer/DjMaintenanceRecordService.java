@@ -331,6 +331,7 @@ public class DjMaintenanceRecordService {
         }
         //1.标题头文字设置
         paramMap.put("titleName",titleName);
+        paramMap.put("maintenanceRecordType",maintenanceRecordType);//维保人类型
         return  ServerResponse.createBySuccess("查询成功",paramMap);
     }
 
