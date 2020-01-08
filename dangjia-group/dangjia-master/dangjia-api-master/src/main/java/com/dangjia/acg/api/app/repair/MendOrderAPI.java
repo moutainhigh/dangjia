@@ -21,6 +21,10 @@ public interface MendOrderAPI {
     @ApiOperation(value = "业主已添加退货单明细", notes = "业主已添加退货单明细")
     ServerResponse landlordBackDetail(@RequestParam("houseId") String houseId);
 
+    @PostMapping(value = "app/repair/mendOrder/landlordOnekeyBack")
+    @ApiOperation(value = "业主一键退", notes = "业主一键退")
+    ServerResponse landlordOnekeyBack(String userToken, String houseId);
+
     @PostMapping(value = "app/repair/mendOrder/landlordBack")
     @ApiOperation(value = "业主退材料", notes = "业主退材料")
     ServerResponse landlordBack(@RequestParam("userToken") String userToken,
