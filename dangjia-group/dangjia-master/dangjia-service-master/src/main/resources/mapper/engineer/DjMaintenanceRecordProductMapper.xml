@@ -2,6 +2,23 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.dangjia.acg.mapper.engineer.DjMaintenanceRecordProductMapper">
 
+    <sql id="basic_columns">
+            id,
+            create_date createDate,
+            modify_date modifyDate,
+            house_id houseId,
+            product_id productId,
+            maintenance_record_id maintenanceRecordId,
+            shop_count shopCount,
+            price,
+            worker_type_id workerTypeId,
+            maintenance_member_id maintenanceMemberId,
+            maintenance_member_type maintenanceMemberType,
+            total_price totalPrice,
+            pay_price payPrice,
+            over_protection over_protection,
+            pay_state payState
+    </sql>
     <select id="queryDjMaintenanceRecordProductList"
             resultType="com.dangjia.acg.dto.engineer.DjMaintenanceRecordProductDTO">
         SELECT
@@ -65,5 +82,52 @@
         INNER JOIN dj_basics_goods_category bgc ON bgc.id = bpt.category_id
         WHERE
             bgc.parent_top =#{parentTop}
+    </select>
+
+    <select id="selectMaintenanceProductByMemberId" resultType="com.dangjia.acg.modle.engineer.DjMaintenanceRecordProduct">
+        SELECT
+        <include refid="basic_columns"/>
+        FROM
+            dj_maintenance_record_product mrp
+        WHERE
+            mrp.maintenance_member_id = #{memberId}
+        AND mrp.house_id = #{houseId}
+        and mrp.maintenance_member_type = #{maintenanceRecordType}
+        and mrp.worker_type_id = #{workerTypeId}
+        AND (
+            mrp.maintenance_record_id IS NULL
+            OR maintenance_record_id = ''
+        )
+    </select>
+
+    <select id="selectWorkerTypeListById" resultType="java.util.Map">
+       SELECT
+            mrp.worker_type_id workerTypeId,
+            cwt.`name` workerTypeName,
+            cwt.image workerTypeImage,
+            mrp.over_protection overProtection,
+            sum(mrp.total_price) totalPrice,
+            sum(mrp.pay_price) payPrice
+        FROM
+            dj_maintenance_record_product mrp,
+            dj_core_worker_type cwt
+        WHERE
+            mrp.worker_type_id = cwt.id
+        AND mrp.maintenance_record_id = #{maintenanceRecordId}
+        AND mrp.maintenance_member_type = #{maintenanceRecordType}
+        and mrp.pay_state = 1
+        group by mrp.worker_type_id,cwt.`name`,cwt.image
+    </select>
+
+    <!-- 查询已支付的商品总价 -->
+    <select id="queryMaintenanceRecordMoney" resultType="java.lang.Double">
+        SELECT
+            sum(mrp.pay_price) payPrice
+        FROM
+            dj_maintenance_record_product mrp
+        WHERE
+            mrp.maintenance_record_id = #{maintenanceRecordId}
+        AND mrp.maintenance_member_type = #{maintenanceRecordType}
+        AND mrp.pay_state = 2
     </select>
 </mapper>

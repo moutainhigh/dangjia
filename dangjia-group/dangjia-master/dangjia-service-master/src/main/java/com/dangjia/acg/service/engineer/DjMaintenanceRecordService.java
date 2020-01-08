@@ -1,6 +1,7 @@
 package com.dangjia.acg.service.engineer;
 
 import com.dangjia.acg.api.BasicsStorefrontAPI;
+import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.BaseException;
 import com.dangjia.acg.common.exception.ServerCode;
@@ -8,13 +9,16 @@ import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
+import com.dangjia.acg.common.util.MathUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.engineer.*;
+import com.dangjia.acg.dto.product.StorefrontProductDTO;
 import com.dangjia.acg.mapper.account.IMasterAccountFlowRecordMapper;
 import com.dangjia.acg.mapper.complain.IComplainMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
+import com.dangjia.acg.mapper.delivery.IOrderMapper;
 import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordContentMapper;
 import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordMapper;
 import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordProductMapper;
@@ -32,6 +36,7 @@ import com.dangjia.acg.modle.complain.Complain;
 import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.WorkerType;
+import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.engineer.DjMaintenanceRecord;
 import com.dangjia.acg.modle.engineer.DjMaintenanceRecordContent;
 import com.dangjia.acg.modle.engineer.DjMaintenanceRecordProduct;
@@ -39,6 +44,7 @@ import com.dangjia.acg.modle.engineer.DjMaintenanceRecordResponsibleParty;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.TaskStack;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.product.BasicsGoodsCategory;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
@@ -49,8 +55,14 @@ import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.TaskStackService;
 import com.dangjia.acg.service.product.MasterProductTemplateService;
+import com.dangjia.acg.service.safe.WorkerTypeSafeOrderService;
+import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.netflix.hystrix.contrib.javanica.utils.CommonUtils;
+import io.swagger.models.auth.In;
+import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,6 +106,8 @@ public class DjMaintenanceRecordService {
     IWorkerDetailMapper iWorkerDetailMapper;
 
     @Autowired
+    private IOrderMapper iOrderMapper;
+    @Autowired
     private IHouseFlowApplyMapper houseFlowApplyMapper;
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
@@ -124,9 +138,13 @@ public class DjMaintenanceRecordService {
     @Autowired
     private IHouseMapper houseMapper;
     @Autowired
-    private IMasterStorefrontProductMapper iMasterStorefrontProductMapper;
+    private ConfigMessageService configMessageService ;
     @Autowired
     private IMasterProductTemplateMapper iMasterProductTemplateMapper;
+    @Autowired
+    private IMasterStorefrontProductMapper iMasterStorefrontProductMapper;
+    @Autowired
+    private WorkerTypeSafeOrderService workerTypeSafeOrderService;
 
     private static Logger logger = LoggerFactory.getLogger(DjMaintenanceRecordService.class);
 
@@ -138,34 +156,255 @@ public class DjMaintenanceRecordService {
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
         }
-        //判断当前房子下是否有正在处理中的质保
+        //1.判断当前房子下是否有正在处理中的质保
         List<DjMaintenanceRecord> maintenanceRecordList = djMaintenanceRecordMapper.selectMaintenanceRecoredByHouseId(houseId);
         if (maintenanceRecordList != null && maintenanceRecordList.size() > 0) {
             return ServerResponse.createByErrorMessage("已有质保流程在处理中！");
         }
+        //查询保险订单对应的工种
+        WorkerTypeSafeOrder workerTypeSafeOrder=workerTypeSafeOrderMapper.selectByPrimaryKey(workerTypeSafeOrderId);
         Member member = (Member) object;//业主信息
-        //添加质保信息
-        DjMaintenanceRecord djMaintenanceRecord = new DjMaintenanceRecord();
+        List<DjMaintenanceRecordProduct> mrProductList=djMaintenanceRecordProductMapper.selectMaintenanceProductByMemberId(member.getId(),houseId,"1",workerTypeSafeOrder.getWorkerTypeId());
+        if(mrProductList==null||mrProductList.size()==0){
+            return ServerResponse.createByErrorMessage("请选择维保商品！");
+        }
+        //2.添加质保信息
+        DjMaintenanceRecord djMaintenanceRecord=new DjMaintenanceRecord();
         djMaintenanceRecord.setHouseId(houseId);
         djMaintenanceRecord.setMemberId(member.getId());
         djMaintenanceRecord.setOwnerName(member.getName());
         djMaintenanceRecord.setOwnerMobile(member.getMobile());
         djMaintenanceRecord.setWorkerTypeSafeOrderId(workerTypeSafeOrderId);
-        //查询保险订单对应的工种
-        WorkerTypeSafeOrder workerTypeSafeOrder = workerTypeSafeOrderMapper.selectByPrimaryKey(workerTypeSafeOrderId);
         djMaintenanceRecord.setWorkerTypeId(workerTypeSafeOrder.getWorkerTypeId());
         djMaintenanceRecordMapper.insert(djMaintenanceRecord);
-        //添加质保对应的图片、备注信息
-        DjMaintenanceRecordContent djMaintenanceRecordContent = new DjMaintenanceRecordContent();
+        //3.添加质保对应的图片、备注信息
+        DjMaintenanceRecordContent djMaintenanceRecordContent=new DjMaintenanceRecordContent();
         djMaintenanceRecordContent.setMaintenanceRecordId(djMaintenanceRecord.getId());
         djMaintenanceRecordContent.setRemark(remark);
         djMaintenanceRecordContent.setImage(images);
         djMaintenanceRecordContent.setMemberId(member.getId());
         djMaintenanceRecordContent.setType(3);
         djMaintenanceRecordContentMapper.insert(djMaintenanceRecordContent);
-        return ServerResponse.createBySuccess("申请成功", "");
+        //4.判断当前商品质保卡是否在质保期内
+        Integer serviveState=1;//已过保
+        if(workerTypeSafeOrder.getForceTime()!=null&&workerTypeSafeOrder.getExpirationDate()!=null&& DateUtil.compareDate(workerTypeSafeOrder.getExpirationDate(),new Date())){
+            serviveState=0;//未过保
+        }
+        //5.判断是否有需要管家勘查的维保商品
+        Integer stewardExploration=updateMaitenanceProductInfo(mrProductList,member.getId(),houseId,serviveState,djMaintenanceRecord.getId(),djMaintenanceRecord.getWorkerTypeId());
+        if(stewardExploration==1){//若需要勘查，则返回需要勘查的维保勘查费商品
+            return getMaintenaceProductList(djMaintenanceRecord.getId(),4);//勘查费用的商品
+        }else{
+            //返回对应需要维保的业主所有维保商品
+            return getMaintenaceProductList(djMaintenanceRecord.getId(),1);//业主所选维保商品
+        }
     }
 
+    /**
+     * 判断是否需在大管家勘查商品
+     * @param mrProductList
+     * @param memberId
+     * @param houseId
+     * @param serviveState
+     * @param maintenanceRecordId
+     * @param workerTypeId
+     * @return
+     */
+    public Integer updateMaitenanceProductInfo(List<DjMaintenanceRecordProduct> mrProductList,String memberId,String houseId,Integer serviveState,String maintenanceRecordId,String workerTypeId){
+        Integer stewardExploration=0;//是否需要管家勘查,默认为否
+        //查询业主添加的维保商品
+        if(mrProductList!=null&&mrProductList.size()>0){
+            for(DjMaintenanceRecordProduct mrp:mrProductList){
+               if(stewardExploration==0){
+                   //判断当前商品是否需要管家勘查
+                   StorefrontProduct storefrontProduct=iMasterStorefrontProductMapper.selectByPrimaryKey(mrp.getProductId());
+                   DjBasicsProductTemplate djBasicsProductTemplate=iMasterProductTemplateMapper.selectByPrimaryKey(storefrontProduct.getProdTemplateId());
+                   stewardExploration=djBasicsProductTemplate.getStewardExploration();
+               }
+               //修改当前商品的过期状态
+                mrp.setMaintenanceRecordId(maintenanceRecordId);
+                mrp.setOverProtection(serviveState);
+                if(serviveState==1){
+                    mrp.setPayPrice(mrp.getTotalPrice());//已过保需支付金额为当前金额
+                }else{
+                    mrp.setPayPrice(0d);//未过保需支付金额为0
+                }
+                mrp.setModifyDate(new Date());
+                djMaintenanceRecordProductMapper.updateByPrimaryKeySelective(mrp);//修改对应的商品过保状态
+            }
+            if(stewardExploration==1){
+                DjMaintenanceRecordProduct recordProduct=mrProductList.get(0);
+                //维护对应的勘查费用商品
+                Example example=new Example(DjBasicsProductTemplate.class);
+                example.createCriteria().andEqualTo(DjBasicsProductTemplate.MAINTENANCE_INVESTIGATION,1);
+                DjBasicsProductTemplate djBasicsProductTemplate=iMasterProductTemplateMapper.selectOneByExample(example);
+                if(djBasicsProductTemplate!=null&& StringUtils.isNotBlank(djBasicsProductTemplate.getId())){
+                    StorefrontProductDTO storefrontProductDTO=imasterProductTemplateService.getStorefrontProductByTemplateId(djBasicsProductTemplate.getId());
+                    DjMaintenanceRecordProduct mrp=new DjMaintenanceRecordProduct();
+                    mrp.setProductId(storefrontProductDTO.getStorefrontProductId());
+                    mrp.setMaintenanceRecordId(maintenanceRecordId);
+                    mrp.setHouseId(houseId);
+                    mrp.setMaintenanceMemberId(memberId);
+                    mrp.setMaintenanceMemberType(4);
+                    mrp.setPrice(storefrontProductDTO.getSellPrice());
+                    mrp.setShopCount(1d);
+                    mrp.setTotalPrice(storefrontProductDTO.getSellPrice());
+                    mrp.setOverProtection(serviveState);
+                    if(serviveState==1){
+                        mrp.setPayPrice(mrp.getTotalPrice());//已过保需支付金额为当前金额
+                    }else{
+                        mrp.setPayPrice(0d);//未过保需支付金额为0
+                    }
+                    mrp.setWorkerTypeId(workerTypeId);
+                    mrp.setPayState(1);
+                    djMaintenanceRecordProductMapper.insert(mrp);//添加维保勘查费用商品
+                }
+            }
+        }
+
+        return stewardExploration;
+    }
+
+    /**
+     * 查询符合条件的商品
+     * @param maintenanceRecordId
+     * @param maintenanceRecordType
+     * @return
+     */
+    public ServerResponse getMaintenaceProductList(String maintenanceRecordId,Integer maintenanceRecordType){
+        Map<String,Object> paramMap=new HashMap<>();
+        String titleName="";
+        if(maintenanceRecordType==4){
+            titleName= DjConstants.CommonMessage.GJ_KC_MSG;
+        }
+
+        //2.查询对应工总的质保商品总 额
+        Double totalPrice=0d;
+        Double payPrice=0d;
+        List<Map<String,Object>> workerTypeList=djMaintenanceRecordProductMapper.selectWorkerTypeListById(maintenanceRecordId,maintenanceRecordType);
+        if(workerTypeList!=null&&workerTypeList.size()>0){
+            String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            for(Map map:workerTypeList){
+                String workerTypeId=(String)map.get("workerTypeId");
+                String workerTypeImage=(String)map.get("workerTypeImage");
+                Integer overProtection=(Integer)map.get("overProtection");
+                map.put("workerTypeImageUrl",address+workerTypeImage);
+                totalPrice= MathUtil.add(totalPrice,(Double)map.get("totalPrice"));
+                payPrice= MathUtil.add(payPrice,(Double)map.get("payPrice"));
+                //查对应的商品信息
+                Example example=new Example(DjMaintenanceRecordProduct.class);
+                example.createCriteria().andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_RECORD_ID,maintenanceRecordId)
+                        .andEqualTo(DjMaintenanceRecordProduct.WORKER_TYPE_ID,workerTypeId)
+                        .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_MEMBER_TYPE,maintenanceRecordType);
+                List<DjMaintenanceRecordProduct> mrProductList=djMaintenanceRecordProductMapper.selectByExample(example);
+                List productList=workerTypeSafeOrderService.getRecordProductList(mrProductList);
+                if(overProtection==1){
+                    map.put("overProtectionName","已过保");
+                }else{
+                    map.put("overProtectionName","质保期内");
+                }
+                map.put("productList",productList);
+            }
+        }
+        //加上工种列表
+        paramMap.put("workerTypeList",workerTypeList);
+        //设置商品总额，及需支付总额
+        paramMap.put("totalPrice",totalPrice);
+        paramMap.put("payPrice",payPrice);
+        if(maintenanceRecordType==2||maintenanceRecordType==3){
+            //获取已支付单的信息
+           paramMap.putAll(getOrderProductInfo(maintenanceRecordType,maintenanceRecordId,payPrice));
+            Integer payType=(Integer) paramMap.get("payType");
+            if(payType==1){
+                titleName= DjConstants.CommonMessage.GJ_ZB_BK;
+            }else if(payType==3){
+                titleName= DjConstants.CommonMessage.GJ_ZB_TK;
+            }
+        }else{
+            paramMap.put("paymentPrice",0d);
+            paramMap.put("needPayPrice",payPrice);
+            if(payPrice>0){
+                paramMap.put("payType",1);//订单类型:1需支付，2无需支付，3待退款
+            }else if(payPrice==0){
+                paramMap.put("payType",2);//订单类型:1需支付，2无需支付，3待退款
+            }
+        }
+        //1.标题头文字设置
+        paramMap.put("titleName",titleName);
+        return  ServerResponse.createBySuccess("查询成功",paramMap);
+    }
+
+    /**
+     * 查询已支付的订单信息
+     * @param maintenanceRecordType
+     * @param maintenanceRecordId
+     * @param payPrice
+     * @return
+     */
+    public Map<String,Object> getOrderProductInfo(Integer maintenanceRecordType, String maintenanceRecordId,Double payPrice){
+        Map<String,Object> paramMap=new HashMap();
+        if(maintenanceRecordType==2){
+            //查询已支付总额
+            List productList=null;
+            Double totalPayPrice=djMaintenanceRecordProductMapper.queryMaintenanceRecordMoney(maintenanceRecordId,1);
+            if(totalPayPrice!=null&&totalPayPrice>0){
+                // 查询已支付订单列表
+                Example example=new Example(DjMaintenanceRecordProduct.class);
+                example.createCriteria().andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_RECORD_ID,maintenanceRecordId)
+                        .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_MEMBER_TYPE,1);
+                List<DjMaintenanceRecordProduct> mrProductList=djMaintenanceRecordProductMapper.selectByExample(example);
+                productList=workerTypeSafeOrderService.getRecordProductList(mrProductList);
+
+            }else{
+                totalPayPrice=0d;
+            }
+            paramMap.put("paymentPrice",totalPayPrice);
+            paramMap.put("needPayPrice",MathUtil.sub(payPrice,totalPayPrice));
+            paramMap.put("orderProductList",productList);
+        }else if(maintenanceRecordType==3){
+            Double totalPayPrice=djMaintenanceRecordProductMapper.queryMaintenanceRecordMoney(maintenanceRecordId,2);
+            List productList=null;
+            List<DjMaintenanceRecordProduct> mrProductList;
+            if(totalPayPrice==null||totalPayPrice==0){
+                totalPayPrice=djMaintenanceRecordProductMapper.queryMaintenanceRecordMoney(maintenanceRecordId,1);
+                if(totalPayPrice==null){
+                    totalPayPrice=0d;
+                }
+                //查询已支付订单列表
+                Example example=new Example(DjMaintenanceRecordProduct.class);
+                example.createCriteria().andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_RECORD_ID,maintenanceRecordId)
+                        .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_MEMBER_TYPE,1);
+                mrProductList=djMaintenanceRecordProductMapper.selectByExample(example);
+                productList=workerTypeSafeOrderService.getRecordProductList(mrProductList);
+            }else {
+                Example example=new Example(DjMaintenanceRecordProduct.class);
+                example.createCriteria().andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_RECORD_ID,maintenanceRecordId)
+                        .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_MEMBER_TYPE,2);
+                mrProductList=djMaintenanceRecordProductMapper.selectByExample(example);
+                productList=workerTypeSafeOrderService.getRecordProductList(mrProductList);
+            }
+            paramMap.put("payMentPrice",totalPayPrice);
+            Double needPayPrice=MathUtil.sub(payPrice,totalPayPrice);
+            paramMap.put("needPayPrice",needPayPrice);
+            if(needPayPrice>0){
+                paramMap.put("payType",1);//订单类型:1需支付，2无需支付，3待退款
+            }else if(needPayPrice==0){
+                paramMap.put("payType",2);//订单类型:1需支付，2无需支付，3待退款
+            }else{
+                paramMap.put("payType",3);//订单类型:1需支付，2无需支付，3待退款
+            }
+            paramMap.put("orderProductList",productList);
+            if(mrProductList!=null&&mrProductList.size()>0){
+                DjMaintenanceRecordProduct djMaintenanceRecordProduct=mrProductList.get(0);
+                Example example = new Example(Order.class);
+                example.createCriteria().andEqualTo(Order.BUSINESS_ORDER_NUMBER,djMaintenanceRecordProduct.getBusinessOrderNumber());
+                Order order=iOrderMapper.selectOneByExample(example);
+                paramMap.put("orderNumber",order.getOrderNumber());//订单号
+                paramMap.put("createDate",order.getCreateDate());//创建时间
+            }
+        }
+        return paramMap;
+    }
 
     /**
      * 查询质保审核列表
@@ -254,7 +493,7 @@ public class DjMaintenanceRecordService {
                 djMaintenanceRecordDTOS.setStewardImages(this.getImage(djMaintenanceRecordDTOS.getStewardImage()));
             }
 
-            return ServerResponse.createBySuccess("查询成功", djMaintenanceRecordDTOS);
+            return ServerResponse.createBySuccess("查询成功",djMaintenanceRecordDTOS);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("查询失败");
@@ -264,7 +503,6 @@ public class DjMaintenanceRecordService {
 
     /**
      * 处理质保审核
-     *
      * @param id
      * @return
      */
