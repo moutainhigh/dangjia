@@ -22,6 +22,10 @@ import javax.servlet.http.HttpServletRequest;
 @Api(value = "用户信息接口", description = "用户信息接口")
 public interface MemberAPI {
 
+
+    @RequestMapping(value = "member/getUserToKenStr", method = RequestMethod.POST)
+    @ApiOperation(value = "获取用户Token", notes = "获取用户Token")
+    String getUserToKenStr(@RequestParam("userRole") String userRole,@RequestParam("memberId") String memberId);
     /**
      * showdoc
      *

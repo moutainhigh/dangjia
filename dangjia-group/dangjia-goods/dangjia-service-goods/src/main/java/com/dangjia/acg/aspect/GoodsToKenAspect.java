@@ -24,10 +24,6 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 
-import java.util.Map;
-
-import static com.dangjia.acg.common.util.AES.decrypt;
-
 /**
  *  拦截器：检查用户是否登录……
  *
@@ -83,7 +79,6 @@ public class GoodsToKenAspect {
                 return ServerResponse.createbyUserTokenError();
             }
         }
-
 
 
         if(!CommonUtil.isEmpty(houseId)) {

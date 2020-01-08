@@ -123,6 +123,11 @@ public class MemberService {
     @Autowired
     private IStoreUserMapper iStoreUserMapper;
 
+    public String getUserToKenStr(String userRole,String memberId){
+        String userRoleText = "role" + userRole + ":" + memberId;
+        String token = redisClient.getCache(userRoleText, String.class);
+        return  token;
+    }
     /**
      * 获取用户手机号
      *

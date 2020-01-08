@@ -68,6 +68,9 @@ public class ConfigMessageService {
      * @return
      */
     public ServerResponse getConfigMessages(HttpServletRequest request, PageDTO pageDTO, ConfigMessage configMessage) {
+        if ("4".equals(configMessage.getAppType())) {
+            configMessage.setAppType("2");
+        }
         String userToken = request.getParameter(Constants.USER_TOKEY);
         String cityId = request.getParameter(Constants.CITY_ID);
         Example example = new Example(ConfigMessage.class);

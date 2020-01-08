@@ -20,7 +20,10 @@ public class MemberController implements MemberAPI {
     private MemberService memberService;
     @Autowired
     private CraftsmanConstructionService constructionService;
-
+    @Override
+    public String getUserToKenStr(String userRole,String memberId){
+        return memberService.getUserToKenStr(userRole, memberId);
+    }
     @Override
     @ApiMethod
     public ServerResponse getMemberMobile(HttpServletRequest request, String id, String idType) {

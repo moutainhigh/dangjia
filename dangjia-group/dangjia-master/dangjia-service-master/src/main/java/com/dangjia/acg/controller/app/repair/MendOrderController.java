@@ -36,6 +36,15 @@ public class MendOrderController implements MendOrderAPI {
         return mendOrderService.landlordBackDetail(houseId);
     }
     /**
+     *   业主一键退
+     */
+    @Override
+    public ServerResponse landlordOnekeyBack(String userToken, String houseId){
+        return mendOrderService.landlordOnekeyBack(userToken, houseId);
+    }
+
+
+    /**
      * 业主退材料
      */
     @Override

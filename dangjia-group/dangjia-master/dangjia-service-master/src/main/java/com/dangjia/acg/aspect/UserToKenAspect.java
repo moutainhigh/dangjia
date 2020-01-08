@@ -54,6 +54,7 @@ public class UserToKenAspect {
                         userToken = json.getString(Constants.USER_TOKEY);
                     }
                 }
+
             }catch (Exception e){
 
             }

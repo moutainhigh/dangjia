@@ -90,6 +90,9 @@ public class ReturnAspect {
             JSONObject json = JSON.parseObject(new String(dec));
             for (int i = 0; i < args.length; i++) {
                 if(args[i] instanceof HttpServletRequest){
+                    for (String key:json.keySet()){
+                        request.setAttribute(key,json.get(key));
+                    }
                     ParameterRequestWrapper wrapper = new ParameterRequestWrapper(request, json);
                     args[i]=wrapper;
                 }else if (CommonUtil.isBaseType(argClasss[i]))  {
