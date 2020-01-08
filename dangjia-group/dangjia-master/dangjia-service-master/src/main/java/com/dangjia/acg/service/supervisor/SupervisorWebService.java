@@ -6,7 +6,6 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dto.supervisor.AuthorityDTO;
 import com.dangjia.acg.mapper.supervisor.ISupervisorAuthorityMapper;
-import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.supervisor.DjBasicsSupervisorAuthority;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
