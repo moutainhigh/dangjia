@@ -1578,6 +1578,67 @@ public class DateUtil implements AutoCloseable, Serializable {
         calendar.set(Calendar.MILLISECOND, calendar.getActualMaximum(Calendar.MILLISECOND));
     }
 
+    /**
+     * 根据开始时间和结束时间返回时间段内的时间集合
+     * @param beginDate
+     * @param endDate
+     * @return List<Date>
+     * @throws ParseException
+     */
+    public static List<String> getDatesBetweenTwoDate(String beginDate, String endDate) throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat(FORMAT1);
+        List<String> lDate = new ArrayList<String>();
+        lDate.add(beginDate);//把开始时间加入集合
+        Calendar cal = Calendar.getInstance();
+        //使用给定的 Date 设置此 Calendar 的时间
+        cal.setTime(sdf.parse(beginDate));
+        boolean bContinue = true;
+        while (bContinue) {
+            //根据日历的规则，为给定的日历字段添加或减去指定的时间量
+            cal.add(Calendar.DAY_OF_MONTH, 1);
+            // 测试此日期是否在指定日期之后
+            if (sdf.parse(endDate).after(cal.getTime())) {
+                lDate.add(sdf.format(cal.getTime()));
+            } else {
+                break;
+            }
+        }
+        lDate.add(endDate);//把结束时间加入集合
+        return lDate;
+    }
+
+    /**
+     * 判断日期是否是周末
+     * @param bDate
+     * @return
+     * @throws ParseException
+     */
+    public static boolean isWeekend(String bDate) throws ParseException {
+        DateFormat format1 = new SimpleDateFormat(FORMAT1);
+        Date bdate = format1.parse(bDate);
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(bdate);
+        if(cal.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY || cal.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY){
+            return true;
+        } else{
+            return false;
+        }
+    }
+
+    public static Integer getWeekendDay(Date startDate,Date endDate){
+        Integer dayNum=0;
+        try {
+            List<String> allData= getDatesBetweenTwoDate(getDateString(startDate.getTime()),getDateString(endDate.getTime()));
+            for (String allDatum : allData) {
+                if(isWeekend(allDatum)){
+                    dayNum++;
+                }
+            }
+        } catch (Exception e) {
+            return dayNum;
+        }
+        return dayNum;
+    }
     public static void main(String[] args) {
 
         DateRange currentQuarter = getThisQuarter();

@@ -14,6 +14,7 @@ import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.repair.ChangeOrder;
+import com.dangjia.acg.service.configRule.ConfigRuleUtilService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -38,6 +39,8 @@ public class HouseFlowScheduleService {
     private IHouseMapper houseMapper;
     @Autowired
     private IChangeOrderMapper changeOrderMapper;
+    @Autowired
+    private ConfigRuleUtilService configRuleUtilService;
 
     /**
      * 工程日历工序列表
@@ -85,21 +88,6 @@ public class HouseFlowScheduleService {
     }
 
 
-    /**
-     * 设置指定工序的工期
-     *
-     * @param houseFlowId 工序ID
-     * @param startDate   工期开始时间
-     * @param endDate     工期结束时间
-     * @return
-     */
-    public ServerResponse setHouseFlowSchedule(String houseFlowId, Date startDate, Date endDate) {
-        HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
-        houseFlow.setStartDate(startDate);
-        houseFlow.setEndDate(endDate);
-        houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
-        return ServerResponse.createBySuccessMessage("保持成功");
-    }
 
     /**
      * 延长或提前工序的工期
@@ -139,14 +127,14 @@ public class HouseFlowScheduleService {
      * @param houseId 房子ID
      * @return
      */
-    public ServerResponse makeCalendar(String houseId) {
+    public ServerResponse makeCalendar(Date constructionDate,Boolean isWeekend,String houseId) {
         House house = houseMapper.selectByPrimaryKey(houseId);
         if(house.getVisitState()==4){
             return ServerResponse.createByErrorMessage("已提前结束，无法排期");
         }
-        house.setSchedule("1");
+        List<HouseFlow> houseFlowList = houseFlowMapper.getForCheckMoney(houseId);
+        configRuleUtilService.getAutoSchedulingConfig(constructionDate,isWeekend,house,houseFlowList);
 
-        houseMapper.updateByPrimaryKeySelective(house);
         return ServerResponse.createBySuccessMessage("生成成功");
     }
 
