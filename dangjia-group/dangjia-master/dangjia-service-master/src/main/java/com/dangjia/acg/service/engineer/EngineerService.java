@@ -234,7 +234,7 @@ public class EngineerService {
             houseFlow.setWorkerId(workerId);
             House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
             HouseWorker houseWorker = houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), 1);
-            houseWorkerService.grabSheet(worker, house, houseFlow, houseMapper);
+            houseWorkerService.grabSheet(worker, house, houseFlow);
             if (houseWorker != null) {
                 houseWorker.setWorkerId(workerId);
                 houseWorker.setWorkType(1);//已抢单

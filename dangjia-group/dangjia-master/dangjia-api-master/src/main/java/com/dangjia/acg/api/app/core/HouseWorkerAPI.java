@@ -27,7 +27,8 @@ public interface HouseWorkerAPI {
     @ApiOperation(value = "工匠抢单", notes = "工匠抢单")
     ServerResponse setWorkerGrab(@RequestParam("userToken") String userToken,
                                  @RequestParam("cityId") String cityId,
-                                 @RequestParam("houseFlowId") String houseFlowId);
+                                 @RequestParam("houseFlowId") String houseFlowId,
+                                 @RequestParam("type") Integer type);
 
     /**
      * showdoc

@@ -26,13 +26,15 @@ public interface HouseFlowAPI {
     ServerResponse getGrabList(@RequestParam("request")  HttpServletRequest request,
                                @RequestParam("pageDTO") PageDTO pageDTO,
                                @RequestParam("userToken") String userToken,
-                               @RequestParam("cityId") String cityId);
+                               @RequestParam("cityId") String cityId,
+                               @RequestParam("type") Integer type);
 
     @PostMapping("app/core/houseFlow/getGrabInfo")
     @ApiOperation(value = "抢单详细(装修+维修)", notes = "抢单详细(装修+维修)")
     ServerResponse getGrabInfo(@RequestParam("request")  HttpServletRequest request,
                                @RequestParam("userToken") String userToken,
-                               @RequestParam("houseFlowId") String houseFlowId);
+                               @RequestParam("houseFlowId") String houseFlowId,
+                               @RequestParam("type") Integer type);
 
 
     @PostMapping("app/core/houseFlow/setGrabVerification")

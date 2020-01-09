@@ -22,6 +22,8 @@ import com.dangjia.acg.dto.house.HouseChatDTO;
 import com.dangjia.acg.dto.house.MyHouseFlowDTO;
 import com.dangjia.acg.mapper.complain.IComplainMapper;
 import com.dangjia.acg.mapper.core.*;
+import com.dangjia.acg.mapper.delivery.IOrderMapper;
+import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordMapper;
 import com.dangjia.acg.mapper.engineer.DjSkillCertificationMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IModelingVillageMapper;
@@ -38,6 +40,8 @@ import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.complain.Complain;
 import com.dangjia.acg.modle.core.*;
+import com.dangjia.acg.modle.deliver.Order;
+import com.dangjia.acg.modle.engineer.DjMaintenanceRecord;
 import com.dangjia.acg.modle.engineer.DjSkillCertification;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.ModelingVillage;
@@ -156,6 +160,13 @@ public class HouseWorkerService {
     private TaskStackService taskStackService;
     @Autowired
     private IMasterTechnologyMapper iMasterTechnologyMapper;
+
+    @Autowired
+    private IOrderMapper orderMapper;
+
+    @Autowired
+    private DjMaintenanceRecordMapper djMaintenanceRecordMapper;
+
     /**
      * 根据工人id查询所有房子任务
      */
@@ -457,7 +468,7 @@ public class HouseWorkerService {
     /**
      * 抢单
      */
-    public ServerResponse setWorkerGrab(String userToken, String cityId, String houseFlowId) {
+    public ServerResponse setWorkerGrab(String userToken, String cityId, String houseFlowId,Integer type) {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
@@ -467,91 +478,160 @@ public class HouseWorkerService {
             ServerResponse serverResponse = houseFlowService.setGrabVerification(userToken, cityId, houseFlowId);
             if (!serverResponse.isSuccess())
                 return serverResponse;
-            HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
-            if (houseFlow.getWorkType() == 3) {
-                return ServerResponse.createByErrorMessage("该订单已被抢");
-            }
-            House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
-            houseFlow.setGrabNumber(houseFlow.getGrabNumber() + 1);
-            houseFlow.setWorkType(3);//等待支付
-            houseFlow.setWorkerId(worker.getId());
-            grabSheet(worker, house, houseFlow, houseMapper);
-            houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
-            houseWorkerMapper.doModifyAllByWorkerId(worker.getId());//将所有houseWorker的选中状态IsSelect改为0未选中
-            HouseWorker houseWorker = new HouseWorker();
-            houseWorker.setHouseId(house.getId());
-            houseWorker.setWorkerId(worker.getId());
-            houseWorker.setWorkerTypeId(houseFlow.getWorkerTypeId());
-            houseWorker.setWorkerType(houseFlow.getWorkerType());
-            houseWorker.setWorkType(1);//已抢单
-            houseWorker.setIsSelect(1);
-            houseWorker.setPrice(houseFlow.getWorkPrice());
-            houseWorker.setType(0);
-            houseWorker.setBusinessId(houseFlow.getId());
-            houseWorkerMapper.insert(houseWorker);
+            if(type==1){
+                Order order =  orderMapper.selectByPrimaryKey(houseFlowId);
+                Example example = new Example(HouseWorker.class);
+                example.createCriteria().andEqualTo(HouseWorker.WORK_TYPE,1).andEqualTo(HouseWorker.TYPE,type).andEqualTo(HouseWorker.BUSINESS_ID,order.getId());
+                Integer ordernum= houseWorkerMapper.selectCountByExample(example);
+                if (ordernum>0) {
+                    return ServerResponse.createByErrorMessage("该订单已被抢");
+                }
+                houseWorkerMapper.doModifyAllByWorkerId(worker.getId());//将所有houseWorker的选中状态IsSelect改为0未选中
+                HouseWorker houseWorker = new HouseWorker();
+                houseWorker.setWorkerId(worker.getId());
+                houseWorker.setWorkerTypeId(worker.getWorkerTypeId());
+                houseWorker.setWorkerType(worker.getWorkerType());
+                houseWorker.setWorkType(1);//已抢单
+                houseWorker.setIsSelect(1);
+                houseWorker.setPrice(order.getTotalAmount());
+                houseWorker.setType(type);
+                houseWorker.setBusinessId(order.getId());
+                houseWorkerMapper.insert(houseWorker);
 
-            Example example = new Example(MemberCity.class);
-            example.createCriteria()
-                    .andEqualTo(MemberCity.MEMBER_ID, worker.getId())
-                    .andEqualTo(MemberCity.CITY_ID, cityId);
-            List list = memberCityMapper.selectByExample(example);
-            if (list.size() == 0) {
-                MemberCity userCity = new MemberCity();
-                userCity.setMemberId(worker.getId());
-                userCity.setCityId(cityId);
-                userCity.setCityName(house.getCityName());
-                memberCityMapper.insert(userCity);
-            }
-            example = new Example(Insurance.class);
-            example.createCriteria().andEqualTo(Insurance.WORKER_ID, houseWorker.getWorkerId()).andIsNotNull(Insurance.END_DATE);
-            example.orderBy(Insurance.END_DATE).desc();
-            List<Insurance> insurances = insuranceMapper.selectByExample(example);
+                order.setWorkerId(worker.getId());
+                order.setWorkerTypeId(order.getWorkerTypeId());
+                orderMapper.updateByPrimaryKeySelective(order);
 
-            //保险服务剩余天数小于等于60天
-            Integer daynum = 0;
-            if (insurances.size() > 0) {
-                daynum = DateUtil.daysofTwo(new Date(), insurances.get(0).getEndDate());
-            }
-            //工人未购买保险
-            if (houseFlow.getWorkerType() > 2 && ((insurances.size() == 0) || (insurances.size() > 0 & daynum <= 60))) {
-                //满足则不提醒业主
-            } else {
+                String text = "业主您好,我是体验师" +  worker.getName() + "，已成功抢单";
+                HouseChatDTO h = new HouseChatDTO();
+                h.setTargetId(order.getMemberId());
+                h.setTargetAppKey(messageAPI.getAppKey(AppType.ZHUANGXIU.getDesc()));
+                h.setText(text);
+                return ServerResponse.createBySuccess("抢单成功", h);
+            }else if(type==2){
+                DjMaintenanceRecord record=djMaintenanceRecordMapper.selectByPrimaryKey(houseFlowId);
+                Example example = new Example(HouseWorker.class);
+                example.createCriteria().andEqualTo(HouseWorker.WORK_TYPE,1).andEqualTo(HouseWorker.TYPE,type).andEqualTo(HouseWorker.BUSINESS_ID,record.getId());
+                Integer ordernum= houseWorkerMapper.selectCountByExample(example);
+                if (ordernum>0) {
+                    return ServerResponse.createByErrorMessage("该订单已被抢");
+                }
+                houseWorkerMapper.doModifyAllByWorkerId(worker.getId());//将所有houseWorker的选中状态IsSelect改为0未选中
+                HouseWorker houseWorker = new HouseWorker();
+                houseWorker.setWorkerId(worker.getId());
+                houseWorker.setWorkerTypeId(worker.getWorkerTypeId());
+                houseWorker.setWorkerType(worker.getWorkerType());
+                houseWorker.setWorkType(1);//已抢单
+                houseWorker.setIsSelect(1);
+                houseWorker.setPrice(new BigDecimal(record.getSincePurchaseAmount()));
+                houseWorker.setType(type);
+                houseWorker.setBusinessId(record.getId());
+                houseWorkerMapper.insert(houseWorker);
+
+                if(worker.getWorkerType()==3){
+                    record.setStewardId(worker.getId());
+                    record.setStewardState(1);
+                    record.setStewardOrderTime(new Date());
+                    djMaintenanceRecordMapper.updateByPrimaryKeySelective(record);
+                }else{
+                    record.setWorkerMemberId(worker.getId());
+                    record.setWorkerTypeId(worker.getWorkerTypeId());
+                    record.setWorkerCreateDate(new Date());
+                    djMaintenanceRecordMapper.updateByPrimaryKeySelective(record);
+                }
+                String text = "业主您好,我是"+ workerTypeMapper.getName(worker.getWorkerType())+"维保" +  worker.getName() + "，已成功抢单";
+                HouseChatDTO h = new HouseChatDTO();
+                h.setTargetId(record.getMemberId());
+                h.setTargetAppKey(messageAPI.getAppKey(AppType.ZHUANGXIU.getDesc()));
+                h.setText(text);
+                return ServerResponse.createBySuccess("抢单成功");
+            }else {
+                HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
+                if (houseFlow.getWorkType() == 3) {
+                    return ServerResponse.createByErrorMessage("该订单已被抢");
+                }
+                House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
+                houseFlow.setGrabNumber(houseFlow.getGrabNumber() + 1);
+                houseFlow.setWorkType(3);//等待支付
+                houseFlow.setWorkerId(worker.getId());
+                grabSheet(worker, house, houseFlow);
+                houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
+                houseWorkerMapper.doModifyAllByWorkerId(worker.getId());//将所有houseWorker的选中状态IsSelect改为0未选中
+                HouseWorker houseWorker = new HouseWorker();
+                houseWorker.setHouseId(house.getId());
+                houseWorker.setWorkerId(worker.getId());
+                houseWorker.setWorkerTypeId(houseFlow.getWorkerTypeId());
+                houseWorker.setWorkerType(houseFlow.getWorkerType());
+                houseWorker.setWorkType(1);//已抢单
+                houseWorker.setIsSelect(1);
+                houseWorker.setPrice(houseFlow.getWorkPrice());
+                houseWorker.setType(0);
+                houseWorker.setBusinessId(houseFlow.getId());
+                houseWorkerMapper.insert(houseWorker);
+
+                Example example = new Example(MemberCity.class);
+                example.createCriteria()
+                        .andEqualTo(MemberCity.MEMBER_ID, worker.getId())
+                        .andEqualTo(MemberCity.CITY_ID, cityId);
+                List list = memberCityMapper.selectByExample(example);
+                if (list.size() == 0) {
+                    MemberCity userCity = new MemberCity();
+                    userCity.setMemberId(worker.getId());
+                    userCity.setCityId(cityId);
+                    userCity.setCityName(house.getCityName());
+                    memberCityMapper.insert(userCity);
+                }
+                example = new Example(Insurance.class);
+                example.createCriteria().andEqualTo(Insurance.WORKER_ID, houseWorker.getWorkerId()).andIsNotNull(Insurance.END_DATE);
+                example.orderBy(Insurance.END_DATE).desc();
+                List<Insurance> insurances = insuranceMapper.selectByExample(example);
+
+                //保险服务剩余天数小于等于60天
+                Integer daynum = 0;
+                if (insurances.size() > 0) {
+                    daynum = DateUtil.daysofTwo(new Date(), insurances.get(0).getEndDate());
+                }
+                //工人未购买保险
+                if (houseFlow.getWorkerType() > 2 && ((insurances.size() == 0) || (insurances.size() > 0 & daynum <= 60))) {
+                    //满足则不提醒业主
+                } else {
 //            3大管家,4拆除，6水电工，7防水，8泥工,9木工，10油漆工
-                //通知业主设计师抢单成功
-                if (worker.getWorkerType() == 1) {//设计师
-                    configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "设计师抢单提醒",
-                            String.format(DjConstants.PushMessage.DESIGNER_GRABS_THE_BILL, house.getHouseName()), "");
-                }
-                //通知业主精算师抢单成功
-                if (worker.getWorkerType() == 2) {//精算师
-                    configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "精算师抢单提醒",
-                            String.format(DjConstants.PushMessage.BUDGET_GRABS_THE_BILL, house.getHouseName()), "");
-                }
-                //通知业主大管家抢单成功
-                if (worker.getWorkerType() == 3) {//大管家
+                    //通知业主设计师抢单成功
+                    if (worker.getWorkerType() == 1) {//设计师
+                        configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "设计师抢单提醒",
+                                String.format(DjConstants.PushMessage.DESIGNER_GRABS_THE_BILL, house.getHouseName()), "");
+                    }
+                    //通知业主精算师抢单成功
+                    if (worker.getWorkerType() == 2) {//精算师
+                        configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "精算师抢单提醒",
+                                String.format(DjConstants.PushMessage.BUDGET_GRABS_THE_BILL, house.getHouseName()), "");
+                    }
+                    //通知业主大管家抢单成功
+                    if (worker.getWorkerType() == 3) {//大管家
 
-                    configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "大管家抢单提醒",
-                            String.format(DjConstants.PushMessage.STEWARD_RUSH_TO_PURCHASE, house.getHouseName()), "");
+                        configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "大管家抢单提醒",
+                                String.format(DjConstants.PushMessage.STEWARD_RUSH_TO_PURCHASE, house.getHouseName()), "");
+                    }
+                    if (worker.getWorkerType() > 3) {//其他工匠
+                        configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "工匠抢单提醒",
+                                String.format(DjConstants.PushMessage.CRAFTSMAN_RUSH_TO_PURCHASE, house.getHouseName()), "4");
+                        //通知大管家已有工匠抢单
+                        //通知大管家抢单
+                        HouseFlow houseFlowDgj = houseFlowMapper.getHouseFlowByHidAndWty(houseFlow.getHouseId(), 3);
+                        configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlowDgj.getWorkerId(), "0", "工匠抢单提醒",
+                                String.format(DjConstants.PushMessage.STEWARD_TWO_RUSH_TO_PURCHASE, house.getHouseName()), "4");
+                    }
                 }
-                if (worker.getWorkerType() > 3) {//其他工匠
-                    configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "工匠抢单提醒",
-                            String.format(DjConstants.PushMessage.CRAFTSMAN_RUSH_TO_PURCHASE, house.getHouseName()), "4");
-                    //通知大管家已有工匠抢单
-                    //通知大管家抢单
-                    HouseFlow houseFlowDgj = houseFlowMapper.getHouseFlowByHidAndWty(houseFlow.getHouseId(), 3);
-                    configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlowDgj.getWorkerId(), "0", "工匠抢单提醒",
-                            String.format(DjConstants.PushMessage.STEWARD_TWO_RUSH_TO_PURCHASE, house.getHouseName()), "4");
-                }
+                example = new Example(WorkerType.class);
+                example.createCriteria().andEqualTo(WorkerType.TYPE, worker.getWorkerType());
+                List<WorkerType> workerType = workerTypeMapper.selectByExample(example);
+                String text = "业主您好,我是" + workerType.get(0).getName() + worker.getName() + "，已成功抢单";
+                HouseChatDTO h = new HouseChatDTO();
+                h.setTargetId(house.getMemberId());
+                h.setTargetAppKey(messageAPI.getAppKey(AppType.ZHUANGXIU.getDesc()));
+                h.setText(text);
+                return ServerResponse.createBySuccess("抢单成功", h);
             }
-            example = new Example(WorkerType.class);
-            example.createCriteria().andEqualTo(WorkerType.TYPE, worker.getWorkerType());
-            List<WorkerType> workerType = workerTypeMapper.selectByExample(example);
-            String text = "业主您好,我是" + workerType.get(0).getName() + worker.getName() + "已成功抢单";
-            HouseChatDTO h = new HouseChatDTO();
-            h.setTargetId(house.getMemberId());
-            h.setTargetAppKey(messageAPI.getAppKey(AppType.ZHUANGXIU.getDesc()));
-            h.setText(text);
-            return ServerResponse.createBySuccess("抢单成功", h);
         } catch (Exception e) {
             e.printStackTrace();
             return ServerResponse.createByErrorMessage("抢单失败");
@@ -564,9 +644,8 @@ public class HouseWorkerService {
      * @param worker      工匠
      * @param house       房子
      * @param houseFlow   工序
-     * @param houseMapper 房子表mapper
      */
-    public void grabSheet(Member worker, House house, HouseFlow houseFlow, IHouseMapper houseMapper) {
+    public void grabSheet(Member worker, House house, HouseFlow houseFlow) {
         if (worker.getWorkerType() == 1) {//设计师
             house.setDesignerOk(1);//有设计抢单待业主支付
             houseFlow.setWorkType(3);
@@ -1442,7 +1521,7 @@ public class HouseWorkerService {
         for (Map<String, Object> stringObjectMap : list) {
             String userRoleText = "role2:" + stringObjectMap.get(HouseWorker.WORKER_ID);
             String userToken = redisClient.getCache(userRoleText, String.class);
-            ServerResponse serverResponse = setWorkerGrab( userToken,  houseFlow.getCityId(),  houseFlowId);
+            ServerResponse serverResponse = setWorkerGrab(userToken,  houseFlow.getCityId(), houseFlowId,0);
             //如果已指派则无需继续遍历
             if(serverResponse.isSuccess()){
                 break;

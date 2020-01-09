@@ -18,7 +18,7 @@ public class AllgrabBean {
     private String houseName;
     private String houseFlowId;//任务id
     private String square;//面积
-    private Integer type;//1=装修(人工费用+施工图纸+其他) 2=体验(体验商品)  3=维修（维修商品）
+    private Integer type;//0=装修(人工费用+施工图纸+其他) 1=体验(体验商品)  2=维修（维修商品）
     private Integer orderType;//0=无 1=新单 2=二手
     private String houseMember;//	业主名称
     private String workerTypeId;//	工种类型的id
@@ -37,5 +37,5 @@ public class AllgrabBean {
     private String latitude;//纬度
     private String longitude;//经度
 
-    private List<T> goodsData;//经度
+    private List goodsData;//体验/维保商品数据
 }
