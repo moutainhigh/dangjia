@@ -81,8 +81,8 @@ public class AppCategoryGoodsController implements AppCategoryGoodsAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse queryMaintenanceRecordTopCategory(String cityId,String workerTypeId){
-        return appCategoryGoodsService.queryMaintenanceRecordTopCategory(cityId, workerTypeId);
+    public ServerResponse queryMaintenanceRecordTopCategory(String cityId,String workerTypeId,String houseId){
+        return appCategoryGoodsService.queryMaintenanceRecordTopCategory(cityId, workerTypeId,houseId);
     }
 
     /**
@@ -94,8 +94,8 @@ public class AppCategoryGoodsController implements AppCategoryGoodsAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse queryMaintenanceRecordProduct(PageDTO pageDTO,String cityId,String workerTypeId,String topCategoryId,String searchKey){
-        return appCategoryGoodsService.queryMaintenanceRecordProduct(pageDTO,cityId, workerTypeId,topCategoryId,searchKey);
+    public ServerResponse queryMaintenanceRecordProduct(PageDTO pageDTO,String cityId,String workerTypeId,String topCategoryId,String searchKey,String houseId){
+        return appCategoryGoodsService.queryMaintenanceRecordProduct(pageDTO,cityId, workerTypeId,topCategoryId,searchKey,houseId);
     }
 
 
