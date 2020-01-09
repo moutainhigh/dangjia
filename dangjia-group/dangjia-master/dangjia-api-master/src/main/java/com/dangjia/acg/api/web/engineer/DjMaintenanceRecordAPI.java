@@ -219,4 +219,11 @@ public interface DjMaintenanceRecordAPI {
                                  @RequestParam("operateId")String operateId,
                                  @RequestParam("rejectReason")String rejectReason);
 
+
+    @PostMapping(value = "web/engineer/workerApplyCollect")
+    @ApiOperation(value = "工匠申请维保验收", notes = "工匠申请维保验收")
+    ServerResponse  workerApplyCollect(@RequestParam("id")String id,
+                                 @RequestParam("remarks")String remarks,
+                                 @RequestParam("image") String image);
+
 }

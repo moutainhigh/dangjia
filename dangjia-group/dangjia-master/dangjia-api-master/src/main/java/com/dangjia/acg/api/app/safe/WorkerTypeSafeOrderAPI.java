@@ -28,7 +28,8 @@ public interface WorkerTypeSafeOrderAPI {
     @ApiOperation(value = "我的质保卡", notes = "我的质保卡")
     ServerResponse queryMySafeTypeOrder(@RequestParam("userToken") String userToken,
                                         @RequestParam("houseId") String houseId,
-                                        @RequestParam("pageDTO") PageDTO pageDTO);
+                                        @RequestParam("pageDTO") PageDTO pageDTO,
+                                        @RequestParam("workerTypeId") String workerTypeId);
 
     @PostMapping("app/safe/order/detail")
     @ApiOperation(value = "我的质保卡明细", notes = "我的质保卡明细")
