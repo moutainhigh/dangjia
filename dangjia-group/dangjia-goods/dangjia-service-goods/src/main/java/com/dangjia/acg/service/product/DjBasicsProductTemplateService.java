@@ -589,12 +589,14 @@ public class DjBasicsProductTemplateService {
     /**
      * 商品信息暂存
      *
-     * @param basicsProductDTO
+     * @param productArr
      * @param dataStatus 数据状态，0正常，1暂存
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse saveProductTemporaryStorage(BasicsProductDTO basicsProductDTO,int dataStatus,String cityId,String userId){
+    public ServerResponse saveProductTemporaryStorage(String productArr,int dataStatus,String cityId,String userId){
+        JSONObject obj = JSONObject.parseObject(productArr);
+        BasicsProductDTO basicsProductDTO=JSONObject.toJavaObject(obj, BasicsProductDTO.class);
         if (!StringUtils.isNotBlank(basicsProductDTO.getCategoryId()))
             return ServerResponse.createByErrorMessage("商品分类不能为空");
 

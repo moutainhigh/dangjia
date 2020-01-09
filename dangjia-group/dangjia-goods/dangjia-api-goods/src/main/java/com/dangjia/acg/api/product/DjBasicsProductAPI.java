@@ -101,14 +101,14 @@ public interface DjBasicsProductAPI {
     @PostMapping("/product/djBasicsProduct/saveProductTemporaryStorage")
     @ApiOperation(value = "暂存商品信息", notes = "暂存商品信息")
     ServerResponse saveProductTemporaryStorage(@RequestParam("request") HttpServletRequest request,
-                                 BasicsProductDTO basicsProductDTO,
+                                               @RequestParam("productArr") String productArr,
                                  @RequestParam("cityId") String  cityId,
                                  @RequestParam("user_id")String user_id);
 
     @PostMapping("/product/djBasicsProduct/editSingleProduct")
     @ApiOperation(value = "单个新增修改货品下的商品", notes = "单个新增修改货品下的商品")
     ServerResponse editSingleProduct(@RequestParam("request") HttpServletRequest request,
-                                 BasicsProductDTO basicsProductDTO,
+                                     @RequestParam("productArr") String productArr,
                                  @RequestParam("cityId") String  cityId,
                                  @RequestParam("user_id")String user_id);
 
