@@ -5,9 +5,12 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.engineer.DjMaintenanceRecordService;
+import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -44,6 +47,22 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
             return ServerResponse.createByErrorMessage("申请异常");
         }
 
+    }
+
+    /**
+     * 消息弹窗--需勘查维保商品
+     * @param userToken
+     * @param houseId
+     * @param taskId
+     * @return
+     */
+    public ServerResponse searchMaintenanceProduct(String userToken,String houseId,String taskId){
+        try{
+            return djMaintenanceRecordService.searchMaintenanceProduct(userToken,houseId,taskId);
+        }catch (Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
     }
 
     @Override

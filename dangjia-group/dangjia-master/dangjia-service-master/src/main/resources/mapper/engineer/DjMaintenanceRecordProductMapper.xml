@@ -130,4 +130,18 @@
         AND mrp.maintenance_member_type = #{maintenanceRecordType}
         AND mrp.pay_state = 2
     </select>
+
+    <select id="queryPayMaintenanceRecordProduct" resultType="com.dangjia.acg.modle.engineer.DjMaintenanceRecordProduct">
+        SELECT
+        <include refid="basic_columns"/>
+        FROM
+        dj_maintenance_record_product mrp
+        WHERE
+        mrp.maintenance_record_id = #{maintenanceRecordId}
+        and mrp.maintenance_member_type = #{maintenanceRecordType}
+        and mrp.pay_state=#{payState}
+        <if test="null!=workerTypeId and ''!=workerTypeId">
+            and mrp.worker_type_id=#{workerTypeId}
+        </if>
+    </select>
 </mapper>

@@ -38,6 +38,12 @@ public interface DjMaintenanceRecordAPI {
                                          @RequestParam("remark") String remark,
                                          @RequestParam("images") String images);
 
+    @PostMapping(value = "app/engineer/searchMaintenanceProduct")
+    @ApiOperation(value = "消息弹窗--需勘查维保商品", notes = "消息弹窗--需勘查维保商品")
+    ServerResponse searchMaintenanceProduct(@RequestParam("userToken") String userToken,
+                                         @RequestParam("houseId") String houseId,
+                                         @RequestParam("taskId") String taskId);
+
     @PostMapping(value = "web/engineer/queryDjMaintenanceRecordList")
     @ApiOperation(value = "查询质保审核列表", notes = "查询质保审核列表")
     ServerResponse queryDjMaintenanceRecordList(@RequestParam("pageDTO") PageDTO pageDTO,

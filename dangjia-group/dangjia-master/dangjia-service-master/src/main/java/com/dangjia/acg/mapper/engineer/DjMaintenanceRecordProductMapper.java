@@ -49,4 +49,6 @@ public interface DjMaintenanceRecordProductMapper extends Mapper<DjMaintenanceRe
     List<BasicsGoodsCategory> queryGroupByGoodsCategory(Map<String,Object> map);
 
     List<DjMaintenanceRecordProductDTO> queryMaintenanceShoppingBasket(@Param("parentTop") String parentTop);
+
+    List<DjMaintenanceRecordProduct> queryPayMaintenanceRecordProduct(@Param("maintenanceRecordId") String maintenanceRecordId,@Param("maintenanceRecordType") Integer maintenanceRecordType,@Param("payState") Integer payState,@Param("workerTypeId") String  workerTypeId);
 }
