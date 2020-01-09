@@ -28,8 +28,8 @@ public class WorkerTypeSafeOrderController implements WorkerTypeSafeOrderAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse queryMySafeTypeOrder(String userToken, String houseId, PageDTO pageDTO){
-        return workerTypeSafeOrderService.queryMySafeTypeOrder(userToken,houseId,pageDTO);
+    public ServerResponse queryMySafeTypeOrder(String userToken, String houseId, PageDTO pageDTO,String workerTypeId){
+        return workerTypeSafeOrderService.queryMySafeTypeOrder(userToken,houseId,pageDTO,workerTypeId);
     }
     /*
      *我的质保卡明细

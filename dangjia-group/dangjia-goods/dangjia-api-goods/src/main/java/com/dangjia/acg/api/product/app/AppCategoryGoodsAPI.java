@@ -59,7 +59,7 @@ public interface AppCategoryGoodsAPI {
      */
     @PostMapping("/app/category/queryMaintenanceRecordTopCategory")
     @ApiOperation(value = "第一部分：查询维保商品的顶级分类", notes = "第一部分：查询维保商品的顶级")
-    ServerResponse queryMaintenanceRecordTopCategory(@RequestParam("cityId") String cityId,@RequestParam("workerTypeId") String workerTypeId);
+    ServerResponse queryMaintenanceRecordTopCategory(@RequestParam("cityId") String cityId,@RequestParam("workerTypeId") String workerTypeId,@RequestParam("houseId") String houseId);
 
     /**
      * 查询有当前顶级分类下的所有维保商品
@@ -73,6 +73,6 @@ public interface AppCategoryGoodsAPI {
     @ApiOperation(value = "第二部分：查询有当前顶级分类下的所有维保商品", notes = "第二部分：查询有当前顶级分类下的所有维保商品")
     ServerResponse queryMaintenanceRecordProduct(@RequestParam("pageDTO") PageDTO pageDTO,@RequestParam("cityId") String cityId
             ,@RequestParam("workerTypeId") String workerTypeId,@RequestParam("topCategoryId") String topCategoryId,
-                                                 @RequestParam("searchKey") String searchKey);
+                                                 @RequestParam("searchKey") String searchKey,@RequestParam("houseId") String houseId);
 
 }

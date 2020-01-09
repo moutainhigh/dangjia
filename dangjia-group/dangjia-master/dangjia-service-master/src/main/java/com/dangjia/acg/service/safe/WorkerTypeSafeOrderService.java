@@ -4,6 +4,7 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.common.util.MathUtil;
 import com.dangjia.acg.dao.ConfigUtil;
@@ -103,7 +104,7 @@ public class WorkerTypeSafeOrderService {
     /**
      * 我的质保卡
      */
-    public ServerResponse queryMySafeTypeOrder(String userToken, String houseId, PageDTO pageDTO) {
+    public ServerResponse queryMySafeTypeOrder(String userToken, String houseId, PageDTO pageDTO, String workerTypeId) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -113,6 +114,10 @@ public class WorkerTypeSafeOrderService {
                 .andEqualTo(WorkerTypeSafeOrder.HOUSE_ID, houseId)
                 .andIsNotNull(WorkerTypeSafeOrder.FORCE_TIME)
                 .andEqualTo(WorkerTypeSafeOrder.DATA_STATUS, 0);
+        //增加条件，查询唯一工种 质保卡
+        if (!CommonUtil.isEmpty(workerTypeId)) {
+            example.createCriteria().andEqualTo(WorkerTypeSafeOrder.WORKER_TYPE_ID,workerTypeId);
+        }
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<WorkerTypeSafeOrder> list = workerTypeSafeOrderMapper.selectByExample(example);
         List<Map> listMap = new ArrayList<>();
