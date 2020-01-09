@@ -228,6 +228,11 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
         return djMaintenanceRecordService.handleAppeal(id,type,actualMoney,operateId,rejectReason);
     }
 
+    @Override
+    @ApiMethod
+    public ServerResponse workerApplyCollect(String id,String remarks,String image){
+        return djMaintenanceRecordService.workerApplyCollect(id,remarks,image);
+    }
 
     @Override
     @ApiMethod
@@ -246,6 +251,9 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
     public ServerResponse queryMaintenanceShoppingBasket(String userToken, String houseId, String maintenanceRecordId) {
         return djMaintenanceRecordService.queryMaintenanceShoppingBasket(userToken,houseId, maintenanceRecordId);
     }
+
+
+
 
 }
 

@@ -1594,6 +1594,7 @@ public class DjMaintenanceRecordService {
             }
             iComplainMapper.updateByPrimaryKeySelective(complain);
 
+
             return ServerResponse.createBySuccessMessage("操作成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -1601,6 +1602,55 @@ public class DjMaintenanceRecordService {
         }
     }
 
+
+    /**
+     * 工匠申请维保验收
+     * @param id
+     * @param remarks
+     * @param image
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse workerApplyCollect(String id,String remarks,String image){
+        if (CommonUtil.isEmpty(id)) {
+            return ServerResponse.createByErrorMessage("任务不存在");
+        }
+
+        DjMaintenanceRecord djMaintenanceRecord = djMaintenanceRecordMapper.selectByPrimaryKey(id);
+
+        if(djMaintenanceRecord == null){
+            return ServerResponse.createByErrorMessage("该任务不存在");
+        }
+
+        //增加工匠验收内容
+        DjMaintenanceRecordContent djMaintenanceRecordContent = new DjMaintenanceRecordContent();
+        djMaintenanceRecordContent.setImage(image);
+        djMaintenanceRecordContent.setRemark(remarks);
+        djMaintenanceRecordContent.setMaintenanceRecordId(id);
+        djMaintenanceRecordContent.setMemberId(djMaintenanceRecord.getMemberId());
+        djMaintenanceRecordContent.setType(1);
+        djMaintenanceRecordContent.setWorkerTypeId(djMaintenanceRecord.getWorkerTypeId());
+        djMaintenanceRecordContentMapper.insert(djMaintenanceRecordContent);
+
+        //修改维保状态
+        djMaintenanceRecord.setState(1);//业主待验收
+        djMaintenanceRecord.setModifyDate(new Date());
+        djMaintenanceRecord.setApplyCollectTime(new Date());
+        djMaintenanceRecordMapper.updateByPrimaryKeySelective(djMaintenanceRecord);
+
+        //工匠申请验收，给业主推送消息
+        TaskStack taskStack = new TaskStack();
+        taskStack.setData(id);
+        taskStack.setName("工匠申请维保验收");
+        taskStack.setType(13);//工匠维保申请验收
+        taskStack.setMemberId(djMaintenanceRecord.getMemberId());
+        taskStack.setHouseId(djMaintenanceRecord.getHouseId());
+        taskStack.setImage("icon/sheji.png");
+        taskStack.setState(0);
+        taskStack.setRemarks(remarks);
+        iMasterTaskStackMapper.insert(taskStack);
+        return ServerResponse.createBySuccessMessage("操作成功");
+    }
 
 }
 
