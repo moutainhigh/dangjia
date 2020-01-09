@@ -686,7 +686,7 @@ public class HouseFlowService {
                     List<HouseFlow> houseFlowList = houseFlowMapper.selectByExample(exampleFlow);
                     if (houseFlowList.size() > 0) {
                         String userToken = redisClient.getCache("role2:" + houseWorker.getWorkerId(), String.class);
-                        setGiveUpOrder(userToken, houseFlowList.get(0).getId());
+                        setGiveUpOrder(userToken, houseFlowList.get(0).getId(),0);
                     }
                 }
             }
@@ -772,7 +772,7 @@ public class HouseFlowService {
      * @param houseFlowId 房子ID
      * @return 是否成功
      */
-    public ServerResponse setGiveUpOrder(String userToken, String houseFlowId) {
+    public ServerResponse setGiveUpOrder(String userToken, String houseFlowId,Integer type) {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
@@ -782,78 +782,144 @@ public class HouseFlowService {
             if (member == null) {
                 return ServerResponse.createbyUserTokenError();
             }
-            HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowId);
-            Example example = new Example(HouseWorker.class);
-            example.createCriteria().andEqualTo(HouseWorker.WORKER_ID, member.getId()).andEqualTo(HouseWorker.HOUSE_ID, hf.getHouseId());
-            List<HouseWorker> hwList = houseWorkerMapper.selectByExample(example);//查出自己的
-            HouseWorker houseWorker = hwList.get(0);
-            if (member.getWorkerType() == 3) {//大管家
-                if (hf.getWorkType() == 3 && hf.getSupervisorStart() == 0) {//已抢单待支付，并且未开工(无责取消)
-                    hf.setWorkType(2);//抢s单状态更改为待抢单
-                    hf.setReleaseTime(new Date());//set发布时间
-                    hf.setWorkerId("");
-                    houseFlowMapper.updateByPrimaryKeySelective(hf);
+            if(type==1){
+                Order order =  orderMapper.selectByPrimaryKey(houseFlowId);
+                Example example = new Example(HouseWorker.class);
+                example.createCriteria().andEqualTo(HouseWorker.WORKER_ID, member.getId()).andEqualTo(HouseWorker.BUSINESS_ID, houseFlowId).andEqualTo(HouseWorker.TYPE, type);
+                List<HouseWorker> hwList = houseWorkerMapper.selectByExample(example);//查出自己的
+                HouseWorker houseWorker = null;
+                if(hwList.size()==0){
+                    houseWorker = new HouseWorker();
+                    houseWorker.setWorkerId(member.getId());
+                    houseWorker.setWorkerTypeId(member.getWorkerTypeId());
+                    houseWorker.setWorkerType(member.getWorkerType());
+                    houseWorker.setWorkType(5);//拒单
+                    houseWorker.setIsSelect(0);
+                    houseWorker.setPrice(order.getTotalAmount());
+                    houseWorker.setType(type);
+                    houseWorker.setBusinessId(order.getId());
+                    houseWorkerMapper.insert(houseWorker);
+                }else{
+                    houseWorker = hwList.get(0);
                     houseWorker.setWorkType(7);//抢单状态改为（7抢单后放弃）
+                    houseWorker.setIsSelect(0);
                     houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
-                } else {
-                    if (hf.getSupervisorStart() != 0) {//已开工的状态不可放弃
-                        return ServerResponse.createBySuccessMessage("您已确认开工，不可放弃！");
-                    } else {
-                        if (hf.getWorkType() == 4) {//已支付（有责取消）
-                            hf.setWorkType(2);//抢单状态更改为待抢单
-                            hf.setReleaseTime(new Date());//set发布时间
-                            hf.setWorkerId("");
-                            houseFlowMapper.updateByPrimaryKeySelective(hf);
-                            BigDecimal evaluation = member.getEvaluationScore();
-                            if (evaluation == null) {//如果积分为空，默认60分
-                                member.setEvaluationScore(new BigDecimal(60));
-                            }
-                            BigDecimal evaluation2 = member.getEvaluationScore().subtract(new BigDecimal(2));//积分减2分
-                            member.setEvaluationScore(evaluation2);
-                            memberMapper.updateByPrimaryKeySelective(member);
-                            //修改此单为放弃
-                            houseWorker.setWorkType(7);//抢单状态改为（7抢单后放弃）
-                            houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
-                        }
-                    }
                 }
-                House house = houseMapper.selectByPrimaryKey(hf.getHouseId());
-                configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "大管家放弃", String.format(DjConstants.PushMessage.STEWARD_ABANDON, house.getHouseName()), "");
-            } else {//普通工匠
-                if (hf.getWorkType() == 3) {//已抢单待支付(无责取消)
-                    hf.setWorkType(2);//抢单状态更改为待抢单
-                    hf.setReleaseTime(new Date());//set发布时间
-                    hf.setWorkerId("");
-                    houseFlowMapper.updateByPrimaryKeySelective(hf);
-                } else {
-                    if (hf.getWorkSteta() != 3 || hf.getWorkSteta() != 0) {//已开工的状态不可放弃
-                        return ServerResponse.createByErrorMessage("您已在施工，不可放弃！");
-                    } else {
-                        if (hf.getWorkType() == 4) {//已支付（有责取消）
-                            hf.setWorkType(2);//抢单状态更改为待抢单
-                            hf.setReleaseTime(new Date());//set发布时间
-                            hf.setWorkerId("");
-                            houseFlowMapper.updateByPrimaryKeySelective(hf);
-                            BigDecimal evaluation = member.getEvaluationScore();
-                            if (evaluation == null) {//如果积分为空，默认60分
-                                member.setEvaluationScore(new BigDecimal(60));
-                            }
-                            BigDecimal evaluation2 = member.getEvaluationScore().subtract(new BigDecimal(2));//积分减2分
-                            member.setEvaluationScore(evaluation2);
-                            memberMapper.updateByPrimaryKeySelective(member);
-                        }
-                    }
+                order.setWorkerId(null);
+                order.setWorkerTypeId(null);
+                orderMapper.updateByPrimaryKey(order);
+            }else if(type==2){
+                DjMaintenanceRecord record=djMaintenanceRecordMapper.selectByPrimaryKey(houseFlowId);
+                Example example = new Example(HouseWorker.class);
+                example.createCriteria().andEqualTo(HouseWorker.WORKER_ID, member.getId()).andEqualTo(HouseWorker.BUSINESS_ID, houseFlowId).andEqualTo(HouseWorker.TYPE, type);
+                List<HouseWorker> hwList = houseWorkerMapper.selectByExample(example);//查出自己的
+                HouseWorker houseWorker;
+                if(hwList.size()==0){
+                    houseWorker = new HouseWorker();
+                    houseWorker.setWorkerId(member.getId());
+                    houseWorker.setWorkerTypeId(member.getWorkerTypeId());
+                    houseWorker.setWorkerType(member.getWorkerType());
+                    houseWorker.setWorkType(5);//拒单
+                    houseWorker.setIsSelect(0);
+                    houseWorker.setPrice(new BigDecimal(record.getSincePurchaseAmount()));
+                    houseWorker.setType(type);
+                    houseWorker.setBusinessId(record.getId());
+                    houseWorkerMapper.insert(houseWorker);
+                }else{
+                    houseWorker = hwList.get(0);
+                    houseWorker.setWorkType(7);//抢单状态改为（7抢单后放弃）
+                    houseWorker.setIsSelect(0);
+                    houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
                 }
-                //修改此单为放弃
-                houseWorker.setWorkType(7);//抢单状态改为（7抢单后放弃）
-                houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
-                House house = houseMapper.selectByPrimaryKey(hf.getHouseId());
-                WorkerType workerType = workerTypeMapper.selectByPrimaryKey(hf.getWorkerTypeId());
-                configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "工匠放弃", String.format(DjConstants.PushMessage.CRAFTSMAN_ABANDON, house.getHouseName(), workerType.getName()), "");
-                HouseFlow houseFlowDgj = houseFlowMapper.getHouseFlowByHidAndWty(hf.getHouseId(), 3);
-                configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlowDgj.getWorkerId(), "0", "工匠放弃",
-                        String.format(DjConstants.PushMessage.STEWARD_CRAFTSMAN_TWO_ABANDON, house.getHouseName()), "5");
+                if(member.getWorkerType()==3){
+                    record.setStewardId(null);
+                    record.setStewardState(null);
+                    record.setStewardOrderTime(null);
+                    djMaintenanceRecordMapper.updateByPrimaryKey(record);
+                }else{
+                    record.setWorkerMemberId(null);
+                    record.setWorkerTypeId(null);
+                    record.setWorkerCreateDate(null);
+                    djMaintenanceRecordMapper.updateByPrimaryKey(record);
+                }
+            }else{
 
+                HouseFlow hf = houseFlowMapper.selectByPrimaryKey(houseFlowId);
+                Example example = new Example(HouseWorker.class);
+                example.createCriteria().andEqualTo(HouseWorker.WORKER_ID, member.getId()).andEqualTo(HouseWorker.HOUSE_ID, hf.getHouseId()).andEqualTo(HouseWorker.TYPE, type);
+                List<HouseWorker> hwList = houseWorkerMapper.selectByExample(example);//查出自己的
+                HouseWorker houseWorker = hwList.get(0);
+                if (member.getWorkerType() == 3) {//大管家
+                    if (hf.getWorkType() == 3 && hf.getSupervisorStart() == 0) {//已抢单待支付，并且未开工(无责取消)
+                        hf.setWorkType(2);//抢s单状态更改为待抢单
+                        hf.setReleaseTime(new Date());//set发布时间
+                        hf.setWorkerId("");
+                        houseFlowMapper.updateByPrimaryKeySelective(hf);
+                        houseWorker.setWorkType(7);//抢单状态改为（7抢单后放弃）
+                        houseWorker.setIsSelect(0);
+                        houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
+                    } else {
+                        if (hf.getSupervisorStart() != 0) {//已开工的状态不可放弃
+                            return ServerResponse.createBySuccessMessage("您已确认开工，不可放弃！");
+                        } else {
+                            if (hf.getWorkType() == 4) {//已支付（有责取消）
+                                hf.setWorkType(2);//抢单状态更改为待抢单
+                                hf.setReleaseTime(new Date());//set发布时间
+                                hf.setWorkerId("");
+                                houseFlowMapper.updateByPrimaryKeySelective(hf);
+                                BigDecimal evaluation = member.getEvaluationScore();
+                                if (evaluation == null) {//如果积分为空，默认60分
+                                    member.setEvaluationScore(new BigDecimal(60));
+                                }
+                                BigDecimal evaluation2 = member.getEvaluationScore().subtract(new BigDecimal(2));//积分减2分
+                                member.setEvaluationScore(evaluation2);
+                                memberMapper.updateByPrimaryKeySelective(member);
+                                //修改此单为放弃
+                                houseWorker.setWorkType(7);//抢单状态改为（7抢单后放弃）
+                                houseWorker.setIsSelect(0);
+                                houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
+                            }
+                        }
+                    }
+                    House house = houseMapper.selectByPrimaryKey(hf.getHouseId());
+                    configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "大管家放弃", String.format(DjConstants.PushMessage.STEWARD_ABANDON, house.getHouseName()), "");
+                } else {//普通工匠
+                    if (hf.getWorkType() == 3) {//已抢单待支付(无责取消)
+                        hf.setWorkType(2);//抢单状态更改为待抢单
+                        hf.setReleaseTime(new Date());//set发布时间
+                        hf.setWorkerId("");
+                        houseFlowMapper.updateByPrimaryKeySelective(hf);
+                    } else {
+                        if (hf.getWorkSteta() != 3 || hf.getWorkSteta() != 0) {//已开工的状态不可放弃
+                            return ServerResponse.createByErrorMessage("您已在施工，不可放弃！");
+                        } else {
+                            if (hf.getWorkType() == 4) {//已支付（有责取消）
+                                hf.setWorkType(2);//抢单状态更改为待抢单
+                                hf.setReleaseTime(new Date());//set发布时间
+                                hf.setWorkerId("");
+                                houseFlowMapper.updateByPrimaryKeySelective(hf);
+                                BigDecimal evaluation = member.getEvaluationScore();
+                                if (evaluation == null) {//如果积分为空，默认60分
+                                    member.setEvaluationScore(new BigDecimal(60));
+                                }
+                                BigDecimal evaluation2 = member.getEvaluationScore().subtract(new BigDecimal(2));//积分减2分
+                                member.setEvaluationScore(evaluation2);
+                                memberMapper.updateByPrimaryKeySelective(member);
+                            }
+                        }
+                    }
+                    //修改此单为放弃
+                    houseWorker.setWorkType(7);//抢单状态改为（7抢单后放弃）
+                    houseWorker.setIsSelect(0);
+                    houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
+                    House house = houseMapper.selectByPrimaryKey(hf.getHouseId());
+                    WorkerType workerType = workerTypeMapper.selectByPrimaryKey(hf.getWorkerTypeId());
+                    configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "工匠放弃", String.format(DjConstants.PushMessage.CRAFTSMAN_ABANDON, house.getHouseName(), workerType.getName()), "");
+                    HouseFlow houseFlowDgj = houseFlowMapper.getHouseFlowByHidAndWty(hf.getHouseId(), 3);
+                    configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlowDgj.getWorkerId(), "0", "工匠放弃",
+                            String.format(DjConstants.PushMessage.STEWARD_CRAFTSMAN_TWO_ABANDON, house.getHouseName()), "5");
+
+                }
             }
             return ServerResponse.createBySuccessMessage("放弃成功！");
         } catch (Exception e) {

@@ -46,7 +46,8 @@ public interface HouseFlowAPI {
     @PostMapping("app/core/houseFlow/setGiveUpOrder")
     @ApiOperation(value = "放弃此单", notes = "放弃此单")
     ServerResponse setGiveUpOrder(@RequestParam("userToken") String userToken,
-                                  @RequestParam("houseFlowId") String houseFlowId);
+                                  @RequestParam("houseFlowId") String houseFlowId,
+                                  @RequestParam("type") Integer type);
 
     @PostMapping("app/core/houseFlow/setConfirm")
     @ApiOperation(value = "业主确认此单", notes = "业主确认此单")

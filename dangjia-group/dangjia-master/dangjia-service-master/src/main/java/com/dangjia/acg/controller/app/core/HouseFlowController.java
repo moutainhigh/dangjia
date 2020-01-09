@@ -63,8 +63,8 @@ public class HouseFlowController implements HouseFlowAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse setGiveUpOrder(String userToken, String houseFlowId) {
-        return houseFlowService.setGiveUpOrder(userToken, houseFlowId);
+    public ServerResponse setGiveUpOrder(String userToken, String houseFlowId,Integer type) {
+        return houseFlowService.setGiveUpOrder(userToken, houseFlowId, type);
     }
 
     @Override
