@@ -25,8 +25,8 @@ public class Complain extends BaseEntity {
     private String memberId;
 
     @Column(name = "complain_type")
-    @Desc(value = "申述类型 1: 被处罚申诉.2：要求整改.3：要求换人.4:部分收货申诉.5:提前结束装修.6业主要求换人.7:业主申诉退货.8工匠申请部分退货.9业主申请质保.10工匠申维保定责")
-    @ApiModelProperty("申述类型 1: 被处罚申诉.2：要求整改.3：要求换人.4:部分收货申诉.5:提前结束装修.6业主要求换人.7:业主申诉退货.8工匠申请部分退货.9业主申请质保.10工匠申维保定责")
+    @Desc(value = "申述类型 1: 被处罚申诉.2：要求整改.3：要求换人.4:部分收货申诉.5:提前结束装修.6业主要求换人.7:业主申诉退货.8工匠申请部分退货.9工匠报销.10工匠申维保定责")
+    @ApiModelProperty("申述类型 1: 被处罚申诉.2：要求整改.3：要求换人.4:部分收货申诉.5:提前结束装修.6业主要求换人.7:业主申诉退货.8工匠申请部分退货.9工匠报销.10工匠申维保定责")
     private Integer complainType;
 
     @Column(name = "user_id")
@@ -116,5 +116,16 @@ public class Complain extends BaseEntity {
     @Desc(value = "平台处理时间")
     @ApiModelProperty("平台处理时间")
     private Date handleDate;
+
+    @Column(name = "apply_money")
+    @Desc(value = "申请报销金钱")
+    @ApiModelProperty("申请报销金额")
+    private Double applyMoney;
+
+    @Column(name = "actual_money")
+    @Desc(value = "实际报销金额")
+    @ApiModelProperty("实际报销金额")
+    private Double actualMoney;
+
 
 }

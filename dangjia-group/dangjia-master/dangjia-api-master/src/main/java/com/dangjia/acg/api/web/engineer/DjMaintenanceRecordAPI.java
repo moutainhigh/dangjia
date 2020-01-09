@@ -185,4 +185,32 @@ public interface DjMaintenanceRecordAPI {
     ServerResponse queryMaintenanceShoppingBasket(@RequestParam("userToken") String userToken,
                                                   @RequestParam("houseId") String houseId,
                                                   @RequestParam("maintenanceRecordId") String maintenanceRecordId);
+
+    @PostMapping(value = "app/engineer/addApplyNewspaper")
+    @ApiOperation(value = "工匠申请报销", notes = "工匠申请报销")
+    ServerResponse addApplyNewspaper(@RequestParam("userToken") String userToken,
+                                          @RequestParam("memberId") String memberId,
+                                          @RequestParam("money")  Double money,
+                                          @RequestParam("description") String description,
+                                          @RequestParam("image") String image,
+                                          @RequestParam("houseId")  String houseId);
+
+
+    @PostMapping(value = "app/engineer/queryComplain")
+    @ApiOperation(value = "查询报销记录", notes = "查询报销记录")
+    ServerResponse  queryComplain(@RequestParam("userToken")String userToken,
+                                  @RequestParam("memberId")String memberId);
+
+    @PostMapping(value = "app/engineer/queryComplainInFo")
+    @ApiOperation(value = "查询报销记录详情", notes = "查询报销记录详情")
+    ServerResponse  queryComplainInFo(@RequestParam("id")String id);
+
+    @PostMapping(value = "web/engineer/handleAppeal")
+    @ApiOperation(value = "处理工匠报销申诉", notes = "处理工匠报销申诉")
+    ServerResponse  handleAppeal(@RequestParam("id")String id,
+                                 @RequestParam("type")Integer type,
+                                 @RequestParam("actualMoney") Double actualMoney,
+                                 @RequestParam("operateId")String operateId,
+                                 @RequestParam("rejectReason")String rejectReason);
+
 }

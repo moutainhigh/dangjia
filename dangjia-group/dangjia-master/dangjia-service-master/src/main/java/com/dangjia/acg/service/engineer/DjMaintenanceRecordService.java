@@ -30,6 +30,7 @@ import com.dangjia.acg.mapper.product.IMasterStorefrontMapper;
 import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
 import com.dangjia.acg.mapper.safe.IWorkerTypeSafeOrderMapper;
 import com.dangjia.acg.mapper.task.IMasterTaskStackMapper;
+import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.account.AccountFlowRecord;
 import com.dangjia.acg.modle.complain.Complain;
@@ -49,6 +50,7 @@ import com.dangjia.acg.modle.product.BasicsGoodsCategory;
 import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
 import com.dangjia.acg.modle.safe.WorkerTypeSafeOrder;
 import com.dangjia.acg.modle.storefront.Storefront;
+import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
@@ -137,7 +139,9 @@ public class DjMaintenanceRecordService {
 
     @Autowired
     private IHouseMapper houseMapper;
+
     @Autowired
+    private UserMapper userMapper;
     private ConfigMessageService configMessageService ;
     @Autowired
     private IMasterProductTemplateMapper iMasterProductTemplateMapper;
@@ -1383,6 +1387,166 @@ public class DjMaintenanceRecordService {
             e.printStackTrace();
             logger.info("查询失败", e);
             return ServerResponse.createBySuccessMessage("查询失败");
+        }
+    }
+
+
+
+
+    /**
+     * 申请报销
+     * @param money
+     * @param description
+     * @param image
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse addApplyNewspaper(String userToken,
+                                         String memberId,
+                                         Double money,
+                                         String description,
+                                         String image,
+                                         String houseId){
+        try {
+            Member member = iMemberMapper.selectByPrimaryKey(memberId);
+            if(member == null){
+                return  ServerResponse.createByErrorMessage("用户不存在");
+            }
+            Complain complain = new Complain();
+            complain.setMemberId(memberId);
+            complain.setUserName(member.getName());
+            complain.setUserNickName(member.getNickName());
+            complain.setUserMobile(member.getMobile());
+            complain.setComplainType(9);
+            complain.setHouseId(houseId);
+            complain.setDescription(description);
+            complain.setApplyMoney(money);
+            complain.setImage(image);
+            complain.setStatus(0);
+            iComplainMapper.insert(complain);
+            return ServerResponse.createBySuccessMessage("提交成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("提交失败");
+        }
+    }
+
+
+    /**
+     * 查询报销记录
+     * @param userToken
+     * @param memberId
+     * @return
+     */
+    public ServerResponse queryComplain(String userToken,String memberId){
+        try {
+            Example example = new Example(Complain.class);
+            example.createCriteria().andEqualTo(Complain.MEMBER_ID,memberId)
+                    .andEqualTo(Complain.DATA_STATUS,0).
+                    andEqualTo(Complain.COMPLAIN_TYPE,9);
+            example.orderBy(Complain.MODIFY_DATE).desc();
+            List<Complain> member = iComplainMapper.selectByExample(example);
+            if (member.size() <= 0) {
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+            }
+            return ServerResponse.createBySuccess("查询成功", member);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    /**
+     * 查询报销记录详情
+     * @param id
+     * @return
+     */
+    public ServerResponse queryComplainInFo(String id){
+        try {
+            if (CommonUtil.isEmpty(id)) {
+                return ServerResponse.createByErrorMessage("id不能为空");
+            }
+
+            Complain complain = iComplainMapper.selectByPrimaryKey(id);
+            Map<String,Object> map = new HashMap<>();
+
+            if(complain != null ){
+                House house = houseMapper.selectByPrimaryKey(complain.getHouseId());
+                if(house != null){
+                    map.put("houseName",house.getResidential() + house.getBuilding() + "栋" +
+                            house.getUnit() + "单元" + house.getNumber() + "号");
+                }
+                map.put("complainType",complain.getComplainType());
+                map.put("status",complain.getStatus());
+                map.put("modifyDate",complain.getModifyDate());
+                map.put("actualMoney",complain.getActualMoney());
+                map.put("rejectReason",complain.getRejectReason());
+                map.put("applyMoney",complain.getApplyMoney());
+                map.put("description",complain.getDescription());
+                map.put("images",getImage(complain.getImage()));
+                map.put("memberName",complain.getUserName());
+                map.put("memberMobile",complain.getUserMobile());
+                map.put("id",complain.getId());
+                map.put("memberId",complain.getMemberId());
+            }
+            return ServerResponse.createBySuccess("查询成功", map);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    /**
+     * 处理工匠报销申诉
+     * @param id
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse handleAppeal(String id,
+                                       Integer type,
+                                       Double actualMoney,
+                                       String operateId,
+                                       String rejectReason){
+        try {
+            if (CommonUtil.isEmpty(type)) {
+                return ServerResponse.createByErrorMessage("type不能为空");
+            }
+            if (CommonUtil.isEmpty(id)) {
+                return ServerResponse.createByErrorMessage("id不能为空");
+            }
+            if (CommonUtil.isEmpty(operateId)) {
+                return ServerResponse.createByErrorMessage("operateId不能为空");
+            }
+
+            Complain complain = new Complain();
+            MainUser mainUser = userMapper.selectByPrimaryKey(operateId);
+            complain.setOperateName(mainUser.getUsername());
+            complain.setOperateId(operateId);
+            complain.setModifyDate(new Date());
+            complain.setId(id);
+            //type: 0 -确定处理 1-结束流程
+            if(type == 0){
+                complain.setStatus(2);
+                complain.setActualMoney(actualMoney);
+                Complain complain1 = iComplainMapper.selectByPrimaryKey(id);
+                //给工匠加上申诉金额
+                Member member = iMemberMapper.selectByPrimaryKey(complain1.getMemberId());
+                if (member == null) {
+                    return ServerResponse.createByErrorMessage("用户不存在");
+                }
+                member.setSurplusMoney(new BigDecimal(actualMoney).add(member.getSurplusMoney()));
+                member.setModifyDate(new Date());
+                iMemberMapper.updateByPrimaryKeySelective(member);
+            }else if(type == 1){
+                complain.setStatus(1);
+                complain.setRejectReason(rejectReason);
+            }
+            iComplainMapper.updateByPrimaryKeySelective(complain);
+
+            return ServerResponse.createBySuccessMessage("操作成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("操作失败");
         }
     }
 

@@ -178,6 +178,40 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
 
     @Override
     @ApiMethod
+    public ServerResponse addApplyNewspaper(String userToken,
+                                         String memberId,
+                                         Double money,
+                                         String description,
+                                         String image,
+                                         String houseId) {
+        return djMaintenanceRecordService.addApplyNewspaper(userToken, memberId, money, description, image, houseId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryComplain(String userToken,String memberId){
+        return djMaintenanceRecordService.queryComplain(userToken, memberId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryComplainInFo(String id){
+        return djMaintenanceRecordService.queryComplainInFo(id);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse handleAppeal(String id,
+                                       Integer type,
+                                       Double actualMoney,
+                                       String operateId,
+                                       String rejectReason){
+        return djMaintenanceRecordService.handleAppeal(id,type,actualMoney,operateId,rejectReason);
+    }
+
+
+    @Override
+    @ApiMethod
     public ServerResponse insertMaintenanceRecordProduct(String userToken, String houseId, String maintenanceRecordId,String productId) {
         return djMaintenanceRecordService.insertMaintenanceRecordProduct(userToken,houseId,maintenanceRecordId,productId);
     }
