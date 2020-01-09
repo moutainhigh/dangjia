@@ -2095,7 +2095,7 @@ public class HouseService {
                 if (serverResponse.getResultObj() != null) {
                     String obj = serverResponse.getResultObj().toString();//获取对应的支付单号码
                     //增加任务(补差价订单）
-                    taskStackService.inserTaskStackInfo(house.getId(), house.getMemberId(), "是否提交补差价订单", "icon/sheji.png", 7, obj);
+                    taskStackService.insertTaskStackInfo(house.getId(), house.getMemberId(), "是否提交补差价订单", "icon/sheji.png", 7, obj);
                 }
 
 
@@ -3819,7 +3819,7 @@ public class HouseService {
             houseFlowApplyImageMapper.insert(houseFlowApplyImage);
         }
         //生成任务发送给业主
-        taskStackService.inserTaskStackInfo(house.getId(), house.getMemberId(), "大管家主动验收", "icon/sheji.png", 3, houseFlowApply.getId());
+        taskStackService.insertTaskStackInfo(house.getId(), house.getMemberId(), "大管家主动验收", "icon/sheji.png", 3, houseFlowApply.getId());
         return ServerResponse.createBySuccess("操作成功");
     }
 
@@ -3853,7 +3853,7 @@ public class HouseService {
             houseFlowApply.setAcceptanceNumber(0);
             houseFlowApplyMapper.insert(houseFlowApply);
             //生成任务发送给大管家
-            taskStackService.inserTaskStackInfo(houseFlowApply.getId(), houseFlowApply.getWorkerId(), "大管家主动验收", "icon/sheji.png", 3, houseFlowApply.getId());
+            taskStackService.insertTaskStackInfo(houseFlowApply.getId(), houseFlowApply.getWorkerId(), "大管家主动验收", "icon/sheji.png", 3, houseFlowApply.getId());
         }
         Member worker = memberMapper.selectByPrimaryKey(houseFlowApply.getWorkerId());
         worker.initPath(address);

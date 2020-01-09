@@ -100,7 +100,7 @@ public class DjSkillCertificationService {
     /**
      * 技能认证
      * @param jsonStr
-     * @param workerId
+     * @param skillCertificationId
      * @return
      */
     public ServerResponse insertSkillCertification(String jsonStr, String skillCertificationId, String cityId) {

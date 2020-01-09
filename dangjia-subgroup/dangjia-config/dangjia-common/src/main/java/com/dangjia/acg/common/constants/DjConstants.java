@@ -358,4 +358,10 @@ public class DjConstants {
 
         public final static String GZ_T_WORK = "工匠您好！【%s】图纸已设计完成，请查看";
     }
+
+    public static class CommonMessage {
+        public final static String GJ_KC_MSG = "您所选择的维保项需上门勘察后才能确认维修方案，请购买“维保勘察及验收”服务后，等待服务人员上门。";
+        public final static String GJ_ZB_TK = "经大管家/工匠实地勘察后，您选择的维保商品费用高于实际所需费用，确认后将退款至您的钱包。";
+        public final static String GJ_ZB_BK = "经大管家/工匠实地勘察后，您选择的维保商品有需要付费/维保期外的商品，请提交订单支付后继续维保。";
+    }
 }

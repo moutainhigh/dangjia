@@ -31,15 +31,15 @@ public class HouseFlowController implements HouseFlowAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse getGrabList(HttpServletRequest request, PageDTO pageDTO, String userToken, String cityId) {
-        return houseFlowService.getGrabList(request,  pageDTO, userToken, cityId);
+    public ServerResponse getGrabList(HttpServletRequest request, PageDTO pageDTO, String userToken, String cityId,Integer type) {
+        return houseFlowService.getGrabList(request,  pageDTO, userToken, cityId, type);
     }
 
 
     @Override
     @ApiMethod
-    public ServerResponse getGrabInfo(HttpServletRequest request,String userToken, String houseFlowId){
-        return houseFlowService.getGrabInfo(request,  userToken, houseFlowId);
+    public ServerResponse getGrabInfo(HttpServletRequest request,String userToken, String houseFlowId, Integer type){
+        return houseFlowService.getGrabInfo(request,  userToken, houseFlowId,  type);
     }
     /**
      * 抢单验证
@@ -63,8 +63,8 @@ public class HouseFlowController implements HouseFlowAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse setGiveUpOrder(String userToken, String houseFlowId) {
-        return houseFlowService.setGiveUpOrder(userToken, houseFlowId);
+    public ServerResponse setGiveUpOrder(String userToken, String houseFlowId,Integer type) {
+        return houseFlowService.setGiveUpOrder(userToken, houseFlowId, type);
     }
 
     @Override

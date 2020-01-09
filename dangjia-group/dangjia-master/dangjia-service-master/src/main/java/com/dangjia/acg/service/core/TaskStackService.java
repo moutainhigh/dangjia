@@ -5,7 +5,6 @@ import com.dangjia.acg.mapper.task.IMasterTaskStackMapper;
 import com.dangjia.acg.modle.house.TaskStack;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import sun.rmi.log.LogInputStream;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
@@ -21,16 +20,16 @@ public class TaskStackService {
     /**
      * 添加任务信息
      * @param houseId 房子ID
-     * @param memeberId 用户ID
+     * @param memberId 用户ID
      * @param name 任务名称
      * @param image 图片地址
      * @param type 任务类型
      * @param data 数值
      */
-    public void inserTaskStackInfo(String houseId,String memeberId,String name,String image,Integer type,String data){
+    public void insertTaskStackInfo(String houseId,String memberId ,String name,String image,Integer type,String data){
         TaskStack taskStack=new TaskStack();
         taskStack.setHouseId(houseId);
-        taskStack.setMemberId(memeberId);
+        taskStack.setMemberId(memberId);
         taskStack.setName(name);
         taskStack.setImage(image);
         taskStack.setType(type);

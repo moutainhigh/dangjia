@@ -82,6 +82,7 @@ import com.dangjia.acg.service.account.MasterAccountFlowRecordService;
 import com.dangjia.acg.service.acquisition.MasterCostAcquisitionService;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.dangjia.acg.service.core.HouseWorkerService;
 import com.dangjia.acg.service.core.TaskStackService;
 import com.dangjia.acg.service.design.HouseDesignPayService;
 import com.dangjia.acg.service.repair.MendOrderCheckService;
@@ -216,6 +217,9 @@ public class PaymentService {
     @Autowired
     private TaskStackService taskStackService;
 
+
+    @Autowired
+    private HouseWorkerService houseWorkerService;
 
     @Value("${spring.profiles.active}")
     private String active;
@@ -594,7 +598,7 @@ public class PaymentService {
                 }
                 //修改补差价任务为已处理（查贸易符合条件补差价订单信息)
                 TaskStack taskStack=taskStackService.selectTaskStackByData(order.getHouseId(),7,order.getBusinessOrderNumber());
-                if(taskStack!=null&& cn.jiguang.common.utils.StringUtils.isNotEmpty(taskStack.getId())){
+                if(taskStack!=null&& !CommonUtil.isEmpty(taskStack.getId())){
                     taskStack.setState(1);
                     taskStack.setModifyDate(new Date());
                     taskStackService.updateTaskStackInfo(taskStack);
@@ -611,7 +615,7 @@ public class PaymentService {
 
                 //修改待处理的任务为已处理
                 TaskStack taskStack=taskStackService.selectTaskStackByHouseIdData(order.getHouseId(),order.getBusinessOrderNumber());
-                if(taskStack!=null&& cn.jiguang.common.utils.StringUtils.isNotEmpty(taskStack.getId())){
+                if(taskStack!=null&& !CommonUtil.isEmpty(taskStack.getId())){
                     taskStack.setState(1);
                     taskStack.setModifyDate(new Date());
                     taskStackService.updateTaskStackInfo(taskStack);
@@ -687,7 +691,9 @@ public class PaymentService {
         warehouseDetailMapper.insert(warehouseDetail);
         /*处理人工和取消的材料改到自购精算*/
         budgetCorrect(order, payState, houseFlow.getId());
-
+        if(houseFlow.getWorkType()==3) {//大管家自动派单
+            houseWorkerService.autoDistributeHandle(houseFlow.getId());
+        }
         /*处理保险订单*/
         this.insurance(hwo, payState);
     }

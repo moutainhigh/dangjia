@@ -7,10 +7,7 @@ import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.operation.IOperationFlowMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
-import com.dangjia.acg.model.config.DjConfigRuleItemOne;
-import com.dangjia.acg.model.config.DjConfigRuleItemTwo;
-import com.dangjia.acg.model.config.DjConfigRuleModule;
-import com.dangjia.acg.model.config.DjConfigRuleRank;
+import com.dangjia.acg.model.config.*;
 import com.dangjia.acg.modle.member.Member;
 import com.github.pagehelper.PageHelper;
 import org.slf4j.Logger;
@@ -173,20 +170,20 @@ public class ConfigRuleUtilService {
     public Integer getProtectMethodsCount() {
         if (active != null && active.equals("pre")) {
             Integer amount=1;
-                Example example=new Example(DjConfigRuleModule.class);
-                example.createCriteria().andEqualTo(DjConfigRuleModule.TYPE_ID,ConfigRuleService.MK013);
-                DjConfigRuleModule configRuleModule=configRuleModuleMapper.selectOneByExample(example);
+            Example example=new Example(DjConfigRuleModule.class);
+            example.createCriteria().andEqualTo(DjConfigRuleModule.TYPE_ID,ConfigRuleService.MK013);
+            DjConfigRuleModule configRuleModule=configRuleModuleMapper.selectOneByExample(example);
 
-                example=new Example(DjConfigRuleItemTwo.class);
-                example.createCriteria().andEqualTo(DjConfigRuleItemTwo.MODULE_ID,configRuleModule.getId());
-                example.orderBy(DjConfigRuleItemTwo.CREATE_DATE).desc();
-                PageHelper.startPage(1, 1);
-                List<DjConfigRuleItemTwo> configRuleItemTwos=configRuleItemTwoMapper.selectByExample(example);
-                if (configRuleItemTwos.size() > 0) {
-                    for (DjConfigRuleItemTwo configRuleItemTwo : configRuleItemTwos) {
-                        amount=Integer.parseInt(configRuleItemTwo.getFieldValue());
-                    }
+            example=new Example(DjConfigRuleItemTwo.class);
+            example.createCriteria().andEqualTo(DjConfigRuleItemTwo.MODULE_ID,configRuleModule.getId());
+            example.orderBy(DjConfigRuleItemTwo.CREATE_DATE).desc();
+            PageHelper.startPage(1, 1);
+            List<DjConfigRuleItemTwo> configRuleItemTwos=configRuleItemTwoMapper.selectByExample(example);
+            if (configRuleItemTwos.size() > 0) {
+                for (DjConfigRuleItemTwo configRuleItemTwo : configRuleItemTwos) {
+                    amount=Integer.parseInt(configRuleItemTwo.getFieldValue());
                 }
+            }
             return amount;
         } else {
             return 1;
@@ -248,5 +245,94 @@ public class ConfigRuleUtilService {
         } else {
             return 90;
         }
+    }
+
+    /**
+     *  大管家自动派单
+     * @param juli 距离
+     * @param evaluationScore  积分
+     * @param methods 持单量
+     * @return
+     */
+    public Double getautoDistributeHandleConfig(Double juli,Double evaluationScore,Integer methods) {
+        Double amount = 0d;
+        Example example = new Example(DjConfigRuleModule.class);
+        example.createCriteria().andEqualTo(DjConfigRuleModule.TYPE_ID, ConfigRuleService.MK017);
+        DjConfigRuleModule configRuleModule = configRuleModuleMapper.selectOneByExample(example);
+
+        Double a=0d;//距离参考分
+        Double b=0d;//积分参考分
+        Double c=0d;//距离参考分
+        example = new Example(DjConfigRuleItemThree.class);
+        example.createCriteria().andEqualTo(DjConfigRuleItemThree.MODULE_ID, configRuleModule.getId());
+        example.orderBy(DjConfigRuleItemThree.CREATE_DATE).desc();
+        PageHelper.startPage(1, 1);
+        List<DjConfigRuleItemThree> configRuleItemThrees = configRuleItemThreeMapper.selectByExample(example);
+        if (configRuleItemThrees.size() > 0) {
+            for (DjConfigRuleItemThree configRuleItemThree : configRuleItemThrees) {
+                example = new Example(DjConfigRuleItemLadder.class);
+                example.createCriteria().andEqualTo(DjConfigRuleItemLadder.ITEM_THREE_ID, configRuleItemThree.getId());
+                List<DjConfigRuleItemLadder> configRuleItemLadders = configRuleItemLadderMapper.selectByExample(example);
+                //地域距离
+                if(configRuleItemThree.getParamType().equals(ConfigRuleService.CS006)){
+                    for (DjConfigRuleItemLadder configRuleItemLadder : configRuleItemLadders) {
+                        if(configRuleItemLadder.getPhaseStart()<=juli&&configRuleItemLadder.getPhaseEnd()>=juli){
+                            a=configRuleItemLadder.getFraction()*(configRuleItemThree.getParamWeight()/100);
+                            break;
+                        }
+                    }
+                    if(a==0){
+                        for (DjConfigRuleItemLadder configRuleItemLadder : configRuleItemLadders) {
+                            if(configRuleItemLadder.getPhaseStart()>juli){
+                                a=configRuleItemLadder.getFraction()*(configRuleItemThree.getParamWeight()/100);
+                            }
+                            if(configRuleItemLadder.getPhaseEnd()<juli){
+                                a=configRuleItemLadder.getFraction()*(configRuleItemThree.getParamWeight()/100);
+                            }
+                        }
+                    }
+                }
+                //积分
+                if(configRuleItemThree.getParamType().equals(ConfigRuleService.CS007)){
+                    for (DjConfigRuleItemLadder configRuleItemLadder : configRuleItemLadders) {
+                        if(configRuleItemLadder.getPhaseStart()<=evaluationScore&&configRuleItemLadder.getPhaseEnd()>=evaluationScore){
+                            b=configRuleItemLadder.getFraction()*(configRuleItemThree.getParamWeight()/100);
+                            break;
+                        }
+                    }
+                    if(a==0){
+                        for (DjConfigRuleItemLadder configRuleItemLadder : configRuleItemLadders) {
+                            if(configRuleItemLadder.getPhaseStart()>evaluationScore){
+                                a=configRuleItemLadder.getFraction()*(configRuleItemThree.getParamWeight()/100);
+                            }
+                            if(configRuleItemLadder.getPhaseEnd()<evaluationScore){
+                                a=configRuleItemLadder.getFraction()*(configRuleItemThree.getParamWeight()/100);
+                            }
+                        }
+                    }
+                }
+                //持单上限
+                if(configRuleItemThree.getParamType().equals(ConfigRuleService.CS008)){
+                    for (DjConfigRuleItemLadder configRuleItemLadder : configRuleItemLadders) {
+                        if(configRuleItemLadder.getPhaseStart()<=methods&&configRuleItemLadder.getPhaseEnd()>=methods){
+                            c=configRuleItemLadder.getFraction()*(configRuleItemThree.getParamWeight()/100);
+                            break;
+                        }
+                    }
+                    if(a==0){
+                        for (DjConfigRuleItemLadder configRuleItemLadder : configRuleItemLadders) {
+                            if(configRuleItemLadder.getPhaseStart()>methods){
+                                a=configRuleItemLadder.getFraction()*(configRuleItemThree.getParamWeight()/100);
+                            }
+                            if(configRuleItemLadder.getPhaseEnd()<methods){
+                                a=configRuleItemLadder.getFraction()*(configRuleItemThree.getParamWeight()/100);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        amount=a+b+c;
+        return amount;
     }
 }

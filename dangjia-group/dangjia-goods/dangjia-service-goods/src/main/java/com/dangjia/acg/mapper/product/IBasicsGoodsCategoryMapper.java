@@ -51,4 +51,11 @@ public interface IBasicsGoodsCategoryMapper extends Mapper<BasicsGoodsCategory> 
 																      @Param("goodsName") String goodsName,
 																	  @Param("cityId") String cityId);
 
+	/**
+	 * 查询符合条件的维保商品的顶级分类
+	 * @param cityId 城市ID
+	 * @param workerTypeId 工种ID
+	 * @return
+	 */
+	List<BasicsGoodsCategory> queryMaintenanceRecordTopCategory(@Param("cityId") String cityId,@Param("workerTypeId") String workerTypeId,@Param("houseId") String houseId);
 }

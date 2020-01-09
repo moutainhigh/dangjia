@@ -234,7 +234,7 @@ public class EngineerService {
             houseFlow.setWorkerId(workerId);
             House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
             HouseWorker houseWorker = houseWorkerMapper.getByWorkerTypeId(houseFlow.getHouseId(), houseFlow.getWorkerTypeId(), 1);
-            houseWorkerService.grabSheet(worker, house, houseFlow, houseMapper);
+            houseWorkerService.grabSheet(worker, house, houseFlow);
             if (houseWorker != null) {
                 houseWorker.setWorkerId(workerId);
                 houseWorker.setWorkType(1);//已抢单
@@ -637,6 +637,7 @@ public class EngineerService {
             if (supervisor != null) {
                 map.put("supName", supervisor.getName());
                 map.put("supMobile", supervisor.getMobile());
+                map.put("supWorkerId", supervisor.getId());
             }
             map.put("designerOk", house.getDesignerOk());
             map.put("budgetOk", house.getBudgetOk());

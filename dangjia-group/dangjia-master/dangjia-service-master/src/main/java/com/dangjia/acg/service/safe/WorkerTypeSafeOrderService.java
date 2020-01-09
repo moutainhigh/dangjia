@@ -4,6 +4,7 @@ import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.common.util.MathUtil;
 import com.dangjia.acg.dao.ConfigUtil;
@@ -103,7 +104,7 @@ public class WorkerTypeSafeOrderService {
     /**
      * 我的质保卡
      */
-    public ServerResponse queryMySafeTypeOrder(String userToken, String houseId, PageDTO pageDTO) {
+    public ServerResponse queryMySafeTypeOrder(String userToken, String houseId, PageDTO pageDTO, String workerTypeId) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
@@ -113,6 +114,10 @@ public class WorkerTypeSafeOrderService {
                 .andEqualTo(WorkerTypeSafeOrder.HOUSE_ID, houseId)
                 .andIsNotNull(WorkerTypeSafeOrder.FORCE_TIME)
                 .andEqualTo(WorkerTypeSafeOrder.DATA_STATUS, 0);
+        //增加条件，查询唯一工种 质保卡
+        if (!CommonUtil.isEmpty(workerTypeId)) {
+            example.createCriteria().andEqualTo(WorkerTypeSafeOrder.WORKER_TYPE_ID,workerTypeId);
+        }
         PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
         List<WorkerTypeSafeOrder> list = workerTypeSafeOrderMapper.selectByExample(example);
         List<Map> listMap = new ArrayList<>();
@@ -142,10 +147,9 @@ public class WorkerTypeSafeOrderService {
         }
         map.put("imglist",imglist);*/
        //判断是否过保
-        if(wtso.getExpirationDate()!=null&& DateUtil.compareDate(new Date(),wtso.getExpirationDate())){
-            wtso.setServiceState(2);//已过保
-        }else if(wtso.getForceTime()!=null){
-            wtso.setServiceState(1);//未过保
+        wtso.setServiceState(2);//已过保
+       if(wtso.getForceTime()!=null&&wtso.getExpirationDate()!=null&& DateUtil.compareDate(wtso.getExpirationDate(),new Date())){
+           wtso.setServiceState(1);//未过保
         }
 
         Map map = BeanUtils.beanToMap(wtso);
@@ -160,10 +164,13 @@ public class WorkerTypeSafeOrderService {
                 recordMap=new HashMap();
                 recordMap.put("applicationDate",mr.getCreateDate());//质保申请时间
                 //2.1查询维保商品记录
-                example=new Example(DjMaintenanceRecordProduct.class);
-                example.createCriteria().andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_RECORD_ID,mr.getId());
-                List<DjMaintenanceRecordProduct> mrProductList=djMaintenanceRecordProductMapper.selectByExample(example);
-                List productList=getRecordProductList(mrProductList);
+                List productList=getMrProductList(mr.getId(),"3");//工匠维保商品
+                if(productList==null||productList.size()==0){
+                    productList=getMrProductList(mr.getId(),"2");//大管家维保商品
+                    if(productList==null||productList.size()==0){
+                        productList=getMrProductList(mr.getId(),"1");//业主维保商品
+                    }
+                }
                 recordMap.put("productList",productList);//商品列表
                 //2.2查询人工信息
                 recordMap.put("workerList",getWorkerList(mr));
@@ -173,6 +180,16 @@ public class WorkerTypeSafeOrderService {
         map.put("historyRecordList",maintenanceRecordList);
         return ServerResponse.createBySuccess("查询成功", map);
     }
+
+    List<DjMaintenanceRecordProduct> getMrProductList(String maintenanceRecordId,String type){
+        Example example=new Example(DjMaintenanceRecordProduct.class);
+        example.createCriteria().andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_RECORD_ID,maintenanceRecordId)
+                .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_MEMBER_TYPE,type);
+        List<DjMaintenanceRecordProduct> mrProductList=djMaintenanceRecordProductMapper.selectByExample(example);
+        List productList=getRecordProductList(mrProductList);
+        return productList;
+    }
+
 
     /**
      * 获取对应处理人大管家和工匠
@@ -222,13 +239,7 @@ public class WorkerTypeSafeOrderService {
             for(DjMaintenanceRecordProduct mrp:mrProductList){
                 StorefrontProduct storefrontProduct= iMasterStorefrontProductMapper.selectByPrimaryKey(mrp.getProductId());
                 Map map=BeanUtils.beanToMap(mrp);
-                if(mrp.getPrice()==null){
-                    mrp.setPrice(0d);
-                }
-                if(mrp.getShopCount()==null){
-                    mrp.setShopCount(0d);
-                }
-                map.put("totalPrice", MathUtil.mul(mrp.getPrice(),mrp.getShopCount()));
+                map.put("totalPrice", mrp.getTotalPrice());
                 if(storefrontProduct!=null){
                     map.put("productName",storefrontProduct.getProductName());
                     map.put("image",storefrontProduct.getImage());

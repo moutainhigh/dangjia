@@ -57,14 +57,14 @@ public class HouseDesignImageController implements HouseDesignImageAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse setPlaneMap(HttpServletRequest request, String userToken, String houseId, String userId, String image) {
-        return designerOperationService.setPlaneMap(userToken, houseId, userId, image);
+    public ServerResponse setPlaneMap(HttpServletRequest request, String userToken, String houseId, String userId, String image,String type) {
+        return designerOperationService.setPlaneMap(userToken, houseId, userId, image,type);
     }
 
     @Override
     @ApiMethod
-    public ServerResponse setConstructionPlans(HttpServletRequest request, String userToken, String houseId, String userId, String imageJson, String productIds) {
-        return designerOperationService.setConstructionPlans(userToken, houseId, userId, imageJson, productIds);
+    public ServerResponse setConstructionPlans(HttpServletRequest request, String userToken, String houseId, String userId, String imageJson, String productIds,String type) {
+        return designerOperationService.setConstructionPlans(userToken, houseId, userId, imageJson, productIds,type);
     }
 
     @Override

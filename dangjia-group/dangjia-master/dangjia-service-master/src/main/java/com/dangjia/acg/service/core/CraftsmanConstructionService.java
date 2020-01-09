@@ -389,8 +389,10 @@ public class CraftsmanConstructionService {
                 buttonList.add(Utils.getButton("审核图纸", 2002));
             } else if (house.getBudgetOk() == 1 && house.getDesignerOk() != 0 && house.getDesignerOk() != 3) {//若精算师为已他单，设计师为已抢单未完成状态
                 buttonList.add(Utils.getButton("请等待设计师制作完毕", 2004));
-            } else if (house.getBudgetOk() == 6 && house.getDesignerOk() != 3) {//精算师为已审核完成，设计师为未审核
-                buttonList.add(Utils.getButton("上传图纸", 2006));
+            } else if (house.getBudgetOk() == 6 && house.getDesignerOk() != 7&& house.getDesignerOk() != 3) {//精算师为已审核完成，设计师为未审核,先上传平面图
+                buttonList.add(Utils.getButton("上传平面图", 3));
+            }else if(house.getBudgetOk() == 6 && house.getDesignerOk() == 7){//精算师为已审核完成，设计师为未审核,先上传施工图
+                buttonList.add(Utils.getButton("上传施工图", 4));
             }
 
         } catch (Exception e) {

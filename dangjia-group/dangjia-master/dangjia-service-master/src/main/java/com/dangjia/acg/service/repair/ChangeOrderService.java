@@ -271,7 +271,7 @@ public class ChangeOrderService {
                     (DjConstants.PushMessage.GJ_T_003, house.getHouseName()), url);
 
             //生成退人工审核任务给到业主
-            //taskStackService.inserTaskStackInfo(houseId,houseFlow.getWorkerId(),"退人工审核",workerType.getImage(),12,changeOrder.getId());//存变更申请单ID
+            //taskStackService.insertTaskStackInfo(houseId,houseFlow.getWorkerId(),"退人工审核",workerType.getImage(),12,changeOrder.getId());//存变更申请单ID
             updateOrderProgressInfo(changeOrder.getId(),"2","REFUND_AFTER_SALES","RA_012",member.getId());//您的退人工申请已提交
             updateOrderProgressInfo(changeOrder.getId(),"2","REFUND_AFTER_SALES","RA_016",member.getId());// 工匠审核中
         }else if(type==1){//工匠补人工
@@ -286,7 +286,7 @@ public class ChangeOrderService {
                     (DjConstants.PushMessage.YZ_Y_001, house.getHouseName(), workerType.getName()), "");
 
             //生成补人工审核任务给到业主
-           // taskStackService.inserTaskStackInfo(houseId,house.getMemberId(),workerType.getName()+"申请补人工",workerType.getImage(),2,changeOrder.getId());//存变更申请单ID
+           // taskStackService.insertTaskStackInfo(houseId,house.getMemberId(),workerType.getName()+"申请补人工",workerType.getImage(),2,changeOrder.getId());//存变更申请单ID
            updateOrderProgressInfo(changeOrder.getId(),"3","REFUND_AFTER_SALES","RA_020",member.getId());//您的补人工申请已提交
            updateOrderProgressInfo(changeOrder.getId(),"3","REFUND_AFTER_SALES","RA_021",member.getId());//业主审核中
         }

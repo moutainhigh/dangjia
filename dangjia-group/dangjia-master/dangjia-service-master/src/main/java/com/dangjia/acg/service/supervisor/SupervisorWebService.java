@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -83,48 +84,55 @@ public class SupervisorWebService {
      * 督导添加授权
      *
      * @param memberId 督导ID
-     * @param houseId  房子ID
+     * @param houseIds 房子ID
      * @return ServerResponse
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse addAuthority(String memberId, String houseId, String userId) {
-        if (CommonUtil.isEmpty(memberId) || CommonUtil.isEmpty(houseId) || CommonUtil.isEmpty(userId)) {
+    public ServerResponse addAuthority(String memberId, String houseIds, String userId) {
+        if (CommonUtil.isEmpty(memberId) || CommonUtil.isEmpty(houseIds) || CommonUtil.isEmpty(userId)) {
             return ServerResponse.createByErrorMessage("传入参数有误");
         }
-        Example example = new Example(DjBasicsSupervisorAuthority.class);
-        example.createCriteria()
-                .andEqualTo(DjBasicsSupervisorAuthority.MEMBER_ID, memberId)
-                .andEqualTo(DjBasicsSupervisorAuthority.HOUSE_ID, houseId);
-        if (iSupervisorAuthorityMapper.selectCountByExample(example) > 0) {
-            return ServerResponse.createByErrorMessage("请勿重复添加");
+        String[] houseIdList = houseIds.split(",");
+        for (String houseId : houseIdList) {
+            if(CommonUtil.isEmpty(houseId)){
+                continue;
+            }
+            Example example = new Example(DjBasicsSupervisorAuthority.class);
+            example.createCriteria()
+                    .andEqualTo(DjBasicsSupervisorAuthority.MEMBER_ID, memberId)
+                    .andEqualTo(DjBasicsSupervisorAuthority.HOUSE_ID, houseId);
+            if (iSupervisorAuthorityMapper.selectCountByExample(example) > 0) {
+                continue;
+            }
+            try {
+                DjBasicsSupervisorAuthority authority = new DjBasicsSupervisorAuthority();
+                authority.setMemberId(memberId);
+                authority.setHouseId(houseId);
+                authority.setOperateId(userId);
+                iSupervisorAuthorityMapper.insertSelective(authority);
+            } catch (Exception ignored) {
+            }
         }
-        DjBasicsSupervisorAuthority authority = new DjBasicsSupervisorAuthority();
-        authority.setMemberId(memberId);
-        authority.setHouseId(houseId);
-        authority.setOperateId(userId);
-        if (iSupervisorAuthorityMapper.insertSelective(authority) > 0) {
-            return ServerResponse.createBySuccessMessage("增加成功");
-        } else {
-            return ServerResponse.createByErrorMessage("新增失败，请您稍后再试");
-        }
+        return ServerResponse.createBySuccessMessage("增加成功");
     }
 
     /**
      * 督导移除授权
      *
      * @param memberId
-     * @param houseId
+     * @param houseIds
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
-    public ServerResponse deleteAuthority(String memberId, String houseId) {
-        if (CommonUtil.isEmpty(memberId) || CommonUtil.isEmpty(houseId)) {
+    public ServerResponse deleteAuthority(String memberId, String houseIds) {
+        if (CommonUtil.isEmpty(memberId) || CommonUtil.isEmpty(houseIds)) {
             return ServerResponse.createByErrorMessage("传入参数有误");
         }
+        String[] houseIdList = houseIds.split(",");
         Example example = new Example(DjBasicsSupervisorAuthority.class);
         example.createCriteria()
                 .andEqualTo(DjBasicsSupervisorAuthority.MEMBER_ID, memberId)
-                .andEqualTo(DjBasicsSupervisorAuthority.HOUSE_ID, houseId);
+                .andIn(DjBasicsSupervisorAuthority.HOUSE_ID, Arrays.asList(houseIdList));
         if (iSupervisorAuthorityMapper.deleteByExample(example) > 0) {
             return ServerResponse.createBySuccessMessage("删除成功");
         } else {

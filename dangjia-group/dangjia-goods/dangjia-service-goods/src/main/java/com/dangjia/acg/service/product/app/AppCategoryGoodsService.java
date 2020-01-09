@@ -8,6 +8,8 @@ import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.actuary.AttributeDTO;
 import com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO;
+import com.dangjia.acg.dto.product.DjBasicsProductTemplateDTO;
+import com.dangjia.acg.dto.product.StorefrontProductDTO;
 import com.dangjia.acg.mapper.basics.IUnitMapper;
 import com.dangjia.acg.mapper.product.*;
 import com.dangjia.acg.modle.brand.Brand;
@@ -18,6 +20,8 @@ import com.dangjia.acg.service.actuary.app.SearchActuarialConfigServices;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -36,6 +40,7 @@ import java.util.Map;
  */
 @Service
 public class AppCategoryGoodsService {
+    protected static final Logger logger = LoggerFactory.getLogger(AppCategoryGoodsService.class);
 
     @Autowired
     private IUnitMapper iUnitMapper;
@@ -200,4 +205,44 @@ public class AppCategoryGoodsService {
 
 
     /************************APP 商品3.0 分类模块********************************/
+
+    /**
+     * 查询维保商品的顶级分类
+     * @param cityId 城市ID
+     * @param workerTypeId 工种ID
+     * @return
+     */
+    public ServerResponse queryMaintenanceRecordTopCategory(String cityId,String workerTypeId,String houseId){
+        try{
+            List<BasicsGoodsCategory> goodsCategoryList=iBasicsGoodsCategoryMapper.queryMaintenanceRecordTopCategory(cityId,workerTypeId,houseId);
+            return ServerResponse.createBySuccess("查询成功", goodsCategoryList);
+        }catch (Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+
+    }
+
+    /**
+     * 查询所有的符合条件的维保商品
+     * @param cityId 城市ID
+     * @param workerTypeId 工种ID
+     * @param topCategoryId 顶级类别ID
+     * @return
+     */
+    public ServerResponse queryMaintenanceRecordProduct(PageDTO pageDTO,String cityId,String workerTypeId,String topCategoryId,String searchKey,String houseId){
+        try{
+            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            List<ActuarialProductAppDTO> productList=iBasicsProductTemplateMapper.queryMaintenanceRecordProduct(cityId,workerTypeId,topCategoryId,searchKey,houseId);
+            PageInfo pageResult = new PageInfo<>(productList);
+            searchActuarialConfigServices.getProductList(productList,address,new BigDecimal(0));
+            pageResult.setList(productList);
+            return ServerResponse.createBySuccess("查询成功", pageResult);
+        }catch (Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+
+    }
 }

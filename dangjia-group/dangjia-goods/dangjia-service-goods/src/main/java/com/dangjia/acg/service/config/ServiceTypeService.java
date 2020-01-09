@@ -48,7 +48,7 @@ public class ServiceTypeService {
      * @return
      */
     public ServiceType getServiceTypeById( String id) {
-        JSONObject json= elasticSearchAPI.getSearchJsonId(ServiceType.class.getSimpleName(),id);
+        JSONObject json= null;//elasticSearchAPI.getSearchJsonId(ServiceType.class.getSimpleName(),id);
         ServiceType serviceType;
         if(json!=null){
             serviceType= json.toJavaObject(ServiceType.class);
@@ -67,7 +67,7 @@ public class ServiceTypeService {
     public ServerResponse selectServiceTypeById( String id) {
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            JSONObject json= elasticSearchAPI.getSearchJsonId(ServiceType.class.getSimpleName(),id);
+            JSONObject json= null;//elasticSearchAPI.getSearchJsonId(ServiceType.class.getSimpleName(),id);
             if(json==null){
                 ServiceType  serviceType=iServiceTypeMapper.selectByPrimaryKey(id);
                 json=JSONObject.parseObject(JSON.toJSONString(serviceType));
@@ -153,7 +153,7 @@ public class ServiceTypeService {
             json.put("coverImageUrl",address+serviceType.getCoverImage());
             json.put("imageUrl",address+serviceType.getImage());
             json.put("houseType",serviceType.getId());
-            elasticSearchAPI.updateResponse(json.toJSONString(),ServiceType.class.getSimpleName(),id);
+            //elasticSearchAPI.updateResponse(json.toJSONString(),ServiceType.class.getSimpleName(),id);
             return ServerResponse.createBySuccess("修改成功", serviceType.getId());
         } catch (Exception e) {
             logger.error("修改失败",e);
@@ -185,7 +185,7 @@ public class ServiceTypeService {
             json.put("coverImageUrl",address+serviceType.getCoverImage());
             json.put("imageUrl",address+serviceType.getImage());
             json.put("houseType",serviceType.getId());
-            elasticSearchAPI.saveESJson(json.toJSONString(),ServiceType.class.getSimpleName());
+           // elasticSearchAPI.saveESJson(json.toJSONString(),ServiceType.class.getSimpleName());
             return ServerResponse.createBySuccess("新增成功", serviceType.getId());
         } catch (Exception e) {
             logger.error("新增失败",e);
@@ -206,7 +206,7 @@ public class ServiceTypeService {
             serviceType.setDataStatus(1);
             serviceType.setId(id);
             iServiceTypeMapper.updateByPrimaryKeySelective(serviceType);
-            elasticSearchAPI.deleteResponse(ServiceType.class.getSimpleName(),id);
+           // elasticSearchAPI.deleteResponse(ServiceType.class.getSimpleName(),id);
             return ServerResponse.createBySuccessMessage("删除成功");
         } catch (Exception e) {
             logger.error("删除成功",e);

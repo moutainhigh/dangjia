@@ -5,9 +5,12 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.engineer.DjMaintenanceRecordService;
+import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -44,6 +47,22 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
             return ServerResponse.createByErrorMessage("申请异常");
         }
 
+    }
+
+    /**
+     * 消息弹窗--需勘查维保商品
+     * @param userToken
+     * @param houseId
+     * @param taskId
+     * @return
+     */
+    public ServerResponse searchMaintenanceProduct(String userToken,String houseId,String taskId){
+        try{
+            return djMaintenanceRecordService.searchMaintenanceProduct(userToken,houseId,taskId);
+        }catch (Exception e){
+            logger.error("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
     }
 
     @Override
@@ -175,6 +194,66 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
         return djMaintenanceRecordService.submitQualityAssurance(userToken, houseId, remark, image, id, state, productId, price,
                 shopCount, workerTypeSafeOrderId);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse addApplyNewspaper(String userToken,
+                                         String memberId,
+                                         Double money,
+                                         String description,
+                                         String image,
+                                         String houseId) {
+        return djMaintenanceRecordService.addApplyNewspaper(userToken, memberId, money, description, image, houseId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryComplain(String userToken,String memberId){
+        return djMaintenanceRecordService.queryComplain(userToken, memberId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryComplainInFo(String id){
+        return djMaintenanceRecordService.queryComplainInFo(id);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse handleAppeal(String id,
+                                       Integer type,
+                                       Double actualMoney,
+                                       String operateId,
+                                       String rejectReason){
+        return djMaintenanceRecordService.handleAppeal(id,type,actualMoney,operateId,rejectReason);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse workerApplyCollect(String id,String remarks,String image){
+        return djMaintenanceRecordService.workerApplyCollect(id,remarks,image);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse insertMaintenanceRecordProduct(String userToken, String houseId, String maintenanceRecordId,String productId) {
+        return djMaintenanceRecordService.insertMaintenanceRecordProduct(userToken,houseId,maintenanceRecordId,productId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse setMaintenanceRecordProduct(String userToken, String houseId, String maintenanceRecordId) {
+        return djMaintenanceRecordService.setMaintenanceRecordProduct(userToken,houseId,maintenanceRecordId);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryMaintenanceShoppingBasket(String userToken, String houseId, String maintenanceRecordId) {
+        return djMaintenanceRecordService.queryMaintenanceShoppingBasket(userToken,houseId, maintenanceRecordId);
+    }
+
+
+
 
 }
 

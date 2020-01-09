@@ -325,5 +325,62 @@
           AND worker_id = #{workerId}
     </update>
 
+    <!-- 所有管家地域距离、积分、持单量的记录 -->
+    <select id="getSupWorkerConfInfo" resultType="java.util.Map">
+       SELECT
+			m.id workerId,
+			m.`name` workerName,
+			m.evaluation_score evaluationScore,
+			IFNULL(o.methods, 0) methods,
+			IFNULL(ROUND(j.juli,2), 99.99) juli
+		FROM
+			`dj_member` m
+		LEFT JOIN (
+			SELECT
+				hw.worker_id,
+				count(hw.id) methods
+			FROM
+				dj_core_house_worker hw
+			LEFT JOIN dj_core_house_flow hf ON hw.house_id = hf.house_id
+			AND hw.worker_type_id = hf.worker_type_id
+			WHERE
+				hw.work_type IN (1, 6)
+			AND hw.worker_type = 3
+			AND hf.work_steta NOT IN (1, 2, 6)
+			GROUP BY
+				hw.worker_id
+		) o ON o.worker_id = m.id
+		LEFT JOIN (
+			SELECT
+				hw.worker_id,
+				MIN(v.juli) juli
+			FROM
+				dj_core_house_worker hw
+			INNER JOIN dj_house h ON h.id = hw.house_id
+			INNER JOIN (
+				SELECT
+					mv.*, (
+						st_distance (
+							point (mv.locationx, mv.locationy),
+							point (#{locationx}, #{locationy})
+						) * 111195 / 1000
+					) AS juli
+				FROM
+					`dj_house_modeling_village` mv
+				WHERE
+					mv.locationx IS NOT NULL
+			) v ON v.id = h.village_id
+			WHERE
+				hw.worker_type = 3
+			GROUP BY
+				hw.worker_id
+		) j ON j.worker_id = m.id
+		WHERE
+			m.`worker_type` = '3'
+		AND m.`check_type` = '2'
+		AND m.`real_name_state` = '3'
+		AND m.evaluation_score >= 60
+
+    </select>
 </mapper>
 

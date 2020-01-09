@@ -88,7 +88,7 @@ public interface SupervisorAuthorityAPI {
      * showdoc
      *
      * @param memberId 必选 string 督导ID
-     * @param houseId  必选 string 房子ID
+     * @param houseIds  必选 string 房子ID","号分割
      * @param userId   必选 string 中台登录的用户ID
      * @return {"res":1000,"msg":{"resultCode":1000,"resultMsg":"成功"} }
      * @catalog 工匠端升级/中台/督导
@@ -105,14 +105,14 @@ public interface SupervisorAuthorityAPI {
     @ApiOperation(value = "督导添加授权", notes = "督导添加授权")
     ServerResponse addAuthority(@RequestParam("request") HttpServletRequest request,
                                 @RequestParam("memberId") String memberId,
-                                @RequestParam("houseId") String houseId,
+                                @RequestParam("houseIds") String houseIds,
                                 @RequestParam("userId") String userId);
 
     /**
      * showdoc
      *
      * @param memberId 必选 string 督导ID
-     * @param houseId  必选 string 房子ID
+     * @param houseIds  必选 string 房子ID","号分割
      * @return {"res":1000,"msg":{"resultCode":1000,"resultMsg":"成功"} }
      * @catalog 工匠端升级/中台/督导
      * @title （web）督导移除授权
@@ -128,6 +128,6 @@ public interface SupervisorAuthorityAPI {
     @ApiOperation(value = "督导移除授权", notes = "督导移除授权")
     ServerResponse deleteAuthority(@RequestParam("request") HttpServletRequest request,
                                    @RequestParam("memberId") String memberId,
-                                   @RequestParam("houseId") String houseId);
+                                   @RequestParam("houseIds") String houseIds);
 
 }
