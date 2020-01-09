@@ -100,14 +100,9 @@ public class DjMaintenanceRecord extends BaseEntity {
     @ApiModelProperty("自购商品备注")
     private String remark;
 
-    @Column(name = "owner_state")
+    @Column(name = "state")
     @Desc(value = "状态 1:待业主确认 2:业主已确认 3:业主已拒绝")
     @ApiModelProperty("状态 1:待业主确认 2:业主已确认 3:业主已拒绝")
-    private Integer ownerState;
-
-    @Column(name = "state")
-    @Desc(value = "状态 1:待审核 2:已通过 3:已拒绝")
-    @ApiModelProperty("状态 1:待审核 2:已通过 3:已拒绝")
     private Integer state;
 
     @Column(name = "complain_type")

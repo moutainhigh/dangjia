@@ -24,6 +24,11 @@ import javax.persistence.Table;
 @ApiModel(description = "维保商品记录")
 public class DjMaintenanceRecordProduct extends BaseEntity {
 
+    @Column(name = "house_id")
+    @Desc(value = "房子ID")
+    @ApiModelProperty("房子ID")
+    private String houseId;
+
     @Column(name = "product_id")
     @Desc(value = "商品ID")
     @ApiModelProperty("商品ID")
@@ -56,7 +61,7 @@ public class DjMaintenanceRecordProduct extends BaseEntity {
 
     @Column(name = "maintenance_member_type")
     @Desc(value = "维护人类型：1业主；2大管家；3工匠")
-    @ApiModelProperty("维护人类型：1业主；2大管家；3工匠")
+    @ApiModelProperty("维护人类型：1业主；2大管家；3工匠；4系统（勘查费用商品）")
     private Integer  maintenanceMemberType;
 
     @Column(name = "total_price")
@@ -72,12 +77,15 @@ public class DjMaintenanceRecordProduct extends BaseEntity {
     @Column(name = "over_protection")
     @Desc(value = "是否过保商品（1是，0否）")
     @ApiModelProperty("是否过保商品（1是，0否）")
-    private Integer over_protection;
+    private Integer overProtection;
 
     @Column(name = "pay_state")
     @Desc(value = "是否已付费（1未支付，2已支付）")
     @ApiModelProperty("是否已付费（1未支付，2已支付）")
     private Integer payState;
 
-
+    @Column(name = "business_order_number")
+    @Desc(value = "业务支付单号")
+    @ApiModelProperty("业务支付单号")
+    private String businessOrderNumber;
 }

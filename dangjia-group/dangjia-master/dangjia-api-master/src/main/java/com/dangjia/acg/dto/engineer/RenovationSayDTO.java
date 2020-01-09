@@ -1,8 +1,6 @@
 package com.dangjia.acg.dto.engineer;
 
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-
 import java.util.Date;
 import java.util.List;
 
@@ -20,8 +18,7 @@ public class RenovationSayDTO {
     private String id;
     private String content;//内容
     private String contentImage;//装修说内容图
-    private List<String> contentImages;//装修说内容图list
+    private List<String> contentImages;//装修说内容图List
     private String coverImage;//装修说封面
     private String coverImages;//装修说封面
-//    private List<String> arrContentImages;//装修说封面 + 装修说内容图
 }

@@ -8,7 +8,8 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-/**maintenanceRecordId
+/**
+ * maintenanceRecordId
  * Created with IntelliJ IDEA.
  * author: wk
  * Date: 13/12/2019
@@ -21,11 +22,12 @@ public interface DjMaintenanceRecordAPI {
 
     /**
      * 保存质保记录（申请质保）
-     * @param userToken 用户token
-     * @param houseId 房子ID
+     *
+     * @param userToken             用户token
+     * @param houseId               房子ID
      * @param workerTypeSafeOrderId 保险订单ID
-     * @param remark 备注
-     * @param images 图片，多张用逗号分隔
+     * @param remark                备注
+     * @param images                图片，多张用逗号分隔
      * @return
      */
     @PostMapping(value = "app/engineer/saveMaintenanceRecord")
@@ -61,10 +63,10 @@ public interface DjMaintenanceRecordAPI {
     @ApiOperation(value = "处理申诉", notes = "处理申诉")
     ServerResponse upDateMaintenanceInFo(@RequestParam("supervisorId") String supervisorId,
                                          @RequestParam("stewardSubsidy") Integer stewardSubsidy,
-                                         @RequestParam("serviceRemark")  String serviceRemark,
-                                         @RequestParam("userId")  String userId,
+                                         @RequestParam("serviceRemark") String serviceRemark,
+                                         @RequestParam("userId") String userId,
                                          @RequestParam("id") String id,
-                                         @RequestParam("handleType")  Integer handleType);
+                                         @RequestParam("handleType") Integer handleType);
 
 
     @PostMapping(value = "app/engineer/updateTaskStackData")
@@ -105,7 +107,6 @@ public interface DjMaintenanceRecordAPI {
                                      @RequestParam("data") String data);
 
 
-
 //    @PostMapping(value = "app/engineer/applicationAcceptance")
 //    @ApiOperation(value = "确认申请验收", notes = "确认申请验收")
 //    ServerResponse applicationAcceptance( @RequestParam("houseId") String houseId);
@@ -113,11 +114,11 @@ public interface DjMaintenanceRecordAPI {
 
     @PostMapping("/web/queryGuaranteeMoneyList")
     @ApiOperation(value = "店铺-缴纳质保金列表", notes = "质保金缴纳列表")
-    ServerResponse queryGuaranteeMoneyList( @RequestParam("pageDTO") PageDTO pageDTO,@RequestParam("userId") String userId,@RequestParam("cityId") String cityId);
+    ServerResponse queryGuaranteeMoneyList(@RequestParam("pageDTO") PageDTO pageDTO, @RequestParam("userId") String userId, @RequestParam("cityId") String cityId);
 
     @PostMapping("/web/queryGuaranteeMoneyDetail")
     @ApiOperation(value = "店铺-缴纳质保金详情", notes = "缴纳质保金详情")
-    ServerResponse queryGuaranteeMoneyDetail(@RequestParam("userId") String userId,@RequestParam("cityId") String cityId,@RequestParam("id") String id);
+    ServerResponse queryGuaranteeMoneyDetail(@RequestParam("userId") String userId, @RequestParam("cityId") String cityId, @RequestParam("id") String id);
 
 
     @PostMapping(value = "app/engineer/resolved")
@@ -132,11 +133,11 @@ public interface DjMaintenanceRecordAPI {
 
     @PostMapping(value = "app/engineer/sendingOwners")
     @ApiOperation(value = "(自购金额确认)发送给业主", notes = "(自购金额确认)发送给业主")
-    ServerResponse sendingOwners( @RequestParam("userToken") String userToken,
-                                  @RequestParam("houseId") String houseId,
-                                  @RequestParam("remark") String remark,
-                                  @RequestParam("enoughAmount") String enoughAmount
-                                  );
+    ServerResponse sendingOwners(@RequestParam("userToken") String userToken,
+                                 @RequestParam("houseId") String houseId,
+                                 @RequestParam("remark") String remark,
+                                 @RequestParam("enoughAmount") String enoughAmount
+    );
 
     //确定维保工序（已有）
     //选择责任方（已有）
@@ -144,12 +145,12 @@ public interface DjMaintenanceRecordAPI {
     @PostMapping(value = "app/auditMaintenance")
     @ApiOperation(value = "管家审核维修", notes = "管家审核维修")
     ServerResponse auditMaintenance(@RequestParam("userToken") String userToken,
-                            @RequestParam("remark") String remark,
-                            @RequestParam("houseId") String houseId,
-                            @RequestParam("image") String image,
-                            @RequestParam("id") String id,
-                            @RequestParam("state") Integer state,
-                            @RequestParam("workerTypeSafeOrderId") String workerTypeSafeOrderId
+                                    @RequestParam("remark") String remark,
+                                    @RequestParam("houseId") String houseId,
+                                    @RequestParam("image") String image,
+                                    @RequestParam("id") String id,
+                                    @RequestParam("state") Integer state,
+                                    @RequestParam("workerTypeSafeOrderId") String workerTypeSafeOrderId
     );
 
     @PostMapping(value = "app/submitQualityAssurance")
@@ -160,9 +161,56 @@ public interface DjMaintenanceRecordAPI {
                                           @RequestParam("image") String image,
                                           @RequestParam("id") String id,
                                           @RequestParam("state") Integer state,
-                                          @RequestParam("productId")     String productId,
-                                          @RequestParam("price")     Double price,
-                                          @RequestParam("shopCount")     Double shopCount,
-                                          @RequestParam("workerTypeSafeOrderId") String workerTypeSafeOrderId
-            );
+                                          @RequestParam("productId") String productId,
+                                          @RequestParam("price") Double price,
+                                          @RequestParam("shopCount") Double shopCount,
+                                          @RequestParam("workerTypeSafeOrderId") String workerTypeSafeOrderId);
+
+    @PostMapping(value = "app/engineer/insertMaintenanceRecordProduct")
+    @ApiOperation(value = "添加维保商品到购物篮", notes = "添加维保商品到购物篮")
+    ServerResponse insertMaintenanceRecordProduct(@RequestParam("userToken") String userToken,
+                                                  @RequestParam("houseId") String houseId,
+                                                  @RequestParam("maintenanceRecordId") String maintenanceRecordId,
+                                                  @RequestParam("productId") String productId);
+
+    @PostMapping(value = "app/engineer/setMaintenanceRecordProduct")
+    @ApiOperation(value = "管家/工匠维保购物篮处理", notes = "管家/工匠维保购物篮处理")
+    ServerResponse setMaintenanceRecordProduct(@RequestParam("userToken") String userToken,
+                                               @RequestParam("houseId") String houseId,
+                                               @RequestParam("maintenanceRecordId") String maintenanceRecordId);
+
+
+    @PostMapping(value = "app/engineer/submitQualityAssurance")
+    @ApiOperation(value = "维保购物篮", notes = "维保购物篮")
+    ServerResponse queryMaintenanceShoppingBasket(@RequestParam("userToken") String userToken,
+                                                  @RequestParam("houseId") String houseId,
+                                                  @RequestParam("maintenanceRecordId") String maintenanceRecordId);
+
+    @PostMapping(value = "app/engineer/addApplyNewspaper")
+    @ApiOperation(value = "工匠申请报销", notes = "工匠申请报销")
+    ServerResponse addApplyNewspaper(@RequestParam("userToken") String userToken,
+                                          @RequestParam("memberId") String memberId,
+                                          @RequestParam("money")  Double money,
+                                          @RequestParam("description") String description,
+                                          @RequestParam("image") String image,
+                                          @RequestParam("houseId")  String houseId);
+
+
+    @PostMapping(value = "app/engineer/queryComplain")
+    @ApiOperation(value = "查询报销记录", notes = "查询报销记录")
+    ServerResponse  queryComplain(@RequestParam("userToken")String userToken,
+                                  @RequestParam("memberId")String memberId);
+
+    @PostMapping(value = "app/engineer/queryComplainInFo")
+    @ApiOperation(value = "查询报销记录详情", notes = "查询报销记录详情")
+    ServerResponse  queryComplainInFo(@RequestParam("id")String id);
+
+    @PostMapping(value = "web/engineer/handleAppeal")
+    @ApiOperation(value = "处理工匠报销申诉", notes = "处理工匠报销申诉")
+    ServerResponse  handleAppeal(@RequestParam("id")String id,
+                                 @RequestParam("type")Integer type,
+                                 @RequestParam("actualMoney") Double actualMoney,
+                                 @RequestParam("operateId")String operateId,
+                                 @RequestParam("rejectReason")String rejectReason);
+
 }

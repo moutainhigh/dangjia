@@ -14,6 +14,7 @@ import com.dangjia.acg.common.util.*;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.core.HomePageBean;
 import com.dangjia.acg.dto.member.MemberCustomerDTO;
+import com.dangjia.acg.dto.member.MemberDTO;
 import com.dangjia.acg.dto.worker.WorkerComprehensiveDTO;
 import com.dangjia.acg.mapper.config.ISmsMapper;
 import com.dangjia.acg.mapper.core.IHouseWorkerOrderMapper;
@@ -23,11 +24,13 @@ import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.*;
 import com.dangjia.acg.mapper.menu.IMenuConfigurationMapper;
 import com.dangjia.acg.mapper.other.ICityMapper;
+import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
 import com.dangjia.acg.mapper.store.IStoreMapper;
 import com.dangjia.acg.mapper.store.IStoreUserMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.mapper.worker.IInsuranceMapper;
 import com.dangjia.acg.mapper.worker.IWorkIntegralMapper;
+import com.dangjia.acg.mapper.worker.IWorkerBankCardMapper;
 import com.dangjia.acg.modle.config.Sms;
 import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.core.WorkerType;
@@ -36,12 +39,14 @@ import com.dangjia.acg.modle.house.HouseDistribution;
 import com.dangjia.acg.modle.member.*;
 import com.dangjia.acg.modle.menu.MenuConfiguration;
 import com.dangjia.acg.modle.other.City;
+import com.dangjia.acg.modle.pay.BusinessOrder;
 import com.dangjia.acg.modle.store.Store;
 import com.dangjia.acg.modle.store.StoreUser;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.sup.Supplier;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.modle.worker.Insurance;
+import com.dangjia.acg.modle.worker.WorkerBankCard;
 import com.dangjia.acg.service.activity.RedPackPayService;
 import com.dangjia.acg.service.clue.ClueService;
 import com.dangjia.acg.service.config.ConfigMessageService;
@@ -142,6 +147,10 @@ public class MemberService {
 
     @Autowired
     private BasicsStorefrontAPI basicsStorefrontAPI;
+    @Autowired
+    private IWorkerBankCardMapper iWorkerBankCardMapper;
+    @Autowired
+    private IBusinessOrderMapper iBusinessOrderMapper;
 
     /**
      * 获取用户手机号
@@ -1465,4 +1474,40 @@ public class MemberService {
         return ServerResponse.createBySuccess("查询成功", pageResult);
     }
 
+
+    /**
+     * 我的界面
+     * @param userToken
+     * @return
+     */
+    public ServerResponse queryMember(String userToken) {
+        try {
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;
+            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+            member.initPath(imageAddress);
+            MemberDTO memberDTO=new MemberDTO();
+            memberDTO.setHead(member.getHead());
+            memberDTO.setMobile(member.getMobile());
+            Example example=new Example(WorkerBankCard.class);
+            example.createCriteria().andEqualTo(WorkerBankCard.DATA_STATUS,0)
+                    .andEqualTo(WorkerBankCard.WORKER_ID,member.getId());
+            memberDTO.setBankCardCount(iWorkerBankCardMapper.selectCountByExample(example));//银行卡数量
+            memberDTO.setDiscountCouponCount(0);//优惠券数量
+            example=new Example(BusinessOrder.class);
+            example.createCriteria().andEqualTo(BusinessOrder.DATA_STATUS,0)
+                    .andEqualTo(BusinessOrder.MEMBER_ID,member.getId())
+                    .andIn(BusinessOrder.STATE,Arrays.asList(new Integer[]{1,2}));
+            memberDTO.setObligationCount(iBusinessOrderMapper.selectCountByExample(example));//待付款数量
+            memberDTO.setSurplusMoney(member.getSurplusMoney());
+            return ServerResponse.createBySuccess("查询成功",memberDTO);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.info("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
 }

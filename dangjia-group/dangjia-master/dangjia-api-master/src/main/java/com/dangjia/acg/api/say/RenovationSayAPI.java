@@ -29,7 +29,7 @@ public interface RenovationSayAPI {
 
     @PostMapping("web/renovation/deleteRenovationSay")
     @ApiOperation(value = "删除装修说", notes = "删除装修说")
-    ServerResponse deleteRenovationSay(@RequestParam("content") String id);
+    ServerResponse deleteRenovationSay(@RequestParam("id") String id);
 
     @PostMapping("web/renovation/queryRenovationSayList")
     @ApiOperation(value = "查询装修说列表", notes = "查询装修说列表")
