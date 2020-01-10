@@ -3,11 +3,15 @@ package com.dangjia.acg.service.configRule;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.mapper.configRule.*;
+import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
+import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.operation.IOperationFlowMapper;
 import com.dangjia.acg.mapper.user.UserMapper;
 import com.dangjia.acg.model.config.*;
+import com.dangjia.acg.modle.core.HouseFlow;
+import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
 import com.github.pagehelper.PageHelper;
 import org.slf4j.Logger;
@@ -18,10 +22,7 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
 import java.math.BigDecimal;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * author: qiyuxiang
@@ -56,6 +57,10 @@ public class ConfigRuleUtilService {
     @Autowired
     private ConfigRuleService configRuleService;
 
+    @Autowired
+    private IHouseFlowMapper houseFlowMapper;
+    @Autowired
+    private IHouseMapper houseMapper;
 
     @Value("${spring.profiles.active}")
     private String active;
@@ -335,4 +340,108 @@ public class ConfigRuleUtilService {
         amount=a+b+c;
         return amount;
     }
+
+
+    /**
+     * 自动排期配置-工地户型设置
+     * @param square 面积
+     * @return
+     */
+    public DjConfigRuleItemTwo getApartmentConfig(BigDecimal square) {
+        Example example=new Example(DjConfigRuleModule.class);
+        example.createCriteria().andEqualTo(DjConfigRuleModule.TYPE_ID,ConfigRuleService.PQ101);
+        DjConfigRuleModule configRuleModule=configRuleModuleMapper.selectOneByExample(example);
+        DjConfigRuleItemTwo configRuleItemTwoNew=null;
+        example=new Example(DjConfigRuleItemTwo.class);
+        example.createCriteria().andEqualTo(DjConfigRuleItemTwo.MODULE_ID,configRuleModule.getId());
+        example.orderBy(DjConfigRuleItemTwo.CREATE_DATE).desc();
+        PageHelper.startPage(1, 3);
+        List<DjConfigRuleItemTwo> configRuleItemTwos=configRuleItemTwoMapper.selectByExample(example);
+        if (configRuleItemTwos.size() > 0) {
+            for (DjConfigRuleItemTwo configRuleItemTwo : configRuleItemTwos) {
+                String[] fieldValues=configRuleItemTwo.getFieldValue().split(",");
+                if(Double.parseDouble(fieldValues[0])<=square.doubleValue()&&Double.parseDouble(fieldValues[1])>=square.doubleValue()){
+                    configRuleItemTwoNew= configRuleItemTwo;
+                    break;
+                }
+            }
+        }
+        return configRuleItemTwoNew;
+    }
+
+    /**
+     * 自动排期配置-其他
+     * @param typeId 平均工价(PQ102)/默认人数(PQ103)/工序安装期配置(PQ104)
+     */
+    public List<Map> getAutoSchedulingConfig(String typeId) {
+        Example example=new Example(DjConfigRuleModule.class);
+        example.createCriteria().andEqualTo(DjConfigRuleModule.TYPE_ID,typeId);
+        DjConfigRuleModule configRuleModule=configRuleModuleMapper.selectOneByExample(example);
+        ServerResponse serverResponse=configRuleService.getConfigRuleModule(configRuleModule.getId(),configRuleModule.getTypeId(),null);
+        if(serverResponse.isSuccess()){
+            List<Map> returnData = (List<Map>) serverResponse.getResultObj();
+            return returnData;
+        }
+        return new ArrayList();
+    }
+
+    /**
+     * 自动排期
+     * @param house
+     * @param houseFlows
+     */
+    public void getAutoSchedulingConfig(Date constructionDate,Boolean isWeekend,House house, List<HouseFlow> houseFlows) {
+        if(house.getSquare()==null){
+            return;
+        }
+        Date startDate=null;
+        house.setStartDate(constructionDate);
+        house.setEndDate(constructionDate);
+        DjConfigRuleItemTwo configRuleItemTwo= getApartmentConfig(house.getSquare());
+        List<Map> averageLabourPrice = getAutoSchedulingConfig(ConfigRuleService.PQ102);//平均工价
+        List<Map> defaultNumber = getAutoSchedulingConfig(ConfigRuleService.PQ103);//默认人数
+        List<Map> installationPeriod = getAutoSchedulingConfig(ConfigRuleService.PQ104);//工序安装期配置
+        for (HouseFlow houseFlow : houseFlows) {
+            BigDecimal gongJia=new BigDecimal(0);
+            Integer renShu=0;
+            for (Map map : averageLabourPrice) {
+                if(houseFlow.getWorkerTypeId().equals(map.get(DjConfigRuleItemOne.RANK_ID))){
+                    gongJia=new BigDecimal(map.get(configRuleItemTwo.getFieldCode()).toString());
+                }
+            }
+            for (Map map : defaultNumber) {
+                if(houseFlow.getWorkerTypeId().equals(map.get(DjConfigRuleItemOne.RANK_ID))){
+                    renShu=Integer.parseInt(map.get("number").toString());
+                }
+            }
+            if(startDate==null){
+                startDate=constructionDate;
+            }else{
+                startDate=DateUtil.addDateDays(startDate,1);
+            }
+            //工期 = 工序工价 / （户型平均工价（工序）* 默认工人人数）
+            Integer dayNum=(houseFlow.getWorkPrice().intValue()/(gongJia.intValue()*renShu))-1;
+            houseFlow.setStartDate(startDate);
+            houseFlow.setEndDate(DateUtil.addDateDays(startDate,dayNum));
+            //如果不包含周末，则加上周末的天数
+            if(isWeekend){
+                dayNum = dayNum + DateUtil.getWeekendDay(houseFlow.getStartDate(),houseFlow.getEndDate());
+                houseFlow.setEndDate(DateUtil.addDateDays(startDate,dayNum));
+            }
+            houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
+            startDate=houseFlow.getEndDate();
+        }
+        for (HouseFlow houseFlow : houseFlows) {
+            for (Map map : installationPeriod) {
+                if(houseFlow.getWorkerTypeId().equals(map.get(DjConfigRuleItemOne.RANK_ID))){
+                    Integer day=Integer.parseInt(map.get("number").toString());
+                    startDate=DateUtil.addDateDays(startDate,day);
+                }
+            }
+        }
+        house.setEndDate(startDate);
+        house.setSchedule("1");
+        houseMapper.updateByPrimaryKeySelective(house);
+    }
+
 }

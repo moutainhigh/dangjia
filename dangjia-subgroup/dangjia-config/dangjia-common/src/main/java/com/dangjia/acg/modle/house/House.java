@@ -99,6 +99,15 @@ public class House extends BaseEntity {
     @Desc(value = "大管家排期")
     @ApiModelProperty("大管家排期 0=未排期  1=已排期")
     private String schedule;
+    @Column(name = "start_date")
+    @Desc(value = "排期开始时间")
+    @ApiModelProperty("管家排期的开工开始时间")
+    private Date startDate;
+
+    @Column(name = "end_date")
+    @Desc(value = "排期结束时间")
+    @ApiModelProperty("管家排期的竣工时间")
+    private Date endDate;
 
     @Column(name = "type")
     @Desc(value = "默认0，1用户点击了开始装修，2代表老用户,3用户自己撤回")    //迁移数据时设置老用户

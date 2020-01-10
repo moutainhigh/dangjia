@@ -35,20 +35,6 @@ public class HouseFlowScheduleController implements HouseFlowScheduleAPI {
     }
 
 
-    /**
-     * 设置指定工序的工期
-     *
-     * @param houseFlowId 工序ID
-     * @param startDate   工期开始时间
-     * @param endDate     工期结束时间
-     * @return
-     */
-    @Override
-    @ApiMethod
-    public ServerResponse setHouseFlowSchedule(String houseFlowId, Date startDate, Date endDate) {
-
-        return houseFlowScheduleService.setHouseFlowSchedule(houseFlowId, startDate, endDate);
-    }
 
 
     /**
@@ -59,9 +45,8 @@ public class HouseFlowScheduleController implements HouseFlowScheduleAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse makeCalendar(String houseId) {
-
-        return houseFlowScheduleService.makeCalendar(houseId);
+    public ServerResponse makeCalendar(Date constructionDate,Boolean isWeekend,String houseId) {
+        return houseFlowScheduleService.makeCalendar(constructionDate, isWeekend,houseId);
     }
 
 
