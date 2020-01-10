@@ -4,8 +4,6 @@ import com.dangjia.acg.api.supervisor.DjBasicsSupervisorAuthorityAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.dto.supervisor.DjBasicsSupervisorAuthorityDTO;
-import com.dangjia.acg.modle.supervisor.DjBasicsSupervisorAuthority;
 import com.dangjia.acg.service.supervisor.SupAuthorityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,12 +26,6 @@ public class DjBasicsSupAuthorityController implements DjBasicsSupervisorAuthori
     @ApiMethod
     public ServerResponse queryDvResponsibility(HttpServletRequest request,String houseId,PageDTO pageDTO) {
         return supAuthorityService.queryDvResponsibility(request,houseId,pageDTO);
-    }
-
-    @Override
-    @ApiMethod
-    public ServerResponse querySupervisorHostDetailList(HttpServletRequest request, String houseId) {
-        return supAuthorityService.querySupervisorHostDetailList(request,houseId);
     }
 
     @Override

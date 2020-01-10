@@ -48,12 +48,14 @@ public class MemberAddressController implements MemberAddressAPI {
     @Override
     @ApiMethod
     public ServerResponse selectAddress(HttpServletRequest request, String addressId) {
+        request.setAttribute("isShow", "true");
         return memberAddressService.selectAddress(addressId);
     }
 
     @Override
     @ApiMethod
     public ServerResponse selectAddressList(HttpServletRequest request, PageDTO pageDTO, String userToken, Integer renovationType) {
+        request.setAttribute("isShow", "true");
         return memberAddressService.selectAddressList(pageDTO, userToken, renovationType);
     }
 }

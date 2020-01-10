@@ -8,18 +8,32 @@ import com.dangjia.acg.common.util.DateUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.supervisor.AuthorityDTO;
 import com.dangjia.acg.dto.supervisor.PatrolRecordIndexDTO;
+import com.dangjia.acg.dto.supervisor.SupHouseDetailsDTO;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
+import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
+import com.dangjia.acg.mapper.house.IHouseMapper;
+import com.dangjia.acg.mapper.house.IModelingVillageMapper;
+import com.dangjia.acg.mapper.member.IMasterMemberAddressMapper;
+import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.supervisor.ISupervisorAuthorityMapper;
+import com.dangjia.acg.modle.core.HouseFlow;
 import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.core.WorkerType;
+import com.dangjia.acg.modle.house.House;
+import com.dangjia.acg.modle.house.ModelingVillage;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.member.MemberAddress;
+import com.dangjia.acg.modle.supervisor.DjBasicsSupervisorAuthority;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -42,6 +56,16 @@ public class SupervisorAppService {
     private IHouseFlowApplyMapper houseFlowApplyMapper;
     @Autowired
     private IWorkerTypeMapper workerTypeMapper;
+    @Autowired
+    private IHouseFlowMapper houseFlowMapper;
+    @Autowired
+    private IHouseMapper iHouseMapper;
+    @Autowired
+    private IMasterMemberAddressMapper iMasterMemberAddressMapper;
+    @Autowired
+    private IModelingVillageMapper modelingVillageMapper;
+    @Autowired
+    private IMemberMapper memberMapper;
 
     /**
      * 督导首页数据获取
@@ -101,7 +125,7 @@ public class SupervisorAppService {
                 if (authorityDTO.getStartDate() != null && authorityDTO.getEndDate() != null) {
                     plan = 1 + DateUtil.daysofTwo(authorityDTO.getStartDate(), authorityDTO.getEndDate());//计划工期天数
                 }
-                int fatalism = iSupervisorAuthorityMapper.getFatalism(authorityDTO.getHouseId());
+                int fatalism = iSupervisorAuthorityMapper.getFatalism(authorityDTO.getHouseId(), null);
                 authorityDTO.setConstructionPeriod(plan + "/" + fatalism);
                 //查询今日开工记录
                 List<HouseFlowApply> todayStartList = houseFlowApplyMapper.getTodayStartByHouseId(authorityDTO.getHouseId(), new Date());
@@ -125,4 +149,141 @@ public class SupervisorAppService {
         return ServerResponse.createBySuccess("查询成功", pageResult);
     }
 
+    /**
+     * 督导获取工地详情
+     *
+     * @param userToken userToken
+     * @param houseId   房子ID
+     * @return ServerResponse
+     */
+    public ServerResponse getSupHouseDetails(String userToken, String houseId) {
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member member = (Member) object;
+        House house = iHouseMapper.selectByPrimaryKey(houseId);
+        if (house == null) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "没有查询到相关房子");
+        }
+        Example example = new Example(DjBasicsSupervisorAuthority.class);
+        example.createCriteria()
+                .andEqualTo(DjBasicsSupervisorAuthority.MEMBER_ID, member.getId())
+                .andEqualTo(DjBasicsSupervisorAuthority.HOUSE_ID, houseId);
+        if (iSupervisorAuthorityMapper.selectCountByExample(example) > 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+        SupHouseDetailsDTO detailsDTO = new SupHouseDetailsDTO();
+        example = new Example(MemberAddress.class);
+        example.createCriteria().andEqualTo(MemberAddress.HOUSE_ID, houseId);
+        MemberAddress memberAddress = iMasterMemberAddressMapper.selectOneByExample(example);
+        detailsDTO.setHouseId(houseId);
+        if (memberAddress == null) {
+            detailsDTO.setHouseName(house.getHouseName());
+        } else {
+            detailsDTO.setHouseName(memberAddress.getAddress());
+        }
+        ModelingVillage modelingVillage = modelingVillageMapper.selectByPrimaryKey(house.getVillageId());
+        if (memberAddress != null) {
+            detailsDTO.setAddress(modelingVillage.getAddress());
+            detailsDTO.setLongitude(modelingVillage.getLocationx());
+            detailsDTO.setLatitude(modelingVillage.getLocationy());
+        }
+
+        //TODO  查询维保
+
+        if (house.getVisitState() == 3) {
+            detailsDTO.setButtonType(1);
+        } else {
+            detailsDTO.setButtonType(0);
+        }
+        example = new Example(HouseFlow.class);
+        example.createCriteria()
+                .andEqualTo(HouseFlow.WORK_TYPE, 4)
+                .andGreaterThan(HouseFlow.WORKER_TYPE, 2)
+                .andEqualTo(HouseFlow.HOUSE_ID, houseId);
+        example.orderBy(HouseFlow.SORT).desc();
+        List<HouseFlow> houseFlows = houseFlowMapper.selectByExample(example);
+        if (houseFlows.size() <= 0) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+        }
+        List<SupHouseDetailsDTO.SupHouseFlowDTO> flowDTOS = new ArrayList<>();
+        String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
+        for (HouseFlow houseFlow : houseFlows) {
+            SupHouseDetailsDTO.SupHouseFlowDTO flowDTO = new SupHouseDetailsDTO.SupHouseFlowDTO();
+            WorkerType workerType = workerTypeMapper.selectByPrimaryKey(houseFlow.getWorkerTypeId());
+            flowDTO.setWorkerType(houseFlow.getWorkerType());
+            flowDTO.setWorkerTypeId(houseFlow.getWorkerTypeId());
+            if (workerType != null) {
+                flowDTO.setWorkerTypeName(workerType.getName());
+                flowDTO.setImage(imageAddress + workerType.getImage());
+            }
+            Member worker = memberMapper.selectByPrimaryKey(houseFlow.getWorkerId());
+            if (worker != null) {
+                flowDTO.setMemberId(worker.getId());
+                flowDTO.setMemberName(worker.getName());
+            }
+            List<SupHouseDetailsDTO.WorkerMapDTO> workerMapDTOS = new ArrayList<>();
+            if (houseFlow.getWorkerType() == 3) {
+                int plan = 0;
+                if (house.getStartDate() != null && house.getEndDate() != null) {
+                    plan = 1 + DateUtil.daysofTwo(house.getStartDate(), house.getEndDate());//计划工期天数
+                }
+                int fatalism = iSupervisorAuthorityMapper.getFatalism(houseId, null);
+                SupHouseDetailsDTO.WorkerMapDTO workerMapDTO = new SupHouseDetailsDTO.WorkerMapDTO();
+                workerMapDTO.setKeyName("工期");
+                workerMapDTO.setValueName(plan + "/" + fatalism);
+                workerMapDTOS.add(workerMapDTO);
+                Long allPatrol = houseFlowApplyMapper.countPatrol(house.getId(), null);
+                allPatrol = allPatrol == null ? 0 : allPatrol;
+                int all = 0;
+                int time = 0;//累计管家总阶段验收和完工验收次数
+                for (HouseFlow flow : houseFlows) {
+                    if (flow.getWorkerType() != 3 && flow.getPatrol() != null) {
+                        all = all + flow.getPatrol();
+                        if (flow.getWorkerType() == 4) {
+                            time++;
+                        } else {
+                            time += 2;
+                        }
+                    }
+                }
+                workerMapDTO = new SupHouseDetailsDTO.WorkerMapDTO();
+                workerMapDTO.setKeyName("巡查");
+                workerMapDTO.setValueName(allPatrol + "/" + all);
+                workerMapDTOS.add(workerMapDTO);
+                Integer check = iSupervisorAuthorityMapper.getAcceptanceCheck(houseId);
+                check = check == null ? 0 : check;
+                workerMapDTO = new SupHouseDetailsDTO.WorkerMapDTO();
+                workerMapDTO.setKeyName("验收");
+                workerMapDTO.setValueName(check + "/" + time);
+                workerMapDTOS.add(workerMapDTO);
+            } else {
+                if (houseFlow.getWorkSteta() == 1) {
+                    flowDTO.setCompletion("阶段完工");
+                } else if (houseFlow.getWorkSteta() == 2) {
+                    flowDTO.setCompletion("整体完工");
+                }
+                int plan = 0;
+                if (houseFlow.getStartDate() != null && houseFlow.getEndDate() != null) {
+                    plan = 1 + DateUtil.daysofTwo(houseFlow.getStartDate(), houseFlow.getEndDate());//计划工期天数
+                }
+                int fatalism = iSupervisorAuthorityMapper.getFatalism(houseId, houseFlow.getWorkerType());
+                SupHouseDetailsDTO.WorkerMapDTO workerMapDTO = new SupHouseDetailsDTO.WorkerMapDTO();
+                workerMapDTO.setKeyName("工期");
+                workerMapDTO.setValueName(plan + "/" + fatalism);
+                workerMapDTOS.add(workerMapDTO);
+                //节点
+                int allNumber = iSupervisorAuthorityMapper.getAllNumber(houseId, houseFlow.getWorkerTypeId());
+                int completeNumber = iSupervisorAuthorityMapper.getCompleteNumber(houseId, houseFlow.getWorkerTypeId());
+                workerMapDTO = new SupHouseDetailsDTO.WorkerMapDTO();
+                workerMapDTO.setKeyName("节点");
+                workerMapDTO.setValueName(completeNumber + "/" + allNumber);
+                workerMapDTOS.add(workerMapDTO);
+            }
+            flowDTO.setMapList(workerMapDTOS);
+        }
+        detailsDTO.setFlowDatas(flowDTOS);
+        return ServerResponse.createBySuccess("查询成功", detailsDTO);
+    }
 }

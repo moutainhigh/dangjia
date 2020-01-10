@@ -199,4 +199,44 @@ public interface SupervisorAuthorityAPI {
                                    @RequestParam("longitude") String longitude,
                                    @RequestParam("searchKey") String searchKey);
 
+    /**
+     * showdoc
+     *
+     * @param userToken 必选 string userToken
+     * @param houseId   必选 string 房子ID
+     * @return {"res":1000,"msg":{"resultObj":{返回参数说明},"resultCode":1000,"resultMsg":"成功"} }
+     * @catalog 工匠端升级/中台/督导
+     * @title （APP）督导获取工地详情
+     * @description 督导获取工地详情
+     * @method POST
+     * @url master/app/supervisor/getSupHouseDetails
+     * @return_param houseId string 房子ID
+     * @return_param houseName string 房子名称
+     * @return_param address string 地址
+     * @return_param latitude string 纬度
+     * @return_param longitude string 经度
+     * @return_param type Integer 0:施工,1:维保
+     * @return_param buttonType Integer 0:显示底部按钮,1:不显示底部按钮
+     * @return_param flowDatas List<SupHouseFlowDTO> 记录集合
+     * @return_param flowDatas-memberName string 工匠名称
+     * @return_param flowDatas-memberId string 工匠ID
+     * @return_param flowDatas-workerTypeName string 工种名称
+     * @return_param flowDatas-workerTypeId string workertyid
+     * @return_param flowDatas-workerType string workertype
+     * @return_param flowDatas-image string 工种图片
+     * @return_param flowDatas-completion string 进程名称，为空不显示
+     * @return_param flowDatas-mapList List<WorkerMapDTO> 进程数据集合
+     * @return_param flowDatas-mapList-keyName string 键，如：工期
+     * @return_param flowDatas-mapList-valueName string 值，如：35/75
+     * @remark 更多返回错误代码请看首页的错误代码描述
+     * @number 7
+     * @Author: Ruking 18075121944
+     * @Date: 2020/1/10 6:34 PM
+     */
+    @PostMapping("app/supervisor/getSupHouseDetails")
+    @ApiOperation(value = "督导获取工地详情", notes = "督导获取工地详情")
+    ServerResponse getSupHouseDetails(@RequestParam("request") HttpServletRequest request,
+                                      @RequestParam("userToken") String userToken,
+                                      @RequestParam("houseId") String houseId);
+
 }
