@@ -182,49 +182,6 @@
             mr.id = #{id}
     </select>
 
-    <select id="queryApplicationInfo" resultType="com.dangjia.acg.dto.supervisor.MaintenanceRecordDTO">
-           select
-				dmr.owner_name as ownerName,
-				dmr.create_date as createDate,
-				mrc.image as ownerImage,
-				mrc.remark as ownerRemark
-				From  dj_maintenance_record  dmr inner join
-				dj_maintenance_record_content mrc on mrc.maintenance_record_id=dmr.id
-            where dmr.house_id=#{houseId}
-    </select>
-
-    <select id="queryAcceptanceTrend" resultType="com.dangjia.acg.dto.supervisor.AcceptanceTrendDTO">
-        select
-        dmr.id as id,
-        CASE state
-                WHEN 2 THEN
-                    '质保验收-通过'
-                WHEN 3 THEN
-                    '质保验收-不通过'
-                ELSE
-                    '无'
-            END state
-         ,
-        IFNULL(create_date,'') as createDate
-        from dj_maintenance_record dmr where dmr.state in (2,3)
-        and dmr.house_id=#{houseId}
-    </select>
-
-    <select id="queryAcceptanceTrendDetail" resultType="com.dangjia.acg.dto.supervisor.AcceptanceTrendDetailDTO">
-       select
-        IFNULL(dm.worker_type,'') as workerType,
-        IFNULL(dm.name,'') as name,
-        IFNULL(dmr.steward_image,'') as stewardImage,
-        IFNULL(dmr.steward_remark ,'')as stewardRemark,
-        IFNULL(dwe.star,'') as star,
-        IFNULL(dwe.content,'') as content
-        From  dj_maintenance_record_responsible_party rrp
-        inner join dj_maintenance_record dmr on dmr.id=rrp.maintenance_record_id inner join
-        dj_worker_evaluate dwe on rrp.responsible_party_type=3 and dmr.house_id=dwe.house_id  and dwe.state=1
-        inner join dj_member dm on dm.id=rrp.responsible_party_id
-        where 1=1 and rrp.maintenance_record_id=#{id}
-    </select>
-
     <select id="queryDvResponsibility" resultType="com.dangjia.acg.dto.supervisor.DjResponsiblePartyDTO">
         select
         rrp.responsible_party_id as responsiblePartyId,
@@ -262,36 +219,6 @@
         from dj_maintenance_record_responsible_party rrp
         inner join dj_basics_storefront dbs  on dbs.id=rrp.responsible_party_id
         where 1=1 and rrp.responsible_party_type=#{responsiblePartyType} and rrp.responsible_party_id=#{responsiblePartyId}
-    </select>
-
-
-    <select id="queryMaintenanceHostList" resultType="com.dangjia.acg.dto.supervisor.RepairHouseListDTO" >
-        select
-        IFNULL(CONCAT(IFNULL(dh.residential,'*'),IFNULL(CONCAT(dh.building,'栋'),'*栋'),IFNULL(CONCAT(dh.unit,'单元'),'*单元'),IFNULL(CONCAT(dh.number,'号'),'*号')) ,'') as address,
-        dmr.since_purchase_amount as sincePurchaseAmount, -- 维保金额
-        -- 参与人员
-        substring(dha.address,7,3)as area,-- 地区
-        dmr.house_id as houseId
-        from dj_maintenance_record dmr
-        inner join dj_house dh  on dmr.house_id=dh.id
-        inner join dj_house_address dha
-    </select>
-
-    <select id="queryMtHostListDetail" resultType="com.dangjia.acg.dto.supervisor.MtHostListDetailDTO">
-      select
-        dh.id as houseId,
-        IFNULL(CONCAT(IFNULL(dh.residential,'*'),IFNULL(CONCAT(dh.building,'栋'),'*栋'),IFNULL(CONCAT(dh.unit,'单元'),'*单元'),IFNULL(CONCAT(dh.number,'号'),'*号')) ,'') as address,
-        dha.latitude,
-        dha.longitude,
-        dmr.since_purchase_amount as sincePurchaseAmount,
-        dmr.remark
-        from dj_house  dh
-        inner join  dj_house_address dha on dh.id=dha.house_id
-        inner join dj_member dm on dm.id=dh.member_id
-        inner join dj_maintenance_record dmr on dh.id=dmr.house_id
-        where dh.id=#{houseId}
-        and dmr.owner_state=2
-		and dmr.state=2
     </select>
 
     <select id="queryMaintenanceRecord" resultType="com.dangjia.acg.modle.engineer.DjMaintenanceRecord">

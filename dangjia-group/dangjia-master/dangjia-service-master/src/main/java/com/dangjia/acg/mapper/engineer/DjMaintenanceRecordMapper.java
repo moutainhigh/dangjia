@@ -24,21 +24,11 @@ public interface DjMaintenanceRecordMapper extends Mapper<DjMaintenanceRecord> {
 
     DjMaintenanceRecordDTO queryDjMaintenanceRecordDetail(@Param("id") String id);
 
-    List<MaintenanceRecordDTO > queryApplicationInfo(@Param("houseId") String houseId);
-
-    List<AcceptanceTrendDTO> queryAcceptanceTrend(@Param("houseId") String houseId);
-
-    List<AcceptanceTrendDetailDTO> queryAcceptanceTrendDetail(@Param("id") String id);
-
     List<DjResponsiblePartyDTO> queryDvResponsibility(@Param("houseId") String houseId);
 
     List<StoreMaintenanceDTO> queryStoreMaintenance(@Param("responsiblePartyType")String responsiblePartyType ,@Param("responsiblePartyId") String responsiblePartyId);
 
     List<MemberMaintenanceDTO> queryMemberMaintenance(@Param("responsiblePartyType")String responsiblePartyType ,@Param("responsiblePartyId") String responsiblePartyId);
-
-    List<RepairHouseListDTO>  queryMaintenanceHostList(@Param("memberId")String memberId,@Param("keyWord")String keyWord);
-
-    MtHostListDetailDTO queryMtHostListDetail(@Param("houseId") String houseId);
 
     List<DjMaintenanceRecord> queryMaintenanceRecord(@Param("memberId") String memberId,@Param("houseId") String houseId);
 
