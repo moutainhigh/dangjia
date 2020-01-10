@@ -61,4 +61,10 @@ public class SupervisorAuthorityController implements SupervisorAuthorityAPI {
     public ServerResponse getSupHouseList(HttpServletRequest request, PageDTO pageDTO, String userToken, String cityId, Integer sortNum, Integer type, String latitude, String longitude, String searchKey) {
         return supervisorAppService.getSupHouseList(pageDTO, userToken, cityId, sortNum, type, latitude, longitude, searchKey);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse getSupHouseDetails(HttpServletRequest request, String userToken, String houseId) {
+        return supervisorAppService.getSupHouseDetails(userToken, houseId);
+    }
 }

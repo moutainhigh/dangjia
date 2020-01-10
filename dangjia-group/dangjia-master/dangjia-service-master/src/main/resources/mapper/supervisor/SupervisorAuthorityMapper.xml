@@ -474,8 +474,49 @@
         select
         COUNT(DISTINCT to_days(create_date))
         from dj_core_house_flow_apply
-        where  house_id = #{houseId}
+        where house_id = #{houseId}
+        <if test="workerType!=null and workerType !=''">
+            and worker_type = #{workerType}
+        </if>
         and apply_type = 4
+    </select>
+
+    <select id="getAcceptanceCheck" resultType="java.lang.Integer">
+        SELECT
+            COUNT(id)
+        FROM
+            dj_core_house_flow_apply
+        WHERE
+            house_id = #{houseId}
+            AND ( apply_type = 1 OR apply_type = 2 )
+            AND ( member_check = 1 OR member_check = 3 )
+    </select>
+    <select id="getAllNumber" resultType="java.lang.Integer">
+        SELECT
+			count(t4.id)
+		FROM
+			dj_house_warehouse t1,
+			dj_basics_storefront_product t2,
+			dj_basics_product_template t3,
+			dj_basics_technology t4
+		WHERE
+			t1.product_type = 2
+		and t1.house_id=#{houseId}
+		AND t1.product_id = t2.id
+		AND t2.prod_template_id = t3.id
+		and t4.worker_type_id=#{workerTypeId}
+		AND FIND_IN_SET(t4.id, t3.technology_ids)
+    </select>
+
+    <select id="getCompleteNumber" resultType="java.lang.Integer">
+        SELECT
+            count( id )
+        FROM
+            dj_matter_technology_record
+        WHERE
+            house_id = #{houseId}
+            AND worker_type_id = #{workerTypeId}
+            AND state = 1
     </select>
 
 </mapper>
