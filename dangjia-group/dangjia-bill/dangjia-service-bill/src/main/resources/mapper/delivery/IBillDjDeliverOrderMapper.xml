@@ -28,7 +28,7 @@
             dj_deliver_order t1,
             dj_pay_business_order t3,
             dj_basics_storefront t4
-            <if test="null=houseId or ''=houseId">
+            <if test="null==houseId or ''==houseId">
                 ,dj_member_address t5
             </if>
         WHERE

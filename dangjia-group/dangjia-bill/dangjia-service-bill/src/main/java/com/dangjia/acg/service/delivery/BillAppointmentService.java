@@ -62,8 +62,6 @@ public class BillAppointmentService {
 
     @Autowired
     private ConfigUtil configUtil;
-    @Autowired
-    private IBillMemberAddressMapper iBillMemberAddressMapper;
 
     /**
      * 我的预约查询
