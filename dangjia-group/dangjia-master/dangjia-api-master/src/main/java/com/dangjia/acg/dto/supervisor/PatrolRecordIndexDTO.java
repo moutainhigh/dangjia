@@ -4,8 +4,8 @@ import lombok.Data;
 
 @Data
 public class PatrolRecordIndexDTO {
-    private String num;
+    private Integer num;
     private String name;
-    private String sortNum;
+    private Integer sortNum;
     private String image;
 }

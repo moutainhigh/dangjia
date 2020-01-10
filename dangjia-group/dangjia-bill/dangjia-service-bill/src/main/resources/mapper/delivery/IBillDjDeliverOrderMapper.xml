@@ -28,12 +28,24 @@
             dj_deliver_order t1,
             dj_pay_business_order t3,
             dj_basics_storefront t4
+            <if test="null==houseId or ''==houseId">
+                ,dj_member_address t5
+            </if>
         WHERE
             t1.business_order_number = t3.number
         AND t1.storefont_id = t4.id
         AND t1.payment IS NOT NULL
         AND t3.state = 3
-        AND t1.house_id = #{houseId}
+        <choose>
+            <when test="null!=houseId and ''!=houseId">
+                AND t1.house_id=#{houseId}
+            </when>
+            <otherwise>
+                AND (t1.house_id = t5.house_id OR t1.address_id = t5.id)
+                AND t5.member_id = #{memberId}
+                AND t5.data_status=0
+            </otherwise>
+        </choose>
         AND EXISTS (
             SELECT
                 1

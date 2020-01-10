@@ -30,7 +30,7 @@ public interface IBillDjDeliverOrderMapper extends Mapper<Order> {
      * @param houseId
      * @return
      */
-    List<OrderStorefrontDTO> queryDjDeliverOrderStorefront(@Param("houseId") String houseId);
+    List<OrderStorefrontDTO> queryDjDeliverOrderStorefront(@Param("houseId") String houseId,@Param("memberId") String memberId);
 
 
     /**

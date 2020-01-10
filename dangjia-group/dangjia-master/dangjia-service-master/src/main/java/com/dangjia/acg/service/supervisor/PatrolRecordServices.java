@@ -1,15 +1,11 @@
 package com.dangjia.acg.service.supervisor;
 
-import com.alibaba.fastjson.JSONObject;
-import com.dangjia.acg.api.app.member.MemberAPI;
-import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.supervisor.JFRewardPunishRecordDTO;
 import com.dangjia.acg.dto.supervisor.PatrolRecordDTO;
-import com.dangjia.acg.dto.supervisor.PatrolRecordIndexDTO;
 import com.dangjia.acg.dto.supervisor.WorkerRewardPunishRecordDTO;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
@@ -47,32 +43,6 @@ public class PatrolRecordServices {
     @Autowired
     private IMemberMapper memberMapper;
 
-    /**
-     * 督导首页
-     *
-     * @param request
-     * @return
-     */
-    public ServerResponse getSupHomePage(HttpServletRequest request, PageDTO pageDTO, String userToken, String keyWord) {
-        try {
-            String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
-            Object object = constructionService.getMember(userToken);
-            if (object instanceof ServerResponse) {
-                return (ServerResponse) object;
-            }
-            Member worker = (Member) object;
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<PatrolRecordIndexDTO> list = rewardPunishRecordMapper.getSupHomePage(worker.getId(), keyWord);
-            list.forEach(patrolRecordIndexDTO -> {
-                patrolRecordIndexDTO.setImage(imageAddress + patrolRecordIndexDTO.getImage());
-            });
-            PageInfo pageResult = new PageInfo(list);
-            return ServerResponse.createBySuccess("查询成功", pageResult);
-        } catch (Exception e) {
-            logger.error("获取督导首页异常", e);
-            return ServerResponse.createByErrorMessage("获取督导首页异常");
-        }
-    }
 
     /**
      * 新建巡检

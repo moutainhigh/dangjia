@@ -605,6 +605,7 @@ public class EngineerService {
         map.put("idnumber", worker.getIdnumber());//身份证号码
         map.put("praiseRate", worker.getPraiseRate());//好评率
         map.put("volume", worker.getVolume());//成交量
+        map.put("checkType",worker.getCheckType());//审核状态
         Example example=new Example(DjSkillCertification.class);
         example.createCriteria().andEqualTo(DjSkillCertification.SKILL_CERTIFICATION_ID,workerId)
                 .andEqualTo(DjSkillCertification.DATA_STATUS,0)

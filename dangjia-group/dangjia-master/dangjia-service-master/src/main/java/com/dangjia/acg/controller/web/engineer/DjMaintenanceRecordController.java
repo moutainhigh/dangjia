@@ -255,5 +255,27 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
 
 
 
+    @Override
+    @ApiMethod
+    public ServerResponse setMaintenanceSolve(String userToken, String maintenanceRecordId, String remark, String image) {
+        try {
+            return djMaintenanceRecordService.setMaintenanceSolve(userToken,maintenanceRecordId,remark,image);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("操作失败");
+        }
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse deleteMaintenanceRecordProduct(String id) {
+        return djMaintenanceRecordService.deleteMaintenanceRecordProduct(id);
+    }
+
+//    @Override
+//    public ServerResponse setMaintenanceHandlesSubmissions(String maintenanceRecordId, String remark, String image) {
+//        return null;
+//    }
+
 }
 

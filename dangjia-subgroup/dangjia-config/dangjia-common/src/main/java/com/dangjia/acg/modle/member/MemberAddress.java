@@ -16,7 +16,7 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "dj_member_address")
 @FieldNameConstants(prefix = "")
-@ApiModel(description = "当家用户身份表")
+@ApiModel(description = "当家用户地址表")
 public class MemberAddress extends BaseEntity {
 
     @Column(name = "member_id")

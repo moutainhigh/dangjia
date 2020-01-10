@@ -1266,7 +1266,8 @@ public class DjMaintenanceRecordService {
             example.createCriteria().andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_MEMBER_ID, worker.getId())
                     .andEqualTo(DjMaintenanceRecordProduct.DATA_STATUS, 0)
                     .andEqualTo(DjMaintenanceRecordProduct.HOUSE_ID, houseId)
-                    .andEqualTo(DjMaintenanceRecordProduct.PRODUCT_ID, productId);
+                    .andEqualTo(DjMaintenanceRecordProduct.PRODUCT_ID, productId)
+                    .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_RECORD_ID,maintenanceRecordId);
             if (djMaintenanceRecordMapper.selectCountByExample(example) > 0)
                 return ServerResponse.createByErrorMessage("商品已选");
             StorefrontProduct storefrontProduct = iMasterStorefrontProductMapper.selectByPrimaryKey(productId);
@@ -1438,6 +1439,57 @@ public class DjMaintenanceRecordService {
             e.printStackTrace();
             logger.info("查询失败", e);
             return ServerResponse.createBySuccessMessage("查询失败");
+        }
+    }
+
+
+    /**
+     * 管家质保已解决
+     * @param userToken
+     * @param maintenanceRecordId
+     * @param remark
+     * @param image
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse setMaintenanceSolve(String userToken, String maintenanceRecordId, String remark, String image) {
+        Object object = constructionService.getMember(userToken);
+        if (object instanceof ServerResponse) {
+            return (ServerResponse) object;
+        }
+        Member worker = (Member) object;
+        DjMaintenanceRecord djMaintenanceRecord=new DjMaintenanceRecord();
+        djMaintenanceRecord.setId(maintenanceRecordId);
+        djMaintenanceRecord.setState(2);
+        djMaintenanceRecord.setStewardState(2);
+        djMaintenanceRecordMapper.updateByPrimaryKeySelective(djMaintenanceRecord);
+        DjMaintenanceRecordContent djMaintenanceRecordContent=new DjMaintenanceRecordContent();
+        djMaintenanceRecordContent.setImage(image);
+        djMaintenanceRecordContent.setMaintenanceRecordId(maintenanceRecordId);
+        djMaintenanceRecordContent.setMemberId(worker.getId());
+        djMaintenanceRecordContent.setRemark(remark);
+        djMaintenanceRecordContent.setType(2);
+        djMaintenanceRecordContent.setWorkerTypeId(worker.getWorkerTypeId());
+        djMaintenanceRecordContentMapper.insert(djMaintenanceRecordContent);
+        return ServerResponse.createBySuccessMessage("操作成功");
+    }
+
+
+    /**
+     * 删除购物篮商品
+     * @param id
+     * @return
+     */
+    public ServerResponse deleteMaintenanceRecordProduct(String id) {
+        try {
+            DjMaintenanceRecordProduct djMaintenanceRecordProduct = djMaintenanceRecordProductMapper.selectByPrimaryKey(id);
+            if(djMaintenanceRecordProduct.getPayState()==2)
+                return ServerResponse.createByErrorMessage("商品已支付不能修改");
+            djMaintenanceRecordProductMapper.deleteByPrimaryKey(id);
+            return ServerResponse.createBySuccessMessage("删除成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createBySuccessMessage("删除失败");
         }
     }
 

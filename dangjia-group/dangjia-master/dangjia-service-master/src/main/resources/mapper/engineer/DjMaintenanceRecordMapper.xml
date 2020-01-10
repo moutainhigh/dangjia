@@ -264,29 +264,6 @@
         where 1=1 and rrp.responsible_party_type=#{responsiblePartyType} and rrp.responsible_party_id=#{responsiblePartyId}
     </select>
 
-    <select id="querySupervisorHostList" resultType="com.dangjia.acg.dto.supervisor.SupSitelistDTO">
-        select
-        IFNULL(CONCAT(IFNULL(dh.residential,'*'),IFNULL(CONCAT(dh.building,'栋'),'*栋'),IFNULL(CONCAT(dh.unit,'单元'),'*单元'),IFNULL(CONCAT(dh.number,'号'),'*号')) ,'') as address,
-        substring(dha.address,7,3)as area,
-        SUM(TIMESTAMPDIFF(DAY,dh.construction_date,dh.completed_date)) as workerDate,
-        dbs.house_id as houseId
-        from dj_basics_supervisor_authority dbs
-        inner join dj_house  dh  on dbs.house_id=dh.id
-        inner join dj_house_address dha on dha.house_id=dh.id
-    </select>
-
-
-    <select id="querySupervisorHostDetailList" resultType="com.dangjia.acg.dto.supervisor.WorkerSiteDetailsDTO">
-        select
-        IFNULL(CONCAT(IFNULL(dh.residential,'*'),IFNULL(CONCAT(dh.building,'栋'),'*栋'),IFNULL(CONCAT(dh.unit,'单元'),'*单元'),IFNULL(CONCAT(dh.number,'号'),'*号')) ,'') as address,
-        dha.latitude,
-        dha.longitude,
-        dh.id as houseId
-        from dj_house  dh
-        inner join  dj_house_address dha on dh.id=dha.house_id
-        inner join dj_member dm on dm.id=dh.member_id
-        where dh.id=#{houseId}
-    </select>
 
     <select id="queryMaintenanceHostList" resultType="com.dangjia.acg.dto.supervisor.RepairHouseListDTO" >
         select

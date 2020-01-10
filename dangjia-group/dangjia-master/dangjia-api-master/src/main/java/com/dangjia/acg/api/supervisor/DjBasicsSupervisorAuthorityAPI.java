@@ -27,18 +27,6 @@ public interface DjBasicsSupervisorAuthorityAPI {
     ServerResponse queryDvResponsibility(@RequestParam("request") HttpServletRequest request,
                                          @RequestParam("houseId") String houseId, @RequestParam("pageDTO") PageDTO pageDTO);
 
-    @PostMapping("web/supervisor/querySupervisorHostList")
-    @ApiOperation(value = "督导-工地列表", notes = "督导-工地列表")
-    ServerResponse querySupervisorHostList(@RequestParam("request") HttpServletRequest request,
-                                           @RequestParam("sortNum") String sortNum,
-                                           @RequestParam("pageDTO") PageDTO pageDTO,
-                                           @RequestParam("userToken") String userToken,
-                                           @RequestParam("keyWord") String keyWord);
-
-    @PostMapping("web/supervisor/querySupervisorHostDetailList")
-    @ApiOperation(value = "督导-工地详情", notes = "督导-工地详情")
-    ServerResponse querySupervisorHostDetailList(@RequestParam("request") HttpServletRequest request,
-                                                 @RequestParam("houseId") String houseId);
 
     @PostMapping("web/supervisor/queryMaintenanceHostList")
     @ApiOperation(value = "督导-（维修)工地列表", notes = "督导-（维修)工地列表")
