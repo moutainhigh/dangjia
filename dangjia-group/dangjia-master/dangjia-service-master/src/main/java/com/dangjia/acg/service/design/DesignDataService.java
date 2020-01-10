@@ -326,18 +326,13 @@ public class DesignDataService {
      */
     public ServerResponse getDesignList(HttpServletRequest request, PageDTO pageDTO, Integer designerType,
                                         String searchKey, String workerKey, String userId) {
-        String userID = request.getParameter(Constants.USERID);
-
         Member member = memberMapper.selectByPrimaryKey(userId);
         int flag = 0;
         if (member != null) {
             //设计师
             flag = member.getWorkerType();
         }
-
         String cityKey = request.getParameter(Constants.CITY_ID);
-//        String cityKey = "402881882ba8753a012ba93101120116";
-//        String cityKey = redisClient.getCache(Constants.CITY_KEY + userID, String.class);
         if (CommonUtil.isEmpty(cityKey)) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
@@ -380,8 +375,8 @@ public class DesignDataService {
                 List<QuantityRoomImages> images = quantityRoomDTO.getImages();
                 if (images != null && images.size() > 0) {
                     String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-                    designDTO.setImage(images.get(0).getBaseImage(imageAddress));
-                    designDTO.setImageUrl(images.get(0).getImage());
+                    designDTO.setImage(images.get(0).getImage());
+                    designDTO.setImageUrl(images.get(0).getImageUrl());
                 }
             }
             designDTO.setShowUpdata(0);

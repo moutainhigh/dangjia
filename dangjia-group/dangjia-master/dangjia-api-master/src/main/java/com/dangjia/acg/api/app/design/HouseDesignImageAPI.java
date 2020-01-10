@@ -408,6 +408,7 @@ public interface HouseDesignImageAPI {
      * @return_param images-quantityRoomId string 操作ID
      * @return_param images-name string 名称
      * @return_param images-image string 图片地址
+     * @return_param images-imageUrl string 图片地址（全）
      * @return_param images-sort int 优先顺序
      * @remark 更多返回错误代码请看首页的错误代码描述
      * @number 4
@@ -447,6 +448,7 @@ public interface HouseDesignImageAPI {
      * @return_param images-quantityRoomId string 操作ID
      * @return_param images-name string 名称
      * @return_param images-image string 图片地址
+     * @return_param images-imageUrl string 图片地址（全）
      * @return_param images-sort int 优先顺序
      * @remark 更多返回错误代码请看首页的错误代码描述
      * @number 9
@@ -486,6 +488,7 @@ public interface HouseDesignImageAPI {
      * @return_param images-quantityRoomId string 操作ID
      * @return_param images-name string 名称
      * @return_param images-image string 图片地址
+     * @return_param images-imageUrl string 图片地址（全）
      * @return_param images-sort int 优先顺序
      * @remark 更多返回错误代码请看首页的错误代码描述
      * @number 10
@@ -599,6 +602,7 @@ public interface HouseDesignImageAPI {
      * @return_param images-quantityRoomId string 操作ID
      * @return_param images-name string 名称
      * @return_param images-image string 图片地址
+     * @return_param images-imageUrl string 图片地址（全）
      * @return_param images-sort int 优先顺序
      * @remark 更多返回错误代码请看首页的错误代码描述
      * @number 13

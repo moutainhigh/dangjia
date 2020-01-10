@@ -34,18 +34,4 @@ public class DjBasicsSupervisorAuthority  extends BaseEntity {
     @ApiModelProperty("操作人id")
     private String operateId ;
 
-    @Transient
-    private String address;
-    @Transient
-    private String name;
-    @Transient
-    private String mobile;
-    @Transient
-    private Integer visitState;
-    @Transient
-    private String constructionDate;
-
-
-
-
 }
