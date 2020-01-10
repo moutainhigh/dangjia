@@ -326,7 +326,6 @@
         GROUP BY dmr.house_id
     </select>
 
-
     <select id="getSupHouseList" resultType="com.dangjia.acg.dto.supervisor.AuthorityDTO">
         SELECT
         IFNULL(
@@ -491,6 +490,7 @@
             AND ( apply_type = 1 OR apply_type = 2 )
             AND ( member_check = 1 OR member_check = 3 )
     </select>
+
     <select id="getAllNumber" resultType="java.lang.Integer">
         SELECT
 			count(t4.id)

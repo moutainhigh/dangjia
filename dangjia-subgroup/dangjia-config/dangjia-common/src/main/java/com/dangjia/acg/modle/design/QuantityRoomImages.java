@@ -11,6 +11,7 @@ import lombok.experimental.FieldNameConstants;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 /**
  * @author Ruking.Cheng
@@ -51,17 +52,12 @@ public class QuantityRoomImages extends BaseEntity {
     @ApiModelProperty("优先顺序")
     private Integer sort;
 
+    @Transient
+    private String imageUrl;
 
     //所有图片字段加入域名和端口，形成全路径
     public void initPath(String imageAddress) {
-        this.image = CommonUtil.isEmpty(this.image) ? null : imageAddress + this.image;
-    }
-
-    public String getBaseImage(String imageAddress) {
-        if (image == null) {
-            return null;
-        }
-        return this.image.replace(imageAddress, "");
+        this.imageUrl = CommonUtil.isEmpty(this.image) ? null : imageAddress + this.image;
     }
 
 }

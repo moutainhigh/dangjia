@@ -287,7 +287,7 @@ public class QuantityRoomService {
             String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             for (QuantityRoomImages quantityRoomImage : quantityRoomImages) {
                 quantityRoomImage.initPath(imageAddress);
-                images.add(quantityRoomImage.getImage());
+                images.add(quantityRoomImage.getImageUrl());
             }
         }
         map.put("images", images);//量房图片
