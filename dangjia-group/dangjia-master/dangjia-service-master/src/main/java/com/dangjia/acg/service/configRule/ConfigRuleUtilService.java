@@ -397,6 +397,7 @@ public class ConfigRuleUtilService {
         Date startDate=null;
         house.setStartDate(constructionDate);
         house.setEndDate(constructionDate);
+        house.setIsWeekend(isWeekend);
         DjConfigRuleItemTwo configRuleItemTwo= getApartmentConfig(house.getSquare());
         List<Map> averageLabourPrice = getAutoSchedulingConfig(ConfigRuleService.PQ102);//平均工价
         List<Map> defaultNumber = getAutoSchedulingConfig(ConfigRuleService.PQ103);//默认人数
