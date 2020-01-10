@@ -145,12 +145,12 @@ public class DjBasicsProductTemplate extends GoodsBaseEntity {
     @Column(name = "max_warranty_period_year")
     @Desc(value = "最高质保年限")
     @ApiModelProperty("最高质保年限")
-    private Integer maxWarrantyPeriodYear;//最高质保年限
+    private Double maxWarrantyPeriodYear;//最高质保年限
 
     @Column(name = "min_warranty_period_year")
     @Desc(value = "最低质保年限")
     @ApiModelProperty("最低质保年限")
-    private Integer minWarrantyPeriodYear;//最低质保年限
+    private Double minWarrantyPeriodYear;//最低质保年限
 
     @Column(name = "marketing_name")
     @Desc(value = "营销名称")

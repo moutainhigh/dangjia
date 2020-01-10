@@ -66,9 +66,9 @@ public class BasicsProductDTO extends GoodsBaseEntity {
     private String isInflueWarrantyPeriod;//是否影响质保年限（1是，0否）
 
 
-    private Integer maxWarrantyPeriodYear;//最高质保年限
+    private Double maxWarrantyPeriodYear;//最高质保年限
 
-    private Integer minWarrantyPeriodYear;//最低质保年限
+    private Double minWarrantyPeriodYear;//最低质保年限
 
     private String marketingName;//营销名称
 
