@@ -94,37 +94,6 @@ public class SupAuthorityService {
     }
 
     /**
-     * 工地列表
-     *
-     * @param request
-     * @param sortNum
-     * @return
-     */
-    public ServerResponse querySupervisorHostList(HttpServletRequest request, String sortNum, PageDTO pageDTO, String userToken, String keyWord) {
-        try {
-            Object object = constructionService.getMember(userToken);
-            if (object instanceof ServerResponse) {
-                return (ServerResponse) object;
-            }
-            JSONObject job = (JSONObject) object;
-            Member worker = job.toJavaObject(Member.class);
-            PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<SupSitelistDTO> list = djMaintenanceRecordMapper.querySupervisorHostList(worker.getId(), keyWord);
-            list.forEach(supSitelistDTO -> {
-                String houseId = supSitelistDTO.getHouseId();
-                supSitelistDTO.setTodayConstruction("油漆");//通过房子id，当前时间进行查询
-                //通过房子id查询已经开工的记录，就是开工的天数
-                supSitelistDTO.setRealworkerDate("5");
-
-            });
-            PageInfo pageResult = new PageInfo(list);
-            return ServerResponse.createBySuccess("查询成功", pageResult);
-        } catch (Exception e) {
-            return ServerResponse.createByErrorMessage("工地列表异常");
-        }
-    }
-
-    /**
      * 工地详情
      *
      * @param request
