@@ -118,15 +118,15 @@ public class TechnologyService {
                 t.setSampleImage(sampleImage);
                 t.setType(type);
                 t.setCityId(cityId);
-                //0服务工艺;1:人工工艺
-                if (materialOrWorker == 1) { //1人工工艺
+                //0服务工艺;1:人工工艺;2维保
+              //  if (materialOrWorker == 1) { //1人工工艺
                     t.setWorkerTypeId(workerTypeId);
 //                    t.setType(type);
-                    t.setMaterialOrWorker(1);
-                } else {//0服务工艺
+                    t.setMaterialOrWorker(materialOrWorker);
+              //  } else {//0服务工艺
 //                    t.setType(1);
-                    t.setMaterialOrWorker(0);
-                }
+                   // t.setMaterialOrWorker(0);
+               // }
                 if (!StringUtils.isNotBlank(id)) {//为空 ： 就是新增
                     iTechnologyMapper.insertSelective(t);
                 } else { //修改
@@ -160,12 +160,12 @@ public class TechnologyService {
             if (technologyList.size() > 0) {
                 return ServerResponse.createByErrorMessage("工艺名称不能重复");
             }
-            if (technology.getMaterialOrWorker()!=null&&technology.getMaterialOrWorker() != 1) {
+           /* if (technology.getMaterialOrWorker()!=null&&technology.getMaterialOrWorker() != 1) {
                 technology.setType(1);
                 technology.setMaterialOrWorker(0);
             }else{
                 technology.setMaterialOrWorker(1);
-            }
+            }*/
             iTechnologyMapper.insertSelective(technology);
             return ServerResponse.createBySuccessMessage("新增成功");
         } catch (Exception e) {
@@ -188,12 +188,12 @@ public class TechnologyService {
                 if (technologyList.size() > 0)
                     return ServerResponse.createByErrorMessage("工艺名称已存在");
             }
-            if (technology.getMaterialOrWorker()!=null&&technology.getMaterialOrWorker() != 1) {
+           /* if (technology.getMaterialOrWorker()!=null&&technology.getMaterialOrWorker() != 1) {
                 technology.setType(1);
                 technology.setMaterialOrWorker(0);
             }else{
                 technology.setMaterialOrWorker(1);
-            }
+            }*/
             iTechnologyMapper.updateByPrimaryKeySelective(technology);
             return ServerResponse.createBySuccessMessage("修改成功");
         } catch (Exception e) {
