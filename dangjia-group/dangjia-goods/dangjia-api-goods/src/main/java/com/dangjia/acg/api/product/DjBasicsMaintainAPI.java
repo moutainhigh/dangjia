@@ -38,7 +38,7 @@ public interface DjBasicsMaintainAPI {
 
     @PostMapping("/product/djBasicsMaintain/addRelatedTags")
     @ApiOperation(value = "关联标签", notes = "关联标签")
-    ServerResponse addRelatedTags(@RequestParam("request") HttpServletRequest requestm,
+    ServerResponse addRelatedTags(@RequestParam("request") HttpServletRequest request,
                                   @RequestParam("id") String id,
                                   @RequestParam("labelIds") String labelIds);
 

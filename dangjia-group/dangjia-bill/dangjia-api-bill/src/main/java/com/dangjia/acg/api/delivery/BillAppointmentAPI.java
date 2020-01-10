@@ -27,7 +27,8 @@ public interface BillAppointmentAPI {
     @ApiOperation(value = "我的预约", notes = "我的预约")
     ServerResponse queryAppointment(@RequestParam("request") HttpServletRequest request,
                                     @RequestParam("pageDTO") PageDTO pageDTO,
-                                    @RequestParam("houseId") String houseId);
+                                    @RequestParam("houseId") String houseId,
+                                    @RequestParam("userToken") String userToken);
 
 
     @PostMapping("/app/billAppointment/insertAppointment")

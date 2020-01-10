@@ -192,6 +192,23 @@ public interface DjMaintenanceRecordAPI {
                                                   @RequestParam("houseId") String houseId,
                                                   @RequestParam("maintenanceRecordId") String maintenanceRecordId);
 
+    @PostMapping(value = "app/engineer/setMaintenanceSolve")
+    @ApiOperation(value = "管家质保已解决", notes = "管家质保已解决")
+    ServerResponse setMaintenanceSolve(@RequestParam("userToken") String userToken,
+                                       @RequestParam("maintenanceRecordId") String maintenanceRecordId,
+                                       @RequestParam("remark") String remark,
+                                       @RequestParam("image") String image);
+
+    @PostMapping(value = "app/engineer/deleteMaintenanceRecordProduct")
+    @ApiOperation(value = "删除购物篮商品", notes = "删除购物篮商品")
+    ServerResponse deleteMaintenanceRecordProduct(@RequestParam("id") String id);
+
+//    @PostMapping(value = "app/engineer/setMaintenanceHandlesSubmissions")
+//    @ApiOperation(value = "管家质保处理提交", notes = "管家质保处理提交")
+//    ServerResponse setMaintenanceHandlesSubmissions(@RequestParam("maintenanceRecordId") String maintenanceRecordId,
+//                                                    @RequestParam("remark") String remark,
+//                                                    @RequestParam("image") String image);
+
     @PostMapping(value = "app/engineer/addApplyNewspaper")
     @ApiOperation(value = "工匠申请报销", notes = "工匠申请报销")
     ServerResponse addApplyNewspaper(@RequestParam("userToken") String userToken,

@@ -14,9 +14,11 @@ import com.dangjia.acg.dto.delivery.AppointmentDTO;
 import com.dangjia.acg.dto.delivery.AppointmentListDTO;
 import com.dangjia.acg.dto.delivery.OrderStorefrontDTO;
 import com.dangjia.acg.mapper.delivery.*;
+import com.dangjia.acg.mapper.member.IBillMemberAddressMapper;
 import com.dangjia.acg.mapper.storeFront.BillStoreFrontProductMapper;
 import com.dangjia.acg.modle.deliver.*;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.member.MemberAddress;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -60,6 +62,8 @@ public class BillAppointmentService {
 
     @Autowired
     private ConfigUtil configUtil;
+    @Autowired
+    private IBillMemberAddressMapper iBillMemberAddressMapper;
 
     /**
      * 我的预约查询
@@ -68,11 +72,17 @@ public class BillAppointmentService {
      * @param houseId
      * @return
      */
-    public ServerResponse queryAppointment(PageDTO pageDTO, String houseId) {
+    public ServerResponse queryAppointment(PageDTO pageDTO, String houseId, String userToken) {
         try {
+            Object object = memberAPI.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            JSONObject job = (JSONObject) object;
+            Member member = job.toJavaObject(Member.class);
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<OrderStorefrontDTO> orderStorefrontDTOS = djDeliverOrderMapper.queryDjDeliverOrderStorefront(houseId);
+            List<OrderStorefrontDTO> orderStorefrontDTOS = djDeliverOrderMapper.queryDjDeliverOrderStorefront(houseId,member.getId());
             List<AppointmentListDTO> appointmentListDTOS = new ArrayList<>();
             orderStorefrontDTOS.forEach(orderStorefrontDTO -> {
                 orderStorefrontDTO.setStorefrontIcon(imageAddress+orderStorefrontDTO.getStorefrontIcon());
