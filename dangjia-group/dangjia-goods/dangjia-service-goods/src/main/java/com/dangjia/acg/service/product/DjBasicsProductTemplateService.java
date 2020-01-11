@@ -79,6 +79,8 @@ public class DjBasicsProductTemplateService {
     private GoodsStorefrontProductService   goodsStorefrontProductService;
     @Autowired
     private IGoodsStorefrontProductAddedRelationMapper iGoodsStorefrontProductAddedRelationMapper;
+    @Autowired
+    private DjBasicsGoodsService djbasicsgoodsService;
 
 
     public List<ProductAddedRelation> queryProductAddRelationByPid(HttpServletRequest request, String pid) {
@@ -781,12 +783,21 @@ public class DjBasicsProductTemplateService {
                 Map<String, Object> gMap = BeanUtils.beanToMap(goods);
                 List<Map<String, Object>> mapList = new ArrayList<>();
                 if (2 != goods.getBuy()) {
+                    String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
                     List<DjBasicsProductTemplate> djBasicsProducts = iBasicsProductTemplateMapper.queryByGoodsId(goods.getId());
                     for (DjBasicsProductTemplate p : djBasicsProducts) {
                         //type表示： 是否禁用  0：禁用；1不禁用 ;  -1全部默认
                         if (type!=null&& !type.equals(p.getType()) && -1 != type) //不等于 type 的不返回给前端
                             continue;
                         Map<String, Object> map = BeanUtils.beanToMap(p);
+                        map.put("imageUrl", StringTool.getImage(p.getImage(),address));
+                        map.put("detailImageUrl", StringTool.getImage(p.getDetailImage(),address));
+                        if(StringUtils.isNoneBlank(p.getConvertUnit())){
+                            map.put("convertUnitName", iUnitMapper.selectByPrimaryKey(p.getConvertUnit()).getName());
+                        }
+
+                        map.put("newValueNameArr", djbasicsgoodsService.getValueNameArr(p.getValueIdArr()));
+
                         map.put("productType",goods.getType());
                         mapList.add(map);
                     }
