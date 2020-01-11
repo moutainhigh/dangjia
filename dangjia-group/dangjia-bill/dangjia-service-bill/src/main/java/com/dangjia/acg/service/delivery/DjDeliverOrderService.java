@@ -50,7 +50,6 @@ import com.dangjia.acg.modle.menu.MenuConfiguration;
 import com.dangjia.acg.modle.product.ShoppingCart;
 import com.dangjia.acg.modle.repair.MendOrder;
 import com.dangjia.acg.modle.sale.royalty.DjAlreadyRobSingle;
-import com.dangjia.acg.modle.sale.royalty.DjRoyaltyDetailsSurface;
 import com.dangjia.acg.modle.storefront.Storefront;
 import com.dangjia.acg.modle.user.MainUser;
 import com.dangjia.acg.service.product.BillProductTemplateService;
@@ -130,6 +129,7 @@ public class DjDeliverOrderService {
 
     @Autowired
     private IBillShoppingCartMapper iBillShoppingCartMapper;
+
 
     public Object getHouse(String memberId, HouseResult houseResult) {
         //该城市该用户所有开工房产
@@ -1667,7 +1667,7 @@ public class DjDeliverOrderService {
 
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         OrderCollectInFoDTO orderCollectInFoDTO = new OrderCollectInFoDTO();
-        House house = houseAPI.selectHouseById(splitDeliver.getHouseId());
+        House house = iBillHouseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
         String houseName = house.getResidential() + house.getBuilding() + "栋" + house.getUnit() + "单元" + house.getNumber() + "号";
         orderCollectInFoDTO.setHouseName(houseName);
         orderCollectInFoDTO.setCreateDate(splitDeliver.getCreateDate());
@@ -1874,7 +1874,7 @@ public class DjDeliverOrderService {
 
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         OrderCollectInFoDTO orderCollectInFoDTO = new OrderCollectInFoDTO();
-        House house = houseAPI.selectHouseById(splitDeliver.getHouseId());
+        House house = iBillHouseMapper.selectByPrimaryKey(splitDeliver.getHouseId());
         String houseName = house.getResidential() + house.getBuilding() + "栋" + house.getUnit() + "单元" + house.getNumber() + "号";
         orderCollectInFoDTO.setHouseName(houseName);
         orderCollectInFoDTO.setCreateDate(splitDeliver.getCreateDate());
@@ -2092,4 +2092,68 @@ public class DjDeliverOrderService {
         }
     }
 
+
+    /**
+     * 查询订单人工商品
+     * orderStatus 3待收货，4已完成
+     * @param houseId
+     * @return
+     */
+    public ServerResponse queryWorkerGoods(String houseId,Integer orderStatus) {
+        try {
+
+            List<WorkerGoodsInFoDTO> workerGoodsInFoDTOS = iBillDjDeliverOrderMapper.queryWorkerGoods(houseId, orderStatus);
+            if(workerGoodsInFoDTOS != null && workerGoodsInFoDTOS.size() > 0){
+                String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+                workerGoodsInFoDTOS.forEach(a->{
+                    a.setImage(imageAddress + a.getImage());
+                });
+            }
+            if (workerGoodsInFoDTOS.size() <= 0)
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+
+            return ServerResponse.createBySuccess("查询成功", workerGoodsInFoDTOS);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    /**
+     * 查询订单人工商品详情
+     * orderStatus 3待收货，4已完成
+     * @param id
+     * @return
+     */
+    public ServerResponse queryWorkerGoodsInFo(String id) {
+        try {
+            List<WorkerGoodsInFoDTO> workerGoodsInFoDTOS = iBillDjDeliverOrderMapper.queryWorkerGoodsInFo(id);
+            List<Map<String,Object>> list = new ArrayList<>();
+            Map<String,Object> map = new HashMap<>();
+            if(workerGoodsInFoDTOS != null && workerGoodsInFoDTOS.size() > 0){
+                House house = iBillHouseMapper.selectByPrimaryKey(workerGoodsInFoDTOS.get(0).getHouseId());
+                String houseName = house.getResidential() + house.getBuilding() + "栋" + house.getUnit() + "单元" + house.getNumber() + "号";
+                map.put("houseName",houseName);
+                map.put("createDate", workerGoodsInFoDTOS.get(0).getCreateDate());
+                map.put("totalAmount", workerGoodsInFoDTOS.get(0).getTotalAmount());
+                String imageAddress = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+
+                workerGoodsInFoDTOS.forEach(a->{
+                    a.setTotalNodeNumber(iBillDjDeliverOrderMapper.queryArrNumber(a.getProductTemplateId()));//查询总节点数
+                    a.setCompletedNodeNumber( iBillDjDeliverOrderMapper.queryTestNumber(a.getProductTemplateId(),a.getHouseId(),a.getWorkerId()));//已完成节点
+                    a.setImage(imageAddress + a.getImage());
+                });
+            }
+            map.put("workerGoodsDTOS", workerGoodsInFoDTOS);
+
+            list.add(map);
+            if (list.size() <= 0)
+                return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
+
+            return ServerResponse.createBySuccess("查询成功", list);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
 }
