@@ -36,6 +36,7 @@ import com.dangjia.acg.mapper.reason.ReasonMatchMapper;
 import com.dangjia.acg.mapper.repair.IChangeOrderMapper;
 import com.dangjia.acg.mapper.sale.DjRoyaltyMatchMapper;
 import com.dangjia.acg.mapper.worker.IInsuranceMapper;
+import com.dangjia.acg.mapper.worker.IWorkerChoiceCaseMapper;
 import com.dangjia.acg.mapper.worker.IWorkerDetailMapper;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.complain.Complain;
@@ -53,6 +54,7 @@ import com.dangjia.acg.modle.reason.ReasonMatchSurface;
 import com.dangjia.acg.modle.repair.ChangeOrder;
 import com.dangjia.acg.modle.sale.royalty.DjRoyaltyMatch;
 import com.dangjia.acg.modle.worker.Insurance;
+import com.dangjia.acg.modle.worker.WorkerChoiceCase;
 import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.configRule.ConfigRuleUtilService;
@@ -167,6 +169,8 @@ public class HouseWorkerService {
     @Autowired
     private DjMaintenanceRecordMapper djMaintenanceRecordMapper;
 
+    @Autowired
+    private IWorkerChoiceCaseMapper iWorkerChoiceCaseMapper;
     /**
      * 根据工人id查询所有房子任务
      */
@@ -413,6 +417,22 @@ public class HouseWorkerService {
         }
         //他的徽章
         mapData.put("lists",list);
+
+        //查询我的精选案列
+        List<Map<String, Object>> workerList = new ArrayList<>();
+        Map<String, Object> workerMap = new HashMap<>();
+        example = new Example(WorkerChoiceCase.class);
+        example.createCriteria().andEqualTo(WorkerChoiceCase.WORKER_ID,houseFlow.getWorkerId() )
+                .andEqualTo(WorkerChoiceCase.DATA_STATUS, 0);
+        example.orderBy(WorkerChoiceCase.CREATE_DATE).desc();
+        List<WorkerChoiceCase> workerChoiceCases = iWorkerChoiceCaseMapper.selectByExample(example);
+        if(workerChoiceCases != null && workerChoiceCases.size() > 0){
+            workerMap.put("textContent",getImage(workerChoiceCases.get(0).getTextContent()));
+            workerMap.put("remark",workerChoiceCases.get(0).getRemark());
+        }
+        workerList.add(workerMap);
+        mapData.put("workerList",workerList);
+
         return ServerResponse.createBySuccess("查询成功", mapData);
     }
 

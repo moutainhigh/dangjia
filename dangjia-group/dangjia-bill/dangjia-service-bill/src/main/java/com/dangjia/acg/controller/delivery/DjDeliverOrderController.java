@@ -183,4 +183,17 @@ public class DjDeliverOrderController implements DjDeliverOrderAPI {
     public ServerResponse setConfirmReceipt(String id) {
         return djDeliverOrderService.setConfirmReceipt(id);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse  queryWorkerGoods(String houseId,Integer orderStatus) {
+        return djDeliverOrderService.queryWorkerGoods(houseId,orderStatus);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryWorkerGoodsInFo(String id) {
+        return djDeliverOrderService.queryWorkerGoodsInFo(id);
+    }
+
 }

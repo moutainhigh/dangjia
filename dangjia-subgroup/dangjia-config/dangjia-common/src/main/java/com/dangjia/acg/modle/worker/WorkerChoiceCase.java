@@ -19,7 +19,7 @@ import javax.persistence.Table;
 @Data
 @Entity
 @Table(name = "dj_core_worker_choice_case")
-@ApiModel(description = "房屋精选案例")
+@ApiModel(description = "个人精选案例")
 @FieldNameConstants(prefix = "")
 public class WorkerChoiceCase extends BaseEntity {
 

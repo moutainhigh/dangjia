@@ -172,4 +172,16 @@ public interface IBillDjDeliverOrderMapper extends Mapper<Order> {
     List<AppointmentDTO> queryOrderSnapshotHump(@Param("orderId") String orderId);
 
     Integer querySales(@Param("id") String id);
+
+    List<WorkerGoodsInFoDTO> queryWorkerGoods(@Param("houseId") String houseId, @Param("orderStatus") Integer orderStatus);
+
+    List<WorkerGoodsInFoDTO> queryWorkerGoodsInFo(@Param("id") String id);
+
+
+    int queryArrNumber(@Param("id") String id);
+
+
+    int queryTestNumber(@Param("id") String id,
+                        @Param("houseId") String houseId,
+                        @Param("workerId") String workerId);
 }
