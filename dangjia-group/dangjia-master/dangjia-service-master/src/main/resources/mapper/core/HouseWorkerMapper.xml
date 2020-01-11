@@ -80,9 +80,9 @@
         hw.create_date as createDate,
         hw.modify_date as modifyDate
         from `dj_core_house_worker` hw
-        INNER JOIN dj_core_house_flow h ON hw.house_id = h.house_id
+       INNER JOIN dj_core_house_flow h ON hw.house_id = h.house_id  AND hw.worker_type_id=h.worker_type_id
         WHERE
-        h.work_steta NOT IN (0, 2) AND hw.work_type =6 AND hw.worker_type >2
+        h.work_steta NOT IN (0, 2, 6) AND hw.work_type =6 AND hw.worker_type >2
         GROUP BY hw.worker_id
     </select>
     <!--根据workerTypeId和workType-->

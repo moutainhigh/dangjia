@@ -258,7 +258,8 @@
             dj_maintenance_record
         WHERE
             house_id = #{houseId}
-        AND state NOT IN (2, 3)
+        and worker_type_safe_order_id = #{workerTypeSafeOrderId}
+        AND state NOT IN (2, 4)
     </select>
 
 </mapper>

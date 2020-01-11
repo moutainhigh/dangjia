@@ -39,9 +39,9 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
     @Override
     @ApiMethod
     public ServerResponse saveMaintenanceRecord(String userToken,String houseId, String workerTypeSafeOrderId,
-                                         String remark,String images){
+                                         String remark,String images,String productId){
         try{
-            return djMaintenanceRecordService.saveMaintenanceRecord(userToken,houseId,workerTypeSafeOrderId,remark,images);
+            return djMaintenanceRecordService.saveMaintenanceRecord(userToken,houseId,workerTypeSafeOrderId,remark,images,productId);
         }catch (Exception e){
             logger.error("申请异常",e);
             return ServerResponse.createByErrorMessage("申请异常");

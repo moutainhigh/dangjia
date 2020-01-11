@@ -28,6 +28,7 @@ public interface DjMaintenanceRecordAPI {
      * @param workerTypeSafeOrderId 保险订单ID
      * @param remark                备注
      * @param images                图片，多张用逗号分隔
+     * @param productId             商品ID
      * @return
      */
     @PostMapping(value = "app/engineer/saveMaintenanceRecord")
@@ -36,7 +37,8 @@ public interface DjMaintenanceRecordAPI {
                                          @RequestParam("houseId") String houseId,
                                          @RequestParam("workerTypeSafeOrderId") String workerTypeSafeOrderId,
                                          @RequestParam("remark") String remark,
-                                         @RequestParam("images") String images);
+                                         @RequestParam("images") String images,
+                                         @RequestParam("productId") String productId);
 
     @PostMapping(value = "app/engineer/searchMaintenanceProduct")
     @ApiOperation(value = "消息弹窗--需勘查维保商品", notes = "消息弹窗--需勘查维保商品")

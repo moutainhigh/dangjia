@@ -187,4 +187,14 @@ public interface DjDeliverOrderAPI {
     @PostMapping("app/order/setConfirmReceipt")
     @ApiOperation(value = "待收货列表-确认收货", notes = "收货列表-确认收货")
     ServerResponse setConfirmReceipt(@RequestParam("id") String id);
+
+    @PostMapping("app/order/queryWorkerGoods")
+    @ApiOperation(value = "查询订单人工商品", notes = "查询订单人工商品")
+    ServerResponse queryWorkerGoods(@RequestParam("houseId") String houseId,
+                                    @RequestParam("orderStatus") Integer orderStatus);
+
+    @PostMapping("app/order/queryWorkerGoodsInFo")
+    @ApiOperation(value = "查询订单人工商品详情", notes = "查询订单人工商品详情")
+    ServerResponse queryWorkerGoodsInFo(@RequestParam("id") String id);
+
 }

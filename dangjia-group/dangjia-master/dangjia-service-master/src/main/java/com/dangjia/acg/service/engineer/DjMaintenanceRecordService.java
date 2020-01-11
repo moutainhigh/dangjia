@@ -155,13 +155,13 @@ public class DjMaintenanceRecordService {
 
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse saveMaintenanceRecord(String userToken, String houseId, String workerTypeSafeOrderId,
-                                                String remark, String images) {
+                                                String remark, String images,String productId) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
         }
         //1.判断当前房子下是否有正在处理中的质保
-        List<DjMaintenanceRecord> maintenanceRecordList = djMaintenanceRecordMapper.selectMaintenanceRecoredByHouseId(houseId);
+        List<DjMaintenanceRecord> maintenanceRecordList = djMaintenanceRecordMapper.selectMaintenanceRecoredByHouseId(houseId,workerTypeSafeOrderId);
         if (maintenanceRecordList != null && maintenanceRecordList.size() > 0) {
             return ServerResponse.createByErrorMessage("已有质保流程在处理中！");
         }
@@ -209,7 +209,7 @@ public class DjMaintenanceRecordService {
                 mrp.setMaintenanceRecordId(djMaintenanceRecord.getId());
                 mrp.setHouseId(houseId);
                 mrp.setMaintenanceMemberId(djMaintenanceRecord.getMemberId());
-                mrp.setMaintenanceMemberType(4);
+             //   mrp.setMaintenanceMemberType(4);
                 mrp.setPrice(storefrontProductDTO.getSellPrice());
                 mrp.setShopCount(1d);
                 mrp.setTotalPrice(storefrontProductDTO.getSellPrice());
@@ -219,7 +219,7 @@ public class DjMaintenanceRecordService {
                 }else{
                     mrp.setPayPrice(0d);//未过保需支付金额为0
                 }
-                mrp.setWorkerTypeId(djMaintenanceRecord.getWorkerTypeId());
+             //   mrp.setWorkerTypeId(djMaintenanceRecord.getWorkerTypeId());
                 mrp.setPayState(1);
                 djMaintenanceRecordProductMapper.insert(mrp);//添加维保勘查费用商品
             }
@@ -294,9 +294,9 @@ public class DjMaintenanceRecordService {
                 payPrice= MathUtil.add(payPrice,(Double)map.get("payPrice"));
                 //查对应的商品信息
                 Example example=new Example(DjMaintenanceRecordProduct.class);
-                example.createCriteria().andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_RECORD_ID,maintenanceRecordId)
-                        .andEqualTo(DjMaintenanceRecordProduct.WORKER_TYPE_ID,workerTypeId)
-                        .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_MEMBER_TYPE,maintenanceRecordType);
+                example.createCriteria().andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_RECORD_ID,maintenanceRecordId);
+                      /*  .andEqualTo(DjMaintenanceRecordProduct.WORKER_TYPE_ID,workerTypeId)
+                        .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_MEMBER_TYPE,maintenanceRecordType);*/
                 List<DjMaintenanceRecordProduct> mrProductList=djMaintenanceRecordProductMapper.selectByExample(example);
                 List productList=workerTypeSafeOrderService.getRecordProductList(mrProductList);
                 if(overProtection==1){
@@ -575,7 +575,7 @@ public class DjMaintenanceRecordService {
                         djMaintenanceRecordResponsiblePartyMapper.selectByExample(example);
                 djMaintenanceRecordResponsibleParties.forEach(djMaintenanceRecordResponsibleParty -> {
                     //扣除金额
-                    Double amountDeducted = (djMaintenanceRecordResponsibleParty.getProportion() / 100) * (djMaintenanceRecord1.getSincePurchaseAmount() + djMaintenanceRecord1.getEnoughAmount());
+                    Double amountDeducted =0d;// (djMaintenanceRecordResponsibleParty.getProportion() / 100) * (djMaintenanceRecord1.getSincePurchaseAmount() + djMaintenanceRecord1.getEnoughAmount());
                     if (djMaintenanceRecordResponsibleParty.getResponsiblePartyType() == 1) {
                         AccountFlowRecord accountFlowRecord = new AccountFlowRecord();
                         accountFlowRecord.setState(3);
@@ -635,13 +635,13 @@ public class DjMaintenanceRecordService {
                 djMaintenanceRecord = new DjMaintenanceRecord();
                 djMaintenanceRecord.setId(id);
                 djMaintenanceRecord.setState(2);
-                djMaintenanceRecord.setPaymentDate(new Date());
+                //djMaintenanceRecord.setPaymentDate(new Date());
                 djMaintenanceRecordMapper.updateByPrimaryKeySelective(djMaintenanceRecord);
             } else if (state == 3) {//拒绝
                 djMaintenanceRecord = new DjMaintenanceRecord();
                 djMaintenanceRecord.setId(id);
                 djMaintenanceRecord.setState(3);
-                djMaintenanceRecord.setStewardState(1);
+                //djMaintenanceRecord.setStewardState(1);
                 djMaintenanceRecordMapper.updateByPrimaryKeySelective(djMaintenanceRecord);
             }
             return ServerResponse.createBySuccessMessage("处理成功");
@@ -726,24 +726,24 @@ public class DjMaintenanceRecordService {
             DjMaintenanceRecord djMaintenanceRecord = new DjMaintenanceRecord();
             if (handleType != null && handleType == 3) {
                 //确定处理
-                djMaintenanceRecord.setUserId(userId);
+                /*djMaintenanceRecord.setUserId(userId);
                 djMaintenanceRecord.setSupervisorId(supervisorId);
                 djMaintenanceRecord.setStewardSubsidy(stewardSubsidy);
-                djMaintenanceRecord.setServiceRemark(serviceRemark);
+                djMaintenanceRecord.setServiceRemark(serviceRemark);*/
                 djMaintenanceRecord.setId(id);
                 djMaintenanceRecord.setState(1);
                 djMaintenanceRecord.setCreateDate(null);
-                djMaintenanceRecord.setHandleType(handleType);
+               // djMaintenanceRecord.setHandleType(handleType);
                 djMaintenanceRecordMapper.updateByPrimaryKeySelective(djMaintenanceRecord);
                 return ServerResponse.createBySuccess("提交成功");
             } else if (handleType != null && handleType == 4) {
                 //结束流程
-                djMaintenanceRecord.setUserId(userId);
-                djMaintenanceRecord.setServiceRemark(serviceRemark);
+               /* djMaintenanceRecord.setUserId(userId);
+                djMaintenanceRecord.setServiceRemark(serviceRemark);*/
                 djMaintenanceRecord.setId(id);
                 djMaintenanceRecord.setState(2);
                 djMaintenanceRecord.setCreateDate(null);
-                djMaintenanceRecord.setHandleType(handleType);
+                //djMaintenanceRecord.setHandleType(handleType);
                 djMaintenanceRecordMapper.updateByPrimaryKeySelective(djMaintenanceRecord);
                 return ServerResponse.createBySuccess("提交成功");
             }
@@ -1174,12 +1174,12 @@ public class DjMaintenanceRecordService {
             }
             Member member = (Member) object;//业主信息
             DjMaintenanceRecord djMaintenanceRecord = djMaintenanceRecordMapper.selectByPrimaryKey(id);
-            djMaintenanceRecord.setRemark(remark);
+            //djMaintenanceRecord.setRemark(remark);
             djMaintenanceRecord.setHouseId(houseId);
             djMaintenanceRecord.setState(state);
             djMaintenanceRecord.setWorkerTypeSafeOrderId(workerTypeSafeOrderId);
             djMaintenanceRecord.setMemberId(member.getId());
-            djMaintenanceRecord.setStewardState(2);//管家处理状态 1：待处理 2：已处理
+           // djMaintenanceRecord.setStewardState(2);//管家处理状态 1：待处理 2：已处理
             djMaintenanceRecord.setWorkerTypeId(null);
             int i = djMaintenanceRecordMapper.updateByPrimaryKey(djMaintenanceRecord);
             if (i <= 0)
@@ -1293,9 +1293,9 @@ public class DjMaintenanceRecordService {
             djMaintenanceRecordProduct.setMaintenanceRecordId(maintenanceRecordId);
             djMaintenanceRecordProduct.setShopCount(1d);
             djMaintenanceRecordProduct.setPrice(storefrontProduct.getSellPrice());
-            djMaintenanceRecordProduct.setWorkerTypeId(djBasicsProductTemplate.getWorkerTypeId());
+            //djMaintenanceRecordProduct.setWorkerTypeId(djBasicsProductTemplate.getWorkerTypeId());
             djMaintenanceRecordProduct.setMaintenanceMemberId(worker.getId());
-            djMaintenanceRecordProduct.setMaintenanceMemberType(memberType);
+           // djMaintenanceRecordProduct.setMaintenanceMemberType(memberType);
             djMaintenanceRecordProduct.setTotalPrice(djMaintenanceRecordProduct.getShopCount() * storefrontProduct.getSellPrice());
             djMaintenanceRecordProduct.setPayPrice(0d);
             djMaintenanceRecordProduct.setPayState(1);
@@ -1333,7 +1333,7 @@ public class DjMaintenanceRecordService {
                     memberType = 2;
                     example.createCriteria().andEqualTo(DjMaintenanceRecordProduct.DATA_STATUS, 0)
                             .andEqualTo(DjMaintenanceRecordProduct.HOUSE_ID, houseId)
-                            .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_MEMBER_TYPE, 2)
+                            //.andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_MEMBER_TYPE, 2)
                             .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_RECORD_ID, maintenanceRecordId)
                             .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_MEMBER_ID, worker.getId());
                     djMaintenanceRecordProducts =
@@ -1342,7 +1342,7 @@ public class DjMaintenanceRecordService {
                         example = new Example(DjMaintenanceRecordProduct.class);
                         example.createCriteria().andEqualTo(DjMaintenanceRecordProduct.DATA_STATUS, 0)
                                 .andEqualTo(DjMaintenanceRecordProduct.HOUSE_ID, houseId)
-                                .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_MEMBER_TYPE, 1)
+                                //.andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_MEMBER_TYPE, 1)
                                 .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_RECORD_ID, maintenanceRecordId);
                         djMaintenanceRecordProducts =
                                 djMaintenanceRecordProductMapper.selectByExample(example);
@@ -1351,7 +1351,7 @@ public class DjMaintenanceRecordService {
                     memberType = 3;
                     example.createCriteria().andEqualTo(DjMaintenanceRecordProduct.DATA_STATUS, 0)
                             .andEqualTo(DjMaintenanceRecordProduct.HOUSE_ID, houseId)
-                            .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_MEMBER_TYPE, 3)
+                           // .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_MEMBER_TYPE, 3)
                             .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_RECORD_ID, maintenanceRecordId)
                             .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_MEMBER_ID, worker.getId());
                     djMaintenanceRecordProducts =
@@ -1360,7 +1360,7 @@ public class DjMaintenanceRecordService {
                         example = new Example(DjMaintenanceRecordProduct.class);
                         example.createCriteria().andEqualTo(DjMaintenanceRecordProduct.DATA_STATUS, 0)
                                 .andEqualTo(DjMaintenanceRecordProduct.HOUSE_ID, houseId)
-                                .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_MEMBER_TYPE, 2)
+                                //.andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_MEMBER_TYPE, 2)
                                 .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_RECORD_ID, maintenanceRecordId);
                         djMaintenanceRecordProducts =
                                 djMaintenanceRecordProductMapper.selectByExample(example);
@@ -1368,7 +1368,7 @@ public class DjMaintenanceRecordService {
                             example = new Example(DjMaintenanceRecordProduct.class);
                             example.createCriteria().andEqualTo(DjMaintenanceRecordProduct.DATA_STATUS, 0)
                                     .andEqualTo(DjMaintenanceRecordProduct.HOUSE_ID, houseId)
-                                    .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_MEMBER_TYPE, 1)
+                                   // .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_MEMBER_TYPE, 1)
                                     .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_RECORD_ID, maintenanceRecordId);
                             djMaintenanceRecordProducts =
                                     djMaintenanceRecordProductMapper.selectByExample(example);
@@ -1377,9 +1377,9 @@ public class DjMaintenanceRecordService {
                 }
                 djMaintenanceRecordProducts.forEach(djMaintenanceRecordProduct -> {
                     djMaintenanceRecordProduct.setId((Math.random() * 50000000) + 50000000 + "" + System.currentTimeMillis());
-                    djMaintenanceRecordProduct.setWorkerTypeId(worker.getWorkerTypeId());
+                   // djMaintenanceRecordProduct.setWorkerTypeId(worker.getWorkerTypeId());
                     djMaintenanceRecordProduct.setMaintenanceMemberId(worker.getId());
-                    djMaintenanceRecordProduct.setMaintenanceMemberType(memberType);
+                   // djMaintenanceRecordProduct.setMaintenanceMemberType(memberType);
                     djMaintenanceRecordProduct.setPayState(1);
                     djMaintenanceRecordProductMapper.insert(djMaintenanceRecordProduct);
                 });
@@ -1461,7 +1461,7 @@ public class DjMaintenanceRecordService {
         DjMaintenanceRecord djMaintenanceRecord=new DjMaintenanceRecord();
         djMaintenanceRecord.setId(maintenanceRecordId);
         djMaintenanceRecord.setState(2);
-        djMaintenanceRecord.setStewardState(2);
+        //djMaintenanceRecord.setStewardState(2);
         djMaintenanceRecordMapper.updateByPrimaryKeySelective(djMaintenanceRecord);
         DjMaintenanceRecordContent djMaintenanceRecordContent=new DjMaintenanceRecordContent();
         djMaintenanceRecordContent.setImage(image);
