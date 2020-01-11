@@ -132,7 +132,7 @@ public class ConfigMessageService {
      * @param memberId 接收人
      * @param title    推送标题
      * @param alert    推送内容
-     * @param type     动作类型（0:直接跳转URL，1:跳转支付，2:只显示，3:登录，4:工匠端抢单界面/销售抢单页，5:工匠端施工界面/销售首页，6：销售业绩页）
+     * @param type     动作类型（0:直接跳转URL，1:跳转支付，2:只显示，3:登录，4:工匠端抢单界面/销售抢单页，5:工匠端施工界面/销售首页，6：销售业绩页，201：备忘录提醒）
      * @return
      */
     public ServerResponse addConfigMessage(AppType appType, String memberId, String title, String alert, int type) {
