@@ -57,5 +57,5 @@ public interface IBasicsGoodsCategoryMapper extends Mapper<BasicsGoodsCategory> 
 	 * @param workerTypeId 工种ID
 	 * @return
 	 */
-	List<BasicsGoodsCategory> queryMaintenanceRecordTopCategory(@Param("cityId") String cityId,@Param("workerTypeId") String workerTypeId,@Param("houseId") String houseId);
+	List<BasicsGoodsCategory> queryMaintenanceRecordTopCategory(@Param("cityId") String cityId,@Param("workerTypeId") String workerTypeId);
 }

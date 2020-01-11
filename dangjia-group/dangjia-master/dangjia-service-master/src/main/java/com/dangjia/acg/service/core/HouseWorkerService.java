@@ -523,14 +523,14 @@ public class HouseWorkerService {
                 houseWorker.setWorkerType(worker.getWorkerType());
                 houseWorker.setWorkType(1);//已抢单
                 houseWorker.setIsSelect(1);
-                houseWorker.setPrice(new BigDecimal(record.getSincePurchaseAmount()));
+             //   houseWorker.setPrice(new BigDecimal(record.getSincePurchaseAmount()));
                 houseWorker.setType(type);
                 houseWorker.setBusinessId(record.getId());
                 houseWorkerMapper.insert(houseWorker);
 
                 if(worker.getWorkerType()==3){
                     record.setStewardId(worker.getId());
-                    record.setStewardState(1);
+                   // record.setStewardState(1);
                     record.setStewardOrderTime(new Date());
                     djMaintenanceRecordMapper.updateByPrimaryKeySelective(record);
                 }else{

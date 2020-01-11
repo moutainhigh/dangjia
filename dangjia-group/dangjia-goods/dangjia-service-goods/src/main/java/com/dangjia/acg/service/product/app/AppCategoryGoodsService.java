@@ -212,9 +212,9 @@ public class AppCategoryGoodsService {
      * @param workerTypeId 工种ID
      * @return
      */
-    public ServerResponse queryMaintenanceRecordTopCategory(String cityId,String workerTypeId,String houseId){
+    public ServerResponse queryMaintenanceRecordTopCategory(String cityId,String workerTypeId){
         try{
-            List<BasicsGoodsCategory> goodsCategoryList=iBasicsGoodsCategoryMapper.queryMaintenanceRecordTopCategory(cityId,workerTypeId,houseId);
+            List<BasicsGoodsCategory> goodsCategoryList=iBasicsGoodsCategoryMapper.queryMaintenanceRecordTopCategory(cityId,workerTypeId);
             return ServerResponse.createBySuccess("查询成功", goodsCategoryList);
         }catch (Exception e){
             logger.error("查询失败",e);
@@ -230,11 +230,11 @@ public class AppCategoryGoodsService {
      * @param topCategoryId 顶级类别ID
      * @return
      */
-    public ServerResponse queryMaintenanceRecordProduct(PageDTO pageDTO,String cityId,String workerTypeId,String topCategoryId,String searchKey,String houseId){
+    public ServerResponse queryMaintenanceRecordProduct(PageDTO pageDTO,String cityId,String workerTypeId,String topCategoryId,String searchKey){
         try{
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            List<ActuarialProductAppDTO> productList=iBasicsProductTemplateMapper.queryMaintenanceRecordProduct(cityId,workerTypeId,topCategoryId,searchKey,houseId);
+            List<ActuarialProductAppDTO> productList=iBasicsProductTemplateMapper.queryMaintenanceRecordProduct(cityId,workerTypeId,topCategoryId,searchKey);
             PageInfo pageResult = new PageInfo<>(productList);
             searchActuarialConfigServices.getProductList(productList,address,new BigDecimal(0));
             pageResult.setList(productList);

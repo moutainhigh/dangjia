@@ -286,13 +286,8 @@
                 and g.type=5
                 and g.city_id=#{cityId}
                 and g.id=pt.goods_id
-                and pt.worker_type_id in (select  worker_type_id from dj_safe_worker_type_safe_order where house_id=#{houseId})
-                <if test="workerTypeId!=null and workerTypeId!=''">
-                  and pt.worker_type_id=#{workerTypeId}
-                </if>
+                and pt.worker_type_id=#{workerTypeId}
                 and gcp.id=pt.category_id
-
-
         )
     </select>
 </mapper>

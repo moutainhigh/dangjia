@@ -289,8 +289,8 @@ public class HouseFlowService {
                     allgrabBean.setSquare("面积 " + (house.getSquare() == null ? "***" : house.getSquare()) + "m²");//面积
                     allgrabBean.setHouseMember("业主 " + (mem.getNickName() == null ? mem.getName() : mem.getNickName()));//业主名称
                     allgrabBean.setWorkertotal("¥0");//工钱
-                    double totalPrice = record.getSincePurchaseAmount();
-                    allgrabBean.setWorkertotal("¥" + String.format("%.2f", totalPrice));//工钱
+                //    double totalPrice = record.getSincePurchaseAmount();
+                  //  allgrabBean.setWorkertotal("¥" + String.format("%.2f", totalPrice));//工钱
                     grabList.add(allgrabBean);
                 }
             }
@@ -350,8 +350,8 @@ public class HouseFlowService {
             allgrabBean.setSquare("面积 " + (house.getSquare() == null ? "***" : house.getSquare()) + "m²");//面积
             allgrabBean.setHouseMember("业主 " + (mem.getNickName() == null ? mem.getName() : mem.getNickName()));//业主名称
             allgrabBean.setWorkertotal("¥0");//工钱
-            double totalPrice = record.getSincePurchaseAmount();
-            allgrabBean.setWorkertotal("¥" + String.format("%.2f", totalPrice));//工钱
+           // double totalPrice = record.getSincePurchaseAmount();
+          //  allgrabBean.setWorkertotal("¥" + String.format("%.2f", totalPrice));//工钱
 
             //维保商品列表
             List<DjMaintenanceRecordProductDTO> maintenanceRecordProducts = maintenanceRecordProductMapper.queryDjMaintenanceRecordProductList(record.getId());
@@ -821,7 +821,7 @@ public class HouseFlowService {
                     houseWorker.setWorkerType(member.getWorkerType());
                     houseWorker.setWorkType(5);//拒单
                     houseWorker.setIsSelect(0);
-                    houseWorker.setPrice(new BigDecimal(record.getSincePurchaseAmount()));
+                  //  houseWorker.setPrice(new BigDecimal(record.getSincePurchaseAmount()));
                     houseWorker.setType(type);
                     houseWorker.setBusinessId(record.getId());
                     houseWorkerMapper.insert(houseWorker);
@@ -833,7 +833,7 @@ public class HouseFlowService {
                 }
                 if(member.getWorkerType()==3){
                     record.setStewardId(null);
-                    record.setStewardState(null);
+                   // record.setStewardState(null);
                     record.setStewardOrderTime(null);
                     djMaintenanceRecordMapper.updateByPrimaryKey(record);
                 }else{

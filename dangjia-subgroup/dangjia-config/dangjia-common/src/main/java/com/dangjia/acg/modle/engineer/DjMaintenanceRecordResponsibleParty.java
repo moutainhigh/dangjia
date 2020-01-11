@@ -25,8 +25,8 @@ import javax.persistence.Table;
 public class DjMaintenanceRecordResponsibleParty extends BaseEntity {
 
     @Column(name = "responsible_party_id")
-    @Desc(value = "责任方ID(店铺/供应商/工匠 id)")
-    @ApiModelProperty("责任方ID(店铺/供应商/工匠 id)")
+    @Desc(value = "责任方ID(店铺/工匠 id)")
+    @ApiModelProperty("责任方ID(店铺/工匠 id)")
     private String responsiblePartyId;
 
     @Column(name = "maintenance_record_id")
@@ -40,8 +40,8 @@ public class DjMaintenanceRecordResponsibleParty extends BaseEntity {
     private Double proportion;
 
     @Column(name = "responsible_party_type")
-    @Desc(value = "维保责任方类型 1:店铺 2:供应商 3：工匠")
-    @ApiModelProperty("维保责任方类型 1:店铺 2:供应商 3：工匠")
+    @Desc(value = "维保责任方类型 1:店铺 2:工匠")
+    @ApiModelProperty("维保责任方类型 1:店铺 2:工匠")
     private Integer responsiblePartyType;
 
     @Column(name = "product_id")

@@ -30,11 +30,6 @@ public class DjMaintenanceRecord extends BaseEntity {
     @ApiModelProperty("管家处理时间")
     private Date stewardProcessingTime;
 
-    @Column(name = " payment_date")
-    @Desc(value = "支付时间")
-    @ApiModelProperty("支付时间")
-    private Date paymentDate;
-
     @Column(name = "steward_order_time")
     @Desc(value = "管家接单时间")
     @ApiModelProperty("管家接单时间")
@@ -60,66 +55,15 @@ public class DjMaintenanceRecord extends BaseEntity {
     @ApiModelProperty("业主电话号码")
     private String ownerMobile;
 
-    @Column(name = "supervisor_id")
-    @Desc(value = "督导id")
-    @ApiModelProperty("督导id")
-    private String supervisorId;
-
-    @Column(name = "steward_subsidy")
-    @Desc(value = "是否需要补贴管家 1:是 2:否")
-    @ApiModelProperty("是否需要补贴管家 1:是 2:否")
-    private Integer stewardSubsidy;
-
-    @Column(name = "service_remark")
-    @Desc(value = "客服备注")
-    @ApiModelProperty("客服备注")
-    private String serviceRemark;
-
     @Column(name = "steward_id")
     @Desc(value = "接单管家id")
     @ApiModelProperty("接单管家id")
     private String stewardId;
 
-    @Column(name = "steward_state")
-    @Desc(value = "管家处理状态 1：待处理 2：已处理")
-    @ApiModelProperty("管家处理状态 1：待处理 2：已处理")
-    private Integer stewardState;
-
-    @Column(name = "since_purchase_amount")
-    @Desc(value = "维保金额")
-    @ApiModelProperty("维保金额")
-    private Double sincePurchaseAmount;
-
-    @Column(name = "enough_amount")
-    @Desc(value = "自购金额")
-    @ApiModelProperty("自购金额")
-    private Double enoughAmount;
-
-    @Column(name = "remark")
-    @Desc(value = "自购商品备注")
-    @ApiModelProperty("自购商品备注")
-    private String remark;
-
     @Column(name = "state")
-    @Desc(value = "状态 1:业主待验收 2:业主已验收 3:业主拒绝验收")
-    @ApiModelProperty("状态 1:业主待验收 2:业主已验收 3:业主拒绝验收")
+    @Desc(value = "状态 1:业主待验收 2:业主已验收 3:业主拒绝验收 4结束质保")
+    @ApiModelProperty("状态 1:业主待验收 2:业主已验收 3:业主拒绝验收 4结束质保")
     private Integer state;
-
-    @Column(name = "complain_type")
-    @Desc(value = "申诉类型：9-业主申请质保")
-    @ApiModelProperty("申诉类型：9-业主申请质保")
-    private Integer complainType;
-
-    @Column(name = "handle_type")
-    @Desc(value = "客服处理状态0-待处理 1-驳回 2-接受 3-已处理 4-已结束")
-    @ApiModelProperty("客服处理状态0-待处理 1-驳回 2-接受 3-已处理 4-已结束")
-    private Integer handleType;
-
-    @Column(name = "user_id")
-    @Desc(value = "处理人id")
-    @ApiModelProperty("处理人id")
-    private String userId;
-
 
     @Column(name = "worker_type_id")
     @Desc(value = "工种id")

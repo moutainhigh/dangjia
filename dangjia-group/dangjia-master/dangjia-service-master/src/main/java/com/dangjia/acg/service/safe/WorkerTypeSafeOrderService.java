@@ -183,8 +183,8 @@ public class WorkerTypeSafeOrderService {
 
     List<DjMaintenanceRecordProduct> getMrProductList(String maintenanceRecordId,String type){
         Example example=new Example(DjMaintenanceRecordProduct.class);
-        example.createCriteria().andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_RECORD_ID,maintenanceRecordId)
-                .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_MEMBER_TYPE,type);
+        example.createCriteria().andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_RECORD_ID,maintenanceRecordId);
+               // .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_MEMBER_TYPE,type);
         List<DjMaintenanceRecordProduct> mrProductList=djMaintenanceRecordProductMapper.selectByExample(example);
         List productList=getRecordProductList(mrProductList);
         return productList;

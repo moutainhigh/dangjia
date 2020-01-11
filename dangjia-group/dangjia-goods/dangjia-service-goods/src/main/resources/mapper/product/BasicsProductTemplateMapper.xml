@@ -722,12 +722,9 @@
         AND bg.data_status = 0
         AND bg.type = 5
         and bg.city_id= #{cityId}
-        and bp.worker_type_id in (select  worker_type_id from dj_safe_worker_type_safe_order where house_id=#{houseId})
+        and bp.worker_type_id=#{workerTypeId}
         <if test="topCategoryId!=null and topCategoryId!=''">
             and gc.parent_top=#{topCategoryId}
-        </if>
-        <if test="workerTypeId!=null and workerTypeId!=''">
-            and bp.worker_type_id=#{workerTypeId}
         </if>
         <if test="searchKey!=null and searchKey!=''">
             and t.name like CONCAT('%',#{searchKey},'%')
