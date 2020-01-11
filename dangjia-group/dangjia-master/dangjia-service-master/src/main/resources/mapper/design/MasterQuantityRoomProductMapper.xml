@@ -19,8 +19,8 @@
             pt.unit_name AS unitName
         FROM
             dj_design_quantity_room_product q
-            INNER JOIN dj_basics_storefront_product p ON q.product_id = p.id
-            INNER JOIN dj_basics_product_template pt ON  p.prod_template_id = pt.id
+            INNER JOIN dj_basics_product_template pt ON  q.product_id = pt.id
+            INNER JOIN dj_basics_storefront_product p ON pt.id = p.prod_template_id
             INNER JOIN dj_basics_storefront s ON  p.storefront_id = s.id
         WHERE
             q.house_id = #{houseId}
