@@ -149,6 +149,7 @@ public class MemberCollectService {
             if (!CommonUtil.isEmpty(house.getBuildSquare())) {
                 dianList.add(house.getBuildSquare() + "㎡");
             }
+            map.put("collectId",house.getId());
             map.put("dianList", dianList);
             map.put("houseName", house.getHouseName());
             map.put("imageUrl", address + house.getImage());
