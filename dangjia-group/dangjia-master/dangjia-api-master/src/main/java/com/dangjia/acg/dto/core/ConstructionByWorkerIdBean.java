@@ -56,6 +56,7 @@ public class ConstructionByWorkerIdBean {
     private Integer node;//工序申请节点  0-工匠审核 1-大管家审核通过 2-业主审核通过
     private Integer retentionType;//0-需缴纳质保金 1-不缴纳质保金
 
+    private String businessId;//业务id
     @Data
     public static class BigListBean {
         private String name;

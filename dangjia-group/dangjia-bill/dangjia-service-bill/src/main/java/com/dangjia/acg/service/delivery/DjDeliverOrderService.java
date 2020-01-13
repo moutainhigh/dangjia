@@ -2023,8 +2023,8 @@ public class DjDeliverOrderService {
     public Member queryWorker(String houseId, String workerTypeId) {
         try {
             Example example = new Example(HouseFlow.class);
-            example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID)
-                    .andEqualTo(HouseFlow.WORKER_TYPE_ID)
+            example.createCriteria().andEqualTo(HouseFlow.HOUSE_ID,houseId)
+                    .andEqualTo(HouseFlow.WORKER_TYPE_ID,workerTypeId)
                     .andEqualTo(HouseFlow.DATA_STATUS, 0);
             HouseFlow houseFlow = iBillHouseFlowMapper.selectOneByExample(example);
             Member member = iBillMemberMapper.selectByPrimaryKey(houseFlow.getWorkerId());

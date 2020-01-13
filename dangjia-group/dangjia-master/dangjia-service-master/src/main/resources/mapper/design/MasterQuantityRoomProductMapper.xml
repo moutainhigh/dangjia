@@ -16,6 +16,8 @@
             s.storefront_name AS storefrontName,
             s.system_logo AS storefrontIcon,
             pt.unit_id AS unitId,
+            pt.value_name_arr as valueNameArr,
+            pt.value_id_arr as valueIdArr,
             pt.unit_name AS unitName
         FROM
             dj_design_quantity_room_product q

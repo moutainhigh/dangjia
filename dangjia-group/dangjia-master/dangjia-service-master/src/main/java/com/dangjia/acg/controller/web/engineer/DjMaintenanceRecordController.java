@@ -198,12 +198,13 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
     @Override
     @ApiMethod
     public ServerResponse addApplyNewspaper(String userToken,
-                                         String memberId,
-                                         Double money,
-                                         String description,
-                                         String image,
-                                         String houseId) {
-        return djMaintenanceRecordService.addApplyNewspaper(userToken, memberId, money, description, image, houseId);
+                                             String memberId,
+                                             Double money,
+                                             String description,
+                                             String image,
+                                             String houseId,
+                                            String businessId) {
+        return djMaintenanceRecordService.addApplyNewspaper(userToken, memberId, money, description, image, houseId,businessId);
     }
 
     @Override
@@ -271,6 +272,13 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
     public ServerResponse deleteMaintenanceRecordProduct(String id) {
         return djMaintenanceRecordService.deleteMaintenanceRecordProduct(id);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse confirmStart(String businessId) {
+        return djMaintenanceRecordService.confirmStart(businessId);
+    }
+
 
 //    @Override
 //    public ServerResponse setMaintenanceHandlesSubmissions(String maintenanceRecordId, String remark, String image) {

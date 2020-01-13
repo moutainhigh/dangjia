@@ -612,6 +612,8 @@ public class CraftsmanConstructionService {
         List<HouseOrderDetailDTO> houseOrderDetailDTOList = houseMapper.getBudgetOrderDetailByInFo(house.getId(), hw.getWorkerTypeId(),type);
         List<Map<String, Object>> mapDataList = new ArrayList<>();
         if(houseOrderDetailDTOList != null && houseOrderDetailDTOList.size() >0){
+            //获取维保id
+            bean.setBusinessId(houseOrderDetailDTOList.get(0).getBusinessId());
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             for (HouseOrderDetailDTO houseOrderDetailDTO : houseOrderDetailDTOList) {
                 setProductInfo(houseOrderDetailDTO, address);
