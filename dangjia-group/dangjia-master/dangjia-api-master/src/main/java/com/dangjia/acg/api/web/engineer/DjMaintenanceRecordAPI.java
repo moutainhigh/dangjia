@@ -218,7 +218,8 @@ public interface DjMaintenanceRecordAPI {
                                           @RequestParam("money")  Double money,
                                           @RequestParam("description") String description,
                                           @RequestParam("image") String image,
-                                          @RequestParam("houseId")  String houseId);
+                                          @RequestParam("houseId")  String houseId,
+                                         @RequestParam("businessId") String businessId);
 
 
     @PostMapping(value = "app/engineer/queryComplain")
@@ -244,5 +245,10 @@ public interface DjMaintenanceRecordAPI {
     ServerResponse  workerApplyCollect(@RequestParam("id")String id,
                                  @RequestParam("remarks")String remarks,
                                  @RequestParam("image") String image);
+
+
+    @PostMapping(value = "web/engineer/confirmStart")
+    @ApiOperation(value = "已确认可开工", notes = "已确认可开工")
+    ServerResponse  confirmStart(@RequestParam("businessId")String businessId);
 
 }

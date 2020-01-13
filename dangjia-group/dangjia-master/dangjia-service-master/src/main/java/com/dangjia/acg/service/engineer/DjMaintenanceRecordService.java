@@ -1511,11 +1511,12 @@ public class DjMaintenanceRecordService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse addApplyNewspaper(String userToken,
-                                         String memberId,
-                                         Double money,
-                                         String description,
-                                         String image,
-                                         String houseId){
+                                             String memberId,
+                                             Double money,
+                                             String description,
+                                             String image,
+                                             String houseId,
+                                             String businessId){
         try {
             Member member = iMemberMapper.selectByPrimaryKey(memberId);
             if(member == null){
@@ -1532,6 +1533,7 @@ public class DjMaintenanceRecordService {
             complain.setApplyMoney(money);
             complain.setImage(image);
             complain.setStatus(0);
+            complain.setBusinessId(businessId);
             iComplainMapper.insert(complain);
             return ServerResponse.createBySuccessMessage("提交成功");
         } catch (Exception e) {
@@ -1590,12 +1592,14 @@ public class DjMaintenanceRecordService {
                 map.put("modifyDate",complain.getModifyDate());
                 map.put("actualMoney",complain.getActualMoney());
                 map.put("rejectReason",complain.getRejectReason());
+                map.put("createDate",complain.getCreateDate());
                 map.put("applyMoney",complain.getApplyMoney());
                 map.put("description",complain.getDescription());
                 map.put("images",getImage(complain.getImage()));
                 map.put("memberName",complain.getUserName());
                 map.put("memberMobile",complain.getUserMobile());
                 map.put("id",complain.getId());
+                map.put("businessId",complain.getBusinessId());
                 map.put("memberId",complain.getMemberId());
             }
             return ServerResponse.createBySuccess("查询成功", map);
@@ -1627,12 +1631,13 @@ public class DjMaintenanceRecordService {
                 return ServerResponse.createByErrorMessage("operateId不能为空");
             }
 
-            Complain complain = new Complain();
+            Complain complain = iComplainMapper.selectByPrimaryKey(id);
             MainUser mainUser = userMapper.selectByPrimaryKey(operateId);
             complain.setOperateName(mainUser.getUsername());
             complain.setOperateId(operateId);
             complain.setModifyDate(new Date());
-            complain.setId(id);
+            complain.setCreateDate(null);
+//            complain.setId(id);
             //type: 0 -确定处理 1-结束流程
             if(type == 0){
                 complain.setStatus(2);
@@ -1646,6 +1651,33 @@ public class DjMaintenanceRecordService {
                 member.setSurplusMoney(new BigDecimal(actualMoney).add(member.getSurplusMoney()));
                 member.setModifyDate(new Date());
                 iMemberMapper.updateByPrimaryKeySelective(member);
+
+                //查询维保任务
+                DjMaintenanceRecord djMaintenanceRecord = djMaintenanceRecordMapper.selectByPrimaryKey(complain.getBusinessId());
+                if(djMaintenanceRecord == null){
+                    return ServerResponse.createByErrorMessage("该条任务异常");
+                }
+
+                //增加维保商品记录
+                DjMaintenanceRecordProduct djMaintenanceRecordProduct = new DjMaintenanceRecordProduct();
+                djMaintenanceRecordProduct.setHouseId(djMaintenanceRecord.getHouseId());
+                djMaintenanceRecordProduct.setMaintenanceRecordId(djMaintenanceRecord.getId());
+                djMaintenanceRecordProduct.setMaintenanceMemberId(complain1.getMemberId());
+                djMaintenanceRecordProduct.setMaintenanceProductType(4);
+                djMaintenanceRecordProduct.setTotalPrice(complain.getApplyMoney());
+                djMaintenanceRecordProduct.setPayState(1);
+                //是否过保  1是，0否
+                if(djMaintenanceRecord.getOverProtection() == 0){
+                    //未过保
+                    djMaintenanceRecordProduct.setPayPrice(0d);
+                    djMaintenanceRecordProduct.setOverProtection(djMaintenanceRecord.getOverProtection());
+                }else if(djMaintenanceRecord.getOverProtection() == 1){
+                    //已过保
+                    djMaintenanceRecordProduct.setPayPrice(actualMoney);
+                    djMaintenanceRecordProduct.setOverProtection(djMaintenanceRecord.getOverProtection());
+                }
+                djMaintenanceRecordProductMapper.insert(djMaintenanceRecordProduct);
+
             }else if(type == 1){
                 complain.setStatus(1);
                 complain.setRejectReason(rejectReason);
@@ -1670,45 +1702,72 @@ public class DjMaintenanceRecordService {
      */
     @Transactional(rollbackFor = Exception.class)
     public ServerResponse workerApplyCollect(String id,String remarks,String image){
-        if (CommonUtil.isEmpty(id)) {
-            return ServerResponse.createByErrorMessage("任务不存在");
+        try {
+            if (CommonUtil.isEmpty(id)) {
+                return ServerResponse.createByErrorMessage("任务不存在");
+            }
+
+            DjMaintenanceRecord djMaintenanceRecord = djMaintenanceRecordMapper.selectByPrimaryKey(id);
+
+            if(djMaintenanceRecord == null){
+                return ServerResponse.createByErrorMessage("该任务不存在");
+            }
+
+            //增加工匠验收内容
+            DjMaintenanceRecordContent djMaintenanceRecordContent = new DjMaintenanceRecordContent();
+            djMaintenanceRecordContent.setImage(image);
+            djMaintenanceRecordContent.setRemark(remarks);
+            djMaintenanceRecordContent.setMaintenanceRecordId(id);
+            djMaintenanceRecordContent.setMemberId(djMaintenanceRecord.getMemberId());
+            djMaintenanceRecordContent.setType(1);
+            djMaintenanceRecordContent.setWorkerTypeId(djMaintenanceRecord.getWorkerTypeId());
+            djMaintenanceRecordContentMapper.insert(djMaintenanceRecordContent);
+
+            //修改维保状态
+            djMaintenanceRecord.setState(1);//业主待验收
+            djMaintenanceRecord.setModifyDate(new Date());
+            djMaintenanceRecord.setApplyCollectTime(new Date());
+            djMaintenanceRecordMapper.updateByPrimaryKeySelective(djMaintenanceRecord);
+
+            //工匠申请验收，给业主推送消息
+            TaskStack taskStack = new TaskStack();
+            taskStack.setData(id);
+            taskStack.setName("工匠申请维保验收");
+            taskStack.setType(13);//工匠维保申请验收
+            taskStack.setMemberId(djMaintenanceRecord.getMemberId());
+            taskStack.setHouseId(djMaintenanceRecord.getHouseId());
+            taskStack.setImage("icon/sheji.png");
+            taskStack.setState(0);
+            taskStack.setRemarks(remarks);
+            iMasterTaskStackMapper.insert(taskStack);
+            return ServerResponse.createBySuccessMessage("操作成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("操作失败");
         }
-
-        DjMaintenanceRecord djMaintenanceRecord = djMaintenanceRecordMapper.selectByPrimaryKey(id);
-
-        if(djMaintenanceRecord == null){
-            return ServerResponse.createByErrorMessage("该任务不存在");
-        }
-
-        //增加工匠验收内容
-        DjMaintenanceRecordContent djMaintenanceRecordContent = new DjMaintenanceRecordContent();
-        djMaintenanceRecordContent.setImage(image);
-        djMaintenanceRecordContent.setRemark(remarks);
-        djMaintenanceRecordContent.setMaintenanceRecordId(id);
-        djMaintenanceRecordContent.setMemberId(djMaintenanceRecord.getMemberId());
-        djMaintenanceRecordContent.setType(1);
-        djMaintenanceRecordContent.setWorkerTypeId(djMaintenanceRecord.getWorkerTypeId());
-        djMaintenanceRecordContentMapper.insert(djMaintenanceRecordContent);
-
-        //修改维保状态
-        djMaintenanceRecord.setState(1);//业主待验收
-        djMaintenanceRecord.setModifyDate(new Date());
-        djMaintenanceRecord.setApplyCollectTime(new Date());
-        djMaintenanceRecordMapper.updateByPrimaryKeySelective(djMaintenanceRecord);
-
-        //工匠申请验收，给业主推送消息
-        TaskStack taskStack = new TaskStack();
-        taskStack.setData(id);
-        taskStack.setName("工匠申请维保验收");
-        taskStack.setType(13);//工匠维保申请验收
-        taskStack.setMemberId(djMaintenanceRecord.getMemberId());
-        taskStack.setHouseId(djMaintenanceRecord.getHouseId());
-        taskStack.setImage("icon/sheji.png");
-        taskStack.setState(0);
-        taskStack.setRemarks(remarks);
-        iMasterTaskStackMapper.insert(taskStack);
-        return ServerResponse.createBySuccessMessage("操作成功");
     }
 
+
+
+    /**
+     * 已确认可开工
+     * @param businessId
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse confirmStart(String businessId){
+        try {
+            DjMaintenanceRecord djMaintenanceRecord = new DjMaintenanceRecord();
+            djMaintenanceRecord.setState(5);
+            djMaintenanceRecord.setId(businessId);
+            djMaintenanceRecord.setModifyDate(new Date());
+            djMaintenanceRecord.setCreateDate(null);
+            djMaintenanceRecordMapper.updateByPrimaryKeySelective(djMaintenanceRecord);
+            return ServerResponse.createBySuccessMessage("操作成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("操作失败");
+        }
+    }
 }
 

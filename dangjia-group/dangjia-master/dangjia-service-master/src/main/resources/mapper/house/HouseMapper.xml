@@ -320,7 +320,8 @@
         t1.product_id productId,
         t1.worker_type_id workerTypeId,
         t.order_number as orderNumber,
-        t.order_status as orderStatus
+        t.order_status as orderStatus,
+        ho.business_id as businessId
         FROM
         dj_core_house_worker ho,
         dj_deliver_order t,

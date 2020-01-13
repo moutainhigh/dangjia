@@ -31,4 +31,7 @@ public class HouseOrderDetailDTO {
     private Integer totalNodeNumber;//总结点数
     private Integer completedNodeNumber;//已完成节点
 
+    private String businessId;//业务id
+
+
 }

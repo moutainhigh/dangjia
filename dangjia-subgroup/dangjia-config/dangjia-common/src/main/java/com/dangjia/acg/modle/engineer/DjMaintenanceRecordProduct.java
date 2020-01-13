@@ -55,8 +55,8 @@ public class DjMaintenanceRecordProduct extends BaseEntity {
     private String maintenanceMemberId;
 
     @Column(name = "maintenance_product_type")
-    @Desc(value = "维保商品类型：1业主维保商品 2管家勘查费用商品 3工匠维保材料商品")
-    @ApiModelProperty("维保商品类型：1业主维保商品 2管家勘查费用商品 3工匠维保材料商品")
+    @Desc(value = "维保商品类型：1业主维保商品 2管家勘查费用商品 3工匠维保材料商品 4工匠申请报销")
+    @ApiModelProperty("维保商品类型：1业主维保商品 2管家勘查费用商品 3工匠维保材料商品 4工匠申请报销")
     private Integer  maintenanceProductType;
 
     @Column(name = "total_price")
