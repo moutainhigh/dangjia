@@ -76,7 +76,7 @@ public interface IBasicsProductTemplateMapper extends Mapper<DjBasicsProductTemp
      */
    // void deleteProductWorker(@Param("goodsId") String goodsId);
 
-    List<DjBasicsProductTemplate> queryProductByCategoryId(@Param("categoryId") String categoryId,@Param("cityId") String cityId);
+    List<DjBasicsProductTemplate> queryProductByCategoryId(@Param("categoryId") String categoryId,@Param("cityId") String cityId,@Param("searchKey") String searchKey);
 
     List<ActuarialProductAppDTO> serchCategoryProduct(@Param("categoryId") String categoryId,@Param("goodsId") String goodsId ,@Param("name")String[]   name, @Param("brandVal") String[] brandVal, @Param("attributeVal") String[] attributeVal, @Param("orderKey") String orderKey);
 

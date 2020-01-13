@@ -27,4 +27,12 @@ public class MemberCollectDTO {
      * 调价时间
      */
     private Date modityPriceTime;
+
+    private String collectId;
+
+    private String storefrontName;
+
+    private String systemLogo;
+
+    private String conditionType;
 }

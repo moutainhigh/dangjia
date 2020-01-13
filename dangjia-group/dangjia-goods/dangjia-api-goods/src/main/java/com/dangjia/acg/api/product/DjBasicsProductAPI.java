@@ -132,7 +132,8 @@ public interface DjBasicsProductAPI {
     ServerResponse<PageInfo> queryProduct(@RequestParam("request") HttpServletRequest request,
                                           @RequestParam("pageDTO") PageDTO pageDTO,
                                           @RequestParam("categoryId") String categoryId,
-                                          @RequestParam("cityId") String cityId);
+                                          @RequestParam("cityId") String cityId,
+                                          @RequestParam("searchKey") String searchKey);
 
     @PostMapping("/product/djBasicsProduct/queryUnit")
     @ApiOperation(value = "查询所有单位", notes = "查询所有单位")

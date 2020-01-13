@@ -214,8 +214,8 @@ public class DjBasicsProductController implements DjBasicsProductAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse<PageInfo> queryProduct(HttpServletRequest request, PageDTO pageDTO, String categoryId,String cityId) {
-        return djBasicsProductService.queryProduct(pageDTO, categoryId,cityId);
+    public ServerResponse<PageInfo> queryProduct(HttpServletRequest request, PageDTO pageDTO, String categoryId,String cityId,String searchKey) {
+        return djBasicsProductService.queryProduct(pageDTO, categoryId,cityId,searchKey);
     }
 
     /**

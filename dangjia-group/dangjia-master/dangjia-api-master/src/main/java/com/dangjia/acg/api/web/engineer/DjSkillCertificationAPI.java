@@ -37,7 +37,7 @@ public interface DjSkillCertificationAPI {
                                                        @RequestParam("cityId") String cityId);
 
     @PostMapping(value = "web/engineer/insertSkillCertification")
-    @ApiOperation(value = "工匠技能认证", notes = "技能认证")
+    @ApiOperation(value = "工匠技能认证", notes = "工匠技能认证")
     ServerResponse insertSkillCertification(@RequestParam("jsonStr") String jsonStr,
                                             @RequestParam("skillCertificationId") String skillCertificationId,
                                             @RequestParam("cityId") String cityId);

@@ -5,15 +5,18 @@
 
     <select id="queryCollectGood" resultType="com.dangjia.acg.dto.product.MemberCollectDTO">
         SELECT
-            bsp.prod_template_id AS productId,
+            bsp.id AS productId,
             bsp.product_name AS productName,
             bsp.image,
             bpt.unit_name AS unitName,
 			bsp.adjusted_price as adjustedPrice,
-			bsp.modity_price_time as modityPriceTime
+			bsp.modity_price_time as modityPriceTime,
+			bs.storefront_name as storefrontName,
+			bs.system_logo as systemLogo
         FROM
             dj_basics_storefront_product bsp
         INNER JOIN dj_basics_product_template bpt ON bsp.prod_template_id = bpt.id
+        INNER JOIN dj_basics_storefront bs ON bs.id=bsp.storefront_id
         WHERE
             bsp.id =#{productId}
     </select>

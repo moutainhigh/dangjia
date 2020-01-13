@@ -134,6 +134,7 @@ public class DjBasicsProductTemplateService {
 
     /**
      * 根据类型查询同级货品
+     * 根据类型查询同级货品
      * @param categoryId
      * @return
      */
@@ -825,11 +826,11 @@ public class DjBasicsProductTemplateService {
      * @param categoryId
      * @return
      */
-    public ServerResponse<PageInfo> queryProduct(PageDTO pageDTO, String categoryId,String cityId) {
+    public ServerResponse<PageInfo> queryProduct(PageDTO pageDTO, String categoryId,String cityId,String searchKey) {
         try {
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
-            List<DjBasicsProductTemplate> productList = iBasicsProductTemplateMapper.queryProductByCategoryId(categoryId,cityId);
+            List<DjBasicsProductTemplate> productList = iBasicsProductTemplateMapper.queryProductByCategoryId(categoryId,cityId, searchKey);
             PageInfo pageResult = new PageInfo(productList);
             List<Map<String, Object>> mapList = new ArrayList<>();
             for (DjBasicsProductTemplate p : productList) {
@@ -842,7 +843,13 @@ public class DjBasicsProductTemplateService {
                 StringTool.getImages(address, imgArr, imgStr, imgUrlStr);
                 p.setImage(imgStr.toString());
                 Map<String, Object> map = BeanUtils.beanToMap(p);
-                map.put("imageUrl", imgUrlStr.toString());
+                map.put("imageUrl", StringTool.getImage(p.getImage(),address));
+                map.put("detailImageUrl", StringTool.getImage(p.getDetailImage(),address));
+                if(StringUtils.isNoneBlank(p.getConvertUnit())){
+                    map.put("convertUnitName", iUnitMapper.selectByPrimaryKey(p.getConvertUnit()).getName());
+                }
+
+                map.put("newValueNameArr", djbasicsgoodsService.getValueNameArr(p.getValueIdArr()));
                 mapList.add(map);
             }
             pageResult.setList(mapList);

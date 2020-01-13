@@ -4,6 +4,7 @@ import com.dangjia.acg.api.member.MemberAddressAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.modle.member.MemberAddress;
 import com.dangjia.acg.service.member.MemberAddressService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,8 +36,8 @@ public class MemberAddressController implements MemberAddressAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse updataAddress(HttpServletRequest request, String userToken, String addressId, Integer defaultType, String name, String mobile) {
-        return memberAddressService.updataAddress(userToken, addressId, defaultType, name, mobile);
+    public ServerResponse updataAddress(HttpServletRequest request, String userToken, MemberAddress memberAddress) {
+        return memberAddressService.updataAddress(userToken, memberAddress);
     }
 
     @Override
