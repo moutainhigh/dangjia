@@ -37,8 +37,8 @@ public class BillAppointmentController implements BillAppointmentAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryReserved(HttpServletRequest request,PageDTO pageDTO, String houseId) {
-        return billAppointmentService.queryReserved(pageDTO,houseId);
+    public ServerResponse queryReserved(HttpServletRequest request,PageDTO pageDTO, String houseId, String userToken) {
+        return billAppointmentService.queryReserved(pageDTO,houseId,userToken);
     }
 
     @Override

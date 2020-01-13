@@ -117,33 +117,35 @@ public class MemberAddressService {
      * 业主修改地址
      *
      * @param userToken   userToken
-     * @param addressId   地址ID
-     * @param defaultType 是否是默认地址:0：否，1：是
-     * @param name        业主姓名
-     * @param mobile      业主手机
+     * @Param  memberAddress
      * @return ServerResponse
      */
-    public ServerResponse updataAddress(String userToken, String addressId, int defaultType, String name, String mobile) {
+    public ServerResponse updataAddress(String userToken,MemberAddress memberAddress) {
         Object object = constructionService.getMember(userToken);
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
         }
-        if (CommonUtil.isEmpty(name)) {
+        if (CommonUtil.isEmpty(memberAddress.getName())) {
             return ServerResponse.createByErrorMessage("业主姓名未录入");
         }
-        if (CommonUtil.isEmpty(mobile)) {
+        if (CommonUtil.isEmpty(memberAddress.getMobile())) {
             return ServerResponse.createByErrorMessage("业主手机未录入");
         }
-        MemberAddress memberAddress = iMasterMemberAddressMapper.selectByPrimaryKey(addressId);
-        if (memberAddress == null) {
-            return ServerResponse.createByErrorMessage("未找到该地址");
+        if (CommonUtil.isEmpty(memberAddress.getCityId())) {
+            return ServerResponse.createByErrorMessage("业主城市未录入");
+        }
+        if (CommonUtil.isEmpty(memberAddress.getAddress())) {
+            return ServerResponse.createByErrorMessage("业主详细地址未录入");
+        }
+        if (memberAddress.getRenovationType() == 1 && memberAddress.getInputArea() == null) {
+            return ServerResponse.createByErrorMessage("房子面积未录入");
+        }
+        if (CommonUtil.isEmpty(memberAddress.getLongitude()) || CommonUtil.isEmpty(memberAddress.getLatitude())) {
+            return ServerResponse.createByErrorMessage("业主地址信息未录入");
         }
         Member member = (Member) object;
-        memberAddress.setDefaultType(defaultType);
-        memberAddress.setName(name);
-        memberAddress.setMobile(mobile);
-        memberAddress.setModifyDate(new Date());
-        setAddressDefaultType(defaultType, member.getId());
+        memberAddress.setMemberId(member.getId());
+        setAddressDefaultType(memberAddress.getDefaultType(), member.getId());
         iMasterMemberAddressMapper.updateByPrimaryKeySelective(memberAddress);
         return ServerResponse.createBySuccessMessage("修改成功");
     }

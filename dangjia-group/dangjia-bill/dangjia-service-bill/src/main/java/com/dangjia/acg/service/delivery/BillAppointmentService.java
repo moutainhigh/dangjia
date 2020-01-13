@@ -242,11 +242,17 @@ public class BillAppointmentService {
      * @param houseId
      * @return
      */
-    public ServerResponse queryReserved(PageDTO pageDTO, String houseId) {
+    public ServerResponse queryReserved(PageDTO pageDTO, String houseId, String userToken) {
         try {
+            Object object = memberAPI.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            JSONObject job = (JSONObject) object;
+            Member member = job.toJavaObject(Member.class);
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<OrderStorefrontDTO> orderStorefrontDTOS = djDeliverOrderMapper.queryReservedStorefront(houseId);
+            List<OrderStorefrontDTO> orderStorefrontDTOS = djDeliverOrderMapper.queryReservedStorefront(houseId,member.getId());
             List<AppointmentListDTO> appointmentListDTOS = new ArrayList<>();
             orderStorefrontDTOS.forEach(orderStorefrontDTO -> {
                 orderStorefrontDTO.setStorefrontIcon(imageAddress+orderStorefrontDTO.getStorefrontIcon());
