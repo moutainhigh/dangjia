@@ -84,6 +84,7 @@ public class MemberCollectService {
                 List<MemberCollectDTO> memberCollectDTOS = iMasterStorefrontProductMapper.queryCollectGood(memberCollect.getCollectId());
                 memberCollectDTOS.forEach(memberCollectDTO -> {
                     memberCollectDTO.setId(memberCollect.getId());
+                    memberCollectDTO.setSystemLogo(imageAddress+memberCollectDTO.getSystemLogo());
                     memberCollectDTO.setImage(imageAddress + memberCollectDTO.getImage());
                     memberCollectDTO.setCollectId(memberCollect.getCollectId());
                     memberCollectDTO.setConditionType(memberCollect.getConditionType());

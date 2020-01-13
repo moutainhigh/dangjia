@@ -5,7 +5,7 @@
 
     <select id="queryCollectGood" resultType="com.dangjia.acg.dto.product.MemberCollectDTO">
         SELECT
-            bsp.prod_template_id AS productId,
+            bsp.id AS productId,
             bsp.product_name AS productName,
             bsp.image,
             bpt.unit_name AS unitName,
