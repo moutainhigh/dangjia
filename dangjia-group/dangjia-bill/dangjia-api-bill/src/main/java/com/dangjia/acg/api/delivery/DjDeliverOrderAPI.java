@@ -51,7 +51,7 @@ public interface DjDeliverOrderAPI {
                                   @RequestParam("userId") String userId,
                                   @RequestParam("cityId") String cityId,
                                   @RequestParam("orderKey") String orderKey,
-                                  @RequestParam("orderKey") int state);
+                                  @RequestParam("orderKey") Integer state);
 
     @PostMapping("web/design/queryOrderFineInfo")
     @ApiOperation(value = "查询订单详情", notes = "查询订单详情")
@@ -196,5 +196,9 @@ public interface DjDeliverOrderAPI {
     @PostMapping("app/order/queryWorkerGoodsInFo")
     @ApiOperation(value = "查询订单人工商品详情", notes = "查询订单人工商品详情")
     ServerResponse queryWorkerGoodsInFo(@RequestParam("id") String id);
+
+    @PostMapping("app/order/queryCostDetailsAfterCompletion")
+    @ApiOperation(value = "完工后-花费明细", notes = "完工后-花费明细")
+    ServerResponse queryCostDetailsAfterCompletion(@RequestParam("houseId") String houseId);
 
 }

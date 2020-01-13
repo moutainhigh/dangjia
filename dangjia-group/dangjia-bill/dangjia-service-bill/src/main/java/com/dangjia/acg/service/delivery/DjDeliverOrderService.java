@@ -21,10 +21,7 @@ import com.dangjia.acg.dto.design.CollectDataDTO;
 import com.dangjia.acg.dto.design.QuantityRoomDTO;
 import com.dangjia.acg.dto.design.WorkChartListDTO;
 import com.dangjia.acg.dto.member.WorkerTypeDTO;
-import com.dangjia.acg.dto.order.DOrderArrFineInfoDTO;
-import com.dangjia.acg.dto.order.DOrderArrInfoDTO;
-import com.dangjia.acg.dto.order.DOrderFineInfoDTO;
-import com.dangjia.acg.dto.order.DOrderInfoDTO;
+import com.dangjia.acg.dto.order.*;
 import com.dangjia.acg.mapper.delivery.*;
 import com.dangjia.acg.mapper.order.IBillHouseMapper;
 import com.dangjia.acg.mapper.order.IBillQuantityRoomImagesMapper;
@@ -68,6 +65,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class DjDeliverOrderService {
@@ -1066,7 +1064,7 @@ public class DjDeliverOrderService {
      * @return
      */
     public ServerResponse queryOrderInfo(PageDTO pageDTO, String userId, String cityId,
-                                         String orderKey, int state) {
+                                         String orderKey, Integer state) {
 
         Example example = new Example(Storefront.class);
         example.createCriteria().andEqualTo(Storefront.USER_ID, userId).
@@ -1953,6 +1951,7 @@ public class DjDeliverOrderService {
             return ServerResponse.createBySuccessMessage("删除成功");
         } catch (Exception e) {
             e.printStackTrace();
+            logger.info("删除失败",e);
             return ServerResponse.createByErrorMessage("删除失败");
         }
     }
@@ -2115,6 +2114,7 @@ public class DjDeliverOrderService {
             return ServerResponse.createBySuccess("查询成功", workerGoodsInFoDTOS);
         } catch (Exception e) {
             e.printStackTrace();
+            logger.info("查询失败",e);
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }
@@ -2153,6 +2153,26 @@ public class DjDeliverOrderService {
             return ServerResponse.createBySuccess("查询成功", list);
         } catch (Exception e) {
             e.printStackTrace();
+            logger.info("查询失败",e);
+            return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+
+    /**
+     * 完工后-花费明细
+     * @param houseId
+     * @return
+     */
+    public ServerResponse queryCostDetailsAfterCompletion(String houseId) {
+        try {
+            List<DecorationCostDTO> decorationCostDTOS = iBillDjDeliverOrderMapper.queryCostDetailsAfterCompletion(houseId);
+            Map<String, List<DecorationCostDTO>> collect = decorationCostDTOS.stream()
+                    .collect(Collectors.groupingBy(DecorationCostDTO::getWorkerTypeId));
+            return ServerResponse.createBySuccess("查询成功",collect);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.info("查询失败",e);
             return ServerResponse.createByErrorMessage("查询失败");
         }
     }

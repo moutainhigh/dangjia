@@ -1169,5 +1169,47 @@
         and t1.type in(2,3)
     </select>
 
+    <select id="queryCostDetailsAfterCompletion" resultType="com.dangjia.acg.dto.order.DecorationCostDTO">
+        SELECT
+            t3.product_name productName,
+            t2.create_date createDate,
+            (
+                IFNULL(
+                    t2.actual_payment_price,
+                    IFNULL(
+                        t2.total_price,
+                        t2.price * t2.shop_count
+                    )
+                ) + IFNULL(
+                    (
+                        SELECT
+                            price
+                        FROM
+                            dj_deliver_order_added_product tt
+                        WHERE
+                            tt.any_order_id = t2.id
+                    ),
+                    0
+                ) * t2.shop_count
+            ) actualPaymentPrice,
+        IF (
+            t1.worker_type_id IS NULL
+            OR t1.worker_type_id = '',
+            0,
+            t1.worker_type_id
+        ) workerTypeId
+        FROM
+            dj_deliver_order t1,
+            dj_deliver_order_item t2,
+            dj_basics_storefront_product t3,
+            dj_basics_product_template t4,
+            dj_basics_goods_category t5
+        WHERE
+            t1.id = t2.order_id
+        AND t2.product_id = t3.id
+        AND t3.prod_template_id = t4.id
+        AND t4.category_id = t5.id
+        AND t1.house_id = #{houseId}
+    </select>
 
 </mapper>

@@ -8,7 +8,8 @@
             a.product_sn productSn,
             a.name,
             a.id,
-            c.type
+            c.type,
+            a.worker_type_id workerTypeId
         FROM
             dj_basics_product_template a,
             dj_basics_goods c

@@ -5,7 +5,6 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.core.WorkerType;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -55,5 +54,9 @@ public interface DjSkillCertificationAPI {
     ServerResponse insertWorkerTypeSkillPackConfiguration(@RequestParam("jsonStr") String jsonStr,
                                                           @RequestParam("workerType") WorkerType workerType,
                                                           @RequestParam("cityId") String cityId);
+
+    @PostMapping(value = "web/engineer/deleteSkillCertification")
+    @ApiOperation(value = "技能删除", notes = "技能删除")
+    ServerResponse deleteSkillCertification(@RequestParam("id") String id);
 
 }

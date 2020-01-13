@@ -61,7 +61,7 @@ public class DjDeliverOrderController implements DjDeliverOrderAPI {
     public ServerResponse queryOrderInfo(HttpServletRequest request,
                                          PageDTO pageDTO,
                                          String userId, String cityId,
-                                         String orderKey, int state) {
+                                         String orderKey, Integer state) {
         return djDeliverOrderService.queryOrderInfo(pageDTO, userId, cityId, orderKey, state);
     }
 
@@ -194,6 +194,12 @@ public class DjDeliverOrderController implements DjDeliverOrderAPI {
     @ApiMethod
     public ServerResponse queryWorkerGoodsInFo(String id) {
         return djDeliverOrderService.queryWorkerGoodsInFo(id);
+    }
+
+    @Override
+    @ApiMethod
+    public ServerResponse queryCostDetailsAfterCompletion(String houseId) {
+        return djDeliverOrderService.queryCostDetailsAfterCompletion(houseId);
     }
 
 }

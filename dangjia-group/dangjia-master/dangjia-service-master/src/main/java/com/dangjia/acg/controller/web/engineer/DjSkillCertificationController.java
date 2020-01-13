@@ -57,4 +57,10 @@ public class DjSkillCertificationController implements DjSkillCertificationAPI {
     public ServerResponse insertWorkerTypeSkillPackConfiguration(String jsonStr, WorkerType workerType, String cityId) {
         return djSkillCertificationService.insertWorkerTypeSkillPackConfiguration(jsonStr, workerType, cityId);
     }
+
+    @Override
+    @ApiMethod
+    public ServerResponse deleteSkillCertification(String id) {
+        return djSkillCertificationService.deleteSkillCertification(id);
+    }
 }

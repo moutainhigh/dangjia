@@ -33,6 +33,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created with IntelliJ IDEA.
@@ -43,8 +44,6 @@ import java.util.stream.Collectors;
 @Service
 public class DjSupApplicationProductService {
 
-    @Autowired
-    private DjSupApplicationMapper djSupApplicationMapper;
     @Autowired
     private DjSupApplicationProductMapper djSupApplicationProductMapper;
     @Autowired
@@ -61,8 +60,8 @@ public class DjSupApplicationProductService {
 
     @Autowired
     private BasicsStorefrontAPI basicsStorefrontAPI;
-    @Autowired
-    private IStoreStorefrontMapper iStoreStorefrontMapper;
+
+
     /**
      * 供应商申请供应商品
      *

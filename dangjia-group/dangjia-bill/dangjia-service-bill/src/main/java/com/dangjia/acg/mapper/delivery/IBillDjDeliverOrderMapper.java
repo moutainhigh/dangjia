@@ -186,4 +186,7 @@ public interface IBillDjDeliverOrderMapper extends Mapper<Order> {
     int queryTestNumber(@Param("id") String id,
                         @Param("houseId") String houseId,
                         @Param("workerId") String workerId);
+
+    List<DecorationCostDTO> queryCostDetailsAfterCompletion(@Param("houseId") String houseId);
+
 }
