@@ -160,6 +160,9 @@ public class DjMaintenanceRecordService {
         if (object instanceof ServerResponse) {
             return (ServerResponse) object;
         }
+        if(productId==null||StringUtils.isBlank(productId)){
+            return ServerResponse.createByErrorMessage("请选择对应的维保商品");
+        }
         //1.判断当前房子下是否有正在处理中的质保
         List<DjMaintenanceRecord> maintenanceRecordList = djMaintenanceRecordMapper.selectMaintenanceRecoredByHouseId(houseId,workerTypeSafeOrderId);
         if (maintenanceRecordList != null && maintenanceRecordList.size() > 0) {
@@ -168,10 +171,12 @@ public class DjMaintenanceRecordService {
         //查询保险订单对应的工种
         WorkerTypeSafeOrder workerTypeSafeOrder=workerTypeSafeOrderMapper.selectByPrimaryKey(workerTypeSafeOrderId);
         Member member = (Member) object;//业主信息
-        List<DjMaintenanceRecordProduct> mrProductList=djMaintenanceRecordProductMapper.selectMaintenanceProductByMemberId(member.getId(),houseId,"1",workerTypeSafeOrder.getWorkerTypeId());
-        if(mrProductList==null||mrProductList.size()==0){
-            return ServerResponse.createByErrorMessage("请选择维保商品！");
+        //判断维保商品是否存在,是否为正确的维保商品
+        StorefrontProduct storefrontProduct=iMasterStorefrontProductMapper.selectByPrimaryKey(productId);
+        if(storefrontProduct==null||StringUtils.isBlank(storefrontProduct.getId())){
+            return ServerResponse.createByErrorMessage("请选择正确的维保商品！");
         }
+
         //2.添加质保信息
         DjMaintenanceRecord djMaintenanceRecord=new DjMaintenanceRecord();
         djMaintenanceRecord.setHouseId(houseId);
@@ -195,7 +200,7 @@ public class DjMaintenanceRecordService {
             serviveState=0;//未过保
         }
         //5.判断是否有需要管家勘查的维保商品
-        Integer stewardExploration=updateMaitenanceProductInfo(mrProductList,serviveState,djMaintenanceRecord.getId());
+       /* Integer stewardExploration=updateMaitenanceProductInfo(mrProductList,serviveState,djMaintenanceRecord.getId());
         if(stewardExploration==1){//若需要勘查，则返回需要勘查的维保勘查费商品
             DjMaintenanceRecordProduct recordProduct=mrProductList.get(0);
             //维护对应的勘查费用商品
@@ -227,7 +232,8 @@ public class DjMaintenanceRecordService {
         }else{
             //返回对应需要维保的业主所有维保商品
             return getMaintenaceProductList(djMaintenanceRecord.getId(),1);//业主所选维保商品
-        }
+        }*/
+        return getMaintenaceProductList(djMaintenanceRecord.getId(),1);//业主所选维保商品
     }
 
     /**

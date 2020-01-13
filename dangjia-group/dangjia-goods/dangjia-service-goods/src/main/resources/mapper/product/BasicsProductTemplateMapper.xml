@@ -320,7 +320,7 @@
            and city_id=#{cityId}
         </if>
         <if test="searchKey!=null and searchKey!=''">
-            and LIKE CONCAT('%',#{searchKey},'%')
+            and name LIKE CONCAT('%',#{searchKey},'%')
         </if>
         ORDER BY istop DESC,create_date desc
     </select>
