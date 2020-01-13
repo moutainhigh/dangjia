@@ -28,6 +28,7 @@ import com.dangjia.acg.modle.matter.TechnologyRecord;
 import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.deliver.OrderSplitItemService;
+import com.dangjia.acg.util.Utils;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -183,12 +184,13 @@ public class TechnologyRecordService {
                         workNodeDTOA.setProductName(storefrontProduct.getProductName());//商品名
                         workNodeDTOA.setProductId(storefrontProduct.getId());//商品名
                     }
+
                     TechnologyRecordDTO trd = new TechnologyRecordDTO();
                     trd.setId(pt.getId());
                     trd.setName(pt.getName());
                     trd.setState(pt.getState());
                     trd.setWorkerTypeId(pt.getWorkerTypeId());
-                    trd.setImage(address + pt.getImage());
+                    trd.setImage(Utils.getImageAddress(address, pt.getImage()));
                     technologyRecordDTOS.add(trd);
                     workNodeDTOA.setTrList(technologyRecordDTOS);
                     trList.put(pt.getProductId(), workNodeDTOA);
