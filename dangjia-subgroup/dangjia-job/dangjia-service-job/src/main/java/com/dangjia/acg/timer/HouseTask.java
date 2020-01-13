@@ -6,6 +6,7 @@ import com.dangjia.acg.api.app.house.HouseAPI;
 import com.dangjia.acg.api.config.ConfigMessageAPI;
 import com.dangjia.acg.api.data.TechnologyRecordAPI;
 import com.dangjia.acg.api.sale.rob.RobAPI;
+import com.dangjia.acg.api.supervisor.DjBasicsSiteMemoAPI;
 import com.dangjia.acg.common.constants.DjConstants;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.modle.config.ConfigMessage;
@@ -42,6 +43,8 @@ public class HouseTask {
     private HouseFlowAPI houseFlowAPI;
     @Autowired
     private RobAPI robAPI;
+    @Autowired
+    private DjBasicsSiteMemoAPI siteMemoAPI;
 
 
     private Logger log = LoggerFactory.getLogger(HouseTask.class);
@@ -66,8 +69,7 @@ public class HouseTask {
         houseFlowAPI.autoGiveUpOrder();
         log.info(format.format(new Date()) + "结束执行工匠保险检测任务...");
         robAPI.remindTime();
-
-
+        siteMemoAPI.remindSiteMemo();
     }
 
 
@@ -105,18 +107,18 @@ public class HouseTask {
         return configMessageAPI.addConfigMessage(null, configMessage);
     }
 
-  /**
-   * 检测是否旷工
-   * 每天凌晨(23点55分)执行一次
-   */
-  @Scheduled(cron = "0 55 23 * * ?") //每天23点55触发
-  public void absenteeism() {
-    log.info(format.format(new Date()) + "开始执行旷工检测任务...");
-    houseFlowApplyAPI.absenteeism();
-    log.info(format.format(new Date()) + "结束执行旷工检测任务...");
+    /**
+     * 检测是否旷工
+     * 每天凌晨(23点55分)执行一次
+     */
+    @Scheduled(cron = "0 55 23 * * ?") //每天23点55触发
+    public void absenteeism() {
+        log.info(format.format(new Date()) + "开始执行旷工检测任务...");
+        houseFlowApplyAPI.absenteeism();
+        log.info(format.format(new Date()) + "结束执行旷工检测任务...");
 
-    log.info(format.format(new Date()) + "开始执行工匠自动续保任务...");
-    houseFlowAPI.autoRenewOrder();
-    log.info(format.format(new Date()) + "结束执行工匠自动续保任务...");
-  }
+        log.info(format.format(new Date()) + "开始执行工匠自动续保任务...");
+        houseFlowAPI.autoRenewOrder();
+        log.info(format.format(new Date()) + "结束执行工匠自动续保任务...");
+    }
 }

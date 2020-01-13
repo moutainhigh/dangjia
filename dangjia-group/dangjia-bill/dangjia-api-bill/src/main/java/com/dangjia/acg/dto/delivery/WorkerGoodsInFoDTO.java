@@ -27,7 +27,6 @@ public class WorkerGoodsInFoDTO {
     private String styleName;//规格
     private String unitName;//单位
 
-
     private String productTemplateId;//商品模板ID
     private Integer totalNodeNumber;//总节点数
     private Integer completedNodeNumber;//已完成节点

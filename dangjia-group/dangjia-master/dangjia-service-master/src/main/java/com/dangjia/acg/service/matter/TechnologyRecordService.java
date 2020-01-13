@@ -7,20 +7,17 @@ import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
-import com.dangjia.acg.dto.basics.ProductDTO;
-import com.dangjia.acg.dto.deliver.OrderSplitItemDTO;
 import com.dangjia.acg.dto.matter.TechnologyRecordDTO;
 import com.dangjia.acg.dto.matter.WorkNodeDTO;
-import com.dangjia.acg.dto.product.ProductAppDTO;
 import com.dangjia.acg.mapper.core.IHouseFlowApplyMapper;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
-import com.dangjia.acg.mapper.delivery.IOrderSplitItemMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
 import com.dangjia.acg.mapper.house.IWarehouseMapper;
 import com.dangjia.acg.mapper.matter.IMasterTechnologyMapper;
 import com.dangjia.acg.mapper.matter.ITechnologyRecordMapper;
-import com.dangjia.acg.mapper.product.IMasterProductTemplateMapper;
+import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
 import com.dangjia.acg.mapper.repair.IMendWorkerMapper;
 import com.dangjia.acg.modle.basics.Technology;
 import com.dangjia.acg.modle.core.HouseFlow;
@@ -28,9 +25,7 @@ import com.dangjia.acg.modle.core.HouseFlowApply;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.Warehouse;
 import com.dangjia.acg.modle.matter.TechnologyRecord;
-import com.dangjia.acg.modle.member.Member;
-import com.dangjia.acg.modle.product.DjBasicsProductTemplate;
-import com.dangjia.acg.modle.repair.MendWorker;
+import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.deliver.OrderSplitItemService;
 import com.github.pagehelper.PageInfo;
@@ -38,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
 import tk.mybatis.mapper.util.StringUtil;
 
 import java.util.ArrayList;
@@ -75,8 +71,9 @@ public class TechnologyRecordService {
     private ConfigUtil configUtil;
     @Autowired
     private OrderSplitItemService orderSplitItemService;
+
     @Autowired
-    private IMasterProductTemplateMapper iMasterProductTemplateMapper;
+    private IMasterStorefrontProductMapper masterStorefrontProductMapper;
     @Autowired
     private IMasterTechnologyMapper iMasterTechnologyMapper;
 
@@ -152,16 +149,10 @@ public class TechnologyRecordService {
     }
 
     /**
-     * 1.31
-     * 管家工匠合并 节点列表
-     * applyType 0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4：每日开工,5有效巡查,6无人巡查,7追加巡查
+     * 3.0
+     * 管家待巡查的节点
      */
     public ServerResponse workNodeList(String userToken, String houseFlowId) {
-        Object object1 = constructionService.getMember(userToken);
-        if (object1 instanceof ServerResponse) {
-            return (ServerResponse) object1;
-        }
-        Member worker = (Member) object1;
         HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowId);
         House house = houseMapper.selectByPrimaryKey(houseFlow.getHouseId());
         if (house.getPause() != null) {
@@ -169,109 +160,46 @@ public class TechnologyRecordService {
                 return ServerResponse.createByErrorMessage("该房子已暂停施工,请勿提交申请！");
             }
         }
-
+        String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         List<WorkNodeDTO> workNodeDTOList = new ArrayList<>();
-        //JSONArray jsonArray;
-        List<ProductAppDTO> productList;
-        if (worker.getWorkerType() == 3) { //管家查询管家应验收节点
-            productList=technologyRecordMapper.selectWorkerProductInfo(houseFlow.getHouseId(),null);
-            /*jsonArray = budgetWorkerAPI.getAllTechnologyByHouseId(house.getCityId(), house.getId());
-            *//* 补人工的节点也加入进来 *//*
-            List<MendWorker> mendWorkerList = mendWorkerMapper.houseMendWorkerList(house.getId());
-            for (MendWorker mendWorker : mendWorkerList) {
-                if (budgetWorkerAPI.patrolList(house.getCityId(), mendWorker.getWorkerGoodsId())) {
-                    JSONObject jsonObject = new JSONObject();
-                    jsonObject.put("workerGoodsId", mendWorker.getWorkerGoodsId());
-                    jsonObject.put("workerGoodsName", mendWorker.getWorkerGoodsName());
-                    jsonArray.add(jsonObject);
-                }
-            }*/
-        } else {//工匠提交的验收节点
-            //含工艺人工商品(查当当前房子，当前工种下面所有需要此工匠验收的节点）dj_house_warehouse 仓库
-            productList=technologyRecordMapper.selectWorkerProductInfo(houseFlow.getHouseId(),houseFlow.getWorkerTypeId());
-
-
-           /* jsonArray = budgetWorkerAPI.getWorkerGoodsList(house.getCityId(), houseFlow.getHouseId(), houseFlowId);
-            *//* 补人工的节点也加入进来 *//*
-            List<MendWorker> mendWorkerList = mendWorkerMapper.mendWorkerList(house.getId(), worker.getWorkerTypeId());
-            for (MendWorker mendWorker : mendWorkerList) {
-                if (budgetWorkerAPI.workerPatrolList(house.getCityId(), mendWorker.getWorkerGoodsId())) {
-                    JSONObject jsonObject = new JSONObject();
-                    jsonObject.put("workerGoodsId", mendWorker.getWorkerGoodsId());
-                    jsonObject.put("workerGoodsName", mendWorker.getWorkerGoodsName());
-                    jsonArray.add(jsonObject);
-                }
-            }*/
-        }
+        Example example = new Example(TechnologyRecord.class);
+        example.createCriteria().andEqualTo(TechnologyRecord.STATE, 0);
+        example.orderBy(TechnologyRecord.CREATE_DATE).desc();
+        List<TechnologyRecord>  productList = technologyRecordMapper.selectByExample(example);
+        Map<String,WorkNodeDTO> trList = new HashMap<>();
        if(productList!=null&&productList.size()>0){
-           for (ProductAppDTO pt:productList) {
-               //JSONObject object = jsonArray.getJSONObject(i);
-               //String workerGoodsId =pt.getProductId();// object.getString("workerGoodsId");
-               String workerGoodsName =pt.getProductName();// object.getString("workerGoodsName");
-               String prodTemplateId=pt.getProductTemplateId();
-               WorkNodeDTO workNodeDTOA = new WorkNodeDTO();
-               workNodeDTOA.setTecName(workerGoodsName);//商品名
-              // JSONArray tecArray = budgetWorkerAPI.getTecList(house.getCityId(), worker.getWorkerType(), workerGoodsId);
-               JSONArray tecArray = getTecList(worker.getWorkerType(), prodTemplateId);
-               List<TechnologyRecordDTO> trList = new ArrayList<>();
-               if(tecArray!=null&&tecArray.size()>0){
-                   for (int j = 0; j < tecArray.size(); j++) {
-                       JSONObject tecObject = tecArray.getJSONObject(j);
-                       String technologyId = tecObject.getString("technologyId");
-                       String technologyName = tecObject.getString("technologyName");
-                       TechnologyRecordDTO trd = new TechnologyRecordDTO();
-                       trd.setId(technologyId);
-                       trd.setName(technologyName);
-                       List<TechnologyRecord> technologyRecordList = technologyRecordMapper.checkByTechnologyId(houseFlow.getHouseId(), technologyId, worker.getWorkerTypeId());
-                       if (technologyRecordList.size() == 0) { //没有验收
-                           trd.setState(0);
-                       } else {
-                           TechnologyRecord technologyRecord = technologyRecordList.get(0);
-                           if (technologyRecord.getState() == 2) {//不通过
-                               trd.setState(0);
-                           } else if (technologyRecord.getState() == 0) {
-                               trd.setState(0);//未验收
-                           } else {
-                               trd.setState(1);//已验收
-                           }
-                       }
-                       trList.add(trd);
-                   }
+           for (TechnologyRecord pt:productList) {
+               if(trList.get(pt.getProductId())==null){
+                   trList.put(pt.getProductId(),new WorkNodeDTO());
                }
-
-               workNodeDTOA.setTrList(trList);
-               workNodeDTOList.add(workNodeDTOA);
+               WorkNodeDTO workNodeDTOA =trList.get(pt.getProductId());
+               if(workNodeDTOA.getTrList()==null){
+                   workNodeDTOA.setTrList(new ArrayList<>());
+               }
+               List<TechnologyRecordDTO> technologyRecordDTOS = workNodeDTOA.getTrList();
+               if(CommonUtil.isEmpty(workNodeDTOA.getProductId())) {
+                   StorefrontProduct storefrontProduct = masterStorefrontProductMapper.selectByPrimaryKey(pt.getProductId());
+                   workNodeDTOA.setProductName(storefrontProduct.getProductName());//商品名
+                   workNodeDTOA.setProductId(storefrontProduct.getId());//商品名
+               }
+               TechnologyRecordDTO trd = new TechnologyRecordDTO();
+               trd.setId(pt.getId());
+               trd.setName(pt.getName());
+               trd.setState(pt.getState());
+               trd.setWorkerTypeId(pt.getWorkerTypeId());
+               trd.setImage(address + pt.getImage());
+               technologyRecordDTOS.add(trd);
+               workNodeDTOA.setTrList(technologyRecordDTOS);
+               trList.put(pt.getProductId(),workNodeDTOA);
            }
        }
 
+       for(String key:trList.keySet()){
+           workNodeDTOList.add(trList.get(key));
+       }
         return ServerResponse.createBySuccess("查询成功", workNodeDTOList);
     }
 
-    /**
-     * 根据人工商品查询工艺
-     */
-    public JSONArray getTecList(int workerType, String workerGoodsId) {
-        try {
-            JSONArray jsonArray = new JSONArray();
-            DjBasicsProductTemplate wg = iMasterProductTemplateMapper.selectByPrimaryKey(workerGoodsId);
-            List<Technology> tList;
-            if (workerType == 3) {
-                tList = iMasterTechnologyMapper.patrolList(wg.getTechnologyIds());
-            } else {
-                tList = iMasterTechnologyMapper.workerPatrolList(wg.getTechnologyIds());
-            }
-            for (Technology t : tList) {
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put("technologyId", t.getId());
-                jsonObject.put("technologyName", t.getName());
-                jsonArray.add(jsonObject);
-            }
-            return jsonArray;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
     /**
      * 获取上传图片列表
      * applyType 0每日完工申请，1阶段完工申请，2整体完工申请,3停工申请，4：每日开工,5有效巡查,6无人巡查,7追加巡查

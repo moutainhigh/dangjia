@@ -35,6 +35,12 @@ public class TechnologyRecord extends BaseEntity {
     @Column(name = "name")
     private String name;
 
+
+    @Column(name = "product_id")
+    @Desc(value = "店铺商品表id")
+    @ApiModelProperty("店铺商品表id")
+    private String productId;
+
     @Column(name = "material_or_worker")
     private Integer materialOrWorker;//0材料工艺,1人工工艺
 
