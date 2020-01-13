@@ -85,6 +85,8 @@ public class MemberCollectService {
                 memberCollectDTOS.forEach(memberCollectDTO -> {
                     memberCollectDTO.setId(memberCollect.getId());
                     memberCollectDTO.setImage(imageAddress + memberCollectDTO.getImage());
+                    memberCollectDTO.setCollectId(memberCollect.getCollectId());
+                    memberCollectDTO.setConditionType(memberCollect.getConditionType());
                     //当前时间小于调价的时间时则展示调价预告信息
                     if (memberCollectDTO.getAdjustedPrice() == null
                             || memberCollectDTO.getModityPriceTime() == null

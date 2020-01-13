@@ -143,6 +143,9 @@ public class DjSkillCertificationService {
             List<WorkerType> workerTypes = iWorkerTypeMapper.selectByExample(example);
             workerTypes.forEach(workerType -> {
                 workerType.setImage(imageAddress+workerType.getImage());
+                if(StringUtils.isEmpty(workerType.getSkillPackName())){
+                    workerType.setSkillPackName("");
+                }
             });
             return ServerResponse.createBySuccess("查询成功",workerTypes);
         } catch (Exception e) {
@@ -190,6 +193,11 @@ public class DjSkillCertificationService {
                 }
                 iWorkerTypeMapper.updateByPrimaryKeySelective(workerType);
             }else{
+                Example example=new Example(WorkerType.class);
+                example.createCriteria().andEqualTo(WorkerType.DATA_STATUS,0);
+                example.orderBy(WorkerType.TYPE).desc();
+                WorkerType workerType1 = iWorkerTypeMapper.selectOneByExample(example);
+                workerType.setType(workerType1.getType()+1);
                 iWorkerTypeMapper.insert(workerType);
             }
             JSONArray jsonArray = JSONArray.parseArray(jsonStr);

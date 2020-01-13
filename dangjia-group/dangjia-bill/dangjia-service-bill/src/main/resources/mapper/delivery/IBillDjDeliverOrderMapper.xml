@@ -103,30 +103,43 @@
 
     <select id="queryReservedStorefront" resultType="com.dangjia.acg.dto.delivery.OrderStorefrontDTO">
         SELECT
-            t1.storefront_id storefrontId,
-            t1.id orderSplitId,
-            t1.address_id addressId,
-            t1.house_id houseId,
-            t4.storefront_name storefrontName,
-            t1.order_id orderId,
-            t1.id as orderSplitId
+             t1.house_id,
+             t1.storefront_id storefrontId,
+             t1.id orderSplitId,
+             t1.address_id addressId,
+             t1.house_id houseId,
+             t4.storefront_name storefrontName,
+             t1.order_id orderId
         FROM
-            dj_deliver_order_split t1,
-            dj_basics_storefront t4
-        WHERE
-            t1.storefront_id = t4.id
-        AND t1.house_id=#{houseId}
-        AND EXISTS (
-            SELECT
-                1
-            FROM
-                dj_deliver_order_split_item t2
-            WHERE
-                t1.id = t2.order_split_id
-            AND t2.data_status = 0
-            AND t2.is_reservation_deliver = 1
-            AND t2.reservation_deliver_time IS NOT NULL
-        )
+         dj_deliver_order_split t1,
+         dj_basics_storefront t4,
+         dj_deliver_order_split_item t2
+        WHERE t4.id = t1.storefront_id
+        <choose>
+            <when test="null!=houseId and ''!=houseId">
+                AND t1.house_id=#{houseId}
+            </when>
+            <otherwise>
+                EXISTS (
+                    SELECT
+                    1
+                    FROM
+                    dj_member_address t5
+                    WHERE
+                    t5.member_id = #{memberId}
+                    AND t5.data_status = 0
+                    AND (
+                    t1.house_id = t5.house_id
+                    OR t1.address_id = t5.id
+                    )
+                )
+            </otherwise>
+        </choose>
+          and t1.id = t2.order_split_id
+          AND t2.data_status = 0
+          AND t2.is_reservation_deliver = 1
+          AND t2.reservation_deliver_time IS NOT NULL
+        GROUP BY t1.id
     </select>
 
 
