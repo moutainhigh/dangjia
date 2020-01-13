@@ -28,16 +28,20 @@ import com.dangjia.acg.dto.pay.SafeTypeDTO;
 import com.dangjia.acg.dto.pay.UpgradeSafeDTO;
 import com.dangjia.acg.dto.product.ShoppingCartDTO;
 import com.dangjia.acg.dto.product.ShoppingCartListDTO;
+import com.dangjia.acg.dto.product.StorefrontProductDTO;
 import com.dangjia.acg.mapper.account.IMasterAccountFlowRecordMapper;
 import com.dangjia.acg.mapper.activity.IActivityRedPackRecordMapper;
 import com.dangjia.acg.mapper.core.*;
 import com.dangjia.acg.mapper.delivery.*;
+import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordMapper;
+import com.dangjia.acg.mapper.engineer.DjMaintenanceRecordProductMapper;
 import com.dangjia.acg.mapper.house.*;
 import com.dangjia.acg.mapper.member.ICustomerRecordMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.pay.IBusinessOrderMapper;
 import com.dangjia.acg.mapper.pay.IMasterSupplierPayOrderMapper;
 import com.dangjia.acg.mapper.pay.IPayOrderMapper;
+import com.dangjia.acg.mapper.product.IMasterProductTemplateMapper;
 import com.dangjia.acg.mapper.product.IMasterStorefrontMapper;
 import com.dangjia.acg.mapper.product.IMasterStorefrontProductMapper;
 import com.dangjia.acg.mapper.product.IShoppingCartMapper;
@@ -55,12 +59,15 @@ import com.dangjia.acg.modle.actuary.BudgetMaterial;
 import com.dangjia.acg.modle.attribute.AttributeValue;
 import com.dangjia.acg.modle.brand.Brand;
 import com.dangjia.acg.modle.core.HouseFlow;
+import com.dangjia.acg.modle.core.HouseWorker;
 import com.dangjia.acg.modle.core.HouseWorkerOrder;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.deliver.Order;
 import com.dangjia.acg.modle.deliver.OrderItem;
 import com.dangjia.acg.modle.deliver.OrderSplit;
 import com.dangjia.acg.modle.deliver.OrderSplitItem;
+import com.dangjia.acg.modle.engineer.DjMaintenanceRecord;
+import com.dangjia.acg.modle.engineer.DjMaintenanceRecordProduct;
 import com.dangjia.acg.modle.house.*;
 import com.dangjia.acg.modle.member.CustomerRecord;
 import com.dangjia.acg.modle.member.Member;
@@ -86,6 +93,7 @@ import com.dangjia.acg.service.core.HouseWorkerService;
 import com.dangjia.acg.service.core.TaskStackService;
 import com.dangjia.acg.service.design.HouseDesignPayService;
 import com.dangjia.acg.service.repair.MendOrderCheckService;
+import javafx.concurrent.Worker;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -121,7 +129,7 @@ public class PaymentService {
     private IWorkerTypeMapper workerTypeMapper;
 
     @Autowired
-    private IMemberMapper memberMapper;
+    private IMasterProductTemplateMapper iMasterProductTemplateMapper;
     @Autowired
     private IHouseMapper houseMapper;
     @Autowired
@@ -130,7 +138,7 @@ public class PaymentService {
     private IWorkerTypeSafeOrderMapper workerTypeSafeOrderMapper;
 
     @Autowired
-    private MasterAccountFlowRecordService masterAccountFlowRecordService;
+    private IHouseWorkerMapper houseWorkerMapper;
 
     @Autowired
     private IMasterBasicsGoodsMapper iMasterBasicsGoodsMapper;
@@ -153,7 +161,9 @@ public class PaymentService {
     @Autowired
     private IMendMaterialMapper mendMaterialMapper;
     @Autowired
-    private IMendWorkerMapper mendWorkerMapper;
+    private DjMaintenanceRecordMapper djMaintenanceRecordMapper;
+    @Autowired
+    private DjMaintenanceRecordProductMapper djMaintenanceRecordProductMapper;
     @Autowired
     private IOrderMapper orderMapper;
     @Autowired
@@ -216,6 +226,8 @@ public class PaymentService {
     private IMasterAttributeValueMapper iMasterAttributeValueMapper;
     @Autowired
     private TaskStackService taskStackService;
+    @Autowired
+    private IMemberMapper iMemberMapper;
 
 
     @Autowired
@@ -1426,6 +1438,166 @@ public class PaymentService {
         houseWorkerOrderMapper.updateByPrimaryKey(hwo);
 
     }
+
+    /**
+     * 维保订单
+     * @param userToken
+     * @param maintenanceRecordId
+     * @param maintenanceRecordType
+     * @return
+     */
+    public ServerResponse generateMaintenanceRecordOrder(String userToken,String maintenanceRecordId,Integer maintenanceRecordType,String cityId) {
+        try {
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = (Member) object;
+            //查询质保信息
+            DjMaintenanceRecord djMaintenanceRecord = djMaintenanceRecordMapper.selectByPrimaryKey(maintenanceRecordId);
+
+            WorkerType wt = workerTypeMapper.selectByPrimaryKey(djMaintenanceRecord.getWorkerTypeId());
+
+            Integer payState=1;//未支付
+            if(djMaintenanceRecord.getOverProtection()==0){
+                payState=2;//已支付
+            }
+            BigDecimal paymentPrice = new BigDecimal(0);//总共钱
+            BigDecimal totalPrice = new BigDecimal(0);//总共钱
+            BigDecimal freightPrice = new BigDecimal(0);//总运费
+            BigDecimal totalMoveDost = new BigDecimal(0);//搬运费
+           List<DjMaintenanceRecordProduct> recordProductList=djMaintenanceRecordProductMapper.queryPayMaintenanceRecordProduct(maintenanceRecordId,maintenanceRecordType,1,null);
+           if(djMaintenanceRecord==null||recordProductList==null){
+              return ServerResponse.createByErrorMessage("未找到符合条件的维修记录，请核实");
+           }
+
+            if (recordProductList!=null) {
+                Order order = new Order();
+                order.setHouseId(djMaintenanceRecord.getHouseId());
+                order.setWorkerTypeName(wt.getName() + "维修订单");
+                order.setCityId(cityId);
+                order.setWorkerTypeId(djMaintenanceRecord.getWorkerTypeId());
+                order.setMemberId(member.getId());
+//                order.setBusinessOrderNumber(businessOrderNumber);
+                order.setType(5);
+                order.setOrderNumber(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
+                order.setTotalDiscountPrice(new BigDecimal(0));
+                order.setTotalStevedorageCost(new BigDecimal(0));
+                order.setTotalTransportationCost(new BigDecimal(0));
+                order.setActualPaymentPrice(new BigDecimal(0));
+                order.setOrderStatus("1");
+                order.setOrderGenerationTime(new Date());
+                order.setOrderSource(5);//精算制作
+                order.setWorkerId(String.valueOf(wt.getType()));
+                order.setCreateBy(member.getId());
+                orderMapper.insert(order);
+                for (DjMaintenanceRecordProduct recordProduct : recordProductList) {
+                    StorefrontProduct storefrontProduct=iMasterStorefrontProductMapper.selectByPrimaryKey(recordProduct.getProductId());
+                    StorefrontProductDTO storefrontProductDTO=iMasterProductTemplateMapper.getStorefrontProductByTemplateId(storefrontProduct.getProdTemplateId());
+                    BasicsGoods basicsGoods=iMasterBasicsGoodsMapper.selectByPrimaryKey(storefrontProductDTO.getGoodsId());
+
+                    OrderItem orderItem = new OrderItem();
+                    orderItem.setIsReservationDeliver("0");
+                    orderItem.setOrderId(order.getId());
+                    orderItem.setHouseId(djMaintenanceRecord.getHouseId());
+                    orderItem.setPrice(recordProduct.getPrice().doubleValue());//销售价
+                    orderItem.setShopCount(recordProduct.getShopCount().doubleValue());//购买总数
+                    orderItem.setUnitName(storefrontProductDTO.getUnitName());//单位
+                    orderItem.setTotalPrice(recordProduct.getTotalPrice().doubleValue());//总价
+                    orderItem.setProductName(storefrontProduct.getProductName());
+                    orderItem.setProductSn(storefrontProductDTO.getProductSn());
+                    orderItem.setCategoryId(storefrontProductDTO.getCategoryId());
+                    orderItem.setProductId(storefrontProductDTO.getStorefrontProductId());
+                    orderItem.setImage(storefrontProductDTO.getImage());
+                    orderItem.setCityId(cityId);
+                    orderItem.setProductType(basicsGoods.getType());
+                    orderItem.setStorefontId(storefrontProduct.getStorefrontId());
+                    orderItem.setAskCount(0d);
+                    orderItem.setDiscountPrice(0d);
+                    orderItem.setActualPaymentPrice(0d);
+                    orderItem.setStevedorageCost(0d);
+                    orderItem.setTransportationCost(0d);
+                    orderItem.setOrderStatus("1");//1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭
+                    if(payState==2){
+                        orderItem.setOrderStatus("2");
+                    }
+                    orderItem.setCreateBy(member.getId());
+                    orderItemMapper.insert(orderItem);
+                    paymentPrice=paymentPrice.add(BigDecimal.valueOf(recordProduct.getPayPrice()));
+                    totalPrice=totalPrice.add(BigDecimal.valueOf(recordProduct.getTotalPrice()));
+                }
+
+                // 生成支付业务单
+                Example example = new Example(BusinessOrder.class);
+                example.createCriteria().andEqualTo(BusinessOrder.TASK_ID, order.getId()).andNotEqualTo(BusinessOrder.STATE, 4).andNotEqualTo(BusinessOrder.STATE, 3);
+                List<BusinessOrder> businessOrderList = businessOrderMapper.selectByExample(example);
+                BusinessOrder businessOrder = null;
+                if (businessOrderList.size() > 0) {
+                    businessOrder = businessOrderList.get(0);
+                }
+                if (businessOrderList.size() == 0) {
+                    businessOrder = new BusinessOrder();
+                    businessOrder.setMemberId(member.getId());
+                    businessOrder.setHouseId(djMaintenanceRecord.getHouseId());
+                    businessOrder.setNumber(System.currentTimeMillis() + "-" + (int) (Math.random() * 9000 + 1000));
+                    businessOrder.setState(1);//刚生成
+                    if(payState==2){
+                        businessOrder.setState(3);//已支付
+                    }
+                    businessOrder.setTotalPrice(totalPrice);//订单总价
+                    businessOrder.setDiscountsPrice(new BigDecimal(0));
+                    businessOrder.setPayPrice(paymentPrice);//实付总价
+                    businessOrder.setType(10);//记录支付类型任务类型
+                    businessOrder.setTaskId(order.getId());//保存任务ID
+                    businessOrder.setMaintenanceRecordId(maintenanceRecordId);
+                    businessOrderMapper.insert(businessOrder);
+                }
+                order.setTotalTransportationCost(freightPrice);//总运费
+                order.setTotalStevedorageCost(totalMoveDost);//总搬运费
+                order.setBusinessOrderNumber(businessOrder.getNumber());
+                order.setTotalAmount(totalPrice);// 订单总额(工钱)
+                order.setActualPaymentPrice(paymentPrice);//实付总价
+                orderMapper.updateByPrimaryKeySelective(order);
+               // budgetCorrect(order,null,null); 拆分单，只有材料商品才会有拆分单
+                //将业务支付订单号维护到维保订单中去
+                djMaintenanceRecordProductMapper.updateRecordProductInfo(maintenanceRecordId,maintenanceRecordType,businessOrder.getNumber(),payState);
+                if(payState==2){//维保期内的订单
+                    setHouseWorker(djMaintenanceRecord, maintenanceRecordType, order.getTotalAmount());
+                }
+                return ServerResponse.createBySuccess("提交成功", businessOrder.getNumber());
+            }
+            return ServerResponse.createBySuccess("提交成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return ServerResponse.createByErrorMessage("提交失败：原因："+e.getMessage());
+        }
+    }
+
+    /**
+     * 增加待抢单列表记录
+     */
+    private void setHouseWorker(DjMaintenanceRecord djMaintenanceRecord,Integer maintenanceRecordType,BigDecimal totalAmount){
+        //直接找到原工匠或原管家，将订单分配给对应的人员
+        HouseFlow houseFlow=houseFlowMapper.getByWorkerTypeId(djMaintenanceRecord.getHouseId(),djMaintenanceRecord.getWorkerTypeId()); //找原工匠
+        if(maintenanceRecordType==2){
+            //找原管家
+            houseFlow=houseFlowMapper.getByWorkerTypeId(djMaintenanceRecord.getHouseId(),"3");
+        }
+        //生成抢单记录
+        Member worker=iMemberMapper.selectByPrimaryKey(houseFlow.getWorkerId());
+        HouseWorker houseWorker = new HouseWorker();
+        houseWorker.setWorkerId(worker.getId());
+        houseWorker.setWorkerTypeId(worker.getWorkerTypeId());
+        houseWorker.setWorkerType(worker.getWorkerType());
+        houseWorker.setWorkType(1);//已抢单
+        houseWorker.setIsSelect(1);
+        houseWorker.setPrice(totalAmount);
+        houseWorker.setType(2);
+        houseWorker.setBusinessId(djMaintenanceRecord.getId());
+        houseWorkerMapper.insert(houseWorker);
+    }
+
 
     /**
      * 提交订单(精算)

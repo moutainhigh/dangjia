@@ -56,12 +56,33 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
      * @param taskId
      * @return
      */
+    @Override
+    @ApiMethod
     public ServerResponse searchMaintenanceProduct(String userToken,String houseId,String taskId){
         try{
             return djMaintenanceRecordService.searchMaintenanceProduct(userToken,houseId,taskId);
         }catch (Exception e){
             logger.error("查询失败",e);
             return ServerResponse.createByErrorMessage("查询失败");
+        }
+    }
+
+    /**
+     * 质保申请，提交订单
+     * @param userToken
+     * @param houseId
+     * @param maintenanceRecordId
+     * @param maintenanceRecordType
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse saveMaintenanceRecordOrder(String userToken,String houseId,String maintenanceRecordId,Integer maintenanceRecordType,String cityId){
+        try{
+            return djMaintenanceRecordService.saveMaintenanceRecordOrder(userToken,houseId,maintenanceRecordId,maintenanceRecordType,cityId);
+        }catch (Exception e){
+            logger.error("提交失败",e);
+            return ServerResponse.createByErrorMessage("提交失败");
         }
     }
 

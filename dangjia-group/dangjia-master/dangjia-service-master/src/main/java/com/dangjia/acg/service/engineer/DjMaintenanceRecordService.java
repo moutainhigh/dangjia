@@ -56,6 +56,7 @@ import com.dangjia.acg.modle.worker.WorkerDetail;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.service.core.TaskStackService;
+import com.dangjia.acg.service.pay.PaymentService;
 import com.dangjia.acg.service.product.MasterProductTemplateService;
 import com.dangjia.acg.service.safe.WorkerTypeSafeOrderService;
 import com.dangjia.acg.util.Utils;
@@ -142,7 +143,6 @@ public class DjMaintenanceRecordService {
 
     @Autowired
     private UserMapper userMapper;
-    private ConfigMessageService configMessageService ;
     @Autowired
     private IMasterProductTemplateMapper iMasterProductTemplateMapper;
     @Autowired
@@ -150,6 +150,8 @@ public class DjMaintenanceRecordService {
     @Autowired
     private WorkerTypeSafeOrderService workerTypeSafeOrderService;
 
+    @Autowired
+    private PaymentService paymentService;
     private static Logger logger = LoggerFactory.getLogger(DjMaintenanceRecordService.class);
 
 
@@ -176,7 +178,11 @@ public class DjMaintenanceRecordService {
         if(storefrontProduct==null||StringUtils.isBlank(storefrontProduct.getId())){
             return ServerResponse.createByErrorMessage("请选择正确的维保商品！");
         }
-
+        //4.判断当前商品质保卡是否在质保期内
+        Integer serviveState=1;//已过保
+        if(workerTypeSafeOrder.getForceTime()!=null&&workerTypeSafeOrder.getExpirationDate()!=null&& DateUtil.compareDate(workerTypeSafeOrder.getExpirationDate(),new Date())){
+            serviveState=0;//未过保
+        }
         //2.添加质保信息
         DjMaintenanceRecord djMaintenanceRecord=new DjMaintenanceRecord();
         djMaintenanceRecord.setHouseId(houseId);
@@ -185,6 +191,7 @@ public class DjMaintenanceRecordService {
         djMaintenanceRecord.setOwnerMobile(member.getMobile());
         djMaintenanceRecord.setWorkerTypeSafeOrderId(workerTypeSafeOrderId);
         djMaintenanceRecord.setWorkerTypeId(workerTypeSafeOrder.getWorkerTypeId());
+        djMaintenanceRecord.setState(serviveState                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         );
         djMaintenanceRecordMapper.insert(djMaintenanceRecord);
         //3.添加质保对应的图片、备注信息
         DjMaintenanceRecordContent djMaintenanceRecordContent=new DjMaintenanceRecordContent();
@@ -194,13 +201,12 @@ public class DjMaintenanceRecordService {
         djMaintenanceRecordContent.setMemberId(member.getId());
         djMaintenanceRecordContent.setType(3);
         djMaintenanceRecordContentMapper.insert(djMaintenanceRecordContent);
-        //4.判断当前商品质保卡是否在质保期内
-        Integer serviveState=1;//已过保
-        if(workerTypeSafeOrder.getForceTime()!=null&&workerTypeSafeOrder.getExpirationDate()!=null&& DateUtil.compareDate(workerTypeSafeOrder.getExpirationDate(),new Date())){
-            serviveState=0;//未过保
-        }
-        //5.判断是否有需要管家勘查的维保商品
-       /* Integer stewardExploration=updateMaitenanceProductInfo(mrProductList,serviveState,djMaintenanceRecord.getId());
+
+        //5.添加维保商品
+        insertMaintenanceProductInfo(productId,djMaintenanceRecord,serviveState);
+        return getMaintenaceProductList(djMaintenanceRecord.getId(),1);//业主所选维保商品
+    }
+ /* Integer stewardExploration=updateMaitenanceProductInfo(mrProductList,serviveState,djMaintenanceRecord.getId());
         if(stewardExploration==1){//若需要勘查，则返回需要勘查的维保勘查费商品
             DjMaintenanceRecordProduct recordProduct=mrProductList.get(0);
             //维护对应的勘查费用商品
@@ -233,7 +239,30 @@ public class DjMaintenanceRecordService {
             //返回对应需要维保的业主所有维保商品
             return getMaintenaceProductList(djMaintenanceRecord.getId(),1);//业主所选维保商品
         }*/
-        return getMaintenaceProductList(djMaintenanceRecord.getId(),1);//业主所选维保商品
+    /**
+     * 添加维保商品信息
+     * @param productId
+     * @param djMaintenanceRecord
+     */
+    public void insertMaintenanceProductInfo(String productId,DjMaintenanceRecord djMaintenanceRecord,Integer serviceState){
+        StorefrontProduct storefrontProduct=iMasterStorefrontProductMapper.selectByPrimaryKey(productId);
+        DjMaintenanceRecordProduct mrp=new DjMaintenanceRecordProduct();
+        mrp.setProductId(productId);
+        mrp.setMaintenanceRecordId(djMaintenanceRecord.getId());
+        mrp.setHouseId(djMaintenanceRecord.getHouseId());
+        mrp.setMaintenanceMemberId(djMaintenanceRecord.getMemberId());
+        mrp.setMaintenanceProductType(1);//业主所选维保商品
+        mrp.setPrice(storefrontProduct.getSellPrice());
+        mrp.setShopCount(1d);
+        mrp.setTotalPrice(storefrontProduct.getSellPrice());
+        mrp.setOverProtection(serviceState);
+        if(serviceState==1){
+            mrp.setPayPrice(mrp.getTotalPrice());//已过保需支付金额为当前金额
+        }else{
+            mrp.setPayPrice(0d);//未过保需支付金额为0
+        }
+        mrp.setPayState(1);
+        djMaintenanceRecordProductMapper.insert(mrp);//添加维保商品
     }
 
     /**
@@ -279,11 +308,6 @@ public class DjMaintenanceRecordService {
      */
     public ServerResponse getMaintenaceProductList(String maintenanceRecordId,Integer maintenanceRecordType){
         Map<String,Object> paramMap=new HashMap<>();
-        String titleName="";
-        if(maintenanceRecordType==4){
-            titleName= DjConstants.CommonMessage.GJ_KC_MSG;
-        }
-
         //2.查询对应工总的质保商品总 额
         Double totalPrice=0d;
         Double payPrice=0d;
@@ -291,7 +315,7 @@ public class DjMaintenanceRecordService {
         if(workerTypeList!=null&&workerTypeList.size()>0){
             String address = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             for(Map map:workerTypeList){
-                String workerTypeId=(String)map.get("workerTypeId");
+               // String workerTypeId=(String)map.get("workerTypeId");
                 String workerTypeImage=(String)map.get("workerTypeImage");
                 Integer overProtection=(Integer)map.get("overProtection");
                 map.put("workerTypeImageUrl",address+workerTypeImage);
@@ -300,9 +324,8 @@ public class DjMaintenanceRecordService {
                 payPrice= MathUtil.add(payPrice,(Double)map.get("payPrice"));
                 //查对应的商品信息
                 Example example=new Example(DjMaintenanceRecordProduct.class);
-                example.createCriteria().andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_RECORD_ID,maintenanceRecordId);
-                      /*  .andEqualTo(DjMaintenanceRecordProduct.WORKER_TYPE_ID,workerTypeId)
-                        .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_MEMBER_TYPE,maintenanceRecordType);*/
+                example.createCriteria().andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_RECORD_ID,maintenanceRecordId)
+                                   .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_PRODUCT_TYPE,maintenanceRecordType);
                 List<DjMaintenanceRecordProduct> mrProductList=djMaintenanceRecordProductMapper.selectByExample(example);
                 List productList=workerTypeSafeOrderService.getRecordProductList(mrProductList);
                 if(overProtection==1){
@@ -318,27 +341,7 @@ public class DjMaintenanceRecordService {
         //设置商品总额，及需支付总额
         paramMap.put("totalPrice",totalPrice);
         paramMap.put("payPrice",payPrice);
-        if(maintenanceRecordType==2||maintenanceRecordType==3){
-            //获取已支付单的信息
-           paramMap.putAll(getOrderProductInfo(maintenanceRecordType,maintenanceRecordId,payPrice));
-            Integer payType=(Integer) paramMap.get("payType");
-            if(payType==1){
-                titleName= DjConstants.CommonMessage.GJ_ZB_BK;
-            }else if(payType==3){
-                titleName= DjConstants.CommonMessage.GJ_ZB_TK;
-            }
-        }else{
-            paramMap.put("paymentPrice",0d);
-            paramMap.put("needPayPrice",payPrice);
-            if(payPrice>0){
-                paramMap.put("payType",1);//订单类型:1需支付，2无需支付，3待退款
-            }else if(payPrice==0){
-                paramMap.put("payType",2);//订单类型:1需支付，2无需支付，3待退款
-            }
-        }
-        //1.标题头文字设置
-        paramMap.put("titleName",titleName);
-        paramMap.put("maintenanceRecordType",maintenanceRecordType);//维保人类型
+        paramMap.put("maintenanceRecordType",maintenanceRecordType);//维保商品类型
         return  ServerResponse.createBySuccess("查询成功",paramMap);
     }
 
@@ -469,12 +472,27 @@ public class DjMaintenanceRecordService {
     }
 
     /**
-     * 查询质保审核列表
-     *
-     * @param pageDTO
-     * @param searchKey
+     * 保存质保订单表
+     * @param userToken
+     * @param houseId
+     * @param maintenanceRecordId 质保ID
+     * @param maintenanceRecordType 质保订单类型（１业主维保商品，２管家勘查商品，３工匠维修要货商品，４工匠报销费用）
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
+    public ServerResponse saveMaintenanceRecordOrder(String userToken,String houseId,String maintenanceRecordId,Integer maintenanceRecordType,String cityId) {
+
+         paymentService.generateMaintenanceRecordOrder(userToken,maintenanceRecordId,maintenanceRecordType,cityId);
+
+        return ServerResponse.createBySuccess("提交成功","");
+    }
+        /**
+         * 查询质保审核列表
+         *
+         * @param pageDTO
+         * @param searchKey
+         * @return
+         */
 
     public ServerResponse queryDjMaintenanceRecordList(PageDTO pageDTO, String searchKey, Integer state) {
         try {

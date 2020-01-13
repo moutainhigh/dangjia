@@ -6,7 +6,6 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.BeanUtils;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.common.util.DateUtil;
-import com.dangjia.acg.common.util.MathUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.mapper.core.IHouseFlowMapper;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
@@ -30,7 +29,6 @@ import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.apache.commons.lang.time.DateUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -138,53 +136,68 @@ public class WorkerTypeSafeOrderService {
     public ServerResponse getMySafeTypeOrderDetail(String id) {
         //1.查询质保明细
         WorkerTypeSafeOrder wtso = workerTypeSafeOrderMapper.selectByPrimaryKey(id);
-
-       /* WorkerTypeSafe wts = workerTypeSafeMapper.selectByPrimaryKey(wtso.getWorkerTypeSafeId());//获得类型算出时间
-        map.put("workerTypeSafe",wts);
-        List<HouseFlowApplyImage> imglist=houseFlowApplyImageMapper.getHouseFlowApplyImageList(wtso.getWorkerTypeId(), String.valueOf(wtso.getWorkerType()), wtso.getHouseId(), wtso.getHouseFlowId(), "0");
-        for (HouseFlowApplyImage msg:imglist) {
-            msg.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
-        }
-        map.put("imglist",imglist);*/
        //判断是否过保
         wtso.setServiceState(2);//已过保
        if(wtso.getForceTime()!=null&&wtso.getExpirationDate()!=null&& DateUtil.compareDate(wtso.getExpirationDate(),new Date())){
            wtso.setServiceState(1);//未过保
         }
-
         Map map = BeanUtils.beanToMap(wtso);
+        WorkerTypeSafe wts = workerTypeSafeMapper.selectByPrimaryKey(wtso.getWorkerTypeSafeId());//获得类型算出时间
+        WorkerType workerType=iWorkerTypeMapper.selectByPrimaryKey(wts.getWorkerTypeId());
+        if(wtso.getServiceState()==2){
+            wts.setName(workerType.getName()+"已过保");
+        }
+        map.put("workerTypeSafe",wts);
+        /*List<HouseFlowApplyImage> imglist=houseFlowApplyImageMapper.getHouseFlowApplyImageList(wtso.getWorkerTypeId(), String.valueOf(wtso.getWorkerType()), wtso.getHouseId(), wtso.getHouseFlowId(), "0");
+        for (HouseFlowApplyImage msg:imglist) {
+            msg.initPath(configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class));
+        }
+        map.put("imglist",imglist);*/
         List maintenanceRecordList=new ArrayList();
         Map recordMap;
        //2.查询历史质保记录
         Example example=new Example(DjMaintenanceRecord.class);
         example.createCriteria().andEqualTo(DjMaintenanceRecord.WORKER_TYPE_SAFE_ORDER_ID,id);
         List<DjMaintenanceRecord> recordList=djMaintenanceRecordMapper.selectByExample(example);
+        boolean applicateMaintenaneButton=true;
         if(recordList!=null&&recordList.size()>0){
             for(DjMaintenanceRecord mr:recordList){
                 recordMap=new HashMap();
                 recordMap.put("applicationDate",mr.getCreateDate());//质保申请时间
                 //2.1查询维保商品记录
-                List productList=getMrProductList(mr.getId(),"3");//工匠维保商品
-                if(productList==null||productList.size()==0){
-                    productList=getMrProductList(mr.getId(),"2");//大管家维保商品
-                    if(productList==null||productList.size()==0){
-                        productList=getMrProductList(mr.getId(),"1");//业主维保商品
-                    }
-                }
-                recordMap.put("productList",productList);//商品列表
-                //2.2查询人工信息
-                recordMap.put("workerList",getWorkerList(mr));
+                recordMap.put("name","申请"+workerType.getName()+"质保");
+                recordMap.put("state",mr.getState());//质保状态
+                recordMap.put("stateName",getStateName(mr.getState()));//质保状态名称
                 maintenanceRecordList.add(recordMap);
+                if(mr.getState()!=2&&mr.getState()!=4){
+                    applicateMaintenaneButton=false;//不通申请
+                }
             }
         }
         map.put("historyRecordList",maintenanceRecordList);
+        map.put("applicateMaintenaneButton",applicateMaintenaneButton);//申请质保按钮状态，true可申请，false 不可申请
         return ServerResponse.createBySuccess("查询成功", map);
     }
 
+    private String getStateName(Integer state){
+        String stateName="进行中";
+        switch (state){
+            case 2:
+                stateName = "已完成";
+                break;
+            case 4:
+                stateName = "已提交结束";
+                break;
+        }
+        return stateName;
+    }
+
+
+
     List<DjMaintenanceRecordProduct> getMrProductList(String maintenanceRecordId,String type){
         Example example=new Example(DjMaintenanceRecordProduct.class);
-        example.createCriteria().andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_RECORD_ID,maintenanceRecordId);
-               // .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_MEMBER_TYPE,type);
+        example.createCriteria().andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_RECORD_ID,maintenanceRecordId)
+                .andEqualTo(DjMaintenanceRecordProduct.MAINTENANCE_PRODUCT_TYPE,type);
         List<DjMaintenanceRecordProduct> mrProductList=djMaintenanceRecordProductMapper.selectByExample(example);
         List productList=getRecordProductList(mrProductList);
         return productList;

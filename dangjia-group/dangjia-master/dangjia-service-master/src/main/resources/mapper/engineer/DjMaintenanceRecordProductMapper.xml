@@ -144,4 +144,11 @@
             and mrp.worker_type_id=#{workerTypeId}
         </if>
     </select>
+
+    <update id="updateRecordProductInfo" >
+        update dj_maintenance_record_product
+        set business_order_number= #{businessOrderNumber},pay_state=#{payState},modify_date=now()
+        where maintenance_record_id=#{maintenanceRecordId}
+        and maintenance_member_type=#{maintenanceRecordType}
+    </update>
 </mapper>

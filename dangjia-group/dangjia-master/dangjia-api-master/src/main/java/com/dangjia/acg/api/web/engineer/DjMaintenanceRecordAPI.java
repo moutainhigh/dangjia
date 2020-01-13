@@ -46,6 +46,14 @@ public interface DjMaintenanceRecordAPI {
                                          @RequestParam("houseId") String houseId,
                                          @RequestParam("taskId") String taskId);
 
+    @PostMapping(value = "app/engineer/saveMaintenanceRecordOrder")
+    @ApiOperation(value = "质保申请--提交订单", notes = "质保申请--提交订单")
+    ServerResponse saveMaintenanceRecordOrder(@RequestParam("userToken") String userToken,
+                                         @RequestParam("houseId") String houseId,
+                                         @RequestParam("maintenanceRecordId") String maintenanceRecordId,
+                                         @RequestParam("maintenanceRecordType") Integer maintenanceRecordType,
+                                              @RequestParam("cityId") String cityId);
+
     @PostMapping(value = "web/engineer/queryDjMaintenanceRecordList")
     @ApiOperation(value = "查询质保审核列表", notes = "查询质保审核列表")
     ServerResponse queryDjMaintenanceRecordList(@RequestParam("pageDTO") PageDTO pageDTO,

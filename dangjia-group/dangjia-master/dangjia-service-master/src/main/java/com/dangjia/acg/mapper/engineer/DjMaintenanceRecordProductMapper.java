@@ -51,4 +51,6 @@ public interface DjMaintenanceRecordProductMapper extends Mapper<DjMaintenanceRe
     List<DjMaintenanceRecordProductDTO> queryMaintenanceShoppingBasket(@Param("parentTop") String parentTop);
 
     List<DjMaintenanceRecordProduct> queryPayMaintenanceRecordProduct(@Param("maintenanceRecordId") String maintenanceRecordId,@Param("maintenanceRecordType") Integer maintenanceRecordType,@Param("payState") Integer payState,@Param("workerTypeId") String  workerTypeId);
+
+    void updateRecordProductInfo(@Param("maintenanceRecordId") String maintenanceRecordId,@Param("maintenanceRecordType") Integer maintenanceRecordType,@Param("businessOrderNumber") String businessOrderNumber,@Param("payState") Integer payState);
 }
