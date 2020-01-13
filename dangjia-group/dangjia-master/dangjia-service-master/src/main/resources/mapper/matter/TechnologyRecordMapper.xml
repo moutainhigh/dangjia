@@ -7,6 +7,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		id,
 		house_id as houseId,
 		technology_id as technologyId,
+		house_flow_apply_id as houseFlowApplyId,
+		steward_house_flow_apply_id as stewardHouseFlowApplyId,
+		steward_check_time as stewardCheckTime,
 		name,
 		material_or_worker as materialOrWorker,
 		worker_type_id as workerTypeId,
@@ -69,24 +72,29 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	</update>
 
 
-	<select id="selectWorkerProductInfo" resultType="com.dangjia.acg.dto.product.ProductAppDTO">
+	<select id="selectWorkerProductInfo" resultType="com.dangjia.acg.dto.matter.TechnologyRecordDTO">
 		SELECT
-			t2.id productId,
-		    t2.product_name productName,
-		    t3.id productTemplateId
+			t4.id,
+			t4. NAME,
+			'0' state,
+			t4.image,
+			t1.product_id productId,
+			t4.worker_type_id workerTypeId,
+			t5.id technologyId
 		FROM
-			dj_house_warehouse t1,
-			dj_basics_storefront_product t2,
-			dj_basics_product_template t3,
-			dj_basics_technology t4
+			dj_house_warehouse t1
+		INNER JOIN dj_basics_storefront_product t2 ON t1.product_id = t2.id
+		INNER JOIN dj_basics_product_template t3 ON t2.prod_template_id = t3.id
+		INNER JOIN dj_basics_technology t4 ON FIND_IN_SET(t4.id, t3.technology_ids)
+		LEFT JOIN dj_matter_technology_record t5 ON t4.id = t5.technology_Id
+		AND t4.worker_type_id = t5.worker_type_id
+		AND t5.state != 3
 		WHERE
 			t1.product_type = 2
-		and t1.house_id=#{houseId}
-		AND t1.product_id = t2.id
-		AND t2.prod_template_id = t3.id
-		and t4.worker_type_id=#{workerTypeId}
-		AND FIND_IN_SET(t4.id, t3.technology_ids)
-		group by t2.id,t2.product_name
+		AND t1.house_id = #{houseId}
+		AND t4.worker_type_id =#{workerTypeId}
+		AND t5.id IS NULL
+
 	</select>
 </mapper>
 

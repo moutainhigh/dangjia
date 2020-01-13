@@ -203,10 +203,10 @@ public class EvaluateService {
             houseFlowApply.setSupervisorCheck(2);
             houseFlowApply.setModifyDate(new Date());
             houseFlowApplyMapper.updateByPrimaryKeySelective(houseFlowApply);
-            /*
-            验收节点不通过
-             */
-            technologyRecordMapper.passNoTecRecord(houseFlowApply.getHouseId(), houseFlowApply.getWorkerTypeId());
+//            /*
+//            验收节点不通过
+//             */
+//            technologyRecordMapper.passNoTecRecord(houseFlowApply.getHouseId(), houseFlowApply.getWorkerTypeId());
             //业主不通过工匠发起阶段/整体完工申请驳回次数超过两次后将扣工人钱
             List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.noPassList(houseFlowApply.getHouseFlowId());
             if (houseFlowApplyList.size() > 2) {

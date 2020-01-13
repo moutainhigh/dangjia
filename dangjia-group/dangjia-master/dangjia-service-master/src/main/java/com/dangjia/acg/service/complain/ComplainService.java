@@ -5,7 +5,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.dangjia.acg.api.BasicsStorefrontAPI;
 import com.dangjia.acg.api.data.ForMasterAPI;
 import com.dangjia.acg.api.refund.RefundAfterSalesAPI;
-import com.dangjia.acg.api.sup.SupplierProductAPI;
 import com.dangjia.acg.api.supplier.DjSupplierAPI;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.exception.ServerCode;
@@ -536,8 +535,8 @@ public class ComplainService {
                         HouseFlow houseFlow = houseFlowMapper.selectByPrimaryKey(houseFlowApply.getHouseFlowId());
                         houseFlow.setPause(0);
                         houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
-                        //不通过节点验收
-                        technologyRecordMapper.passNoTecRecord(houseFlowApply.getHouseId(), houseFlowApply.getWorkerTypeId());
+//                        //不通过节点验收
+//                        technologyRecordMapper.passNoTecRecord(houseFlowApply.getHouseId(), houseFlowApply.getWorkerTypeId());
 
                         //业主不通过工匠发起阶段/整体完工申请驳回次数超过两次后将扣工人钱
                         List<HouseFlowApply> houseFlowApplyList = houseFlowApplyMapper.noPassList(houseFlow.getId());

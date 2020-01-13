@@ -1243,9 +1243,23 @@ public class HouseWorkerService {
             for (int i = 0; i < imageObjArr.size(); i++) {//上传材料照片
                 JSONObject imageObj = imageObjArr.getJSONObject(i);
                 int imageType = Integer.parseInt(imageObj.getString("imageType"));
-                String imageTypeName = imageObj.getString("imageTypeName");
                 String imageUrl = imageObj.getString("imageUrl"); //图片,拼接
-                if (imageType == 3) {//节点图
+                if (hfa.getApplyType()==5 && imageType == 3) {//节点图
+                    String imageTypeId = imageObj.getString("imageTypeId");
+                    String imageState = imageObj.getString("imageState");
+                    TechnologyRecord technologyRecord = technologyRecordMapper.selectByPrimaryKey(imageTypeId);
+                    if (technologyRecord == null) continue;
+                    technologyRecord.setImage(imageUrl);
+                    technologyRecord.setStewardCheckTime(new Date());
+                    technologyRecord.setStewardHouseFlowApplyId(hfa.getId());
+                    technologyRecord.setState(Integer.parseInt(imageState));//未验收
+                    technologyRecord.setModifyDate(new Date());
+                    technologyRecordMapper.updateByPrimaryKey(technologyRecord);
+                    strbfr.append(technologyRecord.getName());
+                    strbfr.append("<br/>");
+                }
+                if (hfa.getApplyType()!=5 && imageType == 3) {//节点图
+                    String imageTypeName = imageObj.getString("imageTypeName");
                     String imageTypeId = imageObj.getString("imageTypeId");
                     Technology technology = iMasterTechnologyMapper.selectByPrimaryKey(imageTypeId);
                    // forMasterAPI.byTechnologyId(house.getCityId(), imageTypeId);
@@ -1267,18 +1281,19 @@ public class HouseWorkerService {
                     technologyRecordMapper.insert(technologyRecord);
                     strbfr.append(technology.getName());
                     strbfr.append("<br/>");
-                } else {
-                    String[] imageArr = imageUrl.split(",");
-                    for (String anImageArr : imageArr) {
-                        HouseFlowApplyImage houseFlowApplyImage = new HouseFlowApplyImage();
-                        houseFlowApplyImage.setHouseFlowApplyId(hfa.getId());
-                        houseFlowApplyImage.setHouseId(house.getId());
-                        houseFlowApplyImage.setImageUrl(anImageArr);
-                        houseFlowApplyImage.setImageType(imageType);//图片类型 0：材料照片；1：进度照片；2:现场照片；3:其他
-                        houseFlowApplyImage.setImageTypeName(imageObj.getString("imageTypeName"));//图片类型名称 例如：材料照片；进度照片
-                        houseFlowApplyImageMapper.insert(houseFlowApplyImage);
-                    }
                 }
+
+                String[] imageArr = imageUrl.split(",");
+                for (String anImageArr : imageArr) {
+                    HouseFlowApplyImage houseFlowApplyImage = new HouseFlowApplyImage();
+                    houseFlowApplyImage.setHouseFlowApplyId(hfa.getId());
+                    houseFlowApplyImage.setHouseId(house.getId());
+                    houseFlowApplyImage.setImageUrl(anImageArr);
+                    houseFlowApplyImage.setImageType(imageType);//图片类型 0：材料照片；1：进度照片；2:现场照片；3:其他
+                    houseFlowApplyImage.setImageTypeName(imageObj.getString("imageTypeName"));//图片类型名称 例如：材料照片；进度照片
+                    houseFlowApplyImageMapper.insert(houseFlowApplyImage);
+                }
+
             }
         }
         return strbfr.toString();
