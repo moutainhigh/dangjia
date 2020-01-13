@@ -91,5 +91,9 @@ public class DjMaintenanceRecord extends BaseEntity {
     @ApiModelProperty("工匠申请验收时间")
     private Date applyCollectTime;
 
+    @Column(name = "over_protection")
+    @Desc(value = "是否过保（1是，0否）")
+    @ApiModelProperty("是否过保（1是，0否）")
+    private Integer overProtection;
 
 }
