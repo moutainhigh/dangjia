@@ -33,6 +33,8 @@ public interface HouseWorkerSupAPI {
      * @param isPatrol 巡查：1=巡查未完成  暂无其他
      * @return
      */
+    @PostMapping("app/core/house/order")
+    @ApiOperation(value = "大管家-首页", notes = "大管家-首页")
     ServerResponse getHouseOrderList(@RequestParam("request")HttpServletRequest request,
                                      @RequestParam("pageDTO")PageDTO pageDTO,
                                      @RequestParam("userToken")String userToken,
