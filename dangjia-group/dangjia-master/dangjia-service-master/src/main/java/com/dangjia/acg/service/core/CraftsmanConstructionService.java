@@ -160,7 +160,7 @@ public class CraftsmanConstructionService {
             case 2://精算师
                 return getActuariesBean(request, bean, hw, worker, house, hf);
             case 3://大管家
-                return getHousekeeperBean(request, bean, hw, worker, house, hf);
+                return getHousekeeperBean(request, bean, hw, worker, house, hf,type);
             default://工匠
                 return getCraftsmanBean(request, bean, hw, worker, house, hf,type);
         }
@@ -404,7 +404,7 @@ public class CraftsmanConstructionService {
     /**
      * 大管家
      */
-    private ServerResponse getHousekeeperBean(HttpServletRequest request, ConstructionByWorkerIdBean bean, HouseWorker hw, Member worker, House house, HouseFlow hf) {
+    private ServerResponse getHousekeeperBean(HttpServletRequest request, ConstructionByWorkerIdBean bean, HouseWorker hw, Member worker, House house, HouseFlow hf,Integer type) {
         bean.setWorkerType(0);//0:大管家；1：工匠；2：设计师；3：精算师
         bean.setHouseFlowId(hf.getId());
         setMoney(bean, hw);
@@ -414,9 +414,29 @@ public class CraftsmanConstructionService {
             bean.setHouseMemberPhone(houseMember.getMobile());//业主电话
             bean.setUserId(houseMember.getId());//
         }
+
+        //查询我的单
+        List<HouseOrderDetailDTO> houseOrderDetailDTOList = houseMapper.getBudgetOrderDetailByInFo(house.getId(), hw.getWorkerTypeId(),type);
+        List<Map<String, Object>> mapDataList = new ArrayList<>();
+        if(houseOrderDetailDTOList != null && houseOrderDetailDTOList.size() >0){
+            String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
+            for (HouseOrderDetailDTO houseOrderDetailDTO : houseOrderDetailDTOList) {
+                setProductInfo(houseOrderDetailDTO, address);
+                Map<String, Object> dataMap = BeanUtils.beanToMap(houseOrderDetailDTO);
+                dataMap.put("totalNodeNumber", houseMapper.queryArrNumber(houseOrderDetailDTO.getProductTemplateId()));//总节点数
+                dataMap.put("completedNodeNumber", houseMapper.queryTestNumber(houseOrderDetailDTO.getProductTemplateId(),house.getId(),hw.getWorkerId()));//已完成节点数(已完成)
+                mapDataList.add(dataMap);
+            }
+            //获取维保id
+            bean.setBusinessId(houseOrderDetailDTOList.get(0).getBusinessId());
+        }
+        bean.setDataList(mapDataList);
+
+
         Long allPatrol = houseFlowApplyMapper.countPatrol(house.getId(), null);
         bean.setAllPatrol("总巡查次数:" + (allPatrol == null ? 0 : allPatrol));
         bean.setIfBackOut(1);//0可放弃；1：申请停工；2：已停工 3 审核中
+
 
         setMenus(bean, house, hf);
         List<String> promptList = new ArrayList<>();//消息提示list
