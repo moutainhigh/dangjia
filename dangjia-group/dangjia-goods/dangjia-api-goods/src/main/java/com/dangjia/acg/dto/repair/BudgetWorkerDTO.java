@@ -25,4 +25,7 @@ public class BudgetWorkerDTO {
     private String unitName;//单位
 
     private String image;
+    private String valueNameArr;
+
+
 }
