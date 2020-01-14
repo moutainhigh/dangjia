@@ -479,6 +479,25 @@ public class ShopCartService {
             //更新或添加增值商品
             setAddedProduct(shoppingCartId, addedProductIds);
             ShoppingCartListDTO shoppingCartListDTO = iShoppingCartmapper.querySingleCartList(shoppingCartId);
+            if (!CommonUtil.isEmpty(shoppingCartListDTO.getValueIdArr())) {
+                String strNewValueNameArr = "";
+                String[] newValueNameArr = shoppingCartListDTO.getValueIdArr().split(",");
+                for (int i = 0; i < newValueNameArr.length; i++) {
+                    String valueId = newValueNameArr[i];
+                    if (StringUtils.isNotBlank(valueId)) {
+                        AttributeValue attributeValue = iMasterAttributeValueMapper.selectByPrimaryKey(valueId);
+                        if (attributeValue != null && StringUtils.isNotBlank(attributeValue.getName())) {
+                            if (StringUtils.isBlank(strNewValueNameArr)) {
+                                strNewValueNameArr = attributeValue.getName();
+                                System.out.println();
+                            } else {
+                                strNewValueNameArr = strNewValueNameArr + "," + attributeValue.getName();
+                            }
+                        }
+                    }
+                }
+                shoppingCartListDTO.setValueNameArr(strNewValueNameArr);
+            }
             return ServerResponse.createBySuccess("更换成功!",shoppingCartListDTO);
         } catch (Exception e) {
             logger.info("系统报错,更换失败!", e);
