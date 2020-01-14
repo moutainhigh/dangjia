@@ -24,7 +24,7 @@ import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.house.ModelingVillage;
 import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.member.MemberAddress;
-import com.dangjia.acg.modle.supervisor.DjBasicsSupervisorAuthority;
+import com.dangjia.acg.modle.supervisor.SupervisorAuthority;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -113,7 +113,7 @@ public class SupervisorAppService {
         if (authorityDTOS.size() <= 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
-        PageInfo pageResult = new PageInfo(authorityDTOS);
+        PageInfo<AuthorityDTO> pageResult = new PageInfo<>(authorityDTOS);
         for (AuthorityDTO authorityDTO : authorityDTOS) {
             if (sortNum == 8) {//维保
                 //TODO  查询维保的人员 金额
@@ -165,10 +165,10 @@ public class SupervisorAppService {
         if (house == null) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "没有查询到相关房子");
         }
-        Example example = new Example(DjBasicsSupervisorAuthority.class);
+        Example example = new Example(SupervisorAuthority.class);
         example.createCriteria()
-                .andEqualTo(DjBasicsSupervisorAuthority.MEMBER_ID, member.getId())
-                .andEqualTo(DjBasicsSupervisorAuthority.HOUSE_ID, houseId);
+                .andEqualTo(SupervisorAuthority.MEMBER_ID, member.getId())
+                .andEqualTo(SupervisorAuthority.HOUSE_ID, houseId);
         if (iSupervisorAuthorityMapper.selectCountByExample(example) > 0) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }

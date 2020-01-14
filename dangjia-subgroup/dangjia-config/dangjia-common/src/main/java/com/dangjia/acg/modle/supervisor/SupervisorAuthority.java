@@ -17,7 +17,7 @@ import javax.persistence.Transient;
 @Table(name = "dj_basics_supervisor_authority")
 @ApiModel(description = "督导权限配置表")
 @FieldNameConstants(prefix = "")
-public class DjBasicsSupervisorAuthority  extends BaseEntity {
+public class SupervisorAuthority extends BaseEntity {
 
     @Column(name = "house_id")
     @Desc(value = "房子id")

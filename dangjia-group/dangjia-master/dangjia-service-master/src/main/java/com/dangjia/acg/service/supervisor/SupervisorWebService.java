@@ -6,7 +6,7 @@ import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dto.supervisor.AuthorityDTO;
 import com.dangjia.acg.mapper.supervisor.ISupervisorAuthorityMapper;
-import com.dangjia.acg.modle.supervisor.DjBasicsSupervisorAuthority;
+import com.dangjia.acg.modle.supervisor.SupervisorAuthority;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,10 +47,10 @@ public class SupervisorWebService {
         }
         PageInfo pageResult = new PageInfo(authorityDTOS);
         for (AuthorityDTO authorityDTO : authorityDTOS) {
-            Example example = new Example(DjBasicsSupervisorAuthority.class);
+            Example example = new Example(SupervisorAuthority.class);
             example.createCriteria()
-                    .andEqualTo(DjBasicsSupervisorAuthority.MEMBER_ID, memberId)
-                    .andEqualTo(DjBasicsSupervisorAuthority.HOUSE_ID, authorityDTO.getHouseId());
+                    .andEqualTo(SupervisorAuthority.MEMBER_ID, memberId)
+                    .andEqualTo(SupervisorAuthority.HOUSE_ID, authorityDTO.getHouseId());
             if (iSupervisorAuthorityMapper.selectCountByExample(example) > 0) {
                 authorityDTO.setSelection(true);
             } else {
@@ -97,15 +97,15 @@ public class SupervisorWebService {
             if(CommonUtil.isEmpty(houseId)){
                 continue;
             }
-            Example example = new Example(DjBasicsSupervisorAuthority.class);
+            Example example = new Example(SupervisorAuthority.class);
             example.createCriteria()
-                    .andEqualTo(DjBasicsSupervisorAuthority.MEMBER_ID, memberId)
-                    .andEqualTo(DjBasicsSupervisorAuthority.HOUSE_ID, houseId);
+                    .andEqualTo(SupervisorAuthority.MEMBER_ID, memberId)
+                    .andEqualTo(SupervisorAuthority.HOUSE_ID, houseId);
             if (iSupervisorAuthorityMapper.selectCountByExample(example) > 0) {
                 continue;
             }
             try {
-                DjBasicsSupervisorAuthority authority = new DjBasicsSupervisorAuthority();
+                SupervisorAuthority authority = new SupervisorAuthority();
                 authority.setMemberId(memberId);
                 authority.setHouseId(houseId);
                 authority.setOperateId(userId);
@@ -129,10 +129,10 @@ public class SupervisorWebService {
             return ServerResponse.createByErrorMessage("传入参数有误");
         }
         String[] houseIdList = houseIds.split(",");
-        Example example = new Example(DjBasicsSupervisorAuthority.class);
+        Example example = new Example(SupervisorAuthority.class);
         example.createCriteria()
-                .andEqualTo(DjBasicsSupervisorAuthority.MEMBER_ID, memberId)
-                .andIn(DjBasicsSupervisorAuthority.HOUSE_ID, Arrays.asList(houseIdList));
+                .andEqualTo(SupervisorAuthority.MEMBER_ID, memberId)
+                .andIn(SupervisorAuthority.HOUSE_ID, Arrays.asList(houseIdList));
         if (iSupervisorAuthorityMapper.deleteByExample(example) > 0) {
             return ServerResponse.createBySuccessMessage("删除成功");
         } else {

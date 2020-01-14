@@ -22,6 +22,7 @@ import com.dangjia.acg.modle.member.Member;
 import com.dangjia.acg.modle.worker.*;
 import com.dangjia.acg.service.config.ConfigMessageService;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
+import com.dangjia.acg.service.supervisor.PatrolRecordServices;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -66,12 +67,15 @@ public class RewardPunishService {
     private IWorkerTypeMapper workerTypeMapper;
     @Autowired
     private ConfigUtil configUtil;
+    @Autowired
+    private PatrolRecordServices patrolRecordServices;
+
     /**
      * 保存奖罚条件及条件明细
      *
      * @return
      */
-    public ServerResponse addRewardPunishCorrelation(String id, String name, String content, Integer type, Integer state, String conditionArr,BigDecimal quantity) {
+    public ServerResponse addRewardPunishCorrelation(String id, String name, String content, Integer type, Integer state, String conditionArr, BigDecimal quantity) {
         try {
             RewardPunishCorrelation rewardPunishCorrelation = new RewardPunishCorrelation();
             rewardPunishCorrelation.setName(name);
@@ -257,6 +261,11 @@ public class RewardPunishService {
                 configMessageService.addConfigMessage(null, AppType.GONGJIANG, rewardPunishRecord.getMemberId(),
                         "0", "奖罚提醒", String.format(DjConstants.PushMessage.RECORD_OF_REWARDS_AND_PENALTIES, house.getHouseName()), "7");
             }
+            //添加记录到督导工作记录中
+            patrolRecordServices.addPatrolRecord(rewardPunishRecord.getOperatorId(),
+                    rewardPunishRecord.getHouseId(), rewardPunishRecord.getRemarks(),
+                    rewardPunishRecord.getImages(), rewardPunishRecord.getType(),
+                    rewardPunishRecord.getId());
             return ServerResponse.createBySuccessMessage("新增奖罚记录成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -413,7 +422,8 @@ public class RewardPunishService {
     }
 
     /**
-     *奖罚-选择奖罚原因
+     * 奖罚-选择奖罚原因
+     *
      * @param pageDTO
      * @param type
      * @return
@@ -431,6 +441,7 @@ public class RewardPunishService {
 
     /**
      * 奖罚记录列表
+     *
      * @param pageDTO
      * @param houseId
      * @return
@@ -439,28 +450,26 @@ public class RewardPunishService {
         try {
             String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
             PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-            List<RewardPunishRecordListDTO> list=rewardPunishCorrelationMapper.queryPunishRecordList(houseId);
-            list.forEach(rewardPunishRecordListDTO->{
-                rewardPunishRecordListDTO.setWorkerTypeName(rewardPunishRecordListDTO.getWorkerTypeId()!=null?workerTypeMapper.selectByPrimaryKey(rewardPunishRecordListDTO.getWorkerTypeId()).getName():"");
-                rewardPunishRecordListDTO.setImagesUrl(StringTool.getImage(rewardPunishRecordListDTO.getImages(),address).split(","));//图片数组
-                String type=rewardPunishRecordListDTO.getType();
-                String name=null;
-                if(type.equals("0"))
-                    name="奖励";
-                if(type.equals("1"))
-                    name="处罚";
+            List<RewardPunishRecordListDTO> list = rewardPunishCorrelationMapper.queryPunishRecordList(houseId);
+            list.forEach(rewardPunishRecordListDTO -> {
+                rewardPunishRecordListDTO.setWorkerTypeName(rewardPunishRecordListDTO.getWorkerTypeId() != null ? workerTypeMapper.selectByPrimaryKey(rewardPunishRecordListDTO.getWorkerTypeId()).getName() : "");
+                rewardPunishRecordListDTO.setImagesUrl(StringTool.getImage(rewardPunishRecordListDTO.getImages(), address).split(","));//图片数组
+                String type = rewardPunishRecordListDTO.getType();
+                String name = null;
+                if (type.equals("0"))
+                    name = "奖励";
+                if (type.equals("1"))
+                    name = "处罚";
                 rewardPunishRecordListDTO.setName(name);
 
-                String id=rewardPunishRecordListDTO.getId();
-                RewardPunishRecordDetailDTO rewardPunishRecordDetailDTO= rewardPunishCorrelationMapper.queryPunishRecordDetailList(id);
-                if(rewardPunishRecordDetailDTO!=null)
-                {
-                    rewardPunishRecordDetailDTO.setWorkerTypeName(rewardPunishRecordDetailDTO.getWorkerTypeId()!=null?workerTypeMapper.selectByPrimaryKey(rewardPunishRecordDetailDTO.getWorkerTypeId()).getName():"");
-                    if(rewardPunishRecordDetailDTO.getHead()!=null&&rewardPunishRecordDetailDTO.getHead().length()>0)
-                    {
-                        rewardPunishRecordDetailDTO.setHead(address+rewardPunishRecordDetailDTO.getHead());
+                String id = rewardPunishRecordListDTO.getId();
+                RewardPunishRecordDetailDTO rewardPunishRecordDetailDTO = rewardPunishCorrelationMapper.queryPunishRecordDetailList(id);
+                if (rewardPunishRecordDetailDTO != null) {
+                    rewardPunishRecordDetailDTO.setWorkerTypeName(rewardPunishRecordDetailDTO.getWorkerTypeId() != null ? workerTypeMapper.selectByPrimaryKey(rewardPunishRecordDetailDTO.getWorkerTypeId()).getName() : "");
+                    if (rewardPunishRecordDetailDTO.getHead() != null && rewardPunishRecordDetailDTO.getHead().length() > 0) {
+                        rewardPunishRecordDetailDTO.setHead(address + rewardPunishRecordDetailDTO.getHead());
                     }
-                    rewardPunishRecordDetailDTO.setImagesUrl(StringTool.getImage(rewardPunishRecordDetailDTO.getImages(),address).split(","));//图片数组
+                    rewardPunishRecordDetailDTO.setImagesUrl(StringTool.getImage(rewardPunishRecordDetailDTO.getImages(), address).split(","));//图片数组
 
                     rewardPunishRecordListDTO.setRewardPunishRecordDetailDTO(rewardPunishRecordDetailDTO);
                 }
@@ -477,6 +486,7 @@ public class RewardPunishService {
 
     /**
      * 奖罚-选择工匠列表
+     *
      * @param pageDTO
      * @param houseId
      * @return
@@ -488,13 +498,13 @@ public class RewardPunishService {
             List<CraftsmenListDTO> list = rewardPunishCorrelationMapper.queryCraftsmenList(houseId);
             list.forEach(craftsmenListDTO -> {
                 String workerTypeId = craftsmenListDTO.getWorkerTypeId();
-                String workerTypeName=null;
+                String workerTypeName = null;
                 if (workerTypeId != null) {
                     WorkerType workerType = workerTypeMapper.selectByPrimaryKey(workerTypeId);//查询工种
-                    workerTypeName=workerType!=null?workerType.getName():"";
+                    workerTypeName = workerType != null ? workerType.getName() : "";
                     craftsmenListDTO.setWorkerTypeName(workerTypeName);
                 }
-                craftsmenListDTO.setHead(craftsmenListDTO.getHead()!=null&&craftsmenListDTO.getHead().length()>0?address+craftsmenListDTO.getHead():"");
+                craftsmenListDTO.setHead(craftsmenListDTO.getHead() != null && craftsmenListDTO.getHead().length() > 0 ? address + craftsmenListDTO.getHead() : "");
             });
             PageInfo pageResult = new PageInfo(list);
             return ServerResponse.createBySuccess("查询成功", pageResult);
