@@ -344,6 +344,7 @@ public class HouseFlowService {
             allgrabBean.setWorkerTypeId(record.getWorkerTypeId());
             allgrabBean.setHouseFlowId(record.getId());
             allgrabBean.setCreateDate(record.getCreateDate());
+            allgrabBean.setHouseId(house.getId());
             allgrabBean.setHouseName(house.getHouseName());
             allgrabBean.setType(3);
             allgrabBean.setOrderType(0);
@@ -411,6 +412,7 @@ public class HouseFlowService {
             allgrabBean.setHouseFlowId(houseFlow.getId());
             allgrabBean.setCreateDate(houseFlow.getCreateDate());
             allgrabBean.setHouseName(house.getHouseName());
+            allgrabBean.setHouseId(house.getId());
             allgrabBean.setType(1);
             allgrabBean.setOrderType(0);
             allgrabBean.setSquare("面积 " + (house.getSquare() == null ? "***" : house.getSquare()) + "m²");//面积
