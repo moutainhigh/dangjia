@@ -896,6 +896,20 @@ public class HouseFlowService {
                 example.createCriteria().andEqualTo(HouseWorker.WORKER_ID, member.getId()).andEqualTo(HouseWorker.HOUSE_ID, hf.getHouseId()).andEqualTo(HouseWorker.TYPE, type);
                 List<HouseWorker> hwList = houseWorkerMapper.selectByExample(example);//查出自己的
                 HouseWorker houseWorker = hwList.get(0);
+                if(hwList.size()==0){
+                    houseWorker = new HouseWorker();
+                    houseWorker.setWorkerId(member.getId());
+                    houseWorker.setWorkerTypeId(member.getWorkerTypeId());
+                    houseWorker.setWorkerType(member.getWorkerType());
+                    houseWorker.setWorkType(5);//拒单
+                    houseWorker.setIsSelect(0);
+                    houseWorker.setType(type);
+                    houseWorker.setBusinessId(houseFlowId);
+                    houseWorkerMapper.insert(houseWorker);
+                }else{
+                    houseWorker = hwList.get(0);
+                }
+
                 if (member.getWorkerType() == 3) {//大管家
                     if (hf.getWorkType() == 3 && hf.getSupervisorStart() == 0) {//已抢单待支付，并且未开工(无责取消)
                         hf.setWorkType(2);//抢s单状态更改为待抢单
