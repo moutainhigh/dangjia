@@ -467,7 +467,8 @@ public class ShopCartService {
 
             //更新或添加增值商品
             setAddedProduct(shoppingCartId, addedProductIds);
-            return ServerResponse.createBySuccessMessage("更换成功!");
+            ShoppingCartListDTO shoppingCartListDTO = iShoppingCartmapper.querySingleCartList(shoppingCartId);
+            return ServerResponse.createBySuccess("更换成功!",shoppingCartListDTO);
         } catch (Exception e) {
             logger.info("系统报错,更换失败!", e);
             return ServerResponse.createByErrorMessage("系统报错,更换失败!");
