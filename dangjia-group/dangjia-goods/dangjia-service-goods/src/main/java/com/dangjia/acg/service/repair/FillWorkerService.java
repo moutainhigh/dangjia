@@ -1,10 +1,8 @@
 package com.dangjia.acg.service.repair;
 
 import com.dangjia.acg.common.constants.SysConfig;
-import com.dangjia.acg.common.model.PageBean;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.product.ProductAppDTO;
 import com.dangjia.acg.dto.product.ProductWorkerDTO;
@@ -51,7 +49,7 @@ public class FillWorkerService {
      *             <p>
      *             补人工,退人工共用此接口(精算内)
      */
-    public ServerResponse repairBudgetWorker(int type, String workerTypeId, String houseId, String name, PageDTO pageDTO,String cityId) {
+    public ServerResponse repairBudgetWorker(int type, String workerTypeId, String houseId, PageDTO pageDTO,String cityId, String orderSource) {
         String address = configUtil.getValue(SysConfig.PUBLIC_DANGJIA_ADDRESS, String.class);
         if (StringUtil.isEmpty(workerTypeId)) {
             return ServerResponse.createByErrorMessage("workerTypeId不能为空");
@@ -60,7 +58,7 @@ public class FillWorkerService {
         List<BudgetWorkerDTO> budgetWorkerDTOList = new ArrayList<>();
         PageInfo pageResult;
         try {
-            if (type == 0) {//精算内
+            if (type == 0 && !"1".equals(workerTypeId) && !"2".equals(workerTypeId)) {//精算内
                 Example example = new Example(BudgetMaterial.class);
                 Example.Criteria criteria = example.createCriteria();
                 criteria.andEqualTo(BudgetMaterial.WORKER_TYPE_ID, workerTypeId);
@@ -68,10 +66,6 @@ public class FillWorkerService {
                 criteria.andEqualTo(BudgetMaterial.PRODUCT_TYPE, "2");
                 criteria.andNotEqualTo(BudgetMaterial.DELETE_STATE, "1");
                 criteria.andEqualTo(BudgetMaterial.CITY_ID,cityId);
-                criteria.andCondition(" ( `name` IS NOT NULL OR `name` <> '' ) ");
-                if (!CommonUtil.isEmpty(name)) {
-                    criteria.andLike(BudgetMaterial.PRODUCT_NAME, "%" + name + "%");
-                }
                 List<BudgetMaterial> budgetWorkerList = budgetWorkerMapper.selectByExample(example);
                 pageResult = new PageInfo(budgetWorkerList);
                 for (BudgetMaterial budgetWorker : budgetWorkerList) {
@@ -88,16 +82,9 @@ public class FillWorkerService {
                     budgetWorkerDTOList.add(budgetWorkerDTO);
                 }
             } else {
-               /* Example example = new Example(DjBasicsProductWorker.class);
-                Example.Criteria criteria = example.createCriteria();
-                criteria.andEqualTo(DjBasicsProductWorker.WORKER_TYPE_ID, workerTypeId);
-                criteria.andEqualTo(WorkerGoods.SHOW_GOODS, 1);
-                if (!CommonUtil.isEmpty(name)) {
-                    criteria.andLike(WorkerGoods.NAME, "%" + name + "%");
-                }*/
 
                 PageHelper.startPage(pageDTO.getPageNum(), pageDTO.getPageSize());
-                List<ProductWorkerDTO> workerGoodsList = workerGoodsMapper.getProductWorker(workerTypeId,name,cityId);
+                List<ProductWorkerDTO> workerGoodsList = workerGoodsMapper.getProductWorker(workerTypeId,houseId,  orderSource);
                 pageResult = new PageInfo(workerGoodsList);
                 for (ProductWorkerDTO  workerGoods : workerGoodsList) {
                     BudgetWorkerDTO budgetWorkerDTO = new BudgetWorkerDTO();

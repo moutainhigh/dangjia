@@ -5,10 +5,7 @@ import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
 import com.dangjia.acg.service.repair.FillWorkerService;
-import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -26,9 +23,9 @@ public class MendWorkerController implements MendWorkerAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse repairBudgetWorker(HttpServletRequest request, Integer type, String workerTypeId, String houseId, String name,
+    public ServerResponse repairBudgetWorker(HttpServletRequest request, Integer type, String workerTypeId, String houseId,
                                              PageDTO pageDTO,String cityId) {
-        return mendWorkerService.repairBudgetWorker(type, workerTypeId, houseId, name, pageDTO,cityId);
+        return mendWorkerService.repairBudgetWorker(type, workerTypeId, houseId, pageDTO,cityId,"3");
     }
 
     /**
