@@ -568,7 +568,7 @@ public class HouseService {
                     houseChoiceCase.setTitle(srcHouse.getNoNumberHouseName());
 //                    houseChoiceCase.setLabel(srcHouse.getStyle());
                     houseChoiceCase.setSource("房源来自当家装修精选推荐");
-                    houseChoiceCaseService.addHouseChoiceCase(houseChoiceCase);
+                    houseChoiceCaseService.addHouseChoiceCase(houseChoiceCase,srcHouse.getCityId());
                 } else {
                     houseChoiceCaseService.delHouseChoiceCase(house.getId());
                 }
@@ -2156,7 +2156,7 @@ public class HouseService {
                         .andEqualTo(DjActuarialTemplateConfig.CONFIG_TYPE,workerTypeId);
                 DjActuarialTemplateConfig djActuarialTemplateConfig=iMasterActuarialTemplateConfigMapper.selectOneByExample(example);
 
-                 example = new Example(DjActuarialProductConfig.class);
+                example = new Example(DjActuarialProductConfig.class);
                 example.createCriteria().andEqualTo(DjActuarialProductConfig.WORKER_TYPE_ID, workerTypeId)
                         .andEqualTo(DjActuarialProductConfig.ACTUARIAL_TEMPLATE_ID,djActuarialTemplateConfig.getId())
                         .andEqualTo(DjActuarialProductConfig.PRODUCT_ID, productTemplateId);
