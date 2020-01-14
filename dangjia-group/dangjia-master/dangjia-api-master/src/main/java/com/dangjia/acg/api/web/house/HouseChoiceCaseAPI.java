@@ -84,7 +84,8 @@ public interface HouseChoiceCaseAPI {
     @PostMapping("/config/choice/edit")
     @ApiOperation(value = "修改房屋精选案例", notes = "修改房屋精选案例")
     ServerResponse editHouseChoiceCase(@RequestParam("request") HttpServletRequest request,
-                                       @RequestParam("houseChoiceCase") HouseChoiceCase houseChoiceCase);
+                                       @RequestParam("houseChoiceCase") HouseChoiceCase houseChoiceCase,
+                                       @RequestParam("cityId") String cityId);
 
     /**
      * 新增房屋精选案例
@@ -95,6 +96,7 @@ public interface HouseChoiceCaseAPI {
     @PostMapping("/config/choice/add")
     @ApiOperation(value = "新增房屋精选案例", notes = "新增房屋精选案例")
     ServerResponse addHouseChoiceCase(@RequestParam("request") HttpServletRequest request,
-                                      @RequestParam("houseChoiceCase") HouseChoiceCase houseChoiceCase);
+                                      @RequestParam("houseChoiceCase") HouseChoiceCase houseChoiceCase,
+                                      @RequestParam("cityId") String cityId);
 
 }
