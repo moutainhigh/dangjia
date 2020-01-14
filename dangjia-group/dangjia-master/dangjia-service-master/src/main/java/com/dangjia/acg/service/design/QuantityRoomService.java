@@ -266,7 +266,7 @@ public class QuantityRoomService {
         map.put("number", house.getNumber());//房间号
         map.put("houseUnit", house.getHouseUnit());//楼栋单元房间
         map.put("square", house.getSquare());//外框面积
-        map.put("buildSquare", house.getBudgetState());//建筑面积
+        map.put("buildSquare", house.getBuildSquare());//建筑面积
         map.put("houseType", house.getHouseType());//装修的房子类型
         ServiceType serviceType = iServiceTypeMapper.selectByPrimaryKey(house.getHouseType());
         if (serviceType != null && StringUtils.isNotBlank(serviceType.getName())) {
