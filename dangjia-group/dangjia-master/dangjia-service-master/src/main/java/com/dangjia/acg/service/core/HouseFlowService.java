@@ -895,7 +895,7 @@ public class HouseFlowService {
                 Example example = new Example(HouseWorker.class);
                 example.createCriteria().andEqualTo(HouseWorker.WORKER_ID, member.getId()).andEqualTo(HouseWorker.HOUSE_ID, hf.getHouseId()).andEqualTo(HouseWorker.TYPE, type);
                 List<HouseWorker> hwList = houseWorkerMapper.selectByExample(example);//查出自己的
-                HouseWorker houseWorker = hwList.get(0);
+                HouseWorker houseWorker ;
                 if(hwList.size()==0){
                     houseWorker = new HouseWorker();
                     houseWorker.setWorkerId(member.getId());
