@@ -301,10 +301,17 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
     }
 
 
-//    @Override
-//    public ServerResponse setMaintenanceHandlesSubmissions(String maintenanceRecordId, String remark, String image) {
-//        return null;
-//    }
+    @Override
+    @ApiMethod
+    public ServerResponse setMaintenanceHandlesSubmissions(String userToken,String maintenanceRecordId, String remark, String image) {
+        try {
+            return djMaintenanceRecordService.setMaintenanceHandlesSubmissions(userToken,maintenanceRecordId,remark,image);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.info("操作失败",e);
+            return ServerResponse.createByErrorMessage("操作成功");
+        }
+    }
 
 }
 
