@@ -25,8 +25,8 @@ public class WebHouseChoiceCaseController implements HouseChoiceCaseAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse getHouseChoiceCases(HttpServletRequest request, PageDTO pageDTO, Integer from, Integer state,String cityId) {
-        return houseChoiceCaseService.getHouseChoiceCases(pageDTO, from, state,cityId);
+    public ServerResponse getHouseChoiceCases(HttpServletRequest request, PageDTO pageDTO, Integer from, Integer state, String cityId) {
+        return houseChoiceCaseService.getHouseChoiceCases(pageDTO, from, state, cityId);
     }
 
     /**
@@ -49,8 +49,8 @@ public class WebHouseChoiceCaseController implements HouseChoiceCaseAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse editHouseChoiceCase(HttpServletRequest request, HouseChoiceCase houseChoiceCase) {
-        return houseChoiceCaseService.editHouseChoiceCase(houseChoiceCase);
+    public ServerResponse editHouseChoiceCase(HttpServletRequest request, HouseChoiceCase houseChoiceCase, String cityId) {
+        return houseChoiceCaseService.editHouseChoiceCase(houseChoiceCase, cityId);
     }
 
     /**
@@ -61,7 +61,7 @@ public class WebHouseChoiceCaseController implements HouseChoiceCaseAPI {
      */
     @Override
     @ApiMethod
-    public ServerResponse addHouseChoiceCase(HttpServletRequest request, HouseChoiceCase houseChoiceCase) {
-        return houseChoiceCaseService.addHouseChoiceCase(houseChoiceCase);
+    public ServerResponse addHouseChoiceCase(HttpServletRequest request, HouseChoiceCase houseChoiceCase, String cityId) {
+        return houseChoiceCaseService.addHouseChoiceCase(houseChoiceCase, cityId);
     }
 }

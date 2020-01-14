@@ -9,13 +9,19 @@ import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.supervisor.PatrolRecordDTO;
 import com.dangjia.acg.mapper.core.IWorkerTypeMapper;
 import com.dangjia.acg.mapper.house.IHouseMapper;
+import com.dangjia.acg.mapper.member.IMasterMemberAddressMapper;
 import com.dangjia.acg.mapper.member.IMemberMapper;
 import com.dangjia.acg.mapper.supervisor.IPatrolRecordMapper;
+import com.dangjia.acg.mapper.user.UserMapper;
+import com.dangjia.acg.mapper.worker.IRewardPunishCorrelationMapper;
 import com.dangjia.acg.mapper.worker.IRewardPunishRecordMapper;
 import com.dangjia.acg.modle.core.WorkerType;
 import com.dangjia.acg.modle.house.House;
 import com.dangjia.acg.modle.member.Member;
+import com.dangjia.acg.modle.member.MemberAddress;
 import com.dangjia.acg.modle.supervisor.PatrolRecord;
+import com.dangjia.acg.modle.user.MainUser;
+import com.dangjia.acg.modle.worker.RewardPunishCorrelation;
 import com.dangjia.acg.modle.worker.RewardPunishRecord;
 import com.dangjia.acg.service.core.CraftsmanConstructionService;
 import com.github.pagehelper.PageHelper;
@@ -23,6 +29,7 @@ import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tk.mybatis.mapper.entity.Example;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +51,12 @@ public class PatrolRecordServices {
     private IWorkerTypeMapper workerTypeMapper;
     @Autowired
     private IMemberMapper memberMapper;
+    @Autowired
+    private IMasterMemberAddressMapper iMasterMemberAddressMapper;
+    @Autowired
+    private IRewardPunishCorrelationMapper rewardPunishCorrelationMapper;
+    @Autowired
+    private UserMapper userMapper;
 
     /**
      * 督导添加巡查
@@ -51,7 +64,7 @@ public class PatrolRecordServices {
      * @param userToken userToken
      * @param houseId   房子ID
      * @param content   巡查内容
-     * @param images    巡查图片
+     * @param images    巡查图片","分割
      * @return
      */
     @Transactional(rollbackFor = Exception.class)
@@ -185,13 +198,75 @@ public class PatrolRecordServices {
         if (patrolRecord == null) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
         }
+        String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
         PatrolRecordDTO dto = new PatrolRecordDTO();
         dto.setPatrolRecordId(patrolRecord.getId());
         dto.setCreateDate(patrolRecord.getCreateDate());
         dto.setOperatorId(patrolRecord.getMemberId());
         dto.setHouseId(patrolRecord.getHouseId());
-
-        return null;
+        dto.setType(patrolRecord.getType());
+        Member worker = memberMapper.selectByPrimaryKey(patrolRecord.getMemberId());
+        if (worker != null) {
+            dto.setOperatorName(worker.getName());
+            dto.setOperatorMobile(worker.getMobile());
+        } else {
+            MainUser user = userMapper.selectByPrimaryKey(patrolRecord.getMemberId());
+            if (user != null) {
+                dto.setOperatorName(user.getUsername());
+                dto.setOperatorMobile(user.getMobile());
+            }
+        }
+        //房子地址
+        Example example = new Example(MemberAddress.class);
+        example.createCriteria().andEqualTo(MemberAddress.HOUSE_ID, patrolRecord.getHouseId());
+        MemberAddress memberAddress = iMasterMemberAddressMapper.selectOneByExample(example);
+        if (memberAddress != null) {
+            dto.setHouseName(memberAddress.getAddress());
+        } else {
+            House house = iHouseMapper.selectByPrimaryKey(patrolRecord.getHouseId());
+            if (house != null) {
+                dto.setHouseName(house.getHouseName());
+            }
+        }
+        List<String> imageList = new ArrayList<>();
+        if (patrolRecord.getType() == 2) {//巡查
+            if (!CommonUtil.isEmpty(patrolRecord.getImages())) {
+                String[] images = patrolRecord.getImages().split(",");
+                for (String image : images) {
+                    imageList.add(imageAddress + image);
+                }
+            }
+            dto.setContent(patrolRecord.getContent());
+        } else {//奖罚
+            RewardPunishRecord record = rewardPunishRecordMapper.selectByPrimaryKey(patrolRecord.getRewardPunishId());
+            if (record != null) {
+                dto.setContent(record.getRemarks());
+                Member member = memberMapper.selectByPrimaryKey(record.getMemberId());
+                if (member != null) {
+                    dto.setMemberId(member.getId());
+                    dto.setMemberName(member.getName());
+                    dto.setMemberHead(imageAddress + member.getHead());
+                    dto.setMemberMobile(member.getMobile());
+                    WorkerType workerType = workerTypeMapper.selectByPrimaryKey(member.getWorkerTypeId());
+                    if (workerType != null) {
+                        dto.setWorkerTypeType(workerType.getType());
+                        dto.setWorkerTypeName(workerType.getName());
+                    }
+                }
+                RewardPunishCorrelation rewardPunishCorrelation = rewardPunishCorrelationMapper.selectByPrimaryKey(record.getRewardPunishCorrelationId());
+                if (rewardPunishCorrelation != null) {
+                    dto.setRewardPunishCorrelation(rewardPunishCorrelation.getName());
+                }
+                if (!CommonUtil.isEmpty(record.getImages())) {
+                    String[] images = record.getImages().split(",");
+                    for (String image : images) {
+                        imageList.add(imageAddress + image);
+                    }
+                }
+            }
+        }
+        dto.setImageList(imageList);
+        return ServerResponse.createBySuccess("查询成功", dto);
     }
 
 
