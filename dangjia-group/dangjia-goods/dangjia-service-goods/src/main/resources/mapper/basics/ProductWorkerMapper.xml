@@ -41,7 +41,7 @@
             abw.id AS id,
             abw.worker_type_id AS workerTypeId,
             abw.product_sn AS productSn,
-            abw.name,
+            abw.product_name AS name,
             abw.price AS price,
             abw.unit_name AS unitName,
             abw.image AS image
