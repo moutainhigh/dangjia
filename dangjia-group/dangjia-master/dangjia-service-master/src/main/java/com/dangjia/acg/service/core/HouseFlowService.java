@@ -898,16 +898,21 @@ public class HouseFlowService {
                 HouseWorker houseWorker ;
                 if(hwList.size()==0){
                     houseWorker = new HouseWorker();
+                    houseWorker.setHouseId(hf.getHouseId());
                     houseWorker.setWorkerId(member.getId());
                     houseWorker.setWorkerTypeId(member.getWorkerTypeId());
                     houseWorker.setWorkerType(member.getWorkerType());
+                    houseWorker.setPrice(hf.getWorkPrice());
                     houseWorker.setWorkType(5);//拒单
                     houseWorker.setIsSelect(0);
                     houseWorker.setType(type);
                     houseWorker.setBusinessId(houseFlowId);
                     houseWorkerMapper.insert(houseWorker);
                 }else{
-                    houseWorker = hwList.get(0);
+                    houseWorker = hwList.get(0); //修改此单为放弃
+                    houseWorker.setWorkType(7);//抢单状态改为（7抢单后放弃）
+                    houseWorker.setIsSelect(0);
+                    houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
                 }
 
                 if (member.getWorkerType() == 3) {//大管家
@@ -951,7 +956,7 @@ public class HouseFlowService {
                         hf.setWorkerId("");
                         houseFlowMapper.updateByPrimaryKeySelective(hf);
                     } else {
-                        if (hf.getWorkSteta() != 3 || hf.getWorkSteta() != 0) {//已开工的状态不可放弃
+                        if (hf.getWorkSteta() != 3 && hf.getWorkSteta() != 0) {//已开工的状态不可放弃
                             return ServerResponse.createByErrorMessage("您已在施工，不可放弃！");
                         } else {
                             if (hf.getWorkType() == 4) {//已支付（有责取消）
@@ -969,16 +974,14 @@ public class HouseFlowService {
                             }
                         }
                     }
-                    //修改此单为放弃
-                    houseWorker.setWorkType(7);//抢单状态改为（7抢单后放弃）
-                    houseWorker.setIsSelect(0);
-                    houseWorkerMapper.updateByPrimaryKeySelective(houseWorker);
-                    House house = houseMapper.selectByPrimaryKey(hf.getHouseId());
-                    WorkerType workerType = workerTypeMapper.selectByPrimaryKey(hf.getWorkerTypeId());
-                    configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "工匠放弃", String.format(DjConstants.PushMessage.CRAFTSMAN_ABANDON, house.getHouseName(), workerType.getName()), "");
-                    HouseFlow houseFlowDgj = houseFlowMapper.getHouseFlowByHidAndWty(hf.getHouseId(), 3);
-                    configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlowDgj.getWorkerId(), "0", "工匠放弃",
-                            String.format(DjConstants.PushMessage.STEWARD_CRAFTSMAN_TWO_ABANDON, house.getHouseName()), "5");
+                    if (member.getWorkerType() > 3) {
+                        House house = houseMapper.selectByPrimaryKey(hf.getHouseId());
+                        WorkerType workerType = workerTypeMapper.selectByPrimaryKey(hf.getWorkerTypeId());
+                            configMessageService.addConfigMessage(null, AppType.ZHUANGXIU, house.getMemberId(), "0", "工匠放弃", String.format(DjConstants.PushMessage.CRAFTSMAN_ABANDON, house.getHouseName(), workerType.getName()), "");
+                            HouseFlow houseFlowDgj = houseFlowMapper.getHouseFlowByHidAndWty(hf.getHouseId(), 3);
+                            configMessageService.addConfigMessage(null, AppType.GONGJIANG, houseFlowDgj.getWorkerId(), "0", "工匠放弃",
+                                    String.format(DjConstants.PushMessage.STEWARD_CRAFTSMAN_TWO_ABANDON, house.getHouseName()), "5");
+                    }
 
                 }
             }
