@@ -418,13 +418,14 @@ public interface MemberAuthAPI {
      * @param encrypted  必选 string encryptedData
      * @param iv         必选 string vi
      * @param sessionKey 必选 string 会话密钥
-     * @return {"res":1000,"msg":{"resultObj":"手机号","resultCode":1000,"resultMsg":"成功"} }
+     * @return {"res":1000,"msg":{"resultObj":{返回参数说明},"resultCode":1000,"resultMsg":"成功"} }
      * @catalog 当家接口文档/用户模块/第三方认证
      * @title 获取微信用户手机号码
      * @description 获取微信用户手机号码
      * @method POST
      * @url master/memberAuth/decodeWxAppPhone
-     * @return_param resultObj string 手机号
+     * @return_param unionId string unionId
+     * @return_param phone string 手机号
      * @remark 更多返回错误代码请看首页的错误代码描述
      * @number 8
      * @Author: Ruking 18075121944
