@@ -3,6 +3,7 @@ package com.dangjia.acg.service.repair;
 import com.dangjia.acg.common.constants.SysConfig;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
+import com.dangjia.acg.common.util.CommonUtil;
 import com.dangjia.acg.dao.ConfigUtil;
 import com.dangjia.acg.dto.product.ProductAppDTO;
 import com.dangjia.acg.dto.product.ProductWorkerDTO;
@@ -72,12 +73,13 @@ public class FillWorkerService {
                 List<BudgetMaterial> budgetWorkerList = budgetWorkerMapper.selectByExample(example);
                 pageResult = new PageInfo(budgetWorkerList);
                 for (BudgetMaterial budgetWorker : budgetWorkerList) {
-                    DjBasicsProductTemplate workerGoods = workerGoodsMapper.selectByPrimaryKey(budgetWorker.getProductId());
-                    DjBasicsProductTemplate djBasicsProduct=djBasicsProductService.queryDataByProductId(budgetWorker.getProductId());  //通过商品id去关联规格
-                    String valueIdArr=djBasicsProduct.getValueIdArr();
-                    String valueNameArr=djBasicsProductService.getNewValueNameArr(valueIdArr);
                     BudgetWorkerDTO budgetWorkerDTO = new BudgetWorkerDTO();
-                    budgetWorkerDTO.setValueNameArr(valueNameArr);
+                    DjBasicsProductTemplate workerGoods = workerGoodsMapper.selectByPrimaryKey(budgetWorker.getProductId());
+                    String valueIdArr=workerGoods.getValueIdArr();
+                    if(!CommonUtil.isEmpty(valueIdArr)){
+                        String valueNameArr=djBasicsProductService.getNewValueNameArr(valueIdArr);
+                        budgetWorkerDTO.setValueNameArr(valueNameArr);
+                    }
                     budgetWorkerDTO.setWorkerGoodsId(budgetWorker.getProductId());
                     budgetWorkerDTO.setWorkerTypeId(budgetWorker.getWorkerTypeId());
                     budgetWorkerDTO.setWorkerGoodsSn(budgetWorker.getProductSn());
@@ -94,11 +96,15 @@ public class FillWorkerService {
                 List<ProductWorkerDTO> workerGoodsList = workerGoodsMapper.getProductWorker(workerTypeId,houseId,  orderSource);
                 pageResult = new PageInfo(workerGoodsList);
                 for (ProductWorkerDTO  workerGoods : workerGoodsList) {
-                    DjBasicsProductTemplate djBasicsProduct=djBasicsProductService.queryDataByProductId(workerGoods.getId());  //通过商品id去关联规格
-                    String valueIdArr=djBasicsProduct.getValueIdArr();
-                    String valueNameArr=djBasicsProductService.getNewValueNameArr(valueIdArr);
                     BudgetWorkerDTO budgetWorkerDTO = new BudgetWorkerDTO();
-                    budgetWorkerDTO.setValueNameArr(valueNameArr);
+                    DjBasicsProductTemplate djBasicsProduct=djBasicsProductService.queryDataByProductId(workerGoods.getId());  //通过商品id去关联规格
+                    if(djBasicsProduct!=null) {
+                        String valueIdArr = djBasicsProduct.getValueIdArr();
+                        if(!CommonUtil.isEmpty(valueIdArr)) {
+                            String valueNameArr = djBasicsProductService.getNewValueNameArr(valueIdArr);
+                            budgetWorkerDTO.setValueNameArr(valueNameArr);
+                        }
+                    }
                     budgetWorkerDTO.setWorkerGoodsId(workerGoods.getId());
                     budgetWorkerDTO.setWorkerTypeId(workerGoods.getWorkerTypeId());
                     budgetWorkerDTO.setWorkerGoodsSn(workerGoods.getProductSn());
