@@ -588,7 +588,14 @@ public class HouseWorkerService {
                 houseWorker.setType(0);
                 houseWorker.setBusinessId(houseFlow.getId());
                 houseWorkerMapper.insert(houseWorker);
-
+                /*
+                 * 工匠订单
+                 */
+                HouseWorkerOrder hwo = houseWorkerOrderMapper.getByHouseIdAndWorkerTypeId(house.getHouseId(), houseFlow.getWorkerTypeId());
+                if (hwo != null) {
+                    hwo.setWorkerId(houseWorker.getWorkerId());
+                    houseWorkerOrderMapper.updateByPrimaryKey(hwo);
+                }
                 Example example = new Example(MemberCity.class);
                 example.createCriteria()
                         .andEqualTo(MemberCity.MEMBER_ID, worker.getId())
