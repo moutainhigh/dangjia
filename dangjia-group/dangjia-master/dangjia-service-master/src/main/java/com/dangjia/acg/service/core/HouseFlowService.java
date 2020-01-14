@@ -245,7 +245,16 @@ public class HouseFlowService {
                             continue;
                         }
                         AllgrabBean allgrabBean = new AllgrabBean();
-
+                        if(CommonUtil.isEmpty(house.getResidential())) {
+                            example = new Example(MemberAddress.class);
+                            example.createCriteria().andEqualTo(MemberAddress.HOUSE_ID, house.getId());
+                            MemberAddress memberAddress = iMasterMemberAddressMapper.selectOneByExample(example);
+                            if (memberAddress != null && StringUtils.isNotBlank(memberAddress.getAddress())) {
+                                allgrabBean.setHouseName(memberAddress.getAddress());
+                            }
+                        }else {
+                            allgrabBean.setHouseName(house.getHouseName());
+                        }
                         Member mem = memberMapper.selectByPrimaryKey(house.getMemberId());
                         if (mem == null) {
                             continue;
@@ -260,7 +269,7 @@ public class HouseFlowService {
                         allgrabBean.setWorkerTypeId(workerTypeId);
                         allgrabBean.setHouseFlowId(houseFlow.getId());
                         allgrabBean.setCreateDate(houseFlow.getCreateDate());
-                        allgrabBean.setHouseName(house.getHouseName());
+
                         allgrabBean.setType(type);
                         allgrabBean.setOrderType(0);
                         //是否为新单
