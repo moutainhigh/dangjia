@@ -13,16 +13,16 @@ import com.dangjia.acg.dto.basics.ProductDTO;
 import com.dangjia.acg.dto.product.*;
 import com.dangjia.acg.mapper.basics.IAttributeValueMapper;
 import com.dangjia.acg.mapper.basics.ILabelMapper;
-import com.dangjia.acg.mapper.basics.ITechnologyMapper;
 import com.dangjia.acg.mapper.basics.IUnitMapper;
 import com.dangjia.acg.mapper.product.*;
 import com.dangjia.acg.mapper.storefront.IGoodsStorefrontProductAddedRelationMapper;
+import com.dangjia.acg.mapper.storefront.IGoodsStorefrontProductMapper;
 import com.dangjia.acg.modle.attribute.AttributeValue;
 import com.dangjia.acg.modle.basics.Label;
 import com.dangjia.acg.modle.brand.Unit;
 import com.dangjia.acg.modle.product.*;
+import com.dangjia.acg.modle.storefront.StorefrontProduct;
 import com.dangjia.acg.modle.storefront.StorefrontProductAddedRelation;
-import com.dangjia.acg.service.basics.TechnologyService;
 import com.dangjia.acg.service.storefront.GoodsStorefrontProductService;
 import com.dangjia.acg.util.StringTool;
 import com.github.pagehelper.PageHelper;
@@ -75,6 +75,8 @@ public class DjBasicsProductTemplateService {
     @Autowired
     private ILabelMapper iLabelMapper;
 
+    @Autowired
+    private IGoodsStorefrontProductMapper iGoodsStorefrontProductMapper;
     @Autowired
     private GoodsStorefrontProductService   goodsStorefrontProductService;
     @Autowired
@@ -157,8 +159,9 @@ public class DjBasicsProductTemplateService {
      */
     public DjBasicsProductTemplate queryDataByProductId(String productId) {
         try {
+            StorefrontProduct storefrontProduct=iGoodsStorefrontProductMapper.selectByPrimaryKey(productId);
             Example example = new Example(DjBasicsProductTemplate.class);
-            example.createCriteria().andEqualTo(DjBasicsProductTemplate.ID,productId);
+            example.createCriteria().andEqualTo(DjBasicsProductTemplate.ID,storefrontProduct.getProdTemplateId());
             DjBasicsProductTemplate djBasicsProduct = iBasicsProductTemplateMapper.selectByPrimaryKey(example); //根据商品编号查询对象
             return djBasicsProduct;
         } catch (Exception e) {
