@@ -48,7 +48,7 @@ public class MininProgramUtil {
             // 拿到手机号码
             Map<String,String> map = new HashMap<>();
             map.put("phone",object.getString("phoneNumber"));
-            map.put("unionId",object.getString("unionId"));
+            map.put("unionid",object.getString("unionId"));
             return map;
         } catch (Exception e) {
             return null;
