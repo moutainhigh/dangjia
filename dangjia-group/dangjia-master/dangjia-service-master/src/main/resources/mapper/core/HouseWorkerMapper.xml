@@ -316,7 +316,7 @@
         AND h.visit_state != 3
         AND h.visit_state != 4
         ORDER BY
-        hw.modify_date DESC
+        hw.create_date DESC
     </select>
     <update id="changeWorkerByHouseIdWorkerId" parameterType="java.lang.String">
         UPDATE dj_core_house_worker
