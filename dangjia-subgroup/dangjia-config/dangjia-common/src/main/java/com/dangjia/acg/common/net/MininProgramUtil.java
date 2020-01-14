@@ -10,6 +10,8 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.spec.AlgorithmParameterSpec;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Ruking.Cheng
@@ -31,7 +33,7 @@ public class MininProgramUtil {
         return JSON.parseObject(result);
     }
 
-    public static String getPhone(String encrypted, String iv, String sessionkey) {
+    public static Map<String,String> getPhone(String encrypted, String iv, String sessionkey) {
         try {
             // 解密
             byte[] encrypData = Base64Utils.decodeFromString(encrypted);
@@ -44,7 +46,10 @@ public class MininProgramUtil {
             String resultString = new String(cipher.doFinal(encrypData), StandardCharsets.UTF_8);
             JSONObject object = JSONObject.parseObject(resultString);
             // 拿到手机号码
-            return object.getString("phoneNumber");
+            Map<String,String> map = new HashMap<>();
+            map.put("phone",object.getString("phoneNumber"));
+            map.put("unionId",object.getString("unionId"));
+            return map;
         } catch (Exception e) {
             return null;
         }
@@ -61,6 +66,8 @@ public class MininProgramUtil {
         } catch (Exception e) {
             System.out.println("=====Exception========" + e.getMessage());
         }
-
+        getPhone("1G0zw02unBKYhCHMMqS8Gno2AiukQ0H1reak4v/aFWTNkup5AAUEXjlFEviAsKysFRwWa5fkzhOdpgBkvUlBt0l7c8hsinmBylvdTC0TpOUq9tYCcEdF6O2EvcIj73P+NmxNc6CnUQvjkhFZ8PGXr6Co8RT6N7SyZEj7TxoH4PT/tlNFre3Ss4h272vOI5RtWtBqIkurEk/8YziOoNVCt3XlC15+XgkagUWef1ZNBoFDVpISHgY4Uhobio37uQteRTuDqClrsg6ds4fwBHHFGeJ8OLXFuahA015jcBvE2ErU8pM5JbyCiHryXrfJnHk5UK/fHZn4wy88gnj5jy7ZFujFQ/Zu4HpTuRjL/3BmyCYGNdaKZew/dRvuB8sqLoBjCDojIT5CpaVv7rkx1/d1iW4tbdhjTuOBcCnYIlzEzQgCGx2w8ypvmkbWNzanKfXjufj8vq4vlQZAwDEAsazVVAsKMm0APwT1uPHiLkBdMdy93yK0A3bEjI8QjgRhg85XMoX2g1fVzy0EwsIfsRJgGQ==",
+                "CfzCvS4WiVhjEpivbOMSWQ==",
+                "nY+Tk26S+0LN6LhOJ1UbUQ==");
     }
 }

@@ -257,6 +257,13 @@ public class MemberAuthService {
         String openid = object.getString("openid");
         String sessionKey = object.getString("session_key");
         String unionid = object.getString("unionid");
+        if (CommonUtil.isEmpty(unionid)) {
+            Map map = new HashMap();
+            map.put("openid", openid);
+            map.put("sessionKey", sessionKey);
+            map.put("loginType", 1);
+            return ServerResponse.createBySuccess("登录失败", map);
+        }
         ServerResponse serverResponse = authLogin(1, unionid, 1);
         if (serverResponse.isSuccess()) {
             Map map = BeanUtils.beanToMap(serverResponse.getResultObj());
@@ -284,11 +291,11 @@ public class MemberAuthService {
      */
     public ServerResponse decodeWxAppPhone(HttpServletRequest request, String encrypted, String iv, String sessionKey) {
         request.setAttribute("isShow", "true");
-        String phone = MininProgramUtil.getPhone(encrypted, iv, sessionKey);
-        if (phone == null) {
-            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "未找到手机号");
+        Map<String, String> map = MininProgramUtil.getPhone(encrypted, iv, sessionKey);
+        if (map == null) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "未找到相关信息");
         } else {
-            return ServerResponse.createBySuccess("获取成功", phone);
+            return ServerResponse.createBySuccess("获取成功", map);
         }
     }
 
@@ -299,7 +306,11 @@ public class MemberAuthService {
     public ServerResponse miniProgramCodeRegister(HttpServletRequest request, String encrypted, String iv,
                                                   String sessionKey, String openid, String unionid,
                                                   String name, String iconurl) {
-        String phone = MininProgramUtil.getPhone(encrypted, iv, sessionKey);
+        Map<String, String> map = MininProgramUtil.getPhone(encrypted, iv, sessionKey);
+        if (map == null) {
+            return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "未找到手机号");
+        }
+        String phone = map.get("phone");
         if (phone == null) {
             return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), "未找到手机号");
         } else {
