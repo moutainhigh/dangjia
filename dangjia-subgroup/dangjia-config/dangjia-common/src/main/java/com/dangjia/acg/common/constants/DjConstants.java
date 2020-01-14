@@ -294,6 +294,8 @@ public class DjConstants {
 
         public final static String YEZHUTUIKUAN = "业主您好！您发起的补人工申请工匠未同意，退款即将进入您的钱包，请注意查收";
 
+        public final static String YEZHUENDMAINTENANCE = "业主您好！您发起的提前结束维保操作成功，退款即将进入您的钱包，请注意查收";
+
 
         public final static String STEWARD_Y_SERVER = "业主您好！【%s】大管家已为您安排了包工包料，请知晓。";
         public final static String STEWARD_T_SERVER = "业主您好！根据【%s】装修施工需要，现场退部分包工包料，请查看。";

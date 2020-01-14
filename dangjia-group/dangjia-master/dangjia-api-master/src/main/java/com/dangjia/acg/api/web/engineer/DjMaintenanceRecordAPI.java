@@ -41,8 +41,20 @@ public interface DjMaintenanceRecordAPI {
                                          @RequestParam("productId") String productId);
 
     @PostMapping(value = "app/engineer/searchMaintenanceProduct")
-    @ApiOperation(value = "消息弹窗--需勘查维保商品", notes = "消息弹窗--需勘查维保商品")
+    @ApiOperation(value = "消息弹窗--维保商品订单", notes = "消息弹窗--维保商品订单")
     ServerResponse searchMaintenanceProduct(@RequestParam("userToken") String userToken,
+                                            @RequestParam("houseId") String houseId,
+                                            @RequestParam("taskId") String taskId);
+
+    @PostMapping(value = "app/engineer/searchExpenseMaintenanceProduct")
+    @ApiOperation(value = "消息弹窗--报销商品订单", notes = "消息弹窗--报销商品订单")
+    ServerResponse searchExpenseMaintenanceProduct(@RequestParam("userToken") String userToken,
+                                            @RequestParam("houseId") String houseId,
+                                            @RequestParam("taskId") String taskId);
+
+    @PostMapping(value = "app/engineer/searchAcceptanceApplication")
+    @ApiOperation(value = "消息弹窗--验收申请单", notes = "消息弹窗--验收申请单")
+    ServerResponse searchAcceptanceApplication(@RequestParam("userToken") String userToken,
                                             @RequestParam("houseId") String houseId,
                                             @RequestParam("taskId") String taskId);
 
@@ -53,6 +65,20 @@ public interface DjMaintenanceRecordAPI {
                                               @RequestParam("maintenanceRecordId") String maintenanceRecordId,
                                               @RequestParam("maintenanceRecordType") Integer maintenanceRecordType,
                                               @RequestParam("cityId") String cityId);
+
+    @PostMapping(value = "app/engineer/endMaintenanceSearchProduct")
+    @ApiOperation(value = "提前结束--勘查费用商品页面", notes = "提前结束--勘查费用商品页面")
+    ServerResponse endMaintenanceSearchProduct(@RequestParam("userToken") String userToken,
+                                              @RequestParam("houseId") String houseId,
+                                              @RequestParam("maintenanceRecordId") String maintenanceRecordId,
+                                              @RequestParam("cityId") String cityId);
+
+    @PostMapping(value = "app/engineer/endMaintenanceRecord")
+    @ApiOperation(value = "提前结束--结束维保", notes = "提前结束--结束维保")
+    ServerResponse endMaintenanceRecord(@RequestParam("userToken") String userToken,
+                                       @RequestParam("houseId") String houseId,
+                                       @RequestParam("maintenanceRecordId") String maintenanceRecordId,
+                                       @RequestParam("cityId") String cityId);
 
     @PostMapping(value = "web/engineer/queryDjMaintenanceRecordList")
     @ApiOperation(value = "查询质保审核列表", notes = "查询质保审核列表")

@@ -305,6 +305,61 @@
         </if>
     </select>
 
+    <select id="getOrderDetailByHouseId" resultType="com.dangjia.acg.dto.house.HouseOrderDetailDTO">
+        SELECT
+        t.id orderId,
+        t1.id orderItemId,
+        IFNULL(t1.image, t2.image) image,
+        t1.product_name productName,
+        t1.price,
+        IFNULL(t1.total_price,t1.price*t1.shop_count) totalPrice,
+        t1.shop_count shopCount,
+        t2.prod_template_id productTemplateId,
+        t1.product_id productId,
+        t1.worker_type_id workerTypeId,
+        t.order_number as orderNumber,
+        t.order_status as orderStatus
+        FROM
+            dj_deliver_order t,
+            dj_deliver_order_item t1,
+            dj_basics_storefront_product t2,
+            dj_pay_business_order t3
+        WHERE
+        t.id = t1.order_id
+        AND t1.product_id = t2.id
+        AND t.house_id = #{houseId}
+        AND t1.worker_type_id =#{workerTypeId}
+        and t.business_order_number=t3.number
+        and t3.state in(1,2)
+        UNION ALL
+        SELECT
+        t.id orderId,
+        t1.id orderItemId,
+        t2.image image,
+        t3.product_name productName,
+        t3.price,
+        IFNULL(t3.price*t1.shop_count,0) totalPrice,
+        t1.shop_count shopCount,
+        t2.prod_template_id productTemplateId,
+        t3.added_product_id productId,
+        t1.worker_type_id workerTypeId,
+        t.order_number as orderNumber,
+        t.order_status as orderStatus
+        FROM
+        dj_deliver_order t,
+        dj_deliver_order_item t1,
+        dj_basics_storefront_product t2,
+        dj_deliver_order_added_product t3,
+        dj_pay_business_order t4
+        WHERE
+        t.id = t1.order_id
+        AND t3.added_product_id= t2.id
+        and t1.id=t3.any_order_id
+        AND t.house_id = #{houseId}
+        AND t1.worker_type_id =#{workerTypeId}
+        and t.business_order_number=t4.number
+        and t4.state in(1,2)
+    </select>
 
     <!-- 查询当前房子的订单详情(包含增值商品信息的查询)-->
     <select id="getBudgetOrderDetailByInFo" resultType="com.dangjia.acg.dto.house.HouseOrderDetailDTO">
@@ -361,7 +416,8 @@
         t3.added_product_id productId,
         t1.worker_type_id workerTypeId,
         t.order_number as orderNumber,
-        t.order_status as orderStatus
+        t.order_status as orderStatus,
+        ho.business_id as businessId
         FROM
         dj_core_house_worker ho,
         dj_deliver_order t,

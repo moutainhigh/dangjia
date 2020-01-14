@@ -1,6 +1,8 @@
 package com.dangjia.acg.mapper.engineer;
 
+import com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO;
 import com.dangjia.acg.dto.engineer.DjMaintenanceRecordProductDTO;
+import com.dangjia.acg.dto.product.StorefrontProductDTO;
 import com.dangjia.acg.modle.engineer.DjMaintenanceRecordProduct;
 import com.dangjia.acg.modle.product.BasicsGoodsCategory;
 import org.apache.ibatis.annotations.Param;
@@ -50,7 +52,17 @@ public interface DjMaintenanceRecordProductMapper extends Mapper<DjMaintenanceRe
 
     List<DjMaintenanceRecordProductDTO> queryMaintenanceShoppingBasket(@Param("parentTop") String parentTop);
 
-    List<DjMaintenanceRecordProduct> queryPayMaintenanceRecordProduct(@Param("maintenanceRecordId") String maintenanceRecordId,@Param("maintenanceRecordType") Integer maintenanceRecordType,@Param("payState") Integer payState,@Param("workerTypeId") String  workerTypeId);
+    List<DjMaintenanceRecordProduct> queryPayMaintenanceRecordProduct(@Param("maintenanceRecordId") String maintenanceRecordId,@Param("maintenanceRecordType") Integer maintenanceRecordType,@Param("payState") Integer payState,@Param("workerTypeId") String  workerTypeId,@Param("storefrontId") String storefrontId);
+
+    List<DjMaintenanceRecordProduct> selectStorefrontIdByTypeId(@Param("maintenanceRecordId") String maintenanceRecordId,@Param("maintenanceRecordType") Integer maintenanceRecordType,@Param("payState") Integer payState);
 
     void updateRecordProductInfo(@Param("maintenanceRecordId") String maintenanceRecordId,@Param("maintenanceRecordType") Integer maintenanceRecordType,@Param("businessOrderNumber") String businessOrderNumber,@Param("payState") Integer payState);
+
+    void updateRecordProductInfoByBusinessNumber(@Param("maintenanceRecordId") String maintenanceRecordId,@Param("businessOrderNumber") String businessOrderNumber);
+
+    void updateRecordProductInfoByRecordId(@Param("maintenanceRecordId") String maintenanceRecordId);
+
+    List<Map<String,Object>> selectCategoryByRecordId(@Param("maintenanceRecordId") String maintenanceRecordId,@Param("maintenanceRecordType") Integer maintenanceRecordType,@Param("storefrontId") String storefrontId);
+
+    List<ActuarialProductAppDTO> selectMaintenaceProductByCategoryId(@Param("maintenanceRecordId") String maintenanceRecordId, @Param("maintenanceRecordType") Integer maintenanceRecordType, @Param("storefrontId") String storefrontId, @Param("categoryId") String categoryId);
 }

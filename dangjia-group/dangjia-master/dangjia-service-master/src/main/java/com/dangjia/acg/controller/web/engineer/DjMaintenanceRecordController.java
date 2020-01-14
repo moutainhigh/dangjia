@@ -50,7 +50,7 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
     }
 
     /**
-     * 消息弹窗--需勘查维保商品
+     * 消息弹窗--维保商品订单
      * @param userToken
      * @param houseId
      * @param taskId
@@ -68,6 +68,33 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
     }
 
     /**
+     * 消息弹窗--报销商品订单
+     * @param userToken
+     * @param houseId
+     * @param taskId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse searchExpenseMaintenanceProduct(String userToken,String houseId,String taskId){
+         return djMaintenanceRecordService.searchExpenseMaintenanceProduct(userToken,houseId,taskId);
+    }
+
+    /**
+     * 消息弹窗--验收申请单
+     * @param userToken
+     * @param houseId
+     * @param taskId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse searchAcceptanceApplication(String userToken,String houseId,String taskId){
+          return djMaintenanceRecordService.searchAcceptanceApplication(userToken,houseId,taskId);
+    }
+
+
+    /**
      * 质保申请，提交订单
      * @param userToken
      * @param houseId
@@ -80,6 +107,39 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
     public ServerResponse saveMaintenanceRecordOrder(String userToken,String houseId,String maintenanceRecordId,Integer maintenanceRecordType,String cityId){
         try{
             return djMaintenanceRecordService.saveMaintenanceRecordOrder(userToken,houseId,maintenanceRecordId,maintenanceRecordType,cityId);
+        }catch (Exception e){
+            logger.error("提交失败",e);
+            return ServerResponse.createByErrorMessage("提交失败");
+        }
+    }
+
+    /**
+     * 提前结束--勘查费用商品页面
+     * @param userToken
+     * @param houseId
+     * @param maintenanceRecordId
+     * @param cityId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse endMaintenanceSearchProduct(String userToken,String houseId,String maintenanceRecordId,String cityId){
+        return djMaintenanceRecordService.endMaintenanceSearchProduct(userToken,houseId,maintenanceRecordId,cityId);
+    }
+
+    /**
+     * 提前结束，结束维保
+     * @param userToken
+     * @param houseId
+     * @param maintenanceRecordId
+     * @param cityId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse endMaintenanceRecord(String userToken,String houseId,String maintenanceRecordId,String cityId){
+        try{
+            return djMaintenanceRecordService.endMaintenanceRecord(userToken,houseId,maintenanceRecordId,cityId);
         }catch (Exception e){
             logger.error("提交失败",e);
             return ServerResponse.createByErrorMessage("提交失败");

@@ -407,8 +407,9 @@ public class DesignerOperationService {
             if(StringUtils.isNotBlank(houseFlow.getWorkerId())){//若已有工匠，则通知精算工匠继续进行精算
                 configMessageService.addConfigMessage(null,AppType.GONGJIANG,houseFlow.getWorkerId(),"0","设计图纸已完成",String.format(DjConstants.PushMessage.GZ_T_WORK, house.getHouseName()),"");
             }else{//若没有工匠，但有流程，则将其流程改为抢单状态，让对应的工匠抢单
-                houseFlow.setState(2);//已支付待工匠抢单
+                houseFlow.setWorkSteta(2);//已支付待工匠抢单
                 houseFlow.setModifyDate(new Date());
+                houseFlow.setReleaseTime(new Date());
                 houseFlowMapper.updateByPrimaryKeySelective(houseFlow);
             }
 

@@ -8,12 +8,12 @@
             modify_date modifyDate,
             house_id houseId,
             product_id productId,
+            storefront_id storefrontId,
             maintenance_record_id maintenanceRecordId,
             shop_count shopCount,
             price,
-            worker_type_id workerTypeId,
             maintenance_member_id maintenanceMemberId,
-            maintenance_member_type maintenanceMemberType,
+            maintenance_product_type maintenanceProductType,
             total_price totalPrice,
             pay_price payPrice,
             over_protection over_protection,
@@ -55,7 +55,7 @@
             mrp.maintenance_member_id =#{maintenanceMemberId}
         </if>
         <if test="null!=maintenanceMemberType and ''!=maintenanceMemberType">
-            AND mrp.maintenance_member_type =#{maintenanceMemberType}
+            AND mrp.maintenance_product_type =#{maintenanceMemberType}
         </if>
         <if test="null!=maintenanceRecordId and ''!=maintenanceRecordId">
             AND mrp.maintenance_record_id =#{maintenanceRecordId}
@@ -92,7 +92,7 @@
         WHERE
             mrp.maintenance_member_id = #{memberId}
         AND mrp.house_id = #{houseId}
-        and mrp.maintenance_member_type = #{maintenanceRecordType}
+        and mrp.maintenance_product_type = #{maintenanceRecordType}
         and mrp.worker_type_id = #{workerTypeId}
         AND (
             mrp.maintenance_record_id IS NULL
@@ -102,7 +102,7 @@
 
     <select id="selectWorkerTypeListById" resultType="java.util.Map">
        SELECT
-            mrp.worker_type_id workerTypeId,
+            mr.worker_type_id workerTypeId,
             cwt.`name` workerTypeName,
             cwt.image workerTypeImage,
             mrp.over_protection overProtection,
@@ -110,13 +110,15 @@
             sum(mrp.pay_price) payPrice
         FROM
             dj_maintenance_record_product mrp,
-            dj_core_worker_type cwt
+            dj_core_worker_type cwt,
+            dj_maintenance_record mr
         WHERE
-            mrp.worker_type_id = cwt.id
+            mrp.maintenance_record_id=mr.id
+        and  mr.worker_type_id = cwt.id
         AND mrp.maintenance_record_id = #{maintenanceRecordId}
-        AND mrp.maintenance_member_type = #{maintenanceRecordType}
+        AND mrp.maintenance_product_type = #{maintenanceRecordType}
         and mrp.pay_state = 1
-        group by mrp.worker_type_id,cwt.`name`,cwt.image
+        group by mr.worker_type_id,cwt.`name`,cwt.image
     </select>
 
     <!-- 查询已支付的商品总价 -->
@@ -127,7 +129,7 @@
             dj_maintenance_record_product mrp
         WHERE
             mrp.maintenance_record_id = #{maintenanceRecordId}
-        AND mrp.maintenance_member_type = #{maintenanceRecordType}
+        AND mrp.maintenance_product_type = #{maintenanceRecordType}
         AND mrp.pay_state = 2
     </select>
 
@@ -138,17 +140,106 @@
         dj_maintenance_record_product mrp
         WHERE
         mrp.maintenance_record_id = #{maintenanceRecordId}
-        and mrp.maintenance_member_type = #{maintenanceRecordType}
+        and mrp.maintenance_product_type = #{maintenanceRecordType}
         and mrp.pay_state=#{payState}
         <if test="null!=workerTypeId and ''!=workerTypeId">
             and mrp.worker_type_id=#{workerTypeId}
         </if>
+        <if test="null!=storefrontId and ''!=storefrontId">
+            and mrp.storefront_id=#{storefrontId}
+        </if>
     </select>
 
+    <select id="selectStorefrontIdByTypeId" resultType="com.dangjia.acg.modle.engineer.DjMaintenanceRecordProduct">
+        select storefront_id storefrontId,sum(total_price) totalPrice
+          from dj_maintenance_record_product mrp
+        WHERE
+          mrp.maintenance_record_id = #{maintenanceRecordId}
+        and mrp.maintenance_product_type = #{maintenanceRecordType}
+        and mrp.pay_state=#{payState}
+         group by storefront_id
+    </select>
+
+    <select id="selectCategoryByRecordId" resultType="java.util.Map">
+
+        SELECT
+            mrp.storefront_id storefrontId,
+            bgc.id categoryId,
+            bgc.`name` categoryName,
+            sum(total_price) totalPrice
+        FROM
+            dj_maintenance_record_product mrp,
+            dj_basics_storefront_product bsp,
+            dj_basics_product_template bpt,
+            dj_basics_goods_category bgc
+        WHERE
+            mrp.product_id = bsp.id
+        AND bsp.prod_template_id = bpt.id
+        AND bpt.category_id = bgc.id
+        AND mrp.maintenance_record_id = #{maintenanceRecordId}
+        AND mrp.maintenance_product_type = #{maintenanceRecordType}
+        AND mrp.pay_state = 1
+        and mrp.storefront_id=#{storefrontId}
+        GROUP BY
+            mrp.storefront_id,
+            bgc.id,
+            bgc. NAME
+    </select>
+
+    <select id="selectMaintenaceProductByCategoryId" resultType="com.dangjia.acg.dto.actuary.app.ActuarialProductAppDTO">
+
+        SELECT
+           SELECT
+            bsp.id productId,
+            bsp.storefront_id storefrontId,
+            bsp.id productTemplateId,
+            bpt.product_sn productSn,
+            bsp.product_name productName,
+            bpt.goods_id goodsId,
+            mrp.price price,
+            mrp.shop_count shopCount
+            bsp.image,
+            bpt.unit_id unit,
+            bpt.unit_name unitName,
+            bpt.value_id_arr valueIdArr,
+            bpt.value_name_arr valueNameArr
+        FROM
+            dj_maintenance_record_product mrp,
+            dj_basics_storefront_product bsp,
+            dj_basics_product_template bpt
+        WHERE
+            mrp.product_id = bsp.id
+        AND bsp.prod_template_id = bpt.id
+        AND mrp.maintenance_record_id = #{maintenanceRecordId}
+        AND mrp.maintenance_product_type = #{maintenanceRecordType}
+        AND mrp.pay_state = 1
+        and mrp.storefront_id=#{storefrontId}
+        and bpt.category_id=#{categoryId}
+    </select>
+
+    <!--修改当前单的业务支付订单号-->
     <update id="updateRecordProductInfo" >
         update dj_maintenance_record_product
         set business_order_number= #{businessOrderNumber},pay_state=#{payState},modify_date=now()
         where maintenance_record_id=#{maintenanceRecordId}
-        and maintenance_member_type=#{maintenanceRecordType}
+        and maintenance_product_type=#{maintenanceRecordType}
+        and pay_state=1
+    </update>
+
+    <!--修改当前单的状态为已支付-->
+    <update id="updateRecordProductInfoByBusinessNumber" >
+        update dj_maintenance_record_product
+        set pay_state=2,modify_date=now()
+        where maintenance_record_id=#{maintenanceRecordId}
+        and business_order_number=#{businessOrderNumber}
+    </update>
+
+    <!--修改已支付单的状态为已退款-->
+    <update id="updateRecordProductInfoByRecordId">
+        update dj_maintenance_record_product
+        set pay_state=3,modify_date=now()
+        where maintenance_record_id=#{maintenanceRecordId}
+        and pay_state=2
+        and maintenance_product_type in(1,2)
     </update>
 </mapper>

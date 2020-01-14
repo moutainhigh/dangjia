@@ -40,6 +40,16 @@ public interface IHouseMapper extends Mapper<House> {
     List<HouseOrderDetailDTO> getBudgetOrderDetailByHouseId(@Param("houseId") String houseId,
                                                             @Param("workerTypeId") String workerTypeId);
 
+    /**
+     * 查询房子订单信息
+     * @param houseId 房子信息
+     * @param workerTypeId 订单类型（1设计，2精算）
+     * @return
+     */
+    List<HouseOrderDetailDTO> getOrderDetailByHouseId(@Param("houseId") String houseId,
+                                                            @Param("workerTypeId") String workerTypeId);
+
+
 
     /**
      * 查询房子订单信息
