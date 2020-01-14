@@ -424,7 +424,7 @@ public interface MemberAuthAPI {
      * @description 获取微信用户手机号码
      * @method POST
      * @url master/memberAuth/decodeWxAppPhone
-     * @return_param unionId string unionId
+     * @return_param unionid string unionid
      * @return_param phone string 手机号
      * @remark 更多返回错误代码请看首页的错误代码描述
      * @number 8
