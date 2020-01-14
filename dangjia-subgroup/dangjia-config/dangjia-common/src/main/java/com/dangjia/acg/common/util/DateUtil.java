@@ -694,7 +694,37 @@ public class DateUtil implements AutoCloseable, Serializable {
         long seconds = (mills % rateD % rateH % rateM) / rateS;
         return "" + days + "天" + hours + "时" + minutes + "分" + seconds + "秒";
     }
+    /**
+     * 两个时间相差多少分钟
+     * @param first
+     * @param second
+     * @return
+     * @throws ParseException
+     */
+    public static String daysBetweenMinutes(Date first, Date second) {
+        try {
+            SimpleDateFormat sformat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            first = sformat.parse(sformat.format(first));
+            second = sformat.parse(sformat.format(second));
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(first);
+            long firstMills = calendar.getTimeInMillis();
+            calendar.setTime(second);
+            long secondMills = calendar.getTimeInMillis();
+            long rateD = 1000 * 60 * 60 * 24;
+            long rateH = 1000 * 60 * 60;
+            long rateM = 1000 * 60;
+            long rateS = 1000;
+            long mills = secondMills - firstMills;
+            long days = mills / rateD;
+            long hours = (mills % rateD) / rateH;
+            long minutes = (mills % rateD % rateH) / rateM;
+            return String.valueOf(minutes);
+        }catch (ParseException e){
+            return "0";
+        }
 
+    }
     /**
      * 两个时间相差多少天多少秒多少小时(只到分，如果相差为负数，返回，0天0时0分
      * @param first
@@ -899,6 +929,22 @@ public class DateUtil implements AutoCloseable, Serializable {
         Calendar ca = Calendar.getInstance();
         ca.setTime(date);
         ca.add(Calendar.MINUTE, minutes);
+        return ca.getTime();
+    }
+    /***
+     * 在当前日期上减多少分钟
+     *
+     * @param date    日期
+     * @param minutes 分钟
+     * @return date
+     */
+    public static Date delDateMinutes(Date date, int minutes) {
+        if (date == null) {
+            return null;
+        }
+        Calendar ca = Calendar.getInstance();
+        ca.setTime(date);
+        ca.add(Calendar.MINUTE, -minutes);
         return ca.getTime();
     }
 

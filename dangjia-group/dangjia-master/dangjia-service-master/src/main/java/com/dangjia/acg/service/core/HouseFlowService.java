@@ -153,7 +153,52 @@ public class HouseFlowService {
         }
         return false;
     }
-
+    /**
+     * 抢单播报
+     */
+    public ServerResponse getGrabBroadcast(String userToken, Integer type) {
+        try {
+            Object object = constructionService.getMember(userToken);
+            if (object instanceof ServerResponse) {
+                return (ServerResponse) object;
+            }
+            Member member = memberMapper.selectByPrimaryKey(((Member) object).getId());
+            if (member == null) {
+                return ServerResponse.createbyUserTokenError();
+            }
+            List<Map> grabList = new ArrayList<>();//返回的任务list
+            Example example = new Example(HouseWorker.class);
+            if(type==1){
+                example.createCriteria().andEqualTo(HouseWorker.WORK_TYPE, 1)
+                        .andEqualTo(HouseWorker.TYPE, type)
+                        .andGreaterThan(HouseWorker.CREATE_DATE, DateUtil.delDateMinutes(new Date(),30));
+            }else{
+                example.createCriteria().andEqualTo(HouseWorker.WORK_TYPE, 1)
+                        .andEqualTo(HouseWorker.TYPE, type)
+                        .andEqualTo(HouseWorker.WORKER_TYPE_ID, member.getWorkerTypeId())
+                        .andGreaterThan(HouseWorker.CREATE_DATE, DateUtil.delDateMinutes(new Date(),30));
+            }
+          
+            List<HouseWorker> hwList = houseWorkerMapper.selectByExample(example);//查出自己的所有已抢单
+            for (HouseWorker houseWorker : hwList) {
+                Map map =new HashMap();
+                if(type!=1){
+                    House house = houseMapper.selectByPrimaryKey(houseWorker.getHouseId());
+                    map.put("name",house.getNoNumberHouseName()+"已被抢单");
+                }else{
+                    Order order =  orderMapper.selectByPrimaryKey(houseWorker.getBusinessId());
+                    MemberAddress memberAddress=iMasterMemberAddressMapper.selectByPrimaryKey(order.getAddressId());
+                    map.put("name",memberAddress.getName()+"已被抢单");
+                }
+                map.put("minutes",DateUtil.daysBetweenMinutes(houseWorker.getCreateDate(),new Date())+"分钟前");
+                grabList.add(map);
+            }
+            return ServerResponse.createBySuccess("查询成功", grabList);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ServerResponse.createByErrorMessage("系统出错,查询失败");
+        }
+    }
     /**
      * 抢单列表
      */
