@@ -29,10 +29,10 @@ public interface IProductWorkerMapper extends Mapper<DjBasicsProductTemplate> {
     /**
      * 根据工种查询对应的产品信息
      * @param workerTypeId 工种ID
-     * @param name 商品名称
+     * @param houseId 工地ID
      * @return
      */
-    List<ProductWorkerDTO> getProductWorker(@Param("workerTypeId") String workerTypeId,@Param("name") String name,@Param("cityId") String cityId );
+    List<ProductWorkerDTO> getProductWorker(@Param("workerTypeId") String workerTypeId,@Param("houseId") String houseId,@Param("orderSource") String orderSource);
 
     List<ProductAppDTO> getWorkerProductList(@Param("workerId") String workerId,@Param("houseId") String houseId, @Param("searchKey") String searchKey, @Param("cityId") String cityId);
 

@@ -25,7 +25,6 @@ public interface MendWorkerAPI {
                                       @RequestParam("type") Integer type,
                                       @RequestParam("workerTypeId") String workerTypeId,
                                       @RequestParam("houseId") String houseId,
-                                      @RequestParam("name") String name,
                                       @RequestParam("pageDTO") PageDTO pageDTO,
                                       @RequestParam("cityId") String cityId);
 
