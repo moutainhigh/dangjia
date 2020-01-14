@@ -449,10 +449,19 @@ public class ShopCartService {
      */
     public ServerResponse replaceShoppingCart(String shoppingCartId, String productId, Double shopCount, String addedProductIds) {
         try {
+            ShoppingCart shoppingCart = iShoppingCartmapper.selectByPrimaryKey(shoppingCartId);
             StorefrontProduct storefrontProduct = iMasterStorefrontProductMapper.selectByPrimaryKey(productId);
+            //判断去重,如果有的话就购买数量加1
+            Example example = new Example(ShoppingCart.class);
+            example.createCriteria().andEqualTo(ShoppingCart.MEMBER_ID, shoppingCart.getMemberId())
+                    .andEqualTo(ShoppingCart.PRODUCT_ID, productId)
+                    .andEqualTo(ShoppingCart.STOREFRONT_ID, storefrontProduct.getStorefrontId());
+            List<ShoppingCart> list = iShoppingCartmapper.selectByExample(example);
+            if(list.size()>0)
+                return ServerResponse.createByErrorMessage("购物车已存在该商品");
             DjBasicsProductTemplate djBasicsProductTemplate = iMasterProductTemplateMapper.selectByPrimaryKey(storefrontProduct.getProdTemplateId());
             BasicsGoods goods = iMasterGoodsMapper.selectByPrimaryKey(djBasicsProductTemplate.getGoodsId());
-            ShoppingCart shoppingCart = new ShoppingCart();
+            Unit unit = iMasterUnitMapper.selectByPrimaryKey(djBasicsProductTemplate.getUnitId());
             shoppingCart.setId(shoppingCartId);
             shoppingCart.setProductId(productId);
             shoppingCart.setProductSn(djBasicsProductTemplate.getProductSn());
@@ -463,6 +472,8 @@ public class ShopCartService {
             shoppingCart.setUnitName(djBasicsProductTemplate.getUnitName());
             shoppingCart.setStorefrontId(storefrontProduct.getStorefrontId());
             shoppingCart.setShopCount(shopCount);
+            shoppingCart.setValueIdArr(djBasicsProductTemplate.getValueIdArr());
+            shoppingCart.setUnitType(unit.getType());
             iShoppingCartmapper.updateByPrimaryKeySelective(shoppingCart);
 
             //更新或添加增值商品
