@@ -166,6 +166,7 @@ public class DjSkillCertificationService {
             WorkerType workerType = iWorkerTypeMapper.selectByPrimaryKey(workerTypeId);
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
             workerType.setImage(imageAddress+workerType.getImage());
+            workerType.setImageUrl(workerType.getImage());
             return ServerResponse.createBySuccess("查询成功",workerType);
         } catch (Exception e) {
             e.printStackTrace();

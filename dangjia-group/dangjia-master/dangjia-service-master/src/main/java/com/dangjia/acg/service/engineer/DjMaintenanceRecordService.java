@@ -1572,7 +1572,7 @@ public class DjMaintenanceRecordService {
                 map.put("parentTop",basicsGoodsCategory.getId());
                 maintenanceShoppingBasketDTO.setDjMaintenanceRecordProductDTOS(djMaintenanceRecordProductMapper.queryMaintenanceShoppingBasket(map));
                 maintenanceShoppingBasketDTOS.add(maintenanceShoppingBasketDTO);
-            }) ;
+            });
             if (maintenanceShoppingBasketDTOS.size() <= 0)
                 return ServerResponse.createByErrorCodeMessage(ServerCode.NO_DATA.getCode(), ServerCode.NO_DATA.getDesc());
             return ServerResponse.createBySuccess("查询购物篮成功", maintenanceShoppingBasketDTOS);
