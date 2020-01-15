@@ -1086,6 +1086,11 @@ public class HouseFlowService {
         workerDTO.setHouseWorkerId(houseWorker.getId());//换人参数
         workerDTO.setHead(imageAddress + worker.getHead());
         workerDTO.setWorkerTypeName(workerType.getName());
+        workerDTO.setWorkerType(workerType.getType());
+        workerDTO.setWorkerTypeId(workerType.getId());
+        workerDTO.setWorkerTypeColor(workerType.getColor());
+        workerDTO.setWorkerTypeImage(imageAddress + workerType.getImage());
+        workerDTO.setWorkerType(workerType.getType());
         workerDTO.setName(worker.getName());
         workerDTO.setWorkerId(houseWorker.getWorkerId());
         workerDTO.setMobile(worker.getMobile());
