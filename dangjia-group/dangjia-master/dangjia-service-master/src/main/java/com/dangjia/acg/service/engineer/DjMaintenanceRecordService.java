@@ -560,6 +560,7 @@ public class DjMaintenanceRecordService {
         if(auditResult==null||(auditResult!=1||auditResult!=2)){
             return ServerResponse.createByErrorMessage("请选择你的审批意见！");
         }
+        Map<String,Object> map=new HashMap<>();
         TaskStack taskStack = taskStackService.selectTaskStackById(taskId);
         if (taskStack != null && taskStack.getState() == 0) {
             DjMaintenanceRecord djMaintenanceRecord=djMaintenanceRecordMapper.selectByPrimaryKey(taskStack.getData());
@@ -585,11 +586,17 @@ public class DjMaintenanceRecordService {
                 configMessageService.addConfigMessage( AppType.GONGJIANG, djMaintenanceRecord.getWorkerMemberId(),
                         "0", "业主审核通过", String.format(DjConstants.CommonMessage.YEZHU_ACCEPT,member.getName()),2, "业主审核通过");
 
+                Member worker=iMemberMapper.selectByPrimaryKey(djMaintenanceRecord.getWorkerMemberId());
+                WorkerType workerType=workerTypeMapper.selectByPrimaryKey(djMaintenanceRecord.getWorkerTypeId());
+                map.put("workerId",worker.getId());
+                map.put("workerName",worker.getName());
+                map.put("labelName",workerType.getName());
+                map.put("headImage",worker.getHead());
             }
             taskStack.setState(1);
             taskStack.setModifyDate(new Date());
             taskStackService.updateTaskStackInfo(taskStack);
-            return ServerResponse.createBySuccessMessage("提交成功");
+            return ServerResponse.createBySuccess("提交成功",map);
         }
         return ServerResponse.createBySuccess("未找到需处理的任务");
     }
