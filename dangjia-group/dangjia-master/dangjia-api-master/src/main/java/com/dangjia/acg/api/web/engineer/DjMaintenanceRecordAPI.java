@@ -58,6 +58,27 @@ public interface DjMaintenanceRecordAPI {
                                             @RequestParam("houseId") String houseId,
                                             @RequestParam("taskId") String taskId);
 
+    @PostMapping(value = "app/engineer/saveMaintenanceProduct")
+    @ApiOperation(value = "消息弹窗提交--提交维保商品订单", notes = "消息弹窗--维保商品订单")
+    ServerResponse saveMaintenanceProduct(@RequestParam("userToken") String userToken,
+                                          @RequestParam("houseId") String houseId,
+                                          @RequestParam("taskId") String taskId,
+                                          @RequestParam("cityId") String cityId);
+
+    @PostMapping(value = "app/engineer/saveExpenseMaintenanceProduct")
+    @ApiOperation(value = "消息弹窗提交--提交报销商品订单", notes = "消息弹窗--报销商品订单")
+    ServerResponse saveExpenseMaintenanceProduct(@RequestParam("userToken") String userToken,
+                                                 @RequestParam("houseId") String houseId,
+                                                 @RequestParam("taskId") String taskId,
+                                                 @RequestParam("cityId") String cityId);
+
+    @PostMapping(value = "app/engineer/saveAcceptanceApplication")
+    @ApiOperation(value = "消息弹窗提交--提交验收申请单", notes = "消息弹窗--验收申请单")
+    ServerResponse saveAcceptanceApplication(@RequestParam("userToken") String userToken,
+                                             @RequestParam("houseId") String houseId,
+                                             @RequestParam("taskId") String taskId,
+                                             @RequestParam("auditResult") Integer auditResult);
+
     @PostMapping(value = "app/engineer/saveMaintenanceRecordOrder")
     @ApiOperation(value = "质保申请--提交订单", notes = "质保申请--提交订单")
     ServerResponse saveMaintenanceRecordOrder(@RequestParam("userToken") String userToken,

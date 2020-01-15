@@ -41,6 +41,19 @@ public interface DjMaintenanceRecordProductMapper extends Mapper<DjMaintenanceRe
     List<Map<String,Object>> selectWorkerTypeListById(@Param("maintenanceRecordId") String maintenanceRecordId,@Param("maintenanceRecordType") Integer maintenanceRecordType);
 
     /**
+     * 查询所有需报销的维保商品费用
+     * @param maintenanceRecordId
+     * @return
+     */
+    Double selectTotalPayPriceByRecordId(@Param("maintenanceRecordId") String maintenanceRecordId);
+
+    /**
+     * 查询需报销维保商品的运费，搬运费
+     * @param maintenanceRecordId
+     * @return
+     */
+    Map<String,Object> selectProductCostByRecordId(@Param("maintenanceRecordId") String maintenanceRecordId);
+    /**
      * 查询已支付的订单总额
      * @param maintenanceRecordId
      * @param maintenanceRecordType
@@ -65,6 +78,14 @@ public interface DjMaintenanceRecordProductMapper extends Mapper<DjMaintenanceRe
     List<Map<String,Object>> selectCategoryByRecordId(@Param("maintenanceRecordId") String maintenanceRecordId,@Param("maintenanceRecordType") Integer maintenanceRecordType,@Param("storefrontId") String storefrontId);
 
     List<ActuarialProductAppDTO> selectMaintenaceProductByCategoryId(@Param("maintenanceRecordId") String maintenanceRecordId, @Param("maintenanceRecordType") Integer maintenanceRecordType, @Param("storefrontId") String storefrontId, @Param("categoryId") String categoryId);
+
+    /**
+     * 查询担责店铺信息
+     * @param houseId 房子ID
+     * @param categoryId 类型
+     * @return
+     */
+    String selectStorefrontIdByHouseId(@Param("houseId") String houseId,@Param("categoryId") String categoryId);
 
     int setWorkerMaintenanceGoods(Map<String,Object> map);
 }

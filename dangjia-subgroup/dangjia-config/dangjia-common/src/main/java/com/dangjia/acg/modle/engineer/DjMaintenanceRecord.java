@@ -61,8 +61,8 @@ public class DjMaintenanceRecord extends BaseEntity {
     private String stewardId;
 
     @Column(name = "state")
-    @Desc(value = "状态 1:业主待验收 2:业主已验收 3:业主拒绝验收 4结束质保  5 已开工")
-    @ApiModelProperty("状态 1:业主待验收 2:业主已验收 3:业主拒绝验收 4结束质保  5 已开工")
+    @Desc(value = "状态 1:业主待验收 2:业主已验收 3:业主拒绝验收通过 4结束质保  5 已开工")
+    @ApiModelProperty("状态 1:业主待验收 2:业主已验收 3:业主拒绝验收通过 4结束质保  5 已开工")
     private Integer state;
 
     @Column(name = "worker_type_id")

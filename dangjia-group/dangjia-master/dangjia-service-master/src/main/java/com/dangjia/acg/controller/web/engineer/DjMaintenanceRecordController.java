@@ -93,6 +93,62 @@ public class DjMaintenanceRecordController implements DjMaintenanceRecordAPI {
           return djMaintenanceRecordService.searchAcceptanceApplication(userToken,houseId,taskId);
     }
 
+    /**
+     * 消息弹窗--提交维保商品
+     * @param userToken
+     * @param houseId
+     * @param taskId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse saveMaintenanceProduct(String userToken,String houseId,String taskId,String cityId){
+        try{
+            return djMaintenanceRecordService.saveMaintenanceProduct(userToken,houseId,taskId,cityId);
+        }catch (Exception e){
+            logger.error("提交失败",e);
+            return ServerResponse.createByErrorMessage("提交失败");
+        }
+    }
+
+    /**
+     * 消息弹窗--提交报销商品
+     * @param userToken
+     * @param houseId
+     * @param taskId
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse saveExpenseMaintenanceProduct(String userToken,String houseId,String taskId,String cityId){
+        try{
+
+            return djMaintenanceRecordService.saveExpenseMaintenanceProduct(userToken,houseId,taskId,cityId);
+        }catch (Exception e){
+            logger.error("提交失败",e);
+            return ServerResponse.createByErrorMessage("提交失败");
+        }
+    }
+
+    /**
+     * 消息弹窗--提交验收申请结果
+     * @param userToken 用户token
+     * @param houseId 房子ID
+     * @param taskId 任务ID
+     * @param auditResult 审核结果1通过，2不通过
+     * @return
+     */
+    @Override
+    @ApiMethod
+    public ServerResponse saveAcceptanceApplication(String userToken,String houseId,String taskId,Integer auditResult){
+        try{
+            return djMaintenanceRecordService.saveAcceptanceApplication(userToken,houseId,taskId,auditResult);
+        }catch (Exception e){
+            logger.error("提交失败",e);
+            return ServerResponse.createByErrorMessage("提交失败");
+        }
+    }
+
 
     /**
      * 质保申请，提交订单

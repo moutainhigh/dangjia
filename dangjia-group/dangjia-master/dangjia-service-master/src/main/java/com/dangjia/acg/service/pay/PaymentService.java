@@ -333,6 +333,8 @@ public class PaymentService {
                     DjMaintenanceRecord djMaintenanceRecord=djMaintenanceRecordMapper.selectByPrimaryKey(businessOrder.getMaintenanceRecordId());
                     if(djMaintenanceRecordProduct.getMaintenanceProductType()==1||djMaintenanceRecordProduct.getMaintenanceProductType()==2){//质保和勘查费用订单
                        setHouseWorker(djMaintenanceRecord,djMaintenanceRecordProduct.getMaintenanceProductType(),businessOrder.getTotalPrice());
+                    }else if(djMaintenanceRecordProduct.getMaintenanceProductType()==3){//维保材料商品付款后，走要货流程
+                        insertDeliverSplitOrderInfo(businessOrder.getNumber());
                     }
                     //修改维保订单的支付状态为已支付
                     djMaintenanceRecordProductMapper.updateRecordProductInfoByBusinessNumber(businessOrder.getMaintenanceRecordId(),businessOrder.getNumber());
@@ -1468,7 +1470,7 @@ public class PaymentService {
      * @param maintenanceRecordType
      * @return
      */
-    public ServerResponse generateMaintenanceRecordOrder(String userToken,String maintenanceRecordId,Integer maintenanceRecordType,String cityId) {
+    public ServerResponse generateMaintenanceRecordOrder(String userToken,String maintenanceRecordId,Integer maintenanceRecordType,String cityId,String maintenanceRecordProductId) {
         try {
             Object object = constructionService.getMember(userToken);
             if (object instanceof ServerResponse) {
@@ -1489,11 +1491,11 @@ public class PaymentService {
             BigDecimal freightPrice = new BigDecimal(0);//总运费
             BigDecimal totalMoveDost = new BigDecimal(0);//搬运费
             List<DjMaintenanceRecordProduct> storeProductList=djMaintenanceRecordProductMapper.selectStorefrontIdByTypeId(maintenanceRecordId,maintenanceRecordType,1);
-           if(djMaintenanceRecord==null||storeProductList==null){
+           if(maintenanceRecordType!=4&&(djMaintenanceRecord==null||storeProductList==null)){//报销维保没有商品信息
               return ServerResponse.createByErrorMessage("未找到符合条件的维修记录，请核实");
            }
 
-            if (storeProductList!=null) {
+            if (storeProductList!=null||maintenanceRecordType==4) {
                 Order order = new Order();
                 order.setHouseId(djMaintenanceRecord.getHouseId());
                 order.setWorkerTypeName(wt.getName() + "维修订单");
@@ -1512,67 +1514,75 @@ public class PaymentService {
                 order.setWorkerId(String.valueOf(wt.getType()));
                 order.setCreateBy(member.getId());
                 orderMapper.insert(order);
-                for(DjMaintenanceRecordProduct storeProduct:storeProductList){
-                    List<DjMaintenanceRecordProduct> recordProductList=djMaintenanceRecordProductMapper.queryPayMaintenanceRecordProduct(maintenanceRecordId,maintenanceRecordType,1,null,storeProduct.getStorefrontId());
-                    Double freight=storefrontConfigAPI.getFreightPrice(storeProduct.getStorefrontId(),storeProduct.getTotalPrice());
-                    freightPrice=freightPrice.add(new BigDecimal(freight));
-                    //查询有几个店铺的商品,按店铺划分
-                    for (DjMaintenanceRecordProduct recordProduct : recordProductList) {
-                        StorefrontProduct storefrontProduct=iMasterStorefrontProductMapper.selectByPrimaryKey(recordProduct.getProductId());
-                        StorefrontProductDTO storefrontProductDTO=iMasterProductTemplateMapper.getStorefrontProductByTemplateId(storefrontProduct.getProdTemplateId());
-                        BasicsGoods basicsGoods=iMasterBasicsGoodsMapper.selectByPrimaryKey(storefrontProductDTO.getGoodsId());
+                if(maintenanceRecordType!=4){//报销费用的商品，不走详情单信息
+                    for(DjMaintenanceRecordProduct storeProduct:storeProductList){
+                        List<DjMaintenanceRecordProduct> recordProductList=djMaintenanceRecordProductMapper.queryPayMaintenanceRecordProduct(maintenanceRecordId,maintenanceRecordType,1,null,storeProduct.getStorefrontId());
+                        Double freight=storefrontConfigAPI.getFreightPrice(storeProduct.getStorefrontId(),storeProduct.getTotalPrice());
+                        freightPrice=freightPrice.add(new BigDecimal(freight));
+                        //查询有几个店铺的商品,按店铺划分
+                        for (DjMaintenanceRecordProduct recordProduct : recordProductList) {
+                            StorefrontProduct storefrontProduct=iMasterStorefrontProductMapper.selectByPrimaryKey(recordProduct.getProductId());
+                            StorefrontProductDTO storefrontProductDTO=iMasterProductTemplateMapper.getStorefrontProductByTemplateId(storefrontProduct.getProdTemplateId());
+                            BasicsGoods basicsGoods=iMasterBasicsGoodsMapper.selectByPrimaryKey(storefrontProductDTO.getGoodsId());
 
-                        OrderItem orderItem = new OrderItem();
-                        orderItem.setIsReservationDeliver("0");
-                        orderItem.setOrderId(order.getId());
-                        orderItem.setHouseId(djMaintenanceRecord.getHouseId());
-                        orderItem.setPrice(recordProduct.getPrice().doubleValue());//销售价
-                        orderItem.setShopCount(recordProduct.getShopCount().doubleValue());//购买总数
-                        orderItem.setUnitName(storefrontProductDTO.getUnitName());//单位
-                        orderItem.setTotalPrice(recordProduct.getTotalPrice().doubleValue());//总价
-                        orderItem.setProductName(storefrontProduct.getProductName());
-                        orderItem.setProductSn(storefrontProductDTO.getProductSn());
-                        orderItem.setCategoryId(storefrontProductDTO.getCategoryId());
-                        orderItem.setProductId(storefrontProductDTO.getStorefrontProductId());
-                        orderItem.setImage(storefrontProductDTO.getImage());
-                        orderItem.setCityId(cityId);
-                        orderItem.setProductType(basicsGoods.getType());
-                        orderItem.setStorefontId(storefrontProduct.getStorefrontId());
-                        orderItem.setAskCount(0d);
-                        orderItem.setDiscountPrice(0d);
-                        orderItem.setActualPaymentPrice(0d);
-                        orderItem.setStevedorageCost(0d);
-                        orderItem.setTransportationCost(0d);
-                        orderItem.setOrderStatus("1");//1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭
-                        if(payState==2){
-                            orderItem.setOrderStatus("2");
-                        }
-                        orderItem.setCreateBy(member.getId());
-                        if(basicsGoods.getType()==0&&freight>0){
-                            //均摊运费
-                            Double transportationCost=(orderItem.getTotalPrice()/storeProduct.getTotalPrice().doubleValue())*freight;
-                            orderItem.setTransportationCost(transportationCost);
-                            order.setTotalTransportationCost(order.getTotalStevedorageCost().add(BigDecimal.valueOf(transportationCost)));
-                        }
-                        if(StringUtils.isNotBlank(recordProduct.getProductId())){
-                            //搬运费运算
-                            Double moveDost=masterCostAcquisitionService.getStevedorageCost(djMaintenanceRecord.getHouseId(),orderItem.getProductId(),orderItem.getShopCount());
-                            totalMoveDost=totalMoveDost.add(new BigDecimal(moveDost));
-                            if(moveDost>0){
-                                //均摊运费
-                                orderItem.setStevedorageCost(moveDost);
-                                order.setTotalStevedorageCost(order.getTotalStevedorageCost().add(BigDecimal.valueOf(moveDost)));
+                            OrderItem orderItem = new OrderItem();
+                            orderItem.setIsReservationDeliver("0");
+                            orderItem.setOrderId(order.getId());
+                            orderItem.setHouseId(djMaintenanceRecord.getHouseId());
+                            orderItem.setPrice(recordProduct.getPrice().doubleValue());//销售价
+                            orderItem.setShopCount(recordProduct.getShopCount().doubleValue());//购买总数
+                            orderItem.setUnitName(storefrontProductDTO.getUnitName());//单位
+                            orderItem.setTotalPrice(recordProduct.getTotalPrice().doubleValue());//总价
+                            orderItem.setProductName(storefrontProduct.getProductName());
+                            orderItem.setProductSn(storefrontProductDTO.getProductSn());
+                            orderItem.setCategoryId(storefrontProductDTO.getCategoryId());
+                            orderItem.setProductId(storefrontProductDTO.getStorefrontProductId());
+                            orderItem.setImage(storefrontProductDTO.getImage());
+                            orderItem.setCityId(cityId);
+                            orderItem.setProductType(basicsGoods.getType());
+                            orderItem.setStorefontId(storefrontProduct.getStorefrontId());
+                            orderItem.setAskCount(0d);
+                            orderItem.setDiscountPrice(0d);
+                            orderItem.setActualPaymentPrice(0d);
+                            orderItem.setStevedorageCost(0d);
+                            orderItem.setTransportationCost(0d);
+                            orderItem.setOrderStatus("1");//1待付款，2已付款，3待收货，4已完成，5已取消，6已退货，7已关闭
+                            if(payState==2){
+                                orderItem.setOrderStatus("2");
                             }
+                            orderItem.setCreateBy(member.getId());
+                            if(basicsGoods.getType()==0&&freight>0){
+                                //均摊运费
+                                Double transportationCost=(orderItem.getTotalPrice()/storeProduct.getTotalPrice().doubleValue())*freight;
+                                orderItem.setTransportationCost(transportationCost);
+                                order.setTotalTransportationCost(order.getTotalStevedorageCost().add(BigDecimal.valueOf(transportationCost)));
+                            }
+                            if(StringUtils.isNotBlank(recordProduct.getProductId())){
+                                //搬运费运算
+                                Double moveDost=masterCostAcquisitionService.getStevedorageCost(djMaintenanceRecord.getHouseId(),orderItem.getProductId(),orderItem.getShopCount());
+                                totalMoveDost=totalMoveDost.add(new BigDecimal(moveDost));
+                                if(moveDost>0){
+                                    //均摊运费
+                                    orderItem.setStevedorageCost(moveDost);
+                                    order.setTotalStevedorageCost(order.getTotalStevedorageCost().add(BigDecimal.valueOf(moveDost)));
+                                }
+                            }
+                            orderItemMapper.insert(orderItem);
+                            paymentPrice=paymentPrice.add(BigDecimal.valueOf(recordProduct.getPayPrice()));
+                            totalPrice=totalPrice.add(BigDecimal.valueOf(recordProduct.getTotalPrice()));
                         }
-                        orderItemMapper.insert(orderItem);
-                        paymentPrice=paymentPrice.add(BigDecimal.valueOf(recordProduct.getPayPrice()));
-                        totalPrice=totalPrice.add(BigDecimal.valueOf(recordProduct.getTotalPrice()));
-                    }
 
+                    }
                 }
+
                 if(djMaintenanceRecord.getOverProtection()==1){
                     paymentPrice=paymentPrice.add(order.getTotalTransportationCost());
                     paymentPrice=paymentPrice.add(order.getTotalStevedorageCost());
+                }
+                if(maintenanceRecordType==4){
+                    DjMaintenanceRecordProduct djMaintenanceRecordProduct=djMaintenanceRecordProductMapper.selectByPrimaryKey(maintenanceRecordProductId);//报销费用商品的总报销费用
+                    totalPrice=BigDecimal.valueOf(djMaintenanceRecordProduct.getTotalPrice());
+                    paymentPrice=BigDecimal.valueOf(djMaintenanceRecordProduct.getPrice());
                 }
                 // 生成支付业务单
                 Example example = new Example(BusinessOrder.class);
@@ -1611,10 +1621,14 @@ public class PaymentService {
 
                 //将业务支付订单号维护到维保订单中去
                 djMaintenanceRecordProductMapper.updateRecordProductInfo(maintenanceRecordId,maintenanceRecordType,businessOrder.getNumber(),payState);
-                if((maintenanceRecordType==1||maintenanceRecordType==2)&&payState==2){//维保期内的订单(只有维保订单或勘查订单，才会生成待抢单信息)
-                    setHouseWorker(djMaintenanceRecord, maintenanceRecordType, order.getTotalAmount());
-                }
-                if(djMaintenanceRecord.getOverProtection()==1){//过保需业主支付时，则返回业务订单号
+                if(djMaintenanceRecord.getOverProtection()==0){
+                    if(maintenanceRecordType==1||maintenanceRecordType==2){//维保期内的订单(只有维保订单或勘查订单，才会生成待抢单信息)
+                        setHouseWorker(djMaintenanceRecord, maintenanceRecordType, order.getTotalAmount());
+                    }else if(maintenanceRecordType==3){// 质保期内的商品
+                        //如果是维保生成的要货材料，则生成要货单到对应的店铺
+                        insertDeliverSplitOrderInfo(businessOrder.getNumber());
+                    }
+                }else if(djMaintenanceRecord.getOverProtection()==1){//过保需业主支付时，则返回业务订单号
                     return ServerResponse.createBySuccess("提交成功", businessOrder.getNumber());
                 }
             }
@@ -1625,6 +1639,68 @@ public class PaymentService {
             return ServerResponse.createByErrorMessage("提交失败：原因："+e.getMessage());
         }
     }
+
+    /**
+     * 维修订单，生成对应的要货单给到店铺
+     * @param businessOrderNumber
+     */
+    public void insertDeliverSplitOrderInfo(String businessOrderNumber){
+        BusinessOrder businessOrder=businessOrderMapper.selectByPrimaryKey(businessOrderNumber);
+        List<Order> orderList=orderMapper.byBusinessOrderNumber(businessOrderNumber);
+        if(orderList!=null&&orderList.size()>0){//查订单表
+            for(Order order:orderList){//查订单详情表
+                List<OrderItem> orderItemList=orderItemMapper.byOrderIdList(order.getId());
+                if(orderItemList!=null&&orderItemList.size()>0){
+                    DjMaintenanceRecord djMaintenanceRecord=djMaintenanceRecordMapper.selectByPrimaryKey(businessOrder.getMaintenanceRecordId());
+                    Member worker=iMemberMapper.selectByPrimaryKey(djMaintenanceRecord.getWorkerMemberId());
+                    //1.生成要货单
+                    Example example = new Example(OrderSplit.class);
+                    OrderSplit orderSplit=new OrderSplit();
+                    orderSplit.setNumber("DJ" + 200000 + orderSplitMapper.selectCountByExample(example));//要货单号
+                    orderSplit.setHouseId(order.getHouseId());
+                    orderSplit.setApplyStatus(0);//后台审核状态：0生成中, 1申请中, 2通过, 3不通过, 4业主待支付补货材料 后台(材料员)
+                    orderSplit.setMemberId(worker.getId());
+                    orderSplit.setMemberName(worker.getName());
+                    orderSplit.setMobile(worker.getMobile());
+                    orderSplit.setWorkerTypeId(worker.getWorkerTypeId());
+                    orderSplit.setTotalAmount(order.getTotalAmount());
+                    orderSplit.setStorefrontId(order.getStorefontId());
+                    orderSplitMapper.insert(orderSplit);
+                    //2.生成要货单明细
+                    for(OrderItem orderItem:orderItemList){
+                        OrderSplitItem orderSplitItem=new OrderSplitItem();
+                        orderSplitItem.setOrderSplitId(orderSplit.getId());
+                        orderSplitItem.setProductId(orderItem.getProductId());
+                        orderSplitItem.setProductSn(orderItem.getProductSn());
+                        orderSplitItem.setProductName(orderItem.getProductName());
+                        orderSplitItem.setPrice(orderItem.getPrice());
+                        orderSplitItem.setAskCount(orderItem.getShopCount());
+                        orderSplitItem.setCost(orderItem.getCost());
+                        orderSplitItem.setShopCount(orderItem.getShopCount());
+                        orderSplitItem.setNum(0d);
+                        orderSplitItem.setUnitName(orderItem.getUnitName());
+                        orderSplitItem.setTotalPrice(order.getTotalAmount().doubleValue());//单项总价 销售价
+                        orderSplitItem.setProductType(orderItem.getProductType());
+                        orderSplitItem.setCategoryId(orderItem.getCategoryId());
+                        orderSplitItem.setImage(orderItem.getImage());//货品图片
+                        orderSplitItem.setHouseId(order.getHouseId());
+                        orderSplitItem.setStorefrontId(order.getStorefontId());
+                        orderSplitItemMapper.insert(orderSplitItem);
+                        //修改订单详情的要货量
+                        orderItem.setAskCount(orderItem.getShopCount());
+                        orderItem.setOrderStatus("3");
+                        orderItem.setModifyDate(new Date());
+                        orderItemMapper.updateByPrimaryKeySelective(orderItem);
+                    }
+                    //修改订的状态为待收货
+                    order.setOrderStatus("3");
+                    order.setModifyDate(new Date());
+                    orderMapper.updateByPrimaryKeySelective(order);
+                }
+            }
+        }
+    }
+
 
     /**
      * 增加待抢单列表记录
