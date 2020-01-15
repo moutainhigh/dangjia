@@ -4,7 +4,6 @@ import com.dangjia.acg.api.app.member.MemberCollectAPI;
 import com.dangjia.acg.common.annotation.ApiMethod;
 import com.dangjia.acg.common.model.PageDTO;
 import com.dangjia.acg.common.response.ServerResponse;
-import com.dangjia.acg.modle.member.MemberCollect;
 import com.dangjia.acg.service.member.MemberCollectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
