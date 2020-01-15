@@ -48,7 +48,7 @@ public class DjSkillCertificationController implements DjSkillCertificationAPI {
 
     @Override
     @ApiMethod
-    public ServerResponse queryWorkerTypeSkillPackConfigurationDetail(Integer workerTypeId) {
+    public ServerResponse queryWorkerTypeSkillPackConfigurationDetail(String workerTypeId) {
         return djSkillCertificationService.queryWorkerTypeSkillPackConfigurationDetail(workerTypeId);
     }
 

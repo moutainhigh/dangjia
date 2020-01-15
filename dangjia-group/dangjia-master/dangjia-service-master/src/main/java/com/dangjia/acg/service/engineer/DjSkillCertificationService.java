@@ -161,7 +161,7 @@ public class DjSkillCertificationService {
      * @param workerTypeId
      * @return
      */
-    public ServerResponse queryWorkerTypeSkillPackConfigurationDetail(Integer workerTypeId) {
+    public ServerResponse queryWorkerTypeSkillPackConfigurationDetail(String workerTypeId) {
         try {
             WorkerType workerType = iWorkerTypeMapper.selectByPrimaryKey(workerTypeId);
             String imageAddress = configUtil.getValue(SysConfig.DANGJIA_IMAGE_LOCAL, String.class);
